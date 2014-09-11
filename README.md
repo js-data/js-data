@@ -1,4 +1,3 @@
-js-data
-=======
+# js-data
 
 Own your data...
