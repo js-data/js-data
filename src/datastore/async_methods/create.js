@@ -98,11 +98,11 @@ function create(resourceName, attrs, options) {
         return func.call(attrs, resourceName, attrs);
       })
       .then(function (attrs) {
-        return DS.adapters[options.adapter || definition.defaultAdapter].create(definition, definition.serialize(resourceName, attrs), options);
+        return DS.adapters[options.adapter || definition.defaultAdapter].create(definition, options.serialize ? options.serialize(resourceName, attrs) : definition.serialize(resourceName, attrs), options);
       })
       .then(function (res) {
         var func = options.afterCreate ? DSUtils.promisify(options.afterCreate) : definition.afterCreate;
-        var attrs = definition.deserialize(resourceName, res);
+        var attrs = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
         return func.call(attrs, resourceName, attrs);
       })
       .then(function (data) {

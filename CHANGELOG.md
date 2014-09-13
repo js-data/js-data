@@ -2,6 +2,7 @@
 
 ###### Backwards compatible API changes
 - jmdobry/angular-data#145 - Add "useClass" option to inject, find, findAll, create
+- jmdobry/angular-data#155 - Allow deserialize and serialize to be configured per-method as well
 - jmdobry/angular-data#167 - Default params argument of bindAll to empty object
 
 ###### Backwards compatible bug fixes

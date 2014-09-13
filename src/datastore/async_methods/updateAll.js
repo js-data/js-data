@@ -105,11 +105,11 @@ function updateAll(resourceName, attrs, params, options) {
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      return DS.adapters[options.adapter || definition.defaultAdapter].updateAll(definition, definition.serialize(resourceName, attrs), params, options);
+      return DS.adapters[options.adapter || definition.defaultAdapter].updateAll(definition, options.serialize ? options.serialize(resourceName, attrs) : definition.serialize(resourceName, attrs), params, options);
     })
     .then(function (res) {
       var func = options.afterUpdate ? DSUtils.promisify(options.afterUpdate) : definition.afterUpdate;
-      var attrs = definition.deserialize(resourceName, res);
+      var attrs = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (data) {

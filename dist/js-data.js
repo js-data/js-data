@@ -4060,11 +4060,11 @@ function create(resourceName, attrs, options) {
         return func.call(attrs, resourceName, attrs);
       })
       .then(function (attrs) {
-        return DS.adapters[options.adapter || definition.defaultAdapter].create(definition, definition.serialize(resourceName, attrs), options);
+        return DS.adapters[options.adapter || definition.defaultAdapter].create(definition, options.serialize ? options.serialize(resourceName, attrs) : definition.serialize(resourceName, attrs), options);
       })
       .then(function (res) {
         var func = options.afterCreate ? DSUtils.promisify(options.afterCreate) : definition.afterCreate;
-        var attrs = definition.deserialize(resourceName, res);
+        var attrs = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
         return func.call(attrs, resourceName, attrs);
       })
       .then(function (data) {
@@ -4342,7 +4342,7 @@ function find(resourceName, id, options) {
         if (!(id in resource.pendingQueries)) {
           resource.pendingQueries[id] = DS.adapters[options.adapter || definition.defaultAdapter].find(definition, id, options)
             .then(function (res) {
-              var data = definition.deserialize(resourceName, res);
+              var data = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
               if (options.cacheResponse) {
                 // Query is no longer pending
                 delete resource.pendingQueries[id];
@@ -4504,7 +4504,7 @@ function findAll(resourceName, params, options) {
           resource.pendingQueries[queryHash] = DS.adapters[options.adapter || definition.defaultAdapter].findAll(definition, params, options)
             .then(function (res) {
               delete resource.pendingQueries[queryHash];
-              var data = definition.deserialize(resourceName, res);
+              var data = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
               if (options.cacheResponse) {
                 try {
                   return processResults.call(DS, data, resourceName, queryHash, options);
@@ -4972,11 +4972,11 @@ function save(resourceName, id, options) {
           attrs = changes;
         }
       }
-      return DS.adapters[options.adapter || definition.defaultAdapter].update(definition, id, definition.serialize(resourceName, attrs), options);
+      return DS.adapters[options.adapter || definition.defaultAdapter].update(definition, id, options.serialize ? options.serialize(resourceName, attrs) : definition.serialize(resourceName, attrs), options);
     })
     .then(function (res) {
       var func = options.afterUpdate ? DSUtils.promisify(options.afterUpdate) : definition.afterUpdate;
-      var attrs = definition.deserialize(resourceName, res);
+      var attrs = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (data) {
@@ -5091,11 +5091,11 @@ function update(resourceName, id, attrs, options) {
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      return DS.adapters[options.adapter || definition.defaultAdapter].update(definition, id, definition.serialize(resourceName, attrs), options);
+      return DS.adapters[options.adapter || definition.defaultAdapter].update(definition, id, options.serialize ? options.serialize(resourceName, attrs) : definition.serialize(resourceName, attrs), options);
     })
     .then(function (res) {
       var func = options.afterUpdate ? DSUtils.promisify(options.afterUpdate) : definition.afterUpdate;
-      var attrs = definition.deserialize(resourceName, res);
+      var attrs = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (data) {
@@ -5223,11 +5223,11 @@ function updateAll(resourceName, attrs, params, options) {
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      return DS.adapters[options.adapter || definition.defaultAdapter].updateAll(definition, definition.serialize(resourceName, attrs), params, options);
+      return DS.adapters[options.adapter || definition.defaultAdapter].updateAll(definition, options.serialize ? options.serialize(resourceName, attrs) : definition.serialize(resourceName, attrs), params, options);
     })
     .then(function (res) {
       var func = options.afterUpdate ? DSUtils.promisify(options.afterUpdate) : definition.afterUpdate;
-      var attrs = definition.deserialize(resourceName, res);
+      var attrs = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (data) {
