@@ -9,7 +9,7 @@ function errorPrefix(resourceName) {
   return 'DS.inject(' + resourceName + ', attrs[, options]): ';
 }
 
-function _inject(definition, resource, attrs) {
+function _inject(definition, resource, attrs, options) {
   var DS = this;
 
   function _react(added, removed, changed, oldValueFn, firstTime) {
@@ -40,7 +40,7 @@ function _inject(definition, resource, attrs) {
         });
         compute = compute || !fn.deps.length;
         if (compute) {
-          _compute.call(item, fn, field);
+          _compute.call(item, fn, field, DS.utils);
         }
       });
     }
@@ -65,7 +65,7 @@ function _inject(definition, resource, attrs) {
   if (DS.utils.isArray(attrs)) {
     injected = [];
     for (var i = 0; i < attrs.length; i++) {
-      injected.push(_inject.call(DS, definition, resource, attrs[i]));
+      injected.push(_inject.call(DS, definition, resource, attrs[i], options));
     }
   } else {
     // check if "idAttribute" is a computed property
@@ -89,7 +89,7 @@ function _inject(definition, resource, attrs) {
         var item = DS.get(definition.name, id);
 
         if (!item) {
-          if (definition.methods || definition.useClass) {
+          if (options.useClass) {
             if (attrs instanceof definition[definition.class]) {
               item = attrs;
             } else {
@@ -211,6 +211,7 @@ function _injectRelations(definition, injected, options) {
  * @param {object|array} attrs The item or collection of items to inject into the data store.
  * @param {object=} options The item or collection of items to inject into the data store. Properties:
  *
+ * - `{boolean=}` - `useClass` - Whether to wrap the injected item with the resource's instance constructor.
  * - `{boolean=}` - `findBelongsTo` - Find and attach any existing "belongsTo" relationships to the newly injected item. Potentially expensive if enabled. Default: `false`.
  * - `{boolean=}` - `findHasMany` - Find and attach any existing "hasMany" relationships to the newly injected item. Potentially expensive if enabled. Default: `false`.
  * - `{boolean=}` - `findHasOne` - Find and attach any existing "hasOne" relationships to the newly injected item. Potentially expensive if enabled. Default: `false`.
@@ -240,7 +241,10 @@ function inject(resourceName, attrs, options) {
   stack++;
 
   try {
-    injected = _inject.call(DS, definition, resource, attrs);
+    if (!('useClass' in options)) {
+      options.useClass = definition.useClass;
+    }
+    injected = _inject.call(DS, definition, resource, attrs, options);
     if (definition.relations) {
       _injectRelations.call(DS, definition, injected, options);
     }

@@ -81,6 +81,7 @@ function processResults(data, resourceName, queryHash, options) {
  *
  * @param {object=} options Optional configuration. Also passed along to the adapter's `findAll` method. Properties:
  *
+ * - `{boolean=}` - `useClass` - Whether to wrap the injected item with the resource's instance constructor.
  * - `{boolean=}` - `bypassCache` - Bypass the cache. Default: `false`.
  * - `{boolean=}` - `cacheResponse` - Inject the data returned by the adapter into the data store. Default: `true`.
  *
@@ -143,6 +144,9 @@ function findAll(resourceName, params, options) {
                   throw err;
                 }
               } else {
+                DS.utils.forEach(data, function (item, i) {
+                  data[i] = DS.createInstance(resourceName, item, options);
+                });
                 return data;
               }
             }).catch(function (err) {

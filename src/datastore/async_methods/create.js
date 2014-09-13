@@ -32,6 +32,7 @@ function errorPrefix(resourceName) {
  * @param {object} attrs The attributes with which to create the item of the type specified by `resourceName`.
  * @param {object=} options Configuration options. Also passed along to the adapter's `create` method. Properties:
  *
+ * - `{boolean=}` - `useClass` - Whether to wrap the injected item with the resource's instance constructor.
  * - `{boolean=}` - `cacheResponse` - Inject the data returned by the adapter into the data store. Default: `true`.
  * - `{boolean=}` - `upsert` - If `attrs` already contains a primary key, then attempt to call `DS.update` instead. Default: `true`.
  * - `{function=}` - `beforeValidate` - Override the resource or global lifecycle hook.
@@ -114,7 +115,7 @@ function create(resourceName, attrs, options) {
           resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
           return DS.get(definition.name, id);
         } else {
-          return data;
+          return DS.createInstance(resourceName, data, options);
         }
       });
   }

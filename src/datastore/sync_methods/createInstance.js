@@ -57,7 +57,7 @@ function errorPrefix(resourceName) {
  * @param {object=} attrs Optional attributes to mix in to the new instance.
  * @param {object=} options Optional configuration. Properties:
  *
- * - `{boolean=}` - `useClass` - Whether to use the resource's wrapper class. Default: `true`.
+ * - `{boolean=}` - `useClass` - Whether to wrap the injected item with the resource's instance constructor.
  *
  * @returns {object} The new instance.
  */
@@ -79,7 +79,7 @@ function createInstance(resourceName, attrs, options) {
   }
 
   if (!('useClass' in options)) {
-    options.useClass = true;
+    options.useClass = definition.useClass;
   }
 
   var item;

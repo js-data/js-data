@@ -31,6 +31,7 @@ function errorPrefix(resourceName, id) {
  * @param {string|number} id The primary key of the item to retrieve.
  * @param {object=} options Optional configuration. Also passed along to the adapter's `find` method. Properties:
  *
+ * - `{boolean=}` - `useClass` - Whether to wrap the injected item with the resource's instance constructor.
  * - `{boolean=}` - `bypassCache` - Bypass the cache. Default: `false`.
  * - `{boolean=}` - `cacheResponse` - Inject the data returned by the adapter into the data store. Default: `true`.
  *
@@ -86,7 +87,7 @@ function find(resourceName, id, options) {
                 resource.completedQueries[id] = new Date().getTime();
                 return DS.inject(resourceName, data, options);
               } else {
-                return data;
+                return DS.createInstance(resourceName, data, options);
               }
             }).catch(function (err) {
               delete resource.pendingQueries[id];
