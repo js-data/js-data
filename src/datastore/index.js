@@ -86,6 +86,8 @@ Defaults.prototype.defaultFilter = function (collection, resourceName, params, o
               keep = first ? (attrs[field] <= val) : keep && (attrs[field] <= val);
             } else if (op === 'in') {
               keep = first ? DSUtils.contains(val, attrs[field]) : keep && DSUtils.contains(val, attrs[field]);
+            } else if (op === 'notIn') {
+              keep = first ? !DSUtils.contains(val, attrs[field]) : keep && !DSUtils.contains(val, attrs[field]);
             } else if (op === '|==') {
               keep = first ? (attrs[field] == val) : keep || (attrs[field] == val);
             } else if (op === '|===') {
@@ -104,6 +106,8 @@ Defaults.prototype.defaultFilter = function (collection, resourceName, params, o
               keep = first ? (attrs[field] <= val) : keep || (attrs[field] <= val);
             } else if (op === '|in') {
               keep = first ? DSUtils.contains(val, attrs[field]) : keep || DSUtils.contains(val, attrs[field]);
+            } else if (op === '|notIn') {
+              keep = first ? !DSUtils.contains(val, attrs[field]) : keep || !DSUtils.contains(val, attrs[field]);
             }
             first = false;
           });
@@ -195,6 +199,8 @@ Defaults.prototype.defaultFilter = function (collection, resourceName, params, o
 Defaults.prototype.baseUrl = '';
 Defaults.prototype.endpoint = '';
 Defaults.prototype.useClass = true;
+Defaults.prototype.keepChangeHistory = false;
+Defaults.prototype.resetHistoryOnInject = true;
 /**
  * @doc property
  * @id DSProvider.properties:defaults.beforeValidate

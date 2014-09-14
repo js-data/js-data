@@ -118,6 +118,7 @@ beforeEach(function () {
   localStorage.clear();
   datastore.defineResource({
     name: 'post',
+    keepChangeHistory: true,
     endpoint: '/posts'
   });
   datastore.defineResource({

@@ -12,6 +12,16 @@ module.exports = {
 
   /**
    * @doc method
+   * @id DS.sync methods:changeHistory
+   * @name changeHistory
+   * @methodOf DS
+   * @description
+   * See [DS.changeHistory](/documentation/api/api/DS.sync methods:changeHistory).
+   */
+  changeHistory: require('./changeHistory'),
+
+  /**
+   * @doc method
    * @id DS.sync methods:compute
    * @name compute
    * @methodOf DS

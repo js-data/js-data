@@ -2251,7 +2251,7 @@ var makeIterator = require('../function/makeIterator_');
 
 
 
-},{"../function/makeIterator_":34}],27:[function(require,module,exports){
+},{"../function/makeIterator_":35}],27:[function(require,module,exports){
 
 
     /**
@@ -2326,6 +2326,21 @@ var filter = require('./filter');
 
 
 },{"./filter":26}],30:[function(require,module,exports){
+var indexOf = require('./indexOf');
+
+    /**
+     * Remove a single item from the array.
+     * (it won't remove duplicates, just a single item)
+     */
+    function remove(arr, item){
+        var idx = indexOf(arr, item);
+        if (idx !== -1) arr.splice(idx, 1);
+    }
+
+    module.exports = remove;
+
+
+},{"./indexOf":28}],31:[function(require,module,exports){
 
 
     /**
@@ -2362,7 +2377,7 @@ var filter = require('./filter');
 
 
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 
 
     /**
@@ -2419,7 +2434,7 @@ var filter = require('./filter');
 
 
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 var isFunction = require('../lang/isFunction');
 
     /**
@@ -2449,7 +2464,7 @@ var isFunction = require('../lang/isFunction');
     module.exports = toLookup;
 
 
-},{"../lang/isFunction":41}],33:[function(require,module,exports){
+},{"../lang/isFunction":42}],34:[function(require,module,exports){
 
 
     /**
@@ -2463,7 +2478,7 @@ var isFunction = require('../lang/isFunction');
 
 
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 var identity = require('./identity');
 var prop = require('./prop');
 var deepMatches = require('../object/deepMatches');
@@ -2499,7 +2514,7 @@ var deepMatches = require('../object/deepMatches');
 
 
 
-},{"../object/deepMatches":49,"./identity":33,"./prop":35}],35:[function(require,module,exports){
+},{"../object/deepMatches":50,"./identity":34,"./prop":36}],36:[function(require,module,exports){
 
 
     /**
@@ -2515,7 +2530,7 @@ var deepMatches = require('../object/deepMatches');
 
 
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 var kindOf = require('./kindOf');
 var isPlainObject = require('./isPlainObject');
 var mixIn = require('../object/mixIn');
@@ -2566,7 +2581,7 @@ var mixIn = require('../object/mixIn');
 
 
 
-},{"../object/mixIn":55,"./isPlainObject":45,"./kindOf":47}],37:[function(require,module,exports){
+},{"../object/mixIn":56,"./isPlainObject":46,"./kindOf":48}],38:[function(require,module,exports){
 var clone = require('./clone');
 var forOwn = require('../object/forOwn');
 var kindOf = require('./kindOf');
@@ -2616,7 +2631,7 @@ var isPlainObject = require('./isPlainObject');
 
 
 
-},{"../object/forOwn":52,"./clone":36,"./isPlainObject":45,"./kindOf":47}],38:[function(require,module,exports){
+},{"../object/forOwn":53,"./clone":37,"./isPlainObject":46,"./kindOf":48}],39:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2626,7 +2641,7 @@ var isKind = require('./isKind');
     module.exports = isArray;
 
 
-},{"./isKind":42}],39:[function(require,module,exports){
+},{"./isKind":43}],40:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2636,7 +2651,7 @@ var isKind = require('./isKind');
     module.exports = isBoolean;
 
 
-},{"./isKind":42}],40:[function(require,module,exports){
+},{"./isKind":43}],41:[function(require,module,exports){
 var forOwn = require('../object/forOwn');
 var isArray = require('./isArray');
 
@@ -2662,7 +2677,7 @@ var isArray = require('./isArray');
 
 
 
-},{"../object/forOwn":52,"./isArray":38}],41:[function(require,module,exports){
+},{"../object/forOwn":53,"./isArray":39}],42:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2672,7 +2687,7 @@ var isKind = require('./isKind');
     module.exports = isFunction;
 
 
-},{"./isKind":42}],42:[function(require,module,exports){
+},{"./isKind":43}],43:[function(require,module,exports){
 var kindOf = require('./kindOf');
     /**
      * Check if value is from a specific "kind".
@@ -2683,7 +2698,7 @@ var kindOf = require('./kindOf');
     module.exports = isKind;
 
 
-},{"./kindOf":47}],43:[function(require,module,exports){
+},{"./kindOf":48}],44:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2693,7 +2708,7 @@ var isKind = require('./isKind');
     module.exports = isNumber;
 
 
-},{"./isKind":42}],44:[function(require,module,exports){
+},{"./isKind":43}],45:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2703,7 +2718,7 @@ var isKind = require('./isKind');
     module.exports = isObject;
 
 
-},{"./isKind":42}],45:[function(require,module,exports){
+},{"./isKind":43}],46:[function(require,module,exports){
 
 
     /**
@@ -2718,7 +2733,7 @@ var isKind = require('./isKind');
 
 
 
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2728,7 +2743,7 @@ var isKind = require('./isKind');
     module.exports = isString;
 
 
-},{"./isKind":42}],47:[function(require,module,exports){
+},{"./isKind":43}],48:[function(require,module,exports){
 
 
     var _rKind = /^\[object (.*)\]$/,
@@ -2750,7 +2765,7 @@ var isKind = require('./isKind');
     module.exports = kindOf;
 
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 
 
     /**
@@ -2765,7 +2780,7 @@ var isKind = require('./isKind');
 
 
 
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 var forOwn = require('./forOwn');
 var isArray = require('../lang/isArray');
 
@@ -2822,7 +2837,7 @@ var isArray = require('../lang/isArray');
 
 
 
-},{"../lang/isArray":38,"./forOwn":52}],50:[function(require,module,exports){
+},{"../lang/isArray":39,"./forOwn":53}],51:[function(require,module,exports){
 var forOwn = require('./forOwn');
 var isPlainObject = require('../lang/isPlainObject');
 
@@ -2858,7 +2873,7 @@ var isPlainObject = require('../lang/isPlainObject');
 
 
 
-},{"../lang/isPlainObject":45,"./forOwn":52}],51:[function(require,module,exports){
+},{"../lang/isPlainObject":46,"./forOwn":53}],52:[function(require,module,exports){
 var hasOwn = require('./hasOwn');
 
     var _hasDontEnumBug,
@@ -2936,7 +2951,7 @@ var hasOwn = require('./hasOwn');
 
 
 
-},{"./hasOwn":53}],52:[function(require,module,exports){
+},{"./hasOwn":54}],53:[function(require,module,exports){
 var hasOwn = require('./hasOwn');
 var forIn = require('./forIn');
 
@@ -2957,7 +2972,7 @@ var forIn = require('./forIn');
 
 
 
-},{"./forIn":51,"./hasOwn":53}],53:[function(require,module,exports){
+},{"./forIn":52,"./hasOwn":54}],54:[function(require,module,exports){
 
 
     /**
@@ -2971,7 +2986,7 @@ var forIn = require('./forIn');
 
 
 
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 var hasOwn = require('./hasOwn');
 var deepClone = require('../lang/deepClone');
 var isObject = require('../lang/isObject');
@@ -3013,7 +3028,7 @@ var isObject = require('../lang/isObject');
 
 
 
-},{"../lang/deepClone":37,"../lang/isObject":44,"./hasOwn":53}],55:[function(require,module,exports){
+},{"../lang/deepClone":38,"../lang/isObject":45,"./hasOwn":54}],56:[function(require,module,exports){
 var forOwn = require('./forOwn');
 
     /**
@@ -3043,7 +3058,7 @@ var forOwn = require('./forOwn');
     module.exports = mixIn;
 
 
-},{"./forOwn":52}],56:[function(require,module,exports){
+},{"./forOwn":53}],57:[function(require,module,exports){
 var forEach = require('../array/forEach');
 
     /**
@@ -3064,7 +3079,7 @@ var forEach = require('../array/forEach');
 
 
 
-},{"../array/forEach":27}],57:[function(require,module,exports){
+},{"../array/forEach":27}],58:[function(require,module,exports){
 var slice = require('../array/slice');
 
     /**
@@ -3084,7 +3099,7 @@ var slice = require('../array/slice');
 
 
 
-},{"../array/slice":30}],58:[function(require,module,exports){
+},{"../array/slice":31}],59:[function(require,module,exports){
 var namespace = require('./namespace');
 
     /**
@@ -3103,7 +3118,7 @@ var namespace = require('./namespace');
 
 
 
-},{"./namespace":56}],59:[function(require,module,exports){
+},{"./namespace":57}],60:[function(require,module,exports){
 var toString = require('../lang/toString');
 var replaceAccents = require('./replaceAccents');
 var removeNonWord = require('./removeNonWord');
@@ -3125,7 +3140,7 @@ var lowerCase = require('./lowerCase');
     module.exports = camelCase;
 
 
-},{"../lang/toString":48,"./lowerCase":60,"./removeNonWord":63,"./replaceAccents":64,"./upperCase":65}],60:[function(require,module,exports){
+},{"../lang/toString":49,"./lowerCase":61,"./removeNonWord":64,"./replaceAccents":65,"./upperCase":66}],61:[function(require,module,exports){
 var toString = require('../lang/toString');
     /**
      * "Safer" String.toLowerCase()
@@ -3138,7 +3153,7 @@ var toString = require('../lang/toString');
     module.exports = lowerCase;
 
 
-},{"../lang/toString":48}],61:[function(require,module,exports){
+},{"../lang/toString":49}],62:[function(require,module,exports){
 var join = require('../array/join');
 var slice = require('../array/slice');
 
@@ -3155,7 +3170,7 @@ var slice = require('../array/slice');
     module.exports = makePath;
 
 
-},{"../array/join":29,"../array/slice":30}],62:[function(require,module,exports){
+},{"../array/join":29,"../array/slice":31}],63:[function(require,module,exports){
 var toString = require('../lang/toString');
 var camelCase = require('./camelCase');
 var upperCase = require('./upperCase');
@@ -3170,7 +3185,7 @@ var upperCase = require('./upperCase');
     module.exports = pascalCase;
 
 
-},{"../lang/toString":48,"./camelCase":59,"./upperCase":65}],63:[function(require,module,exports){
+},{"../lang/toString":49,"./camelCase":60,"./upperCase":66}],64:[function(require,module,exports){
 var toString = require('../lang/toString');
     // This pattern is generated by the _build/pattern-removeNonWord.js script
     var PATTERN = /[^\x20\x2D0-9A-Z\x5Fa-z\xC0-\xD6\xD8-\xF6\xF8-\xFF]/g;
@@ -3186,7 +3201,7 @@ var toString = require('../lang/toString');
     module.exports = removeNonWord;
 
 
-},{"../lang/toString":48}],64:[function(require,module,exports){
+},{"../lang/toString":49}],65:[function(require,module,exports){
 var toString = require('../lang/toString');
     /**
     * Replaces all accented chars with regular ones
@@ -3224,7 +3239,7 @@ var toString = require('../lang/toString');
     module.exports = replaceAccents;
 
 
-},{"../lang/toString":48}],65:[function(require,module,exports){
+},{"../lang/toString":49}],66:[function(require,module,exports){
 var toString = require('../lang/toString');
     /**
      * "Safer" String.toUpperCase()
@@ -3236,7 +3251,7 @@ var toString = require('../lang/toString');
     module.exports = upperCase;
 
 
-},{"../lang/toString":48}],66:[function(require,module,exports){
+},{"../lang/toString":49}],67:[function(require,module,exports){
 var DSUtils = require('../utils');
 
 function Defaults() {
@@ -3688,7 +3703,7 @@ DSHttpAdapter.prototype.destroyAll = function (resourceConfig, params, options) 
 
 module.exports = DSHttpAdapter;
 
-},{"../utils":101}],67:[function(require,module,exports){
+},{"../utils":103}],68:[function(require,module,exports){
 var DSUtils = require('../utils');
 var DSErrors = require('../errors');
 
@@ -3959,7 +3974,7 @@ DSLocalStorageAdapter.prototype.destroyAll = function () {
 
 module.exports = DSLocalStorageAdapter;
 
-},{"../errors":99,"../utils":101}],68:[function(require,module,exports){
+},{"../errors":101,"../utils":103}],69:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.create(' + resourceName + ', attrs[, options]): ';
 }
@@ -4085,7 +4100,7 @@ function create(resourceName, attrs, options) {
 
 module.exports = create;
 
-},{}],69:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.destroy(' + resourceName + ', ' + id + '[, options]): ';
 }
@@ -4175,7 +4190,7 @@ function destroy(resourceName, id, options) {
 
 module.exports = destroy;
 
-},{}],70:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.destroyAll(' + resourceName + ', params[, options]): ';
 }
@@ -4259,7 +4274,7 @@ function destroyAll(resourceName, params, options) {
 
 module.exports = destroyAll;
 
-},{}],71:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.find(' + resourceName + ', ' + id + '[, options]): ';
 }
@@ -4365,7 +4380,7 @@ function find(resourceName, id, options) {
 
 module.exports = find;
 
-},{}],72:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.findAll(' + resourceName + ', params[, options]): ';
 }
@@ -4532,7 +4547,7 @@ function findAll(resourceName, params, options) {
 
 module.exports = findAll;
 
-},{}],73:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 module.exports = {
   /**
    * @doc method
@@ -4635,7 +4650,7 @@ module.exports = {
   updateAll: require('./updateAll')
 };
 
-},{"./create":68,"./destroy":69,"./destroyAll":70,"./find":71,"./findAll":72,"./loadRelations":74,"./refresh":75,"./save":76,"./update":77,"./updateAll":78}],74:[function(require,module,exports){
+},{"./create":69,"./destroy":70,"./destroyAll":71,"./find":72,"./findAll":73,"./loadRelations":75,"./refresh":76,"./save":77,"./update":78,"./updateAll":79}],75:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.loadRelations(' + resourceName + ', instance(Id), relations[, options]): ';
 }
@@ -4773,7 +4788,7 @@ function loadRelations(resourceName, instance, relations, options) {
 
 module.exports = loadRelations;
 
-},{}],75:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.refresh(' + resourceName + ', ' + id + '[, options]): ';
 }
@@ -4856,7 +4871,7 @@ function refresh(resourceName, id, options) {
 
 module.exports = refresh;
 
-},{}],76:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.save(' + resourceName + ', ' + id + '[, options]): ';
 }
@@ -4995,7 +5010,7 @@ function save(resourceName, id, options) {
 
 module.exports = save;
 
-},{}],77:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.update(' + resourceName + ', ' + id + ', attrs[, options]): ';
 }
@@ -5115,7 +5130,7 @@ function update(resourceName, id, attrs, options) {
 
 module.exports = update;
 
-},{}],78:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.updateAll(' + resourceName + ', attrs, params[, options]): ';
 }
@@ -5241,7 +5256,7 @@ function updateAll(resourceName, attrs, params, options) {
 
 module.exports = updateAll;
 
-},{}],79:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 var DSUtils = require('../utils');
 var DSErrors = require('../errors');
 var DSHttpAdapter = require('../adapters/http');
@@ -5330,6 +5345,8 @@ Defaults.prototype.defaultFilter = function (collection, resourceName, params, o
               keep = first ? (attrs[field] <= val) : keep && (attrs[field] <= val);
             } else if (op === 'in') {
               keep = first ? DSUtils.contains(val, attrs[field]) : keep && DSUtils.contains(val, attrs[field]);
+            } else if (op === 'notIn') {
+              keep = first ? !DSUtils.contains(val, attrs[field]) : keep && !DSUtils.contains(val, attrs[field]);
             } else if (op === '|==') {
               keep = first ? (attrs[field] == val) : keep || (attrs[field] == val);
             } else if (op === '|===') {
@@ -5348,6 +5365,8 @@ Defaults.prototype.defaultFilter = function (collection, resourceName, params, o
               keep = first ? (attrs[field] <= val) : keep || (attrs[field] <= val);
             } else if (op === '|in') {
               keep = first ? DSUtils.contains(val, attrs[field]) : keep || DSUtils.contains(val, attrs[field]);
+            } else if (op === '|notIn') {
+              keep = first ? !DSUtils.contains(val, attrs[field]) : keep || !DSUtils.contains(val, attrs[field]);
             }
             first = false;
           });
@@ -5439,6 +5458,8 @@ Defaults.prototype.defaultFilter = function (collection, resourceName, params, o
 Defaults.prototype.baseUrl = '';
 Defaults.prototype.endpoint = '';
 Defaults.prototype.useClass = true;
+Defaults.prototype.keepChangeHistory = false;
+Defaults.prototype.resetHistoryOnInject = true;
 /**
  * @doc property
  * @id DSProvider.properties:defaults.beforeValidate
@@ -5914,7 +5935,74 @@ DSUtils.deepMixIn(DS.prototype, asyncMethods);
 
 module.exports = DS;
 
-},{"../adapters/http":66,"../adapters/localStorage":67,"../errors":99,"../utils":101,"./async_methods":73,"./sync_methods":90}],80:[function(require,module,exports){
+},{"../adapters/http":67,"../adapters/localStorage":68,"../errors":101,"../utils":103,"./async_methods":74,"./sync_methods":92}],81:[function(require,module,exports){
+function errorPrefix(resourceName) {
+  return 'DS.changeHistory(' + resourceName + ', id): ';
+}
+
+/**
+ * @doc method
+ * @id DS.sync methods:changeHistory
+ * @name changeHistory
+ * @description
+ * Synchronously return the changeHistory of the item of the type specified by `resourceName` that has the primary key
+ * specified by `id`. This object represents the history of changes in the item since the item was last injected or
+ * re-injected (on save, update, etc.) into the data store.
+ *
+ * ## Signature:
+ * ```js
+ * DS.changeHistory(resourceName, id)
+ * ```
+ *
+ * ## Example:
+ *
+ * ```js
+ * var d = DS.get('document', 5); // { author: 'John Anderson', id: 5 }
+ *
+ * d.author = 'Sally';
+ *
+ * // You might have to do $scope.$apply() first
+ *
+ * DS.changeHistory('document', 5); // [{...}] Array of changes
+ * ```
+ *
+ * ## Throws
+ *
+ * - `{IllegalArgumentError}`
+ * - `{NonexistentResourceError}`
+ *
+ * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
+ * @param {string|number=} id The primary key of the item for which to retrieve the changeHistory.
+ * @returns {object} The changeHistory of the item of the type specified by `resourceName` with the primary key specified by `id`.
+ */
+function changeHistory(resourceName, id) {
+  var DS = this;
+  var DSUtils = DS.utils;
+  var definition = DS.definitions[resourceName];
+  var resource = DS.store[resourceName];
+  if (resourceName && !DS.definitions[resourceName]) {
+    throw new DS.errors.NER(errorPrefix(resourceName) + resourceName);
+  } else if (id && !DSUtils.isString(id) && !DSUtils.isNumber(id)) {
+    throw new DS.errors.IA(errorPrefix(resourceName) + 'id: Must be a string or a number!');
+  }
+
+  if (!definition.keepChangeHistory) {
+    console.warn(errorPrefix(resourceName) + 'changeHistory is disabled for this resource!');
+  } else {
+    if (resourceName) {
+      var item = DS.get(resourceName, id);
+      if (item) {
+        return resource.changeHistories[id];
+      }
+    } else {
+      return resource.changeHistory;
+    }
+  }
+}
+
+module.exports = changeHistory;
+
+},{}],82:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.changes(' + resourceName + ', id): ';
 }
@@ -5983,7 +6071,7 @@ function changes(resourceName, id) {
 
 module.exports = changes;
 
-},{}],81:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.compute(' + resourceName + ', instance): ';
 }
@@ -6080,7 +6168,7 @@ module.exports = {
   _compute: _compute
 };
 
-},{}],82:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.createInstance(' + resourceName + '[, attrs][, options]): ';
 }
@@ -6178,7 +6266,7 @@ function createInstance(resourceName, attrs, options) {
 
 module.exports = createInstance;
 
-},{}],83:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 /*jshint evil:true*/
 var errorPrefix = 'DS.defineResource(definition): ';
 
@@ -6195,6 +6283,7 @@ function Resource(utils, options) {
 
 var methodsToProxy = [
   'changes',
+  'changeHistory',
   'create',
   'createInstance',
   'destroy',
@@ -6259,6 +6348,8 @@ var methodsToProxy = [
  * - `{string=}` - `endpoint` - The attribute that specifies the primary key for this resource. Default is the value of `name`.
  * - `{string=}` - `baseUrl` - The url relative to which all AJAX requests will be made.
  * - `{boolean=}` - `useClass` - Whether to use a wrapper class created from the ProperCase name of the resource. The wrapper will always be used for resources that have `methods` defined.
+ * - `{boolean=}` - `keepChangeHistory` - Whether to keep a history of changes for items in the data store. Default: `false`.
+ * - `{boolean=}` - `resetHistoryOnInject` - Whether to reset the history of changes for items when they are injected of re-injected into the data store. This will also reset an item's previous attributes. Default: `true`.
  * - `{function=}` - `defaultFilter` - Override the filtering used internally by `DS.filter` with you own function here.
  * - `{*=}` - `meta` - A property reserved for developer use. This will never be used by the API.
  * - `{object=}` - `methods` - If provided, items of this resource will be wrapped in a constructor function that is
@@ -6435,6 +6526,8 @@ function defineResource(definition) {
       saved: {},
       previousAttributes: {},
       observers: {},
+      changeHistories: {},
+      changeHistory: [],
       collectionModified: 0
     };
 
@@ -6468,7 +6561,7 @@ function defineResource(definition) {
 
 module.exports = defineResource;
 
-},{}],84:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 var observe = require('../../../lib/observe-js/observe-js');
 
 /**
@@ -6491,12 +6584,13 @@ function digest() {
 
 module.exports = digest;
 
-},{"../../../lib/observe-js/observe-js":1}],85:[function(require,module,exports){
+},{"../../../lib/observe-js/observe-js":1}],87:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.eject(' + resourceName + ', ' + id + '): ';
 }
 
 function _eject(definition, resource, id) {
+  var DS = this;
   var item;
   var found = false;
   for (var i = 0; i < resource.collection.length; i++) {
@@ -6515,6 +6609,11 @@ function _eject(definition, resource, id) {
     delete resource.index[id];
     delete resource.previousAttributes[id];
     delete resource.completedQueries[id];
+    delete resource.pendingQueries[id];
+    DS.utils.forEach(resource.changeHistories[id], function (changeRecord) {
+      DS.utils.remove(resource.changeHistory, changeRecord);
+    });
+    delete resource.changeHistories[id];
     delete resource.modified[id];
     delete resource.saved[id];
     resource.collectionModified = this.utils.updateTimestamp(resource.collectionModified);
@@ -6570,7 +6669,7 @@ function eject(resourceName, id) {
 
 module.exports = eject;
 
-},{}],86:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.ejectAll(' + resourceName + '[, params]): ';
 }
@@ -6673,7 +6772,7 @@ function ejectAll(resourceName, params) {
 
 module.exports = ejectAll;
 
-},{}],87:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.filter(' + resourceName + '[, params][, options]): ';
 }
@@ -6757,7 +6856,7 @@ function filter(resourceName, params, options) {
 
 module.exports = filter;
 
-},{}],88:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.get(' + resourceName + ', ' + id + '): ';
 }
@@ -6822,7 +6921,7 @@ function get(resourceName, id, options) {
 
 module.exports = get;
 
-},{}],89:[function(require,module,exports){
+},{}],91:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.hasChanges(' + resourceName + ', ' + id + '): ';
 }
@@ -6887,7 +6986,7 @@ function hasChanges(resourceName, id) {
 
 module.exports = hasChanges;
 
-},{}],90:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 module.exports = {
 
   /**
@@ -6899,6 +6998,16 @@ module.exports = {
    * See [DS.changes](/documentation/api/api/DS.sync methods:changes).
    */
   changes: require('./changes'),
+
+  /**
+   * @doc method
+   * @id DS.sync methods:changeHistory
+   * @name changeHistory
+   * @methodOf DS
+   * @description
+   * See [DS.changeHistory](/documentation/api/api/DS.sync methods:changeHistory).
+   */
+  changeHistory: require('./changeHistory'),
 
   /**
    * @doc method
@@ -7071,7 +7180,7 @@ module.exports = {
   unlinkInverse: require('./unlinkInverse')
 };
 
-},{"./changes":80,"./compute":81,"./createInstance":82,"./defineResource":83,"./digest":84,"./eject":85,"./ejectAll":86,"./filter":87,"./get":88,"./hasChanges":89,"./inject":91,"./lastModified":92,"./lastSaved":93,"./link":94,"./linkAll":95,"./linkInverse":96,"./previous":97,"./unlinkInverse":98}],91:[function(require,module,exports){
+},{"./changeHistory":81,"./changes":82,"./compute":83,"./createInstance":84,"./defineResource":85,"./digest":86,"./eject":87,"./ejectAll":88,"./filter":89,"./get":90,"./hasChanges":91,"./inject":93,"./lastModified":94,"./lastSaved":95,"./link":96,"./linkAll":97,"./linkInverse":98,"./previous":99,"./unlinkInverse":100}],93:[function(require,module,exports){
 var observe = require('../../../lib/observe-js/observe-js');
 var _compute = require('./compute')._compute;
 var stack = 0;
@@ -7098,12 +7207,25 @@ function _inject(definition, resource, attrs, options) {
     });
 
     if (!DS.utils.isEmpty(added) || !DS.utils.isEmpty(removed) || !DS.utils.isEmpty(changed) || firstTime) {
+      item = DS.get(definition.name, innerId);
       resource.modified[innerId] = DS.utils.updateTimestamp(resource.modified[innerId]);
       resource.collectionModified = DS.utils.updateTimestamp(resource.collectionModified);
+      if (definition.keepChangeHistory) {
+        var changeRecord = {
+          resourceName: definition.name,
+          target: item,
+          added: added,
+          removed: removed,
+          changed: changed,
+          timestamp: resource.modified[innerId]
+        };
+        resource.changeHistories[innerId].push(changeRecord);
+        resource.changeHistory.push(changeRecord);
+      }
     }
 
     if (definition.computed) {
-      item = DS.get(definition.name, innerId);
+      item = item || DS.get(definition.name, innerId);
       DS.utils.forOwn(definition.computed, function (fn, field) {
         var compute = false;
         // check if required fields changed
@@ -7120,7 +7242,7 @@ function _inject(definition, resource, attrs, options) {
     }
 
     if (definition.relations) {
-      item = DS.get(definition.name, innerId);
+      item = item || DS.get(definition.name, innerId);
       DS.utils.forEach(definition.relationList, function (def) {
         if (item[def.localField] && (def.localKey in added || def.localKey in removed || def.localKey in changed)) {
           DS.link(definition.name, item[definition.idAttribute], [def.relation]);
@@ -7179,6 +7301,7 @@ function _inject(definition, resource, attrs, options) {
 
           resource.collection.push(item);
 
+          resource.changeHistories[id] = [];
           resource.observers[id] = new observe.ObjectObserver(item);
           resource.observers[id].open(_react, item);
           resource.index[id] = item;
@@ -7186,6 +7309,16 @@ function _inject(definition, resource, attrs, options) {
           _react.call(item, {}, {}, {}, null, true);
         } else {
           DS.utils.deepMixIn(item, attrs);
+          if (definition.resetHistoryOnInject) {
+            resource.previousAttributes[id] = {};
+            DS.utils.deepMixIn(resource.previousAttributes[id], attrs);
+            if (resource.changeHistories[id].length) {
+              DS.utils.forEach(resource.changeHistories[id], function (changeRecord) {
+                DS.utils.remove(resource.changeHistory, changeRecord);
+              });
+              resource.changeHistories[id].splice(0, resource.changeHistories[id].length);
+            }
+          }
           resource.observers[id].deliver();
         }
         resource.saved[id] = DS.utils.updateTimestamp(resource.saved[id]);
@@ -7346,7 +7479,7 @@ function inject(resourceName, attrs, options) {
 
 module.exports = inject;
 
-},{"../../../lib/observe-js/observe-js":1,"./compute":81}],92:[function(require,module,exports){
+},{"../../../lib/observe-js/observe-js":1,"./compute":83}],94:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.lastModified(' + resourceName + '[, ' + id + ']): ';
 }
@@ -7405,7 +7538,7 @@ function lastModified(resourceName, id) {
 
 module.exports = lastModified;
 
-},{}],93:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.lastSaved(' + resourceName + '[, ' + id + ']): ';
 }
@@ -7469,7 +7602,7 @@ function lastSaved(resourceName, id) {
 
 module.exports = lastSaved;
 
-},{}],94:[function(require,module,exports){
+},{}],96:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.link(' + resourceName + ', id[, relations]): ';
 }
@@ -7565,7 +7698,7 @@ function link(resourceName, id, relations) {
 
 module.exports = link;
 
-},{}],95:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.linkAll(' + resourceName + '[, params][, relations]): ';
 }
@@ -7677,7 +7810,7 @@ function linkAll(resourceName, params, relations) {
 
 module.exports = linkAll;
 
-},{}],96:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.linkInverse(' + resourceName + ', id[, relations]): ';
 }
@@ -7768,7 +7901,7 @@ function linkInverse(resourceName, id, relations) {
 
 module.exports = linkInverse;
 
-},{}],97:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.previous(' + resourceName + '[, ' + id + ']): ';
 }
@@ -7826,7 +7959,7 @@ function previous(resourceName, id) {
 
 module.exports = previous;
 
-},{}],98:[function(require,module,exports){
+},{}],100:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.unlinkInverse(' + resourceName + ', id[, relations]): ';
 }
@@ -7919,7 +8052,7 @@ function unlinkInverse(resourceName, id, relations) {
 
 module.exports = unlinkInverse;
 
-},{}],99:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 /**
  * @doc function
  * @id errors.types:IllegalArgumentError
@@ -8050,7 +8183,7 @@ module.exports = {
   NER: NonexistentResourceError
 };
 
-},{}],100:[function(require,module,exports){
+},{}],102:[function(require,module,exports){
 /**
  * @doc overview
  * @id js-data
@@ -8085,7 +8218,7 @@ module.exports = {
   DSErrors: require('./errors')
 };
 
-},{"./adapters/http":66,"./adapters/localStorage":67,"./datastore":79,"./errors":99,"./utils":101}],101:[function(require,module,exports){
+},{"./adapters/http":67,"./adapters/localStorage":68,"./datastore":80,"./errors":101,"./utils":103}],103:[function(require,module,exports){
 module.exports = {
   isBoolean: require('mout/lang/isBoolean'),
   isString: require('mout/lang/isString'),
@@ -8108,6 +8241,7 @@ module.exports = {
   contains: require('mout/array/contains'),
   filter: require('mout/array/filter'),
   toLookup: require('mout/array/toLookup'),
+  remove: require('mout/array/remove'),
   slice: require('mout/array/slice'),
   sort: require('mout/array/sort'),
   updateTimestamp: function (timestamp) {
@@ -8199,5 +8333,5 @@ module.exports = {
   }
 };
 
-},{"axios":2,"es6-promises":21,"mout/array/contains":25,"mout/array/filter":26,"mout/array/forEach":27,"mout/array/slice":30,"mout/array/sort":31,"mout/array/toLookup":32,"mout/lang/isArray":38,"mout/lang/isBoolean":39,"mout/lang/isEmpty":40,"mout/lang/isFunction":41,"mout/lang/isNumber":43,"mout/lang/isObject":44,"mout/lang/isString":46,"mout/object/deepMixIn":50,"mout/object/forOwn":52,"mout/object/merge":54,"mout/object/pick":57,"mout/object/set":58,"mout/string/makePath":61,"mout/string/pascalCase":62,"mout/string/upperCase":65}]},{},[100])(100)
+},{"axios":2,"es6-promises":21,"mout/array/contains":25,"mout/array/filter":26,"mout/array/forEach":27,"mout/array/remove":30,"mout/array/slice":31,"mout/array/sort":32,"mout/array/toLookup":33,"mout/lang/isArray":39,"mout/lang/isBoolean":40,"mout/lang/isEmpty":41,"mout/lang/isFunction":42,"mout/lang/isNumber":44,"mout/lang/isObject":45,"mout/lang/isString":47,"mout/object/deepMixIn":51,"mout/object/forOwn":53,"mout/object/merge":55,"mout/object/pick":58,"mout/object/set":59,"mout/string/makePath":62,"mout/string/pascalCase":63,"mout/string/upperCase":66}]},{},[102])(102)
 });

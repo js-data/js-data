@@ -3,6 +3,7 @@ function errorPrefix(resourceName, id) {
 }
 
 function _eject(definition, resource, id) {
+  var DS = this;
   var item;
   var found = false;
   for (var i = 0; i < resource.collection.length; i++) {
@@ -21,6 +22,11 @@ function _eject(definition, resource, id) {
     delete resource.index[id];
     delete resource.previousAttributes[id];
     delete resource.completedQueries[id];
+    delete resource.pendingQueries[id];
+    DS.utils.forEach(resource.changeHistories[id], function (changeRecord) {
+      DS.utils.remove(resource.changeHistory, changeRecord);
+    });
+    delete resource.changeHistories[id];
     delete resource.modified[id];
     delete resource.saved[id];
     resource.collectionModified = this.utils.updateTimestamp(resource.collectionModified);

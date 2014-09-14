@@ -200,6 +200,14 @@ describe('DS.filter(resourceName[, params][, options])', function () {
 
     assert.deepEqual(datastore.filter('post', params), [p2, p4], 'should accept and/or clause');
 
+    params.where = {
+      id: {
+        'notIn': [8]
+      }
+    };
+
+    assert.deepEqual(datastore.filter('post', params), [p1, p2, p3, p5], 'should accept notIn clause');
+
     params.where = { age: { garbage: 'should have no effect' } };
 
     assert.deepEqual(datastore.filter('post', params), [p1, p2, p3, p4, p5], 'should return all elements');

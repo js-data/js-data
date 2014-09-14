@@ -20,6 +20,7 @@ module.exports = {
   contains: require('mout/array/contains'),
   filter: require('mout/array/filter'),
   toLookup: require('mout/array/toLookup'),
+  remove: require('mout/array/remove'),
   slice: require('mout/array/slice'),
   sort: require('mout/array/sort'),
   updateTimestamp: function (timestamp) {

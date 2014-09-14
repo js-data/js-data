@@ -14,6 +14,7 @@ function Resource(utils, options) {
 
 var methodsToProxy = [
   'changes',
+  'changeHistory',
   'create',
   'createInstance',
   'destroy',
@@ -78,6 +79,8 @@ var methodsToProxy = [
  * - `{string=}` - `endpoint` - The attribute that specifies the primary key for this resource. Default is the value of `name`.
  * - `{string=}` - `baseUrl` - The url relative to which all AJAX requests will be made.
  * - `{boolean=}` - `useClass` - Whether to use a wrapper class created from the ProperCase name of the resource. The wrapper will always be used for resources that have `methods` defined.
+ * - `{boolean=}` - `keepChangeHistory` - Whether to keep a history of changes for items in the data store. Default: `false`.
+ * - `{boolean=}` - `resetHistoryOnInject` - Whether to reset the history of changes for items when they are injected of re-injected into the data store. This will also reset an item's previous attributes. Default: `true`.
  * - `{function=}` - `defaultFilter` - Override the filtering used internally by `DS.filter` with you own function here.
  * - `{*=}` - `meta` - A property reserved for developer use. This will never be used by the API.
  * - `{object=}` - `methods` - If provided, items of this resource will be wrapped in a constructor function that is
@@ -254,6 +257,8 @@ function defineResource(definition) {
       saved: {},
       previousAttributes: {},
       observers: {},
+      changeHistories: {},
+      changeHistory: [],
       collectionModified: 0
     };
 

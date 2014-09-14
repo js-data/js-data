@@ -24,12 +24,25 @@ function _inject(definition, resource, attrs, options) {
     });
 
     if (!DS.utils.isEmpty(added) || !DS.utils.isEmpty(removed) || !DS.utils.isEmpty(changed) || firstTime) {
+      item = DS.get(definition.name, innerId);
       resource.modified[innerId] = DS.utils.updateTimestamp(resource.modified[innerId]);
       resource.collectionModified = DS.utils.updateTimestamp(resource.collectionModified);
+      if (definition.keepChangeHistory) {
+        var changeRecord = {
+          resourceName: definition.name,
+          target: item,
+          added: added,
+          removed: removed,
+          changed: changed,
+          timestamp: resource.modified[innerId]
+        };
+        resource.changeHistories[innerId].push(changeRecord);
+        resource.changeHistory.push(changeRecord);
+      }
     }
 
     if (definition.computed) {
-      item = DS.get(definition.name, innerId);
+      item = item || DS.get(definition.name, innerId);
       DS.utils.forOwn(definition.computed, function (fn, field) {
         var compute = false;
         // check if required fields changed
@@ -46,7 +59,7 @@ function _inject(definition, resource, attrs, options) {
     }
 
     if (definition.relations) {
-      item = DS.get(definition.name, innerId);
+      item = item || DS.get(definition.name, innerId);
       DS.utils.forEach(definition.relationList, function (def) {
         if (item[def.localField] && (def.localKey in added || def.localKey in removed || def.localKey in changed)) {
           DS.link(definition.name, item[definition.idAttribute], [def.relation]);
@@ -105,6 +118,7 @@ function _inject(definition, resource, attrs, options) {
 
           resource.collection.push(item);
 
+          resource.changeHistories[id] = [];
           resource.observers[id] = new observe.ObjectObserver(item);
           resource.observers[id].open(_react, item);
           resource.index[id] = item;
@@ -112,6 +126,16 @@ function _inject(definition, resource, attrs, options) {
           _react.call(item, {}, {}, {}, null, true);
         } else {
           DS.utils.deepMixIn(item, attrs);
+          if (definition.resetHistoryOnInject) {
+            resource.previousAttributes[id] = {};
+            DS.utils.deepMixIn(resource.previousAttributes[id], attrs);
+            if (resource.changeHistories[id].length) {
+              DS.utils.forEach(resource.changeHistories[id], function (changeRecord) {
+                DS.utils.remove(resource.changeHistory, changeRecord);
+              });
+              resource.changeHistories[id].splice(0, resource.changeHistories[id].length);
+            }
+          }
           resource.observers[id].deliver();
         }
         resource.saved[id] = DS.utils.updateTimestamp(resource.saved[id]);
