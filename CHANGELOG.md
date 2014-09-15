@@ -9,4 +9,5 @@
 
 ###### Backwards compatible bug fixes
 - jmdobry/angular-data#156 - cached findAll pending query doesn't get removed sometimes
+- jmdobry/angular-data#163 - loadRelations shouldn't try to load a relation if the id for it is missing
 - jmdobry/angular-data#165 - DS.hasChanges() reports changes after loading relations

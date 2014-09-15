@@ -98,17 +98,17 @@ function loadRelations(resourceName, instance, relations, options) {
           var params = {};
           params[def.foreignKey] = instance[definition.idAttribute];
 
-          if (def.type === 'hasMany') {
+          if (def.type === 'hasMany' && params[def.foreignKey]) {
             task = DS.findAll(relationName, params, options);
           } else if (def.type === 'hasOne') {
             if (def.localKey && instance[def.localKey]) {
               task = DS.find(relationName, instance[def.localKey], options);
-            } else if (def.foreignKey) {
+            } else if (def.foreignKey && params[def.foreignKey]) {
               task = DS.findAll(relationName, params, options).then(function (hasOnes) {
                 return hasOnes.length ? hasOnes[0] : null;
               });
             }
-          } else {
+          } else if (instance[def.localKey]) {
             task = DS.find(relationName, instance[def.localKey], options);
           }
 
