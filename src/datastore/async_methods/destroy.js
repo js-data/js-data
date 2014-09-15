@@ -72,14 +72,16 @@ function destroy(resourceName, id, options) {
       var func = options.beforeDestroy ? DSUtils.promisify(options.beforeDestroy) : definition.beforeDestroy;
       return func.call(attrs, resourceName, attrs);
     })
-    .then(function () {
+    .then(function (attrs) {
+      DS.notify(definition, 'beforeDestroy', DSUtils.merge({}, attrs));
       return DS.adapters[options.adapter || definition.defaultAdapter].destroy(definition, id, options);
     })
     .then(function () {
       var func = options.afterDestroy ? DSUtils.promisify(options.afterDestroy) : definition.afterDestroy;
       return func.call(item, resourceName, item);
     })
-    .then(function () {
+    .then(function (item) {
+      DS.notify(definition, 'afterDestroy', DSUtils.merge({}, item));
       DS.eject(resourceName, id);
       return id;
     });

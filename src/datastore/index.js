@@ -621,6 +621,13 @@ function DS(options) {
   this.defaults = new Defaults();
   DSUtils.deepMixIn(this.defaults, options);
 
+  this.notify = function (definition, event) {
+    var args = Array.prototype.slice.call(arguments, 2);
+    args.unshift(definition.name);
+    args.unshift('DS.' + event);
+    definition.emit.apply(definition, args);
+  };
+
   /*!
    * @doc property
    * @id DS.properties:store

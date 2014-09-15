@@ -15,6 +15,8 @@ function _ejectAll(definition, resource, params) {
   delete resource.completedQueries[queryHash];
   resource.collectionModified = DS.utils.updateTimestamp(resource.collectionModified);
 
+  DS.notify(definition, 'eject', items);
+
   return items;
 }
 

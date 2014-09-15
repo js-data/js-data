@@ -1,3 +1,47 @@
+function Events(target) {
+  var events = {};
+  target = target || this;
+  /**
+   *  On: listen to events
+   */
+  target.on = function (type, func, ctx) {
+    events[type] = events[type] || [];
+    events[type].push({
+      f: func,
+      c: ctx
+    });
+  };
+
+  /**
+   *  Off: stop listening to event / specific callback
+   */
+  target.off = function (type, func) {
+    var listeners = events[type];
+    if (!listeners) {
+      events = {};
+    } else if (func) {
+      for (var i = 0; i < listeners.length; i++) {
+        if (listeners[i] === func) {
+          listeners.splice(i, 1);
+          break;
+        }
+      }
+    } else {
+      listeners.splice(0, listeners.length);
+    }
+  };
+
+  target.emit = function () {
+    var args = Array.prototype.slice.call(arguments);
+    var listeners = events[args.shift()] || [];
+    if (listeners) {
+      for (var i = 0; i < listeners.length; i++) {
+        listeners[i].f.apply(listeners[i].c, args);
+      }
+    }
+  };
+}
+
 module.exports = {
   isBoolean: require('mout/lang/isBoolean'),
   isString: require('mout/lang/isString'),
@@ -12,11 +56,11 @@ module.exports = {
   upperCase: require('mout/string/upperCase'),
   pascalCase: require('mout/string/pascalCase'),
   deepMixIn: require('mout/object/deepMixIn'),
-  merge: require('mout/object/merge'),
   forOwn: require('mout/object/forOwn'),
   forEach: require('mout/array/forEach'),
   pick: require('mout/object/pick'),
   set: require('mout/object/set'),
+  merge: require('mout/object/merge'),
   contains: require('mout/array/contains'),
   filter: require('mout/array/filter'),
   toLookup: require('mout/array/toLookup'),
@@ -31,7 +75,7 @@ module.exports = {
       return newTimestamp;
     }
   },
-  Promise: require('es6-promises'),
+  Promise: require('es6-promise').Promise,
   http: require('axios'),
   deepFreeze: function deepFreeze(o) {
     if (typeof Object.freeze === 'function') {
@@ -109,5 +153,6 @@ module.exports = {
         }
       });
     };
-  }
+  },
+  Events: Events
 };

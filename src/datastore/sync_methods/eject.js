@@ -14,7 +14,7 @@ function _eject(definition, resource, id) {
     }
   }
   if (found) {
-    this.unlinkInverse(definition.name, id);
+    DS.unlinkInverse(definition.name, id);
     resource.collection.splice(i, 1);
     resource.observers[id].close();
     delete resource.observers[id];
@@ -29,7 +29,9 @@ function _eject(definition, resource, id) {
     delete resource.changeHistories[id];
     delete resource.modified[id];
     delete resource.saved[id];
-    resource.collectionModified = this.utils.updateTimestamp(resource.collectionModified);
+    resource.collectionModified = DS.utils.updateTimestamp(resource.collectionModified);
+
+    DS.notify(definition, 'eject', item);
 
     return item;
   }

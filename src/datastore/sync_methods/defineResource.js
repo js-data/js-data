@@ -281,6 +281,9 @@ function defineResource(definition) {
     def.beforeDestroy = DSUtils.promisify(def.beforeDestroy);
     def.afterDestroy = DSUtils.promisify(def.afterDestroy);
 
+    // Mix-in events
+    DSUtils.Events(def);
+
     return def;
   } catch (err) {
     console.error(err);
