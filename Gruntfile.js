@@ -79,7 +79,7 @@ module.exports = function (grunt) {
           files: [
             'dist/js-data.min.js',
             'karma.start.js',
-            'test/integration/**/*.js'
+            'test/**/*.js'
           ]
         }
       },
