@@ -59,6 +59,7 @@ function refresh(resourceName, id, options) {
   return new DSUtils.Promise(function (resolve, reject) {
     options = options || {};
 
+    id = DSUtils.resolveId(DS.definitions[resourceName], id);
     if (!DS.definitions[resourceName]) {
       reject(new DS.errors.NER(errorPrefix(resourceName, id) + resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {

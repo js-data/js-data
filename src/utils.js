@@ -67,6 +67,22 @@ module.exports = {
   remove: require('mout/array/remove'),
   slice: require('mout/array/slice'),
   sort: require('mout/array/sort'),
+  resolveItem: function (resource, idOrInstance) {
+    if (resource && (this.isString(idOrInstance) || this.isNumber(idOrInstance))) {
+      return resource.index[idOrInstance] || idOrInstance;
+    } else {
+      return idOrInstance;
+    }
+  },
+  resolveId: function (definition, idOrInstance) {
+    if (this.isString(idOrInstance) || this.isNumber(idOrInstance)) {
+      return idOrInstance;
+    } else if (idOrInstance && definition) {
+      return idOrInstance[definition.idAttribute] || idOrInstance;
+    } else {
+      return idOrInstance;
+    }
+  },
   updateTimestamp: function (timestamp) {
     var newTimestamp = typeof Date.now === 'function' ? Date.now() : new Date().getTime();
     if (timestamp && newTimestamp <= timestamp) {

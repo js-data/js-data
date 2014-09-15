@@ -57,6 +57,7 @@ function destroy(resourceName, id, options) {
   return new DSUtils.Promise(function (resolve, reject) {
     options = options || {};
 
+    id = DSUtils.resolveId(definition, id);
     if (!definition) {
       reject(new DSErrors.NER(errorPrefix(resourceName, id) + resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {

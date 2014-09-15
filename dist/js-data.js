@@ -3848,6 +3848,7 @@ function destroy(resourceName, id, options) {
   return new DSUtils.Promise(function (resolve, reject) {
     options = options || {};
 
+    id = DSUtils.resolveId(definition, id);
     if (!definition) {
       reject(new DSErrors.NER(errorPrefix(resourceName, id) + resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -4540,6 +4541,7 @@ function refresh(resourceName, id, options) {
   return new DSUtils.Promise(function (resolve, reject) {
     options = options || {};
 
+    id = DSUtils.resolveId(DS.definitions[resourceName], id);
     if (!DS.definitions[resourceName]) {
       reject(new DS.errors.NER(errorPrefix(resourceName, id) + resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -4625,6 +4627,7 @@ function save(resourceName, id, options) {
   return new DSUtils.Promise(function (resolve, reject) {
     options = options || {};
 
+    id = DSUtils.resolveId(definition, id);
     if (!definition) {
       reject(new DSErrors.NER(errorPrefix(resourceName, id) + resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -4767,6 +4770,7 @@ function update(resourceName, id, attrs, options) {
   return new DSUtils.Promise(function (resolve, reject) {
     options = options || {};
 
+    id = DSUtils.resolveId(definition, id);
     if (!definition) {
       reject(new DSErrors.NER(errorPrefix(resourceName, id) + resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -5683,6 +5687,8 @@ function changeHistory(resourceName, id) {
   var DSUtils = DS.utils;
   var definition = DS.definitions[resourceName];
   var resource = DS.store[resourceName];
+
+  id = DSUtils.resolveId(definition, id);
   if (resourceName && !DS.definitions[resourceName]) {
     throw new DS.errors.NER(errorPrefix(resourceName) + resourceName);
   } else if (id && !DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -5749,6 +5755,8 @@ function changes(resourceName, id) {
   var DS = this;
   var DSUtils = DS.utils;
   var DSErrors = DS.errors;
+
+  id = DSUtils.resolveId(DS.definitions[resourceName], id);
   if (!DS.definitions[resourceName]) {
     throw new DSErrors.NER(errorPrefix(resourceName) + resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -5854,6 +5862,7 @@ function compute(resourceName, instance) {
   var DSErrors = DS.errors;
   var definition = DS.definitions[resourceName];
 
+  instance = DSUtils.resolveItem(DS.store[resourceName], instance);
   if (!definition) {
     throw new DSErrors.NER(errorPrefix(resourceName) + resourceName);
   } else if (!DSUtils.isObject(instance) && !DSUtils.isString(instance) && !DSUtils.isNumber(instance)) {
@@ -6372,6 +6381,8 @@ function eject(resourceName, id) {
   var DSUtils = DS.utils;
   var DSErrors = DS.errors;
   var definition = DS.definitions[resourceName];
+
+  id = DSUtils.resolveId(definition, id);
   if (!definition) {
     throw new DSErrors.NER(errorPrefix(resourceName, id) + resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -6685,6 +6696,8 @@ function hasChanges(resourceName, id) {
   var DS = this;
   var DSUtils = DS.utils;
   var DSErrors = DS.errors;
+
+  id = DSUtils.resolveId(DS.definitions[resourceName], id);
   if (!DS.definitions[resourceName]) {
     throw new DSErrors.NER(errorPrefix(resourceName, id) + resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -7239,6 +7252,8 @@ function lastModified(resourceName, id) {
   var DSUtils = DS.utils;
   var DSErrors = DS.errors;
   var resource = DS.store[resourceName];
+
+  id = DSUtils.resolveId(DS.definitions[resourceName], id);
   if (!DS.definitions[resourceName]) {
     throw new DSErrors.NER(errorPrefix(resourceName, id) + resourceName);
   } else if (id && !DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -7306,6 +7321,8 @@ function lastSaved(resourceName, id) {
   var DSUtils = DS.utils;
   var DSErrors = DS.errors;
   var resource = DS.store[resourceName];
+
+  id = DSUtils.resolveId(DS.definitions[resourceName], id);
   if (!DS.definitions[resourceName]) {
     throw new DSErrors.NER(errorPrefix(resourceName, id) + resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -7397,6 +7414,7 @@ function link(resourceName, id, relations) {
 
   relations = relations || [];
 
+  id = DSUtils.resolveId(definition, id);
   if (!definition) {
     throw new DSErrors.NER(errorPrefix(resourceName) + resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -7600,6 +7618,7 @@ function linkInverse(resourceName, id, relations) {
 
   relations = relations || [];
 
+  id = DSUtils.resolveId(definition, id);
   if (!definition) {
     throw new DSErrors.NER(errorPrefix(resourceName) + resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -7664,6 +7683,8 @@ function previous(resourceName, id) {
   var DSUtils = DS.utils;
   var DSErrors = DS.errors;
   var resource = DS.store[resourceName];
+
+  id = DSUtils.resolveId(DS.definitions[resourceName], id);
   if (!DS.definitions[resourceName]) {
     throw new DSErrors.NER(errorPrefix(resourceName, id) + resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -7751,6 +7772,7 @@ function unlinkInverse(resourceName, id, relations) {
 
   relations = relations || [];
 
+  id = DSUtils.resolveId(definition, id);
   if (!definition) {
     throw new DSErrors.NER(errorPrefix(resourceName) + resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -8005,6 +8027,22 @@ module.exports = {
   remove: require('mout/array/remove'),
   slice: require('mout/array/slice'),
   sort: require('mout/array/sort'),
+  resolveItem: function (resource, idOrInstance) {
+    if (resource && (this.isString(idOrInstance) || this.isNumber(idOrInstance))) {
+      return resource.index[idOrInstance] || idOrInstance;
+    } else {
+      return idOrInstance;
+    }
+  },
+  resolveId: function (definition, idOrInstance) {
+    if (this.isString(idOrInstance) || this.isNumber(idOrInstance)) {
+      return idOrInstance;
+    } else if (idOrInstance && definition) {
+      return idOrInstance[definition.idAttribute] || idOrInstance;
+    } else {
+      return idOrInstance;
+    }
+  },
   updateTimestamp: function (timestamp) {
     var newTimestamp = typeof Date.now === 'function' ? Date.now() : new Date().getTime();
     if (timestamp && newTimestamp <= timestamp) {

@@ -40,6 +40,8 @@ function lastModified(resourceName, id) {
   var DSUtils = DS.utils;
   var DSErrors = DS.errors;
   var resource = DS.store[resourceName];
+
+  id = DSUtils.resolveId(DS.definitions[resourceName], id);
   if (!DS.definitions[resourceName]) {
     throw new DSErrors.NER(errorPrefix(resourceName, id) + resourceName);
   } else if (id && !DSUtils.isString(id) && !DSUtils.isNumber(id)) {

@@ -41,6 +41,8 @@ function changes(resourceName, id) {
   var DS = this;
   var DSUtils = DS.utils;
   var DSErrors = DS.errors;
+
+  id = DSUtils.resolveId(DS.definitions[resourceName], id);
   if (!DS.definitions[resourceName]) {
     throw new DSErrors.NER(errorPrefix(resourceName) + resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {

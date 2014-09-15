@@ -72,6 +72,7 @@ function unlinkInverse(resourceName, id, relations) {
 
   relations = relations || [];
 
+  id = DSUtils.resolveId(definition, id);
   if (!definition) {
     throw new DSErrors.NER(errorPrefix(resourceName) + resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {

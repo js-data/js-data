@@ -72,6 +72,7 @@ function compute(resourceName, instance) {
   var DSErrors = DS.errors;
   var definition = DS.definitions[resourceName];
 
+  instance = DSUtils.resolveItem(DS.store[resourceName], instance);
   if (!definition) {
     throw new DSErrors.NER(errorPrefix(resourceName) + resourceName);
   } else if (!DSUtils.isObject(instance) && !DSUtils.isString(instance) && !DSUtils.isNumber(instance)) {
