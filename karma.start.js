@@ -1,6 +1,7 @@
 // Setup global test variables
 var datastore, DSUtils, dsHttpAdapter, dsLocalStorageAdapter, p1, p2, p3, p4, p5;
 
+var Post, User, Organization, Comment, Profile;
 var user1, organization2, comment3, profile4;
 var comment11, comment12, comment13, organization14, profile15, user10, user16, user17, user18, organization15, user19, user20, comment19, user22, profile21;
 
@@ -116,12 +117,12 @@ beforeEach(function () {
   datastore.adapters.DSHttpAdapter = dsHttpAdapter;
   datastore.adapters.DSLocalStorageAdapter = dsLocalStorageAdapter;
   localStorage.clear();
-  datastore.defineResource({
+  Post = datastore.defineResource({
     name: 'post',
     keepChangeHistory: true,
     endpoint: '/posts'
   });
-  datastore.defineResource({
+  User = datastore.defineResource({
     name: 'user',
     relations: {
       hasMany: {
@@ -146,7 +147,7 @@ beforeEach(function () {
     }
   });
 
-  datastore.defineResource({
+  Organization = datastore.defineResource({
     name: 'organization',
     relations: {
       hasMany: {
@@ -158,7 +159,7 @@ beforeEach(function () {
     }
   });
 
-  datastore.defineResource({
+  Profile = datastore.defineResource({
     name: 'profile',
     relations: {
       belongsTo: {
@@ -170,7 +171,7 @@ beforeEach(function () {
     }
   });
 
-  datastore.defineResource({
+  Comment = datastore.defineResource({
     name: 'comment',
     relations: {
       belongsTo: {

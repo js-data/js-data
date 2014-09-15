@@ -10,8 +10,8 @@ Supporting relations, computed properties, model lifecycle control and a slew of
 
 All your data are belong to you...
 
-__Latest Release:__ [pending](http://js-data.io/)
-__master:__ [0.0.1](http://js-data-next.io/)
+__Latest Release:__ [0.0.1](http://js-data.io/)
+__master:__ [0.0.2](http://js-data-next.io/)
 
 JSData is pre-alpha. The API is subject to change, though the current api is well tested.
 

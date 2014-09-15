@@ -117,9 +117,24 @@ describe('DS.update(resourceName, id, attrs[, options])', function () {
       assert.deepEqual(comment, testComment);
       assert.deepEqual(comment, datastore.get('comment', 5));
 
-      datastore.inject('comment', testComment2);
+      var c = Comment.inject(testComment2);
 
-      datastore.update('comment', 6, {
+      function onBeforeUpdate (resourceName, attrs) {
+        attrs.other = 'stuff';
+        assert.equal(resourceName, 'comment');
+        assert.deepEqual(attrs, { content: 'stuff', other: 'stuff' });
+      }
+
+      function onAfterUpdate(resourceName, attrs) {
+        assert.equal(resourceName, 'comment');
+        assert.deepEqual(attrs, testComment2);
+        assert.isFalse(testComment2 === attrs);
+      }
+
+      Comment.on('DS.beforeUpdate', onBeforeUpdate);
+      Comment.on('DS.afterUpdate', onAfterUpdate);
+
+      Comment.update(c, {
         content: 'stuff'
       }, {
         params: {
