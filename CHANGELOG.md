@@ -9,3 +9,4 @@
 
 ###### Backwards compatible bug fixes
 - jmdobry/angular-data#156 - cached findAll pending query doesn't get removed sometimes
+- jmdobry/angular-data#165 - DS.hasChanges() reports changes after loading relations
