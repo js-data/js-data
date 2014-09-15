@@ -281,6 +281,8 @@ function inject(resourceName, attrs, options) {
       }
     }
 
+    DS.notify(definition, 'inject', injected);
+
     stack--;
   } catch (err) {
     stack--;

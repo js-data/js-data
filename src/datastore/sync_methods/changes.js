@@ -41,6 +41,8 @@ function changes(resourceName, id) {
   var DS = this;
   var DSUtils = DS.utils;
   var DSErrors = DS.errors;
+
+  id = DSUtils.resolveId(DS.definitions[resourceName], id);
   if (!DS.definitions[resourceName]) {
     throw new DSErrors.NER(errorPrefix(resourceName) + resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -59,6 +61,11 @@ function changes(resourceName, id) {
         }
       });
       diff[name] = DSUtils.pick(diff[name], toKeep);
+    });
+    DSUtils.forEach(DS.definitions[resourceName].relationFields, function (field) {
+      delete diff.added[field];
+      delete diff.removed[field];
+      delete diff.changed[field];
     });
     return diff;
   }

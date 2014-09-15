@@ -105,6 +105,7 @@ function updateAll(resourceName, attrs, params, options) {
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
+      DS.notify(definition, 'beforeUpdate', DSUtils.merge({}, attrs));
       return DS.adapters[options.adapter || definition.defaultAdapter].updateAll(definition, options.serialize ? options.serialize(resourceName, attrs) : definition.serialize(resourceName, attrs), params, options);
     })
     .then(function (res) {
@@ -113,6 +114,7 @@ function updateAll(resourceName, attrs, params, options) {
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (data) {
+      DS.notify(definition, 'afterUpdate', DSUtils.merge({}, attrs));
       if (options.cacheResponse) {
         return DS.inject(definition.name, data, options);
       } else {

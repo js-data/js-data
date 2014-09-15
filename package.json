@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Data store.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "homepage": "http://js-data.io",
   "repository": {
     "type": "git",
@@ -46,8 +46,8 @@
     "test": "grunt test"
   },
   "dependencies": {
-    "axios": "^0.1.0",
-    "es6-promises": "^1.0.8",
+    "axios": "^0.2.2",
+    "es6-promise": "^1.0.0",
     "mout": "^0.10.0"
   }
 }

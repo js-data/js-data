@@ -42,6 +42,8 @@ function changeHistory(resourceName, id) {
   var DSUtils = DS.utils;
   var definition = DS.definitions[resourceName];
   var resource = DS.store[resourceName];
+
+  id = DSUtils.resolveId(definition, id);
   if (resourceName && !DS.definitions[resourceName]) {
     throw new DS.errors.NER(errorPrefix(resourceName) + resourceName);
   } else if (id && !DSUtils.isString(id) && !DSUtils.isNumber(id)) {

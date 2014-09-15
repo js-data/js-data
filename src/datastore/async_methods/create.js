@@ -98,6 +98,7 @@ function create(resourceName, attrs, options) {
         return func.call(attrs, resourceName, attrs);
       })
       .then(function (attrs) {
+        DS.notify(definition, 'beforeCreate', DSUtils.merge({}, attrs));
         return DS.adapters[options.adapter || definition.defaultAdapter].create(definition, options.serialize ? options.serialize(resourceName, attrs) : definition.serialize(resourceName, attrs), options);
       })
       .then(function (res) {
@@ -105,17 +106,18 @@ function create(resourceName, attrs, options) {
         var attrs = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
         return func.call(attrs, resourceName, attrs);
       })
-      .then(function (data) {
+      .then(function (attrs) {
+        DS.notify(definition, 'afterCreate', DSUtils.merge({}, attrs));
         if (options.cacheResponse) {
           var resource = DS.store[resourceName];
-          var created = DS.inject(definition.name, data, options);
+          var created = DS.inject(definition.name, attrs, options);
           var id = created[definition.idAttribute];
           resource.completedQueries[id] = new Date().getTime();
           resource.previousAttributes[id] = DSUtils.deepMixIn({}, created);
           resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
           return DS.get(definition.name, id);
         } else {
-          return DS.createInstance(resourceName, data, options);
+          return DS.createInstance(resourceName, attrs, options);
         }
       });
   }

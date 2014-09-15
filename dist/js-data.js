@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file js-data.js
-* @version 0.0.1 - Homepage <http://js-data.io/>
+* @version 0.0.2 - Homepage <http://js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -595,15 +595,110 @@
 
 },{}],2:[function(require,module,exports){
 module.exports = require('./lib/axios');
-},{"./lib/axios":3}],3:[function(require,module,exports){
+},{"./lib/axios":4}],3:[function(require,module,exports){
+var buildUrl = require('./../buildUrl');
+var cookies = require('./../cookies');
+var defaults = require('./../defaults');
+var parseHeaders = require('./../parseHeaders');
+var transformData = require('./../transformData');
+var urlIsSameOrigin = require('./../urlIsSameOrigin');
+var utils = require('./../utils');
+
+module.exports = function xhrAdapter(resolve, reject, config) {
+  // Transform request data
+  var data = transformData(
+    config.data,
+    config.headers,
+    config.transformRequest
+  );
+
+  // Merge headers
+  var headers = utils.merge(
+    defaults.headers.common,
+    defaults.headers[config.method] || {},
+    config.headers || {}
+  );
+
+  // Create the request
+  var request = new(XMLHttpRequest || ActiveXObject)('Microsoft.XMLHTTP');
+  request.open(config.method, buildUrl(config.url, config.params), true);
+
+  // Listen for ready state
+  request.onreadystatechange = function () {
+    if (request && request.readyState === 4) {
+      // Prepare the response
+      var headers = parseHeaders(request.getAllResponseHeaders());
+      var response = {
+        data: transformData(
+          request.responseText,
+          headers,
+          config.transformResponse
+        ),
+        status: request.status,
+        headers: headers,
+        config: config
+      };
+
+      // Resolve or reject the Promise based on the status
+      (request.status >= 200 && request.status < 300
+        ? resolve
+        : reject)(
+          response.data,
+          response.status,
+          response.headers,
+          response.config
+        );
+
+      // Clean up request
+      request = null;
+    }
+  };
+
+  // Add xsrf header
+  var xsrfValue = urlIsSameOrigin(config.url)
+    ? cookies.read(config.xsrfCookieName || defaults.xsrfCookieName)
+    : undefined;
+  if (xsrfValue) {
+    headers[config.xsrfHeaderName || defaults.xsrfHeaderName] = xsrfValue;
+  }
+
+  // Add headers to the request
+  utils.forEach(headers, function (val, key) {
+    // Remove Content-Type if data is undefined
+    if (!data && key.toLowerCase() === 'content-type') {
+      delete headers[key];
+    }
+    // Otherwise add header to the request
+    else {
+      request.setRequestHeader(key, val);
+    }
+  });
+
+  // Add withCredentials to request if needed
+  if (config.withCredentials) {
+    request.withCredentials = true;
+  }
+
+  // Add responseType to request if needed
+  if (config.responseType) {
+    try {
+      request.responseType = config.responseType;
+    } catch (e) {
+      if (request.responseType !== 'json') {
+        throw e;
+      }
+    }
+  }
+
+  // Send the request
+  request.send(data);
+};
+},{"./../buildUrl":5,"./../cookies":6,"./../defaults":7,"./../parseHeaders":8,"./../transformData":10,"./../urlIsSameOrigin":11,"./../utils":12}],4:[function(require,module,exports){
+(function (process){
 var Promise = require('es6-promise').Promise;
-var buildUrl = require('./buildUrl');
-var cookies = require('./cookies');
 var defaults = require('./defaults');
-var parseHeaders = require('./parseHeaders');
-var transformData = require('./transformData');
-var urlIsSameOrigin = require('./urlIsSameOrigin');
 var utils = require('./utils');
+var spread = require('./spread');
 
 var axios = module.exports = function axios(config) {
   config = utils.merge({
@@ -616,92 +711,18 @@ var axios = module.exports = function axios(config) {
   config.withCredentials = config.withCredentials || defaults.withCredentials;
 
   var promise = new Promise(function (resolve, reject) {
-    // Create the request
-    var request = new(XMLHttpRequest || ActiveXObject)('Microsoft.XMLHTTP');
-    var data = transformData(
-      config.data,
-      config.headers,
-      config.transformRequest
-    );
-
-    // Open the request
-    request.open(config.method, buildUrl(config.url, config.params), true);
-
-    // Listen for ready state
-    request.onreadystatechange = function () {
-      if (request && request.readyState === 4) {
-        // Prepare the response
-        var headers = parseHeaders(request.getAllResponseHeaders());
-        var response = {
-          data: transformData(
-            request.responseText,
-            headers,
-            config.transformResponse
-          ),
-          status: request.status,
-          headers: headers,
-          config: config
-        };
-
-        // Resolve or reject the Promise based on the status
-        (request.status >= 200 && request.status < 300
-          ? resolve
-          : reject)(
-            response.data,
-            response.status,
-            response.headers,
-            response.config
-          );
-
-        // Clean up request
-        request = null;
+    try {
+      // For browsers use XHR adapter
+      if (typeof window !== 'undefined') {
+        require('./adapters/xhr')(resolve, reject, config);
       }
-    };
-
-    // Merge headers and add to request
-    var headers = utils.merge(
-      defaults.headers.common,
-      defaults.headers[config.method] || {},
-      config.headers || {}
-    );
-
-    // Add xsrf header
-    var xsrfValue = urlIsSameOrigin(config.url)
-        ? cookies.read(config.xsrfCookieName || defaults.xsrfCookieName)
-        : undefined;
-    if (xsrfValue) {
-      headers[config.xsrfHeaderName || defaults.xsrfHeaderName] = xsrfValue;
+      // For node use HTTP adapter
+      else if (typeof process !== 'undefined') {
+        require('./adapters/http')(resolve, reject, config);
+      }
+    } catch (e) {
+      reject(e);
     }
-
-    utils.forEach(headers, function (val, key) {
-      // Remove Content-Type if data is undefined
-      if (!data && key.toLowerCase() === 'content-type') {
-        delete headers[key];
-      }
-      // Otherwise add header to the request
-      else {
-        request.setRequestHeader(key, val);
-      }
-    });
-
-    // Add withCredentials to request if needed
-    if (config.withCredentials) {
-      request.withCredentials = true;
-    }
-
-    // Add responseType to request if needed
-    if (config.responseType) {
-      try {
-        request.responseType = config.responseType;
-      } catch (e) {
-        if (request.responseType !== 'json') {
-          throw e;
-        }
-      }
-    }
-
-    // Send the request
-    request.send(data);
   });
 
   // Provide alias for success
@@ -725,6 +746,10 @@ var axios = module.exports = function axios(config) {
 
 // Expose defaults
 axios.defaults = defaults;
+
+// Expose all/spread
+axios.all = Promise.all;
+axios.spread = spread;
 
 // Provide aliases for supported request methods
 createShortMethods('delete', 'get', 'head');
@@ -752,7 +777,8 @@ function createShortMethodsWithData() {
     };
   });
 }
-},{"./buildUrl":4,"./cookies":5,"./defaults":6,"./parseHeaders":7,"./transformData":8,"./urlIsSameOrigin":9,"./utils":10,"es6-promise":11}],4:[function(require,module,exports){
+}).call(this,require('_process'))
+},{"./adapters/http":3,"./adapters/xhr":3,"./defaults":7,"./spread":9,"./utils":12,"_process":33,"es6-promise":13}],5:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -798,7 +824,7 @@ module.exports = function buildUrl(url, params) {
 
   return url;
 };
-},{"./utils":10}],5:[function(require,module,exports){
+},{"./utils":12}],6:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -836,7 +862,7 @@ module.exports = {
     this.write(name, '', Date.now() - 86400000);
   }
 };
-},{"./utils":10}],6:[function(require,module,exports){
+},{"./utils":12}],7:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -878,7 +904,7 @@ module.exports = {
   xsrfCookieName: 'XSRF-TOKEN',
   xsrfHeaderName: 'X-XSRF-TOKEN'
 };
-},{"./utils":10}],7:[function(require,module,exports){
+},{"./utils":12}],8:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -913,7 +939,33 @@ module.exports = function parseHeaders(headers) {
 
   return parsed;
 };
-},{"./utils":10}],8:[function(require,module,exports){
+},{"./utils":12}],9:[function(require,module,exports){
+/**
+ * Syntactic sugar for invoking a function and expanding an array for arguments.
+ *
+ * Common use case would be to use `Function.prototype.apply`.
+ *
+ *  ```js
+ *  function f(x, y, z) {}
+ *  var args = [1, 2, 3];
+ *  f.apply(null, args);
+ *  ```
+ *
+ * With `spread` this example can be re-written.
+ *
+ *  ```js
+ *  spread(function(x, y, z) {})([1, 2, 3]);
+ *  ```
+ *
+ * @param {Function} callback
+ * @returns {Function}
+ */
+module.exports = function spread(callback) {
+  return function (arr) {
+    callback.apply(null, arr);
+  };
+};
+},{}],10:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -933,7 +985,7 @@ module.exports = function transformData(data, headers, fns) {
 
   return data;
 };
-},{"./utils":10}],9:[function(require,module,exports){
+},{"./utils":12}],11:[function(require,module,exports){
 'use strict';
 
 var msie = /(msie|trident)/i.test(navigator.userAgent);
@@ -984,7 +1036,7 @@ module.exports = function urlIsSameOrigin(requestUrl) {
   return (parsed.protocol === originUrl.protocol &&
         parsed.host === originUrl.host);
 };
-},{"./utils":10}],10:[function(require,module,exports){
+},{"./utils":12}],12:[function(require,module,exports){
 // utils is a library of generic helper functions non-specific to axios
 
 var toString = Object.prototype.toString;
@@ -1150,13 +1202,13 @@ module.exports = {
   merge: merge,
   trim: trim
 };
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 "use strict";
 var Promise = require("./promise/promise").Promise;
 var polyfill = require("./promise/polyfill").polyfill;
 exports.Promise = Promise;
 exports.polyfill = polyfill;
-},{"./promise/polyfill":15,"./promise/promise":16}],12:[function(require,module,exports){
+},{"./promise/polyfill":17,"./promise/promise":18}],14:[function(require,module,exports){
 "use strict";
 /* global toString */
 
@@ -1250,7 +1302,7 @@ function all(promises) {
 }
 
 exports.all = all;
-},{"./utils":20}],13:[function(require,module,exports){
+},{"./utils":22}],15:[function(require,module,exports){
 (function (process,global){
 "use strict";
 var browserGlobal = (typeof window !== 'undefined') ? window : {};
@@ -1314,7 +1366,7 @@ function asap(callback, arg) {
 
 exports.asap = asap;
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":22}],14:[function(require,module,exports){
+},{"_process":33}],16:[function(require,module,exports){
 "use strict";
 var config = {
   instrument: false
@@ -1330,7 +1382,7 @@ function configure(name, value) {
 
 exports.config = config;
 exports.configure = configure;
-},{}],15:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 (function (global){
 "use strict";
 /*global self*/
@@ -1371,7 +1423,7 @@ function polyfill() {
 
 exports.polyfill = polyfill;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./promise":16,"./utils":20}],16:[function(require,module,exports){
+},{"./promise":18,"./utils":22}],18:[function(require,module,exports){
 "use strict";
 var config = require("./config").config;
 var configure = require("./config").configure;
@@ -1583,7 +1635,7 @@ function publishRejection(promise) {
 }
 
 exports.Promise = Promise;
-},{"./all":12,"./asap":13,"./config":14,"./race":17,"./reject":18,"./resolve":19,"./utils":20}],17:[function(require,module,exports){
+},{"./all":14,"./asap":15,"./config":16,"./race":19,"./reject":20,"./resolve":21,"./utils":22}],19:[function(require,module,exports){
 "use strict";
 /* global toString */
 var isArray = require("./utils").isArray;
@@ -1673,7 +1725,7 @@ function race(promises) {
 }
 
 exports.race = race;
-},{"./utils":20}],18:[function(require,module,exports){
+},{"./utils":22}],20:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.reject` returns a promise that will become rejected with the passed
@@ -1721,7 +1773,7 @@ function reject(reason) {
 }
 
 exports.reject = reject;
-},{}],19:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 "use strict";
 function resolve(value) {
   /*jshint validthis:true */
@@ -1737,7 +1789,7 @@ function resolve(value) {
 }
 
 exports.resolve = resolve;
-},{}],20:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 "use strict";
 function objectOrFunction(x) {
   return isFunction(x) || (typeof x === "object" && x !== null);
@@ -1760,283 +1812,27 @@ exports.objectOrFunction = objectOrFunction;
 exports.isFunction = isFunction;
 exports.isArray = isArray;
 exports.now = now;
-},{}],21:[function(require,module,exports){
-/**
- * Promise polyfill v1.0.8
- * requires setImmediate
- *
- * © 2014 Dmitry Korobkin
- * Released under the MIT license
- * github.com/Octane/Promise
- */
-(function (global) {'use strict';
-
-    var setImmediate = global.setImmediate || require('timers').setImmediate;
-
-    function toPromise(thenable) {
-        if (isPromise(thenable)) {
-            return thenable;
-        }
-        return new Promise(function (resolve, reject) {
-            setImmediate(function () {
-                try {
-                    thenable.then(resolve, reject);
-                } catch (error) {
-                    reject(error);
-                }
-            });
-        });
-    }
-
-    function isCallable(anything) {
-        return 'function' == typeof anything;
-    }
-
-    function isPromise(anything) {
-        return anything instanceof Promise;
-    }
-
-    function isThenable(anything) {
-        return Object(anything) === anything && isCallable(anything.then);
-    }
-
-    function isSettled(promise) {
-        return promise._fulfilled || promise._rejected;
-    }
-
-    function identity(value) {
-        return value;
-    }
-
-    function thrower(reason) {
-        throw reason;
-    }
-
-    function call(callback) {
-        callback();
-    }
-
-    function dive(thenable, onFulfilled, onRejected) {
-        function interimOnFulfilled(value) {
-            if (isThenable(value)) {
-                toPromise(value).then(interimOnFulfilled, interimOnRejected);
-            } else {
-                onFulfilled(value);
-            }
-        }
-        function interimOnRejected(reason) {
-            if (isThenable(reason)) {
-                toPromise(reason).then(interimOnFulfilled, interimOnRejected);
-            } else {
-                onRejected(reason);
-            }
-        }
-        toPromise(thenable).then(interimOnFulfilled, interimOnRejected);
-    }
-
-    function Promise(resolver) {
-        this._fulfilled = false;
-        this._rejected = false;
-        this._value = undefined;
-        this._reason = undefined;
-        this._onFulfilled = [];
-        this._onRejected = [];
-        this._resolve(resolver);
-    }
-
-    Promise.resolve = function (value) {
-        if (isThenable(value)) {
-            return toPromise(value);
-        }
-        return new Promise(function (resolve) {
-            resolve(value);
-        });
-    };
-
-    Promise.reject = function (reason) {
-        return new Promise(function (resolve, reject) {
-            reject(reason);
-        });
-    };
-
-    Promise.race = function (values) {
-        return new Promise(function (resolve, reject) {
-            var value,
-                length = values.length,
-                i = 0;
-            while (i < length) {
-                value = values[i];
-                if (isThenable(value)) {
-                    dive(value, resolve, reject);
-                } else {
-                    resolve(value);
-                }
-                i++;
-            }
-        });
-    };
-
-    Promise.all = function (values) {
-        return new Promise(function (resolve, reject) {
-            var thenables = 0,
-                fulfilled = 0,
-                value,
-                length = values.length,
-                i = 0;
-            values = values.slice(0);
-            while (i < length) {
-                value = values[i];
-                if (isThenable(value)) {
-                    thenables++;
-                    dive(
-                        value,
-                        function (index) {
-                            return function (value) {
-                                values[index] = value;
-                                fulfilled++;
-                                if (fulfilled == thenables) {
-                                    resolve(values);
-                                }
-                            };
-                        }(i),
-                        reject
-                    );
-                } else {
-                    //[1, , 3] → [1, undefined, 3]
-                    values[i] = value;
-                }
-                i++;
-            }
-            if (!thenables) {
-                resolve(values);
-            }
-        });
-    };
-
-    Promise.prototype = {
-
-        constructor: Promise,
-
-        _resolve: function (resolver) {
-
-            var promise = this;
-
-            function resolve(value) {
-                promise._fulfill(value);
-            }
-
-            function reject(reason) {
-                promise._reject(reason);
-            }
-
-            try {
-                resolver(resolve, reject);
-            } catch(error) {
-                if (!isSettled(promise)) {
-                    reject(error);
-                }
-            }
-
-        },
-
-        _fulfill: function (value) {
-            if (!isSettled(this)) {
-                this._fulfilled = true;
-                this._value = value;
-                this._onFulfilled.forEach(call);
-                this._clearQueue();
-            }
-        },
-
-        _reject: function (reason) {
-            if (!isSettled(this)) {
-                this._rejected = true;
-                this._reason = reason;
-                this._onRejected.forEach(call);
-                this._clearQueue();
-            }
-        },
-
-        _enqueue: function (onFulfilled, onRejected) {
-            this._onFulfilled.push(onFulfilled);
-            this._onRejected.push(onRejected);
-        },
-
-        _clearQueue: function () {
-            this._onFulfilled = [];
-            this._onRejected = [];
-        },
-
-        then: function (onFulfilled, onRejected) {
-
-            var promise = this;
-
-            onFulfilled = isCallable(onFulfilled) ? onFulfilled : identity;
-            onRejected = isCallable(onRejected) ? onRejected : thrower;
-
-            return new Promise(function (resolve, reject) {
-
-                function asyncOnFulfilled() {
-                    setImmediate(function () {
-                        var value;
-                        try {
-                            value = onFulfilled(promise._value);
-                        } catch (error) {
-                            reject(error);
-                            return;
-                        }
-                        if (isThenable(value)) {
-                            toPromise(value).then(resolve, reject);
-                        } else {
-                            resolve(value);
-                        }
-                    });
-                }
-
-                function asyncOnRejected() {
-                    setImmediate(function () {
-                        var reason;
-                        try {
-                            reason = onRejected(promise._reason);
-                        } catch (error) {
-                            reject(error);
-                            return;
-                        }
-                        if (isThenable(reason)) {
-                            toPromise(reason).then(resolve, reject);
-                        } else {
-                            resolve(reason);
-                        }
-                    });
-                }
-
-                if (promise._fulfilled) {
-                    asyncOnFulfilled();
-                } else if (promise._rejected) {
-                    asyncOnRejected();
-                } else {
-                    promise._enqueue(asyncOnFulfilled, asyncOnRejected);
-                }
-
-            });
-
-        },
-
-        'catch': function (onRejected) {
-            return this.then(undefined, onRejected);
-        }
-
-    };
-
-    if ('undefined' != typeof module && module.exports) {
-        module.exports = global.Promise || Promise;
-    } else if (!global.Promise) {
-        global.Promise = Promise;
-    }
-
-}(this));
-
-},{"timers":23}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
+module.exports=require(13)
+},{"./promise/polyfill":27,"./promise/promise":28,"/Users/jason/github/js-data/node_modules/axios/node_modules/es6-promise/dist/commonjs/main.js":13}],24:[function(require,module,exports){
+module.exports=require(14)
+},{"./utils":32,"/Users/jason/github/js-data/node_modules/axios/node_modules/es6-promise/dist/commonjs/promise/all.js":14}],25:[function(require,module,exports){
+module.exports=require(15)
+},{"/Users/jason/github/js-data/node_modules/axios/node_modules/es6-promise/dist/commonjs/promise/asap.js":15,"_process":33}],26:[function(require,module,exports){
+module.exports=require(16)
+},{"/Users/jason/github/js-data/node_modules/axios/node_modules/es6-promise/dist/commonjs/promise/config.js":16}],27:[function(require,module,exports){
+module.exports=require(17)
+},{"./promise":28,"./utils":32,"/Users/jason/github/js-data/node_modules/axios/node_modules/es6-promise/dist/commonjs/promise/polyfill.js":17}],28:[function(require,module,exports){
+module.exports=require(18)
+},{"./all":24,"./asap":25,"./config":26,"./race":29,"./reject":30,"./resolve":31,"./utils":32,"/Users/jason/github/js-data/node_modules/axios/node_modules/es6-promise/dist/commonjs/promise/promise.js":18}],29:[function(require,module,exports){
+module.exports=require(19)
+},{"./utils":32,"/Users/jason/github/js-data/node_modules/axios/node_modules/es6-promise/dist/commonjs/promise/race.js":19}],30:[function(require,module,exports){
+module.exports=require(20)
+},{"/Users/jason/github/js-data/node_modules/axios/node_modules/es6-promise/dist/commonjs/promise/reject.js":20}],31:[function(require,module,exports){
+module.exports=require(21)
+},{"/Users/jason/github/js-data/node_modules/axios/node_modules/es6-promise/dist/commonjs/promise/resolve.js":21}],32:[function(require,module,exports){
+module.exports=require(22)
+},{"/Users/jason/github/js-data/node_modules/axios/node_modules/es6-promise/dist/commonjs/promise/utils.js":22}],33:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -2101,117 +1897,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],23:[function(require,module,exports){
-var nextTick = require('process/browser.js').nextTick;
-var slice = Array.prototype.slice;
-var immediateIds = {};
-var nextImmediateId = 0;
-
-// DOM APIs, for completeness
-
-if (typeof setTimeout !== 'undefined') exports.setTimeout = function() { return setTimeout.apply(window, arguments); };
-if (typeof clearTimeout !== 'undefined') exports.clearTimeout = function() { clearTimeout.apply(window, arguments); };
-if (typeof setInterval !== 'undefined') exports.setInterval = function() { return setInterval.apply(window, arguments); };
-if (typeof clearInterval !== 'undefined') exports.clearInterval = function() { clearInterval.apply(window, arguments); };
-
-// TODO: Change to more efficient list approach used in Node.js
-// For now, we just implement the APIs using the primitives above.
-
-exports.enroll = function(item, delay) {
-  item._timeoutID = setTimeout(item._onTimeout, delay);
-};
-
-exports.unenroll = function(item) {
-  clearTimeout(item._timeoutID);
-};
-
-exports.active = function(item) {
-  // our naive impl doesn't care (correctness is still preserved)
-};
-
-// That's not how node.js implements it but the exposed api is the same.
-exports.setImmediate = function(fn) {
-  var id = nextImmediateId++;
-  var args = arguments.length < 2 ? false : slice.call(arguments, 1);
-
-  immediateIds[id] = true;
-
-  nextTick(function onNextTick() {
-    if (immediateIds[id]) {
-      // fn.call() is faster so we optimize for the common use-case
-      // @see http://jsperf.com/call-apply-segu
-      if (args) {
-        fn.apply(null, args);
-      } else {
-        fn.call(null);
-      }
-      // Prevent ids from leaking
-      exports.clearImmediate(id);
-    }
-  });
-
-  return id;
-};
-
-exports.clearImmediate = function(id) {
-  delete immediateIds[id];
-};
-},{"process/browser.js":24}],24:[function(require,module,exports){
-// shim for using process in browser
-
-var process = module.exports = {};
-
-process.nextTick = (function () {
-    var canSetImmediate = typeof window !== 'undefined'
-    && window.setImmediate;
-    var canPost = typeof window !== 'undefined'
-    && window.postMessage && window.addEventListener
-    ;
-
-    if (canSetImmediate) {
-        return function (f) { return window.setImmediate(f) };
-    }
-
-    if (canPost) {
-        var queue = [];
-        window.addEventListener('message', function (ev) {
-            var source = ev.source;
-            if ((source === window || source === null) && ev.data === 'process-tick') {
-                ev.stopPropagation();
-                if (queue.length > 0) {
-                    var fn = queue.shift();
-                    fn();
-                }
-            }
-        }, true);
-
-        return function nextTick(fn) {
-            queue.push(fn);
-            window.postMessage('process-tick', '*');
-        };
-    }
-
-    return function nextTick(fn) {
-        setTimeout(fn, 0);
-    };
-})();
-
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-}
-
-// TODO(shtylman)
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-
-},{}],25:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 var indexOf = require('./indexOf');
 
     /**
@@ -2223,7 +1909,7 @@ var indexOf = require('./indexOf');
     module.exports = contains;
 
 
-},{"./indexOf":28}],26:[function(require,module,exports){
+},{"./indexOf":37}],35:[function(require,module,exports){
 var makeIterator = require('../function/makeIterator_');
 
     /**
@@ -2251,7 +1937,7 @@ var makeIterator = require('../function/makeIterator_');
 
 
 
-},{"../function/makeIterator_":35}],27:[function(require,module,exports){
+},{"../function/makeIterator_":44}],36:[function(require,module,exports){
 
 
     /**
@@ -2276,7 +1962,7 @@ var makeIterator = require('../function/makeIterator_');
 
 
 
-},{}],28:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 
 
     /**
@@ -2306,7 +1992,7 @@ var makeIterator = require('../function/makeIterator_');
     module.exports = indexOf;
 
 
-},{}],29:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 var filter = require('./filter');
 
     function isValidString(val) {
@@ -2325,7 +2011,7 @@ var filter = require('./filter');
     module.exports = join;
 
 
-},{"./filter":26}],30:[function(require,module,exports){
+},{"./filter":35}],39:[function(require,module,exports){
 var indexOf = require('./indexOf');
 
     /**
@@ -2340,7 +2026,7 @@ var indexOf = require('./indexOf');
     module.exports = remove;
 
 
-},{"./indexOf":28}],31:[function(require,module,exports){
+},{"./indexOf":37}],40:[function(require,module,exports){
 
 
     /**
@@ -2377,7 +2063,7 @@ var indexOf = require('./indexOf');
 
 
 
-},{}],32:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 
 
     /**
@@ -2434,7 +2120,7 @@ var indexOf = require('./indexOf');
 
 
 
-},{}],33:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 var isFunction = require('../lang/isFunction');
 
     /**
@@ -2464,7 +2150,7 @@ var isFunction = require('../lang/isFunction');
     module.exports = toLookup;
 
 
-},{"../lang/isFunction":42}],34:[function(require,module,exports){
+},{"../lang/isFunction":51}],43:[function(require,module,exports){
 
 
     /**
@@ -2478,7 +2164,7 @@ var isFunction = require('../lang/isFunction');
 
 
 
-},{}],35:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 var identity = require('./identity');
 var prop = require('./prop');
 var deepMatches = require('../object/deepMatches');
@@ -2514,7 +2200,7 @@ var deepMatches = require('../object/deepMatches');
 
 
 
-},{"../object/deepMatches":50,"./identity":34,"./prop":36}],36:[function(require,module,exports){
+},{"../object/deepMatches":59,"./identity":43,"./prop":45}],45:[function(require,module,exports){
 
 
     /**
@@ -2530,7 +2216,7 @@ var deepMatches = require('../object/deepMatches');
 
 
 
-},{}],37:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 var kindOf = require('./kindOf');
 var isPlainObject = require('./isPlainObject');
 var mixIn = require('../object/mixIn');
@@ -2581,7 +2267,7 @@ var mixIn = require('../object/mixIn');
 
 
 
-},{"../object/mixIn":56,"./isPlainObject":46,"./kindOf":48}],38:[function(require,module,exports){
+},{"../object/mixIn":65,"./isPlainObject":55,"./kindOf":57}],47:[function(require,module,exports){
 var clone = require('./clone');
 var forOwn = require('../object/forOwn');
 var kindOf = require('./kindOf');
@@ -2631,7 +2317,7 @@ var isPlainObject = require('./isPlainObject');
 
 
 
-},{"../object/forOwn":53,"./clone":37,"./isPlainObject":46,"./kindOf":48}],39:[function(require,module,exports){
+},{"../object/forOwn":62,"./clone":46,"./isPlainObject":55,"./kindOf":57}],48:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2641,7 +2327,7 @@ var isKind = require('./isKind');
     module.exports = isArray;
 
 
-},{"./isKind":43}],40:[function(require,module,exports){
+},{"./isKind":52}],49:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2651,7 +2337,7 @@ var isKind = require('./isKind');
     module.exports = isBoolean;
 
 
-},{"./isKind":43}],41:[function(require,module,exports){
+},{"./isKind":52}],50:[function(require,module,exports){
 var forOwn = require('../object/forOwn');
 var isArray = require('./isArray');
 
@@ -2677,7 +2363,7 @@ var isArray = require('./isArray');
 
 
 
-},{"../object/forOwn":53,"./isArray":39}],42:[function(require,module,exports){
+},{"../object/forOwn":62,"./isArray":48}],51:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2687,7 +2373,7 @@ var isKind = require('./isKind');
     module.exports = isFunction;
 
 
-},{"./isKind":43}],43:[function(require,module,exports){
+},{"./isKind":52}],52:[function(require,module,exports){
 var kindOf = require('./kindOf');
     /**
      * Check if value is from a specific "kind".
@@ -2698,7 +2384,7 @@ var kindOf = require('./kindOf');
     module.exports = isKind;
 
 
-},{"./kindOf":48}],44:[function(require,module,exports){
+},{"./kindOf":57}],53:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2708,7 +2394,7 @@ var isKind = require('./isKind');
     module.exports = isNumber;
 
 
-},{"./isKind":43}],45:[function(require,module,exports){
+},{"./isKind":52}],54:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2718,7 +2404,7 @@ var isKind = require('./isKind');
     module.exports = isObject;
 
 
-},{"./isKind":43}],46:[function(require,module,exports){
+},{"./isKind":52}],55:[function(require,module,exports){
 
 
     /**
@@ -2733,7 +2419,7 @@ var isKind = require('./isKind');
 
 
 
-},{}],47:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2743,7 +2429,7 @@ var isKind = require('./isKind');
     module.exports = isString;
 
 
-},{"./isKind":43}],48:[function(require,module,exports){
+},{"./isKind":52}],57:[function(require,module,exports){
 
 
     var _rKind = /^\[object (.*)\]$/,
@@ -2765,7 +2451,7 @@ var isKind = require('./isKind');
     module.exports = kindOf;
 
 
-},{}],49:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 
 
     /**
@@ -2780,7 +2466,7 @@ var isKind = require('./isKind');
 
 
 
-},{}],50:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 var forOwn = require('./forOwn');
 var isArray = require('../lang/isArray');
 
@@ -2837,7 +2523,7 @@ var isArray = require('../lang/isArray');
 
 
 
-},{"../lang/isArray":39,"./forOwn":53}],51:[function(require,module,exports){
+},{"../lang/isArray":48,"./forOwn":62}],60:[function(require,module,exports){
 var forOwn = require('./forOwn');
 var isPlainObject = require('../lang/isPlainObject');
 
@@ -2873,7 +2559,7 @@ var isPlainObject = require('../lang/isPlainObject');
 
 
 
-},{"../lang/isPlainObject":46,"./forOwn":53}],52:[function(require,module,exports){
+},{"../lang/isPlainObject":55,"./forOwn":62}],61:[function(require,module,exports){
 var hasOwn = require('./hasOwn');
 
     var _hasDontEnumBug,
@@ -2951,7 +2637,7 @@ var hasOwn = require('./hasOwn');
 
 
 
-},{"./hasOwn":54}],53:[function(require,module,exports){
+},{"./hasOwn":63}],62:[function(require,module,exports){
 var hasOwn = require('./hasOwn');
 var forIn = require('./forIn');
 
@@ -2972,7 +2658,7 @@ var forIn = require('./forIn');
 
 
 
-},{"./forIn":52,"./hasOwn":54}],54:[function(require,module,exports){
+},{"./forIn":61,"./hasOwn":63}],63:[function(require,module,exports){
 
 
     /**
@@ -2986,7 +2672,7 @@ var forIn = require('./forIn');
 
 
 
-},{}],55:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 var hasOwn = require('./hasOwn');
 var deepClone = require('../lang/deepClone');
 var isObject = require('../lang/isObject');
@@ -3028,7 +2714,7 @@ var isObject = require('../lang/isObject');
 
 
 
-},{"../lang/deepClone":38,"../lang/isObject":45,"./hasOwn":54}],56:[function(require,module,exports){
+},{"../lang/deepClone":47,"../lang/isObject":54,"./hasOwn":63}],65:[function(require,module,exports){
 var forOwn = require('./forOwn');
 
     /**
@@ -3058,7 +2744,7 @@ var forOwn = require('./forOwn');
     module.exports = mixIn;
 
 
-},{"./forOwn":53}],57:[function(require,module,exports){
+},{"./forOwn":62}],66:[function(require,module,exports){
 var forEach = require('../array/forEach');
 
     /**
@@ -3079,7 +2765,7 @@ var forEach = require('../array/forEach');
 
 
 
-},{"../array/forEach":27}],58:[function(require,module,exports){
+},{"../array/forEach":36}],67:[function(require,module,exports){
 var slice = require('../array/slice');
 
     /**
@@ -3099,7 +2785,7 @@ var slice = require('../array/slice');
 
 
 
-},{"../array/slice":31}],59:[function(require,module,exports){
+},{"../array/slice":40}],68:[function(require,module,exports){
 var namespace = require('./namespace');
 
     /**
@@ -3118,7 +2804,7 @@ var namespace = require('./namespace');
 
 
 
-},{"./namespace":57}],60:[function(require,module,exports){
+},{"./namespace":66}],69:[function(require,module,exports){
 var toString = require('../lang/toString');
 var replaceAccents = require('./replaceAccents');
 var removeNonWord = require('./removeNonWord');
@@ -3140,7 +2826,7 @@ var lowerCase = require('./lowerCase');
     module.exports = camelCase;
 
 
-},{"../lang/toString":49,"./lowerCase":61,"./removeNonWord":64,"./replaceAccents":65,"./upperCase":66}],61:[function(require,module,exports){
+},{"../lang/toString":58,"./lowerCase":70,"./removeNonWord":73,"./replaceAccents":74,"./upperCase":75}],70:[function(require,module,exports){
 var toString = require('../lang/toString');
     /**
      * "Safer" String.toLowerCase()
@@ -3153,7 +2839,7 @@ var toString = require('../lang/toString');
     module.exports = lowerCase;
 
 
-},{"../lang/toString":49}],62:[function(require,module,exports){
+},{"../lang/toString":58}],71:[function(require,module,exports){
 var join = require('../array/join');
 var slice = require('../array/slice');
 
@@ -3170,7 +2856,7 @@ var slice = require('../array/slice');
     module.exports = makePath;
 
 
-},{"../array/join":29,"../array/slice":31}],63:[function(require,module,exports){
+},{"../array/join":38,"../array/slice":40}],72:[function(require,module,exports){
 var toString = require('../lang/toString');
 var camelCase = require('./camelCase');
 var upperCase = require('./upperCase');
@@ -3185,7 +2871,7 @@ var upperCase = require('./upperCase');
     module.exports = pascalCase;
 
 
-},{"../lang/toString":49,"./camelCase":60,"./upperCase":66}],64:[function(require,module,exports){
+},{"../lang/toString":58,"./camelCase":69,"./upperCase":75}],73:[function(require,module,exports){
 var toString = require('../lang/toString');
     // This pattern is generated by the _build/pattern-removeNonWord.js script
     var PATTERN = /[^\x20\x2D0-9A-Z\x5Fa-z\xC0-\xD6\xD8-\xF6\xF8-\xFF]/g;
@@ -3201,7 +2887,7 @@ var toString = require('../lang/toString');
     module.exports = removeNonWord;
 
 
-},{"../lang/toString":49}],65:[function(require,module,exports){
+},{"../lang/toString":58}],74:[function(require,module,exports){
 var toString = require('../lang/toString');
     /**
     * Replaces all accented chars with regular ones
@@ -3239,7 +2925,7 @@ var toString = require('../lang/toString');
     module.exports = replaceAccents;
 
 
-},{"../lang/toString":49}],66:[function(require,module,exports){
+},{"../lang/toString":58}],75:[function(require,module,exports){
 var toString = require('../lang/toString');
     /**
      * "Safer" String.toUpperCase()
@@ -3251,7 +2937,7 @@ var toString = require('../lang/toString');
     module.exports = upperCase;
 
 
-},{"../lang/toString":49}],67:[function(require,module,exports){
+},{"../lang/toString":58}],76:[function(require,module,exports){
 var DSUtils = require('../utils');
 
 function Defaults() {
@@ -3703,7 +3389,7 @@ DSHttpAdapter.prototype.destroyAll = function (resourceConfig, params, options) 
 
 module.exports = DSHttpAdapter;
 
-},{"../utils":103}],68:[function(require,module,exports){
+},{"../utils":112}],77:[function(require,module,exports){
 var DSUtils = require('../utils');
 var DSErrors = require('../errors');
 
@@ -3974,7 +3660,7 @@ DSLocalStorageAdapter.prototype.destroyAll = function () {
 
 module.exports = DSLocalStorageAdapter;
 
-},{"../errors":101,"../utils":103}],69:[function(require,module,exports){
+},{"../errors":110,"../utils":112}],78:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.create(' + resourceName + ', attrs[, options]): ';
 }
@@ -4075,6 +3761,7 @@ function create(resourceName, attrs, options) {
         return func.call(attrs, resourceName, attrs);
       })
       .then(function (attrs) {
+        DS.notify(definition, 'beforeCreate', DSUtils.merge({}, attrs));
         return DS.adapters[options.adapter || definition.defaultAdapter].create(definition, options.serialize ? options.serialize(resourceName, attrs) : definition.serialize(resourceName, attrs), options);
       })
       .then(function (res) {
@@ -4082,17 +3769,18 @@ function create(resourceName, attrs, options) {
         var attrs = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
         return func.call(attrs, resourceName, attrs);
       })
-      .then(function (data) {
+      .then(function (attrs) {
+        DS.notify(definition, 'afterCreate', DSUtils.merge({}, attrs));
         if (options.cacheResponse) {
           var resource = DS.store[resourceName];
-          var created = DS.inject(definition.name, data, options);
+          var created = DS.inject(definition.name, attrs, options);
           var id = created[definition.idAttribute];
           resource.completedQueries[id] = new Date().getTime();
           resource.previousAttributes[id] = DSUtils.deepMixIn({}, created);
           resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
           return DS.get(definition.name, id);
         } else {
-          return DS.createInstance(resourceName, data, options);
+          return DS.createInstance(resourceName, attrs, options);
         }
       });
   }
@@ -4100,7 +3788,7 @@ function create(resourceName, attrs, options) {
 
 module.exports = create;
 
-},{}],70:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.destroy(' + resourceName + ', ' + id + '[, options]): ';
 }
@@ -4160,6 +3848,7 @@ function destroy(resourceName, id, options) {
   return new DSUtils.Promise(function (resolve, reject) {
     options = options || {};
 
+    id = DSUtils.resolveId(definition, id);
     if (!definition) {
       reject(new DSErrors.NER(errorPrefix(resourceName, id) + resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -4175,14 +3864,16 @@ function destroy(resourceName, id, options) {
       var func = options.beforeDestroy ? DSUtils.promisify(options.beforeDestroy) : definition.beforeDestroy;
       return func.call(attrs, resourceName, attrs);
     })
-    .then(function () {
+    .then(function (attrs) {
+      DS.notify(definition, 'beforeDestroy', DSUtils.merge({}, attrs));
       return DS.adapters[options.adapter || definition.defaultAdapter].destroy(definition, id, options);
     })
     .then(function () {
       var func = options.afterDestroy ? DSUtils.promisify(options.afterDestroy) : definition.afterDestroy;
       return func.call(item, resourceName, item);
     })
-    .then(function () {
+    .then(function (item) {
+      DS.notify(definition, 'afterDestroy', DSUtils.merge({}, item));
       DS.eject(resourceName, id);
       return id;
     });
@@ -4190,7 +3881,7 @@ function destroy(resourceName, id, options) {
 
 module.exports = destroy;
 
-},{}],71:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.destroyAll(' + resourceName + ', params[, options]): ';
 }
@@ -4274,7 +3965,7 @@ function destroyAll(resourceName, params, options) {
 
 module.exports = destroyAll;
 
-},{}],72:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.find(' + resourceName + ', ' + id + '[, options]): ';
 }
@@ -4380,7 +4071,7 @@ function find(resourceName, id, options) {
 
 module.exports = find;
 
-},{}],73:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.findAll(' + resourceName + ', params[, options]): ';
 }
@@ -4547,7 +4238,7 @@ function findAll(resourceName, params, options) {
 
 module.exports = findAll;
 
-},{}],74:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 module.exports = {
   /**
    * @doc method
@@ -4650,7 +4341,7 @@ module.exports = {
   updateAll: require('./updateAll')
 };
 
-},{"./create":69,"./destroy":70,"./destroyAll":71,"./find":72,"./findAll":73,"./loadRelations":75,"./refresh":76,"./save":77,"./update":78,"./updateAll":79}],75:[function(require,module,exports){
+},{"./create":78,"./destroy":79,"./destroyAll":80,"./find":81,"./findAll":82,"./loadRelations":84,"./refresh":85,"./save":86,"./update":87,"./updateAll":88}],84:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.loadRelations(' + resourceName + ', instance(Id), relations[, options]): ';
 }
@@ -4751,17 +4442,17 @@ function loadRelations(resourceName, instance, relations, options) {
           var params = {};
           params[def.foreignKey] = instance[definition.idAttribute];
 
-          if (def.type === 'hasMany') {
+          if (def.type === 'hasMany' && params[def.foreignKey]) {
             task = DS.findAll(relationName, params, options);
           } else if (def.type === 'hasOne') {
             if (def.localKey && instance[def.localKey]) {
               task = DS.find(relationName, instance[def.localKey], options);
-            } else if (def.foreignKey) {
+            } else if (def.foreignKey && params[def.foreignKey]) {
               task = DS.findAll(relationName, params, options).then(function (hasOnes) {
                 return hasOnes.length ? hasOnes[0] : null;
               });
             }
-          } else {
+          } else if (instance[def.localKey]) {
             task = DS.find(relationName, instance[def.localKey], options);
           }
 
@@ -4788,7 +4479,7 @@ function loadRelations(resourceName, instance, relations, options) {
 
 module.exports = loadRelations;
 
-},{}],76:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.refresh(' + resourceName + ', ' + id + '[, options]): ';
 }
@@ -4850,6 +4541,7 @@ function refresh(resourceName, id, options) {
   return new DSUtils.Promise(function (resolve, reject) {
     options = options || {};
 
+    id = DSUtils.resolveId(DS.definitions[resourceName], id);
     if (!DS.definitions[resourceName]) {
       reject(new DS.errors.NER(errorPrefix(resourceName, id) + resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -4871,7 +4563,7 @@ function refresh(resourceName, id, options) {
 
 module.exports = refresh;
 
-},{}],77:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.save(' + resourceName + ', ' + id + '[, options]): ';
 }
@@ -4935,6 +4627,7 @@ function save(resourceName, id, options) {
   return new DSUtils.Promise(function (resolve, reject) {
     options = options || {};
 
+    id = DSUtils.resolveId(definition, id);
     if (!definition) {
       reject(new DSErrors.NER(errorPrefix(resourceName, id) + resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -4967,6 +4660,7 @@ function save(resourceName, id, options) {
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
+      DS.notify(definition, 'beforeUpdate', DSUtils.merge({}, attrs));
       if (options.changesOnly) {
         var resource = DS.store[resourceName];
         resource.observers[id].deliver();
@@ -4994,23 +4688,24 @@ function save(resourceName, id, options) {
       var attrs = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
       return func.call(attrs, resourceName, attrs);
     })
-    .then(function (data) {
+    .then(function (attrs) {
+      DS.notify(definition, 'afterUpdate', DSUtils.merge({}, attrs));
       if (options.cacheResponse) {
         var resource = DS.store[resourceName];
-        var saved = DS.inject(definition.name, data, options);
+        var saved = DS.inject(definition.name, attrs, options);
         resource.previousAttributes[id] = DSUtils.deepMixIn({}, saved);
         resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
         resource.observers[id].discardChanges();
         return DS.get(resourceName, id);
       } else {
-        return data;
+        return attrs;
       }
     });
 }
 
 module.exports = save;
 
-},{}],78:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.update(' + resourceName + ', ' + id + ', attrs[, options]): ';
 }
@@ -5075,6 +4770,7 @@ function update(resourceName, id, attrs, options) {
   return new DSUtils.Promise(function (resolve, reject) {
     options = options || {};
 
+    id = DSUtils.resolveId(definition, id);
     if (!definition) {
       reject(new DSErrors.NER(errorPrefix(resourceName, id) + resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -5106,6 +4802,7 @@ function update(resourceName, id, attrs, options) {
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
+      DS.notify(definition, 'beforeUpdate', DSUtils.merge({}, attrs));
       return DS.adapters[options.adapter || definition.defaultAdapter].update(definition, id, options.serialize ? options.serialize(resourceName, attrs) : definition.serialize(resourceName, attrs), options);
     })
     .then(function (res) {
@@ -5113,24 +4810,25 @@ function update(resourceName, id, attrs, options) {
       var attrs = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
       return func.call(attrs, resourceName, attrs);
     })
-    .then(function (data) {
+    .then(function (attrs) {
+      DS.notify(definition, 'afterUpdate', DSUtils.merge({}, attrs));
       if (options.cacheResponse) {
         var resource = DS.store[resourceName];
-        var updated = DS.inject(definition.name, data, options);
+        var updated = DS.inject(definition.name, attrs, options);
         var id = updated[definition.idAttribute];
         resource.previousAttributes[id] = DSUtils.deepMixIn({}, updated);
         resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
         resource.observers[id].discardChanges();
         return DS.get(definition.name, id);
       } else {
-        return data;
+        return attrs;
       }
     });
 }
 
 module.exports = update;
 
-},{}],79:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.updateAll(' + resourceName + ', attrs, params[, options]): ';
 }
@@ -5238,6 +4936,7 @@ function updateAll(resourceName, attrs, params, options) {
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
+      DS.notify(definition, 'beforeUpdate', DSUtils.merge({}, attrs));
       return DS.adapters[options.adapter || definition.defaultAdapter].updateAll(definition, options.serialize ? options.serialize(resourceName, attrs) : definition.serialize(resourceName, attrs), params, options);
     })
     .then(function (res) {
@@ -5246,6 +4945,7 @@ function updateAll(resourceName, attrs, params, options) {
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (data) {
+      DS.notify(definition, 'afterUpdate', DSUtils.merge({}, attrs));
       if (options.cacheResponse) {
         return DS.inject(definition.name, data, options);
       } else {
@@ -5256,7 +4956,7 @@ function updateAll(resourceName, attrs, params, options) {
 
 module.exports = updateAll;
 
-},{}],80:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 var DSUtils = require('../utils');
 var DSErrors = require('../errors');
 var DSHttpAdapter = require('../adapters/http');
@@ -5880,6 +5580,13 @@ function DS(options) {
   this.defaults = new Defaults();
   DSUtils.deepMixIn(this.defaults, options);
 
+  this.notify = function (definition, event) {
+    var args = Array.prototype.slice.call(arguments, 2);
+    args.unshift(definition.name);
+    args.unshift('DS.' + event);
+    definition.emit.apply(definition, args);
+  };
+
   /*!
    * @doc property
    * @id DS.properties:store
@@ -5935,7 +5642,7 @@ DSUtils.deepMixIn(DS.prototype, asyncMethods);
 
 module.exports = DS;
 
-},{"../adapters/http":67,"../adapters/localStorage":68,"../errors":101,"../utils":103,"./async_methods":74,"./sync_methods":92}],81:[function(require,module,exports){
+},{"../adapters/http":76,"../adapters/localStorage":77,"../errors":110,"../utils":112,"./async_methods":83,"./sync_methods":101}],90:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.changeHistory(' + resourceName + ', id): ';
 }
@@ -5980,6 +5687,8 @@ function changeHistory(resourceName, id) {
   var DSUtils = DS.utils;
   var definition = DS.definitions[resourceName];
   var resource = DS.store[resourceName];
+
+  id = DSUtils.resolveId(definition, id);
   if (resourceName && !DS.definitions[resourceName]) {
     throw new DS.errors.NER(errorPrefix(resourceName) + resourceName);
   } else if (id && !DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -6002,7 +5711,7 @@ function changeHistory(resourceName, id) {
 
 module.exports = changeHistory;
 
-},{}],82:[function(require,module,exports){
+},{}],91:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.changes(' + resourceName + ', id): ';
 }
@@ -6046,6 +5755,8 @@ function changes(resourceName, id) {
   var DS = this;
   var DSUtils = DS.utils;
   var DSErrors = DS.errors;
+
+  id = DSUtils.resolveId(DS.definitions[resourceName], id);
   if (!DS.definitions[resourceName]) {
     throw new DSErrors.NER(errorPrefix(resourceName) + resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -6065,13 +5776,18 @@ function changes(resourceName, id) {
       });
       diff[name] = DSUtils.pick(diff[name], toKeep);
     });
+    DSUtils.forEach(DS.definitions[resourceName].relationFields, function (field) {
+      delete diff.added[field];
+      delete diff.removed[field];
+      delete diff.changed[field];
+    });
     return diff;
   }
 }
 
 module.exports = changes;
 
-},{}],83:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.compute(' + resourceName + ', instance): ';
 }
@@ -6146,6 +5862,7 @@ function compute(resourceName, instance) {
   var DSErrors = DS.errors;
   var definition = DS.definitions[resourceName];
 
+  instance = DSUtils.resolveItem(DS.store[resourceName], instance);
   if (!definition) {
     throw new DSErrors.NER(errorPrefix(resourceName) + resourceName);
   } else if (!DSUtils.isObject(instance) && !DSUtils.isString(instance) && !DSUtils.isNumber(instance)) {
@@ -6168,7 +5885,7 @@ module.exports = {
   _compute: _compute
 };
 
-},{}],84:[function(require,module,exports){
+},{}],93:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.createInstance(' + resourceName + '[, attrs][, options]): ';
 }
@@ -6266,7 +5983,7 @@ function createInstance(resourceName, attrs, options) {
 
 module.exports = createInstance;
 
-},{}],85:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 /*jshint evil:true*/
 var errorPrefix = 'DS.defineResource(definition): ';
 
@@ -6550,6 +6267,9 @@ function defineResource(definition) {
     def.beforeDestroy = DSUtils.promisify(def.beforeDestroy);
     def.afterDestroy = DSUtils.promisify(def.afterDestroy);
 
+    // Mix-in events
+    DSUtils.Events(def);
+
     return def;
   } catch (err) {
     console.error(err);
@@ -6561,7 +6281,7 @@ function defineResource(definition) {
 
 module.exports = defineResource;
 
-},{}],86:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 var observe = require('../../../lib/observe-js/observe-js');
 
 /**
@@ -6584,7 +6304,7 @@ function digest() {
 
 module.exports = digest;
 
-},{"../../../lib/observe-js/observe-js":1}],87:[function(require,module,exports){
+},{"../../../lib/observe-js/observe-js":1}],96:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.eject(' + resourceName + ', ' + id + '): ';
 }
@@ -6601,7 +6321,7 @@ function _eject(definition, resource, id) {
     }
   }
   if (found) {
-    this.unlinkInverse(definition.name, id);
+    DS.unlinkInverse(definition.name, id);
     resource.collection.splice(i, 1);
     resource.observers[id].close();
     delete resource.observers[id];
@@ -6616,7 +6336,9 @@ function _eject(definition, resource, id) {
     delete resource.changeHistories[id];
     delete resource.modified[id];
     delete resource.saved[id];
-    resource.collectionModified = this.utils.updateTimestamp(resource.collectionModified);
+    resource.collectionModified = DS.utils.updateTimestamp(resource.collectionModified);
+
+    DS.notify(definition, 'eject', item);
 
     return item;
   }
@@ -6659,6 +6381,8 @@ function eject(resourceName, id) {
   var DSUtils = DS.utils;
   var DSErrors = DS.errors;
   var definition = DS.definitions[resourceName];
+
+  id = DSUtils.resolveId(definition, id);
   if (!definition) {
     throw new DSErrors.NER(errorPrefix(resourceName, id) + resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -6669,7 +6393,7 @@ function eject(resourceName, id) {
 
 module.exports = eject;
 
-},{}],88:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.ejectAll(' + resourceName + '[, params]): ';
 }
@@ -6686,6 +6410,8 @@ function _ejectAll(definition, resource, params) {
 
   delete resource.completedQueries[queryHash];
   resource.collectionModified = DS.utils.updateTimestamp(resource.collectionModified);
+
+  DS.notify(definition, 'eject', items);
 
   return items;
 }
@@ -6772,7 +6498,7 @@ function ejectAll(resourceName, params) {
 
 module.exports = ejectAll;
 
-},{}],89:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.filter(' + resourceName + '[, params][, options]): ';
 }
@@ -6856,7 +6582,7 @@ function filter(resourceName, params, options) {
 
 module.exports = filter;
 
-},{}],90:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.get(' + resourceName + ', ' + id + '): ';
 }
@@ -6921,7 +6647,7 @@ function get(resourceName, id, options) {
 
 module.exports = get;
 
-},{}],91:[function(require,module,exports){
+},{}],100:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.hasChanges(' + resourceName + ', ' + id + '): ';
 }
@@ -6970,6 +6696,8 @@ function hasChanges(resourceName, id) {
   var DS = this;
   var DSUtils = DS.utils;
   var DSErrors = DS.errors;
+
+  id = DSUtils.resolveId(DS.definitions[resourceName], id);
   if (!DS.definitions[resourceName]) {
     throw new DSErrors.NER(errorPrefix(resourceName, id) + resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -6986,7 +6714,7 @@ function hasChanges(resourceName, id) {
 
 module.exports = hasChanges;
 
-},{}],92:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 module.exports = {
 
   /**
@@ -7180,7 +6908,7 @@ module.exports = {
   unlinkInverse: require('./unlinkInverse')
 };
 
-},{"./changeHistory":81,"./changes":82,"./compute":83,"./createInstance":84,"./defineResource":85,"./digest":86,"./eject":87,"./ejectAll":88,"./filter":89,"./get":90,"./hasChanges":91,"./inject":93,"./lastModified":94,"./lastSaved":95,"./link":96,"./linkAll":97,"./linkInverse":98,"./previous":99,"./unlinkInverse":100}],93:[function(require,module,exports){
+},{"./changeHistory":90,"./changes":91,"./compute":92,"./createInstance":93,"./defineResource":94,"./digest":95,"./eject":96,"./ejectAll":97,"./filter":98,"./get":99,"./hasChanges":100,"./inject":102,"./lastModified":103,"./lastSaved":104,"./link":105,"./linkAll":106,"./linkInverse":107,"./previous":108,"./unlinkInverse":109}],102:[function(require,module,exports){
 var observe = require('../../../lib/observe-js/observe-js');
 var _compute = require('./compute')._compute;
 var stack = 0;
@@ -7464,6 +7192,8 @@ function inject(resourceName, attrs, options) {
       }
     }
 
+    DS.notify(definition, 'inject', injected);
+
     stack--;
   } catch (err) {
     stack--;
@@ -7479,7 +7209,7 @@ function inject(resourceName, attrs, options) {
 
 module.exports = inject;
 
-},{"../../../lib/observe-js/observe-js":1,"./compute":83}],94:[function(require,module,exports){
+},{"../../../lib/observe-js/observe-js":1,"./compute":92}],103:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.lastModified(' + resourceName + '[, ' + id + ']): ';
 }
@@ -7522,6 +7252,8 @@ function lastModified(resourceName, id) {
   var DSUtils = DS.utils;
   var DSErrors = DS.errors;
   var resource = DS.store[resourceName];
+
+  id = DSUtils.resolveId(DS.definitions[resourceName], id);
   if (!DS.definitions[resourceName]) {
     throw new DSErrors.NER(errorPrefix(resourceName, id) + resourceName);
   } else if (id && !DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -7538,7 +7270,7 @@ function lastModified(resourceName, id) {
 
 module.exports = lastModified;
 
-},{}],95:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.lastSaved(' + resourceName + '[, ' + id + ']): ';
 }
@@ -7589,6 +7321,8 @@ function lastSaved(resourceName, id) {
   var DSUtils = DS.utils;
   var DSErrors = DS.errors;
   var resource = DS.store[resourceName];
+
+  id = DSUtils.resolveId(DS.definitions[resourceName], id);
   if (!DS.definitions[resourceName]) {
     throw new DSErrors.NER(errorPrefix(resourceName, id) + resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -7602,7 +7336,7 @@ function lastSaved(resourceName, id) {
 
 module.exports = lastSaved;
 
-},{}],96:[function(require,module,exports){
+},{}],105:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.link(' + resourceName + ', id[, relations]): ';
 }
@@ -7680,6 +7414,7 @@ function link(resourceName, id, relations) {
 
   relations = relations || [];
 
+  id = DSUtils.resolveId(definition, id);
   if (!definition) {
     throw new DSErrors.NER(errorPrefix(resourceName) + resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -7698,7 +7433,7 @@ function link(resourceName, id, relations) {
 
 module.exports = link;
 
-},{}],97:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.linkAll(' + resourceName + '[, params][, relations]): ';
 }
@@ -7810,7 +7545,7 @@ function linkAll(resourceName, params, relations) {
 
 module.exports = linkAll;
 
-},{}],98:[function(require,module,exports){
+},{}],107:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.linkInverse(' + resourceName + ', id[, relations]): ';
 }
@@ -7883,6 +7618,7 @@ function linkInverse(resourceName, id, relations) {
 
   relations = relations || [];
 
+  id = DSUtils.resolveId(definition, id);
   if (!definition) {
     throw new DSErrors.NER(errorPrefix(resourceName) + resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -7901,7 +7637,7 @@ function linkInverse(resourceName, id, relations) {
 
 module.exports = linkInverse;
 
-},{}],99:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.previous(' + resourceName + '[, ' + id + ']): ';
 }
@@ -7947,6 +7683,8 @@ function previous(resourceName, id) {
   var DSUtils = DS.utils;
   var DSErrors = DS.errors;
   var resource = DS.store[resourceName];
+
+  id = DSUtils.resolveId(DS.definitions[resourceName], id);
   if (!DS.definitions[resourceName]) {
     throw new DSErrors.NER(errorPrefix(resourceName, id) + resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -7959,7 +7697,7 @@ function previous(resourceName, id) {
 
 module.exports = previous;
 
-},{}],100:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.unlinkInverse(' + resourceName + ', id[, relations]): ';
 }
@@ -8034,6 +7772,7 @@ function unlinkInverse(resourceName, id, relations) {
 
   relations = relations || [];
 
+  id = DSUtils.resolveId(definition, id);
   if (!definition) {
     throw new DSErrors.NER(errorPrefix(resourceName) + resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
@@ -8052,7 +7791,7 @@ function unlinkInverse(resourceName, id, relations) {
 
 module.exports = unlinkInverse;
 
-},{}],101:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 /**
  * @doc function
  * @id errors.types:IllegalArgumentError
@@ -8183,7 +7922,7 @@ module.exports = {
   NER: NonexistentResourceError
 };
 
-},{}],102:[function(require,module,exports){
+},{}],111:[function(require,module,exports){
 /**
  * @doc overview
  * @id js-data
@@ -8218,7 +7957,51 @@ module.exports = {
   DSErrors: require('./errors')
 };
 
-},{"./adapters/http":67,"./adapters/localStorage":68,"./datastore":80,"./errors":101,"./utils":103}],103:[function(require,module,exports){
+},{"./adapters/http":76,"./adapters/localStorage":77,"./datastore":89,"./errors":110,"./utils":112}],112:[function(require,module,exports){
+function Events(target) {
+  var events = {};
+  target = target || this;
+  /**
+   *  On: listen to events
+   */
+  target.on = function (type, func, ctx) {
+    events[type] = events[type] || [];
+    events[type].push({
+      f: func,
+      c: ctx
+    });
+  };
+
+  /**
+   *  Off: stop listening to event / specific callback
+   */
+  target.off = function (type, func) {
+    var listeners = events[type];
+    if (!listeners) {
+      events = {};
+    } else if (func) {
+      for (var i = 0; i < listeners.length; i++) {
+        if (listeners[i] === func) {
+          listeners.splice(i, 1);
+          break;
+        }
+      }
+    } else {
+      listeners.splice(0, listeners.length);
+    }
+  };
+
+  target.emit = function () {
+    var args = Array.prototype.slice.call(arguments);
+    var listeners = events[args.shift()] || [];
+    if (listeners) {
+      for (var i = 0; i < listeners.length; i++) {
+        listeners[i].f.apply(listeners[i].c, args);
+      }
+    }
+  };
+}
+
 module.exports = {
   isBoolean: require('mout/lang/isBoolean'),
   isString: require('mout/lang/isString'),
@@ -8233,17 +8016,33 @@ module.exports = {
   upperCase: require('mout/string/upperCase'),
   pascalCase: require('mout/string/pascalCase'),
   deepMixIn: require('mout/object/deepMixIn'),
-  merge: require('mout/object/merge'),
   forOwn: require('mout/object/forOwn'),
   forEach: require('mout/array/forEach'),
   pick: require('mout/object/pick'),
   set: require('mout/object/set'),
+  merge: require('mout/object/merge'),
   contains: require('mout/array/contains'),
   filter: require('mout/array/filter'),
   toLookup: require('mout/array/toLookup'),
   remove: require('mout/array/remove'),
   slice: require('mout/array/slice'),
   sort: require('mout/array/sort'),
+  resolveItem: function (resource, idOrInstance) {
+    if (resource && (this.isString(idOrInstance) || this.isNumber(idOrInstance))) {
+      return resource.index[idOrInstance] || idOrInstance;
+    } else {
+      return idOrInstance;
+    }
+  },
+  resolveId: function (definition, idOrInstance) {
+    if (this.isString(idOrInstance) || this.isNumber(idOrInstance)) {
+      return idOrInstance;
+    } else if (idOrInstance && definition) {
+      return idOrInstance[definition.idAttribute] || idOrInstance;
+    } else {
+      return idOrInstance;
+    }
+  },
   updateTimestamp: function (timestamp) {
     var newTimestamp = typeof Date.now === 'function' ? Date.now() : new Date().getTime();
     if (timestamp && newTimestamp <= timestamp) {
@@ -8252,7 +8051,7 @@ module.exports = {
       return newTimestamp;
     }
   },
-  Promise: require('es6-promises'),
+  Promise: require('es6-promise').Promise,
   http: require('axios'),
   deepFreeze: function deepFreeze(o) {
     if (typeof Object.freeze === 'function') {
@@ -8330,8 +8129,9 @@ module.exports = {
         }
       });
     };
-  }
+  },
+  Events: Events
 };
 
-},{"axios":2,"es6-promises":21,"mout/array/contains":25,"mout/array/filter":26,"mout/array/forEach":27,"mout/array/remove":30,"mout/array/slice":31,"mout/array/sort":32,"mout/array/toLookup":33,"mout/lang/isArray":39,"mout/lang/isBoolean":40,"mout/lang/isEmpty":41,"mout/lang/isFunction":42,"mout/lang/isNumber":44,"mout/lang/isObject":45,"mout/lang/isString":47,"mout/object/deepMixIn":51,"mout/object/forOwn":53,"mout/object/merge":55,"mout/object/pick":58,"mout/object/set":59,"mout/string/makePath":62,"mout/string/pascalCase":63,"mout/string/upperCase":66}]},{},[102])(102)
+},{"axios":2,"es6-promise":23,"mout/array/contains":34,"mout/array/filter":35,"mout/array/forEach":36,"mout/array/remove":39,"mout/array/slice":40,"mout/array/sort":41,"mout/array/toLookup":42,"mout/lang/isArray":48,"mout/lang/isBoolean":49,"mout/lang/isEmpty":50,"mout/lang/isFunction":51,"mout/lang/isNumber":53,"mout/lang/isObject":54,"mout/lang/isString":56,"mout/object/deepMixIn":60,"mout/object/forOwn":62,"mout/object/merge":64,"mout/object/pick":67,"mout/object/set":68,"mout/string/makePath":71,"mout/string/pascalCase":72,"mout/string/upperCase":75}]},{},[111])(111)
 });
