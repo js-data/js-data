@@ -8123,7 +8123,10 @@ module.exports = {
         });
 
         try {
-          fn.apply(target || this, args);
+          var promise = fn.apply(target || this, args);
+          if (promise && promise.then) {
+            promise.then(resolve, reject);
+          }
         } catch (err) {
           reject(err);
         }

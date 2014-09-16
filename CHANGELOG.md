@@ -8,6 +8,7 @@
 - jmdobry/angular-data#167 - Default params argument of bindAll to empty object
 - jmdobry/angular-data#170 - Global callbacks
 - jmdobry/angular-data#171 - "not in" query
+- jmdobry/angular-data#177 - Allow promises to be returned in lifecycle hooks
 
 ###### Backwards compatible bug fixes
 - jmdobry/angular-data#156 - cached findAll pending query doesn't get removed sometimes
