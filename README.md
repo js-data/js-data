@@ -1,4 +1,5 @@
 ## js-data
+<img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="128" height="128" />
 
 Inspired by [Ember Data](https://github.com/emberjs/data), JSData is the model layer you've been craving. It consists of a convenient in-memory cache for managing your data, and several adapters for communicating with various persistence layers.
 
