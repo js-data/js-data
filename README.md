@@ -49,11 +49,11 @@ All your data are belong to you...
 
 ## API
 - [Overview](http://www.js-data.io)
-- [DS](/js-data/js-data/wiki/DS)
-- [DSHttpAdapter](/js-data/js-data/wiki/DSHttpAdapter)
-- [DSLocalStorageAdapter](/js-data/js-data/wiki/DSLocalStorageAdapter)
-- [DSFirebaseAdapter](/js-data/js-data/wiki/DSLocalStorageAdapter)
-- [Schemator](/js-data/js-data/wiki/Schemator)
+- [DS](https://github.com/js-data/js-data/wiki/DS)
+- [DSHttpAdapter](https://github.com/js-data/js-data/wiki/DSHttpAdapter)
+- [DSLocalStorageAdapter](https://github.com/js-data/js-data/wiki/DSLocalStorageAdapter)
+- [DSFirebaseAdapter](https://github.com/js-data/js-data/wiki/DSLocalStorageAdapter)
+- [Schemator](https://github.com/js-data/js-data/wiki/Schemator)
 
 ## Changelog
 [CHANGELOG.md](https://github.com/js-data/js-data/blob/master/CHANGELOG.md)
