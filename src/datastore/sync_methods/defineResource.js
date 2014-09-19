@@ -1,5 +1,6 @@
 /*jshint evil:true*/
-var errorPrefix = 'DS.defineResource(definition): ';
+var DSUtils = require('../../utils');
+var DSErrors = require('../../errors');
 
 function Resource(utils, options) {
 
@@ -32,6 +33,7 @@ var methodsToProxy = [
   'link',
   'linkAll',
   'linkInverse',
+  'unlinkInverse',
   'loadRelations',
   'previous',
   'refresh',
@@ -105,26 +107,19 @@ var methodsToProxy = [
  */
 function defineResource(definition) {
   var DS = this;
-  var DSUtils = DS.utils;
-  var DSErrors = DS.errors;
   var definitions = DS.definitions;
 
   if (DSUtils.isString(definition)) {
-    definition = definition.replace(/\s/gi, '');
     definition = {
-      name: definition
+      name: definition.replace(/\s/gi, '')
     };
   }
   if (!DSUtils.isObject(definition)) {
-    throw new DSErrors.IA(errorPrefix + 'definition: Must be an object!');
+    throw new DSErrors.IA('"definition" must be an object!');
   } else if (!DSUtils.isString(definition.name)) {
-    throw new DSErrors.IA(errorPrefix + 'definition.name: Must be a string!');
-  } else if (definition.idAttribute && !DSUtils.isString(definition.idAttribute)) {
-    throw new DSErrors.IA(errorPrefix + 'definition.idAttribute: Must be a string!');
-  } else if (definition.endpoint && !DSUtils.isString(definition.endpoint)) {
-    throw new DSErrors.IA(errorPrefix + 'definition.endpoint: Must be a string!');
+    throw new DSErrors.IA('"name" must be a string!');
   } else if (DS.store[definition.name]) {
-    throw new DSErrors.R(errorPrefix + definition.name + ' is already registered!');
+    throw new DSErrors.R(definition.name + ' is already registered!');
   }
 
   try {
@@ -133,6 +128,10 @@ function defineResource(definition) {
     definitions[definition.name] = new Resource(DSUtils, definition);
 
     var def = definitions[definition.name];
+
+    if (!DSUtils.isString(def.idAttribute)) {
+      throw new DSErrors.IA('"idAttribute" must be a string!');
+    }
 
     // Setup nested parent configuration
     if (def.relations) {
@@ -172,21 +171,22 @@ function defineResource(definition) {
       var item;
       var endpoint;
       var thisEndpoint = options.endpoint || this.endpoint;
+      var parentDef = definitions[parent];
       delete options.endpoint;
       options = options || {};
       options.params = options.params || {};
-      if (parent && parentKey && definitions[parent] && options.params[parentKey] !== false) {
+      if (parent && parentKey && parentDef && options.params[parentKey] !== false) {
         if (DSUtils.isNumber(attrs) || DSUtils.isString(attrs)) {
           item = DS.get(this.name, attrs);
         }
         if (DSUtils.isObject(attrs) && parentKey in attrs) {
           delete options.params[parentKey];
-          endpoint = DSUtils.makePath(definitions[parent].getEndpoint(attrs, options), attrs[parentKey], thisEndpoint);
+          endpoint = DSUtils.makePath(parentDef.getEndpoint(attrs, options), attrs[parentKey], thisEndpoint);
         } else if (item && parentKey in item) {
           delete options.params[parentKey];
-          endpoint = DSUtils.makePath(definitions[parent].getEndpoint(attrs, options), item[parentKey], thisEndpoint);
+          endpoint = DSUtils.makePath(parentDef.getEndpoint(attrs, options), item[parentKey], thisEndpoint);
         } else if (options && options.params[parentKey]) {
-          endpoint = DSUtils.makePath(definitions[parent].getEndpoint(attrs, options), options.params[parentKey], thisEndpoint);
+          endpoint = DSUtils.makePath(parentDef.getEndpoint(attrs, options), options.params[parentKey], thisEndpoint);
           delete options.params[parentKey];
         }
       }
@@ -221,7 +221,7 @@ function defineResource(definition) {
           fn = def.computed[field];
         }
         if (def.methods && field in def.methods) {
-          console.warn(errorPrefix + 'Computed property "' + field + '" conflicts with previously defined prototype method!');
+          console.warn('Computed property "' + field + '" conflicts with previously defined prototype method!');
         }
         var deps;
         if (fn.length === 1) {
@@ -230,7 +230,7 @@ function defineResource(definition) {
           def.computed[field] = deps.concat(fn);
           fn = def.computed[field];
           if (deps.length) {
-            console.warn(errorPrefix + 'Use the computed property array syntax for compatibility with minified code!');
+            console.warn('Use the computed property array syntax for compatibility with minified code!');
           }
         }
         deps = fn.slice(0, fn.length - 1);

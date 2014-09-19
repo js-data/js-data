@@ -1,18 +1,14 @@
 describe('DS.filter(resourceName[, params][, options])', function () {
-  function errorPrefix(resourceName) {
-    return 'DS.filter(' + resourceName + '[, params][, options]): ';
-  }
-
   it('should throw an error when method pre-conditions are not met', function () {
     assert.throws(function () {
       datastore.filter('does not exist');
-    }, datastore.errors.NonexistentResourceError, errorPrefix('does not exist') + 'does not exist is not a registered resource!');
+    }, datastore.errors.NonexistentResourceError, 'does not exist is not a registered resource!');
 
     DSUtils.forEach(TYPES_EXCEPT_OBJECT, function (key) {
       if (key) {
         assert.throws(function () {
           datastore.filter('post', key);
-        }, datastore.errors.IllegalArgumentError, errorPrefix('post') + 'params: Must be an object!');
+        }, datastore.errors.IllegalArgumentError, '"params" must be an object!');
       }
     });
 
@@ -22,7 +18,7 @@ describe('DS.filter(resourceName[, params][, options])', function () {
       if (key) {
         assert.throws(function () {
           datastore.filter('post', {}, key);
-        }, datastore.errors.IllegalArgumentError, errorPrefix('post') + 'options: Must be an object!');
+        }, datastore.errors.IllegalArgumentError, '"options" must be an object!');
       }
     });
 
@@ -340,7 +336,7 @@ describe('DS.filter(resourceName[, params][, options])', function () {
   it('should allow custom filter function', function () {
     datastore.defineResource({
       name: 'Comment',
-      defaultFilter: function (collection, resourceName, params, options) {
+      defaultFilter: function (collection, resourceName, params) {
         var filtered = collection;
         var where = params.where;
         filtered = this.utils.filter(filtered, function (attrs) {

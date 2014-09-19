@@ -1,42 +1,32 @@
 describe('DS.defineResource(definition)', function () {
-  var errorPrefix = 'DS.defineResource(definition): ';
-
   it('should throw an error when method pre-conditions are not met', function () {
     DSUtils.forEach(TYPES_EXCEPT_STRING_OR_OBJECT, function (key) {
       if (!DSUtils.isArray(key)) {
         assert.throws(function () {
           datastore.defineResource(key);
-        }, datastore.errors.IllegalArgumentError, errorPrefix + 'definition: Must be an object!');
+        }, datastore.errors.IllegalArgumentError, '"definition" must be an object!');
       }
     });
 
     DSUtils.forEach(TYPES_EXCEPT_STRING, function (key) {
       assert.throws(function () {
         datastore.defineResource({ name: key });
-      }, datastore.errors.IllegalArgumentError, errorPrefix + 'definition.name: Must be a string!');
+      }, datastore.errors.IllegalArgumentError, '"name" must be a string!');
     });
 
     DSUtils.forEach(TYPES_EXCEPT_STRING, function (key) {
       if (key) {
         assert.throws(function () {
           datastore.defineResource({ name: 'name', idAttribute: key });
-        }, datastore.errors.IllegalArgumentError, errorPrefix + 'definition.idAttribute: Must be a string!');
+        }, datastore.errors.IllegalArgumentError, '"idAttribute" must be a string!');
       }
     });
 
-    DSUtils.forEach(TYPES_EXCEPT_STRING, function (key) {
-      if (key) {
-        assert.throws(function () {
-          datastore.defineResource({ name: 'name', endpoint: key });
-        }, datastore.errors.IllegalArgumentError, errorPrefix + 'definition.endpoint: Must be a string!');
-      }
-    });
-
-    datastore.defineResource('name');
+    datastore.defineResource('fake');
 
     assert.throws(function () {
-      datastore.defineResource('name');
-    }, datastore.errors.RuntimeError, errorPrefix + 'name is already registered!');
+      datastore.defineResource('fake');
+    }, datastore.errors.RuntimeError, 'fake is already registered!');
 
     assert.doesNotThrow(function () {
       datastore.defineResource('new resource');

@@ -1,17 +1,13 @@
 describe('DS.changes(resourceName, id)', function () {
-  function errorPrefix(resourceName) {
-    return 'DS.changes(' + resourceName + ', id): ';
-  }
-
   it('should throw an error when method pre-conditions are not met', function () {
     assert.throws(function () {
       datastore.changes('does not exist', {});
-    }, datastore.errors.NonexistentResourceError, errorPrefix('does not exist') + 'does not exist is not a registered resource!');
+    }, datastore.errors.NonexistentResourceError, 'does not exist is not a registered resource!');
 
     DSUtils.forEach(TYPES_EXCEPT_STRING_OR_NUMBER, function (key) {
       assert.throws(function () {
         datastore.changes('post', key);
-      }, datastore.errors.IllegalArgumentError, errorPrefix('post') + 'id: Must be a string or a number!');
+      }, datastore.errors.IllegalArgumentError, '"id" must be a string or a number!');
     });
   });
   it('should return false if the item is not in the store', function () {

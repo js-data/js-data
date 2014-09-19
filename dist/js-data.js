@@ -3674,61 +3674,24 @@ function changeHistory(resourceName, id) {
 module.exports = changeHistory;
 
 },{"../../errors":87,"../../utils":89}],68:[function(require,module,exports){
-function errorPrefix(resourceName) {
-  return 'DS.changes(' + resourceName + ', id): ';
-}
+var DSUtils = require('../../utils');
+var DSErrors = require('../../errors');
 
-/**
- * @doc method
- * @id DS.sync methods:changes
- * @name changes
- * @description
- * Synchronously return the changes object of the item of the type specified by `resourceName` that has the primary key
- * specified by `id`. This object represents the diff between the item in its current state and the state of the item
- * the last time it was saved via an adapter.
- *
- * ## Signature:
- * ```js
- * DS.changes(resourceName, id)
- * ```
- *
- * ## Example:
- *
- * ```js
- * var d = DS.get('document', 5); // { author: 'John Anderson', id: 5 }
- *
- * d.author = 'Sally';
- *
- * // You might have to do DS.digest() first
- *
- * DS.changes('document', 5); // {...} Object describing changes
- * ```
- *
- * ## Throws
- *
- * - `{IllegalArgumentError}`
- * - `{NonexistentResourceError}`
- *
- * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
- * @param {string|number} id The primary key of the item of the changes to retrieve.
- * @returns {object} The changes of the item of the type specified by `resourceName` with the primary key specified by `id`.
- */
 function changes(resourceName, id) {
-  var DS = this;
-  var DSUtils = DS.utils;
-  var DSErrors = DS.errors;
+  var _this = this;
+  var definition = _this.definitions[resourceName];
 
-  id = DSUtils.resolveId(DS.definitions[resourceName], id);
-  if (!DS.definitions[resourceName]) {
-    throw new DSErrors.NER(errorPrefix(resourceName) + resourceName);
+  id = DSUtils.resolveId(definition, id);
+  if (!definition) {
+    throw new DSErrors.NER(resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new DSErrors.IA(errorPrefix(resourceName) + 'id: Must be a string or a number!');
+    throw new DSErrors.IA('"id" must be a string or a number!');
   }
 
-  var item = DS.get(resourceName, id);
+  var item = _this.get(resourceName, id);
   if (item) {
-    DS.store[resourceName].observers[id].deliver();
-    var diff = DSUtils.diffObjectFromOldObject(item, DS.store[resourceName].previousAttributes[id]);
+    _this.store[resourceName].observers[id].deliver();
+    var diff = DSUtils.diffObjectFromOldObject(item, _this.store[resourceName].previousAttributes[id]);
     DSUtils.forOwn(diff, function (changeset, name) {
       var toKeep = [];
       DSUtils.forOwn(changeset, function (value, field) {
@@ -3738,7 +3701,7 @@ function changes(resourceName, id) {
       });
       diff[name] = DSUtils.pick(diff[name], toKeep);
     });
-    DSUtils.forEach(DS.definitions[resourceName].relationFields, function (field) {
+    DSUtils.forEach(definition.relationFields, function (field) {
       delete diff.added[field];
       delete diff.removed[field];
       delete diff.changed[field];
@@ -3749,7 +3712,7 @@ function changes(resourceName, id) {
 
 module.exports = changes;
 
-},{}],69:[function(require,module,exports){
+},{"../../errors":87,"../../utils":89}],69:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.compute(' + resourceName + ', instance): ';
 }
@@ -3885,7 +3848,8 @@ module.exports = createInstance;
 
 },{"../../errors":87,"../../utils":89}],71:[function(require,module,exports){
 /*jshint evil:true*/
-var errorPrefix = 'DS.defineResource(definition): ';
+var DSUtils = require('../../utils');
+var DSErrors = require('../../errors');
 
 function Resource(utils, options) {
 
@@ -3918,6 +3882,7 @@ var methodsToProxy = [
   'link',
   'linkAll',
   'linkInverse',
+  'unlinkInverse',
   'loadRelations',
   'previous',
   'refresh',
@@ -3991,26 +3956,19 @@ var methodsToProxy = [
  */
 function defineResource(definition) {
   var DS = this;
-  var DSUtils = DS.utils;
-  var DSErrors = DS.errors;
   var definitions = DS.definitions;
 
   if (DSUtils.isString(definition)) {
-    definition = definition.replace(/\s/gi, '');
     definition = {
-      name: definition
+      name: definition.replace(/\s/gi, '')
     };
   }
   if (!DSUtils.isObject(definition)) {
-    throw new DSErrors.IA(errorPrefix + 'definition: Must be an object!');
+    throw new DSErrors.IA('"definition" must be an object!');
   } else if (!DSUtils.isString(definition.name)) {
-    throw new DSErrors.IA(errorPrefix + 'definition.name: Must be a string!');
-  } else if (definition.idAttribute && !DSUtils.isString(definition.idAttribute)) {
-    throw new DSErrors.IA(errorPrefix + 'definition.idAttribute: Must be a string!');
-  } else if (definition.endpoint && !DSUtils.isString(definition.endpoint)) {
-    throw new DSErrors.IA(errorPrefix + 'definition.endpoint: Must be a string!');
+    throw new DSErrors.IA('"name" must be a string!');
   } else if (DS.store[definition.name]) {
-    throw new DSErrors.R(errorPrefix + definition.name + ' is already registered!');
+    throw new DSErrors.R(definition.name + ' is already registered!');
   }
 
   try {
@@ -4019,6 +3977,10 @@ function defineResource(definition) {
     definitions[definition.name] = new Resource(DSUtils, definition);
 
     var def = definitions[definition.name];
+
+    if (!DSUtils.isString(def.idAttribute)) {
+      throw new DSErrors.IA('"idAttribute" must be a string!');
+    }
 
     // Setup nested parent configuration
     if (def.relations) {
@@ -4058,21 +4020,22 @@ function defineResource(definition) {
       var item;
       var endpoint;
       var thisEndpoint = options.endpoint || this.endpoint;
+      var parentDef = definitions[parent];
       delete options.endpoint;
       options = options || {};
       options.params = options.params || {};
-      if (parent && parentKey && definitions[parent] && options.params[parentKey] !== false) {
+      if (parent && parentKey && parentDef && options.params[parentKey] !== false) {
         if (DSUtils.isNumber(attrs) || DSUtils.isString(attrs)) {
           item = DS.get(this.name, attrs);
         }
         if (DSUtils.isObject(attrs) && parentKey in attrs) {
           delete options.params[parentKey];
-          endpoint = DSUtils.makePath(definitions[parent].getEndpoint(attrs, options), attrs[parentKey], thisEndpoint);
+          endpoint = DSUtils.makePath(parentDef.getEndpoint(attrs, options), attrs[parentKey], thisEndpoint);
         } else if (item && parentKey in item) {
           delete options.params[parentKey];
-          endpoint = DSUtils.makePath(definitions[parent].getEndpoint(attrs, options), item[parentKey], thisEndpoint);
+          endpoint = DSUtils.makePath(parentDef.getEndpoint(attrs, options), item[parentKey], thisEndpoint);
         } else if (options && options.params[parentKey]) {
-          endpoint = DSUtils.makePath(definitions[parent].getEndpoint(attrs, options), options.params[parentKey], thisEndpoint);
+          endpoint = DSUtils.makePath(parentDef.getEndpoint(attrs, options), options.params[parentKey], thisEndpoint);
           delete options.params[parentKey];
         }
       }
@@ -4107,7 +4070,7 @@ function defineResource(definition) {
           fn = def.computed[field];
         }
         if (def.methods && field in def.methods) {
-          console.warn(errorPrefix + 'Computed property "' + field + '" conflicts with previously defined prototype method!');
+          console.warn('Computed property "' + field + '" conflicts with previously defined prototype method!');
         }
         var deps;
         if (fn.length === 1) {
@@ -4116,7 +4079,7 @@ function defineResource(definition) {
           def.computed[field] = deps.concat(fn);
           fn = def.computed[field];
           if (deps.length) {
-            console.warn(errorPrefix + 'Use the computed property array syntax for compatibility with minified code!');
+            console.warn('Use the computed property array syntax for compatibility with minified code!');
           }
         }
         deps = fn.slice(0, fn.length - 1);
@@ -4181,7 +4144,7 @@ function defineResource(definition) {
 
 module.exports = defineResource;
 
-},{}],72:[function(require,module,exports){
+},{"../../errors":87,"../../utils":89}],72:[function(require,module,exports){
 var observe = require('../../../lib/observe-js/observe-js');
 
 /**
@@ -4205,14 +4168,23 @@ function digest() {
 module.exports = digest;
 
 },{"../../../lib/observe-js/observe-js":1}],73:[function(require,module,exports){
-function errorPrefix(resourceName, id) {
-  return 'DS.eject(' + resourceName + ', ' + id + '): ';
-}
+var DSUtils = require('../../utils');
+var DSErrors = require('../../errors');
 
-function _eject(definition, resource, id) {
-  var DS = this;
+function eject(resourceName, id) {
+  var _this = this;
+  var definition = _this.definitions[resourceName];
+  var resource = _this.store[resourceName];
   var item;
   var found = false;
+
+  id = DSUtils.resolveId(definition, id);
+  if (!definition) {
+    throw new DSErrors.NER(resourceName);
+  } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
+    throw new DSErrors.IA('"id" must be a string or a number!');
+  }
+
   for (var i = 0; i < resource.collection.length; i++) {
     if (resource.collection[i][definition.idAttribute] == id) {
       item = resource.collection[i];
@@ -4221,7 +4193,7 @@ function _eject(definition, resource, id) {
     }
   }
   if (found) {
-    DS.unlinkInverse(definition.name, id);
+    _this.unlinkInverse(definition.name, id);
     resource.collection.splice(i, 1);
     resource.observers[id].close();
     delete resource.observers[id];
@@ -4230,239 +4202,81 @@ function _eject(definition, resource, id) {
     delete resource.previousAttributes[id];
     delete resource.completedQueries[id];
     delete resource.pendingQueries[id];
-    DS.utils.forEach(resource.changeHistories[id], function (changeRecord) {
-      DS.utils.remove(resource.changeHistory, changeRecord);
+    DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
+      DSUtils.remove(resource.changeHistory, changeRecord);
     });
     delete resource.changeHistories[id];
     delete resource.modified[id];
     delete resource.saved[id];
-    resource.collectionModified = DS.utils.updateTimestamp(resource.collectionModified);
+    resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
-    DS.notify(definition, 'eject', item);
+    _this.notify(definition, 'eject', item);
 
     return item;
   }
 }
 
-/**
- * @doc method
- * @id DS.sync methods:eject
- * @name eject
- * @description
- * Eject the item of the specified type that has the given primary key from the data store. Ejection only removes items
- * from the data store and does not attempt to destroy items via an adapter.
- *
- * ## Signature:
- * ```js
- * DS.eject(resourceName[, id])
- * ```
- *
- * ## Example:
- *
- * ```js
- * DS.get('document', 45); // { title: 'How to Cook', id: 45 }
- *
- * DS.eject('document', 45);
- *
- * DS.get('document', 45); // undefined
- * ```
- *
- * ## Throws
- *
- * - `{IllegalArgumentError}`
- * - `{NonexistentResourceError}`
- *
- * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
- * @param {string|number} id The primary key of the item to eject.
- * @returns {object} A reference to the item that was ejected from the data store.
- */
-function eject(resourceName, id) {
-  var DS = this;
-  var DSUtils = DS.utils;
-  var DSErrors = DS.errors;
-  var definition = DS.definitions[resourceName];
-
-  id = DSUtils.resolveId(definition, id);
-  if (!definition) {
-    throw new DSErrors.NER(errorPrefix(resourceName, id) + resourceName);
-  } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new DSErrors.IA(errorPrefix(resourceName, id) + 'id: Must be a string or a number!');
-  }
-  return _eject.call(DS, definition, DS.store[resourceName], id);
-}
-
 module.exports = eject;
 
-},{}],74:[function(require,module,exports){
-function errorPrefix(resourceName) {
-  return 'DS.ejectAll(' + resourceName + '[, params]): ';
-}
+},{"../../errors":87,"../../utils":89}],74:[function(require,module,exports){
+var DSUtils = require('../../utils');
+var DSErrors = require('../../errors');
 
-function _ejectAll(definition, resource, params) {
-  var DS = this;
-  var queryHash = DS.utils.toJson(params);
-  var items = DS.filter(definition.name, params);
-  var ids = DS.utils.toLookup(items, definition.idAttribute);
+function ejectAll(resourceName, params) {
+  var _this = this;
+  var definition = _this.definitions[resourceName];
+  params = params || {};
 
-  DS.utils.forOwn(ids, function (item, id) {
-    DS.eject(definition.name, id);
+  if (!definition) {
+    throw new DSErrors.NER(resourceName);
+  } else if (!DSUtils.isObject(params)) {
+    throw new DSErrors.IA('"params" must be an object!');
+  }
+  var resource = _this.store[resourceName];
+  if (DSUtils.isEmpty(params)) {
+    resource.completedQueries = {};
+  }
+  var queryHash = DSUtils.toJson(params);
+  var items = _this.filter(definition.name, params);
+  var ids = DSUtils.toLookup(items, definition.idAttribute);
+
+  DSUtils.forOwn(ids, function (item, id) {
+    _this.eject(definition.name, id);
   });
 
   delete resource.completedQueries[queryHash];
-  resource.collectionModified = DS.utils.updateTimestamp(resource.collectionModified);
+  resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
-  DS.notify(definition, 'eject', items);
+  _this.notify(definition, 'eject', items);
 
   return items;
 }
 
-/**
- * @doc method
- * @id DS.sync methods:ejectAll
- * @name ejectAll
- * @description
- * Eject all matching items of the specified type from the data store. Ejection only removes items from the data store
- * and does not attempt to destroy items via an adapter.
- *
- * ## Signature:
- * ```javascript
- * DS.ejectAll(resourceName[, params])
- * ```
- *
- * ## Example:
- *
- * ```javascript
- * DS.get('document', 45); // { title: 'How to Cook', id: 45 }
- *
- * DS.eject('document', 45);
- *
- * DS.get('document', 45); // undefined
- * ```
- *
- * Eject all items of the specified type that match the criteria from the data store.
- *
- * ```javascript
- * DS.filter('document');   // [ { title: 'How to Cook', id: 45, author: 'John Anderson' },
- *                          //   { title: 'How to Eat', id: 46, author: 'Sally Jane' } ]
- *
- * DS.ejectAll('document', { where: { author: 'Sally Jane' } });
- *
- * DS.filter('document'); // [ { title: 'How to Cook', id: 45, author: 'John Anderson' } ]
- * ```
- *
- * Eject all items of the specified type from the data store.
- *
- * ```javascript
- * DS.filter('document');   // [ { title: 'How to Cook', id: 45, author: 'John Anderson' },
- *                          //   { title: 'How to Eat', id: 46, author: 'Sally Jane' } ]
- *
- * DS.ejectAll('document');
- *
- * DS.filter('document'); // [ ]
- * ```
- *
- * ## Throws
- *
- * - `{IllegalArgumentError}`
- * - `{NonexistentResourceError}`
- *
- * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
- * @param {object} params Parameter object that is used to filter items. Properties:
- *
- *  - `{object=}` - `where` - Where clause.
- *  - `{number=}` - `limit` - Limit clause.
- *  - `{number=}` - `skip` - Skip clause.
- *  - `{number=}` - `offset` - Same as skip.
- *  - `{string|array=}` - `orderBy` - OrderBy clause.
- *
- * @returns {array} The items that were ejected from the data store.
- */
-function ejectAll(resourceName, params) {
-  var DS = this;
-  var DSUtils = DS.utils;
-  var DSErrors = DS.errors;
-  var definition = DS.definitions[resourceName];
-  params = params || {};
-
-  if (!definition) {
-    throw new DSErrors.NER(errorPrefix(resourceName) + resourceName);
-  } else if (!DSUtils.isObject(params)) {
-    throw new DSErrors.IA(errorPrefix(resourceName) + 'params: Must be an object!');
-  }
-  var resource = DS.store[resourceName];
-  if (DSUtils.isEmpty(params)) {
-    resource.completedQueries = {};
-  }
-  return _ejectAll.call(DS, definition, resource, params);
-}
-
 module.exports = ejectAll;
 
-},{}],75:[function(require,module,exports){
-function errorPrefix(resourceName) {
-  return 'DS.filter(' + resourceName + '[, params][, options]): ';
-}
+},{"../../errors":87,"../../utils":89}],75:[function(require,module,exports){
+var DSUtils = require('../../utils');
+var DSErrors = require('../../errors');
 
-/**
- * @doc method
- * @id DS.sync methods:filter
- * @name filter
- * @description
- * Synchronously filter items in the data store of the type specified by `resourceName`.
- *
- * ## Signature:
- * ```js
- * DS.filter(resourceName[, params][, options])
- * ```
- *
- * ## Example:
- *
- * For many examples see the [tests for DS.filter](https://github.com/js-data/js-data/blob/master/test/integration/datastore/sync methods/filter.test.js).
- *
- * ## Throws
- *
- * - `{IllegalArgumentError}`
- * - `{NonexistentResourceError}`
- *
- * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
- * @param {object=} params Parameter object that is used to filter items. Properties:
- *
- *  - `{object=}` - `where` - Where clause.
- *  - `{number=}` - `limit` - Limit clause.
- *  - `{number=}` - `skip` - Skip clause.
- *  - `{number=}` - `offset` - Same as skip.
- *  - `{string|array=}` - `orderBy` - OrderBy clause.
- *
- * @param {object=} options Optional configuration. Properties:
- *
- * - `{boolean=}` - `loadFromServer` - Send the query to server if it has not been sent yet. Default: `false`.
- * - `{boolean=}` - `allowSimpleWhere` - Treat top-level fields on the `params` argument as simple "where" equality clauses. Default: `true`.
- *
- * @returns {array} The filtered collection of items of the type specified by `resourceName`.
- */
 function filter(resourceName, params, options) {
-  var DS = this;
-  var DSUtils = DS.utils;
-  var DSErrors = DS.errors;
-  var definition = DS.definitions[resourceName];
+  var _this = this;
+  var definition = _this.definitions[resourceName];
 
   options = options || {};
 
   if (!definition) {
-    throw new DSErrors.NER(errorPrefix(resourceName) + resourceName);
+    throw new DSErrors.NER(resourceName);
   } else if (params && !DSUtils.isObject(params)) {
-    throw new DSErrors.IA(errorPrefix(resourceName) + 'params: Must be an object!');
+    throw new DSErrors.IA('"params" must be an object!');
   } else if (!DSUtils.isObject(options)) {
-    throw new DSErrors.IA(errorPrefix(resourceName) + 'options: Must be an object!');
+    throw new DSErrors.IA('"options" must be an object!');
   }
-  var resource = DS.store[resourceName];
+  var resource = _this.store[resourceName];
 
   // Protect against null
   params = params || {};
 
-  if ('allowSimpleWhere' in options) {
-    options.allowSimpleWhere = !!options.allowSimpleWhere;
-  } else {
+  if (!('allowSimpleWhere' in options)) {
     options.allowSimpleWhere = true;
   }
 
@@ -4473,16 +4287,16 @@ function filter(resourceName, params, options) {
 
     if (!resource.pendingQueries[queryHash]) {
       // This particular query has never even been started
-      DS.findAll(resourceName, params, options);
+      _this.findAll(resourceName, params, options);
     }
   }
 
-  return definition.defaultFilter.call(DS, resource.collection, resourceName, params, options);
+  return definition.defaultFilter.call(_this, resource.collection, resourceName, params, options);
 }
 
 module.exports = filter;
 
-},{}],76:[function(require,module,exports){
+},{"../../errors":87,"../../utils":89}],76:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.get(' + resourceName + ', ' + id + '): ';
 }

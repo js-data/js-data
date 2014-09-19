@@ -1,18 +1,14 @@
 describe('DS.ejectAll(resourceName[, params])', function () {
-  function errorPrefix(resourceName) {
-    return 'DS.ejectAll(' + resourceName + '[, params]): ';
-  }
-
   it('should throw an error when method pre-conditions are not met', function () {
     assert.throws(function () {
       datastore.ejectAll('does not exist');
-    }, datastore.errors.NonexistentResourceError, errorPrefix('does not exist') + 'does not exist is not a registered resource!');
+    }, datastore.errors.NonexistentResourceError, 'does not exist is not a registered resource!');
 
     DSUtils.forEach(TYPES_EXCEPT_OBJECT, function (key) {
       if (key) {
         assert.throws(function () {
           datastore.ejectAll('post', key);
-        }, datastore.errors.IllegalArgumentError, errorPrefix('post') + 'params: Must be an object!');
+        }, datastore.errors.IllegalArgumentError, '"params" must be an object!');
       }
     });
   });
