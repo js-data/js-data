@@ -1,0 +1,184 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Js-data by js-data</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Js-data</h1>
+        <p>All your data are belong to you...</p>
+
+        <p class="view"><a href="https://github.com/js-data/js-data">View the Project on GitHub <small>js-data/js-data</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/js-data/js-data/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/js-data/js-data/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/js-data/js-data">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p><img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="64" height="64"></p>
+
+<h2>
+<a name="js-data----" class="anchor" href="#js-data----"><span class="octicon octicon-link"></span></a>js-data  <a href="http://waffle.io/js-data/js-data"><img src="https://badge.waffle.io/js-data/js-data.svg?label=backlog&amp;title=Backlog" alt="Stories in Backlog"></a> <a href="http://waffle.io/js-data/js-data"><img src="https://badge.waffle.io/js-data/js-data.svg?label=ready&amp;title=Ready" alt="Stories in Ready"></a> <a href="http://waffle.io/js-data/js-data"><img src="https://badge.waffle.io/js-data/js-data.svg?label=in%20progress&amp;title=In%20Progress" alt="Stories in progress"></a>
+</h2>
+
+<p>Inspired by <a href="https://github.com/emberjs/data">Ember Data</a>, JSData is the model layer you've been craving. It consists of a convenient in-memory cache for managing your data, and several adapters for communicating with various persistence layers.</p>
+
+<p>You can use the <a href="http://www.js-data.io/js-data-http">http adapter</a>, which is perfect for communicating with your RESTful backend. You could also use the <a href="http://www.js-data.io/js-data-localstorage">localStorage adapter</a>. More adapters are coming, and you're free to implement your own.</p>
+
+<p>Unlike Backbone and Ember Models, JSData does not require the use of getters and setters, and doesn't wrap your data with custom classes if you don't want it to. JSData's internal dirty-checking (via <a href="https://github.com/Polymer/observe-js">observe-js</a> or <code>Object.observe</code> in supporting browsers) allows for powerful use cases and an easy avenue for implementing your own <a href="https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html">3-way data-binding</a>.</p>
+
+<p>Supporting relations, computed properties, model lifecycle control and a slew of other features, JSData is the tool for giving your data the respect it deserves.</p>
+
+<p><strong>Latest Release:</strong> <a href="http://www.js-data.io/">0.0.1</a></p>
+
+<p><strong>master:</strong> 0.1.0</p>
+
+<p>JSData is pre-alpha. The API is subject to change, though the current api is well tested.</p>
+
+<p>If you want to use JSData, keep a close eye on the changelog. 1.0.0 will introduce strict semver (until then, minor number is bumped for breaking changes).</p>
+
+<h2>
+<a name="documentation" class="anchor" href="#documentation"><span class="octicon octicon-link"></span></a>Documentation</h2>
+
+<p><a href="http://www.js-data.io">js-data.io</a></p>
+
+<h2>
+<a name="project-status" class="anchor" href="#project-status"><span class="octicon octicon-link"></span></a>Project Status</h2>
+
+<table>
+<thead><tr>
+<th>Branch</th>
+<th>Master</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Bower</td>
+<td><a href="http://badge.fury.io/bo/js-data"><img src="https://badge.fury.io/bo/js-data.png" alt="Bower version"></a></td>
+</tr>
+<tr>
+<td>NPM</td>
+<td><a href="http://badge.fury.io/js/js-data"><img src="https://badge.fury.io/js/js-data.png" alt="NPM version"></a></td>
+</tr>
+<tr>
+<td>Build Status</td>
+<td><a href="https://travis-ci.org/js-data/js-data"><img src="https://travis-ci.org/js-data/js-data.png?branch=master" alt="Build Status"></a></td>
+</tr>
+<tr>
+<td>Code Climate</td>
+<td><a href="https://codeclimate.com/github/js-data/js-data"><img src="https://codeclimate.com/github/js-data/js-data.png" alt="Code Climate"></a></td>
+</tr>
+<tr>
+<td>Dependency Status</td>
+<td><a href="https://gemnasium.com/js-data/js-data"><img src="https://gemnasium.com/js-data/js-data.png" alt="Dependency Status"></a></td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td><a href="https://coveralls.io/r/js-data/js-data?branch=master"><img src="https://coveralls.io/repos/js-data/js-data/badge.png?branch=master" alt="Coverage Status"></a></td>
+</tr>
+</tbody>
+</table><h2>
+<a name="quick-start" class="anchor" href="#quick-start"><span class="octicon octicon-link"></span></a>Quick Start</h2>
+
+<p><code>bower install --save js-data</code> or <code>npm install --save js-data</code>.</p>
+
+<div class="highlight highlight-js"><pre><span class="kd">var</span> <span class="nx">dataStore</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">JSData</span><span class="p">.</span><span class="nx">DS</span><span class="p">();</span>
+
+<span class="kd">var</span> <span class="nx">User</span> <span class="o">=</span> <span class="nx">dataStore</span><span class="p">.</span><span class="nx">defineResource</span><span class="p">(</span><span class="s1">'user'</span><span class="p">);</span>
+
+<span class="nx">User</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">user</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">user</span><span class="p">;</span> <span class="c1">// { id: 1, name: 'John' }</span>
+<span class="p">});</span>
+</pre></div>
+
+<p>All your data are belong to you...</p>
+
+<h2>
+<a name="api" class="anchor" href="#api"><span class="octicon octicon-link"></span></a>API</h2>
+
+<ul>
+<li><a href="http://www.js-data.io">Overview</a></li>
+<li><a href="https://github.com/js-data/js-data/wiki/DS">DS</a></li>
+<li><a href="https://github.com/js-data/js-data/wiki/DSHttpAdapter">DSHttpAdapter</a></li>
+<li><a href="https://github.com/js-data/js-data/wiki/DSLocalStorageAdapter">DSLocalStorageAdapter</a></li>
+<li><a href="https://github.com/js-data/js-data/wiki/DSLocalStorageAdapter">DSFirebaseAdapter</a></li>
+<li><a href="https://github.com/js-data/js-data/wiki/Schemator">Schemator</a></li>
+</ul><h2>
+<a name="changelog" class="anchor" href="#changelog"><span class="octicon octicon-link"></span></a>Changelog</h2>
+
+<p><a href="https://github.com/js-data/js-data/blob/master/CHANGELOG.md">CHANGELOG.md</a></p>
+
+<h2>
+<a name="version-migration" class="anchor" href="#version-migration"><span class="octicon octicon-link"></span></a>Version Migration</h2>
+
+<p><a href="https://github.com/js-data/js-data/blob/master/TRANSITION.md">TRANSITION.md</a></p>
+
+<h2>
+<a name="community" class="anchor" href="#community"><span class="octicon octicon-link"></span></a>Community</h2>
+
+<ul>
+<li>
+<a href="https://groups.google.com/forum/?fromgroups#!forum/js-data-project">Mailing List</a> - Ask your questions!</li>
+<li>
+<a href="https://github.com/js-data/js-data/issues">Issues</a> - Found a bug? Feature request? Submit an issue!</li>
+<li>
+<a href="https://github.com/js-data/js-data">GitHub</a> - View the source code for js-data.</li>
+<li><a href="https://github.com/js-data/js-data/blob/master/CONTRIBUTING.md">Contributing Guide</a></li>
+</ul><h2>
+<a name="contributing" class="anchor" href="#contributing"><span class="octicon octicon-link"></span></a>Contributing</h2>
+
+<p>First, feel free to contact me with questions. <a href="https://groups.google.com/forum/?fromgroups#!forum/js-data-project">Mailing List</a>. <a href="https://github.com/js-data/js-data/issues">Issues</a>.</p>
+
+<ol>
+<li>Contribute to the issue that is the reason you'll be developing in the first place</li>
+<li>Fork js-data</li>
+<li><code>git clone https://github.com/&lt;you&gt;/js-data.git</code></li>
+<li><code>cd js-data; npm install; bower install;</code></li>
+<li>
+<code>grunt go</code> (builds and starts a watch)</li>
+<li>(in another terminal) <code>grunt karma:dev</code> (runs the tests)</li>
+<li>Write your code, including relevant documentation and tests</li>
+<li>Submit a PR and we'll review</li>
+</ol><h2>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
+
+<p>Copyright (C) 2014 Jason Dobry</p>
+
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:</p>
+
+<p>The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.</p>
+
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/js-data">js-data</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
