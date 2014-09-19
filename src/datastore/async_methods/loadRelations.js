@@ -1,64 +1,8 @@
-function errorPrefix(resourceName) {
-  return 'DS.loadRelations(' + resourceName + ', instance(Id), relations[, options]): ';
-}
+var DSUtils = require('../../utils');
+var DSErrors = require('../../errors');
 
-/**
- * @doc method
- * @id DS.async methods:loadRelations
- * @name loadRelations
- * @description
- * Asynchronously load the indicated relations of the given instance.
- *
- * ## Signature:
- * ```js
- * DS.loadRelations(resourceName, instance|id, relations[, options])
- * ```
- *
- * ## Examples:
- *
- * ```js
- * DS.loadRelations('user', 10, ['profile']).then(function (user) {
- *   user.profile; // object
- *   assert.deepEqual(user.profile, DS.filter('profile', { userId: 10 })[0]);
- * });
- * ```
- *
- * ```js
- * var user = DS.get('user', 10);
- *
- * DS.loadRelations('user', user, ['profile']).then(function (user) {
- *   user.profile; // object
- *   assert.deepEqual(user.profile, DS.filter('profile', { userId: 10 })[0]);
- * });
- * ```
- *
- * ```js
- * DS.loadRelations('user', 10, ['profile'], { cacheResponse: false }).then(function (user) {
- *   user.profile; // object
- *   assert.equal(DS.filter('profile', { userId: 10 }).length, 0);
- * });
- * ```
- *
- * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
- * @param {string|number|object} instance The instance or the id of the instance for which relations are to be loaded.
- * @param {string|array=} relations The relation(s) to load.
- * @param {object=} options Optional configuration. Also passed along to the adapter's `find` or `findAll` methods.
- *
- * @returns {Promise} Promise.
- *
- * ## Resolves with:
- *
- * - `{object}` - `item` - The instance with its loaded relations.
- *
- * ## Rejects with:
- *
- * - `{IllegalArgumentError}`
- * - `{NonexistentResourceError}`
- */
 function loadRelations(resourceName, instance, relations, options) {
   var DS = this;
-  var DSUtils = DS.utils;
-  var DSErrors = DS.errors;
   var definition = DS.definitions[resourceName];
   var fields = [];
 
@@ -74,13 +18,13 @@ function loadRelations(resourceName, instance, relations, options) {
     }
 
     if (!definition) {
-      reject(new DS.errors.NER(errorPrefix(resourceName) + resourceName));
+      reject(new DS.errors.NER(resourceName));
     } else if (!DSUtils.isObject(instance)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName) + 'instance(Id): Must be a string, number or object!'));
+      reject(new DSErrors.IA('"instance(id)" must be a string, number or object!'));
     } else if (!DSUtils.isArray(relations)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName) + 'relations: Must be a string or an array!'));
+      reject(new DSErrors.IA('"relations" must be a string or an array!'));
     } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName) + 'options: Must be an object!'));
+      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
       if (!('findBelongsTo' in options)) {
         options.findBelongsTo = true;

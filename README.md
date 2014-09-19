@@ -4,23 +4,21 @@
 
 Inspired by [Ember Data](https://github.com/emberjs/data), JSData is the model layer you've been craving. It consists of a convenient in-memory cache for managing your data, and several adapters for communicating with various persistence layers.
 
-By default JSData uses the http adapter, which is perfect for communicating with your RESTful backend. It also includes a localStorage adapter. More adapters are coming, and you're free to implement your own.
+You can use the [http adapter](http://www.js-data.io/js-data-http), which is perfect for communicating with your RESTful backend. You could also use the [localStorage adapter](http://www.js-data.io/js-data-localstorage). More adapters are coming, and you're free to implement your own.
 
 Unlike Backbone and Ember Models, JSData does not require the use of getters and setters, and doesn't wrap your data with custom classes if you don't want it to. JSData's internal dirty-checking (via [observe-js](https://github.com/Polymer/observe-js) or `Object.observe` in supporting browsers) allows for powerful use cases and an easy avenue for implementing your own [3-way data-binding](https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html).
 
 Supporting relations, computed properties, model lifecycle control and a slew of other features, JSData is the tool for giving your data the respect it deserves.
 
-All your data are belong to you...
-
-__Latest Release:__ [0.0.1](http://js-data.io/)
-__master:__ [0.0.2](http://js-data-next.io/)
+__Latest Release:__ [0.0.1](http://www.js-data.io/)
+__master:__ 0.1.0
 
 JSData is pre-alpha. The API is subject to change, though the current api is well tested.
 
 If you want to use JSData, keep a close eye on the changelog. 1.0.0 will introduce strict semver (until then, minor number is bumped for breaking changes).
 
 ## Documentation
-[http://js-data.io](http://js-data.io)
+[js-data.io](http://www.js-data.io)
 
 ## Project Status
 
@@ -46,11 +44,15 @@ User.find(1).then(function (user) {
 });
 ```
 
+All your data are belong to you...
+
 ## API
-- [Overview](http://js-data.io/documentation/api/js-data/js-data)
-- [DS](http://js-data.io/documentation/api/js-data/DS)
-- [DSHttpAdapter](http://js-data.io/documentation/api/js-data/DSHttpAdapter)
-- [DSLocalStorageAdapter](http://js-data.io/documentation/api/js-data/DSLocalStorageAdapter)
+- [Overview](http://www.js-data.io)
+- [DS](/js-data/js-data/wiki/DS)
+- [DSHttpAdapter](/js-data/js-data/wiki/DSHttpAdapter)
+- [DSLocalStorageAdapter](/js-data/js-data/wiki/DSLocalStorageAdapter)
+- [DSFirebaseAdapter](/js-data/js-data/wiki/DSLocalStorageAdapter)
+- [Schemator](/js-data/js-data/wiki/Schemator)
 
 ## Changelog
 [CHANGELOG.md](https://github.com/js-data/js-data/blob/master/CHANGELOG.md)
@@ -59,14 +61,14 @@ User.find(1).then(function (user) {
 [TRANSITION.md](https://github.com/js-data/js-data/blob/master/TRANSITION.md)
 
 ## Community
-- [Mailing List](https://groups.google.com/forum/?fromgroups#!forum/js-data) - Ask your questions!
+- [Mailing List](https://groups.google.com/forum/?fromgroups#!forum/js-data-project) - Ask your questions!
 - [Issues](https://github.com/js-data/js-data/issues) - Found a bug? Feature request? Submit an issue!
 - [GitHub](https://github.com/js-data/js-data) - View the source code for js-data.
 - [Contributing Guide](https://github.com/js-data/js-data/blob/master/CONTRIBUTING.md)
 
 ## Contributing
 
-First, feel free to contact me with questions. [Mailing List](https://groups.google.com/forum/?fromgroups#!forum/js-data). [Issues](https://github.com/js-data/js-data/issues).
+First, feel free to contact me with questions. [Mailing List](https://groups.google.com/forum/?fromgroups#!forum/js-data-project). [Issues](https://github.com/js-data/js-data/issues).
 
 1. Contribute to the issue that is the reason you'll be developing in the first place
 1. Fork js-data

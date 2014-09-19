@@ -1,7 +1,5 @@
 var DSUtils = require('../utils');
 var DSErrors = require('../errors');
-var DSHttpAdapter = require('../adapters/http');
-var DSLocalStorageAdapter = require('../adapters/localStorage');
 var syncMethods = require('./sync_methods');
 var asyncMethods = require('./async_methods');
 
@@ -654,11 +652,13 @@ function DS(options) {
    * Registered adapters available to the data store. Object consists of key-values pairs where the key is
    * the name of the adapter and the value is the adapter itself.
    */
-  this.adapters = {
-    DSHttpAdapter: new DSHttpAdapter(),
-    DSLocalStorageAdapter: new DSLocalStorageAdapter()
-  };
+  this.adapters = {};
 }
+
+DS.prototype.getAdapter = function (def, options) {
+  options = options || {};
+  return this.adapters[options.adapter] || this.adapters[def.defaultAdapter];
+};
 
 /**
  * @doc property

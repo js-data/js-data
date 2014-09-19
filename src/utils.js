@@ -92,7 +92,6 @@ module.exports = {
     }
   },
   Promise: require('es6-promise').Promise,
-  http: require('axios'),
   deepFreeze: function deepFreeze(o) {
     if (typeof Object.freeze === 'function') {
       var prop, propKey;

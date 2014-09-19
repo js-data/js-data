@@ -1,14 +1,10 @@
 describe('DS.find(resourceName, id[, options]): ', function () {
-  function errorPrefix(resourceName, id) {
-    return 'DS.find(' + resourceName + ', ' + id + '[, options]): ';
-  }
-
   it('should throw an error when method pre-conditions are not met', function () {
     datastore.find('does not exist', 5).then(function () {
       fail('should have rejected');
     }).catch(function (err) {
       assert.isTrue(err instanceof datastore.errors.NonexistentResourceError);
-      assert.equal(err.message, errorPrefix('does not exist', 5) + 'does not exist is not a registered resource!');
+      assert.equal(err.message, 'does not exist is not a registered resource!');
     });
 
     DSUtils.forEach(TYPES_EXCEPT_STRING_OR_NUMBER, function (key) {
@@ -16,7 +12,7 @@ describe('DS.find(resourceName, id[, options]): ', function () {
         fail('should have rejected');
       }).catch(function (err) {
         assert.isTrue(err instanceof datastore.errors.IllegalArgumentError);
-        assert.equal(err.message, errorPrefix('post', key) + 'id: Must be a string or a number!');
+        assert.equal(err.message, '"id" must be a string or a number!');
       });
     });
 
@@ -26,7 +22,7 @@ describe('DS.find(resourceName, id[, options]): ', function () {
           fail('should have rejected');
         }).catch(function (err) {
           assert.isTrue(err instanceof datastore.errors.IllegalArgumentError);
-          assert.equal(err.message, errorPrefix('post', 5) + 'options: Must be an object!');
+          assert.equal(err.message, '"options" must be an object!');
         });
       }
     });
@@ -122,6 +118,9 @@ describe('DS.find(resourceName, id[, options]): ', function () {
 
     datastore.find('post', 5).then(function () {
       done('Should not have succeeded!');
+    }, function (err) {
+      assert.equal(err.data, 'Not Found');
+      done();
     }).catch(function (err) {
       assert.equal(err, 'Not Found');
       done();

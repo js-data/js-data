@@ -1,8 +1,8 @@
 {
   "name": "js-data",
   "description": "Data store.",
-  "version": "0.0.2",
-  "homepage": "http://js-data.io",
+  "version": "0.1.0",
+  "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
     "url": "https://github.com/js-data/js-data.git"
@@ -18,35 +18,52 @@
       "url": "https://github.com/js-data/js-data/blob/master/LICENSE"
     }
   ],
+  "keywords": [
+    "orm",
+    "odm",
+    "model",
+    "schema",
+    "rest",
+    "angular",
+    "ember",
+    "backbone",
+    "react",
+    "firebase",
+    "datastore",
+    "store",
+    "database",
+    "adapter",
+    "http",
+    "localstorage"
+  ],
   "devDependencies": {
     "grunt": "^0.4.5",
-    "grunt-browserify": "^3.0.0",
+    "grunt-browserify": "^3.0.1",
     "grunt-contrib-clean": "^0.6.0",
     "grunt-contrib-concat": "^0.5.0",
-    "grunt-contrib-copy": "^0.5.0",
+    "grunt-contrib-copy": "^0.6.0",
     "grunt-contrib-jshint": "^0.10.0",
-    "grunt-contrib-uglify": "^0.5.1",
+    "grunt-contrib-uglify": "^0.6.0",
     "grunt-contrib-watch": "^0.6.1",
-    "grunt-karma": "^0.8.3",
-    "grunt-karma-coveralls": "^2.5.1",
+    "grunt-karma": "^0.9.0",
+    "grunt-karma-coveralls": "^2.5.2",
+    "jit-grunt": "^0.8.0",
     "karma": "^0.12.23",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^0.1.4",
     "karma-coverage": "^0.2.6",
-    "karma-script-launcher": "^0.1.0",
     "karma-firefox-launcher": "^0.1.3",
-    "karma-phantomjs-launcher": "^0.1.4",
     "karma-mocha": "^0.1.9",
+    "karma-phantomjs-launcher": "^0.1.4",
+    "karma-script-launcher": "^0.1.0",
     "karma-sinon": "^1.0.3",
     "karma-spec-reporter": "^0.0.13",
-    "time-grunt": "^1.0.0",
-    "jit-grunt": "^0.8.0"
+    "time-grunt": "^1.0.0"
   },
   "scripts": {
     "test": "grunt test"
   },
   "dependencies": {
-    "axios": "^0.2.2",
     "es6-promise": "^1.0.0",
     "mout": "^0.10.0"
   }

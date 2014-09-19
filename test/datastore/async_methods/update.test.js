@@ -1,14 +1,10 @@
 describe('DS.update(resourceName, id, attrs[, options])', function () {
-  function errorPrefix(resourceName, id) {
-    return 'DS.update(' + resourceName + ', ' + id + ', attrs[, options]): ';
-  }
-
   it('should throw an error when method pre-conditions are not met', function () {
     datastore.update('does not exist', 5).then(function () {
       fail('should have rejected');
     }, function (err) {
       assert.isTrue(err instanceof datastore.errors.NonexistentResourceError);
-      assert.equal(err.message, errorPrefix('does not exist', 5) + 'does not exist is not a registered resource!');
+      assert.equal(err.message, 'does not exist is not a registered resource!');
     });
 
     DSUtils.forEach(TYPES_EXCEPT_STRING_OR_NUMBER, function (key) {
@@ -16,19 +12,8 @@ describe('DS.update(resourceName, id, attrs[, options])', function () {
         fail('should have rejected');
       }, function (err) {
         assert.isTrue(err instanceof datastore.errors.IllegalArgumentError);
-        assert.equal(err.message, errorPrefix('post', key) + 'id: Must be a string or a number!');
+        assert.equal(err.message, '"id" must be a string or a number!');
       });
-    });
-
-    DSUtils.forEach(TYPES_EXCEPT_OBJECT, function (key) {
-      if (key) {
-        datastore.update('post', 5, key).then(function () {
-          fail('should have rejected');
-        }, function (err) {
-          assert.isTrue(err instanceof datastore.errors.IllegalArgumentError);
-          assert.equal(err.message, errorPrefix('post', 5) + 'attrs: Must be an object!');
-        });
-      }
     });
 
     DSUtils.forEach(TYPES_EXCEPT_OBJECT, function (key) {
@@ -37,7 +22,7 @@ describe('DS.update(resourceName, id, attrs[, options])', function () {
           fail('should have rejected');
         }, function (err) {
           assert.isTrue(err instanceof datastore.errors.IllegalArgumentError);
-          assert.equal(err.message, errorPrefix('post', 5) + 'options: Must be an object!');
+          assert.equal(err.message, '"options" must be an object!');
         });
       }
     });

@@ -1,14 +1,10 @@
 describe('DS.loadRelations(resourceName, instance(Id), relations[, options]): ', function () {
-  function errorPrefix(resourceName) {
-    return 'DS.loadRelations(' + resourceName + ', instance(Id), relations[, options]): ';
-  }
-
   it('should throw an error when method pre-conditions are not met', function () {
     datastore.loadRelations('does not exist', user10, []).then(function () {
       fail('should have rejected');
     }, function (err) {
       assert.isTrue(err instanceof datastore.errors.NonexistentResourceError);
-      assert.equal(err.message, errorPrefix('does not exist') + 'does not exist is not a registered resource!');
+      assert.equal(err.message, 'does not exist is not a registered resource!');
     });
 
     DSUtils.forEach(TYPES_EXCEPT_STRING_OR_NUMBER_OBJECT, function (key) {
@@ -19,7 +15,7 @@ describe('DS.loadRelations(resourceName, instance(Id), relations[, options]): ',
         fail('should have rejected');
       }, function (err) {
         assert.isTrue(err instanceof datastore.errors.IllegalArgumentError);
-        assert.equal(err.message, errorPrefix('user') + 'instance(Id): Must be a string, number or object!');
+        assert.equal(err.message, '"instance(Id)" must be a string, number or object!');
       });
     });
 
@@ -29,7 +25,7 @@ describe('DS.loadRelations(resourceName, instance(Id), relations[, options]): ',
           fail('should have rejected');
         }, function (err) {
           assert.isTrue(err instanceof datastore.errors.IllegalArgumentError);
-          assert.equal(err.message, errorPrefix('user') + 'relations: Must be a string or an array!');
+          assert.equal(err.message, '"relations" must be a string or an array!');
         });
       }
     });
@@ -40,7 +36,7 @@ describe('DS.loadRelations(resourceName, instance(Id), relations[, options]): ',
           fail('should have rejected');
         }, function (err) {
           assert.isTrue(err instanceof datastore.errors.IllegalArgumentError);
-          assert.equal(err.message, errorPrefix('user') + 'options: Must be an object!');
+          assert.equal(err.message, '"options" must be an object!');
         });
       }
     });
@@ -161,8 +157,11 @@ describe('DS.loadRelations(resourceName, instance(Id), relations[, options]): ',
 
     datastore.loadRelations('user', 10, ['comment', 'profile', 'organization']).then(function () {
       done('Should not have succeeded!');
+    }, function (err) {
+      assert.equal(err.data, 'Not Found');
+      done();
     }).catch(function (err) {
-      assert.equal(err, 'Not Found');
+      assert.equal(err.data, 'Not Found');
       done();
     });
 

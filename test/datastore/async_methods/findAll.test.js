@@ -1,14 +1,10 @@
 describe('DS.findAll(resourceName, params[, options]): ', function () {
-  function errorPrefix(resourceName) {
-    return 'DS.findAll(' + resourceName + ', params[, options]): ';
-  }
-
   it('should throw an error when method pre-conditions are not met', function () {
     datastore.findAll('does not exist', {}).then(function () {
       fail('should have rejected');
     }, function (err) {
       assert.isTrue(err instanceof datastore.errors.NonexistentResourceError);
-      assert.equal(err.message, errorPrefix('does not exist') + 'does not exist is not a registered resource!');
+      assert.equal(err.message, 'does not exist is not a registered resource!');
     });
 
     DSUtils.forEach(TYPES_EXCEPT_OBJECT, function (key) {
@@ -17,7 +13,7 @@ describe('DS.findAll(resourceName, params[, options]): ', function () {
           fail('should have rejected');
         }, function (err) {
           assert.isTrue(err instanceof datastore.errors.IllegalArgumentError);
-          assert.equal(err.message, errorPrefix('post') + 'params: Must be an object!');
+          assert.equal(err.message, '"params" must be an object!');
         });
       }
     });
@@ -28,7 +24,7 @@ describe('DS.findAll(resourceName, params[, options]): ', function () {
           fail('should have rejected');
         }, function (err) {
           assert.isTrue(err instanceof datastore.errors.IllegalArgumentError);
-          assert.equal(err.message, errorPrefix('post') + 'options: Must be an object!');
+          assert.equal(err.message, '"options" must be an object!');
         });
       }
     });
@@ -146,6 +142,9 @@ describe('DS.findAll(resourceName, params[, options]): ', function () {
 
     datastore.findAll('post', {}).then(function () {
       done('Should not have succeeded!');
+    }, function (err) {
+      assert.equal(err.data, 'Not Found');
+      done();
     }).catch(function (err) {
       assert.equal(err, 'Not Found');
       done();

@@ -21,6 +21,8 @@ module.exports = function (config) {
 		// list of files / patterns to load in the browser
 		files: [
 			'dist/js-data.js',
+			'bower_components/js-data-http/dist/js-data-http.js',
+			'bower_components/js-data-localstorage/dist/js-data-localstorage.js',
 			'karma.start.js',
 			'test/**/*.test.js'
 		],

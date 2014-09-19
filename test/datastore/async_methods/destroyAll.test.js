@@ -1,34 +1,10 @@
 describe('DS.destroyAll(resourceName, params[, options]): ', function () {
-  function errorPrefix(resourceName) {
-    return 'DS.destroyAll(' + resourceName + ', params[, options]): ';
-  }
-
   it('should throw an error when method pre-conditions are not met', function () {
     datastore.destroyAll('does not exist', {}).then(function () {
       fail('should have rejected');
     }, function (err) {
       assert.isTrue(err instanceof datastore.errors.NonexistentResourceError);
-      assert.equal(err.message, errorPrefix('does not exist') + 'does not exist is not a registered resource!');
-    });
-
-    DSUtils.forEach(TYPES_EXCEPT_OBJECT, function (key) {
-      datastore.destroyAll('post', key).then(function () {
-        fail('should have rejected');
-      }, function (err) {
-        assert.isTrue(err instanceof datastore.errors.IllegalArgumentError);
-        assert.equal(err.message, errorPrefix('post') + 'params: Must be an object!');
-      });
-    });
-
-    DSUtils.forEach(TYPES_EXCEPT_OBJECT, function (key) {
-      if (key) {
-        datastore.destroyAll('post', {}, key).then(function () {
-          fail('should have rejected');
-        }, function (err) {
-          assert.isTrue(err instanceof datastore.errors.IllegalArgumentError);
-          assert.equal(err.message, errorPrefix('post') + 'options: Must be an object!');
-        });
-      }
+      assert.equal(err.message, 'does not exist is not a registered resource!');
     });
   });
   it('should query the server for a collection', function (done) {
@@ -55,12 +31,15 @@ describe('DS.destroyAll(resourceName, params[, options]): ', function () {
       datastore.destroyAll('post', {}).then(function () {
         assert.deepEqual(datastore.filter('post', {}), [], 'The posts should not be in the store yet');
         done();
+      }, function (err) {
+        console.log(err);
+        done(err);
       }).catch(function (err) {
         console.error(err.stack);
         done('Should not have rejected!');
       });
       setTimeout(function () {
-        assert.equal(2, _this.requests.length);
+        assert.equal(_this.requests.length, 2);
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/posts');
         assert.equal(_this.requests[1].method, 'delete');
         _this.requests[1].respond(200);
@@ -71,10 +50,14 @@ describe('DS.destroyAll(resourceName, params[, options]): ', function () {
     });
 
     setTimeout(function () {
-      assert.equal(1, _this.requests.length);
-      assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts?where=%7B%22age%22:33%7D');
-      assert.equal(_this.requests[0].method, 'delete');
-      _this.requests[0].respond(200);
+      try {
+        assert.equal(_this.requests.length, 1);
+        assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts?where=%7B%22age%22:33%7D');
+        assert.equal(_this.requests[0].method, 'delete');
+        _this.requests[0].respond(200);
+      } catch (err) {
+        done(err);
+      }
     }, 30);
   });
   it('should handle nested resources', function (done) {

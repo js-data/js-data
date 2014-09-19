@@ -1,23 +1,10 @@
 describe('DS.create(resourceName, attrs[, options])', function () {
-  function errorPrefix(resourceName) {
-    return 'DS.create(' + resourceName + ', attrs[, options]): ';
-  }
-
   it('should throw an error when method pre-conditions are not met', function () {
     datastore.create('fruit loops', 5).then(function () {
       fail('should have rejected');
     }, function (err) {
       assert.isTrue(err instanceof datastore.errors.NonexistentResourceError);
-      assert.equal(err.message, errorPrefix('fruit loops') + 'fruit loops is not a registered resource!');
-    });
-
-    DSUtils.forEach(TYPES_EXCEPT_OBJECT, function (key) {
-      datastore.create('post', key).then(function () {
-        fail('should have rejected');
-      }, function (err) {
-        assert.isTrue(err instanceof datastore.errors.IllegalArgumentError);
-        assert.equal(err.message, errorPrefix('post') + 'attrs: Must be an object!');
-      });
+      assert.equal(err.message, 'fruit loops is not a registered resource!');
     });
   });
   it('should create an item and save it to the server', function (done) {

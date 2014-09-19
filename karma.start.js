@@ -109,10 +109,10 @@ beforeEach(function () {
     serialize: lifecycle.serialize,
     deserialize: lifecycle.deserialize
   });
-  dsHttpAdapter = new JSData.DSHttpAdapter({
+  dsHttpAdapter = new DSHttpAdapter({
     queryTransform: lifecycle.queryTransform
   });
-  dsLocalStorageAdapter = new JSData.DSLocalStorageAdapter();
+  dsLocalStorageAdapter = new DSLocalStorageAdapter();
   DSUtils = JSData.DSUtils;
   datastore.adapters.DSHttpAdapter = dsHttpAdapter;
   datastore.adapters.DSLocalStorageAdapter = dsLocalStorageAdapter;
@@ -318,16 +318,24 @@ beforeEach(function () {
     user: user22
   };
 
-  this.xhr = sinon.useFakeXMLHttpRequest();
-  // Create an array to store requests
-  var requests = this.requests = [];
-  // Keep references to created requests
-  this.xhr.onCreate = function (xhr) {
-    requests.push(xhr);
-  };
+  try {
+    this.xhr = sinon.useFakeXMLHttpRequest();
+    // Create an array to store requests
+    var requests = this.requests = [];
+    // Keep references to created requests
+    this.xhr.onCreate = function (xhr) {
+      requests.push(xhr);
+    };
+  } catch (err) {
+    console.log(err);
+  }
 });
 
 afterEach(function () {
   // Restore the global timer functions to their native implementations
-  this.xhr.restore();
+  try {
+    this.xhr.restore();
+  } catch (err) {
+    console.log(err);
+  }
 });

@@ -1,8 +1,8 @@
 {
   "name": "js-data",
   "description": "Data store.",
-  "version": "0.0.2",
-  "homepage": "http://js-data.io/",
+  "version": "0.1.0",
+  "homepage": "http://www.js-data.io/",
   "repository": {
     "type": "git",
     "url": "git://github.com/js-data/js-data.git"
@@ -30,6 +30,8 @@
     "karma.start.js"
   ],
   "devDependencies": {
-    "observe-js": "0.3.4"
+    "observe-js": "0.3.4",
+    "js-data-http": "~0.1.x",
+    "js-data-localstorage": "~0.1.x"
   }
 }

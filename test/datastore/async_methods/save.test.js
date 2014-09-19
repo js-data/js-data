@@ -1,14 +1,10 @@
 describe('DS.save(resourceName, id[, options])', function () {
-  function errorPrefix(resourceName, id) {
-    return 'DS.save(' + resourceName + ', ' + id + '[, options]): ';
-  }
-
   it('should throw an error when method pre-conditions are not met', function () {
     datastore.save('does not exist', 5).then(function () {
       fail('should have rejected');
     }, function (err) {
       assert.isTrue(err instanceof datastore.errors.NonexistentResourceError);
-      assert.equal(err.message, errorPrefix('does not exist', 5) + 'does not exist is not a registered resource!');
+      assert.equal(err.message, 'does not exist is not a registered resource!');
     });
 
     DSUtils.forEach(TYPES_EXCEPT_STRING_OR_NUMBER, function (key) {
@@ -16,7 +12,7 @@ describe('DS.save(resourceName, id[, options])', function () {
         fail('should have rejected');
       }, function (err) {
         assert.isTrue(err instanceof datastore.errors.IllegalArgumentError);
-        assert.equal(err.message, errorPrefix('post', key) + 'id: Must be a string or a number!');
+        assert.equal(err.message, '"id" must be a string or a number!');
       });
     });
 
@@ -26,7 +22,7 @@ describe('DS.save(resourceName, id[, options])', function () {
           fail('should have rejected');
         }, function (err) {
           assert.isTrue(err instanceof datastore.errors.IllegalArgumentError);
-          assert.equal(err.message, errorPrefix('post', 5) + 'options: Must be an object!');
+          assert.equal(err.message, '"options" must be an object!');
         });
       }
     });
@@ -41,34 +37,45 @@ describe('DS.save(resourceName, id[, options])', function () {
     datastore.get('post', 5).author = 'Jake';
 
     datastore.save('post', 5).then(function (post) {
-      assert.deepEqual(DSUtils.toJson(post), DSUtils.toJson(datastore.get('post', 5)), 'post 5 should have been saved');
-      assert.equal(post.author, 'Jake');
-      assert.equal(lifecycle.beforeUpdate.callCount, 1, 'beforeUpdate should have been called');
-      assert.equal(lifecycle.afterUpdate.callCount, 1, 'afterUpdate should have been called');
-      assert.deepEqual(datastore.get('post', 5), {
-        author: 'Jake',
-        id: 5,
-        age: 30
-      });
-      datastore.digest();
-      assert.notEqual(datastore.lastModified('post', 5), initialModified);
-      assert.notEqual(datastore.lastSaved('post', 5), initialSaved);
+      try {
+        assert.deepEqual(DSUtils.toJson(post), DSUtils.toJson(datastore.get('post', 5)), 'post 5 should have been saved');
+        assert.equal(post.author, 'Jake');
+        assert.equal(lifecycle.beforeUpdate.callCount, 1, 'beforeUpdate should have been called');
+        assert.equal(lifecycle.afterUpdate.callCount, 1, 'afterUpdate should have been called');
+        assert.deepEqual(datastore.get('post', 5), {
+          author: 'Jake',
+          id: 5,
+          age: 30
+        });
+        datastore.digest();
+        assert.notEqual(datastore.lastModified('post', 5), initialModified);
+        assert.notEqual(datastore.lastSaved('post', 5), initialSaved);
 
-      datastore.save('post', 6).then(function () {
-        done('should not have succeeded');
-      }).catch(function (err) {
-        assert.isTrue(err instanceof datastore.errors.RuntimeError);
-        assert.equal(err.message, errorPrefix('post', 6) + 'id: "6" not found!');
-        done();
-      });
+        datastore.save('post', 6).then(function () {
+          done('should not have succeeded');
+        }, function (err) {
+          assert.isTrue(err instanceof datastore.errors.RuntimeError);
+          assert.equal(err.message, 'id "6" not found in cache!');
+          done();
+        }).catch(function (err) {
+          assert.isTrue(err instanceof datastore.errors.RuntimeError);
+          assert.equal(err.message, 'id "6" not found in cache!');
+          done();
+        });
 
-      assert.equal(lifecycle.beforeInject.callCount, 2, 'beforeInject should have been called');
-      assert.equal(lifecycle.afterInject.callCount, 2, 'afterInject should have been called');
-      assert.equal(lifecycle.serialize.callCount, 1, 'serialize should have been called');
-      assert.equal(lifecycle.deserialize.callCount, 1, 'deserialize should have been called');
+        assert.equal(lifecycle.beforeInject.callCount, 2, 'beforeInject should have been called');
+        assert.equal(lifecycle.afterInject.callCount, 2, 'afterInject should have been called');
+        assert.equal(lifecycle.serialize.callCount, 1, 'serialize should have been called');
+        assert.equal(lifecycle.deserialize.callCount, 1, 'deserialize should have been called');
+      } catch (err) {
+        done(err);
+      }
+    }, function (err) {
+      console.log(err);
+      done(err);
     }).catch(function (err) {
-      console.error(err.stack);
-      done('should not have rejected');
+      console.error(stack);
+      done(err);
     });
 
     setTimeout(function () {
@@ -162,7 +169,7 @@ describe('DS.save(resourceName, id[, options])', function () {
         done('should not have succeeded');
       }).catch(function (err) {
         assert.isTrue(err instanceof datastore.errors.RuntimeError);
-        assert.equal(err.message, errorPrefix('post', 6) + 'id: "6" not found!');
+        assert.equal(err.message, 'id "6" not found in cache!');
         done();
       });
 

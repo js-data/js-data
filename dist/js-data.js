@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file js-data.js
-* @version 0.0.2 - Homepage <http://js-data.io/>
+* @version 0.1.0 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -594,621 +594,12 @@
 })((exports.Number = { isNaN: window.isNaN }) ? exports : exports);
 
 },{}],2:[function(require,module,exports){
-module.exports = require('./lib/axios');
-},{"./lib/axios":4}],3:[function(require,module,exports){
-var buildUrl = require('./../buildUrl');
-var cookies = require('./../cookies');
-var defaults = require('./../defaults');
-var parseHeaders = require('./../parseHeaders');
-var transformData = require('./../transformData');
-var urlIsSameOrigin = require('./../urlIsSameOrigin');
-var utils = require('./../utils');
-
-module.exports = function xhrAdapter(resolve, reject, config) {
-  // Transform request data
-  var data = transformData(
-    config.data,
-    config.headers,
-    config.transformRequest
-  );
-
-  // Merge headers
-  var headers = utils.merge(
-    defaults.headers.common,
-    defaults.headers[config.method] || {},
-    config.headers || {}
-  );
-
-  // Create the request
-  var request = new(XMLHttpRequest || ActiveXObject)('Microsoft.XMLHTTP');
-  request.open(config.method, buildUrl(config.url, config.params), true);
-
-  // Listen for ready state
-  request.onreadystatechange = function () {
-    if (request && request.readyState === 4) {
-      // Prepare the response
-      var headers = parseHeaders(request.getAllResponseHeaders());
-      var response = {
-        data: transformData(
-          request.responseText,
-          headers,
-          config.transformResponse
-        ),
-        status: request.status,
-        headers: headers,
-        config: config
-      };
-
-      // Resolve or reject the Promise based on the status
-      (request.status >= 200 && request.status < 300
-        ? resolve
-        : reject)(
-          response.data,
-          response.status,
-          response.headers,
-          response.config
-        );
-
-      // Clean up request
-      request = null;
-    }
-  };
-
-  // Add xsrf header
-  var xsrfValue = urlIsSameOrigin(config.url)
-    ? cookies.read(config.xsrfCookieName || defaults.xsrfCookieName)
-    : undefined;
-  if (xsrfValue) {
-    headers[config.xsrfHeaderName || defaults.xsrfHeaderName] = xsrfValue;
-  }
-
-  // Add headers to the request
-  utils.forEach(headers, function (val, key) {
-    // Remove Content-Type if data is undefined
-    if (!data && key.toLowerCase() === 'content-type') {
-      delete headers[key];
-    }
-    // Otherwise add header to the request
-    else {
-      request.setRequestHeader(key, val);
-    }
-  });
-
-  // Add withCredentials to request if needed
-  if (config.withCredentials) {
-    request.withCredentials = true;
-  }
-
-  // Add responseType to request if needed
-  if (config.responseType) {
-    try {
-      request.responseType = config.responseType;
-    } catch (e) {
-      if (request.responseType !== 'json') {
-        throw e;
-      }
-    }
-  }
-
-  // Send the request
-  request.send(data);
-};
-},{"./../buildUrl":5,"./../cookies":6,"./../defaults":7,"./../parseHeaders":8,"./../transformData":10,"./../urlIsSameOrigin":11,"./../utils":12}],4:[function(require,module,exports){
-(function (process){
-var Promise = require('es6-promise').Promise;
-var defaults = require('./defaults');
-var utils = require('./utils');
-var spread = require('./spread');
-
-var axios = module.exports = function axios(config) {
-  config = utils.merge({
-    method: 'get',
-    transformRequest: defaults.transformRequest,
-    transformResponse: defaults.transformResponse
-  }, config);
-
-  // Don't allow overriding defaults.withCredentials
-  config.withCredentials = config.withCredentials || defaults.withCredentials;
-
-  var promise = new Promise(function (resolve, reject) {
-    try {
-      // For browsers use XHR adapter
-      if (typeof window !== 'undefined') {
-        require('./adapters/xhr')(resolve, reject, config);
-      }
-      // For node use HTTP adapter
-      else if (typeof process !== 'undefined') {
-        require('./adapters/http')(resolve, reject, config);
-      }
-    } catch (e) {
-      reject(e);
-    }
-  });
-
-  // Provide alias for success
-  promise.success = function success(fn) {
-    promise.then(function(response) {
-      fn(response);
-    });
-    return promise;
-  };
-
-  // Provide alias for error
-  promise.error = function error(fn) {
-    promise.then(null, function(response) {
-      fn(response);
-    });
-    return promise;
-  };
-
-  return promise;
-};
-
-// Expose defaults
-axios.defaults = defaults;
-
-// Expose all/spread
-axios.all = Promise.all;
-axios.spread = spread;
-
-// Provide aliases for supported request methods
-createShortMethods('delete', 'get', 'head');
-createShortMethodsWithData('post', 'put', 'patch');
-
-function createShortMethods() {
-  utils.forEach(arguments, function (method) {
-    axios[method] = function (url, config) {
-      return axios(utils.merge(config || {}, {
-        method: method,
-        url: url
-      }));
-    };
-  });
-}
-
-function createShortMethodsWithData() {
-  utils.forEach(arguments, function (method) {
-    axios[method] = function (url, data, config) {
-      return axios(utils.merge(config || {}, {
-        method: method,
-        url: url,
-        data: data
-      }));
-    };
-  });
-}
-}).call(this,require('_process'))
-},{"./adapters/http":3,"./adapters/xhr":3,"./defaults":7,"./spread":9,"./utils":12,"_process":33,"es6-promise":13}],5:[function(require,module,exports){
-'use strict';
-
-var utils = require('./utils');
-
-function encode(val) {
-  return encodeURIComponent(val).
-    replace(/%40/gi, '@').
-    replace(/%3A/gi, ':').
-    replace(/%24/g, '$').
-    replace(/%2C/gi, ',').
-    replace(/%20/g, '+');
-}
-
-module.exports = function buildUrl(url, params) {
-  if (!params) {
-    return url;
-  }
-
-  var parts = [];
-
-  utils.forEach(params, function (val, key) {
-    if (val === null || typeof val === 'undefined') {
-      return;
-    }
-    if (!utils.isArray(val)) {
-      val = [val];
-    }
-
-    utils.forEach(val, function (v) {
-      if (utils.isDate(v)) {
-        v = v.toISOString();
-      }
-      else if (utils.isObject(v)) {
-        v = JSON.stringify(v);
-      }
-      parts.push(encode(key) + '=' + encode(v));
-    });
-  });
-
-  if (parts.length > 0) {
-    url += (url.indexOf('?') === -1 ? '?' : '&') + parts.join('&');
-  }
-
-  return url;
-};
-},{"./utils":12}],6:[function(require,module,exports){
-'use strict';
-
-var utils = require('./utils');
-
-module.exports = {
-  write: function write(name, value, expires, path, domain, secure) {
-    var cookie = [];
-    cookie.push(name + '=' + encodeURIComponent(value));
-
-    if (utils.isNumber(expires)) {
-      cookie.push('expires=' + new Date(expires).toGMTString());
-    }
-
-    if (utils.isString(path)) {
-      cookie.push('path=' + path);
-    }
-
-    if (utils.isString(domain)) {
-      cookie.push('domain=' + domain);
-    }
-
-    if (secure === true) {
-      cookie.push('secure');
-    }
-
-    document.cookie = cookie.join('; ');
-  },
-
-  read: function read(name) {
-    var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
-    return (match ? decodeURIComponent(match[3]) : null);
-  },
-
-  remove: function remove(name) {
-    this.write(name, '', Date.now() - 86400000);
-  }
-};
-},{"./utils":12}],7:[function(require,module,exports){
-'use strict';
-
-var utils = require('./utils');
-
-var JSON_START = /^\s*(\[|\{[^\{])/;
-var JSON_END = /[\}\]]\s*$/;
-var PROTECTION_PREFIX = /^\)\]\}',?\n/;
-var CONTENT_TYPE_APPLICATION_JSON = {
-  'Content-Type': 'application/json;charset=utf-8'
-};
-
-module.exports = {
-  transformRequest: [function (data) {
-    return utils.isObject(data) &&
-          !utils.isFile(data) &&
-          !utils.isBlob(data) ?
-            JSON.stringify(data) : null;
-  }],
-
-  transformResponse: [function (data) {
-    if (typeof data === 'string') {
-      data = data.replace(PROTECTION_PREFIX, '');
-      if (JSON_START.test(data) && JSON_END.test(data)) {
-        data = JSON.parse(data);
-      }
-    }
-    return data;
-  }],
-
-  headers: {
-    common: {
-      'Accept': 'application/json, text/plain, */*'
-    },
-    patch: utils.merge(CONTENT_TYPE_APPLICATION_JSON),
-    post: utils.merge(CONTENT_TYPE_APPLICATION_JSON),
-    put: utils.merge(CONTENT_TYPE_APPLICATION_JSON)
-  },
-
-  xsrfCookieName: 'XSRF-TOKEN',
-  xsrfHeaderName: 'X-XSRF-TOKEN'
-};
-},{"./utils":12}],8:[function(require,module,exports){
-'use strict';
-
-var utils = require('./utils');
-
-/**
- * Parse headers into an object
- *
- * ```
- * Date: Wed, 27 Aug 2014 08:58:49 GMT
- * Content-Type: application/json
- * Connection: keep-alive
- * Transfer-Encoding: chunked
- * ```
- *
- * @param {String} headers Headers needing to be parsed
- * @returns {Object} Headers parsed into an object
- */
-module.exports = function parseHeaders(headers) {
-  var parsed = {}, key, val, i;
-
-  if (!headers) return parsed;
-
-  utils.forEach(headers.split('\n'), function(line) {
-    i = line.indexOf(':');
-    key = utils.trim(line.substr(0, i)).toLowerCase();
-    val = utils.trim(line.substr(i + 1));
-
-    if (key) {
-      parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
-    }
-  });
-
-  return parsed;
-};
-},{"./utils":12}],9:[function(require,module,exports){
-/**
- * Syntactic sugar for invoking a function and expanding an array for arguments.
- *
- * Common use case would be to use `Function.prototype.apply`.
- *
- *  ```js
- *  function f(x, y, z) {}
- *  var args = [1, 2, 3];
- *  f.apply(null, args);
- *  ```
- *
- * With `spread` this example can be re-written.
- *
- *  ```js
- *  spread(function(x, y, z) {})([1, 2, 3]);
- *  ```
- *
- * @param {Function} callback
- * @returns {Function}
- */
-module.exports = function spread(callback) {
-  return function (arr) {
-    callback.apply(null, arr);
-  };
-};
-},{}],10:[function(require,module,exports){
-'use strict';
-
-var utils = require('./utils');
-
-/**
- * Transform the data for a request or a response
- *
- * @param {Object|String} data The data to be transformed
- * @param {Array} headers The headers for the request or response
- * @param {Array|Function} fns A single function or Array of functions
- * @returns {*} The resulting transformed data
- */
-module.exports = function transformData(data, headers, fns) {
-  utils.forEach(fns, function (fn) {
-    data = fn(data, headers);
-  });
-
-  return data;
-};
-},{"./utils":12}],11:[function(require,module,exports){
-'use strict';
-
-var msie = /(msie|trident)/i.test(navigator.userAgent);
-var utils = require('./utils');
-var urlParsingNode = document.createElement('a');
-var originUrl = urlResolve(window.location.href);
-
-/**
- * Parse a URL to discover it's components
- *
- * @param {String} url The URL to be parsed
- * @returns {Object}
- */
-function urlResolve(url) {
-  var href = url;
-
-  if (msie) {
-    // IE needs attribute set twice to normalize properties
-    urlParsingNode.setAttribute('href', href);
-    href = urlParsingNode.href;
-  }
-
-  urlParsingNode.setAttribute('href', href);
-
-  // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
-  return {
-    href: urlParsingNode.href,
-    protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
-    host: urlParsingNode.host,
-    search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
-    hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
-    hostname: urlParsingNode.hostname,
-    port: urlParsingNode.port,
-    pathname: (urlParsingNode.pathname.charAt(0) === '/')
-      ? urlParsingNode.pathname
-      : '/' + urlParsingNode.pathname
-  };
-}
-
-/**
- * Determine if a URL shares the same origin as the current location
- *
- * @param {String} requestUrl The URL to test
- * @returns {boolean} True if URL shares the same origin, otherwise false
- */
-module.exports = function urlIsSameOrigin(requestUrl) {
-  var parsed = (utils.isString(requestUrl)) ? urlResolve(requestUrl) : requestUrl;
-  return (parsed.protocol === originUrl.protocol &&
-        parsed.host === originUrl.host);
-};
-},{"./utils":12}],12:[function(require,module,exports){
-// utils is a library of generic helper functions non-specific to axios
-
-var toString = Object.prototype.toString;
-
-/**
- * Determine if a value is an Array
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an Array, otherwise false
- */
-function isArray(val) {
-  return toString.call(val) === '[object Array]';
-}
-
-/**
- * Determine if a value is a String
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a String, otherwise false
- */
-function isString(val) {
-  return typeof val === 'string';
-}
-
-/**
- * Determine if a value is a Number
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Number, otherwise false
- */
-function isNumber(val) {
-  return typeof val === 'number';
-}
-
-/**
- * Determine if a value is an Object
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an Object, otherwise false
- */
-function isObject(val) {
-  return val !== null && typeof val === 'object';
-}
-
-/**
- * Determine if a value is a Date
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Date, otherwise false
- */
-function isDate(val) {
-  return toString.call(val) === '[object Date]';
-}
-
-/**
- * Determine if a value is a File
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a File, otherwise false
- */
-function isFile(val) {
-  return toString.call(val) === '[object File]';
-}
-
-/**
- * Determine if a value is a Blob
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Blob, otherwise false
- */
-function isBlob(val) {
-  return toString.call(val) === '[object Blob]';
-}
-
-/**
- * Trim excess whitespace off the beginning and end of a string
- *
- * @param {String} str The String to trim
- * @returns {String} The String freed of excess whitespace
- */
-function trim(str) {
-  return str.replace(/^\s*/, '').replace(/\s*$/, '');
-}
-
-/**
- * Iterate over an Array or an Object invoking a function for each item.
- *
- * If `obj` is an Array or arguments callback will be called passing
- * the value, index, and complete array for each item.
- *
- * If 'obj' is an Object callback will be called passing
- * the value, key, and complete object for each property.
- *
- * @param {Object|Array} obj The object to iterate
- * @param {Function} fn The callback to invoke for each item
- */
-function forEach(obj, fn) {
-  // Don't bother if no value provided
-  if (obj === null || typeof obj === 'undefined') {
-    return;
-  }
-
-  // Check if obj is array-like
-  var isArray = obj.constructor === Array || typeof obj.callee === 'function';
-
-  // Force an array if not already something iterable
-  if (typeof obj !== 'object' && !isArray) {
-    obj = [obj];
-  }
-
-  // Iterate over array values
-  if (isArray) {
-    for (var i=0, l=obj.length; i<l; i++) {
-      fn.call(null, obj[i], i, obj);
-    }
-  }
-  // Iterate over object keys
-  else {
-    for (var key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        fn.call(null, obj[key], key, obj);
-      }
-    }
-  }
-}
-
-/**
- * Accepts varargs expecting each argument to be an object, then
- * immutably merges the properties of each object and returns result.
- *
- * When multiple objects contain the same key the later object in
- * the arguments list will take precedence.
- *
- * Example:
- *
- * ```js
- * var result = merge({foo: 123}, {foo: 456});
- * console.log(result.foo); // outputs 456
- * ```
- *
- * @param {Object} obj1 Object to merge
- * @returns {Object} Result of all merge properties
- */
-function merge(obj1/*, obj2, obj3, ...*/) {
-  var result = {};
-  forEach(arguments, function (obj) {
-    forEach(obj, function (val, key) {
-      result[key] = val;
-    });
-  });
-  return result;
-}
-
-module.exports = {
-  isArray: isArray,
-  isString: isString,
-  isNumber: isNumber,
-  isObject: isObject,
-  isDate: isDate,
-  isFile: isFile,
-  isBlob: isBlob,
-  forEach: forEach,
-  merge: merge,
-  trim: trim
-};
-},{}],13:[function(require,module,exports){
 "use strict";
 var Promise = require("./promise/promise").Promise;
 var polyfill = require("./promise/polyfill").polyfill;
 exports.Promise = Promise;
 exports.polyfill = polyfill;
-},{"./promise/polyfill":17,"./promise/promise":18}],14:[function(require,module,exports){
+},{"./promise/polyfill":6,"./promise/promise":7}],3:[function(require,module,exports){
 "use strict";
 /* global toString */
 
@@ -1302,7 +693,7 @@ function all(promises) {
 }
 
 exports.all = all;
-},{"./utils":22}],15:[function(require,module,exports){
+},{"./utils":11}],4:[function(require,module,exports){
 (function (process,global){
 "use strict";
 var browserGlobal = (typeof window !== 'undefined') ? window : {};
@@ -1366,7 +757,7 @@ function asap(callback, arg) {
 
 exports.asap = asap;
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":33}],16:[function(require,module,exports){
+},{"_process":12}],5:[function(require,module,exports){
 "use strict";
 var config = {
   instrument: false
@@ -1382,7 +773,7 @@ function configure(name, value) {
 
 exports.config = config;
 exports.configure = configure;
-},{}],17:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 (function (global){
 "use strict";
 /*global self*/
@@ -1423,7 +814,7 @@ function polyfill() {
 
 exports.polyfill = polyfill;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./promise":18,"./utils":22}],18:[function(require,module,exports){
+},{"./promise":7,"./utils":11}],7:[function(require,module,exports){
 "use strict";
 var config = require("./config").config;
 var configure = require("./config").configure;
@@ -1635,7 +1026,7 @@ function publishRejection(promise) {
 }
 
 exports.Promise = Promise;
-},{"./all":14,"./asap":15,"./config":16,"./race":19,"./reject":20,"./resolve":21,"./utils":22}],19:[function(require,module,exports){
+},{"./all":3,"./asap":4,"./config":5,"./race":8,"./reject":9,"./resolve":10,"./utils":11}],8:[function(require,module,exports){
 "use strict";
 /* global toString */
 var isArray = require("./utils").isArray;
@@ -1725,7 +1116,7 @@ function race(promises) {
 }
 
 exports.race = race;
-},{"./utils":22}],20:[function(require,module,exports){
+},{"./utils":11}],9:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.reject` returns a promise that will become rejected with the passed
@@ -1773,7 +1164,7 @@ function reject(reason) {
 }
 
 exports.reject = reject;
-},{}],21:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 "use strict";
 function resolve(value) {
   /*jshint validthis:true */
@@ -1789,7 +1180,7 @@ function resolve(value) {
 }
 
 exports.resolve = resolve;
-},{}],22:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 "use strict";
 function objectOrFunction(x) {
   return isFunction(x) || (typeof x === "object" && x !== null);
@@ -1812,27 +1203,7 @@ exports.objectOrFunction = objectOrFunction;
 exports.isFunction = isFunction;
 exports.isArray = isArray;
 exports.now = now;
-},{}],23:[function(require,module,exports){
-module.exports=require(13)
-},{"./promise/polyfill":27,"./promise/promise":28,"/Users/jason/github/js-data/node_modules/axios/node_modules/es6-promise/dist/commonjs/main.js":13}],24:[function(require,module,exports){
-module.exports=require(14)
-},{"./utils":32,"/Users/jason/github/js-data/node_modules/axios/node_modules/es6-promise/dist/commonjs/promise/all.js":14}],25:[function(require,module,exports){
-module.exports=require(15)
-},{"/Users/jason/github/js-data/node_modules/axios/node_modules/es6-promise/dist/commonjs/promise/asap.js":15,"_process":33}],26:[function(require,module,exports){
-module.exports=require(16)
-},{"/Users/jason/github/js-data/node_modules/axios/node_modules/es6-promise/dist/commonjs/promise/config.js":16}],27:[function(require,module,exports){
-module.exports=require(17)
-},{"./promise":28,"./utils":32,"/Users/jason/github/js-data/node_modules/axios/node_modules/es6-promise/dist/commonjs/promise/polyfill.js":17}],28:[function(require,module,exports){
-module.exports=require(18)
-},{"./all":24,"./asap":25,"./config":26,"./race":29,"./reject":30,"./resolve":31,"./utils":32,"/Users/jason/github/js-data/node_modules/axios/node_modules/es6-promise/dist/commonjs/promise/promise.js":18}],29:[function(require,module,exports){
-module.exports=require(19)
-},{"./utils":32,"/Users/jason/github/js-data/node_modules/axios/node_modules/es6-promise/dist/commonjs/promise/race.js":19}],30:[function(require,module,exports){
-module.exports=require(20)
-},{"/Users/jason/github/js-data/node_modules/axios/node_modules/es6-promise/dist/commonjs/promise/reject.js":20}],31:[function(require,module,exports){
-module.exports=require(21)
-},{"/Users/jason/github/js-data/node_modules/axios/node_modules/es6-promise/dist/commonjs/promise/resolve.js":21}],32:[function(require,module,exports){
-module.exports=require(22)
-},{"/Users/jason/github/js-data/node_modules/axios/node_modules/es6-promise/dist/commonjs/promise/utils.js":22}],33:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -1897,7 +1268,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],34:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 var indexOf = require('./indexOf');
 
     /**
@@ -1909,7 +1280,7 @@ var indexOf = require('./indexOf');
     module.exports = contains;
 
 
-},{"./indexOf":37}],35:[function(require,module,exports){
+},{"./indexOf":16}],14:[function(require,module,exports){
 var makeIterator = require('../function/makeIterator_');
 
     /**
@@ -1937,7 +1308,7 @@ var makeIterator = require('../function/makeIterator_');
 
 
 
-},{"../function/makeIterator_":44}],36:[function(require,module,exports){
+},{"../function/makeIterator_":23}],15:[function(require,module,exports){
 
 
     /**
@@ -1962,7 +1333,7 @@ var makeIterator = require('../function/makeIterator_');
 
 
 
-},{}],37:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 
 
     /**
@@ -1992,7 +1363,7 @@ var makeIterator = require('../function/makeIterator_');
     module.exports = indexOf;
 
 
-},{}],38:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 var filter = require('./filter');
 
     function isValidString(val) {
@@ -2011,7 +1382,7 @@ var filter = require('./filter');
     module.exports = join;
 
 
-},{"./filter":35}],39:[function(require,module,exports){
+},{"./filter":14}],18:[function(require,module,exports){
 var indexOf = require('./indexOf');
 
     /**
@@ -2026,7 +1397,7 @@ var indexOf = require('./indexOf');
     module.exports = remove;
 
 
-},{"./indexOf":37}],40:[function(require,module,exports){
+},{"./indexOf":16}],19:[function(require,module,exports){
 
 
     /**
@@ -2063,7 +1434,7 @@ var indexOf = require('./indexOf');
 
 
 
-},{}],41:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 
 
     /**
@@ -2120,7 +1491,7 @@ var indexOf = require('./indexOf');
 
 
 
-},{}],42:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var isFunction = require('../lang/isFunction');
 
     /**
@@ -2150,7 +1521,7 @@ var isFunction = require('../lang/isFunction');
     module.exports = toLookup;
 
 
-},{"../lang/isFunction":51}],43:[function(require,module,exports){
+},{"../lang/isFunction":30}],22:[function(require,module,exports){
 
 
     /**
@@ -2164,7 +1535,7 @@ var isFunction = require('../lang/isFunction');
 
 
 
-},{}],44:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var identity = require('./identity');
 var prop = require('./prop');
 var deepMatches = require('../object/deepMatches');
@@ -2200,7 +1571,7 @@ var deepMatches = require('../object/deepMatches');
 
 
 
-},{"../object/deepMatches":59,"./identity":43,"./prop":45}],45:[function(require,module,exports){
+},{"../object/deepMatches":38,"./identity":22,"./prop":24}],24:[function(require,module,exports){
 
 
     /**
@@ -2216,7 +1587,7 @@ var deepMatches = require('../object/deepMatches');
 
 
 
-},{}],46:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 var kindOf = require('./kindOf');
 var isPlainObject = require('./isPlainObject');
 var mixIn = require('../object/mixIn');
@@ -2267,7 +1638,7 @@ var mixIn = require('../object/mixIn');
 
 
 
-},{"../object/mixIn":65,"./isPlainObject":55,"./kindOf":57}],47:[function(require,module,exports){
+},{"../object/mixIn":44,"./isPlainObject":34,"./kindOf":36}],26:[function(require,module,exports){
 var clone = require('./clone');
 var forOwn = require('../object/forOwn');
 var kindOf = require('./kindOf');
@@ -2317,7 +1688,7 @@ var isPlainObject = require('./isPlainObject');
 
 
 
-},{"../object/forOwn":62,"./clone":46,"./isPlainObject":55,"./kindOf":57}],48:[function(require,module,exports){
+},{"../object/forOwn":41,"./clone":25,"./isPlainObject":34,"./kindOf":36}],27:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2327,7 +1698,7 @@ var isKind = require('./isKind');
     module.exports = isArray;
 
 
-},{"./isKind":52}],49:[function(require,module,exports){
+},{"./isKind":31}],28:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2337,7 +1708,7 @@ var isKind = require('./isKind');
     module.exports = isBoolean;
 
 
-},{"./isKind":52}],50:[function(require,module,exports){
+},{"./isKind":31}],29:[function(require,module,exports){
 var forOwn = require('../object/forOwn');
 var isArray = require('./isArray');
 
@@ -2363,7 +1734,7 @@ var isArray = require('./isArray');
 
 
 
-},{"../object/forOwn":62,"./isArray":48}],51:[function(require,module,exports){
+},{"../object/forOwn":41,"./isArray":27}],30:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2373,7 +1744,7 @@ var isKind = require('./isKind');
     module.exports = isFunction;
 
 
-},{"./isKind":52}],52:[function(require,module,exports){
+},{"./isKind":31}],31:[function(require,module,exports){
 var kindOf = require('./kindOf');
     /**
      * Check if value is from a specific "kind".
@@ -2384,7 +1755,7 @@ var kindOf = require('./kindOf');
     module.exports = isKind;
 
 
-},{"./kindOf":57}],53:[function(require,module,exports){
+},{"./kindOf":36}],32:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2394,7 +1765,7 @@ var isKind = require('./isKind');
     module.exports = isNumber;
 
 
-},{"./isKind":52}],54:[function(require,module,exports){
+},{"./isKind":31}],33:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2404,7 +1775,7 @@ var isKind = require('./isKind');
     module.exports = isObject;
 
 
-},{"./isKind":52}],55:[function(require,module,exports){
+},{"./isKind":31}],34:[function(require,module,exports){
 
 
     /**
@@ -2419,7 +1790,7 @@ var isKind = require('./isKind');
 
 
 
-},{}],56:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2429,7 +1800,7 @@ var isKind = require('./isKind');
     module.exports = isString;
 
 
-},{"./isKind":52}],57:[function(require,module,exports){
+},{"./isKind":31}],36:[function(require,module,exports){
 
 
     var _rKind = /^\[object (.*)\]$/,
@@ -2451,7 +1822,7 @@ var isKind = require('./isKind');
     module.exports = kindOf;
 
 
-},{}],58:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 
 
     /**
@@ -2466,7 +1837,7 @@ var isKind = require('./isKind');
 
 
 
-},{}],59:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 var forOwn = require('./forOwn');
 var isArray = require('../lang/isArray');
 
@@ -2523,7 +1894,7 @@ var isArray = require('../lang/isArray');
 
 
 
-},{"../lang/isArray":48,"./forOwn":62}],60:[function(require,module,exports){
+},{"../lang/isArray":27,"./forOwn":41}],39:[function(require,module,exports){
 var forOwn = require('./forOwn');
 var isPlainObject = require('../lang/isPlainObject');
 
@@ -2559,7 +1930,7 @@ var isPlainObject = require('../lang/isPlainObject');
 
 
 
-},{"../lang/isPlainObject":55,"./forOwn":62}],61:[function(require,module,exports){
+},{"../lang/isPlainObject":34,"./forOwn":41}],40:[function(require,module,exports){
 var hasOwn = require('./hasOwn');
 
     var _hasDontEnumBug,
@@ -2637,7 +2008,7 @@ var hasOwn = require('./hasOwn');
 
 
 
-},{"./hasOwn":63}],62:[function(require,module,exports){
+},{"./hasOwn":42}],41:[function(require,module,exports){
 var hasOwn = require('./hasOwn');
 var forIn = require('./forIn');
 
@@ -2658,7 +2029,7 @@ var forIn = require('./forIn');
 
 
 
-},{"./forIn":61,"./hasOwn":63}],63:[function(require,module,exports){
+},{"./forIn":40,"./hasOwn":42}],42:[function(require,module,exports){
 
 
     /**
@@ -2672,7 +2043,7 @@ var forIn = require('./forIn');
 
 
 
-},{}],64:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 var hasOwn = require('./hasOwn');
 var deepClone = require('../lang/deepClone');
 var isObject = require('../lang/isObject');
@@ -2714,7 +2085,7 @@ var isObject = require('../lang/isObject');
 
 
 
-},{"../lang/deepClone":47,"../lang/isObject":54,"./hasOwn":63}],65:[function(require,module,exports){
+},{"../lang/deepClone":26,"../lang/isObject":33,"./hasOwn":42}],44:[function(require,module,exports){
 var forOwn = require('./forOwn');
 
     /**
@@ -2744,7 +2115,7 @@ var forOwn = require('./forOwn');
     module.exports = mixIn;
 
 
-},{"./forOwn":62}],66:[function(require,module,exports){
+},{"./forOwn":41}],45:[function(require,module,exports){
 var forEach = require('../array/forEach');
 
     /**
@@ -2765,7 +2136,7 @@ var forEach = require('../array/forEach');
 
 
 
-},{"../array/forEach":36}],67:[function(require,module,exports){
+},{"../array/forEach":15}],46:[function(require,module,exports){
 var slice = require('../array/slice');
 
     /**
@@ -2785,7 +2156,7 @@ var slice = require('../array/slice');
 
 
 
-},{"../array/slice":40}],68:[function(require,module,exports){
+},{"../array/slice":19}],47:[function(require,module,exports){
 var namespace = require('./namespace');
 
     /**
@@ -2804,7 +2175,7 @@ var namespace = require('./namespace');
 
 
 
-},{"./namespace":66}],69:[function(require,module,exports){
+},{"./namespace":45}],48:[function(require,module,exports){
 var toString = require('../lang/toString');
 var replaceAccents = require('./replaceAccents');
 var removeNonWord = require('./removeNonWord');
@@ -2826,7 +2197,7 @@ var lowerCase = require('./lowerCase');
     module.exports = camelCase;
 
 
-},{"../lang/toString":58,"./lowerCase":70,"./removeNonWord":73,"./replaceAccents":74,"./upperCase":75}],70:[function(require,module,exports){
+},{"../lang/toString":37,"./lowerCase":49,"./removeNonWord":52,"./replaceAccents":53,"./upperCase":54}],49:[function(require,module,exports){
 var toString = require('../lang/toString');
     /**
      * "Safer" String.toLowerCase()
@@ -2839,7 +2210,7 @@ var toString = require('../lang/toString');
     module.exports = lowerCase;
 
 
-},{"../lang/toString":58}],71:[function(require,module,exports){
+},{"../lang/toString":37}],50:[function(require,module,exports){
 var join = require('../array/join');
 var slice = require('../array/slice');
 
@@ -2856,7 +2227,7 @@ var slice = require('../array/slice');
     module.exports = makePath;
 
 
-},{"../array/join":38,"../array/slice":40}],72:[function(require,module,exports){
+},{"../array/join":17,"../array/slice":19}],51:[function(require,module,exports){
 var toString = require('../lang/toString');
 var camelCase = require('./camelCase');
 var upperCase = require('./upperCase');
@@ -2871,7 +2242,7 @@ var upperCase = require('./upperCase');
     module.exports = pascalCase;
 
 
-},{"../lang/toString":58,"./camelCase":69,"./upperCase":75}],73:[function(require,module,exports){
+},{"../lang/toString":37,"./camelCase":48,"./upperCase":54}],52:[function(require,module,exports){
 var toString = require('../lang/toString');
     // This pattern is generated by the _build/pattern-removeNonWord.js script
     var PATTERN = /[^\x20\x2D0-9A-Z\x5Fa-z\xC0-\xD6\xD8-\xF6\xF8-\xFF]/g;
@@ -2887,7 +2258,7 @@ var toString = require('../lang/toString');
     module.exports = removeNonWord;
 
 
-},{"../lang/toString":58}],74:[function(require,module,exports){
+},{"../lang/toString":37}],53:[function(require,module,exports){
 var toString = require('../lang/toString');
     /**
     * Replaces all accented chars with regular ones
@@ -2925,7 +2296,7 @@ var toString = require('../lang/toString');
     module.exports = replaceAccents;
 
 
-},{"../lang/toString":58}],75:[function(require,module,exports){
+},{"../lang/toString":37}],54:[function(require,module,exports){
 var toString = require('../lang/toString');
     /**
      * "Safer" String.toUpperCase()
@@ -2937,798 +2308,21 @@ var toString = require('../lang/toString');
     module.exports = upperCase;
 
 
-},{"../lang/toString":58}],76:[function(require,module,exports){
-var DSUtils = require('../utils');
+},{"../lang/toString":37}],55:[function(require,module,exports){
+var DSUtils = require('../../utils');
+var DSErrors = require('../../errors');
+var promisify = DSUtils.promisify;
 
-function Defaults() {
-
-}
-
-/**
- * @doc property
- * @id DSHttpAdapter.properties:defaults.queryTransform
- * @name defaults.queryTransform
- * @description
- * Transform the js-data query to something your server understands. You might just do this on the server instead.
- *
- * ## Example:
- * ```js
- * DSHttpAdapter.defaults.queryTransform = function (resourceName, params) {
- *   if (params && params.userId) {
- *     params.user_id = params.userId;
- *     delete params.userId;
- *   }
- *   return params;
- * };
- * ```
- *
- * @param {string} resourceName The name of the resource.
- * @param {object} params Params that will be passed to `http`.
- * @returns {*} By default just returns `params` as-is.
- */
-Defaults.prototype.queryTransform = function (resourceName, params) {
-  return params;
-};
-
-/**
- * @doc property
- * @id DSHttpAdapter.properties:defaults.httpConfig
- * @name defaults.httpConfig
- * @description
- * Default http configuration options used whenever `DSHttpAdapter` uses `http`.
- *
- * ## Example:
- * ```js
- * var dsHttpAdapter = new DSHttpAdapter({
- *   httpConfig: {
- *     headers: {
- *       Authorization: 'Basic YmVlcDpib29w'
- *     },
- *     timeout: 20000
- *   });
- * });
- * ```
- */
-Defaults.prototype.httpConfig = {};
-
-/**
- * @doc constructor
- * @id DSHttpAdapter
- * @name DSHttpAdapter
- * @description
- * Default adapter used by js-data. This adapter uses AJAX and JSON to send/retrieve data to/from a server.
- * Developers may provide custom adapters that implement the adapter interface.
- */
-function DSHttpAdapter(options) {
-  /**
-   * @doc property
-   * @id DSHttpAdapter.properties:defaults
-   * @name defaults
-   * @description
-   * Reference to [DSHttpAdapter.defaults](/documentation/api/api/DSHttpAdapter.properties:defaults).
-   */
-  this.defaults = new Defaults();
-  DSUtils.deepMixIn(this.defaults, options);
-}
-
-/**
- * @doc method
- * @id DSHttpAdapter.methods:HTTP
- * @name HTTP
- * @description
- * A wrapper for `http()`.
- *
- * ## Signature:
- * ```js
- * DSHttpAdapter.HTTP(config)
- * ```
- *
- * @param {object} config Configuration object.
- * @returns {Promise} Promise.
- */
-DSHttpAdapter.prototype.HTTP = function (config) {
-  var start = new Date().getTime();
-  config = DSUtils.deepMixIn(config, this.defaults.httpConfig);
-  return DSUtils.http(config).then(function (data) {
-    console.log(config.method + ' request:' + config.url + ' Time taken: ' + (new Date().getTime() - start) + 'ms', arguments);
-    return data;
-  });
-};
-
-/**
- * @doc method
- * @id DSHttpAdapter.methods:GET
- * @name GET
- * @description
- * A wrapper for `http.get()`.
- *
- * ## Signature:
- * ```js
- * DSHttpAdapter.GET(url[, config])
- * ```
- *
- * @param {string} url The url of the request.
- * @param {object=} config Optional configuration.
- * @returns {Promise} Promise.
- */
-DSHttpAdapter.prototype.GET = function (url, config) {
-  config = config || {};
-  if (!('method' in config)) {
-    config.method = 'get';
-  }
-  return this.HTTP(DSUtils.deepMixIn(config, {
-    url: url
-  }));
-};
-
-/**
- * @doc method
- * @id DSHttpAdapter.methods:POST
- * @name POST
- * @description
- * A wrapper for `http.post()`.
- *
- * ## Signature:
- * ```js
- * DSHttpAdapter.POST(url[, attrs][, config])
- * ```
- *
- * @param {string} url The url of the request.
- * @param {object=} attrs Request payload.
- * @param {object=} config Optional configuration.
- * @returns {Promise} Promise.
- */
-DSHttpAdapter.prototype.POST = function (url, attrs, config) {
-  config = config || {};
-  if (!('method' in config)) {
-    config.method = 'post';
-  }
-  return this.HTTP(DSUtils.deepMixIn(config, {
-    url: url,
-    data: attrs
-  }));
-};
-
-/**
- * @doc method
- * @id DSHttpAdapter.methods:PUT
- * @name PUT
- * @description
- * A wrapper for `http.put()`.
- *
- * ## Signature:
- * ```js
- * DSHttpAdapter.PUT(url[, attrs][, config])
- * ```
- *
- * @param {string} url The url of the request.
- * @param {object=} attrs Request payload.
- * @param {object=} config Optional configuration.
- * @returns {Promise} Promise.
- */
-DSHttpAdapter.prototype.PUT = function (url, attrs, config) {
-  config = config || {};
-  if (!('method' in config)) {
-    config.method = 'put';
-  }
-  return this.HTTP(DSUtils.deepMixIn(config, {
-    url: url,
-    data: attrs || {}
-  }));
-};
-
-/**
- * @doc method
- * @id DSHttpAdapter.methods:DEL
- * @name DEL
- * @description
- * A wrapper for `http.delete()`.
- *
- * ## Signature:
- * ```js
- * DSHttpAdapter.DEL(url[, config])
- * ```
- *
- * @param {string} url The url of the request.
- * @param {object=} config Optional configuration.
- * @returns {Promise} Promise.
- */
-DSHttpAdapter.prototype.DEL = function (url, config) {
-  config = config || {};
-  if (!('method' in config)) {
-    config.method = 'delete';
-  }
-  return this.HTTP(DSUtils.deepMixIn(config, {
-    url: url
-  }));
-};
-
-/**
- * @doc method
- * @id DSHttpAdapter.methods:find
- * @name find
- * @description
- * Retrieve a single entity from the server.
- *
- * Makes a `GET` request.
- *
- * ## Signature:
- * ```js
- * DSHttpAdapter.find(resourceConfig, id[, options])
- * ```
- *
- * @param {object} resourceConfig DS resource definition object:
- * @param {string|number} id Primary key of the entity to update.
- * @param {object=} options Optional configuration. Also passed along to `http([config])`. Properties:
- *
- * - `{string=}` - `baseUrl` - Override the default base url.
- * - `{string=}` - `endpoint` - Override the default endpoint.
- * - `{object=}` - `params` - Additional query string parameters to add to the url.
- *
- * @returns {Promise} Promise.
- */
-DSHttpAdapter.prototype.find = function (resourceConfig, id, options) {
-  options = options || {};
-  return this.GET(
-    DSUtils.makePath(options.baseUrl || resourceConfig.baseUrl, resourceConfig.getEndpoint(id, options), id),
-    options
-  );
-};
-
-/**
- * @doc method
- * @id DSHttpAdapter.methods:findAll
- * @name findAll
- * @description
- * Retrieve a collection of entities from the server.
- *
- * Makes a `GET` request.
- *
- * ## Signature:
- * ```js
- * DSHttpAdapter.findAll(resourceConfig[, params][, options])
- * ```
- *
- * @param {object} resourceConfig DS resource definition object:
- * @param {object=} params Search query parameters. See the [query guide](/documentation/guide/queries/index).
- * @param {object=} options Optional configuration. Also passed along to `http([config])`. Properties:
- *
- * - `{string=}` - `baseUrl` - Override the default base url.
- * - `{string=}` - `endpoint` - Override the default endpoint.
- * - `{object=}` - `params` - Additional query string parameters to add to the url.
- *
- * @returns {Promise} Promise.
- */
-DSHttpAdapter.prototype.findAll = function (resourceConfig, params, options) {
-  options = options || {};
-  options.params = options.params || {};
-  if (params) {
-    params = this.defaults.queryTransform(resourceConfig.name, params);
-    DSUtils.deepMixIn(options.params, params);
-  }
-  return this.GET(
-    DSUtils.makePath(options.baseUrl || resourceConfig.baseUrl, resourceConfig.getEndpoint(null, options)),
-    options
-  );
-};
-
-/**
- * @doc method
- * @id DSHttpAdapter.methods:create
- * @name create
- * @description
- * Create a new entity on the server.
- *
- * Makes a `POST` request.
- *
- * ## Signature:
- * ```js
- * DSHttpAdapter.create(resourceConfig, attrs[, options])
- * ```
- *
- * @param {object} resourceConfig DS resource definition object:
- * @param {object} attrs The attribute payload.
- * @param {object=} options Optional configuration. Also passed along to `http([config])`. Properties:
- *
- * - `{string=}` - `baseUrl` - Override the default base url.
- * - `{string=}` - `endpoint` - Override the default endpoint.
- * - `{object=}` - `params` - Additional query string parameters to add to the url.
- *
- * @returns {Promise} Promise.
- */
-DSHttpAdapter.prototype.create = function (resourceConfig, attrs, options) {
-  options = options || {};
-  return this.POST(
-    DSUtils.makePath(options.baseUrl || resourceConfig.baseUrl, resourceConfig.getEndpoint(attrs, options)),
-    attrs,
-    options
-  );
-};
-
-/**
- * @doc method
- * @id DSHttpAdapter.methods:update
- * @name update
- * @description
- * Update an entity on the server.
- *
- * Makes a `PUT` request.
- *
- * ## Signature:
- * ```js
- * DSHttpAdapter.update(resourceConfig, id, attrs[, options])
- * ```
- *
- * @param {object} resourceConfig DS resource definition object:
- * @param {string|number} id Primary key of the entity to update.
- * @param {object} attrs The attribute payload.
- * @param {object=} options Optional configuration. Also passed along to `http([config])`. Properties:
- *
- * - `{string=}` - `baseUrl` - Override the default base url.
- * - `{string=}` - `endpoint` - Override the default endpoint.
- * - `{object=}` - `params` - Additional query string parameters to add to the url.
- *
- * @returns {Promise} Promise.
- */
-DSHttpAdapter.prototype.update = function (resourceConfig, id, attrs, options) {
-  options = options || {};
-  return this.PUT(
-    DSUtils.makePath(options.baseUrl || resourceConfig.baseUrl, resourceConfig.getEndpoint(id, options), id),
-    attrs,
-    options
-  );
-};
-
-/**
- * @doc method
- * @id DSHttpAdapter.methods:updateAll
- * @name updateAll
- * @description
- * Update a collection of entities on the server.
- *
- * Makes a `PUT` request.
- *
- * ## Signature:
- * ```js
- * DSHttpAdapter.updateAll(resourceConfig, attrs[, params][, options])
- * ```
- *
- * @param {object} resourceConfig DS resource definition object:
- * @param {object} attrs The attribute payload.
- * @param {object=} params Search query parameters. See the [query guide](/documentation/guide/queries/index).
- * @param {object=} options Optional configuration. Also passed along to `http([config])`. Properties:
- *
- * - `{string=}` - `baseUrl` - Override the default base url.
- * - `{string=}` - `endpoint` - Override the default endpoint.
- * - `{object=}` - `params` - Additional query string parameters to add to the url.
- *
- * @returns {Promise} Promise.
- */
-DSHttpAdapter.prototype.updateAll = function (resourceConfig, attrs, params, options) {
-  options = options || {};
-  options.params = options.params || {};
-  if (params) {
-    params = this.defaults.queryTransform(resourceConfig.name, params);
-    DSUtils.deepMixIn(options.params, params);
-  }
-  return this.PUT(
-    DSUtils.makePath(options.baseUrl || resourceConfig.baseUrl, resourceConfig.getEndpoint(null, options)),
-    attrs,
-    options
-  );
-};
-
-/**
- * @doc method
- * @id DSHttpAdapter.methods:destroy
- * @name destroy
- * @description
- * Delete an entity on the server.
- *
- * Makes a `DELETE` request.
- *
- * ## Signature:
- * ```js
- * DSHttpAdapter.destroy(resourceConfig, id[, options)
- * ```
- *
- * @param {object} resourceConfig DS resource definition object:
- * @param {string|number} id Primary key of the entity to update.
- * @param {object=} options Optional configuration. Also passed along to `http([config])`. Properties:
- *
- * - `{string=}` - `baseUrl` - Override the default base url.
- * - `{string=}` - `endpoint` - Override the default endpoint.
- * - `{object=}` - `params` - Additional query string parameters to add to the url.
- *
- * @returns {Promise} Promise.
- */
-DSHttpAdapter.prototype.destroy = function (resourceConfig, id, options) {
-  options = options || {};
-  return this.DEL(
-    DSUtils.makePath(options.baseUrl || resourceConfig.baseUrl, resourceConfig.getEndpoint(id, options), id),
-    options
-  );
-};
-
-/**
- * @doc method
- * @id DSHttpAdapter.methods:destroyAll
- * @name destroyAll
- * @description
- * Delete a collection of entities on the server.
- *
- * Makes `DELETE` request.
- *
- * ## Signature:
- * ```js
- * DSHttpAdapter.destroyAll(resourceConfig[, params][, options])
- * ```
- *
- * @param {object} resourceConfig DS resource definition object:
- * @param {object=} params Search query parameters. See the [query guide](/documentation/guide/queries/index).
- * @param {object=} options Optional configuration. Also passed along to `http([config])`. Properties:
- *
- * - `{string=}` - `baseUrl` - Override the default base url.
- * - `{string=}` - `endpoint` - Override the default endpoint.
- * - `{object=}` - `params` - Additional query string parameters to add to the url.
- *
- * @returns {Promise} Promise.
- */
-DSHttpAdapter.prototype.destroyAll = function (resourceConfig, params, options) {
-  options = options || {};
-  options.params = options.params || {};
-  if (params) {
-    params = this.defaults.queryTransform(resourceConfig.name, params);
-    DSUtils.deepMixIn(options.params, params);
-  }
-  return this.DEL(
-    DSUtils.makePath(options.baseUrl || resourceConfig.baseUrl, resourceConfig.getEndpoint(null, options)),
-    options
-  );
-};
-
-module.exports = DSHttpAdapter;
-
-},{"../utils":112}],77:[function(require,module,exports){
-var DSUtils = require('../utils');
-var DSErrors = require('../errors');
-
-/**
- * @doc constructor
- * @id DSLocalStorageAdapter
- * @name DSLocalStorageAdapter
- * @description
- * Adapter that uses `localStorage` as its persistence layer. The localStorage adapter does not support operations
- * on collections because localStorage itself is a key-value store.
- */
-function DSLocalStorageAdapter() {
-}
-
-/**
- * @doc method
- * @id DSLocalStorageAdapter.methods:GET
- * @name GET
- * @description
- * An asynchronous wrapper for `localStorage.getItem(key)`.
- *
- * ## Signature:
- * ```js
- * DSLocalStorageAdapter.GET(key)
- * ```
- *
- * @param {string} key The key path of the item to retrieve.
- * @returns {Promise} Promise.
- */
-DSLocalStorageAdapter.prototype.GET = function (key) {
-  return new DSUtils.Promise(function (resolve) {
-    var item = localStorage.getItem(key);
-    resolve(item ? DSUtils.fromJson(item) : undefined);
-  });
-};
-
-/**
- * @doc method
- * @id DSLocalStorageAdapter.methods:PUT
- * @name PUT
- * @description
- * An asynchronous wrapper for `localStorage.setItem(key, value)`.
- *
- * ## Signature:
- * ```js
- * DSLocalStorageAdapter.PUT(key, value)
- * ```
- *
- * @param {string} key The key to update.
- * @param {object} value Attributes to put.
- * @returns {Promise} Promise.
- */
-DSLocalStorageAdapter.prototype.PUT = function (key, value) {
-  var DSLocalStorageAdapter = this;
-  return DSLocalStorageAdapter.GET(key).then(function (item) {
-    if (item) {
-      DSUtils.deepMixIn(item, value);
-    }
-    localStorage.setItem(key, DSUtils.toJson(item || value));
-    return DSLocalStorageAdapter.GET(key);
-  });
-};
-
-/**
- * @doc method
- * @id DSLocalStorageAdapter.methods:DEL
- * @name DEL
- * @description
- * An asynchronous wrapper for `localStorage.removeItem(key)`.
- *
- * ## Signature:
- * ```js
- * DSLocalStorageAdapter.DEL(key)
- * ```
- *
- * @param {string} key The key to remove.
- * @returns {Promise} Promise.
- */
-DSLocalStorageAdapter.prototype.DEL = function (key) {
-  return new DSUtils.Promise(function (resolve) {
-    localStorage.removeItem(key);
-    resolve();
-  });
-};
-
-/**
- * @doc method
- * @id DSLocalStorageAdapter.methods:find
- * @name find
- * @description
- * Retrieve a single entity from localStorage.
- *
- * ## Signature:
- * ```js
- * DSLocalStorageAdapter.find(resourceConfig, id[, options])
- * ```
- *
- * ## Example:
- * ```js
- * DS.find('user', 5, {
- *   adapter: 'DSLocalStorageAdapter'
- * }).then(function (user) {
- *   user; // { id: 5, ... }
- * });
- * ```
- *
- * @param {object} resourceConfig DS resource definition object:
- * @param {string|number} id Primary key of the entity to retrieve.
- * @param {object=} options Optional configuration. Properties:
- *
- * - `{string=}` - `baseUrl` - Base path to use.
- *
- * @returns {Promise} Promise.
- */
-DSLocalStorageAdapter.prototype.find = function find(resourceConfig, id, options) {
-  options = options || {};
-  return this.GET(DSUtils.makePath(options.baseUrl || resourceConfig.baseUrl, resourceConfig.endpoint, id));
-};
-
-/**
- * @doc method
- * @id DSLocalStorageAdapter.methods:findAll
- * @name findAll
- * @description
- * Not supported.
- */
-DSLocalStorageAdapter.prototype.findAll = function () {
-  throw new Error('DSLocalStorageAdapter.findAll is not supported!');
-};
-
-/**
- * @doc method
- * @id DSLocalStorageAdapter.methods:create
- * @name create
- * @description
- * Create an entity in `localStorage`. You must generate the primary key and include it in the `attrs` object.
- *
- * ## Signature:
- * ```js
- * DSLocalStorageAdapter.create(resourceConfig, attrs[, options])
- * ```
- *
- * ## Example:
- * ```js
- * DS.create('user', {
- *   id: 1,
- *   name: 'john'
- * }, {
- *   adapter: 'DSLocalStorageAdapter'
- * }).then(function (user) {
- *   user; // { id: 1, name: 'john' }
- * });
- * ```
- *
- * @param {object} resourceConfig DS resource definition object:
- * @param {object} attrs Attributes to create in localStorage.
- * @param {object=} options Optional configuration. Properties:
- *
- * - `{string=}` - `baseUrl` - Base path to use.
- *
- * @returns {Promise} Promise.
- */
-DSLocalStorageAdapter.prototype.create = function (resourceConfig, attrs, options) {
-  if (!(resourceConfig.idAttribute in attrs)) {
-    throw new DSErrors.IA('DSLocalStorageAdapter.create: You must provide a primary key in the attrs object!');
-  }
-  options = options || {};
-  return this.PUT(
-    DSUtils.makePath(options.baseUrl || resourceConfig.baseUrl, resourceConfig.getEndpoint(attrs, options), attrs[resourceConfig.idAttribute]),
-    attrs
-  );
-};
-
-/**
- * @doc method
- * @id DSLocalStorageAdapter.methods:update
- * @name update
- * @description
- * Update an entity in localStorage.
- *
- * ## Signature:
- * ```js
- * DSLocalStorageAdapter.update(resourceConfig, id, attrs[, options])
- * ```
- *
- * ## Example:
- * ```js
- * DS.update('user', 5, {
- *   name: 'john'
- * }, {
- *   adapter: 'DSLocalStorageAdapter'
- * }).then(function (user) {
- *   user; // { id: 5, ... }
- * });
- * ```
- *
- * @param {object} resourceConfig DS resource definition object:
- * @param {string|number} id Primary key of the entity to retrieve.
- * @param {object} attrs Attributes with which to update the entity.
- * @param {object=} options Optional configuration. Properties:
- *
- * - `{string=}` - `baseUrl` - Base path to use.
- *
- * @returns {Promise} Promise.
- */
-DSLocalStorageAdapter.prototype.update = function (resourceConfig, id, attrs, options) {
-  options = options || {};
-  return this.PUT(DSUtils.makePath(options.baseUrl || resourceConfig.baseUrl, resourceConfig.getEndpoint(id, options), id), attrs);
-};
-
-/**
- * @doc method
- * @id DSLocalStorageAdapter.methods:updateAll
- * @name updateAll
- * @description
- * Not supported.
- */
-DSLocalStorageAdapter.prototype.updateAll = function () {
-  throw new Error('DSLocalStorageAdapter.updateAll is not supported!');
-};
-
-/**
- * @doc method
- * @id DSLocalStorageAdapter.methods:destroy
- * @name destroy
- * @description
- * Destroy an entity from localStorage.
- *
- * ## Signature:
- * ```js
- * DSLocalStorageAdapter.destroy(resourceConfig, id[, options])
- * ```
- *
- * ## Example:
- * ```js
- * DS.destroy('user', 5, {
- *   name: ''
- * }, {
- *   adapter: 'DSLocalStorageAdapter'
- * }).then(function (user) {
- *   user; // { id: 5, ... }
- * });
- * ```
- *
- * @param {object} resourceConfig DS resource definition object:
- * @param {string|number} id Primary key of the entity to destroy.
- * @param {object=} options Optional configuration. Properties:
- *
- * - `{string=}` - `baseUrl` - Base path to use.
- *
- * @returns {Promise} Promise.
- */
-DSLocalStorageAdapter.prototype.destroy = function (resourceConfig, id, options) {
-  options = options || {};
-  return this.DEL(DSUtils.makePath(options.baseUrl || resourceConfig.baseUrl, resourceConfig.getEndpoint(id, options), id));
-};
-
-/**
- * @doc method
- * @id DSLocalStorageAdapter.methods:destroyAll
- * @name destroyAll
- * @description
- * Not supported.
- */
-DSLocalStorageAdapter.prototype.destroyAll = function () {
-  throw new Error('Not supported!');
-};
-
-module.exports = DSLocalStorageAdapter;
-
-},{"../errors":110,"../utils":112}],78:[function(require,module,exports){
-function errorPrefix(resourceName) {
-  return 'DS.create(' + resourceName + ', attrs[, options]): ';
-}
-
-/**
- * @doc method
- * @id DS.async methods:create
- * @name create
- * @description
- * The "C" in "CRUD". Delegate to the `create` method of whichever adapter is being used (http by default) and inject the
- * result into the data store.
- *
- * ## Signature:
- * ```js
- * DS.create(resourceName, attrs[, options])
- * ```
- *
- * ## Example:
- *
- * ```js
- * DS.create('document', {
- *   author: 'John Anderson'
- * }).then(function (document) {
- *   document; // { id: 5, author: 'John Anderson' }
- *
- *   // The new document is already in the data store
- *   DS.get('document', document.id); // { id: 5, author: 'John Anderson' }
- * });
- * ```
- *
- * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
- * @param {object} attrs The attributes with which to create the item of the type specified by `resourceName`.
- * @param {object=} options Configuration options. Also passed along to the adapter's `create` method. Properties:
- *
- * - `{boolean=}` - `useClass` - Whether to wrap the injected item with the resource's instance constructor.
- * - `{boolean=}` - `cacheResponse` - Inject the data returned by the adapter into the data store. Default: `true`.
- * - `{boolean=}` - `upsert` - If `attrs` already contains a primary key, then attempt to call `DS.update` instead. Default: `true`.
- * - `{function=}` - `beforeValidate` - Override the resource or global lifecycle hook.
- * - `{function=}` - `validate` - Override the resource or global lifecycle hook.
- * - `{function=}` - `afterValidate` - Override the resource or global lifecycle hook.
- * - `{function=}` - `beforeCreate` - Override the resource or global lifecycle hook.
- * - `{function=}` - `afterCreate` - Override the resource or global lifecycle hook.
- *
- * @returns {Promise} Promise.
- *
- * ## Resolves with:
- *
- * - `{object}` - `item` - A reference to the newly created item.
- *
- * ## Rejects with:
- *
- * - `{IllegalArgumentError}`
- * - `{NonexistentResourceError}`
- */
 function create(resourceName, attrs, options) {
-  var DS = this;
-  var DSUtils = DS.utils;
-  var DSErrors = DS.errors;
-  var definition = DS.definitions[resourceName];
+  var _this = this;
+  var definition = _this.definitions[resourceName];
 
   var promise = new DSUtils.Promise(function (resolve, reject) {
 
     options = options || {};
 
     if (!definition) {
-      reject(new DSErrors.NER(errorPrefix(resourceName) + resourceName));
-    } else if (!DSUtils.isObject(attrs)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName) + 'attrs: Must be an object!'));
+      reject(new DSErrors.NER(resourceName));
     } else {
       if (!('cacheResponse' in options)) {
         options.cacheResponse = true;
@@ -3741,46 +2335,46 @@ function create(resourceName, attrs, options) {
   });
 
   if (options.upsert && attrs[definition.idAttribute]) {
-    return DS.update(resourceName, attrs[definition.idAttribute], attrs, options);
+    return _this.update(resourceName, attrs[definition.idAttribute], attrs, options);
   } else {
     return promise
       .then(function (attrs) {
-        var func = options.beforeValidate ? DSUtils.promisify(options.beforeValidate) : definition.beforeValidate;
+        var func = options.beforeValidate ? promisify(options.beforeValidate) : definition.beforeValidate;
         return func.call(attrs, resourceName, attrs);
       })
       .then(function (attrs) {
-        var func = options.validate ? DSUtils.promisify(options.validate) : definition.validate;
+        var func = options.validate ? promisify(options.validate) : definition.validate;
         return func.call(attrs, resourceName, attrs);
       })
       .then(function (attrs) {
-        var func = options.afterValidate ? DSUtils.promisify(options.afterValidate) : definition.afterValidate;
+        var func = options.afterValidate ? promisify(options.afterValidate) : definition.afterValidate;
         return func.call(attrs, resourceName, attrs);
       })
       .then(function (attrs) {
-        var func = options.beforeCreate ? DSUtils.promisify(options.beforeCreate) : definition.beforeCreate;
+        var func = options.beforeCreate ? promisify(options.beforeCreate) : definition.beforeCreate;
         return func.call(attrs, resourceName, attrs);
       })
       .then(function (attrs) {
-        DS.notify(definition, 'beforeCreate', DSUtils.merge({}, attrs));
-        return DS.adapters[options.adapter || definition.defaultAdapter].create(definition, options.serialize ? options.serialize(resourceName, attrs) : definition.serialize(resourceName, attrs), options);
+        _this.notify(definition, 'beforeCreate', DSUtils.merge({}, attrs));
+        return _this.getAdapter(definition, options).create(definition, options.serialize ? options.serialize(resourceName, attrs) : definition.serialize(resourceName, attrs), options);
       })
       .then(function (res) {
-        var func = options.afterCreate ? DSUtils.promisify(options.afterCreate) : definition.afterCreate;
+        var func = options.afterCreate ? promisify(options.afterCreate) : definition.afterCreate;
         var attrs = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
         return func.call(attrs, resourceName, attrs);
       })
       .then(function (attrs) {
-        DS.notify(definition, 'afterCreate', DSUtils.merge({}, attrs));
+        _this.notify(definition, 'afterCreate', DSUtils.merge({}, attrs));
         if (options.cacheResponse) {
-          var resource = DS.store[resourceName];
-          var created = DS.inject(definition.name, attrs, options);
+          var resource = _this.store[resourceName];
+          var created = _this.inject(definition.name, attrs, options);
           var id = created[definition.idAttribute];
           resource.completedQueries[id] = new Date().getTime();
           resource.previousAttributes[id] = DSUtils.deepMixIn({}, created);
           resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
-          return DS.get(definition.name, id);
+          return _this.get(definition.name, id);
         } else {
-          return DS.createInstance(resourceName, attrs, options);
+          return _this.createInstance(resourceName, attrs, options);
         }
       });
   }
@@ -3788,61 +2382,14 @@ function create(resourceName, attrs, options) {
 
 module.exports = create;
 
-},{}],79:[function(require,module,exports){
-function errorPrefix(resourceName, id) {
-  return 'DS.destroy(' + resourceName + ', ' + id + '[, options]): ';
-}
+},{"../../errors":87,"../../utils":89}],56:[function(require,module,exports){
+var DSUtils = require('../../utils');
+var DSErrors = require('../../errors');
+var promisify = DSUtils.promisify;
 
-/**
- * @doc method
- * @id DS.async methods:destroy
- * @name destroy
- * @description
- * The "D" in "CRUD". Delegate to the `destroy` method of whichever adapter is being used (http by default) and eject the
- * appropriate item from the data store.
- *
- * ## Signature:
- * ```js
- * DS.destroy(resourceName, id[, options]);
- * ```
- *
- * ## Example:
- *
- * ```js
- * DS.get('document', 5); { id: 5, ... }
- *
- * DS.destroy('document', 5).then(function (id) {
- *   id; // 5
- *
- *   // The document is gone
- *   DS.get('document', 5); // undefined
- * });
- * ```
- *
- * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
- * @param {string|number} id The primary key of the item to remove.
- * @param {object=} options Configuration options. Also passed along to the adapter's `destroy` method. Properties:
- *
- * - `{function=}` - `beforeDestroy` - Override the resource or global lifecycle hook.
- * - `{function=}` - `afterDestroy` - Override the resource or global lifecycle hook.
- *
- * @returns {Promise} Promise.
- *
- * ## Resolves with:
- *
- * - `{string|number}` - `id` - The primary key of the destroyed item.
- *
- * ## Rejects with:
- *
- * - `{IllegalArgumentError}`
- * - `{RuntimeError}`
- * - `{NonexistentResourceError}`
- */
 function destroy(resourceName, id, options) {
-  var DS = this;
-  var DSUtils = DS.utils;
-  var DSErrors = DS.errors;
-  var definition = DS.definitions[resourceName];
+  var _this = this;
+  var definition = _this.definitions[resourceName];
   var item;
 
   return new DSUtils.Promise(function (resolve, reject) {
@@ -3850,174 +2397,66 @@ function destroy(resourceName, id, options) {
 
     id = DSUtils.resolveId(definition, id);
     if (!definition) {
-      reject(new DSErrors.NER(errorPrefix(resourceName, id) + resourceName));
+      reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName, id) + 'id: Must be a string or a number!'));
-    } else if (!DS.get(resourceName, id)) {
-      reject(new DSErrors.R(errorPrefix(resourceName, id) + 'id: "' + id + '" not found!'));
+      reject(new DSErrors.IA('"id" must be a string or a number!'));
+    } else if (!_this.get(resourceName, id)) {
+      reject(new DSErrors.R('id "' + id + '" not found in cache!'));
     } else {
-      item = DS.get(resourceName, id);
+      item = _this.get(resourceName, id);
       resolve(item);
     }
   })
     .then(function (attrs) {
-      var func = options.beforeDestroy ? DSUtils.promisify(options.beforeDestroy) : definition.beforeDestroy;
+      var func = options.beforeDestroy ? promisify(options.beforeDestroy) : definition.beforeDestroy;
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      DS.notify(definition, 'beforeDestroy', DSUtils.merge({}, attrs));
-      return DS.adapters[options.adapter || definition.defaultAdapter].destroy(definition, id, options);
+      _this.notify(definition, 'beforeDestroy', DSUtils.merge({}, attrs));
+      return _this.getAdapter(definition, options).destroy(definition, id, options);
     })
     .then(function () {
-      var func = options.afterDestroy ? DSUtils.promisify(options.afterDestroy) : definition.afterDestroy;
+      var func = options.afterDestroy ? promisify(options.afterDestroy) : definition.afterDestroy;
       return func.call(item, resourceName, item);
     })
     .then(function (item) {
-      DS.notify(definition, 'afterDestroy', DSUtils.merge({}, item));
-      DS.eject(resourceName, id);
+      _this.notify(definition, 'afterDestroy', DSUtils.merge({}, item));
+      _this.eject(resourceName, id);
       return id;
     });
 }
 
 module.exports = destroy;
 
-},{}],80:[function(require,module,exports){
-function errorPrefix(resourceName) {
-  return 'DS.destroyAll(' + resourceName + ', params[, options]): ';
-}
+},{"../../errors":87,"../../utils":89}],57:[function(require,module,exports){
+var DSUtils = require('../../utils');
+var DSErrors = require('../../errors');
 
-/**
- * @doc method
- * @id DS.async methods:destroyAll
- * @name destroyAll
- * @description
- * The "D" in "CRUD". Delegate to the `destroyAll` method of whichever adapter is being used (http by default) and eject
- * the appropriate items from the data store.
- *
- * ## Signature:
- * ```js
- * DS.destroyAll(resourceName, params[, options])
- * ```
- *
- * ## Example:
- *
- * ```js
- * var params = {
- *   where: {
- *     author: {
- *       '==': 'John Anderson'
- *     }
- *   }
- * };
- *
- * DS.destroyAll('document', params).then(function (documents) {
- *   // The documents are gone from the data store
- *   DS.filter('document', params); // []
- * });
- * ```
- *
- * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
- * @param {object} params Parameter object that is serialized into the query string. Properties:
- *
- *  - `{object=}` - `where` - Where clause.
- *  - `{number=}` - `limit` - Limit clause.
- *  - `{number=}` - `skip` - Skip clause.
- *  - `{number=}` - `offset` - Same as skip.
- *  - `{string|array=}` - `orderBy` - OrderBy clause.
- *
- * @param {object=} options Optional configuration. Also passed along to the adapter's `destroyAll` method. Properties:
- *
- * - `{boolean=}` - `bypassCache` - Bypass the cache. Default: `false`.
- *
- * @returns {Promise} Promise.
- *
- * ## Rejects with:
- *
- * - `{IllegalArgumentError}`
- * - `{NonexistentResourceError}`
- */
 function destroyAll(resourceName, params, options) {
-  var DS = this;
-  var DSUtils = DS.utils;
-  var DSErrors = DS.errors;
-  var definition = DS.definitions[resourceName];
+  var _this = this;
+  var definition = _this.definitions[resourceName];
 
   return new DSUtils.Promise(function (resolve, reject) {
-    options = options || {};
-
     if (!definition) {
-      reject(new DSErrors.NER(errorPrefix(resourceName) + resourceName));
-    } else if (!DSUtils.isObject(params)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName) + 'params: Must be an object!'));
-    } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName) + 'options: Must be an object!'));
+      reject(new DSErrors.NER(resourceName));
     } else {
       resolve();
     }
-  })
-    .then(function () {
-      return DS.adapters[options.adapter || definition.defaultAdapter].destroyAll(definition, params, options);
-    })
-    .then(function () {
-      return DS.ejectAll(resourceName, params);
+  }).then(function () {
+      return _this.getAdapter(definition, options).destroyAll(definition, params, options);
+    }).then(function () {
+      return _this.ejectAll(resourceName, params);
     });
 }
 
 module.exports = destroyAll;
 
-},{}],81:[function(require,module,exports){
-function errorPrefix(resourceName, id) {
-  return 'DS.find(' + resourceName + ', ' + id + '[, options]): ';
-}
+},{"../../errors":87,"../../utils":89}],58:[function(require,module,exports){
+var DSUtils = require('../../utils');
+var DSErrors = require('../../errors');
 
-/**
- * @doc method
- * @id DS.async methods:find
- * @name find
- * @description
- * The "R" in "CRUD". Delegate to the `find` method of whichever adapter is being used (http by default) and inject the
- * resulting item into the data store.
- *
- * ## Signature:
- * ```js
- * DS.find(resourceName, id[, options])
- * ```
- *
- * ## Example:
- *
- * ```js
- * DS.get('document', 5); // undefined
- * DS.find('document', 5).then(function (document) {
- *   document; // { id: 5, author: 'John Anderson' }
- *
- *   // the document is now in the data store
- *   DS.get('document', 5); // { id: 5, author: 'John Anderson' }
- * });
- * ```
- *
- * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
- * @param {string|number} id The primary key of the item to retrieve.
- * @param {object=} options Optional configuration. Also passed along to the adapter's `find` method. Properties:
- *
- * - `{boolean=}` - `useClass` - Whether to wrap the injected item with the resource's instance constructor.
- * - `{boolean=}` - `bypassCache` - Bypass the cache. Default: `false`.
- * - `{boolean=}` - `cacheResponse` - Inject the data returned by the adapter into the data store. Default: `true`.
- *
- * @returns {Promise} Promise.
- *
- * ## Resolves with:
- *
- * - `{object}` - `item` - The item returned by the adapter.
- *
- * ## Rejects with:
- *
- * - `{IllegalArgumentError}`
- * - `{NonexistentResourceError}`
- */
 function find(resourceName, id, options) {
   var DS = this;
-  var DSUtils = DS.utils;
-  var DSErrors = DS.errors;
   var definition = DS.definitions[resourceName];
   var resource = DS.store[resourceName];
 
@@ -4025,11 +2464,11 @@ function find(resourceName, id, options) {
     options = options || {};
 
     if (!definition) {
-      reject(new DSErrors.NER(errorPrefix(resourceName, id) + resourceName));
+      reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName, id) + 'id: Must be a string or a number!'));
+      reject(new DSErrors.IA('"id" must be a string or a number!'));
     } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName, id) + 'options: Must be an object!'));
+      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
       if (!('cacheResponse' in options)) {
         options.cacheResponse = true;
@@ -4057,24 +2496,23 @@ function find(resourceName, id, options) {
               } else {
                 return DS.createInstance(resourceName, data, options);
               }
-            }).catch(function (err) {
-              delete resource.pendingQueries[id];
-              throw err;
             });
         }
         return resource.pendingQueries[id];
       } else {
         return item;
       }
+    }).catch(function (err) {
+      delete resource.pendingQueries[id];
+      throw err;
     });
 }
 
 module.exports = find;
 
-},{}],82:[function(require,module,exports){
-function errorPrefix(resourceName) {
-  return 'DS.findAll(' + resourceName + ', params[, options]): ';
-}
+},{"../../errors":87,"../../utils":89}],59:[function(require,module,exports){
+var DSUtils = require('../../utils');
+var DSErrors = require('../../errors');
 
 function processResults(data, resourceName, queryHash, options) {
   var DS = this;
@@ -4089,14 +2527,14 @@ function processResults(data, resourceName, queryHash, options) {
   resource.completedQueries[queryHash] = date;
 
   // Update modified timestamp of collection
-  resource.collectionModified = DS.utils.updateTimestamp(resource.collectionModified);
+  resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
   // Merge the new values into the cache
   var injected = DS.inject(resourceName, data, options);
 
   // Make sure each object is added to completedQueries
-  if (DS.utils.isArray(injected)) {
-    DS.utils.forEach(injected, function (item) {
+  if (DSUtils.isArray(injected)) {
+    DSUtils.forEach(injected, function (item) {
       if (item && item[idAttribute]) {
         resource.completedQueries[item[idAttribute]] = date;
       }
@@ -4109,71 +2547,8 @@ function processResults(data, resourceName, queryHash, options) {
   return injected;
 }
 
-/**
- * @doc method
- * @id DS.async methods:findAll
- * @name findAll
- * @description
- * The "R" in "CRUD". Delegate to the `findAll` method of whichever adapter is being used (http by default) and inject
- * the resulting collection into the data store.
- *
- * ## Signature:
- * ```js
- * DS.findAll(resourceName, params[, options])
- * ```
- *
- * ## Example:
- *
- * ```js
- * var params = {
- *   where: {
- *     author: {
- *       '==': 'John Anderson'
- *     }
- *   }
- * };
- *
- * DS.filter('document', params); // []
- * DS.findAll('document', params).then(function (documents) {
- *   documents;  // [{ id: '1', author: 'John Anderson', title: 'How to cook' },
- *               //  { id: '2', author: 'John Anderson', title: 'How NOT to cook' }]
- *
- *   // The documents are now in the data store
- *   DS.filter('document', params); // [{ id: '1', author: 'John Anderson', title: 'How to cook' },
- *                                  //  { id: '2', author: 'John Anderson', title: 'How NOT to cook' }]
- * });
- * ```
- *
- * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
- * @param {object=} params Parameter object that is serialized into the query string. Default properties:
- *
- * - `{object=}` - `where` - Where clause.
- * - `{number=}` - `limit` - Limit clause.
- * - `{number=}` - `skip` - Skip clause.
- * - `{number=}` - `offset` - Same as skip.
- * - `{string|array=}` - `orderBy` - OrderBy clause.
- *
- * @param {object=} options Optional configuration. Also passed along to the adapter's `findAll` method. Properties:
- *
- * - `{boolean=}` - `useClass` - Whether to wrap the injected item with the resource's instance constructor.
- * - `{boolean=}` - `bypassCache` - Bypass the cache. Default: `false`.
- * - `{boolean=}` - `cacheResponse` - Inject the data returned by the adapter into the data store. Default: `true`.
- *
- * @returns {Promise} Promise.
- *
- * ## Resolves with:
- *
- * - `{array}` - `items` - The collection of items returned by the adapter.
- *
- * ## Rejects with:
- *
- * - `{IllegalArgumentError}`
- * - `{NonexistentResourceError}`
- */
 function findAll(resourceName, params, options) {
   var DS = this;
-  var DSUtils = DS.utils;
-  var DSErrors = DS.errors;
   var definition = DS.definitions[resourceName];
   var resource = DS.store[resourceName];
   var queryHash;
@@ -4183,17 +2558,17 @@ function findAll(resourceName, params, options) {
     params = params || {};
 
     if (!DS.definitions[resourceName]) {
-      reject(new DSErrors.NER(errorPrefix(resourceName) + resourceName));
+      reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isObject(params)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName) + 'params: Must be an object!'));
+      reject(new DSErrors.IA('"params" must be an object!'));
     } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName) + 'options: Must be an object!'));
+      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
       if (!('cacheResponse' in options)) {
         options.cacheResponse = true;
       }
 
-      queryHash = DS.utils.toJson(params);
+      queryHash = DSUtils.toJson(params);
 
       if (options.bypassCache || !options.cacheResponse) {
         delete resource.completedQueries[queryHash];
@@ -4212,20 +2587,13 @@ function findAll(resourceName, params, options) {
               delete resource.pendingQueries[queryHash];
               var data = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
               if (options.cacheResponse) {
-                try {
-                  return processResults.call(DS, data, resourceName, queryHash, options);
-                } catch (err) {
-                  throw err;
-                }
+                return processResults.call(DS, data, resourceName, queryHash, options);
               } else {
-                DS.utils.forEach(data, function (item, i) {
+                DSUtils.forEach(data, function (item, i) {
                   data[i] = DS.createInstance(resourceName, item, options);
                 });
                 return data;
               }
-            }).catch(function (err) {
-              delete resource.pendingQueries[queryHash];
-              throw err;
             });
         }
 
@@ -4233,176 +2601,34 @@ function findAll(resourceName, params, options) {
       } else {
         return items;
       }
+    }).catch(function (err) {
+      delete resource.pendingQueries[queryHash];
+      throw err;
     });
 }
 
 module.exports = findAll;
 
-},{}],83:[function(require,module,exports){
+},{"../../errors":87,"../../utils":89}],60:[function(require,module,exports){
 module.exports = {
-  /**
-   * @doc method
-   * @id DS.async methods:create
-   * @name create
-   * @methodOf DS
-   * @description
-   * See [DS.create](/documentation/api/api/DS.async methods:create).
-   */
   create: require('./create'),
-
-  /**
-   * @doc method
-   * @id DS.async methods:destroy
-   * @name destroy
-   * @methodOf DS
-   * @description
-   * See [DS.destroy](/documentation/api/api/DS.async methods:destroy).
-   */
   destroy: require('./destroy'),
-
-  /**
-   * @doc method
-   * @id DS.async methods:destroyAll
-   * @name destroyAll
-   * @methodOf DS
-   * @description
-   * See [DS.destroyAll](/documentation/api/api/DS.async methods:destroyAll).
-   */
   destroyAll: require('./destroyAll'),
-
-  /**
-   * @doc method
-   * @id DS.async methods:find
-   * @name find
-   * @methodOf DS
-   * @description
-   * See [DS.find](/documentation/api/api/DS.async methods:find).
-   */
   find: require('./find'),
-
-  /**
-   * @doc method
-   * @id DS.async methods:findAll
-   * @name findAll
-   * @methodOf DS
-   * @description
-   * See [DS.findAll](/documentation/api/api/DS.async methods:findAll).
-   */
   findAll: require('./findAll'),
-
-  /**
-   * @doc method
-   * @id DS.async methods:loadRelations
-   * @name loadRelations
-   * @methodOf DS
-   * @description
-   * See [DS.loadRelations](/documentation/api/api/DS.async methods:loadRelations).
-   */
   loadRelations: require('./loadRelations'),
-
-  /**
-   * @doc method
-   * @id DS.async methods:refresh
-   * @name refresh
-   * @methodOf DS
-   * @description
-   * See [DS.refresh](/documentation/api/api/DS.async methods:refresh).
-   */
   refresh: require('./refresh'),
-
-  /**
-   * @doc method
-   * @id DS.async methods:save
-   * @name save
-   * @methodOf DS
-   * @description
-   * See [DS.save](/documentation/api/api/DS.async methods:save).
-   */
   save: require('./save'),
-
-  /**
-   * @doc method
-   * @id DS.async methods:update
-   * @name update
-   * @methodOf DS
-   * @description
-   * See [DS.update](/documentation/api/api/DS.async methods:update).
-   */
   update: require('./update'),
-
-  /**
-   * @doc method
-   * @id DS.async methods:updateAll
-   * @name updateAll
-   * @methodOf DS
-   * @description
-   * See [DS.updateAll](/documentation/api/api/DS.async methods:updateAll).
-   */
   updateAll: require('./updateAll')
 };
 
-},{"./create":78,"./destroy":79,"./destroyAll":80,"./find":81,"./findAll":82,"./loadRelations":84,"./refresh":85,"./save":86,"./update":87,"./updateAll":88}],84:[function(require,module,exports){
-function errorPrefix(resourceName) {
-  return 'DS.loadRelations(' + resourceName + ', instance(Id), relations[, options]): ';
-}
+},{"./create":55,"./destroy":56,"./destroyAll":57,"./find":58,"./findAll":59,"./loadRelations":61,"./refresh":62,"./save":63,"./update":64,"./updateAll":65}],61:[function(require,module,exports){
+var DSUtils = require('../../utils');
+var DSErrors = require('../../errors');
 
-/**
- * @doc method
- * @id DS.async methods:loadRelations
- * @name loadRelations
- * @description
- * Asynchronously load the indicated relations of the given instance.
- *
- * ## Signature:
- * ```js
- * DS.loadRelations(resourceName, instance|id, relations[, options])
- * ```
- *
- * ## Examples:
- *
- * ```js
- * DS.loadRelations('user', 10, ['profile']).then(function (user) {
- *   user.profile; // object
- *   assert.deepEqual(user.profile, DS.filter('profile', { userId: 10 })[0]);
- * });
- * ```
- *
- * ```js
- * var user = DS.get('user', 10);
- *
- * DS.loadRelations('user', user, ['profile']).then(function (user) {
- *   user.profile; // object
- *   assert.deepEqual(user.profile, DS.filter('profile', { userId: 10 })[0]);
- * });
- * ```
- *
- * ```js
- * DS.loadRelations('user', 10, ['profile'], { cacheResponse: false }).then(function (user) {
- *   user.profile; // object
- *   assert.equal(DS.filter('profile', { userId: 10 }).length, 0);
- * });
- * ```
- *
- * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
- * @param {string|number|object} instance The instance or the id of the instance for which relations are to be loaded.
- * @param {string|array=} relations The relation(s) to load.
- * @param {object=} options Optional configuration. Also passed along to the adapter's `find` or `findAll` methods.
- *
- * @returns {Promise} Promise.
- *
- * ## Resolves with:
- *
- * - `{object}` - `item` - The instance with its loaded relations.
- *
- * ## Rejects with:
- *
- * - `{IllegalArgumentError}`
- * - `{NonexistentResourceError}`
- */
 function loadRelations(resourceName, instance, relations, options) {
   var DS = this;
-  var DSUtils = DS.utils;
-  var DSErrors = DS.errors;
   var definition = DS.definitions[resourceName];
   var fields = [];
 
@@ -4418,13 +2644,13 @@ function loadRelations(resourceName, instance, relations, options) {
     }
 
     if (!definition) {
-      reject(new DS.errors.NER(errorPrefix(resourceName) + resourceName));
+      reject(new DS.errors.NER(resourceName));
     } else if (!DSUtils.isObject(instance)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName) + 'instance(Id): Must be a string, number or object!'));
+      reject(new DSErrors.IA('"instance(id)" must be a string, number or object!'));
     } else if (!DSUtils.isArray(relations)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName) + 'relations: Must be a string or an array!'));
+      reject(new DSErrors.IA('"relations" must be a string or an array!'));
     } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName) + 'options: Must be an object!'));
+      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
       if (!('findBelongsTo' in options)) {
         options.findBelongsTo = true;
@@ -4479,82 +2705,30 @@ function loadRelations(resourceName, instance, relations, options) {
 
 module.exports = loadRelations;
 
-},{}],85:[function(require,module,exports){
-function errorPrefix(resourceName, id) {
-  return 'DS.refresh(' + resourceName + ', ' + id + '[, options]): ';
-}
+},{"../../errors":87,"../../utils":89}],62:[function(require,module,exports){
+var DSUtils = require('../../utils');
+var DSErrors = require('../../errors');
 
-/**
- * @doc method
- * @id DS.async methods:refresh
- * @name refresh
- * @description
- * Like `DS.find`, except the resource is only refreshed from the adapter if it already exists in the data store.
- *
- * ## Signature:
- * ```js
- * DS.refresh(resourceName, id[, options])
- * ```
- * ## Example:
- *
- * ```js
- * // Exists in the data store, but we want a fresh copy
- * DS.get('document', 5);
- *
- * DS.refresh('document', 5).then(function (document) {
- *   document; // The fresh copy
- * });
- *
- * // Does not exist in the data store
- * DS.get('document', 6); // undefined
- *
- * DS.refresh('document', 6).then(function (document) {
- *   document; // undefined
- * });
- * ```
- *
- * ## Throws
- *
- * - `{IllegalArgumentError}`
- * - `{NonexistentResourceError}`
- *
- * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
- * @param {string|number} id The primary key of the item to refresh from the adapter.
- * @param {object=} options Optional configuration. Also passed along to the adapter's `find` method.
- * @returns {Promise} Promise.
- *
- * ## Resolves with:
- *
- * - `{object|undefined}` - `item` - The item returned by the adapter or `undefined` if the item wasn't already in the
- * data store.
- *
- * ## Rejects with:
- *
- * - `{IllegalArgumentError}`
- * - `{NonexistentResourceError}`
- */
 function refresh(resourceName, id, options) {
-  var DS = this;
-  var DSUtils = DS.utils;
-  var DSErrors = DS.errors;
+  var _this = this;
 
   return new DSUtils.Promise(function (resolve, reject) {
     options = options || {};
 
-    id = DSUtils.resolveId(DS.definitions[resourceName], id);
-    if (!DS.definitions[resourceName]) {
-      reject(new DS.errors.NER(errorPrefix(resourceName, id) + resourceName));
+    id = DSUtils.resolveId(_this.definitions[resourceName], id);
+    if (!_this.definitions[resourceName]) {
+      reject(new _this.errors.NER(resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName, id) + 'id: Must be a string or a number!'));
+      reject(new DSErrors.IA('"id" must be a string or a number!'));
     } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName, id) + 'options: Must be an object!'));
+      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
       options.bypassCache = true;
-      resolve(DS.get(resourceName, id));
+      resolve(_this.get(resourceName, id));
     }
   }).then(function (item) {
       if (item) {
-        return DS.find(resourceName, id, options);
+        return _this.find(resourceName, id, options);
       } else {
         return item;
       }
@@ -4563,65 +2737,14 @@ function refresh(resourceName, id, options) {
 
 module.exports = refresh;
 
-},{}],86:[function(require,module,exports){
-function errorPrefix(resourceName, id) {
-  return 'DS.save(' + resourceName + ', ' + id + '[, options]): ';
-}
+},{"../../errors":87,"../../utils":89}],63:[function(require,module,exports){
+var DSUtils = require('../../utils');
+var DSErrors = require('../../errors');
+var promisify = DSUtils.promisify;
 
-/**
- * @doc method
- * @id DS.async methods:save
- * @name save
- * @description
- * The "U" in "CRUD". Persist a single item already in the store and in it's current form to whichever adapter is being
- * used (http by default) and inject the resulting item into the data store.
- *
- * ## Signature:
- * ```js
- * DS.save(resourceName, id[, options])
- * ```
- *
- * ## Example:
- *
- * ```js
- * var document = DS.get('document', 5);
- *
- * document.title = 'How to cook in style';
- *
- * DS.save('document', 5).then(function (document) {
- *   document; // A reference to the document that's been persisted via an adapter
- * });
- * ```
- *
- * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
- * @param {string|number} id The primary key of the item to save.
- * @param {object=} options Optional configuration. Also passed along to the adapter's `update` method. Properties:
- *
- * - `{boolean=}` - `cacheResponse` - Inject the data returned by the adapter into the data store. Default: `true`.
- * - `{boolean=}` - `changesOnly` - Only send changed and added values to the adapter. Default: `false`.
- * - `{function=}` - `beforeValidate` - Override the resource or global lifecycle hook.
- * - `{function=}` - `validate` - Override the resource or global lifecycle hook.
- * - `{function=}` - `afterValidate` - Override the resource or global lifecycle hook.
- * - `{function=}` - `beforeUpdate` - Override the resource or global lifecycle hook.
- * - `{function=}` - `afterUpdate` - Override the resource or global lifecycle hook.
- *
- * @returns {Promise} Promise.
- *
- * ## Resolves with:
- *
- * - `{object}` - `item` - The item returned by the adapter.
- *
- * ## Rejects with:
- *
- * - `{IllegalArgumentError}`
- * - `{RuntimeError}`
- * - `{NonexistentResourceError}`
- */
 function save(resourceName, id, options) {
-  var DS = this;
-  var DSUtils = DS.utils;
-  var DSErrors = DS.errors;
-  var definition = DS.definitions[resourceName];
+  var _this = this;
+  var definition = _this.definitions[resourceName];
   var item;
 
   return new DSUtils.Promise(function (resolve, reject) {
@@ -4629,43 +2752,43 @@ function save(resourceName, id, options) {
 
     id = DSUtils.resolveId(definition, id);
     if (!definition) {
-      reject(new DSErrors.NER(errorPrefix(resourceName, id) + resourceName));
+      reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName, id) + 'id: Must be a string or a number!'));
+      reject(new DSErrors.IA('"id" must be a string or a number!'));
     } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName, id) + 'options: Must be an object!'));
-    } else if (!DS.get(resourceName, id)) {
-      reject(new DSErrors.R(errorPrefix(resourceName, id) + 'id: "' + id + '" not found!'));
+      reject(new DSErrors.IA('"options" must be an object!'));
+    } else if (!_this.get(resourceName, id)) {
+      reject(new DSErrors.R('id "' + id + '" not found in cache!'));
     } else {
-      item = DS.get(resourceName, id);
+      item = _this.get(resourceName, id);
       if (!('cacheResponse' in options)) {
         options.cacheResponse = true;
       }
       resolve(item);
     }
   }).then(function (attrs) {
-      var func = options.beforeValidate ? DSUtils.promisify(options.beforeValidate) : definition.beforeValidate;
+      var func = options.beforeValidate ? promisify(options.beforeValidate) : definition.beforeValidate;
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      var func = options.validate ? DSUtils.promisify(options.validate) : definition.validate;
+      var func = options.validate ? promisify(options.validate) : definition.validate;
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      var func = options.afterValidate ? DSUtils.promisify(options.afterValidate) : definition.afterValidate;
+      var func = options.afterValidate ? promisify(options.afterValidate) : definition.afterValidate;
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      var func = options.beforeUpdate ? DSUtils.promisify(options.beforeUpdate) : definition.beforeUpdate;
+      var func = options.beforeUpdate ? promisify(options.beforeUpdate) : definition.beforeUpdate;
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      DS.notify(definition, 'beforeUpdate', DSUtils.merge({}, attrs));
+      _this.notify(definition, 'beforeUpdate', DSUtils.merge({}, attrs));
       if (options.changesOnly) {
-        var resource = DS.store[resourceName];
+        var resource = _this.store[resourceName];
         resource.observers[id].deliver();
         var toKeep = [];
-        var changes = DS.changes(resourceName, id);
+        var changes = _this.changes(resourceName, id);
 
         for (var key in changes.added) {
           toKeep.push(key);
@@ -4681,22 +2804,22 @@ function save(resourceName, id, options) {
           attrs = changes;
         }
       }
-      return DS.adapters[options.adapter || definition.defaultAdapter].update(definition, id, options.serialize ? options.serialize(resourceName, attrs) : definition.serialize(resourceName, attrs), options);
+      return _this.getAdapter(definition, options).update(definition, id, options.serialize ? options.serialize(resourceName, attrs) : definition.serialize(resourceName, attrs), options);
     })
     .then(function (res) {
-      var func = options.afterUpdate ? DSUtils.promisify(options.afterUpdate) : definition.afterUpdate;
+      var func = options.afterUpdate ? promisify(options.afterUpdate) : definition.afterUpdate;
       var attrs = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      DS.notify(definition, 'afterUpdate', DSUtils.merge({}, attrs));
+      _this.notify(definition, 'afterUpdate', DSUtils.merge({}, attrs));
       if (options.cacheResponse) {
-        var resource = DS.store[resourceName];
-        var saved = DS.inject(definition.name, attrs, options);
+        var resource = _this.store[resourceName];
+        var saved = _this.inject(definition.name, attrs, options);
         resource.previousAttributes[id] = DSUtils.deepMixIn({}, saved);
         resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
         resource.observers[id].discardChanges();
-        return DS.get(resourceName, id);
+        return _this.get(resourceName, id);
       } else {
         return attrs;
       }
@@ -4705,80 +2828,25 @@ function save(resourceName, id, options) {
 
 module.exports = save;
 
-},{}],87:[function(require,module,exports){
-function errorPrefix(resourceName, id) {
-  return 'DS.update(' + resourceName + ', ' + id + ', attrs[, options]): ';
-}
+},{"../../errors":87,"../../utils":89}],64:[function(require,module,exports){
+var DSUtils = require('../../utils');
+var DSErrors = require('../../errors');
+var promisify = DSUtils.promisify;
 
-/**
- * @doc method
- * @id DS.async methods:update
- * @name update
- * @description
- * The "U" in "CRUD". Update the item of type `resourceName` and primary key `id` with `attrs`. This is useful when you
- * want to update an item that isn't already in the data store, or you don't want to update the item that's in the data
- * store until the adapter operation succeeds. This differs from `DS.save` which simply saves items in their current
- * form that already exist in the data store. The resulting item (by default) will be injected into the data store.
- *
- * ## Signature:
- * ```js
- * DS.update(resourceName, id, attrs[, options])
- * ```
- *
- * ## Example:
- *
- * ```js
- * DS.get('document', 5); // undefined
- *
- * DS.update('document', 5, {
- *   title: 'How to cook in style'
- * }).then(function (document) {
- *   document; // A reference to the document that's been saved via an adapter
- *             // and now resides in the data store
- * });
- * ```
- *
- * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
- * @param {string|number} id The primary key of the item to update.
- * @param {object} attrs The attributes with which to update the item.
- * @param {object=} options Optional configuration. Also passed along to the adapter's `update` method. Properties:
- *
- * - `{boolean=}` - `cacheResponse` - Inject the data returned by the adapter into the data store. Default: `true`.
- * - `{function=}` - `beforeValidate` - Override the resource or global lifecycle hook.
- * - `{function=}` - `validate` - Override the resource or global lifecycle hook.
- * - `{function=}` - `afterValidate` - Override the resource or global lifecycle hook.
- * - `{function=}` - `beforeUpdate` - Override the resource or global lifecycle hook.
- * - `{function=}` - `afterUpdate` - Override the resource or global lifecycle hook.
- *
- * @returns {Promise} Promise.
- *
- * ## Resolves with:
- *
- * - `{object}` - `item` - The item returned by the adapter.
- *
- * ## Rejects with:
- *
- * - `{IllegalArgumentError}`
- * - `{NonexistentResourceError}`
- */
 function update(resourceName, id, attrs, options) {
-  var DS = this;
-  var DSUtils = DS.utils;
-  var DSErrors = DS.errors;
-  var definition = DS.definitions[resourceName];
+  var _this = this;
+  var definition = _this.definitions[resourceName];
 
   return new DSUtils.Promise(function (resolve, reject) {
     options = options || {};
 
     id = DSUtils.resolveId(definition, id);
     if (!definition) {
-      reject(new DSErrors.NER(errorPrefix(resourceName, id) + resourceName));
+      reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName, id) + 'id: Must be a string or a number!'));
-    } else if (!DSUtils.isObject(attrs)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName, id) + 'attrs: Must be an object!'));
+      reject(new DSErrors.IA('"id" must be a string or a number!'));
     } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName, id) + 'options: Must be an object!'));
+      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
       if (!('cacheResponse' in options)) {
         options.cacheResponse = true;
@@ -4786,40 +2854,40 @@ function update(resourceName, id, attrs, options) {
       resolve(attrs);
     }
   }).then(function (attrs) {
-      var func = options.beforeValidate ? DSUtils.promisify(options.beforeValidate) : definition.beforeValidate;
+      var func = options.beforeValidate ? promisify(options.beforeValidate) : definition.beforeValidate;
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      var func = options.validate ? DSUtils.promisify(options.validate) : definition.validate;
+      var func = options.validate ? promisify(options.validate) : definition.validate;
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      var func = options.afterValidate ? DSUtils.promisify(options.afterValidate) : definition.afterValidate;
+      var func = options.afterValidate ? promisify(options.afterValidate) : definition.afterValidate;
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      var func = options.beforeUpdate ? DSUtils.promisify(options.beforeUpdate) : definition.beforeUpdate;
+      var func = options.beforeUpdate ? promisify(options.beforeUpdate) : definition.beforeUpdate;
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      DS.notify(definition, 'beforeUpdate', DSUtils.merge({}, attrs));
-      return DS.adapters[options.adapter || definition.defaultAdapter].update(definition, id, options.serialize ? options.serialize(resourceName, attrs) : definition.serialize(resourceName, attrs), options);
+      _this.notify(definition, 'beforeUpdate', DSUtils.merge({}, attrs));
+      return _this.getAdapter(definition, options).update(definition, id, options.serialize ? options.serialize(resourceName, attrs) : definition.serialize(resourceName, attrs), options);
     })
     .then(function (res) {
-      var func = options.afterUpdate ? DSUtils.promisify(options.afterUpdate) : definition.afterUpdate;
+      var func = options.afterUpdate ? promisify(options.afterUpdate) : definition.afterUpdate;
       var attrs = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      DS.notify(definition, 'afterUpdate', DSUtils.merge({}, attrs));
+      _this.notify(definition, 'afterUpdate', DSUtils.merge({}, attrs));
       if (options.cacheResponse) {
-        var resource = DS.store[resourceName];
-        var updated = DS.inject(definition.name, attrs, options);
+        var resource = _this.store[resourceName];
+        var updated = _this.inject(definition.name, attrs, options);
         var id = updated[definition.idAttribute];
         resource.previousAttributes[id] = DSUtils.deepMixIn({}, updated);
         resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
         resource.observers[id].discardChanges();
-        return DS.get(definition.name, id);
+        return _this.get(definition.name, id);
       } else {
         return attrs;
       }
@@ -4828,91 +2896,22 @@ function update(resourceName, id, attrs, options) {
 
 module.exports = update;
 
-},{}],88:[function(require,module,exports){
-function errorPrefix(resourceName) {
-  return 'DS.updateAll(' + resourceName + ', attrs, params[, options]): ';
-}
+},{"../../errors":87,"../../utils":89}],65:[function(require,module,exports){
+var DSUtils = require('../../utils');
+var DSErrors = require('../../errors');
+var promisify = DSUtils.promisify;
 
-/**
- * @doc method
- * @id DS.async methods:updateAll
- * @name updateAll
- * @description
- * The "U" in "CRUD". Update items of type `resourceName` with `attrs` according to the criteria specified by `params`.
- * This is useful when you want to update multiple items with the same attributes or you don't want to update the items
- * in the data store until the adapter operation succeeds. The resulting items (by default) will be injected into the
- * data store.
- *
- * ## Signature:
- * ```js
- * DS.updateAll(resourceName, attrs, params[, options])
- * ```
- *
- * ## Example:
- *
- * ```js
- * var params = {
- *   where: {
- *     author: {
- *       '==': 'John Anderson'
- *     }
- *   }
- * };
- *
- * DS.filter('document', params); // []
- *
- * DS.updateAll('document', 5, {
- *   author: 'Sally'
- * }, params).then(function (documents) {
- *   documents; // The documents that were updated via an adapter
- *              // and now reside in the data store
- *
- *   documents[0].author; // "Sally"
- * });
- * ```
- *
- * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
- * @param {object} attrs The attributes with which to update the items.
- * @param {object} params Parameter object that is serialized into the query string. Default properties:
- *
- *  - `{object=}` - `where` - Where clause.
- *  - `{number=}` - `limit` - Limit clause.
- *  - `{number=}` - `skip` - Skip clause.
- *  - `{number=}` - `offset` - Same as skip.
- *  - `{string|array=}` - `orderBy` - OrderBy clause.
- *
- * @param {object=} options Optional configuration. Also passed along to the adapter's `updateAll` method. Properties:
- *
- * - `{boolean=}` - `cacheResponse` - Inject the items returned by the adapter into the data store. Default: `true`.
- *
- * @returns {Promise} Promise.
- *
- * ## Resolves with:
- *
- * - `{array}` - `items` - The items returned by the adapter.
- *
- * ## Rejects with:
- *
- * - `{IllegalArgumentError}`
- * - `{NonexistentResourceError}`
- */
 function updateAll(resourceName, attrs, params, options) {
-  var DS = this;
-  var DSUtils = DS.utils;
-  var DSErrors = DS.errors;
-  var definition = DS.definitions[resourceName];
+  var _this = this;
+  var definition = _this.definitions[resourceName];
 
   return new DSUtils.Promise(function (resolve, reject) {
     options = options || {};
 
     if (!definition) {
-      reject(new DSErrors.NER(errorPrefix(resourceName) + resourceName));
-    } else if (!DSUtils.isObject(attrs)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName) + 'attrs: Must be an object!'));
-    } else if (!DSUtils.isObject(params)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName) + 'params: Must be an object!'));
+      reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA(errorPrefix(resourceName) + 'options: Must be an object!'));
+      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
       if (!('cacheResponse' in options)) {
         options.cacheResponse = true;
@@ -4920,34 +2919,34 @@ function updateAll(resourceName, attrs, params, options) {
       resolve(attrs);
     }
   }).then(function (attrs) {
-      var func = options.beforeValidate ? DSUtils.promisify(options.beforeValidate) : definition.beforeValidate;
+      var func = options.beforeValidate ? promisify(options.beforeValidate) : definition.beforeValidate;
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      var func = options.validate ? DSUtils.promisify(options.validate) : definition.validate;
+      var func = options.validate ? promisify(options.validate) : definition.validate;
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      var func = options.afterValidate ? DSUtils.promisify(options.afterValidate) : definition.afterValidate;
+      var func = options.afterValidate ? promisify(options.afterValidate) : definition.afterValidate;
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      var func = options.beforeUpdate ? DSUtils.promisify(options.beforeUpdate) : definition.beforeUpdate;
+      var func = options.beforeUpdate ? promisify(options.beforeUpdate) : definition.beforeUpdate;
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      DS.notify(definition, 'beforeUpdate', DSUtils.merge({}, attrs));
-      return DS.adapters[options.adapter || definition.defaultAdapter].updateAll(definition, options.serialize ? options.serialize(resourceName, attrs) : definition.serialize(resourceName, attrs), params, options);
+      _this.notify(definition, 'beforeUpdate', DSUtils.merge({}, attrs));
+      return _this.getAdapter(definition, options).updateAll(definition, options.serialize ? options.serialize(resourceName, attrs) : definition.serialize(resourceName, attrs), params, options);
     })
     .then(function (res) {
-      var func = options.afterUpdate ? DSUtils.promisify(options.afterUpdate) : definition.afterUpdate;
+      var func = options.afterUpdate ? promisify(options.afterUpdate) : definition.afterUpdate;
       var attrs = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (data) {
-      DS.notify(definition, 'afterUpdate', DSUtils.merge({}, attrs));
+      _this.notify(definition, 'afterUpdate', DSUtils.merge({}, attrs));
       if (options.cacheResponse) {
-        return DS.inject(definition.name, data, options);
+        return _this.inject(definition.name, data, options);
       } else {
         return data;
       }
@@ -4956,11 +2955,9 @@ function updateAll(resourceName, attrs, params, options) {
 
 module.exports = updateAll;
 
-},{}],89:[function(require,module,exports){
+},{"../../errors":87,"../../utils":89}],66:[function(require,module,exports){
 var DSUtils = require('../utils');
 var DSErrors = require('../errors');
-var DSHttpAdapter = require('../adapters/http');
-var DSLocalStorageAdapter = require('../adapters/localStorage');
 var syncMethods = require('./sync_methods');
 var asyncMethods = require('./async_methods');
 
@@ -5613,11 +3610,13 @@ function DS(options) {
    * Registered adapters available to the data store. Object consists of key-values pairs where the key is
    * the name of the adapter and the value is the adapter itself.
    */
-  this.adapters = {
-    DSHttpAdapter: new DSHttpAdapter(),
-    DSLocalStorageAdapter: new DSLocalStorageAdapter()
-  };
+  this.adapters = {};
 }
+
+DS.prototype.getAdapter = function (def, options) {
+  options = options || {};
+  return this.adapters[options.adapter] || this.adapters[def.defaultAdapter];
+};
 
 /**
  * @doc property
@@ -5642,7 +3641,7 @@ DSUtils.deepMixIn(DS.prototype, asyncMethods);
 
 module.exports = DS;
 
-},{"../adapters/http":76,"../adapters/localStorage":77,"../errors":110,"../utils":112,"./async_methods":83,"./sync_methods":101}],90:[function(require,module,exports){
+},{"../errors":87,"../utils":89,"./async_methods":60,"./sync_methods":78}],67:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.changeHistory(' + resourceName + ', id): ';
 }
@@ -5711,7 +3710,7 @@ function changeHistory(resourceName, id) {
 
 module.exports = changeHistory;
 
-},{}],91:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.changes(' + resourceName + ', id): ';
 }
@@ -5787,7 +3786,7 @@ function changes(resourceName, id) {
 
 module.exports = changes;
 
-},{}],92:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.compute(' + resourceName + ', instance): ';
 }
@@ -5885,7 +3884,7 @@ module.exports = {
   _compute: _compute
 };
 
-},{}],93:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.createInstance(' + resourceName + '[, attrs][, options]): ';
 }
@@ -5983,7 +3982,7 @@ function createInstance(resourceName, attrs, options) {
 
 module.exports = createInstance;
 
-},{}],94:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 /*jshint evil:true*/
 var errorPrefix = 'DS.defineResource(definition): ';
 
@@ -6281,7 +4280,7 @@ function defineResource(definition) {
 
 module.exports = defineResource;
 
-},{}],95:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 var observe = require('../../../lib/observe-js/observe-js');
 
 /**
@@ -6304,7 +4303,7 @@ function digest() {
 
 module.exports = digest;
 
-},{"../../../lib/observe-js/observe-js":1}],96:[function(require,module,exports){
+},{"../../../lib/observe-js/observe-js":1}],73:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.eject(' + resourceName + ', ' + id + '): ';
 }
@@ -6393,7 +4392,7 @@ function eject(resourceName, id) {
 
 module.exports = eject;
 
-},{}],97:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.ejectAll(' + resourceName + '[, params]): ';
 }
@@ -6498,7 +4497,7 @@ function ejectAll(resourceName, params) {
 
 module.exports = ejectAll;
 
-},{}],98:[function(require,module,exports){
+},{}],75:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.filter(' + resourceName + '[, params][, options]): ';
 }
@@ -6582,7 +4581,7 @@ function filter(resourceName, params, options) {
 
 module.exports = filter;
 
-},{}],99:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.get(' + resourceName + ', ' + id + '): ';
 }
@@ -6647,7 +4646,7 @@ function get(resourceName, id, options) {
 
 module.exports = get;
 
-},{}],100:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.hasChanges(' + resourceName + ', ' + id + '): ';
 }
@@ -6714,7 +4713,7 @@ function hasChanges(resourceName, id) {
 
 module.exports = hasChanges;
 
-},{}],101:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 module.exports = {
 
   /**
@@ -6908,7 +4907,7 @@ module.exports = {
   unlinkInverse: require('./unlinkInverse')
 };
 
-},{"./changeHistory":90,"./changes":91,"./compute":92,"./createInstance":93,"./defineResource":94,"./digest":95,"./eject":96,"./ejectAll":97,"./filter":98,"./get":99,"./hasChanges":100,"./inject":102,"./lastModified":103,"./lastSaved":104,"./link":105,"./linkAll":106,"./linkInverse":107,"./previous":108,"./unlinkInverse":109}],102:[function(require,module,exports){
+},{"./changeHistory":67,"./changes":68,"./compute":69,"./createInstance":70,"./defineResource":71,"./digest":72,"./eject":73,"./ejectAll":74,"./filter":75,"./get":76,"./hasChanges":77,"./inject":79,"./lastModified":80,"./lastSaved":81,"./link":82,"./linkAll":83,"./linkInverse":84,"./previous":85,"./unlinkInverse":86}],79:[function(require,module,exports){
 var observe = require('../../../lib/observe-js/observe-js');
 var _compute = require('./compute')._compute;
 var stack = 0;
@@ -7209,7 +5208,7 @@ function inject(resourceName, attrs, options) {
 
 module.exports = inject;
 
-},{"../../../lib/observe-js/observe-js":1,"./compute":92}],103:[function(require,module,exports){
+},{"../../../lib/observe-js/observe-js":1,"./compute":69}],80:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.lastModified(' + resourceName + '[, ' + id + ']): ';
 }
@@ -7270,7 +5269,7 @@ function lastModified(resourceName, id) {
 
 module.exports = lastModified;
 
-},{}],104:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.lastSaved(' + resourceName + '[, ' + id + ']): ';
 }
@@ -7336,7 +5335,7 @@ function lastSaved(resourceName, id) {
 
 module.exports = lastSaved;
 
-},{}],105:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.link(' + resourceName + ', id[, relations]): ';
 }
@@ -7433,7 +5432,7 @@ function link(resourceName, id, relations) {
 
 module.exports = link;
 
-},{}],106:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.linkAll(' + resourceName + '[, params][, relations]): ';
 }
@@ -7545,7 +5544,7 @@ function linkAll(resourceName, params, relations) {
 
 module.exports = linkAll;
 
-},{}],107:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.linkInverse(' + resourceName + ', id[, relations]): ';
 }
@@ -7637,7 +5636,7 @@ function linkInverse(resourceName, id, relations) {
 
 module.exports = linkInverse;
 
-},{}],108:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 function errorPrefix(resourceName, id) {
   return 'DS.previous(' + resourceName + '[, ' + id + ']): ';
 }
@@ -7697,7 +5696,7 @@ function previous(resourceName, id) {
 
 module.exports = previous;
 
-},{}],109:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.unlinkInverse(' + resourceName + ', id[, relations]): ';
 }
@@ -7791,7 +5790,7 @@ function unlinkInverse(resourceName, id, relations) {
 
 module.exports = unlinkInverse;
 
-},{}],110:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 /**
  * @doc function
  * @id errors.types:IllegalArgumentError
@@ -7922,7 +5921,9 @@ module.exports = {
   NER: NonexistentResourceError
 };
 
-},{}],111:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
+var DS = require('./datastore');
+
 /**
  * @doc overview
  * @id js-data
@@ -7932,7 +5933,7 @@ module.exports = {
  *
  * ## Install
  *
- * `bower install js-data` or `npm install js-data`
+ * `bower install --save js-data` or `npm install --save js-data`
  *
  * #### Manual download
  * Download js-data from the [Releases](https://github.com/js-data/js-data/releases) section of the js-data GitHub project.
@@ -7950,14 +5951,15 @@ module.exports = {
  * [DSErrors](/documentation/api/api/DSErrors) provides references to the various errors thrown by the data store.
  */
 module.exports = {
-  DS: require('./datastore'),
-  DSHttpAdapter: require('./adapters/http'),
-  DSLocalStorageAdapter: require('./adapters/localStorage'),
+  DS: DS,
+  createStore: function () {
+    return new DS();
+  },
   DSUtils: require('./utils'),
   DSErrors: require('./errors')
 };
 
-},{"./adapters/http":76,"./adapters/localStorage":77,"./datastore":89,"./errors":110,"./utils":112}],112:[function(require,module,exports){
+},{"./datastore":66,"./errors":87,"./utils":89}],89:[function(require,module,exports){
 function Events(target) {
   var events = {};
   target = target || this;
@@ -8052,7 +6054,6 @@ module.exports = {
     }
   },
   Promise: require('es6-promise').Promise,
-  http: require('axios'),
   deepFreeze: function deepFreeze(o) {
     if (typeof Object.freeze === 'function') {
       var prop, propKey;
@@ -8136,5 +6137,5 @@ module.exports = {
   Events: Events
 };
 
-},{"axios":2,"es6-promise":23,"mout/array/contains":34,"mout/array/filter":35,"mout/array/forEach":36,"mout/array/remove":39,"mout/array/slice":40,"mout/array/sort":41,"mout/array/toLookup":42,"mout/lang/isArray":48,"mout/lang/isBoolean":49,"mout/lang/isEmpty":50,"mout/lang/isFunction":51,"mout/lang/isNumber":53,"mout/lang/isObject":54,"mout/lang/isString":56,"mout/object/deepMixIn":60,"mout/object/forOwn":62,"mout/object/merge":64,"mout/object/pick":67,"mout/object/set":68,"mout/string/makePath":71,"mout/string/pascalCase":72,"mout/string/upperCase":75}]},{},[111])(111)
+},{"es6-promise":2,"mout/array/contains":13,"mout/array/filter":14,"mout/array/forEach":15,"mout/array/remove":18,"mout/array/slice":19,"mout/array/sort":20,"mout/array/toLookup":21,"mout/lang/isArray":27,"mout/lang/isBoolean":28,"mout/lang/isEmpty":29,"mout/lang/isFunction":30,"mout/lang/isNumber":32,"mout/lang/isObject":33,"mout/lang/isString":35,"mout/object/deepMixIn":39,"mout/object/forOwn":41,"mout/object/merge":43,"mout/object/pick":46,"mout/object/set":47,"mout/string/makePath":50,"mout/string/pascalCase":51,"mout/string/upperCase":54}]},{},[88])(88)
 });

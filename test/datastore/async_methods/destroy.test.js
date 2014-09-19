@@ -1,14 +1,10 @@
 describe('DS.destroy(resourceName, id)', function () {
-  function errorPrefix(resourceName, id) {
-    return 'DS.destroy(' + resourceName + ', ' + id + '[, options]): ';
-  }
-
   it('should throw an error when method pre-conditions are not met', function () {
     datastore.destroy('does not exist', 5).then(function () {
       fail('should have rejected');
     }, function (err) {
       assert.isTrue(err instanceof datastore.errors.NonexistentResourceError);
-      assert.equal(err.message, errorPrefix('does not exist', 5) + 'does not exist is not a registered resource!');
+      assert.equal(err.message, 'does not exist is not a registered resource!');
     });
 
     DSUtils.forEach(TYPES_EXCEPT_STRING_OR_NUMBER, function (key) {
@@ -16,7 +12,7 @@ describe('DS.destroy(resourceName, id)', function () {
         fail('should have rejected');
       }, function (err) {
         assert.isTrue(err instanceof datastore.errors.IllegalArgumentError);
-        assert.equal(err.message, errorPrefix('post', key) + 'id: Must be a string or a number!');
+        assert.equal(err.message, '"id" must be a string or a number!');
       });
     });
   });
