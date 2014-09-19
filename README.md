@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="64" height="64" />
 
-## js-data
+## js-data  [![Stories in Backlog](https://badge.waffle.io/js-data/js-data.svg?label=backlog&title=Backlog)](http://waffle.io/js-data/js-data) [![Stories in Ready](https://badge.waffle.io/js-data/js-data.svg?label=ready&title=Ready)](http://waffle.io/js-data/js-data) [![Stories in progress](https://badge.waffle.io/js-data/js-data.svg?label=in%20progress&title=In%20Progress)](http://waffle.io/js-data/js-data)
 
 Inspired by [Ember Data](https://github.com/emberjs/data), JSData is the model layer you've been craving. It consists of a convenient in-memory cache for managing your data, and several adapters for communicating with various persistence layers.
 
