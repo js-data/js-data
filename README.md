@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/js-data/js-data/prototype/js-data.png" alt="js-data logo" title="js-data" align="right" width="64" height="64" />
+<img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="64" height="64" />
 
 ## js-data
 
@@ -11,6 +11,7 @@ Unlike Backbone and Ember Models, JSData does not require the use of getters and
 Supporting relations, computed properties, model lifecycle control and a slew of other features, JSData is the tool for giving your data the respect it deserves.
 
 __Latest Release:__ [0.0.1](http://www.js-data.io/)
+
 __master:__ 0.1.0
 
 JSData is pre-alpha. The API is subject to change, though the current api is well tested.
