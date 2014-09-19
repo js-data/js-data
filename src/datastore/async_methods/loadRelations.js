@@ -2,15 +2,15 @@ var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
 function loadRelations(resourceName, instance, relations, options) {
-  var DS = this;
-  var definition = DS.definitions[resourceName];
+  var _this = this;
+  var definition = _this.definitions[resourceName];
   var fields = [];
 
   return new DSUtils.Promise(function (resolve, reject) {
     options = options || {};
 
     if (DSUtils.isString(instance) || DSUtils.isNumber(instance)) {
-      instance = DS.get(resourceName, instance);
+      instance = _this.get(resourceName, instance);
     }
 
     if (DSUtils.isString(relations)) {
@@ -18,7 +18,7 @@ function loadRelations(resourceName, instance, relations, options) {
     }
 
     if (!definition) {
-      reject(new DS.errors.NER(resourceName));
+      reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isObject(instance)) {
       reject(new DSErrors.IA('"instance(id)" must be a string, number or object!'));
     } else if (!DSUtils.isArray(relations)) {
@@ -43,17 +43,17 @@ function loadRelations(resourceName, instance, relations, options) {
           params[def.foreignKey] = instance[definition.idAttribute];
 
           if (def.type === 'hasMany' && params[def.foreignKey]) {
-            task = DS.findAll(relationName, params, options);
+            task = _this.findAll(relationName, params, options);
           } else if (def.type === 'hasOne') {
             if (def.localKey && instance[def.localKey]) {
-              task = DS.find(relationName, instance[def.localKey], options);
+              task = _this.find(relationName, instance[def.localKey], options);
             } else if (def.foreignKey && params[def.foreignKey]) {
-              task = DS.findAll(relationName, params, options).then(function (hasOnes) {
+              task = _this.findAll(relationName, params, options).then(function (hasOnes) {
                 return hasOnes.length ? hasOnes[0] : null;
               });
             }
           } else if (instance[def.localKey]) {
-            task = DS.find(relationName, instance[def.localKey], options);
+            task = _this.find(relationName, instance[def.localKey], options);
           }
 
           if (task) {

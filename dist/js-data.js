@@ -2456,9 +2456,9 @@ var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
 function find(resourceName, id, options) {
-  var DS = this;
-  var definition = DS.definitions[resourceName];
-  var resource = DS.store[resourceName];
+  var _this = this;
+  var definition = _this.definitions[resourceName];
+  var resource = _this.store[resourceName];
 
   return new DSUtils.Promise(function (resolve, reject) {
     options = options || {};
@@ -2477,7 +2477,7 @@ function find(resourceName, id, options) {
         delete resource.completedQueries[id];
       }
       if (id in resource.completedQueries) {
-        resolve(DS.get(resourceName, id));
+        resolve(_this.get(resourceName, id));
       } else {
         resolve();
       }
@@ -2485,16 +2485,16 @@ function find(resourceName, id, options) {
   }).then(function (item) {
       if (!(id in resource.completedQueries)) {
         if (!(id in resource.pendingQueries)) {
-          resource.pendingQueries[id] = DS.adapters[options.adapter || definition.defaultAdapter].find(definition, id, options)
+          resource.pendingQueries[id] = _this.getAdapter(definition, options).find(definition, id, options)
             .then(function (res) {
               var data = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
               if (options.cacheResponse) {
                 // Query is no longer pending
                 delete resource.pendingQueries[id];
                 resource.completedQueries[id] = new Date().getTime();
-                return DS.inject(resourceName, data, options);
+                return _this.inject(resourceName, data, options);
               } else {
-                return DS.createInstance(resourceName, data, options);
+                return _this.createInstance(resourceName, data, options);
               }
             });
         }
@@ -2515,9 +2515,9 @@ var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
 function processResults(data, resourceName, queryHash, options) {
-  var DS = this;
-  var resource = DS.store[resourceName];
-  var idAttribute = DS.definitions[resourceName].idAttribute;
+  var _this = this;
+  var resource = _this.store[resourceName];
+  var idAttribute = _this.definitions[resourceName].idAttribute;
   var date = new Date().getTime();
 
   data = data || [];
@@ -2530,7 +2530,7 @@ function processResults(data, resourceName, queryHash, options) {
   resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
   // Merge the new values into the cache
-  var injected = DS.inject(resourceName, data, options);
+  var injected = _this.inject(resourceName, data, options);
 
   // Make sure each object is added to completedQueries
   if (DSUtils.isArray(injected)) {
@@ -2548,16 +2548,16 @@ function processResults(data, resourceName, queryHash, options) {
 }
 
 function findAll(resourceName, params, options) {
-  var DS = this;
-  var definition = DS.definitions[resourceName];
-  var resource = DS.store[resourceName];
+  var _this = this;
+  var definition = _this.definitions[resourceName];
+  var resource = _this.store[resourceName];
   var queryHash;
 
   return new DSUtils.Promise(function (resolve, reject) {
     options = options || {};
     params = params || {};
 
-    if (!DS.definitions[resourceName]) {
+    if (!_this.definitions[resourceName]) {
       reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isObject(params)) {
       reject(new DSErrors.IA('"params" must be an object!'));
@@ -2574,7 +2574,7 @@ function findAll(resourceName, params, options) {
         delete resource.completedQueries[queryHash];
       }
       if (queryHash in resource.completedQueries) {
-        resolve(DS.filter(resourceName, params, options));
+        resolve(_this.filter(resourceName, params, options));
       } else {
         resolve();
       }
@@ -2582,15 +2582,15 @@ function findAll(resourceName, params, options) {
   }).then(function (items) {
       if (!(queryHash in resource.completedQueries)) {
         if (!(queryHash in resource.pendingQueries)) {
-          resource.pendingQueries[queryHash] = DS.adapters[options.adapter || definition.defaultAdapter].findAll(definition, params, options)
+          resource.pendingQueries[queryHash] = _this.getAdapter(definition, options).findAll(definition, params, options)
             .then(function (res) {
               delete resource.pendingQueries[queryHash];
               var data = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
               if (options.cacheResponse) {
-                return processResults.call(DS, data, resourceName, queryHash, options);
+                return processResults.call(_this, data, resourceName, queryHash, options);
               } else {
                 DSUtils.forEach(data, function (item, i) {
-                  data[i] = DS.createInstance(resourceName, item, options);
+                  data[i] = _this.createInstance(resourceName, item, options);
                 });
                 return data;
               }
@@ -2628,15 +2628,15 @@ var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
 function loadRelations(resourceName, instance, relations, options) {
-  var DS = this;
-  var definition = DS.definitions[resourceName];
+  var _this = this;
+  var definition = _this.definitions[resourceName];
   var fields = [];
 
   return new DSUtils.Promise(function (resolve, reject) {
     options = options || {};
 
     if (DSUtils.isString(instance) || DSUtils.isNumber(instance)) {
-      instance = DS.get(resourceName, instance);
+      instance = _this.get(resourceName, instance);
     }
 
     if (DSUtils.isString(relations)) {
@@ -2644,7 +2644,7 @@ function loadRelations(resourceName, instance, relations, options) {
     }
 
     if (!definition) {
-      reject(new DS.errors.NER(resourceName));
+      reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isObject(instance)) {
       reject(new DSErrors.IA('"instance(id)" must be a string, number or object!'));
     } else if (!DSUtils.isArray(relations)) {
@@ -2669,17 +2669,17 @@ function loadRelations(resourceName, instance, relations, options) {
           params[def.foreignKey] = instance[definition.idAttribute];
 
           if (def.type === 'hasMany' && params[def.foreignKey]) {
-            task = DS.findAll(relationName, params, options);
+            task = _this.findAll(relationName, params, options);
           } else if (def.type === 'hasOne') {
             if (def.localKey && instance[def.localKey]) {
-              task = DS.find(relationName, instance[def.localKey], options);
+              task = _this.find(relationName, instance[def.localKey], options);
             } else if (def.foreignKey && params[def.foreignKey]) {
-              task = DS.findAll(relationName, params, options).then(function (hasOnes) {
+              task = _this.findAll(relationName, params, options).then(function (hasOnes) {
                 return hasOnes.length ? hasOnes[0] : null;
               });
             }
           } else if (instance[def.localKey]) {
-            task = DS.find(relationName, instance[def.localKey], options);
+            task = _this.find(relationName, instance[def.localKey], options);
           }
 
           if (task) {
@@ -3642,63 +3642,26 @@ DSUtils.deepMixIn(DS.prototype, asyncMethods);
 module.exports = DS;
 
 },{"../errors":87,"../utils":89,"./async_methods":60,"./sync_methods":78}],67:[function(require,module,exports){
-function errorPrefix(resourceName) {
-  return 'DS.changeHistory(' + resourceName + ', id): ';
-}
+var DSUtils = require('../../utils');
+var DSErrors = require('../../errors');
 
-/**
- * @doc method
- * @id DS.sync methods:changeHistory
- * @name changeHistory
- * @description
- * Synchronously return the changeHistory of the item of the type specified by `resourceName` that has the primary key
- * specified by `id`. This object represents the history of changes in the item since the item was last injected or
- * re-injected (on save, update, etc.) into the data store.
- *
- * ## Signature:
- * ```js
- * DS.changeHistory(resourceName, id)
- * ```
- *
- * ## Example:
- *
- * ```js
- * var d = DS.get('document', 5); // { author: 'John Anderson', id: 5 }
- *
- * d.author = 'Sally';
- *
- * // You might have to do $scope.$apply() first
- *
- * DS.changeHistory('document', 5); // [{...}] Array of changes
- * ```
- *
- * ## Throws
- *
- * - `{IllegalArgumentError}`
- * - `{NonexistentResourceError}`
- *
- * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
- * @param {string|number=} id The primary key of the item for which to retrieve the changeHistory.
- * @returns {object} The changeHistory of the item of the type specified by `resourceName` with the primary key specified by `id`.
- */
 function changeHistory(resourceName, id) {
-  var DS = this;
-  var DSUtils = DS.utils;
-  var definition = DS.definitions[resourceName];
-  var resource = DS.store[resourceName];
+  var _this = this;
+  var definition = _this.definitions[resourceName];
+  var resource = _this.store[resourceName];
 
   id = DSUtils.resolveId(definition, id);
-  if (resourceName && !DS.definitions[resourceName]) {
-    throw new DS.errors.NER(errorPrefix(resourceName) + resourceName);
+  if (resourceName && !_this.definitions[resourceName]) {
+    throw new DSErrors.NER(resourceName);
   } else if (id && !DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new DS.errors.IA(errorPrefix(resourceName) + 'id: Must be a string or a number!');
+    throw new DSErrors.IA('"id" must be a string or a number!');
   }
 
   if (!definition.keepChangeHistory) {
-    console.warn(errorPrefix(resourceName) + 'changeHistory is disabled for this resource!');
+    console.warn('changeHistory is disabled for this resource!');
   } else {
     if (resourceName) {
-      var item = DS.get(resourceName, id);
+      var item = _this.get(resourceName, id);
       if (item) {
         return resource.changeHistories[id];
       }
@@ -3710,7 +3673,7 @@ function changeHistory(resourceName, id) {
 
 module.exports = changeHistory;
 
-},{}],68:[function(require,module,exports){
+},{"../../errors":87,"../../utils":89}],68:[function(require,module,exports){
 function errorPrefix(resourceName) {
   return 'DS.changes(' + resourceName + ', id): ';
 }
@@ -3885,84 +3848,22 @@ module.exports = {
 };
 
 },{}],70:[function(require,module,exports){
-function errorPrefix(resourceName) {
-  return 'DS.createInstance(' + resourceName + '[, attrs][, options]): ';
-}
+var DSUtils = require('../../utils');
+var DSErrors = require('../../errors');
 
-/**
- * @doc method
- * @id DS.sync methods:createInstance
- * @name createInstance
- * @description
- * Return a new instance of the specified resource.
- *
- * ## Signature:
- * ```js
- * DS.createInstance(resourceName[, attrs][, options])
- * ```
- *
- * ## Example:
- *
- * ```js
- * var User = DS.defineResource({
- *   name: 'user',
- *   methods: {
- *     say: function () {
- *       return 'hi';
- *     }
- *   }
- * });
- *
- * var user = User.createInstance();
- * var user2 = DS.createInstance('user');
- *
- * user instanceof User[User.class]; // true
- * user2 instanceof User[User.class]; // true
- *
- * user.say(); // hi
- * user2.say(); // hi
- *
- * var user3 = User.createInstance({ name: 'John' }, { useClass: false });
- * var user4 = DS.createInstance('user', { name: 'John' }, { useClass: false });
- *
- * user3; // { name: 'John' }
- * user3 instanceof User[User.class]; // false
- *
- * user4; // { name: 'John' }
- * user4 instanceof User[User.class]; // false
- *
- * user3.say(); // TypeError: undefined is not a function
- * user4.say(); // TypeError: undefined is not a function
- * ```
- *
- * ## Throws
- *
- * - `{IllegalArgumentError}`
- * - `{NonexistentResourceError}`
- *
- * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
- * @param {object=} attrs Optional attributes to mix in to the new instance.
- * @param {object=} options Optional configuration. Properties:
- *
- * - `{boolean=}` - `useClass` - Whether to wrap the injected item with the resource's instance constructor.
- *
- * @returns {object} The new instance.
- */
 function createInstance(resourceName, attrs, options) {
-  var DS = this;
-  var DSUtils = DS.utils;
-  var DSErrors = DS.errors;
-  var definition = DS.definitions[resourceName];
+  var _this = this;
+  var definition = _this.definitions[resourceName];
 
   attrs = attrs || {};
   options = options || {};
 
   if (!definition) {
-    throw new DSErrors.NER(errorPrefix(resourceName) + resourceName);
+    throw new DSErrors.NER(resourceName);
   } else if (attrs && !DSUtils.isObject(attrs)) {
-    throw new DSErrors.IA(errorPrefix(resourceName) + 'attrs: Must be an object!');
+    throw new DSErrors.IA('"attrs" must be an object!');
   } else if (!DSUtils.isObject(options)) {
-    throw new DSErrors.IA(errorPrefix(resourceName) + 'options: Must be an object!');
+    throw new DSErrors.IA('"options" must be an object!');
   }
 
   if (!('useClass' in options)) {
@@ -3982,7 +3883,7 @@ function createInstance(resourceName, attrs, options) {
 
 module.exports = createInstance;
 
-},{}],71:[function(require,module,exports){
+},{"../../errors":87,"../../utils":89}],71:[function(require,module,exports){
 /*jshint evil:true*/
 var errorPrefix = 'DS.defineResource(definition): ';
 

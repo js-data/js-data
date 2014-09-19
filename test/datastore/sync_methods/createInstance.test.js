@@ -1,12 +1,8 @@
 describe('DS.createInstance(resourceName[, attrs][, options])', function () {
-  function errorPrefix(resourceName) {
-    return 'DS.createInstance(' + resourceName + '[, attrs][, options]): ';
-  }
-
   it('should throw an error when method pre-conditions are not met', function () {
     assert.throws(function () {
       datastore.createInstance('fruit loops');
-    }, datastore.errors.NonexistentResourceError, errorPrefix('fruit loops') + 'fruit loops is not a registered resource!');
+    }, datastore.errors.NonexistentResourceError, 'fruit loops is not a registered resource!');
 
     DSUtils.forEach(TYPES_EXCEPT_OBJECT, function (key) {
       if (!key) {
@@ -14,7 +10,7 @@ describe('DS.createInstance(resourceName[, attrs][, options])', function () {
       }
       assert.throws(function () {
         datastore.createInstance('post', key);
-      }, datastore.errors.IllegalArgumentError, errorPrefix('post') + 'attrs: Must be an object!');
+      }, datastore.errors.IllegalArgumentError, '"attrs" must be an object!');
     });
 
     DSUtils.forEach(TYPES_EXCEPT_OBJECT, function (key) {
@@ -23,7 +19,7 @@ describe('DS.createInstance(resourceName[, attrs][, options])', function () {
       }
       assert.throws(function () {
         datastore.createInstance('post', {}, key);
-      }, datastore.errors.IllegalArgumentError, errorPrefix('post') + 'options: Must be an object!');
+      }, datastore.errors.IllegalArgumentError, '"options" must be an object!');
     });
   });
 

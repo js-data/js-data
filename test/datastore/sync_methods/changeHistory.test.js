@@ -1,18 +1,14 @@
 describe('DS.changeHistory(resourceName, id)', function () {
-  function errorPrefix(resourceName) {
-    return 'DS.changeHistory(' + resourceName + ', id): ';
-  }
-
   it('should throw an error when method pre-conditions are not met', function () {
     assert.throws(function () {
       datastore.changeHistory('does not exist', {});
-    }, datastore.errors.NonexistentResourceError, errorPrefix('does not exist') + 'does not exist is not a registered resource!');
+    }, datastore.errors.NonexistentResourceError, 'does not exist is not a registered resource!');
 
     DSUtils.forEach(TYPES_EXCEPT_STRING_OR_NUMBER, function (key) {
       if (key) {
         assert.throws(function () {
           datastore.changeHistory('post', key);
-        }, datastore.errors.IllegalArgumentError, errorPrefix('post') + 'id: Must be a string or a number!');
+        }, datastore.errors.IllegalArgumentError, '"id" must be a string or a number!');
       }
     });
   });

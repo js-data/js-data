@@ -1,4 +1,4 @@
-##### 0.0.2 - xx September 2014
+##### 0.2.0 - xx September 2014
 
 ###### Backwards compatible API changes
 - jmdobry/angular-data#145 - Add "useClass" option to inject, find, findAll, create

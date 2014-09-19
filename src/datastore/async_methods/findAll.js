@@ -2,9 +2,9 @@ var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
 function processResults(data, resourceName, queryHash, options) {
-  var DS = this;
-  var resource = DS.store[resourceName];
-  var idAttribute = DS.definitions[resourceName].idAttribute;
+  var _this = this;
+  var resource = _this.store[resourceName];
+  var idAttribute = _this.definitions[resourceName].idAttribute;
   var date = new Date().getTime();
 
   data = data || [];
@@ -17,7 +17,7 @@ function processResults(data, resourceName, queryHash, options) {
   resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
   // Merge the new values into the cache
-  var injected = DS.inject(resourceName, data, options);
+  var injected = _this.inject(resourceName, data, options);
 
   // Make sure each object is added to completedQueries
   if (DSUtils.isArray(injected)) {
@@ -35,16 +35,16 @@ function processResults(data, resourceName, queryHash, options) {
 }
 
 function findAll(resourceName, params, options) {
-  var DS = this;
-  var definition = DS.definitions[resourceName];
-  var resource = DS.store[resourceName];
+  var _this = this;
+  var definition = _this.definitions[resourceName];
+  var resource = _this.store[resourceName];
   var queryHash;
 
   return new DSUtils.Promise(function (resolve, reject) {
     options = options || {};
     params = params || {};
 
-    if (!DS.definitions[resourceName]) {
+    if (!_this.definitions[resourceName]) {
       reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isObject(params)) {
       reject(new DSErrors.IA('"params" must be an object!'));
@@ -61,7 +61,7 @@ function findAll(resourceName, params, options) {
         delete resource.completedQueries[queryHash];
       }
       if (queryHash in resource.completedQueries) {
-        resolve(DS.filter(resourceName, params, options));
+        resolve(_this.filter(resourceName, params, options));
       } else {
         resolve();
       }
@@ -69,15 +69,15 @@ function findAll(resourceName, params, options) {
   }).then(function (items) {
       if (!(queryHash in resource.completedQueries)) {
         if (!(queryHash in resource.pendingQueries)) {
-          resource.pendingQueries[queryHash] = DS.adapters[options.adapter || definition.defaultAdapter].findAll(definition, params, options)
+          resource.pendingQueries[queryHash] = _this.getAdapter(definition, options).findAll(definition, params, options)
             .then(function (res) {
               delete resource.pendingQueries[queryHash];
               var data = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
               if (options.cacheResponse) {
-                return processResults.call(DS, data, resourceName, queryHash, options);
+                return processResults.call(_this, data, resourceName, queryHash, options);
               } else {
                 DSUtils.forEach(data, function (item, i) {
-                  data[i] = DS.createInstance(resourceName, item, options);
+                  data[i] = _this.createInstance(resourceName, item, options);
                 });
                 return data;
               }

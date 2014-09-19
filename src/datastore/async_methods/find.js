@@ -2,9 +2,9 @@ var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
 function find(resourceName, id, options) {
-  var DS = this;
-  var definition = DS.definitions[resourceName];
-  var resource = DS.store[resourceName];
+  var _this = this;
+  var definition = _this.definitions[resourceName];
+  var resource = _this.store[resourceName];
 
   return new DSUtils.Promise(function (resolve, reject) {
     options = options || {};
@@ -23,7 +23,7 @@ function find(resourceName, id, options) {
         delete resource.completedQueries[id];
       }
       if (id in resource.completedQueries) {
-        resolve(DS.get(resourceName, id));
+        resolve(_this.get(resourceName, id));
       } else {
         resolve();
       }
@@ -31,16 +31,16 @@ function find(resourceName, id, options) {
   }).then(function (item) {
       if (!(id in resource.completedQueries)) {
         if (!(id in resource.pendingQueries)) {
-          resource.pendingQueries[id] = DS.adapters[options.adapter || definition.defaultAdapter].find(definition, id, options)
+          resource.pendingQueries[id] = _this.getAdapter(definition, options).find(definition, id, options)
             .then(function (res) {
               var data = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
               if (options.cacheResponse) {
                 // Query is no longer pending
                 delete resource.pendingQueries[id];
                 resource.completedQueries[id] = new Date().getTime();
-                return DS.inject(resourceName, data, options);
+                return _this.inject(resourceName, data, options);
               } else {
-                return DS.createInstance(resourceName, data, options);
+                return _this.createInstance(resourceName, data, options);
               }
             });
         }
