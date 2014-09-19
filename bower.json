@@ -1,0 +1,37 @@
+{
+  "name": "js-data",
+  "description": "Data store.",
+  "version": "0.1.0",
+  "homepage": "http://www.js-data.io/",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/js-data/js-data.git"
+  },
+  "author": {
+    "name": "Jason Dobry",
+    "url": "http://www.pseudobry.com",
+    "email": "jason.dobry@gmail.com"
+  },
+  "main": "./dist/js-data.min.js",
+  "ignore": [
+    ".idea/",
+    ".*",
+    "*.iml",
+    "src/",
+    "lib/",
+    "doc/",
+    "guide/",
+    "coverage/",
+    "Gruntfile.js",
+    "node_modules/",
+    "test/",
+    "package.json",
+    "karma.conf.js",
+    "karma.start.js"
+  ],
+  "devDependencies": {
+    "observe-js": "0.3.4",
+    "js-data-http": "~0.1.x",
+    "js-data-localstorage": "~0.1.x"
+  }
+}
