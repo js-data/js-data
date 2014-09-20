@@ -1,22 +1,18 @@
 describe('DS.inject(resourceName, attrs[, options])', function () {
-  function errorPrefix(resourceName) {
-    return 'DS.inject(' + resourceName + ', attrs[, options]): ';
-  }
-
   it('should throw an error when method pre-conditions are not met', function () {
     assert.throws(function () {
       datastore.inject('does not exist', {});
-    }, datastore.errors.NonexistentResourceError, errorPrefix('does not exist') + 'does not exist is not a registered resource!');
+    }, datastore.errors.NonexistentResourceError, 'does not exist is not a registered resource!');
 
     DSUtils.forEach(TYPES_EXCEPT_OBJECT, function (key) {
       assert.throws(function () {
         datastore.inject('post', key);
-      }, datastore.errors.IllegalArgumentError, errorPrefix('post') + 'attrs: Must be an object or an array!');
+      }, datastore.errors.IllegalArgumentError, 'post.inject: "attrs" must be an object or an array!');
     });
 
     assert.throws(function () {
       datastore.inject('post', {});
-    }, datastore.errors.RuntimeError, errorPrefix('post') + 'attrs: Must contain the property specified by `idAttribute`!');
+    }, datastore.errors.RuntimeError, 'post.inject: "attrs" must contain the property specified by `idAttribute`!');
   });
   it('should inject an item into the store', function () {
 
