@@ -18,9 +18,6 @@ JSData is pre-alpha. The API is subject to change, though the current api is wel
 
 If you want to use JSData, keep a close eye on the changelog. 1.0.0 will introduce strict semver (until then, minor number is bumped for breaking changes).
 
-## Documentation
-[js-data.io](http://www.js-data.io)
-
 ## Project Status
 
 | Branch | Master |

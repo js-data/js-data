@@ -1,24 +1,20 @@
 describe('DS.get(resourceName, id[, options])', function () {
-  function errorPrefix(resourceName, id) {
-    return 'DS.get(' + resourceName + ', ' + id + '): ';
-  }
-
   it('should throw an error when method pre-conditions are not met', function () {
     assert.throws(function () {
       datastore.get('does not exist', {});
-    }, datastore.errors.NonexistentResourceError, errorPrefix('does not exist', {}) + 'does not exist is not a registered resource!');
+    }, datastore.errors.NonexistentResourceError, 'does not exist is not a registered resource!');
 
     DSUtils.forEach(TYPES_EXCEPT_STRING_OR_NUMBER, function (key) {
       assert.throws(function () {
         datastore.get('post', key);
-      }, datastore.errors.IllegalArgumentError, errorPrefix('post', key) + 'id: Must be a string or a number!');
+      }, datastore.errors.IllegalArgumentError, '"id" must be a string or a number!');
     });
 
     DSUtils.forEach(TYPES_EXCEPT_OBJECT, function (key) {
       if (key) {
         assert.throws(function () {
           datastore.get('post', 5, key);
-        }, datastore.errors.IllegalArgumentError, errorPrefix('post', 5) + 'options: Must be an object!');
+        }, datastore.errors.IllegalArgumentError, '"options" must be an object!');
       }
     });
   });

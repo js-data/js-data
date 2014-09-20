@@ -4147,20 +4147,6 @@ module.exports = defineResource;
 },{"../../errors":87,"../../utils":89}],72:[function(require,module,exports){
 var observe = require('../../../lib/observe-js/observe-js');
 
-/**
- * @doc method
- * @id DS.sync methods:digest
- * @name digest
- * @description
- * Trigger a digest loop that checks for changes and updates the `lastModified` timestamp if an object has changed.
- * If your browser supports `Object.observe` then this function has no effect.
- *
- * ## Signature:
- * ```js
- * DS.digest()
- * ```
- *
- */
 function digest() {
   observe.Platform.performMicrotaskCheckpoint();
 }
@@ -4297,62 +4283,25 @@ function filter(resourceName, params, options) {
 module.exports = filter;
 
 },{"../../errors":87,"../../utils":89}],76:[function(require,module,exports){
-function errorPrefix(resourceName, id) {
-  return 'DS.get(' + resourceName + ', ' + id + '): ';
-}
+var DSUtils = require('../../utils');
+var DSErrors = require('../../errors');
 
-/**
- * @doc method
- * @id DS.sync methods:get
- * @name get
- * @description
- * Synchronously return the resource with the given id. The data store will forward the request to an adapter if
- * `loadFromServer` is `true` in the options hash.
- *
- * ## Signature:
- * ```js
- * DS.get(resourceName, id[, options])
- * ```
- *
- * ## Example:
- *
- * ```js
- * DS.get('document', 5'); // { author: 'John Anderson', id: 5 }
- * ```
- *
- * ## Throws
- *
- * - `{IllegalArgumentError}`
- * - `{NonexistentResourceError}`
- *
- * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
- * @param {string|number} id The primary key of the item to retrieve.
- * @param {object=} options Optional configuration. Also passed along to `DS.find` if `loadFromServer` is `true`. Properties:
- *
- * - `{boolean=}` - `loadFromServer` - Send the query to server if it has not been sent yet. Default: `false`.
- *
- * @returns {object} The item of the type specified by `resourceName` with the primary key specified by `id`.
- */
 function get(resourceName, id, options) {
-  var DS = this;
-  var DSUtils = DS.utils;
-  var DSErrors = DS.errors;
+  var _this = this;
 
   options = options || {};
 
-  if (!DS.definitions[resourceName]) {
-    throw new DSErrors.NER(errorPrefix(resourceName, id) + resourceName);
+  if (!_this.definitions[resourceName]) {
+    throw new DSErrors.NER(resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new DSErrors.IA(errorPrefix(resourceName, id) + 'id: Must be a string or a number!');
+    throw new DSErrors.IA('"id" must be a string or a number!');
   } else if (!DSUtils.isObject(options)) {
-    throw new DSErrors.IA(errorPrefix(resourceName, id) + 'options: Must be an object!');
+    throw new DSErrors.IA('"options" must be an object!');
   }
   // cache miss, request resource from server
-  var item = DS.store[resourceName].index[id];
+  var item = _this.store[resourceName].index[id];
   if (!item && options.loadFromServer) {
-    DS.find(resourceName, id, options).then(null, function (err) {
-      return err;
-    });
+    _this.find(resourceName, id, options);
   }
 
   // return resource from cache
@@ -4361,10 +4310,9 @@ function get(resourceName, id, options) {
 
 module.exports = get;
 
-},{}],77:[function(require,module,exports){
-function errorPrefix(resourceName, id) {
-  return 'DS.hasChanges(' + resourceName + ', ' + id + '): ';
-}
+},{"../../errors":87,"../../utils":89}],77:[function(require,module,exports){
+var DSUtils = require('../../utils');
+var DSErrors = require('../../errors');
 
 function diffIsEmpty(utils, diff) {
   return !(utils.isEmpty(diff.added) &&
@@ -4372,55 +4320,17 @@ function diffIsEmpty(utils, diff) {
     utils.isEmpty(diff.changed));
 }
 
-/**
- * @doc method
- * @id DS.sync methods:hasChanges
- * @name hasChanges
- * @description
- * Synchronously return whether object of the item of the type specified by `resourceName` that has the primary key
- * specified by `id` has changes.
- *
- * ## Signature:
- * ```js
- * DS.hasChanges(resourceName, id)
- * ```
- *
- * ## Example:
- *
- * ```js
- * var d = DS.get('document', 5); // { author: 'John Anderson', id: 5 }
- *
- * d.author = 'Sally';
- *
- * // You may have to do DS.digest() first
- *
- * DS.hasChanges('document', 5); // true
- * ```
- *
- * ## Throws
- *
- * - `{IllegalArgumentError}`
- * - `{NonexistentResourceError}`
- *
- * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
- * @param {string|number} id The primary key of the item.
- * @returns {boolean} Whether the item of the type specified by `resourceName` with the primary key specified by `id` has changes.
- */
 function hasChanges(resourceName, id) {
-  var DS = this;
-  var DSUtils = DS.utils;
-  var DSErrors = DS.errors;
+  var _this = this;
 
-  id = DSUtils.resolveId(DS.definitions[resourceName], id);
-  if (!DS.definitions[resourceName]) {
-    throw new DSErrors.NER(errorPrefix(resourceName, id) + resourceName);
-  } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new DSErrors.IA(errorPrefix(resourceName, id) + 'id: Must be a string or a number!');
+  id = DSUtils.resolveId(_this.definitions[resourceName], id);
+  if (!_this.definitions[resourceName]) {
+    throw new DSErrors.NER(resourceName);
   }
 
   // return resource from cache
-  if (DS.get(resourceName, id)) {
-    return diffIsEmpty(DSUtils, DS.changes(resourceName, id));
+  if (_this.get(resourceName, id)) {
+    return diffIsEmpty(DSUtils, _this.changes(resourceName, id));
   } else {
     return false;
   }
@@ -4428,7 +4338,7 @@ function hasChanges(resourceName, id) {
 
 module.exports = hasChanges;
 
-},{}],78:[function(require,module,exports){
+},{"../../errors":87,"../../utils":89}],78:[function(require,module,exports){
 module.exports = {
 
   /**
