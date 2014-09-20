@@ -1,7 +1,6 @@
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 var observe = require('../../../lib/observe-js/observe-js');
-var _compute = require('./compute')._compute;
 var stack = 0;
 var data = {
   injectedSoFar: {}
@@ -49,7 +48,7 @@ function _getReactFunction(DS, definition, resource) {
         });
         compute = compute || !fn.deps.length;
         if (compute) {
-          _compute.call(item, fn, field, DSUtils);
+          DSUtils.compute.call(item, fn, field, DSUtils);
         }
       });
     }

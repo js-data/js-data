@@ -109,6 +109,15 @@ module.exports = {
       }
     }
   },
+  compute: function (fn, field, DSUtils) {
+    var _this = this;
+    var args = [];
+    DSUtils.forEach(fn.deps, function (dep) {
+      args.push(_this[dep]);
+    });
+    // compute property
+    this[field] = fn[fn.length - 1].apply(this, args);
+  },
   diffObjectFromOldObject: function (object, oldObject) {
     var added = {};
     var removed = {};
