@@ -40,12 +40,11 @@ function update(resourceName, id, attrs, options) {
     })
     .then(function (attrs) {
       _this.notify(definition, 'beforeUpdate', DSUtils.merge({}, attrs));
-      return _this.getAdapter(definition, options).update(definition, id, options.serialize ? options.serialize(resourceName, attrs) : definition.serialize(resourceName, attrs), options);
+      return _this.getAdapter(definition, options).update(definition, id, attrs, options);
     })
-    .then(function (res) {
+    .then(function (data) {
       var func = options.afterUpdate ? promisify(options.afterUpdate) : definition.afterUpdate;
-      var attrs = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
-      return func.call(attrs, resourceName, attrs);
+      return func.call(data, resourceName, data);
     })
     .then(function (attrs) {
       _this.notify(definition, 'afterUpdate', DSUtils.merge({}, attrs));

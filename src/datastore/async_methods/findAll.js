@@ -70,9 +70,8 @@ function findAll(resourceName, params, options) {
       if (!(queryHash in resource.completedQueries)) {
         if (!(queryHash in resource.pendingQueries)) {
           resource.pendingQueries[queryHash] = _this.getAdapter(definition, options).findAll(definition, params, options)
-            .then(function (res) {
+            .then(function (data) {
               delete resource.pendingQueries[queryHash];
-              var data = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
               if (options.cacheResponse) {
                 return processResults.call(_this, data, resourceName, queryHash, options);
               } else {

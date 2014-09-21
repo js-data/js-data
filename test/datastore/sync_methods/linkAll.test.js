@@ -1,20 +1,8 @@
 describe('DS.linkAll(resourceName[, params][, relations])', function () {
-  function errorPrefix(resourceName) {
-    return 'DS.linkAll(' + resourceName + '[, params][, relations]): ';
-  }
-
   it('should throw an error when method pre-conditions are not met', function () {
     assert.throws(function () {
       datastore.linkAll('does not exist', {});
-    }, datastore.errors.NonexistentResourceError, errorPrefix('does not exist') + 'does not exist is not a registered resource!');
-
-    DSUtils.forEach(TYPES_EXCEPT_OBJECT, function (key) {
-      if (key) {
-        assert.throws(function () {
-          datastore.linkAll('post', key);
-        }, datastore.errors.IllegalArgumentError, errorPrefix('post') + 'params: Must be an object!');
-      }
-    });
+    }, datastore.errors.NonexistentResourceError, 'does not exist is not a registered resource!');
   });
   it('should find links', function () {
     var org66 = datastore.inject('organization', {

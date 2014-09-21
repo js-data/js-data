@@ -1,9 +1,6 @@
 function Events(target) {
   var events = {};
   target = target || this;
-  /**
-   *  On: listen to events
-   */
   target.on = function (type, func, ctx) {
     events[type] = events[type] || [];
     events[type].push({
@@ -11,10 +8,6 @@ function Events(target) {
       c: ctx
     });
   };
-
-  /**
-   *  Off: stop listening to event / specific callback
-   */
   target.off = function (type, func) {
     var listeners = events[type];
     if (!listeners) {
@@ -30,7 +23,6 @@ function Events(target) {
       listeners.splice(0, listeners.length);
     }
   };
-
   target.emit = function () {
     var args = Array.prototype.slice.call(arguments);
     var listeners = events[args.shift()] || [];

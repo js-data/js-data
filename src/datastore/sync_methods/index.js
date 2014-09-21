@@ -3,7 +3,8 @@ var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
 function changes(resourceName, id) {
-  var definition = this.definitions[resourceName];
+  var _this = this;
+  var definition = _this.definitions[resourceName];
 
   id = DSUtils.resolveId(definition, id);
   if (!definition) {
@@ -12,10 +13,10 @@ function changes(resourceName, id) {
     throw new DSErrors.IA('"id" must be a string or a number!');
   }
 
-  var item = this.get(resourceName, id);
+  var item = _this.get(resourceName, id);
   if (item) {
-    this.store[resourceName].observers[id].deliver();
-    var diff = DSUtils.diffObjectFromOldObject(item, this.store[resourceName].previousAttributes[id]);
+    _this.store[resourceName].observers[id].deliver();
+    var diff = DSUtils.diffObjectFromOldObject(item, _this.store[resourceName].previousAttributes[id]);
     DSUtils.forOwn(diff, function (changeset, name) {
       var toKeep = [];
       DSUtils.forOwn(changeset, function (value, field) {
@@ -35,11 +36,12 @@ function changes(resourceName, id) {
 }
 
 function changeHistory(resourceName, id) {
-  var definition = this.definitions[resourceName];
-  var resource = this.store[resourceName];
+  var _this = this;
+  var definition = _this.definitions[resourceName];
+  var resource = _this.store[resourceName];
 
   id = DSUtils.resolveId(definition, id);
-  if (resourceName && !this.definitions[resourceName]) {
+  if (resourceName && !_this.definitions[resourceName]) {
     throw new DSErrors.NER(resourceName);
   } else if (id && !DSUtils.isString(id) && !DSUtils.isNumber(id)) {
     throw new DSErrors.IA('"id" must be a string or a number!');
@@ -49,7 +51,7 @@ function changeHistory(resourceName, id) {
     console.warn('changeHistory is disabled for this resource!');
   } else {
     if (resourceName) {
-      var item = this.get(resourceName, id);
+      var item = _this.get(resourceName, id);
       if (item) {
         return resource.changeHistories[id];
       }
@@ -99,9 +101,10 @@ function digest() {
 }
 
 function compute(resourceName, instance) {
-  var definition = this.definitions[resourceName];
+  var _this = this;
+  var definition = _this.definitions[resourceName];
 
-  instance = DSUtils.resolveItem(this.store[resourceName], instance);
+  instance = DSUtils.resolveItem(_this.store[resourceName], instance);
   if (!definition) {
     throw new DSErrors.NER(resourceName);
   } else if (!DSUtils.isObject(instance) && !DSUtils.isString(instance) && !DSUtils.isNumber(instance)) {
@@ -109,7 +112,7 @@ function compute(resourceName, instance) {
   }
 
   if (DSUtils.isString(instance) || DSUtils.isNumber(instance)) {
-    instance = this.get(resourceName, instance);
+    instance = _this.get(resourceName, instance);
   }
 
   DSUtils.forOwn(definition.computed, function (fn, field) {
@@ -120,9 +123,10 @@ function compute(resourceName, instance) {
 }
 
 function get(resourceName, id, options) {
+  var _this = this;
   options = options || {};
 
-  if (!this.definitions[resourceName]) {
+  if (!_this.definitions[resourceName]) {
     throw new DSErrors.NER(resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
     throw new DSErrors.IA('"id" must be a string or a number!');
@@ -130,9 +134,9 @@ function get(resourceName, id, options) {
     throw new DSErrors.IA('"options" must be an object!');
   }
   // cache miss, request resource from server
-  var item = this.store[resourceName].index[id];
+  var item = _this.store[resourceName].index[id];
   if (!item && options.loadFromServer) {
-    this.find(resourceName, id, options);
+    _this.find(resourceName, id, options);
   }
 
   // return resource from cache
@@ -140,14 +144,15 @@ function get(resourceName, id, options) {
 }
 
 function hasChanges(resourceName, id) {
-  id = DSUtils.resolveId(this.definitions[resourceName], id);
-  if (!this.definitions[resourceName]) {
+  var _this = this;
+  id = DSUtils.resolveId(_this.definitions[resourceName], id);
+  if (!_this.definitions[resourceName]) {
     throw new DSErrors.NER(resourceName);
   }
 
   // return resource from cache
-  if (this.get(resourceName, id)) {
-    return diffIsEmpty(this.changes(resourceName, id));
+  if (_this.get(resourceName, id)) {
+    return diffIsEmpty(_this.changes(resourceName, id));
   } else {
     return false;
   }
@@ -184,6 +189,22 @@ function lastSaved(resourceName, id) {
   return resource.saved[id];
 }
 
+function previous(resourceName, id) {
+  var _this = this;
+  var definition = _this.definitions[resourceName];
+  var resource = _this.store[resourceName];
+
+  id = DSUtils.resolveId(definition, id);
+  if (!definition) {
+    throw new DSErrors.NER(resourceName);
+  } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
+    throw new DSErrors.IA('"id" must be a string or a number!');
+  }
+
+  // return resource from cache
+  return resource.previousAttributes[id] ? DSUtils.merge({}, resource.previousAttributes[id]) : undefined;
+}
+
 module.exports = {
   changes: changes,
   changeHistory: changeHistory,
@@ -202,6 +223,6 @@ module.exports = {
   link: require('./link'),
   linkAll: require('./linkAll'),
   linkInverse: require('./linkInverse'),
-  previous: require('./previous'),
+  previous: previous,
   unlinkInverse: require('./unlinkInverse')
 };

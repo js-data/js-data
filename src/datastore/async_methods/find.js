@@ -32,8 +32,7 @@ function find(resourceName, id, options) {
       if (!(id in resource.completedQueries)) {
         if (!(id in resource.pendingQueries)) {
           resource.pendingQueries[id] = _this.getAdapter(definition, options).find(definition, id, options)
-            .then(function (res) {
-              var data = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
+            .then(function (data) {
               if (options.cacheResponse) {
                 // Query is no longer pending
                 delete resource.pendingQueries[id];

@@ -2,9 +2,9 @@
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
-function Resource(utils, options) {
+function Resource(options) {
 
-  utils.deepMixIn(this, options);
+  DSUtils.deepMixIn(this, options);
 
   if ('endpoint' in options) {
     this.endpoint = options.endpoint;
@@ -33,81 +33,18 @@ var methodsToProxy = [
   'link',
   'linkAll',
   'linkInverse',
-  'unlinkInverse',
   'loadRelations',
   'previous',
   'refresh',
   'save',
+  'unlinkInverse',
   'update',
   'updateAll'
 ];
 
-/**
- * @doc method
- * @id DS.sync methods:defineResource
- * @name defineResource
- * @description
- * Define a resource and register it with the data store.
- *
- * ## Signature:
- * ```js
- * DS.defineResource(definition)
- * ```
- *
- * ## Example:
- *
- * ```js
- *  DS.defineResource({
- *      name: 'document',
- *      idAttribute: '_id',
- *      endpoint: '/documents
- *      baseUrl: 'http://myapp.com/api',
- *      beforeDestroy: function (resourceName attrs, cb) {
- *          console.log('looks good to me');
- *          cb(null, attrs);
- *      }
- *  });
- * ```
- *
- * ## Throws
- *
- * - `{IllegalArgumentError}`
- * - `{RuntimeError}`
- *
- * @param {string|object} definition Name of resource or resource definition object: Properties:
- *
- * - `{string}` - `name` - The name by which this resource will be identified.
- * - `{string="id"}` - `idAttribute` - The attribute that specifies the primary key for this resource.
- * - `{string=}` - `endpoint` - The attribute that specifies the primary key for this resource. Default is the value of `name`.
- * - `{string=}` - `baseUrl` - The url relative to which all AJAX requests will be made.
- * - `{boolean=}` - `useClass` - Whether to use a wrapper class created from the ProperCase name of the resource. The wrapper will always be used for resources that have `methods` defined.
- * - `{boolean=}` - `keepChangeHistory` - Whether to keep a history of changes for items in the data store. Default: `false`.
- * - `{boolean=}` - `resetHistoryOnInject` - Whether to reset the history of changes for items when they are injected of re-injected into the data store. This will also reset an item's previous attributes. Default: `true`.
- * - `{function=}` - `defaultFilter` - Override the filtering used internally by `DS.filter` with you own function here.
- * - `{*=}` - `meta` - A property reserved for developer use. This will never be used by the API.
- * - `{object=}` - `methods` - If provided, items of this resource will be wrapped in a constructor function that is
- * empty save for the attributes in this option which will be mixed in to the constructor function prototype. Enabling
- * this feature for this resource will incur a slight performance penalty, but allows you to give custom behavior to what
- * are now "instances" of this resource.
- * - `{function=}` - `beforeValidate` - Lifecycle hook. Overrides global. Signature: `beforeValidate(resourceName, attrs, cb)`. Callback signature: `cb(err, attrs)`.
- * - `{function=}` - `validate` - Lifecycle hook. Overrides global. Signature: `validate(resourceName, attrs, cb)`. Callback signature: `cb(err, attrs)`.
- * - `{function=}` - `afterValidate` - Lifecycle hook. Overrides global. Signature: `afterValidate(resourceName, attrs, cb)`. Callback signature: `cb(err, attrs)`.
- * - `{function=}` - `beforeCreate` - Lifecycle hook. Overrides global. Signature: `beforeCreate(resourceName, attrs, cb)`. Callback signature: `cb(err, attrs)`.
- * - `{function=}` - `afterCreate` - Lifecycle hook. Overrides global. Signature: `afterCreate(resourceName, attrs, cb)`. Callback signature: `cb(err, attrs)`.
- * - `{function=}` - `beforeUpdate` - Lifecycle hook. Overrides global. Signature: `beforeUpdate(resourceName, attrs, cb)`. Callback signature: `cb(err, attrs)`.
- * - `{function=}` - `afterUpdate` - Lifecycle hook. Overrides global. Signature: `afterUpdate(resourceName, attrs, cb)`. Callback signature: `cb(err, attrs)`.
- * - `{function=}` - `beforeDestroy` - Lifecycle hook. Overrides global. Signature: `beforeDestroy(resourceName, attrs, cb)`. Callback signature: `cb(err, attrs)`.
- * - `{function=}` - `afterDestroy` - Lifecycle hook. Overrides global. Signature: `afterDestroy(resourceName, attrs, cb)`. Callback signature: `cb(err, attrs)`.
- * - `{function=}` - `beforeInject` - Lifecycle hook. Overrides global. Signature: `beforeInject(resourceName, attrs)`.
- * - `{function=}` - `afterInject` - Lifecycle hook. Overrides global. Signature: `afterInject(resourceName, attrs)`.
- * - `{function=}` - `serialize` - Serialization hook. Overrides global. Signature: `serialize(resourceName, attrs)`.
- * - `{function=}` - `deserialize` - Deserialization hook. Overrides global. Signature: `deserialize(resourceName, attrs)`.
- *
- * See [DSProvider.defaults](/documentation/api/js-data/DSProvider.properties:defaults).
- */
 function defineResource(definition) {
-  var DS = this;
-  var definitions = DS.definitions;
+  var _this = this;
+  var definitions = _this.definitions;
 
   if (DSUtils.isString(definition)) {
     definition = {
@@ -118,14 +55,14 @@ function defineResource(definition) {
     throw new DSErrors.IA('"definition" must be an object!');
   } else if (!DSUtils.isString(definition.name)) {
     throw new DSErrors.IA('"name" must be a string!');
-  } else if (DS.store[definition.name]) {
+  } else if (_this.store[definition.name]) {
     throw new DSErrors.R(definition.name + ' is already registered!');
   }
 
   try {
     // Inherit from global defaults
-    Resource.prototype = DS.defaults;
-    definitions[definition.name] = new Resource(DSUtils, definition);
+    Resource.prototype = _this.defaults;
+    definitions[definition.name] = new Resource(definition);
 
     var def = definitions[definition.name];
 
@@ -177,7 +114,7 @@ function defineResource(definition) {
       options.params = options.params || {};
       if (parent && parentKey && parentDef && options.params[parentKey] !== false) {
         if (DSUtils.isNumber(attrs) || DSUtils.isString(attrs)) {
-          item = DS.get(this.name, attrs);
+          item = _this.get(this.name, attrs);
         }
         if (DSUtils.isObject(attrs) && parentKey in attrs) {
           delete options.params[parentKey];
@@ -243,12 +180,12 @@ function defineResource(definition) {
       });
 
       def[def.class].prototype.DSCompute = function () {
-        return DS.compute(def.name, this);
+        return _this.compute(def.name, this);
       };
     }
 
     // Initialize store data for the new resource
-    DS.store[def.name] = {
+    _this.store[def.name] = {
       collection: [],
       completedQueries: {},
       pendingQueries: {},
@@ -267,7 +204,7 @@ function defineResource(definition) {
       def[name] = function () {
         var args = Array.prototype.slice.call(arguments);
         args.unshift(def.name);
-        return DS[name].apply(DS, args);
+        return _this[name].apply(_this, args);
       };
     });
 
@@ -288,7 +225,7 @@ function defineResource(definition) {
   } catch (err) {
     console.error(err);
     delete definitions[definition.name];
-    delete DS.store[definition.name];
+    delete _this.store[definition.name];
     throw err;
   }
 }

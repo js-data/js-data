@@ -87,7 +87,7 @@ beforeEach(function () {
   };
   lifecycle.deserialize = function (resourceName, data) {
     lifecycle.deserialize.callCount += 1;
-    return data;
+    return data ? ('data' in data ? data.data : data) : data;
   };
   lifecycle.queryTransform = function (resourceName, query) {
     lifecycle.queryTransform.callCount += 1;
@@ -105,12 +105,12 @@ beforeEach(function () {
     beforeDestroy: lifecycle.beforeDestroy,
     afterDestroy: lifecycle.afterDestroy,
     beforeInject: lifecycle.beforeInject,
-    afterInject: lifecycle.afterInject,
-    serialize: lifecycle.serialize,
-    deserialize: lifecycle.deserialize
+    afterInject: lifecycle.afterInject
   });
   dsHttpAdapter = new DSHttpAdapter({
-    queryTransform: lifecycle.queryTransform
+    queryTransform: lifecycle.queryTransform,
+    serialize: lifecycle.serialize,
+    deserialize: lifecycle.deserialize
   });
   dsLocalStorageAdapter = new DSLocalStorageAdapter();
   DSUtils = JSData.DSUtils;

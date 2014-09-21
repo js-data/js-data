@@ -2,7 +2,7 @@
 
 ## js-data  [![Stories in Backlog](https://badge.waffle.io/js-data/js-data.svg?label=backlog&title=Backlog)](http://waffle.io/js-data/js-data) [![Stories in Ready](https://badge.waffle.io/js-data/js-data.svg?label=ready&title=Ready)](http://waffle.io/js-data/js-data) [![Stories in progress](https://badge.waffle.io/js-data/js-data.svg?label=in%20progress&title=In%20Progress)](http://waffle.io/js-data/js-data)
 
-Inspired by [Ember Data](https://github.com/emberjs/data), JSData is the model layer you've been craving. It consists of a convenient in-memory cache for managing your data, and several adapters for communicating with various persistence layers.
+Inspired by [Ember Data](https://github.com/emberjs/data), JSData is the model layer you've been craving. It consists of a convenient framework-agnostic in-memory cache for managing your data, which uses adapters for communicating with various persistence layers.
 
 You can use the [http adapter](http://www.js-data.io/js-data-http), which is perfect for communicating with your RESTful backend. You could also use the [localStorage adapter](http://www.js-data.io/js-data-localstorage). More adapters are coming, and you're free to implement your own.
 
@@ -10,9 +10,7 @@ Unlike Backbone and Ember Models, JSData does not require the use of getters and
 
 Supporting relations, computed properties, model lifecycle control and a slew of other features, JSData is the tool for giving your data the respect it deserves.
 
-__Latest Release:__ [0.0.1](http://www.js-data.io/)
-
-__master:__ 0.1.0
+__Latest Release:__ [0.2.0](https://github.com/js-data/js-data/releases/tag/0.2.0)
 
 JSData is pre-alpha. The API is subject to change, though the current api is well tested.
 
@@ -30,10 +28,12 @@ If you want to use JSData, keep a close eye on the changelog. 1.0.0 will introdu
 | Coverage | [![Coverage Status](https://coveralls.io/repos/js-data/js-data/badge.png?branch=master)](https://coveralls.io/r/js-data/js-data?branch=master) |
 
 ## Quick Start
-`bower install --save js-data` or `npm install --save js-data`.
+`bower install --save js-data js-data-http` or `npm install --save js-data js-data-http`.
 
 ```js
 var dataStore = new JSData.DS();
+
+dataStore.adapters.DSHttpAdapter = new DSHttpAdapter();
 
 var User = dataStore.defineResource('user');
 

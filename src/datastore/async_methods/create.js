@@ -45,12 +45,11 @@ function create(resourceName, attrs, options) {
       })
       .then(function (attrs) {
         _this.notify(definition, 'beforeCreate', DSUtils.merge({}, attrs));
-        return _this.getAdapter(definition, options).create(definition, options.serialize ? options.serialize(resourceName, attrs) : definition.serialize(resourceName, attrs), options);
+        return _this.getAdapter(definition, options).create(definition, attrs, options);
       })
-      .then(function (res) {
+      .then(function (data) {
         var func = options.afterCreate ? promisify(options.afterCreate) : definition.afterCreate;
-        var attrs = options.deserialize ? options.deserialize(resourceName, res) : definition.deserialize(resourceName, res);
-        return func.call(attrs, resourceName, attrs);
+        return func.call(data, resourceName, data);
       })
       .then(function (attrs) {
         _this.notify(definition, 'afterCreate', DSUtils.merge({}, attrs));
