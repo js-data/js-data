@@ -34,7 +34,7 @@
 <a name="js-data----" class="anchor" href="#js-data----"><span class="octicon octicon-link"></span></a>js-data  <a href="http://waffle.io/js-data/js-data"><img src="https://badge.waffle.io/js-data/js-data.svg?label=backlog&amp;title=Backlog" alt="Stories in Backlog"></a> <a href="http://waffle.io/js-data/js-data"><img src="https://badge.waffle.io/js-data/js-data.svg?label=ready&amp;title=Ready" alt="Stories in Ready"></a> <a href="http://waffle.io/js-data/js-data"><img src="https://badge.waffle.io/js-data/js-data.svg?label=in%20progress&amp;title=In%20Progress" alt="Stories in progress"></a>
 </h2>
 
-<p>Inspired by <a href="https://github.com/emberjs/data">Ember Data</a>, JSData is the model layer you've been craving. It consists of a convenient in-memory cache for managing your data, and several adapters for communicating with various persistence layers.</p>
+<p>Inspired by <a href="https://github.com/emberjs/data">Ember Data</a>, JSData is the model layer you've been craving. It consists of a convenient framework-agnostic in-memory cache for managing your data, which uses adapters for communicating with various persistence layers.</p>
 
 <p>You can use the <a href="http://www.js-data.io/js-data-http">http adapter</a>, which is perfect for communicating with your RESTful backend. You could also use the <a href="http://www.js-data.io/js-data-localstorage">localStorage adapter</a>. More adapters are coming, and you're free to implement your own.</p>
 
@@ -42,18 +42,11 @@
 
 <p>Supporting relations, computed properties, model lifecycle control and a slew of other features, JSData is the tool for giving your data the respect it deserves.</p>
 
-<p><strong>Latest Release:</strong> <a href="http://www.js-data.io/">0.0.1</a></p>
-
-<p><strong>master:</strong> 0.1.0</p>
+<p><strong>Latest Release:</strong> <a href="https://github.com/js-data/js-data/releases/tag/0.2.0">0.2.0</a></p>
 
 <p>JSData is pre-alpha. The API is subject to change, though the current api is well tested.</p>
 
 <p>If you want to use JSData, keep a close eye on the changelog. 1.0.0 will introduce strict semver (until then, minor number is bumped for breaking changes).</p>
-
-<h2>
-<a name="documentation" class="anchor" href="#documentation"><span class="octicon octicon-link"></span></a>Documentation</h2>
-
-<p><a href="http://www.js-data.io">js-data.io</a></p>
 
 <h2>
 <a name="project-status" class="anchor" href="#project-status"><span class="octicon octicon-link"></span></a>Project Status</h2>
@@ -92,9 +85,11 @@
 </table><h2>
 <a name="quick-start" class="anchor" href="#quick-start"><span class="octicon octicon-link"></span></a>Quick Start</h2>
 
-<p><code>bower install --save js-data</code> or <code>npm install --save js-data</code>.</p>
+<p><code>bower install --save js-data js-data-http</code> or <code>npm install --save js-data js-data-http</code>.</p>
 
 <div class="highlight highlight-js"><pre><span class="kd">var</span> <span class="nx">dataStore</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">JSData</span><span class="p">.</span><span class="nx">DS</span><span class="p">();</span>
+
+<span class="nx">dataStore</span><span class="p">.</span><span class="nx">adapters</span><span class="p">.</span><span class="nx">DSHttpAdapter</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">DSHttpAdapter</span><span class="p">();</span>
 
 <span class="kd">var</span> <span class="nx">User</span> <span class="o">=</span> <span class="nx">dataStore</span><span class="p">.</span><span class="nx">defineResource</span><span class="p">(</span><span class="s1">'user'</span><span class="p">);</span>
 
