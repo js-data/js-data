@@ -60,8 +60,8 @@ describe('DS.findAll(resourceName, params[, options]): ', function () {
       // Should make a request because bypassCache is set to true
       datastore.findAll('post', {}, { bypassCache: true }).then(function (data) {
         assert.deepEqual(data, [p1, p2, p3, p4]);
-        assert.equal(lifecycle.beforeInject.callCount, 8, 'beforeInject should have been called');
-        assert.equal(lifecycle.afterInject.callCount, 8, 'afterInject should have been called');
+        assert.equal(lifecycle.beforeInject.callCount, 2, 'beforeInject should have been called');
+        assert.equal(lifecycle.afterInject.callCount, 2, 'afterInject should have been called');
         assert.equal(lifecycle.serialize.callCount, 0, 'serialize should have been called');
         assert.equal(lifecycle.deserialize.callCount, 2, 'deserialize should have been called');
         done();
@@ -93,12 +93,16 @@ describe('DS.findAll(resourceName, params[, options]): ', function () {
 
     datastore.findAll('post', {}).then(function () {
       done('Should not have succeeded!');
-    }).catch(function (err) {
-      assert(err.message, 'DS.inject(resourceName, attrs[, options]): attrs: Must contain the property specified by `idAttribute`!');
-      assert.deepEqual(datastore.filter('post', {}), [], 'The posts should not be in the store');
-      assert.equal(lifecycle.beforeInject.callCount, 0, 'beforeInject should not have been called');
-      assert.equal(lifecycle.afterInject.callCount, 0, 'afterInject should not have been called');
-      done();
+    }, function (err) {
+      try {
+        assert(err.message, 'post.inject: "attrs" must contain the property specified by `idAttribute`!');
+        assert.deepEqual(datastore.filter('post', {}), [], 'The posts should not be in the store');
+        assert.equal(lifecycle.beforeInject.callCount, 1, 'beforeInject should have been called once');
+        assert.equal(lifecycle.afterInject.callCount, 0, 'afterInject should not have been called');
+        done();
+      } catch (e) {
+        done(e.message);
+      }
     });
 
     setTimeout(function () {
@@ -164,8 +168,8 @@ describe('DS.findAll(resourceName, params[, options]): ', function () {
       assert.deepEqual(data, [p1, p2, p3, p4]);
       assert.deepEqual(datastore.filter('post', {}), [p1, p2, p3, p4], 'The posts are now in the store');
 
-      assert.equal(lifecycle.beforeInject.callCount, 4, 'beforeInject should have been called');
-      assert.equal(lifecycle.afterInject.callCount, 4, 'afterInject should have been called');
+      assert.equal(lifecycle.beforeInject.callCount, 1, 'beforeInject should have been called');
+      assert.equal(lifecycle.afterInject.callCount, 1, 'afterInject should have been called');
       assert.equal(lifecycle.serialize.callCount, 0, 'serialize should have been called');
       assert.equal(lifecycle.deserialize.callCount, 1, 'deserialize should have been called');
       done();
@@ -200,8 +204,8 @@ describe('DS.findAll(resourceName, params[, options]): ', function () {
         }
       }), [p5], 'The posts are now in the store');
 
-      assert.equal(lifecycle.beforeInject.callCount, 2, 'beforeInject should have been called');
-      assert.equal(lifecycle.afterInject.callCount, 2, 'afterInject should have been called');
+      assert.equal(lifecycle.beforeInject.callCount, 1, 'beforeInject should have been called');
+      assert.equal(lifecycle.afterInject.callCount, 1, 'afterInject should have been called');
       assert.equal(lifecycle.serialize.callCount, 0, 'serialize should have been called');
       assert.equal(lifecycle.deserialize.callCount, 1, 'deserialize should have been called');
       done();
@@ -251,8 +255,8 @@ describe('DS.findAll(resourceName, params[, options]): ', function () {
         DSUtils.deepMixIn(new datastore.definitions.person[datastore.definitions.person.class](), u2)
       ], 'The users are now in the store');
 
-      assert.equal(lifecycle.beforeInject.callCount, 2, 'beforeInject should have been called');
-      assert.equal(lifecycle.afterInject.callCount, 2, 'afterInject should have been called');
+      assert.equal(lifecycle.beforeInject.callCount, 1, 'beforeInject should have been called');
+      assert.equal(lifecycle.afterInject.callCount, 1, 'afterInject should have been called');
       assert.equal(lifecycle.serialize.callCount, 0, 'serialize should have been called');
       assert.equal(lifecycle.deserialize.callCount, 1, 'deserialize should have been called');
       done();

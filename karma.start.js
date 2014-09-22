@@ -68,6 +68,7 @@ beforeEach(function () {
     cb(null, attrs);
   };
   lifecycle.beforeDestroy = function (resourceName, attrs, cb) {
+    console.log(resourceName, attrs, cb);
     lifecycle.beforeDestroy.callCount += 1;
     cb(null, attrs);
   };

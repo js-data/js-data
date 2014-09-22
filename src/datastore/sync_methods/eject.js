@@ -1,18 +1,22 @@
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
-function eject(resourceName, id) {
+function eject(resourceName, id, options) {
   var _this = this;
   var definition = _this.definitions[resourceName];
   var resource = _this.store[resourceName];
   var item;
   var found = false;
 
+  options = options || {};
+
   id = DSUtils.resolveId(definition, id);
   if (!definition) {
     throw new DSErrors.NER(resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
     throw new DSErrors.IA('"id" must be a string or a number!');
+  } else if (!DSUtils.isObject(options)) {
+    throw new DSErrors.IA('"options" must be an object!');
   }
 
   for (var i = 0; i < resource.collection.length; i++) {
@@ -23,6 +27,12 @@ function eject(resourceName, id) {
     }
   }
   if (found) {
+    if (!('notify' in options)) {
+      options.notify = true;
+    }
+    if (options.notify) {
+      definition.beforeEject(definition.name, item);
+    }
     _this.unlinkInverse(definition.name, id);
     resource.collection.splice(i, 1);
     resource.observers[id].close();
@@ -40,7 +50,10 @@ function eject(resourceName, id) {
     delete resource.saved[id];
     resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
-    _this.notify(definition, 'eject', item);
+    if (options.notify) {
+      definition.afterEject(definition.name, item);
+      _this.notify(definition, 'eject', item);
+    }
 
     return item;
   }

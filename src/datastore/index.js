@@ -36,6 +36,9 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
     sort: ''
   };
 
+  params = params || {};
+  options = options || {};
+
   if (DSUtils.isObject(params.where)) {
     where = params.where;
   } else {
@@ -216,6 +219,8 @@ defaultsPrototype.beforeDestroy = lifecycleNoopCb;
 defaultsPrototype.afterDestroy = lifecycleNoopCb;
 defaultsPrototype.beforeInject = lifecycleNoop;
 defaultsPrototype.afterInject = lifecycleNoop;
+defaultsPrototype.beforeEject = lifecycleNoop;
+defaultsPrototype.afterEject = lifecycleNoop;
 
 function DS(options) {
   this.store = {};

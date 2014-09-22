@@ -19,25 +19,48 @@ function destroy(resourceName, id, options) {
       reject(new DSErrors.R('id "' + id + '" not found in cache!'));
     } else {
       item = _this.get(resourceName, id);
+      if (!('notify' in options)) {
+        options.notify = true;
+      }
       resolve(item);
     }
   })
     .then(function (attrs) {
-      var func = options.beforeDestroy ? promisify(options.beforeDestroy) : definition.beforeDestroy;
-      return func.call(attrs, resourceName, attrs);
+      if (options.notify) {
+        var func = options.beforeDestroy ? promisify(options.beforeDestroy) : definition.beforeDestroy;
+        return func.call(attrs, resourceName, attrs);
+      } else {
+        return attrs;
+      }
     })
     .then(function (attrs) {
-      _this.notify(definition, 'beforeDestroy', DSUtils.merge({}, attrs));
+      if (options.notify) {
+        _this.notify(definition, 'beforeDestroy', DSUtils.merge({}, attrs));
+      }
+      if (options.eagerEject) {
+        _this.eject(resourceName, id);
+      }
       return _this.getAdapter(definition, options).destroy(definition, id, options);
     })
     .then(function () {
-      var func = options.afterDestroy ? promisify(options.afterDestroy) : definition.afterDestroy;
-      return func.call(item, resourceName, item);
+      if (options.notify) {
+        var func = options.afterDestroy ? promisify(options.afterDestroy) : definition.afterDestroy;
+        return func.call(item, resourceName, item);
+      } else {
+        return item;
+      }
     })
     .then(function (item) {
-      _this.notify(definition, 'afterDestroy', DSUtils.merge({}, item));
+      if (options.notify) {
+        _this.notify(definition, 'afterDestroy', DSUtils.merge({}, item));
+      }
       _this.eject(resourceName, id);
       return id;
+    }).catch(function (err) {
+      if (options.eagerEject && item) {
+        _this.inject(resourceName, item, { notify: false });
+      }
+      throw err;
     });
 }
 

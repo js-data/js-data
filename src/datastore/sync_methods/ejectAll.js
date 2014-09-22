@@ -1,7 +1,7 @@
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
-function ejectAll(resourceName, params) {
+function ejectAll(resourceName, params, options) {
   var _this = this;
   var definition = _this.definitions[resourceName];
   params = params || {};
@@ -20,13 +20,11 @@ function ejectAll(resourceName, params) {
   var ids = DSUtils.toLookup(items, definition.idAttribute);
 
   DSUtils.forOwn(ids, function (item, id) {
-    _this.eject(definition.name, id);
+    _this.eject(definition.name, id, options);
   });
 
   delete resource.completedQueries[queryHash];
   resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
-
-  _this.notify(definition, 'eject', items);
 
   return items;
 }

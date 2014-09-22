@@ -43,8 +43,8 @@ describe('DS.updateAll(resourceName, attrs, params[, options])', function () {
       datastore.updateAll('post', { age: 5 }, { where: { age: { '==': 31 } } }).then(function (ps) {
         assert.deepEqual(ps, datastore.filter('post', { where: { age: { '==': 5 } } }));
         assert.deepEqual(ps[0], { author: 'Jane', age: 5, id: 6 });
-        assert.equal(lifecycle.beforeInject.callCount, 5, 'beforeInject should have been called');
-        assert.equal(lifecycle.afterInject.callCount, 5, 'afterInject should have been called');
+        assert.equal(lifecycle.beforeInject.callCount, 4, 'beforeInject should have been called');
+        assert.equal(lifecycle.afterInject.callCount, 4, 'afterInject should have been called');
         assert.equal(lifecycle.serialize.callCount, 2, 'serialize should have been called');
         assert.equal(lifecycle.deserialize.callCount, 2, 'deserialize should have been called');
         done();

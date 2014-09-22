@@ -2403,25 +2403,48 @@ function destroy(resourceName, id, options) {
       reject(new DSErrors.R('id "' + id + '" not found in cache!'));
     } else {
       item = _this.get(resourceName, id);
+      if (!('notify' in options)) {
+        options.notify = true;
+      }
       resolve(item);
     }
   })
     .then(function (attrs) {
-      var func = options.beforeDestroy ? promisify(options.beforeDestroy) : definition.beforeDestroy;
-      return func.call(attrs, resourceName, attrs);
+      if (options.notify) {
+        var func = options.beforeDestroy ? promisify(options.beforeDestroy) : definition.beforeDestroy;
+        return func.call(attrs, resourceName, attrs);
+      } else {
+        return attrs;
+      }
     })
     .then(function (attrs) {
-      _this.notify(definition, 'beforeDestroy', DSUtils.merge({}, attrs));
+      if (options.notify) {
+        _this.notify(definition, 'beforeDestroy', DSUtils.merge({}, attrs));
+      }
+      if (options.eagerEject) {
+        _this.eject(resourceName, id);
+      }
       return _this.getAdapter(definition, options).destroy(definition, id, options);
     })
     .then(function () {
-      var func = options.afterDestroy ? promisify(options.afterDestroy) : definition.afterDestroy;
-      return func.call(item, resourceName, item);
+      if (options.notify) {
+        var func = options.afterDestroy ? promisify(options.afterDestroy) : definition.afterDestroy;
+        return func.call(item, resourceName, item);
+      } else {
+        return item;
+      }
     })
     .then(function (item) {
-      _this.notify(definition, 'afterDestroy', DSUtils.merge({}, item));
+      if (options.notify) {
+        _this.notify(definition, 'afterDestroy', DSUtils.merge({}, item));
+      }
       _this.eject(resourceName, id);
       return id;
+    }).catch(function (err) {
+      if (options.eagerEject && item) {
+        _this.inject(resourceName, item, { notify: false });
+      }
+      throw err;
     });
 }
 
@@ -2434,17 +2457,40 @@ var DSErrors = require('../../errors');
 function destroyAll(resourceName, params, options) {
   var _this = this;
   var definition = _this.definitions[resourceName];
+  var ejected, toEject;
 
   return new DSUtils.Promise(function (resolve, reject) {
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
     } else {
+      options = options || {};
       resolve();
     }
   }).then(function () {
+      var func = options.beforeDestroy ? promisify(options.beforeDestroy) : definition.beforeDestroy;
+      toEject = _this.defaults.defaultFilter.call(_this, resourceName, params);
+      return func(resourceName, toEject);
+    }).then(function () {
+      if (options.notify) {
+        _this.notify(definition, 'beforeDestroy', toEject);
+      }
+      if (options.eagerEject) {
+        ejected = _this.ejectAll(resourceName, params);
+      }
       return _this.getAdapter(definition, options).destroyAll(definition, params, options);
     }).then(function () {
-      return _this.ejectAll(resourceName, params);
+      var func = options.afterDestroy ? promisify(options.afterDestroy) : definition.afterDestroy;
+      return func(resourceName, toEject);
+    }).then(function () {
+      if (options.notify) {
+        _this.notify(definition, 'afterDestroy', toEject);
+      }
+      return ejected || _this.ejectAll(resourceName, params);
+    }).catch(function (err) {
+      if (options.eagerEject && ejected) {
+        _this.inject(resourceName, ejected, { notify: false });
+      }
+      throw err;
     });
 }
 
@@ -2985,6 +3031,9 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
     sort: ''
   };
 
+  params = params || {};
+  options = options || {};
+
   if (DSUtils.isObject(params.where)) {
     where = params.where;
   } else {
@@ -3165,6 +3214,8 @@ defaultsPrototype.beforeDestroy = lifecycleNoopCb;
 defaultsPrototype.afterDestroy = lifecycleNoopCb;
 defaultsPrototype.beforeInject = lifecycleNoop;
 defaultsPrototype.afterInject = lifecycleNoop;
+defaultsPrototype.beforeEject = lifecycleNoop;
+defaultsPrototype.afterEject = lifecycleNoop;
 
 function DS(options) {
   this.store = {};
@@ -3434,18 +3485,22 @@ module.exports = defineResource;
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
-function eject(resourceName, id) {
+function eject(resourceName, id, options) {
   var _this = this;
   var definition = _this.definitions[resourceName];
   var resource = _this.store[resourceName];
   var item;
   var found = false;
 
+  options = options || {};
+
   id = DSUtils.resolveId(definition, id);
   if (!definition) {
     throw new DSErrors.NER(resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
     throw new DSErrors.IA('"id" must be a string or a number!');
+  } else if (!DSUtils.isObject(options)) {
+    throw new DSErrors.IA('"options" must be an object!');
   }
 
   for (var i = 0; i < resource.collection.length; i++) {
@@ -3456,6 +3511,12 @@ function eject(resourceName, id) {
     }
   }
   if (found) {
+    if (!('notify' in options)) {
+      options.notify = true;
+    }
+    if (options.notify) {
+      definition.beforeEject(definition.name, item);
+    }
     _this.unlinkInverse(definition.name, id);
     resource.collection.splice(i, 1);
     resource.observers[id].close();
@@ -3473,7 +3534,10 @@ function eject(resourceName, id) {
     delete resource.saved[id];
     resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
-    _this.notify(definition, 'eject', item);
+    if (options.notify) {
+      definition.afterEject(definition.name, item);
+      _this.notify(definition, 'eject', item);
+    }
 
     return item;
   }
@@ -3485,7 +3549,7 @@ module.exports = eject;
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
-function ejectAll(resourceName, params) {
+function ejectAll(resourceName, params, options) {
   var _this = this;
   var definition = _this.definitions[resourceName];
   params = params || {};
@@ -3504,13 +3568,11 @@ function ejectAll(resourceName, params) {
   var ids = DSUtils.toLookup(items, definition.idAttribute);
 
   DSUtils.forOwn(ids, function (item, id) {
-    _this.eject(definition.name, id);
+    _this.eject(definition.name, id, options);
   });
 
   delete resource.completedQueries[queryHash];
   resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
-
-  _this.notify(definition, 'eject', items);
 
   return items;
 }
@@ -3889,7 +3951,6 @@ function _inject(definition, resource, attrs, options) {
       throw error;
     } else {
       try {
-        definition.beforeInject(definition.name, attrs);
         var id = attrs[idA];
         var item = _this.get(definition.name, id);
 
@@ -3931,7 +3992,6 @@ function _inject(definition, resource, attrs, options) {
           resource.observers[id].deliver();
         }
         resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
-        definition.afterInject(definition.name, item);
         injected = item;
       } catch (err) {
         console.error(err);
@@ -4005,6 +4065,13 @@ function inject(resourceName, attrs, options) {
     if (!('useClass' in options)) {
       options.useClass = definition.useClass;
     }
+    if (!('notify' in options)) {
+      options.notify = true;
+    }
+    if (options.notify) {
+      definition.beforeInject(definition.name, attrs);
+    }
+
     injected = _inject.call(_this, definition, _this.store[resourceName], attrs, options);
     if (definition.relations) {
       _injectRelations.call(_this, definition, injected, options);
@@ -4018,7 +4085,10 @@ function inject(resourceName, attrs, options) {
       }
     }
 
-    _this.notify(definition, 'inject', injected);
+    if (options.notify) {
+      definition.afterInject(definition.name, injected);
+      _this.notify(definition, 'inject', injected);
+    }
 
     stack--;
   } catch (err) {

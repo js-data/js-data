@@ -97,7 +97,6 @@ function _inject(definition, resource, attrs, options) {
       throw error;
     } else {
       try {
-        definition.beforeInject(definition.name, attrs);
         var id = attrs[idA];
         var item = _this.get(definition.name, id);
 
@@ -139,7 +138,6 @@ function _inject(definition, resource, attrs, options) {
           resource.observers[id].deliver();
         }
         resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
-        definition.afterInject(definition.name, item);
         injected = item;
       } catch (err) {
         console.error(err);
@@ -213,6 +211,13 @@ function inject(resourceName, attrs, options) {
     if (!('useClass' in options)) {
       options.useClass = definition.useClass;
     }
+    if (!('notify' in options)) {
+      options.notify = true;
+    }
+    if (options.notify) {
+      definition.beforeInject(definition.name, attrs);
+    }
+
     injected = _inject.call(_this, definition, _this.store[resourceName], attrs, options);
     if (definition.relations) {
       _injectRelations.call(_this, definition, injected, options);
@@ -226,7 +231,10 @@ function inject(resourceName, attrs, options) {
       }
     }
 
-    _this.notify(definition, 'inject', injected);
+    if (options.notify) {
+      definition.afterInject(definition.name, injected);
+      _this.notify(definition, 'inject', injected);
+    }
 
     stack--;
   } catch (err) {
