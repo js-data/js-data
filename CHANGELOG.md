@@ -2,6 +2,7 @@
 
 ###### Backwards compatible API changes
 - Added `beforeDestroy` and `afterDestroy` to `DS#destroyAll`
+- Added `eagerEject` option to `DS#destroyAll` and `DS#destroy`
 
 ##### 0.2.0 - 20 September 2014
 
