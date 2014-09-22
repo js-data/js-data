@@ -1,4 +1,4 @@
-##### 0.3.0 - xx September 2014
+##### 0.3.0 - 22 September 2014
 
 ###### Backwards compatible API changes
 - Added `beforeDestroy` and `afterDestroy` to `DS#destroyAll`
