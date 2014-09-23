@@ -31,7 +31,7 @@
   ],
   "devDependencies": {
     "observe-js": "0.3.4",
-    "js-data-http": "~0.2.x",
-    "js-data-localstorage": "~0.1.x"
+    "js-data-http": "~0.3.x",
+    "js-data-localstorage": "~0.3.x"
   }
 }
