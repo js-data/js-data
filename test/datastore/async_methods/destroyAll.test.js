@@ -29,7 +29,7 @@ describe('DS.destroyAll(resourceName, params[, options]): ', function () {
       datastore.inject('post', p5);
 
       datastore.destroyAll('post', {}).then(function () {
-        assert.deepEqual(datastore.filter('post', {}), [], 'The posts should not be in the store yet');
+        assert.deepEqual(JSON.stringify(datastore.filter('post', {})), JSON.stringify([]), 'The posts should not be in the store yet');
         done();
       }, function (err) {
         console.log(err);

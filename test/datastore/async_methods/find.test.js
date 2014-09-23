@@ -30,8 +30,8 @@ describe('DS.find(resourceName, id[, options]): ', function () {
   it('should get an item from the server', function (done) {
     var _this = this;
     datastore.find('post', 5).then(function (post) {
-      assert.deepEqual(post, p1);
-      assert.deepEqual(datastore.get('post', 5), p1, 'The post is now in the datastore');
+      assert.deepEqual(JSON.stringify(post), JSON.stringify(p1));
+      assert.deepEqual(JSON.stringify(datastore.get('post', 5)), JSON.stringify(p1), 'The post is now in the datastore');
       assert.isNumber(datastore.lastModified('post', 5));
       assert.isNumber(datastore.lastSaved('post', 5));
     }).catch(function (err) {
@@ -43,8 +43,8 @@ describe('DS.find(resourceName, id[, options]): ', function () {
 
     // Should have no effect because there is already a pending query
     datastore.find('post', 5).then(function (post) {
-      assert.deepEqual(post, p1);
-      assert.deepEqual(datastore.get('post', 5), p1, 'The post is now in the datastore');
+      assert.deepEqual(JSON.stringify(post), JSON.stringify(p1));
+      assert.deepEqual(JSON.stringify(datastore.get('post', 5)), JSON.stringify(p1), 'The post is now in the datastore');
       assert.isNumber(datastore.lastModified('post', 5));
       assert.isNumber(datastore.lastSaved('post', 5));
       assert.equal(1, _this.requests.length);
@@ -52,10 +52,10 @@ describe('DS.find(resourceName, id[, options]): ', function () {
 
       // Should not make a request because the request was already completed
       datastore.find('post', 5).then(function (post) {
-        assert.deepEqual(post, p1);
+        assert.deepEqual(JSON.stringify(post), JSON.stringify(p1));
         // Should make a request because bypassCache is set to true
         datastore.find('post', 5, { bypassCache: true }).then(function (post) {
-          assert.deepEqual(post, p1);
+          assert.deepEqual(JSON.stringify(post), JSON.stringify(p1));
 
           assert.equal(lifecycle.beforeInject.callCount, 2, 'beforeInject should have been called');
           assert.equal(lifecycle.afterInject.callCount, 2, 'afterInject should have been called');
@@ -93,7 +93,7 @@ describe('DS.find(resourceName, id[, options]): ', function () {
     var _this = this;
 
     datastore.find('post', 5, { cacheResponse: false }).then(function (post) {
-      assert.deepEqual(post, p1);
+      assert.deepEqual(JSON.stringify(post), JSON.stringify(p1));
 
       assert.isUndefined(datastore.get('post', 5), 'The post should not have been injected into the store');
       assert.equal(lifecycle.beforeInject.callCount, 0, 'beforeInject should have been called');
@@ -145,14 +145,14 @@ describe('DS.find(resourceName, id[, options]): ', function () {
         approvedBy: 4
       }
     }).then(function (comment) {
-      assert.deepEqual(comment, testComment);
-      assert.deepEqual(comment, datastore.get('comment', 5));
+      assert.deepEqual(JSON.stringify(comment), JSON.stringify(testComment));
+      assert.deepEqual(JSON.stringify(comment), JSON.stringify(datastore.get('comment', 5)));
 
       datastore.find('comment', 5, {
         bypassCache: true
       }).then(function (comment) {
-        assert.deepEqual(comment, testComment);
-        assert.deepEqual(comment, datastore.get('comment', 5));
+        assert.deepEqual(JSON.stringify(comment), JSON.stringify(testComment));
+        assert.deepEqual(JSON.stringify(comment), JSON.stringify(datastore.get('comment', 5)));
 
         datastore.find('comment', 5, {
           bypassCache: true,
@@ -160,8 +160,8 @@ describe('DS.find(resourceName, id[, options]): ', function () {
             approvedBy: false
           }
         }).then(function (comment) {
-          assert.deepEqual(comment, testComment);
-          assert.deepEqual(comment, datastore.get('comment', 5));
+          assert.deepEqual(JSON.stringify(comment), JSON.stringify(testComment));
+          assert.deepEqual(JSON.stringify(comment), JSON.stringify(datastore.get('comment', 5)));
 
           datastore.find('comment', 19, {
             bypassCache: true,
@@ -170,8 +170,8 @@ describe('DS.find(resourceName, id[, options]): ', function () {
               organizationId: 14
             }
           }).then(function (comment) {
-            assert.deepEqual(comment, comment19);
-            assert.deepEqual(comment, datastore.get('comment', 19));
+            assert.deepEqual(JSON.stringify(comment), JSON.stringify(comment19));
+            assert.deepEqual(JSON.stringify(comment), JSON.stringify(datastore.get('comment', 19)));
 
             done();
           }).catch(function () {

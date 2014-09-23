@@ -42,13 +42,13 @@ describe('DS.refresh(resourceName, id[, options]): ', function () {
     assert.isUndefined(datastore.get('post', 5), 'The post should not be in the store yet');
 
     datastore.inject('post', p1);
-    assert.deepEqual(datastore.get('post', 5), p1, 'The post is now in the store');
+    assert.deepEqual(JSON.stringify(datastore.get('post', 5)), JSON.stringify(p1), 'The post is now in the store');
 
     var initialLastModified = datastore.lastModified('post', 5);
 
     // Should refresh the item that's in the store
     datastore.refresh('post', 5).then(function (post) {
-      assert.deepEqual(post, { author: 'Jake', age: 31, id: 5 });
+      assert.deepEqual(JSON.stringify(post), JSON.stringify({ author: 'Jake', age: 31, id: 5 }));
     }).catch(function (err) {
       console.error(err.stack);
       done('Should not have rejected!');
@@ -56,8 +56,8 @@ describe('DS.refresh(resourceName, id[, options]): ', function () {
 
     // Should have no effect because the request is already pending
     datastore.refresh('post', 5).then(function (post) {
-      assert.deepEqual(post, { author: 'Jake', age: 31, id: 5 });
-      assert.deepEqual(datastore.get('post', 5), { author: 'Jake', age: 31, id: 5 }, 'The post has been refreshed');
+      assert.deepEqual(JSON.stringify(post), JSON.stringify({ author: 'Jake', age: 31, id: 5 }));
+      assert.deepEqual(JSON.stringify(datastore.get('post', 5)), JSON.stringify({ author: 'Jake', age: 31, id: 5 }), 'The post has been refreshed');
       assert.notEqual(datastore.lastModified('post', 5), initialLastModified);
       done();
     }).catch(function (err) {

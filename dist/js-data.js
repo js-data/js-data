@@ -2401,10 +2401,15 @@ function destroy(resourceName, id, options) {
       reject(new DSErrors.IA('"id" must be a string or a number!'));
     } else if (!_this.get(resourceName, id)) {
       reject(new DSErrors.R('id "' + id + '" not found in cache!'));
+    } else if (!DSUtils.isObject(options)) {
+      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
       item = _this.get(resourceName, id);
       if (!('notify' in options)) {
         options.notify = true;
+      }
+      if (!('eagerEject' in options)) {
+        options.eagerEject = definition.eagerEject;
       }
       resolve(item);
     }
@@ -2460,10 +2465,19 @@ function destroyAll(resourceName, params, options) {
   var ejected, toEject;
 
   return new DSUtils.Promise(function (resolve, reject) {
+    options = options || {};
+
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
+    } else if (!DSUtils.isObject(options)) {
+      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
-      options = options || {};
+      if (!('notify' in options)) {
+        options.notify = true;
+      }
+      if (!('eagerEject' in options)) {
+        options.eagerEject = definition.eagerEject;
+      }
       resolve();
     }
   }).then(function () {
@@ -3203,6 +3217,7 @@ defaultsPrototype.endpoint = '';
 defaultsPrototype.useClass = true;
 defaultsPrototype.keepChangeHistory = false;
 defaultsPrototype.resetHistoryOnInject = true;
+Defaults.prototype.eagerEject = false;
 defaultsPrototype.beforeValidate = lifecycleNoopCb;
 defaultsPrototype.validate = lifecycleNoopCb;
 defaultsPrototype.afterValidate = lifecycleNoopCb;
@@ -3432,6 +3447,20 @@ function defineResource(definition) {
         return _this.compute(def.name, this);
       };
     }
+
+    def[def.class].prototype.DSUpdate = function () {
+      var args = Array.prototype.slice.call(arguments);
+      args.unshift(this[def.idAttribute]);
+      args.unshift(def.name);
+      return _this.update.apply(_this, args);
+    };
+
+    def[def.class].prototype.DSSave = function () {
+      var args = Array.prototype.slice.call(arguments);
+      args.unshift(this[def.idAttribute]);
+      args.unshift(def.name);
+      return _this.save.apply(_this, args);
+    };
 
     // Initialize store data for the new resource
     _this.store[def.name] = {

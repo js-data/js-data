@@ -111,7 +111,8 @@ beforeEach(function () {
   dsHttpAdapter = new DSHttpAdapter({
     queryTransform: lifecycle.queryTransform,
     serialize: lifecycle.serialize,
-    deserialize: lifecycle.deserialize
+    deserialize: lifecycle.deserialize,
+    log: function () {}
   });
   dsLocalStorageAdapter = new DSLocalStorageAdapter();
   DSUtils = JSData.DSUtils;

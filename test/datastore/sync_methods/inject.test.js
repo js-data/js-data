@@ -18,7 +18,7 @@ describe('DS.inject(resourceName, attrs[, options])', function () {
 
     assert.equal(datastore.lastModified('post', 5), 0);
     assert.doesNotThrow(function () {
-      assert.deepEqual(datastore.inject('post', p1), p1);
+      assert.deepEqual(JSON.stringify(datastore.inject('post', p1)), JSON.stringify(p1));
     });
     assert.notEqual(datastore.lastModified('post', 5), 0);
     assert.isNumber(datastore.lastModified('post', 5));
@@ -49,13 +49,13 @@ describe('DS.inject(resourceName, attrs[, options])', function () {
   it('should inject multiple items into the store', function () {
 
     assert.doesNotThrow(function () {
-      assert.deepEqual(datastore.inject('post', [p1, p2, p3, p4]), [p1, p2, p3, p4]);
+      assert.deepEqual(JSON.stringify(datastore.inject('post', [p1, p2, p3, p4])), JSON.stringify([p1, p2, p3, p4]));
     });
 
-    assert.deepEqual(datastore.get('post', 5), p1);
-    assert.deepEqual(datastore.get('post', 6), p2);
-    assert.deepEqual(datastore.get('post', 7), p3);
-    assert.deepEqual(datastore.get('post', 8), p4);
+    assert.deepEqual(JSON.stringify(datastore.get('post', 5)), JSON.stringify(p1));
+    assert.deepEqual(JSON.stringify(datastore.get('post', 6)), JSON.stringify(p2));
+    assert.deepEqual(JSON.stringify(datastore.get('post', 7)), JSON.stringify(p3));
+    assert.deepEqual(JSON.stringify(datastore.get('post', 8)), JSON.stringify(p4));
   });
   it('should inject relations', function () {
     // can inject items without relations
@@ -64,8 +64,8 @@ describe('DS.inject(resourceName, attrs[, options])', function () {
     datastore.inject('comment', comment3);
     datastore.inject('profile', profile4);
 
-    assert.deepEqual(datastore.get('user', 1), user1);
-    assert.deepEqual(datastore.get('organization', 2), organization2);
+    assert.deepEqual(JSON.stringify(datastore.get('user', 1)), JSON.stringify(user1));
+    assert.deepEqual(JSON.stringify(datastore.get('organization', 2)), JSON.stringify(organization2));
     assert.deepEqual(datastore.get('comment', 3).id, comment3.id);
     assert.deepEqual(datastore.get('profile', 4).id, profile4.id);
 
@@ -89,23 +89,23 @@ describe('DS.inject(resourceName, attrs[, options])', function () {
     assert.deepEqual(datastore.get('profile', 21).content, profile21.content);
 
     // user10 relations
-    assert.deepEqual(datastore.get('comment', 11), datastore.get('user', 10).comments[0]);
-    assert.deepEqual(datastore.get('comment', 12), datastore.get('user', 10).comments[1]);
-    assert.deepEqual(datastore.get('comment', 13), datastore.get('user', 10).comments[2]);
-    assert.deepEqual(datastore.get('organization', 14), datastore.get('user', 10).organization);
-    assert.deepEqual(datastore.get('profile', 15), datastore.get('user', 10).profile);
+    assert.deepEqual(JSON.stringify(datastore.get('comment', 11)), JSON.stringify(datastore.get('user', 10).comments[0]));
+    assert.deepEqual(JSON.stringify(datastore.get('comment', 12)), JSON.stringify(datastore.get('user', 10).comments[1]));
+    assert.deepEqual(JSON.stringify(datastore.get('comment', 13)), JSON.stringify(datastore.get('user', 10).comments[2]));
+    assert.deepEqual(JSON.stringify(datastore.get('organization', 14)), JSON.stringify(datastore.get('user', 10).organization));
+    assert.deepEqual(JSON.stringify(datastore.get('profile', 15)), JSON.stringify(datastore.get('user', 10).profile));
 
     // organization15 relations
-    assert.deepEqual(datastore.get('user', 16), datastore.get('organization', 15).users[0]);
-    assert.deepEqual(datastore.get('user', 17), datastore.get('organization', 15).users[1]);
-    assert.deepEqual(datastore.get('user', 18), datastore.get('organization', 15).users[2]);
+    assert.deepEqual(JSON.stringify(datastore.get('user', 16)), JSON.stringify(datastore.get('organization', 15).users[0]));
+    assert.deepEqual(JSON.stringify(datastore.get('user', 17)), JSON.stringify(datastore.get('organization', 15).users[1]));
+    assert.deepEqual(JSON.stringify(datastore.get('user', 18)), JSON.stringify(datastore.get('organization', 15).users[2]));
 
     // comment19 relations
-    assert.deepEqual(datastore.get('user', 20), datastore.get('comment', 19).user);
-    assert.deepEqual(datastore.get('user', 19), datastore.get('comment', 19).approvedByUser);
+    assert.deepEqual(JSON.stringify(datastore.get('user', 20)), JSON.stringify(datastore.get('comment', 19).user));
+    assert.deepEqual(JSON.stringify(datastore.get('user', 19)), JSON.stringify(datastore.get('comment', 19).approvedByUser));
 
     // profile21 relations
-    assert.deepEqual(datastore.get('user', 22), datastore.get('profile', 21).user);
+    assert.deepEqual(JSON.stringify(datastore.get('user', 22)), JSON.stringify(datastore.get('profile', 21).user));
   });
   it('should find inverse links', function () {
     datastore.inject('user', { organizationId: 5, id: 1 });

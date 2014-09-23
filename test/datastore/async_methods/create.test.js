@@ -11,14 +11,14 @@ describe('DS.create(resourceName, attrs[, options])', function () {
     var _this = this;
 
     datastore.create('post', { author: 'John', age: 30 }).then(function (post) {
-      assert.deepEqual(post, p1, 'post 5 should have been created');
+      assert.deepEqual(JSON.stringify(post), JSON.stringify(p1), 'post 5 should have been created');
       assert.equal(lifecycle.beforeCreate.callCount, 1, 'beforeCreate should have been called');
       assert.equal(lifecycle.afterCreate.callCount, 1, 'afterCreate should have been called');
       assert.equal(lifecycle.beforeInject.callCount, 1, 'beforeInject should have been called');
       assert.equal(lifecycle.afterInject.callCount, 1, 'afterInject should have been called');
       assert.equal(lifecycle.serialize.callCount, 1, 'serialize should have been called');
       assert.equal(lifecycle.deserialize.callCount, 1, 'deserialize should have been called');
-      assert.deepEqual(datastore.get('post', 5), p1);
+      assert.deepEqual(JSON.stringify(datastore.get('post', 5)), JSON.stringify(p1));
       done();
     }).catch(function (err) {
       console.error(err.stack);
@@ -36,7 +36,7 @@ describe('DS.create(resourceName, attrs[, options])', function () {
   it('should create an item and save it to the server but not inject the result', function (done) {
     var _this = this;
     datastore.create('post', { author: 'John', age: 30 }, { cacheResponse: false }).then(function (post) {
-      assert.deepEqual(post, p1, 'post 5 should have been created');
+      assert.deepEqual(JSON.stringify(post), JSON.stringify(p1), 'post 5 should have been created');
       assert.equal(lifecycle.beforeCreate.callCount, 1, 'beforeCreate should have been called');
       assert.equal(lifecycle.afterCreate.callCount, 1, 'afterCreate should have been called');
       assert.equal(lifecycle.beforeInject.callCount, 0, 'beforeInject should not have been called');
@@ -62,10 +62,10 @@ describe('DS.create(resourceName, attrs[, options])', function () {
     var _this = this;
 
     datastore.create('post', { author: 'John', age: 30, id: 5 }).then(function (post) {
-      assert.deepEqual(post, p1, 'post 5 should have been created');
+      assert.deepEqual(JSON.stringify(post), JSON.stringify(p1), 'post 5 should have been created');
 
       datastore.create('post', { author: 'Sue', age: 70, id: 6 }, { upsert: false }).then(function (post) {
-        assert.deepEqual(post, p2, 'post 6 should have been created');
+        assert.deepEqual(JSON.stringify(post), JSON.stringify(p2), 'post 6 should have been created');
         assert.equal(lifecycle.beforeUpdate.callCount, 1, 'beforeUpdate should have been called');
         assert.equal(lifecycle.afterUpdate.callCount, 1, 'afterUpdate should have been called');
         assert.equal(lifecycle.beforeCreate.callCount, 1, 'beforeCreate should have been called');
@@ -122,7 +122,7 @@ describe('DS.create(resourceName, attrs[, options])', function () {
     }, {
       findBelongsTo: true
     }).then(function (user) {
-      assert.deepEqual(user.id, payload.id, 'user should have been created');
+      assert.equal(user.id, payload.id, 'user should have been created');
 
       assert.equal(lifecycle.beforeCreate.callCount, 1, 'beforeCreate should have been called twice');
       assert.equal(lifecycle.afterCreate.callCount, 1, 'afterCreate should have been called twice');
@@ -130,9 +130,9 @@ describe('DS.create(resourceName, attrs[, options])', function () {
       assert.equal(lifecycle.afterInject.callCount, 2, 'afterInject should have been called twice');
       assert.equal(lifecycle.serialize.callCount, 1, 'serialize should have been called');
       assert.equal(lifecycle.deserialize.callCount, 1, 'deserialize should have been called');
-      assert.deepEqual(datastore.get('user', 99).id, payload.id);
+      assert.equal(datastore.get('user', 99).id, payload.id);
       assert.isObject(datastore.get('user', 99).profile);
-      assert.deepEqual(datastore.get('profile', 999).id, 999);
+      assert.equal(datastore.get('profile', 999).id, 999);
       assert.isObject(datastore.get('profile', 999).user);
 
       datastore.find('user', 99); // should not trigger another http request
@@ -173,8 +173,8 @@ describe('DS.create(resourceName, attrs[, options])', function () {
       content: 'test',
       approvedBy: 4
     }).then(function (comment) {
-      assert.deepEqual(comment, testComment);
-      assert.deepEqual(comment, datastore.get('comment', 5));
+      assert.deepEqual(JSON.stringify(comment), JSON.stringify(testComment));
+      assert.deepEqual(JSON.stringify(comment), JSON.stringify(datastore.get('comment', 5)));
 
       datastore.create('comment', {
         content: 'test'
@@ -183,8 +183,8 @@ describe('DS.create(resourceName, attrs[, options])', function () {
           approvedBy: 4
         }
       }).then(function (comment) {
-        assert.deepEqual(comment, testComment2);
-        assert.deepEqual(comment, datastore.get('comment', 6));
+        assert.deepEqual(JSON.stringify(comment), JSON.stringify(testComment2));
+        assert.deepEqual(JSON.stringify(comment), JSON.stringify(datastore.get('comment', 6)));
 
         datastore.create('comment', {
           content: 'test',
@@ -194,8 +194,8 @@ describe('DS.create(resourceName, attrs[, options])', function () {
             approvedBy: false
           }
         }).then(function (comment) {
-          assert.deepEqual(comment, testComment2);
-          assert.deepEqual(comment, datastore.get('comment', 6));
+          assert.deepEqual(JSON.stringify(comment), JSON.stringify(testComment2));
+          assert.deepEqual(JSON.stringify(comment), JSON.stringify(datastore.get('comment', 6)));
           done();
         }).catch(function () {
           done('Should not have failed!');

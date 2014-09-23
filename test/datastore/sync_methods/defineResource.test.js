@@ -70,10 +70,10 @@ describe('DS.defineResource(definition)', function () {
       _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson({ name: 'Sally', id: 1 }));
 
       setTimeout(function () {
-        assert.deepEqual(datastore.get('Comment', 1), { name: 'Sally', id: 1 });
+        assert.deepEqual(JSON.stringify(datastore.get('Comment', 1)), JSON.stringify({ name: 'Sally', id: 1 }));
 
         datastore.create('Comment', { name: 'John' }).then(function (comment) {
-          assert.deepEqual(comment, { name: 'John', id: 2 });
+          assert.deepEqual(JSON.stringify(comment), JSON.stringify({ name: 'John', id: 2 }));
           assert.equal(callCount, 1, 'overridden validate should have been called once');
           assert.equal(lifecycle.validate.callCount, 0, 'global validate should not have been called');
           done();

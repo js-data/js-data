@@ -208,6 +208,7 @@ defaultsPrototype.endpoint = '';
 defaultsPrototype.useClass = true;
 defaultsPrototype.keepChangeHistory = false;
 defaultsPrototype.resetHistoryOnInject = true;
+Defaults.prototype.eagerEject = false;
 defaultsPrototype.beforeValidate = lifecycleNoopCb;
 defaultsPrototype.validate = lifecycleNoopCb;
 defaultsPrototype.afterValidate = lifecycleNoopCb;

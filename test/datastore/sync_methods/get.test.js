@@ -35,7 +35,7 @@ describe('DS.get(resourceName, id[, options])', function () {
       _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(p1));
 
       setTimeout(function () {
-        assert.deepEqual(datastore.get('post', 5), p1, 'p1 should now be in the store');
+        assert.deepEqual(JSON.stringify(datastore.get('post', 5)), JSON.stringify(p1), 'p1 should now be in the store');
         assert.isNumber(datastore.lastModified('post', 5));
         assert.isNumber(datastore.lastSaved('post', 5));
         done();

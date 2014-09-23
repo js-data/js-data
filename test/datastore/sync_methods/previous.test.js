@@ -19,18 +19,18 @@ describe('DS.previous(resourceName, id)', function () {
 
     var post = datastore.get('post', 5);
 
-    assert.deepEqual(datastore.previous('post', 5), p1);
+    assert.deepEqual(JSON.stringify(datastore.previous('post', 5)), JSON.stringify(p1));
 
     post.author = 'Jake';
 
     datastore.digest();
 
-    assert.deepEqual(datastore.previous('post', 5), p1);
-    assert.deepEqual(datastore.get('post', 5), { author: 'Jake', age: 30, id: 5 });
+    assert.deepEqual(JSON.stringify(datastore.previous('post', 5)), JSON.stringify(p1));
+    assert.deepEqual(JSON.stringify(datastore.get('post', 5)), JSON.stringify({ author: 'Jake', age: 30, id: 5 }));
 
     datastore.save('post', 5).then(function () {
-      assert.deepEqual(datastore.previous('post', 5), { author: 'Jake', age: 30, id: 5 }, 'previous attributes should have been updated');
-      assert.deepEqual(datastore.get('post', 5), { author: 'Jake', age: 30, id: 5 });
+      assert.deepEqual(JSON.stringify(datastore.previous('post', 5)), JSON.stringify({ author: 'Jake', age: 30, id: 5 }), 'previous attributes should have been updated');
+      assert.deepEqual(JSON.stringify(datastore.get('post', 5)), JSON.stringify({ author: 'Jake', age: 30, id: 5 }));
       done();
     }).catch(done);
 
@@ -47,18 +47,18 @@ describe('DS.previous(resourceName, id)', function () {
 
     var post = datastore.get('post', 5);
 
-    assert.deepEqual(datastore.previous('post', 5), p1);
+    assert.deepEqual(JSON.stringify(datastore.previous('post', 5)), JSON.stringify(p1));
 
     post.author = 'Jake';
 
     datastore.digest();
 
-    assert.deepEqual(datastore.previous('post', 5), p1);
-    assert.deepEqual(datastore.get('post', 5), { author: 'Jake', age: 30, id: 5 });
+    assert.deepEqual(JSON.stringify(datastore.previous('post', 5)), JSON.stringify(p1));
+    assert.deepEqual(JSON.stringify(datastore.get('post', 5)), JSON.stringify({ author: 'Jake', age: 30, id: 5 }));
 
     datastore.save('post', 5, { changesOnly: true }).then(function () {
-      assert.deepEqual(datastore.previous('post', 5), { author: 'Jake', age: 30, id: 5 }, 'previous attributes should have been updated');
-      assert.deepEqual(datastore.get('post', 5), { author: 'Jake', age: 30, id: 5 });
+      assert.deepEqual(JSON.stringify(datastore.previous('post', 5)), JSON.stringify({ author: 'Jake', age: 30, id: 5 }), 'previous attributes should have been updated');
+      assert.deepEqual(JSON.stringify(datastore.get('post', 5)), JSON.stringify({ author: 'Jake', age: 30, id: 5 }));
       done();
     }).catch(done);
 

@@ -34,7 +34,7 @@ describe('DS.update(resourceName, id, attrs[, options])', function () {
     var initialSaved = datastore.lastSaved('post', 5);
 
     datastore.update('post', 5, { author: 'Jake' }).then(function (p) {
-      assert.deepEqual(p, post, 'post 5 should have been updated');
+      assert.deepEqual(JSON.stringify(p), JSON.stringify(post), 'post 5 should have been updated');
       assert.equal(p.author, 'Jake');
       assert.equal(post.author, 'Jake');
 
@@ -44,13 +44,13 @@ describe('DS.update(resourceName, id, attrs[, options])', function () {
       assert.equal(lifecycle.afterInject.callCount, 2, 'afterInject should have been called');
       assert.equal(lifecycle.serialize.callCount, 1, 'serialize should have been called');
       assert.equal(lifecycle.deserialize.callCount, 1, 'deserialize should have been called');
-      assert.deepEqual(datastore.get('post', 5), post);
+      assert.deepEqual(JSON.stringify(datastore.get('post', 5)), JSON.stringify(post));
       assert.notEqual(datastore.lastModified('post', 5), initialModified);
       assert.notEqual(datastore.lastSaved('post', 5), initialSaved);
 
       datastore.update('post', 6, { author: 'Jane' }).then(function (p) {
-        assert.deepEqual(p, datastore.get('post', 6));
-        assert.deepEqual(p, { author: 'Jane', age: 31, id: 6 });
+        assert.deepEqual(JSON.stringify(p), JSON.stringify(datastore.get('post', 6)));
+        assert.deepEqual(JSON.stringify(p), JSON.stringify({ author: 'Jane', age: 31, id: 6 }));
         assert.equal(lifecycle.beforeInject.callCount, 3, 'beforeInject should have been called');
         assert.equal(lifecycle.afterInject.callCount, 3, 'afterInject should have been called');
         assert.equal(lifecycle.serialize.callCount, 2, 'serialize should have been called');
@@ -68,6 +68,41 @@ describe('DS.update(resourceName, id, attrs[, options])', function () {
         assert.equal(_this.requests[1].requestBody, DSUtils.toJson({ author: 'Jane' }));
         _this.requests[1].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson({ author: 'Jane', age: 31, id: 6 }));
       }, 30);
+    }).catch(function (err) {
+      console.error(err.stack);
+      done('should not have rejected');
+    });
+
+    setTimeout(function () {
+      assert.equal(1, _this.requests.length);
+      assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
+      assert.equal(_this.requests[0].method, 'put');
+      assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ author: 'Jake' }));
+      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson({ author: 'Jake', age: 30, id: 5 }));
+    }, 30);
+  });
+  it('should update an item via the instance method', function (done) {
+    var _this = this;
+    var post = datastore.inject('post', p1);
+    var initialModified = datastore.lastModified('post', 5);
+    var initialSaved = datastore.lastSaved('post', 5);
+
+    post.DSUpdate({ author: 'Jake' }).then(function (p) {
+      assert.deepEqual(JSON.stringify(p), JSON.stringify(post), 'post 5 should have been updated');
+      assert.equal(p.author, 'Jake');
+      assert.equal(post.author, 'Jake');
+
+      assert.equal(lifecycle.beforeUpdate.callCount, 1, 'beforeUpdate should have been called');
+      assert.equal(lifecycle.afterUpdate.callCount, 1, 'afterUpdate should have been called');
+      assert.equal(lifecycle.beforeInject.callCount, 2, 'beforeInject should have been called');
+      assert.equal(lifecycle.afterInject.callCount, 2, 'afterInject should have been called');
+      assert.equal(lifecycle.serialize.callCount, 1, 'serialize should have been called');
+      assert.equal(lifecycle.deserialize.callCount, 1, 'deserialize should have been called');
+      assert.deepEqual(JSON.stringify(datastore.get('post', 5)), JSON.stringify(post));
+      assert.notEqual(datastore.lastModified('post', 5), initialModified);
+      assert.notEqual(datastore.lastSaved('post', 5), initialSaved);
+
+      done();
     }).catch(function (err) {
       console.error(err.stack);
       done('should not have rejected');
@@ -99,12 +134,12 @@ describe('DS.update(resourceName, id, attrs[, options])', function () {
     datastore.update('comment', 5, {
       content: 'stuff'
     }).then(function (comment) {
-      assert.deepEqual(comment, testComment);
-      assert.deepEqual(comment, datastore.get('comment', 5));
+      assert.deepEqual(JSON.stringify(comment), JSON.stringify(testComment));
+      assert.deepEqual(JSON.stringify(comment), JSON.stringify(datastore.get('comment', 5)));
 
       var c = Comment.inject(testComment2);
 
-      function onBeforeUpdate (resourceName, attrs) {
+      function onBeforeUpdate(resourceName, attrs) {
         attrs.other = 'stuff';
         assert.equal(resourceName, 'comment');
         assert.deepEqual(attrs, { content: 'stuff', other: 'stuff' });
@@ -126,8 +161,8 @@ describe('DS.update(resourceName, id, attrs[, options])', function () {
           approvedBy: 4
         }
       }).then(function (comment) {
-        assert.deepEqual(comment, testComment2);
-        assert.deepEqual(comment, datastore.get('comment', 6));
+        assert.deepEqual(JSON.stringify(comment), JSON.stringify(testComment2));
+        assert.deepEqual(JSON.stringify(comment), JSON.stringify(datastore.get('comment', 6)));
 
         datastore.inject('comment', testComment2);
 
@@ -138,8 +173,8 @@ describe('DS.update(resourceName, id, attrs[, options])', function () {
             approvedBy: false
           }
         }).then(function (comment) {
-          assert.deepEqual(comment, testComment2);
-          assert.deepEqual(comment, datastore.get('comment', 6));
+          assert.deepEqual(JSON.stringify(comment), JSON.stringify(testComment2));
+          assert.deepEqual(JSON.stringify(comment), JSON.stringify(datastore.get('comment', 6)));
           done();
         }).catch(function () {
           done('Should not have failed!');

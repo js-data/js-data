@@ -48,11 +48,11 @@ describe('DS.loadRelations(resourceName, instance(Id), relations[, options]): ',
     datastore.loadRelations('user', 10, ['comment', 'profile', 'organization'], { params: { approvedBy: 10 } }).then(function (user) {
       try {
         assert.deepEqual(user.comments[0].id, datastore.get('comment', user.comments[0].id).id);
-        assert.deepEqual(user.comments[0].user, datastore.get('comment', user.comments[0].id).user);
+        assert.deepEqual(user.comments[0].user.id, datastore.get('comment', user.comments[0].id).user.id);
         assert.deepEqual(user.comments[1].id, datastore.get('comment', user.comments[1].id).id);
-        assert.deepEqual(user.comments[1].user, datastore.get('comment', user.comments[1].id).user);
+        assert.deepEqual(user.comments[1].user.id, datastore.get('comment', user.comments[1].id).user.id);
         assert.deepEqual(user.comments[2].id, datastore.get('comment', user.comments[2].id).id);
-        assert.deepEqual(user.comments[2].user, datastore.get('comment', user.comments[2].id).user);
+        assert.deepEqual(user.comments[2].user.id, datastore.get('comment', user.comments[2].id).user.id);
         assert.deepEqual(user.organization.id, datastore.get('organization', 14).id);
         assert.deepEqual(user.profile.id, datastore.get('profile', 15).id);
         // try a comment that has a belongsTo relationship to multiple users:
@@ -109,13 +109,13 @@ describe('DS.loadRelations(resourceName, instance(Id), relations[, options]): ',
     });
 
     datastore.loadRelations('user', 10, ['comment', 'profile', 'organization'], { cacheResponse: false }).then(function (user) {
-      assert.deepEqual(user.comments, [
+      assert.deepEqual(JSON.stringify(user.comments), JSON.stringify([
         comment11,
         comment12,
         comment13
-      ]);
-      assert.deepEqual(user.organization, organization14);
-      assert.deepEqual(user.profile, profile15);
+      ]));
+      assert.deepEqual(JSON.stringify(user.organization), JSON.stringify(organization14));
+      assert.deepEqual(JSON.stringify(user.profile), JSON.stringify(profile15));
 
       assert.isUndefined(datastore.get('comment', 11));
       assert.isUndefined(datastore.get('comment', 12));

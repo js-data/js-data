@@ -54,10 +54,10 @@ describe('DS.ejectAll(resourceName[, params])', function () {
     datastore.inject('post', p3);
     datastore.inject('post', p4);
 
-    assert.deepEqual(datastore.get('post', 5), p1);
-    assert.deepEqual(datastore.get('post', 6), p2);
-    assert.deepEqual(datastore.get('post', 7), p3);
-    assert.deepEqual(datastore.get('post', 8), p4);
+    assert.deepEqual(JSON.stringify(datastore.get('post', 5)), JSON.stringify(p1));
+    assert.deepEqual(JSON.stringify(datastore.get('post', 6)), JSON.stringify(p2));
+    assert.deepEqual(JSON.stringify(datastore.get('post', 7)), JSON.stringify(p3));
+    assert.deepEqual(JSON.stringify(datastore.get('post', 8)), JSON.stringify(p4));
 
     datastore.store.post.completedQueries.test = 'stuff';
 
@@ -65,7 +65,7 @@ describe('DS.ejectAll(resourceName[, params])', function () {
       datastore.ejectAll('post');
     });
 
-    assert.deepEqual(datastore.store.post.completedQueries, {});
+    assert.deepEqual(JSON.stringify(datastore.store.post.completedQueries), JSON.stringify({}));
     assert.isUndefined(datastore.get('post', 5));
     assert.isUndefined(datastore.get('post', 6));
     assert.isUndefined(datastore.get('post', 7));

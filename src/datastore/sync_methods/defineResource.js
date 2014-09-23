@@ -184,6 +184,20 @@ function defineResource(definition) {
       };
     }
 
+    def[def.class].prototype.DSUpdate = function () {
+      var args = Array.prototype.slice.call(arguments);
+      args.unshift(this[def.idAttribute]);
+      args.unshift(def.name);
+      return _this.update.apply(_this, args);
+    };
+
+    def[def.class].prototype.DSSave = function () {
+      var args = Array.prototype.slice.call(arguments);
+      args.unshift(this[def.idAttribute]);
+      args.unshift(def.name);
+      return _this.save.apply(_this, args);
+    };
+
     // Initialize store data for the new resource
     _this.store[def.name] = {
       collection: [],

@@ -32,26 +32,26 @@ describe('DS.findAll(resourceName, params[, options]): ', function () {
   it('should query the server for a collection', function (done) {
     var _this = this;
     datastore.findAll('post', {}).then(function (data) {
-      assert.deepEqual(data, [p1, p2, p3, p4]);
+      assert.deepEqual(JSON.stringify(data), JSON.stringify([p1, p2, p3, p4]));
     }).catch(function (err) {
       console.error(err.stack);
       done('Should not have rejected!');
     });
 
-    assert.deepEqual(datastore.filter('post', {}), [], 'The posts should not be in the store yet');
+    assert.deepEqual(JSON.stringify(datastore.filter('post', {})), JSON.stringify([]), 'The posts should not be in the store yet');
 
     // Should have no effect because there is already a pending query
     datastore.findAll('post', {}).then(function (data) {
-      assert.deepEqual(data, [p1, p2, p3, p4]);
+      assert.deepEqual(JSON.stringify(data), JSON.stringify([p1, p2, p3, p4]));
 
-      assert.deepEqual(datastore.filter('post', {}), [p1, p2, p3, p4], 'The posts are now in the store');
+      assert.deepEqual(JSON.stringify(datastore.filter('post', {})), JSON.stringify([p1, p2, p3, p4]), 'The posts are now in the store');
       assert.isNumber(datastore.lastModified('post', 5));
       assert.isNumber(datastore.lastSaved('post', 5));
       datastore.find('post', p1.id); // should not trigger another XHR
 
       // Should not make a request because the request was already completed
       datastore.findAll('post', {}).then(function (data) {
-        assert.deepEqual(data, [p1, p2, p3, p4]);
+        assert.deepEqual(JSON.stringify(data), JSON.stringify([p1, p2, p3, p4]));
       }).catch(function (err) {
         console.error(err.stack);
         done('Should not have rejected!');
@@ -59,7 +59,7 @@ describe('DS.findAll(resourceName, params[, options]): ', function () {
 
       // Should make a request because bypassCache is set to true
       datastore.findAll('post', {}, { bypassCache: true }).then(function (data) {
-        assert.deepEqual(data, [p1, p2, p3, p4]);
+        assert.deepEqual(JSON.stringify(data), JSON.stringify([p1, p2, p3, p4]));
         assert.equal(lifecycle.beforeInject.callCount, 2, 'beforeInject should have been called');
         assert.equal(lifecycle.afterInject.callCount, 2, 'afterInject should have been called');
         assert.equal(lifecycle.serialize.callCount, 0, 'serialize should have been called');
@@ -96,7 +96,7 @@ describe('DS.findAll(resourceName, params[, options]): ', function () {
     }, function (err) {
       try {
         assert(err.message, 'post.inject: "attrs" must contain the property specified by `idAttribute`!');
-        assert.deepEqual(datastore.filter('post', {}), [], 'The posts should not be in the store');
+        assert.deepEqual(JSON.stringify(datastore.filter('post', {})), JSON.stringify([]), 'The posts should not be in the store');
         assert.equal(lifecycle.beforeInject.callCount, 1, 'beforeInject should have been called once');
         assert.equal(lifecycle.afterInject.callCount, 0, 'afterInject should not have been called');
         done();
@@ -119,9 +119,9 @@ describe('DS.findAll(resourceName, params[, options]): ', function () {
     var _this = this;
 
     datastore.findAll('post', {}, { cacheResponse: false }).then(function (data) {
-      assert.deepEqual(data, [p1, p2, p3, p4]);
+      assert.deepEqual(JSON.stringify(data), JSON.stringify([p1, p2, p3, p4]));
 
-      assert.deepEqual(datastore.filter('post', {}), [], 'The posts should not have been injected into the store');
+      assert.deepEqual(JSON.stringify(datastore.filter('post', {})), JSON.stringify([]), 'The posts should not have been injected into the store');
 
       assert.equal(lifecycle.beforeInject.callCount, 0, 'beforeInject should have been called');
       assert.equal(lifecycle.afterInject.callCount, 0, 'afterInject should have been called');
@@ -165,8 +165,8 @@ describe('DS.findAll(resourceName, params[, options]): ', function () {
     var _this = this;
 
     datastore.findAll('post').then(function (data) {
-      assert.deepEqual(data, [p1, p2, p3, p4]);
-      assert.deepEqual(datastore.filter('post', {}), [p1, p2, p3, p4], 'The posts are now in the store');
+      assert.deepEqual(JSON.stringify(data), JSON.stringify([p1, p2, p3, p4]));
+      assert.deepEqual(JSON.stringify(datastore.filter('post', {})), JSON.stringify([p1, p2, p3, p4]), 'The posts are now in the store');
 
       assert.equal(lifecycle.beforeInject.callCount, 1, 'beforeInject should have been called');
       assert.equal(lifecycle.afterInject.callCount, 1, 'afterInject should have been called');
@@ -194,15 +194,15 @@ describe('DS.findAll(resourceName, params[, options]): ', function () {
       }
     };
     datastore.findAll('post', params).then(function (data) {
-      assert.deepEqual(data, [p4, p5]);
-      assert.deepEqual(datastore.filter('post', params), [p4, p5], 'The posts are now in the store');
-      assert.deepEqual(datastore.filter('post', {
+      assert.deepEqual(JSON.stringify(data), JSON.stringify([p4, p5]));
+      assert.deepEqual(JSON.stringify(datastore.filter('post', params)), JSON.stringify([p4, p5]), 'The posts are now in the store');
+      assert.deepEqual(JSON.stringify(datastore.filter('post', {
         where: {
           id: {
             '>': 8
           }
         }
-      }), [p5], 'The posts are now in the store');
+      })), JSON.stringify([p5]), 'The posts are now in the store');
 
       assert.equal(lifecycle.beforeInject.callCount, 1, 'beforeInject should have been called');
       assert.equal(lifecycle.afterInject.callCount, 1, 'afterInject should have been called');
@@ -243,17 +243,17 @@ describe('DS.findAll(resourceName, params[, options]): ', function () {
     });
 
     datastore.findAll('person').then(function (data) {
-      assert.deepEqual(data, [
+      assert.deepEqual(JSON.stringify(data), JSON.stringify([
         DSUtils.deepMixIn(new datastore.definitions.person[datastore.definitions.person.class](), u1),
         DSUtils.deepMixIn(new datastore.definitions.person[datastore.definitions.person.class](), u2)
-      ]);
+      ]));
       DSUtils.forEach(data, function (person) {
         assert.isTrue(person instanceof datastore.definitions.person[datastore.definitions.person.class], 'should be an instance of User');
       });
-      assert.deepEqual(datastore.filter('person'), [
+      assert.deepEqual(JSON.stringify(datastore.filter('person')), JSON.stringify([
         DSUtils.deepMixIn(new datastore.definitions.person[datastore.definitions.person.class](), u1),
         DSUtils.deepMixIn(new datastore.definitions.person[datastore.definitions.person.class](), u2)
-      ], 'The users are now in the store');
+      ]), 'The users are now in the store');
 
       assert.equal(lifecycle.beforeInject.callCount, 1, 'beforeInject should have been called');
       assert.equal(lifecycle.afterInject.callCount, 1, 'afterInject should have been called');
@@ -292,10 +292,10 @@ describe('DS.findAll(resourceName, params[, options]): ', function () {
         approvedBy: 4
       }
     }).then(function (comments) {
-      assert.deepEqual(comments, [testComment, testComment2]);
-      assert.deepEqual(comments, datastore.filter('comment', {
+      assert.deepEqual(JSON.stringify(comments), JSON.stringify([testComment, testComment2]));
+      assert.deepEqual(JSON.stringify(comments), JSON.stringify(datastore.filter('comment', {
         content: 'test'
-      }));
+      })));
       datastore.ejectAll('comment');
 
       datastore.findAll('comment', {
@@ -303,10 +303,10 @@ describe('DS.findAll(resourceName, params[, options]): ', function () {
       }, {
         bypassCache: true
       }).then(function (comments) {
-        assert.deepEqual(comments, [testComment, testComment2]);
-        assert.deepEqual(comments, datastore.filter('comment', {
+        assert.deepEqual(JSON.stringify(comments), JSON.stringify([testComment, testComment2]));
+        assert.deepEqual(JSON.stringify(comments), JSON.stringify(datastore.filter('comment', {
           content: 'test'
-        }));
+        })));
         datastore.ejectAll('comment');
 
         datastore.findAll('comment', {
@@ -317,10 +317,10 @@ describe('DS.findAll(resourceName, params[, options]): ', function () {
             approvedBy: false
           }
         }).then(function (comments) {
-          assert.deepEqual(comments, [testComment, testComment2]);
-          assert.deepEqual(comments, datastore.filter('comment', {
+          assert.deepEqual(JSON.stringify(comments), JSON.stringify([testComment, testComment2]));
+          assert.deepEqual(JSON.stringify(comments), JSON.stringify(datastore.filter('comment', {
             content: 'test'
-          }));
+          })));
           done();
         }).catch(function () {
           done('Should not have failed!');
