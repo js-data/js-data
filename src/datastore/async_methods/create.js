@@ -19,6 +19,9 @@ function create(resourceName, attrs, options) {
       if (!('upsert' in options)) {
         options.upsert = true;
       }
+      if (!('notify' in options)) {
+        options.notify = definition.notify;
+      }
       resolve(attrs);
     }
   });
@@ -44,7 +47,9 @@ function create(resourceName, attrs, options) {
         return func.call(attrs, resourceName, attrs);
       })
       .then(function (attrs) {
-        _this.notify(definition, 'beforeCreate', DSUtils.merge({}, attrs));
+        if (options.notify) {
+          _this.emit(definition, 'beforeCreate', DSUtils.merge({}, attrs));
+        }
         return _this.getAdapter(definition, options).create(definition, attrs, options);
       })
       .then(function (data) {
@@ -52,7 +57,9 @@ function create(resourceName, attrs, options) {
         return func.call(data, resourceName, data);
       })
       .then(function (attrs) {
-        _this.notify(definition, 'afterCreate', DSUtils.merge({}, attrs));
+        if (options.notify) {
+          _this.emit(definition, 'afterCreate', DSUtils.merge({}, attrs));
+        }
         if (options.cacheResponse) {
           var resource = _this.store[resourceName];
           var created = _this.inject(definition.name, attrs, options);

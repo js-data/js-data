@@ -47,7 +47,7 @@ describe('DS.defineResource(definition)', function () {
 
     datastore.defineResource({
       name: 'Comment',
-      baseUrl: 'hello/',
+      basePath: 'hello/',
       validate: test.validate
     });
 

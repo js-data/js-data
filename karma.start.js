@@ -95,7 +95,7 @@ beforeEach(function () {
     return query;
   };
   datastore = new JSData.DS({
-    baseUrl: 'http://test.js-data.io',
+    basePath: 'http://test.js-data.io',
     beforeValidate: lifecycle.beforeValidate,
     validate: lifecycle.validate,
     afterValidate: lifecycle.afterValidate,

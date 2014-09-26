@@ -124,4 +124,66 @@ describe('DS.inject(resourceName, attrs[, options])', function () {
 
     assert.equal(2, datastore.get('user', 1).comments.length);
   });
+  it('should inject cyclic dependencies', function () {
+    datastore.defineResource({
+      name: 'foo',
+      relations: {
+        hasMany: {
+          foo: {
+            localField: 'children',
+            foreignKey: 'parentId'
+          }
+        }
+      }
+    });
+    var injected = datastore.inject('foo', [{
+      id: 1,
+      children: [
+        {
+          id: 2,
+          parentId: 1,
+          children: [
+            {
+              id: 4,
+              parentId: 2
+            },
+            {
+              id: 5,
+              parentId: 2
+            }
+          ]
+        },
+        {
+          id: 3,
+          parentId: 1,
+          children: [
+            {
+              id: 6,
+              parentId: 3
+            },
+            {
+              id: 7,
+              parentId: 3
+            }
+          ]
+        }
+      ]
+    }]);
+
+    assert.equal(injected[0].id, 1);
+    assert.equal(injected[0].children[0].id, 2);
+    assert.equal(injected[0].children[1].id, 3);
+    assert.equal(injected[0].children[0].children[0].id, 4);
+    assert.equal(injected[0].children[0].children[1].id, 5);
+    assert.equal(injected[0].children[1].children[0].id, 6);
+    assert.equal(injected[0].children[1].children[1].id, 7);
+
+    assert.isDefined(datastore.get('foo', 1));
+    assert.isDefined(datastore.get('foo', 2));
+    assert.isDefined(datastore.get('foo', 3));
+    assert.isDefined(datastore.get('foo', 4));
+    assert.isDefined(datastore.get('foo', 5));
+    assert.isDefined(datastore.get('foo', 6));
+    assert.isDefined(datastore.get('foo', 7));
+  });
 });

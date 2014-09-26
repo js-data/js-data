@@ -203,12 +203,15 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
 
   return filtered;
 };
-defaultsPrototype.baseUrl = '';
+defaultsPrototype.basePath = '';
 defaultsPrototype.endpoint = '';
 defaultsPrototype.useClass = true;
 defaultsPrototype.keepChangeHistory = false;
 defaultsPrototype.resetHistoryOnInject = true;
-Defaults.prototype.eagerEject = false;
+defaultsPrototype.eagerEject = false;
+// TODO: Implement eagerInject in DS#create
+defaultsPrototype.eagerInject = false;
+defaultsPrototype.notify = true;
 defaultsPrototype.beforeValidate = lifecycleNoopCb;
 defaultsPrototype.validate = lifecycleNoopCb;
 defaultsPrototype.afterValidate = lifecycleNoopCb;
@@ -238,7 +241,19 @@ dsPrototype.getAdapter = function (def, options) {
   return this.adapters[options.adapter] || this.adapters[def.defaultAdapter];
 };
 
-dsPrototype.notify = function (definition, event) {
+dsPrototype.registerAdapter = function (name, Adapter, options) {
+  options = options || {};
+  if (DSUtils.isFunction(Adapter)) {
+    this.adapters[name] = new Adapter(options);
+  } else {
+    this.adapters[name] = Adapter;
+  }
+  if (options.default) {
+    this.defaults.defaultAdapter = name;
+  }
+};
+
+dsPrototype.emit = function (definition, event) {
   var args = Array.prototype.slice.call(arguments, 2);
   args.unshift(definition.name);
   args.unshift('DS.' + event);

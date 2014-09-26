@@ -22,7 +22,7 @@ function destroy(resourceName, id, options) {
     } else {
       item = _this.get(resourceName, id);
       if (!('notify' in options)) {
-        options.notify = true;
+        options.notify = definition.notify;
       }
       if (!('eagerEject' in options)) {
         options.eagerEject = definition.eagerEject;
@@ -31,16 +31,12 @@ function destroy(resourceName, id, options) {
     }
   })
     .then(function (attrs) {
-      if (options.notify) {
-        var func = options.beforeDestroy ? promisify(options.beforeDestroy) : definition.beforeDestroy;
-        return func.call(attrs, resourceName, attrs);
-      } else {
-        return attrs;
-      }
+      var func = options.beforeDestroy ? promisify(options.beforeDestroy) : definition.beforeDestroy;
+      return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.notify(definition, 'beforeDestroy', DSUtils.merge({}, attrs));
+        _this.emit(definition, 'beforeDestroy', DSUtils.merge({}, attrs));
       }
       if (options.eagerEject) {
         _this.eject(resourceName, id);
@@ -48,16 +44,12 @@ function destroy(resourceName, id, options) {
       return _this.getAdapter(definition, options).destroy(definition, id, options);
     })
     .then(function () {
-      if (options.notify) {
-        var func = options.afterDestroy ? promisify(options.afterDestroy) : definition.afterDestroy;
-        return func.call(item, resourceName, item);
-      } else {
-        return item;
-      }
+      var func = options.afterDestroy ? promisify(options.afterDestroy) : definition.afterDestroy;
+      return func.call(item, resourceName, item);
     })
     .then(function (item) {
       if (options.notify) {
-        _this.notify(definition, 'afterDestroy', DSUtils.merge({}, item));
+        _this.emit(definition, 'afterDestroy', DSUtils.merge({}, item));
       }
       _this.eject(resourceName, id);
       return id;

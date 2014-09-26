@@ -20,6 +20,9 @@ function update(resourceName, id, attrs, options) {
       if (!('cacheResponse' in options)) {
         options.cacheResponse = true;
       }
+      if (!('notify' in options)) {
+        options.notify = definition.notify;
+      }
       resolve(attrs);
     }
   }).then(function (attrs) {
@@ -39,7 +42,9 @@ function update(resourceName, id, attrs, options) {
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      _this.notify(definition, 'beforeUpdate', DSUtils.merge({}, attrs));
+      if (options.notify) {
+        _this.emit(definition, 'beforeUpdate', DSUtils.merge({}, attrs));
+      }
       return _this.getAdapter(definition, options).update(definition, id, attrs, options);
     })
     .then(function (data) {
@@ -47,7 +52,9 @@ function update(resourceName, id, attrs, options) {
       return func.call(data, resourceName, data);
     })
     .then(function (attrs) {
-      _this.notify(definition, 'afterUpdate', DSUtils.merge({}, attrs));
+      if (options.notify) {
+        _this.emit(definition, 'afterUpdate', DSUtils.merge({}, attrs));
+      }
       if (options.cacheResponse) {
         var resource = _this.store[resourceName];
         var updated = _this.inject(definition.name, attrs, options);

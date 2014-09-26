@@ -24,6 +24,9 @@ function save(resourceName, id, options) {
       if (!('cacheResponse' in options)) {
         options.cacheResponse = true;
       }
+      if (!('notify' in options)) {
+        options.notify = definition.notify;
+      }
       resolve(item);
     }
   }).then(function (attrs) {
@@ -43,7 +46,9 @@ function save(resourceName, id, options) {
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      _this.notify(definition, 'beforeUpdate', DSUtils.merge({}, attrs));
+      if (options.notify) {
+        _this.emit(definition, 'beforeUpdate', DSUtils.merge({}, attrs));
+      }
       if (options.changesOnly) {
         var resource = _this.store[resourceName];
         resource.observers[id].deliver();
@@ -71,7 +76,9 @@ function save(resourceName, id, options) {
       return func.call(data, resourceName, data);
     })
     .then(function (attrs) {
-      _this.notify(definition, 'afterUpdate', DSUtils.merge({}, attrs));
+      if (options.notify) {
+        _this.emit(definition, 'afterUpdate', DSUtils.merge({}, attrs));
+      }
       if (options.cacheResponse) {
         var resource = _this.store[resourceName];
         var saved = _this.inject(definition.name, attrs, options);

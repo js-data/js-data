@@ -28,7 +28,7 @@ function eject(resourceName, id, options) {
   }
   if (found) {
     if (!('notify' in options)) {
-      options.notify = true;
+      options.notify = definition.notify;
     }
     if (options.notify) {
       definition.beforeEject(definition.name, item);
@@ -52,7 +52,7 @@ function eject(resourceName, id, options) {
 
     if (options.notify) {
       definition.afterEject(definition.name, item);
-      _this.notify(definition, 'eject', item);
+      _this.emit(definition, 'eject', item);
     }
 
     return item;

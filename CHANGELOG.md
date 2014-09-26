@@ -1,3 +1,9 @@
+##### 0.4.0 - 25 September 2014
+
+###### Breaking API changes
+- Refactored from `baseUrl` to `basePath`, as `baseUrl` doesn't make sense for all adapters, but `basePath` does
+- Made `notify` configurable globally and per-resource
+
 ##### 0.3.0 - 22 September 2014
 
 ###### Backwards compatible API changes

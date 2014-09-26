@@ -1,10 +1,22 @@
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 var observe = require('../../../lib/observe-js/observe-js');
-var stack = 0;
-var data = {
-  injectedSoFar: {}
-};
+
+function _injectRelations(definition, injected, options) {
+  var _this = this;
+
+  DSUtils.forEach(definition.relationList, function (def) {
+    var relationName = def.relation;
+    var relationDef = _this.definitions[relationName];
+    if (relationDef && injected[def.localField]) {
+      try {
+        injected[def.localField] = _this.inject(relationName, injected[def.localField], options);
+      } catch (err) {
+        console.error(definition.name + ': Failed to inject ' + def.type + ' relation: "' + relationName + '"!', err);
+      }
+    }
+  });
+}
 
 function _getReactFunction(DS, definition, resource) {
   return function _react(added, removed, changed, oldValueFn, firstTime) {
@@ -123,6 +135,10 @@ function _inject(definition, resource, attrs, options) {
           resource.index[id] = item;
 
           _react.call(item, {}, {}, {}, null, true);
+
+          if (definition.relations) {
+            _injectRelations.call(_this, definition, item, options);
+          }
         } else {
           DSUtils.deepMixIn(item, attrs);
           if (definition.resetHistoryOnInject) {
@@ -148,44 +164,14 @@ function _inject(definition, resource, attrs, options) {
   return injected;
 }
 
-function _injectRelations(definition, injected, options) {
+function _link(definition, injected, options) {
   var _this = this;
 
-  function _process(def, relationName, injected) {
-    var relationDef = _this.definitions[relationName];
-    if (relationDef && injected[def.localField] && !data.injectedSoFar[relationName + injected[def.localField][relationDef.idAttribute]]) {
-      try {
-        data.injectedSoFar[relationName + injected[def.localField][relationDef.idAttribute]] = 1;
-        injected[def.localField] = _this.inject(relationName, injected[def.localField], options);
-      } catch (err) {
-        console.error(definition.name + ': Failed to inject ' + def.type + ' relation: "' + relationName + '"!', err);
-      }
-    } else if (options.findBelongsTo && def.type === 'belongsTo') {
-      if (DSUtils.isArray(injected)) {
-        DSUtils.forEach(injected, function (injectedItem) {
-          _this.link(definition.name, injectedItem[definition.idAttribute], [relationName]);
-        });
-      } else {
-        _this.link(definition.name, injected[definition.idAttribute], [relationName]);
-      }
-    } else if ((options.findHasMany && def.type === 'hasMany') || (options.findHasOne && def.type === 'hasOne')) {
-      if (DSUtils.isArray(injected)) {
-        DSUtils.forEach(injected, function (injectedItem) {
-          _this.link(definition.name, injectedItem[definition.idAttribute], [relationName]);
-        });
-      } else {
-        _this.link(definition.name, injected[definition.idAttribute], [relationName]);
-      }
-    }
-  }
-
   DSUtils.forEach(definition.relationList, function (def) {
-    if (DSUtils.isArray(injected)) {
-      DSUtils.forEach(injected, function (injectedI) {
-        _process(def, def.relation, injectedI);
-      });
-    } else {
-      _process(def, def.relation, injected);
+    if (options.findBelongsTo && def.type === 'belongsTo' && injected[definition.idAttribute]) {
+      _this.link(definition.name, injected[definition.idAttribute], [def.relation]);
+    } else if ((options.findHasMany && def.type === 'hasMany') || (options.findHasOne && def.type === 'hasOne')) {
+      _this.link(definition.name, injected[definition.idAttribute], [def.relation]);
     }
   });
 }
@@ -205,45 +191,37 @@ function inject(resourceName, attrs, options) {
   }
   var injected;
 
-  stack++;
-
-  try {
-    if (!('useClass' in options)) {
-      options.useClass = definition.useClass;
-    }
-    if (!('notify' in options)) {
-      options.notify = true;
-    }
-    if (options.notify) {
-      definition.beforeInject(definition.name, attrs);
-    }
-
-    injected = _inject.call(_this, definition, _this.store[resourceName], attrs, options);
-    if (definition.relations) {
-      _injectRelations.call(_this, definition, injected, options);
-    }
-
-    if (options.linkInverse) {
-      if (DSUtils.isArray(injected) && injected.length) {
-        _this.linkInverse(definition.name, injected[0][definition.idAttribute]);
-      } else {
-        _this.linkInverse(definition.name, injected[definition.idAttribute]);
-      }
-    }
-
-    if (options.notify) {
-      definition.afterInject(definition.name, injected);
-      _this.notify(definition, 'inject', injected);
-    }
-
-    stack--;
-  } catch (err) {
-    stack--;
-    throw err;
+  if (!('useClass' in options)) {
+    options.useClass = definition.useClass;
+  }
+  if (!('notify' in options)) {
+    options.notify = definition.notify;
+  }
+  if (options.notify) {
+    definition.beforeInject(definition.name, attrs);
   }
 
-  if (!stack) {
-    data.injectedSoFar = {};
+  injected = _inject.call(_this, definition, _this.store[resourceName], attrs, options);
+
+  if (options.linkInverse) {
+    if (DSUtils.isArray(injected) && injected.length) {
+      _this.linkInverse(definition.name, injected[0][definition.idAttribute]);
+    } else {
+      _this.linkInverse(definition.name, injected[definition.idAttribute]);
+    }
+  }
+
+  if (DSUtils.isArray(injected)) {
+    DSUtils.forEach(injected, function (injectedI) {
+      _link.call(_this, definition, injectedI, options);
+    });
+  } else {
+    _link.call(_this, definition, injected, options);
+  }
+
+  if (options.notify) {
+    definition.afterInject(definition.name, injected);
+    _this.emit(definition, 'inject', injected);
   }
 
   return injected;

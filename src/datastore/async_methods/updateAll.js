@@ -17,6 +17,9 @@ function updateAll(resourceName, attrs, params, options) {
       if (!('cacheResponse' in options)) {
         options.cacheResponse = true;
       }
+      if (!('notify' in options)) {
+        options.notify = definition.notify;
+      }
       resolve(attrs);
     }
   }).then(function (attrs) {
@@ -36,7 +39,9 @@ function updateAll(resourceName, attrs, params, options) {
       return func.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      _this.notify(definition, 'beforeUpdate', DSUtils.merge({}, attrs));
+      if (options.notify) {
+        _this.emit(definition, 'beforeUpdate', DSUtils.merge({}, attrs));
+      }
       return _this.getAdapter(definition, options).updateAll(definition, attrs, params, options);
     })
     .then(function (data) {
@@ -44,7 +49,9 @@ function updateAll(resourceName, attrs, params, options) {
       return func.call(data, resourceName, data);
     })
     .then(function (data) {
-      _this.notify(definition, 'afterUpdate', DSUtils.merge({}, attrs));
+      if (options.notify) {
+        _this.emit(definition, 'afterUpdate', DSUtils.merge({}, attrs));
+      }
       if (options.cacheResponse) {
         return _this.inject(definition.name, data, options);
       } else {
