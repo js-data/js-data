@@ -1,3 +1,8 @@
+##### 0.4.1 - xx September 2014
+
+###### Backwards compatible API changes
+- #9 - Make all options passed to methods also inherit from Resource defaults
+
 ##### 0.4.0 - 25 September 2014
 
 ###### Breaking API changes

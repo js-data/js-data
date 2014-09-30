@@ -7,18 +7,12 @@ function find(resourceName, id, options) {
   var resource = _this.store[resourceName];
 
   return new DSUtils.Promise(function (resolve, reject) {
-    options = options || {};
-
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
       reject(new DSErrors.IA('"id" must be a string or a number!'));
-    } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
-      if (!('cacheResponse' in options)) {
-        options.cacheResponse = true;
-      }
+      options = DSUtils._(definition, options);
       if (options.bypassCache || !options.cacheResponse) {
         delete resource.completedQueries[id];
       }

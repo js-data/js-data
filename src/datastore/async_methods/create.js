@@ -6,27 +6,18 @@ function create(resourceName, attrs, options) {
   var _this = this;
   var definition = _this.definitions[resourceName];
 
+  options = options || {};
+
   var promise = new DSUtils.Promise(function (resolve, reject) {
-
-    options = options || {};
-
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
     } else {
-      if (!('cacheResponse' in options)) {
-        options.cacheResponse = true;
-      }
-      if (!('upsert' in options)) {
-        options.upsert = true;
-      }
-      if (!('notify' in options)) {
-        options.notify = definition.notify;
-      }
+      options = DSUtils._(definition, options);
       resolve(attrs);
     }
   });
 
-  if (options.upsert && attrs[definition.idAttribute]) {
+  if (definition && (options.hasOwnProperty('upsert') ? options.upsert : definition.upsert) && attrs[definition.idAttribute]) {
     return _this.update(resourceName, attrs[definition.idAttribute], attrs, options);
   } else {
     return promise

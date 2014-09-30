@@ -170,11 +170,14 @@ describe('DS.find(resourceName, id[, options]): ', function () {
               organizationId: 14
             }
           }).then(function (comment) {
+            delete comment.approvedByUser.comments;
+            delete comment.user.comments;
             assert.deepEqual(JSON.stringify(comment), JSON.stringify(comment19));
             assert.deepEqual(JSON.stringify(comment), JSON.stringify(datastore.get('comment', 19)));
 
             done();
-          }).catch(function () {
+          }).catch(function (err) {
+            console.error(err.stack);
             done('Should not have failed!');
           });
 
@@ -184,7 +187,8 @@ describe('DS.find(resourceName, id[, options]): ', function () {
             assert.equal(_this.requests[3].method, 'get');
             _this.requests[3].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(comment19));
           }, 30);
-        }).catch(function () {
+        }).catch(function (err) {
+          console.error(err.stack);
           done('Should not have failed!');
         });
 

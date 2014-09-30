@@ -7,22 +7,13 @@ function update(resourceName, id, attrs, options) {
   var definition = _this.definitions[resourceName];
 
   return new DSUtils.Promise(function (resolve, reject) {
-    options = options || {};
-
     id = DSUtils.resolveId(definition, id);
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
       reject(new DSErrors.IA('"id" must be a string or a number!'));
-    } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
-      if (!('cacheResponse' in options)) {
-        options.cacheResponse = true;
-      }
-      if (!('notify' in options)) {
-        options.notify = definition.notify;
-      }
+      options = DSUtils._(definition, options);
       resolve(attrs);
     }
   }).then(function (attrs) {

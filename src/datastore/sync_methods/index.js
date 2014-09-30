@@ -63,23 +63,17 @@ function changeHistory(resourceName, id) {
 
 function createInstance(resourceName, attrs, options) {
   var definition = this.definitions[resourceName];
+  var item;
 
   attrs = attrs || {};
-  options = options || {};
 
   if (!definition) {
     throw new DSErrors.NER(resourceName);
   } else if (attrs && !DSUtils.isObject(attrs)) {
     throw new DSErrors.IA('"attrs" must be an object!');
-  } else if (!DSUtils.isObject(options)) {
-    throw new DSErrors.IA('"options" must be an object!');
   }
 
-  if (!('useClass' in options)) {
-    options.useClass = definition.useClass;
-  }
-
-  var item;
+  options = DSUtils._(definition, options);
 
   if (options.useClass) {
     var Constructor = definition[definition.class];
@@ -124,15 +118,16 @@ function compute(resourceName, instance) {
 
 function get(resourceName, id, options) {
   var _this = this;
-  options = options || {};
+  var definition = _this.definitions[resourceName];
 
-  if (!_this.definitions[resourceName]) {
+  if (!definition) {
     throw new DSErrors.NER(resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
     throw new DSErrors.IA('"id" must be a string or a number!');
-  } else if (!DSUtils.isObject(options)) {
-    throw new DSErrors.IA('"options" must be an object!');
   }
+
+  options = DSUtils._(definition, options);
+
   // cache miss, request resource from server
   var item = _this.store[resourceName].index[id];
   if (!item && options.loadFromServer) {

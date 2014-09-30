@@ -199,7 +199,8 @@ describe('DS.loadRelations(resourceName, instance(Id), relations[, options]): ',
       datastore.loadRelations('user', user, ['comment']).then(function (user) {
         assert.isArray(user.comments);
         done();
-      }).catch(function () {
+      }).catch(function (err) {
+        console.log(err.stack);
         done('Should not have failed!');
       });
 

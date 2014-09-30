@@ -110,17 +110,17 @@ describe('DS.inject(resourceName, attrs[, options])', function () {
   it('should find inverse links', function () {
     datastore.inject('user', { organizationId: 5, id: 1 });
 
-    datastore.inject('organization', { id: 5 }, { linkInverse: true });
+    datastore.inject('organization', { id: 5 }, { findInverseLinks: true });
 
     assert.isObject(datastore.get('user', 1).organization);
 
     assert.isUndefined(datastore.get('user', 1).comments);
 
-    datastore.inject('comment', { approvedBy: 1, id: 23 }, { linkInverse: true });
+    datastore.inject('comment', { approvedBy: 1, id: 23 }, { findInverseLinks: true });
 
     assert.equal(1, datastore.get('user', 1).comments.length);
 
-    datastore.inject('comment', { approvedBy: 1, id: 44 }, { linkInverse: true });
+    datastore.inject('comment', { approvedBy: 1, id: 44 }, { findInverseLinks: true });
 
     assert.equal(2, datastore.get('user', 1).comments.length);
   });

@@ -179,31 +179,23 @@ function _link(definition, injected, options) {
 function inject(resourceName, attrs, options) {
   var _this = this;
   var definition = _this.definitions[resourceName];
-
-  options = options || {};
+  var injected;
 
   if (!definition) {
     throw new DSErrors.NER(resourceName);
   } else if (!DSUtils.isObject(attrs) && !DSUtils.isArray(attrs)) {
     throw new DSErrors.IA(resourceName + '.inject: "attrs" must be an object or an array!');
-  } else if (!DSUtils.isObject(options)) {
-    throw new DSErrors.IA('"options" must be an object!');
   }
-  var injected;
 
-  if (!('useClass' in options)) {
-    options.useClass = definition.useClass;
-  }
-  if (!('notify' in options)) {
-    options.notify = definition.notify;
-  }
+  options = DSUtils._(definition, options);
+
   if (options.notify) {
     definition.beforeInject(definition.name, attrs);
   }
 
   injected = _inject.call(_this, definition, _this.store[resourceName], attrs, options);
 
-  if (options.linkInverse) {
+  if (options.findInverseLinks) {
     if (DSUtils.isArray(injected) && injected.length) {
       _this.linkInverse(definition.name, injected[0][definition.idAttribute]);
     } else {

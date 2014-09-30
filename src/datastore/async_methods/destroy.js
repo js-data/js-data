@@ -8,8 +8,6 @@ function destroy(resourceName, id, options) {
   var item;
 
   return new DSUtils.Promise(function (resolve, reject) {
-    options = options || {};
-
     id = DSUtils.resolveId(definition, id);
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
@@ -17,16 +15,9 @@ function destroy(resourceName, id, options) {
       reject(new DSErrors.IA('"id" must be a string or a number!'));
     } else if (!_this.get(resourceName, id)) {
       reject(new DSErrors.R('id "' + id + '" not found in cache!'));
-    } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
       item = _this.get(resourceName, id);
-      if (!('notify' in options)) {
-        options.notify = definition.notify;
-      }
-      if (!('eagerEject' in options)) {
-        options.eagerEject = definition.eagerEject;
-      }
+      options = DSUtils._(definition, options);
       resolve(item);
     }
   })

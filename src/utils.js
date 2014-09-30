@@ -34,6 +34,8 @@ function Events(target) {
   };
 }
 
+var DSErrors = require('./errors');
+
 module.exports = {
   isBoolean: require('mout/lang/isBoolean'),
   isString: require('mout/lang/isString'),
@@ -59,6 +61,21 @@ module.exports = {
   remove: require('mout/array/remove'),
   slice: require('mout/array/slice'),
   sort: require('mout/array/sort'),
+  // Options that inherit from defaults
+  _: function (parent, options) {
+    var _this = this;
+    options = options || {};
+    if (options && options.constructor === parent.constructor) {
+      return options;
+    } else if (!_this.isObject(options)) {
+      throw new DSErrors.IA('"options" must be an object!');
+    }
+    var O = function Options(attrs) {
+      _this.deepMixIn(this, attrs);
+    };
+    O.prototype = parent;
+    return new O(options);
+  },
   resolveItem: function (resource, idOrInstance) {
     if (resource && (this.isString(idOrInstance) || this.isNumber(idOrInstance))) {
       return resource.index[idOrInstance] || idOrInstance;

@@ -8,16 +8,15 @@ function eject(resourceName, id, options) {
   var item;
   var found = false;
 
-  options = options || {};
-
   id = DSUtils.resolveId(definition, id);
+
   if (!definition) {
     throw new DSErrors.NER(resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
     throw new DSErrors.IA('"id" must be a string or a number!');
-  } else if (!DSUtils.isObject(options)) {
-    throw new DSErrors.IA('"options" must be an object!');
   }
+
+  options = DSUtils._(definition, options);
 
   for (var i = 0; i < resource.collection.length; i++) {
     if (resource.collection[i][definition.idAttribute] == id) {
@@ -27,9 +26,6 @@ function eject(resourceName, id, options) {
     }
   }
   if (found) {
-    if (!('notify' in options)) {
-      options.notify = definition.notify;
-    }
     if (options.notify) {
       definition.beforeEject(definition.name, item);
     }

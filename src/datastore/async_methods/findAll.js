@@ -41,20 +41,14 @@ function findAll(resourceName, params, options) {
   var queryHash;
 
   return new DSUtils.Promise(function (resolve, reject) {
-    options = options || {};
     params = params || {};
 
     if (!_this.definitions[resourceName]) {
       reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isObject(params)) {
       reject(new DSErrors.IA('"params" must be an object!'));
-    } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
-      if (!('cacheResponse' in options)) {
-        options.cacheResponse = true;
-      }
-
+      options = DSUtils._(definition, options);
       queryHash = DSUtils.toJson(params);
 
       if (options.bypassCache || !options.cacheResponse) {

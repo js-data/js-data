@@ -253,17 +253,21 @@ describe('DS.create(resourceName, attrs[, options])', function () {
     });
 
     setTimeout(function () {
-      assert.equal(1, _this.requests.length);
-      assert.equal(_this.requests[0].url, 'http://test.js-data.io/organization/77/user');
-      assert.equal(_this.requests[0].method, 'post');
-      assert.equal(_this.requests[0].requestBody, DSUtils.toJson({
-        organizationId: 77,
-        id: 88
-      }));
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson({
-        organizationId: 77,
-        id: 88
-      }));
+      try {
+        assert.equal(1, _this.requests.length);
+        assert.equal(_this.requests[0].url, 'http://test.js-data.io/organization/77/user');
+        assert.equal(_this.requests[0].method, 'post');
+        assert.equal(_this.requests[0].requestBody, DSUtils.toJson({
+          organizationId: 77,
+          id: 88
+        }));
+        _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson({
+          organizationId: 77,
+          id: 88
+        }));
+      } catch (err) {
+        console.error(err.stack);
+      }
     }, 30);
   });
 });

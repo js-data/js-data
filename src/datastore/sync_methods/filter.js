@@ -4,24 +4,18 @@ var DSErrors = require('../../errors');
 function filter(resourceName, params, options) {
   var _this = this;
   var definition = _this.definitions[resourceName];
-
-  options = options || {};
+  var resource = _this.store[resourceName];
 
   if (!definition) {
     throw new DSErrors.NER(resourceName);
   } else if (params && !DSUtils.isObject(params)) {
     throw new DSErrors.IA('"params" must be an object!');
-  } else if (!DSUtils.isObject(options)) {
-    throw new DSErrors.IA('"options" must be an object!');
   }
-  var resource = _this.store[resourceName];
+
+  options = DSUtils._(definition, options);
 
   // Protect against null
   params = params || {};
-
-  if (!('allowSimpleWhere' in options)) {
-    options.allowSimpleWhere = true;
-  }
 
   var queryHash = DSUtils.toJson(params);
 

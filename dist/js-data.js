@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file js-data.js
-* @version 0.4.0 - Homepage <http://www.js-data.io/>
+* @version 0.4.1 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -2317,27 +2317,18 @@ function create(resourceName, attrs, options) {
   var _this = this;
   var definition = _this.definitions[resourceName];
 
+  options = options || {};
+
   var promise = new DSUtils.Promise(function (resolve, reject) {
-
-    options = options || {};
-
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
     } else {
-      if (!('cacheResponse' in options)) {
-        options.cacheResponse = true;
-      }
-      if (!('upsert' in options)) {
-        options.upsert = true;
-      }
-      if (!('notify' in options)) {
-        options.notify = definition.notify;
-      }
+      options = DSUtils._(definition, options);
       resolve(attrs);
     }
   });
 
-  if (options.upsert && attrs[definition.idAttribute]) {
+  if (definition && (options.hasOwnProperty('upsert') ? options.upsert : definition.upsert) && attrs[definition.idAttribute]) {
     return _this.update(resourceName, attrs[definition.idAttribute], attrs, options);
   } else {
     return promise
@@ -2399,8 +2390,6 @@ function destroy(resourceName, id, options) {
   var item;
 
   return new DSUtils.Promise(function (resolve, reject) {
-    options = options || {};
-
     id = DSUtils.resolveId(definition, id);
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
@@ -2408,16 +2397,9 @@ function destroy(resourceName, id, options) {
       reject(new DSErrors.IA('"id" must be a string or a number!'));
     } else if (!_this.get(resourceName, id)) {
       reject(new DSErrors.R('id "' + id + '" not found in cache!'));
-    } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
       item = _this.get(resourceName, id);
-      if (!('notify' in options)) {
-        options.notify = definition.notify;
-      }
-      if (!('eagerEject' in options)) {
-        options.eagerEject = definition.eagerEject;
-      }
+      options = DSUtils._(definition, options);
       resolve(item);
     }
   })
@@ -2464,19 +2446,10 @@ function destroyAll(resourceName, params, options) {
   var ejected, toEject;
 
   return new DSUtils.Promise(function (resolve, reject) {
-    options = options || {};
-
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
-    } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
-      if (!('notify' in options)) {
-        options.notify = definition.notify;
-      }
-      if (!('eagerEject' in options)) {
-        options.eagerEject = definition.eagerEject;
-      }
+      options = DSUtils._(definition, options);
       resolve();
     }
   }).then(function () {
@@ -2519,18 +2492,12 @@ function find(resourceName, id, options) {
   var resource = _this.store[resourceName];
 
   return new DSUtils.Promise(function (resolve, reject) {
-    options = options || {};
-
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
       reject(new DSErrors.IA('"id" must be a string or a number!'));
-    } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
-      if (!('cacheResponse' in options)) {
-        options.cacheResponse = true;
-      }
+      options = DSUtils._(definition, options);
       if (options.bypassCache || !options.cacheResponse) {
         delete resource.completedQueries[id];
       }
@@ -2611,20 +2578,14 @@ function findAll(resourceName, params, options) {
   var queryHash;
 
   return new DSUtils.Promise(function (resolve, reject) {
-    options = options || {};
     params = params || {};
 
     if (!_this.definitions[resourceName]) {
       reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isObject(params)) {
       reject(new DSErrors.IA('"params" must be an object!'));
-    } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
-      if (!('cacheResponse' in options)) {
-        options.cacheResponse = true;
-      }
-
+      options = DSUtils._(definition, options);
       queryHash = DSUtils.toJson(params);
 
       if (options.bypassCache || !options.cacheResponse) {
@@ -2718,8 +2679,6 @@ function loadRelations(resourceName, instance, relations, options) {
   var fields = [];
 
   return new DSUtils.Promise(function (resolve, reject) {
-    options = options || {};
-
     if (DSUtils.isString(instance) || DSUtils.isNumber(instance)) {
       instance = _this.get(resourceName, instance);
     }
@@ -2734,13 +2693,12 @@ function loadRelations(resourceName, instance, relations, options) {
       reject(new DSErrors.IA('"instance(id)" must be a string, number or object!'));
     } else if (!DSUtils.isArray(relations)) {
       reject(new DSErrors.IA('"relations" must be a string or an array!'));
-    } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
-      if (!('findBelongsTo' in options)) {
+      options = DSUtils._(definition, options);
+      if (!options.hasOwnProperty('findBelongsTo')) {
         options.findBelongsTo = true;
       }
-      if (!('findHasMany' in options)) {
+      if (!options.hasOwnProperty('findHasMany')) {
         options.findHasMany = true;
       }
 
@@ -2801,25 +2759,16 @@ function save(resourceName, id, options) {
   var item;
 
   return new DSUtils.Promise(function (resolve, reject) {
-    options = options || {};
-
     id = DSUtils.resolveId(definition, id);
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
       reject(new DSErrors.IA('"id" must be a string or a number!'));
-    } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA('"options" must be an object!'));
     } else if (!_this.get(resourceName, id)) {
       reject(new DSErrors.R('id "' + id + '" not found in cache!'));
     } else {
       item = _this.get(resourceName, id);
-      if (!('cacheResponse' in options)) {
-        options.cacheResponse = true;
-      }
-      if (!('notify' in options)) {
-        options.notify = definition.notify;
-      }
+      options = DSUtils._(definition, options);
       resolve(item);
     }
   }).then(function (attrs) {
@@ -2897,22 +2846,13 @@ function update(resourceName, id, attrs, options) {
   var definition = _this.definitions[resourceName];
 
   return new DSUtils.Promise(function (resolve, reject) {
-    options = options || {};
-
     id = DSUtils.resolveId(definition, id);
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
       reject(new DSErrors.IA('"id" must be a string or a number!'));
-    } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
-      if (!('cacheResponse' in options)) {
-        options.cacheResponse = true;
-      }
-      if (!('notify' in options)) {
-        options.notify = definition.notify;
-      }
+      options = DSUtils._(definition, options);
       resolve(attrs);
     }
   }).then(function (attrs) {
@@ -2971,19 +2911,10 @@ function updateAll(resourceName, attrs, params, options) {
   var definition = _this.definitions[resourceName];
 
   return new DSUtils.Promise(function (resolve, reject) {
-    options = options || {};
-
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
-    } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
-      if (!('cacheResponse' in options)) {
-        options.cacheResponse = true;
-      }
-      if (!('notify' in options)) {
-        options.notify = definition.notify;
-      }
+      options = DSUtils._(definition, options);
       resolve(attrs);
     }
   }).then(function (attrs) {
@@ -3240,7 +3171,16 @@ defaultsPrototype.resetHistoryOnInject = true;
 defaultsPrototype.eagerEject = false;
 // TODO: Implement eagerInject in DS#create
 defaultsPrototype.eagerInject = false;
+defaultsPrototype.allowSimpleWhere = true;
+defaultsPrototype.loadFromServer = false;
 defaultsPrototype.notify = true;
+defaultsPrototype.upsert = true;
+defaultsPrototype.cacheResponse = true;
+defaultsPrototype.bypassCache = false;
+defaultsPrototype.findInverseLinks = false;
+defaultsPrototype.findBelongsTo = false;
+defaultsPrototype.findHasOn = false;
+defaultsPrototype.findHasMany = false;
 defaultsPrototype.beforeValidate = lifecycleNoopCb;
 defaultsPrototype.validate = lifecycleNoopCb;
 defaultsPrototype.afterValidate = lifecycleNoopCb;
@@ -3402,6 +3342,7 @@ function defineResource(definition) {
     }
 
     def.getEndpoint = function (attrs, options) {
+      options = DSUtils.deepMixIn({}, options);
       var parent = this.parent;
       var parentKey = this.parentKey;
       var item;
@@ -3556,16 +3497,15 @@ function eject(resourceName, id, options) {
   var item;
   var found = false;
 
-  options = options || {};
-
   id = DSUtils.resolveId(definition, id);
+
   if (!definition) {
     throw new DSErrors.NER(resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
     throw new DSErrors.IA('"id" must be a string or a number!');
-  } else if (!DSUtils.isObject(options)) {
-    throw new DSErrors.IA('"options" must be an object!');
   }
+
+  options = DSUtils._(definition, options);
 
   for (var i = 0; i < resource.collection.length; i++) {
     if (resource.collection[i][definition.idAttribute] == id) {
@@ -3575,9 +3515,6 @@ function eject(resourceName, id, options) {
     }
   }
   if (found) {
-    if (!('notify' in options)) {
-      options.notify = definition.notify;
-    }
     if (options.notify) {
       definition.beforeEject(definition.name, item);
     }
@@ -3650,24 +3587,18 @@ var DSErrors = require('../../errors');
 function filter(resourceName, params, options) {
   var _this = this;
   var definition = _this.definitions[resourceName];
-
-  options = options || {};
+  var resource = _this.store[resourceName];
 
   if (!definition) {
     throw new DSErrors.NER(resourceName);
   } else if (params && !DSUtils.isObject(params)) {
     throw new DSErrors.IA('"params" must be an object!');
-  } else if (!DSUtils.isObject(options)) {
-    throw new DSErrors.IA('"options" must be an object!');
   }
-  var resource = _this.store[resourceName];
+
+  options = DSUtils._(definition, options);
 
   // Protect against null
   params = params || {};
-
-  if (!('allowSimpleWhere' in options)) {
-    options.allowSimpleWhere = true;
-  }
 
   var queryHash = DSUtils.toJson(params);
 
@@ -3751,23 +3682,17 @@ function changeHistory(resourceName, id) {
 
 function createInstance(resourceName, attrs, options) {
   var definition = this.definitions[resourceName];
+  var item;
 
   attrs = attrs || {};
-  options = options || {};
 
   if (!definition) {
     throw new DSErrors.NER(resourceName);
   } else if (attrs && !DSUtils.isObject(attrs)) {
     throw new DSErrors.IA('"attrs" must be an object!');
-  } else if (!DSUtils.isObject(options)) {
-    throw new DSErrors.IA('"options" must be an object!');
   }
 
-  if (!('useClass' in options)) {
-    options.useClass = definition.useClass;
-  }
-
-  var item;
+  options = DSUtils._(definition, options);
 
   if (options.useClass) {
     var Constructor = definition[definition.class];
@@ -3812,15 +3737,16 @@ function compute(resourceName, instance) {
 
 function get(resourceName, id, options) {
   var _this = this;
-  options = options || {};
+  var definition = _this.definitions[resourceName];
 
-  if (!_this.definitions[resourceName]) {
+  if (!definition) {
     throw new DSErrors.NER(resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
     throw new DSErrors.IA('"id" must be a string or a number!');
-  } else if (!DSUtils.isObject(options)) {
-    throw new DSErrors.IA('"options" must be an object!');
   }
+
+  options = DSUtils._(definition, options);
+
   // cache miss, request resource from server
   var item = _this.store[resourceName].index[id];
   if (!item && options.loadFromServer) {
@@ -4097,31 +4023,23 @@ function _link(definition, injected, options) {
 function inject(resourceName, attrs, options) {
   var _this = this;
   var definition = _this.definitions[resourceName];
-
-  options = options || {};
+  var injected;
 
   if (!definition) {
     throw new DSErrors.NER(resourceName);
   } else if (!DSUtils.isObject(attrs) && !DSUtils.isArray(attrs)) {
     throw new DSErrors.IA(resourceName + '.inject: "attrs" must be an object or an array!');
-  } else if (!DSUtils.isObject(options)) {
-    throw new DSErrors.IA('"options" must be an object!');
   }
-  var injected;
 
-  if (!('useClass' in options)) {
-    options.useClass = definition.useClass;
-  }
-  if (!('notify' in options)) {
-    options.notify = definition.notify;
-  }
+  options = DSUtils._(definition, options);
+
   if (options.notify) {
     definition.beforeInject(definition.name, attrs);
   }
 
   injected = _inject.call(_this, definition, _this.store[resourceName], attrs, options);
 
-  if (options.linkInverse) {
+  if (options.findInverseLinks) {
     if (DSUtils.isArray(injected) && injected.length) {
       _this.linkInverse(definition.name, injected[0][definition.idAttribute]);
     } else {
@@ -4498,6 +4416,8 @@ function Events(target) {
   };
 }
 
+var DSErrors = require('./errors');
+
 module.exports = {
   isBoolean: require('mout/lang/isBoolean'),
   isString: require('mout/lang/isString'),
@@ -4523,6 +4443,21 @@ module.exports = {
   remove: require('mout/array/remove'),
   slice: require('mout/array/slice'),
   sort: require('mout/array/sort'),
+  // Options that inherit from defaults
+  _: function (parent, options) {
+    var _this = this;
+    options = options || {};
+    if (options && options.constructor === parent.constructor) {
+      return options;
+    } else if (!_this.isObject(options)) {
+      throw new DSErrors.IA('"options" must be an object!');
+    }
+    var O = function Options(attrs) {
+      _this.deepMixIn(this, attrs);
+    };
+    O.prototype = parent;
+    return new O(options);
+  },
   resolveItem: function (resource, idOrInstance) {
     if (resource && (this.isString(idOrInstance) || this.isNumber(idOrInstance))) {
       return resource.index[idOrInstance] || idOrInstance;
@@ -4640,5 +4575,5 @@ module.exports = {
   Events: Events
 };
 
-},{"es6-promise":2,"mout/array/contains":13,"mout/array/filter":14,"mout/array/forEach":15,"mout/array/remove":18,"mout/array/slice":19,"mout/array/sort":20,"mout/array/toLookup":21,"mout/lang/isArray":27,"mout/lang/isBoolean":28,"mout/lang/isEmpty":29,"mout/lang/isFunction":30,"mout/lang/isNumber":32,"mout/lang/isObject":33,"mout/lang/isString":35,"mout/object/deepMixIn":39,"mout/object/forOwn":41,"mout/object/merge":43,"mout/object/pick":46,"mout/object/set":47,"mout/string/makePath":50,"mout/string/pascalCase":51,"mout/string/upperCase":54}]},{},[77])(77)
+},{"./errors":76,"es6-promise":2,"mout/array/contains":13,"mout/array/filter":14,"mout/array/forEach":15,"mout/array/remove":18,"mout/array/slice":19,"mout/array/sort":20,"mout/array/toLookup":21,"mout/lang/isArray":27,"mout/lang/isBoolean":28,"mout/lang/isEmpty":29,"mout/lang/isFunction":30,"mout/lang/isNumber":32,"mout/lang/isObject":33,"mout/lang/isString":35,"mout/object/deepMixIn":39,"mout/object/forOwn":41,"mout/object/merge":43,"mout/object/pick":46,"mout/object/set":47,"mout/string/makePath":50,"mout/string/pascalCase":51,"mout/string/upperCase":54}]},{},[77])(77)
 });

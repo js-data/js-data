@@ -7,19 +7,10 @@ function destroyAll(resourceName, params, options) {
   var ejected, toEject;
 
   return new DSUtils.Promise(function (resolve, reject) {
-    options = options || {};
-
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
-    } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
-      if (!('notify' in options)) {
-        options.notify = definition.notify;
-      }
-      if (!('eagerEject' in options)) {
-        options.eagerEject = definition.eagerEject;
-      }
+      options = DSUtils._(definition, options);
       resolve();
     }
   }).then(function () {

@@ -211,7 +211,16 @@ defaultsPrototype.resetHistoryOnInject = true;
 defaultsPrototype.eagerEject = false;
 // TODO: Implement eagerInject in DS#create
 defaultsPrototype.eagerInject = false;
+defaultsPrototype.allowSimpleWhere = true;
+defaultsPrototype.loadFromServer = false;
 defaultsPrototype.notify = true;
+defaultsPrototype.upsert = true;
+defaultsPrototype.cacheResponse = true;
+defaultsPrototype.bypassCache = false;
+defaultsPrototype.findInverseLinks = false;
+defaultsPrototype.findBelongsTo = false;
+defaultsPrototype.findHasOn = false;
+defaultsPrototype.findHasMany = false;
 defaultsPrototype.beforeValidate = lifecycleNoopCb;
 defaultsPrototype.validate = lifecycleNoopCb;
 defaultsPrototype.afterValidate = lifecycleNoopCb;

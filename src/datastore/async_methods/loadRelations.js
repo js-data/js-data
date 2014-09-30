@@ -7,8 +7,6 @@ function loadRelations(resourceName, instance, relations, options) {
   var fields = [];
 
   return new DSUtils.Promise(function (resolve, reject) {
-    options = options || {};
-
     if (DSUtils.isString(instance) || DSUtils.isNumber(instance)) {
       instance = _this.get(resourceName, instance);
     }
@@ -23,13 +21,12 @@ function loadRelations(resourceName, instance, relations, options) {
       reject(new DSErrors.IA('"instance(id)" must be a string, number or object!'));
     } else if (!DSUtils.isArray(relations)) {
       reject(new DSErrors.IA('"relations" must be a string or an array!'));
-    } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
-      if (!('findBelongsTo' in options)) {
+      options = DSUtils._(definition, options);
+      if (!options.hasOwnProperty('findBelongsTo')) {
         options.findBelongsTo = true;
       }
-      if (!('findHasMany' in options)) {
+      if (!options.hasOwnProperty('findHasMany')) {
         options.findHasMany = true;
       }
 

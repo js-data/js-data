@@ -8,25 +8,16 @@ function save(resourceName, id, options) {
   var item;
 
   return new DSUtils.Promise(function (resolve, reject) {
-    options = options || {};
-
     id = DSUtils.resolveId(definition, id);
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
       reject(new DSErrors.IA('"id" must be a string or a number!'));
-    } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA('"options" must be an object!'));
     } else if (!_this.get(resourceName, id)) {
       reject(new DSErrors.R('id "' + id + '" not found in cache!'));
     } else {
       item = _this.get(resourceName, id);
-      if (!('cacheResponse' in options)) {
-        options.cacheResponse = true;
-      }
-      if (!('notify' in options)) {
-        options.notify = definition.notify;
-      }
+      options = DSUtils._(definition, options);
       resolve(item);
     }
   }).then(function (attrs) {
