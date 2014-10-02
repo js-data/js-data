@@ -58,6 +58,10 @@ function create(resourceName, attrs, options) {
           resource.completedQueries[id] = new Date().getTime();
           resource.previousAttributes[id] = DSUtils.deepMixIn({}, created);
           resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
+          resource.expiresHeap.push({
+            timestamp: resource.saved[id],
+            item: created
+          });
           return _this.get(definition.name, id);
         } else {
           return _this.createInstance(resourceName, attrs, options);

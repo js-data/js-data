@@ -202,6 +202,11 @@ function defineResource(definition) {
     // Initialize store data for the new resource
     _this.store[def.name] = {
       collection: [],
+      expiresHeap: new DSUtils.DSBinaryHeap(function (x) {
+        return x.timestamp;
+      }, function (x, y) {
+        return x.item === y;
+      }),
       completedQueries: {},
       pendingQueries: {},
       index: {},

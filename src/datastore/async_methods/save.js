@@ -42,7 +42,9 @@ function save(resourceName, id, options) {
       }
       if (options.changesOnly) {
         var resource = _this.store[resourceName];
-        resource.observers[id].deliver();
+        if (DSUtils.w) {
+          resource.observers[id].deliver();
+        }
         var toKeep = [];
         var changes = _this.changes(resourceName, id);
 
@@ -75,7 +77,14 @@ function save(resourceName, id, options) {
         var saved = _this.inject(definition.name, attrs, options);
         resource.previousAttributes[id] = DSUtils.deepMixIn({}, saved);
         resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
-        resource.observers[id].discardChanges();
+        resource.expiresHeap.remove(saved);
+        resource.expiresHeap.push({
+          timestamp: resource.saved[id],
+          item: saved
+        });
+        if (DSUtils.w) {
+          resource.observers[id].discardChanges();
+        }
         return _this.get(resourceName, id);
       } else {
         return attrs;

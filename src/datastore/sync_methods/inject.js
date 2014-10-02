@@ -131,6 +131,10 @@ function _inject(definition, resource, attrs, options) {
           DSUtils.deepMixIn(resource.previousAttributes[id], attrs);
 
           resource.collection.push(item);
+          resource.expiresHeap.push({
+            item: item,
+            timestamp: DSUtils.updateTimestamp(resource.saved[id])
+          });
 
           resource.changeHistories[id] = [];
 

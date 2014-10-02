@@ -1,3 +1,23 @@
+var DSErrors = require('./errors');
+var isFunction = require('mout/lang/isFunction');
+var w;
+
+try {
+  w = window;
+  w = {};
+} catch (e) {
+  w = null;
+}
+
+function updateTimestamp(timestamp) {
+  var newTimestamp = typeof Date.now === 'function' ? Date.now() : new Date().getTime();
+  if (timestamp && newTimestamp <= timestamp) {
+    return timestamp + 1;
+  } else {
+    return newTimestamp;
+  }
+}
+
 function Events(target) {
   var events = {};
   target = target || this;
@@ -34,24 +54,144 @@ function Events(target) {
   };
 }
 
-var DSErrors = require('./errors');
-var w;
-
-try {
-  w = window;
-  w = {};
-} catch (e) {
-  w = null;
+/**
+ * @method bubbleUp
+ * @param {array} heap The heap.
+ * @param {function} weightFunc The weight function.
+ * @param {number} n The index of the element to bubble up.
+ */
+function bubbleUp(heap, weightFunc, n) {
+  var element = heap[n];
+  var weight = weightFunc(element);
+  // When at 0, an element can not go up any further.
+  while (n > 0) {
+    // Compute the parent element's index, and fetch it.
+    var parentN = Math.floor((n + 1) / 2) - 1;
+    var parent = heap[parentN];
+    // If the parent has a lesser weight, things are in order and we
+    // are done.
+    if (weight >= weightFunc(parent)) {
+      break;
+    } else {
+      heap[parentN] = element;
+      heap[n] = parent;
+      n = parentN;
+    }
+  }
 }
+
+/**
+ * @method bubbleDown
+ * @param {array} heap The heap.
+ * @param {function} weightFunc The weight function.
+ * @param {number} n The index of the element to sink down.
+ */
+function bubbleDown(heap, weightFunc, n) {
+  var length = heap.length;
+  var node = heap[n];
+  var nodeWeight = weightFunc(node);
+
+  while (true) {
+    var child2N = (n + 1) * 2,
+      child1N = child2N - 1;
+    var swap = null;
+    if (child1N < length) {
+      var child1 = heap[child1N],
+        child1Weight = weightFunc(child1);
+      // If the score is less than our node's, we need to swap.
+      if (child1Weight < nodeWeight) {
+        swap = child1N;
+      }
+    }
+    // Do the same checks for the other child.
+    if (child2N < length) {
+      var child2 = heap[child2N],
+        child2Weight = weightFunc(child2);
+      if (child2Weight < (swap === null ? nodeWeight : weightFunc(heap[child1N]))) {
+        swap = child2N;
+      }
+    }
+
+    if (swap === null) {
+      break;
+    } else {
+      heap[n] = heap[swap];
+      heap[swap] = node;
+      n = swap;
+    }
+  }
+}
+
+function DSBinaryHeap(weightFunc, compareFunc) {
+  if (weightFunc && !isFunction(weightFunc)) {
+    throw new Error('DSBinaryHeap(weightFunc): weightFunc: must be a function!');
+  }
+  weightFunc = weightFunc || function (x) {
+    return x;
+  };
+  compareFunc = compareFunc || function (x, y) {
+    return x === y;
+  };
+  this.weightFunc = weightFunc;
+  this.compareFunc = compareFunc;
+  this.heap = [];
+}
+
+var dsp = DSBinaryHeap.prototype;
+
+dsp.push = function (node) {
+  this.heap.push(node);
+  bubbleUp(this.heap, this.weightFunc, this.heap.length - 1);
+};
+
+dsp.peek = function () {
+  return this.heap[0];
+};
+
+dsp.pop = function () {
+  var front = this.heap[0],
+    end = this.heap.pop();
+  if (this.heap.length > 0) {
+    this.heap[0] = end;
+    bubbleDown(this.heap, this.weightFunc, 0);
+  }
+  return front;
+};
+
+dsp.remove = function (node) {
+  var length = this.heap.length;
+  for (var i = 0; i < length; i++) {
+    if (this.compareFunc(this.heap[i], node)) {
+      var removed = this.heap[i];
+      var end = this.heap.pop();
+      if (i !== length - 1) {
+        this.heap[i] = end;
+        bubbleUp(this.heap, this.weightFunc, i);
+        bubbleDown(this.heap, this.weightFunc, i);
+      }
+      return removed;
+    }
+  }
+  return null;
+};
+
+dsp.removeAll = function () {
+  this.heap = [];
+};
+
+dsp.size = function () {
+  return this.heap.length;
+};
 
 module.exports = {
   w: w,
+  DSBinaryHeap: DSBinaryHeap,
   isBoolean: require('mout/lang/isBoolean'),
   isString: require('mout/lang/isString'),
   isArray: require('mout/lang/isArray'),
   isObject: require('mout/lang/isObject'),
   isNumber: require('mout/lang/isNumber'),
-  isFunction: require('mout/lang/isFunction'),
+  isFunction: isFunction,
   isEmpty: require('mout/lang/isEmpty'),
   toJson: JSON.stringify,
   fromJson: JSON.parse,
@@ -101,14 +241,7 @@ module.exports = {
       return idOrInstance;
     }
   },
-  updateTimestamp: function (timestamp) {
-    var newTimestamp = typeof Date.now === 'function' ? Date.now() : new Date().getTime();
-    if (timestamp && newTimestamp <= timestamp) {
-      return timestamp + 1;
-    } else {
-      return newTimestamp;
-    }
-  },
+  updateTimestamp: updateTimestamp,
   Promise: require('es6-promise').Promise,
   deepFreeze: function deepFreeze(o) {
     if (typeof Object.freeze === 'function' && typeof Object.isFrozen === 'function') {

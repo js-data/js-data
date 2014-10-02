@@ -52,7 +52,14 @@ function update(resourceName, id, attrs, options) {
         var id = updated[definition.idAttribute];
         resource.previousAttributes[id] = DSUtils.deepMixIn({}, updated);
         resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
-        resource.observers[id].discardChanges();
+        resource.expiresHeap.remove(updated);
+        resource.expiresHeap.push({
+          timestamp: resource.saved[id],
+          item: updated
+        });
+        if (DSUtils.w) {
+          resource.observers[id].discardChanges();
+        }
         return _this.get(definition.name, id);
       } else {
         return attrs;

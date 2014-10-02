@@ -21,6 +21,7 @@ function eject(resourceName, id, options) {
   for (var i = 0; i < resource.collection.length; i++) {
     if (resource.collection[i][definition.idAttribute] == id) {
       item = resource.collection[i];
+      resource.expiresHeap.remove(item);
       found = true;
       break;
     }
@@ -31,7 +32,7 @@ function eject(resourceName, id, options) {
     }
     _this.unlinkInverse(definition.name, id);
     resource.collection.splice(i, 1);
-    if (resource.observers[id]) {
+    if (DSUtils.w) {
       resource.observers[id].close();
     }
     delete resource.observers[id];
