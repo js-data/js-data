@@ -42,11 +42,18 @@
 
 <p>Supporting relations, computed properties, model lifecycle control and a slew of other features, js-data is the tool for giving your data the respect it deserves.</p>
 
-<p><strong>Latest Release:</strong> <a href="https://github.com/js-data/js-data/releases/tag/0.4.0">0.4.0</a></p>
+<p><strong>Latest Release:</strong> <a href="https://github.com/js-data/js-data/releases/tag/0.4.1">0.4.1</a></p>
 
 <p>js-data is pre-alpha. The API is subject to change, though the current api is well tested.</p>
 
 <p>If you want to use js-data, keep a close eye on the changelog. 1.0.0 will introduce strict semver (until then, minor number is bumped for breaking changes).</p>
+
+<h2>
+<a name="supported-platforms" class="anchor" href="#supported-platforms"><span class="octicon octicon-link"></span></a>Supported Platforms</h2>
+
+<p>Browsers: Chrome, Firefox, IE 8+, Safari, Opera, iOS Safari 7.1+, Android Browser 2.3+</p>
+
+<p>Node: 0.10+ (at least)</p>
 
 <h2>
 <a name="quick-start" class="anchor" href="#quick-start"><span class="octicon octicon-link"></span></a>Quick Start</h2>
@@ -55,15 +62,13 @@
 
 <p>Load <code>js-data-http.js</code> after <code>js-data.js</code>.</p>
 
-<div class="highlight highlight-js"><pre><span class="kd">var</span> <span class="nx">dataStore</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">JSData</span><span class="p">.</span><span class="nx">DS</span><span class="p">();</span>
+<div class="highlight highlight-js"><pre><span class="kd">var</span> <span class="nx">store</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">JSData</span><span class="p">.</span><span class="nx">DS</span><span class="p">();</span>
 
-<span class="nx">dataStore</span><span class="p">.</span><span class="nx">adapters</span><span class="p">.</span><span class="nx">DSHttpAdapter</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">DSHttpAdapter</span><span class="p">();</span>
-
-<span class="c1">// use http by default for async operations</span>
-<span class="nx">dataStore</span><span class="p">.</span><span class="nx">defaults</span><span class="p">.</span><span class="nx">defaultAdapter</span> <span class="o">=</span> <span class="s1">'DSHttpAdapter'</span><span class="p">;</span>
+<span class="c1">// register and use http by default for async operations</span>
+<span class="nx">store</span><span class="p">.</span><span class="nx">registerAdapter</span><span class="p">(</span><span class="s1">'http'</span><span class="p">,</span> <span class="k">new</span> <span class="nx">DSHttpAdapter</span><span class="p">(),</span> <span class="p">{</span> <span class="k">default</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
 
 <span class="c1">// simplest model definition</span>
-<span class="kd">var</span> <span class="nx">User</span> <span class="o">=</span> <span class="nx">dataStore</span><span class="p">.</span><span class="nx">defineResource</span><span class="p">(</span><span class="s1">'user'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">User</span> <span class="o">=</span> <span class="nx">store</span><span class="p">.</span><span class="nx">defineResource</span><span class="p">(</span><span class="s1">'user'</span><span class="p">);</span>
 
 <span class="nx">User</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">user</span><span class="p">)</span> <span class="p">{</span>
   <span class="nx">user</span><span class="p">;</span> <span class="c1">// { id: 1, name: 'John' }</span>
@@ -114,30 +119,34 @@
 <li><code>cd js-data; npm install; bower install;</code></li>
 <li>
 <code>grunt go</code> (builds and starts a watch)</li>
-<li>(in another terminal) <code>grunt karma:dev</code> (runs the tests)</li>
+<li>(in another terminal) <code>grunt karma:dev</code> (runs the Karma tests)</li>
+<li>(in another terminal) <code>grunt w</code> (runs the NodeJS tests)</li>
 <li>Write your code, including relevant documentation and tests</li>
 <li>Submit a PR and we'll review</li>
 </ol><h2>
 <a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
 
-<p>Copyright (C) 2014 Jason Dobry</p>
+<p>The MIT License (MIT)</p>
 
-<p>Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:</p>
+<p>Copyright (c) 2014 Jason Dobry</p>
+
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:</p>
 
 <p>The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.</p>
 
 <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.</p>
       </section>
       <footer>
         <p>This project is maintained by <a href="https://github.com/js-data">js-data</a></p>
