@@ -10,11 +10,17 @@ Unlike Backbone and Ember Models, js-data does not require the use of getters an
 
 Supporting relations, computed properties, model lifecycle control and a slew of other features, js-data is the tool for giving your data the respect it deserves.
 
-__Latest Release:__ [0.4.0](https://github.com/js-data/js-data/releases/tag/0.4.0)
+__Latest Release:__ [0.4.1](https://github.com/js-data/js-data/releases/tag/0.4.1)
 
 js-data is pre-alpha. The API is subject to change, though the current api is well tested.
 
 If you want to use js-data, keep a close eye on the changelog. 1.0.0 will introduce strict semver (until then, minor number is bumped for breaking changes).
+
+## Supported Platforms
+
+Browsers: Chrome, Firefox, IE 8+, Safari, Opera, iOS Safari 7.1+, Android Browser 2.3+
+
+Node: 0.10+ (at least)
 
 ## Quick Start
 `bower install --save js-data js-data-http` or `npm install --save js-data js-data-http`.
@@ -22,15 +28,13 @@ If you want to use js-data, keep a close eye on the changelog. 1.0.0 will introd
 Load `js-data-http.js` after `js-data.js`.
 
 ```js
-var dataStore = new JSData.DS();
+var store = new JSData.DS();
 
-dataStore.adapters.DSHttpAdapter = new DSHttpAdapter();
-
-// use http by default for async operations
-dataStore.defaults.defaultAdapter = 'DSHttpAdapter';
+// register and use http by default for async operations
+store.registerAdapter('http', new DSHttpAdapter(), { default: true });
 
 // simplest model definition
-var User = dataStore.defineResource('user');
+var User = store.defineResource('user');
 
 User.find(1).then(function (user) {
   user; // { id: 1, name: 'John' }
@@ -67,27 +71,32 @@ First, feel free to contact me with questions. [Mailing List](https://groups.io/
 1. `git clone https://github.com/<you>/js-data.git`
 1. `cd js-data; npm install; bower install;`
 1. `grunt go` (builds and starts a watch)
-1. (in another terminal) `grunt karma:dev` (runs the tests)
+1. (in another terminal) `grunt karma:dev` (runs the Karma tests)
+1. (in another terminal) `grunt w` (runs the NodeJS tests)
 1. Write your code, including relevant documentation and tests
 1. Submit a PR and we'll review
 
 ## License
 
-Copyright (C) 2014 Jason Dobry
+The MIT License (MIT)
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
+Copyright (c) 2014 Jason Dobry
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+

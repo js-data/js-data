@@ -31,7 +31,9 @@ function eject(resourceName, id, options) {
     }
     _this.unlinkInverse(definition.name, id);
     resource.collection.splice(i, 1);
-    resource.observers[id].close();
+    if (resource.observers[id]) {
+      resource.observers[id].close();
+    }
     delete resource.observers[id];
 
     delete resource.index[id];

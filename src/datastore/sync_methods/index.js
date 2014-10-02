@@ -15,7 +15,9 @@ function changes(resourceName, id) {
 
   var item = _this.get(resourceName, id);
   if (item) {
-    _this.store[resourceName].observers[id].deliver();
+    if (DSUtils.w) {
+      _this.store[resourceName].observers[id].deliver();
+    }
     var diff = DSUtils.diffObjectFromOldObject(item, _this.store[resourceName].previousAttributes[id]);
     DSUtils.forOwn(diff, function (changeset, name) {
       var toKeep = [];

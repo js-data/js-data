@@ -8,7 +8,10 @@ function _injectRelations(definition, injected, options) {
   DSUtils.forEach(definition.relationList, function (def) {
     var relationName = def.relation;
     var relationDef = _this.definitions[relationName];
-    if (relationDef && injected[def.localField]) {
+    if (injected[def.localField]) {
+      if (!relationDef) {
+        throw new DSErrors.R(definition.name + ' relation is defined, but the resource is not!');
+      }
       try {
         injected[def.localField] = _this.inject(relationName, injected[def.localField], options);
       } catch (err) {
@@ -130,10 +133,13 @@ function _inject(definition, resource, attrs, options) {
           resource.collection.push(item);
 
           resource.changeHistories[id] = [];
-          resource.observers[id] = new observe.ObjectObserver(item);
-          resource.observers[id].open(_react, item);
-          resource.index[id] = item;
 
+          if (DSUtils.w) {
+            resource.observers[id] = new observe.ObjectObserver(item);
+            resource.observers[id].open(_react, item);
+          }
+
+          resource.index[id] = item;
           _react.call(item, {}, {}, {}, null, true);
 
           if (definition.relations) {
@@ -151,12 +157,14 @@ function _inject(definition, resource, attrs, options) {
               resource.changeHistories[id].splice(0, resource.changeHistories[id].length);
             }
           }
-          resource.observers[id].deliver();
+          if (DSUtils.w) {
+            resource.observers[id].deliver();
+          }
         }
         resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
         injected = item;
       } catch (err) {
-        console.error(err);
+        console.error(err.stack);
         console.error('inject failed!', definition.name, attrs);
       }
     }

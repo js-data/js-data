@@ -1,7 +1,13 @@
-##### 0.4.1 - xx September 2014
+##### 0.4.1 - 01 October 2014
 
 ###### Backwards compatible API changes
 - #9 - Make all options passed to methods also inherit from Resource defaults
+
+###### Backwards compatible bug fixes
+- jmdobry/angular-data/#195 - throw an error when you try to inject a relation but the resource for it hasn't been defined
+
+###### Other
+- Added official support for NodeJS
 
 ##### 0.4.0 - 25 September 2014
 

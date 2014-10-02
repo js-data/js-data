@@ -9,7 +9,10 @@ module.exports = function (grunt) {
   'use strict';
 
   require('jit-grunt')(grunt, {
-    coveralls: 'grunt-karma-coveralls'
+    coveralls: 'grunt-karma-coveralls',
+    instrument: 'grunt-istanbul',
+    storeCoverage: 'grunt-istanbul',
+    makeReport: 'grunt-istanbul'
   });
   require('time-grunt')(grunt);
 
@@ -30,6 +33,10 @@ module.exports = function (grunt) {
       dist: {
         files: ['src/**/*.js'],
         tasks: ['build']
+      },
+      n: {
+        files: ['src/**/*.js', 'test/both/**/*.js', 'test/node/**/*.js'],
+        tasks: ['n']
       }
     },
     uglify: {
@@ -74,19 +81,20 @@ module.exports = function (grunt) {
         preprocessors: {}
       },
       min: {
-        browsers: ['Firefox', 'PhantomJS'],
+        browsers: ['Firefox'],
         options: {
           files: [
             'dist/js-data.min.js',
             'bower_components/js-data-http/dist/js-data-http.min.js',
             'bower_components/js-data-localstorage/dist/js-data-localstorage.min.js',
             'karma.start.js',
-            'test/**/*.js'
+            'test/both/**/*.js',
+            'test/browser/**/*.js'
           ]
         }
       },
       ci: {
-        browsers: ['Firefox', 'PhantomJS']
+        browsers: ['Firefox']
       }
     },
     coveralls: {
@@ -94,108 +102,13 @@ module.exports = function (grunt) {
         coverage_dir: 'coverage'
       }
     },
-    docular: {
-      groups: [
-//        {
-//          groupTitle: 'Guide',
-//          groupId: 'guide',
-//          groupIcon: 'icon-book',
-//          sections: [
-//            {
-//              id: 'angular-data',
-//              title: 'angular-data',
-//              docs: [
-//                'guide/angular-data/index.md',
-//                'guide/angular-data/overview.md',
-//                'guide/angular-data/resources.md',
-//                'guide/angular-data/asynchronous.md',
-//                'guide/angular-data/synchronous.md',
-//                'guide/angular-data/queries.md',
-//                'guide/angular-data/adapters.md',
-//                'guide/angular-data/how.md'
-//              ],
-//              rank: {
-//                index: 1,
-//                overview: 2,
-//                resources: 3,
-//                asynchronous: 4,
-//                synchronous: 5,
-//                queries: 6,
-//                adapters: 7,
-//                how: 8
-//              }
-//            },
-//            {
-//              id: 'angular-cache',
-//              title: 'angular-cache',
-//              docs: ['guide/angular-cache/'],
-//              rank: {
-//                index: 1,
-//                basics: 2,
-//                configure: 3,
-//                http: 4,
-//                storage: 5
-//              }
-//            },
-//            {
-//              id: 'angular-data-mocks',
-//              title: 'angular-data-mocks',
-//              docs: ['guide/angular-data-mocks/'],
-//              rank: {
-//                index: 1,
-//                overview: 2,
-//                setup: 3,
-//                testing: 4
-//              }
-//            },
-//            {
-//              id: 'angular-data-resource',
-//              title: 'Defining Resources',
-//              docs: ['guide/angular-data/resource/'],
-//              rank: {
-//                index: 1,
-//                overview: 2,
-//                basic: 3,
-//                advanced: 4,
-//                lifecycle: 5,
-//                custom: 6,
-//                relations: 7
-//              }
-//            }
-//          ]
-//        },
-        {
-          groupTitle: 'API',
-          groupId: 'api',
-          groupIcon: 'icon-wrench',
-          showSource: true,
-          sections: [
-            {
-              id: 'js-data',
-              title: 'js-data',
-              scripts: [
-                'src/'
-              ],
-              docs: ['guide/api']
-            }
-          ]
-        }
-      ],
-      docular_webapp_target: 'doc',
-      showDocularDocs: false,
-      showAngularDocs: false//,
-//      docular_partial_home: 'guide/home.html',
-//      docular_partial_navigation: 'guide/nav.html',
-//      docular_partial_footer: 'guide/footer.html',
-//      analytics: {
-//        account: 'UA-34445126-2',
-//        domainName: 'angular-data.pseudobry.com'
-//      },
-//      discussions: {
-//        shortName: 'angulardata',
-//        url: 'http://angular-data.pseudobry.com',
-//        dev: dev
-//      }
+    mochaTest: {
+      all: {
+        options: {
+          reporter: 'spec'
+        },
+        src: ['mocha.start.js', 'test/both/**/*.js', 'test/node/**/*.js']
+      }
     }
   });
 
@@ -225,7 +138,11 @@ module.exports = function (grunt) {
     grunt.file.write('dist/js-data.js', file);
   });
 
-  grunt.registerTask('test', ['build', 'karma:ci', 'karma:min']);
+  grunt.registerTask('n', ['mochaTest']);
+  grunt.registerTask('b', ['karma:ci', 'karma:min']);
+  grunt.registerTask('w', ['n', 'watch:n']);
+
+  grunt.registerTask('test', ['build', 'n', 'b']);
   grunt.registerTask('build', [
     'clean',
     'jshint',

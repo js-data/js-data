@@ -591,7 +591,7 @@
   global.Observer.hasObjectObserve = hasObserve;
 
   global.ObjectObserver = ObjectObserver;
-})((exports.Number = { isNaN: window.isNaN }) ? exports : exports);
+})(exports);
 
 },{}],2:[function(require,module,exports){
 "use strict";
@@ -3520,7 +3520,9 @@ function eject(resourceName, id, options) {
     }
     _this.unlinkInverse(definition.name, id);
     resource.collection.splice(i, 1);
-    resource.observers[id].close();
+    if (resource.observers[id]) {
+      resource.observers[id].close();
+    }
     delete resource.observers[id];
 
     delete resource.index[id];
@@ -3634,7 +3636,9 @@ function changes(resourceName, id) {
 
   var item = _this.get(resourceName, id);
   if (item) {
-    _this.store[resourceName].observers[id].deliver();
+    if (DSUtils.w) {
+      _this.store[resourceName].observers[id].deliver();
+    }
     var diff = DSUtils.diffObjectFromOldObject(item, _this.store[resourceName].previousAttributes[id]);
     DSUtils.forOwn(diff, function (changeset, name) {
       var toKeep = [];
@@ -3852,7 +3856,10 @@ function _injectRelations(definition, injected, options) {
   DSUtils.forEach(definition.relationList, function (def) {
     var relationName = def.relation;
     var relationDef = _this.definitions[relationName];
-    if (relationDef && injected[def.localField]) {
+    if (injected[def.localField]) {
+      if (!relationDef) {
+        throw new DSErrors.R(definition.name + ' relation is defined, but the resource is not!');
+      }
       try {
         injected[def.localField] = _this.inject(relationName, injected[def.localField], options);
       } catch (err) {
@@ -3974,10 +3981,13 @@ function _inject(definition, resource, attrs, options) {
           resource.collection.push(item);
 
           resource.changeHistories[id] = [];
-          resource.observers[id] = new observe.ObjectObserver(item);
-          resource.observers[id].open(_react, item);
-          resource.index[id] = item;
 
+          if (DSUtils.w) {
+            resource.observers[id] = new observe.ObjectObserver(item);
+            resource.observers[id].open(_react, item);
+          }
+
+          resource.index[id] = item;
           _react.call(item, {}, {}, {}, null, true);
 
           if (definition.relations) {
@@ -3995,12 +4005,14 @@ function _inject(definition, resource, attrs, options) {
               resource.changeHistories[id].splice(0, resource.changeHistories[id].length);
             }
           }
-          resource.observers[id].deliver();
+          if (DSUtils.w) {
+            resource.observers[id].deliver();
+          }
         }
         resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
         injected = item;
       } catch (err) {
-        console.error(err);
+        console.error(err.stack);
         console.error('inject failed!', definition.name, attrs);
       }
     }
@@ -4417,8 +4429,17 @@ function Events(target) {
 }
 
 var DSErrors = require('./errors');
+var w;
+
+try {
+  w = window;
+  w = {};
+} catch (e) {
+  w = null;
+}
 
 module.exports = {
+  w: w,
   isBoolean: require('mout/lang/isBoolean'),
   isString: require('mout/lang/isString'),
   isArray: require('mout/lang/isArray'),
@@ -4489,7 +4510,7 @@ module.exports = {
       Object.freeze(o); // First freeze the object.
       for (propKey in o) {
         prop = o[propKey];
-        if (!o.hasOwnProperty(propKey) || typeof prop !== 'object' || Object.isFrozen(prop)) {
+        if (!prop || !o.hasOwnProperty(propKey) || typeof prop !== 'object' || Object.isFrozen(prop)) {
           // If the object is on the prototype, not an object, or is already frozen,
           // skip it. Note that this might leave an unfrozen reference somewhere in the
           // object if there is an already frozen object containing an unfrozen object.

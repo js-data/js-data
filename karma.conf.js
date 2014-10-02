@@ -24,7 +24,8 @@ module.exports = function (config) {
 			'bower_components/js-data-http/dist/js-data-http.js',
 			'bower_components/js-data-localstorage/dist/js-data-localstorage.js',
 			'karma.start.js',
-			'test/**/*.test.js'
+			'test/both/**/*.test.js',
+			'test/browser/**/*.test.js'
 		],
 
 		reporters: ['spec', 'coverage'],

@@ -1,6 +1,6 @@
 # Contributing Guide
 
-First, feel free to contact me with questions. [Mailing List](https://groups.google.com/forum/?fromgroups#!forum/js-data). [Issues](https://github.com/js-data/js-data/issues).
+First, feel free to contact me with questions. [Mailing List](https://groups.io/org/groupsio/jsdata). [Issues](https://github.com/js-data/js-data/issues).
 
 1. Contribute to the issue that is the reason you'll be developing in the first place
 1. Fork js-data

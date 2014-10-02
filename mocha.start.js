@@ -1,43 +1,53 @@
-// Setup global test variables
-var store, DSUtils, dsHttpAdapter, dsLocalStorageAdapter, p1, p2, p3, p4, p5;
+/*global assert:true */
+'use strict';
 
-var Post, User, Organization, Comment, Profile;
-var user1, organization2, comment3, profile4;
-var comment11, comment12, comment13, organization14, profile15, user10, user16, user17, user18, organization15, user19, user20, comment19, user22, profile21;
+var assert = require('chai').assert;
+var mocha = require('mocha');
+var sinon = require('sinon');
+var JSData = require('./');
+
+var store, DSUtils, DSErrors;
 
 var lifecycle = {};
 
-// Helper globals
-var fail = function (msg) {
-    if (msg instanceof Error) {
-      console.log(msg.stack);
-    } else {
-      assert.equal('should not reach this!: ' + msg, 'failure');
-    }
+var globals = module.exports = {
+  fail: function (msg) {
+    assert.equal('should not reach this!: ' + msg, 'failure');
   },
-  TYPES_EXCEPT_STRING = [123, 123.123, null, undefined, {}, [], true, false, function () {
+  TYPES_EXCEPT_STRING: [123, 123.123, null, undefined, {}, [], true, false, function () {
   }],
-  TYPES_EXCEPT_STRING_OR_ARRAY = [123, 123.123, null, undefined, {}, true, false, function () {
+  TYPES_EXCEPT_STRING_OR_ARRAY: [123, 123.123, null, undefined, {}, true, false, function () {
   }],
-  TYPES_EXCEPT_STRING_OR_OBJECT = [123, 123.123, null, undefined, [], true, false, function () {
+  TYPES_EXCEPT_STRING_OR_NUMBER: [null, undefined, {}, [], true, false, function () {
   }],
-  TYPES_EXCEPT_STRING_OR_NUMBER_OBJECT = [null, undefined, [], true, false, function () {
+  TYPES_EXCEPT_STRING_OR_OBJECT: [123, 123.123, null, undefined, [], true, false, function () {
   }],
-  TYPES_EXCEPT_ARRAY = ['string', 123, 123.123, null, undefined, {}, true, false, function () {
+  TYPES_EXCEPT_STRING_OR_NUMBER_OBJECT: [null, undefined, [], true, false, function () {
   }],
-  TYPES_EXCEPT_STRING_OR_NUMBER = [null, undefined, {}, [], true, false, function () {
+  TYPES_EXCEPT_STRING_OR_ARRAY_OR_NUMBER: [null, undefined, {}, true, false, function () {
   }],
-  TYPES_EXCEPT_STRING_OR_ARRAY_OR_NUMBER = [null, undefined, {}, true, false, function () {
+  TYPES_EXCEPT_NUMBER: ['string', null, undefined, {}, [], true, false, function () {
   }],
-  TYPES_EXCEPT_NUMBER = ['string', null, undefined, {}, [], true, false, function () {
+  TYPES_EXCEPT_OBJECT: ['string', 123, 123.123, null, undefined, true, false, function () {
   }],
-  TYPES_EXCEPT_OBJECT = ['string', 123, 123.123, null, undefined, true, false, function () {
+  TYPES_EXCEPT_BOOLEAN: ['string', 123, 123.123, null, undefined, {}, [], function () {
   }],
-  TYPES_EXCEPT_BOOLEAN = ['string', 123, 123.123, null, undefined, {}, [], function () {
-  }],
-  TYPES_EXCEPT_FUNCTION = ['string', 123, 123.123, null, undefined, {}, [], true, false];
+  TYPES_EXCEPT_FUNCTION: ['string', 123, 123.123, null, undefined, {}, [], true, false],
+  assert: assert,
+  sinon: sinon,
+  store: undefined
+};
 
-// Setup before each test
+var test = new mocha();
+
+var testGlobals = [];
+
+for (var key in globals) {
+  global[key] = globals[key];
+  testGlobals.push(globals[key]);
+}
+test.globals(testGlobals);
+
 beforeEach(function () {
   lifecycle.beforeValidate = function (resourceName, attrs, cb) {
     lifecycle.beforeValidate.callCount += 1;
@@ -108,23 +118,14 @@ beforeEach(function () {
     beforeInject: lifecycle.beforeInject,
     afterInject: lifecycle.afterInject
   });
-  dsHttpAdapter = new DSHttpAdapter({
-    queryTransform: lifecycle.queryTransform,
-    serialize: lifecycle.serialize,
-    deserialize: lifecycle.deserialize,
-    log: function () {}
-  });
-  dsLocalStorageAdapter = new DSLocalStorageAdapter();
   DSUtils = JSData.DSUtils;
-  store.adapters.DSHttpAdapter = dsHttpAdapter;
-  store.adapters.DSLocalStorageAdapter = dsLocalStorageAdapter;
-  localStorage.clear();
-  Post = store.defineResource({
+  DSErrors = JSData.DSErrors;
+  globals.Post = global.Post = store.defineResource({
     name: 'post',
     keepChangeHistory: true,
     endpoint: '/posts'
   });
-  User = store.defineResource({
+  globals.User = global.User = store.defineResource({
     name: 'user',
     relations: {
       hasMany: {
@@ -149,7 +150,7 @@ beforeEach(function () {
     }
   });
 
-  Organization = store.defineResource({
+  globals.Organization = global.Organization = store.defineResource({
     name: 'organization',
     relations: {
       hasMany: {
@@ -161,7 +162,7 @@ beforeEach(function () {
     }
   });
 
-  Profile = store.defineResource({
+  globals.Profile = global.Profile = store.defineResource({
     name: 'profile',
     relations: {
       belongsTo: {
@@ -173,7 +174,7 @@ beforeEach(function () {
     }
   });
 
-  Comment = store.defineResource({
+  globals.Comment = global.Comment = store.defineResource({
     name: 'comment',
     relations: {
       belongsTo: {
@@ -207,137 +208,143 @@ beforeEach(function () {
   lifecycle.deserialize.callCount = 0;
   lifecycle.queryTransform.callCount = 0;
 
-  p1 = { author: 'John', age: 30, id: 5 };
-  p2 = { author: 'Sally', age: 31, id: 6 };
-  p3 = { author: 'Mike', age: 32, id: 7 };
-  p4 = { author: 'Adam', age: 33, id: 8 };
-  p5 = { author: 'Adam', age: 33, id: 9 };
+  globals.p1 = global.p1 = { author: 'John', age: 30, id: 5 };
+  globals.p2 = global.p2 = { author: 'Sally', age: 31, id: 6 };
+  globals.p3 = global.p3 = { author: 'Mike', age: 32, id: 7 };
+  globals.p4 = global.p4 = { author: 'Adam', age: 33, id: 8 };
+  globals.p5 = global.p5 = { author: 'Adam', age: 33, id: 9 };
 
-  user1 = {
+  globals.user1 = global.user1 = {
     name: 'John Anderson',
     id: 1,
     organizationId: 2
   };
-  organization2 = {
+  globals.organization2 = global.organization2 = {
     name: 'Test Corp 2',
     id: 2
   };
-  comment3 = {
+  globals.comment3 = global.comment3 = {
     content: 'test comment 3',
     id: 3,
     userId: 1
   };
-  profile4 = {
+  globals.profile4 = global.profile4 = {
     content: 'test profile 4',
     id: 4,
     userId: 1
   };
 
-  comment11 = {
+  globals.comment11 = global.comment11 = {
     id: 11,
     userId: 10,
     content: 'test comment 11'
   };
-  comment12 = {
+  globals.comment12 = global.comment12 = {
     id: 12,
     userId: 10,
     content: 'test comment 12'
   };
-  comment13 = {
+  globals.comment13 = global.comment13 = {
     id: 13,
     userId: 10,
     content: 'test comment 13'
   };
-  organization14 = {
+  globals.organization14 = global.organization14 = {
     id: 14,
     name: 'Test Corp'
   };
-  profile15 = {
+  globals.profile15 = global.profile15 = {
     id: 15,
     userId: 10,
     email: 'john.anderson@test.com'
   };
-  user10 = {
+  globals.user10 = global.user10 = {
     name: 'John Anderson',
     id: 10,
     organizationId: 14,
     comments: [
-      comment11,
-      comment12,
-      comment13
+      globals.comment11,
+      globals.comment12,
+      globals.comment13
     ],
-    organization: organization14,
-    profile: profile15
+    organization: globals.organization14,
+    profile: globals.profile15
   };
-  user16 = {
+  globals.user16 = global.user16 = {
     id: 16,
     organizationId: 15,
     name: 'test user 16'
   };
-  user17 = {
+  globals.user17 = global.user17 = {
     id: 17,
     organizationId: 15,
     name: 'test user 17'
   };
-  user18 = {
+  globals.user18 = global.user18 = {
     id: 18,
     organizationId: 15,
     name: 'test user 18'
   };
-  organization15 = {
+  globals.organization15 = global.organization15 = {
     name: 'Another Test Corp',
     id: 15,
     users: [
-      user16,
-      user17,
-      user18
+      globals.user16,
+      globals.user17,
+      globals.user18
     ]
   };
-  user19 = {
+  globals.user19 = global.user19 = {
     id: 19,
     name: 'test user 19'
   };
-  user20 = {
+  globals.user20 = global.user20 = {
     id: 20,
     name: 'test user 20'
   };
-  comment19 = {
+  globals.comment19 = global.comment19 = {
     content: 'test comment 19',
     id: 19,
     approvedBy: 19,
-    approvedByUser: user19,
+    approvedByUser: globals.user19,
     userId: 20,
-    user: user20
+    user: globals.user20
   };
-  user22 = {
+  globals.user22 = global.user22 = {
     id: 22,
     name: 'test user 22'
   };
-  profile21 = {
+  globals.profile21 = global.profile21 = {
     content: 'test profile 21',
     id: 21,
     userId: 22,
-    user: user22
+    user: globals.user22
   };
 
-  try {
-    this.xhr = sinon.useFakeXMLHttpRequest();
-    // Create an array to store requests
-    var requests = this.requests = [];
-    // Keep references to created requests
-    this.xhr.onCreate = function (xhr) {
-      requests.push(xhr);
-    };
-  } catch (err) {
-    console.log(err);
-  }
+  globals.store = store;
+  global.store = globals.store;
+
+  globals.DSUtils = DSUtils;
+  global.DSUtils = globals.DSUtils;
+
+  globals.DSErrors = DSErrors;
+  global.DSErrors = globals.DSErrors;
+
+  globals.DSErrors = DSErrors;
+  global.DSErrors = globals.DSErrors;
+
+  globals.DSErrors = DSErrors;
+  global.DSErrors = globals.DSErrors;
+
+  globals.lifecycle = lifecycle;
+  global.lifecycle = globals.lifecycle;
+
+  globals.isNode = true;
+  global.isNode = true;
+  this.isNode = true;
 });
 
 afterEach(function () {
-  // Restore the global timer functions to their native implementations
-  try {
-    this.xhr.restore();
-  } catch (err) {
-    console.log(err);
-  }
+  globals.store = null;
+  global.store = null;
 });

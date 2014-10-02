@@ -35,8 +35,17 @@ function Events(target) {
 }
 
 var DSErrors = require('./errors');
+var w;
+
+try {
+  w = window;
+  w = {};
+} catch (e) {
+  w = null;
+}
 
 module.exports = {
+  w: w,
   isBoolean: require('mout/lang/isBoolean'),
   isString: require('mout/lang/isString'),
   isArray: require('mout/lang/isArray'),
@@ -102,12 +111,12 @@ module.exports = {
   },
   Promise: require('es6-promise').Promise,
   deepFreeze: function deepFreeze(o) {
-    if (typeof Object.freeze === 'function') {
+    if (typeof Object.freeze === 'function' && typeof Object.isFrozen === 'function') {
       var prop, propKey;
       Object.freeze(o); // First freeze the object.
       for (propKey in o) {
         prop = o[propKey];
-        if (!o.hasOwnProperty(propKey) || typeof prop !== 'object' || Object.isFrozen(prop)) {
+        if (!prop || !o.hasOwnProperty(propKey) || typeof prop !== 'object' || Object.isFrozen(prop)) {
           // If the object is on the prototype, not an object, or is already frozen,
           // skip it. Note that this might leave an unfrozen reference somewhere in the
           // object if there is an already frozen object containing an unfrozen object.
