@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file js-data.js
-* @version 0.4.1 - Homepage <http://www.js-data.io/>
+* @version 0.4.2 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -2363,17 +2363,10 @@ function create(resourceName, attrs, options) {
           _this.emit(definition, 'afterCreate', DSUtils.merge({}, attrs));
         }
         if (options.cacheResponse) {
-          var resource = _this.store[resourceName];
           var created = _this.inject(definition.name, attrs, options);
           var id = created[definition.idAttribute];
-          resource.completedQueries[id] = new Date().getTime();
-          resource.previousAttributes[id] = DSUtils.deepMixIn({}, created);
-          resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
-          resource.expiresHeap.push({
-            timestamp: resource.saved[id],
-            item: created
-          });
-          return _this.get(definition.name, id);
+          _this.store[resourceName].completedQueries[id] = new Date().getTime();
+          return created;
         } else {
           return _this.createInstance(resourceName, attrs, options);
         }
@@ -2634,20 +2627,75 @@ module.exports = findAll;
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
+function reap(resourceName, options) {
+  var _this = this;
+  var definition = _this.definitions[resourceName];
+  var resource = _this.store[resourceName];
+
+  return new DSUtils.Promise(function (resolve, reject) {
+
+    if (!definition) {
+      reject(new _this.errors.NER(resourceName));
+    } else {
+      options = DSUtils._(definition, options);
+      if (!options.hasOwnProperty('notify')) {
+        options.notify = false;
+      }
+      var items = [];
+      var now = new Date().getTime();
+      var expiredItem;
+      while ((expiredItem = resource.expiresHeap.peek()) && expiredItem.expires < now) {
+        items.push(expiredItem.item);
+        delete expiredItem.item;
+        resource.expiresHeap.pop();
+      }
+      resolve(items);
+    }
+  }).then(function (items) {
+      if (options.isInterval || options.notify) {
+        _this.emit(definition, 'beforeReap', items);
+      }
+      if (options.reapAction === 'inject') {
+        DSUtils.forEach(items, function (item) {
+          var id = item[definition.idAttribute];
+          resource.expiresHeap.push({
+            item: item,
+            timestamp: resource.saved[id],
+            expires: definition.maxAge ? resource.saved[id] + definition.maxAge : Number.MAX_VALUE
+          });
+        });
+      } else if (options.reapAction === 'eject') {
+        DSUtils.forEach(items, function (item) {
+          _this.eject(resourceName, item[definition.idAttribute]);
+        });
+      } else if (options.reapAction === 'refresh') {
+        var tasks = [];
+        DSUtils.forEach(items, function (item) {
+          tasks.push(_this.refresh(resourceName, item[definition.idAttribute]));
+        });
+        return DSUtils.Promise.all(tasks);
+      }
+      return items;
+    }).then(function (items) {
+      if (options.isInterval || options.notify) {
+        _this.emit(definition, 'afterReap', items);
+      }
+      return items;
+    });
+}
+
 function refresh(resourceName, id, options) {
   var _this = this;
 
   return new DSUtils.Promise(function (resolve, reject) {
-    options = options || {};
-
+    var definition = _this.definitions[resourceName];
     id = DSUtils.resolveId(_this.definitions[resourceName], id);
-    if (!_this.definitions[resourceName]) {
+    if (!definition) {
       reject(new _this.errors.NER(resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
       reject(new DSErrors.IA('"id" must be a string or a number!'));
-    } else if (!DSUtils.isObject(options)) {
-      reject(new DSErrors.IA('"options" must be an object!'));
     } else {
+      options = DSUtils._(definition, options);
       options.bypassCache = true;
       resolve(_this.get(resourceName, id));
     }
@@ -2667,6 +2715,7 @@ module.exports = {
   find: require('./find'),
   findAll: require('./findAll'),
   loadRelations: require('./loadRelations'),
+  reap: reap,
   refresh: refresh,
   save: require('./save'),
   update: require('./update'),
@@ -2828,19 +2877,7 @@ function save(resourceName, id, options) {
         _this.emit(definition, 'afterUpdate', DSUtils.merge({}, attrs));
       }
       if (options.cacheResponse) {
-        var resource = _this.store[resourceName];
-        var saved = _this.inject(definition.name, attrs, options);
-        resource.previousAttributes[id] = DSUtils.deepMixIn({}, saved);
-        resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
-        resource.expiresHeap.remove(saved);
-        resource.expiresHeap.push({
-          timestamp: resource.saved[id],
-          item: saved
-        });
-        if (DSUtils.w) {
-          resource.observers[id].discardChanges();
-        }
-        return _this.get(resourceName, id);
+        return _this.inject(definition.name, attrs, options);
       } else {
         return attrs;
       }
@@ -2899,20 +2936,7 @@ function update(resourceName, id, attrs, options) {
         _this.emit(definition, 'afterUpdate', DSUtils.merge({}, attrs));
       }
       if (options.cacheResponse) {
-        var resource = _this.store[resourceName];
-        var updated = _this.inject(definition.name, attrs, options);
-        var id = updated[definition.idAttribute];
-        resource.previousAttributes[id] = DSUtils.deepMixIn({}, updated);
-        resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
-        resource.expiresHeap.remove(updated);
-        resource.expiresHeap.push({
-          timestamp: resource.saved[id],
-          item: updated
-        });
-        if (DSUtils.w) {
-          resource.observers[id].discardChanges();
-        }
-        return _this.get(definition.name, id);
+        return _this.inject(definition.name, attrs, options);
       } else {
         return attrs;
       }
@@ -3201,6 +3225,9 @@ defaultsPrototype.findInverseLinks = false;
 defaultsPrototype.findBelongsTo = false;
 defaultsPrototype.findHasOn = false;
 defaultsPrototype.findHasMany = false;
+defaultsPrototype.reapInterval = 30000;
+defaultsPrototype.reapAction = 'inject';
+defaultsPrototype.maxAge = false;
 defaultsPrototype.beforeValidate = lifecycleNoopCb;
 defaultsPrototype.validate = lifecycleNoopCb;
 defaultsPrototype.afterValidate = lifecycleNoopCb;
@@ -3294,6 +3321,7 @@ var methodsToProxy = [
   'linkInverse',
   'loadRelations',
   'previous',
+  'reap',
   'refresh',
   'save',
   'unlinkInverse',
@@ -3462,7 +3490,7 @@ function defineResource(definition) {
     _this.store[def.name] = {
       collection: [],
       expiresHeap: new DSUtils.DSBinaryHeap(function (x) {
-        return x.timestamp;
+        return x.expires;
       }, function (x, y) {
         return x.item === y;
       }),
@@ -3477,6 +3505,10 @@ function defineResource(definition) {
       changeHistory: [],
       collectionModified: 0
     };
+
+    setInterval(function () {
+      _this.reap(def.name, { isInterval: true });
+    }, def.reapInterval);
 
     // Proxy DS methods with shorthand ones
     DSUtils.forEach(methodsToProxy, function (name) {
@@ -4005,11 +4037,6 @@ function _inject(definition, resource, attrs, options) {
           DSUtils.deepMixIn(resource.previousAttributes[id], attrs);
 
           resource.collection.push(item);
-          resource.expiresHeap.push({
-            item: item,
-            timestamp: DSUtils.updateTimestamp(resource.saved[id])
-          });
-
           resource.changeHistories[id] = [];
 
           if (DSUtils.w) {
@@ -4040,6 +4067,12 @@ function _inject(definition, resource, attrs, options) {
           }
         }
         resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
+        resource.expiresHeap.remove(item);
+        resource.expiresHeap.push({
+          item: item,
+          timestamp: resource.saved[id],
+          expires: definition.maxAge ? resource.saved[id] + definition.maxAge : Number.MAX_VALUE
+        });
         injected = item;
       } catch (err) {
         console.error(err.stack);

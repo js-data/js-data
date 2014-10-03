@@ -47,20 +47,7 @@ function update(resourceName, id, attrs, options) {
         _this.emit(definition, 'afterUpdate', DSUtils.merge({}, attrs));
       }
       if (options.cacheResponse) {
-        var resource = _this.store[resourceName];
-        var updated = _this.inject(definition.name, attrs, options);
-        var id = updated[definition.idAttribute];
-        resource.previousAttributes[id] = DSUtils.deepMixIn({}, updated);
-        resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
-        resource.expiresHeap.remove(updated);
-        resource.expiresHeap.push({
-          timestamp: resource.saved[id],
-          item: updated
-        });
-        if (DSUtils.w) {
-          resource.observers[id].discardChanges();
-        }
-        return _this.get(definition.name, id);
+        return _this.inject(definition.name, attrs, options);
       } else {
         return attrs;
       }

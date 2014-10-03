@@ -1,3 +1,8 @@
+##### 0.4.2 - xx October 2014
+
+###### Backwards compatible API changes
+- #12 - Add expiration capabilities (reapInterval, reapAction, maxAge, DS#reap)
+
 ##### 0.4.1 - 01 October 2014
 
 ###### Backwards compatible API changes

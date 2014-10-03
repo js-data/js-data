@@ -35,6 +35,7 @@ var methodsToProxy = [
   'linkInverse',
   'loadRelations',
   'previous',
+  'reap',
   'refresh',
   'save',
   'unlinkInverse',
@@ -203,7 +204,7 @@ function defineResource(definition) {
     _this.store[def.name] = {
       collection: [],
       expiresHeap: new DSUtils.DSBinaryHeap(function (x) {
-        return x.timestamp;
+        return x.expires;
       }, function (x, y) {
         return x.item === y;
       }),
@@ -218,6 +219,10 @@ function defineResource(definition) {
       changeHistory: [],
       collectionModified: 0
     };
+
+    setInterval(function () {
+      _this.reap(def.name, { isInterval: true });
+    }, def.reapInterval);
 
     // Proxy DS methods with shorthand ones
     DSUtils.forEach(methodsToProxy, function (name) {

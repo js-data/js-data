@@ -73,19 +73,7 @@ function save(resourceName, id, options) {
         _this.emit(definition, 'afterUpdate', DSUtils.merge({}, attrs));
       }
       if (options.cacheResponse) {
-        var resource = _this.store[resourceName];
-        var saved = _this.inject(definition.name, attrs, options);
-        resource.previousAttributes[id] = DSUtils.deepMixIn({}, saved);
-        resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
-        resource.expiresHeap.remove(saved);
-        resource.expiresHeap.push({
-          timestamp: resource.saved[id],
-          item: saved
-        });
-        if (DSUtils.w) {
-          resource.observers[id].discardChanges();
-        }
-        return _this.get(resourceName, id);
+        return _this.inject(definition.name, attrs, options);
       } else {
         return attrs;
       }
