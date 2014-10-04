@@ -220,9 +220,11 @@ function defineResource(definition) {
       collectionModified: 0
     };
 
-    setInterval(function () {
-      _this.reap(def.name, { isInterval: true });
-    }, def.reapInterval);
+    if (def.reapInterval) {
+      setInterval(function () {
+        _this.reap(def.name, { isInterval: true });
+      }, def.reapInterval);
+    }
 
     // Proxy DS methods with shorthand ones
     DSUtils.forEach(methodsToProxy, function (name) {
