@@ -56,7 +56,9 @@ describe('DS#reap', function () {
     Thing.inject({ id: 2 });
 
     setTimeout(function () {
-      Thing.reap().then(function (items) {
+      Thing.reap({
+        reapAction: 'inject'
+      }).then(function (items) {
         try {
           assert.equal(items.length, 2);
           assert.equal(expiresHeap.peek().item.id, 1);
@@ -81,7 +83,9 @@ describe('DS#reap', function () {
     Thing.inject({ id: 2 });
 
     setTimeout(function () {
-      Thing.reap().then(function (items) {
+      Thing.reap({
+        reapAction: 'eject'
+      }).then(function (items) {
         try {
           assert.equal(items.length, 2);
           assert.equal(expiresHeap.heap.length, 0);

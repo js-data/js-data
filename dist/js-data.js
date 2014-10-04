@@ -3026,7 +3026,40 @@ function Defaults() {
 var defaultsPrototype = Defaults.prototype;
 
 defaultsPrototype.idAttribute = 'id';
-defaultsPrototype.defaultAdapter = 'DSHttpAdapter';
+defaultsPrototype.basePath = '';
+defaultsPrototype.endpoint = '';
+defaultsPrototype.useClass = true;
+defaultsPrototype.keepChangeHistory = false;
+defaultsPrototype.resetHistoryOnInject = true;
+defaultsPrototype.eagerEject = false;
+// TODO: Implement eagerInject in DS#create
+defaultsPrototype.eagerInject = false;
+defaultsPrototype.allowSimpleWhere = true;
+defaultsPrototype.loadFromServer = false;
+defaultsPrototype.notify = !!DSUtils.w;
+defaultsPrototype.upsert = !!DSUtils.w;
+defaultsPrototype.cacheResponse = !!DSUtils.w;
+defaultsPrototype.bypassCache = false;
+defaultsPrototype.findInverseLinks = false;
+defaultsPrototype.findBelongsTo = false;
+defaultsPrototype.findHasOn = false;
+defaultsPrototype.findHasMany = false;
+defaultsPrototype.reapInterval = !!DSUtils.w ? 30000 : false;
+defaultsPrototype.reapAction = !!DSUtils.w ? 'inject' : 'none';
+defaultsPrototype.maxAge = false;
+defaultsPrototype.beforeValidate = lifecycleNoopCb;
+defaultsPrototype.validate = lifecycleNoopCb;
+defaultsPrototype.afterValidate = lifecycleNoopCb;
+defaultsPrototype.beforeCreate = lifecycleNoopCb;
+defaultsPrototype.afterCreate = lifecycleNoopCb;
+defaultsPrototype.beforeUpdate = lifecycleNoopCb;
+defaultsPrototype.afterUpdate = lifecycleNoopCb;
+defaultsPrototype.beforeDestroy = lifecycleNoopCb;
+defaultsPrototype.afterDestroy = lifecycleNoopCb;
+defaultsPrototype.beforeInject = lifecycleNoop;
+defaultsPrototype.afterInject = lifecycleNoop;
+defaultsPrototype.beforeEject = lifecycleNoop;
+defaultsPrototype.afterEject = lifecycleNoop;
 defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
   var _this = this;
   var filtered = collection;
@@ -3207,40 +3240,6 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
 
   return filtered;
 };
-defaultsPrototype.basePath = '';
-defaultsPrototype.endpoint = '';
-defaultsPrototype.useClass = true;
-defaultsPrototype.keepChangeHistory = false;
-defaultsPrototype.resetHistoryOnInject = true;
-defaultsPrototype.eagerEject = false;
-// TODO: Implement eagerInject in DS#create
-defaultsPrototype.eagerInject = false;
-defaultsPrototype.allowSimpleWhere = true;
-defaultsPrototype.loadFromServer = false;
-defaultsPrototype.notify = true;
-defaultsPrototype.upsert = true;
-defaultsPrototype.cacheResponse = true;
-defaultsPrototype.bypassCache = false;
-defaultsPrototype.findInverseLinks = false;
-defaultsPrototype.findBelongsTo = false;
-defaultsPrototype.findHasOn = false;
-defaultsPrototype.findHasMany = false;
-defaultsPrototype.reapInterval = 30000;
-defaultsPrototype.reapAction = 'inject';
-defaultsPrototype.maxAge = false;
-defaultsPrototype.beforeValidate = lifecycleNoopCb;
-defaultsPrototype.validate = lifecycleNoopCb;
-defaultsPrototype.afterValidate = lifecycleNoopCb;
-defaultsPrototype.beforeCreate = lifecycleNoopCb;
-defaultsPrototype.afterCreate = lifecycleNoopCb;
-defaultsPrototype.beforeUpdate = lifecycleNoopCb;
-defaultsPrototype.afterUpdate = lifecycleNoopCb;
-defaultsPrototype.beforeDestroy = lifecycleNoopCb;
-defaultsPrototype.afterDestroy = lifecycleNoopCb;
-defaultsPrototype.beforeInject = lifecycleNoop;
-defaultsPrototype.afterInject = lifecycleNoop;
-defaultsPrototype.beforeEject = lifecycleNoop;
-defaultsPrototype.afterEject = lifecycleNoop;
 
 function DS(options) {
   this.store = {};
@@ -3506,9 +3505,11 @@ function defineResource(definition) {
       collectionModified: 0
     };
 
-    setInterval(function () {
-      _this.reap(def.name, { isInterval: true });
-    }, def.reapInterval);
+    if (def.reapInterval) {
+      setInterval(function () {
+        _this.reap(def.name, { isInterval: true });
+      }, def.reapInterval);
+    }
 
     // Proxy DS methods with shorthand ones
     DSUtils.forEach(methodsToProxy, function (name) {

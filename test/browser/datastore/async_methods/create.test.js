@@ -13,7 +13,7 @@ describe('DS#create', function () {
       assert.deepEqual(JSON.stringify(store.get('post', 5)), JSON.stringify(p1));
       done();
     }).catch(function (err) {
-      console.error(err.stack);
+      console.log(err.stack);
       done('should not have rejected');
     });
 

@@ -114,10 +114,10 @@ beforeEach(function () {
     deserialize: lifecycle.deserialize,
     log: function () {}
   });
+  store.registerAdapter('http', dsHttpAdapter, { default: true });
   dsLocalStorageAdapter = new DSLocalStorageAdapter();
+  store.registerAdapter('localstorage', dsLocalStorageAdapter);
   DSUtils = JSData.DSUtils;
-  store.adapters.DSHttpAdapter = dsHttpAdapter;
-  store.adapters.DSLocalStorageAdapter = dsLocalStorageAdapter;
   localStorage.clear();
   Post = store.defineResource({
     name: 'post',

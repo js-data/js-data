@@ -107,6 +107,9 @@ beforeEach(function () {
   store = new JSData.DS({
     basePath: 'http://test.js-data.io',
     beforeValidate: lifecycle.beforeValidate,
+    cacheResponse: true,
+    notify: true,
+    upsert: true,
     validate: lifecycle.validate,
     afterValidate: lifecycle.afterValidate,
     beforeCreate: lifecycle.beforeCreate,
