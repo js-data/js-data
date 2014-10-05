@@ -192,6 +192,7 @@ function _link(definition, injected, options) {
 function inject(resourceName, attrs, options) {
   var _this = this;
   var definition = _this.definitions[resourceName];
+  var resource = _this.store[resourceName];
   var injected;
 
   if (!definition) {
@@ -206,7 +207,7 @@ function inject(resourceName, attrs, options) {
     definition.beforeInject(definition.name, attrs);
   }
 
-  injected = _inject.call(_this, definition, _this.store[resourceName], attrs, options);
+  injected = _inject.call(_this, definition, resource, attrs, options);
 
   if (options.findInverseLinks) {
     if (DSUtils.isArray(injected) && injected.length) {
@@ -217,6 +218,7 @@ function inject(resourceName, attrs, options) {
   }
 
   if (DSUtils.isArray(injected)) {
+    resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
     DSUtils.forEach(injected, function (injectedI) {
       _link.call(_this, definition, injectedI, options);
     });
