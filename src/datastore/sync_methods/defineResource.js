@@ -1,4 +1,4 @@
-/*jshint evil:true*/
+/*jshint evil:true, loopfunc:true*/
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -13,34 +13,11 @@ function Resource(options) {
   }
 }
 
-var methodsToProxy = [
-  'changes',
-  'changeHistory',
-  'create',
-  'createInstance',
-  'destroy',
-  'destroyAll',
-  'eject',
-  'ejectAll',
-  'filter',
-  'find',
-  'findAll',
-  'get',
-  'hasChanges',
-  'inject',
-  'lastModified',
-  'lastSaved',
-  'link',
-  'linkAll',
-  'linkInverse',
-  'loadRelations',
-  'previous',
-  'reap',
+var instanceMethods = [
+  'compute',
   'refresh',
   'save',
-  'unlinkInverse',
-  'update',
-  'updateAll'
+  'update'
 ];
 
 function defineResource(definition) {
@@ -180,25 +157,16 @@ function defineResource(definition) {
           return !!dep;
         });
       });
-
-      def[def.class].prototype.DSCompute = function () {
-        return _this.compute(def.name, this);
-      };
     }
 
-    def[def.class].prototype.DSUpdate = function () {
-      var args = Array.prototype.slice.call(arguments);
-      args.unshift(this[def.idAttribute]);
-      args.unshift(def.name);
-      return _this.update.apply(_this, args);
-    };
-
-    def[def.class].prototype.DSSave = function () {
-      var args = Array.prototype.slice.call(arguments);
-      args.unshift(this[def.idAttribute]);
-      args.unshift(def.name);
-      return _this.save.apply(_this, args);
-    };
+    DSUtils.forEach(instanceMethods, function (name) {
+      def[def.class].prototype['DS' + DSUtils.pascalCase(name)] = function () {
+        var args = Array.prototype.slice.call(arguments);
+        args.unshift(this);
+        args.unshift(def.name);
+        return _this[name].apply(_this, args);
+      };
+    });
 
     // Initialize store data for the new resource
     _this.store[def.name] = {
@@ -227,13 +195,17 @@ function defineResource(definition) {
     }
 
     // Proxy DS methods with shorthand ones
-    DSUtils.forEach(methodsToProxy, function (name) {
-      def[name] = function () {
-        var args = Array.prototype.slice.call(arguments);
-        args.unshift(def.name);
-        return _this[name].apply(_this, args);
-      };
-    });
+    for (var key in _this) {
+      if (typeof _this[key] === 'function' && key !== 'defineResource') {
+        (function (k) {
+          def[k] = function () {
+            var args = Array.prototype.slice.call(arguments);
+            args.unshift(def.name);
+            return _this[k].apply(_this, args);
+          };
+        })(key);
+      }
+    }
 
     def.beforeValidate = DSUtils.promisify(def.beforeValidate);
     def.validate = DSUtils.promisify(def.validate);

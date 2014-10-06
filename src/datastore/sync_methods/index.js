@@ -63,6 +63,28 @@ function changeHistory(resourceName, id) {
   }
 }
 
+function compute(resourceName, instance) {
+  var _this = this;
+  var definition = _this.definitions[resourceName];
+
+  instance = DSUtils.resolveItem(_this.store[resourceName], instance);
+  if (!definition) {
+    throw new DSErrors.NER(resourceName);
+  } else if (!DSUtils.isObject(instance) && !DSUtils.isString(instance) && !DSUtils.isNumber(instance)) {
+    throw new DSErrors.IA('"instance" must be an object, string or number!');
+  }
+
+  if (DSUtils.isString(instance) || DSUtils.isNumber(instance)) {
+    instance = _this.get(resourceName, instance);
+  }
+
+  DSUtils.forOwn(definition.computed, function (fn, field) {
+    DSUtils.compute.call(instance, fn, field, DSUtils);
+  });
+
+  return instance;
+}
+
 function createInstance(resourceName, attrs, options) {
   var definition = this.definitions[resourceName];
   var item;
@@ -94,28 +116,6 @@ function diffIsEmpty(diff) {
 
 function digest() {
   observe.Platform.performMicrotaskCheckpoint();
-}
-
-function compute(resourceName, instance) {
-  var _this = this;
-  var definition = _this.definitions[resourceName];
-
-  instance = DSUtils.resolveItem(_this.store[resourceName], instance);
-  if (!definition) {
-    throw new DSErrors.NER(resourceName);
-  } else if (!DSUtils.isObject(instance) && !DSUtils.isString(instance) && !DSUtils.isNumber(instance)) {
-    throw new DSErrors.IA('"instance" must be an object, string or number!');
-  }
-
-  if (DSUtils.isString(instance) || DSUtils.isNumber(instance)) {
-    instance = _this.get(resourceName, instance);
-  }
-
-  DSUtils.forOwn(definition.computed, function (fn, field) {
-    DSUtils.compute.call(instance, fn, field, DSUtils);
-  });
-
-  return instance;
 }
 
 function get(resourceName, id, options) {
