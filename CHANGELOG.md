@@ -1,3 +1,8 @@
+##### 1.0.0-alpha.1-0 - 13 October 2014
+
+###### Backwards compatible API changes
+- #15 - Add beforeCreateInstance & afterCreateInstance
+
 ##### 0.4.2 - 06 October 2014
 
 ###### Backwards compatible API changes

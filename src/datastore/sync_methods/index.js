@@ -99,13 +99,21 @@ function createInstance(resourceName, attrs, options) {
 
   options = DSUtils._(definition, options);
 
+  if (options.notify) {
+    options.beforeCreateInstance(resourceName, attrs);
+  }
+
   if (options.useClass) {
     var Constructor = definition[definition.class];
     item = new Constructor();
   } else {
     item = {};
   }
-  return DSUtils.deepMixIn(item, attrs);
+  DSUtils.deepMixIn(item, attrs);
+  if (options.notify) {
+    options.afterCreateInstance(resourceName, attrs);
+  }
+  return item;
 }
 
 function diffIsEmpty(diff) {

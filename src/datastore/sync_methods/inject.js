@@ -204,7 +204,7 @@ function inject(resourceName, attrs, options) {
   options = DSUtils._(definition, options);
 
   if (options.notify) {
-    definition.beforeInject(definition.name, attrs);
+    options.beforeInject(definition.name, attrs);
   }
 
   injected = _inject.call(_this, definition, resource, attrs, options);
@@ -227,7 +227,7 @@ function inject(resourceName, attrs, options) {
   }
 
   if (options.notify) {
-    definition.afterInject(definition.name, injected);
+    options.afterInject(definition.name, injected);
     _this.emit(definition, 'inject', injected);
   }
 

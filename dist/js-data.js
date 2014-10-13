@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file js-data.js
-* @version 0.4.2 - Homepage <http://www.js-data.io/>
+* @version 1.0.0-alpha.1-0 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -2509,9 +2509,9 @@ function find(resourceName, id, options) {
         if (!(id in resource.pendingQueries)) {
           resource.pendingQueries[id] = _this.getAdapter(definition, options).find(definition, id, options)
             .then(function (data) {
+              // Query is no longer pending
+              delete resource.pendingQueries[id];
               if (options.cacheResponse) {
-                // Query is no longer pending
-                delete resource.pendingQueries[id];
                 resource.completedQueries[id] = new Date().getTime();
                 return _this.inject(resourceName, data, options);
               } else {
@@ -3056,6 +3056,8 @@ defaultsPrototype.beforeUpdate = lifecycleNoopCb;
 defaultsPrototype.afterUpdate = lifecycleNoopCb;
 defaultsPrototype.beforeDestroy = lifecycleNoopCb;
 defaultsPrototype.afterDestroy = lifecycleNoopCb;
+defaultsPrototype.beforeCreateInstance = lifecycleNoop;
+defaultsPrototype.afterCreateInstance = lifecycleNoop;
 defaultsPrototype.beforeInject = lifecycleNoop;
 defaultsPrototype.afterInject = lifecycleNoop;
 defaultsPrototype.beforeEject = lifecycleNoop;
@@ -3751,13 +3753,21 @@ function createInstance(resourceName, attrs, options) {
 
   options = DSUtils._(definition, options);
 
+  if (options.notify) {
+    options.beforeCreateInstance(resourceName, attrs);
+  }
+
   if (options.useClass) {
     var Constructor = definition[definition.class];
     item = new Constructor();
   } else {
     item = {};
   }
-  return DSUtils.deepMixIn(item, attrs);
+  DSUtils.deepMixIn(item, attrs);
+  if (options.notify) {
+    options.afterCreateInstance(resourceName, attrs);
+  }
+  return item;
 }
 
 function diffIsEmpty(diff) {
@@ -4083,7 +4093,7 @@ function inject(resourceName, attrs, options) {
   options = DSUtils._(definition, options);
 
   if (options.notify) {
-    definition.beforeInject(definition.name, attrs);
+    options.beforeInject(definition.name, attrs);
   }
 
   injected = _inject.call(_this, definition, resource, attrs, options);
@@ -4106,7 +4116,7 @@ function inject(resourceName, attrs, options) {
   }
 
   if (options.notify) {
-    definition.afterInject(definition.name, injected);
+    options.afterInject(definition.name, injected);
     _this.emit(definition, 'inject', injected);
   }
 

@@ -27,9 +27,9 @@ function find(resourceName, id, options) {
         if (!(id in resource.pendingQueries)) {
           resource.pendingQueries[id] = _this.getAdapter(definition, options).find(definition, id, options)
             .then(function (data) {
+              // Query is no longer pending
+              delete resource.pendingQueries[id];
               if (options.cacheResponse) {
-                // Query is no longer pending
-                delete resource.pendingQueries[id];
                 resource.completedQueries[id] = new Date().getTime();
                 return _this.inject(resourceName, data, options);
               } else {

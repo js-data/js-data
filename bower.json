@@ -1,11 +1,11 @@
 {
   "name": "js-data",
-  "description": "Data store.",
-  "version": "0.4.2",
-  "homepage": "http://www.js-data.io/",
+  "description": "Robust, framework-agnostic in-memory data store.",
+  "version": "1.0.0-alpha.1-0",
+  "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
-    "url": "git://github.com/js-data/js-data.git"
+    "url": "https://github.com/js-data/js-data.git"
   },
   "author": {
     "name": "Jason Dobry",
