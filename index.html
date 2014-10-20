@@ -36,15 +36,15 @@
 
 <p>Inspired by <a href="https://github.com/emberjs/data">Ember Data</a>, js-data is the model layer you've been craving. It consists of a convenient framework-agnostic, in-memory cache for managing your data, which users adapters to communicate with various persistence layers.</p>
 
-<p>You can use the <a href="http://www.js-data.io/js-data-http">http adapter</a>, which is perfect for communicating with your RESTful backend. You could also use the <a href="http://www.js-data.io/js-data-localstorage">localStorage adapter</a>. More adapters are coming, and you're free to implement your own.</p>
+<p>You can use the <a href="http://www.js-data.io/docs/dshttpadapter">http adapter</a>, which is perfect for communicating with your RESTful backend. You could also use the <a href="http://www.js-data.io/docs/dslocalstorageadapter">localStorage adapter</a>. More adapters are coming, and you're free to implement your own. View available adapters <a href="http://www.js-data.io/docs/adapters">here</a>.</p>
 
 <p>Unlike Backbone and Ember Models, js-data does not require the use of getters and setters, and doesn't wrap your data with custom classes if you don't want it to. js-data's internal dirty-checking (via <a href="https://github.com/Polymer/observe-js">observe-js</a> or <code>Object.observe</code> in supporting browsers) allows for powerful use cases and an easy avenue for implementing your own <a href="https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html">3-way data-binding</a>.</p>
 
 <p>Supporting relations, computed properties, model lifecycle control and a slew of other features, js-data is the tool for giving your data the respect it deserves.</p>
 
-<p><strong>Latest Release:</strong> <a href="https://github.com/js-data/js-data/releases/tag/0.4.1">0.4.1</a></p>
+<p><strong>Latest Release:</strong> <a href="https://github.com/js-data/js-data/releases/tag/1.0.0-alpha.1-1">1.0.0-alpha.1-1</a></p>
 
-<p>js-data is pre-alpha. The API is subject to change, though the current api is well tested.</p>
+<p>js-data is pre-release. The API is subject to change, though the current api is well tested.</p>
 
 <p>If you want to use js-data, keep a close eye on the changelog. 1.0.0 will introduce strict semver (until then, minor number is bumped for breaking changes).</p>
 
@@ -78,15 +78,36 @@
 <p>All your data are belong to you...</p>
 
 <h2>
-<a name="api" class="anchor" href="#api"><span class="octicon octicon-link"></span></a>API</h2>
+<a name="guides" class="anchor" href="#guides"><span class="octicon octicon-link"></span></a>Guides</h2>
 
 <ul>
-<li><a href="DS">DS</a></li>
-<li><a href="DSHttpAdapter">DSHttpAdapter</a></li>
-<li><a href="DSLocalStorageAdapter">DSLocalStorageAdapter</a></li>
-<li><a href="DSFirebaseAdapter">DSFirebaseAdapter</a></li>
-<li><a href="Schemator">Schemator</a></li>
-</ul><h2>
+<li><a href="http://www.js-data.io/docs/home">Getting Started with js-data</a></li>
+<li><a href="http://www.js-data.io/docs/resources">Resources</a></li>
+<li><a href="http://www.js-data.io/docs/working-with-the-data-store">Working with the Data Store</a></li>
+<li><a href="http://www.js-data.io/docs/working-with-adapters">Adapters</a></li>
+<li><a href="http://www.js-data.io/docs/model-lifecycle">Model Lifecycle</a></li>
+<li><a href="http://www.js-data.io/docs/custom-instance-behavior">Custom Instance Behavior</a></li>
+<li><a href="http://www.js-data.io/docs/computed-properties">Computed Properties</a></li>
+<li><a href="http://www.js-data.io/docs/relations">Relations</a></li>
+<li><a href="http://www.js-data.io/docs/schemata--validation">Schemata &amp; Validation</a></li>
+<li><a href="http://www.js-data.io/docs/faq">FAQ</a></li>
+</ul>
+
+<h2>
+<a name="api-documentation" class="anchor" href="#api-documentation"><span class="octicon octicon-link"></span></a>API Documentation</h2>
+
+<ul>
+<li><a href="http://www.js-data.io/docs/ds">DS</a></li>
+<li><a href="http://www.js-data.io/docs/js-data-schema">Schemator</a></li>
+<li><a href="http://www.js-data.io/docs/dshttpadapter">DSHttpAdapter</a></li>
+<li><a href="http://www.js-data.io/docs/dslocalstorageadapter">DSLocalStorageAdapter</a></li>
+<li><a href="http://www.js-data.io/docs/dslocalforageadapter">DSLocalForageAdapter</a></li>
+<li><a href="http://www.js-data.io/docs/dsfirebaseadapter">DSFirebaseAdapter</a></li>
+<li><a href="http://www.js-data.io/docs/dsredisadapter">DSRedisAdapter</a></li>
+<li><a href="http://www.js-data.io/docs/dsrethinkdbadapter">DSRethinkDBAdapter</a></li>
+</ul>
+
+<h2>
 <a name="changelog" class="anchor" href="#changelog"><span class="octicon octicon-link"></span></a>Changelog</h2>
 
 <p><a href="https://github.com/js-data/js-data/blob/master/CHANGELOG.md">CHANGELOG.md</a></p>
@@ -107,7 +128,9 @@
 <li>
 <a href="https://github.com/js-data/js-data">GitHub</a> - View the source code for js-data.</li>
 <li><a href="https://github.com/js-data/js-data/blob/master/CONTRIBUTING.md">Contributing Guide</a></li>
-</ul><h2>
+</ul>
+
+<h2>
 <a name="contributing" class="anchor" href="#contributing"><span class="octicon octicon-link"></span></a>Contributing</h2>
 
 <p>First, feel free to contact me with questions. <a href="https://groups.io/org/groupsio/jsdata">Mailing List</a>. <a href="https://github.com/js-data/js-data/issues">Issues</a>.</p>
@@ -123,7 +146,9 @@
 <li>(in another terminal) <code>grunt w</code> (runs the NodeJS tests)</li>
 <li>Write your code, including relevant documentation and tests</li>
 <li>Submit a PR and we'll review</li>
-</ol><h2>
+</ol>
+
+<h2>
 <a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
 
 <p>The MIT License (MIT)</p>
