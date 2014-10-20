@@ -73,4 +73,37 @@ describe('DS#defineResource', function () {
     assert.equal(lifecycle.beforeInject.callCount, 2, 'beforeInject should have been called twice');
     assert.equal(lifecycle.afterInject.callCount, 2, 'afterInject should have been called twice');
   });
+
+  it('should integrate with js-data-schema', function (done) {
+    var Person = store.defineResource({
+      name: 'person',
+      schema: {
+        id: 'string',
+        name: 'string'
+      }
+    });
+
+    Person.create({
+      name: 10
+    }).then(function () {
+      done('Should not have succeeded');
+    }).catch(function (err) {
+      try {
+        assert.deepEqual(err, {
+          name: {
+            errors: [
+              {
+                rule: 'type',
+                expected: 'string',
+                actual: 'number'
+              }
+            ]
+          }
+        });
+        done();
+      } catch (e) {
+        done(e);
+      }
+    })
+  });
 });

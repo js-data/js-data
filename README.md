@@ -4,15 +4,15 @@
 
 Inspired by [Ember Data](https://github.com/emberjs/data), js-data is the model layer you've been craving. It consists of a convenient framework-agnostic, in-memory cache for managing your data, which users adapters to communicate with various persistence layers.
 
-You can use the [http adapter](http://www.js-data.io/js-data-http), which is perfect for communicating with your RESTful backend. You could also use the [localStorage adapter](http://www.js-data.io/js-data-localstorage). More adapters are coming, and you're free to implement your own.
+You can use the [http adapter](http://www.js-data.io/docs/dshttpadapter), which is perfect for communicating with your RESTful backend. You could also use the [localStorage adapter](http://www.js-data.io/docs/dslocalstorageadapter). More adapters are coming, and you're free to implement your own. View available adapters [here](http://www.js-data.io/docs/adapters).
 
 Unlike Backbone and Ember Models, js-data does not require the use of getters and setters, and doesn't wrap your data with custom classes if you don't want it to. js-data's internal dirty-checking (via [observe-js](https://github.com/Polymer/observe-js) or `Object.observe` in supporting browsers) allows for powerful use cases and an easy avenue for implementing your own [3-way data-binding](https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html).
 
 Supporting relations, computed properties, model lifecycle control and a slew of other features, js-data is the tool for giving your data the respect it deserves.
 
-__Latest Release:__ [1.0.0-alpha.1-0](https://github.com/js-data/js-data/releases/tag/1.0.0-alpha.1-0)
+__Latest Release:__ [1.0.0-alpha.1-1](https://github.com/js-data/js-data/releases/tag/1.0.0-alpha.1-1)
 
-js-data is pre-alpha. The API is subject to change, though the current api is well tested.
+js-data is pre-release. The API is subject to change, though the current api is well tested.
 
 If you want to use js-data, keep a close eye on the changelog. 1.0.0 will introduce strict semver (until then, minor number is bumped for breaking changes).
 
@@ -43,12 +43,27 @@ User.find(1).then(function (user) {
 
 All your data are belong to you...
 
-## API
-- [DS](DS)
-- [DSHttpAdapter](DSHttpAdapter)
-- [DSLocalStorageAdapter](DSLocalStorageAdapter)
-- [DSFirebaseAdapter](DSFirebaseAdapter)
-- [Schemator](Schemator)
+## Guides
+- [Getting Started with js-data](http://www.js-data.io/docs/home)
+- [Resources](http://www.js-data.io/docs/resources)
+- [Working with the Data Store](http://www.js-data.io/docs/working-with-the-data-store)
+- [Adapters](http://www.js-data.io/docs/working-with-adapters)
+- [Model Lifecycle](http://www.js-data.io/docs/model-lifecycle)
+- [Custom Instance Behavior](http://www.js-data.io/docs/custom-instance-behavior)
+- [Computed Properties](http://www.js-data.io/docs/computed-properties)
+- [Relations](http://www.js-data.io/docs/relations)
+- [Schemata & Validation](http://www.js-data.io/docs/schemata--validation)
+- [FAQ](http://www.js-data.io/docs/faq)
+
+## API Documentation
+- [DS](http://www.js-data.io/docs/ds)
+- [Schemator](http://www.js-data.io/docs/js-data-schema)
+- [DSHttpAdapter](http://www.js-data.io/docs/dshttpadapter)
+- [DSLocalStorageAdapter](http://www.js-data.io/docs/dslocalstorageadapter)
+- [DSLocalForageAdapter](http://www.js-data.io/docs/dslocalforageadapter)
+- [DSFirebaseAdapter](http://www.js-data.io/docs/dsfirebaseadapter)
+- [DSRedisAdapter](http://www.js-data.io/docs/dsredisadapter)
+- [DSRethinkDBAdapter](http://www.js-data.io/docs/dsrethinkdbadapter)
 
 ## Changelog
 [CHANGELOG.md](https://github.com/js-data/js-data/blob/master/CHANGELOG.md)

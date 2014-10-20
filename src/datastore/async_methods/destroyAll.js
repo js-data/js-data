@@ -14,9 +14,8 @@ function destroyAll(resourceName, params, options) {
       resolve();
     }
   }).then(function () {
-      var func = options.beforeDestroy ? DSUtils.promisify(options.beforeDestroy) : definition.beforeDestroy;
       toEject = _this.defaults.defaultFilter.call(_this, resourceName, params);
-      return func(resourceName, toEject);
+      return options.beforeDestroy(resourceName, toEject);
     }).then(function () {
       if (options.notify) {
         _this.emit(definition, 'beforeDestroy', toEject);
@@ -26,8 +25,7 @@ function destroyAll(resourceName, params, options) {
       }
       return _this.getAdapter(definition, options).destroyAll(definition, params, options);
     }).then(function () {
-      var func = options.afterDestroy ? DSUtils.promisify(options.afterDestroy) : definition.afterDestroy;
-      return func(resourceName, toEject);
+      return options.afterDestroy(resourceName, toEject);
     }).then(function () {
       if (options.notify) {
         _this.emit(definition, 'afterDestroy', toEject);

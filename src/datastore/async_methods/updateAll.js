@@ -1,6 +1,5 @@
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
-var promisify = DSUtils.promisify;
 
 function updateAll(resourceName, attrs, params, options) {
   var _this = this;
@@ -14,20 +13,16 @@ function updateAll(resourceName, attrs, params, options) {
       resolve(attrs);
     }
   }).then(function (attrs) {
-      var func = options.beforeValidate ? promisify(options.beforeValidate) : definition.beforeValidate;
-      return func.call(attrs, resourceName, attrs);
+      return options.beforeValidate.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      var func = options.validate ? promisify(options.validate) : definition.validate;
-      return func.call(attrs, resourceName, attrs);
+      return options.validate.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      var func = options.afterValidate ? promisify(options.afterValidate) : definition.afterValidate;
-      return func.call(attrs, resourceName, attrs);
+      return options.afterValidate.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
-      var func = options.beforeUpdate ? promisify(options.beforeUpdate) : definition.beforeUpdate;
-      return func.call(attrs, resourceName, attrs);
+      return options.beforeUpdate.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
       if (options.notify) {
@@ -36,8 +31,7 @@ function updateAll(resourceName, attrs, params, options) {
       return _this.getAdapter(definition, options).updateAll(definition, attrs, params, options);
     })
     .then(function (data) {
-      var func = options.afterUpdate ? promisify(options.afterUpdate) : definition.afterUpdate;
-      return func.call(data, resourceName, data);
+      return options.afterUpdate.call(data, resourceName, data);
     })
     .then(function (data) {
       if (options.notify) {

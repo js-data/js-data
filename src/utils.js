@@ -183,6 +183,18 @@ dsp.size = function () {
   return this.heap.length;
 };
 
+var toPromisify = [
+  'beforeValidate',
+  'validate',
+  'afterValidate',
+  'beforeCreate',
+  'afterCreate',
+  'beforeUpdate',
+  'afterUpdate',
+  'beforeDestroy',
+  'afterDestroy'
+];
+
 module.exports = {
   w: w,
   DSBinaryHeap: DSBinaryHeap,
@@ -219,6 +231,11 @@ module.exports = {
     } else if (!_this.isObject(options)) {
       throw new DSErrors.IA('"options" must be an object!');
     }
+    _this.forEach(toPromisify, function (name) {
+      if (typeof options[name] === 'function') {
+        option[name] = _this.promisify(options[name]);
+      }
+    });
     var O = function Options(attrs) {
       _this.deepMixIn(this, attrs);
     };

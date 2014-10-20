@@ -2,6 +2,7 @@ var DSUtils = require('../utils');
 var DSErrors = require('../errors');
 var syncMethods = require('./sync_methods');
 var asyncMethods = require('./async_methods');
+var Schemator;
 
 DSUtils.deepFreeze(syncMethods);
 DSUtils.deepFreeze(asyncMethods);
@@ -31,6 +32,7 @@ defaultsPrototype.eagerEject = false;
 // TODO: Implement eagerInject in DS#create
 defaultsPrototype.eagerInject = false;
 defaultsPrototype.allowSimpleWhere = true;
+defaultsPrototype.defaultAdapter = 'http';
 defaultsPrototype.loadFromServer = false;
 defaultsPrototype.notify = !!DSUtils.w;
 defaultsPrototype.upsert = !!DSUtils.w;
@@ -240,6 +242,24 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
 };
 
 function DS(options) {
+  options = options || {};
+
+  try {
+    Schemator = require('js-data-schema');
+  } catch (e) {
+  }
+
+  if (!Schemator) {
+    try {
+      Schemator = window.Schemator;
+    } catch (e) {
+    }
+  }
+
+  if (Schemator || options.schemator) {
+    this.schemator = options.schemator || new Schemator();
+  }
+
   this.store = {};
   this.definitions = {};
   this.adapters = {};

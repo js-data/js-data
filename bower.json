@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "1.0.0-alpha.1-0",
+  "version": "1.0.0-alpha.1-1",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -31,6 +31,7 @@
   ],
   "devDependencies": {
     "observe-js": "0.3.4",
+    "js-data-schema": "~0.1.x",
     "js-data-http": "~0.4.x",
     "js-data-localstorage": "~0.4.x"
   }

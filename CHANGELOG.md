@@ -1,3 +1,8 @@
+##### 1.0.0-alpha.1-1 - 19 October 2014
+
+###### Backwards compatible API changes
+- #10 - Add js-data-schema integration
+
 ##### 1.0.0-alpha.1-0 - 13 October 2014
 
 ###### Backwards compatible API changes

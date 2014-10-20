@@ -1,6 +1,5 @@
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
-var promisify = DSUtils.promisify;
 
 function destroy(resourceName, id, options) {
   var _this = this;
@@ -22,8 +21,7 @@ function destroy(resourceName, id, options) {
     }
   })
     .then(function (attrs) {
-      var func = options.beforeDestroy ? promisify(options.beforeDestroy) : definition.beforeDestroy;
-      return func.call(attrs, resourceName, attrs);
+      return options.beforeDestroy.call(attrs, resourceName, attrs);
     })
     .then(function (attrs) {
       if (options.notify) {
@@ -35,8 +33,7 @@ function destroy(resourceName, id, options) {
       return _this.getAdapter(definition, options).destroy(definition, id, options);
     })
     .then(function () {
-      var func = options.afterDestroy ? promisify(options.afterDestroy) : definition.afterDestroy;
-      return func.call(item, resourceName, item);
+      return options.afterDestroy.call(item, resourceName, item);
     })
     .then(function (item) {
       if (options.notify) {

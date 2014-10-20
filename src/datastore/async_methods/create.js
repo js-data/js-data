@@ -1,6 +1,5 @@
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
-var promisify = DSUtils.promisify;
 
 function create(resourceName, attrs, options) {
   var _this = this;
@@ -22,20 +21,16 @@ function create(resourceName, attrs, options) {
   } else {
     return promise
       .then(function (attrs) {
-        var func = options.beforeValidate ? promisify(options.beforeValidate) : definition.beforeValidate;
-        return func.call(attrs, resourceName, attrs);
+        return options.beforeValidate.call(attrs, resourceName, attrs);
       })
       .then(function (attrs) {
-        var func = options.validate ? promisify(options.validate) : definition.validate;
-        return func.call(attrs, resourceName, attrs);
+        return options.validate.call(attrs, resourceName, attrs);
       })
       .then(function (attrs) {
-        var func = options.afterValidate ? promisify(options.afterValidate) : definition.afterValidate;
-        return func.call(attrs, resourceName, attrs);
+        return options.afterValidate.call(attrs, resourceName, attrs);
       })
       .then(function (attrs) {
-        var func = options.beforeCreate ? promisify(options.beforeCreate) : definition.beforeCreate;
-        return func.call(attrs, resourceName, attrs);
+        return options.beforeCreate.call(attrs, resourceName, attrs);
       })
       .then(function (attrs) {
         if (options.notify) {
@@ -44,8 +39,7 @@ function create(resourceName, attrs, options) {
         return _this.getAdapter(definition, options).create(definition, attrs, options);
       })
       .then(function (data) {
-        var func = options.afterCreate ? promisify(options.afterCreate) : definition.afterCreate;
-        return func.call(data, resourceName, data);
+        return options.afterCreate.call(data, resourceName, data);
       })
       .then(function (attrs) {
         if (options.notify) {

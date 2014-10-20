@@ -159,6 +159,22 @@ function defineResource(definition) {
       });
     }
 
+    if (definition.schema && _this.schemator) {
+      def.schema = _this.schemator.defineSchema(def.name, definition.schema);
+
+      if (!('validate' in definition)) {
+        def.validate = function (resourceName, attrs, cb) {
+          def.schema.validate(attrs, true, function (err) {
+            if (err) {
+              return cb(err);
+            } else {
+              return cb(null, attrs);
+            }
+          });
+        };
+      }
+    }
+
     DSUtils.forEach(instanceMethods, function (name) {
       def[def.class].prototype['DS' + DSUtils.pascalCase(name)] = function () {
         var args = Array.prototype.slice.call(arguments);

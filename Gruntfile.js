@@ -61,7 +61,8 @@ module.exports = function (grunt) {
       options: {
         browserifyOptions: {
           standalone: 'JSData'
-        }
+        },
+        external: ['js-data-schema']
       },
       dist: {
         files: {
@@ -85,6 +86,7 @@ module.exports = function (grunt) {
         options: {
           files: [
             'dist/js-data.min.js',
+            'bower_components/js-data-schema/dist/js-data-schema.min.js',
             'bower_components/js-data-http/dist/js-data-http.min.js',
             'bower_components/js-data-localstorage/dist/js-data-localstorage.min.js',
             'karma.start.js',

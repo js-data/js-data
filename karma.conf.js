@@ -22,6 +22,7 @@ module.exports = function (config) {
 		files: [
 			'dist/js-data.js',
 			'bower_components/js-data-http/dist/js-data-http.js',
+			'bower_components/js-data-schema/dist/js-data-schema.js',
 			'bower_components/js-data-localstorage/dist/js-data-localstorage.js',
 			'karma.start.js',
 			'test/both/**/*.test.js',
