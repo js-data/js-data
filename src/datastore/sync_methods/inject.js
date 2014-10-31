@@ -114,6 +114,7 @@ function _inject(definition, resource, attrs, options) {
       try {
         var id = attrs[idA];
         var item = _this.get(definition.name, id);
+        var initialLastModified = item ? resource.modified[id] : 0;
 
         if (!item) {
           if (options.useClass) {
@@ -161,6 +162,7 @@ function _inject(definition, resource, attrs, options) {
           }
         }
         resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
+        resource.modified[id] = initialLastModified && resource.modified[id] === initialLastModified ? DSUtils.updateTimestamp(resource.modified[id]) : resource.modified[id];
         resource.expiresHeap.remove(item);
         resource.expiresHeap.push({
           item: item,
@@ -208,6 +210,7 @@ function inject(resourceName, attrs, options) {
   }
 
   injected = _inject.call(_this, definition, resource, attrs, options);
+  resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
   if (options.findInverseLinks) {
     if (DSUtils.isArray(injected) && injected.length) {
@@ -218,7 +221,6 @@ function inject(resourceName, attrs, options) {
   }
 
   if (DSUtils.isArray(injected)) {
-    resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
     DSUtils.forEach(injected, function (injectedI) {
       _link.call(_this, definition, injectedI, options);
     });
