@@ -1,3 +1,8 @@
+##### 1.0.0-alpha.1-2 - 30 October 2014
+
+###### Backwards compatible bug fixes
+- Fixed an issue with the options defaults util function
+
 ##### 1.0.0-alpha.1-1 - 19 October 2014
 
 ###### Backwards compatible API changes

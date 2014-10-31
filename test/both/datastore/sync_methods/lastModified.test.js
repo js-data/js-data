@@ -4,7 +4,7 @@ describe('DS#lastModified', function () {
       store.lastModified('does not exist', {});
     }, store.errors.NonexistentResourceError, 'does not exist is not a registered resource!');
   });
-  it('should lastModified an item into the store', function () {
+  it('should update lastModified when an item is injected into the store', function () {
 
     var collectionLastModified;
 
@@ -38,7 +38,6 @@ describe('DS#lastModified', function () {
 
     assert.notEqual(store.lastModified('post'), collectionLastModified);
 
-    collectionLastModified = store.lastModified('post');
     assert.equal(store.lastModified('post', 5), lastModified);
   });
 //	it('should lastModified an item into the store', function (done) {

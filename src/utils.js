@@ -211,6 +211,7 @@ module.exports = {
   upperCase: require('mout/string/upperCase'),
   pascalCase: require('mout/string/pascalCase'),
   deepMixIn: require('mout/object/deepMixIn'),
+  mixIn: require('mout/object/mixIn'),
   forOwn: require('mout/object/forOwn'),
   forEach: require('mout/array/forEach'),
   pick: require('mout/object/pick'),
@@ -232,12 +233,12 @@ module.exports = {
       throw new DSErrors.IA('"options" must be an object!');
     }
     _this.forEach(toPromisify, function (name) {
-      if (typeof options[name] === 'function') {
-        option[name] = _this.promisify(options[name]);
+      if (typeof options[name] === 'function' && options[name].toString().indexOf('var args = Array') === -1) {
+        options[name] = _this.promisify(options[name]);
       }
     });
     var O = function Options(attrs) {
-      _this.deepMixIn(this, attrs);
+      _this.mixIn(this, attrs);
     };
     O.prototype = parent;
     return new O(options);
