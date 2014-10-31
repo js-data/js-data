@@ -110,5 +110,20 @@ describe('DSUtils', function () {
         }
       }, 30);
     });
+
+    it('should support "finally"', function (done) {
+      var promise = new DSUtils.Promise(function (resolve) {
+        resolve('data');
+      });
+
+      promise.then(function (data) {
+        assert.equal(data, 'data');
+        return data + data;
+      }).finally(function () {
+        done();
+      }, function (err) {
+        done('Should not have rejected!', err);
+      });
+    });
   });
 });

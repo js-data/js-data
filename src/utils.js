@@ -1,12 +1,38 @@
 var DSErrors = require('./errors');
 var isFunction = require('mout/lang/isFunction');
 var w;
+var _Promise;
+
+var es6Promise = require('es6-promise');
+es6Promise.polyfill();
+
+function finallyPolyfill(cb) {
+  var constructor = this.constructor;
+
+  return this.then(function (value) {
+    return constructor.resolve(cb()).then(function () {
+      return value;
+    });
+  }, function (reason) {
+    return constructor.resolve(cb()).then(function () {
+      throw reason;
+    });
+  });
+}
 
 try {
   w = window;
+  if (!w.Promise.prototype['finally']) {
+    w.Promise.prototype['finally'] = finallyPolyfill;
+  }
+  _Promise = w.Promise;
   w = {};
 } catch (e) {
   w = null;
+  if (!global.Promise.prototype['finally']) {
+    global.Promise.prototype['finally'] = finallyPolyfill;
+  }
+  _Promise = global.Promise;
 }
 
 function updateTimestamp(timestamp) {
@@ -260,7 +286,7 @@ module.exports = {
     }
   },
   updateTimestamp: updateTimestamp,
-  Promise: require('es6-promise').Promise,
+  Promise: _Promise,
   deepFreeze: function deepFreeze(o) {
     if (typeof Object.freeze === 'function' && typeof Object.isFrozen === 'function') {
       var prop, propKey;

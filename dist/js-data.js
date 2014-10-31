@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file js-data.js
-* @version 1.0.0-alpha.1-2 - Homepage <http://www.js-data.io/>
+* @version 1.0.0-alpha.2 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -4829,15 +4829,42 @@ module.exports = {
 };
 
 },{"./datastore":56,"./errors":67,"./utils":69}],69:[function(require,module,exports){
+(function (global){
 var DSErrors = require('./errors');
 var isFunction = require('mout/lang/isFunction');
 var w;
+var _Promise;
+
+var es6Promise = require('es6-promise');
+es6Promise.polyfill();
+
+function finallyPolyfill(cb) {
+  var constructor = this.constructor;
+
+  return this.then(function (value) {
+    return constructor.resolve(cb()).then(function () {
+      return value;
+    });
+  }, function (reason) {
+    return constructor.resolve(cb()).then(function () {
+      throw reason;
+    });
+  });
+}
 
 try {
   w = window;
+  if (!w.Promise.prototype['finally']) {
+    w.Promise.prototype['finally'] = finallyPolyfill;
+  }
+  _Promise = w.Promise;
   w = {};
 } catch (e) {
   w = null;
+  if (!global.Promise.prototype['finally']) {
+    global.Promise.prototype['finally'] = finallyPolyfill;
+  }
+  _Promise = global.Promise;
 }
 
 function updateTimestamp(timestamp) {
@@ -5091,7 +5118,7 @@ module.exports = {
     }
   },
   updateTimestamp: updateTimestamp,
-  Promise: require('es6-promise').Promise,
+  Promise: _Promise,
   deepFreeze: function deepFreeze(o) {
     if (typeof Object.freeze === 'function' && typeof Object.isFrozen === 'function') {
       var prop, propKey;
@@ -5184,5 +5211,6 @@ module.exports = {
   Events: Events
 };
 
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./errors":67,"es6-promise":2,"mout/array/contains":4,"mout/array/filter":5,"mout/array/forEach":6,"mout/array/remove":9,"mout/array/slice":10,"mout/array/sort":11,"mout/array/toLookup":12,"mout/lang/isArray":18,"mout/lang/isBoolean":19,"mout/lang/isEmpty":20,"mout/lang/isFunction":21,"mout/lang/isNumber":23,"mout/lang/isObject":24,"mout/lang/isString":26,"mout/object/deepMixIn":30,"mout/object/forOwn":32,"mout/object/merge":34,"mout/object/mixIn":35,"mout/object/pick":37,"mout/object/set":38,"mout/string/makePath":41,"mout/string/pascalCase":42,"mout/string/upperCase":45}]},{},[68])(68)
 });

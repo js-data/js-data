@@ -10,7 +10,7 @@ Unlike Backbone and Ember Models, js-data does not require the use of getters an
 
 Supporting relations, computed properties, model lifecycle control and a slew of other features, js-data is the tool for giving your data the respect it deserves.
 
-__Latest Release:__ [1.0.0-alpha.1-1](https://github.com/js-data/js-data/releases/tag/1.0.0-alpha.1-1)
+__Latest Release:__ [1.0.0-alpha.2](https://github.com/js-data/js-data/releases/tag/1.0.0-alpha.2)
 
 js-data is pre-release. The API is subject to change, though the current api is well tested.
 

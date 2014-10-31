@@ -1,3 +1,8 @@
+##### 1.0.0-alpha.2 - 31 October 2014
+
+###### Backwards compatible API changes
+- #20 - es6-promise finally polyfill
+
 ##### 1.0.0-alpha.1-2 - 30 October 2014
 
 ###### Backwards compatible bug fixes
