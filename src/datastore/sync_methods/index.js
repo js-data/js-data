@@ -2,9 +2,10 @@ var observe = require('../../../lib/observe-js/observe-js');
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
-function changes(resourceName, id) {
+function changes(resourceName, id, options) {
   var _this = this;
   var definition = _this.definitions[resourceName];
+  options = options || {};
 
   id = DSUtils.resolveId(definition, id);
   if (!definition) {
@@ -12,13 +13,14 @@ function changes(resourceName, id) {
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
     throw new DSErrors.IA('"id" must be a string or a number!');
   }
+  options = DSUtils._(definition, options);
 
   var item = _this.get(resourceName, id);
   if (item) {
     if (DSUtils.w) {
       _this.store[resourceName].observers[id].deliver();
     }
-    var diff = DSUtils.diffObjectFromOldObject(item, _this.store[resourceName].previousAttributes[id]);
+    var diff = DSUtils.diffObjectFromOldObject(item, _this.store[resourceName].previousAttributes[id], options.ignoredChanges);
     DSUtils.forOwn(diff, function (changeset, name) {
       var toKeep = [];
       DSUtils.forOwn(changeset, function (value, field) {

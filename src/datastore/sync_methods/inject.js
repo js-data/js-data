@@ -213,8 +213,10 @@ function inject(resourceName, attrs, options) {
   resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
   if (options.findInverseLinks) {
-    if (DSUtils.isArray(injected) && injected.length) {
-      _this.linkInverse(definition.name, injected[0][definition.idAttribute]);
+    if (DSUtils.isArray(injected)) {
+      if (injected.length) {
+        _this.linkInverse(definition.name, injected[0][definition.idAttribute]);
+      }
     } else {
       _this.linkInverse(definition.name, injected[definition.idAttribute]);
     }

@@ -1,3 +1,11 @@
+##### 1.0.0-alpha.4-0 - 04 November 2014
+
+###### Backwards compatible API changes
+- jmdobry/angular-data#208 - ng-repeat $$hashKey affecting hasChanges
+
+###### Backwards compatible bug fixes
+- jmdobry/angular-data#225 - If the server returned an empty array for a get request (valid scenario), angular-data throws an exception
+
 ##### 1.0.0-alpha.2 - 31 October 2014
 
 ###### Backwards compatible API changes
@@ -29,7 +37,7 @@
 - #9 - Make all options passed to methods also inherit from Resource defaults
 
 ###### Backwards compatible bug fixes
-- jmdobry/angular-data/#195 - throw an error when you try to inject a relation but the resource for it hasn't been defined
+- jmdobry/angular-data#195 - throw an error when you try to inject a relation but the resource for it hasn't been defined
 
 ###### Other
 - Added official support for NodeJS

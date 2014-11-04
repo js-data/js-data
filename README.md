@@ -4,13 +4,13 @@
 
 Inspired by [Ember Data](https://github.com/emberjs/data), js-data is the model layer you've been craving. It consists of a convenient framework-agnostic, in-memory cache for managing your data, which users adapters to communicate with various persistence layers.
 
-You can use the [http adapter](http://www.js-data.io/docs/dshttpadapter), which is perfect for communicating with your RESTful backend. You could also use the [localStorage adapter](http://www.js-data.io/docs/dslocalstorageadapter). More adapters are coming, and you're free to implement your own. View available adapters [here](http://www.js-data.io/docs/adapters).
+You can use the [http adapter](http://www.js-data.io/docs/dshttpadapter), which is perfect for communicating with your RESTful backend. You could also use the [localStorage adapter](http://www.js-data.io/docs/dslocalstorageadapter). More adapters are coming, and you're free to implement your own. View [available adapters](http://www.js-data.io/docs/adapters).
 
 Unlike Backbone and Ember Models, js-data does not require the use of getters and setters, and doesn't wrap your data with custom classes if you don't want it to. js-data's internal dirty-checking (via [observe-js](https://github.com/Polymer/observe-js) or `Object.observe` in supporting browsers) allows for powerful use cases and an easy avenue for implementing your own [3-way data-binding](https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html).
 
 Supporting relations, computed properties, model lifecycle control and a slew of other features, js-data is the tool for giving your data the respect it deserves.
 
-__Latest Release:__ [1.0.0-alpha.3-0](https://github.com/js-data/js-data/releases/tag/1.0.0-alpha.3-0)
+__Latest Release:__ [1.0.0-alpha.4-0](https://github.com/js-data/js-data/releases/tag/1.0.0-alpha.4-0)
 
 js-data is pre-release. The API is subject to change, though the current api is well tested.
 
