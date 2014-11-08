@@ -6,9 +6,13 @@ function destroyAll(resourceName, params, options) {
   var definition = _this.definitions[resourceName];
   var ejected, toEject;
 
+  params = params || {};
+
   return new DSUtils.Promise(function (resolve, reject) {
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
+    } else if (!DSUtils.isObject(params)) {
+      reject(new DSErrors.IA('"params" must be an object!'));
     } else {
       options = DSUtils._(definition, options);
       resolve();
