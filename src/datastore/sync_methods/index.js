@@ -1,6 +1,7 @@
-var observe = require('../../../lib/observe-js/observe-js');
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
+var NER = DSErrors.NER;
+var IA = DSErrors.IA;
 
 function changes(resourceName, id, options) {
   var _this = this;
@@ -9,9 +10,9 @@ function changes(resourceName, id, options) {
 
   id = DSUtils.resolveId(definition, id);
   if (!definition) {
-    throw new DSErrors.NER(resourceName);
+    throw new NER(resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new DSErrors.IA('"id" must be a string or a number!');
+    throw new IA('"id" must be a string or a number!');
   }
   options = DSUtils._(definition, options);
 
@@ -46,9 +47,9 @@ function changeHistory(resourceName, id) {
 
   id = DSUtils.resolveId(definition, id);
   if (resourceName && !_this.definitions[resourceName]) {
-    throw new DSErrors.NER(resourceName);
+    throw new NER(resourceName);
   } else if (id && !DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new DSErrors.IA('"id" must be a string or a number!');
+    throw new IA('"id" must be a string or a number!');
   }
 
   if (!definition.keepChangeHistory) {
@@ -71,9 +72,9 @@ function compute(resourceName, instance) {
 
   instance = DSUtils.resolveItem(_this.store[resourceName], instance);
   if (!definition) {
-    throw new DSErrors.NER(resourceName);
+    throw new NER(resourceName);
   } else if (!DSUtils.isObject(instance) && !DSUtils.isString(instance) && !DSUtils.isNumber(instance)) {
-    throw new DSErrors.IA('"instance" must be an object, string or number!');
+    throw new IA('"instance" must be an object, string or number!');
   }
 
   if (DSUtils.isString(instance) || DSUtils.isNumber(instance)) {
@@ -94,9 +95,9 @@ function createInstance(resourceName, attrs, options) {
   attrs = attrs || {};
 
   if (!definition) {
-    throw new DSErrors.NER(resourceName);
+    throw new NER(resourceName);
   } else if (attrs && !DSUtils.isObject(attrs)) {
-    throw new DSErrors.IA('"attrs" must be an object!');
+    throw new IA('"attrs" must be an object!');
   }
 
   options = DSUtils._(definition, options);
@@ -120,12 +121,12 @@ function createInstance(resourceName, attrs, options) {
 
 function diffIsEmpty(diff) {
   return !(DSUtils.isEmpty(diff.added) &&
-    DSUtils.isEmpty(diff.removed) &&
-    DSUtils.isEmpty(diff.changed));
+  DSUtils.isEmpty(diff.removed) &&
+  DSUtils.isEmpty(diff.changed));
 }
 
 function digest() {
-  observe.Platform.performMicrotaskCheckpoint();
+  this.observe.Platform.performMicrotaskCheckpoint();
 }
 
 function get(resourceName, id, options) {
@@ -133,9 +134,9 @@ function get(resourceName, id, options) {
   var definition = _this.definitions[resourceName];
 
   if (!definition) {
-    throw new DSErrors.NER(resourceName);
+    throw new NER(resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new DSErrors.IA('"id" must be a string or a number!');
+    throw new IA('"id" must be a string or a number!');
   }
 
   options = DSUtils._(definition, options);
@@ -150,11 +151,36 @@ function get(resourceName, id, options) {
   return item;
 }
 
+function getAll(resourceName, ids) {
+  var _this = this;
+  var resource = _this.store[resourceName];
+  var collection = [];
+
+  if (!_this.definitions[resourceName]) {
+    throw new NER(resourceName);
+  } else if (ids && !DSUtils.isArray(ids)) {
+    throw new IA('"ids" must be an array!');
+  }
+
+  if (DSUtils.isArray(ids)) {
+    var length = ids.length;
+    for (var i = 0; i < length; i++) {
+      if (resource.index[ids[i]]) {
+        collection.push(resource.index[ids[i]]);
+      }
+    }
+  } else {
+    collection = resource.collection.slice();
+  }
+
+  return collection;
+}
+
 function hasChanges(resourceName, id) {
   var _this = this;
   id = DSUtils.resolveId(_this.definitions[resourceName], id);
   if (!_this.definitions[resourceName]) {
-    throw new DSErrors.NER(resourceName);
+    throw new NER(resourceName);
   }
 
   // return resource from cache
@@ -171,7 +197,7 @@ function lastModified(resourceName, id) {
 
   id = DSUtils.resolveId(definition, id);
   if (!definition) {
-    throw new DSErrors.NER(resourceName);
+    throw new NER(resourceName);
   }
   if (id) {
     if (!(id in resource.modified)) {
@@ -188,7 +214,7 @@ function lastSaved(resourceName, id) {
 
   id = DSUtils.resolveId(definition, id);
   if (!definition) {
-    throw new DSErrors.NER(resourceName);
+    throw new NER(resourceName);
   }
   if (!(id in resource.saved)) {
     resource.saved[id] = 0;
@@ -203,9 +229,9 @@ function previous(resourceName, id) {
 
   id = DSUtils.resolveId(definition, id);
   if (!definition) {
-    throw new DSErrors.NER(resourceName);
+    throw new NER(resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new DSErrors.IA('"id" must be a string or a number!');
+    throw new IA('"id" must be a string or a number!');
   }
 
   // return resource from cache
@@ -223,6 +249,7 @@ module.exports = {
   ejectAll: require('./ejectAll'),
   filter: require('./filter'),
   get: get,
+  getAll: getAll,
   hasChanges: hasChanges,
   inject: require('./inject'),
   lastModified: lastModified,

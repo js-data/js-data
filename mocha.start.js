@@ -24,6 +24,8 @@ var globals = module.exports = {
   }],
   TYPES_EXCEPT_STRING_OR_NUMBER_OBJECT: [null, undefined, [], true, false, function () {
   }],
+  TYPES_EXCEPT_ARRAY: ['string', 123, 123.123, null, undefined, {}, true, false, function () {
+  }],
   TYPES_EXCEPT_STRING_OR_ARRAY_OR_NUMBER: [null, undefined, {}, true, false, function () {
   }],
   TYPES_EXCEPT_NUMBER: ['string', null, undefined, {}, [], true, false, function () {

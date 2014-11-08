@@ -1,3 +1,8 @@
+##### 1.0.0-alpha.4-1 - 08 November 2014
+
+###### Backwards compatible bug fixes
+- Various fixes
+
 ##### 1.0.0-alpha.4-0 - 04 November 2014
 
 ###### Backwards compatible API changes

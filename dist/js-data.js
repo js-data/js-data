@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file js-data.js
-* @version 1.0.0-alpha.4-0 - Homepage <http://www.js-data.io/>
+* @version 1.0.0-alpha.4-1 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -2749,11 +2749,14 @@ function create(resourceName, attrs, options) {
   var definition = _this.definitions[resourceName];
 
   options = options || {};
+  attrs = attrs || {};
 
   var promise = new DSUtils.Promise(function (resolve, reject) {
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
-    } else {
+    } else if (!DSUtils.isObject(attrs)) {
+      reject(new DSErrors.IA('"attrs" must be an object!'));
+    }  else {
       options = DSUtils._(definition, options);
       resolve(attrs);
     }
@@ -3409,6 +3412,7 @@ var DSUtils = require('../utils');
 var DSErrors = require('../errors');
 var syncMethods = require('./sync_methods');
 var asyncMethods = require('./async_methods');
+var observe = require('../../lib/observe-js/observe-js');
 var Schemator;
 
 DSUtils.deepFreeze(syncMethods);
@@ -3673,6 +3677,7 @@ function DS(options) {
   this.definitions = {};
   this.adapters = {};
   this.defaults = new Defaults();
+  this.observe = observe;
   DSUtils.deepMixIn(this.defaults, options);
 }
 
@@ -3709,7 +3714,7 @@ DSUtils.deepMixIn(dsPrototype, asyncMethods);
 
 module.exports = DS;
 
-},{"../errors":70,"../utils":72,"./async_methods":54,"./sync_methods":64,"js-data-schema":"js-data-schema"}],60:[function(require,module,exports){
+},{"../../lib/observe-js/observe-js":1,"../errors":70,"../utils":72,"./async_methods":54,"./sync_methods":64,"js-data-schema":"js-data-schema"}],60:[function(require,module,exports){
 /*jshint evil:true, loopfunc:true*/
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
@@ -4093,9 +4098,10 @@ function filter(resourceName, params, options) {
 module.exports = filter;
 
 },{"../../errors":70,"../../utils":72}],64:[function(require,module,exports){
-var observe = require('../../../lib/observe-js/observe-js');
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
+var NER = DSErrors.NER;
+var IA = DSErrors.IA;
 
 function changes(resourceName, id, options) {
   var _this = this;
@@ -4104,9 +4110,9 @@ function changes(resourceName, id, options) {
 
   id = DSUtils.resolveId(definition, id);
   if (!definition) {
-    throw new DSErrors.NER(resourceName);
+    throw new NER(resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new DSErrors.IA('"id" must be a string or a number!');
+    throw new IA('"id" must be a string or a number!');
   }
   options = DSUtils._(definition, options);
 
@@ -4141,9 +4147,9 @@ function changeHistory(resourceName, id) {
 
   id = DSUtils.resolveId(definition, id);
   if (resourceName && !_this.definitions[resourceName]) {
-    throw new DSErrors.NER(resourceName);
+    throw new NER(resourceName);
   } else if (id && !DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new DSErrors.IA('"id" must be a string or a number!');
+    throw new IA('"id" must be a string or a number!');
   }
 
   if (!definition.keepChangeHistory) {
@@ -4166,9 +4172,9 @@ function compute(resourceName, instance) {
 
   instance = DSUtils.resolveItem(_this.store[resourceName], instance);
   if (!definition) {
-    throw new DSErrors.NER(resourceName);
+    throw new NER(resourceName);
   } else if (!DSUtils.isObject(instance) && !DSUtils.isString(instance) && !DSUtils.isNumber(instance)) {
-    throw new DSErrors.IA('"instance" must be an object, string or number!');
+    throw new IA('"instance" must be an object, string or number!');
   }
 
   if (DSUtils.isString(instance) || DSUtils.isNumber(instance)) {
@@ -4189,9 +4195,9 @@ function createInstance(resourceName, attrs, options) {
   attrs = attrs || {};
 
   if (!definition) {
-    throw new DSErrors.NER(resourceName);
+    throw new NER(resourceName);
   } else if (attrs && !DSUtils.isObject(attrs)) {
-    throw new DSErrors.IA('"attrs" must be an object!');
+    throw new IA('"attrs" must be an object!');
   }
 
   options = DSUtils._(definition, options);
@@ -4215,12 +4221,12 @@ function createInstance(resourceName, attrs, options) {
 
 function diffIsEmpty(diff) {
   return !(DSUtils.isEmpty(diff.added) &&
-    DSUtils.isEmpty(diff.removed) &&
-    DSUtils.isEmpty(diff.changed));
+  DSUtils.isEmpty(diff.removed) &&
+  DSUtils.isEmpty(diff.changed));
 }
 
 function digest() {
-  observe.Platform.performMicrotaskCheckpoint();
+  this.observe.Platform.performMicrotaskCheckpoint();
 }
 
 function get(resourceName, id, options) {
@@ -4228,9 +4234,9 @@ function get(resourceName, id, options) {
   var definition = _this.definitions[resourceName];
 
   if (!definition) {
-    throw new DSErrors.NER(resourceName);
+    throw new NER(resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new DSErrors.IA('"id" must be a string or a number!');
+    throw new IA('"id" must be a string or a number!');
   }
 
   options = DSUtils._(definition, options);
@@ -4245,11 +4251,36 @@ function get(resourceName, id, options) {
   return item;
 }
 
+function getAll(resourceName, ids) {
+  var _this = this;
+  var resource = _this.store[resourceName];
+  var collection = [];
+
+  if (!_this.definitions[resourceName]) {
+    throw new NER(resourceName);
+  } else if (ids && !DSUtils.isArray(ids)) {
+    throw new IA('"ids" must be an array!');
+  }
+
+  if (DSUtils.isArray(ids)) {
+    var length = ids.length;
+    for (var i = 0; i < length; i++) {
+      if (resource.index[ids[i]]) {
+        collection.push(resource.index[ids[i]]);
+      }
+    }
+  } else {
+    collection = resource.collection.slice();
+  }
+
+  return collection;
+}
+
 function hasChanges(resourceName, id) {
   var _this = this;
   id = DSUtils.resolveId(_this.definitions[resourceName], id);
   if (!_this.definitions[resourceName]) {
-    throw new DSErrors.NER(resourceName);
+    throw new NER(resourceName);
   }
 
   // return resource from cache
@@ -4266,7 +4297,7 @@ function lastModified(resourceName, id) {
 
   id = DSUtils.resolveId(definition, id);
   if (!definition) {
-    throw new DSErrors.NER(resourceName);
+    throw new NER(resourceName);
   }
   if (id) {
     if (!(id in resource.modified)) {
@@ -4283,7 +4314,7 @@ function lastSaved(resourceName, id) {
 
   id = DSUtils.resolveId(definition, id);
   if (!definition) {
-    throw new DSErrors.NER(resourceName);
+    throw new NER(resourceName);
   }
   if (!(id in resource.saved)) {
     resource.saved[id] = 0;
@@ -4298,9 +4329,9 @@ function previous(resourceName, id) {
 
   id = DSUtils.resolveId(definition, id);
   if (!definition) {
-    throw new DSErrors.NER(resourceName);
+    throw new NER(resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new DSErrors.IA('"id" must be a string or a number!');
+    throw new IA('"id" must be a string or a number!');
   }
 
   // return resource from cache
@@ -4318,6 +4349,7 @@ module.exports = {
   ejectAll: require('./ejectAll'),
   filter: require('./filter'),
   get: get,
+  getAll: getAll,
   hasChanges: hasChanges,
   inject: require('./inject'),
   lastModified: lastModified,
@@ -4329,10 +4361,9 @@ module.exports = {
   unlinkInverse: require('./unlinkInverse')
 };
 
-},{"../../../lib/observe-js/observe-js":1,"../../errors":70,"../../utils":72,"./defineResource":60,"./eject":61,"./ejectAll":62,"./filter":63,"./inject":65,"./link":66,"./linkAll":67,"./linkInverse":68,"./unlinkInverse":69}],65:[function(require,module,exports){
+},{"../../errors":70,"../../utils":72,"./defineResource":60,"./eject":61,"./ejectAll":62,"./filter":63,"./inject":65,"./link":66,"./linkAll":67,"./linkInverse":68,"./unlinkInverse":69}],65:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
-var observe = require('../../../lib/observe-js/observe-js');
 
 function _injectRelations(definition, injected, options) {
   var _this = this;
@@ -4411,8 +4442,8 @@ function _getReactFunction(DS, definition, resource) {
 
     if (definition.idAttribute in changed) {
       console.error('Doh! You just changed the primary key of an object! ' +
-        'I don\'t know how to handle this yet, so your data for the "' + definition.name +
-        '" resource is now in an undefined (probably broken) state.');
+      'I don\'t know how to handle this yet, so your data for the "' + definition.name +
+      '" resource is now in an undefined (probably broken) state.');
     }
   };
 }
@@ -4467,7 +4498,7 @@ function _inject(definition, resource, attrs, options) {
           resource.changeHistories[id] = [];
 
           if (DSUtils.w) {
-            resource.observers[id] = new observe.ObjectObserver(item);
+            resource.observers[id] = new _this.observe.ObjectObserver(item);
             resource.observers[id].open(_react, item);
           }
 
@@ -4572,7 +4603,7 @@ function inject(resourceName, attrs, options) {
 
 module.exports = inject;
 
-},{"../../../lib/observe-js/observe-js":1,"../../errors":70,"../../utils":72}],66:[function(require,module,exports){
+},{"../../errors":70,"../../utils":72}],66:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -4720,41 +4751,6 @@ module.exports = linkInverse;
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
-/**
- * @doc method
- * @id DS.sync methods:unlinkInverse
- * @name unlinkInverse
- * @description
- * Find relations of the item with the given primary key that are already in the data store and _unlink_ this item from those
- * relations. This unlinks links that would be created by `DS.linkInverse`.
- *
- * ## Signature:
- * ```js
- * DS.unlinkInverse(resourceName, id[, relations])
- * ```
- *
- * ## Examples:
- *
- * Assume `organization` has `hasMany` relationship to `user` and `post` has a `belongsTo` relationship to `user`.
- * ```js
- * DS.get('organization', 5); // { id: 5, users: [{ organizationId: 5, id: 1 }] }
- *
- * // unlink user 1 from its relations
- * DS.unlinkInverse('user', 1, ['organization']);
- *
- * DS.get('organization', 5); // { id: 5, users: [] }
- * ```
- *
- * ## Throws
- *
- * - `{IllegalArgumentError}`
- * - `{NonexistentResourceError}`
- *
- * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
- * @param {string|number} id The primary key of the item for which to unlink relations.
- * @param {array=} relations The relations to be unlinked. If not provided then all relations will be unlinked. Default: `[]`.
- * @returns {object|array} A reference to the item that has been unlinked.
- */
 function unlinkInverse(resourceName, id, relations) {
   var _this = this;
   var definition = _this.definitions[resourceName];
@@ -4851,36 +4847,10 @@ module.exports = {
 },{}],71:[function(require,module,exports){
 var DS = require('./datastore');
 
-/**
- * @doc overview
- * @id js-data
- * @name js-data
- * @description
- * __Version:__ 0.0.1
- *
- * ## Install
- *
- * `bower install --save js-data` or `npm install --save js-data`
- *
- * #### Manual download
- * Download js-data from the [Releases](https://github.com/js-data/js-data/releases) section of the js-data GitHub project.
- *
- * - `DS`
- * - `DSHttpAdapter`
- * - `DSLocalStorageAdapter`
- * - `DSUtils`
- * - `DSErrors`
- *
- * [DS](/documentation/api/api/DS) is the Data Store itself, which you will inject often.
- * [DSHttpAdapter](/documentation/api/api/DSHttpAdapter) is useful as a wrapper for `http` and is configurable.
- * [DSLocalStorageAdapter](/documentation/api/api/DSLocalStorageAdapter) is useful as a wrapper for `localStorage` and is configurable.
- * [DSUtils](/documentation/api/api/DSUtils) has some useful utility methods.
- * [DSErrors](/documentation/api/api/DSErrors) provides references to the various errors thrown by the data store.
- */
 module.exports = {
   DS: DS,
-  createStore: function () {
-    return new DS();
+  createStore: function (options) {
+    return new DS(options);
   },
   DSUtils: require('./utils'),
   DSErrors: require('./errors')

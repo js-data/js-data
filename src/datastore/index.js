@@ -2,6 +2,7 @@ var DSUtils = require('../utils');
 var DSErrors = require('../errors');
 var syncMethods = require('./sync_methods');
 var asyncMethods = require('./async_methods');
+var observe = require('../../lib/observe-js/observe-js');
 var Schemator;
 
 DSUtils.deepFreeze(syncMethods);
@@ -266,6 +267,7 @@ function DS(options) {
   this.definitions = {};
   this.adapters = {};
   this.defaults = new Defaults();
+  this.observe = observe;
   DSUtils.deepMixIn(this.defaults, options);
 }
 

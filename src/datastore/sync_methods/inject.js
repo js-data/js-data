@@ -1,6 +1,5 @@
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
-var observe = require('../../../lib/observe-js/observe-js');
 
 function _injectRelations(definition, injected, options) {
   var _this = this;
@@ -79,8 +78,8 @@ function _getReactFunction(DS, definition, resource) {
 
     if (definition.idAttribute in changed) {
       console.error('Doh! You just changed the primary key of an object! ' +
-        'I don\'t know how to handle this yet, so your data for the "' + definition.name +
-        '" resource is now in an undefined (probably broken) state.');
+      'I don\'t know how to handle this yet, so your data for the "' + definition.name +
+      '" resource is now in an undefined (probably broken) state.');
     }
   };
 }
@@ -135,7 +134,7 @@ function _inject(definition, resource, attrs, options) {
           resource.changeHistories[id] = [];
 
           if (DSUtils.w) {
-            resource.observers[id] = new observe.ObjectObserver(item);
+            resource.observers[id] = new _this.observe.ObjectObserver(item);
             resource.observers[id].open(_react, item);
           }
 

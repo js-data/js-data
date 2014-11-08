@@ -1,41 +1,6 @@
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
-/**
- * @doc method
- * @id DS.sync methods:unlinkInverse
- * @name unlinkInverse
- * @description
- * Find relations of the item with the given primary key that are already in the data store and _unlink_ this item from those
- * relations. This unlinks links that would be created by `DS.linkInverse`.
- *
- * ## Signature:
- * ```js
- * DS.unlinkInverse(resourceName, id[, relations])
- * ```
- *
- * ## Examples:
- *
- * Assume `organization` has `hasMany` relationship to `user` and `post` has a `belongsTo` relationship to `user`.
- * ```js
- * DS.get('organization', 5); // { id: 5, users: [{ organizationId: 5, id: 1 }] }
- *
- * // unlink user 1 from its relations
- * DS.unlinkInverse('user', 1, ['organization']);
- *
- * DS.get('organization', 5); // { id: 5, users: [] }
- * ```
- *
- * ## Throws
- *
- * - `{IllegalArgumentError}`
- * - `{NonexistentResourceError}`
- *
- * @param {string} resourceName The resource type, e.g. 'user', 'comment', etc.
- * @param {string|number} id The primary key of the item for which to unlink relations.
- * @param {array=} relations The relations to be unlinked. If not provided then all relations will be unlinked. Default: `[]`.
- * @returns {object|array} A reference to the item that has been unlinked.
- */
 function unlinkInverse(resourceName, id, relations) {
   var _this = this;
   var definition = _this.definitions[resourceName];

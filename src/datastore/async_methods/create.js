@@ -6,11 +6,14 @@ function create(resourceName, attrs, options) {
   var definition = _this.definitions[resourceName];
 
   options = options || {};
+  attrs = attrs || {};
 
   var promise = new DSUtils.Promise(function (resolve, reject) {
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
-    } else {
+    } else if (!DSUtils.isObject(attrs)) {
+      reject(new DSErrors.IA('"attrs" must be an object!'));
+    }  else {
       options = DSUtils._(definition, options);
       resolve(attrs);
     }
