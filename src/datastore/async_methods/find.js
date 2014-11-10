@@ -41,7 +41,7 @@ function find(resourceName, id, options) {
       } else {
         return item;
       }
-    }).catch(function (err) {
+    })['catch'](function (err) {
       delete resource.pendingQueries[id];
       throw err;
     });

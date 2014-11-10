@@ -17,7 +17,18 @@ var instanceMethods = [
   'compute',
   'refresh',
   'save',
-  'update'
+  'update',
+  'destroy',
+  'loadRelations',
+  'changeHistory',
+  'changes',
+  'hasChanges',
+  'lastModified',
+  'lastSaved',
+  'link',
+  'linkInverse',
+  'previous',
+  'unlinkInverse'
 ];
 
 function defineResource(definition) {
@@ -120,13 +131,13 @@ function defineResource(definition) {
     }
 
     // Create the wrapper class for the new resource
-    def.class = DSUtils.pascalCase(definition.name);
-    eval('function ' + def.class + '() {}');
-    def[def.class] = eval(def.class);
+    def['class'] = DSUtils.pascalCase(definition.name);
+    eval('function ' + def['class'] + '() {}');
+    def[def['class']] = eval(def['class']);
 
     // Apply developer-defined methods
     if (def.methods) {
-      DSUtils.deepMixIn(def[def.class].prototype, def.methods);
+      DSUtils.deepMixIn(def[def['class']].prototype, def.methods);
     }
 
     // Prepare for computed properties
@@ -176,9 +187,9 @@ function defineResource(definition) {
     }
 
     DSUtils.forEach(instanceMethods, function (name) {
-      def[def.class].prototype['DS' + DSUtils.pascalCase(name)] = function () {
+      def[def['class']].prototype['DS' + DSUtils.pascalCase(name)] = function () {
         var args = Array.prototype.slice.call(arguments);
-        args.unshift(this);
+        args.unshift(this[def.idAttribute] || this);
         args.unshift(def.name);
         return _this[name].apply(_this, args);
       };

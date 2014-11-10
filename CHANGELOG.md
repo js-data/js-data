@@ -1,3 +1,11 @@
+##### 1.0.0-alpha.4-2 - 09 November 2014
+
+###### Backwards compatible API changes
+- jmdobry/angular-data#227 - Supporting methods on model instances
+
+###### Backwards compatible bug fixes
+- jmdobry/angular-data#235 - IE 8 support
+
 ##### 1.0.0-alpha.4-1 - 08 November 2014
 
 ###### Backwards compatible bug fixes

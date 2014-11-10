@@ -117,10 +117,10 @@ function _inject(definition, resource, attrs, options) {
 
         if (!item) {
           if (options.useClass) {
-            if (attrs instanceof definition[definition.class]) {
+            if (attrs instanceof definition[definition['class']]) {
               item = attrs;
             } else {
-              item = new definition[definition.class]();
+              item = new definition[definition['class']]();
             }
           } else {
             item = {};

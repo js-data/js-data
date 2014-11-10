@@ -178,9 +178,13 @@ function getAll(resourceName, ids) {
 
 function hasChanges(resourceName, id) {
   var _this = this;
+
   id = DSUtils.resolveId(_this.definitions[resourceName], id);
+
   if (!_this.definitions[resourceName]) {
     throw new NER(resourceName);
+  } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
+    throw new IA('"id" must be a string or a number!');
   }
 
   // return resource from cache

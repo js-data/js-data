@@ -81,7 +81,7 @@ function findAll(resourceName, params, options) {
       } else {
         return items;
       }
-    }).catch(function (err) {
+    })['catch'](function (err) {
       delete resource.pendingQueries[queryHash];
       throw err;
     });

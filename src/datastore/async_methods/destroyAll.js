@@ -35,7 +35,7 @@ function destroyAll(resourceName, params, options) {
         _this.emit(definition, 'afterDestroy', toEject);
       }
       return ejected || _this.ejectAll(resourceName, params);
-    }).catch(function (err) {
+    })['catch'](function (err) {
       if (options.eagerEject && ejected) {
         _this.inject(resourceName, ejected, { notify: false });
       }

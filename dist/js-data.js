@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file js-data.js
-* @version 1.0.0-alpha.4-1 - Homepage <http://www.js-data.io/>
+* @version 1.0.0-alpha.4-2 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -26,6 +26,7 @@
 // Copyright 2014 Jason Dobry
 //
 // Summary of modifications:
+// Fixed use of "delete" keyword for IE8 compatibility
 // Removed all code related to:
 // - ArrayObserver
 // - ArraySplice
@@ -523,7 +524,7 @@
   var expectedRecordTypes = {
     add: true,
     update: true,
-    delete: true
+    'delete': true
   };
 
   function diffObjectFromChangeRecords(object, changeRecords, oldValues) {
@@ -2849,7 +2850,7 @@ function destroy(resourceName, id, options) {
       }
       _this.eject(resourceName, id);
       return id;
-    }).catch(function (err) {
+    })['catch'](function (err) {
       if (options.eagerEject && item) {
         _this.inject(resourceName, item, { notify: false });
       }
@@ -2868,9 +2869,13 @@ function destroyAll(resourceName, params, options) {
   var definition = _this.definitions[resourceName];
   var ejected, toEject;
 
+  params = params || {};
+
   return new DSUtils.Promise(function (resolve, reject) {
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
+    } else if (!DSUtils.isObject(params)) {
+      reject(new DSErrors.IA('"params" must be an object!'));
     } else {
       options = DSUtils._(definition, options);
       resolve();
@@ -2893,7 +2898,7 @@ function destroyAll(resourceName, params, options) {
         _this.emit(definition, 'afterDestroy', toEject);
       }
       return ejected || _this.ejectAll(resourceName, params);
-    }).catch(function (err) {
+    })['catch'](function (err) {
       if (options.eagerEject && ejected) {
         _this.inject(resourceName, ejected, { notify: false });
       }
@@ -2947,7 +2952,7 @@ function find(resourceName, id, options) {
       } else {
         return item;
       }
-    }).catch(function (err) {
+    })['catch'](function (err) {
       delete resource.pendingQueries[id];
       throw err;
     });
@@ -3039,7 +3044,7 @@ function findAll(resourceName, params, options) {
       } else {
         return items;
       }
-    }).catch(function (err) {
+    })['catch'](function (err) {
       delete resource.pendingQueries[queryHash];
       throw err;
     });
@@ -3734,7 +3739,18 @@ var instanceMethods = [
   'compute',
   'refresh',
   'save',
-  'update'
+  'update',
+  'destroy',
+  'loadRelations',
+  'changeHistory',
+  'changes',
+  'hasChanges',
+  'lastModified',
+  'lastSaved',
+  'link',
+  'linkInverse',
+  'previous',
+  'unlinkInverse'
 ];
 
 function defineResource(definition) {
@@ -3837,13 +3853,13 @@ function defineResource(definition) {
     }
 
     // Create the wrapper class for the new resource
-    def.class = DSUtils.pascalCase(definition.name);
-    eval('function ' + def.class + '() {}');
-    def[def.class] = eval(def.class);
+    def['class'] = DSUtils.pascalCase(definition.name);
+    eval('function ' + def['class'] + '() {}');
+    def[def['class']] = eval(def['class']);
 
     // Apply developer-defined methods
     if (def.methods) {
-      DSUtils.deepMixIn(def[def.class].prototype, def.methods);
+      DSUtils.deepMixIn(def[def['class']].prototype, def.methods);
     }
 
     // Prepare for computed properties
@@ -3893,9 +3909,9 @@ function defineResource(definition) {
     }
 
     DSUtils.forEach(instanceMethods, function (name) {
-      def[def.class].prototype['DS' + DSUtils.pascalCase(name)] = function () {
+      def[def['class']].prototype['DS' + DSUtils.pascalCase(name)] = function () {
         var args = Array.prototype.slice.call(arguments);
-        args.unshift(this);
+        args.unshift(this[def.idAttribute] || this);
         args.unshift(def.name);
         return _this[name].apply(_this, args);
       };
@@ -4278,9 +4294,13 @@ function getAll(resourceName, ids) {
 
 function hasChanges(resourceName, id) {
   var _this = this;
+
   id = DSUtils.resolveId(_this.definitions[resourceName], id);
+
   if (!_this.definitions[resourceName]) {
     throw new NER(resourceName);
+  } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
+    throw new IA('"id" must be a string or a number!');
   }
 
   // return resource from cache
@@ -4481,10 +4501,10 @@ function _inject(definition, resource, attrs, options) {
 
         if (!item) {
           if (options.useClass) {
-            if (attrs instanceof definition[definition.class]) {
+            if (attrs instanceof definition[definition['class']]) {
               item = attrs;
             } else {
-              item = new definition[definition.class]();
+              item = new definition[definition['class']]();
             }
           } else {
             item = {};
@@ -4808,7 +4828,7 @@ function IllegalArgumentError(message) {
   this.message = message || 'Illegal Argument!';
 }
 
-IllegalArgumentError.prototype = Object.create(Error.prototype);
+IllegalArgumentError.prototype = new Error();
 IllegalArgumentError.prototype.constructor = IllegalArgumentError;
 
 function RuntimeError(message) {
@@ -4820,7 +4840,7 @@ function RuntimeError(message) {
   this.message = message || 'RuntimeError Error!';
 }
 
-RuntimeError.prototype = Object.create(Error.prototype);
+RuntimeError.prototype = new Error();
 RuntimeError.prototype.constructor = RuntimeError;
 
 function NonexistentResourceError(resourceName) {
@@ -4832,7 +4852,7 @@ function NonexistentResourceError(resourceName) {
   this.message = (resourceName || '') + ' is not a registered resource!';
 }
 
-NonexistentResourceError.prototype = Object.create(Error.prototype);
+NonexistentResourceError.prototype = new Error();
 NonexistentResourceError.prototype.constructor = NonexistentResourceError;
 
 module.exports = {
