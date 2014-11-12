@@ -34,6 +34,10 @@ module.exports = function (grunt) {
         files: ['src/**/*.js'],
         tasks: ['build']
       },
+      lite: {
+        files: ['src/**/*.js'],
+        tasks: ['jshint', 'browserify']
+      },
       n: {
         files: ['src/**/*.js', 'test/both/**/*.js', 'test/node/**/*.js'],
         tasks: ['n']
@@ -43,14 +47,14 @@ module.exports = function (grunt) {
       main: {
         options: {
           banner: '/**\n' +
-            '* @author Jason Dobry <jason.dobry@gmail.com>\n' +
-            '* @file js-data.min.js\n' +
-            '* @version <%= pkg.version %> - Homepage <http://www.js-data.io/>\n' +
-            '* @copyright (c) 2014 Jason Dobry\n' +
-            '* @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>\n' +
-            '*\n' +
-            '* @overview Data store.\n' +
-            '*/\n'
+          '* @author Jason Dobry <jason.dobry@gmail.com>\n' +
+          '* @file js-data.min.js\n' +
+          '* @version <%= pkg.version %> - Homepage <http://www.js-data.io/>\n' +
+          '* @copyright (c) 2014 Jason Dobry\n' +
+          '* @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>\n' +
+          '*\n' +
+          '* @overview Data store.\n' +
+          '*/\n'
         },
         files: {
           'dist/js-data.min.js': ['dist/js-data.js']
@@ -77,6 +81,7 @@ module.exports = function (grunt) {
       dev: {
         browsers: ['Chrome'],
         autoWatch: true,
+        autoWatchBatchDelay: 1000,
         singleRun: false,
         reporters: ['spec'],
         preprocessors: {}
@@ -153,5 +158,6 @@ module.exports = function (grunt) {
     'uglify:main'
   ]);
   grunt.registerTask('go', ['build', 'watch:dist']);
+  grunt.registerTask('golite', ['jshint', 'browserify', 'watch:lite']);
   grunt.registerTask('default', ['build']);
 };

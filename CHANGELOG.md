@@ -1,3 +1,8 @@
+##### 1.0.0-alpha.4-3 - 11 November 2014
+
+###### Backwards compatible bug fixes
+- #19 - multiple orderBy does not work
+
 ##### 1.0.0-alpha.4-2 - 09 November 2014
 
 ###### Backwards compatible API changes

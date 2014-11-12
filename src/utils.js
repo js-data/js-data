@@ -248,7 +248,9 @@ module.exports = {
   isEmpty: require('mout/lang/isEmpty'),
   isRegExp: isRegExp,
   toJson: JSON.stringify,
-  fromJson: JSON.parse,
+  fromJson: function (json) {
+    return this.isString(json) ? JSON.parse(json) : json;
+  },
   makePath: require('mout/string/makePath'),
   upperCase: require('mout/string/upperCase'),
   pascalCase: require('mout/string/pascalCase'),

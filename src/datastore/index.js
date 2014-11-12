@@ -18,6 +18,42 @@ function lifecycleNoop(resourceName, attrs) {
   return attrs;
 }
 
+function compare(orderBy, index, a, b) {
+  var def = orderBy[index];
+  var cA = a[def[0]], cB = b[def[0]];
+  if (DSUtils.isString(cA)) {
+    cA = DSUtils.upperCase(cA);
+  }
+  if (DSUtils.isString(cB)) {
+    cB = DSUtils.upperCase(cB);
+  }
+  if (def[1] === 'DESC') {
+    if (cB < cA) {
+      return -1;
+    } else if (cB > cA) {
+      return 1;
+    } else {
+      if (index < orderBy.length - 1) {
+        return compare(orderBy, index + 1, a, b);
+      } else {
+        return 0;
+      }
+    }
+  } else {
+    if (cA < cB) {
+      return -1;
+    } else if (cA > cB) {
+      return 1;
+    } else {
+      if (index < orderBy.length - 1) {
+        return compare(orderBy, index + 1, a, b);
+      } else {
+        return 0;
+      }
+    }
+  }
+}
+
 function Defaults() {
 }
 
@@ -184,38 +220,23 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
 
   // Apply 'orderBy'
   if (orderBy) {
-    DSUtils.forEach(orderBy, function (def) {
+    var index = 0;
+    DSUtils.forEach(orderBy, function (def, i) {
       if (DSUtils.isString(def)) {
-        def = [def, 'ASC'];
+        orderBy[i] = [def, 'ASC'];
       } else if (!DSUtils.isArray(def)) {
-        throw new _this.errors.IllegalArgumentError('DS.filter(resourceName[, params][, options]): ' + DSUtils.toJson(def) + ': Must be a string or an array!', { params: { 'orderBy[i]': { actual: typeof def, expected: 'string|array' } } });
+        throw new _this.errors.IllegalArgumentError('DS.filter(resourceName[, params][, options]): ' + DSUtils.toJson(def) + ': Must be a string or an array!', {
+          params: {
+            'orderBy[i]': {
+              actual: typeof def,
+              expected: 'string|array'
+            }
+          }
+        });
       }
-      filtered = DSUtils.sort(filtered, function (a, b) {
-        var cA = a[def[0]], cB = b[def[0]];
-        if (DSUtils.isString(cA)) {
-          cA = DSUtils.upperCase(cA);
-        }
-        if (DSUtils.isString(cB)) {
-          cB = DSUtils.upperCase(cB);
-        }
-        if (def[1] === 'DESC') {
-          if (cB < cA) {
-            return -1;
-          } else if (cB > cA) {
-            return 1;
-          } else {
-            return 0;
-          }
-        } else {
-          if (cA < cB) {
-            return -1;
-          } else if (cA > cB) {
-            return 1;
-          } else {
-            return 0;
-          }
-        }
-      });
+    });
+    filtered = DSUtils.sort(filtered, function (a, b) {
+      return compare(orderBy, index, a, b);
     });
   }
 

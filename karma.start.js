@@ -1,5 +1,5 @@
 // Setup global test variables
-var store, DSUtils, dsHttpAdapter, dsLocalStorageAdapter, p1, p2, p3, p4, p5;
+var store, DSUtils, dsHttpAdapter, dsLocalStorageAdapter, p1, p2, p3, p4, p5, p6;
 
 var Post, User, Organization, Comment, Profile;
 var user1, organization2, comment3, profile4;
@@ -212,6 +212,7 @@ beforeEach(function () {
   p3 = { author: 'Mike', age: 32, id: 7 };
   p4 = { author: 'Adam', age: 33, id: 8 };
   p5 = { author: 'Adam', age: 33, id: 9 };
+  p6 = { author: 'Adam', age: 33, id: 10 };
 
   user1 = {
     name: 'John Anderson',
