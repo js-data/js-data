@@ -132,8 +132,13 @@ function defineResource(definition) {
 
     // Create the wrapper class for the new resource
     def['class'] = DSUtils.pascalCase(definition.name);
-    eval('function ' + def['class'] + '() {}');
-    def[def['class']] = eval(def['class']);
+    try {
+      eval('function ' + def['class'] + '() {}');
+      def[def['class']] = eval(def['class']);
+    } catch (e) {
+      def[def['class']] = function () {
+      };
+    }
 
     // Apply developer-defined methods
     if (def.methods) {

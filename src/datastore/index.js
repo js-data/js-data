@@ -82,7 +82,6 @@ defaultsPrototype.findHasMany = false;
 defaultsPrototype.reapInterval = !!DSUtils.w ? 30000 : false;
 defaultsPrototype.reapAction = !!DSUtils.w ? 'inject' : 'none';
 defaultsPrototype.maxAge = false;
-defaultsPrototype.maxAge = false;
 defaultsPrototype.ignoredChanges = [/\$/];
 defaultsPrototype.beforeValidate = lifecycleNoopCb;
 defaultsPrototype.validate = lifecycleNoopCb;

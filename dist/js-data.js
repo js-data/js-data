@@ -3191,7 +3191,14 @@ function loadRelations(resourceName, instance, relations, options) {
         if (DSUtils.contains(relations, relationName)) {
           var task;
           var params = {};
-          params[def.foreignKey] = instance[definition.idAttribute];
+          if (options.allowSimpleWhere) {
+            params[def.foreignKey] = instance[definition.idAttribute];
+          } else {
+            params.where = {};
+            params.where[def.foreignKey] = {
+              '==': instance[definition.idAttribute]
+            };
+          }
 
           if (def.type === 'hasMany' && params[def.foreignKey]) {
             task = _this.findAll(relationName, params, options);
@@ -3496,7 +3503,6 @@ defaultsPrototype.findHasOn = false;
 defaultsPrototype.findHasMany = false;
 defaultsPrototype.reapInterval = !!DSUtils.w ? 30000 : false;
 defaultsPrototype.reapAction = !!DSUtils.w ? 'inject' : 'none';
-defaultsPrototype.maxAge = false;
 defaultsPrototype.maxAge = false;
 defaultsPrototype.ignoredChanges = [/\$/];
 defaultsPrototype.beforeValidate = lifecycleNoopCb;
@@ -3875,8 +3881,13 @@ function defineResource(definition) {
 
     // Create the wrapper class for the new resource
     def['class'] = DSUtils.pascalCase(definition.name);
-    eval('function ' + def['class'] + '() {}');
-    def[def['class']] = eval(def['class']);
+    try {
+      eval('function ' + def['class'] + '() {}');
+      def[def['class']] = eval(def['class']);
+    } catch (e) {
+      def[def['class']] = function () {
+      };
+    }
 
     // Apply developer-defined methods
     if (def.methods) {
