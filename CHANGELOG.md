@@ -1,7 +1,11 @@
+##### 1.0.0-alpha.5-1 - 19 November 2014
+
+Removed DSUtils.deepFreeze
+
 ##### 1.0.0-alpha.5-0 - 18 November 2014
 
 ###### Breaking API changes
-- All hooks now take the resource definition object as the first argument instead of just the name of the resource  
+- All hooks now take the resource definition object as the first argument instead of just the name of the resource
 
 ###### Backwards compatible API changes
 - jmdobry/angular-data#238

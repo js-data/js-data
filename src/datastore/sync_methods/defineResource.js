@@ -87,8 +87,10 @@ function defineResource(definition) {
           });
         });
       }
-      DSUtils.deepFreeze(def.relations);
-      DSUtils.deepFreeze(def.relationList);
+      if (typeof Object.freeze === 'function') {
+        Object.freeze(def.relations);
+        Object.freeze(def.relationList);
+      }
     }
 
     def.getEndpoint = function (attrs, options) {

@@ -5,16 +5,11 @@ var asyncMethods = require('./async_methods');
 var observe = require('../../lib/observe-js/observe-js');
 var Schemator;
 
-DSUtils.deepFreeze(syncMethods);
-DSUtils.deepFreeze(asyncMethods);
-DSUtils.deepFreeze(DSErrors);
-DSUtils.deepFreeze(DSUtils);
-
-function lifecycleNoopCb(resourceName, attrs, cb) {
+function lifecycleNoopCb(resource, attrs, cb) {
   cb(null, attrs);
 }
 
-function lifecycleNoop(resourceName, attrs) {
+function lifecycleNoop(resource, attrs) {
   return attrs;
 }
 

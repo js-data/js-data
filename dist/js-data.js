@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file js-data.js
-* @version 1.0.0-alpha.5-0 - Homepage <http://www.js-data.io/>
+* @version 1.0.0-alpha.5-1 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -3427,16 +3427,11 @@ var asyncMethods = require('./async_methods');
 var observe = require('../../lib/observe-js/observe-js');
 var Schemator;
 
-DSUtils.deepFreeze(syncMethods);
-DSUtils.deepFreeze(asyncMethods);
-DSUtils.deepFreeze(DSErrors);
-DSUtils.deepFreeze(DSUtils);
-
-function lifecycleNoopCb(resourceName, attrs, cb) {
+function lifecycleNoopCb(resource, attrs, cb) {
   cb(null, attrs);
 }
 
-function lifecycleNoop(resourceName, attrs) {
+function lifecycleNoop(resource, attrs) {
   return attrs;
 }
 
@@ -3853,8 +3848,10 @@ function defineResource(definition) {
           });
         });
       }
-      DSUtils.deepFreeze(def.relations);
-      DSUtils.deepFreeze(def.relationList);
+      if (typeof Object.freeze === 'function') {
+        Object.freeze(def.relations);
+        Object.freeze(def.relationList);
+      }
     }
 
     def.getEndpoint = function (attrs, options) {
@@ -5238,23 +5235,6 @@ module.exports = {
   },
   updateTimestamp: updateTimestamp,
   Promise: _Promise,
-  deepFreeze: function deepFreeze(o) {
-    if (typeof Object.freeze === 'function' && typeof Object.isFrozen === 'function') {
-      var prop, propKey;
-      Object.freeze(o); // First freeze the object.
-      for (propKey in o) {
-        prop = o[propKey];
-        if (!prop || !o.hasOwnProperty(propKey) || typeof prop !== 'object' || Object.isFrozen(prop)) {
-          // If the object is on the prototype, not an object, or is already frozen,
-          // skip it. Note that this might leave an unfrozen reference somewhere in the
-          // object if there is an already frozen object containing an unfrozen object.
-          continue;
-        }
-
-        deepFreeze(prop); // Recursively call deepFreeze.
-      }
-    }
-  },
   compute: function (fn, field, DSUtils) {
     var _this = this;
     var args = [];
