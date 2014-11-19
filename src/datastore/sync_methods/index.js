@@ -103,7 +103,7 @@ function createInstance(resourceName, attrs, options) {
   options = DSUtils._(definition, options);
 
   if (options.notify) {
-    options.beforeCreateInstance(resourceName, attrs);
+    options.beforeCreateInstance(options, attrs);
   }
 
   if (options.useClass) {
@@ -114,7 +114,7 @@ function createInstance(resourceName, attrs, options) {
   }
   DSUtils.deepMixIn(item, attrs);
   if (options.notify) {
-    options.afterCreateInstance(resourceName, attrs);
+    options.afterCreateInstance(options, attrs);
   }
   return item;
 }

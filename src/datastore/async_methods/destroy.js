@@ -21,32 +21,32 @@ function destroy(resourceName, id, options) {
     }
   })
     .then(function (attrs) {
-      return options.beforeDestroy.call(attrs, resourceName, attrs);
+      return options.beforeDestroy.call(attrs, options, attrs);
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(definition, 'beforeDestroy', DSUtils.merge({}, attrs));
+        _this.emit(options, 'beforeDestroy', DSUtils.merge({}, attrs));
       }
       if (options.eagerEject) {
         _this.eject(resourceName, id);
       }
-      return _this.getAdapter(definition, options).destroy(definition, id, options);
+      return _this.getAdapter(options).destroy(definition, id, options);
     })
     .then(function () {
-      return options.afterDestroy.call(item, resourceName, item);
+      return options.afterDestroy.call(item, options, item);
     })
     .then(function (item) {
       if (options.notify) {
-        _this.emit(definition, 'afterDestroy', DSUtils.merge({}, item));
+        _this.emit(options, 'afterDestroy', DSUtils.merge({}, item));
       }
       _this.eject(resourceName, id);
       return id;
     })['catch'](function (err) {
-      if (options.eagerEject && item) {
-        _this.inject(resourceName, item, { notify: false });
-      }
-      throw err;
-    });
+    if (options.eagerEject && item) {
+      _this.inject(resourceName, item, { notify: false });
+    }
+    throw err;
+  });
 }
 
 module.exports = destroy;

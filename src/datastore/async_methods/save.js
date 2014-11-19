@@ -20,20 +20,20 @@ function save(resourceName, id, options) {
       resolve(item);
     }
   }).then(function (attrs) {
-      return options.beforeValidate.call(attrs, resourceName, attrs);
+      return options.beforeValidate.call(attrs, options, attrs);
     })
     .then(function (attrs) {
-      return options.validate.call(attrs, resourceName, attrs);
+      return options.validate.call(attrs, options, attrs);
     })
     .then(function (attrs) {
-      return options.afterValidate.call(attrs, resourceName, attrs);
+      return options.afterValidate.call(attrs, options, attrs);
     })
     .then(function (attrs) {
-      return options.beforeUpdate.call(attrs, resourceName, attrs);
+      return options.beforeUpdate.call(attrs, options, attrs);
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(definition, 'beforeUpdate', DSUtils.merge({}, attrs));
+        _this.emit(options, 'beforeUpdate', DSUtils.merge({}, attrs));
       }
       if (options.changesOnly) {
         var resource = _this.store[resourceName];
@@ -57,14 +57,14 @@ function save(resourceName, id, options) {
           attrs = changes;
         }
       }
-      return _this.getAdapter(definition, options).update(definition, id, attrs, options);
+      return _this.getAdapter(options).update(definition, id, attrs, options);
     })
     .then(function (data) {
-      return options.afterUpdate.call(data, resourceName, data);
+      return options.afterUpdate.call(data, options, data);
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(definition, 'afterUpdate', DSUtils.merge({}, attrs));
+        _this.emit(options, 'afterUpdate', DSUtils.merge({}, attrs));
       }
       if (options.cacheResponse) {
         return _this.inject(definition.name, attrs, options);

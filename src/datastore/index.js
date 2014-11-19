@@ -75,6 +75,7 @@ defaultsPrototype.notify = !!DSUtils.w;
 defaultsPrototype.upsert = !!DSUtils.w;
 defaultsPrototype.cacheResponse = !!DSUtils.w;
 defaultsPrototype.bypassCache = false;
+defaultsPrototype.ignoreMissing = false;
 defaultsPrototype.findInverseLinks = false;
 defaultsPrototype.findBelongsTo = false;
 defaultsPrototype.findHasOn = false;
@@ -167,9 +168,17 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
             } else if (op === '<=') {
               keep = first ? (attrs[field] <= val) : keep && (attrs[field] <= val);
             } else if (op === 'in') {
-              keep = first ? DSUtils.contains(val, attrs[field]) : keep && DSUtils.contains(val, attrs[field]);
+              if (DSUtils.isString(val)) {
+                keep = first ? val.indexOf(attrs[field]) !== -1 : keep && val.indexOf(attrs[field]) !== -1;
+              } else {
+                keep = first ? DSUtils.contains(val, attrs[field]) : keep && DSUtils.contains(val, attrs[field]);
+              }
             } else if (op === 'notIn') {
-              keep = first ? !DSUtils.contains(val, attrs[field]) : keep && !DSUtils.contains(val, attrs[field]);
+              if (DSUtils.isString(val)) {
+                keep = first ? val.indexOf(attrs[field]) === -1 : keep && val.indexOf(attrs[field]) === -1;
+              } else {
+                keep = first ? !DSUtils.contains(val, attrs[field]) : keep && !DSUtils.contains(val, attrs[field]);
+              }
             } else if (op === '|==') {
               keep = first ? (attrs[field] == val) : keep || (attrs[field] == val);
             } else if (op === '|===') {
@@ -187,9 +196,17 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
             } else if (op === '|<=') {
               keep = first ? (attrs[field] <= val) : keep || (attrs[field] <= val);
             } else if (op === '|in') {
-              keep = first ? DSUtils.contains(val, attrs[field]) : keep || DSUtils.contains(val, attrs[field]);
+              if (DSUtils.isString(val)) {
+                keep = first ? val.indexOf(attrs[field]) !== -1 : keep || val.indexOf(attrs[field]) !== -1;
+              } else {
+                keep = first ? DSUtils.contains(val, attrs[field]) : keep || DSUtils.contains(val, attrs[field]);
+              }
             } else if (op === '|notIn') {
-              keep = first ? !DSUtils.contains(val, attrs[field]) : keep || !DSUtils.contains(val, attrs[field]);
+              if (DSUtils.isString(val)) {
+                keep = first ? val.indexOf(attrs[field]) === -1 : keep || val.indexOf(attrs[field]) === -1;
+              } else {
+                keep = first ? !DSUtils.contains(val, attrs[field]) : keep || !DSUtils.contains(val, attrs[field]);
+              }
             }
             first = false;
           });
@@ -293,9 +310,9 @@ function DS(options) {
 
 var dsPrototype = DS.prototype;
 
-dsPrototype.getAdapter = function (def, options) {
+dsPrototype.getAdapter = function (options) {
   options = options || {};
-  return this.adapters[options.adapter] || this.adapters[def.defaultAdapter];
+  return this.adapters[options.adapter] || this.adapters[options.defaultAdapter];
 };
 
 dsPrototype.registerAdapter = function (name, Adapter, options) {

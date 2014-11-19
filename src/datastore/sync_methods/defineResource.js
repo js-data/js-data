@@ -178,9 +178,11 @@ function defineResource(definition) {
     if (definition.schema && _this.schemator) {
       def.schema = _this.schemator.defineSchema(def.name, definition.schema);
 
-      if (!('validate' in definition)) {
+      if (!definition.hasOwnProperty('validate')) {
         def.validate = function (resourceName, attrs, cb) {
-          def.schema.validate(attrs, true, function (err) {
+          def.schema.validate(attrs, {
+            ignoreMissing: def.ignoreMissing
+          }, function (err) {
             if (err) {
               return cb(err);
             } else {

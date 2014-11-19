@@ -63,7 +63,7 @@ function findAll(resourceName, params, options) {
   }).then(function (items) {
       if (!(queryHash in resource.completedQueries)) {
         if (!(queryHash in resource.pendingQueries)) {
-          resource.pendingQueries[queryHash] = _this.getAdapter(definition, options).findAll(definition, params, options)
+          resource.pendingQueries[queryHash] = _this.getAdapter(options).findAll(definition, params, options)
             .then(function (data) {
               delete resource.pendingQueries[queryHash];
               if (options.cacheResponse) {

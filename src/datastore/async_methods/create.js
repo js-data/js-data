@@ -13,40 +13,40 @@ function create(resourceName, attrs, options) {
       reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isObject(attrs)) {
       reject(new DSErrors.IA('"attrs" must be an object!'));
-    }  else {
+    } else {
       options = DSUtils._(definition, options);
       resolve(attrs);
     }
   });
 
-  if (definition && (options.hasOwnProperty('upsert') ? options.upsert : definition.upsert) && attrs[definition.idAttribute]) {
+  if (definition && options.upsert && attrs[definition.idAttribute]) {
     return _this.update(resourceName, attrs[definition.idAttribute], attrs, options);
   } else {
     return promise
       .then(function (attrs) {
-        return options.beforeValidate.call(attrs, resourceName, attrs);
+        return options.beforeValidate.call(attrs, options, attrs);
       })
       .then(function (attrs) {
-        return options.validate.call(attrs, resourceName, attrs);
+        return options.validate.call(attrs, options, attrs);
       })
       .then(function (attrs) {
-        return options.afterValidate.call(attrs, resourceName, attrs);
+        return options.afterValidate.call(attrs, options, attrs);
       })
       .then(function (attrs) {
-        return options.beforeCreate.call(attrs, resourceName, attrs);
+        return options.beforeCreate.call(attrs, options, attrs);
       })
       .then(function (attrs) {
         if (options.notify) {
-          _this.emit(definition, 'beforeCreate', DSUtils.merge({}, attrs));
+          _this.emit(options, 'beforeCreate', DSUtils.merge({}, attrs));
         }
-        return _this.getAdapter(definition, options).create(definition, attrs, options);
+        return _this.getAdapter(options).create(definition, attrs, options);
       })
-      .then(function (data) {
-        return options.afterCreate.call(data, resourceName, data);
+      .then(function (attrs) {
+        return options.afterCreate.call(attrs, options, attrs);
       })
       .then(function (attrs) {
         if (options.notify) {
-          _this.emit(definition, 'afterCreate', DSUtils.merge({}, attrs));
+          _this.emit(options, 'afterCreate', DSUtils.merge({}, attrs));
         }
         if (options.cacheResponse) {
           var created = _this.inject(definition.name, attrs, options);

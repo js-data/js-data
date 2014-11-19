@@ -78,7 +78,10 @@ describe('DS#defineResource', function () {
     var Person = store.defineResource({
       name: 'person',
       schema: {
-        id: 'string',
+        id: {
+          type: 'string',
+          nullable: true
+        },
         name: 'string'
       }
     });
@@ -104,6 +107,72 @@ describe('DS#defineResource', function () {
       } catch (e) {
         done(e);
       }
-    })
+    });
+  });
+
+  it('should integrate with js-data-schema 2', function (done) {
+    var Guy = store.defineResource({
+      name: 'guy',
+      schema: {
+        id: {
+          type: 'integer'
+        },
+        email: {
+          type: 'string',
+          nullable: false
+        },
+        username: {
+          type: 'string',
+          minLength: 1,
+          nullable: false
+        }
+      },
+      validate: function (resourceName, attrs, cb) {
+        Guy.schema.validate(attrs, {}, function (err) {
+          if (err) {
+            return cb(err);
+          } else {
+            return cb(null, attrs);
+          }
+        });
+      }
+    });
+
+    return Guy.create({
+      email: 'test@test.com'
+    }).then(function () {
+      done('Should not have succeeded');
+    }).catch(function (err) {
+      try {
+        assert.deepEqual(err, {
+          id: {
+            errors: [
+              {
+                rule: 'type',
+                actual: 'undefined',
+                expected: 'integer'
+              }
+            ]
+          },
+          username: {
+            errors: [
+              {
+                rule: 'type',
+                actual: 'undefined',
+                expected: 'string'
+              },
+              {
+                rule: 'nullable',
+                actual: 'x === undefined',
+                expected: 'x !== null && x !== undefined'
+              }
+            ]
+          }
+        });
+        done();
+      } catch (e) {
+        done(e);
+      }
+    });
   });
 });

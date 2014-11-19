@@ -21,6 +21,7 @@ function _injectRelations(definition, injected, options) {
 }
 
 function _getReactFunction(DS, definition, resource) {
+  var name = definition.name;
   return function _react(added, removed, changed, oldValueFn, firstTime) {
     var target = this;
     var item;
@@ -33,12 +34,12 @@ function _getReactFunction(DS, definition, resource) {
     });
 
     if (!DSUtils.isEmpty(added) || !DSUtils.isEmpty(removed) || !DSUtils.isEmpty(changed) || firstTime) {
-      item = DS.get(definition.name, innerId);
+      item = DS.get(name, innerId);
       resource.modified[innerId] = DSUtils.updateTimestamp(resource.modified[innerId]);
       resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
       if (definition.keepChangeHistory) {
         var changeRecord = {
-          resourceName: definition.name,
+          resourceName: name,
           target: item,
           added: added,
           removed: removed,
@@ -51,7 +52,7 @@ function _getReactFunction(DS, definition, resource) {
     }
 
     if (definition.computed) {
-      item = item || DS.get(definition.name, innerId);
+      item = item || DS.get(name, innerId);
       DSUtils.forOwn(definition.computed, function (fn, field) {
         var compute = false;
         // check if required fields changed
@@ -68,17 +69,16 @@ function _getReactFunction(DS, definition, resource) {
     }
 
     if (definition.relations) {
-      item = item || DS.get(definition.name, innerId);
+      item = item || DS.get(name, innerId);
       DSUtils.forEach(definition.relationList, function (def) {
         if (item[def.localField] && (def.localKey in added || def.localKey in removed || def.localKey in changed)) {
-          DS.link(definition.name, item[definition.idAttribute], [def.relation]);
+          DS.link(name, item[definition.idAttribute], [def.relation]);
         }
       });
     }
 
     if (definition.idAttribute in changed) {
-      console.error('Doh! You just changed the primary key of an object! ' +
-      'I don\'t know how to handle this yet, so your data for the "' + definition.name +
+      console.error('Doh! You just changed the primary key of an object! Your data for the' + name +
       '" resource is now in an undefined (probably broken) state.');
     }
   };
@@ -202,10 +202,11 @@ function inject(resourceName, attrs, options) {
     throw new DSErrors.IA(resourceName + '.inject: "attrs" must be an object or an array!');
   }
 
+  var name = definition.name;
   options = DSUtils._(definition, options);
 
   if (options.notify) {
-    options.beforeInject(definition.name, attrs);
+    options.beforeInject(options, attrs);
   }
 
   injected = _inject.call(_this, definition, resource, attrs, options);
@@ -214,10 +215,10 @@ function inject(resourceName, attrs, options) {
   if (options.findInverseLinks) {
     if (DSUtils.isArray(injected)) {
       if (injected.length) {
-        _this.linkInverse(definition.name, injected[0][definition.idAttribute]);
+        _this.linkInverse(name, injected[0][definition.idAttribute]);
       }
     } else {
-      _this.linkInverse(definition.name, injected[definition.idAttribute]);
+      _this.linkInverse(name, injected[definition.idAttribute]);
     }
   }
 
@@ -230,8 +231,8 @@ function inject(resourceName, attrs, options) {
   }
 
   if (options.notify) {
-    options.afterInject(definition.name, injected);
-    _this.emit(definition, 'inject', injected);
+    options.afterInject(options, injected);
+    _this.emit(options, 'inject', injected);
   }
 
   return injected;

@@ -10,7 +10,7 @@ Unlike Backbone and Ember Models, js-data does not require the use of getters an
 
 Supporting relations, computed properties, model lifecycle control and a slew of other features, js-data is the tool for giving your data the respect it deserves.
 
-__Latest Release:__ [1.0.0-alpha.4-3](https://github.com/js-data/js-data/releases/tag/1.0.0-alpha.4-3)
+__Latest Release:__ [1.0.0-alpha.5-0](https://github.com/js-data/js-data/releases/tag/1.0.0-alpha.5-0)
 
 js-data is pre-release. The API is subject to change, though the current api is well tested.
 
@@ -18,9 +18,9 @@ If you want to use js-data, keep a close eye on the changelog. 1.0.0 will introd
 
 ## Supported Platforms
 
-Browsers: Chrome, Firefox, IE 8+, Safari, Opera, iOS Safari 7.1+, Android Browser 2.3+
+Browsers: Chrome, Firefox, IE 9+, Safari, Opera, iOS Safari 7.1+, Android Browser 2.3+
 
-Node: 0.10+ (at least)
+Node: 0.10+
 
 ## Quick Start
 `bower install --save js-data js-data-http` or `npm install --save js-data js-data-http`.

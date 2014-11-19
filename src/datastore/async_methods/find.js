@@ -25,7 +25,7 @@ function find(resourceName, id, options) {
   }).then(function (item) {
       if (!(id in resource.completedQueries)) {
         if (!(id in resource.pendingQueries)) {
-          resource.pendingQueries[id] = _this.getAdapter(definition, options).find(definition, id, options)
+          resource.pendingQueries[id] = _this.getAdapter(options).find(definition, id, options)
             .then(function (data) {
               // Query is no longer pending
               delete resource.pendingQueries[id];
@@ -42,9 +42,9 @@ function find(resourceName, id, options) {
         return item;
       }
     })['catch'](function (err) {
-      delete resource.pendingQueries[id];
-      throw err;
-    });
+    delete resource.pendingQueries[id];
+    throw err;
+  });
 }
 
 module.exports = find;

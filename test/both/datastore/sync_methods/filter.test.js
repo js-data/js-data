@@ -148,6 +148,22 @@ describe('DS#filter', function () {
     assert.deepEqual(JSON.stringify(store.filter('post', params)), JSON.stringify([p1, p4, p5]), 'should accept normal "in" clause');
 
     params.where = {
+      author: {
+        'in': 'John'
+      }
+    };
+
+    assert.deepEqual(JSON.stringify(store.filter('post', params)), JSON.stringify([p1]), 'should accept normal "in" clause with a string');
+
+    params.where = {
+      author: {
+        'notIn': 'John'
+      }
+    };
+
+    assert.deepEqual(JSON.stringify(store.filter('post', params)), JSON.stringify([p2, p3, p4, p5]), 'should accept normal "notIn" clause with a string');
+
+    params.where = {
       age: {
         '|in': [31]
       },

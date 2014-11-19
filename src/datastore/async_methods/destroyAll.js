@@ -19,20 +19,20 @@ function destroyAll(resourceName, params, options) {
     }
   }).then(function () {
       toEject = _this.defaults.defaultFilter.call(_this, resourceName, params);
-      return options.beforeDestroy(resourceName, toEject);
+      return options.beforeDestroy(options, toEject);
     }).then(function () {
       if (options.notify) {
-        _this.emit(definition, 'beforeDestroy', toEject);
+        _this.emit(options, 'beforeDestroy', toEject);
       }
       if (options.eagerEject) {
         ejected = _this.ejectAll(resourceName, params);
       }
-      return _this.getAdapter(definition, options).destroyAll(definition, params, options);
+      return _this.getAdapter(options).destroyAll(definition, params, options);
     }).then(function () {
-      return options.afterDestroy(resourceName, toEject);
+      return options.afterDestroy(options, toEject);
     }).then(function () {
       if (options.notify) {
-        _this.emit(definition, 'afterDestroy', toEject);
+        _this.emit(options, 'afterDestroy', toEject);
       }
       return ejected || _this.ejectAll(resourceName, params);
     })['catch'](function (err) {

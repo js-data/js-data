@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file js-data.js
-* @version 1.0.0-alpha.4-3 - Homepage <http://www.js-data.io/>
+* @version 1.0.0-alpha.5-0 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -2757,40 +2757,40 @@ function create(resourceName, attrs, options) {
       reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isObject(attrs)) {
       reject(new DSErrors.IA('"attrs" must be an object!'));
-    }  else {
+    } else {
       options = DSUtils._(definition, options);
       resolve(attrs);
     }
   });
 
-  if (definition && (options.hasOwnProperty('upsert') ? options.upsert : definition.upsert) && attrs[definition.idAttribute]) {
+  if (definition && options.upsert && attrs[definition.idAttribute]) {
     return _this.update(resourceName, attrs[definition.idAttribute], attrs, options);
   } else {
     return promise
       .then(function (attrs) {
-        return options.beforeValidate.call(attrs, resourceName, attrs);
+        return options.beforeValidate.call(attrs, options, attrs);
       })
       .then(function (attrs) {
-        return options.validate.call(attrs, resourceName, attrs);
+        return options.validate.call(attrs, options, attrs);
       })
       .then(function (attrs) {
-        return options.afterValidate.call(attrs, resourceName, attrs);
+        return options.afterValidate.call(attrs, options, attrs);
       })
       .then(function (attrs) {
-        return options.beforeCreate.call(attrs, resourceName, attrs);
+        return options.beforeCreate.call(attrs, options, attrs);
       })
       .then(function (attrs) {
         if (options.notify) {
-          _this.emit(definition, 'beforeCreate', DSUtils.merge({}, attrs));
+          _this.emit(options, 'beforeCreate', DSUtils.merge({}, attrs));
         }
-        return _this.getAdapter(definition, options).create(definition, attrs, options);
+        return _this.getAdapter(options).create(definition, attrs, options);
       })
-      .then(function (data) {
-        return options.afterCreate.call(data, resourceName, data);
+      .then(function (attrs) {
+        return options.afterCreate.call(attrs, options, attrs);
       })
       .then(function (attrs) {
         if (options.notify) {
-          _this.emit(definition, 'afterCreate', DSUtils.merge({}, attrs));
+          _this.emit(options, 'afterCreate', DSUtils.merge({}, attrs));
         }
         if (options.cacheResponse) {
           var created = _this.inject(definition.name, attrs, options);
@@ -2830,32 +2830,32 @@ function destroy(resourceName, id, options) {
     }
   })
     .then(function (attrs) {
-      return options.beforeDestroy.call(attrs, resourceName, attrs);
+      return options.beforeDestroy.call(attrs, options, attrs);
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(definition, 'beforeDestroy', DSUtils.merge({}, attrs));
+        _this.emit(options, 'beforeDestroy', DSUtils.merge({}, attrs));
       }
       if (options.eagerEject) {
         _this.eject(resourceName, id);
       }
-      return _this.getAdapter(definition, options).destroy(definition, id, options);
+      return _this.getAdapter(options).destroy(definition, id, options);
     })
     .then(function () {
-      return options.afterDestroy.call(item, resourceName, item);
+      return options.afterDestroy.call(item, options, item);
     })
     .then(function (item) {
       if (options.notify) {
-        _this.emit(definition, 'afterDestroy', DSUtils.merge({}, item));
+        _this.emit(options, 'afterDestroy', DSUtils.merge({}, item));
       }
       _this.eject(resourceName, id);
       return id;
     })['catch'](function (err) {
-      if (options.eagerEject && item) {
-        _this.inject(resourceName, item, { notify: false });
-      }
-      throw err;
-    });
+    if (options.eagerEject && item) {
+      _this.inject(resourceName, item, { notify: false });
+    }
+    throw err;
+  });
 }
 
 module.exports = destroy;
@@ -2882,20 +2882,20 @@ function destroyAll(resourceName, params, options) {
     }
   }).then(function () {
       toEject = _this.defaults.defaultFilter.call(_this, resourceName, params);
-      return options.beforeDestroy(resourceName, toEject);
+      return options.beforeDestroy(options, toEject);
     }).then(function () {
       if (options.notify) {
-        _this.emit(definition, 'beforeDestroy', toEject);
+        _this.emit(options, 'beforeDestroy', toEject);
       }
       if (options.eagerEject) {
         ejected = _this.ejectAll(resourceName, params);
       }
-      return _this.getAdapter(definition, options).destroyAll(definition, params, options);
+      return _this.getAdapter(options).destroyAll(definition, params, options);
     }).then(function () {
-      return options.afterDestroy(resourceName, toEject);
+      return options.afterDestroy(options, toEject);
     }).then(function () {
       if (options.notify) {
-        _this.emit(definition, 'afterDestroy', toEject);
+        _this.emit(options, 'afterDestroy', toEject);
       }
       return ejected || _this.ejectAll(resourceName, params);
     })['catch'](function (err) {
@@ -2936,7 +2936,7 @@ function find(resourceName, id, options) {
   }).then(function (item) {
       if (!(id in resource.completedQueries)) {
         if (!(id in resource.pendingQueries)) {
-          resource.pendingQueries[id] = _this.getAdapter(definition, options).find(definition, id, options)
+          resource.pendingQueries[id] = _this.getAdapter(options).find(definition, id, options)
             .then(function (data) {
               // Query is no longer pending
               delete resource.pendingQueries[id];
@@ -2953,9 +2953,9 @@ function find(resourceName, id, options) {
         return item;
       }
     })['catch'](function (err) {
-      delete resource.pendingQueries[id];
-      throw err;
-    });
+    delete resource.pendingQueries[id];
+    throw err;
+  });
 }
 
 module.exports = find;
@@ -3026,7 +3026,7 @@ function findAll(resourceName, params, options) {
   }).then(function (items) {
       if (!(queryHash in resource.completedQueries)) {
         if (!(queryHash in resource.pendingQueries)) {
-          resource.pendingQueries[queryHash] = _this.getAdapter(definition, options).findAll(definition, params, options)
+          resource.pendingQueries[queryHash] = _this.getAdapter(options).findAll(definition, params, options)
             .then(function (data) {
               delete resource.pendingQueries[queryHash];
               if (options.cacheResponse) {
@@ -3260,20 +3260,20 @@ function save(resourceName, id, options) {
       resolve(item);
     }
   }).then(function (attrs) {
-      return options.beforeValidate.call(attrs, resourceName, attrs);
+      return options.beforeValidate.call(attrs, options, attrs);
     })
     .then(function (attrs) {
-      return options.validate.call(attrs, resourceName, attrs);
+      return options.validate.call(attrs, options, attrs);
     })
     .then(function (attrs) {
-      return options.afterValidate.call(attrs, resourceName, attrs);
+      return options.afterValidate.call(attrs, options, attrs);
     })
     .then(function (attrs) {
-      return options.beforeUpdate.call(attrs, resourceName, attrs);
+      return options.beforeUpdate.call(attrs, options, attrs);
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(definition, 'beforeUpdate', DSUtils.merge({}, attrs));
+        _this.emit(options, 'beforeUpdate', DSUtils.merge({}, attrs));
       }
       if (options.changesOnly) {
         var resource = _this.store[resourceName];
@@ -3297,14 +3297,14 @@ function save(resourceName, id, options) {
           attrs = changes;
         }
       }
-      return _this.getAdapter(definition, options).update(definition, id, attrs, options);
+      return _this.getAdapter(options).update(definition, id, attrs, options);
     })
     .then(function (data) {
-      return options.afterUpdate.call(data, resourceName, data);
+      return options.afterUpdate.call(data, options, data);
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(definition, 'afterUpdate', DSUtils.merge({}, attrs));
+        _this.emit(options, 'afterUpdate', DSUtils.merge({}, attrs));
       }
       if (options.cacheResponse) {
         return _this.inject(definition.name, attrs, options);
@@ -3335,29 +3335,29 @@ function update(resourceName, id, attrs, options) {
       resolve(attrs);
     }
   }).then(function (attrs) {
-      return options.beforeValidate.call(attrs, resourceName, attrs);
+      return options.beforeValidate.call(attrs, options, attrs);
     })
     .then(function (attrs) {
-      return options.validate.call(attrs, resourceName, attrs);
+      return options.validate.call(attrs, options, attrs);
     })
     .then(function (attrs) {
-      return options.afterValidate.call(attrs, resourceName, attrs);
+      return options.afterValidate.call(attrs, options, attrs);
     })
     .then(function (attrs) {
-      return options.beforeUpdate.call(attrs, resourceName, attrs);
+      return options.beforeUpdate.call(attrs, options, attrs);
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(definition, 'beforeUpdate', DSUtils.merge({}, attrs));
+        _this.emit(options, 'beforeUpdate', DSUtils.merge({}, attrs));
       }
-      return _this.getAdapter(definition, options).update(definition, id, attrs, options);
+      return _this.getAdapter(options).update(definition, id, attrs, options);
     })
     .then(function (data) {
-      return options.afterUpdate.call(data, resourceName, data);
+      return options.afterUpdate.call(data, options, data);
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(definition, 'afterUpdate', DSUtils.merge({}, attrs));
+        _this.emit(options, 'afterUpdate', DSUtils.merge({}, attrs));
       }
       if (options.cacheResponse) {
         return _this.inject(definition.name, attrs, options);
@@ -3385,29 +3385,29 @@ function updateAll(resourceName, attrs, params, options) {
       resolve(attrs);
     }
   }).then(function (attrs) {
-      return options.beforeValidate.call(attrs, resourceName, attrs);
+      return options.beforeValidate.call(attrs, options, attrs);
     })
     .then(function (attrs) {
-      return options.validate.call(attrs, resourceName, attrs);
+      return options.validate.call(attrs, options, attrs);
     })
     .then(function (attrs) {
-      return options.afterValidate.call(attrs, resourceName, attrs);
+      return options.afterValidate.call(attrs, options, attrs);
     })
     .then(function (attrs) {
-      return options.beforeUpdate.call(attrs, resourceName, attrs);
+      return options.beforeUpdate.call(attrs, options, attrs);
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(definition, 'beforeUpdate', DSUtils.merge({}, attrs));
+        _this.emit(options, 'beforeUpdate', DSUtils.merge({}, attrs));
       }
-      return _this.getAdapter(definition, options).updateAll(definition, attrs, params, options);
+      return _this.getAdapter(options).updateAll(definition, attrs, params, options);
     })
     .then(function (data) {
-      return options.afterUpdate.call(data, resourceName, data);
+      return options.afterUpdate.call(data, options, data);
     })
     .then(function (data) {
       if (options.notify) {
-        _this.emit(definition, 'afterUpdate', DSUtils.merge({}, attrs));
+        _this.emit(options, 'afterUpdate', DSUtils.merge({}, attrs));
       }
       if (options.cacheResponse) {
         return _this.inject(definition.name, data, options);
@@ -3497,6 +3497,7 @@ defaultsPrototype.notify = !!DSUtils.w;
 defaultsPrototype.upsert = !!DSUtils.w;
 defaultsPrototype.cacheResponse = !!DSUtils.w;
 defaultsPrototype.bypassCache = false;
+defaultsPrototype.ignoreMissing = false;
 defaultsPrototype.findInverseLinks = false;
 defaultsPrototype.findBelongsTo = false;
 defaultsPrototype.findHasOn = false;
@@ -3589,9 +3590,17 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
             } else if (op === '<=') {
               keep = first ? (attrs[field] <= val) : keep && (attrs[field] <= val);
             } else if (op === 'in') {
-              keep = first ? DSUtils.contains(val, attrs[field]) : keep && DSUtils.contains(val, attrs[field]);
+              if (DSUtils.isString(val)) {
+                keep = first ? val.indexOf(attrs[field]) !== -1 : keep && val.indexOf(attrs[field]) !== -1;
+              } else {
+                keep = first ? DSUtils.contains(val, attrs[field]) : keep && DSUtils.contains(val, attrs[field]);
+              }
             } else if (op === 'notIn') {
-              keep = first ? !DSUtils.contains(val, attrs[field]) : keep && !DSUtils.contains(val, attrs[field]);
+              if (DSUtils.isString(val)) {
+                keep = first ? val.indexOf(attrs[field]) === -1 : keep && val.indexOf(attrs[field]) === -1;
+              } else {
+                keep = first ? !DSUtils.contains(val, attrs[field]) : keep && !DSUtils.contains(val, attrs[field]);
+              }
             } else if (op === '|==') {
               keep = first ? (attrs[field] == val) : keep || (attrs[field] == val);
             } else if (op === '|===') {
@@ -3609,9 +3618,17 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
             } else if (op === '|<=') {
               keep = first ? (attrs[field] <= val) : keep || (attrs[field] <= val);
             } else if (op === '|in') {
-              keep = first ? DSUtils.contains(val, attrs[field]) : keep || DSUtils.contains(val, attrs[field]);
+              if (DSUtils.isString(val)) {
+                keep = first ? val.indexOf(attrs[field]) !== -1 : keep || val.indexOf(attrs[field]) !== -1;
+              } else {
+                keep = first ? DSUtils.contains(val, attrs[field]) : keep || DSUtils.contains(val, attrs[field]);
+              }
             } else if (op === '|notIn') {
-              keep = first ? !DSUtils.contains(val, attrs[field]) : keep || !DSUtils.contains(val, attrs[field]);
+              if (DSUtils.isString(val)) {
+                keep = first ? val.indexOf(attrs[field]) === -1 : keep || val.indexOf(attrs[field]) === -1;
+              } else {
+                keep = first ? !DSUtils.contains(val, attrs[field]) : keep || !DSUtils.contains(val, attrs[field]);
+              }
             }
             first = false;
           });
@@ -3715,9 +3732,9 @@ function DS(options) {
 
 var dsPrototype = DS.prototype;
 
-dsPrototype.getAdapter = function (def, options) {
+dsPrototype.getAdapter = function (options) {
   options = options || {};
-  return this.adapters[options.adapter] || this.adapters[def.defaultAdapter];
+  return this.adapters[options.adapter] || this.adapters[options.defaultAdapter];
 };
 
 dsPrototype.registerAdapter = function (name, Adapter, options) {
@@ -3927,9 +3944,11 @@ function defineResource(definition) {
     if (definition.schema && _this.schemator) {
       def.schema = _this.schemator.defineSchema(def.name, definition.schema);
 
-      if (!('validate' in definition)) {
+      if (!definition.hasOwnProperty('validate')) {
         def.validate = function (resourceName, attrs, cb) {
-          def.schema.validate(attrs, true, function (err) {
+          def.schema.validate(attrs, {
+            ignoreMissing: def.ignoreMissing
+          }, function (err) {
             if (err) {
               return cb(err);
             } else {
@@ -4043,7 +4062,7 @@ function eject(resourceName, id, options) {
   }
   if (found) {
     if (options.notify) {
-      definition.beforeEject(definition.name, item);
+      definition.beforeEject(options, item);
     }
     _this.unlinkInverse(definition.name, id);
     resource.collection.splice(i, 1);
@@ -4065,7 +4084,7 @@ function eject(resourceName, id, options) {
     resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
     if (options.notify) {
-      definition.afterEject(definition.name, item);
+      definition.afterEject(options, item);
       _this.emit(definition, 'eject', item);
     }
 
@@ -4251,7 +4270,7 @@ function createInstance(resourceName, attrs, options) {
   options = DSUtils._(definition, options);
 
   if (options.notify) {
-    options.beforeCreateInstance(resourceName, attrs);
+    options.beforeCreateInstance(options, attrs);
   }
 
   if (options.useClass) {
@@ -4262,7 +4281,7 @@ function createInstance(resourceName, attrs, options) {
   }
   DSUtils.deepMixIn(item, attrs);
   if (options.notify) {
-    options.afterCreateInstance(resourceName, attrs);
+    options.afterCreateInstance(options, attrs);
   }
   return item;
 }
@@ -4437,6 +4456,7 @@ function _injectRelations(definition, injected, options) {
 }
 
 function _getReactFunction(DS, definition, resource) {
+  var name = definition.name;
   return function _react(added, removed, changed, oldValueFn, firstTime) {
     var target = this;
     var item;
@@ -4449,12 +4469,12 @@ function _getReactFunction(DS, definition, resource) {
     });
 
     if (!DSUtils.isEmpty(added) || !DSUtils.isEmpty(removed) || !DSUtils.isEmpty(changed) || firstTime) {
-      item = DS.get(definition.name, innerId);
+      item = DS.get(name, innerId);
       resource.modified[innerId] = DSUtils.updateTimestamp(resource.modified[innerId]);
       resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
       if (definition.keepChangeHistory) {
         var changeRecord = {
-          resourceName: definition.name,
+          resourceName: name,
           target: item,
           added: added,
           removed: removed,
@@ -4467,7 +4487,7 @@ function _getReactFunction(DS, definition, resource) {
     }
 
     if (definition.computed) {
-      item = item || DS.get(definition.name, innerId);
+      item = item || DS.get(name, innerId);
       DSUtils.forOwn(definition.computed, function (fn, field) {
         var compute = false;
         // check if required fields changed
@@ -4484,17 +4504,16 @@ function _getReactFunction(DS, definition, resource) {
     }
 
     if (definition.relations) {
-      item = item || DS.get(definition.name, innerId);
+      item = item || DS.get(name, innerId);
       DSUtils.forEach(definition.relationList, function (def) {
         if (item[def.localField] && (def.localKey in added || def.localKey in removed || def.localKey in changed)) {
-          DS.link(definition.name, item[definition.idAttribute], [def.relation]);
+          DS.link(name, item[definition.idAttribute], [def.relation]);
         }
       });
     }
 
     if (definition.idAttribute in changed) {
-      console.error('Doh! You just changed the primary key of an object! ' +
-      'I don\'t know how to handle this yet, so your data for the "' + definition.name +
+      console.error('Doh! You just changed the primary key of an object! Your data for the' + name +
       '" resource is now in an undefined (probably broken) state.');
     }
   };
@@ -4618,10 +4637,11 @@ function inject(resourceName, attrs, options) {
     throw new DSErrors.IA(resourceName + '.inject: "attrs" must be an object or an array!');
   }
 
+  var name = definition.name;
   options = DSUtils._(definition, options);
 
   if (options.notify) {
-    options.beforeInject(definition.name, attrs);
+    options.beforeInject(options, attrs);
   }
 
   injected = _inject.call(_this, definition, resource, attrs, options);
@@ -4630,10 +4650,10 @@ function inject(resourceName, attrs, options) {
   if (options.findInverseLinks) {
     if (DSUtils.isArray(injected)) {
       if (injected.length) {
-        _this.linkInverse(definition.name, injected[0][definition.idAttribute]);
+        _this.linkInverse(name, injected[0][definition.idAttribute]);
       }
     } else {
-      _this.linkInverse(definition.name, injected[definition.idAttribute]);
+      _this.linkInverse(name, injected[definition.idAttribute]);
     }
   }
 
@@ -4646,8 +4666,8 @@ function inject(resourceName, attrs, options) {
   }
 
   if (options.notify) {
-    options.afterInject(definition.name, injected);
-    _this.emit(definition, 'inject', injected);
+    options.afterInject(options, injected);
+    _this.emit(options, 'inject', injected);
   }
 
   return injected;
