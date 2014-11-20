@@ -236,7 +236,7 @@ function isBlacklisted(prop, blacklist) {
   return !!matches;
 }
 
-module.exports = {
+var DSUtils = {
   w: w,
   DSBinaryHeap: DSBinaryHeap,
   isBoolean: require('mout/lang/isBoolean'),
@@ -249,7 +249,7 @@ module.exports = {
   isRegExp: isRegExp,
   toJson: JSON.stringify,
   fromJson: function (json) {
-    return this.isString(json) ? JSON.parse(json) : json;
+    return DSUtils.isString(json) ? JSON.parse(json) : json;
   },
   makePath: require('mout/string/makePath'),
   upperCase: require('mout/string/upperCase'),
@@ -270,33 +270,32 @@ module.exports = {
   sort: require('mout/array/sort'),
   // Options that inherit from defaults
   _: function (parent, options) {
-    var _this = this;
     options = options || {};
     if (options && options.constructor === parent.constructor) {
       return options;
-    } else if (!_this.isObject(options)) {
+    } else if (!DSUtils.isObject(options)) {
       throw new DSErrors.IA('"options" must be an object!');
     }
-    _this.forEach(toPromisify, function (name) {
+    DSUtils.forEach(toPromisify, function (name) {
       if (typeof options[name] === 'function' && options[name].toString().indexOf('var args = Array') === -1) {
-        options[name] = _this.promisify(options[name]);
+        options[name] = DSUtils.promisify(options[name]);
       }
     });
     var O = function Options(attrs) {
-      _this.mixIn(this, attrs);
+      DSUtils.mixIn(this, attrs);
     };
     O.prototype = parent;
     return new O(options);
   },
   resolveItem: function (resource, idOrInstance) {
-    if (resource && (this.isString(idOrInstance) || this.isNumber(idOrInstance))) {
+    if (resource && (DSUtils.isString(idOrInstance) || DSUtils.isNumber(idOrInstance))) {
       return resource.index[idOrInstance] || idOrInstance;
     } else {
       return idOrInstance;
     }
   },
   resolveId: function (definition, idOrInstance) {
-    if (this.isString(idOrInstance) || this.isNumber(idOrInstance)) {
+    if (DSUtils.isString(idOrInstance) || DSUtils.isNumber(idOrInstance)) {
       return idOrInstance;
     } else if (idOrInstance && definition) {
       return idOrInstance[definition.idAttribute] || idOrInstance;
@@ -313,7 +312,7 @@ module.exports = {
       args.push(_this[dep]);
     });
     // compute property
-    this[field] = fn[fn.length - 1].apply(this, args);
+    _this[field] = fn[fn.length - 1].apply(_this, args);
   },
   diffObjectFromOldObject: function (object, oldObject, blacklist) {
     var added = {};
@@ -362,7 +361,7 @@ module.exports = {
     };
   },
   promisify: function (fn, target) {
-    var Promise = this.Promise;
+    var Promise = DSUtils.Promise;
     if (!fn) {
       return;
     } else if (typeof fn !== 'function') {
@@ -393,3 +392,5 @@ module.exports = {
   },
   Events: Events
 };
+
+module.exports = DSUtils;

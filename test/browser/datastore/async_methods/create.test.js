@@ -22,7 +22,7 @@ describe('DS#create', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
       assert.equal(_this.requests[0].method, 'post');
       assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ author: 'John', age: 30 }));
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(p1));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(p1));
     }, 30);
   });
   it('should create an item and save it to the server but not inject the result', function (done) {
@@ -47,7 +47,7 @@ describe('DS#create', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
       assert.equal(_this.requests[0].method, 'post');
       assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ author: 'John', age: 30 }));
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(p1));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(p1));
     }, 30);
   });
   it('should work with the upsert option', function (done) {
@@ -79,7 +79,7 @@ describe('DS#create', function () {
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/posts');
         assert.equal(_this.requests[1].method, 'post');
         assert.equal(_this.requests[1].requestBody, DSUtils.toJson({ author: 'Sue', age: 70, id: 6 }));
-        _this.requests[1].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(p2));
+        _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(p2));
       }, 30);
     }).catch(function (err) {
       console.error(err.stack);
@@ -91,7 +91,7 @@ describe('DS#create', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
       assert.equal(_this.requests[0].method, 'put');
       assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ author: 'John', age: 30, id: 5 }));
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(p1));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(p1));
     }, 30);
   });
   it('should create an item that includes relations, save them to the server and inject the results', function (done) {
@@ -145,7 +145,7 @@ describe('DS#create', function () {
           email: 'sally@test.com'
         }
       }));
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(payload));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(payload));
     }, 30);
   });
   it('should handle nested resources', function (done) {
@@ -198,7 +198,7 @@ describe('DS#create', function () {
           assert.equal(_this.requests[2].url, 'http://test.js-data.io/comment');
           assert.equal(_this.requests[2].method, 'post');
           assert.equal(_this.requests[2].requestBody, DSUtils.toJson({ content: 'test', approvedBy: 4 }));
-          _this.requests[2].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(testComment2));
+          _this.requests[2].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment2));
         }, 30);
       }).catch(function () {
         done('Should not have failed!');
@@ -209,7 +209,7 @@ describe('DS#create', function () {
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/user/4/comment');
         assert.equal(_this.requests[1].method, 'post');
         assert.equal(_this.requests[1].requestBody, DSUtils.toJson({ content: 'test' }));
-        _this.requests[1].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(testComment2));
+        _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment2));
       }, 30);
     }).catch(function () {
       done('Should not have failed!');
@@ -220,7 +220,7 @@ describe('DS#create', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/user/4/comment');
       assert.equal(_this.requests[0].method, 'post');
       assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ content: 'test', approvedBy: 4 }));
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(testComment));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment));
     }, 30);
   });
   it('should find inverse links', function (done) {
@@ -253,9 +253,80 @@ describe('DS#create', function () {
           organizationId: 77,
           id: 88
         }));
-        _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson({
+        _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({
           organizationId: 77,
           id: 88
+        }));
+      } catch (err) {
+        console.error(err.stack);
+      }
+    }, 30);
+  });
+  it('should use the fallback strategy', function (done) {
+    var _this = this;
+
+    var Thing = store.defineResource({
+      name: 'thing',
+      strategy: 'fallback',
+      fallbackAdapters: ['http', 'localstorage']
+    });
+
+    Thing.create({
+      thing: 'stuff'
+    }).then(function (thing) {
+      assert.equal(localStorage.getItem(store.adapters.localstorage.getIdPath(Thing, Thing, thing.id)), DSUtils.toJson(thing));
+      done();
+    }).catch(function (err) {
+      console.log(err.stack);
+      done('Should not have failed!');
+    });
+
+    setTimeout(function () {
+      try {
+        assert.equal(1, _this.requests.length);
+        assert.equal(_this.requests[0].url, 'http://test.js-data.io/thing');
+        assert.equal(_this.requests[0].method, 'post');
+        assert.equal(_this.requests[0].requestBody, DSUtils.toJson({
+          thing: 'stuff'
+        }));
+        _this.requests[0].respond(500, { 'Content-Type': 'application/json' }, '500 - Internal Server Error');
+      } catch (err) {
+        console.error(err.stack);
+      }
+    }, 30);
+  });
+  it('should use the series strategy', function (done) {
+    var _this = this;
+
+    var Thing = store.defineResource({
+      name: 'thing',
+      strategy: 'series',
+      seriesAdapters: ['http', 'localstorage']
+    });
+
+    var thing;
+
+    Thing.create({
+      thing: 'stuff'
+    }).then(function (thing) {
+      assert.equal(localStorage.getItem(store.adapters.localstorage.getIdPath(Thing, Thing, thing.id)), DSUtils.toJson(thing));
+      done();
+    }).catch(function (err) {
+      console.log(err.stack);
+      done('Should not have failed!');
+    });
+
+    setTimeout(function () {
+      try {
+        assert.equal(1, _this.requests.length);
+        assert.equal(_this.requests[0].url, 'http://test.js-data.io/thing');
+        assert.equal(_this.requests[0].method, 'post');
+        assert.equal(_this.requests[0].requestBody, DSUtils.toJson({
+          thing: 'stuff'
+        }));
+        _this.requests[0].respond(201, { 'Content-Type': 'application/json' }, DSUtils.toJson({
+          thing: 'stuff',
+          id: 1
         }));
       } catch (err) {
         console.error(err.stack);

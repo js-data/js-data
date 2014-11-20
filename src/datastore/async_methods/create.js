@@ -1,3 +1,4 @@
+/* jshint -W082 */
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -39,7 +40,41 @@ function create(resourceName, attrs, options) {
         if (options.notify) {
           _this.emit(options, 'beforeCreate', DSUtils.merge({}, attrs));
         }
-        return _this.getAdapter(options).create(definition, attrs, options);
+        if (options.strategy === 'single') {
+          return _this.getAdapter(options).create(definition, attrs, options);
+        } else if (options.strategy === 'fallback') {
+          function makeFallbackCall(index) {
+            return _this.getAdapter(options.fallbackAdapters[index]).create(definition, attrs, options)['catch'](function (err) {
+              index++;
+              if (index < options.fallbackAdapters.length) {
+                return makeFallbackCall(index);
+              } else {
+                return Promise.reject(err);
+              }
+            });
+          }
+
+          return makeFallbackCall(0);
+        } else if (options.strategy === 'parallel') {
+          var tasks = [];
+          DSUtils.forEach(options.parallelAdapters, function (adapter) {
+            tasks.push(_this.getAdapter(adapter).create(definition, attrs, options));
+          });
+          return Promise.all(tasks);
+        } else if (options.strategy === 'series') {
+          function makeSeriesCall(index, a) {
+            return _this.getAdapter(options.seriesAdapters[index]).create(definition, a, options).then(function (data) {
+              index++;
+              if (index < options.seriesAdapters.length) {
+                return makeSeriesCall(index, data);
+              } else {
+                return data;
+              }
+            });
+          }
+
+          return makeSeriesCall(0, attrs);
+        }
       })
       .then(function (attrs) {
         return options.afterCreate.call(attrs, options, attrs);

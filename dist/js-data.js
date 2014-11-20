@@ -2742,6 +2742,7 @@ var toString = require('../lang/toString');
 
 
 },{"../lang/toString":31}],49:[function(require,module,exports){
+/* jshint -W082 */
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -2783,7 +2784,41 @@ function create(resourceName, attrs, options) {
         if (options.notify) {
           _this.emit(options, 'beforeCreate', DSUtils.merge({}, attrs));
         }
-        return _this.getAdapter(options).create(definition, attrs, options);
+        if (options.strategy === 'single') {
+          return _this.getAdapter(options).create(definition, attrs, options);
+        } else if (options.strategy === 'fallback') {
+          function makeFallbackCall(index) {
+            return _this.getAdapter(options.fallbackAdapters[index]).create(definition, attrs, options)['catch'](function (err) {
+              index++;
+              if (index < options.fallbackAdapters.length) {
+                return makeFallbackCall(index);
+              } else {
+                return Promise.reject(err);
+              }
+            });
+          }
+
+          return makeFallbackCall(0);
+        } else if (options.strategy === 'parallel') {
+          var tasks = [];
+          DSUtils.forEach(options.parallelAdapters, function (adapter) {
+            tasks.push(_this.getAdapter(adapter).create(definition, attrs, options));
+          });
+          return Promise.all(tasks);
+        } else if (options.strategy === 'series') {
+          function makeSeriesCall(index, a) {
+            return _this.getAdapter(options.seriesAdapters[index]).create(definition, a, options).then(function (data) {
+              index++;
+              if (index < options.seriesAdapters.length) {
+                return makeSeriesCall(index, data);
+              } else {
+                return data;
+              }
+            });
+          }
+
+          return makeSeriesCall(0, attrs);
+        }
       })
       .then(function (attrs) {
         return options.afterCreate.call(attrs, options, attrs);
@@ -3487,6 +3522,10 @@ defaultsPrototype.eagerEject = false;
 defaultsPrototype.eagerInject = false;
 defaultsPrototype.allowSimpleWhere = true;
 defaultsPrototype.defaultAdapter = 'http';
+defaultsPrototype.strategy = 'single';
+defaultsPrototype.parallelAdapters = ['http'];
+defaultsPrototype.fallbackAdapters = ['http'];
+defaultsPrototype.seriesAdapters = ['http'];
 defaultsPrototype.loadFromServer = false;
 defaultsPrototype.notify = !!DSUtils.w;
 defaultsPrototype.upsert = !!DSUtils.w;
@@ -3728,8 +3767,22 @@ function DS(options) {
 var dsPrototype = DS.prototype;
 
 dsPrototype.getAdapter = function (options) {
+  var errorIfNotExist = false;
   options = options || {};
-  return this.adapters[options.adapter] || this.adapters[options.defaultAdapter];
+  if (DSUtils.isString(options)) {
+    errorIfNotExist = true;
+    options = {
+      adapter: options
+    };
+  }
+  var adapter = this.adapters[options.adapter];
+  if (adapter) {
+    return adapter;
+  } else if (errorIfNotExist) {
+    throw new Error(options.adapter + ' is not a registered adapter!');
+  } else {
+    return this.adapters[options.defaultAdapter];
+  }
 };
 
 dsPrototype.registerAdapter = function (name, Adapter, options) {
@@ -5165,7 +5218,7 @@ function isBlacklisted(prop, blacklist) {
   return !!matches;
 }
 
-module.exports = {
+var DSUtils = {
   w: w,
   DSBinaryHeap: DSBinaryHeap,
   isBoolean: require('mout/lang/isBoolean'),
@@ -5178,7 +5231,7 @@ module.exports = {
   isRegExp: isRegExp,
   toJson: JSON.stringify,
   fromJson: function (json) {
-    return this.isString(json) ? JSON.parse(json) : json;
+    return DSUtils.isString(json) ? JSON.parse(json) : json;
   },
   makePath: require('mout/string/makePath'),
   upperCase: require('mout/string/upperCase'),
@@ -5199,33 +5252,32 @@ module.exports = {
   sort: require('mout/array/sort'),
   // Options that inherit from defaults
   _: function (parent, options) {
-    var _this = this;
     options = options || {};
     if (options && options.constructor === parent.constructor) {
       return options;
-    } else if (!_this.isObject(options)) {
+    } else if (!DSUtils.isObject(options)) {
       throw new DSErrors.IA('"options" must be an object!');
     }
-    _this.forEach(toPromisify, function (name) {
+    DSUtils.forEach(toPromisify, function (name) {
       if (typeof options[name] === 'function' && options[name].toString().indexOf('var args = Array') === -1) {
-        options[name] = _this.promisify(options[name]);
+        options[name] = DSUtils.promisify(options[name]);
       }
     });
     var O = function Options(attrs) {
-      _this.mixIn(this, attrs);
+      DSUtils.mixIn(this, attrs);
     };
     O.prototype = parent;
     return new O(options);
   },
   resolveItem: function (resource, idOrInstance) {
-    if (resource && (this.isString(idOrInstance) || this.isNumber(idOrInstance))) {
+    if (resource && (DSUtils.isString(idOrInstance) || DSUtils.isNumber(idOrInstance))) {
       return resource.index[idOrInstance] || idOrInstance;
     } else {
       return idOrInstance;
     }
   },
   resolveId: function (definition, idOrInstance) {
-    if (this.isString(idOrInstance) || this.isNumber(idOrInstance)) {
+    if (DSUtils.isString(idOrInstance) || DSUtils.isNumber(idOrInstance)) {
       return idOrInstance;
     } else if (idOrInstance && definition) {
       return idOrInstance[definition.idAttribute] || idOrInstance;
@@ -5242,7 +5294,7 @@ module.exports = {
       args.push(_this[dep]);
     });
     // compute property
-    this[field] = fn[fn.length - 1].apply(this, args);
+    _this[field] = fn[fn.length - 1].apply(_this, args);
   },
   diffObjectFromOldObject: function (object, oldObject, blacklist) {
     var added = {};
@@ -5291,7 +5343,7 @@ module.exports = {
     };
   },
   promisify: function (fn, target) {
-    var Promise = this.Promise;
+    var Promise = DSUtils.Promise;
     if (!fn) {
       return;
     } else if (typeof fn !== 'function') {
@@ -5322,6 +5374,8 @@ module.exports = {
   },
   Events: Events
 };
+
+module.exports = DSUtils;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./errors":70,"es6-promise":2,"mout/array/contains":4,"mout/array/filter":5,"mout/array/find":6,"mout/array/forEach":8,"mout/array/remove":11,"mout/array/slice":12,"mout/array/sort":13,"mout/array/toLookup":14,"mout/lang/isArray":20,"mout/lang/isBoolean":21,"mout/lang/isEmpty":22,"mout/lang/isFunction":23,"mout/lang/isNumber":25,"mout/lang/isObject":26,"mout/lang/isRegExp":28,"mout/lang/isString":29,"mout/object/deepMixIn":33,"mout/object/forOwn":35,"mout/object/merge":37,"mout/object/mixIn":38,"mout/object/pick":40,"mout/object/set":41,"mout/string/makePath":44,"mout/string/pascalCase":45,"mout/string/upperCase":48}]},{},[71])(71)
