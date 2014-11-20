@@ -16,6 +16,17 @@ js-data is pre-release. The API is subject to change, though the current api is 
 
 If you want to use js-data, keep a close eye on the changelog. 1.0.0 will introduce strict semver (until then, minor number is bumped for breaking changes).
 
+## Project Status
+
+| Project | js-data |
+| ------ | ------ |
+| Bower | [![Bower version](https://badge.fury.io/bo/js-data.png)](http://badge.fury.io/bo/js-data) |
+| NPM | [![NPM version](https://badge.fury.io/js/js-data.png)](http://badge.fury.io/js/js-data) |
+| Build Status | [![Circle CI](https://circleci.com/gh/js-data/js-data/tree/master.png?style=badge)](https://circleci.com/gh/js-data/js-data/tree/master) |
+| Code Climate | [![Code Climate](https://codeclimate.com/github/js-data/js-data.png)](https://codeclimate.com/github/js-data/js-data) |
+| Dependency Status | [![Dependency Status](https://gemnasium.com/js-data/js-data.png)](https://gemnasium.com/js-data/js-data) |
+| Coverage | [![Coverage Status](https://coveralls.io/repos/js-data/js-data/badge.png?branch=master)](https://coveralls.io/r/js-data/js-data?branch=master) |
+
 ## Supported Platforms
 
 Browsers: Chrome, Firefox, IE 9+, Safari, Opera, iOS Safari 7.1+, Android Browser 2.3+
