@@ -87,7 +87,7 @@ module.exports = function (grunt) {
         preprocessors: {}
       },
       min: {
-        browsers: ['Firefox'],
+        browsers: ['Chrome', 'Firefox', 'PhantomJS'],
         options: {
           files: [
             'dist/js-data.min.js',
@@ -101,7 +101,7 @@ module.exports = function (grunt) {
         }
       },
       ci: {
-        browsers: ['Firefox']
+        browsers: ['Chrome', 'Firefox', 'PhantomJS']
       }
     },
     coveralls: {

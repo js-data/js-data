@@ -2045,7 +2045,7 @@ var mixIn = require('../object/mixIn');
         var flags = '';
         flags += r.multiline ? 'm' : '';
         flags += r.global ? 'g' : '';
-        flags += r.ignorecase ? 'i' : '';
+        flags += r.ignoreCase ? 'i' : '';
         return new RegExp(r.source, flags);
     }
 
