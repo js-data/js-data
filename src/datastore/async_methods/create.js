@@ -60,7 +60,14 @@ function create(resourceName, attrs, options) {
           DSUtils.forEach(options.parallelAdapters, function (adapter) {
             tasks.push(_this.getAdapter(adapter).create(definition, attrs, options));
           });
-          return Promise.all(tasks);
+          return DSUtils.Promise.all(tasks).then(function (results) {
+            DSUtils.forEach(results, function (r, i) {
+              if (DSUtils.isObject(r) && i) {
+                DSUtils.deepMixIn(results[0], r);
+              }
+            });
+            return results[0];
+          });
         } else if (options.strategy === 'series') {
           function makeSeriesCall(index, a) {
             return _this.getAdapter(options.seriesAdapters[index]).create(definition, a, options).then(function (data) {

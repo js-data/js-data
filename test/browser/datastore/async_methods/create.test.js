@@ -333,4 +333,45 @@ describe('DS#create', function () {
       }
     }, 30);
   });
+  it('should use the parallel strategy', function (done) {
+    var _this = this;
+
+    var Thing = store.defineResource({
+      name: 'thing',
+      strategy: 'parallel',
+      parallelAdapters: ['http', 'localstorage']
+    });
+
+    var thing;
+
+    Thing.create({
+      thing: 'stuff',
+      id: 1
+    }, { upsert: false }).then(function (thing) {
+      console.log(thing);
+      assert.equal(localStorage.getItem(store.adapters.localstorage.getIdPath(Thing, Thing, thing.id)), DSUtils.toJson(thing));
+      done();
+    }).catch(function (err) {
+      console.log(err.stack);
+      done('Should not have failed!');
+    });
+
+    setTimeout(function () {
+      try {
+        assert.equal(1, _this.requests.length);
+        assert.equal(_this.requests[0].url, 'http://test.js-data.io/thing');
+        assert.equal(_this.requests[0].method, 'post');
+        assert.equal(_this.requests[0].requestBody, DSUtils.toJson({
+          thing: 'stuff',
+          id: 1
+        }));
+        _this.requests[0].respond(201, { 'Content-Type': 'application/json' }, DSUtils.toJson({
+          thing: 'stuff',
+          id: 1
+        }));
+      } catch (err) {
+        console.error(err.stack);
+      }
+    }, 30);
+  });
 });
