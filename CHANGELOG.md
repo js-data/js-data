@@ -1,3 +1,8 @@
+##### 1.0.0-alpha.5-2 - 23 November 2014
+
+###### Backwards compatible API changes
+- items don't have to be in the data store to call destroy on them anymore
+
 ##### 1.0.0-alpha.5-1 - 19 November 2014
 
 Removed DSUtils.deepFreeze

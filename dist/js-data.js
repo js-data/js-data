@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file js-data.js
-* @version 1.0.0-alpha.5-1 - Homepage <http://www.js-data.io/>
+* @version 1.0.0-alpha.5-2 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -2821,10 +2821,8 @@ function destroy(resourceName, id, options) {
       reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
       reject(new DSErrors.IA('"id" must be a string or a number!'));
-    } else if (!_this.get(resourceName, id)) {
-      reject(new DSErrors.R('id "' + id + '" not found in cache!'));
     } else {
-      item = _this.get(resourceName, id);
+      item = _this.get(resourceName, id) || { id: id };
       options = DSUtils._(definition, options);
       resolve(item);
     }
