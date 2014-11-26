@@ -124,6 +124,7 @@ beforeEach(function () {
     keepChangeHistory: true,
     endpoint: '/posts'
   });
+
   User = store.defineResource({
     name: 'user',
     relations: {

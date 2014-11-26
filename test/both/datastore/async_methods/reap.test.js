@@ -1,22 +1,26 @@
 describe('DS#reap', function () {
   it('should throw an error when method pre-conditions are not met', function () {
-    store.reap('does not exist').then(function () {
+    var tasks = [];
+
+    tasks.push(store.reap('does not exist').then(function () {
       fail('should not have succeeded');
     }).catch(function (err) {
       assert.isTrue(err instanceof store.errors.NonexistentResourceError);
       assert.equal(err.message, 'does not exist is not a registered resource!');
-    });
+    }));
 
     DSUtils.forEach(TYPES_EXCEPT_OBJECT, function (key) {
       if (key) {
-        store.reap('post', 5).then(function () {
+        tasks.push(store.reap('post', 5).then(function () {
           fail('should not have succeeded');
         }).catch(function (err) {
           assert.isTrue(err instanceof store.errors.IllegalArgumentError);
           assert.equal(err.message, '"options" must be an object!');
-        });
+        }));
       }
     });
+
+    return store.utils.Promise.all(tasks);
   });
   it('should order items by expire date', function (done) {
     var Thing = store.defineResource({

@@ -42,7 +42,9 @@ function find(resourceName, id, options) {
         return item;
       }
     })['catch'](function (err) {
-    delete resource.pendingQueries[id];
+    if (resource) {
+      delete resource.pendingQueries[id];
+    }
     throw err;
   });
 }

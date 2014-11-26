@@ -29,10 +29,7 @@ try {
   w = {};
 } catch (e) {
   w = null;
-  if (!global.Promise.prototype['finally']) {
-    global.Promise.prototype['finally'] = finallyPolyfill;
-  }
-  _Promise = global.Promise;
+  _Promise = require('bluebird');
 }
 
 function updateTimestamp(timestamp) {

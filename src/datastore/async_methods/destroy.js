@@ -40,7 +40,7 @@ function destroy(resourceName, id, options) {
       _this.eject(resourceName, id);
       return id;
     })['catch'](function (err) {
-    if (options.eagerEject && item) {
+    if (options && options.eagerEject && item) {
       _this.inject(resourceName, item, { notify: false });
     }
     throw err;

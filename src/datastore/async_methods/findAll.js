@@ -82,9 +82,11 @@ function findAll(resourceName, params, options) {
         return items;
       }
     })['catch'](function (err) {
+    if (resource) {
       delete resource.pendingQueries[queryHash];
-      throw err;
-    });
+    }
+    throw err;
+  });
 }
 
 module.exports = findAll;

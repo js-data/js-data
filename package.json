@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "1.0.0-alpha.5-2",
+  "version": "1.0.0-alpha.5-3",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -66,6 +66,7 @@
     "test": "grunt test"
   },
   "dependencies": {
+    "bluebird": "2.3.11",
     "es6-promise": "2.0.0",
     "mout": "0.11.0"
   }

@@ -119,14 +119,6 @@ module.exports = function (grunt) {
     }
   });
 
-  grunt.registerTask('version', function (filePath) {
-    var file = grunt.file.read(filePath);
-
-    file = file.replace(/<%= pkg\.version %>/gi, pkg.version);
-
-    grunt.file.write(filePath, file);
-  });
-
   grunt.registerTask('banner', function () {
     var file = grunt.file.read('dist/js-data.js');
 

@@ -1,3 +1,8 @@
+##### 1.0.0-alpha.5-3 - 26 November 2014
+
+###### Backwards compatible API changes
+- Server-side js-data now uses the Bluebird promise library
+
 ##### 1.0.0-alpha.5-2 - 23 November 2014
 
 ###### Backwards compatible API changes
