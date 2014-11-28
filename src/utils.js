@@ -233,7 +233,7 @@ function isBlacklisted(prop, blacklist) {
   return !!matches;
 }
 
-module.exports = {
+var DSUtils = {
   w: w,
   DSBinaryHeap: DSBinaryHeap,
   isBoolean: require('mout/lang/isBoolean'),
@@ -390,3 +390,25 @@ module.exports = {
   },
   Events: Events
 };
+
+function intersection(array1, array2) {
+  if (!array1 || !array2) {
+    return [];
+  }
+  var result = [];
+  var item;
+  for (var i = 0, length = array1.length; i < length; i++) {
+    item = array1[i];
+    if (DSUtils.contains(result, item)) {
+      continue;
+    }
+    if (DSUtils.contains(array2, item)) {
+      result.push(item);
+    }
+  }
+  return result;
+}
+
+DSUtils.intersection = intersection;
+
+module.exports = DSUtils;

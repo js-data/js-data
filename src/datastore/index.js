@@ -162,6 +162,10 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
               keep = first ? (attrs[field] < val) : keep && (attrs[field] < val);
             } else if (op === '<=') {
               keep = first ? (attrs[field] <= val) : keep && (attrs[field] <= val);
+            } else if (op === 'isectEmpty') {
+              keep = first ? !DSUtils.intersection((attrs[field] || []), (val || [])).length : keep && !DSUtils.intersection((attrs[field] || []), (val || [])).length;
+            } else if (op === 'isectNotEmpty') {
+              keep = first ? DSUtils.intersection((attrs[field] || []), (val || [])).length : keep && DSUtils.intersection((attrs[field] || []), (val || [])).length;
             } else if (op === 'in') {
               if (DSUtils.isString(val)) {
                 keep = first ? val.indexOf(attrs[field]) !== -1 : keep && val.indexOf(attrs[field]) !== -1;
@@ -190,6 +194,10 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
               keep = first ? (attrs[field] < val) : keep || (attrs[field] < val);
             } else if (op === '|<=') {
               keep = first ? (attrs[field] <= val) : keep || (attrs[field] <= val);
+            } else if (op === '|isectEmpty') {
+              keep = first ? !DSUtils.intersection((attrs[field] || []), (val || [])).length : keep || !DSUtils.intersection((attrs[field] || []), (val || [])).length;
+            } else if (op === '|isectNotEmpty') {
+              keep = first ? DSUtils.intersection((attrs[field] || []), (val || [])).length : keep || DSUtils.intersection((attrs[field] || []), (val || [])).length;
             } else if (op === '|in') {
               if (DSUtils.isString(val)) {
                 keep = first ? val.indexOf(attrs[field]) !== -1 : keep || val.indexOf(attrs[field]) !== -1;

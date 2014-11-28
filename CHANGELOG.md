@@ -1,3 +1,11 @@
+##### 1.0.0-alpha.5-3 - 28 November 2014
+
+###### Backwards compatible API changes
+- Added the isectEmpty, isectNotEmpty, |isectEmpty, and |isectNotEmpty filter operators
+
+###### Other
+- Fixed file size of browser dist file
+
 ##### 1.0.0-alpha.5-3 - 26 November 2014
 
 ###### Backwards compatible API changes
