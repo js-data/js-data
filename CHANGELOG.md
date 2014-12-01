@@ -1,3 +1,11 @@
+##### 1.0.0-alpha.5-5 - 30 November 2014
+
+###### Breaking API changes
+- findInverseLinks, findBelongsTo, findHasOne, and findHasMany now default to true
+
+###### Backwards compatible bug fixes
+- Backport jmdobry/angular-data#253
+
 ##### 1.0.0-alpha.5-3 - 28 November 2014
 
 ###### Backwards compatible API changes

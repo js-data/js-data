@@ -112,7 +112,8 @@ describe('DS#create', function () {
         email: 'sally@test.com'
       }
     }, {
-      findBelongsTo: true
+      findBelongsTo: true,
+      findInverseLinks: true
     }).then(function (user) {
       assert.equal(user.id, payload.id, 'user should have been created');
 
@@ -125,6 +126,7 @@ describe('DS#create', function () {
       assert.equal(store.get('user', 99).id, payload.id);
       assert.isObject(store.get('user', 99).profile);
       assert.equal(store.get('profile', 999).id, 999);
+      console.log(store.get('profile', 999).user);
       assert.isObject(store.get('profile', 999).user);
 
       store.find('user', 99); // should not trigger another http request

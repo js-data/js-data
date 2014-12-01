@@ -1,25 +1,6 @@
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
-function _injectRelations(definition, injected, options) {
-  var _this = this;
-
-  DSUtils.forEach(definition.relationList, function (def) {
-    var relationName = def.relation;
-    var relationDef = _this.definitions[relationName];
-    if (injected[def.localField]) {
-      if (!relationDef) {
-        throw new DSErrors.R(definition.name + ' relation is defined, but the resource is not!');
-      }
-      try {
-        injected[def.localField] = _this.inject(relationName, injected[def.localField], options);
-      } catch (err) {
-        console.error(definition.name + ': Failed to inject ' + def.type + ' relation: "' + relationName + '"!', err);
-      }
-    }
-  });
-}
-
 function _getReactFunction(DS, definition, resource) {
   var name = definition.name;
   return function _react(added, removed, changed, oldValueFn, firstTime) {
@@ -111,6 +92,45 @@ function _inject(definition, resource, attrs, options) {
       throw error;
     } else {
       try {
+        DSUtils.forEach(definition.relationList, function (def) {
+          var relationName = def.relation;
+          var relationDef = _this.definitions[relationName];
+          var toInject = attrs[def.localField];
+          if (toInject) {
+            if (!relationDef) {
+              throw new DSErrors.R(definition.name + ' relation is defined but the resource is not!');
+            }
+            if (DSUtils.isArray(toInject)) {
+              var items = [];
+              DSUtils.forEach(toInject, function (toInjectItem) {
+                if (toInjectItem !== _this.store[relationName][toInjectItem[relationDef.idAttribute]]) {
+                  try {
+                    var injectedItem = _this.inject(relationName, toInjectItem, options);
+                    if (def.foreignKey) {
+                      injectedItem[def.foreignKey] = attrs[definition.idAttribute];
+                    }
+                    items.push(injectedItem);
+                  } catch (err) {
+                    console.error(definition.name + ': Failed to inject ' + def.type + ' relation: "' + relationName + '"!', err);
+                  }
+                }
+              });
+              attrs[def.localField] = items;
+            } else {
+              if (toInject !== _this.store[relationName][toInject[relationDef.idAttribute]]) {
+                try {
+                  attrs[def.localField] = _this.inject(relationName, attrs[def.localField], options);
+                  if (def.foreignKey) {
+                    attrs[def.localField][def.foreignKey] = attrs[definition.idAttribute];
+                  }
+                } catch (err) {
+                  console.error(definition.name + ': Failed to inject ' + def.type + ' relation: "' + relationName + '"!', err);
+                }
+              }
+            }
+          }
+        });
+
         var id = attrs[idA];
         var item = _this.get(definition.name, id);
         var initialLastModified = item ? resource.modified[id] : 0;
@@ -140,10 +160,6 @@ function _inject(definition, resource, attrs, options) {
 
           resource.index[id] = item;
           _react.call(item, {}, {}, {}, null, true);
-
-          if (definition.relations) {
-            _injectRelations.call(_this, definition, item, options);
-          }
         } else {
           DSUtils.deepMixIn(item, attrs);
           if (definition.resetHistoryOnInject) {
