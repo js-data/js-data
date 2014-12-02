@@ -145,71 +145,46 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
           };
         }
         if (DSUtils.isObject(clause)) {
-          DSUtils.forOwn(clause, function (val, op) {
+          DSUtils.forOwn(clause, function (term, op) {
+            var expr;
+            var isOr = op[0] === '|';
+            var val = attrs[field];
+            op = isOr ? op.substr(1) : op;
             if (op === '==') {
-              keep = first ? (attrs[field] == val) : keep && (attrs[field] == val);
+              expr = val == term;
             } else if (op === '===') {
-              keep = first ? (attrs[field] === val) : keep && (attrs[field] === val);
+              expr = val === term;
             } else if (op === '!=') {
-              keep = first ? (attrs[field] != val) : keep && (attrs[field] != val);
+              expr = val != term;
             } else if (op === '!==') {
-              keep = first ? (attrs[field] !== val) : keep && (attrs[field] !== val);
+              expr = val !== term;
             } else if (op === '>') {
-              keep = first ? (attrs[field] > val) : keep && (attrs[field] > val);
+              expr = val > term;
             } else if (op === '>=') {
-              keep = first ? (attrs[field] >= val) : keep && (attrs[field] >= val);
+              expr = val >= term;
             } else if (op === '<') {
-              keep = first ? (attrs[field] < val) : keep && (attrs[field] < val);
+              expr = val < term;
             } else if (op === '<=') {
-              keep = first ? (attrs[field] <= val) : keep && (attrs[field] <= val);
+              expr = val <= term;
             } else if (op === 'isectEmpty') {
-              keep = first ? !DSUtils.intersection((attrs[field] || []), (val || [])).length : keep && !DSUtils.intersection((attrs[field] || []), (val || [])).length;
+              expr = !DSUtils.intersection((val || []), (term || [])).length;
             } else if (op === 'isectNotEmpty') {
-              keep = first ? DSUtils.intersection((attrs[field] || []), (val || [])).length : keep && DSUtils.intersection((attrs[field] || []), (val || [])).length;
+              expr = DSUtils.intersection((val || []), (term || [])).length;
             } else if (op === 'in') {
-              if (DSUtils.isString(val)) {
-                keep = first ? val.indexOf(attrs[field]) !== -1 : keep && val.indexOf(attrs[field]) !== -1;
+              if (DSUtils.isString(term)) {
+                expr = term.indexOf(val) !== -1;
               } else {
-                keep = first ? DSUtils.contains(val, attrs[field]) : keep && DSUtils.contains(val, attrs[field]);
+                expr = DSUtils.contains(term, val);
               }
             } else if (op === 'notIn') {
-              if (DSUtils.isString(val)) {
-                keep = first ? val.indexOf(attrs[field]) === -1 : keep && val.indexOf(attrs[field]) === -1;
+              if (DSUtils.isString(term)) {
+                expr = term.indexOf(val) === -1;
               } else {
-                keep = first ? !DSUtils.contains(val, attrs[field]) : keep && !DSUtils.contains(val, attrs[field]);
+                expr = !DSUtils.contains(term, val);
               }
-            } else if (op === '|==') {
-              keep = first ? (attrs[field] == val) : keep || (attrs[field] == val);
-            } else if (op === '|===') {
-              keep = first ? (attrs[field] === val) : keep || (attrs[field] === val);
-            } else if (op === '|!=') {
-              keep = first ? (attrs[field] != val) : keep || (attrs[field] != val);
-            } else if (op === '|!==') {
-              keep = first ? (attrs[field] !== val) : keep || (attrs[field] !== val);
-            } else if (op === '|>') {
-              keep = first ? (attrs[field] > val) : keep || (attrs[field] > val);
-            } else if (op === '|>=') {
-              keep = first ? (attrs[field] >= val) : keep || (attrs[field] >= val);
-            } else if (op === '|<') {
-              keep = first ? (attrs[field] < val) : keep || (attrs[field] < val);
-            } else if (op === '|<=') {
-              keep = first ? (attrs[field] <= val) : keep || (attrs[field] <= val);
-            } else if (op === '|isectEmpty') {
-              keep = first ? !DSUtils.intersection((attrs[field] || []), (val || [])).length : keep || !DSUtils.intersection((attrs[field] || []), (val || [])).length;
-            } else if (op === '|isectNotEmpty') {
-              keep = first ? DSUtils.intersection((attrs[field] || []), (val || [])).length : keep || DSUtils.intersection((attrs[field] || []), (val || [])).length;
-            } else if (op === '|in') {
-              if (DSUtils.isString(val)) {
-                keep = first ? val.indexOf(attrs[field]) !== -1 : keep || val.indexOf(attrs[field]) !== -1;
-              } else {
-                keep = first ? DSUtils.contains(val, attrs[field]) : keep || DSUtils.contains(val, attrs[field]);
-              }
-            } else if (op === '|notIn') {
-              if (DSUtils.isString(val)) {
-                keep = first ? val.indexOf(attrs[field]) === -1 : keep || val.indexOf(attrs[field]) === -1;
-              } else {
-                keep = first ? !DSUtils.contains(val, attrs[field]) : keep || !DSUtils.contains(val, attrs[field]);
-              }
+            }
+            if (expr !== undefined) {
+              keep = first ? expr : (isOr ? keep || expr : keep && expr);
             }
             first = false;
           });

@@ -1691,7 +1691,7 @@ var makeIterator = require('../function/makeIterator_');
 
 
 
-},{"../function/makeIterator_":16}],6:[function(require,module,exports){
+},{"../function/makeIterator_":15}],6:[function(require,module,exports){
 var findIndex = require('./findIndex');
 
     /**
@@ -1731,7 +1731,7 @@ var makeIterator = require('../function/makeIterator_');
     module.exports = findIndex;
 
 
-},{"../function/makeIterator_":16}],8:[function(require,module,exports){
+},{"../function/makeIterator_":15}],8:[function(require,module,exports){
 
 
     /**
@@ -1915,36 +1915,6 @@ var indexOf = require('./indexOf');
 
 
 },{}],14:[function(require,module,exports){
-var isFunction = require('../lang/isFunction');
-
-    /**
-     * Creates an object that holds a lookup for the objects in the array.
-     */
-    function toLookup(arr, key) {
-        var result = {};
-        if (arr == null) {
-            return result;
-        }
-
-        var i = -1, len = arr.length, value;
-        if (isFunction(key)) {
-            while (++i < len) {
-                value = arr[i];
-                result[key(value)] = value;
-            }
-        } else {
-            while (++i < len) {
-                value = arr[i];
-                result[value[key]] = value;
-            }
-        }
-
-        return result;
-    }
-    module.exports = toLookup;
-
-
-},{"../lang/isFunction":23}],15:[function(require,module,exports){
 
 
     /**
@@ -1958,7 +1928,7 @@ var isFunction = require('../lang/isFunction');
 
 
 
-},{}],16:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 var identity = require('./identity');
 var prop = require('./prop');
 var deepMatches = require('../object/deepMatches');
@@ -1994,7 +1964,7 @@ var deepMatches = require('../object/deepMatches');
 
 
 
-},{"../object/deepMatches":32,"./identity":15,"./prop":17}],17:[function(require,module,exports){
+},{"../object/deepMatches":31,"./identity":14,"./prop":16}],16:[function(require,module,exports){
 
 
     /**
@@ -2010,7 +1980,7 @@ var deepMatches = require('../object/deepMatches');
 
 
 
-},{}],18:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 var kindOf = require('./kindOf');
 var isPlainObject = require('./isPlainObject');
 var mixIn = require('../object/mixIn');
@@ -2061,7 +2031,7 @@ var mixIn = require('../object/mixIn');
 
 
 
-},{"../object/mixIn":38,"./isPlainObject":27,"./kindOf":30}],19:[function(require,module,exports){
+},{"../object/mixIn":37,"./isPlainObject":26,"./kindOf":29}],18:[function(require,module,exports){
 var clone = require('./clone');
 var forOwn = require('../object/forOwn');
 var kindOf = require('./kindOf');
@@ -2111,7 +2081,7 @@ var isPlainObject = require('./isPlainObject');
 
 
 
-},{"../object/forOwn":35,"./clone":18,"./isPlainObject":27,"./kindOf":30}],20:[function(require,module,exports){
+},{"../object/forOwn":34,"./clone":17,"./isPlainObject":26,"./kindOf":29}],19:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2121,7 +2091,7 @@ var isKind = require('./isKind');
     module.exports = isArray;
 
 
-},{"./isKind":24}],21:[function(require,module,exports){
+},{"./isKind":23}],20:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2131,7 +2101,7 @@ var isKind = require('./isKind');
     module.exports = isBoolean;
 
 
-},{"./isKind":24}],22:[function(require,module,exports){
+},{"./isKind":23}],21:[function(require,module,exports){
 var forOwn = require('../object/forOwn');
 var isArray = require('./isArray');
 
@@ -2157,7 +2127,7 @@ var isArray = require('./isArray');
 
 
 
-},{"../object/forOwn":35,"./isArray":20}],23:[function(require,module,exports){
+},{"../object/forOwn":34,"./isArray":19}],22:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2167,7 +2137,7 @@ var isKind = require('./isKind');
     module.exports = isFunction;
 
 
-},{"./isKind":24}],24:[function(require,module,exports){
+},{"./isKind":23}],23:[function(require,module,exports){
 var kindOf = require('./kindOf');
     /**
      * Check if value is from a specific "kind".
@@ -2178,7 +2148,7 @@ var kindOf = require('./kindOf');
     module.exports = isKind;
 
 
-},{"./kindOf":30}],25:[function(require,module,exports){
+},{"./kindOf":29}],24:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2188,7 +2158,7 @@ var isKind = require('./isKind');
     module.exports = isNumber;
 
 
-},{"./isKind":24}],26:[function(require,module,exports){
+},{"./isKind":23}],25:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2198,7 +2168,7 @@ var isKind = require('./isKind');
     module.exports = isObject;
 
 
-},{"./isKind":24}],27:[function(require,module,exports){
+},{"./isKind":23}],26:[function(require,module,exports){
 
 
     /**
@@ -2213,7 +2183,7 @@ var isKind = require('./isKind');
 
 
 
-},{}],28:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2223,7 +2193,7 @@ var isKind = require('./isKind');
     module.exports = isRegExp;
 
 
-},{"./isKind":24}],29:[function(require,module,exports){
+},{"./isKind":23}],28:[function(require,module,exports){
 var isKind = require('./isKind');
     /**
      */
@@ -2233,7 +2203,7 @@ var isKind = require('./isKind');
     module.exports = isString;
 
 
-},{"./isKind":24}],30:[function(require,module,exports){
+},{"./isKind":23}],29:[function(require,module,exports){
 
 
     var _rKind = /^\[object (.*)\]$/,
@@ -2255,7 +2225,7 @@ var isKind = require('./isKind');
     module.exports = kindOf;
 
 
-},{}],31:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 
 
     /**
@@ -2270,7 +2240,7 @@ var isKind = require('./isKind');
 
 
 
-},{}],32:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 var forOwn = require('./forOwn');
 var isArray = require('../lang/isArray');
 
@@ -2327,7 +2297,7 @@ var isArray = require('../lang/isArray');
 
 
 
-},{"../lang/isArray":20,"./forOwn":35}],33:[function(require,module,exports){
+},{"../lang/isArray":19,"./forOwn":34}],32:[function(require,module,exports){
 var forOwn = require('./forOwn');
 var isPlainObject = require('../lang/isPlainObject');
 
@@ -2363,7 +2333,7 @@ var isPlainObject = require('../lang/isPlainObject');
 
 
 
-},{"../lang/isPlainObject":27,"./forOwn":35}],34:[function(require,module,exports){
+},{"../lang/isPlainObject":26,"./forOwn":34}],33:[function(require,module,exports){
 var hasOwn = require('./hasOwn');
 
     var _hasDontEnumBug,
@@ -2441,7 +2411,7 @@ var hasOwn = require('./hasOwn');
 
 
 
-},{"./hasOwn":36}],35:[function(require,module,exports){
+},{"./hasOwn":35}],34:[function(require,module,exports){
 var hasOwn = require('./hasOwn');
 var forIn = require('./forIn');
 
@@ -2462,7 +2432,7 @@ var forIn = require('./forIn');
 
 
 
-},{"./forIn":34,"./hasOwn":36}],36:[function(require,module,exports){
+},{"./forIn":33,"./hasOwn":35}],35:[function(require,module,exports){
 
 
     /**
@@ -2476,7 +2446,7 @@ var forIn = require('./forIn');
 
 
 
-},{}],37:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 var hasOwn = require('./hasOwn');
 var deepClone = require('../lang/deepClone');
 var isObject = require('../lang/isObject');
@@ -2518,7 +2488,7 @@ var isObject = require('../lang/isObject');
 
 
 
-},{"../lang/deepClone":19,"../lang/isObject":26,"./hasOwn":36}],38:[function(require,module,exports){
+},{"../lang/deepClone":18,"../lang/isObject":25,"./hasOwn":35}],37:[function(require,module,exports){
 var forOwn = require('./forOwn');
 
     /**
@@ -2548,7 +2518,7 @@ var forOwn = require('./forOwn');
     module.exports = mixIn;
 
 
-},{"./forOwn":35}],39:[function(require,module,exports){
+},{"./forOwn":34}],38:[function(require,module,exports){
 var forEach = require('../array/forEach');
 
     /**
@@ -2569,7 +2539,7 @@ var forEach = require('../array/forEach');
 
 
 
-},{"../array/forEach":8}],40:[function(require,module,exports){
+},{"../array/forEach":8}],39:[function(require,module,exports){
 var slice = require('../array/slice');
 
     /**
@@ -2589,7 +2559,7 @@ var slice = require('../array/slice');
 
 
 
-},{"../array/slice":12}],41:[function(require,module,exports){
+},{"../array/slice":12}],40:[function(require,module,exports){
 var namespace = require('./namespace');
 
     /**
@@ -2608,7 +2578,7 @@ var namespace = require('./namespace');
 
 
 
-},{"./namespace":39}],42:[function(require,module,exports){
+},{"./namespace":38}],41:[function(require,module,exports){
 var toString = require('../lang/toString');
 var replaceAccents = require('./replaceAccents');
 var removeNonWord = require('./removeNonWord');
@@ -2630,7 +2600,7 @@ var lowerCase = require('./lowerCase');
     module.exports = camelCase;
 
 
-},{"../lang/toString":31,"./lowerCase":43,"./removeNonWord":46,"./replaceAccents":47,"./upperCase":48}],43:[function(require,module,exports){
+},{"../lang/toString":30,"./lowerCase":42,"./removeNonWord":45,"./replaceAccents":46,"./upperCase":47}],42:[function(require,module,exports){
 var toString = require('../lang/toString');
     /**
      * "Safer" String.toLowerCase()
@@ -2643,7 +2613,7 @@ var toString = require('../lang/toString');
     module.exports = lowerCase;
 
 
-},{"../lang/toString":31}],44:[function(require,module,exports){
+},{"../lang/toString":30}],43:[function(require,module,exports){
 var join = require('../array/join');
 var slice = require('../array/slice');
 
@@ -2660,7 +2630,7 @@ var slice = require('../array/slice');
     module.exports = makePath;
 
 
-},{"../array/join":10,"../array/slice":12}],45:[function(require,module,exports){
+},{"../array/join":10,"../array/slice":12}],44:[function(require,module,exports){
 var toString = require('../lang/toString');
 var camelCase = require('./camelCase');
 var upperCase = require('./upperCase');
@@ -2675,7 +2645,7 @@ var upperCase = require('./upperCase');
     module.exports = pascalCase;
 
 
-},{"../lang/toString":31,"./camelCase":42,"./upperCase":48}],46:[function(require,module,exports){
+},{"../lang/toString":30,"./camelCase":41,"./upperCase":47}],45:[function(require,module,exports){
 var toString = require('../lang/toString');
     // This pattern is generated by the _build/pattern-removeNonWord.js script
     var PATTERN = /[^\x20\x2D0-9A-Z\x5Fa-z\xC0-\xD6\xD8-\xF6\xF8-\xFF]/g;
@@ -2691,7 +2661,7 @@ var toString = require('../lang/toString');
     module.exports = removeNonWord;
 
 
-},{"../lang/toString":31}],47:[function(require,module,exports){
+},{"../lang/toString":30}],46:[function(require,module,exports){
 var toString = require('../lang/toString');
     /**
     * Replaces all accented chars with regular ones
@@ -2729,7 +2699,7 @@ var toString = require('../lang/toString');
     module.exports = replaceAccents;
 
 
-},{"../lang/toString":31}],48:[function(require,module,exports){
+},{"../lang/toString":30}],47:[function(require,module,exports){
 var toString = require('../lang/toString');
     /**
      * "Safer" String.toUpperCase()
@@ -2741,7 +2711,7 @@ var toString = require('../lang/toString');
     module.exports = upperCase;
 
 
-},{"../lang/toString":31}],49:[function(require,module,exports){
+},{"../lang/toString":30}],48:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -2806,7 +2776,7 @@ function create(resourceName, attrs, options) {
 
 module.exports = create;
 
-},{"../../errors":70,"../../utils":72}],50:[function(require,module,exports){
+},{"../../errors":69,"../../utils":71}],49:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -2858,7 +2828,7 @@ function destroy(resourceName, id, options) {
 
 module.exports = destroy;
 
-},{"../../errors":70,"../../utils":72}],51:[function(require,module,exports){
+},{"../../errors":69,"../../utils":71}],50:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -2906,7 +2876,7 @@ function destroyAll(resourceName, params, options) {
 
 module.exports = destroyAll;
 
-},{"../../errors":70,"../../utils":72}],52:[function(require,module,exports){
+},{"../../errors":69,"../../utils":71}],51:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -2960,7 +2930,7 @@ function find(resourceName, id, options) {
 
 module.exports = find;
 
-},{"../../errors":70,"../../utils":72}],53:[function(require,module,exports){
+},{"../../errors":69,"../../utils":71}],52:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -3054,7 +3024,7 @@ function findAll(resourceName, params, options) {
 
 module.exports = findAll;
 
-},{"../../errors":70,"../../utils":72}],54:[function(require,module,exports){
+},{"../../errors":69,"../../utils":71}],53:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -3153,7 +3123,7 @@ module.exports = {
   updateAll: require('./updateAll')
 };
 
-},{"../../errors":70,"../../utils":72,"./create":49,"./destroy":50,"./destroyAll":51,"./find":52,"./findAll":53,"./loadRelations":55,"./save":56,"./update":57,"./updateAll":58}],55:[function(require,module,exports){
+},{"../../errors":69,"../../utils":71,"./create":48,"./destroy":49,"./destroyAll":50,"./find":51,"./findAll":52,"./loadRelations":54,"./save":55,"./update":56,"./updateAll":57}],54:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -3239,7 +3209,7 @@ function loadRelations(resourceName, instance, relations, options) {
 
 module.exports = loadRelations;
 
-},{"../../errors":70,"../../utils":72}],56:[function(require,module,exports){
+},{"../../errors":69,"../../utils":71}],55:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -3318,7 +3288,7 @@ function save(resourceName, id, options) {
 
 module.exports = save;
 
-},{"../../errors":70,"../../utils":72}],57:[function(require,module,exports){
+},{"../../errors":69,"../../utils":71}],56:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -3371,7 +3341,7 @@ function update(resourceName, id, attrs, options) {
 
 module.exports = update;
 
-},{"../../errors":70,"../../utils":72}],58:[function(require,module,exports){
+},{"../../errors":69,"../../utils":71}],57:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -3421,7 +3391,7 @@ function updateAll(resourceName, attrs, params, options) {
 
 module.exports = updateAll;
 
-},{"../../errors":70,"../../utils":72}],59:[function(require,module,exports){
+},{"../../errors":69,"../../utils":71}],58:[function(require,module,exports){
 var DSUtils = require('../utils');
 var DSErrors = require('../errors');
 var syncMethods = require('./sync_methods');
@@ -3569,71 +3539,46 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
           };
         }
         if (DSUtils.isObject(clause)) {
-          DSUtils.forOwn(clause, function (val, op) {
+          DSUtils.forOwn(clause, function (term, op) {
+            var expr;
+            var isOr = op[0] === '|';
+            var val = attrs[field];
+            op = isOr ? op.substr(1) : op;
             if (op === '==') {
-              keep = first ? (attrs[field] == val) : keep && (attrs[field] == val);
+              expr = val == term;
             } else if (op === '===') {
-              keep = first ? (attrs[field] === val) : keep && (attrs[field] === val);
+              expr = val === term;
             } else if (op === '!=') {
-              keep = first ? (attrs[field] != val) : keep && (attrs[field] != val);
+              expr = val != term;
             } else if (op === '!==') {
-              keep = first ? (attrs[field] !== val) : keep && (attrs[field] !== val);
+              expr = val !== term;
             } else if (op === '>') {
-              keep = first ? (attrs[field] > val) : keep && (attrs[field] > val);
+              expr = val > term;
             } else if (op === '>=') {
-              keep = first ? (attrs[field] >= val) : keep && (attrs[field] >= val);
+              expr = val >= term;
             } else if (op === '<') {
-              keep = first ? (attrs[field] < val) : keep && (attrs[field] < val);
+              expr = val < term;
             } else if (op === '<=') {
-              keep = first ? (attrs[field] <= val) : keep && (attrs[field] <= val);
+              expr = val <= term;
             } else if (op === 'isectEmpty') {
-              keep = first ? !DSUtils.intersection((attrs[field] || []), (val || [])).length : keep && !DSUtils.intersection((attrs[field] || []), (val || [])).length;
+              expr = !DSUtils.intersection((val || []), (term || [])).length;
             } else if (op === 'isectNotEmpty') {
-              keep = first ? DSUtils.intersection((attrs[field] || []), (val || [])).length : keep && DSUtils.intersection((attrs[field] || []), (val || [])).length;
+              expr = DSUtils.intersection((val || []), (term || [])).length;
             } else if (op === 'in') {
-              if (DSUtils.isString(val)) {
-                keep = first ? val.indexOf(attrs[field]) !== -1 : keep && val.indexOf(attrs[field]) !== -1;
+              if (DSUtils.isString(term)) {
+                expr = term.indexOf(val) !== -1;
               } else {
-                keep = first ? DSUtils.contains(val, attrs[field]) : keep && DSUtils.contains(val, attrs[field]);
+                expr = DSUtils.contains(term, val);
               }
             } else if (op === 'notIn') {
-              if (DSUtils.isString(val)) {
-                keep = first ? val.indexOf(attrs[field]) === -1 : keep && val.indexOf(attrs[field]) === -1;
+              if (DSUtils.isString(term)) {
+                expr = term.indexOf(val) === -1;
               } else {
-                keep = first ? !DSUtils.contains(val, attrs[field]) : keep && !DSUtils.contains(val, attrs[field]);
+                expr = !DSUtils.contains(term, val);
               }
-            } else if (op === '|==') {
-              keep = first ? (attrs[field] == val) : keep || (attrs[field] == val);
-            } else if (op === '|===') {
-              keep = first ? (attrs[field] === val) : keep || (attrs[field] === val);
-            } else if (op === '|!=') {
-              keep = first ? (attrs[field] != val) : keep || (attrs[field] != val);
-            } else if (op === '|!==') {
-              keep = first ? (attrs[field] !== val) : keep || (attrs[field] !== val);
-            } else if (op === '|>') {
-              keep = first ? (attrs[field] > val) : keep || (attrs[field] > val);
-            } else if (op === '|>=') {
-              keep = first ? (attrs[field] >= val) : keep || (attrs[field] >= val);
-            } else if (op === '|<') {
-              keep = first ? (attrs[field] < val) : keep || (attrs[field] < val);
-            } else if (op === '|<=') {
-              keep = first ? (attrs[field] <= val) : keep || (attrs[field] <= val);
-            } else if (op === '|isectEmpty') {
-              keep = first ? !DSUtils.intersection((attrs[field] || []), (val || [])).length : keep || !DSUtils.intersection((attrs[field] || []), (val || [])).length;
-            } else if (op === '|isectNotEmpty') {
-              keep = first ? DSUtils.intersection((attrs[field] || []), (val || [])).length : keep || DSUtils.intersection((attrs[field] || []), (val || [])).length;
-            } else if (op === '|in') {
-              if (DSUtils.isString(val)) {
-                keep = first ? val.indexOf(attrs[field]) !== -1 : keep || val.indexOf(attrs[field]) !== -1;
-              } else {
-                keep = first ? DSUtils.contains(val, attrs[field]) : keep || DSUtils.contains(val, attrs[field]);
-              }
-            } else if (op === '|notIn') {
-              if (DSUtils.isString(val)) {
-                keep = first ? val.indexOf(attrs[field]) === -1 : keep || val.indexOf(attrs[field]) === -1;
-              } else {
-                keep = first ? !DSUtils.contains(val, attrs[field]) : keep || !DSUtils.contains(val, attrs[field]);
-              }
+            }
+            if (expr !== undefined) {
+              keep = first ? expr : (isOr ? keep || expr : keep && expr);
             }
             first = false;
           });
@@ -3768,7 +3713,7 @@ DSUtils.deepMixIn(dsPrototype, asyncMethods);
 
 module.exports = DS;
 
-},{"../../lib/observe-js/observe-js":1,"../errors":70,"../utils":72,"./async_methods":54,"./sync_methods":64,"js-data-schema":"js-data-schema"}],60:[function(require,module,exports){
+},{"../../lib/observe-js/observe-js":1,"../errors":69,"../utils":71,"./async_methods":53,"./sync_methods":63,"js-data-schema":"js-data-schema"}],59:[function(require,module,exports){
 /*jshint evil:true, loopfunc:true*/
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
@@ -4038,7 +3983,7 @@ function defineResource(definition) {
 
 module.exports = defineResource;
 
-},{"../../errors":70,"../../utils":72}],61:[function(require,module,exports){
+},{"../../errors":69,"../../utils":71}],60:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -4101,7 +4046,7 @@ function eject(resourceName, id, options) {
 
 module.exports = eject;
 
-},{"../../errors":70,"../../utils":72}],62:[function(require,module,exports){
+},{"../../errors":69,"../../utils":71}],61:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -4121,9 +4066,14 @@ function ejectAll(resourceName, params, options) {
   }
   var queryHash = DSUtils.toJson(params);
   var items = _this.filter(definition.name, params);
-  var ids = DSUtils.toLookup(items, definition.idAttribute);
+  var ids = [];
+  DSUtils.forEach(items, function (item) {
+    if (item && item[definition.idAttribute]) {
+      ids.push(item[definition.idAttribute]);
+    }
+  });
 
-  DSUtils.forOwn(ids, function (item, id) {
+  DSUtils.forEach(ids, function (id) {
     _this.eject(definition.name, id, options);
   });
 
@@ -4135,7 +4085,7 @@ function ejectAll(resourceName, params, options) {
 
 module.exports = ejectAll;
 
-},{"../../errors":70,"../../utils":72}],63:[function(require,module,exports){
+},{"../../errors":69,"../../utils":71}],62:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -4171,7 +4121,7 @@ function filter(resourceName, params, options) {
 
 module.exports = filter;
 
-},{"../../errors":70,"../../utils":72}],64:[function(require,module,exports){
+},{"../../errors":69,"../../utils":71}],63:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 var NER = DSErrors.NER;
@@ -4439,7 +4389,7 @@ module.exports = {
   unlinkInverse: require('./unlinkInverse')
 };
 
-},{"../../errors":70,"../../utils":72,"./defineResource":60,"./eject":61,"./ejectAll":62,"./filter":63,"./inject":65,"./link":66,"./linkAll":67,"./linkInverse":68,"./unlinkInverse":69}],65:[function(require,module,exports){
+},{"../../errors":69,"../../utils":71,"./defineResource":59,"./eject":60,"./ejectAll":61,"./filter":62,"./inject":64,"./link":65,"./linkAll":66,"./linkInverse":67,"./unlinkInverse":68}],64:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -4587,6 +4537,7 @@ function _inject(definition, resource, attrs, options) {
           } else {
             item = {};
           }
+          // TODO: Need to just to a deep copy here
           resource.previousAttributes[id] = {};
 
           DSUtils.deepMixIn(item, attrs);
@@ -4698,7 +4649,7 @@ function inject(resourceName, attrs, options) {
 
 module.exports = inject;
 
-},{"../../errors":70,"../../utils":72}],66:[function(require,module,exports){
+},{"../../errors":69,"../../utils":71}],65:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -4748,7 +4699,7 @@ function link(resourceName, id, relations) {
 
 module.exports = link;
 
-},{"../../errors":70,"../../utils":72}],67:[function(require,module,exports){
+},{"../../errors":69,"../../utils":71}],66:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -4802,7 +4753,7 @@ function linkAll(resourceName, params, relations) {
 
 module.exports = linkAll;
 
-},{"../../errors":70,"../../utils":72}],68:[function(require,module,exports){
+},{"../../errors":69,"../../utils":71}],67:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -4842,7 +4793,7 @@ function linkInverse(resourceName, id, relations) {
 
 module.exports = linkInverse;
 
-},{"../../errors":70,"../../utils":72}],69:[function(require,module,exports){
+},{"../../errors":69,"../../utils":71}],68:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -4893,7 +4844,7 @@ function unlinkInverse(resourceName, id, relations) {
 
 module.exports = unlinkInverse;
 
-},{"../../errors":70,"../../utils":72}],70:[function(require,module,exports){
+},{"../../errors":69,"../../utils":71}],69:[function(require,module,exports){
 function IllegalArgumentError(message) {
   Error.call(this);
   if (typeof Error.captureStackTrace === 'function') {
@@ -4939,7 +4890,7 @@ module.exports = {
   NER: NonexistentResourceError
 };
 
-},{}],71:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 var DS = require('./datastore');
 
 module.exports = {
@@ -4951,7 +4902,7 @@ module.exports = {
   DSErrors: require('./errors')
 };
 
-},{"./datastore":59,"./errors":70,"./utils":72}],72:[function(require,module,exports){
+},{"./datastore":58,"./errors":69,"./utils":71}],71:[function(require,module,exports){
 var DSErrors = require('./errors');
 var isFunction = require('mout/lang/isFunction');
 var w;
@@ -5215,7 +5166,6 @@ var DSUtils = {
   contains: require('mout/array/contains'),
   filter: require('mout/array/filter'),
   find: find,
-  toLookup: require('mout/array/toLookup'),
   remove: require('mout/array/remove'),
   slice: require('mout/array/slice'),
   sort: require('mout/array/sort'),
@@ -5280,6 +5230,7 @@ var DSUtils = {
         continue;
       }
 
+      // TODO: Need a deep equals comparison here
       if (newValue !== undefined && newValue === oldObject[prop]) {
         continue;
       }
@@ -5289,6 +5240,7 @@ var DSUtils = {
         continue;
       }
 
+      // TODO: Need a deep equals comparison here
       if (newValue !== oldObject[prop]) {
         changed[prop] = newValue;
       }
@@ -5367,5 +5319,5 @@ DSUtils.intersection = intersection;
 
 module.exports = DSUtils;
 
-},{"./errors":70,"bluebird":"bluebird","es6-promise":2,"mout/array/contains":4,"mout/array/filter":5,"mout/array/find":6,"mout/array/forEach":8,"mout/array/remove":11,"mout/array/slice":12,"mout/array/sort":13,"mout/array/toLookup":14,"mout/lang/isArray":20,"mout/lang/isBoolean":21,"mout/lang/isEmpty":22,"mout/lang/isFunction":23,"mout/lang/isNumber":25,"mout/lang/isObject":26,"mout/lang/isRegExp":28,"mout/lang/isString":29,"mout/object/deepMixIn":33,"mout/object/forOwn":35,"mout/object/merge":37,"mout/object/mixIn":38,"mout/object/pick":40,"mout/object/set":41,"mout/string/makePath":44,"mout/string/pascalCase":45,"mout/string/upperCase":48}]},{},[71])(71)
+},{"./errors":69,"bluebird":"bluebird","es6-promise":2,"mout/array/contains":4,"mout/array/filter":5,"mout/array/find":6,"mout/array/forEach":8,"mout/array/remove":11,"mout/array/slice":12,"mout/array/sort":13,"mout/lang/isArray":19,"mout/lang/isBoolean":20,"mout/lang/isEmpty":21,"mout/lang/isFunction":22,"mout/lang/isNumber":24,"mout/lang/isObject":25,"mout/lang/isRegExp":27,"mout/lang/isString":28,"mout/object/deepMixIn":32,"mout/object/forOwn":34,"mout/object/merge":36,"mout/object/mixIn":37,"mout/object/pick":39,"mout/object/set":40,"mout/string/makePath":43,"mout/string/pascalCase":44,"mout/string/upperCase":47}]},{},[70])(70)
 });

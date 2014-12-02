@@ -261,7 +261,6 @@ var DSUtils = {
   contains: require('mout/array/contains'),
   filter: require('mout/array/filter'),
   find: find,
-  toLookup: require('mout/array/toLookup'),
   remove: require('mout/array/remove'),
   slice: require('mout/array/slice'),
   sort: require('mout/array/sort'),
@@ -326,6 +325,7 @@ var DSUtils = {
         continue;
       }
 
+      // TODO: Need a deep equals comparison here
       if (newValue !== undefined && newValue === oldObject[prop]) {
         continue;
       }
@@ -335,6 +335,7 @@ var DSUtils = {
         continue;
       }
 
+      // TODO: Need a deep equals comparison here
       if (newValue !== oldObject[prop]) {
         changed[prop] = newValue;
       }

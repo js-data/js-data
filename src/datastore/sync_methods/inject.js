@@ -145,6 +145,7 @@ function _inject(definition, resource, attrs, options) {
           } else {
             item = {};
           }
+          // TODO: Need to just to a deep copy here
           resource.previousAttributes[id] = {};
 
           DSUtils.deepMixIn(item, attrs);

@@ -17,9 +17,14 @@ function ejectAll(resourceName, params, options) {
   }
   var queryHash = DSUtils.toJson(params);
   var items = _this.filter(definition.name, params);
-  var ids = DSUtils.toLookup(items, definition.idAttribute);
+  var ids = [];
+  DSUtils.forEach(items, function (item) {
+    if (item && item[definition.idAttribute]) {
+      ids.push(item[definition.idAttribute]);
+    }
+  });
 
-  DSUtils.forOwn(ids, function (item, id) {
+  DSUtils.forEach(ids, function (id) {
     _this.eject(definition.name, id, options);
   });
 
