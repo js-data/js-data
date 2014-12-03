@@ -44,7 +44,7 @@ function _getReactFunction(DS, definition, resource) {
         });
         compute = compute || !fn.deps.length;
         if (compute) {
-          DSUtils.compute.call(item, fn, field, DSUtils);
+          DSUtils.compute.call(item, fn, field);
         }
       });
     }
@@ -145,11 +145,9 @@ function _inject(definition, resource, attrs, options) {
           } else {
             item = {};
           }
-          // TODO: Need to just to a deep copy here
-          resource.previousAttributes[id] = {};
+          resource.previousAttributes[id] = DSUtils.copy(attrs);
 
           DSUtils.deepMixIn(item, attrs);
-          DSUtils.deepMixIn(resource.previousAttributes[id], attrs);
 
           resource.collection.push(item);
           resource.changeHistories[id] = [];
@@ -224,6 +222,7 @@ function inject(resourceName, attrs, options) {
 
   if (options.notify) {
     options.beforeInject(options, attrs);
+    _this.emit(options, 'beforeInject', DSUtils.copy(attrs));
   }
 
   injected = _inject.call(_this, definition, resource, attrs, options);
@@ -249,7 +248,7 @@ function inject(resourceName, attrs, options) {
 
   if (options.notify) {
     options.afterInject(options, injected);
-    _this.emit(options, 'inject', injected);
+    _this.emit(options, 'afterInject', DSUtils.copy(injected));
   }
 
   return injected;

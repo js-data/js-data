@@ -1,10 +1,99 @@
+/* jshint -W041 */
+var w, _Promise;
+var objectProto = Object.prototype;
+var toString = objectProto.toString;
 var DSErrors = require('./errors');
-var isFunction = require('mout/lang/isFunction');
-var w;
-var _Promise;
-
+var forEach = require('mout/array/forEach');
+var slice = require('mout/array/slice');
+var forOwn = require('mout/object/forOwn');
+var observe = require('../lib/observe-js/observe-js');
 var es6Promise = require('es6-promise');
 es6Promise.polyfill();
+
+var isArray = Array.isArray || function isArray(value) {
+    return toString.call(value) == '[object Array]' || false;
+  };
+
+function isRegExp(value) {
+  return toString.call(value) == '[object RegExp]' || false;
+}
+
+// adapted from lodash.isBoolean
+function isBoolean(value) {
+  return (value === true || value === false || value && typeof value == 'object' && toString.call(value) == '[object Boolean]') || false;
+}
+
+// adapted from lodash.isString
+function isString(value) {
+  return typeof value == 'string' || (value && typeof value == 'object' && toString.call(value) == '[object String]') || false;
+}
+
+function isObject(value) {
+  return toString.call(value) == '[object Object]' || false;
+}
+
+// adapted from lodash.isDate
+function isDate(value) {
+  return (value && typeof value == 'object' && toString.call(value) == '[object Date]') || false;
+}
+
+// adapted from lodash.isNumber
+function isNumber(value) {
+  var type = typeof value;
+  return type == 'number' || (value && type == 'object' && toString.call(value) == '[object Number]') || false;
+}
+
+// adapted from lodash.isFunction
+function isFunction(value) {
+  return typeof value == 'function' || (value && toString.call(value) === '[object Function]') || false;
+}
+
+// adapted from mout.isEmpty
+function isEmpty(val) {
+  if (val == null) {
+    // typeof null == 'object' so we check it first
+    return true;
+  } else if (typeof val === 'string' || isArray(val)) {
+    return !val.length;
+  } else if (typeof val === 'object') {
+    var result = true;
+    forOwn(val, function () {
+      result = false;
+      return false; // break loop
+    });
+    return result;
+  } else {
+    return true;
+  }
+}
+
+function intersection(array1, array2) {
+  if (!array1 || !array2) {
+    return [];
+  }
+  var result = [];
+  var item;
+  for (var i = 0, length = array1.length; i < length; i++) {
+    item = array1[i];
+    if (DSUtils.contains(result, item)) {
+      continue;
+    }
+    if (DSUtils.contains(array2, item)) {
+      result.push(item);
+    }
+  }
+  return result;
+}
+
+function filter(array, cb, thisObj) {
+  var results = [];
+  forEach(array, function (value, key, arr) {
+    if (cb(value, key, arr)) {
+      results.push(value);
+    }
+  }, thisObj);
+  return results;
+}
 
 function finallyPolyfill(cb) {
   var constructor = this.constructor;
@@ -218,147 +307,210 @@ var toPromisify = [
   'afterDestroy'
 ];
 
-var find = require('mout/array/find');
-var isRegExp = require('mout/lang/isRegExp');
-
-function isBlacklisted(prop, blacklist) {
-  if (!blacklist || !blacklist.length) {
-    return false;
-  }
-  var matches = find(blacklist, function (blItem) {
-    if ((isRegExp(blItem) && blItem.test(prop)) || blItem === prop) {
-      return prop;
+// adapted from angular.copy
+function copy(source, destination, stackSource, stackDest) {
+  if (!destination) {
+    destination = source;
+    if (source) {
+      if (isArray(source)) {
+        destination = copy(source, [], stackSource, stackDest);
+      } else if (isDate(source)) {
+        destination = new Date(source.getTime());
+      } else if (isRegExp(source)) {
+        destination = new RegExp(source.source, source.toString().match(/[^\/]*$/)[0]);
+        destination.lastIndex = source.lastIndex;
+      } else if (isObject(source)) {
+        var emptyObject = Object.create(Object.getPrototypeOf(source));
+        destination = copy(source, emptyObject, stackSource, stackDest);
+      }
     }
-  });
-  return !!matches;
+  } else {
+    if (source === destination) {
+      throw new Error('Cannot copy! Source and destination are identical.');
+    }
+
+    stackSource = stackSource || [];
+    stackDest = stackDest || [];
+
+    if (isObject(source)) {
+      var index = stackSource.indexOf(source);
+      if (index !== -1) return stackDest[index];
+
+      stackSource.push(source);
+      stackDest.push(destination);
+    }
+
+    var result;
+    if (isArray(source)) {
+      destination.length = 0;
+      for (var i = 0; i < source.length; i++) {
+        result = copy(source[i], null, stackSource, stackDest);
+        if (isObject(source[i])) {
+          stackSource.push(source[i]);
+          stackDest.push(result);
+        }
+        destination.push(result);
+      }
+    } else {
+      if (isArray(destination)) {
+        destination.length = 0;
+      } else {
+        forEach(destination, function (value, key) {
+          delete destination[key];
+        });
+      }
+      for (var key in source) {
+        if (source.hasOwnProperty(key)) {
+          result = copy(source[key], null, stackSource, stackDest);
+          if (isObject(source[key])) {
+            stackSource.push(source[key]);
+            stackDest.push(result);
+          }
+          destination[key] = result;
+        }
+      }
+    }
+
+  }
+  return destination;
 }
 
+// adapted from angular.equals
+function equals(o1, o2) {
+  if (o1 === o2) return true;
+  if (o1 === null || o2 === null) return false;
+  if (o1 !== o1 && o2 !== o2) return true; // NaN === NaN
+  var t1 = typeof o1, t2 = typeof o2, length, key, keySet;
+  if (t1 == t2) {
+    if (t1 == 'object') {
+      if (isArray(o1)) {
+        if (!isArray(o2)) return false;
+        if ((length = o1.length) == o2.length) {
+          for (key = 0; key < length; key++) {
+            if (!equals(o1[key], o2[key])) return false;
+          }
+          return true;
+        }
+      } else if (isDate(o1)) {
+        if (!isDate(o2)) return false;
+        return equals(o1.getTime(), o2.getTime());
+      } else if (isRegExp(o1) && isRegExp(o2)) {
+        return o1.toString() == o2.toString();
+      } else {
+        if (isArray(o2)) return false;
+        keySet = {};
+        for (key in o1) {
+          if (key.charAt(0) === '$' || isFunction(o1[key])) continue;
+          if (!equals(o1[key], o2[key])) return false;
+          keySet[key] = true;
+        }
+        for (key in o2) {
+          if (!keySet.hasOwnProperty(key) &&
+            key.charAt(0) !== '$' &&
+            o2[key] !== undefined && !isFunction(o2[key])) return false;
+        }
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function resolveId(definition, idOrInstance) {
+  if (this.isString(idOrInstance) || isNumber(idOrInstance)) {
+    return idOrInstance;
+  } else if (idOrInstance && definition) {
+    return idOrInstance[definition.idAttribute] || idOrInstance;
+  } else {
+    return idOrInstance;
+  }
+}
+
+function resolveItem(resource, idOrInstance) {
+  if (resource && (isString(idOrInstance) || isNumber(idOrInstance))) {
+    return resource.index[idOrInstance] || idOrInstance;
+  } else {
+    return idOrInstance;
+  }
+}
+
+function isValidString(val) {
+  return (val != null && val !== '');
+}
+
+function join(items, separator) {
+  separator = separator || '';
+  return filter(items, isValidString).join(separator);
+}
+
+function makePath(var_args) {
+  var result = join(slice(arguments), '/');
+  return result.replace(/([^:\/]|^)\/{2,}/g, '$1/');
+}
+
+observe.setEqualityFn(equals);
+
 var DSUtils = {
-  w: w,
-  DSBinaryHeap: DSBinaryHeap,
-  isBoolean: require('mout/lang/isBoolean'),
-  isString: require('mout/lang/isString'),
-  isArray: require('mout/lang/isArray'),
-  isObject: require('mout/lang/isObject'),
-  isNumber: require('mout/lang/isNumber'),
-  isFunction: isFunction,
-  isEmpty: require('mout/lang/isEmpty'),
-  isRegExp: isRegExp,
-  toJson: JSON.stringify,
-  fromJson: function (json) {
-    return this.isString(json) ? JSON.parse(json) : json;
-  },
-  makePath: require('mout/string/makePath'),
-  upperCase: require('mout/string/upperCase'),
-  pascalCase: require('mout/string/pascalCase'),
-  deepMixIn: require('mout/object/deepMixIn'),
-  mixIn: require('mout/object/mixIn'),
-  forOwn: require('mout/object/forOwn'),
-  forEach: require('mout/array/forEach'),
-  pick: require('mout/object/pick'),
-  set: require('mout/object/set'),
-  merge: require('mout/object/merge'),
-  contains: require('mout/array/contains'),
-  filter: require('mout/array/filter'),
-  find: find,
-  remove: require('mout/array/remove'),
-  slice: require('mout/array/slice'),
-  sort: require('mout/array/sort'),
   // Options that inherit from defaults
   _: function (parent, options) {
     var _this = this;
     options = options || {};
     if (options && options.constructor === parent.constructor) {
       return options;
-    } else if (!_this.isObject(options)) {
+    } else if (!isObject(options)) {
       throw new DSErrors.IA('"options" must be an object!');
     }
-    _this.forEach(toPromisify, function (name) {
+    forEach(toPromisify, function (name) {
       if (typeof options[name] === 'function' && options[name].toString().indexOf('var args = Array') === -1) {
         options[name] = _this.promisify(options[name]);
       }
     });
     var O = function Options(attrs) {
-      _this.mixIn(this, attrs);
+      var self = this;
+      forOwn(attrs, function (value, key) {
+        self[key] = value;
+      });
     };
     O.prototype = parent;
     return new O(options);
   },
-  resolveItem: function (resource, idOrInstance) {
-    if (resource && (this.isString(idOrInstance) || this.isNumber(idOrInstance))) {
-      return resource.index[idOrInstance] || idOrInstance;
-    } else {
-      return idOrInstance;
-    }
-  },
-  resolveId: function (definition, idOrInstance) {
-    if (this.isString(idOrInstance) || this.isNumber(idOrInstance)) {
-      return idOrInstance;
-    } else if (idOrInstance && definition) {
-      return idOrInstance[definition.idAttribute] || idOrInstance;
-    } else {
-      return idOrInstance;
-    }
-  },
-  updateTimestamp: updateTimestamp,
-  Promise: _Promise,
-  compute: function (fn, field, DSUtils) {
+  compute: function (fn, field) {
     var _this = this;
     var args = [];
-    DSUtils.forEach(fn.deps, function (dep) {
+    forEach(fn.deps, function (dep) {
       args.push(_this[dep]);
     });
     // compute property
-    this[field] = fn[fn.length - 1].apply(this, args);
+    _this[field] = fn[fn.length - 1].apply(_this, args);
   },
-  diffObjectFromOldObject: function (object, oldObject, blacklist) {
-    var added = {};
-    var removed = {};
-    var changed = {};
-
-    blacklist = blacklist || [];
-
-    for (var prop in oldObject) {
-      var newValue = object[prop];
-
-      if (isBlacklisted(prop, blacklist)) {
-        continue;
-      }
-
-      // TODO: Need a deep equals comparison here
-      if (newValue !== undefined && newValue === oldObject[prop]) {
-        continue;
-      }
-
-      if (!(prop in object)) {
-        removed[prop] = undefined;
-        continue;
-      }
-
-      // TODO: Need a deep equals comparison here
-      if (newValue !== oldObject[prop]) {
-        changed[prop] = newValue;
-      }
-    }
-
-    for (var prop2 in object) {
-      if (prop2 in oldObject) {
-        continue;
-      }
-
-      if (isBlacklisted(prop2, blacklist)) {
-        continue;
-      }
-
-      added[prop2] = object[prop2];
-    }
-
-    return {
-      added: added,
-      removed: removed,
-      changed: changed
-    };
+  contains: require('mout/array/contains'),
+  copy: copy,
+  deepMixIn: require('mout/object/deepMixIn'),
+  diffObjectFromOldObject: observe.diffObjectFromOldObject,
+  DSBinaryHeap: DSBinaryHeap,
+  equals: equals,
+  Events: Events,
+  filter: filter,
+  forEach: forEach,
+  forOwn: forOwn,
+  fromJson: function (json) {
+    return isString(json) ? JSON.parse(json) : json;
   },
+  intersection: intersection,
+  isArray: isArray,
+  isBoolean: isBoolean,
+  isDate: isDate,
+  isEmpty: isEmpty,
+  isFunction: isFunction,
+  isObject: isObject,
+  isNumber: isNumber,
+  isRegExp: isRegExp,
+  isString: isString,
+  makePath: makePath,
+  observe: observe,
+  pascalCase: require('mout/string/pascalCase'),
+  pick: require('mout/object/pick'),
+  Promise: _Promise,
   promisify: function (fn, target) {
     var Promise = this.Promise;
     if (!fn) {
@@ -389,27 +541,16 @@ var DSUtils = {
       });
     };
   },
-  Events: Events
+  remove: require('mout/array/remove'),
+  set: require('mout/object/set'),
+  slice: slice,
+  sort: require('mout/array/sort'),
+  toJson: JSON.stringify,
+  updateTimestamp: updateTimestamp,
+  upperCase: require('mout/string/upperCase'),
+  resolveItem: resolveItem,
+  resolveId: resolveId,
+  w: w
 };
-
-function intersection(array1, array2) {
-  if (!array1 || !array2) {
-    return [];
-  }
-  var result = [];
-  var item;
-  for (var i = 0, length = array1.length; i < length; i++) {
-    item = array1[i];
-    if (DSUtils.contains(result, item)) {
-      continue;
-    }
-    if (DSUtils.contains(array2, item)) {
-      result.push(item);
-    }
-  }
-  return result;
-}
-
-DSUtils.intersection = intersection;
 
 module.exports = DSUtils;

@@ -23,7 +23,7 @@ function destroy(resourceName, id, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'beforeDestroy', DSUtils.merge({}, attrs));
+        _this.emit(options, 'beforeDestroy', DSUtils.copy(attrs));
       }
       if (options.eagerEject) {
         _this.eject(resourceName, id);
@@ -35,7 +35,7 @@ function destroy(resourceName, id, options) {
     })
     .then(function (item) {
       if (options.notify) {
-        _this.emit(options, 'afterDestroy', DSUtils.merge({}, item));
+        _this.emit(options, 'afterDestroy', DSUtils.copy(item));
       }
       _this.eject(resourceName, id);
       return id;

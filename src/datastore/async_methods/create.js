@@ -37,7 +37,7 @@ function create(resourceName, attrs, options) {
       })
       .then(function (attrs) {
         if (options.notify) {
-          _this.emit(options, 'beforeCreate', DSUtils.merge({}, attrs));
+          _this.emit(options, 'beforeCreate', DSUtils.copy(attrs));
         }
         return _this.getAdapter(options).create(definition, attrs, options);
       })
@@ -46,7 +46,7 @@ function create(resourceName, attrs, options) {
       })
       .then(function (attrs) {
         if (options.notify) {
-          _this.emit(options, 'afterCreate', DSUtils.merge({}, attrs));
+          _this.emit(options, 'afterCreate', DSUtils.copy(attrs));
         }
         if (options.cacheResponse) {
           var created = _this.inject(definition.name, attrs, options);

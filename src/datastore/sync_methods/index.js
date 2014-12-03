@@ -21,7 +21,7 @@ function changes(resourceName, id, options) {
     if (DSUtils.w) {
       _this.store[resourceName].observers[id].deliver();
     }
-    var diff = DSUtils.diffObjectFromOldObject(item, _this.store[resourceName].previousAttributes[id], options.ignoredChanges);
+    var diff = DSUtils.diffObjectFromOldObject(item, _this.store[resourceName].previousAttributes[id], DSUtils.equals, options.ignoredChanges);
     DSUtils.forOwn(diff, function (changeset, name) {
       var toKeep = [];
       DSUtils.forOwn(changeset, function (value, field) {
@@ -82,7 +82,7 @@ function compute(resourceName, instance) {
   }
 
   DSUtils.forOwn(definition.computed, function (fn, field) {
-    DSUtils.compute.call(instance, fn, field, DSUtils);
+    DSUtils.compute.call(instance, fn, field);
   });
 
   return instance;
@@ -239,7 +239,7 @@ function previous(resourceName, id) {
   }
 
   // return resource from cache
-  return resource.previousAttributes[id] ? DSUtils.merge({}, resource.previousAttributes[id]) : undefined;
+  return resource.previousAttributes[id] ? DSUtils.copy(resource.previousAttributes[id]) : undefined;
 }
 
 module.exports = {

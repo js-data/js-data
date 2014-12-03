@@ -2,7 +2,6 @@ var DSUtils = require('../utils');
 var DSErrors = require('../errors');
 var syncMethods = require('./sync_methods');
 var asyncMethods = require('./async_methods');
-var observe = require('../../lib/observe-js/observe-js');
 var Schemator;
 
 function lifecycleNoopCb(resource, attrs, cb) {
@@ -94,6 +93,8 @@ defaultsPrototype.beforeInject = lifecycleNoop;
 defaultsPrototype.afterInject = lifecycleNoop;
 defaultsPrototype.beforeEject = lifecycleNoop;
 defaultsPrototype.afterEject = lifecycleNoop;
+defaultsPrototype.beforeReap = lifecycleNoop;
+defaultsPrototype.afterReap = lifecycleNoop;
 defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
   var _this = this;
   var filtered = collection;
@@ -282,7 +283,7 @@ function DS(options) {
   this.definitions = {};
   this.adapters = {};
   this.defaults = new Defaults();
-  this.observe = observe;
+  this.observe = DSUtils.observe;
   DSUtils.deepMixIn(this.defaults, options);
 }
 

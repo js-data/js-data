@@ -258,7 +258,6 @@ function defineResource(definition) {
 
     return def;
   } catch (err) {
-    console.error(err);
     delete definitions[definition.name];
     delete _this.store[definition.name];
     throw err;

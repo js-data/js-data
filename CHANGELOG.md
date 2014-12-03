@@ -1,3 +1,12 @@
+##### 1.0.0-alpha.5-6 - 03 December 2014
+
+###### Backwards compatible bug fixes
+- Backport jmdobry/angular-data#262
+
+###### Other
+- Optimized utility functions to save several kilobytes off of minified file
+- Change detection of nested properties "should" work now
+
 ##### 1.0.0-alpha.5-5 - 30 November 2014
 
 ###### Breaking API changes

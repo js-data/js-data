@@ -22,7 +22,7 @@ function destroyAll(resourceName, params, options) {
       return options.beforeDestroy(options, toEject);
     }).then(function () {
       if (options.notify) {
-        _this.emit(options, 'beforeDestroy', toEject);
+        _this.emit(options, 'beforeDestroy', DSUtils.copy(toEject));
       }
       if (options.eagerEject) {
         ejected = _this.ejectAll(resourceName, params);
@@ -32,7 +32,7 @@ function destroyAll(resourceName, params, options) {
       return options.afterDestroy(options, toEject);
     }).then(function () {
       if (options.notify) {
-        _this.emit(options, 'afterDestroy', toEject);
+        _this.emit(options, 'afterDestroy', DSUtils.copy(toEject));
       }
       return ejected || _this.ejectAll(resourceName, params);
     })['catch'](function (err) {

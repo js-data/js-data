@@ -62,13 +62,13 @@ module.exports = function (grunt) {
       }
     },
     browserify: {
-      options: {
-        browserifyOptions: {
-          standalone: 'JSData'
-        },
-        external: ['js-data-schema', 'bluebird']
-      },
       dist: {
+        options: {
+          browserifyOptions: {
+            standalone: 'JSData'
+          },
+          external: ['js-data-schema', 'bluebird']
+        },
         files: {
           'dist/js-data.js': ['src/index.js']
         }
