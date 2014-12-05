@@ -16,6 +16,7 @@ function Resource(options) {
 var instanceMethods = [
   'compute',
   'refresh',
+  'create',
   'save',
   'update',
   'destroy',
