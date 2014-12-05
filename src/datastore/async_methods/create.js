@@ -8,21 +8,26 @@ function create(resourceName, attrs, options) {
   options = options || {};
   attrs = attrs || {};
 
-  var promise = new DSUtils.Promise(function (resolve, reject) {
-    if (!definition) {
-      reject(new DSErrors.NER(resourceName));
-    } else if (!DSUtils.isObject(attrs)) {
-      reject(new DSErrors.IA('"attrs" must be an object!'));
-    } else {
-      options = DSUtils._(definition, options);
-      resolve(attrs);
-    }
-  });
+  var rejectionError;
+  if (!definition) {
+    rejectionError = new DSErrors.NER(resourceName);
+  } else if (!DSUtils.isObject(attrs)) {
+    rejectionError = new DSErrors.IA('"attrs" must be an object!');
+  } else {
+    options = DSUtils._(definition, options);
+  }
+  if (rejectionError) {
+    return new DSUtils.Promise(function (resolve, reject) {
+      reject(rejectionError);
+    });
+  }
 
   if (definition && options.upsert && attrs[definition.idAttribute]) {
     return _this.update(resourceName, attrs[definition.idAttribute], attrs, options);
   } else {
-    return promise
+    return new DSUtils.Promise(function(resolve, reject) {
+      resolve(attrs);
+    })
       .then(function (attrs) {
         return options.beforeValidate.call(attrs, options, attrs);
       })
