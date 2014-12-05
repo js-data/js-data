@@ -110,12 +110,12 @@ function defineResource(definition) {
         }
         if (DSUtils.isObject(attrs) && parentKey in attrs) {
           delete options.params[parentKey];
-          endpoint = DSUtils.makePath(parentDef.getEndpoint(attrs, options), attrs[parentKey], thisEndpoint);
+          endpoint = DSUtils.makePath(parentDef.getEndpoint(attrs[parentKey], options), attrs[parentKey], thisEndpoint);
         } else if (item && parentKey in item) {
           delete options.params[parentKey];
-          endpoint = DSUtils.makePath(parentDef.getEndpoint(attrs, options), item[parentKey], thisEndpoint);
+          endpoint = DSUtils.makePath(parentDef.getEndpoint(item[parentKey], options), item[parentKey], thisEndpoint);
         } else if (options && options.params[parentKey]) {
-          endpoint = DSUtils.makePath(parentDef.getEndpoint(attrs, options), options.params[parentKey], thisEndpoint);
+          endpoint = DSUtils.makePath(parentDef.getEndpoint(options.params[parentKey], options), options.params[parentKey], thisEndpoint);
           delete options.params[parentKey];
         }
       }
