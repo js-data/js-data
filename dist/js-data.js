@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file js-data.js
-* @version 1.0.0-alpha.5-6 - Homepage <http://www.js-data.io/>
+* @version 1.0.0-alpha.5-7 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -2229,56 +2229,59 @@ function create(resourceName, attrs, options) {
   options = options || {};
   attrs = attrs || {};
 
-  var promise = new DSUtils.Promise(function (resolve, reject) {
-    if (!definition) {
-      reject(new DSErrors.NER(resourceName));
-    } else if (!DSUtils.isObject(attrs)) {
-      reject(new DSErrors.IA('"attrs" must be an object!'));
+  var rejectionError;
+  if (!definition) {
+    rejectionError = new DSErrors.NER(resourceName);
+  } else if (!DSUtils.isObject(attrs)) {
+    rejectionError = new DSErrors.IA('"attrs" must be an object!');
+  } else {
+    options = DSUtils._(definition, options);
+    if (options.upsert && (DSUtils.isString(attrs[definition.idAttribute]) || DSUtils.isNumber(attrs[definition.idAttribute]))) {
+      return _this.update(resourceName, attrs[definition.idAttribute], attrs, options);
+    }
+  }
+
+  return new DSUtils.Promise(function (resolve, reject) {
+    if (rejectionError) {
+      reject(rejectionError);
     } else {
-      options = DSUtils._(definition, options);
       resolve(attrs);
     }
-  });
-
-  if (definition && options.upsert && attrs[definition.idAttribute]) {
-    return _this.update(resourceName, attrs[definition.idAttribute], attrs, options);
-  } else {
-    return promise
-      .then(function (attrs) {
-        return options.beforeValidate.call(attrs, options, attrs);
-      })
-      .then(function (attrs) {
-        return options.validate.call(attrs, options, attrs);
-      })
-      .then(function (attrs) {
-        return options.afterValidate.call(attrs, options, attrs);
-      })
-      .then(function (attrs) {
-        return options.beforeCreate.call(attrs, options, attrs);
-      })
-      .then(function (attrs) {
-        if (options.notify) {
-          _this.emit(options, 'beforeCreate', DSUtils.copy(attrs));
-        }
-        return _this.getAdapter(options).create(definition, attrs, options);
-      })
-      .then(function (attrs) {
-        return options.afterCreate.call(attrs, options, attrs);
-      })
-      .then(function (attrs) {
-        if (options.notify) {
-          _this.emit(options, 'afterCreate', DSUtils.copy(attrs));
-        }
-        if (options.cacheResponse) {
-          var created = _this.inject(definition.name, attrs, options);
-          var id = created[definition.idAttribute];
-          _this.store[resourceName].completedQueries[id] = new Date().getTime();
-          return created;
-        } else {
-          return _this.createInstance(resourceName, attrs, options);
-        }
-      });
-  }
+  })
+    .then(function (attrs) {
+      return options.beforeValidate.call(attrs, options, attrs);
+    })
+    .then(function (attrs) {
+      return options.validate.call(attrs, options, attrs);
+    })
+    .then(function (attrs) {
+      return options.afterValidate.call(attrs, options, attrs);
+    })
+    .then(function (attrs) {
+      return options.beforeCreate.call(attrs, options, attrs);
+    })
+    .then(function (attrs) {
+      if (options.notify) {
+        _this.emit(options, 'beforeCreate', DSUtils.copy(attrs));
+      }
+      return _this.getAdapter(options).create(definition, attrs, options);
+    })
+    .then(function (attrs) {
+      return options.afterCreate.call(attrs, options, attrs);
+    })
+    .then(function (attrs) {
+      if (options.notify) {
+        _this.emit(options, 'afterCreate', DSUtils.copy(attrs));
+      }
+      if (options.cacheResponse) {
+        var created = _this.inject(definition.name, attrs, options);
+        var id = created[definition.idAttribute];
+        _this.store[resourceName].completedQueries[id] = new Date().getTime();
+        return created;
+      } else {
+        return _this.createInstance(resourceName, attrs, options);
+      }
+    });
 }
 
 module.exports = create;
@@ -2399,6 +2402,11 @@ function find(resourceName, id, options) {
       reject(new DSErrors.IA('"id" must be a string or a number!'));
     } else {
       options = DSUtils._(definition, options);
+
+      if (options.params) {
+        options.params = DSUtils.copy(options.params);
+      }
+
       if (options.bypassCache || !options.cacheResponse) {
         delete resource.completedQueries[id];
       }
@@ -2467,7 +2475,7 @@ function processResults(data, resourceName, queryHash, options) {
       }
     });
   } else {
-    console.warn(errorPrefix(resourceName) + 'response is expected to be an array!');
+    console.warn('response is expected to be an array!');
     resource.completedQueries[injected[idAttribute]] = date;
   }
 
@@ -2490,6 +2498,10 @@ function findAll(resourceName, params, options) {
     } else {
       options = DSUtils._(definition, options);
       queryHash = DSUtils.toJson(params);
+
+      if (options.params) {
+        options.params = DSUtils.copy(options.params);
+      }
 
       if (options.bypassCache || !options.cacheResponse) {
         delete resource.completedQueries[queryHash];
@@ -3429,6 +3441,13 @@ function defineResource(definition) {
         return _this[name].apply(_this, args);
       };
     });
+
+    def[def['class']].prototype.DSCreate = function () {
+      var args = Array.prototype.slice.call(arguments);
+      args.unshift(this);
+      args.unshift(def.name);
+      return _this.create.apply(_this, args);
+    };
 
     // Initialize store data for the new resource
     _this.store[def.name] = {

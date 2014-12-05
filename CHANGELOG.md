@@ -1,3 +1,11 @@
+##### 1.0.0-alpha.5-7 - 05 December 2014
+
+###### Backwards compatible API changes
+- #26 - Added the DSCreate instance method
+
+###### Backwards compatible bug fixes
+- #23 - DS#findAll: make a copy of options.params if it's passed in and manipulate that
+
 ##### 1.0.0-alpha.5-6 - 03 December 2014
 
 ###### Backwards compatible bug fixes

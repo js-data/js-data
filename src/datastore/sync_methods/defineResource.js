@@ -16,7 +16,6 @@ function Resource(options) {
 var instanceMethods = [
   'compute',
   'refresh',
-  'create',
   'save',
   'update',
   'destroy',
@@ -204,6 +203,13 @@ function defineResource(definition) {
         return _this[name].apply(_this, args);
       };
     });
+
+    def[def['class']].prototype.DSCreate = function () {
+      var args = Array.prototype.slice.call(arguments);
+      args.unshift(this);
+      args.unshift(def.name);
+      return _this.create.apply(_this, args);
+    };
 
     // Initialize store data for the new resource
     _this.store[def.name] = {
