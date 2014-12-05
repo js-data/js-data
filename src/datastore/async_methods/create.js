@@ -11,8 +11,7 @@ function create(resourceName, attrs, options) {
   var rejectionError;
   if (!definition) {
     rejectionError = new DSErrors.NER(resourceName);
-  }
-  if (definition) {
+  } else {
     options = DSUtils._(definition, options);
     if (options.upsert && (DSUtils.isString(attrs) || DSUtils.isNumber(attrs))) {
       return _this.update(resourceName, attrs, _this.get(resourceName, attrs), options);
