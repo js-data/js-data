@@ -39,11 +39,11 @@ describe('DS#hasChanges', function () {
     setTimeout(function () {
       try {
         assert.equal(3, _this.requests.length);
-        assert.equal(_this.requests[0].url, 'http://test.js-data.io/user/10/comment');
+        assert.equal(_this.requests[0].url, 'http://test.js-data.io/organization/14/user/10/comment');
         assert.equal(_this.requests[0].method, 'get');
-        assert.equal(_this.requests[1].url, 'http://test.js-data.io/profile?userId=10');
+        assert.equal(_this.requests[1].url, 'http://test.js-data.io/profile?approvedBy=10&userId=10');
         assert.equal(_this.requests[1].method, 'get');
-        assert.equal(_this.requests[2].url, 'http://test.js-data.io/organization/14?userId=10');
+        assert.equal(_this.requests[2].url, 'http://test.js-data.io/organization/14?approvedBy=10');
         assert.equal(_this.requests[2].method, 'get');
         _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([
           comment11,

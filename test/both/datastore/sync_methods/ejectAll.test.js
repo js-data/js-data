@@ -36,7 +36,7 @@ describe('DS#ejectAll', function () {
     try {
       store.ejectAll('post', { where: { age: 33 } });
     } catch (err) {
-      console.log(err.stack);
+      console.error(err.stack);
     }
     assert.doesNotThrow(function () {
       store.ejectAll('post', { where: { age: 33 } });

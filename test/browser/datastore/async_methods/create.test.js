@@ -13,7 +13,7 @@ describe('DS#create', function () {
       assert.deepEqual(JSON.stringify(store.get('post', 5)), JSON.stringify(p1));
       done();
     }).catch(function (err) {
-      console.log(err.stack);
+      console.error(err.stack);
       done('should not have rejected');
     });
 
@@ -22,7 +22,7 @@ describe('DS#create', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
       assert.equal(_this.requests[0].method, 'post');
       assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ author: 'John', age: 30 }));
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(p1));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(p1));
     }, 30);
   });
   it('should create an item and save it to the server but not inject the result', function (done) {
@@ -47,7 +47,7 @@ describe('DS#create', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
       assert.equal(_this.requests[0].method, 'post');
       assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ author: 'John', age: 30 }));
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(p1));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(p1));
     }, 30);
   });
   it('should work with the upsert option', function (done) {
@@ -79,7 +79,7 @@ describe('DS#create', function () {
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/posts');
         assert.equal(_this.requests[1].method, 'post');
         assert.equal(_this.requests[1].requestBody, DSUtils.toJson({ author: 'Sue', age: 70, id: 6 }));
-        _this.requests[1].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(p2));
+        _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(p2));
       }, 30);
     }).catch(function (err) {
       console.error(err.stack);
@@ -91,7 +91,7 @@ describe('DS#create', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
       assert.equal(_this.requests[0].method, 'put');
       assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ author: 'John', age: 30, id: 5 }));
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(p1));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(p1));
     }, 30);
   });
   it('should create an item that includes relations, save them to the server and inject the results', function (done) {
@@ -126,7 +126,6 @@ describe('DS#create', function () {
       assert.equal(store.get('user', 99).id, payload.id);
       assert.isObject(store.get('user', 99).profile);
       assert.equal(store.get('profile', 999).id, 999);
-      console.log(store.get('profile', 999).user);
       assert.isObject(store.get('profile', 999).user);
 
       store.find('user', 99); // should not trigger another http request
@@ -138,16 +137,20 @@ describe('DS#create', function () {
     });
 
     setTimeout(function () {
-      assert.equal(1, _this.requests.length);
-      assert.equal(_this.requests[0].url, 'http://test.js-data.io/user');
-      assert.equal(_this.requests[0].method, 'post');
-      assert.equal(_this.requests[0].requestBody, DSUtils.toJson({
-        name: 'Sally',
-        profile: {
-          email: 'sally@test.com'
-        }
-      }));
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(payload));
+      try {
+        assert.equal(1, _this.requests.length);
+        assert.equal(_this.requests[0].url, 'http://test.js-data.io/user');
+        assert.equal(_this.requests[0].method, 'post');
+        assert.equal(_this.requests[0].requestBody, DSUtils.toJson({
+          name: 'Sally',
+          profile: {
+            email: 'sally@test.com'
+          }
+        }));
+        _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(payload));
+      } catch (err) {
+        done(err);
+      }
     }, 30);
   });
   it('should handle nested resources', function (done) {
@@ -200,7 +203,7 @@ describe('DS#create', function () {
           assert.equal(_this.requests[2].url, 'http://test.js-data.io/comment');
           assert.equal(_this.requests[2].method, 'post');
           assert.equal(_this.requests[2].requestBody, DSUtils.toJson({ content: 'test', approvedBy: 4 }));
-          _this.requests[2].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(testComment2));
+          _this.requests[2].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment2));
         }, 30);
       }).catch(function () {
         done('Should not have failed!');
@@ -211,7 +214,7 @@ describe('DS#create', function () {
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/user/4/comment');
         assert.equal(_this.requests[1].method, 'post');
         assert.equal(_this.requests[1].requestBody, DSUtils.toJson({ content: 'test' }));
-        _this.requests[1].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(testComment2));
+        _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment2));
       }, 30);
     }).catch(function () {
       done('Should not have failed!');
@@ -222,7 +225,7 @@ describe('DS#create', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/user/4/comment');
       assert.equal(_this.requests[0].method, 'post');
       assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ content: 'test', approvedBy: 4 }));
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(testComment));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment));
     }, 30);
   });
   it('should find inverse links', function (done) {
@@ -255,12 +258,13 @@ describe('DS#create', function () {
           organizationId: 77,
           id: 88
         }));
-        _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson({
+        _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({
           organizationId: 77,
           id: 88
         }));
       } catch (err) {
         console.error(err.stack);
+        done(err);
       }
     }, 30);
   });

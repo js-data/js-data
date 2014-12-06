@@ -1,3 +1,8 @@
+##### 1.0.0-alpha.5-8 - 05 December 2014
+
+###### Backwards compatible API changes
+- #27 - Properly resolve parent params for generating the URL
+
 ##### 1.0.0-alpha.5-7 - 05 December 2014
 
 ###### Backwards compatible API changes

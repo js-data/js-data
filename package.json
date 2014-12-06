@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "1.0.0-alpha.5-7",
+  "version": "1.0.0-alpha.5-8",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",

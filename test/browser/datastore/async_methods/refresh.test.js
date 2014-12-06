@@ -44,7 +44,7 @@ describe('DS#refresh', function () {
           age: 31
         }));
       } catch (err) {
-        console.log(err.stack);
+        console.error(err.stack);
         done(err);
       }
     }, 30);
