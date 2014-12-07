@@ -62,13 +62,13 @@ module.exports = function (grunt) {
       }
     },
     browserify: {
-      options: {
-        browserifyOptions: {
-          standalone: 'JSData'
-        },
-        external: ['js-data-schema']
-      },
       dist: {
+        options: {
+          browserifyOptions: {
+            standalone: 'JSData'
+          },
+          external: ['js-data-schema', 'bluebird']
+        },
         files: {
           'dist/js-data.js': ['src/index.js']
         }
@@ -117,14 +117,6 @@ module.exports = function (grunt) {
         src: ['mocha.start.js', 'test/both/**/*.js', 'test/node/**/*.js']
       }
     }
-  });
-
-  grunt.registerTask('version', function (filePath) {
-    var file = grunt.file.read(filePath);
-
-    file = file.replace(/<%= pkg\.version %>/gi, pkg.version);
-
-    grunt.file.write(filePath, file);
   });
 
   grunt.registerTask('banner', function () {

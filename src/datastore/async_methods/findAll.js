@@ -27,7 +27,7 @@ function processResults(data, resourceName, queryHash, options) {
       }
     });
   } else {
-    console.warn(errorPrefix(resourceName) + 'response is expected to be an array!');
+    console.warn('response is expected to be an array!');
     resource.completedQueries[injected[idAttribute]] = date;
   }
 
@@ -50,6 +50,10 @@ function findAll(resourceName, params, options) {
     } else {
       options = DSUtils._(definition, options);
       queryHash = DSUtils.toJson(params);
+
+      if (options.params) {
+        options.params = DSUtils.copy(options.params);
+      }
 
       if (options.bypassCache || !options.cacheResponse) {
         delete resource.completedQueries[queryHash];
@@ -82,9 +86,11 @@ function findAll(resourceName, params, options) {
         return items;
       }
     })['catch'](function (err) {
+    if (resource) {
       delete resource.pendingQueries[queryHash];
-      throw err;
-    });
+    }
+    throw err;
+  });
 }
 
 module.exports = findAll;

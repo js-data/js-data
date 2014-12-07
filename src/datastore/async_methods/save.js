@@ -33,7 +33,7 @@ function save(resourceName, id, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'beforeUpdate', DSUtils.merge({}, attrs));
+        _this.emit(options, 'beforeUpdate', DSUtils.copy(attrs));
       }
       if (options.changesOnly) {
         var resource = _this.store[resourceName];
@@ -64,7 +64,7 @@ function save(resourceName, id, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'afterUpdate', DSUtils.merge({}, attrs));
+        _this.emit(options, 'afterUpdate', DSUtils.copy(attrs));
       }
       if (options.cacheResponse) {
         return _this.inject(definition.name, attrs, options);

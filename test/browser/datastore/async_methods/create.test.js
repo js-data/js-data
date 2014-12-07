@@ -13,7 +13,7 @@ describe('DS#create', function () {
       assert.deepEqual(JSON.stringify(store.get('post', 5)), JSON.stringify(p1));
       done();
     }).catch(function (err) {
-      console.log(err.stack);
+      console.error(err.stack);
       done('should not have rejected');
     });
 
@@ -112,7 +112,8 @@ describe('DS#create', function () {
         email: 'sally@test.com'
       }
     }, {
-      findBelongsTo: true
+      findBelongsTo: true,
+      findInverseLinks: true
     }).then(function (user) {
       assert.equal(user.id, payload.id, 'user should have been created');
 
@@ -136,16 +137,20 @@ describe('DS#create', function () {
     });
 
     setTimeout(function () {
-      assert.equal(1, _this.requests.length);
-      assert.equal(_this.requests[0].url, 'http://test.js-data.io/user');
-      assert.equal(_this.requests[0].method, 'post');
-      assert.equal(_this.requests[0].requestBody, DSUtils.toJson({
-        name: 'Sally',
-        profile: {
-          email: 'sally@test.com'
-        }
-      }));
-      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(payload));
+      try {
+        assert.equal(1, _this.requests.length);
+        assert.equal(_this.requests[0].url, 'http://test.js-data.io/user');
+        assert.equal(_this.requests[0].method, 'post');
+        assert.equal(_this.requests[0].requestBody, DSUtils.toJson({
+          name: 'Sally',
+          profile: {
+            email: 'sally@test.com'
+          }
+        }));
+        _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(payload));
+      } catch (err) {
+        done(err);
+      }
     }, 30);
   });
   it('should handle nested resources', function (done) {
@@ -259,6 +264,7 @@ describe('DS#create', function () {
         }));
       } catch (err) {
         console.error(err.stack);
+        done(err);
       }
     }, 30);
   });

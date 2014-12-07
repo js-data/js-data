@@ -12,10 +12,8 @@ function destroy(resourceName, id, options) {
       reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
       reject(new DSErrors.IA('"id" must be a string or a number!'));
-    } else if (!_this.get(resourceName, id)) {
-      reject(new DSErrors.R('id "' + id + '" not found in cache!'));
     } else {
-      item = _this.get(resourceName, id);
+      item = _this.get(resourceName, id) || { id: id };
       options = DSUtils._(definition, options);
       resolve(item);
     }
@@ -25,7 +23,7 @@ function destroy(resourceName, id, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'beforeDestroy', DSUtils.merge({}, attrs));
+        _this.emit(options, 'beforeDestroy', DSUtils.copy(attrs));
       }
       if (options.eagerEject) {
         _this.eject(resourceName, id);
@@ -37,12 +35,12 @@ function destroy(resourceName, id, options) {
     })
     .then(function (item) {
       if (options.notify) {
-        _this.emit(options, 'afterDestroy', DSUtils.merge({}, item));
+        _this.emit(options, 'afterDestroy', DSUtils.copy(item));
       }
       _this.eject(resourceName, id);
       return id;
     })['catch'](function (err) {
-    if (options.eagerEject && item) {
+    if (options && options.eagerEject && item) {
       _this.inject(resourceName, item, { notify: false });
     }
     throw err;

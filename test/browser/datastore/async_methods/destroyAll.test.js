@@ -24,7 +24,7 @@ describe('DS#destroyAll', function () {
         assert.deepEqual(JSON.stringify(store.filter('post', {})), JSON.stringify([]), 'The posts should not be in the store yet');
         done();
       }, function (err) {
-        console.log(err);
+        console.error(err.stack);
         done(err);
       }).catch(function (err) {
         console.error(err.stack);
@@ -74,7 +74,7 @@ describe('DS#destroyAll', function () {
         }).then(function () {
           done();
         }).catch(function (err) {
-          console.log(err);
+          console.error(err);
           done('Should not have failed!');
         });
 
@@ -85,7 +85,7 @@ describe('DS#destroyAll', function () {
           _this.requests[2].respond(204);
         }, 30);
       }).catch(function (err) {
-        console.log(err);
+        console.error(err);
         done('Should not have failed!');
       });
 
@@ -96,7 +96,7 @@ describe('DS#destroyAll', function () {
         _this.requests[1].respond(204);
       }, 30);
     }).catch(function (err) {
-      console.log(err);
+      console.error(err);
       done('Should not have failed!');
     });
 

@@ -43,7 +43,7 @@ describe('DS#save', function () {
         done(err);
       }
     }, function (err) {
-      console.log(err);
+      console.error(err);
       done(err);
     }).catch(function (err) {
       console.error(stack);
@@ -66,7 +66,7 @@ describe('DS#save', function () {
           age: 30
         }));
       } catch (err) {
-        console.log(err.stack);
+        console.error(err.stack);
         done(err);
       }
     }, 30);
@@ -99,7 +99,7 @@ describe('DS#save', function () {
         done(err);
       }
     }, function (err) {
-      console.log(err);
+      console.error(err);
       done(err);
     }).catch(function (err) {
       console.error(stack);
@@ -122,7 +122,7 @@ describe('DS#save', function () {
           age: 30
         }));
       } catch (err) {
-        console.log(err.stack);
+        console.error(err.stack);
         done(err);
       }
     }, 30);
@@ -153,7 +153,7 @@ describe('DS#save', function () {
       assert.equal(store.lastSaved('post', 5), initialSaved);
       done();
     }).catch(function (err) {
-      console.log(err.stack);
+      console.error(err.stack);
       done('should not have rejected');
     });
 
@@ -169,7 +169,7 @@ describe('DS#save', function () {
           random: 'stuff'
         }));
       } catch (err) {
-        console.log(err.stack);
+        console.error(err.stack);
         done(err);
       }
     }, 30);
@@ -222,7 +222,7 @@ describe('DS#save', function () {
           id: 5
         }));
       } catch (err) {
-        console.log(err.stack);
+        console.error(err.stack);
         done(err);
       }
     }, 30);

@@ -26,7 +26,7 @@ function updateAll(resourceName, attrs, params, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'beforeUpdate', DSUtils.merge({}, attrs));
+        _this.emit(options, 'beforeUpdate', DSUtils.copy(attrs));
       }
       return _this.getAdapter(options).updateAll(definition, attrs, params, options);
     })
@@ -35,7 +35,7 @@ function updateAll(resourceName, attrs, params, options) {
     })
     .then(function (data) {
       if (options.notify) {
-        _this.emit(options, 'afterUpdate', DSUtils.merge({}, attrs));
+        _this.emit(options, 'afterUpdate', DSUtils.copy(attrs));
       }
       if (options.cacheResponse) {
         return _this.inject(definition.name, data, options);

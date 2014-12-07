@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file js-data.js
-* @version 1.0.0-alpha.5-1 - Homepage <http://www.js-data.io/>
+* @version 1.0.0-alpha.5-8 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -27,6 +27,10 @@
 //
 // Summary of modifications:
 // Fixed use of "delete" keyword for IE8 compatibility
+// Exposed diffObjectFromOldObject on the exported object
+// Added the "equals" argument to diffObjectFromOldObject to be used to check equality
+// Added a way to to define a default equality operator for diffObjectFromOldObject
+// Added a way in diffObjectFromOldObject to ignore changes to certain properties
 // Removed all code related to:
 // - ArrayObserver
 // - ArraySplice
@@ -36,6 +40,12 @@
 // - ObserverTransform
 (function(global) {
   'use strict';
+
+  var equalityFn = function (a, b) {
+    return a === b;
+  };
+
+  var blacklist = [];
 
   // Detect and do basic sanity checking on Object/Array.observe.
   function detectObjectObserve() {
@@ -136,7 +146,20 @@
            objectIsEmpty(diff.changed);
   }
 
-  function diffObjectFromOldObject(object, oldObject) {
+  function isBlacklisted(prop, bl) {
+    if (!bl || !bl.length) {
+      return false;
+    }
+    var matches;
+    for (var i = 0; i < bl.length; i++) {
+      if ((Object.prototype.toString.call(bl[i]) === '[object RegExp]' && bl[i].test(prop)) || bl[i] === prop) {
+        return matches = prop;
+      }
+    }
+    return !!matches;
+  }
+
+  function diffObjectFromOldObject(object, oldObject, equals, bl) {
     var added = {};
     var removed = {};
     var changed = {};
@@ -144,7 +167,10 @@
     for (var prop in oldObject) {
       var newValue = object[prop];
 
-      if (newValue !== undefined && newValue === oldObject[prop])
+      if (isBlacklisted(prop, bl))
+        continue;
+
+      if (newValue !== undefined && (equals ? equals(newValue, oldObject[prop]) : newValue === oldObject[prop]))
         continue;
 
       if (!(prop in object)) {
@@ -152,12 +178,15 @@
         continue;
       }
 
-      if (newValue !== oldObject[prop])
+      if (equals ? !equals(newValue, oldObject[prop]) : newValue !== oldObject[prop])
         changed[prop] = newValue;
     }
 
     for (var prop in object) {
       if (prop in oldObject)
+        continue;
+
+      if (isBlacklisted(prop, bl))
         continue;
 
       added[prop] = object[prop];
@@ -469,7 +498,7 @@
                                            oldValues);
       } else {
         oldValues = this.oldObject_;
-        diff = diffObjectFromOldObject(this.value_, this.oldObject_);
+        diff = diffObjectFromOldObject(this.value_, this.oldObject_, equalityFn, blacklist);
       }
 
       if (diffIsEmpty(diff))
@@ -587,6 +616,13 @@
   }
 
   global.Observer = Observer;
+  global.diffObjectFromOldObject = diffObjectFromOldObject;
+  global.setEqualityFn = function (fn) {
+    equalityFn = fn;
+  };
+  global.setBlacklist = function (bl) {
+    blacklist = bl;
+  };
   global.Observer.runEOM_ = runEOM;
   global.Observer.observerSentinel_ = observerSentinel; // for testing.
   global.Observer.hasObjectObserve = hasObserve;
@@ -1663,75 +1699,7 @@ var indexOf = require('./indexOf');
     module.exports = contains;
 
 
-},{"./indexOf":9}],5:[function(require,module,exports){
-var makeIterator = require('../function/makeIterator_');
-
-    /**
-     * Array filter
-     */
-    function filter(arr, callback, thisObj) {
-        callback = makeIterator(callback, thisObj);
-        var results = [];
-        if (arr == null) {
-            return results;
-        }
-
-        var i = -1, len = arr.length, value;
-        while (++i < len) {
-            value = arr[i];
-            if (callback(value, i, arr)) {
-                results.push(value);
-            }
-        }
-
-        return results;
-    }
-
-    module.exports = filter;
-
-
-
-},{"../function/makeIterator_":16}],6:[function(require,module,exports){
-var findIndex = require('./findIndex');
-
-    /**
-     * Returns first item that matches criteria
-     */
-    function find(arr, iterator, thisObj){
-        var idx = findIndex(arr, iterator, thisObj);
-        return idx >= 0? arr[idx] : void(0);
-    }
-
-    module.exports = find;
-
-
-
-},{"./findIndex":7}],7:[function(require,module,exports){
-var makeIterator = require('../function/makeIterator_');
-
-    /**
-     * Returns the index of the first item that matches criteria
-     */
-    function findIndex(arr, iterator, thisObj){
-        iterator = makeIterator(iterator, thisObj);
-        if (arr == null) {
-            return -1;
-        }
-
-        var i = -1, len = arr.length;
-        while (++i < len) {
-            if (iterator(arr[i], i, arr)) {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-    module.exports = findIndex;
-
-
-},{"../function/makeIterator_":16}],8:[function(require,module,exports){
+},{"./indexOf":6}],5:[function(require,module,exports){
 
 
     /**
@@ -1756,7 +1724,7 @@ var makeIterator = require('../function/makeIterator_');
 
 
 
-},{}],9:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 
 
     /**
@@ -1786,26 +1754,7 @@ var makeIterator = require('../function/makeIterator_');
     module.exports = indexOf;
 
 
-},{}],10:[function(require,module,exports){
-var filter = require('./filter');
-
-    function isValidString(val) {
-        return (val != null && val !== '');
-    }
-
-    /**
-     * Joins strings with the specified separator inserted between each value.
-     * Null values and empty strings will be excluded.
-     */
-    function join(items, separator) {
-        separator = separator || '';
-        return filter(items, isValidString).join(separator);
-    }
-
-    module.exports = join;
-
-
-},{"./filter":5}],11:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 var indexOf = require('./indexOf');
 
     /**
@@ -1820,7 +1769,7 @@ var indexOf = require('./indexOf');
     module.exports = remove;
 
 
-},{"./indexOf":9}],12:[function(require,module,exports){
+},{"./indexOf":6}],8:[function(require,module,exports){
 
 
     /**
@@ -1857,7 +1806,7 @@ var indexOf = require('./indexOf');
 
 
 
-},{}],13:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 
 
     /**
@@ -1914,291 +1863,7 @@ var indexOf = require('./indexOf');
 
 
 
-},{}],14:[function(require,module,exports){
-var isFunction = require('../lang/isFunction');
-
-    /**
-     * Creates an object that holds a lookup for the objects in the array.
-     */
-    function toLookup(arr, key) {
-        var result = {};
-        if (arr == null) {
-            return result;
-        }
-
-        var i = -1, len = arr.length, value;
-        if (isFunction(key)) {
-            while (++i < len) {
-                value = arr[i];
-                result[key(value)] = value;
-            }
-        } else {
-            while (++i < len) {
-                value = arr[i];
-                result[value[key]] = value;
-            }
-        }
-
-        return result;
-    }
-    module.exports = toLookup;
-
-
-},{"../lang/isFunction":23}],15:[function(require,module,exports){
-
-
-    /**
-     * Returns the first argument provided to it.
-     */
-    function identity(val){
-        return val;
-    }
-
-    module.exports = identity;
-
-
-
-},{}],16:[function(require,module,exports){
-var identity = require('./identity');
-var prop = require('./prop');
-var deepMatches = require('../object/deepMatches');
-
-    /**
-     * Converts argument into a valid iterator.
-     * Used internally on most array/object/collection methods that receives a
-     * callback/iterator providing a shortcut syntax.
-     */
-    function makeIterator(src, thisObj){
-        if (src == null) {
-            return identity;
-        }
-        switch(typeof src) {
-            case 'function':
-                // function is the first to improve perf (most common case)
-                // also avoid using `Function#call` if not needed, which boosts
-                // perf a lot in some cases
-                return (typeof thisObj !== 'undefined')? function(val, i, arr){
-                    return src.call(thisObj, val, i, arr);
-                } : src;
-            case 'object':
-                return function(val){
-                    return deepMatches(val, src);
-                };
-            case 'string':
-            case 'number':
-                return prop(src);
-        }
-    }
-
-    module.exports = makeIterator;
-
-
-
-},{"../object/deepMatches":32,"./identity":15,"./prop":17}],17:[function(require,module,exports){
-
-
-    /**
-     * Returns a function that gets a property of the passed object
-     */
-    function prop(name){
-        return function(obj){
-            return obj[name];
-        };
-    }
-
-    module.exports = prop;
-
-
-
-},{}],18:[function(require,module,exports){
-var kindOf = require('./kindOf');
-var isPlainObject = require('./isPlainObject');
-var mixIn = require('../object/mixIn');
-
-    /**
-     * Clone native types.
-     */
-    function clone(val){
-        switch (kindOf(val)) {
-            case 'Object':
-                return cloneObject(val);
-            case 'Array':
-                return cloneArray(val);
-            case 'RegExp':
-                return cloneRegExp(val);
-            case 'Date':
-                return cloneDate(val);
-            default:
-                return val;
-        }
-    }
-
-    function cloneObject(source) {
-        if (isPlainObject(source)) {
-            return mixIn({}, source);
-        } else {
-            return source;
-        }
-    }
-
-    function cloneRegExp(r) {
-        var flags = '';
-        flags += r.multiline ? 'm' : '';
-        flags += r.global ? 'g' : '';
-        flags += r.ignoreCase ? 'i' : '';
-        return new RegExp(r.source, flags);
-    }
-
-    function cloneDate(date) {
-        return new Date(+date);
-    }
-
-    function cloneArray(arr) {
-        return arr.slice();
-    }
-
-    module.exports = clone;
-
-
-
-},{"../object/mixIn":38,"./isPlainObject":27,"./kindOf":30}],19:[function(require,module,exports){
-var clone = require('./clone');
-var forOwn = require('../object/forOwn');
-var kindOf = require('./kindOf');
-var isPlainObject = require('./isPlainObject');
-
-    /**
-     * Recursively clone native types.
-     */
-    function deepClone(val, instanceClone) {
-        switch ( kindOf(val) ) {
-            case 'Object':
-                return cloneObject(val, instanceClone);
-            case 'Array':
-                return cloneArray(val, instanceClone);
-            default:
-                return clone(val);
-        }
-    }
-
-    function cloneObject(source, instanceClone) {
-        if (isPlainObject(source)) {
-            var out = {};
-            forOwn(source, function(val, key) {
-                this[key] = deepClone(val, instanceClone);
-            }, out);
-            return out;
-        } else if (instanceClone) {
-            return instanceClone(source);
-        } else {
-            return source;
-        }
-    }
-
-    function cloneArray(arr, instanceClone) {
-        var out = [],
-            i = -1,
-            n = arr.length,
-            val;
-        while (++i < n) {
-            out[i] = deepClone(arr[i], instanceClone);
-        }
-        return out;
-    }
-
-    module.exports = deepClone;
-
-
-
-
-},{"../object/forOwn":35,"./clone":18,"./isPlainObject":27,"./kindOf":30}],20:[function(require,module,exports){
-var isKind = require('./isKind');
-    /**
-     */
-    var isArray = Array.isArray || function (val) {
-        return isKind(val, 'Array');
-    };
-    module.exports = isArray;
-
-
-},{"./isKind":24}],21:[function(require,module,exports){
-var isKind = require('./isKind');
-    /**
-     */
-    function isBoolean(val) {
-        return isKind(val, 'Boolean');
-    }
-    module.exports = isBoolean;
-
-
-},{"./isKind":24}],22:[function(require,module,exports){
-var forOwn = require('../object/forOwn');
-var isArray = require('./isArray');
-
-    function isEmpty(val){
-        if (val == null) {
-            // typeof null == 'object' so we check it first
-            return true;
-        } else if ( typeof val === 'string' || isArray(val) ) {
-            return !val.length;
-        } else if ( typeof val === 'object' ) {
-            var result = true;
-            forOwn(val, function(){
-                result = false;
-                return false; // break loop
-            });
-            return result;
-        } else {
-            return true;
-        }
-    }
-
-    module.exports = isEmpty;
-
-
-
-},{"../object/forOwn":35,"./isArray":20}],23:[function(require,module,exports){
-var isKind = require('./isKind');
-    /**
-     */
-    function isFunction(val) {
-        return isKind(val, 'Function');
-    }
-    module.exports = isFunction;
-
-
-},{"./isKind":24}],24:[function(require,module,exports){
-var kindOf = require('./kindOf');
-    /**
-     * Check if value is from a specific "kind".
-     */
-    function isKind(val, kind){
-        return kindOf(val) === kind;
-    }
-    module.exports = isKind;
-
-
-},{"./kindOf":30}],25:[function(require,module,exports){
-var isKind = require('./isKind');
-    /**
-     */
-    function isNumber(val) {
-        return isKind(val, 'Number');
-    }
-    module.exports = isNumber;
-
-
-},{"./isKind":24}],26:[function(require,module,exports){
-var isKind = require('./isKind');
-    /**
-     */
-    function isObject(val) {
-        return isKind(val, 'Object');
-    }
-    module.exports = isObject;
-
-
-},{"./isKind":24}],27:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 
 
     /**
@@ -2213,49 +1878,7 @@ var isKind = require('./isKind');
 
 
 
-},{}],28:[function(require,module,exports){
-var isKind = require('./isKind');
-    /**
-     */
-    function isRegExp(val) {
-        return isKind(val, 'RegExp');
-    }
-    module.exports = isRegExp;
-
-
-},{"./isKind":24}],29:[function(require,module,exports){
-var isKind = require('./isKind');
-    /**
-     */
-    function isString(val) {
-        return isKind(val, 'String');
-    }
-    module.exports = isString;
-
-
-},{"./isKind":24}],30:[function(require,module,exports){
-
-
-    var _rKind = /^\[object (.*)\]$/,
-        _toString = Object.prototype.toString,
-        UNDEF;
-
-    /**
-     * Gets the "kind" of value. (e.g. "String", "Number", etc)
-     */
-    function kindOf(val) {
-        if (val === null) {
-            return 'Null';
-        } else if (val === UNDEF) {
-            return 'Undefined';
-        } else {
-            return _rKind.exec( _toString.call(val) )[1];
-        }
-    }
-    module.exports = kindOf;
-
-
-},{}],31:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 
 
     /**
@@ -2270,64 +1893,7 @@ var isKind = require('./isKind');
 
 
 
-},{}],32:[function(require,module,exports){
-var forOwn = require('./forOwn');
-var isArray = require('../lang/isArray');
-
-    function containsMatch(array, pattern) {
-        var i = -1, length = array.length;
-        while (++i < length) {
-            if (deepMatches(array[i], pattern)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    function matchArray(target, pattern) {
-        var i = -1, patternLength = pattern.length;
-        while (++i < patternLength) {
-            if (!containsMatch(target, pattern[i])) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    function matchObject(target, pattern) {
-        var result = true;
-        forOwn(pattern, function(val, key) {
-            if (!deepMatches(target[key], val)) {
-                // Return false to break out of forOwn early
-                return (result = false);
-            }
-        });
-
-        return result;
-    }
-
-    /**
-     * Recursively check if the objects match.
-     */
-    function deepMatches(target, pattern){
-        if (target && typeof target === 'object') {
-            if (isArray(target) && isArray(pattern)) {
-                return matchArray(target, pattern);
-            } else {
-                return matchObject(target, pattern);
-            }
-        } else {
-            return target === pattern;
-        }
-    }
-
-    module.exports = deepMatches;
-
-
-
-},{"../lang/isArray":20,"./forOwn":35}],33:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var forOwn = require('./forOwn');
 var isPlainObject = require('../lang/isPlainObject');
 
@@ -2363,7 +1929,7 @@ var isPlainObject = require('../lang/isPlainObject');
 
 
 
-},{"../lang/isPlainObject":27,"./forOwn":35}],34:[function(require,module,exports){
+},{"../lang/isPlainObject":10,"./forOwn":14}],13:[function(require,module,exports){
 var hasOwn = require('./hasOwn');
 
     var _hasDontEnumBug,
@@ -2441,7 +2007,7 @@ var hasOwn = require('./hasOwn');
 
 
 
-},{"./hasOwn":36}],35:[function(require,module,exports){
+},{"./hasOwn":15}],14:[function(require,module,exports){
 var hasOwn = require('./hasOwn');
 var forIn = require('./forIn');
 
@@ -2462,7 +2028,7 @@ var forIn = require('./forIn');
 
 
 
-},{"./forIn":34,"./hasOwn":36}],36:[function(require,module,exports){
+},{"./forIn":13,"./hasOwn":15}],15:[function(require,module,exports){
 
 
     /**
@@ -2476,79 +2042,7 @@ var forIn = require('./forIn');
 
 
 
-},{}],37:[function(require,module,exports){
-var hasOwn = require('./hasOwn');
-var deepClone = require('../lang/deepClone');
-var isObject = require('../lang/isObject');
-
-    /**
-     * Deep merge objects.
-     */
-    function merge() {
-        var i = 1,
-            key, val, obj, target;
-
-        // make sure we don't modify source element and it's properties
-        // objects are passed by reference
-        target = deepClone( arguments[0] );
-
-        while (obj = arguments[i++]) {
-            for (key in obj) {
-                if ( ! hasOwn(obj, key) ) {
-                    continue;
-                }
-
-                val = obj[key];
-
-                if ( isObject(val) && isObject(target[key]) ){
-                    // inception, deep merge objects
-                    target[key] = merge(target[key], val);
-                } else {
-                    // make sure arrays, regexp, date, objects are cloned
-                    target[key] = deepClone(val);
-                }
-
-            }
-        }
-
-        return target;
-    }
-
-    module.exports = merge;
-
-
-
-},{"../lang/deepClone":19,"../lang/isObject":26,"./hasOwn":36}],38:[function(require,module,exports){
-var forOwn = require('./forOwn');
-
-    /**
-    * Combine properties from all the objects into first one.
-    * - This method affects target object in place, if you want to create a new Object pass an empty object as first param.
-    * @param {object} target    Target Object
-    * @param {...object} objects    Objects to be combined (0...n objects).
-    * @return {object} Target Object.
-    */
-    function mixIn(target, objects){
-        var i = 0,
-            n = arguments.length,
-            obj;
-        while(++i < n){
-            obj = arguments[i];
-            if (obj != null) {
-                forOwn(obj, copyProp, target);
-            }
-        }
-        return target;
-    }
-
-    function copyProp(val, key){
-        this[key] = val;
-    }
-
-    module.exports = mixIn;
-
-
-},{"./forOwn":35}],39:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 var forEach = require('../array/forEach');
 
     /**
@@ -2569,7 +2063,7 @@ var forEach = require('../array/forEach');
 
 
 
-},{"../array/forEach":8}],40:[function(require,module,exports){
+},{"../array/forEach":5}],17:[function(require,module,exports){
 var slice = require('../array/slice');
 
     /**
@@ -2589,7 +2083,7 @@ var slice = require('../array/slice');
 
 
 
-},{"../array/slice":12}],41:[function(require,module,exports){
+},{"../array/slice":8}],18:[function(require,module,exports){
 var namespace = require('./namespace');
 
     /**
@@ -2608,7 +2102,7 @@ var namespace = require('./namespace');
 
 
 
-},{"./namespace":39}],42:[function(require,module,exports){
+},{"./namespace":16}],19:[function(require,module,exports){
 var toString = require('../lang/toString');
 var replaceAccents = require('./replaceAccents');
 var removeNonWord = require('./removeNonWord');
@@ -2630,7 +2124,7 @@ var lowerCase = require('./lowerCase');
     module.exports = camelCase;
 
 
-},{"../lang/toString":31,"./lowerCase":43,"./removeNonWord":46,"./replaceAccents":47,"./upperCase":48}],43:[function(require,module,exports){
+},{"../lang/toString":11,"./lowerCase":20,"./removeNonWord":22,"./replaceAccents":23,"./upperCase":24}],20:[function(require,module,exports){
 var toString = require('../lang/toString');
     /**
      * "Safer" String.toLowerCase()
@@ -2643,24 +2137,7 @@ var toString = require('../lang/toString');
     module.exports = lowerCase;
 
 
-},{"../lang/toString":31}],44:[function(require,module,exports){
-var join = require('../array/join');
-var slice = require('../array/slice');
-
-    /**
-     * Group arguments as path segments, if any of the args is `null` or an
-     * empty string it will be ignored from resulting path.
-     */
-    function makePath(var_args){
-        var result = join(slice(arguments), '/');
-        // need to disconsider duplicate '/' after protocol (eg: 'http://')
-        return result.replace(/([^:\/]|^)\/{2,}/g, '$1/');
-    }
-
-    module.exports = makePath;
-
-
-},{"../array/join":10,"../array/slice":12}],45:[function(require,module,exports){
+},{"../lang/toString":11}],21:[function(require,module,exports){
 var toString = require('../lang/toString');
 var camelCase = require('./camelCase');
 var upperCase = require('./upperCase');
@@ -2675,7 +2152,7 @@ var upperCase = require('./upperCase');
     module.exports = pascalCase;
 
 
-},{"../lang/toString":31,"./camelCase":42,"./upperCase":48}],46:[function(require,module,exports){
+},{"../lang/toString":11,"./camelCase":19,"./upperCase":24}],22:[function(require,module,exports){
 var toString = require('../lang/toString');
     // This pattern is generated by the _build/pattern-removeNonWord.js script
     var PATTERN = /[^\x20\x2D0-9A-Z\x5Fa-z\xC0-\xD6\xD8-\xF6\xF8-\xFF]/g;
@@ -2691,7 +2168,7 @@ var toString = require('../lang/toString');
     module.exports = removeNonWord;
 
 
-},{"../lang/toString":31}],47:[function(require,module,exports){
+},{"../lang/toString":11}],23:[function(require,module,exports){
 var toString = require('../lang/toString');
     /**
     * Replaces all accented chars with regular ones
@@ -2729,7 +2206,7 @@ var toString = require('../lang/toString');
     module.exports = replaceAccents;
 
 
-},{"../lang/toString":31}],48:[function(require,module,exports){
+},{"../lang/toString":11}],24:[function(require,module,exports){
 var toString = require('../lang/toString');
     /**
      * "Safer" String.toUpperCase()
@@ -2741,8 +2218,7 @@ var toString = require('../lang/toString');
     module.exports = upperCase;
 
 
-},{"../lang/toString":31}],49:[function(require,module,exports){
-/* jshint -W082 */
+},{"../lang/toString":11}],25:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -2753,102 +2229,64 @@ function create(resourceName, attrs, options) {
   options = options || {};
   attrs = attrs || {};
 
-  var promise = new DSUtils.Promise(function (resolve, reject) {
-    if (!definition) {
-      reject(new DSErrors.NER(resourceName));
-    } else if (!DSUtils.isObject(attrs)) {
-      reject(new DSErrors.IA('"attrs" must be an object!'));
+  var rejectionError;
+  if (!definition) {
+    rejectionError = new DSErrors.NER(resourceName);
+  } else if (!DSUtils.isObject(attrs)) {
+    rejectionError = new DSErrors.IA('"attrs" must be an object!');
+  } else {
+    options = DSUtils._(definition, options);
+    if (options.upsert && (DSUtils.isString(attrs[definition.idAttribute]) || DSUtils.isNumber(attrs[definition.idAttribute]))) {
+      return _this.update(resourceName, attrs[definition.idAttribute], attrs, options);
+    }
+  }
+
+  return new DSUtils.Promise(function (resolve, reject) {
+    if (rejectionError) {
+      reject(rejectionError);
     } else {
-      options = DSUtils._(definition, options);
       resolve(attrs);
     }
-  });
-
-  if (definition && options.upsert && attrs[definition.idAttribute]) {
-    return _this.update(resourceName, attrs[definition.idAttribute], attrs, options);
-  } else {
-    return promise
-      .then(function (attrs) {
-        return options.beforeValidate.call(attrs, options, attrs);
-      })
-      .then(function (attrs) {
-        return options.validate.call(attrs, options, attrs);
-      })
-      .then(function (attrs) {
-        return options.afterValidate.call(attrs, options, attrs);
-      })
-      .then(function (attrs) {
-        return options.beforeCreate.call(attrs, options, attrs);
-      })
-      .then(function (attrs) {
-        if (options.notify) {
-          _this.emit(options, 'beforeCreate', DSUtils.merge({}, attrs));
-        }
-        if (options.strategy === 'single') {
-          return _this.getAdapter(options).create(definition, attrs, options);
-        } else if (options.strategy === 'fallback') {
-          function makeFallbackCall(index) {
-            return _this.getAdapter(options.fallbackAdapters[index]).create(definition, attrs, options)['catch'](function (err) {
-              index++;
-              if (index < options.fallbackAdapters.length) {
-                return makeFallbackCall(index);
-              } else {
-                return Promise.reject(err);
-              }
-            });
-          }
-
-          return makeFallbackCall(0);
-        } else if (options.strategy === 'parallel') {
-          var tasks = [];
-          DSUtils.forEach(options.parallelAdapters, function (adapter) {
-            tasks.push(_this.getAdapter(adapter).create(definition, attrs, options));
-          });
-          return DSUtils.Promise.all(tasks).then(function (results) {
-            DSUtils.forEach(results, function (r, i) {
-              if (DSUtils.isObject(r) && i) {
-                DSUtils.deepMixIn(results[0], r);
-              }
-            });
-            return results[0];
-          });
-        } else if (options.strategy === 'series') {
-          function makeSeriesCall(index, a) {
-            return _this.getAdapter(options.seriesAdapters[index]).create(definition, a, options).then(function (data) {
-              index++;
-              if (index < options.seriesAdapters.length) {
-                return makeSeriesCall(index, data);
-              } else {
-                return data;
-              }
-            });
-          }
-
-          return makeSeriesCall(0, attrs);
-        }
-      })
-      .then(function (attrs) {
-        return options.afterCreate.call(attrs, options, attrs);
-      })
-      .then(function (attrs) {
-        if (options.notify) {
-          _this.emit(options, 'afterCreate', DSUtils.merge({}, attrs));
-        }
-        if (options.cacheResponse) {
-          var created = _this.inject(definition.name, attrs, options);
-          var id = created[definition.idAttribute];
-          _this.store[resourceName].completedQueries[id] = new Date().getTime();
-          return created;
-        } else {
-          return _this.createInstance(resourceName, attrs, options);
-        }
-      });
-  }
+  })
+    .then(function (attrs) {
+      return options.beforeValidate.call(attrs, options, attrs);
+    })
+    .then(function (attrs) {
+      return options.validate.call(attrs, options, attrs);
+    })
+    .then(function (attrs) {
+      return options.afterValidate.call(attrs, options, attrs);
+    })
+    .then(function (attrs) {
+      return options.beforeCreate.call(attrs, options, attrs);
+    })
+    .then(function (attrs) {
+      if (options.notify) {
+        _this.emit(options, 'beforeCreate', DSUtils.copy(attrs));
+      }
+      return _this.getAdapter(options).create(definition, attrs, options);
+    })
+    .then(function (attrs) {
+      return options.afterCreate.call(attrs, options, attrs);
+    })
+    .then(function (attrs) {
+      if (options.notify) {
+        _this.emit(options, 'afterCreate', DSUtils.copy(attrs));
+      }
+      if (options.cacheResponse) {
+        var created = _this.inject(definition.name, attrs, options);
+        var id = created[definition.idAttribute];
+        _this.store[resourceName].completedQueries[id] = new Date().getTime();
+        return created;
+      } else {
+        return _this.createInstance(resourceName, attrs, options);
+      }
+    });
 }
 
 module.exports = create;
 
-},{"../../errors":70,"../../utils":72}],50:[function(require,module,exports){
+},{"../../errors":46,"../../utils":48}],26:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -2863,10 +2301,8 @@ function destroy(resourceName, id, options) {
       reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
       reject(new DSErrors.IA('"id" must be a string or a number!'));
-    } else if (!_this.get(resourceName, id)) {
-      reject(new DSErrors.R('id "' + id + '" not found in cache!'));
     } else {
-      item = _this.get(resourceName, id);
+      item = _this.get(resourceName, id) || { id: id };
       options = DSUtils._(definition, options);
       resolve(item);
     }
@@ -2876,7 +2312,7 @@ function destroy(resourceName, id, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'beforeDestroy', DSUtils.merge({}, attrs));
+        _this.emit(options, 'beforeDestroy', DSUtils.copy(attrs));
       }
       if (options.eagerEject) {
         _this.eject(resourceName, id);
@@ -2888,12 +2324,12 @@ function destroy(resourceName, id, options) {
     })
     .then(function (item) {
       if (options.notify) {
-        _this.emit(options, 'afterDestroy', DSUtils.merge({}, item));
+        _this.emit(options, 'afterDestroy', DSUtils.copy(item));
       }
       _this.eject(resourceName, id);
       return id;
     })['catch'](function (err) {
-    if (options.eagerEject && item) {
+    if (options && options.eagerEject && item) {
       _this.inject(resourceName, item, { notify: false });
     }
     throw err;
@@ -2902,7 +2338,7 @@ function destroy(resourceName, id, options) {
 
 module.exports = destroy;
 
-},{"../../errors":70,"../../utils":72}],51:[function(require,module,exports){
+},{"../../errors":46,"../../utils":48}],27:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -2927,7 +2363,7 @@ function destroyAll(resourceName, params, options) {
       return options.beforeDestroy(options, toEject);
     }).then(function () {
       if (options.notify) {
-        _this.emit(options, 'beforeDestroy', toEject);
+        _this.emit(options, 'beforeDestroy', DSUtils.copy(toEject));
       }
       if (options.eagerEject) {
         ejected = _this.ejectAll(resourceName, params);
@@ -2937,11 +2373,11 @@ function destroyAll(resourceName, params, options) {
       return options.afterDestroy(options, toEject);
     }).then(function () {
       if (options.notify) {
-        _this.emit(options, 'afterDestroy', toEject);
+        _this.emit(options, 'afterDestroy', DSUtils.copy(toEject));
       }
       return ejected || _this.ejectAll(resourceName, params);
     })['catch'](function (err) {
-      if (options.eagerEject && ejected) {
+      if (options && options.eagerEject && ejected) {
         _this.inject(resourceName, ejected, { notify: false });
       }
       throw err;
@@ -2950,8 +2386,7 @@ function destroyAll(resourceName, params, options) {
 
 module.exports = destroyAll;
 
-},{"../../errors":70,"../../utils":72}],52:[function(require,module,exports){
-/* jshint -W082 */
+},{"../../errors":46,"../../utils":48}],28:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -2967,6 +2402,11 @@ function find(resourceName, id, options) {
       reject(new DSErrors.IA('"id" must be a string or a number!'));
     } else {
       options = DSUtils._(definition, options);
+
+      if (options.params) {
+        options.params = DSUtils.copy(options.params);
+      }
+
       if (options.bypassCache || !options.cacheResponse) {
         delete resource.completedQueries[id];
       }
@@ -2979,75 +2419,33 @@ function find(resourceName, id, options) {
   }).then(function (item) {
       if (!(id in resource.completedQueries)) {
         if (!(id in resource.pendingQueries)) {
-          var promise;
-          if (options.strategy === 'single') {
-            promise = _this.getAdapter(options).find(definition, id, options);
-          } else if (options.strategy === 'fallback') {
-            function makeFallbackCall(index) {
-              return _this.getAdapter(options.fallbackAdapters[index]).find(definition, id, options)['catch'](function (err) {
-                index++;
-                if (index < options.fallbackAdapters.length) {
-                  return makeFallbackCall(index);
-                } else {
-                  return Promise.reject(err);
-                }
-              });
-            }
-
-            promise = makeFallbackCall(0);
-          } else if (options.strategy === 'parallel') {
-            var tasks = [];
-            DSUtils.forEach(options.parallelAdapters, function (adapter) {
-              tasks.push(_this.getAdapter(adapter).find(definition, id, options));
+          resource.pendingQueries[id] = _this.getAdapter(options).find(definition, id, options)
+            .then(function (data) {
+              // Query is no longer pending
+              delete resource.pendingQueries[id];
+              if (options.cacheResponse) {
+                resource.completedQueries[id] = new Date().getTime();
+                return _this.inject(resourceName, data, options);
+              } else {
+                return _this.createInstance(resourceName, data, options);
+              }
             });
-            promise = DSUtils.Promise.all(tasks).then(function (results) {
-              DSUtils.forEach(results, function (r, i) {
-                if (DSUtils.isObject(r) && i) {
-                  DSUtils.deepMixIn(results[0], r);
-                }
-              });
-              return results[0];
-            });
-          } else if (options.strategy === 'series') {
-            function makeSeriesCall(index, d) {
-              return _this.getAdapter(options.seriesAdapters[index]).find(definition, id, options).then(function (data) {
-                DSUtils.deepMixIn(data, d);
-                index++;
-                if (index < options.seriesAdapters.length) {
-                  return makeSeriesCall(index, data);
-                } else {
-                  return data;
-                }
-              });
-            }
-
-            promise = makeSeriesCall(0, {});
-          }
-
-          resource.pendingQueries[id] = promise.then(function (data) {
-            // Query is no longer pending
-            delete resource.pendingQueries[id];
-            if (options.cacheResponse) {
-              resource.completedQueries[id] = new Date().getTime();
-              return _this.inject(resourceName, data, options);
-            } else {
-              return _this.createInstance(resourceName, data, options);
-            }
-          });
         }
         return resource.pendingQueries[id];
       } else {
         return item;
       }
     })['catch'](function (err) {
-    delete resource.pendingQueries[id];
+    if (resource) {
+      delete resource.pendingQueries[id];
+    }
     throw err;
   });
 }
 
 module.exports = find;
 
-},{"../../errors":70,"../../utils":72}],53:[function(require,module,exports){
+},{"../../errors":46,"../../utils":48}],29:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -3077,7 +2475,7 @@ function processResults(data, resourceName, queryHash, options) {
       }
     });
   } else {
-    console.warn(errorPrefix(resourceName) + 'response is expected to be an array!');
+    console.warn('response is expected to be an array!');
     resource.completedQueries[injected[idAttribute]] = date;
   }
 
@@ -3100,6 +2498,10 @@ function findAll(resourceName, params, options) {
     } else {
       options = DSUtils._(definition, options);
       queryHash = DSUtils.toJson(params);
+
+      if (options.params) {
+        options.params = DSUtils.copy(options.params);
+      }
 
       if (options.bypassCache || !options.cacheResponse) {
         delete resource.completedQueries[queryHash];
@@ -3132,14 +2534,16 @@ function findAll(resourceName, params, options) {
         return items;
       }
     })['catch'](function (err) {
+    if (resource) {
       delete resource.pendingQueries[queryHash];
-      throw err;
-    });
+    }
+    throw err;
+  });
 }
 
 module.exports = findAll;
 
-},{"../../errors":70,"../../utils":72}],54:[function(require,module,exports){
+},{"../../errors":46,"../../utils":48}],30:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -3169,7 +2573,8 @@ function reap(resourceName, options) {
     }
   }).then(function (items) {
       if (options.isInterval || options.notify) {
-        _this.emit(definition, 'beforeReap', items);
+        definition.beforeReap(options, items);
+        _this.emit(options, 'beforeReap', DSUtils.copy(items));
       }
       if (options.reapAction === 'inject') {
         DSUtils.forEach(items, function (item) {
@@ -3194,7 +2599,8 @@ function reap(resourceName, options) {
       return items;
     }).then(function (items) {
       if (options.isInterval || options.notify) {
-        _this.emit(definition, 'afterReap', items);
+        definition.afterReap(options, items);
+        _this.emit(options, 'afterReap', DSUtils.copy(items));
       }
       return items;
     });
@@ -3238,7 +2644,7 @@ module.exports = {
   updateAll: require('./updateAll')
 };
 
-},{"../../errors":70,"../../utils":72,"./create":49,"./destroy":50,"./destroyAll":51,"./find":52,"./findAll":53,"./loadRelations":55,"./save":56,"./update":57,"./updateAll":58}],55:[function(require,module,exports){
+},{"../../errors":46,"../../utils":48,"./create":25,"./destroy":26,"./destroyAll":27,"./find":28,"./findAll":29,"./loadRelations":31,"./save":32,"./update":33,"./updateAll":34}],31:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -3324,7 +2730,7 @@ function loadRelations(resourceName, instance, relations, options) {
 
 module.exports = loadRelations;
 
-},{"../../errors":70,"../../utils":72}],56:[function(require,module,exports){
+},{"../../errors":46,"../../utils":48}],32:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -3360,7 +2766,7 @@ function save(resourceName, id, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'beforeUpdate', DSUtils.merge({}, attrs));
+        _this.emit(options, 'beforeUpdate', DSUtils.copy(attrs));
       }
       if (options.changesOnly) {
         var resource = _this.store[resourceName];
@@ -3391,7 +2797,7 @@ function save(resourceName, id, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'afterUpdate', DSUtils.merge({}, attrs));
+        _this.emit(options, 'afterUpdate', DSUtils.copy(attrs));
       }
       if (options.cacheResponse) {
         return _this.inject(definition.name, attrs, options);
@@ -3403,7 +2809,7 @@ function save(resourceName, id, options) {
 
 module.exports = save;
 
-},{"../../errors":70,"../../utils":72}],57:[function(require,module,exports){
+},{"../../errors":46,"../../utils":48}],33:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -3435,7 +2841,7 @@ function update(resourceName, id, attrs, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'beforeUpdate', DSUtils.merge({}, attrs));
+        _this.emit(options, 'beforeUpdate', DSUtils.copy(attrs));
       }
       return _this.getAdapter(options).update(definition, id, attrs, options);
     })
@@ -3444,7 +2850,7 @@ function update(resourceName, id, attrs, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'afterUpdate', DSUtils.merge({}, attrs));
+        _this.emit(options, 'afterUpdate', DSUtils.copy(attrs));
       }
       if (options.cacheResponse) {
         return _this.inject(definition.name, attrs, options);
@@ -3456,7 +2862,7 @@ function update(resourceName, id, attrs, options) {
 
 module.exports = update;
 
-},{"../../errors":70,"../../utils":72}],58:[function(require,module,exports){
+},{"../../errors":46,"../../utils":48}],34:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -3485,7 +2891,7 @@ function updateAll(resourceName, attrs, params, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'beforeUpdate', DSUtils.merge({}, attrs));
+        _this.emit(options, 'beforeUpdate', DSUtils.copy(attrs));
       }
       return _this.getAdapter(options).updateAll(definition, attrs, params, options);
     })
@@ -3494,7 +2900,7 @@ function updateAll(resourceName, attrs, params, options) {
     })
     .then(function (data) {
       if (options.notify) {
-        _this.emit(options, 'afterUpdate', DSUtils.merge({}, attrs));
+        _this.emit(options, 'afterUpdate', DSUtils.copy(attrs));
       }
       if (options.cacheResponse) {
         return _this.inject(definition.name, data, options);
@@ -3506,12 +2912,11 @@ function updateAll(resourceName, attrs, params, options) {
 
 module.exports = updateAll;
 
-},{"../../errors":70,"../../utils":72}],59:[function(require,module,exports){
+},{"../../errors":46,"../../utils":48}],35:[function(require,module,exports){
 var DSUtils = require('../utils');
 var DSErrors = require('../errors');
 var syncMethods = require('./sync_methods');
 var asyncMethods = require('./async_methods');
-var observe = require('../../lib/observe-js/observe-js');
 var Schemator;
 
 function lifecycleNoopCb(resource, attrs, cb) {
@@ -3574,20 +2979,16 @@ defaultsPrototype.eagerEject = false;
 defaultsPrototype.eagerInject = false;
 defaultsPrototype.allowSimpleWhere = true;
 defaultsPrototype.defaultAdapter = 'http';
-defaultsPrototype.strategy = 'single';
-defaultsPrototype.parallelAdapters = ['http'];
-defaultsPrototype.fallbackAdapters = ['http'];
-defaultsPrototype.seriesAdapters = ['http'];
 defaultsPrototype.loadFromServer = false;
 defaultsPrototype.notify = !!DSUtils.w;
 defaultsPrototype.upsert = !!DSUtils.w;
 defaultsPrototype.cacheResponse = !!DSUtils.w;
 defaultsPrototype.bypassCache = false;
 defaultsPrototype.ignoreMissing = false;
-defaultsPrototype.findInverseLinks = false;
-defaultsPrototype.findBelongsTo = false;
-defaultsPrototype.findHasOn = false;
-defaultsPrototype.findHasMany = false;
+defaultsPrototype.findInverseLinks = true;
+defaultsPrototype.findBelongsTo = true;
+defaultsPrototype.findHasOne = true;
+defaultsPrototype.findHasMany = true;
 defaultsPrototype.reapInterval = !!DSUtils.w ? 30000 : false;
 defaultsPrototype.reapAction = !!DSUtils.w ? 'inject' : 'none';
 defaultsPrototype.maxAge = false;
@@ -3607,6 +3008,8 @@ defaultsPrototype.beforeInject = lifecycleNoop;
 defaultsPrototype.afterInject = lifecycleNoop;
 defaultsPrototype.beforeEject = lifecycleNoop;
 defaultsPrototype.afterEject = lifecycleNoop;
+defaultsPrototype.beforeReap = lifecycleNoop;
+defaultsPrototype.afterReap = lifecycleNoop;
 defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
   var _this = this;
   var filtered = collection;
@@ -3658,63 +3061,46 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
           };
         }
         if (DSUtils.isObject(clause)) {
-          DSUtils.forOwn(clause, function (val, op) {
+          DSUtils.forOwn(clause, function (term, op) {
+            var expr;
+            var isOr = op[0] === '|';
+            var val = attrs[field];
+            op = isOr ? op.substr(1) : op;
             if (op === '==') {
-              keep = first ? (attrs[field] == val) : keep && (attrs[field] == val);
+              expr = val == term;
             } else if (op === '===') {
-              keep = first ? (attrs[field] === val) : keep && (attrs[field] === val);
+              expr = val === term;
             } else if (op === '!=') {
-              keep = first ? (attrs[field] != val) : keep && (attrs[field] != val);
+              expr = val != term;
             } else if (op === '!==') {
-              keep = first ? (attrs[field] !== val) : keep && (attrs[field] !== val);
+              expr = val !== term;
             } else if (op === '>') {
-              keep = first ? (attrs[field] > val) : keep && (attrs[field] > val);
+              expr = val > term;
             } else if (op === '>=') {
-              keep = first ? (attrs[field] >= val) : keep && (attrs[field] >= val);
+              expr = val >= term;
             } else if (op === '<') {
-              keep = first ? (attrs[field] < val) : keep && (attrs[field] < val);
+              expr = val < term;
             } else if (op === '<=') {
-              keep = first ? (attrs[field] <= val) : keep && (attrs[field] <= val);
+              expr = val <= term;
+            } else if (op === 'isectEmpty') {
+              expr = !DSUtils.intersection((val || []), (term || [])).length;
+            } else if (op === 'isectNotEmpty') {
+              expr = DSUtils.intersection((val || []), (term || [])).length;
             } else if (op === 'in') {
-              if (DSUtils.isString(val)) {
-                keep = first ? val.indexOf(attrs[field]) !== -1 : keep && val.indexOf(attrs[field]) !== -1;
+              if (DSUtils.isString(term)) {
+                expr = term.indexOf(val) !== -1;
               } else {
-                keep = first ? DSUtils.contains(val, attrs[field]) : keep && DSUtils.contains(val, attrs[field]);
+                expr = DSUtils.contains(term, val);
               }
             } else if (op === 'notIn') {
-              if (DSUtils.isString(val)) {
-                keep = first ? val.indexOf(attrs[field]) === -1 : keep && val.indexOf(attrs[field]) === -1;
+              if (DSUtils.isString(term)) {
+                expr = term.indexOf(val) === -1;
               } else {
-                keep = first ? !DSUtils.contains(val, attrs[field]) : keep && !DSUtils.contains(val, attrs[field]);
+                expr = !DSUtils.contains(term, val);
               }
-            } else if (op === '|==') {
-              keep = first ? (attrs[field] == val) : keep || (attrs[field] == val);
-            } else if (op === '|===') {
-              keep = first ? (attrs[field] === val) : keep || (attrs[field] === val);
-            } else if (op === '|!=') {
-              keep = first ? (attrs[field] != val) : keep || (attrs[field] != val);
-            } else if (op === '|!==') {
-              keep = first ? (attrs[field] !== val) : keep || (attrs[field] !== val);
-            } else if (op === '|>') {
-              keep = first ? (attrs[field] > val) : keep || (attrs[field] > val);
-            } else if (op === '|>=') {
-              keep = first ? (attrs[field] >= val) : keep || (attrs[field] >= val);
-            } else if (op === '|<') {
-              keep = first ? (attrs[field] < val) : keep || (attrs[field] < val);
-            } else if (op === '|<=') {
-              keep = first ? (attrs[field] <= val) : keep || (attrs[field] <= val);
-            } else if (op === '|in') {
-              if (DSUtils.isString(val)) {
-                keep = first ? val.indexOf(attrs[field]) !== -1 : keep || val.indexOf(attrs[field]) !== -1;
-              } else {
-                keep = first ? DSUtils.contains(val, attrs[field]) : keep || DSUtils.contains(val, attrs[field]);
-              }
-            } else if (op === '|notIn') {
-              if (DSUtils.isString(val)) {
-                keep = first ? val.indexOf(attrs[field]) === -1 : keep || val.indexOf(attrs[field]) === -1;
-              } else {
-                keep = first ? !DSUtils.contains(val, attrs[field]) : keep || !DSUtils.contains(val, attrs[field]);
-              }
+            }
+            if (expr !== undefined) {
+              keep = first ? expr : (isOr ? keep || expr : keep && expr);
             }
             first = false;
           });
@@ -3812,29 +3198,15 @@ function DS(options) {
   this.definitions = {};
   this.adapters = {};
   this.defaults = new Defaults();
-  this.observe = observe;
+  this.observe = DSUtils.observe;
   DSUtils.deepMixIn(this.defaults, options);
 }
 
 var dsPrototype = DS.prototype;
 
 dsPrototype.getAdapter = function (options) {
-  var errorIfNotExist = false;
   options = options || {};
-  if (DSUtils.isString(options)) {
-    errorIfNotExist = true;
-    options = {
-      adapter: options
-    };
-  }
-  var adapter = this.adapters[options.adapter];
-  if (adapter) {
-    return adapter;
-  } else if (errorIfNotExist) {
-    throw new Error(options.adapter + ' is not a registered adapter!');
-  } else {
-    return this.adapters[options.defaultAdapter];
-  }
+  return this.adapters[options.adapter] || this.adapters[options.defaultAdapter];
 };
 
 dsPrototype.registerAdapter = function (name, Adapter, options) {
@@ -3863,7 +3235,7 @@ DSUtils.deepMixIn(dsPrototype, asyncMethods);
 
 module.exports = DS;
 
-},{"../../lib/observe-js/observe-js":1,"../errors":70,"../utils":72,"./async_methods":54,"./sync_methods":64,"js-data-schema":"js-data-schema"}],60:[function(require,module,exports){
+},{"../errors":46,"../utils":48,"./async_methods":30,"./sync_methods":40,"js-data-schema":"js-data-schema"}],36:[function(require,module,exports){
 /*jshint evil:true, loopfunc:true*/
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
@@ -3949,6 +3321,7 @@ function defineResource(definition) {
             if (relation.parent) {
               def.parent = modelName;
               def.parentKey = relation.localKey;
+              def.parentField = relation.localField;
             }
           });
         });
@@ -3959,36 +3332,46 @@ function defineResource(definition) {
       }
     }
 
-    def.getEndpoint = function (attrs, options) {
-      options = DSUtils.deepMixIn({}, options);
-      var parent = this.parent;
-      var parentKey = this.parentKey;
-      var item;
-      var endpoint;
-      var thisEndpoint = options.endpoint || this.endpoint;
-      var parentDef = definitions[parent];
-      delete options.endpoint;
-      options = options || {};
+    def.getEndpoint = function (id, options) {
       options.params = options.params || {};
-      if (parent && parentKey && parentDef && options.params[parentKey] !== false) {
-        if (DSUtils.isNumber(attrs) || DSUtils.isString(attrs)) {
-          item = _this.get(this.name, attrs);
-        }
-        if (DSUtils.isObject(attrs) && parentKey in attrs) {
-          delete options.params[parentKey];
-          endpoint = DSUtils.makePath(parentDef.getEndpoint(attrs, options), attrs[parentKey], thisEndpoint);
-        } else if (item && parentKey in item) {
-          delete options.params[parentKey];
-          endpoint = DSUtils.makePath(parentDef.getEndpoint(attrs, options), item[parentKey], thisEndpoint);
-        } else if (options && options.params[parentKey]) {
-          endpoint = DSUtils.makePath(parentDef.getEndpoint(attrs, options), options.params[parentKey], thisEndpoint);
+
+      var item;
+      var parentKey = def.parentKey;
+      var endpoint = options.hasOwnProperty('endpoint') ? options.endpoint : def.endpoint;
+      var parentField = def.parentField;
+      var parentDef = definitions[def.parent];
+      var parentId = options.params[parentKey];
+
+      if (parentId === false || !parentKey || !parentDef) {
+        if (parentId === false) {
           delete options.params[parentKey];
         }
-      }
-      if (options.params[parentKey] === false) {
+        return endpoint;
+      } else {
         delete options.params[parentKey];
+
+        if (DSUtils.isNumber(id) || DSUtils.isString(id)) {
+          item = def.get(id);
+        } else if (DSUtils.isObject(id)) {
+          item = id;
+        }
+
+        if (item) {
+          parentId = parentId || item[parentKey] || (item[parentField] ? item[parentField][parentDef.idAttribute] : null);
+        }
+
+        if (parentId) {
+          delete options.endpoint;
+          var _options = {};
+          DSUtils.forOwn(options, function (value, key) {
+            _options[key] = value;
+          });
+          var e = DSUtils.makePath(parentDef.getEndpoint(parentId, DSUtils._(parentDef, _options)), parentId, endpoint);
+          return e;
+        } else {
+          return endpoint;
+        }
       }
-      return endpoint || thisEndpoint;
     };
 
     // Remove this in v0.11.0 and make a breaking change notice
@@ -4070,6 +3453,13 @@ function defineResource(definition) {
       };
     });
 
+    def[def['class']].prototype.DSCreate = function () {
+      var args = Array.prototype.slice.call(arguments);
+      args.unshift(this);
+      args.unshift(def.name);
+      return _this.create.apply(_this, args);
+    };
+
     // Initialize store data for the new resource
     _this.store[def.name] = {
       collection: [],
@@ -4124,7 +3514,6 @@ function defineResource(definition) {
 
     return def;
   } catch (err) {
-    console.error(err);
     delete definitions[definition.name];
     delete _this.store[definition.name];
     throw err;
@@ -4133,7 +3522,7 @@ function defineResource(definition) {
 
 module.exports = defineResource;
 
-},{"../../errors":70,"../../utils":72}],61:[function(require,module,exports){
+},{"../../errors":46,"../../utils":48}],37:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -4165,6 +3554,7 @@ function eject(resourceName, id, options) {
   if (found) {
     if (options.notify) {
       definition.beforeEject(options, item);
+      _this.emit(options, 'beforeEject', DSUtils.copy(item));
     }
     _this.unlinkInverse(definition.name, id);
     resource.collection.splice(i, 1);
@@ -4187,7 +3577,7 @@ function eject(resourceName, id, options) {
 
     if (options.notify) {
       definition.afterEject(options, item);
-      _this.emit(definition, 'eject', item);
+      _this.emit(options, 'afterEject', DSUtils.copy(item));
     }
 
     return item;
@@ -4196,7 +3586,7 @@ function eject(resourceName, id, options) {
 
 module.exports = eject;
 
-},{"../../errors":70,"../../utils":72}],62:[function(require,module,exports){
+},{"../../errors":46,"../../utils":48}],38:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -4216,9 +3606,14 @@ function ejectAll(resourceName, params, options) {
   }
   var queryHash = DSUtils.toJson(params);
   var items = _this.filter(definition.name, params);
-  var ids = DSUtils.toLookup(items, definition.idAttribute);
+  var ids = [];
+  DSUtils.forEach(items, function (item) {
+    if (item && item[definition.idAttribute]) {
+      ids.push(item[definition.idAttribute]);
+    }
+  });
 
-  DSUtils.forOwn(ids, function (item, id) {
+  DSUtils.forEach(ids, function (id) {
     _this.eject(definition.name, id, options);
   });
 
@@ -4230,7 +3625,7 @@ function ejectAll(resourceName, params, options) {
 
 module.exports = ejectAll;
 
-},{"../../errors":70,"../../utils":72}],63:[function(require,module,exports){
+},{"../../errors":46,"../../utils":48}],39:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -4266,7 +3661,7 @@ function filter(resourceName, params, options) {
 
 module.exports = filter;
 
-},{"../../errors":70,"../../utils":72}],64:[function(require,module,exports){
+},{"../../errors":46,"../../utils":48}],40:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 var NER = DSErrors.NER;
@@ -4290,7 +3685,7 @@ function changes(resourceName, id, options) {
     if (DSUtils.w) {
       _this.store[resourceName].observers[id].deliver();
     }
-    var diff = DSUtils.diffObjectFromOldObject(item, _this.store[resourceName].previousAttributes[id], options.ignoredChanges);
+    var diff = DSUtils.diffObjectFromOldObject(item, _this.store[resourceName].previousAttributes[id], DSUtils.equals, options.ignoredChanges);
     DSUtils.forOwn(diff, function (changeset, name) {
       var toKeep = [];
       DSUtils.forOwn(changeset, function (value, field) {
@@ -4351,7 +3746,7 @@ function compute(resourceName, instance) {
   }
 
   DSUtils.forOwn(definition.computed, function (fn, field) {
-    DSUtils.compute.call(instance, fn, field, DSUtils);
+    DSUtils.compute.call(instance, fn, field);
   });
 
   return instance;
@@ -4508,7 +3903,7 @@ function previous(resourceName, id) {
   }
 
   // return resource from cache
-  return resource.previousAttributes[id] ? DSUtils.merge({}, resource.previousAttributes[id]) : undefined;
+  return resource.previousAttributes[id] ? DSUtils.copy(resource.previousAttributes[id]) : undefined;
 }
 
 module.exports = {
@@ -4534,28 +3929,9 @@ module.exports = {
   unlinkInverse: require('./unlinkInverse')
 };
 
-},{"../../errors":70,"../../utils":72,"./defineResource":60,"./eject":61,"./ejectAll":62,"./filter":63,"./inject":65,"./link":66,"./linkAll":67,"./linkInverse":68,"./unlinkInverse":69}],65:[function(require,module,exports){
+},{"../../errors":46,"../../utils":48,"./defineResource":36,"./eject":37,"./ejectAll":38,"./filter":39,"./inject":41,"./link":42,"./linkAll":43,"./linkInverse":44,"./unlinkInverse":45}],41:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
-
-function _injectRelations(definition, injected, options) {
-  var _this = this;
-
-  DSUtils.forEach(definition.relationList, function (def) {
-    var relationName = def.relation;
-    var relationDef = _this.definitions[relationName];
-    if (injected[def.localField]) {
-      if (!relationDef) {
-        throw new DSErrors.R(definition.name + ' relation is defined, but the resource is not!');
-      }
-      try {
-        injected[def.localField] = _this.inject(relationName, injected[def.localField], options);
-      } catch (err) {
-        console.error(definition.name + ': Failed to inject ' + def.type + ' relation: "' + relationName + '"!', err);
-      }
-    }
-  });
-}
 
 function _getReactFunction(DS, definition, resource) {
   var name = definition.name;
@@ -4600,7 +3976,7 @@ function _getReactFunction(DS, definition, resource) {
         });
         compute = compute || !fn.deps.length;
         if (compute) {
-          DSUtils.compute.call(item, fn, field, DSUtils);
+          DSUtils.compute.call(item, fn, field);
         }
       });
     }
@@ -4648,6 +4024,45 @@ function _inject(definition, resource, attrs, options) {
       throw error;
     } else {
       try {
+        DSUtils.forEach(definition.relationList, function (def) {
+          var relationName = def.relation;
+          var relationDef = _this.definitions[relationName];
+          var toInject = attrs[def.localField];
+          if (toInject) {
+            if (!relationDef) {
+              throw new DSErrors.R(definition.name + ' relation is defined but the resource is not!');
+            }
+            if (DSUtils.isArray(toInject)) {
+              var items = [];
+              DSUtils.forEach(toInject, function (toInjectItem) {
+                if (toInjectItem !== _this.store[relationName][toInjectItem[relationDef.idAttribute]]) {
+                  try {
+                    var injectedItem = _this.inject(relationName, toInjectItem, options);
+                    if (def.foreignKey) {
+                      injectedItem[def.foreignKey] = attrs[definition.idAttribute];
+                    }
+                    items.push(injectedItem);
+                  } catch (err) {
+                    console.error(definition.name + ': Failed to inject ' + def.type + ' relation: "' + relationName + '"!', err);
+                  }
+                }
+              });
+              attrs[def.localField] = items;
+            } else {
+              if (toInject !== _this.store[relationName][toInject[relationDef.idAttribute]]) {
+                try {
+                  attrs[def.localField] = _this.inject(relationName, attrs[def.localField], options);
+                  if (def.foreignKey) {
+                    attrs[def.localField][def.foreignKey] = attrs[definition.idAttribute];
+                  }
+                } catch (err) {
+                  console.error(definition.name + ': Failed to inject ' + def.type + ' relation: "' + relationName + '"!', err);
+                }
+              }
+            }
+          }
+        });
+
         var id = attrs[idA];
         var item = _this.get(definition.name, id);
         var initialLastModified = item ? resource.modified[id] : 0;
@@ -4662,10 +4077,9 @@ function _inject(definition, resource, attrs, options) {
           } else {
             item = {};
           }
-          resource.previousAttributes[id] = {};
+          resource.previousAttributes[id] = DSUtils.copy(attrs);
 
           DSUtils.deepMixIn(item, attrs);
-          DSUtils.deepMixIn(resource.previousAttributes[id], attrs);
 
           resource.collection.push(item);
           resource.changeHistories[id] = [];
@@ -4677,10 +4091,6 @@ function _inject(definition, resource, attrs, options) {
 
           resource.index[id] = item;
           _react.call(item, {}, {}, {}, null, true);
-
-          if (definition.relations) {
-            _injectRelations.call(_this, definition, item, options);
-          }
         } else {
           DSUtils.deepMixIn(item, attrs);
           if (definition.resetHistoryOnInject) {
@@ -4744,6 +4154,7 @@ function inject(resourceName, attrs, options) {
 
   if (options.notify) {
     options.beforeInject(options, attrs);
+    _this.emit(options, 'beforeInject', DSUtils.copy(attrs));
   }
 
   injected = _inject.call(_this, definition, resource, attrs, options);
@@ -4769,7 +4180,7 @@ function inject(resourceName, attrs, options) {
 
   if (options.notify) {
     options.afterInject(options, injected);
-    _this.emit(options, 'inject', injected);
+    _this.emit(options, 'afterInject', DSUtils.copy(injected));
   }
 
   return injected;
@@ -4777,7 +4188,7 @@ function inject(resourceName, attrs, options) {
 
 module.exports = inject;
 
-},{"../../errors":70,"../../utils":72}],66:[function(require,module,exports){
+},{"../../errors":46,"../../utils":48}],42:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -4827,7 +4238,7 @@ function link(resourceName, id, relations) {
 
 module.exports = link;
 
-},{"../../errors":70,"../../utils":72}],67:[function(require,module,exports){
+},{"../../errors":46,"../../utils":48}],43:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -4881,7 +4292,7 @@ function linkAll(resourceName, params, relations) {
 
 module.exports = linkAll;
 
-},{"../../errors":70,"../../utils":72}],68:[function(require,module,exports){
+},{"../../errors":46,"../../utils":48}],44:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -4921,7 +4332,7 @@ function linkInverse(resourceName, id, relations) {
 
 module.exports = linkInverse;
 
-},{"../../errors":70,"../../utils":72}],69:[function(require,module,exports){
+},{"../../errors":46,"../../utils":48}],45:[function(require,module,exports){
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -4972,7 +4383,7 @@ function unlinkInverse(resourceName, id, relations) {
 
 module.exports = unlinkInverse;
 
-},{"../../errors":70,"../../utils":72}],70:[function(require,module,exports){
+},{"../../errors":46,"../../utils":48}],46:[function(require,module,exports){
 function IllegalArgumentError(message) {
   Error.call(this);
   if (typeof Error.captureStackTrace === 'function') {
@@ -5018,7 +4429,7 @@ module.exports = {
   NER: NonexistentResourceError
 };
 
-},{}],71:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 var DS = require('./datastore');
 
 module.exports = {
@@ -5030,15 +4441,103 @@ module.exports = {
   DSErrors: require('./errors')
 };
 
-},{"./datastore":59,"./errors":70,"./utils":72}],72:[function(require,module,exports){
-(function (global){
+},{"./datastore":35,"./errors":46,"./utils":48}],48:[function(require,module,exports){
+/* jshint -W041 */
+var w, _Promise;
+var objectProto = Object.prototype;
+var toString = objectProto.toString;
 var DSErrors = require('./errors');
-var isFunction = require('mout/lang/isFunction');
-var w;
-var _Promise;
-
+var forEach = require('mout/array/forEach');
+var slice = require('mout/array/slice');
+var forOwn = require('mout/object/forOwn');
+var observe = require('../lib/observe-js/observe-js');
 var es6Promise = require('es6-promise');
 es6Promise.polyfill();
+
+var isArray = Array.isArray || function isArray(value) {
+    return toString.call(value) == '[object Array]' || false;
+  };
+
+function isRegExp(value) {
+  return toString.call(value) == '[object RegExp]' || false;
+}
+
+// adapted from lodash.isBoolean
+function isBoolean(value) {
+  return (value === true || value === false || value && typeof value == 'object' && toString.call(value) == '[object Boolean]') || false;
+}
+
+// adapted from lodash.isString
+function isString(value) {
+  return typeof value == 'string' || (value && typeof value == 'object' && toString.call(value) == '[object String]') || false;
+}
+
+function isObject(value) {
+  return toString.call(value) == '[object Object]' || false;
+}
+
+// adapted from lodash.isDate
+function isDate(value) {
+  return (value && typeof value == 'object' && toString.call(value) == '[object Date]') || false;
+}
+
+// adapted from lodash.isNumber
+function isNumber(value) {
+  var type = typeof value;
+  return type == 'number' || (value && type == 'object' && toString.call(value) == '[object Number]') || false;
+}
+
+// adapted from lodash.isFunction
+function isFunction(value) {
+  return typeof value == 'function' || (value && toString.call(value) === '[object Function]') || false;
+}
+
+// adapted from mout.isEmpty
+function isEmpty(val) {
+  if (val == null) {
+    // typeof null == 'object' so we check it first
+    return true;
+  } else if (typeof val === 'string' || isArray(val)) {
+    return !val.length;
+  } else if (typeof val === 'object') {
+    var result = true;
+    forOwn(val, function () {
+      result = false;
+      return false; // break loop
+    });
+    return result;
+  } else {
+    return true;
+  }
+}
+
+function intersection(array1, array2) {
+  if (!array1 || !array2) {
+    return [];
+  }
+  var result = [];
+  var item;
+  for (var i = 0, length = array1.length; i < length; i++) {
+    item = array1[i];
+    if (DSUtils.contains(result, item)) {
+      continue;
+    }
+    if (DSUtils.contains(array2, item)) {
+      result.push(item);
+    }
+  }
+  return result;
+}
+
+function filter(array, cb, thisObj) {
+  var results = [];
+  forEach(array, function (value, key, arr) {
+    if (cb(value, key, arr)) {
+      results.push(value);
+    }
+  }, thisObj);
+  return results;
+}
 
 function finallyPolyfill(cb) {
   var constructor = this.constructor;
@@ -5063,10 +4562,7 @@ try {
   w = {};
 } catch (e) {
   w = null;
-  if (!global.Promise.prototype['finally']) {
-    global.Promise.prototype['finally'] = finallyPolyfill;
-  }
-  _Promise = global.Promise;
+  _Promise = require('bluebird');
 }
 
 function updateTimestamp(timestamp) {
@@ -5255,147 +4751,212 @@ var toPromisify = [
   'afterDestroy'
 ];
 
-var find = require('mout/array/find');
-var isRegExp = require('mout/lang/isRegExp');
-
-function isBlacklisted(prop, blacklist) {
-  if (!blacklist || !blacklist.length) {
-    return false;
-  }
-  var matches = find(blacklist, function (blItem) {
-    if ((isRegExp(blItem) && blItem.test(prop)) || blItem === prop) {
-      return prop;
+// adapted from angular.copy
+function copy(source, destination, stackSource, stackDest) {
+  if (!destination) {
+    destination = source;
+    if (source) {
+      if (isArray(source)) {
+        destination = copy(source, [], stackSource, stackDest);
+      } else if (isDate(source)) {
+        destination = new Date(source.getTime());
+      } else if (isRegExp(source)) {
+        destination = new RegExp(source.source, source.toString().match(/[^\/]*$/)[0]);
+        destination.lastIndex = source.lastIndex;
+      } else if (isObject(source)) {
+        var emptyObject = Object.create(Object.getPrototypeOf(source));
+        destination = copy(source, emptyObject, stackSource, stackDest);
+      }
     }
-  });
-  return !!matches;
+  } else {
+    if (source === destination) {
+      throw new Error('Cannot copy! Source and destination are identical.');
+    }
+
+    stackSource = stackSource || [];
+    stackDest = stackDest || [];
+
+    if (isObject(source)) {
+      var index = stackSource.indexOf(source);
+      if (index !== -1) return stackDest[index];
+
+      stackSource.push(source);
+      stackDest.push(destination);
+    }
+
+    var result;
+    if (isArray(source)) {
+      destination.length = 0;
+      for (var i = 0; i < source.length; i++) {
+        result = copy(source[i], null, stackSource, stackDest);
+        if (isObject(source[i])) {
+          stackSource.push(source[i]);
+          stackDest.push(result);
+        }
+        destination.push(result);
+      }
+    } else {
+      if (isArray(destination)) {
+        destination.length = 0;
+      } else {
+        forEach(destination, function (value, key) {
+          delete destination[key];
+        });
+      }
+      for (var key in source) {
+        if (source.hasOwnProperty(key)) {
+          result = copy(source[key], null, stackSource, stackDest);
+          if (isObject(source[key])) {
+            stackSource.push(source[key]);
+            stackDest.push(result);
+          }
+          destination[key] = result;
+        }
+      }
+    }
+
+  }
+  return destination;
 }
 
+// adapted from angular.equals
+function equals(o1, o2) {
+  if (o1 === o2) return true;
+  if (o1 === null || o2 === null) return false;
+  if (o1 !== o1 && o2 !== o2) return true; // NaN === NaN
+  var t1 = typeof o1, t2 = typeof o2, length, key, keySet;
+  if (t1 == t2) {
+    if (t1 == 'object') {
+      if (isArray(o1)) {
+        if (!isArray(o2)) return false;
+        if ((length = o1.length) == o2.length) {
+          for (key = 0; key < length; key++) {
+            if (!equals(o1[key], o2[key])) return false;
+          }
+          return true;
+        }
+      } else if (isDate(o1)) {
+        if (!isDate(o2)) return false;
+        return equals(o1.getTime(), o2.getTime());
+      } else if (isRegExp(o1) && isRegExp(o2)) {
+        return o1.toString() == o2.toString();
+      } else {
+        if (isArray(o2)) return false;
+        keySet = {};
+        for (key in o1) {
+          if (key.charAt(0) === '$' || isFunction(o1[key])) continue;
+          if (!equals(o1[key], o2[key])) return false;
+          keySet[key] = true;
+        }
+        for (key in o2) {
+          if (!keySet.hasOwnProperty(key) &&
+            key.charAt(0) !== '$' &&
+            o2[key] !== undefined && !isFunction(o2[key])) return false;
+        }
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function resolveId(definition, idOrInstance) {
+  if (this.isString(idOrInstance) || isNumber(idOrInstance)) {
+    return idOrInstance;
+  } else if (idOrInstance && definition) {
+    return idOrInstance[definition.idAttribute] || idOrInstance;
+  } else {
+    return idOrInstance;
+  }
+}
+
+function resolveItem(resource, idOrInstance) {
+  if (resource && (isString(idOrInstance) || isNumber(idOrInstance))) {
+    return resource.index[idOrInstance] || idOrInstance;
+  } else {
+    return idOrInstance;
+  }
+}
+
+function isValidString(val) {
+  return (val != null && val !== '');
+}
+
+function join(items, separator) {
+  separator = separator || '';
+  return filter(items, isValidString).join(separator);
+}
+
+function makePath(var_args) {
+  var result = join(slice(arguments), '/');
+  return result.replace(/([^:\/]|^)\/{2,}/g, '$1/');
+}
+
+observe.setEqualityFn(equals);
+
 var DSUtils = {
-  w: w,
-  DSBinaryHeap: DSBinaryHeap,
-  isBoolean: require('mout/lang/isBoolean'),
-  isString: require('mout/lang/isString'),
-  isArray: require('mout/lang/isArray'),
-  isObject: require('mout/lang/isObject'),
-  isNumber: require('mout/lang/isNumber'),
-  isFunction: isFunction,
-  isEmpty: require('mout/lang/isEmpty'),
-  isRegExp: isRegExp,
-  toJson: JSON.stringify,
-  fromJson: function (json) {
-    return DSUtils.isString(json) ? JSON.parse(json) : json;
-  },
-  makePath: require('mout/string/makePath'),
-  upperCase: require('mout/string/upperCase'),
-  pascalCase: require('mout/string/pascalCase'),
-  deepMixIn: require('mout/object/deepMixIn'),
-  mixIn: require('mout/object/mixIn'),
-  forOwn: require('mout/object/forOwn'),
-  forEach: require('mout/array/forEach'),
-  pick: require('mout/object/pick'),
-  set: require('mout/object/set'),
-  merge: require('mout/object/merge'),
-  contains: require('mout/array/contains'),
-  filter: require('mout/array/filter'),
-  find: find,
-  toLookup: require('mout/array/toLookup'),
-  remove: require('mout/array/remove'),
-  slice: require('mout/array/slice'),
-  sort: require('mout/array/sort'),
   // Options that inherit from defaults
   _: function (parent, options) {
+    var _this = this;
     options = options || {};
     if (options && options.constructor === parent.constructor) {
       return options;
-    } else if (!DSUtils.isObject(options)) {
+    } else if (!isObject(options)) {
       throw new DSErrors.IA('"options" must be an object!');
     }
-    DSUtils.forEach(toPromisify, function (name) {
+    forEach(toPromisify, function (name) {
       if (typeof options[name] === 'function' && options[name].toString().indexOf('var args = Array') === -1) {
-        options[name] = DSUtils.promisify(options[name]);
+        options[name] = _this.promisify(options[name]);
       }
     });
     var O = function Options(attrs) {
-      DSUtils.mixIn(this, attrs);
+      var self = this;
+      forOwn(attrs, function (value, key) {
+        self[key] = value;
+      });
     };
     O.prototype = parent;
     return new O(options);
   },
-  resolveItem: function (resource, idOrInstance) {
-    if (resource && (DSUtils.isString(idOrInstance) || DSUtils.isNumber(idOrInstance))) {
-      return resource.index[idOrInstance] || idOrInstance;
-    } else {
-      return idOrInstance;
-    }
-  },
-  resolveId: function (definition, idOrInstance) {
-    if (DSUtils.isString(idOrInstance) || DSUtils.isNumber(idOrInstance)) {
-      return idOrInstance;
-    } else if (idOrInstance && definition) {
-      return idOrInstance[definition.idAttribute] || idOrInstance;
-    } else {
-      return idOrInstance;
-    }
-  },
-  updateTimestamp: updateTimestamp,
-  Promise: _Promise,
-  compute: function (fn, field, DSUtils) {
+  compute: function (fn, field) {
     var _this = this;
     var args = [];
-    DSUtils.forEach(fn.deps, function (dep) {
+    forEach(fn.deps, function (dep) {
       args.push(_this[dep]);
     });
     // compute property
     _this[field] = fn[fn.length - 1].apply(_this, args);
   },
-  diffObjectFromOldObject: function (object, oldObject, blacklist) {
-    var added = {};
-    var removed = {};
-    var changed = {};
-
-    blacklist = blacklist || [];
-
-    for (var prop in oldObject) {
-      var newValue = object[prop];
-
-      if (isBlacklisted(prop, blacklist)) {
-        continue;
-      }
-
-      if (newValue !== undefined && newValue === oldObject[prop]) {
-        continue;
-      }
-
-      if (!(prop in object)) {
-        removed[prop] = undefined;
-        continue;
-      }
-
-      if (newValue !== oldObject[prop]) {
-        changed[prop] = newValue;
-      }
-    }
-
-    for (var prop2 in object) {
-      if (prop2 in oldObject) {
-        continue;
-      }
-
-      if (isBlacklisted(prop2, blacklist)) {
-        continue;
-      }
-
-      added[prop2] = object[prop2];
-    }
-
-    return {
-      added: added,
-      removed: removed,
-      changed: changed
-    };
+  contains: require('mout/array/contains'),
+  copy: copy,
+  deepMixIn: require('mout/object/deepMixIn'),
+  diffObjectFromOldObject: observe.diffObjectFromOldObject,
+  DSBinaryHeap: DSBinaryHeap,
+  equals: equals,
+  Events: Events,
+  filter: filter,
+  forEach: forEach,
+  forOwn: forOwn,
+  fromJson: function (json) {
+    return isString(json) ? JSON.parse(json) : json;
   },
+  intersection: intersection,
+  isArray: isArray,
+  isBoolean: isBoolean,
+  isDate: isDate,
+  isEmpty: isEmpty,
+  isFunction: isFunction,
+  isObject: isObject,
+  isNumber: isNumber,
+  isRegExp: isRegExp,
+  isString: isString,
+  makePath: makePath,
+  observe: observe,
+  pascalCase: require('mout/string/pascalCase'),
+  pick: require('mout/object/pick'),
+  Promise: _Promise,
   promisify: function (fn, target) {
-    var Promise = DSUtils.Promise;
+    var Promise = this.Promise;
     if (!fn) {
       return;
     } else if (typeof fn !== 'function') {
@@ -5424,11 +4985,19 @@ var DSUtils = {
       });
     };
   },
-  Events: Events
+  remove: require('mout/array/remove'),
+  set: require('mout/object/set'),
+  slice: slice,
+  sort: require('mout/array/sort'),
+  toJson: JSON.stringify,
+  updateTimestamp: updateTimestamp,
+  upperCase: require('mout/string/upperCase'),
+  resolveItem: resolveItem,
+  resolveId: resolveId,
+  w: w
 };
 
 module.exports = DSUtils;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./errors":70,"es6-promise":2,"mout/array/contains":4,"mout/array/filter":5,"mout/array/find":6,"mout/array/forEach":8,"mout/array/remove":11,"mout/array/slice":12,"mout/array/sort":13,"mout/array/toLookup":14,"mout/lang/isArray":20,"mout/lang/isBoolean":21,"mout/lang/isEmpty":22,"mout/lang/isFunction":23,"mout/lang/isNumber":25,"mout/lang/isObject":26,"mout/lang/isRegExp":28,"mout/lang/isString":29,"mout/object/deepMixIn":33,"mout/object/forOwn":35,"mout/object/merge":37,"mout/object/mixIn":38,"mout/object/pick":40,"mout/object/set":41,"mout/string/makePath":44,"mout/string/pascalCase":45,"mout/string/upperCase":48}]},{},[71])(71)
+},{"../lib/observe-js/observe-js":1,"./errors":46,"bluebird":"bluebird","es6-promise":2,"mout/array/contains":4,"mout/array/forEach":5,"mout/array/remove":7,"mout/array/slice":8,"mout/array/sort":9,"mout/object/deepMixIn":12,"mout/object/forOwn":14,"mout/object/pick":17,"mout/object/set":18,"mout/string/pascalCase":21,"mout/string/upperCase":24}]},{},[47])(47)
 });

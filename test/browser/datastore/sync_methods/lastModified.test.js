@@ -23,12 +23,12 @@ describe('DS#lastModified', function () {
             assert.equal(time, Thing.lastModified(1));
             done();
           } catch (e) {
-            console.log(e.stack);
+            console.error(e.stack);
             done(e);
           }
         }, 100);
       } catch (e) {
-        console.log(e.stack);
+        console.error(e.stack);
         done(e);
       }
     }, 100);

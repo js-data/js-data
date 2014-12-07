@@ -1,3 +1,51 @@
+##### 1.0.0-alpha.5-8 - 05 December 2014
+
+###### Backwards compatible API changes
+- #27 - Properly resolve parent params for generating the URL
+
+##### 1.0.0-alpha.5-7 - 05 December 2014
+
+###### Backwards compatible API changes
+- #26 - Added the DSCreate instance method
+
+###### Backwards compatible bug fixes
+- #23 - DS#findAll: make a copy of options.params if it's passed in and manipulate that
+
+##### 1.0.0-alpha.5-6 - 03 December 2014
+
+###### Backwards compatible bug fixes
+- Backport jmdobry/angular-data#262
+
+###### Other
+- Optimized utility functions to save several kilobytes off of minified file
+- Change detection of nested properties "should" work now
+
+##### 1.0.0-alpha.5-5 - 30 November 2014
+
+###### Breaking API changes
+- findInverseLinks, findBelongsTo, findHasOne, and findHasMany now default to true
+
+###### Backwards compatible bug fixes
+- Backport jmdobry/angular-data#253
+
+##### 1.0.0-alpha.5-3 - 28 November 2014
+
+###### Backwards compatible API changes
+- Added the isectEmpty, isectNotEmpty, |isectEmpty, and |isectNotEmpty filter operators
+
+###### Other
+- Fixed file size of browser dist file
+
+##### 1.0.0-alpha.5-3 - 26 November 2014
+
+###### Backwards compatible API changes
+- Server-side js-data now uses the Bluebird promise library
+
+##### 1.0.0-alpha.5-2 - 23 November 2014
+
+###### Backwards compatible API changes
+- items don't have to be in the data store to call destroy on them anymore
+
 ##### 1.0.0-alpha.5-1 - 19 November 2014
 
 Removed DSUtils.deepFreeze

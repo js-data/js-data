@@ -14,6 +14,11 @@ function find(resourceName, id, options) {
       reject(new DSErrors.IA('"id" must be a string or a number!'));
     } else {
       options = DSUtils._(definition, options);
+
+      if (options.params) {
+        options.params = DSUtils.copy(options.params);
+      }
+
       if (options.bypassCache || !options.cacheResponse) {
         delete resource.completedQueries[id];
       }
@@ -87,7 +92,9 @@ function find(resourceName, id, options) {
         return item;
       }
     })['catch'](function (err) {
-    delete resource.pendingQueries[id];
+    if (resource) {
+      delete resource.pendingQueries[id];
+    }
     throw err;
   });
 }

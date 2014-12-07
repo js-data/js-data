@@ -27,7 +27,8 @@ function reap(resourceName, options) {
     }
   }).then(function (items) {
       if (options.isInterval || options.notify) {
-        _this.emit(definition, 'beforeReap', items);
+        definition.beforeReap(options, items);
+        _this.emit(options, 'beforeReap', DSUtils.copy(items));
       }
       if (options.reapAction === 'inject') {
         DSUtils.forEach(items, function (item) {
@@ -52,7 +53,8 @@ function reap(resourceName, options) {
       return items;
     }).then(function (items) {
       if (options.isInterval || options.notify) {
-        _this.emit(definition, 'afterReap', items);
+        definition.afterReap(options, items);
+        _this.emit(options, 'afterReap', DSUtils.copy(items));
       }
       return items;
     });

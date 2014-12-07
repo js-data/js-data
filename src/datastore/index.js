@@ -2,7 +2,6 @@ var DSUtils = require('../utils');
 var DSErrors = require('../errors');
 var syncMethods = require('./sync_methods');
 var asyncMethods = require('./async_methods');
-var observe = require('../../lib/observe-js/observe-js');
 var Schemator;
 
 function lifecycleNoopCb(resource, attrs, cb) {
@@ -75,10 +74,10 @@ defaultsPrototype.upsert = !!DSUtils.w;
 defaultsPrototype.cacheResponse = !!DSUtils.w;
 defaultsPrototype.bypassCache = false;
 defaultsPrototype.ignoreMissing = false;
-defaultsPrototype.findInverseLinks = false;
-defaultsPrototype.findBelongsTo = false;
-defaultsPrototype.findHasOn = false;
-defaultsPrototype.findHasMany = false;
+defaultsPrototype.findInverseLinks = true;
+defaultsPrototype.findBelongsTo = true;
+defaultsPrototype.findHasOne = true;
+defaultsPrototype.findHasMany = true;
 defaultsPrototype.reapInterval = !!DSUtils.w ? 30000 : false;
 defaultsPrototype.reapAction = !!DSUtils.w ? 'inject' : 'none';
 defaultsPrototype.maxAge = false;
@@ -98,6 +97,8 @@ defaultsPrototype.beforeInject = lifecycleNoop;
 defaultsPrototype.afterInject = lifecycleNoop;
 defaultsPrototype.beforeEject = lifecycleNoop;
 defaultsPrototype.afterEject = lifecycleNoop;
+defaultsPrototype.beforeReap = lifecycleNoop;
+defaultsPrototype.afterReap = lifecycleNoop;
 defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
   var _this = this;
   var filtered = collection;
@@ -149,63 +150,46 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
           };
         }
         if (DSUtils.isObject(clause)) {
-          DSUtils.forOwn(clause, function (val, op) {
+          DSUtils.forOwn(clause, function (term, op) {
+            var expr;
+            var isOr = op[0] === '|';
+            var val = attrs[field];
+            op = isOr ? op.substr(1) : op;
             if (op === '==') {
-              keep = first ? (attrs[field] == val) : keep && (attrs[field] == val);
+              expr = val == term;
             } else if (op === '===') {
-              keep = first ? (attrs[field] === val) : keep && (attrs[field] === val);
+              expr = val === term;
             } else if (op === '!=') {
-              keep = first ? (attrs[field] != val) : keep && (attrs[field] != val);
+              expr = val != term;
             } else if (op === '!==') {
-              keep = first ? (attrs[field] !== val) : keep && (attrs[field] !== val);
+              expr = val !== term;
             } else if (op === '>') {
-              keep = first ? (attrs[field] > val) : keep && (attrs[field] > val);
+              expr = val > term;
             } else if (op === '>=') {
-              keep = first ? (attrs[field] >= val) : keep && (attrs[field] >= val);
+              expr = val >= term;
             } else if (op === '<') {
-              keep = first ? (attrs[field] < val) : keep && (attrs[field] < val);
+              expr = val < term;
             } else if (op === '<=') {
-              keep = first ? (attrs[field] <= val) : keep && (attrs[field] <= val);
+              expr = val <= term;
+            } else if (op === 'isectEmpty') {
+              expr = !DSUtils.intersection((val || []), (term || [])).length;
+            } else if (op === 'isectNotEmpty') {
+              expr = DSUtils.intersection((val || []), (term || [])).length;
             } else if (op === 'in') {
-              if (DSUtils.isString(val)) {
-                keep = first ? val.indexOf(attrs[field]) !== -1 : keep && val.indexOf(attrs[field]) !== -1;
+              if (DSUtils.isString(term)) {
+                expr = term.indexOf(val) !== -1;
               } else {
-                keep = first ? DSUtils.contains(val, attrs[field]) : keep && DSUtils.contains(val, attrs[field]);
+                expr = DSUtils.contains(term, val);
               }
             } else if (op === 'notIn') {
-              if (DSUtils.isString(val)) {
-                keep = first ? val.indexOf(attrs[field]) === -1 : keep && val.indexOf(attrs[field]) === -1;
+              if (DSUtils.isString(term)) {
+                expr = term.indexOf(val) === -1;
               } else {
-                keep = first ? !DSUtils.contains(val, attrs[field]) : keep && !DSUtils.contains(val, attrs[field]);
+                expr = !DSUtils.contains(term, val);
               }
-            } else if (op === '|==') {
-              keep = first ? (attrs[field] == val) : keep || (attrs[field] == val);
-            } else if (op === '|===') {
-              keep = first ? (attrs[field] === val) : keep || (attrs[field] === val);
-            } else if (op === '|!=') {
-              keep = first ? (attrs[field] != val) : keep || (attrs[field] != val);
-            } else if (op === '|!==') {
-              keep = first ? (attrs[field] !== val) : keep || (attrs[field] !== val);
-            } else if (op === '|>') {
-              keep = first ? (attrs[field] > val) : keep || (attrs[field] > val);
-            } else if (op === '|>=') {
-              keep = first ? (attrs[field] >= val) : keep || (attrs[field] >= val);
-            } else if (op === '|<') {
-              keep = first ? (attrs[field] < val) : keep || (attrs[field] < val);
-            } else if (op === '|<=') {
-              keep = first ? (attrs[field] <= val) : keep || (attrs[field] <= val);
-            } else if (op === '|in') {
-              if (DSUtils.isString(val)) {
-                keep = first ? val.indexOf(attrs[field]) !== -1 : keep || val.indexOf(attrs[field]) !== -1;
-              } else {
-                keep = first ? DSUtils.contains(val, attrs[field]) : keep || DSUtils.contains(val, attrs[field]);
-              }
-            } else if (op === '|notIn') {
-              if (DSUtils.isString(val)) {
-                keep = first ? val.indexOf(attrs[field]) === -1 : keep || val.indexOf(attrs[field]) === -1;
-              } else {
-                keep = first ? !DSUtils.contains(val, attrs[field]) : keep || !DSUtils.contains(val, attrs[field]);
-              }
+            }
+            if (expr !== undefined) {
+              keep = first ? expr : (isOr ? keep || expr : keep && expr);
             }
             first = false;
           });
@@ -303,7 +287,7 @@ function DS(options) {
   this.definitions = {};
   this.adapters = {};
   this.defaults = new Defaults();
-  this.observe = observe;
+  this.observe = DSUtils.observe;
   DSUtils.deepMixIn(this.defaults, options);
 }
 

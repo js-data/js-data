@@ -64,8 +64,8 @@ describe('DS#inject', function () {
     store.inject('comment', comment3);
     store.inject('profile', profile4);
 
-    assert.deepEqual(JSON.stringify(store.get('user', 1)), JSON.stringify(user1));
-    assert.deepEqual(JSON.stringify(store.get('organization', 2)), JSON.stringify(organization2));
+    assert.deepEqual(store.get('user', 1).id, user1.id);
+    assert.deepEqual(store.get('organization', 2).id, organization2.id);
     assert.deepEqual(store.get('comment', 3).id, comment3.id);
     assert.deepEqual(store.get('profile', 4).id, profile4.id);
 
@@ -89,23 +89,23 @@ describe('DS#inject', function () {
     assert.deepEqual(store.get('profile', 21).content, profile21.content);
 
     // user10 relations
-    assert.deepEqual(JSON.stringify(store.get('comment', 11)), JSON.stringify(store.get('user', 10).comments[0]));
-    assert.deepEqual(JSON.stringify(store.get('comment', 12)), JSON.stringify(store.get('user', 10).comments[1]));
-    assert.deepEqual(JSON.stringify(store.get('comment', 13)), JSON.stringify(store.get('user', 10).comments[2]));
-    assert.deepEqual(JSON.stringify(store.get('organization', 14)), JSON.stringify(store.get('user', 10).organization));
-    assert.deepEqual(JSON.stringify(store.get('profile', 15)), JSON.stringify(store.get('user', 10).profile));
+    assert.deepEqual(store.get('comment', 11), store.get('user', 10).comments[0]);
+    assert.deepEqual(store.get('comment', 12), store.get('user', 10).comments[1]);
+    assert.deepEqual(store.get('comment', 13), store.get('user', 10).comments[2]);
+    assert.deepEqual(store.get('organization', 14), store.get('user', 10).organization);
+    assert.deepEqual(store.get('profile', 15), store.get('user', 10).profile);
 
     // organization15 relations
-    assert.deepEqual(JSON.stringify(store.get('user', 16)), JSON.stringify(store.get('organization', 15).users[0]));
-    assert.deepEqual(JSON.stringify(store.get('user', 17)), JSON.stringify(store.get('organization', 15).users[1]));
-    assert.deepEqual(JSON.stringify(store.get('user', 18)), JSON.stringify(store.get('organization', 15).users[2]));
+    assert.deepEqual(store.get('user', 16), store.get('organization', 15).users[0]);
+    assert.deepEqual(store.get('user', 17), store.get('organization', 15).users[1]);
+    assert.deepEqual(store.get('user', 18), store.get('organization', 15).users[2]);
 
     // comment19 relations
-    assert.deepEqual(JSON.stringify(store.get('user', 20)), JSON.stringify(store.get('comment', 19).user));
-    assert.deepEqual(JSON.stringify(store.get('user', 19)), JSON.stringify(store.get('comment', 19).approvedByUser));
+    assert.deepEqual(store.get('user', 20), store.get('comment', 19).user);
+    assert.deepEqual(store.get('user', 19), store.get('comment', 19).approvedByUser);
 
     // profile21 relations
-    assert.deepEqual(JSON.stringify(store.get('user', 22)), JSON.stringify(store.get('profile', 21).user));
+    assert.deepEqual(store.get('user', 22), store.get('profile', 21).user);
   });
   it('should find inverse links', function () {
     store.inject('user', { organizationId: 5, id: 1 });
@@ -114,7 +114,7 @@ describe('DS#inject', function () {
 
     assert.isObject(store.get('user', 1).organization);
 
-    assert.isUndefined(store.get('user', 1).comments);
+    assert.deepEqual(store.get('user', 1).comments, []);
 
     store.inject('comment', { approvedBy: 1, id: 23 }, { findInverseLinks: true });
 
@@ -185,5 +185,60 @@ describe('DS#inject', function () {
     assert.isDefined(store.get('foo', 5));
     assert.isDefined(store.get('foo', 6));
     assert.isDefined(store.get('foo', 7));
+  });
+  it('should work when injecting child relations multiple times', function () {
+    var Parent = store.defineResource({
+      name: 'parent',
+      relations: {
+        hasMany: {
+          child: {
+            localField: 'children',
+            foreignKey: 'parentId'
+          }
+        }
+      }
+    });
+
+    var Child = store.defineResource({
+      name: 'child',
+      relations: {
+        belongsTo: {
+          parent: {
+            localField: 'parent',
+            localKey: 'parentId'
+          }
+        }
+      }
+    });
+
+    Parent.inject({
+      id: 1,
+      name: 'parent1',
+      children: [{
+        id: 1,
+        name: 'child1'
+      }]
+    });
+
+    assert.isTrue(Parent.get(1).children[0] instanceof Child.Child);
+
+    Parent.inject({
+      id: 1,
+      name: 'parent',
+      children: [
+        {
+          id: 1,
+          name: 'Child-1'
+        },
+        {
+          id: 2,
+          name: 'Child-2'
+        }
+      ]
+    });
+
+    assert.isTrue(Parent.get(1).children[0] instanceof Child.Child);
+    assert.isTrue(Parent.get(1).children[1] instanceof Child.Child);
+    assert.deepEqual(Child.filter({ parentId: 1 }), Parent.get(1).children);
   });
 });

@@ -10,7 +10,7 @@ var lifecycle = {};
 // Helper globals
 var fail = function (msg) {
     if (msg instanceof Error) {
-      console.log(msg.stack);
+      console.error(msg.stack);
     } else {
       assert.equal('should not reach this!: ' + msg, 'failure');
     }
@@ -68,7 +68,6 @@ beforeEach(function () {
     cb(null, attrs);
   };
   lifecycle.beforeDestroy = function (resourceName, attrs, cb) {
-    console.log(resourceName, attrs, cb);
     lifecycle.beforeDestroy.callCount += 1;
     cb(null, attrs);
   };
@@ -124,6 +123,7 @@ beforeEach(function () {
     keepChangeHistory: true,
     endpoint: '/posts'
   });
+
   User = store.defineResource({
     name: 'user',
     relations: {
@@ -330,7 +330,7 @@ beforeEach(function () {
       requests.push(xhr);
     };
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 });
 
@@ -339,6 +339,6 @@ afterEach(function () {
   try {
     this.xhr.restore();
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 });

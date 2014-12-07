@@ -83,6 +83,7 @@ function defineResource(definition) {
             if (relation.parent) {
               def.parent = modelName;
               def.parentKey = relation.localKey;
+              def.parentField = relation.localField;
             }
           });
         });
@@ -93,36 +94,46 @@ function defineResource(definition) {
       }
     }
 
-    def.getEndpoint = function (attrs, options) {
-      options = DSUtils.deepMixIn({}, options);
-      var parent = this.parent;
-      var parentKey = this.parentKey;
-      var item;
-      var endpoint;
-      var thisEndpoint = options.endpoint || this.endpoint;
-      var parentDef = definitions[parent];
-      delete options.endpoint;
-      options = options || {};
+    def.getEndpoint = function (id, options) {
       options.params = options.params || {};
-      if (parent && parentKey && parentDef && options.params[parentKey] !== false) {
-        if (DSUtils.isNumber(attrs) || DSUtils.isString(attrs)) {
-          item = _this.get(this.name, attrs);
-        }
-        if (DSUtils.isObject(attrs) && parentKey in attrs) {
-          delete options.params[parentKey];
-          endpoint = DSUtils.makePath(parentDef.getEndpoint(attrs, options), attrs[parentKey], thisEndpoint);
-        } else if (item && parentKey in item) {
-          delete options.params[parentKey];
-          endpoint = DSUtils.makePath(parentDef.getEndpoint(attrs, options), item[parentKey], thisEndpoint);
-        } else if (options && options.params[parentKey]) {
-          endpoint = DSUtils.makePath(parentDef.getEndpoint(attrs, options), options.params[parentKey], thisEndpoint);
+
+      var item;
+      var parentKey = def.parentKey;
+      var endpoint = options.hasOwnProperty('endpoint') ? options.endpoint : def.endpoint;
+      var parentField = def.parentField;
+      var parentDef = definitions[def.parent];
+      var parentId = options.params[parentKey];
+
+      if (parentId === false || !parentKey || !parentDef) {
+        if (parentId === false) {
           delete options.params[parentKey];
         }
-      }
-      if (options.params[parentKey] === false) {
+        return endpoint;
+      } else {
         delete options.params[parentKey];
+
+        if (DSUtils.isNumber(id) || DSUtils.isString(id)) {
+          item = def.get(id);
+        } else if (DSUtils.isObject(id)) {
+          item = id;
+        }
+
+        if (item) {
+          parentId = parentId || item[parentKey] || (item[parentField] ? item[parentField][parentDef.idAttribute] : null);
+        }
+
+        if (parentId) {
+          delete options.endpoint;
+          var _options = {};
+          DSUtils.forOwn(options, function (value, key) {
+            _options[key] = value;
+          });
+          var e = DSUtils.makePath(parentDef.getEndpoint(parentId, DSUtils._(parentDef, _options)), parentId, endpoint);
+          return e;
+        } else {
+          return endpoint;
+        }
       }
-      return endpoint || thisEndpoint;
     };
 
     // Remove this in v0.11.0 and make a breaking change notice
@@ -204,6 +215,13 @@ function defineResource(definition) {
       };
     });
 
+    def[def['class']].prototype.DSCreate = function () {
+      var args = Array.prototype.slice.call(arguments);
+      args.unshift(this);
+      args.unshift(def.name);
+      return _this.create.apply(_this, args);
+    };
+
     // Initialize store data for the new resource
     _this.store[def.name] = {
       collection: [],
@@ -258,7 +276,6 @@ function defineResource(definition) {
 
     return def;
   } catch (err) {
-    console.error(err);
     delete definitions[definition.name];
     delete _this.store[definition.name];
     throw err;

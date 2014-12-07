@@ -29,6 +29,7 @@ function eject(resourceName, id, options) {
   if (found) {
     if (options.notify) {
       definition.beforeEject(options, item);
+      _this.emit(options, 'beforeEject', DSUtils.copy(item));
     }
     _this.unlinkInverse(definition.name, id);
     resource.collection.splice(i, 1);
@@ -51,7 +52,7 @@ function eject(resourceName, id, options) {
 
     if (options.notify) {
       definition.afterEject(options, item);
-      _this.emit(definition, 'eject', item);
+      _this.emit(options, 'afterEject', DSUtils.copy(item));
     }
 
     return item;
