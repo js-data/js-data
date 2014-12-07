@@ -43,22 +43,7 @@ function create(resourceName, attrs, options) {
       if (options.notify) {
         _this.emit(options, 'beforeCreate', DSUtils.copy(attrs));
       }
-      if (options.strategy === 'fallback') {
-        function makeFallbackCall(index) {
-          return _this.getAdapter(options.fallbackAdapters[index]).create(definition, attrs, options)['catch'](function (err) {
-            index++;
-            if (index < options.fallbackAdapters.length) {
-              return makeFallbackCall(index);
-            } else {
-              return Promise.reject(err);
-            }
-          });
-        }
-
-        return makeFallbackCall(0);
-      } else {
-        return _this.getAdapter(options).create(definition, attrs, options);
-      }
+      return _this.getAdapter(options).create(definition, attrs, options);
     })
     .then(function (attrs) {
       return options.afterCreate.call(attrs, options, attrs);

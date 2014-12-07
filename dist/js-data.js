@@ -2387,6 +2387,7 @@ function destroyAll(resourceName, params, options) {
 module.exports = destroyAll;
 
 },{"../../errors":46,"../../utils":48}],28:[function(require,module,exports){
+/* jshint -W082 */
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -2419,17 +2420,35 @@ function find(resourceName, id, options) {
   }).then(function (item) {
       if (!(id in resource.completedQueries)) {
         if (!(id in resource.pendingQueries)) {
-          resource.pendingQueries[id] = _this.getAdapter(options).find(definition, id, options)
-            .then(function (data) {
-              // Query is no longer pending
-              delete resource.pendingQueries[id];
-              if (options.cacheResponse) {
-                resource.completedQueries[id] = new Date().getTime();
-                return _this.inject(resourceName, data, options);
-              } else {
-                return _this.createInstance(resourceName, data, options);
-              }
-            });
+          var promise;
+          var strategy = options.findStrategy || options.strategy;
+          if (strategy === 'fallback') {
+            function makeFallbackCall(index) {
+              return _this.getAdapter((options.findFallbackAdapters || options.fallbackAdapters)[index]).find(definition, id, options)['catch'](function (err) {
+                index++;
+                if (index < options.fallbackAdapters.length) {
+                  return makeFallbackCall(index);
+                } else {
+                  return Promise.reject(err);
+                }
+              });
+            }
+
+            promise = makeFallbackCall(0);
+          } else {
+            promise = _this.getAdapter(options).find(definition, id, options);
+          }
+
+          resource.pendingQueries[id] = promise.then(function (data) {
+            // Query is no longer pending
+            delete resource.pendingQueries[id];
+            if (options.cacheResponse) {
+              resource.completedQueries[id] = new Date().getTime();
+              return _this.inject(resourceName, data, options);
+            } else {
+              return _this.createInstance(resourceName, data, options);
+            }
+          });
         }
         return resource.pendingQueries[id];
       } else {
@@ -2446,6 +2465,7 @@ function find(resourceName, id, options) {
 module.exports = find;
 
 },{"../../errors":46,"../../utils":48}],29:[function(require,module,exports){
+/* jshint -W082 */
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -2515,18 +2535,37 @@ function findAll(resourceName, params, options) {
   }).then(function (items) {
       if (!(queryHash in resource.completedQueries)) {
         if (!(queryHash in resource.pendingQueries)) {
-          resource.pendingQueries[queryHash] = _this.getAdapter(options).findAll(definition, params, options)
-            .then(function (data) {
-              delete resource.pendingQueries[queryHash];
-              if (options.cacheResponse) {
-                return processResults.call(_this, data, resourceName, queryHash, options);
-              } else {
-                DSUtils.forEach(data, function (item, i) {
-                  data[i] = _this.createInstance(resourceName, item, options);
-                });
-                return data;
-              }
-            });
+          var promise;
+          var strategy = options.findAllStrategy || options.strategy;
+          if (strategy === 'fallback') {
+            function makeFallbackCall(index) {
+              console.log('calling findAll', (options.findAllFallbackAdapters || options.fallbackAdapters)[index]);
+              return _this.getAdapter((options.findAllFallbackAdapters || options.fallbackAdapters)[index]).findAll(definition, params, options)['catch'](function (err) {
+                index++;
+                if (index < options.fallbackAdapters.length) {
+                  return makeFallbackCall(index);
+                } else {
+                  return Promise.reject(err);
+                }
+              });
+            }
+
+            promise = makeFallbackCall(0);
+          } else {
+            promise = _this.getAdapter(options).findAll(definition, params, options);
+          }
+
+          resource.pendingQueries[queryHash] = promise.then(function (data) {
+            delete resource.pendingQueries[queryHash];
+            if (options.cacheResponse) {
+              return processResults.call(_this, data, resourceName, queryHash, options);
+            } else {
+              DSUtils.forEach(data, function (item, i) {
+                data[i] = _this.createInstance(resourceName, item, options);
+              });
+              return data;
+            }
+          });
         }
 
         return resource.pendingQueries[queryHash];
@@ -2979,6 +3018,8 @@ defaultsPrototype.eagerEject = false;
 defaultsPrototype.eagerInject = false;
 defaultsPrototype.allowSimpleWhere = true;
 defaultsPrototype.defaultAdapter = 'http';
+defaultsPrototype.strategy = 'single';
+defaultsPrototype.fallbackAdapters = ['http'];
 defaultsPrototype.loadFromServer = false;
 defaultsPrototype.notify = !!DSUtils.w;
 defaultsPrototype.upsert = !!DSUtils.w;
@@ -3205,8 +3246,22 @@ function DS(options) {
 var dsPrototype = DS.prototype;
 
 dsPrototype.getAdapter = function (options) {
+  var errorIfNotExist = false;
   options = options || {};
-  return this.adapters[options.adapter] || this.adapters[options.defaultAdapter];
+  if (DSUtils.isString(options)) {
+    errorIfNotExist = true;
+    options = {
+      adapter: options
+    };
+  }
+  var adapter = this.adapters[options.adapter];
+  if (adapter) {
+    return adapter;
+  } else if (errorIfNotExist) {
+    throw new Error(options.adapter + ' is not a registered adapter!');
+  } else {
+    return this.adapters[options.defaultAdapter];
+  }
 };
 
 dsPrototype.registerAdapter = function (name, Adapter, options) {

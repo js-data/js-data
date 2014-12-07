@@ -32,11 +32,10 @@ function find(resourceName, id, options) {
       if (!(id in resource.completedQueries)) {
         if (!(id in resource.pendingQueries)) {
           var promise;
-          if (options.strategy === 'single') {
-            promise = _this.getAdapter(options).find(definition, id, options);
-          } else if (options.strategy === 'fallback') {
+          var strategy = options.findStrategy || options.strategy;
+          if (strategy === 'fallback') {
             function makeFallbackCall(index) {
-              return _this.getAdapter(options.fallbackAdapters[index]).find(definition, id, options)['catch'](function (err) {
+              return _this.getAdapter((options.findFallbackAdapters || options.fallbackAdapters)[index]).find(definition, id, options)['catch'](function (err) {
                 index++;
                 if (index < options.fallbackAdapters.length) {
                   return makeFallbackCall(index);
@@ -47,33 +46,8 @@ function find(resourceName, id, options) {
             }
 
             promise = makeFallbackCall(0);
-          } else if (options.strategy === 'parallel') {
-            var tasks = [];
-            DSUtils.forEach(options.parallelAdapters, function (adapter) {
-              tasks.push(_this.getAdapter(adapter).find(definition, id, options));
-            });
-            promise = DSUtils.Promise.all(tasks).then(function (results) {
-              DSUtils.forEach(results, function (r, i) {
-                if (DSUtils.isObject(r) && i) {
-                  DSUtils.deepMixIn(results[0], r);
-                }
-              });
-              return results[0];
-            });
-          } else if (options.strategy === 'series') {
-            function makeSeriesCall(index, d) {
-              return _this.getAdapter(options.seriesAdapters[index]).find(definition, id, options).then(function (data) {
-                DSUtils.deepMixIn(data, d);
-                index++;
-                if (index < options.seriesAdapters.length) {
-                  return makeSeriesCall(index, data);
-                } else {
-                  return data;
-                }
-              });
-            }
-
-            promise = makeSeriesCall(0, {});
+          } else {
+            promise = _this.getAdapter(options).find(definition, id, options);
           }
 
           resource.pendingQueries[id] = promise.then(function (data) {
