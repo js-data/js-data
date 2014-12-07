@@ -1,3 +1,4 @@
+/* jshint -W082 */
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -67,18 +68,37 @@ function findAll(resourceName, params, options) {
   }).then(function (items) {
       if (!(queryHash in resource.completedQueries)) {
         if (!(queryHash in resource.pendingQueries)) {
-          resource.pendingQueries[queryHash] = _this.getAdapter(options).findAll(definition, params, options)
-            .then(function (data) {
-              delete resource.pendingQueries[queryHash];
-              if (options.cacheResponse) {
-                return processResults.call(_this, data, resourceName, queryHash, options);
-              } else {
-                DSUtils.forEach(data, function (item, i) {
-                  data[i] = _this.createInstance(resourceName, item, options);
-                });
-                return data;
-              }
-            });
+          var promise;
+          var strategy = options.findAllStrategy || options.strategy;
+          if (strategy === 'fallback') {
+            function makeFallbackCall(index) {
+              console.log('calling findAll', (options.findAllFallbackAdapters || options.fallbackAdapters)[index]);
+              return _this.getAdapter((options.findAllFallbackAdapters || options.fallbackAdapters)[index]).findAll(definition, params, options)['catch'](function (err) {
+                index++;
+                if (index < options.fallbackAdapters.length) {
+                  return makeFallbackCall(index);
+                } else {
+                  return Promise.reject(err);
+                }
+              });
+            }
+
+            promise = makeFallbackCall(0);
+          } else {
+            promise = _this.getAdapter(options).findAll(definition, params, options);
+          }
+
+          resource.pendingQueries[queryHash] = promise.then(function (data) {
+            delete resource.pendingQueries[queryHash];
+            if (options.cacheResponse) {
+              return processResults.call(_this, data, resourceName, queryHash, options);
+            } else {
+              DSUtils.forEach(data, function (item, i) {
+                data[i] = _this.createInstance(resourceName, item, options);
+              });
+              return data;
+            }
+          });
         }
 
         return resource.pendingQueries[queryHash];

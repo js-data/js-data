@@ -44,7 +44,7 @@ describe('DS#findAll', function () {
         assert.equal(2, _this.requests.length);
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/posts');
         assert.equal(_this.requests[1].method, 'get');
-        _this.requests[1].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([p1, p2, p3, p4]));
+        _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([p1, p2, p3, p4]));
       }, 30);
     }).catch(function (err) {
       console.error(err.stack);
@@ -55,7 +55,7 @@ describe('DS#findAll', function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
       assert.equal(_this.requests[0].method, 'get');
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([p1, p2, p3, p4]));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([p1, p2, p3, p4]));
     }, 30);
   });
   it('should fail when no "idAttribute" is present on an item in the response', function (done) {
@@ -79,7 +79,7 @@ describe('DS#findAll', function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
       assert.equal(_this.requests[0].method, 'get');
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([
         { author: 'John', age: 30 },
         { author: 'Sally', age: 31 }
       ]));
@@ -108,7 +108,7 @@ describe('DS#findAll', function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
       assert.equal(_this.requests[0].method, 'get');
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([p1, p2, p3, p4]));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([p1, p2, p3, p4]));
     }, 30);
   });
   it('should correctly propagate errors', function (done) {
@@ -128,7 +128,7 @@ describe('DS#findAll', function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
       assert.equal(_this.requests[0].method, 'get');
-      _this.requests[0].respond(404, {'Content-Type': 'text/plain'}, 'Not Found');
+      _this.requests[0].respond(404, { 'Content-Type': 'text/plain' }, 'Not Found');
     }, 30);
   });
   it('"params" argument is optional', function (done) {
@@ -152,7 +152,7 @@ describe('DS#findAll', function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
       assert.equal(_this.requests[0].method, 'get');
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([p1, p2, p3, p4]));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([p1, p2, p3, p4]));
     }, 30);
   });
   it('"params"', function (done) {
@@ -188,7 +188,7 @@ describe('DS#findAll', function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts?where=%7B%22author%22:%22Adam%22%7D');
       assert.equal(_this.requests[0].method, 'get');
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([p4, p5]));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([p4, p5]));
     }, 30);
   });
   it('should return already injected items', function (done) {
@@ -239,7 +239,7 @@ describe('DS#findAll', function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/users');
       assert.equal(_this.requests[0].method, 'get');
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([u1, u2]));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([u1, u2]));
     }, 30);
   });
   it('should handle nested resources', function (done) {
@@ -300,7 +300,7 @@ describe('DS#findAll', function () {
           assert.equal(3, _this.requests.length);
           assert.equal(_this.requests[2].url, 'http://test.js-data.io/comment?content=test');
           assert.equal(_this.requests[2].method, 'get');
-          _this.requests[2].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([testComment, testComment2]));
+          _this.requests[2].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([testComment, testComment2]));
         }, 30);
       }).catch(function () {
         done('Should not have failed!');
@@ -310,7 +310,7 @@ describe('DS#findAll', function () {
         assert.equal(2, _this.requests.length);
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/comment?content=test');
         assert.equal(_this.requests[1].method, 'get');
-        _this.requests[1].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([testComment, testComment2]));
+        _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([testComment, testComment2]));
       }, 30);
     }).catch(function () {
       done('Should not have failed!');
@@ -320,7 +320,44 @@ describe('DS#findAll', function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/user/4/comment?content=test');
       assert.equal(_this.requests[0].method, 'get');
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([testComment, testComment2]));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([testComment, testComment2]));
     }, 30);
+  });
+  it('should use the fallback strategy', function (done) {
+    var _this = this;
+
+    var Thing = store.defineResource({
+      name: 'thing',
+      strategy: 'fallback',
+      fallbackAdapters: ['http', 'localstorage']
+    });
+
+    store.adapters.localstorage.update(Thing, 1, {
+      thing: 'stuff',
+      id: 1
+    }).then(function (thing) {
+      Thing.findAll({ thing: 'stuff' }).then(function (things) {
+        console.log(things);
+        assert.deepEqual(DSUtils.toJson([{
+          thing: 'stuff',
+          id: 1
+        }]), DSUtils.toJson(things));
+        done();
+      }).catch(function (err) {
+        console.log(err.stack);
+        done('Should not have failed!');
+      });
+
+      setTimeout(function () {
+        try {
+          assert.equal(1, _this.requests.length);
+          assert.equal(_this.requests[0].url, 'http://test.js-data.io/thing?thing=stuff');
+          assert.equal(_this.requests[0].method, 'get');
+          _this.requests[0].respond(500, { 'Content-Type': 'text/plain' }, '500 - Internal Server Error');
+        } catch (err) {
+          console.error(err.stack);
+        }
+      }, 30);
+    });
   });
 });

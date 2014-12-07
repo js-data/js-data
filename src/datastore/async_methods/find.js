@@ -1,3 +1,4 @@
+/* jshint -W082 */
 var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
@@ -30,17 +31,35 @@ function find(resourceName, id, options) {
   }).then(function (item) {
       if (!(id in resource.completedQueries)) {
         if (!(id in resource.pendingQueries)) {
-          resource.pendingQueries[id] = _this.getAdapter(options).find(definition, id, options)
-            .then(function (data) {
-              // Query is no longer pending
-              delete resource.pendingQueries[id];
-              if (options.cacheResponse) {
-                resource.completedQueries[id] = new Date().getTime();
-                return _this.inject(resourceName, data, options);
-              } else {
-                return _this.createInstance(resourceName, data, options);
-              }
-            });
+          var promise;
+          var strategy = options.findStrategy || options.strategy;
+          if (strategy === 'fallback') {
+            function makeFallbackCall(index) {
+              return _this.getAdapter((options.findFallbackAdapters || options.fallbackAdapters)[index]).find(definition, id, options)['catch'](function (err) {
+                index++;
+                if (index < options.fallbackAdapters.length) {
+                  return makeFallbackCall(index);
+                } else {
+                  return Promise.reject(err);
+                }
+              });
+            }
+
+            promise = makeFallbackCall(0);
+          } else {
+            promise = _this.getAdapter(options).find(definition, id, options);
+          }
+
+          resource.pendingQueries[id] = promise.then(function (data) {
+            // Query is no longer pending
+            delete resource.pendingQueries[id];
+            if (options.cacheResponse) {
+              resource.completedQueries[id] = new Date().getTime();
+              return _this.inject(resourceName, data, options);
+            } else {
+              return _this.createInstance(resourceName, data, options);
+            }
+          });
         }
         return resource.pendingQueries[id];
       } else {

@@ -16,6 +16,7 @@ module.exports = function (config) {
 			'karma-spec-reporter'
 		],
 		autoWatch: false,
+		autoWatchBatchDelay: 4000,
 		browsers: ['Chrome'],
 
 		// list of files / patterns to load in the browser

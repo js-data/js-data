@@ -64,6 +64,8 @@ defaultsPrototype.eagerEject = false;
 defaultsPrototype.eagerInject = false;
 defaultsPrototype.allowSimpleWhere = true;
 defaultsPrototype.defaultAdapter = 'http';
+defaultsPrototype.strategy = 'single';
+defaultsPrototype.fallbackAdapters = ['http'];
 defaultsPrototype.loadFromServer = false;
 defaultsPrototype.notify = !!DSUtils.w;
 defaultsPrototype.upsert = !!DSUtils.w;
@@ -290,8 +292,22 @@ function DS(options) {
 var dsPrototype = DS.prototype;
 
 dsPrototype.getAdapter = function (options) {
+  var errorIfNotExist = false;
   options = options || {};
-  return this.adapters[options.adapter] || this.adapters[options.defaultAdapter];
+  if (DSUtils.isString(options)) {
+    errorIfNotExist = true;
+    options = {
+      adapter: options
+    };
+  }
+  var adapter = this.adapters[options.adapter];
+  if (adapter) {
+    return adapter;
+  } else if (errorIfNotExist) {
+    throw new Error(options.adapter + ' is not a registered adapter!');
+  } else {
+    return this.adapters[options.defaultAdapter];
+  }
 };
 
 dsPrototype.registerAdapter = function (name, Adapter, options) {
