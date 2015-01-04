@@ -59,7 +59,7 @@ function _getReactFunction(DS, definition, resource) {
     }
 
     if (definition.idAttribute in changed) {
-      console.error('Doh! You just changed the primary key of an object! Your data for the' + name +
+      definition.errorFn('Doh! You just changed the primary key of an object! Your data for the "' + name +
       '" resource is now in an undefined (probably broken) state.');
     }
   };
@@ -88,7 +88,7 @@ function _inject(definition, resource, attrs, options) {
     }
     if (!(idA in attrs)) {
       var error = new DSErrors.R(definition.name + '.inject: "attrs" must contain the property specified by `idAttribute`!');
-      console.error(error);
+      options.errorFn(error);
       throw error;
     } else {
       try {
@@ -111,7 +111,7 @@ function _inject(definition, resource, attrs, options) {
                     }
                     items.push(injectedItem);
                   } catch (err) {
-                    console.error(definition.name + ': Failed to inject ' + def.type + ' relation: "' + relationName + '"!', err);
+                    options.errorFn(err, 'Failed to inject ' + def.type + ' relation: "' + relationName + '"!');
                   }
                 }
               });
@@ -124,7 +124,7 @@ function _inject(definition, resource, attrs, options) {
                     attrs[def.localField][def.foreignKey] = attrs[definition.idAttribute];
                   }
                 } catch (err) {
-                  console.error(definition.name + ': Failed to inject ' + def.type + ' relation: "' + relationName + '"!', err);
+                  options.errorFn(err, 'Failed to inject ' + def.type + ' relation: "' + relationName + '"!');
                 }
               }
             }
@@ -185,8 +185,7 @@ function _inject(definition, resource, attrs, options) {
         });
         injected = item;
       } catch (err) {
-        console.error(err.stack);
-        console.error('inject failed!', definition.name, attrs);
+        options.errorFn(err, attrs);
       }
     }
   }
@@ -219,6 +218,8 @@ function inject(resourceName, attrs, options) {
 
   var name = definition.name;
   options = DSUtils._(definition, options);
+
+  options.logFn('inject', attrs, options);
 
   if (options.notify) {
     options.beforeInject(options, attrs);

@@ -15,6 +15,7 @@ function destroy(resourceName, id, options) {
     } else {
       item = _this.get(resourceName, id) || { id: id };
       options = DSUtils._(definition, options);
+      options.logFn('destroy', id, options);
       resolve(item);
     }
   })

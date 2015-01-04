@@ -13,6 +13,7 @@ function update(resourceName, id, attrs, options) {
       reject(new DSErrors.IA('"id" must be a string or a number!'));
     } else {
       options = DSUtils._(definition, options);
+      options.logFn('update', id, attrs, options);
       resolve(attrs);
     }
   }).then(function (attrs) {

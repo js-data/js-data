@@ -105,7 +105,8 @@ beforeEach(function () {
     beforeDestroy: lifecycle.beforeDestroy,
     afterDestroy: lifecycle.afterDestroy,
     beforeInject: lifecycle.beforeInject,
-    afterInject: lifecycle.afterInject
+    afterInject: lifecycle.afterInject,
+    debug: false
   });
   dsHttpAdapter = new DSHttpAdapter({
     queryTransform: lifecycle.queryTransform,

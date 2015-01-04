@@ -14,6 +14,8 @@ function filter(resourceName, params, options) {
 
   options = DSUtils._(definition, options);
 
+  options.logFn('filter', params, options);
+
   // Protect against null
   params = params || {};
 

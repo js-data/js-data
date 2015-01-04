@@ -29,6 +29,7 @@ function loadRelations(resourceName, instance, relations, options) {
       if (!options.hasOwnProperty('findHasMany')) {
         options.findHasMany = true;
       }
+      options.logFn('loadRelations', instance, relations, options);
 
       var tasks = [];
 

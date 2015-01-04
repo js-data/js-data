@@ -14,6 +14,7 @@ function find(resourceName, id, options) {
       reject(new DSErrors.IA('"id" must be a string or a number!'));
     } else {
       options = DSUtils._(definition, options);
+      options.logFn('find', id, options);
 
       if (options.params) {
         options.params = DSUtils.copy(options.params);

@@ -18,6 +18,8 @@ function eject(resourceName, id, options) {
 
   options = DSUtils._(definition, options);
 
+  options.logFn('eject', id, options);
+
   for (var i = 0; i < resource.collection.length; i++) {
     if (resource.collection[i][definition.idAttribute] == id) {
       item = resource.collection[i];

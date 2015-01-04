@@ -15,6 +15,7 @@ function reap(resourceName, options) {
       if (!options.hasOwnProperty('notify')) {
         options.notify = false;
       }
+      options.logFn('reap', options);
       var items = [];
       var now = new Date().getTime();
       var expiredItem;
@@ -73,6 +74,7 @@ function refresh(resourceName, id, options) {
     } else {
       options = DSUtils._(definition, options);
       options.bypassCache = true;
+      options.logFn('refresh', id, options);
       resolve(_this.get(resourceName, id));
     }
   }).then(function (item) {

@@ -15,6 +15,7 @@ function destroyAll(resourceName, params, options) {
       reject(new DSErrors.IA('"params" must be an object!'));
     } else {
       options = DSUtils._(definition, options);
+      options.logFn('destroyAll', params, options);
       resolve();
     }
   }).then(function () {

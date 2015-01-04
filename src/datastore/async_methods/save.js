@@ -17,6 +17,7 @@ function save(resourceName, id, options) {
     } else {
       item = _this.get(resourceName, id);
       options = DSUtils._(definition, options);
+      options.logFn('save', id, options);
       resolve(item);
     }
   }).then(function (attrs) {

@@ -15,6 +15,9 @@ function unlinkInverse(resourceName, id, relations) {
   } else if (!DSUtils.isArray(relations)) {
     throw new DSErrors.IA('"relations" must be an array!');
   }
+
+  definition.logFn('unlinkInverse', id, relations);
+
   var linked = _this.get(resourceName, id);
 
   if (linked) {

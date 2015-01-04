@@ -70,7 +70,7 @@ module.exports = function (grunt) {
           external: ['js-data-schema', 'bluebird']
         },
         files: {
-          'dist/js-data.js': ['src/index.js']
+          'dist/js-data-debug.js': ['src/index.js']
         }
       }
     },
@@ -119,12 +119,12 @@ module.exports = function (grunt) {
     }
   });
 
-  grunt.registerTask('banner', function () {
-    var file = grunt.file.read('dist/js-data.js');
+  grunt.registerTask('banner', function (filename) {
+    var file = grunt.file.read(filename);
 
     var banner = '/**\n' +
       '* @author Jason Dobry <jason.dobry@gmail.com>\n' +
-      '* @file js-data.js\n' +
+      '* @file ' + filename + '\n' +
       '* @version ' + pkg.version + ' - Homepage <http://www.js-data.io/>\n' +
       '* @copyright (c) 2014 Jason Dobry \n' +
       '* @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>\n' +
@@ -134,7 +134,7 @@ module.exports = function (grunt) {
 
     file = banner + file;
 
-    grunt.file.write('dist/js-data.js', file);
+    grunt.file.write(filename, file);
   });
 
   grunt.registerTask('version', function (filePath) {
@@ -164,6 +164,26 @@ module.exports = function (grunt) {
     grunt.file.write(filePath, file);
   });
 
+  grunt.registerTask('debug', function (filePath) {
+    var file = grunt.file.read(filePath);
+
+    var lines = file.split('\n');
+
+    var newLines = [];
+
+    lines.forEach(function (line) {
+      if (line.indexOf('logFn(') === -1) {
+        newLines.push(line);
+      }
+    });
+
+    file = newLines.join('\n');
+
+    file += '\n';
+
+    grunt.file.write(filePath.replace('-debug', ''), file);
+  });
+
   grunt.registerTask('n', ['mochaTest']);
   grunt.registerTask('b', ['karma:ci', 'karma:min']);
   grunt.registerTask('w', ['n', 'watch:n']);
@@ -173,8 +193,11 @@ module.exports = function (grunt) {
     'clean',
     'jshint',
     'browserify',
+    'debug:dist/js-data-debug.js',
+    'version:dist/js-data-debug.js',
     'version:dist/js-data.js',
-    'banner',
+    'banner:dist/js-data-debug.js',
+    'banner:dist/js-data.js',
     'uglify:main'
   ]);
   grunt.registerTask('go', ['build', 'watch:dist']);

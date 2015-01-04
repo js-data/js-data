@@ -1,6 +1,6 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
-* @file dist/js-data.js
+* @file dist/js-data-debug.js
 * @version 1.0.0-beta.1 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -2233,6 +2233,7 @@ function create(resourceName, attrs, options) {
     if (options.upsert && (DSUtils.isString(attrs[definition.idAttribute]) || DSUtils.isNumber(attrs[definition.idAttribute]))) {
       return _this.update(resourceName, attrs[definition.idAttribute], attrs, options);
     }
+    options.logFn('create', attrs, options);
   }
 
   return new DSUtils.Promise(function (resolve, reject) {
@@ -2298,6 +2299,7 @@ function destroy(resourceName, id, options) {
     } else {
       item = _this.get(resourceName, id) || { id: id };
       options = DSUtils._(definition, options);
+      options.logFn('destroy', id, options);
       resolve(item);
     }
   })
@@ -2350,6 +2352,7 @@ function destroyAll(resourceName, params, options) {
       reject(new DSErrors.IA('"params" must be an object!'));
     } else {
       options = DSUtils._(definition, options);
+      options.logFn('destroyAll', params, options);
       resolve();
     }
   }).then(function () {
@@ -2397,6 +2400,7 @@ function find(resourceName, id, options) {
       reject(new DSErrors.IA('"id" must be a string or a number!'));
     } else {
       options = DSUtils._(definition, options);
+      options.logFn('find', id, options);
 
       if (options.params) {
         options.params = DSUtils.copy(options.params);
@@ -2512,6 +2516,7 @@ function findAll(resourceName, params, options) {
     } else {
       options = DSUtils._(definition, options);
       queryHash = DSUtils.toJson(params);
+      options.logFn('findAll', params, options);
 
       if (options.params) {
         options.params = DSUtils.copy(options.params);
@@ -2600,6 +2605,7 @@ function reap(resourceName, options) {
       if (!options.hasOwnProperty('notify')) {
         options.notify = false;
       }
+      options.logFn('reap', options);
       var items = [];
       var now = new Date().getTime();
       var expiredItem;
@@ -2658,6 +2664,7 @@ function refresh(resourceName, id, options) {
     } else {
       options = DSUtils._(definition, options);
       options.bypassCache = true;
+      options.logFn('refresh', id, options);
       resolve(_this.get(resourceName, id));
     }
   }).then(function (item) {
@@ -2715,6 +2722,7 @@ function loadRelations(resourceName, instance, relations, options) {
       if (!options.hasOwnProperty('findHasMany')) {
         options.findHasMany = true;
       }
+      options.logFn('loadRelations', instance, relations, options);
 
       var tasks = [];
 
@@ -2789,6 +2797,7 @@ function save(resourceName, id, options) {
     } else {
       item = _this.get(resourceName, id);
       options = DSUtils._(definition, options);
+      options.logFn('save', id, options);
       resolve(item);
     }
   }).then(function (attrs) {
@@ -2864,6 +2873,7 @@ function update(resourceName, id, attrs, options) {
       reject(new DSErrors.IA('"id" must be a string or a number!'));
     } else {
       options = DSUtils._(definition, options);
+      options.logFn('update', id, attrs, options);
       resolve(attrs);
     }
   }).then(function (attrs) {
@@ -2914,6 +2924,7 @@ function updateAll(resourceName, attrs, params, options) {
       reject(new DSErrors.NER(resourceName));
     } else {
       options = DSUtils._(definition, options);
+      options.logFn('updateAll', attrs, params, options);
       resolve(attrs);
     }
   }).then(function (attrs) {
@@ -3269,6 +3280,7 @@ function DS(options) {
   _this.defaults = new Defaults();
   _this.observe = DSUtils.observe;
   DSUtils.deepMixIn(_this.defaults, options);
+  _this.defaults.logFn('new data store created', _this.defaults);
 }
 
 var dsPrototype = DS.prototype;
@@ -3276,6 +3288,7 @@ var dsPrototype = DS.prototype;
 dsPrototype.getAdapter = function (options) {
   var errorIfNotExist = false;
   options = options || {};
+  this.defaults.logFn('getAdapter', options);
   if (DSUtils.isString(options)) {
     errorIfNotExist = true;
     options = {
@@ -3295,6 +3308,7 @@ dsPrototype.getAdapter = function (options) {
 dsPrototype.registerAdapter = function (name, Adapter, options) {
   var _this = this;
   options = options || {};
+  _this.defaults.logFn('registerAdapter', name, Adapter, options);
   if (DSUtils.isFunction(Adapter)) {
     _this.adapters[name] = new Adapter(options);
   } else {
@@ -3303,6 +3317,7 @@ dsPrototype.registerAdapter = function (name, Adapter, options) {
   if (options.default) {
     _this.defaults.defaultAdapter = name;
   }
+  _this.defaults.logFn('default adapter is ' + _this.defaults.defaultAdapter);
 };
 
 dsPrototype.emit = function (definition, event) {
@@ -3377,6 +3392,7 @@ function defineResource(definition) {
 
     var def = definitions[definition.name];
 
+    def.logFn('Preparing resource.');
 
     if (!DSUtils.isString(def.idAttribute)) {
       throw new DSErrors.IA('"idAttribute" must be a string!');
@@ -3598,6 +3614,7 @@ function defineResource(definition) {
     // Mix-in events
     DSUtils.Events(def);
 
+    def.logFn('Done preparing resource.');
 
     return def;
   } catch (err) {
@@ -3630,6 +3647,7 @@ function eject(resourceName, id, options) {
 
   options = DSUtils._(definition, options);
 
+  options.logFn('eject', id, options);
 
   for (var i = 0; i < resource.collection.length; i++) {
     if (resource.collection[i][definition.idAttribute] == id) {
@@ -3694,6 +3712,7 @@ function ejectAll(resourceName, params, options) {
     throw new DSErrors.IA('"params" must be an object!');
   }
 
+  definition.logFn('ejectAll', params, options);
 
   var resource = _this.store[resourceName];
   if (DSUtils.isEmpty(params)) {
@@ -3737,6 +3756,7 @@ function filter(resourceName, params, options) {
 
   options = DSUtils._(definition, options);
 
+  options.logFn('filter', params, options);
 
   // Protect against null
   params = params || {};
@@ -3777,6 +3797,7 @@ function changes(resourceName, id, options) {
   }
   options = DSUtils._(definition, options);
 
+  options.logFn('changes', id, options);
 
   var item = _this.get(resourceName, id);
   if (item) {
@@ -3814,6 +3835,7 @@ function changeHistory(resourceName, id) {
     throw new IA('"id" must be a string or a number!');
   }
 
+  definition.logFn('changeHistory', id);
 
   if (!definition.keepChangeHistory) {
     definition.errorFn('changeHistory is disabled for this resource!');
@@ -3842,6 +3864,7 @@ function compute(resourceName, instance) {
     throw new IA('"instance" must be an object, string or number!');
   }
 
+  definition.logFn('compute', instance);
 
   DSUtils.forOwn(definition.computed, function (fn, field) {
     DSUtils.compute.call(instance, fn, field);
@@ -3864,6 +3887,7 @@ function createInstance(resourceName, attrs, options) {
 
   options = DSUtils._(definition, options);
 
+  options.logFn('createInstance', attrs, options);
 
   if (options.notify) {
     options.beforeCreateInstance(options, attrs);
@@ -3904,6 +3928,7 @@ function get(resourceName, id, options) {
 
   options = DSUtils._(definition, options);
 
+  options.logFn('get', id, options);
 
   // cache miss, request resource from server
   var item = _this.store[resourceName].index[id];
@@ -3927,6 +3952,7 @@ function getAll(resourceName, ids) {
     throw new IA('"ids" must be an array!');
   }
 
+  definition.logFn('getAll', ids);
 
   if (DSUtils.isArray(ids)) {
     var length = ids.length;
@@ -3954,6 +3980,7 @@ function hasChanges(resourceName, id) {
     throw new IA('"id" must be a string or a number!');
   }
 
+  definition.logFn('hasChanges', id);
 
   // return resource from cache
   if (_this.get(resourceName, id)) {
@@ -3972,6 +3999,7 @@ function lastModified(resourceName, id) {
     throw new NER(resourceName);
   }
 
+  definition.logFn('lastModified', id);
 
   if (id) {
     if (!(id in resource.modified)) {
@@ -3991,6 +4019,7 @@ function lastSaved(resourceName, id) {
     throw new NER(resourceName);
   }
 
+  definition.logFn('lastSaved', id);
 
   if (!(id in resource.saved)) {
     resource.saved[id] = 0;
@@ -4010,6 +4039,7 @@ function previous(resourceName, id) {
     throw new IA('"id" must be a string or a number!');
   }
 
+  definition.logFn('previous', id);
 
   // return resource from cache
   return resource.previousAttributes[id] ? DSUtils.copy(resource.previousAttributes[id]) : undefined;
@@ -4260,6 +4290,7 @@ function inject(resourceName, attrs, options) {
   var name = definition.name;
   options = DSUtils._(definition, options);
 
+  options.logFn('inject', attrs, options);
 
   if (options.notify) {
     options.beforeInject(options, attrs);
@@ -4316,6 +4347,7 @@ function link(resourceName, id, relations) {
     throw new DSErrors.IA('"relations" must be an array!');
   }
 
+  definition.logFn('link', id, relations);
 
   var linked = _this.get(resourceName, id);
 
@@ -4365,6 +4397,7 @@ function linkAll(resourceName, params, relations) {
     throw new DSErrors.IA('"relations" must be an array!');
   }
 
+  definition.logFn('linkAll', params, relations);
 
   var linked = _this.filter(resourceName, params);
 
@@ -4424,6 +4457,7 @@ function linkInverse(resourceName, id, relations) {
     throw new DSErrors.IA('"relations" must be an array!');
   }
 
+  definition.logFn('linkInverse', id, relations);
 
   var linked = _this.get(resourceName, id);
 
@@ -4466,6 +4500,7 @@ function unlinkInverse(resourceName, id, relations) {
     throw new DSErrors.IA('"relations" must be an array!');
   }
 
+  definition.logFn('unlinkInverse', id, relations);
 
   var linked = _this.get(resourceName, id);
 

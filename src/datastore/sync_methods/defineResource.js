@@ -55,6 +55,8 @@ function defineResource(definition) {
 
     var def = definitions[definition.name];
 
+    def.logFn('Preparing resource.');
+
     if (!DSUtils.isString(def.idAttribute)) {
       throw new DSErrors.IA('"idAttribute" must be a string!');
     }
@@ -166,7 +168,7 @@ function defineResource(definition) {
           fn = def.computed[field];
         }
         if (def.methods && field in def.methods) {
-          console.warn('Computed property "' + field + '" conflicts with previously defined prototype method!');
+          def.errorFn('Computed property "' + field + '" conflicts with previously defined prototype method!');
         }
         var deps;
         if (fn.length === 1) {
@@ -175,7 +177,7 @@ function defineResource(definition) {
           def.computed[field] = deps.concat(fn);
           fn = def.computed[field];
           if (deps.length) {
-            console.warn('Use the computed property array syntax for compatibility with minified code!');
+            def.errorFn('Use the computed property array syntax for compatibility with minified code!');
           }
         }
         deps = fn.slice(0, fn.length - 1);
@@ -274,6 +276,8 @@ function defineResource(definition) {
 
     // Mix-in events
     DSUtils.Events(def);
+
+    def.logFn('Done preparing resource.');
 
     return def;
   } catch (err) {

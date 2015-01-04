@@ -74,10 +74,28 @@ defaultsPrototype.beforeValidate = lifecycleNoopCb;
 defaultsPrototype.bypassCache = false;
 defaultsPrototype.cacheResponse = !!DSUtils.w;
 defaultsPrototype.defaultAdapter = 'http';
+defaultsPrototype.debug = true;
 defaultsPrototype.eagerEject = false;
 // TODO: Implement eagerInject in DS#create
 defaultsPrototype.eagerInject = false;
 defaultsPrototype.endpoint = '';
+defaultsPrototype.error = console ? function (a, b, c) {
+  console[typeof console.error === 'function' ? 'error' : 'log'](a, b, c);
+} : false;
+defaultsPrototype.errorFn = function (a, b) {
+  if (this.error && typeof this.error === 'function') {
+    try {
+      if (typeof a === 'string') {
+        throw new Error(a);
+      } else {
+        throw a;
+      }
+    } catch (err) {
+      a = err;
+    }
+    this.error(this.name || null, a || null, b || null);
+  }
+};
 defaultsPrototype.fallbackAdapters = ['http'];
 defaultsPrototype.findBelongsTo = true;
 defaultsPrototype.findHasOne = true;
@@ -88,6 +106,14 @@ defaultsPrototype.ignoredChanges = [/\$/];
 defaultsPrototype.ignoreMissing = false;
 defaultsPrototype.keepChangeHistory = false;
 defaultsPrototype.loadFromServer = false;
+defaultsPrototype.log = console ? function (a, b, c, d, e) {
+  console[typeof console.info === 'function' ? 'info' : 'log'](a, b, c, d, e);
+} : false;
+defaultsPrototype.logFn = function (a, b, c, d) {
+  if (this.debug && this.log && typeof this.log === 'function') {
+    this.log(this.name || null, a || null, b || null, c || null, d || null);
+  }
+};
 defaultsPrototype.maxAge = false;
 defaultsPrototype.notify = !!DSUtils.w;
 defaultsPrototype.reapAction = !!DSUtils.w ? 'inject' : 'none';
@@ -264,6 +290,7 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
 };
 
 function DS(options) {
+  var _this = this;
   options = options || {};
 
   try {
@@ -279,15 +306,16 @@ function DS(options) {
   }
 
   if (Schemator || options.schemator) {
-    this.schemator = options.schemator || new Schemator();
+    _this.schemator = options.schemator || new Schemator();
   }
 
-  this.store = {};
-  this.definitions = {};
-  this.adapters = {};
-  this.defaults = new Defaults();
-  this.observe = DSUtils.observe;
-  DSUtils.deepMixIn(this.defaults, options);
+  _this.store = {};
+  _this.definitions = {};
+  _this.adapters = {};
+  _this.defaults = new Defaults();
+  _this.observe = DSUtils.observe;
+  DSUtils.deepMixIn(_this.defaults, options);
+  _this.defaults.logFn('new data store created', _this.defaults);
 }
 
 var dsPrototype = DS.prototype;
@@ -295,6 +323,7 @@ var dsPrototype = DS.prototype;
 dsPrototype.getAdapter = function (options) {
   var errorIfNotExist = false;
   options = options || {};
+  this.defaults.logFn('getAdapter', options);
   if (DSUtils.isString(options)) {
     errorIfNotExist = true;
     options = {
@@ -312,15 +341,18 @@ dsPrototype.getAdapter = function (options) {
 };
 
 dsPrototype.registerAdapter = function (name, Adapter, options) {
+  var _this = this;
   options = options || {};
+  _this.defaults.logFn('registerAdapter', name, Adapter, options);
   if (DSUtils.isFunction(Adapter)) {
-    this.adapters[name] = new Adapter(options);
+    _this.adapters[name] = new Adapter(options);
   } else {
-    this.adapters[name] = Adapter;
+    _this.adapters[name] = Adapter;
   }
   if (options.default) {
-    this.defaults.defaultAdapter = name;
+    _this.defaults.defaultAdapter = name;
   }
+  _this.defaults.logFn('default adapter is ' + _this.defaults.defaultAdapter);
 };
 
 dsPrototype.emit = function (definition, event) {

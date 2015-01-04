@@ -12,6 +12,9 @@ function linkAll(resourceName, params, relations) {
   } else if (!DSUtils.isArray(relations)) {
     throw new DSErrors.IA('"relations" must be an array!');
   }
+
+  definition.logFn('linkAll', params, relations);
+
   var linked = _this.filter(resourceName, params);
 
   if (linked) {

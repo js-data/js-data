@@ -4,7 +4,9 @@
 - #30 - Issue with offset. To solve this a `useFilter` option was added, which defaults to `false`. Previously `DS#filter` was used to return cached `findAll` queries, but that had problems. Now, cached items are also tracked by the query that retrieved them, so when you make a query again you consistently get the right data.
 
 ###### Backwards compatible API changes
+- #6 - Allow logging to be configurable
 - #29 - Add version to JSData export
+- #31 - Add build for js-data-debug.js which contains lots of debugging statements and a configurable logger.
 
 ##### 1.0.0-alpha.5-8 - 05 December 2014
 

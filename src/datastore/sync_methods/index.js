@@ -2,6 +2,7 @@ var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 var NER = DSErrors.NER;
 var IA = DSErrors.IA;
+var R = DSErrors.R;
 
 function changes(resourceName, id, options) {
   var _this = this;
@@ -15,6 +16,8 @@ function changes(resourceName, id, options) {
     throw new IA('"id" must be a string or a number!');
   }
   options = DSUtils._(definition, options);
+
+  options.logFn('changes', id, options);
 
   var item = _this.get(resourceName, id);
   if (item) {
@@ -52,8 +55,10 @@ function changeHistory(resourceName, id) {
     throw new IA('"id" must be a string or a number!');
   }
 
+  definition.logFn('changeHistory', id);
+
   if (!definition.keepChangeHistory) {
-    console.warn('changeHistory is disabled for this resource!');
+    definition.errorFn('changeHistory is disabled for this resource!');
   } else {
     if (resourceName) {
       var item = _this.get(resourceName, id);
@@ -73,13 +78,13 @@ function compute(resourceName, instance) {
   instance = DSUtils.resolveItem(_this.store[resourceName], instance);
   if (!definition) {
     throw new NER(resourceName);
+  } else if (!instance) {
+    throw new R('Item not in the store!');
   } else if (!DSUtils.isObject(instance) && !DSUtils.isString(instance) && !DSUtils.isNumber(instance)) {
     throw new IA('"instance" must be an object, string or number!');
   }
 
-  if (DSUtils.isString(instance) || DSUtils.isNumber(instance)) {
-    instance = _this.get(resourceName, instance);
-  }
+  definition.logFn('compute', instance);
 
   DSUtils.forOwn(definition.computed, function (fn, field) {
     DSUtils.compute.call(instance, fn, field);
@@ -101,6 +106,8 @@ function createInstance(resourceName, attrs, options) {
   }
 
   options = DSUtils._(definition, options);
+
+  options.logFn('createInstance', attrs, options);
 
   if (options.notify) {
     options.beforeCreateInstance(options, attrs);
@@ -141,6 +148,8 @@ function get(resourceName, id, options) {
 
   options = DSUtils._(definition, options);
 
+  options.logFn('get', id, options);
+
   // cache miss, request resource from server
   var item = _this.store[resourceName].index[id];
   if (!item && options.loadFromServer) {
@@ -153,14 +162,17 @@ function get(resourceName, id, options) {
 
 function getAll(resourceName, ids) {
   var _this = this;
+  var definition = _this.definitions[resourceName];
   var resource = _this.store[resourceName];
   var collection = [];
 
-  if (!_this.definitions[resourceName]) {
+  if (!definition) {
     throw new NER(resourceName);
   } else if (ids && !DSUtils.isArray(ids)) {
     throw new IA('"ids" must be an array!');
   }
+
+  definition.logFn('getAll', ids);
 
   if (DSUtils.isArray(ids)) {
     var length = ids.length;
@@ -178,14 +190,17 @@ function getAll(resourceName, ids) {
 
 function hasChanges(resourceName, id) {
   var _this = this;
+  var definition = _this.definitions[resourceName];
 
-  id = DSUtils.resolveId(_this.definitions[resourceName], id);
+  id = DSUtils.resolveId(definition, id);
 
-  if (!_this.definitions[resourceName]) {
+  if (!definition) {
     throw new NER(resourceName);
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
     throw new IA('"id" must be a string or a number!');
   }
+
+  definition.logFn('hasChanges', id);
 
   // return resource from cache
   if (_this.get(resourceName, id)) {
@@ -203,6 +218,9 @@ function lastModified(resourceName, id) {
   if (!definition) {
     throw new NER(resourceName);
   }
+
+  definition.logFn('lastModified', id);
+
   if (id) {
     if (!(id in resource.modified)) {
       resource.modified[id] = 0;
@@ -220,6 +238,9 @@ function lastSaved(resourceName, id) {
   if (!definition) {
     throw new NER(resourceName);
   }
+
+  definition.logFn('lastSaved', id);
+
   if (!(id in resource.saved)) {
     resource.saved[id] = 0;
   }
@@ -237,6 +258,8 @@ function previous(resourceName, id) {
   } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
     throw new IA('"id" must be a string or a number!');
   }
+
+  definition.logFn('previous', id);
 
   // return resource from cache
   return resource.previousAttributes[id] ? DSUtils.copy(resource.previousAttributes[id]) : undefined;

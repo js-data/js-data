@@ -11,6 +11,9 @@ function ejectAll(resourceName, params, options) {
   } else if (!DSUtils.isObject(params)) {
     throw new DSErrors.IA('"params" must be an object!');
   }
+
+  definition.logFn('ejectAll', params, options);
+
   var resource = _this.store[resourceName];
   if (DSUtils.isEmpty(params)) {
     resource.completedQueries = {};

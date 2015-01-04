@@ -10,6 +10,7 @@ function updateAll(resourceName, attrs, params, options) {
       reject(new DSErrors.NER(resourceName));
     } else {
       options = DSUtils._(definition, options);
+      options.logFn('updateAll', attrs, params, options);
       resolve(attrs);
     }
   }).then(function (attrs) {

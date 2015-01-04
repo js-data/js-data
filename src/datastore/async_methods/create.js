@@ -18,6 +18,7 @@ function create(resourceName, attrs, options) {
     if (options.upsert && (DSUtils.isString(attrs[definition.idAttribute]) || DSUtils.isNumber(attrs[definition.idAttribute]))) {
       return _this.update(resourceName, attrs[definition.idAttribute], attrs, options);
     }
+    options.logFn('create', attrs, options);
   }
 
   return new DSUtils.Promise(function (resolve, reject) {

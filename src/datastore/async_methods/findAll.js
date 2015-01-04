@@ -28,7 +28,7 @@ function processResults(data, resourceName, queryHash, options) {
       }
     });
   } else {
-    console.warn('response is expected to be an array!');
+    options.errorFn('response is expected to be an array!');
     resource.completedQueries[injected[idAttribute]] = date;
   }
 
@@ -51,6 +51,7 @@ function findAll(resourceName, params, options) {
     } else {
       options = DSUtils._(definition, options);
       queryHash = DSUtils.toJson(params);
+      options.logFn('findAll', params, options);
 
       if (options.params) {
         options.params = DSUtils.copy(options.params);
@@ -77,7 +78,6 @@ function findAll(resourceName, params, options) {
           var strategy = options.findAllStrategy || options.strategy;
           if (strategy === 'fallback') {
             function makeFallbackCall(index) {
-              console.log('calling findAll', (options.findAllFallbackAdapters || options.fallbackAdapters)[index]);
               return _this.getAdapter((options.findAllFallbackAdapters || options.fallbackAdapters)[index]).findAll(definition, params, options)['catch'](function (err) {
                 index++;
                 if (index < options.fallbackAdapters.length) {
