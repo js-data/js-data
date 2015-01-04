@@ -231,6 +231,7 @@ function defineResource(definition) {
         return x.item === y;
       }),
       completedQueries: {},
+      queryData: {},
       pendingQueries: {},
       index: {},
       modified: {},

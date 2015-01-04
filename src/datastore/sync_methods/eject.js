@@ -45,6 +45,11 @@ function eject(resourceName, id, options) {
     DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
       DSUtils.remove(resource.changeHistory, changeRecord);
     });
+    DSUtils.forOwn(resource.queryData, function (items) {
+      if (items.$$injected) {
+        DSUtils.remove(items, item);
+      }
+    });
     delete resource.changeHistories[id];
     delete resource.modified[id];
     delete resource.saved[id];

@@ -58,9 +58,14 @@ function findAll(resourceName, params, options) {
 
       if (options.bypassCache || !options.cacheResponse) {
         delete resource.completedQueries[queryHash];
+        delete resource.queryData[queryHash];
       }
       if (queryHash in resource.completedQueries) {
-        resolve(_this.filter(resourceName, params, options));
+        if (options.useFilter) {
+          resolve(_this.filter(resourceName, params, options));
+        } else {
+          resolve(resource.queryData[queryHash]);
+        }
       } else {
         resolve();
       }
@@ -91,7 +96,9 @@ function findAll(resourceName, params, options) {
           resource.pendingQueries[queryHash] = promise.then(function (data) {
             delete resource.pendingQueries[queryHash];
             if (options.cacheResponse) {
-              return processResults.call(_this, data, resourceName, queryHash, options);
+              resource.queryData[queryHash] = processResults.call(_this, data, resourceName, queryHash, options);
+              resource.queryData[queryHash].$$injected = true;
+              return resource.queryData[queryHash];
             } else {
               DSUtils.forEach(data, function (item, i) {
                 data[i] = _this.createInstance(resourceName, item, options);

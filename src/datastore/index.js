@@ -96,6 +96,7 @@ defaultsPrototype.resetHistoryOnInject = true;
 defaultsPrototype.strategy = 'single';
 defaultsPrototype.upsert = !!DSUtils.w;
 defaultsPrototype.useClass = true;
+defaultsPrototype.useFilter = false;
 defaultsPrototype.validate = lifecycleNoopCb;
 defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
   var _this = this;

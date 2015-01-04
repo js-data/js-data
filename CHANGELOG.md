@@ -1,3 +1,11 @@
+##### 1.0.0-beta.1 - 04 January 2015
+
+###### Breaking API changes
+- #30 - Issue with offset. To solve this a `useFilter` option was added, which defaults to `false`. Previously `DS#filter` was used to return cached `findAll` queries, but that had problems. Now, cached items are also tracked by the query that retrieved them, so when you make a query again you consistently get the right data.
+
+###### Backwards compatible API changes
+- #29 - Add version to JSData export
+
 ##### 1.0.0-alpha.5-8 - 05 December 2014
 
 ###### Backwards compatible API changes

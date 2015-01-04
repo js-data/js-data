@@ -1,18 +1,18 @@
 <img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="64" height="64" />
 
-## js-data  [![Stories in Backlog](https://badge.waffle.io/js-data/js-data.svg?label=backlog&title=Backlog)](http://waffle.io/js-data/js-data) [![Stories in Ready](https://badge.waffle.io/js-data/js-data.svg?label=ready&title=Ready)](http://waffle.io/js-data/js-data) [![Stories in progress](https://badge.waffle.io/js-data/js-data.svg?label=in%20progress&title=In%20Progress)](http://waffle.io/js-data/js-data)
+## JSData [![Bower version](https://badge.fury.io/bo/js-data.png)](http://badge.fury.io/bo/js-data) [![NPM version](https://badge.fury.io/js/js-data.png)](http://badge.fury.io/js/js-data)
 
 Inspired by [Ember Data](https://github.com/emberjs/data), js-data is the model layer you've been craving. It consists of a convenient framework-agnostic, in-memory cache for managing your data, which users adapters to communicate with various persistence layers.
 
 You can use the [http adapter](http://www.js-data.io/docs/dshttpadapter), which is perfect for communicating with your RESTful backend. You could also use the [localStorage adapter](http://www.js-data.io/docs/dslocalstorageadapter). More adapters are coming, and you're free to implement your own. View [available adapters](http://www.js-data.io/docs/adapters).
 
-Unlike Backbone and Ember Models, js-data does not require the use of getters and setters, and doesn't wrap your data with custom classes if you don't want it to. js-data's internal dirty-checking (via [observe-js](https://github.com/Polymer/observe-js) or `Object.observe` in supporting browsers) allows for powerful use cases and an easy avenue for implementing your own [3-way data-binding](https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html).
+Unlike Backbone and Ember Models, JSData does not require the use of getters and setters, and doesn't wrap your data with custom classes if you don't want it to. JSData's internal dirty-checking (via [observe-js](https://github.com/Polymer/observe-js) or `Object.observe` in supporting browsers) allows for powerful use cases and an easy avenue for implementing your own [3-way data-binding](https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html).
 
-Supporting relations, computed properties, model lifecycle control and a slew of other features, js-data is the tool for giving your data the respect it deserves.
+Supporting relations, computed properties, model lifecycle control and a slew of other features, JSData is the tool for giving your data the respect it deserves.
 
-__Latest Release:__ [1.0.0-alpha.5-8](https://github.com/js-data/js-data/releases/tag/1.0.0-alpha.5-8)
+__See Latest Release:__ [JSData Releases](https://github.com/js-data/js-data/releases)
 
-js-data is pre-release. The API is subject to change, though the current api is well tested.
+JSData is pre-release. The API is subject to change, though the current api is well tested.
 
 If you want to use js-data, keep a close eye on the changelog. 1.0.0 will introduce strict semver (until then, minor number is bumped for breaking changes).
 
@@ -20,6 +20,7 @@ If you want to use js-data, keep a close eye on the changelog. 1.0.0 will introd
 
 | Project | js-data |
 | ------ | ------ |
+| Tasks | [![Stories in Backlog](https://badge.waffle.io/js-data/js-data.svg?label=backlog&title=Backlog)](http://waffle.io/js-data/js-data) [![Stories in Ready](https://badge.waffle.io/js-data/js-data.svg?label=ready&title=Ready)](http://waffle.io/js-data/js-data) [![Stories in progress](https://badge.waffle.io/js-data/js-data.svg?label=in%20progress&title=In%20Progress)](http://waffle.io/js-data/js-data) |
 | Bower | [![Bower version](https://badge.fury.io/bo/js-data.png)](http://badge.fury.io/bo/js-data) |
 | NPM | [![NPM version](https://badge.fury.io/js/js-data.png)](http://badge.fury.io/js/js-data) |
 | Build Status | [![Circle CI](https://circleci.com/gh/js-data/js-data/tree/master.png?style=badge)](https://circleci.com/gh/js-data/js-data/tree/master) |
@@ -56,7 +57,7 @@ All your data are belong to you...
 
 ## Guides
 - [Getting Started with js-data](http://www.js-data.io/docs/home)
-- [Resources](http://www.js-data.io/docs/resources)
+- [Resources/Models](http://www.js-data.io/docs/resources)
 - [Working with the Data Store](http://www.js-data.io/docs/working-with-the-data-store)
 - [Adapters](http://www.js-data.io/docs/working-with-adapters)
 - [Model Lifecycle](http://www.js-data.io/docs/model-lifecycle)
@@ -64,6 +65,7 @@ All your data are belong to you...
 - [Computed Properties](http://www.js-data.io/docs/computed-properties)
 - [Relations](http://www.js-data.io/docs/relations)
 - [Schemata & Validation](http://www.js-data.io/docs/schemata--validation)
+- [Angular + JSData](http://www.js-data.io/docs/js-data-angular)
 - [FAQ](http://www.js-data.io/docs/faq)
 
 ## API Documentation
@@ -79,18 +81,15 @@ All your data are belong to you...
 ## Changelog
 [CHANGELOG.md](https://github.com/js-data/js-data/blob/master/CHANGELOG.md)
 
-## Version Migration
-[TRANSITION.md](https://github.com/js-data/js-data/blob/master/TRANSITION.md)
-
 ## Community
 - [Mailing List](https://groups.io/org/groupsio/jsdata) - Ask your questions!
 - [Issues](https://github.com/js-data/js-data/issues) - Found a bug? Feature request? Submit an issue!
-- [GitHub](https://github.com/js-data/js-data) - View the source code for js-data.
+- [GitHub](https://github.com/js-data/js-data) - View the source code for JSData.
 - [Contributing Guide](https://github.com/js-data/js-data/blob/master/CONTRIBUTING.md)
 
 ## Contributing
 
-First, feel free to contact me with questions. [Mailing List](https://groups.io/org/groupsio/jsdata). [Issues](https://github.com/js-data/js-data/issues).
+First, feel free to contact me with questions. [Mailing List](https://groups.io/org/groupsio/jsdata).
 
 1. Contribute to the issue that is the reason you'll be developing in the first place
 1. Fork js-data

@@ -360,4 +360,42 @@ describe('DS#findAll', function () {
       }, 30);
     });
   });
+  it('should "useFilter" and not "useFilter"', function (done) {
+    var _this = this;
+    store.findAll('post', {}).then(function (data) {
+      assert.deepEqual(JSON.stringify(data), JSON.stringify([p1, p2, p3, p4]));
+
+      store.eject('post', p1.id);
+
+      assert.deepEqual(JSON.stringify(store.store.post.queryData['{}']), JSON.stringify([p2, p3, p4]));
+
+      store.findAll('post', {}).then(function (data) {
+        assert.isTrue(data === store.store.post.queryData['{}']);
+        assert.deepEqual(JSON.stringify(data), JSON.stringify([p2, p3, p4]));
+
+        store.findAll('post', {}, { useFilter: true }).then(function (data) {
+          assert.isFalse(data === store.store.post.queryData);
+          assert.deepEqual(JSON.stringify(data), JSON.stringify([p2, p3, p4]));
+
+          done();
+        }).catch(function (err) {
+          console.error(err.stack);
+          done(err);
+        });
+      }).catch(function (err) {
+        console.error(err.stack);
+        done(err);
+      });
+    }).catch(function (err) {
+      console.error(err.stack);
+      done(err);
+    });
+
+    setTimeout(function () {
+      assert.equal(1, _this.requests.length);
+      assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
+      assert.equal(_this.requests[0].method, 'get');
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([p1, p2, p3, p4]));
+    }, 30);
+  });
 });

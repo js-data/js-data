@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file js-data.js
-* @version 1.0.0-alpha.5-8 - Homepage <http://www.js-data.io/>
+* @version 1.0.0-beta.1 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -637,7 +637,7 @@
  * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/jakearchibald/es6-promise/master/LICENSE
- * @version   2.0.0
+ * @version   2.0.1
  */
 
 (function() {
@@ -1268,13 +1268,11 @@
 
       @class Promise
       @param {function} resolver
-      @param {String} label optional string for labeling the promise.
       Useful for tooling.
       @constructor
     */
-    function $$es6$promise$promise$$Promise(resolver, label) {
+    function $$es6$promise$promise$$Promise(resolver) {
       this._id = $$es6$promise$promise$$counter++;
-      this._label = label;
       this._state = undefined;
       this._result = undefined;
       this._subscribers = [];
@@ -1490,11 +1488,10 @@
       @method then
       @param {Function} onFulfilled
       @param {Function} onRejected
-      @param {String} label optional string for labeling the promise.
       Useful for tooling.
       @return {Promise}
     */
-      then: function(onFulfillment, onRejection, label) {
+      then: function(onFulfillment, onRejection) {
         var parent = this;
         var state = parent._state;
 
@@ -1502,9 +1499,7 @@
           return this;
         }
 
-        parent._onerror = null;
-
-        var child = new this.constructor($$$internal$$noop, label);
+        var child = new this.constructor($$$internal$$noop);
         var result = parent._result;
 
         if (state) {
@@ -1543,12 +1538,11 @@
 
       @method catch
       @param {Function} onRejection
-      @param {String} label optional string for labeling the promise.
       Useful for tooling.
       @return {Promise}
     */
-      'catch': function(onRejection, label) {
-        return this.then(null, onRejection, label);
+      'catch': function(onRejection) {
+        return this.then(null, onRejection);
       }
     };
 
@@ -1585,8 +1579,8 @@
     };
 
     var es6$promise$umd$$ES6Promise = {
-      Promise: $$es6$promise$promise$$default,
-      polyfill: $$es6$promise$polyfill$$default
+      'Promise': $$es6$promise$promise$$default,
+      'polyfill': $$es6$promise$polyfill$$default
     };
 
     /* global define:true module:true window: true */
@@ -2525,9 +2519,14 @@ function findAll(resourceName, params, options) {
 
       if (options.bypassCache || !options.cacheResponse) {
         delete resource.completedQueries[queryHash];
+        delete resource.queryData[queryHash];
       }
       if (queryHash in resource.completedQueries) {
-        resolve(_this.filter(resourceName, params, options));
+        if (options.useFilter) {
+          resolve(_this.filter(resourceName, params, options));
+        } else {
+          resolve(resource.queryData[queryHash]);
+        }
       } else {
         resolve();
       }
@@ -2558,7 +2557,9 @@ function findAll(resourceName, params, options) {
           resource.pendingQueries[queryHash] = promise.then(function (data) {
             delete resource.pendingQueries[queryHash];
             if (options.cacheResponse) {
-              return processResults.call(_this, data, resourceName, queryHash, options);
+              resource.queryData[queryHash] = processResults.call(_this, data, resourceName, queryHash, options);
+              resource.queryData[queryHash].$$injected = true;
+              return resource.queryData[queryHash];
             } else {
               DSUtils.forEach(data, function (item, i) {
                 data[i] = _this.createInstance(resourceName, item, options);
@@ -3050,6 +3051,7 @@ defaultsPrototype.resetHistoryOnInject = true;
 defaultsPrototype.strategy = 'single';
 defaultsPrototype.upsert = !!DSUtils.w;
 defaultsPrototype.useClass = true;
+defaultsPrototype.useFilter = false;
 defaultsPrototype.validate = lifecycleNoopCb;
 defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
   var _this = this;
@@ -3524,6 +3526,7 @@ function defineResource(definition) {
         return x.item === y;
       }),
       completedQueries: {},
+      queryData: {},
       pendingQueries: {},
       index: {},
       modified: {},
@@ -3624,6 +3627,11 @@ function eject(resourceName, id, options) {
     delete resource.pendingQueries[id];
     DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
       DSUtils.remove(resource.changeHistory, changeRecord);
+    });
+    DSUtils.forOwn(resource.queryData, function (items) {
+      if (items.$$injected) {
+        DSUtils.remove(items, item);
+      }
     });
     delete resource.changeHistories[id];
     delete resource.modified[id];
@@ -4495,12 +4503,12 @@ module.exports = {
   DSUtils: require('./utils'),
   DSErrors: require('./errors'),
   version: {
-    full: '1.0.0-alpha.5-8',
+    full: '1.0.0-beta.1',
     major: parseInt('1', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10),
-    alpha: '5-8' !== 'false' ? '5-8' : false,
-    beta: 'false' !== 'false' ? 'false' : false
+    alpha: 'false' !== 'false' ? 'false' : false,
+    beta: '1' !== 'false' ? '1' : false
   }
 };
 
