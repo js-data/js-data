@@ -14,7 +14,7 @@ __See Latest Release:__ [JSData Releases](https://github.com/js-data/js-data/rel
 
 JSData is pre-release. The API is subject to change, though the current api is well tested.
 
-If you want to use js-data, keep a close eye on the changelog. 1.0.0 will introduce strict semver (until then, minor number is bumped for breaking changes).
+If you want to use JSData, keep a close eye on the changelog. 1.0.0 will introduce strict semver (until then, minor number is bumped for breaking changes).
 
 ## Project Status
 
@@ -105,7 +105,7 @@ First, feel free to contact me with questions. [Mailing List](https://groups.io/
 
 The MIT License (MIT)
 
-Copyright (c) 2014 Jason Dobry
+Copyright (c) 2014-2015 Jason Dobry
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

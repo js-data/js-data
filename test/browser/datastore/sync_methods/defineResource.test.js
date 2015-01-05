@@ -220,4 +220,51 @@ describe('DS#defineResource', function () {
       done();
     }, 150);
   });
+  it('should allow definition of "actions"', function (done) {
+    var _this = this;
+    var newStore = new JSData.DS({
+      debug: false,
+      actions: {
+        test: {
+          method: 'POST'
+        }
+      }
+    });
+
+    newStore.registerAdapter('http', dsHttpAdapter, { default: true });
+
+    var Thing = newStore.defineResource({
+      name: 'thing',
+      actions: {
+        count: {
+          method: 'GET'
+        }
+      }
+    });
+
+    Thing.test().then(function (data) {
+      assert.equal(data.data, 'stuff');
+
+      Thing.count().then(function (data) {
+        assert.equal(data.data, 'stuff2');
+
+        done();
+      });
+
+      setTimeout(function () {
+        assert.equal(2, _this.requests.length);
+        assert.equal(_this.requests[1].url, 'thing/count');
+        assert.equal(_this.requests[1].method, 'GET');
+        _this.requests[1].respond(200, {'Content-Type': 'text/plain'}, 'stuff2');
+
+      }, 30);
+    });
+
+    setTimeout(function () {
+      assert.equal(1, _this.requests.length);
+      assert.equal(_this.requests[0].url, 'thing/test');
+      assert.equal(_this.requests[0].method, 'POST');
+      _this.requests[0].respond(200, {'Content-Type': 'text/plain'}, 'stuff');
+    }, 30);
+  });
 });

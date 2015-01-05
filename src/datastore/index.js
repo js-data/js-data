@@ -53,6 +53,7 @@ function Defaults() {
 
 var defaultsPrototype = Defaults.prototype;
 
+defaultsPrototype.actions = {};
 defaultsPrototype.afterCreate = lifecycleNoopCb;
 defaultsPrototype.afterCreateInstance = lifecycleNoop;
 defaultsPrototype.afterDestroy = lifecycleNoopCb;

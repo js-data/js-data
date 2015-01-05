@@ -274,6 +274,20 @@ function defineResource(definition) {
     def.beforeDestroy = DSUtils.promisify(def.beforeDestroy);
     def.afterDestroy = DSUtils.promisify(def.afterDestroy);
 
+    DSUtils.forOwn(def.actions, function addAction(action, name) {
+      if (def[name]) {
+        throw new Error('Cannot override existing method "' + name + '"!');
+      }
+      def[name] = function (options) {
+        options = options || {};
+        var config = DSUtils.deepMixIn({}, action);
+        config.url = DSUtils.makePath(def.getEndpoint(null, options), name);
+        config.method = config.method || 'GET';
+        DSUtils.deepMixIn(config, options);
+        return _this.getAdapter(action.adapter || 'http').HTTP(config);
+      };
+    });
+
     // Mix-in events
     DSUtils.Events(def);
 

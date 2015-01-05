@@ -1,4 +1,4 @@
-##### 1.0.0-beta.1 - 04 January 2015
+##### 1.0.0-beta.1 - 05 January 2015
 
 ###### Breaking API changes
 - #30 - Issue with offset. To solve this a `useFilter` option was added, which defaults to `false`. Previously `DS#filter` was used to return cached `findAll` queries, but that had problems. Now, cached items are also tracked by the query that retrieved them, so when you make a query again you consistently get the right data.
