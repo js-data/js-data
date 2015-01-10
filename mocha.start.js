@@ -121,7 +121,8 @@ beforeEach(function () {
     beforeDestroy: lifecycle.beforeDestroy,
     afterDestroy: lifecycle.afterDestroy,
     beforeInject: lifecycle.beforeInject,
-    afterInject: lifecycle.afterInject
+    afterInject: lifecycle.afterInject,
+    log: false
   });
   DSUtils = JSData.DSUtils;
   DSErrors = JSData.DSErrors;

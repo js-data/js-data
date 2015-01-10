@@ -33,7 +33,7 @@ module.exports = function (config) {
 		reporters: ['spec', 'coverage'],
 
 		preprocessors: {
-			'dist/js-data.js': ['coverage']
+			'dist/js-data-debug.js': ['coverage']
 		},
 
 		// optionally, configure the reporter

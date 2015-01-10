@@ -12,7 +12,7 @@ Supporting relations, computed properties, model lifecycle control and a slew of
 
 __See Latest Release:__ [JSData Releases](https://github.com/js-data/js-data/releases)
 
-JSData is pre-release. The API is subject to change, though the current api is well tested.
+JSData is in beta. The API is subject to change, though the current api is well tested.
 
 If you want to use JSData, keep a close eye on the changelog. 1.0.0 will introduce strict semver (until then, minor number is bumped for breaking changes).
 
