@@ -1,3 +1,8 @@
+##### 1.0.0-beta.2 - 23 January 2015
+
+###### Backwards compatible API changes
+- Updates to defining "actions"
+
 ##### 1.0.0-beta.1 - 10 January 2015
 
 ###### Breaking API changes

@@ -315,7 +315,10 @@ function DS(options) {
   _this.adapters = {};
   _this.defaults = new Defaults();
   _this.observe = DSUtils.observe;
-  DSUtils.deepMixIn(_this.defaults, options);
+  DSUtils.forOwn(options, function (v, k) {
+    _this.defaults[k] = v;
+  });
+
   _this.defaults.logFn('new data store created', _this.defaults);
 }
 

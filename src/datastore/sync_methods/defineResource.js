@@ -130,8 +130,7 @@ function defineResource(definition) {
           DSUtils.forOwn(options, function (value, key) {
             _options[key] = value;
           });
-          var e = DSUtils.makePath(parentDef.getEndpoint(parentId, DSUtils._(parentDef, _options)), parentId, endpoint);
-          return e;
+          return DSUtils.makePath(parentDef.getEndpoint(parentId, DSUtils._(parentDef, _options)), parentId, endpoint);
         } else {
           return endpoint;
         }
@@ -281,7 +280,14 @@ function defineResource(definition) {
       def[name] = function (options) {
         options = options || {};
         var config = DSUtils.deepMixIn({}, action);
-        config.url = DSUtils.makePath(def.getEndpoint(null, options), name);
+        if (!options.hasOwnProperty('endpoint') && config.endpoint) {
+          options.endpoint = config.endpoint;
+        }
+        if (typeof options.getEndpoint === 'function') {
+          config.url = options.getEndpoint(def, options);
+        } else {
+          config.url = DSUtils.makePath(def.getEndpoint(null, options), name);
+        }
         config.method = config.method || 'GET';
         DSUtils.deepMixIn(config, options);
         return _this.getAdapter(action.adapter || 'http').HTTP(config);

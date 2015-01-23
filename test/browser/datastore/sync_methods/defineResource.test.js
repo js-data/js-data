@@ -32,7 +32,7 @@ describe('DS#defineResource', function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'hello/Comment/1');
       assert.equal(_this.requests[0].method, 'get');
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson({ name: 'Sally', id: 1 }));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({ name: 'Sally', id: 1 }));
 
       setTimeout(function () {
         assert.deepEqual(JSON.stringify(store.get('Comment', 1)), JSON.stringify({ name: 'Sally', id: 1 }));
@@ -49,7 +49,10 @@ describe('DS#defineResource', function () {
           assert.equal(_this.requests[1].url, 'hello/Comment');
           assert.equal(_this.requests[1].method, 'post');
           assert.equal(_this.requests[1].requestBody, JSON.stringify({ name: 'John' }));
-          _this.requests[1].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson({ name: 'John', id: 2 }));
+          _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({
+            name: 'John',
+            id: 2
+          }));
         }, 30);
       }, 30);
     }, 30);
@@ -220,7 +223,7 @@ describe('DS#defineResource', function () {
       done();
     }, 150);
   });
-  it('should allow definition of "actions"', function (done) {
+  it('should allow definition of POST actions', function (done) {
     var _this = this;
     var newStore = new JSData.DS({
       debug: false,
@@ -233,14 +236,76 @@ describe('DS#defineResource', function () {
 
     newStore.registerAdapter('http', dsHttpAdapter, { default: true });
 
+    var Thing2 = newStore.defineResource({
+      name: 'thing2',
+      actions: {
+        count: {
+          method: 'POST'
+        }
+      }
+    });
+
+
+    Thing2.test({
+      data: 'thing2 payload'
+    }).then(function (data) {
+      assert.equal(data.data, 'stuff');
+
+      Thing2.count().then(function (data) {
+        assert.equal(data.data, 'stuff2');
+
+        done();
+      });
+
+      setTimeout(function () {
+        try {
+          assert.equal(2, _this.requests.length);
+          assert.equal(_this.requests[1].url, 'thing2/count');
+          assert.equal(_this.requests[1].method, 'POST');
+          _this.requests[1].respond(200, { 'Content-Type': 'text/plain' }, 'stuff2');
+        } catch (err) {
+          done(err);
+        }
+      }, 30);
+    }).catch(done);
+
+    setTimeout(function () {
+      try {
+        assert.equal(1, _this.requests.length);
+        assert.equal(_this.requests[0].url, 'thing2/test');
+        assert.equal(_this.requests[0].method, 'POST');
+        assert.equal(_this.requests[0].requestBody, 'thing2 payload');
+        _this.requests[0].respond(200, { 'Content-Type': 'text/plain' }, 'stuff');
+      } catch (err) {
+        done(err);
+      }
+    }, 30);
+  });
+  it('should allow definition of GET actions', function (done) {
+    var _this = this;
+    var newStore = new JSData.DS({
+      debug: false,
+      actions: {
+        test: {},
+        test2: {
+          endpoint: 'blah'
+        }
+      }
+    });
+
+    newStore.registerAdapter('http2', dsHttpAdapter);
+    newStore.registerAdapter('http', dsHttpAdapter, { default: true });
+
     var Thing = newStore.defineResource({
       name: 'thing',
       actions: {
         count: {
-          method: 'GET'
+          method: 'GET',
+          adapter: 'http2'
         }
       }
     });
+
 
     Thing.test().then(function (data) {
       assert.equal(data.data, 'stuff');
@@ -248,23 +313,35 @@ describe('DS#defineResource', function () {
       Thing.count().then(function (data) {
         assert.equal(data.data, 'stuff2');
 
-        done();
-      });
+        Thing.test2().then(function (data) {
+          assert.equal(data.data, 'blah');
+
+          done();
+        });
+
+        setTimeout(function () {
+          assert.equal(3, _this.requests.length);
+          assert.equal(_this.requests[2].url, 'blah/test2');
+          assert.equal(_this.requests[2].method, 'GET');
+          _this.requests[2].respond(200, { 'Content-Type': 'text/plain' }, 'blah');
+
+        }, 30);
+      }).catch(done);
 
       setTimeout(function () {
         assert.equal(2, _this.requests.length);
         assert.equal(_this.requests[1].url, 'thing/count');
         assert.equal(_this.requests[1].method, 'GET');
-        _this.requests[1].respond(200, {'Content-Type': 'text/plain'}, 'stuff2');
+        _this.requests[1].respond(200, { 'Content-Type': 'text/plain' }, 'stuff2');
 
       }, 30);
-    });
+    }).catch(done);
 
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'thing/test');
-      assert.equal(_this.requests[0].method, 'POST');
-      _this.requests[0].respond(200, {'Content-Type': 'text/plain'}, 'stuff');
+      assert.equal(_this.requests[0].method, 'GET');
+      _this.requests[0].respond(200, { 'Content-Type': 'text/plain' }, 'stuff');
     }, 30);
   });
 });

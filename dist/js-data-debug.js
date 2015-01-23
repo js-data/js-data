@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file dist/js-data-debug.js
-* @version 1.0.0-beta.1 - Homepage <http://www.js-data.io/>
+* @version 1.0.0-beta.2 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -3280,7 +3280,10 @@ function DS(options) {
   _this.adapters = {};
   _this.defaults = new Defaults();
   _this.observe = DSUtils.observe;
-  DSUtils.deepMixIn(_this.defaults, options);
+  DSUtils.forOwn(options, function (v, k) {
+    _this.defaults[k] = v;
+  });
+
   _this.defaults.logFn('new data store created', _this.defaults);
 }
 
@@ -3468,8 +3471,7 @@ function defineResource(definition) {
           DSUtils.forOwn(options, function (value, key) {
             _options[key] = value;
           });
-          var e = DSUtils.makePath(parentDef.getEndpoint(parentId, DSUtils._(parentDef, _options)), parentId, endpoint);
-          return e;
+          return DSUtils.makePath(parentDef.getEndpoint(parentId, DSUtils._(parentDef, _options)), parentId, endpoint);
         } else {
           return endpoint;
         }
@@ -3619,7 +3621,14 @@ function defineResource(definition) {
       def[name] = function (options) {
         options = options || {};
         var config = DSUtils.deepMixIn({}, action);
-        config.url = DSUtils.makePath(def.getEndpoint(null, options), name);
+        if (!options.hasOwnProperty('endpoint') && config.endpoint) {
+          options.endpoint = config.endpoint;
+        }
+        if (typeof options.getEndpoint === 'function') {
+          config.url = options.getEndpoint(def, options);
+        } else {
+          config.url = DSUtils.makePath(def.getEndpoint(null, options), name);
+        }
         config.method = config.method || 'GET';
         DSUtils.deepMixIn(config, options);
         return _this.getAdapter(action.adapter || 'http').HTTP(config);
@@ -4607,12 +4616,12 @@ module.exports = {
   DSUtils: require('./utils'),
   DSErrors: require('./errors'),
   version: {
-    full: '1.0.0-beta.1',
+    full: '1.0.0-beta.2',
     major: parseInt('1', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10),
     alpha: 'false' !== 'false' ? 'false' : false,
-    beta: '1' !== 'false' ? '1' : false
+    beta: '2' !== 'false' ? '2' : false
   }
 };
 
