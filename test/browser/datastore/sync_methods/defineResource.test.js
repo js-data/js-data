@@ -31,7 +31,7 @@ describe('DS#defineResource', function () {
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'hello/Comment/1');
-      assert.equal(_this.requests[0].method, 'get');
+      assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({ name: 'Sally', id: 1 }));
 
       setTimeout(function () {
@@ -47,7 +47,7 @@ describe('DS#defineResource', function () {
         setTimeout(function () {
           assert.equal(2, _this.requests.length);
           assert.equal(_this.requests[1].url, 'hello/Comment');
-          assert.equal(_this.requests[1].method, 'post');
+          assert.equal(_this.requests[1].method, 'POST');
           assert.equal(_this.requests[1].requestBody, JSON.stringify({ name: 'John' }));
           _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({
             name: 'John',

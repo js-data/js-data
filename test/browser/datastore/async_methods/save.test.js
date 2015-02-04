@@ -54,7 +54,7 @@ describe('DS#save', function () {
       try {
         assert.equal(1, _this.requests.length);
         assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
-        assert.equal(_this.requests[0].method, 'put');
+        assert.equal(_this.requests[0].method, 'PUT');
         assert.equal(_this.requests[0].requestBody, DSUtils.toJson({
           author: 'Jake',
           age: 30,
@@ -110,7 +110,7 @@ describe('DS#save', function () {
       try {
         assert.equal(1, _this.requests.length);
         assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
-        assert.equal(_this.requests[0].method, 'put');
+        assert.equal(_this.requests[0].method, 'PUT');
         assert.equal(_this.requests[0].requestBody, DSUtils.toJson({
           author: 'Jake',
           age: 30,
@@ -163,7 +163,7 @@ describe('DS#save', function () {
         initialSaved = store.lastSaved('post', 5);
         assert.equal(1, _this.requests.length);
         assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
-        assert.equal(_this.requests[0].method, 'put');
+        assert.equal(_this.requests[0].method, 'PUT');
         assert.equal(_this.requests[0].requestBody, DSUtils.toJson(store.get('post', 5)));
         _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson({
           random: 'stuff'
@@ -214,7 +214,7 @@ describe('DS#save', function () {
       try {
         assert.equal(1, _this.requests.length);
         assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
-        assert.equal(_this.requests[0].method, 'put');
+        assert.equal(_this.requests[0].method, 'PUT');
         assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ author: 'Jake' }));
         _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson({
           author: 'Jake',

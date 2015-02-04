@@ -156,7 +156,7 @@ describe('DS#find', function () {
           setTimeout(function () {
             assert.equal(4, _this.requests.length);
             assert.equal(_this.requests[3].url, 'http://test.js-data.io/organization/14/user/19/comment/19');
-            assert.equal(_this.requests[3].method, 'get');
+            assert.equal(_this.requests[3].method, 'GET');
             _this.requests[3].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(comment19));
           }, 30);
         }).catch(function (err) {
@@ -167,7 +167,7 @@ describe('DS#find', function () {
         setTimeout(function () {
           assert.equal(3, _this.requests.length);
           assert.equal(_this.requests[2].url, 'http://test.js-data.io/comment/5');
-          assert.equal(_this.requests[2].method, 'get');
+          assert.equal(_this.requests[2].method, 'GET');
           _this.requests[2].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment));
         }, 30);
       }).catch(function () {
@@ -177,7 +177,7 @@ describe('DS#find', function () {
       setTimeout(function () {
         assert.equal(2, _this.requests.length);
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/user/4/comment/5');
-        assert.equal(_this.requests[1].method, 'get');
+        assert.equal(_this.requests[1].method, 'GET');
         _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment));
       }, 30);
     }).catch(function () {
@@ -187,7 +187,7 @@ describe('DS#find', function () {
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/user/4/comment/5');
-      assert.equal(_this.requests[0].method, 'get');
+      assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment));
     }, 30);
   });
@@ -220,7 +220,7 @@ describe('DS#find', function () {
         try {
           assert.equal(2, _this.requests.length);
           assert.equal(_this.requests[1].url, 'http://test.js-data.io/thing/2');
-          assert.equal(_this.requests[1].method, 'get');
+          assert.equal(_this.requests[1].method, 'GET');
           _this.requests[1].respond(500, { 'Content-Type': 'application/json' }, '500 - Internal Servier Error');
         } catch (err) {
           console.error(err.stack);
@@ -235,7 +235,7 @@ describe('DS#find', function () {
       try {
         assert.equal(1, _this.requests.length);
         assert.equal(_this.requests[0].url, 'http://test.js-data.io/thing/1');
-        assert.equal(_this.requests[0].method, 'get');
+        assert.equal(_this.requests[0].method, 'GET');
         _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, JSON.stringify({
           thing: 'stuff',
           id: 1

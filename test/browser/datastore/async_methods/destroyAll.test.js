@@ -33,7 +33,7 @@ describe('DS#destroyAll', function () {
       setTimeout(function () {
         assert.equal(_this.requests.length, 2);
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/posts');
-        assert.equal(_this.requests[1].method, 'delete');
+        assert.equal(_this.requests[1].method, 'DELETE');
         _this.requests[1].respond(200);
       }, 30);
     }).catch(function (err) {
@@ -45,7 +45,7 @@ describe('DS#destroyAll', function () {
       try {
         assert.equal(_this.requests.length, 1);
         assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts?where=%7B%22age%22:33%7D');
-        assert.equal(_this.requests[0].method, 'delete');
+        assert.equal(_this.requests[0].method, 'DELETE');
         _this.requests[0].respond(200);
       } catch (err) {
         done(err);
@@ -81,7 +81,7 @@ describe('DS#destroyAll', function () {
         setTimeout(function () {
           assert.equal(3, _this.requests.length);
           assert.equal(_this.requests[2].url, 'http://test.js-data.io/comment?content=test');
-          assert.equal(_this.requests[2].method, 'delete');
+          assert.equal(_this.requests[2].method, 'DELETE');
           _this.requests[2].respond(204);
         }, 30);
       }).catch(function (err) {
@@ -92,7 +92,7 @@ describe('DS#destroyAll', function () {
       setTimeout(function () {
         assert.equal(2, _this.requests.length);
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/comment?content=test');
-        assert.equal(_this.requests[1].method, 'delete');
+        assert.equal(_this.requests[1].method, 'DELETE');
         _this.requests[1].respond(204);
       }, 30);
     }).catch(function (err) {
@@ -103,7 +103,7 @@ describe('DS#destroyAll', function () {
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/user/4/comment?content=test');
-      assert.equal(_this.requests[0].method, 'delete');
+      assert.equal(_this.requests[0].method, 'DELETE');
       _this.requests[0].respond(204);
     }, 30);
   });

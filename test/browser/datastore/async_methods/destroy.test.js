@@ -25,7 +25,7 @@ describe('DS#destroy', function () {
       try {
         assert.equal(1, _this.requests.length);
         assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
-        assert.equal(_this.requests[0].method, 'delete');
+        assert.equal(_this.requests[0].method, 'DELETE');
         _this.requests[0].respond(200, {'Content-Type': 'text/plain'}, '5');
       } catch (e) {
         done(e);
@@ -71,7 +71,7 @@ describe('DS#destroy', function () {
         setTimeout(function () {
           assert.equal(3, _this.requests.length);
           assert.equal(_this.requests[2].url, 'http://test.js-data.io/comment/6');
-          assert.equal(_this.requests[2].method, 'delete');
+          assert.equal(_this.requests[2].method, 'DELETE');
           _this.requests[2].respond(204);
         }, 30);
       }).catch(function () {
@@ -81,7 +81,7 @@ describe('DS#destroy', function () {
       setTimeout(function () {
         assert.equal(2, _this.requests.length);
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/user/4/comment/6');
-        assert.equal(_this.requests[1].method, 'delete');
+        assert.equal(_this.requests[1].method, 'DELETE');
         _this.requests[1].respond(204);
       }, 30);
     }).catch(function () {
@@ -91,7 +91,7 @@ describe('DS#destroy', function () {
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/user/4/comment/5');
-      assert.equal(_this.requests[0].method, 'delete');
+      assert.equal(_this.requests[0].method, 'DELETE');
       _this.requests[0].respond(204);
     }, 30);
   });
@@ -123,7 +123,7 @@ describe('DS#destroy', function () {
         try {
           assert.equal(1, _this.requests.length);
           assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
-          assert.equal(_this.requests[0].method, 'delete');
+          assert.equal(_this.requests[0].method, 'DELETE');
           _this.requests[0].respond(200, {'Content-Type': 'text/plain'}, '5');
         } catch (e) {
           done(e);

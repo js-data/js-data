@@ -37,7 +37,7 @@ describe('DS#updateAll', function () {
       setTimeout(function () {
         assert.equal(2, _this.requests.length);
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/posts?where=%7B%22age%22:%7B%22%3D%3D%22:31%7D%7D');
-        assert.equal(_this.requests[1].method, 'put');
+        assert.equal(_this.requests[1].method, 'PUT');
         assert.equal(_this.requests[1].requestBody, DSUtils.toJson({ age: 5 }));
         _this.requests[1].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([
           { author: 'Jane', age: 5, id: 6 }
@@ -51,7 +51,7 @@ describe('DS#updateAll', function () {
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts?where=%7B%22age%22:%7B%22%3D%3D%22:33%7D%7D');
-      assert.equal(_this.requests[0].method, 'put');
+      assert.equal(_this.requests[0].method, 'PUT');
       assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ age: 27 }));
       _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([
         { author: 'Adam', age: 27, id: 8 },
@@ -127,7 +127,7 @@ describe('DS#updateAll', function () {
         setTimeout(function () {
           assert.equal(3, _this.requests.length);
           assert.equal(_this.requests[2].url, 'http://test.js-data.io/comment?content=test');
-          assert.equal(_this.requests[2].method, 'put');
+          assert.equal(_this.requests[2].method, 'PUT');
           assert.equal(_this.requests[2].requestBody, DSUtils.toJson({ content: 'stuff' }));
           _this.requests[2].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([testComment, testComment2]));
         }, 30);
@@ -138,7 +138,7 @@ describe('DS#updateAll', function () {
       setTimeout(function () {
         assert.equal(2, _this.requests.length);
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/comment?content=test');
-        assert.equal(_this.requests[1].method, 'put');
+        assert.equal(_this.requests[1].method, 'PUT');
         assert.equal(_this.requests[1].requestBody, DSUtils.toJson({ content: 'stuff' }));
         _this.requests[1].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([testComment, testComment2]));
       }, 30);
@@ -149,7 +149,7 @@ describe('DS#updateAll', function () {
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/user/4/comment?content=test');
-      assert.equal(_this.requests[0].method, 'put');
+      assert.equal(_this.requests[0].method, 'PUT');
       assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ content: 'stuff' }));
       _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([testComment, testComment2]));
     }, 30);

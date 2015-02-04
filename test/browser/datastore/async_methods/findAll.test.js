@@ -43,7 +43,7 @@ describe('DS#findAll', function () {
       setTimeout(function () {
         assert.equal(2, _this.requests.length);
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/posts');
-        assert.equal(_this.requests[1].method, 'get');
+        assert.equal(_this.requests[1].method, 'GET');
         _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([p1, p2, p3, p4]));
       }, 30);
     }).catch(function (err) {
@@ -54,7 +54,7 @@ describe('DS#findAll', function () {
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
-      assert.equal(_this.requests[0].method, 'get');
+      assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([p1, p2, p3, p4]));
     }, 30);
   });
@@ -78,7 +78,7 @@ describe('DS#findAll', function () {
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
-      assert.equal(_this.requests[0].method, 'get');
+      assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([
         { author: 'John', age: 30 },
         { author: 'Sally', age: 31 }
@@ -107,7 +107,7 @@ describe('DS#findAll', function () {
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
-      assert.equal(_this.requests[0].method, 'get');
+      assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([p1, p2, p3, p4]));
     }, 30);
   });
@@ -127,7 +127,7 @@ describe('DS#findAll', function () {
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
-      assert.equal(_this.requests[0].method, 'get');
+      assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(404, { 'Content-Type': 'text/plain' }, 'Not Found');
     }, 30);
   });
@@ -151,7 +151,7 @@ describe('DS#findAll', function () {
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
-      assert.equal(_this.requests[0].method, 'get');
+      assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([p1, p2, p3, p4]));
     }, 30);
   });
@@ -187,7 +187,7 @@ describe('DS#findAll', function () {
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts?where=%7B%22author%22:%22Adam%22%7D');
-      assert.equal(_this.requests[0].method, 'get');
+      assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([p4, p5]));
     }, 30);
   });
@@ -238,7 +238,7 @@ describe('DS#findAll', function () {
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/users');
-      assert.equal(_this.requests[0].method, 'get');
+      assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([u1, u2]));
     }, 30);
   });
@@ -299,7 +299,7 @@ describe('DS#findAll', function () {
         setTimeout(function () {
           assert.equal(3, _this.requests.length);
           assert.equal(_this.requests[2].url, 'http://test.js-data.io/comment?content=test');
-          assert.equal(_this.requests[2].method, 'get');
+          assert.equal(_this.requests[2].method, 'GET');
           _this.requests[2].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([testComment, testComment2]));
         }, 30);
       }).catch(function () {
@@ -309,7 +309,7 @@ describe('DS#findAll', function () {
       setTimeout(function () {
         assert.equal(2, _this.requests.length);
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/comment?content=test');
-        assert.equal(_this.requests[1].method, 'get');
+        assert.equal(_this.requests[1].method, 'GET');
         _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([testComment, testComment2]));
       }, 30);
     }).catch(function () {
@@ -319,7 +319,7 @@ describe('DS#findAll', function () {
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/user/4/comment?content=test');
-      assert.equal(_this.requests[0].method, 'get');
+      assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([testComment, testComment2]));
     }, 30);
   });
@@ -352,7 +352,7 @@ describe('DS#findAll', function () {
         try {
           assert.equal(1, _this.requests.length);
           assert.equal(_this.requests[0].url, 'http://test.js-data.io/thing?thing=stuff');
-          assert.equal(_this.requests[0].method, 'get');
+          assert.equal(_this.requests[0].method, 'GET');
           _this.requests[0].respond(500, { 'Content-Type': 'text/plain' }, '500 - Internal Server Error');
         } catch (err) {
           console.error(err.stack);
@@ -394,7 +394,7 @@ describe('DS#findAll', function () {
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
-      assert.equal(_this.requests[0].method, 'get');
+      assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([p1, p2, p3, p4]));
     }, 30);
   });
