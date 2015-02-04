@@ -1,3 +1,10 @@
+##### 1.0.0 - 03 February 2015
+
+Stable Version 1.0.0
+
+###### Other
+- Upgraded to the latest observe-js
+
 ##### 1.0.0-beta.2 - 23 January 2015
 
 ###### Backwards compatible API changes

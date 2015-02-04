@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file dist/js-data-debug.js
-* @version 1.0.0-beta.2 - Homepage <http://www.js-data.io/>
+* @version 1.0.0 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -23,7 +23,7 @@
 // limitations under the License.
 
 // Modifications
-// Copyright 2014 Jason Dobry
+// Copyright 2014-2015 Jason Dobry
 //
 // Summary of modifications:
 // Fixed use of "delete" keyword for IE8 compatibility
@@ -50,7 +50,7 @@
   // Detect and do basic sanity checking on Object/Array.observe.
   function detectObjectObserve() {
     if (typeof Object.observe !== 'function' ||
-        typeof Array.observe !== 'function') {
+      typeof Array.observe !== 'function') {
       return false;
     }
 
@@ -75,10 +75,10 @@
       return false;
 
     if (records[0].type != 'add' ||
-        records[1].type != 'update' ||
-        records[2].type != 'delete' ||
-        records[3].type != 'splice' ||
-        records[4].type != 'splice') {
+      records[1].type != 'update' ||
+      records[2].type != 'delete' ||
+      records[3].type != 'splice' ||
+      records[4].type != 'splice') {
       return false;
     }
 
@@ -116,7 +116,7 @@
       var newObject = Object.create(proto);
       Object.getOwnPropertyNames(obj).forEach(function(name) {
         Object.defineProperty(newObject, name,
-                             Object.getOwnPropertyDescriptor(obj, name));
+          Object.getOwnPropertyDescriptor(obj, name));
       });
       return newObject;
     };
@@ -142,8 +142,8 @@
 
   function diffIsEmpty(diff) {
     return objectIsEmpty(diff.added) &&
-           objectIsEmpty(diff.removed) &&
-           objectIsEmpty(diff.changed);
+      objectIsEmpty(diff.removed) &&
+      objectIsEmpty(diff.changed);
   }
 
   function isBlacklisted(prop, bl) {
@@ -231,11 +231,11 @@
       }
     };
   })() :
-  (function() {
-    return function(fn) {
-      eomTasks.push(fn);
-    };
-  })();
+    (function() {
+      return function(fn) {
+        eomTasks.push(fn);
+      };
+    })();
 
   var observedObjectCache = [];
 
@@ -363,7 +363,7 @@
       } catch (ex) {
         Observer._errorThrownDuringCallback = true;
         console.error('Exception caught during observer callback: ' +
-                       (ex.stack || ex));
+        (ex.stack || ex));
       }
     },
 
@@ -396,13 +396,13 @@
   var runningMicrotaskCheckpoint = false;
 
   var hasDebugForceFullDelivery = hasObserve && hasEval && (function() {
-    try {
-      eval('%RunMicrotasks()');
-      return true;
-    } catch (ex) {
-      return false;
-    }
-  })();
+      try {
+        eval('%RunMicrotasks()');
+        return true;
+      } catch (ex) {
+        return false;
+      }
+    })();
 
   global.Platform = global.Platform || {};
 
@@ -469,7 +469,7 @@
     connect_: function(callback, target) {
       if (hasObserve) {
         this.directObserver_ = getObservedObject(this, this.value_,
-                                                 this.arrayObserve);
+          this.arrayObserve);
       } else {
         this.oldObject_ = this.copyObject(this.value_);
       }
@@ -495,10 +495,10 @@
 
         oldValues = {};
         diff = diffObjectFromChangeRecords(this.value_, changeRecords,
-                                           oldValues);
+          oldValues);
       } else {
         oldValues = this.oldObject_;
-        diff = diffObjectFromOldObject(this.value_, this.oldObject_, equalityFn, blacklist);
+        diff = diffObjectFromOldObject(this.value_, this.oldObject_);
       }
 
       if (diffIsEmpty(diff))
@@ -553,7 +553,7 @@
   var expectedRecordTypes = {
     add: true,
     update: true,
-    'delete': true
+    delete: true
   };
 
   function diffObjectFromChangeRecords(object, changeRecords, oldValues) {
@@ -4616,12 +4616,12 @@ module.exports = {
   DSUtils: require('./utils'),
   DSErrors: require('./errors'),
   version: {
-    full: '1.0.0-beta.2',
+    full: '1.0.0',
     major: parseInt('1', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10),
     alpha: 'false' !== 'false' ? 'false' : false,
-    beta: '2' !== 'false' ? '2' : false
+    beta: 'false' !== 'false' ? 'false' : false
   }
 };
 
