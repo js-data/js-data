@@ -2,7 +2,7 @@
 
 ## JSData [![Bower version](https://badge.fury.io/bo/js-data.png)](http://badge.fury.io/bo/js-data) [![NPM version](https://badge.fury.io/js/js-data.png)](http://badge.fury.io/js/js-data)
 
-Inspired by [Ember Data](https://github.com/emberjs/data), js-data is the model layer you've been craving. It consists of a convenient framework-agnostic, in-memory cache for managing your data, which users adapters to communicate with various persistence layers.
+Inspired by [Ember Data](https://github.com/emberjs/data), js-data is the model layer you've been craving. It consists of a convenient framework-agnostic, in-memory cache for managing your data, which uses adapters to communicate with various persistence layers.
 
 You can use the [http adapter](http://www.js-data.io/docs/dshttpadapter), which is perfect for communicating with your RESTful backend. You could also use the [localStorage adapter](http://www.js-data.io/docs/dslocalstorageadapter). More adapters are coming, and you're free to implement your own. View [available adapters](http://www.js-data.io/docs/adapters).
 
