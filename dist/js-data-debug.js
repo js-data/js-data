@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file dist/js-data-debug.js
-* @version 1.1.1 - Homepage <http://www.js-data.io/>
+* @version 1.2.0 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -3469,6 +3469,10 @@ function defineResource(definition) {
       }
     }
 
+    def.getResource = function (resourceName) {
+      return _this.definitions[resourceName];
+    };
+
     def.getEndpoint = function (id, options) {
       options.params = options.params || {};
 
@@ -4664,10 +4668,10 @@ module.exports = {
   DSUtils: require('./utils'),
   DSErrors: require('./errors'),
   version: {
-    full: '1.1.1',
+    full: '1.2.0',
     major: parseInt('1', 10),
-    minor: parseInt('1', 10),
-    patch: parseInt('1', 10),
+    minor: parseInt('2', 10),
+    patch: parseInt('0', 10),
     alpha: 'false' !== 'false' ? 'false' : false,
     beta: 'false' !== 'false' ? 'false' : false
   }

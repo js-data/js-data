@@ -96,6 +96,10 @@ function defineResource(definition) {
       }
     }
 
+    def.getResource = function (resourceName) {
+      return _this.definitions[resourceName];
+    };
+
     def.getEndpoint = function (id, options) {
       options.params = options.params || {};
 

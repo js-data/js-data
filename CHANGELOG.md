@@ -1,3 +1,8 @@
+##### 1.2.0 - 05 February 2015
+
+###### Backwards compatible bug fixes
+- Added a `getResource(resourceName)` method to resource definitions so adapters can grab the definitions of a resource's relations
+
 ##### 1.1.1 - 05 February 2015
 
 ###### Backwards compatible bug fixes
