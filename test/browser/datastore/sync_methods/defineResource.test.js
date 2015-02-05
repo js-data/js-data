@@ -227,6 +227,7 @@ describe('DS#defineResource', function () {
     var _this = this;
     var newStore = new JSData.DS({
       debug: false,
+      basePath: 'http://foo.com',
       actions: {
         test: {
           method: 'POST'
@@ -260,7 +261,7 @@ describe('DS#defineResource', function () {
       setTimeout(function () {
         try {
           assert.equal(2, _this.requests.length);
-          assert.equal(_this.requests[1].url, 'thing2/count');
+          assert.equal(_this.requests[1].url, 'http://foo.com/thing2/count');
           assert.equal(_this.requests[1].method, 'POST');
           _this.requests[1].respond(200, { 'Content-Type': 'text/plain' }, 'stuff2');
         } catch (err) {
@@ -272,7 +273,7 @@ describe('DS#defineResource', function () {
     setTimeout(function () {
       try {
         assert.equal(1, _this.requests.length);
-        assert.equal(_this.requests[0].url, 'thing2/test');
+        assert.equal(_this.requests[0].url, 'http://foo.com/thing2/test');
         assert.equal(_this.requests[0].method, 'POST');
         assert.equal(_this.requests[0].requestBody, 'thing2 payload');
         _this.requests[0].respond(200, { 'Content-Type': 'text/plain' }, 'stuff');
@@ -298,6 +299,7 @@ describe('DS#defineResource', function () {
 
     var Thing = newStore.defineResource({
       name: 'thing',
+      endpoint: 'foo',
       actions: {
         count: {
           method: 'GET',
@@ -330,7 +332,7 @@ describe('DS#defineResource', function () {
 
       setTimeout(function () {
         assert.equal(2, _this.requests.length);
-        assert.equal(_this.requests[1].url, 'thing/count');
+        assert.equal(_this.requests[1].url, 'foo/count');
         assert.equal(_this.requests[1].method, 'GET');
         _this.requests[1].respond(200, { 'Content-Type': 'text/plain' }, 'stuff2');
 
@@ -339,7 +341,7 @@ describe('DS#defineResource', function () {
 
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
-      assert.equal(_this.requests[0].url, 'thing/test');
+      assert.equal(_this.requests[0].url, 'foo/test');
       assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, { 'Content-Type': 'text/plain' }, 'stuff');
     }, 30);

@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file dist/js-data.js
-* @version 1.1.0 - Homepage <http://www.js-data.io/>
+* @version 1.1.1 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -3651,6 +3651,7 @@ function defineResource(definition) {
       }
       def[name] = function (options) {
         options = options || {};
+        var adapter = _this.getAdapter(action.adapter || 'http');
         var config = DSUtils.deepMixIn({}, action);
         if (!options.hasOwnProperty('endpoint') && config.endpoint) {
           options.endpoint = config.endpoint;
@@ -3658,11 +3659,11 @@ function defineResource(definition) {
         if (typeof options.getEndpoint === 'function') {
           config.url = options.getEndpoint(def, options);
         } else {
-          config.url = DSUtils.makePath(def.getEndpoint(null, options), name);
+          config.url = DSUtils.makePath(options.basePath || adapter.defaults.basePath || def.basePath, def.getEndpoint(null, options), name);
         }
         config.method = config.method || 'GET';
         DSUtils.deepMixIn(config, options);
-        return _this.getAdapter(action.adapter || 'http').HTTP(config);
+        return adapter.HTTP(config);
       };
     });
 
@@ -4628,10 +4629,10 @@ module.exports = {
   DSUtils: require('./utils'),
   DSErrors: require('./errors'),
   version: {
-    full: '1.1.0',
+    full: '1.1.1',
     major: parseInt('1', 10),
     minor: parseInt('1', 10),
-    patch: parseInt('0', 10),
+    patch: parseInt('1', 10),
     alpha: 'false' !== 'false' ? 'false' : false,
     beta: 'false' !== 'false' ? 'false' : false
   }

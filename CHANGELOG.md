@@ -1,3 +1,8 @@
+##### 1.1.1 - 05 February 2015
+
+###### Backwards compatible bug fixes
+- #46 - "actions" don't inherit basePath properly
+
 ##### 1.1.0 - 04 February 2015
 
 ##### Backwards compatible API changes

@@ -294,6 +294,7 @@ function defineResource(definition) {
       }
       def[name] = function (options) {
         options = options || {};
+        var adapter = _this.getAdapter(action.adapter || 'http');
         var config = DSUtils.deepMixIn({}, action);
         if (!options.hasOwnProperty('endpoint') && config.endpoint) {
           options.endpoint = config.endpoint;
@@ -301,11 +302,11 @@ function defineResource(definition) {
         if (typeof options.getEndpoint === 'function') {
           config.url = options.getEndpoint(def, options);
         } else {
-          config.url = DSUtils.makePath(def.getEndpoint(null, options), name);
+          config.url = DSUtils.makePath(options.basePath || adapter.defaults.basePath || def.basePath, def.getEndpoint(null, options), name);
         }
         config.method = config.method || 'GET';
         DSUtils.deepMixIn(config, options);
-        return _this.getAdapter(action.adapter || 'http').HTTP(config);
+        return adapter.HTTP(config);
       };
     });
 
