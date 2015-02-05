@@ -4,7 +4,7 @@
 
 Inspired by [Ember Data](https://github.com/emberjs/data), js-data is the model layer you've been craving. It consists of a convenient framework-agnostic, in-memory cache for managing your data, which uses adapters to communicate with various persistence layers.
 
-You can use the [http adapter](http://www.js-data.io/docs/dshttpadapter), which is perfect for communicating with your RESTful backend. You could also use the [localStorage adapter](http://www.js-data.io/docs/dslocalstorageadapter). More adapters are coming, and you're free to implement your own. View [available adapters](http://www.js-data.io/docs/adapters).
+You can use the [http adapter](http://www.js-data.io/docs/dshttpadapter), which is perfect for communicating with your RESTful backend. You could also use the [localStorage adapter](http://www.js-data.io/docs/dslocalstorageadapter). More adapters are coming, and you're free to implement your own. View [available adapters](http://www.js-data.io/docs/working-with-adapters).
 
 Unlike Backbone and Ember Models, JSData does not require the use of getters and setters, and doesn't wrap your data with custom classes if you don't want it to. JSData's internal dirty-checking (via [observe-js](https://github.com/Polymer/observe-js) or `Object.observe` in supporting browsers) allows for powerful use cases and an easy avenue for implementing your own [3-way data-binding](https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html).
 
@@ -61,6 +61,7 @@ All your data are belong to you...
 - [Computed Properties](http://www.js-data.io/docs/computed-properties)
 - [Relations](http://www.js-data.io/docs/relations)
 - [Schemata & Validation](http://www.js-data.io/docs/schemata--validation)
+- [JSData on the server](http://www.js-data.io/docs/jsdata-on-the-server)
 - [Angular + JSData](http://www.js-data.io/docs/js-data-angular)
 - [FAQ](http://www.js-data.io/docs/faq)
 
