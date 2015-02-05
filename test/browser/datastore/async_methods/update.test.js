@@ -38,7 +38,11 @@ describe('DS#update', function () {
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/posts/6');
         assert.equal(_this.requests[1].method, 'PUT');
         assert.equal(_this.requests[1].requestBody, DSUtils.toJson({ author: 'Jane' }));
-        _this.requests[1].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson({ author: 'Jane', age: 31, id: 6 }));
+        _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({
+          author: 'Jane',
+          age: 31,
+          id: 6
+        }));
       }, 30);
     }).catch(function (err) {
       console.error(err.stack);
@@ -50,7 +54,11 @@ describe('DS#update', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
       assert.equal(_this.requests[0].method, 'PUT');
       assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ author: 'Jake' }));
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson({ author: 'Jake', age: 30, id: 5 }));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({
+        author: 'Jake',
+        age: 30,
+        id: 5
+      }));
     }, 30);
   });
   it('should update an item via the instance method', function (done) {
@@ -85,7 +93,11 @@ describe('DS#update', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
       assert.equal(_this.requests[0].method, 'PUT');
       assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ author: 'Jake' }));
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson({ author: 'Jake', age: 30, id: 5 }));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({
+        author: 'Jake',
+        age: 30,
+        id: 5
+      }));
     }, 30);
   });
   it('should handle nested resources', function (done) {
@@ -157,7 +169,7 @@ describe('DS#update', function () {
           assert.equal(_this.requests[2].url, 'http://test.js-data.io/comment/6');
           assert.equal(_this.requests[2].method, 'PUT');
           assert.equal(_this.requests[2].requestBody, DSUtils.toJson({ content: 'stuff' }));
-          _this.requests[2].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(testComment2));
+          _this.requests[2].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment2));
         }, 30);
       }).catch(function () {
         done('Should not have failed!');
@@ -168,7 +180,7 @@ describe('DS#update', function () {
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/user/4/comment/6');
         assert.equal(_this.requests[1].method, 'PUT');
         assert.equal(_this.requests[1].requestBody, DSUtils.toJson({ content: 'stuff' }));
-        _this.requests[1].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(testComment2));
+        _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment2));
       }, 30);
     }).catch(function () {
       done('Should not have failed!');
@@ -179,7 +191,87 @@ describe('DS#update', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/user/4/comment/5');
       assert.equal(_this.requests[0].method, 'PUT');
       assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ content: 'stuff' }));
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(testComment));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment));
+    }, 30);
+  });
+  it('should handle cyclic resources', function (done) {
+    var _this = this;
+    var Thing = store.defineResource({
+      name: 'thing',
+      relations: {
+        belongsTo: {
+          parent: {
+            localKey: 'parentId',
+            localField: 'parent'
+          }
+        }
+      }
+    });
+    var Parent = store.defineResource({
+      name: 'parent',
+      relations: {
+        hasMany: {
+          thing: {
+            localField: 'things',
+            foreignKey: 'parentId'
+          }
+        }
+      }
+    });
+    var things = Thing.inject([
+      {
+        id: 1,
+        parentId: 1,
+        thing: '1'
+      },
+      {
+        id: 2,
+        parentId: 1,
+        thing: '2'
+      }
+    ]);
+    var parent = Parent.inject({
+      id: 1,
+      parent: '1'
+    });
+    parent.things = things;
+    things[0].parent = parent;
+    things[1].parent = parent;
+
+    parent.content = 'stuff';
+
+    Parent.save(1).then(function (parent) {
+      assert.equal(parent.content, 'stuff');
+
+      done();
+    }).catch(function (err) {
+      done(err);
+    });
+
+    setTimeout(function () {
+      assert.equal(1, _this.requests.length);
+      assert.equal(_this.requests[0].url, 'http://test.js-data.io/parent/1');
+      assert.equal(_this.requests[0].method, 'PUT');
+      assert.equal(_this.requests[0].requestBody, DSUtils.toJson(DSUtils.removeCircular(parent)));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, JSON.stringify({
+        id: 1,
+        parent: '1',
+        content: 'stuff',
+        things: [
+          {
+            id: 1,
+            parentId: 1,
+            thing: '1',
+            content: 'foo'
+          },
+          {
+            id: 2,
+            parentId: 1,
+            thing: '2',
+            content: 'bar'
+          }
+        ]
+      }));
     }, 30);
   });
 });

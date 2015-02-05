@@ -408,4 +408,44 @@ describe('DS#filter', function () {
 
     assert.deepEqual(JSON.stringify(store.filter('Comment', params)), JSON.stringify([p1, p2]), 'should keep p1 and p2');
   });
+  it('should order by nested keys', function () {
+    var Thing = store.defineResource('thing');
+    var things = Thing.inject([
+      {
+        id: 1,
+        foo: {
+          bar: 'f'
+        }
+      },
+      {
+        id: 2,
+        foo: {
+          bar: 'a'
+        }
+      },
+      {
+        id: 3,
+        foo: {
+          bar: 'c'
+        }
+      },
+      {
+        id: 4,
+        foo: {
+          bar: 'b'
+        }
+      }
+    ]);
+
+    var params = {
+      orderBy: [['foo.bar', 'ASC']]
+    };
+
+    assert.deepEqual(JSON.stringify(Thing.filter(params)), JSON.stringify([things[1], things[3], things[2], things[0]]), 'should order by a nested key');
+
+    params = {
+      orderBy: [['foo.bar', 'DESC']]
+    };
+    assert.deepEqual(JSON.stringify(Thing.filter(params)), JSON.stringify([things[0], things[2], things[3], things[1]]), 'should order by a nested key');
+  });
 });

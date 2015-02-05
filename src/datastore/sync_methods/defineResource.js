@@ -159,6 +159,21 @@ function defineResource(definition) {
       DSUtils.deepMixIn(def[def['class']].prototype, def.methods);
     }
 
+    def[def['class']].prototype.set = function (key, value) {
+      DSUtils.set(this, key, value);
+      var observer = _this.store[def.name].observers[this[def.idAttribute]];
+      if (observer && !DSUtils.observe.hasObjectObserve) {
+        observer.deliver();
+      } else {
+        _this.compute(def.name, this);
+      }
+      return this;
+    };
+
+    def[def['class']].prototype.get = function (key) {
+      return DSUtils.get(this, key);
+    };
+
     // Prepare for computed properties
     if (def.computed) {
       DSUtils.forOwn(def.computed, function (fn, field) {

@@ -41,7 +41,11 @@ function updateAll(resourceName, attrs, params, options) {
       if (options.cacheResponse) {
         return _this.inject(definition.name, data, options);
       } else {
-        return data;
+        var instances = [];
+        DSUtils.forEach(data, function (item) {
+          instances.push(_this.createInstance(resourceName, item, options));
+        });
+        return instances;
       }
     });
 }

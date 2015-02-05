@@ -496,6 +496,7 @@ var DSUtils = {
   fromJson: function (json) {
     return isString(json) ? JSON.parse(json) : json;
   },
+  get: require('mout/object/get'),
   intersection: intersection,
   isArray: isArray,
   isBoolean: isBoolean,
@@ -548,6 +549,40 @@ var DSUtils = {
   toJson: JSON.stringify,
   updateTimestamp: updateTimestamp,
   upperCase: require('mout/string/upperCase'),
+  removeCircular: function (object) {
+    var objects = [];
+
+    return (function rmCirc(value) {
+
+      var i;
+      var nu;
+
+      if (typeof value === 'object' && value !== null && !(value instanceof Boolean) && !(value instanceof Date) && !(value instanceof Number) && !(value instanceof RegExp) && !(value instanceof String)) {
+
+        for (i = 0; i < objects.length; i += 1) {
+          if (objects[i] === value) {
+            return undefined;
+          }
+        }
+
+        objects.push(value);
+
+        if (DSUtils.isArray(value)) {
+          nu = [];
+          for (i = 0; i < value.length; i += 1) {
+            nu[i] = rmCirc(value[i]);
+          }
+        } else {
+          nu = {};
+          forOwn(value, function (v, k) {
+            nu[k] = rmCirc(value[k]);
+          });
+        }
+        return nu;
+      }
+      return value;
+    }(object));
+  },
   resolveItem: resolveItem,
   resolveId: resolveId,
   w: w

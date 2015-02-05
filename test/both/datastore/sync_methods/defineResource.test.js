@@ -175,4 +175,38 @@ describe('DS#defineResource', function () {
       }
     });
   });
+
+  it('should put getters and setters on instances', function () {
+    var Thing = store.defineResource({
+      name: 'thing',
+      computed: {
+        name: ['first', 'last', function (first, last) {
+          return first + ' ' + last;
+        }]
+      }
+    });
+
+    var thing = Thing.inject({
+      id: 1,
+      first: 'John',
+      last: 'Anderson'
+    });
+
+    assert.equal(thing.get('first'), 'John');
+    assert.equal(thing.get('last'), 'Anderson');
+    assert.isUndefined(thing.get('foo'));
+    assert.equal(thing.get('name'), 'John Anderson');
+
+    thing.set('first', 'Sally');
+    assert.equal(thing.get('first'), 'Sally');
+    assert.equal(thing.get('last'), 'Anderson');
+    assert.equal(thing.get('name'), 'Sally Anderson');
+
+    thing.set('last', 'Jones');
+
+    assert.equal(thing.get('first'), 'Sally');
+    assert.equal(thing.get('last'), 'Jones');
+    assert.isUndefined(thing.get('foo'));
+    assert.equal(thing.get('name'), 'Sally Jones');
+  });
 });

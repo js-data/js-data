@@ -1,3 +1,14 @@
+##### 1.1.0 - 04 February 2015
+
+##### Backwards compatible API changes
+- Allow nested keys in "orderBy" clauses, i.e. `orderBy: 'foo.bar'`
+- Added `get` and `set` methods to the instance prototype for getter/setter manipulation of data store items. Use of `set` will trigger immediate recalculation of computed properties on the instance. Both `get` and `set` support nested key names.
+- Added a `removeCircular` util method so cyclic objects can be saved without fuss
+- #43 - Added `contains` operator to the default filter
+
+##### Backwards compatible bug fixes
+- Added missing `createInstance` calls
+
 ##### 1.0.0 - 03 February 2015
 
 Stable Version 1.0.0

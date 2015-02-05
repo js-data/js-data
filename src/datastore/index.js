@@ -14,7 +14,7 @@ function lifecycleNoop(resource, attrs) {
 
 function compare(orderBy, index, a, b) {
   var def = orderBy[index];
-  var cA = a[def[0]], cB = b[def[0]];
+  var cA = DSUtils.get(a, def[0]), cB = DSUtils.get(b, def[0]);
   if (DSUtils.isString(cA)) {
     cA = DSUtils.upperCase(cA);
   }
@@ -212,6 +212,18 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
                 expr = term.indexOf(val) === -1;
               } else {
                 expr = !DSUtils.contains(term, val);
+              }
+            } else if (op === 'contains') {
+              if (DSUtils.isString(val)) {
+                expr = val.indexOf(term) !== -1;
+              } else {
+                expr = DSUtils.contains(val, term);
+              }
+            } else if (op === 'notContains') {
+              if (DSUtils.isString(val)) {
+                expr = val.indexOf(term) === -1;
+              } else {
+                expr = !DSUtils.contains(val, term);
               }
             }
             if (expr !== undefined) {

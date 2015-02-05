@@ -44,7 +44,7 @@ function update(resourceName, id, attrs, options) {
       if (options.cacheResponse) {
         return _this.inject(definition.name, attrs, options);
       } else {
-        return attrs;
+        return _this.createInstance(resourceName, attrs, options);
       }
     });
 }
