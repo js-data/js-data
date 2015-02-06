@@ -1,3 +1,8 @@
+##### 1.2.1 - 06 February 2015
+
+###### Backwards compatible bug fixes
+- #42 - deserialize and beforeInject are called from the parent relation when loadRelations is used
+
 ##### 1.2.0 - 05 February 2015
 
 ###### Backwards compatible bug fixes

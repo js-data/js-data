@@ -152,6 +152,7 @@ beforeEach(function () {
 
   Organization = store.defineResource({
     name: 'organization',
+    beforeInject: sinon.spy(),
     relations: {
       hasMany: {
         user: {
@@ -164,6 +165,7 @@ beforeEach(function () {
 
   Profile = store.defineResource({
     name: 'profile',
+    beforeInject: sinon.spy(),
     relations: {
       belongsTo: {
         user: {
@@ -176,6 +178,7 @@ beforeEach(function () {
 
   Comment = store.defineResource({
     name: 'comment',
+    beforeInject: sinon.spy(),
     relations: {
       belongsTo: {
         user: [

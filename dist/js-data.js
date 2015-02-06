@@ -2724,22 +2724,24 @@ function loadRelations(resourceName, instance, relations, options) {
     } else if (!DSUtils.isArray(relations)) {
       reject(new DSErrors.IA('"relations" must be a string or an array!'));
     } else {
-      options = DSUtils._(definition, options);
-      if (!options.hasOwnProperty('findBelongsTo')) {
-        options.findBelongsTo = true;
+      var _options = DSUtils._(definition, options);
+      if (!_options.hasOwnProperty('findBelongsTo')) {
+        _options.findBelongsTo = true;
       }
-      if (!options.hasOwnProperty('findHasMany')) {
-        options.findHasMany = true;
+      if (!_options.hasOwnProperty('findHasMany')) {
+        _options.findHasMany = true;
       }
 
       var tasks = [];
 
       DSUtils.forEach(definition.relationList, function (def) {
         var relationName = def.relation;
+        var relationDef = definition.getResource(relationName);
+        var __options = DSUtils._(relationDef, options);
         if (DSUtils.contains(relations, relationName)) {
           var task;
           var params = {};
-          if (options.allowSimpleWhere) {
+          if (__options.allowSimpleWhere) {
             params[def.foreignKey] = instance[definition.idAttribute];
           } else {
             params.where = {};
@@ -2749,12 +2751,12 @@ function loadRelations(resourceName, instance, relations, options) {
           }
 
           if (def.type === 'hasMany' && params[def.foreignKey]) {
-            task = _this.findAll(relationName, params, options);
+            task = _this.findAll(relationName, params, __options);
           } else if (def.type === 'hasOne') {
             if (def.localKey && instance[def.localKey]) {
-              task = _this.find(relationName, instance[def.localKey], options);
+              task = _this.find(relationName, instance[def.localKey], __options);
             } else if (def.foreignKey && params[def.foreignKey]) {
-              task = _this.findAll(relationName, params, options).then(function (hasOnes) {
+              task = _this.findAll(relationName, params, __options).then(function (hasOnes) {
                 return hasOnes.length ? hasOnes[0] : null;
               });
             }
