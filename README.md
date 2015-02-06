@@ -4,7 +4,7 @@
 
 Inspired by [Ember Data](https://github.com/emberjs/data), js-data is the model layer you've been craving. It consists of a convenient framework-agnostic, in-memory cache for managing your data, which uses adapters to communicate with various persistence layers.
 
-You can use the [http adapter](http://www.js-data.io/docs/dshttpadapter), which is perfect for communicating with your RESTful backend. You could also use the [localStorage adapter](http://www.js-data.io/docs/dslocalstorageadapter). More adapters are coming, and you're free to implement your own. View [available adapters](http://www.js-data.io/docs/working-with-adapters).
+You can use the [http adapter](http://www.js-data.io/docs/dshttpadapter), which is perfect for communicating with your RESTful backend. You could also use the [localStorage adapter](http://www.js-data.io/docs/dslocalstorageadapter). On the server you could hook up to the [SQL adapter (Postgres/MySQL/MariaDB/SQLite3)](http://www.js-data.io/docs/dssqladapter) and add in the [Redis adapter](http://www.js-data.io/docs/dsredisadapter) as a caching layer for your read endpoints. More adapters are coming, and you're free to implement your own. View [available adapters](http://www.js-data.io/docs/working-with-adapters).
 
 Unlike Backbone and Ember Models, JSData does not require the use of getters and setters, and doesn't wrap your data with custom classes if you don't want it to. JSData's internal dirty-checking (via [observe-js](https://github.com/Polymer/observe-js) or `Object.observe` in supporting browsers) allows for powerful use cases and an easy avenue for implementing your own [3-way data-binding](https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html).
 
@@ -68,12 +68,14 @@ All your data are belong to you...
 ## API Documentation
 - [DS](http://www.js-data.io/docs/ds)
 - [js-data-schema](http://www.js-data.io/docs/js-data-schema)
-- [DSHttpAdapter](http://www.js-data.io/docs/dshttpadapter)
-- [DSLocalStorageAdapter](http://www.js-data.io/docs/dslocalstorageadapter)
-- [DSLocalForageAdapter](http://www.js-data.io/docs/dslocalforageadapter)
 - [DSFirebaseAdapter](http://www.js-data.io/docs/dsfirebaseadapter)
+- [DSHttpAdapter](http://www.js-data.io/docs/dshttpadapter)
+- [DSLocalForageAdapter](http://www.js-data.io/docs/dslocalforageadapter)
+- [DSLocalStorageAdapter](http://www.js-data.io/docs/dslocalstorageadapter)
+- [DSMongoDBAdapter](http://www.js-data.io/docs/dsmongodbadapter)
 - [DSRedisAdapter](http://www.js-data.io/docs/dsredisadapter)
 - [DSRethinkDBAdapter](http://www.js-data.io/docs/dsrethinkdbadapter)
+- [DSSqlAdapter](http://www.js-data.io/docs/dssqladapter)
 
 ## Changelog
 [CHANGELOG.md](https://github.com/js-data/js-data/blob/master/CHANGELOG.md)
