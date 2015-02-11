@@ -47,10 +47,18 @@ function eject(resourceName, id, options) {
     DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
       DSUtils.remove(resource.changeHistory, changeRecord);
     });
-    DSUtils.forOwn(resource.queryData, function (items) {
+    var toRemove = [];
+    DSUtils.forOwn(resource.queryData, function (items, queryHash) {
       if (items.$$injected) {
         DSUtils.remove(items, item);
       }
+      if (!items.length) {
+        toRemove.push(queryHash);
+      }
+    });
+    DSUtils.forEach(toRemove, function (queryHash) {
+      delete resource.completedQueries[queryHash];
+      delete resource.queryData[queryHash];
     });
     delete resource.changeHistories[id];
     delete resource.modified[id];

@@ -1,3 +1,11 @@
+##### 1.3.0 - 11 February 2015
+
+###### Backwards compatible api changes
+- #50 - Added a `DS#is(resourceName, instance)` or `Resource#is(instance)` method to check if an object is an instance of a particular resource
+
+###### Backwards compatible bug fixes
+- When items are ejected cached collection queries are now checked to see if all the cached items from that query are gone, and if so, the cache query is deleted
+
 ##### 1.2.1 - 06 February 2015
 
 ###### Backwards compatible bug fixes

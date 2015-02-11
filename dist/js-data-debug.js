@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file dist/js-data-debug.js
-* @version 1.2.0 - Homepage <http://www.js-data.io/>
+* @version 1.3.0 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -3365,6 +3365,14 @@ dsPrototype.emit = function (definition, event) {
   definition.emit.apply(definition, args);
 };
 
+dsPrototype.is = function is(resourceName, instance) {
+  var definition = this.definitions[resourceName];
+  if (!definition) {
+    throw new DSErrors.NER(resourceName);
+  }
+  return instance instanceof definition[definition.class];
+};
+
 dsPrototype.errors = require('../errors');
 dsPrototype.utils = DSUtils;
 DSUtils.deepMixIn(dsPrototype, syncMethods);
@@ -3754,10 +3762,18 @@ function eject(resourceName, id, options) {
     DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
       DSUtils.remove(resource.changeHistory, changeRecord);
     });
-    DSUtils.forOwn(resource.queryData, function (items) {
+    var toRemove = [];
+    DSUtils.forOwn(resource.queryData, function (items, queryHash) {
       if (items.$$injected) {
         DSUtils.remove(items, item);
       }
+      if (!items.length) {
+        toRemove.push(queryHash);
+      }
+    });
+    DSUtils.forEach(toRemove, function (queryHash) {
+      delete resource.completedQueries[queryHash];
+      delete resource.queryData[queryHash];
     });
     delete resource.changeHistories[id];
     delete resource.modified[id];
@@ -4670,9 +4686,9 @@ module.exports = {
   DSUtils: require('./utils'),
   DSErrors: require('./errors'),
   version: {
-    full: '1.2.0',
+    full: '1.3.0',
     major: parseInt('1', 10),
-    minor: parseInt('2', 10),
+    minor: parseInt('3', 10),
     patch: parseInt('0', 10),
     alpha: 'false' !== 'false' ? 'false' : false,
     beta: 'false' !== 'false' ? 'false' : false

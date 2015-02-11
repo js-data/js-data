@@ -100,4 +100,30 @@ describe('DS#reap', function () {
       }, done).catch(done);
     }, 60);
   });
+  it('should return expired items and eject', function (done) {
+    var Thing = store.defineResource({
+      name: 'thing',
+      maxAge: 30,
+      reapAction: 'eject'
+    });
+
+    var expiresHeap = store.store.thing.expiresHeap;
+
+    Thing.inject({ id: 1 });
+    Thing.inject({ id: 2 });
+
+    setTimeout(function () {
+      Thing.reap({
+        reapAction: 'eject'
+      }).then(function (items) {
+        try {
+          assert.equal(items.length, 2);
+          assert.equal(expiresHeap.heap.length, 0);
+          done();
+        } catch (err) {
+          done(err);
+        }
+      }, done).catch(done);
+    }, 60);
+  });
 });

@@ -192,6 +192,9 @@ describe('DS#defineResource', function () {
       last: 'Anderson'
     });
 
+    assert.isTrue(store.is('thing', thing));
+    assert.isTrue(Thing.is(thing));
+
     assert.equal(thing.get('first'), 'John');
     assert.equal(thing.get('last'), 'Anderson');
     assert.isUndefined(thing.get('foo'));

@@ -378,6 +378,14 @@ dsPrototype.emit = function (definition, event) {
   definition.emit.apply(definition, args);
 };
 
+dsPrototype.is = function is(resourceName, instance) {
+  var definition = this.definitions[resourceName];
+  if (!definition) {
+    throw new DSErrors.NER(resourceName);
+  }
+  return instance instanceof definition[definition.class];
+};
+
 dsPrototype.errors = require('../errors');
 dsPrototype.utils = DSUtils;
 DSUtils.deepMixIn(dsPrototype, syncMethods);
