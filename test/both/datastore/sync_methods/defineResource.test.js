@@ -212,4 +212,76 @@ describe('DS#defineResource', function () {
     assert.isUndefined(thing.get('foo'));
     assert.equal(thing.get('name'), 'Sally Jones');
   });
+
+  it('should allow custom model class definitions', function () {
+
+    function MyBaseClass(){
+      this.instanceMethod = function( value ){
+        return 'instanceMethod' + value;
+      };
+      this.firstNameBackwards = function(){
+        return this.first.split("").reverse().join("");
+      };
+    }
+
+    MyBaseClass.prototype.protoMethod = function( value ){
+      return 'protoMethod' + value;
+    };
+
+    var Thing1 = store.defineResource({
+      name: 'thing1',
+      useClass: MyBaseClass
+    });
+
+    var thing1 = Thing1.inject({
+      id: 1,
+      first: 'John',
+      last: 'Anderson'
+    });
+
+    
+    var Thing2 = store.defineResource({
+      name: 'thing2',
+      useClass: MyBaseClass
+    });
+
+    var thing2 = Thing2.inject({
+      id: 2,
+      first: 'Ferris',
+      last: 'Bueller'
+    });
+
+    assert.equal(store.definitions.thing1.class, 'Thing1');
+    assert.equal(store.definitions.thing2.class, 'Thing2');
+
+    assert.isTrue(store.is('thing1', thing1));
+    assert.isTrue(Thing1.is(thing1));
+
+    assert.isTrue(store.is('thing2', thing2));
+    assert.isTrue(Thing2.is(thing2));
+
+    assert.isFalse(store.is('thing1', thing2));
+    assert.isFalse(Thing1.is(thing2));
+
+    assert.isFalse(store.is('thing2', thing1));
+    assert.isFalse(Thing2.is(thing1));
+
+    assert.equal(thing1.instanceMethod('Value'), 'instanceMethodValue');
+    assert.equal(thing1.protoMethod('Value'), 'protoMethodValue');
+    assert.equal(thing2.instanceMethod('Other'), 'instanceMethodOther');
+    assert.equal(thing2.protoMethod('Other'), 'protoMethodOther');
+    
+    assert.equal(thing1.firstNameBackwards(), 'nhoJ');
+    assert.equal(thing2.firstNameBackwards(), 'sirreF');
+    
+    /* Is this really necessary to test?
+    thing2.firstNameBackwards = function(){
+      return this.first.split("").reverse().join(".");
+    }
+    assert.equal(thing1.firstNameBackwards(), 'nhoJ');
+    assert.equal(thing2.firstNameBackwards(), 's.i.r.r.e.F');
+    */
+    
+  });
+
 });
