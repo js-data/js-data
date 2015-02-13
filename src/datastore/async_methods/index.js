@@ -50,6 +50,8 @@ function reap(resourceName, options) {
           tasks.push(_this.refresh(resourceName, item[definition.idAttribute]));
         });
         return DSUtils.Promise.all(tasks);
+      } else if (typeof options.reapAction === 'function') {
+        options.reapAction(resource, items);
       }
       return items;
     }).then(function (items) {
