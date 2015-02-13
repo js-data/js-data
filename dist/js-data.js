@@ -3519,8 +3519,7 @@ function defineResource(definition) {
     def['class'] = DSUtils.pascalCase(definition.name);
     try {
       if (typeof def.useClass === 'function') {
-        var useClass = def.useClass;
-        eval('function ' + def['class'] + '() { useClass.call(this); }');
+        eval('function ' + def['class'] + '() { def.useClass.call(this); }');
         def[def['class']] = eval(def['class']);
         def[def['class']].prototype = (function(proto) {
           function ctor() { }
