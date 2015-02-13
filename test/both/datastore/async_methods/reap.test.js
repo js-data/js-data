@@ -126,4 +126,24 @@ describe('DS#reap', function () {
       }, done).catch(done);
     }, 60);
   });
+  it('should call reapAction', function (done) {
+    var Thing = store.defineResource({
+      name: 'thing',
+      maxAge: 30,
+      reapAction: function (resource, items) {
+        done();
+      }
+    });
+
+    var expiresHeap = store.store.thing.expiresHeap;
+
+    Thing.inject({ id: 1 });
+    Thing.inject({ id: 2 });
+
+    setTimeout(function () {
+      Thing.reap().then(function () {
+        done('reapAction was not called');
+      }, done).catch(done);
+    }, 60);
+  });
 });
