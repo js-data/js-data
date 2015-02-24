@@ -3534,8 +3534,18 @@ function defineResource(definition) {
     // Create the wrapper class for the new resource
     def['class'] = DSUtils.pascalCase(definition.name);
     try {
-      eval('function ' + def['class'] + '() {}');
-      def[def['class']] = eval(def['class']);
+      if (typeof def.useClass === 'function') {
+        eval('function ' + def['class'] + '() { def.useClass.call(this); }');
+        def[def['class']] = eval(def['class']);
+        def[def['class']].prototype = (function(proto) {
+          function ctor() { }
+          ctor.prototype = proto;
+          return new ctor();
+        })(def.useClass.prototype);
+      } else {
+        eval('function ' + def['class'] + '() {}');
+        def[def['class']] = eval(def['class']);
+      }
     } catch (e) {
       def[def['class']] = function () {
       };
