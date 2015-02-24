@@ -154,10 +154,12 @@ function defineResource(definition) {
       if (typeof def.useClass === 'function') {
         eval('function ' + def['class'] + '() { def.useClass.call(this); }');
         def[def['class']] = eval(def['class']);
-        def[def['class']].prototype = (function(proto) {
-          function ctor() { }
-          ctor.prototype = proto;
-          return new ctor();
+        def[def['class']].prototype = (function (proto) {
+          function Ctor() {
+          }
+
+          Ctor.prototype = proto;
+          return new Ctor();
         })(def.useClass.prototype);
       } else {
         eval('function ' + def['class'] + '() {}');

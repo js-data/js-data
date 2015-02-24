@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file dist/js-data.js
-* @version 1.3.0 - Homepage <http://www.js-data.io/>
+* @version 1.4.0 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -3287,7 +3287,7 @@ function DS(options) {
   } catch (e) {
   }
 
-  if (!Schemator) {
+  if (!Schemator || DSUtils.isEmpty(Schemator)) {
     try {
       Schemator = window.Schemator;
     } catch (e) {
@@ -3521,10 +3521,12 @@ function defineResource(definition) {
       if (typeof def.useClass === 'function') {
         eval('function ' + def['class'] + '() { def.useClass.call(this); }');
         def[def['class']] = eval(def['class']);
-        def[def['class']].prototype = (function(proto) {
-          function ctor() { }
-          ctor.prototype = proto;
-          return new ctor();
+        def[def['class']].prototype = (function (proto) {
+          function Ctor() {
+          }
+
+          Ctor.prototype = proto;
+          return new Ctor();
         })(def.useClass.prototype);
       } else {
         eval('function ' + def['class'] + '() {}');
@@ -4661,9 +4663,9 @@ module.exports = {
   DSUtils: require('./utils'),
   DSErrors: require('./errors'),
   version: {
-    full: '1.3.0',
+    full: '1.4.0',
     major: parseInt('1', 10),
-    minor: parseInt('3', 10),
+    minor: parseInt('4', 10),
     patch: parseInt('0', 10),
     alpha: 'false' !== 'false' ? 'false' : false,
     beta: 'false' !== 'false' ? 'false' : false

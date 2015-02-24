@@ -1,3 +1,8 @@
+##### 1.4.0 - 24 February 2015
+
+###### Backwards compatible api changes
+- #51 - Allow resource instances to be created from a base class
+
 ##### 1.3.0 - 11 February 2015
 
 ###### Backwards compatible api changes
