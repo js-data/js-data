@@ -311,7 +311,7 @@ function DS(options) {
   } catch (e) {
   }
 
-  if (!Schemator) {
+  if (DSUtils.isEmpty(Schemator)) {
     try {
       Schemator = window.Schemator;
     } catch (e) {
