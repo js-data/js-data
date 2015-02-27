@@ -23,14 +23,15 @@ function find(resourceName, id, options) {
       if (options.bypassCache || !options.cacheResponse) {
         delete resource.completedQueries[id];
       }
-      if (id in resource.completedQueries) {
+      if (id in resource.completedQueries && _this.get(resourceName, id)) {
         resolve(_this.get(resourceName, id));
       } else {
+        delete resource.completedQueries[id];
         resolve();
       }
     }
   }).then(function (item) {
-      if (!(id in resource.completedQueries)) {
+      if (!item) {
         if (!(id in resource.pendingQueries)) {
           var promise;
           var strategy = options.findStrategy || options.strategy;
@@ -55,8 +56,9 @@ function find(resourceName, id, options) {
             // Query is no longer pending
             delete resource.pendingQueries[id];
             if (options.cacheResponse) {
+              var injected = _this.inject(resourceName, data, options);
               resource.completedQueries[id] = new Date().getTime();
-              return _this.inject(resourceName, data, options);
+              return injected;
             } else {
               return _this.createInstance(resourceName, data, options);
             }

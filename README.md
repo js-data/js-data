@@ -18,7 +18,7 @@ __See Latest Release:__ [JSData Releases](https://github.com/js-data/js-data/rel
 | ------ | ------ |
 | Tasks | [![Stories in Backlog](https://badge.waffle.io/js-data/js-data.svg?label=backlog&title=Backlog)](http://waffle.io/js-data/js-data) [![Stories in Ready](https://badge.waffle.io/js-data/js-data.svg?label=ready&title=Ready)](http://waffle.io/js-data/js-data) [![Stories in progress](https://badge.waffle.io/js-data/js-data.svg?label=in%20progress&title=In%20Progress)](http://waffle.io/js-data/js-data) |
 | Bower | [![Bower version](https://badge.fury.io/bo/js-data.png)](http://badge.fury.io/bo/js-data) |
-| NPM | [![NPM version](https://badge.fury.io/js/js-data.png)](http://badge.fury.io/js/js-data) |
+| NPM | [![NPM](https://nodei.co/npm/js-data.png?downloads=true&stars=true)](https://nodei.co/npm/js-data/) |
 | Build Status | [![Circle CI](https://circleci.com/gh/js-data/js-data/tree/master.png?style=badge)](https://circleci.com/gh/js-data/js-data/tree/master) |
 | Code Climate | [![Code Climate](https://codeclimate.com/github/js-data/js-data.png)](https://codeclimate.com/github/js-data/js-data) |
 | Dependency Status | [![Dependency Status](https://gemnasium.com/js-data/js-data.png)](https://gemnasium.com/js-data/js-data) |
@@ -43,10 +43,65 @@ store.registerAdapter('http', new DSHttpAdapter(), { default: true });
 
 // simplest model definition
 var User = store.defineResource('user');
+var Comment = store.defineResource('comment');
 
-User.find(1).then(function (user) {
-  user; // { id: 1, name: 'John' }
-});
+var user;
+
+// Example CRUD operations with default configuration
+// See http://www.js-data.io/docs/dsfind
+User.find(1)
+  .then(function (_user) {
+    _user; // { id: 1, name: 'John' }
+
+    // See http://www.js-data.io/docs/dsis
+    User.is(user); // true
+    Comment.is(user); // false
+
+    // The user is in the store now
+    // See http://www.js-data.io/docs/dsget
+    User.get(_user.id); // { id: 1, name: 'John' }
+
+    user = _user;
+
+    // No need for another GET request, will resolve immediately
+    // See http://www.js-data.io/docs/dsfind
+    return User.find(1);
+  })
+  .then(function (_user) {
+    user === _user; // true
+
+    // PUT /user/1 {name:"Johnny"}
+    // See http://www.js-data.io/docs/dsupdate
+    return User.update(user.id, { name: 'Johnny' });
+  })
+  .then(function (_user) {
+    // identity mapping at play
+    user === _user; // true
+    user === User.get(_user.id); // true
+
+    user; // { id: 1, name: 'Johnny' }
+
+    user.name = 'Billy';
+
+    // PUT /user/1 {id:1,name:"Billy"}
+    // See http://www.js-data.io/docs/dssave
+    return User.save(1);
+  })
+  .then(function (_user) {
+    // identity mapping at play
+    user === _user; // true
+    user === User.get(_user.id); // true
+
+    user; // { id: 1, name: 'Johnny' }
+
+    // DELETE /user/1
+    // See http://www.js-data.io/docs/dsdestroy
+    return User.destroy(1);
+  })
+  .then(function () {
+    // The user has also been removed from the in-memory store
+    User.get(1); // undefined
+  });
 ```
 
 All your data are belong to you...
@@ -64,6 +119,8 @@ All your data are belong to you...
 - [JSData on the server](http://www.js-data.io/docs/jsdata-on-the-server)
 - [Angular + JSData](http://www.js-data.io/docs/js-data-angular)
 - [FAQ](http://www.js-data.io/docs/faq)
+
+See an issue with or have a suggestion for the documentation? You can suggest edits right on the documentation pages! (There's a link at the top right of each page.)
 
 ## API Documentation
 - [DS](http://www.js-data.io/docs/ds)

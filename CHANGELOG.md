@@ -1,3 +1,8 @@
+##### 1.4.1 - 26 February 2015
+
+###### Backwards compatible bug fixes
+- # - Two possible error cases in `DS#find`
+
 ##### 1.4.0 - 24 February 2015
 
 ###### Backwards compatible api changes
