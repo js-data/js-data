@@ -337,6 +337,10 @@ function DS(options) {
 var dsPrototype = DS.prototype;
 
 dsPrototype.getAdapter = function (options) {
+  // when called from a Resource, the first argument is the resource name
+  if (arguments.length === 2) {
+    options = arguments[1];
+  }
   var errorIfNotExist = false;
   options = options || {};
   this.defaults.logFn('getAdapter', options);
