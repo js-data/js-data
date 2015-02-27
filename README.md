@@ -54,8 +54,8 @@ User.find(1)
     _user; // { id: 1, name: 'John' }
 
     // See http://www.js-data.io/docs/dsis
-    User.is(user); // true
-    Comment.is(user); // false
+    User.is(_user); // true
+    Comment.is(_user); // false
 
     // The user is in the store now
     // See http://www.js-data.io/docs/dsget
