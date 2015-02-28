@@ -4,8 +4,8 @@ var DSErrors = require('../../errors');
 
 function processResults(data, resourceName, queryHash, options) {
   var _this = this;
-  var resource = _this.store[resourceName];
-  var idAttribute = _this.definitions[resourceName].idAttribute;
+  var resource = _this.s[resourceName];
+  var idAttribute = _this.defs[resourceName].idAttribute;
   var date = new Date().getTime();
 
   data = data || [];
@@ -21,7 +21,7 @@ function processResults(data, resourceName, queryHash, options) {
   var injected = _this.inject(resourceName, data, options);
 
   // Make sure each object is added to completedQueries
-  if (DSUtils.isArray(injected)) {
+  if (DSUtils._a(injected)) {
     DSUtils.forEach(injected, function (item) {
       if (item && item[idAttribute]) {
         resource.completedQueries[item[idAttribute]] = date;
@@ -37,17 +37,17 @@ function processResults(data, resourceName, queryHash, options) {
 
 function findAll(resourceName, params, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
-  var resource = _this.store[resourceName];
+  var definition = _this.defs[resourceName];
+  var resource = _this.s[resourceName];
   var queryHash;
 
   return new DSUtils.Promise(function (resolve, reject) {
     params = params || {};
 
-    if (!_this.definitions[resourceName]) {
+    if (!_this.defs[resourceName]) {
       reject(new DSErrors.NER(resourceName));
-    } else if (!DSUtils.isObject(params)) {
-      reject(new DSErrors.IA('"params" must be an object!'));
+    } else if (!DSUtils._o(params)) {
+      reject(DSUtils._oErr('params'));
     } else {
       options = DSUtils._(definition, options);
       queryHash = DSUtils.toJson(params);

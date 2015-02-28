@@ -3,8 +3,8 @@ var DSErrors = require('../../errors');
 
 function reap(resourceName, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
-  var resource = _this.store[resourceName];
+  var definition = _this.defs[resourceName];
+  var resource = _this.s[resourceName];
 
   return new DSUtils.Promise(function (resolve, reject) {
 
@@ -29,7 +29,7 @@ function reap(resourceName, options) {
   }).then(function (items) {
       if (options.isInterval || options.notify) {
         definition.beforeReap(options, items);
-        _this.emit(options, 'beforeReap', DSUtils.copy(items));
+        definition.emit('DS.beforeReap', definition, DSUtils.copy(items));
       }
       if (options.reapAction === 'inject') {
         DSUtils.forEach(items, function (item) {
@@ -55,7 +55,7 @@ function reap(resourceName, options) {
     }).then(function (items) {
       if (options.isInterval || options.notify) {
         definition.afterReap(options, items);
-        _this.emit(options, 'afterReap', DSUtils.copy(items));
+        definition.emit('DS.afterReap', definition, DSUtils.copy(items));
       }
       return items;
     });
@@ -65,12 +65,12 @@ function refresh(resourceName, id, options) {
   var _this = this;
 
   return new DSUtils.Promise(function (resolve, reject) {
-    var definition = _this.definitions[resourceName];
-    id = DSUtils.resolveId(_this.definitions[resourceName], id);
+    var definition = _this.defs[resourceName];
+    id = DSUtils.resolveId(_this.defs[resourceName], id);
     if (!definition) {
       reject(new _this.errors.NER(resourceName));
-    } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-      reject(new DSErrors.IA('"id" must be a string or a number!'));
+    } else if (!DSUtils._sn(id)) {
+      reject(DSUtils._snErr('id'));
     } else {
       options = DSUtils._(definition, options);
       options.bypassCache = true;

@@ -3,7 +3,7 @@ var DSErrors = require('../../errors');
 
 function destroyAll(resourceName, params, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
   var ejected, toEject;
 
   params = params || {};
@@ -11,8 +11,8 @@ function destroyAll(resourceName, params, options) {
   return new DSUtils.Promise(function (resolve, reject) {
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
-    } else if (!DSUtils.isObject(params)) {
-      reject(new DSErrors.IA('"params" must be an object!'));
+    } else if (!DSUtils._o(params)) {
+      reject(DSUtils._oErr('attrs'));
     } else {
       options = DSUtils._(definition, options);
       options.logFn('destroyAll', params, options);
@@ -23,7 +23,7 @@ function destroyAll(resourceName, params, options) {
       return options.beforeDestroy(options, toEject);
     }).then(function () {
       if (options.notify) {
-        _this.emit(options, 'beforeDestroy', DSUtils.copy(toEject));
+        definition.emit('DS.beforeDestroy', definition, DSUtils.copy(toEject));
       }
       if (options.eagerEject) {
         ejected = _this.ejectAll(resourceName, params);
@@ -33,15 +33,15 @@ function destroyAll(resourceName, params, options) {
       return options.afterDestroy(options, toEject);
     }).then(function () {
       if (options.notify) {
-        _this.emit(options, 'afterDestroy', DSUtils.copy(toEject));
+        definition.emit('DS.afterDestroy', definition, DSUtils.copy(toEject));
       }
       return ejected || _this.ejectAll(resourceName, params);
     })['catch'](function (err) {
-      if (options && options.eagerEject && ejected) {
-        _this.inject(resourceName, ejected, { notify: false });
-      }
-      throw err;
-    });
+    if (options && options.eagerEject && ejected) {
+      _this.inject(resourceName, ejected, { notify: false });
+    }
+    throw err;
+  });
 }
 
 module.exports = destroyAll;

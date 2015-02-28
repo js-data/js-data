@@ -58,6 +58,52 @@ describe('DS#loadRelations', function () {
       }
     }, 30);
   });
+  it('should load relations based on field name', function (done) {
+    var _this = this;
+    store.inject('user', user10);
+
+    store.loadRelations('user', 10, ['comments'], { params: { approvedBy: 10 } }).then(function (user) {
+      try {
+        assert.deepEqual(user.comments[0].id, store.get('comment', user.comments[0].id).id);
+        assert.deepEqual(user.comments[0].user.id, store.get('comment', user.comments[0].id).user.id);
+        assert.deepEqual(user.comments[1].id, store.get('comment', user.comments[1].id).id);
+        assert.deepEqual(user.comments[1].user.id, store.get('comment', user.comments[1].id).user.id);
+        assert.deepEqual(user.comments[2].id, store.get('comment', user.comments[2].id).id);
+        assert.deepEqual(user.comments[2].user.id, store.get('comment', user.comments[2].id).user.id);
+        // try a comment that has a belongsTo relationship to multiple users:
+        store.inject('comment', comment19);
+        store.loadRelations('comment', 19, ['approvedByUser']).then(function (comment) {
+          assert.isObject(comment.approvedByUser);
+          assert.equal(comment.approvedByUser.id, user19.id);
+          done();
+        }, done);
+      } catch (err) {
+        done(err);
+      }
+
+      setTimeout(function () {
+        assert.equal(2, _this.requests.length);
+        assert.equal(_this.requests[1].url, 'http://test.js-data.io/user/19');
+        assert.equal(_this.requests[1].method, 'GET');
+        _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(user19));
+      }, 30);
+    }, done);
+
+    setTimeout(function () {
+      try {
+        assert.equal(1, _this.requests.length);
+        assert.equal(_this.requests[0].url, 'http://test.js-data.io/organization/14/user/10/comment');
+        assert.equal(_this.requests[0].method, 'GET');
+        _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([
+          comment11,
+          comment12,
+          comment13
+        ]));
+      } catch (err) {
+        done(err.stack);
+      }
+    }, 30);
+  });
   it('should get an item from the server but not store it if cacheResponse is false', function (done) {
     var _this = this;
     store.inject('user', {

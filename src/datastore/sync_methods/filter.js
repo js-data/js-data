@@ -3,13 +3,13 @@ var DSErrors = require('../../errors');
 
 function filter(resourceName, params, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
-  var resource = _this.store[resourceName];
+  var definition = _this.defs[resourceName];
+  var resource = _this.s[resourceName];
 
   if (!definition) {
     throw new DSErrors.NER(resourceName);
-  } else if (params && !DSUtils.isObject(params)) {
-    throw new DSErrors.IA('"params" must be an object!');
+  } else if (params && !DSUtils._o(params)) {
+    throw DSUtils._oErr('params');
   }
 
   options = DSUtils._(definition, options);

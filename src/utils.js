@@ -48,6 +48,20 @@ function isFunction(value) {
   return typeof value == 'function' || (value && toString.call(value) === '[object Function]') || false;
 }
 
+// shorthand argument checking functions, using these shaves 1.18 kb off of the minified build
+function isStringOrNumber(value) {
+  return isString(value) || isNumber(value);
+}
+function isStringOrNumberErr(field) {
+  return new DSErrors.IA('"' + field + '" must be a string or a number!');
+}
+function isObjectErr(field) {
+  return new DSErrors.IA('"' + field + '" must be an object!');
+}
+function isArrayErr(field) {
+  return new DSErrors.IA('"' + field + '" must be an array!');
+}
+
 // adapted from mout.isEmpty
 function isEmpty(val) {
   if (val == null) {
@@ -474,6 +488,14 @@ var DSUtils = {
     O.prototype = parent;
     return new O(options);
   },
+  _n: isNumber,
+  _s: isString,
+  _sn: isStringOrNumber,
+  _snErr: isStringOrNumberErr,
+  _o: isObject,
+  _oErr: isObjectErr,
+  _a: isArray,
+  _aErr: isArrayErr,
   compute: function (fn, field) {
     var _this = this;
     var args = [];

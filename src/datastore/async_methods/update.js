@@ -3,14 +3,14 @@ var DSErrors = require('../../errors');
 
 function update(resourceName, id, attrs, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
 
   return new DSUtils.Promise(function (resolve, reject) {
     id = DSUtils.resolveId(definition, id);
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
-    } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-      reject(new DSErrors.IA('"id" must be a string or a number!'));
+    } else if (!DSUtils._sn(id)) {
+      reject(DSUtils._snErr('id'));
     } else {
       options = DSUtils._(definition, options);
       options.logFn('update', id, attrs, options);
@@ -30,7 +30,7 @@ function update(resourceName, id, attrs, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'beforeUpdate', DSUtils.copy(attrs));
+        definition.emit('DS.beforeUpdate', definition, DSUtils.copy(attrs));
       }
       return _this.getAdapter(options).update(definition, id, attrs, options);
     })
@@ -39,10 +39,10 @@ function update(resourceName, id, attrs, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'afterUpdate', DSUtils.copy(attrs));
+        definition.emit('DS.afterUpdate', definition, DSUtils.copy(attrs));
       }
       if (options.cacheResponse) {
-        return _this.inject(definition.name, attrs, options);
+        return _this.inject(definition.n, attrs, options);
       } else {
         return _this.createInstance(resourceName, attrs, options);
       }

@@ -3,23 +3,23 @@ var DSErrors = require('../../errors');
 
 function loadRelations(resourceName, instance, relations, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
   var fields = [];
 
   return new DSUtils.Promise(function (resolve, reject) {
-    if (DSUtils.isString(instance) || DSUtils.isNumber(instance)) {
+    if (DSUtils._sn(instance)) {
       instance = _this.get(resourceName, instance);
     }
 
-    if (DSUtils.isString(relations)) {
+    if (DSUtils._s(relations)) {
       relations = [relations];
     }
 
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
-    } else if (!DSUtils.isObject(instance)) {
+    } else if (!DSUtils._o(instance)) {
       reject(new DSErrors.IA('"instance(id)" must be a string, number or object!'));
-    } else if (!DSUtils.isArray(relations)) {
+    } else if (!DSUtils._a(relations)) {
       reject(new DSErrors.IA('"relations" must be a string or an array!'));
     } else {
       var _options = DSUtils._(definition, options);
@@ -37,7 +37,7 @@ function loadRelations(resourceName, instance, relations, options) {
         var relationName = def.relation;
         var relationDef = definition.getResource(relationName);
         var __options = DSUtils._(relationDef, options);
-        if (DSUtils.contains(relations, relationName)) {
+        if (DSUtils.contains(relations, relationName) || DSUtils.contains(relations, def.localField)) {
           var task;
           var params = {};
           if (__options.allowSimpleWhere) {

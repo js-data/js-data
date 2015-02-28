@@ -2,7 +2,7 @@ var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
 function _getReactFunction(DS, definition, resource) {
-  var name = definition.name;
+  var name = definition.n;
   return function _react(added, removed, changed, oldValueFn, firstTime) {
     var target = this;
     var item;
@@ -70,7 +70,7 @@ function _inject(definition, resource, attrs, options) {
   var _react = _getReactFunction(_this, definition, resource, attrs, options);
 
   var injected;
-  if (DSUtils.isArray(attrs)) {
+  if (DSUtils._a(attrs)) {
     injected = [];
     for (var i = 0; i < attrs.length; i++) {
       injected.push(_inject.call(_this, definition, resource, attrs[i], options));
@@ -87,23 +87,23 @@ function _inject(definition, resource, attrs, options) {
       attrs[idA] = c[idA][c[idA].length - 1].apply(attrs, args);
     }
     if (!(idA in attrs)) {
-      var error = new DSErrors.R(definition.name + '.inject: "attrs" must contain the property specified by `idAttribute`!');
+      var error = new DSErrors.R(definition.n + '.inject: "attrs" must contain the property specified by `idAttribute`!');
       options.errorFn(error);
       throw error;
     } else {
       try {
         DSUtils.forEach(definition.relationList, function (def) {
           var relationName = def.relation;
-          var relationDef = _this.definitions[relationName];
+          var relationDef = _this.defs[relationName];
           var toInject = attrs[def.localField];
           if (toInject) {
             if (!relationDef) {
-              throw new DSErrors.R(definition.name + ' relation is defined but the resource is not!');
+              throw new DSErrors.R(definition.n + ' relation is defined but the resource is not!');
             }
-            if (DSUtils.isArray(toInject)) {
+            if (DSUtils._a(toInject)) {
               var items = [];
               DSUtils.forEach(toInject, function (toInjectItem) {
-                if (toInjectItem !== _this.store[relationName][toInjectItem[relationDef.idAttribute]]) {
+                if (toInjectItem !== _this.s[relationName][toInjectItem[relationDef.idAttribute]]) {
                   try {
                     var injectedItem = _this.inject(relationName, toInjectItem, options);
                     if (def.foreignKey) {
@@ -117,7 +117,7 @@ function _inject(definition, resource, attrs, options) {
               });
               attrs[def.localField] = items;
             } else {
-              if (toInject !== _this.store[relationName][toInject[relationDef.idAttribute]]) {
+              if (toInject !== _this.s[relationName][toInject[relationDef.idAttribute]]) {
                 try {
                   attrs[def.localField] = _this.inject(relationName, attrs[def.localField], options);
                   if (def.foreignKey) {
@@ -132,7 +132,7 @@ function _inject(definition, resource, attrs, options) {
         });
 
         var id = attrs[idA];
-        var item = _this.get(definition.name, id);
+        var item = _this.get(definition.n, id);
         var initialLastModified = item ? resource.modified[id] : 0;
 
         if (!item) {
@@ -197,40 +197,40 @@ function _link(definition, injected, options) {
 
   DSUtils.forEach(definition.relationList, function (def) {
     if (options.findBelongsTo && def.type === 'belongsTo' && injected[definition.idAttribute]) {
-      _this.link(definition.name, injected[definition.idAttribute], [def.relation]);
+      _this.link(definition.n, injected[definition.idAttribute], [def.relation]);
     } else if ((options.findHasMany && def.type === 'hasMany') || (options.findHasOne && def.type === 'hasOne')) {
-      _this.link(definition.name, injected[definition.idAttribute], [def.relation]);
+      _this.link(definition.n, injected[definition.idAttribute], [def.relation]);
     }
   });
 }
 
 function inject(resourceName, attrs, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
-  var resource = _this.store[resourceName];
+  var definition = _this.defs[resourceName];
+  var resource = _this.s[resourceName];
   var injected;
 
   if (!definition) {
     throw new DSErrors.NER(resourceName);
-  } else if (!DSUtils.isObject(attrs) && !DSUtils.isArray(attrs)) {
+  } else if (!DSUtils._o(attrs) && !DSUtils._a(attrs)) {
     throw new DSErrors.IA(resourceName + '.inject: "attrs" must be an object or an array!');
   }
 
-  var name = definition.name;
+  var name = definition.n;
   options = DSUtils._(definition, options);
 
   options.logFn('inject', attrs, options);
 
   if (options.notify) {
     options.beforeInject(options, attrs);
-    _this.emit(options, 'beforeInject', DSUtils.copy(attrs));
+    definition.emit('DS.beforeInject', definition, DSUtils.copy(attrs));
   }
 
   injected = _inject.call(_this, definition, resource, attrs, options);
   resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
   if (options.findInverseLinks) {
-    if (DSUtils.isArray(injected)) {
+    if (DSUtils._a(injected)) {
       if (injected.length) {
         _this.linkInverse(name, injected[0][definition.idAttribute]);
       }
@@ -239,7 +239,7 @@ function inject(resourceName, attrs, options) {
     }
   }
 
-  if (DSUtils.isArray(injected)) {
+  if (DSUtils._a(injected)) {
     DSUtils.forEach(injected, function (injectedI) {
       _link.call(_this, definition, injectedI, options);
     });
@@ -249,7 +249,7 @@ function inject(resourceName, attrs, options) {
 
   if (options.notify) {
     options.afterInject(options, injected);
-    _this.emit(options, 'afterInject', DSUtils.copy(injected));
+    definition.emit('DS.afterInject', definition, DSUtils.copy(injected));
   }
 
   return injected;

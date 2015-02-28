@@ -3,7 +3,7 @@ var DSErrors = require('../../errors');
 
 function create(resourceName, attrs, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
 
   options = options || {};
   attrs = attrs || {};
@@ -11,11 +11,11 @@ function create(resourceName, attrs, options) {
   var rejectionError;
   if (!definition) {
     rejectionError = new DSErrors.NER(resourceName);
-  } else if (!DSUtils.isObject(attrs)) {
-    rejectionError = new DSErrors.IA('"attrs" must be an object!');
+  } else if (!DSUtils._o(attrs)) {
+    rejectionError = DSUtils._oErr('attrs');
   } else {
     options = DSUtils._(definition, options);
-    if (options.upsert && (DSUtils.isString(attrs[definition.idAttribute]) || DSUtils.isNumber(attrs[definition.idAttribute]))) {
+    if (options.upsert && DSUtils._sn(attrs[definition.idAttribute])) {
       return _this.update(resourceName, attrs[definition.idAttribute], attrs, options);
     }
     options.logFn('create', attrs, options);
@@ -42,7 +42,7 @@ function create(resourceName, attrs, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'beforeCreate', DSUtils.copy(attrs));
+        definition.emit('DS.beforeCreate', definition, DSUtils.copy(attrs));
       }
       return _this.getAdapter(options).create(definition, attrs, options);
     })
@@ -51,12 +51,12 @@ function create(resourceName, attrs, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'afterCreate', DSUtils.copy(attrs));
+        definition.emit('DS.afterCreate', definition, DSUtils.copy(attrs));
       }
       if (options.cacheResponse) {
-        var created = _this.inject(definition.name, attrs, options);
+        var created = _this.inject(definition.n, attrs, options);
         var id = created[definition.idAttribute];
-        _this.store[resourceName].completedQueries[id] = new Date().getTime();
+        _this.s[resourceName].completedQueries[id] = new Date().getTime();
         return created;
       } else {
         return _this.createInstance(resourceName, attrs, options);

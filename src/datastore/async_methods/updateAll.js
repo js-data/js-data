@@ -3,7 +3,7 @@ var DSErrors = require('../../errors');
 
 function updateAll(resourceName, attrs, params, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
 
   return new DSUtils.Promise(function (resolve, reject) {
     if (!definition) {
@@ -27,7 +27,7 @@ function updateAll(resourceName, attrs, params, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'beforeUpdate', DSUtils.copy(attrs));
+        definition.emit('DS.beforeUpdate', definition, DSUtils.copy(attrs));
       }
       return _this.getAdapter(options).updateAll(definition, attrs, params, options);
     })
@@ -36,10 +36,10 @@ function updateAll(resourceName, attrs, params, options) {
     })
     .then(function (data) {
       if (options.notify) {
-        _this.emit(options, 'afterUpdate', DSUtils.copy(attrs));
+        definition.emit('DS.afterUpdate', definition, DSUtils.copy(attrs));
       }
       if (options.cacheResponse) {
-        return _this.inject(definition.name, data, options);
+        return _this.inject(definition.n, data, options);
       } else {
         var instances = [];
         DSUtils.forEach(data, function (item) {

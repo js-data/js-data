@@ -3,14 +3,14 @@ var DSErrors = require('../../errors');
 
 function linkAll(resourceName, params, relations) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
 
   relations = relations || [];
 
   if (!definition) {
     throw new DSErrors.NER(resourceName);
-  } else if (!DSUtils.isArray(relations)) {
-    throw new DSErrors.IA('"relations" must be an array!');
+  } else if (!DSUtils._a(relations)) {
+    throw DSUtils._aErr('relations');
   }
 
   definition.logFn('linkAll', params, relations);
@@ -34,13 +34,13 @@ function linkAll(resourceName, params, relations) {
         DSUtils.forEach(linked, function (injectedItem) {
           var params = {};
           params[def.foreignKey] = injectedItem[definition.idAttribute];
-          injectedItem[def.localField] = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.store[relationName].collection, relationName, params, { allowSimpleWhere: true });
+          injectedItem[def.localField] = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
         });
       } else if (def.type === 'hasOne') {
         DSUtils.forEach(linked, function (injectedItem) {
           var params = {};
           params[def.foreignKey] = injectedItem[definition.idAttribute];
-          var children = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.store[relationName].collection, relationName, params, { allowSimpleWhere: true });
+          var children = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
           if (children.length) {
             injectedItem[def.localField] = children[0];
           }

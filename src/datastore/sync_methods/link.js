@@ -3,17 +3,17 @@ var DSErrors = require('../../errors');
 
 function link(resourceName, id, relations) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
 
   relations = relations || [];
 
   id = DSUtils.resolveId(definition, id);
   if (!definition) {
     throw new DSErrors.NER(resourceName);
-  } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new DSErrors.IA('"id" must be a string or a number!');
-  } else if (!DSUtils.isArray(relations)) {
-    throw new DSErrors.IA('"relations" must be an array!');
+  } else if (!DSUtils._sn(id)) {
+    throw DSUtils._snErr('id');
+  } else if (!DSUtils._a(relations)) {
+    throw DSUtils._aErr('relations');
   }
 
   definition.logFn('link', id, relations);
@@ -34,10 +34,10 @@ function link(resourceName, id, relations) {
         }
       } else if (def.type === 'hasMany') {
         params[def.foreignKey] = linked[definition.idAttribute];
-        linked[def.localField] = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.store[relationName].collection, relationName, params, { allowSimpleWhere: true });
+        linked[def.localField] = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
       } else if (def.type === 'hasOne') {
         params[def.foreignKey] = linked[definition.idAttribute];
-        var children = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.store[relationName].collection, relationName, params, { allowSimpleWhere: true });
+        var children = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
         if (children.length) {
           linked[def.localField] = children[0];
         }

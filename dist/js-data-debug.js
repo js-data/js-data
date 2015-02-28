@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file dist/js-data-debug.js
-* @version 1.4.1 - Homepage <http://www.js-data.io/>
+* @version 1.5.0 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -2234,7 +2234,7 @@ var DSErrors = require('../../errors');
 
 function create(resourceName, attrs, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
 
   options = options || {};
   attrs = attrs || {};
@@ -2242,11 +2242,11 @@ function create(resourceName, attrs, options) {
   var rejectionError;
   if (!definition) {
     rejectionError = new DSErrors.NER(resourceName);
-  } else if (!DSUtils.isObject(attrs)) {
-    rejectionError = new DSErrors.IA('"attrs" must be an object!');
+  } else if (!DSUtils._o(attrs)) {
+    rejectionError = DSUtils._oErr('attrs');
   } else {
     options = DSUtils._(definition, options);
-    if (options.upsert && (DSUtils.isString(attrs[definition.idAttribute]) || DSUtils.isNumber(attrs[definition.idAttribute]))) {
+    if (options.upsert && DSUtils._sn(attrs[definition.idAttribute])) {
       return _this.update(resourceName, attrs[definition.idAttribute], attrs, options);
     }
     options.logFn('create', attrs, options);
@@ -2273,7 +2273,7 @@ function create(resourceName, attrs, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'beforeCreate', DSUtils.copy(attrs));
+        definition.emit('DS.beforeCreate', definition, DSUtils.copy(attrs));
       }
       return _this.getAdapter(options).create(definition, attrs, options);
     })
@@ -2282,12 +2282,12 @@ function create(resourceName, attrs, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'afterCreate', DSUtils.copy(attrs));
+        definition.emit('DS.afterCreate', definition, DSUtils.copy(attrs));
       }
       if (options.cacheResponse) {
-        var created = _this.inject(definition.name, attrs, options);
+        var created = _this.inject(definition.n, attrs, options);
         var id = created[definition.idAttribute];
-        _this.store[resourceName].completedQueries[id] = new Date().getTime();
+        _this.s[resourceName].completedQueries[id] = new Date().getTime();
         return created;
       } else {
         return _this.createInstance(resourceName, attrs, options);
@@ -2303,15 +2303,15 @@ var DSErrors = require('../../errors');
 
 function destroy(resourceName, id, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
   var item;
 
   return new DSUtils.Promise(function (resolve, reject) {
     id = DSUtils.resolveId(definition, id);
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
-    } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-      reject(new DSErrors.IA('"id" must be a string or a number!'));
+    } else if (!DSUtils._sn(id)) {
+      reject(DSUtils._snErr('id'));
     } else {
       item = _this.get(resourceName, id) || { id: id };
       options = DSUtils._(definition, options);
@@ -2324,7 +2324,7 @@ function destroy(resourceName, id, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'beforeDestroy', DSUtils.copy(attrs));
+        definition.emit('DS.beforeDestroy', definition, DSUtils.copy(attrs));
       }
       if (options.eagerEject) {
         _this.eject(resourceName, id);
@@ -2336,7 +2336,7 @@ function destroy(resourceName, id, options) {
     })
     .then(function (item) {
       if (options.notify) {
-        _this.emit(options, 'afterDestroy', DSUtils.copy(item));
+        definition.emit('DS.afterDestroy', definition, DSUtils.copy(item));
       }
       _this.eject(resourceName, id);
       return id;
@@ -2356,7 +2356,7 @@ var DSErrors = require('../../errors');
 
 function destroyAll(resourceName, params, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
   var ejected, toEject;
 
   params = params || {};
@@ -2364,8 +2364,8 @@ function destroyAll(resourceName, params, options) {
   return new DSUtils.Promise(function (resolve, reject) {
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
-    } else if (!DSUtils.isObject(params)) {
-      reject(new DSErrors.IA('"params" must be an object!'));
+    } else if (!DSUtils._o(params)) {
+      reject(DSUtils._oErr('attrs'));
     } else {
       options = DSUtils._(definition, options);
       options.logFn('destroyAll', params, options);
@@ -2376,7 +2376,7 @@ function destroyAll(resourceName, params, options) {
       return options.beforeDestroy(options, toEject);
     }).then(function () {
       if (options.notify) {
-        _this.emit(options, 'beforeDestroy', DSUtils.copy(toEject));
+        definition.emit('DS.beforeDestroy', definition, DSUtils.copy(toEject));
       }
       if (options.eagerEject) {
         ejected = _this.ejectAll(resourceName, params);
@@ -2386,15 +2386,15 @@ function destroyAll(resourceName, params, options) {
       return options.afterDestroy(options, toEject);
     }).then(function () {
       if (options.notify) {
-        _this.emit(options, 'afterDestroy', DSUtils.copy(toEject));
+        definition.emit('DS.afterDestroy', definition, DSUtils.copy(toEject));
       }
       return ejected || _this.ejectAll(resourceName, params);
     })['catch'](function (err) {
-      if (options && options.eagerEject && ejected) {
-        _this.inject(resourceName, ejected, { notify: false });
-      }
-      throw err;
-    });
+    if (options && options.eagerEject && ejected) {
+      _this.inject(resourceName, ejected, { notify: false });
+    }
+    throw err;
+  });
 }
 
 module.exports = destroyAll;
@@ -2406,14 +2406,14 @@ var DSErrors = require('../../errors');
 
 function find(resourceName, id, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
-  var resource = _this.store[resourceName];
+  var definition = _this.defs[resourceName];
+  var resource = _this.s[resourceName];
 
   return new DSUtils.Promise(function (resolve, reject) {
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
-    } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-      reject(new DSErrors.IA('"id" must be a string or a number!'));
+    } else if (!DSUtils._sn(id)) {
+      reject(DSUtils._snErr('id'));
     } else {
       options = DSUtils._(definition, options);
       options.logFn('find', id, options);
@@ -2487,8 +2487,8 @@ var DSErrors = require('../../errors');
 
 function processResults(data, resourceName, queryHash, options) {
   var _this = this;
-  var resource = _this.store[resourceName];
-  var idAttribute = _this.definitions[resourceName].idAttribute;
+  var resource = _this.s[resourceName];
+  var idAttribute = _this.defs[resourceName].idAttribute;
   var date = new Date().getTime();
 
   data = data || [];
@@ -2504,7 +2504,7 @@ function processResults(data, resourceName, queryHash, options) {
   var injected = _this.inject(resourceName, data, options);
 
   // Make sure each object is added to completedQueries
-  if (DSUtils.isArray(injected)) {
+  if (DSUtils._a(injected)) {
     DSUtils.forEach(injected, function (item) {
       if (item && item[idAttribute]) {
         resource.completedQueries[item[idAttribute]] = date;
@@ -2520,17 +2520,17 @@ function processResults(data, resourceName, queryHash, options) {
 
 function findAll(resourceName, params, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
-  var resource = _this.store[resourceName];
+  var definition = _this.defs[resourceName];
+  var resource = _this.s[resourceName];
   var queryHash;
 
   return new DSUtils.Promise(function (resolve, reject) {
     params = params || {};
 
-    if (!_this.definitions[resourceName]) {
+    if (!_this.defs[resourceName]) {
       reject(new DSErrors.NER(resourceName));
-    } else if (!DSUtils.isObject(params)) {
-      reject(new DSErrors.IA('"params" must be an object!'));
+    } else if (!DSUtils._o(params)) {
+      reject(DSUtils._oErr('params'));
     } else {
       options = DSUtils._(definition, options);
       queryHash = DSUtils.toJson(params);
@@ -2611,8 +2611,8 @@ var DSErrors = require('../../errors');
 
 function reap(resourceName, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
-  var resource = _this.store[resourceName];
+  var definition = _this.defs[resourceName];
+  var resource = _this.s[resourceName];
 
   return new DSUtils.Promise(function (resolve, reject) {
 
@@ -2637,7 +2637,7 @@ function reap(resourceName, options) {
   }).then(function (items) {
       if (options.isInterval || options.notify) {
         definition.beforeReap(options, items);
-        _this.emit(options, 'beforeReap', DSUtils.copy(items));
+        definition.emit('DS.beforeReap', definition, DSUtils.copy(items));
       }
       if (options.reapAction === 'inject') {
         DSUtils.forEach(items, function (item) {
@@ -2663,7 +2663,7 @@ function reap(resourceName, options) {
     }).then(function (items) {
       if (options.isInterval || options.notify) {
         definition.afterReap(options, items);
-        _this.emit(options, 'afterReap', DSUtils.copy(items));
+        definition.emit('DS.afterReap', definition, DSUtils.copy(items));
       }
       return items;
     });
@@ -2673,12 +2673,12 @@ function refresh(resourceName, id, options) {
   var _this = this;
 
   return new DSUtils.Promise(function (resolve, reject) {
-    var definition = _this.definitions[resourceName];
-    id = DSUtils.resolveId(_this.definitions[resourceName], id);
+    var definition = _this.defs[resourceName];
+    id = DSUtils.resolveId(_this.defs[resourceName], id);
     if (!definition) {
       reject(new _this.errors.NER(resourceName));
-    } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-      reject(new DSErrors.IA('"id" must be a string or a number!'));
+    } else if (!DSUtils._sn(id)) {
+      reject(DSUtils._snErr('id'));
     } else {
       options = DSUtils._(definition, options);
       options.bypassCache = true;
@@ -2714,23 +2714,23 @@ var DSErrors = require('../../errors');
 
 function loadRelations(resourceName, instance, relations, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
   var fields = [];
 
   return new DSUtils.Promise(function (resolve, reject) {
-    if (DSUtils.isString(instance) || DSUtils.isNumber(instance)) {
+    if (DSUtils._sn(instance)) {
       instance = _this.get(resourceName, instance);
     }
 
-    if (DSUtils.isString(relations)) {
+    if (DSUtils._s(relations)) {
       relations = [relations];
     }
 
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
-    } else if (!DSUtils.isObject(instance)) {
+    } else if (!DSUtils._o(instance)) {
       reject(new DSErrors.IA('"instance(id)" must be a string, number or object!'));
-    } else if (!DSUtils.isArray(relations)) {
+    } else if (!DSUtils._a(relations)) {
       reject(new DSErrors.IA('"relations" must be a string or an array!'));
     } else {
       var _options = DSUtils._(definition, options);
@@ -2748,7 +2748,7 @@ function loadRelations(resourceName, instance, relations, options) {
         var relationName = def.relation;
         var relationDef = definition.getResource(relationName);
         var __options = DSUtils._(relationDef, options);
-        if (DSUtils.contains(relations, relationName)) {
+        if (DSUtils.contains(relations, relationName) || DSUtils.contains(relations, def.localField)) {
           var task;
           var params = {};
           if (__options.allowSimpleWhere) {
@@ -2803,15 +2803,15 @@ var DSErrors = require('../../errors');
 
 function save(resourceName, id, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
   var item;
 
   return new DSUtils.Promise(function (resolve, reject) {
     id = DSUtils.resolveId(definition, id);
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
-    } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-      reject(new DSErrors.IA('"id" must be a string or a number!'));
+    } else if (!DSUtils._sn(id)) {
+      reject(DSUtils._snErr('id'));
     } else if (!_this.get(resourceName, id)) {
       reject(new DSErrors.R('id "' + id + '" not found in cache!'));
     } else {
@@ -2834,10 +2834,10 @@ function save(resourceName, id, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'beforeUpdate', DSUtils.copy(attrs));
+        definition.emit('DS.beforeUpdate', definition, DSUtils.copy(attrs));
       }
       if (options.changesOnly) {
-        var resource = _this.store[resourceName];
+        var resource = _this.s[resourceName];
         if (DSUtils.w) {
           resource.observers[id].deliver();
         }
@@ -2865,10 +2865,10 @@ function save(resourceName, id, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'afterUpdate', DSUtils.copy(attrs));
+        definition.emit('DS.afterUpdate', definition, DSUtils.copy(attrs));
       }
       if (options.cacheResponse) {
-        return _this.inject(definition.name, attrs, options);
+        return _this.inject(definition.n, attrs, options);
       } else {
         return _this.createInstance(resourceName, attrs, options);
       }
@@ -2883,14 +2883,14 @@ var DSErrors = require('../../errors');
 
 function update(resourceName, id, attrs, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
 
   return new DSUtils.Promise(function (resolve, reject) {
     id = DSUtils.resolveId(definition, id);
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
-    } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-      reject(new DSErrors.IA('"id" must be a string or a number!'));
+    } else if (!DSUtils._sn(id)) {
+      reject(DSUtils._snErr('id'));
     } else {
       options = DSUtils._(definition, options);
       options.logFn('update', id, attrs, options);
@@ -2910,7 +2910,7 @@ function update(resourceName, id, attrs, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'beforeUpdate', DSUtils.copy(attrs));
+        definition.emit('DS.beforeUpdate', definition, DSUtils.copy(attrs));
       }
       return _this.getAdapter(options).update(definition, id, attrs, options);
     })
@@ -2919,10 +2919,10 @@ function update(resourceName, id, attrs, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'afterUpdate', DSUtils.copy(attrs));
+        definition.emit('DS.afterUpdate', definition, DSUtils.copy(attrs));
       }
       if (options.cacheResponse) {
-        return _this.inject(definition.name, attrs, options);
+        return _this.inject(definition.n, attrs, options);
       } else {
         return _this.createInstance(resourceName, attrs, options);
       }
@@ -2937,7 +2937,7 @@ var DSErrors = require('../../errors');
 
 function updateAll(resourceName, attrs, params, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
 
   return new DSUtils.Promise(function (resolve, reject) {
     if (!definition) {
@@ -2961,7 +2961,7 @@ function updateAll(resourceName, attrs, params, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'beforeUpdate', DSUtils.copy(attrs));
+        definition.emit('DS.beforeUpdate', definition, DSUtils.copy(attrs));
       }
       return _this.getAdapter(options).updateAll(definition, attrs, params, options);
     })
@@ -2970,10 +2970,10 @@ function updateAll(resourceName, attrs, params, options) {
     })
     .then(function (data) {
       if (options.notify) {
-        _this.emit(options, 'afterUpdate', DSUtils.copy(attrs));
+        definition.emit('DS.afterUpdate', definition, DSUtils.copy(attrs));
       }
       if (options.cacheResponse) {
-        return _this.inject(definition.name, data, options);
+        return _this.inject(definition.n, data, options);
       } else {
         var instances = [];
         DSUtils.forEach(data, function (item) {
@@ -3004,10 +3004,10 @@ function lifecycleNoop(resource, attrs) {
 function compare(orderBy, index, a, b) {
   var def = orderBy[index];
   var cA = DSUtils.get(a, def[0]), cB = DSUtils.get(b, def[0]);
-  if (DSUtils.isString(cA)) {
+  if (DSUtils._s(cA)) {
     cA = DSUtils.upperCase(cA);
   }
-  if (DSUtils.isString(cB)) {
+  if (DSUtils._s(cB)) {
     cB = DSUtils.upperCase(cB);
   }
   if (def[1] === 'DESC') {
@@ -3130,7 +3130,7 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
   params = params || {};
   options = options || {};
 
-  if (DSUtils.isObject(params.where)) {
+  if (DSUtils._o(params.where)) {
     where = params.where;
   } else {
     where = {};
@@ -3155,16 +3155,16 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
       var first = true;
       var keep = true;
       DSUtils.forOwn(where, function (clause, field) {
-        if (DSUtils.isString(clause)) {
+        if (DSUtils._s(clause)) {
           clause = {
             '===': clause
           };
-        } else if (DSUtils.isNumber(clause) || DSUtils.isBoolean(clause)) {
+        } else if (DSUtils._n(clause) || DSUtils.isBoolean(clause)) {
           clause = {
             '==': clause
           };
         }
-        if (DSUtils.isObject(clause)) {
+        if (DSUtils._o(clause)) {
           DSUtils.forOwn(clause, function (term, op) {
             var expr;
             var isOr = op[0] === '|';
@@ -3191,25 +3191,25 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
             } else if (op === 'isectNotEmpty') {
               expr = DSUtils.intersection((val || []), (term || [])).length;
             } else if (op === 'in') {
-              if (DSUtils.isString(term)) {
+              if (DSUtils._s(term)) {
                 expr = term.indexOf(val) !== -1;
               } else {
                 expr = DSUtils.contains(term, val);
               }
             } else if (op === 'notIn') {
-              if (DSUtils.isString(term)) {
+              if (DSUtils._s(term)) {
                 expr = term.indexOf(val) === -1;
               } else {
                 expr = !DSUtils.contains(term, val);
               }
             } else if (op === 'contains') {
-              if (DSUtils.isString(val)) {
+              if (DSUtils._s(val)) {
                 expr = val.indexOf(term) !== -1;
               } else {
                 expr = DSUtils.contains(val, term);
               }
             } else if (op === 'notContains') {
-              if (DSUtils.isString(val)) {
+              if (DSUtils._s(val)) {
                 expr = val.indexOf(term) === -1;
               } else {
                 expr = !DSUtils.contains(val, term);
@@ -3228,19 +3228,19 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
 
   var orderBy = null;
 
-  if (DSUtils.isString(params.orderBy)) {
+  if (DSUtils._s(params.orderBy)) {
     orderBy = [
       [params.orderBy, 'ASC']
     ];
-  } else if (DSUtils.isArray(params.orderBy)) {
+  } else if (DSUtils._a(params.orderBy)) {
     orderBy = params.orderBy;
   }
 
-  if (!orderBy && DSUtils.isString(params.sort)) {
+  if (!orderBy && DSUtils._s(params.sort)) {
     orderBy = [
       [params.sort, 'ASC']
     ];
-  } else if (!orderBy && DSUtils.isArray(params.sort)) {
+  } else if (!orderBy && DSUtils._a(params.sort)) {
     orderBy = params.sort;
   }
 
@@ -3248,10 +3248,10 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
   if (orderBy) {
     var index = 0;
     DSUtils.forEach(orderBy, function (def, i) {
-      if (DSUtils.isString(def)) {
+      if (DSUtils._s(def)) {
         orderBy[i] = [def, 'ASC'];
-      } else if (!DSUtils.isArray(def)) {
-        throw new _this.errors.IllegalArgumentError('DS.filter(resourceName[, params][, options]): ' + DSUtils.toJson(def) + ': Must be a string or an array!', {
+      } else if (!DSUtils._a(def)) {
+        throw new DSErrors.IA('DS.filter(resourceName[, params][, options]): ' + DSUtils.toJson(def) + ': Must be a string or an array!', {
           params: {
             'orderBy[i]': {
               actual: typeof def,
@@ -3266,21 +3266,21 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
     });
   }
 
-  var limit = DSUtils.isNumber(params.limit) ? params.limit : null;
+  var limit = DSUtils._n(params.limit) ? params.limit : null;
   var skip = null;
 
-  if (DSUtils.isNumber(params.skip)) {
+  if (DSUtils._n(params.skip)) {
     skip = params.skip;
-  } else if (DSUtils.isNumber(params.offset)) {
+  } else if (DSUtils._n(params.offset)) {
     skip = params.offset;
   }
 
   // Apply 'limit' and 'skip'
   if (limit && skip) {
     filtered = DSUtils.slice(filtered, skip, Math.min(filtered.length, skip + limit));
-  } else if (DSUtils.isNumber(limit)) {
+  } else if (DSUtils._n(limit)) {
     filtered = DSUtils.slice(filtered, 0, Math.min(filtered.length, limit));
-  } else if (DSUtils.isNumber(skip)) {
+  } else if (DSUtils._n(skip)) {
     if (skip < filtered.length) {
       filtered = DSUtils.slice(filtered, skip);
     } else {
@@ -3312,7 +3312,11 @@ function DS(options) {
   }
 
   _this.store = {};
+  // alias store, shaves 0.1 kb off the minified build
+  _this.s = _this.store;
   _this.definitions = {};
+  // alias definitions, shaves 0.3 kb off the minified build
+  _this.defs = _this.definitions;
   _this.adapters = {};
   _this.defaults = new Defaults();
   _this.observe = DSUtils.observe;
@@ -3325,11 +3329,11 @@ function DS(options) {
 
 var dsPrototype = DS.prototype;
 
-dsPrototype.getAdapter = function (options) {
+dsPrototype.getAdapter = function getAdapter(options) {
   var errorIfNotExist = false;
   options = options || {};
   this.defaults.logFn('getAdapter', options);
-  if (DSUtils.isString(options)) {
+  if (DSUtils._s(options)) {
     errorIfNotExist = true;
     options = {
       adapter: options
@@ -3345,7 +3349,9 @@ dsPrototype.getAdapter = function (options) {
   }
 };
 
-dsPrototype.registerAdapter = function (name, Adapter, options) {
+dsPrototype.getAdapter.shorthand = false;
+
+dsPrototype.registerAdapter = function registerAdapter(name, Adapter, options) {
   var _this = this;
   options = options || {};
   _this.defaults.logFn('registerAdapter', name, Adapter, options);
@@ -3360,15 +3366,10 @@ dsPrototype.registerAdapter = function (name, Adapter, options) {
   _this.defaults.logFn('default adapter is ' + _this.defaults.defaultAdapter);
 };
 
-dsPrototype.emit = function (definition, event) {
-  var args = Array.prototype.slice.call(arguments, 2);
-  args.unshift(definition.name);
-  args.unshift('DS.' + event);
-  definition.emit.apply(definition, args);
-};
+dsPrototype.registerAdapter.shorthand = false;
 
 dsPrototype.is = function is(resourceName, instance) {
-  var definition = this.definitions[resourceName];
+  var definition = this.defs[resourceName];
   if (!definition) {
     throw new DSErrors.NER(resourceName);
   }
@@ -3418,18 +3419,18 @@ var instanceMethods = [
 
 function defineResource(definition) {
   var _this = this;
-  var definitions = _this.definitions;
+  var definitions = _this.defs;
 
-  if (DSUtils.isString(definition)) {
+  if (DSUtils._s(definition)) {
     definition = {
       name: definition.replace(/\s/gi, '')
     };
   }
-  if (!DSUtils.isObject(definition)) {
-    throw new DSErrors.IA('"definition" must be an object!');
-  } else if (!DSUtils.isString(definition.name)) {
+  if (!DSUtils._o(definition)) {
+    throw DSUtils._oErr('definition');
+  } else if (!DSUtils._s(definition.name)) {
     throw new DSErrors.IA('"name" must be a string!');
-  } else if (_this.store[definition.name]) {
+  } else if (_this.s[definition.name]) {
     throw new DSErrors.R(definition.name + ' is already registered!');
   }
 
@@ -3440,9 +3441,12 @@ function defineResource(definition) {
 
     var def = definitions[definition.name];
 
+    // alias name, shaves 0.08 kb off the minified build
+    def.n = def.name;
+
     def.logFn('Preparing resource.');
 
-    if (!DSUtils.isString(def.idAttribute)) {
+    if (!DSUtils._s(def.idAttribute)) {
       throw new DSErrors.IA('"idAttribute" must be a string!');
     }
 
@@ -3452,13 +3456,13 @@ function defineResource(definition) {
       def.relationFields = [];
       DSUtils.forOwn(def.relations, function (relatedModels, type) {
         DSUtils.forOwn(relatedModels, function (defs, relationName) {
-          if (!DSUtils.isArray(defs)) {
+          if (!DSUtils._a(defs)) {
             relatedModels[relationName] = [defs];
           }
           DSUtils.forEach(relatedModels[relationName], function (d) {
             d.type = type;
             d.relation = relationName;
-            d.name = def.name;
+            d.name = def.n;
             def.relationList.push(d);
             def.relationFields.push(d.localField);
           });
@@ -3482,7 +3486,7 @@ function defineResource(definition) {
     }
 
     def.getResource = function (resourceName) {
-      return _this.definitions[resourceName];
+      return _this.defs[resourceName];
     };
 
     def.getEndpoint = function (id, options) {
@@ -3503,9 +3507,9 @@ function defineResource(definition) {
       } else {
         delete options.params[parentKey];
 
-        if (DSUtils.isNumber(id) || DSUtils.isString(id)) {
+        if (DSUtils._sn(id)) {
           item = def.get(id);
-        } else if (DSUtils.isObject(id)) {
+        } else if (DSUtils._o(id)) {
           item = id;
         }
 
@@ -3534,7 +3538,7 @@ function defineResource(definition) {
     }
 
     // Create the wrapper class for the new resource
-    def['class'] = DSUtils.pascalCase(definition.name);
+    def['class'] = DSUtils.pascalCase(def.name);
     try {
       if (typeof def.useClass === 'function') {
         eval('function ' + def['class'] + '() { def.useClass.call(this); }');
@@ -3562,11 +3566,11 @@ function defineResource(definition) {
 
     def[def['class']].prototype.set = function (key, value) {
       DSUtils.set(this, key, value);
-      var observer = _this.store[def.name].observers[this[def.idAttribute]];
+      var observer = _this.s[def.n].observers[this[def.idAttribute]];
       if (observer && !DSUtils.observe.hasObjectObserve) {
         observer.deliver();
       } else {
-        _this.compute(def.name, this);
+        _this.compute(def.n, this);
       }
       return this;
     };
@@ -3606,7 +3610,7 @@ function defineResource(definition) {
     }
 
     if (definition.schema && _this.schemator) {
-      def.schema = _this.schemator.defineSchema(def.name, definition.schema);
+      def.schema = _this.schemator.defineSchema(def.n, definition.schema);
 
       if (!definition.hasOwnProperty('validate')) {
         def.validate = function (resourceName, attrs, cb) {
@@ -3627,7 +3631,7 @@ function defineResource(definition) {
       def[def['class']].prototype['DS' + DSUtils.pascalCase(name)] = function () {
         var args = Array.prototype.slice.call(arguments);
         args.unshift(this[def.idAttribute] || this);
-        args.unshift(def.name);
+        args.unshift(def.n);
         return _this[name].apply(_this, args);
       };
     });
@@ -3635,12 +3639,12 @@ function defineResource(definition) {
     def[def['class']].prototype.DSCreate = function () {
       var args = Array.prototype.slice.call(arguments);
       args.unshift(this);
-      args.unshift(def.name);
+      args.unshift(def.n);
       return _this.create.apply(_this, args);
     };
 
     // Initialize store data for the new resource
-    _this.store[def.name] = {
+    _this.s[def.n] = {
       collection: [],
       expiresHeap: new DSUtils.DSBinaryHeap(function (x) {
         return x.expires;
@@ -3662,20 +3666,28 @@ function defineResource(definition) {
 
     if (def.reapInterval) {
       setInterval(function () {
-        _this.reap(def.name, { isInterval: true });
+        _this.reap(def.n, { isInterval: true });
       }, def.reapInterval);
     }
 
     // Proxy DS methods with shorthand ones
     for (var key in _this) {
-      if (typeof _this[key] === 'function' && key !== 'defineResource') {
-        (function (k) {
-          def[k] = function () {
-            var args = Array.prototype.slice.call(arguments);
-            args.unshift(def.name);
-            return _this[k].apply(_this, args);
-          };
-        })(key);
+      if (typeof _this[key] === 'function') {
+        if (_this[key].shorthand !== false) {
+          (function (k) {
+            def[k] = function () {
+              var args = Array.prototype.slice.call(arguments);
+              args.unshift(def.n);
+              return _this[k].apply(_this, args);
+            };
+          })(key);
+        } else {
+          (function (k) {
+            def[k] = function () {
+              return _this[k].apply(_this, Array.prototype.slice.call(arguments));
+            };
+          })(key);
+        }
       }
     }
 
@@ -3719,7 +3731,7 @@ function defineResource(definition) {
     return def;
   } catch (err) {
     delete definitions[definition.name];
-    delete _this.store[definition.name];
+    delete _this.s[definition.name];
     throw err;
   }
 }
@@ -3732,8 +3744,8 @@ var DSErrors = require('../../errors');
 
 function eject(resourceName, id, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
-  var resource = _this.store[resourceName];
+  var definition = _this.defs[resourceName];
+  var resource = _this.s[resourceName];
   var item;
   var found = false;
 
@@ -3741,8 +3753,8 @@ function eject(resourceName, id, options) {
 
   if (!definition) {
     throw new DSErrors.NER(resourceName);
-  } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new DSErrors.IA('"id" must be a string or a number!');
+  } else if (!DSUtils._sn(id)) {
+    throw DSUtils._snErr('id');
   }
 
   options = DSUtils._(definition, options);
@@ -3760,9 +3772,9 @@ function eject(resourceName, id, options) {
   if (found) {
     if (options.notify) {
       definition.beforeEject(options, item);
-      _this.emit(options, 'beforeEject', DSUtils.copy(item));
+      definition.emit('DS.beforeEject', definition, DSUtils.copy(item));
     }
-    _this.unlinkInverse(definition.name, id);
+    _this.unlinkInverse(definition.n, id);
     resource.collection.splice(i, 1);
     if (DSUtils.w) {
       resource.observers[id].close();
@@ -3796,7 +3808,7 @@ function eject(resourceName, id, options) {
 
     if (options.notify) {
       definition.afterEject(options, item);
-      _this.emit(options, 'afterEject', DSUtils.copy(item));
+      definition.emit('DS.afterEject', definition, DSUtils.copy(item));
     }
 
     return item;
@@ -3811,23 +3823,23 @@ var DSErrors = require('../../errors');
 
 function ejectAll(resourceName, params, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
   params = params || {};
 
   if (!definition) {
     throw new DSErrors.NER(resourceName);
-  } else if (!DSUtils.isObject(params)) {
-    throw new DSErrors.IA('"params" must be an object!');
+  } else if (!DSUtils._o(params)) {
+    throw DSUtils._oErr('params');
   }
 
   definition.logFn('ejectAll', params, options);
 
-  var resource = _this.store[resourceName];
+  var resource = _this.s[resourceName];
   if (DSUtils.isEmpty(params)) {
     resource.completedQueries = {};
   }
   var queryHash = DSUtils.toJson(params);
-  var items = _this.filter(definition.name, params);
+  var items = _this.filter(definition.n, params);
   var ids = [];
   DSUtils.forEach(items, function (item) {
     if (item && item[definition.idAttribute]) {
@@ -3836,7 +3848,7 @@ function ejectAll(resourceName, params, options) {
   });
 
   DSUtils.forEach(ids, function (id) {
-    _this.eject(definition.name, id, options);
+    _this.eject(definition.n, id, options);
   });
 
   delete resource.completedQueries[queryHash];
@@ -3853,13 +3865,13 @@ var DSErrors = require('../../errors');
 
 function filter(resourceName, params, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
-  var resource = _this.store[resourceName];
+  var definition = _this.defs[resourceName];
+  var resource = _this.s[resourceName];
 
   if (!definition) {
     throw new DSErrors.NER(resourceName);
-  } else if (params && !DSUtils.isObject(params)) {
-    throw new DSErrors.IA('"params" must be an object!');
+  } else if (params && !DSUtils._o(params)) {
+    throw DSUtils._oErr('params');
   }
 
   options = DSUtils._(definition, options);
@@ -3894,14 +3906,14 @@ var R = DSErrors.R;
 
 function changes(resourceName, id, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
   options = options || {};
 
   id = DSUtils.resolveId(definition, id);
   if (!definition) {
     throw new NER(resourceName);
-  } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new IA('"id" must be a string or a number!');
+  } else if (!DSUtils._sn(id)) {
+    throw DSUtils._snErr('id');
   }
   options = DSUtils._(definition, options);
 
@@ -3910,9 +3922,9 @@ function changes(resourceName, id, options) {
   var item = _this.get(resourceName, id);
   if (item) {
     if (DSUtils.w) {
-      _this.store[resourceName].observers[id].deliver();
+      _this.s[resourceName].observers[id].deliver();
     }
-    var diff = DSUtils.diffObjectFromOldObject(item, _this.store[resourceName].previousAttributes[id], DSUtils.equals, options.ignoredChanges);
+    var diff = DSUtils.diffObjectFromOldObject(item, _this.s[resourceName].previousAttributes[id], DSUtils.equals, options.ignoredChanges);
     DSUtils.forOwn(diff, function (changeset, name) {
       var toKeep = [];
       DSUtils.forOwn(changeset, function (value, field) {
@@ -3933,14 +3945,14 @@ function changes(resourceName, id, options) {
 
 function changeHistory(resourceName, id) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
-  var resource = _this.store[resourceName];
+  var definition = _this.defs[resourceName];
+  var resource = _this.s[resourceName];
 
   id = DSUtils.resolveId(definition, id);
-  if (resourceName && !_this.definitions[resourceName]) {
+  if (resourceName && !_this.defs[resourceName]) {
     throw new NER(resourceName);
-  } else if (id && !DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new IA('"id" must be a string or a number!');
+  } else if (id && !DSUtils._sn(id)) {
+    throw DSUtils._snErr('id');
   }
 
   definition.logFn('changeHistory', id);
@@ -3961,14 +3973,14 @@ function changeHistory(resourceName, id) {
 
 function compute(resourceName, instance) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
 
-  instance = DSUtils.resolveItem(_this.store[resourceName], instance);
+  instance = DSUtils.resolveItem(_this.s[resourceName], instance);
   if (!definition) {
     throw new NER(resourceName);
   } else if (!instance) {
     throw new R('Item not in the store!');
-  } else if (!DSUtils.isObject(instance) && !DSUtils.isString(instance) && !DSUtils.isNumber(instance)) {
+  } else if (!DSUtils._o(instance) && !DSUtils._sn(instance)) {
     throw new IA('"instance" must be an object, string or number!');
   }
 
@@ -3982,7 +3994,7 @@ function compute(resourceName, instance) {
 }
 
 function createInstance(resourceName, attrs, options) {
-  var definition = this.definitions[resourceName];
+  var definition = this.defs[resourceName];
   var item;
 
   attrs = attrs || {};
@@ -4026,12 +4038,12 @@ function digest() {
 
 function get(resourceName, id, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
 
   if (!definition) {
     throw new NER(resourceName);
-  } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new IA('"id" must be a string or a number!');
+  } else if (!DSUtils._sn(id)) {
+    throw DSUtils._snErr('id');
   }
 
   options = DSUtils._(definition, options);
@@ -4039,7 +4051,7 @@ function get(resourceName, id, options) {
   options.logFn('get', id, options);
 
   // cache miss, request resource from server
-  var item = _this.store[resourceName].index[id];
+  var item = _this.s[resourceName].index[id];
   if (!item && options.loadFromServer) {
     _this.find(resourceName, id, options);
   }
@@ -4050,19 +4062,19 @@ function get(resourceName, id, options) {
 
 function getAll(resourceName, ids) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
-  var resource = _this.store[resourceName];
+  var definition = _this.defs[resourceName];
+  var resource = _this.s[resourceName];
   var collection = [];
 
   if (!definition) {
     throw new NER(resourceName);
-  } else if (ids && !DSUtils.isArray(ids)) {
-    throw new IA('"ids" must be an array!');
+  } else if (ids && !DSUtils._a(ids)) {
+    throw DSUtils._aErr('ids');
   }
 
   definition.logFn('getAll', ids);
 
-  if (DSUtils.isArray(ids)) {
+  if (DSUtils._a(ids)) {
     var length = ids.length;
     for (var i = 0; i < length; i++) {
       if (resource.index[ids[i]]) {
@@ -4078,14 +4090,14 @@ function getAll(resourceName, ids) {
 
 function hasChanges(resourceName, id) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
 
   id = DSUtils.resolveId(definition, id);
 
   if (!definition) {
     throw new NER(resourceName);
-  } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new IA('"id" must be a string or a number!');
+  } else if (!DSUtils._sn(id)) {
+    throw DSUtils._snErr('id');
   }
 
   definition.logFn('hasChanges', id);
@@ -4099,8 +4111,8 @@ function hasChanges(resourceName, id) {
 }
 
 function lastModified(resourceName, id) {
-  var definition = this.definitions[resourceName];
-  var resource = this.store[resourceName];
+  var definition = this.defs[resourceName];
+  var resource = this.s[resourceName];
 
   id = DSUtils.resolveId(definition, id);
   if (!definition) {
@@ -4119,8 +4131,8 @@ function lastModified(resourceName, id) {
 }
 
 function lastSaved(resourceName, id) {
-  var definition = this.definitions[resourceName];
-  var resource = this.store[resourceName];
+  var definition = this.defs[resourceName];
+  var resource = this.s[resourceName];
 
   id = DSUtils.resolveId(definition, id);
   if (!definition) {
@@ -4137,14 +4149,14 @@ function lastSaved(resourceName, id) {
 
 function previous(resourceName, id) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
-  var resource = _this.store[resourceName];
+  var definition = _this.defs[resourceName];
+  var resource = _this.s[resourceName];
 
   id = DSUtils.resolveId(definition, id);
   if (!definition) {
     throw new NER(resourceName);
-  } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new IA('"id" must be a string or a number!');
+  } else if (!DSUtils._sn(id)) {
+    throw DSUtils._snErr('id');
   }
 
   definition.logFn('previous', id);
@@ -4181,7 +4193,7 @@ var DSUtils = require('../../utils');
 var DSErrors = require('../../errors');
 
 function _getReactFunction(DS, definition, resource) {
-  var name = definition.name;
+  var name = definition.n;
   return function _react(added, removed, changed, oldValueFn, firstTime) {
     var target = this;
     var item;
@@ -4249,7 +4261,7 @@ function _inject(definition, resource, attrs, options) {
   var _react = _getReactFunction(_this, definition, resource, attrs, options);
 
   var injected;
-  if (DSUtils.isArray(attrs)) {
+  if (DSUtils._a(attrs)) {
     injected = [];
     for (var i = 0; i < attrs.length; i++) {
       injected.push(_inject.call(_this, definition, resource, attrs[i], options));
@@ -4266,23 +4278,23 @@ function _inject(definition, resource, attrs, options) {
       attrs[idA] = c[idA][c[idA].length - 1].apply(attrs, args);
     }
     if (!(idA in attrs)) {
-      var error = new DSErrors.R(definition.name + '.inject: "attrs" must contain the property specified by `idAttribute`!');
+      var error = new DSErrors.R(definition.n + '.inject: "attrs" must contain the property specified by `idAttribute`!');
       options.errorFn(error);
       throw error;
     } else {
       try {
         DSUtils.forEach(definition.relationList, function (def) {
           var relationName = def.relation;
-          var relationDef = _this.definitions[relationName];
+          var relationDef = _this.defs[relationName];
           var toInject = attrs[def.localField];
           if (toInject) {
             if (!relationDef) {
-              throw new DSErrors.R(definition.name + ' relation is defined but the resource is not!');
+              throw new DSErrors.R(definition.n + ' relation is defined but the resource is not!');
             }
-            if (DSUtils.isArray(toInject)) {
+            if (DSUtils._a(toInject)) {
               var items = [];
               DSUtils.forEach(toInject, function (toInjectItem) {
-                if (toInjectItem !== _this.store[relationName][toInjectItem[relationDef.idAttribute]]) {
+                if (toInjectItem !== _this.s[relationName][toInjectItem[relationDef.idAttribute]]) {
                   try {
                     var injectedItem = _this.inject(relationName, toInjectItem, options);
                     if (def.foreignKey) {
@@ -4296,7 +4308,7 @@ function _inject(definition, resource, attrs, options) {
               });
               attrs[def.localField] = items;
             } else {
-              if (toInject !== _this.store[relationName][toInject[relationDef.idAttribute]]) {
+              if (toInject !== _this.s[relationName][toInject[relationDef.idAttribute]]) {
                 try {
                   attrs[def.localField] = _this.inject(relationName, attrs[def.localField], options);
                   if (def.foreignKey) {
@@ -4311,7 +4323,7 @@ function _inject(definition, resource, attrs, options) {
         });
 
         var id = attrs[idA];
-        var item = _this.get(definition.name, id);
+        var item = _this.get(definition.n, id);
         var initialLastModified = item ? resource.modified[id] : 0;
 
         if (!item) {
@@ -4376,40 +4388,40 @@ function _link(definition, injected, options) {
 
   DSUtils.forEach(definition.relationList, function (def) {
     if (options.findBelongsTo && def.type === 'belongsTo' && injected[definition.idAttribute]) {
-      _this.link(definition.name, injected[definition.idAttribute], [def.relation]);
+      _this.link(definition.n, injected[definition.idAttribute], [def.relation]);
     } else if ((options.findHasMany && def.type === 'hasMany') || (options.findHasOne && def.type === 'hasOne')) {
-      _this.link(definition.name, injected[definition.idAttribute], [def.relation]);
+      _this.link(definition.n, injected[definition.idAttribute], [def.relation]);
     }
   });
 }
 
 function inject(resourceName, attrs, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
-  var resource = _this.store[resourceName];
+  var definition = _this.defs[resourceName];
+  var resource = _this.s[resourceName];
   var injected;
 
   if (!definition) {
     throw new DSErrors.NER(resourceName);
-  } else if (!DSUtils.isObject(attrs) && !DSUtils.isArray(attrs)) {
+  } else if (!DSUtils._o(attrs) && !DSUtils._a(attrs)) {
     throw new DSErrors.IA(resourceName + '.inject: "attrs" must be an object or an array!');
   }
 
-  var name = definition.name;
+  var name = definition.n;
   options = DSUtils._(definition, options);
 
   options.logFn('inject', attrs, options);
 
   if (options.notify) {
     options.beforeInject(options, attrs);
-    _this.emit(options, 'beforeInject', DSUtils.copy(attrs));
+    definition.emit('DS.beforeInject', definition, DSUtils.copy(attrs));
   }
 
   injected = _inject.call(_this, definition, resource, attrs, options);
   resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
   if (options.findInverseLinks) {
-    if (DSUtils.isArray(injected)) {
+    if (DSUtils._a(injected)) {
       if (injected.length) {
         _this.linkInverse(name, injected[0][definition.idAttribute]);
       }
@@ -4418,7 +4430,7 @@ function inject(resourceName, attrs, options) {
     }
   }
 
-  if (DSUtils.isArray(injected)) {
+  if (DSUtils._a(injected)) {
     DSUtils.forEach(injected, function (injectedI) {
       _link.call(_this, definition, injectedI, options);
     });
@@ -4428,7 +4440,7 @@ function inject(resourceName, attrs, options) {
 
   if (options.notify) {
     options.afterInject(options, injected);
-    _this.emit(options, 'afterInject', DSUtils.copy(injected));
+    definition.emit('DS.afterInject', definition, DSUtils.copy(injected));
   }
 
   return injected;
@@ -4442,17 +4454,17 @@ var DSErrors = require('../../errors');
 
 function link(resourceName, id, relations) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
 
   relations = relations || [];
 
   id = DSUtils.resolveId(definition, id);
   if (!definition) {
     throw new DSErrors.NER(resourceName);
-  } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new DSErrors.IA('"id" must be a string or a number!');
-  } else if (!DSUtils.isArray(relations)) {
-    throw new DSErrors.IA('"relations" must be an array!');
+  } else if (!DSUtils._sn(id)) {
+    throw DSUtils._snErr('id');
+  } else if (!DSUtils._a(relations)) {
+    throw DSUtils._aErr('relations');
   }
 
   definition.logFn('link', id, relations);
@@ -4473,10 +4485,10 @@ function link(resourceName, id, relations) {
         }
       } else if (def.type === 'hasMany') {
         params[def.foreignKey] = linked[definition.idAttribute];
-        linked[def.localField] = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.store[relationName].collection, relationName, params, { allowSimpleWhere: true });
+        linked[def.localField] = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
       } else if (def.type === 'hasOne') {
         params[def.foreignKey] = linked[definition.idAttribute];
-        var children = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.store[relationName].collection, relationName, params, { allowSimpleWhere: true });
+        var children = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
         if (children.length) {
           linked[def.localField] = children[0];
         }
@@ -4495,14 +4507,14 @@ var DSErrors = require('../../errors');
 
 function linkAll(resourceName, params, relations) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
 
   relations = relations || [];
 
   if (!definition) {
     throw new DSErrors.NER(resourceName);
-  } else if (!DSUtils.isArray(relations)) {
-    throw new DSErrors.IA('"relations" must be an array!');
+  } else if (!DSUtils._a(relations)) {
+    throw DSUtils._aErr('relations');
   }
 
   definition.logFn('linkAll', params, relations);
@@ -4526,13 +4538,13 @@ function linkAll(resourceName, params, relations) {
         DSUtils.forEach(linked, function (injectedItem) {
           var params = {};
           params[def.foreignKey] = injectedItem[definition.idAttribute];
-          injectedItem[def.localField] = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.store[relationName].collection, relationName, params, { allowSimpleWhere: true });
+          injectedItem[def.localField] = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
         });
       } else if (def.type === 'hasOne') {
         DSUtils.forEach(linked, function (injectedItem) {
           var params = {};
           params[def.foreignKey] = injectedItem[definition.idAttribute];
-          var children = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.store[relationName].collection, relationName, params, { allowSimpleWhere: true });
+          var children = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
           if (children.length) {
             injectedItem[def.localField] = children[0];
           }
@@ -4552,17 +4564,17 @@ var DSErrors = require('../../errors');
 
 function linkInverse(resourceName, id, relations) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
 
   relations = relations || [];
 
   id = DSUtils.resolveId(definition, id);
   if (!definition) {
     throw new DSErrors.NER(resourceName);
-  } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new DSErrors.IA('"id" must be a string or a number!');
-  } else if (!DSUtils.isArray(relations)) {
-    throw new DSErrors.IA('"relations" must be an array!');
+  } else if (!DSUtils._sn(id)) {
+    throw DSUtils._snErr('id');
+  } else if (!DSUtils._a(relations)) {
+    throw DSUtils._aErr('relations');
   }
 
   definition.logFn('linkInverse', id, relations);
@@ -4570,14 +4582,14 @@ function linkInverse(resourceName, id, relations) {
   var linked = _this.get(resourceName, id);
 
   if (linked) {
-    DSUtils.forOwn(_this.definitions, function (d) {
+    DSUtils.forOwn(_this.defs, function (d) {
       DSUtils.forOwn(d.relations, function (relatedModels) {
         DSUtils.forOwn(relatedModels, function (defs, relationName) {
-          if (relations.length && !DSUtils.contains(relations, d.name)) {
+          if (relations.length && !DSUtils.contains(relations, d.n)) {
             return;
           }
-          if (definition.name === relationName) {
-            _this.linkAll(d.name, {}, [definition.name]);
+          if (definition.n === relationName) {
+            _this.linkAll(d.n, {}, [definition.n]);
           }
         });
       });
@@ -4595,17 +4607,17 @@ var DSErrors = require('../../errors');
 
 function unlinkInverse(resourceName, id, relations) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
 
   relations = relations || [];
 
   id = DSUtils.resolveId(definition, id);
   if (!definition) {
     throw new DSErrors.NER(resourceName);
-  } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new DSErrors.IA('"id" must be a string or a number!');
-  } else if (!DSUtils.isArray(relations)) {
-    throw new DSErrors.IA('"relations" must be an array!');
+  } else if (!DSUtils._sn(id)) {
+    throw DSUtils._snErr('id');
+  } else if (!DSUtils._a(relations)) {
+    throw DSUtils._aErr('relations');
   }
 
   definition.logFn('unlinkInverse', id, relations);
@@ -4613,12 +4625,12 @@ function unlinkInverse(resourceName, id, relations) {
   var linked = _this.get(resourceName, id);
 
   if (linked) {
-    DSUtils.forOwn(_this.definitions, function (d) {
+    DSUtils.forOwn(_this.defs, function (d) {
       DSUtils.forOwn(d.relations, function (relatedModels) {
         DSUtils.forOwn(relatedModels, function (defs, relationName) {
-          if (definition.name === relationName) {
+          if (definition.n === relationName) {
             DSUtils.forEach(defs, function (def) {
-              DSUtils.forEach(_this.store[def.name].collection, function (item) {
+              DSUtils.forEach(_this.s[def.name].collection, function (item) {
                 if (def.type === 'hasMany' && item[def.localField]) {
                   var index;
                   DSUtils.forEach(item[def.localField], function (subItem, i) {
@@ -4700,10 +4712,10 @@ module.exports = {
   DSUtils: require('./utils'),
   DSErrors: require('./errors'),
   version: {
-    full: '1.4.1',
+    full: '1.5.0',
     major: parseInt('1', 10),
-    minor: parseInt('4', 10),
-    patch: parseInt('1', 10),
+    minor: parseInt('5', 10),
+    patch: parseInt('0', 10),
     alpha: 'false' !== 'false' ? 'false' : false,
     beta: 'false' !== 'false' ? 'false' : false
   }
@@ -4758,6 +4770,20 @@ function isNumber(value) {
 // adapted from lodash.isFunction
 function isFunction(value) {
   return typeof value == 'function' || (value && toString.call(value) === '[object Function]') || false;
+}
+
+// shorthand argument checking functions, using these shaves 1.18 kb off of the minified build
+function isStringOrNumber(value) {
+  return isString(value) || isNumber(value);
+}
+function isStringOrNumberErr(field) {
+  return new DSErrors.IA('"' + field + '" must be a string or a number!');
+}
+function isObjectErr(field) {
+  return new DSErrors.IA('"' + field + '" must be an object!');
+}
+function isArrayErr(field) {
+  return new DSErrors.IA('"' + field + '" must be an array!');
 }
 
 // adapted from mout.isEmpty
@@ -5186,6 +5212,14 @@ var DSUtils = {
     O.prototype = parent;
     return new O(options);
   },
+  _n: isNumber,
+  _s: isString,
+  _sn: isStringOrNumber,
+  _snErr: isStringOrNumberErr,
+  _o: isObject,
+  _oErr: isObjectErr,
+  _a: isArray,
+  _aErr: isArrayErr,
   compute: function (fn, field) {
     var _this = this;
     var args = [];

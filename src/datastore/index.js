@@ -15,10 +15,10 @@ function lifecycleNoop(resource, attrs) {
 function compare(orderBy, index, a, b) {
   var def = orderBy[index];
   var cA = DSUtils.get(a, def[0]), cB = DSUtils.get(b, def[0]);
-  if (DSUtils.isString(cA)) {
+  if (DSUtils._s(cA)) {
     cA = DSUtils.upperCase(cA);
   }
-  if (DSUtils.isString(cB)) {
+  if (DSUtils._s(cB)) {
     cB = DSUtils.upperCase(cB);
   }
   if (def[1] === 'DESC') {
@@ -141,7 +141,7 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
   params = params || {};
   options = options || {};
 
-  if (DSUtils.isObject(params.where)) {
+  if (DSUtils._o(params.where)) {
     where = params.where;
   } else {
     where = {};
@@ -166,16 +166,16 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
       var first = true;
       var keep = true;
       DSUtils.forOwn(where, function (clause, field) {
-        if (DSUtils.isString(clause)) {
+        if (DSUtils._s(clause)) {
           clause = {
             '===': clause
           };
-        } else if (DSUtils.isNumber(clause) || DSUtils.isBoolean(clause)) {
+        } else if (DSUtils._n(clause) || DSUtils.isBoolean(clause)) {
           clause = {
             '==': clause
           };
         }
-        if (DSUtils.isObject(clause)) {
+        if (DSUtils._o(clause)) {
           DSUtils.forOwn(clause, function (term, op) {
             var expr;
             var isOr = op[0] === '|';
@@ -202,25 +202,25 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
             } else if (op === 'isectNotEmpty') {
               expr = DSUtils.intersection((val || []), (term || [])).length;
             } else if (op === 'in') {
-              if (DSUtils.isString(term)) {
+              if (DSUtils._s(term)) {
                 expr = term.indexOf(val) !== -1;
               } else {
                 expr = DSUtils.contains(term, val);
               }
             } else if (op === 'notIn') {
-              if (DSUtils.isString(term)) {
+              if (DSUtils._s(term)) {
                 expr = term.indexOf(val) === -1;
               } else {
                 expr = !DSUtils.contains(term, val);
               }
             } else if (op === 'contains') {
-              if (DSUtils.isString(val)) {
+              if (DSUtils._s(val)) {
                 expr = val.indexOf(term) !== -1;
               } else {
                 expr = DSUtils.contains(val, term);
               }
             } else if (op === 'notContains') {
-              if (DSUtils.isString(val)) {
+              if (DSUtils._s(val)) {
                 expr = val.indexOf(term) === -1;
               } else {
                 expr = !DSUtils.contains(val, term);
@@ -239,19 +239,19 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
 
   var orderBy = null;
 
-  if (DSUtils.isString(params.orderBy)) {
+  if (DSUtils._s(params.orderBy)) {
     orderBy = [
       [params.orderBy, 'ASC']
     ];
-  } else if (DSUtils.isArray(params.orderBy)) {
+  } else if (DSUtils._a(params.orderBy)) {
     orderBy = params.orderBy;
   }
 
-  if (!orderBy && DSUtils.isString(params.sort)) {
+  if (!orderBy && DSUtils._s(params.sort)) {
     orderBy = [
       [params.sort, 'ASC']
     ];
-  } else if (!orderBy && DSUtils.isArray(params.sort)) {
+  } else if (!orderBy && DSUtils._a(params.sort)) {
     orderBy = params.sort;
   }
 
@@ -259,10 +259,10 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
   if (orderBy) {
     var index = 0;
     DSUtils.forEach(orderBy, function (def, i) {
-      if (DSUtils.isString(def)) {
+      if (DSUtils._s(def)) {
         orderBy[i] = [def, 'ASC'];
-      } else if (!DSUtils.isArray(def)) {
-        throw new _this.errors.IllegalArgumentError('DS.filter(resourceName[, params][, options]): ' + DSUtils.toJson(def) + ': Must be a string or an array!', {
+      } else if (!DSUtils._a(def)) {
+        throw new DSErrors.IA('DS.filter(resourceName[, params][, options]): ' + DSUtils.toJson(def) + ': Must be a string or an array!', {
           params: {
             'orderBy[i]': {
               actual: typeof def,
@@ -277,21 +277,21 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
     });
   }
 
-  var limit = DSUtils.isNumber(params.limit) ? params.limit : null;
+  var limit = DSUtils._n(params.limit) ? params.limit : null;
   var skip = null;
 
-  if (DSUtils.isNumber(params.skip)) {
+  if (DSUtils._n(params.skip)) {
     skip = params.skip;
-  } else if (DSUtils.isNumber(params.offset)) {
+  } else if (DSUtils._n(params.offset)) {
     skip = params.offset;
   }
 
   // Apply 'limit' and 'skip'
   if (limit && skip) {
     filtered = DSUtils.slice(filtered, skip, Math.min(filtered.length, skip + limit));
-  } else if (DSUtils.isNumber(limit)) {
+  } else if (DSUtils._n(limit)) {
     filtered = DSUtils.slice(filtered, 0, Math.min(filtered.length, limit));
-  } else if (DSUtils.isNumber(skip)) {
+  } else if (DSUtils._n(skip)) {
     if (skip < filtered.length) {
       filtered = DSUtils.slice(filtered, skip);
     } else {
@@ -323,7 +323,11 @@ function DS(options) {
   }
 
   _this.store = {};
+  // alias store, shaves 0.1 kb off the minified build
+  _this.s = _this.store;
   _this.definitions = {};
+  // alias definitions, shaves 0.3 kb off the minified build
+  _this.defs = _this.definitions;
   _this.adapters = {};
   _this.defaults = new Defaults();
   _this.observe = DSUtils.observe;
@@ -336,11 +340,11 @@ function DS(options) {
 
 var dsPrototype = DS.prototype;
 
-dsPrototype.getAdapter = function (options) {
+dsPrototype.getAdapter = function getAdapter(options) {
   var errorIfNotExist = false;
   options = options || {};
   this.defaults.logFn('getAdapter', options);
-  if (DSUtils.isString(options)) {
+  if (DSUtils._s(options)) {
     errorIfNotExist = true;
     options = {
       adapter: options
@@ -356,7 +360,9 @@ dsPrototype.getAdapter = function (options) {
   }
 };
 
-dsPrototype.registerAdapter = function (name, Adapter, options) {
+dsPrototype.getAdapter.shorthand = false;
+
+dsPrototype.registerAdapter = function registerAdapter(name, Adapter, options) {
   var _this = this;
   options = options || {};
   _this.defaults.logFn('registerAdapter', name, Adapter, options);
@@ -371,15 +377,10 @@ dsPrototype.registerAdapter = function (name, Adapter, options) {
   _this.defaults.logFn('default adapter is ' + _this.defaults.defaultAdapter);
 };
 
-dsPrototype.emit = function (definition, event) {
-  var args = Array.prototype.slice.call(arguments, 2);
-  args.unshift(definition.name);
-  args.unshift('DS.' + event);
-  definition.emit.apply(definition, args);
-};
+dsPrototype.registerAdapter.shorthand = false;
 
 dsPrototype.is = function is(resourceName, instance) {
-  var definition = this.definitions[resourceName];
+  var definition = this.defs[resourceName];
   if (!definition) {
     throw new DSErrors.NER(resourceName);
   }

@@ -3,15 +3,15 @@ var DSErrors = require('../../errors');
 
 function destroy(resourceName, id, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
   var item;
 
   return new DSUtils.Promise(function (resolve, reject) {
     id = DSUtils.resolveId(definition, id);
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
-    } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-      reject(new DSErrors.IA('"id" must be a string or a number!'));
+    } else if (!DSUtils._sn(id)) {
+      reject(DSUtils._snErr('id'));
     } else {
       item = _this.get(resourceName, id) || { id: id };
       options = DSUtils._(definition, options);
@@ -24,7 +24,7 @@ function destroy(resourceName, id, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'beforeDestroy', DSUtils.copy(attrs));
+        definition.emit('DS.beforeDestroy', definition, DSUtils.copy(attrs));
       }
       if (options.eagerEject) {
         _this.eject(resourceName, id);
@@ -36,7 +36,7 @@ function destroy(resourceName, id, options) {
     })
     .then(function (item) {
       if (options.notify) {
-        _this.emit(options, 'afterDestroy', DSUtils.copy(item));
+        definition.emit('DS.afterDestroy', definition, DSUtils.copy(item));
       }
       _this.eject(resourceName, id);
       return id;

@@ -10,11 +10,14 @@ describe('DS#defineResource', function () {
         }
       };
 
-    store.defineResource({
+    var Comment = store.defineResource({
       name: 'Comment',
       basePath: 'hello/',
       validate: test.validate
     });
+
+    assert.isTrue(Comment.getAdapter() === store.getAdapter());
+    assert.isTrue(Comment.getAdapter({ adapter: 'http' }) === store.getAdapter({ adapter: 'http' }));
 
     var weirdThing = store.defineResource({
       name: 'weird-thing'

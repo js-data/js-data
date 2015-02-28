@@ -123,14 +123,14 @@ describe('DS#update', function () {
 
       var c = Comment.inject(testComment2);
 
-      function onBeforeUpdate(resourceName, attrs) {
+      function onBeforeUpdate(resource, attrs) {
         attrs.other = 'stuff';
-        assert.equal(resourceName, 'comment');
+        assert.equal(resource.name, 'comment');
         assert.deepEqual(attrs, { content: 'stuff', other: 'stuff' });
       }
 
-      function onAfterUpdate(resourceName, attrs) {
-        assert.equal(resourceName, 'comment');
+      function onAfterUpdate(resource, attrs) {
+        assert.equal(resource.name, 'comment');
         assert.deepEqual(attrs, testComment2);
         assert.isFalse(testComment2 === attrs);
       }
@@ -160,7 +160,8 @@ describe('DS#update', function () {
           assert.deepEqual(JSON.stringify(comment), JSON.stringify(testComment2));
           assert.deepEqual(JSON.stringify(comment), JSON.stringify(store.get('comment', 6)));
           done();
-        }).catch(function () {
+        }).catch(function (err) {
+          console.log(err.stack);
           done('Should not have failed!');
         });
 
@@ -171,7 +172,8 @@ describe('DS#update', function () {
           assert.equal(_this.requests[2].requestBody, DSUtils.toJson({ content: 'stuff' }));
           _this.requests[2].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment2));
         }, 30);
-      }).catch(function () {
+      }).catch(function (err) {
+        console.log(err.stack);
         done('Should not have failed!');
       });
 
@@ -182,7 +184,8 @@ describe('DS#update', function () {
         assert.equal(_this.requests[1].requestBody, DSUtils.toJson({ content: 'stuff' }));
         _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment2));
       }, 30);
-    }).catch(function () {
+    }).catch(function (err) {
+      console.log(err.stack);
       done('Should not have failed!');
     });
 

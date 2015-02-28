@@ -3,15 +3,15 @@ var DSErrors = require('../../errors');
 
 function save(resourceName, id, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
+  var definition = _this.defs[resourceName];
   var item;
 
   return new DSUtils.Promise(function (resolve, reject) {
     id = DSUtils.resolveId(definition, id);
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
-    } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-      reject(new DSErrors.IA('"id" must be a string or a number!'));
+    } else if (!DSUtils._sn(id)) {
+      reject(DSUtils._snErr('id'));
     } else if (!_this.get(resourceName, id)) {
       reject(new DSErrors.R('id "' + id + '" not found in cache!'));
     } else {
@@ -34,10 +34,10 @@ function save(resourceName, id, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'beforeUpdate', DSUtils.copy(attrs));
+        definition.emit('DS.beforeUpdate', definition, DSUtils.copy(attrs));
       }
       if (options.changesOnly) {
-        var resource = _this.store[resourceName];
+        var resource = _this.s[resourceName];
         if (DSUtils.w) {
           resource.observers[id].deliver();
         }
@@ -65,10 +65,10 @@ function save(resourceName, id, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        _this.emit(options, 'afterUpdate', DSUtils.copy(attrs));
+        definition.emit('DS.afterUpdate', definition, DSUtils.copy(attrs));
       }
       if (options.cacheResponse) {
-        return _this.inject(definition.name, attrs, options);
+        return _this.inject(definition.n, attrs, options);
       } else {
         return _this.createInstance(resourceName, attrs, options);
       }

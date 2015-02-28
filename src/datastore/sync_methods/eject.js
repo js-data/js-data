@@ -3,8 +3,8 @@ var DSErrors = require('../../errors');
 
 function eject(resourceName, id, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
-  var resource = _this.store[resourceName];
+  var definition = _this.defs[resourceName];
+  var resource = _this.s[resourceName];
   var item;
   var found = false;
 
@@ -12,8 +12,8 @@ function eject(resourceName, id, options) {
 
   if (!definition) {
     throw new DSErrors.NER(resourceName);
-  } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-    throw new DSErrors.IA('"id" must be a string or a number!');
+  } else if (!DSUtils._sn(id)) {
+    throw DSUtils._snErr('id');
   }
 
   options = DSUtils._(definition, options);
@@ -31,9 +31,9 @@ function eject(resourceName, id, options) {
   if (found) {
     if (options.notify) {
       definition.beforeEject(options, item);
-      _this.emit(options, 'beforeEject', DSUtils.copy(item));
+      definition.emit('DS.beforeEject', definition, DSUtils.copy(item));
     }
-    _this.unlinkInverse(definition.name, id);
+    _this.unlinkInverse(definition.n, id);
     resource.collection.splice(i, 1);
     if (DSUtils.w) {
       resource.observers[id].close();
@@ -67,7 +67,7 @@ function eject(resourceName, id, options) {
 
     if (options.notify) {
       definition.afterEject(options, item);
-      _this.emit(options, 'afterEject', DSUtils.copy(item));
+      definition.emit('DS.afterEject', definition, DSUtils.copy(item));
     }
 
     return item;

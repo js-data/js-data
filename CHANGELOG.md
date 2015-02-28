@@ -1,4 +1,15 @@
-##### 1.4.1 - 26 February 2015
+##### 1.5.0 - 27 February 2015
+
+###### Backwards compatible API changes
+- #17 - feat: Load relations based on local field name
+
+###### Backwards compatible bug fixes
+- #65 - internal emit api was not updated to use Resource instead of Resource.name like the lifecycle hooks were
+
+###### Other
+- Internal optimizations to shave ~2kb off the minified build
+
+##### 1.4.1 - 27 February 2015
 
 ###### Backwards compatible bug fixes
 - # - Two possible error cases in `DS#find`

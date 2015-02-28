@@ -4,14 +4,14 @@ var DSErrors = require('../../errors');
 
 function find(resourceName, id, options) {
   var _this = this;
-  var definition = _this.definitions[resourceName];
-  var resource = _this.store[resourceName];
+  var definition = _this.defs[resourceName];
+  var resource = _this.s[resourceName];
 
   return new DSUtils.Promise(function (resolve, reject) {
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
-    } else if (!DSUtils.isString(id) && !DSUtils.isNumber(id)) {
-      reject(new DSErrors.IA('"id" must be a string or a number!'));
+    } else if (!DSUtils._sn(id)) {
+      reject(DSUtils._snErr('id'));
     } else {
       options = DSUtils._(definition, options);
       options.logFn('find', id, options);

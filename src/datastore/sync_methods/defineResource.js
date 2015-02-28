@@ -33,18 +33,18 @@ var instanceMethods = [
 
 function defineResource(definition) {
   var _this = this;
-  var definitions = _this.definitions;
+  var definitions = _this.defs;
 
-  if (DSUtils.isString(definition)) {
+  if (DSUtils._s(definition)) {
     definition = {
       name: definition.replace(/\s/gi, '')
     };
   }
-  if (!DSUtils.isObject(definition)) {
-    throw new DSErrors.IA('"definition" must be an object!');
-  } else if (!DSUtils.isString(definition.name)) {
+  if (!DSUtils._o(definition)) {
+    throw DSUtils._oErr('definition');
+  } else if (!DSUtils._s(definition.name)) {
     throw new DSErrors.IA('"name" must be a string!');
-  } else if (_this.store[definition.name]) {
+  } else if (_this.s[definition.name]) {
     throw new DSErrors.R(definition.name + ' is already registered!');
   }
 
@@ -55,9 +55,12 @@ function defineResource(definition) {
 
     var def = definitions[definition.name];
 
+    // alias name, shaves 0.08 kb off the minified build
+    def.n = def.name;
+
     def.logFn('Preparing resource.');
 
-    if (!DSUtils.isString(def.idAttribute)) {
+    if (!DSUtils._s(def.idAttribute)) {
       throw new DSErrors.IA('"idAttribute" must be a string!');
     }
 
@@ -67,13 +70,13 @@ function defineResource(definition) {
       def.relationFields = [];
       DSUtils.forOwn(def.relations, function (relatedModels, type) {
         DSUtils.forOwn(relatedModels, function (defs, relationName) {
-          if (!DSUtils.isArray(defs)) {
+          if (!DSUtils._a(defs)) {
             relatedModels[relationName] = [defs];
           }
           DSUtils.forEach(relatedModels[relationName], function (d) {
             d.type = type;
             d.relation = relationName;
-            d.name = def.name;
+            d.name = def.n;
             def.relationList.push(d);
             def.relationFields.push(d.localField);
           });
@@ -97,7 +100,7 @@ function defineResource(definition) {
     }
 
     def.getResource = function (resourceName) {
-      return _this.definitions[resourceName];
+      return _this.defs[resourceName];
     };
 
     def.getEndpoint = function (id, options) {
@@ -118,9 +121,9 @@ function defineResource(definition) {
       } else {
         delete options.params[parentKey];
 
-        if (DSUtils.isNumber(id) || DSUtils.isString(id)) {
+        if (DSUtils._sn(id)) {
           item = def.get(id);
-        } else if (DSUtils.isObject(id)) {
+        } else if (DSUtils._o(id)) {
           item = id;
         }
 
@@ -149,7 +152,7 @@ function defineResource(definition) {
     }
 
     // Create the wrapper class for the new resource
-    def['class'] = DSUtils.pascalCase(definition.name);
+    def['class'] = DSUtils.pascalCase(def.name);
     try {
       if (typeof def.useClass === 'function') {
         eval('function ' + def['class'] + '() { def.useClass.call(this); }');
@@ -177,11 +180,11 @@ function defineResource(definition) {
 
     def[def['class']].prototype.set = function (key, value) {
       DSUtils.set(this, key, value);
-      var observer = _this.store[def.name].observers[this[def.idAttribute]];
+      var observer = _this.s[def.n].observers[this[def.idAttribute]];
       if (observer && !DSUtils.observe.hasObjectObserve) {
         observer.deliver();
       } else {
-        _this.compute(def.name, this);
+        _this.compute(def.n, this);
       }
       return this;
     };
@@ -221,7 +224,7 @@ function defineResource(definition) {
     }
 
     if (definition.schema && _this.schemator) {
-      def.schema = _this.schemator.defineSchema(def.name, definition.schema);
+      def.schema = _this.schemator.defineSchema(def.n, definition.schema);
 
       if (!definition.hasOwnProperty('validate')) {
         def.validate = function (resourceName, attrs, cb) {
@@ -242,7 +245,7 @@ function defineResource(definition) {
       def[def['class']].prototype['DS' + DSUtils.pascalCase(name)] = function () {
         var args = Array.prototype.slice.call(arguments);
         args.unshift(this[def.idAttribute] || this);
-        args.unshift(def.name);
+        args.unshift(def.n);
         return _this[name].apply(_this, args);
       };
     });
@@ -250,12 +253,12 @@ function defineResource(definition) {
     def[def['class']].prototype.DSCreate = function () {
       var args = Array.prototype.slice.call(arguments);
       args.unshift(this);
-      args.unshift(def.name);
+      args.unshift(def.n);
       return _this.create.apply(_this, args);
     };
 
     // Initialize store data for the new resource
-    _this.store[def.name] = {
+    _this.s[def.n] = {
       collection: [],
       expiresHeap: new DSUtils.DSBinaryHeap(function (x) {
         return x.expires;
@@ -277,20 +280,28 @@ function defineResource(definition) {
 
     if (def.reapInterval) {
       setInterval(function () {
-        _this.reap(def.name, { isInterval: true });
+        _this.reap(def.n, { isInterval: true });
       }, def.reapInterval);
     }
 
     // Proxy DS methods with shorthand ones
     for (var key in _this) {
-      if (typeof _this[key] === 'function' && key !== 'defineResource') {
-        (function (k) {
-          def[k] = function () {
-            var args = Array.prototype.slice.call(arguments);
-            args.unshift(def.name);
-            return _this[k].apply(_this, args);
-          };
-        })(key);
+      if (typeof _this[key] === 'function') {
+        if (_this[key].shorthand !== false) {
+          (function (k) {
+            def[k] = function () {
+              var args = Array.prototype.slice.call(arguments);
+              args.unshift(def.n);
+              return _this[k].apply(_this, args);
+            };
+          })(key);
+        } else {
+          (function (k) {
+            def[k] = function () {
+              return _this[k].apply(_this, Array.prototype.slice.call(arguments));
+            };
+          })(key);
+        }
       }
     }
 
@@ -334,7 +345,7 @@ function defineResource(definition) {
     return def;
   } catch (err) {
     delete definitions[definition.name];
-    delete _this.store[definition.name];
+    delete _this.s[definition.name];
     throw err;
   }
 }
