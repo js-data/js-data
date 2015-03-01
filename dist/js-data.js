@@ -4306,7 +4306,8 @@ function _inject(definition, resource, attrs, options) {
           } else {
             item = {};
           }
-          resource.previousAttributes[id] = DSUtils.copy(attrs);
+          resource.previousAttributes[id] = {};
+          DSUtils.deepMixIn(resource.previousAttributes[id], attrs);
 
           DSUtils.deepMixIn(item, attrs);
 
