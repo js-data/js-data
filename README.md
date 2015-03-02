@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="64" height="64" />
 
-## JSData [![Bower version](https://badge.fury.io/bo/js-data.png)](http://badge.fury.io/bo/js-data) [![NPM version](https://badge.fury.io/js/js-data.png)](http://badge.fury.io/js/js-data)
+## JSData [![bower version](https://img.shields.io/bower/v/js-data.svg?style=flat-square)](https://www.npmjs.org/package/js-data) [![npm version](https://img.shields.io/npm/v/js-data.svg?style=flat-square)](https://www.npmjs.org/package/js-data) [![Circle CI](https://img.shields.io/circleci/project/js-data/js-data/master.svg?style=flat-square)](https://circleci.com/gh/js-data/js-data/tree/master) [![npm downloads](https://img.shields.io/npm/dm/js-data.svg?style=flat-square)](https://www.npmjs.org/package/js-data) [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/js-data/js-data/blob/master/LICENSE)
 
 Inspired by [Ember Data](https://github.com/emberjs/data), js-data is the model layer you've been craving. It consists of a convenient framework-agnostic, in-memory cache for managing your data, which uses adapters to communicate with various persistence layers.
 
@@ -10,27 +10,17 @@ Unlike Backbone and Ember Models, JSData does not require the use of getters and
 
 Supporting relations, computed properties, model lifecycle control and a slew of other features, JSData is the tool for giving your data the respect it deserves.
 
-__See Latest Release:__ [JSData Releases](https://github.com/js-data/js-data/releases)
+__Latest Release:__ [![Latest Release](https://img.shields.io/github/release/js-data/js-data.svg?style=flat-square)](https://github.com/js-data/js-data/releases)
 
-## Project Status
+__Status:__
 
-| Project | js-data |
-| ------ | ------ |
-| Tasks | [![Stories in Backlog](https://badge.waffle.io/js-data/js-data.svg?label=backlog&title=Backlog)](http://waffle.io/js-data/js-data) [![Stories in Ready](https://badge.waffle.io/js-data/js-data.svg?label=ready&title=Ready)](http://waffle.io/js-data/js-data) [![Stories in progress](https://badge.waffle.io/js-data/js-data.svg?label=in%20progress&title=In%20Progress)](http://waffle.io/js-data/js-data) |
-| Bower | [![Bower version](https://badge.fury.io/bo/js-data.png)](http://badge.fury.io/bo/js-data) |
-| NPM | [![NPM](https://nodei.co/npm/js-data.png?downloads=true&stars=true)](https://nodei.co/npm/js-data/) |
-| Build Status | [![Circle CI](https://circleci.com/gh/js-data/js-data/tree/master.png?style=badge)](https://circleci.com/gh/js-data/js-data/tree/master) |
-| Code Climate | [![Code Climate](https://codeclimate.com/github/js-data/js-data.png)](https://codeclimate.com/github/js-data/js-data) |
-| Dependency Status | [![Dependency Status](https://gemnasium.com/js-data/js-data.png)](https://gemnasium.com/js-data/js-data) |
-| Coverage | [![Coverage Status](https://coveralls.io/repos/js-data/js-data/badge.png?branch=master)](https://coveralls.io/r/js-data/js-data?branch=master) |
+[![Dependency Status](https://img.shields.io/gemnasium/js-data/js-data.svg?style=flat-square)](https://gemnasium.com/js-data/js-data) [![Coverage Status](https://img.shields.io/coveralls/js-data/js-data/master.svg?style=flat-square)](https://coveralls.io/r/js-data/js-data?branch=master) [![Codacity](https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg?style=flat-square)](https://www.codacy.com/public/jasondobry/js-data/dashboard) 
 
-## Supported Platforms
+__Supported Platforms:__
 
-Browsers: Chrome, Firefox, IE 9+, Safari, Opera, iOS Safari 7.1+, Android Browser 2.3+
+[![node version](https://img.shields.io/badge/Node-0.10%2B-green.svg?style=flat-square)](https://github.com/js-data/js-data) [![browsers](https://img.shields.io/badge/Browser-Chrome%2CFirefox%2CSafari%2COpera%2CIE%209%2B%2CiOS%20Safari%207.1%2B%2CAndroid%20Browser%202.3%2B-green.svg?style=flat-square)](https://github.com/js-data/js-data)
 
-Node: 0.10+
-
-## Quick Start
+### Quick Start
 `bower install --save js-data js-data-http` or `npm install --save js-data js-data-http`.
 
 Load `js-data-http.js` after `js-data.js`.
@@ -106,7 +96,7 @@ User.find(1)
 
 All your data are belong to you...
 
-## Guides
+### Guides
 - [Getting Started with js-data](http://www.js-data.io/docs/home)
 - [Resources/Models](http://www.js-data.io/docs/resources)
 - [Working with the Data Store](http://www.js-data.io/docs/working-with-the-data-store)
@@ -122,7 +112,7 @@ All your data are belong to you...
 
 See an issue with or have a suggestion for the documentation? You can suggest edits right on the documentation pages! (There's a link at the top right of each page.)
 
-## API Documentation
+### API Documentation
 - [DS](http://www.js-data.io/docs/ds)
 - [js-data-schema](http://www.js-data.io/docs/js-data-schema)
 - [DSFirebaseAdapter](http://www.js-data.io/docs/dsfirebaseadapter)
@@ -134,16 +124,16 @@ See an issue with or have a suggestion for the documentation? You can suggest ed
 - [DSRethinkDBAdapter](http://www.js-data.io/docs/dsrethinkdbadapter)
 - [DSSqlAdapter](http://www.js-data.io/docs/dssqladapter)
 
-## Changelog
+### Changelog
 [CHANGELOG.md](https://github.com/js-data/js-data/blob/master/CHANGELOG.md)
 
-## Community
+### Community
 - [Mailing List](https://groups.io/org/groupsio/jsdata) - Ask your questions!
 - [Issues](https://github.com/js-data/js-data/issues) - Found a bug? Feature request? Submit an issue!
 - [GitHub](https://github.com/js-data/js-data) - View the source code for JSData.
 - [Contributing Guide](https://github.com/js-data/js-data/blob/master/CONTRIBUTING.md)
 
-## Contributing
+### Contributing
 
 First, feel free to contact me with questions. [Mailing List](https://groups.io/org/groupsio/jsdata).
 
@@ -157,7 +147,7 @@ First, feel free to contact me with questions. [Mailing List](https://groups.io/
 1. Write your code, including relevant documentation and tests
 1. Submit a PR and we'll review
 
-## License
+### License
 
 The MIT License (MIT)
 
