@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file dist/js-data-debug.js
-* @version 1.5.0 - Homepage <http://www.js-data.io/>
+* @version 1.5.1 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -2273,7 +2273,7 @@ function create(resourceName, attrs, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        definition.emit('DS.beforeCreate', definition, DSUtils.copy(attrs));
+        definition.emit('DS.beforeCreate', definition, attrs);
       }
       return _this.getAdapter(options).create(definition, attrs, options);
     })
@@ -2282,12 +2282,14 @@ function create(resourceName, attrs, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        definition.emit('DS.afterCreate', definition, DSUtils.copy(attrs));
+        definition.emit('DS.afterCreate', definition, attrs);
       }
       if (options.cacheResponse) {
         var created = _this.inject(definition.n, attrs, options);
         var id = created[definition.idAttribute];
-        _this.s[resourceName].completedQueries[id] = new Date().getTime();
+        var resource = _this.s[resourceName];
+        resource.completedQueries[id] = new Date().getTime();
+        resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
         return created;
       } else {
         return _this.createInstance(resourceName, attrs, options);
@@ -2324,7 +2326,7 @@ function destroy(resourceName, id, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        definition.emit('DS.beforeDestroy', definition, DSUtils.copy(attrs));
+        definition.emit('DS.beforeDestroy', definition, attrs);
       }
       if (options.eagerEject) {
         _this.eject(resourceName, id);
@@ -2336,7 +2338,7 @@ function destroy(resourceName, id, options) {
     })
     .then(function (item) {
       if (options.notify) {
-        definition.emit('DS.afterDestroy', definition, DSUtils.copy(item));
+        definition.emit('DS.afterDestroy', definition, item);
       }
       _this.eject(resourceName, id);
       return id;
@@ -2376,7 +2378,7 @@ function destroyAll(resourceName, params, options) {
       return options.beforeDestroy(options, toEject);
     }).then(function () {
       if (options.notify) {
-        definition.emit('DS.beforeDestroy', definition, DSUtils.copy(toEject));
+        definition.emit('DS.beforeDestroy', definition, toEject);
       }
       if (options.eagerEject) {
         ejected = _this.ejectAll(resourceName, params);
@@ -2386,7 +2388,7 @@ function destroyAll(resourceName, params, options) {
       return options.afterDestroy(options, toEject);
     }).then(function () {
       if (options.notify) {
-        definition.emit('DS.afterDestroy', definition, DSUtils.copy(toEject));
+        definition.emit('DS.afterDestroy', definition, toEject);
       }
       return ejected || _this.ejectAll(resourceName, params);
     })['catch'](function (err) {
@@ -2460,6 +2462,7 @@ function find(resourceName, id, options) {
             if (options.cacheResponse) {
               var injected = _this.inject(resourceName, data, options);
               resource.completedQueries[id] = new Date().getTime();
+              resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
               return injected;
             } else {
               return _this.createInstance(resourceName, data, options);
@@ -2506,8 +2509,12 @@ function processResults(data, resourceName, queryHash, options) {
   // Make sure each object is added to completedQueries
   if (DSUtils._a(injected)) {
     DSUtils.forEach(injected, function (item) {
-      if (item && item[idAttribute]) {
-        resource.completedQueries[item[idAttribute]] = date;
+      if (item) {
+        var id = item[idAttribute];
+        if (id) {
+          resource.completedQueries[id] = date;
+          resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
+        }
       }
     });
   } else {
@@ -2637,15 +2644,16 @@ function reap(resourceName, options) {
   }).then(function (items) {
       if (options.isInterval || options.notify) {
         definition.beforeReap(options, items);
-        definition.emit('DS.beforeReap', definition, DSUtils.copy(items));
+        definition.emit('DS.beforeReap', definition, items);
       }
       if (options.reapAction === 'inject') {
+        var timestamp = new Date().getTime();
         DSUtils.forEach(items, function (item) {
           var id = item[definition.idAttribute];
           resource.expiresHeap.push({
             item: item,
-            timestamp: resource.saved[id],
-            expires: definition.maxAge ? resource.saved[id] + definition.maxAge : Number.MAX_VALUE
+            timestamp: timestamp,
+            expires: definition.maxAge ? timestamp + definition.maxAge : Number.MAX_VALUE
           });
         });
       } else if (options.reapAction === 'eject') {
@@ -2663,7 +2671,7 @@ function reap(resourceName, options) {
     }).then(function (items) {
       if (options.isInterval || options.notify) {
         definition.afterReap(options, items);
-        definition.emit('DS.afterReap', definition, DSUtils.copy(items));
+        definition.emit('DS.afterReap', definition, items);
       }
       return items;
     });
@@ -2834,7 +2842,7 @@ function save(resourceName, id, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        definition.emit('DS.beforeUpdate', definition, DSUtils.copy(attrs));
+        definition.emit('DS.beforeUpdate', definition, attrs);
       }
       if (options.changesOnly) {
         var resource = _this.s[resourceName];
@@ -2865,10 +2873,13 @@ function save(resourceName, id, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        definition.emit('DS.afterUpdate', definition, DSUtils.copy(attrs));
+        definition.emit('DS.afterUpdate', definition, attrs);
       }
       if (options.cacheResponse) {
-        return _this.inject(definition.n, attrs, options);
+        var injected = _this.inject(definition.n, attrs, options);
+        var saved = _this.s[resourceName].saved;
+        saved[injected[definition.idAttribute]] = DSUtils.updateTimestamp(saved[injected[definition.idAttribute]]);
+        return injected;
       } else {
         return _this.createInstance(resourceName, attrs, options);
       }
@@ -2910,7 +2921,7 @@ function update(resourceName, id, attrs, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        definition.emit('DS.beforeUpdate', definition, DSUtils.copy(attrs));
+        definition.emit('DS.beforeUpdate', definition, attrs);
       }
       return _this.getAdapter(options).update(definition, id, attrs, options);
     })
@@ -2919,10 +2930,13 @@ function update(resourceName, id, attrs, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        definition.emit('DS.afterUpdate', definition, DSUtils.copy(attrs));
+        definition.emit('DS.afterUpdate', definition, attrs);
       }
       if (options.cacheResponse) {
-        return _this.inject(definition.n, attrs, options);
+        var injected = _this.inject(definition.n, attrs, options);
+        var saved = _this.s[resourceName].saved;
+        saved[injected[definition.idAttribute]] = DSUtils.updateTimestamp(saved[injected[definition.idAttribute]]);
+        return injected;
       } else {
         return _this.createInstance(resourceName, attrs, options);
       }
@@ -2961,7 +2975,7 @@ function updateAll(resourceName, attrs, params, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        definition.emit('DS.beforeUpdate', definition, DSUtils.copy(attrs));
+        definition.emit('DS.beforeUpdate', definition, attrs);
       }
       return _this.getAdapter(options).updateAll(definition, attrs, params, options);
     })
@@ -2970,10 +2984,15 @@ function updateAll(resourceName, attrs, params, options) {
     })
     .then(function (data) {
       if (options.notify) {
-        definition.emit('DS.afterUpdate', definition, DSUtils.copy(attrs));
+        definition.emit('DS.afterUpdate', definition, attrs);
       }
       if (options.cacheResponse) {
-        return _this.inject(definition.n, data, options);
+        var injected = _this.inject(definition.n, data, options);
+        var saved = _this.s[resourceName].saved;
+        DSUtils.forEach(injected, function (i) {
+          saved[i[definition.idAttribute]] = DSUtils.updateTimestamp(saved[i[definition.idAttribute]]);
+        });
+        return injected;
       } else {
         var instances = [];
         DSUtils.forEach(data, function (item) {
@@ -3772,7 +3791,7 @@ function eject(resourceName, id, options) {
   if (found) {
     if (options.notify) {
       definition.beforeEject(options, item);
-      definition.emit('DS.beforeEject', definition, DSUtils.copy(item));
+      definition.emit('DS.beforeEject', definition, item);
     }
     _this.unlinkInverse(definition.n, id);
     resource.collection.splice(i, 1);
@@ -3808,7 +3827,7 @@ function eject(resourceName, id, options) {
 
     if (options.notify) {
       definition.afterEject(options, item);
-      definition.emit('DS.afterEject', definition, DSUtils.copy(item));
+      definition.emit('DS.afterEject', definition, item);
     }
 
     return item;
@@ -4336,9 +4355,6 @@ function _inject(definition, resource, attrs, options) {
           } else {
             item = {};
           }
-          resource.previousAttributes[id] = {};
-          DSUtils.deepMixIn(resource.previousAttributes[id], attrs);
-
           DSUtils.deepMixIn(item, attrs);
 
           resource.collection.push(item);
@@ -4351,6 +4367,8 @@ function _inject(definition, resource, attrs, options) {
 
           resource.index[id] = item;
           _react.call(item, {}, {}, {}, null, true);
+          resource.previousAttributes[id] = {};
+          DSUtils.deepMixIn(resource.previousAttributes[id], item);
         } else {
           DSUtils.deepMixIn(item, attrs);
           if (definition.resetHistoryOnInject) {
@@ -4367,13 +4385,13 @@ function _inject(definition, resource, attrs, options) {
             resource.observers[id].deliver();
           }
         }
-        resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
         resource.modified[id] = initialLastModified && resource.modified[id] === initialLastModified ? DSUtils.updateTimestamp(resource.modified[id]) : resource.modified[id];
         resource.expiresHeap.remove(item);
+        var timestamp = new Date().getTime();
         resource.expiresHeap.push({
           item: item,
-          timestamp: resource.saved[id],
-          expires: definition.maxAge ? resource.saved[id] + definition.maxAge : Number.MAX_VALUE
+          timestamp: timestamp,
+          expires: definition.maxAge ? timestamp + definition.maxAge : Number.MAX_VALUE
         });
         injected = item;
       } catch (err) {
@@ -4415,7 +4433,7 @@ function inject(resourceName, attrs, options) {
 
   if (options.notify) {
     options.beforeInject(options, attrs);
-    definition.emit('DS.beforeInject', definition, DSUtils.copy(attrs));
+    definition.emit('DS.beforeInject', definition, attrs);
   }
 
   injected = _inject.call(_this, definition, resource, attrs, options);
@@ -4441,7 +4459,7 @@ function inject(resourceName, attrs, options) {
 
   if (options.notify) {
     options.afterInject(options, injected);
-    definition.emit('DS.afterInject', definition, DSUtils.copy(injected));
+    definition.emit('DS.afterInject', definition, injected);
   }
 
   return injected;
@@ -4713,10 +4731,10 @@ module.exports = {
   DSUtils: require('./utils'),
   DSErrors: require('./errors'),
   version: {
-    full: '1.5.0',
+    full: '1.5.1',
     major: parseInt('1', 10),
     minor: parseInt('5', 10),
-    patch: parseInt('0', 10),
+    patch: parseInt('1', 10),
     alpha: 'false' !== 'false' ? 'false' : false,
     beta: 'false' !== 'false' ? 'false' : false
   }

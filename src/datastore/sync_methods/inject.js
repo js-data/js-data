@@ -145,9 +145,6 @@ function _inject(definition, resource, attrs, options) {
           } else {
             item = {};
           }
-          resource.previousAttributes[id] = {};
-          DSUtils.deepMixIn(resource.previousAttributes[id], attrs);
-
           DSUtils.deepMixIn(item, attrs);
 
           resource.collection.push(item);
@@ -160,6 +157,8 @@ function _inject(definition, resource, attrs, options) {
 
           resource.index[id] = item;
           _react.call(item, {}, {}, {}, null, true);
+          resource.previousAttributes[id] = {};
+          DSUtils.deepMixIn(resource.previousAttributes[id], item);
         } else {
           DSUtils.deepMixIn(item, attrs);
           if (definition.resetHistoryOnInject) {
@@ -176,13 +175,13 @@ function _inject(definition, resource, attrs, options) {
             resource.observers[id].deliver();
           }
         }
-        resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
         resource.modified[id] = initialLastModified && resource.modified[id] === initialLastModified ? DSUtils.updateTimestamp(resource.modified[id]) : resource.modified[id];
         resource.expiresHeap.remove(item);
+        var timestamp = new Date().getTime();
         resource.expiresHeap.push({
           item: item,
-          timestamp: resource.saved[id],
-          expires: definition.maxAge ? resource.saved[id] + definition.maxAge : Number.MAX_VALUE
+          timestamp: timestamp,
+          expires: definition.maxAge ? timestamp + definition.maxAge : Number.MAX_VALUE
         });
         injected = item;
       } catch (err) {
@@ -224,7 +223,7 @@ function inject(resourceName, attrs, options) {
 
   if (options.notify) {
     options.beforeInject(options, attrs);
-    definition.emit('DS.beforeInject', definition, DSUtils.copy(attrs));
+    definition.emit('DS.beforeInject', definition, attrs);
   }
 
   injected = _inject.call(_this, definition, resource, attrs, options);
@@ -250,7 +249,7 @@ function inject(resourceName, attrs, options) {
 
   if (options.notify) {
     options.afterInject(options, injected);
-    definition.emit('DS.afterInject', definition, DSUtils.copy(injected));
+    definition.emit('DS.afterInject', definition, injected);
   }
 
   return injected;

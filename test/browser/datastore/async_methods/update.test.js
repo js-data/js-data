@@ -124,15 +124,25 @@ describe('DS#update', function () {
       var c = Comment.inject(testComment2);
 
       function onBeforeUpdate(resource, attrs) {
-        attrs.other = 'stuff';
-        assert.equal(resource.name, 'comment');
-        assert.deepEqual(attrs, { content: 'stuff', other: 'stuff' });
+        try {
+          attrs.other = 'stuff';
+          assert.equal(resource.name, 'comment');
+          assert.deepEqual(attrs, { content: 'stuff', other: 'stuff' });
+        } catch (err) {
+          console.log(err.stack);
+          done(err);
+        }
       }
 
       function onAfterUpdate(resource, attrs) {
-        assert.equal(resource.name, 'comment');
-        assert.deepEqual(attrs, testComment2);
-        assert.isFalse(testComment2 === attrs);
+        try {
+          assert.equal(resource.name, 'comment');
+          assert.deepEqual(JSON.stringify(attrs), JSON.stringify({ id: 6, content: 'stuff', approvedBy: 4 }));
+          assert.isFalse(testComment2 === attrs);
+        } catch (err) {
+          console.log(err.stack);
+          done(err);
+        }
       }
 
       Comment.on('DS.beforeUpdate', onBeforeUpdate);
@@ -145,11 +155,14 @@ describe('DS#update', function () {
           approvedBy: 4
         }
       }).then(function (comment) {
-        assert.deepEqual(JSON.stringify(comment), JSON.stringify(testComment2));
-        assert.deepEqual(JSON.stringify(comment), JSON.stringify(store.get('comment', 6)));
+        try {
+          assert.deepEqual(JSON.stringify(comment), JSON.stringify(testComment2));
+          assert.deepEqual(JSON.stringify(comment), JSON.stringify(store.get('comment', 6)));
 
-        store.inject('comment', testComment2);
-
+          store.inject('comment', testComment2);
+        } catch (err) {
+          console.log(err.stack);
+        }
         store.update('comment', 6, {
           content: 'stuff'
         }, {
@@ -166,11 +179,16 @@ describe('DS#update', function () {
         });
 
         setTimeout(function () {
-          assert.equal(3, _this.requests.length);
-          assert.equal(_this.requests[2].url, 'http://test.js-data.io/comment/6');
-          assert.equal(_this.requests[2].method, 'PUT');
-          assert.equal(_this.requests[2].requestBody, DSUtils.toJson({ content: 'stuff' }));
-          _this.requests[2].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment2));
+          try {
+            assert.equal(3, _this.requests.length);
+            assert.equal(_this.requests[2].url, 'http://test.js-data.io/comment/6');
+            assert.equal(_this.requests[2].method, 'PUT');
+            assert.equal(_this.requests[2].requestBody, DSUtils.toJson({ content: 'stuff', other: 'stuff' }));
+            _this.requests[2].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment2));
+          } catch (err) {
+            console.log(err.stack);
+            done(err);
+          }
         }, 30);
       }).catch(function (err) {
         console.log(err.stack);
@@ -178,11 +196,16 @@ describe('DS#update', function () {
       });
 
       setTimeout(function () {
-        assert.equal(2, _this.requests.length);
-        assert.equal(_this.requests[1].url, 'http://test.js-data.io/user/4/comment/6');
-        assert.equal(_this.requests[1].method, 'PUT');
-        assert.equal(_this.requests[1].requestBody, DSUtils.toJson({ content: 'stuff' }));
-        _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment2));
+        try {
+          assert.equal(2, _this.requests.length);
+          assert.equal(_this.requests[1].url, 'http://test.js-data.io/user/4/comment/6');
+          assert.equal(_this.requests[1].method, 'PUT');
+          assert.equal(_this.requests[1].requestBody, DSUtils.toJson({ content: 'stuff', other: 'stuff' }));
+          _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment2));
+        } catch (err) {
+          console.log(err.stack);
+          done(err);
+        }
       }, 30);
     }).catch(function (err) {
       console.log(err.stack);

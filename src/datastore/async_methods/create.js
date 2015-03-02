@@ -42,7 +42,7 @@ function create(resourceName, attrs, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        definition.emit('DS.beforeCreate', definition, DSUtils.copy(attrs));
+        definition.emit('DS.beforeCreate', definition, attrs);
       }
       return _this.getAdapter(options).create(definition, attrs, options);
     })
@@ -51,12 +51,14 @@ function create(resourceName, attrs, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        definition.emit('DS.afterCreate', definition, DSUtils.copy(attrs));
+        definition.emit('DS.afterCreate', definition, attrs);
       }
       if (options.cacheResponse) {
         var created = _this.inject(definition.n, attrs, options);
         var id = created[definition.idAttribute];
-        _this.s[resourceName].completedQueries[id] = new Date().getTime();
+        var resource = _this.s[resourceName];
+        resource.completedQueries[id] = new Date().getTime();
+        resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
         return created;
       } else {
         return _this.createInstance(resourceName, attrs, options);

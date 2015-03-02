@@ -23,7 +23,7 @@ function destroyAll(resourceName, params, options) {
       return options.beforeDestroy(options, toEject);
     }).then(function () {
       if (options.notify) {
-        definition.emit('DS.beforeDestroy', definition, DSUtils.copy(toEject));
+        definition.emit('DS.beforeDestroy', definition, toEject);
       }
       if (options.eagerEject) {
         ejected = _this.ejectAll(resourceName, params);
@@ -33,7 +33,7 @@ function destroyAll(resourceName, params, options) {
       return options.afterDestroy(options, toEject);
     }).then(function () {
       if (options.notify) {
-        definition.emit('DS.afterDestroy', definition, DSUtils.copy(toEject));
+        definition.emit('DS.afterDestroy', definition, toEject);
       }
       return ejected || _this.ejectAll(resourceName, params);
     })['catch'](function (err) {

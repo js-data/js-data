@@ -24,7 +24,7 @@ function destroy(resourceName, id, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        definition.emit('DS.beforeDestroy', definition, DSUtils.copy(attrs));
+        definition.emit('DS.beforeDestroy', definition, attrs);
       }
       if (options.eagerEject) {
         _this.eject(resourceName, id);
@@ -36,7 +36,7 @@ function destroy(resourceName, id, options) {
     })
     .then(function (item) {
       if (options.notify) {
-        definition.emit('DS.afterDestroy', definition, DSUtils.copy(item));
+        definition.emit('DS.afterDestroy', definition, item);
       }
       _this.eject(resourceName, id);
       return id;

@@ -29,15 +29,16 @@ function reap(resourceName, options) {
   }).then(function (items) {
       if (options.isInterval || options.notify) {
         definition.beforeReap(options, items);
-        definition.emit('DS.beforeReap', definition, DSUtils.copy(items));
+        definition.emit('DS.beforeReap', definition, items);
       }
       if (options.reapAction === 'inject') {
+        var timestamp = new Date().getTime();
         DSUtils.forEach(items, function (item) {
           var id = item[definition.idAttribute];
           resource.expiresHeap.push({
             item: item,
-            timestamp: resource.saved[id],
-            expires: definition.maxAge ? resource.saved[id] + definition.maxAge : Number.MAX_VALUE
+            timestamp: timestamp,
+            expires: definition.maxAge ? timestamp + definition.maxAge : Number.MAX_VALUE
           });
         });
       } else if (options.reapAction === 'eject') {
@@ -55,7 +56,7 @@ function reap(resourceName, options) {
     }).then(function (items) {
       if (options.isInterval || options.notify) {
         definition.afterReap(options, items);
-        definition.emit('DS.afterReap', definition, DSUtils.copy(items));
+        definition.emit('DS.afterReap', definition, items);
       }
       return items;
     });

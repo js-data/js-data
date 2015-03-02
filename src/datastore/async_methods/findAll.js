@@ -23,8 +23,12 @@ function processResults(data, resourceName, queryHash, options) {
   // Make sure each object is added to completedQueries
   if (DSUtils._a(injected)) {
     DSUtils.forEach(injected, function (item) {
-      if (item && item[idAttribute]) {
-        resource.completedQueries[item[idAttribute]] = date;
+      if (item) {
+        var id = item[idAttribute];
+        if (id) {
+          resource.completedQueries[id] = date;
+          resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
+        }
       }
     });
   } else {

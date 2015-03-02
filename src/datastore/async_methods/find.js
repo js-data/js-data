@@ -58,6 +58,7 @@ function find(resourceName, id, options) {
             if (options.cacheResponse) {
               var injected = _this.inject(resourceName, data, options);
               resource.completedQueries[id] = new Date().getTime();
+              resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
               return injected;
             } else {
               return _this.createInstance(resourceName, data, options);

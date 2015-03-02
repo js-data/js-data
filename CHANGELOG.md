@@ -1,9 +1,20 @@
+##### 1.5.1 - 02 March 2015
+
+###### Backwards compatible bug fixes
+- #66 - "saved" and "lastSaved" method seems to be a misnomer
+- #69 - Using resource base class w/additional properties has some side effects
+- #70 - "lastSaved" timestamp changes too often
+
+###### Other
+- Removed use of `DSUtils.copy` in the event hooks. This should increase performance quite a bit.
+
 ##### 1.5.0 - 27 February 2015
 
 ###### Backwards compatible API changes
 - #17 - feat: Load relations based on local field name
 
 ###### Backwards compatible bug fixes
+- #62 - getAdapter when called from a Resource fails
 - #65 - internal emit api was not updated to use Resource instead of Resource.name like the lifecycle hooks were
 
 ###### Other
@@ -12,7 +23,7 @@
 ##### 1.4.1 - 27 February 2015
 
 ###### Backwards compatible bug fixes
-- # - Two possible error cases in `DS#find`
+- #64 - Two possible error cases in `DS#find`
 
 ##### 1.4.0 - 24 February 2015
 

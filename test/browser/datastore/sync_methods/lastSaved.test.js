@@ -8,7 +8,7 @@ describe('DS#lastSaved', function () {
       store.inject('post', p1);
     });
 
-    assert.notEqual(lastSaved, store.lastSaved('post', 5));
+    assert.equal(lastSaved, store.lastSaved('post', 5));
 
     lastSaved = store.lastSaved('post', 5);
 

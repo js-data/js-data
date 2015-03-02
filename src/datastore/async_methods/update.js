@@ -30,7 +30,7 @@ function update(resourceName, id, attrs, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        definition.emit('DS.beforeUpdate', definition, DSUtils.copy(attrs));
+        definition.emit('DS.beforeUpdate', definition, attrs);
       }
       return _this.getAdapter(options).update(definition, id, attrs, options);
     })
@@ -39,10 +39,13 @@ function update(resourceName, id, attrs, options) {
     })
     .then(function (attrs) {
       if (options.notify) {
-        definition.emit('DS.afterUpdate', definition, DSUtils.copy(attrs));
+        definition.emit('DS.afterUpdate', definition, attrs);
       }
       if (options.cacheResponse) {
-        return _this.inject(definition.n, attrs, options);
+        var injected = _this.inject(definition.n, attrs, options);
+        var saved = _this.s[resourceName].saved;
+        saved[injected[definition.idAttribute]] = DSUtils.updateTimestamp(saved[injected[definition.idAttribute]]);
+        return injected;
       } else {
         return _this.createInstance(resourceName, attrs, options);
       }

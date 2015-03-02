@@ -215,16 +215,18 @@ describe('DS#defineResource', function () {
 
   it('should allow custom model class definitions', function () {
 
-    function MyBaseClass(){
-      this.instanceMethod = function( value ){
+    function MyBaseClass() {
+      this.foo = 'bar';
+
+      this.instanceMethod = function (value) {
         return 'instanceMethod' + value;
       };
-      this.firstNameBackwards = function(){
+      this.firstNameBackwards = function () {
         return this.first.split("").reverse().join("");
       };
     }
 
-    MyBaseClass.prototype.protoMethod = function( value ){
+    MyBaseClass.prototype.protoMethod = function (value) {
       return 'protoMethod' + value;
     };
 
@@ -239,7 +241,7 @@ describe('DS#defineResource', function () {
       last: 'Anderson'
     });
 
-    
+
     var Thing2 = store.defineResource({
       name: 'thing2',
       useClass: MyBaseClass
@@ -270,18 +272,18 @@ describe('DS#defineResource', function () {
     assert.equal(thing1.protoMethod('Value'), 'protoMethodValue');
     assert.equal(thing2.instanceMethod('Other'), 'instanceMethodOther');
     assert.equal(thing2.protoMethod('Other'), 'protoMethodOther');
-    
+
     assert.equal(thing1.firstNameBackwards(), 'nhoJ');
     assert.equal(thing2.firstNameBackwards(), 'sirreF');
-    
+
     /* Is this really necessary to test?
-    thing2.firstNameBackwards = function(){
-      return this.first.split("").reverse().join(".");
-    }
-    assert.equal(thing1.firstNameBackwards(), 'nhoJ');
-    assert.equal(thing2.firstNameBackwards(), 's.i.r.r.e.F');
-    */
-    
+     thing2.firstNameBackwards = function(){
+     return this.first.split("").reverse().join(".");
+     }
+     assert.equal(thing1.firstNameBackwards(), 'nhoJ');
+     assert.equal(thing2.firstNameBackwards(), 's.i.r.r.e.F');
+     */
+
   });
 
 });
