@@ -2,7 +2,7 @@
  * js-data
  * http://github.com/jmdobry/js-data
  *
- * Copyright (c) 2014 Jason Dobry <http://jmdobry.github.io/js-data>
+ * Copyright (c) 2014-2015 Jason Dobry <http://jmdobry.github.io/js-data>
  * Licensed under the MIT license. <https://github.com/jmdobry/js-data/blob/master/LICENSE>
  */
 module.exports = function (grunt) {
@@ -36,7 +36,7 @@ module.exports = function (grunt) {
       },
       lite: {
         files: ['src/**/*.js'],
-        tasks: ['jshint', 'browserify']
+        tasks: ['jshint', 'webpack']
       },
       n: {
         files: ['src/**/*.js', 'test/both/**/*.js', 'test/node/**/*.js'],
@@ -52,7 +52,7 @@ module.exports = function (grunt) {
           '* @author Jason Dobry <jason.dobry@gmail.com>\n' +
           '* @file js-data.min.js\n' +
           '* @version <%= pkg.version %> - Homepage <http://www.js-data.io/>\n' +
-          '* @copyright (c) 2014 Jason Dobry\n' +
+          '* @copyright (c) 2014-2015 Jason Dobry\n' +
           '* @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>\n' +
           '*\n' +
           '* @overview Data store.\n' +
@@ -63,16 +63,22 @@ module.exports = function (grunt) {
         }
       }
     },
-    browserify: {
+    webpack: {
       dist: {
-        options: {
-          browserifyOptions: {
-            standalone: 'JSData'
-          },
-          external: ['js-data-schema', 'bluebird']
+        entry: './src/index.js',
+        output: {
+          filename: './dist/js-data-debug.js',
+          libraryTarget: 'umd',
+          library: 'JSData'
         },
-        files: {
-          'dist/js-data-debug.js': ['src/index.js']
+        externals: {
+          'js-data-schema': {
+            amd: 'js-data-schema',
+            commonjs: 'js-data-schema',
+            commonjs2: 'js-data-schema',
+            root: 'Schemator'
+          },
+          'bluebird': 'bluebird'
         }
       }
     },
@@ -128,7 +134,7 @@ module.exports = function (grunt) {
       '* @author Jason Dobry <jason.dobry@gmail.com>\n' +
       '* @file ' + filename + '\n' +
       '* @version ' + pkg.version + ' - Homepage <http://www.js-data.io/>\n' +
-      '* @copyright (c) 2014 Jason Dobry \n' +
+      '* @copyright (c) 2014-2015 Jason Dobry \n' +
       '* @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>\n' +
       '*\n' +
       '* @overview Data store.\n' +
@@ -194,7 +200,7 @@ module.exports = function (grunt) {
   grunt.registerTask('build', [
     'clean',
     'jshint',
-    'browserify',
+    'webpack',
     'debug:dist/js-data-debug.js',
     'version:dist/js-data-debug.js',
     'version:dist/js-data.js',
@@ -203,6 +209,6 @@ module.exports = function (grunt) {
     'uglify:main'
   ]);
   grunt.registerTask('go', ['build', 'watch:dist']);
-  grunt.registerTask('golite', ['jshint', 'browserify', 'watch:lite']);
+  grunt.registerTask('golite', ['jshint', 'webpack', 'watch:lite']);
   grunt.registerTask('default', ['build']);
 };
