@@ -40,9 +40,13 @@ function updateAll(resourceName, attrs, params, options) {
       }
       if (options.cacheResponse) {
         var injected = _this.inject(definition.n, data, options);
-        var saved = _this.s[resourceName].saved;
+        var resource = _this.s[resourceName];
         DSUtils.forEach(injected, function (i) {
-          saved[i[definition.idAttribute]] = DSUtils.updateTimestamp(saved[i[definition.idAttribute]]);
+          var id = i[definition.idAttribute];
+          resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
+          if (!definition.resetHistoryOnInject) {
+            resource.previousAttributes[id] = DSUtils.copy(i);
+          }
         });
         return injected;
       } else {

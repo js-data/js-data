@@ -1,7 +1,7 @@
 /**
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @file dist/js-data-debug.js
-* @version 1.5.1 - Homepage <http://www.js-data.io/>
+* @version 1.5.2 - Homepage <http://www.js-data.io/>
 * @copyright (c) 2014 Jason Dobry 
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
@@ -2877,8 +2877,12 @@ function save(resourceName, id, options) {
       }
       if (options.cacheResponse) {
         var injected = _this.inject(definition.n, attrs, options);
-        var saved = _this.s[resourceName].saved;
-        saved[injected[definition.idAttribute]] = DSUtils.updateTimestamp(saved[injected[definition.idAttribute]]);
+        var resource = _this.s[resourceName];
+        var id = injected[definition.idAttribute];
+        resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
+        if (!definition.resetHistoryOnInject) {
+          resource.previousAttributes[id] = DSUtils.copy(injected);
+        }
         return injected;
       } else {
         return _this.createInstance(resourceName, attrs, options);
@@ -2934,8 +2938,12 @@ function update(resourceName, id, attrs, options) {
       }
       if (options.cacheResponse) {
         var injected = _this.inject(definition.n, attrs, options);
-        var saved = _this.s[resourceName].saved;
-        saved[injected[definition.idAttribute]] = DSUtils.updateTimestamp(saved[injected[definition.idAttribute]]);
+        var resource = _this.s[resourceName];
+        var id = injected[definition.idAttribute];
+        resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
+        if (!definition.resetHistoryOnInject) {
+          resource.previousAttributes[id] = DSUtils.copy(injected);
+        }
         return injected;
       } else {
         return _this.createInstance(resourceName, attrs, options);
@@ -2988,9 +2996,13 @@ function updateAll(resourceName, attrs, params, options) {
       }
       if (options.cacheResponse) {
         var injected = _this.inject(definition.n, data, options);
-        var saved = _this.s[resourceName].saved;
+        var resource = _this.s[resourceName];
         DSUtils.forEach(injected, function (i) {
-          saved[i[definition.idAttribute]] = DSUtils.updateTimestamp(saved[i[definition.idAttribute]]);
+          var id = i[definition.idAttribute];
+          resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
+          if (!definition.resetHistoryOnInject) {
+            resource.previousAttributes[id] = DSUtils.copy(i);
+          }
         });
         return injected;
       } else {
@@ -4367,13 +4379,11 @@ function _inject(definition, resource, attrs, options) {
 
           resource.index[id] = item;
           _react.call(item, {}, {}, {}, null, true);
-          resource.previousAttributes[id] = {};
-          DSUtils.deepMixIn(resource.previousAttributes[id], item);
+          resource.previousAttributes[id] = DSUtils.copy(item);
         } else {
           DSUtils.deepMixIn(item, attrs);
           if (definition.resetHistoryOnInject) {
-            resource.previousAttributes[id] = {};
-            DSUtils.deepMixIn(resource.previousAttributes[id], attrs);
+            resource.previousAttributes[id] = DSUtils.copy(item);
             if (resource.changeHistories[id].length) {
               DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
                 DSUtils.remove(resource.changeHistory, changeRecord);
@@ -4731,10 +4741,10 @@ module.exports = {
   DSUtils: require('./utils'),
   DSErrors: require('./errors'),
   version: {
-    full: '1.5.1',
+    full: '1.5.2',
     major: parseInt('1', 10),
     minor: parseInt('5', 10),
-    patch: parseInt('1', 10),
+    patch: parseInt('2', 10),
     alpha: 'false' !== 'false' ? 'false' : false,
     beta: 'false' !== 'false' ? 'false' : false
   }

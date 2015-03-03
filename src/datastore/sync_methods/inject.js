@@ -157,13 +157,11 @@ function _inject(definition, resource, attrs, options) {
 
           resource.index[id] = item;
           _react.call(item, {}, {}, {}, null, true);
-          resource.previousAttributes[id] = {};
-          DSUtils.deepMixIn(resource.previousAttributes[id], item);
+          resource.previousAttributes[id] = DSUtils.copy(item);
         } else {
           DSUtils.deepMixIn(item, attrs);
           if (definition.resetHistoryOnInject) {
-            resource.previousAttributes[id] = {};
-            DSUtils.deepMixIn(resource.previousAttributes[id], attrs);
+            resource.previousAttributes[id] = DSUtils.copy(item);
             if (resource.changeHistories[id].length) {
               DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
                 DSUtils.remove(resource.changeHistory, changeRecord);

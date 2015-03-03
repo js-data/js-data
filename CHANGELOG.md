@@ -1,3 +1,8 @@
+##### 1.5.2 - 02 March 2015
+
+###### Backwards compatible bug fixes
+- Now using `DSUtils.copy` when saving "original" attributes so changes can be computed properly
+
 ##### 1.5.1 - 02 March 2015
 
 ###### Backwards compatible bug fixes

@@ -69,8 +69,12 @@ function save(resourceName, id, options) {
       }
       if (options.cacheResponse) {
         var injected = _this.inject(definition.n, attrs, options);
-        var saved = _this.s[resourceName].saved;
-        saved[injected[definition.idAttribute]] = DSUtils.updateTimestamp(saved[injected[definition.idAttribute]]);
+        var resource = _this.s[resourceName];
+        var id = injected[definition.idAttribute];
+        resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
+        if (!definition.resetHistoryOnInject) {
+          resource.previousAttributes[id] = DSUtils.copy(injected);
+        }
         return injected;
       } else {
         return _this.createInstance(resourceName, attrs, options);

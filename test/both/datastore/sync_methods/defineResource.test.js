@@ -215,6 +215,10 @@ describe('DS#defineResource', function () {
 
   it('should allow custom model class definitions', function () {
 
+    function MyBaseBaseClass() {
+      this.biz = 'baz';
+    }
+
     function MyBaseClass() {
       this.foo = 'bar';
 
@@ -225,6 +229,8 @@ describe('DS#defineResource', function () {
         return this.first.split("").reverse().join("");
       };
     }
+
+    MyBaseClass.prototype = new MyBaseBaseClass();
 
     MyBaseClass.prototype.protoMethod = function (value) {
       return 'protoMethod' + value;
@@ -241,6 +247,7 @@ describe('DS#defineResource', function () {
       last: 'Anderson'
     });
 
+    assert.isFalse(Thing1.hasChanges(1));
 
     var Thing2 = store.defineResource({
       name: 'thing2',

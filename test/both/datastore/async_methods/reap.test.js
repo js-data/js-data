@@ -32,9 +32,6 @@ describe('DS#reap', function () {
     Thing.inject({ id: 1 });
     Thing.inject({ id: 2 });
 
-    console.log(Thing.lastSaved(1));
-    console.log(Thing.lastSaved(2));
-
     setTimeout(function () {
       try {
         assert.isTrue(expiresHeap.peek().item.id === 1 || expiresHeap.peek().item.id === 2);
