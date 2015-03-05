@@ -39,7 +39,6 @@
   ],
   "devDependencies": {
     "grunt": "0.4.5",
-    "grunt-browserify": "3.3.0",
     "grunt-contrib-clean": "0.6.0",
     "grunt-contrib-jshint": "0.11.0",
     "grunt-contrib-uglify": "0.7.0",
@@ -47,6 +46,7 @@
     "grunt-karma": "0.10.1",
     "grunt-karma-coveralls": "2.5.3",
     "grunt-mocha-test": "0.12.7",
+    "grunt-webpack": "^1.0.8",
     "jit-grunt": "0.9.1",
     "js-data-schema": ">=1.0.0",
     "karma": "0.12.31",
@@ -60,7 +60,8 @@
     "karma-sinon": "1.0.4",
     "karma-spec-reporter": "0.0.16",
     "sinon": "1.12.2",
-    "time-grunt": "1.0.0"
+    "time-grunt": "1.0.0",
+    "webpack-dev-server": "^1.7.0"
   },
   "scripts": {
     "test": "grunt test"
