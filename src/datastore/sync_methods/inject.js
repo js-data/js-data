@@ -65,7 +65,7 @@ function _getReactFunction(DS, definition, resource) {
   };
 }
 
-function _inject(definition, resource, attrs, options) {
+function _inject(definition, resource, attrs, options, origOptions) {
   var _this = this;
   var _react = _getReactFunction(_this, definition, resource, attrs, options);
 
@@ -73,7 +73,7 @@ function _inject(definition, resource, attrs, options) {
   if (DSUtils._a(attrs)) {
     injected = [];
     for (var i = 0; i < attrs.length; i++) {
-      injected.push(_inject.call(_this, definition, resource, attrs[i], options));
+      injected.push(_inject.call(_this, definition, resource, attrs[i], options, origOptions));
     }
   } else {
     // check if "idAttribute" is a computed property
@@ -105,7 +105,7 @@ function _inject(definition, resource, attrs, options) {
               DSUtils.forEach(toInject, function (toInjectItem) {
                 if (toInjectItem !== _this.s[relationName][toInjectItem[relationDef.idAttribute]]) {
                   try {
-                    var injectedItem = _this.inject(relationName, toInjectItem, options);
+                    var injectedItem = _this.inject(relationName, toInjectItem, origOptions);
                     if (def.foreignKey) {
                       injectedItem[def.foreignKey] = attrs[definition.idAttribute];
                     }
@@ -119,7 +119,7 @@ function _inject(definition, resource, attrs, options) {
             } else {
               if (toInject !== _this.s[relationName][toInject[relationDef.idAttribute]]) {
                 try {
-                  attrs[def.localField] = _this.inject(relationName, attrs[def.localField], options);
+                  attrs[def.localField] = _this.inject(relationName, attrs[def.localField], origOptions);
                   if (def.foreignKey) {
                     attrs[def.localField][def.foreignKey] = attrs[definition.idAttribute];
                   }
@@ -215,16 +215,16 @@ function inject(resourceName, attrs, options) {
   }
 
   var name = definition.n;
+  var origOptions = options;
   options = DSUtils._(definition, options);
 
   options.logFn('inject', attrs, options);
-
   if (options.notify) {
     options.beforeInject(options, attrs);
     definition.emit('DS.beforeInject', definition, attrs);
   }
 
-  injected = _inject.call(_this, definition, resource, attrs, options);
+  injected = _inject.call(_this, definition, resource, attrs, options, origOptions);
   resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
   if (options.findInverseLinks) {

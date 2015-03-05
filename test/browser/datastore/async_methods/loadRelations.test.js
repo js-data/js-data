@@ -313,20 +313,21 @@ describe('DS#loadRelations', function () {
         assert.deepEqual(user.organization.id, store.get('organization', 14).id);
         assert.deepEqual(user.profile.id, store.get('profile', 15).id);
 
-        assert.equal(lifecycle.beforeInject.callCount, 6);
-        assert.equal(Profile.beforeInject.callCount, 1);
-        assert.deepEqual(Profile.beforeInject.getCall(0).args[1], [{
+        assert.equal(lifecycle.beforeInject.callCount, 1);
+        assert.equal(Comment.beforeInject.callCount, 4);
+        assert.equal(Profile.beforeInject.callCount, 2);
+        assert.deepEqual(Profile.beforeInject.getCall(0).args[1], {
           id: 15,
           userId: 10,
           email: 'john.anderson@test.com'
-        }]);
-        assert.equal(Organization.beforeInject.callCount, 1);
+        });
+        assert.equal(Organization.beforeInject.callCount, 2);
         assert.deepEqual(Organization.beforeInject.getCall(0).args[1], {
           id: 14,
           name: 'Test Corp'
         });
-        assert.equal(Comment.beforeInject.callCount, 1);
-        assert.deepEqual(Comment.beforeInject.getCall(0).args[1], [
+        assert.equal(Comment.beforeInject.callCount, 4);
+        assert.deepEqual(Comment.beforeInject.getCall(3).args[1], [
           {
             id: 11,
             userId: 10,

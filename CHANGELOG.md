@@ -1,3 +1,9 @@
+##### 1.5.3 - 05 March 2015
+
+###### Backwards compatible bug fixes
+- #35 - beforeInject not called on relationships
+- #72 - bug: items injected via a relationship fail to fire notifications
+
 ##### 1.5.2 - 02 March 2015
 
 ###### Backwards compatible bug fixes
