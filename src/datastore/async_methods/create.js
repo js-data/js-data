@@ -54,7 +54,7 @@ function create(resourceName, attrs, options) {
         definition.emit('DS.afterCreate', definition, attrs);
       }
       if (options.cacheResponse) {
-        var created = _this.inject(definition.n, attrs, options);
+        var created = _this.inject(definition.n, attrs, options.orig());
         var id = created[definition.idAttribute];
         var resource = _this.s[resourceName];
         resource.completedQueries[id] = new Date().getTime();

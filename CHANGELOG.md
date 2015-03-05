@@ -1,3 +1,8 @@
+##### 1.5.4 - 05 March 2015
+
+###### Backwards compatible bug fixes
+- #72 - bug: items injected via a relationship fail to fire notifications (fixed more cases of this happening)
+
 ##### 1.5.3 - 05 March 2015
 
 ###### Backwards compatible bug fixes

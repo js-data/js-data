@@ -486,6 +486,13 @@ var DSUtils = {
       });
     };
     O.prototype = parent;
+    O.prototype.orig = function () {
+      var orig = {};
+      forOwn(this, function (value, key) {
+        orig[key] = value;
+      });
+      return orig;
+    };
     return new O(options);
   },
   _n: isNumber,

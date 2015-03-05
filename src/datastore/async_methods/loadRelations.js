@@ -50,12 +50,12 @@ function loadRelations(resourceName, instance, relations, options) {
           }
 
           if (def.type === 'hasMany' && params[def.foreignKey]) {
-            task = _this.findAll(relationName, params, __options);
+            task = _this.findAll(relationName, params, __options.orig());
           } else if (def.type === 'hasOne') {
             if (def.localKey && instance[def.localKey]) {
-              task = _this.find(relationName, instance[def.localKey], __options);
+              task = _this.find(relationName, instance[def.localKey], __options.orig());
             } else if (def.foreignKey && params[def.foreignKey]) {
-              task = _this.findAll(relationName, params, __options).then(function (hasOnes) {
+              task = _this.findAll(relationName, params, __options.orig()).then(function (hasOnes) {
                 return hasOnes.length ? hasOnes[0] : null;
               });
             }

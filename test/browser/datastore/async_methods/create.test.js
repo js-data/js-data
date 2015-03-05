@@ -119,8 +119,8 @@ describe('DS#create', function () {
 
       assert.equal(lifecycle.beforeCreate.callCount, 1, 'beforeCreate should have been called twice');
       assert.equal(lifecycle.afterCreate.callCount, 1, 'afterCreate should have been called twice');
-      assert.equal(lifecycle.beforeInject.callCount, 2, 'beforeInject should have been called twice');
-      assert.equal(lifecycle.afterInject.callCount, 2, 'afterInject should have been called twice');
+      assert.equal(lifecycle.beforeInject.callCount, 1, 'beforeInject should have been called twice');
+      assert.equal(lifecycle.afterInject.callCount, 1, 'afterInject should have been called twice');
       assert.equal(lifecycle.serialize.callCount, 1, 'serialize should have been called');
       assert.equal(lifecycle.deserialize.callCount, 1, 'deserialize should have been called');
       assert.equal(store.get('user', 99).id, payload.id);
@@ -133,7 +133,7 @@ describe('DS#create', function () {
       done();
     }).catch(function (err) {
       console.error(err.stack);
-      done('should not have rejected');
+      done(err);
     });
 
     setTimeout(function () {

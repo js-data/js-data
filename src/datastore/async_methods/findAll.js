@@ -18,7 +18,7 @@ function processResults(data, resourceName, queryHash, options) {
   resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
   // Merge the new values into the cache
-  var injected = _this.inject(resourceName, data, options);
+  var injected = _this.inject(resourceName, data, options.orig());
 
   // Make sure each object is added to completedQueries
   if (DSUtils._a(injected)) {
@@ -67,7 +67,7 @@ function findAll(resourceName, params, options) {
       }
       if (queryHash in resource.completedQueries) {
         if (options.useFilter) {
-          resolve(_this.filter(resourceName, params, options));
+          resolve(_this.filter(resourceName, params, options.orig()));
         } else {
           resolve(resource.queryData[queryHash]);
         }
@@ -105,7 +105,7 @@ function findAll(resourceName, params, options) {
               return resource.queryData[queryHash];
             } else {
               DSUtils.forEach(data, function (item, i) {
-                data[i] = _this.createInstance(resourceName, item, options);
+                data[i] = _this.createInstance(resourceName, item, options.orig());
               });
               return data;
             }

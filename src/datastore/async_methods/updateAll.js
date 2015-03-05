@@ -38,8 +38,9 @@ function updateAll(resourceName, attrs, params, options) {
       if (options.notify) {
         definition.emit('DS.afterUpdate', definition, attrs);
       }
+      var origOptions = options.orig();
       if (options.cacheResponse) {
-        var injected = _this.inject(definition.n, data, options);
+        var injected = _this.inject(definition.n, data, origOptions);
         var resource = _this.s[resourceName];
         DSUtils.forEach(injected, function (i) {
           var id = i[definition.idAttribute];
@@ -52,7 +53,7 @@ function updateAll(resourceName, attrs, params, options) {
       } else {
         var instances = [];
         DSUtils.forEach(data, function (item) {
-          instances.push(_this.createInstance(resourceName, item, options));
+          instances.push(_this.createInstance(resourceName, item, origOptions));
         });
         return instances;
       }

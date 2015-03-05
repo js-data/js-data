@@ -56,12 +56,12 @@ function find(resourceName, id, options) {
             // Query is no longer pending
             delete resource.pendingQueries[id];
             if (options.cacheResponse) {
-              var injected = _this.inject(resourceName, data, options);
+              var injected = _this.inject(resourceName, data, options.orig());
               resource.completedQueries[id] = new Date().getTime();
               resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
               return injected;
             } else {
-              return _this.createInstance(resourceName, data, options);
+              return _this.createInstance(resourceName, data, options.orig());
             }
           });
         }
