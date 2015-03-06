@@ -1,9 +1,7 @@
 /* jshint -W082 */
-var DSUtils = require('../../utils');
-var DSErrors = require('../../errors');
-
 function processResults(data, resourceName, queryHash, options) {
   var _this = this;
+  var DSUtils = _this.utils;
   var resource = _this.s[resourceName];
   var idAttribute = _this.defs[resourceName].idAttribute;
   var date = new Date().getTime();
@@ -49,7 +47,7 @@ function findAll(resourceName, params, options) {
     params = params || {};
 
     if (!_this.defs[resourceName]) {
-      reject(new DSErrors.NER(resourceName));
+      reject(new _this.errors.NER(resourceName));
     } else if (!DSUtils._o(params)) {
       reject(DSUtils._oErr('params'));
     } else {

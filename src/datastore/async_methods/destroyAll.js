@@ -1,8 +1,6 @@
-var DSUtils = require('../../utils');
-var DSErrors = require('../../errors');
-
 function destroyAll(resourceName, params, options) {
   var _this = this;
+  var DSUtils = _this.utils;
   var definition = _this.defs[resourceName];
   var ejected, toEject;
 
@@ -10,7 +8,7 @@ function destroyAll(resourceName, params, options) {
 
   return new DSUtils.Promise(function (resolve, reject) {
     if (!definition) {
-      reject(new DSErrors.NER(resourceName));
+      reject(new _this.errors.NER(resourceName));
     } else if (!DSUtils._o(params)) {
       reject(DSUtils._oErr('attrs'));
     } else {
@@ -44,4 +42,4 @@ function destroyAll(resourceName, params, options) {
   });
 }
 
-module.exports = destroyAll;
+export default destroyAll;

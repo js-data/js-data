@@ -1,5 +1,5 @@
-var DSUtils = require('../../utils');
-var DSErrors = require('../../errors');
+import DSUtils from '../../utils';
+import DSErrors from '../../errors';
 
 function _getReactFunction(DS, definition, resource) {
   var name = definition.n;
@@ -22,9 +22,9 @@ function _getReactFunction(DS, definition, resource) {
         var changeRecord = {
           resourceName: name,
           target: item,
-          added: added,
-          removed: removed,
-          changed: changed,
+          added,
+          removed,
+          changed,
           timestamp: resource.modified[innerId]
         };
         resource.changeHistories[innerId].push(changeRecord);
@@ -59,8 +59,7 @@ function _getReactFunction(DS, definition, resource) {
     }
 
     if (definition.idAttribute in changed) {
-      definition.errorFn('Doh! You just changed the primary key of an object! Your data for the "' + name +
-      '" resource is now in an undefined (probably broken) state.');
+      definition.errorFn(`Doh! You just changed the primary key of an object! Your data for the "${name}" resource is now in an undefined (probably broken) state.`);
     }
   };
 }
@@ -87,7 +86,7 @@ function _inject(definition, resource, attrs, options) {
       attrs[idA] = c[idA][c[idA].length - 1].apply(attrs, args);
     }
     if (!(idA in attrs)) {
-      var error = new DSErrors.R(definition.n + '.inject: "attrs" must contain the property specified by `idAttribute`!');
+      var error = new DSErrors.R(`${definition.n}.inject: "attrs" must contain the property specified by "idAttribute"!`);
       options.errorFn(error);
       throw error;
     } else {
@@ -98,7 +97,7 @@ function _inject(definition, resource, attrs, options) {
           var toInject = attrs[def.localField];
           if (toInject) {
             if (!relationDef) {
-              throw new DSErrors.R(definition.n + ' relation is defined but the resource is not!');
+              throw new DSErrors.R(`${definition.n} relation is defined but the resource is not!`);
             }
             if (DSUtils._a(toInject)) {
               var items = [];
@@ -111,7 +110,7 @@ function _inject(definition, resource, attrs, options) {
                     }
                     items.push(injectedItem);
                   } catch (err) {
-                    options.errorFn(err, 'Failed to inject ' + def.type + ' relation: "' + relationName + '"!');
+                    options.errorFn(err, `Failed to inject ${def.type} relation: "${relationName}"!`);
                   }
                 }
               });
@@ -124,7 +123,7 @@ function _inject(definition, resource, attrs, options) {
                     attrs[def.localField][def.foreignKey] = attrs[definition.idAttribute];
                   }
                 } catch (err) {
-                  options.errorFn(err, 'Failed to inject ' + def.type + ' relation: "' + relationName + '"!');
+                  options.errorFn(err, `Failed to inject ${def.type} relation: "${relationName}"!`);
                 }
               }
             }
@@ -211,7 +210,7 @@ function inject(resourceName, attrs, options) {
   if (!definition) {
     throw new DSErrors.NER(resourceName);
   } else if (!DSUtils._o(attrs) && !DSUtils._a(attrs)) {
-    throw new DSErrors.IA(resourceName + '.inject: "attrs" must be an object or an array!');
+    throw new DSErrors.IA(`${resourceName}.inject: "attrs" must be an object or an array!`);
   }
 
   var name = definition.n;
@@ -252,4 +251,4 @@ function inject(resourceName, attrs, options) {
   return injected;
 }
 
-module.exports = inject;
+export default inject;

@@ -12,7 +12,7 @@ describe('DS#inject', function () {
 
     assert.throws(function () {
       store.inject('post', {});
-    }, store.errors.RuntimeError, 'post.inject: "attrs" must contain the property specified by `idAttribute`!');
+    }, store.errors.RuntimeError, 'post.inject: "attrs" must contain the property specified by "idAttribute"!');
   });
   it('should inject an item into the store', function () {
 

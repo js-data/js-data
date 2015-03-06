@@ -1,8 +1,7 @@
-var DSUtils = require('../../utils');
-var DSErrors = require('../../errors');
-
 function updateAll(resourceName, attrs, params, options) {
   var _this = this;
+  var DSUtils = _this.utils;
+  var DSErrors = _this.errors;
   var definition = _this.defs[resourceName];
 
   return new DSUtils.Promise(function (resolve, reject) {
@@ -60,4 +59,4 @@ function updateAll(resourceName, attrs, params, options) {
     });
 }
 
-module.exports = updateAll;
+export default updateAll;

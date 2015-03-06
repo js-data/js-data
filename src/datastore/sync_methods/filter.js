@@ -1,13 +1,11 @@
-var DSUtils = require('../../utils');
-var DSErrors = require('../../errors');
-
 function filter(resourceName, params, options) {
   var _this = this;
+  var DSUtils = _this.utils;
   var definition = _this.defs[resourceName];
   var resource = _this.s[resourceName];
 
   if (!definition) {
-    throw new DSErrors.NER(resourceName);
+    throw new _this.errors.NER(resourceName);
   } else if (params && !DSUtils._o(params)) {
     throw DSUtils._oErr('params');
   }
@@ -33,4 +31,4 @@ function filter(resourceName, params, options) {
   return definition.defaultFilter.call(_this, resource.collection, resourceName, params, options);
 }
 
-module.exports = filter;
+export default filter;

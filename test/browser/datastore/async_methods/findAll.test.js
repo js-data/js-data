@@ -65,7 +65,7 @@ describe('DS#findAll', function () {
       done('Should not have succeeded!');
     }, function (err) {
       try {
-        assert(err.message, 'post.inject: "attrs" must contain the property specified by `idAttribute`!');
+        assert(err.message, 'post.inject: "attrs" must contain the property specified by "idAttribute"!');
         assert.deepEqual(JSON.stringify(store.filter('post', {})), JSON.stringify([]), 'The posts should not be in the store');
         assert.equal(lifecycle.beforeInject.callCount, 1, 'beforeInject should have been called once');
         assert.equal(lifecycle.afterInject.callCount, 0, 'afterInject should not have been called');

@@ -1,5 +1,16 @@
-var DSUtils = require('../../utils');
-var DSErrors = require('../../errors');
+import DSUtils from '../../utils';
+import DSErrors from '../../errors';
+
+import defineResource from './defineResource';
+import eject from './eject';
+import ejectAll from './ejectAll';
+import filter from './filter';
+import inject from './inject';
+import link from './link';
+import linkAll from './linkAll';
+import linkInverse from './linkInverse';
+import unlinkInverse from './unlinkInverse';
+
 var NER = DSErrors.NER;
 var IA = DSErrors.IA;
 var R = DSErrors.R;
@@ -265,25 +276,27 @@ function previous(resourceName, id) {
   return resource.previousAttributes[id] ? DSUtils.copy(resource.previousAttributes[id]) : undefined;
 }
 
-module.exports = {
-  changes: changes,
-  changeHistory: changeHistory,
-  compute: compute,
-  createInstance: createInstance,
-  defineResource: require('./defineResource'),
-  digest: digest,
-  eject: require('./eject'),
-  ejectAll: require('./ejectAll'),
-  filter: require('./filter'),
-  get: get,
-  getAll: getAll,
-  hasChanges: hasChanges,
-  inject: require('./inject'),
-  lastModified: lastModified,
-  lastSaved: lastSaved,
-  link: require('./link'),
-  linkAll: require('./linkAll'),
-  linkInverse: require('./linkInverse'),
-  previous: previous,
-  unlinkInverse: require('./unlinkInverse')
+var syncMethods = {
+  changes,
+  changeHistory,
+  compute,
+  createInstance,
+  defineResource,
+  digest,
+  eject,
+  ejectAll,
+  filter,
+  get,
+  getAll,
+  hasChanges,
+  inject,
+  lastModified,
+  lastSaved,
+  link,
+  linkAll,
+  linkInverse,
+  previous,
+  unlinkInverse
 };
+
+export default syncMethods;

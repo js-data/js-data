@@ -1,13 +1,20 @@
 /* jshint -W041 */
+import DSErrors from './errors';
+import forEach from 'mout/array/forEach';
+import slice from 'mout/array/slice';
+import forOwn from 'mout/object/forOwn';
+import contains from 'mout/array/contains';
+import deepMixIn from 'mout/object/deepMixIn';
+import pascalCase from 'mout/string/pascalCase';
+import remove from 'mout/array/remove';
+import pick from 'mout/object/pick';
+import sort from 'mout/array/sort';
+import upperCase from 'mout/string/upperCase';
+import observe from '../lib/observe-js/observe-js';
+import es6Promise from 'es6-promise';
 var w, _Promise;
 var objectProto = Object.prototype;
 var toString = objectProto.toString;
-var DSErrors = require('./errors');
-var forEach = require('mout/array/forEach');
-var slice = require('mout/array/slice');
-var forOwn = require('mout/object/forOwn');
-var observe = require('../lib/observe-js/observe-js');
-var es6Promise = require('es6-promise');
 es6Promise.polyfill();
 
 var isArray = Array.isArray || function isArray(value) {
@@ -53,13 +60,13 @@ function isStringOrNumber(value) {
   return isString(value) || isNumber(value);
 }
 function isStringOrNumberErr(field) {
-  return new DSErrors.IA('"' + field + '" must be a string or a number!');
+  return new DSErrors.IA(`"${field}" must be a string or a number!`);
 }
 function isObjectErr(field) {
-  return new DSErrors.IA('"' + field + '" must be an object!');
+  return new DSErrors.IA(`"${field}" must be an object!`);
 }
 function isArrayErr(field) {
-  return new DSErrors.IA('"' + field + '" must be an array!');
+  return new DSErrors.IA(`"${field}" must be an array!`);
 }
 
 // adapted from mout.isEmpty
@@ -169,8 +176,7 @@ function Events(target) {
       listeners.splice(0, listeners.length);
     }
   };
-  target.emit = function () {
-    var args = Array.prototype.slice.call(arguments);
+  target.emit = function (...args) {
     var listeners = events[args.shift()] || [];
     if (listeners) {
       for (var i = 0; i < listeners.length; i++) {
@@ -248,66 +254,64 @@ function bubbleDown(heap, weightFunc, n) {
   }
 }
 
-function DSBinaryHeap(weightFunc, compareFunc) {
-  if (weightFunc && !isFunction(weightFunc)) {
-    throw new Error('DSBinaryHeap(weightFunc): weightFunc: must be a function!');
-  }
-  weightFunc = weightFunc || function (x) {
-    return x;
-  };
-  compareFunc = compareFunc || function (x, y) {
-    return x === y;
-  };
-  this.weightFunc = weightFunc;
-  this.compareFunc = compareFunc;
-  this.heap = [];
-}
-
-var dsp = DSBinaryHeap.prototype;
-
-dsp.push = function (node) {
-  this.heap.push(node);
-  bubbleUp(this.heap, this.weightFunc, this.heap.length - 1);
-};
-
-dsp.peek = function () {
-  return this.heap[0];
-};
-
-dsp.pop = function () {
-  var front = this.heap[0],
-    end = this.heap.pop();
-  if (this.heap.length > 0) {
-    this.heap[0] = end;
-    bubbleDown(this.heap, this.weightFunc, 0);
-  }
-  return front;
-};
-
-dsp.remove = function (node) {
-  var length = this.heap.length;
-  for (var i = 0; i < length; i++) {
-    if (this.compareFunc(this.heap[i], node)) {
-      var removed = this.heap[i];
-      var end = this.heap.pop();
-      if (i !== length - 1) {
-        this.heap[i] = end;
-        bubbleUp(this.heap, this.weightFunc, i);
-        bubbleDown(this.heap, this.weightFunc, i);
-      }
-      return removed;
+class DSBinaryHeap {
+  constructor(weightFunc, compareFunc) {
+    if (weightFunc && !isFunction(weightFunc)) {
+      throw new Error('DSBinaryHeap(weightFunc): weightFunc: must be a function!');
     }
+    this.weightFunc = weightFunc || function (x) {
+      return x;
+    };
+    this.compareFunc = compareFunc || function (x, y) {
+      return x === y;
+    };
+    this.heap = [];
   }
-  return null;
-};
 
-dsp.removeAll = function () {
-  this.heap = [];
-};
+  push(node) {
+    this.heap.push(node);
+    bubbleUp(this.heap, this.weightFunc, this.heap.length - 1);
+  }
 
-dsp.size = function () {
-  return this.heap.length;
-};
+  peek() {
+    return this.heap[0];
+  }
+
+  pop() {
+    var front = this.heap[0],
+      end = this.heap.pop();
+    if (this.heap.length > 0) {
+      this.heap[0] = end;
+      bubbleDown(this.heap, this.weightFunc, 0);
+    }
+    return front;
+  }
+
+  remove(node) {
+    var length = this.heap.length;
+    for (var i = 0; i < length; i++) {
+      if (this.compareFunc(this.heap[i], node)) {
+        var removed = this.heap[i];
+        var end = this.heap.pop();
+        if (i !== length - 1) {
+          this.heap[i] = end;
+          bubbleUp(this.heap, this.weightFunc, i);
+          bubbleDown(this.heap, this.weightFunc, i);
+        }
+        return removed;
+      }
+    }
+    return null;
+  }
+
+  removeAll() {
+    this.heap = [];
+  }
+
+  size() {
+    return this.heap.length;
+  }
+}
 
 var toPromisify = [
   'beforeValidate',
@@ -466,7 +470,7 @@ observe.setEqualityFn(equals);
 
 var DSUtils = {
   // Options that inherit from defaults
-  _: function (parent, options) {
+  _(parent, options) {
     var _this = this;
     options = options || {};
     if (options && options.constructor === parent.constructor) {
@@ -503,7 +507,7 @@ var DSUtils = {
   _oErr: isObjectErr,
   _a: isArray,
   _aErr: isArrayErr,
-  compute: function (fn, field) {
+  compute(fn, field) {
     var _this = this;
     var args = [];
     forEach(fn.deps, function (dep) {
@@ -512,44 +516,43 @@ var DSUtils = {
     // compute property
     _this[field] = fn[fn.length - 1].apply(_this, args);
   },
-  contains: require('mout/array/contains'),
-  copy: copy,
-  deepMixIn: require('mout/object/deepMixIn'),
+  contains,
+  copy,
+  deepMixIn,
   diffObjectFromOldObject: observe.diffObjectFromOldObject,
-  DSBinaryHeap: DSBinaryHeap,
-  equals: equals,
-  Events: Events,
-  filter: filter,
-  forEach: forEach,
-  forOwn: forOwn,
-  fromJson: function (json) {
+  DSBinaryHeap,
+  equals,
+  Events,
+  filter,
+  forEach,
+  forOwn,
+  fromJson(json) {
     return isString(json) ? JSON.parse(json) : json;
   },
   get: require('mout/object/get'),
-  intersection: intersection,
-  isArray: isArray,
-  isBoolean: isBoolean,
-  isDate: isDate,
-  isEmpty: isEmpty,
-  isFunction: isFunction,
-  isObject: isObject,
-  isNumber: isNumber,
-  isRegExp: isRegExp,
-  isString: isString,
-  makePath: makePath,
-  observe: observe,
-  pascalCase: require('mout/string/pascalCase'),
-  pick: require('mout/object/pick'),
+  intersection,
+  isArray,
+  isBoolean,
+  isDate,
+  isEmpty,
+  isFunction,
+  isObject,
+  isNumber,
+  isRegExp,
+  isString,
+  makePath,
+  observe,
+  pascalCase,
+  pick,
   Promise: _Promise,
-  promisify: function (fn, target) {
+  promisify(fn, target) {
     var Promise = this.Promise;
     if (!fn) {
       return;
     } else if (typeof fn !== 'function') {
       throw new Error('Can only promisify functions!');
     }
-    return function () {
-      var args = Array.prototype.slice.apply(arguments);
+    return function (...args) {
       return new Promise(function (resolve, reject) {
 
         args.push(function (err, result) {
@@ -571,14 +574,14 @@ var DSUtils = {
       });
     };
   },
-  remove: require('mout/array/remove'),
+  remove,
   set: require('mout/object/set'),
-  slice: slice,
-  sort: require('mout/array/sort'),
+  slice,
+  sort,
   toJson: JSON.stringify,
-  updateTimestamp: updateTimestamp,
-  upperCase: require('mout/string/upperCase'),
-  removeCircular: function (object) {
+  updateTimestamp,
+  upperCase,
+  removeCircular(object) {
     var objects = [];
 
     return (function rmCirc(value) {
@@ -612,9 +615,9 @@ var DSUtils = {
       return value;
     }(object));
   },
-  resolveItem: resolveItem,
-  resolveId: resolveId,
-  w: w
+  resolveItem,
+  resolveId,
+  w
 };
 
-module.exports = DSUtils;
+export default DSUtils;

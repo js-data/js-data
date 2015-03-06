@@ -32,32 +32,47 @@ describe('DS#defineResource', function () {
     assert.isUndefined(store.get('Comment', 1, { loadFromServer: true }), 'should be undefined');
 
     setTimeout(function () {
-      assert.equal(1, _this.requests.length);
-      assert.equal(_this.requests[0].url, 'hello/Comment/1');
-      assert.equal(_this.requests[0].method, 'GET');
-      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({ name: 'Sally', id: 1 }));
-
-      setTimeout(function () {
-        assert.deepEqual(JSON.stringify(store.get('Comment', 1)), JSON.stringify({ name: 'Sally', id: 1 }));
-
-        store.create('Comment', { name: 'John' }).then(function (comment) {
-          assert.deepEqual(JSON.stringify(comment), JSON.stringify({ name: 'John', id: 2 }));
-          assert.equal(callCount, 1, 'overridden validate should have been called once');
-          assert.equal(lifecycle.validate.callCount, 0, 'global validate should not have been called');
-          done();
-        }).catch(done);
+      try {
+        assert.equal(1, _this.requests.length);
+        assert.equal(_this.requests[0].url, 'hello/Comment/1');
+        assert.equal(_this.requests[0].method, 'GET');
+        _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({
+          name: 'Sally',
+          id: 1
+        }));
 
         setTimeout(function () {
-          assert.equal(2, _this.requests.length);
-          assert.equal(_this.requests[1].url, 'hello/Comment');
-          assert.equal(_this.requests[1].method, 'POST');
-          assert.equal(_this.requests[1].requestBody, JSON.stringify({ name: 'John' }));
-          _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({
-            name: 'John',
-            id: 2
-          }));
+          try {
+            assert.deepEqual(JSON.stringify(store.get('Comment', 1)), JSON.stringify({ name: 'Sally', id: 1 }));
+
+            store.create('Comment', { name: 'John' }).then(function (comment) {
+              assert.deepEqual(JSON.stringify(comment), JSON.stringify({ name: 'John', id: 2 }));
+              assert.equal(callCount, 1, 'overridden validate should have been called once');
+              assert.equal(lifecycle.validate.callCount, 0, 'global validate should not have been called');
+              done();
+            }).catch(done);
+
+            setTimeout(function () {
+              try {
+                assert.equal(2, _this.requests.length);
+                assert.equal(_this.requests[1].url, 'hello/Comment');
+                assert.equal(_this.requests[1].method, 'POST');
+                assert.equal(_this.requests[1].requestBody, JSON.stringify({ name: 'John' }));
+                _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({
+                  name: 'John',
+                  id: 2
+                }));
+              } catch (err) {
+                done(err);
+              }
+            }, 30);
+          } catch (err) {
+            done(err);
+          }
         }, 30);
-      }, 30);
+      } catch (err) {
+        done(err);
+      }
     }, 30);
   });
   it('should allow definition of computed properties', function (done) {

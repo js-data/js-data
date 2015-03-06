@@ -112,18 +112,24 @@ beforeEach(function () {
     queryTransform: lifecycle.queryTransform,
     serialize: lifecycle.serialize,
     deserialize: lifecycle.deserialize,
-    log: function () {}
+    log: function () {
+    }
   });
   store.registerAdapter('http', dsHttpAdapter, { default: true });
   dsLocalStorageAdapter = new DSLocalStorageAdapter();
   store.registerAdapter('localstorage', dsLocalStorageAdapter);
   DSUtils = JSData.DSUtils;
   localStorage.clear();
-  Post = store.defineResource({
-    name: 'post',
-    keepChangeHistory: true,
-    endpoint: '/posts'
-  });
+  try {
+    Post = store.defineResource({
+      name: 'post',
+      keepChangeHistory: true,
+      endpoint: '/posts'
+    });
+  } catch (err) {
+    console.log(err.stack);
+    throw err;
+  }
 
   User = store.defineResource({
     name: 'user',

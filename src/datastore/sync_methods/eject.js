@@ -1,8 +1,6 @@
-var DSUtils = require('../../utils');
-var DSErrors = require('../../errors');
-
 function eject(resourceName, id, options) {
   var _this = this;
+  var DSUtils = _this.utils;
   var definition = _this.defs[resourceName];
   var resource = _this.s[resourceName];
   var item;
@@ -11,7 +9,7 @@ function eject(resourceName, id, options) {
   id = DSUtils.resolveId(definition, id);
 
   if (!definition) {
-    throw new DSErrors.NER(resourceName);
+    throw new _this.errors.NER(resourceName);
   } else if (!DSUtils._sn(id)) {
     throw DSUtils._snErr('id');
   }
@@ -74,4 +72,4 @@ function eject(resourceName, id, options) {
   }
 }
 
-module.exports = eject;
+export default eject;

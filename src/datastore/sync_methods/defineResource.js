@@ -1,15 +1,15 @@
 /*jshint evil:true, loopfunc:true*/
-var DSUtils = require('../../utils');
-var DSErrors = require('../../errors');
+import DSUtils from '../../utils';
+import DSErrors from '../../errors';
 
-function Resource(options) {
-
-  DSUtils.deepMixIn(this, options);
-
-  if ('endpoint' in options) {
-    this.endpoint = options.endpoint;
-  } else {
-    this.endpoint = this.name;
+class Resource {
+  constructor(options) {
+    DSUtils.deepMixIn(this, options);
+    if ('endpoint' in options) {
+      this.endpoint = options.endpoint;
+    } else {
+      this.endpoint = this.name;
+    }
   }
 }
 
@@ -45,7 +45,7 @@ function defineResource(definition) {
   } else if (!DSUtils._s(definition.name)) {
     throw new DSErrors.IA('"name" must be a string!');
   } else if (_this.s[definition.name]) {
-    throw new DSErrors.R(definition.name + ' is already registered!');
+    throw new DSErrors.R(`${definition.name} is already registered!`);
   }
 
   try {
@@ -152,12 +152,12 @@ function defineResource(definition) {
     }
 
     // Create the wrapper class for the new resource
-    def['class'] = DSUtils.pascalCase(def.name);
+    var _class = def['class'] = DSUtils.pascalCase(def.name);
     try {
       if (typeof def.useClass === 'function') {
-        eval('function ' + def['class'] + '() { def.useClass.call(this); }');
-        def[def['class']] = eval(def['class']);
-        def[def['class']].prototype = (function (proto) {
+        eval(`function ${_class}() { def.useClass.call(this); }`);
+        def[_class] = eval(_class);
+        def[_class].prototype = (function (proto) {
           function Ctor() {
           }
 
@@ -165,20 +165,20 @@ function defineResource(definition) {
           return new Ctor();
         })(def.useClass.prototype);
       } else {
-        eval('function ' + def['class'] + '() {}');
-        def[def['class']] = eval(def['class']);
+        eval(`function ${_class}() {}`);
+        def[_class] = eval(_class);
       }
     } catch (e) {
-      def[def['class']] = function () {
+      def[_class] = function () {
       };
     }
 
     // Apply developer-defined methods
     if (def.methods) {
-      DSUtils.deepMixIn(def[def['class']].prototype, def.methods);
+      DSUtils.deepMixIn(def[_class].prototype, def.methods);
     }
 
-    def[def['class']].prototype.set = function (key, value) {
+    def[_class].prototype.set = function (key, value) {
       DSUtils.set(this, key, value);
       var observer = _this.s[def.n].observers[this[def.idAttribute]];
       if (observer && !DSUtils.observe.hasObjectObserve) {
@@ -189,7 +189,7 @@ function defineResource(definition) {
       return this;
     };
 
-    def[def['class']].prototype.get = function (key) {
+    def[_class].prototype.get = function (key) {
       return DSUtils.get(this, key);
     };
 
@@ -201,7 +201,7 @@ function defineResource(definition) {
           fn = def.computed[field];
         }
         if (def.methods && field in def.methods) {
-          def.errorFn('Computed property "' + field + '" conflicts with previously defined prototype method!');
+          def.errorFn(`Computed property "${field}" conflicts with previously defined prototype method!`);
         }
         var deps;
         if (fn.length === 1) {
@@ -242,15 +242,14 @@ function defineResource(definition) {
     }
 
     DSUtils.forEach(instanceMethods, function (name) {
-      def[def['class']].prototype['DS' + DSUtils.pascalCase(name)] = function () {
-        var args = Array.prototype.slice.call(arguments);
+      def[_class].prototype[`DS${DSUtils.pascalCase(name)}`] = function (...args) {
         args.unshift(this[def.idAttribute] || this);
         args.unshift(def.n);
         return _this[name].apply(_this, args);
       };
     });
 
-    def[def['class']].prototype.DSCreate = function () {
+    def[_class].prototype.DSCreate = function () {
       var args = Array.prototype.slice.call(arguments);
       args.unshift(this);
       args.unshift(def.n);
@@ -285,25 +284,29 @@ function defineResource(definition) {
     }
 
     // Proxy DS methods with shorthand ones
+    var fns = ['registerAdapter', 'getAdapter', 'is'];
     for (var key in _this) {
       if (typeof _this[key] === 'function') {
-        if (_this[key].shorthand !== false) {
-          (function (k) {
-            def[k] = function () {
-              var args = Array.prototype.slice.call(arguments);
-              args.unshift(def.n);
-              return _this[k].apply(_this, args);
-            };
-          })(key);
-        } else {
-          (function (k) {
-            def[k] = function () {
-              return _this[k].apply(_this, Array.prototype.slice.call(arguments));
-            };
-          })(key);
-        }
+        fns.push(key);
       }
     }
+
+    DSUtils.forEach(fns, function (key) {
+      if (_this[key].shorthand !== false) {
+        (function (k) {
+          def[k] = function (...args) {
+            args.unshift(def.n);
+            return _this[k].apply(_this, args);
+          };
+        })(key);
+      } else {
+        (function (k) {
+          def[k] = function () {
+            return _this[k].apply(_this, Array.prototype.slice.call(arguments));
+          };
+        })(key);
+      }
+    });
 
     def.beforeValidate = DSUtils.promisify(def.beforeValidate);
     def.validate = DSUtils.promisify(def.validate);
@@ -317,7 +320,7 @@ function defineResource(definition) {
 
     DSUtils.forOwn(def.actions, function addAction(action, name) {
       if (def[name]) {
-        throw new Error('Cannot override existing method "' + name + '"!');
+        throw new Error(`Cannot override existing method "${name}"!`);
       }
       def[name] = function (options) {
         options = options || {};
@@ -350,4 +353,4 @@ function defineResource(definition) {
   }
 }
 
-module.exports = defineResource;
+export default defineResource;

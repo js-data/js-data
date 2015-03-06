@@ -1,8 +1,6 @@
-var DSUtils = require('../../utils');
-var DSErrors = require('../../errors');
-
 function create(resourceName, attrs, options) {
   var _this = this;
+  var DSUtils = _this.utils;
   var definition = _this.defs[resourceName];
 
   options = options || {};
@@ -10,7 +8,7 @@ function create(resourceName, attrs, options) {
 
   var rejectionError;
   if (!definition) {
-    rejectionError = new DSErrors.NER(resourceName);
+    rejectionError = new _this.errors.NER(resourceName);
   } else if (!DSUtils._o(attrs)) {
     rejectionError = DSUtils._oErr('attrs');
   } else {
@@ -66,4 +64,4 @@ function create(resourceName, attrs, options) {
     });
 }
 
-module.exports = create;
+export default create;

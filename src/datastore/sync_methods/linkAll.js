@@ -1,14 +1,12 @@
-var DSUtils = require('../../utils');
-var DSErrors = require('../../errors');
-
 function linkAll(resourceName, params, relations) {
   var _this = this;
+  var DSUtils = _this.utils;
   var definition = _this.defs[resourceName];
 
   relations = relations || [];
 
   if (!definition) {
-    throw new DSErrors.NER(resourceName);
+    throw new _this.errors.NER(resourceName);
   } else if (!DSUtils._a(relations)) {
     throw DSUtils._aErr('relations');
   }
@@ -52,4 +50,4 @@ function linkAll(resourceName, params, relations) {
   return linked;
 }
 
-module.exports = linkAll;
+export default linkAll;

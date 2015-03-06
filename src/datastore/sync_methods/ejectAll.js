@@ -1,13 +1,11 @@
-var DSUtils = require('../../utils');
-var DSErrors = require('../../errors');
-
 function ejectAll(resourceName, params, options) {
   var _this = this;
+  var DSUtils = _this.utils;
   var definition = _this.defs[resourceName];
   params = params || {};
 
   if (!definition) {
-    throw new DSErrors.NER(resourceName);
+    throw new _this.errors.NER(resourceName);
   } else if (!DSUtils._o(params)) {
     throw DSUtils._oErr('params');
   }
@@ -37,4 +35,4 @@ function ejectAll(resourceName, params, options) {
   return items;
 }
 
-module.exports = ejectAll;
+export default ejectAll;

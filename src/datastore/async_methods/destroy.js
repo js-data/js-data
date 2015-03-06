@@ -1,15 +1,13 @@
-var DSUtils = require('../../utils');
-var DSErrors = require('../../errors');
-
 function destroy(resourceName, id, options) {
   var _this = this;
+  var DSUtils = _this.utils;
   var definition = _this.defs[resourceName];
   var item;
 
   return new DSUtils.Promise(function (resolve, reject) {
     id = DSUtils.resolveId(definition, id);
     if (!definition) {
-      reject(new DSErrors.NER(resourceName));
+      reject(new _this.errors.NER(resourceName));
     } else if (!DSUtils._sn(id)) {
       reject(DSUtils._snErr('id'));
     } else {

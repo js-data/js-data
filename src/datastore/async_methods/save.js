@@ -1,8 +1,6 @@
-var DSUtils = require('../../utils');
-var DSErrors = require('../../errors');
-
 function save(resourceName, id, options) {
   var _this = this;
+  var {utils: DSUtils, errors: DSErrors} = _this;
   var definition = _this.defs[resourceName];
   var item;
 
@@ -13,7 +11,7 @@ function save(resourceName, id, options) {
     } else if (!DSUtils._sn(id)) {
       reject(DSUtils._snErr('id'));
     } else if (!_this.get(resourceName, id)) {
-      reject(new DSErrors.R('id "' + id + '" not found in cache!'));
+      reject(new DSErrors.R(`id "${id}" not found in cache!`));
     } else {
       item = _this.get(resourceName, id);
       options = DSUtils._(definition, options);
@@ -82,4 +80,4 @@ function save(resourceName, id, options) {
     });
 }
 
-module.exports = save;
+export default save;

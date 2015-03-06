@@ -18,7 +18,7 @@
       "url": "https://github.com/js-data/js-data/blob/master/LICENSE"
     }
   ],
-  "main": "./src/index.js",
+  "main": "./dist/js-data-debug.js",
   "keywords": [
     "orm",
     "odm",
@@ -38,6 +38,8 @@
     "localstorage"
   ],
   "devDependencies": {
+    "babel-core": "^4.6.6",
+    "babel-loader": "^4.0.0",
     "grunt": "0.4.5",
     "grunt-contrib-clean": "0.6.0",
     "grunt-contrib-jshint": "0.11.0",

@@ -1,44 +1,43 @@
-function IllegalArgumentError(message) {
-  Error.call(this);
-  if (typeof Error.captureStackTrace === 'function') {
-    Error.captureStackTrace(this, this.constructor);
+class IllegalArgumentError extends Error {
+  constructor(message) {
+    super(this);
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, this.constructor);
+    }
+    this.type = this.constructor.name;
+    this.message = message || 'Illegal Argument!';
   }
-  this.type = this.constructor.name;
-  this.message = message || 'Illegal Argument!';
 }
 
-IllegalArgumentError.prototype = new Error();
-IllegalArgumentError.prototype.constructor = IllegalArgumentError;
-
-function RuntimeError(message) {
-  Error.call(this);
-  if (typeof Error.captureStackTrace === 'function') {
-    Error.captureStackTrace(this, this.constructor);
+class RuntimeError extends Error {
+  constructor(message) {
+    super(this);
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, this.constructor);
+    }
+    this.type = this.constructor.name;
+    this.message = message || 'RuntimeError Error!';
   }
-  this.type = this.constructor.name;
-  this.message = message || 'RuntimeError Error!';
 }
 
-RuntimeError.prototype = new Error();
-RuntimeError.prototype.constructor = RuntimeError;
-
-function NonexistentResourceError(resourceName) {
-  Error.call(this);
-  if (typeof Error.captureStackTrace === 'function') {
-    Error.captureStackTrace(this, this.constructor);
+class NonexistentResourceError extends Error {
+  constructor(resourceName) {
+    super(this);
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, this.constructor);
+    }
+    this.type = this.constructor.name;
+    this.message = `${resourceName} is not a registered resource!`;
   }
-  this.type = this.constructor.name;
-  this.message = (resourceName || '') + ' is not a registered resource!';
 }
 
-NonexistentResourceError.prototype = new Error();
-NonexistentResourceError.prototype.constructor = NonexistentResourceError;
-
-module.exports = {
-  IllegalArgumentError: IllegalArgumentError,
+var DSErrors = {
+  IllegalArgumentError,
   IA: IllegalArgumentError,
-  RuntimeError: RuntimeError,
+  RuntimeError,
   R: RuntimeError,
-  NonexistentResourceError: NonexistentResourceError,
+  NonexistentResourceError,
   NER: NonexistentResourceError
 };
+
+export default DSErrors;

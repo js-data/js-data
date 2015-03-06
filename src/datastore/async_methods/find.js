@@ -1,15 +1,13 @@
 /* jshint -W082 */
-var DSUtils = require('../../utils');
-var DSErrors = require('../../errors');
-
 function find(resourceName, id, options) {
   var _this = this;
+  var DSUtils = _this.utils;
   var definition = _this.defs[resourceName];
   var resource = _this.s[resourceName];
 
   return new DSUtils.Promise(function (resolve, reject) {
     if (!definition) {
-      reject(new DSErrors.NER(resourceName));
+      reject(new _this.errors.NER(resourceName));
     } else if (!DSUtils._sn(id)) {
       reject(DSUtils._snErr('id'));
     } else {
@@ -77,4 +75,4 @@ function find(resourceName, id, options) {
   });
 }
 
-module.exports = find;
+export default find;

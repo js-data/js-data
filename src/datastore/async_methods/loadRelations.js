@@ -1,8 +1,7 @@
-var DSUtils = require('../../utils');
-var DSErrors = require('../../errors');
-
 function loadRelations(resourceName, instance, relations, options) {
   var _this = this;
+  var DSUtils = _this.utils;
+  var DSErrors = _this.errors;
   var definition = _this.defs[resourceName];
   var fields = [];
 
@@ -84,4 +83,4 @@ function loadRelations(resourceName, instance, relations, options) {
     });
 }
 
-module.exports = loadRelations;
+export default loadRelations;

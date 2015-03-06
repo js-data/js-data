@@ -65,6 +65,7 @@ module.exports = function (grunt) {
     },
     webpack: {
       dist: {
+        debug: true,
         entry: './src/index.js',
         output: {
           filename: './dist/js-data-debug.js',
@@ -79,6 +80,11 @@ module.exports = function (grunt) {
             root: 'Schemator'
           },
           'bluebird': 'bluebird'
+        },
+        module: {
+          loaders: [
+            { test: /(src)(.+)\.js$/, exclude: /node_modules/, loader: 'babel-loader?blacklist=useStrict' }
+          ]
         }
       }
     },
@@ -199,7 +205,7 @@ module.exports = function (grunt) {
   grunt.registerTask('test', ['build', 'n', 'b']);
   grunt.registerTask('build', [
     'clean',
-    'jshint',
+    //'jshint',
     'webpack',
     'debug:dist/js-data-debug.js',
     'version:dist/js-data-debug.js',

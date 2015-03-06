@@ -1,7 +1,7 @@
-var DSUtils = require('../utils');
-var DSErrors = require('../errors');
-var syncMethods = require('./sync_methods');
-var asyncMethods = require('./async_methods');
+import DSUtils from '../utils';
+import DSErrors from '../errors';
+import syncMethods from './sync_methods/index';
+import asyncMethods from './async_methods/index';
 var Schemator;
 
 function lifecycleNoopCb(resource, attrs, cb) {
@@ -48,7 +48,21 @@ function compare(orderBy, index, a, b) {
   }
 }
 
-function Defaults() {
+class Defaults {
+  errorFn(a, b) {
+    if (this.error && typeof this.error === 'function') {
+      try {
+        if (typeof a === 'string') {
+          throw new Error(a);
+        } else {
+          throw a;
+        }
+      } catch (err) {
+        a = err;
+      }
+      this.error(this.name || null, a || null, b || null);
+    }
+  }
 }
 
 var defaultsPrototype = Defaults.prototype;
@@ -83,20 +97,6 @@ defaultsPrototype.endpoint = '';
 defaultsPrototype.error = console ? function (a, b, c) {
   console[typeof console.error === 'function' ? 'error' : 'log'](a, b, c);
 } : false;
-defaultsPrototype.errorFn = function (a, b) {
-  if (this.error && typeof this.error === 'function') {
-    try {
-      if (typeof a === 'string') {
-        throw new Error(a);
-      } else {
-        throw a;
-      }
-    } catch (err) {
-      a = err;
-    }
-    this.error(this.name || null, a || null, b || null);
-  }
-};
 defaultsPrototype.fallbackAdapters = ['http'];
 defaultsPrototype.findBelongsTo = true;
 defaultsPrototype.findHasOne = true;
@@ -110,11 +110,14 @@ defaultsPrototype.loadFromServer = false;
 defaultsPrototype.log = console ? function (a, b, c, d, e) {
   console[typeof console.info === 'function' ? 'info' : 'log'](a, b, c, d, e);
 } : false;
+
 defaultsPrototype.logFn = function (a, b, c, d) {
-  if (this.debug && this.log && typeof this.log === 'function') {
-    this.log(this.name || null, a || null, b || null, c || null, d || null);
+  var _this = this;
+  if (_this.debug && _this.log && typeof _this.log === 'function') {
+    _this.log(_this.name || null, a || null, b || null, c || null, d || null);
   }
 };
+
 defaultsPrototype.maxAge = false;
 defaultsPrototype.notify = !!DSUtils.w;
 defaultsPrototype.reapAction = !!DSUtils.w ? 'inject' : 'none';
@@ -126,7 +129,6 @@ defaultsPrototype.useClass = true;
 defaultsPrototype.useFilter = false;
 defaultsPrototype.validate = lifecycleNoopCb;
 defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
-  var _this = this;
   var filtered = collection;
   var where = null;
   var reserved = {
@@ -262,7 +264,7 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
       if (DSUtils._s(def)) {
         orderBy[i] = [def, 'ASC'];
       } else if (!DSUtils._a(def)) {
-        throw new DSErrors.IA('DS.filter(resourceName[, params][, options]): ' + DSUtils.toJson(def) + ': Must be a string or an array!', {
+        throw new DSErrors.IA(`DS.filter("${resourceName}"[, params][, options]): ${DSUtils.toJson(def)}: Must be a string or an array!`, {
           params: {
             'orderBy[i]': {
               actual: typeof def,
@@ -302,94 +304,94 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
   return filtered;
 };
 
-function DS(options) {
-  var _this = this;
-  options = options || {};
+class DS {
+  constructor(options) {
+    var _this = this;
+    options = options || {};
 
-  try {
-    Schemator = require('js-data-schema');
-  } catch (e) {
+    try {
+      Schemator = require('js-data-schema');
+    } catch (e) {
+    }
+
+    if (!Schemator || DSUtils.isEmpty(Schemator)) {
+      try {
+        Schemator = window.Schemator;
+      } catch (e) {
+      }
+    }
+
+    if (Schemator || options.schemator) {
+      _this.schemator = options.schemator || new Schemator();
+    }
+
+    _this.store = {};
+    // alias store, shaves 0.1 kb off the minified build
+    _this.s = _this.store;
+    _this.definitions = {};
+    // alias definitions, shaves 0.3 kb off the minified build
+    _this.defs = _this.definitions;
+    _this.adapters = {};
+    _this.defaults = new Defaults();
+    _this.observe = DSUtils.observe;
+    DSUtils.forOwn(options, function (v, k) {
+      _this.defaults[k] = v;
+    });
+
+    _this.defaults.logFn('new data store created', _this.defaults);
   }
 
-  if (!Schemator || DSUtils.isEmpty(Schemator)) {
-    try {
-      Schemator = window.Schemator;
-    } catch (e) {
+  getAdapter(options) {
+    var errorIfNotExist = false;
+    options = options || {};
+    this.defaults.logFn('getAdapter', options);
+    if (DSUtils._s(options)) {
+      errorIfNotExist = true;
+      options = {
+        adapter: options
+      };
+    }
+    var adapter = this.adapters[options.adapter];
+    if (adapter) {
+      return adapter;
+    } else if (errorIfNotExist) {
+      throw new Error(`${options.adapter} is not a registered adapter!`);
+    } else {
+      return this.adapters[options.defaultAdapter];
     }
   }
 
-  if (Schemator || options.schemator) {
-    _this.schemator = options.schemator || new Schemator();
+  registerAdapter(name, Adapter, options) {
+    var _this = this;
+    options = options || {};
+    _this.defaults.logFn('registerAdapter', name, Adapter, options);
+    if (DSUtils.isFunction(Adapter)) {
+      _this.adapters[name] = new Adapter(options);
+    } else {
+      _this.adapters[name] = Adapter;
+    }
+    if (options.default) {
+      _this.defaults.defaultAdapter = name;
+    }
+    _this.defaults.logFn(`default adapter is ${_this.defaults.defaultAdapter}`);
   }
 
-  _this.store = {};
-  // alias store, shaves 0.1 kb off the minified build
-  _this.s = _this.store;
-  _this.definitions = {};
-  // alias definitions, shaves 0.3 kb off the minified build
-  _this.defs = _this.definitions;
-  _this.adapters = {};
-  _this.defaults = new Defaults();
-  _this.observe = DSUtils.observe;
-  DSUtils.forOwn(options, function (v, k) {
-    _this.defaults[k] = v;
-  });
-
-  _this.defaults.logFn('new data store created', _this.defaults);
+  is(resourceName, instance) {
+    var definition = this.defs[resourceName];
+    if (!definition) {
+      throw new DSErrors.NER(resourceName);
+    }
+    return instance instanceof definition[definition.class];
+  }
 }
 
 var dsPrototype = DS.prototype;
 
-dsPrototype.getAdapter = function getAdapter(options) {
-  var errorIfNotExist = false;
-  options = options || {};
-  this.defaults.logFn('getAdapter', options);
-  if (DSUtils._s(options)) {
-    errorIfNotExist = true;
-    options = {
-      adapter: options
-    };
-  }
-  var adapter = this.adapters[options.adapter];
-  if (adapter) {
-    return adapter;
-  } else if (errorIfNotExist) {
-    throw new Error(options.adapter + ' is not a registered adapter!');
-  } else {
-    return this.adapters[options.defaultAdapter];
-  }
-};
-
 dsPrototype.getAdapter.shorthand = false;
-
-dsPrototype.registerAdapter = function registerAdapter(name, Adapter, options) {
-  var _this = this;
-  options = options || {};
-  _this.defaults.logFn('registerAdapter', name, Adapter, options);
-  if (DSUtils.isFunction(Adapter)) {
-    _this.adapters[name] = new Adapter(options);
-  } else {
-    _this.adapters[name] = Adapter;
-  }
-  if (options.default) {
-    _this.defaults.defaultAdapter = name;
-  }
-  _this.defaults.logFn('default adapter is ' + _this.defaults.defaultAdapter);
-};
-
 dsPrototype.registerAdapter.shorthand = false;
-
-dsPrototype.is = function is(resourceName, instance) {
-  var definition = this.defs[resourceName];
-  if (!definition) {
-    throw new DSErrors.NER(resourceName);
-  }
-  return instance instanceof definition[definition.class];
-};
-
-dsPrototype.errors = require('../errors');
+dsPrototype.errors = DSErrors;
 dsPrototype.utils = DSUtils;
 DSUtils.deepMixIn(dsPrototype, syncMethods);
 DSUtils.deepMixIn(dsPrototype, asyncMethods);
 
-module.exports = DS;
+export default DS;

@@ -1,12 +1,14 @@
-var DS = require('./datastore');
+import DSUtils from './utils';
+import DSErrors from './errors';
+import DS from './datastore/index';
 
-module.exports = {
-  DS: DS,
-  createStore: function (options) {
+var JSData = {
+  DS,
+  createStore(options) {
     return new DS(options);
   },
-  DSUtils: require('./utils'),
-  DSErrors: require('./errors'),
+  DSUtils,
+  DSErrors,
   version: {
     full: '<%= pkg.version %>',
     major: parseInt('<%= major %>', 10),
@@ -16,3 +18,5 @@ module.exports = {
     beta: '<%= beta %>' !== 'false' ? '<%= beta %>' : false
   }
 };
+
+export default JSData;

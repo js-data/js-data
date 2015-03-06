@@ -1,5 +1,15 @@
-var DSUtils = require('../../utils');
-var DSErrors = require('../../errors');
+import DSUtils from '../../utils';
+import DSErrors from '../../errors';
+
+import create from './create';
+import destroy from './destroy';
+import destroyAll from './destroyAll';
+import find from './find';
+import findAll from './findAll';
+import loadRelations from './loadRelations';
+import save from './save';
+import update from './update';
+import updateAll from './updateAll';
 
 function reap(resourceName, options) {
   var _this = this;
@@ -87,16 +97,18 @@ function refresh(resourceName, id, options) {
     });
 }
 
-module.exports = {
-  create: require('./create'),
-  destroy: require('./destroy'),
-  destroyAll: require('./destroyAll'),
-  find: require('./find'),
-  findAll: require('./findAll'),
-  loadRelations: require('./loadRelations'),
-  reap: reap,
-  refresh: refresh,
-  save: require('./save'),
-  update: require('./update'),
-  updateAll: require('./updateAll')
+var asyncMethods = {
+  create,
+  destroy,
+  destroyAll,
+  find,
+  findAll,
+  loadRelations,
+  reap,
+  refresh,
+  save,
+  update,
+  updateAll
 };
+
+export default asyncMethods;

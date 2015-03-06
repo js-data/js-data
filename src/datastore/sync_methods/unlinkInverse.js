@@ -1,15 +1,13 @@
-var DSUtils = require('../../utils');
-var DSErrors = require('../../errors');
-
 function unlinkInverse(resourceName, id, relations) {
   var _this = this;
+  var DSUtils = _this.utils;
   var definition = _this.defs[resourceName];
 
   relations = relations || [];
 
   id = DSUtils.resolveId(definition, id);
   if (!definition) {
-    throw new DSErrors.NER(resourceName);
+    throw new _this.errors.NER(resourceName);
   } else if (!DSUtils._sn(id)) {
     throw DSUtils._snErr('id');
   } else if (!DSUtils._a(relations)) {
@@ -49,4 +47,4 @@ function unlinkInverse(resourceName, id, relations) {
   return linked;
 }
 
-module.exports = unlinkInverse;
+export default unlinkInverse;
