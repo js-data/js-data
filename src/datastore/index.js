@@ -1,8 +1,9 @@
+/* jshint eqeqeq:false */
 import DSUtils from '../utils';
 import DSErrors from '../errors';
 import syncMethods from './sync_methods/index';
 import asyncMethods from './async_methods/index';
-var Schemator;
+let Schemator;
 
 function lifecycleNoopCb(resource, attrs, cb) {
   cb(null, attrs);
@@ -13,8 +14,8 @@ function lifecycleNoop(resource, attrs) {
 }
 
 function compare(orderBy, index, a, b) {
-  var def = orderBy[index];
-  var cA = DSUtils.get(a, def[0]), cB = DSUtils.get(b, def[0]);
+  let def = orderBy[index];
+  let cA = DSUtils.get(a, def[0]), cB = DSUtils.get(b, def[0]);
   if (DSUtils._s(cA)) {
     cA = DSUtils.upperCase(cA);
   }
@@ -94,9 +95,7 @@ defaultsPrototype.eagerEject = false;
 // TODO: Implement eagerInject in DS#create
 defaultsPrototype.eagerInject = false;
 defaultsPrototype.endpoint = '';
-defaultsPrototype.error = console ? function (a, b, c) {
-  console[typeof console.error === 'function' ? 'error' : 'log'](a, b, c);
-} : false;
+defaultsPrototype.error = console ? (a, b, c) => console[typeof console.error === 'function' ? 'error' : 'log'](a, b, c) : false;
 defaultsPrototype.fallbackAdapters = ['http'];
 defaultsPrototype.findBelongsTo = true;
 defaultsPrototype.findHasOne = true;
@@ -107,12 +106,10 @@ defaultsPrototype.ignoredChanges = [/\$/];
 defaultsPrototype.ignoreMissing = false;
 defaultsPrototype.keepChangeHistory = false;
 defaultsPrototype.loadFromServer = false;
-defaultsPrototype.log = console ? function (a, b, c, d, e) {
-  console[typeof console.info === 'function' ? 'info' : 'log'](a, b, c, d, e);
-} : false;
+defaultsPrototype.log = console ? (a, b, c, d, e) => console[typeof console.info === 'function' ? 'info' : 'log'](a, b, c, d, e) : false;
 
 defaultsPrototype.logFn = function (a, b, c, d) {
-  var _this = this;
+  let _this = this;
   if (_this.debug && _this.log && typeof _this.log === 'function') {
     _this.log(_this.name || null, a || null, b || null, c || null, d || null);
   }
@@ -128,10 +125,10 @@ defaultsPrototype.upsert = !!DSUtils.w;
 defaultsPrototype.useClass = true;
 defaultsPrototype.useFilter = false;
 defaultsPrototype.validate = lifecycleNoopCb;
-defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
-  var filtered = collection;
-  var where = null;
-  var reserved = {
+defaultsPrototype.defaultFilter = (collection, resourceName, params, options) => {
+  let filtered = collection;
+  let where = null;
+  let reserved = {
     skip: '',
     offset: '',
     where: '',
@@ -150,7 +147,7 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
   }
 
   if (options.allowSimpleWhere) {
-    DSUtils.forOwn(params, function (value, key) {
+    DSUtils.forOwn(params, (value, key) => {
       if (!(key in reserved) && !(key in where)) {
         where[key] = {
           '==': value
@@ -164,10 +161,10 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
   }
 
   if (where) {
-    filtered = DSUtils.filter(filtered, function (attrs) {
-      var first = true;
-      var keep = true;
-      DSUtils.forOwn(where, function (clause, field) {
+    filtered = DSUtils.filter(filtered, attrs => {
+      let first = true;
+      let keep = true;
+      DSUtils.forOwn(where, (clause, field) => {
         if (DSUtils._s(clause)) {
           clause = {
             '===': clause
@@ -178,10 +175,10 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
           };
         }
         if (DSUtils._o(clause)) {
-          DSUtils.forOwn(clause, function (term, op) {
-            var expr;
-            var isOr = op[0] === '|';
-            var val = attrs[field];
+          DSUtils.forOwn(clause, (term, op) => {
+            let expr;
+            let isOr = op[0] === '|';
+            let val = attrs[field];
             op = isOr ? op.substr(1) : op;
             if (op === '==') {
               expr = val == term;
@@ -239,7 +236,7 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
     });
   }
 
-  var orderBy = null;
+  let orderBy = null;
 
   if (DSUtils._s(params.orderBy)) {
     orderBy = [
@@ -259,8 +256,8 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
 
   // Apply 'orderBy'
   if (orderBy) {
-    var index = 0;
-    DSUtils.forEach(orderBy, function (def, i) {
+    let index = 0;
+    DSUtils.forEach(orderBy, (def, i) => {
       if (DSUtils._s(def)) {
         orderBy[i] = [def, 'ASC'];
       } else if (!DSUtils._a(def)) {
@@ -274,13 +271,11 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
         });
       }
     });
-    filtered = DSUtils.sort(filtered, function (a, b) {
-      return compare(orderBy, index, a, b);
-    });
+    filtered = DSUtils.sort(filtered, (a, b) => compare(orderBy, index, a, b));
   }
 
-  var limit = DSUtils._n(params.limit) ? params.limit : null;
-  var skip = null;
+  let limit = DSUtils._n(params.limit) ? params.limit : null;
+  let skip = null;
 
   if (DSUtils._n(params.skip)) {
     skip = params.skip;
@@ -306,7 +301,7 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
 
 class DS {
   constructor(options) {
-    var _this = this;
+    let _this = this;
     options = options || {};
 
     try {
@@ -334,15 +329,14 @@ class DS {
     _this.adapters = {};
     _this.defaults = new Defaults();
     _this.observe = DSUtils.observe;
-    DSUtils.forOwn(options, function (v, k) {
+    DSUtils.forOwn(options, (v, k) => {
       _this.defaults[k] = v;
     });
-
     _this.defaults.logFn('new data store created', _this.defaults);
   }
 
   getAdapter(options) {
-    var errorIfNotExist = false;
+    let errorIfNotExist = false;
     options = options || {};
     this.defaults.logFn('getAdapter', options);
     if (DSUtils._s(options)) {
@@ -351,7 +345,7 @@ class DS {
         adapter: options
       };
     }
-    var adapter = this.adapters[options.adapter];
+    let adapter = this.adapters[options.adapter];
     if (adapter) {
       return adapter;
     } else if (errorIfNotExist) {
@@ -362,7 +356,7 @@ class DS {
   }
 
   registerAdapter(name, Adapter, options) {
-    var _this = this;
+    let _this = this;
     options = options || {};
     _this.defaults.logFn('registerAdapter', name, Adapter, options);
     if (DSUtils.isFunction(Adapter)) {
@@ -377,7 +371,7 @@ class DS {
   }
 
   is(resourceName, instance) {
-    var definition = this.defs[resourceName];
+    let definition = this.defs[resourceName];
     if (!definition) {
       throw new DSErrors.NER(resourceName);
     }

@@ -122,7 +122,12 @@ beforeEach(function () {
     afterDestroy: lifecycle.afterDestroy,
     beforeInject: lifecycle.beforeInject,
     afterInject: lifecycle.afterInject,
-    log: false
+    log: false,
+    methods: {
+      say: function () {
+        return 'hi';
+      }
+    }
   });
   DSUtils = JSData.DSUtils;
   DSErrors = JSData.DSErrors;

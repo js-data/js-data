@@ -13,7 +13,7 @@ class Resource {
   }
 }
 
-var instanceMethods = [
+let instanceMethods = [
   'compute',
   'refresh',
   'save',
@@ -31,9 +31,9 @@ var instanceMethods = [
   'unlinkInverse'
 ];
 
-function defineResource(definition) {
-  var _this = this;
-  var definitions = _this.defs;
+export default function defineResource(definition) {
+  let _this = this;
+  let definitions = _this.defs;
 
   if (DSUtils._s(definition)) {
     definition = {
@@ -68,12 +68,12 @@ function defineResource(definition) {
     if (def.relations) {
       def.relationList = [];
       def.relationFields = [];
-      DSUtils.forOwn(def.relations, function (relatedModels, type) {
-        DSUtils.forOwn(relatedModels, function (defs, relationName) {
+      DSUtils.forOwn(def.relations, (relatedModels, type) => {
+        DSUtils.forOwn(relatedModels, (defs, relationName) => {
           if (!DSUtils._a(defs)) {
             relatedModels[relationName] = [defs];
           }
-          DSUtils.forEach(relatedModels[relationName], function (d) {
+          DSUtils.forEach(relatedModels[relationName], d => {
             d.type = type;
             d.relation = relationName;
             d.name = def.n;
@@ -83,8 +83,8 @@ function defineResource(definition) {
         });
       });
       if (def.relations.belongsTo) {
-        DSUtils.forOwn(def.relations.belongsTo, function (relatedModel, modelName) {
-          DSUtils.forEach(relatedModel, function (relation) {
+        DSUtils.forOwn(def.relations.belongsTo, (relatedModel, modelName) => {
+          DSUtils.forEach(relatedModel, relation => {
             if (relation.parent) {
               def.parent = modelName;
               def.parentKey = relation.localKey;
@@ -99,19 +99,19 @@ function defineResource(definition) {
       }
     }
 
-    def.getResource = function (resourceName) {
+    def.getResource = resourceName => {
       return _this.defs[resourceName];
     };
 
-    def.getEndpoint = function (id, options) {
+    def.getEndpoint = (id, options) => {
       options.params = options.params || {};
 
-      var item;
-      var parentKey = def.parentKey;
-      var endpoint = options.hasOwnProperty('endpoint') ? options.endpoint : def.endpoint;
-      var parentField = def.parentField;
-      var parentDef = definitions[def.parent];
-      var parentId = options.params[parentKey];
+      let item;
+      let parentKey = def.parentKey;
+      let endpoint = options.hasOwnProperty('endpoint') ? options.endpoint : def.endpoint;
+      let parentField = def.parentField;
+      let parentDef = definitions[def.parent];
+      let parentId = options.params[parentKey];
 
       if (parentId === false || !parentKey || !parentDef) {
         if (parentId === false) {
@@ -133,10 +133,8 @@ function defineResource(definition) {
 
         if (parentId) {
           delete options.endpoint;
-          var _options = {};
-          DSUtils.forOwn(options, function (value, key) {
-            _options[key] = value;
-          });
+          let _options = {};
+          DSUtils.forOwn(options, (value, key) =>_options[key] = value);
           return DSUtils.makePath(parentDef.getEndpoint(parentId, DSUtils._(parentDef, _options)), parentId, endpoint);
         } else {
           return endpoint;
@@ -195,7 +193,7 @@ function defineResource(definition) {
 
     // Prepare for computed properties
     if (def.computed) {
-      DSUtils.forOwn(def.computed, function (fn, field) {
+      DSUtils.forOwn(def.computed, (fn, field) => {
         if (DSUtils.isFunction(fn)) {
           def.computed[field] = [fn];
           fn = def.computed[field];
@@ -205,7 +203,7 @@ function defineResource(definition) {
         }
         var deps;
         if (fn.length === 1) {
-          var match = fn[0].toString().match(/function.*?\(([\s\S]*?)\)/);
+          let match = fn[0].toString().match(/function.*?\(([\s\S]*?)\)/);
           deps = match[1].split(',');
           def.computed[field] = deps.concat(fn);
           fn = def.computed[field];
@@ -214,10 +212,8 @@ function defineResource(definition) {
           }
         }
         deps = fn.slice(0, fn.length - 1);
-        DSUtils.forEach(deps, function (val, index) {
-          deps[index] = val.trim();
-        });
-        fn.deps = DSUtils.filter(deps, function (dep) {
+        DSUtils.forEach(deps, (val, index) => deps[index] = val.trim());
+        fn.deps = DSUtils.filter(deps, dep => {
           return !!dep;
         });
       });
@@ -227,10 +223,10 @@ function defineResource(definition) {
       def.schema = _this.schemator.defineSchema(def.n, definition.schema);
 
       if (!definition.hasOwnProperty('validate')) {
-        def.validate = function (resourceName, attrs, cb) {
+        def.validate = (resourceName, attrs, cb) => {
           def.schema.validate(attrs, {
             ignoreMissing: def.ignoreMissing
-          }, function (err) {
+          }, err => {
             if (err) {
               return cb(err);
             } else {
@@ -241,7 +237,7 @@ function defineResource(definition) {
       }
     }
 
-    DSUtils.forEach(instanceMethods, function (name) {
+    DSUtils.forEach(instanceMethods, name => {
       def[_class].prototype[`DS${DSUtils.pascalCase(name)}`] = function (...args) {
         args.unshift(this[def.idAttribute] || this);
         args.unshift(def.n);
@@ -249,8 +245,7 @@ function defineResource(definition) {
       };
     });
 
-    def[_class].prototype.DSCreate = function () {
-      var args = Array.prototype.slice.call(arguments);
+    def[_class].prototype.DSCreate = function (...args) {
       args.unshift(this);
       args.unshift(def.n);
       return _this.create.apply(_this, args);
@@ -259,9 +254,9 @@ function defineResource(definition) {
     // Initialize store data for the new resource
     _this.s[def.n] = {
       collection: [],
-      expiresHeap: new DSUtils.DSBinaryHeap(function (x) {
+      expiresHeap: new DSUtils.DSBinaryHeap(x => {
         return x.expires;
-      }, function (x, y) {
+      }, (x, y) => {
         return x.item === y;
       }),
       completedQueries: {},
@@ -278,33 +273,28 @@ function defineResource(definition) {
     };
 
     if (def.reapInterval) {
-      setInterval(function () {
-        _this.reap(def.n, { isInterval: true });
-      }, def.reapInterval);
+      setInterval(() => _this.reap(def.n, { isInterval: true }), def.reapInterval);
     }
 
     // Proxy DS methods with shorthand ones
-    var fns = ['registerAdapter', 'getAdapter', 'is'];
+    let fns = ['registerAdapter', 'getAdapter', 'is'];
     for (var key in _this) {
       if (typeof _this[key] === 'function') {
         fns.push(key);
       }
     }
 
-    DSUtils.forEach(fns, function (key) {
-      if (_this[key].shorthand !== false) {
-        (function (k) {
-          def[k] = function (...args) {
-            args.unshift(def.n);
-            return _this[k].apply(_this, args);
-          };
-        })(key);
+    DSUtils.forEach(fns, key => {
+      let k = key;
+      if (_this[k].shorthand !== false) {
+        def[k] = (...args) => {
+          args.unshift(def.n);
+          return _this[k].apply(_this, args);
+        };
       } else {
-        (function (k) {
-          def[k] = function () {
-            return _this[k].apply(_this, Array.prototype.slice.call(arguments));
-          };
-        })(key);
+        def[k] = (...args) => {
+          return _this[k].apply(_this, args);
+        };
       }
     });
 
@@ -318,14 +308,14 @@ function defineResource(definition) {
     def.beforeDestroy = DSUtils.promisify(def.beforeDestroy);
     def.afterDestroy = DSUtils.promisify(def.afterDestroy);
 
-    DSUtils.forOwn(def.actions, function addAction(action, name) {
-      if (def[name]) {
+    DSUtils.forOwn(def.actions, (action, name) => {
+      if (def[name] && !def.actions[name]) {
         throw new Error(`Cannot override existing method "${name}"!`);
       }
       def[name] = function (options) {
         options = options || {};
-        var adapter = _this.getAdapter(action.adapter || 'http');
-        var config = DSUtils.deepMixIn({}, action);
+        let adapter = _this.getAdapter(action.adapter || 'http');
+        let config = DSUtils.deepMixIn({}, action);
         if (!options.hasOwnProperty('endpoint') && config.endpoint) {
           options.endpoint = config.endpoint;
         }
@@ -352,5 +342,3 @@ function defineResource(definition) {
     throw err;
   }
 }
-
-export default defineResource;

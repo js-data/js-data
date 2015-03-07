@@ -1,7 +1,7 @@
-function link(resourceName, id, relations) {
-  var _this = this;
-  var DSUtils = _this.utils;
-  var definition = _this.defs[resourceName];
+export default function link(resourceName, id, relations) {
+  let _this = this;
+  let DSUtils = _this.utils;
+  let definition = _this.defs[resourceName];
 
   relations = relations || [];
 
@@ -16,17 +16,17 @@ function link(resourceName, id, relations) {
 
   definition.logFn('link', id, relations);
 
-  var linked = _this.get(resourceName, id);
+  let linked = _this.get(resourceName, id);
 
   if (linked) {
-    DSUtils.forEach(definition.relationList, function (def) {
-      var relationName = def.relation;
+    DSUtils.forEach(definition.relationList, def => {
+      let relationName = def.relation;
       if (relations.length && !DSUtils.contains(relations, relationName)) {
         return;
       }
-      var params = {};
+      let params = {};
       if (def.type === 'belongsTo') {
-        var parent = linked[def.localKey] ? _this.get(relationName, linked[def.localKey]) : null;
+        let parent = linked[def.localKey] ? _this.get(relationName, linked[def.localKey]) : null;
         if (parent) {
           linked[def.localField] = parent;
         }
@@ -35,7 +35,7 @@ function link(resourceName, id, relations) {
         linked[def.localField] = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
       } else if (def.type === 'hasOne') {
         params[def.foreignKey] = linked[definition.idAttribute];
-        var children = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
+        let children = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
         if (children.length) {
           linked[def.localField] = children[0];
         }
@@ -45,5 +45,3 @@ function link(resourceName, id, relations) {
 
   return linked;
 }
-
-export default link;

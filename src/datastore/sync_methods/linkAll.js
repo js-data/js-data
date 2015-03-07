@@ -1,7 +1,7 @@
-function linkAll(resourceName, params, relations) {
-  var _this = this;
-  var DSUtils = _this.utils;
-  var definition = _this.defs[resourceName];
+export default function linkAll(resourceName, params, relations) {
+  let _this = this;
+  let DSUtils = _this.utils;
+  let definition = _this.defs[resourceName];
 
   relations = relations || [];
 
@@ -13,32 +13,32 @@ function linkAll(resourceName, params, relations) {
 
   definition.logFn('linkAll', params, relations);
 
-  var linked = _this.filter(resourceName, params);
+  let linked = _this.filter(resourceName, params);
 
   if (linked) {
-    DSUtils.forEach(definition.relationList, function (def) {
-      var relationName = def.relation;
+    DSUtils.forEach(definition.relationList, def => {
+      let relationName = def.relation;
       if (relations.length && !DSUtils.contains(relations, relationName)) {
         return;
       }
       if (def.type === 'belongsTo') {
-        DSUtils.forEach(linked, function (injectedItem) {
-          var parent = injectedItem[def.localKey] ? _this.get(relationName, injectedItem[def.localKey]) : null;
+        DSUtils.forEach(linked, injectedItem => {
+          let parent = injectedItem[def.localKey] ? _this.get(relationName, injectedItem[def.localKey]) : null;
           if (parent) {
             injectedItem[def.localField] = parent;
           }
         });
       } else if (def.type === 'hasMany') {
-        DSUtils.forEach(linked, function (injectedItem) {
-          var params = {};
+        DSUtils.forEach(linked, injectedItem => {
+          let params = {};
           params[def.foreignKey] = injectedItem[definition.idAttribute];
           injectedItem[def.localField] = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
         });
       } else if (def.type === 'hasOne') {
-        DSUtils.forEach(linked, function (injectedItem) {
-          var params = {};
+        DSUtils.forEach(linked, injectedItem => {
+          let params = {};
           params[def.foreignKey] = injectedItem[definition.idAttribute];
-          var children = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
+          let children = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
           if (children.length) {
             injectedItem[def.localField] = children[0];
           }
@@ -49,5 +49,3 @@ function linkAll(resourceName, params, relations) {
 
   return linked;
 }
-
-export default linkAll;

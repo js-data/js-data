@@ -1,11 +1,11 @@
 /* jshint -W082 */
-function find(resourceName, id, options) {
-  var _this = this;
-  var DSUtils = _this.utils;
-  var definition = _this.defs[resourceName];
-  var resource = _this.s[resourceName];
+export default function find(resourceName, id, options) {
+  let _this = this;
+  let DSUtils = _this.utils;
+  let definition = _this.defs[resourceName];
+  let resource = _this.s[resourceName];
 
-  return new DSUtils.Promise(function (resolve, reject) {
+  return new DSUtils.Promise((resolve, reject) => {
     if (!definition) {
       reject(new _this.errors.NER(resourceName));
     } else if (!DSUtils._sn(id)) {
@@ -28,19 +28,19 @@ function find(resourceName, id, options) {
         resolve();
       }
     }
-  }).then(function (item) {
+  }).then(item => {
       if (!item) {
         if (!(id in resource.pendingQueries)) {
-          var promise;
-          var strategy = options.findStrategy || options.strategy;
+          let promise;
+          let strategy = options.findStrategy || options.strategy;
           if (strategy === 'fallback') {
             function makeFallbackCall(index) {
-              return _this.getAdapter((options.findFallbackAdapters || options.fallbackAdapters)[index]).find(definition, id, options)['catch'](function (err) {
+              return _this.getAdapter((options.findFallbackAdapters || options.fallbackAdapters)[index]).find(definition, id, options)['catch'](err => {
                 index++;
                 if (index < options.fallbackAdapters.length) {
                   return makeFallbackCall(index);
                 } else {
-                  return Promise.reject(err);
+                  return DSUtils.Promise.reject(err);
                 }
               });
             }
@@ -50,11 +50,11 @@ function find(resourceName, id, options) {
             promise = _this.getAdapter(options).find(definition, id, options);
           }
 
-          resource.pendingQueries[id] = promise.then(function (data) {
+          resource.pendingQueries[id] = promise.then(data => {
             // Query is no longer pending
             delete resource.pendingQueries[id];
             if (options.cacheResponse) {
-              var injected = _this.inject(resourceName, data, options.orig());
+              let injected = _this.inject(resourceName, data, options.orig());
               resource.completedQueries[id] = new Date().getTime();
               resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
               return injected;
@@ -67,12 +67,10 @@ function find(resourceName, id, options) {
       } else {
         return item;
       }
-    })['catch'](function (err) {
+    })['catch'](err => {
     if (resource) {
       delete resource.pendingQueries[id];
     }
     throw err;
   });
 }
-
-export default find;

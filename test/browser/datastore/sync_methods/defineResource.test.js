@@ -1,79 +1,87 @@
 describe('DS#defineResource', function () {
   it('should correctly register a resource', function (done) {
-    var _this = this;
+    try {
+      var _this = this;
 
-    var callCount = 0,
-      test = {
-        validate: function (resourceName, attrs, cb) {
-          callCount += 1;
-          cb(null, attrs);
-        }
-      };
-
-    var Comment = store.defineResource({
-      name: 'Comment',
-      basePath: 'hello/',
-      validate: test.validate
-    });
-
-    assert.isTrue(Comment.getAdapter() === store.getAdapter());
-    assert.isTrue(Comment.getAdapter({ adapter: 'http' }) === store.getAdapter({ adapter: 'http' }));
-
-    var weirdThing = store.defineResource({
-      name: 'weird-thing'
-    });
-
-    assert.equal(weirdThing.class, 'WeirdThing');
-
-    assert.doesNotThrow(function () {
-      assert.isUndefined(store.get('Comment', 5), 'should be undefined');
-    });
-
-    assert.isUndefined(store.get('Comment', 1, { loadFromServer: true }), 'should be undefined');
-
-    setTimeout(function () {
-      try {
-        assert.equal(1, _this.requests.length);
-        assert.equal(_this.requests[0].url, 'hello/Comment/1');
-        assert.equal(_this.requests[0].method, 'GET');
-        _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({
-          name: 'Sally',
-          id: 1
-        }));
-
-        setTimeout(function () {
-          try {
-            assert.deepEqual(JSON.stringify(store.get('Comment', 1)), JSON.stringify({ name: 'Sally', id: 1 }));
-
-            store.create('Comment', { name: 'John' }).then(function (comment) {
-              assert.deepEqual(JSON.stringify(comment), JSON.stringify({ name: 'John', id: 2 }));
-              assert.equal(callCount, 1, 'overridden validate should have been called once');
-              assert.equal(lifecycle.validate.callCount, 0, 'global validate should not have been called');
-              done();
-            }).catch(done);
-
-            setTimeout(function () {
-              try {
-                assert.equal(2, _this.requests.length);
-                assert.equal(_this.requests[1].url, 'hello/Comment');
-                assert.equal(_this.requests[1].method, 'POST');
-                assert.equal(_this.requests[1].requestBody, JSON.stringify({ name: 'John' }));
-                _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({
-                  name: 'John',
-                  id: 2
-                }));
-              } catch (err) {
-                done(err);
-              }
-            }, 30);
-          } catch (err) {
-            done(err);
+      var callCount = 0,
+        test = {
+          validate: function (resourceName, attrs, cb) {
+            callCount += 1;
+            cb(null, attrs);
           }
-        }, 30);
-      } catch (err) {
-        done(err);
-      }
-    }, 30);
+        };
+
+      var Comment = store.defineResource({
+        name: 'Comment',
+        basePath: 'hello/',
+        validate: test.validate
+      });
+
+      assert.isTrue(Comment.getAdapter() === store.getAdapter(), 'should get the same default adapter');
+      assert.isTrue(Comment.getAdapter({ adapter: 'http' }) === store.getAdapter({ adapter: 'http' }), 'should get the same adapter');
+
+      var weirdThing = store.defineResource({
+        name: 'weird-thing'
+      });
+
+      assert.equal(weirdThing.class, 'WeirdThing');
+
+      assert.doesNotThrow(function () {
+        assert.isUndefined(store.get('Comment', 5), 'should be undefined');
+      });
+
+      assert.isUndefined(store.get('Comment', 1, { loadFromServer: true }), 'should be undefined');
+
+      setTimeout(function () {
+        try {
+          assert.equal(1, _this.requests.length);
+          assert.equal(_this.requests[0].url, 'hello/Comment/1');
+          assert.equal(_this.requests[0].method, 'GET');
+          _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({
+            name: 'Sally',
+            id: 1
+          }));
+
+          setTimeout(function () {
+            try {
+              assert.deepEqual(JSON.stringify(store.get('Comment', 1)), JSON.stringify({ name: 'Sally', id: 1 }));
+
+              store.create('Comment', { name: 'John' }).then(function (comment) {
+                assert.deepEqual(JSON.stringify(comment), JSON.stringify({ name: 'John', id: 2 }));
+                assert.equal(callCount, 1, 'overridden validate should have been called once');
+                assert.equal(lifecycle.validate.callCount, 0, 'global validate should not have been called');
+                done();
+              }).catch(done);
+
+              setTimeout(function () {
+                try {
+                  assert.equal(2, _this.requests.length);
+                  assert.equal(_this.requests[1].url, 'hello/Comment');
+                  assert.equal(_this.requests[1].method, 'POST');
+                  assert.equal(_this.requests[1].requestBody, JSON.stringify({ name: 'John' }));
+                  _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({
+                    name: 'John',
+                    id: 2
+                  }));
+                } catch (err) {
+                  console.log(err.stack);
+                  done(err);
+                }
+              }, 30);
+            } catch (err) {
+              console.log(err.stack);
+              done(err);
+            }
+          }, 30);
+        } catch (err) {
+          console.log(err.stack);
+          done(err);
+        }
+      }, 30);
+    } catch (err) {
+      console.log(err.stack);
+      done(err);
+    }
   });
   it('should allow definition of computed properties', function (done) {
     var callCount = 0;
@@ -263,7 +271,6 @@ describe('DS#defineResource', function () {
         }
       }
     });
-
 
     Thing2.test({
       data: 'thing2 payload'

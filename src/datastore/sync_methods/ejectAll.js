@@ -1,7 +1,7 @@
-function ejectAll(resourceName, params, options) {
-  var _this = this;
-  var DSUtils = _this.utils;
-  var definition = _this.defs[resourceName];
+export default function ejectAll(resourceName, params, options) {
+  let _this = this;
+  let DSUtils = _this.utils;
+  let definition = _this.defs[resourceName];
   params = params || {};
 
   if (!definition) {
@@ -12,27 +12,17 @@ function ejectAll(resourceName, params, options) {
 
   definition.logFn('ejectAll', params, options);
 
-  var resource = _this.s[resourceName];
+  let resource = _this.s[resourceName];
+  let queryHash = DSUtils.toJson(params);
+  let items = _this.filter(definition.n, params);
+  let ids = [];
   if (DSUtils.isEmpty(params)) {
     resource.completedQueries = {};
+  } else {
+    delete resource.completedQueries[queryHash];
   }
-  var queryHash = DSUtils.toJson(params);
-  var items = _this.filter(definition.n, params);
-  var ids = [];
-  DSUtils.forEach(items, function (item) {
-    if (item && item[definition.idAttribute]) {
-      ids.push(item[definition.idAttribute]);
-    }
-  });
-
-  DSUtils.forEach(ids, function (id) {
-    _this.eject(definition.n, id, options);
-  });
-
-  delete resource.completedQueries[queryHash];
+  DSUtils.forEach(items, item => item && item[definition.idAttribute] ? ids.push(item[definition.idAttribute]) : null);
+  DSUtils.forEach(ids, id => _this.eject(definition.n, id, options));
   resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
-
   return items;
 }
-
-export default ejectAll;

@@ -2,13 +2,13 @@ import DSUtils from '../../utils';
 import DSErrors from '../../errors';
 
 function _getReactFunction(DS, definition, resource) {
-  var name = definition.n;
+  let name = definition.n;
   return function _react(added, removed, changed, oldValueFn, firstTime) {
-    var target = this;
-    var item;
-    var innerId = (oldValueFn && oldValueFn(definition.idAttribute)) ? oldValueFn(definition.idAttribute) : target[definition.idAttribute];
+    let target = this;
+    let item;
+    let innerId = (oldValueFn && oldValueFn(definition.idAttribute)) ? oldValueFn(definition.idAttribute) : target[definition.idAttribute];
 
-    DSUtils.forEach(definition.relationFields, function (field) {
+    DSUtils.forEach(definition.relationFields, field => {
       delete added[field];
       delete removed[field];
       delete changed[field];
@@ -19,7 +19,7 @@ function _getReactFunction(DS, definition, resource) {
       resource.modified[innerId] = DSUtils.updateTimestamp(resource.modified[innerId]);
       resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
       if (definition.keepChangeHistory) {
-        var changeRecord = {
+        let changeRecord = {
           resourceName: name,
           target: item,
           added,
@@ -34,10 +34,10 @@ function _getReactFunction(DS, definition, resource) {
 
     if (definition.computed) {
       item = item || DS.get(name, innerId);
-      DSUtils.forOwn(definition.computed, function (fn, field) {
-        var compute = false;
+      DSUtils.forOwn(definition.computed, (fn, field) => {
+        let compute = false;
         // check if required fields changed
-        DSUtils.forEach(fn.deps, function (dep) {
+        DSUtils.forEach(fn.deps, dep => {
           if (dep in added || dep in removed || dep in changed || !(field in item)) {
             compute = true;
           }
@@ -51,7 +51,7 @@ function _getReactFunction(DS, definition, resource) {
 
     if (definition.relations) {
       item = item || DS.get(name, innerId);
-      DSUtils.forEach(definition.relationList, function (def) {
+      DSUtils.forEach(definition.relationList, def => {
         if (item[def.localField] && (def.localKey in added || def.localKey in removed || def.localKey in changed)) {
           DS.link(name, item[definition.idAttribute], [def.relation]);
         }
@@ -65,10 +65,10 @@ function _getReactFunction(DS, definition, resource) {
 }
 
 function _inject(definition, resource, attrs, options) {
-  var _this = this;
-  var _react = _getReactFunction(_this, definition, resource, attrs, options);
+  let _this = this;
+  let _react = _getReactFunction(_this, definition, resource, attrs, options);
 
-  var injected;
+  let injected;
   if (DSUtils._a(attrs)) {
     injected = [];
     for (var i = 0; i < attrs.length; i++) {
@@ -76,35 +76,33 @@ function _inject(definition, resource, attrs, options) {
     }
   } else {
     // check if "idAttribute" is a computed property
-    var c = definition.computed;
-    var idA = definition.idAttribute;
+    let c = definition.computed;
+    let idA = definition.idAttribute;
     if (c && c[idA]) {
-      var args = [];
-      DSUtils.forEach(c[idA].deps, function (dep) {
-        args.push(attrs[dep]);
-      });
+      let args = [];
+      DSUtils.forEach(c[idA].deps, dep => args.push(attrs[dep]));
       attrs[idA] = c[idA][c[idA].length - 1].apply(attrs, args);
     }
     if (!(idA in attrs)) {
-      var error = new DSErrors.R(`${definition.n}.inject: "attrs" must contain the property specified by "idAttribute"!`);
+      let error = new DSErrors.R(`${definition.n}.inject: "attrs" must contain the property specified by "idAttribute"!`);
       options.errorFn(error);
       throw error;
     } else {
       try {
-        DSUtils.forEach(definition.relationList, function (def) {
-          var relationName = def.relation;
-          var relationDef = _this.defs[relationName];
-          var toInject = attrs[def.localField];
+        DSUtils.forEach(definition.relationList, def => {
+          let relationName = def.relation;
+          let relationDef = _this.defs[relationName];
+          let toInject = attrs[def.localField];
           if (toInject) {
             if (!relationDef) {
               throw new DSErrors.R(`${definition.n} relation is defined but the resource is not!`);
             }
             if (DSUtils._a(toInject)) {
-              var items = [];
-              DSUtils.forEach(toInject, function (toInjectItem) {
+              let items = [];
+              DSUtils.forEach(toInject, toInjectItem => {
                 if (toInjectItem !== _this.s[relationName][toInjectItem[relationDef.idAttribute]]) {
                   try {
-                    var injectedItem = _this.inject(relationName, toInjectItem, options.orig());
+                    let injectedItem = _this.inject(relationName, toInjectItem, options.orig());
                     if (def.foreignKey) {
                       injectedItem[def.foreignKey] = attrs[definition.idAttribute];
                     }
@@ -130,9 +128,9 @@ function _inject(definition, resource, attrs, options) {
           }
         });
 
-        var id = attrs[idA];
-        var item = _this.get(definition.n, id);
-        var initialLastModified = item ? resource.modified[id] : 0;
+        let id = attrs[idA];
+        let item = _this.get(definition.n, id);
+        let initialLastModified = item ? resource.modified[id] : 0;
 
         if (!item) {
           if (options.useClass) {
@@ -162,9 +160,7 @@ function _inject(definition, resource, attrs, options) {
           if (definition.resetHistoryOnInject) {
             resource.previousAttributes[id] = DSUtils.copy(item);
             if (resource.changeHistories[id].length) {
-              DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
-                DSUtils.remove(resource.changeHistory, changeRecord);
-              });
+              DSUtils.forEach(resource.changeHistories[id], changeRecord => DSUtils.remove(resource.changeHistory, changeRecord));
               resource.changeHistories[id].splice(0, resource.changeHistories[id].length);
             }
           }
@@ -174,7 +170,7 @@ function _inject(definition, resource, attrs, options) {
         }
         resource.modified[id] = initialLastModified && resource.modified[id] === initialLastModified ? DSUtils.updateTimestamp(resource.modified[id]) : resource.modified[id];
         resource.expiresHeap.remove(item);
-        var timestamp = new Date().getTime();
+        let timestamp = new Date().getTime();
         resource.expiresHeap.push({
           item: item,
           timestamp: timestamp,
@@ -192,7 +188,7 @@ function _inject(definition, resource, attrs, options) {
 function _link(definition, injected, options) {
   var _this = this;
 
-  DSUtils.forEach(definition.relationList, function (def) {
+  DSUtils.forEach(definition.relationList, def => {
     if (options.findBelongsTo && def.type === 'belongsTo' && injected[definition.idAttribute]) {
       _this.link(definition.n, injected[definition.idAttribute], [def.relation]);
     } else if ((options.findHasMany && def.type === 'hasMany') || (options.findHasOne && def.type === 'hasOne')) {
@@ -201,11 +197,11 @@ function _link(definition, injected, options) {
   });
 }
 
-function inject(resourceName, attrs, options) {
-  var _this = this;
-  var definition = _this.defs[resourceName];
-  var resource = _this.s[resourceName];
-  var injected;
+export default function inject(resourceName, attrs, options) {
+  let _this = this;
+  let definition = _this.defs[resourceName];
+  let resource = _this.s[resourceName];
+  let injected;
 
   if (!definition) {
     throw new DSErrors.NER(resourceName);
@@ -213,7 +209,7 @@ function inject(resourceName, attrs, options) {
     throw new DSErrors.IA(`${resourceName}.inject: "attrs" must be an object or an array!`);
   }
 
-  var name = definition.n;
+  let name = definition.n;
   options = DSUtils._(definition, options);
 
   options.logFn('inject', attrs, options);
@@ -236,9 +232,7 @@ function inject(resourceName, attrs, options) {
   }
 
   if (DSUtils._a(injected)) {
-    DSUtils.forEach(injected, function (injectedI) {
-      _link.call(_this, definition, injectedI, options);
-    });
+    DSUtils.forEach(injected, injectedI => _link.call(_this, definition, injectedI, options));
   } else {
     _link.call(_this, definition, injected, options);
   }
@@ -250,5 +244,3 @@ function inject(resourceName, attrs, options) {
 
   return injected;
 }
-
-export default inject;

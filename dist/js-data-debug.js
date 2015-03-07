@@ -71,7 +71,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var DS = _interopRequire(__webpack_require__(3));
 
-	var JSData = {
+	module.exports = {
 	  DS: DS,
 	  createStore: function createStore(options) {
 	    return new DS(options);
@@ -88,8 +88,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	};
 
-	module.exports = JSData;
-
 /***/ },
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
@@ -100,7 +98,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
-	/* jshint -W041 */
+	/* jshint eqeqeq:false */
 
 	var DSErrors = _interopRequire(__webpack_require__(2));
 
@@ -128,7 +126,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var es6Promise = _interopRequire(__webpack_require__(21));
 
-	var w, _Promise;
+	var w = undefined,
+	    _Promise = undefined;
+	var DSUtils = undefined;
 	var objectProto = Object.prototype;
 	var toString = objectProto.toString;
 	es6Promise.polyfill();
@@ -137,80 +137,87 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return toString.call(value) == "[object Array]" || false;
 	};
 
-	function isRegExp(value) {
+	var isRegExp = function (value) {
 	  return toString.call(value) == "[object RegExp]" || false;
-	}
+	};
 
 	// adapted from lodash.isBoolean
-	function isBoolean(value) {
+	var isBoolean = function (value) {
 	  return value === true || value === false || value && typeof value == "object" && toString.call(value) == "[object Boolean]" || false;
-	}
+	};
 
 	// adapted from lodash.isString
-	function isString(value) {
+	var isString = function (value) {
 	  return typeof value == "string" || value && typeof value == "object" && toString.call(value) == "[object String]" || false;
-	}
+	};
 
-	function isObject(value) {
+	var isObject = function (value) {
 	  return toString.call(value) == "[object Object]" || false;
-	}
+	};
 
 	// adapted from lodash.isDate
-	function isDate(value) {
+	var isDate = function (value) {
 	  return value && typeof value == "object" && toString.call(value) == "[object Date]" || false;
-	}
+	};
 
 	// adapted from lodash.isNumber
-	function isNumber(value) {
+	var isNumber = function (value) {
 	  var type = typeof value;
 	  return type == "number" || value && type == "object" && toString.call(value) == "[object Number]" || false;
-	}
+	};
 
 	// adapted from lodash.isFunction
-	function isFunction(value) {
+	var isFunction = function (value) {
 	  return typeof value == "function" || value && toString.call(value) === "[object Function]" || false;
-	}
+	};
 
 	// shorthand argument checking functions, using these shaves 1.18 kb off of the minified build
-	function isStringOrNumber(value) {
+	var isStringOrNumber = function (value) {
 	  return isString(value) || isNumber(value);
-	}
-	function isStringOrNumberErr(field) {
+	};
+	var isStringOrNumberErr = function (field) {
 	  return new DSErrors.IA("\"" + field + "\" must be a string or a number!");
-	}
-	function isObjectErr(field) {
+	};
+	var isObjectErr = function (field) {
 	  return new DSErrors.IA("\"" + field + "\" must be an object!");
-	}
-	function isArrayErr(field) {
+	};
+	var isArrayErr = function (field) {
 	  return new DSErrors.IA("\"" + field + "\" must be an array!");
-	}
+	};
 
 	// adapted from mout.isEmpty
-	function isEmpty(val) {
+	var isEmpty = function (val) {
 	  if (val == null) {
+	    // jshint ignore:line
 	    // typeof null == 'object' so we check it first
 	    return true;
 	  } else if (typeof val === "string" || isArray(val)) {
 	    return !val.length;
 	  } else if (typeof val === "object") {
-	    var result = true;
-	    forOwn(val, function () {
-	      result = false;
-	      return false; // break loop
-	    });
-	    return result;
+	    var _ret = (function () {
+	      var result = true;
+	      forOwn(val, function () {
+	        result = false;
+	        return false; // break loop
+	      });
+	      return {
+	        v: result
+	      };
+	    })();
+
+	    if (typeof _ret === "object") return _ret.v;
 	  } else {
 	    return true;
 	  }
-	}
+	};
 
-	function intersection(array1, array2) {
+	var intersection = function (array1, array2) {
 	  if (!array1 || !array2) {
 	    return [];
 	  }
 	  var result = [];
-	  var item;
-	  for (var i = 0, length = array1.length; i < length; i++) {
+	  var item = undefined;
+	  for (var i = 0, _length = array1.length; i < _length; i++) {
 	    item = array1[i];
 	    if (DSUtils.contains(result, item)) {
 	      continue;
@@ -220,9 +227,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	  return result;
-	}
+	};
 
-	function filter(array, cb, thisObj) {
+	var filter = function (array, cb, thisObj) {
 	  var results = [];
 	  forEach(array, function (value, key, arr) {
 	    if (cb(value, key, arr)) {
@@ -230,7 +237,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }, thisObj);
 	  return results;
-	}
+	};
 
 	function finallyPolyfill(cb) {
 	  var constructor = this.constructor;
@@ -256,15 +263,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	} catch (e) {
 	  w = null;
 	  _Promise = __webpack_require__(4);
-	}
-
-	function updateTimestamp(timestamp) {
-	  var newTimestamp = typeof Date.now === "function" ? Date.now() : new Date().getTime();
-	  if (timestamp && newTimestamp <= timestamp) {
-	    return timestamp + 1;
-	  } else {
-	    return newTimestamp;
-	  }
 	}
 
 	function Events(target) {
@@ -319,14 +317,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  while (n > 0) {
 	    // Compute the parent element's index, and fetch it.
 	    var parentN = Math.floor((n + 1) / 2) - 1;
-	    var parent = heap[parentN];
+	    var _parent = heap[parentN];
 	    // If the parent has a lesser weight, things are in order and we
 	    // are done.
-	    if (weight >= weightFunc(parent)) {
+	    if (weight >= weightFunc(_parent)) {
 	      break;
 	    } else {
 	      heap[parentN] = element;
-	      heap[n] = parent;
+	      heap[n] = _parent;
 	      n = parentN;
 	    }
 	  }
@@ -338,7 +336,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {function} weightFunc The weight function.
 	 * @param {number} n The index of the element to sink down.
 	 */
-	function bubbleDown(heap, weightFunc, n) {
+	var bubbleDown = function (heap, weightFunc, n) {
 	  var length = heap.length;
 	  var node = heap[n];
 	  var nodeWeight = weightFunc(node);
@@ -372,7 +370,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      n = swap;
 	    }
 	  }
-	}
+	};
 
 	var DSBinaryHeap = (function () {
 	  function DSBinaryHeap(weightFunc, compareFunc) {
@@ -381,12 +379,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (weightFunc && !isFunction(weightFunc)) {
 	      throw new Error("DSBinaryHeap(weightFunc): weightFunc: must be a function!");
 	    }
-	    this.weightFunc = weightFunc || function (x) {
-	      return x;
-	    };
-	    this.compareFunc = compareFunc || function (x, y) {
-	      return x === y;
-	    };
+	    if (!weightFunc) {
+	      weightFunc = function (x) {
+	        return x;
+	      };
+	    }
+	    if (!compareFunc) {
+	      compareFunc = function (x, y) {
+	        return x === y;
+	      };
+	    }
+	    this.weightFunc = weightFunc;
+	    this.compareFunc = compareFunc;
 	    this.heap = [];
 	  }
 
@@ -408,11 +412,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    pop: {
 	      value: function pop() {
-	        var front = this.heap[0],
-	            end = this.heap.pop();
-	        if (this.heap.length > 0) {
-	          this.heap[0] = end;
-	          bubbleDown(this.heap, this.weightFunc, 0);
+	        var _this = this;
+	        var front = _this.heap[0];
+	        var end = _this.heap.pop();
+	        if (_this.heap.length > 0) {
+	          _this.heap[0] = end;
+	          bubbleDown(_this.heap, _this.weightFunc, 0);
 	        }
 	        return front;
 	      },
@@ -421,15 +426,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    remove: {
 	      value: function remove(node) {
-	        var length = this.heap.length;
+	        var _this = this;
+	        var length = _this.heap.length;
 	        for (var i = 0; i < length; i++) {
-	          if (this.compareFunc(this.heap[i], node)) {
-	            var removed = this.heap[i];
-	            var end = this.heap.pop();
+	          if (_this.compareFunc(_this.heap[i], node)) {
+	            var removed = _this.heap[i];
+	            var end = _this.heap.pop();
 	            if (i !== length - 1) {
-	              this.heap[i] = end;
-	              bubbleUp(this.heap, this.weightFunc, i);
-	              bubbleDown(this.heap, this.weightFunc, i);
+	              _this.heap[i] = end;
+	              bubbleUp(_this.heap, _this.weightFunc, i);
+	              bubbleDown(_this.heap, _this.weightFunc, i);
 	            }
 	            return removed;
 	          }
@@ -461,7 +467,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var toPromisify = ["beforeValidate", "validate", "afterValidate", "beforeCreate", "afterCreate", "beforeUpdate", "afterUpdate", "beforeDestroy", "afterDestroy"];
 
 	// adapted from angular.copy
-	function copy(source, destination, stackSource, stackDest) {
+	var copy = function (source, destination, stackSource, stackDest) {
 	  if (!destination) {
 	    destination = source;
 	    if (source) {
@@ -473,8 +479,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        destination = new RegExp(source.source, source.toString().match(/[^\/]*$/)[0]);
 	        destination.lastIndex = source.lastIndex;
 	      } else if (isObject(source)) {
-	        var emptyObject = Object.create(Object.getPrototypeOf(source));
-	        destination = copy(source, emptyObject, stackSource, stackDest);
+	        destination = copy(source, Object.create(Object.getPrototypeOf(source)), stackSource, stackDest);
 	      }
 	    }
 	  } else {
@@ -489,11 +494,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var index = stackSource.indexOf(source);
 	      if (index !== -1) {
 	        return stackDest[index];
-	      }stackSource.push(source);
+	      }
+
+	      stackSource.push(source);
 	      stackDest.push(destination);
 	    }
 
-	    var result;
+	    var result = undefined;
 	    if (isArray(source)) {
 	      destination.length = 0;
 	      for (var i = 0; i < source.length; i++) {
@@ -525,110 +532,111 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	  return destination;
-	}
+	};
 
 	// adapted from angular.equals
-	function equals(_x, _x2) {
-	  var _again = true;
-
-	  _function: while (_again) {
-	    _again = false;
-	    var o1 = _x,
-	        o2 = _x2;
-	    t1 = t2 = length = key = keySet = undefined;
-
-	    if (o1 === o2) {
-	      return true;
-	    }if (o1 === null || o2 === null) {
-	      return false;
-	    }if (o1 !== o1 && o2 !== o2) {
-	      return true;
-	    } // NaN === NaN
-	    var t1 = typeof o1,
-	        t2 = typeof o2,
-	        length,
-	        key,
-	        keySet;
-	    if (t1 == t2) {
-	      if (t1 == "object") {
-	        if (isArray(o1)) {
-	          if (!isArray(o2)) {
-	            return false;
-	          }if ((length = o1.length) == o2.length) {
-	            for (key = 0; key < length; key++) {
-	              if (!equals(o1[key], o2[key])) {
-	                return false;
-	              }
-	            }
-	            return true;
-	          }
-	        } else if (isDate(o1)) {
-	          if (!isDate(o2)) {
-	            return false;
-	          }_x = o1.getTime();
-	          _x2 = o2.getTime();
-	          _again = true;
-	          continue _function;
-	        } else if (isRegExp(o1) && isRegExp(o2)) {
-	          return o1.toString() == o2.toString();
-	        } else {
-	          if (isArray(o2)) {
-	            return false;
-	          }keySet = {};
-	          for (key in o1) {
-	            if (key.charAt(0) === "$" || isFunction(o1[key])) continue;
+	var equals = function (o1, o2) {
+	  if (o1 === o2) {
+	    return true;
+	  }
+	  if (o1 === null || o2 === null) {
+	    return false;
+	  }
+	  if (o1 !== o1 && o2 !== o2) {
+	    return true;
+	  } // NaN === NaN
+	  var t1 = typeof o1,
+	      t2 = typeof o2,
+	      length,
+	      key,
+	      keySet;
+	  if (t1 == t2) {
+	    if (t1 == "object") {
+	      if (isArray(o1)) {
+	        if (!isArray(o2)) {
+	          return false;
+	        }
+	        if ((length = o1.length) == o2.length) {
+	          // jshint ignore:line
+	          for (key = 0; key < length; key++) {
 	            if (!equals(o1[key], o2[key])) {
-	              return false;
-	            }keySet[key] = true;
-	          }
-	          for (key in o2) {
-	            if (!keySet.hasOwnProperty(key) && key.charAt(0) !== "$" && o2[key] !== undefined && !isFunction(o2[key])) {
 	              return false;
 	            }
 	          }
 	          return true;
 	        }
+	      } else if (isDate(o1)) {
+	        if (!isDate(o2)) {
+	          return false;
+	        }
+	        return equals(o1.getTime(), o2.getTime());
+	      } else if (isRegExp(o1) && isRegExp(o2)) {
+	        return o1.toString() == o2.toString();
+	      } else {
+	        if (isArray(o2)) {
+	          return false;
+	        }
+	        keySet = {};
+	        for (key in o1) {
+	          if (key.charAt(0) === "$" || isFunction(o1[key])) {
+	            continue;
+	          }
+	          if (!equals(o1[key], o2[key])) {
+	            return false;
+	          }
+	          keySet[key] = true;
+	        }
+	        for (key in o2) {
+	          if (!keySet.hasOwnProperty(key) && key.charAt(0) !== "$" && o2[key] !== undefined && !isFunction(o2[key])) {
+	            return false;
+	          }
+	        }
+	        return true;
 	      }
 	    }
-	    return false;
 	  }
-	}
+	  return false;
+	};
 
-	function resolveId(definition, idOrInstance) {
-	  if (this.isString(idOrInstance) || isNumber(idOrInstance)) {
+	var resolveId = function (definition, idOrInstance) {
+	  if (isString(idOrInstance) || isNumber(idOrInstance)) {
 	    return idOrInstance;
 	  } else if (idOrInstance && definition) {
 	    return idOrInstance[definition.idAttribute] || idOrInstance;
 	  } else {
 	    return idOrInstance;
 	  }
-	}
+	};
 
-	function resolveItem(resource, idOrInstance) {
+	var resolveItem = function (resource, idOrInstance) {
 	  if (resource && (isString(idOrInstance) || isNumber(idOrInstance))) {
 	    return resource.index[idOrInstance] || idOrInstance;
 	  } else {
 	    return idOrInstance;
 	  }
-	}
+	};
 
-	function isValidString(val) {
-	  return val != null && val !== "";
-	}
+	var isValidString = function (val) {
+	  return val != null && val !== ""; // jshint ignore:line
+	};
 
-	function join(items, separator) {
+	var join = function (items, separator) {
 	  separator = separator || "";
 	  return filter(items, isValidString).join(separator);
-	}
+	};
 
-	function makePath(var_args) {
-	  var result = join(slice(arguments), "/");
+	var makePath = function () {
+	  for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	    args[_key] = arguments[_key];
+	  }
+
+	  var result = join(args, "/");
 	  return result.replace(/([^:\/]|^)\/{2,}/g, "$1/");
-	}
+	};
 
 	observe.setEqualityFn(equals);
 
-	var DSUtils = {
+	DSUtils = {
 	  // Options that inherit from defaults
 	  _: function _(parent, options) {
 	    var _this = this;
@@ -639,21 +647,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	      throw new DSErrors.IA("\"options\" must be an object!");
 	    }
 	    forEach(toPromisify, function (name) {
-	      if (typeof options[name] === "function" && options[name].toString().indexOf("var args = Array") === -1) {
+	      if (typeof options[name] === "function" && options[name].toString().indexOf("for (var _len = arg") === -1) {
 	        options[name] = _this.promisify(options[name]);
 	      }
 	    });
 	    var O = function Options(attrs) {
 	      var self = this;
 	      forOwn(attrs, function (value, key) {
-	        self[key] = value;
+	        return self[key] = value;
 	      });
 	    };
 	    O.prototype = parent;
 	    O.prototype.orig = function () {
 	      var orig = {};
 	      forOwn(this, function (value, key) {
-	        orig[key] = value;
+	        return orig[key] = value;
 	      });
 	      return orig;
 	    };
@@ -671,7 +679,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _this = this;
 	    var args = [];
 	    forEach(fn.deps, function (dep) {
-	      args.push(_this[dep]);
+	      return args.push(_this[dep]);
 	    });
 	    // compute property
 	    _this[field] = fn[fn.length - 1].apply(_this, args);
@@ -706,7 +714,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  pick: pick,
 	  Promise: _Promise,
 	  promisify: function promisify(fn, target) {
-	    var Promise = this.Promise;
+	    var _this = this;
 	    if (!fn) {
 	      return;
 	    } else if (typeof fn !== "function") {
@@ -717,7 +725,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        args[_key] = arguments[_key];
 	      }
 
-	      return new Promise(function (resolve, reject) {
+	      return new _this.Promise(function (resolve, reject) {
 
 	        args.push(function (err, result) {
 	          if (err) {
@@ -743,15 +751,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	  slice: slice,
 	  sort: sort,
 	  toJson: JSON.stringify,
-	  updateTimestamp: updateTimestamp,
+	  updateTimestamp: function updateTimestamp(timestamp) {
+	    var newTimestamp = typeof Date.now === "function" ? Date.now() : new Date().getTime();
+	    if (timestamp && newTimestamp <= timestamp) {
+	      return timestamp + 1;
+	    } else {
+	      return newTimestamp;
+	    }
+	  },
 	  upperCase: upperCase,
 	  removeCircular: function removeCircular(object) {
 	    var objects = [];
 
 	    return (function rmCirc(value) {
 
-	      var i;
-	      var nu;
+	      var i = undefined;
+	      var nu = undefined;
 
 	      if (typeof value === "object" && value !== null && !(value instanceof Boolean) && !(value instanceof Date) && !(value instanceof Number) && !(value instanceof RegExp) && !(value instanceof String)) {
 
@@ -771,7 +786,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } else {
 	          nu = {};
 	          forOwn(value, function (v, k) {
-	            nu[k] = rmCirc(value[k]);
+	            return nu[k] = rmCirc(value[k]);
 	          });
 	        }
 	        return nu;
@@ -847,7 +862,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return NonexistentResourceError;
 	})(Error);
 
-	var DSErrors = {
+	module.exports = {
 	  IllegalArgumentError: IllegalArgumentError,
 	  IA: IllegalArgumentError,
 	  RuntimeError: RuntimeError,
@@ -855,8 +870,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  NonexistentResourceError: NonexistentResourceError,
 	  NER: NonexistentResourceError
 	};
-
-	module.exports = DSErrors;
 
 /***/ },
 /* 3 */
@@ -868,6 +881,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
+	/* jshint eqeqeq:false */
+
 	var DSUtils = _interopRequire(__webpack_require__(1));
 
 	var DSErrors = _interopRequire(__webpack_require__(2));
@@ -876,7 +891,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var asyncMethods = _interopRequire(__webpack_require__(7));
 
-	var Schemator;
+	var Schemator = undefined;
 
 	function lifecycleNoopCb(resource, attrs, cb) {
 	  cb(null, attrs);
@@ -1003,7 +1018,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	defaultsPrototype.eagerInject = false;
 	defaultsPrototype.endpoint = "";
 	defaultsPrototype.error = console ? function (a, b, c) {
-	  console[typeof console.error === "function" ? "error" : "log"](a, b, c);
+	  return console[typeof console.error === "function" ? "error" : "log"](a, b, c);
 	} : false;
 	defaultsPrototype.fallbackAdapters = ["http"];
 	defaultsPrototype.findBelongsTo = true;
@@ -1016,7 +1031,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	defaultsPrototype.keepChangeHistory = false;
 	defaultsPrototype.loadFromServer = false;
 	defaultsPrototype.log = console ? function (a, b, c, d, e) {
-	  console[typeof console.info === "function" ? "info" : "log"](a, b, c, d, e);
+	  return console[typeof console.info === "function" ? "info" : "log"](a, b, c, d, e);
 	} : false;
 
 	defaultsPrototype.logFn = function (a, b, c, d) {
@@ -1087,7 +1102,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        if (DSUtils._o(clause)) {
 	          DSUtils.forOwn(clause, function (term, op) {
-	            var expr;
+	            var expr = undefined;
 	            var isOr = op[0] === "|";
 	            var val = attrs[field];
 	            op = isOr ? op.substr(1) : op;
@@ -1163,24 +1178,26 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  // Apply 'orderBy'
 	  if (orderBy) {
-	    var index = 0;
-	    DSUtils.forEach(orderBy, function (def, i) {
-	      if (DSUtils._s(def)) {
-	        orderBy[i] = [def, "ASC"];
-	      } else if (!DSUtils._a(def)) {
-	        throw new DSErrors.IA("DS.filter(\"" + resourceName + "\"[, params][, options]): " + DSUtils.toJson(def) + ": Must be a string or an array!", {
-	          params: {
-	            "orderBy[i]": {
-	              actual: typeof def,
-	              expected: "string|array"
+	    (function () {
+	      var index = 0;
+	      DSUtils.forEach(orderBy, function (def, i) {
+	        if (DSUtils._s(def)) {
+	          orderBy[i] = [def, "ASC"];
+	        } else if (!DSUtils._a(def)) {
+	          throw new DSErrors.IA("DS.filter(\"" + resourceName + "\"[, params][, options]): " + DSUtils.toJson(def) + ": Must be a string or an array!", {
+	            params: {
+	              "orderBy[i]": {
+	                actual: typeof def,
+	                expected: "string|array"
+	              }
 	            }
-	          }
-	        });
-	      }
-	    });
-	    filtered = DSUtils.sort(filtered, function (a, b) {
-	      return compare(orderBy, index, a, b);
-	    });
+	          });
+	        }
+	      });
+	      filtered = DSUtils.sort(filtered, function (a, b) {
+	        return compare(orderBy, index, a, b);
+	      });
+	    })();
 	  }
 
 	  var limit = DSUtils._n(params.limit) ? params.limit : null;
@@ -1241,7 +1258,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    DSUtils.forOwn(options, function (v, k) {
 	      _this.defaults[k] = v;
 	    });
-
 	    _this.defaults.logFn("new data store created", _this.defaults);
 	  }
 
@@ -1359,299 +1375,275 @@ return /******/ (function(modules) { // webpackBootstrap
 	var IA = DSErrors.IA;
 	var R = DSErrors.R;
 
-	function changes(resourceName, id, options) {
-	  var _this = this;
-	  var definition = _this.defs[resourceName];
-	  options = options || {};
-
-	  id = DSUtils.resolveId(definition, id);
-	  if (!definition) {
-	    throw new NER(resourceName);
-	  } else if (!DSUtils._sn(id)) {
-	    throw DSUtils._snErr("id");
-	  }
-	  options = DSUtils._(definition, options);
-
-	  options.logFn("changes", id, options);
-
-	  var item = _this.get(resourceName, id);
-	  if (item) {
-	    if (DSUtils.w) {
-	      _this.s[resourceName].observers[id].deliver();
-	    }
-	    var diff = DSUtils.diffObjectFromOldObject(item, _this.s[resourceName].previousAttributes[id], DSUtils.equals, options.ignoredChanges);
-	    DSUtils.forOwn(diff, function (changeset, name) {
-	      var toKeep = [];
-	      DSUtils.forOwn(changeset, function (value, field) {
-	        if (!DSUtils.isFunction(value)) {
-	          toKeep.push(field);
-	        }
-	      });
-	      diff[name] = DSUtils.pick(diff[name], toKeep);
-	    });
-	    DSUtils.forEach(definition.relationFields, function (field) {
-	      delete diff.added[field];
-	      delete diff.removed[field];
-	      delete diff.changed[field];
-	    });
-	    return diff;
-	  }
-	}
-
-	function changeHistory(resourceName, id) {
-	  var _this = this;
-	  var definition = _this.defs[resourceName];
-	  var resource = _this.s[resourceName];
-
-	  id = DSUtils.resolveId(definition, id);
-	  if (resourceName && !_this.defs[resourceName]) {
-	    throw new NER(resourceName);
-	  } else if (id && !DSUtils._sn(id)) {
-	    throw DSUtils._snErr("id");
-	  }
-
-	  definition.logFn("changeHistory", id);
-
-	  if (!definition.keepChangeHistory) {
-	    definition.errorFn("changeHistory is disabled for this resource!");
-	  } else {
-	    if (resourceName) {
-	      var item = _this.get(resourceName, id);
-	      if (item) {
-	        return resource.changeHistories[id];
-	      }
-	    } else {
-	      return resource.changeHistory;
-	    }
-	  }
-	}
-
-	function compute(resourceName, instance) {
-	  var _this = this;
-	  var definition = _this.defs[resourceName];
-
-	  instance = DSUtils.resolveItem(_this.s[resourceName], instance);
-	  if (!definition) {
-	    throw new NER(resourceName);
-	  } else if (!instance) {
-	    throw new R("Item not in the store!");
-	  } else if (!DSUtils._o(instance) && !DSUtils._sn(instance)) {
-	    throw new IA("\"instance\" must be an object, string or number!");
-	  }
-
-	  definition.logFn("compute", instance);
-
-	  DSUtils.forOwn(definition.computed, function (fn, field) {
-	    DSUtils.compute.call(instance, fn, field);
-	  });
-
-	  return instance;
-	}
-
-	function createInstance(resourceName, attrs, options) {
-	  var definition = this.defs[resourceName];
-	  var item;
-
-	  attrs = attrs || {};
-
-	  if (!definition) {
-	    throw new NER(resourceName);
-	  } else if (attrs && !DSUtils.isObject(attrs)) {
-	    throw new IA("\"attrs\" must be an object!");
-	  }
-
-	  options = DSUtils._(definition, options);
-
-	  options.logFn("createInstance", attrs, options);
-
-	  if (options.notify) {
-	    options.beforeCreateInstance(options, attrs);
-	  }
-
-	  if (options.useClass) {
-	    var Constructor = definition[definition["class"]];
-	    item = new Constructor();
-	  } else {
-	    item = {};
-	  }
-	  DSUtils.deepMixIn(item, attrs);
-	  if (options.notify) {
-	    options.afterCreateInstance(options, attrs);
-	  }
-	  return item;
-	}
-
 	function diffIsEmpty(diff) {
 	  return !(DSUtils.isEmpty(diff.added) && DSUtils.isEmpty(diff.removed) && DSUtils.isEmpty(diff.changed));
 	}
 
-	function digest() {
-	  this.observe.Platform.performMicrotaskCheckpoint();
-	}
+	module.exports = {
+	  changes: function changes(resourceName, id, options) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+	    options = options || {};
 
-	function get(resourceName, id, options) {
-	  var _this = this;
-	  var definition = _this.defs[resourceName];
+	    id = DSUtils.resolveId(definition, id);
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (!DSUtils._sn(id)) {
+	      throw DSUtils._snErr("id");
+	    }
+	    options = DSUtils._(definition, options);
 
-	  if (!definition) {
-	    throw new NER(resourceName);
-	  } else if (!DSUtils._sn(id)) {
-	    throw DSUtils._snErr("id");
-	  }
+	    options.logFn("changes", id, options);
 
-	  options = DSUtils._(definition, options);
+	    var item = _this.get(resourceName, id);
+	    if (item) {
+	      var _ret = (function () {
+	        if (DSUtils.w) {
+	          _this.s[resourceName].observers[id].deliver();
+	        }
+	        var diff = DSUtils.diffObjectFromOldObject(item, _this.s[resourceName].previousAttributes[id], DSUtils.equals, options.ignoredChanges);
+	        DSUtils.forOwn(diff, function (changeset, name) {
+	          var toKeep = [];
+	          DSUtils.forOwn(changeset, function (value, field) {
+	            return !DSUtils.isFunction(value) ? toKeep.push(field) : null;
+	          });
+	          diff[name] = DSUtils.pick(diff[name], toKeep);
+	        });
+	        DSUtils.forEach(definition.relationFields, function (field) {
+	          delete diff.added[field];
+	          delete diff.removed[field];
+	          delete diff.changed[field];
+	        });
+	        return {
+	          v: diff
+	        };
+	      })();
 
-	  options.logFn("get", id, options);
-
-	  // cache miss, request resource from server
-	  var item = _this.s[resourceName].index[id];
-	  if (!item && options.loadFromServer) {
-	    _this.find(resourceName, id, options);
-	  }
-
-	  // return resource from cache
-	  return item;
-	}
-
-	function getAll(resourceName, ids) {
-	  var _this = this;
-	  var definition = _this.defs[resourceName];
-	  var resource = _this.s[resourceName];
-	  var collection = [];
-
-	  if (!definition) {
-	    throw new NER(resourceName);
-	  } else if (ids && !DSUtils._a(ids)) {
-	    throw DSUtils._aErr("ids");
-	  }
-
-	  definition.logFn("getAll", ids);
-
-	  if (DSUtils._a(ids)) {
-	    var length = ids.length;
-	    for (var i = 0; i < length; i++) {
-	      if (resource.index[ids[i]]) {
-	        collection.push(resource.index[ids[i]]);
+	      if (typeof _ret === "object") {
+	        return _ret.v;
 	      }
 	    }
-	  } else {
-	    collection = resource.collection.slice();
-	  }
+	  },
+	  changeHistory: function changeHistory(resourceName, id) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+	    var resource = _this.s[resourceName];
 
-	  return collection;
-	}
-
-	function hasChanges(resourceName, id) {
-	  var _this = this;
-	  var definition = _this.defs[resourceName];
-
-	  id = DSUtils.resolveId(definition, id);
-
-	  if (!definition) {
-	    throw new NER(resourceName);
-	  } else if (!DSUtils._sn(id)) {
-	    throw DSUtils._snErr("id");
-	  }
-
-	  definition.logFn("hasChanges", id);
-
-	  // return resource from cache
-	  if (_this.get(resourceName, id)) {
-	    return diffIsEmpty(_this.changes(resourceName, id));
-	  } else {
-	    return false;
-	  }
-	}
-
-	function lastModified(resourceName, id) {
-	  var definition = this.defs[resourceName];
-	  var resource = this.s[resourceName];
-
-	  id = DSUtils.resolveId(definition, id);
-	  if (!definition) {
-	    throw new NER(resourceName);
-	  }
-
-	  definition.logFn("lastModified", id);
-
-	  if (id) {
-	    if (!(id in resource.modified)) {
-	      resource.modified[id] = 0;
+	    id = DSUtils.resolveId(definition, id);
+	    if (resourceName && !_this.defs[resourceName]) {
+	      throw new NER(resourceName);
+	    } else if (id && !DSUtils._sn(id)) {
+	      throw DSUtils._snErr("id");
 	    }
-	    return resource.modified[id];
-	  }
-	  return resource.collectionModified;
-	}
 
-	function lastSaved(resourceName, id) {
-	  var definition = this.defs[resourceName];
-	  var resource = this.s[resourceName];
+	    definition.logFn("changeHistory", id);
 
-	  id = DSUtils.resolveId(definition, id);
-	  if (!definition) {
-	    throw new NER(resourceName);
-	  }
+	    if (!definition.keepChangeHistory) {
+	      definition.errorFn("changeHistory is disabled for this resource!");
+	    } else {
+	      if (resourceName) {
+	        var item = _this.get(resourceName, id);
+	        if (item) {
+	          return resource.changeHistories[id];
+	        }
+	      } else {
+	        return resource.changeHistory;
+	      }
+	    }
+	  },
+	  compute: function compute(resourceName, instance) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
 
-	  definition.logFn("lastSaved", id);
+	    instance = DSUtils.resolveItem(_this.s[resourceName], instance);
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (!instance) {
+	      throw new R("Item not in the store!");
+	    } else if (!DSUtils._o(instance) && !DSUtils._sn(instance)) {
+	      throw new IA("\"instance\" must be an object, string or number!");
+	    }
 
-	  if (!(id in resource.saved)) {
-	    resource.saved[id] = 0;
-	  }
-	  return resource.saved[id];
-	}
+	    definition.logFn("compute", instance);
+	    DSUtils.forOwn(definition.computed, function (fn, field) {
+	      return DSUtils.compute.call(instance, fn, field);
+	    });
+	    return instance;
+	  },
+	  createInstance: function createInstance(resourceName, attrs, options) {
+	    var definition = this.defs[resourceName];
+	    var item = undefined;
 
-	function previous(resourceName, id) {
-	  var _this = this;
-	  var definition = _this.defs[resourceName];
-	  var resource = _this.s[resourceName];
+	    attrs = attrs || {};
 
-	  id = DSUtils.resolveId(definition, id);
-	  if (!definition) {
-	    throw new NER(resourceName);
-	  } else if (!DSUtils._sn(id)) {
-	    throw DSUtils._snErr("id");
-	  }
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (attrs && !DSUtils.isObject(attrs)) {
+	      throw new IA("\"attrs\" must be an object!");
+	    }
 
-	  definition.logFn("previous", id);
+	    options = DSUtils._(definition, options);
 
-	  // return resource from cache
-	  return resource.previousAttributes[id] ? DSUtils.copy(resource.previousAttributes[id]) : undefined;
-	}
+	    options.logFn("createInstance", attrs, options);
 
-	var syncMethods = {
-	  changes: changes,
-	  changeHistory: changeHistory,
-	  compute: compute,
-	  createInstance: createInstance,
+	    if (options.notify) {
+	      options.beforeCreateInstance(options, attrs);
+	    }
+
+	    if (options.useClass) {
+	      var Constructor = definition[definition["class"]];
+	      item = new Constructor();
+	    } else {
+	      item = {};
+	    }
+	    DSUtils.deepMixIn(item, attrs);
+	    if (options.notify) {
+	      options.afterCreateInstance(options, attrs);
+	    }
+	    return item;
+	  },
 	  defineResource: defineResource,
-	  digest: digest,
+	  digest: function digest() {
+	    this.observe.Platform.performMicrotaskCheckpoint();
+	  },
 	  eject: eject,
 	  ejectAll: ejectAll,
 	  filter: filter,
-	  get: get,
-	  getAll: getAll,
-	  hasChanges: hasChanges,
+	  get: function get(resourceName, id, options) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (!DSUtils._sn(id)) {
+	      throw DSUtils._snErr("id");
+	    }
+
+	    options = DSUtils._(definition, options);
+
+	    options.logFn("get", id, options);
+
+	    // cache miss, request resource from server
+	    var item = _this.s[resourceName].index[id];
+	    if (!item && options.loadFromServer) {
+	      _this.find(resourceName, id, options);
+	    }
+
+	    // return resource from cache
+	    return item;
+	  },
+	  getAll: function getAll(resourceName, ids) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+	    var resource = _this.s[resourceName];
+	    var collection = [];
+
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (ids && !DSUtils._a(ids)) {
+	      throw DSUtils._aErr("ids");
+	    }
+
+	    definition.logFn("getAll", ids);
+
+	    if (DSUtils._a(ids)) {
+	      var _length = ids.length;
+	      for (var i = 0; i < _length; i++) {
+	        if (resource.index[ids[i]]) {
+	          collection.push(resource.index[ids[i]]);
+	        }
+	      }
+	    } else {
+	      collection = resource.collection.slice();
+	    }
+
+	    return collection;
+	  },
+	  hasChanges: function hasChanges(resourceName, id) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+
+	    id = DSUtils.resolveId(definition, id);
+
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (!DSUtils._sn(id)) {
+	      throw DSUtils._snErr("id");
+	    }
+
+	    definition.logFn("hasChanges", id);
+
+	    // return resource from cache
+	    if (_this.get(resourceName, id)) {
+	      return diffIsEmpty(_this.changes(resourceName, id));
+	    } else {
+	      return false;
+	    }
+	  },
 	  inject: inject,
-	  lastModified: lastModified,
-	  lastSaved: lastSaved,
+	  lastModified: function lastModified(resourceName, id) {
+	    var definition = this.defs[resourceName];
+	    var resource = this.s[resourceName];
+
+	    id = DSUtils.resolveId(definition, id);
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    }
+
+	    definition.logFn("lastModified", id);
+
+	    if (id) {
+	      if (!(id in resource.modified)) {
+	        resource.modified[id] = 0;
+	      }
+	      return resource.modified[id];
+	    }
+	    return resource.collectionModified;
+	  },
+	  lastSaved: function lastSaved(resourceName, id) {
+	    var definition = this.defs[resourceName];
+	    var resource = this.s[resourceName];
+
+	    id = DSUtils.resolveId(definition, id);
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    }
+
+	    definition.logFn("lastSaved", id);
+
+	    if (!(id in resource.saved)) {
+	      resource.saved[id] = 0;
+	    }
+	    return resource.saved[id];
+	  },
 	  link: link,
 	  linkAll: linkAll,
 	  linkInverse: linkInverse,
-	  previous: previous,
+	  previous: function previous(resourceName, id) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+	    var resource = _this.s[resourceName];
+
+	    id = DSUtils.resolveId(definition, id);
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (!DSUtils._sn(id)) {
+	      throw DSUtils._snErr("id");
+	    }
+
+	    definition.logFn("previous", id);
+
+	    // return resource from cache
+	    return resource.previousAttributes[id] ? DSUtils.copy(resource.previousAttributes[id]) : undefined;
+	  },
 	  unlinkInverse: unlinkInverse
 	};
-
-	module.exports = syncMethods;
 
 /***/ },
 /* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
-
-	var DSUtils = _interopRequire(__webpack_require__(1));
-
-	var DSErrors = _interopRequire(__webpack_require__(2));
 
 	var create = _interopRequire(__webpack_require__(31));
 
@@ -1665,99 +1657,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var loadRelations = _interopRequire(__webpack_require__(36));
 
-	var save = _interopRequire(__webpack_require__(37));
+	var reap = _interopRequire(__webpack_require__(37));
 
-	var update = _interopRequire(__webpack_require__(38));
+	var save = _interopRequire(__webpack_require__(38));
 
-	var updateAll = _interopRequire(__webpack_require__(39));
+	var update = _interopRequire(__webpack_require__(39));
 
-	function reap(resourceName, options) {
-	  var _this = this;
-	  var definition = _this.defs[resourceName];
-	  var resource = _this.s[resourceName];
+	var updateAll = _interopRequire(__webpack_require__(40));
 
-	  return new DSUtils.Promise(function (resolve, reject) {
-
-	    if (!definition) {
-	      reject(new _this.errors.NER(resourceName));
-	    } else {
-	      options = DSUtils._(definition, options);
-	      if (!options.hasOwnProperty("notify")) {
-	        options.notify = false;
-	      }
-	      options.logFn("reap", options);
-	      var items = [];
-	      var now = new Date().getTime();
-	      var expiredItem;
-	      while ((expiredItem = resource.expiresHeap.peek()) && expiredItem.expires < now) {
-	        items.push(expiredItem.item);
-	        delete expiredItem.item;
-	        resource.expiresHeap.pop();
-	      }
-	      resolve(items);
-	    }
-	  }).then(function (items) {
-	    if (options.isInterval || options.notify) {
-	      definition.beforeReap(options, items);
-	      definition.emit("DS.beforeReap", definition, items);
-	    }
-	    if (options.reapAction === "inject") {
-	      var timestamp = new Date().getTime();
-	      DSUtils.forEach(items, function (item) {
-	        var id = item[definition.idAttribute];
-	        resource.expiresHeap.push({
-	          item: item,
-	          timestamp: timestamp,
-	          expires: definition.maxAge ? timestamp + definition.maxAge : Number.MAX_VALUE
-	        });
-	      });
-	    } else if (options.reapAction === "eject") {
-	      DSUtils.forEach(items, function (item) {
-	        _this.eject(resourceName, item[definition.idAttribute]);
-	      });
-	    } else if (options.reapAction === "refresh") {
-	      var tasks = [];
-	      DSUtils.forEach(items, function (item) {
-	        tasks.push(_this.refresh(resourceName, item[definition.idAttribute]));
-	      });
-	      return DSUtils.Promise.all(tasks);
-	    }
-	    return items;
-	  }).then(function (items) {
-	    if (options.isInterval || options.notify) {
-	      definition.afterReap(options, items);
-	      definition.emit("DS.afterReap", definition, items);
-	    }
-	    return items;
-	  });
-	}
-
-	function refresh(resourceName, id, options) {
-	  var _this = this;
-
-	  return new DSUtils.Promise(function (resolve, reject) {
-	    var definition = _this.defs[resourceName];
-	    id = DSUtils.resolveId(_this.defs[resourceName], id);
-	    if (!definition) {
-	      reject(new _this.errors.NER(resourceName));
-	    } else if (!DSUtils._sn(id)) {
-	      reject(DSUtils._snErr("id"));
-	    } else {
-	      options = DSUtils._(definition, options);
-	      options.bypassCache = true;
-	      options.logFn("refresh", id, options);
-	      resolve(_this.get(resourceName, id));
-	    }
-	  }).then(function (item) {
-	    if (item) {
-	      return _this.find(resourceName, id, options);
-	    } else {
-	      return item;
-	    }
-	  });
-	}
-
-	var asyncMethods = {
+	module.exports = {
 	  create: create,
 	  destroy: destroy,
 	  destroyAll: destroyAll,
@@ -1765,13 +1673,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	  findAll: findAll,
 	  loadRelations: loadRelations,
 	  reap: reap,
-	  refresh: refresh,
+	  refresh: function refresh(resourceName, id, options) {
+	    var _this = this;
+	    var DSUtils = _this.utils;
+
+	    return new DSUtils.Promise(function (resolve, reject) {
+	      var definition = _this.defs[resourceName];
+	      id = DSUtils.resolveId(_this.defs[resourceName], id);
+	      if (!definition) {
+	        reject(new _this.errors.NER(resourceName));
+	      } else if (!DSUtils._sn(id)) {
+	        reject(DSUtils._snErr("id"));
+	      } else {
+	        options = DSUtils._(definition, options);
+	        options.bypassCache = true;
+	        options.logFn("refresh", id, options);
+	        resolve(_this.get(resourceName, id));
+	      }
+	    }).then(function (item) {
+	      return item ? _this.find(resourceName, id, options) : item;
+	    });
+	  },
 	  save: save,
 	  update: update,
 	  updateAll: updateAll
 	};
-
-	module.exports = asyncMethods;
 
 /***/ },
 /* 8 */
@@ -2474,7 +2400,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var indexOf = __webpack_require__(40);
+	var indexOf = __webpack_require__(48);
 
 	    /**
 	     * If array contains values.
@@ -2490,7 +2416,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var indexOf = __webpack_require__(40);
+	var indexOf = __webpack_require__(48);
 
 	    /**
 	     * Remove a single item from the array.
@@ -3695,7 +3621,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 
 	    /* global define:true module:true window: true */
-	    if ("function" === 'function' && __webpack_require__(49)['amd']) {
+	    if ("function" === 'function' && __webpack_require__(50)['amd']) {
 	      !(__WEBPACK_AMD_DEFINE_RESULT__ = function() { return es6$promise$umd$$ES6Promise; }.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	    } else if (typeof module !== 'undefined' && module['exports']) {
 	      module['exports'] = es6$promise$umd$$ES6Promise;
@@ -3703,7 +3629,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this['ES6Promise'] = es6$promise$umd$$ES6Promise;
 	    }
 	}).call(this);
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(48), (function() { return this; }()), __webpack_require__(50)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(49), (function() { return this; }()), __webpack_require__(51)(module)))
 
 /***/ },
 /* 22 */
@@ -3713,6 +3639,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
+	module.exports = defineResource;
 	/*jshint evil:true, loopfunc:true*/
 
 	var DSUtils = _interopRequire(__webpack_require__(1));
@@ -3807,7 +3734,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    def.getEndpoint = function (id, options) {
 	      options.params = options.params || {};
 
-	      var item;
+	      var item = undefined;
 	      var parentKey = def.parentKey;
 	      var endpoint = options.hasOwnProperty("endpoint") ? options.endpoint : def.endpoint;
 	      var parentField = def.parentField;
@@ -3833,12 +3760,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        if (parentId) {
-	          delete options.endpoint;
-	          var _options = {};
-	          DSUtils.forOwn(options, function (value, key) {
-	            _options[key] = value;
-	          });
-	          return DSUtils.makePath(parentDef.getEndpoint(parentId, DSUtils._(parentDef, _options)), parentId, endpoint);
+	          var _ret = (function () {
+	            delete options.endpoint;
+	            var _options = {};
+	            DSUtils.forOwn(options, function (value, key) {
+	              return _options[key] = value;
+	            });
+	            return {
+	              v: DSUtils.makePath(parentDef.getEndpoint(parentId, DSUtils._(parentDef, _options)), parentId, endpoint)
+	            };
+	          })();
+
+	          if (typeof _ret === "object") return _ret.v;
 	        } else {
 	          return endpoint;
 	        }
@@ -3914,7 +3847,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        deps = fn.slice(0, fn.length - 1);
 	        DSUtils.forEach(deps, function (val, index) {
-	          deps[index] = val.trim();
+	          return deps[index] = val.trim();
 	        });
 	        fn.deps = DSUtils.filter(deps, function (dep) {
 	          return !!dep;
@@ -3953,7 +3886,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 
 	    def[_class].prototype.DSCreate = function () {
-	      var args = Array.prototype.slice.call(arguments);
+	      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	        args[_key] = arguments[_key];
+	      }
+
 	      args.unshift(this);
 	      args.unshift(def.n);
 	      return _this.create.apply(_this, args);
@@ -3982,7 +3918,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (def.reapInterval) {
 	      setInterval(function () {
-	        _this.reap(def.n, { isInterval: true });
+	        return _this.reap(def.n, { isInterval: true });
 	      }, def.reapInterval);
 	    }
 
@@ -3995,23 +3931,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    DSUtils.forEach(fns, function (key) {
-	      if (_this[key].shorthand !== false) {
-	        (function (k) {
-	          def[k] = function () {
-	            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	              args[_key] = arguments[_key];
-	            }
+	      var k = key;
+	      if (_this[k].shorthand !== false) {
+	        def[k] = function () {
+	          for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	            args[_key] = arguments[_key];
+	          }
 
-	            args.unshift(def.n);
-	            return _this[k].apply(_this, args);
-	          };
-	        })(key);
+	          args.unshift(def.n);
+	          return _this[k].apply(_this, args);
+	        };
 	      } else {
-	        (function (k) {
-	          def[k] = function () {
-	            return _this[k].apply(_this, Array.prototype.slice.call(arguments));
-	          };
-	        })(key);
+	        def[k] = function () {
+	          for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	            args[_key] = arguments[_key];
+	          }
+
+	          return _this[k].apply(_this, args);
+	        };
 	      }
 	    });
 
@@ -4025,8 +3962,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    def.beforeDestroy = DSUtils.promisify(def.beforeDestroy);
 	    def.afterDestroy = DSUtils.promisify(def.afterDestroy);
 
-	    DSUtils.forOwn(def.actions, function addAction(action, name) {
-	      if (def[name]) {
+	    DSUtils.forOwn(def.actions, function (action, name) {
+	      if (def[name] && !def.actions[name]) {
 	        throw new Error("Cannot override existing method \"" + name + "\"!");
 	      }
 	      def[name] = function (options) {
@@ -4060,18 +3997,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	}
 
-	module.exports = defineResource;
-
 /***/ },
 /* 23 */
 /***/ function(module, exports, __webpack_require__) {
+
+	module.exports = eject;
 
 	function eject(resourceName, id, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
 	  var definition = _this.defs[resourceName];
 	  var resource = _this.s[resourceName];
-	  var item;
+	  var item = undefined;
 	  var found = false;
 
 	  id = DSUtils.resolveId(definition, id);
@@ -4088,6 +4025,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  for (var i = 0; i < resource.collection.length; i++) {
 	    if (resource.collection[i][definition.idAttribute] == id) {
+	      // jshint ignore:line
 	      item = resource.collection[i];
 	      resource.expiresHeap.remove(item);
 	      found = true;
@@ -4095,56 +4033,64 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	  if (found) {
-	    if (options.notify) {
-	      definition.beforeEject(options, item);
-	      definition.emit("DS.beforeEject", definition, item);
-	    }
-	    _this.unlinkInverse(definition.n, id);
-	    resource.collection.splice(i, 1);
-	    if (DSUtils.w) {
-	      resource.observers[id].close();
-	    }
-	    delete resource.observers[id];
-
-	    delete resource.index[id];
-	    delete resource.previousAttributes[id];
-	    delete resource.completedQueries[id];
-	    delete resource.pendingQueries[id];
-	    DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
-	      DSUtils.remove(resource.changeHistory, changeRecord);
-	    });
-	    var toRemove = [];
-	    DSUtils.forOwn(resource.queryData, function (items, queryHash) {
-	      if (items.$$injected) {
-	        DSUtils.remove(items, item);
+	    var _ret = (function () {
+	      if (options.notify) {
+	        definition.beforeEject(options, item);
+	        definition.emit("DS.beforeEject", definition, item);
 	      }
-	      if (!items.length) {
-	        toRemove.push(queryHash);
+	      _this.unlinkInverse(definition.n, id);
+	      resource.collection.splice(i, 1);
+	      if (DSUtils.w) {
+	        resource.observers[id].close();
 	      }
-	    });
-	    DSUtils.forEach(toRemove, function (queryHash) {
-	      delete resource.completedQueries[queryHash];
-	      delete resource.queryData[queryHash];
-	    });
-	    delete resource.changeHistories[id];
-	    delete resource.modified[id];
-	    delete resource.saved[id];
-	    resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
+	      delete resource.observers[id];
 
-	    if (options.notify) {
-	      definition.afterEject(options, item);
-	      definition.emit("DS.afterEject", definition, item);
+	      delete resource.index[id];
+	      delete resource.previousAttributes[id];
+	      delete resource.completedQueries[id];
+	      delete resource.pendingQueries[id];
+	      DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
+	        return DSUtils.remove(resource.changeHistory, changeRecord);
+	      });
+	      var toRemove = [];
+	      DSUtils.forOwn(resource.queryData, function (items, queryHash) {
+	        if (items.$$injected) {
+	          DSUtils.remove(items, item);
+	        }
+	        if (!items.length) {
+	          toRemove.push(queryHash);
+	        }
+	      });
+	      DSUtils.forEach(toRemove, function (queryHash) {
+	        delete resource.completedQueries[queryHash];
+	        delete resource.queryData[queryHash];
+	      });
+	      delete resource.changeHistories[id];
+	      delete resource.modified[id];
+	      delete resource.saved[id];
+	      resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
+
+	      if (options.notify) {
+	        definition.afterEject(options, item);
+	        definition.emit("DS.afterEject", definition, item);
+	      }
+
+	      return {
+	        v: item
+	      };
+	    })();
+
+	    if (typeof _ret === "object") {
+	      return _ret.v;
 	    }
-
-	    return item;
 	  }
 	}
-
-	module.exports = eject;
 
 /***/ },
 /* 24 */
 /***/ function(module, exports, __webpack_require__) {
+
+	module.exports = ejectAll;
 
 	function ejectAll(resourceName, params, options) {
 	  var _this = this;
@@ -4161,33 +4107,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	  definition.logFn("ejectAll", params, options);
 
 	  var resource = _this.s[resourceName];
-	  if (DSUtils.isEmpty(params)) {
-	    resource.completedQueries = {};
-	  }
 	  var queryHash = DSUtils.toJson(params);
 	  var items = _this.filter(definition.n, params);
 	  var ids = [];
+	  if (DSUtils.isEmpty(params)) {
+	    resource.completedQueries = {};
+	  } else {
+	    delete resource.completedQueries[queryHash];
+	  }
 	  DSUtils.forEach(items, function (item) {
-	    if (item && item[definition.idAttribute]) {
-	      ids.push(item[definition.idAttribute]);
-	    }
+	    return item && item[definition.idAttribute] ? ids.push(item[definition.idAttribute]) : null;
 	  });
-
 	  DSUtils.forEach(ids, function (id) {
-	    _this.eject(definition.n, id, options);
+	    return _this.eject(definition.n, id, options);
 	  });
-
-	  delete resource.completedQueries[queryHash];
 	  resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
-
 	  return items;
 	}
-
-	module.exports = ejectAll;
 
 /***/ },
 /* 25 */
 /***/ function(module, exports, __webpack_require__) {
+
+	module.exports = filter;
 
 	function filter(resourceName, params, options) {
 	  var _this = this;
@@ -4201,12 +4143,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    throw DSUtils._oErr("params");
 	  }
 
+	  // Protect against null
+	  params = params || {};
+
 	  options = DSUtils._(definition, options);
 
 	  options.logFn("filter", params, options);
-
-	  // Protect against null
-	  params = params || {};
 
 	  var queryHash = DSUtils.toJson(params);
 
@@ -4222,13 +4164,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return definition.defaultFilter.call(_this, resource.collection, resourceName, params, options);
 	}
 
-	module.exports = filter;
-
 /***/ },
 /* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+
+	module.exports = inject;
 
 	var DSUtils = _interopRequire(__webpack_require__(1));
 
@@ -4238,7 +4180,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var name = definition.n;
 	  return function _react(added, removed, changed, oldValueFn, firstTime) {
 	    var target = this;
-	    var item;
+	    var item = undefined;
 	    var innerId = oldValueFn && oldValueFn(definition.idAttribute) ? oldValueFn(definition.idAttribute) : target[definition.idAttribute];
 
 	    DSUtils.forEach(definition.relationFields, function (field) {
@@ -4301,7 +4243,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var _this = this;
 	  var _react = _getReactFunction(_this, definition, resource, attrs, options);
 
-	  var injected;
+	  var injected = undefined;
 	  if (DSUtils._a(attrs)) {
 	    injected = [];
 	    for (var i = 0; i < attrs.length; i++) {
@@ -4312,11 +4254,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var c = definition.computed;
 	    var idA = definition.idAttribute;
 	    if (c && c[idA]) {
-	      var args = [];
-	      DSUtils.forEach(c[idA].deps, function (dep) {
-	        args.push(attrs[dep]);
-	      });
-	      attrs[idA] = c[idA][c[idA].length - 1].apply(attrs, args);
+	      (function () {
+	        var args = [];
+	        DSUtils.forEach(c[idA].deps, function (dep) {
+	          return args.push(attrs[dep]);
+	        });
+	        attrs[idA] = c[idA][c[idA].length - 1].apply(attrs, args);
+	      })();
 	    }
 	    if (!(idA in attrs)) {
 	      var error = new DSErrors.R("" + definition.n + ".inject: \"attrs\" must contain the property specified by \"idAttribute\"!");
@@ -4333,21 +4277,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	              throw new DSErrors.R("" + definition.n + " relation is defined but the resource is not!");
 	            }
 	            if (DSUtils._a(toInject)) {
-	              var items = [];
-	              DSUtils.forEach(toInject, function (toInjectItem) {
-	                if (toInjectItem !== _this.s[relationName][toInjectItem[relationDef.idAttribute]]) {
-	                  try {
-	                    var injectedItem = _this.inject(relationName, toInjectItem, options.orig());
-	                    if (def.foreignKey) {
-	                      injectedItem[def.foreignKey] = attrs[definition.idAttribute];
+	              (function () {
+	                var items = [];
+	                DSUtils.forEach(toInject, function (toInjectItem) {
+	                  if (toInjectItem !== _this.s[relationName][toInjectItem[relationDef.idAttribute]]) {
+	                    try {
+	                      var injectedItem = _this.inject(relationName, toInjectItem, options.orig());
+	                      if (def.foreignKey) {
+	                        injectedItem[def.foreignKey] = attrs[definition.idAttribute];
+	                      }
+	                      items.push(injectedItem);
+	                    } catch (err) {
+	                      options.errorFn(err, "Failed to inject " + def.type + " relation: \"" + relationName + "\"!");
 	                    }
-	                    items.push(injectedItem);
-	                  } catch (err) {
-	                    options.errorFn(err, "Failed to inject " + def.type + " relation: \"" + relationName + "\"!");
 	                  }
-	                }
-	              });
-	              attrs[def.localField] = items;
+	                });
+	                attrs[def.localField] = items;
+	              })();
 	            } else {
 	              if (toInject !== _this.s[relationName][toInject[relationDef.idAttribute]]) {
 	                try {
@@ -4396,7 +4342,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            resource.previousAttributes[id] = DSUtils.copy(item);
 	            if (resource.changeHistories[id].length) {
 	              DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
-	                DSUtils.remove(resource.changeHistory, changeRecord);
+	                return DSUtils.remove(resource.changeHistory, changeRecord);
 	              });
 	              resource.changeHistories[id].splice(0, resource.changeHistories[id].length);
 	            }
@@ -4438,7 +4384,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var _this = this;
 	  var definition = _this.defs[resourceName];
 	  var resource = _this.s[resourceName];
-	  var injected;
+	  var injected = undefined;
 
 	  if (!definition) {
 	    throw new DSErrors.NER(resourceName);
@@ -4470,7 +4416,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  if (DSUtils._a(injected)) {
 	    DSUtils.forEach(injected, function (injectedI) {
-	      _link.call(_this, definition, injectedI, options);
+	      return _link.call(_this, definition, injectedI, options);
 	    });
 	  } else {
 	    _link.call(_this, definition, injected, options);
@@ -4484,11 +4430,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return injected;
 	}
 
-	module.exports = inject;
-
 /***/ },
 /* 27 */
 /***/ function(module, exports, __webpack_require__) {
+
+	module.exports = link;
 
 	function link(resourceName, id, relations) {
 	  var _this = this;
@@ -4518,9 +4464,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      var params = {};
 	      if (def.type === "belongsTo") {
-	        var parent = linked[def.localKey] ? _this.get(relationName, linked[def.localKey]) : null;
-	        if (parent) {
-	          linked[def.localField] = parent;
+	        var _parent = linked[def.localKey] ? _this.get(relationName, linked[def.localKey]) : null;
+	        if (_parent) {
+	          linked[def.localField] = _parent;
 	        }
 	      } else if (def.type === "hasMany") {
 	        params[def.foreignKey] = linked[definition.idAttribute];
@@ -4538,11 +4484,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return linked;
 	}
 
-	module.exports = link;
-
 /***/ },
 /* 28 */
 /***/ function(module, exports, __webpack_require__) {
+
+	module.exports = linkAll;
 
 	function linkAll(resourceName, params, relations) {
 	  var _this = this;
@@ -4596,11 +4542,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return linked;
 	}
 
-	module.exports = linkAll;
-
 /***/ },
 /* 29 */
 /***/ function(module, exports, __webpack_require__) {
+
+	module.exports = linkInverse;
 
 	function linkInverse(resourceName, id, relations) {
 	  var _this = this;
@@ -4640,11 +4586,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return linked;
 	}
 
-	module.exports = linkInverse;
-
 /***/ },
 /* 30 */
 /***/ function(module, exports, __webpack_require__) {
+
+	module.exports = unlinkInverse;
 
 	function unlinkInverse(resourceName, id, relations) {
 	  var _this = this;
@@ -4674,13 +4620,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	            DSUtils.forEach(defs, function (def) {
 	              DSUtils.forEach(_this.s[def.name].collection, function (item) {
 	                if (def.type === "hasMany" && item[def.localField]) {
-	                  var index;
-	                  DSUtils.forEach(item[def.localField], function (subItem, i) {
-	                    if (subItem === linked) {
-	                      index = i;
+	                  (function () {
+	                    var index = undefined;
+	                    DSUtils.forEach(item[def.localField], function (subItem, i) {
+	                      return subItem === linked ? index = i : null;
+	                    });
+	                    if (index !== undefined) {
+	                      item[def.localField].splice(index, 1);
 	                    }
-	                  });
-	                  item[def.localField].splice(index, 1);
+	                  })();
 	                } else if (item[def.localField] === linked) {
 	                  delete item[def.localField];
 	                }
@@ -4695,11 +4643,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return linked;
 	}
 
-	module.exports = unlinkInverse;
-
 /***/ },
 /* 31 */
 /***/ function(module, exports, __webpack_require__) {
+
+	module.exports = create;
 
 	function create(resourceName, attrs, options) {
 	  var _this = this;
@@ -4709,7 +4657,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  options = options || {};
 	  attrs = attrs || {};
 
-	  var rejectionError;
+	  var rejectionError = undefined;
 	  if (!definition) {
 	    rejectionError = new _this.errors.NER(resourceName);
 	  } else if (!DSUtils._o(attrs)) {
@@ -4760,17 +4708,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	}
 
-	module.exports = create;
-
 /***/ },
 /* 32 */
 /***/ function(module, exports, __webpack_require__) {
+
+	module.exports = destroy;
 
 	function destroy(resourceName, id, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
 	  var definition = _this.defs[resourceName];
-	  var item;
+	  var item = undefined;
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    id = DSUtils.resolveId(definition, id);
@@ -4810,17 +4758,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	}
 
-	module.exports = destroy;
-
 /***/ },
 /* 33 */
 /***/ function(module, exports, __webpack_require__) {
+
+	module.exports = destroyAll;
 
 	function destroyAll(resourceName, params, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
 	  var definition = _this.defs[resourceName];
-	  var ejected, toEject;
+	  var ejected = undefined,
+	      toEject = undefined;
 
 	  params = params || {};
 
@@ -4860,13 +4809,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	}
 
-	module.exports = destroyAll;
-
 /***/ },
 /* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* jshint -W082 */
+	module.exports = find;
+
 	function find(resourceName, id, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
@@ -4899,7 +4848,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }).then(function (item) {
 	    if (!item) {
 	      if (!(id in resource.pendingQueries)) {
-	        var promise;
+	        var promise = undefined;
 	        var strategy = options.findStrategy || options.strategy;
 	        if (strategy === "fallback") {
 	          (function () {
@@ -4909,7 +4858,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (index < options.fallbackAdapters.length) {
 	                  return makeFallbackCall(index);
 	                } else {
-	                  return Promise.reject(err);
+	                  return DSUtils.Promise.reject(err);
 	                }
 	              });
 	            };
@@ -4945,12 +4894,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	}
 
-	module.exports = find;
-
 /***/ },
 /* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
+	module.exports = findAll;
 	/* jshint -W082 */
 	function processResults(data, resourceName, queryHash, options) {
 	  var _this = this;
@@ -4992,9 +4940,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function findAll(resourceName, params, options) {
 	  var _this = this;
+	  var DSUtils = _this.utils;
 	  var definition = _this.defs[resourceName];
 	  var resource = _this.s[resourceName];
-	  var queryHash;
+	  var queryHash = undefined;
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    params = params || {};
@@ -5029,7 +4978,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }).then(function (items) {
 	    if (!(queryHash in resource.completedQueries)) {
 	      if (!(queryHash in resource.pendingQueries)) {
-	        var promise;
+	        var promise = undefined;
 	        var strategy = options.findAllStrategy || options.strategy;
 	        if (strategy === "fallback") {
 	          (function () {
@@ -5058,7 +5007,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return resource.queryData[queryHash];
 	          } else {
 	            DSUtils.forEach(data, function (item, i) {
-	              data[i] = _this.createInstance(resourceName, item, options.orig());
+	              return data[i] = _this.createInstance(resourceName, item, options.orig());
 	            });
 	            return data;
 	          }
@@ -5077,16 +5026,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	}
 
-	module.exports = findAll;
-
 /***/ },
 /* 36 */
 /***/ function(module, exports, __webpack_require__) {
+
+	module.exports = loadRelations;
 
 	function loadRelations(resourceName, instance, relations, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
 	  var DSErrors = _this.errors;
+
 	  var definition = _this.defs[resourceName];
 	  var fields = [];
 
@@ -5106,71 +5056,148 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else if (!DSUtils._a(relations)) {
 	      reject(new DSErrors.IA("\"relations\" must be a string or an array!"));
 	    } else {
-	      var _options = DSUtils._(definition, options);
-	      if (!_options.hasOwnProperty("findBelongsTo")) {
-	        _options.findBelongsTo = true;
-	      }
-	      if (!_options.hasOwnProperty("findHasMany")) {
-	        _options.findHasMany = true;
-	      }
-	      _options.logFn("loadRelations", instance, relations, _options);
-
-	      var tasks = [];
-
-	      DSUtils.forEach(definition.relationList, function (def) {
-	        var relationName = def.relation;
-	        var relationDef = definition.getResource(relationName);
-	        var __options = DSUtils._(relationDef, options);
-	        if (DSUtils.contains(relations, relationName) || DSUtils.contains(relations, def.localField)) {
-	          var task;
-	          var params = {};
-	          if (__options.allowSimpleWhere) {
-	            params[def.foreignKey] = instance[definition.idAttribute];
-	          } else {
-	            params.where = {};
-	            params.where[def.foreignKey] = {
-	              "==": instance[definition.idAttribute]
-	            };
-	          }
-
-	          if (def.type === "hasMany" && params[def.foreignKey]) {
-	            task = _this.findAll(relationName, params, __options.orig());
-	          } else if (def.type === "hasOne") {
-	            if (def.localKey && instance[def.localKey]) {
-	              task = _this.find(relationName, instance[def.localKey], __options.orig());
-	            } else if (def.foreignKey && params[def.foreignKey]) {
-	              task = _this.findAll(relationName, params, __options.orig()).then(function (hasOnes) {
-	                return hasOnes.length ? hasOnes[0] : null;
-	              });
-	            }
-	          } else if (instance[def.localKey]) {
-	            task = _this.find(relationName, instance[def.localKey], options);
-	          }
-
-	          if (task) {
-	            tasks.push(task);
-	            fields.push(def.localField);
-	          }
+	      (function () {
+	        var _options = DSUtils._(definition, options);
+	        if (!_options.hasOwnProperty("findBelongsTo")) {
+	          _options.findBelongsTo = true;
 	        }
-	      });
+	        if (!_options.hasOwnProperty("findHasMany")) {
+	          _options.findHasMany = true;
+	        }
+	        _options.logFn("loadRelations", instance, relations, _options);
 
-	      resolve(tasks);
+	        var tasks = [];
+
+	        DSUtils.forEach(definition.relationList, function (def) {
+	          var relationName = def.relation;
+	          var relationDef = definition.getResource(relationName);
+	          var __options = DSUtils._(relationDef, options);
+	          if (DSUtils.contains(relations, relationName) || DSUtils.contains(relations, def.localField)) {
+	            var task = undefined;
+	            var params = {};
+	            if (__options.allowSimpleWhere) {
+	              params[def.foreignKey] = instance[definition.idAttribute];
+	            } else {
+	              params.where = {};
+	              params.where[def.foreignKey] = {
+	                "==": instance[definition.idAttribute]
+	              };
+	            }
+
+	            if (def.type === "hasMany" && params[def.foreignKey]) {
+	              task = _this.findAll(relationName, params, __options.orig());
+	            } else if (def.type === "hasOne") {
+	              if (def.localKey && instance[def.localKey]) {
+	                task = _this.find(relationName, instance[def.localKey], __options.orig());
+	              } else if (def.foreignKey && params[def.foreignKey]) {
+	                task = _this.findAll(relationName, params, __options.orig()).then(function (hasOnes) {
+	                  return hasOnes.length ? hasOnes[0] : null;
+	                });
+	              }
+	            } else if (instance[def.localKey]) {
+	              task = _this.find(relationName, instance[def.localKey], options);
+	            }
+
+	            if (task) {
+	              tasks.push(task);
+	              fields.push(def.localField);
+	            }
+	          }
+	        });
+
+	        resolve(tasks);
+	      })();
 	    }
 	  }).then(function (tasks) {
 	    return DSUtils.Promise.all(tasks);
 	  }).then(function (loadedRelations) {
 	    DSUtils.forEach(fields, function (field, index) {
-	      instance[field] = loadedRelations[index];
+	      return instance[field] = loadedRelations[index];
 	    });
 	    return instance;
 	  });
 	}
 
-	module.exports = loadRelations;
-
 /***/ },
 /* 37 */
 /***/ function(module, exports, __webpack_require__) {
+
+	module.exports = reap;
+
+	function reap(resourceName, options) {
+	  var _this = this;
+	  var DSUtils = _this.utils;
+	  var definition = _this.defs[resourceName];
+	  var resource = _this.s[resourceName];
+
+	  return new DSUtils.Promise(function (resolve, reject) {
+
+	    if (!definition) {
+	      reject(new _this.errors.NER(resourceName));
+	    } else {
+	      options = DSUtils._(definition, options);
+	      if (!options.hasOwnProperty("notify")) {
+	        options.notify = false;
+	      }
+	      options.logFn("reap", options);
+	      var items = [];
+	      var now = new Date().getTime();
+	      var expiredItem = undefined;
+	      while ((expiredItem = resource.expiresHeap.peek()) && expiredItem.expires < now) {
+	        items.push(expiredItem.item);
+	        delete expiredItem.item;
+	        resource.expiresHeap.pop();
+	      }
+	      resolve(items);
+	    }
+	  }).then(function (items) {
+	    if (options.isInterval || options.notify) {
+	      definition.beforeReap(options, items);
+	      definition.emit("DS.beforeReap", definition, items);
+	    }
+	    if (options.reapAction === "inject") {
+	      (function () {
+	        var timestamp = new Date().getTime();
+	        DSUtils.forEach(items, function (item) {
+	          return resource.expiresHeap.push({
+	            item: item,
+	            timestamp: timestamp,
+	            expires: definition.maxAge ? timestamp + definition.maxAge : Number.MAX_VALUE
+	          });
+	        });
+	      })();
+	    } else if (options.reapAction === "eject") {
+	      DSUtils.forEach(items, function (item) {
+	        return _this.eject(resourceName, item[definition.idAttribute]);
+	      });
+	    } else if (options.reapAction === "refresh") {
+	      var _ret2 = (function () {
+	        var tasks = [];
+	        DSUtils.forEach(items, function (item) {
+	          return tasks.push(_this.refresh(resourceName, item[definition.idAttribute]));
+	        });
+	        return {
+	          v: DSUtils.Promise.all(tasks)
+	        };
+	      })();
+
+	      if (typeof _ret2 === "object") return _ret2.v;
+	    }
+	    return items;
+	  }).then(function (items) {
+	    if (options.isInterval || options.notify) {
+	      definition.afterReap(options, items);
+	      definition.emit("DS.afterReap", definition, items);
+	    }
+	    return items;
+	  });
+	}
+
+/***/ },
+/* 38 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = save;
 
 	function save(resourceName, id, options) {
 	  var _this = this;
@@ -5178,7 +5205,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSErrors = _this.errors;
 
 	  var definition = _this.defs[resourceName];
-	  var item;
+	  var item = undefined;
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    id = DSUtils.resolveId(definition, id);
@@ -5238,10 +5265,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (options.cacheResponse) {
 	      var injected = _this.inject(definition.n, attrs, options.orig());
 	      var resource = _this.s[resourceName];
-	      var id = injected[definition.idAttribute];
-	      resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
+	      var _id = injected[definition.idAttribute];
+	      resource.saved[_id] = DSUtils.updateTimestamp(resource.saved[_id]);
 	      if (!definition.resetHistoryOnInject) {
-	        resource.previousAttributes[id] = DSUtils.copy(injected);
+	        resource.previousAttributes[_id] = DSUtils.copy(injected);
 	      }
 	      return injected;
 	    } else {
@@ -5250,16 +5277,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	}
 
-	module.exports = save;
-
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
+
+	module.exports = update;
 
 	function update(resourceName, id, attrs, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
 	  var DSErrors = _this.errors;
+
 	  var definition = _this.defs[resourceName];
 
 	  return new DSUtils.Promise(function (resolve, reject) {
@@ -5295,10 +5323,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (options.cacheResponse) {
 	      var injected = _this.inject(definition.n, attrs, options.orig());
 	      var resource = _this.s[resourceName];
-	      var id = injected[definition.idAttribute];
-	      resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
+	      var _id = injected[definition.idAttribute];
+	      resource.saved[_id] = DSUtils.updateTimestamp(resource.saved[_id]);
 	      if (!definition.resetHistoryOnInject) {
-	        resource.previousAttributes[id] = DSUtils.copy(injected);
+	        resource.previousAttributes[_id] = DSUtils.copy(injected);
 	      }
 	      return injected;
 	    } else {
@@ -5307,16 +5335,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	}
 
-	module.exports = update;
-
 /***/ },
-/* 39 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
+
+	module.exports = updateAll;
 
 	function updateAll(resourceName, attrs, params, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
 	  var DSErrors = _this.errors;
+
 	  var definition = _this.defs[resourceName];
 
 	  return new DSUtils.Promise(function (resolve, reject) {
@@ -5348,61 +5377,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    var origOptions = options.orig();
 	    if (options.cacheResponse) {
-	      var injected = _this.inject(definition.n, data, origOptions);
-	      var resource = _this.s[resourceName];
-	      DSUtils.forEach(injected, function (i) {
-	        var id = i[definition.idAttribute];
-	        resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
-	        if (!definition.resetHistoryOnInject) {
-	          resource.previousAttributes[id] = DSUtils.copy(i);
-	        }
-	      });
-	      return injected;
+	      var _ret = (function () {
+	        var injected = _this.inject(definition.n, data, origOptions);
+	        var resource = _this.s[resourceName];
+	        DSUtils.forEach(injected, function (i) {
+	          var id = i[definition.idAttribute];
+	          resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
+	          if (!definition.resetHistoryOnInject) {
+	            resource.previousAttributes[id] = DSUtils.copy(i);
+	          }
+	        });
+	        return {
+	          v: injected
+	        };
+	      })();
+
+	      if (typeof _ret === "object") return _ret.v;
 	    } else {
-	      var instances = [];
-	      DSUtils.forEach(data, function (item) {
-	        instances.push(_this.createInstance(resourceName, item, origOptions));
-	      });
-	      return instances;
+	      var _ret2 = (function () {
+	        var instances = [];
+	        DSUtils.forEach(data, function (item) {
+	          return instances.push(_this.createInstance(resourceName, item, origOptions));
+	        });
+	        return {
+	          v: instances
+	        };
+	      })();
+
+	      if (typeof _ret2 === "object") return _ret2.v;
 	    }
 	  });
 	}
-
-	module.exports = updateAll;
-
-/***/ },
-/* 40 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Array.indexOf
-	     */
-	    function indexOf(arr, item, fromIndex) {
-	        fromIndex = fromIndex || 0;
-	        if (arr == null) {
-	            return -1;
-	        }
-
-	        var len = arr.length,
-	            i = fromIndex < 0 ? len + fromIndex : fromIndex;
-	        while (i < len) {
-	            // we iterate over sparse items since there is no way to make it
-	            // work properly on IE 7-8. see #64
-	            if (arr[i] === item) {
-	                return i;
-	            }
-
-	            i++;
-	        }
-
-	        return -1;
-	    }
-
-	    module.exports = indexOf;
-
-
 
 /***/ },
 /* 41 */
@@ -5599,10 +5604,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var toString = __webpack_require__(46);
-	var replaceAccents = __webpack_require__(51);
-	var removeNonWord = __webpack_require__(52);
+	var replaceAccents = __webpack_require__(52);
+	var removeNonWord = __webpack_require__(53);
 	var upperCase = __webpack_require__(20);
-	var lowerCase = __webpack_require__(53);
+	var lowerCase = __webpack_require__(54);
 	    /**
 	    * Convert string to camelCase text.
 	    */
@@ -5622,6 +5627,40 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 48 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Array.indexOf
+	     */
+	    function indexOf(arr, item, fromIndex) {
+	        fromIndex = fromIndex || 0;
+	        if (arr == null) {
+	            return -1;
+	        }
+
+	        var len = arr.length,
+	            i = fromIndex < 0 ? len + fromIndex : fromIndex;
+	        while (i < len) {
+	            // we iterate over sparse items since there is no way to make it
+	            // work properly on IE 7-8. see #64
+	            if (arr[i] === item) {
+	                return i;
+	            }
+
+	            i++;
+	        }
+
+	        return -1;
+	    }
+
+	    module.exports = indexOf;
+
+
+
+/***/ },
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// shim for using process in browser
@@ -5713,14 +5752,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 49 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = function() { throw new Error("define cannot be used indirect"); };
 
 
 /***/ },
-/* 50 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = function(module) {
@@ -5736,7 +5775,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 51 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var toString = __webpack_require__(46);
@@ -5778,7 +5817,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 52 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var toString = __webpack_require__(46);
@@ -5798,7 +5837,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 53 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var toString = __webpack_require__(46);

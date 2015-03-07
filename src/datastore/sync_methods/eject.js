@@ -1,10 +1,10 @@
-function eject(resourceName, id, options) {
-  var _this = this;
-  var DSUtils = _this.utils;
-  var definition = _this.defs[resourceName];
-  var resource = _this.s[resourceName];
-  var item;
-  var found = false;
+export default function eject(resourceName, id, options) {
+  let _this = this;
+  let DSUtils = _this.utils;
+  let definition = _this.defs[resourceName];
+  let resource = _this.s[resourceName];
+  let item;
+  let found = false;
 
   id = DSUtils.resolveId(definition, id);
 
@@ -19,7 +19,7 @@ function eject(resourceName, id, options) {
   options.logFn('eject', id, options);
 
   for (var i = 0; i < resource.collection.length; i++) {
-    if (resource.collection[i][definition.idAttribute] == id) {
+    if (resource.collection[i][definition.idAttribute] == id) { // jshint ignore:line
       item = resource.collection[i];
       resource.expiresHeap.remove(item);
       found = true;
@@ -42,11 +42,9 @@ function eject(resourceName, id, options) {
     delete resource.previousAttributes[id];
     delete resource.completedQueries[id];
     delete resource.pendingQueries[id];
-    DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
-      DSUtils.remove(resource.changeHistory, changeRecord);
-    });
-    var toRemove = [];
-    DSUtils.forOwn(resource.queryData, function (items, queryHash) {
+    DSUtils.forEach(resource.changeHistories[id], changeRecord => DSUtils.remove(resource.changeHistory, changeRecord));
+    let toRemove = [];
+    DSUtils.forOwn(resource.queryData, (items, queryHash) => {
       if (items.$$injected) {
         DSUtils.remove(items, item);
       }
@@ -54,7 +52,7 @@ function eject(resourceName, id, options) {
         toRemove.push(queryHash);
       }
     });
-    DSUtils.forEach(toRemove, function (queryHash) {
+    DSUtils.forEach(toRemove, queryHash => {
       delete resource.completedQueries[queryHash];
       delete resource.queryData[queryHash];
     });
@@ -71,5 +69,3 @@ function eject(resourceName, id, options) {
     return item;
   }
 }
-
-export default eject;

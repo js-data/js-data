@@ -1,7 +1,7 @@
-function linkInverse(resourceName, id, relations) {
-  var _this = this;
-  var DSUtils = _this.utils;
-  var definition = _this.defs[resourceName];
+export default function linkInverse(resourceName, id, relations) {
+  let _this = this;
+  let DSUtils = _this.utils;
+  let definition = _this.defs[resourceName];
 
   relations = relations || [];
 
@@ -16,12 +16,12 @@ function linkInverse(resourceName, id, relations) {
 
   definition.logFn('linkInverse', id, relations);
 
-  var linked = _this.get(resourceName, id);
+  let linked = _this.get(resourceName, id);
 
   if (linked) {
-    DSUtils.forOwn(_this.defs, function (d) {
-      DSUtils.forOwn(d.relations, function (relatedModels) {
-        DSUtils.forOwn(relatedModels, function (defs, relationName) {
+    DSUtils.forOwn(_this.defs, d => {
+      DSUtils.forOwn(d.relations, relatedModels => {
+        DSUtils.forOwn(relatedModels, (defs, relationName) => {
           if (relations.length && !DSUtils.contains(relations, d.n)) {
             return;
           }
@@ -35,5 +35,3 @@ function linkInverse(resourceName, id, relations) {
 
   return linked;
 }
-
-export default linkInverse;

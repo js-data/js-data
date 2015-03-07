@@ -1,10 +1,10 @@
-function destroy(resourceName, id, options) {
-  var _this = this;
-  var DSUtils = _this.utils;
-  var definition = _this.defs[resourceName];
-  var item;
+export default function destroy(resourceName, id, options) {
+  let _this = this;
+  let DSUtils = _this.utils;
+  let definition = _this.defs[resourceName];
+  let item;
 
-  return new DSUtils.Promise(function (resolve, reject) {
+  return new DSUtils.Promise((resolve, reject) => {
     id = DSUtils.resolveId(definition, id);
     if (!definition) {
       reject(new _this.errors.NER(resourceName));
@@ -17,10 +17,8 @@ function destroy(resourceName, id, options) {
       resolve(item);
     }
   })
-    .then(function (attrs) {
-      return options.beforeDestroy.call(attrs, options, attrs);
-    })
-    .then(function (attrs) {
+    .then(attrs => options.beforeDestroy.call(attrs, options, attrs))
+    .then(attrs => {
       if (options.notify) {
         definition.emit('DS.beforeDestroy', definition, attrs);
       }
@@ -29,21 +27,17 @@ function destroy(resourceName, id, options) {
       }
       return _this.getAdapter(options).destroy(definition, id, options);
     })
-    .then(function () {
-      return options.afterDestroy.call(item, options, item);
-    })
-    .then(function (item) {
+    .then(() => options.afterDestroy.call(item, options, item))
+    .then(item => {
       if (options.notify) {
         definition.emit('DS.afterDestroy', definition, item);
       }
       _this.eject(resourceName, id);
       return id;
-    })['catch'](function (err) {
+    })['catch'](err => {
     if (options && options.eagerEject && item) {
       _this.inject(resourceName, item, { notify: false });
     }
     throw err;
   });
 }
-
-module.exports = destroy;

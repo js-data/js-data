@@ -1,12 +1,12 @@
-function create(resourceName, attrs, options) {
-  var _this = this;
-  var DSUtils = _this.utils;
-  var definition = _this.defs[resourceName];
+export default function create(resourceName, attrs, options) {
+  let _this = this;
+  let DSUtils = _this.utils;
+  let definition = _this.defs[resourceName];
 
   options = options || {};
   attrs = attrs || {};
 
-  var rejectionError;
+  let rejectionError;
   if (!definition) {
     rejectionError = new _this.errors.NER(resourceName);
   } else if (!DSUtils._o(attrs)) {
@@ -19,42 +19,31 @@ function create(resourceName, attrs, options) {
     options.logFn('create', attrs, options);
   }
 
-  return new DSUtils.Promise(function (resolve, reject) {
+  return new DSUtils.Promise((resolve, reject) => {
     if (rejectionError) {
       reject(rejectionError);
     } else {
       resolve(attrs);
     }
-  })
-    .then(function (attrs) {
-      return options.beforeValidate.call(attrs, options, attrs);
-    })
-    .then(function (attrs) {
-      return options.validate.call(attrs, options, attrs);
-    })
-    .then(function (attrs) {
-      return options.afterValidate.call(attrs, options, attrs);
-    })
-    .then(function (attrs) {
-      return options.beforeCreate.call(attrs, options, attrs);
-    })
-    .then(function (attrs) {
+  }).then(attrs => options.beforeValidate.call(attrs, options, attrs))
+    .then(attrs => options.validate.call(attrs, options, attrs))
+    .then(attrs => options.afterValidate.call(attrs, options, attrs))
+    .then(attrs => options.beforeCreate.call(attrs, options, attrs))
+    .then(attrs => {
       if (options.notify) {
         definition.emit('DS.beforeCreate', definition, attrs);
       }
       return _this.getAdapter(options).create(definition, attrs, options);
     })
-    .then(function (attrs) {
-      return options.afterCreate.call(attrs, options, attrs);
-    })
-    .then(function (attrs) {
+    .then(attrs => options.afterCreate.call(attrs, options, attrs))
+    .then(attrs => {
       if (options.notify) {
         definition.emit('DS.afterCreate', definition, attrs);
       }
       if (options.cacheResponse) {
-        var created = _this.inject(definition.n, attrs, options.orig());
-        var id = created[definition.idAttribute];
-        var resource = _this.s[resourceName];
+        let created = _this.inject(definition.n, attrs, options.orig());
+        let id = created[definition.idAttribute];
+        let resource = _this.s[resourceName];
         resource.completedQueries[id] = new Date().getTime();
         resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
         return created;
@@ -63,5 +52,3 @@ function create(resourceName, attrs, options) {
       }
     });
 }
-
-export default create;

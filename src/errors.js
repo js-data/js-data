@@ -31,7 +31,7 @@ class NonexistentResourceError extends Error {
   }
 }
 
-var DSErrors = {
+export default {
   IllegalArgumentError,
   IA: IllegalArgumentError,
   RuntimeError,
@@ -39,5 +39,3 @@ var DSErrors = {
   NonexistentResourceError,
   NER: NonexistentResourceError
 };
-
-export default DSErrors;

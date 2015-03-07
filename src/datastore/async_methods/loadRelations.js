@@ -1,11 +1,10 @@
-function loadRelations(resourceName, instance, relations, options) {
-  var _this = this;
-  var DSUtils = _this.utils;
-  var DSErrors = _this.errors;
-  var definition = _this.defs[resourceName];
-  var fields = [];
+export default function loadRelations(resourceName, instance, relations, options) {
+  let _this = this;
+  let {utils: DSUtils, errors: DSErrors} = _this;
+  let definition = _this.defs[resourceName];
+  let fields = [];
 
-  return new DSUtils.Promise(function (resolve, reject) {
+  return new DSUtils.Promise((resolve, reject) => {
     if (DSUtils._sn(instance)) {
       instance = _this.get(resourceName, instance);
     }
@@ -21,7 +20,7 @@ function loadRelations(resourceName, instance, relations, options) {
     } else if (!DSUtils._a(relations)) {
       reject(new DSErrors.IA('"relations" must be a string or an array!'));
     } else {
-      var _options = DSUtils._(definition, options);
+      let _options = DSUtils._(definition, options);
       if (!_options.hasOwnProperty('findBelongsTo')) {
         _options.findBelongsTo = true;
       }
@@ -30,15 +29,15 @@ function loadRelations(resourceName, instance, relations, options) {
       }
       _options.logFn('loadRelations', instance, relations, _options);
 
-      var tasks = [];
+      let tasks = [];
 
-      DSUtils.forEach(definition.relationList, function (def) {
-        var relationName = def.relation;
-        var relationDef = definition.getResource(relationName);
-        var __options = DSUtils._(relationDef, options);
+      DSUtils.forEach(definition.relationList, def => {
+        let relationName = def.relation;
+        let relationDef = definition.getResource(relationName);
+        let __options = DSUtils._(relationDef, options);
         if (DSUtils.contains(relations, relationName) || DSUtils.contains(relations, def.localField)) {
-          var task;
-          var params = {};
+          let task;
+          let params = {};
           if (__options.allowSimpleWhere) {
             params[def.foreignKey] = instance[definition.idAttribute];
           } else {
@@ -54,9 +53,7 @@ function loadRelations(resourceName, instance, relations, options) {
             if (def.localKey && instance[def.localKey]) {
               task = _this.find(relationName, instance[def.localKey], __options.orig());
             } else if (def.foreignKey && params[def.foreignKey]) {
-              task = _this.findAll(relationName, params, __options.orig()).then(function (hasOnes) {
-                return hasOnes.length ? hasOnes[0] : null;
-              });
+              task = _this.findAll(relationName, params, __options.orig()).then(hasOnes => hasOnes.length ? hasOnes[0] : null);
             }
           } else if (instance[def.localKey]) {
             task = _this.find(relationName, instance[def.localKey], options);
@@ -71,16 +68,9 @@ function loadRelations(resourceName, instance, relations, options) {
 
       resolve(tasks);
     }
-  })
-    .then(function (tasks) {
-      return DSUtils.Promise.all(tasks);
-    })
-    .then(function (loadedRelations) {
-      DSUtils.forEach(fields, function (field, index) {
-        instance[field] = loadedRelations[index];
-      });
+  }).then(tasks => DSUtils.Promise.all(tasks))
+    .then(loadedRelations => {
+      DSUtils.forEach(fields, (field, index) => instance[field] = loadedRelations[index]);
       return instance;
     });
 }
-
-export default loadRelations;

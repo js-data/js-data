@@ -51,6 +51,8 @@
     "grunt-webpack": "^1.0.8",
     "jit-grunt": "0.9.1",
     "js-data-schema": ">=1.0.0",
+    "jshint": "^2.6.3",
+    "jshint-loader": "^0.8.3",
     "karma": "0.12.31",
     "karma-chai": "0.1.0",
     "karma-chrome-launcher": "0.1.7",

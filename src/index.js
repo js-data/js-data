@@ -2,7 +2,7 @@ import DSUtils from './utils';
 import DSErrors from './errors';
 import DS from './datastore/index';
 
-var JSData = {
+export default {
   DS,
   createStore(options) {
     return new DS(options);
@@ -18,5 +18,3 @@ var JSData = {
     beta: '<%= beta %>' !== 'false' ? '<%= beta %>' : false
   }
 };
-
-export default JSData;

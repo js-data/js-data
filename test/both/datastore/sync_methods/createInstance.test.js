@@ -38,6 +38,9 @@ describe('DS#createInstance', function () {
       }
     });
 
+    console.log(store.defaults);
+    console.log(store.defaults.prototype);
+
     store.defineResource({
       name: 'dog',
       useClass: true
@@ -59,6 +62,8 @@ describe('DS#createInstance', function () {
     var person = store.createInstance('person', personAttrs);
     var dog = store.createInstance('dog', dogAttrs, { useClass: false });
     var cat = store.createInstance('cat');
+
+    assert.equal(cat.say(), 'hi');
 
     assert.deepEqual(JSON.stringify(person), JSON.stringify(personAttrs));
     assert.deepEqual(dog, dogAttrs);

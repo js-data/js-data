@@ -1,8 +1,8 @@
-function filter(resourceName, params, options) {
-  var _this = this;
-  var DSUtils = _this.utils;
-  var definition = _this.defs[resourceName];
-  var resource = _this.s[resourceName];
+export default function filter(resourceName, params, options) {
+  let _this = this;
+  let DSUtils = _this.utils;
+  let definition = _this.defs[resourceName];
+  let resource = _this.s[resourceName];
 
   if (!definition) {
     throw new _this.errors.NER(resourceName);
@@ -10,14 +10,14 @@ function filter(resourceName, params, options) {
     throw DSUtils._oErr('params');
   }
 
+  // Protect against null
+  params = params || {};
+
   options = DSUtils._(definition, options);
 
   options.logFn('filter', params, options);
 
-  // Protect against null
-  params = params || {};
-
-  var queryHash = DSUtils.toJson(params);
+  let queryHash = DSUtils.toJson(params);
 
   if (!(queryHash in resource.completedQueries) && options.loadFromServer) {
     // This particular query has never been completed
@@ -30,5 +30,3 @@ function filter(resourceName, params, options) {
 
   return definition.defaultFilter.call(_this, resource.collection, resourceName, params, options);
 }
-
-export default filter;

@@ -25,10 +25,6 @@ module.exports = function (grunt) {
       coverage: ['coverage/'],
       dist: ['dist/']
     },
-    jshint: {
-      all: ['Gruntfile.js', 'src/**/*.js', 'test/*.js'],
-      jshintrc: '.jshintrc'
-    },
     watch: {
       dist: {
         files: ['src/**/*.js'],
@@ -36,7 +32,7 @@ module.exports = function (grunt) {
       },
       lite: {
         files: ['src/**/*.js'],
-        tasks: ['jshint', 'webpack']
+        tasks: ['webpack']
       },
       n: {
         files: ['src/**/*.js', 'test/both/**/*.js', 'test/node/**/*.js'],
@@ -84,6 +80,13 @@ module.exports = function (grunt) {
         module: {
           loaders: [
             { test: /(src)(.+)\.js$/, exclude: /node_modules/, loader: 'babel-loader?blacklist=useStrict' }
+          ],
+          preLoaders: [
+            {
+              test: /(src)(.+)\.js$|(test)(.+)\.js$/, // include .js files
+              exclude: /node_modules/, // exclude any and all files in the node_modules folder
+              loader: "jshint-loader?failOnHint=true"
+            }
           ]
         }
       }
@@ -205,7 +208,6 @@ module.exports = function (grunt) {
   grunt.registerTask('test', ['build', 'n', 'b']);
   grunt.registerTask('build', [
     'clean',
-    //'jshint',
     'webpack',
     'debug:dist/js-data-debug.js',
     'version:dist/js-data-debug.js',
@@ -215,6 +217,6 @@ module.exports = function (grunt) {
     'uglify:main'
   ]);
   grunt.registerTask('go', ['build', 'watch:dist']);
-  grunt.registerTask('golite', ['jshint', 'webpack', 'watch:lite']);
+  grunt.registerTask('golite', ['webpack', 'watch:lite']);
   grunt.registerTask('default', ['build']);
 };
