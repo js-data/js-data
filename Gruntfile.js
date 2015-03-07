@@ -16,7 +16,15 @@ module.exports = function (grunt) {
   });
   require('time-grunt')(grunt);
 
+  var webpack = require('webpack');
   var pkg = grunt.file.readJSON('package.json');
+  var banner = 'js-data\n' +
+    '@version ' + pkg.version + ' - Homepage <http://www.js-data.io/>\n' +
+    '@author Jason Dobry <jason.dobry@gmail.com>\n' +
+    '@copyright (c) 2014-2015 Jason Dobry \n' +
+    '@license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>\n' +
+    '\n' +
+    '@overview Robust framework-agnostic data store.';
 
   // Project configuration.
   grunt.initConfig({
@@ -88,7 +96,10 @@ module.exports = function (grunt) {
               loader: "jshint-loader?failOnHint=true"
             }
           ]
-        }
+        },
+        plugins: [
+          new webpack.BannerPlugin(banner)
+        ]
       }
     },
     karma: {
@@ -134,24 +145,6 @@ module.exports = function (grunt) {
         src: ['mocha.start.js', 'test/both/**/*.js', 'test/node/**/*.js']
       }
     }
-  });
-
-  grunt.registerTask('banner', function (filename) {
-    var file = grunt.file.read(filename);
-
-    var banner = '/**\n' +
-      '* @author Jason Dobry <jason.dobry@gmail.com>\n' +
-      '* @file ' + filename + '\n' +
-      '* @version ' + pkg.version + ' - Homepage <http://www.js-data.io/>\n' +
-      '* @copyright (c) 2014-2015 Jason Dobry \n' +
-      '* @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>\n' +
-      '*\n' +
-      '* @overview Data store.\n' +
-      '*/\n';
-
-    file = banner + file;
-
-    grunt.file.write(filename, file);
   });
 
   grunt.registerTask('version', function (filePath) {
@@ -212,8 +205,6 @@ module.exports = function (grunt) {
     'debug:dist/js-data-debug.js',
     'version:dist/js-data-debug.js',
     'version:dist/js-data.js',
-    'banner:dist/js-data-debug.js',
-    'banner:dist/js-data.js',
     'uglify:main'
   ]);
   grunt.registerTask('go', ['build', 'watch:dist']);
