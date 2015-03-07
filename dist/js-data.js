@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 1.5.4 - Homepage <http://www.js-data.io/>
+ * @version 1.5.5 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -79,10 +79,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  DSUtils: DSUtils,
 	  DSErrors: DSErrors,
 	  version: {
-	    full: "1.5.4",
+	    full: "1.5.5",
 	    major: parseInt("1", 10),
 	    minor: parseInt("5", 10),
-	    patch: parseInt("4", 10),
+	    patch: parseInt("5", 10),
 	    alpha: true ? "false" : false,
 	    beta: true ? "false" : false
 	  }

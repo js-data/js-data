@@ -1,4 +1,4 @@
-##### 1.5.5 - 06 March 2015
+##### 1.5.5 - 07 March 2015
 
 ###### Other
 - Re-wrote a good amount of the code to use ES6. Now using Babel.js to transpile back to ES5.
