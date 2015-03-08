@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 1.5.5 - Homepage <http://www.js-data.io/>
+ * @version 1.5.6 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -79,10 +79,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  DSUtils: DSUtils,
 	  DSErrors: DSErrors,
 	  version: {
-	    full: "1.5.5",
+	    full: "1.5.6",
 	    major: parseInt("1", 10),
 	    minor: parseInt("5", 10),
-	    patch: parseInt("5", 10),
+	    patch: parseInt("6", 10),
 	    alpha: true ? "false" : false,
 	    beta: true ? "false" : false
 	  }
@@ -1242,8 +1242,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      } catch (e) {}
 	    }
 
-	    if (Schemator || options.schemator) {
-	      _this.schemator = options.schemator || new Schemator();
+	    Schemator = Schemator || options.schemator;
+	    if (typeof Schemator === "function") {
+	      _this.schemator = new Schemator();
 	    }
 
 	    _this.store = {};
@@ -3551,7 +3552,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isPrimitive = __webpack_require__(26);
+	var isPrimitive = __webpack_require__(27);
 
 	    /**
 	     * get "nested" object property
@@ -3577,7 +3578,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var namespace = __webpack_require__(27);
+	var namespace = __webpack_require__(26);
 
 	    /**
 	     * set "nested" object property
@@ -3788,6 +3789,31 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var forEach = __webpack_require__(10);
+
+	    /**
+	     * Create nested object if non-existent
+	     */
+	    function namespace(obj, path){
+	        if (!path) return obj;
+	        forEach(path.split('.'), function(key){
+	            if (!obj[key]) {
+	                obj[key] = {};
+	            }
+	            obj = obj[key];
+	        });
+	        return obj;
+	    }
+
+	    module.exports = namespace;
+
+
+
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
 	
 
 	    /**
@@ -3807,31 +3833,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    module.exports = isPrimitive;
-
-
-
-
-/***/ },
-/* 27 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var forEach = __webpack_require__(10);
-
-	    /**
-	     * Create nested object if non-existent
-	     */
-	    function namespace(obj, path){
-	        if (!path) return obj;
-	        forEach(path.split('.'), function(key){
-	            if (!obj[key]) {
-	                obj[key] = {};
-	            }
-	            obj = obj[key];
-	        });
-	        return obj;
-	    }
-
-	    module.exports = namespace;
 
 
 

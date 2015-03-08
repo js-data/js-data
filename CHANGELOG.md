@@ -1,3 +1,8 @@
+##### 1.5.6 - 07 March 2015
+
+###### Backwards compatible bug fixes
+- Fixed loading of the optional js-data-schema
+
 ##### 1.5.5 - 07 March 2015
 
 ###### Other

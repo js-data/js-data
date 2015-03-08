@@ -316,8 +316,9 @@ class DS {
       }
     }
 
-    if (Schemator || options.schemator) {
-      _this.schemator = options.schemator || new Schemator();
+    Schemator = Schemator || options.schemator;
+    if (typeof Schemator === 'function') {
+      _this.schemator = new Schemator();
     }
 
     _this.store = {};
