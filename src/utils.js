@@ -506,12 +506,16 @@ DSUtils = {
     });
     let O = function Options(attrs) {
       let self = this;
-      forOwn(attrs, (value, key) => self[key] = value);
+      forOwn(attrs, (value, key) => {
+        self[key] = value;
+      });
     };
     O.prototype = parent;
     O.prototype.orig = function () {
       let orig = {};
-      forOwn(this, (value, key) => orig[key] = value);
+      forOwn(this, (value, key) => {
+        orig[key] = value;
+      });
       return orig;
     };
     return new O(options);
@@ -527,7 +531,9 @@ DSUtils = {
   compute(fn, field) {
     let _this = this;
     let args = [];
-    forEach(fn.deps, dep => args.push(_this[dep]));
+    forEach(fn.deps, dep => {
+      args.push(_this[dep]);
+    });
     // compute property
     _this[field] = fn[fn.length - 1].apply(_this, args);
   },
@@ -628,7 +634,9 @@ DSUtils = {
           }
         } else {
           nu = {};
-          forOwn(value, (v, k) => nu[k] = rmCirc(value[k]));
+          forOwn(value, (v, k) => {
+            nu[k] = rmCirc(value[k]);
+          });
         }
         return nu;
       }

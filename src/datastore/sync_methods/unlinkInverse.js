@@ -27,7 +27,11 @@ export default function unlinkInverse(resourceName, id, relations) {
               DSUtils.forEach(_this.s[def.name].collection, item => {
                 if (def.type === 'hasMany' && item[def.localField]) {
                   let index;
-                  DSUtils.forEach(item[def.localField], (subItem, i) => subItem === linked ? index = i : null);
+                  DSUtils.forEach(item[def.localField], (subItem, i) => {
+                    if (subItem === linked) {
+                      index = i;
+                    }
+                  });
                   if (index !== undefined) {
                     item[def.localField].splice(index, 1);
                   }

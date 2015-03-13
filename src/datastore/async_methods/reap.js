@@ -31,16 +31,22 @@ export default function reap(resourceName, options) {
       }
       if (options.reapAction === 'inject') {
         let timestamp = new Date().getTime();
-        DSUtils.forEach(items, item => resource.expiresHeap.push({
-          item: item,
-          timestamp: timestamp,
-          expires: definition.maxAge ? timestamp + definition.maxAge : Number.MAX_VALUE
-        }));
+        DSUtils.forEach(items, item => {
+          resource.expiresHeap.push({
+            item: item,
+            timestamp: timestamp,
+            expires: definition.maxAge ? timestamp + definition.maxAge : Number.MAX_VALUE
+          });
+        });
       } else if (options.reapAction === 'eject') {
-        DSUtils.forEach(items, item => _this.eject(resourceName, item[definition.idAttribute]));
+        DSUtils.forEach(items, item => {
+          _this.eject(resourceName, item[definition.idAttribute]);
+        });
       } else if (options.reapAction === 'refresh') {
         let tasks = [];
-        DSUtils.forEach(items, item => tasks.push(_this.refresh(resourceName, item[definition.idAttribute])));
+        DSUtils.forEach(items, item => {
+          tasks.push(_this.refresh(resourceName, item[definition.idAttribute]));
+        });
         return DSUtils.Promise.all(tasks);
       }
       return items;

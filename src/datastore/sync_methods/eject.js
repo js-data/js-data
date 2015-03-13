@@ -42,7 +42,9 @@ export default function eject(resourceName, id, options) {
     delete resource.previousAttributes[id];
     delete resource.completedQueries[id];
     delete resource.pendingQueries[id];
-    DSUtils.forEach(resource.changeHistories[id], changeRecord => DSUtils.remove(resource.changeHistory, changeRecord));
+    DSUtils.forEach(resource.changeHistories[id], changeRecord => {
+      DSUtils.remove(resource.changeHistory, changeRecord);
+    });
     let toRemove = [];
     DSUtils.forOwn(resource.queryData, (items, queryHash) => {
       if (items.$$injected) {

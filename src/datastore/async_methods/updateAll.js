@@ -40,7 +40,9 @@ export default function updateAll(resourceName, attrs, params, options) {
         return injected;
       } else {
         let instances = [];
-        DSUtils.forEach(data, item => instances.push(_this.createInstance(resourceName, item, origOptions)));
+        DSUtils.forEach(data, item => {
+          instances.push(_this.createInstance(resourceName, item, origOptions));
+        });
         return instances;
       }
     });

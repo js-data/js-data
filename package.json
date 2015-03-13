@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "1.5.6",
+  "version": "1.5.7",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -38,16 +38,16 @@
     "localstorage"
   ],
   "devDependencies": {
-    "babel-core": "^4.6.6",
-    "babel-loader": "^4.0.0",
+    "babel-core": "4.7.12",
+    "babel-loader": "4.1.0",
     "grunt": "0.4.5",
     "grunt-contrib-clean": "0.6.0",
-    "grunt-contrib-uglify": "0.7.0",
+    "grunt-contrib-uglify": "0.8.0",
     "grunt-contrib-watch": "0.6.1",
     "grunt-karma": "0.10.1",
     "grunt-karma-coveralls": "2.5.3",
     "grunt-mocha-test": "0.12.7",
-    "grunt-webpack": "^1.0.8",
+    "grunt-webpack": "1.0.8",
     "jit-grunt": "0.9.1",
     "js-data-schema": ">=1.0.0",
     "jshint": "^2.6.3",
@@ -62,15 +62,15 @@
     "karma-script-launcher": "0.1.0",
     "karma-sinon": "1.0.4",
     "karma-spec-reporter": "0.0.16",
-    "sinon": "1.12.2",
-    "time-grunt": "1.0.0",
-    "webpack-dev-server": "^1.7.0"
+    "sinon": "1.14.0",
+    "time-grunt": "1.1.0",
+    "webpack-dev-server": "1.7.0"
   },
   "scripts": {
     "test": "grunt test"
   },
   "dependencies": {
-    "bluebird": "^2.9.6",
+    "bluebird": "^2.9.14",
     "es6-promise": "^2.0.1",
     "mout": "0.11.0"
   }

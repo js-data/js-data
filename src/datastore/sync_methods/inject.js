@@ -80,7 +80,9 @@ function _inject(definition, resource, attrs, options) {
     let idA = definition.idAttribute;
     if (c && c[idA]) {
       let args = [];
-      DSUtils.forEach(c[idA].deps, dep => args.push(attrs[dep]));
+      DSUtils.forEach(c[idA].deps, dep => {
+        args.push(attrs[dep]);
+      });
       attrs[idA] = c[idA][c[idA].length - 1].apply(attrs, args);
     }
     if (!(idA in attrs)) {
@@ -160,7 +162,9 @@ function _inject(definition, resource, attrs, options) {
           if (definition.resetHistoryOnInject) {
             resource.previousAttributes[id] = DSUtils.copy(item);
             if (resource.changeHistories[id].length) {
-              DSUtils.forEach(resource.changeHistories[id], changeRecord => DSUtils.remove(resource.changeHistory, changeRecord));
+              DSUtils.forEach(resource.changeHistories[id], changeRecord => {
+                DSUtils.remove(resource.changeHistory, changeRecord);
+              });
               resource.changeHistories[id].splice(0, resource.changeHistories[id].length);
             }
           }
@@ -232,7 +236,9 @@ export default function inject(resourceName, attrs, options) {
   }
 
   if (DSUtils._a(injected)) {
-    DSUtils.forEach(injected, injectedI => _link.call(_this, definition, injectedI, options));
+    DSUtils.forEach(injected, injectedI => {
+      _link.call(_this, definition, injectedI, options);
+    });
   } else {
     _link.call(_this, definition, injected, options);
   }

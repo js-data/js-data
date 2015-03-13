@@ -45,7 +45,11 @@ export default {
       let diff = DSUtils.diffObjectFromOldObject(item, _this.s[resourceName].previousAttributes[id], DSUtils.equals, options.ignoredChanges);
       DSUtils.forOwn(diff, (changeset, name) => {
         let toKeep = [];
-        DSUtils.forOwn(changeset, (value, field) => !DSUtils.isFunction(value) ? toKeep.push(field) : null);
+        DSUtils.forOwn(changeset, (value, field) => {
+          if (!DSUtils.isFunction(value)) {
+            toKeep.push(field);
+          }
+        });
         diff[name] = DSUtils.pick(diff[name], toKeep);
       });
       DSUtils.forEach(definition.relationFields, field => {
@@ -97,7 +101,9 @@ export default {
     }
 
     definition.logFn('compute', instance);
-    DSUtils.forOwn(definition.computed, (fn, field) => DSUtils.compute.call(instance, fn, field));
+    DSUtils.forOwn(definition.computed, (fn, field) => {
+      DSUtils.compute.call(instance, fn, field);
+    });
     return instance;
   },
   createInstance(resourceName, attrs, options) {

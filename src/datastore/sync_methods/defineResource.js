@@ -134,7 +134,9 @@ export default function defineResource(definition) {
         if (parentId) {
           delete options.endpoint;
           let _options = {};
-          DSUtils.forOwn(options, (value, key) =>_options[key] = value);
+          DSUtils.forOwn(options, (value, key) => {
+            _options[key] = value;
+          });
           return DSUtils.makePath(parentDef.getEndpoint(parentId, DSUtils._(parentDef, _options)), parentId, endpoint);
         } else {
           return endpoint;
@@ -212,7 +214,9 @@ export default function defineResource(definition) {
           }
         }
         deps = fn.slice(0, fn.length - 1);
-        DSUtils.forEach(deps, (val, index) => deps[index] = val.trim());
+        DSUtils.forEach(deps, (val, index) => {
+          deps[index] = val.trim();
+        });
         fn.deps = DSUtils.filter(deps, dep => {
           return !!dep;
         });
@@ -292,9 +296,7 @@ export default function defineResource(definition) {
           return _this[k].apply(_this, args);
         };
       } else {
-        def[k] = (...args) => {
-          return _this[k].apply(_this, args);
-        };
+        def[k] = (...args) => _this[k].apply(_this, args);
       }
     });
 

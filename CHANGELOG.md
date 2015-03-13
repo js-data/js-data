@@ -1,3 +1,8 @@
+##### 1.5.7 - 13 March 2015
+
+###### Backwards compatible bug fixes
+- #75 - `DSUtils.removeCircular` is removing more stuff than it should
+
 ##### 1.5.6 - 07 March 2015
 
 ###### Backwards compatible bug fixes

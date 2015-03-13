@@ -70,7 +70,9 @@ export default function loadRelations(resourceName, instance, relations, options
     }
   }).then(tasks => DSUtils.Promise.all(tasks))
     .then(loadedRelations => {
-      DSUtils.forEach(fields, (field, index) => instance[field] = loadedRelations[index]);
+      DSUtils.forEach(fields, (field, index) => {
+        instance[field] = loadedRelations[index];
+      });
       return instance;
     });
 }

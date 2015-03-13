@@ -21,8 +21,14 @@ export default function ejectAll(resourceName, params, options) {
   } else {
     delete resource.completedQueries[queryHash];
   }
-  DSUtils.forEach(items, item => item && item[definition.idAttribute] ? ids.push(item[definition.idAttribute]) : null);
-  DSUtils.forEach(ids, id => _this.eject(definition.n, id, options));
+  DSUtils.forEach(items, item => {
+    if (item && item[definition.idAttribute]) {
+      ids.push(item[definition.idAttribute]);
+    }
+  });
+  DSUtils.forEach(ids, id => {
+    _this.eject(definition.n, id, options);
+  });
   resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
   return items;
 }

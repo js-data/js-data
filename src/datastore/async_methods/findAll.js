@@ -103,7 +103,9 @@ export default function findAll(resourceName, params, options) {
               resource.queryData[queryHash].$$injected = true;
               return resource.queryData[queryHash];
             } else {
-              DSUtils.forEach(data, (item, i) => data[i] = _this.createInstance(resourceName, item, options.orig()));
+              DSUtils.forEach(data, (item, i) => {
+                data[i] = _this.createInstance(resourceName, item, options.orig());
+              });
               return data;
             }
           });
