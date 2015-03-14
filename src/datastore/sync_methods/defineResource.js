@@ -258,11 +258,7 @@ export default function defineResource(definition) {
     // Initialize store data for the new resource
     _this.s[def.n] = {
       collection: [],
-      expiresHeap: new DSUtils.DSBinaryHeap(x => {
-        return x.expires;
-      }, (x, y) => {
-        return x.item === y;
-      }),
+      expiresHeap: new DSUtils.BinaryHeap(x => x.expires, (x, y) => x.item === y),
       completedQueries: {},
       queryData: {},
       pendingQueries: {},

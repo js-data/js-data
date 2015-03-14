@@ -1,3 +1,8 @@
+##### 1.5.8 - 14 March 2015
+
+###### Other
+- Extracted BinaryHeap class to its own npm module
+
 ##### 1.5.7 - 13 March 2015
 
 ###### Backwards compatible bug fixes

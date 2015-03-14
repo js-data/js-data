@@ -1,9 +1,9 @@
 /*
  * js-data
- * http://github.com/jmdobry/js-data
+ * http://www.js-data.io
  *
- * Copyright (c) 2014-2015 Jason Dobry <http://jmdobry.github.io/js-data>
- * Licensed under the MIT license. <https://github.com/jmdobry/js-data/blob/master/LICENSE>
+ * Copyright (c) 2014-2015 Jason Dobry <http://www.js-data.io>
+ * Licensed under the MIT license. <https://github.com/js-data/js-data/blob/master/LICENSE>
  */
 module.exports = function (grunt) {
   'use strict';
