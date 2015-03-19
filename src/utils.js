@@ -10,7 +10,7 @@ import remove from 'mout/array/remove';
 import pick from 'mout/object/pick';
 import sort from 'mout/array/sort';
 import upperCase from 'mout/string/upperCase';
-import observe from '../lib/observe-js/observe-js';
+import observe from '../lib/observe-js/observe.js';
 import es6Promise from 'es6-promise';
 import BinaryHeap from 'yabh';
 let w, _Promise;
@@ -352,8 +352,6 @@ let makePath = (...args) => {
   let result = join(args, '/');
   return result.replace(/([^:\/]|^)\/{2,}/g, '$1/');
 };
-
-observe.setEqualityFn(equals);
 
 DSUtils = {
   // Options that inherit from defaults

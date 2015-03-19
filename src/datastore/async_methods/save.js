@@ -3,6 +3,7 @@ export default function save(resourceName, id, options) {
   let {utils: DSUtils, errors: DSErrors} = _this;
   let definition = _this.defs[resourceName];
   let item;
+  let noChanges;
 
   return new DSUtils.Promise((resolve, reject) => {
     id = DSUtils.resolveId(definition, id);
@@ -43,6 +44,8 @@ export default function save(resourceName, id, options) {
         changes = DSUtils.pick(attrs, toKeep);
         if (DSUtils.isEmpty(changes)) {
           // no changes, return
+          options.logFn('save - no changes', id, options);
+          noChanges = true;
           return attrs;
         } else {
           attrs = changes;
@@ -55,7 +58,9 @@ export default function save(resourceName, id, options) {
       if (options.notify) {
         definition.emit('DS.afterUpdate', definition, attrs);
       }
-      if (options.cacheResponse) {
+      if (noChanges) {
+        return attrs;
+      } else if (options.cacheResponse) {
         let injected = _this.inject(definition.n, attrs, options.orig());
         let resource = _this.s[resourceName];
         let id = injected[definition.idAttribute];

@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 1.5.8 - Homepage <http://www.js-data.io/>
+ * @version 1.5.9 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -79,10 +79,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  DSUtils: DSUtils,
 	  DSErrors: DSErrors,
 	  version: {
-	    full: "1.5.8",
+	    full: "1.5.9",
 	    major: parseInt("1", 10),
 	    minor: parseInt("5", 10),
-	    patch: parseInt("8", 10),
+	    patch: parseInt("9", 10),
 	    alpha: true ? "false" : false,
 	    beta: true ? "false" : false
 	  }
@@ -471,8 +471,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var result = join(args, "/");
 	  return result.replace(/([^:\/]|^)\/{2,}/g, "$1/");
 	};
-
-	observe.setEqualityFn(equals);
 
 	DSUtils = {
 	  // Options that inherit from defaults
@@ -1178,19 +1176,14 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-	// Copyright 2012 Google Inc.
-	//
-	// Licensed under the Apache License, Version 2.0 (the "License");
-	// you may not use this file except in compliance with the License.
-	// You may obtain a copy of the License at
-	//
-	//     http://www.apache.org/licenses/LICENSE-2.0
-	//
-	// Unless required by applicable law or agreed to in writing, software
-	// distributed under the License is distributed on an "AS IS" BASIS,
-	// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	// See the License for the specific language governing permissions and
-	// limitations under the License.
+	/*
+	 * Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
+	 * This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+	 * The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+	 * The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+	 * Code distributed by Google as part of the polymer project is also
+	 * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+	 */
 
 	// Modifications
 	// Copyright 2014-2015 Jason Dobry
@@ -1199,7 +1192,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	// Fixed use of "delete" keyword for IE8 compatibility
 	// Exposed diffObjectFromOldObject on the exported object
 	// Added the "equals" argument to diffObjectFromOldObject to be used to check equality
-	// Added a way to to define a default equality operator for diffObjectFromOldObject
 	// Added a way in diffObjectFromOldObject to ignore changes to certain properties
 	// Removed all code related to:
 	// - ArrayObserver
@@ -1208,8 +1200,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	// - CompoundObserver
 	// - Path
 	// - ObserverTransform
+
 	(function(global) {
 	  'use strict';
+
+	  var testingExposeCycleCount = global.testingExposeCycleCount;
 
 	  var equalityFn = function (a, b) {
 	    return a === b;
@@ -1220,7 +1215,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Detect and do basic sanity checking on Object/Array.observe.
 	  function detectObjectObserve() {
 	    if (typeof Object.observe !== 'function' ||
-	      typeof Array.observe !== 'function') {
+	        typeof Array.observe !== 'function') {
 	      return false;
 	    }
 
@@ -1245,10 +1240,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return false;
 
 	    if (records[0].type != 'add' ||
-	      records[1].type != 'update' ||
-	      records[2].type != 'delete' ||
-	      records[3].type != 'splice' ||
-	      records[4].type != 'splice') {
+	        records[1].type != 'update' ||
+	        records[2].type != 'delete' ||
+	        records[3].type != 'splice' ||
+	        records[4].type != 'splice') {
 	      return false;
 	    }
 
@@ -1260,23 +1255,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var hasObserve = detectObjectObserve();
 
-	  function detectEval() {
-	    // Don't test for eval if we're running in a Chrome App environment.
-	    // We check for APIs set that only exist in a Chrome App context.
-	    if (typeof chrome !== 'undefined' && chrome.app && chrome.app.runtime) {
-	      return false;
-	    }
-
-	    try {
-	      var f = new Function('', 'return true;');
-	      return f();
-	    } catch (ex) {
-	      return false;
-	    }
-	  }
-
-	  var hasEval = detectEval();
-
 	  var createObject = ('__proto__' in {}) ?
 	    function(obj) { return obj; } :
 	    function(obj) {
@@ -1286,7 +1264,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var newObject = Object.create(proto);
 	      Object.getOwnPropertyNames(obj).forEach(function(name) {
 	        Object.defineProperty(newObject, name,
-	          Object.getOwnPropertyDescriptor(obj, name));
+	                             Object.getOwnPropertyDescriptor(obj, name));
 	      });
 	      return newObject;
 	    };
@@ -1298,7 +1276,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    while (cycles < MAX_DIRTY_CHECK_CYCLES && observer.check_()) {
 	      cycles++;
 	    }
-	    if (global.testingExposeCycleCount)
+	    if (testingExposeCycleCount)
 	      global.dirtyCheckCycleCount = cycles;
 
 	    return cycles > 0;
@@ -1312,8 +1290,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  function diffIsEmpty(diff) {
 	    return objectIsEmpty(diff.added) &&
-	      objectIsEmpty(diff.removed) &&
-	      objectIsEmpty(diff.changed);
+	           objectIsEmpty(diff.removed) &&
+	           objectIsEmpty(diff.changed);
 	  }
 
 	  function isBlacklisted(prop, bl) {
@@ -1385,27 +1363,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  var runEOM = hasObserve ? (function(){
-	    var eomObj = { pingPong: true };
-	    var eomRunScheduled = false;
-
-	    Object.observe(eomObj, function() {
-	      runEOMTasks();
-	      eomRunScheduled = false;
-	    });
-
+	    return function(fn) {
+	      return Promise.resolve().then(fn);
+	    }
+	  })() :
+	  (function() {
 	    return function(fn) {
 	      eomTasks.push(fn);
-	      if (!eomRunScheduled) {
-	        eomRunScheduled = true;
-	        eomObj.pingPong = !eomObj.pingPong;
-	      }
 	    };
-	  })() :
-	    (function() {
-	      return function(fn) {
-	        eomTasks.push(fn);
-	      };
-	    })();
+	  })();
 
 	  var observedObjectCache = [];
 
@@ -1450,28 +1416,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    };
 	  }
-
-	  /*
-	   * The observedSet abstraction is a perf optimization which reduces the total
-	   * number of Object.observe observations of a set of objects. The idea is that
-	   * groups of Observers will have some object dependencies in common and this
-	   * observed set ensures that each object in the transitive closure of
-	   * dependencies is only observed once. The observedSet acts as a write barrier
-	   * such that whenever any change comes through, all Observers are checked for
-	   * changed values.
-	   *
-	   * Note that this optimization is explicitly moving work from setup-time to
-	   * change-time.
-	   *
-	   * TODO(rafaelw): Implement "garbage collection". In order to move work off
-	   * the critical path, when Observers are closed, their observed objects are
-	   * not Object.unobserve(d). As a result, it's possible that if the observedSet
-	   * is kept open, but some Observers have been closed, it could cause "leaks"
-	   * (prevent otherwise collectable objects from being collected). At some
-	   * point, we should implement incremental "gc" which keeps a list of
-	   * observedSets which may need clean-up and does small amounts of cleanup on a
-	   * timeout until all is clean.
-	   */
 
 	  function getObservedObject(observer, object, arrayObserve) {
 	    var dir = observedObjectCache.pop() || newObservedObject();
@@ -1533,7 +1477,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      } catch (ex) {
 	        Observer._errorThrownDuringCallback = true;
 	        console.error('Exception caught during observer callback: ' +
-	        (ex.stack || ex));
+	                       (ex.stack || ex));
 	      }
 	    },
 
@@ -1565,25 +1509,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var runningMicrotaskCheckpoint = false;
 
-	  var hasDebugForceFullDelivery = hasObserve && hasEval && (function() {
-	      try {
-	        eval('%RunMicrotasks()');
-	        return true;
-	      } catch (ex) {
-	        return false;
-	      }
-	    })();
-
 	  global.Platform = global.Platform || {};
 
 	  global.Platform.performMicrotaskCheckpoint = function() {
 	    if (runningMicrotaskCheckpoint)
 	      return;
-
-	    if (hasDebugForceFullDelivery) {
-	      eval('%RunMicrotasks()');
-	      return;
-	    }
 
 	    if (!collectObservers)
 	      return;
@@ -1613,7 +1543,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        anyChanged = true;
 	    } while (cycles < MAX_DIRTY_CHECK_CYCLES && anyChanged);
 
-	    if (global.testingExposeCycleCount)
+	    if (testingExposeCycleCount)
 	      global.dirtyCheckCycleCount = cycles;
 
 	    runningMicrotaskCheckpoint = false;
@@ -1639,7 +1569,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    connect_: function(callback, target) {
 	      if (hasObserve) {
 	        this.directObserver_ = getObservedObject(this, this.value_,
-	          this.arrayObserve);
+	                                                 this.arrayObserve);
 	      } else {
 	        this.oldObject_ = this.copyObject(this.value_);
 	      }
@@ -1665,7 +1595,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        oldValues = {};
 	        diff = diffObjectFromChangeRecords(this.value_, changeRecords,
-	          oldValues);
+	                                           oldValues);
 	      } else {
 	        oldValues = this.oldObject_;
 	        diff = diffObjectFromOldObject(this.value_, this.oldObject_);
@@ -1723,7 +1653,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var expectedRecordTypes = {
 	    add: true,
 	    update: true,
-	    delete: true
+	    'delete': true
 	  };
 
 	  function diffObjectFromChangeRecords(object, changeRecords, oldValues) {
@@ -1785,19 +1715,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	  }
 
+	  // Export the observe-js object for **Node.js**, with backwards-compatibility
+	  // for the old `require()` API. Also ensure `exports` is not a DOM Element.
+	  // If we're in the browser, export as a global object.
+
 	  global.Observer = Observer;
-	  global.diffObjectFromOldObject = diffObjectFromOldObject;
-	  global.setEqualityFn = function (fn) {
-	    equalityFn = fn;
-	  };
-	  global.setBlacklist = function (bl) {
-	    blacklist = bl;
-	  };
 	  global.Observer.runEOM_ = runEOM;
 	  global.Observer.observerSentinel_ = observerSentinel; // for testing.
 	  global.Observer.hasObjectObserve = hasObserve;
-
+	  global.diffObjectFromOldObject = diffObjectFromOldObject;
 	  global.ObjectObserver = ObjectObserver;
+
 	})(exports);
 
 
@@ -2355,7 +2283,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var forOwn = __webpack_require__(14);
-	var isPlainObject = __webpack_require__(26);
+	var isPlainObject = __webpack_require__(27);
 
 	    /**
 	     * Mixes objects into the target object, recursively mixing existing child
@@ -2418,7 +2346,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isPrimitive = __webpack_require__(27);
+	var isPrimitive = __webpack_require__(26);
 
 	    /**
 	     * get "nested" object property
@@ -3834,25 +3762,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 
 	    /**
-	     * Checks if the value is created by the `Object` constructor.
-	     */
-	    function isPlainObject(value) {
-	        return (!!value && typeof value === 'object' &&
-	            value.constructor === Object);
-	    }
-
-	    module.exports = isPlainObject;
-
-
-
-
-/***/ },
-/* 27 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
 	     * Checks if the object is a primitive
 	     */
 	    function isPrimitive(value) {
@@ -3869,6 +3778,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    module.exports = isPrimitive;
+
+
+
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Checks if the value is created by the `Object` constructor.
+	     */
+	    function isPlainObject(value) {
+	        return (!!value && typeof value === 'object' &&
+	            value.constructor === Object);
+	    }
+
+	    module.exports = isPlainObject;
 
 
 
@@ -5522,6 +5450,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var definition = _this.defs[resourceName];
 	  var item = undefined;
+	  var noChanges = undefined;
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    id = DSUtils.resolveId(definition, id);
@@ -5566,6 +5495,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      changes = DSUtils.pick(attrs, toKeep);
 	      if (DSUtils.isEmpty(changes)) {
 	        // no changes, return
+	        options.logFn("save - no changes", id, options);
+	        noChanges = true;
 	        return attrs;
 	      } else {
 	        attrs = changes;
@@ -5578,7 +5509,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (options.notify) {
 	      definition.emit("DS.afterUpdate", definition, attrs);
 	    }
-	    if (options.cacheResponse) {
+	    if (noChanges) {
+	      return attrs;
+	    } else if (options.cacheResponse) {
 	      var injected = _this.inject(definition.n, attrs, options.orig());
 	      var resource = _this.s[resourceName];
 	      var _id = injected[definition.idAttribute];

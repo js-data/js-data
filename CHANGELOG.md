@@ -1,3 +1,12 @@
+##### 1.5.9 - 18 March 2015
+
+###### Backwards compatible bug fixes
+- #76 - Saving relation fields with changesOnly=true
+- #80 - save + changesOnly + nested relations + no actual changes results in an error
+
+###### Other
+- Upgraded dependencies
+
 ##### 1.5.8 - 14 March 2015
 
 ###### Other
