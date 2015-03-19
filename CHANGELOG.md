@@ -1,3 +1,11 @@
+##### 1.5.10 - 19 March 2015
+
+###### Backwards compatible bug fixes
+- #81 - Sometimes `inject` with nested relations causes an infinite loop
+
+###### Other
+- Added `.npmignore` for a slimmer npm package
+
 ##### 1.5.9 - 18 March 2015
 
 ###### Backwards compatible bug fixes

@@ -102,7 +102,7 @@ function _inject(definition, resource, attrs, options) {
             if (DSUtils._a(toInject)) {
               let items = [];
               DSUtils.forEach(toInject, toInjectItem => {
-                if (toInjectItem !== _this.s[relationName][toInjectItem[relationDef.idAttribute]]) {
+                if (toInjectItem !== _this.s[relationName].index[toInjectItem[relationDef.idAttribute]]) {
                   try {
                     let injectedItem = _this.inject(relationName, toInjectItem, options.orig());
                     if (def.foreignKey) {
@@ -116,7 +116,7 @@ function _inject(definition, resource, attrs, options) {
               });
               attrs[def.localField] = items;
             } else {
-              if (toInject !== _this.s[relationName][toInject[relationDef.idAttribute]]) {
+              if (toInject !== _this.s[relationName].index[toInject[relationDef.idAttribute]]) {
                 try {
                   attrs[def.localField] = _this.inject(relationName, attrs[def.localField], options.orig());
                   if (def.foreignKey) {

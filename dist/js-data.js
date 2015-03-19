@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 1.5.9 - Homepage <http://www.js-data.io/>
+ * @version 1.5.10 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -79,10 +79,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  DSUtils: DSUtils,
 	  DSErrors: DSErrors,
 	  version: {
-	    full: "1.5.9",
+	    full: "1.5.10",
 	    major: parseInt("1", 10),
 	    minor: parseInt("5", 10),
-	    patch: parseInt("9", 10),
+	    patch: parseInt("10", 10),
 	    alpha: true ? "false" : false,
 	    beta: true ? "false" : false
 	  }
@@ -98,31 +98,31 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var DSErrors = _interopRequire(__webpack_require__(2));
 
-	var forEach = _interopRequire(__webpack_require__(9));
+	var forEach = _interopRequire(__webpack_require__(10));
 
-	var slice = _interopRequire(__webpack_require__(10));
+	var slice = _interopRequire(__webpack_require__(11));
 
-	var forOwn = _interopRequire(__webpack_require__(14));
+	var forOwn = _interopRequire(__webpack_require__(15));
 
-	var contains = _interopRequire(__webpack_require__(11));
+	var contains = _interopRequire(__webpack_require__(12));
 
-	var deepMixIn = _interopRequire(__webpack_require__(15));
+	var deepMixIn = _interopRequire(__webpack_require__(16));
 
-	var pascalCase = _interopRequire(__webpack_require__(19));
+	var pascalCase = _interopRequire(__webpack_require__(20));
 
-	var remove = _interopRequire(__webpack_require__(12));
+	var remove = _interopRequire(__webpack_require__(13));
 
-	var pick = _interopRequire(__webpack_require__(16));
+	var pick = _interopRequire(__webpack_require__(17));
 
-	var sort = _interopRequire(__webpack_require__(13));
+	var sort = _interopRequire(__webpack_require__(14));
 
-	var upperCase = _interopRequire(__webpack_require__(20));
+	var upperCase = _interopRequire(__webpack_require__(21));
 
 	var observe = _interopRequire(__webpack_require__(6));
 
-	var es6Promise = _interopRequire(__webpack_require__(21));
+	var es6Promise = _interopRequire(__webpack_require__(22));
 
-	var BinaryHeap = _interopRequire(__webpack_require__(22));
+	var BinaryHeap = _interopRequire(__webpack_require__(9));
 
 	var w = undefined,
 	    _Promise = undefined;
@@ -533,7 +533,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  fromJson: function fromJson(json) {
 	    return isString(json) ? JSON.parse(json) : json;
 	  },
-	  get: __webpack_require__(17),
+	  get: __webpack_require__(18),
 	  intersection: intersection,
 	  isArray: isArray,
 	  isBoolean: isBoolean,
@@ -583,7 +583,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	  },
 	  remove: remove,
-	  set: __webpack_require__(18),
+	  set: __webpack_require__(19),
 	  slice: slice,
 	  sort: sort,
 	  toJson: JSON.stringify,
@@ -2076,6 +2076,235 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
+	/*!
+	 * yabh
+	 * @version 1.0.0 - Homepage <http://jmdobry.github.io/yabh/>
+	 * @author Jason Dobry <jason.dobry@gmail.com>
+	 * @copyright (c) 2015 Jason Dobry 
+	 * @license MIT <https://github.com/jmdobry/yabh/blob/master/LICENSE>
+	 * 
+	 * @overview Yet another Binary Heap.
+	 */
+	(function webpackUniversalModuleDefinition(root, factory) {
+		if(true)
+			module.exports = factory();
+		else if(typeof define === 'function' && define.amd)
+			define(factory);
+		else if(typeof exports === 'object')
+			exports["BinaryHeap"] = factory();
+		else
+			root["BinaryHeap"] = factory();
+	})(this, function() {
+	return /******/ (function(modules) { // webpackBootstrap
+	/******/ 	// The module cache
+	/******/ 	var installedModules = {};
+
+	/******/ 	// The require function
+	/******/ 	function __webpack_require__(moduleId) {
+
+	/******/ 		// Check if module is in cache
+	/******/ 		if(installedModules[moduleId])
+	/******/ 			return installedModules[moduleId].exports;
+
+	/******/ 		// Create a new module (and put it into the cache)
+	/******/ 		var module = installedModules[moduleId] = {
+	/******/ 			exports: {},
+	/******/ 			id: moduleId,
+	/******/ 			loaded: false
+	/******/ 		};
+
+	/******/ 		// Execute the module function
+	/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+
+	/******/ 		// Flag the module as loaded
+	/******/ 		module.loaded = true;
+
+	/******/ 		// Return the exports of the module
+	/******/ 		return module.exports;
+	/******/ 	}
+
+
+	/******/ 	// expose the modules object (__webpack_modules__)
+	/******/ 	__webpack_require__.m = modules;
+
+	/******/ 	// expose the module cache
+	/******/ 	__webpack_require__.c = installedModules;
+
+	/******/ 	// __webpack_public_path__
+	/******/ 	__webpack_require__.p = "";
+
+	/******/ 	// Load entry module and return exports
+	/******/ 	return __webpack_require__(0);
+	/******/ })
+	/************************************************************************/
+	/******/ ([
+	/* 0 */
+	/***/ function(module, exports, __webpack_require__) {
+
+		var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+		var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+		/**
+		 * @method bubbleUp
+		 * @param {array} heap The heap.
+		 * @param {function} weightFunc The weight function.
+		 * @param {number} n The index of the element to bubble up.
+		 */
+		function bubbleUp(heap, weightFunc, n) {
+		  var element = heap[n];
+		  var weight = weightFunc(element);
+		  // When at 0, an element can not go up any further.
+		  while (n > 0) {
+		    // Compute the parent element's index, and fetch it.
+		    var parentN = Math.floor((n + 1) / 2) - 1;
+		    var _parent = heap[parentN];
+		    // If the parent has a lesser weight, things are in order and we
+		    // are done.
+		    if (weight >= weightFunc(_parent)) {
+		      break;
+		    } else {
+		      heap[parentN] = element;
+		      heap[n] = _parent;
+		      n = parentN;
+		    }
+		  }
+		}
+
+		/**
+		 * @method bubbleDown
+		 * @param {array} heap The heap.
+		 * @param {function} weightFunc The weight function.
+		 * @param {number} n The index of the element to sink down.
+		 */
+		var bubbleDown = function (heap, weightFunc, n) {
+		  var length = heap.length;
+		  var node = heap[n];
+		  var nodeWeight = weightFunc(node);
+
+		  while (true) {
+		    var child2N = (n + 1) * 2,
+		        child1N = child2N - 1;
+		    var swap = null;
+		    if (child1N < length) {
+		      var child1 = heap[child1N],
+		          child1Weight = weightFunc(child1);
+		      // If the score is less than our node's, we need to swap.
+		      if (child1Weight < nodeWeight) {
+		        swap = child1N;
+		      }
+		    }
+		    // Do the same checks for the other child.
+		    if (child2N < length) {
+		      var child2 = heap[child2N],
+		          child2Weight = weightFunc(child2);
+		      if (child2Weight < (swap === null ? nodeWeight : weightFunc(heap[child1N]))) {
+		        swap = child2N;
+		      }
+		    }
+
+		    if (swap === null) {
+		      break;
+		    } else {
+		      heap[n] = heap[swap];
+		      heap[swap] = node;
+		      n = swap;
+		    }
+		  }
+		};
+
+		var BinaryHeap = (function () {
+		  function BinaryHeap(weightFunc, compareFunc) {
+		    _classCallCheck(this, BinaryHeap);
+
+		    if (!weightFunc) {
+		      weightFunc = function (x) {
+		        return x;
+		      };
+		    }
+		    if (!compareFunc) {
+		      compareFunc = function (x, y) {
+		        return x === y;
+		      };
+		    }
+		    if (typeof weightFunc !== "function") {
+		      throw new Error("BinaryHeap([weightFunc][, compareFunc]): \"weightFunc\" must be a function!");
+		    }
+		    if (typeof compareFunc !== "function") {
+		      throw new Error("BinaryHeap([weightFunc][, compareFunc]): \"compareFunc\" must be a function!");
+		    }
+		    this.weightFunc = weightFunc;
+		    this.compareFunc = compareFunc;
+		    this.heap = [];
+		  }
+
+		  _createClass(BinaryHeap, {
+		    push: {
+		      value: function push(node) {
+		        this.heap.push(node);
+		        bubbleUp(this.heap, this.weightFunc, this.heap.length - 1);
+		      }
+		    },
+		    peek: {
+		      value: function peek() {
+		        return this.heap[0];
+		      }
+		    },
+		    pop: {
+		      value: function pop() {
+		        var front = this.heap[0];
+		        var end = this.heap.pop();
+		        if (this.heap.length > 0) {
+		          this.heap[0] = end;
+		          bubbleDown(this.heap, this.weightFunc, 0);
+		        }
+		        return front;
+		      }
+		    },
+		    remove: {
+		      value: function remove(node) {
+		        var length = this.heap.length;
+		        for (var i = 0; i < length; i++) {
+		          if (this.compareFunc(this.heap[i], node)) {
+		            var removed = this.heap[i];
+		            var end = this.heap.pop();
+		            if (i !== length - 1) {
+		              this.heap[i] = end;
+		              bubbleUp(this.heap, this.weightFunc, i);
+		              bubbleDown(this.heap, this.weightFunc, i);
+		            }
+		            return removed;
+		          }
+		        }
+		        return null;
+		      }
+		    },
+		    removeAll: {
+		      value: function removeAll() {
+		        this.heap = [];
+		      }
+		    },
+		    size: {
+		      value: function size() {
+		        return this.heap.length;
+		      }
+		    }
+		  });
+
+		  return BinaryHeap;
+		})();
+
+		module.exports = BinaryHeap;
+
+	/***/ }
+	/******/ ])
+	});
+	;
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
 	
 
 	    /**
@@ -2102,7 +2331,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -2143,7 +2372,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var indexOf = __webpack_require__(23);
@@ -2159,7 +2388,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var indexOf = __webpack_require__(23);
@@ -2178,7 +2407,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -2239,7 +2468,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var hasOwn = __webpack_require__(24);
@@ -2264,11 +2493,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var forOwn = __webpack_require__(14);
-	var isPlainObject = __webpack_require__(27);
+	var forOwn = __webpack_require__(15);
+	var isPlainObject = __webpack_require__(26);
 
 	    /**
 	     * Mixes objects into the target object, recursively mixing existing child
@@ -2304,10 +2533,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var slice = __webpack_require__(10);
+	var slice = __webpack_require__(11);
 
 	    /**
 	     * Return a copy of the object, filtered to only have values for the whitelisted keys.
@@ -2328,10 +2557,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isPrimitive = __webpack_require__(26);
+	var isPrimitive = __webpack_require__(27);
 
 	    /**
 	     * get "nested" object property
@@ -2354,7 +2583,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var namespace = __webpack_require__(28);
@@ -2377,12 +2606,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var toString = __webpack_require__(29);
 	var camelCase = __webpack_require__(30);
-	var upperCase = __webpack_require__(20);
+	var upperCase = __webpack_require__(21);
 	    /**
 	     * camelCase + UPPERCASE first char
 	     */
@@ -2396,7 +2625,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var toString = __webpack_require__(29);
@@ -2412,7 +2641,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(process, global, module) {/*!
@@ -3378,235 +3607,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(50), (function() { return this; }()), __webpack_require__(52)(module)))
 
 /***/ },
-/* 22 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/*!
-	 * yabh
-	 * @version 1.0.0 - Homepage <http://jmdobry.github.io/yabh/>
-	 * @author Jason Dobry <jason.dobry@gmail.com>
-	 * @copyright (c) 2015 Jason Dobry 
-	 * @license MIT <https://github.com/jmdobry/yabh/blob/master/LICENSE>
-	 * 
-	 * @overview Yet another Binary Heap.
-	 */
-	(function webpackUniversalModuleDefinition(root, factory) {
-		if(true)
-			module.exports = factory();
-		else if(typeof define === 'function' && define.amd)
-			define(factory);
-		else if(typeof exports === 'object')
-			exports["BinaryHeap"] = factory();
-		else
-			root["BinaryHeap"] = factory();
-	})(this, function() {
-	return /******/ (function(modules) { // webpackBootstrap
-	/******/ 	// The module cache
-	/******/ 	var installedModules = {};
-
-	/******/ 	// The require function
-	/******/ 	function __webpack_require__(moduleId) {
-
-	/******/ 		// Check if module is in cache
-	/******/ 		if(installedModules[moduleId])
-	/******/ 			return installedModules[moduleId].exports;
-
-	/******/ 		// Create a new module (and put it into the cache)
-	/******/ 		var module = installedModules[moduleId] = {
-	/******/ 			exports: {},
-	/******/ 			id: moduleId,
-	/******/ 			loaded: false
-	/******/ 		};
-
-	/******/ 		// Execute the module function
-	/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-
-	/******/ 		// Flag the module as loaded
-	/******/ 		module.loaded = true;
-
-	/******/ 		// Return the exports of the module
-	/******/ 		return module.exports;
-	/******/ 	}
-
-
-	/******/ 	// expose the modules object (__webpack_modules__)
-	/******/ 	__webpack_require__.m = modules;
-
-	/******/ 	// expose the module cache
-	/******/ 	__webpack_require__.c = installedModules;
-
-	/******/ 	// __webpack_public_path__
-	/******/ 	__webpack_require__.p = "";
-
-	/******/ 	// Load entry module and return exports
-	/******/ 	return __webpack_require__(0);
-	/******/ })
-	/************************************************************************/
-	/******/ ([
-	/* 0 */
-	/***/ function(module, exports, __webpack_require__) {
-
-		var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-		var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-		/**
-		 * @method bubbleUp
-		 * @param {array} heap The heap.
-		 * @param {function} weightFunc The weight function.
-		 * @param {number} n The index of the element to bubble up.
-		 */
-		function bubbleUp(heap, weightFunc, n) {
-		  var element = heap[n];
-		  var weight = weightFunc(element);
-		  // When at 0, an element can not go up any further.
-		  while (n > 0) {
-		    // Compute the parent element's index, and fetch it.
-		    var parentN = Math.floor((n + 1) / 2) - 1;
-		    var _parent = heap[parentN];
-		    // If the parent has a lesser weight, things are in order and we
-		    // are done.
-		    if (weight >= weightFunc(_parent)) {
-		      break;
-		    } else {
-		      heap[parentN] = element;
-		      heap[n] = _parent;
-		      n = parentN;
-		    }
-		  }
-		}
-
-		/**
-		 * @method bubbleDown
-		 * @param {array} heap The heap.
-		 * @param {function} weightFunc The weight function.
-		 * @param {number} n The index of the element to sink down.
-		 */
-		var bubbleDown = function (heap, weightFunc, n) {
-		  var length = heap.length;
-		  var node = heap[n];
-		  var nodeWeight = weightFunc(node);
-
-		  while (true) {
-		    var child2N = (n + 1) * 2,
-		        child1N = child2N - 1;
-		    var swap = null;
-		    if (child1N < length) {
-		      var child1 = heap[child1N],
-		          child1Weight = weightFunc(child1);
-		      // If the score is less than our node's, we need to swap.
-		      if (child1Weight < nodeWeight) {
-		        swap = child1N;
-		      }
-		    }
-		    // Do the same checks for the other child.
-		    if (child2N < length) {
-		      var child2 = heap[child2N],
-		          child2Weight = weightFunc(child2);
-		      if (child2Weight < (swap === null ? nodeWeight : weightFunc(heap[child1N]))) {
-		        swap = child2N;
-		      }
-		    }
-
-		    if (swap === null) {
-		      break;
-		    } else {
-		      heap[n] = heap[swap];
-		      heap[swap] = node;
-		      n = swap;
-		    }
-		  }
-		};
-
-		var BinaryHeap = (function () {
-		  function BinaryHeap(weightFunc, compareFunc) {
-		    _classCallCheck(this, BinaryHeap);
-
-		    if (!weightFunc) {
-		      weightFunc = function (x) {
-		        return x;
-		      };
-		    }
-		    if (!compareFunc) {
-		      compareFunc = function (x, y) {
-		        return x === y;
-		      };
-		    }
-		    if (typeof weightFunc !== "function") {
-		      throw new Error("BinaryHeap([weightFunc][, compareFunc]): \"weightFunc\" must be a function!");
-		    }
-		    if (typeof compareFunc !== "function") {
-		      throw new Error("BinaryHeap([weightFunc][, compareFunc]): \"compareFunc\" must be a function!");
-		    }
-		    this.weightFunc = weightFunc;
-		    this.compareFunc = compareFunc;
-		    this.heap = [];
-		  }
-
-		  _createClass(BinaryHeap, {
-		    push: {
-		      value: function push(node) {
-		        this.heap.push(node);
-		        bubbleUp(this.heap, this.weightFunc, this.heap.length - 1);
-		      }
-		    },
-		    peek: {
-		      value: function peek() {
-		        return this.heap[0];
-		      }
-		    },
-		    pop: {
-		      value: function pop() {
-		        var front = this.heap[0];
-		        var end = this.heap.pop();
-		        if (this.heap.length > 0) {
-		          this.heap[0] = end;
-		          bubbleDown(this.heap, this.weightFunc, 0);
-		        }
-		        return front;
-		      }
-		    },
-		    remove: {
-		      value: function remove(node) {
-		        var length = this.heap.length;
-		        for (var i = 0; i < length; i++) {
-		          if (this.compareFunc(this.heap[i], node)) {
-		            var removed = this.heap[i];
-		            var end = this.heap.pop();
-		            if (i !== length - 1) {
-		              this.heap[i] = end;
-		              bubbleUp(this.heap, this.weightFunc, i);
-		              bubbleDown(this.heap, this.weightFunc, i);
-		            }
-		            return removed;
-		          }
-		        }
-		        return null;
-		      }
-		    },
-		    removeAll: {
-		      value: function removeAll() {
-		        this.heap = [];
-		      }
-		    },
-		    size: {
-		      value: function size() {
-		        return this.heap.length;
-		      }
-		    }
-		  });
-
-		  return BinaryHeap;
-		})();
-
-		module.exports = BinaryHeap;
-
-	/***/ }
-	/******/ ])
-	});
-	;
-
-/***/ },
 /* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -3747,6 +3747,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 
 	    /**
+	     * Checks if the value is created by the `Object` constructor.
+	     */
+	    function isPlainObject(value) {
+	        return (!!value && typeof value === 'object' &&
+	            value.constructor === Object);
+	    }
+
+	    module.exports = isPlainObject;
+
+
+
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
 	     * Checks if the object is a primitive
 	     */
 	    function isPrimitive(value) {
@@ -3768,29 +3787,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 27 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Checks if the value is created by the `Object` constructor.
-	     */
-	    function isPlainObject(value) {
-	        return (!!value && typeof value === 'object' &&
-	            value.constructor === Object);
-	    }
-
-	    module.exports = isPlainObject;
-
-
-
-
-/***/ },
 /* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var forEach = __webpack_require__(9);
+	var forEach = __webpack_require__(10);
 
 	    /**
 	     * Create nested object if non-existent
@@ -3837,7 +3837,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var toString = __webpack_require__(29);
 	var replaceAccents = __webpack_require__(53);
 	var removeNonWord = __webpack_require__(54);
-	var upperCase = __webpack_require__(20);
+	var upperCase = __webpack_require__(21);
 	var lowerCase = __webpack_require__(55);
 	    /**
 	    * Convert string to camelCase text.
@@ -4502,7 +4502,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	              (function () {
 	                var items = [];
 	                DSUtils.forEach(toInject, function (toInjectItem) {
-	                  if (toInjectItem !== _this.s[relationName][toInjectItem[relationDef.idAttribute]]) {
+	                  if (toInjectItem !== _this.s[relationName].index[toInjectItem[relationDef.idAttribute]]) {
 	                    try {
 	                      var injectedItem = _this.inject(relationName, toInjectItem, options.orig());
 	                      if (def.foreignKey) {
@@ -4517,7 +4517,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                attrs[def.localField] = items;
 	              })();
 	            } else {
-	              if (toInject !== _this.s[relationName][toInject[relationDef.idAttribute]]) {
+	              if (toInject !== _this.s[relationName].index[toInject[relationDef.idAttribute]]) {
 	                try {
 	                  attrs[def.localField] = _this.inject(relationName, attrs[def.localField], options.orig());
 	                  if (def.foreignKey) {
