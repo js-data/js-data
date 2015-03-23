@@ -38,15 +38,15 @@
 
 <p>You can use the <a href="http://www.js-data.io/docs/dshttpadapter">http adapter</a>, which is perfect for communicating with your RESTful backend. You could also use the <a href="http://www.js-data.io/docs/dslocalstorageadapter">localStorage adapter</a>. On the server you could hook up to the <a href="http://www.js-data.io/docs/dssqladapter">SQL adapter (Postgres/MySQL/MariaDB/SQLite3)</a> and add in the <a href="http://www.js-data.io/docs/dsredisadapter">Redis adapter</a> as a caching layer for your read endpoints. More adapters are coming, and you're free to implement your own. View <a href="http://www.js-data.io/docs/working-with-adapters">available adapters</a>.</p>
 
-<p>Unlike Backbone and Ember Models, JSData does not require the use of getters and setters, and doesn't wrap your data with custom classes if you don't want it to. JSData's internal dirty-checking (via <a href="https://github.com/Polymer/observe-js">observe-js</a> or <code>Object.observe</code> in supporting browsers) allows for powerful use cases and an easy avenue for implementing your own <a href="https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html">3-way data-binding</a>.</p>
+<p>Unlike Backbone and Ember Models, JSData does not require the use of getters and setters, and doesn't wrap your data with custom classes if you don't want it to. JSData's internal change detection (via <a href="https://github.com/Polymer/observe-js">observe-js</a> or <code>Object.observe</code> in supporting browsers) allows for powerful use cases and an easy avenue for implementing your own <a href="https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html">3-way data-binding</a>.</p>
 
 <p>Supporting relations, computed properties, model lifecycle control and a slew of other features, JSData is the tool for giving your data the respect it deserves.</p>
 
-<p><strong>Latest Release:</strong> <a href="https://github.com/js-data/js-data/releases"><img src="https://img.shields.io/github/release/js-data/js-data.svg?style=flat-square" alt="Latest Release"></a></p>
+<p>It's also written in ES6. Contributions ftw!</p>
 
 <p><strong>Status:</strong></p>
 
-<p><a href="https://gemnasium.com/js-data/js-data"><img src="https://img.shields.io/gemnasium/js-data/js-data.svg?style=flat-square" alt="Dependency Status"></a> <a href="https://coveralls.io/r/js-data/js-data?branch=master"><img src="https://img.shields.io/coveralls/js-data/js-data/master.svg?style=flat-square" alt="Coverage Status"></a> <a href="https://www.codacy.com/public/jasondobry/js-data/dashboard"><img src="https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg?style=flat-square" alt="Codacity"></a> </p>
+<p><a href="https://github.com/js-data/js-data/releases"><img src="https://img.shields.io/github/release/js-data/js-data.svg?style=flat-square" alt="Latest Release"></a> <a href="https://gemnasium.com/js-data/js-data"><img src="https://img.shields.io/gemnasium/js-data/js-data.svg?style=flat-square" alt="Dependency Status"></a> <a href="https://coveralls.io/r/js-data/js-data?branch=master"><img src="https://img.shields.io/coveralls/js-data/js-data/master.svg?style=flat-square" alt="Coverage Status"></a> <a href="https://www.codacy.com/public/jasondobry/js-data/dashboard"><img src="https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg?style=flat-square" alt="Codacity"></a></p>
 
 <p><strong>Supported Platforms:</strong></p>
 
@@ -57,23 +57,25 @@
 
 <p><code>bower install --save js-data js-data-http</code> or <code>npm install --save js-data js-data-http</code>.</p>
 
-<p>Load <code>js-data-http.js</code> after <code>js-data.js</code>.</p>
+<p>Load <code>js-data-http.js</code> after <code>js-data.js</code>. See <a href="http://www.js-data.io/docs#use-with-webpack">installation instructions</a> for making js-data part of your r.js/browserify/webpack build.</p>
 
-<div class="highlight highlight-js"><pre><span class="pl-s">var</span> store <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">JSData.DS</span>();
+<div class="highlight highlight-js"><pre><span class="pl-c">// you can also require "js-data" if you're using AMD/CommonJS</span>
+<span class="pl-c">// e.g. var JSData = require('js-data'); var DSHttpAdapter = require('js-data-http');</span>
+<span class="pl-k">var</span> store <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">JSData.DS</span>();
 
 <span class="pl-c">// register and use http by default for async operations</span>
-store.registerAdapter(<span class="pl-s1"><span class="pl-pds">'</span>http<span class="pl-pds">'</span></span>, <span class="pl-k">new</span> <span class="pl-en">DSHttpAdapter</span>(), { <span class="pl-k">default</span><span class="pl-k">:</span> <span class="pl-c1">true</span> });
+store.registerAdapter(<span class="pl-s"><span class="pl-pds">'</span>http<span class="pl-pds">'</span></span>, <span class="pl-k">new</span> <span class="pl-en">DSHttpAdapter</span>(), { <span class="pl-k">default</span><span class="pl-k">:</span> <span class="pl-c1">true</span> });
 
 <span class="pl-c">// simplest model definition</span>
-<span class="pl-s">var</span> User <span class="pl-k">=</span> store.defineResource(<span class="pl-s1"><span class="pl-pds">'</span>user<span class="pl-pds">'</span></span>);
-<span class="pl-s">var</span> Comment <span class="pl-k">=</span> store.defineResource(<span class="pl-s1"><span class="pl-pds">'</span>comment<span class="pl-pds">'</span></span>);
+<span class="pl-k">var</span> User <span class="pl-k">=</span> store.defineResource(<span class="pl-s"><span class="pl-pds">'</span>user<span class="pl-pds">'</span></span>);
+<span class="pl-k">var</span> Comment <span class="pl-k">=</span> store.defineResource(<span class="pl-s"><span class="pl-pds">'</span>comment<span class="pl-pds">'</span></span>);
 
-<span class="pl-s">var</span> user;
+<span class="pl-k">var</span> user;
 
 <span class="pl-c">// Example CRUD operations with default configuration</span>
 <span class="pl-c">// See http://www.js-data.io/docs/dsfind</span>
-User.<span class="pl-s3">find</span>(<span class="pl-c1">1</span>)
-  .then(<span class="pl-st">function</span> (<span class="pl-vpf">_user</span>) {
+User.<span class="pl-c1">find</span>(<span class="pl-c1">1</span>)
+  .then(<span class="pl-k">function</span> (<span class="pl-smi">_user</span>) {
     _user; <span class="pl-c">// { id: 1, name: 'John' }</span>
 
     <span class="pl-c">// See http://www.js-data.io/docs/dsis</span>
@@ -82,38 +84,38 @@ User.<span class="pl-s3">find</span>(<span class="pl-c1">1</span>)
 
     <span class="pl-c">// The user is in the store now</span>
     <span class="pl-c">// See http://www.js-data.io/docs/dsget</span>
-    User.get(_user.<span class="pl-sc">id</span>); <span class="pl-c">// { id: 1, name: 'John' }</span>
+    User.get(_user.<span class="pl-c1">id</span>); <span class="pl-c">// { id: 1, name: 'John' }</span>
 
     user <span class="pl-k">=</span> _user;
 
     <span class="pl-c">// No need for another GET request, will resolve immediately</span>
     <span class="pl-c">// See http://www.js-data.io/docs/dsfind</span>
-    <span class="pl-k">return</span> User.<span class="pl-s3">find</span>(<span class="pl-c1">1</span>);
+    <span class="pl-k">return</span> User.<span class="pl-c1">find</span>(<span class="pl-c1">1</span>);
   })
-  .then(<span class="pl-st">function</span> (<span class="pl-vpf">_user</span>) {
+  .then(<span class="pl-k">function</span> (<span class="pl-smi">_user</span>) {
     user <span class="pl-k">===</span> _user; <span class="pl-c">// true</span>
 
     <span class="pl-c">// PUT /user/1 {name:"Johnny"}</span>
     <span class="pl-c">// See http://www.js-data.io/docs/dsupdate</span>
-    <span class="pl-k">return</span> User.update(user.<span class="pl-sc">id</span>, { name<span class="pl-k">:</span> <span class="pl-s1"><span class="pl-pds">'</span>Johnny<span class="pl-pds">'</span></span> });
+    <span class="pl-k">return</span> User.update(user.<span class="pl-c1">id</span>, { name<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>Johnny<span class="pl-pds">'</span></span> });
   })
-  .then(<span class="pl-st">function</span> (<span class="pl-vpf">_user</span>) {
+  .then(<span class="pl-k">function</span> (<span class="pl-smi">_user</span>) {
     <span class="pl-c">// identity mapping at play</span>
     user <span class="pl-k">===</span> _user; <span class="pl-c">// true</span>
-    user <span class="pl-k">===</span> User.get(_user.<span class="pl-sc">id</span>); <span class="pl-c">// true</span>
+    user <span class="pl-k">===</span> User.get(_user.<span class="pl-c1">id</span>); <span class="pl-c">// true</span>
 
     user; <span class="pl-c">// { id: 1, name: 'Johnny' }</span>
 
-    user.<span class="pl-sc">name</span> <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">'</span>Billy<span class="pl-pds">'</span></span>;
+    user.<span class="pl-c1">name</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>Billy<span class="pl-pds">'</span></span>;
 
     <span class="pl-c">// PUT /user/1 {id:1,name:"Billy"}</span>
     <span class="pl-c">// See http://www.js-data.io/docs/dssave</span>
     <span class="pl-k">return</span> User.save(<span class="pl-c1">1</span>);
   })
-  .then(<span class="pl-st">function</span> (<span class="pl-vpf">_user</span>) {
+  .then(<span class="pl-k">function</span> (<span class="pl-smi">_user</span>) {
     <span class="pl-c">// identity mapping at play</span>
     user <span class="pl-k">===</span> _user; <span class="pl-c">// true</span>
-    user <span class="pl-k">===</span> User.get(_user.<span class="pl-sc">id</span>); <span class="pl-c">// true</span>
+    user <span class="pl-k">===</span> User.get(_user.<span class="pl-c1">id</span>); <span class="pl-c">// true</span>
 
     user; <span class="pl-c">// { id: 1, name: 'Johnny' }</span>
 
@@ -121,7 +123,7 @@ User.<span class="pl-s3">find</span>(<span class="pl-c1">1</span>)
     <span class="pl-c">// See http://www.js-data.io/docs/dsdestroy</span>
     <span class="pl-k">return</span> User.destroy(<span class="pl-c1">1</span>);
   })
-  .then(<span class="pl-st">function</span> () {
+  .then(<span class="pl-k">function</span> () {
     <span class="pl-c">// The user has also been removed from the in-memory store</span>
     User.get(<span class="pl-c1">1</span>); <span class="pl-c">// undefined</span>
   });</pre></div>
