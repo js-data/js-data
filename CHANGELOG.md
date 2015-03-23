@@ -1,3 +1,8 @@
+##### 1.5.11 - 22 March 2015
+
+###### Backwards compatible bug fixes
+- #83 - Change detection incorrectly handles cycles in the object
+
 ##### 1.5.10 - 19 March 2015
 
 ###### Backwards compatible bug fixes

@@ -42,7 +42,9 @@ export default {
       if (DSUtils.w) {
         _this.s[resourceName].observers[id].deliver();
       }
-      let diff = DSUtils.diffObjectFromOldObject(item, _this.s[resourceName].previousAttributes[id], DSUtils.equals, options.ignoredChanges);
+      let ignoredChanges = options.ignoredChanges || [];
+      DSUtils.forEach(definition.relationFields, field => ignoredChanges.push(field));
+      let diff = DSUtils.diffObjectFromOldObject(item, _this.s[resourceName].previousAttributes[id], DSUtils.equals, ignoredChanges);
       DSUtils.forOwn(diff, (changeset, name) => {
         let toKeep = [];
         DSUtils.forOwn(changeset, (value, field) => {
