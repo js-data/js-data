@@ -6,15 +6,15 @@ Inspired by [Ember Data](https://github.com/emberjs/data), js-data is the model 
 
 You can use the [http adapter](http://www.js-data.io/docs/dshttpadapter), which is perfect for communicating with your RESTful backend. You could also use the [localStorage adapter](http://www.js-data.io/docs/dslocalstorageadapter). On the server you could hook up to the [SQL adapter (Postgres/MySQL/MariaDB/SQLite3)](http://www.js-data.io/docs/dssqladapter) and add in the [Redis adapter](http://www.js-data.io/docs/dsredisadapter) as a caching layer for your read endpoints. More adapters are coming, and you're free to implement your own. View [available adapters](http://www.js-data.io/docs/working-with-adapters).
 
-Unlike Backbone and Ember Models, JSData does not require the use of getters and setters, and doesn't wrap your data with custom classes if you don't want it to. JSData's internal dirty-checking (via [observe-js](https://github.com/Polymer/observe-js) or `Object.observe` in supporting browsers) allows for powerful use cases and an easy avenue for implementing your own [3-way data-binding](https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html).
+Unlike Backbone and Ember Models, JSData does not require the use of getters and setters, and doesn't wrap your data with custom classes if you don't want it to. JSData's internal change detection (via [observe-js](https://github.com/Polymer/observe-js) or `Object.observe` in supporting browsers) allows for powerful use cases and an easy avenue for implementing your own [3-way data-binding](https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html).
 
 Supporting relations, computed properties, model lifecycle control and a slew of other features, JSData is the tool for giving your data the respect it deserves.
 
-__Latest Release:__ [![Latest Release](https://img.shields.io/github/release/js-data/js-data.svg?style=flat-square)](https://github.com/js-data/js-data/releases)
+It's also written in ES6. Contributions ftw!
 
 __Status:__
 
-[![Dependency Status](https://img.shields.io/gemnasium/js-data/js-data.svg?style=flat-square)](https://gemnasium.com/js-data/js-data) [![Coverage Status](https://img.shields.io/coveralls/js-data/js-data/master.svg?style=flat-square)](https://coveralls.io/r/js-data/js-data?branch=master) [![Codacity](https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg?style=flat-square)](https://www.codacy.com/public/jasondobry/js-data/dashboard) 
+[![Latest Release](https://img.shields.io/github/release/js-data/js-data.svg?style=flat-square)](https://github.com/js-data/js-data/releases) [![Dependency Status](https://img.shields.io/gemnasium/js-data/js-data.svg?style=flat-square)](https://gemnasium.com/js-data/js-data) [![Coverage Status](https://img.shields.io/coveralls/js-data/js-data/master.svg?style=flat-square)](https://coveralls.io/r/js-data/js-data?branch=master) [![Codacity](https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg?style=flat-square)](https://www.codacy.com/public/jasondobry/js-data/dashboard)
 
 __Supported Platforms:__
 
@@ -23,9 +23,11 @@ __Supported Platforms:__
 ### Quick Start
 `bower install --save js-data js-data-http` or `npm install --save js-data js-data-http`.
 
-Load `js-data-http.js` after `js-data.js`.
+Load `js-data-http.js` after `js-data.js`. See [installation instructions](http://www.js-data.io/docs#use-with-webpack) for making js-data part of your r.js/browserify/webpack build.
 
 ```js
+// you can also require "js-data" if you're using AMD/CommonJS
+// e.g. var JSData = require('js-data'); var DSHttpAdapter = require('js-data-http');
 var store = new JSData.DS();
 
 // register and use http by default for async operations
