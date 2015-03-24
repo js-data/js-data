@@ -1,3 +1,8 @@
+##### 1.5.12 - 23 March 2015
+
+###### Backwards compatible bug fixes
+- #84 - DS.Inject performance issues when reloading data (`DSUtils.copy` was attempting to copy relations)
+
 ##### 1.5.11 - 22 March 2015
 
 ###### Backwards compatible bug fixes

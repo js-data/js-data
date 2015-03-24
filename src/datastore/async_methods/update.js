@@ -35,7 +35,7 @@ export default function update(resourceName, id, attrs, options) {
         let id = injected[definition.idAttribute];
         resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
         if (!definition.resetHistoryOnInject) {
-          resource.previousAttributes[id] = DSUtils.copy(injected);
+          resource.previousAttributes[id] = DSUtils.copy(injected, null, null, null, definition.relationFields);
         }
         return injected;
       } else {

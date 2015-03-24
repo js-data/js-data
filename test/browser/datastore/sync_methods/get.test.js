@@ -12,7 +12,7 @@ describe('DS#get', function () {
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(p1));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(p1));
 
       setTimeout(function () {
         assert.deepEqual(JSON.stringify(store.get('post', 5)), JSON.stringify(p1), 'p1 should now be in the store');

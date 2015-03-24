@@ -191,20 +191,33 @@ let toPromisify = [
   'afterDestroy'
 ];
 
+let isBlacklisted = (prop, bl) => {
+  let i;
+  if (!bl || !bl.length) {
+    return false;
+  }
+  for (i = 0; i < bl.length; i++) {
+    if (bl[i] === prop) {
+      return true;
+    }
+  }
+  return false;
+};
+
 // adapted from angular.copy
-let copy = (source, destination, stackSource, stackDest) => {
+let copy = (source, destination, stackSource, stackDest, blacklist) => {
   if (!destination) {
     destination = source;
     if (source) {
       if (isArray(source)) {
-        destination = copy(source, [], stackSource, stackDest);
+        destination = copy(source, [], stackSource, stackDest, blacklist);
       } else if (isDate(source)) {
         destination = new Date(source.getTime());
       } else if (isRegExp(source)) {
         destination = new RegExp(source.source, source.toString().match(/[^\/]*$/)[0]);
         destination.lastIndex = source.lastIndex;
       } else if (isObject(source)) {
-        destination = copy(source, Object.create(Object.getPrototypeOf(source)), stackSource, stackDest);
+        destination = copy(source, Object.create(Object.getPrototypeOf(source)), stackSource, stackDest, blacklist);
       }
     }
   } else {
@@ -227,9 +240,10 @@ let copy = (source, destination, stackSource, stackDest) => {
 
     let result;
     if (isArray(source)) {
+      let i;
       destination.length = 0;
-      for (let i = 0; i < source.length; i++) {
-        result = copy(source[i], null, stackSource, stackDest);
+      for (i = 0; i < source.length; i++) {
+        result = copy(source[i], null, stackSource, stackDest, blacklist);
         if (isObject(source[i])) {
           stackSource.push(source[i]);
           stackDest.push(result);
@@ -246,7 +260,10 @@ let copy = (source, destination, stackSource, stackDest) => {
       }
       for (let key in source) {
         if (source.hasOwnProperty(key)) {
-          result = copy(source[key], null, stackSource, stackDest);
+          if (isBlacklisted(key, blacklist)) {
+            continue;
+          }
+          result = copy(source[key], null, stackSource, stackDest, blacklist);
           if (isObject(source[key])) {
             stackSource.push(source[key]);
             stackDest.push(result);
