@@ -12,6 +12,8 @@ Supporting relations, computed properties, model lifecycle control and a slew of
 
 It's also written in ES6. Contributions ftw!
 
+Support is handled via the [Mailing List](https://groups.io/org/groupsio/jsdata).
+
 __Status:__
 
 [![Latest Release](https://img.shields.io/github/release/js-data/js-data.svg?style=flat-square)](https://github.com/js-data/js-data/releases) [![Dependency Status](https://img.shields.io/gemnasium/js-data/js-data.svg?style=flat-square)](https://gemnasium.com/js-data/js-data) [![Coverage Status](https://img.shields.io/coveralls/js-data/js-data/master.svg?style=flat-square)](https://coveralls.io/r/js-data/js-data?branch=master) [![Codacity](https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg?style=flat-square)](https://www.codacy.com/public/jasondobry/js-data/dashboard)
@@ -137,17 +139,27 @@ See an issue with or have a suggestion for the documentation? You can suggest ed
 
 ### Contributing
 
-First, feel free to contact me with questions. [Mailing List](https://groups.io/org/groupsio/jsdata).
+First, support is handled via the [Mailing List](https://groups.io/org/groupsio/jsdata). Ask your questions there.
+
+When submitting issues on GitHub, please include as much detail as possible to make debugging quick and easy.
+
+- good - Your versions of Angular, JSData, etc, relevant console logs/error, code examples that revealed the issue
+- better - A [plnkr](http://plnkr.co/), [fiddle](http://jsfiddle.net/), or [bin](http://jsbin.com/?html,output) that demonstrates the issue
+- best - A Pull Request that fixes the issue, including test coverage for the issue and the fix
+
+[Github Issues](https://github.com/js-data/js-data/issues).
+
+#### Pull Requests
 
 1. Contribute to the issue that is the reason you'll be developing in the first place
 1. Fork js-data
 1. `git clone https://github.com/<you>/js-data.git`
 1. `cd js-data; npm install; bower install;`
 1. `grunt go` (builds and starts a watch)
-1. (in another terminal) `grunt karma:dev` (runs the Karma tests)
-1. (in another terminal) `grunt w` (runs the NodeJS tests)
+1. (in another terminal) `grunt karma:dev` (runs the tests)
 1. Write your code, including relevant documentation and tests
 1. Submit a PR and we'll review
+
 
 ### License
 

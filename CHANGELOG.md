@@ -1,3 +1,8 @@
+##### 1.5.13 - 25 March 2015
+
+###### Backwards compatible bug fixes
+- #91 - Wrong second argument passed to afterCreateInstance
+
 ##### 1.5.12 - 23 March 2015
 
 ###### Backwards compatible bug fixes

@@ -136,7 +136,7 @@ export default {
     }
     DSUtils.deepMixIn(item, attrs);
     if (options.notify) {
-      options.afterCreateInstance(options, attrs);
+      options.afterCreateInstance(options, item);
     }
     return item;
   },
