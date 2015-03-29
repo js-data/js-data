@@ -18,7 +18,7 @@ export default function linkAll(resourceName, params, relations) {
   if (linked) {
     DSUtils.forEach(definition.relationList, def => {
       let relationName = def.relation;
-      if (relations.length && !DSUtils.contains(relations, relationName)) {
+      if ((relations.length && !DSUtils.contains(relations, relationName)) || !def.localField) {
         return;
       }
       if (def.type === 'belongsTo') {

@@ -21,7 +21,7 @@ export default function link(resourceName, id, relations) {
   if (linked) {
     DSUtils.forEach(definition.relationList, def => {
       let relationName = def.relation;
-      if (relations.length && !DSUtils.contains(relations, relationName)) {
+      if ((relations.length && !DSUtils.contains(relations, relationName)) || !def.localField) {
         return;
       }
       let params = {};
