@@ -61,4 +61,45 @@ describe('DS#link', function () {
     assert.isUndefined(user99.profile);
     assert.equal(2, org66.users.length);
   });
+
+  it('should not link resources if localField is not specified', function () {
+    store.defineResource({
+      name: 'water',
+      relations: {
+        hasOne: {
+          oxygen: {
+            foreignKey: 'atomId'
+          }
+        }
+      }
+    });
+    store.defineResource({
+      name: 'oxygen',
+      relations: {
+        belongsTo: {
+          water: {
+            localKey: 'moleculeId'
+          }
+        }
+      }
+    });
+    var water = store.inject('water', {
+      id: 21,
+      atomId: 41
+    });
+    var oxygen = store.inject('oxygen', {
+      id: 41,
+      moleculeId: 21
+    });
+
+    store.link('water', 21, []);
+    store.link('oxygen', 41, []);
+    
+    Object.keys(water).forEach(function(key) {
+      assert.isTrue(water[key] !== oxygen);
+    });
+    Object.keys(oxygen).forEach(function(key) {
+      assert.isTrue(oxygen[key] !== water);
+    });
+  });
 });
