@@ -78,7 +78,9 @@ export default function defineResource(definition) {
             d.relation = relationName;
             d.name = def.n;
             def.relationList.push(d);
-            def.relationFields.push(d.localField);
+            if (d.localField) {
+              def.relationFields.push(d.localField);
+            }
           });
         });
       });
@@ -306,13 +308,17 @@ export default function defineResource(definition) {
     def.beforeDestroy = DSUtils.promisify(def.beforeDestroy);
     def.afterDestroy = DSUtils.promisify(def.afterDestroy);
 
+    let defaultAdapter;
+    if (def.hasOwnProperty('defaultAdapter')) {
+      defaultAdapter = def.defaultAdapter;
+    }
     DSUtils.forOwn(def.actions, (action, name) => {
       if (def[name] && !def.actions[name]) {
         throw new Error(`Cannot override existing method "${name}"!`);
       }
       def[name] = function (options) {
         options = options || {};
-        let adapter = _this.getAdapter(action.adapter || 'http');
+        let adapter = _this.getAdapter(action.adapter || defaultAdapter || 'http');
         let config = DSUtils.deepMixIn({}, action);
         if (!options.hasOwnProperty('endpoint') && config.endpoint) {
           options.endpoint = config.endpoint;

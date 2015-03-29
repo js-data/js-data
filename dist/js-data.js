@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 1.5.13 - Homepage <http://www.js-data.io/>
+ * @version 1.6.0 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -9,13 +9,13 @@
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory((function webpackLoadOptionalExternalModule() { try { return require("js-data-schema"); } catch(e) {} }()), require("bluebird"));
+		module.exports = factory(require("bluebird"), (function webpackLoadOptionalExternalModule() { try { return require("js-data-schema"); } catch(e) {} }()));
 	else if(typeof define === 'function' && define.amd)
-		define(["js-data-schema", "bluebird"], factory);
+		define(["bluebird", "js-data-schema"], factory);
 	else if(typeof exports === 'object')
-		exports["JSData"] = factory((function webpackLoadOptionalExternalModule() { try { return require("js-data-schema"); } catch(e) {} }()), require("bluebird"));
+		exports["JSData"] = factory(require("bluebird"), (function webpackLoadOptionalExternalModule() { try { return require("js-data-schema"); } catch(e) {} }()));
 	else
-		root["JSData"] = factory(root["Schemator"], root["bluebird"]);
+		root["JSData"] = factory(root["bluebird"], root["Schemator"]);
 })(this, function(__WEBPACK_EXTERNAL_MODULE_4__, __WEBPACK_EXTERNAL_MODULE_5__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -79,10 +79,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  DSUtils: DSUtils,
 	  DSErrors: DSErrors,
 	  version: {
-	    full: "1.5.13",
+	    full: "1.6.0",
 	    major: parseInt("1", 10),
-	    minor: parseInt("5", 10),
-	    patch: parseInt("13", 10),
+	    minor: parseInt("6", 10),
+	    patch: parseInt("0", 10),
 	    alpha: true ? "false" : false,
 	    beta: true ? "false" : false
 	  }
@@ -98,9 +98,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var DSErrors = _interopRequire(__webpack_require__(2));
 
-	var forEach = _interopRequire(__webpack_require__(10));
+	var forEach = _interopRequire(__webpack_require__(9));
 
-	var slice = _interopRequire(__webpack_require__(9));
+	var slice = _interopRequire(__webpack_require__(10));
 
 	var forOwn = _interopRequire(__webpack_require__(14));
 
@@ -118,7 +118,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var upperCase = _interopRequire(__webpack_require__(20));
 
-	var observe = _interopRequire(__webpack_require__(8));
+	var observe = _interopRequire(__webpack_require__(6));
 
 	var es6Promise = _interopRequire(__webpack_require__(21));
 
@@ -260,7 +260,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  w = {};
 	} catch (e) {
 	  w = null;
-	  _Promise = __webpack_require__(5);
+	  _Promise = __webpack_require__(4);
 	}
 
 	function Events(target) {
@@ -740,9 +740,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var DSErrors = _interopRequire(__webpack_require__(2));
 
-	var syncMethods = _interopRequire(__webpack_require__(6));
+	var syncMethods = _interopRequire(__webpack_require__(7));
 
-	var asyncMethods = _interopRequire(__webpack_require__(7));
+	var asyncMethods = _interopRequire(__webpack_require__(8));
 
 	var Schemator = undefined;
 
@@ -1084,7 +1084,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    options = options || {};
 
 	    try {
-	      Schemator = __webpack_require__(4);
+	      Schemator = __webpack_require__(5);
 	    } catch (e) {}
 
 	    if (!Schemator || DSUtils.isEmpty(Schemator)) {
@@ -1176,368 +1176,17 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	if(typeof __WEBPACK_EXTERNAL_MODULE_4__ === 'undefined') {var e = new Error("Cannot find module \"undefined\""); e.code = 'MODULE_NOT_FOUND'; throw e;}
 	module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
 
 /***/ },
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
+	if(typeof __WEBPACK_EXTERNAL_MODULE_5__ === 'undefined') {var e = new Error("Cannot find module \"undefined\""); e.code = 'MODULE_NOT_FOUND'; throw e;}
 	module.exports = __WEBPACK_EXTERNAL_MODULE_5__;
 
 /***/ },
 /* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
-
-	var DSUtils = _interopRequire(__webpack_require__(1));
-
-	var DSErrors = _interopRequire(__webpack_require__(2));
-
-	var defineResource = _interopRequire(__webpack_require__(23));
-
-	var eject = _interopRequire(__webpack_require__(24));
-
-	var ejectAll = _interopRequire(__webpack_require__(25));
-
-	var filter = _interopRequire(__webpack_require__(26));
-
-	var inject = _interopRequire(__webpack_require__(27));
-
-	var link = _interopRequire(__webpack_require__(28));
-
-	var linkAll = _interopRequire(__webpack_require__(29));
-
-	var linkInverse = _interopRequire(__webpack_require__(30));
-
-	var unlinkInverse = _interopRequire(__webpack_require__(31));
-
-	var NER = DSErrors.NER;
-	var IA = DSErrors.IA;
-	var R = DSErrors.R;
-
-	function diffIsEmpty(diff) {
-	  return !(DSUtils.isEmpty(diff.added) && DSUtils.isEmpty(diff.removed) && DSUtils.isEmpty(diff.changed));
-	}
-
-	module.exports = {
-	  changes: function changes(resourceName, id, options) {
-	    var _this = this;
-	    var definition = _this.defs[resourceName];
-	    options = options || {};
-
-	    id = DSUtils.resolveId(definition, id);
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (!DSUtils._sn(id)) {
-	      throw DSUtils._snErr("id");
-	    }
-	    options = DSUtils._(definition, options);
-
-
-	    var item = _this.get(resourceName, id);
-	    if (item) {
-	      var _ret = (function () {
-	        if (DSUtils.w) {
-	          _this.s[resourceName].observers[id].deliver();
-	        }
-	        var ignoredChanges = options.ignoredChanges || [];
-	        DSUtils.forEach(definition.relationFields, function (field) {
-	          return ignoredChanges.push(field);
-	        });
-	        var diff = DSUtils.diffObjectFromOldObject(item, _this.s[resourceName].previousAttributes[id], DSUtils.equals, ignoredChanges);
-	        DSUtils.forOwn(diff, function (changeset, name) {
-	          var toKeep = [];
-	          DSUtils.forOwn(changeset, function (value, field) {
-	            if (!DSUtils.isFunction(value)) {
-	              toKeep.push(field);
-	            }
-	          });
-	          diff[name] = DSUtils.pick(diff[name], toKeep);
-	        });
-	        DSUtils.forEach(definition.relationFields, function (field) {
-	          delete diff.added[field];
-	          delete diff.removed[field];
-	          delete diff.changed[field];
-	        });
-	        return {
-	          v: diff
-	        };
-	      })();
-
-	      if (typeof _ret === "object") {
-	        return _ret.v;
-	      }
-	    }
-	  },
-	  changeHistory: function changeHistory(resourceName, id) {
-	    var _this = this;
-	    var definition = _this.defs[resourceName];
-	    var resource = _this.s[resourceName];
-
-	    id = DSUtils.resolveId(definition, id);
-	    if (resourceName && !_this.defs[resourceName]) {
-	      throw new NER(resourceName);
-	    } else if (id && !DSUtils._sn(id)) {
-	      throw DSUtils._snErr("id");
-	    }
-
-
-	    if (!definition.keepChangeHistory) {
-	      definition.errorFn("changeHistory is disabled for this resource!");
-	    } else {
-	      if (resourceName) {
-	        var item = _this.get(resourceName, id);
-	        if (item) {
-	          return resource.changeHistories[id];
-	        }
-	      } else {
-	        return resource.changeHistory;
-	      }
-	    }
-	  },
-	  compute: function compute(resourceName, instance) {
-	    var _this = this;
-	    var definition = _this.defs[resourceName];
-
-	    instance = DSUtils.resolveItem(_this.s[resourceName], instance);
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (!instance) {
-	      throw new R("Item not in the store!");
-	    } else if (!DSUtils._o(instance) && !DSUtils._sn(instance)) {
-	      throw new IA("\"instance\" must be an object, string or number!");
-	    }
-
-	    DSUtils.forOwn(definition.computed, function (fn, field) {
-	      DSUtils.compute.call(instance, fn, field);
-	    });
-	    return instance;
-	  },
-	  createInstance: function createInstance(resourceName, attrs, options) {
-	    var definition = this.defs[resourceName];
-	    var item = undefined;
-
-	    attrs = attrs || {};
-
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (attrs && !DSUtils.isObject(attrs)) {
-	      throw new IA("\"attrs\" must be an object!");
-	    }
-
-	    options = DSUtils._(definition, options);
-
-
-	    if (options.notify) {
-	      options.beforeCreateInstance(options, attrs);
-	    }
-
-	    if (options.useClass) {
-	      var Constructor = definition[definition["class"]];
-	      item = new Constructor();
-	    } else {
-	      item = {};
-	    }
-	    DSUtils.deepMixIn(item, attrs);
-	    if (options.notify) {
-	      options.afterCreateInstance(options, item);
-	    }
-	    return item;
-	  },
-	  defineResource: defineResource,
-	  digest: function digest() {
-	    this.observe.Platform.performMicrotaskCheckpoint();
-	  },
-	  eject: eject,
-	  ejectAll: ejectAll,
-	  filter: filter,
-	  get: function get(resourceName, id, options) {
-	    var _this = this;
-	    var definition = _this.defs[resourceName];
-
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (!DSUtils._sn(id)) {
-	      throw DSUtils._snErr("id");
-	    }
-
-	    options = DSUtils._(definition, options);
-
-
-	    // cache miss, request resource from server
-	    var item = _this.s[resourceName].index[id];
-	    if (!item && options.loadFromServer) {
-	      _this.find(resourceName, id, options);
-	    }
-
-	    // return resource from cache
-	    return item;
-	  },
-	  getAll: function getAll(resourceName, ids) {
-	    var _this = this;
-	    var definition = _this.defs[resourceName];
-	    var resource = _this.s[resourceName];
-	    var collection = [];
-
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (ids && !DSUtils._a(ids)) {
-	      throw DSUtils._aErr("ids");
-	    }
-
-
-	    if (DSUtils._a(ids)) {
-	      var _length = ids.length;
-	      for (var i = 0; i < _length; i++) {
-	        if (resource.index[ids[i]]) {
-	          collection.push(resource.index[ids[i]]);
-	        }
-	      }
-	    } else {
-	      collection = resource.collection.slice();
-	    }
-
-	    return collection;
-	  },
-	  hasChanges: function hasChanges(resourceName, id) {
-	    var _this = this;
-	    var definition = _this.defs[resourceName];
-
-	    id = DSUtils.resolveId(definition, id);
-
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (!DSUtils._sn(id)) {
-	      throw DSUtils._snErr("id");
-	    }
-
-
-	    // return resource from cache
-	    if (_this.get(resourceName, id)) {
-	      return diffIsEmpty(_this.changes(resourceName, id));
-	    } else {
-	      return false;
-	    }
-	  },
-	  inject: inject,
-	  lastModified: function lastModified(resourceName, id) {
-	    var definition = this.defs[resourceName];
-	    var resource = this.s[resourceName];
-
-	    id = DSUtils.resolveId(definition, id);
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    }
-
-
-	    if (id) {
-	      if (!(id in resource.modified)) {
-	        resource.modified[id] = 0;
-	      }
-	      return resource.modified[id];
-	    }
-	    return resource.collectionModified;
-	  },
-	  lastSaved: function lastSaved(resourceName, id) {
-	    var definition = this.defs[resourceName];
-	    var resource = this.s[resourceName];
-
-	    id = DSUtils.resolveId(definition, id);
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    }
-
-
-	    if (!(id in resource.saved)) {
-	      resource.saved[id] = 0;
-	    }
-	    return resource.saved[id];
-	  },
-	  link: link,
-	  linkAll: linkAll,
-	  linkInverse: linkInverse,
-	  previous: function previous(resourceName, id) {
-	    var _this = this;
-	    var definition = _this.defs[resourceName];
-	    var resource = _this.s[resourceName];
-
-	    id = DSUtils.resolveId(definition, id);
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (!DSUtils._sn(id)) {
-	      throw DSUtils._snErr("id");
-	    }
-
-
-	    // return resource from cache
-	    return resource.previousAttributes[id] ? DSUtils.copy(resource.previousAttributes[id]) : undefined;
-	  },
-	  unlinkInverse: unlinkInverse
-	};
-
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
-
-	var create = _interopRequire(__webpack_require__(40));
-
-	var destroy = _interopRequire(__webpack_require__(41));
-
-	var destroyAll = _interopRequire(__webpack_require__(42));
-
-	var find = _interopRequire(__webpack_require__(43));
-
-	var findAll = _interopRequire(__webpack_require__(44));
-
-	var loadRelations = _interopRequire(__webpack_require__(45));
-
-	var reap = _interopRequire(__webpack_require__(46));
-
-	var save = _interopRequire(__webpack_require__(47));
-
-	var update = _interopRequire(__webpack_require__(48));
-
-	var updateAll = _interopRequire(__webpack_require__(49));
-
-	module.exports = {
-	  create: create,
-	  destroy: destroy,
-	  destroyAll: destroyAll,
-	  find: find,
-	  findAll: findAll,
-	  loadRelations: loadRelations,
-	  reap: reap,
-	  refresh: function refresh(resourceName, id, options) {
-	    var _this = this;
-	    var DSUtils = _this.utils;
-
-	    return new DSUtils.Promise(function (resolve, reject) {
-	      var definition = _this.defs[resourceName];
-	      id = DSUtils.resolveId(_this.defs[resourceName], id);
-	      if (!definition) {
-	        reject(new _this.errors.NER(resourceName));
-	      } else if (!DSUtils._sn(id)) {
-	        reject(DSUtils._snErr("id"));
-	      } else {
-	        options = DSUtils._(definition, options);
-	        options.bypassCache = true;
-	        resolve(_this.get(resourceName, id));
-	      }
-	    }).then(function (item) {
-	      return item ? _this.find(resourceName, id, options) : item;
-	    });
-	  },
-	  save: save,
-	  update: update,
-	  updateAll: updateAll
-	};
-
-/***/ },
-/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -2086,7 +1735,387 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+
+	var DSUtils = _interopRequire(__webpack_require__(1));
+
+	var DSErrors = _interopRequire(__webpack_require__(2));
+
+	var defineResource = _interopRequire(__webpack_require__(31));
+
+	var eject = _interopRequire(__webpack_require__(32));
+
+	var ejectAll = _interopRequire(__webpack_require__(33));
+
+	var filter = _interopRequire(__webpack_require__(34));
+
+	var inject = _interopRequire(__webpack_require__(35));
+
+	var link = _interopRequire(__webpack_require__(36));
+
+	var linkAll = _interopRequire(__webpack_require__(37));
+
+	var linkInverse = _interopRequire(__webpack_require__(38));
+
+	var unlinkInverse = _interopRequire(__webpack_require__(39));
+
+	var NER = DSErrors.NER;
+	var IA = DSErrors.IA;
+	var R = DSErrors.R;
+
+	function diffIsEmpty(diff) {
+	  return !(DSUtils.isEmpty(diff.added) && DSUtils.isEmpty(diff.removed) && DSUtils.isEmpty(diff.changed));
+	}
+
+	module.exports = {
+	  changes: function changes(resourceName, id, options) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+	    options = options || {};
+
+	    id = DSUtils.resolveId(definition, id);
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (!DSUtils._sn(id)) {
+	      throw DSUtils._snErr("id");
+	    }
+	    options = DSUtils._(definition, options);
+
+
+	    var item = _this.get(resourceName, id);
+	    if (item) {
+	      var _ret = (function () {
+	        if (DSUtils.w) {
+	          _this.s[resourceName].observers[id].deliver();
+	        }
+	        var ignoredChanges = options.ignoredChanges || [];
+	        DSUtils.forEach(definition.relationFields, function (field) {
+	          return ignoredChanges.push(field);
+	        });
+	        var diff = DSUtils.diffObjectFromOldObject(item, _this.s[resourceName].previousAttributes[id], DSUtils.equals, ignoredChanges);
+	        DSUtils.forOwn(diff, function (changeset, name) {
+	          var toKeep = [];
+	          DSUtils.forOwn(changeset, function (value, field) {
+	            if (!DSUtils.isFunction(value)) {
+	              toKeep.push(field);
+	            }
+	          });
+	          diff[name] = DSUtils.pick(diff[name], toKeep);
+	        });
+	        DSUtils.forEach(definition.relationFields, function (field) {
+	          delete diff.added[field];
+	          delete diff.removed[field];
+	          delete diff.changed[field];
+	        });
+	        return {
+	          v: diff
+	        };
+	      })();
+
+	      if (typeof _ret === "object") {
+	        return _ret.v;
+	      }
+	    }
+	  },
+	  changeHistory: function changeHistory(resourceName, id) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+	    var resource = _this.s[resourceName];
+
+	    id = DSUtils.resolveId(definition, id);
+	    if (resourceName && !_this.defs[resourceName]) {
+	      throw new NER(resourceName);
+	    } else if (id && !DSUtils._sn(id)) {
+	      throw DSUtils._snErr("id");
+	    }
+
+
+	    if (!definition.keepChangeHistory) {
+	      definition.errorFn("changeHistory is disabled for this resource!");
+	    } else {
+	      if (resourceName) {
+	        var item = _this.get(resourceName, id);
+	        if (item) {
+	          return resource.changeHistories[id];
+	        }
+	      } else {
+	        return resource.changeHistory;
+	      }
+	    }
+	  },
+	  compute: function compute(resourceName, instance) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+
+	    instance = DSUtils.resolveItem(_this.s[resourceName], instance);
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (!instance) {
+	      throw new R("Item not in the store!");
+	    } else if (!DSUtils._o(instance) && !DSUtils._sn(instance)) {
+	      throw new IA("\"instance\" must be an object, string or number!");
+	    }
+
+	    DSUtils.forOwn(definition.computed, function (fn, field) {
+	      DSUtils.compute.call(instance, fn, field);
+	    });
+	    return instance;
+	  },
+	  createInstance: function createInstance(resourceName, attrs, options) {
+	    var definition = this.defs[resourceName];
+	    var item = undefined;
+
+	    attrs = attrs || {};
+
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (attrs && !DSUtils.isObject(attrs)) {
+	      throw new IA("\"attrs\" must be an object!");
+	    }
+
+	    options = DSUtils._(definition, options);
+
+
+	    if (options.notify) {
+	      options.beforeCreateInstance(options, attrs);
+	    }
+
+	    if (options.useClass) {
+	      var Constructor = definition[definition["class"]];
+	      item = new Constructor();
+	    } else {
+	      item = {};
+	    }
+	    DSUtils.deepMixIn(item, attrs);
+	    if (options.notify) {
+	      options.afterCreateInstance(options, item);
+	    }
+	    return item;
+	  },
+	  defineResource: defineResource,
+	  digest: function digest() {
+	    this.observe.Platform.performMicrotaskCheckpoint();
+	  },
+	  eject: eject,
+	  ejectAll: ejectAll,
+	  filter: filter,
+	  get: function get(resourceName, id, options) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (!DSUtils._sn(id)) {
+	      throw DSUtils._snErr("id");
+	    }
+
+	    options = DSUtils._(definition, options);
+
+
+	    // cache miss, request resource from server
+	    var item = _this.s[resourceName].index[id];
+	    if (!item && options.loadFromServer) {
+	      _this.find(resourceName, id, options);
+	    }
+
+	    // return resource from cache
+	    return item;
+	  },
+	  getAll: function getAll(resourceName, ids) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+	    var resource = _this.s[resourceName];
+	    var collection = [];
+
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (ids && !DSUtils._a(ids)) {
+	      throw DSUtils._aErr("ids");
+	    }
+
+
+	    if (DSUtils._a(ids)) {
+	      var _length = ids.length;
+	      for (var i = 0; i < _length; i++) {
+	        if (resource.index[ids[i]]) {
+	          collection.push(resource.index[ids[i]]);
+	        }
+	      }
+	    } else {
+	      collection = resource.collection.slice();
+	    }
+
+	    return collection;
+	  },
+	  hasChanges: function hasChanges(resourceName, id) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+
+	    id = DSUtils.resolveId(definition, id);
+
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (!DSUtils._sn(id)) {
+	      throw DSUtils._snErr("id");
+	    }
+
+
+	    // return resource from cache
+	    if (_this.get(resourceName, id)) {
+	      return diffIsEmpty(_this.changes(resourceName, id));
+	    } else {
+	      return false;
+	    }
+	  },
+	  inject: inject,
+	  lastModified: function lastModified(resourceName, id) {
+	    var definition = this.defs[resourceName];
+	    var resource = this.s[resourceName];
+
+	    id = DSUtils.resolveId(definition, id);
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    }
+
+
+	    if (id) {
+	      if (!(id in resource.modified)) {
+	        resource.modified[id] = 0;
+	      }
+	      return resource.modified[id];
+	    }
+	    return resource.collectionModified;
+	  },
+	  lastSaved: function lastSaved(resourceName, id) {
+	    var definition = this.defs[resourceName];
+	    var resource = this.s[resourceName];
+
+	    id = DSUtils.resolveId(definition, id);
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    }
+
+
+	    if (!(id in resource.saved)) {
+	      resource.saved[id] = 0;
+	    }
+	    return resource.saved[id];
+	  },
+	  link: link,
+	  linkAll: linkAll,
+	  linkInverse: linkInverse,
+	  previous: function previous(resourceName, id) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+	    var resource = _this.s[resourceName];
+
+	    id = DSUtils.resolveId(definition, id);
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (!DSUtils._sn(id)) {
+	      throw DSUtils._snErr("id");
+	    }
+
+
+	    // return resource from cache
+	    return resource.previousAttributes[id] ? DSUtils.copy(resource.previousAttributes[id]) : undefined;
+	  },
+	  unlinkInverse: unlinkInverse
+	};
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+
+	var create = _interopRequire(__webpack_require__(40));
+
+	var destroy = _interopRequire(__webpack_require__(41));
+
+	var destroyAll = _interopRequire(__webpack_require__(42));
+
+	var find = _interopRequire(__webpack_require__(43));
+
+	var findAll = _interopRequire(__webpack_require__(44));
+
+	var loadRelations = _interopRequire(__webpack_require__(45));
+
+	var reap = _interopRequire(__webpack_require__(46));
+
+	var save = _interopRequire(__webpack_require__(47));
+
+	var update = _interopRequire(__webpack_require__(48));
+
+	var updateAll = _interopRequire(__webpack_require__(49));
+
+	module.exports = {
+	  create: create,
+	  destroy: destroy,
+	  destroyAll: destroyAll,
+	  find: find,
+	  findAll: findAll,
+	  loadRelations: loadRelations,
+	  reap: reap,
+	  refresh: function refresh(resourceName, id, options) {
+	    var _this = this;
+	    var DSUtils = _this.utils;
+
+	    return new DSUtils.Promise(function (resolve, reject) {
+	      var definition = _this.defs[resourceName];
+	      id = DSUtils.resolveId(_this.defs[resourceName], id);
+	      if (!definition) {
+	        reject(new _this.errors.NER(resourceName));
+	      } else if (!DSUtils._sn(id)) {
+	        reject(DSUtils._snErr("id"));
+	      } else {
+	        options = DSUtils._(definition, options);
+	        options.bypassCache = true;
+	        resolve(_this.get(resourceName, id));
+	      }
+	    }).then(function (item) {
+	      return item ? _this.find(resourceName, id, options) : item;
+	    });
+	  },
+	  save: save,
+	  update: update,
+	  updateAll: updateAll
+	};
+
+/***/ },
 /* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Array forEach
+	     */
+	    function forEach(arr, callback, thisObj) {
+	        if (arr == null) {
+	            return;
+	        }
+	        var i = -1,
+	            len = arr.length;
+	        while (++i < len) {
+	            // we iterate over sparse items since there is no way to make it
+	            // work properly on IE 7-8. see #64
+	            if ( callback.call(thisObj, arr[i], i, arr) === false ) {
+	                break;
+	            }
+	        }
+	    }
+
+	    module.exports = forEach;
+
+
+
+
+/***/ },
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -2127,39 +2156,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Array forEach
-	     */
-	    function forEach(arr, callback, thisObj) {
-	        if (arr == null) {
-	            return;
-	        }
-	        var i = -1,
-	            len = arr.length;
-	        while (++i < len) {
-	            // we iterate over sparse items since there is no way to make it
-	            // work properly on IE 7-8. see #64
-	            if ( callback.call(thisObj, arr[i], i, arr) === false ) {
-	                break;
-	            }
-	        }
-	    }
-
-	    module.exports = forEach;
-
-
-
-
-/***/ },
 /* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var indexOf = __webpack_require__(32);
+	var indexOf = __webpack_require__(23);
 
 	    /**
 	     * If array contains values.
@@ -2175,7 +2175,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var indexOf = __webpack_require__(32);
+	var indexOf = __webpack_require__(23);
 
 	    /**
 	     * Remove a single item from the array.
@@ -2255,8 +2255,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var hasOwn = __webpack_require__(33);
-	var forIn = __webpack_require__(34);
+	var hasOwn = __webpack_require__(24);
+	var forIn = __webpack_require__(25);
 
 	    /**
 	     * Similar to Array/forEach but works over object properties and fixes Don't
@@ -2281,7 +2281,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var forOwn = __webpack_require__(14);
-	var isPlainObject = __webpack_require__(35);
+	var isPlainObject = __webpack_require__(26);
 
 	    /**
 	     * Mixes objects into the target object, recursively mixing existing child
@@ -2320,7 +2320,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var slice = __webpack_require__(9);
+	var slice = __webpack_require__(10);
 
 	    /**
 	     * Return a copy of the object, filtered to only have values for the whitelisted keys.
@@ -2344,7 +2344,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isPrimitive = __webpack_require__(36);
+	var isPrimitive = __webpack_require__(27);
 
 	    /**
 	     * get "nested" object property
@@ -2370,7 +2370,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var namespace = __webpack_require__(37);
+	var namespace = __webpack_require__(28);
 
 	    /**
 	     * set "nested" object property
@@ -2393,8 +2393,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(38);
-	var camelCase = __webpack_require__(39);
+	var toString = __webpack_require__(29);
+	var camelCase = __webpack_require__(30);
 	var upperCase = __webpack_require__(20);
 	    /**
 	     * camelCase + UPPERCASE first char
@@ -2412,7 +2412,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(38);
+	var toString = __webpack_require__(29);
 	    /**
 	     * "Safer" String.toUpperCase()
 	     */
@@ -3623,6 +3623,256 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
+	
+
+	    /**
+	     * Array.indexOf
+	     */
+	    function indexOf(arr, item, fromIndex) {
+	        fromIndex = fromIndex || 0;
+	        if (arr == null) {
+	            return -1;
+	        }
+
+	        var len = arr.length,
+	            i = fromIndex < 0 ? len + fromIndex : fromIndex;
+	        while (i < len) {
+	            // we iterate over sparse items since there is no way to make it
+	            // work properly on IE 7-8. see #64
+	            if (arr[i] === item) {
+	                return i;
+	            }
+
+	            i++;
+	        }
+
+	        return -1;
+	    }
+
+	    module.exports = indexOf;
+
+
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Safer Object.hasOwnProperty
+	     */
+	     function hasOwn(obj, prop){
+	         return Object.prototype.hasOwnProperty.call(obj, prop);
+	     }
+
+	     module.exports = hasOwn;
+
+
+
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var hasOwn = __webpack_require__(24);
+
+	    var _hasDontEnumBug,
+	        _dontEnums;
+
+	    function checkDontEnum(){
+	        _dontEnums = [
+	                'toString',
+	                'toLocaleString',
+	                'valueOf',
+	                'hasOwnProperty',
+	                'isPrototypeOf',
+	                'propertyIsEnumerable',
+	                'constructor'
+	            ];
+
+	        _hasDontEnumBug = true;
+
+	        for (var key in {'toString': null}) {
+	            _hasDontEnumBug = false;
+	        }
+	    }
+
+	    /**
+	     * Similar to Array/forEach but works over object properties and fixes Don't
+	     * Enum bug on IE.
+	     * based on: http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
+	     */
+	    function forIn(obj, fn, thisObj){
+	        var key, i = 0;
+	        // no need to check if argument is a real object that way we can use
+	        // it for arrays, functions, date, etc.
+
+	        //post-pone check till needed
+	        if (_hasDontEnumBug == null) checkDontEnum();
+
+	        for (key in obj) {
+	            if (exec(fn, obj, key, thisObj) === false) {
+	                break;
+	            }
+	        }
+
+
+	        if (_hasDontEnumBug) {
+	            var ctor = obj.constructor,
+	                isProto = !!ctor && obj === ctor.prototype;
+
+	            while (key = _dontEnums[i++]) {
+	                // For constructor, if it is a prototype object the constructor
+	                // is always non-enumerable unless defined otherwise (and
+	                // enumerated above).  For non-prototype objects, it will have
+	                // to be defined on this object, since it cannot be defined on
+	                // any prototype objects.
+	                //
+	                // For other [[DontEnum]] properties, check if the value is
+	                // different than Object prototype value.
+	                if (
+	                    (key !== 'constructor' ||
+	                        (!isProto && hasOwn(obj, key))) &&
+	                    obj[key] !== Object.prototype[key]
+	                ) {
+	                    if (exec(fn, obj, key, thisObj) === false) {
+	                        break;
+	                    }
+	                }
+	            }
+	        }
+	    }
+
+	    function exec(fn, obj, key, thisObj){
+	        return fn.call(thisObj, obj[key], key, obj);
+	    }
+
+	    module.exports = forIn;
+
+
+
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Checks if the value is created by the `Object` constructor.
+	     */
+	    function isPlainObject(value) {
+	        return (!!value && typeof value === 'object' &&
+	            value.constructor === Object);
+	    }
+
+	    module.exports = isPlainObject;
+
+
+
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Checks if the object is a primitive
+	     */
+	    function isPrimitive(value) {
+	        // Using switch fallthrough because it's simple to read and is
+	        // generally fast: http://jsperf.com/testing-value-is-primitive/5
+	        switch (typeof value) {
+	            case "string":
+	            case "number":
+	            case "boolean":
+	                return true;
+	        }
+
+	        return value == null;
+	    }
+
+	    module.exports = isPrimitive;
+
+
+
+
+/***/ },
+/* 28 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var forEach = __webpack_require__(9);
+
+	    /**
+	     * Create nested object if non-existent
+	     */
+	    function namespace(obj, path){
+	        if (!path) return obj;
+	        forEach(path.split('.'), function(key){
+	            if (!obj[key]) {
+	                obj[key] = {};
+	            }
+	            obj = obj[key];
+	        });
+	        return obj;
+	    }
+
+	    module.exports = namespace;
+
+
+
+
+/***/ },
+/* 29 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Typecast a value to a String, using an empty string value for null or
+	     * undefined.
+	     */
+	    function toString(val){
+	        return val == null ? '' : val.toString();
+	    }
+
+	    module.exports = toString;
+
+
+
+
+/***/ },
+/* 30 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var toString = __webpack_require__(29);
+	var replaceAccents = __webpack_require__(53);
+	var removeNonWord = __webpack_require__(54);
+	var upperCase = __webpack_require__(20);
+	var lowerCase = __webpack_require__(55);
+	    /**
+	    * Convert string to camelCase text.
+	    */
+	    function camelCase(str){
+	        str = toString(str);
+	        str = replaceAccents(str);
+	        str = removeNonWord(str)
+	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
+	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
+	            .replace(/\s+/g, '') //remove spaces
+	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
+	        return str;
+	    }
+	    module.exports = camelCase;
+
+
+
+/***/ },
+/* 31 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
 	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
@@ -3665,317 +3915,334 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  try {
-	    // Inherit from global defaults
-	    Resource.prototype = _this.defaults;
-	    definitions[definition.name] = new Resource(definition);
+	    var def;
 
-	    var def = definitions[definition.name];
+	    var _class;
 
-	    // alias name, shaves 0.08 kb off the minified build
-	    def.n = def.name;
+	    var _ret = (function () {
+	      // Inherit from global defaults
+	      Resource.prototype = _this.defaults;
+	      definitions[definition.name] = new Resource(definition);
+
+	      def = definitions[definition.name];
+
+	      // alias name, shaves 0.08 kb off the minified build
+	      def.n = def.name;
 
 
-	    if (!DSUtils._s(def.idAttribute)) {
-	      throw new DSErrors.IA("\"idAttribute\" must be a string!");
-	    }
+	      if (!DSUtils._s(def.idAttribute)) {
+	        throw new DSErrors.IA("\"idAttribute\" must be a string!");
+	      }
 
-	    // Setup nested parent configuration
-	    if (def.relations) {
-	      def.relationList = [];
-	      def.relationFields = [];
-	      DSUtils.forOwn(def.relations, function (relatedModels, type) {
-	        DSUtils.forOwn(relatedModels, function (defs, relationName) {
-	          if (!DSUtils._a(defs)) {
-	            relatedModels[relationName] = [defs];
-	          }
-	          DSUtils.forEach(relatedModels[relationName], function (d) {
-	            d.type = type;
-	            d.relation = relationName;
-	            d.name = def.n;
-	            def.relationList.push(d);
-	            def.relationFields.push(d.localField);
-	          });
-	        });
-	      });
-	      if (def.relations.belongsTo) {
-	        DSUtils.forOwn(def.relations.belongsTo, function (relatedModel, modelName) {
-	          DSUtils.forEach(relatedModel, function (relation) {
-	            if (relation.parent) {
-	              def.parent = modelName;
-	              def.parentKey = relation.localKey;
-	              def.parentField = relation.localField;
+	      // Setup nested parent configuration
+	      if (def.relations) {
+	        def.relationList = [];
+	        def.relationFields = [];
+	        DSUtils.forOwn(def.relations, function (relatedModels, type) {
+	          DSUtils.forOwn(relatedModels, function (defs, relationName) {
+	            if (!DSUtils._a(defs)) {
+	              relatedModels[relationName] = [defs];
 	            }
-	          });
-	        });
-	      }
-	      if (typeof Object.freeze === "function") {
-	        Object.freeze(def.relations);
-	        Object.freeze(def.relationList);
-	      }
-	    }
-
-	    def.getResource = function (resourceName) {
-	      return _this.defs[resourceName];
-	    };
-
-	    def.getEndpoint = function (id, options) {
-	      options.params = options.params || {};
-
-	      var item = undefined;
-	      var parentKey = def.parentKey;
-	      var endpoint = options.hasOwnProperty("endpoint") ? options.endpoint : def.endpoint;
-	      var parentField = def.parentField;
-	      var parentDef = definitions[def.parent];
-	      var parentId = options.params[parentKey];
-
-	      if (parentId === false || !parentKey || !parentDef) {
-	        if (parentId === false) {
-	          delete options.params[parentKey];
-	        }
-	        return endpoint;
-	      } else {
-	        delete options.params[parentKey];
-
-	        if (DSUtils._sn(id)) {
-	          item = def.get(id);
-	        } else if (DSUtils._o(id)) {
-	          item = id;
-	        }
-
-	        if (item) {
-	          parentId = parentId || item[parentKey] || (item[parentField] ? item[parentField][parentDef.idAttribute] : null);
-	        }
-
-	        if (parentId) {
-	          var _ret = (function () {
-	            delete options.endpoint;
-	            var _options = {};
-	            DSUtils.forOwn(options, function (value, key) {
-	              _options[key] = value;
+	            DSUtils.forEach(relatedModels[relationName], function (d) {
+	              d.type = type;
+	              d.relation = relationName;
+	              d.name = def.n;
+	              def.relationList.push(d);
+	              if (d.localField) {
+	                def.relationFields.push(d.localField);
+	              }
 	            });
-	            return {
-	              v: DSUtils.makePath(parentDef.getEndpoint(parentId, DSUtils._(parentDef, _options)), parentId, endpoint)
-	            };
-	          })();
+	          });
+	        });
+	        if (def.relations.belongsTo) {
+	          DSUtils.forOwn(def.relations.belongsTo, function (relatedModel, modelName) {
+	            DSUtils.forEach(relatedModel, function (relation) {
+	              if (relation.parent) {
+	                def.parent = modelName;
+	                def.parentKey = relation.localKey;
+	                def.parentField = relation.localField;
+	              }
+	            });
+	          });
+	        }
+	        if (typeof Object.freeze === "function") {
+	          Object.freeze(def.relations);
+	          Object.freeze(def.relationList);
+	        }
+	      }
 
-	          if (typeof _ret === "object") return _ret.v;
-	        } else {
+	      def.getResource = function (resourceName) {
+	        return _this.defs[resourceName];
+	      };
+
+	      def.getEndpoint = function (id, options) {
+	        options.params = options.params || {};
+
+	        var item = undefined;
+	        var parentKey = def.parentKey;
+	        var endpoint = options.hasOwnProperty("endpoint") ? options.endpoint : def.endpoint;
+	        var parentField = def.parentField;
+	        var parentDef = definitions[def.parent];
+	        var parentId = options.params[parentKey];
+
+	        if (parentId === false || !parentKey || !parentDef) {
+	          if (parentId === false) {
+	            delete options.params[parentKey];
+	          }
 	          return endpoint;
-	        }
-	      }
-	    };
+	        } else {
+	          delete options.params[parentKey];
 
-	    // Remove this in v0.11.0 and make a breaking change notice
-	    // the the `filter` option has been renamed to `defaultFilter`
-	    if (def.filter) {
-	      def.defaultFilter = def.filter;
-	      delete def.filter;
-	    }
+	          if (DSUtils._sn(id)) {
+	            item = def.get(id);
+	          } else if (DSUtils._o(id)) {
+	            item = id;
+	          }
 
-	    // Create the wrapper class for the new resource
-	    var _class = def["class"] = DSUtils.pascalCase(def.name);
-	    try {
-	      if (typeof def.useClass === "function") {
-	        eval("function " + _class + "() { def.useClass.call(this); }");
-	        def[_class] = eval(_class);
-	        def[_class].prototype = (function (proto) {
-	          function Ctor() {}
+	          if (item) {
+	            parentId = parentId || item[parentKey] || (item[parentField] ? item[parentField][parentDef.idAttribute] : null);
+	          }
 
-	          Ctor.prototype = proto;
-	          return new Ctor();
-	        })(def.useClass.prototype);
-	      } else {
-	        eval("function " + _class + "() {}");
-	        def[_class] = eval(_class);
-	      }
-	    } catch (e) {
-	      def[_class] = function () {};
-	    }
+	          if (parentId) {
+	            var _ret2 = (function () {
+	              delete options.endpoint;
+	              var _options = {};
+	              DSUtils.forOwn(options, function (value, key) {
+	                _options[key] = value;
+	              });
+	              return {
+	                v: DSUtils.makePath(parentDef.getEndpoint(parentId, DSUtils._(parentDef, _options)), parentId, endpoint)
+	              };
+	            })();
 
-	    // Apply developer-defined methods
-	    if (def.methods) {
-	      DSUtils.deepMixIn(def[_class].prototype, def.methods);
-	    }
-
-	    def[_class].prototype.set = function (key, value) {
-	      DSUtils.set(this, key, value);
-	      var observer = _this.s[def.n].observers[this[def.idAttribute]];
-	      if (observer && !DSUtils.observe.hasObjectObserve) {
-	        observer.deliver();
-	      } else {
-	        _this.compute(def.n, this);
-	      }
-	      return this;
-	    };
-
-	    def[_class].prototype.get = function (key) {
-	      return DSUtils.get(this, key);
-	    };
-
-	    // Prepare for computed properties
-	    if (def.computed) {
-	      DSUtils.forOwn(def.computed, function (fn, field) {
-	        if (DSUtils.isFunction(fn)) {
-	          def.computed[field] = [fn];
-	          fn = def.computed[field];
-	        }
-	        if (def.methods && field in def.methods) {
-	          def.errorFn("Computed property \"" + field + "\" conflicts with previously defined prototype method!");
-	        }
-	        var deps;
-	        if (fn.length === 1) {
-	          var match = fn[0].toString().match(/function.*?\(([\s\S]*?)\)/);
-	          deps = match[1].split(",");
-	          def.computed[field] = deps.concat(fn);
-	          fn = def.computed[field];
-	          if (deps.length) {
-	            def.errorFn("Use the computed property array syntax for compatibility with minified code!");
+	            if (typeof _ret2 === "object") return _ret2.v;
+	          } else {
+	            return endpoint;
 	          }
 	        }
-	        deps = fn.slice(0, fn.length - 1);
-	        DSUtils.forEach(deps, function (val, index) {
-	          deps[index] = val.trim();
-	        });
-	        fn.deps = DSUtils.filter(deps, function (dep) {
-	          return !!dep;
-	        });
-	      });
-	    }
+	      };
 
-	    if (definition.schema && _this.schemator) {
-	      def.schema = _this.schemator.defineSchema(def.n, definition.schema);
-
-	      if (!definition.hasOwnProperty("validate")) {
-	        def.validate = function (resourceName, attrs, cb) {
-	          def.schema.validate(attrs, {
-	            ignoreMissing: def.ignoreMissing
-	          }, function (err) {
-	            if (err) {
-	              return cb(err);
-	            } else {
-	              return cb(null, attrs);
-	            }
-	          });
-	        };
+	      // Remove this in v0.11.0 and make a breaking change notice
+	      // the the `filter` option has been renamed to `defaultFilter`
+	      if (def.filter) {
+	        def.defaultFilter = def.filter;
+	        delete def.filter;
 	      }
-	    }
 
-	    DSUtils.forEach(instanceMethods, function (name) {
-	      def[_class].prototype["DS" + DSUtils.pascalCase(name)] = function () {
+	      // Create the wrapper class for the new resource
+	      _class = def["class"] = DSUtils.pascalCase(def.name);
+
+	      try {
+	        if (typeof def.useClass === "function") {
+	          eval("function " + _class + "() { def.useClass.call(this); }");
+	          def[_class] = eval(_class);
+	          def[_class].prototype = (function (proto) {
+	            function Ctor() {}
+
+	            Ctor.prototype = proto;
+	            return new Ctor();
+	          })(def.useClass.prototype);
+	        } else {
+	          eval("function " + _class + "() {}");
+	          def[_class] = eval(_class);
+	        }
+	      } catch (e) {
+	        def[_class] = function () {};
+	      }
+
+	      // Apply developer-defined methods
+	      if (def.methods) {
+	        DSUtils.deepMixIn(def[_class].prototype, def.methods);
+	      }
+
+	      def[_class].prototype.set = function (key, value) {
+	        DSUtils.set(this, key, value);
+	        var observer = _this.s[def.n].observers[this[def.idAttribute]];
+	        if (observer && !DSUtils.observe.hasObjectObserve) {
+	          observer.deliver();
+	        } else {
+	          _this.compute(def.n, this);
+	        }
+	        return this;
+	      };
+
+	      def[_class].prototype.get = function (key) {
+	        return DSUtils.get(this, key);
+	      };
+
+	      // Prepare for computed properties
+	      if (def.computed) {
+	        DSUtils.forOwn(def.computed, function (fn, field) {
+	          if (DSUtils.isFunction(fn)) {
+	            def.computed[field] = [fn];
+	            fn = def.computed[field];
+	          }
+	          if (def.methods && field in def.methods) {
+	            def.errorFn("Computed property \"" + field + "\" conflicts with previously defined prototype method!");
+	          }
+	          var deps;
+	          if (fn.length === 1) {
+	            var match = fn[0].toString().match(/function.*?\(([\s\S]*?)\)/);
+	            deps = match[1].split(",");
+	            def.computed[field] = deps.concat(fn);
+	            fn = def.computed[field];
+	            if (deps.length) {
+	              def.errorFn("Use the computed property array syntax for compatibility with minified code!");
+	            }
+	          }
+	          deps = fn.slice(0, fn.length - 1);
+	          DSUtils.forEach(deps, function (val, index) {
+	            deps[index] = val.trim();
+	          });
+	          fn.deps = DSUtils.filter(deps, function (dep) {
+	            return !!dep;
+	          });
+	        });
+	      }
+
+	      if (definition.schema && _this.schemator) {
+	        def.schema = _this.schemator.defineSchema(def.n, definition.schema);
+
+	        if (!definition.hasOwnProperty("validate")) {
+	          def.validate = function (resourceName, attrs, cb) {
+	            def.schema.validate(attrs, {
+	              ignoreMissing: def.ignoreMissing
+	            }, function (err) {
+	              if (err) {
+	                return cb(err);
+	              } else {
+	                return cb(null, attrs);
+	              }
+	            });
+	          };
+	        }
+	      }
+
+	      DSUtils.forEach(instanceMethods, function (name) {
+	        def[_class].prototype["DS" + DSUtils.pascalCase(name)] = function () {
+	          for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	            args[_key] = arguments[_key];
+	          }
+
+	          args.unshift(this[def.idAttribute] || this);
+	          args.unshift(def.n);
+	          return _this[name].apply(_this, args);
+	        };
+	      });
+
+	      def[_class].prototype.DSCreate = function () {
 	        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
 	          args[_key] = arguments[_key];
 	        }
 
-	        args.unshift(this[def.idAttribute] || this);
+	        args.unshift(this);
 	        args.unshift(def.n);
-	        return _this[name].apply(_this, args);
+	        return _this.create.apply(_this, args);
 	      };
-	    });
 
-	    def[_class].prototype.DSCreate = function () {
-	      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	        args[_key] = arguments[_key];
+	      // Initialize store data for the new resource
+	      _this.s[def.n] = {
+	        collection: [],
+	        expiresHeap: new DSUtils.BinaryHeap(function (x) {
+	          return x.expires;
+	        }, function (x, y) {
+	          return x.item === y;
+	        }),
+	        completedQueries: {},
+	        queryData: {},
+	        pendingQueries: {},
+	        index: {},
+	        modified: {},
+	        saved: {},
+	        previousAttributes: {},
+	        observers: {},
+	        changeHistories: {},
+	        changeHistory: [],
+	        collectionModified: 0
+	      };
+
+	      if (def.reapInterval) {
+	        setInterval(function () {
+	          return _this.reap(def.n, { isInterval: true });
+	        }, def.reapInterval);
 	      }
 
-	      args.unshift(this);
-	      args.unshift(def.n);
-	      return _this.create.apply(_this, args);
-	    };
-
-	    // Initialize store data for the new resource
-	    _this.s[def.n] = {
-	      collection: [],
-	      expiresHeap: new DSUtils.BinaryHeap(function (x) {
-	        return x.expires;
-	      }, function (x, y) {
-	        return x.item === y;
-	      }),
-	      completedQueries: {},
-	      queryData: {},
-	      pendingQueries: {},
-	      index: {},
-	      modified: {},
-	      saved: {},
-	      previousAttributes: {},
-	      observers: {},
-	      changeHistories: {},
-	      changeHistory: [],
-	      collectionModified: 0
-	    };
-
-	    if (def.reapInterval) {
-	      setInterval(function () {
-	        return _this.reap(def.n, { isInterval: true });
-	      }, def.reapInterval);
-	    }
-
-	    // Proxy DS methods with shorthand ones
-	    var fns = ["registerAdapter", "getAdapter", "is"];
-	    for (var key in _this) {
-	      if (typeof _this[key] === "function") {
-	        fns.push(key);
-	      }
-	    }
-
-	    DSUtils.forEach(fns, function (key) {
-	      var k = key;
-	      if (_this[k].shorthand !== false) {
-	        def[k] = function () {
-	          for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	            args[_key] = arguments[_key];
-	          }
-
-	          args.unshift(def.n);
-	          return _this[k].apply(_this, args);
-	        };
-	      } else {
-	        def[k] = function () {
-	          for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	            args[_key] = arguments[_key];
-	          }
-
-	          return _this[k].apply(_this, args);
-	        };
-	      }
-	    });
-
-	    def.beforeValidate = DSUtils.promisify(def.beforeValidate);
-	    def.validate = DSUtils.promisify(def.validate);
-	    def.afterValidate = DSUtils.promisify(def.afterValidate);
-	    def.beforeCreate = DSUtils.promisify(def.beforeCreate);
-	    def.afterCreate = DSUtils.promisify(def.afterCreate);
-	    def.beforeUpdate = DSUtils.promisify(def.beforeUpdate);
-	    def.afterUpdate = DSUtils.promisify(def.afterUpdate);
-	    def.beforeDestroy = DSUtils.promisify(def.beforeDestroy);
-	    def.afterDestroy = DSUtils.promisify(def.afterDestroy);
-
-	    DSUtils.forOwn(def.actions, function (action, name) {
-	      if (def[name] && !def.actions[name]) {
-	        throw new Error("Cannot override existing method \"" + name + "\"!");
-	      }
-	      def[name] = function (options) {
-	        options = options || {};
-	        var adapter = _this.getAdapter(action.adapter || "http");
-	        var config = DSUtils.deepMixIn({}, action);
-	        if (!options.hasOwnProperty("endpoint") && config.endpoint) {
-	          options.endpoint = config.endpoint;
+	      // Proxy DS methods with shorthand ones
+	      var fns = ["registerAdapter", "getAdapter", "is"];
+	      for (key in _this) {
+	        if (typeof _this[key] === "function") {
+	          fns.push(key);
 	        }
-	        if (typeof options.getEndpoint === "function") {
-	          config.url = options.getEndpoint(def, options);
+	      }
+
+	      DSUtils.forEach(fns, function (key) {
+	        var k = key;
+	        if (_this[k].shorthand !== false) {
+	          def[k] = function () {
+	            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	              args[_key] = arguments[_key];
+	            }
+
+	            args.unshift(def.n);
+	            return _this[k].apply(_this, args);
+	          };
 	        } else {
-	          config.url = DSUtils.makePath(options.basePath || adapter.defaults.basePath || def.basePath, def.getEndpoint(null, options), name);
+	          def[k] = function () {
+	            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	              args[_key] = arguments[_key];
+	            }
+
+	            return _this[k].apply(_this, args);
+	          };
 	        }
-	        config.method = config.method || "GET";
-	        DSUtils.deepMixIn(config, options);
-	        return adapter.HTTP(config);
+	      });
+
+	      def.beforeValidate = DSUtils.promisify(def.beforeValidate);
+	      def.validate = DSUtils.promisify(def.validate);
+	      def.afterValidate = DSUtils.promisify(def.afterValidate);
+	      def.beforeCreate = DSUtils.promisify(def.beforeCreate);
+	      def.afterCreate = DSUtils.promisify(def.afterCreate);
+	      def.beforeUpdate = DSUtils.promisify(def.beforeUpdate);
+	      def.afterUpdate = DSUtils.promisify(def.afterUpdate);
+	      def.beforeDestroy = DSUtils.promisify(def.beforeDestroy);
+	      def.afterDestroy = DSUtils.promisify(def.afterDestroy);
+
+	      var defaultAdapter = undefined;
+	      if (def.hasOwnProperty("defaultAdapter")) {
+	        defaultAdapter = def.defaultAdapter;
+	      }
+	      DSUtils.forOwn(def.actions, function (action, name) {
+	        if (def[name] && !def.actions[name]) {
+	          throw new Error("Cannot override existing method \"" + name + "\"!");
+	        }
+	        def[name] = function (options) {
+	          options = options || {};
+	          var adapter = _this.getAdapter(action.adapter || defaultAdapter || "http");
+	          var config = DSUtils.deepMixIn({}, action);
+	          if (!options.hasOwnProperty("endpoint") && config.endpoint) {
+	            options.endpoint = config.endpoint;
+	          }
+	          if (typeof options.getEndpoint === "function") {
+	            config.url = options.getEndpoint(def, options);
+	          } else {
+	            config.url = DSUtils.makePath(options.basePath || adapter.defaults.basePath || def.basePath, def.getEndpoint(null, options), name);
+	          }
+	          config.method = config.method || "GET";
+	          DSUtils.deepMixIn(config, options);
+	          return adapter.HTTP(config);
+	        };
+	      });
+
+	      // Mix-in events
+	      DSUtils.Events(def);
+
+
+	      return {
+	        v: def
 	      };
-	    });
+	    })();
 
-	    // Mix-in events
-	    DSUtils.Events(def);
-
-
-	    return def;
+	    if (typeof _ret === "object") return _ret.v;
 	  } catch (err) {
 	    delete definitions[definition.name];
 	    delete _this.s[definition.name];
@@ -3984,7 +4251,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 24 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = eject;
@@ -4072,7 +4339,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 25 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = ejectAll;
@@ -4112,7 +4379,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 26 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = filter;
@@ -4150,7 +4417,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 27 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -4415,7 +4682,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 28 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = link;
@@ -4442,7 +4709,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (linked) {
 	    DSUtils.forEach(definition.relationList, function (def) {
 	      var relationName = def.relation;
-	      if (relations.length && !DSUtils.contains(relations, relationName)) {
+	      if (relations.length && !DSUtils.contains(relations, relationName) || !def.localField) {
 	        return;
 	      }
 	      var params = {};
@@ -4468,7 +4735,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 29 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = linkAll;
@@ -4492,7 +4759,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (linked) {
 	    DSUtils.forEach(definition.relationList, function (def) {
 	      var relationName = def.relation;
-	      if (relations.length && !DSUtils.contains(relations, relationName)) {
+	      if (relations.length && !DSUtils.contains(relations, relationName) || !def.localField) {
 	        return;
 	      }
 	      if (def.type === "belongsTo") {
@@ -4525,7 +4792,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 30 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = linkInverse;
@@ -4568,7 +4835,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 31 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = unlinkInverse;
@@ -4624,256 +4891,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return linked;
 	}
-
-/***/ },
-/* 32 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Array.indexOf
-	     */
-	    function indexOf(arr, item, fromIndex) {
-	        fromIndex = fromIndex || 0;
-	        if (arr == null) {
-	            return -1;
-	        }
-
-	        var len = arr.length,
-	            i = fromIndex < 0 ? len + fromIndex : fromIndex;
-	        while (i < len) {
-	            // we iterate over sparse items since there is no way to make it
-	            // work properly on IE 7-8. see #64
-	            if (arr[i] === item) {
-	                return i;
-	            }
-
-	            i++;
-	        }
-
-	        return -1;
-	    }
-
-	    module.exports = indexOf;
-
-
-
-/***/ },
-/* 33 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Safer Object.hasOwnProperty
-	     */
-	     function hasOwn(obj, prop){
-	         return Object.prototype.hasOwnProperty.call(obj, prop);
-	     }
-
-	     module.exports = hasOwn;
-
-
-
-
-/***/ },
-/* 34 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var hasOwn = __webpack_require__(33);
-
-	    var _hasDontEnumBug,
-	        _dontEnums;
-
-	    function checkDontEnum(){
-	        _dontEnums = [
-	                'toString',
-	                'toLocaleString',
-	                'valueOf',
-	                'hasOwnProperty',
-	                'isPrototypeOf',
-	                'propertyIsEnumerable',
-	                'constructor'
-	            ];
-
-	        _hasDontEnumBug = true;
-
-	        for (var key in {'toString': null}) {
-	            _hasDontEnumBug = false;
-	        }
-	    }
-
-	    /**
-	     * Similar to Array/forEach but works over object properties and fixes Don't
-	     * Enum bug on IE.
-	     * based on: http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
-	     */
-	    function forIn(obj, fn, thisObj){
-	        var key, i = 0;
-	        // no need to check if argument is a real object that way we can use
-	        // it for arrays, functions, date, etc.
-
-	        //post-pone check till needed
-	        if (_hasDontEnumBug == null) checkDontEnum();
-
-	        for (key in obj) {
-	            if (exec(fn, obj, key, thisObj) === false) {
-	                break;
-	            }
-	        }
-
-
-	        if (_hasDontEnumBug) {
-	            var ctor = obj.constructor,
-	                isProto = !!ctor && obj === ctor.prototype;
-
-	            while (key = _dontEnums[i++]) {
-	                // For constructor, if it is a prototype object the constructor
-	                // is always non-enumerable unless defined otherwise (and
-	                // enumerated above).  For non-prototype objects, it will have
-	                // to be defined on this object, since it cannot be defined on
-	                // any prototype objects.
-	                //
-	                // For other [[DontEnum]] properties, check if the value is
-	                // different than Object prototype value.
-	                if (
-	                    (key !== 'constructor' ||
-	                        (!isProto && hasOwn(obj, key))) &&
-	                    obj[key] !== Object.prototype[key]
-	                ) {
-	                    if (exec(fn, obj, key, thisObj) === false) {
-	                        break;
-	                    }
-	                }
-	            }
-	        }
-	    }
-
-	    function exec(fn, obj, key, thisObj){
-	        return fn.call(thisObj, obj[key], key, obj);
-	    }
-
-	    module.exports = forIn;
-
-
-
-
-/***/ },
-/* 35 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Checks if the value is created by the `Object` constructor.
-	     */
-	    function isPlainObject(value) {
-	        return (!!value && typeof value === 'object' &&
-	            value.constructor === Object);
-	    }
-
-	    module.exports = isPlainObject;
-
-
-
-
-/***/ },
-/* 36 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Checks if the object is a primitive
-	     */
-	    function isPrimitive(value) {
-	        // Using switch fallthrough because it's simple to read and is
-	        // generally fast: http://jsperf.com/testing-value-is-primitive/5
-	        switch (typeof value) {
-	            case "string":
-	            case "number":
-	            case "boolean":
-	                return true;
-	        }
-
-	        return value == null;
-	    }
-
-	    module.exports = isPrimitive;
-
-
-
-
-/***/ },
-/* 37 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var forEach = __webpack_require__(10);
-
-	    /**
-	     * Create nested object if non-existent
-	     */
-	    function namespace(obj, path){
-	        if (!path) return obj;
-	        forEach(path.split('.'), function(key){
-	            if (!obj[key]) {
-	                obj[key] = {};
-	            }
-	            obj = obj[key];
-	        });
-	        return obj;
-	    }
-
-	    module.exports = namespace;
-
-
-
-
-/***/ },
-/* 38 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Typecast a value to a String, using an empty string value for null or
-	     * undefined.
-	     */
-	    function toString(val){
-	        return val == null ? '' : val.toString();
-	    }
-
-	    module.exports = toString;
-
-
-
-
-/***/ },
-/* 39 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(38);
-	var replaceAccents = __webpack_require__(53);
-	var removeNonWord = __webpack_require__(54);
-	var upperCase = __webpack_require__(20);
-	var lowerCase = __webpack_require__(55);
-	    /**
-	    * Convert string to camelCase text.
-	    */
-	    function camelCase(str){
-	        str = toString(str);
-	        str = replaceAccents(str);
-	        str = removeNonWord(str)
-	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
-	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
-	            .replace(/\s+/g, '') //remove spaces
-	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
-	        return str;
-	    }
-	    module.exports = camelCase;
-
-
 
 /***/ },
 /* 40 */
@@ -5326,7 +5343,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (task) {
 	              tasks.push(task);
-	              fields.push(def.localField);
+	              fields.push(def.localField || false);
 	            }
 	          }
 	        });
@@ -5338,7 +5355,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return DSUtils.Promise.all(tasks);
 	  }).then(function (loadedRelations) {
 	    DSUtils.forEach(fields, function (field, index) {
-	      instance[field] = loadedRelations[index];
+	      if (field) {
+	        instance[field] = loadedRelations[index];
+	      }
 	    });
 	    return instance;
 	  });
@@ -5754,7 +5773,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(38);
+	var toString = __webpack_require__(29);
 	    /**
 	    * Replaces all accented chars with regular ones
 	    */
@@ -5796,7 +5815,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(38);
+	var toString = __webpack_require__(29);
 	    // This pattern is generated by the _build/pattern-removeNonWord.js script
 	    var PATTERN = /[^\x20\x2D0-9A-Z\x5Fa-z\xC0-\xD6\xD8-\xF6\xF8-\xFF]/g;
 
@@ -5816,7 +5835,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(38);
+	var toString = __webpack_require__(29);
 	    /**
 	     * "Safer" String.toLowerCase()
 	     */

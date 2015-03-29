@@ -1,3 +1,11 @@
+##### 1.6.0 - 29 March 2015
+
+###### Backwards compatible API changes
+- #97 - Don't link relations where localField is undefined
+
+###### Backwards compatible bug fixes
+- #95 - actions should use defaultAdapter of the resource
+
 ##### 1.5.13 - 25 March 2015
 
 ###### Backwards compatible bug fixes
