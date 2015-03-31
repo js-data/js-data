@@ -71,6 +71,6 @@ export default function find(resourceName, id, options) {
     if (resource) {
       delete resource.pendingQueries[id];
     }
-    throw err;
+    return DSUtils.Promise.reject(err);
   });
 }

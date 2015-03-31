@@ -38,6 +38,6 @@ export default function destroyAll(resourceName, params, options) {
     if (options && options.eagerEject && ejected) {
       _this.inject(resourceName, ejected, { notify: false });
     }
-    throw err;
+    return DSUtils.Promise.reject(err);
   });
 }

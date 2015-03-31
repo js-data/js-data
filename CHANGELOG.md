@@ -1,3 +1,8 @@
+##### 1.6.1 - 31 March 2015
+
+###### Backwards compatible bug fixes
+- #101 - Reject instead of throw, as throw is messy in the console
+
 ##### 1.6.0 - 29 March 2015
 
 ###### Backwards compatible API changes
