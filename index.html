@@ -1,37 +1,28 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en-us">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta charset="UTF-8">
     <title>Js-data by js-data</title>
-
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>Js-data</h1>
-        <p>Robust framework-agnostic in-memory data store.</p>
+    <section class="page-header">
+      <h1 class="project-name">Js-data</h1>
+      <h2 class="project-tagline">Robust framework-agnostic in-memory data store.</h2>
+      <a href="https://github.com/js-data/js-data" class="btn">View on GitHub</a>
+      <a href="https://github.com/js-data/js-data/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/js-data/js-data/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
 
-        <p class="view"><a href="https://github.com/js-data/js-data">View the Project on GitHub <small>js-data/js-data</small></a></p>
-
-
-        <ul>
-          <li><a href="https://github.com/js-data/js-data/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/js-data/js-data/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/js-data/js-data">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <p><img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="64" height="64"></p>
+    <section class="main-content">
+      <p><img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="64" height="64"></p>
 
 <h2>
-<a id="jsdata-----" class="anchor" href="#jsdata-----" aria-hidden="true"><span class="octicon octicon-link"></span></a>JSData <a href="https://www.npmjs.org/package/js-data"><img src="https://img.shields.io/bower/v/js-data.svg?style=flat-square" alt="bower version"></a> <a href="https://www.npmjs.org/package/js-data"><img src="https://img.shields.io/npm/v/js-data.svg?style=flat-square" alt="npm version"></a> <a href="https://circleci.com/gh/js-data/js-data/tree/master"><img src="https://img.shields.io/circleci/project/js-data/js-data/master.svg?style=flat-square" alt="Circle CI"></a> <a href="https://www.npmjs.org/package/js-data"><img src="https://img.shields.io/npm/dm/js-data.svg?style=flat-square" alt="npm downloads"></a> <a href="https://github.com/js-data/js-data/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License"></a>
+<a id="jsdata------" class="anchor" href="#jsdata------" aria-hidden="true"><span class="octicon octicon-link"></span></a>JSData <a href="https://gitter.im/js-data/js-data?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge"><img src="https://badges.gitter.im/Join%20Chat.svg" alt="Gitter"></a> <a href="https://www.npmjs.org/package/js-data"><img src="https://img.shields.io/bower/v/js-data.svg?style=flat-square" alt="bower version"></a> <a href="https://www.npmjs.org/package/js-data"><img src="https://img.shields.io/npm/v/js-data.svg?style=flat-square" alt="npm version"></a> <a href="https://circleci.com/gh/js-data/js-data/tree/master"><img src="https://img.shields.io/circleci/project/js-data/js-data/master.svg?style=flat-square" alt="Circle CI"></a> <a href="https://www.npmjs.org/package/js-data"><img src="https://img.shields.io/npm/dm/js-data.svg?style=flat-square" alt="npm downloads"></a> <a href="https://github.com/js-data/js-data/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License"></a>
 </h2>
 
 <p>Inspired by <a href="https://github.com/emberjs/data">Ember Data</a>, js-data is the model layer you've been craving. It consists of a convenient framework-agnostic, in-memory cache for managing your data, which uses adapters to communicate with various persistence layers.</p>
@@ -40,9 +31,13 @@
 
 <p>Unlike Backbone and Ember Models, JSData does not require the use of getters and setters, and doesn't wrap your data with custom classes if you don't want it to. JSData's internal change detection (via <a href="https://github.com/Polymer/observe-js">observe-js</a> or <code>Object.observe</code> in supporting browsers) allows for powerful use cases and an easy avenue for implementing your own <a href="https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html">3-way data-binding</a>.</p>
 
-<p>Supporting relations, computed properties, model lifecycle control and a slew of other features, JSData is the tool for giving your data the respect it deserves.</p>
+<p>Supporting relations, computed properties, model lifecycle control and a slew of other features, JSData is the tool for <a href="http://confreaks.tv/videos/mwjs2015-give-your-data-the-respect-it-deserves">giving your data the respect it deserves</a>.</p>
 
 <p>It's also written in ES6. Contributions ftw!</p>
+
+<p>Support is handled via the <a href="https://groups.io/org/groupsio/jsdata">Mailing List</a>.</p>
+
+<p><a href="https://www.youtube.com/watch?v=8wxnnJA9FKw"><img src="http://img.youtube.com/vi/8wxnnJA9FKw/0.jpg" alt="MtnWestJS Conf 2015 Presentation"></a></p>
 
 <p><strong>Status:</strong></p>
 
@@ -187,7 +182,20 @@ User.<span class="pl-c1">find</span>(<span class="pl-c1">1</span>)
 <h3>
 <a id="contributing" class="anchor" href="#contributing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributing</h3>
 
-<p>First, feel free to contact me with questions. <a href="https://groups.io/org/groupsio/jsdata">Mailing List</a>.</p>
+<p>First, support is handled via the <a href="https://groups.io/org/groupsio/jsdata">Mailing List</a>. Ask your questions there.</p>
+
+<p>When submitting issues on GitHub, please include as much detail as possible to make debugging quick and easy.</p>
+
+<ul>
+<li>good - Your versions of Angular, JSData, etc, relevant console logs/error, code examples that revealed the issue</li>
+<li>better - A <a href="http://plnkr.co/">plnkr</a>, <a href="http://jsfiddle.net/">fiddle</a>, or <a href="http://jsbin.com/?html,output">bin</a> that demonstrates the issue</li>
+<li>best - A Pull Request that fixes the issue, including test coverage for the issue and the fix</li>
+</ul>
+
+<p><a href="https://github.com/js-data/js-data/issues">Github Issues</a>.</p>
+
+<h4>
+<a id="pull-requests" class="anchor" href="#pull-requests" aria-hidden="true"><span class="octicon octicon-link"></span></a>Pull Requests</h4>
 
 <ol>
 <li>Contribute to the issue that is the reason you'll be developing in the first place</li>
@@ -196,8 +204,7 @@ User.<span class="pl-c1">find</span>(<span class="pl-c1">1</span>)
 <li><code>cd js-data; npm install; bower install;</code></li>
 <li>
 <code>grunt go</code> (builds and starts a watch)</li>
-<li>(in another terminal) <code>grunt karma:dev</code> (runs the Karma tests)</li>
-<li>(in another terminal) <code>grunt w</code> (runs the NodeJS tests)</li>
+<li>(in another terminal) <code>grunt karma:dev</code> (runs the tests)</li>
 <li>Write your code, including relevant documentation and tests</li>
 <li>Submit a PR and we'll review</li>
 </ol>
@@ -226,13 +233,16 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.</p>
-      </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/js-data">js-data</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/js-data/js-data">Js-data</a> is maintained by <a href="https://github.com/js-data">js-data</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
-    </div>
-    <script src="javascripts/scale.fix.js"></script>
-    
+
+    </section>
+
+  
   </body>
 </html>
+
