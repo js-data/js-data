@@ -119,6 +119,6 @@ export default function findAll(resourceName, params, options) {
     if (resource) {
       delete resource.pendingQueries[queryHash];
     }
-    throw err;
+    return DSUtils.Promise.reject(err);
   });
 }

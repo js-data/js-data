@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 1.6.0 - Homepage <http://www.js-data.io/>
+ * @version 1.6.1 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -79,10 +79,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  DSUtils: DSUtils,
 	  DSErrors: DSErrors,
 	  version: {
-	    full: "1.6.0",
+	    full: "1.6.1",
 	    major: parseInt("1", 10),
 	    minor: parseInt("6", 10),
-	    patch: parseInt("0", 10),
+	    patch: parseInt("1", 10),
 	    alpha: true ? "false" : false,
 	    beta: true ? "false" : false
 	  }
@@ -98,29 +98,29 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var DSErrors = _interopRequire(__webpack_require__(2));
 
-	var forEach = _interopRequire(__webpack_require__(9));
+	var forEach = _interopRequire(__webpack_require__(10));
 
-	var slice = _interopRequire(__webpack_require__(10));
+	var slice = _interopRequire(__webpack_require__(11));
 
-	var forOwn = _interopRequire(__webpack_require__(14));
+	var forOwn = _interopRequire(__webpack_require__(15));
 
-	var contains = _interopRequire(__webpack_require__(11));
+	var contains = _interopRequire(__webpack_require__(12));
 
-	var deepMixIn = _interopRequire(__webpack_require__(15));
+	var deepMixIn = _interopRequire(__webpack_require__(16));
 
-	var pascalCase = _interopRequire(__webpack_require__(19));
+	var pascalCase = _interopRequire(__webpack_require__(20));
 
-	var remove = _interopRequire(__webpack_require__(12));
+	var remove = _interopRequire(__webpack_require__(13));
 
-	var pick = _interopRequire(__webpack_require__(16));
+	var pick = _interopRequire(__webpack_require__(17));
 
-	var sort = _interopRequire(__webpack_require__(13));
+	var sort = _interopRequire(__webpack_require__(14));
 
-	var upperCase = _interopRequire(__webpack_require__(20));
+	var upperCase = _interopRequire(__webpack_require__(21));
 
 	var observe = _interopRequire(__webpack_require__(6));
 
-	var es6Promise = _interopRequire(__webpack_require__(21));
+	var es6Promise = _interopRequire(__webpack_require__(9));
 
 	var BinaryHeap = _interopRequire(__webpack_require__(22));
 
@@ -550,7 +550,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  fromJson: function fromJson(json) {
 	    return isString(json) ? JSON.parse(json) : json;
 	  },
-	  get: __webpack_require__(17),
+	  get: __webpack_require__(18),
 	  intersection: intersection,
 	  isArray: isArray,
 	  isBoolean: isBoolean,
@@ -600,7 +600,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	  },
 	  remove: remove,
-	  set: __webpack_require__(18),
+	  set: __webpack_require__(19),
 	  slice: slice,
 	  sort: sort,
 	  toJson: JSON.stringify,
@@ -2104,345 +2104,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
-	
-
-	    /**
-	     * Array forEach
-	     */
-	    function forEach(arr, callback, thisObj) {
-	        if (arr == null) {
-	            return;
-	        }
-	        var i = -1,
-	            len = arr.length;
-	        while (++i < len) {
-	            // we iterate over sparse items since there is no way to make it
-	            // work properly on IE 7-8. see #64
-	            if ( callback.call(thisObj, arr[i], i, arr) === false ) {
-	                break;
-	            }
-	        }
-	    }
-
-	    module.exports = forEach;
-
-
-
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Create slice of source array or array-like object
-	     */
-	    function slice(arr, start, end){
-	        var len = arr.length;
-
-	        if (start == null) {
-	            start = 0;
-	        } else if (start < 0) {
-	            start = Math.max(len + start, 0);
-	        } else {
-	            start = Math.min(start, len);
-	        }
-
-	        if (end == null) {
-	            end = len;
-	        } else if (end < 0) {
-	            end = Math.max(len + end, 0);
-	        } else {
-	            end = Math.min(end, len);
-	        }
-
-	        var result = [];
-	        while (start < end) {
-	            result.push(arr[start++]);
-	        }
-
-	        return result;
-	    }
-
-	    module.exports = slice;
-
-
-
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var indexOf = __webpack_require__(23);
-
-	    /**
-	     * If array contains values.
-	     */
-	    function contains(arr, val) {
-	        return indexOf(arr, val) !== -1;
-	    }
-	    module.exports = contains;
-
-
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var indexOf = __webpack_require__(23);
-
-	    /**
-	     * Remove a single item from the array.
-	     * (it won't remove duplicates, just a single item)
-	     */
-	    function remove(arr, item){
-	        var idx = indexOf(arr, item);
-	        if (idx !== -1) arr.splice(idx, 1);
-	    }
-
-	    module.exports = remove;
-
-
-
-/***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Merge sort (http://en.wikipedia.org/wiki/Merge_sort)
-	     */
-	    function mergeSort(arr, compareFn) {
-	        if (arr == null) {
-	            return [];
-	        } else if (arr.length < 2) {
-	            return arr;
-	        }
-
-	        if (compareFn == null) {
-	            compareFn = defaultCompare;
-	        }
-
-	        var mid, left, right;
-
-	        mid   = ~~(arr.length / 2);
-	        left  = mergeSort( arr.slice(0, mid), compareFn );
-	        right = mergeSort( arr.slice(mid, arr.length), compareFn );
-
-	        return merge(left, right, compareFn);
-	    }
-
-	    function defaultCompare(a, b) {
-	        return a < b ? -1 : (a > b? 1 : 0);
-	    }
-
-	    function merge(left, right, compareFn) {
-	        var result = [];
-
-	        while (left.length && right.length) {
-	            if (compareFn(left[0], right[0]) <= 0) {
-	                // if 0 it should preserve same order (stable)
-	                result.push(left.shift());
-	            } else {
-	                result.push(right.shift());
-	            }
-	        }
-
-	        if (left.length) {
-	            result.push.apply(result, left);
-	        }
-
-	        if (right.length) {
-	            result.push.apply(result, right);
-	        }
-
-	        return result;
-	    }
-
-	    module.exports = mergeSort;
-
-
-
-
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var hasOwn = __webpack_require__(24);
-	var forIn = __webpack_require__(25);
-
-	    /**
-	     * Similar to Array/forEach but works over object properties and fixes Don't
-	     * Enum bug on IE.
-	     * based on: http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
-	     */
-	    function forOwn(obj, fn, thisObj){
-	        forIn(obj, function(val, key){
-	            if (hasOwn(obj, key)) {
-	                return fn.call(thisObj, obj[key], key, obj);
-	            }
-	        });
-	    }
-
-	    module.exports = forOwn;
-
-
-
-
-/***/ },
-/* 15 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var forOwn = __webpack_require__(14);
-	var isPlainObject = __webpack_require__(26);
-
-	    /**
-	     * Mixes objects into the target object, recursively mixing existing child
-	     * objects.
-	     */
-	    function deepMixIn(target, objects) {
-	        var i = 0,
-	            n = arguments.length,
-	            obj;
-
-	        while(++i < n){
-	            obj = arguments[i];
-	            if (obj) {
-	                forOwn(obj, copyProp, target);
-	            }
-	        }
-
-	        return target;
-	    }
-
-	    function copyProp(val, key) {
-	        var existing = this[key];
-	        if (isPlainObject(val) && isPlainObject(existing)) {
-	            deepMixIn(existing, val);
-	        } else {
-	            this[key] = val;
-	        }
-	    }
-
-	    module.exports = deepMixIn;
-
-
-
-
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var slice = __webpack_require__(10);
-
-	    /**
-	     * Return a copy of the object, filtered to only have values for the whitelisted keys.
-	     */
-	    function pick(obj, var_keys){
-	        var keys = typeof arguments[1] !== 'string'? arguments[1] : slice(arguments, 1),
-	            out = {},
-	            i = 0, key;
-	        while (key = keys[i++]) {
-	            out[key] = obj[key];
-	        }
-	        return out;
-	    }
-
-	    module.exports = pick;
-
-
-
-
-/***/ },
-/* 17 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var isPrimitive = __webpack_require__(27);
-
-	    /**
-	     * get "nested" object property
-	     */
-	    function get(obj, prop){
-	        var parts = prop.split('.'),
-	            last = parts.pop();
-
-	        while (prop = parts.shift()) {
-	            obj = obj[prop];
-	            if (obj == null) return;
-	        }
-
-	        return obj[last];
-	    }
-
-	    module.exports = get;
-
-
-
-
-/***/ },
-/* 18 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var namespace = __webpack_require__(28);
-
-	    /**
-	     * set "nested" object property
-	     */
-	    function set(obj, prop, val){
-	        var parts = (/^(.+)\.(.+)$/).exec(prop);
-	        if (parts){
-	            namespace(obj, parts[1])[parts[2]] = val;
-	        } else {
-	            obj[prop] = val;
-	        }
-	    }
-
-	    module.exports = set;
-
-
-
-
-/***/ },
-/* 19 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(29);
-	var camelCase = __webpack_require__(30);
-	var upperCase = __webpack_require__(20);
-	    /**
-	     * camelCase + UPPERCASE first char
-	     */
-	    function pascalCase(str){
-	        str = toString(str);
-	        return camelCase(str).replace(/^[a-z]/, upperCase);
-	    }
-
-	    module.exports = pascalCase;
-
-
-
-/***/ },
-/* 20 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(29);
-	    /**
-	     * "Safer" String.toUpperCase()
-	     */
-	    function upperCase(str){
-	        str = toString(str);
-	        return str.toUpperCase();
-	    }
-	    module.exports = upperCase;
-
-
-
-/***/ },
-/* 21 */
-/***/ function(module, exports, __webpack_require__) {
-
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(process, global, module) {/*!
 	 * @overview es6-promise - a tiny implementation of Promises/A+.
 	 * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
@@ -3406,6 +3067,345 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(50), (function() { return this; }()), __webpack_require__(52)(module)))
 
 /***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Array forEach
+	     */
+	    function forEach(arr, callback, thisObj) {
+	        if (arr == null) {
+	            return;
+	        }
+	        var i = -1,
+	            len = arr.length;
+	        while (++i < len) {
+	            // we iterate over sparse items since there is no way to make it
+	            // work properly on IE 7-8. see #64
+	            if ( callback.call(thisObj, arr[i], i, arr) === false ) {
+	                break;
+	            }
+	        }
+	    }
+
+	    module.exports = forEach;
+
+
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Create slice of source array or array-like object
+	     */
+	    function slice(arr, start, end){
+	        var len = arr.length;
+
+	        if (start == null) {
+	            start = 0;
+	        } else if (start < 0) {
+	            start = Math.max(len + start, 0);
+	        } else {
+	            start = Math.min(start, len);
+	        }
+
+	        if (end == null) {
+	            end = len;
+	        } else if (end < 0) {
+	            end = Math.max(len + end, 0);
+	        } else {
+	            end = Math.min(end, len);
+	        }
+
+	        var result = [];
+	        while (start < end) {
+	            result.push(arr[start++]);
+	        }
+
+	        return result;
+	    }
+
+	    module.exports = slice;
+
+
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var indexOf = __webpack_require__(23);
+
+	    /**
+	     * If array contains values.
+	     */
+	    function contains(arr, val) {
+	        return indexOf(arr, val) !== -1;
+	    }
+	    module.exports = contains;
+
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var indexOf = __webpack_require__(23);
+
+	    /**
+	     * Remove a single item from the array.
+	     * (it won't remove duplicates, just a single item)
+	     */
+	    function remove(arr, item){
+	        var idx = indexOf(arr, item);
+	        if (idx !== -1) arr.splice(idx, 1);
+	    }
+
+	    module.exports = remove;
+
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Merge sort (http://en.wikipedia.org/wiki/Merge_sort)
+	     */
+	    function mergeSort(arr, compareFn) {
+	        if (arr == null) {
+	            return [];
+	        } else if (arr.length < 2) {
+	            return arr;
+	        }
+
+	        if (compareFn == null) {
+	            compareFn = defaultCompare;
+	        }
+
+	        var mid, left, right;
+
+	        mid   = ~~(arr.length / 2);
+	        left  = mergeSort( arr.slice(0, mid), compareFn );
+	        right = mergeSort( arr.slice(mid, arr.length), compareFn );
+
+	        return merge(left, right, compareFn);
+	    }
+
+	    function defaultCompare(a, b) {
+	        return a < b ? -1 : (a > b? 1 : 0);
+	    }
+
+	    function merge(left, right, compareFn) {
+	        var result = [];
+
+	        while (left.length && right.length) {
+	            if (compareFn(left[0], right[0]) <= 0) {
+	                // if 0 it should preserve same order (stable)
+	                result.push(left.shift());
+	            } else {
+	                result.push(right.shift());
+	            }
+	        }
+
+	        if (left.length) {
+	            result.push.apply(result, left);
+	        }
+
+	        if (right.length) {
+	            result.push.apply(result, right);
+	        }
+
+	        return result;
+	    }
+
+	    module.exports = mergeSort;
+
+
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var hasOwn = __webpack_require__(24);
+	var forIn = __webpack_require__(25);
+
+	    /**
+	     * Similar to Array/forEach but works over object properties and fixes Don't
+	     * Enum bug on IE.
+	     * based on: http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
+	     */
+	    function forOwn(obj, fn, thisObj){
+	        forIn(obj, function(val, key){
+	            if (hasOwn(obj, key)) {
+	                return fn.call(thisObj, obj[key], key, obj);
+	            }
+	        });
+	    }
+
+	    module.exports = forOwn;
+
+
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var forOwn = __webpack_require__(15);
+	var isPlainObject = __webpack_require__(26);
+
+	    /**
+	     * Mixes objects into the target object, recursively mixing existing child
+	     * objects.
+	     */
+	    function deepMixIn(target, objects) {
+	        var i = 0,
+	            n = arguments.length,
+	            obj;
+
+	        while(++i < n){
+	            obj = arguments[i];
+	            if (obj) {
+	                forOwn(obj, copyProp, target);
+	            }
+	        }
+
+	        return target;
+	    }
+
+	    function copyProp(val, key) {
+	        var existing = this[key];
+	        if (isPlainObject(val) && isPlainObject(existing)) {
+	            deepMixIn(existing, val);
+	        } else {
+	            this[key] = val;
+	        }
+	    }
+
+	    module.exports = deepMixIn;
+
+
+
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var slice = __webpack_require__(11);
+
+	    /**
+	     * Return a copy of the object, filtered to only have values for the whitelisted keys.
+	     */
+	    function pick(obj, var_keys){
+	        var keys = typeof arguments[1] !== 'string'? arguments[1] : slice(arguments, 1),
+	            out = {},
+	            i = 0, key;
+	        while (key = keys[i++]) {
+	            out[key] = obj[key];
+	        }
+	        return out;
+	    }
+
+	    module.exports = pick;
+
+
+
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var isPrimitive = __webpack_require__(27);
+
+	    /**
+	     * get "nested" object property
+	     */
+	    function get(obj, prop){
+	        var parts = prop.split('.'),
+	            last = parts.pop();
+
+	        while (prop = parts.shift()) {
+	            obj = obj[prop];
+	            if (obj == null) return;
+	        }
+
+	        return obj[last];
+	    }
+
+	    module.exports = get;
+
+
+
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var namespace = __webpack_require__(28);
+
+	    /**
+	     * set "nested" object property
+	     */
+	    function set(obj, prop, val){
+	        var parts = (/^(.+)\.(.+)$/).exec(prop);
+	        if (parts){
+	            namespace(obj, parts[1])[parts[2]] = val;
+	        } else {
+	            obj[prop] = val;
+	        }
+	    }
+
+	    module.exports = set;
+
+
+
+
+/***/ },
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var toString = __webpack_require__(29);
+	var camelCase = __webpack_require__(30);
+	var upperCase = __webpack_require__(21);
+	    /**
+	     * camelCase + UPPERCASE first char
+	     */
+	    function pascalCase(str){
+	        str = toString(str);
+	        return camelCase(str).replace(/^[a-z]/, upperCase);
+	    }
+
+	    module.exports = pascalCase;
+
+
+
+/***/ },
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var toString = __webpack_require__(29);
+	    /**
+	     * "Safer" String.toUpperCase()
+	     */
+	    function upperCase(str){
+	        str = toString(str);
+	        return str.toUpperCase();
+	    }
+	    module.exports = upperCase;
+
+
+
+/***/ },
 /* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -3818,7 +3818,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var forEach = __webpack_require__(9);
+	var forEach = __webpack_require__(10);
 
 	    /**
 	     * Create nested object if non-existent
@@ -3865,7 +3865,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var toString = __webpack_require__(29);
 	var replaceAccents = __webpack_require__(53);
 	var removeNonWord = __webpack_require__(54);
-	var upperCase = __webpack_require__(20);
+	var upperCase = __webpack_require__(21);
 	var lowerCase = __webpack_require__(55);
 	    /**
 	    * Convert string to camelCase text.
@@ -5028,7 +5028,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (options && options.eagerEject && item) {
 	      _this.inject(resourceName, item, { notify: false });
 	    }
-	    throw err;
+	    return DSUtils.Promise.reject(err);
 	  });
 	}
 
@@ -5079,7 +5079,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (options && options.eagerEject && ejected) {
 	      _this.inject(resourceName, ejected, { notify: false });
 	    }
-	    throw err;
+	    return DSUtils.Promise.reject(err);
 	  });
 	}
 
@@ -5164,7 +5164,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (resource) {
 	      delete resource.pendingQueries[id];
 	    }
-	    throw err;
+	    return DSUtils.Promise.reject(err);
 	  });
 	}
 
@@ -5296,7 +5296,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (resource) {
 	      delete resource.pendingQueries[queryHash];
 	    }
-	    throw err;
+	    return DSUtils.Promise.reject(err);
 	  });
 	}
 
