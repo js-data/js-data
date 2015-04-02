@@ -1,3 +1,8 @@
+##### 1.6.2 - 01 April 2015
+
+###### Backwards compatible bug fixes
+- #104 - DS.schemator is undefined when using browserify
+
 ##### 1.6.1 - 31 March 2015
 
 ###### Backwards compatible bug fixes

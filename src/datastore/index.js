@@ -309,7 +309,7 @@ class DS {
     } catch (e) {
     }
 
-    if (!Schemator || DSUtils.isEmpty(Schemator)) {
+    if (!Schemator || typeof Schemator !== 'function') {
       try {
         Schemator = window.Schemator;
       } catch (e) {
