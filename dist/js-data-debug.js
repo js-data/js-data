@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 1.6.2 - Homepage <http://www.js-data.io/>
+ * @version 1.6.3 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -79,10 +79,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  DSUtils: DSUtils,
 	  DSErrors: DSErrors,
 	  version: {
-	    full: "1.6.2",
+	    full: "1.6.3",
 	    major: parseInt("1", 10),
 	    minor: parseInt("6", 10),
-	    patch: parseInt("2", 10),
+	    patch: parseInt("3", 10),
 	    alpha: true ? "false" : false,
 	    beta: true ? "false" : false
 	  }
@@ -5358,12 +5358,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	              };
 	            }
 
-	            if (def.type === "hasMany" && params[def.foreignKey]) {
+	            if (def.type === "hasMany") {
 	              task = _this.findAll(relationName, params, __options.orig());
 	            } else if (def.type === "hasOne") {
 	              if (def.localKey && instance[def.localKey]) {
 	                task = _this.find(relationName, instance[def.localKey], __options.orig());
-	              } else if (def.foreignKey && params[def.foreignKey]) {
+	              } else if (def.foreignKey) {
 	                task = _this.findAll(relationName, params, __options.orig()).then(function (hasOnes) {
 	                  return hasOnes.length ? hasOnes[0] : null;
 	                });

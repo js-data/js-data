@@ -47,12 +47,12 @@ export default function loadRelations(resourceName, instance, relations, options
             };
           }
 
-          if (def.type === 'hasMany' && params[def.foreignKey]) {
+          if (def.type === 'hasMany') {
             task = _this.findAll(relationName, params, __options.orig());
           } else if (def.type === 'hasOne') {
             if (def.localKey && instance[def.localKey]) {
               task = _this.find(relationName, instance[def.localKey], __options.orig());
-            } else if (def.foreignKey && params[def.foreignKey]) {
+            } else if (def.foreignKey) {
               task = _this.findAll(relationName, params, __options.orig()).then(hasOnes => hasOnes.length ? hasOnes[0] : null);
             }
           } else if (instance[def.localKey]) {
