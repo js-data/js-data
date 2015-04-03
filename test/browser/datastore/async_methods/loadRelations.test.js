@@ -372,4 +372,22 @@ describe('DS#loadRelations', function () {
       }
     }, 30);
   });
+  it('should get an item from the server with allowSimpleWhere disabled', function (done) {
+    var _this = this;
+    store.inject('user', user10);
+
+    store.loadRelations('user', 10, ['profile'], { allowSimpleWhere: false, bypassCache: true });
+
+    setTimeout(function () {
+      try {
+        assert.equal(1, _this.requests.length);
+        assert.equal(_this.requests[0].url, 'http://test.js-data.io/profile?where=%7B%22userId%22:10%7D');
+        assert.equal(_this.requests[0].method, 'GET');
+        done();
+      } catch (err) {
+        done(err.stack);
+      }
+    }, 30);
+
+  });
 });

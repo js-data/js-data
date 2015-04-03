@@ -38,21 +38,22 @@ export default function loadRelations(resourceName, instance, relations, options
         if (DSUtils.contains(relations, relationName) || DSUtils.contains(relations, def.localField)) {
           let task;
           let params = {};
+          let where;
           if (__options.allowSimpleWhere) {
             params[def.foreignKey] = instance[definition.idAttribute];
+            where = params;
           } else {
             params.where = {};
-            params.where[def.foreignKey] = {
-              '==': instance[definition.idAttribute]
-            };
+            params.where[def.foreignKey] = instance[definition.idAttribute];
+            where = params.where;
           }
 
-          if (def.type === 'hasMany' && params[def.foreignKey]) {
+          if (def.type === 'hasMany' && where[def.foreignKey]) {
             task = _this.findAll(relationName, params, __options.orig());
           } else if (def.type === 'hasOne') {
             if (def.localKey && instance[def.localKey]) {
               task = _this.find(relationName, instance[def.localKey], __options.orig());
-            } else if (def.foreignKey && params[def.foreignKey]) {
+            } else if (def.foreignKey && where[def.foreignKey]) {
               task = _this.findAll(relationName, params, __options.orig()).then(hasOnes => hasOnes.length ? hasOnes[0] : null);
             }
           } else if (instance[def.localKey]) {
