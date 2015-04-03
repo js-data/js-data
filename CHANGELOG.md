@@ -1,3 +1,8 @@
+##### 1.6.3 - 03 April 2015
+
+###### Backwards compatible bug fixes
+- #106 - loadRelations: check params.where instead when allowSimpleWhere is disabled - Thanks @maninga!
+
 ##### 1.6.2 - 01 April 2015
 
 ###### Backwards compatible bug fixes
