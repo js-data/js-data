@@ -2,7 +2,8 @@ import DSUtils from '../../utils';
 import DSErrors from '../../errors';
 
 function _getReactFunction(DS, definition, resource) {
-  let name = definition.n;
+  // using "var" avoids a JSHint error
+  var name = definition.n;
   return function _react(added, removed, changed, oldValueFn, firstTime) {
     let target = this;
     let item;
@@ -45,15 +46,6 @@ function _getReactFunction(DS, definition, resource) {
         compute = compute || !fn.deps.length;
         if (compute) {
           DSUtils.compute.call(item, fn, field);
-        }
-      });
-    }
-
-    if (definition.relations) {
-      item = item || DS.get(name, innerId);
-      DSUtils.forEach(definition.relationList, def => {
-        if (item[def.localField] && (def.localKey in added || def.localKey in removed || def.localKey in changed)) {
-          DS.link(name, item[definition.idAttribute], [def.relation]);
         }
       });
     }
@@ -114,13 +106,12 @@ function _inject(definition, resource, attrs, options) {
                   }
                 }
               });
-              attrs[def.localField] = items;
             } else {
               if (toInject !== _this.s[relationName].index[toInject[relationDef.idAttribute]]) {
                 try {
-                  attrs[def.localField] = _this.inject(relationName, attrs[def.localField], options.orig());
+                  let injected = _this.inject(relationName, attrs[def.localField], options.orig());
                   if (def.foreignKey) {
-                    attrs[def.localField][def.foreignKey] = attrs[definition.idAttribute];
+                    injected[def.foreignKey] = attrs[definition.idAttribute];
                   }
                 } catch (err) {
                   options.errorFn(err, `Failed to inject ${def.type} relation: "${relationName}"!`);
@@ -144,6 +135,45 @@ function _inject(definition, resource, attrs, options) {
           } else {
             item = {};
           }
+          DSUtils.forEach(definition.relationList, def => {
+            let relationName = def.relation;
+            let relationDef = _this.defs[relationName];
+            let params = {};
+            delete attrs[def.localField];
+            if (def.type === 'belongsTo') {
+              Object.defineProperty(item, def.localField, {
+                get: () => item[def.localKey] ? relationDef.get(item[def.localKey]) : undefined,
+                set: v => v
+              });
+            } else if (def.type === 'hasMany') {
+              params[def.foreignKey] = attrs[definition.idAttribute];
+              Object.defineProperty(item, def.localField, {
+                get: () => {
+                  return params[def.foreignKey] ? _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true }) : undefined;
+                },
+                set: v => v
+              });
+            } else if (def.type === 'hasOne') {
+              if (def.localKey) {
+                Object.defineProperty(item, def.localField, {
+                  get: () => item[def.localKey] ? relationDef.get(item[def.localKey]) : undefined,
+                  set: v => v
+                });
+              } else {
+                params[def.foreignKey] = attrs[definition.idAttribute];
+                Object.defineProperty(item, def.localField, {
+                  get: () => {
+                    let items = params[def.foreignKey] ? _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true }) : [];
+                    if (items.length) {
+                      return items[0];
+                    }
+                    return undefined;
+                  },
+                  set: v => v
+                });
+              }
+            }
+          });
           DSUtils.deepMixIn(item, attrs);
 
           resource.collection.push(item);
@@ -189,18 +219,6 @@ function _inject(definition, resource, attrs, options) {
   return injected;
 }
 
-function _link(definition, injected, options) {
-  var _this = this;
-
-  DSUtils.forEach(definition.relationList, def => {
-    if (options.findBelongsTo && def.type === 'belongsTo' && injected[definition.idAttribute]) {
-      _this.link(definition.n, injected[definition.idAttribute], [def.relation]);
-    } else if ((options.findHasMany && def.type === 'hasMany') || (options.findHasOne && def.type === 'hasOne')) {
-      _this.link(definition.n, injected[definition.idAttribute], [def.relation]);
-    }
-  });
-}
-
 export default function inject(resourceName, attrs, options) {
   let _this = this;
   let definition = _this.defs[resourceName];
@@ -213,7 +231,6 @@ export default function inject(resourceName, attrs, options) {
     throw new DSErrors.IA(`${resourceName}.inject: "attrs" must be an object or an array!`);
   }
 
-  let name = definition.n;
   options = DSUtils._(definition, options);
 
   options.logFn('inject', attrs, options);
@@ -224,24 +241,6 @@ export default function inject(resourceName, attrs, options) {
 
   injected = _inject.call(_this, definition, resource, attrs, options);
   resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
-
-  if (options.findInverseLinks) {
-    if (DSUtils._a(injected)) {
-      if (injected.length) {
-        _this.linkInverse(name, injected[0][definition.idAttribute]);
-      }
-    } else {
-      _this.linkInverse(name, injected[definition.idAttribute]);
-    }
-  }
-
-  if (DSUtils._a(injected)) {
-    DSUtils.forEach(injected, injectedI => {
-      _link.call(_this, definition, injectedI, options);
-    });
-  } else {
-    _link.call(_this, definition, injected, options);
-  }
 
   if (options.notify) {
     options.afterInject(options, injected);

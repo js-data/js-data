@@ -144,8 +144,9 @@ describe('DS#find', function () {
           }).then(function (comment) {
             delete comment.approvedByUser.comments;
             delete comment.user.comments;
-            assert.deepEqual(JSON.stringify(comment), JSON.stringify(comment19));
-            assert.deepEqual(JSON.stringify(comment), JSON.stringify(store.get('comment', 19)));
+            assert.deepEqual(JSON.stringify(comment.approvedByUser), JSON.stringify(comment19.approvedByUser));
+            assert.deepEqual(JSON.stringify(comment.user), JSON.stringify(comment19.user));
+            assert.isTrue(comment === store.get('comment', 19));
 
             done();
           }).catch(function (err) {
@@ -170,7 +171,8 @@ describe('DS#find', function () {
           assert.equal(_this.requests[2].method, 'GET');
           _this.requests[2].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment));
         }, 30);
-      }).catch(function () {
+      }).catch(function (e) {
+        console.error(e.stack);
         done('Should not have failed!');
       });
 
@@ -180,7 +182,8 @@ describe('DS#find', function () {
         assert.equal(_this.requests[1].method, 'GET');
         _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment));
       }, 30);
-    }).catch(function () {
+    }).catch(function (e) {
+      console.error(e.stack);
       done('Should not have failed!');
     });
 

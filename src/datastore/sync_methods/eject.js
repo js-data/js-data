@@ -31,7 +31,6 @@ export default function eject(resourceName, id, options) {
       definition.beforeEject(options, item);
       definition.emit('DS.beforeEject', definition, item);
     }
-    _this.unlinkInverse(definition.n, id);
     resource.collection.splice(i, 1);
     if (DSUtils.w) {
       resource.observers[id].close();
