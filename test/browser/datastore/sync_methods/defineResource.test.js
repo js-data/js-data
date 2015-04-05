@@ -237,8 +237,6 @@ describe('DS#defineResource', function () {
       organizationId: 66
     });
 
-    store.link('user', 88, ['organization']);
-
     assert.isTrue(user88.organization === org66);
 
     user88.organizationId = 77;

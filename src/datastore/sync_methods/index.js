@@ -6,10 +6,6 @@ import eject from './eject';
 import ejectAll from './ejectAll';
 import filter from './filter';
 import inject from './inject';
-import link from './link';
-import linkAll from './linkAll';
-import linkInverse from './linkInverse';
-import unlinkInverse from './unlinkInverse';
 
 let NER = DSErrors.NER;
 let IA = DSErrors.IA;
@@ -254,9 +250,6 @@ export default {
     }
     return resource.saved[id];
   },
-  link,
-  linkAll,
-  linkInverse,
   previous(resourceName, id) {
     let _this = this;
     let definition = _this.defs[resourceName];
@@ -273,6 +266,5 @@ export default {
 
     // return resource from cache
     return resource.previousAttributes[id] ? DSUtils.copy(resource.previousAttributes[id]) : undefined;
-  },
-  unlinkInverse
+  }
 };

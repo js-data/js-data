@@ -110,17 +110,17 @@ describe('DS#inject', function () {
   it('should find inverse links', function () {
     store.inject('user', { organizationId: 5, id: 1 });
 
-    store.inject('organization', { id: 5 }, { findInverseLinks: true });
+    store.inject('organization', { id: 5 });
 
     assert.isObject(store.get('user', 1).organization);
 
     assert.deepEqual(store.get('user', 1).comments, []);
 
-    store.inject('comment', { approvedBy: 1, id: 23 }, { findInverseLinks: true });
+    store.inject('comment', { approvedBy: 1, id: 23 });
 
     assert.equal(1, store.get('user', 1).comments.length);
 
-    store.inject('comment', { approvedBy: 1, id: 44 }, { findInverseLinks: true });
+    store.inject('comment', { approvedBy: 1, id: 44 });
 
     assert.equal(2, store.get('user', 1).comments.length);
   });

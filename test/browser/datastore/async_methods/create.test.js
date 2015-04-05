@@ -111,9 +111,6 @@ describe('DS#create', function () {
       profile: {
         email: 'sally@test.com'
       }
-    }, {
-      findBelongsTo: true,
-      findInverseLinks: true
     }).then(function (user) {
       assert.equal(user.id, payload.id, 'user should have been created');
 
@@ -238,7 +235,7 @@ describe('DS#create', function () {
       organizationId: 77,
       id: 88
     }, { upsert: false, findBelongsTo: true }).then(function (user) {
-      var organization = store.link('organization', 77, ['user']);
+      var organization = user.organization;
       assert.isArray(organization.users);
       assert.equal(1, organization.users.length);
       assert.isObject(user.organization);
