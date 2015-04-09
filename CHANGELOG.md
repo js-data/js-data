@@ -1,3 +1,9 @@
+##### 1.7.0 - 09 April 2015
+
+###### Backwards compatible API changes
+- #106 - Add pathname option to actions
+- #114 - Add support to actions for having item ids in the path
+
 ##### 1.6.3 - 03 April 2015
 
 ###### Backwards compatible bug fixes
