@@ -268,6 +268,10 @@ describe('DS#defineResource', function () {
       actions: {
         count: {
           method: 'POST'
+        },
+        foo: {
+          method: 'POST',
+          pathname: 'bar'
         }
       }
     });
@@ -280,7 +284,22 @@ describe('DS#defineResource', function () {
       Thing2.count().then(function (data) {
         assert.equal(data.data, 'stuff2');
 
-        done();
+        Thing2.foo().then(function (data) {
+          assert.equal(data.data, 'stuff3');
+
+          done();
+        });
+
+        setTimeout(function () {
+          try {
+            assert.equal(3, _this.requests.length);
+            assert.equal(_this.requests[2].url, 'http://foo.com/thing2/bar');
+            assert.equal(_this.requests[2].method, 'POST');
+            _this.requests[2].respond(200, { 'Content-Type': 'text/plain' }, 'stuff3');
+          } catch (err) {
+            done(err);
+          }
+        }, 30);
       });
 
       setTimeout(function () {
@@ -343,7 +362,20 @@ describe('DS#defineResource', function () {
         Thing.test2().then(function (data) {
           assert.equal(data.data, 'blah');
 
-          done();
+          Thing.test2(1).then(function (data) {
+            assert.equal(data.data, 'bleh');
+
+            done();
+          });
+
+          setTimeout(function () {
+            assert.equal(4, _this.requests.length);
+            console.log(_this.requests[3]);
+            assert.equal(_this.requests[3].url, 'blah/1/test2');
+            assert.equal(_this.requests[3].method, 'GET');
+            _this.requests[3].respond(200, { 'Content-Type': 'text/plain' }, 'bleh');
+
+          }, 30);
         });
 
         setTimeout(function () {

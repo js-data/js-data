@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 1.6.3 - Homepage <http://www.js-data.io/>
+ * @version 1.7.0 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -79,10 +79,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  DSUtils: DSUtils,
 	  DSErrors: DSErrors,
 	  version: {
-	    full: "1.6.3",
+	    full: "1.7.0",
 	    major: parseInt("1", 10),
-	    minor: parseInt("6", 10),
-	    patch: parseInt("3", 10),
+	    minor: parseInt("7", 10),
+	    patch: parseInt("0", 10),
 	    alpha: true ? "false" : false,
 	    beta: true ? "false" : false
 	  }
@@ -98,29 +98,29 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var DSErrors = _interopRequire(__webpack_require__(2));
 
-	var forEach = _interopRequire(__webpack_require__(9));
+	var forEach = _interopRequire(__webpack_require__(10));
 
-	var slice = _interopRequire(__webpack_require__(10));
+	var slice = _interopRequire(__webpack_require__(11));
 
-	var forOwn = _interopRequire(__webpack_require__(14));
+	var forOwn = _interopRequire(__webpack_require__(15));
 
-	var contains = _interopRequire(__webpack_require__(11));
+	var contains = _interopRequire(__webpack_require__(12));
 
-	var deepMixIn = _interopRequire(__webpack_require__(15));
+	var deepMixIn = _interopRequire(__webpack_require__(16));
 
-	var pascalCase = _interopRequire(__webpack_require__(19));
+	var pascalCase = _interopRequire(__webpack_require__(20));
 
-	var remove = _interopRequire(__webpack_require__(12));
+	var remove = _interopRequire(__webpack_require__(13));
 
-	var pick = _interopRequire(__webpack_require__(16));
+	var pick = _interopRequire(__webpack_require__(17));
 
-	var sort = _interopRequire(__webpack_require__(13));
+	var sort = _interopRequire(__webpack_require__(14));
 
-	var upperCase = _interopRequire(__webpack_require__(20));
+	var upperCase = _interopRequire(__webpack_require__(21));
 
 	var observe = _interopRequire(__webpack_require__(6));
 
-	var es6Promise = _interopRequire(__webpack_require__(21));
+	var es6Promise = _interopRequire(__webpack_require__(9));
 
 	var BinaryHeap = _interopRequire(__webpack_require__(22));
 
@@ -550,7 +550,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  fromJson: function fromJson(json) {
 	    return isString(json) ? JSON.parse(json) : json;
 	  },
-	  get: __webpack_require__(17),
+	  get: __webpack_require__(18),
 	  intersection: intersection,
 	  isArray: isArray,
 	  isBoolean: isBoolean,
@@ -600,7 +600,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	  },
 	  remove: remove,
-	  set: __webpack_require__(18),
+	  set: __webpack_require__(19),
 	  slice: slice,
 	  sort: sort,
 	  toJson: JSON.stringify,
@@ -1744,23 +1744,23 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var DSErrors = _interopRequire(__webpack_require__(2));
 
-	var defineResource = _interopRequire(__webpack_require__(31));
+	var defineResource = _interopRequire(__webpack_require__(30));
 
-	var eject = _interopRequire(__webpack_require__(32));
+	var eject = _interopRequire(__webpack_require__(31));
 
-	var ejectAll = _interopRequire(__webpack_require__(33));
+	var ejectAll = _interopRequire(__webpack_require__(32));
 
-	var filter = _interopRequire(__webpack_require__(34));
+	var filter = _interopRequire(__webpack_require__(33));
 
-	var inject = _interopRequire(__webpack_require__(35));
+	var inject = _interopRequire(__webpack_require__(34));
 
-	var link = _interopRequire(__webpack_require__(36));
+	var link = _interopRequire(__webpack_require__(35));
 
-	var linkAll = _interopRequire(__webpack_require__(37));
+	var linkAll = _interopRequire(__webpack_require__(36));
 
-	var linkInverse = _interopRequire(__webpack_require__(38));
+	var linkInverse = _interopRequire(__webpack_require__(37));
 
-	var unlinkInverse = _interopRequire(__webpack_require__(39));
+	var unlinkInverse = _interopRequire(__webpack_require__(38));
 
 	var NER = DSErrors.NER;
 	var IA = DSErrors.IA;
@@ -2032,25 +2032,25 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
-	var create = _interopRequire(__webpack_require__(40));
+	var create = _interopRequire(__webpack_require__(41));
 
-	var destroy = _interopRequire(__webpack_require__(41));
+	var destroy = _interopRequire(__webpack_require__(42));
 
-	var destroyAll = _interopRequire(__webpack_require__(42));
+	var destroyAll = _interopRequire(__webpack_require__(43));
 
-	var find = _interopRequire(__webpack_require__(43));
+	var find = _interopRequire(__webpack_require__(44));
 
-	var findAll = _interopRequire(__webpack_require__(44));
+	var findAll = _interopRequire(__webpack_require__(45));
 
-	var loadRelations = _interopRequire(__webpack_require__(45));
+	var loadRelations = _interopRequire(__webpack_require__(46));
 
-	var reap = _interopRequire(__webpack_require__(46));
+	var reap = _interopRequire(__webpack_require__(47));
 
-	var save = _interopRequire(__webpack_require__(47));
+	var save = _interopRequire(__webpack_require__(48));
 
-	var update = _interopRequire(__webpack_require__(48));
+	var update = _interopRequire(__webpack_require__(49));
 
-	var updateAll = _interopRequire(__webpack_require__(49));
+	var updateAll = _interopRequire(__webpack_require__(50));
 
 	module.exports = {
 	  create: create,
@@ -2087,345 +2087,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Array forEach
-	     */
-	    function forEach(arr, callback, thisObj) {
-	        if (arr == null) {
-	            return;
-	        }
-	        var i = -1,
-	            len = arr.length;
-	        while (++i < len) {
-	            // we iterate over sparse items since there is no way to make it
-	            // work properly on IE 7-8. see #64
-	            if ( callback.call(thisObj, arr[i], i, arr) === false ) {
-	                break;
-	            }
-	        }
-	    }
-
-	    module.exports = forEach;
-
-
-
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Create slice of source array or array-like object
-	     */
-	    function slice(arr, start, end){
-	        var len = arr.length;
-
-	        if (start == null) {
-	            start = 0;
-	        } else if (start < 0) {
-	            start = Math.max(len + start, 0);
-	        } else {
-	            start = Math.min(start, len);
-	        }
-
-	        if (end == null) {
-	            end = len;
-	        } else if (end < 0) {
-	            end = Math.max(len + end, 0);
-	        } else {
-	            end = Math.min(end, len);
-	        }
-
-	        var result = [];
-	        while (start < end) {
-	            result.push(arr[start++]);
-	        }
-
-	        return result;
-	    }
-
-	    module.exports = slice;
-
-
-
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var indexOf = __webpack_require__(23);
-
-	    /**
-	     * If array contains values.
-	     */
-	    function contains(arr, val) {
-	        return indexOf(arr, val) !== -1;
-	    }
-	    module.exports = contains;
-
-
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var indexOf = __webpack_require__(23);
-
-	    /**
-	     * Remove a single item from the array.
-	     * (it won't remove duplicates, just a single item)
-	     */
-	    function remove(arr, item){
-	        var idx = indexOf(arr, item);
-	        if (idx !== -1) arr.splice(idx, 1);
-	    }
-
-	    module.exports = remove;
-
-
-
-/***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Merge sort (http://en.wikipedia.org/wiki/Merge_sort)
-	     */
-	    function mergeSort(arr, compareFn) {
-	        if (arr == null) {
-	            return [];
-	        } else if (arr.length < 2) {
-	            return arr;
-	        }
-
-	        if (compareFn == null) {
-	            compareFn = defaultCompare;
-	        }
-
-	        var mid, left, right;
-
-	        mid   = ~~(arr.length / 2);
-	        left  = mergeSort( arr.slice(0, mid), compareFn );
-	        right = mergeSort( arr.slice(mid, arr.length), compareFn );
-
-	        return merge(left, right, compareFn);
-	    }
-
-	    function defaultCompare(a, b) {
-	        return a < b ? -1 : (a > b? 1 : 0);
-	    }
-
-	    function merge(left, right, compareFn) {
-	        var result = [];
-
-	        while (left.length && right.length) {
-	            if (compareFn(left[0], right[0]) <= 0) {
-	                // if 0 it should preserve same order (stable)
-	                result.push(left.shift());
-	            } else {
-	                result.push(right.shift());
-	            }
-	        }
-
-	        if (left.length) {
-	            result.push.apply(result, left);
-	        }
-
-	        if (right.length) {
-	            result.push.apply(result, right);
-	        }
-
-	        return result;
-	    }
-
-	    module.exports = mergeSort;
-
-
-
-
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var hasOwn = __webpack_require__(24);
-	var forIn = __webpack_require__(25);
-
-	    /**
-	     * Similar to Array/forEach but works over object properties and fixes Don't
-	     * Enum bug on IE.
-	     * based on: http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
-	     */
-	    function forOwn(obj, fn, thisObj){
-	        forIn(obj, function(val, key){
-	            if (hasOwn(obj, key)) {
-	                return fn.call(thisObj, obj[key], key, obj);
-	            }
-	        });
-	    }
-
-	    module.exports = forOwn;
-
-
-
-
-/***/ },
-/* 15 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var forOwn = __webpack_require__(14);
-	var isPlainObject = __webpack_require__(26);
-
-	    /**
-	     * Mixes objects into the target object, recursively mixing existing child
-	     * objects.
-	     */
-	    function deepMixIn(target, objects) {
-	        var i = 0,
-	            n = arguments.length,
-	            obj;
-
-	        while(++i < n){
-	            obj = arguments[i];
-	            if (obj) {
-	                forOwn(obj, copyProp, target);
-	            }
-	        }
-
-	        return target;
-	    }
-
-	    function copyProp(val, key) {
-	        var existing = this[key];
-	        if (isPlainObject(val) && isPlainObject(existing)) {
-	            deepMixIn(existing, val);
-	        } else {
-	            this[key] = val;
-	        }
-	    }
-
-	    module.exports = deepMixIn;
-
-
-
-
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var slice = __webpack_require__(10);
-
-	    /**
-	     * Return a copy of the object, filtered to only have values for the whitelisted keys.
-	     */
-	    function pick(obj, var_keys){
-	        var keys = typeof arguments[1] !== 'string'? arguments[1] : slice(arguments, 1),
-	            out = {},
-	            i = 0, key;
-	        while (key = keys[i++]) {
-	            out[key] = obj[key];
-	        }
-	        return out;
-	    }
-
-	    module.exports = pick;
-
-
-
-
-/***/ },
-/* 17 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var isPrimitive = __webpack_require__(27);
-
-	    /**
-	     * get "nested" object property
-	     */
-	    function get(obj, prop){
-	        var parts = prop.split('.'),
-	            last = parts.pop();
-
-	        while (prop = parts.shift()) {
-	            obj = obj[prop];
-	            if (obj == null) return;
-	        }
-
-	        return obj[last];
-	    }
-
-	    module.exports = get;
-
-
-
-
-/***/ },
-/* 18 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var namespace = __webpack_require__(28);
-
-	    /**
-	     * set "nested" object property
-	     */
-	    function set(obj, prop, val){
-	        var parts = (/^(.+)\.(.+)$/).exec(prop);
-	        if (parts){
-	            namespace(obj, parts[1])[parts[2]] = val;
-	        } else {
-	            obj[prop] = val;
-	        }
-	    }
-
-	    module.exports = set;
-
-
-
-
-/***/ },
-/* 19 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(29);
-	var camelCase = __webpack_require__(30);
-	var upperCase = __webpack_require__(20);
-	    /**
-	     * camelCase + UPPERCASE first char
-	     */
-	    function pascalCase(str){
-	        str = toString(str);
-	        return camelCase(str).replace(/^[a-z]/, upperCase);
-	    }
-
-	    module.exports = pascalCase;
-
-
-
-/***/ },
-/* 20 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(29);
-	    /**
-	     * "Safer" String.toUpperCase()
-	     */
-	    function upperCase(str){
-	        str = toString(str);
-	        return str.toUpperCase();
-	    }
-	    module.exports = upperCase;
-
-
-
-/***/ },
-/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(process, global, module) {/*!
@@ -3388,7 +3049,346 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this['ES6Promise'] = es6$promise$umd$$ES6Promise;
 	    }
 	}).call(this);
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(50), (function() { return this; }()), __webpack_require__(52)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(40), (function() { return this; }()), __webpack_require__(52)(module)))
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Array forEach
+	     */
+	    function forEach(arr, callback, thisObj) {
+	        if (arr == null) {
+	            return;
+	        }
+	        var i = -1,
+	            len = arr.length;
+	        while (++i < len) {
+	            // we iterate over sparse items since there is no way to make it
+	            // work properly on IE 7-8. see #64
+	            if ( callback.call(thisObj, arr[i], i, arr) === false ) {
+	                break;
+	            }
+	        }
+	    }
+
+	    module.exports = forEach;
+
+
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Create slice of source array or array-like object
+	     */
+	    function slice(arr, start, end){
+	        var len = arr.length;
+
+	        if (start == null) {
+	            start = 0;
+	        } else if (start < 0) {
+	            start = Math.max(len + start, 0);
+	        } else {
+	            start = Math.min(start, len);
+	        }
+
+	        if (end == null) {
+	            end = len;
+	        } else if (end < 0) {
+	            end = Math.max(len + end, 0);
+	        } else {
+	            end = Math.min(end, len);
+	        }
+
+	        var result = [];
+	        while (start < end) {
+	            result.push(arr[start++]);
+	        }
+
+	        return result;
+	    }
+
+	    module.exports = slice;
+
+
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var indexOf = __webpack_require__(23);
+
+	    /**
+	     * If array contains values.
+	     */
+	    function contains(arr, val) {
+	        return indexOf(arr, val) !== -1;
+	    }
+	    module.exports = contains;
+
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var indexOf = __webpack_require__(23);
+
+	    /**
+	     * Remove a single item from the array.
+	     * (it won't remove duplicates, just a single item)
+	     */
+	    function remove(arr, item){
+	        var idx = indexOf(arr, item);
+	        if (idx !== -1) arr.splice(idx, 1);
+	    }
+
+	    module.exports = remove;
+
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Merge sort (http://en.wikipedia.org/wiki/Merge_sort)
+	     */
+	    function mergeSort(arr, compareFn) {
+	        if (arr == null) {
+	            return [];
+	        } else if (arr.length < 2) {
+	            return arr;
+	        }
+
+	        if (compareFn == null) {
+	            compareFn = defaultCompare;
+	        }
+
+	        var mid, left, right;
+
+	        mid   = ~~(arr.length / 2);
+	        left  = mergeSort( arr.slice(0, mid), compareFn );
+	        right = mergeSort( arr.slice(mid, arr.length), compareFn );
+
+	        return merge(left, right, compareFn);
+	    }
+
+	    function defaultCompare(a, b) {
+	        return a < b ? -1 : (a > b? 1 : 0);
+	    }
+
+	    function merge(left, right, compareFn) {
+	        var result = [];
+
+	        while (left.length && right.length) {
+	            if (compareFn(left[0], right[0]) <= 0) {
+	                // if 0 it should preserve same order (stable)
+	                result.push(left.shift());
+	            } else {
+	                result.push(right.shift());
+	            }
+	        }
+
+	        if (left.length) {
+	            result.push.apply(result, left);
+	        }
+
+	        if (right.length) {
+	            result.push.apply(result, right);
+	        }
+
+	        return result;
+	    }
+
+	    module.exports = mergeSort;
+
+
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var hasOwn = __webpack_require__(24);
+	var forIn = __webpack_require__(25);
+
+	    /**
+	     * Similar to Array/forEach but works over object properties and fixes Don't
+	     * Enum bug on IE.
+	     * based on: http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
+	     */
+	    function forOwn(obj, fn, thisObj){
+	        forIn(obj, function(val, key){
+	            if (hasOwn(obj, key)) {
+	                return fn.call(thisObj, obj[key], key, obj);
+	            }
+	        });
+	    }
+
+	    module.exports = forOwn;
+
+
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var forOwn = __webpack_require__(15);
+	var isPlainObject = __webpack_require__(26);
+
+	    /**
+	     * Mixes objects into the target object, recursively mixing existing child
+	     * objects.
+	     */
+	    function deepMixIn(target, objects) {
+	        var i = 0,
+	            n = arguments.length,
+	            obj;
+
+	        while(++i < n){
+	            obj = arguments[i];
+	            if (obj) {
+	                forOwn(obj, copyProp, target);
+	            }
+	        }
+
+	        return target;
+	    }
+
+	    function copyProp(val, key) {
+	        var existing = this[key];
+	        if (isPlainObject(val) && isPlainObject(existing)) {
+	            deepMixIn(existing, val);
+	        } else {
+	            this[key] = val;
+	        }
+	    }
+
+	    module.exports = deepMixIn;
+
+
+
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var slice = __webpack_require__(11);
+
+	    /**
+	     * Return a copy of the object, filtered to only have values for the whitelisted keys.
+	     */
+	    function pick(obj, var_keys){
+	        var keys = typeof arguments[1] !== 'string'? arguments[1] : slice(arguments, 1),
+	            out = {},
+	            i = 0, key;
+	        while (key = keys[i++]) {
+	            out[key] = obj[key];
+	        }
+	        return out;
+	    }
+
+	    module.exports = pick;
+
+
+
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var isPrimitive = __webpack_require__(29);
+
+	    /**
+	     * get "nested" object property
+	     */
+	    function get(obj, prop){
+	        var parts = prop.split('.'),
+	            last = parts.pop();
+
+	        while (prop = parts.shift()) {
+	            obj = obj[prop];
+	            if (obj == null) return;
+	        }
+
+	        return obj[last];
+	    }
+
+	    module.exports = get;
+
+
+
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var namespace = __webpack_require__(39);
+
+	    /**
+	     * set "nested" object property
+	     */
+	    function set(obj, prop, val){
+	        var parts = (/^(.+)\.(.+)$/).exec(prop);
+	        if (parts){
+	            namespace(obj, parts[1])[parts[2]] = val;
+	        } else {
+	            obj[prop] = val;
+	        }
+	    }
+
+	    module.exports = set;
+
+
+
+
+/***/ },
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var toString = __webpack_require__(27);
+	var camelCase = __webpack_require__(28);
+	var upperCase = __webpack_require__(21);
+	    /**
+	     * camelCase + UPPERCASE first char
+	     */
+	    function pascalCase(str){
+	        str = toString(str);
+	        return camelCase(str).replace(/^[a-z]/, upperCase);
+	    }
+
+	    module.exports = pascalCase;
+
+
+
+/***/ },
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var toString = __webpack_require__(27);
+	    /**
+	     * "Safer" String.toUpperCase()
+	     */
+	    function upperCase(str){
+	        str = toString(str);
+	        return str.toUpperCase();
+	    }
+	    module.exports = upperCase;
+
+
 
 /***/ },
 /* 22 */
@@ -3779,6 +3779,51 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 
 	    /**
+	     * Typecast a value to a String, using an empty string value for null or
+	     * undefined.
+	     */
+	    function toString(val){
+	        return val == null ? '' : val.toString();
+	    }
+
+	    module.exports = toString;
+
+
+
+
+/***/ },
+/* 28 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var toString = __webpack_require__(27);
+	var replaceAccents = __webpack_require__(53);
+	var removeNonWord = __webpack_require__(54);
+	var upperCase = __webpack_require__(21);
+	var lowerCase = __webpack_require__(55);
+	    /**
+	    * Convert string to camelCase text.
+	    */
+	    function camelCase(str){
+	        str = toString(str);
+	        str = replaceAccents(str);
+	        str = removeNonWord(str)
+	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
+	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
+	            .replace(/\s+/g, '') //remove spaces
+	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
+	        return str;
+	    }
+	    module.exports = camelCase;
+
+
+
+/***/ },
+/* 29 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
 	     * Checks if the object is a primitive
 	     */
 	    function isPrimitive(value) {
@@ -3800,77 +3845,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 28 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var forEach = __webpack_require__(9);
-
-	    /**
-	     * Create nested object if non-existent
-	     */
-	    function namespace(obj, path){
-	        if (!path) return obj;
-	        forEach(path.split('.'), function(key){
-	            if (!obj[key]) {
-	                obj[key] = {};
-	            }
-	            obj = obj[key];
-	        });
-	        return obj;
-	    }
-
-	    module.exports = namespace;
-
-
-
-
-/***/ },
-/* 29 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Typecast a value to a String, using an empty string value for null or
-	     * undefined.
-	     */
-	    function toString(val){
-	        return val == null ? '' : val.toString();
-	    }
-
-	    module.exports = toString;
-
-
-
-
-/***/ },
 /* 30 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(29);
-	var replaceAccents = __webpack_require__(53);
-	var removeNonWord = __webpack_require__(54);
-	var upperCase = __webpack_require__(20);
-	var lowerCase = __webpack_require__(55);
-	    /**
-	    * Convert string to camelCase text.
-	    */
-	    function camelCase(str){
-	        str = toString(str);
-	        str = replaceAccents(str);
-	        str = removeNonWord(str)
-	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
-	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
-	            .replace(/\s+/g, '') //remove spaces
-	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
-	        return str;
-	    }
-	    module.exports = camelCase;
-
-
-
-/***/ },
-/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -4215,7 +4190,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (def[name] && !def.actions[name]) {
 	          throw new Error("Cannot override existing method \"" + name + "\"!");
 	        }
-	        def[name] = function (options) {
+	        def[name] = function (id, options) {
+	          if (DSUtils._o(id)) {
+	            options = id;
+	          }
 	          options = options || {};
 	          var adapter = _this.getAdapter(action.adapter || defaultAdapter || "http");
 	          var config = DSUtils.deepMixIn({}, action);
@@ -4225,7 +4203,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	          if (typeof options.getEndpoint === "function") {
 	            config.url = options.getEndpoint(def, options);
 	          } else {
-	            config.url = DSUtils.makePath(options.basePath || adapter.defaults.basePath || def.basePath, def.getEndpoint(null, options), name);
+	            var args = [options.basePath || adapter.defaults.basePath || def.basePath, def.getEndpoint(DSUtils._sn(id) ? id : null, options)];
+	            if (DSUtils._sn(id)) {
+	              args.push(id);
+	            }
+	            args.push(action.pathname || name);
+	            config.url = DSUtils.makePath.apply(null, args);
 	          }
 	          config.method = config.method || "GET";
 	          DSUtils.deepMixIn(config, options);
@@ -4251,7 +4234,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 32 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = eject;
@@ -4339,7 +4322,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 33 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = ejectAll;
@@ -4379,7 +4362,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 34 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = filter;
@@ -4417,7 +4400,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 35 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -4682,7 +4665,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 36 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = link;
@@ -4735,7 +4718,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 37 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = linkAll;
@@ -4792,7 +4775,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 38 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = linkInverse;
@@ -4835,7 +4818,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 39 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = unlinkInverse;
@@ -4893,7 +4876,124 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
+/* 39 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var forEach = __webpack_require__(10);
+
+	    /**
+	     * Create nested object if non-existent
+	     */
+	    function namespace(obj, path){
+	        if (!path) return obj;
+	        forEach(path.split('.'), function(key){
+	            if (!obj[key]) {
+	                obj[key] = {};
+	            }
+	            obj = obj[key];
+	        });
+	        return obj;
+	    }
+
+	    module.exports = namespace;
+
+
+
+
+/***/ },
 /* 40 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// shim for using process in browser
+
+	var process = module.exports = {};
+
+	process.nextTick = (function () {
+	    var canSetImmediate = typeof window !== 'undefined'
+	    && window.setImmediate;
+	    var canMutationObserver = typeof window !== 'undefined'
+	    && window.MutationObserver;
+	    var canPost = typeof window !== 'undefined'
+	    && window.postMessage && window.addEventListener
+	    ;
+
+	    if (canSetImmediate) {
+	        return function (f) { return window.setImmediate(f) };
+	    }
+
+	    var queue = [];
+
+	    if (canMutationObserver) {
+	        var hiddenDiv = document.createElement("div");
+	        var observer = new MutationObserver(function () {
+	            var queueList = queue.slice();
+	            queue.length = 0;
+	            queueList.forEach(function (fn) {
+	                fn();
+	            });
+	        });
+
+	        observer.observe(hiddenDiv, { attributes: true });
+
+	        return function nextTick(fn) {
+	            if (!queue.length) {
+	                hiddenDiv.setAttribute('yes', 'no');
+	            }
+	            queue.push(fn);
+	        };
+	    }
+
+	    if (canPost) {
+	        window.addEventListener('message', function (ev) {
+	            var source = ev.source;
+	            if ((source === window || source === null) && ev.data === 'process-tick') {
+	                ev.stopPropagation();
+	                if (queue.length > 0) {
+	                    var fn = queue.shift();
+	                    fn();
+	                }
+	            }
+	        }, true);
+
+	        return function nextTick(fn) {
+	            queue.push(fn);
+	            window.postMessage('process-tick', '*');
+	        };
+	    }
+
+	    return function nextTick(fn) {
+	        setTimeout(fn, 0);
+	    };
+	})();
+
+	process.title = 'browser';
+	process.browser = true;
+	process.env = {};
+	process.argv = [];
+
+	function noop() {}
+
+	process.on = noop;
+	process.addListener = noop;
+	process.once = noop;
+	process.off = noop;
+	process.removeListener = noop;
+	process.removeAllListeners = noop;
+	process.emit = noop;
+
+	process.binding = function (name) {
+	    throw new Error('process.binding is not supported');
+	};
+
+	// TODO(shtylman)
+	process.cwd = function () { return '/' };
+	process.chdir = function (dir) {
+	    throw new Error('process.chdir is not supported');
+	};
+
+
+/***/ },
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = create;
@@ -4957,7 +5057,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 41 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = destroy;
@@ -5006,7 +5106,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 42 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = destroyAll;
@@ -5056,7 +5156,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 43 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* jshint -W082 */
@@ -5140,7 +5240,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 44 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = findAll;
@@ -5271,7 +5371,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 45 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = loadRelations;
@@ -5364,7 +5464,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 46 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = reap;
@@ -5438,7 +5538,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 47 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = save;
@@ -5525,7 +5625,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 48 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = update;
@@ -5582,7 +5682,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 49 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = updateAll;
@@ -5655,98 +5755,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 50 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// shim for using process in browser
-
-	var process = module.exports = {};
-
-	process.nextTick = (function () {
-	    var canSetImmediate = typeof window !== 'undefined'
-	    && window.setImmediate;
-	    var canMutationObserver = typeof window !== 'undefined'
-	    && window.MutationObserver;
-	    var canPost = typeof window !== 'undefined'
-	    && window.postMessage && window.addEventListener
-	    ;
-
-	    if (canSetImmediate) {
-	        return function (f) { return window.setImmediate(f) };
-	    }
-
-	    var queue = [];
-
-	    if (canMutationObserver) {
-	        var hiddenDiv = document.createElement("div");
-	        var observer = new MutationObserver(function () {
-	            var queueList = queue.slice();
-	            queue.length = 0;
-	            queueList.forEach(function (fn) {
-	                fn();
-	            });
-	        });
-
-	        observer.observe(hiddenDiv, { attributes: true });
-
-	        return function nextTick(fn) {
-	            if (!queue.length) {
-	                hiddenDiv.setAttribute('yes', 'no');
-	            }
-	            queue.push(fn);
-	        };
-	    }
-
-	    if (canPost) {
-	        window.addEventListener('message', function (ev) {
-	            var source = ev.source;
-	            if ((source === window || source === null) && ev.data === 'process-tick') {
-	                ev.stopPropagation();
-	                if (queue.length > 0) {
-	                    var fn = queue.shift();
-	                    fn();
-	                }
-	            }
-	        }, true);
-
-	        return function nextTick(fn) {
-	            queue.push(fn);
-	            window.postMessage('process-tick', '*');
-	        };
-	    }
-
-	    return function nextTick(fn) {
-	        setTimeout(fn, 0);
-	    };
-	})();
-
-	process.title = 'browser';
-	process.browser = true;
-	process.env = {};
-	process.argv = [];
-
-	function noop() {}
-
-	process.on = noop;
-	process.addListener = noop;
-	process.once = noop;
-	process.off = noop;
-	process.removeListener = noop;
-	process.removeAllListeners = noop;
-	process.emit = noop;
-
-	process.binding = function (name) {
-	    throw new Error('process.binding is not supported');
-	};
-
-	// TODO(shtylman)
-	process.cwd = function () { return '/' };
-	process.chdir = function (dir) {
-	    throw new Error('process.chdir is not supported');
-	};
-
-
-/***/ },
 /* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -5773,7 +5781,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(29);
+	var toString = __webpack_require__(27);
 	    /**
 	    * Replaces all accented chars with regular ones
 	    */
@@ -5815,7 +5823,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(29);
+	var toString = __webpack_require__(27);
 	    // This pattern is generated by the _build/pattern-removeNonWord.js script
 	    var PATTERN = /[^\x20\x2D0-9A-Z\x5Fa-z\xC0-\xD6\xD8-\xF6\xF8-\xFF]/g;
 
@@ -5835,7 +5843,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(29);
+	var toString = __webpack_require__(27);
 	    /**
 	     * "Safer" String.toLowerCase()
 	     */
