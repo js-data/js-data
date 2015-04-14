@@ -179,12 +179,7 @@ export default function defineResource(definition) {
 
     def[_class].prototype.set = function (key, value) {
       DSUtils.set(this, key, value);
-      var observer = _this.s[def.n].observers[this[def.idAttribute]];
-      if (observer && !DSUtils.observe.hasObjectObserve) {
-        observer.deliver();
-      } else {
-        _this.compute(def.n, this);
-      }
+      _this.compute(def.n, this);
       return this;
     };
 
@@ -313,7 +308,10 @@ export default function defineResource(definition) {
       if (def[name] && !def.actions[name]) {
         throw new Error(`Cannot override existing method "${name}"!`);
       }
-      def[name] = function (options) {
+      def[name] = function (id, options) {
+        if (DSUtils._o(id)) {
+          options = id;
+        }
         options = options || {};
         let adapter = _this.getAdapter(action.adapter || defaultAdapter || 'http');
         let config = DSUtils.deepMixIn({}, action);
@@ -323,7 +321,12 @@ export default function defineResource(definition) {
         if (typeof options.getEndpoint === 'function') {
           config.url = options.getEndpoint(def, options);
         } else {
-          config.url = DSUtils.makePath(options.basePath || adapter.defaults.basePath || def.basePath, def.getEndpoint(null, options), name);
+          let args = [options.basePath || adapter.defaults.basePath || def.basePath, def.getEndpoint(DSUtils._sn(id) ? id : null, options)];
+          if (DSUtils._sn(id)) {
+            args.push(id);
+          }
+          args.push(action.pathname || name);
+          config.url = DSUtils.makePath.apply(null, args);
         }
         config.method = config.method || 'GET';
         DSUtils.deepMixIn(config, options);

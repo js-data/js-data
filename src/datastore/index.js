@@ -97,6 +97,7 @@ defaultsPrototype.eagerInject = false;
 defaultsPrototype.endpoint = '';
 defaultsPrototype.error = console ? (a, b, c) => console[typeof console.error === 'function' ? 'error' : 'log'](a, b, c) : false;
 defaultsPrototype.fallbackAdapters = ['http'];
+defaultsPrototype.findStrictCache = false;
 defaultsPrototype.idAttribute = 'id';
 defaultsPrototype.ignoredChanges = [/\$/];
 defaultsPrototype.ignoreMissing = false;
