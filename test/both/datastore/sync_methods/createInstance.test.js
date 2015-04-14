@@ -65,7 +65,11 @@ describe('DS#createInstance', function () {
 
     assert.equal(cat.say(), 'hi');
 
-    assert.deepEqual(JSON.stringify(person), JSON.stringify(personAttrs));
+    assert.deepEqual(JSON.stringify(person), JSON.stringify({
+      first: 'John',
+      last: 'Anderson',
+      fullName: 'John Anderson'
+    }));
     assert.deepEqual(dog, dogAttrs);
     assert.deepEqual(JSON.stringify(cat), JSON.stringify({}));
 

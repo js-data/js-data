@@ -135,6 +135,9 @@ export default {
       item = {};
     }
     DSUtils.deepMixIn(item, attrs);
+    if (definition.computed) {
+      this.compute(definition.name, item);
+    }
     if (options.notify) {
       options.afterCreateInstance(options, item);
     }

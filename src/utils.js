@@ -491,38 +491,37 @@ DSUtils = {
   },
   upperCase,
   removeCircular(object) {
-    let objects = [];
-
-    return (function rmCirc(value) {
-
+    return (function rmCirc(value, context) {
       let i;
       let nu;
 
       if (typeof value === 'object' && value !== null && !(value instanceof Boolean) && !(value instanceof Date) && !(value instanceof Number) && !(value instanceof RegExp) && !(value instanceof String)) {
 
-        for (i = 0; i < objects.length; i += 1) {
-          if (objects[i] === value) {
+        // check if current object points back to itself
+        let current = context.current;
+        var parent = context.context;
+        while (parent) {
+          if (parent.current === current) {
             return undefined;
           }
+          parent = parent.context;
         }
-
-        objects.push(value);
 
         if (DSUtils.isArray(value)) {
           nu = [];
           for (i = 0; i < value.length; i += 1) {
-            nu[i] = rmCirc(value[i]);
+            nu[i] = rmCirc(value[i], { context, current: value[i] });
           }
         } else {
           nu = {};
           forOwn(value, (v, k) => {
-            nu[k] = rmCirc(value[k]);
+            nu[k] = rmCirc(value[k], { context, current: value[k] });
           });
         }
         return nu;
       }
       return value;
-    }(object));
+    }(object, { context: null, current: object }));
   },
   resolveItem,
   resolveId,
