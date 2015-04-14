@@ -126,4 +126,41 @@ describe('DSUtils', function () {
       });
     });
   });
+  describe('removeCircular', function () {
+    it('should remove circular', function () {
+      var a = { name: 'a' };
+      var b = { name: 'b' };
+      var c = { name: 'c' };
+      a.b = b;
+      b.a = a;
+      a.c = [c, c, c];
+      b.c = [c, c];
+
+      assert.equal(JSON.stringify(DSUtils.removeCircular(a), null, 2), JSON.stringify({
+        name: 'a',
+        b: {
+          name: 'b',
+          c: [
+            {
+              name: 'c'
+            },
+            {
+              name: 'c'
+            }
+          ]
+        },
+        c: [
+          {
+            name: 'c'
+          },
+          {
+            name: 'c'
+          },
+          {
+            name: 'c'
+          }
+        ]
+      }, null, 2));
+    });
+  });
 });

@@ -1,3 +1,13 @@
+##### 1.8.0 - 14 April 2015
+
+###### Backwards compatible API changes
+- #117 - .find skips the object in the store
+- #118 - DS#find() returns items cached with DS#inject() - Thanks @mightyguava!
+- `createInstance` will now initialize computed properties (but they won't be updated until the item is injected into the store, or unless you use `Instance#set(key, value)` to mutate the instance)
+
+###### Backwards compatible bug fixes
+- #115 - removeCircular bug
+
 ##### 1.7.0 - 09 April 2015
 
 ###### Backwards compatible API changes

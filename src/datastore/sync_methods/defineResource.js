@@ -179,12 +179,7 @@ export default function defineResource(definition) {
 
     def[_class].prototype.set = function (key, value) {
       DSUtils.set(this, key, value);
-      var observer = _this.s[def.n].observers[this[def.idAttribute]];
-      if (observer && !DSUtils.observe.hasObjectObserve) {
-        observer.deliver();
-      } else {
-        _this.compute(def.n, this);
-      }
+      _this.compute(def.n, this);
       return this;
     };
 
