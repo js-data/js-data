@@ -21,7 +21,7 @@ export default function find(resourceName, id, options) {
       if (options.bypassCache || !options.cacheResponse) {
         delete resource.completedQueries[id];
       }
-      if (id in resource.completedQueries && _this.get(resourceName, id)) {
+      if ((!options.findStrictCache || id in resource.completedQueries) && _this.get(resourceName, id)) {
         resolve(_this.get(resourceName, id));
       } else {
         delete resource.completedQueries[id];
