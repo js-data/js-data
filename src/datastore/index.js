@@ -101,6 +101,7 @@ defaultsPrototype.findBelongsTo = true;
 defaultsPrototype.findHasOne = true;
 defaultsPrototype.findHasMany = true;
 defaultsPrototype.findInverseLinks = true;
+defaultsPrototype.findStrictCache = true;
 defaultsPrototype.idAttribute = 'id';
 defaultsPrototype.ignoredChanges = [/\$/];
 defaultsPrototype.ignoreMissing = false;
