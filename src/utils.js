@@ -11,6 +11,8 @@ let remove = require('mout/array/remove');
 let pick = require('mout/object/pick');
 let sort = require('mout/array/sort');
 let upperCase = require('mout/string/upperCase');
+let get = require('mout/object/get');
+let set = require('mout/object/set');
 let observe = require('../lib/observe-js/observe.js');
 let w;
 let objectProto = Object.prototype;
@@ -399,10 +401,10 @@ export default {
     let _this = this;
     let args = [];
     forEach(fn.deps, dep => {
-      args.push(_this[dep]);
+      args.push(get(_this, dep));
     });
     // compute property
-    _this[field] = fn[fn.length - 1].apply(_this, args);
+    set(_this, field, fn[fn.length - 1].apply(_this, args));
   },
   contains,
   copy,
@@ -417,7 +419,7 @@ export default {
   fromJson(json) {
     return isString(json) ? JSON.parse(json) : json;
   },
-  get: require('mout/object/get'),
+  get,
   intersection,
   isArray,
   isBoolean,
@@ -462,7 +464,7 @@ export default {
     };
   },
   remove,
-  set: require('mout/object/set'),
+  set,
   slice,
   sort,
   toJson: JSON.stringify,

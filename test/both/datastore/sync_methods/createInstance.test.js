@@ -38,9 +38,6 @@ describe('DS#createInstance', function () {
       }
     });
 
-    console.log(store.defaults);
-    console.log(store.defaults.prototype);
-
     store.defineResource({
       name: 'dog',
       useClass: true
@@ -60,7 +57,7 @@ describe('DS#createInstance', function () {
     };
 
     var person = store.createInstance('person', personAttrs);
-    var dog = store.createInstance('dog', dogAttrs, { useClass: false });
+    var dog = store.createInstance('dog', dogAttrs);
     var cat = store.createInstance('cat');
 
     assert.equal(cat.say(), 'hi');
@@ -70,7 +67,7 @@ describe('DS#createInstance', function () {
       last: 'Anderson',
       fullName: 'John Anderson'
     }));
-    assert.deepEqual(dog, dogAttrs);
+    assert.deepEqual(JSON.stringify(dog), JSON.stringify(dogAttrs));
     assert.deepEqual(JSON.stringify(cat), JSON.stringify({}));
 
     assert.isTrue(person instanceof store.definitions.person[store.definitions.person.class]);
