@@ -1,6 +1,8 @@
 /*global assert:true */
 'use strict';
 
+require('es6-promise').polyfill();
+
 var assert = require('chai').assert;
 var mocha = require('mocha');
 var sinon = require('sinon');

@@ -1,23 +1,23 @@
 describe('DS#lastSaved', function () {
   it('should lastSaved an item into the store', function (done) {
     var _this = this;
-    var lastSaved = store.lastSaved('post', 5);
-    assert.equal(store.lastSaved('post', 5), 0);
+    var lastSaved = Post.lastSaved( 5);
+    assert.equal(Post.lastSaved( 5), 0);
 
     assert.doesNotThrow(function () {
-      store.inject('post', p1);
+      Post.inject(p1);
     });
 
-    assert.equal(lastSaved, store.lastSaved('post', 5));
+    assert.equal(lastSaved, Post.lastSaved( 5));
 
-    lastSaved = store.lastSaved('post', 5);
+    lastSaved = Post.lastSaved( 5);
 
-    var post = store.get('post', 5);
+    var post = Post.get(5);
 
     post.author = 'Jake';
 
     store.save('post', 5).then(function () {
-      assert.notEqual(lastSaved, store.lastSaved('post', 5));
+      assert.notEqual(lastSaved, Post.lastSaved( 5));
       done();
     }).catch(done);
 

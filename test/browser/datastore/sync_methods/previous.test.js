@@ -1,9 +1,9 @@
 describe('DS#previous', function () {
   it('should return the previous in an object', function (done) {
     var _this = this;
-    store.inject('post', p1);
+    Post.inject(p1);
 
-    var post = store.get('post', 5);
+    var post = Post.get(5);
 
     assert.deepEqual(JSON.stringify(store.previous('post', 5)), JSON.stringify(p1));
 
@@ -12,7 +12,7 @@ describe('DS#previous', function () {
     store.digest();
 
     assert.deepEqual(JSON.stringify(store.previous('post', 5)), JSON.stringify(p1));
-    assert.deepEqual(JSON.stringify(store.get('post', 5)), JSON.stringify({ author: 'Jake', age: 30, id: 5 }));
+    assert.deepEqual(JSON.stringify(Post.get(5)), JSON.stringify({ author: 'Jake', age: 30, id: 5 }));
 
     store.save('post', 5).then(function () {
       assert.deepEqual(JSON.stringify(store.previous('post', 5)), JSON.stringify({
@@ -20,14 +20,14 @@ describe('DS#previous', function () {
         age: 30,
         id: 5
       }), 'previous attributes should have been updated');
-      assert.deepEqual(JSON.stringify(store.get('post', 5)), JSON.stringify({ author: 'Jake', age: 30, id: 5 }));
+      assert.deepEqual(JSON.stringify(Post.get(5)), JSON.stringify({ author: 'Jake', age: 30, id: 5 }));
       done();
     }).catch(done);
 
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
-      assert.deepEqual(JSON.stringify(store.get('post', 5)), _this.requests[0].requestBody);
+      assert.deepEqual(JSON.stringify(Post.get(5)), _this.requests[0].requestBody);
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({
         author: 'Jake',
         age: 30,
@@ -38,9 +38,9 @@ describe('DS#previous', function () {
   it('should return the previous in an object and save changed only', function (done) {
     try {
       var _this = this;
-      store.inject('post', p1);
+      Post.inject(p1);
 
-      var post = store.get('post', 5);
+      var post = Post.get(5);
 
       assert.deepEqual(JSON.stringify(store.previous('post', 5)), JSON.stringify(p1));
 
@@ -49,7 +49,7 @@ describe('DS#previous', function () {
       store.digest();
 
       assert.deepEqual(JSON.stringify(store.previous('post', 5)), JSON.stringify(p1));
-      assert.deepEqual(JSON.stringify(store.get('post', 5)), JSON.stringify({ author: 'Jake', age: 30, id: 5 }));
+      assert.deepEqual(JSON.stringify(Post.get(5)), JSON.stringify({ author: 'Jake', age: 30, id: 5 }));
 
       store.save('post', 5, { changesOnly: true }).then(function () {
         assert.deepEqual(JSON.stringify(store.previous('post', 5)), JSON.stringify({
@@ -57,7 +57,7 @@ describe('DS#previous', function () {
           age: 30,
           id: 5
         }), 'previous attributes should have been updated');
-        assert.deepEqual(JSON.stringify(store.get('post', 5)), JSON.stringify({ author: 'Jake', age: 30, id: 5 }));
+        assert.deepEqual(JSON.stringify(Post.get(5)), JSON.stringify({ author: 'Jake', age: 30, id: 5 }));
         done();
       }).catch(done);
 

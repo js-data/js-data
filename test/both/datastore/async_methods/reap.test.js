@@ -20,7 +20,7 @@ describe('DS#reap', function () {
       }
     });
 
-    return store.utils.Promise.all(tasks);
+    return Promise.all(tasks);
   });
   it('should order items by expire date', function (done) {
     var Thing = store.defineResource({
