@@ -55,7 +55,7 @@ export default function loadRelations(resourceName, instance, relations, options
               task = _this.findAll(relationName, params, __options.orig()).then(hasOnes => hasOnes.length ? hasOnes[0] : null);
             }
           } else if (instance[def.localKey]) {
-            task = _this.find(relationName, instance[def.localKey], options);
+            task = _this.find(relationName, instance[def.localKey], __options.orig());
           }
 
           if (task) {

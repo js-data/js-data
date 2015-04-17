@@ -1,23 +1,27 @@
 /* jshint eqeqeq:false */
 import DSErrors from './errors';
-import forEach from 'mout/array/forEach';
-import slice from 'mout/array/slice';
-import forOwn from 'mout/object/forOwn';
-import contains from 'mout/array/contains';
-import deepMixIn from 'mout/object/deepMixIn';
-import pascalCase from 'mout/string/pascalCase';
-import remove from 'mout/array/remove';
-import pick from 'mout/object/pick';
-import sort from 'mout/array/sort';
-import upperCase from 'mout/string/upperCase';
-import observe from '../lib/observe-js/observe.js';
-import es6Promise from 'es6-promise';
-import BinaryHeap from 'yabh';
-let w, _Promise;
-let DSUtils;
+let BinaryHeap = require('yabh');
+let forEach = require('mout/array/forEach');
+let slice = require('mout/array/slice');
+let forOwn = require('mout/object/forOwn');
+let contains = require('mout/array/contains');
+let deepMixIn = require('mout/object/deepMixIn');
+let pascalCase = require('mout/string/pascalCase');
+let remove = require('mout/array/remove');
+let pick = require('mout/object/pick');
+let sort = require('mout/array/sort');
+let upperCase = require('mout/string/upperCase');
+let observe = require('../lib/observe-js/observe.js');
+let w;
 let objectProto = Object.prototype;
 let toString = objectProto.toString;
-es6Promise.polyfill();
+let P;
+
+try {
+  P = Promise;
+} catch (err) {
+  console.error('js-data requires a global Promise constructor!');
+}
 
 let isArray = Array.isArray || function isArray(value) {
     return toString.call(value) == '[object Array]' || false;
@@ -98,10 +102,10 @@ let intersection = (array1, array2) => {
   let item;
   for (let i = 0, length = array1.length; i < length; i++) {
     item = array1[i];
-    if (DSUtils.contains(result, item)) {
+    if (contains(result, item)) {
       continue;
     }
-    if (DSUtils.contains(array2, item)) {
+    if (contains(array2, item)) {
       result.push(item);
     }
   }
@@ -118,30 +122,11 @@ let filter = (array, cb, thisObj) => {
   return results;
 };
 
-function finallyPolyfill(cb) {
-  let constructor = this.constructor;
-
-  return this.then(value => {
-    return constructor.resolve(cb()).then(() => {
-      return value;
-    });
-  }, reason => {
-    return constructor.resolve(cb()).then(() => {
-      throw reason;
-    });
-  });
-}
-
 try {
   w = window;
-  if (!w.Promise.prototype['finally']) {
-    w.Promise.prototype['finally'] = finallyPolyfill;
-  }
-  _Promise = w.Promise;
   w = {};
 } catch (e) {
   w = null;
-  _Promise = require('bluebird');
 }
 
 function Events(target) {
@@ -370,7 +355,8 @@ let makePath = (...args) => {
   return result.replace(/([^:\/]|^)\/{2,}/g, '$1/');
 };
 
-DSUtils = {
+export default {
+  Promise: P,
   // Options that inherit from defaults
   _(parent, options) {
     let _this = this;
@@ -446,7 +432,6 @@ DSUtils = {
   observe,
   pascalCase,
   pick,
-  Promise: _Promise,
   promisify(fn, target) {
     let _this = this;
     if (!fn) {
@@ -507,7 +492,7 @@ DSUtils = {
           parent = parent.context;
         }
 
-        if (DSUtils.isArray(value)) {
+        if (isArray(value)) {
           nu = [];
           for (i = 0; i < value.length; i += 1) {
             nu[i] = rmCirc(value[i], { context, current: value[i] });
@@ -525,7 +510,57 @@ DSUtils = {
   },
   resolveItem,
   resolveId,
-  w
+  w,
+  applyRelationGettersToTarget(store, definition, target) {
+    this.forEach(definition.relationList, def => {
+      let relationName = def.relation;
+      let enumerable = typeof def.enumerable === 'boolean' ? def.enumerable : !!definition.relationsEnumerable;
+      if (typeof def.link === 'boolean' ? def.link : !!definition.linkRelations) {
+        delete target[def.localField];
+        if (def.type === 'belongsTo') {
+          Object.defineProperty(target, def.localField, {
+            enumerable,
+            get() {
+              return this[def.localKey] ? definition.getResource(relationName).get(this[def.localKey]) : undefined;
+            },
+            set() {}
+          });
+        } else if (def.type === 'hasMany') {
+          Object.defineProperty(target, def.localField, {
+            enumerable,
+            get() {
+              let params = {};
+              params[def.foreignKey] = this[definition.idAttribute];
+              return params[def.foreignKey] ? store.defaults.constructor.prototype.defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true }) : undefined;
+            },
+            set() {}
+          });
+        } else if (def.type === 'hasOne') {
+          if (def.localKey) {
+            Object.defineProperty(target, def.localField, {
+              enumerable,
+              get() {
+                return this[def.localKey] ? definition.getResource(relationName).get(this[def.localKey]) : undefined;
+              },
+              set() {}
+            });
+          } else {
+            Object.defineProperty(target, def.localField, {
+              enumerable,
+              get() {
+                let params = {};
+                params[def.foreignKey] = this[definition.idAttribute];
+                let items = params[def.foreignKey] ? store.defaults.constructor.prototype.defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true }) : [];
+                if (items.length) {
+                  return items[0];
+                }
+                return undefined;
+              },
+              set() {}
+            });
+          }
+        }
+      }
+    });
+  }
 };
-
-export default DSUtils;

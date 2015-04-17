@@ -3,7 +3,6 @@ import DSUtils from '../utils';
 import DSErrors from '../errors';
 import syncMethods from './sync_methods/index';
 import asyncMethods from './async_methods/index';
-let Schemator;
 
 function lifecycleNoopCb(resource, attrs, cb) {
   cb(null, attrs);
@@ -102,7 +101,7 @@ defaultsPrototype.idAttribute = 'id';
 defaultsPrototype.ignoredChanges = [/\$/];
 defaultsPrototype.ignoreMissing = false;
 defaultsPrototype.keepChangeHistory = false;
-defaultsPrototype.loadFromServer = false;
+defaultsPrototype.linkRelations = true;
 defaultsPrototype.log = console ? (a, b, c, d, e) => console[typeof console.info === 'function' ? 'info' : 'log'](a, b, c, d, e) : false;
 
 defaultsPrototype.logFn = function (a, b, c, d) {
@@ -116,6 +115,7 @@ defaultsPrototype.maxAge = false;
 defaultsPrototype.notify = !!DSUtils.w;
 defaultsPrototype.reapAction = !!DSUtils.w ? 'inject' : 'none';
 defaultsPrototype.reapInterval = !!DSUtils.w ? 30000 : false;
+defaultsPrototype.relationsEnumerable = false;
 defaultsPrototype.resetHistoryOnInject = true;
 defaultsPrototype.strategy = 'single';
 defaultsPrototype.upsert = !!DSUtils.w;
@@ -300,23 +300,6 @@ class DS {
   constructor(options) {
     let _this = this;
     options = options || {};
-
-    try {
-      Schemator = require('js-data-schema');
-    } catch (e) {
-    }
-
-    if (!Schemator || typeof Schemator !== 'function') {
-      try {
-        Schemator = window.Schemator;
-      } catch (e) {
-      }
-    }
-
-    Schemator = Schemator || options.schemator;
-    if (typeof Schemator === 'function') {
-      _this.schemator = new Schemator();
-    }
 
     _this.store = {};
     // alias store, shaves 0.1 kb off the minified build

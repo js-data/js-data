@@ -136,43 +136,7 @@ function _inject(definition, resource, attrs, options) {
             item = {};
           }
           DSUtils.forEach(definition.relationList, def => {
-            let relationName = def.relation;
-            let relationDef = _this.defs[relationName];
-            let params = {};
             delete attrs[def.localField];
-            if (def.type === 'belongsTo') {
-              Object.defineProperty(item, def.localField, {
-                get: () => item[def.localKey] ? relationDef.get(item[def.localKey]) : undefined,
-                set: v => v
-              });
-            } else if (def.type === 'hasMany') {
-              params[def.foreignKey] = attrs[definition.idAttribute];
-              Object.defineProperty(item, def.localField, {
-                get: () => {
-                  return params[def.foreignKey] ? _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true }) : undefined;
-                },
-                set: v => v
-              });
-            } else if (def.type === 'hasOne') {
-              if (def.localKey) {
-                Object.defineProperty(item, def.localField, {
-                  get: () => item[def.localKey] ? relationDef.get(item[def.localKey]) : undefined,
-                  set: v => v
-                });
-              } else {
-                params[def.foreignKey] = attrs[definition.idAttribute];
-                Object.defineProperty(item, def.localField, {
-                  get: () => {
-                    let items = params[def.foreignKey] ? _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true }) : [];
-                    if (items.length) {
-                      return items[0];
-                    }
-                    return undefined;
-                  },
-                  set: v => v
-                });
-              }
-            }
           });
           DSUtils.deepMixIn(item, attrs);
 

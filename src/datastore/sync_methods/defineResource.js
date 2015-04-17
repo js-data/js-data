@@ -187,6 +187,8 @@ export default function defineResource(definition) {
       return DSUtils.get(this, key);
     };
 
+    DSUtils.applyRelationGettersToTarget(_this, def, def[_class].prototype);
+
     // Prepare for computed properties
     if (def.computed) {
       DSUtils.forOwn(def.computed, (fn, field) => {
@@ -215,24 +217,6 @@ export default function defineResource(definition) {
           return !!dep;
         });
       });
-    }
-
-    if (definition.schema && _this.schemator) {
-      def.schema = _this.schemator.defineSchema(def.n, definition.schema);
-
-      if (!definition.hasOwnProperty('validate')) {
-        def.validate = (resourceName, attrs, cb) => {
-          def.schema.validate(attrs, {
-            ignoreMissing: def.ignoreMissing
-          }, err => {
-            if (err) {
-              return cb(err);
-            } else {
-              return cb(null, attrs);
-            }
-          });
-        };
-      }
     }
 
     DSUtils.forEach(instanceMethods, name => {

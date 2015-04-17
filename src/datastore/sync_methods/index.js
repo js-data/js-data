@@ -162,9 +162,6 @@ export default {
 
     // cache miss, request resource from server
     let item = _this.s[resourceName].index[id];
-    if (!item && options.loadFromServer) {
-      _this.find(resourceName, id, options);
-    }
 
     // return resource from cache
     return item;
