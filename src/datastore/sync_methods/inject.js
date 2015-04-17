@@ -126,14 +126,10 @@ function _inject(definition, resource, attrs, options) {
         let initialLastModified = item ? resource.modified[id] : 0;
 
         if (!item) {
-          if (options.useClass) {
-            if (attrs instanceof definition[definition['class']]) {
-              item = attrs;
-            } else {
-              item = new definition[definition['class']]();
-            }
+          if (attrs instanceof definition[definition['class']]) {
+            item = attrs;
           } else {
-            item = {};
+            item = new definition[definition['class']]();
           }
           DSUtils.forEach(definition.relationList, def => {
             delete attrs[def.localField];

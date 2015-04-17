@@ -124,12 +124,8 @@ export default {
       options.beforeCreateInstance(options, attrs);
     }
 
-    if (options.useClass) {
-      let Constructor = definition[definition.class];
-      item = new Constructor();
-    } else {
-      item = {};
-    }
+    let Constructor = definition[definition.class];
+    item = new Constructor();
     DSUtils.deepMixIn(item, attrs);
     if (definition.computed) {
       this.compute(definition.name, item);
