@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 2.0.0-beta.2 - Homepage <http://www.js-data.io/>
+ * @version 2.0.0-beta.3 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -77,12 +77,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new _DS['default'](options);
 	  },
 	  version: {
-	    full: '2.0.0-beta.2',
+	    full: '2.0.0-beta.3',
 	    major: parseInt('2', 10),
 	    minor: parseInt('0', 10),
 	    patch: parseInt('0', 10),
 	    alpha: true ? 'false' : false,
-	    beta: true ? '2' : false
+	    beta: true ? '3' : false
 	  }
 	};
 
@@ -2496,8 +2496,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var hasOwn = __webpack_require__(21);
-	var forIn = __webpack_require__(22);
+	var hasOwn = __webpack_require__(22);
+	var forIn = __webpack_require__(23);
 
 	    /**
 	     * Similar to Array/forEach but works over object properties and fixes Don't
@@ -2522,7 +2522,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var forOwn = __webpack_require__(13);
-	var isPlainObject = __webpack_require__(23);
+	var isPlainObject = __webpack_require__(21);
 
 	    /**
 	     * Mixes objects into the target object, recursively mixing existing child
@@ -2706,6 +2706,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 
 	    /**
+	     * Checks if the value is created by the `Object` constructor.
+	     */
+	    function isPlainObject(value) {
+	        return (!!value && typeof value === 'object' &&
+	            value.constructor === Object);
+	    }
+
+	    module.exports = isPlainObject;
+
+
+
+
+/***/ },
+/* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
 	     * Safer Object.hasOwnProperty
 	     */
 	     function hasOwn(obj, prop){
@@ -2718,10 +2737,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var hasOwn = __webpack_require__(21);
+	var hasOwn = __webpack_require__(22);
 
 	    var _hasDontEnumBug,
 	        _dontEnums;
@@ -2795,25 +2814,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    module.exports = forIn;
-
-
-
-
-/***/ },
-/* 23 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Checks if the value is created by the `Object` constructor.
-	     */
-	    function isPlainObject(value) {
-	        return (!!value && typeof value === 'object' &&
-	            value.constructor === Object);
-	    }
-
-	    module.exports = isPlainObject;
 
 
 
