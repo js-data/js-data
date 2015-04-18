@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 2.0.0-beta.1 - Homepage <http://www.js-data.io/>
+ * @version 2.0.0-beta.2 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -77,12 +77,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new _DS['default'](options);
 	  },
 	  version: {
-	    full: '2.0.0-beta.1',
+	    full: '2.0.0-beta.2',
 	    major: parseInt('2', 10),
 	    minor: parseInt('0', 10),
 	    patch: parseInt('0', 10),
 	    alpha: true ? 'false' : false,
-	    beta: true ? '1' : false
+	    beta: true ? '2' : false
 	  }
 	};
 
@@ -1211,15 +1211,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _DSErrors = __webpack_require__(3);
 
-	var _defineResource = __webpack_require__(26);
+	var _defineResource = __webpack_require__(28);
 
-	var _eject = __webpack_require__(27);
+	var _eject = __webpack_require__(29);
 
-	var _ejectAll = __webpack_require__(28);
+	var _ejectAll = __webpack_require__(30);
 
-	var _filter = __webpack_require__(29);
+	var _filter = __webpack_require__(31);
 
-	var _inject = __webpack_require__(30);
+	var _inject = __webpack_require__(32);
 
 	var NER = _DSErrors['default'].NER;
 	var IA = _DSErrors['default'].IA;
@@ -1491,25 +1491,25 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _create = __webpack_require__(31);
+	var _create = __webpack_require__(33);
 
-	var _destroy = __webpack_require__(32);
+	var _destroy = __webpack_require__(34);
 
-	var _destroyAll = __webpack_require__(33);
+	var _destroyAll = __webpack_require__(35);
 
-	var _find = __webpack_require__(34);
+	var _find = __webpack_require__(36);
 
-	var _findAll = __webpack_require__(35);
+	var _findAll = __webpack_require__(37);
 
-	var _loadRelations = __webpack_require__(36);
+	var _loadRelations = __webpack_require__(38);
 
-	var _reap = __webpack_require__(37);
+	var _reap = __webpack_require__(39);
 
-	var _save = __webpack_require__(38);
+	var _save = __webpack_require__(40);
 
-	var _update = __webpack_require__(39);
+	var _update = __webpack_require__(41);
 
-	var _updateAll = __webpack_require__(40);
+	var _updateAll = __webpack_require__(42);
 
 	exports['default'] = {
 	  create: _create['default'],
@@ -2100,7 +2100,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/*!
 	 * yabh
-	 * @version 1.0.0 - Homepage <http://jmdobry.github.io/yabh/>
+	 * @version 1.0.1 - Homepage <http://jmdobry.github.io/yabh/>
 	 * @author Jason Dobry <jason.dobry@gmail.com>
 	 * @copyright (c) 2015 Jason Dobry 
 	 * @license MIT <https://github.com/jmdobry/yabh/blob/master/LICENSE>
@@ -2111,7 +2111,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		if(true)
 			module.exports = factory();
 		else if(typeof define === 'function' && define.amd)
-			define(factory);
+			define("yabh", factory);
 		else if(typeof exports === 'object')
 			exports["BinaryHeap"] = factory();
 		else
@@ -2163,10 +2163,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* 0 */
 	/***/ function(module, exports, __webpack_require__) {
 
-		var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+		var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
 
-		var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+		var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
+		Object.defineProperty(exports, '__esModule', {
+		  value: true
+		});
 		/**
 		 * @method bubbleUp
 		 * @param {array} heap The heap.
@@ -2199,7 +2202,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		 * @param {function} weightFunc The weight function.
 		 * @param {number} n The index of the element to sink down.
 		 */
-		var bubbleDown = function (heap, weightFunc, n) {
+		var bubbleDown = function bubbleDown(heap, weightFunc, n) {
 		  var length = heap.length;
 		  var node = heap[n];
 		  var nodeWeight = weightFunc(node);
@@ -2249,74 +2252,74 @@ return /******/ (function(modules) { // webpackBootstrap
 		        return x === y;
 		      };
 		    }
-		    if (typeof weightFunc !== "function") {
-		      throw new Error("BinaryHeap([weightFunc][, compareFunc]): \"weightFunc\" must be a function!");
+		    if (typeof weightFunc !== 'function') {
+		      throw new Error('BinaryHeap([weightFunc][, compareFunc]): "weightFunc" must be a function!');
 		    }
-		    if (typeof compareFunc !== "function") {
-		      throw new Error("BinaryHeap([weightFunc][, compareFunc]): \"compareFunc\" must be a function!");
+		    if (typeof compareFunc !== 'function') {
+		      throw new Error('BinaryHeap([weightFunc][, compareFunc]): "compareFunc" must be a function!');
 		    }
 		    this.weightFunc = weightFunc;
 		    this.compareFunc = compareFunc;
 		    this.heap = [];
 		  }
 
-		  _createClass(BinaryHeap, {
-		    push: {
-		      value: function push(node) {
-		        this.heap.push(node);
-		        bubbleUp(this.heap, this.weightFunc, this.heap.length - 1);
-		      }
-		    },
-		    peek: {
-		      value: function peek() {
-		        return this.heap[0];
-		      }
-		    },
-		    pop: {
-		      value: function pop() {
-		        var front = this.heap[0];
-		        var end = this.heap.pop();
-		        if (this.heap.length > 0) {
-		          this.heap[0] = end;
-		          bubbleDown(this.heap, this.weightFunc, 0);
-		        }
-		        return front;
-		      }
-		    },
-		    remove: {
-		      value: function remove(node) {
-		        var length = this.heap.length;
-		        for (var i = 0; i < length; i++) {
-		          if (this.compareFunc(this.heap[i], node)) {
-		            var removed = this.heap[i];
-		            var end = this.heap.pop();
-		            if (i !== length - 1) {
-		              this.heap[i] = end;
-		              bubbleUp(this.heap, this.weightFunc, i);
-		              bubbleDown(this.heap, this.weightFunc, i);
-		            }
-		            return removed;
-		          }
-		        }
-		        return null;
-		      }
-		    },
-		    removeAll: {
-		      value: function removeAll() {
-		        this.heap = [];
-		      }
-		    },
-		    size: {
-		      value: function size() {
-		        return this.heap.length;
-		      }
+		  _createClass(BinaryHeap, [{
+		    key: 'push',
+		    value: function push(node) {
+		      this.heap.push(node);
+		      bubbleUp(this.heap, this.weightFunc, this.heap.length - 1);
 		    }
-		  });
+		  }, {
+		    key: 'peek',
+		    value: function peek() {
+		      return this.heap[0];
+		    }
+		  }, {
+		    key: 'pop',
+		    value: function pop() {
+		      var front = this.heap[0];
+		      var end = this.heap.pop();
+		      if (this.heap.length > 0) {
+		        this.heap[0] = end;
+		        bubbleDown(this.heap, this.weightFunc, 0);
+		      }
+		      return front;
+		    }
+		  }, {
+		    key: 'remove',
+		    value: function remove(node) {
+		      var length = this.heap.length;
+		      for (var i = 0; i < length; i++) {
+		        if (this.compareFunc(this.heap[i], node)) {
+		          var removed = this.heap[i];
+		          var end = this.heap.pop();
+		          if (i !== length - 1) {
+		            this.heap[i] = end;
+		            bubbleUp(this.heap, this.weightFunc, i);
+		            bubbleDown(this.heap, this.weightFunc, i);
+		          }
+		          return removed;
+		        }
+		      }
+		      return null;
+		    }
+		  }, {
+		    key: 'removeAll',
+		    value: function removeAll() {
+		      this.heap = [];
+		    }
+		  }, {
+		    key: 'size',
+		    value: function size() {
+		      return this.heap.length;
+		    }
+		  }]);
 
 		  return BinaryHeap;
 		})();
 
-		module.exports = BinaryHeap;
+		exports['default'] = BinaryHeap;
+		module.exports = exports['default'];
 
 	/***/ }
 	/******/ ])
@@ -2631,8 +2634,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(41);
-	var camelCase = __webpack_require__(42);
+	var toString = __webpack_require__(26);
+	var camelCase = __webpack_require__(27);
 	var upperCase = __webpack_require__(19);
 	    /**
 	     * camelCase + UPPERCASE first char
@@ -2650,7 +2653,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(41);
+	var toString = __webpack_require__(26);
 	    /**
 	     * "Safer" String.toUpperCase()
 	     */
@@ -2869,6 +2872,51 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Typecast a value to a String, using an empty string value for null or
+	     * undefined.
+	     */
+	    function toString(val){
+	        return val == null ? '' : val.toString();
+	    }
+
+	    module.exports = toString;
+
+
+
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var toString = __webpack_require__(26);
+	var replaceAccents = __webpack_require__(43);
+	var removeNonWord = __webpack_require__(44);
+	var upperCase = __webpack_require__(19);
+	var lowerCase = __webpack_require__(45);
+	    /**
+	    * Convert string to camelCase text.
+	    */
+	    function camelCase(str){
+	        str = toString(str);
+	        str = replaceAccents(str);
+	        str = removeNonWord(str)
+	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
+	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
+	            .replace(/\s+/g, '') //remove spaces
+	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
+	        return str;
+	    }
+	    module.exports = camelCase;
+
+
+
+/***/ },
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
@@ -3236,7 +3284,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 27 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = eject;
@@ -3324,7 +3372,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 28 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = ejectAll;
@@ -3365,7 +3413,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 29 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = filter;
@@ -3389,7 +3437,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 30 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = inject;
@@ -3612,7 +3660,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 31 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = create;
@@ -3677,7 +3725,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 32 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = destroy;
@@ -3727,7 +3775,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 33 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = destroyAll;
@@ -3778,7 +3826,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 34 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* jshint -W082 */
@@ -3863,7 +3911,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 35 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = findAll;
@@ -3995,7 +4043,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 36 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = loadRelations;
@@ -4082,7 +4130,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 37 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = reap;
@@ -4157,7 +4205,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 38 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = save;
@@ -4246,7 +4294,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 39 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = update;
@@ -4304,7 +4352,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 40 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = updateAll;
@@ -4378,55 +4426,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 41 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Typecast a value to a String, using an empty string value for null or
-	     * undefined.
-	     */
-	    function toString(val){
-	        return val == null ? '' : val.toString();
-	    }
-
-	    module.exports = toString;
-
-
-
-
-/***/ },
-/* 42 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(41);
-	var replaceAccents = __webpack_require__(43);
-	var removeNonWord = __webpack_require__(44);
-	var upperCase = __webpack_require__(19);
-	var lowerCase = __webpack_require__(45);
-	    /**
-	    * Convert string to camelCase text.
-	    */
-	    function camelCase(str){
-	        str = toString(str);
-	        str = replaceAccents(str);
-	        str = removeNonWord(str)
-	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
-	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
-	            .replace(/\s+/g, '') //remove spaces
-	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
-	        return str;
-	    }
-	    module.exports = camelCase;
-
-
-
-/***/ },
 /* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(41);
+	var toString = __webpack_require__(26);
 	    /**
 	    * Replaces all accented chars with regular ones
 	    */
@@ -4468,7 +4471,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(41);
+	var toString = __webpack_require__(26);
 	    // This pattern is generated by the _build/pattern-removeNonWord.js script
 	    var PATTERN = /[^\x20\x2D0-9A-Z\x5Fa-z\xC0-\xD6\xD8-\xF6\xF8-\xFF]/g;
 
@@ -4488,7 +4491,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(41);
+	var toString = __webpack_require__(26);
 	    /**
 	     * "Safer" String.toLowerCase()
 	     */

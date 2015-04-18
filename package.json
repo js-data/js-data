@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0-beta.2",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -50,8 +50,6 @@
     "grunt-mocha-test": "0.12.7",
     "grunt-webpack": "1.0.8",
     "jit-grunt": "0.9.1",
-    "js-data-http": "2.0.0-beta.1",
-    "js-data-localstorage": "2.0.0-beta.1",
     "jshint": "2.7.0",
     "jshint-loader": "0.8.3",
     "karma": "0.12.31",
@@ -72,7 +70,7 @@
     "test": "grunt test"
   },
   "dependencies": {
-    "yabh": "1.0.0",
+    "yabh": "1.0.1",
     "mout": "0.11.0"
   }
 }
