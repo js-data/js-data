@@ -1,3 +1,7 @@
+##### 2.0.0-beta.2 - 17 April 2015
+
+Updated a dependency for better umd amd/r.js support
+
 ##### 2.0.0-beta.1 - 17 April 2015
 
 ###### Breaking API changes
