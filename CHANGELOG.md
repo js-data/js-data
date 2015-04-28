@@ -1,3 +1,8 @@
+##### 2.0.0-beta.4 - 28 April 2015
+
+###### Backwards compatible API changes
+- #129 - Add interceptors to actions
+
 ##### 2.0.0-beta.2 - 17 April 2015
 
 Updated a dependency for better umd amd/r.js support
