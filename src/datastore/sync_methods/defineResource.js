@@ -292,6 +292,9 @@ export default function defineResource(definition) {
       if (def[name] && !def.actions[name]) {
         throw new Error(`Cannot override existing method "${name}"!`);
       }
+      action.request = action.request || (config => config);
+      action.response = action.response || (response => response);
+      action.responseError = action.responseError || (err => DSUtils.Promise.reject(err));
       def[name] = function (id, options) {
         if (DSUtils._o(id)) {
           options = id;
@@ -314,7 +317,10 @@ export default function defineResource(definition) {
         }
         config.method = config.method || 'GET';
         DSUtils.deepMixIn(config, options);
-        return adapter.HTTP(config);
+        return new DSUtils.Promise(r => r(config))
+          .then(options.request || action.request)
+          .then(config => adapter.HTTP(config))
+          .then(options.response || action.response, options.responseError || action.responseError);
       };
     });
 
