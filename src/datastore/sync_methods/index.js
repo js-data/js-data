@@ -39,7 +39,11 @@ export default {
         _this.s[resourceName].observers[id].deliver();
       }
       let ignoredChanges = options.ignoredChanges || [];
-      DSUtils.forEach(definition.relationFields, field => ignoredChanges.push(field));
+      DSUtils.forEach(definition.relationFields, field => {
+        if (!DSUtils.contains(ignoredChanges, field)) {
+          ignoredChanges.push(field);
+        }
+      });
       let diff = DSUtils.diffObjectFromOldObject(item, _this.s[resourceName].previousAttributes[id], DSUtils.equals, ignoredChanges);
       DSUtils.forOwn(diff, (changeset, name) => {
         let toKeep = [];
