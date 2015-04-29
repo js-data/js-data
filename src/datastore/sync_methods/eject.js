@@ -27,8 +27,8 @@ export default function eject(resourceName, id, options) {
     }
   }
   if (found) {
+    definition.beforeEject(options, item);
     if (options.notify) {
-      definition.beforeEject(options, item);
       definition.emit('DS.beforeEject', definition, item);
     }
     resource.collection.splice(i, 1);
@@ -62,8 +62,8 @@ export default function eject(resourceName, id, options) {
     delete resource.saved[id];
     resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
+    definition.afterEject(options, item);
     if (options.notify) {
-      definition.afterEject(options, item);
       definition.emit('DS.afterEject', definition, item);
     }
 

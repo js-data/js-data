@@ -194,16 +194,16 @@ export default function inject(resourceName, attrs, options) {
   options = DSUtils._(definition, options);
 
   options.logFn('inject', attrs, options);
+  options.beforeInject(options, attrs);
   if (options.notify) {
-    options.beforeInject(options, attrs);
     definition.emit('DS.beforeInject', definition, attrs);
   }
 
   injected = _inject.call(_this, definition, resource, attrs, options);
   resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
+  options.afterInject(options, injected);
   if (options.notify) {
-    options.afterInject(options, injected);
     definition.emit('DS.afterInject', definition, injected);
   }
 

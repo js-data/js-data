@@ -1,5 +1,8 @@
 ##### 2.0.0-beta.5 - 28 April 2015
 
+###### Breaking API changes
+- #54 - feat: Call the inject and eject lifecycle hooks regardless of if the notify option is enabled
+
 ###### Backwards compatible bug fixes
 - #127 - Memory leak in DS.changes
 
