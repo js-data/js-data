@@ -2,17 +2,6 @@
 import DSUtils from '../../utils';
 import DSErrors from '../../errors';
 
-class Resource {
-  constructor(options) {
-    DSUtils.deepMixIn(this, options);
-    if ('endpoint' in options) {
-      this.endpoint = options.endpoint;
-    } else {
-      this.endpoint = this.name;
-    }
-  }
-}
-
 let instanceMethods = [
   'compute',
   'refresh',
@@ -45,9 +34,19 @@ export default function defineResource(definition) {
     throw new DSErrors.R(`${definition.name} is already registered!`);
   }
 
+  function Resource(options) {
+    DSUtils.deepMixIn(this, options);
+    this.endpoint = ('endpoint' in options) ? options.endpoint : this.name;
+  }
+
   try {
-    // Inherit from global defaults
-    Resource.prototype = _this.defaults;
+    if (definition.extends && definitions[definition.extends]) {
+      // Inherit from another resource
+      Resource.prototype = definitions[definition.extends];
+    } else {
+      // Inherit from global defaults
+      Resource.prototype = _this.defaults;
+    }
     definitions[definition.name] = new Resource(definition);
 
     var def = definitions[definition.name];
