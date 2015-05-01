@@ -3,6 +3,9 @@
 ###### Breaking API changes
 - #54 - feat: Call the inject and eject lifecycle hooks regardless of if the notify option is enabled
 
+###### Backwards compatible API changes
+- #131 - array of IDs based hasMany relations
+
 ###### Backwards compatible bug fixes
 - #127 - Memory leak in DS.changes
 
