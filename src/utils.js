@@ -525,17 +525,27 @@ export default {
             get() {
               return this[def.localKey] ? definition.getResource(relationName).get(this[def.localKey]) : undefined;
             },
-            set() {}
+            set() {
+            }
           });
         } else if (def.type === 'hasMany') {
           Object.defineProperty(target, def.localField, {
             enumerable,
             get() {
               let params = {};
-              params[def.foreignKey] = this[definition.idAttribute];
-              return params[def.foreignKey] ? store.defaults.constructor.prototype.defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true }) : undefined;
+              if (def.foreignKey) {
+                params[def.foreignKey] = this[definition.idAttribute];
+                return store.defaults.constructor.prototype.defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
+              } else if (def.localKeys) {
+                params.where = {
+                  'in': this[def.localKeys]
+                };
+                return store.defaults.constructor.prototype.defaultFilter.call(store, store.s[relationName].collection, relationName, params);
+              }
+              return undefined;
             },
-            set() {}
+            set() {
+            }
           });
         } else if (def.type === 'hasOne') {
           if (def.localKey) {
@@ -544,7 +554,8 @@ export default {
               get() {
                 return this[def.localKey] ? definition.getResource(relationName).get(this[def.localKey]) : undefined;
               },
-              set() {}
+              set() {
+              }
             });
           } else {
             Object.defineProperty(target, def.localField, {
@@ -558,7 +569,8 @@ export default {
                 }
                 return undefined;
               },
-              set() {}
+              set() {
+              }
             });
           }
         }

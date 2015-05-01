@@ -20,7 +20,10 @@ describe('DS#loadRelations', function () {
       _this.requests[2].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(organization14));
     }, 30);
 
-    return User.loadRelations(10, ['comment', 'profile', 'organization'], { params: { approvedBy: 10 }, findStrictCache: true }).then(function (user) {
+    return User.loadRelations(10, ['comment', 'profile', 'organization'], {
+      params: { approvedBy: 10 },
+      findStrictCache: true
+    }).then(function (user) {
       assert.deepEqual(user.comments[0].id, Comment.get(user.comments[0].id).id);
       assert.deepEqual(user.comments[0].user.id, Comment.get(user.comments[0].id).user.id);
       assert.deepEqual(user.comments[1].id, Comment.get(user.comments[1].id).id);
@@ -271,7 +274,10 @@ describe('DS#loadRelations', function () {
       _this.requests[2].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(organization14));
     }, 30);
 
-    return User.loadRelations(10, ['comment', 'profile', 'organization'], { params: { approvedBy: 10 }, findStrictCache: true }).then(function (user) {
+    return User.loadRelations(10, ['comment', 'profile', 'organization'], {
+      params: { approvedBy: 10 },
+      findStrictCache: true
+    }).then(function (user) {
       assert.deepEqual(user.comments[0].id, Comment.get(user.comments[0].id).id);
       assert.deepEqual(user.comments[0].user.id, Comment.get(user.comments[0].id).user.id);
       assert.deepEqual(user.comments[1].id, Comment.get(user.comments[1].id).id);
@@ -326,5 +332,58 @@ describe('DS#loadRelations', function () {
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(profile15));
     }, 30);
     return User.loadRelations(user, ['profile'], { allowSimpleWhere: false, bypassCache: true, findStrictCache: true });
+  });
+
+  it('should work in hasMany "localKeys" mode', function () {
+    var Foo = store.defineResource({
+      name: 'foo',
+      relations: {
+        hasMany: {
+          bar: {
+            localKeys: 'barIds',
+            localField: 'bars'
+          }
+        }
+      }
+    });
+    store.defineResource({
+      name: 'bar',
+      relations: {
+        belongsTo: {
+          foo: {
+            localKey: 'fooId',
+            localField: 'foo'
+          }
+        }
+      }
+    });
+    var _this = this;
+    var foo = Foo.inject({
+      id: 1,
+      barIds: [4, 7, 9]
+    });
+    var barsData = [
+      {
+        id: 4,
+        fooId: 1
+      },
+      {
+        id: 7,
+        fooId: 1
+      },
+      {
+        id: 9,
+        fooId: 1
+      }
+    ];
+    setTimeout(function () {
+      assert.equal(1, _this.requests.length);
+      assert.equal(_this.requests[0].url, 'http://test.js-data.io/bar?where=%7B%22in%22:%5B4,7,9%5D%7D');
+      assert.equal(_this.requests[0].method, 'GET');
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(barsData));
+    }, 30);
+    return Foo.loadRelations(foo, ['bar']).then(function (foo) {
+      assert.deepEqual(DSUtils.toJson(foo.bars), DSUtils.toJson(barsData));
+    });
   });
 });
