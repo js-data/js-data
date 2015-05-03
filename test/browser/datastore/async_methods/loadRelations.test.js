@@ -378,7 +378,7 @@ describe('DS#loadRelations', function () {
     ];
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
-      assert.equal(_this.requests[0].url, 'http://test.js-data.io/bar?where=%7B%22in%22:%5B4,7,9%5D%7D');
+      assert.equal(_this.requests[0].url, 'http://test.js-data.io/bar?where=%7B%22id%22:%7B%22in%22:%5B4,7,9%5D%7D%7D');
       assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(barsData));
     }, 30);

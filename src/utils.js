@@ -538,7 +538,9 @@ export default {
                 return store.defaults.constructor.prototype.defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
               } else if (def.localKeys) {
                 params.where = {
-                  'in': this[def.localKeys]
+                  [definition.getResource(relationName).idAttribute]: {
+                    'in': this[def.localKeys]
+                  }
                 };
                 return store.defaults.constructor.prototype.defaultFilter.call(store, store.s[relationName].collection, relationName, params);
               }
