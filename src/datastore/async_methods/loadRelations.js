@@ -50,7 +50,9 @@ export default function loadRelations(resourceName, instance, relations, options
             if (def.localKeys) {
               delete params[def.foreignKey];
               params.where = {
-                'in': instance[def.localKeys]
+                [relationDef.idAttribute]: {
+                  'in': instance[def.localKeys]
+                }
               };
             }
             task = _this.findAll(relationName, params, __options.orig());
