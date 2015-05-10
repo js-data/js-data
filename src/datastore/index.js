@@ -179,7 +179,7 @@ defaultsPrototype.defaultFilter = (collection, resourceName, params, options) =>
           DSUtils.forOwn(clause, (term, op) => {
             let expr;
             let isOr = op[0] === '|';
-            let val = attrs[field];
+            let val = DSUtils.get(attrs, field);
             op = isOr ? op.substr(1) : op;
             if (op === '==') {
               expr = val == term;

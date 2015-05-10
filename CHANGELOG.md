@@ -5,7 +5,8 @@
 
 ###### Backwards compatible API changes
 - #131 - array of IDs based hasMany relations
-- #133 - Allow resources to extend other resources
+- #132 - Allow resources to extend other resources
+- #133 - Allow filtering by nested fields
 
 ###### Backwards compatible bug fixes
 - #127 - Memory leak in DS.changes
