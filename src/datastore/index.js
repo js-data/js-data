@@ -69,6 +69,7 @@ var defaultsPrototype = Defaults.prototype;
 
 defaultsPrototype.actions = {};
 defaultsPrototype.afterCreate = lifecycleNoopCb;
+defaultsPrototype.afterCreateCollection = lifecycleNoop;
 defaultsPrototype.afterCreateInstance = lifecycleNoop;
 defaultsPrototype.afterDestroy = lifecycleNoopCb;
 defaultsPrototype.afterEject = lifecycleNoop;
@@ -79,6 +80,7 @@ defaultsPrototype.afterValidate = lifecycleNoopCb;
 defaultsPrototype.allowSimpleWhere = true;
 defaultsPrototype.basePath = '';
 defaultsPrototype.beforeCreate = lifecycleNoopCb;
+defaultsPrototype.beforeCreateCollection = lifecycleNoop;
 defaultsPrototype.beforeCreateInstance = lifecycleNoop;
 defaultsPrototype.beforeDestroy = lifecycleNoopCb;
 defaultsPrototype.beforeEject = lifecycleNoop;

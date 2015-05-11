@@ -139,6 +139,63 @@ export default {
     }
     return item;
   },
+  createCollection(resourceName, arr, params, options) {
+    let _this = this;
+    let definition = _this.defs[resourceName];
+
+    arr = arr || [];
+    params = params || {};
+
+    if (!definition) {
+      throw new NER(resourceName);
+    } else if (arr && !DSUtils.isArray(arr)) {
+      throw new IA('"arr" must be an array!');
+    }
+
+    options = DSUtils._(definition, options);
+
+    options.logFn('createCollection', arr, options);
+
+    if (options.notify) {
+      options.beforeCreateCollection(options, arr);
+    }
+
+    Object.defineProperties(arr, {
+      fetch: {
+        value: function (params, options) {
+          let __this = this;
+          __this.params = params || __this.params;
+          return _this.findAll(resourceName, __this.params, options).then(function (data) {
+            if (data === __this) {
+              return __this;
+            }
+            data.unshift(__this.length);
+            data.unshift(0);
+            __this.splice.apply(__this, data);
+            data.shift();
+            data.shift();
+            if (data.$$injected) {
+              _this.s[resourceName].queryData[DSUtils.toJson(__this.params)] = __this;
+              __this.$$injected = true;
+            }
+            return __this;
+          });
+        }
+      },
+      params: {
+        value: params,
+        writable: true
+      },
+      resourceName: {
+        value: resourceName
+      }
+    });
+
+    if (options.notify) {
+      options.afterCreateCollection(options, arr);
+    }
+    return arr;
+  },
   defineResource,
   digest() {
     this.observe.Platform.performMicrotaskCheckpoint();
