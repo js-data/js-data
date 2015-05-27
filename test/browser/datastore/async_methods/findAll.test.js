@@ -337,7 +337,7 @@ describe('DS#findAll', function () {
     });
   });
 
-  it.only('"collections"', function () {
+  it('"collections"', function () {
     var _this = this;
 
     var params = {
@@ -398,11 +398,16 @@ describe('DS#findAll', function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts?where=%7B%22author%22:%22Adam%22%7D');
       assert.equal(_this.requests[0].method, 'GET');
-      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([p4, p5]));
+      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([p4, p5, p6]));
     }, 30);
 
     var posts = Post.createCollection([p4, p5], params);
     assert.deepEqual(JSON.stringify(posts), JSON.stringify([p4, p5]));
     assert.equal(posts.resourceName, 'post');
+
+    return posts.fetch().then(function (p) {
+      assert.isTrue(posts === p);
+      assert.equal(p.length, 3);
+    });
   });
 });

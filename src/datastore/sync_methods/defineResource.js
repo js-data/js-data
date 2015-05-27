@@ -35,7 +35,17 @@ export default function defineResource(definition) {
   }
 
   function Resource(options) {
+    this.defaultValues = {};
+    this.methods = {};
+    this.computed = {};
     DSUtils.deepMixIn(this, options);
+    let parent = _this.defaults;
+    if (definition.extends && definitions[definition.extends]) {
+      parent = definitions[definition.extends];
+    }
+    DSUtils.fillIn(this.defaultValues, parent.defaultValues);
+    DSUtils.fillIn(this.methods, parent.methods);
+    DSUtils.fillIn(this.computed, parent.computed);
     this.endpoint = ('endpoint' in options) ? options.endpoint : this.name;
   }
 
@@ -102,6 +112,7 @@ export default function defineResource(definition) {
     };
 
     def.getEndpoint = (id, options) => {
+      options = options || {};
       options.params = options.params || {};
 
       let item;
@@ -172,9 +183,9 @@ export default function defineResource(definition) {
     }
 
     // Apply developer-defined methods
-    if (def.methods) {
-      DSUtils.deepMixIn(def[_class].prototype, def.methods);
-    }
+    DSUtils.forOwn(def.methods, (fn, m) => {
+      def[_class].prototype[m] = fn;
+    });
 
     def[_class].prototype.set = function (key, value) {
       DSUtils.set(this, key, value);
@@ -189,34 +200,32 @@ export default function defineResource(definition) {
     DSUtils.applyRelationGettersToTarget(_this, def, def[_class].prototype);
 
     // Prepare for computed properties
-    if (def.computed) {
-      DSUtils.forOwn(def.computed, (fn, field) => {
-        if (DSUtils.isFunction(fn)) {
-          def.computed[field] = [fn];
-          fn = def.computed[field];
+    DSUtils.forOwn(def.computed, (fn, field) => {
+      if (DSUtils.isFunction(fn)) {
+        def.computed[field] = [fn];
+        fn = def.computed[field];
+      }
+      if (def.methods && field in def.methods) {
+        def.errorFn(`Computed property "${field}" conflicts with previously defined prototype method!`);
+      }
+      var deps;
+      if (fn.length === 1) {
+        let match = fn[0].toString().match(/function.*?\(([\s\S]*?)\)/);
+        deps = match[1].split(',');
+        def.computed[field] = deps.concat(fn);
+        fn = def.computed[field];
+        if (deps.length) {
+          def.errorFn('Use the computed property array syntax for compatibility with minified code!');
         }
-        if (def.methods && field in def.methods) {
-          def.errorFn(`Computed property "${field}" conflicts with previously defined prototype method!`);
-        }
-        var deps;
-        if (fn.length === 1) {
-          let match = fn[0].toString().match(/function.*?\(([\s\S]*?)\)/);
-          deps = match[1].split(',');
-          def.computed[field] = deps.concat(fn);
-          fn = def.computed[field];
-          if (deps.length) {
-            def.errorFn('Use the computed property array syntax for compatibility with minified code!');
-          }
-        }
-        deps = fn.slice(0, fn.length - 1);
-        DSUtils.forEach(deps, (val, index) => {
-          deps[index] = val.trim();
-        });
-        fn.deps = DSUtils.filter(deps, dep => {
-          return !!dep;
-        });
+      }
+      deps = fn.slice(0, fn.length - 1);
+      DSUtils.forEach(deps, (val, index) => {
+        deps[index] = val.trim();
       });
-    }
+      fn.deps = DSUtils.filter(deps, dep => {
+        return !!dep;
+      });
+    });
 
     DSUtils.forEach(instanceMethods, name => {
       def[_class].prototype[`DS${DSUtils.pascalCase(name)}`] = function (...args) {
@@ -250,7 +259,7 @@ export default function defineResource(definition) {
     };
 
     if (def.reapInterval) {
-      setInterval(() => _this.reap(def.n, { isInterval: true }), def.reapInterval);
+      setInterval(() => _this.reap(def.n, {isInterval: true}), def.reapInterval);
     }
 
     // Proxy DS methods with shorthand ones

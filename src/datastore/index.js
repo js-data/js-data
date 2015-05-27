@@ -90,8 +90,11 @@ defaultsPrototype.beforeUpdate = lifecycleNoopCb;
 defaultsPrototype.beforeValidate = lifecycleNoopCb;
 defaultsPrototype.bypassCache = false;
 defaultsPrototype.cacheResponse = !!DSUtils.w;
+defaultsPrototype.clearEmptyQueries = true;
+defaultsPrototype.computed = {};
 defaultsPrototype.defaultAdapter = 'http';
 defaultsPrototype.debug = true;
+defaultsPrototype.defaultValues = {};
 defaultsPrototype.eagerEject = false;
 // TODO: Implement eagerInject in DS#create
 defaultsPrototype.eagerInject = false;
@@ -114,6 +117,7 @@ defaultsPrototype.logFn = function (a, b, c, d) {
 };
 
 defaultsPrototype.maxAge = false;
+defaultsPrototype.methods = {};
 defaultsPrototype.notify = !!DSUtils.w;
 defaultsPrototype.reapAction = !!DSUtils.w ? 'inject' : 'none';
 defaultsPrototype.reapInterval = !!DSUtils.w ? 30000 : false;

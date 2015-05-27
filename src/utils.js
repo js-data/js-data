@@ -414,6 +414,14 @@ export default {
   equals,
   Events,
   filter,
+  fillIn(target, obj) {
+    forOwn(obj, (v, k) => {
+      if (!(k in target)) {
+        target[k] = v;
+      }
+    });
+    return target;
+  },
   forEach,
   forOwn,
   fromJson(json) {

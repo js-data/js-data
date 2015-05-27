@@ -15,7 +15,7 @@ describe('DS#update', function () {
         age: 30,
         id: 5
       }));
-    }, 30);
+    }, 60);
 
     return Post.update(5, { author: 'Jake' }).then(function (p) {
       assert.deepEqual(JSON.stringify(p), JSON.stringify(post), 'post 5 should have been updated');
@@ -42,7 +42,7 @@ describe('DS#update', function () {
           age: 31,
           id: 6
         }));
-      }, 30);
+      }, 60);
 
       return Post.update(6, { author: 'Jane' });
     }).then(function (p) {
@@ -70,7 +70,7 @@ describe('DS#update', function () {
         age: 30,
         id: 5
       }));
-    }, 30);
+    }, 60);
 
     return post.DSUpdate({ author: 'Jake' }).then(function (p) {
       assert.deepEqual(JSON.stringify(p), JSON.stringify(post), 'post 5 should have been updated');
@@ -109,7 +109,7 @@ describe('DS#update', function () {
       assert.equal(_this.requests[0].method, 'PUT');
       assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ content: 'stuff' }));
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment));
-    }, 30);
+    }, 60);
 
     return Comment.update(5, {
       content: 'stuff'
@@ -140,7 +140,7 @@ describe('DS#update', function () {
         assert.equal(_this.requests[1].method, 'PUT');
         assert.equal(_this.requests[1].requestBody, DSUtils.toJson({ content: 'stuff', other: 'stuff' }));
         _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment2));
-      }, 30);
+      }, 60);
 
       return Comment.update(c, {
         content: 'stuff'
@@ -161,7 +161,7 @@ describe('DS#update', function () {
         assert.equal(_this.requests[2].method, 'PUT');
         assert.equal(_this.requests[2].requestBody, DSUtils.toJson({ content: 'stuff', other: 'stuff' }));
         _this.requests[2].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment2));
-      }, 30);
+      }, 60);
 
       return Comment.update(6, {
         content: 'stuff'
@@ -245,7 +245,7 @@ describe('DS#update', function () {
           }
         ]
       }));
-    }, 30);
+    }, 60);
 
     return Parent.save(1).then(function (parent) {
       assert.equal(parent.content, 'stuff');

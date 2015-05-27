@@ -225,4 +225,23 @@ describe('DS#defineResource', function () {
     assert.equal(Foo.getEndpoint(foo, {}), 'baz/10/foo');
     assert.equal(Bar.getEndpoint(bar, {}), 'baz/10/bar');
   });
+  it('should allow default instance values', function () {
+    store.defineResource('baz');
+    var Foo = store.defineResource({
+      name: 'foo',
+      defaultValues: {
+        beep: 'boop',
+        foo: true
+      }
+    });
+    var foo = Foo.createInstance({ id: 1, foo: false, type: 'foo', bazId: 10 });
+
+    assert.equal(DSUtils.toJson(foo), DSUtils.toJson({
+      beep: 'boop',
+      foo: false,
+      id: 1,
+      type: 'foo',
+      bazId: 10
+    }));
+  });
 });

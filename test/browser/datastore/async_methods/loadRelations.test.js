@@ -18,7 +18,7 @@ describe('DS#loadRelations', function () {
       ]));
       _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([profile15]));
       _this.requests[2].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(organization14));
-    }, 30);
+    }, 60);
 
     return User.loadRelations(10, ['comment', 'profile', 'organization'], {
       params: { approvedBy: 10 },
@@ -43,7 +43,7 @@ describe('DS#loadRelations', function () {
         assert.equal(_this.requests[4].method, 'GET');
         _this.requests[3].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(user20));
         _this.requests[4].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(user19));
-      }, 30);
+      }, 60);
 
       return Comment.loadRelations(19, ['user'], { findStrictCache: true, bypassCache: true });
     }).then(function (comment) {
@@ -66,7 +66,7 @@ describe('DS#loadRelations', function () {
         comment12,
         comment13
       ]));
-    }, 30);
+    }, 60);
 
     return User.loadRelations(10, ['comments'], { params: { approvedBy: 10 } }).then(function (user) {
       assert.deepEqual(user.comments[0].id, Comment.get(user.comments[0].id).id);
@@ -83,7 +83,7 @@ describe('DS#loadRelations', function () {
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/user/19');
         assert.equal(_this.requests[1].method, 'GET');
         _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(user19));
-      }, 30);
+      }, 60);
 
       return Comment.loadRelations(19, ['approvedByUser'], { findStrictCache: true, bypassCache: true });
     }).then(function (comment) {
@@ -140,7 +140,7 @@ describe('DS#loadRelations', function () {
   //    } catch (err) {
   //      done(err.stack);
   //    }
-  //  }, 30);
+  //  }, 60);
   //});
   it('should correctly propagate errors', function () {
     var _this = this;
@@ -161,7 +161,7 @@ describe('DS#loadRelations', function () {
       _this.requests[0].respond(404, { 'Content-Type': 'text/plain' }, 'Not Found');
       _this.requests[1].respond(404, { 'Content-Type': 'text/plain' }, 'Not Found');
       _this.requests[2].respond(404, { 'Content-Type': 'text/plain' }, 'Not Found');
-    }, 30);
+    }, 60);
 
     return User.loadRelations(10, ['comment', 'profile', 'organization']).then(function () {
       throw new Error('Should not have succeeded!');
@@ -183,7 +183,7 @@ describe('DS#loadRelations', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/organization/14/user');
       assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([copy]));
-    }, 30);
+    }, 60);
 
     return Organization.loadRelations(organization, ['user']).then(function (organization) {
       assert.isTrue(organization === organization.users[0].organization);
@@ -195,7 +195,7 @@ describe('DS#loadRelations', function () {
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/organization/14/user/10/comment');
         assert.equal(_this.requests[1].method, 'GET');
         _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([comment11, comment12]));
-      }, 30);
+      }, 60);
 
       return User.loadRelations(user, ['comment']);
     }).then(function (user) {
@@ -218,7 +218,7 @@ describe('DS#loadRelations', function () {
           id: 1
         }
       ]));
-    }, 30);
+    }, 60);
 
     return Organization.loadRelations(organization, ['user']).then(function (organization) {
       assert.isTrue(organization === organization.users[0].organization);
@@ -245,7 +245,7 @@ describe('DS#loadRelations', function () {
             }
           }
         ]));
-      }, 30);
+      }, 60);
 
       return User.loadRelations(user, ['comment']);
     }).then(function (user) {
@@ -272,7 +272,7 @@ describe('DS#loadRelations', function () {
       ]));
       _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([profile15]));
       _this.requests[2].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(organization14));
-    }, 30);
+    }, 60);
 
     return User.loadRelations(10, ['comment', 'profile', 'organization'], {
       params: { approvedBy: 10 },
@@ -330,7 +330,7 @@ describe('DS#loadRelations', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/profile?where=%7B%22userId%22:%7B%22%3D%3D%22:10%7D%7D');
       assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(profile15));
-    }, 30);
+    }, 60);
     return User.loadRelations(user, ['profile'], { allowSimpleWhere: false, bypassCache: true, findStrictCache: true });
   });
 
@@ -381,7 +381,7 @@ describe('DS#loadRelations', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/bar?where=%7B%22id%22:%7B%22in%22:%5B4,7,9%5D%7D%7D');
       assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(barsData));
-    }, 30);
+    }, 60);
     return Foo.loadRelations(foo, ['bar']).then(function (foo) {
       assert.deepEqual(DSUtils.toJson(foo.bars), DSUtils.toJson(barsData));
     });
