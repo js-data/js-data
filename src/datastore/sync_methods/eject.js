@@ -49,7 +49,7 @@ export default function eject(resourceName, id, options) {
       if (items.$$injected) {
         DSUtils.remove(items, item);
       }
-      if (!items.length) {
+      if (!items.length && options.clearEmptyQueries) {
         toRemove.push(queryHash);
       }
     });

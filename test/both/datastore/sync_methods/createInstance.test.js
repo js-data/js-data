@@ -24,7 +24,7 @@ describe('DS#createInstance', function () {
   });
 
   it('create an instance', function () {
-    store.defineResource({
+    var Person = store.defineResource({
       name: 'person',
       methods: {
         fullName: function () {
@@ -39,11 +39,10 @@ describe('DS#createInstance', function () {
     });
 
     store.defineResource({
-      name: 'dog',
-      useClass: true
+      name: 'dog'
     });
 
-    store.defineResource({
+    var Cat = store.defineResource({
       name: 'cat'
     });
 

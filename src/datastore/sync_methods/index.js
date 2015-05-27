@@ -130,6 +130,9 @@ export default {
 
     let Constructor = definition[definition.class];
     item = new Constructor();
+    if (options.defaultValues) {
+      DSUtils.deepMixIn(item, options.defaultValues);
+    }
     DSUtils.deepMixIn(item, attrs);
     if (definition.computed) {
       this.compute(definition.name, item);

@@ -7,9 +7,13 @@
 - #131 - array of IDs based hasMany relations
 - #132 - Allow resources to extend other resources
 - #133 - Allow filtering by nested fields
+- #135 - JSData caching inconsistence behaviour when ejecting items
+- #139 - Option to specify default values of new resource instances.
 
 ###### Backwards compatible bug fixes
 - #127 - Memory leak in DS.changes
+- #134 - All resources get all methods defined on any resource 
+- #142 - Allow omitting options in getEndpoint
 
 ##### 2.0.0-beta.4 - 28 April 2015
 
