@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 2.0.0-beta.4 - Homepage <http://www.js-data.io/>
+ * @version 2.0.0-beta.5 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -77,12 +77,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new _DS['default'](options);
 	  },
 	  version: {
-	    full: '2.0.0-beta.4',
+	    full: '2.0.0-beta.5',
 	    major: parseInt('2', 10),
 	    minor: parseInt('0', 10),
 	    patch: parseInt('0', 10),
 	    alpha: true ? 'false' : false,
-	    beta: true ? '4' : false
+	    beta: true ? '5' : false
 	  }
 	};
 
@@ -100,9 +100,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _DSErrors = __webpack_require__(3);
 
-	var _syncMethods = __webpack_require__(5);
+	var _syncMethods = __webpack_require__(4);
 
-	var _asyncMethods = __webpack_require__(4);
+	var _asyncMethods = __webpack_require__(5);
 
 	function lifecycleNoopCb(resource, attrs, cb) {
 	  cb(null, attrs);
@@ -200,6 +200,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	defaultsPrototype.actions = {};
 	defaultsPrototype.afterCreate = lifecycleNoopCb;
+	defaultsPrototype.afterCreateCollection = lifecycleNoop;
 	defaultsPrototype.afterCreateInstance = lifecycleNoop;
 	defaultsPrototype.afterDestroy = lifecycleNoopCb;
 	defaultsPrototype.afterEject = lifecycleNoop;
@@ -210,6 +211,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	defaultsPrototype.allowSimpleWhere = true;
 	defaultsPrototype.basePath = '';
 	defaultsPrototype.beforeCreate = lifecycleNoopCb;
+	defaultsPrototype.beforeCreateCollection = lifecycleNoop;
 	defaultsPrototype.beforeCreateInstance = lifecycleNoop;
 	defaultsPrototype.beforeDestroy = lifecycleNoopCb;
 	defaultsPrototype.beforeEject = lifecycleNoop;
@@ -219,8 +221,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	defaultsPrototype.beforeValidate = lifecycleNoopCb;
 	defaultsPrototype.bypassCache = false;
 	defaultsPrototype.cacheResponse = !!_DSUtils['default'].w;
+	defaultsPrototype.clearEmptyQueries = true;
+	defaultsPrototype.computed = {};
 	defaultsPrototype.defaultAdapter = 'http';
 	defaultsPrototype.debug = true;
+	defaultsPrototype.defaultValues = {};
 	defaultsPrototype.eagerEject = false;
 	// TODO: Implement eagerInject in DS#create
 	defaultsPrototype.eagerInject = false;
@@ -247,6 +252,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	defaultsPrototype.maxAge = false;
+	defaultsPrototype.methods = {};
 	defaultsPrototype.notify = !!_DSUtils['default'].w;
 	defaultsPrototype.reapAction = !!_DSUtils['default'].w ? 'inject' : 'none';
 	defaultsPrototype.reapInterval = !!_DSUtils['default'].w ? 30000 : false;
@@ -310,7 +316,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          _DSUtils['default'].forOwn(clause, function (term, op) {
 	            var expr = undefined;
 	            var isOr = op[0] === '|';
-	            var val = attrs[field];
+	            var val = _DSUtils['default'].get(attrs, field);
 	            op = isOr ? op.substr(1) : op;
 	            if (op === '==') {
 	              expr = val == term;
@@ -514,6 +520,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ },
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
+
+	var _defineProperty = function (obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: key == null || typeof Symbol == 'undefined' || key.constructor !== Symbol, configurable: true, writable: true }); };
 
 	/* jshint eqeqeq:false */
 
@@ -962,6 +970,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  equals: equals,
 	  Events: Events,
 	  filter: filter,
+	  fillIn: function fillIn(target, obj) {
+	    forOwn(obj, function (v, k) {
+	      if (!(k in target)) {
+	        target[k] = v;
+	      }
+	    });
+	    return target;
+	  },
 	  forEach: forEach,
 	  forOwn: forOwn,
 	  fromJson: function fromJson(json) {
@@ -1084,8 +1100,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	            enumerable: enumerable,
 	            get: function get() {
 	              var params = {};
-	              params[def.foreignKey] = this[definition.idAttribute];
-	              return params[def.foreignKey] ? store.defaults.constructor.prototype.defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true }) : undefined;
+	              if (def.foreignKey) {
+	                params[def.foreignKey] = this[definition.idAttribute];
+	                return store.defaults.constructor.prototype.defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
+	              } else if (def.localKeys) {
+	                params.where = _defineProperty({}, definition.getResource(relationName).idAttribute, {
+	                  'in': this[def.localKeys]
+	                });
+	                return store.defaults.constructor.prototype.defaultFilter.call(store, store.s[relationName].collection, relationName, params);
+	              }
+	              return undefined;
 	            },
 	            set: function set() {}
 	          });
@@ -1203,76 +1227,19 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _create = __webpack_require__(20);
-
-	var _destroy = __webpack_require__(21);
-
-	var _destroyAll = __webpack_require__(22);
-
-	var _find = __webpack_require__(23);
-
-	var _findAll = __webpack_require__(24);
-
-	var _loadRelations = __webpack_require__(25);
-
-	var _reap = __webpack_require__(26);
-
-	var _save = __webpack_require__(27);
-
-	var _update = __webpack_require__(28);
-
-	var _updateAll = __webpack_require__(29);
-
-	exports['default'] = {
-	  create: _create['default'],
-	  destroy: _destroy['default'],
-	  destroyAll: _destroyAll['default'],
-	  find: _find['default'],
-	  findAll: _findAll['default'],
-	  loadRelations: _loadRelations['default'],
-	  reap: _reap['default'],
-	  refresh: function refresh(resourceName, id, options) {
-	    var _this = this;
-	    var DSUtils = _this.utils;
-
-	    return new DSUtils.Promise(function (resolve, reject) {
-	      var definition = _this.defs[resourceName];
-	      id = DSUtils.resolveId(_this.defs[resourceName], id);
-	      if (!definition) {
-	        reject(new _this.errors.NER(resourceName));
-	      } else if (!DSUtils._sn(id)) {
-	        reject(DSUtils._snErr('id'));
-	      } else {
-	        options = DSUtils._(definition, options);
-	        options.bypassCache = true;
-	        resolve(_this.get(resourceName, id));
-	      }
-	    }).then(function (item) {
-	      return item ? _this.find(resourceName, id, options) : item;
-	    });
-	  },
-	  save: _save['default'],
-	  update: _update['default'],
-	  updateAll: _updateAll['default']
-	};
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
 	var _DSUtils = __webpack_require__(2);
 
 	var _DSErrors = __webpack_require__(3);
 
-	var _defineResource = __webpack_require__(38);
+	var _defineResource = __webpack_require__(28);
 
-	var _eject = __webpack_require__(39);
+	var _eject = __webpack_require__(29);
 
-	var _ejectAll = __webpack_require__(40);
+	var _ejectAll = __webpack_require__(30);
 
-	var _filter = __webpack_require__(41);
+	var _filter = __webpack_require__(31);
 
-	var _inject = __webpack_require__(42);
+	var _inject = __webpack_require__(32);
 
 	var NER = _DSErrors['default'].NER;
 	var IA = _DSErrors['default'].IA;
@@ -1305,7 +1272,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        var ignoredChanges = options.ignoredChanges || [];
 	        _DSUtils['default'].forEach(definition.relationFields, function (field) {
-	          return ignoredChanges.push(field);
+	          if (!_DSUtils['default'].contains(ignoredChanges, field)) {
+	            ignoredChanges.push(field);
+	          }
 	        });
 	        var diff = _DSUtils['default'].diffObjectFromOldObject(item, _this.s[resourceName].previousAttributes[id], _DSUtils['default'].equals, ignoredChanges);
 	        _DSUtils['default'].forOwn(diff, function (changeset, name) {
@@ -1397,6 +1366,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var Constructor = definition[definition['class']];
 	    item = new Constructor();
+	    if (options.defaultValues) {
+	      _DSUtils['default'].deepMixIn(item, options.defaultValues);
+	    }
 	    _DSUtils['default'].deepMixIn(item, attrs);
 	    if (definition.computed) {
 	      this.compute(definition.name, item);
@@ -1405,6 +1377,62 @@ return /******/ (function(modules) { // webpackBootstrap
 	      options.afterCreateInstance(options, item);
 	    }
 	    return item;
+	  },
+	  createCollection: function createCollection(resourceName, arr, params, options) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+
+	    arr = arr || [];
+	    params = params || {};
+
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (arr && !_DSUtils['default'].isArray(arr)) {
+	      throw new IA('"arr" must be an array!');
+	    }
+
+	    options = _DSUtils['default']._(definition, options);
+
+
+	    if (options.notify) {
+	      options.beforeCreateCollection(options, arr);
+	    }
+
+	    Object.defineProperties(arr, {
+	      fetch: {
+	        value: function value(params, options) {
+	          var __this = this;
+	          __this.params = params || __this.params;
+	          return _this.findAll(resourceName, __this.params, options).then(function (data) {
+	            if (data === __this) {
+	              return __this;
+	            }
+	            data.unshift(__this.length);
+	            data.unshift(0);
+	            __this.splice.apply(__this, data);
+	            data.shift();
+	            data.shift();
+	            if (data.$$injected) {
+	              _this.s[resourceName].queryData[_DSUtils['default'].toJson(__this.params)] = __this;
+	              __this.$$injected = true;
+	            }
+	            return __this;
+	          });
+	        }
+	      },
+	      params: {
+	        value: params,
+	        writable: true
+	      },
+	      resourceName: {
+	        value: resourceName
+	      }
+	    });
+
+	    if (options.notify) {
+	      options.afterCreateCollection(options, arr);
+	    }
+	    return arr;
 	  },
 	  defineResource: _defineResource['default'],
 	  digest: function digest() {
@@ -1528,6 +1556,63 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // return resource from cache
 	    return resource.previousAttributes[id] ? _DSUtils['default'].copy(resource.previousAttributes[id]) : undefined;
 	  }
+	};
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _create = __webpack_require__(33);
+
+	var _destroy = __webpack_require__(34);
+
+	var _destroyAll = __webpack_require__(35);
+
+	var _find = __webpack_require__(36);
+
+	var _findAll = __webpack_require__(37);
+
+	var _loadRelations = __webpack_require__(38);
+
+	var _reap = __webpack_require__(39);
+
+	var _save = __webpack_require__(40);
+
+	var _update = __webpack_require__(41);
+
+	var _updateAll = __webpack_require__(42);
+
+	exports['default'] = {
+	  create: _create['default'],
+	  destroy: _destroy['default'],
+	  destroyAll: _destroyAll['default'],
+	  find: _find['default'],
+	  findAll: _findAll['default'],
+	  loadRelations: _loadRelations['default'],
+	  reap: _reap['default'],
+	  refresh: function refresh(resourceName, id, options) {
+	    var _this = this;
+	    var DSUtils = _this.utils;
+
+	    return new DSUtils.Promise(function (resolve, reject) {
+	      var definition = _this.defs[resourceName];
+	      id = DSUtils.resolveId(_this.defs[resourceName], id);
+	      if (!definition) {
+	        reject(new _this.errors.NER(resourceName));
+	      } else if (!DSUtils._sn(id)) {
+	        reject(DSUtils._snErr('id'));
+	      } else {
+	        options = DSUtils._(definition, options);
+	        options.bypassCache = true;
+	        resolve(_this.get(resourceName, id));
+	      }
+	    }).then(function (item) {
+	      return item ? _this.find(resourceName, id, options) : item;
+	    });
+	  },
+	  save: _save['default'],
+	  update: _update['default'],
+	  updateAll: _updateAll['default']
 	};
 
 /***/ },
@@ -2385,7 +2470,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var indexOf = __webpack_require__(30);
+	var indexOf = __webpack_require__(20);
 
 	    /**
 	     * If array contains values.
@@ -2401,7 +2486,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var indexOf = __webpack_require__(30);
+	var indexOf = __webpack_require__(20);
 
 	    /**
 	     * Remove a single item from the array.
@@ -2481,8 +2566,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var hasOwn = __webpack_require__(31);
-	var forIn = __webpack_require__(32);
+	var hasOwn = __webpack_require__(21);
+	var forIn = __webpack_require__(22);
 
 	    /**
 	     * Similar to Array/forEach but works over object properties and fixes Don't
@@ -2507,7 +2592,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var forOwn = __webpack_require__(13);
-	var isPlainObject = __webpack_require__(34);
+	var isPlainObject = __webpack_require__(23);
 
 	    /**
 	     * Mixes objects into the target object, recursively mixing existing child
@@ -2570,7 +2655,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isPrimitive = __webpack_require__(33);
+	var isPrimitive = __webpack_require__(24);
 
 	    /**
 	     * get "nested" object property
@@ -2596,7 +2681,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var namespace = __webpack_require__(37);
+	var namespace = __webpack_require__(25);
 
 	    /**
 	     * set "nested" object property
@@ -2619,8 +2704,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(35);
-	var camelCase = __webpack_require__(36);
+	var toString = __webpack_require__(26);
+	var camelCase = __webpack_require__(27);
 	var upperCase = __webpack_require__(19);
 	    /**
 	     * camelCase + UPPERCASE first char
@@ -2638,7 +2723,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(35);
+	var toString = __webpack_require__(26);
 	    /**
 	     * "Safer" String.toUpperCase()
 	     */
@@ -2652,761 +2737,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 20 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports['default'] = create;
-
-	function create(resourceName, attrs, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var definition = _this.defs[resourceName];
-
-	  options = options || {};
-	  attrs = attrs || {};
-
-	  var rejectionError = undefined;
-	  if (!definition) {
-	    rejectionError = new _this.errors.NER(resourceName);
-	  } else if (!DSUtils._o(attrs)) {
-	    rejectionError = DSUtils._oErr('attrs');
-	  } else {
-	    options = DSUtils._(definition, options);
-	    if (options.upsert && DSUtils._sn(attrs[definition.idAttribute])) {
-	      return _this.update(resourceName, attrs[definition.idAttribute], attrs, options);
-	    }
-	  }
-
-	  return new DSUtils.Promise(function (resolve, reject) {
-	    if (rejectionError) {
-	      reject(rejectionError);
-	    } else {
-	      resolve(attrs);
-	    }
-	  }).then(function (attrs) {
-	    return options.beforeValidate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.validate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.afterValidate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.beforeCreate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    if (options.notify) {
-	      definition.emit('DS.beforeCreate', definition, attrs);
-	    }
-	    return _this.getAdapter(options).create(definition, attrs, options);
-	  }).then(function (attrs) {
-	    return options.afterCreate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    if (options.notify) {
-	      definition.emit('DS.afterCreate', definition, attrs);
-	    }
-	    if (options.cacheResponse) {
-	      var created = _this.inject(definition.n, attrs, options.orig());
-	      var id = created[definition.idAttribute];
-	      var resource = _this.s[resourceName];
-	      resource.completedQueries[id] = new Date().getTime();
-	      resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
-	      return created;
-	    } else {
-	      return _this.createInstance(resourceName, attrs, options);
-	    }
-	  });
-	}
-
-/***/ },
-/* 21 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports['default'] = destroy;
-
-	function destroy(resourceName, id, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var definition = _this.defs[resourceName];
-	  var item = undefined;
-
-	  return new DSUtils.Promise(function (resolve, reject) {
-	    id = DSUtils.resolveId(definition, id);
-	    if (!definition) {
-	      reject(new _this.errors.NER(resourceName));
-	    } else if (!DSUtils._sn(id)) {
-	      reject(DSUtils._snErr('id'));
-	    } else {
-	      item = _this.get(resourceName, id) || { id: id };
-	      options = DSUtils._(definition, options);
-	      resolve(item);
-	    }
-	  }).then(function (attrs) {
-	    return options.beforeDestroy.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    if (options.notify) {
-	      definition.emit('DS.beforeDestroy', definition, attrs);
-	    }
-	    if (options.eagerEject) {
-	      _this.eject(resourceName, id);
-	    }
-	    return _this.getAdapter(options).destroy(definition, id, options);
-	  }).then(function () {
-	    return options.afterDestroy.call(item, options, item);
-	  }).then(function (item) {
-	    if (options.notify) {
-	      definition.emit('DS.afterDestroy', definition, item);
-	    }
-	    _this.eject(resourceName, id);
-	    return id;
-	  })['catch'](function (err) {
-	    if (options && options.eagerEject && item) {
-	      _this.inject(resourceName, item, { notify: false });
-	    }
-	    return DSUtils.Promise.reject(err);
-	  });
-	}
-
-/***/ },
-/* 22 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports['default'] = destroyAll;
-
-	function destroyAll(resourceName, params, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var definition = _this.defs[resourceName];
-	  var ejected = undefined,
-	      toEject = undefined;
-
-	  params = params || {};
-
-	  return new DSUtils.Promise(function (resolve, reject) {
-	    if (!definition) {
-	      reject(new _this.errors.NER(resourceName));
-	    } else if (!DSUtils._o(params)) {
-	      reject(DSUtils._oErr('attrs'));
-	    } else {
-	      options = DSUtils._(definition, options);
-	      resolve();
-	    }
-	  }).then(function () {
-	    toEject = _this.defaults.defaultFilter.call(_this, resourceName, params);
-	    return options.beforeDestroy(options, toEject);
-	  }).then(function () {
-	    if (options.notify) {
-	      definition.emit('DS.beforeDestroy', definition, toEject);
-	    }
-	    if (options.eagerEject) {
-	      ejected = _this.ejectAll(resourceName, params);
-	    }
-	    return _this.getAdapter(options).destroyAll(definition, params, options);
-	  }).then(function () {
-	    return options.afterDestroy(options, toEject);
-	  }).then(function () {
-	    if (options.notify) {
-	      definition.emit('DS.afterDestroy', definition, toEject);
-	    }
-	    return ejected || _this.ejectAll(resourceName, params);
-	  })['catch'](function (err) {
-	    if (options && options.eagerEject && ejected) {
-	      _this.inject(resourceName, ejected, { notify: false });
-	    }
-	    return DSUtils.Promise.reject(err);
-	  });
-	}
-
-/***/ },
-/* 23 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* jshint -W082 */
-	exports['default'] = find;
-
-	function find(resourceName, id, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var definition = _this.defs[resourceName];
-	  var resource = _this.s[resourceName];
-
-	  return new DSUtils.Promise(function (resolve, reject) {
-	    if (!definition) {
-	      reject(new _this.errors.NER(resourceName));
-	    } else if (!DSUtils._sn(id)) {
-	      reject(DSUtils._snErr('id'));
-	    } else {
-	      options = DSUtils._(definition, options);
-
-	      if (options.params) {
-	        options.params = DSUtils.copy(options.params);
-	      }
-
-	      if (options.bypassCache || !options.cacheResponse) {
-	        delete resource.completedQueries[id];
-	      }
-	      if ((!options.findStrictCache || id in resource.completedQueries) && _this.get(resourceName, id) && !options.bypassCache) {
-	        resolve(_this.get(resourceName, id));
-	      } else {
-	        delete resource.completedQueries[id];
-	        resolve();
-	      }
-	    }
-	  }).then(function (item) {
-	    if (!item) {
-	      if (!(id in resource.pendingQueries)) {
-	        var promise = undefined;
-	        var strategy = options.findStrategy || options.strategy;
-	        if (strategy === 'fallback') {
-	          (function () {
-	            var makeFallbackCall = function (index) {
-	              return _this.getAdapter((options.findFallbackAdapters || options.fallbackAdapters)[index]).find(definition, id, options)['catch'](function (err) {
-	                index++;
-	                if (index < options.fallbackAdapters.length) {
-	                  return makeFallbackCall(index);
-	                } else {
-	                  return DSUtils.Promise.reject(err);
-	                }
-	              });
-	            };
-
-	            promise = makeFallbackCall(0);
-	          })();
-	        } else {
-	          promise = _this.getAdapter(options).find(definition, id, options);
-	        }
-
-	        resource.pendingQueries[id] = promise.then(function (data) {
-	          // Query is no longer pending
-	          delete resource.pendingQueries[id];
-	          if (options.cacheResponse) {
-	            var injected = _this.inject(resourceName, data, options.orig());
-	            resource.completedQueries[id] = new Date().getTime();
-	            resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
-	            return injected;
-	          } else {
-	            return _this.createInstance(resourceName, data, options.orig());
-	          }
-	        });
-	      }
-	      return resource.pendingQueries[id];
-	    } else {
-	      return item;
-	    }
-	  })['catch'](function (err) {
-	    if (resource) {
-	      delete resource.pendingQueries[id];
-	    }
-	    return DSUtils.Promise.reject(err);
-	  });
-	}
-
-/***/ },
-/* 24 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports['default'] = findAll;
-	/* jshint -W082 */
-	function processResults(data, resourceName, queryHash, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var resource = _this.s[resourceName];
-	  var idAttribute = _this.defs[resourceName].idAttribute;
-	  var date = new Date().getTime();
-
-	  data = data || [];
-
-	  // Query is no longer pending
-	  delete resource.pendingQueries[queryHash];
-	  resource.completedQueries[queryHash] = date;
-
-	  // Update modified timestamp of collection
-	  resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
-
-	  // Merge the new values into the cache
-	  var injected = _this.inject(resourceName, data, options.orig());
-
-	  // Make sure each object is added to completedQueries
-	  if (DSUtils._a(injected)) {
-	    DSUtils.forEach(injected, function (item) {
-	      if (item) {
-	        var id = item[idAttribute];
-	        if (id) {
-	          resource.completedQueries[id] = date;
-	          resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
-	        }
-	      }
-	    });
-	  } else {
-	    options.errorFn('response is expected to be an array!');
-	    resource.completedQueries[injected[idAttribute]] = date;
-	  }
-
-	  return injected;
-	}
-
-	function findAll(resourceName, params, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var definition = _this.defs[resourceName];
-	  var resource = _this.s[resourceName];
-	  var queryHash = undefined;
-
-	  return new DSUtils.Promise(function (resolve, reject) {
-	    params = params || {};
-
-	    if (!_this.defs[resourceName]) {
-	      reject(new _this.errors.NER(resourceName));
-	    } else if (!DSUtils._o(params)) {
-	      reject(DSUtils._oErr('params'));
-	    } else {
-	      options = DSUtils._(definition, options);
-	      queryHash = DSUtils.toJson(params);
-
-	      if (options.params) {
-	        options.params = DSUtils.copy(options.params);
-	      }
-
-	      if (options.bypassCache || !options.cacheResponse) {
-	        delete resource.completedQueries[queryHash];
-	        delete resource.queryData[queryHash];
-	      }
-	      if (queryHash in resource.completedQueries) {
-	        if (options.useFilter) {
-	          resolve(_this.filter(resourceName, params, options.orig()));
-	        } else {
-	          resolve(resource.queryData[queryHash]);
-	        }
-	      } else {
-	        resolve();
-	      }
-	    }
-	  }).then(function (items) {
-	    if (!(queryHash in resource.completedQueries)) {
-	      if (!(queryHash in resource.pendingQueries)) {
-	        var promise = undefined;
-	        var strategy = options.findAllStrategy || options.strategy;
-	        if (strategy === 'fallback') {
-	          (function () {
-	            var makeFallbackCall = function (index) {
-	              return _this.getAdapter((options.findAllFallbackAdapters || options.fallbackAdapters)[index]).findAll(definition, params, options)['catch'](function (err) {
-	                index++;
-	                if (index < options.fallbackAdapters.length) {
-	                  return makeFallbackCall(index);
-	                } else {
-	                  return DSUtils.Promise.reject(err);
-	                }
-	              });
-	            };
-
-	            promise = makeFallbackCall(0);
-	          })();
-	        } else {
-	          promise = _this.getAdapter(options).findAll(definition, params, options);
-	        }
-
-	        resource.pendingQueries[queryHash] = promise.then(function (data) {
-	          delete resource.pendingQueries[queryHash];
-	          if (options.cacheResponse) {
-	            resource.queryData[queryHash] = processResults.call(_this, data, resourceName, queryHash, options);
-	            resource.queryData[queryHash].$$injected = true;
-	            return resource.queryData[queryHash];
-	          } else {
-	            DSUtils.forEach(data, function (item, i) {
-	              data[i] = _this.createInstance(resourceName, item, options.orig());
-	            });
-	            return data;
-	          }
-	        });
-	      }
-
-	      return resource.pendingQueries[queryHash];
-	    } else {
-	      return items;
-	    }
-	  })['catch'](function (err) {
-	    if (resource) {
-	      delete resource.pendingQueries[queryHash];
-	    }
-	    return DSUtils.Promise.reject(err);
-	  });
-	}
-
-/***/ },
-/* 25 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports['default'] = loadRelations;
-
-	function loadRelations(resourceName, instance, relations, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var DSErrors = _this.errors;
-
-	  var definition = _this.defs[resourceName];
-
-	  return new DSUtils.Promise(function (resolve, reject) {
-	    if (DSUtils._sn(instance)) {
-	      instance = _this.get(resourceName, instance);
-	    }
-
-	    if (DSUtils._s(relations)) {
-	      relations = [relations];
-	    }
-
-	    if (!definition) {
-	      reject(new DSErrors.NER(resourceName));
-	    } else if (!DSUtils._o(instance)) {
-	      reject(new DSErrors.IA('"instance(id)" must be a string, number or object!'));
-	    } else if (!DSUtils._a(relations)) {
-	      reject(new DSErrors.IA('"relations" must be a string or an array!'));
-	    } else {
-	      (function () {
-	        var _options = DSUtils._(definition, options);
-	        if (!_options.hasOwnProperty('findBelongsTo')) {
-	          _options.findBelongsTo = true;
-	        }
-	        if (!_options.hasOwnProperty('findHasMany')) {
-	          _options.findHasMany = true;
-	        }
-
-	        var tasks = [];
-
-	        DSUtils.forEach(definition.relationList, function (def) {
-	          var relationName = def.relation;
-	          var relationDef = definition.getResource(relationName);
-	          var __options = DSUtils._(relationDef, options);
-	          if (DSUtils.contains(relations, relationName) || DSUtils.contains(relations, def.localField)) {
-	            var task = undefined;
-	            var params = {};
-	            if (__options.allowSimpleWhere) {
-	              params[def.foreignKey] = instance[definition.idAttribute];
-	            } else {
-	              params.where = {};
-	              params.where[def.foreignKey] = {
-	                '==': instance[definition.idAttribute]
-	              };
-	            }
-
-	            if (def.type === 'hasMany') {
-	              task = _this.findAll(relationName, params, __options.orig());
-	            } else if (def.type === 'hasOne') {
-	              if (def.localKey && instance[def.localKey]) {
-	                task = _this.find(relationName, instance[def.localKey], __options.orig());
-	              } else if (def.foreignKey) {
-	                task = _this.findAll(relationName, params, __options.orig()).then(function (hasOnes) {
-	                  return hasOnes.length ? hasOnes[0] : null;
-	                });
-	              }
-	            } else if (instance[def.localKey]) {
-	              task = _this.find(relationName, instance[def.localKey], __options.orig());
-	            }
-
-	            if (task) {
-	              tasks.push(task);
-	            }
-	          }
-	        });
-
-	        resolve(tasks);
-	      })();
-	    }
-	  }).then(function (tasks) {
-	    return DSUtils.Promise.all(tasks);
-	  }).then(function () {
-	    return instance;
-	  });
-	}
-
-/***/ },
-/* 26 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports['default'] = reap;
-
-	function reap(resourceName, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var definition = _this.defs[resourceName];
-	  var resource = _this.s[resourceName];
-
-	  return new DSUtils.Promise(function (resolve, reject) {
-
-	    if (!definition) {
-	      reject(new _this.errors.NER(resourceName));
-	    } else {
-	      options = DSUtils._(definition, options);
-	      if (!options.hasOwnProperty('notify')) {
-	        options.notify = false;
-	      }
-	      var items = [];
-	      var now = new Date().getTime();
-	      var expiredItem = undefined;
-	      while ((expiredItem = resource.expiresHeap.peek()) && expiredItem.expires < now) {
-	        items.push(expiredItem.item);
-	        delete expiredItem.item;
-	        resource.expiresHeap.pop();
-	      }
-	      resolve(items);
-	    }
-	  }).then(function (items) {
-	    if (options.isInterval || options.notify) {
-	      definition.beforeReap(options, items);
-	      definition.emit('DS.beforeReap', definition, items);
-	    }
-	    if (options.reapAction === 'inject') {
-	      (function () {
-	        var timestamp = new Date().getTime();
-	        DSUtils.forEach(items, function (item) {
-	          resource.expiresHeap.push({
-	            item: item,
-	            timestamp: timestamp,
-	            expires: definition.maxAge ? timestamp + definition.maxAge : Number.MAX_VALUE
-	          });
-	        });
-	      })();
-	    } else if (options.reapAction === 'eject') {
-	      DSUtils.forEach(items, function (item) {
-	        _this.eject(resourceName, item[definition.idAttribute]);
-	      });
-	    } else if (options.reapAction === 'refresh') {
-	      var _ret2 = (function () {
-	        var tasks = [];
-	        DSUtils.forEach(items, function (item) {
-	          tasks.push(_this.refresh(resourceName, item[definition.idAttribute]));
-	        });
-	        return {
-	          v: DSUtils.Promise.all(tasks)
-	        };
-	      })();
-
-	      if (typeof _ret2 === 'object') return _ret2.v;
-	    }
-	    return items;
-	  }).then(function (items) {
-	    if (options.isInterval || options.notify) {
-	      definition.afterReap(options, items);
-	      definition.emit('DS.afterReap', definition, items);
-	    }
-	    return items;
-	  });
-	}
-
-/***/ },
-/* 27 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports['default'] = save;
-
-	function save(resourceName, id, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var DSErrors = _this.errors;
-
-	  var definition = _this.defs[resourceName];
-	  var item = undefined;
-	  var noChanges = undefined;
-
-	  return new DSUtils.Promise(function (resolve, reject) {
-	    id = DSUtils.resolveId(definition, id);
-	    if (!definition) {
-	      reject(new DSErrors.NER(resourceName));
-	    } else if (!DSUtils._sn(id)) {
-	      reject(DSUtils._snErr('id'));
-	    } else if (!_this.get(resourceName, id)) {
-	      reject(new DSErrors.R('id "' + id + '" not found in cache!'));
-	    } else {
-	      item = _this.get(resourceName, id);
-	      options = DSUtils._(definition, options);
-	      resolve(item);
-	    }
-	  }).then(function (attrs) {
-	    return options.beforeValidate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.validate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.afterValidate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.beforeUpdate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    if (options.notify) {
-	      definition.emit('DS.beforeUpdate', definition, attrs);
-	    }
-	    if (options.changesOnly) {
-	      var resource = _this.s[resourceName];
-	      if (DSUtils.w) {
-	        resource.observers[id].deliver();
-	      }
-	      var toKeep = [];
-	      var changes = _this.changes(resourceName, id);
-
-	      for (var key in changes.added) {
-	        toKeep.push(key);
-	      }
-	      for (key in changes.changed) {
-	        toKeep.push(key);
-	      }
-	      changes = DSUtils.pick(attrs, toKeep);
-	      if (DSUtils.isEmpty(changes)) {
-	        // no changes, return
-	        noChanges = true;
-	        return attrs;
-	      } else {
-	        attrs = changes;
-	      }
-	    }
-	    return _this.getAdapter(options).update(definition, id, attrs, options);
-	  }).then(function (data) {
-	    return options.afterUpdate.call(data, options, data);
-	  }).then(function (attrs) {
-	    if (options.notify) {
-	      definition.emit('DS.afterUpdate', definition, attrs);
-	    }
-	    if (noChanges) {
-	      return attrs;
-	    } else if (options.cacheResponse) {
-	      var injected = _this.inject(definition.n, attrs, options.orig());
-	      var resource = _this.s[resourceName];
-	      var _id = injected[definition.idAttribute];
-	      resource.saved[_id] = DSUtils.updateTimestamp(resource.saved[_id]);
-	      if (!definition.resetHistoryOnInject) {
-	        resource.previousAttributes[_id] = DSUtils.copy(injected, null, null, null, definition.relationFields);
-	      }
-	      return injected;
-	    } else {
-	      return _this.createInstance(resourceName, attrs, options.orig());
-	    }
-	  });
-	}
-
-/***/ },
-/* 28 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports['default'] = update;
-
-	function update(resourceName, id, attrs, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var DSErrors = _this.errors;
-
-	  var definition = _this.defs[resourceName];
-
-	  return new DSUtils.Promise(function (resolve, reject) {
-	    id = DSUtils.resolveId(definition, id);
-	    if (!definition) {
-	      reject(new DSErrors.NER(resourceName));
-	    } else if (!DSUtils._sn(id)) {
-	      reject(DSUtils._snErr('id'));
-	    } else {
-	      options = DSUtils._(definition, options);
-	      resolve(attrs);
-	    }
-	  }).then(function (attrs) {
-	    return options.beforeValidate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.validate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.afterValidate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.beforeUpdate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    if (options.notify) {
-	      definition.emit('DS.beforeUpdate', definition, attrs);
-	    }
-	    return _this.getAdapter(options).update(definition, id, attrs, options);
-	  }).then(function (data) {
-	    return options.afterUpdate.call(data, options, data);
-	  }).then(function (attrs) {
-	    if (options.notify) {
-	      definition.emit('DS.afterUpdate', definition, attrs);
-	    }
-	    if (options.cacheResponse) {
-	      var injected = _this.inject(definition.n, attrs, options.orig());
-	      var resource = _this.s[resourceName];
-	      var _id = injected[definition.idAttribute];
-	      resource.saved[_id] = DSUtils.updateTimestamp(resource.saved[_id]);
-	      if (!definition.resetHistoryOnInject) {
-	        resource.previousAttributes[_id] = DSUtils.copy(injected, null, null, null, definition.relationFields);
-	      }
-	      return injected;
-	    } else {
-	      return _this.createInstance(resourceName, attrs, options.orig());
-	    }
-	  });
-	}
-
-/***/ },
-/* 29 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports['default'] = updateAll;
-
-	function updateAll(resourceName, attrs, params, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var DSErrors = _this.errors;
-
-	  var definition = _this.defs[resourceName];
-
-	  return new DSUtils.Promise(function (resolve, reject) {
-	    if (!definition) {
-	      reject(new DSErrors.NER(resourceName));
-	    } else {
-	      options = DSUtils._(definition, options);
-	      resolve(attrs);
-	    }
-	  }).then(function (attrs) {
-	    return options.beforeValidate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.validate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.afterValidate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.beforeUpdate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    if (options.notify) {
-	      definition.emit('DS.beforeUpdate', definition, attrs);
-	    }
-	    return _this.getAdapter(options).updateAll(definition, attrs, params, options);
-	  }).then(function (data) {
-	    return options.afterUpdate.call(data, options, data);
-	  }).then(function (data) {
-	    if (options.notify) {
-	      definition.emit('DS.afterUpdate', definition, attrs);
-	    }
-	    var origOptions = options.orig();
-	    if (options.cacheResponse) {
-	      var _ret = (function () {
-	        var injected = _this.inject(definition.n, data, origOptions);
-	        var resource = _this.s[resourceName];
-	        DSUtils.forEach(injected, function (i) {
-	          var id = i[definition.idAttribute];
-	          resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
-	          if (!definition.resetHistoryOnInject) {
-	            resource.previousAttributes[id] = DSUtils.copy(i, null, null, null, definition.relationFields);
-	          }
-	        });
-	        return {
-	          v: injected
-	        };
-	      })();
-
-	      if (typeof _ret === 'object') return _ret.v;
-	    } else {
-	      var _ret2 = (function () {
-	        var instances = [];
-	        DSUtils.forEach(data, function (item) {
-	          instances.push(_this.createInstance(resourceName, item, origOptions));
-	        });
-	        return {
-	          v: instances
-	        };
-	      })();
-
-	      if (typeof _ret2 === 'object') return _ret2.v;
-	    }
-	  });
-	}
-
-/***/ },
-/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -3440,7 +2770,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 31 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -3458,10 +2788,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 32 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var hasOwn = __webpack_require__(31);
+	var hasOwn = __webpack_require__(21);
 
 	    var _hasDontEnumBug,
 	        _dontEnums;
@@ -3540,7 +2870,26 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 33 */
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Checks if the value is created by the `Object` constructor.
+	     */
+	    function isPlainObject(value) {
+	        return (!!value && typeof value === 'object' &&
+	            value.constructor === Object);
+	    }
+
+	    module.exports = isPlainObject;
+
+
+
+
+/***/ },
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -3567,71 +2916,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 34 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Checks if the value is created by the `Object` constructor.
-	     */
-	    function isPlainObject(value) {
-	        return (!!value && typeof value === 'object' &&
-	            value.constructor === Object);
-	    }
-
-	    module.exports = isPlainObject;
-
-
-
-
-/***/ },
-/* 35 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Typecast a value to a String, using an empty string value for null or
-	     * undefined.
-	     */
-	    function toString(val){
-	        return val == null ? '' : val.toString();
-	    }
-
-	    module.exports = toString;
-
-
-
-
-/***/ },
-/* 36 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(35);
-	var replaceAccents = __webpack_require__(43);
-	var removeNonWord = __webpack_require__(44);
-	var upperCase = __webpack_require__(19);
-	var lowerCase = __webpack_require__(45);
-	    /**
-	    * Convert string to camelCase text.
-	    */
-	    function camelCase(str){
-	        str = toString(str);
-	        str = replaceAccents(str);
-	        str = removeNonWord(str)
-	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
-	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
-	            .replace(/\s+/g, '') //remove spaces
-	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
-	        return str;
-	    }
-	    module.exports = camelCase;
-
-
-
-/***/ },
-/* 37 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var forEach = __webpack_require__(8);
@@ -3656,10 +2941,53 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 38 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+	
+
+	    /**
+	     * Typecast a value to a String, using an empty string value for null or
+	     * undefined.
+	     */
+	    function toString(val){
+	        return val == null ? '' : val.toString();
+	    }
+
+	    module.exports = toString;
+
+
+
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var toString = __webpack_require__(26);
+	var replaceAccents = __webpack_require__(43);
+	var removeNonWord = __webpack_require__(44);
+	var upperCase = __webpack_require__(19);
+	var lowerCase = __webpack_require__(45);
+	    /**
+	    * Convert string to camelCase text.
+	    */
+	    function camelCase(str){
+	        str = toString(str);
+	        str = replaceAccents(str);
+	        str = removeNonWord(str)
+	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
+	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
+	            .replace(/\s+/g, '') //remove spaces
+	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
+	        return str;
+	    }
+	    module.exports = camelCase;
+
+
+
+/***/ },
+/* 28 */
+/***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = defineResource;
 	/*jshint evil:true, loopfunc:true*/
@@ -3667,17 +2995,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _DSUtils = __webpack_require__(2);
 
 	var _DSErrors = __webpack_require__(3);
-
-	var Resource = function Resource(options) {
-	  _classCallCheck(this, Resource);
-
-	  _DSUtils['default'].deepMixIn(this, options);
-	  if ('endpoint' in options) {
-	    this.endpoint = options.endpoint;
-	  } else {
-	    this.endpoint = this.name;
-	  }
-	};
 
 	var instanceMethods = ['compute', 'refresh', 'save', 'update', 'destroy', 'loadRelations', 'changeHistory', 'changes', 'hasChanges', 'lastModified', 'lastSaved', 'previous'];
 
@@ -3698,14 +3015,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	    throw new _DSErrors['default'].R('' + definition.name + ' is already registered!');
 	  }
 
+	  function Resource(options) {
+	    this.defaultValues = {};
+	    this.methods = {};
+	    this.computed = {};
+	    _DSUtils['default'].deepMixIn(this, options);
+	    var parent = _this.defaults;
+	    if (definition['extends'] && definitions[definition['extends']]) {
+	      parent = definitions[definition['extends']];
+	    }
+	    _DSUtils['default'].fillIn(this.defaultValues, parent.defaultValues);
+	    _DSUtils['default'].fillIn(this.methods, parent.methods);
+	    _DSUtils['default'].fillIn(this.computed, parent.computed);
+	    this.endpoint = 'endpoint' in options ? options.endpoint : this.name;
+	  }
+
 	  try {
 	    var def;
 
 	    var _class;
 
 	    var _ret = (function () {
-	      // Inherit from global defaults
-	      Resource.prototype = _this.defaults;
+	      if (definition['extends'] && definitions[definition['extends']]) {
+	        // Inherit from another resource
+	        Resource.prototype = definitions[definition['extends']];
+	      } else {
+	        // Inherit from global defaults
+	        Resource.prototype = _this.defaults;
+	      }
 	      definitions[definition.name] = new Resource(definition);
 
 	      def = definitions[definition.name];
@@ -3760,6 +3097,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      };
 
 	      def.getEndpoint = function (id, options) {
+	        options = options || {};
 	        options.params = options.params || {};
 
 	        var item = undefined;
@@ -3835,9 +3173,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 
 	      // Apply developer-defined methods
-	      if (def.methods) {
-	        _DSUtils['default'].deepMixIn(def[_class].prototype, def.methods);
-	      }
+	      _DSUtils['default'].forOwn(def.methods, function (fn, m) {
+	        def[_class].prototype[m] = fn;
+	      });
 
 	      def[_class].prototype.set = function (key, value) {
 	        _DSUtils['default'].set(this, key, value);
@@ -3852,34 +3190,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	      _DSUtils['default'].applyRelationGettersToTarget(_this, def, def[_class].prototype);
 
 	      // Prepare for computed properties
-	      if (def.computed) {
-	        _DSUtils['default'].forOwn(def.computed, function (fn, field) {
-	          if (_DSUtils['default'].isFunction(fn)) {
-	            def.computed[field] = [fn];
-	            fn = def.computed[field];
+	      _DSUtils['default'].forOwn(def.computed, function (fn, field) {
+	        if (_DSUtils['default'].isFunction(fn)) {
+	          def.computed[field] = [fn];
+	          fn = def.computed[field];
+	        }
+	        if (def.methods && field in def.methods) {
+	          def.errorFn('Computed property "' + field + '" conflicts with previously defined prototype method!');
+	        }
+	        var deps;
+	        if (fn.length === 1) {
+	          var match = fn[0].toString().match(/function.*?\(([\s\S]*?)\)/);
+	          deps = match[1].split(',');
+	          def.computed[field] = deps.concat(fn);
+	          fn = def.computed[field];
+	          if (deps.length) {
+	            def.errorFn('Use the computed property array syntax for compatibility with minified code!');
 	          }
-	          if (def.methods && field in def.methods) {
-	            def.errorFn('Computed property "' + field + '" conflicts with previously defined prototype method!');
-	          }
-	          var deps;
-	          if (fn.length === 1) {
-	            var match = fn[0].toString().match(/function.*?\(([\s\S]*?)\)/);
-	            deps = match[1].split(',');
-	            def.computed[field] = deps.concat(fn);
-	            fn = def.computed[field];
-	            if (deps.length) {
-	              def.errorFn('Use the computed property array syntax for compatibility with minified code!');
-	            }
-	          }
-	          deps = fn.slice(0, fn.length - 1);
-	          _DSUtils['default'].forEach(deps, function (val, index) {
-	            deps[index] = val.trim();
-	          });
-	          fn.deps = _DSUtils['default'].filter(deps, function (dep) {
-	            return !!dep;
-	          });
+	        }
+	        deps = fn.slice(0, fn.length - 1);
+	        _DSUtils['default'].forEach(deps, function (val, index) {
+	          deps[index] = val.trim();
 	        });
-	      }
+	        fn.deps = _DSUtils['default'].filter(deps, function (dep) {
+	          return !!dep;
+	        });
+	      });
 
 	      _DSUtils['default'].forEach(instanceMethods, function (name) {
 	        def[_class].prototype['DS' + _DSUtils['default'].pascalCase(name)] = function () {
@@ -4035,7 +3371,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 39 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = eject;
@@ -4070,8 +3406,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  if (found) {
 	    var _ret = (function () {
+	      definition.beforeEject(options, item);
 	      if (options.notify) {
-	        definition.beforeEject(options, item);
 	        definition.emit('DS.beforeEject', definition, item);
 	      }
 	      resource.collection.splice(i, 1);
@@ -4092,7 +3428,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (items.$$injected) {
 	          DSUtils.remove(items, item);
 	        }
-	        if (!items.length) {
+	        if (!items.length && options.clearEmptyQueries) {
 	          toRemove.push(queryHash);
 	        }
 	      });
@@ -4105,8 +3441,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      delete resource.saved[id];
 	      resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
+	      definition.afterEject(options, item);
 	      if (options.notify) {
-	        definition.afterEject(options, item);
 	        definition.emit('DS.afterEject', definition, item);
 	      }
 
@@ -4122,7 +3458,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 40 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = ejectAll;
@@ -4162,7 +3498,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 41 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = filter;
@@ -4185,7 +3521,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 42 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = inject;
@@ -4390,16 +3726,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  options = _DSUtils['default']._(definition, options);
 
+	  options.beforeInject(options, attrs);
 	  if (options.notify) {
-	    options.beforeInject(options, attrs);
 	    definition.emit('DS.beforeInject', definition, attrs);
 	  }
 
 	  injected = _inject.call(_this, definition, resource, attrs, options);
 	  resource.collectionModified = _DSUtils['default'].updateTimestamp(resource.collectionModified);
 
+	  options.afterInject(options, injected);
 	  if (options.notify) {
-	    options.afterInject(options, injected);
 	    definition.emit('DS.afterInject', definition, injected);
 	  }
 
@@ -4407,10 +3743,773 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
+/* 33 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports['default'] = create;
+
+	function create(resourceName, attrs, options) {
+	  var _this = this;
+	  var DSUtils = _this.utils;
+	  var definition = _this.defs[resourceName];
+
+	  options = options || {};
+	  attrs = attrs || {};
+
+	  var rejectionError = undefined;
+	  if (!definition) {
+	    rejectionError = new _this.errors.NER(resourceName);
+	  } else if (!DSUtils._o(attrs)) {
+	    rejectionError = DSUtils._oErr('attrs');
+	  } else {
+	    options = DSUtils._(definition, options);
+	    if (options.upsert && DSUtils._sn(attrs[definition.idAttribute])) {
+	      return _this.update(resourceName, attrs[definition.idAttribute], attrs, options);
+	    }
+	  }
+
+	  return new DSUtils.Promise(function (resolve, reject) {
+	    if (rejectionError) {
+	      reject(rejectionError);
+	    } else {
+	      resolve(attrs);
+	    }
+	  }).then(function (attrs) {
+	    return options.beforeValidate.call(attrs, options, attrs);
+	  }).then(function (attrs) {
+	    return options.validate.call(attrs, options, attrs);
+	  }).then(function (attrs) {
+	    return options.afterValidate.call(attrs, options, attrs);
+	  }).then(function (attrs) {
+	    return options.beforeCreate.call(attrs, options, attrs);
+	  }).then(function (attrs) {
+	    if (options.notify) {
+	      definition.emit('DS.beforeCreate', definition, attrs);
+	    }
+	    return _this.getAdapter(options).create(definition, attrs, options);
+	  }).then(function (attrs) {
+	    return options.afterCreate.call(attrs, options, attrs);
+	  }).then(function (attrs) {
+	    if (options.notify) {
+	      definition.emit('DS.afterCreate', definition, attrs);
+	    }
+	    if (options.cacheResponse) {
+	      var created = _this.inject(definition.n, attrs, options.orig());
+	      var id = created[definition.idAttribute];
+	      var resource = _this.s[resourceName];
+	      resource.completedQueries[id] = new Date().getTime();
+	      resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
+	      return created;
+	    } else {
+	      return _this.createInstance(resourceName, attrs, options);
+	    }
+	  });
+	}
+
+/***/ },
+/* 34 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports['default'] = destroy;
+
+	function destroy(resourceName, id, options) {
+	  var _this = this;
+	  var DSUtils = _this.utils;
+	  var definition = _this.defs[resourceName];
+	  var item = undefined;
+
+	  return new DSUtils.Promise(function (resolve, reject) {
+	    id = DSUtils.resolveId(definition, id);
+	    if (!definition) {
+	      reject(new _this.errors.NER(resourceName));
+	    } else if (!DSUtils._sn(id)) {
+	      reject(DSUtils._snErr('id'));
+	    } else {
+	      item = _this.get(resourceName, id) || { id: id };
+	      options = DSUtils._(definition, options);
+	      resolve(item);
+	    }
+	  }).then(function (attrs) {
+	    return options.beforeDestroy.call(attrs, options, attrs);
+	  }).then(function (attrs) {
+	    if (options.notify) {
+	      definition.emit('DS.beforeDestroy', definition, attrs);
+	    }
+	    if (options.eagerEject) {
+	      _this.eject(resourceName, id);
+	    }
+	    return _this.getAdapter(options).destroy(definition, id, options);
+	  }).then(function () {
+	    return options.afterDestroy.call(item, options, item);
+	  }).then(function (item) {
+	    if (options.notify) {
+	      definition.emit('DS.afterDestroy', definition, item);
+	    }
+	    _this.eject(resourceName, id);
+	    return id;
+	  })['catch'](function (err) {
+	    if (options && options.eagerEject && item) {
+	      _this.inject(resourceName, item, { notify: false });
+	    }
+	    return DSUtils.Promise.reject(err);
+	  });
+	}
+
+/***/ },
+/* 35 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports['default'] = destroyAll;
+
+	function destroyAll(resourceName, params, options) {
+	  var _this = this;
+	  var DSUtils = _this.utils;
+	  var definition = _this.defs[resourceName];
+	  var ejected = undefined,
+	      toEject = undefined;
+
+	  params = params || {};
+
+	  return new DSUtils.Promise(function (resolve, reject) {
+	    if (!definition) {
+	      reject(new _this.errors.NER(resourceName));
+	    } else if (!DSUtils._o(params)) {
+	      reject(DSUtils._oErr('attrs'));
+	    } else {
+	      options = DSUtils._(definition, options);
+	      resolve();
+	    }
+	  }).then(function () {
+	    toEject = _this.defaults.defaultFilter.call(_this, resourceName, params);
+	    return options.beforeDestroy(options, toEject);
+	  }).then(function () {
+	    if (options.notify) {
+	      definition.emit('DS.beforeDestroy', definition, toEject);
+	    }
+	    if (options.eagerEject) {
+	      ejected = _this.ejectAll(resourceName, params);
+	    }
+	    return _this.getAdapter(options).destroyAll(definition, params, options);
+	  }).then(function () {
+	    return options.afterDestroy(options, toEject);
+	  }).then(function () {
+	    if (options.notify) {
+	      definition.emit('DS.afterDestroy', definition, toEject);
+	    }
+	    return ejected || _this.ejectAll(resourceName, params);
+	  })['catch'](function (err) {
+	    if (options && options.eagerEject && ejected) {
+	      _this.inject(resourceName, ejected, { notify: false });
+	    }
+	    return DSUtils.Promise.reject(err);
+	  });
+	}
+
+/***/ },
+/* 36 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* jshint -W082 */
+	exports['default'] = find;
+
+	function find(resourceName, id, options) {
+	  var _this = this;
+	  var DSUtils = _this.utils;
+	  var definition = _this.defs[resourceName];
+	  var resource = _this.s[resourceName];
+
+	  return new DSUtils.Promise(function (resolve, reject) {
+	    if (!definition) {
+	      reject(new _this.errors.NER(resourceName));
+	    } else if (!DSUtils._sn(id)) {
+	      reject(DSUtils._snErr('id'));
+	    } else {
+	      options = DSUtils._(definition, options);
+
+	      if (options.params) {
+	        options.params = DSUtils.copy(options.params);
+	      }
+
+	      if (options.bypassCache || !options.cacheResponse) {
+	        delete resource.completedQueries[id];
+	      }
+	      if ((!options.findStrictCache || id in resource.completedQueries) && _this.get(resourceName, id) && !options.bypassCache) {
+	        resolve(_this.get(resourceName, id));
+	      } else {
+	        delete resource.completedQueries[id];
+	        resolve();
+	      }
+	    }
+	  }).then(function (item) {
+	    if (!item) {
+	      if (!(id in resource.pendingQueries)) {
+	        var promise = undefined;
+	        var strategy = options.findStrategy || options.strategy;
+	        if (strategy === 'fallback') {
+	          (function () {
+	            var makeFallbackCall = function (index) {
+	              return _this.getAdapter((options.findFallbackAdapters || options.fallbackAdapters)[index]).find(definition, id, options)['catch'](function (err) {
+	                index++;
+	                if (index < options.fallbackAdapters.length) {
+	                  return makeFallbackCall(index);
+	                } else {
+	                  return DSUtils.Promise.reject(err);
+	                }
+	              });
+	            };
+
+	            promise = makeFallbackCall(0);
+	          })();
+	        } else {
+	          promise = _this.getAdapter(options).find(definition, id, options);
+	        }
+
+	        resource.pendingQueries[id] = promise.then(function (data) {
+	          // Query is no longer pending
+	          delete resource.pendingQueries[id];
+	          if (options.cacheResponse) {
+	            var injected = _this.inject(resourceName, data, options.orig());
+	            resource.completedQueries[id] = new Date().getTime();
+	            resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
+	            return injected;
+	          } else {
+	            return _this.createInstance(resourceName, data, options.orig());
+	          }
+	        });
+	      }
+	      return resource.pendingQueries[id];
+	    } else {
+	      return item;
+	    }
+	  })['catch'](function (err) {
+	    if (resource) {
+	      delete resource.pendingQueries[id];
+	    }
+	    return DSUtils.Promise.reject(err);
+	  });
+	}
+
+/***/ },
+/* 37 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports['default'] = findAll;
+	/* jshint -W082 */
+	function processResults(data, resourceName, queryHash, options) {
+	  var _this = this;
+	  var DSUtils = _this.utils;
+	  var resource = _this.s[resourceName];
+	  var idAttribute = _this.defs[resourceName].idAttribute;
+	  var date = new Date().getTime();
+
+	  data = data || [];
+
+	  // Query is no longer pending
+	  delete resource.pendingQueries[queryHash];
+	  resource.completedQueries[queryHash] = date;
+
+	  // Update modified timestamp of collection
+	  resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
+
+	  // Merge the new values into the cache
+	  var injected = _this.inject(resourceName, data, options.orig());
+
+	  // Make sure each object is added to completedQueries
+	  if (DSUtils._a(injected)) {
+	    DSUtils.forEach(injected, function (item) {
+	      if (item) {
+	        var id = item[idAttribute];
+	        if (id) {
+	          resource.completedQueries[id] = date;
+	          resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
+	        }
+	      }
+	    });
+	  } else {
+	    options.errorFn('response is expected to be an array!');
+	    resource.completedQueries[injected[idAttribute]] = date;
+	  }
+
+	  return injected;
+	}
+
+	function findAll(resourceName, params, options) {
+	  var _this = this;
+	  var DSUtils = _this.utils;
+	  var definition = _this.defs[resourceName];
+	  var resource = _this.s[resourceName];
+	  var queryHash = undefined;
+
+	  return new DSUtils.Promise(function (resolve, reject) {
+	    params = params || {};
+
+	    if (!_this.defs[resourceName]) {
+	      reject(new _this.errors.NER(resourceName));
+	    } else if (!DSUtils._o(params)) {
+	      reject(DSUtils._oErr('params'));
+	    } else {
+	      options = DSUtils._(definition, options);
+	      queryHash = DSUtils.toJson(params);
+
+	      if (options.params) {
+	        options.params = DSUtils.copy(options.params);
+	      }
+
+	      if (options.bypassCache || !options.cacheResponse) {
+	        delete resource.completedQueries[queryHash];
+	        delete resource.queryData[queryHash];
+	      }
+	      if (queryHash in resource.completedQueries) {
+	        if (options.useFilter) {
+	          resolve(_this.filter(resourceName, params, options.orig()));
+	        } else {
+	          resolve(resource.queryData[queryHash]);
+	        }
+	      } else {
+	        resolve();
+	      }
+	    }
+	  }).then(function (items) {
+	    if (!(queryHash in resource.completedQueries)) {
+	      if (!(queryHash in resource.pendingQueries)) {
+	        var promise = undefined;
+	        var strategy = options.findAllStrategy || options.strategy;
+	        if (strategy === 'fallback') {
+	          (function () {
+	            var makeFallbackCall = function (index) {
+	              return _this.getAdapter((options.findAllFallbackAdapters || options.fallbackAdapters)[index]).findAll(definition, params, options)['catch'](function (err) {
+	                index++;
+	                if (index < options.fallbackAdapters.length) {
+	                  return makeFallbackCall(index);
+	                } else {
+	                  return DSUtils.Promise.reject(err);
+	                }
+	              });
+	            };
+
+	            promise = makeFallbackCall(0);
+	          })();
+	        } else {
+	          promise = _this.getAdapter(options).findAll(definition, params, options);
+	        }
+
+	        resource.pendingQueries[queryHash] = promise.then(function (data) {
+	          delete resource.pendingQueries[queryHash];
+	          if (options.cacheResponse) {
+	            resource.queryData[queryHash] = processResults.call(_this, data, resourceName, queryHash, options);
+	            resource.queryData[queryHash].$$injected = true;
+	            return resource.queryData[queryHash];
+	          } else {
+	            DSUtils.forEach(data, function (item, i) {
+	              data[i] = _this.createInstance(resourceName, item, options.orig());
+	            });
+	            return data;
+	          }
+	        });
+	      }
+
+	      return resource.pendingQueries[queryHash];
+	    } else {
+	      return items;
+	    }
+	  })['catch'](function (err) {
+	    if (resource) {
+	      delete resource.pendingQueries[queryHash];
+	    }
+	    return DSUtils.Promise.reject(err);
+	  });
+	}
+
+/***/ },
+/* 38 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _defineProperty = function (obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: key == null || typeof Symbol == 'undefined' || key.constructor !== Symbol, configurable: true, writable: true }); };
+
+	exports['default'] = loadRelations;
+
+	function loadRelations(resourceName, instance, relations, options) {
+	  var _this = this;
+	  var DSUtils = _this.utils;
+	  var DSErrors = _this.errors;
+
+	  var definition = _this.defs[resourceName];
+
+	  return new DSUtils.Promise(function (resolve, reject) {
+	    if (DSUtils._sn(instance)) {
+	      instance = _this.get(resourceName, instance);
+	    }
+
+	    if (DSUtils._s(relations)) {
+	      relations = [relations];
+	    }
+
+	    if (!definition) {
+	      reject(new DSErrors.NER(resourceName));
+	    } else if (!DSUtils._o(instance)) {
+	      reject(new DSErrors.IA('"instance(id)" must be a string, number or object!'));
+	    } else if (!DSUtils._a(relations)) {
+	      reject(new DSErrors.IA('"relations" must be a string or an array!'));
+	    } else {
+	      (function () {
+	        var _options = DSUtils._(definition, options);
+	        if (!_options.hasOwnProperty('findBelongsTo')) {
+	          _options.findBelongsTo = true;
+	        }
+	        if (!_options.hasOwnProperty('findHasMany')) {
+	          _options.findHasMany = true;
+	        }
+
+	        var tasks = [];
+
+	        DSUtils.forEach(definition.relationList, function (def) {
+	          var relationName = def.relation;
+	          var relationDef = definition.getResource(relationName);
+	          var __options = DSUtils._(relationDef, options);
+	          if (DSUtils.contains(relations, relationName) || DSUtils.contains(relations, def.localField)) {
+	            var task = undefined;
+	            var params = {};
+	            if (__options.allowSimpleWhere) {
+	              params[def.foreignKey] = instance[definition.idAttribute];
+	            } else {
+	              params.where = {};
+	              params.where[def.foreignKey] = {
+	                '==': instance[definition.idAttribute]
+	              };
+	            }
+
+	            if (def.type === 'hasMany') {
+	              if (def.localKeys) {
+	                delete params[def.foreignKey];
+	                params.where = _defineProperty({}, relationDef.idAttribute, {
+	                  'in': instance[def.localKeys]
+	                });
+	              }
+	              task = _this.findAll(relationName, params, __options.orig());
+	            } else if (def.type === 'hasOne') {
+	              if (def.localKey && instance[def.localKey]) {
+	                task = _this.find(relationName, instance[def.localKey], __options.orig());
+	              } else if (def.foreignKey) {
+	                task = _this.findAll(relationName, params, __options.orig()).then(function (hasOnes) {
+	                  return hasOnes.length ? hasOnes[0] : null;
+	                });
+	              }
+	            } else if (instance[def.localKey]) {
+	              task = _this.find(relationName, instance[def.localKey], __options.orig());
+	            }
+
+	            if (task) {
+	              tasks.push(task);
+	            }
+	          }
+	        });
+
+	        resolve(tasks);
+	      })();
+	    }
+	  }).then(function (tasks) {
+	    return DSUtils.Promise.all(tasks);
+	  }).then(function () {
+	    return instance;
+	  });
+	}
+
+/***/ },
+/* 39 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports['default'] = reap;
+
+	function reap(resourceName, options) {
+	  var _this = this;
+	  var DSUtils = _this.utils;
+	  var definition = _this.defs[resourceName];
+	  var resource = _this.s[resourceName];
+
+	  return new DSUtils.Promise(function (resolve, reject) {
+
+	    if (!definition) {
+	      reject(new _this.errors.NER(resourceName));
+	    } else {
+	      options = DSUtils._(definition, options);
+	      if (!options.hasOwnProperty('notify')) {
+	        options.notify = false;
+	      }
+	      var items = [];
+	      var now = new Date().getTime();
+	      var expiredItem = undefined;
+	      while ((expiredItem = resource.expiresHeap.peek()) && expiredItem.expires < now) {
+	        items.push(expiredItem.item);
+	        delete expiredItem.item;
+	        resource.expiresHeap.pop();
+	      }
+	      resolve(items);
+	    }
+	  }).then(function (items) {
+	    if (options.isInterval || options.notify) {
+	      definition.beforeReap(options, items);
+	      definition.emit('DS.beforeReap', definition, items);
+	    }
+	    if (options.reapAction === 'inject') {
+	      (function () {
+	        var timestamp = new Date().getTime();
+	        DSUtils.forEach(items, function (item) {
+	          resource.expiresHeap.push({
+	            item: item,
+	            timestamp: timestamp,
+	            expires: definition.maxAge ? timestamp + definition.maxAge : Number.MAX_VALUE
+	          });
+	        });
+	      })();
+	    } else if (options.reapAction === 'eject') {
+	      DSUtils.forEach(items, function (item) {
+	        _this.eject(resourceName, item[definition.idAttribute]);
+	      });
+	    } else if (options.reapAction === 'refresh') {
+	      var _ret2 = (function () {
+	        var tasks = [];
+	        DSUtils.forEach(items, function (item) {
+	          tasks.push(_this.refresh(resourceName, item[definition.idAttribute]));
+	        });
+	        return {
+	          v: DSUtils.Promise.all(tasks)
+	        };
+	      })();
+
+	      if (typeof _ret2 === 'object') return _ret2.v;
+	    }
+	    return items;
+	  }).then(function (items) {
+	    if (options.isInterval || options.notify) {
+	      definition.afterReap(options, items);
+	      definition.emit('DS.afterReap', definition, items);
+	    }
+	    return items;
+	  });
+	}
+
+/***/ },
+/* 40 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports['default'] = save;
+
+	function save(resourceName, id, options) {
+	  var _this = this;
+	  var DSUtils = _this.utils;
+	  var DSErrors = _this.errors;
+
+	  var definition = _this.defs[resourceName];
+	  var item = undefined;
+	  var noChanges = undefined;
+
+	  return new DSUtils.Promise(function (resolve, reject) {
+	    id = DSUtils.resolveId(definition, id);
+	    if (!definition) {
+	      reject(new DSErrors.NER(resourceName));
+	    } else if (!DSUtils._sn(id)) {
+	      reject(DSUtils._snErr('id'));
+	    } else if (!_this.get(resourceName, id)) {
+	      reject(new DSErrors.R('id "' + id + '" not found in cache!'));
+	    } else {
+	      item = _this.get(resourceName, id);
+	      options = DSUtils._(definition, options);
+	      resolve(item);
+	    }
+	  }).then(function (attrs) {
+	    return options.beforeValidate.call(attrs, options, attrs);
+	  }).then(function (attrs) {
+	    return options.validate.call(attrs, options, attrs);
+	  }).then(function (attrs) {
+	    return options.afterValidate.call(attrs, options, attrs);
+	  }).then(function (attrs) {
+	    return options.beforeUpdate.call(attrs, options, attrs);
+	  }).then(function (attrs) {
+	    if (options.notify) {
+	      definition.emit('DS.beforeUpdate', definition, attrs);
+	    }
+	    if (options.changesOnly) {
+	      var resource = _this.s[resourceName];
+	      if (DSUtils.w) {
+	        resource.observers[id].deliver();
+	      }
+	      var toKeep = [];
+	      var changes = _this.changes(resourceName, id);
+
+	      for (var key in changes.added) {
+	        toKeep.push(key);
+	      }
+	      for (key in changes.changed) {
+	        toKeep.push(key);
+	      }
+	      changes = DSUtils.pick(attrs, toKeep);
+	      if (DSUtils.isEmpty(changes)) {
+	        // no changes, return
+	        noChanges = true;
+	        return attrs;
+	      } else {
+	        attrs = changes;
+	      }
+	    }
+	    return _this.getAdapter(options).update(definition, id, attrs, options);
+	  }).then(function (data) {
+	    return options.afterUpdate.call(data, options, data);
+	  }).then(function (attrs) {
+	    if (options.notify) {
+	      definition.emit('DS.afterUpdate', definition, attrs);
+	    }
+	    if (noChanges) {
+	      return attrs;
+	    } else if (options.cacheResponse) {
+	      var injected = _this.inject(definition.n, attrs, options.orig());
+	      var resource = _this.s[resourceName];
+	      var _id = injected[definition.idAttribute];
+	      resource.saved[_id] = DSUtils.updateTimestamp(resource.saved[_id]);
+	      if (!definition.resetHistoryOnInject) {
+	        resource.previousAttributes[_id] = DSUtils.copy(injected, null, null, null, definition.relationFields);
+	      }
+	      return injected;
+	    } else {
+	      return _this.createInstance(resourceName, attrs, options.orig());
+	    }
+	  });
+	}
+
+/***/ },
+/* 41 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports['default'] = update;
+
+	function update(resourceName, id, attrs, options) {
+	  var _this = this;
+	  var DSUtils = _this.utils;
+	  var DSErrors = _this.errors;
+
+	  var definition = _this.defs[resourceName];
+
+	  return new DSUtils.Promise(function (resolve, reject) {
+	    id = DSUtils.resolveId(definition, id);
+	    if (!definition) {
+	      reject(new DSErrors.NER(resourceName));
+	    } else if (!DSUtils._sn(id)) {
+	      reject(DSUtils._snErr('id'));
+	    } else {
+	      options = DSUtils._(definition, options);
+	      resolve(attrs);
+	    }
+	  }).then(function (attrs) {
+	    return options.beforeValidate.call(attrs, options, attrs);
+	  }).then(function (attrs) {
+	    return options.validate.call(attrs, options, attrs);
+	  }).then(function (attrs) {
+	    return options.afterValidate.call(attrs, options, attrs);
+	  }).then(function (attrs) {
+	    return options.beforeUpdate.call(attrs, options, attrs);
+	  }).then(function (attrs) {
+	    if (options.notify) {
+	      definition.emit('DS.beforeUpdate', definition, attrs);
+	    }
+	    return _this.getAdapter(options).update(definition, id, attrs, options);
+	  }).then(function (data) {
+	    return options.afterUpdate.call(data, options, data);
+	  }).then(function (attrs) {
+	    if (options.notify) {
+	      definition.emit('DS.afterUpdate', definition, attrs);
+	    }
+	    if (options.cacheResponse) {
+	      var injected = _this.inject(definition.n, attrs, options.orig());
+	      var resource = _this.s[resourceName];
+	      var _id = injected[definition.idAttribute];
+	      resource.saved[_id] = DSUtils.updateTimestamp(resource.saved[_id]);
+	      if (!definition.resetHistoryOnInject) {
+	        resource.previousAttributes[_id] = DSUtils.copy(injected, null, null, null, definition.relationFields);
+	      }
+	      return injected;
+	    } else {
+	      return _this.createInstance(resourceName, attrs, options.orig());
+	    }
+	  });
+	}
+
+/***/ },
+/* 42 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports['default'] = updateAll;
+
+	function updateAll(resourceName, attrs, params, options) {
+	  var _this = this;
+	  var DSUtils = _this.utils;
+	  var DSErrors = _this.errors;
+
+	  var definition = _this.defs[resourceName];
+
+	  return new DSUtils.Promise(function (resolve, reject) {
+	    if (!definition) {
+	      reject(new DSErrors.NER(resourceName));
+	    } else {
+	      options = DSUtils._(definition, options);
+	      resolve(attrs);
+	    }
+	  }).then(function (attrs) {
+	    return options.beforeValidate.call(attrs, options, attrs);
+	  }).then(function (attrs) {
+	    return options.validate.call(attrs, options, attrs);
+	  }).then(function (attrs) {
+	    return options.afterValidate.call(attrs, options, attrs);
+	  }).then(function (attrs) {
+	    return options.beforeUpdate.call(attrs, options, attrs);
+	  }).then(function (attrs) {
+	    if (options.notify) {
+	      definition.emit('DS.beforeUpdate', definition, attrs);
+	    }
+	    return _this.getAdapter(options).updateAll(definition, attrs, params, options);
+	  }).then(function (data) {
+	    return options.afterUpdate.call(data, options, data);
+	  }).then(function (data) {
+	    if (options.notify) {
+	      definition.emit('DS.afterUpdate', definition, attrs);
+	    }
+	    var origOptions = options.orig();
+	    if (options.cacheResponse) {
+	      var _ret = (function () {
+	        var injected = _this.inject(definition.n, data, origOptions);
+	        var resource = _this.s[resourceName];
+	        DSUtils.forEach(injected, function (i) {
+	          var id = i[definition.idAttribute];
+	          resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
+	          if (!definition.resetHistoryOnInject) {
+	            resource.previousAttributes[id] = DSUtils.copy(i, null, null, null, definition.relationFields);
+	          }
+	        });
+	        return {
+	          v: injected
+	        };
+	      })();
+
+	      if (typeof _ret === 'object') return _ret.v;
+	    } else {
+	      var _ret2 = (function () {
+	        var instances = [];
+	        DSUtils.forEach(data, function (item) {
+	          instances.push(_this.createInstance(resourceName, item, origOptions));
+	        });
+	        return {
+	          v: instances
+	        };
+	      })();
+
+	      if (typeof _ret2 === 'object') return _ret2.v;
+	    }
+	  });
+	}
+
+/***/ },
 /* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(35);
+	var toString = __webpack_require__(26);
 	    /**
 	    * Replaces all accented chars with regular ones
 	    */
@@ -4452,7 +4551,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(35);
+	var toString = __webpack_require__(26);
 	    // This pattern is generated by the _build/pattern-removeNonWord.js script
 	    var PATTERN = /[^\x20\x2D0-9A-Z\x5Fa-z\xC0-\xD6\xD8-\xF6\xF8-\xFF]/g;
 
@@ -4472,7 +4571,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(35);
+	var toString = __webpack_require__(26);
 	    /**
 	     * "Safer" String.toLowerCase()
 	     */

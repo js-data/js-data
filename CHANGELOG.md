@@ -7,7 +7,8 @@
 - #131 - array of IDs based hasMany relations
 - #132 - Allow resources to extend other resources
 - #133 - Allow filtering by nested fields
-- #135 - JSData caching inconsistence behaviour when ejecting items
+- #135 - JSData caching inconsistent behaviour when ejecting items
+- #138 - Collection class
 - #139 - Option to specify default values of new resource instances.
 
 ###### Backwards compatible bug fixes
