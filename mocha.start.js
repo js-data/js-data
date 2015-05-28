@@ -337,6 +337,9 @@ beforeEach(function () {
   globals.store = store;
   global.store = globals.store;
 
+  globals.JSData = JSData;
+  global.JSData = globals.JSData;
+
   globals.DSUtils = DSUtils;
   global.DSUtils = globals.DSUtils;
 
