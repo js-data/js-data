@@ -2,17 +2,6 @@
 import DSUtils from '../../utils';
 import DSErrors from '../../errors';
 
-class Resource {
-  constructor(options) {
-    DSUtils.deepMixIn(this, options);
-    if ('endpoint' in options) {
-      this.endpoint = options.endpoint;
-    } else {
-      this.endpoint = this.name;
-    }
-  }
-}
-
 let instanceMethods = [
   'compute',
   'refresh',
@@ -25,10 +14,7 @@ let instanceMethods = [
   'hasChanges',
   'lastModified',
   'lastSaved',
-  'link',
-  'linkInverse',
-  'previous',
-  'unlinkInverse'
+  'previous'
 ];
 
 export default function defineResource(definition) {
@@ -48,9 +34,29 @@ export default function defineResource(definition) {
     throw new DSErrors.R(`${definition.name} is already registered!`);
   }
 
+  function Resource(options) {
+    this.defaultValues = {};
+    this.methods = {};
+    this.computed = {};
+    DSUtils.deepMixIn(this, options);
+    let parent = _this.defaults;
+    if (definition.extends && definitions[definition.extends]) {
+      parent = definitions[definition.extends];
+    }
+    DSUtils.fillIn(this.defaultValues, parent.defaultValues);
+    DSUtils.fillIn(this.methods, parent.methods);
+    DSUtils.fillIn(this.computed, parent.computed);
+    this.endpoint = ('endpoint' in options) ? options.endpoint : this.name;
+  }
+
   try {
-    // Inherit from global defaults
-    Resource.prototype = _this.defaults;
+    if (definition.extends && definitions[definition.extends]) {
+      // Inherit from another resource
+      Resource.prototype = definitions[definition.extends];
+    } else {
+      // Inherit from global defaults
+      Resource.prototype = _this.defaults;
+    }
     definitions[definition.name] = new Resource(definition);
 
     var def = definitions[definition.name];
@@ -106,6 +112,7 @@ export default function defineResource(definition) {
     };
 
     def.getEndpoint = (id, options) => {
+      options = options || {};
       options.params = options.params || {};
 
       let item;
@@ -176,9 +183,9 @@ export default function defineResource(definition) {
     }
 
     // Apply developer-defined methods
-    if (def.methods) {
-      DSUtils.deepMixIn(def[_class].prototype, def.methods);
-    }
+    DSUtils.forOwn(def.methods, (fn, m) => {
+      def[_class].prototype[m] = fn;
+    });
 
     def[_class].prototype.set = function (key, value) {
       DSUtils.set(this, key, value);
@@ -190,53 +197,35 @@ export default function defineResource(definition) {
       return DSUtils.get(this, key);
     };
 
+    DSUtils.applyRelationGettersToTarget(_this, def, def[_class].prototype);
+
     // Prepare for computed properties
-    if (def.computed) {
-      DSUtils.forOwn(def.computed, (fn, field) => {
-        if (DSUtils.isFunction(fn)) {
-          def.computed[field] = [fn];
-          fn = def.computed[field];
-        }
-        if (def.methods && field in def.methods) {
-          def.errorFn(`Computed property "${field}" conflicts with previously defined prototype method!`);
-        }
-        var deps;
-        if (fn.length === 1) {
-          let match = fn[0].toString().match(/function.*?\(([\s\S]*?)\)/);
-          deps = match[1].split(',');
-          def.computed[field] = deps.concat(fn);
-          fn = def.computed[field];
-          if (deps.length) {
-            def.errorFn('Use the computed property array syntax for compatibility with minified code!');
-          }
-        }
-        deps = fn.slice(0, fn.length - 1);
-        DSUtils.forEach(deps, (val, index) => {
-          deps[index] = val.trim();
-        });
-        fn.deps = DSUtils.filter(deps, dep => {
-          return !!dep;
-        });
-      });
-    }
-
-    if (definition.schema && _this.schemator) {
-      def.schema = _this.schemator.defineSchema(def.n, definition.schema);
-
-      if (!definition.hasOwnProperty('validate')) {
-        def.validate = (resourceName, attrs, cb) => {
-          def.schema.validate(attrs, {
-            ignoreMissing: def.ignoreMissing
-          }, err => {
-            if (err) {
-              return cb(err);
-            } else {
-              return cb(null, attrs);
-            }
-          });
-        };
+    DSUtils.forOwn(def.computed, (fn, field) => {
+      if (DSUtils.isFunction(fn)) {
+        def.computed[field] = [fn];
+        fn = def.computed[field];
       }
-    }
+      if (def.methods && field in def.methods) {
+        def.errorFn(`Computed property "${field}" conflicts with previously defined prototype method!`);
+      }
+      var deps;
+      if (fn.length === 1) {
+        let match = fn[0].toString().match(/function.*?\(([\s\S]*?)\)/);
+        deps = match[1].split(',');
+        def.computed[field] = deps.concat(fn);
+        fn = def.computed[field];
+        if (deps.length) {
+          def.errorFn('Use the computed property array syntax for compatibility with minified code!');
+        }
+      }
+      deps = fn.slice(0, fn.length - 1);
+      DSUtils.forEach(deps, (val, index) => {
+        deps[index] = val.trim();
+      });
+      fn.deps = DSUtils.filter(deps, dep => {
+        return !!dep;
+      });
+    });
 
     DSUtils.forEach(instanceMethods, name => {
       def[_class].prototype[`DS${DSUtils.pascalCase(name)}`] = function (...args) {
@@ -270,7 +259,7 @@ export default function defineResource(definition) {
     };
 
     if (def.reapInterval) {
-      setInterval(() => _this.reap(def.n, { isInterval: true }), def.reapInterval);
+      setInterval(() => _this.reap(def.n, {isInterval: true}), def.reapInterval);
     }
 
     // Proxy DS methods with shorthand ones
@@ -287,6 +276,12 @@ export default function defineResource(definition) {
         def[k] = (...args) => {
           args.unshift(def.n);
           return _this[k].apply(_this, args);
+        };
+        def[k].before = fn => {
+          let orig = def[k];
+          def[k] = (...args) => {
+            return orig.apply(def, fn.apply(def, args) || args);
+          };
         };
       } else {
         def[k] = (...args) => _this[k].apply(_this, args);
@@ -311,6 +306,9 @@ export default function defineResource(definition) {
       if (def[name] && !def.actions[name]) {
         throw new Error(`Cannot override existing method "${name}"!`);
       }
+      action.request = action.request || (config => config);
+      action.response = action.response || (response => response);
+      action.responseError = action.responseError || (err => DSUtils.Promise.reject(err));
       def[name] = function (id, options) {
         if (DSUtils._o(id)) {
           options = id;
@@ -333,7 +331,10 @@ export default function defineResource(definition) {
         }
         config.method = config.method || 'GET';
         DSUtils.deepMixIn(config, options);
-        return adapter.HTTP(config);
+        return new DSUtils.Promise(r => r(config))
+          .then(options.request || action.request)
+          .then(config => adapter.HTTP(config))
+          .then(options.response || action.response, options.responseError || action.responseError);
       };
     });
 

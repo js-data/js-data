@@ -2,7 +2,6 @@ export default function loadRelations(resourceName, instance, relations, options
   let _this = this;
   let {utils: DSUtils, errors: DSErrors} = _this;
   let definition = _this.defs[resourceName];
-  let fields = [];
 
   return new DSUtils.Promise((resolve, reject) => {
     if (DSUtils._sn(instance)) {
@@ -48,6 +47,14 @@ export default function loadRelations(resourceName, instance, relations, options
           }
 
           if (def.type === 'hasMany') {
+            if (def.localKeys) {
+              delete params[def.foreignKey];
+              params.where = {
+                [relationDef.idAttribute]: {
+                  'in': instance[def.localKeys]
+                }
+              };
+            }
             task = _this.findAll(relationName, params, __options.orig());
           } else if (def.type === 'hasOne') {
             if (def.localKey && instance[def.localKey]) {
@@ -56,25 +63,16 @@ export default function loadRelations(resourceName, instance, relations, options
               task = _this.findAll(relationName, params, __options.orig()).then(hasOnes => hasOnes.length ? hasOnes[0] : null);
             }
           } else if (instance[def.localKey]) {
-            task = _this.find(relationName, instance[def.localKey], options);
+            task = _this.find(relationName, instance[def.localKey], __options.orig());
           }
 
           if (task) {
             tasks.push(task);
-            fields.push(def.localField || false);
           }
         }
       });
 
       resolve(tasks);
     }
-  }).then(tasks => DSUtils.Promise.all(tasks))
-    .then(loadedRelations => {
-      DSUtils.forEach(fields, (field, index) => {
-        if (field) {
-          instance[field] = loadedRelations[index];
-        }
-      });
-      return instance;
-    });
+  }).then(tasks => DSUtils.Promise.all(tasks)).then(() => instance);
 }

@@ -27,11 +27,10 @@ export default function eject(resourceName, id, options) {
     }
   }
   if (found) {
+    definition.beforeEject(options, item);
     if (options.notify) {
-      definition.beforeEject(options, item);
       definition.emit('DS.beforeEject', definition, item);
     }
-    _this.unlinkInverse(definition.n, id);
     resource.collection.splice(i, 1);
     if (DSUtils.w) {
       resource.observers[id].close();
@@ -50,7 +49,7 @@ export default function eject(resourceName, id, options) {
       if (items.$$injected) {
         DSUtils.remove(items, item);
       }
-      if (!items.length) {
+      if (!items.length && options.clearEmptyQueries) {
         toRemove.push(queryHash);
       }
     });
@@ -63,8 +62,8 @@ export default function eject(resourceName, id, options) {
     delete resource.saved[id];
     resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
+    definition.afterEject(options, item);
     if (options.notify) {
-      definition.afterEject(options, item);
       definition.emit('DS.afterEject', definition, item);
     }
 

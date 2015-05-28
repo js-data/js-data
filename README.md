@@ -2,17 +2,21 @@
 
 ## JSData [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/js-data/js-data?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![bower version](https://img.shields.io/bower/v/js-data.svg?style=flat-square)](https://www.npmjs.org/package/js-data) [![npm version](https://img.shields.io/npm/v/js-data.svg?style=flat-square)](https://www.npmjs.org/package/js-data) [![Circle CI](https://img.shields.io/circleci/project/js-data/js-data/master.svg?style=flat-square)](https://circleci.com/gh/js-data/js-data/tree/master) [![npm downloads](https://img.shields.io/npm/dm/js-data.svg?style=flat-square)](https://www.npmjs.org/package/js-data) [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/js-data/js-data/blob/master/LICENSE)
 
-Inspired by [Ember Data](https://github.com/emberjs/data), js-data is the model layer you've been craving. It consists of a convenient framework-agnostic, in-memory cache for managing your data, which uses adapters to communicate with various persistence layers.
+Inspired by [Ember Data](https://github.com/emberjs/data), __JSData__ is the model layer you've been craving. It consists of a convenient __framework-agnostic, in-memory store__ for managing your data, which uses __adapters__ to communicate with various __persistence layers__.
 
 You can use the [http adapter](http://www.js-data.io/docs/dshttpadapter), which is perfect for communicating with your RESTful backend. You could also use the [localStorage adapter](http://www.js-data.io/docs/dslocalstorageadapter). On the server you could hook up to the [SQL adapter (Postgres/MySQL/MariaDB/SQLite3)](http://www.js-data.io/docs/dssqladapter) and add in the [Redis adapter](http://www.js-data.io/docs/dsredisadapter) as a caching layer for your read endpoints. More adapters are coming, and you're free to implement your own. View [available adapters](http://www.js-data.io/docs/working-with-adapters).
 
-Unlike Backbone and Ember Models, JSData does not require the use of getters and setters, and doesn't wrap your data with custom classes if you don't want it to. JSData's internal change detection (via [observe-js](https://github.com/Polymer/observe-js) or `Object.observe` in supporting browsers) allows for powerful use cases and an easy avenue for implementing your own [3-way data-binding](https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html).
+Unlike some libraries, JSData does not require the use of getters and setters, and doesn't decorate your data with a bunch of cruft. JSData's internal change detection (via [observe-js](https://github.com/Polymer/observe-js) or `Object.observe` in supporting browsers) allows for powerful use cases and an easy avenue for implementing your own [3-way data-binding](https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html).
 
 Supporting relations, computed properties, model lifecycle control and a slew of other features, JSData is the tool for [giving your data the respect it deserves](http://confreaks.tv/videos/mwjs2015-give-your-data-the-respect-it-deserves).
 
-It's also written in ES6. Contributions ftw!
+Written in ES6 and built for modern web development, JSData will save you thousands of lines of code _and_ make you cooler.
 
 Support is handled via the [Mailing List](https://groups.io/org/groupsio/jsdata).
+
+##### Looking for contributors!
+
+JSData is getting popular and becoming a lot of work for me. I could use help with tests, documentation, demos/examples, and adapters. Contact me if you want to help! jason dot dobry at gmail dot com
 
 [![MtnWestJS Conf 2015 Presentation](http://img.youtube.com/vi/8wxnnJA9FKw/0.jpg)](https://www.youtube.com/watch?v=8wxnnJA9FKw)
 

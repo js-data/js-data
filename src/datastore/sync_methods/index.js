@@ -6,10 +6,6 @@ import eject from './eject';
 import ejectAll from './ejectAll';
 import filter from './filter';
 import inject from './inject';
-import link from './link';
-import linkAll from './linkAll';
-import linkInverse from './linkInverse';
-import unlinkInverse from './unlinkInverse';
 
 let NER = DSErrors.NER;
 let IA = DSErrors.IA;
@@ -43,7 +39,11 @@ export default {
         _this.s[resourceName].observers[id].deliver();
       }
       let ignoredChanges = options.ignoredChanges || [];
-      DSUtils.forEach(definition.relationFields, field => ignoredChanges.push(field));
+      DSUtils.forEach(definition.relationFields, field => {
+        if (!DSUtils.contains(ignoredChanges, field)) {
+          ignoredChanges.push(field);
+        }
+      });
       let diff = DSUtils.diffObjectFromOldObject(item, _this.s[resourceName].previousAttributes[id], DSUtils.equals, ignoredChanges);
       DSUtils.forOwn(diff, (changeset, name) => {
         let toKeep = [];
@@ -128,11 +128,10 @@ export default {
       options.beforeCreateInstance(options, attrs);
     }
 
-    if (options.useClass) {
-      let Constructor = definition[definition.class];
-      item = new Constructor();
-    } else {
-      item = {};
+    let Constructor = definition[definition.class];
+    item = new Constructor();
+    if (options.defaultValues) {
+      DSUtils.deepMixIn(item, options.defaultValues);
     }
     DSUtils.deepMixIn(item, attrs);
     if (definition.computed) {
@@ -142,6 +141,63 @@ export default {
       options.afterCreateInstance(options, item);
     }
     return item;
+  },
+  createCollection(resourceName, arr, params, options) {
+    let _this = this;
+    let definition = _this.defs[resourceName];
+
+    arr = arr || [];
+    params = params || {};
+
+    if (!definition) {
+      throw new NER(resourceName);
+    } else if (arr && !DSUtils.isArray(arr)) {
+      throw new IA('"arr" must be an array!');
+    }
+
+    options = DSUtils._(definition, options);
+
+    options.logFn('createCollection', arr, options);
+
+    if (options.notify) {
+      options.beforeCreateCollection(options, arr);
+    }
+
+    Object.defineProperties(arr, {
+      fetch: {
+        value: function (params, options) {
+          let __this = this;
+          __this.params = params || __this.params;
+          return _this.findAll(resourceName, __this.params, options).then(function (data) {
+            if (data === __this) {
+              return __this;
+            }
+            data.unshift(__this.length);
+            data.unshift(0);
+            __this.splice.apply(__this, data);
+            data.shift();
+            data.shift();
+            if (data.$$injected) {
+              _this.s[resourceName].queryData[DSUtils.toJson(__this.params)] = __this;
+              __this.$$injected = true;
+            }
+            return __this;
+          });
+        }
+      },
+      params: {
+        value: params,
+        writable: true
+      },
+      resourceName: {
+        value: resourceName
+      }
+    });
+
+    if (options.notify) {
+      options.afterCreateCollection(options, arr);
+    }
+    return arr;
   },
   defineResource,
   digest() {
@@ -166,9 +222,6 @@ export default {
 
     // cache miss, request resource from server
     let item = _this.s[resourceName].index[id];
-    if (!item && options.loadFromServer) {
-      _this.find(resourceName, id, options);
-    }
 
     // return resource from cache
     return item;
@@ -257,9 +310,6 @@ export default {
     }
     return resource.saved[id];
   },
-  link,
-  linkAll,
-  linkInverse,
   previous(resourceName, id) {
     let _this = this;
     let definition = _this.defs[resourceName];
@@ -276,6 +326,5 @@ export default {
 
     // return resource from cache
     return resource.previousAttributes[id] ? DSUtils.copy(resource.previousAttributes[id]) : undefined;
-  },
-  unlinkInverse
+  }
 };

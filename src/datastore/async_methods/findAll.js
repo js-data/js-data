@@ -86,7 +86,7 @@ export default function findAll(resourceName, params, options) {
                 if (index < options.fallbackAdapters.length) {
                   return makeFallbackCall(index);
                 } else {
-                  return Promise.reject(err);
+                  return DSUtils.Promise.reject(err);
                 }
               });
             }

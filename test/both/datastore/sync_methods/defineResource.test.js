@@ -74,108 +74,6 @@ describe('DS#defineResource', function () {
     assert.equal(lifecycle.afterInject.callCount, 2, 'afterInject should have been called twice');
   });
 
-  it('should integrate with js-data-schema', function (done) {
-    var Person = store.defineResource({
-      name: 'person',
-      schema: {
-        id: {
-          type: 'string',
-          nullable: true
-        },
-        name: 'string'
-      }
-    });
-
-    Person.create({
-      name: 10
-    }).then(function () {
-      done('Should not have succeeded');
-    }).catch(function (err) {
-      try {
-        assert.deepEqual(err, {
-          name: {
-            errors: [
-              {
-                rule: 'type',
-                expected: 'string',
-                actual: 'number'
-              }
-            ]
-          }
-        });
-        done();
-      } catch (e) {
-        done(e);
-      }
-    });
-  });
-
-  it('should integrate with js-data-schema 2', function (done) {
-    var Guy = store.defineResource({
-      name: 'guy',
-      schema: {
-        id: {
-          type: 'integer'
-        },
-        email: {
-          type: 'string',
-          nullable: false
-        },
-        username: {
-          type: 'string',
-          minLength: 1,
-          nullable: false
-        }
-      },
-      validate: function (resourceName, attrs, cb) {
-        Guy.schema.validate(attrs, {}, function (err) {
-          if (err) {
-            return cb(err);
-          } else {
-            return cb(null, attrs);
-          }
-        });
-      }
-    });
-
-    return Guy.create({
-      email: 'test@test.com'
-    }).then(function () {
-      done('Should not have succeeded');
-    }).catch(function (err) {
-      try {
-        assert.deepEqual(err, {
-          id: {
-            errors: [
-              {
-                rule: 'type',
-                actual: 'undefined',
-                expected: 'integer'
-              }
-            ]
-          },
-          username: {
-            errors: [
-              {
-                rule: 'type',
-                actual: 'undefined',
-                expected: 'string'
-              },
-              {
-                rule: 'nullable',
-                actual: 'x === undefined',
-                expected: 'x !== null && x !== undefined'
-              }
-            ]
-          }
-        });
-        done();
-      } catch (e) {
-        done(e);
-      }
-    });
-  });
-
   it('should put getters and setters on instances', function () {
     var Thing = store.defineResource({
       name: 'thing',
@@ -292,5 +190,110 @@ describe('DS#defineResource', function () {
      */
 
   });
+  it('should allow resources to extend other resources', function () {
+    store.defineResource('baz');
+    var Foo = store.defineResource({
+      name: 'foo',
+      relations: {
+        belongsTo: {
+          baz: {
+            localField: 'baz',
+            localKey: 'bazId',
+            parent: true
+          }
+        }
+      },
+      methods: {
+        say: function () {
+          return this.constructor.name;
+        }
+      }
+    });
+    var Bar = store.defineResource({
+      name: 'bar',
+      'extends': 'foo'
+    });
+    assert.equal(Foo.name, 'foo');
+    assert.equal(Bar.name, 'bar');
 
+    var foo = Foo.createInstance({ id: 1, type: 'foo', bazId: 10 });
+    var bar = Bar.createInstance({ id: 1, type: 'bar', bazId: 10 });
+
+    assert.equal(foo.say(), 'Foo');
+    assert.equal(bar.say(), 'Bar');
+
+    assert.equal(Foo.getEndpoint(foo, {}), 'baz/10/foo');
+    assert.equal(Bar.getEndpoint(bar, {}), 'baz/10/bar');
+  });
+  it('should allow default instance values', function () {
+    store.defineResource('baz');
+    var Foo = store.defineResource({
+      name: 'foo',
+      defaultValues: {
+        beep: 'boop',
+        foo: true
+      }
+    });
+    var foo = Foo.createInstance({ id: 1, foo: false, type: 'foo', bazId: 10 });
+
+    assert.equal(DSUtils.toJson(foo), DSUtils.toJson({
+      beep: 'boop',
+      foo: false,
+      id: 1,
+      type: 'foo',
+      bazId: 10
+    }));
+  });
+  it('should allow a bit of aspect oriented programming', function () {
+    var Foo = store.defineResource('foo');
+
+    var orig = Foo.createInstance;
+    Foo.createInstance.before(function (attrs) {
+      assert.isTrue(this === Foo);
+      if (attrs && !('name' in attrs)) {
+        attrs.name = 'hi';
+      } else if (arguments.length === 0) {
+        return [{ id: 'anonymous' }];
+      }
+    });
+    assert.isFalse(orig === Foo.createInstance);
+
+    var foo = Foo.createInstance({ id: 1 });
+    var foo2 = Foo.createInstance();
+
+    assert.deepEqual(DSUtils.toJson(foo), DSUtils.toJson({ id: 1, name: 'hi' }));
+    assert.deepEqual(DSUtils.toJson(foo2), DSUtils.toJson({ id: 'anonymous' }));
+
+    var newStore = new JSData.DS({ log: false });
+    orig = newStore.createInstance;
+    newStore.createInstance.before(function (resourceName, attrs) {
+      if (attrs) {
+        attrs.foo = 'bar';
+      }
+      assert.isTrue(this === newStore);
+    });
+    assert.isFalse(orig === newStore.createInstance);
+
+    var NewFoo = newStore.defineResource('newFoo');
+
+    foo = newStore.createInstance('newFoo', { id: 1 });
+
+    assert.equal(foo.id, 1);
+    assert.equal(foo.foo, 'bar');
+
+    NewFoo.createInstance.before(function (attrs) {
+      if (attrs) {
+        attrs.beep = 'boop';
+      }
+      assert.isTrue(this === NewFoo);
+    });
+    foo = NewFoo.createInstance({ id: 1 });
+
+    assert.equal(foo.id, 1);
+    assert.equal(foo.beep, 'boop');
+    assert.equal(foo.foo, 'bar');
+
+    // clean up
+    newStore.constructor.prototype.createInstance = orig;
+  });
 });

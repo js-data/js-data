@@ -76,18 +76,9 @@ module.exports = function (grunt) {
           libraryTarget: 'umd',
           library: 'JSData'
         },
-        externals: {
-          'js-data-schema': {
-            amd: 'js-data-schema',
-            commonjs: 'js-data-schema',
-            commonjs2: 'js-data-schema',
-            root: 'Schemator'
-          },
-          'bluebird': 'bluebird'
-        },
         module: {
           loaders: [
-            { test: /(src)(.+)\.js$/, exclude: /node_modules/, loader: 'babel-loader?blacklist=useStrict' }
+            { test: /(src)(.+)\.js$/, exclude: /node_modules/, loader: 'babel-loader?blacklist=useStrict&modules=commonStrict' }
           ],
           preLoaders: [
             {
@@ -118,10 +109,10 @@ module.exports = function (grunt) {
         browsers: ['Chrome', 'Firefox', 'PhantomJS'],
         options: {
           files: [
+            'node_modules/es6-promise/dist/es6-promise.js',
             'dist/js-data.min.js',
-            'bower_components/js-data-schema/dist/js-data-schema.min.js',
-            'bower_components/js-data-http/dist/js-data-http.min.js',
-            'bower_components/js-data-localstorage/dist/js-data-localstorage.min.js',
+            'node_modules/js-data-http/dist/js-data-http.js',
+            'node_modules/js-data-localstorage/dist/js-data-localstorage.js',
             'karma.start.js',
             'test/both/**/*.js',
             'test/browser/**/*.js'

@@ -3,7 +3,6 @@ import DSUtils from '../utils';
 import DSErrors from '../errors';
 import syncMethods from './sync_methods/index';
 import asyncMethods from './async_methods/index';
-let Schemator;
 
 function lifecycleNoopCb(resource, attrs, cb) {
   cb(null, attrs);
@@ -70,6 +69,7 @@ var defaultsPrototype = Defaults.prototype;
 
 defaultsPrototype.actions = {};
 defaultsPrototype.afterCreate = lifecycleNoopCb;
+defaultsPrototype.afterCreateCollection = lifecycleNoop;
 defaultsPrototype.afterCreateInstance = lifecycleNoop;
 defaultsPrototype.afterDestroy = lifecycleNoopCb;
 defaultsPrototype.afterEject = lifecycleNoop;
@@ -80,6 +80,7 @@ defaultsPrototype.afterValidate = lifecycleNoopCb;
 defaultsPrototype.allowSimpleWhere = true;
 defaultsPrototype.basePath = '';
 defaultsPrototype.beforeCreate = lifecycleNoopCb;
+defaultsPrototype.beforeCreateCollection = lifecycleNoop;
 defaultsPrototype.beforeCreateInstance = lifecycleNoop;
 defaultsPrototype.beforeDestroy = lifecycleNoopCb;
 defaultsPrototype.beforeEject = lifecycleNoop;
@@ -89,24 +90,23 @@ defaultsPrototype.beforeUpdate = lifecycleNoopCb;
 defaultsPrototype.beforeValidate = lifecycleNoopCb;
 defaultsPrototype.bypassCache = false;
 defaultsPrototype.cacheResponse = !!DSUtils.w;
+defaultsPrototype.clearEmptyQueries = true;
+defaultsPrototype.computed = {};
 defaultsPrototype.defaultAdapter = 'http';
 defaultsPrototype.debug = true;
+defaultsPrototype.defaultValues = {};
 defaultsPrototype.eagerEject = false;
 // TODO: Implement eagerInject in DS#create
 defaultsPrototype.eagerInject = false;
 defaultsPrototype.endpoint = '';
 defaultsPrototype.error = console ? (a, b, c) => console[typeof console.error === 'function' ? 'error' : 'log'](a, b, c) : false;
 defaultsPrototype.fallbackAdapters = ['http'];
-defaultsPrototype.findBelongsTo = true;
-defaultsPrototype.findHasOne = true;
-defaultsPrototype.findHasMany = true;
-defaultsPrototype.findInverseLinks = true;
-defaultsPrototype.findStrictCache = true;
+defaultsPrototype.findStrictCache = false;
 defaultsPrototype.idAttribute = 'id';
 defaultsPrototype.ignoredChanges = [/\$/];
 defaultsPrototype.ignoreMissing = false;
 defaultsPrototype.keepChangeHistory = false;
-defaultsPrototype.loadFromServer = false;
+defaultsPrototype.linkRelations = true;
 defaultsPrototype.log = console ? (a, b, c, d, e) => console[typeof console.info === 'function' ? 'info' : 'log'](a, b, c, d, e) : false;
 
 defaultsPrototype.logFn = function (a, b, c, d) {
@@ -117,9 +117,11 @@ defaultsPrototype.logFn = function (a, b, c, d) {
 };
 
 defaultsPrototype.maxAge = false;
+defaultsPrototype.methods = {};
 defaultsPrototype.notify = !!DSUtils.w;
 defaultsPrototype.reapAction = !!DSUtils.w ? 'inject' : 'none';
 defaultsPrototype.reapInterval = !!DSUtils.w ? 30000 : false;
+defaultsPrototype.relationsEnumerable = false;
 defaultsPrototype.resetHistoryOnInject = true;
 defaultsPrototype.strategy = 'single';
 defaultsPrototype.upsert = !!DSUtils.w;
@@ -179,7 +181,7 @@ defaultsPrototype.defaultFilter = (collection, resourceName, params, options) =>
           DSUtils.forOwn(clause, (term, op) => {
             let expr;
             let isOr = op[0] === '|';
-            let val = attrs[field];
+            let val = DSUtils.get(attrs, field);
             op = isOr ? op.substr(1) : op;
             if (op === '==') {
               expr = val == term;
@@ -305,23 +307,6 @@ class DS {
     let _this = this;
     options = options || {};
 
-    try {
-      Schemator = require('js-data-schema');
-    } catch (e) {
-    }
-
-    if (!Schemator || typeof Schemator !== 'function') {
-      try {
-        Schemator = window.Schemator;
-      } catch (e) {
-      }
-    }
-
-    Schemator = Schemator || options.schemator;
-    if (typeof Schemator === 'function') {
-      _this.schemator = new Schemator();
-    }
-
     _this.store = {};
     // alias store, shaves 0.1 kb off the minified build
     _this.s = _this.store;
@@ -387,7 +372,20 @@ dsPrototype.getAdapter.shorthand = false;
 dsPrototype.registerAdapter.shorthand = false;
 dsPrototype.errors = DSErrors;
 dsPrototype.utils = DSUtils;
-DSUtils.deepMixIn(dsPrototype, syncMethods);
-DSUtils.deepMixIn(dsPrototype, asyncMethods);
+
+function addMethods(target, obj) {
+  DSUtils.forOwn(obj, (v, k) => {
+    target[k] = v;
+    target[k].before = function (fn) {
+      let orig = target[k];
+      target[k] = function (...args) {
+        return orig.apply(this, fn.apply(this, args) || args);
+      };
+    };
+  });
+}
+
+addMethods(dsPrototype, syncMethods);
+addMethods(dsPrototype, asyncMethods);
 
 export default DS;

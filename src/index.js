@@ -1,14 +1,14 @@
+import DS from './datastore/index';
 import DSUtils from './utils';
 import DSErrors from './errors';
-import DS from './datastore/index';
 
-export default {
+module.exports = {
   DS,
+  DSUtils,
+  DSErrors,
   createStore(options) {
     return new DS(options);
   },
-  DSUtils,
-  DSErrors,
   version: {
     full: '<%= pkg.version %>',
     major: parseInt('<%= major %>', 10),

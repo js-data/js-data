@@ -17,6 +17,6 @@ describe('DS#destroy', function () {
       }));
     });
 
-    return store.utils.Promise.all(tasks);
+    return Promise.all(tasks);
   });
 });
