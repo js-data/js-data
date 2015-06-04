@@ -93,7 +93,7 @@ defaultsPrototype.cacheResponse = !!DSUtils.w;
 defaultsPrototype.clearEmptyQueries = true;
 defaultsPrototype.computed = {};
 defaultsPrototype.defaultAdapter = 'http';
-defaultsPrototype.debug = true;
+defaultsPrototype.debug = false;
 defaultsPrototype.defaultValues = {};
 defaultsPrototype.eagerEject = false;
 // TODO: Implement eagerInject in DS#create
