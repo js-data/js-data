@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 2.0.0-beta.5 - Homepage <http://www.js-data.io/>
+ * @version 2.0.0-beta.6 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -63,26 +63,26 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _DS = __webpack_require__(1);
+	var _datastoreIndex = __webpack_require__(1);
 
-	var _DSUtils = __webpack_require__(2);
+	var _utils = __webpack_require__(2);
 
-	var _DSErrors = __webpack_require__(3);
+	var _errors = __webpack_require__(3);
 
 	module.exports = {
-	  DS: _DS['default'],
-	  DSUtils: _DSUtils['default'],
-	  DSErrors: _DSErrors['default'],
+	  DS: _datastoreIndex['default'],
+	  DSUtils: _utils['default'],
+	  DSErrors: _errors['default'],
 	  createStore: function createStore(options) {
-	    return new _DS['default'](options);
+	    return new _datastoreIndex['default'](options);
 	  },
 	  version: {
-	    full: '2.0.0-beta.5',
+	    full: '2.0.0-beta.6',
 	    major: parseInt('2', 10),
 	    minor: parseInt('0', 10),
 	    patch: parseInt('0', 10),
 	    alpha: true ? 'false' : false,
-	    beta: true ? '5' : false
+	    beta: true ? '6' : false
 	  }
 	};
 
@@ -90,19 +90,19 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
-
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 	/* jshint eqeqeq:false */
 
-	var _DSUtils = __webpack_require__(2);
+	var _utils = __webpack_require__(2);
 
-	var _DSErrors = __webpack_require__(3);
+	var _errors = __webpack_require__(3);
 
-	var _syncMethods = __webpack_require__(4);
+	var _sync_methodsIndex = __webpack_require__(4);
 
-	var _asyncMethods = __webpack_require__(5);
+	var _async_methodsIndex = __webpack_require__(5);
 
 	function lifecycleNoopCb(resource, attrs, cb) {
 	  cb(null, attrs);
@@ -116,21 +116,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var _again = true;
 
 	  _function: while (_again) {
-	    def = cA = cB = undefined;
-	    _again = false;
 	    var orderBy = _x,
 	        index = _x2,
 	        a = _x3,
 	        b = _x4;
+	    def = cA = cB = undefined;
+	    _again = false;
 
 	    var def = orderBy[index];
-	    var cA = _DSUtils['default'].get(a, def[0]),
-	        cB = _DSUtils['default'].get(b, def[0]);
-	    if (_DSUtils['default']._s(cA)) {
-	      cA = _DSUtils['default'].upperCase(cA);
+	    var cA = _utils['default'].get(a, def[0]),
+	        cB = _utils['default'].get(b, def[0]);
+	    if (_utils['default']._s(cA)) {
+	      cA = _utils['default'].upperCase(cA);
 	    }
-	    if (_DSUtils['default']._s(cB)) {
-	      cB = _DSUtils['default'].upperCase(cB);
+	    if (_utils['default']._s(cB)) {
+	      cB = _utils['default'].upperCase(cB);
 	    }
 	    if (def[1] === 'DESC') {
 	      if (cB < cA) {
@@ -220,11 +220,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	defaultsPrototype.beforeUpdate = lifecycleNoopCb;
 	defaultsPrototype.beforeValidate = lifecycleNoopCb;
 	defaultsPrototype.bypassCache = false;
-	defaultsPrototype.cacheResponse = !!_DSUtils['default'].w;
+	defaultsPrototype.cacheResponse = !!_utils['default'].w;
 	defaultsPrototype.clearEmptyQueries = true;
 	defaultsPrototype.computed = {};
 	defaultsPrototype.defaultAdapter = 'http';
-	defaultsPrototype.debug = true;
+	defaultsPrototype.debug = false;
 	defaultsPrototype.defaultValues = {};
 	defaultsPrototype.eagerEject = false;
 	// TODO: Implement eagerInject in DS#create
@@ -253,13 +253,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	defaultsPrototype.maxAge = false;
 	defaultsPrototype.methods = {};
-	defaultsPrototype.notify = !!_DSUtils['default'].w;
-	defaultsPrototype.reapAction = !!_DSUtils['default'].w ? 'inject' : 'none';
-	defaultsPrototype.reapInterval = !!_DSUtils['default'].w ? 30000 : false;
+	defaultsPrototype.notify = !!_utils['default'].w;
+	defaultsPrototype.reapAction = !!_utils['default'].w ? 'inject' : 'none';
+	defaultsPrototype.reapInterval = !!_utils['default'].w ? 30000 : false;
 	defaultsPrototype.relationsEnumerable = false;
 	defaultsPrototype.resetHistoryOnInject = true;
 	defaultsPrototype.strategy = 'single';
-	defaultsPrototype.upsert = !!_DSUtils['default'].w;
+	defaultsPrototype.upsert = !!_utils['default'].w;
 	defaultsPrototype.useClass = true;
 	defaultsPrototype.useFilter = false;
 	defaultsPrototype.validate = lifecycleNoopCb;
@@ -278,14 +278,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  params = params || {};
 	  options = options || {};
 
-	  if (_DSUtils['default']._o(params.where)) {
+	  if (_utils['default']._o(params.where)) {
 	    where = params.where;
 	  } else {
 	    where = {};
 	  }
 
 	  if (options.allowSimpleWhere) {
-	    _DSUtils['default'].forOwn(params, function (value, key) {
+	    _utils['default'].forOwn(params, function (value, key) {
 	      if (!(key in reserved) && !(key in where)) {
 	        where[key] = {
 	          '==': value
@@ -294,29 +294,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	  }
 
-	  if (_DSUtils['default'].isEmpty(where)) {
+	  if (_utils['default'].isEmpty(where)) {
 	    where = null;
 	  }
 
 	  if (where) {
-	    filtered = _DSUtils['default'].filter(filtered, function (attrs) {
+	    filtered = _utils['default'].filter(filtered, function (attrs) {
 	      var first = true;
 	      var keep = true;
-	      _DSUtils['default'].forOwn(where, function (clause, field) {
-	        if (_DSUtils['default']._s(clause)) {
+	      _utils['default'].forOwn(where, function (clause, field) {
+	        if (_utils['default']._s(clause)) {
 	          clause = {
 	            '===': clause
 	          };
-	        } else if (_DSUtils['default']._n(clause) || _DSUtils['default'].isBoolean(clause)) {
+	        } else if (_utils['default']._n(clause) || _utils['default'].isBoolean(clause)) {
 	          clause = {
 	            '==': clause
 	          };
 	        }
-	        if (_DSUtils['default']._o(clause)) {
-	          _DSUtils['default'].forOwn(clause, function (term, op) {
+	        if (_utils['default']._o(clause)) {
+	          _utils['default'].forOwn(clause, function (term, op) {
 	            var expr = undefined;
 	            var isOr = op[0] === '|';
-	            var val = _DSUtils['default'].get(attrs, field);
+	            var val = _utils['default'].get(attrs, field);
 	            op = isOr ? op.substr(1) : op;
 	            if (op === '==') {
 	              expr = val == term;
@@ -335,32 +335,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	            } else if (op === '<=') {
 	              expr = val <= term;
 	            } else if (op === 'isectEmpty') {
-	              expr = !_DSUtils['default'].intersection(val || [], term || []).length;
+	              expr = !_utils['default'].intersection(val || [], term || []).length;
 	            } else if (op === 'isectNotEmpty') {
-	              expr = _DSUtils['default'].intersection(val || [], term || []).length;
+	              expr = _utils['default'].intersection(val || [], term || []).length;
 	            } else if (op === 'in') {
-	              if (_DSUtils['default']._s(term)) {
+	              if (_utils['default']._s(term)) {
 	                expr = term.indexOf(val) !== -1;
 	              } else {
-	                expr = _DSUtils['default'].contains(term, val);
+	                expr = _utils['default'].contains(term, val);
 	              }
 	            } else if (op === 'notIn') {
-	              if (_DSUtils['default']._s(term)) {
+	              if (_utils['default']._s(term)) {
 	                expr = term.indexOf(val) === -1;
 	              } else {
-	                expr = !_DSUtils['default'].contains(term, val);
+	                expr = !_utils['default'].contains(term, val);
 	              }
 	            } else if (op === 'contains') {
-	              if (_DSUtils['default']._s(val)) {
+	              if (_utils['default']._s(val)) {
 	                expr = val.indexOf(term) !== -1;
 	              } else {
-	                expr = _DSUtils['default'].contains(val, term);
+	                expr = _utils['default'].contains(val, term);
 	              }
 	            } else if (op === 'notContains') {
-	              if (_DSUtils['default']._s(val)) {
+	              if (_utils['default']._s(val)) {
 	                expr = val.indexOf(term) === -1;
 	              } else {
-	                expr = !_DSUtils['default'].contains(val, term);
+	                expr = !_utils['default'].contains(val, term);
 	              }
 	            }
 	            if (expr !== undefined) {
@@ -376,15 +376,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var orderBy = null;
 
-	  if (_DSUtils['default']._s(params.orderBy)) {
+	  if (_utils['default']._s(params.orderBy)) {
 	    orderBy = [[params.orderBy, 'ASC']];
-	  } else if (_DSUtils['default']._a(params.orderBy)) {
+	  } else if (_utils['default']._a(params.orderBy)) {
 	    orderBy = params.orderBy;
 	  }
 
-	  if (!orderBy && _DSUtils['default']._s(params.sort)) {
+	  if (!orderBy && _utils['default']._s(params.sort)) {
 	    orderBy = [[params.sort, 'ASC']];
-	  } else if (!orderBy && _DSUtils['default']._a(params.sort)) {
+	  } else if (!orderBy && _utils['default']._a(params.sort)) {
 	    orderBy = params.sort;
 	  }
 
@@ -392,11 +392,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (orderBy) {
 	    (function () {
 	      var index = 0;
-	      _DSUtils['default'].forEach(orderBy, function (def, i) {
-	        if (_DSUtils['default']._s(def)) {
+	      _utils['default'].forEach(orderBy, function (def, i) {
+	        if (_utils['default']._s(def)) {
 	          orderBy[i] = [def, 'ASC'];
-	        } else if (!_DSUtils['default']._a(def)) {
-	          throw new _DSErrors['default'].IA('DS.filter("' + resourceName + '"[, params][, options]): ' + _DSUtils['default'].toJson(def) + ': Must be a string or an array!', {
+	        } else if (!_utils['default']._a(def)) {
+	          throw new _errors['default'].IA('DS.filter("' + resourceName + '"[, params][, options]): ' + _utils['default'].toJson(def) + ': Must be a string or an array!', {
 	            params: {
 	              'orderBy[i]': {
 	                actual: typeof def,
@@ -406,29 +406,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	          });
 	        }
 	      });
-	      filtered = _DSUtils['default'].sort(filtered, function (a, b) {
+	      filtered = _utils['default'].sort(filtered, function (a, b) {
 	        return compare(orderBy, index, a, b);
 	      });
 	    })();
 	  }
 
-	  var limit = _DSUtils['default']._n(params.limit) ? params.limit : null;
+	  var limit = _utils['default']._n(params.limit) ? params.limit : null;
 	  var skip = null;
 
-	  if (_DSUtils['default']._n(params.skip)) {
+	  if (_utils['default']._n(params.skip)) {
 	    skip = params.skip;
-	  } else if (_DSUtils['default']._n(params.offset)) {
+	  } else if (_utils['default']._n(params.offset)) {
 	    skip = params.offset;
 	  }
 
 	  // Apply 'limit' and 'skip'
 	  if (limit && skip) {
-	    filtered = _DSUtils['default'].slice(filtered, skip, Math.min(filtered.length, skip + limit));
-	  } else if (_DSUtils['default']._n(limit)) {
-	    filtered = _DSUtils['default'].slice(filtered, 0, Math.min(filtered.length, limit));
-	  } else if (_DSUtils['default']._n(skip)) {
+	    filtered = _utils['default'].slice(filtered, skip, Math.min(filtered.length, skip + limit));
+	  } else if (_utils['default']._n(limit)) {
+	    filtered = _utils['default'].slice(filtered, 0, Math.min(filtered.length, limit));
+	  } else if (_utils['default']._n(skip)) {
 	    if (skip < filtered.length) {
-	      filtered = _DSUtils['default'].slice(filtered, skip);
+	      filtered = _utils['default'].slice(filtered, skip);
 	    } else {
 	      filtered = [];
 	    }
@@ -452,8 +452,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _this.defs = _this.definitions;
 	    _this.adapters = {};
 	    _this.defaults = new Defaults();
-	    _this.observe = _DSUtils['default'].observe;
-	    _DSUtils['default'].forOwn(options, function (v, k) {
+	    _this.observe = _utils['default'].observe;
+	    _utils['default'].forOwn(options, function (v, k) {
 	      _this.defaults[k] = v;
 	    });
 	    _this.defaults.logFn('new data store created', _this.defaults);
@@ -465,7 +465,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var errorIfNotExist = false;
 	      options = options || {};
 	      this.defaults.logFn('getAdapter', options);
-	      if (_DSUtils['default']._s(options)) {
+	      if (_utils['default']._s(options)) {
 	        errorIfNotExist = true;
 	        options = {
 	          adapter: options
@@ -486,7 +486,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var _this = this;
 	      options = options || {};
 	      _this.defaults.logFn('registerAdapter', name, Adapter, options);
-	      if (_DSUtils['default'].isFunction(Adapter)) {
+	      if (_utils['default'].isFunction(Adapter)) {
 	        _this.adapters[name] = new Adapter(options);
 	      } else {
 	        _this.adapters[name] = Adapter;
@@ -501,7 +501,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function is(resourceName, instance) {
 	      var definition = this.defs[resourceName];
 	      if (!definition) {
-	        throw new _DSErrors['default'].NER(resourceName);
+	        throw new _errors['default'].NER(resourceName);
 	      }
 	      return instance instanceof definition[definition['class']];
 	    }
@@ -514,10 +514,27 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	dsPrototype.getAdapter.shorthand = false;
 	dsPrototype.registerAdapter.shorthand = false;
-	dsPrototype.errors = _DSErrors['default'];
-	dsPrototype.utils = _DSUtils['default'];
-	_DSUtils['default'].deepMixIn(dsPrototype, _syncMethods['default']);
-	_DSUtils['default'].deepMixIn(dsPrototype, _asyncMethods['default']);
+	dsPrototype.errors = _errors['default'];
+	dsPrototype.utils = _utils['default'];
+
+	function addMethods(target, obj) {
+	  _utils['default'].forOwn(obj, function (v, k) {
+	    target[k] = v;
+	    target[k].before = function (fn) {
+	      var orig = target[k];
+	      target[k] = function () {
+	        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	          args[_key] = arguments[_key];
+	        }
+
+	        return orig.apply(this, fn.apply(this, args) || args);
+	      };
+	    };
+	  });
+	}
+
+	addMethods(dsPrototype, _sync_methodsIndex['default']);
+	addMethods(dsPrototype, _async_methodsIndex['default']);
 
 	exports['default'] = DS;
 
@@ -525,11 +542,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _defineProperty = function (obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: key == null || typeof Symbol == 'undefined' || key.constructor !== Symbol, configurable: true, writable: true }); };
+	function _defineProperty(obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); }
 
 	/* jshint eqeqeq:false */
 
-	var _DSErrors = __webpack_require__(3);
+	var _errors = __webpack_require__(3);
 
 	var BinaryHeap = __webpack_require__(7);
 	var forEach = __webpack_require__(8);
@@ -599,13 +616,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return isString(value) || isNumber(value);
 	};
 	var isStringOrNumberErr = function isStringOrNumberErr(field) {
-	  return new _DSErrors['default'].IA('"' + field + '" must be a string or a number!');
+	  return new _errors['default'].IA('"' + field + '" must be a string or a number!');
 	};
 	var isObjectErr = function isObjectErr(field) {
-	  return new _DSErrors['default'].IA('"' + field + '" must be an object!');
+	  return new _errors['default'].IA('"' + field + '" must be an object!');
 	};
 	var isArrayErr = function isArrayErr(field) {
-	  return new _DSErrors['default'].IA('"' + field + '" must be an array!');
+	  return new _errors['default'].IA('"' + field + '" must be an array!');
 	};
 
 	// adapted from mout.isEmpty
@@ -628,9 +645,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      };
 	    })();
 
-	    if (typeof _ret === 'object') {
-	      return _ret.v;
-	    }
+	    if (typeof _ret === 'object') return _ret.v;
 	  } else {
 	    return true;
 	  }
@@ -726,17 +741,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	// adapted from angular.copy
-	var copy = (function (_copy) {
-	  function copy(_x, _x2, _x3, _x4, _x5) {
-	    return _copy.apply(this, arguments);
-	  }
-
-	  copy.toString = function () {
-	    return _copy.toString();
-	  };
-
-	  return copy;
-	})(function (source, destination, stackSource, stackDest, blacklist) {
+	var copy = function copy(source, destination, stackSource, stackDest, blacklist) {
 	  if (!destination) {
 	    destination = source;
 	    if (source) {
@@ -805,81 +810,83 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	  return destination;
-	});
+	};
 
 	// adapted from angular.equals
-	var equals = (function (_equals) {
-	  function equals(_x6, _x7) {
-	    return _equals.apply(this, arguments);
-	  }
+	var equals = function equals(_x, _x2) {
+	  var _again = true;
 
-	  equals.toString = function () {
-	    return _equals.toString();
-	  };
+	  _function: while (_again) {
+	    var o1 = _x,
+	        o2 = _x2;
+	    t1 = t2 = length = key = keySet = undefined;
+	    _again = false;
 
-	  return equals;
-	})(function (o1, o2) {
-	  if (o1 === o2) {
-	    return true;
-	  }
-	  if (o1 === null || o2 === null) {
-	    return false;
-	  }
-	  if (o1 !== o1 && o2 !== o2) {
-	    return true;
-	  } // NaN === NaN
-	  var t1 = typeof o1,
-	      t2 = typeof o2,
-	      length,
-	      key,
-	      keySet;
-	  if (t1 == t2) {
-	    if (t1 == 'object') {
-	      if (isArray(o1)) {
-	        if (!isArray(o2)) {
-	          return false;
-	        }
-	        if ((length = o1.length) == o2.length) {
-	          // jshint ignore:line
-	          for (key = 0; key < length; key++) {
+	    if (o1 === o2) {
+	      return true;
+	    }
+	    if (o1 === null || o2 === null) {
+	      return false;
+	    }
+	    if (o1 !== o1 && o2 !== o2) {
+	      return true;
+	    } // NaN === NaN
+	    var t1 = typeof o1,
+	        t2 = typeof o2,
+	        length,
+	        key,
+	        keySet;
+	    if (t1 == t2) {
+	      if (t1 == 'object') {
+	        if (isArray(o1)) {
+	          if (!isArray(o2)) {
+	            return false;
+	          }
+	          if ((length = o1.length) == o2.length) {
+	            // jshint ignore:line
+	            for (key = 0; key < length; key++) {
+	              if (!equals(o1[key], o2[key])) {
+	                return false;
+	              }
+	            }
+	            return true;
+	          }
+	        } else if (isDate(o1)) {
+	          if (!isDate(o2)) {
+	            return false;
+	          }
+	          _x = o1.getTime();
+	          _x2 = o2.getTime();
+	          _again = true;
+	          continue _function;
+	        } else if (isRegExp(o1) && isRegExp(o2)) {
+	          return o1.toString() == o2.toString();
+	        } else {
+	          if (isArray(o2)) {
+	            return false;
+	          }
+	          keySet = {};
+	          for (key in o1) {
+	            if (key.charAt(0) === '$' || isFunction(o1[key])) {
+	              continue;
+	            }
 	            if (!equals(o1[key], o2[key])) {
+	              return false;
+	            }
+	            keySet[key] = true;
+	          }
+	          for (key in o2) {
+	            if (!keySet.hasOwnProperty(key) && key.charAt(0) !== '$' && o2[key] !== undefined && !isFunction(o2[key])) {
 	              return false;
 	            }
 	          }
 	          return true;
 	        }
-	      } else if (isDate(o1)) {
-	        if (!isDate(o2)) {
-	          return false;
-	        }
-	        return equals(o1.getTime(), o2.getTime());
-	      } else if (isRegExp(o1) && isRegExp(o2)) {
-	        return o1.toString() == o2.toString();
-	      } else {
-	        if (isArray(o2)) {
-	          return false;
-	        }
-	        keySet = {};
-	        for (key in o1) {
-	          if (key.charAt(0) === '$' || isFunction(o1[key])) {
-	            continue;
-	          }
-	          if (!equals(o1[key], o2[key])) {
-	            return false;
-	          }
-	          keySet[key] = true;
-	        }
-	        for (key in o2) {
-	          if (!keySet.hasOwnProperty(key) && key.charAt(0) !== '$' && o2[key] !== undefined && !isFunction(o2[key])) {
-	            return false;
-	          }
-	        }
-	        return true;
 	      }
 	    }
+	    return false;
 	  }
-	  return false;
-	});
+	};
 
 	var resolveId = function resolveId(definition, idOrInstance) {
 	  if (isString(idOrInstance) || isNumber(idOrInstance)) {
@@ -926,7 +933,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (options && options.constructor === parent.constructor) {
 	      return options;
 	    } else if (!isObject(options)) {
-	      throw new _DSErrors['default'].IA('"options" must be an object!');
+	      throw new _errors['default'].IA('"options" must be an object!');
 	    }
 	    forEach(toPromisify, function (name) {
 	      if (typeof options[name] === 'function' && options[name].toString().indexOf('for (var _len = arg') === -1) {
@@ -1151,24 +1158,22 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
-	var _inherits = function (subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
 
 	var IllegalArgumentError = (function (_Error) {
 	  function IllegalArgumentError(message) {
 	    _classCallCheck(this, IllegalArgumentError);
 
-	    var _this = new _Error(_this);
-
-	    _this.__proto__ = IllegalArgumentError.prototype;
-
+	    _get(Object.getPrototypeOf(IllegalArgumentError.prototype), 'constructor', this).call(this);
 	    if (typeof Error.captureStackTrace === 'function') {
-	      Error.captureStackTrace(_this, _this.constructor);
+	      Error.captureStackTrace(this, this.constructor);
 	    }
-	    _this.type = _this.constructor.name;
-	    _this.message = message || 'Illegal Argument!';
-	    return _this;
+	    this.type = this.constructor.name;
+	    this.message = message || 'Illegal Argument!';
 	  }
 
 	  _inherits(IllegalArgumentError, _Error);
@@ -1180,16 +1185,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  function RuntimeError(message) {
 	    _classCallCheck(this, RuntimeError);
 
-	    var _this2 = new _Error2(_this2);
-
-	    _this2.__proto__ = RuntimeError.prototype;
-
+	    _get(Object.getPrototypeOf(RuntimeError.prototype), 'constructor', this).call(this);
 	    if (typeof Error.captureStackTrace === 'function') {
-	      Error.captureStackTrace(_this2, _this2.constructor);
+	      Error.captureStackTrace(this, this.constructor);
 	    }
-	    _this2.type = _this2.constructor.name;
-	    _this2.message = message || 'RuntimeError Error!';
-	    return _this2;
+	    this.type = this.constructor.name;
+	    this.message = message || 'RuntimeError Error!';
 	  }
 
 	  _inherits(RuntimeError, _Error2);
@@ -1201,16 +1202,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  function NonexistentResourceError(resourceName) {
 	    _classCallCheck(this, NonexistentResourceError);
 
-	    var _this3 = new _Error3(_this3);
-
-	    _this3.__proto__ = NonexistentResourceError.prototype;
-
+	    _get(Object.getPrototypeOf(NonexistentResourceError.prototype), 'constructor', this).call(this);
 	    if (typeof Error.captureStackTrace === 'function') {
-	      Error.captureStackTrace(_this3, _this3.constructor);
+	      Error.captureStackTrace(this, this.constructor);
 	    }
-	    _this3.type = _this3.constructor.name;
-	    _this3.message = '' + resourceName + ' is not a registered resource!';
-	    return _this3;
+	    this.type = this.constructor.name;
+	    this.message = '' + resourceName + ' is not a registered resource!';
 	  }
 
 	  _inherits(NonexistentResourceError, _Error3);
@@ -1231,26 +1228,26 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _DSUtils = __webpack_require__(2);
+	var _utils = __webpack_require__(2);
 
-	var _DSErrors = __webpack_require__(3);
+	var _errors = __webpack_require__(3);
 
-	var _defineResource = __webpack_require__(28);
+	var _defineResource = __webpack_require__(25);
 
-	var _eject = __webpack_require__(29);
+	var _eject = __webpack_require__(26);
 
-	var _ejectAll = __webpack_require__(30);
+	var _ejectAll = __webpack_require__(27);
 
-	var _filter = __webpack_require__(31);
+	var _filter = __webpack_require__(28);
 
-	var _inject = __webpack_require__(32);
+	var _inject = __webpack_require__(29);
 
-	var NER = _DSErrors['default'].NER;
-	var IA = _DSErrors['default'].IA;
-	var R = _DSErrors['default'].R;
+	var NER = _errors['default'].NER;
+	var IA = _errors['default'].IA;
+	var R = _errors['default'].R;
 
 	function diffIsEmpty(diff) {
-	  return !(_DSUtils['default'].isEmpty(diff.added) && _DSUtils['default'].isEmpty(diff.removed) && _DSUtils['default'].isEmpty(diff.changed));
+	  return !(_utils['default'].isEmpty(diff.added) && _utils['default'].isEmpty(diff.removed) && _utils['default'].isEmpty(diff.changed));
 	}
 
 	exports['default'] = {
@@ -1259,39 +1256,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var definition = _this.defs[resourceName];
 	    options = options || {};
 
-	    id = _DSUtils['default'].resolveId(definition, id);
+	    id = _utils['default'].resolveId(definition, id);
 	    if (!definition) {
 	      throw new NER(resourceName);
-	    } else if (!_DSUtils['default']._sn(id)) {
-	      throw _DSUtils['default']._snErr('id');
+	    } else if (!_utils['default']._sn(id)) {
+	      throw _utils['default']._snErr('id');
 	    }
-	    options = _DSUtils['default']._(definition, options);
+	    options = _utils['default']._(definition, options);
 
 	    options.logFn('changes', id, options);
 
 	    var item = _this.get(resourceName, id);
 	    if (item) {
 	      var _ret = (function () {
-	        if (_DSUtils['default'].w) {
+	        if (_utils['default'].w) {
 	          _this.s[resourceName].observers[id].deliver();
 	        }
 	        var ignoredChanges = options.ignoredChanges || [];
-	        _DSUtils['default'].forEach(definition.relationFields, function (field) {
-	          if (!_DSUtils['default'].contains(ignoredChanges, field)) {
+	        _utils['default'].forEach(definition.relationFields, function (field) {
+	          if (!_utils['default'].contains(ignoredChanges, field)) {
 	            ignoredChanges.push(field);
 	          }
 	        });
-	        var diff = _DSUtils['default'].diffObjectFromOldObject(item, _this.s[resourceName].previousAttributes[id], _DSUtils['default'].equals, ignoredChanges);
-	        _DSUtils['default'].forOwn(diff, function (changeset, name) {
+	        var diff = _utils['default'].diffObjectFromOldObject(item, _this.s[resourceName].previousAttributes[id], _utils['default'].equals, ignoredChanges);
+	        _utils['default'].forOwn(diff, function (changeset, name) {
 	          var toKeep = [];
-	          _DSUtils['default'].forOwn(changeset, function (value, field) {
-	            if (!_DSUtils['default'].isFunction(value)) {
+	          _utils['default'].forOwn(changeset, function (value, field) {
+	            if (!_utils['default'].isFunction(value)) {
 	              toKeep.push(field);
 	            }
 	          });
-	          diff[name] = _DSUtils['default'].pick(diff[name], toKeep);
+	          diff[name] = _utils['default'].pick(diff[name], toKeep);
 	        });
-	        _DSUtils['default'].forEach(definition.relationFields, function (field) {
+	        _utils['default'].forEach(definition.relationFields, function (field) {
 	          delete diff.added[field];
 	          delete diff.removed[field];
 	          delete diff.changed[field];
@@ -1301,9 +1298,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	      })();
 
-	      if (typeof _ret === 'object') {
-	        return _ret.v;
-	      }
+	      if (typeof _ret === 'object') return _ret.v;
 	    }
 	  },
 	  changeHistory: function changeHistory(resourceName, id) {
@@ -1311,11 +1306,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var definition = _this.defs[resourceName];
 	    var resource = _this.s[resourceName];
 
-	    id = _DSUtils['default'].resolveId(definition, id);
+	    id = _utils['default'].resolveId(definition, id);
 	    if (resourceName && !_this.defs[resourceName]) {
 	      throw new NER(resourceName);
-	    } else if (id && !_DSUtils['default']._sn(id)) {
-	      throw _DSUtils['default']._snErr('id');
+	    } else if (id && !_utils['default']._sn(id)) {
+	      throw _utils['default']._snErr('id');
 	    }
 
 	    definition.logFn('changeHistory', id);
@@ -1337,18 +1332,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _this = this;
 	    var definition = _this.defs[resourceName];
 
-	    instance = _DSUtils['default'].resolveItem(_this.s[resourceName], instance);
+	    instance = _utils['default'].resolveItem(_this.s[resourceName], instance);
 	    if (!definition) {
 	      throw new NER(resourceName);
 	    } else if (!instance) {
 	      throw new R('Item not in the store!');
-	    } else if (!_DSUtils['default']._o(instance) && !_DSUtils['default']._sn(instance)) {
+	    } else if (!_utils['default']._o(instance) && !_utils['default']._sn(instance)) {
 	      throw new IA('"instance" must be an object, string or number!');
 	    }
 
 	    definition.logFn('compute', instance);
-	    _DSUtils['default'].forOwn(definition.computed, function (fn, field) {
-	      _DSUtils['default'].compute.call(instance, fn, field);
+	    _utils['default'].forOwn(definition.computed, function (fn, field) {
+	      _utils['default'].compute.call(instance, fn, field);
 	    });
 	    return instance;
 	  },
@@ -1360,11 +1355,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (!definition) {
 	      throw new NER(resourceName);
-	    } else if (attrs && !_DSUtils['default'].isObject(attrs)) {
+	    } else if (attrs && !_utils['default'].isObject(attrs)) {
 	      throw new IA('"attrs" must be an object!');
 	    }
 
-	    options = _DSUtils['default']._(definition, options);
+	    options = _utils['default']._(definition, options);
 
 	    options.logFn('createInstance', attrs, options);
 
@@ -1375,9 +1370,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var Constructor = definition[definition['class']];
 	    item = new Constructor();
 	    if (options.defaultValues) {
-	      _DSUtils['default'].deepMixIn(item, options.defaultValues);
+	      _utils['default'].deepMixIn(item, options.defaultValues);
 	    }
-	    _DSUtils['default'].deepMixIn(item, attrs);
+	    _utils['default'].deepMixIn(item, attrs);
 	    if (definition.computed) {
 	      this.compute(definition.name, item);
 	    }
@@ -1395,11 +1390,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (!definition) {
 	      throw new NER(resourceName);
-	    } else if (arr && !_DSUtils['default'].isArray(arr)) {
+	    } else if (arr && !_utils['default'].isArray(arr)) {
 	      throw new IA('"arr" must be an array!');
 	    }
 
-	    options = _DSUtils['default']._(definition, options);
+	    options = _utils['default']._(definition, options);
 
 	    options.logFn('createCollection', arr, options);
 
@@ -1422,7 +1417,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            data.shift();
 	            data.shift();
 	            if (data.$$injected) {
-	              _this.s[resourceName].queryData[_DSUtils['default'].toJson(__this.params)] = __this;
+	              _this.s[resourceName].queryData[_utils['default'].toJson(__this.params)] = __this;
 	              __this.$$injected = true;
 	            }
 	            return __this;
@@ -1456,11 +1451,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (!definition) {
 	      throw new NER(resourceName);
-	    } else if (!_DSUtils['default']._sn(id)) {
-	      throw _DSUtils['default']._snErr('id');
+	    } else if (!_utils['default']._sn(id)) {
+	      throw _utils['default']._snErr('id');
 	    }
 
-	    options = _DSUtils['default']._(definition, options);
+	    options = _utils['default']._(definition, options);
 
 	    options.logFn('get', id, options);
 
@@ -1478,13 +1473,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (!definition) {
 	      throw new NER(resourceName);
-	    } else if (ids && !_DSUtils['default']._a(ids)) {
-	      throw _DSUtils['default']._aErr('ids');
+	    } else if (ids && !_utils['default']._a(ids)) {
+	      throw _utils['default']._aErr('ids');
 	    }
 
 	    definition.logFn('getAll', ids);
 
-	    if (_DSUtils['default']._a(ids)) {
+	    if (_utils['default']._a(ids)) {
 	      var _length = ids.length;
 	      for (var i = 0; i < _length; i++) {
 	        if (resource.index[ids[i]]) {
@@ -1501,12 +1496,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _this = this;
 	    var definition = _this.defs[resourceName];
 
-	    id = _DSUtils['default'].resolveId(definition, id);
+	    id = _utils['default'].resolveId(definition, id);
 
 	    if (!definition) {
 	      throw new NER(resourceName);
-	    } else if (!_DSUtils['default']._sn(id)) {
-	      throw _DSUtils['default']._snErr('id');
+	    } else if (!_utils['default']._sn(id)) {
+	      throw _utils['default']._snErr('id');
 	    }
 
 	    definition.logFn('hasChanges', id);
@@ -1523,7 +1518,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var definition = this.defs[resourceName];
 	    var resource = this.s[resourceName];
 
-	    id = _DSUtils['default'].resolveId(definition, id);
+	    id = _utils['default'].resolveId(definition, id);
 	    if (!definition) {
 	      throw new NER(resourceName);
 	    }
@@ -1542,7 +1537,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var definition = this.defs[resourceName];
 	    var resource = this.s[resourceName];
 
-	    id = _DSUtils['default'].resolveId(definition, id);
+	    id = _utils['default'].resolveId(definition, id);
 	    if (!definition) {
 	      throw new NER(resourceName);
 	    }
@@ -1559,17 +1554,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var definition = _this.defs[resourceName];
 	    var resource = _this.s[resourceName];
 
-	    id = _DSUtils['default'].resolveId(definition, id);
+	    id = _utils['default'].resolveId(definition, id);
 	    if (!definition) {
 	      throw new NER(resourceName);
-	    } else if (!_DSUtils['default']._sn(id)) {
-	      throw _DSUtils['default']._snErr('id');
+	    } else if (!_utils['default']._sn(id)) {
+	      throw _utils['default']._snErr('id');
 	    }
 
 	    definition.logFn('previous', id);
 
 	    // return resource from cache
-	    return resource.previousAttributes[id] ? _DSUtils['default'].copy(resource.previousAttributes[id]) : undefined;
+	    return resource.previousAttributes[id] ? _utils['default'].copy(resource.previousAttributes[id]) : undefined;
 	  }
 	};
 
@@ -1577,25 +1572,25 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _create = __webpack_require__(33);
+	var _create = __webpack_require__(31);
 
-	var _destroy = __webpack_require__(34);
+	var _destroy = __webpack_require__(32);
 
-	var _destroyAll = __webpack_require__(35);
+	var _destroyAll = __webpack_require__(33);
 
-	var _find = __webpack_require__(36);
+	var _find = __webpack_require__(34);
 
-	var _findAll = __webpack_require__(37);
+	var _findAll = __webpack_require__(35);
 
-	var _loadRelations = __webpack_require__(38);
+	var _loadRelations = __webpack_require__(36);
 
-	var _reap = __webpack_require__(39);
+	var _reap = __webpack_require__(37);
 
-	var _save = __webpack_require__(40);
+	var _save = __webpack_require__(38);
 
-	var _update = __webpack_require__(41);
+	var _update = __webpack_require__(39);
 
-	var _updateAll = __webpack_require__(42);
+	var _updateAll = __webpack_require__(40);
 
 	exports['default'] = {
 	  create: _create['default'],
@@ -2697,7 +2692,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var namespace = __webpack_require__(25);
+	var namespace = __webpack_require__(30);
 
 	    /**
 	     * set "nested" object property
@@ -2720,8 +2715,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(26);
-	var camelCase = __webpack_require__(27);
+	var toString = __webpack_require__(41);
+	var camelCase = __webpack_require__(42);
 	var upperCase = __webpack_require__(19);
 	    /**
 	     * camelCase + UPPERCASE first char
@@ -2739,7 +2734,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(26);
+	var toString = __webpack_require__(41);
 	    /**
 	     * "Safer" String.toUpperCase()
 	     */
@@ -2935,82 +2930,12 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var forEach = __webpack_require__(8);
-
-	    /**
-	     * Create nested object if non-existent
-	     */
-	    function namespace(obj, path){
-	        if (!path) return obj;
-	        forEach(path.split('.'), function(key){
-	            if (!obj[key]) {
-	                obj[key] = {};
-	            }
-	            obj = obj[key];
-	        });
-	        return obj;
-	    }
-
-	    module.exports = namespace;
-
-
-
-
-/***/ },
-/* 26 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Typecast a value to a String, using an empty string value for null or
-	     * undefined.
-	     */
-	    function toString(val){
-	        return val == null ? '' : val.toString();
-	    }
-
-	    module.exports = toString;
-
-
-
-
-/***/ },
-/* 27 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(26);
-	var replaceAccents = __webpack_require__(43);
-	var removeNonWord = __webpack_require__(44);
-	var upperCase = __webpack_require__(19);
-	var lowerCase = __webpack_require__(45);
-	    /**
-	    * Convert string to camelCase text.
-	    */
-	    function camelCase(str){
-	        str = toString(str);
-	        str = replaceAccents(str);
-	        str = removeNonWord(str)
-	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
-	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
-	            .replace(/\s+/g, '') //remove spaces
-	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
-	        return str;
-	    }
-	    module.exports = camelCase;
-
-
-
-/***/ },
-/* 28 */
-/***/ function(module, exports, __webpack_require__) {
-
 	exports['default'] = defineResource;
 	/*jshint evil:true, loopfunc:true*/
 
-	var _DSUtils = __webpack_require__(2);
+	var _utils = __webpack_require__(2);
 
-	var _DSErrors = __webpack_require__(3);
+	var _errors = __webpack_require__(3);
 
 	var instanceMethods = ['compute', 'refresh', 'save', 'update', 'destroy', 'loadRelations', 'changeHistory', 'changes', 'hasChanges', 'lastModified', 'lastSaved', 'previous'];
 
@@ -3018,31 +2943,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var _this = this;
 	  var definitions = _this.defs;
 
-	  if (_DSUtils['default']._s(definition)) {
+	  if (_utils['default']._s(definition)) {
 	    definition = {
 	      name: definition.replace(/\s/gi, '')
 	    };
 	  }
-	  if (!_DSUtils['default']._o(definition)) {
-	    throw _DSUtils['default']._oErr('definition');
-	  } else if (!_DSUtils['default']._s(definition.name)) {
-	    throw new _DSErrors['default'].IA('"name" must be a string!');
+	  if (!_utils['default']._o(definition)) {
+	    throw _utils['default']._oErr('definition');
+	  } else if (!_utils['default']._s(definition.name)) {
+	    throw new _errors['default'].IA('"name" must be a string!');
 	  } else if (_this.s[definition.name]) {
-	    throw new _DSErrors['default'].R('' + definition.name + ' is already registered!');
+	    throw new _errors['default'].R('' + definition.name + ' is already registered!');
 	  }
 
 	  function Resource(options) {
 	    this.defaultValues = {};
 	    this.methods = {};
 	    this.computed = {};
-	    _DSUtils['default'].deepMixIn(this, options);
+	    _utils['default'].deepMixIn(this, options);
 	    var parent = _this.defaults;
 	    if (definition['extends'] && definitions[definition['extends']]) {
 	      parent = definitions[definition['extends']];
 	    }
-	    _DSUtils['default'].fillIn(this.defaultValues, parent.defaultValues);
-	    _DSUtils['default'].fillIn(this.methods, parent.methods);
-	    _DSUtils['default'].fillIn(this.computed, parent.computed);
+	    _utils['default'].fillIn(this.defaultValues, parent.defaultValues);
+	    _utils['default'].fillIn(this.methods, parent.methods);
+	    _utils['default'].fillIn(this.computed, parent.computed);
 	    this.endpoint = 'endpoint' in options ? options.endpoint : this.name;
 	  }
 
@@ -3068,20 +2993,20 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      def.logFn('Preparing resource.');
 
-	      if (!_DSUtils['default']._s(def.idAttribute)) {
-	        throw new _DSErrors['default'].IA('"idAttribute" must be a string!');
+	      if (!_utils['default']._s(def.idAttribute)) {
+	        throw new _errors['default'].IA('"idAttribute" must be a string!');
 	      }
 
 	      // Setup nested parent configuration
 	      if (def.relations) {
 	        def.relationList = [];
 	        def.relationFields = [];
-	        _DSUtils['default'].forOwn(def.relations, function (relatedModels, type) {
-	          _DSUtils['default'].forOwn(relatedModels, function (defs, relationName) {
-	            if (!_DSUtils['default']._a(defs)) {
+	        _utils['default'].forOwn(def.relations, function (relatedModels, type) {
+	          _utils['default'].forOwn(relatedModels, function (defs, relationName) {
+	            if (!_utils['default']._a(defs)) {
 	              relatedModels[relationName] = [defs];
 	            }
-	            _DSUtils['default'].forEach(relatedModels[relationName], function (d) {
+	            _utils['default'].forEach(relatedModels[relationName], function (d) {
 	              d.type = type;
 	              d.relation = relationName;
 	              d.name = def.n;
@@ -3093,8 +3018,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	          });
 	        });
 	        if (def.relations.belongsTo) {
-	          _DSUtils['default'].forOwn(def.relations.belongsTo, function (relatedModel, modelName) {
-	            _DSUtils['default'].forEach(relatedModel, function (relation) {
+	          _utils['default'].forOwn(def.relations.belongsTo, function (relatedModel, modelName) {
+	            _utils['default'].forEach(relatedModel, function (relation) {
 	              if (relation.parent) {
 	                def.parent = modelName;
 	                def.parentKey = relation.localKey;
@@ -3132,9 +3057,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } else {
 	          delete options.params[parentKey];
 
-	          if (_DSUtils['default']._sn(id)) {
+	          if (_utils['default']._sn(id)) {
 	            item = def.get(id);
-	          } else if (_DSUtils['default']._o(id)) {
+	          } else if (_utils['default']._o(id)) {
 	            item = id;
 	          }
 
@@ -3146,11 +3071,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var _ret2 = (function () {
 	              delete options.endpoint;
 	              var _options = {};
-	              _DSUtils['default'].forOwn(options, function (value, key) {
+	              _utils['default'].forOwn(options, function (value, key) {
 	                _options[key] = value;
 	              });
 	              return {
-	                v: _DSUtils['default'].makePath(parentDef.getEndpoint(parentId, _DSUtils['default']._(parentDef, _options)), parentId, endpoint)
+	                v: _utils['default'].makePath(parentDef.getEndpoint(parentId, _utils['default']._(parentDef, _options)), parentId, endpoint)
 	              };
 	            })();
 
@@ -3169,7 +3094,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 
 	      // Create the wrapper class for the new resource
-	      _class = def['class'] = _DSUtils['default'].pascalCase(def.name);
+	      _class = def['class'] = _utils['default'].pascalCase(def.name);
 
 	      try {
 	        if (typeof def.useClass === 'function') {
@@ -3190,25 +3115,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 
 	      // Apply developer-defined methods
-	      _DSUtils['default'].forOwn(def.methods, function (fn, m) {
+	      _utils['default'].forOwn(def.methods, function (fn, m) {
 	        def[_class].prototype[m] = fn;
 	      });
 
 	      def[_class].prototype.set = function (key, value) {
-	        _DSUtils['default'].set(this, key, value);
+	        _utils['default'].set(this, key, value);
 	        _this.compute(def.n, this);
 	        return this;
 	      };
 
 	      def[_class].prototype.get = function (key) {
-	        return _DSUtils['default'].get(this, key);
+	        return _utils['default'].get(this, key);
 	      };
 
-	      _DSUtils['default'].applyRelationGettersToTarget(_this, def, def[_class].prototype);
+	      _utils['default'].applyRelationGettersToTarget(_this, def, def[_class].prototype);
 
 	      // Prepare for computed properties
-	      _DSUtils['default'].forOwn(def.computed, function (fn, field) {
-	        if (_DSUtils['default'].isFunction(fn)) {
+	      _utils['default'].forOwn(def.computed, function (fn, field) {
+	        if (_utils['default'].isFunction(fn)) {
 	          def.computed[field] = [fn];
 	          fn = def.computed[field];
 	        }
@@ -3226,16 +3151,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 	        }
 	        deps = fn.slice(0, fn.length - 1);
-	        _DSUtils['default'].forEach(deps, function (val, index) {
+	        _utils['default'].forEach(deps, function (val, index) {
 	          deps[index] = val.trim();
 	        });
-	        fn.deps = _DSUtils['default'].filter(deps, function (dep) {
+	        fn.deps = _utils['default'].filter(deps, function (dep) {
 	          return !!dep;
 	        });
 	      });
 
-	      _DSUtils['default'].forEach(instanceMethods, function (name) {
-	        def[_class].prototype['DS' + _DSUtils['default'].pascalCase(name)] = function () {
+	      _utils['default'].forEach(instanceMethods, function (name) {
+	        def[_class].prototype['DS' + _utils['default'].pascalCase(name)] = function () {
 	          for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
 	            args[_key] = arguments[_key];
 	          }
@@ -3259,7 +3184,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // Initialize store data for the new resource
 	      _this.s[def.n] = {
 	        collection: [],
-	        expiresHeap: new _DSUtils['default'].BinaryHeap(function (x) {
+	        expiresHeap: new _utils['default'].BinaryHeap(function (x) {
 	          return x.expires;
 	        }, function (x, y) {
 	          return x.item === y;
@@ -3291,7 +3216,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      }
 
-	      _DSUtils['default'].forEach(fns, function (key) {
+	      _utils['default'].forEach(fns, function (key) {
 	        var k = key;
 	        if (_this[k].shorthand !== false) {
 	          def[k] = function () {
@@ -3302,10 +3227,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	            args.unshift(def.n);
 	            return _this[k].apply(_this, args);
 	          };
+	          def[k].before = function (fn) {
+	            var orig = def[k];
+	            def[k] = function () {
+	              for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+	                args[_key4] = arguments[_key4];
+	              }
+
+	              return orig.apply(def, fn.apply(def, args) || args);
+	            };
+	          };
 	        } else {
 	          def[k] = function () {
-	            for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-	              args[_key4] = arguments[_key4];
+	            for (var _len5 = arguments.length, args = Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+	              args[_key5] = arguments[_key5];
 	            }
 
 	            return _this[k].apply(_this, args);
@@ -3313,21 +3248,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      });
 
-	      def.beforeValidate = _DSUtils['default'].promisify(def.beforeValidate);
-	      def.validate = _DSUtils['default'].promisify(def.validate);
-	      def.afterValidate = _DSUtils['default'].promisify(def.afterValidate);
-	      def.beforeCreate = _DSUtils['default'].promisify(def.beforeCreate);
-	      def.afterCreate = _DSUtils['default'].promisify(def.afterCreate);
-	      def.beforeUpdate = _DSUtils['default'].promisify(def.beforeUpdate);
-	      def.afterUpdate = _DSUtils['default'].promisify(def.afterUpdate);
-	      def.beforeDestroy = _DSUtils['default'].promisify(def.beforeDestroy);
-	      def.afterDestroy = _DSUtils['default'].promisify(def.afterDestroy);
+	      def.beforeValidate = _utils['default'].promisify(def.beforeValidate);
+	      def.validate = _utils['default'].promisify(def.validate);
+	      def.afterValidate = _utils['default'].promisify(def.afterValidate);
+	      def.beforeCreate = _utils['default'].promisify(def.beforeCreate);
+	      def.afterCreate = _utils['default'].promisify(def.afterCreate);
+	      def.beforeUpdate = _utils['default'].promisify(def.beforeUpdate);
+	      def.afterUpdate = _utils['default'].promisify(def.afterUpdate);
+	      def.beforeDestroy = _utils['default'].promisify(def.beforeDestroy);
+	      def.afterDestroy = _utils['default'].promisify(def.afterDestroy);
 
 	      var defaultAdapter = undefined;
 	      if (def.hasOwnProperty('defaultAdapter')) {
 	        defaultAdapter = def.defaultAdapter;
 	      }
-	      _DSUtils['default'].forOwn(def.actions, function (action, name) {
+	      _utils['default'].forOwn(def.actions, function (action, name) {
 	        if (def[name] && !def.actions[name]) {
 	          throw new Error('Cannot override existing method "' + name + '"!');
 	        }
@@ -3338,31 +3273,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	          return response;
 	        };
 	        action.responseError = action.responseError || function (err) {
-	          return _DSUtils['default'].Promise.reject(err);
+	          return _utils['default'].Promise.reject(err);
 	        };
 	        def[name] = function (id, options) {
-	          if (_DSUtils['default']._o(id)) {
+	          if (_utils['default']._o(id)) {
 	            options = id;
 	          }
 	          options = options || {};
 	          var adapter = _this.getAdapter(action.adapter || defaultAdapter || 'http');
-	          var config = _DSUtils['default'].deepMixIn({}, action);
+	          var config = _utils['default'].deepMixIn({}, action);
 	          if (!options.hasOwnProperty('endpoint') && config.endpoint) {
 	            options.endpoint = config.endpoint;
 	          }
 	          if (typeof options.getEndpoint === 'function') {
 	            config.url = options.getEndpoint(def, options);
 	          } else {
-	            var args = [options.basePath || adapter.defaults.basePath || def.basePath, def.getEndpoint(_DSUtils['default']._sn(id) ? id : null, options)];
-	            if (_DSUtils['default']._sn(id)) {
+	            var args = [options.basePath || adapter.defaults.basePath || def.basePath, def.getEndpoint(_utils['default']._sn(id) ? id : null, options)];
+	            if (_utils['default']._sn(id)) {
 	              args.push(id);
 	            }
 	            args.push(action.pathname || name);
-	            config.url = _DSUtils['default'].makePath.apply(null, args);
+	            config.url = _utils['default'].makePath.apply(null, args);
 	          }
 	          config.method = config.method || 'GET';
-	          _DSUtils['default'].deepMixIn(config, options);
-	          return new _DSUtils['default'].Promise(function (r) {
+	          _utils['default'].deepMixIn(config, options);
+	          return new _utils['default'].Promise(function (r) {
 	            return r(config);
 	          }).then(options.request || action.request).then(function (config) {
 	            return adapter.HTTP(config);
@@ -3371,7 +3306,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      });
 
 	      // Mix-in events
-	      _DSUtils['default'].Events(def);
+	      _utils['default'].Events(def);
 
 	      def.logFn('Done preparing resource.');
 
@@ -3389,7 +3324,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 29 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = eject;
@@ -3470,14 +3405,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      };
 	    })();
 
-	    if (typeof _ret === 'object') {
-	      return _ret.v;
-	    }
+	    if (typeof _ret === 'object') return _ret.v;
 	  }
 	}
 
 /***/ },
-/* 30 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = ejectAll;
@@ -3518,7 +3451,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 31 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = filter;
@@ -3542,14 +3475,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 32 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = inject;
 
-	var _DSUtils = __webpack_require__(2);
+	var _utils = __webpack_require__(2);
 
-	var _DSErrors = __webpack_require__(3);
+	var _errors = __webpack_require__(3);
 
 	function _getReactFunction(DS, definition, resource) {
 	  // using "var" avoids a JSHint error
@@ -3559,16 +3492,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var item = undefined;
 	    var innerId = oldValueFn && oldValueFn(definition.idAttribute) ? oldValueFn(definition.idAttribute) : target[definition.idAttribute];
 
-	    _DSUtils['default'].forEach(definition.relationFields, function (field) {
+	    _utils['default'].forEach(definition.relationFields, function (field) {
 	      delete added[field];
 	      delete removed[field];
 	      delete changed[field];
 	    });
 
-	    if (!_DSUtils['default'].isEmpty(added) || !_DSUtils['default'].isEmpty(removed) || !_DSUtils['default'].isEmpty(changed) || firstTime) {
+	    if (!_utils['default'].isEmpty(added) || !_utils['default'].isEmpty(removed) || !_utils['default'].isEmpty(changed) || firstTime) {
 	      item = DS.get(name, innerId);
-	      resource.modified[innerId] = _DSUtils['default'].updateTimestamp(resource.modified[innerId]);
-	      resource.collectionModified = _DSUtils['default'].updateTimestamp(resource.collectionModified);
+	      resource.modified[innerId] = _utils['default'].updateTimestamp(resource.modified[innerId]);
+	      resource.collectionModified = _utils['default'].updateTimestamp(resource.collectionModified);
 	      if (definition.keepChangeHistory) {
 	        var changeRecord = {
 	          resourceName: name,
@@ -3585,17 +3518,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (definition.computed) {
 	      item = item || DS.get(name, innerId);
-	      _DSUtils['default'].forOwn(definition.computed, function (fn, field) {
+	      _utils['default'].forOwn(definition.computed, function (fn, field) {
 	        var compute = false;
 	        // check if required fields changed
-	        _DSUtils['default'].forEach(fn.deps, function (dep) {
+	        _utils['default'].forEach(fn.deps, function (dep) {
 	          if (dep in added || dep in removed || dep in changed || !(field in item)) {
 	            compute = true;
 	          }
 	        });
 	        compute = compute || !fn.deps.length;
 	        if (compute) {
-	          _DSUtils['default'].compute.call(item, fn, field);
+	          _utils['default'].compute.call(item, fn, field);
 	        }
 	      });
 	    }
@@ -3611,7 +3544,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var _react = _getReactFunction(_this, definition, resource, attrs, options);
 
 	  var injected = undefined;
-	  if (_DSUtils['default']._a(attrs)) {
+	  if (_utils['default']._a(attrs)) {
 	    injected = [];
 	    for (var i = 0; i < attrs.length; i++) {
 	      injected.push(_inject.call(_this, definition, resource, attrs[i], options));
@@ -3623,30 +3556,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (c && c[idA]) {
 	      (function () {
 	        var args = [];
-	        _DSUtils['default'].forEach(c[idA].deps, function (dep) {
+	        _utils['default'].forEach(c[idA].deps, function (dep) {
 	          args.push(attrs[dep]);
 	        });
 	        attrs[idA] = c[idA][c[idA].length - 1].apply(attrs, args);
 	      })();
 	    }
 	    if (!(idA in attrs)) {
-	      var error = new _DSErrors['default'].R('' + definition.n + '.inject: "attrs" must contain the property specified by "idAttribute"!');
+	      var error = new _errors['default'].R('' + definition.n + '.inject: "attrs" must contain the property specified by "idAttribute"!');
 	      options.errorFn(error);
 	      throw error;
 	    } else {
 	      try {
-	        _DSUtils['default'].forEach(definition.relationList, function (def) {
+	        _utils['default'].forEach(definition.relationList, function (def) {
 	          var relationName = def.relation;
 	          var relationDef = _this.defs[relationName];
 	          var toInject = attrs[def.localField];
 	          if (toInject) {
 	            if (!relationDef) {
-	              throw new _DSErrors['default'].R('' + definition.n + ' relation is defined but the resource is not!');
+	              throw new _errors['default'].R('' + definition.n + ' relation is defined but the resource is not!');
 	            }
-	            if (_DSUtils['default']._a(toInject)) {
+	            if (_utils['default']._a(toInject)) {
 	              (function () {
 	                var items = [];
-	                _DSUtils['default'].forEach(toInject, function (toInjectItem) {
+	                _utils['default'].forEach(toInject, function (toInjectItem) {
 	                  if (toInjectItem !== _this.s[relationName].index[toInjectItem[relationDef.idAttribute]]) {
 	                    try {
 	                      var injectedItem = _this.inject(relationName, toInjectItem, options.orig());
@@ -3685,38 +3618,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	          } else {
 	            item = new definition[definition['class']]();
 	          }
-	          _DSUtils['default'].forEach(definition.relationList, function (def) {
+	          _utils['default'].forEach(definition.relationList, function (def) {
 	            delete attrs[def.localField];
 	          });
-	          _DSUtils['default'].deepMixIn(item, attrs);
+	          _utils['default'].deepMixIn(item, attrs);
 
 	          resource.collection.push(item);
 	          resource.changeHistories[id] = [];
 
-	          if (_DSUtils['default'].w) {
+	          if (_utils['default'].w) {
 	            resource.observers[id] = new _this.observe.ObjectObserver(item);
 	            resource.observers[id].open(_react, item);
 	          }
 
 	          resource.index[id] = item;
 	          _react.call(item, {}, {}, {}, null, true);
-	          resource.previousAttributes[id] = _DSUtils['default'].copy(item, null, null, null, definition.relationFields);
+	          resource.previousAttributes[id] = _utils['default'].copy(item, null, null, null, definition.relationFields);
 	        } else {
-	          _DSUtils['default'].deepMixIn(item, attrs);
+	          _utils['default'].deepMixIn(item, attrs);
 	          if (definition.resetHistoryOnInject) {
-	            resource.previousAttributes[id] = _DSUtils['default'].copy(item, null, null, null, definition.relationFields);
+	            resource.previousAttributes[id] = _utils['default'].copy(item, null, null, null, definition.relationFields);
 	            if (resource.changeHistories[id].length) {
-	              _DSUtils['default'].forEach(resource.changeHistories[id], function (changeRecord) {
-	                _DSUtils['default'].remove(resource.changeHistory, changeRecord);
+	              _utils['default'].forEach(resource.changeHistories[id], function (changeRecord) {
+	                _utils['default'].remove(resource.changeHistory, changeRecord);
 	              });
 	              resource.changeHistories[id].splice(0, resource.changeHistories[id].length);
 	            }
 	          }
-	          if (_DSUtils['default'].w) {
+	          if (_utils['default'].w) {
 	            resource.observers[id].deliver();
 	          }
 	        }
-	        resource.modified[id] = initialLastModified && resource.modified[id] === initialLastModified ? _DSUtils['default'].updateTimestamp(resource.modified[id]) : resource.modified[id];
+	        resource.modified[id] = initialLastModified && resource.modified[id] === initialLastModified ? _utils['default'].updateTimestamp(resource.modified[id]) : resource.modified[id];
 	        resource.expiresHeap.remove(item);
 	        var timestamp = new Date().getTime();
 	        resource.expiresHeap.push({
@@ -3740,12 +3673,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var injected = undefined;
 
 	  if (!definition) {
-	    throw new _DSErrors['default'].NER(resourceName);
-	  } else if (!_DSUtils['default']._o(attrs) && !_DSUtils['default']._a(attrs)) {
-	    throw new _DSErrors['default'].IA('' + resourceName + '.inject: "attrs" must be an object or an array!');
+	    throw new _errors['default'].NER(resourceName);
+	  } else if (!_utils['default']._o(attrs) && !_utils['default']._a(attrs)) {
+	    throw new _errors['default'].IA('' + resourceName + '.inject: "attrs" must be an object or an array!');
 	  }
 
-	  options = _DSUtils['default']._(definition, options);
+	  options = _utils['default']._(definition, options);
 
 	  options.logFn('inject', attrs, options);
 	  options.beforeInject(options, attrs);
@@ -3754,7 +3687,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  injected = _inject.call(_this, definition, resource, attrs, options);
-	  resource.collectionModified = _DSUtils['default'].updateTimestamp(resource.collectionModified);
+	  resource.collectionModified = _utils['default'].updateTimestamp(resource.collectionModified);
 
 	  options.afterInject(options, injected);
 	  if (options.notify) {
@@ -3765,7 +3698,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 33 */
+/* 30 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var forEach = __webpack_require__(8);
+
+	    /**
+	     * Create nested object if non-existent
+	     */
+	    function namespace(obj, path){
+	        if (!path) return obj;
+	        forEach(path.split('.'), function(key){
+	            if (!obj[key]) {
+	                obj[key] = {};
+	            }
+	            obj = obj[key];
+	        });
+	        return obj;
+	    }
+
+	    module.exports = namespace;
+
+
+
+
+/***/ },
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = create;
@@ -3830,7 +3788,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 34 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = destroy;
@@ -3880,7 +3838,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 35 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = destroyAll;
@@ -3931,11 +3889,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 36 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* jshint -W082 */
 	exports['default'] = find;
+	/* jshint -W082 */
 
 	function find(resourceName, id, options) {
 	  var _this = this;
@@ -4016,7 +3974,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 37 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = findAll;
@@ -4148,12 +4106,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 38 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _defineProperty = function (obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: key == null || typeof Symbol == 'undefined' || key.constructor !== Symbol, configurable: true, writable: true }); };
-
 	exports['default'] = loadRelations;
+
+	function _defineProperty(obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); }
 
 	function loadRelations(resourceName, instance, relations, options) {
 	  var _this = this;
@@ -4243,7 +4201,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 39 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = reap;
@@ -4318,7 +4276,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 40 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = save;
@@ -4407,7 +4365,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 41 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = update;
@@ -4465,7 +4423,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 42 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = updateAll;
@@ -4539,10 +4497,55 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
+/* 41 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Typecast a value to a String, using an empty string value for null or
+	     * undefined.
+	     */
+	    function toString(val){
+	        return val == null ? '' : val.toString();
+	    }
+
+	    module.exports = toString;
+
+
+
+
+/***/ },
+/* 42 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var toString = __webpack_require__(41);
+	var replaceAccents = __webpack_require__(43);
+	var removeNonWord = __webpack_require__(44);
+	var upperCase = __webpack_require__(19);
+	var lowerCase = __webpack_require__(45);
+	    /**
+	    * Convert string to camelCase text.
+	    */
+	    function camelCase(str){
+	        str = toString(str);
+	        str = replaceAccents(str);
+	        str = removeNonWord(str)
+	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
+	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
+	            .replace(/\s+/g, '') //remove spaces
+	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
+	        return str;
+	    }
+	    module.exports = camelCase;
+
+
+
+/***/ },
 /* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(26);
+	var toString = __webpack_require__(41);
 	    /**
 	    * Replaces all accented chars with regular ones
 	    */
@@ -4584,7 +4587,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(26);
+	var toString = __webpack_require__(41);
 	    // This pattern is generated by the _build/pattern-removeNonWord.js script
 	    var PATTERN = /[^\x20\x2D0-9A-Z\x5Fa-z\xC0-\xD6\xD8-\xF6\xF8-\xFF]/g;
 
@@ -4604,7 +4607,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(26);
+	var toString = __webpack_require__(41);
 	    /**
 	     * "Safer" String.toLowerCase()
 	     */

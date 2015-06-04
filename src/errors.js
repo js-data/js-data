@@ -1,6 +1,6 @@
 class IllegalArgumentError extends Error {
   constructor(message) {
-    super(this);
+    super();
     if (typeof Error.captureStackTrace === 'function') {
       Error.captureStackTrace(this, this.constructor);
     }
@@ -11,7 +11,7 @@ class IllegalArgumentError extends Error {
 
 class RuntimeError extends Error {
   constructor(message) {
-    super(this);
+    super();
     if (typeof Error.captureStackTrace === 'function') {
       Error.captureStackTrace(this, this.constructor);
     }
@@ -22,7 +22,7 @@ class RuntimeError extends Error {
 
 class NonexistentResourceError extends Error {
   constructor(resourceName) {
-    super(this);
+    super();
     if (typeof Error.captureStackTrace === 'function') {
       Error.captureStackTrace(this, this.constructor);
     }
