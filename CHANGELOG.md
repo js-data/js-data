@@ -1,3 +1,11 @@
+##### 2.0.0-beta.6 - xx June 2015
+
+###### Breaking API changes
+- #150 - Debug output, `debug` now defaults to `false`
+
+###### Backwards compatible API changes
+- #145 - A little AOP, add a `.before` to all methods, allowing per-method argument customization
+
 ##### 2.0.0-beta.5 - 27 May 2015
 
 ###### Breaking API changes
