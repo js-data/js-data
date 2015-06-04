@@ -277,6 +277,12 @@ export default function defineResource(definition) {
           args.unshift(def.n);
           return _this[k].apply(_this, args);
         };
+        def[k].before = fn => {
+          let orig = def[k];
+          def[k] = (...args) => {
+            return orig.apply(def, fn.apply(def, args) || args);
+          };
+        };
       } else {
         def[k] = (...args) => _this[k].apply(_this, args);
       }

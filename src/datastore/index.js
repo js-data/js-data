@@ -93,7 +93,7 @@ defaultsPrototype.cacheResponse = !!DSUtils.w;
 defaultsPrototype.clearEmptyQueries = true;
 defaultsPrototype.computed = {};
 defaultsPrototype.defaultAdapter = 'http';
-defaultsPrototype.debug = true;
+defaultsPrototype.debug = false;
 defaultsPrototype.defaultValues = {};
 defaultsPrototype.eagerEject = false;
 // TODO: Implement eagerInject in DS#create
@@ -372,7 +372,20 @@ dsPrototype.getAdapter.shorthand = false;
 dsPrototype.registerAdapter.shorthand = false;
 dsPrototype.errors = DSErrors;
 dsPrototype.utils = DSUtils;
-DSUtils.deepMixIn(dsPrototype, syncMethods);
-DSUtils.deepMixIn(dsPrototype, asyncMethods);
+
+function addMethods(target, obj) {
+  DSUtils.forOwn(obj, (v, k) => {
+    target[k] = v;
+    target[k].before = function (fn) {
+      let orig = target[k];
+      target[k] = function (...args) {
+        return orig.apply(this, fn.apply(this, args) || args);
+      };
+    };
+  });
+}
+
+addMethods(dsPrototype, syncMethods);
+addMethods(dsPrototype, asyncMethods);
 
 export default DS;

@@ -244,4 +244,56 @@ describe('DS#defineResource', function () {
       bazId: 10
     }));
   });
+  it('should allow a bit of aspect oriented programming', function () {
+    var Foo = store.defineResource('foo');
+
+    var orig = Foo.createInstance;
+    Foo.createInstance.before(function (attrs) {
+      assert.isTrue(this === Foo);
+      if (attrs && !('name' in attrs)) {
+        attrs.name = 'hi';
+      } else if (arguments.length === 0) {
+        return [{ id: 'anonymous' }];
+      }
+    });
+    assert.isFalse(orig === Foo.createInstance);
+
+    var foo = Foo.createInstance({ id: 1 });
+    var foo2 = Foo.createInstance();
+
+    assert.deepEqual(DSUtils.toJson(foo), DSUtils.toJson({ id: 1, name: 'hi' }));
+    assert.deepEqual(DSUtils.toJson(foo2), DSUtils.toJson({ id: 'anonymous' }));
+
+    var newStore = new JSData.DS({ log: false });
+    orig = newStore.createInstance;
+    newStore.createInstance.before(function (resourceName, attrs) {
+      if (attrs) {
+        attrs.foo = 'bar';
+      }
+      assert.isTrue(this === newStore);
+    });
+    assert.isFalse(orig === newStore.createInstance);
+
+    var NewFoo = newStore.defineResource('newFoo');
+
+    foo = newStore.createInstance('newFoo', { id: 1 });
+
+    assert.equal(foo.id, 1);
+    assert.equal(foo.foo, 'bar');
+
+    NewFoo.createInstance.before(function (attrs) {
+      if (attrs) {
+        attrs.beep = 'boop';
+      }
+      assert.isTrue(this === NewFoo);
+    });
+    foo = NewFoo.createInstance({ id: 1 });
+
+    assert.equal(foo.id, 1);
+    assert.equal(foo.beep, 'boop');
+    assert.equal(foo.foo, 'bar');
+
+    // clean up
+    newStore.constructor.prototype.createInstance = orig;
+  });
 });
