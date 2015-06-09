@@ -1,3 +1,12 @@
+/**
+ * Update a collection of items using the supplied properties hash.
+ *
+ * @param resourceName The name of the type of resource of the items to update.
+ * @param attrs  The attributes with which to update the item.
+ * @param params The criteria by which to select items to update. See http://www.js-data.io/docs/query-syntax
+ * @param options Optional configuration.
+ * @returns The updated items.
+ */
 export default function updateAll(resourceName, attrs, params, options) {
   let _this = this;
   let {utils: DSUtils, errors: DSErrors} = _this;
@@ -11,7 +20,9 @@ export default function updateAll(resourceName, attrs, params, options) {
       options.logFn('updateAll', attrs, params, options);
       resolve(attrs);
     }
-  }).then(attrs => options.beforeValidate.call(attrs, options, attrs))
+  })
+    // start lifecycle
+    .then(attrs => options.beforeValidate.call(attrs, options, attrs))
     .then(attrs => options.validate.call(attrs, options, attrs))
     .then(attrs => options.afterValidate.call(attrs, options, attrs))
     .then(attrs => options.beforeUpdate.call(attrs, options, attrs))
@@ -19,7 +30,7 @@ export default function updateAll(resourceName, attrs, params, options) {
       if (options.notify) {
         definition.emit('DS.beforeUpdate', definition, attrs);
       }
-      return _this.getAdapter(options).updateAll(definition, attrs, params, options);
+      return definition.getAdapter(options).updateAll(definition, attrs, params, options);
     })
     .then(data => options.afterUpdate.call(data, options, data))
     .then(data => {
@@ -28,8 +39,10 @@ export default function updateAll(resourceName, attrs, params, options) {
       }
       let origOptions = options.orig();
       if (options.cacheResponse) {
-        let injected = _this.inject(definition.name, data, origOptions);
+        // inject the updated items into the store
+        let injected = definition.inject(data, origOptions);
         let resource = _this.s[resourceName];
+        // mark the items as "saved"
         DSUtils.forEach(injected, i => {
           let id = i[definition.idAttribute];
           resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
@@ -39,9 +52,10 @@ export default function updateAll(resourceName, attrs, params, options) {
         });
         return injected;
       } else {
+        // just return instances
         let instances = [];
         DSUtils.forEach(data, item => {
-          instances.push(_this.createInstance(resourceName, item, origOptions));
+          instances.push(definition.createInstance(item, origOptions));
         });
         return instances;
       }

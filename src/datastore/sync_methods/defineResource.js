@@ -205,7 +205,7 @@ export default function defineResource(definition) {
      */
     def[_class].prototype.set = function (key, value) {
       DSUtils.set(this, key, value);
-      _this.compute(def.name, this);
+      def.compute(this);
       return this;
     };
 
@@ -283,7 +283,7 @@ export default function defineResource(definition) {
 
     // start the reaping
     if (def.reapInterval) {
-      setInterval(() => _this.reap(def.name, {isInterval: true}), def.reapInterval);
+      setInterval(() => def.reap(), def.reapInterval);
     }
 
     // proxy DS methods with shorthand ones
@@ -349,7 +349,7 @@ export default function defineResource(definition) {
           options = id;
         }
         options = options || {};
-        let adapter = _this.getAdapter(action.adapter || defaultAdapter || 'http');
+        let adapter = def.getAdapter(action.adapter || defaultAdapter || 'http');
         let config = DSUtils.deepMixIn({}, action);
         if (!options.hasOwnProperty('endpoint') && config.endpoint) {
           options.endpoint = config.endpoint;

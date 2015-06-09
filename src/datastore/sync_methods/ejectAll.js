@@ -24,7 +24,7 @@ export default function ejectAll(resourceName, params, options) {
   let queryHash = DSUtils.toJson(params);
 
   // get items that match the criteria
-  let items = _this.filter(definition.name, params);
+  let items = definition.filter(params);
   let ids = [];
 
   if (DSUtils.isEmpty(params)) {
@@ -42,7 +42,7 @@ export default function ejectAll(resourceName, params, options) {
   });
   // eject each matching item
   DSUtils.forEach(ids, id => {
-    _this.eject(definition.name, id, options);
+    definition.eject(id, options);
   });
   // collection has been modified
   resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);

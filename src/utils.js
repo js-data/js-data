@@ -592,14 +592,14 @@ export default {
               let params = {};
               if (def.foreignKey) {
                 params[def.foreignKey] = this[definition.idAttribute];
-                return store.defaults.constructor.prototype.defaultFilter.call(store, store.s[relationName].collection, relationName, params, {allowSimpleWhere: true});
+                return definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, {allowSimpleWhere: true});
               } else if (def.localKeys) {
                 params.where = {
                   [definition.getResource(relationName).idAttribute]: {
                     'in': this[def.localKeys]
                   }
                 };
-                return store.defaults.constructor.prototype.defaultFilter.call(store, store.s[relationName].collection, relationName, params);
+                return definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params);
               }
               return undefined;
             },
@@ -622,7 +622,7 @@ export default {
               get() {
                 let params = {};
                 params[def.foreignKey] = this[definition.idAttribute];
-                let items = params[def.foreignKey] ? store.defaults.constructor.prototype.defaultFilter.call(store, store.s[relationName].collection, relationName, params, {allowSimpleWhere: true}) : [];
+                let items = params[def.foreignKey] ? definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, {allowSimpleWhere: true}) : [];
                 if (items.length) {
                   return items[0];
                 }

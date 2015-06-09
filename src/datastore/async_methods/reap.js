@@ -1,3 +1,10 @@
+/**
+ * Find expired items of the specified resource type and perform the configured action.
+ *
+ * @param resourceName The name of the type of resource of the items to reap.
+ * @param options Optional configuration.
+ * @returns The reaped items.
+ */
 export default function reap(resourceName, options) {
   let _this = this;
   var DSUtils = _this.utils;
@@ -17,6 +24,8 @@ export default function reap(resourceName, options) {
       let items = [];
       let now = new Date().getTime();
       let expiredItem;
+
+      // find the expired items
       while ((expiredItem = resource.expiresHeap.peek()) && expiredItem.expires < now) {
         items.push(expiredItem.item);
         delete expiredItem.item;
@@ -25,10 +34,14 @@ export default function reap(resourceName, options) {
       resolve(items);
     }
   }).then(items => {
-      if (options.isInterval || options.notify) {
+      // only hit lifecycle if there are items
+      if (items.length) {
         definition.beforeReap(options, items);
-        definition.emit('DS.beforeReap', definition, items);
+        if (options.notify) {
+          definition.emit('DS.beforeReap', definition, items);
+        }
       }
+
       if (options.reapAction === 'inject') {
         let timestamp = new Date().getTime();
         DSUtils.forEach(items, item => {
@@ -40,20 +53,23 @@ export default function reap(resourceName, options) {
         });
       } else if (options.reapAction === 'eject') {
         DSUtils.forEach(items, item => {
-          _this.eject(resourceName, item[definition.idAttribute]);
+          definition.eject(item[definition.idAttribute]);
         });
       } else if (options.reapAction === 'refresh') {
         let tasks = [];
         DSUtils.forEach(items, item => {
-          tasks.push(_this.refresh(resourceName, item[definition.idAttribute]));
+          tasks.push(definition.refresh(item[definition.idAttribute]));
         });
         return DSUtils.Promise.all(tasks);
       }
       return items;
     }).then(items => {
-      if (options.isInterval || options.notify) {
+      // only hit lifecycle if there are items
+      if (items.length) {
         definition.afterReap(options, items);
-        definition.emit('DS.afterReap', definition, items);
+        if (options.notify) {
+          definition.emit('DS.afterReap', definition, items);
+        }
       }
       return items;
     });

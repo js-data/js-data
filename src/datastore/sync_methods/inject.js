@@ -153,7 +153,7 @@ function _inject(definition, resource, attrs, options) {
               DSUtils.forEach(toInject, toInjectItem => {
                 if (toInjectItem !== _this.s[relationName].index[toInjectItem[relationDef.idAttribute]]) {
                   try {
-                    let injectedItem = _this.inject(relationName, toInjectItem, options.orig());
+                    let injectedItem = relationDef.inject(toInjectItem, options.orig());
                     if (def.foreignKey) {
                       injectedItem[def.foreignKey] = attrs[definition.idAttribute];
                     }
@@ -167,7 +167,7 @@ function _inject(definition, resource, attrs, options) {
               // handle injecting belongsTo and hasOne relations
               if (toInject !== _this.s[relationName].index[toInject[relationDef.idAttribute]]) {
                 try {
-                  let injected = _this.inject(relationName, attrs[def.localField], options.orig());
+                  let injected = relationDef.inject(attrs[def.localField], options.orig());
                   if (def.foreignKey) {
                     injected[def.foreignKey] = attrs[definition.idAttribute];
                   }
@@ -182,7 +182,7 @@ function _inject(definition, resource, attrs, options) {
         // primary key of item being injected
         let id = attrs[idA];
         // item being injected
-        let item = _this.get(definition.name, id);
+        let item = definition.get(id);
         // 0 if the item is new, otherwise the previous last modified timestamp of the item
         let initialLastModified = item ? resource.modified[id] : 0;
 
