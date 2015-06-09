@@ -42,10 +42,10 @@ describe('DS#changeHistory', function () {
           } catch (err) {
             done(err);
           }
-        }, 30);
+        }, 100);
       } catch (err) {
         done(err);
       }
-    }, 30);
+    }, 100);
   });
 });

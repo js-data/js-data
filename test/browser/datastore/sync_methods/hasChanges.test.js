@@ -18,7 +18,7 @@ describe('DS#hasChanges', function () {
       ]));
       _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([profile15]));
       _this.requests[2].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(organization14));
-    }, 30);
+    }, 100);
 
     return User.loadRelations(10, ['comment', 'profile', 'organization'], { params: { approvedBy: 10 }, findStrictCache: true }).then(function () {
       assert.isFalse(User.hasChanges(10));
@@ -33,7 +33,7 @@ describe('DS#hasChanges', function () {
         assert.equal(_this.requests[4].method, 'GET');
         _this.requests[3].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(user20));
         _this.requests[4].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(user19));
-      }, 30);
+      }, 100);
 
       return Comment.loadRelations(19, ['user'], { findStrictCache: true });
     }).then(function () {

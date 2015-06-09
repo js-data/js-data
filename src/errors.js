@@ -1,3 +1,6 @@
+/**
+ * Thrown during a method call when an argument passed into the method is invalid.
+ */
 class IllegalArgumentError extends Error {
   constructor(message) {
     super();
@@ -9,6 +12,9 @@ class IllegalArgumentError extends Error {
   }
 }
 
+/**
+ * Thrown when an invariant is violated or unrecoverable error is encountered during execution.
+ */
 class RuntimeError extends Error {
   constructor(message) {
     super();
@@ -20,6 +26,9 @@ class RuntimeError extends Error {
   }
 }
 
+/**
+ * Thrown when attempting to access or work with a non-existent resource.
+ */
 class NonexistentResourceError extends Error {
   constructor(resourceName) {
     super();

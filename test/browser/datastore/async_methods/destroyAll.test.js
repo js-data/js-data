@@ -12,7 +12,7 @@ describe('DS#destroyAll', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts?where=%7B%22age%22:33%7D');
       assert.equal(_this.requests[0].method, 'DELETE');
       _this.requests[0].respond(200);
-    }, 30);
+    }, 100);
 
     return Post.destroyAll({ where: { age: 33 } }).then(function () {
       assert.isDefined(Post.get(5));
@@ -32,7 +32,7 @@ describe('DS#destroyAll', function () {
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/posts');
         assert.equal(_this.requests[1].method, 'DELETE');
         _this.requests[1].respond(200);
-      }, 30);
+      }, 100);
 
       return Post.destroyAll();
     }).then(function () {
@@ -47,7 +47,7 @@ describe('DS#destroyAll', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/user/4/comment?content=test');
       assert.equal(_this.requests[0].method, 'DELETE');
       _this.requests[0].respond(204);
-    }, 30);
+    }, 100);
 
     return Comment.destroyAll({
       content: 'test'
@@ -61,7 +61,7 @@ describe('DS#destroyAll', function () {
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/comment?content=test');
         assert.equal(_this.requests[1].method, 'DELETE');
         _this.requests[1].respond(204);
-      }, 30);
+      }, 100);
 
       return Comment.destroyAll({
         content: 'test'
@@ -72,7 +72,7 @@ describe('DS#destroyAll', function () {
         assert.equal(_this.requests[2].url, 'http://test.js-data.io/comment?content=test');
         assert.equal(_this.requests[2].method, 'DELETE');
         _this.requests[2].respond(204);
-      }, 30);
+      }, 100);
 
       return Comment.destroyAll({
         content: 'test'

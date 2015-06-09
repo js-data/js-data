@@ -18,7 +18,7 @@ describe('DS#updateAll', function () {
         { author: 'Adam', age: 27, id: 8 },
         { author: 'Adam', age: 27, id: 9 }
       ]));
-    }, 30);
+    }, 100);
 
     return Post.updateAll({ age: 27 }, { where: { age: { '==': 33 } } }).then(function (ps) {
       assert.deepEqual(JSON.stringify(ps), JSON.stringify(posts), '2 posts should have been updated');
@@ -40,7 +40,7 @@ describe('DS#updateAll', function () {
         _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([
           { author: 'Jane', age: 5, id: 6 }
         ]));
-      }, 30);
+      }, 100);
 
       return Post.updateAll({ age: 5 }, { where: { age: { '==': 31 } } });
     }).then(function (ps) {
@@ -73,7 +73,7 @@ describe('DS#updateAll', function () {
       assert.equal(_this.requests[0].method, 'PUT');
       assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ content: 'stuff' }));
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([testComment, testComment2]));
-    }, 30);
+    }, 100);
 
     return Comment.updateAll({
       content: 'stuff'
@@ -98,7 +98,7 @@ describe('DS#updateAll', function () {
         assert.equal(_this.requests[1].method, 'PUT');
         assert.equal(_this.requests[1].requestBody, DSUtils.toJson({ content: 'stuff' }));
         _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([testComment, testComment2]));
-      }, 30);
+      }, 100);
 
       return Comment.updateAll({
         content: 'stuff'
@@ -121,7 +121,7 @@ describe('DS#updateAll', function () {
         assert.equal(_this.requests[2].method, 'PUT');
         assert.equal(_this.requests[2].requestBody, DSUtils.toJson({ content: 'stuff' }));
         _this.requests[2].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([testComment, testComment2]));
-      }, 30);
+      }, 100);
 
       return Comment.updateAll({
         content: 'stuff'

@@ -23,7 +23,7 @@ describe('DS#refresh', function () {
           id: 5,
           age: 31
         }));
-      }, 30);
+      }, 100);
 
       // Should refresh the item that's in the store
       Post.refresh(5);

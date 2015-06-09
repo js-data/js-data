@@ -28,7 +28,7 @@ export default function updateAll(resourceName, attrs, params, options) {
       }
       let origOptions = options.orig();
       if (options.cacheResponse) {
-        let injected = _this.inject(definition.n, data, origOptions);
+        let injected = _this.inject(definition.name, data, origOptions);
         let resource = _this.s[resourceName];
         DSUtils.forEach(injected, i => {
           let id = i[definition.idAttribute];

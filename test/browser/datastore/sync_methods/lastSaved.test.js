@@ -25,6 +25,6 @@ describe('DS#lastSaved', function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
       _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson(p1));
-    }, 30);
+    }, 100);
   });
 });

@@ -39,7 +39,7 @@ describe('DS#defineResource', function () {
       } catch (err) {
         console.log(err.stack);
       }
-    }, 30);
+    }, 100);
 
     return store.create('Comment', { name: 'John' }).then(function (comment) {
       assert.deepEqual(JSON.stringify(comment), JSON.stringify({ name: 'John', id: 2 }));
@@ -261,7 +261,7 @@ describe('DS#defineResource', function () {
           } catch (err) {
             done(err);
           }
-        }, 30);
+        }, 100);
       });
 
       setTimeout(function () {
@@ -273,7 +273,7 @@ describe('DS#defineResource', function () {
         } catch (err) {
           done(err);
         }
-      }, 30);
+      }, 100);
     }).catch(done);
 
     setTimeout(function () {
@@ -286,7 +286,7 @@ describe('DS#defineResource', function () {
       } catch (err) {
         done(err);
       }
-    }, 30);
+    }, 100);
   });
   it('should allow definition of GET actions', function (done) {
     var _this = this;
@@ -337,7 +337,7 @@ describe('DS#defineResource', function () {
             assert.equal(_this.requests[3].method, 'GET');
             _this.requests[3].respond(200, { 'Content-Type': 'text/plain' }, 'bleh');
 
-          }, 30);
+          }, 100);
         });
 
         setTimeout(function () {
@@ -346,7 +346,7 @@ describe('DS#defineResource', function () {
           assert.equal(_this.requests[2].method, 'GET');
           _this.requests[2].respond(200, { 'Content-Type': 'text/plain' }, 'blah');
 
-        }, 30);
+        }, 100);
       }).catch(done);
 
       setTimeout(function () {
@@ -355,7 +355,7 @@ describe('DS#defineResource', function () {
         assert.equal(_this.requests[1].method, 'GET');
         _this.requests[1].respond(200, { 'Content-Type': 'text/plain' }, 'stuff2');
 
-      }, 30);
+      }, 100);
     }).catch(done);
 
     setTimeout(function () {
@@ -363,6 +363,6 @@ describe('DS#defineResource', function () {
       assert.equal(_this.requests[0].url, 'foo/test');
       assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, { 'Content-Type': 'text/plain' }, 'stuff');
-    }, 30);
+    }, 100);
   });
 });

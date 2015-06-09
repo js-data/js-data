@@ -8,7 +8,7 @@ describe('DS#create', function () {
       assert.equal(_this.requests[0].method, 'POST');
       assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ author: 'John', age: 30 }));
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(p1));
-    }, 30);
+    }, 100);
 
     return Post.create({ author: 'John', age: 30 }).then(function (post) {
       assert.deepEqual(JSON.stringify(post), JSON.stringify(p1), 'post 5 should have been created');
@@ -30,7 +30,7 @@ describe('DS#create', function () {
       assert.equal(_this.requests[0].method, 'POST');
       assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ author: 'John', age: 30 }));
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(p1));
-    }, 30);
+    }, 100);
 
     return Post.create({ author: 'John', age: 30 }, { cacheResponse: false }).then(function (post) {
       assert.deepEqual(JSON.stringify(post), JSON.stringify(p1), 'post 5 should have been created');
@@ -52,7 +52,7 @@ describe('DS#create', function () {
       assert.equal(_this.requests[0].method, 'PUT');
       assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ author: 'John', age: 30, id: 5 }));
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(p1));
-    }, 30);
+    }, 100);
 
     return Post.create({ author: 'John', age: 30, id: 5 }).then(function (post) {
       assert.deepEqual(JSON.stringify(post), JSON.stringify(p1), 'post 5 should have been created');
@@ -63,7 +63,7 @@ describe('DS#create', function () {
         assert.equal(_this.requests[1].method, 'POST');
         assert.equal(_this.requests[1].requestBody, DSUtils.toJson({ author: 'Sue', age: 70, id: 6 }));
         _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(p2));
-      }, 30);
+      }, 100);
 
       return Post.create({ author: 'Sue', age: 70, id: 6 }, { upsert: false });
     }).then(function (post) {
@@ -103,7 +103,7 @@ describe('DS#create', function () {
         }
       }));
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(payload));
-    }, 30);
+    }, 100);
 
     return User.create({
       name: 'Sally',
@@ -146,7 +146,7 @@ describe('DS#create', function () {
       assert.equal(_this.requests[0].method, 'POST');
       assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ content: 'test', approvedBy: 4 }));
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment));
-    }, 30);
+    }, 100);
 
     return Comment.create({
       content: 'test',
@@ -161,7 +161,7 @@ describe('DS#create', function () {
         assert.equal(_this.requests[1].method, 'POST');
         assert.equal(_this.requests[1].requestBody, DSUtils.toJson({ content: 'test' }));
         _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment2));
-      }, 30);
+      }, 100);
 
       return Comment.create({
         content: 'test'
@@ -180,7 +180,7 @@ describe('DS#create', function () {
         assert.equal(_this.requests[2].method, 'POST');
         assert.equal(_this.requests[2].requestBody, DSUtils.toJson({ content: 'test', approvedBy: 4 }));
         _this.requests[2].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(testComment2));
-      }, 30);
+      }, 100);
 
       return Comment.create({
         content: 'test',
@@ -213,7 +213,7 @@ describe('DS#create', function () {
         organizationId: 77,
         id: 88
       }));
-    }, 30);
+    }, 100);
 
     return User.create({
       organizationId: 77,

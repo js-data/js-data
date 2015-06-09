@@ -2,6 +2,13 @@ import DS from './datastore/index';
 import DSUtils from './utils';
 import DSErrors from './errors';
 
+/**
+ * The library export.
+ *   - window.JSData
+ *   - require('js-data')
+ *   - define(['js-data', function (JSData) { ... }]);
+ *   - import JSData from 'js-data'
+ */
 module.exports = {
   DS,
   DSUtils,

@@ -41,7 +41,7 @@ export default function create(resourceName, attrs, options) {
         definition.emit('DS.afterCreate', definition, attrs);
       }
       if (options.cacheResponse) {
-        let created = _this.inject(definition.n, attrs, options.orig());
+        let created = _this.inject(definition.name, attrs, options.orig());
         let id = created[definition.idAttribute];
         let resource = _this.s[resourceName];
         resource.completedQueries[id] = new Date().getTime();
