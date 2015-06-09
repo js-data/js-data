@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 2.0.0-beta.6 - Homepage <http://www.js-data.io/>
+ * @version 2.0.0-beta.7 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -69,6 +69,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _errors = __webpack_require__(3);
 
+	/**
+	 * The library export.
+	 *   - window.JSData
+	 *   - require('js-data')
+	 *   - define(['js-data', function (JSData) { ... }]);
+	 *   - import JSData from 'js-data'
+	 */
 	module.exports = {
 	  DS: _datastoreIndex['default'],
 	  DSUtils: _utils['default'],
@@ -77,12 +84,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new _datastoreIndex['default'](options);
 	  },
 	  version: {
-	    full: '2.0.0-beta.6',
+	    full: '2.0.0-beta.7',
 	    major: parseInt('2', 10),
 	    minor: parseInt('0', 10),
 	    patch: parseInt('0', 10),
 	    alpha: true ? 'false' : false,
-	    beta: true ? '6' : false
+	    beta: true ? '7' : false
 	  }
 	};
 
@@ -542,6 +549,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/* jshint eqeqeq:false */
 
+	/**
+	 * Mix of ES6 and CommonJS module imports because the interop of Babel + Webpack + ES6 modules + CommonJS isn't very good.
+	 */
+
 	var _errors = __webpack_require__(3);
 
 	var BinaryHeap = __webpack_require__(7);
@@ -563,6 +574,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	var toString = objectProto.toString;
 	var P = undefined;
 
+	/**
+	 * Attempt to detect the global Promise constructor.
+	 * JSData will still work without one, as long you do something like this:
+	 *
+	 * var JSData = require('js-data');
+	 * JSData.DSUtils.Promise = MyPromiseLib;
+	 */
 	try {
 	  P = Promise;
 	} catch (err) {
@@ -647,6 +665,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	};
 
+	// Find the intersection between two arrays
 	var intersection = function intersection(array1, array2) {
 	  if (!array1 || !array2) {
 	    return [];
@@ -675,6 +694,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return results;
 	};
 
+	/**
+	 * Attempt to detect whether we are in the browser.
+	 */
 	try {
 	  w = window;
 	  w = {};
@@ -682,6 +704,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  w = null;
 	}
 
+	/**
+	 * Event mixin. Usage:
+	 *
+	 * function handler() { ... }
+	 * Events(myObject);
+	 * myObject.on('foo', handler);
+	 * myObject.emit('foo', 'some', 'data');
+	 * myObject.off('foo', handler);
+	 */
 	function Events(target) {
 	  var events = {};
 	  target = target || this;
@@ -721,8 +752,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	}
 
+	/**
+	 * Lifecycle hooks that should support promises.
+	 */
 	var toPromisify = ['beforeValidate', 'validate', 'afterValidate', 'beforeCreate', 'afterCreate', 'beforeUpdate', 'afterUpdate', 'beforeDestroy', 'afterDestroy'];
 
+	/**
+	 * Return whether "prop" is in the blacklist.
+	 */
 	var isBlacklisted = function isBlacklisted(prop, bl) {
 	  var i = undefined;
 	  if (!bl || !bl.length) {
@@ -884,6 +921,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	};
 
+	/**
+	 * Given either an instance or the primary key of an instance, return the primary key.
+	 */
 	var resolveId = function resolveId(definition, idOrInstance) {
 	  if (isString(idOrInstance) || isNumber(idOrInstance)) {
 	    return idOrInstance;
@@ -894,6 +934,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	};
 
+	/**
+	 * Given either an instance or the primary key of an instance, return the instance.
+	 */
 	var resolveItem = function resolveItem(resource, idOrInstance) {
 	  if (resource && (isString(idOrInstance) || isNumber(idOrInstance))) {
 	    return resource.index[idOrInstance] || idOrInstance;
@@ -922,7 +965,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports['default'] = {
 	  Promise: P,
-	  // Options that inherit from defaults
+	  /**
+	   * Method to wrap an "options" object so that it will inherit from
+	   * some parent object, such as a resource definition.
+	   */
 	  _: function _(parent, options) {
 	    var _this = this;
 	    options = options || {};
@@ -936,13 +982,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        options[name] = _this.promisify(options[name]);
 	      }
 	    });
+	    // Dynamic constructor function
 	    var O = function Options(attrs) {
 	      var self = this;
 	      forOwn(attrs, function (value, key) {
 	        self[key] = value;
 	      });
 	    };
+	    // Inherit from some parent object
 	    O.prototype = parent;
+	    // Give us a way to get the original options back.
 	    O.prototype.orig = function () {
 	      var orig = {};
 	      forOwn(this, function (value, key) {
@@ -1005,6 +1054,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  observe: observe,
 	  pascalCase: pascalCase,
 	  pick: pick,
+	  // Turn the given node-style callback function into one that can return a promise.
 	  promisify: function promisify(fn, target) {
 	    var _this = this;
 	    if (!fn) {
@@ -1052,6 +1102,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  },
 	  upperCase: upperCase,
+	  /**
+	   * Return a copy of "object" with cycles removed.
+	   */
 	  removeCircular: function removeCircular(object) {
 	    return (function rmCirc(value, context) {
 	      var i = undefined;
@@ -1088,6 +1141,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  resolveItem: resolveItem,
 	  resolveId: resolveId,
 	  w: w,
+	  /**
+	   * This is where the magic of relations happens.
+	   */
 	  applyRelationGettersToTarget: function applyRelationGettersToTarget(store, definition, target) {
 	    this.forEach(definition.relationList, function (def) {
 	      var relationName = def.relation;
@@ -1109,12 +1165,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	              var params = {};
 	              if (def.foreignKey) {
 	                params[def.foreignKey] = this[definition.idAttribute];
-	                return store.defaults.constructor.prototype.defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
+	                return definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
 	              } else if (def.localKeys) {
 	                params.where = _defineProperty({}, definition.getResource(relationName).idAttribute, {
 	                  'in': this[def.localKeys]
 	                });
-	                return store.defaults.constructor.prototype.defaultFilter.call(store, store.s[relationName].collection, relationName, params);
+	                return definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params);
 	              }
 	              return undefined;
 	            },
@@ -1135,7 +1191,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	              get: function get() {
 	                var params = {};
 	                params[def.foreignKey] = this[definition.idAttribute];
-	                var items = params[def.foreignKey] ? store.defaults.constructor.prototype.defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true }) : [];
+	                var items = params[def.foreignKey] ? definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true }) : [];
 	                if (items.length) {
 	                  return items[0];
 	                }
@@ -1160,6 +1216,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
 
+	/**
+	 * Thrown during a method call when an argument passed into the method is invalid.
+	 */
+
 	var IllegalArgumentError = (function (_Error) {
 	  function IllegalArgumentError(message) {
 	    _classCallCheck(this, IllegalArgumentError);
@@ -1177,6 +1237,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return IllegalArgumentError;
 	})(Error);
 
+	/**
+	 * Thrown when an invariant is violated or unrecoverable error is encountered during execution.
+	 */
+
 	var RuntimeError = (function (_Error2) {
 	  function RuntimeError(message) {
 	    _classCallCheck(this, RuntimeError);
@@ -1193,6 +1257,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return RuntimeError;
 	})(Error);
+
+	/**
+	 * Thrown when attempting to access or work with a non-existent resource.
+	 */
 
 	var NonexistentResourceError = (function (_Error3) {
 	  function NonexistentResourceError(resourceName) {
@@ -1228,15 +1296,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _errors = __webpack_require__(3);
 
-	var _defineResource = __webpack_require__(25);
+	var _defineResource = __webpack_require__(24);
 
-	var _eject = __webpack_require__(26);
+	var _eject = __webpack_require__(25);
 
-	var _ejectAll = __webpack_require__(27);
+	var _ejectAll = __webpack_require__(26);
 
-	var _filter = __webpack_require__(28);
+	var _filter = __webpack_require__(27);
 
-	var _inject = __webpack_require__(29);
+	var _inject = __webpack_require__(28);
 
 	var NER = _errors['default'].NER;
 	var IA = _errors['default'].IA;
@@ -1247,6 +1315,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	exports['default'] = {
+	  /**
+	   * Return the changes for the given item, if any.
+	   *
+	   * @param resourceName The name of the type of resource of the item whose changes are to be returned.
+	   * @param id The primary key of the item whose changes are to be returned.
+	   * @param options Optional configuration.
+	   * @param options.ignoredChanges Array of strings or regular expressions of fields, the changes of which are to be ignored.
+	   * @returns The changes of the given item, if any.
+	   */
 	  changes: function changes(resourceName, id, options) {
 	    var _this = this;
 	    var definition = _this.defs[resourceName];
@@ -1261,19 +1338,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	    options = _utils['default']._(definition, options);
 
 
-	    var item = _this.get(resourceName, id);
+	    var item = definition.get(id);
 	    if (item) {
 	      var _ret = (function () {
 	        if (_utils['default'].w) {
+	          // force observation handler to be fired for item if there are changes and `Object.observe` is not available
 	          _this.s[resourceName].observers[id].deliver();
 	        }
+
 	        var ignoredChanges = options.ignoredChanges || [];
+	        // add linked relations to list of ignored changes
 	        _utils['default'].forEach(definition.relationFields, function (field) {
 	          if (!_utils['default'].contains(ignoredChanges, field)) {
 	            ignoredChanges.push(field);
 	          }
 	        });
+	        // calculate changes
 	        var diff = _utils['default'].diffObjectFromOldObject(item, _this.s[resourceName].previousAttributes[id], _utils['default'].equals, ignoredChanges);
+	        // remove functions from diff
 	        _utils['default'].forOwn(diff, function (changeset, name) {
 	          var toKeep = [];
 	          _utils['default'].forOwn(changeset, function (value, field) {
@@ -1283,6 +1365,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          });
 	          diff[name] = _utils['default'].pick(diff[name], toKeep);
 	        });
+	        // definitely ignore changes to linked relations
 	        _utils['default'].forEach(definition.relationFields, function (field) {
 	          delete diff.added[field];
 	          delete diff.removed[field];
@@ -1296,6 +1379,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (typeof _ret === 'object') return _ret.v;
 	    }
 	  },
+	  /**
+	   * Return the change history of the given item, if any.
+	   *
+	   * @param resourceName The name of the type of resource of the item whose change history is to be returned.
+	   * @param id The primary key of the item whose change history is to be returned.
+	   * @returns The change history of the given item, if any.
+	   */
 	  changeHistory: function changeHistory(resourceName, id) {
 	    var _this = this;
 	    var definition = _this.defs[resourceName];
@@ -1313,7 +1403,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      definition.errorFn('changeHistory is disabled for this resource!');
 	    } else {
 	      if (resourceName) {
-	        var item = _this.get(resourceName, id);
+	        var item = definition.get(id);
 	        if (item) {
 	          return resource.changeHistories[id];
 	        }
@@ -1322,6 +1412,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	  },
+	  /**
+	   * Re-compute the computed properties of the given item.
+	   *
+	   * @param resourceName The name of the type of resource of the item whose computed properties are to be re-computed.
+	   * @param instance The instance whose computed properties are to be re-computed.
+	   * @returns The item whose computed properties were re-computed.
+	   */
 	  compute: function compute(resourceName, instance) {
 	    var _this = this;
 	    var definition = _this.defs[resourceName];
@@ -1335,11 +1432,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	      throw new IA('"instance" must be an object, string or number!');
 	    }
 
+	    // re-compute all computed properties
 	    _utils['default'].forOwn(definition.computed, function (fn, field) {
 	      _utils['default'].compute.call(instance, fn, field);
 	    });
 	    return instance;
 	  },
+	  /**
+	   * Factory function to create an instance of the specified Resource.
+	   *
+	   * @param resourceName The name of the type of resource of which to create an instance.
+	   * @param attrs Hash of properties with which to initialize the instance.
+	   * @param options Optional configuration.
+	   * @param options.defaults Default values with which to initialize the instance.
+	   * @returns The new instance.
+	   */
 	  createInstance: function createInstance(resourceName, attrs, options) {
 	    var definition = this.defs[resourceName];
 	    var item = undefined;
@@ -1354,25 +1461,39 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    options = _utils['default']._(definition, options);
 
+	    // lifecycle
+	    options.beforeCreateInstance(options, attrs);
 
-	    if (options.notify) {
-	      options.beforeCreateInstance(options, attrs);
-	    }
-
+	    // grab instance constructor function from Resource definition
 	    var Constructor = definition[definition['class']];
+
+	    // create instance
 	    item = new Constructor();
+
+	    // add default values
 	    if (options.defaultValues) {
 	      _utils['default'].deepMixIn(item, options.defaultValues);
 	    }
 	    _utils['default'].deepMixIn(item, attrs);
+
+	    // compute computed properties
 	    if (definition.computed) {
-	      this.compute(definition.name, item);
+	      definition.compute(item);
 	    }
-	    if (options.notify) {
-	      options.afterCreateInstance(options, item);
-	    }
+	    // lifecycle
+	    options.afterCreateInstance(options, item);
 	    return item;
 	  },
+	  /**
+	   * Create a new collection of the specified Resource.
+	   *
+	   * @param resourceName The name of the type of resource of which to create a collection
+	   * @param arr Possibly empty array of data from which to create the collection.
+	   * @param params The criteria by which to filter items. Will be passed to `DS#findAll` if `fetch` is called. See http://www.js-data.io/docs/query-syntax
+	   * @param options Optional configuration.
+	   * @param options.notify Whether to call the beforeCreateCollection and afterCreateCollection lifecycle hooks..
+	   * @returns The new collection.
+	   */
 	  createCollection: function createCollection(resourceName, arr, params, options) {
 	    var _this = this;
 	    var definition = _this.defs[resourceName];
@@ -1389,16 +1510,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    options = _utils['default']._(definition, options);
 
 
-	    if (options.notify) {
-	      options.beforeCreateCollection(options, arr);
-	    }
+	    // lifecycle
+	    options.beforeCreateCollection(options, arr);
 
+	    // define the API for this collection
 	    Object.defineProperties(arr, {
+	      /**
+	       * Call DS#findAll with the params of this collection, filling the collection with the results.
+	       */
 	      fetch: {
 	        value: function value(params, options) {
 	          var __this = this;
 	          __this.params = params || __this.params;
-	          return _this.findAll(resourceName, __this.params, options).then(function (data) {
+	          return definition.findAll(__this.params, options).then(function (data) {
 	            if (data === __this) {
 	              return __this;
 	            }
@@ -1415,18 +1539,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	          });
 	        }
 	      },
+	      // params for this collection. See http://www.js-data.io/docs/query-syntax
 	      params: {
 	        value: params,
 	        writable: true
 	      },
+	      // name of the resource type of this collection
 	      resourceName: {
 	        value: resourceName
 	      }
 	    });
 
-	    if (options.notify) {
-	      options.afterCreateCollection(options, arr);
-	    }
+	    // lifecycle
+	    options.afterCreateCollection(options, arr);
 	    return arr;
 	  },
 	  defineResource: _defineResource['default'],
@@ -1436,6 +1561,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  eject: _eject['default'],
 	  ejectAll: _ejectAll['default'],
 	  filter: _filter['default'],
+	  /**
+	   * Return the item with the given primary key if its in the store.
+	   *
+	   * @param resourceName The name of the type of resource of the item to retrieve.
+	   * @param id The primary key of the item to retrieve.
+	   * @param options Optional configuration.
+	   * @returns The item with the given primary key if it's in the store.
+	   */
 	  get: function get(resourceName, id, options) {
 	    var _this = this;
 	    var definition = _this.defs[resourceName];
@@ -1449,12 +1582,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    options = _utils['default']._(definition, options);
 
 
-	    // cache miss, request resource from server
-	    var item = _this.s[resourceName].index[id];
-
-	    // return resource from cache
-	    return item;
+	    // return the item if it exists
+	    return _this.s[resourceName].index[id];
 	  },
+	  /**
+	   * Return the items in the store that have the given primary keys.
+	   *
+	   * @param resourceName The name of the type of resource of the items to retrieve.
+	   * @param ids The primary keys of the items to retrieve.
+	   * @returns The items with the given primary keys if they're in the store.
+	   */
 	  getAll: function getAll(resourceName, ids) {
 	    var _this = this;
 	    var definition = _this.defs[resourceName];
@@ -1469,6 +1606,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	    if (_utils['default']._a(ids)) {
+	      // return just the items with the given primary keys
 	      var _length = ids.length;
 	      for (var i = 0; i < _length; i++) {
 	        if (resource.index[ids[i]]) {
@@ -1476,11 +1614,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      }
 	    } else {
+	      // most efficient of retrieving ALL items from the store
 	      collection = resource.collection.slice();
 	    }
 
 	    return collection;
 	  },
+	  /**
+	   * Return the whether the item with the given primary key has any changes.
+	   *
+	   * @param resourceName The name of the type of resource of the item.
+	   * @param id The primary key of the item.
+	   * @returns Whether the item with the given primary key has any changes.
+	   */
 	  hasChanges: function hasChanges(resourceName, id) {
 	    var _this = this;
 	    var definition = _this.defs[resourceName];
@@ -1494,14 +1640,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 
-	    // return resource from cache
-	    if (_this.get(resourceName, id)) {
-	      return diffIsEmpty(_this.changes(resourceName, id));
-	    } else {
-	      return false;
-	    }
+	    return definition.get(id) ? diffIsEmpty(definition.changes(id)) : false;
 	  },
 	  inject: _inject['default'],
+	  /**
+	   * Return the timestamp from the last time the item with the given primary key was changed.
+	   *
+	   * @param resourceName The name of the type of resource of the item.
+	   * @param id The primary key of the item.
+	   * @returns Timestamp from the last time the item was changed.
+	   */
 	  lastModified: function lastModified(resourceName, id) {
 	    var definition = this.defs[resourceName];
 	    var resource = this.s[resourceName];
@@ -1520,6 +1668,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    return resource.collectionModified;
 	  },
+	  /**
+	   * Return the timestamp from the last time the item with the given primary key was saved via an adapter.
+	   *
+	   * @param resourceName The name of the type of resource of the item.
+	   * @param id The primary key of the item.
+	   * @returns Timestamp from the last time the item was saved.
+	   */
 	  lastSaved: function lastSaved(resourceName, id) {
 	    var definition = this.defs[resourceName];
 	    var resource = this.s[resourceName];
@@ -1535,6 +1690,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    return resource.saved[id];
 	  },
+	  /**
+	   * Return the previous attributes of the item with the given primary key before it was changed.
+	   *
+	   * @param resourceName The name of the type of resource of the item.
+	   * @param id The primary key of the item.
+	   * @returns The previous attributes of the item
+	   */
 	  previous: function previous(resourceName, id) {
 	    var _this = this;
 	    var definition = _this.defs[resourceName];
@@ -1557,25 +1719,25 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _create = __webpack_require__(31);
+	var _create = __webpack_require__(33);
 
-	var _destroy = __webpack_require__(32);
+	var _destroy = __webpack_require__(34);
 
-	var _destroyAll = __webpack_require__(33);
+	var _destroyAll = __webpack_require__(35);
 
-	var _find = __webpack_require__(34);
+	var _find = __webpack_require__(36);
 
-	var _findAll = __webpack_require__(35);
+	var _findAll = __webpack_require__(37);
 
-	var _loadRelations = __webpack_require__(36);
+	var _loadRelations = __webpack_require__(38);
 
-	var _reap = __webpack_require__(37);
+	var _reap = __webpack_require__(39);
 
-	var _save = __webpack_require__(38);
+	var _save = __webpack_require__(40);
 
-	var _update = __webpack_require__(39);
+	var _update = __webpack_require__(41);
 
-	var _updateAll = __webpack_require__(40);
+	var _updateAll = __webpack_require__(42);
 
 	exports['default'] = {
 	  create: _create['default'],
@@ -2650,7 +2812,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isPrimitive = __webpack_require__(24);
+	var isPrimitive = __webpack_require__(29);
 
 	    /**
 	     * get "nested" object property
@@ -2699,8 +2861,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(41);
-	var camelCase = __webpack_require__(42);
+	var toString = __webpack_require__(31);
+	var camelCase = __webpack_require__(32);
 	var upperCase = __webpack_require__(19);
 	    /**
 	     * camelCase + UPPERCASE first char
@@ -2718,7 +2880,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(41);
+	var toString = __webpack_require__(31);
 	    /**
 	     * "Safer" String.toUpperCase()
 	     */
@@ -2887,33 +3049,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
-	
-
-	    /**
-	     * Checks if the object is a primitive
-	     */
-	    function isPrimitive(value) {
-	        // Using switch fallthrough because it's simple to read and is
-	        // generally fast: http://jsperf.com/testing-value-is-primitive/5
-	        switch (typeof value) {
-	            case "string":
-	            case "number":
-	            case "boolean":
-	                return true;
-	        }
-
-	        return value == null;
-	    }
-
-	    module.exports = isPrimitive;
-
-
-
-
-/***/ },
-/* 25 */
-/***/ function(module, exports, __webpack_require__) {
-
 	exports['default'] = defineResource;
 	/*jshint evil:true, loopfunc:true*/
 
@@ -2921,12 +3056,27 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _errors = __webpack_require__(3);
 
-	var instanceMethods = ['compute', 'refresh', 'save', 'update', 'destroy', 'loadRelations', 'changeHistory', 'changes', 'hasChanges', 'lastModified', 'lastSaved', 'previous'];
+	/**
+	 * These are DS methods that will be proxied by instances. e.g.
+	 *
+	 * var store = new JSData.DS();
+	 * var User = store.defineResource('user');
+	 * var user = User.createInstance({ id: 1 });
+	 *
+	 * store.update(resourceName, id, attrs[, options]) // DS method
+	 * User.update(id, attrs[, options]) // DS method proxied on a Resource
+	 * user.DSUpdate(attrs[, options]) // DS method proxied on an Instance
+	 */
+	var instanceMethods = ['compute', 'eject', 'refresh', 'save', 'update', 'destroy', 'loadRelations', 'changeHistory', 'changes', 'hasChanges', 'lastModified', 'lastSaved', 'previous'];
 
 	function defineResource(definition) {
 	  var _this = this;
 	  var definitions = _this.defs;
 
+	  /**
+	   * This allows the name-only definition shorthand.
+	   * store.defineResource('user') is the same as store.defineResource({ name: 'user'})
+	   */
 	  if (_utils['default']._s(definition)) {
 	    definition = {
 	      name: definition.replace(/\s/gi, '')
@@ -2940,6 +3090,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    throw new _errors['default'].R('' + definition.name + ' is already registered!');
 	  }
 
+	  /**
+	   * Dynamic Resource constructor function.
+	   *
+	   * A Resource inherits from the defaults of the data store that created it.
+	   */
 	  function Resource(options) {
 	    this.defaultValues = {};
 	    this.methods = {};
@@ -2961,6 +3116,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _class;
 
 	    var _ret = (function () {
+	      // Resources can inherit from another resource instead of inheriting directly from the data store defaults.
 	      if (definition['extends'] && definitions[definition['extends']]) {
 	        // Inherit from another resource
 	        Resource.prototype = definitions[definition['extends']];
@@ -2971,9 +3127,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      definitions[definition.name] = new Resource(definition);
 
 	      def = definitions[definition.name];
-
-	      // alias name, shaves 0.08 kb off the minified build
-	      def.n = def.name;
 
 
 	      if (!_utils['default']._s(def.idAttribute)) {
@@ -2992,7 +3145,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _utils['default'].forEach(relatedModels[relationName], function (d) {
 	              d.type = type;
 	              d.relation = relationName;
-	              d.name = def.n;
+	              d.name = def.name;
 	              def.relationList.push(d);
 	              if (d.localField) {
 	                def.relationFields.push(d.localField);
@@ -3069,13 +3222,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      };
 
-	      // Remove this in v0.11.0 and make a breaking change notice
-	      // the the `filter` option has been renamed to `defaultFilter`
-	      if (def.filter) {
-	        def.defaultFilter = def.filter;
-	        delete def.filter;
-	      }
-
 	      // Create the wrapper class for the new resource
 	      _class = def['class'] = _utils['default'].pascalCase(def.name);
 
@@ -3097,21 +3243,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	        def[_class] = function () {};
 	      }
 
-	      // Apply developer-defined methods
+	      // Apply developer-defined instance methods
 	      _utils['default'].forOwn(def.methods, function (fn, m) {
 	        def[_class].prototype[m] = fn;
 	      });
 
+	      /**
+	       * var user = User.createInstance({ id: 1 });
+	       * user.set('foo', 'bar');
+	       */
 	      def[_class].prototype.set = function (key, value) {
 	        _utils['default'].set(this, key, value);
-	        _this.compute(def.n, this);
+	        def.compute(this);
 	        return this;
 	      };
 
+	      /**
+	       * var user = User.createInstance({ id: 1 });
+	       * user.get('id'); // 1
+	       */
 	      def[_class].prototype.get = function (key) {
 	        return _utils['default'].get(this, key);
 	      };
 
+	      // Setup the relation links
 	      _utils['default'].applyRelationGettersToTarget(_this, def, def[_class].prototype);
 
 	      // Prepare for computed properties
@@ -3142,6 +3297,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	      });
 
+	      // add instance proxies of DS methods
 	      _utils['default'].forEach(instanceMethods, function (name) {
 	        def[_class].prototype['DS' + _utils['default'].pascalCase(name)] = function () {
 	          for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
@@ -3149,23 +3305,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 
 	          args.unshift(this[def.idAttribute] || this);
-	          args.unshift(def.n);
+	          args.unshift(def.name);
 	          return _this[name].apply(_this, args);
 	        };
 	      });
 
+	      // manually add instance proxy for DS#create
 	      def[_class].prototype.DSCreate = function () {
 	        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
 	          args[_key2] = arguments[_key2];
 	        }
 
 	        args.unshift(this);
-	        args.unshift(def.n);
+	        args.unshift(def.name);
 	        return _this.create.apply(_this, args);
 	      };
 
 	      // Initialize store data for the new resource
-	      _this.s[def.n] = {
+	      _this.s[def.name] = {
 	        collection: [],
 	        expiresHeap: new _utils['default'].BinaryHeap(function (x) {
 	          return x.expires;
@@ -3185,13 +3342,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        collectionModified: 0
 	      };
 
+	      // start the reaping
 	      if (def.reapInterval) {
 	        setInterval(function () {
-	          return _this.reap(def.n, { isInterval: true });
+	          return def.reap();
 	        }, def.reapInterval);
 	      }
 
-	      // Proxy DS methods with shorthand ones
+	      // proxy DS methods with shorthand ones
 	      var fns = ['registerAdapter', 'getAdapter', 'is'];
 	      for (key in _this) {
 	        if (typeof _this[key] === 'function') {
@@ -3199,6 +3357,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      }
 
+	      /**
+	       * Create the Resource shorthands that proxy DS methods. e.g.
+	       *
+	       * var store = new JSData.DS();
+	       * var User = store.defineResource('user');
+	       *
+	       * store.update(resourceName, id, attrs[, options]) // DS method
+	       * User.update(id, attrs[, options]) // DS method proxied on a Resource
+	       */
 	      _utils['default'].forEach(fns, function (key) {
 	        var k = key;
 	        if (_this[k].shorthand !== false) {
@@ -3207,7 +3374,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	              args[_key3] = arguments[_key3];
 	            }
 
-	            args.unshift(def.n);
+	            args.unshift(def.name);
 	            return _this[k].apply(_this, args);
 	          };
 	          def[k].before = function (fn) {
@@ -3245,6 +3412,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (def.hasOwnProperty('defaultAdapter')) {
 	        defaultAdapter = def.defaultAdapter;
 	      }
+
+	      // setup "actions"
 	      _utils['default'].forOwn(def.actions, function (action, name) {
 	        if (def[name] && !def.actions[name]) {
 	          throw new Error('Cannot override existing method "' + name + '"!');
@@ -3263,7 +3432,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            options = id;
 	          }
 	          options = options || {};
-	          var adapter = _this.getAdapter(action.adapter || defaultAdapter || 'http');
+	          var adapter = def.getAdapter(action.adapter || defaultAdapter || 'http');
 	          var config = _utils['default'].deepMixIn({}, action);
 	          if (!options.hasOwnProperty('endpoint') && config.endpoint) {
 	            options.endpoint = config.endpoint;
@@ -3288,7 +3457,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	      });
 
-	      // Mix-in events
+	      // mix in events
 	      _utils['default'].Events(def);
 
 
@@ -3306,10 +3475,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 26 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = eject;
+	/**
+	 * Eject an item from the store, if it is currently in the store.
+	 *
+	 * @param resourceName The name of the resource type of the item eject.
+	 * @param id The primary key of the item to eject.
+	 * @param options Optional configuration.
+	 * @param options.notify Whether to emit the "DS.beforeEject" and "DS.afterEject" events
+	 * @param options.clearEmptyQueries Whether to remove cached findAll queries that become empty as a result of this method call.
+	 * @returns The ejected item if one was ejected.
+	 */
 
 	function eject(resourceName, id, options) {
 	  var _this = this;
@@ -3330,10 +3509,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  options = DSUtils._(definition, options);
 
 
+	  // find the item to eject
 	  for (var i = 0; i < resource.collection.length; i++) {
 	    if (resource.collection[i][definition.idAttribute] == id) {
 	      // jshint ignore:line
 	      item = resource.collection[i];
+	      // remove its expiration timestamp
 	      resource.expiresHeap.remove(item);
 	      found = true;
 	      break;
@@ -3341,41 +3522,51 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  if (found) {
 	    var _ret = (function () {
+	      // lifecycle
 	      definition.beforeEject(options, item);
 	      if (options.notify) {
 	        definition.emit('DS.beforeEject', definition, item);
 	      }
-	      resource.collection.splice(i, 1);
-	      if (DSUtils.w) {
-	        resource.observers[id].close();
-	      }
-	      delete resource.observers[id];
 
-	      delete resource.index[id];
-	      delete resource.previousAttributes[id];
-	      delete resource.completedQueries[id];
-	      delete resource.pendingQueries[id];
-	      DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
-	        DSUtils.remove(resource.changeHistory, changeRecord);
-	      });
+	      // find the item in any ($$injected) cached queries
 	      var toRemove = [];
 	      DSUtils.forOwn(resource.queryData, function (items, queryHash) {
 	        if (items.$$injected) {
 	          DSUtils.remove(items, item);
 	        }
+	        // optionally remove any empty queries
 	        if (!items.length && options.clearEmptyQueries) {
 	          toRemove.push(queryHash);
 	        }
+	      });
+
+	      // clean up
+	      DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
+	        DSUtils.remove(resource.changeHistory, changeRecord);
 	      });
 	      DSUtils.forEach(toRemove, function (queryHash) {
 	        delete resource.completedQueries[queryHash];
 	        delete resource.queryData[queryHash];
 	      });
+	      if (DSUtils.w) {
+	        // stop observation
+	        resource.observers[id].close();
+	      }
+	      delete resource.observers[id];
+	      delete resource.index[id];
+	      delete resource.previousAttributes[id];
+	      delete resource.completedQueries[id];
+	      delete resource.pendingQueries[id];
 	      delete resource.changeHistories[id];
 	      delete resource.modified[id];
 	      delete resource.saved[id];
+
+	      // remove it from the store
+	      resource.collection.splice(i, 1);
+	      // collection has been modified
 	      resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
+	      // lifecycle
 	      definition.afterEject(options, item);
 	      if (options.notify) {
 	        definition.emit('DS.afterEject', definition, item);
@@ -3391,10 +3582,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 27 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = ejectAll;
+	/**
+	 * Eject a collection of items from the store, if any items currently in the store match the given criteria.
+	 *
+	 * @param resourceName The name of the resource type of the items eject.
+	 * @param params The criteria by which to match items to eject. See http://www.js-data.io/docs/query-syntax
+	 * @param options Optional configuration.
+	 * @returns The collection of items that were ejected, if any.
+	 */
 
 	function ejectAll(resourceName, params, options) {
 	  var _this = this;
@@ -3411,30 +3610,48 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var resource = _this.s[resourceName];
 	  var queryHash = DSUtils.toJson(params);
-	  var items = _this.filter(definition.n, params);
+
+	  // get items that match the criteria
+	  var items = definition.filter(params);
 	  var ids = [];
+
 	  if (DSUtils.isEmpty(params)) {
+	    // remove all completed queries if ejecting all items
 	    resource.completedQueries = {};
 	  } else {
+	    // remove matching completed query, if any
 	    delete resource.completedQueries[queryHash];
 	  }
+	  // prepare to remove matching items
 	  DSUtils.forEach(items, function (item) {
 	    if (item && item[definition.idAttribute]) {
 	      ids.push(item[definition.idAttribute]);
 	    }
 	  });
+	  // eject each matching item
 	  DSUtils.forEach(ids, function (id) {
-	    _this.eject(definition.n, id, options);
+	    definition.eject(id, options);
 	  });
+	  // collection has been modified
 	  resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 	  return items;
 	}
 
 /***/ },
-/* 28 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = filter;
+	/**
+	 * Return the subset of items currently in the store that match the given criteria.
+	 *
+	 * The actual filtering is delegated to DS#defaults.defaultFilter, which can be overridden by developers.
+	 *
+	 * @param resourceName The name of the resource type of the items to filter.
+	 * @param params The criteria by which to filter items. See http://www.js-data.io/docs/query-syntax
+	 * @param options Optional configuration.
+	 * @returns Matching items.
+	 */
 
 	function filter(resourceName, params, options) {
 	  var _this = this;
@@ -3450,11 +3667,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Protect against null
 	  params = params || {};
 	  options = DSUtils._(definition, options);
+
+	  // delegate filtering to DS#defaults.defaultFilter, which can be overridden by developers.
 	  return definition.defaultFilter.call(_this, _this.s[resourceName].collection, resourceName, params, options);
 	}
 
 /***/ },
-/* 29 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = inject;
@@ -3463,24 +3682,60 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _errors = __webpack_require__(3);
 
-	function _getReactFunction(DS, definition, resource) {
+	/**
+	 * This is a beast of a file, but it's where a significant portion of the magic happens.
+	 *
+	 * DS#inject makes up the core of how data gets into the store.
+	 */
+
+	/**
+	 * This factory function produces an observer handler function tailor-made for the current item being injected.
+	 *
+	 * The observer handler is what allows computed properties and change tracking to function.
+	 *
+	 * @param definition Resource definition produced by DS#defineResource
+	 * @param resource Resource data as internally stored by the data store
+	 * @returns {Function} Observer handler function
+	 * @private
+	 */
+	function makeObserverHandler(definition, resource) {
+	  var DS = this;
+
 	  // using "var" avoids a JSHint error
-	  var name = definition.n;
+	  var name = definition.name;
+
+	  /**
+	   * This will be called by observe-js when a new change record is available for the observed object
+	   *
+	   * @param added Change record for added properties
+	   * @param removed Change record for removed properties
+	   * @param changed Change record for changed properties
+	   * @param oldValueFn Function that can be used to get the previous value of a changed property
+	   * @param firstTime Whether this is the first time this function is being called for the given item. Will only be true once.
+	   */
 	  return function _react(added, removed, changed, oldValueFn, firstTime) {
 	    var target = this;
 	    var item = undefined;
+
+	    // Get the previous primary key of the observed item, in-case some knucklehead changed it
 	    var innerId = oldValueFn && oldValueFn(definition.idAttribute) ? oldValueFn(definition.idAttribute) : target[definition.idAttribute];
 
+	    // Ignore changes to relation links
 	    _utils['default'].forEach(definition.relationFields, function (field) {
 	      delete added[field];
 	      delete removed[field];
 	      delete changed[field];
 	    });
 
+	    // Detect whether there are actually any changes
 	    if (!_utils['default'].isEmpty(added) || !_utils['default'].isEmpty(removed) || !_utils['default'].isEmpty(changed) || firstTime) {
 	      item = DS.get(name, innerId);
+
+	      // update item and collection "modified" timestamps
 	      resource.modified[innerId] = _utils['default'].updateTimestamp(resource.modified[innerId]);
 	      resource.collectionModified = _utils['default'].updateTimestamp(resource.collectionModified);
+
+	      // Save a change record for the item
 	      if (definition.keepChangeHistory) {
 	        var changeRecord = {
 	          resourceName: name,
@@ -3495,6 +3750,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 
+	    // Recompute computed properties if any computed properties depend on changed properties
 	    if (definition.computed) {
 	      item = item || DS.get(name, innerId);
 	      _utils['default'].forOwn(definition.computed, function (fn, field) {
@@ -3518,20 +3774,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	}
 
+	/**
+	 * A recursive function for injecting data into the store.
+	 *
+	 * @param definition Resource definition produced by DS#defineResource
+	 * @param resource Resource data as internally stored by the data store
+	 * @param attrs The data to be injected. Will be an object or an array of objects.
+	 * @param options Optional configuration.
+	 * @returns The injected data
+	 * @private
+	 */
 	function _inject(definition, resource, attrs, options) {
 	  var _this = this;
-	  var _react = _getReactFunction(_this, definition, resource, attrs, options);
-
 	  var injected = undefined;
+
 	  if (_utils['default']._a(attrs)) {
+	    // have an array of objects, go ahead and inject each one individually and return the resulting array
 	    injected = [];
 	    for (var i = 0; i < attrs.length; i++) {
 	      injected.push(_inject.call(_this, definition, resource, attrs[i], options));
 	    }
 	  } else {
+	    // create the observer handler for the data to be injected
+	    var _react = makeObserverHandler.call(_this, definition, resource);
+
 	    // check if "idAttribute" is a computed property
 	    var c = definition.computed;
 	    var idA = definition.idAttribute;
+	    // compute the primary key if necessary
 	    if (c && c[idA]) {
 	      (function () {
 	        var args = [];
@@ -3541,27 +3811,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	        attrs[idA] = c[idA][c[idA].length - 1].apply(attrs, args);
 	      })();
 	    }
+
 	    if (!(idA in attrs)) {
-	      var error = new _errors['default'].R('' + definition.n + '.inject: "attrs" must contain the property specified by "idAttribute"!');
+	      // we cannot inject any object into the store that does not have a primary key!
+	      var error = new _errors['default'].R('' + definition.name + '.inject: "attrs" must contain the property specified by "idAttribute"!');
 	      options.errorFn(error);
 	      throw error;
 	    } else {
 	      try {
+	        // when injecting object that contain their nested relations, this code
+	        // will recursively inject them into their proper places in the data store.
+	        // Magic!
 	        _utils['default'].forEach(definition.relationList, function (def) {
 	          var relationName = def.relation;
 	          var relationDef = _this.defs[relationName];
 	          var toInject = attrs[def.localField];
 	          if (toInject) {
 	            if (!relationDef) {
-	              throw new _errors['default'].R('' + definition.n + ' relation is defined but the resource is not!');
+	              throw new _errors['default'].R('' + definition.name + ' relation is defined but the resource is not!');
 	            }
+	            // handle injecting hasMany relations
 	            if (_utils['default']._a(toInject)) {
 	              (function () {
 	                var items = [];
 	                _utils['default'].forEach(toInject, function (toInjectItem) {
 	                  if (toInjectItem !== _this.s[relationName].index[toInjectItem[relationDef.idAttribute]]) {
 	                    try {
-	                      var injectedItem = _this.inject(relationName, toInjectItem, options.orig());
+	                      var injectedItem = relationDef.inject(toInjectItem, options.orig());
 	                      if (def.foreignKey) {
 	                        injectedItem[def.foreignKey] = attrs[definition.idAttribute];
 	                      }
@@ -3573,9 +3849,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                });
 	              })();
 	            } else {
+	              // handle injecting belongsTo and hasOne relations
 	              if (toInject !== _this.s[relationName].index[toInject[relationDef.idAttribute]]) {
 	                try {
-	                  var _injected = _this.inject(relationName, attrs[def.localField], options.orig());
+	                  var _injected = relationDef.inject(attrs[def.localField], options.orig());
 	                  if (def.foreignKey) {
 	                    _injected[def.foreignKey] = attrs[definition.idAttribute];
 	                  }
@@ -3587,35 +3864,50 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 	        });
 
+	        // primary key of item being injected
 	        var id = attrs[idA];
-	        var item = _this.get(definition.n, id);
+	        // item being injected
+	        var item = definition.get(id);
+	        // 0 if the item is new, otherwise the previous last modified timestamp of the item
 	        var initialLastModified = item ? resource.modified[id] : 0;
 
+	        // item is new
 	        if (!item) {
 	          if (attrs instanceof definition[definition['class']]) {
 	            item = attrs;
 	          } else {
 	            item = new definition[definition['class']]();
 	          }
+	          // remove relation properties from the item, since those relations have been injected by now
 	          _utils['default'].forEach(definition.relationList, function (def) {
 	            delete attrs[def.localField];
 	          });
+	          // copy remaining properties to the injected item
 	          _utils['default'].deepMixIn(item, attrs);
 
+	          // add item to collection
 	          resource.collection.push(item);
 	          resource.changeHistories[id] = [];
 
+	          // If we're in the browser, start observation
 	          if (_utils['default'].w) {
 	            resource.observers[id] = new _this.observe.ObjectObserver(item);
 	            resource.observers[id].open(_react, item);
 	          }
 
+	          // index item
 	          resource.index[id] = item;
+	          // fire observation handler for the first time
 	          _react.call(item, {}, {}, {}, null, true);
+	          // save "previous" attributes of the injected item, for change diffs later
 	          resource.previousAttributes[id] = _utils['default'].copy(item, null, null, null, definition.relationFields);
 	        } else {
+	          // item is being re-injected
+	          // new properties take precedence
 	          _utils['default'].deepMixIn(item, attrs);
+
 	          if (definition.resetHistoryOnInject) {
+	            // clear change history for item
 	            resource.previousAttributes[id] = _utils['default'].copy(item, null, null, null, definition.relationFields);
 	            if (resource.changeHistories[id].length) {
 	              _utils['default'].forEach(resource.changeHistories[id], function (changeRecord) {
@@ -3625,10 +3917,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	          }
 	          if (_utils['default'].w) {
+	            // force observation callback to be fired if there are any changes to the item and `Object.observe` is not available
 	            resource.observers[id].deliver();
 	          }
 	        }
+	        // update modified timestamp of item
 	        resource.modified[id] = initialLastModified && resource.modified[id] === initialLastModified ? _utils['default'].updateTimestamp(resource.modified[id]) : resource.modified[id];
+
+	        // reset expiry tracking for item
 	        resource.expiresHeap.remove(item);
 	        var timestamp = new Date().getTime();
 	        resource.expiresHeap.push({
@@ -3636,6 +3932,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	          timestamp: timestamp,
 	          expires: definition.maxAge ? timestamp + definition.maxAge : Number.MAX_VALUE
 	        });
+
+	        // final injected item
 	        injected = item;
 	      } catch (err) {
 	        options.errorFn(err, attrs);
@@ -3644,6 +3942,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  return injected;
 	}
+
+	/**
+	 * Inject the given object or array of objects into the data store.
+	 *
+	 * @param resourceName The name of the type of resource of the data to be injected.
+	 * @param attrs Object or array of objects. Objects must contain a primary key.
+	 * @param options Optional configuration.
+	 * @param options.notify Whether to emit the "DS.beforeInject" and "DS.afterInject" events.
+	 * @returns The injected data.
+	 */
 
 	function inject(resourceName, attrs, options) {
 	  var _this = this;
@@ -3659,14 +3967,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  options = _utils['default']._(definition, options);
 
+	  // lifecycle
 	  options.beforeInject(options, attrs);
 	  if (options.notify) {
 	    definition.emit('DS.beforeInject', definition, attrs);
 	  }
 
+	  // start the recursive injection of data
 	  injected = _inject.call(_this, definition, resource, attrs, options);
+
+	  // collection was modified
 	  resource.collectionModified = _utils['default'].updateTimestamp(resource.collectionModified);
 
+	  // lifecycle
 	  options.afterInject(options, injected);
 	  if (options.notify) {
 	    definition.emit('DS.afterInject', definition, injected);
@@ -3674,6 +3987,33 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return injected;
 	}
+
+/***/ },
+/* 29 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Checks if the object is a primitive
+	     */
+	    function isPrimitive(value) {
+	        // Using switch fallthrough because it's simple to read and is
+	        // generally fast: http://jsperf.com/testing-value-is-primitive/5
+	        switch (typeof value) {
+	            case "string":
+	            case "number":
+	            case "boolean":
+	                return true;
+	        }
+
+	        return value == null;
+	    }
+
+	    module.exports = isPrimitive;
+
+
+
 
 /***/ },
 /* 30 */
@@ -3704,7 +4044,70 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
+	
+
+	    /**
+	     * Typecast a value to a String, using an empty string value for null or
+	     * undefined.
+	     */
+	    function toString(val){
+	        return val == null ? '' : val.toString();
+	    }
+
+	    module.exports = toString;
+
+
+
+
+/***/ },
+/* 32 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var toString = __webpack_require__(31);
+	var replaceAccents = __webpack_require__(43);
+	var removeNonWord = __webpack_require__(44);
+	var upperCase = __webpack_require__(19);
+	var lowerCase = __webpack_require__(45);
+	    /**
+	    * Convert string to camelCase text.
+	    */
+	    function camelCase(str){
+	        str = toString(str);
+	        str = replaceAccents(str);
+	        str = removeNonWord(str)
+	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
+	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
+	            .replace(/\s+/g, '') //remove spaces
+	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
+	        return str;
+	    }
+	    module.exports = camelCase;
+
+
+
+/***/ },
+/* 33 */
+/***/ function(module, exports, __webpack_require__) {
+
 	exports['default'] = create;
+	/**
+	 * Using an adapter, create a new item.
+	 *
+	 * Generally a primary key will NOT be provided in the properties hash,
+	 * because the adapter's persistence layer should be generating one.
+	 *
+	 * @param resourceName The name of the type of resource of the new item.
+	 * @param attrs Hash of properties with which to create the new item.
+	 * @param options Optional configuration.
+	 * @param options.cacheResponse Whether the newly created item as returned by the adapter should be injected into the data store.
+	 * @param options.upsert If the properties hash contains a primary key, attempt to call DS#update instead.
+	 * @param options.notify Whether to emit the "DS.beforeCreate" and "DS.afterCreate" events.
+	 * @param options.beforeValidate Lifecycle hook.
+	 * @param options.validate Lifecycle hook.
+	 * @param options.afterValidate Lifecycle hook.
+	 * @param options.beforeCreate Lifecycle hook.
+	 * @param options.afterCreate Lifecycle hook.
+	 */
 
 	function create(resourceName, attrs, options) {
 	  var _this = this;
@@ -3732,7 +4135,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	      resolve(attrs);
 	    }
-	  }).then(function (attrs) {
+	  })
+	  // start lifecycle
+	  .then(function (attrs) {
 	    return options.beforeValidate.call(attrs, options, attrs);
 	  }).then(function (attrs) {
 	    return options.validate.call(attrs, options, attrs);
@@ -3752,23 +4157,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	      definition.emit('DS.afterCreate', definition, attrs);
 	    }
 	    if (options.cacheResponse) {
-	      var created = _this.inject(definition.n, attrs, options.orig());
+	      // injected created intem into the store
+	      var created = _this.inject(definition.name, attrs, options.orig());
 	      var id = created[definition.idAttribute];
+	      // mark item's `find` query as completed, so a subsequent `find` call for this item will resolve immediately
 	      var resource = _this.s[resourceName];
 	      resource.completedQueries[id] = new Date().getTime();
 	      resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
 	      return created;
 	    } else {
+	      // just return an un-injected instance
 	      return _this.createInstance(resourceName, attrs, options);
 	    }
 	  });
 	}
 
 /***/ },
-/* 32 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = destroy;
+	/**
+	 * Using an adapter, destroy an item.
+	 *
+	 * @param resourceName The name of the type of resource of the item to destroy.
+	 * @param id The primary key of the item to destroy.
+	 * @param options Optional configuration.
+	 * @param options.eagerEject Whether to eject the item from the store before the adapter operation completes, re-injecting if the adapter operation fails.
+	 * @param options.notify Whether to emit the "DS.beforeDestroy" and "DS.afterDestroy" events.
+	 * @param options.beforeDestroy Lifecycle hook.
+	 * @param options.afterDestroy Lifecycle hook.
+	 * @returns The primary key of the destroyed item.
+	 */
 
 	function destroy(resourceName, id, options) {
 	  var _this = this;
@@ -3783,41 +4203,59 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else if (!DSUtils._sn(id)) {
 	      reject(DSUtils._snErr('id'));
 	    } else {
-	      item = _this.get(resourceName, id) || { id: id };
+	      // check if the item is in the store
+	      item = definition.get(id) || { id: id };
 	      options = DSUtils._(definition, options);
 	      resolve(item);
 	    }
-	  }).then(function (attrs) {
+	  })
+	  // start lifecycle
+	  .then(function (attrs) {
 	    return options.beforeDestroy.call(attrs, options, attrs);
 	  }).then(function (attrs) {
 	    if (options.notify) {
 	      definition.emit('DS.beforeDestroy', definition, attrs);
 	    }
+	    // don't wait for the adapter, remove the item from the store
 	    if (options.eagerEject) {
-	      _this.eject(resourceName, id);
+	      definition.eject(id);
 	    }
-	    return _this.getAdapter(options).destroy(definition, id, options);
+	    return definition.getAdapter(options).destroy(definition, id, options);
 	  }).then(function () {
 	    return options.afterDestroy.call(item, options, item);
 	  }).then(function (item) {
 	    if (options.notify) {
 	      definition.emit('DS.afterDestroy', definition, item);
 	    }
-	    _this.eject(resourceName, id);
+	    // make sure the item is removed from the store
+	    definition.eject(id);
 	    return id;
 	  })['catch'](function (err) {
+	    // rollback by re-injecting the item into the store
 	    if (options && options.eagerEject && item) {
-	      _this.inject(resourceName, item, { notify: false });
+	      definition.inject(item, { notify: false });
 	    }
 	    return DSUtils.Promise.reject(err);
 	  });
 	}
 
 /***/ },
-/* 33 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = destroyAll;
+	/**
+	 * Using an adapter, destroy an item.
+	 *
+	 * @param resourceName The name of the type of resource of the item to destroy.
+	 * @param params The criteria by which to filter items to destroy. See http://www.js-data.io/docs/query-syntax
+	 * @param options Optional configuration.
+	 * @param options.eagerEject Whether to eject the items from the store before the adapter operation completes, re-injecting if the adapter operation fails.
+	 * @param options.notify Whether to emit the "DS.beforeDestroy" and "DS.afterDestroy" events.
+	 * @param options.beforeDestroy Lifecycle hook.
+	 * @param options.afterDestroy Lifecycle hook.
+	 * @returns The ejected items, if any.
+	 */
 
 	function destroyAll(resourceName, params, options) {
 	  var _this = this;
@@ -3838,37 +4276,57 @@ return /******/ (function(modules) { // webpackBootstrap
 	      resolve();
 	    }
 	  }).then(function () {
-	    toEject = _this.defaults.defaultFilter.call(_this, resourceName, params);
+	    // find items that are to be ejected from the store
+	    toEject = definition.defaultFilter.call(_this, resourceName, params);
 	    return options.beforeDestroy(options, toEject);
 	  }).then(function () {
 	    if (options.notify) {
 	      definition.emit('DS.beforeDestroy', definition, toEject);
 	    }
+	    // don't wait for the adapter, remove the items from the store
 	    if (options.eagerEject) {
-	      ejected = _this.ejectAll(resourceName, params);
+	      ejected = definition.ejectAll(params);
 	    }
-	    return _this.getAdapter(options).destroyAll(definition, params, options);
+	    return definition.getAdapter(options).destroyAll(definition, params, options);
 	  }).then(function () {
 	    return options.afterDestroy(options, toEject);
 	  }).then(function () {
 	    if (options.notify) {
 	      definition.emit('DS.afterDestroy', definition, toEject);
 	    }
-	    return ejected || _this.ejectAll(resourceName, params);
+	    // make sure items are removed from the store
+	    return ejected || definition.ejectAll(params);
 	  })['catch'](function (err) {
+	    // rollback by re-injecting the items into the store
 	    if (options && options.eagerEject && ejected) {
-	      _this.inject(resourceName, ejected, { notify: false });
+	      definition.inject(ejected, { notify: false });
 	    }
 	    return DSUtils.Promise.reject(err);
 	  });
 	}
 
 /***/ },
-/* 34 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = find;
 	/* jshint -W082 */
+
+	/**
+	 * Using an adapter, retrieve a single item.
+	 *
+	 * @param resourceName The of the type of resource of the item to retrieve.
+	 * @param id The primary key of the item to retrieve.
+	 * @param options Optional configuration.
+	 * @param options.bypassCache Whether to ignore any cached item and force the retrieval through the adapter.
+	 * @param options.cacheResponse Whether to inject the found item into the data store.
+	 * @param options.strictCache Whether to only consider items to be "cached" if they were injected into the store as the result of `find` or `findAll`.
+	 * @param options.strategy The retrieval strategy to use.
+	 * @param options.findStrategy The retrieval strategy to use. Overrides "strategy".
+	 * @param options.fallbackAdapters Array of names of adapters to use if using "fallback" strategy.
+	 * @param options.findFallbackAdapters Array of names of adapters to use if using "fallback" strategy. Overrides "fallbackAdapters".
+	 * @returns The item.
+	 */
 
 	function find(resourceName, id, options) {
 	  var _this = this;
@@ -3891,9 +4349,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (options.bypassCache || !options.cacheResponse) {
 	        delete resource.completedQueries[id];
 	      }
-	      if ((!options.findStrictCache || id in resource.completedQueries) && _this.get(resourceName, id) && !options.bypassCache) {
-	        resolve(_this.get(resourceName, id));
+	      if ((!options.findStrictCache || id in resource.completedQueries) && definition.get(id) && !options.bypassCache) {
+	        // resolve immediately with the cached item
+	        resolve(definition.get(id));
 	      } else {
+	        // we're going to delegate to the adapter next
 	        delete resource.completedQueries[id];
 	        resolve();
 	      }
@@ -3903,10 +4363,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (!(id in resource.pendingQueries)) {
 	        var promise = undefined;
 	        var strategy = options.findStrategy || options.strategy;
+
+	        // try subsequent adapters if the preceeding one fails
 	        if (strategy === 'fallback') {
 	          (function () {
 	            var makeFallbackCall = function (index) {
-	              return _this.getAdapter((options.findFallbackAdapters || options.fallbackAdapters)[index]).find(definition, id, options)['catch'](function (err) {
+	              return definition.getAdapter((options.findFallbackAdapters || options.fallbackAdapters)[index]).find(definition, id, options)['catch'](function (err) {
 	                index++;
 	                if (index < options.fallbackAdapters.length) {
 	                  return makeFallbackCall(index);
@@ -3919,24 +4381,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	            promise = makeFallbackCall(0);
 	          })();
 	        } else {
-	          promise = _this.getAdapter(options).find(definition, id, options);
+	          // just make a single attempt
+	          promise = definition.getAdapter(options).find(definition, id, options);
 	        }
 
 	        resource.pendingQueries[id] = promise.then(function (data) {
 	          // Query is no longer pending
 	          delete resource.pendingQueries[id];
 	          if (options.cacheResponse) {
-	            var injected = _this.inject(resourceName, data, options.orig());
+	            // inject the item into the data store
+	            var injected = definition.inject(data, options.orig());
+	            // mark the item as "cached"
 	            resource.completedQueries[id] = new Date().getTime();
 	            resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
 	            return injected;
 	          } else {
-	            return _this.createInstance(resourceName, data, options.orig());
+	            // just return an un-injected instance
+	            return definition.createInstance(data, options.orig());
 	          }
 	        });
 	      }
 	      return resource.pendingQueries[id];
 	    } else {
+	      // resolve immediately with the item
 	      return item;
 	    }
 	  })['catch'](function (err) {
@@ -3948,7 +4415,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 35 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = findAll;
@@ -3956,6 +4423,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function processResults(data, resourceName, queryHash, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
+	  var definition = _this.defs[resourceName];
 	  var resource = _this.s[resourceName];
 	  var idAttribute = _this.defs[resourceName].idAttribute;
 	  var date = new Date().getTime();
@@ -3970,7 +4438,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
 	  // Merge the new values into the cache
-	  var injected = _this.inject(resourceName, data, options.orig());
+	  var injected = definition.inject(data, options.orig());
 
 	  // Make sure each object is added to completedQueries
 	  if (DSUtils._a(injected)) {
@@ -3990,6 +4458,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return injected;
 	}
+
+	/**
+	 * Using an adapter, retrieve a collection of items.
+	 *
+	 * @param resourceName The name of the type of resource of the items to retrieve.
+	 * @param params The criteria by which to filter items to retrieve. See http://www.js-data.io/docs/query-syntax
+	 * @param options Optional configuration.
+	 * @param options.bypassCache Whether to ignore any cached query for these items and force the retrieval through the adapter.
+	 * @param options.cacheResponse Whether to inject the found items into the data store.
+	 * @returns The items.
+	 */
 
 	function findAll(resourceName, params, options) {
 	  var _this = this;
@@ -4013,14 +4492,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        options.params = DSUtils.copy(options.params);
 	      }
 
+	      // force a new request
 	      if (options.bypassCache || !options.cacheResponse) {
 	        delete resource.completedQueries[queryHash];
 	        delete resource.queryData[queryHash];
 	      }
 	      if (queryHash in resource.completedQueries) {
 	        if (options.useFilter) {
-	          resolve(_this.filter(resourceName, params, options.orig()));
+	          // resolve immediately by filtering data from the data store
+	          resolve(definition.filter(params, options.orig()));
 	        } else {
+	          // resolve immediately by returning the cached array from the previously made query
 	          resolve(resource.queryData[queryHash]);
 	        }
 	      } else {
@@ -4032,10 +4514,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (!(queryHash in resource.pendingQueries)) {
 	        var promise = undefined;
 	        var strategy = options.findAllStrategy || options.strategy;
+
+	        // try subsequent adapters if the preceeding one fails
 	        if (strategy === 'fallback') {
 	          (function () {
 	            var makeFallbackCall = function (index) {
-	              return _this.getAdapter((options.findAllFallbackAdapters || options.fallbackAdapters)[index]).findAll(definition, params, options)['catch'](function (err) {
+	              return definition.getAdapter((options.findAllFallbackAdapters || options.fallbackAdapters)[index]).findAll(definition, params, options)['catch'](function (err) {
 	                index++;
 	                if (index < options.fallbackAdapters.length) {
 	                  return makeFallbackCall(index);
@@ -4048,18 +4532,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	            promise = makeFallbackCall(0);
 	          })();
 	        } else {
-	          promise = _this.getAdapter(options).findAll(definition, params, options);
+	          // just make a single attempt
+	          promise = definition.getAdapter(options).findAll(definition, params, options);
 	        }
 
 	        resource.pendingQueries[queryHash] = promise.then(function (data) {
+	          // Query is no longer pending
 	          delete resource.pendingQueries[queryHash];
 	          if (options.cacheResponse) {
+	            // inject the items into the data store
 	            resource.queryData[queryHash] = processResults.call(_this, data, resourceName, queryHash, options);
 	            resource.queryData[queryHash].$$injected = true;
 	            return resource.queryData[queryHash];
 	          } else {
 	            DSUtils.forEach(data, function (item, i) {
-	              data[i] = _this.createInstance(resourceName, item, options.orig());
+	              data[i] = definition.createInstance(item, options.orig());
 	            });
 	            return data;
 	          }
@@ -4068,6 +4555,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      return resource.pendingQueries[queryHash];
 	    } else {
+	      // resolve immediately with the items
 	      return items;
 	    }
 	  })['catch'](function (err) {
@@ -4079,12 +4567,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 36 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = loadRelations;
 
 	function _defineProperty(obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); }
+
+	/**
+	 * Load the specified relations for the given instance.
+	 *
+	 * @param resourceName The name of the type of resource of the instance for which to load relations.
+	 * @param instance The instance or the primary key of the instance.
+	 * @param relations An array of the relations to load.
+	 * @param options Optional configuration.
+	 * @returns The instance, now with its relations loaded.
+	 */
 
 	function loadRelations(resourceName, instance, relations, options) {
 	  var _this = this;
@@ -4095,7 +4593,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    if (DSUtils._sn(instance)) {
-	      instance = _this.get(resourceName, instance);
+	      instance = definition.get(instance);
 	    }
 
 	    if (DSUtils._s(relations)) {
@@ -4111,12 +4609,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	      (function () {
 	        var _options = DSUtils._(definition, options);
-	        if (!_options.hasOwnProperty('findBelongsTo')) {
-	          _options.findBelongsTo = true;
-	        }
-	        if (!_options.hasOwnProperty('findHasMany')) {
-	          _options.findHasMany = true;
-	        }
 
 	        var tasks = [];
 
@@ -4124,6 +4616,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	          var relationName = def.relation;
 	          var relationDef = definition.getResource(relationName);
 	          var __options = DSUtils._(relationDef, options);
+
+	          // relations can be loaded based on resource name or field name
 	          if (DSUtils.contains(relations, relationName) || DSUtils.contains(relations, def.localField)) {
 	            var task = undefined;
 	            var params = {};
@@ -4143,17 +4637,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	                  'in': instance[def.localKeys]
 	                });
 	              }
-	              task = _this.findAll(relationName, params, __options.orig());
+	              task = relationDef.findAll(params, __options.orig());
 	            } else if (def.type === 'hasOne') {
 	              if (def.localKey && instance[def.localKey]) {
-	                task = _this.find(relationName, instance[def.localKey], __options.orig());
+	                task = relationDef.find(instance[def.localKey], __options.orig());
 	              } else if (def.foreignKey) {
-	                task = _this.findAll(relationName, params, __options.orig()).then(function (hasOnes) {
+	                task = relationDef.findAll(params, __options.orig()).then(function (hasOnes) {
 	                  return hasOnes.length ? hasOnes[0] : null;
 	                });
 	              }
 	            } else if (instance[def.localKey]) {
-	              task = _this.find(relationName, instance[def.localKey], __options.orig());
+	              task = relationDef.find(instance[def.localKey], __options.orig());
 	            }
 
 	            if (task) {
@@ -4173,10 +4667,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 37 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = reap;
+	/**
+	 * Find expired items of the specified resource type and perform the configured action.
+	 *
+	 * @param resourceName The name of the type of resource of the items to reap.
+	 * @param options Optional configuration.
+	 * @returns The reaped items.
+	 */
 
 	function reap(resourceName, options) {
 	  var _this = this;
@@ -4196,6 +4697,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var items = [];
 	      var now = new Date().getTime();
 	      var expiredItem = undefined;
+
+	      // find the expired items
 	      while ((expiredItem = resource.expiresHeap.peek()) && expiredItem.expires < now) {
 	        items.push(expiredItem.item);
 	        delete expiredItem.item;
@@ -4204,10 +4707,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      resolve(items);
 	    }
 	  }).then(function (items) {
-	    if (options.isInterval || options.notify) {
+	    // only hit lifecycle if there are items
+	    if (items.length) {
 	      definition.beforeReap(options, items);
-	      definition.emit('DS.beforeReap', definition, items);
+	      if (options.notify) {
+	        definition.emit('DS.beforeReap', definition, items);
+	      }
 	    }
+
 	    if (options.reapAction === 'inject') {
 	      (function () {
 	        var timestamp = new Date().getTime();
@@ -4221,13 +4728,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      })();
 	    } else if (options.reapAction === 'eject') {
 	      DSUtils.forEach(items, function (item) {
-	        _this.eject(resourceName, item[definition.idAttribute]);
+	        definition.eject(item[definition.idAttribute]);
 	      });
 	    } else if (options.reapAction === 'refresh') {
 	      var _ret2 = (function () {
 	        var tasks = [];
 	        DSUtils.forEach(items, function (item) {
-	          tasks.push(_this.refresh(resourceName, item[definition.idAttribute]));
+	          tasks.push(definition.refresh(item[definition.idAttribute]));
 	        });
 	        return {
 	          v: DSUtils.Promise.all(tasks)
@@ -4238,19 +4745,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    return items;
 	  }).then(function (items) {
-	    if (options.isInterval || options.notify) {
+	    // only hit lifecycle if there are items
+	    if (items.length) {
 	      definition.afterReap(options, items);
-	      definition.emit('DS.afterReap', definition, items);
+	      if (options.notify) {
+	        definition.emit('DS.afterReap', definition, items);
+	      }
 	    }
 	    return items;
 	  });
 	}
 
 /***/ },
-/* 38 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = save;
+	/**
+	 * Save a single item in its present state.
+	 *
+	 * @param resourceName The name of the type of resource of the item.
+	 * @param id The primary key of the item.
+	 * @param options Optional congifuration.
+	 * @returns The item, now saved.
+	 */
 
 	function save(resourceName, id, options) {
 	  var _this = this;
@@ -4258,6 +4776,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSErrors = _this.errors;
 
 	  var definition = _this.defs[resourceName];
+	  var resource = _this.s[resourceName];
 	  var item = undefined;
 	  var noChanges = undefined;
 
@@ -4267,14 +4786,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	      reject(new DSErrors.NER(resourceName));
 	    } else if (!DSUtils._sn(id)) {
 	      reject(DSUtils._snErr('id'));
-	    } else if (!_this.get(resourceName, id)) {
+	    } else if (!definition.get(id)) {
 	      reject(new DSErrors.R('id "' + id + '" not found in cache!'));
 	    } else {
-	      item = _this.get(resourceName, id);
+	      item = definition.get(id);
 	      options = DSUtils._(definition, options);
 	      resolve(item);
 	    }
-	  }).then(function (attrs) {
+	  })
+	  // start lifecycle
+	  .then(function (attrs) {
 	    return options.beforeValidate.call(attrs, options, attrs);
 	  }).then(function (attrs) {
 	    return options.validate.call(attrs, options, attrs);
@@ -4286,13 +4807,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (options.notify) {
 	      definition.emit('DS.beforeUpdate', definition, attrs);
 	    }
+	    // only send changed properties to the adapter
 	    if (options.changesOnly) {
-	      var resource = _this.s[resourceName];
+
 	      if (DSUtils.w) {
 	        resource.observers[id].deliver();
 	      }
 	      var toKeep = [];
-	      var changes = _this.changes(resourceName, id);
+	      var changes = definition.changes(id);
 
 	      for (var key in changes.added) {
 	        toKeep.push(key);
@@ -4301,6 +4823,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        toKeep.push(key);
 	      }
 	      changes = DSUtils.pick(attrs, toKeep);
+	      // no changes? no save
 	      if (DSUtils.isEmpty(changes)) {
 	        // no changes, return
 	        noChanges = true;
@@ -4309,7 +4832,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        attrs = changes;
 	      }
 	    }
-	    return _this.getAdapter(options).update(definition, id, attrs, options);
+	    return definition.getAdapter(options).update(definition, id, attrs, options);
 	  }).then(function (data) {
 	    return options.afterUpdate.call(data, options, data);
 	  }).then(function (attrs) {
@@ -4317,27 +4840,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	      definition.emit('DS.afterUpdate', definition, attrs);
 	    }
 	    if (noChanges) {
+	      // no changes, just return
 	      return attrs;
 	    } else if (options.cacheResponse) {
-	      var injected = _this.inject(definition.n, attrs, options.orig());
-	      var resource = _this.s[resourceName];
+	      // inject the reponse into the store, updating the item
+	      var injected = definition.inject(attrs, options.orig());
 	      var _id = injected[definition.idAttribute];
+	      // mark the item as "saved"
 	      resource.saved[_id] = DSUtils.updateTimestamp(resource.saved[_id]);
 	      if (!definition.resetHistoryOnInject) {
 	        resource.previousAttributes[_id] = DSUtils.copy(injected, null, null, null, definition.relationFields);
 	      }
 	      return injected;
 	    } else {
-	      return _this.createInstance(resourceName, attrs, options.orig());
+	      // just return an instance
+	      return definition.createInstance(attrs, options.orig());
 	    }
 	  });
 	}
 
 /***/ },
-/* 39 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = update;
+	/**
+	 * Update a single item using the supplied properties hash.
+	 *
+	 * @param resourceName The name of the type of resource of the item to update.
+	 * @param id The primary key of the item to update.
+	 * @param attrs The attributes with which to update the item.
+	 * @param options Optional configuration.
+	 * @returns The item, now updated.
+	 */
 
 	function update(resourceName, id, attrs, options) {
 	  var _this = this;
@@ -4356,7 +4891,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      options = DSUtils._(definition, options);
 	      resolve(attrs);
 	    }
-	  }).then(function (attrs) {
+	  })
+	  // start lifecycle
+	  .then(function (attrs) {
 	    return options.beforeValidate.call(attrs, options, attrs);
 	  }).then(function (attrs) {
 	    return options.validate.call(attrs, options, attrs);
@@ -4368,7 +4905,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (options.notify) {
 	      definition.emit('DS.beforeUpdate', definition, attrs);
 	    }
-	    return _this.getAdapter(options).update(definition, id, attrs, options);
+	    return definition.getAdapter(options).update(definition, id, attrs, options);
 	  }).then(function (data) {
 	    return options.afterUpdate.call(data, options, data);
 	  }).then(function (attrs) {
@@ -4376,25 +4913,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	      definition.emit('DS.afterUpdate', definition, attrs);
 	    }
 	    if (options.cacheResponse) {
-	      var injected = _this.inject(definition.n, attrs, options.orig());
+	      // inject the updated item into the store
+	      var injected = definition.inject(attrs, options.orig());
 	      var resource = _this.s[resourceName];
 	      var _id = injected[definition.idAttribute];
+	      // mark the item as "saved"
 	      resource.saved[_id] = DSUtils.updateTimestamp(resource.saved[_id]);
 	      if (!definition.resetHistoryOnInject) {
 	        resource.previousAttributes[_id] = DSUtils.copy(injected, null, null, null, definition.relationFields);
 	      }
 	      return injected;
 	    } else {
-	      return _this.createInstance(resourceName, attrs, options.orig());
+	      // just return an instance
+	      return definition.createInstance(attrs, options.orig());
 	    }
 	  });
 	}
 
 /***/ },
-/* 40 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = updateAll;
+	/**
+	 * Update a collection of items using the supplied properties hash.
+	 *
+	 * @param resourceName The name of the type of resource of the items to update.
+	 * @param attrs  The attributes with which to update the item.
+	 * @param params The criteria by which to select items to update. See http://www.js-data.io/docs/query-syntax
+	 * @param options Optional configuration.
+	 * @returns The updated items.
+	 */
 
 	function updateAll(resourceName, attrs, params, options) {
 	  var _this = this;
@@ -4410,7 +4959,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      options = DSUtils._(definition, options);
 	      resolve(attrs);
 	    }
-	  }).then(function (attrs) {
+	  })
+	  // start lifecycle
+	  .then(function (attrs) {
 	    return options.beforeValidate.call(attrs, options, attrs);
 	  }).then(function (attrs) {
 	    return options.validate.call(attrs, options, attrs);
@@ -4422,7 +4973,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (options.notify) {
 	      definition.emit('DS.beforeUpdate', definition, attrs);
 	    }
-	    return _this.getAdapter(options).updateAll(definition, attrs, params, options);
+	    return definition.getAdapter(options).updateAll(definition, attrs, params, options);
 	  }).then(function (data) {
 	    return options.afterUpdate.call(data, options, data);
 	  }).then(function (data) {
@@ -4432,8 +4983,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var origOptions = options.orig();
 	    if (options.cacheResponse) {
 	      var _ret = (function () {
-	        var injected = _this.inject(definition.n, data, origOptions);
+	        // inject the updated items into the store
+	        var injected = definition.inject(data, origOptions);
 	        var resource = _this.s[resourceName];
+	        // mark the items as "saved"
 	        DSUtils.forEach(injected, function (i) {
 	          var id = i[definition.idAttribute];
 	          resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
@@ -4449,9 +5002,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (typeof _ret === 'object') return _ret.v;
 	    } else {
 	      var _ret2 = (function () {
+	        // just return instances
 	        var instances = [];
 	        DSUtils.forEach(data, function (item) {
-	          instances.push(_this.createInstance(resourceName, item, origOptions));
+	          instances.push(definition.createInstance(item, origOptions));
 	        });
 	        return {
 	          v: instances
@@ -4464,55 +5018,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 41 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Typecast a value to a String, using an empty string value for null or
-	     * undefined.
-	     */
-	    function toString(val){
-	        return val == null ? '' : val.toString();
-	    }
-
-	    module.exports = toString;
-
-
-
-
-/***/ },
-/* 42 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(41);
-	var replaceAccents = __webpack_require__(43);
-	var removeNonWord = __webpack_require__(44);
-	var upperCase = __webpack_require__(19);
-	var lowerCase = __webpack_require__(45);
-	    /**
-	    * Convert string to camelCase text.
-	    */
-	    function camelCase(str){
-	        str = toString(str);
-	        str = replaceAccents(str);
-	        str = removeNonWord(str)
-	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
-	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
-	            .replace(/\s+/g, '') //remove spaces
-	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
-	        return str;
-	    }
-	    module.exports = camelCase;
-
-
-
-/***/ },
 /* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(41);
+	var toString = __webpack_require__(31);
 	    /**
 	    * Replaces all accented chars with regular ones
 	    */
@@ -4554,7 +5063,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(41);
+	var toString = __webpack_require__(31);
 	    // This pattern is generated by the _build/pattern-removeNonWord.js script
 	    var PATTERN = /[^\x20\x2D0-9A-Z\x5Fa-z\xC0-\xD6\xD8-\xF6\xF8-\xFF]/g;
 
@@ -4574,7 +5083,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(41);
+	var toString = __webpack_require__(31);
 	    /**
 	     * "Safer" String.toLowerCase()
 	     */

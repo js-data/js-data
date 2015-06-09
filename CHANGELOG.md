@@ -1,4 +1,7 @@
-##### 2.0.0-beta.7 - xx June 2015
+##### 2.0.0-beta.7 - 09 June 2015
+
+###### Breaking API changes
+- #158 - Data store should consume resource definition methods internally (might not be breaking)
 
 ###### Backwards compatible API changes
 - #157 - DSEject not available on instances

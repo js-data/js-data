@@ -42,7 +42,7 @@ export default {
 
     options.logFn('changes', id, options);
 
-    let item = _this.get(resourceName, id);
+    let item = definition.get(id);
     if (item) {
       if (DSUtils.w) {
         // force observation handler to be fired for item if there are changes and `Object.observe` is not available
@@ -102,7 +102,7 @@ export default {
       definition.errorFn('changeHistory is disabled for this resource!');
     } else {
       if (resourceName) {
-        let item = _this.get(resourceName, id);
+        let item = definition.get(id);
         if (item) {
           return resource.changeHistories[id];
         }
@@ -144,7 +144,6 @@ export default {
    * @param resourceName The name of the type of resource of which to create an instance.
    * @param attrs Hash of properties with which to initialize the instance.
    * @param options Optional configuration.
-   * @param options.notify Whether to call the beforeCreateInstance and afterCreateInstance hooks.
    * @param options.defaults Default values with which to initialize the instance.
    * @returns The new instance.
    */
@@ -164,9 +163,7 @@ export default {
     options.logFn('createInstance', attrs, options);
 
     // lifecycle
-    if (options.notify) {
-      options.beforeCreateInstance(options, attrs);
-    }
+    options.beforeCreateInstance(options, attrs);
 
     // grab instance constructor function from Resource definition
     let Constructor = definition[definition.class];
@@ -182,12 +179,10 @@ export default {
 
     // compute computed properties
     if (definition.computed) {
-      this.compute(definition.name, item);
+      definition.compute(item);
     }
     // lifecycle
-    if (options.notify) {
-      options.afterCreateInstance(options, item);
-    }
+    options.afterCreateInstance(options, item);
     return item;
   },
   /**
@@ -217,20 +212,19 @@ export default {
 
     options.logFn('createCollection', arr, options);
 
-    if (options.notify) {
-      options.beforeCreateCollection(options, arr);
-    }
+    // lifecycle
+    options.beforeCreateCollection(options, arr);
 
     // define the API for this collection
     Object.defineProperties(arr, {
       /**
-       * call DS#findAll with the params of this collection, filling the collection with the results.
+       * Call DS#findAll with the params of this collection, filling the collection with the results.
        */
       fetch: {
         value: function (params, options) {
           let __this = this;
           __this.params = params || __this.params;
-          return _this.findAll(resourceName, __this.params, options).then(function (data) {
+          return definition.findAll(__this.params, options).then(function (data) {
             if (data === __this) {
               return __this;
             }
@@ -258,9 +252,8 @@ export default {
       }
     });
 
-    if (options.notify) {
-      options.afterCreateCollection(options, arr);
-    }
+    // lifecycle
+    options.afterCreateCollection(options, arr);
     return arr;
   },
   defineResource,
@@ -352,7 +345,7 @@ export default {
 
     definition.logFn('hasChanges', id);
 
-    return _this.get(resourceName, id) ? diffIsEmpty(_this.changes(resourceName, id)) : false;
+    return definition.get(id) ? diffIsEmpty(definition.changes(id)) : false;
   },
   inject,
   /**
