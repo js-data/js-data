@@ -30,7 +30,7 @@ export default function update(resourceName, id, attrs, options) {
         definition.emit('DS.afterUpdate', definition, attrs);
       }
       if (options.cacheResponse) {
-        let injected = _this.inject(definition.n, attrs, options.orig());
+        let injected = _this.inject(definition.name, attrs, options.orig());
         let resource = _this.s[resourceName];
         let id = injected[definition.idAttribute];
         resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);

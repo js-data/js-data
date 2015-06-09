@@ -1,3 +1,13 @@
+/**
+ * Return the subset of items currently in the store that match the given criteria.
+ *
+ * The actual filtering is delegated to DS#defaults.defaultFilter, which can be overridden by developers.
+ *
+ * @param resourceName The name of the resource type of the items to filter.
+ * @param params The criteria by which to filter items. See http://www.js-data.io/docs/query-syntax
+ * @param options Optional configuration.
+ * @returns Matching items.
+ */
 export default function filter(resourceName, params, options) {
   let _this = this;
   let DSUtils = _this.utils;
@@ -13,5 +23,7 @@ export default function filter(resourceName, params, options) {
   params = params || {};
   options = DSUtils._(definition, options);
   options.logFn('filter', params, options);
+
+  // delegate filtering to DS#defaults.defaultFilter, which can be overridden by developers.
   return definition.defaultFilter.call(_this, _this.s[resourceName].collection, resourceName, params, options);
 }

@@ -21,7 +21,7 @@ describe('DS#reap', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/thing?foo=bar');
       assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(things));
-    }, 30);
+    }, 100);
 
     return Thing.findAll({ foo: 'bar' }).then(function (data) {
       assert.deepEqual(JSON.stringify(data), JSON.stringify(things));

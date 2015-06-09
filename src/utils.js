@@ -1,4 +1,8 @@
 /* jshint eqeqeq:false */
+
+/**
+ * Mix of ES6 and CommonJS module imports because the interop of Babel + Webpack + ES6 modules + CommonJS isn't very good.
+ */
 import DSErrors from './errors';
 let BinaryHeap = require('yabh');
 let forEach = require('mout/array/forEach');
@@ -19,6 +23,13 @@ let objectProto = Object.prototype;
 let toString = objectProto.toString;
 let P;
 
+/**
+ * Attempt to detect the global Promise constructor.
+ * JSData will still work without one, as long you do something like this:
+ *
+ * var JSData = require('js-data');
+ * JSData.DSUtils.Promise = MyPromiseLib;
+ */
 try {
   P = Promise;
 } catch (err) {
@@ -96,6 +107,7 @@ let isEmpty = val => {
   }
 };
 
+// Find the intersection between two arrays
 let intersection = (array1, array2) => {
   if (!array1 || !array2) {
     return [];
@@ -124,6 +136,9 @@ let filter = (array, cb, thisObj) => {
   return results;
 };
 
+/**
+ * Attempt to detect whether we are in the browser.
+ */
 try {
   w = window;
   w = {};
@@ -131,6 +146,15 @@ try {
   w = null;
 }
 
+/**
+ * Event mixin. Usage:
+ *
+ * function handler() { ... }
+ * Events(myObject);
+ * myObject.on('foo', handler);
+ * myObject.emit('foo', 'some', 'data');
+ * myObject.off('foo', handler);
+ */
 function Events(target) {
   let events = {};
   target = target || this;
@@ -166,6 +190,9 @@ function Events(target) {
   };
 }
 
+/**
+ * Lifecycle hooks that should support promises.
+ */
 let toPromisify = [
   'beforeValidate',
   'validate',
@@ -178,6 +205,9 @@ let toPromisify = [
   'afterDestroy'
 ];
 
+/**
+ * Return whether "prop" is in the blacklist.
+ */
 let isBlacklisted = (prop, bl) => {
   let i;
   if (!bl || !bl.length) {
@@ -325,6 +355,9 @@ let equals = (o1, o2) => {
   return false;
 };
 
+/**
+ * Given either an instance or the primary key of an instance, return the primary key.
+ */
 let resolveId = (definition, idOrInstance) => {
   if (isString(idOrInstance) || isNumber(idOrInstance)) {
     return idOrInstance;
@@ -335,6 +368,9 @@ let resolveId = (definition, idOrInstance) => {
   }
 };
 
+/**
+ * Given either an instance or the primary key of an instance, return the instance.
+ */
 let resolveItem = (resource, idOrInstance) => {
   if (resource && (isString(idOrInstance) || isNumber(idOrInstance))) {
     return resource.index[idOrInstance] || idOrInstance;
@@ -359,8 +395,11 @@ let makePath = (...args) => {
 
 export default {
   Promise: P,
-  // Options that inherit from defaults
-  _(parent, options) {
+  /**
+   * Method to wrap an "options" object so that it will inherit from
+   * some parent object, such as a resource definition.
+   */
+    _(parent, options) {
     let _this = this;
     options = options || {};
     if (options && options.constructor === parent.constructor) {
@@ -373,13 +412,16 @@ export default {
         options[name] = _this.promisify(options[name]);
       }
     });
+    // Dynamic constructor function
     let O = function Options(attrs) {
       let self = this;
       forOwn(attrs, (value, key) => {
         self[key] = value;
       });
     };
+    // Inherit from some parent object
     O.prototype = parent;
+    // Give us a way to get the original options back.
     O.prototype.orig = function () {
       let orig = {};
       forOwn(this, (value, key) => {
@@ -442,6 +484,7 @@ export default {
   observe,
   pascalCase,
   pick,
+  // Turn the given node-style callback function into one that can return a promise.
   promisify(fn, target) {
     let _this = this;
     if (!fn) {
@@ -485,7 +528,10 @@ export default {
     }
   },
   upperCase,
-  removeCircular(object) {
+  /**
+   * Return a copy of "object" with cycles removed.
+   */
+    removeCircular(object) {
     return (function rmCirc(value, context) {
       let i;
       let nu;
@@ -505,22 +551,25 @@ export default {
         if (isArray(value)) {
           nu = [];
           for (i = 0; i < value.length; i += 1) {
-            nu[i] = rmCirc(value[i], { context, current: value[i] });
+            nu[i] = rmCirc(value[i], {context, current: value[i]});
           }
         } else {
           nu = {};
           forOwn(value, (v, k) => {
-            nu[k] = rmCirc(value[k], { context, current: value[k] });
+            nu[k] = rmCirc(value[k], {context, current: value[k]});
           });
         }
         return nu;
       }
       return value;
-    }(object, { context: null, current: object }));
+    }(object, {context: null, current: object}));
   },
   resolveItem,
   resolveId,
   w,
+  /**
+   * This is where the magic of relations happens.
+   */
   applyRelationGettersToTarget(store, definition, target) {
     this.forEach(definition.relationList, def => {
       let relationName = def.relation;
@@ -543,7 +592,7 @@ export default {
               let params = {};
               if (def.foreignKey) {
                 params[def.foreignKey] = this[definition.idAttribute];
-                return store.defaults.constructor.prototype.defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
+                return store.defaults.constructor.prototype.defaultFilter.call(store, store.s[relationName].collection, relationName, params, {allowSimpleWhere: true});
               } else if (def.localKeys) {
                 params.where = {
                   [definition.getResource(relationName).idAttribute]: {
@@ -573,7 +622,7 @@ export default {
               get() {
                 let params = {};
                 params[def.foreignKey] = this[definition.idAttribute];
-                let items = params[def.foreignKey] ? store.defaults.constructor.prototype.defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true }) : [];
+                let items = params[def.foreignKey] ? store.defaults.constructor.prototype.defaultFilter.call(store, store.s[relationName].collection, relationName, params, {allowSimpleWhere: true}) : [];
                 if (items.length) {
                   return items[0];
                 }

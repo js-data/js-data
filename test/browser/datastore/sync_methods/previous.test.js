@@ -33,7 +33,7 @@ describe('DS#previous', function () {
         age: 30,
         id: 5
       }));
-    }, 30);
+    }, 100);
   });
   it('should return the previous in an object and save changed only', function (done) {
     try {
@@ -75,7 +75,7 @@ describe('DS#previous', function () {
           console.log(err.stack);
           done(err);
         }
-      }, 30);
+      }, 100);
     } catch (err) {
       done(err);
     }

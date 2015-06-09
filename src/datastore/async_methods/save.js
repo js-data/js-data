@@ -61,7 +61,7 @@ export default function save(resourceName, id, options) {
       if (noChanges) {
         return attrs;
       } else if (options.cacheResponse) {
-        let injected = _this.inject(definition.n, attrs, options.orig());
+        let injected = _this.inject(definition.name, attrs, options.orig());
         let resource = _this.s[resourceName];
         let id = injected[definition.idAttribute];
         resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);

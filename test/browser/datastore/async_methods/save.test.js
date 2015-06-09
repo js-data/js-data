@@ -22,7 +22,7 @@ describe('DS#save', function () {
         id: 5,
         age: 30
       }));
-    }, 30);
+    }, 100);
 
     return Post.save(5).then(function (post) {
       assert.deepEqual(DSUtils.toJson(post), DSUtils.toJson(Post.get(5)), 'post 5 should have been saved');
@@ -73,7 +73,7 @@ describe('DS#save', function () {
         id: 5,
         age: 30
       }));
-    }, 30);
+    }, 100);
 
     return post.DSSave().then(function (post) {
       assert.deepEqual(DSUtils.toJson(post), DSUtils.toJson(Post.get(5)), 'post 5 should have been saved');
@@ -108,7 +108,7 @@ describe('DS#save', function () {
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({
         random: 'stuff'
       }));
-    }, 30);
+    }, 100);
 
     return Post.save(5, { cacheResponse: false }).then(function (post) {
       assert.deepEqual(JSON.stringify(post), JSON.stringify({
@@ -148,7 +148,7 @@ describe('DS#save', function () {
         age: 30,
         id: 5
       }));
-    }, 30);
+    }, 100);
 
     return Post.save(5, { changesOnly: true }).then(function (post) {
       assert.deepEqual(JSON.stringify(post), JSON.stringify(post1), 'post 5 should have been saved');

@@ -9,7 +9,7 @@ describe('DS#destroy', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
       assert.equal(_this.requests[0].method, 'DELETE');
       _this.requests[0].respond(200, { 'Content-Type': 'text/plain' }, '5');
-    }, 30);
+    }, 100);
 
     return Post.destroy(5).then(function (id) {
       assert.equal(id, '5', 'post 5 should have been deleted');
@@ -39,7 +39,7 @@ describe('DS#destroy', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/user/4/comment/5');
       assert.equal(_this.requests[0].method, 'DELETE');
       _this.requests[0].respond(204);
-    }, 30);
+    }, 100);
 
     return Comment.destroy(5, {
       params: {
@@ -53,7 +53,7 @@ describe('DS#destroy', function () {
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/user/4/comment/6');
         assert.equal(_this.requests[1].method, 'DELETE');
         _this.requests[1].respond(204);
-      }, 30);
+      }, 100);
 
       return Comment.destroy(6, {
         bypassCache: true
@@ -66,7 +66,7 @@ describe('DS#destroy', function () {
         assert.equal(_this.requests[2].url, 'http://test.js-data.io/comment/6');
         assert.equal(_this.requests[2].method, 'DELETE');
         _this.requests[2].respond(204);
-      }, 30);
+      }, 100);
 
       return Comment.destroy(6, {
         params: {
@@ -87,8 +87,8 @@ describe('DS#destroy', function () {
         assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
         assert.equal(_this.requests[0].method, 'DELETE');
         _this.requests[0].respond(200, { 'Content-Type': 'text/plain' }, '5');
-      }, 30);
-    }, 30);
+      }, 100);
+    }, 100);
 
     return Post.destroy(5, { eagerEject: true }).then(function (id) {
       assert.equal(id, '5', 'post 5 should have been deleted');

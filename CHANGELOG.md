@@ -1,3 +1,11 @@
+##### 2.0.0-beta.7 - xx June 2015
+
+###### Backwards compatible API changes
+- #157 - DSEject not available on instances
+
+###### Other
+- #156 - Thoroughly annotate all source code to encourage contribution
+
 ##### 2.0.0-beta.6 - 04 June 2015
 
 ###### Breaking API changes

@@ -10,7 +10,7 @@ describe('DS#findAll', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
       assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([p1, p2, p3, p4]));
-    }, 30);
+    }, 100);
 
     // Should have no effect because there is already a pending query
     return Post.findAll().then(function (data) {
@@ -31,7 +31,7 @@ describe('DS#findAll', function () {
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/posts');
         assert.equal(_this.requests[1].method, 'GET');
         _this.requests[1].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([p1, p2, p3, p4]));
-      }, 30);
+      }, 100);
 
       // Should make a request because bypassCache is set to true
       return Post.findAll(null, {bypassCache: true});
@@ -54,7 +54,7 @@ describe('DS#findAll', function () {
         {author: 'John', age: 30},
         {author: 'Sally', age: 31}
       ]));
-    }, 30);
+    }, 100);
 
     return Post.findAll().then(function () {
       throw new Error('Should not have succeeded!');
@@ -73,7 +73,7 @@ describe('DS#findAll', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
       assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([p1, p2, p3, p4]));
-    }, 30);
+    }, 100);
 
     return Post.findAll(null, {cacheResponse: false}).then(function (data) {
       assert.deepEqual(JSON.stringify(data), JSON.stringify([p1, p2, p3, p4]));
@@ -94,7 +94,7 @@ describe('DS#findAll', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
       assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(404, {'Content-Type': 'text/plain'}, 'Not Found');
-    }, 30);
+    }, 100);
 
     return Post.findAll().then(function () {
       throw new Error('Should not have succeeded!');
@@ -110,7 +110,7 @@ describe('DS#findAll', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
       assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([p1, p2, p3, p4]));
-    }, 30);
+    }, 100);
 
     return Post.findAll().then(function (data) {
       assert.deepEqual(JSON.stringify(data), JSON.stringify([p1, p2, p3, p4]));
@@ -136,7 +136,7 @@ describe('DS#findAll', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts?where=%7B%22author%22:%22Adam%22%7D');
       assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([p4, p5]));
-    }, 30);
+    }, 100);
 
     return Post.findAll(params).then(function (data) {
       assert.deepEqual(JSON.stringify(data), JSON.stringify([p4, p5]));
@@ -181,7 +181,7 @@ describe('DS#findAll', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/users');
       assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([u1, u2]));
-    }, 30);
+    }, 100);
 
     return Person.findAll().then(function (data) {
       assert.deepEqual(JSON.stringify(data), JSON.stringify([
@@ -220,7 +220,7 @@ describe('DS#findAll', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/user/4/comment?content=test');
       assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([testComment, testComment2]));
-    }, 30);
+    }, 100);
 
     return Comment.findAll({
       content: 'test'
@@ -240,7 +240,7 @@ describe('DS#findAll', function () {
         assert.equal(_this.requests[1].url, 'http://test.js-data.io/comment?content=test');
         assert.equal(_this.requests[1].method, 'GET');
         _this.requests[1].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([testComment, testComment2]));
-      }, 30);
+      }, 100);
 
       return Comment.findAll({
         content: 'test'
@@ -259,7 +259,7 @@ describe('DS#findAll', function () {
         assert.equal(_this.requests[2].url, 'http://test.js-data.io/comment?content=test');
         assert.equal(_this.requests[2].method, 'GET');
         _this.requests[2].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([testComment, testComment2]));
-      }, 30);
+      }, 100);
 
       return Comment.findAll({
         content: 'test'
@@ -298,7 +298,7 @@ describe('DS#findAll', function () {
         } catch (err) {
           console.error(err.stack);
         }
-      }, 30);
+      }, 100);
 
       return Thing.findAll({thing: 'stuff'});
     }).then(function (things) {
@@ -316,7 +316,7 @@ describe('DS#findAll', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
       assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([p1, p2, p3, p4]));
-    }, 30);
+    }, 100);
 
     return Post.findAll().then(function (data) {
       assert.deepEqual(JSON.stringify(data), JSON.stringify([p1, p2, p3, p4]));
@@ -351,7 +351,7 @@ describe('DS#findAll', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts?where=%7B%22author%22:%22Adam%22%7D');
       assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([p4, p5]));
-    }, 30);
+    }, 100);
 
     var posts = Post.createCollection([], params);
 
@@ -399,7 +399,7 @@ describe('DS#findAll', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts?where=%7B%22author%22:%22Adam%22%7D');
       assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([p4, p5, p6]));
-    }, 30);
+    }, 100);
 
     var posts = Post.createCollection([p4, p5], params);
     assert.deepEqual(JSON.stringify(posts), JSON.stringify([p4, p5]));

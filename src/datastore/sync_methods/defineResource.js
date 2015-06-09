@@ -2,8 +2,20 @@
 import DSUtils from '../../utils';
 import DSErrors from '../../errors';
 
+/**
+ * These are DS methods that will be proxied by instances. e.g.
+ *
+ * var store = new JSData.DS();
+ * var User = store.defineResource('user');
+ * var user = User.createInstance({ id: 1 });
+ *
+ * store.update(resourceName, id, attrs[, options]) // DS method
+ * User.update(id, attrs[, options]) // DS method proxied on a Resource
+ * user.DSUpdate(attrs[, options]) // DS method proxied on an Instance
+ */
 let instanceMethods = [
   'compute',
+  'eject',
   'refresh',
   'save',
   'update',
@@ -21,6 +33,10 @@ export default function defineResource(definition) {
   let _this = this;
   let definitions = _this.defs;
 
+  /**
+   * This allows the name-only definition shorthand.
+   * store.defineResource('user') is the same as store.defineResource({ name: 'user'})
+   */
   if (DSUtils._s(definition)) {
     definition = {
       name: definition.replace(/\s/gi, '')
@@ -34,6 +50,11 @@ export default function defineResource(definition) {
     throw new DSErrors.R(`${definition.name} is already registered!`);
   }
 
+  /**
+   * Dynamic Resource constructor function.
+   *
+   * A Resource inherits from the defaults of the data store that created it.
+   */
   function Resource(options) {
     this.defaultValues = {};
     this.methods = {};
@@ -50,6 +71,7 @@ export default function defineResource(definition) {
   }
 
   try {
+    // Resources can inherit from another resource instead of inheriting directly from the data store defaults.
     if (definition.extends && definitions[definition.extends]) {
       // Inherit from another resource
       Resource.prototype = definitions[definition.extends];
@@ -60,9 +82,6 @@ export default function defineResource(definition) {
     definitions[definition.name] = new Resource(definition);
 
     var def = definitions[definition.name];
-
-    // alias name, shaves 0.08 kb off the minified build
-    def.n = def.name;
 
     def.logFn('Preparing resource.');
 
@@ -82,7 +101,7 @@ export default function defineResource(definition) {
           DSUtils.forEach(relatedModels[relationName], d => {
             d.type = type;
             d.relation = relationName;
-            d.name = def.n;
+            d.name = def.name;
             def.relationList.push(d);
             if (d.localField) {
               def.relationFields.push(d.localField);
@@ -153,13 +172,6 @@ export default function defineResource(definition) {
       }
     };
 
-    // Remove this in v0.11.0 and make a breaking change notice
-    // the the `filter` option has been renamed to `defaultFilter`
-    if (def.filter) {
-      def.defaultFilter = def.filter;
-      delete def.filter;
-    }
-
     // Create the wrapper class for the new resource
     var _class = def['class'] = DSUtils.pascalCase(def.name);
     try {
@@ -182,21 +194,30 @@ export default function defineResource(definition) {
       };
     }
 
-    // Apply developer-defined methods
+    // Apply developer-defined instance methods
     DSUtils.forOwn(def.methods, (fn, m) => {
       def[_class].prototype[m] = fn;
     });
 
+    /**
+     * var user = User.createInstance({ id: 1 });
+     * user.set('foo', 'bar');
+     */
     def[_class].prototype.set = function (key, value) {
       DSUtils.set(this, key, value);
-      _this.compute(def.n, this);
+      _this.compute(def.name, this);
       return this;
     };
 
+    /**
+     * var user = User.createInstance({ id: 1 });
+     * user.get('id'); // 1
+     */
     def[_class].prototype.get = function (key) {
       return DSUtils.get(this, key);
     };
 
+    // Setup the relation links
     DSUtils.applyRelationGettersToTarget(_this, def, def[_class].prototype);
 
     // Prepare for computed properties
@@ -227,22 +248,24 @@ export default function defineResource(definition) {
       });
     });
 
+    // add instance proxies of DS methods
     DSUtils.forEach(instanceMethods, name => {
       def[_class].prototype[`DS${DSUtils.pascalCase(name)}`] = function (...args) {
         args.unshift(this[def.idAttribute] || this);
-        args.unshift(def.n);
+        args.unshift(def.name);
         return _this[name].apply(_this, args);
       };
     });
 
+    // manually add instance proxy for DS#create
     def[_class].prototype.DSCreate = function (...args) {
       args.unshift(this);
-      args.unshift(def.n);
+      args.unshift(def.name);
       return _this.create.apply(_this, args);
     };
 
     // Initialize store data for the new resource
-    _this.s[def.n] = {
+    _this.s[def.name] = {
       collection: [],
       expiresHeap: new DSUtils.BinaryHeap(x => x.expires, (x, y) => x.item === y),
       completedQueries: {},
@@ -258,11 +281,12 @@ export default function defineResource(definition) {
       collectionModified: 0
     };
 
+    // start the reaping
     if (def.reapInterval) {
-      setInterval(() => _this.reap(def.n, {isInterval: true}), def.reapInterval);
+      setInterval(() => _this.reap(def.name, {isInterval: true}), def.reapInterval);
     }
 
-    // Proxy DS methods with shorthand ones
+    // proxy DS methods with shorthand ones
     let fns = ['registerAdapter', 'getAdapter', 'is'];
     for (var key in _this) {
       if (typeof _this[key] === 'function') {
@@ -270,11 +294,20 @@ export default function defineResource(definition) {
       }
     }
 
+    /**
+     * Create the Resource shorthands that proxy DS methods. e.g.
+     *
+     * var store = new JSData.DS();
+     * var User = store.defineResource('user');
+     *
+     * store.update(resourceName, id, attrs[, options]) // DS method
+     * User.update(id, attrs[, options]) // DS method proxied on a Resource
+     */
     DSUtils.forEach(fns, key => {
       let k = key;
       if (_this[k].shorthand !== false) {
         def[k] = (...args) => {
-          args.unshift(def.n);
+          args.unshift(def.name);
           return _this[k].apply(_this, args);
         };
         def[k].before = fn => {
@@ -302,6 +335,8 @@ export default function defineResource(definition) {
     if (def.hasOwnProperty('defaultAdapter')) {
       defaultAdapter = def.defaultAdapter;
     }
+
+    // setup "actions"
     DSUtils.forOwn(def.actions, (action, name) => {
       if (def[name] && !def.actions[name]) {
         throw new Error(`Cannot override existing method "${name}"!`);
@@ -338,7 +373,7 @@ export default function defineResource(definition) {
       };
     });
 
-    // Mix-in events
+    // mix in events
     DSUtils.Events(def);
 
     def.logFn('Done preparing resource.');
