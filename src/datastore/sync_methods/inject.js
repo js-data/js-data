@@ -52,7 +52,14 @@ function makeObserverHandler(definition, resource) {
 
       // update item and collection "modified" timestamps
       resource.modified[innerId] = DSUtils.updateTimestamp(resource.modified[innerId]);
-      resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
+
+      if (item && definition.instanceEvents) {
+        setTimeout(() => {
+          item.emit('DS.change', definition, item);
+        }, 0);
+      }
+
+      definition.handleChange(item);
 
       // Save a change record for the item
       if (definition.keepChangeHistory) {
@@ -292,7 +299,7 @@ export default function inject(resourceName, attrs, options) {
   injected = _inject.call(_this, definition, resource, attrs, options);
 
   // collection was modified
-  resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
+  definition.handleChange(injected);
 
   // lifecycle
   options.afterInject(options, injected);

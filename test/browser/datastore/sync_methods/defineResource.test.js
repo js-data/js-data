@@ -365,4 +365,76 @@ describe('DS#defineResource', function () {
       _this.requests[0].respond(200, { 'Content-Type': 'text/plain' }, 'stuff');
     }, 100);
   });
+  it('should allow instance events', function (done) {
+    var changed = false;
+    var Foo = store.defineResource('foo');
+    var foo = Foo.inject({ id: 1 });
+
+    setTimeout(function () {
+      if (!changed) {
+        done('failed to fire change event');
+      }
+    }, 1000);
+
+    foo.on('DS.change', function (Foo, foo) {
+      changed = true;
+      done();
+    });
+
+    foo.bar = 'baz';
+  });
+  it('should allow Resource change events', function (done) {
+    var changed = false;
+    var Foo = store.defineResource('foo');
+    var foo = Foo.inject({ id: 1 });
+
+    setTimeout(function () {
+      if (!changed) {
+        done('failed to fire change event');
+      }
+    }, 1000);
+
+    Foo.on('DS.change', function (Foo, foo) {
+      changed = true;
+      done();
+    });
+
+    foo.bar = 'baz';
+  });
+  it('should allow instance events 2', function (done) {
+    var changed = false;
+    var Foo = store.defineResource('foo');
+    var foo = Foo.createInstance({ id: 1 });
+
+    setTimeout(function () {
+      if (!changed) {
+        done('failed to fire change event');
+      }
+    }, 1000);
+
+    foo.on('DS.change', function (Foo, foo) {
+      changed = true;
+      done();
+    });
+
+    foo.set('bar', 'baz');
+  });
+  it('should allow Resource change events 2', function (done) {
+    var changed = false;
+    var Foo = store.defineResource('foo');
+    var foo = Foo.createInstance({ id: 1 });
+
+    setTimeout(function () {
+      if (!changed) {
+        done('failed to fire change event');
+      }
+    }, 1000);
+
+    Foo.on('DS.change', function (Foo, foo) {
+      changed = true;
+      done();
+    });
+
+    foo.set('bar', 'baz');
+  });
 });

@@ -13,9 +13,6 @@ function processResults(data, resourceName, queryHash, options) {
   delete resource.pendingQueries[queryHash];
   resource.completedQueries[queryHash] = date;
 
-  // Update modified timestamp of collection
-  resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
-
   // Merge the new values into the cache
   let injected = definition.inject(data, options.orig());
 

@@ -81,7 +81,7 @@ export default function eject(resourceName, id, options) {
     // remove it from the store
     resource.collection.splice(i, 1);
     // collection has been modified
-    resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
+    definition.handleChange(item);
 
     // lifecycle
     definition.afterEject(options, item);

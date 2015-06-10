@@ -46,7 +46,7 @@ export default function defineResource(definition) {
     throw DSUtils._oErr('definition');
   } else if (!DSUtils._s(definition.name)) {
     throw new DSErrors.IA('"name" must be a string!');
-  } else if (_this.s[definition.name]) {
+  } else if (definitions[definition.name]) {
     throw new DSErrors.R(`${definition.name} is already registered!`);
   }
 
@@ -206,6 +206,12 @@ export default function defineResource(definition) {
     def[_class].prototype.set = function (key, value) {
       DSUtils.set(this, key, value);
       def.compute(this);
+      if (def.instanceEvents) {
+        setTimeout(() => {
+          this.emit('DS.change', def, this);
+        }, 0);
+      }
+      def.handleChange(this);
       return this;
     };
 
@@ -216,6 +222,10 @@ export default function defineResource(definition) {
     def[_class].prototype.get = function (key) {
       return DSUtils.get(this, key);
     };
+
+    if (def.instanceEvents) {
+      DSUtils.Events(def[_class].prototype);
+    }
 
     // Setup the relation links
     DSUtils.applyRelationGettersToTarget(_this, def, def[_class].prototype);
@@ -280,6 +290,8 @@ export default function defineResource(definition) {
       changeHistory: [],
       collectionModified: 0
     };
+
+    let resource = _this.s[def.name];
 
     // start the reaping
     if (def.reapInterval) {
@@ -375,6 +387,15 @@ export default function defineResource(definition) {
 
     // mix in events
     DSUtils.Events(def);
+
+    def.handleChange = data => {
+      resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
+      if (def.notify) {
+        setTimeout(() => {
+          def.emit('DS.change', def, data);
+        }, 0);
+      }
+    };
 
     def.logFn('Done preparing resource.');
 
