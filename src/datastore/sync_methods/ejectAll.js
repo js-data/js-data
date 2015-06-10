@@ -45,6 +45,6 @@ export default function ejectAll(resourceName, params, options) {
     definition.eject(id, options);
   });
   // collection has been modified
-  resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
+  definition.handleChange(items);
   return items;
 }

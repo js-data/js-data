@@ -1,3 +1,8 @@
+##### 2.0.0-beta.8 - xx June 2015
+
+###### Backwards compatible API changes
+- #160 - Add "DS.change" events, fired on Resources and instances
+
 ##### 2.0.0-beta.7 - 09 June 2015
 
 ###### Breaking API changes

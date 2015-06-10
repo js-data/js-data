@@ -100,6 +100,7 @@ defaultsPrototype.eagerEject = false;
 defaultsPrototype.eagerInject = false;
 defaultsPrototype.endpoint = '';
 defaultsPrototype.error = console ? (a, b, c) => console[typeof console.error === 'function' ? 'error' : 'log'](a, b, c) : false;
+defaultsPrototype.instanceEvents = !!DSUtils.w;
 defaultsPrototype.fallbackAdapters = ['http'];
 defaultsPrototype.findStrictCache = false;
 defaultsPrototype.idAttribute = 'id';
