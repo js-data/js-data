@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 2.0.0-beta.7 - Homepage <http://www.js-data.io/>
+ * @version 2.0.0-beta.8 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -84,12 +84,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new _datastoreIndex['default'](options);
 	  },
 	  version: {
-	    full: '2.0.0-beta.7',
+	    full: '2.0.0-beta.8',
 	    major: parseInt('2', 10),
 	    minor: parseInt('0', 10),
 	    patch: parseInt('0', 10),
 	    alpha: true ? 'false' : false,
-	    beta: true ? '7' : false
+	    beta: true ? '8' : false
 	  }
 	};
 
@@ -240,6 +240,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	defaultsPrototype.error = console ? function (a, b, c) {
 	  return console[typeof console.error === 'function' ? 'error' : 'log'](a, b, c);
 	} : false;
+	defaultsPrototype.instanceEvents = !!_utils['default'].w;
 	defaultsPrototype.fallbackAdapters = ['http'];
 	defaultsPrototype.findStrictCache = false;
 	defaultsPrototype.idAttribute = 'id';
@@ -1300,15 +1301,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _errors = __webpack_require__(3);
 
-	var _defineResource = __webpack_require__(24);
+	var _defineResource = __webpack_require__(25);
 
-	var _eject = __webpack_require__(25);
+	var _eject = __webpack_require__(26);
 
-	var _ejectAll = __webpack_require__(26);
+	var _ejectAll = __webpack_require__(27);
 
-	var _filter = __webpack_require__(27);
+	var _filter = __webpack_require__(28);
 
-	var _inject = __webpack_require__(28);
+	var _inject = __webpack_require__(29);
 
 	var NER = _errors['default'].NER;
 	var IA = _errors['default'].IA;
@@ -2828,7 +2829,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isPrimitive = __webpack_require__(29);
+	var isPrimitive = __webpack_require__(24);
 
 	    /**
 	     * get "nested" object property
@@ -3065,6 +3066,33 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
+	
+
+	    /**
+	     * Checks if the object is a primitive
+	     */
+	    function isPrimitive(value) {
+	        // Using switch fallthrough because it's simple to read and is
+	        // generally fast: http://jsperf.com/testing-value-is-primitive/5
+	        switch (typeof value) {
+	            case "string":
+	            case "number":
+	            case "boolean":
+	                return true;
+	        }
+
+	        return value == null;
+	    }
+
+	    module.exports = isPrimitive;
+
+
+
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
 	exports['default'] = defineResource;
 	/*jshint evil:true, loopfunc:true*/
 
@@ -3102,7 +3130,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    throw _utils['default']._oErr('definition');
 	  } else if (!_utils['default']._s(definition.name)) {
 	    throw new _errors['default'].IA('"name" must be a string!');
-	  } else if (_this.s[definition.name]) {
+	  } else if (definitions[definition.name]) {
 	    throw new _errors['default'].R('' + definition.name + ' is already registered!');
 	  }
 
@@ -3270,8 +3298,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	       * user.set('foo', 'bar');
 	       */
 	      def[_class].prototype.set = function (key, value) {
+	        var _this2 = this;
+
 	        _utils['default'].set(this, key, value);
 	        def.compute(this);
+	        if (def.instanceEvents) {
+	          setTimeout(function () {
+	            _this2.emit('DS.change', def, _this2);
+	          }, 0);
+	        }
+	        def.handleChange(this);
 	        return this;
 	      };
 
@@ -3282,6 +3318,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      def[_class].prototype.get = function (key) {
 	        return _utils['default'].get(this, key);
 	      };
+
+	      if (def.instanceEvents) {
+	        _utils['default'].Events(def[_class].prototype);
+	      }
 
 	      // Setup the relation links
 	      _utils['default'].applyRelationGettersToTarget(_this, def, def[_class].prototype);
@@ -3358,6 +3398,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        changeHistory: [],
 	        collectionModified: 0
 	      };
+
+	      var resource = _this.s[def.name];
 
 	      // start the reaping
 	      if (def.reapInterval) {
@@ -3477,6 +3519,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // mix in events
 	      _utils['default'].Events(def);
 
+	      def.handleChange = function (data) {
+	        resource.collectionModified = _utils['default'].updateTimestamp(resource.collectionModified);
+	        if (def.notify) {
+	          setTimeout(function () {
+	            def.emit('DS.change', def, data);
+	          }, 0);
+	        }
+	      };
+
 	      def.logFn('Done preparing resource.');
 
 	      return {
@@ -3493,7 +3544,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = eject;
@@ -3583,7 +3634,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // remove it from the store
 	      resource.collection.splice(i, 1);
 	      // collection has been modified
-	      resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
+	      definition.handleChange(item);
 
 	      // lifecycle
 	      definition.afterEject(options, item);
@@ -3601,7 +3652,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = ejectAll;
@@ -3653,12 +3704,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    definition.eject(id, options);
 	  });
 	  // collection has been modified
-	  resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
+	  definition.handleChange(items);
 	  return items;
 	}
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = filter;
@@ -3694,7 +3745,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = inject;
@@ -3754,7 +3805,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      // update item and collection "modified" timestamps
 	      resource.modified[innerId] = _utils['default'].updateTimestamp(resource.modified[innerId]);
-	      resource.collectionModified = _utils['default'].updateTimestamp(resource.collectionModified);
+
+	      if (item && definition.instanceEvents) {
+	        setTimeout(function () {
+	          item.emit('DS.change', definition, item);
+	        }, 0);
+	      }
+
+	      definition.handleChange(item);
 
 	      // Save a change record for the item
 	      if (definition.keepChangeHistory) {
@@ -3999,7 +4057,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  injected = _inject.call(_this, definition, resource, attrs, options);
 
 	  // collection was modified
-	  resource.collectionModified = _utils['default'].updateTimestamp(resource.collectionModified);
+	  definition.handleChange(injected);
 
 	  // lifecycle
 	  options.afterInject(options, injected);
@@ -4009,33 +4067,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return injected;
 	}
-
-/***/ },
-/* 29 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Checks if the object is a primitive
-	     */
-	    function isPrimitive(value) {
-	        // Using switch fallthrough because it's simple to read and is
-	        // generally fast: http://jsperf.com/testing-value-is-primitive/5
-	        switch (typeof value) {
-	            case "string":
-	            case "number":
-	            case "boolean":
-	                return true;
-	        }
-
-	        return value == null;
-	    }
-
-	    module.exports = isPrimitive;
-
-
-
 
 /***/ },
 /* 30 */
@@ -4459,9 +4490,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Query is no longer pending
 	  delete resource.pendingQueries[queryHash];
 	  resource.completedQueries[queryHash] = date;
-
-	  // Update modified timestamp of collection
-	  resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
 	  // Merge the new values into the cache
 	  var injected = definition.inject(data, options.orig());
