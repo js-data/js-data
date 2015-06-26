@@ -226,7 +226,22 @@ function _inject(definition, resource, attrs, options) {
         } else {
           // item is being re-injected
           // new properties take precedence
-          DSUtils.deepMixIn(item, attrs);
+          if (options.onConflict === 'merge') {
+            DSUtils.deepMixIn(item, attrs);
+          } else if (options.onConflict === 'replace') {
+            DSUtils.forOwn(item, (v, k) => {
+              if (k !== definition.idAttribute) {
+                if (!attrs.hasOwnProperty(k)) {
+                  delete item[k];
+                }
+              }
+            });
+            DSUtils.forOwn(attrs, (v, k) => {
+              if (k !== definition.idAttribute) {
+                item[k] = v;
+              }
+            });
+          }
 
           if (definition.resetHistoryOnInject) {
             // clear change history for item

@@ -1,3 +1,8 @@
+##### 2.0.0-beta.11 - 26 June 2015
+
+###### Backwards compatible API changes
+- #168 - DS#inject - replace instead of merge. `onConflict: 'replace'` will replace existing items instead of merging into them.
+
 ##### 2.0.0-beta.10 - 26 June 2015
 
 ###### Backwards compatible bug fixes
@@ -53,7 +58,7 @@
 
 ###### Backwards compatible bug fixes
 - #127 - Memory leak in DS.changes
-- #134 - All resources get all methods defined on any resource 
+- #134 - All resources get all methods defined on any resource
 - #142 - Allow omitting options in getEndpoint
 
 ##### 2.0.0-beta.4 - 28 April 2015
