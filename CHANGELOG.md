@@ -1,3 +1,8 @@
+##### 2.0.0-beta.10 - 26 June 2015
+
+###### Backwards compatible bug fixes
+- Fix so `DS#loadRelations` can load all relations
+
 ##### 2.0.0-beta.9 - 26 June 2015
 
 ###### Breaking API changes
