@@ -21,6 +21,8 @@ export default function loadRelations(resourceName, instance, relations, options
       relations = [relations];
     }
 
+    relations = relations || [];
+
     if (!definition) {
       reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils._o(instance)) {
@@ -39,7 +41,7 @@ export default function loadRelations(resourceName, instance, relations, options
         let __options = DSUtils._(relationDef, options);
 
         // relations can be loaded based on resource name or field name
-        if (DSUtils.contains(relations, relationName) || DSUtils.contains(relations, def.localField)) {
+        if (!relations.length || DSUtils.contains(relations, relationName) || DSUtils.contains(relations, def.localField)) {
           let task;
           let params = {};
           if (__options.allowSimpleWhere) {
