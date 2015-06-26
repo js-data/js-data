@@ -312,4 +312,22 @@ describe('DS#inject', function () {
     }
     assert.isTrue(foundParent, 'parent is enumerable');
   });
+  it('should replace existing items', function () {
+    var post = Post.inject(p1);
+    post.foo = 'bar';
+    post.beep = 'boop';
+    assert.deepEqual(JSON.stringify(post), JSON.stringify({
+      author: 'John',
+      age: 30,
+      id: 5,
+      foo: 'bar',
+      beep: 'boop'
+    }));
+    post = Post.inject(p1, { onConflict: 'replace' });
+    assert.deepEqual(JSON.stringify(post), JSON.stringify({
+      author: 'John',
+      age: 30,
+      id: 5
+    }));
+  });
 });

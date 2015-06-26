@@ -121,6 +121,7 @@ defaultsPrototype.maxAge = false;
 defaultsPrototype.methods = {};
 defaultsPrototype.notify = !!DSUtils.w;
 defaultsPrototype.omit = [];
+defaultsPrototype.onConflict= 'merge';
 defaultsPrototype.reapAction = !!DSUtils.w ? 'inject' : 'none';
 defaultsPrototype.reapInterval = !!DSUtils.w ? 30000 : false;
 defaultsPrototype.relationsEnumerable = false;
