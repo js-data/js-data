@@ -472,6 +472,7 @@ export default {
   get,
   intersection,
   isArray,
+  isBlacklisted: observe.isBlacklisted,
   isBoolean,
   isDate,
   isEmpty,
@@ -482,6 +483,18 @@ export default {
   isString,
   makePath,
   observe,
+  omit(obj, bl) {
+    let toRemove = [];
+    forOwn(obj, (v, k) => {
+      if (observe.isBlacklisted(k, bl)) {
+        toRemove.push(k);
+      }
+    });
+    forEach(toRemove, k => {
+      delete obj[k];
+    });
+    return obj;
+  },
   pascalCase,
   pick,
   // Turn the given node-style callback function into one that can return a promise.
@@ -566,11 +579,20 @@ export default {
   },
   resolveItem,
   resolveId,
+  respond(response, meta, options) {
+    if (options.returnMeta === 'array') {
+      return [response, meta];
+    } else if (options.returnMeta === 'object') {
+      return {response, meta};
+    } else {
+      return response;
+    }
+  },
   w,
   /**
    * This is where the magic of relations happens.
    */
-  applyRelationGettersToTarget(store, definition, target) {
+    applyRelationGettersToTarget(store, definition, target) {
     this.forEach(definition.relationList, def => {
       let relationName = def.relation;
       let enumerable = typeof def.enumerable === 'boolean' ? def.enumerable : !!definition.relationsEnumerable;

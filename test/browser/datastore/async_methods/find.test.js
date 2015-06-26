@@ -202,4 +202,96 @@ describe('DS#find', function () {
       assert.equal(localStorage.getItem(store.adapters.localstorage.getIdPath(Thing, Thing, thing.id)), DSUtils.toJson(thing));
     });
   });
+  it('should get an item from the server and return metadata as array', function () {
+    var _this = this;
+
+    // Respond to the request
+    setTimeout(function () {
+      assert.equal(1, _this.requests.length);
+      assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, JSON.stringify(p1));
+    }, 100);
+
+    return Post.find(5, { returnMeta: 'array' })
+      .spread(function (post, meta) {
+        assert.isTrue(meta.adapter === 'http');
+        assert.deepEqual(JSON.stringify(post), JSON.stringify(p1));
+        assert.deepEqual(JSON.stringify(Post.get(5)), JSON.stringify(p1), 'The post is now in the datastore');
+        assert.isNumber(Post.lastModified(5));
+        assert.isNumber(Post.lastSaved(5));
+        assert.equal(1, _this.requests.length);
+        assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
+
+        // Should not make a request because the request was already completed
+        return Post.find(5, { returnMeta: 'array' });
+      })
+      .spread(function (post, meta) {
+        assert.isUndefined(meta.adapter);
+        assert.deepEqual(JSON.stringify(post), JSON.stringify(p1));
+        setTimeout(function () {
+          assert.equal(2, _this.requests.length);
+          assert.equal(_this.requests[1].url, 'http://test.js-data.io/posts/5');
+          _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, JSON.stringify(p1));
+        }, 100);
+
+        // Should make a request because bypassCache is set to true
+        return Post.find(5, { bypassCache: true });
+      })
+      .then(function (post) {
+        assert.deepEqual(JSON.stringify(post), JSON.stringify(p1));
+
+        assert.equal(lifecycle.beforeInject.callCount, 2, 'beforeInject should have been called');
+        assert.equal(lifecycle.afterInject.callCount, 2, 'afterInject should have been called');
+        assert.equal(lifecycle.serialize.callCount, 0, 'serialize should have been called');
+        assert.equal(lifecycle.deserialize.callCount, 2, 'deserialize should have been called');
+      });
+  });
+  it('should get an item from the server and return metadata as object', function () {
+    var _this = this;
+
+    // Respond to the request
+    setTimeout(function () {
+      assert.equal(1, _this.requests.length);
+      assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, JSON.stringify(p1));
+    }, 100);
+
+    return Post.find(5, { returnMeta: 'object' })
+      .then(function (response) {
+        var post = response.response;
+        var meta = response.meta;
+        assert.isTrue(meta.adapter === 'http');
+        assert.deepEqual(JSON.stringify(post), JSON.stringify(p1));
+        assert.deepEqual(JSON.stringify(Post.get(5)), JSON.stringify(p1), 'The post is now in the datastore');
+        assert.isNumber(Post.lastModified(5));
+        assert.isNumber(Post.lastSaved(5));
+        assert.equal(1, _this.requests.length);
+        assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
+
+        // Should not make a request because the request was already completed
+        return Post.find(5, { returnMeta: 'object' });
+      })
+      .then(function (response) {
+        var post = response.response;
+        var meta = response.meta;
+        assert.isUndefined(meta.adapter);
+        assert.deepEqual(JSON.stringify(post), JSON.stringify(p1));
+        setTimeout(function () {
+          assert.equal(2, _this.requests.length);
+          assert.equal(_this.requests[1].url, 'http://test.js-data.io/posts/5');
+          _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, JSON.stringify(p1));
+        }, 100);
+
+        // Should make a request because bypassCache is set to true
+        return Post.find(5, { bypassCache: true });
+      })
+      .then(function (post) {
+        assert.deepEqual(JSON.stringify(post), JSON.stringify(p1));
+
+        assert.equal(lifecycle.beforeInject.callCount, 2, 'beforeInject should have been called');
+        assert.equal(lifecycle.afterInject.callCount, 2, 'afterInject should have been called');
+        assert.equal(lifecycle.serialize.callCount, 0, 'serialize should have been called');
+        assert.equal(lifecycle.deserialize.callCount, 2, 'deserialize should have been called');
+      });
+  });
 });

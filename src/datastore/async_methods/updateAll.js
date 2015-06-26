@@ -11,6 +11,7 @@ export default function updateAll(resourceName, attrs, params, options) {
   let _this = this;
   let {utils: DSUtils, errors: DSErrors} = _this;
   let definition = _this.defs[resourceName];
+  let adapter;
 
   return new DSUtils.Promise((resolve, reject) => {
     if (!definition) {
@@ -30,7 +31,8 @@ export default function updateAll(resourceName, attrs, params, options) {
       if (options.notify) {
         definition.emit('DS.beforeUpdate', definition, attrs);
       }
-      return definition.getAdapter(options).updateAll(definition, attrs, params, options);
+      adapter = definition.getAdapterName(options);
+      return _this.adapters[adapter].updateAll(definition, DSUtils.omit(attrs, options.omit), params, options);
     })
     .then(data => options.afterUpdate.call(data, options, data))
     .then(data => {
@@ -59,5 +61,8 @@ export default function updateAll(resourceName, attrs, params, options) {
         });
         return instances;
       }
+    })
+    .then(items => {
+      return DSUtils.respond(items, {adapter}, options);
     });
 }

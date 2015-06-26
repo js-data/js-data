@@ -20,6 +20,7 @@ export default function find(resourceName, id, options) {
   let DSUtils = _this.utils;
   let definition = _this.defs[resourceName];
   let resource = _this.s[resourceName];
+  let adapter;
 
   return new DSUtils.Promise((resolve, reject) => {
     if (!definition) {
@@ -55,7 +56,8 @@ export default function find(resourceName, id, options) {
           // try subsequent adapters if the preceeding one fails
           if (strategy === 'fallback') {
             function makeFallbackCall(index) {
-              return definition.getAdapter((options.findFallbackAdapters || options.fallbackAdapters)[index]).find(definition, id, options)['catch'](err => {
+              adapter = definition.getAdapterName((options.findFallbackAdapters || options.fallbackAdapters)[index]);
+              return _this.adapters[adapter].find(definition, id, options)['catch'](err => {
                 index++;
                 if (index < options.fallbackAdapters.length) {
                   return makeFallbackCall(index);
@@ -64,10 +66,12 @@ export default function find(resourceName, id, options) {
                 }
               });
             }
+
             promise = makeFallbackCall(0);
           } else {
+            adapter = definition.getAdapterName(options);
             // just make a single attempt
-            promise = definition.getAdapter(options).find(definition, id, options);
+            promise = _this.adapters[adapter].find(definition, id, options);
           }
 
           resource.pendingQueries[id] = promise.then(data => {
@@ -91,6 +95,8 @@ export default function find(resourceName, id, options) {
         // resolve immediately with the item
         return item;
       }
+    }).then(item => {
+      return DSUtils.respond(item, {adapter}, options);
     })['catch'](err => {
     if (resource) {
       delete resource.pendingQueries[id];

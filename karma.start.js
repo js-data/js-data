@@ -106,6 +106,7 @@ beforeEach(function () {
     afterDestroy: lifecycle.afterDestroy,
     beforeInject: lifecycle.beforeInject,
     afterInject: lifecycle.afterInject,
+    omit: ['omit_this'],
     log: false,
     methods: {
       say: function () {

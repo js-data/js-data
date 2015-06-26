@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 2.0.0-beta.8 - Homepage <http://www.js-data.io/>
+ * @version 2.0.0-beta.9 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -84,12 +84,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new _datastoreIndex['default'](options);
 	  },
 	  version: {
-	    full: '2.0.0-beta.8',
+	    full: '2.0.0-beta.9',
 	    major: parseInt('2', 10),
 	    minor: parseInt('0', 10),
 	    patch: parseInt('0', 10),
 	    alpha: true ? 'false' : false,
-	    beta: true ? '8' : false
+	    beta: true ? '9' : false
 	  }
 	};
 
@@ -262,9 +262,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	defaultsPrototype.maxAge = false;
 	defaultsPrototype.methods = {};
 	defaultsPrototype.notify = !!_utils['default'].w;
+	defaultsPrototype.omit = [];
 	defaultsPrototype.reapAction = !!_utils['default'].w ? 'inject' : 'none';
 	defaultsPrototype.reapInterval = !!_utils['default'].w ? 30000 : false;
 	defaultsPrototype.relationsEnumerable = false;
+	defaultsPrototype.returnMeta = false;
 	defaultsPrototype.resetHistoryOnInject = true;
 	defaultsPrototype.strategy = 'single';
 	defaultsPrototype.upsert = !!_utils['default'].w;
@@ -462,31 +464,51 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _this.defaults = new Defaults();
 	    _this.observe = _utils['default'].observe;
 	    _utils['default'].forOwn(options, function (v, k) {
-	      _this.defaults[k] = v;
+	      if (k === 'omit') {
+	        _this.defaults.omit = v.concat(Defaults.prototype.omit);
+	      } else {
+	        _this.defaults[k] = v;
+	      }
 	    });
 	    _this.defaults.logFn('new data store created', _this.defaults);
+
+	    var P = _utils['default'].Promise;
+
+	    if (P && !P.prototype.spread) {
+	      P.prototype.spread = function (cb) {
+	        return this.then(function (arr) {
+	          return cb.apply(this, arr);
+	        });
+	      };
+	    }
 	  }
 
 	  _createClass(DS, [{
-	    key: 'getAdapter',
-	    value: function getAdapter(options) {
+	    key: 'getAdapterName',
+	    value: function getAdapterName(options) {
 	      var errorIfNotExist = false;
 	      options = options || {};
-	      this.defaults.logFn('getAdapter', options);
+	      this.defaults.logFn('getAdapterName', options);
 	      if (_utils['default']._s(options)) {
 	        errorIfNotExist = true;
 	        options = {
 	          adapter: options
 	        };
 	      }
-	      var adapter = this.adapters[options.adapter];
-	      if (adapter) {
-	        return adapter;
+	      if (this.adapters[options.adapter]) {
+	        return options.adapter;
 	      } else if (errorIfNotExist) {
-	        throw new Error('' + options.adapter + ' is not a registered adapter!');
+	        throw new Error(options.adapter + ' is not a registered adapter!');
 	      } else {
-	        return this.adapters[options.defaultAdapter];
+	        return options.defaultAdapter;
 	      }
+	    }
+	  }, {
+	    key: 'getAdapter',
+	    value: function getAdapter(options) {
+	      options = options || {};
+	      this.defaults.logFn('getAdapter', options);
+	      return this.adapters[this.getAdapterName(options)];
 	    }
 	  }, {
 	    key: 'registerAdapter',
@@ -520,6 +542,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var dsPrototype = DS.prototype;
 
+	dsPrototype.getAdapterName.shorthand = false;
 	dsPrototype.getAdapter.shorthand = false;
 	dsPrototype.registerAdapter.shorthand = false;
 	dsPrototype.errors = _errors['default'];
@@ -550,7 +573,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	function _defineProperty(obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); }
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 	/* jshint eqeqeq:false */
 
@@ -653,18 +676,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  } else if (typeof val === 'string' || isArray(val)) {
 	    return !val.length;
 	  } else if (typeof val === 'object') {
-	    var _ret = (function () {
-	      var result = true;
-	      forOwn(val, function () {
-	        result = false;
-	        return false; // break loop
-	      });
-	      return {
-	        v: result
-	      };
-	    })();
-
-	    if (typeof _ret === 'object') return _ret.v;
+	    var result = true;
+	    forOwn(val, function () {
+	      result = false;
+	      return false; // break loop
+	    });
+	    return result;
 	  } else {
 	    return true;
 	  }
@@ -1047,6 +1064,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  get: get,
 	  intersection: intersection,
 	  isArray: isArray,
+	  isBlacklisted: observe.isBlacklisted,
 	  isBoolean: isBoolean,
 	  isDate: isDate,
 	  isEmpty: isEmpty,
@@ -1057,6 +1075,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  isString: isString,
 	  makePath: makePath,
 	  observe: observe,
+	  omit: function omit(obj, bl) {
+	    var toRemove = [];
+	    forOwn(obj, function (v, k) {
+	      if (observe.isBlacklisted(k, bl)) {
+	        toRemove.push(k);
+	      }
+	    });
+	    forEach(toRemove, function (k) {
+	      delete obj[k];
+	    });
+	    return obj;
+	  },
 	  pascalCase: pascalCase,
 	  pick: pick,
 	  // Turn the given node-style callback function into one that can return a promise.
@@ -1145,6 +1175,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  resolveItem: resolveItem,
 	  resolveId: resolveId,
+	  respond: function respond(response, meta, options) {
+	    if (options.returnMeta === 'array') {
+	      return [response, meta];
+	    } else if (options.returnMeta === 'object') {
+	      return { response: response, meta: meta };
+	    } else {
+	      return response;
+	    }
+	  },
 	  w: w,
 	  /**
 	   * This is where the magic of relations happens.
@@ -1215,7 +1254,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
@@ -1276,7 +1315,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      Error.captureStackTrace(this, this.constructor);
 	    }
 	    this.type = this.constructor.name;
-	    this.message = '' + resourceName + ' is not a registered resource!';
+	    this.message = resourceName + ' is not a registered resource!';
 	  }
 
 	  _inherits(NonexistentResourceError, _Error3);
@@ -1735,25 +1774,25 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _create = __webpack_require__(33);
+	var _create = __webpack_require__(30);
 
-	var _destroy = __webpack_require__(34);
+	var _destroy = __webpack_require__(31);
 
-	var _destroyAll = __webpack_require__(35);
+	var _destroyAll = __webpack_require__(32);
 
-	var _find = __webpack_require__(36);
+	var _find = __webpack_require__(33);
 
-	var _findAll = __webpack_require__(37);
+	var _findAll = __webpack_require__(34);
 
-	var _loadRelations = __webpack_require__(38);
+	var _loadRelations = __webpack_require__(35);
 
-	var _reap = __webpack_require__(39);
+	var _reap = __webpack_require__(36);
 
-	var _save = __webpack_require__(40);
+	var _save = __webpack_require__(37);
 
-	var _update = __webpack_require__(41);
+	var _update = __webpack_require__(38);
 
-	var _updateAll = __webpack_require__(42);
+	var _updateAll = __webpack_require__(39);
 
 	exports['default'] = {
 	  create: _create['default'],
@@ -2329,6 +2368,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // If we're in the browser, export as a global object.
 
 	  global.Observer = Observer;
+	  global.isBlacklisted = isBlacklisted;
 	  global.Observer.runEOM_ = runEOM;
 	  global.Observer.observerSentinel_ = observerSentinel; // for testing.
 	  global.Observer.hasObjectObserve = hasObserve;
@@ -2855,7 +2895,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var namespace = __webpack_require__(30);
+	var namespace = __webpack_require__(40);
 
 	    /**
 	     * set "nested" object property
@@ -2878,8 +2918,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(31);
-	var camelCase = __webpack_require__(32);
+	var toString = __webpack_require__(41);
+	var camelCase = __webpack_require__(42);
 	var upperCase = __webpack_require__(19);
 	    /**
 	     * camelCase + UPPERCASE first char
@@ -2897,7 +2937,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(31);
+	var toString = __webpack_require__(41);
 	    /**
 	     * "Safer" String.toUpperCase()
 	     */
@@ -3131,7 +3171,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  } else if (!_utils['default']._s(definition.name)) {
 	    throw new _errors['default'].IA('"name" must be a string!');
 	  } else if (definitions[definition.name]) {
-	    throw new _errors['default'].R('' + definition.name + ' is already registered!');
+	    throw new _errors['default'].R(definition.name + ' is already registered!');
 	  }
 
 	  /**
@@ -3326,6 +3366,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // Setup the relation links
 	      _utils['default'].applyRelationGettersToTarget(_this, def, def[_class].prototype);
 
+	      var parentOmit = null;
+	      if (!def.hasOwnProperty('omit')) {
+	        parentOmit = def.omit;
+	        def.omit = [];
+	      } else {
+	        parentOmit = _this.defaults.omit;
+	      }
+	      def.omit = def.omit.concat(parentOmit || []);
+
 	      // Prepare for computed properties
 	      _utils['default'].forOwn(def.computed, function (fn, field) {
 	        if (_utils['default'].isFunction(fn)) {
@@ -3335,6 +3384,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (def.methods && field in def.methods) {
 	          def.errorFn('Computed property "' + field + '" conflicts with previously defined prototype method!');
 	        }
+	        def.omit.push(field);
 	        var deps;
 	        if (fn.length === 1) {
 	          var match = fn[0].toString().match(/function.*?\(([\s\S]*?)\)/);
@@ -3409,8 +3459,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 
 	      // proxy DS methods with shorthand ones
-	      var fns = ['registerAdapter', 'getAdapter', 'is'];
-	      for (key in _this) {
+	      var fns = ['registerAdapter', 'getAdapterName', 'getAdapter', 'is'];
+	      for (var key in _this) {
 	        if (typeof _this[key] === 'function') {
 	          fns.push(key);
 	        }
@@ -3893,7 +3943,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (!(idA in attrs)) {
 	      // we cannot inject any object into the store that does not have a primary key!
-	      var error = new _errors['default'].R('' + definition.name + '.inject: "attrs" must contain the property specified by "idAttribute"!');
+	      var error = new _errors['default'].R(definition.name + '.inject: "attrs" must contain the property specified by "idAttribute"!');
 	      options.errorFn(error);
 	      throw error;
 	    } else {
@@ -3907,7 +3957,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          var toInject = attrs[def.localField];
 	          if (toInject) {
 	            if (!relationDef) {
-	              throw new _errors['default'].R('' + definition.name + ' relation is defined but the resource is not!');
+	              throw new _errors['default'].R(definition.name + ' relation is defined but the resource is not!');
 	            }
 	            // handle injecting hasMany relations
 	            if (_utils['default']._a(toInject)) {
@@ -4041,7 +4091,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!definition) {
 	    throw new _errors['default'].NER(resourceName);
 	  } else if (!_utils['default']._o(attrs) && !_utils['default']._a(attrs)) {
-	    throw new _errors['default'].IA('' + resourceName + '.inject: "attrs" must be an object or an array!');
+	    throw new _errors['default'].IA(resourceName + '.inject: "attrs" must be an object or an array!');
 	  }
 
 	  options = _utils['default']._(definition, options);
@@ -4072,76 +4122,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var forEach = __webpack_require__(8);
-
-	    /**
-	     * Create nested object if non-existent
-	     */
-	    function namespace(obj, path){
-	        if (!path) return obj;
-	        forEach(path.split('.'), function(key){
-	            if (!obj[key]) {
-	                obj[key] = {};
-	            }
-	            obj = obj[key];
-	        });
-	        return obj;
-	    }
-
-	    module.exports = namespace;
-
-
-
-
-/***/ },
-/* 31 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Typecast a value to a String, using an empty string value for null or
-	     * undefined.
-	     */
-	    function toString(val){
-	        return val == null ? '' : val.toString();
-	    }
-
-	    module.exports = toString;
-
-
-
-
-/***/ },
-/* 32 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(31);
-	var replaceAccents = __webpack_require__(43);
-	var removeNonWord = __webpack_require__(44);
-	var upperCase = __webpack_require__(19);
-	var lowerCase = __webpack_require__(45);
-	    /**
-	    * Convert string to camelCase text.
-	    */
-	    function camelCase(str){
-	        str = toString(str);
-	        str = replaceAccents(str);
-	        str = removeNonWord(str)
-	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
-	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
-	            .replace(/\s+/g, '') //remove spaces
-	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
-	        return str;
-	    }
-	    module.exports = camelCase;
-
-
-
-/***/ },
-/* 33 */
-/***/ function(module, exports, __webpack_require__) {
-
 	exports['default'] = create;
 	/**
 	 * Using an adapter, create a new item.
@@ -4166,6 +4146,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var _this = this;
 	  var DSUtils = _this.utils;
 	  var definition = _this.defs[resourceName];
+	  var adapter = undefined;
 
 	  options = options || {};
 	  attrs = attrs || {};
@@ -4203,7 +4184,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (options.notify) {
 	      definition.emit('DS.beforeCreate', definition, attrs);
 	    }
-	    return _this.getAdapter(options).create(definition, attrs, options);
+	    adapter = _this.getAdapterName(options);
+	    return _this.adapters[adapter].create(definition, DSUtils.omit(attrs, options.omit), options);
 	  }).then(function (attrs) {
 	    return options.afterCreate.call(attrs, options, attrs);
 	  }).then(function (attrs) {
@@ -4223,11 +4205,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // just return an un-injected instance
 	      return _this.createInstance(resourceName, attrs, options);
 	    }
+	  }).then(function (item) {
+	    return DSUtils.respond(item, { adapter: adapter }, options);
 	  });
 	}
 
 /***/ },
-/* 34 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = destroy;
@@ -4249,6 +4233,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSUtils = _this.utils;
 	  var definition = _this.defs[resourceName];
 	  var item = undefined;
+	  var adapter = undefined;
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    id = DSUtils.resolveId(definition, id);
@@ -4275,7 +4260,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (options.eagerEject) {
 	      definition.eject(id);
 	    }
-	    return definition.getAdapter(options).destroy(definition, id, options);
+	    adapter = definition.getAdapter(options);
+	    return adapter.destroy(definition, id, options);
 	  }).then(function () {
 	    return options.afterDestroy.call(item, options, item);
 	  }).then(function (item) {
@@ -4284,7 +4270,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    // make sure the item is removed from the store
 	    definition.eject(id);
-	    return id;
+	    return DSUtils.respond(id, { adapter: adapter }, options);
 	  })['catch'](function (err) {
 	    // rollback by re-injecting the item into the store
 	    if (options && options.eagerEject && item) {
@@ -4295,7 +4281,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 35 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = destroyAll;
@@ -4317,7 +4303,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSUtils = _this.utils;
 	  var definition = _this.defs[resourceName];
 	  var ejected = undefined,
-	      toEject = undefined;
+	      toEject = undefined,
+	      adapter = undefined;
 
 	  params = params || {};
 
@@ -4343,7 +4330,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (options.eagerEject) {
 	      ejected = definition.ejectAll(params);
 	    }
-	    return definition.getAdapter(options).destroyAll(definition, params, options);
+	    adapter = definition.getAdapterName(options);
+	    return _this.adapters[adapter].destroyAll(definition, params, options);
 	  }).then(function () {
 	    return options.afterDestroy(options, toEject);
 	  }).then(function () {
@@ -4352,6 +4340,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    // make sure items are removed from the store
 	    return ejected || definition.ejectAll(params);
+	  }).then(function (items) {
+	    return DSUtils.respond(items, { adapter: adapter }, options);
 	  })['catch'](function (err) {
 	    // rollback by re-injecting the items into the store
 	    if (options && options.eagerEject && ejected) {
@@ -4362,7 +4352,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 36 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = find;
@@ -4389,6 +4379,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSUtils = _this.utils;
 	  var definition = _this.defs[resourceName];
 	  var resource = _this.s[resourceName];
+	  var adapter = undefined;
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    if (!definition) {
@@ -4424,8 +4415,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // try subsequent adapters if the preceeding one fails
 	        if (strategy === 'fallback') {
 	          (function () {
-	            var makeFallbackCall = function (index) {
-	              return definition.getAdapter((options.findFallbackAdapters || options.fallbackAdapters)[index]).find(definition, id, options)['catch'](function (err) {
+	            var makeFallbackCall = function makeFallbackCall(index) {
+	              adapter = definition.getAdapterName((options.findFallbackAdapters || options.fallbackAdapters)[index]);
+	              return _this.adapters[adapter].find(definition, id, options)['catch'](function (err) {
 	                index++;
 	                if (index < options.fallbackAdapters.length) {
 	                  return makeFallbackCall(index);
@@ -4438,8 +4430,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            promise = makeFallbackCall(0);
 	          })();
 	        } else {
+	          adapter = definition.getAdapterName(options);
 	          // just make a single attempt
-	          promise = definition.getAdapter(options).find(definition, id, options);
+	          promise = _this.adapters[adapter].find(definition, id, options);
 	        }
 
 	        resource.pendingQueries[id] = promise.then(function (data) {
@@ -4463,6 +4456,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // resolve immediately with the item
 	      return item;
 	    }
+	  }).then(function (item) {
+	    return DSUtils.respond(item, { adapter: adapter }, options);
 	  })['catch'](function (err) {
 	    if (resource) {
 	      delete resource.pendingQueries[id];
@@ -4472,7 +4467,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 37 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = findAll;
@@ -4529,7 +4524,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSUtils = _this.utils;
 	  var definition = _this.defs[resourceName];
 	  var resource = _this.s[resourceName];
-	  var queryHash = undefined;
+	  var queryHash = undefined,
+	      adapter = undefined;
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    params = params || {};
@@ -4573,8 +4569,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // try subsequent adapters if the preceeding one fails
 	        if (strategy === 'fallback') {
 	          (function () {
-	            var makeFallbackCall = function (index) {
-	              return definition.getAdapter((options.findAllFallbackAdapters || options.fallbackAdapters)[index]).findAll(definition, params, options)['catch'](function (err) {
+	            var makeFallbackCall = function makeFallbackCall(index) {
+	              adapter = definition.getAdapterName((options.findAllFallbackAdapters || options.fallbackAdapters)[index]);
+	              return _this.adapters[adapter].findAll(definition, params, options)['catch'](function (err) {
 	                index++;
 	                if (index < options.fallbackAdapters.length) {
 	                  return makeFallbackCall(index);
@@ -4587,8 +4584,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            promise = makeFallbackCall(0);
 	          })();
 	        } else {
+	          adapter = definition.getAdapterName(options);
 	          // just make a single attempt
-	          promise = definition.getAdapter(options).findAll(definition, params, options);
+	          promise = _this.adapters[adapter].findAll(definition, params, options);
 	        }
 
 	        resource.pendingQueries[queryHash] = promise.then(function (data) {
@@ -4613,6 +4611,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // resolve immediately with the items
 	      return items;
 	    }
+	  }).then(function (items) {
+	    return DSUtils.respond(items, { adapter: adapter }, options);
 	  })['catch'](function (err) {
 	    if (resource) {
 	      delete resource.pendingQueries[queryHash];
@@ -4622,12 +4622,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 38 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = loadRelations;
 
-	function _defineProperty(obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); }
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 	/**
 	 * Load the specified relations for the given instance.
@@ -4723,7 +4723,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 39 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = reap;
@@ -4814,7 +4814,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 40 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = save;
@@ -4834,8 +4834,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var definition = _this.defs[resourceName];
 	  var resource = _this.s[resourceName];
-	  var item = undefined;
-	  var noChanges = undefined;
+	  var item = undefined,
+	      noChanges = undefined,
+	      adapter = undefined;
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    id = DSUtils.resolveId(definition, id);
@@ -4891,7 +4892,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        attrs = changes;
 	      }
 	    }
-	    return definition.getAdapter(options).update(definition, id, attrs, options);
+	    adapter = definition.getAdapterName(options);
+	    return _this.adapters[adapter].update(definition, id, DSUtils.omit(attrs, options.omit), options);
 	  }).then(function (data) {
 	    return options.afterUpdate.call(data, options, data);
 	  }).then(function (attrs) {
@@ -4915,11 +4917,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // just return an instance
 	      return definition.createInstance(attrs, options.orig());
 	    }
+	  }).then(function (item) {
+	    return DSUtils.respond(item, { adapter: adapter }, options);
 	  });
 	}
 
 /***/ },
-/* 41 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = update;
@@ -4939,6 +4943,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSErrors = _this.errors;
 
 	  var definition = _this.defs[resourceName];
+	  var adapter = undefined;
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    id = DSUtils.resolveId(definition, id);
@@ -4965,7 +4970,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (options.notify) {
 	      definition.emit('DS.beforeUpdate', definition, attrs);
 	    }
-	    return definition.getAdapter(options).update(definition, id, attrs, options);
+	    adapter = definition.getAdapterName(options);
+	    return _this.adapters[adapter].update(definition, id, DSUtils.omit(attrs, options.omit), options);
 	  }).then(function (data) {
 	    return options.afterUpdate.call(data, options, data);
 	  }).then(function (attrs) {
@@ -4987,11 +4993,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // just return an instance
 	      return definition.createInstance(attrs, options.orig());
 	    }
+	  }).then(function (item) {
+	    return DSUtils.respond(item, { adapter: adapter }, options);
 	  });
 	}
 
 /***/ },
-/* 42 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = updateAll;
@@ -5011,6 +5019,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSErrors = _this.errors;
 
 	  var definition = _this.defs[resourceName];
+	  var adapter = undefined;
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    if (!definition) {
@@ -5034,7 +5043,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (options.notify) {
 	      definition.emit('DS.beforeUpdate', definition, attrs);
 	    }
-	    return definition.getAdapter(options).updateAll(definition, attrs, params, options);
+	    adapter = definition.getAdapterName(options);
+	    return _this.adapters[adapter].updateAll(definition, DSUtils.omit(attrs, options.omit), params, options);
 	  }).then(function (data) {
 	    return options.afterUpdate.call(data, options, data);
 	  }).then(function (data) {
@@ -5075,14 +5085,86 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      if (typeof _ret2 === 'object') return _ret2.v;
 	    }
+	  }).then(function (items) {
+	    return DSUtils.respond(items, { adapter: adapter }, options);
 	  });
 	}
+
+/***/ },
+/* 40 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var forEach = __webpack_require__(8);
+
+	    /**
+	     * Create nested object if non-existent
+	     */
+	    function namespace(obj, path){
+	        if (!path) return obj;
+	        forEach(path.split('.'), function(key){
+	            if (!obj[key]) {
+	                obj[key] = {};
+	            }
+	            obj = obj[key];
+	        });
+	        return obj;
+	    }
+
+	    module.exports = namespace;
+
+
+
+
+/***/ },
+/* 41 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Typecast a value to a String, using an empty string value for null or
+	     * undefined.
+	     */
+	    function toString(val){
+	        return val == null ? '' : val.toString();
+	    }
+
+	    module.exports = toString;
+
+
+
+
+/***/ },
+/* 42 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var toString = __webpack_require__(41);
+	var replaceAccents = __webpack_require__(43);
+	var removeNonWord = __webpack_require__(44);
+	var upperCase = __webpack_require__(19);
+	var lowerCase = __webpack_require__(45);
+	    /**
+	    * Convert string to camelCase text.
+	    */
+	    function camelCase(str){
+	        str = toString(str);
+	        str = replaceAccents(str);
+	        str = removeNonWord(str)
+	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
+	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
+	            .replace(/\s+/g, '') //remove spaces
+	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
+	        return str;
+	    }
+	    module.exports = camelCase;
+
+
 
 /***/ },
 /* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(31);
+	var toString = __webpack_require__(41);
 	    /**
 	    * Replaces all accented chars with regular ones
 	    */
@@ -5124,7 +5206,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(31);
+	var toString = __webpack_require__(41);
 	    // This pattern is generated by the _build/pattern-removeNonWord.js script
 	    var PATTERN = /[^\x20\x2D0-9A-Z\x5Fa-z\xC0-\xD6\xD8-\xF6\xF8-\xFF]/g;
 
@@ -5144,7 +5226,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(31);
+	var toString = __webpack_require__(41);
 	    /**
 	     * "Safer" String.toLowerCase()
 	     */

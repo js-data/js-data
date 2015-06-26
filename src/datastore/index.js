@@ -124,9 +124,11 @@ defaultsPrototype.logFn = function (a, b, c, d) {
 defaultsPrototype.maxAge = false;
 defaultsPrototype.methods = {};
 defaultsPrototype.notify = !!DSUtils.w;
+defaultsPrototype.omit = [];
 defaultsPrototype.reapAction = !!DSUtils.w ? 'inject' : 'none';
 defaultsPrototype.reapInterval = !!DSUtils.w ? 30000 : false;
 defaultsPrototype.relationsEnumerable = false;
+defaultsPrototype.returnMeta = false;
 defaultsPrototype.resetHistoryOnInject = true;
 defaultsPrototype.strategy = 'single';
 defaultsPrototype.upsert = !!DSUtils.w;
@@ -322,29 +324,48 @@ class DS {
     _this.defaults = new Defaults();
     _this.observe = DSUtils.observe;
     DSUtils.forOwn(options, (v, k) => {
-      _this.defaults[k] = v;
+      if (k === 'omit') {
+        _this.defaults.omit = v.concat(Defaults.prototype.omit);
+      } else {
+        _this.defaults[k] = v;
+      }
     });
     _this.defaults.logFn('new data store created', _this.defaults);
+
+    let P = DSUtils.Promise;
+
+    if (P && !P.prototype.spread) {
+      P.prototype.spread = function (cb) {
+        return this.then(function (arr) {
+          return cb.apply(this, arr);
+        });
+      };
+    }
   }
 
-  getAdapter(options) {
+  getAdapterName(options) {
     let errorIfNotExist = false;
     options = options || {};
-    this.defaults.logFn('getAdapter', options);
+    this.defaults.logFn('getAdapterName', options);
     if (DSUtils._s(options)) {
       errorIfNotExist = true;
       options = {
         adapter: options
       };
     }
-    let adapter = this.adapters[options.adapter];
-    if (adapter) {
-      return adapter;
+    if (this.adapters[options.adapter]) {
+      return options.adapter;
     } else if (errorIfNotExist) {
       throw new Error(`${options.adapter} is not a registered adapter!`);
     } else {
-      return this.adapters[options.defaultAdapter];
+      return options.defaultAdapter;
     }
+  }
+
+  getAdapter(options) {
+    options = options || {};
+    this.defaults.logFn('getAdapter', options);
+    return this.adapters[this.getAdapterName(options)];
   }
 
   registerAdapter(name, Adapter, options) {
@@ -373,6 +394,7 @@ class DS {
 
 var dsPrototype = DS.prototype;
 
+dsPrototype.getAdapterName.shorthand = false;
 dsPrototype.getAdapter.shorthand = false;
 dsPrototype.registerAdapter.shorthand = false;
 dsPrototype.errors = DSErrors;
