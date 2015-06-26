@@ -15,6 +15,7 @@ export default function destroy(resourceName, id, options) {
   let DSUtils = _this.utils;
   let definition = _this.defs[resourceName];
   let item;
+  let adapter;
 
   return new DSUtils.Promise((resolve, reject) => {
     id = DSUtils.resolveId(definition, id);
@@ -40,7 +41,8 @@ export default function destroy(resourceName, id, options) {
       if (options.eagerEject) {
         definition.eject(id);
       }
-      return definition.getAdapter(options).destroy(definition, id, options);
+      adapter = definition.getAdapter(options);
+      return adapter.destroy(definition, id, options);
     })
     .then(() => options.afterDestroy.call(item, options, item))
     .then(item => {
@@ -49,7 +51,7 @@ export default function destroy(resourceName, id, options) {
       }
       // make sure the item is removed from the store
       definition.eject(id);
-      return id;
+      return DSUtils.respond(id, {adapter}, options);
     })['catch'](err => {
     // rollback by re-injecting the item into the store
     if (options && options.eagerEject && item) {

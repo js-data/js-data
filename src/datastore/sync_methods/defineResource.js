@@ -230,6 +230,15 @@ export default function defineResource(definition) {
     // Setup the relation links
     DSUtils.applyRelationGettersToTarget(_this, def, def[_class].prototype);
 
+    let parentOmit = null;
+    if (!def.hasOwnProperty('omit')) {
+      parentOmit = def.omit;
+      def.omit = [];
+    } else {
+      parentOmit = _this.defaults.omit;
+    }
+    def.omit = def.omit.concat(parentOmit || []);
+
     // Prepare for computed properties
     DSUtils.forOwn(def.computed, (fn, field) => {
       if (DSUtils.isFunction(fn)) {
@@ -239,6 +248,7 @@ export default function defineResource(definition) {
       if (def.methods && field in def.methods) {
         def.errorFn(`Computed property "${field}" conflicts with previously defined prototype method!`);
       }
+      def.omit.push(field);
       var deps;
       if (fn.length === 1) {
         let match = fn[0].toString().match(/function.*?\(([\s\S]*?)\)/);
@@ -299,8 +309,8 @@ export default function defineResource(definition) {
     }
 
     // proxy DS methods with shorthand ones
-    let fns = ['registerAdapter', 'getAdapter', 'is'];
-    for (var key in _this) {
+    let fns = ['registerAdapter', 'getAdapterName', 'getAdapter', 'is'];
+    for (let key in _this) {
       if (typeof _this[key] === 'function') {
         fns.push(key);
       }

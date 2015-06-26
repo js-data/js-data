@@ -14,7 +14,7 @@ export default function destroyAll(resourceName, params, options) {
   let _this = this;
   let DSUtils = _this.utils;
   let definition = _this.defs[resourceName];
-  let ejected, toEject;
+  let ejected, toEject, adapter;
 
   params = params || {};
 
@@ -40,7 +40,8 @@ export default function destroyAll(resourceName, params, options) {
       if (options.eagerEject) {
         ejected = definition.ejectAll(params);
       }
-      return definition.getAdapter(options).destroyAll(definition, params, options);
+      adapter = definition.getAdapterName(options);
+      return _this.adapters[adapter].destroyAll(definition, params, options);
     }).then(() => {
       return options.afterDestroy(options, toEject);
     }).then(() => {
@@ -49,6 +50,8 @@ export default function destroyAll(resourceName, params, options) {
       }
       // make sure items are removed from the store
       return ejected || definition.ejectAll(params);
+    }).then(items => {
+      return DSUtils.respond(items, {adapter}, options);
     })['catch'](err => {
     // rollback by re-injecting the items into the store
     if (options && options.eagerEject && ejected) {

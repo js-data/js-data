@@ -20,6 +20,7 @@ export default function create(resourceName, attrs, options) {
   let _this = this;
   let DSUtils = _this.utils;
   let definition = _this.defs[resourceName];
+  let adapter;
 
   options = options || {};
   attrs = attrs || {};
@@ -54,7 +55,8 @@ export default function create(resourceName, attrs, options) {
       if (options.notify) {
         definition.emit('DS.beforeCreate', definition, attrs);
       }
-      return _this.getAdapter(options).create(definition, attrs, options);
+      adapter = _this.getAdapterName(options);
+      return _this.adapters[adapter].create(definition, DSUtils.omit(attrs, options.omit), options);
     })
     .then(attrs => options.afterCreate.call(attrs, options, attrs))
     .then(attrs => {
@@ -74,5 +76,8 @@ export default function create(resourceName, attrs, options) {
         // just return an un-injected instance
         return _this.createInstance(resourceName, attrs, options);
       }
+    })
+    .then(item => {
+      return DSUtils.respond(item, {adapter}, options);
     });
 }

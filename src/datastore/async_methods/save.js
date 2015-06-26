@@ -11,8 +11,7 @@ export default function save(resourceName, id, options) {
   let {utils: DSUtils, errors: DSErrors} = _this;
   let definition = _this.defs[resourceName];
   let resource = _this.s[resourceName];
-  let item;
-  let noChanges;
+  let item, noChanges, adapter;
 
   return new DSUtils.Promise((resolve, reject) => {
     id = DSUtils.resolveId(definition, id);
@@ -64,7 +63,8 @@ export default function save(resourceName, id, options) {
           attrs = changes;
         }
       }
-      return definition.getAdapter(options).update(definition, id, attrs, options);
+      adapter = definition.getAdapterName(options);
+      return _this.adapters[adapter].update(definition, id, DSUtils.omit(attrs, options.omit), options);
     })
     .then(data => options.afterUpdate.call(data, options, data))
     .then(attrs => {
@@ -88,5 +88,8 @@ export default function save(resourceName, id, options) {
         // just return an instance
         return definition.createInstance(attrs, options.orig());
       }
+    })
+    .then(item => {
+      return DSUtils.respond(item, {adapter}, options);
     });
 }

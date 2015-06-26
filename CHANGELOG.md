@@ -1,4 +1,15 @@
-##### 2.0.0-beta.8 - xx June 2015
+##### 2.0.0-beta.9 - 26 June 2015
+
+###### Breaking API changes
+- #161 - By default, computed properties are no longer sent to adapters. You can also configure other properties that shouldn't be sent.
+
+###### Backwards compatible API changes
+- #162 - Return query metadata as second parameter from a promise.
+
+###### Backwards compatible bug fixes
+- #165 - global leak
+
+##### 2.0.0-beta.8 - 22 June 2015
 
 ###### Backwards compatible API changes
 - #160 - Add "DS.change" events, fired on Resources and instances

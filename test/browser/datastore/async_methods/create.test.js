@@ -227,4 +227,42 @@ describe('DS#create', function () {
       assert.isTrue(user === organization.users[0]);
     });
   });
+  it('should create an item and save it to the server and omit certain fields', function () {
+    var Foo = store.defineResource({
+      name: 'foo',
+      omit: ['skip_this'],
+      computed: {
+        fullName: ['first', 'last', function (first, last) {
+          return first + ' ' + last;
+        }]
+      }
+    });
+    var _this = this;
+
+    var foo = Foo.createInstance({
+      first: 'John',
+      last: 'Anderson',
+      omit_this: 'beep',
+      skip_this: 'boop'
+    });
+
+    setTimeout(function () {
+      assert.equal(1, _this.requests.length);
+      assert.equal(_this.requests[0].url, 'http://test.js-data.io/foo');
+      assert.equal(_this.requests[0].method, 'POST');
+      assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ first: 'John', last: 'Anderson' }));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({ first: 'John', last: 'Anderson', id: 1 }));
+    }, 100);
+
+    return Foo.create(foo).then(function (f) {
+      assert.deepEqual(JSON.stringify(f), JSON.stringify({ first: 'John', last: 'Anderson', id: 1, fullName: 'John Anderson' }), 'foo 1 should have been created');
+      assert.equal(lifecycle.beforeCreate.callCount, 1, 'beforeCreate should have been called');
+      assert.equal(lifecycle.afterCreate.callCount, 1, 'afterCreate should have been called');
+      assert.equal(lifecycle.beforeInject.callCount, 1, 'beforeInject should have been called');
+      assert.equal(lifecycle.afterInject.callCount, 1, 'afterInject should have been called');
+      assert.equal(lifecycle.serialize.callCount, 1, 'serialize should have been called');
+      assert.equal(lifecycle.deserialize.callCount, 1, 'deserialize should have been called');
+      assert.deepEqual(JSON.stringify(Foo.get(1)), JSON.stringify({ first: 'John', last: 'Anderson', id: 1, fullName: 'John Anderson' }));
+    });
+  });
 });

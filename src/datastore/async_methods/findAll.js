@@ -50,7 +50,7 @@ export default function findAll(resourceName, params, options) {
   let DSUtils = _this.utils;
   let definition = _this.defs[resourceName];
   let resource = _this.s[resourceName];
-  let queryHash;
+  let queryHash, adapter;
 
   return new DSUtils.Promise((resolve, reject) => {
     params = params || {};
@@ -94,7 +94,8 @@ export default function findAll(resourceName, params, options) {
           // try subsequent adapters if the preceeding one fails
           if (strategy === 'fallback') {
             function makeFallbackCall(index) {
-              return definition.getAdapter((options.findAllFallbackAdapters || options.fallbackAdapters)[index]).findAll(definition, params, options)['catch'](err => {
+              adapter = definition.getAdapterName((options.findAllFallbackAdapters || options.fallbackAdapters)[index]);
+              return _this.adapters[adapter].findAll(definition, params, options)['catch'](err => {
                 index++;
                 if (index < options.fallbackAdapters.length) {
                   return makeFallbackCall(index);
@@ -106,8 +107,9 @@ export default function findAll(resourceName, params, options) {
 
             promise = makeFallbackCall(0);
           } else {
+            adapter = definition.getAdapterName(options);
             // just make a single attempt
-            promise = definition.getAdapter(options).findAll(definition, params, options);
+            promise = _this.adapters[adapter].findAll(definition, params, options);
           }
 
           resource.pendingQueries[queryHash] = promise.then(data => {
@@ -132,6 +134,8 @@ export default function findAll(resourceName, params, options) {
         // resolve immediately with the items
         return items;
       }
+    }).then(items => {
+      return DSUtils.respond(items, {adapter}, options);
     })['catch'](err => {
     if (resource) {
       delete resource.pendingQueries[queryHash];
