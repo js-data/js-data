@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 2.0.0-beta.11 - Homepage <http://www.js-data.io/>
+ * @version 2.0.0-rc.1 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -84,12 +84,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new _datastoreIndex['default'](options);
 	  },
 	  version: {
-	    full: '2.0.0-beta.11',
+	    full: '2.0.0-rc.1',
 	    major: parseInt('2', 10),
 	    minor: parseInt('0', 10),
 	    patch: parseInt('0', 10),
 	    alpha: true ? 'false' : false,
-	    beta: true ? '11' : false
+	    beta: true ? 'false' : false
 	  }
 	};
 
@@ -314,72 +314,66 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var first = true;
 	      var keep = true;
 	      _utils['default'].forOwn(where, function (clause, field) {
-	        if (_utils['default']._s(clause)) {
-	          clause = {
-	            '===': clause
-	          };
-	        } else if (_utils['default']._n(clause) || _utils['default'].isBoolean(clause)) {
+	        if (!_utils['default']._o(clause)) {
 	          clause = {
 	            '==': clause
 	          };
 	        }
-	        if (_utils['default']._o(clause)) {
-	          _utils['default'].forOwn(clause, function (term, op) {
-	            var expr = undefined;
-	            var isOr = op[0] === '|';
-	            var val = _utils['default'].get(attrs, field);
-	            op = isOr ? op.substr(1) : op;
-	            if (op === '==') {
-	              expr = val == term;
-	            } else if (op === '===') {
-	              expr = val === term;
-	            } else if (op === '!=') {
-	              expr = val != term;
-	            } else if (op === '!==') {
-	              expr = val !== term;
-	            } else if (op === '>') {
-	              expr = val > term;
-	            } else if (op === '>=') {
-	              expr = val >= term;
-	            } else if (op === '<') {
-	              expr = val < term;
-	            } else if (op === '<=') {
-	              expr = val <= term;
-	            } else if (op === 'isectEmpty') {
-	              expr = !_utils['default'].intersection(val || [], term || []).length;
-	            } else if (op === 'isectNotEmpty') {
-	              expr = _utils['default'].intersection(val || [], term || []).length;
-	            } else if (op === 'in') {
-	              if (_utils['default']._s(term)) {
-	                expr = term.indexOf(val) !== -1;
-	              } else {
-	                expr = _utils['default'].contains(term, val);
-	              }
-	            } else if (op === 'notIn') {
-	              if (_utils['default']._s(term)) {
-	                expr = term.indexOf(val) === -1;
-	              } else {
-	                expr = !_utils['default'].contains(term, val);
-	              }
-	            } else if (op === 'contains') {
-	              if (_utils['default']._s(val)) {
-	                expr = val.indexOf(term) !== -1;
-	              } else {
-	                expr = _utils['default'].contains(val, term);
-	              }
-	            } else if (op === 'notContains') {
-	              if (_utils['default']._s(val)) {
-	                expr = val.indexOf(term) === -1;
-	              } else {
-	                expr = !_utils['default'].contains(val, term);
-	              }
+	        _utils['default'].forOwn(clause, function (term, op) {
+	          var expr = undefined;
+	          var isOr = op[0] === '|';
+	          var val = _utils['default'].get(attrs, field);
+	          op = isOr ? op.substr(1) : op;
+	          if (op === '==') {
+	            expr = val == term;
+	          } else if (op === '===') {
+	            expr = val === term;
+	          } else if (op === '!=') {
+	            expr = val != term;
+	          } else if (op === '!==') {
+	            expr = val !== term;
+	          } else if (op === '>') {
+	            expr = val > term;
+	          } else if (op === '>=') {
+	            expr = val >= term;
+	          } else if (op === '<') {
+	            expr = val < term;
+	          } else if (op === '<=') {
+	            expr = val <= term;
+	          } else if (op === 'isectEmpty') {
+	            expr = !_utils['default'].intersection(val || [], term || []).length;
+	          } else if (op === 'isectNotEmpty') {
+	            expr = _utils['default'].intersection(val || [], term || []).length;
+	          } else if (op === 'in') {
+	            if (_utils['default']._s(term)) {
+	              expr = term.indexOf(val) !== -1;
+	            } else {
+	              expr = _utils['default'].contains(term, val);
 	            }
-	            if (expr !== undefined) {
-	              keep = first ? expr : isOr ? keep || expr : keep && expr;
+	          } else if (op === 'notIn') {
+	            if (_utils['default']._s(term)) {
+	              expr = term.indexOf(val) === -1;
+	            } else {
+	              expr = !_utils['default'].contains(term, val);
 	            }
-	            first = false;
-	          });
-	        }
+	          } else if (op === 'contains') {
+	            if (_utils['default']._s(val)) {
+	              expr = val.indexOf(term) !== -1;
+	            } else {
+	              expr = _utils['default'].contains(val, term);
+	            }
+	          } else if (op === 'notContains') {
+	            if (_utils['default']._s(val)) {
+	              expr = val.indexOf(term) === -1;
+	            } else {
+	              expr = !_utils['default'].contains(val, term);
+	            }
+	          }
+	          if (expr !== undefined) {
+	            keep = first ? expr : isOr ? keep || expr : keep && expr;
+	          }
+	          first = false;
+	        });
 	      });
 	      return keep;
 	    });
@@ -624,11 +618,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return toString.call(value) == '[object RegExp]' || false;
 	};
 
-	// adapted from lodash.isBoolean
-	var isBoolean = function isBoolean(value) {
-	  return value === true || value === false || value && typeof value == 'object' && toString.call(value) == '[object Boolean]' || false;
-	};
-
 	// adapted from lodash.isString
 	var isString = function isString(value) {
 	  return typeof value == 'string' || value && typeof value == 'object' && toString.call(value) == '[object String]' || false;
@@ -783,18 +772,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Return whether "prop" is in the blacklist.
 	 */
-	var isBlacklisted = function isBlacklisted(prop, bl) {
-	  var i = undefined;
-	  if (!bl || !bl.length) {
-	    return false;
-	  }
-	  for (i = 0; i < bl.length; i++) {
-	    if (bl[i] === prop) {
-	      return true;
-	    }
-	  }
-	  return false;
-	};
+	var isBlacklisted = observe.isBlacklisted;
 
 	// adapted from angular.copy
 	var copy = function copy(source, destination, stackSource, stackDest, blacklist) {
@@ -1065,21 +1043,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  get: get,
 	  intersection: intersection,
 	  isArray: isArray,
-	  isBlacklisted: observe.isBlacklisted,
-	  isBoolean: isBoolean,
-	  isDate: isDate,
+	  isBlacklisted: isBlacklisted,
 	  isEmpty: isEmpty,
 	  isFunction: isFunction,
 	  isObject: isObject,
 	  isNumber: isNumber,
-	  isRegExp: isRegExp,
 	  isString: isString,
 	  makePath: makePath,
 	  observe: observe,
 	  omit: function omit(obj, bl) {
 	    var toRemove = [];
 	    forOwn(obj, function (v, k) {
-	      if (observe.isBlacklisted(k, bl)) {
+	      if (isBlacklisted(k, bl)) {
 	        toRemove.push(k);
 	      }
 	    });
@@ -1138,41 +1113,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  },
 	  upperCase: upperCase,
-	  /**
-	   * Return a copy of "object" with cycles removed.
-	   */
+	  // Return a copy of "object" with cycles removed.
 	  removeCircular: function removeCircular(object) {
-	    return (function rmCirc(value, context) {
+	    return (function rmCirc(value, ctx) {
 	      var i = undefined;
 	      var nu = undefined;
 
 	      if (typeof value === 'object' && value !== null && !(value instanceof Boolean) && !(value instanceof Date) && !(value instanceof Number) && !(value instanceof RegExp) && !(value instanceof String)) {
 
 	        // check if current object points back to itself
-	        var current = context.current;
-	        var parent = context.context;
+	        var cur = ctx.cur;
+	        var parent = ctx.ctx;
 	        while (parent) {
-	          if (parent.current === current) {
+	          if (parent.cur === cur) {
 	            return undefined;
 	          }
-	          parent = parent.context;
+	          parent = parent.ctx;
 	        }
 
 	        if (isArray(value)) {
 	          nu = [];
 	          for (i = 0; i < value.length; i += 1) {
-	            nu[i] = rmCirc(value[i], { context: context, current: value[i] });
+	            nu[i] = rmCirc(value[i], { ctx: ctx, cur: value[i] });
 	          }
 	        } else {
 	          nu = {};
 	          forOwn(value, function (v, k) {
-	            nu[k] = rmCirc(value[k], { context: context, current: value[k] });
+	            nu[k] = rmCirc(value[k], { ctx: ctx, cur: value[k] });
 	          });
 	        }
 	        return nu;
 	      }
 	      return value;
-	    })(object, { context: null, current: object });
+	    })(object, { ctx: null, cur: object });
 	  },
 	  resolveItem: resolveItem,
 	  resolveId: resolveId,
@@ -1186,9 +1159,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  },
 	  w: w,
-	  /**
-	   * This is where the magic of relations happens.
-	   */
+	  // This is where the magic of relations happens.
 	  applyRelationGettersToTarget: function applyRelationGettersToTarget(store, definition, target) {
 	    this.forEach(definition.relationList, function (def) {
 	      var relationName = def.relation;
@@ -1274,7 +1245,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      Error.captureStackTrace(this, this.constructor);
 	    }
 	    this.type = this.constructor.name;
-	    this.message = message || 'Illegal Argument!';
+	    this.message = message;
 	  }
 
 	  _inherits(IllegalArgumentError, _Error);
@@ -1295,7 +1266,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      Error.captureStackTrace(this, this.constructor);
 	    }
 	    this.type = this.constructor.name;
-	    this.message = message || 'RuntimeError Error!';
+	    this.message = message;
 	  }
 
 	  _inherits(RuntimeError, _Error2);
@@ -3312,6 +3283,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      def = definitions[definition.name];
 
+	      def.getResource = function (resourceName) {
+	        return _this.defs[resourceName];
+	      };
+
 	      def.logFn('Preparing resource.');
 
 	      if (!_utils['default']._s(def.idAttribute)) {
@@ -3354,58 +3329,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	          Object.freeze(def.relationList);
 	        }
 	      }
-
-	      def.getResource = function (resourceName) {
-	        return _this.defs[resourceName];
-	      };
-
-	      def.getEndpoint = function (id, options) {
-	        options = options || {};
-	        options.params = options.params || {};
-
-	        var item = undefined;
-	        var parentKey = def.parentKey;
-	        var endpoint = options.hasOwnProperty('endpoint') ? options.endpoint : def.endpoint;
-	        var parentField = def.parentField;
-	        var parentDef = definitions[def.parent];
-	        var parentId = options.params[parentKey];
-
-	        if (parentId === false || !parentKey || !parentDef) {
-	          if (parentId === false) {
-	            delete options.params[parentKey];
-	          }
-	          return endpoint;
-	        } else {
-	          delete options.params[parentKey];
-
-	          if (_utils['default']._sn(id)) {
-	            item = def.get(id);
-	          } else if (_utils['default']._o(id)) {
-	            item = id;
-	          }
-
-	          if (item) {
-	            parentId = parentId || item[parentKey] || (item[parentField] ? item[parentField][parentDef.idAttribute] : null);
-	          }
-
-	          if (parentId) {
-	            var _ret2 = (function () {
-	              delete options.endpoint;
-	              var _options = {};
-	              _utils['default'].forOwn(options, function (value, key) {
-	                _options[key] = value;
-	              });
-	              return {
-	                v: _utils['default'].makePath(parentDef.getEndpoint(parentId, _utils['default']._(parentDef, _options)), parentId, endpoint)
-	              };
-	            })();
-
-	            if (typeof _ret2 === 'object') return _ret2.v;
-	          } else {
-	            return endpoint;
-	          }
-	        }
-	      };
 
 	      // Create the wrapper class for the new resource
 	      _class = def['class'] = _utils['default'].pascalCase(def.name);
@@ -3649,7 +3572,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          if (typeof options.getEndpoint === 'function') {
 	            config.url = options.getEndpoint(def, options);
 	          } else {
-	            var args = [options.basePath || adapter.defaults.basePath || def.basePath, def.getEndpoint(_utils['default']._sn(id) ? id : null, options)];
+	            var args = [options.basePath || adapter.defaults.basePath || def.basePath, adapter.getEndpoint(def, _utils['default']._sn(id) ? id : null, options)];
 	            if (_utils['default']._sn(id)) {
 	              args.push(id);
 	            }
@@ -3687,6 +3610,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (typeof _ret === 'object') return _ret.v;
 	  } catch (err) {
+	    _this.defaults.errorFn(err);
 	    delete definitions[definition.name];
 	    delete _this.s[definition.name];
 	    throw err;

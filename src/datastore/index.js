@@ -121,7 +121,7 @@ defaultsPrototype.maxAge = false;
 defaultsPrototype.methods = {};
 defaultsPrototype.notify = !!DSUtils.w;
 defaultsPrototype.omit = [];
-defaultsPrototype.onConflict= 'merge';
+defaultsPrototype.onConflict = 'merge';
 defaultsPrototype.reapAction = !!DSUtils.w ? 'inject' : 'none';
 defaultsPrototype.reapInterval = !!DSUtils.w ? 30000 : false;
 defaultsPrototype.relationsEnumerable = false;
@@ -172,72 +172,66 @@ defaultsPrototype.defaultFilter = (collection, resourceName, params, options) =>
       let first = true;
       let keep = true;
       DSUtils.forOwn(where, (clause, field) => {
-        if (DSUtils._s(clause)) {
-          clause = {
-            '===': clause
-          };
-        } else if (DSUtils._n(clause) || DSUtils.isBoolean(clause)) {
+        if (!DSUtils._o(clause)) {
           clause = {
             '==': clause
           };
         }
-        if (DSUtils._o(clause)) {
-          DSUtils.forOwn(clause, (term, op) => {
-            let expr;
-            let isOr = op[0] === '|';
-            let val = DSUtils.get(attrs, field);
-            op = isOr ? op.substr(1) : op;
-            if (op === '==') {
-              expr = val == term;
-            } else if (op === '===') {
-              expr = val === term;
-            } else if (op === '!=') {
-              expr = val != term;
-            } else if (op === '!==') {
-              expr = val !== term;
-            } else if (op === '>') {
-              expr = val > term;
-            } else if (op === '>=') {
-              expr = val >= term;
-            } else if (op === '<') {
-              expr = val < term;
-            } else if (op === '<=') {
-              expr = val <= term;
-            } else if (op === 'isectEmpty') {
-              expr = !DSUtils.intersection((val || []), (term || [])).length;
-            } else if (op === 'isectNotEmpty') {
-              expr = DSUtils.intersection((val || []), (term || [])).length;
-            } else if (op === 'in') {
-              if (DSUtils._s(term)) {
-                expr = term.indexOf(val) !== -1;
-              } else {
-                expr = DSUtils.contains(term, val);
-              }
-            } else if (op === 'notIn') {
-              if (DSUtils._s(term)) {
-                expr = term.indexOf(val) === -1;
-              } else {
-                expr = !DSUtils.contains(term, val);
-              }
-            } else if (op === 'contains') {
-              if (DSUtils._s(val)) {
-                expr = val.indexOf(term) !== -1;
-              } else {
-                expr = DSUtils.contains(val, term);
-              }
-            } else if (op === 'notContains') {
-              if (DSUtils._s(val)) {
-                expr = val.indexOf(term) === -1;
-              } else {
-                expr = !DSUtils.contains(val, term);
-              }
+        DSUtils.forOwn(clause, (term, op) => {
+          let expr;
+          let isOr = op[0] === '|';
+          let val = DSUtils.get(attrs, field);
+          op = isOr ? op.substr(1) : op;
+          if (op === '==') {
+            expr = val == term;
+          } else if (op === '===') {
+            expr = val === term;
+          } else if (op === '!=') {
+            expr = val != term;
+          } else if (op === '!==') {
+            expr = val !== term;
+          } else if (op === '>') {
+            expr = val > term;
+          } else if (op === '>=') {
+            expr = val >= term;
+          } else if (op === '<') {
+            expr = val < term;
+          } else if (op === '<=') {
+            expr = val <= term;
+          } else if (op === 'isectEmpty') {
+            expr = !DSUtils.intersection((val || []), (term || [])).length;
+          } else if (op === 'isectNotEmpty') {
+            expr = DSUtils.intersection((val || []), (term || [])).length;
+          } else if (op === 'in') {
+            if (DSUtils._s(term)) {
+              expr = term.indexOf(val) !== -1;
+            } else {
+              expr = DSUtils.contains(term, val);
             }
-            if (expr !== undefined) {
-              keep = first ? expr : (isOr ? keep || expr : keep && expr);
+          } else if (op === 'notIn') {
+            if (DSUtils._s(term)) {
+              expr = term.indexOf(val) === -1;
+            } else {
+              expr = !DSUtils.contains(term, val);
             }
-            first = false;
-          });
-        }
+          } else if (op === 'contains') {
+            if (DSUtils._s(val)) {
+              expr = val.indexOf(term) !== -1;
+            } else {
+              expr = DSUtils.contains(val, term);
+            }
+          } else if (op === 'notContains') {
+            if (DSUtils._s(val)) {
+              expr = val.indexOf(term) === -1;
+            } else {
+              expr = !DSUtils.contains(val, term);
+            }
+          }
+          if (expr !== undefined) {
+            keep = first ? expr : (isOr ? keep || expr : keep && expr);
+          }
+          first = false;
+        });
       });
       return keep;
     });

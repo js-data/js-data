@@ -8,7 +8,7 @@ class IllegalArgumentError extends Error {
       Error.captureStackTrace(this, this.constructor);
     }
     this.type = this.constructor.name;
-    this.message = message || 'Illegal Argument!';
+    this.message = message;
   }
 }
 
@@ -22,7 +22,7 @@ class RuntimeError extends Error {
       Error.captureStackTrace(this, this.constructor);
     }
     this.type = this.constructor.name;
-    this.message = message || 'RuntimeError Error!';
+    this.message = message;
   }
 }
 

@@ -44,11 +44,6 @@ let isRegExp = value => {
   return toString.call(value) == '[object RegExp]' || false;
 };
 
-// adapted from lodash.isBoolean
-let isBoolean = value => {
-  return (value === true || value === false || value && typeof value == 'object' && toString.call(value) == '[object Boolean]') || false;
-};
-
 // adapted from lodash.isString
 let isString = value => {
   return typeof value == 'string' || (value && typeof value == 'object' && toString.call(value) == '[object String]') || false;
@@ -208,18 +203,7 @@ let toPromisify = [
 /**
  * Return whether "prop" is in the blacklist.
  */
-let isBlacklisted = (prop, bl) => {
-  let i;
-  if (!bl || !bl.length) {
-    return false;
-  }
-  for (i = 0; i < bl.length; i++) {
-    if (bl[i] === prop) {
-      return true;
-    }
-  }
-  return false;
-};
+let isBlacklisted = observe.isBlacklisted;
 
 // adapted from angular.copy
 let copy = (source, destination, stackSource, stackDest, blacklist) => {
@@ -472,21 +456,18 @@ export default {
   get,
   intersection,
   isArray,
-  isBlacklisted: observe.isBlacklisted,
-  isBoolean,
-  isDate,
+  isBlacklisted,
   isEmpty,
   isFunction,
   isObject,
   isNumber,
-  isRegExp,
   isString,
   makePath,
   observe,
   omit(obj, bl) {
     let toRemove = [];
     forOwn(obj, (v, k) => {
-      if (observe.isBlacklisted(k, bl)) {
+      if (isBlacklisted(k, bl)) {
         toRemove.push(k);
       }
     });
@@ -541,41 +522,39 @@ export default {
     }
   },
   upperCase,
-  /**
-   * Return a copy of "object" with cycles removed.
-   */
-    removeCircular(object) {
-    return (function rmCirc(value, context) {
+  // Return a copy of "object" with cycles removed.
+  removeCircular(object) {
+    return (function rmCirc(value, ctx) {
       let i;
       let nu;
 
       if (typeof value === 'object' && value !== null && !(value instanceof Boolean) && !(value instanceof Date) && !(value instanceof Number) && !(value instanceof RegExp) && !(value instanceof String)) {
 
         // check if current object points back to itself
-        let current = context.current;
-        var parent = context.context;
+        let cur = ctx.cur;
+        var parent = ctx.ctx;
         while (parent) {
-          if (parent.current === current) {
+          if (parent.cur === cur) {
             return undefined;
           }
-          parent = parent.context;
+          parent = parent.ctx;
         }
 
         if (isArray(value)) {
           nu = [];
           for (i = 0; i < value.length; i += 1) {
-            nu[i] = rmCirc(value[i], {context, current: value[i]});
+            nu[i] = rmCirc(value[i], {ctx, cur: value[i]});
           }
         } else {
           nu = {};
           forOwn(value, (v, k) => {
-            nu[k] = rmCirc(value[k], {context, current: value[k]});
+            nu[k] = rmCirc(value[k], {ctx, cur: value[k]});
           });
         }
         return nu;
       }
       return value;
-    }(object, {context: null, current: object}));
+    }(object, {ctx: null, cur: object}));
   },
   resolveItem,
   resolveId,
@@ -589,10 +568,8 @@ export default {
     }
   },
   w,
-  /**
-   * This is where the magic of relations happens.
-   */
-    applyRelationGettersToTarget(store, definition, target) {
+  // This is where the magic of relations happens.
+  applyRelationGettersToTarget(store, definition, target) {
     this.forEach(definition.relationList, def => {
       let relationName = def.relation;
       let enumerable = typeof def.enumerable === 'boolean' ? def.enumerable : !!definition.relationsEnumerable;
