@@ -83,6 +83,8 @@ export default function defineResource(definition) {
 
     var def = definitions[definition.name];
 
+    def.getResource = resourceName => _this.defs[resourceName];
+
     def.logFn('Preparing resource.');
 
     if (!DSUtils._s(def.idAttribute)) {
@@ -125,52 +127,6 @@ export default function defineResource(definition) {
         Object.freeze(def.relationList);
       }
     }
-
-    def.getResource = resourceName => {
-      return _this.defs[resourceName];
-    };
-
-    def.getEndpoint = (id, options) => {
-      options = options || {};
-      options.params = options.params || {};
-
-      let item;
-      let parentKey = def.parentKey;
-      let endpoint = options.hasOwnProperty('endpoint') ? options.endpoint : def.endpoint;
-      let parentField = def.parentField;
-      let parentDef = definitions[def.parent];
-      let parentId = options.params[parentKey];
-
-      if (parentId === false || !parentKey || !parentDef) {
-        if (parentId === false) {
-          delete options.params[parentKey];
-        }
-        return endpoint;
-      } else {
-        delete options.params[parentKey];
-
-        if (DSUtils._sn(id)) {
-          item = def.get(id);
-        } else if (DSUtils._o(id)) {
-          item = id;
-        }
-
-        if (item) {
-          parentId = parentId || item[parentKey] || (item[parentField] ? item[parentField][parentDef.idAttribute] : null);
-        }
-
-        if (parentId) {
-          delete options.endpoint;
-          let _options = {};
-          DSUtils.forOwn(options, (value, key) => {
-            _options[key] = value;
-          });
-          return DSUtils.makePath(parentDef.getEndpoint(parentId, DSUtils._(parentDef, _options)), parentId, endpoint);
-        } else {
-          return endpoint;
-        }
-      }
-    };
 
     // Create the wrapper class for the new resource
     var _class = def['class'] = DSUtils.pascalCase(def.name);
@@ -379,7 +335,7 @@ export default function defineResource(definition) {
         if (typeof options.getEndpoint === 'function') {
           config.url = options.getEndpoint(def, options);
         } else {
-          let args = [options.basePath || adapter.defaults.basePath || def.basePath, def.getEndpoint(DSUtils._sn(id) ? id : null, options)];
+          let args = [options.basePath || adapter.defaults.basePath || def.basePath, adapter.getEndpoint(def, DSUtils._sn(id) ? id : null, options)];
           if (DSUtils._sn(id)) {
             args.push(id);
           }
@@ -411,6 +367,7 @@ export default function defineResource(definition) {
 
     return def;
   } catch (err) {
+    _this.defaults.errorFn(err);
     delete definitions[definition.name];
     delete _this.s[definition.name];
     throw err;

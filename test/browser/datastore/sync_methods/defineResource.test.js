@@ -401,6 +401,41 @@ describe('DS#defineResource', function () {
 
     foo.bar = 'baz';
   });
+  it('should allow resources to extend other resources', function () {
+    store.defineResource('baz');
+    var Foo = store.defineResource({
+      name: 'foo',
+      relations: {
+        belongsTo: {
+          baz: {
+            localField: 'baz',
+            localKey: 'bazId',
+            parent: true
+          }
+        }
+      },
+      methods: {
+        say: function () {
+          return this.constructor.name;
+        }
+      }
+    });
+    var Bar = store.defineResource({
+      name: 'bar',
+      'extends': 'foo'
+    });
+    assert.equal(Foo.name, 'foo');
+    assert.equal(Bar.name, 'bar');
+
+    var foo = Foo.createInstance({ id: 1, type: 'foo', bazId: 10 });
+    var bar = Bar.createInstance({ id: 1, type: 'bar', bazId: 10 });
+
+    assert.equal(foo.say(), 'Foo');
+    assert.equal(bar.say(), 'Bar');
+
+    assert.equal(dsHttpAdapter.getEndpoint(Foo, foo, {}), 'baz/10/foo');
+    assert.equal(dsHttpAdapter.getEndpoint(Bar, bar, {}), 'baz/10/bar');
+  });
   it('should allow instance events 2', function (done) {
     var changed = false;
     var Foo = store.defineResource('foo');
