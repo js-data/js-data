@@ -1,6 +1,7 @@
 ##### 2.0.0-beta.11 - 26 June 2015
 
 ###### Backwards compatible API changes
+- #167 - DS#refreshAll
 - #168 - DS#inject - replace instead of merge. `onConflict: 'replace'` will replace existing items instead of merging into them.
 
 ##### 2.0.0-beta.10 - 26 June 2015
