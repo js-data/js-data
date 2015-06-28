@@ -1,4 +1,4 @@
-##### 2.0.0-rc.1 - xx June 2015
+##### 2.0.0-rc.1 - 27 June 2015
 
 ###### Breaking API changes
 - Moved the `getEndpoint` method to the http adapter

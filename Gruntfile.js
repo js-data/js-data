@@ -16,15 +16,7 @@ module.exports = function (grunt) {
   });
   require('time-grunt')(grunt);
 
-  var webpack = require('webpack');
   var pkg = grunt.file.readJSON('package.json');
-  var banner = 'js-data\n' +
-    '@version ' + pkg.version + ' - Homepage <http://www.js-data.io/>\n' +
-    '@author Jason Dobry <jason.dobry@gmail.com>\n' +
-    '@copyright (c) 2014-2015 Jason Dobry \n' +
-    '@license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>\n' +
-    '\n' +
-    '@overview Robust framework-agnostic data store.';
 
   // Project configuration.
   grunt.initConfig({
@@ -68,30 +60,7 @@ module.exports = function (grunt) {
       }
     },
     webpack: {
-      dist: {
-        debug: true,
-        entry: './src/index.js',
-        output: {
-          filename: './dist/js-data-debug.js',
-          libraryTarget: 'umd',
-          library: 'JSData'
-        },
-        module: {
-          loaders: [
-            { test: /(src)(.+)\.js$/, exclude: /node_modules/, loader: 'babel-loader?blacklist=useStrict&modules=commonStrict' }
-          ],
-          preLoaders: [
-            {
-              test: /(src)(.+)\.js$|(test)(.+)\.js$/, // include .js files
-              exclude: /node_modules/, // exclude any and all files in the node_modules folder
-              loader: "jshint-loader?failOnHint=true"
-            }
-          ]
-        },
-        plugins: [
-          new webpack.BannerPlugin(banner)
-        ]
-      }
+      dist: require('./webpack.config.js')
     },
     karma: {
       options: {
@@ -111,8 +80,8 @@ module.exports = function (grunt) {
           files: [
             'node_modules/es6-promise/dist/es6-promise.js',
             'dist/js-data.min.js',
-            'node_modules/js-data-http/dist/js-data-http.js',
-            'node_modules/js-data-localstorage/dist/js-data-localstorage.js',
+            'bower_components/js-data-http/dist/js-data-http.js',
+            'bower_components/js-data-localstorage/dist/js-data-localstorage.js',
             'karma.start.js',
             'test/both/**/*.js',
             'test/browser/**/*.js'
