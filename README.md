@@ -4,7 +4,7 @@
 
 Inspired by [Ember Data](https://github.com/emberjs/data), __JSData__ is the model layer you've been craving. It consists of a convenient __framework-agnostic__, __in-memory store__ for managing your data, which uses __adapters__ to communicate with various __persistence layers__.
 
-The most commonly used adapter is the [http adapter](http://www.js-data.io/docs/dshttpadapter), which is perfect for communicating with your RESTful backend. [localStorage](http://www.js-data.io/js-data-localstorage), [localForage](http://www.js-data.io/js-data-localforage), [firebase](http://www.js-data.io/js-data-firebase) and [other adapters](http://www.js-data.io/docs/working-with-adapters) are already available. On the server you could hook up to the [SQL adapter (Postgres/MySQL/MariaDB/SQLite3)](http://www.js-data.io/docs/dssqladapter) and add in the [Redis adapter](http://www.js-data.io/docs/dsredisadapter) as a caching layer for your read endpoints. More adapters are coming, and you're free to implement your own. See [Adapters](http://www.js-data.io/docs/working-with-adapters). 
+The most commonly used adapter is the [http adapter](http://www.js-data.io/docs/dshttpadapter), which is perfect for communicating with your RESTful backend. [localStorage](http://www.js-data.io/js-data-localstorage), [localForage](http://www.js-data.io/js-data-localforage), [firebase](http://www.js-data.io/js-data-firebase) and [other adapters](http://www.js-data.io/docs/working-with-adapters) are already available. On the server you could hook up to the [SQL adapter (Postgres/MySQL/MariaDB/SQLite3)](http://www.js-data.io/docs/dssqladapter) and add in the [Redis adapter](http://www.js-data.io/docs/dsredisadapter) as a caching layer for your read endpoints. More adapters are coming, and you're free to implement your own. See [Adapters](http://www.js-data.io/docs/working-with-adapters).
 
 Unlike some libraries, JSData does not require the use of getters and setters, and doesn't decorate your data with a bunch of cruft. JSData's internal change detection (via [observe-js](https://github.com/Polymer/observe-js) or `Object.observe` in supporting browsers) allows for powerful use cases and an easy avenue for implementing your own [3-way data-binding](https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html).
 
@@ -27,6 +27,12 @@ __Status:__
 __Supported Platforms:__
 
 [![node version](https://img.shields.io/badge/Node-0.10%2B-green.svg?style=flat-square)](https://github.com/js-data/js-data) [![browsers](https://img.shields.io/badge/Browser-Chrome%2CFirefox%2CSafari%2COpera%2CIE%209%2B%2CiOS%20Safari%207.1%2B%2CAndroid%20Browser%202.3%2B-green.svg?style=flat-square)](https://github.com/js-data/js-data)
+
+### Dependencies
+
+JSData requires the presence of the ES6 (ES2015) `Promise` constructor in the global environment. In the browser, `window.Promise` must be available. In Node, `global.Promise` must be available. Here is a handy library for polyfilling: https://github.com/jakearchibald/es6-promise.
+
+If you can't polyfill the environment, then configure JSData to use a specific `Promise` constructor directly: `JSData.DSUtils.Promise = MyPromiseLib;`. This direct configuration method is useful for telling JSData to use the Bluebird library or Angular's `$q`, etc.
 
 ### Quick Start
 `bower install --save js-data js-data-http` or `npm install --save js-data js-data-http`.
@@ -54,11 +60,11 @@ var Comment = store.defineResource({
         // "join" field, name of field on a comment
         // that is the primary key of the parent user
         localKey: 'userId',
-        
-        // name of the field on the comment where the 
+
+        // name of the field on the comment where the
         // parent user will be attached to the comment
         // by js-data
-        localField: 'user' 
+        localField: 'user'
       }
     }
   }
@@ -143,7 +149,7 @@ See an issue with or have a suggestion for the documentation? You can suggest ed
 
 ### API Documentation
 - [DS](http://www.js-data.io/docs/ds)
-- [js-data-schema](http://www.js-data.io/docs/js-data-schema)
+- [Configuration Options](http://www.js-data.io/docs/dsdefaults)
 - [DSFirebaseAdapter](http://www.js-data.io/docs/dsfirebaseadapter)
 - [DSHttpAdapter](http://www.js-data.io/docs/dshttpadapter)
 - [DSLocalForageAdapter](http://www.js-data.io/docs/dslocalforageadapter)
@@ -152,6 +158,7 @@ See an issue with or have a suggestion for the documentation? You can suggest ed
 - [DSRedisAdapter](http://www.js-data.io/docs/dsredisadapter)
 - [DSRethinkDBAdapter](http://www.js-data.io/docs/dsrethinkdbadapter)
 - [DSSqlAdapter](http://www.js-data.io/docs/dssqladapter)
+- [js-data-schema](http://www.js-data.io/docs/js-data-schema)
 
 ### Changelog
 [CHANGELOG.md](https://github.com/js-data/js-data/blob/master/CHANGELOG.md)

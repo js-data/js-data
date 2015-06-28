@@ -48,10 +48,8 @@
     "grunt-karma": "0.11.1",
     "grunt-karma-coveralls": "2.5.3",
     "grunt-mocha-test": "0.12.7",
-    "grunt-webpack": "1.0.8",
+    "grunt-webpack": "1.0.10",
     "jit-grunt": "0.9.1",
-    "js-data-http": "2.0.0-rc.1",
-    "js-data-localstorage": "2.0.0-rc.1",
     "jshint": "2.8.0",
     "jshint-loader": "0.8.3",
     "karma": "0.12.37",
@@ -64,9 +62,9 @@
     "karma-script-launcher": "0.1.0",
     "karma-sinon": "1.0.4",
     "karma-spec-reporter": "0.0.19",
-    "sinon": "1.15.3",
+    "sinon": "1.15.4",
     "time-grunt": "1.2.1",
-    "webpack-dev-server": "1.9.0"
+    "webpack-dev-server": "1.10.0"
   },
   "scripts": {
     "test": "grunt test"
