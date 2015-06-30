@@ -622,7 +622,7 @@ export default {
         if (def.get) {
           let orig = prop.get;
           prop.get = function () {
-            return def.get(definition, this, (...args) => orig.apply(this, args));
+            return def.get(definition, def, this, (...args) => orig.apply(this, args));
           };
         }
         Object.defineProperty(target, def.localField, prop);

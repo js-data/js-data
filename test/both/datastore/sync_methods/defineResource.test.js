@@ -270,7 +270,8 @@ describe('DS#defineResource', function () {
           bar: {
             localField: 'bar',
             localKey: 'barId',
-            get: function (Foo, foo, orig) {
+            get: function (Foo, relation, foo, orig) {
+              // "relation.name" has relationship "relation.type" to "relation.relation"
               wasItActivated = true;
               return orig();
             }
