@@ -100,12 +100,11 @@ defaultsPrototype.eagerEject = false;
 defaultsPrototype.eagerInject = false;
 defaultsPrototype.endpoint = '';
 defaultsPrototype.error = console ? (a, b, c) => console[typeof console.error === 'function' ? 'error' : 'log'](a, b, c) : false;
-defaultsPrototype.instanceEvents = !!DSUtils.w;
 defaultsPrototype.fallbackAdapters = ['http'];
 defaultsPrototype.findStrictCache = false;
 defaultsPrototype.idAttribute = 'id';
 defaultsPrototype.ignoredChanges = [/\$/];
-defaultsPrototype.ignoreMissing = false;
+defaultsPrototype.instanceEvents = !!DSUtils.w;
 defaultsPrototype.keepChangeHistory = false;
 defaultsPrototype.linkRelations = true;
 defaultsPrototype.log = console ? (a, b, c, d, e) => console[typeof console.info === 'function' ? 'info' : 'log'](a, b, c, d, e) : false;
@@ -125,8 +124,8 @@ defaultsPrototype.onConflict = 'merge';
 defaultsPrototype.reapAction = !!DSUtils.w ? 'inject' : 'none';
 defaultsPrototype.reapInterval = !!DSUtils.w ? 30000 : false;
 defaultsPrototype.relationsEnumerable = false;
-defaultsPrototype.returnMeta = false;
 defaultsPrototype.resetHistoryOnInject = true;
+defaultsPrototype.returnMeta = false;
 defaultsPrototype.strategy = 'single';
 defaultsPrototype.upsert = !!DSUtils.w;
 defaultsPrototype.useClass = true;
@@ -332,6 +331,8 @@ class DS {
         });
       };
     }
+
+    DSUtils.Events(_this);
   }
 
   getAdapterName(options) {

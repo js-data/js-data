@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 2.0.0-rc.1 - Homepage <http://www.js-data.io/>
+ * @version 2.0.0-rc.2 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -84,7 +84,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new _datastoreIndex['default'](options);
 	  },
 	  version: {
-	    full: '2.0.0-rc.1',
+	    full: '2.0.0-rc.2',
 	    major: parseInt('2', 10),
 	    minor: parseInt('0', 10),
 	    patch: parseInt('0', 10),
@@ -107,9 +107,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _errors = __webpack_require__(3);
 
-	var _sync_methodsIndex = __webpack_require__(4);
+	var _sync_methodsIndex = __webpack_require__(5);
 
-	var _async_methodsIndex = __webpack_require__(5);
+	var _async_methodsIndex = __webpack_require__(6);
 
 	function lifecycleNoopCb(resource, attrs, cb) {
 	  cb(null, attrs);
@@ -240,12 +240,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	defaultsPrototype.error = console ? function (a, b, c) {
 	  return console[typeof console.error === 'function' ? 'error' : 'log'](a, b, c);
 	} : false;
-	defaultsPrototype.instanceEvents = !!_utils['default'].w;
 	defaultsPrototype.fallbackAdapters = ['http'];
 	defaultsPrototype.findStrictCache = false;
 	defaultsPrototype.idAttribute = 'id';
 	defaultsPrototype.ignoredChanges = [/\$/];
-	defaultsPrototype.ignoreMissing = false;
+	defaultsPrototype.instanceEvents = !!_utils['default'].w;
 	defaultsPrototype.keepChangeHistory = false;
 	defaultsPrototype.linkRelations = true;
 	defaultsPrototype.log = console ? function (a, b, c, d, e) {
@@ -267,8 +266,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	defaultsPrototype.reapAction = !!_utils['default'].w ? 'inject' : 'none';
 	defaultsPrototype.reapInterval = !!_utils['default'].w ? 30000 : false;
 	defaultsPrototype.relationsEnumerable = false;
-	defaultsPrototype.returnMeta = false;
 	defaultsPrototype.resetHistoryOnInject = true;
+	defaultsPrototype.returnMeta = false;
 	defaultsPrototype.strategy = 'single';
 	defaultsPrototype.upsert = !!_utils['default'].w;
 	defaultsPrototype.useClass = true;
@@ -476,6 +475,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	      };
 	    }
+
+	    _utils['default'].Events(_this);
 	  }
 
 	  _createClass(DS, [{
@@ -568,8 +569,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 	/* jshint eqeqeq:false */
 
 	/**
@@ -584,14 +583,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	var forOwn = __webpack_require__(13);
 	var contains = __webpack_require__(10);
 	var deepMixIn = __webpack_require__(14);
-	var pascalCase = __webpack_require__(18);
+	var pascalCase = __webpack_require__(19);
 	var remove = __webpack_require__(11);
 	var pick = __webpack_require__(15);
+	var _keys = __webpack_require__(16);
 	var sort = __webpack_require__(12);
-	var upperCase = __webpack_require__(19);
-	var get = __webpack_require__(16);
-	var set = __webpack_require__(17);
-	var observe = __webpack_require__(6);
+	var upperCase = __webpack_require__(20);
+	var get = __webpack_require__(17);
+	var set = __webpack_require__(18);
+	var observe = __webpack_require__(4);
 	var w = undefined;
 	var objectProto = Object.prototype;
 	var toString = objectProto.toString;
@@ -1049,6 +1049,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  isObject: isObject,
 	  isNumber: isNumber,
 	  isString: isString,
+	  keys: _keys,
 	  makePath: makePath,
 	  observe: observe,
 	  omit: function omit(obj, bl) {
@@ -1163,60 +1164,67 @@ return /******/ (function(modules) { // webpackBootstrap
 	  applyRelationGettersToTarget: function applyRelationGettersToTarget(store, definition, target) {
 	    this.forEach(definition.relationList, function (def) {
 	      var relationName = def.relation;
+	      var localField = def.localField;
+	      var localKey = def.localKey;
+	      var foreignKey = def.foreignKey;
+	      var localKeys = def.localKeys;
 	      var enumerable = typeof def.enumerable === 'boolean' ? def.enumerable : !!definition.relationsEnumerable;
 	      if (typeof def.link === 'boolean' ? def.link : !!definition.linkRelations) {
-	        delete target[def.localField];
+	        delete target[localField];
+	        var prop = {
+	          enumerable: enumerable,
+	          set: function set() {}
+	        };
 	        if (def.type === 'belongsTo') {
-	          Object.defineProperty(target, def.localField, {
-	            enumerable: enumerable,
-	            get: function get() {
-	              return this[def.localKey] ? definition.getResource(relationName).get(this[def.localKey]) : undefined;
-	            },
-	            set: function set() {}
-	          });
+	          prop.get = function () {
+	            return this[localKey] ? definition.getResource(relationName).get(this[localKey]) : undefined;
+	          };
 	        } else if (def.type === 'hasMany') {
-	          Object.defineProperty(target, def.localField, {
-	            enumerable: enumerable,
-	            get: function get() {
+	          prop.get = function () {
+	            var params = {};
+	            if (foreignKey) {
+	              params[foreignKey] = this[definition.idAttribute];
+	              return definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
+	            } else if (localKeys) {
+	              var keys = this[localKeys] || [];
+	              return definition.getResource(relationName).getAll(isArray(keys) ? keys : _keys(keys));
+	            }
+	            return undefined;
+	          };
+	        } else if (def.type === 'hasOne') {
+	          if (localKey) {
+	            prop.get = function () {
+	              return this[localKey] ? definition.getResource(relationName).get(this[localKey]) : undefined;
+	            };
+	          } else {
+	            prop.get = function () {
 	              var params = {};
-	              if (def.foreignKey) {
-	                params[def.foreignKey] = this[definition.idAttribute];
-	                return definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
-	              } else if (def.localKeys) {
-	                params.where = _defineProperty({}, definition.getResource(relationName).idAttribute, {
-	                  'in': this[def.localKeys]
-	                });
-	                return definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params);
+	              params[foreignKey] = this[definition.idAttribute];
+	              var items = params[foreignKey] ? definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true }) : [];
+	              if (items.length) {
+	                return items[0];
 	              }
 	              return undefined;
-	            },
-	            set: function set() {}
-	          });
-	        } else if (def.type === 'hasOne') {
-	          if (def.localKey) {
-	            Object.defineProperty(target, def.localField, {
-	              enumerable: enumerable,
-	              get: function get() {
-	                return this[def.localKey] ? definition.getResource(relationName).get(this[def.localKey]) : undefined;
-	              },
-	              set: function set() {}
-	            });
-	          } else {
-	            Object.defineProperty(target, def.localField, {
-	              enumerable: enumerable,
-	              get: function get() {
-	                var params = {};
-	                params[def.foreignKey] = this[definition.idAttribute];
-	                var items = params[def.foreignKey] ? definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true }) : [];
-	                if (items.length) {
-	                  return items[0];
-	                }
-	                return undefined;
-	              },
-	              set: function set() {}
-	            });
+	            };
 	          }
 	        }
+	        if (def.get) {
+	          (function () {
+	            var orig = prop.get;
+	            prop.get = function () {
+	              var _this2 = this;
+
+	              return def.get(definition, this, function () {
+	                for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+	                  args[_key4] = arguments[_key4];
+	                }
+
+	                return orig.apply(_this2, args);
+	              });
+	            };
+	          })();
+	        }
+	        Object.defineProperty(target, def.localField, prop);
 	      }
 	    });
 	  }
@@ -1306,531 +1314,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _utils = __webpack_require__(2);
-
-	var _errors = __webpack_require__(3);
-
-	var _defineResource = __webpack_require__(28);
-
-	var _eject = __webpack_require__(29);
-
-	var _ejectAll = __webpack_require__(30);
-
-	var _filter = __webpack_require__(31);
-
-	var _inject = __webpack_require__(32);
-
-	var NER = _errors['default'].NER;
-	var IA = _errors['default'].IA;
-	var R = _errors['default'].R;
-
-	function diffIsEmpty(diff) {
-	  return !(_utils['default'].isEmpty(diff.added) && _utils['default'].isEmpty(diff.removed) && _utils['default'].isEmpty(diff.changed));
-	}
-
-	exports['default'] = {
-	  /**
-	   * Return the changes for the given item, if any.
-	   *
-	   * @param resourceName The name of the type of resource of the item whose changes are to be returned.
-	   * @param id The primary key of the item whose changes are to be returned.
-	   * @param options Optional configuration.
-	   * @param options.ignoredChanges Array of strings or regular expressions of fields, the changes of which are to be ignored.
-	   * @returns The changes of the given item, if any.
-	   */
-	  changes: function changes(resourceName, id, options) {
-	    var _this = this;
-	    var definition = _this.defs[resourceName];
-	    options = options || {};
-
-	    id = _utils['default'].resolveId(definition, id);
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (!_utils['default']._sn(id)) {
-	      throw _utils['default']._snErr('id');
-	    }
-	    options = _utils['default']._(definition, options);
-
-	    options.logFn('changes', id, options);
-
-	    var item = definition.get(id);
-	    if (item) {
-	      var _ret = (function () {
-	        if (_utils['default'].w) {
-	          // force observation handler to be fired for item if there are changes and `Object.observe` is not available
-	          _this.s[resourceName].observers[id].deliver();
-	        }
-
-	        var ignoredChanges = options.ignoredChanges || [];
-	        // add linked relations to list of ignored changes
-	        _utils['default'].forEach(definition.relationFields, function (field) {
-	          if (!_utils['default'].contains(ignoredChanges, field)) {
-	            ignoredChanges.push(field);
-	          }
-	        });
-	        // calculate changes
-	        var diff = _utils['default'].diffObjectFromOldObject(item, _this.s[resourceName].previousAttributes[id], _utils['default'].equals, ignoredChanges);
-	        // remove functions from diff
-	        _utils['default'].forOwn(diff, function (changeset, name) {
-	          var toKeep = [];
-	          _utils['default'].forOwn(changeset, function (value, field) {
-	            if (!_utils['default'].isFunction(value)) {
-	              toKeep.push(field);
-	            }
-	          });
-	          diff[name] = _utils['default'].pick(diff[name], toKeep);
-	        });
-	        // definitely ignore changes to linked relations
-	        _utils['default'].forEach(definition.relationFields, function (field) {
-	          delete diff.added[field];
-	          delete diff.removed[field];
-	          delete diff.changed[field];
-	        });
-	        return {
-	          v: diff
-	        };
-	      })();
-
-	      if (typeof _ret === 'object') return _ret.v;
-	    }
-	  },
-	  /**
-	   * Return the change history of the given item, if any.
-	   *
-	   * @param resourceName The name of the type of resource of the item whose change history is to be returned.
-	   * @param id The primary key of the item whose change history is to be returned.
-	   * @returns The change history of the given item, if any.
-	   */
-	  changeHistory: function changeHistory(resourceName, id) {
-	    var _this = this;
-	    var definition = _this.defs[resourceName];
-	    var resource = _this.s[resourceName];
-
-	    id = _utils['default'].resolveId(definition, id);
-	    if (resourceName && !_this.defs[resourceName]) {
-	      throw new NER(resourceName);
-	    } else if (id && !_utils['default']._sn(id)) {
-	      throw _utils['default']._snErr('id');
-	    }
-
-	    definition.logFn('changeHistory', id);
-
-	    if (!definition.keepChangeHistory) {
-	      definition.errorFn('changeHistory is disabled for this resource!');
-	    } else {
-	      if (resourceName) {
-	        var item = definition.get(id);
-	        if (item) {
-	          return resource.changeHistories[id];
-	        }
-	      } else {
-	        return resource.changeHistory;
-	      }
-	    }
-	  },
-	  /**
-	   * Re-compute the computed properties of the given item.
-	   *
-	   * @param resourceName The name of the type of resource of the item whose computed properties are to be re-computed.
-	   * @param instance The instance whose computed properties are to be re-computed.
-	   * @returns The item whose computed properties were re-computed.
-	   */
-	  compute: function compute(resourceName, instance) {
-	    var _this = this;
-	    var definition = _this.defs[resourceName];
-
-	    instance = _utils['default'].resolveItem(_this.s[resourceName], instance);
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (!instance) {
-	      throw new R('Item not in the store!');
-	    } else if (!_utils['default']._o(instance) && !_utils['default']._sn(instance)) {
-	      throw new IA('"instance" must be an object, string or number!');
-	    }
-
-	    definition.logFn('compute', instance);
-	    // re-compute all computed properties
-	    _utils['default'].forOwn(definition.computed, function (fn, field) {
-	      _utils['default'].compute.call(instance, fn, field);
-	    });
-	    return instance;
-	  },
-	  /**
-	   * Factory function to create an instance of the specified Resource.
-	   *
-	   * @param resourceName The name of the type of resource of which to create an instance.
-	   * @param attrs Hash of properties with which to initialize the instance.
-	   * @param options Optional configuration.
-	   * @param options.defaults Default values with which to initialize the instance.
-	   * @returns The new instance.
-	   */
-	  createInstance: function createInstance(resourceName, attrs, options) {
-	    var definition = this.defs[resourceName];
-	    var item = undefined;
-
-	    attrs = attrs || {};
-
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (attrs && !_utils['default'].isObject(attrs)) {
-	      throw new IA('"attrs" must be an object!');
-	    }
-
-	    options = _utils['default']._(definition, options);
-	    options.logFn('createInstance', attrs, options);
-
-	    // lifecycle
-	    options.beforeCreateInstance(options, attrs);
-
-	    // grab instance constructor function from Resource definition
-	    var Constructor = definition[definition['class']];
-
-	    // create instance
-	    item = new Constructor();
-
-	    // add default values
-	    if (options.defaultValues) {
-	      _utils['default'].deepMixIn(item, options.defaultValues);
-	    }
-	    _utils['default'].deepMixIn(item, attrs);
-
-	    // compute computed properties
-	    if (definition.computed) {
-	      definition.compute(item);
-	    }
-	    // lifecycle
-	    options.afterCreateInstance(options, item);
-	    return item;
-	  },
-	  /**
-	   * Create a new collection of the specified Resource.
-	   *
-	   * @param resourceName The name of the type of resource of which to create a collection
-	   * @param arr Possibly empty array of data from which to create the collection.
-	   * @param params The criteria by which to filter items. Will be passed to `DS#findAll` if `fetch` is called. See http://www.js-data.io/docs/query-syntax
-	   * @param options Optional configuration.
-	   * @param options.notify Whether to call the beforeCreateCollection and afterCreateCollection lifecycle hooks..
-	   * @returns The new collection.
-	   */
-	  createCollection: function createCollection(resourceName, arr, params, options) {
-	    var _this = this;
-	    var definition = _this.defs[resourceName];
-
-	    arr = arr || [];
-	    params = params || {};
-
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (arr && !_utils['default'].isArray(arr)) {
-	      throw new IA('"arr" must be an array!');
-	    }
-
-	    options = _utils['default']._(definition, options);
-
-	    options.logFn('createCollection', arr, options);
-
-	    // lifecycle
-	    options.beforeCreateCollection(options, arr);
-
-	    // define the API for this collection
-	    Object.defineProperties(arr, {
-	      /**
-	       * Call DS#findAll with the params of this collection, filling the collection with the results.
-	       */
-	      fetch: {
-	        value: function value(params, options) {
-	          var __this = this;
-	          __this.params = params || __this.params;
-	          return definition.findAll(__this.params, options).then(function (data) {
-	            if (data === __this) {
-	              return __this;
-	            }
-	            data.unshift(__this.length);
-	            data.unshift(0);
-	            __this.splice.apply(__this, data);
-	            data.shift();
-	            data.shift();
-	            if (data.$$injected) {
-	              _this.s[resourceName].queryData[_utils['default'].toJson(__this.params)] = __this;
-	              __this.$$injected = true;
-	            }
-	            return __this;
-	          });
-	        }
-	      },
-	      // params for this collection. See http://www.js-data.io/docs/query-syntax
-	      params: {
-	        value: params,
-	        writable: true
-	      },
-	      // name of the resource type of this collection
-	      resourceName: {
-	        value: resourceName
-	      }
-	    });
-
-	    // lifecycle
-	    options.afterCreateCollection(options, arr);
-	    return arr;
-	  },
-	  defineResource: _defineResource['default'],
-	  digest: function digest() {
-	    this.observe.Platform.performMicrotaskCheckpoint();
-	  },
-	  eject: _eject['default'],
-	  ejectAll: _ejectAll['default'],
-	  filter: _filter['default'],
-	  /**
-	   * Return the item with the given primary key if its in the store.
-	   *
-	   * @param resourceName The name of the type of resource of the item to retrieve.
-	   * @param id The primary key of the item to retrieve.
-	   * @param options Optional configuration.
-	   * @returns The item with the given primary key if it's in the store.
-	   */
-	  get: function get(resourceName, id, options) {
-	    var _this = this;
-	    var definition = _this.defs[resourceName];
-
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (!_utils['default']._sn(id)) {
-	      throw _utils['default']._snErr('id');
-	    }
-
-	    options = _utils['default']._(definition, options);
-
-	    options.logFn('get', id, options);
-
-	    // return the item if it exists
-	    return _this.s[resourceName].index[id];
-	  },
-	  /**
-	   * Return the items in the store that have the given primary keys.
-	   *
-	   * @param resourceName The name of the type of resource of the items to retrieve.
-	   * @param ids The primary keys of the items to retrieve.
-	   * @returns The items with the given primary keys if they're in the store.
-	   */
-	  getAll: function getAll(resourceName, ids) {
-	    var _this = this;
-	    var definition = _this.defs[resourceName];
-	    var resource = _this.s[resourceName];
-	    var collection = [];
-
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (ids && !_utils['default']._a(ids)) {
-	      throw _utils['default']._aErr('ids');
-	    }
-
-	    definition.logFn('getAll', ids);
-
-	    if (_utils['default']._a(ids)) {
-	      // return just the items with the given primary keys
-	      var _length = ids.length;
-	      for (var i = 0; i < _length; i++) {
-	        if (resource.index[ids[i]]) {
-	          collection.push(resource.index[ids[i]]);
-	        }
-	      }
-	    } else {
-	      // most efficient of retrieving ALL items from the store
-	      collection = resource.collection.slice();
-	    }
-
-	    return collection;
-	  },
-	  /**
-	   * Return the whether the item with the given primary key has any changes.
-	   *
-	   * @param resourceName The name of the type of resource of the item.
-	   * @param id The primary key of the item.
-	   * @returns Whether the item with the given primary key has any changes.
-	   */
-	  hasChanges: function hasChanges(resourceName, id) {
-	    var _this = this;
-	    var definition = _this.defs[resourceName];
-
-	    id = _utils['default'].resolveId(definition, id);
-
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (!_utils['default']._sn(id)) {
-	      throw _utils['default']._snErr('id');
-	    }
-
-	    definition.logFn('hasChanges', id);
-
-	    return definition.get(id) ? diffIsEmpty(definition.changes(id)) : false;
-	  },
-	  inject: _inject['default'],
-	  /**
-	   * Return the timestamp from the last time the item with the given primary key was changed.
-	   *
-	   * @param resourceName The name of the type of resource of the item.
-	   * @param id The primary key of the item.
-	   * @returns Timestamp from the last time the item was changed.
-	   */
-	  lastModified: function lastModified(resourceName, id) {
-	    var definition = this.defs[resourceName];
-	    var resource = this.s[resourceName];
-
-	    id = _utils['default'].resolveId(definition, id);
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    }
-
-	    definition.logFn('lastModified', id);
-
-	    if (id) {
-	      if (!(id in resource.modified)) {
-	        resource.modified[id] = 0;
-	      }
-	      return resource.modified[id];
-	    }
-	    return resource.collectionModified;
-	  },
-	  /**
-	   * Return the timestamp from the last time the item with the given primary key was saved via an adapter.
-	   *
-	   * @param resourceName The name of the type of resource of the item.
-	   * @param id The primary key of the item.
-	   * @returns Timestamp from the last time the item was saved.
-	   */
-	  lastSaved: function lastSaved(resourceName, id) {
-	    var definition = this.defs[resourceName];
-	    var resource = this.s[resourceName];
-
-	    id = _utils['default'].resolveId(definition, id);
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    }
-
-	    definition.logFn('lastSaved', id);
-
-	    if (!(id in resource.saved)) {
-	      resource.saved[id] = 0;
-	    }
-	    return resource.saved[id];
-	  },
-	  /**
-	   * Return the previous attributes of the item with the given primary key before it was changed.
-	   *
-	   * @param resourceName The name of the type of resource of the item.
-	   * @param id The primary key of the item.
-	   * @returns The previous attributes of the item
-	   */
-	  previous: function previous(resourceName, id) {
-	    var _this = this;
-	    var definition = _this.defs[resourceName];
-	    var resource = _this.s[resourceName];
-
-	    id = _utils['default'].resolveId(definition, id);
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (!_utils['default']._sn(id)) {
-	      throw _utils['default']._snErr('id');
-	    }
-
-	    definition.logFn('previous', id);
-
-	    // return resource from cache
-	    return resource.previousAttributes[id] ? _utils['default'].copy(resource.previousAttributes[id]) : undefined;
-	  }
-	};
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _create = __webpack_require__(33);
-
-	var _destroy = __webpack_require__(34);
-
-	var _destroyAll = __webpack_require__(35);
-
-	var _find = __webpack_require__(36);
-
-	var _findAll = __webpack_require__(37);
-
-	var _loadRelations = __webpack_require__(38);
-
-	var _reap = __webpack_require__(39);
-
-	var _save = __webpack_require__(40);
-
-	var _update = __webpack_require__(41);
-
-	var _updateAll = __webpack_require__(42);
-
-	exports['default'] = {
-	  create: _create['default'],
-	  destroy: _destroy['default'],
-	  destroyAll: _destroyAll['default'],
-	  find: _find['default'],
-	  findAll: _findAll['default'],
-	  loadRelations: _loadRelations['default'],
-	  reap: _reap['default'],
-	  refresh: function refresh(resourceName, id, options) {
-	    var _this = this;
-	    var DSUtils = _this.utils;
-
-	    return new DSUtils.Promise(function (resolve, reject) {
-	      var definition = _this.defs[resourceName];
-	      id = DSUtils.resolveId(_this.defs[resourceName], id);
-	      if (!definition) {
-	        reject(new _this.errors.NER(resourceName));
-	      } else if (!DSUtils._sn(id)) {
-	        reject(DSUtils._snErr('id'));
-	      } else {
-	        options = DSUtils._(definition, options);
-	        options.bypassCache = true;
-	        options.logFn('refresh', id, options);
-	        resolve(_this.get(resourceName, id));
-	      }
-	    }).then(function (item) {
-	      return item ? _this.find(resourceName, id, options) : item;
-	    });
-	  },
-	  refreshAll: function refreshAll(resourceName, params, options) {
-	    var _this = this;
-	    var DSUtils = _this.utils;
-	    var definition = _this.defs[resourceName];
-	    params = params || {};
-
-	    return new DSUtils.Promise(function (resolve, reject) {
-	      if (!definition) {
-	        reject(new _this.errors.NER(resourceName));
-	      } else if (!DSUtils._o(params)) {
-	        reject(DSUtils._oErr('params'));
-	      } else {
-	        options = DSUtils._(definition, options);
-	        options.bypassCache = true;
-	        options.logFn('refreshAll', params, options);
-	        resolve(_this.filter(resourceName, params, options));
-	      }
-	    }).then(function (existing) {
-	      options.bypassCache = true;
-	      return _this.findAll(resourceName, params, options).then(function (found) {
-	        DSUtils.forEach(existing, function (item) {
-	          if (found.indexOf(item) === -1) {
-	            definition.eject(item);
-	          }
-	        });
-	        return found;
-	      });
-	    });
-	  },
-	  save: _save['default'],
-	  update: _update['default'],
-	  updateAll: _updateAll['default']
-	};
-
-/***/ },
-/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -2380,6 +1863,531 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _utils = __webpack_require__(2);
+
+	var _errors = __webpack_require__(3);
+
+	var _defineResource = __webpack_require__(29);
+
+	var _eject = __webpack_require__(30);
+
+	var _ejectAll = __webpack_require__(31);
+
+	var _filter = __webpack_require__(32);
+
+	var _inject = __webpack_require__(33);
+
+	var NER = _errors['default'].NER;
+	var IA = _errors['default'].IA;
+	var R = _errors['default'].R;
+
+	function diffIsEmpty(diff) {
+	  return !(_utils['default'].isEmpty(diff.added) && _utils['default'].isEmpty(diff.removed) && _utils['default'].isEmpty(diff.changed));
+	}
+
+	exports['default'] = {
+	  /**
+	   * Return the changes for the given item, if any.
+	   *
+	   * @param resourceName The name of the type of resource of the item whose changes are to be returned.
+	   * @param id The primary key of the item whose changes are to be returned.
+	   * @param options Optional configuration.
+	   * @param options.ignoredChanges Array of strings or regular expressions of fields, the changes of which are to be ignored.
+	   * @returns The changes of the given item, if any.
+	   */
+	  changes: function changes(resourceName, id, options) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+	    options = options || {};
+
+	    id = _utils['default'].resolveId(definition, id);
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (!_utils['default']._sn(id)) {
+	      throw _utils['default']._snErr('id');
+	    }
+	    options = _utils['default']._(definition, options);
+
+	    options.logFn('changes', id, options);
+
+	    var item = definition.get(id);
+	    if (item) {
+	      var _ret = (function () {
+	        if (_utils['default'].w) {
+	          // force observation handler to be fired for item if there are changes and `Object.observe` is not available
+	          _this.s[resourceName].observers[id].deliver();
+	        }
+
+	        var ignoredChanges = options.ignoredChanges || [];
+	        // add linked relations to list of ignored changes
+	        _utils['default'].forEach(definition.relationFields, function (field) {
+	          if (!_utils['default'].contains(ignoredChanges, field)) {
+	            ignoredChanges.push(field);
+	          }
+	        });
+	        // calculate changes
+	        var diff = _utils['default'].diffObjectFromOldObject(item, _this.s[resourceName].previousAttributes[id], _utils['default'].equals, ignoredChanges);
+	        // remove functions from diff
+	        _utils['default'].forOwn(diff, function (changeset, name) {
+	          var toKeep = [];
+	          _utils['default'].forOwn(changeset, function (value, field) {
+	            if (!_utils['default'].isFunction(value)) {
+	              toKeep.push(field);
+	            }
+	          });
+	          diff[name] = _utils['default'].pick(diff[name], toKeep);
+	        });
+	        // definitely ignore changes to linked relations
+	        _utils['default'].forEach(definition.relationFields, function (field) {
+	          delete diff.added[field];
+	          delete diff.removed[field];
+	          delete diff.changed[field];
+	        });
+	        return {
+	          v: diff
+	        };
+	      })();
+
+	      if (typeof _ret === 'object') return _ret.v;
+	    }
+	  },
+	  /**
+	   * Return the change history of the given item, if any.
+	   *
+	   * @param resourceName The name of the type of resource of the item whose change history is to be returned.
+	   * @param id The primary key of the item whose change history is to be returned.
+	   * @returns The change history of the given item, if any.
+	   */
+	  changeHistory: function changeHistory(resourceName, id) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+	    var resource = _this.s[resourceName];
+
+	    id = _utils['default'].resolveId(definition, id);
+	    if (resourceName && !_this.defs[resourceName]) {
+	      throw new NER(resourceName);
+	    } else if (id && !_utils['default']._sn(id)) {
+	      throw _utils['default']._snErr('id');
+	    }
+
+	    definition.logFn('changeHistory', id);
+
+	    if (!definition.keepChangeHistory) {
+	      definition.errorFn('changeHistory is disabled for this resource!');
+	    } else {
+	      if (resourceName) {
+	        var item = definition.get(id);
+	        if (item) {
+	          return resource.changeHistories[id];
+	        }
+	      } else {
+	        return resource.changeHistory;
+	      }
+	    }
+	  },
+	  /**
+	   * Re-compute the computed properties of the given item.
+	   *
+	   * @param resourceName The name of the type of resource of the item whose computed properties are to be re-computed.
+	   * @param instance The instance whose computed properties are to be re-computed.
+	   * @returns The item whose computed properties were re-computed.
+	   */
+	  compute: function compute(resourceName, instance) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+
+	    instance = _utils['default'].resolveItem(_this.s[resourceName], instance);
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (!instance) {
+	      throw new R('Item not in the store!');
+	    } else if (!_utils['default']._o(instance) && !_utils['default']._sn(instance)) {
+	      throw new IA('"instance" must be an object, string or number!');
+	    }
+
+	    definition.logFn('compute', instance);
+	    // re-compute all computed properties
+	    _utils['default'].forOwn(definition.computed, function (fn, field) {
+	      _utils['default'].compute.call(instance, fn, field);
+	    });
+	    return instance;
+	  },
+	  /**
+	   * Factory function to create an instance of the specified Resource.
+	   *
+	   * @param resourceName The name of the type of resource of which to create an instance.
+	   * @param attrs Hash of properties with which to initialize the instance.
+	   * @param options Optional configuration.
+	   * @param options.defaults Default values with which to initialize the instance.
+	   * @returns The new instance.
+	   */
+	  createInstance: function createInstance(resourceName, attrs, options) {
+	    var definition = this.defs[resourceName];
+	    var item = undefined;
+
+	    attrs = attrs || {};
+
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (attrs && !_utils['default'].isObject(attrs)) {
+	      throw new IA('"attrs" must be an object!');
+	    }
+
+	    options = _utils['default']._(definition, options);
+	    options.logFn('createInstance', attrs, options);
+
+	    // lifecycle
+	    options.beforeCreateInstance(options, attrs);
+
+	    // grab instance constructor function from Resource definition
+	    var Constructor = definition[definition['class']];
+
+	    // create instance
+	    item = new Constructor();
+
+	    // add default values
+	    if (options.defaultValues) {
+	      _utils['default'].deepMixIn(item, options.defaultValues);
+	    }
+	    _utils['default'].deepMixIn(item, attrs);
+
+	    // compute computed properties
+	    if (definition.computed) {
+	      definition.compute(item);
+	    }
+	    // lifecycle
+	    options.afterCreateInstance(options, item);
+	    return item;
+	  },
+	  /**
+	   * Create a new collection of the specified Resource.
+	   *
+	   * @param resourceName The name of the type of resource of which to create a collection
+	   * @param arr Possibly empty array of data from which to create the collection.
+	   * @param params The criteria by which to filter items. Will be passed to `DS#findAll` if `fetch` is called. See http://www.js-data.io/docs/query-syntax
+	   * @param options Optional configuration.
+	   * @param options.notify Whether to call the beforeCreateCollection and afterCreateCollection lifecycle hooks..
+	   * @returns The new collection.
+	   */
+	  createCollection: function createCollection(resourceName, arr, params, options) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+
+	    arr = arr || [];
+	    params = params || {};
+
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (arr && !_utils['default'].isArray(arr)) {
+	      throw new IA('"arr" must be an array!');
+	    }
+
+	    options = _utils['default']._(definition, options);
+
+	    options.logFn('createCollection', arr, options);
+
+	    // lifecycle
+	    options.beforeCreateCollection(options, arr);
+
+	    // define the API for this collection
+	    Object.defineProperties(arr, {
+	      /**
+	       * Call DS#findAll with the params of this collection, filling the collection with the results.
+	       */
+	      fetch: {
+	        value: function value(params, options) {
+	          var __this = this;
+	          __this.params = params || __this.params;
+	          return definition.findAll(__this.params, options).then(function (data) {
+	            if (data === __this) {
+	              return __this;
+	            }
+	            data.unshift(__this.length);
+	            data.unshift(0);
+	            __this.splice.apply(__this, data);
+	            data.shift();
+	            data.shift();
+	            if (data.$$injected) {
+	              _this.s[resourceName].queryData[_utils['default'].toJson(__this.params)] = __this;
+	              __this.$$injected = true;
+	            }
+	            return __this;
+	          });
+	        }
+	      },
+	      // params for this collection. See http://www.js-data.io/docs/query-syntax
+	      params: {
+	        value: params,
+	        writable: true
+	      },
+	      // name of the resource type of this collection
+	      resourceName: {
+	        value: resourceName
+	      }
+	    });
+
+	    // lifecycle
+	    options.afterCreateCollection(options, arr);
+	    return arr;
+	  },
+	  defineResource: _defineResource['default'],
+	  digest: function digest() {
+	    this.observe.Platform.performMicrotaskCheckpoint();
+	  },
+	  eject: _eject['default'],
+	  ejectAll: _ejectAll['default'],
+	  filter: _filter['default'],
+	  /**
+	   * Return the item with the given primary key if its in the store.
+	   *
+	   * @param resourceName The name of the type of resource of the item to retrieve.
+	   * @param id The primary key of the item to retrieve.
+	   * @param options Optional configuration.
+	   * @returns The item with the given primary key if it's in the store.
+	   */
+	  get: function get(resourceName, id, options) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (!_utils['default']._sn(id)) {
+	      throw _utils['default']._snErr('id');
+	    }
+
+	    options = _utils['default']._(definition, options);
+
+	    options.logFn('get', id, options);
+
+	    // return the item if it exists
+	    return _this.s[resourceName].index[id];
+	  },
+	  /**
+	   * Return the items in the store that have the given primary keys.
+	   *
+	   * @param resourceName The name of the type of resource of the items to retrieve.
+	   * @param ids The primary keys of the items to retrieve.
+	   * @returns The items with the given primary keys if they're in the store.
+	   */
+	  getAll: function getAll(resourceName, ids) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+	    var resource = _this.s[resourceName];
+	    var collection = [];
+
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (ids && !_utils['default']._a(ids)) {
+	      throw _utils['default']._aErr('ids');
+	    }
+
+	    definition.logFn('getAll', ids);
+
+	    if (_utils['default']._a(ids)) {
+	      // return just the items with the given primary keys
+	      var _length = ids.length;
+	      for (var i = 0; i < _length; i++) {
+	        if (resource.index[ids[i]]) {
+	          collection.push(resource.index[ids[i]]);
+	        }
+	      }
+	    } else {
+	      // most efficient of retrieving ALL items from the store
+	      collection = resource.collection.slice();
+	    }
+
+	    return collection;
+	  },
+	  /**
+	   * Return the whether the item with the given primary key has any changes.
+	   *
+	   * @param resourceName The name of the type of resource of the item.
+	   * @param id The primary key of the item.
+	   * @returns Whether the item with the given primary key has any changes.
+	   */
+	  hasChanges: function hasChanges(resourceName, id) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+
+	    id = _utils['default'].resolveId(definition, id);
+
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (!_utils['default']._sn(id)) {
+	      throw _utils['default']._snErr('id');
+	    }
+
+	    definition.logFn('hasChanges', id);
+
+	    return definition.get(id) ? diffIsEmpty(definition.changes(id)) : false;
+	  },
+	  inject: _inject['default'],
+	  /**
+	   * Return the timestamp from the last time the item with the given primary key was changed.
+	   *
+	   * @param resourceName The name of the type of resource of the item.
+	   * @param id The primary key of the item.
+	   * @returns Timestamp from the last time the item was changed.
+	   */
+	  lastModified: function lastModified(resourceName, id) {
+	    var definition = this.defs[resourceName];
+	    var resource = this.s[resourceName];
+
+	    id = _utils['default'].resolveId(definition, id);
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    }
+
+	    definition.logFn('lastModified', id);
+
+	    if (id) {
+	      if (!(id in resource.modified)) {
+	        resource.modified[id] = 0;
+	      }
+	      return resource.modified[id];
+	    }
+	    return resource.collectionModified;
+	  },
+	  /**
+	   * Return the timestamp from the last time the item with the given primary key was saved via an adapter.
+	   *
+	   * @param resourceName The name of the type of resource of the item.
+	   * @param id The primary key of the item.
+	   * @returns Timestamp from the last time the item was saved.
+	   */
+	  lastSaved: function lastSaved(resourceName, id) {
+	    var definition = this.defs[resourceName];
+	    var resource = this.s[resourceName];
+
+	    id = _utils['default'].resolveId(definition, id);
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    }
+
+	    definition.logFn('lastSaved', id);
+
+	    if (!(id in resource.saved)) {
+	      resource.saved[id] = 0;
+	    }
+	    return resource.saved[id];
+	  },
+	  /**
+	   * Return the previous attributes of the item with the given primary key before it was changed.
+	   *
+	   * @param resourceName The name of the type of resource of the item.
+	   * @param id The primary key of the item.
+	   * @returns The previous attributes of the item
+	   */
+	  previous: function previous(resourceName, id) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+	    var resource = _this.s[resourceName];
+
+	    id = _utils['default'].resolveId(definition, id);
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (!_utils['default']._sn(id)) {
+	      throw _utils['default']._snErr('id');
+	    }
+
+	    definition.logFn('previous', id);
+
+	    // return resource from cache
+	    return resource.previousAttributes[id] ? _utils['default'].copy(resource.previousAttributes[id]) : undefined;
+	  }
+	};
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _create = __webpack_require__(34);
+
+	var _destroy = __webpack_require__(35);
+
+	var _destroyAll = __webpack_require__(36);
+
+	var _find = __webpack_require__(37);
+
+	var _findAll = __webpack_require__(38);
+
+	var _loadRelations = __webpack_require__(39);
+
+	var _reap = __webpack_require__(40);
+
+	var _save = __webpack_require__(41);
+
+	var _update = __webpack_require__(42);
+
+	var _updateAll = __webpack_require__(43);
+
+	exports['default'] = {
+	  create: _create['default'],
+	  destroy: _destroy['default'],
+	  destroyAll: _destroyAll['default'],
+	  find: _find['default'],
+	  findAll: _findAll['default'],
+	  loadRelations: _loadRelations['default'],
+	  reap: _reap['default'],
+	  refresh: function refresh(resourceName, id, options) {
+	    var _this = this;
+	    var DSUtils = _this.utils;
+
+	    return new DSUtils.Promise(function (resolve, reject) {
+	      var definition = _this.defs[resourceName];
+	      id = DSUtils.resolveId(_this.defs[resourceName], id);
+	      if (!definition) {
+	        reject(new _this.errors.NER(resourceName));
+	      } else if (!DSUtils._sn(id)) {
+	        reject(DSUtils._snErr('id'));
+	      } else {
+	        options = DSUtils._(definition, options);
+	        options.bypassCache = true;
+	        options.logFn('refresh', id, options);
+	        resolve(_this.get(resourceName, id));
+	      }
+	    }).then(function (item) {
+	      return item ? _this.find(resourceName, id, options) : item;
+	    });
+	  },
+	  refreshAll: function refreshAll(resourceName, params, options) {
+	    var _this = this;
+	    var DSUtils = _this.utils;
+	    var definition = _this.defs[resourceName];
+	    params = params || {};
+
+	    return new DSUtils.Promise(function (resolve, reject) {
+	      if (!definition) {
+	        reject(new _this.errors.NER(resourceName));
+	      } else if (!DSUtils._o(params)) {
+	        reject(DSUtils._oErr('params'));
+	      } else {
+	        options = DSUtils._(definition, options);
+	        options.bypassCache = true;
+	        options.logFn('refreshAll', params, options);
+	        resolve(_this.filter(resourceName, params, options));
+	      }
+	    }).then(function (existing) {
+	      options.bypassCache = true;
+	      return _this.findAll(resourceName, params, options).then(function (found) {
+	        DSUtils.forEach(existing, function (item) {
+	          if (found.indexOf(item) === -1) {
+	            definition.eject(item);
+	          }
+	        });
+	        return found;
+	      });
+	    });
+	  },
+	  save: _save['default'],
+	  update: _update['default'],
+	  updateAll: _updateAll['default']
+	};
+
+/***/ },
 /* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -2685,7 +2693,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var indexOf = __webpack_require__(20);
+	var indexOf = __webpack_require__(21);
 
 	    /**
 	     * If array contains values.
@@ -2701,7 +2709,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var indexOf = __webpack_require__(20);
+	var indexOf = __webpack_require__(21);
 
 	    /**
 	     * Remove a single item from the array.
@@ -2781,8 +2789,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var hasOwn = __webpack_require__(21);
-	var forIn = __webpack_require__(22);
+	var hasOwn = __webpack_require__(22);
+	var forIn = __webpack_require__(23);
 
 	    /**
 	     * Similar to Array/forEach but works over object properties and fixes Don't
@@ -2807,7 +2815,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var forOwn = __webpack_require__(13);
-	var isPlainObject = __webpack_require__(23);
+	var isPlainObject = __webpack_require__(24);
 
 	    /**
 	     * Mixes objects into the target object, recursively mixing existing child
@@ -2870,7 +2878,29 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isPrimitive = __webpack_require__(24);
+	var forOwn = __webpack_require__(13);
+
+	    /**
+	     * Get object keys
+	     */
+	     var keys = Object.keys || function (obj) {
+	            var keys = [];
+	            forOwn(obj, function(val, key){
+	                keys.push(key);
+	            });
+	            return keys;
+	        };
+
+	    module.exports = keys;
+
+
+
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var isPrimitive = __webpack_require__(25);
 
 	    /**
 	     * get "nested" object property
@@ -2893,10 +2923,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var namespace = __webpack_require__(25);
+	var namespace = __webpack_require__(26);
 
 	    /**
 	     * set "nested" object property
@@ -2916,12 +2946,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(26);
-	var camelCase = __webpack_require__(27);
-	var upperCase = __webpack_require__(19);
+	var toString = __webpack_require__(27);
+	var camelCase = __webpack_require__(28);
+	var upperCase = __webpack_require__(20);
 	    /**
 	     * camelCase + UPPERCASE first char
 	     */
@@ -2935,10 +2965,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(26);
+	var toString = __webpack_require__(27);
 	    /**
 	     * "Safer" String.toUpperCase()
 	     */
@@ -2951,7 +2981,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -2985,7 +3015,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -3003,10 +3033,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var hasOwn = __webpack_require__(21);
+	var hasOwn = __webpack_require__(22);
 
 	    var _hasDontEnumBug,
 	        _dontEnums;
@@ -3085,7 +3115,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -3104,7 +3134,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -3131,7 +3161,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var forEach = __webpack_require__(8);
@@ -3156,7 +3186,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -3175,14 +3205,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(26);
-	var replaceAccents = __webpack_require__(43);
-	var removeNonWord = __webpack_require__(44);
-	var upperCase = __webpack_require__(19);
-	var lowerCase = __webpack_require__(45);
+	var toString = __webpack_require__(27);
+	var replaceAccents = __webpack_require__(44);
+	var removeNonWord = __webpack_require__(45);
+	var upperCase = __webpack_require__(20);
+	var lowerCase = __webpack_require__(46);
 	    /**
 	    * Convert string to camelCase text.
 	    */
@@ -3201,7 +3231,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = defineResource;
@@ -3618,7 +3648,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = eject;
@@ -3726,7 +3756,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 30 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = ejectAll;
@@ -3783,7 +3813,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 31 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = filter;
@@ -3819,7 +3849,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 32 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = inject;
@@ -4160,7 +4190,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 33 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = create;
@@ -4252,7 +4282,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 34 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = destroy;
@@ -4322,7 +4352,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 35 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = destroyAll;
@@ -4393,7 +4423,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 36 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = find;
@@ -4508,7 +4538,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 37 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = findAll;
@@ -4591,8 +4621,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      if (queryHash in resource.completedQueries) {
 	        if (options.useFilter) {
-	          // resolve immediately by filtering data from the data store
-	          resolve(definition.filter(params, options.orig()));
+	          if (options.localKeys) {
+	            resolve(definition.getAll(options.localKeys, options.orig()));
+	          } else {
+	            // resolve immediately by filtering data from the data store
+	            resolve(definition.filter(params, options.orig()));
+	          }
 	        } else {
 	          // resolve immediately by returning the cached array from the previously made query
 	          resolve(resource.queryData[queryHash]);
@@ -4663,7 +4697,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = loadRelations;
@@ -4730,13 +4764,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 
 	            if (def.type === 'hasMany') {
+	              var orig = __options.orig();
 	              if (def.localKeys) {
 	                delete params[def.foreignKey];
+	                var keys = instance[def.localKeys] || [];
+	                keys = DSUtils._a(keys) ? keys : DSUtils.keys(keys);
 	                params.where = _defineProperty({}, relationDef.idAttribute, {
-	                  'in': instance[def.localKeys]
+	                  'in': keys
 	                });
+	                orig.localKeys = keys;
 	              }
-	              task = relationDef.findAll(params, __options.orig());
+	              task = relationDef.findAll(params, orig);
 	            } else if (def.type === 'hasOne') {
 	              if (def.localKey && instance[def.localKey]) {
 	                task = relationDef.find(instance[def.localKey], __options.orig());
@@ -4766,7 +4804,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 39 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = reap;
@@ -4857,7 +4895,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 40 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = save;
@@ -4966,7 +5004,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 41 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = update;
@@ -5042,7 +5080,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 42 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = updateAll;
@@ -5134,10 +5172,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 43 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(26);
+	var toString = __webpack_require__(27);
 	    /**
 	    * Replaces all accented chars with regular ones
 	    */
@@ -5176,10 +5214,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 44 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(26);
+	var toString = __webpack_require__(27);
 	    // This pattern is generated by the _build/pattern-removeNonWord.js script
 	    var PATTERN = /[^\x20\x2D0-9A-Z\x5Fa-z\xC0-\xD6\xD8-\xF6\xF8-\xFF]/g;
 
@@ -5196,10 +5234,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 45 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(26);
+	var toString = __webpack_require__(27);
 	    /**
 	     * "Safer" String.toLowerCase()
 	     */

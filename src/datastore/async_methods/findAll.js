@@ -75,8 +75,12 @@ export default function findAll(resourceName, params, options) {
       }
       if (queryHash in resource.completedQueries) {
         if (options.useFilter) {
-          // resolve immediately by filtering data from the data store
-          resolve(definition.filter(params, options.orig()));
+          if (options.localKeys) {
+            resolve(definition.getAll(options.localKeys, options.orig()));
+          } else {
+            // resolve immediately by filtering data from the data store
+            resolve(definition.filter(params, options.orig()));
+          }
         } else {
           // resolve immediately by returning the cached array from the previously made query
           resolve(resource.queryData[queryHash]);
