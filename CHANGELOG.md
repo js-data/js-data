@@ -1,3 +1,7 @@
+##### 2.0.0-rc.3 - 30 June 2015
+
+- Tweak to custom relation getters
+
 ##### 2.0.0-rc.2 - 30 June 2015
 
 ###### Backwards compatible API changes
