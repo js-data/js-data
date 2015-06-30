@@ -261,4 +261,32 @@ describe('DS#defineResource', function () {
     // clean up
     newStore.constructor.prototype.createInstance = orig;
   });
+  it('should allow enhanced relation getters', function () {
+    var wasItActivated = false;
+    var Foo = store.defineResource({
+      name: 'foo',
+      relations: {
+        belongsTo: {
+          bar: {
+            localField: 'bar',
+            localKey: 'barId',
+            get: function (Foo, foo, orig) {
+              wasItActivated = true;
+              return orig();
+            }
+          }
+        }
+      }
+    });
+    store.defineResource('bar');
+    var foo = Foo.inject({
+      id: 1,
+      barId: 1,
+      bar: {
+        id: 1
+      }
+    });
+    assert.equal(foo.bar.id, 1);
+    assert.isTrue(wasItActivated);
+  });
 });

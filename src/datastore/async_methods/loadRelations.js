@@ -54,15 +54,19 @@ export default function loadRelations(resourceName, instance, relations, options
           }
 
           if (def.type === 'hasMany') {
+            let orig = __options.orig();
             if (def.localKeys) {
               delete params[def.foreignKey];
+              let keys = instance[def.localKeys] || [];
+              keys = DSUtils._a(keys) ? keys : DSUtils.keys(keys);
               params.where = {
                 [relationDef.idAttribute]: {
-                  'in': instance[def.localKeys]
+                  'in': keys
                 }
               };
+              orig.localKeys = keys;
             }
-            task = relationDef.findAll(params, __options.orig());
+            task = relationDef.findAll(params, orig);
           } else if (def.type === 'hasOne') {
             if (def.localKey && instance[def.localKey]) {
               task = relationDef.find(instance[def.localKey], __options.orig());

@@ -1,3 +1,8 @@
+##### 2.0.0-rc.2 - 30 June 2015
+
+###### Backwards compatible API changes
+- Enhanced relation getters and better localKeys support
+
 ##### 2.0.0-rc.1 - 27 June 2015
 
 ###### Breaking API changes

@@ -13,6 +13,7 @@ let deepMixIn = require('mout/object/deepMixIn');
 let pascalCase = require('mout/string/pascalCase');
 let remove = require('mout/array/remove');
 let pick = require('mout/object/pick');
+let _keys = require('mout/object/keys');
 let sort = require('mout/array/sort');
 let upperCase = require('mout/string/upperCase');
 let get = require('mout/object/get');
@@ -462,6 +463,7 @@ export default {
   isObject,
   isNumber,
   isString,
+  keys: _keys,
   makePath,
   observe,
   omit(obj, bl) {
@@ -572,66 +574,58 @@ export default {
   applyRelationGettersToTarget(store, definition, target) {
     this.forEach(definition.relationList, def => {
       let relationName = def.relation;
+      let localField = def.localField;
+      let localKey = def.localKey;
+      let foreignKey = def.foreignKey;
+      let localKeys = def.localKeys;
       let enumerable = typeof def.enumerable === 'boolean' ? def.enumerable : !!definition.relationsEnumerable;
       if (typeof def.link === 'boolean' ? def.link : !!definition.linkRelations) {
-        delete target[def.localField];
+        delete target[localField];
+        let prop = {
+          enumerable,
+          set() {
+          }
+        };
         if (def.type === 'belongsTo') {
-          Object.defineProperty(target, def.localField, {
-            enumerable,
-            get() {
-              return this[def.localKey] ? definition.getResource(relationName).get(this[def.localKey]) : undefined;
-            },
-            set() {
-            }
-          });
+          prop.get = function () {
+            return this[localKey] ? definition.getResource(relationName).get(this[localKey]) : undefined;
+          };
         } else if (def.type === 'hasMany') {
-          Object.defineProperty(target, def.localField, {
-            enumerable,
-            get() {
+          prop.get = function () {
+            let params = {};
+            if (foreignKey) {
+              params[foreignKey] = this[definition.idAttribute];
+              return definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, {allowSimpleWhere: true});
+            } else if (localKeys) {
+              let keys = this[localKeys] || [];
+              return definition.getResource(relationName).getAll(isArray(keys) ? keys : _keys(keys));
+            }
+            return undefined;
+          };
+        } else if (def.type === 'hasOne') {
+          if (localKey) {
+            prop.get = function () {
+              return this[localKey] ? definition.getResource(relationName).get(this[localKey]) : undefined;
+            };
+          } else {
+            prop.get = function () {
               let params = {};
-              if (def.foreignKey) {
-                params[def.foreignKey] = this[definition.idAttribute];
-                return definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, {allowSimpleWhere: true});
-              } else if (def.localKeys) {
-                params.where = {
-                  [definition.getResource(relationName).idAttribute]: {
-                    'in': this[def.localKeys]
-                  }
-                };
-                return definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params);
+              params[foreignKey] = this[definition.idAttribute];
+              let items = params[foreignKey] ? definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, {allowSimpleWhere: true}) : [];
+              if (items.length) {
+                return items[0];
               }
               return undefined;
-            },
-            set() {
-            }
-          });
-        } else if (def.type === 'hasOne') {
-          if (def.localKey) {
-            Object.defineProperty(target, def.localField, {
-              enumerable,
-              get() {
-                return this[def.localKey] ? definition.getResource(relationName).get(this[def.localKey]) : undefined;
-              },
-              set() {
-              }
-            });
-          } else {
-            Object.defineProperty(target, def.localField, {
-              enumerable,
-              get() {
-                let params = {};
-                params[def.foreignKey] = this[definition.idAttribute];
-                let items = params[def.foreignKey] ? definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, {allowSimpleWhere: true}) : [];
-                if (items.length) {
-                  return items[0];
-                }
-                return undefined;
-              },
-              set() {
-              }
-            });
+            };
           }
         }
+        if (def.get) {
+          let orig = prop.get;
+          prop.get = function () {
+            return def.get(definition, this, (...args) => orig.apply(this, args));
+          };
+        }
+        Object.defineProperty(target, def.localField, prop);
       }
     });
   }
