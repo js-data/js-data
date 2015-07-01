@@ -4,7 +4,7 @@
 
 Inspired by [Ember Data](https://github.com/emberjs/data), __JSData__ is the model layer you've been craving. It consists of a convenient __framework-agnostic__, __in-memory store__ for managing your data, which uses __adapters__ to communicate with various __persistence layers__.
 
-The most commonly used adapter is the [http adapter](http://www.js-data.io/docs/dshttpadapter), which is perfect for communicating with your RESTful backend. [localStorage](http://www.js-data.io/js-data-localstorage), [localForage](http://www.js-data.io/js-data-localforage), [firebase](http://www.js-data.io/js-data-firebase) and [other adapters](http://www.js-data.io/docs/working-with-adapters) are already available. On the server you could hook up to the [SQL adapter (Postgres/MySQL/MariaDB/SQLite3)](http://www.js-data.io/docs/dssqladapter) and add in the [Redis adapter](http://www.js-data.io/docs/dsredisadapter) as a caching layer for your read endpoints. More adapters are coming, and you're free to implement your own. See [Adapters](http://www.js-data.io/docs/working-with-adapters).
+The most commonly used adapter is the [http adapter](http://www.js-data.io/docs/dshttpadapter), which is perfect for communicating with your RESTful backend. [localStorage](http://www.js-data.io/docs/dslocalstorageadapter), [localForage](http://www.js-data.io/docs/dslocalforageadapter), [firebase](http://www.js-data.io/docs/dsfirebaseadapter) and [other adapters](http://www.js-data.io/docs/working-with-adapters) are already available. On the server you could hook up to the [SQL adapter (Postgres/MySQL/MariaDB/SQLite3)](http://www.js-data.io/docs/dssqladapter) and add in the [Redis adapter](http://www.js-data.io/docs/dsredisadapter) as a caching layer for your read endpoints. More adapters are coming, and you're free to implement your own. See [Adapters](http://www.js-data.io/docs/working-with-adapters).
 
 Unlike some libraries, JSData does not require the use of getters and setters, and doesn't decorate your data with a bunch of cruft. JSData's internal change detection (via [observe-js](https://github.com/Polymer/observe-js) or `Object.observe` in supporting browsers) allows for powerful use cases and an easy avenue for implementing your own [3-way data-binding](https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html).
 
@@ -164,6 +164,8 @@ See an issue with or have a suggestion for the documentation? You can suggest ed
 [CHANGELOG.md](https://github.com/js-data/js-data/blob/master/CHANGELOG.md)
 
 ### Community
+- [Gitter Channel](https://gitter.im/js-data/js-data) - Better than IRC!
+- [Announcements](http://www.js-data.io/blog)
 - [Mailing List](https://groups.io/org/groupsio/jsdata) - Ask your questions!
 - [Issues](https://github.com/js-data/js-data/issues) - Found a bug? Feature request? Submit an issue!
 - [GitHub](https://github.com/js-data/js-data) - View the source code for JSData.
