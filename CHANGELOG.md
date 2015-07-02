@@ -1,3 +1,104 @@
+##### 2.0.0 - 02 July 2015
+
+Stable Version 2.0.0
+
+##### 2.0.0-rc.3 - 30 June 2015
+
+- Tweak to custom relation getters
+
+##### 2.0.0-rc.2 - 30 June 2015
+
+###### Backwards compatible API changes
+- Enhanced relation getters and better localKeys support
+
+##### 2.0.0-rc.1 - 27 June 2015
+
+###### Breaking API changes
+- Moved the `getEndpoint` method to the http adapter
+
+##### 2.0.0-beta.11 - 26 June 2015
+
+###### Backwards compatible API changes
+- #167 - DS#refreshAll
+- #168 - DS#inject - replace instead of merge. `onConflict: 'replace'` will replace existing items instead of merging into them.
+
+##### 2.0.0-beta.10 - 26 June 2015
+
+###### Backwards compatible bug fixes
+- Fix so `DS#loadRelations` can load all relations
+
+##### 2.0.0-beta.9 - 26 June 2015
+
+###### Breaking API changes
+- #161 - By default, computed properties are no longer sent to adapters. You can also configure other properties that shouldn't be sent.
+
+###### Backwards compatible API changes
+- #162 - Return query metadata as second parameter from a promise.
+
+###### Backwards compatible bug fixes
+- #165 - global leak
+
+##### 2.0.0-beta.8 - 22 June 2015
+
+###### Backwards compatible API changes
+- #160 - Add "DS.change" events, fired on Resources and instances
+
+##### 2.0.0-beta.7 - 09 June 2015
+
+###### Breaking API changes
+- #158 - Data store should consume resource definition methods internally (might not be breaking)
+
+###### Backwards compatible API changes
+- #157 - DSEject not available on instances
+
+###### Other
+- #156 - Thoroughly annotate all source code to encourage contribution
+
+##### 2.0.0-beta.6 - 04 June 2015
+
+###### Breaking API changes
+- #150 - Debug output, `debug` now defaults to `false`
+
+###### Backwards compatible API changes
+- #145 - A little AOP, add a `.before` to all methods, allowing per-method argument customization
+
+##### 2.0.0-beta.5 - 27 May 2015
+
+###### Breaking API changes
+- #54 - feat: Call the inject and eject lifecycle hooks regardless of if the notify option is enabled
+
+###### Backwards compatible API changes
+- #131 - array of IDs based hasMany relations
+- #132 - Allow resources to extend other resources
+- #133 - Allow filtering by nested fields
+- #135 - JSData caching inconsistent behaviour when ejecting items
+- #138 - Collection class
+- #139 - Option to specify default values of new resource instances.
+
+###### Backwards compatible bug fixes
+- #127 - Memory leak in DS.changes
+- #134 - All resources get all methods defined on any resource
+- #142 - Allow omitting options in getEndpoint
+
+##### 2.0.0-beta.4 - 28 April 2015
+
+###### Backwards compatible API changes
+- #129 - Add interceptors to actions
+
+##### 2.0.0-beta.2 - 17 April 2015
+
+Updated a dependency for better umd amd/r.js support
+
+##### 2.0.0-beta.1 - 17 April 2015
+
+###### Breaking API changes
+- #107 - Switch to property accessors (getter/setter) for relations links. (Relation links are no longer enumerable)
+- #121 - Remove bundled Promise code (The developer must now ensure an ES6-style Promise constructor is available)
+- #122 - Remove coupling with js-data-schema (You can still use js-data-schema, js-data just doesn't know anything about js-data-schema anymore)
+
+###### Backwards compatible API changes
+- Computed properties now support nested fields (both the computed field and the fields it depends on) e.g. `computed: { 'name.fullName': ['name.first', 'name.last', function (first, last) { return first + ' ' + last; } }`
+
 ##### 1.8.0 - 14 April 2015
 
 ###### Backwards compatible API changes

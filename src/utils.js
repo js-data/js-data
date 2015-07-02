@@ -1,23 +1,41 @@
 /* jshint eqeqeq:false */
+
+/**
+ * Mix of ES6 and CommonJS module imports because the interop of Babel + Webpack + ES6 modules + CommonJS isn't very good.
+ */
 import DSErrors from './errors';
-import forEach from 'mout/array/forEach';
-import slice from 'mout/array/slice';
-import forOwn from 'mout/object/forOwn';
-import contains from 'mout/array/contains';
-import deepMixIn from 'mout/object/deepMixIn';
-import pascalCase from 'mout/string/pascalCase';
-import remove from 'mout/array/remove';
-import pick from 'mout/object/pick';
-import sort from 'mout/array/sort';
-import upperCase from 'mout/string/upperCase';
-import observe from '../lib/observe-js/observe.js';
-import es6Promise from 'es6-promise';
-import BinaryHeap from 'yabh';
-let w, _Promise;
-let DSUtils;
+let BinaryHeap = require('yabh');
+let forEach = require('mout/array/forEach');
+let slice = require('mout/array/slice');
+let forOwn = require('mout/object/forOwn');
+let contains = require('mout/array/contains');
+let deepMixIn = require('mout/object/deepMixIn');
+let pascalCase = require('mout/string/pascalCase');
+let remove = require('mout/array/remove');
+let pick = require('mout/object/pick');
+let _keys = require('mout/object/keys');
+let sort = require('mout/array/sort');
+let upperCase = require('mout/string/upperCase');
+let get = require('mout/object/get');
+let set = require('mout/object/set');
+let observe = require('../lib/observe-js/observe.js');
+let w;
 let objectProto = Object.prototype;
 let toString = objectProto.toString;
-es6Promise.polyfill();
+let P;
+
+/**
+ * Attempt to detect the global Promise constructor.
+ * JSData will still work without one, as long you do something like this:
+ *
+ * var JSData = require('js-data');
+ * JSData.DSUtils.Promise = MyPromiseLib;
+ */
+try {
+  P = Promise;
+} catch (err) {
+  console.error('js-data requires a global Promise constructor!');
+}
 
 let isArray = Array.isArray || function isArray(value) {
     return toString.call(value) == '[object Array]' || false;
@@ -25,11 +43,6 @@ let isArray = Array.isArray || function isArray(value) {
 
 let isRegExp = value => {
   return toString.call(value) == '[object RegExp]' || false;
-};
-
-// adapted from lodash.isBoolean
-let isBoolean = value => {
-  return (value === true || value === false || value && typeof value == 'object' && toString.call(value) == '[object Boolean]') || false;
 };
 
 // adapted from lodash.isString
@@ -90,6 +103,7 @@ let isEmpty = val => {
   }
 };
 
+// Find the intersection between two arrays
 let intersection = (array1, array2) => {
   if (!array1 || !array2) {
     return [];
@@ -98,10 +112,10 @@ let intersection = (array1, array2) => {
   let item;
   for (let i = 0, length = array1.length; i < length; i++) {
     item = array1[i];
-    if (DSUtils.contains(result, item)) {
+    if (contains(result, item)) {
       continue;
     }
-    if (DSUtils.contains(array2, item)) {
+    if (contains(array2, item)) {
       result.push(item);
     }
   }
@@ -118,32 +132,25 @@ let filter = (array, cb, thisObj) => {
   return results;
 };
 
-function finallyPolyfill(cb) {
-  let constructor = this.constructor;
-
-  return this.then(value => {
-    return constructor.resolve(cb()).then(() => {
-      return value;
-    });
-  }, reason => {
-    return constructor.resolve(cb()).then(() => {
-      throw reason;
-    });
-  });
-}
-
+/**
+ * Attempt to detect whether we are in the browser.
+ */
 try {
   w = window;
-  if (!w.Promise.prototype['finally']) {
-    w.Promise.prototype['finally'] = finallyPolyfill;
-  }
-  _Promise = w.Promise;
   w = {};
 } catch (e) {
   w = null;
-  _Promise = require('bluebird');
 }
 
+/**
+ * Event mixin. Usage:
+ *
+ * function handler() { ... }
+ * Events(myObject);
+ * myObject.on('foo', handler);
+ * myObject.emit('foo', 'some', 'data');
+ * myObject.off('foo', handler);
+ */
 function Events(target) {
   let events = {};
   target = target || this;
@@ -179,6 +186,9 @@ function Events(target) {
   };
 }
 
+/**
+ * Lifecycle hooks that should support promises.
+ */
 let toPromisify = [
   'beforeValidate',
   'validate',
@@ -191,18 +201,10 @@ let toPromisify = [
   'afterDestroy'
 ];
 
-let isBlacklisted = (prop, bl) => {
-  let i;
-  if (!bl || !bl.length) {
-    return false;
-  }
-  for (i = 0; i < bl.length; i++) {
-    if (bl[i] === prop) {
-      return true;
-    }
-  }
-  return false;
-};
+/**
+ * Return whether "prop" is in the blacklist.
+ */
+let isBlacklisted = observe.isBlacklisted;
 
 // adapted from angular.copy
 let copy = (source, destination, stackSource, stackDest, blacklist) => {
@@ -338,6 +340,9 @@ let equals = (o1, o2) => {
   return false;
 };
 
+/**
+ * Given either an instance or the primary key of an instance, return the primary key.
+ */
 let resolveId = (definition, idOrInstance) => {
   if (isString(idOrInstance) || isNumber(idOrInstance)) {
     return idOrInstance;
@@ -348,6 +353,9 @@ let resolveId = (definition, idOrInstance) => {
   }
 };
 
+/**
+ * Given either an instance or the primary key of an instance, return the instance.
+ */
 let resolveItem = (resource, idOrInstance) => {
   if (resource && (isString(idOrInstance) || isNumber(idOrInstance))) {
     return resource.index[idOrInstance] || idOrInstance;
@@ -370,9 +378,13 @@ let makePath = (...args) => {
   return result.replace(/([^:\/]|^)\/{2,}/g, '$1/');
 };
 
-DSUtils = {
-  // Options that inherit from defaults
-  _(parent, options) {
+export default {
+  Promise: P,
+  /**
+   * Method to wrap an "options" object so that it will inherit from
+   * some parent object, such as a resource definition.
+   */
+    _(parent, options) {
     let _this = this;
     options = options || {};
     if (options && options.constructor === parent.constructor) {
@@ -385,13 +397,16 @@ DSUtils = {
         options[name] = _this.promisify(options[name]);
       }
     });
+    // Dynamic constructor function
     let O = function Options(attrs) {
       let self = this;
       forOwn(attrs, (value, key) => {
         self[key] = value;
       });
     };
+    // Inherit from some parent object
     O.prototype = parent;
+    // Give us a way to get the original options back.
     O.prototype.orig = function () {
       let orig = {};
       forOwn(this, (value, key) => {
@@ -413,10 +428,10 @@ DSUtils = {
     let _this = this;
     let args = [];
     forEach(fn.deps, dep => {
-      args.push(_this[dep]);
+      args.push(get(_this, dep));
     });
     // compute property
-    _this[field] = fn[fn.length - 1].apply(_this, args);
+    set(_this, field, fn[fn.length - 1].apply(_this, args));
   },
   contains,
   copy,
@@ -426,27 +441,46 @@ DSUtils = {
   equals,
   Events,
   filter,
+  fillIn(target, obj) {
+    forOwn(obj, (v, k) => {
+      if (!(k in target)) {
+        target[k] = v;
+      }
+    });
+    return target;
+  },
   forEach,
   forOwn,
   fromJson(json) {
     return isString(json) ? JSON.parse(json) : json;
   },
-  get: require('mout/object/get'),
+  get,
   intersection,
   isArray,
-  isBoolean,
-  isDate,
+  isBlacklisted,
   isEmpty,
   isFunction,
   isObject,
   isNumber,
-  isRegExp,
   isString,
+  keys: _keys,
   makePath,
   observe,
+  omit(obj, bl) {
+    let toRemove = [];
+    forOwn(obj, (v, k) => {
+      if (isBlacklisted(k, bl)) {
+        toRemove.push(k);
+      }
+    });
+    forEach(toRemove, k => {
+      delete obj[k];
+    });
+    return obj;
+  },
   pascalCase,
   pick,
-  Promise: _Promise,
+  // Turn the given node-style callback function into one that can return a promise.
   promisify(fn, target) {
     let _this = this;
     if (!fn) {
@@ -477,7 +511,7 @@ DSUtils = {
     };
   },
   remove,
-  set: require('mout/object/set'),
+  set,
   slice,
   sort,
   toJson: JSON.stringify,
@@ -490,42 +524,109 @@ DSUtils = {
     }
   },
   upperCase,
+  // Return a copy of "object" with cycles removed.
   removeCircular(object) {
-    return (function rmCirc(value, context) {
+    return (function rmCirc(value, ctx) {
       let i;
       let nu;
 
       if (typeof value === 'object' && value !== null && !(value instanceof Boolean) && !(value instanceof Date) && !(value instanceof Number) && !(value instanceof RegExp) && !(value instanceof String)) {
 
         // check if current object points back to itself
-        let current = context.current;
-        var parent = context.context;
+        let cur = ctx.cur;
+        var parent = ctx.ctx;
         while (parent) {
-          if (parent.current === current) {
+          if (parent.cur === cur) {
             return undefined;
           }
-          parent = parent.context;
+          parent = parent.ctx;
         }
 
-        if (DSUtils.isArray(value)) {
+        if (isArray(value)) {
           nu = [];
           for (i = 0; i < value.length; i += 1) {
-            nu[i] = rmCirc(value[i], { context, current: value[i] });
+            nu[i] = rmCirc(value[i], {ctx, cur: value[i]});
           }
         } else {
           nu = {};
           forOwn(value, (v, k) => {
-            nu[k] = rmCirc(value[k], { context, current: value[k] });
+            nu[k] = rmCirc(value[k], {ctx, cur: value[k]});
           });
         }
         return nu;
       }
       return value;
-    }(object, { context: null, current: object }));
+    }(object, {ctx: null, cur: object}));
   },
   resolveItem,
   resolveId,
-  w
+  respond(response, meta, options) {
+    if (options.returnMeta === 'array') {
+      return [response, meta];
+    } else if (options.returnMeta === 'object') {
+      return {response, meta};
+    } else {
+      return response;
+    }
+  },
+  w,
+  // This is where the magic of relations happens.
+  applyRelationGettersToTarget(store, definition, target) {
+    this.forEach(definition.relationList, def => {
+      let relationName = def.relation;
+      let localField = def.localField;
+      let localKey = def.localKey;
+      let foreignKey = def.foreignKey;
+      let localKeys = def.localKeys;
+      let enumerable = typeof def.enumerable === 'boolean' ? def.enumerable : !!definition.relationsEnumerable;
+      if (typeof def.link === 'boolean' ? def.link : !!definition.linkRelations) {
+        delete target[localField];
+        let prop = {
+          enumerable,
+          set() {
+          }
+        };
+        if (def.type === 'belongsTo') {
+          prop.get = function () {
+            return this[localKey] ? definition.getResource(relationName).get(this[localKey]) : undefined;
+          };
+        } else if (def.type === 'hasMany') {
+          prop.get = function () {
+            let params = {};
+            if (foreignKey) {
+              params[foreignKey] = this[definition.idAttribute];
+              return definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, {allowSimpleWhere: true});
+            } else if (localKeys) {
+              let keys = this[localKeys] || [];
+              return definition.getResource(relationName).getAll(isArray(keys) ? keys : _keys(keys));
+            }
+            return undefined;
+          };
+        } else if (def.type === 'hasOne') {
+          if (localKey) {
+            prop.get = function () {
+              return this[localKey] ? definition.getResource(relationName).get(this[localKey]) : undefined;
+            };
+          } else {
+            prop.get = function () {
+              let params = {};
+              params[foreignKey] = this[definition.idAttribute];
+              let items = params[foreignKey] ? definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, {allowSimpleWhere: true}) : [];
+              if (items.length) {
+                return items[0];
+              }
+              return undefined;
+            };
+          }
+        }
+        if (def.get) {
+          let orig = prop.get;
+          prop.get = function () {
+            return def.get(definition, def, this, (...args) => orig.apply(this, args));
+          };
+        }
+        Object.defineProperty(target, def.localField, prop);
+      }
+    });
+  }
 };
-
-export default DSUtils;

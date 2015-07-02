@@ -1,14 +1,21 @@
+import DS from './datastore/index';
 import DSUtils from './utils';
 import DSErrors from './errors';
-import DS from './datastore/index';
 
-export default {
+/**
+ * The library export.
+ *   - window.JSData
+ *   - require('js-data')
+ *   - define(['js-data', function (JSData) { ... }]);
+ *   - import JSData from 'js-data'
+ */
+module.exports = {
   DS,
+  DSUtils,
+  DSErrors,
   createStore(options) {
     return new DS(options);
   },
-  DSUtils,
-  DSErrors,
   version: {
     full: '<%= pkg.version %>',
     major: parseInt('<%= major %>', 10),

@@ -3,7 +3,6 @@ import DSUtils from '../utils';
 import DSErrors from '../errors';
 import syncMethods from './sync_methods/index';
 import asyncMethods from './async_methods/index';
-let Schemator;
 
 function lifecycleNoopCb(resource, attrs, cb) {
   cb(null, attrs);
@@ -70,6 +69,7 @@ var defaultsPrototype = Defaults.prototype;
 
 defaultsPrototype.actions = {};
 defaultsPrototype.afterCreate = lifecycleNoopCb;
+defaultsPrototype.afterCreateCollection = lifecycleNoop;
 defaultsPrototype.afterCreateInstance = lifecycleNoop;
 defaultsPrototype.afterDestroy = lifecycleNoopCb;
 defaultsPrototype.afterEject = lifecycleNoop;
@@ -80,6 +80,7 @@ defaultsPrototype.afterValidate = lifecycleNoopCb;
 defaultsPrototype.allowSimpleWhere = true;
 defaultsPrototype.basePath = '';
 defaultsPrototype.beforeCreate = lifecycleNoopCb;
+defaultsPrototype.beforeCreateCollection = lifecycleNoop;
 defaultsPrototype.beforeCreateInstance = lifecycleNoop;
 defaultsPrototype.beforeDestroy = lifecycleNoopCb;
 defaultsPrototype.beforeEject = lifecycleNoop;
@@ -89,24 +90,23 @@ defaultsPrototype.beforeUpdate = lifecycleNoopCb;
 defaultsPrototype.beforeValidate = lifecycleNoopCb;
 defaultsPrototype.bypassCache = false;
 defaultsPrototype.cacheResponse = !!DSUtils.w;
+defaultsPrototype.clearEmptyQueries = true;
+defaultsPrototype.computed = {};
 defaultsPrototype.defaultAdapter = 'http';
-defaultsPrototype.debug = true;
+defaultsPrototype.debug = false;
+defaultsPrototype.defaultValues = {};
 defaultsPrototype.eagerEject = false;
 // TODO: Implement eagerInject in DS#create
 defaultsPrototype.eagerInject = false;
 defaultsPrototype.endpoint = '';
 defaultsPrototype.error = console ? (a, b, c) => console[typeof console.error === 'function' ? 'error' : 'log'](a, b, c) : false;
 defaultsPrototype.fallbackAdapters = ['http'];
-defaultsPrototype.findBelongsTo = true;
-defaultsPrototype.findHasOne = true;
-defaultsPrototype.findHasMany = true;
-defaultsPrototype.findInverseLinks = true;
-defaultsPrototype.findStrictCache = true;
+defaultsPrototype.findStrictCache = false;
 defaultsPrototype.idAttribute = 'id';
 defaultsPrototype.ignoredChanges = [/\$/];
-defaultsPrototype.ignoreMissing = false;
+defaultsPrototype.instanceEvents = !!DSUtils.w;
 defaultsPrototype.keepChangeHistory = false;
-defaultsPrototype.loadFromServer = false;
+defaultsPrototype.linkRelations = true;
 defaultsPrototype.log = console ? (a, b, c, d, e) => console[typeof console.info === 'function' ? 'info' : 'log'](a, b, c, d, e) : false;
 
 defaultsPrototype.logFn = function (a, b, c, d) {
@@ -117,10 +117,15 @@ defaultsPrototype.logFn = function (a, b, c, d) {
 };
 
 defaultsPrototype.maxAge = false;
+defaultsPrototype.methods = {};
 defaultsPrototype.notify = !!DSUtils.w;
+defaultsPrototype.omit = [];
+defaultsPrototype.onConflict = 'merge';
 defaultsPrototype.reapAction = !!DSUtils.w ? 'inject' : 'none';
 defaultsPrototype.reapInterval = !!DSUtils.w ? 30000 : false;
+defaultsPrototype.relationsEnumerable = false;
 defaultsPrototype.resetHistoryOnInject = true;
+defaultsPrototype.returnMeta = false;
 defaultsPrototype.strategy = 'single';
 defaultsPrototype.upsert = !!DSUtils.w;
 defaultsPrototype.useClass = true;
@@ -166,72 +171,66 @@ defaultsPrototype.defaultFilter = (collection, resourceName, params, options) =>
       let first = true;
       let keep = true;
       DSUtils.forOwn(where, (clause, field) => {
-        if (DSUtils._s(clause)) {
-          clause = {
-            '===': clause
-          };
-        } else if (DSUtils._n(clause) || DSUtils.isBoolean(clause)) {
+        if (!DSUtils._o(clause)) {
           clause = {
             '==': clause
           };
         }
-        if (DSUtils._o(clause)) {
-          DSUtils.forOwn(clause, (term, op) => {
-            let expr;
-            let isOr = op[0] === '|';
-            let val = attrs[field];
-            op = isOr ? op.substr(1) : op;
-            if (op === '==') {
-              expr = val == term;
-            } else if (op === '===') {
-              expr = val === term;
-            } else if (op === '!=') {
-              expr = val != term;
-            } else if (op === '!==') {
-              expr = val !== term;
-            } else if (op === '>') {
-              expr = val > term;
-            } else if (op === '>=') {
-              expr = val >= term;
-            } else if (op === '<') {
-              expr = val < term;
-            } else if (op === '<=') {
-              expr = val <= term;
-            } else if (op === 'isectEmpty') {
-              expr = !DSUtils.intersection((val || []), (term || [])).length;
-            } else if (op === 'isectNotEmpty') {
-              expr = DSUtils.intersection((val || []), (term || [])).length;
-            } else if (op === 'in') {
-              if (DSUtils._s(term)) {
-                expr = term.indexOf(val) !== -1;
-              } else {
-                expr = DSUtils.contains(term, val);
-              }
-            } else if (op === 'notIn') {
-              if (DSUtils._s(term)) {
-                expr = term.indexOf(val) === -1;
-              } else {
-                expr = !DSUtils.contains(term, val);
-              }
-            } else if (op === 'contains') {
-              if (DSUtils._s(val)) {
-                expr = val.indexOf(term) !== -1;
-              } else {
-                expr = DSUtils.contains(val, term);
-              }
-            } else if (op === 'notContains') {
-              if (DSUtils._s(val)) {
-                expr = val.indexOf(term) === -1;
-              } else {
-                expr = !DSUtils.contains(val, term);
-              }
+        DSUtils.forOwn(clause, (term, op) => {
+          let expr;
+          let isOr = op[0] === '|';
+          let val = DSUtils.get(attrs, field);
+          op = isOr ? op.substr(1) : op;
+          if (op === '==') {
+            expr = val == term;
+          } else if (op === '===') {
+            expr = val === term;
+          } else if (op === '!=') {
+            expr = val != term;
+          } else if (op === '!==') {
+            expr = val !== term;
+          } else if (op === '>') {
+            expr = val > term;
+          } else if (op === '>=') {
+            expr = val >= term;
+          } else if (op === '<') {
+            expr = val < term;
+          } else if (op === '<=') {
+            expr = val <= term;
+          } else if (op === 'isectEmpty') {
+            expr = !DSUtils.intersection((val || []), (term || [])).length;
+          } else if (op === 'isectNotEmpty') {
+            expr = DSUtils.intersection((val || []), (term || [])).length;
+          } else if (op === 'in') {
+            if (DSUtils._s(term)) {
+              expr = term.indexOf(val) !== -1;
+            } else {
+              expr = DSUtils.contains(term, val);
             }
-            if (expr !== undefined) {
-              keep = first ? expr : (isOr ? keep || expr : keep && expr);
+          } else if (op === 'notIn') {
+            if (DSUtils._s(term)) {
+              expr = term.indexOf(val) === -1;
+            } else {
+              expr = !DSUtils.contains(term, val);
             }
-            first = false;
-          });
-        }
+          } else if (op === 'contains') {
+            if (DSUtils._s(val)) {
+              expr = val.indexOf(term) !== -1;
+            } else {
+              expr = DSUtils.contains(val, term);
+            }
+          } else if (op === 'notContains') {
+            if (DSUtils._s(val)) {
+              expr = val.indexOf(term) === -1;
+            } else {
+              expr = !DSUtils.contains(val, term);
+            }
+          }
+          if (expr !== undefined) {
+            keep = first ? expr : (isOr ? keep || expr : keep && expr);
+          }
+          first = false;
+        });
       });
       return keep;
     });
@@ -305,23 +304,6 @@ class DS {
     let _this = this;
     options = options || {};
 
-    try {
-      Schemator = require('js-data-schema');
-    } catch (e) {
-    }
-
-    if (!Schemator || typeof Schemator !== 'function') {
-      try {
-        Schemator = window.Schemator;
-      } catch (e) {
-      }
-    }
-
-    Schemator = Schemator || options.schemator;
-    if (typeof Schemator === 'function') {
-      _this.schemator = new Schemator();
-    }
-
     _this.store = {};
     // alias store, shaves 0.1 kb off the minified build
     _this.s = _this.store;
@@ -332,29 +314,50 @@ class DS {
     _this.defaults = new Defaults();
     _this.observe = DSUtils.observe;
     DSUtils.forOwn(options, (v, k) => {
-      _this.defaults[k] = v;
+      if (k === 'omit') {
+        _this.defaults.omit = v.concat(Defaults.prototype.omit);
+      } else {
+        _this.defaults[k] = v;
+      }
     });
     _this.defaults.logFn('new data store created', _this.defaults);
+
+    let P = DSUtils.Promise;
+
+    if (P && !P.prototype.spread) {
+      P.prototype.spread = function (cb) {
+        return this.then(function (arr) {
+          return cb.apply(this, arr);
+        });
+      };
+    }
+
+    DSUtils.Events(_this);
   }
 
-  getAdapter(options) {
+  getAdapterName(options) {
     let errorIfNotExist = false;
     options = options || {};
-    this.defaults.logFn('getAdapter', options);
+    this.defaults.logFn('getAdapterName', options);
     if (DSUtils._s(options)) {
       errorIfNotExist = true;
       options = {
         adapter: options
       };
     }
-    let adapter = this.adapters[options.adapter];
-    if (adapter) {
-      return adapter;
+    if (this.adapters[options.adapter]) {
+      return options.adapter;
     } else if (errorIfNotExist) {
       throw new Error(`${options.adapter} is not a registered adapter!`);
     } else {
-      return this.adapters[options.defaultAdapter];
+      return options.defaultAdapter;
     }
+  }
+
+  getAdapter(options) {
+    options = options || {};
+    this.defaults.logFn('getAdapter', options);
+    return this.adapters[this.getAdapterName(options)];
   }
 
   registerAdapter(name, Adapter, options) {
@@ -383,11 +386,25 @@ class DS {
 
 var dsPrototype = DS.prototype;
 
+dsPrototype.getAdapterName.shorthand = false;
 dsPrototype.getAdapter.shorthand = false;
 dsPrototype.registerAdapter.shorthand = false;
 dsPrototype.errors = DSErrors;
 dsPrototype.utils = DSUtils;
-DSUtils.deepMixIn(dsPrototype, syncMethods);
-DSUtils.deepMixIn(dsPrototype, asyncMethods);
+
+function addMethods(target, obj) {
+  DSUtils.forOwn(obj, (v, k) => {
+    target[k] = v;
+    target[k].before = function (fn) {
+      let orig = target[k];
+      target[k] = function (...args) {
+        return orig.apply(this, fn.apply(this, args) || args);
+      };
+    };
+  });
+}
+
+addMethods(dsPrototype, syncMethods);
+addMethods(dsPrototype, asyncMethods);
 
 export default DS;

@@ -1,38 +1,26 @@
 describe('DS#destroy', function () {
-  it('should delete an item from the data store', function (done) {
+  it('should delete an item from the data store', function () {
     var _this = this;
 
-    store.inject('post', p1);
-
-    store.destroy('post', 5).then(function (id) {
-      try {
-        assert.equal(id, '5', 'post 5 should have been deleted');
-        assert.equal(lifecycle.beforeDestroy.callCount, 1, 'beforeDestroy should have been called');
-        assert.equal(lifecycle.afterDestroy.callCount, 1, 'afterDestroy should have been called');
-        assert.isUndefined(store.get('post', 5));
-        assert.equal(store.lastModified('post', 5), 0);
-        assert.equal(store.lastSaved('post', 5), 0);
-        done();
-      } catch (e) {
-        done(e);
-      }
-    }).catch(function (err) {
-      console.error(err.stack);
-      done('should not have rejected');
-    });
+    Post.inject(p1);
 
     setTimeout(function () {
-      try {
-        assert.equal(1, _this.requests.length);
-        assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
-        assert.equal(_this.requests[0].method, 'DELETE');
-        _this.requests[0].respond(200, {'Content-Type': 'text/plain'}, '5');
-      } catch (e) {
-        done(e);
-      }
-    }, 30);
+      assert.equal(1, _this.requests.length);
+      assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
+      assert.equal(_this.requests[0].method, 'DELETE');
+      _this.requests[0].respond(200, { 'Content-Type': 'text/plain' }, '5');
+    }, 100);
+
+    return Post.destroy(5).then(function (id) {
+      assert.equal(id, '5', 'post 5 should have been deleted');
+      assert.equal(lifecycle.beforeDestroy.callCount, 1, 'beforeDestroy should have been called');
+      assert.equal(lifecycle.afterDestroy.callCount, 1, 'afterDestroy should have been called');
+      assert.isUndefined(Post.get(5));
+      assert.equal(Post.lastModified(5), 0);
+      assert.equal(Post.lastSaved(5), 0);
+    });
   });
-  it('should handle nested resources', function (done) {
+  it('should handle nested resources', function () {
     var _this = this;
     var testComment = {
       id: 5,
@@ -44,91 +32,71 @@ describe('DS#destroy', function () {
       approvedBy: 4
     };
 
-    store.inject('comment', testComment);
-
-    store.destroy('comment', 5, {
-      params: {
-        approvedBy: 4
-      }
-    }).then(function () {
-      store.inject('comment', testComment2);
-
-      store.destroy('comment', 6, {
-        bypassCache: true
-      }).then(function () {
-        store.inject('comment', testComment2);
-
-        store.destroy('comment', 6, {
-          params: {
-            approvedBy: false
-          }
-        }).then(function () {
-          done();
-        }).catch(function () {
-          done('Should not have failed!');
-        });
-
-        setTimeout(function () {
-          assert.equal(3, _this.requests.length);
-          assert.equal(_this.requests[2].url, 'http://test.js-data.io/comment/6');
-          assert.equal(_this.requests[2].method, 'DELETE');
-          _this.requests[2].respond(204);
-        }, 30);
-      }).catch(function () {
-        done('Should not have failed!');
-      });
-
-      setTimeout(function () {
-        assert.equal(2, _this.requests.length);
-        assert.equal(_this.requests[1].url, 'http://test.js-data.io/user/4/comment/6');
-        assert.equal(_this.requests[1].method, 'DELETE');
-        _this.requests[1].respond(204);
-      }, 30);
-    }).catch(function () {
-      done('Should not have failed!');
-    });
+    Comment.inject(testComment);
 
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/user/4/comment/5');
       assert.equal(_this.requests[0].method, 'DELETE');
       _this.requests[0].respond(204);
-    }, 30);
+    }, 100);
+
+    return Comment.destroy(5, {
+      params: {
+        approvedBy: 4
+      }
+    }).then(function () {
+      Comment.inject(testComment2);
+
+      setTimeout(function () {
+        assert.equal(2, _this.requests.length);
+        assert.equal(_this.requests[1].url, 'http://test.js-data.io/user/4/comment/6');
+        assert.equal(_this.requests[1].method, 'DELETE');
+        _this.requests[1].respond(204);
+      }, 100);
+
+      return Comment.destroy(6, {
+        bypassCache: true
+      });
+    }).then(function () {
+      Comment.inject(testComment2);
+
+      setTimeout(function () {
+        assert.equal(3, _this.requests.length);
+        assert.equal(_this.requests[2].url, 'http://test.js-data.io/comment/6');
+        assert.equal(_this.requests[2].method, 'DELETE');
+        _this.requests[2].respond(204);
+      }, 100);
+
+      return Comment.destroy(6, {
+        params: {
+          approvedBy: false
+        }
+      });
+    });
   });
-  it('should eager eject', function (done) {
+  it('should eager eject', function () {
     var _this = this;
 
-    store.inject('post', p1);
-
-    store.destroy('post', 5, { eagerEject: true }).then(function (id) {
-      try {
-        assert.equal(id, '5', 'post 5 should have been deleted');
-        assert.equal(lifecycle.beforeDestroy.callCount, 1, 'beforeDestroy should have been called');
-        assert.equal(lifecycle.afterDestroy.callCount, 1, 'afterDestroy should have been called');
-        assert.isUndefined(store.get('post', 5));
-        assert.equal(store.lastModified('post', 5), 0);
-        assert.equal(store.lastSaved('post', 5), 0);
-        done();
-      } catch (e) {
-        done(e);
-      }
-    }).catch(function (err) {
-      console.error(err.stack);
-      done('should not have rejected');
-    });
+    Post.inject(p1);
 
     setTimeout(function () {
-      assert.isUndefined(store.get('post', 5));
+      assert.isUndefined(Post.get(5));
       setTimeout(function () {
-        try {
-          assert.equal(1, _this.requests.length);
-          assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
-          assert.equal(_this.requests[0].method, 'DELETE');
-          _this.requests[0].respond(200, {'Content-Type': 'text/plain'}, '5');
-        } catch (e) {
-          done(e);
-        }
-      }, 30);
-    }, 30);
+        assert.equal(1, _this.requests.length);
+        assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
+        assert.equal(_this.requests[0].method, 'DELETE');
+        _this.requests[0].respond(200, { 'Content-Type': 'text/plain' }, '5');
+      }, 100);
+    }, 100);
+
+    return Post.destroy(5, { eagerEject: true }).then(function (id) {
+      assert.equal(id, '5', 'post 5 should have been deleted');
+      assert.equal(lifecycle.beforeDestroy.callCount, 1, 'beforeDestroy should have been called');
+      assert.equal(lifecycle.afterDestroy.callCount, 1, 'afterDestroy should have been called');
+      assert.isUndefined(Post.get(5));
+      assert.equal(Post.lastModified(5), 0);
+      assert.equal(Post.lastSaved(5), 0);
+    });
   });
 });

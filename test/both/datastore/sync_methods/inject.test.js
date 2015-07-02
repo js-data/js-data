@@ -110,17 +110,17 @@ describe('DS#inject', function () {
   it('should find inverse links', function () {
     store.inject('user', { organizationId: 5, id: 1 });
 
-    store.inject('organization', { id: 5 }, { findInverseLinks: true });
+    store.inject('organization', { id: 5 });
 
     assert.isObject(store.get('user', 1).organization);
 
     assert.deepEqual(store.get('user', 1).comments, []);
 
-    store.inject('comment', { approvedBy: 1, id: 23 }, { findInverseLinks: true });
+    store.inject('comment', { approvedBy: 1, id: 23 });
 
     assert.equal(1, store.get('user', 1).comments.length);
 
-    store.inject('comment', { approvedBy: 1, id: 44 }, { findInverseLinks: true });
+    store.inject('comment', { approvedBy: 1, id: 44 });
 
     assert.equal(2, store.get('user', 1).comments.length);
   });
@@ -240,5 +240,94 @@ describe('DS#inject', function () {
     assert.isTrue(Parent.get(1).children[0] instanceof Child.Child);
     assert.isTrue(Parent.get(1).children[1] instanceof Child.Child);
     assert.deepEqual(Child.filter({ parentId: 1 }), Parent.get(1).children);
+  });
+  it('should configure enumerability and linking of relations', function () {
+    var Parent = store.defineResource({
+      name: 'parent',
+      relations: {
+        hasMany: {
+          child: {
+            localField: 'children',
+            foreignKey: 'parentId'
+          }
+        }
+      }
+    });
+
+    var Child = store.defineResource({
+      name: 'child',
+      relations: {
+        belongsTo: {
+          parent: {
+            link: false,
+            localField: 'parent',
+            localKey: 'parentId'
+          }
+        }
+      }
+    });
+
+    var OtherChild = store.defineResource({
+      name: 'otherChild',
+      relations: {
+        belongsTo: {
+          parent: {
+            enumerable: true,
+            localField: 'parent',
+            localKey: 'parentId'
+          }
+        }
+      }
+    });
+
+    var child = Child.inject({
+      id: 1,
+      parentId: 2,
+      parent: {
+        id: 2
+      }
+    });
+
+    var otherChild = OtherChild.inject({
+      id: 3,
+      parentId: 4,
+      parent: {
+        id: 4
+      }
+    });
+
+    assert.isDefined(Child.get(child.id));
+    assert.isUndefined(child.parent, 'parent was injected but not linked');
+    assert.isDefined(Parent.get(child.parentId), 'parent was injected but not linked');
+
+    assert.isDefined(OtherChild.get(otherChild.id));
+    assert.isDefined(otherChild.parent, 'parent was injected and linked');
+    assert.isDefined(Parent.get(otherChild.parentId), 'parent was injected and linked');
+
+    var foundParent = false;
+    for (var k in otherChild) {
+      if (k === 'parent' && otherChild[k] === otherChild.parent && otherChild[k] === Parent.get(otherChild.parentId)) {
+        foundParent = true;
+      }
+    }
+    assert.isTrue(foundParent, 'parent is enumerable');
+  });
+  it('should replace existing items', function () {
+    var post = Post.inject(p1);
+    post.foo = 'bar';
+    post.beep = 'boop';
+    assert.deepEqual(JSON.stringify(post), JSON.stringify({
+      author: 'John',
+      age: 30,
+      id: 5,
+      foo: 'bar',
+      beep: 'boop'
+    }));
+    post = Post.inject(p1, { onConflict: 'replace' });
+    assert.deepEqual(JSON.stringify(post), JSON.stringify({
+      author: 'John',
+      age: 30,
+      id: 5
+    }));
   });
 });

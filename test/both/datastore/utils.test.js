@@ -45,7 +45,7 @@ describe('DSUtils', function () {
     it('should resolve with a promise', function (done) {
       var resolveValue = {};
       var resolveCb = function () {
-        return new DSUtils.Promise(function (resolve) {
+        return new Promise(function (resolve) {
           resolve(resolveValue);
         });
       };
@@ -66,7 +66,7 @@ describe('DSUtils', function () {
     it('should reject with a promise', function (done) {
       var rejectValue = {};
       var rejectCb = function () {
-        return new DSUtils.Promise(function (resolve, reject) {
+        return new Promise(function (resolve, reject) {
           reject(rejectValue);
         });
       };
@@ -111,20 +111,6 @@ describe('DSUtils', function () {
       }, 30);
     });
 
-    it('should support "finally"', function (done) {
-      var promise = new DSUtils.Promise(function (resolve) {
-        resolve('data');
-      });
-
-      promise.then(function (data) {
-        assert.equal(data, 'data');
-        return data + data;
-      }).finally(function () {
-        done();
-      }, function (err) {
-        done('Should not have rejected!', err);
-      });
-    });
   });
   describe('removeCircular', function () {
     it('should remove circular', function () {

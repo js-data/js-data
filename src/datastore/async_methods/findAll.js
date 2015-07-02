@@ -2,6 +2,7 @@
 function processResults(data, resourceName, queryHash, options) {
   let _this = this;
   let DSUtils = _this.utils;
+  let definition = _this.defs[resourceName];
   let resource = _this.s[resourceName];
   let idAttribute = _this.defs[resourceName].idAttribute;
   let date = new Date().getTime();
@@ -12,11 +13,8 @@ function processResults(data, resourceName, queryHash, options) {
   delete resource.pendingQueries[queryHash];
   resource.completedQueries[queryHash] = date;
 
-  // Update modified timestamp of collection
-  resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
-
   // Merge the new values into the cache
-  let injected = _this.inject(resourceName, data, options.orig());
+  let injected = definition.inject(data, options.orig());
 
   // Make sure each object is added to completedQueries
   if (DSUtils._a(injected)) {
@@ -37,12 +35,22 @@ function processResults(data, resourceName, queryHash, options) {
   return injected;
 }
 
+/**
+ * Using an adapter, retrieve a collection of items.
+ *
+ * @param resourceName The name of the type of resource of the items to retrieve.
+ * @param params The criteria by which to filter items to retrieve. See http://www.js-data.io/docs/query-syntax
+ * @param options Optional configuration.
+ * @param options.bypassCache Whether to ignore any cached query for these items and force the retrieval through the adapter.
+ * @param options.cacheResponse Whether to inject the found items into the data store.
+ * @returns The items.
+ */
 export default function findAll(resourceName, params, options) {
   let _this = this;
   let DSUtils = _this.utils;
   let definition = _this.defs[resourceName];
   let resource = _this.s[resourceName];
-  let queryHash;
+  let queryHash, adapter;
 
   return new DSUtils.Promise((resolve, reject) => {
     params = params || {};
@@ -60,14 +68,21 @@ export default function findAll(resourceName, params, options) {
         options.params = DSUtils.copy(options.params);
       }
 
+      // force a new request
       if (options.bypassCache || !options.cacheResponse) {
         delete resource.completedQueries[queryHash];
         delete resource.queryData[queryHash];
       }
       if (queryHash in resource.completedQueries) {
         if (options.useFilter) {
-          resolve(_this.filter(resourceName, params, options.orig()));
+          if (options.localKeys) {
+            resolve(definition.getAll(options.localKeys, options.orig()));
+          } else {
+            // resolve immediately by filtering data from the data store
+            resolve(definition.filter(params, options.orig()));
+          }
         } else {
+          // resolve immediately by returning the cached array from the previously made query
           resolve(resource.queryData[queryHash]);
         }
       } else {
@@ -79,32 +94,39 @@ export default function findAll(resourceName, params, options) {
         if (!(queryHash in resource.pendingQueries)) {
           let promise;
           let strategy = options.findAllStrategy || options.strategy;
+
+          // try subsequent adapters if the preceeding one fails
           if (strategy === 'fallback') {
             function makeFallbackCall(index) {
-              return _this.getAdapter((options.findAllFallbackAdapters || options.fallbackAdapters)[index]).findAll(definition, params, options)['catch'](err => {
+              adapter = definition.getAdapterName((options.findAllFallbackAdapters || options.fallbackAdapters)[index]);
+              return _this.adapters[adapter].findAll(definition, params, options)['catch'](err => {
                 index++;
                 if (index < options.fallbackAdapters.length) {
                   return makeFallbackCall(index);
                 } else {
-                  return Promise.reject(err);
+                  return DSUtils.Promise.reject(err);
                 }
               });
             }
 
             promise = makeFallbackCall(0);
           } else {
-            promise = _this.getAdapter(options).findAll(definition, params, options);
+            adapter = definition.getAdapterName(options);
+            // just make a single attempt
+            promise = _this.adapters[adapter].findAll(definition, params, options);
           }
 
           resource.pendingQueries[queryHash] = promise.then(data => {
+            // Query is no longer pending
             delete resource.pendingQueries[queryHash];
             if (options.cacheResponse) {
+              // inject the items into the data store
               resource.queryData[queryHash] = processResults.call(_this, data, resourceName, queryHash, options);
               resource.queryData[queryHash].$$injected = true;
               return resource.queryData[queryHash];
             } else {
               DSUtils.forEach(data, (item, i) => {
-                data[i] = _this.createInstance(resourceName, item, options.orig());
+                data[i] = definition.createInstance(item, options.orig());
               });
               return data;
             }
@@ -113,8 +135,11 @@ export default function findAll(resourceName, params, options) {
 
         return resource.pendingQueries[queryHash];
       } else {
+        // resolve immediately with the items
         return items;
       }
+    }).then(items => {
+      return DSUtils.respond(items, {adapter}, options);
     })['catch'](err => {
     if (resource) {
       delete resource.pendingQueries[queryHash];

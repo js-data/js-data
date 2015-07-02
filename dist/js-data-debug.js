@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 1.8.0 - Homepage <http://www.js-data.io/>
+ * @version 2.0.0 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -9,14 +9,14 @@
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("bluebird"), (function webpackLoadOptionalExternalModule() { try { return require("js-data-schema"); } catch(e) {} }()));
+		module.exports = factory();
 	else if(typeof define === 'function' && define.amd)
-		define(["bluebird", "js-data-schema"], factory);
+		define(factory);
 	else if(typeof exports === 'object')
-		exports["JSData"] = factory(require("bluebird"), (function webpackLoadOptionalExternalModule() { try { return require("js-data-schema"); } catch(e) {} }()));
+		exports["JSData"] = factory();
 	else
-		root["JSData"] = factory(root["bluebird"], root["Schemator"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_4__, __WEBPACK_EXTERNAL_MODULE_5__) {
+		root["JSData"] = factory();
+})(this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -63,28 +63,33 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+	var _datastoreIndex = __webpack_require__(1);
 
-	var DSUtils = _interopRequire(__webpack_require__(1));
+	var _utils = __webpack_require__(2);
 
-	var DSErrors = _interopRequire(__webpack_require__(2));
+	var _errors = __webpack_require__(3);
 
-	var DS = _interopRequire(__webpack_require__(3));
-
+	/**
+	 * The library export.
+	 *   - window.JSData
+	 *   - require('js-data')
+	 *   - define(['js-data', function (JSData) { ... }]);
+	 *   - import JSData from 'js-data'
+	 */
 	module.exports = {
-	  DS: DS,
+	  DS: _datastoreIndex['default'],
+	  DSUtils: _utils['default'],
+	  DSErrors: _errors['default'],
 	  createStore: function createStore(options) {
-	    return new DS(options);
+	    return new _datastoreIndex['default'](options);
 	  },
-	  DSUtils: DSUtils,
-	  DSErrors: DSErrors,
 	  version: {
-	    full: "1.8.0",
-	    major: parseInt("1", 10),
-	    minor: parseInt("8", 10),
-	    patch: parseInt("0", 10),
-	    alpha: true ? "false" : false,
-	    beta: true ? "false" : false
+	    full: '2.0.0',
+	    major: parseInt('2', 10),
+	    minor: parseInt('0', 10),
+	    patch: parseInt('0', 10),
+	    alpha: true ? 'false' : false,
+	    beta: true ? 'false' : false
 	  }
 	};
 
@@ -92,124 +97,588 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 	/* jshint eqeqeq:false */
 
-	var DSErrors = _interopRequire(__webpack_require__(2));
+	var _utils = __webpack_require__(2);
 
-	var forEach = _interopRequire(__webpack_require__(9));
+	var _errors = __webpack_require__(3);
 
-	var slice = _interopRequire(__webpack_require__(10));
+	var _sync_methodsIndex = __webpack_require__(4);
 
-	var forOwn = _interopRequire(__webpack_require__(14));
+	var _async_methodsIndex = __webpack_require__(5);
 
-	var contains = _interopRequire(__webpack_require__(11));
+	function lifecycleNoopCb(resource, attrs, cb) {
+	  cb(null, attrs);
+	}
 
-	var deepMixIn = _interopRequire(__webpack_require__(15));
+	function lifecycleNoop(resource, attrs) {
+	  return attrs;
+	}
 
-	var pascalCase = _interopRequire(__webpack_require__(19));
+	function compare(_x, _x2, _x3, _x4) {
+	  var _again = true;
 
-	var remove = _interopRequire(__webpack_require__(12));
+	  _function: while (_again) {
+	    var orderBy = _x,
+	        index = _x2,
+	        a = _x3,
+	        b = _x4;
+	    def = cA = cB = undefined;
+	    _again = false;
 
-	var pick = _interopRequire(__webpack_require__(16));
+	    var def = orderBy[index];
+	    var cA = _utils['default'].get(a, def[0]),
+	        cB = _utils['default'].get(b, def[0]);
+	    if (_utils['default']._s(cA)) {
+	      cA = _utils['default'].upperCase(cA);
+	    }
+	    if (_utils['default']._s(cB)) {
+	      cB = _utils['default'].upperCase(cB);
+	    }
+	    if (def[1] === 'DESC') {
+	      if (cB < cA) {
+	        return -1;
+	      } else if (cB > cA) {
+	        return 1;
+	      } else {
+	        if (index < orderBy.length - 1) {
+	          _x = orderBy;
+	          _x2 = index + 1;
+	          _x3 = a;
+	          _x4 = b;
+	          _again = true;
+	          continue _function;
+	        } else {
+	          return 0;
+	        }
+	      }
+	    } else {
+	      if (cA < cB) {
+	        return -1;
+	      } else if (cA > cB) {
+	        return 1;
+	      } else {
+	        if (index < orderBy.length - 1) {
+	          _x = orderBy;
+	          _x2 = index + 1;
+	          _x3 = a;
+	          _x4 = b;
+	          _again = true;
+	          continue _function;
+	        } else {
+	          return 0;
+	        }
+	      }
+	    }
+	  }
+	}
 
-	var sort = _interopRequire(__webpack_require__(13));
+	var Defaults = (function () {
+	  function Defaults() {
+	    _classCallCheck(this, Defaults);
+	  }
 
-	var upperCase = _interopRequire(__webpack_require__(20));
+	  _createClass(Defaults, [{
+	    key: 'errorFn',
+	    value: function errorFn(a, b) {
+	      if (this.error && typeof this.error === 'function') {
+	        try {
+	          if (typeof a === 'string') {
+	            throw new Error(a);
+	          } else {
+	            throw a;
+	          }
+	        } catch (err) {
+	          a = err;
+	        }
+	        this.error(this.name || null, a || null, b || null);
+	      }
+	    }
+	  }]);
 
-	var observe = _interopRequire(__webpack_require__(8));
+	  return Defaults;
+	})();
 
-	var es6Promise = _interopRequire(__webpack_require__(21));
+	var defaultsPrototype = Defaults.prototype;
 
-	var BinaryHeap = _interopRequire(__webpack_require__(22));
+	defaultsPrototype.actions = {};
+	defaultsPrototype.afterCreate = lifecycleNoopCb;
+	defaultsPrototype.afterCreateCollection = lifecycleNoop;
+	defaultsPrototype.afterCreateInstance = lifecycleNoop;
+	defaultsPrototype.afterDestroy = lifecycleNoopCb;
+	defaultsPrototype.afterEject = lifecycleNoop;
+	defaultsPrototype.afterInject = lifecycleNoop;
+	defaultsPrototype.afterReap = lifecycleNoop;
+	defaultsPrototype.afterUpdate = lifecycleNoopCb;
+	defaultsPrototype.afterValidate = lifecycleNoopCb;
+	defaultsPrototype.allowSimpleWhere = true;
+	defaultsPrototype.basePath = '';
+	defaultsPrototype.beforeCreate = lifecycleNoopCb;
+	defaultsPrototype.beforeCreateCollection = lifecycleNoop;
+	defaultsPrototype.beforeCreateInstance = lifecycleNoop;
+	defaultsPrototype.beforeDestroy = lifecycleNoopCb;
+	defaultsPrototype.beforeEject = lifecycleNoop;
+	defaultsPrototype.beforeInject = lifecycleNoop;
+	defaultsPrototype.beforeReap = lifecycleNoop;
+	defaultsPrototype.beforeUpdate = lifecycleNoopCb;
+	defaultsPrototype.beforeValidate = lifecycleNoopCb;
+	defaultsPrototype.bypassCache = false;
+	defaultsPrototype.cacheResponse = !!_utils['default'].w;
+	defaultsPrototype.clearEmptyQueries = true;
+	defaultsPrototype.computed = {};
+	defaultsPrototype.defaultAdapter = 'http';
+	defaultsPrototype.debug = false;
+	defaultsPrototype.defaultValues = {};
+	defaultsPrototype.eagerEject = false;
+	// TODO: Implement eagerInject in DS#create
+	defaultsPrototype.eagerInject = false;
+	defaultsPrototype.endpoint = '';
+	defaultsPrototype.error = console ? function (a, b, c) {
+	  return console[typeof console.error === 'function' ? 'error' : 'log'](a, b, c);
+	} : false;
+	defaultsPrototype.fallbackAdapters = ['http'];
+	defaultsPrototype.findStrictCache = false;
+	defaultsPrototype.idAttribute = 'id';
+	defaultsPrototype.ignoredChanges = [/\$/];
+	defaultsPrototype.instanceEvents = !!_utils['default'].w;
+	defaultsPrototype.keepChangeHistory = false;
+	defaultsPrototype.linkRelations = true;
+	defaultsPrototype.log = console ? function (a, b, c, d, e) {
+	  return console[typeof console.info === 'function' ? 'info' : 'log'](a, b, c, d, e);
+	} : false;
 
-	var w = undefined,
-	    _Promise = undefined;
-	var DSUtils = undefined;
+	defaultsPrototype.logFn = function (a, b, c, d) {
+	  var _this = this;
+	  if (_this.debug && _this.log && typeof _this.log === 'function') {
+	    _this.log(_this.name || null, a || null, b || null, c || null, d || null);
+	  }
+	};
+
+	defaultsPrototype.maxAge = false;
+	defaultsPrototype.methods = {};
+	defaultsPrototype.notify = !!_utils['default'].w;
+	defaultsPrototype.omit = [];
+	defaultsPrototype.onConflict = 'merge';
+	defaultsPrototype.reapAction = !!_utils['default'].w ? 'inject' : 'none';
+	defaultsPrototype.reapInterval = !!_utils['default'].w ? 30000 : false;
+	defaultsPrototype.relationsEnumerable = false;
+	defaultsPrototype.resetHistoryOnInject = true;
+	defaultsPrototype.returnMeta = false;
+	defaultsPrototype.strategy = 'single';
+	defaultsPrototype.upsert = !!_utils['default'].w;
+	defaultsPrototype.useClass = true;
+	defaultsPrototype.useFilter = false;
+	defaultsPrototype.validate = lifecycleNoopCb;
+	defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
+	  var filtered = collection;
+	  var where = null;
+	  var reserved = {
+	    skip: '',
+	    offset: '',
+	    where: '',
+	    limit: '',
+	    orderBy: '',
+	    sort: ''
+	  };
+
+	  params = params || {};
+	  options = options || {};
+
+	  if (_utils['default']._o(params.where)) {
+	    where = params.where;
+	  } else {
+	    where = {};
+	  }
+
+	  if (options.allowSimpleWhere) {
+	    _utils['default'].forOwn(params, function (value, key) {
+	      if (!(key in reserved) && !(key in where)) {
+	        where[key] = {
+	          '==': value
+	        };
+	      }
+	    });
+	  }
+
+	  if (_utils['default'].isEmpty(where)) {
+	    where = null;
+	  }
+
+	  if (where) {
+	    filtered = _utils['default'].filter(filtered, function (attrs) {
+	      var first = true;
+	      var keep = true;
+	      _utils['default'].forOwn(where, function (clause, field) {
+	        if (!_utils['default']._o(clause)) {
+	          clause = {
+	            '==': clause
+	          };
+	        }
+	        _utils['default'].forOwn(clause, function (term, op) {
+	          var expr = undefined;
+	          var isOr = op[0] === '|';
+	          var val = _utils['default'].get(attrs, field);
+	          op = isOr ? op.substr(1) : op;
+	          if (op === '==') {
+	            expr = val == term;
+	          } else if (op === '===') {
+	            expr = val === term;
+	          } else if (op === '!=') {
+	            expr = val != term;
+	          } else if (op === '!==') {
+	            expr = val !== term;
+	          } else if (op === '>') {
+	            expr = val > term;
+	          } else if (op === '>=') {
+	            expr = val >= term;
+	          } else if (op === '<') {
+	            expr = val < term;
+	          } else if (op === '<=') {
+	            expr = val <= term;
+	          } else if (op === 'isectEmpty') {
+	            expr = !_utils['default'].intersection(val || [], term || []).length;
+	          } else if (op === 'isectNotEmpty') {
+	            expr = _utils['default'].intersection(val || [], term || []).length;
+	          } else if (op === 'in') {
+	            if (_utils['default']._s(term)) {
+	              expr = term.indexOf(val) !== -1;
+	            } else {
+	              expr = _utils['default'].contains(term, val);
+	            }
+	          } else if (op === 'notIn') {
+	            if (_utils['default']._s(term)) {
+	              expr = term.indexOf(val) === -1;
+	            } else {
+	              expr = !_utils['default'].contains(term, val);
+	            }
+	          } else if (op === 'contains') {
+	            if (_utils['default']._s(val)) {
+	              expr = val.indexOf(term) !== -1;
+	            } else {
+	              expr = _utils['default'].contains(val, term);
+	            }
+	          } else if (op === 'notContains') {
+	            if (_utils['default']._s(val)) {
+	              expr = val.indexOf(term) === -1;
+	            } else {
+	              expr = !_utils['default'].contains(val, term);
+	            }
+	          }
+	          if (expr !== undefined) {
+	            keep = first ? expr : isOr ? keep || expr : keep && expr;
+	          }
+	          first = false;
+	        });
+	      });
+	      return keep;
+	    });
+	  }
+
+	  var orderBy = null;
+
+	  if (_utils['default']._s(params.orderBy)) {
+	    orderBy = [[params.orderBy, 'ASC']];
+	  } else if (_utils['default']._a(params.orderBy)) {
+	    orderBy = params.orderBy;
+	  }
+
+	  if (!orderBy && _utils['default']._s(params.sort)) {
+	    orderBy = [[params.sort, 'ASC']];
+	  } else if (!orderBy && _utils['default']._a(params.sort)) {
+	    orderBy = params.sort;
+	  }
+
+	  // Apply 'orderBy'
+	  if (orderBy) {
+	    (function () {
+	      var index = 0;
+	      _utils['default'].forEach(orderBy, function (def, i) {
+	        if (_utils['default']._s(def)) {
+	          orderBy[i] = [def, 'ASC'];
+	        } else if (!_utils['default']._a(def)) {
+	          throw new _errors['default'].IA('DS.filter("' + resourceName + '"[, params][, options]): ' + _utils['default'].toJson(def) + ': Must be a string or an array!', {
+	            params: {
+	              'orderBy[i]': {
+	                actual: typeof def,
+	                expected: 'string|array'
+	              }
+	            }
+	          });
+	        }
+	      });
+	      filtered = _utils['default'].sort(filtered, function (a, b) {
+	        return compare(orderBy, index, a, b);
+	      });
+	    })();
+	  }
+
+	  var limit = _utils['default']._n(params.limit) ? params.limit : null;
+	  var skip = null;
+
+	  if (_utils['default']._n(params.skip)) {
+	    skip = params.skip;
+	  } else if (_utils['default']._n(params.offset)) {
+	    skip = params.offset;
+	  }
+
+	  // Apply 'limit' and 'skip'
+	  if (limit && skip) {
+	    filtered = _utils['default'].slice(filtered, skip, Math.min(filtered.length, skip + limit));
+	  } else if (_utils['default']._n(limit)) {
+	    filtered = _utils['default'].slice(filtered, 0, Math.min(filtered.length, limit));
+	  } else if (_utils['default']._n(skip)) {
+	    if (skip < filtered.length) {
+	      filtered = _utils['default'].slice(filtered, skip);
+	    } else {
+	      filtered = [];
+	    }
+	  }
+
+	  return filtered;
+	};
+
+	var DS = (function () {
+	  function DS(options) {
+	    _classCallCheck(this, DS);
+
+	    var _this = this;
+	    options = options || {};
+
+	    _this.store = {};
+	    // alias store, shaves 0.1 kb off the minified build
+	    _this.s = _this.store;
+	    _this.definitions = {};
+	    // alias definitions, shaves 0.3 kb off the minified build
+	    _this.defs = _this.definitions;
+	    _this.adapters = {};
+	    _this.defaults = new Defaults();
+	    _this.observe = _utils['default'].observe;
+	    _utils['default'].forOwn(options, function (v, k) {
+	      if (k === 'omit') {
+	        _this.defaults.omit = v.concat(Defaults.prototype.omit);
+	      } else {
+	        _this.defaults[k] = v;
+	      }
+	    });
+	    _this.defaults.logFn('new data store created', _this.defaults);
+
+	    var P = _utils['default'].Promise;
+
+	    if (P && !P.prototype.spread) {
+	      P.prototype.spread = function (cb) {
+	        return this.then(function (arr) {
+	          return cb.apply(this, arr);
+	        });
+	      };
+	    }
+
+	    _utils['default'].Events(_this);
+	  }
+
+	  _createClass(DS, [{
+	    key: 'getAdapterName',
+	    value: function getAdapterName(options) {
+	      var errorIfNotExist = false;
+	      options = options || {};
+	      this.defaults.logFn('getAdapterName', options);
+	      if (_utils['default']._s(options)) {
+	        errorIfNotExist = true;
+	        options = {
+	          adapter: options
+	        };
+	      }
+	      if (this.adapters[options.adapter]) {
+	        return options.adapter;
+	      } else if (errorIfNotExist) {
+	        throw new Error(options.adapter + ' is not a registered adapter!');
+	      } else {
+	        return options.defaultAdapter;
+	      }
+	    }
+	  }, {
+	    key: 'getAdapter',
+	    value: function getAdapter(options) {
+	      options = options || {};
+	      this.defaults.logFn('getAdapter', options);
+	      return this.adapters[this.getAdapterName(options)];
+	    }
+	  }, {
+	    key: 'registerAdapter',
+	    value: function registerAdapter(name, Adapter, options) {
+	      var _this = this;
+	      options = options || {};
+	      _this.defaults.logFn('registerAdapter', name, Adapter, options);
+	      if (_utils['default'].isFunction(Adapter)) {
+	        _this.adapters[name] = new Adapter(options);
+	      } else {
+	        _this.adapters[name] = Adapter;
+	      }
+	      if (options['default']) {
+	        _this.defaults.defaultAdapter = name;
+	      }
+	      _this.defaults.logFn('default adapter is ' + _this.defaults.defaultAdapter);
+	    }
+	  }, {
+	    key: 'is',
+	    value: function is(resourceName, instance) {
+	      var definition = this.defs[resourceName];
+	      if (!definition) {
+	        throw new _errors['default'].NER(resourceName);
+	      }
+	      return instance instanceof definition[definition['class']];
+	    }
+	  }]);
+
+	  return DS;
+	})();
+
+	var dsPrototype = DS.prototype;
+
+	dsPrototype.getAdapterName.shorthand = false;
+	dsPrototype.getAdapter.shorthand = false;
+	dsPrototype.registerAdapter.shorthand = false;
+	dsPrototype.errors = _errors['default'];
+	dsPrototype.utils = _utils['default'];
+
+	function addMethods(target, obj) {
+	  _utils['default'].forOwn(obj, function (v, k) {
+	    target[k] = v;
+	    target[k].before = function (fn) {
+	      var orig = target[k];
+	      target[k] = function () {
+	        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	          args[_key] = arguments[_key];
+	        }
+
+	        return orig.apply(this, fn.apply(this, args) || args);
+	      };
+	    };
+	  });
+	}
+
+	addMethods(dsPrototype, _sync_methodsIndex['default']);
+	addMethods(dsPrototype, _async_methodsIndex['default']);
+
+	exports['default'] = DS;
+
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* jshint eqeqeq:false */
+
+	/**
+	 * Mix of ES6 and CommonJS module imports because the interop of Babel + Webpack + ES6 modules + CommonJS isn't very good.
+	 */
+
+	var _errors = __webpack_require__(3);
+
+	var BinaryHeap = __webpack_require__(7);
+	var forEach = __webpack_require__(8);
+	var slice = __webpack_require__(9);
+	var forOwn = __webpack_require__(13);
+	var contains = __webpack_require__(10);
+	var deepMixIn = __webpack_require__(14);
+	var pascalCase = __webpack_require__(19);
+	var remove = __webpack_require__(11);
+	var pick = __webpack_require__(15);
+	var _keys = __webpack_require__(16);
+	var sort = __webpack_require__(12);
+	var upperCase = __webpack_require__(20);
+	var get = __webpack_require__(17);
+	var set = __webpack_require__(18);
+	var observe = __webpack_require__(6);
+	var w = undefined;
 	var objectProto = Object.prototype;
 	var toString = objectProto.toString;
-	es6Promise.polyfill();
+	var P = undefined;
+
+	/**
+	 * Attempt to detect the global Promise constructor.
+	 * JSData will still work without one, as long you do something like this:
+	 *
+	 * var JSData = require('js-data');
+	 * JSData.DSUtils.Promise = MyPromiseLib;
+	 */
+	try {
+	  P = Promise;
+	} catch (err) {
+	  console.error('js-data requires a global Promise constructor!');
+	}
 
 	var isArray = Array.isArray || function isArray(value) {
-	  return toString.call(value) == "[object Array]" || false;
+	  return toString.call(value) == '[object Array]' || false;
 	};
 
-	var isRegExp = function (value) {
-	  return toString.call(value) == "[object RegExp]" || false;
-	};
-
-	// adapted from lodash.isBoolean
-	var isBoolean = function (value) {
-	  return value === true || value === false || value && typeof value == "object" && toString.call(value) == "[object Boolean]" || false;
+	var isRegExp = function isRegExp(value) {
+	  return toString.call(value) == '[object RegExp]' || false;
 	};
 
 	// adapted from lodash.isString
-	var isString = function (value) {
-	  return typeof value == "string" || value && typeof value == "object" && toString.call(value) == "[object String]" || false;
+	var isString = function isString(value) {
+	  return typeof value == 'string' || value && typeof value == 'object' && toString.call(value) == '[object String]' || false;
 	};
 
-	var isObject = function (value) {
-	  return toString.call(value) == "[object Object]" || false;
+	var isObject = function isObject(value) {
+	  return toString.call(value) == '[object Object]' || false;
 	};
 
 	// adapted from lodash.isDate
-	var isDate = function (value) {
-	  return value && typeof value == "object" && toString.call(value) == "[object Date]" || false;
+	var isDate = function isDate(value) {
+	  return value && typeof value == 'object' && toString.call(value) == '[object Date]' || false;
 	};
 
 	// adapted from lodash.isNumber
-	var isNumber = function (value) {
+	var isNumber = function isNumber(value) {
 	  var type = typeof value;
-	  return type == "number" || value && type == "object" && toString.call(value) == "[object Number]" || false;
+	  return type == 'number' || value && type == 'object' && toString.call(value) == '[object Number]' || false;
 	};
 
 	// adapted from lodash.isFunction
-	var isFunction = function (value) {
-	  return typeof value == "function" || value && toString.call(value) === "[object Function]" || false;
+	var isFunction = function isFunction(value) {
+	  return typeof value == 'function' || value && toString.call(value) === '[object Function]' || false;
 	};
 
 	// shorthand argument checking functions, using these shaves 1.18 kb off of the minified build
-	var isStringOrNumber = function (value) {
+	var isStringOrNumber = function isStringOrNumber(value) {
 	  return isString(value) || isNumber(value);
 	};
-	var isStringOrNumberErr = function (field) {
-	  return new DSErrors.IA("\"" + field + "\" must be a string or a number!");
+	var isStringOrNumberErr = function isStringOrNumberErr(field) {
+	  return new _errors['default'].IA('"' + field + '" must be a string or a number!');
 	};
-	var isObjectErr = function (field) {
-	  return new DSErrors.IA("\"" + field + "\" must be an object!");
+	var isObjectErr = function isObjectErr(field) {
+	  return new _errors['default'].IA('"' + field + '" must be an object!');
 	};
-	var isArrayErr = function (field) {
-	  return new DSErrors.IA("\"" + field + "\" must be an array!");
+	var isArrayErr = function isArrayErr(field) {
+	  return new _errors['default'].IA('"' + field + '" must be an array!');
 	};
 
 	// adapted from mout.isEmpty
-	var isEmpty = function (val) {
+	var isEmpty = function isEmpty(val) {
 	  if (val == null) {
 	    // jshint ignore:line
 	    // typeof null == 'object' so we check it first
 	    return true;
-	  } else if (typeof val === "string" || isArray(val)) {
+	  } else if (typeof val === 'string' || isArray(val)) {
 	    return !val.length;
-	  } else if (typeof val === "object") {
-	    var _ret = (function () {
-	      var result = true;
-	      forOwn(val, function () {
-	        result = false;
-	        return false; // break loop
-	      });
-	      return {
-	        v: result
-	      };
-	    })();
-
-	    if (typeof _ret === "object") return _ret.v;
+	  } else if (typeof val === 'object') {
+	    var result = true;
+	    forOwn(val, function () {
+	      result = false;
+	      return false; // break loop
+	    });
+	    return result;
 	  } else {
 	    return true;
 	  }
 	};
 
-	var intersection = function (array1, array2) {
+	// Find the intersection between two arrays
+	var intersection = function intersection(array1, array2) {
 	  if (!array1 || !array2) {
 	    return [];
 	  }
@@ -217,17 +686,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var item = undefined;
 	  for (var i = 0, _length = array1.length; i < _length; i++) {
 	    item = array1[i];
-	    if (DSUtils.contains(result, item)) {
+	    if (contains(result, item)) {
 	      continue;
 	    }
-	    if (DSUtils.contains(array2, item)) {
+	    if (contains(array2, item)) {
 	      result.push(item);
 	    }
 	  }
 	  return result;
 	};
 
-	var filter = function (array, cb, thisObj) {
+	var filter = function filter(array, cb, thisObj) {
 	  var results = [];
 	  forEach(array, function (value, key, arr) {
 	    if (cb(value, key, arr)) {
@@ -237,32 +706,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return results;
 	};
 
-	function finallyPolyfill(cb) {
-	  var constructor = this.constructor;
-
-	  return this.then(function (value) {
-	    return constructor.resolve(cb()).then(function () {
-	      return value;
-	    });
-	  }, function (reason) {
-	    return constructor.resolve(cb()).then(function () {
-	      throw reason;
-	    });
-	  });
-	}
-
+	/**
+	 * Attempt to detect whether we are in the browser.
+	 */
 	try {
 	  w = window;
-	  if (!w.Promise.prototype["finally"]) {
-	    w.Promise.prototype["finally"] = finallyPolyfill;
-	  }
-	  _Promise = w.Promise;
 	  w = {};
 	} catch (e) {
 	  w = null;
-	  _Promise = __webpack_require__(4);
 	}
 
+	/**
+	 * Event mixin. Usage:
+	 *
+	 * function handler() { ... }
+	 * Events(myObject);
+	 * myObject.on('foo', handler);
+	 * myObject.emit('foo', 'some', 'data');
+	 * myObject.off('foo', handler);
+	 */
 	function Events(target) {
 	  var events = {};
 	  target = target || this;
@@ -302,23 +764,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	}
 
-	var toPromisify = ["beforeValidate", "validate", "afterValidate", "beforeCreate", "afterCreate", "beforeUpdate", "afterUpdate", "beforeDestroy", "afterDestroy"];
+	/**
+	 * Lifecycle hooks that should support promises.
+	 */
+	var toPromisify = ['beforeValidate', 'validate', 'afterValidate', 'beforeCreate', 'afterCreate', 'beforeUpdate', 'afterUpdate', 'beforeDestroy', 'afterDestroy'];
 
-	var isBlacklisted = function (prop, bl) {
-	  var i = undefined;
-	  if (!bl || !bl.length) {
-	    return false;
-	  }
-	  for (i = 0; i < bl.length; i++) {
-	    if (bl[i] === prop) {
-	      return true;
-	    }
-	  }
-	  return false;
-	};
+	/**
+	 * Return whether "prop" is in the blacklist.
+	 */
+	var isBlacklisted = observe.isBlacklisted;
 
 	// adapted from angular.copy
-	var copy = function (source, destination, stackSource, stackDest, blacklist) {
+	var copy = function copy(source, destination, stackSource, stackDest, blacklist) {
 	  if (!destination) {
 	    destination = source;
 	    if (source) {
@@ -335,7 +792,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  } else {
 	    if (source === destination) {
-	      throw new Error("Cannot copy! Source and destination are identical.");
+	      throw new Error('Cannot copy! Source and destination are identical.');
 	    }
 
 	    stackSource = stackSource || [];
@@ -390,70 +847,85 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	// adapted from angular.equals
-	var equals = function (o1, o2) {
-	  if (o1 === o2) {
-	    return true;
-	  }
-	  if (o1 === null || o2 === null) {
-	    return false;
-	  }
-	  if (o1 !== o1 && o2 !== o2) {
-	    return true;
-	  } // NaN === NaN
-	  var t1 = typeof o1,
-	      t2 = typeof o2,
-	      length,
-	      key,
-	      keySet;
-	  if (t1 == t2) {
-	    if (t1 == "object") {
-	      if (isArray(o1)) {
-	        if (!isArray(o2)) {
-	          return false;
-	        }
-	        if ((length = o1.length) == o2.length) {
-	          // jshint ignore:line
-	          for (key = 0; key < length; key++) {
+	var equals = function equals(_x, _x2) {
+	  var _again = true;
+
+	  _function: while (_again) {
+	    var o1 = _x,
+	        o2 = _x2;
+	    t1 = t2 = length = key = keySet = undefined;
+	    _again = false;
+
+	    if (o1 === o2) {
+	      return true;
+	    }
+	    if (o1 === null || o2 === null) {
+	      return false;
+	    }
+	    if (o1 !== o1 && o2 !== o2) {
+	      return true;
+	    } // NaN === NaN
+	    var t1 = typeof o1,
+	        t2 = typeof o2,
+	        length,
+	        key,
+	        keySet;
+	    if (t1 == t2) {
+	      if (t1 == 'object') {
+	        if (isArray(o1)) {
+	          if (!isArray(o2)) {
+	            return false;
+	          }
+	          if ((length = o1.length) == o2.length) {
+	            // jshint ignore:line
+	            for (key = 0; key < length; key++) {
+	              if (!equals(o1[key], o2[key])) {
+	                return false;
+	              }
+	            }
+	            return true;
+	          }
+	        } else if (isDate(o1)) {
+	          if (!isDate(o2)) {
+	            return false;
+	          }
+	          _x = o1.getTime();
+	          _x2 = o2.getTime();
+	          _again = true;
+	          continue _function;
+	        } else if (isRegExp(o1) && isRegExp(o2)) {
+	          return o1.toString() == o2.toString();
+	        } else {
+	          if (isArray(o2)) {
+	            return false;
+	          }
+	          keySet = {};
+	          for (key in o1) {
+	            if (key.charAt(0) === '$' || isFunction(o1[key])) {
+	              continue;
+	            }
 	            if (!equals(o1[key], o2[key])) {
+	              return false;
+	            }
+	            keySet[key] = true;
+	          }
+	          for (key in o2) {
+	            if (!keySet.hasOwnProperty(key) && key.charAt(0) !== '$' && o2[key] !== undefined && !isFunction(o2[key])) {
 	              return false;
 	            }
 	          }
 	          return true;
 	        }
-	      } else if (isDate(o1)) {
-	        if (!isDate(o2)) {
-	          return false;
-	        }
-	        return equals(o1.getTime(), o2.getTime());
-	      } else if (isRegExp(o1) && isRegExp(o2)) {
-	        return o1.toString() == o2.toString();
-	      } else {
-	        if (isArray(o2)) {
-	          return false;
-	        }
-	        keySet = {};
-	        for (key in o1) {
-	          if (key.charAt(0) === "$" || isFunction(o1[key])) {
-	            continue;
-	          }
-	          if (!equals(o1[key], o2[key])) {
-	            return false;
-	          }
-	          keySet[key] = true;
-	        }
-	        for (key in o2) {
-	          if (!keySet.hasOwnProperty(key) && key.charAt(0) !== "$" && o2[key] !== undefined && !isFunction(o2[key])) {
-	            return false;
-	          }
-	        }
-	        return true;
 	      }
 	    }
+	    return false;
 	  }
-	  return false;
 	};
 
-	var resolveId = function (definition, idOrInstance) {
+	/**
+	 * Given either an instance or the primary key of an instance, return the primary key.
+	 */
+	var resolveId = function resolveId(definition, idOrInstance) {
 	  if (isString(idOrInstance) || isNumber(idOrInstance)) {
 	    return idOrInstance;
 	  } else if (idOrInstance && definition) {
@@ -463,7 +935,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	};
 
-	var resolveItem = function (resource, idOrInstance) {
+	/**
+	 * Given either an instance or the primary key of an instance, return the instance.
+	 */
+	var resolveItem = function resolveItem(resource, idOrInstance) {
 	  if (resource && (isString(idOrInstance) || isNumber(idOrInstance))) {
 	    return resource.index[idOrInstance] || idOrInstance;
 	  } else {
@@ -471,46 +946,53 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	};
 
-	var isValidString = function (val) {
-	  return val != null && val !== ""; // jshint ignore:line
+	var isValidString = function isValidString(val) {
+	  return val != null && val !== ''; // jshint ignore:line
 	};
 
-	var join = function (items, separator) {
-	  separator = separator || "";
+	var join = function join(items, separator) {
+	  separator = separator || '';
 	  return filter(items, isValidString).join(separator);
 	};
 
-	var makePath = function () {
-	  for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	    args[_key] = arguments[_key];
+	var makePath = function makePath() {
+	  for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+	    args[_key2] = arguments[_key2];
 	  }
 
-	  var result = join(args, "/");
-	  return result.replace(/([^:\/]|^)\/{2,}/g, "$1/");
+	  var result = join(args, '/');
+	  return result.replace(/([^:\/]|^)\/{2,}/g, '$1/');
 	};
 
-	DSUtils = {
-	  // Options that inherit from defaults
+	exports['default'] = {
+	  Promise: P,
+	  /**
+	   * Method to wrap an "options" object so that it will inherit from
+	   * some parent object, such as a resource definition.
+	   */
 	  _: function _(parent, options) {
 	    var _this = this;
 	    options = options || {};
 	    if (options && options.constructor === parent.constructor) {
 	      return options;
 	    } else if (!isObject(options)) {
-	      throw new DSErrors.IA("\"options\" must be an object!");
+	      throw new _errors['default'].IA('"options" must be an object!');
 	    }
 	    forEach(toPromisify, function (name) {
-	      if (typeof options[name] === "function" && options[name].toString().indexOf("for (var _len = arg") === -1) {
+	      if (typeof options[name] === 'function' && options[name].toString().indexOf('for (var _len = arg') === -1) {
 	        options[name] = _this.promisify(options[name]);
 	      }
 	    });
+	    // Dynamic constructor function
 	    var O = function Options(attrs) {
 	      var self = this;
 	      forOwn(attrs, function (value, key) {
 	        self[key] = value;
 	      });
 	    };
+	    // Inherit from some parent object
 	    O.prototype = parent;
+	    // Give us a way to get the original options back.
 	    O.prototype.orig = function () {
 	      var orig = {};
 	      forOwn(this, function (value, key) {
@@ -532,10 +1014,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _this = this;
 	    var args = [];
 	    forEach(fn.deps, function (dep) {
-	      args.push(_this[dep]);
+	      args.push(get(_this, dep));
 	    });
 	    // compute property
-	    _this[field] = fn[fn.length - 1].apply(_this, args);
+	    set(_this, field, fn[fn.length - 1].apply(_this, args));
 	  },
 	  contains: contains,
 	  copy: copy,
@@ -545,37 +1027,56 @@ return /******/ (function(modules) { // webpackBootstrap
 	  equals: equals,
 	  Events: Events,
 	  filter: filter,
+	  fillIn: function fillIn(target, obj) {
+	    forOwn(obj, function (v, k) {
+	      if (!(k in target)) {
+	        target[k] = v;
+	      }
+	    });
+	    return target;
+	  },
 	  forEach: forEach,
 	  forOwn: forOwn,
 	  fromJson: function fromJson(json) {
 	    return isString(json) ? JSON.parse(json) : json;
 	  },
-	  get: __webpack_require__(17),
+	  get: get,
 	  intersection: intersection,
 	  isArray: isArray,
-	  isBoolean: isBoolean,
-	  isDate: isDate,
+	  isBlacklisted: isBlacklisted,
 	  isEmpty: isEmpty,
 	  isFunction: isFunction,
 	  isObject: isObject,
 	  isNumber: isNumber,
-	  isRegExp: isRegExp,
 	  isString: isString,
+	  keys: _keys,
 	  makePath: makePath,
 	  observe: observe,
+	  omit: function omit(obj, bl) {
+	    var toRemove = [];
+	    forOwn(obj, function (v, k) {
+	      if (isBlacklisted(k, bl)) {
+	        toRemove.push(k);
+	      }
+	    });
+	    forEach(toRemove, function (k) {
+	      delete obj[k];
+	    });
+	    return obj;
+	  },
 	  pascalCase: pascalCase,
 	  pick: pick,
-	  Promise: _Promise,
+	  // Turn the given node-style callback function into one that can return a promise.
 	  promisify: function promisify(fn, target) {
 	    var _this = this;
 	    if (!fn) {
 	      return;
-	    } else if (typeof fn !== "function") {
-	      throw new Error("Can only promisify functions!");
+	    } else if (typeof fn !== 'function') {
+	      throw new Error('Can only promisify functions!');
 	    }
 	    return function () {
-	      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	        args[_key] = arguments[_key];
+	      for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+	        args[_key3] = arguments[_key3];
 	      }
 
 	      return new _this.Promise(function (resolve, reject) {
@@ -600,12 +1101,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	  },
 	  remove: remove,
-	  set: __webpack_require__(18),
+	  set: set,
 	  slice: slice,
 	  sort: sort,
 	  toJson: JSON.stringify,
 	  updateTimestamp: function updateTimestamp(timestamp) {
-	    var newTimestamp = typeof Date.now === "function" ? Date.now() : new Date().getTime();
+	    var newTimestamp = typeof Date.now === 'function' ? Date.now() : new Date().getTime();
 	    if (timestamp && newTimestamp <= timestamp) {
 	      return timestamp + 1;
 	    } else {
@@ -613,66 +1114,146 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  },
 	  upperCase: upperCase,
+	  // Return a copy of "object" with cycles removed.
 	  removeCircular: function removeCircular(object) {
-	    return (function rmCirc(value, context) {
+	    return (function rmCirc(value, ctx) {
 	      var i = undefined;
 	      var nu = undefined;
 
-	      if (typeof value === "object" && value !== null && !(value instanceof Boolean) && !(value instanceof Date) && !(value instanceof Number) && !(value instanceof RegExp) && !(value instanceof String)) {
+	      if (typeof value === 'object' && value !== null && !(value instanceof Boolean) && !(value instanceof Date) && !(value instanceof Number) && !(value instanceof RegExp) && !(value instanceof String)) {
 
 	        // check if current object points back to itself
-	        var current = context.current;
-	        var parent = context.context;
+	        var cur = ctx.cur;
+	        var parent = ctx.ctx;
 	        while (parent) {
-	          if (parent.current === current) {
+	          if (parent.cur === cur) {
 	            return undefined;
 	          }
-	          parent = parent.context;
+	          parent = parent.ctx;
 	        }
 
-	        if (DSUtils.isArray(value)) {
+	        if (isArray(value)) {
 	          nu = [];
 	          for (i = 0; i < value.length; i += 1) {
-	            nu[i] = rmCirc(value[i], { context: context, current: value[i] });
+	            nu[i] = rmCirc(value[i], { ctx: ctx, cur: value[i] });
 	          }
 	        } else {
 	          nu = {};
 	          forOwn(value, function (v, k) {
-	            nu[k] = rmCirc(value[k], { context: context, current: value[k] });
+	            nu[k] = rmCirc(value[k], { ctx: ctx, cur: value[k] });
 	          });
 	        }
 	        return nu;
 	      }
 	      return value;
-	    })(object, { context: null, current: object });
+	    })(object, { ctx: null, cur: object });
 	  },
 	  resolveItem: resolveItem,
 	  resolveId: resolveId,
-	  w: w
+	  respond: function respond(response, meta, options) {
+	    if (options.returnMeta === 'array') {
+	      return [response, meta];
+	    } else if (options.returnMeta === 'object') {
+	      return { response: response, meta: meta };
+	    } else {
+	      return response;
+	    }
+	  },
+	  w: w,
+	  // This is where the magic of relations happens.
+	  applyRelationGettersToTarget: function applyRelationGettersToTarget(store, definition, target) {
+	    this.forEach(definition.relationList, function (def) {
+	      var relationName = def.relation;
+	      var localField = def.localField;
+	      var localKey = def.localKey;
+	      var foreignKey = def.foreignKey;
+	      var localKeys = def.localKeys;
+	      var enumerable = typeof def.enumerable === 'boolean' ? def.enumerable : !!definition.relationsEnumerable;
+	      if (typeof def.link === 'boolean' ? def.link : !!definition.linkRelations) {
+	        delete target[localField];
+	        var prop = {
+	          enumerable: enumerable,
+	          set: function set() {}
+	        };
+	        if (def.type === 'belongsTo') {
+	          prop.get = function () {
+	            return this[localKey] ? definition.getResource(relationName).get(this[localKey]) : undefined;
+	          };
+	        } else if (def.type === 'hasMany') {
+	          prop.get = function () {
+	            var params = {};
+	            if (foreignKey) {
+	              params[foreignKey] = this[definition.idAttribute];
+	              return definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
+	            } else if (localKeys) {
+	              var keys = this[localKeys] || [];
+	              return definition.getResource(relationName).getAll(isArray(keys) ? keys : _keys(keys));
+	            }
+	            return undefined;
+	          };
+	        } else if (def.type === 'hasOne') {
+	          if (localKey) {
+	            prop.get = function () {
+	              return this[localKey] ? definition.getResource(relationName).get(this[localKey]) : undefined;
+	            };
+	          } else {
+	            prop.get = function () {
+	              var params = {};
+	              params[foreignKey] = this[definition.idAttribute];
+	              var items = params[foreignKey] ? definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true }) : [];
+	              if (items.length) {
+	                return items[0];
+	              }
+	              return undefined;
+	            };
+	          }
+	        }
+	        if (def.get) {
+	          (function () {
+	            var orig = prop.get;
+	            prop.get = function () {
+	              var _this2 = this;
+
+	              return def.get(definition, def, this, function () {
+	                for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+	                  args[_key4] = arguments[_key4];
+	                }
+
+	                return orig.apply(_this2, args);
+	              });
+	            };
+	          })();
+	        }
+	        Object.defineProperty(target, def.localField, prop);
+	      }
+	    });
+	  }
 	};
 
-	module.exports = DSUtils;
-
 /***/ },
-/* 2 */
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
-	var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+	/**
+	 * Thrown during a method call when an argument passed into the method is invalid.
+	 */
 
 	var IllegalArgumentError = (function (_Error) {
 	  function IllegalArgumentError(message) {
 	    _classCallCheck(this, IllegalArgumentError);
 
-	    _get(Object.getPrototypeOf(IllegalArgumentError.prototype), "constructor", this).call(this, this);
-	    if (typeof Error.captureStackTrace === "function") {
+	    _get(Object.getPrototypeOf(IllegalArgumentError.prototype), 'constructor', this).call(this);
+	    if (typeof Error.captureStackTrace === 'function') {
 	      Error.captureStackTrace(this, this.constructor);
 	    }
 	    this.type = this.constructor.name;
-	    this.message = message || "Illegal Argument!";
+	    this.message = message;
 	  }
 
 	  _inherits(IllegalArgumentError, _Error);
@@ -680,16 +1261,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return IllegalArgumentError;
 	})(Error);
 
+	/**
+	 * Thrown when an invariant is violated or unrecoverable error is encountered during execution.
+	 */
+
 	var RuntimeError = (function (_Error2) {
 	  function RuntimeError(message) {
 	    _classCallCheck(this, RuntimeError);
 
-	    _get(Object.getPrototypeOf(RuntimeError.prototype), "constructor", this).call(this, this);
-	    if (typeof Error.captureStackTrace === "function") {
+	    _get(Object.getPrototypeOf(RuntimeError.prototype), 'constructor', this).call(this);
+	    if (typeof Error.captureStackTrace === 'function') {
 	      Error.captureStackTrace(this, this.constructor);
 	    }
 	    this.type = this.constructor.name;
-	    this.message = message || "RuntimeError Error!";
+	    this.message = message;
 	  }
 
 	  _inherits(RuntimeError, _Error2);
@@ -697,16 +1282,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return RuntimeError;
 	})(Error);
 
+	/**
+	 * Thrown when attempting to access or work with a non-existent resource.
+	 */
+
 	var NonexistentResourceError = (function (_Error3) {
 	  function NonexistentResourceError(resourceName) {
 	    _classCallCheck(this, NonexistentResourceError);
 
-	    _get(Object.getPrototypeOf(NonexistentResourceError.prototype), "constructor", this).call(this, this);
-	    if (typeof Error.captureStackTrace === "function") {
+	    _get(Object.getPrototypeOf(NonexistentResourceError.prototype), 'constructor', this).call(this);
+	    if (typeof Error.captureStackTrace === 'function') {
 	      Error.captureStackTrace(this, this.constructor);
 	    }
 	    this.type = this.constructor.name;
-	    this.message = "" + resourceName + " is not a registered resource!";
+	    this.message = resourceName + ' is not a registered resource!';
 	  }
 
 	  _inherits(NonexistentResourceError, _Error3);
@@ -714,7 +1303,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return NonexistentResourceError;
 	})(Error);
 
-	module.exports = {
+	exports['default'] = {
 	  IllegalArgumentError: IllegalArgumentError,
 	  IA: IllegalArgumentError,
 	  RuntimeError: RuntimeError,
@@ -724,544 +1313,85 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
-
-	var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-	/* jshint eqeqeq:false */
-
-	var DSUtils = _interopRequire(__webpack_require__(1));
-
-	var DSErrors = _interopRequire(__webpack_require__(2));
-
-	var syncMethods = _interopRequire(__webpack_require__(6));
-
-	var asyncMethods = _interopRequire(__webpack_require__(7));
-
-	var Schemator = undefined;
-
-	function lifecycleNoopCb(resource, attrs, cb) {
-	  cb(null, attrs);
-	}
-
-	function lifecycleNoop(resource, attrs) {
-	  return attrs;
-	}
-
-	function compare(_x, _x2, _x3, _x4) {
-	  var _again = true;
-
-	  _function: while (_again) {
-	    _again = false;
-	    var orderBy = _x,
-	        index = _x2,
-	        a = _x3,
-	        b = _x4;
-	    def = cA = cB = undefined;
-
-	    var def = orderBy[index];
-	    var cA = DSUtils.get(a, def[0]),
-	        cB = DSUtils.get(b, def[0]);
-	    if (DSUtils._s(cA)) {
-	      cA = DSUtils.upperCase(cA);
-	    }
-	    if (DSUtils._s(cB)) {
-	      cB = DSUtils.upperCase(cB);
-	    }
-	    if (def[1] === "DESC") {
-	      if (cB < cA) {
-	        return -1;
-	      } else if (cB > cA) {
-	        return 1;
-	      } else {
-	        if (index < orderBy.length - 1) {
-	          _x = orderBy;
-	          _x2 = index + 1;
-	          _x3 = a;
-	          _x4 = b;
-	          _again = true;
-	          continue _function;
-	        } else {
-	          return 0;
-	        }
-	      }
-	    } else {
-	      if (cA < cB) {
-	        return -1;
-	      } else if (cA > cB) {
-	        return 1;
-	      } else {
-	        if (index < orderBy.length - 1) {
-	          _x = orderBy;
-	          _x2 = index + 1;
-	          _x3 = a;
-	          _x4 = b;
-	          _again = true;
-	          continue _function;
-	        } else {
-	          return 0;
-	        }
-	      }
-	    }
-	  }
-	}
-
-	var Defaults = (function () {
-	  function Defaults() {
-	    _classCallCheck(this, Defaults);
-	  }
-
-	  _createClass(Defaults, {
-	    errorFn: {
-	      value: function errorFn(a, b) {
-	        if (this.error && typeof this.error === "function") {
-	          try {
-	            if (typeof a === "string") {
-	              throw new Error(a);
-	            } else {
-	              throw a;
-	            }
-	          } catch (err) {
-	            a = err;
-	          }
-	          this.error(this.name || null, a || null, b || null);
-	        }
-	      }
-	    }
-	  });
-
-	  return Defaults;
-	})();
-
-	var defaultsPrototype = Defaults.prototype;
-
-	defaultsPrototype.actions = {};
-	defaultsPrototype.afterCreate = lifecycleNoopCb;
-	defaultsPrototype.afterCreateInstance = lifecycleNoop;
-	defaultsPrototype.afterDestroy = lifecycleNoopCb;
-	defaultsPrototype.afterEject = lifecycleNoop;
-	defaultsPrototype.afterInject = lifecycleNoop;
-	defaultsPrototype.afterReap = lifecycleNoop;
-	defaultsPrototype.afterUpdate = lifecycleNoopCb;
-	defaultsPrototype.afterValidate = lifecycleNoopCb;
-	defaultsPrototype.allowSimpleWhere = true;
-	defaultsPrototype.basePath = "";
-	defaultsPrototype.beforeCreate = lifecycleNoopCb;
-	defaultsPrototype.beforeCreateInstance = lifecycleNoop;
-	defaultsPrototype.beforeDestroy = lifecycleNoopCb;
-	defaultsPrototype.beforeEject = lifecycleNoop;
-	defaultsPrototype.beforeInject = lifecycleNoop;
-	defaultsPrototype.beforeReap = lifecycleNoop;
-	defaultsPrototype.beforeUpdate = lifecycleNoopCb;
-	defaultsPrototype.beforeValidate = lifecycleNoopCb;
-	defaultsPrototype.bypassCache = false;
-	defaultsPrototype.cacheResponse = !!DSUtils.w;
-	defaultsPrototype.defaultAdapter = "http";
-	defaultsPrototype.debug = true;
-	defaultsPrototype.eagerEject = false;
-	// TODO: Implement eagerInject in DS#create
-	defaultsPrototype.eagerInject = false;
-	defaultsPrototype.endpoint = "";
-	defaultsPrototype.error = console ? function (a, b, c) {
-	  return console[typeof console.error === "function" ? "error" : "log"](a, b, c);
-	} : false;
-	defaultsPrototype.fallbackAdapters = ["http"];
-	defaultsPrototype.findBelongsTo = true;
-	defaultsPrototype.findHasOne = true;
-	defaultsPrototype.findHasMany = true;
-	defaultsPrototype.findInverseLinks = true;
-	defaultsPrototype.findStrictCache = true;
-	defaultsPrototype.idAttribute = "id";
-	defaultsPrototype.ignoredChanges = [/\$/];
-	defaultsPrototype.ignoreMissing = false;
-	defaultsPrototype.keepChangeHistory = false;
-	defaultsPrototype.loadFromServer = false;
-	defaultsPrototype.log = console ? function (a, b, c, d, e) {
-	  return console[typeof console.info === "function" ? "info" : "log"](a, b, c, d, e);
-	} : false;
-
-	defaultsPrototype.logFn = function (a, b, c, d) {
-	  var _this = this;
-	  if (_this.debug && _this.log && typeof _this.log === "function") {
-	    _this.log(_this.name || null, a || null, b || null, c || null, d || null);
-	  }
-	};
-
-	defaultsPrototype.maxAge = false;
-	defaultsPrototype.notify = !!DSUtils.w;
-	defaultsPrototype.reapAction = !!DSUtils.w ? "inject" : "none";
-	defaultsPrototype.reapInterval = !!DSUtils.w ? 30000 : false;
-	defaultsPrototype.resetHistoryOnInject = true;
-	defaultsPrototype.strategy = "single";
-	defaultsPrototype.upsert = !!DSUtils.w;
-	defaultsPrototype.useClass = true;
-	defaultsPrototype.useFilter = false;
-	defaultsPrototype.validate = lifecycleNoopCb;
-	defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
-	  var filtered = collection;
-	  var where = null;
-	  var reserved = {
-	    skip: "",
-	    offset: "",
-	    where: "",
-	    limit: "",
-	    orderBy: "",
-	    sort: ""
-	  };
-
-	  params = params || {};
-	  options = options || {};
-
-	  if (DSUtils._o(params.where)) {
-	    where = params.where;
-	  } else {
-	    where = {};
-	  }
-
-	  if (options.allowSimpleWhere) {
-	    DSUtils.forOwn(params, function (value, key) {
-	      if (!(key in reserved) && !(key in where)) {
-	        where[key] = {
-	          "==": value
-	        };
-	      }
-	    });
-	  }
-
-	  if (DSUtils.isEmpty(where)) {
-	    where = null;
-	  }
-
-	  if (where) {
-	    filtered = DSUtils.filter(filtered, function (attrs) {
-	      var first = true;
-	      var keep = true;
-	      DSUtils.forOwn(where, function (clause, field) {
-	        if (DSUtils._s(clause)) {
-	          clause = {
-	            "===": clause
-	          };
-	        } else if (DSUtils._n(clause) || DSUtils.isBoolean(clause)) {
-	          clause = {
-	            "==": clause
-	          };
-	        }
-	        if (DSUtils._o(clause)) {
-	          DSUtils.forOwn(clause, function (term, op) {
-	            var expr = undefined;
-	            var isOr = op[0] === "|";
-	            var val = attrs[field];
-	            op = isOr ? op.substr(1) : op;
-	            if (op === "==") {
-	              expr = val == term;
-	            } else if (op === "===") {
-	              expr = val === term;
-	            } else if (op === "!=") {
-	              expr = val != term;
-	            } else if (op === "!==") {
-	              expr = val !== term;
-	            } else if (op === ">") {
-	              expr = val > term;
-	            } else if (op === ">=") {
-	              expr = val >= term;
-	            } else if (op === "<") {
-	              expr = val < term;
-	            } else if (op === "<=") {
-	              expr = val <= term;
-	            } else if (op === "isectEmpty") {
-	              expr = !DSUtils.intersection(val || [], term || []).length;
-	            } else if (op === "isectNotEmpty") {
-	              expr = DSUtils.intersection(val || [], term || []).length;
-	            } else if (op === "in") {
-	              if (DSUtils._s(term)) {
-	                expr = term.indexOf(val) !== -1;
-	              } else {
-	                expr = DSUtils.contains(term, val);
-	              }
-	            } else if (op === "notIn") {
-	              if (DSUtils._s(term)) {
-	                expr = term.indexOf(val) === -1;
-	              } else {
-	                expr = !DSUtils.contains(term, val);
-	              }
-	            } else if (op === "contains") {
-	              if (DSUtils._s(val)) {
-	                expr = val.indexOf(term) !== -1;
-	              } else {
-	                expr = DSUtils.contains(val, term);
-	              }
-	            } else if (op === "notContains") {
-	              if (DSUtils._s(val)) {
-	                expr = val.indexOf(term) === -1;
-	              } else {
-	                expr = !DSUtils.contains(val, term);
-	              }
-	            }
-	            if (expr !== undefined) {
-	              keep = first ? expr : isOr ? keep || expr : keep && expr;
-	            }
-	            first = false;
-	          });
-	        }
-	      });
-	      return keep;
-	    });
-	  }
-
-	  var orderBy = null;
-
-	  if (DSUtils._s(params.orderBy)) {
-	    orderBy = [[params.orderBy, "ASC"]];
-	  } else if (DSUtils._a(params.orderBy)) {
-	    orderBy = params.orderBy;
-	  }
-
-	  if (!orderBy && DSUtils._s(params.sort)) {
-	    orderBy = [[params.sort, "ASC"]];
-	  } else if (!orderBy && DSUtils._a(params.sort)) {
-	    orderBy = params.sort;
-	  }
-
-	  // Apply 'orderBy'
-	  if (orderBy) {
-	    (function () {
-	      var index = 0;
-	      DSUtils.forEach(orderBy, function (def, i) {
-	        if (DSUtils._s(def)) {
-	          orderBy[i] = [def, "ASC"];
-	        } else if (!DSUtils._a(def)) {
-	          throw new DSErrors.IA("DS.filter(\"" + resourceName + "\"[, params][, options]): " + DSUtils.toJson(def) + ": Must be a string or an array!", {
-	            params: {
-	              "orderBy[i]": {
-	                actual: typeof def,
-	                expected: "string|array"
-	              }
-	            }
-	          });
-	        }
-	      });
-	      filtered = DSUtils.sort(filtered, function (a, b) {
-	        return compare(orderBy, index, a, b);
-	      });
-	    })();
-	  }
-
-	  var limit = DSUtils._n(params.limit) ? params.limit : null;
-	  var skip = null;
-
-	  if (DSUtils._n(params.skip)) {
-	    skip = params.skip;
-	  } else if (DSUtils._n(params.offset)) {
-	    skip = params.offset;
-	  }
-
-	  // Apply 'limit' and 'skip'
-	  if (limit && skip) {
-	    filtered = DSUtils.slice(filtered, skip, Math.min(filtered.length, skip + limit));
-	  } else if (DSUtils._n(limit)) {
-	    filtered = DSUtils.slice(filtered, 0, Math.min(filtered.length, limit));
-	  } else if (DSUtils._n(skip)) {
-	    if (skip < filtered.length) {
-	      filtered = DSUtils.slice(filtered, skip);
-	    } else {
-	      filtered = [];
-	    }
-	  }
-
-	  return filtered;
-	};
-
-	var DS = (function () {
-	  function DS(options) {
-	    _classCallCheck(this, DS);
-
-	    var _this = this;
-	    options = options || {};
-
-	    try {
-	      Schemator = __webpack_require__(5);
-	    } catch (e) {}
-
-	    if (!Schemator || typeof Schemator !== "function") {
-	      try {
-	        Schemator = window.Schemator;
-	      } catch (e) {}
-	    }
-
-	    Schemator = Schemator || options.schemator;
-	    if (typeof Schemator === "function") {
-	      _this.schemator = new Schemator();
-	    }
-
-	    _this.store = {};
-	    // alias store, shaves 0.1 kb off the minified build
-	    _this.s = _this.store;
-	    _this.definitions = {};
-	    // alias definitions, shaves 0.3 kb off the minified build
-	    _this.defs = _this.definitions;
-	    _this.adapters = {};
-	    _this.defaults = new Defaults();
-	    _this.observe = DSUtils.observe;
-	    DSUtils.forOwn(options, function (v, k) {
-	      _this.defaults[k] = v;
-	    });
-	    _this.defaults.logFn("new data store created", _this.defaults);
-	  }
-
-	  _createClass(DS, {
-	    getAdapter: {
-	      value: function getAdapter(options) {
-	        var errorIfNotExist = false;
-	        options = options || {};
-	        this.defaults.logFn("getAdapter", options);
-	        if (DSUtils._s(options)) {
-	          errorIfNotExist = true;
-	          options = {
-	            adapter: options
-	          };
-	        }
-	        var adapter = this.adapters[options.adapter];
-	        if (adapter) {
-	          return adapter;
-	        } else if (errorIfNotExist) {
-	          throw new Error("" + options.adapter + " is not a registered adapter!");
-	        } else {
-	          return this.adapters[options.defaultAdapter];
-	        }
-	      }
-	    },
-	    registerAdapter: {
-	      value: function registerAdapter(name, Adapter, options) {
-	        var _this = this;
-	        options = options || {};
-	        _this.defaults.logFn("registerAdapter", name, Adapter, options);
-	        if (DSUtils.isFunction(Adapter)) {
-	          _this.adapters[name] = new Adapter(options);
-	        } else {
-	          _this.adapters[name] = Adapter;
-	        }
-	        if (options["default"]) {
-	          _this.defaults.defaultAdapter = name;
-	        }
-	        _this.defaults.logFn("default adapter is " + _this.defaults.defaultAdapter);
-	      }
-	    },
-	    is: {
-	      value: function is(resourceName, instance) {
-	        var definition = this.defs[resourceName];
-	        if (!definition) {
-	          throw new DSErrors.NER(resourceName);
-	        }
-	        return instance instanceof definition[definition["class"]];
-	      }
-	    }
-	  });
-
-	  return DS;
-	})();
-
-	var dsPrototype = DS.prototype;
-
-	dsPrototype.getAdapter.shorthand = false;
-	dsPrototype.registerAdapter.shorthand = false;
-	dsPrototype.errors = DSErrors;
-	dsPrototype.utils = DSUtils;
-	DSUtils.deepMixIn(dsPrototype, syncMethods);
-	DSUtils.deepMixIn(dsPrototype, asyncMethods);
-
-	module.exports = DS;
-
-/***/ },
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
+	var _utils = __webpack_require__(2);
 
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
+	var _errors = __webpack_require__(3);
 
-	if(typeof __WEBPACK_EXTERNAL_MODULE_5__ === 'undefined') {var e = new Error("Cannot find module \"undefined\""); e.code = 'MODULE_NOT_FOUND'; throw e;}
-	module.exports = __WEBPACK_EXTERNAL_MODULE_5__;
+	var _defineResource = __webpack_require__(21);
 
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
+	var _eject = __webpack_require__(22);
 
-	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+	var _ejectAll = __webpack_require__(23);
 
-	var DSUtils = _interopRequire(__webpack_require__(1));
+	var _filter = __webpack_require__(24);
 
-	var DSErrors = _interopRequire(__webpack_require__(2));
+	var _inject = __webpack_require__(25);
 
-	var defineResource = _interopRequire(__webpack_require__(23));
-
-	var eject = _interopRequire(__webpack_require__(24));
-
-	var ejectAll = _interopRequire(__webpack_require__(25));
-
-	var filter = _interopRequire(__webpack_require__(26));
-
-	var inject = _interopRequire(__webpack_require__(27));
-
-	var link = _interopRequire(__webpack_require__(28));
-
-	var linkAll = _interopRequire(__webpack_require__(29));
-
-	var linkInverse = _interopRequire(__webpack_require__(30));
-
-	var unlinkInverse = _interopRequire(__webpack_require__(31));
-
-	var NER = DSErrors.NER;
-	var IA = DSErrors.IA;
-	var R = DSErrors.R;
+	var NER = _errors['default'].NER;
+	var IA = _errors['default'].IA;
+	var R = _errors['default'].R;
 
 	function diffIsEmpty(diff) {
-	  return !(DSUtils.isEmpty(diff.added) && DSUtils.isEmpty(diff.removed) && DSUtils.isEmpty(diff.changed));
+	  return !(_utils['default'].isEmpty(diff.added) && _utils['default'].isEmpty(diff.removed) && _utils['default'].isEmpty(diff.changed));
 	}
 
-	module.exports = {
+	exports['default'] = {
+	  /**
+	   * Return the changes for the given item, if any.
+	   *
+	   * @param resourceName The name of the type of resource of the item whose changes are to be returned.
+	   * @param id The primary key of the item whose changes are to be returned.
+	   * @param options Optional configuration.
+	   * @param options.ignoredChanges Array of strings or regular expressions of fields, the changes of which are to be ignored.
+	   * @returns The changes of the given item, if any.
+	   */
 	  changes: function changes(resourceName, id, options) {
 	    var _this = this;
 	    var definition = _this.defs[resourceName];
 	    options = options || {};
 
-	    id = DSUtils.resolveId(definition, id);
+	    id = _utils['default'].resolveId(definition, id);
 	    if (!definition) {
 	      throw new NER(resourceName);
-	    } else if (!DSUtils._sn(id)) {
-	      throw DSUtils._snErr("id");
+	    } else if (!_utils['default']._sn(id)) {
+	      throw _utils['default']._snErr('id');
 	    }
-	    options = DSUtils._(definition, options);
+	    options = _utils['default']._(definition, options);
 
-	    options.logFn("changes", id, options);
+	    options.logFn('changes', id, options);
 
-	    var item = _this.get(resourceName, id);
+	    var item = definition.get(id);
 	    if (item) {
 	      var _ret = (function () {
-	        if (DSUtils.w) {
+	        if (_utils['default'].w) {
+	          // force observation handler to be fired for item if there are changes and `Object.observe` is not available
 	          _this.s[resourceName].observers[id].deliver();
 	        }
+
 	        var ignoredChanges = options.ignoredChanges || [];
-	        DSUtils.forEach(definition.relationFields, function (field) {
-	          return ignoredChanges.push(field);
+	        // add linked relations to list of ignored changes
+	        _utils['default'].forEach(definition.relationFields, function (field) {
+	          if (!_utils['default'].contains(ignoredChanges, field)) {
+	            ignoredChanges.push(field);
+	          }
 	        });
-	        var diff = DSUtils.diffObjectFromOldObject(item, _this.s[resourceName].previousAttributes[id], DSUtils.equals, ignoredChanges);
-	        DSUtils.forOwn(diff, function (changeset, name) {
+	        // calculate changes
+	        var diff = _utils['default'].diffObjectFromOldObject(item, _this.s[resourceName].previousAttributes[id], _utils['default'].equals, ignoredChanges);
+	        // remove functions from diff
+	        _utils['default'].forOwn(diff, function (changeset, name) {
 	          var toKeep = [];
-	          DSUtils.forOwn(changeset, function (value, field) {
-	            if (!DSUtils.isFunction(value)) {
+	          _utils['default'].forOwn(changeset, function (value, field) {
+	            if (!_utils['default'].isFunction(value)) {
 	              toKeep.push(field);
 	            }
 	          });
-	          diff[name] = DSUtils.pick(diff[name], toKeep);
+	          diff[name] = _utils['default'].pick(diff[name], toKeep);
 	        });
-	        DSUtils.forEach(definition.relationFields, function (field) {
+	        // definitely ignore changes to linked relations
+	        _utils['default'].forEach(definition.relationFields, function (field) {
 	          delete diff.added[field];
 	          delete diff.removed[field];
 	          delete diff.changed[field];
@@ -1271,30 +1401,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	      })();
 
-	      if (typeof _ret === "object") {
-	        return _ret.v;
-	      }
+	      if (typeof _ret === 'object') return _ret.v;
 	    }
 	  },
+	  /**
+	   * Return the change history of the given item, if any.
+	   *
+	   * @param resourceName The name of the type of resource of the item whose change history is to be returned.
+	   * @param id The primary key of the item whose change history is to be returned.
+	   * @returns The change history of the given item, if any.
+	   */
 	  changeHistory: function changeHistory(resourceName, id) {
 	    var _this = this;
 	    var definition = _this.defs[resourceName];
 	    var resource = _this.s[resourceName];
 
-	    id = DSUtils.resolveId(definition, id);
+	    id = _utils['default'].resolveId(definition, id);
 	    if (resourceName && !_this.defs[resourceName]) {
 	      throw new NER(resourceName);
-	    } else if (id && !DSUtils._sn(id)) {
-	      throw DSUtils._snErr("id");
+	    } else if (id && !_utils['default']._sn(id)) {
+	      throw _utils['default']._snErr('id');
 	    }
 
-	    definition.logFn("changeHistory", id);
+	    definition.logFn('changeHistory', id);
 
 	    if (!definition.keepChangeHistory) {
-	      definition.errorFn("changeHistory is disabled for this resource!");
+	      definition.errorFn('changeHistory is disabled for this resource!');
 	    } else {
 	      if (resourceName) {
-	        var item = _this.get(resourceName, id);
+	        var item = definition.get(id);
 	        if (item) {
 	          return resource.changeHistories[id];
 	        }
@@ -1303,25 +1438,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	  },
+	  /**
+	   * Re-compute the computed properties of the given item.
+	   *
+	   * @param resourceName The name of the type of resource of the item whose computed properties are to be re-computed.
+	   * @param instance The instance whose computed properties are to be re-computed.
+	   * @returns The item whose computed properties were re-computed.
+	   */
 	  compute: function compute(resourceName, instance) {
 	    var _this = this;
 	    var definition = _this.defs[resourceName];
 
-	    instance = DSUtils.resolveItem(_this.s[resourceName], instance);
+	    instance = _utils['default'].resolveItem(_this.s[resourceName], instance);
 	    if (!definition) {
 	      throw new NER(resourceName);
 	    } else if (!instance) {
-	      throw new R("Item not in the store!");
-	    } else if (!DSUtils._o(instance) && !DSUtils._sn(instance)) {
-	      throw new IA("\"instance\" must be an object, string or number!");
+	      throw new R('Item not in the store!');
+	    } else if (!_utils['default']._o(instance) && !_utils['default']._sn(instance)) {
+	      throw new IA('"instance" must be an object, string or number!');
 	    }
 
-	    definition.logFn("compute", instance);
-	    DSUtils.forOwn(definition.computed, function (fn, field) {
-	      DSUtils.compute.call(instance, fn, field);
+	    definition.logFn('compute', instance);
+	    // re-compute all computed properties
+	    _utils['default'].forOwn(definition.computed, function (fn, field) {
+	      _utils['default'].compute.call(instance, fn, field);
 	    });
 	    return instance;
 	  },
+	  /**
+	   * Factory function to create an instance of the specified Resource.
+	   *
+	   * @param resourceName The name of the type of resource of which to create an instance.
+	   * @param attrs Hash of properties with which to initialize the instance.
+	   * @param options Optional configuration.
+	   * @param options.defaults Default values with which to initialize the instance.
+	   * @returns The new instance.
+	   */
 	  createInstance: function createInstance(resourceName, attrs, options) {
 	    var definition = this.defs[resourceName];
 	    var item = undefined;
@@ -1330,63 +1482,146 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (!definition) {
 	      throw new NER(resourceName);
-	    } else if (attrs && !DSUtils.isObject(attrs)) {
-	      throw new IA("\"attrs\" must be an object!");
+	    } else if (attrs && !_utils['default'].isObject(attrs)) {
+	      throw new IA('"attrs" must be an object!');
 	    }
 
-	    options = DSUtils._(definition, options);
+	    options = _utils['default']._(definition, options);
+	    options.logFn('createInstance', attrs, options);
 
-	    options.logFn("createInstance", attrs, options);
+	    // lifecycle
+	    options.beforeCreateInstance(options, attrs);
 
-	    if (options.notify) {
-	      options.beforeCreateInstance(options, attrs);
+	    // grab instance constructor function from Resource definition
+	    var Constructor = definition[definition['class']];
+
+	    // create instance
+	    item = new Constructor();
+
+	    // add default values
+	    if (options.defaultValues) {
+	      _utils['default'].deepMixIn(item, options.defaultValues);
 	    }
+	    _utils['default'].deepMixIn(item, attrs);
 
-	    if (options.useClass) {
-	      var Constructor = definition[definition["class"]];
-	      item = new Constructor();
-	    } else {
-	      item = {};
-	    }
-	    DSUtils.deepMixIn(item, attrs);
+	    // compute computed properties
 	    if (definition.computed) {
-	      this.compute(definition.name, item);
+	      definition.compute(item);
 	    }
-	    if (options.notify) {
-	      options.afterCreateInstance(options, item);
-	    }
+	    // lifecycle
+	    options.afterCreateInstance(options, item);
 	    return item;
 	  },
-	  defineResource: defineResource,
+	  /**
+	   * Create a new collection of the specified Resource.
+	   *
+	   * @param resourceName The name of the type of resource of which to create a collection
+	   * @param arr Possibly empty array of data from which to create the collection.
+	   * @param params The criteria by which to filter items. Will be passed to `DS#findAll` if `fetch` is called. See http://www.js-data.io/docs/query-syntax
+	   * @param options Optional configuration.
+	   * @param options.notify Whether to call the beforeCreateCollection and afterCreateCollection lifecycle hooks..
+	   * @returns The new collection.
+	   */
+	  createCollection: function createCollection(resourceName, arr, params, options) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+
+	    arr = arr || [];
+	    params = params || {};
+
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (arr && !_utils['default'].isArray(arr)) {
+	      throw new IA('"arr" must be an array!');
+	    }
+
+	    options = _utils['default']._(definition, options);
+
+	    options.logFn('createCollection', arr, options);
+
+	    // lifecycle
+	    options.beforeCreateCollection(options, arr);
+
+	    // define the API for this collection
+	    Object.defineProperties(arr, {
+	      /**
+	       * Call DS#findAll with the params of this collection, filling the collection with the results.
+	       */
+	      fetch: {
+	        value: function value(params, options) {
+	          var __this = this;
+	          __this.params = params || __this.params;
+	          return definition.findAll(__this.params, options).then(function (data) {
+	            if (data === __this) {
+	              return __this;
+	            }
+	            data.unshift(__this.length);
+	            data.unshift(0);
+	            __this.splice.apply(__this, data);
+	            data.shift();
+	            data.shift();
+	            if (data.$$injected) {
+	              _this.s[resourceName].queryData[_utils['default'].toJson(__this.params)] = __this;
+	              __this.$$injected = true;
+	            }
+	            return __this;
+	          });
+	        }
+	      },
+	      // params for this collection. See http://www.js-data.io/docs/query-syntax
+	      params: {
+	        value: params,
+	        writable: true
+	      },
+	      // name of the resource type of this collection
+	      resourceName: {
+	        value: resourceName
+	      }
+	    });
+
+	    // lifecycle
+	    options.afterCreateCollection(options, arr);
+	    return arr;
+	  },
+	  defineResource: _defineResource['default'],
 	  digest: function digest() {
 	    this.observe.Platform.performMicrotaskCheckpoint();
 	  },
-	  eject: eject,
-	  ejectAll: ejectAll,
-	  filter: filter,
+	  eject: _eject['default'],
+	  ejectAll: _ejectAll['default'],
+	  filter: _filter['default'],
+	  /**
+	   * Return the item with the given primary key if its in the store.
+	   *
+	   * @param resourceName The name of the type of resource of the item to retrieve.
+	   * @param id The primary key of the item to retrieve.
+	   * @param options Optional configuration.
+	   * @returns The item with the given primary key if it's in the store.
+	   */
 	  get: function get(resourceName, id, options) {
 	    var _this = this;
 	    var definition = _this.defs[resourceName];
 
 	    if (!definition) {
 	      throw new NER(resourceName);
-	    } else if (!DSUtils._sn(id)) {
-	      throw DSUtils._snErr("id");
+	    } else if (!_utils['default']._sn(id)) {
+	      throw _utils['default']._snErr('id');
 	    }
 
-	    options = DSUtils._(definition, options);
+	    options = _utils['default']._(definition, options);
 
-	    options.logFn("get", id, options);
+	    options.logFn('get', id, options);
 
-	    // cache miss, request resource from server
-	    var item = _this.s[resourceName].index[id];
-	    if (!item && options.loadFromServer) {
-	      _this.find(resourceName, id, options);
-	    }
-
-	    // return resource from cache
-	    return item;
+	    // return the item if it exists
+	    return _this.s[resourceName].index[id];
 	  },
+	  /**
+	   * Return the items in the store that have the given primary keys.
+	   *
+	   * @param resourceName The name of the type of resource of the items to retrieve.
+	   * @param ids The primary keys of the items to retrieve.
+	   * @returns The items with the given primary keys if they're in the store.
+	   */
 	  getAll: function getAll(resourceName, ids) {
 	    var _this = this;
 	    var definition = _this.defs[resourceName];
@@ -1395,13 +1630,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (!definition) {
 	      throw new NER(resourceName);
-	    } else if (ids && !DSUtils._a(ids)) {
-	      throw DSUtils._aErr("ids");
+	    } else if (ids && !_utils['default']._a(ids)) {
+	      throw _utils['default']._aErr('ids');
 	    }
 
-	    definition.logFn("getAll", ids);
+	    definition.logFn('getAll', ids);
 
-	    if (DSUtils._a(ids)) {
+	    if (_utils['default']._a(ids)) {
+	      // return just the items with the given primary keys
 	      var _length = ids.length;
 	      for (var i = 0; i < _length; i++) {
 	        if (resource.index[ids[i]]) {
@@ -1409,43 +1645,53 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      }
 	    } else {
+	      // most efficient of retrieving ALL items from the store
 	      collection = resource.collection.slice();
 	    }
 
 	    return collection;
 	  },
+	  /**
+	   * Return the whether the item with the given primary key has any changes.
+	   *
+	   * @param resourceName The name of the type of resource of the item.
+	   * @param id The primary key of the item.
+	   * @returns Whether the item with the given primary key has any changes.
+	   */
 	  hasChanges: function hasChanges(resourceName, id) {
 	    var _this = this;
 	    var definition = _this.defs[resourceName];
 
-	    id = DSUtils.resolveId(definition, id);
+	    id = _utils['default'].resolveId(definition, id);
 
 	    if (!definition) {
 	      throw new NER(resourceName);
-	    } else if (!DSUtils._sn(id)) {
-	      throw DSUtils._snErr("id");
+	    } else if (!_utils['default']._sn(id)) {
+	      throw _utils['default']._snErr('id');
 	    }
 
-	    definition.logFn("hasChanges", id);
+	    definition.logFn('hasChanges', id);
 
-	    // return resource from cache
-	    if (_this.get(resourceName, id)) {
-	      return diffIsEmpty(_this.changes(resourceName, id));
-	    } else {
-	      return false;
-	    }
+	    return definition.get(id) ? diffIsEmpty(definition.changes(id)) : false;
 	  },
-	  inject: inject,
+	  inject: _inject['default'],
+	  /**
+	   * Return the timestamp from the last time the item with the given primary key was changed.
+	   *
+	   * @param resourceName The name of the type of resource of the item.
+	   * @param id The primary key of the item.
+	   * @returns Timestamp from the last time the item was changed.
+	   */
 	  lastModified: function lastModified(resourceName, id) {
 	    var definition = this.defs[resourceName];
 	    var resource = this.s[resourceName];
 
-	    id = DSUtils.resolveId(definition, id);
+	    id = _utils['default'].resolveId(definition, id);
 	    if (!definition) {
 	      throw new NER(resourceName);
 	    }
 
-	    definition.logFn("lastModified", id);
+	    definition.logFn('lastModified', id);
 
 	    if (id) {
 	      if (!(id in resource.modified)) {
@@ -1455,79 +1701,87 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    return resource.collectionModified;
 	  },
+	  /**
+	   * Return the timestamp from the last time the item with the given primary key was saved via an adapter.
+	   *
+	   * @param resourceName The name of the type of resource of the item.
+	   * @param id The primary key of the item.
+	   * @returns Timestamp from the last time the item was saved.
+	   */
 	  lastSaved: function lastSaved(resourceName, id) {
 	    var definition = this.defs[resourceName];
 	    var resource = this.s[resourceName];
 
-	    id = DSUtils.resolveId(definition, id);
+	    id = _utils['default'].resolveId(definition, id);
 	    if (!definition) {
 	      throw new NER(resourceName);
 	    }
 
-	    definition.logFn("lastSaved", id);
+	    definition.logFn('lastSaved', id);
 
 	    if (!(id in resource.saved)) {
 	      resource.saved[id] = 0;
 	    }
 	    return resource.saved[id];
 	  },
-	  link: link,
-	  linkAll: linkAll,
-	  linkInverse: linkInverse,
+	  /**
+	   * Return the previous attributes of the item with the given primary key before it was changed.
+	   *
+	   * @param resourceName The name of the type of resource of the item.
+	   * @param id The primary key of the item.
+	   * @returns The previous attributes of the item
+	   */
 	  previous: function previous(resourceName, id) {
 	    var _this = this;
 	    var definition = _this.defs[resourceName];
 	    var resource = _this.s[resourceName];
 
-	    id = DSUtils.resolveId(definition, id);
+	    id = _utils['default'].resolveId(definition, id);
 	    if (!definition) {
 	      throw new NER(resourceName);
-	    } else if (!DSUtils._sn(id)) {
-	      throw DSUtils._snErr("id");
+	    } else if (!_utils['default']._sn(id)) {
+	      throw _utils['default']._snErr('id');
 	    }
 
-	    definition.logFn("previous", id);
+	    definition.logFn('previous', id);
 
 	    // return resource from cache
-	    return resource.previousAttributes[id] ? DSUtils.copy(resource.previousAttributes[id]) : undefined;
-	  },
-	  unlinkInverse: unlinkInverse
+	    return resource.previousAttributes[id] ? _utils['default'].copy(resource.previousAttributes[id]) : undefined;
+	  }
 	};
 
 /***/ },
-/* 7 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+	var _create = __webpack_require__(34);
 
-	var create = _interopRequire(__webpack_require__(40));
+	var _destroy = __webpack_require__(35);
 
-	var destroy = _interopRequire(__webpack_require__(41));
+	var _destroyAll = __webpack_require__(36);
 
-	var destroyAll = _interopRequire(__webpack_require__(42));
+	var _find = __webpack_require__(37);
 
-	var find = _interopRequire(__webpack_require__(43));
+	var _findAll = __webpack_require__(38);
 
-	var findAll = _interopRequire(__webpack_require__(44));
+	var _loadRelations = __webpack_require__(39);
 
-	var loadRelations = _interopRequire(__webpack_require__(45));
+	var _reap = __webpack_require__(40);
 
-	var reap = _interopRequire(__webpack_require__(46));
+	var _save = __webpack_require__(41);
 
-	var save = _interopRequire(__webpack_require__(47));
+	var _update = __webpack_require__(42);
 
-	var update = _interopRequire(__webpack_require__(48));
+	var _updateAll = __webpack_require__(43);
 
-	var updateAll = _interopRequire(__webpack_require__(49));
-
-	module.exports = {
-	  create: create,
-	  destroy: destroy,
-	  destroyAll: destroyAll,
-	  find: find,
-	  findAll: findAll,
-	  loadRelations: loadRelations,
-	  reap: reap,
+	exports['default'] = {
+	  create: _create['default'],
+	  destroy: _destroy['default'],
+	  destroyAll: _destroyAll['default'],
+	  find: _find['default'],
+	  findAll: _findAll['default'],
+	  loadRelations: _loadRelations['default'],
+	  reap: _reap['default'],
 	  refresh: function refresh(resourceName, id, options) {
 	    var _this = this;
 	    var DSUtils = _this.utils;
@@ -1538,24 +1792,53 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (!definition) {
 	        reject(new _this.errors.NER(resourceName));
 	      } else if (!DSUtils._sn(id)) {
-	        reject(DSUtils._snErr("id"));
+	        reject(DSUtils._snErr('id'));
 	      } else {
 	        options = DSUtils._(definition, options);
 	        options.bypassCache = true;
-	        options.logFn("refresh", id, options);
+	        options.logFn('refresh', id, options);
 	        resolve(_this.get(resourceName, id));
 	      }
 	    }).then(function (item) {
 	      return item ? _this.find(resourceName, id, options) : item;
 	    });
 	  },
-	  save: save,
-	  update: update,
-	  updateAll: updateAll
+	  refreshAll: function refreshAll(resourceName, params, options) {
+	    var _this = this;
+	    var DSUtils = _this.utils;
+	    var definition = _this.defs[resourceName];
+	    params = params || {};
+
+	    return new DSUtils.Promise(function (resolve, reject) {
+	      if (!definition) {
+	        reject(new _this.errors.NER(resourceName));
+	      } else if (!DSUtils._o(params)) {
+	        reject(DSUtils._oErr('params'));
+	      } else {
+	        options = DSUtils._(definition, options);
+	        options.bypassCache = true;
+	        options.logFn('refreshAll', params, options);
+	        resolve(_this.filter(resourceName, params, options));
+	      }
+	    }).then(function (existing) {
+	      options.bypassCache = true;
+	      return _this.findAll(resourceName, params, options).then(function (found) {
+	        DSUtils.forEach(existing, function (item) {
+	          if (found.indexOf(item) === -1) {
+	            definition.eject(item);
+	          }
+	        });
+	        return found;
+	      });
+	    });
+	  },
+	  save: _save['default'],
+	  update: _update['default'],
+	  updateAll: _updateAll['default']
 	};
 
 /***/ },
-/* 8 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -2094,6 +2377,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // If we're in the browser, export as a global object.
 
 	  global.Observer = Observer;
+	  global.isBlacklisted = isBlacklisted;
 	  global.Observer.runEOM_ = runEOM;
 	  global.Observer.observerSentinel_ = observerSentinel; // for testing.
 	  global.Observer.hasObjectObserve = hasObserve;
@@ -2104,7 +2388,239 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 9 */
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/*!
+	 * yabh
+	 * @version 1.0.1 - Homepage <http://jmdobry.github.io/yabh/>
+	 * @author Jason Dobry <jason.dobry@gmail.com>
+	 * @copyright (c) 2015 Jason Dobry 
+	 * @license MIT <https://github.com/jmdobry/yabh/blob/master/LICENSE>
+	 * 
+	 * @overview Yet another Binary Heap.
+	 */
+	(function webpackUniversalModuleDefinition(root, factory) {
+		if(true)
+			module.exports = factory();
+		else if(typeof define === 'function' && define.amd)
+			define("yabh", factory);
+		else if(typeof exports === 'object')
+			exports["BinaryHeap"] = factory();
+		else
+			root["BinaryHeap"] = factory();
+	})(this, function() {
+	return /******/ (function(modules) { // webpackBootstrap
+	/******/ 	// The module cache
+	/******/ 	var installedModules = {};
+
+	/******/ 	// The require function
+	/******/ 	function __webpack_require__(moduleId) {
+
+	/******/ 		// Check if module is in cache
+	/******/ 		if(installedModules[moduleId])
+	/******/ 			return installedModules[moduleId].exports;
+
+	/******/ 		// Create a new module (and put it into the cache)
+	/******/ 		var module = installedModules[moduleId] = {
+	/******/ 			exports: {},
+	/******/ 			id: moduleId,
+	/******/ 			loaded: false
+	/******/ 		};
+
+	/******/ 		// Execute the module function
+	/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+
+	/******/ 		// Flag the module as loaded
+	/******/ 		module.loaded = true;
+
+	/******/ 		// Return the exports of the module
+	/******/ 		return module.exports;
+	/******/ 	}
+
+
+	/******/ 	// expose the modules object (__webpack_modules__)
+	/******/ 	__webpack_require__.m = modules;
+
+	/******/ 	// expose the module cache
+	/******/ 	__webpack_require__.c = installedModules;
+
+	/******/ 	// __webpack_public_path__
+	/******/ 	__webpack_require__.p = "";
+
+	/******/ 	// Load entry module and return exports
+	/******/ 	return __webpack_require__(0);
+	/******/ })
+	/************************************************************************/
+	/******/ ([
+	/* 0 */
+	/***/ function(module, exports, __webpack_require__) {
+
+		var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+
+		var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+		Object.defineProperty(exports, '__esModule', {
+		  value: true
+		});
+		/**
+		 * @method bubbleUp
+		 * @param {array} heap The heap.
+		 * @param {function} weightFunc The weight function.
+		 * @param {number} n The index of the element to bubble up.
+		 */
+		function bubbleUp(heap, weightFunc, n) {
+		  var element = heap[n];
+		  var weight = weightFunc(element);
+		  // When at 0, an element can not go up any further.
+		  while (n > 0) {
+		    // Compute the parent element's index, and fetch it.
+		    var parentN = Math.floor((n + 1) / 2) - 1;
+		    var _parent = heap[parentN];
+		    // If the parent has a lesser weight, things are in order and we
+		    // are done.
+		    if (weight >= weightFunc(_parent)) {
+		      break;
+		    } else {
+		      heap[parentN] = element;
+		      heap[n] = _parent;
+		      n = parentN;
+		    }
+		  }
+		}
+
+		/**
+		 * @method bubbleDown
+		 * @param {array} heap The heap.
+		 * @param {function} weightFunc The weight function.
+		 * @param {number} n The index of the element to sink down.
+		 */
+		var bubbleDown = function bubbleDown(heap, weightFunc, n) {
+		  var length = heap.length;
+		  var node = heap[n];
+		  var nodeWeight = weightFunc(node);
+
+		  while (true) {
+		    var child2N = (n + 1) * 2,
+		        child1N = child2N - 1;
+		    var swap = null;
+		    if (child1N < length) {
+		      var child1 = heap[child1N],
+		          child1Weight = weightFunc(child1);
+		      // If the score is less than our node's, we need to swap.
+		      if (child1Weight < nodeWeight) {
+		        swap = child1N;
+		      }
+		    }
+		    // Do the same checks for the other child.
+		    if (child2N < length) {
+		      var child2 = heap[child2N],
+		          child2Weight = weightFunc(child2);
+		      if (child2Weight < (swap === null ? nodeWeight : weightFunc(heap[child1N]))) {
+		        swap = child2N;
+		      }
+		    }
+
+		    if (swap === null) {
+		      break;
+		    } else {
+		      heap[n] = heap[swap];
+		      heap[swap] = node;
+		      n = swap;
+		    }
+		  }
+		};
+
+		var BinaryHeap = (function () {
+		  function BinaryHeap(weightFunc, compareFunc) {
+		    _classCallCheck(this, BinaryHeap);
+
+		    if (!weightFunc) {
+		      weightFunc = function (x) {
+		        return x;
+		      };
+		    }
+		    if (!compareFunc) {
+		      compareFunc = function (x, y) {
+		        return x === y;
+		      };
+		    }
+		    if (typeof weightFunc !== 'function') {
+		      throw new Error('BinaryHeap([weightFunc][, compareFunc]): "weightFunc" must be a function!');
+		    }
+		    if (typeof compareFunc !== 'function') {
+		      throw new Error('BinaryHeap([weightFunc][, compareFunc]): "compareFunc" must be a function!');
+		    }
+		    this.weightFunc = weightFunc;
+		    this.compareFunc = compareFunc;
+		    this.heap = [];
+		  }
+
+		  _createClass(BinaryHeap, [{
+		    key: 'push',
+		    value: function push(node) {
+		      this.heap.push(node);
+		      bubbleUp(this.heap, this.weightFunc, this.heap.length - 1);
+		    }
+		  }, {
+		    key: 'peek',
+		    value: function peek() {
+		      return this.heap[0];
+		    }
+		  }, {
+		    key: 'pop',
+		    value: function pop() {
+		      var front = this.heap[0];
+		      var end = this.heap.pop();
+		      if (this.heap.length > 0) {
+		        this.heap[0] = end;
+		        bubbleDown(this.heap, this.weightFunc, 0);
+		      }
+		      return front;
+		    }
+		  }, {
+		    key: 'remove',
+		    value: function remove(node) {
+		      var length = this.heap.length;
+		      for (var i = 0; i < length; i++) {
+		        if (this.compareFunc(this.heap[i], node)) {
+		          var removed = this.heap[i];
+		          var end = this.heap.pop();
+		          if (i !== length - 1) {
+		            this.heap[i] = end;
+		            bubbleUp(this.heap, this.weightFunc, i);
+		            bubbleDown(this.heap, this.weightFunc, i);
+		          }
+		          return removed;
+		        }
+		      }
+		      return null;
+		    }
+		  }, {
+		    key: 'removeAll',
+		    value: function removeAll() {
+		      this.heap = [];
+		    }
+		  }, {
+		    key: 'size',
+		    value: function size() {
+		      return this.heap.length;
+		    }
+		  }]);
+
+		  return BinaryHeap;
+		})();
+
+		exports['default'] = BinaryHeap;
+		module.exports = exports['default'];
+
+	/***/ }
+	/******/ ])
+	});
+	;
+
+/***/ },
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -2133,7 +2649,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 10 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -2174,10 +2690,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 11 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var indexOf = __webpack_require__(32);
+	var indexOf = __webpack_require__(26);
 
 	    /**
 	     * If array contains values.
@@ -2190,10 +2706,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 12 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var indexOf = __webpack_require__(32);
+	var indexOf = __webpack_require__(26);
 
 	    /**
 	     * Remove a single item from the array.
@@ -2209,7 +2725,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 13 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -2270,11 +2786,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 14 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var hasOwn = __webpack_require__(33);
-	var forIn = __webpack_require__(34);
+	var hasOwn = __webpack_require__(27);
+	var forIn = __webpack_require__(28);
 
 	    /**
 	     * Similar to Array/forEach but works over object properties and fixes Don't
@@ -2295,11 +2811,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 15 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var forOwn = __webpack_require__(14);
-	var isPlainObject = __webpack_require__(36);
+	var forOwn = __webpack_require__(13);
+	var isPlainObject = __webpack_require__(29);
 
 	    /**
 	     * Mixes objects into the target object, recursively mixing existing child
@@ -2335,10 +2851,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 16 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var slice = __webpack_require__(10);
+	var slice = __webpack_require__(9);
 
 	    /**
 	     * Return a copy of the object, filtered to only have values for the whitelisted keys.
@@ -2359,10 +2875,32 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var forOwn = __webpack_require__(13);
+
+	    /**
+	     * Get object keys
+	     */
+	     var keys = Object.keys || function (obj) {
+	            var keys = [];
+	            forOwn(obj, function(val, key){
+	                keys.push(key);
+	            });
+	            return keys;
+	        };
+
+	    module.exports = keys;
+
+
+
+
+/***/ },
 /* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isPrimitive = __webpack_require__(35);
+	var isPrimitive = __webpack_require__(30);
 
 	    /**
 	     * get "nested" object property
@@ -2388,7 +2926,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var namespace = __webpack_require__(37);
+	var namespace = __webpack_require__(31);
 
 	    /**
 	     * set "nested" object property
@@ -2411,8 +2949,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(38);
-	var camelCase = __webpack_require__(39);
+	var toString = __webpack_require__(32);
+	var camelCase = __webpack_require__(33);
 	var upperCase = __webpack_require__(20);
 	    /**
 	     * camelCase + UPPERCASE first char
@@ -2430,7 +2968,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(38);
+	var toString = __webpack_require__(32);
 	    /**
 	     * "Safer" String.toUpperCase()
 	     */
@@ -2446,1240 +2984,65 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(process, global, module) {/*!
-	 * @overview es6-promise - a tiny implementation of Promises/A+.
-	 * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
-	 * @license   Licensed under MIT license
-	 *            See https://raw.githubusercontent.com/jakearchibald/es6-promise/master/LICENSE
-	 * @version   2.0.1
-	 */
-
-	(function() {
-	    "use strict";
-
-	    function $$utils$$objectOrFunction(x) {
-	      return typeof x === 'function' || (typeof x === 'object' && x !== null);
-	    }
-
-	    function $$utils$$isFunction(x) {
-	      return typeof x === 'function';
-	    }
-
-	    function $$utils$$isMaybeThenable(x) {
-	      return typeof x === 'object' && x !== null;
-	    }
-
-	    var $$utils$$_isArray;
-
-	    if (!Array.isArray) {
-	      $$utils$$_isArray = function (x) {
-	        return Object.prototype.toString.call(x) === '[object Array]';
-	      };
-	    } else {
-	      $$utils$$_isArray = Array.isArray;
-	    }
-
-	    var $$utils$$isArray = $$utils$$_isArray;
-	    var $$utils$$now = Date.now || function() { return new Date().getTime(); };
-	    function $$utils$$F() { }
-
-	    var $$utils$$o_create = (Object.create || function (o) {
-	      if (arguments.length > 1) {
-	        throw new Error('Second argument not supported');
-	      }
-	      if (typeof o !== 'object') {
-	        throw new TypeError('Argument must be an object');
-	      }
-	      $$utils$$F.prototype = o;
-	      return new $$utils$$F();
-	    });
-
-	    var $$asap$$len = 0;
-
-	    var $$asap$$default = function asap(callback, arg) {
-	      $$asap$$queue[$$asap$$len] = callback;
-	      $$asap$$queue[$$asap$$len + 1] = arg;
-	      $$asap$$len += 2;
-	      if ($$asap$$len === 2) {
-	        // If len is 1, that means that we need to schedule an async flush.
-	        // If additional callbacks are queued before the queue is flushed, they
-	        // will be processed by this flush that we are scheduling.
-	        $$asap$$scheduleFlush();
-	      }
-	    };
-
-	    var $$asap$$browserGlobal = (typeof window !== 'undefined') ? window : {};
-	    var $$asap$$BrowserMutationObserver = $$asap$$browserGlobal.MutationObserver || $$asap$$browserGlobal.WebKitMutationObserver;
-
-	    // test for web worker but not in IE10
-	    var $$asap$$isWorker = typeof Uint8ClampedArray !== 'undefined' &&
-	      typeof importScripts !== 'undefined' &&
-	      typeof MessageChannel !== 'undefined';
-
-	    // node
-	    function $$asap$$useNextTick() {
-	      return function() {
-	        process.nextTick($$asap$$flush);
-	      };
-	    }
-
-	    function $$asap$$useMutationObserver() {
-	      var iterations = 0;
-	      var observer = new $$asap$$BrowserMutationObserver($$asap$$flush);
-	      var node = document.createTextNode('');
-	      observer.observe(node, { characterData: true });
-
-	      return function() {
-	        node.data = (iterations = ++iterations % 2);
-	      };
-	    }
-
-	    // web worker
-	    function $$asap$$useMessageChannel() {
-	      var channel = new MessageChannel();
-	      channel.port1.onmessage = $$asap$$flush;
-	      return function () {
-	        channel.port2.postMessage(0);
-	      };
-	    }
-
-	    function $$asap$$useSetTimeout() {
-	      return function() {
-	        setTimeout($$asap$$flush, 1);
-	      };
-	    }
-
-	    var $$asap$$queue = new Array(1000);
-
-	    function $$asap$$flush() {
-	      for (var i = 0; i < $$asap$$len; i+=2) {
-	        var callback = $$asap$$queue[i];
-	        var arg = $$asap$$queue[i+1];
-
-	        callback(arg);
-
-	        $$asap$$queue[i] = undefined;
-	        $$asap$$queue[i+1] = undefined;
-	      }
-
-	      $$asap$$len = 0;
-	    }
-
-	    var $$asap$$scheduleFlush;
-
-	    // Decide what async method to use to triggering processing of queued callbacks:
-	    if (typeof process !== 'undefined' && {}.toString.call(process) === '[object process]') {
-	      $$asap$$scheduleFlush = $$asap$$useNextTick();
-	    } else if ($$asap$$BrowserMutationObserver) {
-	      $$asap$$scheduleFlush = $$asap$$useMutationObserver();
-	    } else if ($$asap$$isWorker) {
-	      $$asap$$scheduleFlush = $$asap$$useMessageChannel();
-	    } else {
-	      $$asap$$scheduleFlush = $$asap$$useSetTimeout();
-	    }
-
-	    function $$$internal$$noop() {}
-	    var $$$internal$$PENDING   = void 0;
-	    var $$$internal$$FULFILLED = 1;
-	    var $$$internal$$REJECTED  = 2;
-	    var $$$internal$$GET_THEN_ERROR = new $$$internal$$ErrorObject();
-
-	    function $$$internal$$selfFullfillment() {
-	      return new TypeError("You cannot resolve a promise with itself");
-	    }
-
-	    function $$$internal$$cannotReturnOwn() {
-	      return new TypeError('A promises callback cannot return that same promise.')
-	    }
-
-	    function $$$internal$$getThen(promise) {
-	      try {
-	        return promise.then;
-	      } catch(error) {
-	        $$$internal$$GET_THEN_ERROR.error = error;
-	        return $$$internal$$GET_THEN_ERROR;
-	      }
-	    }
-
-	    function $$$internal$$tryThen(then, value, fulfillmentHandler, rejectionHandler) {
-	      try {
-	        then.call(value, fulfillmentHandler, rejectionHandler);
-	      } catch(e) {
-	        return e;
-	      }
-	    }
-
-	    function $$$internal$$handleForeignThenable(promise, thenable, then) {
-	       $$asap$$default(function(promise) {
-	        var sealed = false;
-	        var error = $$$internal$$tryThen(then, thenable, function(value) {
-	          if (sealed) { return; }
-	          sealed = true;
-	          if (thenable !== value) {
-	            $$$internal$$resolve(promise, value);
-	          } else {
-	            $$$internal$$fulfill(promise, value);
-	          }
-	        }, function(reason) {
-	          if (sealed) { return; }
-	          sealed = true;
-
-	          $$$internal$$reject(promise, reason);
-	        }, 'Settle: ' + (promise._label || ' unknown promise'));
-
-	        if (!sealed && error) {
-	          sealed = true;
-	          $$$internal$$reject(promise, error);
-	        }
-	      }, promise);
-	    }
-
-	    function $$$internal$$handleOwnThenable(promise, thenable) {
-	      if (thenable._state === $$$internal$$FULFILLED) {
-	        $$$internal$$fulfill(promise, thenable._result);
-	      } else if (promise._state === $$$internal$$REJECTED) {
-	        $$$internal$$reject(promise, thenable._result);
-	      } else {
-	        $$$internal$$subscribe(thenable, undefined, function(value) {
-	          $$$internal$$resolve(promise, value);
-	        }, function(reason) {
-	          $$$internal$$reject(promise, reason);
-	        });
-	      }
-	    }
-
-	    function $$$internal$$handleMaybeThenable(promise, maybeThenable) {
-	      if (maybeThenable.constructor === promise.constructor) {
-	        $$$internal$$handleOwnThenable(promise, maybeThenable);
-	      } else {
-	        var then = $$$internal$$getThen(maybeThenable);
-
-	        if (then === $$$internal$$GET_THEN_ERROR) {
-	          $$$internal$$reject(promise, $$$internal$$GET_THEN_ERROR.error);
-	        } else if (then === undefined) {
-	          $$$internal$$fulfill(promise, maybeThenable);
-	        } else if ($$utils$$isFunction(then)) {
-	          $$$internal$$handleForeignThenable(promise, maybeThenable, then);
-	        } else {
-	          $$$internal$$fulfill(promise, maybeThenable);
-	        }
-	      }
-	    }
-
-	    function $$$internal$$resolve(promise, value) {
-	      if (promise === value) {
-	        $$$internal$$reject(promise, $$$internal$$selfFullfillment());
-	      } else if ($$utils$$objectOrFunction(value)) {
-	        $$$internal$$handleMaybeThenable(promise, value);
-	      } else {
-	        $$$internal$$fulfill(promise, value);
-	      }
-	    }
-
-	    function $$$internal$$publishRejection(promise) {
-	      if (promise._onerror) {
-	        promise._onerror(promise._result);
-	      }
-
-	      $$$internal$$publish(promise);
-	    }
-
-	    function $$$internal$$fulfill(promise, value) {
-	      if (promise._state !== $$$internal$$PENDING) { return; }
-
-	      promise._result = value;
-	      promise._state = $$$internal$$FULFILLED;
-
-	      if (promise._subscribers.length === 0) {
-	      } else {
-	        $$asap$$default($$$internal$$publish, promise);
-	      }
-	    }
-
-	    function $$$internal$$reject(promise, reason) {
-	      if (promise._state !== $$$internal$$PENDING) { return; }
-	      promise._state = $$$internal$$REJECTED;
-	      promise._result = reason;
-
-	      $$asap$$default($$$internal$$publishRejection, promise);
-	    }
-
-	    function $$$internal$$subscribe(parent, child, onFulfillment, onRejection) {
-	      var subscribers = parent._subscribers;
-	      var length = subscribers.length;
-
-	      parent._onerror = null;
-
-	      subscribers[length] = child;
-	      subscribers[length + $$$internal$$FULFILLED] = onFulfillment;
-	      subscribers[length + $$$internal$$REJECTED]  = onRejection;
-
-	      if (length === 0 && parent._state) {
-	        $$asap$$default($$$internal$$publish, parent);
-	      }
-	    }
-
-	    function $$$internal$$publish(promise) {
-	      var subscribers = promise._subscribers;
-	      var settled = promise._state;
-
-	      if (subscribers.length === 0) { return; }
-
-	      var child, callback, detail = promise._result;
-
-	      for (var i = 0; i < subscribers.length; i += 3) {
-	        child = subscribers[i];
-	        callback = subscribers[i + settled];
-
-	        if (child) {
-	          $$$internal$$invokeCallback(settled, child, callback, detail);
-	        } else {
-	          callback(detail);
-	        }
-	      }
-
-	      promise._subscribers.length = 0;
-	    }
-
-	    function $$$internal$$ErrorObject() {
-	      this.error = null;
-	    }
-
-	    var $$$internal$$TRY_CATCH_ERROR = new $$$internal$$ErrorObject();
-
-	    function $$$internal$$tryCatch(callback, detail) {
-	      try {
-	        return callback(detail);
-	      } catch(e) {
-	        $$$internal$$TRY_CATCH_ERROR.error = e;
-	        return $$$internal$$TRY_CATCH_ERROR;
-	      }
-	    }
-
-	    function $$$internal$$invokeCallback(settled, promise, callback, detail) {
-	      var hasCallback = $$utils$$isFunction(callback),
-	          value, error, succeeded, failed;
-
-	      if (hasCallback) {
-	        value = $$$internal$$tryCatch(callback, detail);
-
-	        if (value === $$$internal$$TRY_CATCH_ERROR) {
-	          failed = true;
-	          error = value.error;
-	          value = null;
-	        } else {
-	          succeeded = true;
-	        }
-
-	        if (promise === value) {
-	          $$$internal$$reject(promise, $$$internal$$cannotReturnOwn());
-	          return;
-	        }
-
-	      } else {
-	        value = detail;
-	        succeeded = true;
-	      }
-
-	      if (promise._state !== $$$internal$$PENDING) {
-	        // noop
-	      } else if (hasCallback && succeeded) {
-	        $$$internal$$resolve(promise, value);
-	      } else if (failed) {
-	        $$$internal$$reject(promise, error);
-	      } else if (settled === $$$internal$$FULFILLED) {
-	        $$$internal$$fulfill(promise, value);
-	      } else if (settled === $$$internal$$REJECTED) {
-	        $$$internal$$reject(promise, value);
-	      }
-	    }
-
-	    function $$$internal$$initializePromise(promise, resolver) {
-	      try {
-	        resolver(function resolvePromise(value){
-	          $$$internal$$resolve(promise, value);
-	        }, function rejectPromise(reason) {
-	          $$$internal$$reject(promise, reason);
-	        });
-	      } catch(e) {
-	        $$$internal$$reject(promise, e);
-	      }
-	    }
-
-	    function $$$enumerator$$makeSettledResult(state, position, value) {
-	      if (state === $$$internal$$FULFILLED) {
-	        return {
-	          state: 'fulfilled',
-	          value: value
-	        };
-	      } else {
-	        return {
-	          state: 'rejected',
-	          reason: value
-	        };
-	      }
-	    }
-
-	    function $$$enumerator$$Enumerator(Constructor, input, abortOnReject, label) {
-	      this._instanceConstructor = Constructor;
-	      this.promise = new Constructor($$$internal$$noop, label);
-	      this._abortOnReject = abortOnReject;
-
-	      if (this._validateInput(input)) {
-	        this._input     = input;
-	        this.length     = input.length;
-	        this._remaining = input.length;
-
-	        this._init();
-
-	        if (this.length === 0) {
-	          $$$internal$$fulfill(this.promise, this._result);
-	        } else {
-	          this.length = this.length || 0;
-	          this._enumerate();
-	          if (this._remaining === 0) {
-	            $$$internal$$fulfill(this.promise, this._result);
-	          }
-	        }
-	      } else {
-	        $$$internal$$reject(this.promise, this._validationError());
-	      }
-	    }
-
-	    $$$enumerator$$Enumerator.prototype._validateInput = function(input) {
-	      return $$utils$$isArray(input);
-	    };
-
-	    $$$enumerator$$Enumerator.prototype._validationError = function() {
-	      return new Error('Array Methods must be provided an Array');
-	    };
-
-	    $$$enumerator$$Enumerator.prototype._init = function() {
-	      this._result = new Array(this.length);
-	    };
-
-	    var $$$enumerator$$default = $$$enumerator$$Enumerator;
-
-	    $$$enumerator$$Enumerator.prototype._enumerate = function() {
-	      var length  = this.length;
-	      var promise = this.promise;
-	      var input   = this._input;
-
-	      for (var i = 0; promise._state === $$$internal$$PENDING && i < length; i++) {
-	        this._eachEntry(input[i], i);
-	      }
-	    };
-
-	    $$$enumerator$$Enumerator.prototype._eachEntry = function(entry, i) {
-	      var c = this._instanceConstructor;
-	      if ($$utils$$isMaybeThenable(entry)) {
-	        if (entry.constructor === c && entry._state !== $$$internal$$PENDING) {
-	          entry._onerror = null;
-	          this._settledAt(entry._state, i, entry._result);
-	        } else {
-	          this._willSettleAt(c.resolve(entry), i);
-	        }
-	      } else {
-	        this._remaining--;
-	        this._result[i] = this._makeResult($$$internal$$FULFILLED, i, entry);
-	      }
-	    };
-
-	    $$$enumerator$$Enumerator.prototype._settledAt = function(state, i, value) {
-	      var promise = this.promise;
-
-	      if (promise._state === $$$internal$$PENDING) {
-	        this._remaining--;
-
-	        if (this._abortOnReject && state === $$$internal$$REJECTED) {
-	          $$$internal$$reject(promise, value);
-	        } else {
-	          this._result[i] = this._makeResult(state, i, value);
-	        }
-	      }
-
-	      if (this._remaining === 0) {
-	        $$$internal$$fulfill(promise, this._result);
-	      }
-	    };
-
-	    $$$enumerator$$Enumerator.prototype._makeResult = function(state, i, value) {
-	      return value;
-	    };
-
-	    $$$enumerator$$Enumerator.prototype._willSettleAt = function(promise, i) {
-	      var enumerator = this;
-
-	      $$$internal$$subscribe(promise, undefined, function(value) {
-	        enumerator._settledAt($$$internal$$FULFILLED, i, value);
-	      }, function(reason) {
-	        enumerator._settledAt($$$internal$$REJECTED, i, reason);
-	      });
-	    };
-
-	    var $$promise$all$$default = function all(entries, label) {
-	      return new $$$enumerator$$default(this, entries, true /* abort on reject */, label).promise;
-	    };
-
-	    var $$promise$race$$default = function race(entries, label) {
-	      /*jshint validthis:true */
-	      var Constructor = this;
-
-	      var promise = new Constructor($$$internal$$noop, label);
-
-	      if (!$$utils$$isArray(entries)) {
-	        $$$internal$$reject(promise, new TypeError('You must pass an array to race.'));
-	        return promise;
-	      }
-
-	      var length = entries.length;
-
-	      function onFulfillment(value) {
-	        $$$internal$$resolve(promise, value);
-	      }
-
-	      function onRejection(reason) {
-	        $$$internal$$reject(promise, reason);
-	      }
-
-	      for (var i = 0; promise._state === $$$internal$$PENDING && i < length; i++) {
-	        $$$internal$$subscribe(Constructor.resolve(entries[i]), undefined, onFulfillment, onRejection);
-	      }
-
-	      return promise;
-	    };
-
-	    var $$promise$resolve$$default = function resolve(object, label) {
-	      /*jshint validthis:true */
-	      var Constructor = this;
-
-	      if (object && typeof object === 'object' && object.constructor === Constructor) {
-	        return object;
-	      }
-
-	      var promise = new Constructor($$$internal$$noop, label);
-	      $$$internal$$resolve(promise, object);
-	      return promise;
-	    };
-
-	    var $$promise$reject$$default = function reject(reason, label) {
-	      /*jshint validthis:true */
-	      var Constructor = this;
-	      var promise = new Constructor($$$internal$$noop, label);
-	      $$$internal$$reject(promise, reason);
-	      return promise;
-	    };
-
-	    var $$es6$promise$promise$$counter = 0;
-
-	    function $$es6$promise$promise$$needsResolver() {
-	      throw new TypeError('You must pass a resolver function as the first argument to the promise constructor');
-	    }
-
-	    function $$es6$promise$promise$$needsNew() {
-	      throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.");
-	    }
-
-	    var $$es6$promise$promise$$default = $$es6$promise$promise$$Promise;
-
-	    /**
-	      Promise objects represent the eventual result of an asynchronous operation. The
-	      primary way of interacting with a promise is through its `then` method, which
-	      registers callbacks to receive either a promise’s eventual value or the reason
-	      why the promise cannot be fulfilled.
-
-	      Terminology
-	      -----------
-
-	      - `promise` is an object or function with a `then` method whose behavior conforms to this specification.
-	      - `thenable` is an object or function that defines a `then` method.
-	      - `value` is any legal JavaScript value (including undefined, a thenable, or a promise).
-	      - `exception` is a value that is thrown using the throw statement.
-	      - `reason` is a value that indicates why a promise was rejected.
-	      - `settled` the final resting state of a promise, fulfilled or rejected.
-
-	      A promise can be in one of three states: pending, fulfilled, or rejected.
-
-	      Promises that are fulfilled have a fulfillment value and are in the fulfilled
-	      state.  Promises that are rejected have a rejection reason and are in the
-	      rejected state.  A fulfillment value is never a thenable.
-
-	      Promises can also be said to *resolve* a value.  If this value is also a
-	      promise, then the original promise's settled state will match the value's
-	      settled state.  So a promise that *resolves* a promise that rejects will
-	      itself reject, and a promise that *resolves* a promise that fulfills will
-	      itself fulfill.
-
-
-	      Basic Usage:
-	      ------------
-
-	      ```js
-	      var promise = new Promise(function(resolve, reject) {
-	        // on success
-	        resolve(value);
-
-	        // on failure
-	        reject(reason);
-	      });
-
-	      promise.then(function(value) {
-	        // on fulfillment
-	      }, function(reason) {
-	        // on rejection
-	      });
-	      ```
-
-	      Advanced Usage:
-	      ---------------
-
-	      Promises shine when abstracting away asynchronous interactions such as
-	      `XMLHttpRequest`s.
-
-	      ```js
-	      function getJSON(url) {
-	        return new Promise(function(resolve, reject){
-	          var xhr = new XMLHttpRequest();
-
-	          xhr.open('GET', url);
-	          xhr.onreadystatechange = handler;
-	          xhr.responseType = 'json';
-	          xhr.setRequestHeader('Accept', 'application/json');
-	          xhr.send();
-
-	          function handler() {
-	            if (this.readyState === this.DONE) {
-	              if (this.status === 200) {
-	                resolve(this.response);
-	              } else {
-	                reject(new Error('getJSON: `' + url + '` failed with status: [' + this.status + ']'));
-	              }
-	            }
-	          };
-	        });
-	      }
-
-	      getJSON('/posts.json').then(function(json) {
-	        // on fulfillment
-	      }, function(reason) {
-	        // on rejection
-	      });
-	      ```
-
-	      Unlike callbacks, promises are great composable primitives.
-
-	      ```js
-	      Promise.all([
-	        getJSON('/posts'),
-	        getJSON('/comments')
-	      ]).then(function(values){
-	        values[0] // => postsJSON
-	        values[1] // => commentsJSON
-
-	        return values;
-	      });
-	      ```
-
-	      @class Promise
-	      @param {function} resolver
-	      Useful for tooling.
-	      @constructor
-	    */
-	    function $$es6$promise$promise$$Promise(resolver) {
-	      this._id = $$es6$promise$promise$$counter++;
-	      this._state = undefined;
-	      this._result = undefined;
-	      this._subscribers = [];
-
-	      if ($$$internal$$noop !== resolver) {
-	        if (!$$utils$$isFunction(resolver)) {
-	          $$es6$promise$promise$$needsResolver();
-	        }
-
-	        if (!(this instanceof $$es6$promise$promise$$Promise)) {
-	          $$es6$promise$promise$$needsNew();
-	        }
-
-	        $$$internal$$initializePromise(this, resolver);
-	      }
-	    }
-
-	    $$es6$promise$promise$$Promise.all = $$promise$all$$default;
-	    $$es6$promise$promise$$Promise.race = $$promise$race$$default;
-	    $$es6$promise$promise$$Promise.resolve = $$promise$resolve$$default;
-	    $$es6$promise$promise$$Promise.reject = $$promise$reject$$default;
-
-	    $$es6$promise$promise$$Promise.prototype = {
-	      constructor: $$es6$promise$promise$$Promise,
-
-	    /**
-	      The primary way of interacting with a promise is through its `then` method,
-	      which registers callbacks to receive either a promise's eventual value or the
-	      reason why the promise cannot be fulfilled.
-
-	      ```js
-	      findUser().then(function(user){
-	        // user is available
-	      }, function(reason){
-	        // user is unavailable, and you are given the reason why
-	      });
-	      ```
-
-	      Chaining
-	      --------
-
-	      The return value of `then` is itself a promise.  This second, 'downstream'
-	      promise is resolved with the return value of the first promise's fulfillment
-	      or rejection handler, or rejected if the handler throws an exception.
-
-	      ```js
-	      findUser().then(function (user) {
-	        return user.name;
-	      }, function (reason) {
-	        return 'default name';
-	      }).then(function (userName) {
-	        // If `findUser` fulfilled, `userName` will be the user's name, otherwise it
-	        // will be `'default name'`
-	      });
-
-	      findUser().then(function (user) {
-	        throw new Error('Found user, but still unhappy');
-	      }, function (reason) {
-	        throw new Error('`findUser` rejected and we're unhappy');
-	      }).then(function (value) {
-	        // never reached
-	      }, function (reason) {
-	        // if `findUser` fulfilled, `reason` will be 'Found user, but still unhappy'.
-	        // If `findUser` rejected, `reason` will be '`findUser` rejected and we're unhappy'.
-	      });
-	      ```
-	      If the downstream promise does not specify a rejection handler, rejection reasons will be propagated further downstream.
-
-	      ```js
-	      findUser().then(function (user) {
-	        throw new PedagogicalException('Upstream error');
-	      }).then(function (value) {
-	        // never reached
-	      }).then(function (value) {
-	        // never reached
-	      }, function (reason) {
-	        // The `PedgagocialException` is propagated all the way down to here
-	      });
-	      ```
-
-	      Assimilation
-	      ------------
-
-	      Sometimes the value you want to propagate to a downstream promise can only be
-	      retrieved asynchronously. This can be achieved by returning a promise in the
-	      fulfillment or rejection handler. The downstream promise will then be pending
-	      until the returned promise is settled. This is called *assimilation*.
-
-	      ```js
-	      findUser().then(function (user) {
-	        return findCommentsByAuthor(user);
-	      }).then(function (comments) {
-	        // The user's comments are now available
-	      });
-	      ```
-
-	      If the assimliated promise rejects, then the downstream promise will also reject.
-
-	      ```js
-	      findUser().then(function (user) {
-	        return findCommentsByAuthor(user);
-	      }).then(function (comments) {
-	        // If `findCommentsByAuthor` fulfills, we'll have the value here
-	      }, function (reason) {
-	        // If `findCommentsByAuthor` rejects, we'll have the reason here
-	      });
-	      ```
-
-	      Simple Example
-	      --------------
-
-	      Synchronous Example
-
-	      ```javascript
-	      var result;
-
-	      try {
-	        result = findResult();
-	        // success
-	      } catch(reason) {
-	        // failure
-	      }
-	      ```
-
-	      Errback Example
-
-	      ```js
-	      findResult(function(result, err){
-	        if (err) {
-	          // failure
-	        } else {
-	          // success
-	        }
-	      });
-	      ```
-
-	      Promise Example;
-
-	      ```javascript
-	      findResult().then(function(result){
-	        // success
-	      }, function(reason){
-	        // failure
-	      });
-	      ```
-
-	      Advanced Example
-	      --------------
-
-	      Synchronous Example
-
-	      ```javascript
-	      var author, books;
-
-	      try {
-	        author = findAuthor();
-	        books  = findBooksByAuthor(author);
-	        // success
-	      } catch(reason) {
-	        // failure
-	      }
-	      ```
-
-	      Errback Example
-
-	      ```js
-
-	      function foundBooks(books) {
-
-	      }
-
-	      function failure(reason) {
-
-	      }
-
-	      findAuthor(function(author, err){
-	        if (err) {
-	          failure(err);
-	          // failure
-	        } else {
-	          try {
-	            findBoooksByAuthor(author, function(books, err) {
-	              if (err) {
-	                failure(err);
-	              } else {
-	                try {
-	                  foundBooks(books);
-	                } catch(reason) {
-	                  failure(reason);
-	                }
-	              }
-	            });
-	          } catch(error) {
-	            failure(err);
-	          }
-	          // success
-	        }
-	      });
-	      ```
-
-	      Promise Example;
-
-	      ```javascript
-	      findAuthor().
-	        then(findBooksByAuthor).
-	        then(function(books){
-	          // found books
-	      }).catch(function(reason){
-	        // something went wrong
-	      });
-	      ```
-
-	      @method then
-	      @param {Function} onFulfilled
-	      @param {Function} onRejected
-	      Useful for tooling.
-	      @return {Promise}
-	    */
-	      then: function(onFulfillment, onRejection) {
-	        var parent = this;
-	        var state = parent._state;
-
-	        if (state === $$$internal$$FULFILLED && !onFulfillment || state === $$$internal$$REJECTED && !onRejection) {
-	          return this;
-	        }
-
-	        var child = new this.constructor($$$internal$$noop);
-	        var result = parent._result;
-
-	        if (state) {
-	          var callback = arguments[state - 1];
-	          $$asap$$default(function(){
-	            $$$internal$$invokeCallback(state, child, callback, result);
-	          });
-	        } else {
-	          $$$internal$$subscribe(parent, child, onFulfillment, onRejection);
-	        }
-
-	        return child;
-	      },
-
-	    /**
-	      `catch` is simply sugar for `then(undefined, onRejection)` which makes it the same
-	      as the catch block of a try/catch statement.
-
-	      ```js
-	      function findAuthor(){
-	        throw new Error('couldn't find that author');
-	      }
-
-	      // synchronous
-	      try {
-	        findAuthor();
-	      } catch(reason) {
-	        // something went wrong
-	      }
-
-	      // async with promises
-	      findAuthor().catch(function(reason){
-	        // something went wrong
-	      });
-	      ```
-
-	      @method catch
-	      @param {Function} onRejection
-	      Useful for tooling.
-	      @return {Promise}
-	    */
-	      'catch': function(onRejection) {
-	        return this.then(null, onRejection);
-	      }
-	    };
-
-	    var $$es6$promise$polyfill$$default = function polyfill() {
-	      var local;
-
-	      if (typeof global !== 'undefined') {
-	        local = global;
-	      } else if (typeof window !== 'undefined' && window.document) {
-	        local = window;
-	      } else {
-	        local = self;
-	      }
-
-	      var es6PromiseSupport =
-	        "Promise" in local &&
-	        // Some of these methods are missing from
-	        // Firefox/Chrome experimental implementations
-	        "resolve" in local.Promise &&
-	        "reject" in local.Promise &&
-	        "all" in local.Promise &&
-	        "race" in local.Promise &&
-	        // Older version of the spec had a resolver object
-	        // as the arg rather than a function
-	        (function() {
-	          var resolve;
-	          new local.Promise(function(r) { resolve = r; });
-	          return $$utils$$isFunction(resolve);
-	        }());
-
-	      if (!es6PromiseSupport) {
-	        local.Promise = $$es6$promise$promise$$default;
-	      }
-	    };
-
-	    var es6$promise$umd$$ES6Promise = {
-	      'Promise': $$es6$promise$promise$$default,
-	      'polyfill': $$es6$promise$polyfill$$default
-	    };
-
-	    /* global define:true module:true window: true */
-	    if ("function" === 'function' && __webpack_require__(51)['amd']) {
-	      !(__WEBPACK_AMD_DEFINE_RESULT__ = function() { return es6$promise$umd$$ES6Promise; }.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	    } else if (typeof module !== 'undefined' && module['exports']) {
-	      module['exports'] = es6$promise$umd$$ES6Promise;
-	    } else if (typeof this !== 'undefined') {
-	      this['ES6Promise'] = es6$promise$umd$$ES6Promise;
-	    }
-	}).call(this);
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(50), (function() { return this; }()), __webpack_require__(52)(module)))
-
-/***/ },
-/* 22 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/*!
-	 * yabh
-	 * @version 1.0.0 - Homepage <http://jmdobry.github.io/yabh/>
-	 * @author Jason Dobry <jason.dobry@gmail.com>
-	 * @copyright (c) 2015 Jason Dobry 
-	 * @license MIT <https://github.com/jmdobry/yabh/blob/master/LICENSE>
-	 * 
-	 * @overview Yet another Binary Heap.
-	 */
-	(function webpackUniversalModuleDefinition(root, factory) {
-		if(true)
-			module.exports = factory();
-		else if(typeof define === 'function' && define.amd)
-			define(factory);
-		else if(typeof exports === 'object')
-			exports["BinaryHeap"] = factory();
-		else
-			root["BinaryHeap"] = factory();
-	})(this, function() {
-	return /******/ (function(modules) { // webpackBootstrap
-	/******/ 	// The module cache
-	/******/ 	var installedModules = {};
-
-	/******/ 	// The require function
-	/******/ 	function __webpack_require__(moduleId) {
-
-	/******/ 		// Check if module is in cache
-	/******/ 		if(installedModules[moduleId])
-	/******/ 			return installedModules[moduleId].exports;
-
-	/******/ 		// Create a new module (and put it into the cache)
-	/******/ 		var module = installedModules[moduleId] = {
-	/******/ 			exports: {},
-	/******/ 			id: moduleId,
-	/******/ 			loaded: false
-	/******/ 		};
-
-	/******/ 		// Execute the module function
-	/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-
-	/******/ 		// Flag the module as loaded
-	/******/ 		module.loaded = true;
-
-	/******/ 		// Return the exports of the module
-	/******/ 		return module.exports;
-	/******/ 	}
-
-
-	/******/ 	// expose the modules object (__webpack_modules__)
-	/******/ 	__webpack_require__.m = modules;
-
-	/******/ 	// expose the module cache
-	/******/ 	__webpack_require__.c = installedModules;
-
-	/******/ 	// __webpack_public_path__
-	/******/ 	__webpack_require__.p = "";
-
-	/******/ 	// Load entry module and return exports
-	/******/ 	return __webpack_require__(0);
-	/******/ })
-	/************************************************************************/
-	/******/ ([
-	/* 0 */
-	/***/ function(module, exports, __webpack_require__) {
-
-		var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-		var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-		/**
-		 * @method bubbleUp
-		 * @param {array} heap The heap.
-		 * @param {function} weightFunc The weight function.
-		 * @param {number} n The index of the element to bubble up.
-		 */
-		function bubbleUp(heap, weightFunc, n) {
-		  var element = heap[n];
-		  var weight = weightFunc(element);
-		  // When at 0, an element can not go up any further.
-		  while (n > 0) {
-		    // Compute the parent element's index, and fetch it.
-		    var parentN = Math.floor((n + 1) / 2) - 1;
-		    var _parent = heap[parentN];
-		    // If the parent has a lesser weight, things are in order and we
-		    // are done.
-		    if (weight >= weightFunc(_parent)) {
-		      break;
-		    } else {
-		      heap[parentN] = element;
-		      heap[n] = _parent;
-		      n = parentN;
-		    }
-		  }
-		}
-
-		/**
-		 * @method bubbleDown
-		 * @param {array} heap The heap.
-		 * @param {function} weightFunc The weight function.
-		 * @param {number} n The index of the element to sink down.
-		 */
-		var bubbleDown = function (heap, weightFunc, n) {
-		  var length = heap.length;
-		  var node = heap[n];
-		  var nodeWeight = weightFunc(node);
-
-		  while (true) {
-		    var child2N = (n + 1) * 2,
-		        child1N = child2N - 1;
-		    var swap = null;
-		    if (child1N < length) {
-		      var child1 = heap[child1N],
-		          child1Weight = weightFunc(child1);
-		      // If the score is less than our node's, we need to swap.
-		      if (child1Weight < nodeWeight) {
-		        swap = child1N;
-		      }
-		    }
-		    // Do the same checks for the other child.
-		    if (child2N < length) {
-		      var child2 = heap[child2N],
-		          child2Weight = weightFunc(child2);
-		      if (child2Weight < (swap === null ? nodeWeight : weightFunc(heap[child1N]))) {
-		        swap = child2N;
-		      }
-		    }
-
-		    if (swap === null) {
-		      break;
-		    } else {
-		      heap[n] = heap[swap];
-		      heap[swap] = node;
-		      n = swap;
-		    }
-		  }
-		};
-
-		var BinaryHeap = (function () {
-		  function BinaryHeap(weightFunc, compareFunc) {
-		    _classCallCheck(this, BinaryHeap);
-
-		    if (!weightFunc) {
-		      weightFunc = function (x) {
-		        return x;
-		      };
-		    }
-		    if (!compareFunc) {
-		      compareFunc = function (x, y) {
-		        return x === y;
-		      };
-		    }
-		    if (typeof weightFunc !== "function") {
-		      throw new Error("BinaryHeap([weightFunc][, compareFunc]): \"weightFunc\" must be a function!");
-		    }
-		    if (typeof compareFunc !== "function") {
-		      throw new Error("BinaryHeap([weightFunc][, compareFunc]): \"compareFunc\" must be a function!");
-		    }
-		    this.weightFunc = weightFunc;
-		    this.compareFunc = compareFunc;
-		    this.heap = [];
-		  }
-
-		  _createClass(BinaryHeap, {
-		    push: {
-		      value: function push(node) {
-		        this.heap.push(node);
-		        bubbleUp(this.heap, this.weightFunc, this.heap.length - 1);
-		      }
-		    },
-		    peek: {
-		      value: function peek() {
-		        return this.heap[0];
-		      }
-		    },
-		    pop: {
-		      value: function pop() {
-		        var front = this.heap[0];
-		        var end = this.heap.pop();
-		        if (this.heap.length > 0) {
-		          this.heap[0] = end;
-		          bubbleDown(this.heap, this.weightFunc, 0);
-		        }
-		        return front;
-		      }
-		    },
-		    remove: {
-		      value: function remove(node) {
-		        var length = this.heap.length;
-		        for (var i = 0; i < length; i++) {
-		          if (this.compareFunc(this.heap[i], node)) {
-		            var removed = this.heap[i];
-		            var end = this.heap.pop();
-		            if (i !== length - 1) {
-		              this.heap[i] = end;
-		              bubbleUp(this.heap, this.weightFunc, i);
-		              bubbleDown(this.heap, this.weightFunc, i);
-		            }
-		            return removed;
-		          }
-		        }
-		        return null;
-		      }
-		    },
-		    removeAll: {
-		      value: function removeAll() {
-		        this.heap = [];
-		      }
-		    },
-		    size: {
-		      value: function size() {
-		        return this.heap.length;
-		      }
-		    }
-		  });
-
-		  return BinaryHeap;
-		})();
-
-		module.exports = BinaryHeap;
-
-	/***/ }
-	/******/ ])
-	});
-	;
-
-/***/ },
-/* 23 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
-
-	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-	module.exports = defineResource;
+	exports['default'] = defineResource;
 	/*jshint evil:true, loopfunc:true*/
 
-	var DSUtils = _interopRequire(__webpack_require__(1));
+	var _utils = __webpack_require__(2);
 
-	var DSErrors = _interopRequire(__webpack_require__(2));
+	var _errors = __webpack_require__(3);
 
-	var Resource = function Resource(options) {
-	  _classCallCheck(this, Resource);
-
-	  DSUtils.deepMixIn(this, options);
-	  if ("endpoint" in options) {
-	    this.endpoint = options.endpoint;
-	  } else {
-	    this.endpoint = this.name;
-	  }
-	};
-
-	var instanceMethods = ["compute", "refresh", "save", "update", "destroy", "loadRelations", "changeHistory", "changes", "hasChanges", "lastModified", "lastSaved", "link", "linkInverse", "previous", "unlinkInverse"];
+	/**
+	 * These are DS methods that will be proxied by instances. e.g.
+	 *
+	 * var store = new JSData.DS();
+	 * var User = store.defineResource('user');
+	 * var user = User.createInstance({ id: 1 });
+	 *
+	 * store.update(resourceName, id, attrs[, options]) // DS method
+	 * User.update(id, attrs[, options]) // DS method proxied on a Resource
+	 * user.DSUpdate(attrs[, options]) // DS method proxied on an Instance
+	 */
+	var instanceMethods = ['compute', 'eject', 'refresh', 'save', 'update', 'destroy', 'loadRelations', 'changeHistory', 'changes', 'hasChanges', 'lastModified', 'lastSaved', 'previous'];
 
 	function defineResource(definition) {
 	  var _this = this;
 	  var definitions = _this.defs;
 
-	  if (DSUtils._s(definition)) {
+	  /**
+	   * This allows the name-only definition shorthand.
+	   * store.defineResource('user') is the same as store.defineResource({ name: 'user'})
+	   */
+	  if (_utils['default']._s(definition)) {
 	    definition = {
-	      name: definition.replace(/\s/gi, "")
+	      name: definition.replace(/\s/gi, '')
 	    };
 	  }
-	  if (!DSUtils._o(definition)) {
-	    throw DSUtils._oErr("definition");
-	  } else if (!DSUtils._s(definition.name)) {
-	    throw new DSErrors.IA("\"name\" must be a string!");
-	  } else if (_this.s[definition.name]) {
-	    throw new DSErrors.R("" + definition.name + " is already registered!");
+	  if (!_utils['default']._o(definition)) {
+	    throw _utils['default']._oErr('definition');
+	  } else if (!_utils['default']._s(definition.name)) {
+	    throw new _errors['default'].IA('"name" must be a string!');
+	  } else if (definitions[definition.name]) {
+	    throw new _errors['default'].R(definition.name + ' is already registered!');
+	  }
+
+	  /**
+	   * Dynamic Resource constructor function.
+	   *
+	   * A Resource inherits from the defaults of the data store that created it.
+	   */
+	  function Resource(options) {
+	    this.defaultValues = {};
+	    this.methods = {};
+	    this.computed = {};
+	    _utils['default'].deepMixIn(this, options);
+	    var parent = _this.defaults;
+	    if (definition['extends'] && definitions[definition['extends']]) {
+	      parent = definitions[definition['extends']];
+	    }
+	    _utils['default'].fillIn(this.defaultValues, parent.defaultValues);
+	    _utils['default'].fillIn(this.methods, parent.methods);
+	    _utils['default'].fillIn(this.computed, parent.computed);
+	    this.endpoint = 'endpoint' in options ? options.endpoint : this.name;
 	  }
 
 	  try {
@@ -3688,34 +3051,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _class;
 
 	    var _ret = (function () {
-	      // Inherit from global defaults
-	      Resource.prototype = _this.defaults;
+	      // Resources can inherit from another resource instead of inheriting directly from the data store defaults.
+	      if (definition['extends'] && definitions[definition['extends']]) {
+	        // Inherit from another resource
+	        Resource.prototype = definitions[definition['extends']];
+	      } else {
+	        // Inherit from global defaults
+	        Resource.prototype = _this.defaults;
+	      }
 	      definitions[definition.name] = new Resource(definition);
 
 	      def = definitions[definition.name];
 
-	      // alias name, shaves 0.08 kb off the minified build
-	      def.n = def.name;
+	      def.getResource = function (resourceName) {
+	        return _this.defs[resourceName];
+	      };
 
-	      def.logFn("Preparing resource.");
+	      def.logFn('Preparing resource.');
 
-	      if (!DSUtils._s(def.idAttribute)) {
-	        throw new DSErrors.IA("\"idAttribute\" must be a string!");
+	      if (!_utils['default']._s(def.idAttribute)) {
+	        throw new _errors['default'].IA('"idAttribute" must be a string!');
 	      }
 
 	      // Setup nested parent configuration
 	      if (def.relations) {
 	        def.relationList = [];
 	        def.relationFields = [];
-	        DSUtils.forOwn(def.relations, function (relatedModels, type) {
-	          DSUtils.forOwn(relatedModels, function (defs, relationName) {
-	            if (!DSUtils._a(defs)) {
+	        _utils['default'].forOwn(def.relations, function (relatedModels, type) {
+	          _utils['default'].forOwn(relatedModels, function (defs, relationName) {
+	            if (!_utils['default']._a(defs)) {
 	              relatedModels[relationName] = [defs];
 	            }
-	            DSUtils.forEach(relatedModels[relationName], function (d) {
+	            _utils['default'].forEach(relatedModels[relationName], function (d) {
 	              d.type = type;
 	              d.relation = relationName;
-	              d.name = def.n;
+	              d.name = def.name;
 	              def.relationList.push(d);
 	              if (d.localField) {
 	                def.relationFields.push(d.localField);
@@ -3724,8 +3094,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	          });
 	        });
 	        if (def.relations.belongsTo) {
-	          DSUtils.forOwn(def.relations.belongsTo, function (relatedModel, modelName) {
-	            DSUtils.forEach(relatedModel, function (relation) {
+	          _utils['default'].forOwn(def.relations.belongsTo, function (relatedModel, modelName) {
+	            _utils['default'].forEach(relatedModel, function (relation) {
 	              if (relation.parent) {
 	                def.parent = modelName;
 	                def.parentKey = relation.localKey;
@@ -3734,76 +3104,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	          });
 	        }
-	        if (typeof Object.freeze === "function") {
+	        if (typeof Object.freeze === 'function') {
 	          Object.freeze(def.relations);
 	          Object.freeze(def.relationList);
 	        }
 	      }
 
-	      def.getResource = function (resourceName) {
-	        return _this.defs[resourceName];
-	      };
-
-	      def.getEndpoint = function (id, options) {
-	        options.params = options.params || {};
-
-	        var item = undefined;
-	        var parentKey = def.parentKey;
-	        var endpoint = options.hasOwnProperty("endpoint") ? options.endpoint : def.endpoint;
-	        var parentField = def.parentField;
-	        var parentDef = definitions[def.parent];
-	        var parentId = options.params[parentKey];
-
-	        if (parentId === false || !parentKey || !parentDef) {
-	          if (parentId === false) {
-	            delete options.params[parentKey];
-	          }
-	          return endpoint;
-	        } else {
-	          delete options.params[parentKey];
-
-	          if (DSUtils._sn(id)) {
-	            item = def.get(id);
-	          } else if (DSUtils._o(id)) {
-	            item = id;
-	          }
-
-	          if (item) {
-	            parentId = parentId || item[parentKey] || (item[parentField] ? item[parentField][parentDef.idAttribute] : null);
-	          }
-
-	          if (parentId) {
-	            var _ret2 = (function () {
-	              delete options.endpoint;
-	              var _options = {};
-	              DSUtils.forOwn(options, function (value, key) {
-	                _options[key] = value;
-	              });
-	              return {
-	                v: DSUtils.makePath(parentDef.getEndpoint(parentId, DSUtils._(parentDef, _options)), parentId, endpoint)
-	              };
-	            })();
-
-	            if (typeof _ret2 === "object") return _ret2.v;
-	          } else {
-	            return endpoint;
-	          }
-	        }
-	      };
-
-	      // Remove this in v0.11.0 and make a breaking change notice
-	      // the the `filter` option has been renamed to `defaultFilter`
-	      if (def.filter) {
-	        def.defaultFilter = def.filter;
-	        delete def.filter;
-	      }
-
 	      // Create the wrapper class for the new resource
-	      _class = def["class"] = DSUtils.pascalCase(def.name);
+	      _class = def['class'] = _utils['default'].pascalCase(def.name);
 
 	      try {
-	        if (typeof def.useClass === "function") {
-	          eval("function " + _class + "() { def.useClass.call(this); }");
+	        if (typeof def.useClass === 'function') {
+	          eval('function ' + _class + '() { def.useClass.call(this); }');
 	          def[_class] = eval(_class);
 	          def[_class].prototype = (function (proto) {
 	            function Ctor() {}
@@ -3812,102 +3124,117 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return new Ctor();
 	          })(def.useClass.prototype);
 	        } else {
-	          eval("function " + _class + "() {}");
+	          eval('function ' + _class + '() {}');
 	          def[_class] = eval(_class);
 	        }
 	      } catch (e) {
 	        def[_class] = function () {};
 	      }
 
-	      // Apply developer-defined methods
-	      if (def.methods) {
-	        DSUtils.deepMixIn(def[_class].prototype, def.methods);
-	      }
+	      // Apply developer-defined instance methods
+	      _utils['default'].forOwn(def.methods, function (fn, m) {
+	        def[_class].prototype[m] = fn;
+	      });
 
+	      /**
+	       * var user = User.createInstance({ id: 1 });
+	       * user.set('foo', 'bar');
+	       */
 	      def[_class].prototype.set = function (key, value) {
-	        DSUtils.set(this, key, value);
-	        _this.compute(def.n, this);
+	        var _this2 = this;
+
+	        _utils['default'].set(this, key, value);
+	        def.compute(this);
+	        if (def.instanceEvents) {
+	          setTimeout(function () {
+	            _this2.emit('DS.change', def, _this2);
+	          }, 0);
+	        }
+	        def.handleChange(this);
 	        return this;
 	      };
 
+	      /**
+	       * var user = User.createInstance({ id: 1 });
+	       * user.get('id'); // 1
+	       */
 	      def[_class].prototype.get = function (key) {
-	        return DSUtils.get(this, key);
+	        return _utils['default'].get(this, key);
 	      };
 
+	      if (def.instanceEvents) {
+	        _utils['default'].Events(def[_class].prototype);
+	      }
+
+	      // Setup the relation links
+	      _utils['default'].applyRelationGettersToTarget(_this, def, def[_class].prototype);
+
+	      var parentOmit = null;
+	      if (!def.hasOwnProperty('omit')) {
+	        parentOmit = def.omit;
+	        def.omit = [];
+	      } else {
+	        parentOmit = _this.defaults.omit;
+	      }
+	      def.omit = def.omit.concat(parentOmit || []);
+
 	      // Prepare for computed properties
-	      if (def.computed) {
-	        DSUtils.forOwn(def.computed, function (fn, field) {
-	          if (DSUtils.isFunction(fn)) {
-	            def.computed[field] = [fn];
-	            fn = def.computed[field];
-	          }
-	          if (def.methods && field in def.methods) {
-	            def.errorFn("Computed property \"" + field + "\" conflicts with previously defined prototype method!");
-	          }
-	          var deps;
-	          if (fn.length === 1) {
-	            var match = fn[0].toString().match(/function.*?\(([\s\S]*?)\)/);
-	            deps = match[1].split(",");
-	            def.computed[field] = deps.concat(fn);
-	            fn = def.computed[field];
-	            if (deps.length) {
-	              def.errorFn("Use the computed property array syntax for compatibility with minified code!");
-	            }
-	          }
-	          deps = fn.slice(0, fn.length - 1);
-	          DSUtils.forEach(deps, function (val, index) {
-	            deps[index] = val.trim();
-	          });
-	          fn.deps = DSUtils.filter(deps, function (dep) {
-	            return !!dep;
-	          });
-	        });
-	      }
-
-	      if (definition.schema && _this.schemator) {
-	        def.schema = _this.schemator.defineSchema(def.n, definition.schema);
-
-	        if (!definition.hasOwnProperty("validate")) {
-	          def.validate = function (resourceName, attrs, cb) {
-	            def.schema.validate(attrs, {
-	              ignoreMissing: def.ignoreMissing
-	            }, function (err) {
-	              if (err) {
-	                return cb(err);
-	              } else {
-	                return cb(null, attrs);
-	              }
-	            });
-	          };
+	      _utils['default'].forOwn(def.computed, function (fn, field) {
+	        if (_utils['default'].isFunction(fn)) {
+	          def.computed[field] = [fn];
+	          fn = def.computed[field];
 	        }
-	      }
+	        if (def.methods && field in def.methods) {
+	          def.errorFn('Computed property "' + field + '" conflicts with previously defined prototype method!');
+	        }
+	        def.omit.push(field);
+	        var deps;
+	        if (fn.length === 1) {
+	          var match = fn[0].toString().match(/function.*?\(([\s\S]*?)\)/);
+	          deps = match[1].split(',');
+	          def.computed[field] = deps.concat(fn);
+	          fn = def.computed[field];
+	          if (deps.length) {
+	            def.errorFn('Use the computed property array syntax for compatibility with minified code!');
+	          }
+	        }
+	        deps = fn.slice(0, fn.length - 1);
+	        _utils['default'].forEach(deps, function (val, index) {
+	          deps[index] = val.trim();
+	        });
+	        fn.deps = _utils['default'].filter(deps, function (dep) {
+	          return !!dep;
+	        });
+	      });
 
-	      DSUtils.forEach(instanceMethods, function (name) {
-	        def[_class].prototype["DS" + DSUtils.pascalCase(name)] = function () {
+	      // add instance proxies of DS methods
+	      _utils['default'].forEach(instanceMethods, function (name) {
+	        def[_class].prototype['DS' + _utils['default'].pascalCase(name)] = function () {
 	          for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
 	            args[_key] = arguments[_key];
 	          }
 
 	          args.unshift(this[def.idAttribute] || this);
-	          args.unshift(def.n);
+	          args.unshift(def.name);
 	          return _this[name].apply(_this, args);
 	        };
 	      });
 
+	      // manually add instance proxy for DS#create
 	      def[_class].prototype.DSCreate = function () {
-	        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	          args[_key] = arguments[_key];
+	        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+	          args[_key2] = arguments[_key2];
 	        }
 
 	        args.unshift(this);
-	        args.unshift(def.n);
+	        args.unshift(def.name);
 	        return _this.create.apply(_this, args);
 	      };
 
 	      // Initialize store data for the new resource
-	      _this.s[def.n] = {
+	      _this.s[def.name] = {
 	        collection: [],
-	        expiresHeap: new DSUtils.BinaryHeap(function (x) {
+	        expiresHeap: new _utils['default'].BinaryHeap(function (x) {
 	          return x.expires;
 	        }, function (x, y) {
 	          return x.item === y;
@@ -3925,35 +3252,57 @@ return /******/ (function(modules) { // webpackBootstrap
 	        collectionModified: 0
 	      };
 
+	      var resource = _this.s[def.name];
+
+	      // start the reaping
 	      if (def.reapInterval) {
 	        setInterval(function () {
-	          return _this.reap(def.n, { isInterval: true });
+	          return def.reap();
 	        }, def.reapInterval);
 	      }
 
-	      // Proxy DS methods with shorthand ones
-	      var fns = ["registerAdapter", "getAdapter", "is"];
-	      for (key in _this) {
-	        if (typeof _this[key] === "function") {
+	      // proxy DS methods with shorthand ones
+	      var fns = ['registerAdapter', 'getAdapterName', 'getAdapter', 'is'];
+	      for (var key in _this) {
+	        if (typeof _this[key] === 'function') {
 	          fns.push(key);
 	        }
 	      }
 
-	      DSUtils.forEach(fns, function (key) {
+	      /**
+	       * Create the Resource shorthands that proxy DS methods. e.g.
+	       *
+	       * var store = new JSData.DS();
+	       * var User = store.defineResource('user');
+	       *
+	       * store.update(resourceName, id, attrs[, options]) // DS method
+	       * User.update(id, attrs[, options]) // DS method proxied on a Resource
+	       */
+	      _utils['default'].forEach(fns, function (key) {
 	        var k = key;
 	        if (_this[k].shorthand !== false) {
 	          def[k] = function () {
-	            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	              args[_key] = arguments[_key];
+	            for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+	              args[_key3] = arguments[_key3];
 	            }
 
-	            args.unshift(def.n);
+	            args.unshift(def.name);
 	            return _this[k].apply(_this, args);
+	          };
+	          def[k].before = function (fn) {
+	            var orig = def[k];
+	            def[k] = function () {
+	              for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+	                args[_key4] = arguments[_key4];
+	              }
+
+	              return orig.apply(def, fn.apply(def, args) || args);
+	            };
 	          };
 	        } else {
 	          def[k] = function () {
-	            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	              args[_key] = arguments[_key];
+	            for (var _len5 = arguments.length, args = Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+	              args[_key5] = arguments[_key5];
 	            }
 
 	            return _this[k].apply(_this, args);
@@ -3961,62 +3310,87 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      });
 
-	      def.beforeValidate = DSUtils.promisify(def.beforeValidate);
-	      def.validate = DSUtils.promisify(def.validate);
-	      def.afterValidate = DSUtils.promisify(def.afterValidate);
-	      def.beforeCreate = DSUtils.promisify(def.beforeCreate);
-	      def.afterCreate = DSUtils.promisify(def.afterCreate);
-	      def.beforeUpdate = DSUtils.promisify(def.beforeUpdate);
-	      def.afterUpdate = DSUtils.promisify(def.afterUpdate);
-	      def.beforeDestroy = DSUtils.promisify(def.beforeDestroy);
-	      def.afterDestroy = DSUtils.promisify(def.afterDestroy);
+	      def.beforeValidate = _utils['default'].promisify(def.beforeValidate);
+	      def.validate = _utils['default'].promisify(def.validate);
+	      def.afterValidate = _utils['default'].promisify(def.afterValidate);
+	      def.beforeCreate = _utils['default'].promisify(def.beforeCreate);
+	      def.afterCreate = _utils['default'].promisify(def.afterCreate);
+	      def.beforeUpdate = _utils['default'].promisify(def.beforeUpdate);
+	      def.afterUpdate = _utils['default'].promisify(def.afterUpdate);
+	      def.beforeDestroy = _utils['default'].promisify(def.beforeDestroy);
+	      def.afterDestroy = _utils['default'].promisify(def.afterDestroy);
 
 	      var defaultAdapter = undefined;
-	      if (def.hasOwnProperty("defaultAdapter")) {
+	      if (def.hasOwnProperty('defaultAdapter')) {
 	        defaultAdapter = def.defaultAdapter;
 	      }
-	      DSUtils.forOwn(def.actions, function (action, name) {
+
+	      // setup "actions"
+	      _utils['default'].forOwn(def.actions, function (action, name) {
 	        if (def[name] && !def.actions[name]) {
-	          throw new Error("Cannot override existing method \"" + name + "\"!");
+	          throw new Error('Cannot override existing method "' + name + '"!');
 	        }
+	        action.request = action.request || function (config) {
+	          return config;
+	        };
+	        action.response = action.response || function (response) {
+	          return response;
+	        };
+	        action.responseError = action.responseError || function (err) {
+	          return _utils['default'].Promise.reject(err);
+	        };
 	        def[name] = function (id, options) {
-	          if (DSUtils._o(id)) {
+	          if (_utils['default']._o(id)) {
 	            options = id;
 	          }
 	          options = options || {};
-	          var adapter = _this.getAdapter(action.adapter || defaultAdapter || "http");
-	          var config = DSUtils.deepMixIn({}, action);
-	          if (!options.hasOwnProperty("endpoint") && config.endpoint) {
+	          var adapter = def.getAdapter(action.adapter || defaultAdapter || 'http');
+	          var config = _utils['default'].deepMixIn({}, action);
+	          if (!options.hasOwnProperty('endpoint') && config.endpoint) {
 	            options.endpoint = config.endpoint;
 	          }
-	          if (typeof options.getEndpoint === "function") {
+	          if (typeof options.getEndpoint === 'function') {
 	            config.url = options.getEndpoint(def, options);
 	          } else {
-	            var args = [options.basePath || adapter.defaults.basePath || def.basePath, def.getEndpoint(DSUtils._sn(id) ? id : null, options)];
-	            if (DSUtils._sn(id)) {
+	            var args = [options.basePath || adapter.defaults.basePath || def.basePath, adapter.getEndpoint(def, _utils['default']._sn(id) ? id : null, options)];
+	            if (_utils['default']._sn(id)) {
 	              args.push(id);
 	            }
 	            args.push(action.pathname || name);
-	            config.url = DSUtils.makePath.apply(null, args);
+	            config.url = _utils['default'].makePath.apply(null, args);
 	          }
-	          config.method = config.method || "GET";
-	          DSUtils.deepMixIn(config, options);
-	          return adapter.HTTP(config);
+	          config.method = config.method || 'GET';
+	          _utils['default'].deepMixIn(config, options);
+	          return new _utils['default'].Promise(function (r) {
+	            return r(config);
+	          }).then(options.request || action.request).then(function (config) {
+	            return adapter.HTTP(config);
+	          }).then(options.response || action.response, options.responseError || action.responseError);
 	        };
 	      });
 
-	      // Mix-in events
-	      DSUtils.Events(def);
+	      // mix in events
+	      _utils['default'].Events(def);
 
-	      def.logFn("Done preparing resource.");
+	      def.handleChange = function (data) {
+	        resource.collectionModified = _utils['default'].updateTimestamp(resource.collectionModified);
+	        if (def.notify) {
+	          setTimeout(function () {
+	            def.emit('DS.change', def, data);
+	          }, 0);
+	        }
+	      };
+
+	      def.logFn('Done preparing resource.');
 
 	      return {
 	        v: def
 	      };
 	    })();
 
-	    if (typeof _ret === "object") return _ret.v;
+	    if (typeof _ret === 'object') return _ret.v;
 	  } catch (err) {
+	    _this.defaults.errorFn(err);
 	    delete definitions[definition.name];
 	    delete _this.s[definition.name];
 	    throw err;
@@ -4024,10 +3398,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 24 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = eject;
+	exports['default'] = eject;
+	/**
+	 * Eject an item from the store, if it is currently in the store.
+	 *
+	 * @param resourceName The name of the resource type of the item eject.
+	 * @param id The primary key of the item to eject.
+	 * @param options Optional configuration.
+	 * @param options.notify Whether to emit the "DS.beforeEject" and "DS.afterEject" events
+	 * @param options.clearEmptyQueries Whether to remove cached findAll queries that become empty as a result of this method call.
+	 * @returns The ejected item if one was ejected.
+	 */
 
 	function eject(resourceName, id, options) {
 	  var _this = this;
@@ -4042,17 +3426,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!definition) {
 	    throw new _this.errors.NER(resourceName);
 	  } else if (!DSUtils._sn(id)) {
-	    throw DSUtils._snErr("id");
+	    throw DSUtils._snErr('id');
 	  }
 
 	  options = DSUtils._(definition, options);
 
-	  options.logFn("eject", id, options);
+	  options.logFn('eject', id, options);
 
+	  // find the item to eject
 	  for (var i = 0; i < resource.collection.length; i++) {
 	    if (resource.collection[i][definition.idAttribute] == id) {
 	      // jshint ignore:line
 	      item = resource.collection[i];
+	      // remove its expiration timestamp
 	      resource.expiresHeap.remove(item);
 	      found = true;
 	      break;
@@ -4060,45 +3446,54 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  if (found) {
 	    var _ret = (function () {
+	      // lifecycle
+	      definition.beforeEject(options, item);
 	      if (options.notify) {
-	        definition.beforeEject(options, item);
-	        definition.emit("DS.beforeEject", definition, item);
+	        definition.emit('DS.beforeEject', definition, item);
 	      }
-	      _this.unlinkInverse(definition.n, id);
-	      resource.collection.splice(i, 1);
-	      if (DSUtils.w) {
-	        resource.observers[id].close();
-	      }
-	      delete resource.observers[id];
 
-	      delete resource.index[id];
-	      delete resource.previousAttributes[id];
-	      delete resource.completedQueries[id];
-	      delete resource.pendingQueries[id];
-	      DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
-	        DSUtils.remove(resource.changeHistory, changeRecord);
-	      });
+	      // find the item in any ($$injected) cached queries
 	      var toRemove = [];
 	      DSUtils.forOwn(resource.queryData, function (items, queryHash) {
 	        if (items.$$injected) {
 	          DSUtils.remove(items, item);
 	        }
-	        if (!items.length) {
+	        // optionally remove any empty queries
+	        if (!items.length && options.clearEmptyQueries) {
 	          toRemove.push(queryHash);
 	        }
+	      });
+
+	      // clean up
+	      DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
+	        DSUtils.remove(resource.changeHistory, changeRecord);
 	      });
 	      DSUtils.forEach(toRemove, function (queryHash) {
 	        delete resource.completedQueries[queryHash];
 	        delete resource.queryData[queryHash];
 	      });
+	      if (DSUtils.w) {
+	        // stop observation
+	        resource.observers[id].close();
+	      }
+	      delete resource.observers[id];
+	      delete resource.index[id];
+	      delete resource.previousAttributes[id];
+	      delete resource.completedQueries[id];
+	      delete resource.pendingQueries[id];
 	      delete resource.changeHistories[id];
 	      delete resource.modified[id];
 	      delete resource.saved[id];
-	      resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
+	      // remove it from the store
+	      resource.collection.splice(i, 1);
+	      // collection has been modified
+	      definition.handleChange(item);
+
+	      // lifecycle
+	      definition.afterEject(options, item);
 	      if (options.notify) {
-	        definition.afterEject(options, item);
-	        definition.emit("DS.afterEject", definition, item);
+	        definition.emit('DS.afterEject', definition, item);
 	      }
 
 	      return {
@@ -4106,17 +3501,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	      };
 	    })();
 
-	    if (typeof _ret === "object") {
-	      return _ret.v;
-	    }
+	    if (typeof _ret === 'object') return _ret.v;
 	  }
 	}
 
 /***/ },
-/* 25 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = ejectAll;
+	exports['default'] = ejectAll;
+	/**
+	 * Eject a collection of items from the store, if any items currently in the store match the given criteria.
+	 *
+	 * @param resourceName The name of the resource type of the items eject.
+	 * @param params The criteria by which to match items to eject. See http://www.js-data.io/docs/query-syntax
+	 * @param options Optional configuration.
+	 * @returns The collection of items that were ejected, if any.
+	 */
 
 	function ejectAll(resourceName, params, options) {
 	  var _this = this;
@@ -4127,100 +3528,147 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!definition) {
 	    throw new _this.errors.NER(resourceName);
 	  } else if (!DSUtils._o(params)) {
-	    throw DSUtils._oErr("params");
+	    throw DSUtils._oErr('params');
 	  }
 
-	  definition.logFn("ejectAll", params, options);
+	  definition.logFn('ejectAll', params, options);
 
 	  var resource = _this.s[resourceName];
 	  var queryHash = DSUtils.toJson(params);
-	  var items = _this.filter(definition.n, params);
+
+	  // get items that match the criteria
+	  var items = definition.filter(params);
 	  var ids = [];
+
 	  if (DSUtils.isEmpty(params)) {
+	    // remove all completed queries if ejecting all items
 	    resource.completedQueries = {};
 	  } else {
+	    // remove matching completed query, if any
 	    delete resource.completedQueries[queryHash];
 	  }
+	  // prepare to remove matching items
 	  DSUtils.forEach(items, function (item) {
 	    if (item && item[definition.idAttribute]) {
 	      ids.push(item[definition.idAttribute]);
 	    }
 	  });
+	  // eject each matching item
 	  DSUtils.forEach(ids, function (id) {
-	    _this.eject(definition.n, id, options);
+	    definition.eject(id, options);
 	  });
-	  resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
+	  // collection has been modified
+	  definition.handleChange(items);
 	  return items;
 	}
 
 /***/ },
-/* 26 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = filter;
+	exports['default'] = filter;
+	/**
+	 * Return the subset of items currently in the store that match the given criteria.
+	 *
+	 * The actual filtering is delegated to DS#defaults.defaultFilter, which can be overridden by developers.
+	 *
+	 * @param resourceName The name of the resource type of the items to filter.
+	 * @param params The criteria by which to filter items. See http://www.js-data.io/docs/query-syntax
+	 * @param options Optional configuration.
+	 * @returns Matching items.
+	 */
 
 	function filter(resourceName, params, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
 	  var definition = _this.defs[resourceName];
-	  var resource = _this.s[resourceName];
 
 	  if (!definition) {
 	    throw new _this.errors.NER(resourceName);
 	  } else if (params && !DSUtils._o(params)) {
-	    throw DSUtils._oErr("params");
+	    throw DSUtils._oErr('params');
 	  }
 
 	  // Protect against null
 	  params = params || {};
-
 	  options = DSUtils._(definition, options);
+	  options.logFn('filter', params, options);
 
-	  options.logFn("filter", params, options);
-
-	  var queryHash = DSUtils.toJson(params);
-
-	  if (!(queryHash in resource.completedQueries) && options.loadFromServer) {
-	    // This particular query has never been completed
-
-	    if (!resource.pendingQueries[queryHash]) {
-	      // This particular query has never even been started
-	      _this.findAll(resourceName, params, options);
-	    }
-	  }
-
-	  return definition.defaultFilter.call(_this, resource.collection, resourceName, params, options);
+	  // delegate filtering to DS#defaults.defaultFilter, which can be overridden by developers.
+	  return definition.defaultFilter.call(_this, _this.s[resourceName].collection, resourceName, params, options);
 	}
 
 /***/ },
-/* 27 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+	exports['default'] = inject;
 
-	module.exports = inject;
+	var _utils = __webpack_require__(2);
 
-	var DSUtils = _interopRequire(__webpack_require__(1));
+	var _errors = __webpack_require__(3);
 
-	var DSErrors = _interopRequire(__webpack_require__(2));
+	/**
+	 * This is a beast of a file, but it's where a significant portion of the magic happens.
+	 *
+	 * DS#inject makes up the core of how data gets into the store.
+	 */
 
-	function _getReactFunction(DS, definition, resource) {
-	  var name = definition.n;
+	/**
+	 * This factory function produces an observer handler function tailor-made for the current item being injected.
+	 *
+	 * The observer handler is what allows computed properties and change tracking to function.
+	 *
+	 * @param definition Resource definition produced by DS#defineResource
+	 * @param resource Resource data as internally stored by the data store
+	 * @returns {Function} Observer handler function
+	 * @private
+	 */
+	function makeObserverHandler(definition, resource) {
+	  var DS = this;
+
+	  // using "var" avoids a JSHint error
+	  var name = definition.name;
+
+	  /**
+	   * This will be called by observe-js when a new change record is available for the observed object
+	   *
+	   * @param added Change record for added properties
+	   * @param removed Change record for removed properties
+	   * @param changed Change record for changed properties
+	   * @param oldValueFn Function that can be used to get the previous value of a changed property
+	   * @param firstTime Whether this is the first time this function is being called for the given item. Will only be true once.
+	   */
 	  return function _react(added, removed, changed, oldValueFn, firstTime) {
 	    var target = this;
 	    var item = undefined;
+
+	    // Get the previous primary key of the observed item, in-case some knucklehead changed it
 	    var innerId = oldValueFn && oldValueFn(definition.idAttribute) ? oldValueFn(definition.idAttribute) : target[definition.idAttribute];
 
-	    DSUtils.forEach(definition.relationFields, function (field) {
+	    // Ignore changes to relation links
+	    _utils['default'].forEach(definition.relationFields, function (field) {
 	      delete added[field];
 	      delete removed[field];
 	      delete changed[field];
 	    });
 
-	    if (!DSUtils.isEmpty(added) || !DSUtils.isEmpty(removed) || !DSUtils.isEmpty(changed) || firstTime) {
+	    // Detect whether there are actually any changes
+	    if (!_utils['default'].isEmpty(added) || !_utils['default'].isEmpty(removed) || !_utils['default'].isEmpty(changed) || firstTime) {
 	      item = DS.get(name, innerId);
-	      resource.modified[innerId] = DSUtils.updateTimestamp(resource.modified[innerId]);
-	      resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
+
+	      // update item and collection "modified" timestamps
+	      resource.modified[innerId] = _utils['default'].updateTimestamp(resource.modified[innerId]);
+
+	      if (item && definition.instanceEvents) {
+	        setTimeout(function () {
+	          item.emit('DS.change', definition, item);
+	        }, 0);
+	      }
+
+	      definition.handleChange(item);
+
+	      // Save a change record for the item
 	      if (definition.keepChangeHistory) {
 	        var changeRecord = {
 	          resourceName: name,
@@ -4235,159 +3683,208 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 
+	    // Recompute computed properties if any computed properties depend on changed properties
 	    if (definition.computed) {
 	      item = item || DS.get(name, innerId);
-	      DSUtils.forOwn(definition.computed, function (fn, field) {
+	      _utils['default'].forOwn(definition.computed, function (fn, field) {
 	        var compute = false;
 	        // check if required fields changed
-	        DSUtils.forEach(fn.deps, function (dep) {
+	        _utils['default'].forEach(fn.deps, function (dep) {
 	          if (dep in added || dep in removed || dep in changed || !(field in item)) {
 	            compute = true;
 	          }
 	        });
 	        compute = compute || !fn.deps.length;
 	        if (compute) {
-	          DSUtils.compute.call(item, fn, field);
-	        }
-	      });
-	    }
-
-	    if (definition.relations) {
-	      item = item || DS.get(name, innerId);
-	      DSUtils.forEach(definition.relationList, function (def) {
-	        if (item[def.localField] && (def.localKey in added || def.localKey in removed || def.localKey in changed)) {
-	          DS.link(name, item[definition.idAttribute], [def.relation]);
+	          _utils['default'].compute.call(item, fn, field);
 	        }
 	      });
 	    }
 
 	    if (definition.idAttribute in changed) {
-	      definition.errorFn("Doh! You just changed the primary key of an object! Your data for the \"" + name + "\" resource is now in an undefined (probably broken) state.");
+	      definition.errorFn('Doh! You just changed the primary key of an object! Your data for the "' + name + '" resource is now in an undefined (probably broken) state.');
 	    }
 	  };
 	}
 
+	/**
+	 * A recursive function for injecting data into the store.
+	 *
+	 * @param definition Resource definition produced by DS#defineResource
+	 * @param resource Resource data as internally stored by the data store
+	 * @param attrs The data to be injected. Will be an object or an array of objects.
+	 * @param options Optional configuration.
+	 * @returns The injected data
+	 * @private
+	 */
 	function _inject(definition, resource, attrs, options) {
 	  var _this = this;
-	  var _react = _getReactFunction(_this, definition, resource, attrs, options);
-
 	  var injected = undefined;
-	  if (DSUtils._a(attrs)) {
+
+	  if (_utils['default']._a(attrs)) {
+	    // have an array of objects, go ahead and inject each one individually and return the resulting array
 	    injected = [];
 	    for (var i = 0; i < attrs.length; i++) {
 	      injected.push(_inject.call(_this, definition, resource, attrs[i], options));
 	    }
 	  } else {
+	    // create the observer handler for the data to be injected
+	    var _react = makeObserverHandler.call(_this, definition, resource);
+
 	    // check if "idAttribute" is a computed property
 	    var c = definition.computed;
 	    var idA = definition.idAttribute;
+	    // compute the primary key if necessary
 	    if (c && c[idA]) {
 	      (function () {
 	        var args = [];
-	        DSUtils.forEach(c[idA].deps, function (dep) {
+	        _utils['default'].forEach(c[idA].deps, function (dep) {
 	          args.push(attrs[dep]);
 	        });
 	        attrs[idA] = c[idA][c[idA].length - 1].apply(attrs, args);
 	      })();
 	    }
+
 	    if (!(idA in attrs)) {
-	      var error = new DSErrors.R("" + definition.n + ".inject: \"attrs\" must contain the property specified by \"idAttribute\"!");
+	      // we cannot inject any object into the store that does not have a primary key!
+	      var error = new _errors['default'].R(definition.name + '.inject: "attrs" must contain the property specified by "idAttribute"!');
 	      options.errorFn(error);
 	      throw error;
 	    } else {
 	      try {
-	        DSUtils.forEach(definition.relationList, function (def) {
-	          var relationName = def.relation;
-	          var relationDef = _this.defs[relationName];
-	          var toInject = attrs[def.localField];
-	          if (toInject) {
-	            if (!relationDef) {
-	              throw new DSErrors.R("" + definition.n + " relation is defined but the resource is not!");
-	            }
-	            if (DSUtils._a(toInject)) {
-	              (function () {
-	                var items = [];
-	                DSUtils.forEach(toInject, function (toInjectItem) {
-	                  if (toInjectItem !== _this.s[relationName].index[toInjectItem[relationDef.idAttribute]]) {
-	                    try {
-	                      var injectedItem = _this.inject(relationName, toInjectItem, options.orig());
-	                      if (def.foreignKey) {
-	                        injectedItem[def.foreignKey] = attrs[definition.idAttribute];
+	        (function () {
+	          // when injecting object that contain their nested relations, this code
+	          // will recursively inject them into their proper places in the data store.
+	          // Magic!
+	          _utils['default'].forEach(definition.relationList, function (def) {
+	            var relationName = def.relation;
+	            var relationDef = _this.defs[relationName];
+	            var toInject = attrs[def.localField];
+	            if (toInject) {
+	              if (!relationDef) {
+	                throw new _errors['default'].R(definition.name + ' relation is defined but the resource is not!');
+	              }
+	              // handle injecting hasMany relations
+	              if (_utils['default']._a(toInject)) {
+	                (function () {
+	                  var items = [];
+	                  _utils['default'].forEach(toInject, function (toInjectItem) {
+	                    if (toInjectItem !== _this.s[relationName].index[toInjectItem[relationDef.idAttribute]]) {
+	                      try {
+	                        var injectedItem = relationDef.inject(toInjectItem, options.orig());
+	                        if (def.foreignKey) {
+	                          injectedItem[def.foreignKey] = attrs[definition.idAttribute];
+	                        }
+	                        items.push(injectedItem);
+	                      } catch (err) {
+	                        options.errorFn(err, 'Failed to inject ' + def.type + ' relation: "' + relationName + '"!');
 	                      }
-	                      items.push(injectedItem);
-	                    } catch (err) {
-	                      options.errorFn(err, "Failed to inject " + def.type + " relation: \"" + relationName + "\"!");
 	                    }
+	                  });
+	                })();
+	              } else {
+	                // handle injecting belongsTo and hasOne relations
+	                if (toInject !== _this.s[relationName].index[toInject[relationDef.idAttribute]]) {
+	                  try {
+	                    var _injected = relationDef.inject(attrs[def.localField], options.orig());
+	                    if (def.foreignKey) {
+	                      _injected[def.foreignKey] = attrs[definition.idAttribute];
+	                    }
+	                  } catch (err) {
+	                    options.errorFn(err, 'Failed to inject ' + def.type + ' relation: "' + relationName + '"!');
 	                  }
-	                });
-	                attrs[def.localField] = items;
-	              })();
-	            } else {
-	              if (toInject !== _this.s[relationName].index[toInject[relationDef.idAttribute]]) {
-	                try {
-	                  attrs[def.localField] = _this.inject(relationName, attrs[def.localField], options.orig());
-	                  if (def.foreignKey) {
-	                    attrs[def.localField][def.foreignKey] = attrs[definition.idAttribute];
-	                  }
-	                } catch (err) {
-	                  options.errorFn(err, "Failed to inject " + def.type + " relation: \"" + relationName + "\"!");
 	                }
 	              }
 	            }
-	          }
-	        });
+	          });
 
-	        var id = attrs[idA];
-	        var item = _this.get(definition.n, id);
-	        var initialLastModified = item ? resource.modified[id] : 0;
+	          // primary key of item being injected
+	          var id = attrs[idA];
+	          // item being injected
+	          var item = definition.get(id);
+	          // 0 if the item is new, otherwise the previous last modified timestamp of the item
+	          var initialLastModified = item ? resource.modified[id] : 0;
 
-	        if (!item) {
-	          if (options.useClass) {
-	            if (attrs instanceof definition[definition["class"]]) {
+	          // item is new
+	          if (!item) {
+	            if (attrs instanceof definition[definition['class']]) {
 	              item = attrs;
 	            } else {
-	              item = new definition[definition["class"]]();
+	              item = new definition[definition['class']]();
 	            }
+	            // remove relation properties from the item, since those relations have been injected by now
+	            _utils['default'].forEach(definition.relationList, function (def) {
+	              delete attrs[def.localField];
+	            });
+	            // copy remaining properties to the injected item
+	            _utils['default'].deepMixIn(item, attrs);
+
+	            // add item to collection
+	            resource.collection.push(item);
+	            resource.changeHistories[id] = [];
+
+	            // If we're in the browser, start observation
+	            if (_utils['default'].w) {
+	              resource.observers[id] = new _this.observe.ObjectObserver(item);
+	              resource.observers[id].open(_react, item);
+	            }
+
+	            // index item
+	            resource.index[id] = item;
+	            // fire observation handler for the first time
+	            _react.call(item, {}, {}, {}, null, true);
+	            // save "previous" attributes of the injected item, for change diffs later
+	            resource.previousAttributes[id] = _utils['default'].copy(item, null, null, null, definition.relationFields);
 	          } else {
-	            item = {};
-	          }
-	          DSUtils.deepMixIn(item, attrs);
-
-	          resource.collection.push(item);
-	          resource.changeHistories[id] = [];
-
-	          if (DSUtils.w) {
-	            resource.observers[id] = new _this.observe.ObjectObserver(item);
-	            resource.observers[id].open(_react, item);
-	          }
-
-	          resource.index[id] = item;
-	          _react.call(item, {}, {}, {}, null, true);
-	          resource.previousAttributes[id] = DSUtils.copy(item, null, null, null, definition.relationFields);
-	        } else {
-	          DSUtils.deepMixIn(item, attrs);
-	          if (definition.resetHistoryOnInject) {
-	            resource.previousAttributes[id] = DSUtils.copy(item, null, null, null, definition.relationFields);
-	            if (resource.changeHistories[id].length) {
-	              DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
-	                DSUtils.remove(resource.changeHistory, changeRecord);
+	            // item is being re-injected
+	            // new properties take precedence
+	            if (options.onConflict === 'merge') {
+	              _utils['default'].deepMixIn(item, attrs);
+	            } else if (options.onConflict === 'replace') {
+	              _utils['default'].forOwn(item, function (v, k) {
+	                if (k !== definition.idAttribute) {
+	                  if (!attrs.hasOwnProperty(k)) {
+	                    delete item[k];
+	                  }
+	                }
 	              });
-	              resource.changeHistories[id].splice(0, resource.changeHistories[id].length);
+	              _utils['default'].forOwn(attrs, function (v, k) {
+	                if (k !== definition.idAttribute) {
+	                  item[k] = v;
+	                }
+	              });
+	            }
+
+	            if (definition.resetHistoryOnInject) {
+	              // clear change history for item
+	              resource.previousAttributes[id] = _utils['default'].copy(item, null, null, null, definition.relationFields);
+	              if (resource.changeHistories[id].length) {
+	                _utils['default'].forEach(resource.changeHistories[id], function (changeRecord) {
+	                  _utils['default'].remove(resource.changeHistory, changeRecord);
+	                });
+	                resource.changeHistories[id].splice(0, resource.changeHistories[id].length);
+	              }
+	            }
+	            if (_utils['default'].w) {
+	              // force observation callback to be fired if there are any changes to the item and `Object.observe` is not available
+	              resource.observers[id].deliver();
 	            }
 	          }
-	          if (DSUtils.w) {
-	            resource.observers[id].deliver();
-	          }
-	        }
-	        resource.modified[id] = initialLastModified && resource.modified[id] === initialLastModified ? DSUtils.updateTimestamp(resource.modified[id]) : resource.modified[id];
-	        resource.expiresHeap.remove(item);
-	        var timestamp = new Date().getTime();
-	        resource.expiresHeap.push({
-	          item: item,
-	          timestamp: timestamp,
-	          expires: definition.maxAge ? timestamp + definition.maxAge : Number.MAX_VALUE
-	        });
-	        injected = item;
+	          // update modified timestamp of item
+	          resource.modified[id] = initialLastModified && resource.modified[id] === initialLastModified ? _utils['default'].updateTimestamp(resource.modified[id]) : resource.modified[id];
+
+	          // reset expiry tracking for item
+	          resource.expiresHeap.remove(item);
+	          var timestamp = new Date().getTime();
+	          resource.expiresHeap.push({
+	            item: item,
+	            timestamp: timestamp,
+	            expires: definition.maxAge ? timestamp + definition.maxAge : Number.MAX_VALUE
+	          });
+
+	          // final injected item
+	          injected = item;
+	        })();
 	      } catch (err) {
 	        options.errorFn(err, attrs);
 	      }
@@ -4396,17 +3893,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return injected;
 	}
 
-	function _link(definition, injected, options) {
-	  var _this = this;
-
-	  DSUtils.forEach(definition.relationList, function (def) {
-	    if (options.findBelongsTo && def.type === "belongsTo" && injected[definition.idAttribute]) {
-	      _this.link(definition.n, injected[definition.idAttribute], [def.relation]);
-	    } else if (options.findHasMany && def.type === "hasMany" || options.findHasOne && def.type === "hasOne") {
-	      _this.link(definition.n, injected[definition.idAttribute], [def.relation]);
-	    }
-	  });
-	}
+	/**
+	 * Inject the given object or array of objects into the data store.
+	 *
+	 * @param resourceName The name of the type of resource of the data to be injected.
+	 * @param attrs Object or array of objects. Objects must contain a primary key.
+	 * @param options Optional configuration.
+	 * @param options.notify Whether to emit the "DS.beforeInject" and "DS.afterInject" events.
+	 * @returns The injected data.
+	 */
 
 	function inject(resourceName, attrs, options) {
 	  var _this = this;
@@ -4415,266 +3910,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var injected = undefined;
 
 	  if (!definition) {
-	    throw new DSErrors.NER(resourceName);
-	  } else if (!DSUtils._o(attrs) && !DSUtils._a(attrs)) {
-	    throw new DSErrors.IA("" + resourceName + ".inject: \"attrs\" must be an object or an array!");
+	    throw new _errors['default'].NER(resourceName);
+	  } else if (!_utils['default']._o(attrs) && !_utils['default']._a(attrs)) {
+	    throw new _errors['default'].IA(resourceName + '.inject: "attrs" must be an object or an array!');
 	  }
 
-	  var name = definition.n;
-	  options = DSUtils._(definition, options);
+	  options = _utils['default']._(definition, options);
+	  options.logFn('inject', attrs, options);
 
-	  options.logFn("inject", attrs, options);
+	  // lifecycle
+	  options.beforeInject(options, attrs);
 	  if (options.notify) {
-	    options.beforeInject(options, attrs);
-	    definition.emit("DS.beforeInject", definition, attrs);
+	    definition.emit('DS.beforeInject', definition, attrs);
 	  }
 
+	  // start the recursive injection of data
 	  injected = _inject.call(_this, definition, resource, attrs, options);
-	  resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
 
-	  if (options.findInverseLinks) {
-	    if (DSUtils._a(injected)) {
-	      if (injected.length) {
-	        _this.linkInverse(name, injected[0][definition.idAttribute]);
-	      }
-	    } else {
-	      _this.linkInverse(name, injected[definition.idAttribute]);
-	    }
-	  }
+	  // collection was modified
+	  definition.handleChange(injected);
 
-	  if (DSUtils._a(injected)) {
-	    DSUtils.forEach(injected, function (injectedI) {
-	      _link.call(_this, definition, injectedI, options);
-	    });
-	  } else {
-	    _link.call(_this, definition, injected, options);
-	  }
-
+	  // lifecycle
+	  options.afterInject(options, injected);
 	  if (options.notify) {
-	    options.afterInject(options, injected);
-	    definition.emit("DS.afterInject", definition, injected);
+	    definition.emit('DS.afterInject', definition, injected);
 	  }
 
 	  return injected;
 	}
 
 /***/ },
-/* 28 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = link;
-
-	function link(resourceName, id, relations) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var definition = _this.defs[resourceName];
-
-	  relations = relations || [];
-
-	  id = DSUtils.resolveId(definition, id);
-	  if (!definition) {
-	    throw new _this.errors.NER(resourceName);
-	  } else if (!DSUtils._sn(id)) {
-	    throw DSUtils._snErr("id");
-	  } else if (!DSUtils._a(relations)) {
-	    throw DSUtils._aErr("relations");
-	  }
-
-	  definition.logFn("link", id, relations);
-
-	  var linked = _this.get(resourceName, id);
-
-	  if (linked) {
-	    DSUtils.forEach(definition.relationList, function (def) {
-	      var relationName = def.relation;
-	      if (relations.length && !DSUtils.contains(relations, relationName) || !def.localField) {
-	        return;
-	      }
-	      var params = {};
-	      if (def.type === "belongsTo") {
-	        var _parent = linked[def.localKey] ? _this.get(relationName, linked[def.localKey]) : null;
-	        if (_parent) {
-	          linked[def.localField] = _parent;
-	        }
-	      } else if (def.type === "hasMany") {
-	        params[def.foreignKey] = linked[definition.idAttribute];
-	        linked[def.localField] = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
-	      } else if (def.type === "hasOne") {
-	        params[def.foreignKey] = linked[definition.idAttribute];
-	        var children = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
-	        if (children.length) {
-	          linked[def.localField] = children[0];
-	        }
-	      }
-	    });
-	  }
-
-	  return linked;
-	}
-
-/***/ },
-/* 29 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = linkAll;
-
-	function linkAll(resourceName, params, relations) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var definition = _this.defs[resourceName];
-
-	  relations = relations || [];
-
-	  if (!definition) {
-	    throw new _this.errors.NER(resourceName);
-	  } else if (!DSUtils._a(relations)) {
-	    throw DSUtils._aErr("relations");
-	  }
-
-	  definition.logFn("linkAll", params, relations);
-
-	  var linked = _this.filter(resourceName, params);
-
-	  if (linked) {
-	    DSUtils.forEach(definition.relationList, function (def) {
-	      var relationName = def.relation;
-	      if (relations.length && !DSUtils.contains(relations, relationName) || !def.localField) {
-	        return;
-	      }
-	      if (def.type === "belongsTo") {
-	        DSUtils.forEach(linked, function (injectedItem) {
-	          var parent = injectedItem[def.localKey] ? _this.get(relationName, injectedItem[def.localKey]) : null;
-	          if (parent) {
-	            injectedItem[def.localField] = parent;
-	          }
-	        });
-	      } else if (def.type === "hasMany") {
-	        DSUtils.forEach(linked, function (injectedItem) {
-	          var params = {};
-	          params[def.foreignKey] = injectedItem[definition.idAttribute];
-	          injectedItem[def.localField] = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
-	        });
-	      } else if (def.type === "hasOne") {
-	        DSUtils.forEach(linked, function (injectedItem) {
-	          var params = {};
-	          params[def.foreignKey] = injectedItem[definition.idAttribute];
-	          var children = _this.defaults.constructor.prototype.defaultFilter.call(_this, _this.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
-	          if (children.length) {
-	            injectedItem[def.localField] = children[0];
-	          }
-	        });
-	      }
-	    });
-	  }
-
-	  return linked;
-	}
-
-/***/ },
-/* 30 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = linkInverse;
-
-	function linkInverse(resourceName, id, relations) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var definition = _this.defs[resourceName];
-
-	  relations = relations || [];
-
-	  id = DSUtils.resolveId(definition, id);
-	  if (!definition) {
-	    throw new _this.errors.NER(resourceName);
-	  } else if (!DSUtils._sn(id)) {
-	    throw DSUtils._snErr("id");
-	  } else if (!DSUtils._a(relations)) {
-	    throw DSUtils._aErr("relations");
-	  }
-
-	  definition.logFn("linkInverse", id, relations);
-
-	  var linked = _this.get(resourceName, id);
-
-	  if (linked) {
-	    DSUtils.forOwn(_this.defs, function (d) {
-	      DSUtils.forOwn(d.relations, function (relatedModels) {
-	        DSUtils.forOwn(relatedModels, function (defs, relationName) {
-	          if (relations.length && !DSUtils.contains(relations, d.n)) {
-	            return;
-	          }
-	          if (definition.n === relationName) {
-	            _this.linkAll(d.n, {}, [definition.n]);
-	          }
-	        });
-	      });
-	    });
-	  }
-
-	  return linked;
-	}
-
-/***/ },
-/* 31 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = unlinkInverse;
-
-	function unlinkInverse(resourceName, id, relations) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var definition = _this.defs[resourceName];
-
-	  relations = relations || [];
-
-	  id = DSUtils.resolveId(definition, id);
-	  if (!definition) {
-	    throw new _this.errors.NER(resourceName);
-	  } else if (!DSUtils._sn(id)) {
-	    throw DSUtils._snErr("id");
-	  } else if (!DSUtils._a(relations)) {
-	    throw DSUtils._aErr("relations");
-	  }
-
-	  definition.logFn("unlinkInverse", id, relations);
-
-	  var linked = _this.get(resourceName, id);
-
-	  if (linked) {
-	    DSUtils.forOwn(_this.defs, function (d) {
-	      DSUtils.forOwn(d.relations, function (relatedModels) {
-	        DSUtils.forOwn(relatedModels, function (defs, relationName) {
-	          if (definition.n === relationName) {
-	            DSUtils.forEach(defs, function (def) {
-	              DSUtils.forEach(_this.s[def.name].collection, function (item) {
-	                if (def.type === "hasMany" && item[def.localField]) {
-	                  (function () {
-	                    var index = undefined;
-	                    DSUtils.forEach(item[def.localField], function (subItem, i) {
-	                      if (subItem === linked) {
-	                        index = i;
-	                      }
-	                    });
-	                    if (index !== undefined) {
-	                      item[def.localField].splice(index, 1);
-	                    }
-	                  })();
-	                } else if (item[def.localField] === linked) {
-	                  delete item[def.localField];
-	                }
-	              });
-	            });
-	          }
-	        });
-	      });
-	    });
-	  }
-
-	  return linked;
-	}
-
-/***/ },
-/* 32 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -4708,7 +3974,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 33 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -4726,10 +3992,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 34 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var hasOwn = __webpack_require__(33);
+	var hasOwn = __webpack_require__(27);
 
 	    var _hasDontEnumBug,
 	        _dontEnums;
@@ -4808,7 +4074,26 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 35 */
+/* 29 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Checks if the value is created by the `Object` constructor.
+	     */
+	    function isPlainObject(value) {
+	        return (!!value && typeof value === 'object' &&
+	            value.constructor === Object);
+	    }
+
+	    module.exports = isPlainObject;
+
+
+
+
+/***/ },
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -4835,29 +4120,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 36 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
-	
-
-	    /**
-	     * Checks if the value is created by the `Object` constructor.
-	     */
-	    function isPlainObject(value) {
-	        return (!!value && typeof value === 'object' &&
-	            value.constructor === Object);
-	    }
-
-	    module.exports = isPlainObject;
-
-
-
-
-/***/ },
-/* 37 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var forEach = __webpack_require__(9);
+	var forEach = __webpack_require__(8);
 
 	    /**
 	     * Create nested object if non-existent
@@ -4879,7 +4145,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 38 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -4898,14 +4164,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 39 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(38);
-	var replaceAccents = __webpack_require__(53);
-	var removeNonWord = __webpack_require__(54);
+	var toString = __webpack_require__(32);
+	var replaceAccents = __webpack_require__(44);
+	var removeNonWord = __webpack_require__(45);
 	var upperCase = __webpack_require__(20);
-	var lowerCase = __webpack_require__(55);
+	var lowerCase = __webpack_require__(46);
 	    /**
 	    * Convert string to camelCase text.
 	    */
@@ -4924,15 +4190,34 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 40 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = create;
+	exports['default'] = create;
+	/**
+	 * Using an adapter, create a new item.
+	 *
+	 * Generally a primary key will NOT be provided in the properties hash,
+	 * because the adapter's persistence layer should be generating one.
+	 *
+	 * @param resourceName The name of the type of resource of the new item.
+	 * @param attrs Hash of properties with which to create the new item.
+	 * @param options Optional configuration.
+	 * @param options.cacheResponse Whether the newly created item as returned by the adapter should be injected into the data store.
+	 * @param options.upsert If the properties hash contains a primary key, attempt to call DS#update instead.
+	 * @param options.notify Whether to emit the "DS.beforeCreate" and "DS.afterCreate" events.
+	 * @param options.beforeValidate Lifecycle hook.
+	 * @param options.validate Lifecycle hook.
+	 * @param options.afterValidate Lifecycle hook.
+	 * @param options.beforeCreate Lifecycle hook.
+	 * @param options.afterCreate Lifecycle hook.
+	 */
 
 	function create(resourceName, attrs, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
 	  var definition = _this.defs[resourceName];
+	  var adapter = undefined;
 
 	  options = options || {};
 	  attrs = attrs || {};
@@ -4941,13 +4226,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!definition) {
 	    rejectionError = new _this.errors.NER(resourceName);
 	  } else if (!DSUtils._o(attrs)) {
-	    rejectionError = DSUtils._oErr("attrs");
+	    rejectionError = DSUtils._oErr('attrs');
 	  } else {
 	    options = DSUtils._(definition, options);
 	    if (options.upsert && DSUtils._sn(attrs[definition.idAttribute])) {
 	      return _this.update(resourceName, attrs[definition.idAttribute], attrs, options);
 	    }
-	    options.logFn("create", attrs, options);
+	    options.logFn('create', attrs, options);
 	  }
 
 	  return new DSUtils.Promise(function (resolve, reject) {
@@ -4956,7 +4241,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	      resolve(attrs);
 	    }
-	  }).then(function (attrs) {
+	  })
+	  // start lifecycle
+	  .then(function (attrs) {
 	    return options.beforeValidate.call(attrs, options, attrs);
 	  }).then(function (attrs) {
 	    return options.validate.call(attrs, options, attrs);
@@ -4966,90 +4253,129 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return options.beforeCreate.call(attrs, options, attrs);
 	  }).then(function (attrs) {
 	    if (options.notify) {
-	      definition.emit("DS.beforeCreate", definition, attrs);
+	      definition.emit('DS.beforeCreate', definition, attrs);
 	    }
-	    return _this.getAdapter(options).create(definition, attrs, options);
+	    adapter = _this.getAdapterName(options);
+	    return _this.adapters[adapter].create(definition, DSUtils.omit(attrs, options.omit), options);
 	  }).then(function (attrs) {
 	    return options.afterCreate.call(attrs, options, attrs);
 	  }).then(function (attrs) {
 	    if (options.notify) {
-	      definition.emit("DS.afterCreate", definition, attrs);
+	      definition.emit('DS.afterCreate', definition, attrs);
 	    }
 	    if (options.cacheResponse) {
-	      var created = _this.inject(definition.n, attrs, options.orig());
+	      // injected created intem into the store
+	      var created = _this.inject(definition.name, attrs, options.orig());
 	      var id = created[definition.idAttribute];
+	      // mark item's `find` query as completed, so a subsequent `find` call for this item will resolve immediately
 	      var resource = _this.s[resourceName];
 	      resource.completedQueries[id] = new Date().getTime();
 	      resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
 	      return created;
 	    } else {
+	      // just return an un-injected instance
 	      return _this.createInstance(resourceName, attrs, options);
 	    }
+	  }).then(function (item) {
+	    return DSUtils.respond(item, { adapter: adapter }, options);
 	  });
 	}
 
 /***/ },
-/* 41 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = destroy;
+	exports['default'] = destroy;
+	/**
+	 * Using an adapter, destroy an item.
+	 *
+	 * @param resourceName The name of the type of resource of the item to destroy.
+	 * @param id The primary key of the item to destroy.
+	 * @param options Optional configuration.
+	 * @param options.eagerEject Whether to eject the item from the store before the adapter operation completes, re-injecting if the adapter operation fails.
+	 * @param options.notify Whether to emit the "DS.beforeDestroy" and "DS.afterDestroy" events.
+	 * @param options.beforeDestroy Lifecycle hook.
+	 * @param options.afterDestroy Lifecycle hook.
+	 * @returns The primary key of the destroyed item.
+	 */
 
 	function destroy(resourceName, id, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
 	  var definition = _this.defs[resourceName];
 	  var item = undefined;
+	  var adapter = undefined;
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    id = DSUtils.resolveId(definition, id);
 	    if (!definition) {
 	      reject(new _this.errors.NER(resourceName));
 	    } else if (!DSUtils._sn(id)) {
-	      reject(DSUtils._snErr("id"));
+	      reject(DSUtils._snErr('id'));
 	    } else {
-	      item = _this.get(resourceName, id) || { id: id };
+	      // check if the item is in the store
+	      item = definition.get(id) || { id: id };
 	      options = DSUtils._(definition, options);
-	      options.logFn("destroy", id, options);
+	      options.logFn('destroy', id, options);
 	      resolve(item);
 	    }
-	  }).then(function (attrs) {
+	  })
+	  // start lifecycle
+	  .then(function (attrs) {
 	    return options.beforeDestroy.call(attrs, options, attrs);
 	  }).then(function (attrs) {
 	    if (options.notify) {
-	      definition.emit("DS.beforeDestroy", definition, attrs);
+	      definition.emit('DS.beforeDestroy', definition, attrs);
 	    }
+	    // don't wait for the adapter, remove the item from the store
 	    if (options.eagerEject) {
-	      _this.eject(resourceName, id);
+	      definition.eject(id);
 	    }
-	    return _this.getAdapter(options).destroy(definition, id, options);
+	    adapter = definition.getAdapter(options);
+	    return adapter.destroy(definition, id, options);
 	  }).then(function () {
 	    return options.afterDestroy.call(item, options, item);
 	  }).then(function (item) {
 	    if (options.notify) {
-	      definition.emit("DS.afterDestroy", definition, item);
+	      definition.emit('DS.afterDestroy', definition, item);
 	    }
-	    _this.eject(resourceName, id);
-	    return id;
-	  })["catch"](function (err) {
+	    // make sure the item is removed from the store
+	    definition.eject(id);
+	    return DSUtils.respond(id, { adapter: adapter }, options);
+	  })['catch'](function (err) {
+	    // rollback by re-injecting the item into the store
 	    if (options && options.eagerEject && item) {
-	      _this.inject(resourceName, item, { notify: false });
+	      definition.inject(item, { notify: false });
 	    }
 	    return DSUtils.Promise.reject(err);
 	  });
 	}
 
 /***/ },
-/* 42 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = destroyAll;
+	exports['default'] = destroyAll;
+	/**
+	 * Using an adapter, destroy an item.
+	 *
+	 * @param resourceName The name of the type of resource of the item to destroy.
+	 * @param params The criteria by which to filter items to destroy. See http://www.js-data.io/docs/query-syntax
+	 * @param options Optional configuration.
+	 * @param options.eagerEject Whether to eject the items from the store before the adapter operation completes, re-injecting if the adapter operation fails.
+	 * @param options.notify Whether to emit the "DS.beforeDestroy" and "DS.afterDestroy" events.
+	 * @param options.beforeDestroy Lifecycle hook.
+	 * @param options.afterDestroy Lifecycle hook.
+	 * @returns The ejected items, if any.
+	 */
 
 	function destroyAll(resourceName, params, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
 	  var definition = _this.defs[resourceName];
 	  var ejected = undefined,
-	      toEject = undefined;
+	      toEject = undefined,
+	      adapter = undefined;
 
 	  params = params || {};
 
@@ -5057,59 +4383,83 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!definition) {
 	      reject(new _this.errors.NER(resourceName));
 	    } else if (!DSUtils._o(params)) {
-	      reject(DSUtils._oErr("attrs"));
+	      reject(DSUtils._oErr('attrs'));
 	    } else {
 	      options = DSUtils._(definition, options);
-	      options.logFn("destroyAll", params, options);
+	      options.logFn('destroyAll', params, options);
 	      resolve();
 	    }
 	  }).then(function () {
-	    toEject = _this.defaults.defaultFilter.call(_this, resourceName, params);
+	    // find items that are to be ejected from the store
+	    toEject = definition.defaultFilter.call(_this, resourceName, params);
 	    return options.beforeDestroy(options, toEject);
 	  }).then(function () {
 	    if (options.notify) {
-	      definition.emit("DS.beforeDestroy", definition, toEject);
+	      definition.emit('DS.beforeDestroy', definition, toEject);
 	    }
+	    // don't wait for the adapter, remove the items from the store
 	    if (options.eagerEject) {
-	      ejected = _this.ejectAll(resourceName, params);
+	      ejected = definition.ejectAll(params);
 	    }
-	    return _this.getAdapter(options).destroyAll(definition, params, options);
+	    adapter = definition.getAdapterName(options);
+	    return _this.adapters[adapter].destroyAll(definition, params, options);
 	  }).then(function () {
 	    return options.afterDestroy(options, toEject);
 	  }).then(function () {
 	    if (options.notify) {
-	      definition.emit("DS.afterDestroy", definition, toEject);
+	      definition.emit('DS.afterDestroy', definition, toEject);
 	    }
-	    return ejected || _this.ejectAll(resourceName, params);
-	  })["catch"](function (err) {
+	    // make sure items are removed from the store
+	    return ejected || definition.ejectAll(params);
+	  }).then(function (items) {
+	    return DSUtils.respond(items, { adapter: adapter }, options);
+	  })['catch'](function (err) {
+	    // rollback by re-injecting the items into the store
 	    if (options && options.eagerEject && ejected) {
-	      _this.inject(resourceName, ejected, { notify: false });
+	      definition.inject(ejected, { notify: false });
 	    }
 	    return DSUtils.Promise.reject(err);
 	  });
 	}
 
 /***/ },
-/* 43 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
+	exports['default'] = find;
 	/* jshint -W082 */
-	module.exports = find;
+
+	/**
+	 * Using an adapter, retrieve a single item.
+	 *
+	 * @param resourceName The of the type of resource of the item to retrieve.
+	 * @param id The primary key of the item to retrieve.
+	 * @param options Optional configuration.
+	 * @param options.bypassCache Whether to ignore any cached item and force the retrieval through the adapter.
+	 * @param options.cacheResponse Whether to inject the found item into the data store.
+	 * @param options.strictCache Whether to only consider items to be "cached" if they were injected into the store as the result of `find` or `findAll`.
+	 * @param options.strategy The retrieval strategy to use.
+	 * @param options.findStrategy The retrieval strategy to use. Overrides "strategy".
+	 * @param options.fallbackAdapters Array of names of adapters to use if using "fallback" strategy.
+	 * @param options.findFallbackAdapters Array of names of adapters to use if using "fallback" strategy. Overrides "fallbackAdapters".
+	 * @returns The item.
+	 */
 
 	function find(resourceName, id, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
 	  var definition = _this.defs[resourceName];
 	  var resource = _this.s[resourceName];
+	  var adapter = undefined;
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    if (!definition) {
 	      reject(new _this.errors.NER(resourceName));
 	    } else if (!DSUtils._sn(id)) {
-	      reject(DSUtils._snErr("id"));
+	      reject(DSUtils._snErr('id'));
 	    } else {
 	      options = DSUtils._(definition, options);
-	      options.logFn("find", id, options);
+	      options.logFn('find', id, options);
 
 	      if (options.params) {
 	        options.params = DSUtils.copy(options.params);
@@ -5118,9 +4468,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (options.bypassCache || !options.cacheResponse) {
 	        delete resource.completedQueries[id];
 	      }
-	      if ((!options.findStrictCache || id in resource.completedQueries) && _this.get(resourceName, id)) {
-	        resolve(_this.get(resourceName, id));
+	      if ((!options.findStrictCache || id in resource.completedQueries) && definition.get(id) && !options.bypassCache) {
+	        // resolve immediately with the cached item
+	        resolve(definition.get(id));
 	      } else {
+	        // we're going to delegate to the adapter next
 	        delete resource.completedQueries[id];
 	        resolve();
 	      }
@@ -5130,10 +4482,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (!(id in resource.pendingQueries)) {
 	        var promise = undefined;
 	        var strategy = options.findStrategy || options.strategy;
-	        if (strategy === "fallback") {
+
+	        // try subsequent adapters if the preceeding one fails
+	        if (strategy === 'fallback') {
 	          (function () {
-	            var makeFallbackCall = function (index) {
-	              return _this.getAdapter((options.findFallbackAdapters || options.fallbackAdapters)[index]).find(definition, id, options)["catch"](function (err) {
+	            var makeFallbackCall = function makeFallbackCall(index) {
+	              adapter = definition.getAdapterName((options.findFallbackAdapters || options.fallbackAdapters)[index]);
+	              return _this.adapters[adapter].find(definition, id, options)['catch'](function (err) {
 	                index++;
 	                if (index < options.fallbackAdapters.length) {
 	                  return makeFallbackCall(index);
@@ -5146,27 +4501,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	            promise = makeFallbackCall(0);
 	          })();
 	        } else {
-	          promise = _this.getAdapter(options).find(definition, id, options);
+	          adapter = definition.getAdapterName(options);
+	          // just make a single attempt
+	          promise = _this.adapters[adapter].find(definition, id, options);
 	        }
 
 	        resource.pendingQueries[id] = promise.then(function (data) {
 	          // Query is no longer pending
 	          delete resource.pendingQueries[id];
 	          if (options.cacheResponse) {
-	            var injected = _this.inject(resourceName, data, options.orig());
+	            // inject the item into the data store
+	            var injected = definition.inject(data, options.orig());
+	            // mark the item as "cached"
 	            resource.completedQueries[id] = new Date().getTime();
 	            resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
 	            return injected;
 	          } else {
-	            return _this.createInstance(resourceName, data, options.orig());
+	            // just return an un-injected instance
+	            return definition.createInstance(data, options.orig());
 	          }
 	        });
 	      }
 	      return resource.pendingQueries[id];
 	    } else {
+	      // resolve immediately with the item
 	      return item;
 	    }
-	  })["catch"](function (err) {
+	  }).then(function (item) {
+	    return DSUtils.respond(item, { adapter: adapter }, options);
+	  })['catch'](function (err) {
 	    if (resource) {
 	      delete resource.pendingQueries[id];
 	    }
@@ -5175,14 +4538,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 44 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = findAll;
+	exports['default'] = findAll;
 	/* jshint -W082 */
 	function processResults(data, resourceName, queryHash, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
+	  var definition = _this.defs[resourceName];
 	  var resource = _this.s[resourceName];
 	  var idAttribute = _this.defs[resourceName].idAttribute;
 	  var date = new Date().getTime();
@@ -5193,11 +4557,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  delete resource.pendingQueries[queryHash];
 	  resource.completedQueries[queryHash] = date;
 
-	  // Update modified timestamp of collection
-	  resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified);
-
 	  // Merge the new values into the cache
-	  var injected = _this.inject(resourceName, data, options.orig());
+	  var injected = definition.inject(data, options.orig());
 
 	  // Make sure each object is added to completedQueries
 	  if (DSUtils._a(injected)) {
@@ -5211,19 +4572,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    });
 	  } else {
-	    options.errorFn("response is expected to be an array!");
+	    options.errorFn('response is expected to be an array!');
 	    resource.completedQueries[injected[idAttribute]] = date;
 	  }
 
 	  return injected;
 	}
 
+	/**
+	 * Using an adapter, retrieve a collection of items.
+	 *
+	 * @param resourceName The name of the type of resource of the items to retrieve.
+	 * @param params The criteria by which to filter items to retrieve. See http://www.js-data.io/docs/query-syntax
+	 * @param options Optional configuration.
+	 * @param options.bypassCache Whether to ignore any cached query for these items and force the retrieval through the adapter.
+	 * @param options.cacheResponse Whether to inject the found items into the data store.
+	 * @returns The items.
+	 */
+
 	function findAll(resourceName, params, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
 	  var definition = _this.defs[resourceName];
 	  var resource = _this.s[resourceName];
-	  var queryHash = undefined;
+	  var queryHash = undefined,
+	      adapter = undefined;
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    params = params || {};
@@ -5231,24 +4604,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!_this.defs[resourceName]) {
 	      reject(new _this.errors.NER(resourceName));
 	    } else if (!DSUtils._o(params)) {
-	      reject(DSUtils._oErr("params"));
+	      reject(DSUtils._oErr('params'));
 	    } else {
 	      options = DSUtils._(definition, options);
 	      queryHash = DSUtils.toJson(params);
-	      options.logFn("findAll", params, options);
+	      options.logFn('findAll', params, options);
 
 	      if (options.params) {
 	        options.params = DSUtils.copy(options.params);
 	      }
 
+	      // force a new request
 	      if (options.bypassCache || !options.cacheResponse) {
 	        delete resource.completedQueries[queryHash];
 	        delete resource.queryData[queryHash];
 	      }
 	      if (queryHash in resource.completedQueries) {
 	        if (options.useFilter) {
-	          resolve(_this.filter(resourceName, params, options.orig()));
+	          if (options.localKeys) {
+	            resolve(definition.getAll(options.localKeys, options.orig()));
+	          } else {
+	            // resolve immediately by filtering data from the data store
+	            resolve(definition.filter(params, options.orig()));
+	          }
 	        } else {
+	          // resolve immediately by returning the cached array from the previously made query
 	          resolve(resource.queryData[queryHash]);
 	        }
 	      } else {
@@ -5260,15 +4640,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (!(queryHash in resource.pendingQueries)) {
 	        var promise = undefined;
 	        var strategy = options.findAllStrategy || options.strategy;
-	        if (strategy === "fallback") {
+
+	        // try subsequent adapters if the preceeding one fails
+	        if (strategy === 'fallback') {
 	          (function () {
-	            var makeFallbackCall = function (index) {
-	              return _this.getAdapter((options.findAllFallbackAdapters || options.fallbackAdapters)[index]).findAll(definition, params, options)["catch"](function (err) {
+	            var makeFallbackCall = function makeFallbackCall(index) {
+	              adapter = definition.getAdapterName((options.findAllFallbackAdapters || options.fallbackAdapters)[index]);
+	              return _this.adapters[adapter].findAll(definition, params, options)['catch'](function (err) {
 	                index++;
 	                if (index < options.fallbackAdapters.length) {
 	                  return makeFallbackCall(index);
 	                } else {
-	                  return Promise.reject(err);
+	                  return DSUtils.Promise.reject(err);
 	                }
 	              });
 	            };
@@ -5276,18 +4659,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	            promise = makeFallbackCall(0);
 	          })();
 	        } else {
-	          promise = _this.getAdapter(options).findAll(definition, params, options);
+	          adapter = definition.getAdapterName(options);
+	          // just make a single attempt
+	          promise = _this.adapters[adapter].findAll(definition, params, options);
 	        }
 
 	        resource.pendingQueries[queryHash] = promise.then(function (data) {
+	          // Query is no longer pending
 	          delete resource.pendingQueries[queryHash];
 	          if (options.cacheResponse) {
+	            // inject the items into the data store
 	            resource.queryData[queryHash] = processResults.call(_this, data, resourceName, queryHash, options);
 	            resource.queryData[queryHash].$$injected = true;
 	            return resource.queryData[queryHash];
 	          } else {
 	            DSUtils.forEach(data, function (item, i) {
-	              data[i] = _this.createInstance(resourceName, item, options.orig());
+	              data[i] = definition.createInstance(item, options.orig());
 	            });
 	            return data;
 	          }
@@ -5296,9 +4683,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      return resource.pendingQueries[queryHash];
 	    } else {
+	      // resolve immediately with the items
 	      return items;
 	    }
-	  })["catch"](function (err) {
+	  }).then(function (items) {
+	    return DSUtils.respond(items, { adapter: adapter }, options);
+	  })['catch'](function (err) {
 	    if (resource) {
 	      delete resource.pendingQueries[queryHash];
 	    }
@@ -5307,10 +4697,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 45 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = loadRelations;
+	exports['default'] = loadRelations;
+
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+	/**
+	 * Load the specified relations for the given instance.
+	 *
+	 * @param resourceName The name of the type of resource of the instance for which to load relations.
+	 * @param instance The instance or the primary key of the instance.
+	 * @param relations An array of the relations to load.
+	 * @param options Optional configuration.
+	 * @returns The instance, now with its relations loaded.
+	 */
 
 	function loadRelations(resourceName, instance, relations, options) {
 	  var _this = this;
@@ -5318,33 +4720,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSErrors = _this.errors;
 
 	  var definition = _this.defs[resourceName];
-	  var fields = [];
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    if (DSUtils._sn(instance)) {
-	      instance = _this.get(resourceName, instance);
+	      instance = definition.get(instance);
 	    }
 
 	    if (DSUtils._s(relations)) {
 	      relations = [relations];
 	    }
 
+	    relations = relations || [];
+
 	    if (!definition) {
 	      reject(new DSErrors.NER(resourceName));
 	    } else if (!DSUtils._o(instance)) {
-	      reject(new DSErrors.IA("\"instance(id)\" must be a string, number or object!"));
+	      reject(new DSErrors.IA('"instance(id)" must be a string, number or object!'));
 	    } else if (!DSUtils._a(relations)) {
-	      reject(new DSErrors.IA("\"relations\" must be a string or an array!"));
+	      reject(new DSErrors.IA('"relations" must be a string or an array!'));
 	    } else {
 	      (function () {
 	        var _options = DSUtils._(definition, options);
-	        if (!_options.hasOwnProperty("findBelongsTo")) {
-	          _options.findBelongsTo = true;
-	        }
-	        if (!_options.hasOwnProperty("findHasMany")) {
-	          _options.findHasMany = true;
-	        }
-	        _options.logFn("loadRelations", instance, relations, _options);
+	        _options.logFn('loadRelations', instance, relations, _options);
 
 	        var tasks = [];
 
@@ -5352,7 +4749,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	          var relationName = def.relation;
 	          var relationDef = definition.getResource(relationName);
 	          var __options = DSUtils._(relationDef, options);
-	          if (DSUtils.contains(relations, relationName) || DSUtils.contains(relations, def.localField)) {
+
+	          // relations can be loaded based on resource name or field name
+	          if (!relations.length || DSUtils.contains(relations, relationName) || DSUtils.contains(relations, def.localField)) {
 	            var task = undefined;
 	            var params = {};
 	            if (__options.allowSimpleWhere) {
@@ -5360,27 +4759,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	            } else {
 	              params.where = {};
 	              params.where[def.foreignKey] = {
-	                "==": instance[definition.idAttribute]
+	                '==': instance[definition.idAttribute]
 	              };
 	            }
 
-	            if (def.type === "hasMany") {
-	              task = _this.findAll(relationName, params, __options.orig());
-	            } else if (def.type === "hasOne") {
+	            if (def.type === 'hasMany') {
+	              var orig = __options.orig();
+	              if (def.localKeys) {
+	                delete params[def.foreignKey];
+	                var keys = instance[def.localKeys] || [];
+	                keys = DSUtils._a(keys) ? keys : DSUtils.keys(keys);
+	                params.where = _defineProperty({}, relationDef.idAttribute, {
+	                  'in': keys
+	                });
+	                orig.localKeys = keys;
+	              }
+	              task = relationDef.findAll(params, orig);
+	            } else if (def.type === 'hasOne') {
 	              if (def.localKey && instance[def.localKey]) {
-	                task = _this.find(relationName, instance[def.localKey], __options.orig());
+	                task = relationDef.find(instance[def.localKey], __options.orig());
 	              } else if (def.foreignKey) {
-	                task = _this.findAll(relationName, params, __options.orig()).then(function (hasOnes) {
+	                task = relationDef.findAll(params, __options.orig()).then(function (hasOnes) {
 	                  return hasOnes.length ? hasOnes[0] : null;
 	                });
 	              }
 	            } else if (instance[def.localKey]) {
-	              task = _this.find(relationName, instance[def.localKey], options);
+	              task = relationDef.find(instance[def.localKey], __options.orig());
 	            }
 
 	            if (task) {
 	              tasks.push(task);
-	              fields.push(def.localField || false);
 	            }
 	          }
 	        });
@@ -5390,21 +4798,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }).then(function (tasks) {
 	    return DSUtils.Promise.all(tasks);
-	  }).then(function (loadedRelations) {
-	    DSUtils.forEach(fields, function (field, index) {
-	      if (field) {
-	        instance[field] = loadedRelations[index];
-	      }
-	    });
+	  }).then(function () {
 	    return instance;
 	  });
 	}
 
 /***/ },
-/* 46 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = reap;
+	exports['default'] = reap;
+	/**
+	 * Find expired items of the specified resource type and perform the configured action.
+	 *
+	 * @param resourceName The name of the type of resource of the items to reap.
+	 * @param options Optional configuration.
+	 * @returns The reaped items.
+	 */
 
 	function reap(resourceName, options) {
 	  var _this = this;
@@ -5418,13 +4828,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      reject(new _this.errors.NER(resourceName));
 	    } else {
 	      options = DSUtils._(definition, options);
-	      if (!options.hasOwnProperty("notify")) {
+	      if (!options.hasOwnProperty('notify')) {
 	        options.notify = false;
 	      }
-	      options.logFn("reap", options);
+	      options.logFn('reap', options);
 	      var items = [];
 	      var now = new Date().getTime();
 	      var expiredItem = undefined;
+
+	      // find the expired items
 	      while ((expiredItem = resource.expiresHeap.peek()) && expiredItem.expires < now) {
 	        items.push(expiredItem.item);
 	        delete expiredItem.item;
@@ -5433,11 +4845,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      resolve(items);
 	    }
 	  }).then(function (items) {
-	    if (options.isInterval || options.notify) {
+	    // only hit lifecycle if there are items
+	    if (items.length) {
 	      definition.beforeReap(options, items);
-	      definition.emit("DS.beforeReap", definition, items);
+	      if (options.notify) {
+	        definition.emit('DS.beforeReap', definition, items);
+	      }
 	    }
-	    if (options.reapAction === "inject") {
+
+	    if (options.reapAction === 'inject') {
 	      (function () {
 	        var timestamp = new Date().getTime();
 	        DSUtils.forEach(items, function (item) {
@@ -5448,38 +4864,49 @@ return /******/ (function(modules) { // webpackBootstrap
 	          });
 	        });
 	      })();
-	    } else if (options.reapAction === "eject") {
+	    } else if (options.reapAction === 'eject') {
 	      DSUtils.forEach(items, function (item) {
-	        _this.eject(resourceName, item[definition.idAttribute]);
+	        definition.eject(item[definition.idAttribute]);
 	      });
-	    } else if (options.reapAction === "refresh") {
+	    } else if (options.reapAction === 'refresh') {
 	      var _ret2 = (function () {
 	        var tasks = [];
 	        DSUtils.forEach(items, function (item) {
-	          tasks.push(_this.refresh(resourceName, item[definition.idAttribute]));
+	          tasks.push(definition.refresh(item[definition.idAttribute]));
 	        });
 	        return {
 	          v: DSUtils.Promise.all(tasks)
 	        };
 	      })();
 
-	      if (typeof _ret2 === "object") return _ret2.v;
+	      if (typeof _ret2 === 'object') return _ret2.v;
 	    }
 	    return items;
 	  }).then(function (items) {
-	    if (options.isInterval || options.notify) {
+	    // only hit lifecycle if there are items
+	    if (items.length) {
 	      definition.afterReap(options, items);
-	      definition.emit("DS.afterReap", definition, items);
+	      if (options.notify) {
+	        definition.emit('DS.afterReap', definition, items);
+	      }
 	    }
 	    return items;
 	  });
 	}
 
 /***/ },
-/* 47 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = save;
+	exports['default'] = save;
+	/**
+	 * Save a single item in its present state.
+	 *
+	 * @param resourceName The name of the type of resource of the item.
+	 * @param id The primary key of the item.
+	 * @param options Optional congifuration.
+	 * @returns The item, now saved.
+	 */
 
 	function save(resourceName, id, options) {
 	  var _this = this;
@@ -5487,24 +4914,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSErrors = _this.errors;
 
 	  var definition = _this.defs[resourceName];
-	  var item = undefined;
-	  var noChanges = undefined;
+	  var resource = _this.s[resourceName];
+	  var item = undefined,
+	      noChanges = undefined,
+	      adapter = undefined;
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    id = DSUtils.resolveId(definition, id);
 	    if (!definition) {
 	      reject(new DSErrors.NER(resourceName));
 	    } else if (!DSUtils._sn(id)) {
-	      reject(DSUtils._snErr("id"));
-	    } else if (!_this.get(resourceName, id)) {
-	      reject(new DSErrors.R("id \"" + id + "\" not found in cache!"));
+	      reject(DSUtils._snErr('id'));
+	    } else if (!definition.get(id)) {
+	      reject(new DSErrors.R('id "' + id + '" not found in cache!'));
 	    } else {
-	      item = _this.get(resourceName, id);
+	      item = definition.get(id);
 	      options = DSUtils._(definition, options);
-	      options.logFn("save", id, options);
+	      options.logFn('save', id, options);
 	      resolve(item);
 	    }
-	  }).then(function (attrs) {
+	  })
+	  // start lifecycle
+	  .then(function (attrs) {
 	    return options.beforeValidate.call(attrs, options, attrs);
 	  }).then(function (attrs) {
 	    return options.validate.call(attrs, options, attrs);
@@ -5514,15 +4945,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return options.beforeUpdate.call(attrs, options, attrs);
 	  }).then(function (attrs) {
 	    if (options.notify) {
-	      definition.emit("DS.beforeUpdate", definition, attrs);
+	      definition.emit('DS.beforeUpdate', definition, attrs);
 	    }
+	    // only send changed properties to the adapter
 	    if (options.changesOnly) {
-	      var resource = _this.s[resourceName];
+
 	      if (DSUtils.w) {
 	        resource.observers[id].deliver();
 	      }
 	      var toKeep = [];
-	      var changes = _this.changes(resourceName, id);
+	      var changes = definition.changes(id);
 
 	      for (var key in changes.added) {
 	        toKeep.push(key);
@@ -5531,44 +4963,60 @@ return /******/ (function(modules) { // webpackBootstrap
 	        toKeep.push(key);
 	      }
 	      changes = DSUtils.pick(attrs, toKeep);
+	      // no changes? no save
 	      if (DSUtils.isEmpty(changes)) {
 	        // no changes, return
-	        options.logFn("save - no changes", id, options);
+	        options.logFn('save - no changes', id, options);
 	        noChanges = true;
 	        return attrs;
 	      } else {
 	        attrs = changes;
 	      }
 	    }
-	    return _this.getAdapter(options).update(definition, id, attrs, options);
+	    adapter = definition.getAdapterName(options);
+	    return _this.adapters[adapter].update(definition, id, DSUtils.omit(attrs, options.omit), options);
 	  }).then(function (data) {
 	    return options.afterUpdate.call(data, options, data);
 	  }).then(function (attrs) {
 	    if (options.notify) {
-	      definition.emit("DS.afterUpdate", definition, attrs);
+	      definition.emit('DS.afterUpdate', definition, attrs);
 	    }
 	    if (noChanges) {
+	      // no changes, just return
 	      return attrs;
 	    } else if (options.cacheResponse) {
-	      var injected = _this.inject(definition.n, attrs, options.orig());
-	      var resource = _this.s[resourceName];
+	      // inject the reponse into the store, updating the item
+	      var injected = definition.inject(attrs, options.orig());
 	      var _id = injected[definition.idAttribute];
+	      // mark the item as "saved"
 	      resource.saved[_id] = DSUtils.updateTimestamp(resource.saved[_id]);
 	      if (!definition.resetHistoryOnInject) {
 	        resource.previousAttributes[_id] = DSUtils.copy(injected, null, null, null, definition.relationFields);
 	      }
 	      return injected;
 	    } else {
-	      return _this.createInstance(resourceName, attrs, options.orig());
+	      // just return an instance
+	      return definition.createInstance(attrs, options.orig());
 	    }
+	  }).then(function (item) {
+	    return DSUtils.respond(item, { adapter: adapter }, options);
 	  });
 	}
 
 /***/ },
-/* 48 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = update;
+	exports['default'] = update;
+	/**
+	 * Update a single item using the supplied properties hash.
+	 *
+	 * @param resourceName The name of the type of resource of the item to update.
+	 * @param id The primary key of the item to update.
+	 * @param attrs The attributes with which to update the item.
+	 * @param options Optional configuration.
+	 * @returns The item, now updated.
+	 */
 
 	function update(resourceName, id, attrs, options) {
 	  var _this = this;
@@ -5576,19 +5024,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSErrors = _this.errors;
 
 	  var definition = _this.defs[resourceName];
+	  var adapter = undefined;
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    id = DSUtils.resolveId(definition, id);
 	    if (!definition) {
 	      reject(new DSErrors.NER(resourceName));
 	    } else if (!DSUtils._sn(id)) {
-	      reject(DSUtils._snErr("id"));
+	      reject(DSUtils._snErr('id'));
 	    } else {
 	      options = DSUtils._(definition, options);
-	      options.logFn("update", id, attrs, options);
+	      options.logFn('update', id, attrs, options);
 	      resolve(attrs);
 	    }
-	  }).then(function (attrs) {
+	  })
+	  // start lifecycle
+	  .then(function (attrs) {
 	    return options.beforeValidate.call(attrs, options, attrs);
 	  }).then(function (attrs) {
 	    return options.validate.call(attrs, options, attrs);
@@ -5598,35 +5049,50 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return options.beforeUpdate.call(attrs, options, attrs);
 	  }).then(function (attrs) {
 	    if (options.notify) {
-	      definition.emit("DS.beforeUpdate", definition, attrs);
+	      definition.emit('DS.beforeUpdate', definition, attrs);
 	    }
-	    return _this.getAdapter(options).update(definition, id, attrs, options);
+	    adapter = definition.getAdapterName(options);
+	    return _this.adapters[adapter].update(definition, id, DSUtils.omit(attrs, options.omit), options);
 	  }).then(function (data) {
 	    return options.afterUpdate.call(data, options, data);
 	  }).then(function (attrs) {
 	    if (options.notify) {
-	      definition.emit("DS.afterUpdate", definition, attrs);
+	      definition.emit('DS.afterUpdate', definition, attrs);
 	    }
 	    if (options.cacheResponse) {
-	      var injected = _this.inject(definition.n, attrs, options.orig());
+	      // inject the updated item into the store
+	      var injected = definition.inject(attrs, options.orig());
 	      var resource = _this.s[resourceName];
 	      var _id = injected[definition.idAttribute];
+	      // mark the item as "saved"
 	      resource.saved[_id] = DSUtils.updateTimestamp(resource.saved[_id]);
 	      if (!definition.resetHistoryOnInject) {
 	        resource.previousAttributes[_id] = DSUtils.copy(injected, null, null, null, definition.relationFields);
 	      }
 	      return injected;
 	    } else {
-	      return _this.createInstance(resourceName, attrs, options.orig());
+	      // just return an instance
+	      return definition.createInstance(attrs, options.orig());
 	    }
+	  }).then(function (item) {
+	    return DSUtils.respond(item, { adapter: adapter }, options);
 	  });
 	}
 
 /***/ },
-/* 49 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = updateAll;
+	exports['default'] = updateAll;
+	/**
+	 * Update a collection of items using the supplied properties hash.
+	 *
+	 * @param resourceName The name of the type of resource of the items to update.
+	 * @param attrs  The attributes with which to update the item.
+	 * @param params The criteria by which to select items to update. See http://www.js-data.io/docs/query-syntax
+	 * @param options Optional configuration.
+	 * @returns The updated items.
+	 */
 
 	function updateAll(resourceName, attrs, params, options) {
 	  var _this = this;
@@ -5634,16 +5100,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSErrors = _this.errors;
 
 	  var definition = _this.defs[resourceName];
+	  var adapter = undefined;
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    if (!definition) {
 	      reject(new DSErrors.NER(resourceName));
 	    } else {
 	      options = DSUtils._(definition, options);
-	      options.logFn("updateAll", attrs, params, options);
+	      options.logFn('updateAll', attrs, params, options);
 	      resolve(attrs);
 	    }
-	  }).then(function (attrs) {
+	  })
+	  // start lifecycle
+	  .then(function (attrs) {
 	    return options.beforeValidate.call(attrs, options, attrs);
 	  }).then(function (attrs) {
 	    return options.validate.call(attrs, options, attrs);
@@ -5653,20 +5122,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return options.beforeUpdate.call(attrs, options, attrs);
 	  }).then(function (attrs) {
 	    if (options.notify) {
-	      definition.emit("DS.beforeUpdate", definition, attrs);
+	      definition.emit('DS.beforeUpdate', definition, attrs);
 	    }
-	    return _this.getAdapter(options).updateAll(definition, attrs, params, options);
+	    adapter = definition.getAdapterName(options);
+	    return _this.adapters[adapter].updateAll(definition, DSUtils.omit(attrs, options.omit), params, options);
 	  }).then(function (data) {
 	    return options.afterUpdate.call(data, options, data);
 	  }).then(function (data) {
 	    if (options.notify) {
-	      definition.emit("DS.afterUpdate", definition, attrs);
+	      definition.emit('DS.afterUpdate', definition, attrs);
 	    }
 	    var origOptions = options.orig();
 	    if (options.cacheResponse) {
 	      var _ret = (function () {
-	        var injected = _this.inject(definition.n, data, origOptions);
+	        // inject the updated items into the store
+	        var injected = definition.inject(data, origOptions);
 	        var resource = _this.s[resourceName];
+	        // mark the items as "saved"
 	        DSUtils.forEach(injected, function (i) {
 	          var id = i[definition.idAttribute];
 	          resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
@@ -5679,143 +5151,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	      })();
 
-	      if (typeof _ret === "object") return _ret.v;
+	      if (typeof _ret === 'object') return _ret.v;
 	    } else {
 	      var _ret2 = (function () {
+	        // just return instances
 	        var instances = [];
 	        DSUtils.forEach(data, function (item) {
-	          instances.push(_this.createInstance(resourceName, item, origOptions));
+	          instances.push(definition.createInstance(item, origOptions));
 	        });
 	        return {
 	          v: instances
 	        };
 	      })();
 
-	      if (typeof _ret2 === "object") return _ret2.v;
+	      if (typeof _ret2 === 'object') return _ret2.v;
 	    }
+	  }).then(function (items) {
+	    return DSUtils.respond(items, { adapter: adapter }, options);
 	  });
 	}
 
 /***/ },
-/* 50 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
-	// shim for using process in browser
-
-	var process = module.exports = {};
-
-	process.nextTick = (function () {
-	    var canSetImmediate = typeof window !== 'undefined'
-	    && window.setImmediate;
-	    var canMutationObserver = typeof window !== 'undefined'
-	    && window.MutationObserver;
-	    var canPost = typeof window !== 'undefined'
-	    && window.postMessage && window.addEventListener
-	    ;
-
-	    if (canSetImmediate) {
-	        return function (f) { return window.setImmediate(f) };
-	    }
-
-	    var queue = [];
-
-	    if (canMutationObserver) {
-	        var hiddenDiv = document.createElement("div");
-	        var observer = new MutationObserver(function () {
-	            var queueList = queue.slice();
-	            queue.length = 0;
-	            queueList.forEach(function (fn) {
-	                fn();
-	            });
-	        });
-
-	        observer.observe(hiddenDiv, { attributes: true });
-
-	        return function nextTick(fn) {
-	            if (!queue.length) {
-	                hiddenDiv.setAttribute('yes', 'no');
-	            }
-	            queue.push(fn);
-	        };
-	    }
-
-	    if (canPost) {
-	        window.addEventListener('message', function (ev) {
-	            var source = ev.source;
-	            if ((source === window || source === null) && ev.data === 'process-tick') {
-	                ev.stopPropagation();
-	                if (queue.length > 0) {
-	                    var fn = queue.shift();
-	                    fn();
-	                }
-	            }
-	        }, true);
-
-	        return function nextTick(fn) {
-	            queue.push(fn);
-	            window.postMessage('process-tick', '*');
-	        };
-	    }
-
-	    return function nextTick(fn) {
-	        setTimeout(fn, 0);
-	    };
-	})();
-
-	process.title = 'browser';
-	process.browser = true;
-	process.env = {};
-	process.argv = [];
-
-	function noop() {}
-
-	process.on = noop;
-	process.addListener = noop;
-	process.once = noop;
-	process.off = noop;
-	process.removeListener = noop;
-	process.removeAllListeners = noop;
-	process.emit = noop;
-
-	process.binding = function (name) {
-	    throw new Error('process.binding is not supported');
-	};
-
-	// TODO(shtylman)
-	process.cwd = function () { return '/' };
-	process.chdir = function (dir) {
-	    throw new Error('process.chdir is not supported');
-	};
-
-
-/***/ },
-/* 51 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = function() { throw new Error("define cannot be used indirect"); };
-
-
-/***/ },
-/* 52 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = function(module) {
-		if(!module.webpackPolyfill) {
-			module.deprecate = function() {};
-			module.paths = [];
-			// module.parent = undefined by default
-			module.children = [];
-			module.webpackPolyfill = 1;
-		}
-		return module;
-	}
-
-
-/***/ },
-/* 53 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(38);
+	var toString = __webpack_require__(32);
 	    /**
 	    * Replaces all accented chars with regular ones
 	    */
@@ -5854,10 +5214,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 54 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(38);
+	var toString = __webpack_require__(32);
 	    // This pattern is generated by the _build/pattern-removeNonWord.js script
 	    var PATTERN = /[^\x20\x2D0-9A-Z\x5Fa-z\xC0-\xD6\xD8-\xF6\xF8-\xFF]/g;
 
@@ -5874,10 +5234,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 55 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(38);
+	var toString = __webpack_require__(32);
 	    /**
 	     * "Safer" String.toLowerCase()
 	     */

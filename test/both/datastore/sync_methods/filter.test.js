@@ -448,4 +448,43 @@ describe('DS#filter', function () {
     };
     assert.deepEqual(JSON.stringify(Thing.filter(params)), JSON.stringify([things[0], things[2], things[3], things[1]]), 'should order by a nested key');
   });
+  it('should filter by nested keys', function () {
+    var Thing = store.defineResource('thing');
+    var things = Thing.inject([
+      {
+        id: 1,
+        foo: {
+          bar: 1
+        }
+      },
+      {
+        id: 2,
+        foo: {
+          bar: 2
+        }
+      },
+      {
+        id: 3,
+        foo: {
+          bar: 3
+        }
+      },
+      {
+        id: 4,
+        foo: {
+          bar: 4
+        }
+      }
+    ]);
+
+    var params = {
+      where: {
+        'foo.bar': {
+          '>': 2
+        }
+      }
+    };
+
+    assert.deepEqual(JSON.stringify(Thing.filter(params)), JSON.stringify([things[2], things[3]]), 'should filter by a nested key');
+  });
 });

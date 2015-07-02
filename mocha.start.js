@@ -1,6 +1,8 @@
 /*global assert:true */
 'use strict';
 
+require('es6-promise').polyfill();
+
 var assert = require('chai').assert;
 var mocha = require('mocha');
 var sinon = require('sinon');
@@ -334,6 +336,9 @@ beforeEach(function () {
 
   globals.store = store;
   global.store = globals.store;
+
+  globals.JSData = JSData;
+  global.JSData = globals.JSData;
 
   globals.DSUtils = DSUtils;
   global.DSUtils = globals.DSUtils;

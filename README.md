@@ -2,17 +2,21 @@
 
 ## JSData [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/js-data/js-data?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![bower version](https://img.shields.io/bower/v/js-data.svg?style=flat-square)](https://www.npmjs.org/package/js-data) [![npm version](https://img.shields.io/npm/v/js-data.svg?style=flat-square)](https://www.npmjs.org/package/js-data) [![Circle CI](https://img.shields.io/circleci/project/js-data/js-data/master.svg?style=flat-square)](https://circleci.com/gh/js-data/js-data/tree/master) [![npm downloads](https://img.shields.io/npm/dm/js-data.svg?style=flat-square)](https://www.npmjs.org/package/js-data) [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/js-data/js-data/blob/master/LICENSE)
 
-Inspired by [Ember Data](https://github.com/emberjs/data), js-data is the model layer you've been craving. It consists of a convenient framework-agnostic, in-memory cache for managing your data, which uses adapters to communicate with various persistence layers.
+Inspired by [Ember Data](https://github.com/emberjs/data), __JSData__ is the model layer you've been craving. It consists of a convenient __framework-agnostic__, __in-memory store__ for managing your data, which uses __adapters__ to communicate with various __persistence layers__.
 
-You can use the [http adapter](http://www.js-data.io/docs/dshttpadapter), which is perfect for communicating with your RESTful backend. You could also use the [localStorage adapter](http://www.js-data.io/docs/dslocalstorageadapter). On the server you could hook up to the [SQL adapter (Postgres/MySQL/MariaDB/SQLite3)](http://www.js-data.io/docs/dssqladapter) and add in the [Redis adapter](http://www.js-data.io/docs/dsredisadapter) as a caching layer for your read endpoints. More adapters are coming, and you're free to implement your own. View [available adapters](http://www.js-data.io/docs/working-with-adapters).
+The most commonly used adapter is the [http adapter](http://www.js-data.io/docs/dshttpadapter), which is perfect for communicating with your RESTful backend. [localStorage](http://www.js-data.io/docs/dslocalstorageadapter), [localForage](http://www.js-data.io/docs/dslocalforageadapter), [firebase](http://www.js-data.io/docs/dsfirebaseadapter) and [other adapters](http://www.js-data.io/docs/working-with-adapters) are already available. On the server you could hook up to the [SQL adapter (Postgres/MySQL/MariaDB/SQLite3)](http://www.js-data.io/docs/dssqladapter) and add in the [Redis adapter](http://www.js-data.io/docs/dsredisadapter) as a caching layer for your read endpoints. More adapters are coming, and you're free to implement your own. See [Adapters](http://www.js-data.io/docs/working-with-adapters).
 
-Unlike Backbone and Ember Models, JSData does not require the use of getters and setters, and doesn't wrap your data with custom classes if you don't want it to. JSData's internal change detection (via [observe-js](https://github.com/Polymer/observe-js) or `Object.observe` in supporting browsers) allows for powerful use cases and an easy avenue for implementing your own [3-way data-binding](https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html).
+Unlike some libraries, JSData does not require the use of getters and setters, and doesn't decorate your data with a bunch of cruft. JSData's internal change detection (via [observe-js](https://github.com/Polymer/observe-js) or `Object.observe` in supporting browsers) allows for powerful use cases and an easy avenue for implementing your own [3-way data-binding](https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html).
 
-Supporting relations, computed properties, model lifecycle control and a slew of other features, JSData is the tool for [giving your data the respect it deserves](http://confreaks.tv/videos/mwjs2015-give-your-data-the-respect-it-deserves).
+Supporting relations, computed properties, support for Node and the Browser, model lifecycle control and a slew of other features, JSData is the tool for [giving your data the respect it deserves](http://confreaks.tv/videos/mwjs2015-give-your-data-the-respect-it-deserves).
 
-It's also written in ES6. Contributions ftw!
+Written in ES6 and built for modern web development, JSData will save you thousands of lines of code _and_ make you cooler.
 
 Support is handled via the [Mailing List](https://groups.io/org/groupsio/jsdata).
+
+##### Looking for contributors!
+
+JSData is getting popular and becoming a lot of work for me. I could use help with tests, documentation, demos/examples, and adapters. Contact me if you want to help! jason dot dobry at gmail dot com
 
 [![MtnWestJS Conf 2015 Presentation](http://img.youtube.com/vi/8wxnnJA9FKw/0.jpg)](https://www.youtube.com/watch?v=8wxnnJA9FKw)
 
@@ -23,6 +27,12 @@ __Status:__
 __Supported Platforms:__
 
 [![node version](https://img.shields.io/badge/Node-0.10%2B-green.svg?style=flat-square)](https://github.com/js-data/js-data) [![browsers](https://img.shields.io/badge/Browser-Chrome%2CFirefox%2CSafari%2COpera%2CIE%209%2B%2CiOS%20Safari%207.1%2B%2CAndroid%20Browser%202.3%2B-green.svg?style=flat-square)](https://github.com/js-data/js-data)
+
+### Dependencies
+
+JSData requires the presence of the ES6 (ES2015) `Promise` constructor in the global environment. In the browser, `window.Promise` must be available. In Node, `global.Promise` must be available. Here is a handy library for polyfilling: https://github.com/jakearchibald/es6-promise.
+
+If you can't polyfill the environment, then configure JSData to use a specific `Promise` constructor directly: `JSData.DSUtils.Promise = MyPromiseLib;`. This direct configuration method is useful for telling JSData to use the Bluebird library or Angular's `$q`, etc.
 
 ### Quick Start
 `bower install --save js-data js-data-http` or `npm install --save js-data js-data-http`.
@@ -37,9 +47,28 @@ var store = new JSData.DS();
 // register and use http by default for async operations
 store.registerAdapter('http', new DSHttpAdapter(), { default: true });
 
-// simplest model definition
+// simplest model definition, just pass the name instead of an options hash
+// this is the same as "store.defineResource({ name: 'user' })"
 var User = store.defineResource('user');
-var Comment = store.defineResource('comment');
+
+// Usually you'll define a resource by passing options
+var Comment = store.defineResource({
+  name: 'comment',
+  relations: {
+    belongsTo: {
+      user: {
+        // "join" field, name of field on a comment
+        // that is the primary key of the parent user
+        localKey: 'userId',
+
+        // name of the field on the comment where the
+        // parent user will be attached to the comment
+        // by js-data
+        localField: 'user'
+      }
+    }
+  }
+});
 
 var user;
 
@@ -120,7 +149,7 @@ See an issue with or have a suggestion for the documentation? You can suggest ed
 
 ### API Documentation
 - [DS](http://www.js-data.io/docs/ds)
-- [js-data-schema](http://www.js-data.io/docs/js-data-schema)
+- [Configuration Options](http://www.js-data.io/docs/dsdefaults)
 - [DSFirebaseAdapter](http://www.js-data.io/docs/dsfirebaseadapter)
 - [DSHttpAdapter](http://www.js-data.io/docs/dshttpadapter)
 - [DSLocalForageAdapter](http://www.js-data.io/docs/dslocalforageadapter)
@@ -129,11 +158,14 @@ See an issue with or have a suggestion for the documentation? You can suggest ed
 - [DSRedisAdapter](http://www.js-data.io/docs/dsredisadapter)
 - [DSRethinkDBAdapter](http://www.js-data.io/docs/dsrethinkdbadapter)
 - [DSSqlAdapter](http://www.js-data.io/docs/dssqladapter)
+- [js-data-schema](http://www.js-data.io/docs/js-data-schema)
 
 ### Changelog
 [CHANGELOG.md](https://github.com/js-data/js-data/blob/master/CHANGELOG.md)
 
 ### Community
+- [Gitter Channel](https://gitter.im/js-data/js-data) - Better than IRC!
+- [Announcements](http://www.js-data.io/blog)
 - [Mailing List](https://groups.io/org/groupsio/jsdata) - Ask your questions!
 - [Issues](https://github.com/js-data/js-data/issues) - Found a bug? Feature request? Submit an issue!
 - [GitHub](https://github.com/js-data/js-data) - View the source code for JSData.

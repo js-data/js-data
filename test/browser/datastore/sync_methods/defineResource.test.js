@@ -1,87 +1,51 @@
 describe('DS#defineResource', function () {
-  it('should correctly register a resource', function (done) {
-    try {
-      var _this = this;
+  it('should correctly register a resource', function () {
+    var _this = this;
 
-      var callCount = 0,
-        test = {
-          validate: function (resourceName, attrs, cb) {
-            callCount += 1;
-            cb(null, attrs);
-          }
-        };
-
-      var Comment = store.defineResource({
-        name: 'Comment',
-        basePath: 'hello/',
-        validate: test.validate
-      });
-
-      assert.isTrue(Comment.getAdapter() === store.getAdapter(), 'should get the same default adapter');
-      assert.isTrue(Comment.getAdapter({ adapter: 'http' }) === store.getAdapter({ adapter: 'http' }), 'should get the same adapter');
-
-      var weirdThing = store.defineResource({
-        name: 'weird-thing'
-      });
-
-      assert.equal(weirdThing.class, 'WeirdThing');
-
-      assert.doesNotThrow(function () {
-        assert.isUndefined(store.get('Comment', 5), 'should be undefined');
-      });
-
-      assert.isUndefined(store.get('Comment', 1, { loadFromServer: true }), 'should be undefined');
-
-      setTimeout(function () {
-        try {
-          assert.equal(1, _this.requests.length);
-          assert.equal(_this.requests[0].url, 'hello/Comment/1');
-          assert.equal(_this.requests[0].method, 'GET');
-          _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({
-            name: 'Sally',
-            id: 1
-          }));
-
-          setTimeout(function () {
-            try {
-              assert.deepEqual(JSON.stringify(store.get('Comment', 1)), JSON.stringify({ name: 'Sally', id: 1 }));
-
-              store.create('Comment', { name: 'John' }).then(function (comment) {
-                assert.deepEqual(JSON.stringify(comment), JSON.stringify({ name: 'John', id: 2 }));
-                assert.equal(callCount, 1, 'overridden validate should have been called once');
-                assert.equal(lifecycle.validate.callCount, 0, 'global validate should not have been called');
-                done();
-              }).catch(done);
-
-              setTimeout(function () {
-                try {
-                  assert.equal(2, _this.requests.length);
-                  assert.equal(_this.requests[1].url, 'hello/Comment');
-                  assert.equal(_this.requests[1].method, 'POST');
-                  assert.equal(_this.requests[1].requestBody, JSON.stringify({ name: 'John' }));
-                  _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({
-                    name: 'John',
-                    id: 2
-                  }));
-                } catch (err) {
-                  console.log(err.stack);
-                  done(err);
-                }
-              }, 30);
-            } catch (err) {
-              console.log(err.stack);
-              done(err);
-            }
-          }, 30);
-        } catch (err) {
-          console.log(err.stack);
-          done(err);
+    var callCount = 0,
+      test = {
+        validate: function (resourceName, attrs, cb) {
+          callCount += 1;
+          cb(null, attrs);
         }
-      }, 30);
-    } catch (err) {
-      console.log(err.stack);
-      done(err);
-    }
+      };
+
+    var Comment = store.defineResource({
+      name: 'Comment',
+      basePath: 'hello/',
+      validate: test.validate
+    });
+
+    assert.isTrue(Comment.getAdapter() === store.getAdapter(), 'should get the same default adapter');
+    assert.isTrue(Comment.getAdapter({ adapter: 'http' }) === store.getAdapter({ adapter: 'http' }), 'should get the same adapter');
+
+    var weirdThing = store.defineResource({
+      name: 'weird-thing'
+    });
+
+    assert.equal(weirdThing.class, 'WeirdThing');
+    assert.isUndefined(Comment.get(5), 'should be undefined');
+
+    setTimeout(function () {
+      try {
+        assert.equal(1, _this.requests.length);
+        assert.equal(_this.requests[0].url, 'hello/Comment');
+        assert.equal(_this.requests[0].method, 'POST');
+        assert.equal(_this.requests[0].requestBody, JSON.stringify({ name: 'John' }));
+        _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({
+          name: 'John',
+          id: 2
+        }));
+      } catch (err) {
+        console.log(err.stack);
+      }
+    }, 100);
+
+    return store.create('Comment', { name: 'John' }).then(function (comment) {
+      assert.deepEqual(JSON.stringify(comment), JSON.stringify({ name: 'John', id: 2 }));
+      assert.equal(callCount, 1, 'overridden validate should have been called once');
+      assert.equal(lifecycle.validate.callCount, 0, 'global validate should not have been called');
+    });
   });
   it('should allow definition of computed properties', function (done) {
     var callCount = 0;
@@ -237,8 +201,6 @@ describe('DS#defineResource', function () {
       organizationId: 66
     });
 
-    store.link('user', 88, ['organization']);
-
     assert.isTrue(user88.organization === org66);
 
     user88.organizationId = 77;
@@ -299,7 +261,7 @@ describe('DS#defineResource', function () {
           } catch (err) {
             done(err);
           }
-        }, 30);
+        }, 100);
       });
 
       setTimeout(function () {
@@ -311,7 +273,7 @@ describe('DS#defineResource', function () {
         } catch (err) {
           done(err);
         }
-      }, 30);
+      }, 100);
     }).catch(done);
 
     setTimeout(function () {
@@ -324,7 +286,7 @@ describe('DS#defineResource', function () {
       } catch (err) {
         done(err);
       }
-    }, 30);
+    }, 100);
   });
   it('should allow definition of GET actions', function (done) {
     var _this = this;
@@ -375,7 +337,7 @@ describe('DS#defineResource', function () {
             assert.equal(_this.requests[3].method, 'GET');
             _this.requests[3].respond(200, { 'Content-Type': 'text/plain' }, 'bleh');
 
-          }, 30);
+          }, 100);
         });
 
         setTimeout(function () {
@@ -384,7 +346,7 @@ describe('DS#defineResource', function () {
           assert.equal(_this.requests[2].method, 'GET');
           _this.requests[2].respond(200, { 'Content-Type': 'text/plain' }, 'blah');
 
-        }, 30);
+        }, 100);
       }).catch(done);
 
       setTimeout(function () {
@@ -393,7 +355,7 @@ describe('DS#defineResource', function () {
         assert.equal(_this.requests[1].method, 'GET');
         _this.requests[1].respond(200, { 'Content-Type': 'text/plain' }, 'stuff2');
 
-      }, 30);
+      }, 100);
     }).catch(done);
 
     setTimeout(function () {
@@ -401,6 +363,113 @@ describe('DS#defineResource', function () {
       assert.equal(_this.requests[0].url, 'foo/test');
       assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, { 'Content-Type': 'text/plain' }, 'stuff');
-    }, 30);
+    }, 100);
+  });
+  it('should allow instance events', function (done) {
+    var changed = false;
+    var Foo = store.defineResource('foo');
+    var foo = Foo.inject({ id: 1 });
+
+    setTimeout(function () {
+      if (!changed) {
+        done('failed to fire change event');
+      }
+    }, 1000);
+
+    foo.on('DS.change', function (Foo, foo) {
+      changed = true;
+      done();
+    });
+
+    foo.bar = 'baz';
+  });
+  it('should allow Resource change events', function (done) {
+    var changed = false;
+    var Foo = store.defineResource('foo');
+    var foo = Foo.inject({ id: 1 });
+
+    setTimeout(function () {
+      if (!changed) {
+        done('failed to fire change event');
+      }
+    }, 1000);
+
+    Foo.on('DS.change', function (Foo, foo) {
+      changed = true;
+      done();
+    });
+
+    foo.bar = 'baz';
+  });
+  it('should allow resources to extend other resources', function () {
+    store.defineResource('baz');
+    var Foo = store.defineResource({
+      name: 'foo',
+      relations: {
+        belongsTo: {
+          baz: {
+            localField: 'baz',
+            localKey: 'bazId',
+            parent: true
+          }
+        }
+      },
+      methods: {
+        say: function () {
+          return this.constructor.name;
+        }
+      }
+    });
+    var Bar = store.defineResource({
+      name: 'bar',
+      'extends': 'foo'
+    });
+    assert.equal(Foo.name, 'foo');
+    assert.equal(Bar.name, 'bar');
+
+    var foo = Foo.createInstance({ id: 1, type: 'foo', bazId: 10 });
+    var bar = Bar.createInstance({ id: 1, type: 'bar', bazId: 10 });
+
+    assert.equal(foo.say(), 'Foo');
+    assert.equal(bar.say(), 'Bar');
+
+    assert.equal(dsHttpAdapter.getEndpoint(Foo, foo, {}), 'baz/10/foo');
+    assert.equal(dsHttpAdapter.getEndpoint(Bar, bar, {}), 'baz/10/bar');
+  });
+  it('should allow instance events 2', function (done) {
+    var changed = false;
+    var Foo = store.defineResource('foo');
+    var foo = Foo.createInstance({ id: 1 });
+
+    setTimeout(function () {
+      if (!changed) {
+        done('failed to fire change event');
+      }
+    }, 1000);
+
+    foo.on('DS.change', function (Foo, foo) {
+      changed = true;
+      done();
+    });
+
+    foo.set('bar', 'baz');
+  });
+  it('should allow Resource change events 2', function (done) {
+    var changed = false;
+    var Foo = store.defineResource('foo');
+    var foo = Foo.createInstance({ id: 1 });
+
+    setTimeout(function () {
+      if (!changed) {
+        done('failed to fire change event');
+      }
+    }, 1000);
+
+    Foo.on('DS.change', function (Foo, foo) {
+      changed = true;
+      done();
+    });
+
+    foo.set('bar', 'baz');
   });
 });

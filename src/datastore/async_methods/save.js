@@ -1,9 +1,17 @@
+/**
+ * Save a single item in its present state.
+ *
+ * @param resourceName The name of the type of resource of the item.
+ * @param id The primary key of the item.
+ * @param options Optional congifuration.
+ * @returns The item, now saved.
+ */
 export default function save(resourceName, id, options) {
   let _this = this;
   let {utils: DSUtils, errors: DSErrors} = _this;
   let definition = _this.defs[resourceName];
-  let item;
-  let noChanges;
+  let resource = _this.s[resourceName];
+  let item, noChanges, adapter;
 
   return new DSUtils.Promise((resolve, reject) => {
     id = DSUtils.resolveId(definition, id);
@@ -11,15 +19,17 @@ export default function save(resourceName, id, options) {
       reject(new DSErrors.NER(resourceName));
     } else if (!DSUtils._sn(id)) {
       reject(DSUtils._snErr('id'));
-    } else if (!_this.get(resourceName, id)) {
+    } else if (!definition.get(id)) {
       reject(new DSErrors.R(`id "${id}" not found in cache!`));
     } else {
-      item = _this.get(resourceName, id);
+      item = definition.get(id);
       options = DSUtils._(definition, options);
       options.logFn('save', id, options);
       resolve(item);
     }
-  }).then(attrs => options.beforeValidate.call(attrs, options, attrs))
+  })
+    // start lifecycle
+    .then(attrs => options.beforeValidate.call(attrs, options, attrs))
     .then(attrs => options.validate.call(attrs, options, attrs))
     .then(attrs => options.afterValidate.call(attrs, options, attrs))
     .then(attrs => options.beforeUpdate.call(attrs, options, attrs))
@@ -27,13 +37,14 @@ export default function save(resourceName, id, options) {
       if (options.notify) {
         definition.emit('DS.beforeUpdate', definition, attrs);
       }
+      // only send changed properties to the adapter
       if (options.changesOnly) {
-        let resource = _this.s[resourceName];
+
         if (DSUtils.w) {
           resource.observers[id].deliver();
         }
         let toKeep = [];
-        let changes = _this.changes(resourceName, id);
+        let changes = definition.changes(id);
 
         for (var key in changes.added) {
           toKeep.push(key);
@@ -42,6 +53,7 @@ export default function save(resourceName, id, options) {
           toKeep.push(key);
         }
         changes = DSUtils.pick(attrs, toKeep);
+        // no changes? no save
         if (DSUtils.isEmpty(changes)) {
           // no changes, return
           options.logFn('save - no changes', id, options);
@@ -51,7 +63,8 @@ export default function save(resourceName, id, options) {
           attrs = changes;
         }
       }
-      return _this.getAdapter(options).update(definition, id, attrs, options);
+      adapter = definition.getAdapterName(options);
+      return _this.adapters[adapter].update(definition, id, DSUtils.omit(attrs, options.omit), options);
     })
     .then(data => options.afterUpdate.call(data, options, data))
     .then(attrs => {
@@ -59,18 +72,24 @@ export default function save(resourceName, id, options) {
         definition.emit('DS.afterUpdate', definition, attrs);
       }
       if (noChanges) {
+        // no changes, just return
         return attrs;
       } else if (options.cacheResponse) {
-        let injected = _this.inject(definition.n, attrs, options.orig());
-        let resource = _this.s[resourceName];
+        // inject the reponse into the store, updating the item
+        let injected = definition.inject(attrs, options.orig());
         let id = injected[definition.idAttribute];
+        // mark the item as "saved"
         resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
         if (!definition.resetHistoryOnInject) {
           resource.previousAttributes[id] = DSUtils.copy(injected, null, null, null, definition.relationFields);
         }
         return injected;
       } else {
-        return _this.createInstance(resourceName, attrs, options.orig());
+        // just return an instance
+        return definition.createInstance(attrs, options.orig());
       }
+    })
+    .then(item => {
+      return DSUtils.respond(item, {adapter}, options);
     });
 }
