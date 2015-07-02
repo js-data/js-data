@@ -1,3 +1,7 @@
+##### 2.0.0 - 02 July 2015
+
+Stable Version 2.0.0
+
 ##### 2.0.0-rc.3 - 30 June 2015
 
 - Tweak to custom relation getters
