@@ -1,3 +1,8 @@
+##### 2.1.0 - 07 July 2015
+
+###### Backwards compatible API changes
+- Added `DS#clear()`, which is a method only available on a store, and will call `ejectAll` on all of the store's resources
+
 ##### 2.0.0 - 02 July 2015
 
 Stable Version 2.0.0

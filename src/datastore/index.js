@@ -296,7 +296,11 @@ defaultsPrototype.defaultFilter = (collection, resourceName, params, options) =>
     }
   }
 
-  return filtered;
+  if (filtered === collection) {
+    return filtered.slice();
+  } else {
+    return filtered;
+  }
 };
 
 class DS {
@@ -381,6 +385,17 @@ class DS {
       throw new DSErrors.NER(resourceName);
     }
     return instance instanceof definition[definition.class];
+  }
+
+  clear() {
+    let ejected = {};
+    DSUtils.forOwn(this.definitions, definition => {
+      let name = definition.name;
+      ejected[name] = definition.ejectAll();
+      this.store[name].completedQueries = {};
+      this.store[name].queryData = {};
+    });
+    return ejected;
   }
 }
 
