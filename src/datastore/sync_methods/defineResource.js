@@ -265,7 +265,7 @@ export default function defineResource(definition) {
     }
 
     // proxy DS methods with shorthand ones
-    let fns = ['registerAdapter', 'getAdapterName', 'getAdapter', 'is'];
+    let fns = ['registerAdapter', 'getAdapterName', 'getAdapter', 'is', '!clear'];
     for (let key in _this) {
       if (typeof _this[key] === 'function') {
         fns.push(key);
@@ -283,6 +283,9 @@ export default function defineResource(definition) {
      */
     DSUtils.forEach(fns, key => {
       let k = key;
+      if (k[0] === '!') {
+        return;
+      }
       if (_this[k].shorthand !== false) {
         def[k] = (...args) => {
           args.unshift(def.name);

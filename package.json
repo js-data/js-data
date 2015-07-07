@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -39,7 +39,7 @@
   ],
   "devDependencies": {
     "babel-core": "5.6.15",
-    "babel-loader": "5.2.2",
+    "babel-loader": "5.3.1",
     "es6-promise": "2.3.0",
     "grunt": "0.4.5",
     "grunt-contrib-clean": "0.6.0",

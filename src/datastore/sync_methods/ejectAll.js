@@ -25,7 +25,6 @@ export default function ejectAll(resourceName, params, options) {
 
   // get items that match the criteria
   let items = definition.filter(params);
-  let ids = [];
 
   if (DSUtils.isEmpty(params)) {
     // remove all completed queries if ejecting all items
@@ -37,12 +36,8 @@ export default function ejectAll(resourceName, params, options) {
   // prepare to remove matching items
   DSUtils.forEach(items, item => {
     if (item && item[definition.idAttribute]) {
-      ids.push(item[definition.idAttribute]);
+      definition.eject(item[definition.idAttribute], options);
     }
-  });
-  // eject each matching item
-  DSUtils.forEach(ids, id => {
-    definition.eject(id, options);
   });
   // collection has been modified
   definition.handleChange(items);
