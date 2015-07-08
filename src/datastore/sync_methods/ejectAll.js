@@ -6,7 +6,7 @@
  * @param options Optional configuration.
  * @returns The collection of items that were ejected, if any.
  */
-export default function ejectAll(resourceName, params, options) {
+module.exports = function ejectAll(resourceName, params, options) {
   let _this = this;
   let DSUtils = _this.utils;
   let definition = _this.defs[resourceName];
@@ -42,4 +42,4 @@ export default function ejectAll(resourceName, params, options) {
   // collection has been modified
   definition.handleChange(items);
   return items;
-}
+};

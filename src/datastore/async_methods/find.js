@@ -15,7 +15,7 @@
  * @param options.findFallbackAdapters Array of names of adapters to use if using "fallback" strategy. Overrides "fallbackAdapters".
  * @returns The item.
  */
-export default function find(resourceName, id, options) {
+module.exports = function find(resourceName, id, options) {
   let _this = this;
   let DSUtils = _this.utils;
   let definition = _this.defs[resourceName];
@@ -103,4 +103,4 @@ export default function find(resourceName, id, options) {
     }
     return DSUtils.Promise.reject(err);
   });
-}
+};

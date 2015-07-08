@@ -8,7 +8,7 @@
  * @param options.clearEmptyQueries Whether to remove cached findAll queries that become empty as a result of this method call.
  * @returns The ejected item if one was ejected.
  */
-export default function eject(resourceName, id, options) {
+module.exports = function eject(resourceName, id, options) {
   let _this = this;
   let DSUtils = _this.utils;
   let definition = _this.defs[resourceName];
@@ -91,4 +91,4 @@ export default function eject(resourceName, id, options) {
 
     return item;
   }
-}
+};

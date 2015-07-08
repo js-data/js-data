@@ -8,7 +8,7 @@
  * @param options Optional configuration.
  * @returns Matching items.
  */
-export default function filter(resourceName, params, options) {
+module.exports = function filter(resourceName, params, options) {
   let _this = this;
   let DSUtils = _this.utils;
   let definition = _this.defs[resourceName];
@@ -26,4 +26,4 @@ export default function filter(resourceName, params, options) {
 
   // delegate filtering to DS#defaults.defaultFilter, which can be overridden by developers.
   return definition.defaultFilter.call(_this, _this.s[resourceName].collection, resourceName, params, options);
-}
+};

@@ -7,7 +7,7 @@
  * @param options Optional configuration.
  * @returns The instance, now with its relations loaded.
  */
-export default function loadRelations(resourceName, instance, relations, options) {
+module.exports = function loadRelations(resourceName, instance, relations, options) {
   let _this = this;
   let {utils: DSUtils, errors: DSErrors} = _this;
   let definition = _this.defs[resourceName];
@@ -86,4 +86,4 @@ export default function loadRelations(resourceName, instance, relations, options
       resolve(tasks);
     }
   }).then(tasks => DSUtils.Promise.all(tasks)).then(() => instance);
-}
+};

@@ -9,14 +9,6 @@ describe('DS#get', function () {
         store.get('post', key);
       }, store.errors.IllegalArgumentError, '"id" must be a string or a number!');
     });
-
-    DSUtils.forEach(TYPES_EXCEPT_OBJECT, function (key) {
-      if (key) {
-        assert.throws(function () {
-          store.get('post', 5, key);
-        }, store.errors.IllegalArgumentError, '"options" must be an object!');
-      }
-    });
   });
   it('should return undefined if the query has never been made before', function () {
     assert.isUndefined(store.get('post', 5), 'should be undefined');

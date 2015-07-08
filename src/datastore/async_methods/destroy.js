@@ -10,7 +10,7 @@
  * @param options.afterDestroy Lifecycle hook.
  * @returns The primary key of the destroyed item.
  */
-export default function destroy(resourceName, id, options) {
+module.exports = function destroy(resourceName, id, options) {
   let _this = this;
   let DSUtils = _this.utils;
   let definition = _this.defs[resourceName];
@@ -59,4 +59,4 @@ export default function destroy(resourceName, id, options) {
     }
     return DSUtils.Promise.reject(err);
   });
-}
+};

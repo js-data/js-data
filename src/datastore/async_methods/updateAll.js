@@ -7,7 +7,7 @@
  * @param options Optional configuration.
  * @returns The updated items.
  */
-export default function updateAll(resourceName, attrs, params, options) {
+module.exports = function updateAll(resourceName, attrs, params, options) {
   let _this = this;
   let {utils: DSUtils, errors: DSErrors} = _this;
   let definition = _this.defs[resourceName];
@@ -65,4 +65,4 @@ export default function updateAll(resourceName, attrs, params, options) {
     .then(items => {
       return DSUtils.respond(items, {adapter}, options);
     });
-}
+};

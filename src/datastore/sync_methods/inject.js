@@ -289,7 +289,7 @@ function _inject(definition, resource, attrs, options) {
  * @param options.notify Whether to emit the "DS.beforeInject" and "DS.afterInject" events.
  * @returns The injected data.
  */
-export default function inject(resourceName, attrs, options) {
+module.exports = function inject(resourceName, attrs, options) {
   let _this = this;
   let definition = _this.defs[resourceName];
   let resource = _this.s[resourceName];
@@ -323,4 +323,4 @@ export default function inject(resourceName, attrs, options) {
   }
 
   return injected;
-}
+};
