@@ -1,6 +1,6 @@
 # Contributing Guide
 
-First, support is handled via the [Mailing List](https://groups.io/org/groupsio/jsdata). Ask your questions there.
+First, support is handled via the [Gitter Channel](https://gitter.im/js-data/js-data) and the [Mailing List](https://groups.io/org/groupsio/jsdata). Ask your questions there.
 
 When submitting issues on GitHub, please include as much detail as possible to make debugging quick and easy.
 
@@ -14,9 +14,8 @@ When submitting issues on GitHub, please include as much detail as possible to m
 
 1. Contribute to the issue that is the reason you'll be developing in the first place
 1. Fork js-data
-1. `git clone https://github.com/<you>/js-data.git`
+1. `git clone git@github.com:<you>/js-data.git`
 1. `cd js-data; npm install; bower install;`
-1. `grunt go` (builds and starts a watch)
-1. (in another terminal) `grunt karma:dev` (runs the tests)
 1. Write your code, including relevant documentation and tests
+1. `grunt test` (build and test)
 1. Submit a PR and we'll review
