@@ -420,5 +420,27 @@ export default {
 
     // return resource from cache
     return resource.previousAttributes[id] ? DSUtils.copy(resource.previousAttributes[id]) : undefined;
+  },
+  /**
+   * Revert all attributes of the item with the given primary key to their previous values.
+   *
+   * @param resourceName The name of the type of resource of the item.
+   * @param id The primary key of the item.
+   * @returns The reverted item
+   */
+  revert(resourceName, id) {
+    let _this = this;
+    let definition = _this.defs[resourceName];
+
+    id = DSUtils.resolveId(definition, id);
+    if (!definition) {
+      throw new NER(resourceName);
+    } else if (!DSUtils._sn(id)) {
+      throw DSUtils._snErr('id');
+    }
+
+    definition.logFn('revert', id);
+
+    return definition.inject(_this.previous(resourceName, id));
   }
 };

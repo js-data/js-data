@@ -26,7 +26,8 @@ let instanceMethods = [
   'hasChanges',
   'lastModified',
   'lastSaved',
-  'previous'
+  'previous',
+  'revert'
 ];
 
 export default function defineResource(definition) {
