@@ -1,12 +1,15 @@
 describe('DS#revert', function () {
   it('should throw an error when method pre-conditions are not met', function () {
     assert.throws(function () {
-      store.previous('does not exist', {});
+      store.revert('does not exist', {});
     }, store.errors.NonexistentResourceError, 'does not exist is not a registered resource!');
 
     DSUtils.forEach(TYPES_EXCEPT_STRING_OR_NUMBER, function (key) {
+      //if (key === false) {
+      //  return;
+      //}
       assert.throws(function () {
-        store.previous('post', key);
+        store.revert('post', key);
       }, store.errors.IllegalArgumentError, '"id" must be a string or a number!');
     });
   });

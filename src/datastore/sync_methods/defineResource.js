@@ -30,7 +30,7 @@ let instanceMethods = [
   'revert'
 ];
 
-export default function defineResource(definition) {
+module.exports = function defineResource(definition) {
   let _this = this;
   let definitions = _this.defs;
 
@@ -376,4 +376,4 @@ export default function defineResource(definition) {
     delete _this.s[definition.name];
     throw err;
   }
-}
+};

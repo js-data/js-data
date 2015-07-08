@@ -6,7 +6,7 @@
  * @param options Optional congifuration.
  * @returns The item, now saved.
  */
-export default function save(resourceName, id, options) {
+module.exports = function save(resourceName, id, options) {
   let _this = this;
   let {utils: DSUtils, errors: DSErrors} = _this;
   let definition = _this.defs[resourceName];
@@ -92,4 +92,4 @@ export default function save(resourceName, id, options) {
     .then(item => {
       return DSUtils.respond(item, {adapter}, options);
     });
-}
+};

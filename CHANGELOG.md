@@ -1,3 +1,8 @@
+##### 2.2.0 - 07 July 2015
+
+###### Backwards compatible API changes
+- #173 - Added `DS#revert(resourceName, id)` Thanks @internalfx
+
 ##### 2.1.0 - 07 July 2015
 
 ###### Backwards compatible API changes

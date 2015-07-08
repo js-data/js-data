@@ -10,7 +10,7 @@
  * @param options.afterDestroy Lifecycle hook.
  * @returns The ejected items, if any.
  */
-export default function destroyAll(resourceName, params, options) {
+module.exports = function destroyAll(resourceName, params, options) {
   let _this = this;
   let DSUtils = _this.utils;
   let definition = _this.defs[resourceName];
@@ -59,4 +59,4 @@ export default function destroyAll(resourceName, params, options) {
     }
     return DSUtils.Promise.reject(err);
   });
-}
+};

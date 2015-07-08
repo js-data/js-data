@@ -45,7 +45,7 @@ function processResults(data, resourceName, queryHash, options) {
  * @param options.cacheResponse Whether to inject the found items into the data store.
  * @returns The items.
  */
-export default function findAll(resourceName, params, options) {
+module.exports = function findAll(resourceName, params, options) {
   let _this = this;
   let DSUtils = _this.utils;
   let definition = _this.defs[resourceName];
@@ -146,4 +146,4 @@ export default function findAll(resourceName, params, options) {
     }
     return DSUtils.Promise.reject(err);
   });
-}
+};

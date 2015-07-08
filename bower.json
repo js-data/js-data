@@ -6,11 +6,9 @@
     "type": "git",
     "url": "https://github.com/js-data/js-data.git"
   },
-  "author": {
-    "name": "Jason Dobry",
-    "url": "http://www.pseudobry.com",
-    "email": "jason.dobry@gmail.com"
-  },
+  "authors": [
+    "Jason Dobry <jason.dobry@gmail.com>"
+  ],
   "main": "./dist/js-data.js",
   "ignore": [
     ".idea/",

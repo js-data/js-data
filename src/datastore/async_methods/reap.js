@@ -5,7 +5,7 @@
  * @param options Optional configuration.
  * @returns The reaped items.
  */
-export default function reap(resourceName, options) {
+module.exports = function reap(resourceName, options) {
   let _this = this;
   var DSUtils = _this.utils;
   let definition = _this.defs[resourceName];
@@ -73,4 +73,4 @@ export default function reap(resourceName, options) {
       }
       return items;
     });
-}
+};

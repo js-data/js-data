@@ -16,7 +16,7 @@
  * @param options.beforeCreate Lifecycle hook.
  * @param options.afterCreate Lifecycle hook.
  */
-export default function create(resourceName, attrs, options) {
+module.exports = function create(resourceName, attrs, options) {
   let _this = this;
   let DSUtils = _this.utils;
   let definition = _this.defs[resourceName];
@@ -80,4 +80,4 @@ export default function create(resourceName, attrs, options) {
     .then(item => {
       return DSUtils.respond(item, {adapter}, options);
     });
-}
+};

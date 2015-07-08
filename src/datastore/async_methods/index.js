@@ -1,22 +1,11 @@
-import create from './create';
-import destroy from './destroy';
-import destroyAll from './destroyAll';
-import find from './find';
-import findAll from './findAll';
-import loadRelations from './loadRelations';
-import reap from './reap';
-import save from './save';
-import update from './update';
-import updateAll from './updateAll';
-
 export default {
-  create,
-  destroy,
-  destroyAll,
-  find,
-  findAll,
-  loadRelations,
-  reap,
+  create: require('./create'),
+  destroy: require('./destroy'),
+  destroyAll: require('./destroyAll'),
+  find: require('./find'),
+  findAll: require('./findAll'),
+  loadRelations: require('./loadRelations'),
+  reap: require('./reap'),
   refresh(resourceName, id, options) {
     let _this = this;
     let DSUtils = _this.utils;
@@ -65,7 +54,7 @@ export default {
         });
       });
   },
-  save,
-  update,
-  updateAll
+  save: require('./save'),
+  update: require('./update'),
+  updateAll: require('./updateAll')
 };
