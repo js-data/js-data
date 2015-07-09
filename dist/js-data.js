@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 2.2.0 - Homepage <http://www.js-data.io/>
+ * @version 2.2.1 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -84,10 +84,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new _datastoreIndex['default'](options);
 	  },
 	  version: {
-	    full: '2.2.0',
+	    full: '2.2.1',
 	    major: parseInt('2', 10),
 	    minor: parseInt('2', 10),
-	    patch: parseInt('0', 10),
+	    patch: parseInt('1', 10),
 	    alpha: true ? 'false' : false,
 	    beta: true ? 'false' : false
 	  }
@@ -1190,7 +1190,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	        if (def.type === 'belongsTo') {
 	          prop.get = function () {
-	            return this[localKey] ? definition.getResource(relationName).get(this[localKey]) : undefined;
+	            return get(this, localKey) ? definition.getResource(relationName).get(get(this, localKey)) : undefined;
 	          };
 	        } else if (def.type === 'hasMany') {
 	          prop.get = function () {
@@ -1199,7 +1199,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	              params[foreignKey] = this[definition.idAttribute];
 	              return definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
 	            } else if (localKeys) {
-	              var keys = this[localKeys] || [];
+	              var keys = get(this, localKeys) || [];
 	              return definition.getResource(relationName).getAll(isArray(keys) ? keys : _keys(keys));
 	            }
 	            return undefined;
@@ -1207,7 +1207,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } else if (def.type === 'hasOne') {
 	          if (localKey) {
 	            prop.get = function () {
-	              return this[localKey] ? definition.getResource(relationName).get(this[localKey]) : undefined;
+	              return get(this, localKey) ? definition.getResource(relationName).get(get(this, localKey)) : undefined;
 	            };
 	          } else {
 	            prop.get = function () {
@@ -2757,8 +2757,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var hasOwn = __webpack_require__(22);
-	var forIn = __webpack_require__(23);
+	var hasOwn = __webpack_require__(23);
+	var forIn = __webpack_require__(24);
 
 	    /**
 	     * Similar to Array/forEach but works over object properties and fixes Don't
@@ -2783,7 +2783,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var forOwn = __webpack_require__(13);
-	var isPlainObject = __webpack_require__(24);
+	var isPlainObject = __webpack_require__(22);
 
 	    /**
 	     * Mixes objects into the target object, recursively mixing existing child
@@ -2894,7 +2894,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var namespace = __webpack_require__(26);
+	var namespace = __webpack_require__(28);
 
 	    /**
 	     * set "nested" object property
@@ -2917,8 +2917,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(27);
-	var camelCase = __webpack_require__(28);
+	var toString = __webpack_require__(26);
+	var camelCase = __webpack_require__(27);
 	var upperCase = __webpack_require__(20);
 	    /**
 	     * camelCase + UPPERCASE first char
@@ -2936,7 +2936,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(27);
+	var toString = __webpack_require__(26);
 	    /**
 	     * "Safer" String.toUpperCase()
 	     */
@@ -2989,6 +2989,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 
 	    /**
+	     * Checks if the value is created by the `Object` constructor.
+	     */
+	    function isPlainObject(value) {
+	        return (!!value && typeof value === 'object' &&
+	            value.constructor === Object);
+	    }
+
+	    module.exports = isPlainObject;
+
+
+
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
 	     * Safer Object.hasOwnProperty
 	     */
 	     function hasOwn(obj, prop){
@@ -3001,10 +3020,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var hasOwn = __webpack_require__(22);
+	var hasOwn = __webpack_require__(23);
 
 	    var _hasDontEnumBug,
 	        _dontEnums;
@@ -3083,25 +3102,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 24 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Checks if the value is created by the `Object` constructor.
-	     */
-	    function isPlainObject(value) {
-	        return (!!value && typeof value === 'object' &&
-	            value.constructor === Object);
-	    }
-
-	    module.exports = isPlainObject;
-
-
-
-
-/***/ },
 /* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -3132,31 +3132,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var forEach = __webpack_require__(8);
-
-	    /**
-	     * Create nested object if non-existent
-	     */
-	    function namespace(obj, path){
-	        if (!path) return obj;
-	        forEach(path.split('.'), function(key){
-	            if (!obj[key]) {
-	                obj[key] = {};
-	            }
-	            obj = obj[key];
-	        });
-	        return obj;
-	    }
-
-	    module.exports = namespace;
-
-
-
-
-/***/ },
-/* 27 */
-/***/ function(module, exports, __webpack_require__) {
-
 	
 
 	    /**
@@ -3173,10 +3148,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 28 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(27);
+	var toString = __webpack_require__(26);
 	var replaceAccents = __webpack_require__(44);
 	var removeNonWord = __webpack_require__(45);
 	var upperCase = __webpack_require__(20);
@@ -3195,6 +3170,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return str;
 	    }
 	    module.exports = camelCase;
+
+
+
+/***/ },
+/* 28 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var forEach = __webpack_require__(8);
+
+	    /**
+	     * Create nested object if non-existent
+	     */
+	    function namespace(obj, path){
+	        if (!path) return obj;
+	        forEach(path.split('.'), function(key){
+	            if (!obj[key]) {
+	                obj[key] = {};
+	            }
+	            obj = obj[key];
+	        });
+	        return obj;
+	    }
+
+	    module.exports = namespace;
+
 
 
 
@@ -3975,7 +3975,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                      try {
 	                        var injectedItem = relationDef.inject(toInjectItem, options.orig());
 	                        if (def.foreignKey) {
-	                          injectedItem[def.foreignKey] = attrs[definition.idAttribute];
+	                          _utils['default'].set(injectedItem, def.foreignKey, attrs[definition.idAttribute]);
 	                        }
 	                        items.push(injectedItem);
 	                      } catch (err) {
@@ -3990,7 +3990,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                  try {
 	                    var _injected = relationDef.inject(attrs[def.localField], options.orig());
 	                    if (def.foreignKey) {
-	                      _injected[def.foreignKey] = attrs[definition.idAttribute];
+	                      _utils['default'].set(_injected, def.foreignKey, attrs[definition.idAttribute]);
 	                    }
 	                  } catch (err) {
 	                    options.errorFn(err, 'Failed to inject ' + def.type + ' relation: "' + relationName + '"!');
@@ -4698,7 +4698,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	              var orig = __options.orig();
 	              if (def.localKeys) {
 	                delete params[def.foreignKey];
-	                var keys = instance[def.localKeys] || [];
+	                var keys = DSUtils.get(instance, def.localKeys) || [];
 	                keys = DSUtils._a(keys) ? keys : DSUtils.keys(keys);
 	                params.where = _defineProperty({}, relationDef.idAttribute, {
 	                  'in': keys
@@ -4707,15 +4707,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	              }
 	              task = relationDef.findAll(params, orig);
 	            } else if (def.type === 'hasOne') {
-	              if (def.localKey && instance[def.localKey]) {
-	                task = relationDef.find(instance[def.localKey], __options.orig());
+	              if (def.localKey && DSUtils.get(instance, def.localKey)) {
+	                task = relationDef.find(DSUtils.get(instance, def.localKey), __options.orig());
 	              } else if (def.foreignKey) {
 	                task = relationDef.findAll(params, __options.orig()).then(function (hasOnes) {
 	                  return hasOnes.length ? hasOnes[0] : null;
 	                });
 	              }
-	            } else if (instance[def.localKey]) {
-	              task = relationDef.find(instance[def.localKey], __options.orig());
+	            } else if (DSUtils.get(instance, def.localKey)) {
+	              task = relationDef.find(DSUtils.get(instance, def.localKey), __options.orig());
 	            }
 
 	            if (task) {
@@ -5093,7 +5093,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(27);
+	var toString = __webpack_require__(26);
 	    /**
 	    * Replaces all accented chars with regular ones
 	    */
@@ -5135,7 +5135,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(27);
+	var toString = __webpack_require__(26);
 	    // This pattern is generated by the _build/pattern-removeNonWord.js script
 	    var PATTERN = /[^\x20\x2D0-9A-Z\x5Fa-z\xC0-\xD6\xD8-\xF6\xF8-\xFF]/g;
 
@@ -5155,7 +5155,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(27);
+	var toString = __webpack_require__(26);
 	    /**
 	     * "Safer" String.toLowerCase()
 	     */
