@@ -248,7 +248,7 @@ module.exports = function defineResource(definition) {
       completedQueries: {},
       queryData: {},
       pendingQueries: {},
-      index: {},
+      index: new DSUtils.Index(def),
       modified: {},
       saved: {},
       previousAttributes: {},

@@ -158,7 +158,7 @@ function _inject(definition, resource, attrs, options) {
             if (DSUtils._a(toInject)) {
               let items = [];
               DSUtils.forEach(toInject, toInjectItem => {
-                if (toInjectItem !== _this.s[relationName].index[toInjectItem[relationDef.idAttribute]]) {
+                if (toInjectItem !== _this.s[relationName].index.get(toInjectItem[relationDef.idAttribute])) {
                   try {
                     let injectedItem = relationDef.inject(toInjectItem, options.orig());
                     if (def.foreignKey) {
@@ -172,7 +172,7 @@ function _inject(definition, resource, attrs, options) {
               });
             } else {
               // handle injecting belongsTo and hasOne relations
-              if (toInject !== _this.s[relationName].index[toInject[relationDef.idAttribute]]) {
+              if (toInject !== _this.s[relationName].index.get(toInject[relationDef.idAttribute])) {
                 try {
                   let injected = relationDef.inject(attrs[def.localField], options.orig());
                   if (def.foreignKey) {
@@ -218,7 +218,7 @@ function _inject(definition, resource, attrs, options) {
           }
 
           // index item
-          resource.index[id] = item;
+          resource.index.insert(id, item);
           // fire observation handler for the first time
           _react.call(item, {}, {}, {}, null, true);
           // save "previous" attributes of the injected item, for change diffs later
@@ -232,13 +232,13 @@ function _inject(definition, resource, attrs, options) {
             DSUtils.forOwn(item, (v, k) => {
               if (k !== definition.idAttribute) {
                 if (!attrs.hasOwnProperty(k)) {
-                  delete item[k];
+                  definition.set(k, undefined);
                 }
               }
             });
             DSUtils.forOwn(attrs, (v, k) => {
               if (k !== definition.idAttribute) {
-                item[k] = v;
+                definition.set(k, v);
               }
             });
           }

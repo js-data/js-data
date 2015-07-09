@@ -259,7 +259,7 @@ export default {
     let {_this, _resourceName, _id} = check.call(this, 'get', resourceName, id);
 
     // return the item if it exists
-    return _this.s[_resourceName].index[_id];
+    return _this.s[_resourceName].index.get(_id);
   },
 
   // Return the items in the store that have the given primary keys.
@@ -285,8 +285,8 @@ export default {
       // return just the items with the given primary keys
       let length = ids.length;
       for (var i = 0; i < length; i++) {
-        if (resource.index[ids[i]]) {
-          collection.push(resource.index[ids[i]]);
+        if (resource.index.get(ids[i])) {
+          collection.push(resource.index.get(ids[i]));
         }
       }
     } else {
@@ -359,10 +359,22 @@ export default {
   //
   // @param resourceName The name of the type of resource of the item.
   // @param id The primary key of the item.
-  // @returns The reverted item
+  // @returns The reverted item.
   revert(resourceName, id) {
     let {_this, definition, _resourceName, _id} = check.call(this, 'revert', resourceName, id);
 
     return definition.inject(_this.previous(_resourceName, _id));
+  },
+
+  // Set the given field and value of the specified item.
+  //
+  // @param resourceName The name of the type of resource of the item.
+  // @param id The primary key of the item.
+  // @param field Field to set.
+  // @param value Value to set.
+  // @returns The item.
+  set(resourceName, id, field, value) {
+    let {definition, _id} = check.call(this, 'set', resourceName, id);
+    return definition.get(_id).set(field, value);
   }
 };

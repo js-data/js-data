@@ -88,6 +88,36 @@ module.exports = function (grunt) {
           ]
         }
       },
+      immutable: {
+        browsers: ['Chrome', 'Firefox', 'PhantomJS'],
+        options: {
+          files: [
+            'node_modules/immutable/dist/immutable.js',
+            'node_modules/es6-promise/dist/es6-promise.js',
+            'dist/js-data.js',
+            'bower_components/js-data-http/dist/js-data-http.js',
+            'bower_components/js-data-localstorage/dist/js-data-localstorage.js',
+            'karma.immutable.start.js',
+            'test/both/**/*.js',
+            'test/browser/**/*.js'
+          ]
+        }
+      },
+      loki: {
+        browsers: ['Chrome', 'Firefox', 'PhantomJS'],
+        options: {
+          files: [
+            'bower_components/lokijs/src/lokijs.js',
+            'node_modules/es6-promise/dist/es6-promise.js',
+            'dist/js-data.js',
+            'bower_components/js-data-http/dist/js-data-http.js',
+            'bower_components/js-data-localstorage/dist/js-data-localstorage.js',
+            'karma.loki.start.js',
+            'test/both/**/*.js',
+            'test/browser/**/*.js'
+          ]
+        }
+      },
       ci: {
         browsers: ['Chrome', 'Firefox', 'PhantomJS']
       }
@@ -155,7 +185,7 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('n', ['mochaTest']);
-  grunt.registerTask('b', ['karma:ci', 'karma:min']);
+  grunt.registerTask('b', ['karma:ci', 'karma:min', 'karma:immutable', 'karma:loki']);
   grunt.registerTask('w', ['n', 'watch:n']);
 
   grunt.registerTask('test', ['build', 'n', 'b']);

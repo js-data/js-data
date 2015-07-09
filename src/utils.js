@@ -24,6 +24,31 @@ let objectProto = Object.prototype;
 let toString = objectProto.toString;
 let P;
 
+class Index {
+  constructor() {
+    this.data = {};
+  }
+
+  get(key) {
+    return this.data[key];
+  }
+
+  insert(key, value) {
+    this.data[key] = value;
+    return this.data[key];
+  }
+
+  update(key, field, value) {
+    this.data[key] = this.data[key] || {};
+    set(this.data[key], field, value);
+    return this.data[key];
+  }
+
+  remove(key) {
+    delete this.data[key];
+  }
+}
+
 /**
  * Attempt to detect the global Promise constructor.
  * JSData will still work without one, as long you do something like this:
@@ -358,7 +383,7 @@ let resolveId = (definition, idOrInstance) => {
  */
 let resolveItem = (resource, idOrInstance) => {
   if (resource && (isString(idOrInstance) || isNumber(idOrInstance))) {
-    return resource.index[idOrInstance] || idOrInstance;
+    return resource.index.get(idOrInstance) || idOrInstance;
   } else {
     return idOrInstance;
   }
@@ -455,6 +480,7 @@ export default {
     return isString(json) ? JSON.parse(json) : json;
   },
   get,
+  Index,
   intersection,
   isArray,
   isBlacklisted,

@@ -70,7 +70,7 @@ module.exports = function eject(resourceName, id, options) {
       resource.observers[id].close();
     }
     delete resource.observers[id];
-    delete resource.index[id];
+    resource.index.remove(id);
     delete resource.previousAttributes[id];
     delete resource.completedQueries[id];
     delete resource.pendingQueries[id];
