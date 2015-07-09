@@ -162,7 +162,7 @@ function _inject(definition, resource, attrs, options) {
                   try {
                     let injectedItem = relationDef.inject(toInjectItem, options.orig());
                     if (def.foreignKey) {
-                      injectedItem[def.foreignKey] = attrs[definition.idAttribute];
+                      DSUtils.set(injectedItem, def.foreignKey, attrs[definition.idAttribute]);
                     }
                     items.push(injectedItem);
                   } catch (err) {
@@ -176,7 +176,7 @@ function _inject(definition, resource, attrs, options) {
                 try {
                   let injected = relationDef.inject(attrs[def.localField], options.orig());
                   if (def.foreignKey) {
-                    injected[def.foreignKey] = attrs[definition.idAttribute];
+                    DSUtils.set(injected, def.foreignKey, attrs[definition.idAttribute]);
                   }
                 } catch (err) {
                   options.errorFn(err, `Failed to inject ${def.type} relation: "${relationName}"!`);

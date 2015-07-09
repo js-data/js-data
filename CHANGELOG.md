@@ -1,3 +1,8 @@
+##### 2.2.1 - 09 July 2015
+
+###### Backwards compatible bug fixes
+- #176 - `localKey`, `localKeys` and `foreignKey` don't support nested fields.
+
 ##### 2.2.0 - 07 July 2015
 
 ###### Backwards compatible API changes

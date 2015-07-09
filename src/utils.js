@@ -588,7 +588,7 @@ export default {
         };
         if (def.type === 'belongsTo') {
           prop.get = function () {
-            return this[localKey] ? definition.getResource(relationName).get(this[localKey]) : undefined;
+            return get(this, localKey) ? definition.getResource(relationName).get(get(this, localKey)) : undefined;
           };
         } else if (def.type === 'hasMany') {
           prop.get = function () {
@@ -597,7 +597,7 @@ export default {
               params[foreignKey] = this[definition.idAttribute];
               return definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, {allowSimpleWhere: true});
             } else if (localKeys) {
-              let keys = this[localKeys] || [];
+              let keys = get(this, localKeys) || [];
               return definition.getResource(relationName).getAll(isArray(keys) ? keys : _keys(keys));
             }
             return undefined;
@@ -605,7 +605,7 @@ export default {
         } else if (def.type === 'hasOne') {
           if (localKey) {
             prop.get = function () {
-              return this[localKey] ? definition.getResource(relationName).get(this[localKey]) : undefined;
+              return get(this, localKey) ? definition.getResource(relationName).get(get(this, localKey)) : undefined;
             };
           } else {
             prop.get = function () {
