@@ -160,7 +160,7 @@ function Events(target) {
       events = {};
     } else if (func) {
       for (let i = 0; i < listeners.length; i++) {
-        if (listeners[i] === func) {
+        if (listeners[i].f === func) {
           listeners.splice(i, 1);
           break;
         }
