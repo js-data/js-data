@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 2.2.1 - Homepage <http://www.js-data.io/>
+ * @version 2.2.2 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -84,10 +84,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new _datastoreIndex['default'](options);
 	  },
 	  version: {
-	    full: '2.2.1',
+	    full: '2.2.2',
 	    major: parseInt('2', 10),
 	    minor: parseInt('2', 10),
-	    patch: parseInt('1', 10),
+	    patch: parseInt('2', 10),
 	    alpha: true ? 'false' : false,
 	    beta: true ? 'false' : false
 	  }
@@ -107,9 +107,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _errors = __webpack_require__(3);
 
-	var _sync_methodsIndex = __webpack_require__(5);
+	var _sync_methodsIndex = __webpack_require__(4);
 
-	var _async_methodsIndex = __webpack_require__(6);
+	var _async_methodsIndex = __webpack_require__(5);
 
 	function lifecycleNoopCb(resource, attrs, cb) {
 	  cb(null, attrs);
@@ -609,7 +609,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var upperCase = __webpack_require__(20);
 	var get = __webpack_require__(17);
 	var set = __webpack_require__(18);
-	var observe = __webpack_require__(4);
+	var observe = __webpack_require__(6);
 	var w = undefined;
 	var objectProto = Object.prototype;
 	var toString = objectProto.toString;
@@ -759,7 +759,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      events = {};
 	    } else if (func) {
 	      for (var i = 0; i < listeners.length; i++) {
-	        if (listeners[i] === func) {
+	        if (listeners[i].f === func) {
 	          listeners.splice(i, 1);
 	          break;
 	        }
@@ -1334,6 +1334,493 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var _utils = __webpack_require__(2);
+
+	var _errors = __webpack_require__(3);
+
+	var NER = _errors['default'].NER;
+	var IA = _errors['default'].IA;
+	var R = _errors['default'].R;
+
+	var fakeId = 'DS_' + new Date().getTime();
+
+	function diffIsEmpty(diff) {
+	  return !(_utils['default'].isEmpty(diff.added) && _utils['default'].isEmpty(diff.removed) && _utils['default'].isEmpty(diff.changed));
+	}
+
+	function check(fnName, resourceName, id, options) {
+	  var _this = this;
+	  var definition = _this.defs[resourceName];
+	  options = options || {};
+
+	  id = _utils['default'].resolveId(definition, id);
+	  if (!definition) {
+	    throw new NER(resourceName);
+	  } else if (!_utils['default']._sn(id)) {
+	    throw _utils['default']._snErr('id');
+	  }
+	  id = id === fakeId ? undefined : id;
+
+	  options = _utils['default']._(definition, options);
+
+	  options.logFn(fnName, id, options);
+
+	  return { _this: _this, definition: definition, _resourceName: resourceName, _id: id, _options: options };
+	}
+
+	exports['default'] = {
+
+	  // Return the changes for the given item, if any.
+	  //
+	  // @param resourceName The name of the type of resource of the item whose changes are to be returned.
+	  // @param id The primary key of the item whose changes are to be returned.
+	  // @param options Optional configuration.
+	  // @param options.ignoredChanges Array of strings or regular expressions of fields, the changes of which are to be ignored.
+	  // @returns The changes of the given item, if any.
+	  changes: function changes(resourceName, id, options) {
+	    var _check$call = check.call(this, 'changes', resourceName, id, options);
+
+	    var _this = _check$call._this;
+	    var definition = _check$call.definition;
+	    var _resourceName = _check$call._resourceName;
+	    var _id = _check$call._id;
+	    var _options = _check$call._options;
+
+	    var item = definition.get(_id);
+	    if (item) {
+	      var _ret = (function () {
+	        if (_utils['default'].w) {
+	          // force observation handler to be fired for item if there are changes and `Object.observe` is not available
+	          _this.s[_resourceName].observers[_id].deliver();
+	        }
+
+	        var ignoredChanges = _options.ignoredChanges || [];
+	        // add linked relations to list of ignored changes
+	        _utils['default'].forEach(definition.relationFields, function (field) {
+	          if (!_utils['default'].contains(ignoredChanges, field)) {
+	            ignoredChanges.push(field);
+	          }
+	        });
+	        // calculate changes
+	        var diff = _utils['default'].diffObjectFromOldObject(item, _this.s[_resourceName].previousAttributes[_id], _utils['default'].equals, ignoredChanges);
+	        // remove functions from diff
+	        _utils['default'].forOwn(diff, function (changeset, name) {
+	          var toKeep = [];
+	          _utils['default'].forOwn(changeset, function (value, field) {
+	            if (!_utils['default'].isFunction(value)) {
+	              toKeep.push(field);
+	            }
+	          });
+	          diff[name] = _utils['default'].pick(diff[name], toKeep);
+	        });
+	        // definitely ignore changes to linked relations
+	        _utils['default'].forEach(definition.relationFields, function (field) {
+	          delete diff.added[field];
+	          delete diff.removed[field];
+	          delete diff.changed[field];
+	        });
+	        return {
+	          v: diff
+	        };
+	      })();
+
+	      if (typeof _ret === 'object') return _ret.v;
+	    }
+	  },
+
+	  // Return the change history of the given item, if any.
+	  //
+	  // @param resourceName The name of the type of resource of the item whose change history is to be returned.
+	  // @param id The primary key of the item whose change history is to be returned.
+	  // @returns The change history of the given item, if any.
+	  changeHistory: function changeHistory(resourceName, id) {
+	    var _check$call2 = check.call(this, 'changeHistory', resourceName, id || fakeId);
+
+	    var _this = _check$call2._this;
+	    var definition = _check$call2.definition;
+	    var _resourceName = _check$call2._resourceName;
+	    var _id = _check$call2._id;
+
+	    var resource = _this.s[_resourceName];
+
+	    if (!definition.keepChangeHistory) {
+	      definition.errorFn('changeHistory is disabled for this resource!');
+	    } else {
+	      if (_resourceName) {
+	        var item = definition.get(_id);
+	        if (item) {
+	          return resource.changeHistories[_id];
+	        }
+	      } else {
+	        return resource.changeHistory;
+	      }
+	    }
+	  },
+
+	  // Re-compute the computed properties of the given item.
+	  //
+	  // @param resourceName The name of the type of resource of the item whose computed properties are to be re-computed.
+	  // @param instance The instance whose computed properties are to be re-computed.
+	  // @returns The item whose computed properties were re-computed.
+	  compute: function compute(resourceName, instance) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+
+	    instance = _utils['default'].resolveItem(_this.s[resourceName], instance);
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (!instance) {
+	      throw new R('Item not in the store!');
+	    } else if (!_utils['default']._o(instance) && !_utils['default']._sn(instance)) {
+	      throw new IA('"instance" must be an object, string or number!');
+	    }
+
+	    definition.logFn('compute', instance);
+
+	    // re-compute all computed properties
+	    _utils['default'].forOwn(definition.computed, function (fn, field) {
+	      _utils['default'].compute.call(instance, fn, field);
+	    });
+	    return instance;
+	  },
+
+	  // Factory function to create an instance of the specified Resource.
+	  //
+	  // @param resourceName The name of the type of resource of which to create an instance.
+	  // @param attrs Hash of properties with which to initialize the instance.
+	  // @param options Optional configuration.
+	  // @param options.defaults Default values with which to initialize the instance.
+	  // @returns The new instance.
+	  createInstance: function createInstance(resourceName, attrs, options) {
+	    var definition = this.defs[resourceName];
+	    var item = undefined;
+
+	    attrs = attrs || {};
+
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (attrs && !_utils['default'].isObject(attrs)) {
+	      throw new IA('"attrs" must be an object!');
+	    }
+
+	    options = _utils['default']._(definition, options);
+	    options.logFn('createInstance', attrs, options);
+
+	    // lifecycle
+	    options.beforeCreateInstance(options, attrs);
+
+	    // grab instance constructor function from Resource definition
+	    var Constructor = definition[definition['class']];
+
+	    // create instance
+	    item = new Constructor();
+
+	    // add default values
+	    if (options.defaultValues) {
+	      _utils['default'].deepMixIn(item, options.defaultValues);
+	    }
+	    _utils['default'].deepMixIn(item, attrs);
+
+	    // compute computed properties
+	    if (definition.computed) {
+	      definition.compute(item);
+	    }
+	    // lifecycle
+	    options.afterCreateInstance(options, item);
+	    return item;
+	  },
+
+	  // Create a new collection of the specified Resource.
+	  //
+	  // @param resourceName The name of the type of resource of which to create a collection
+	  // @param arr Possibly empty array of data from which to create the collection.
+	  // @param params The criteria by which to filter items. Will be passed to `DS#findAll` if `fetch` is called. See http://www.js-data.io/docs/query-syntax
+	  // @param options Optional configuration.
+	  // @param options.notify Whether to call the beforeCreateCollection and afterCreateCollection lifecycle hooks..
+	  // @returns The new collection.
+	  createCollection: function createCollection(resourceName, arr, params, options) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+
+	    arr = arr || [];
+	    params = params || {};
+
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (arr && !_utils['default'].isArray(arr)) {
+	      throw new IA('"arr" must be an array!');
+	    }
+
+	    options = _utils['default']._(definition, options);
+
+	    options.logFn('createCollection', arr, options);
+
+	    // lifecycle
+	    options.beforeCreateCollection(options, arr);
+
+	    // define the API for this collection
+	    Object.defineProperties(arr, {
+	      //  Call DS#findAll with the params of this collection, filling the collection with the results.
+	      fetch: {
+	        value: function value(params, options) {
+	          var __this = this;
+	          __this.params = params || __this.params;
+	          return definition.findAll(__this.params, options).then(function (data) {
+	            if (data === __this) {
+	              return __this;
+	            }
+	            data.unshift(__this.length);
+	            data.unshift(0);
+	            __this.splice.apply(__this, data);
+	            data.shift();
+	            data.shift();
+	            if (data.$$injected) {
+	              _this.s[resourceName].queryData[_utils['default'].toJson(__this.params)] = __this;
+	              __this.$$injected = true;
+	            }
+	            return __this;
+	          });
+	        }
+	      },
+	      // params for this collection. See http://www.js-data.io/docs/query-syntax
+	      params: {
+	        value: params,
+	        writable: true
+	      },
+	      // name of the resource type of this collection
+	      resourceName: {
+	        value: resourceName
+	      }
+	    });
+
+	    // lifecycle
+	    options.afterCreateCollection(options, arr);
+	    return arr;
+	  },
+	  defineResource: __webpack_require__(27),
+	  digest: function digest() {
+	    this.observe.Platform.performMicrotaskCheckpoint();
+	  },
+	  eject: __webpack_require__(28),
+	  ejectAll: __webpack_require__(29),
+	  filter: __webpack_require__(30),
+
+	  // Return the item with the given primary key if its in the store.
+	  //
+	  // @param resourceName The name of the type of resource of the item to retrieve.
+	  // @param id The primary key of the item to retrieve.
+	  // @returns The item with the given primary key if it's in the store.
+	  ///
+	  get: function get(resourceName, id) {
+	    var _check$call3 = check.call(this, 'get', resourceName, id);
+
+	    var _this = _check$call3._this;
+	    var _resourceName = _check$call3._resourceName;
+	    var _id = _check$call3._id;
+
+	    // return the item if it exists
+	    return _this.s[_resourceName].index[_id];
+	  },
+
+	  // Return the items in the store that have the given primary keys.
+	  //
+	  // @param resourceName The name of the type of resource of the items to retrieve.
+	  // @param ids The primary keys of the items to retrieve.
+	  // @returns The items with the given primary keys if they're in the store.
+	  getAll: function getAll(resourceName, ids) {
+	    var _this = this;
+	    var definition = _this.defs[resourceName];
+	    var resource = _this.s[resourceName];
+	    var collection = [];
+
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (ids && !_utils['default']._a(ids)) {
+	      throw _utils['default']._aErr('ids');
+	    }
+
+	    definition.logFn('getAll', ids);
+
+	    if (_utils['default']._a(ids)) {
+	      // return just the items with the given primary keys
+	      var _length = ids.length;
+	      for (var i = 0; i < _length; i++) {
+	        if (resource.index[ids[i]]) {
+	          collection.push(resource.index[ids[i]]);
+	        }
+	      }
+	    } else {
+	      // most efficient of retrieving ALL items from the store
+	      collection = resource.collection.slice();
+	    }
+
+	    return collection;
+	  },
+
+	  // Return the whether the item with the given primary key has any changes.
+	  //
+	  // @param resourceName The name of the type of resource of the item.
+	  // @param id The primary key of the item.
+	  // @returns Whether the item with the given primary key has any changes.
+	  hasChanges: function hasChanges(resourceName, id) {
+	    var _check$call4 = check.call(this, 'hasChanges', resourceName, id);
+
+	    var definition = _check$call4.definition;
+	    var _id = _check$call4._id;
+
+	    return definition.get(_id) ? diffIsEmpty(definition.changes(_id)) : false;
+	  },
+	  inject: __webpack_require__(31),
+
+	  // Return the timestamp from the last time the item with the given primary key was changed.
+	  //
+	  // @param resourceName The name of the type of resource of the item.
+	  // @param id The primary key of the item.
+	  // @returns Timestamp from the last time the item was changed.
+	  lastModified: function lastModified(resourceName, id) {
+	    var _check$call5 = check.call(this, 'lastModified', resourceName, id || fakeId);
+
+	    var _this = _check$call5._this;
+	    var _resourceName = _check$call5._resourceName;
+	    var _id = _check$call5._id;
+
+	    var resource = _this.s[_resourceName];
+
+	    if (_id) {
+	      if (!(_id in resource.modified)) {
+	        resource.modified[_id] = 0;
+	      }
+	      return resource.modified[_id];
+	    }
+	    return resource.collectionModified;
+	  },
+
+	  // Return the timestamp from the last time the item with the given primary key was saved via an adapter.
+	  //
+	  // @param resourceName The name of the type of resource of the item.
+	  // @param id The primary key of the item.
+	  // @returns Timestamp from the last time the item was saved.
+	  lastSaved: function lastSaved(resourceName, id) {
+	    var _check$call6 = check.call(this, 'lastSaved', resourceName, id || fakeId);
+
+	    var _this = _check$call6._this;
+	    var _resourceName = _check$call6._resourceName;
+	    var _id = _check$call6._id;
+
+	    var resource = _this.s[_resourceName];
+
+	    if (!(_id in resource.saved)) {
+	      resource.saved[_id] = 0;
+	    }
+	    return resource.saved[_id];
+	  },
+
+	  // Return the previous attributes of the item with the given primary key before it was changed.
+	  //
+	  // @param resourceName The name of the type of resource of the item.
+	  // @param id The primary key of the item.
+	  // @returns The previous attributes of the item
+	  previous: function previous(resourceName, id) {
+	    var _check$call7 = check.call(this, 'previous', resourceName, id);
+
+	    var _this = _check$call7._this;
+	    var _resourceName = _check$call7._resourceName;
+	    var _id = _check$call7._id;
+
+	    var resource = _this.s[_resourceName];
+
+	    // return resource from cache
+	    return resource.previousAttributes[_id] ? _utils['default'].copy(resource.previousAttributes[_id]) : undefined;
+	  },
+
+	  // Revert all attributes of the item with the given primary key to their previous values.
+	  //
+	  // @param resourceName The name of the type of resource of the item.
+	  // @param id The primary key of the item.
+	  // @returns The reverted item
+	  revert: function revert(resourceName, id) {
+	    var _check$call8 = check.call(this, 'revert', resourceName, id);
+
+	    var _this = _check$call8._this;
+	    var definition = _check$call8.definition;
+	    var _resourceName = _check$call8._resourceName;
+	    var _id = _check$call8._id;
+
+	    return definition.inject(_this.previous(_resourceName, _id));
+	  }
+	};
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports['default'] = {
+	  create: __webpack_require__(32),
+	  destroy: __webpack_require__(33),
+	  destroyAll: __webpack_require__(34),
+	  find: __webpack_require__(35),
+	  findAll: __webpack_require__(36),
+	  loadRelations: __webpack_require__(37),
+	  reap: __webpack_require__(38),
+	  refresh: function refresh(resourceName, id, options) {
+	    var _this = this;
+	    var DSUtils = _this.utils;
+
+	    return new DSUtils.Promise(function (resolve, reject) {
+	      var definition = _this.defs[resourceName];
+	      id = DSUtils.resolveId(_this.defs[resourceName], id);
+	      if (!definition) {
+	        reject(new _this.errors.NER(resourceName));
+	      } else if (!DSUtils._sn(id)) {
+	        reject(DSUtils._snErr('id'));
+	      } else {
+	        options = DSUtils._(definition, options);
+	        options.bypassCache = true;
+	        options.logFn('refresh', id, options);
+	        resolve(_this.get(resourceName, id));
+	      }
+	    }).then(function (item) {
+	      return item ? _this.find(resourceName, id, options) : item;
+	    });
+	  },
+	  refreshAll: function refreshAll(resourceName, params, options) {
+	    var _this = this;
+	    var DSUtils = _this.utils;
+	    var definition = _this.defs[resourceName];
+	    params = params || {};
+
+	    return new DSUtils.Promise(function (resolve, reject) {
+	      if (!definition) {
+	        reject(new _this.errors.NER(resourceName));
+	      } else if (!DSUtils._o(params)) {
+	        reject(DSUtils._oErr('params'));
+	      } else {
+	        options = DSUtils._(definition, options);
+	        options.bypassCache = true;
+	        options.logFn('refreshAll', params, options);
+	        resolve(_this.filter(resourceName, params, options));
+	      }
+	    }).then(function (existing) {
+	      options.bypassCache = true;
+	      return _this.findAll(resourceName, params, options).then(function (found) {
+	        DSUtils.forEach(existing, function (item) {
+	          if (found.indexOf(item) === -1) {
+	            definition.eject(item);
+	          }
+	        });
+	        return found;
+	      });
+	    });
+	  },
+	  save: __webpack_require__(39),
+	  update: __webpack_require__(40),
+	  updateAll: __webpack_require__(41)
+	};
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
 	/*
 	 * Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
 	 * This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
@@ -1881,493 +2368,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _utils = __webpack_require__(2);
-
-	var _errors = __webpack_require__(3);
-
-	var NER = _errors['default'].NER;
-	var IA = _errors['default'].IA;
-	var R = _errors['default'].R;
-
-	var fakeId = 'DS_' + new Date().getTime();
-
-	function diffIsEmpty(diff) {
-	  return !(_utils['default'].isEmpty(diff.added) && _utils['default'].isEmpty(diff.removed) && _utils['default'].isEmpty(diff.changed));
-	}
-
-	function check(fnName, resourceName, id, options) {
-	  var _this = this;
-	  var definition = _this.defs[resourceName];
-	  options = options || {};
-
-	  id = _utils['default'].resolveId(definition, id);
-	  if (!definition) {
-	    throw new NER(resourceName);
-	  } else if (!_utils['default']._sn(id)) {
-	    throw _utils['default']._snErr('id');
-	  }
-	  id = id === fakeId ? undefined : id;
-
-	  options = _utils['default']._(definition, options);
-
-	  options.logFn(fnName, id, options);
-
-	  return { _this: _this, definition: definition, _resourceName: resourceName, _id: id, _options: options };
-	}
-
-	exports['default'] = {
-
-	  // Return the changes for the given item, if any.
-	  //
-	  // @param resourceName The name of the type of resource of the item whose changes are to be returned.
-	  // @param id The primary key of the item whose changes are to be returned.
-	  // @param options Optional configuration.
-	  // @param options.ignoredChanges Array of strings or regular expressions of fields, the changes of which are to be ignored.
-	  // @returns The changes of the given item, if any.
-	  changes: function changes(resourceName, id, options) {
-	    var _check$call = check.call(this, 'changes', resourceName, id, options);
-
-	    var _this = _check$call._this;
-	    var definition = _check$call.definition;
-	    var _resourceName = _check$call._resourceName;
-	    var _id = _check$call._id;
-	    var _options = _check$call._options;
-
-	    var item = definition.get(_id);
-	    if (item) {
-	      var _ret = (function () {
-	        if (_utils['default'].w) {
-	          // force observation handler to be fired for item if there are changes and `Object.observe` is not available
-	          _this.s[_resourceName].observers[_id].deliver();
-	        }
-
-	        var ignoredChanges = _options.ignoredChanges || [];
-	        // add linked relations to list of ignored changes
-	        _utils['default'].forEach(definition.relationFields, function (field) {
-	          if (!_utils['default'].contains(ignoredChanges, field)) {
-	            ignoredChanges.push(field);
-	          }
-	        });
-	        // calculate changes
-	        var diff = _utils['default'].diffObjectFromOldObject(item, _this.s[_resourceName].previousAttributes[_id], _utils['default'].equals, ignoredChanges);
-	        // remove functions from diff
-	        _utils['default'].forOwn(diff, function (changeset, name) {
-	          var toKeep = [];
-	          _utils['default'].forOwn(changeset, function (value, field) {
-	            if (!_utils['default'].isFunction(value)) {
-	              toKeep.push(field);
-	            }
-	          });
-	          diff[name] = _utils['default'].pick(diff[name], toKeep);
-	        });
-	        // definitely ignore changes to linked relations
-	        _utils['default'].forEach(definition.relationFields, function (field) {
-	          delete diff.added[field];
-	          delete diff.removed[field];
-	          delete diff.changed[field];
-	        });
-	        return {
-	          v: diff
-	        };
-	      })();
-
-	      if (typeof _ret === 'object') return _ret.v;
-	    }
-	  },
-
-	  // Return the change history of the given item, if any.
-	  //
-	  // @param resourceName The name of the type of resource of the item whose change history is to be returned.
-	  // @param id The primary key of the item whose change history is to be returned.
-	  // @returns The change history of the given item, if any.
-	  changeHistory: function changeHistory(resourceName, id) {
-	    var _check$call2 = check.call(this, 'changeHistory', resourceName, id || fakeId);
-
-	    var _this = _check$call2._this;
-	    var definition = _check$call2.definition;
-	    var _resourceName = _check$call2._resourceName;
-	    var _id = _check$call2._id;
-
-	    var resource = _this.s[_resourceName];
-
-	    if (!definition.keepChangeHistory) {
-	      definition.errorFn('changeHistory is disabled for this resource!');
-	    } else {
-	      if (_resourceName) {
-	        var item = definition.get(_id);
-	        if (item) {
-	          return resource.changeHistories[_id];
-	        }
-	      } else {
-	        return resource.changeHistory;
-	      }
-	    }
-	  },
-
-	  // Re-compute the computed properties of the given item.
-	  //
-	  // @param resourceName The name of the type of resource of the item whose computed properties are to be re-computed.
-	  // @param instance The instance whose computed properties are to be re-computed.
-	  // @returns The item whose computed properties were re-computed.
-	  compute: function compute(resourceName, instance) {
-	    var _this = this;
-	    var definition = _this.defs[resourceName];
-
-	    instance = _utils['default'].resolveItem(_this.s[resourceName], instance);
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (!instance) {
-	      throw new R('Item not in the store!');
-	    } else if (!_utils['default']._o(instance) && !_utils['default']._sn(instance)) {
-	      throw new IA('"instance" must be an object, string or number!');
-	    }
-
-	    definition.logFn('compute', instance);
-
-	    // re-compute all computed properties
-	    _utils['default'].forOwn(definition.computed, function (fn, field) {
-	      _utils['default'].compute.call(instance, fn, field);
-	    });
-	    return instance;
-	  },
-
-	  // Factory function to create an instance of the specified Resource.
-	  //
-	  // @param resourceName The name of the type of resource of which to create an instance.
-	  // @param attrs Hash of properties with which to initialize the instance.
-	  // @param options Optional configuration.
-	  // @param options.defaults Default values with which to initialize the instance.
-	  // @returns The new instance.
-	  createInstance: function createInstance(resourceName, attrs, options) {
-	    var definition = this.defs[resourceName];
-	    var item = undefined;
-
-	    attrs = attrs || {};
-
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (attrs && !_utils['default'].isObject(attrs)) {
-	      throw new IA('"attrs" must be an object!');
-	    }
-
-	    options = _utils['default']._(definition, options);
-	    options.logFn('createInstance', attrs, options);
-
-	    // lifecycle
-	    options.beforeCreateInstance(options, attrs);
-
-	    // grab instance constructor function from Resource definition
-	    var Constructor = definition[definition['class']];
-
-	    // create instance
-	    item = new Constructor();
-
-	    // add default values
-	    if (options.defaultValues) {
-	      _utils['default'].deepMixIn(item, options.defaultValues);
-	    }
-	    _utils['default'].deepMixIn(item, attrs);
-
-	    // compute computed properties
-	    if (definition.computed) {
-	      definition.compute(item);
-	    }
-	    // lifecycle
-	    options.afterCreateInstance(options, item);
-	    return item;
-	  },
-
-	  // Create a new collection of the specified Resource.
-	  //
-	  // @param resourceName The name of the type of resource of which to create a collection
-	  // @param arr Possibly empty array of data from which to create the collection.
-	  // @param params The criteria by which to filter items. Will be passed to `DS#findAll` if `fetch` is called. See http://www.js-data.io/docs/query-syntax
-	  // @param options Optional configuration.
-	  // @param options.notify Whether to call the beforeCreateCollection and afterCreateCollection lifecycle hooks..
-	  // @returns The new collection.
-	  createCollection: function createCollection(resourceName, arr, params, options) {
-	    var _this = this;
-	    var definition = _this.defs[resourceName];
-
-	    arr = arr || [];
-	    params = params || {};
-
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (arr && !_utils['default'].isArray(arr)) {
-	      throw new IA('"arr" must be an array!');
-	    }
-
-	    options = _utils['default']._(definition, options);
-
-	    options.logFn('createCollection', arr, options);
-
-	    // lifecycle
-	    options.beforeCreateCollection(options, arr);
-
-	    // define the API for this collection
-	    Object.defineProperties(arr, {
-	      //  Call DS#findAll with the params of this collection, filling the collection with the results.
-	      fetch: {
-	        value: function value(params, options) {
-	          var __this = this;
-	          __this.params = params || __this.params;
-	          return definition.findAll(__this.params, options).then(function (data) {
-	            if (data === __this) {
-	              return __this;
-	            }
-	            data.unshift(__this.length);
-	            data.unshift(0);
-	            __this.splice.apply(__this, data);
-	            data.shift();
-	            data.shift();
-	            if (data.$$injected) {
-	              _this.s[resourceName].queryData[_utils['default'].toJson(__this.params)] = __this;
-	              __this.$$injected = true;
-	            }
-	            return __this;
-	          });
-	        }
-	      },
-	      // params for this collection. See http://www.js-data.io/docs/query-syntax
-	      params: {
-	        value: params,
-	        writable: true
-	      },
-	      // name of the resource type of this collection
-	      resourceName: {
-	        value: resourceName
-	      }
-	    });
-
-	    // lifecycle
-	    options.afterCreateCollection(options, arr);
-	    return arr;
-	  },
-	  defineResource: __webpack_require__(29),
-	  digest: function digest() {
-	    this.observe.Platform.performMicrotaskCheckpoint();
-	  },
-	  eject: __webpack_require__(30),
-	  ejectAll: __webpack_require__(31),
-	  filter: __webpack_require__(32),
-
-	  // Return the item with the given primary key if its in the store.
-	  //
-	  // @param resourceName The name of the type of resource of the item to retrieve.
-	  // @param id The primary key of the item to retrieve.
-	  // @returns The item with the given primary key if it's in the store.
-	  ///
-	  get: function get(resourceName, id) {
-	    var _check$call3 = check.call(this, 'get', resourceName, id);
-
-	    var _this = _check$call3._this;
-	    var _resourceName = _check$call3._resourceName;
-	    var _id = _check$call3._id;
-
-	    // return the item if it exists
-	    return _this.s[_resourceName].index[_id];
-	  },
-
-	  // Return the items in the store that have the given primary keys.
-	  //
-	  // @param resourceName The name of the type of resource of the items to retrieve.
-	  // @param ids The primary keys of the items to retrieve.
-	  // @returns The items with the given primary keys if they're in the store.
-	  getAll: function getAll(resourceName, ids) {
-	    var _this = this;
-	    var definition = _this.defs[resourceName];
-	    var resource = _this.s[resourceName];
-	    var collection = [];
-
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (ids && !_utils['default']._a(ids)) {
-	      throw _utils['default']._aErr('ids');
-	    }
-
-	    definition.logFn('getAll', ids);
-
-	    if (_utils['default']._a(ids)) {
-	      // return just the items with the given primary keys
-	      var _length = ids.length;
-	      for (var i = 0; i < _length; i++) {
-	        if (resource.index[ids[i]]) {
-	          collection.push(resource.index[ids[i]]);
-	        }
-	      }
-	    } else {
-	      // most efficient of retrieving ALL items from the store
-	      collection = resource.collection.slice();
-	    }
-
-	    return collection;
-	  },
-
-	  // Return the whether the item with the given primary key has any changes.
-	  //
-	  // @param resourceName The name of the type of resource of the item.
-	  // @param id The primary key of the item.
-	  // @returns Whether the item with the given primary key has any changes.
-	  hasChanges: function hasChanges(resourceName, id) {
-	    var _check$call4 = check.call(this, 'hasChanges', resourceName, id);
-
-	    var definition = _check$call4.definition;
-	    var _id = _check$call4._id;
-
-	    return definition.get(_id) ? diffIsEmpty(definition.changes(_id)) : false;
-	  },
-	  inject: __webpack_require__(33),
-
-	  // Return the timestamp from the last time the item with the given primary key was changed.
-	  //
-	  // @param resourceName The name of the type of resource of the item.
-	  // @param id The primary key of the item.
-	  // @returns Timestamp from the last time the item was changed.
-	  lastModified: function lastModified(resourceName, id) {
-	    var _check$call5 = check.call(this, 'lastModified', resourceName, id || fakeId);
-
-	    var _this = _check$call5._this;
-	    var _resourceName = _check$call5._resourceName;
-	    var _id = _check$call5._id;
-
-	    var resource = _this.s[_resourceName];
-
-	    if (_id) {
-	      if (!(_id in resource.modified)) {
-	        resource.modified[_id] = 0;
-	      }
-	      return resource.modified[_id];
-	    }
-	    return resource.collectionModified;
-	  },
-
-	  // Return the timestamp from the last time the item with the given primary key was saved via an adapter.
-	  //
-	  // @param resourceName The name of the type of resource of the item.
-	  // @param id The primary key of the item.
-	  // @returns Timestamp from the last time the item was saved.
-	  lastSaved: function lastSaved(resourceName, id) {
-	    var _check$call6 = check.call(this, 'lastSaved', resourceName, id || fakeId);
-
-	    var _this = _check$call6._this;
-	    var _resourceName = _check$call6._resourceName;
-	    var _id = _check$call6._id;
-
-	    var resource = _this.s[_resourceName];
-
-	    if (!(_id in resource.saved)) {
-	      resource.saved[_id] = 0;
-	    }
-	    return resource.saved[_id];
-	  },
-
-	  // Return the previous attributes of the item with the given primary key before it was changed.
-	  //
-	  // @param resourceName The name of the type of resource of the item.
-	  // @param id The primary key of the item.
-	  // @returns The previous attributes of the item
-	  previous: function previous(resourceName, id) {
-	    var _check$call7 = check.call(this, 'previous', resourceName, id);
-
-	    var _this = _check$call7._this;
-	    var _resourceName = _check$call7._resourceName;
-	    var _id = _check$call7._id;
-
-	    var resource = _this.s[_resourceName];
-
-	    // return resource from cache
-	    return resource.previousAttributes[_id] ? _utils['default'].copy(resource.previousAttributes[_id]) : undefined;
-	  },
-
-	  // Revert all attributes of the item with the given primary key to their previous values.
-	  //
-	  // @param resourceName The name of the type of resource of the item.
-	  // @param id The primary key of the item.
-	  // @returns The reverted item
-	  revert: function revert(resourceName, id) {
-	    var _check$call8 = check.call(this, 'revert', resourceName, id);
-
-	    var _this = _check$call8._this;
-	    var definition = _check$call8.definition;
-	    var _resourceName = _check$call8._resourceName;
-	    var _id = _check$call8._id;
-
-	    return definition.inject(_this.previous(_resourceName, _id));
-	  }
-	};
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports['default'] = {
-	  create: __webpack_require__(34),
-	  destroy: __webpack_require__(35),
-	  destroyAll: __webpack_require__(36),
-	  find: __webpack_require__(37),
-	  findAll: __webpack_require__(38),
-	  loadRelations: __webpack_require__(39),
-	  reap: __webpack_require__(40),
-	  refresh: function refresh(resourceName, id, options) {
-	    var _this = this;
-	    var DSUtils = _this.utils;
-
-	    return new DSUtils.Promise(function (resolve, reject) {
-	      var definition = _this.defs[resourceName];
-	      id = DSUtils.resolveId(_this.defs[resourceName], id);
-	      if (!definition) {
-	        reject(new _this.errors.NER(resourceName));
-	      } else if (!DSUtils._sn(id)) {
-	        reject(DSUtils._snErr('id'));
-	      } else {
-	        options = DSUtils._(definition, options);
-	        options.bypassCache = true;
-	        options.logFn('refresh', id, options);
-	        resolve(_this.get(resourceName, id));
-	      }
-	    }).then(function (item) {
-	      return item ? _this.find(resourceName, id, options) : item;
-	    });
-	  },
-	  refreshAll: function refreshAll(resourceName, params, options) {
-	    var _this = this;
-	    var DSUtils = _this.utils;
-	    var definition = _this.defs[resourceName];
-	    params = params || {};
-
-	    return new DSUtils.Promise(function (resolve, reject) {
-	      if (!definition) {
-	        reject(new _this.errors.NER(resourceName));
-	      } else if (!DSUtils._o(params)) {
-	        reject(DSUtils._oErr('params'));
-	      } else {
-	        options = DSUtils._(definition, options);
-	        options.bypassCache = true;
-	        options.logFn('refreshAll', params, options);
-	        resolve(_this.filter(resourceName, params, options));
-	      }
-	    }).then(function (existing) {
-	      options.bypassCache = true;
-	      return _this.findAll(resourceName, params, options).then(function (found) {
-	        DSUtils.forEach(existing, function (item) {
-	          if (found.indexOf(item) === -1) {
-	            definition.eject(item);
-	          }
-	        });
-	        return found;
-	      });
-	    });
-	  },
-	  save: __webpack_require__(41),
-	  update: __webpack_require__(42),
-	  updateAll: __webpack_require__(43)
-	};
-
-/***/ },
 /* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -2769,8 +2769,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var hasOwn = __webpack_require__(23);
-	var forIn = __webpack_require__(24);
+	var hasOwn = __webpack_require__(22);
+	var forIn = __webpack_require__(23);
 
 	    /**
 	     * Similar to Array/forEach but works over object properties and fixes Don't
@@ -2795,7 +2795,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var forOwn = __webpack_require__(13);
-	var isPlainObject = __webpack_require__(22);
+	var isPlainObject = __webpack_require__(24);
 
 	    /**
 	     * Mixes objects into the target object, recursively mixing existing child
@@ -2906,7 +2906,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var namespace = __webpack_require__(28);
+	var namespace = __webpack_require__(26);
 
 	    /**
 	     * set "nested" object property
@@ -2929,8 +2929,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(26);
-	var camelCase = __webpack_require__(27);
+	var toString = __webpack_require__(42);
+	var camelCase = __webpack_require__(43);
 	var upperCase = __webpack_require__(20);
 	    /**
 	     * camelCase + UPPERCASE first char
@@ -2948,7 +2948,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(26);
+	var toString = __webpack_require__(42);
 	    /**
 	     * "Safer" String.toUpperCase()
 	     */
@@ -3001,25 +3001,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 
 	    /**
-	     * Checks if the value is created by the `Object` constructor.
-	     */
-	    function isPlainObject(value) {
-	        return (!!value && typeof value === 'object' &&
-	            value.constructor === Object);
-	    }
-
-	    module.exports = isPlainObject;
-
-
-
-
-/***/ },
-/* 23 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
 	     * Safer Object.hasOwnProperty
 	     */
 	     function hasOwn(obj, prop){
@@ -3032,10 +3013,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 24 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var hasOwn = __webpack_require__(23);
+	var hasOwn = __webpack_require__(22);
 
 	    var _hasDontEnumBug,
 	        _dontEnums;
@@ -3114,6 +3095,25 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Checks if the value is created by the `Object` constructor.
+	     */
+	    function isPlainObject(value) {
+	        return (!!value && typeof value === 'object' &&
+	            value.constructor === Object);
+	    }
+
+	    module.exports = isPlainObject;
+
+
+
+
+/***/ },
 /* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -3144,51 +3144,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
-	
-
-	    /**
-	     * Typecast a value to a String, using an empty string value for null or
-	     * undefined.
-	     */
-	    function toString(val){
-	        return val == null ? '' : val.toString();
-	    }
-
-	    module.exports = toString;
-
-
-
-
-/***/ },
-/* 27 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(26);
-	var replaceAccents = __webpack_require__(44);
-	var removeNonWord = __webpack_require__(45);
-	var upperCase = __webpack_require__(20);
-	var lowerCase = __webpack_require__(46);
-	    /**
-	    * Convert string to camelCase text.
-	    */
-	    function camelCase(str){
-	        str = toString(str);
-	        str = replaceAccents(str);
-	        str = removeNonWord(str)
-	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
-	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
-	            .replace(/\s+/g, '') //remove spaces
-	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
-	        return str;
-	    }
-	    module.exports = camelCase;
-
-
-
-/***/ },
-/* 28 */
-/***/ function(module, exports, __webpack_require__) {
-
 	var forEach = __webpack_require__(8);
 
 	    /**
@@ -3211,7 +3166,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 29 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*jshint evil:true, loopfunc:true*/
@@ -3630,7 +3585,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 30 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -3736,7 +3691,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 31 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -3786,7 +3741,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 32 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -3820,7 +3775,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 33 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _utils = __webpack_require__(2);
@@ -4158,7 +4113,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 34 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -4248,7 +4203,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 35 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -4316,7 +4271,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 36 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -4385,7 +4340,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 37 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* jshint -W082 */
@@ -4498,7 +4453,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 38 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* jshint -W082 */
@@ -4655,7 +4610,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 39 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -4759,7 +4714,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 40 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -4848,7 +4803,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 41 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -4955,7 +4910,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 42 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -5029,7 +4984,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 43 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -5119,10 +5074,55 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
+/* 42 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Typecast a value to a String, using an empty string value for null or
+	     * undefined.
+	     */
+	    function toString(val){
+	        return val == null ? '' : val.toString();
+	    }
+
+	    module.exports = toString;
+
+
+
+
+/***/ },
+/* 43 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var toString = __webpack_require__(42);
+	var replaceAccents = __webpack_require__(44);
+	var removeNonWord = __webpack_require__(45);
+	var upperCase = __webpack_require__(20);
+	var lowerCase = __webpack_require__(46);
+	    /**
+	    * Convert string to camelCase text.
+	    */
+	    function camelCase(str){
+	        str = toString(str);
+	        str = replaceAccents(str);
+	        str = removeNonWord(str)
+	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
+	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
+	            .replace(/\s+/g, '') //remove spaces
+	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
+	        return str;
+	    }
+	    module.exports = camelCase;
+
+
+
+/***/ },
 /* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(26);
+	var toString = __webpack_require__(42);
 	    /**
 	    * Replaces all accented chars with regular ones
 	    */
@@ -5164,7 +5164,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(26);
+	var toString = __webpack_require__(42);
 	    // This pattern is generated by the _build/pattern-removeNonWord.js script
 	    var PATTERN = /[^\x20\x2D0-9A-Z\x5Fa-z\xC0-\xD6\xD8-\xF6\xF8-\xFF]/g;
 
@@ -5184,7 +5184,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(26);
+	var toString = __webpack_require__(42);
 	    /**
 	     * "Safer" String.toLowerCase()
 	     */
