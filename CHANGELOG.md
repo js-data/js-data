@@ -1,3 +1,8 @@
+##### 2.2.2 - 10 July 2015
+
+###### Backwards compatible bug fixes
+- #177 - Fix Events.off
+
 ##### 2.2.1 - 09 July 2015
 
 ###### Backwards compatible bug fixes
