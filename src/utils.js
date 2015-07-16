@@ -573,7 +573,7 @@ export default {
   // This is where the magic of relations happens.
   applyRelationGettersToTarget(store, definition, target) {
     this.forEach(definition.relationList, def => {
-      let relationName = def.relation;
+      let relationName = typeof def.relationName !== 'undefined' ? def.relationName : def.relation;
       let localField = def.localField;
       let localKey = def.localKey;
       let foreignKey = def.foreignKey;
