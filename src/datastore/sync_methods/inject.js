@@ -147,7 +147,7 @@ function _inject(definition, resource, attrs, options) {
         // will recursively inject them into their proper places in the data store.
         // Magic!
         DSUtils.forEach(definition.relationList, def => {
-          let relationName = def.relation;
+          let relationName = typeof def.relationName !== 'undefined' ? def.relationName : def.relation;
           let relationDef = _this.defs[relationName];
           let toInject = attrs[def.localField];
           if (toInject) {

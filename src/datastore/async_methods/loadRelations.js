@@ -36,7 +36,7 @@ module.exports = function loadRelations(resourceName, instance, relations, optio
       let tasks = [];
 
       DSUtils.forEach(definition.relationList, def => {
-        let relationName = def.relation;
+        let relationName = typeof def.relationName !== 'undefined' ? def.relationName : def.relation;
         let relationDef = definition.getResource(relationName);
         let __options = DSUtils._(relationDef, options);
 

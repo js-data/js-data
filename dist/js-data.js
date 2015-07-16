@@ -3973,7 +3973,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          // will recursively inject them into their proper places in the data store.
 	          // Magic!
 	          _utils['default'].forEach(definition.relationList, function (def) {
-	            var relationName = def.relation;
+	            var relationName = typeof def.relationName !== 'undefined' ? def.relationName : def.relation;
 	            var relationDef = _this.defs[relationName];
 	            var toInject = attrs[def.localField];
 	            if (toInject) {
@@ -4264,7 +4264,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var tasks = [];
 
 	        DSUtils.forEach(definition.relationList, function (def) {
-	          var relationName = def.relation;
+	          var relationName = typeof def.relationName !== 'undefined' ? def.relationName : def.relation;
 	          var relationDef = definition.getResource(relationName);
 	          var __options = DSUtils._(relationDef, options);
 
