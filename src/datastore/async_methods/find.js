@@ -18,8 +18,8 @@
 module.exports = function find(resourceName, id, options) {
   let _this = this;
   let DSUtils = _this.utils;
-  let definition = _this.defs[resourceName];
-  let resource = _this.s[resourceName];
+  let definition = _this.definitions[resourceName];
+  let resource = _this.store[resourceName];
   let adapter;
 
   return new DSUtils.Promise((resolve, reject) => {

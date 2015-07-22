@@ -10,7 +10,7 @@
 module.exports = function loadRelations(resourceName, instance, relations, options) {
   let _this = this;
   let {utils: DSUtils, errors: DSErrors} = _this;
-  let definition = _this.defs[resourceName];
+  let definition = _this.definitions[resourceName];
 
   return new DSUtils.Promise((resolve, reject) => {
     if (DSUtils._sn(instance)) {

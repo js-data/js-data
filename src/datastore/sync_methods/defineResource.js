@@ -32,7 +32,7 @@ let instanceMethods = [
 
 module.exports = function defineResource(definition) {
   let _this = this;
-  let definitions = _this.defs;
+  let definitions = _this.definitions;
 
   /**
    * This allows the name-only definition shorthand.
@@ -84,7 +84,7 @@ module.exports = function defineResource(definition) {
 
     var def = definitions[definition.name];
 
-    def.getResource = resourceName => _this.defs[resourceName];
+    def.getResource = resourceName => _this.definitions[resourceName];
 
     def.logFn('Preparing resource.');
 
@@ -242,7 +242,7 @@ module.exports = function defineResource(definition) {
     };
 
     // Initialize store data for the new resource
-    _this.s[def.name] = {
+    _this.store[def.name] = {
       collection: [],
       expiresHeap: new DSUtils.BinaryHeap(x => x.expires, (x, y) => x.item === y),
       completedQueries: {},
@@ -258,7 +258,7 @@ module.exports = function defineResource(definition) {
       collectionModified: 0
     };
 
-    let resource = _this.s[def.name];
+    let resource = _this.store[def.name];
 
     // start the reaping
     if (def.reapInterval) {
@@ -373,7 +373,7 @@ module.exports = function defineResource(definition) {
   } catch (err) {
     _this.defaults.errorFn(err);
     delete definitions[definition.name];
-    delete _this.s[definition.name];
+    delete _this.store[definition.name];
     throw err;
   }
 };

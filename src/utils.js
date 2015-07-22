@@ -386,6 +386,7 @@ export default {
    */
     _(parent, options) {
     let _this = this;
+    parent = parent || {};
     options = options || {};
     if (options && options.constructor === parent.constructor) {
       return options;
@@ -595,7 +596,7 @@ export default {
             let params = {};
             if (foreignKey) {
               params[foreignKey] = this[definition.idAttribute];
-              return definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, {allowSimpleWhere: true});
+              return definition.getResource(relationName).defaultFilter.call(store, store.store[relationName].collection, relationName, params, {allowSimpleWhere: true});
             } else if (localKeys) {
               let keys = get(this, localKeys) || [];
               return definition.getResource(relationName).getAll(isArray(keys) ? keys : _keys(keys));
@@ -611,7 +612,7 @@ export default {
             prop.get = function () {
               let params = {};
               params[foreignKey] = this[definition.idAttribute];
-              let items = params[foreignKey] ? definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, {allowSimpleWhere: true}) : [];
+              let items = params[foreignKey] ? definition.getResource(relationName).defaultFilter.call(store, store.store[relationName].collection, relationName, params, {allowSimpleWhere: true}) : [];
               if (items.length) {
                 return items[0];
               }

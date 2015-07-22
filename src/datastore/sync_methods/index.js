@@ -12,7 +12,7 @@ function diffIsEmpty(diff) {
 
 function check(fnName, resourceName, id, options) {
   let _this = this;
-  let definition = _this.defs[resourceName];
+  let definition = _this.definitions[resourceName];
   options = options || {};
 
   id = DSUtils.resolveId(definition, id);
@@ -46,7 +46,7 @@ export default {
     if (item) {
       if (DSUtils.w) {
         // force observation handler to be fired for item if there are changes and `Object.observe` is not available
-        _this.s[_resourceName].observers[_id].deliver();
+        _this.store[_resourceName].observers[_id].deliver();
       }
 
       let ignoredChanges = _options.ignoredChanges || [];
@@ -57,7 +57,7 @@ export default {
         }
       });
       // calculate changes
-      let diff = DSUtils.diffObjectFromOldObject(item, _this.s[_resourceName].previousAttributes[_id], DSUtils.equals, ignoredChanges);
+      let diff = DSUtils.diffObjectFromOldObject(item, _this.store[_resourceName].previousAttributes[_id], DSUtils.equals, ignoredChanges);
       // remove functions from diff
       DSUtils.forOwn(diff, (changeset, name) => {
         let toKeep = [];
@@ -85,7 +85,7 @@ export default {
   // @returns The change history of the given item, if any.
   changeHistory(resourceName, id) {
     let {_this, definition, _resourceName, _id} = check.call(this, 'changeHistory', resourceName, id || fakeId);
-    let resource = _this.s[_resourceName];
+    let resource = _this.store[_resourceName];
 
     if (!definition.keepChangeHistory) {
       definition.errorFn('changeHistory is disabled for this resource!');
@@ -108,9 +108,9 @@ export default {
   // @returns The item whose computed properties were re-computed.
   compute(resourceName, instance) {
     let _this = this;
-    let definition = _this.defs[resourceName];
+    let definition = _this.definitions[resourceName];
 
-    instance = DSUtils.resolveItem(_this.s[resourceName], instance);
+    instance = DSUtils.resolveItem(_this.store[resourceName], instance);
     if (!definition) {
       throw new NER(resourceName);
     } else if (!instance) {
@@ -136,7 +136,7 @@ export default {
   // @param options.defaults Default values with which to initialize the instance.
   // @returns The new instance.
   createInstance(resourceName, attrs, options) {
-    let definition = this.defs[resourceName];
+    let definition = this.definitions[resourceName];
     let item;
 
     attrs = attrs || {};
@@ -184,7 +184,7 @@ export default {
   // @returns The new collection.
   createCollection(resourceName, arr, params, options) {
     let _this = this;
-    let definition = _this.defs[resourceName];
+    let definition = _this.definitions[resourceName];
 
     arr = arr || [];
     params = params || {};
@@ -219,7 +219,7 @@ export default {
             data.shift();
             data.shift();
             if (data.$$injected) {
-              _this.s[resourceName].queryData[DSUtils.toJson(__this.params)] = __this;
+              _this.store[resourceName].queryData[DSUtils.toJson(__this.params)] = __this;
               __this.$$injected = true;
             }
             return __this;
@@ -259,7 +259,7 @@ export default {
     let {_this, _resourceName, _id} = check.call(this, 'get', resourceName, id);
 
     // return the item if it exists
-    return _this.s[_resourceName].index[_id];
+    return _this.store[_resourceName].index[_id];
   },
 
   // Return the items in the store that have the given primary keys.
@@ -269,8 +269,8 @@ export default {
   // @returns The items with the given primary keys if they're in the store.
   getAll(resourceName, ids) {
     let _this = this;
-    let definition = _this.defs[resourceName];
-    let resource = _this.s[resourceName];
+    let definition = _this.definitions[resourceName];
+    let resource = _this.store[resourceName];
     let collection = [];
 
     if (!definition) {
@@ -316,7 +316,7 @@ export default {
   // @returns Timestamp from the last time the item was changed.
   lastModified(resourceName, id) {
     let {_this, _resourceName, _id} = check.call(this, 'lastModified', resourceName, id || fakeId);
-    let resource = _this.s[_resourceName];
+    let resource = _this.store[_resourceName];
 
     if (_id) {
       if (!(_id in resource.modified)) {
@@ -334,7 +334,7 @@ export default {
   // @returns Timestamp from the last time the item was saved.
   lastSaved(resourceName, id) {
     let {_this, _resourceName, _id} = check.call(this, 'lastSaved', resourceName, id || fakeId);
-    let resource = _this.s[_resourceName];
+    let resource = _this.store[_resourceName];
 
     if (!(_id in resource.saved)) {
       resource.saved[_id] = 0;
@@ -349,7 +349,7 @@ export default {
   // @returns The previous attributes of the item
   previous(resourceName, id) {
     let {_this, _resourceName, _id} = check.call(this, 'previous', resourceName, id);
-    let resource = _this.s[_resourceName];
+    let resource = _this.store[_resourceName];
 
     // return resource from cache
     return resource.previousAttributes[_id] ? DSUtils.copy(resource.previousAttributes[_id]) : undefined;

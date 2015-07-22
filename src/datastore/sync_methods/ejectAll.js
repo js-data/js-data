@@ -9,7 +9,7 @@
 module.exports = function ejectAll(resourceName, params, options) {
   let _this = this;
   let DSUtils = _this.utils;
-  let definition = _this.defs[resourceName];
+  let definition = _this.definitions[resourceName];
   params = params || {};
 
   if (!definition) {
@@ -20,7 +20,7 @@ module.exports = function ejectAll(resourceName, params, options) {
 
   definition.logFn('ejectAll', params, options);
 
-  let resource = _this.s[resourceName];
+  let resource = _this.store[resourceName];
   let queryHash = DSUtils.toJson(params);
 
   // get items that match the criteria

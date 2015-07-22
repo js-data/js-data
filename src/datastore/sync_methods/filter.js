@@ -11,7 +11,7 @@
 module.exports = function filter(resourceName, params, options) {
   let _this = this;
   let DSUtils = _this.utils;
-  let definition = _this.defs[resourceName];
+  let definition = _this.definitions[resourceName];
 
   if (!definition) {
     throw new _this.errors.NER(resourceName);
@@ -25,5 +25,5 @@ module.exports = function filter(resourceName, params, options) {
   options.logFn('filter', params, options);
 
   // delegate filtering to DS#defaults.defaultFilter, which can be overridden by developers.
-  return definition.defaultFilter.call(_this, _this.s[resourceName].collection, resourceName, params, options);
+  return definition.defaultFilter.call(_this, _this.store[resourceName].collection, resourceName, params, options);
 };

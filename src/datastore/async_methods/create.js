@@ -19,7 +19,7 @@
 module.exports = function create(resourceName, attrs, options) {
   let _this = this;
   let DSUtils = _this.utils;
-  let definition = _this.defs[resourceName];
+  let definition = _this.definitions[resourceName];
   let adapter;
 
   options = options || {};
@@ -68,7 +68,7 @@ module.exports = function create(resourceName, attrs, options) {
         let created = _this.inject(definition.name, attrs, options.orig());
         let id = created[definition.idAttribute];
         // mark item's `find` query as completed, so a subsequent `find` call for this item will resolve immediately
-        let resource = _this.s[resourceName];
+        let resource = _this.store[resourceName];
         resource.completedQueries[id] = new Date().getTime();
         resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
         return created;
