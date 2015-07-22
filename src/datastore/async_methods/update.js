@@ -10,7 +10,7 @@
 module.exports = function update(resourceName, id, attrs, options) {
   let _this = this;
   let {utils: DSUtils, errors: DSErrors} = _this;
-  let definition = _this.defs[resourceName];
+  let definition = _this.definitions[resourceName];
   let adapter;
 
   return new DSUtils.Promise((resolve, reject) => {
@@ -45,7 +45,7 @@ module.exports = function update(resourceName, id, attrs, options) {
       if (options.cacheResponse) {
         // inject the updated item into the store
         let injected = definition.inject(attrs, options.orig());
-        let resource = _this.s[resourceName];
+        let resource = _this.store[resourceName];
         let id = injected[definition.idAttribute];
         // mark the item as "saved"
         resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);

@@ -148,7 +148,7 @@ function _inject(definition, resource, attrs, options) {
         // Magic!
         DSUtils.forEach(definition.relationList, def => {
           let relationName = def.relation;
-          let relationDef = _this.defs[relationName];
+          let relationDef = _this.definitions[relationName];
           let toInject = attrs[def.localField];
           if (toInject) {
             if (!relationDef) {
@@ -158,7 +158,7 @@ function _inject(definition, resource, attrs, options) {
             if (DSUtils._a(toInject)) {
               let items = [];
               DSUtils.forEach(toInject, toInjectItem => {
-                if (toInjectItem !== _this.s[relationName].index[toInjectItem[relationDef.idAttribute]]) {
+                if (toInjectItem !== _this.store[relationName].index[toInjectItem[relationDef.idAttribute]]) {
                   try {
                     let injectedItem = relationDef.inject(toInjectItem, options.orig());
                     if (def.foreignKey) {
@@ -172,7 +172,7 @@ function _inject(definition, resource, attrs, options) {
               });
             } else {
               // handle injecting belongsTo and hasOne relations
-              if (toInject !== _this.s[relationName].index[toInject[relationDef.idAttribute]]) {
+              if (toInject !== _this.store[relationName].index[toInject[relationDef.idAttribute]]) {
                 try {
                   let injected = relationDef.inject(attrs[def.localField], options.orig());
                   if (def.foreignKey) {
@@ -291,8 +291,8 @@ function _inject(definition, resource, attrs, options) {
  */
 module.exports = function inject(resourceName, attrs, options) {
   let _this = this;
-  let definition = _this.defs[resourceName];
-  let resource = _this.s[resourceName];
+  let definition = _this.definitions[resourceName];
+  let resource = _this.store[resourceName];
   let injected;
 
   if (!definition) {

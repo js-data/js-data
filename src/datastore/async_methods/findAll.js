@@ -2,9 +2,9 @@
 function processResults(data, resourceName, queryHash, options) {
   let _this = this;
   let DSUtils = _this.utils;
-  let definition = _this.defs[resourceName];
-  let resource = _this.s[resourceName];
-  let idAttribute = _this.defs[resourceName].idAttribute;
+  let definition = _this.definitions[resourceName];
+  let resource = _this.store[resourceName];
+  let idAttribute = _this.definitions[resourceName].idAttribute;
   let date = new Date().getTime();
 
   data = data || [];
@@ -48,14 +48,14 @@ function processResults(data, resourceName, queryHash, options) {
 module.exports = function findAll(resourceName, params, options) {
   let _this = this;
   let DSUtils = _this.utils;
-  let definition = _this.defs[resourceName];
-  let resource = _this.s[resourceName];
+  let definition = _this.definitions[resourceName];
+  let resource = _this.store[resourceName];
   let queryHash, adapter;
 
   return new DSUtils.Promise((resolve, reject) => {
     params = params || {};
 
-    if (!_this.defs[resourceName]) {
+    if (!_this.definitions[resourceName]) {
       reject(new _this.errors.NER(resourceName));
     } else if (!DSUtils._o(params)) {
       reject(DSUtils._oErr('params'));

@@ -13,7 +13,7 @@
 module.exports = function destroyAll(resourceName, params, options) {
   let _this = this;
   let DSUtils = _this.utils;
-  let definition = _this.defs[resourceName];
+  let definition = _this.definitions[resourceName];
   let ejected, toEject, adapter;
 
   params = params || {};

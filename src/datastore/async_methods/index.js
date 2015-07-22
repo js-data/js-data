@@ -11,8 +11,8 @@ export default {
     let DSUtils = _this.utils;
 
     return new DSUtils.Promise((resolve, reject) => {
-      let definition = _this.defs[resourceName];
-      id = DSUtils.resolveId(_this.defs[resourceName], id);
+      let definition = _this.definitions[resourceName];
+      id = DSUtils.resolveId(_this.definitions[resourceName], id);
       if (!definition) {
         reject(new _this.errors.NER(resourceName));
       } else if (!DSUtils._sn(id)) {
@@ -28,7 +28,7 @@ export default {
   refreshAll(resourceName, params, options) {
     let _this = this;
     let DSUtils = _this.utils;
-    let definition = _this.defs[resourceName];
+    let definition = _this.definitions[resourceName];
     params = params || {};
 
     return new DSUtils.Promise((resolve, reject) => {

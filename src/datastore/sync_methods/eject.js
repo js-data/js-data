@@ -11,8 +11,8 @@
 module.exports = function eject(resourceName, id, options) {
   let _this = this;
   let DSUtils = _this.utils;
-  let definition = _this.defs[resourceName];
-  let resource = _this.s[resourceName];
+  let definition = _this.definitions[resourceName];
+  let resource = _this.store[resourceName];
   let item;
   let found = false;
 

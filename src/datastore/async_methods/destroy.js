@@ -13,7 +13,7 @@
 module.exports = function destroy(resourceName, id, options) {
   let _this = this;
   let DSUtils = _this.utils;
-  let definition = _this.defs[resourceName];
+  let definition = _this.definitions[resourceName];
   let item;
   let adapter;
 

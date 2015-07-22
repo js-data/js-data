@@ -8,8 +8,8 @@
 module.exports = function reap(resourceName, options) {
   let _this = this;
   var DSUtils = _this.utils;
-  let definition = _this.defs[resourceName];
-  let resource = _this.s[resourceName];
+  let definition = _this.definitions[resourceName];
+  let resource = _this.store[resourceName];
 
   return new DSUtils.Promise((resolve, reject) => {
 

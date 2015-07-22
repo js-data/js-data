@@ -9,8 +9,8 @@
 module.exports = function save(resourceName, id, options) {
   let _this = this;
   let {utils: DSUtils, errors: DSErrors} = _this;
-  let definition = _this.defs[resourceName];
-  let resource = _this.s[resourceName];
+  let definition = _this.definitions[resourceName];
+  let resource = _this.store[resourceName];
   let item, noChanges, adapter;
 
   return new DSUtils.Promise((resolve, reject) => {

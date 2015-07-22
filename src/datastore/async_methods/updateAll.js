@@ -10,7 +10,7 @@
 module.exports = function updateAll(resourceName, attrs, params, options) {
   let _this = this;
   let {utils: DSUtils, errors: DSErrors} = _this;
-  let definition = _this.defs[resourceName];
+  let definition = _this.definitions[resourceName];
   let adapter;
 
   return new DSUtils.Promise((resolve, reject) => {
@@ -43,7 +43,7 @@ module.exports = function updateAll(resourceName, attrs, params, options) {
       if (options.cacheResponse) {
         // inject the updated items into the store
         let injected = definition.inject(data, origOptions);
-        let resource = _this.s[resourceName];
+        let resource = _this.store[resourceName];
         // mark the items as "saved"
         DSUtils.forEach(injected, i => {
           let id = i[definition.idAttribute];

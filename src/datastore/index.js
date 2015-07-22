@@ -309,11 +309,7 @@ class DS {
     options = options || {};
 
     _this.store = {};
-    // alias store, shaves 0.1 kb off the minified build
-    _this.s = _this.store;
     _this.definitions = {};
-    // alias definitions, shaves 0.3 kb off the minified build
-    _this.defs = _this.definitions;
     _this.adapters = {};
     _this.defaults = new Defaults();
     _this.observe = DSUtils.observe;
@@ -380,7 +376,7 @@ class DS {
   }
 
   is(resourceName, instance) {
-    let definition = this.defs[resourceName];
+    let definition = this.definitions[resourceName];
     if (!definition) {
       throw new DSErrors.NER(resourceName);
     }

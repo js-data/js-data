@@ -1,3 +1,8 @@
+##### 2.2.3 - 22 July 2015
+
+###### Backwards compatible bug fixes
+- Removed some asinine optimizations
+
 ##### 2.2.2 - 10 July 2015
 
 ###### Backwards compatible bug fixes

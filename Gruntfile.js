@@ -154,6 +154,16 @@ module.exports = function (grunt) {
     grunt.file.write(filePath.replace('-debug', ''), file);
   });
 
+  grunt.registerTask('gzip', function () {
+    var child_process = require('child_process');
+    var done = this.async();
+    grunt.log.writeln('Measuring gzip size...');
+    child_process.exec('cat dist/js-data.min.js | gzip -f9 | wc -c', function (err, stdout) {
+      grunt.log.writeln('File dist/js-data.min.js gzipped: ' + stdout.replace('\n', ' kB'));
+      done();
+    });
+  });
+
   grunt.registerTask('n', ['mochaTest']);
   grunt.registerTask('b', ['karma:ci', 'karma:min']);
   grunt.registerTask('w', ['n', 'watch:n']);
@@ -165,7 +175,8 @@ module.exports = function (grunt) {
     'debug:dist/js-data-debug.js',
     'version:dist/js-data-debug.js',
     'version:dist/js-data.js',
-    'uglify:main'
+    'uglify:main',
+    'gzip'
   ]);
   grunt.registerTask('go', ['build', 'watch:dist']);
   grunt.registerTask('golite', ['webpack', 'watch:lite']);

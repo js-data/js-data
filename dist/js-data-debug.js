@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 2.2.2 - Homepage <http://www.js-data.io/>
+ * @version 2.2.3 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -84,10 +84,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new _datastoreIndex['default'](options);
 	  },
 	  version: {
-	    full: '2.2.2',
+	    full: '2.2.3',
 	    major: parseInt('2', 10),
 	    minor: parseInt('2', 10),
-	    patch: parseInt('2', 10),
+	    patch: parseInt('3', 10),
 	    alpha: true ? 'false' : false,
 	    beta: true ? 'false' : false
 	  }
@@ -453,11 +453,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    options = options || {};
 
 	    _this.store = {};
-	    // alias store, shaves 0.1 kb off the minified build
-	    _this.s = _this.store;
 	    _this.definitions = {};
-	    // alias definitions, shaves 0.3 kb off the minified build
-	    _this.defs = _this.definitions;
 	    _this.adapters = {};
 	    _this.defaults = new Defaults();
 	    _this.observe = _utils['default'].observe;
@@ -529,7 +525,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'is',
 	    value: function is(resourceName, instance) {
-	      var definition = this.defs[resourceName];
+	      var definition = this.definitions[resourceName];
 	      if (!definition) {
 	        throw new _errors['default'].NER(resourceName);
 	      }
@@ -990,6 +986,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  _: function _(parent, options) {
 	    var _this = this;
+	    parent = parent || {};
 	    options = options || {};
 	    if (options && options.constructor === parent.constructor) {
 	      return options;
@@ -1202,7 +1199,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var params = {};
 	            if (foreignKey) {
 	              params[foreignKey] = this[definition.idAttribute];
-	              return definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true });
+	              return definition.getResource(relationName).defaultFilter.call(store, store.store[relationName].collection, relationName, params, { allowSimpleWhere: true });
 	            } else if (localKeys) {
 	              var keys = get(this, localKeys) || [];
 	              return definition.getResource(relationName).getAll(isArray(keys) ? keys : _keys(keys));
@@ -1218,7 +1215,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            prop.get = function () {
 	              var params = {};
 	              params[foreignKey] = this[definition.idAttribute];
-	              var items = params[foreignKey] ? definition.getResource(relationName).defaultFilter.call(store, store.s[relationName].collection, relationName, params, { allowSimpleWhere: true }) : [];
+	              var items = params[foreignKey] ? definition.getResource(relationName).defaultFilter.call(store, store.store[relationName].collection, relationName, params, { allowSimpleWhere: true }) : [];
 	              if (items.length) {
 	                return items[0];
 	              }
@@ -1263,6 +1260,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	var IllegalArgumentError = (function (_Error) {
+	  _inherits(IllegalArgumentError, _Error);
+
 	  function IllegalArgumentError(message) {
 	    _classCallCheck(this, IllegalArgumentError);
 
@@ -1274,16 +1273,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.message = message;
 	  }
 
-	  _inherits(IllegalArgumentError, _Error);
-
 	  return IllegalArgumentError;
-	})(Error);
+	})(Error)
 
 	/**
 	 * Thrown when an invariant is violated or unrecoverable error is encountered during execution.
 	 */
+	;
 
 	var RuntimeError = (function (_Error2) {
+	  _inherits(RuntimeError, _Error2);
+
 	  function RuntimeError(message) {
 	    _classCallCheck(this, RuntimeError);
 
@@ -1295,16 +1295,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.message = message;
 	  }
 
-	  _inherits(RuntimeError, _Error2);
-
 	  return RuntimeError;
-	})(Error);
+	})(Error)
 
 	/**
 	 * Thrown when attempting to access or work with a non-existent resource.
 	 */
+	;
 
 	var NonexistentResourceError = (function (_Error3) {
+	  _inherits(NonexistentResourceError, _Error3);
+
 	  function NonexistentResourceError(resourceName) {
 	    _classCallCheck(this, NonexistentResourceError);
 
@@ -1315,8 +1316,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.type = this.constructor.name;
 	    this.message = resourceName + ' is not a registered resource!';
 	  }
-
-	  _inherits(NonexistentResourceError, _Error3);
 
 	  return NonexistentResourceError;
 	})(Error);
@@ -1350,7 +1349,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function check(fnName, resourceName, id, options) {
 	  var _this = this;
-	  var definition = _this.defs[resourceName];
+	  var definition = _this.definitions[resourceName];
 	  options = options || {};
 
 	  id = _utils['default'].resolveId(definition, id);
@@ -1391,7 +1390,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var _ret = (function () {
 	        if (_utils['default'].w) {
 	          // force observation handler to be fired for item if there are changes and `Object.observe` is not available
-	          _this.s[_resourceName].observers[_id].deliver();
+	          _this.store[_resourceName].observers[_id].deliver();
 	        }
 
 	        var ignoredChanges = _options.ignoredChanges || [];
@@ -1402,7 +1401,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 	        });
 	        // calculate changes
-	        var diff = _utils['default'].diffObjectFromOldObject(item, _this.s[_resourceName].previousAttributes[_id], _utils['default'].equals, ignoredChanges);
+	        var diff = _utils['default'].diffObjectFromOldObject(item, _this.store[_resourceName].previousAttributes[_id], _utils['default'].equals, ignoredChanges);
 	        // remove functions from diff
 	        _utils['default'].forOwn(diff, function (changeset, name) {
 	          var toKeep = [];
@@ -1441,7 +1440,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _resourceName = _check$call2._resourceName;
 	    var _id = _check$call2._id;
 
-	    var resource = _this.s[_resourceName];
+	    var resource = _this.store[_resourceName];
 
 	    if (!definition.keepChangeHistory) {
 	      definition.errorFn('changeHistory is disabled for this resource!');
@@ -1464,9 +1463,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // @returns The item whose computed properties were re-computed.
 	  compute: function compute(resourceName, instance) {
 	    var _this = this;
-	    var definition = _this.defs[resourceName];
+	    var definition = _this.definitions[resourceName];
 
-	    instance = _utils['default'].resolveItem(_this.s[resourceName], instance);
+	    instance = _utils['default'].resolveItem(_this.store[resourceName], instance);
 	    if (!definition) {
 	      throw new NER(resourceName);
 	    } else if (!instance) {
@@ -1492,7 +1491,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // @param options.defaults Default values with which to initialize the instance.
 	  // @returns The new instance.
 	  createInstance: function createInstance(resourceName, attrs, options) {
-	    var definition = this.defs[resourceName];
+	    var definition = this.definitions[resourceName];
 	    var item = undefined;
 
 	    attrs = attrs || {};
@@ -1540,7 +1539,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // @returns The new collection.
 	  createCollection: function createCollection(resourceName, arr, params, options) {
 	    var _this = this;
-	    var definition = _this.defs[resourceName];
+	    var definition = _this.definitions[resourceName];
 
 	    arr = arr || [];
 	    params = params || {};
@@ -1575,7 +1574,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            data.shift();
 	            data.shift();
 	            if (data.$$injected) {
-	              _this.s[resourceName].queryData[_utils['default'].toJson(__this.params)] = __this;
+	              _this.store[resourceName].queryData[_utils['default'].toJson(__this.params)] = __this;
 	              __this.$$injected = true;
 	            }
 	            return __this;
@@ -1614,12 +1613,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  get: function get(resourceName, id) {
 	    var _check$call3 = check.call(this, 'get', resourceName, id);
 
+	    // return the item if it exists
 	    var _this = _check$call3._this;
 	    var _resourceName = _check$call3._resourceName;
 	    var _id = _check$call3._id;
-
-	    // return the item if it exists
-	    return _this.s[_resourceName].index[_id];
+	    return _this.store[_resourceName].index[_id];
 	  },
 
 	  // Return the items in the store that have the given primary keys.
@@ -1629,8 +1627,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // @returns The items with the given primary keys if they're in the store.
 	  getAll: function getAll(resourceName, ids) {
 	    var _this = this;
-	    var definition = _this.defs[resourceName];
-	    var resource = _this.s[resourceName];
+	    var definition = _this.definitions[resourceName];
+	    var resource = _this.store[resourceName];
 	    var collection = [];
 
 	    if (!definition) {
@@ -1684,7 +1682,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _resourceName = _check$call5._resourceName;
 	    var _id = _check$call5._id;
 
-	    var resource = _this.s[_resourceName];
+	    var resource = _this.store[_resourceName];
 
 	    if (_id) {
 	      if (!(_id in resource.modified)) {
@@ -1707,7 +1705,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _resourceName = _check$call6._resourceName;
 	    var _id = _check$call6._id;
 
-	    var resource = _this.s[_resourceName];
+	    var resource = _this.store[_resourceName];
 
 	    if (!(_id in resource.saved)) {
 	      resource.saved[_id] = 0;
@@ -1727,7 +1725,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _resourceName = _check$call7._resourceName;
 	    var _id = _check$call7._id;
 
-	    var resource = _this.s[_resourceName];
+	    var resource = _this.store[_resourceName];
 
 	    // return resource from cache
 	    return resource.previousAttributes[_id] ? _utils['default'].copy(resource.previousAttributes[_id]) : undefined;
@@ -1767,8 +1765,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var DSUtils = _this.utils;
 
 	    return new DSUtils.Promise(function (resolve, reject) {
-	      var definition = _this.defs[resourceName];
-	      id = DSUtils.resolveId(_this.defs[resourceName], id);
+	      var definition = _this.definitions[resourceName];
+	      id = DSUtils.resolveId(_this.definitions[resourceName], id);
 	      if (!definition) {
 	        reject(new _this.errors.NER(resourceName));
 	      } else if (!DSUtils._sn(id)) {
@@ -1786,7 +1784,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  refreshAll: function refreshAll(resourceName, params, options) {
 	    var _this = this;
 	    var DSUtils = _this.utils;
-	    var definition = _this.defs[resourceName];
+	    var definition = _this.definitions[resourceName];
 	    params = params || {};
 
 	    return new DSUtils.Promise(function (resolve, reject) {
@@ -2373,7 +2371,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/*!
 	 * yabh
-	 * @version 1.0.1 - Homepage <http://jmdobry.github.io/yabh/>
+	 * @version 1.1.0 - Homepage <http://jmdobry.github.io/yabh/>
 	 * @author Jason Dobry <jason.dobry@gmail.com>
 	 * @copyright (c) 2015 Jason Dobry 
 	 * @license MIT <https://github.com/jmdobry/yabh/blob/master/LICENSE>
@@ -2436,13 +2434,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* 0 */
 	/***/ function(module, exports, __webpack_require__) {
 
-		var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
-
-		var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-		Object.defineProperty(exports, '__esModule', {
-		  value: true
-		});
 		/**
 		 * @method bubbleUp
 		 * @param {array} heap The heap.
@@ -2511,88 +2502,75 @@ return /******/ (function(modules) { // webpackBootstrap
 		  }
 		};
 
-		var BinaryHeap = (function () {
-		  function BinaryHeap(weightFunc, compareFunc) {
-		    _classCallCheck(this, BinaryHeap);
-
-		    if (!weightFunc) {
-		      weightFunc = function (x) {
-		        return x;
-		      };
-		    }
-		    if (!compareFunc) {
-		      compareFunc = function (x, y) {
-		        return x === y;
-		      };
-		    }
-		    if (typeof weightFunc !== 'function') {
-		      throw new Error('BinaryHeap([weightFunc][, compareFunc]): "weightFunc" must be a function!');
-		    }
-		    if (typeof compareFunc !== 'function') {
-		      throw new Error('BinaryHeap([weightFunc][, compareFunc]): "compareFunc" must be a function!');
-		    }
-		    this.weightFunc = weightFunc;
-		    this.compareFunc = compareFunc;
-		    this.heap = [];
+		function BinaryHeap(weightFunc, compareFunc) {
+		  if (!weightFunc) {
+		    weightFunc = function (x) {
+		      return x;
+		    };
 		  }
+		  if (!compareFunc) {
+		    compareFunc = function (x, y) {
+		      return x === y;
+		    };
+		  }
+		  if (typeof weightFunc !== 'function') {
+		    throw new Error('BinaryHeap([weightFunc][, compareFunc]): "weightFunc" must be a function!');
+		  }
+		  if (typeof compareFunc !== 'function') {
+		    throw new Error('BinaryHeap([weightFunc][, compareFunc]): "compareFunc" must be a function!');
+		  }
+		  this.weightFunc = weightFunc;
+		  this.compareFunc = compareFunc;
+		  this.heap = [];
+		}
 
-		  _createClass(BinaryHeap, [{
-		    key: 'push',
-		    value: function push(node) {
-		      this.heap.push(node);
-		      bubbleUp(this.heap, this.weightFunc, this.heap.length - 1);
-		    }
-		  }, {
-		    key: 'peek',
-		    value: function peek() {
-		      return this.heap[0];
-		    }
-		  }, {
-		    key: 'pop',
-		    value: function pop() {
-		      var front = this.heap[0];
+		var BHProto = BinaryHeap.prototype;
+
+		BHProto.push = function (node) {
+		  this.heap.push(node);
+		  bubbleUp(this.heap, this.weightFunc, this.heap.length - 1);
+		};
+
+		BHProto.peek = function () {
+		  return this.heap[0];
+		};
+
+		BHProto.pop = function () {
+		  var front = this.heap[0];
+		  var end = this.heap.pop();
+		  if (this.heap.length > 0) {
+		    this.heap[0] = end;
+		    bubbleDown(this.heap, this.weightFunc, 0);
+		  }
+		  return front;
+		};
+
+		BHProto.remove = function (node) {
+		  var length = this.heap.length;
+		  for (var i = 0; i < length; i++) {
+		    if (this.compareFunc(this.heap[i], node)) {
+		      var removed = this.heap[i];
 		      var end = this.heap.pop();
-		      if (this.heap.length > 0) {
-		        this.heap[0] = end;
-		        bubbleDown(this.heap, this.weightFunc, 0);
+		      if (i !== length - 1) {
+		        this.heap[i] = end;
+		        bubbleUp(this.heap, this.weightFunc, i);
+		        bubbleDown(this.heap, this.weightFunc, i);
 		      }
-		      return front;
+		      return removed;
 		    }
-		  }, {
-		    key: 'remove',
-		    value: function remove(node) {
-		      var length = this.heap.length;
-		      for (var i = 0; i < length; i++) {
-		        if (this.compareFunc(this.heap[i], node)) {
-		          var removed = this.heap[i];
-		          var end = this.heap.pop();
-		          if (i !== length - 1) {
-		            this.heap[i] = end;
-		            bubbleUp(this.heap, this.weightFunc, i);
-		            bubbleDown(this.heap, this.weightFunc, i);
-		          }
-		          return removed;
-		        }
-		      }
-		      return null;
-		    }
-		  }, {
-		    key: 'removeAll',
-		    value: function removeAll() {
-		      this.heap = [];
-		    }
-		  }, {
-		    key: 'size',
-		    value: function size() {
-		      return this.heap.length;
-		    }
-		  }]);
+		  }
+		  return null;
+		};
 
-		  return BinaryHeap;
-		})();
+		BHProto.removeAll = function () {
+		  this.heap = [];
+		};
 
-		exports['default'] = BinaryHeap;
-		module.exports = exports['default'];
+		BHProto.size = function () {
+		  return this.heap.length;
+		};
+
+		module.exports = BinaryHeap;
 
 	/***/ }
 	/******/ ])
@@ -3190,7 +3168,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = function defineResource(definition) {
 	  var _this = this;
-	  var definitions = _this.defs;
+	  var definitions = _this.definitions;
 
 	  /**
 	   * This allows the name-only definition shorthand.
@@ -3248,7 +3226,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      def = definitions[definition.name];
 
 	      def.getResource = function (resourceName) {
-	        return _this.defs[resourceName];
+	        return _this.definitions[resourceName];
 	      };
 
 	      def.logFn('Preparing resource.');
@@ -3416,7 +3394,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      };
 
 	      // Initialize store data for the new resource
-	      _this.s[def.name] = {
+	      _this.store[def.name] = {
 	        collection: [],
 	        expiresHeap: new _utils['default'].BinaryHeap(function (x) {
 	          return x.expires;
@@ -3436,7 +3414,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        collectionModified: 0
 	      };
 
-	      var resource = _this.s[def.name];
+	      var resource = _this.store[def.name];
 
 	      // start the reaping
 	      if (def.reapInterval) {
@@ -3579,7 +3557,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  } catch (err) {
 	    _this.defaults.errorFn(err);
 	    delete definitions[definition.name];
-	    delete _this.s[definition.name];
+	    delete _this.store[definition.name];
 	    throw err;
 	  }
 	};
@@ -3601,8 +3579,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = function eject(resourceName, id, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
-	  var definition = _this.defs[resourceName];
-	  var resource = _this.s[resourceName];
+	  var definition = _this.definitions[resourceName];
+	  var resource = _this.store[resourceName];
 	  var item = undefined;
 	  var found = false;
 
@@ -3705,7 +3683,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = function ejectAll(resourceName, params, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
-	  var definition = _this.defs[resourceName];
+	  var definition = _this.definitions[resourceName];
 	  params = params || {};
 
 	  if (!definition) {
@@ -3716,7 +3694,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  definition.logFn('ejectAll', params, options);
 
-	  var resource = _this.s[resourceName];
+	  var resource = _this.store[resourceName];
 	  var queryHash = DSUtils.toJson(params);
 
 	  // get items that match the criteria
@@ -3757,7 +3735,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = function filter(resourceName, params, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
-	  var definition = _this.defs[resourceName];
+	  var definition = _this.definitions[resourceName];
 
 	  if (!definition) {
 	    throw new _this.errors.NER(resourceName);
@@ -3771,7 +3749,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  options.logFn('filter', params, options);
 
 	  // delegate filtering to DS#defaults.defaultFilter, which can be overridden by developers.
-	  return definition.defaultFilter.call(_this, _this.s[resourceName].collection, resourceName, params, options);
+	  return definition.defaultFilter.call(_this, _this.store[resourceName].collection, resourceName, params, options);
 	};
 
 /***/ },
@@ -3932,7 +3910,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          // Magic!
 	          _utils['default'].forEach(definition.relationList, function (def) {
 	            var relationName = def.relation;
-	            var relationDef = _this.defs[relationName];
+	            var relationDef = _this.definitions[relationName];
 	            var toInject = attrs[def.localField];
 	            if (toInject) {
 	              if (!relationDef) {
@@ -3943,7 +3921,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                (function () {
 	                  var items = [];
 	                  _utils['default'].forEach(toInject, function (toInjectItem) {
-	                    if (toInjectItem !== _this.s[relationName].index[toInjectItem[relationDef.idAttribute]]) {
+	                    if (toInjectItem !== _this.store[relationName].index[toInjectItem[relationDef.idAttribute]]) {
 	                      try {
 	                        var injectedItem = relationDef.inject(toInjectItem, options.orig());
 	                        if (def.foreignKey) {
@@ -3958,7 +3936,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                })();
 	              } else {
 	                // handle injecting belongsTo and hasOne relations
-	                if (toInject !== _this.s[relationName].index[toInject[relationDef.idAttribute]]) {
+	                if (toInject !== _this.store[relationName].index[toInject[relationDef.idAttribute]]) {
 	                  try {
 	                    var _injected = relationDef.inject(attrs[def.localField], options.orig());
 	                    if (def.foreignKey) {
@@ -4078,8 +4056,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	module.exports = function inject(resourceName, attrs, options) {
 	  var _this = this;
-	  var definition = _this.defs[resourceName];
-	  var resource = _this.s[resourceName];
+	  var definition = _this.definitions[resourceName];
+	  var resource = _this.store[resourceName];
 	  var injected = undefined;
 
 	  if (!definition) {
@@ -4137,7 +4115,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = function create(resourceName, attrs, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
-	  var definition = _this.defs[resourceName];
+	  var definition = _this.definitions[resourceName];
 	  var adapter = undefined;
 
 	  options = options || {};
@@ -4189,7 +4167,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var created = _this.inject(definition.name, attrs, options.orig());
 	      var id = created[definition.idAttribute];
 	      // mark item's `find` query as completed, so a subsequent `find` call for this item will resolve immediately
-	      var resource = _this.s[resourceName];
+	      var resource = _this.store[resourceName];
 	      resource.completedQueries[id] = new Date().getTime();
 	      resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
 	      return created;
@@ -4221,7 +4199,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = function destroy(resourceName, id, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
-	  var definition = _this.defs[resourceName];
+	  var definition = _this.definitions[resourceName];
 	  var item = undefined;
 	  var adapter = undefined;
 
@@ -4289,7 +4267,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = function destroyAll(resourceName, params, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
-	  var definition = _this.defs[resourceName];
+	  var definition = _this.definitions[resourceName];
 	  var ejected = undefined,
 	      toEject = undefined,
 	      adapter = undefined;
@@ -4363,8 +4341,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = function find(resourceName, id, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
-	  var definition = _this.defs[resourceName];
-	  var resource = _this.s[resourceName];
+	  var definition = _this.definitions[resourceName];
+	  var resource = _this.store[resourceName];
 	  var adapter = undefined;
 
 	  return new DSUtils.Promise(function (resolve, reject) {
@@ -4460,9 +4438,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	function processResults(data, resourceName, queryHash, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
-	  var definition = _this.defs[resourceName];
-	  var resource = _this.s[resourceName];
-	  var idAttribute = _this.defs[resourceName].idAttribute;
+	  var definition = _this.definitions[resourceName];
+	  var resource = _this.store[resourceName];
+	  var idAttribute = _this.definitions[resourceName].idAttribute;
 	  var date = new Date().getTime();
 
 	  data = data || [];
@@ -4506,15 +4484,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = function findAll(resourceName, params, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
-	  var definition = _this.defs[resourceName];
-	  var resource = _this.s[resourceName];
+	  var definition = _this.definitions[resourceName];
+	  var resource = _this.store[resourceName];
 	  var queryHash = undefined,
 	      adapter = undefined;
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    params = params || {};
 
-	    if (!_this.defs[resourceName]) {
+	    if (!_this.definitions[resourceName]) {
 	      reject(new _this.errors.NER(resourceName));
 	    } else if (!DSUtils._o(params)) {
 	      reject(DSUtils._oErr('params'));
@@ -4629,7 +4607,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSUtils = _this.utils;
 	  var DSErrors = _this.errors;
 
-	  var definition = _this.defs[resourceName];
+	  var definition = _this.definitions[resourceName];
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    if (DSUtils._sn(instance)) {
@@ -4727,8 +4705,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = function reap(resourceName, options) {
 	  var _this = this;
 	  var DSUtils = _this.utils;
-	  var definition = _this.defs[resourceName];
-	  var resource = _this.s[resourceName];
+	  var definition = _this.definitions[resourceName];
+	  var resource = _this.store[resourceName];
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 
@@ -4819,8 +4797,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSUtils = _this.utils;
 	  var DSErrors = _this.errors;
 
-	  var definition = _this.defs[resourceName];
-	  var resource = _this.s[resourceName];
+	  var definition = _this.definitions[resourceName];
+	  var resource = _this.store[resourceName];
 	  var item = undefined,
 	      noChanges = undefined,
 	      adapter = undefined;
@@ -4927,7 +4905,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSUtils = _this.utils;
 	  var DSErrors = _this.errors;
 
-	  var definition = _this.defs[resourceName];
+	  var definition = _this.definitions[resourceName];
 	  var adapter = undefined;
 
 	  return new DSUtils.Promise(function (resolve, reject) {
@@ -4966,7 +4944,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (options.cacheResponse) {
 	      // inject the updated item into the store
 	      var injected = definition.inject(attrs, options.orig());
-	      var resource = _this.s[resourceName];
+	      var resource = _this.store[resourceName];
 	      var _id = injected[definition.idAttribute];
 	      // mark the item as "saved"
 	      resource.saved[_id] = DSUtils.updateTimestamp(resource.saved[_id]);
@@ -5001,7 +4979,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSUtils = _this.utils;
 	  var DSErrors = _this.errors;
 
-	  var definition = _this.defs[resourceName];
+	  var definition = _this.definitions[resourceName];
 	  var adapter = undefined;
 
 	  return new DSUtils.Promise(function (resolve, reject) {
@@ -5039,7 +5017,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var _ret = (function () {
 	        // inject the updated items into the store
 	        var injected = definition.inject(data, origOptions);
-	        var resource = _this.s[resourceName];
+	        var resource = _this.store[resourceName];
 	        // mark the items as "saved"
 	        DSUtils.forEach(injected, function (i) {
 	          var id = i[definition.idAttribute];
