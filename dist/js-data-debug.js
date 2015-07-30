@@ -1283,7 +1283,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 	/**
 	 * Thrown during a method call when an argument passed into the method is invalid.
@@ -1303,13 +1303,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.message = message;
 	  }
 
+	  /**
+	   * Thrown when an invariant is violated or unrecoverable error is encountered during execution.
+	   */
 	  return IllegalArgumentError;
-	})(Error)
-
-	/**
-	 * Thrown when an invariant is violated or unrecoverable error is encountered during execution.
-	 */
-	;
+	})(Error);
 
 	var RuntimeError = (function (_Error2) {
 	  _inherits(RuntimeError, _Error2);
@@ -1325,13 +1323,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.message = message;
 	  }
 
+	  /**
+	   * Thrown when attempting to access or work with a non-existent resource.
+	   */
 	  return RuntimeError;
-	})(Error)
-
-	/**
-	 * Thrown when attempting to access or work with a non-existent resource.
-	 */
-	;
+	})(Error);
 
 	var NonexistentResourceError = (function (_Error3) {
 	  _inherits(NonexistentResourceError, _Error3);
@@ -1627,13 +1623,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    options.afterCreateCollection(options, arr);
 	    return arr;
 	  },
-	  defineResource: __webpack_require__(29),
+	  defineResource: __webpack_require__(27),
 	  digest: function digest() {
 	    this.observe.Platform.performMicrotaskCheckpoint();
 	  },
-	  eject: __webpack_require__(30),
-	  ejectAll: __webpack_require__(31),
-	  filter: __webpack_require__(32),
+	  eject: __webpack_require__(28),
+	  ejectAll: __webpack_require__(29),
+	  filter: __webpack_require__(30),
 
 	  // Return the item with the given primary key if its in the store.
 	  //
@@ -1699,7 +1695,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    return definition.get(_id) ? diffIsEmpty(definition.changes(_id)) : false;
 	  },
-	  inject: __webpack_require__(33),
+	  inject: __webpack_require__(31),
 
 	  // Return the timestamp from the last time the item with the given primary key was changed.
 	  //
@@ -2889,7 +2885,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isPrimitive = __webpack_require__(25);
+	var isPrimitive = __webpack_require__(26);
 
 	    /**
 	     * get "nested" object property
@@ -2915,7 +2911,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var namespace = __webpack_require__(26);
+	var namespace = __webpack_require__(25);
 
 	    /**
 	     * set "nested" object property
@@ -2938,8 +2934,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(27);
-	var camelCase = __webpack_require__(28);
+	var toString = __webpack_require__(32);
+	var camelCase = __webpack_require__(33);
 	var upperCase = __webpack_require__(20);
 	    /**
 	     * camelCase + UPPERCASE first char
@@ -2957,7 +2953,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(27);
+	var toString = __webpack_require__(32);
 	    /**
 	     * "Safer" String.toUpperCase()
 	     */
@@ -3126,6 +3122,31 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var forEach = __webpack_require__(8);
+
+	    /**
+	     * Create nested object if non-existent
+	     */
+	    function namespace(obj, path){
+	        if (!path) return obj;
+	        forEach(path.split('.'), function(key){
+	            if (!obj[key]) {
+	                obj[key] = {};
+	            }
+	            obj = obj[key];
+	        });
+	        return obj;
+	    }
+
+	    module.exports = namespace;
+
+
+
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
 	
 
 	    /**
@@ -3150,77 +3171,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 26 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var forEach = __webpack_require__(8);
-
-	    /**
-	     * Create nested object if non-existent
-	     */
-	    function namespace(obj, path){
-	        if (!path) return obj;
-	        forEach(path.split('.'), function(key){
-	            if (!obj[key]) {
-	                obj[key] = {};
-	            }
-	            obj = obj[key];
-	        });
-	        return obj;
-	    }
-
-	    module.exports = namespace;
-
-
-
-
-/***/ },
 /* 27 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Typecast a value to a String, using an empty string value for null or
-	     * undefined.
-	     */
-	    function toString(val){
-	        return val == null ? '' : val.toString();
-	    }
-
-	    module.exports = toString;
-
-
-
-
-/***/ },
-/* 28 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(27);
-	var replaceAccents = __webpack_require__(44);
-	var removeNonWord = __webpack_require__(45);
-	var upperCase = __webpack_require__(20);
-	var lowerCase = __webpack_require__(46);
-	    /**
-	    * Convert string to camelCase text.
-	    */
-	    function camelCase(str){
-	        str = toString(str);
-	        str = replaceAccents(str);
-	        str = removeNonWord(str)
-	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
-	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
-	            .replace(/\s+/g, '') //remove spaces
-	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
-	        return str;
-	    }
-	    module.exports = camelCase;
-
-
-
-/***/ },
-/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*jshint evil:true, loopfunc:true*/
@@ -3430,14 +3381,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	          var deps;
 	          if (fn.length === 1) {
 	            var match = fn[0].toString().match(/function.*?\(([\s\S]*?)\)/);
-	            console.log(match);
 	            deps = match[1].split(',');
 	            deps = _utils['default'].filter(deps, function (x) {
 	              return x;
 	            });
-	            console.log(deps);
 	            def.computed[field] = deps.concat(fn);
-	            console.log(def.computed[field]);
 	            fn = def.computed[field];
 	            if (deps.length) {
 	              def.errorFn('Use the computed property array syntax for compatibility with minified code!');
@@ -3649,7 +3597,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 30 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -3755,7 +3703,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 31 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -3805,7 +3753,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 32 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -3839,7 +3787,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 33 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _utils = __webpack_require__(2);
@@ -4175,6 +4123,51 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return injected;
 	};
+
+/***/ },
+/* 32 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+
+	    /**
+	     * Typecast a value to a String, using an empty string value for null or
+	     * undefined.
+	     */
+	    function toString(val){
+	        return val == null ? '' : val.toString();
+	    }
+
+	    module.exports = toString;
+
+
+
+
+/***/ },
+/* 33 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var toString = __webpack_require__(32);
+	var replaceAccents = __webpack_require__(44);
+	var removeNonWord = __webpack_require__(45);
+	var upperCase = __webpack_require__(20);
+	var lowerCase = __webpack_require__(46);
+	    /**
+	    * Convert string to camelCase text.
+	    */
+	    function camelCase(str){
+	        str = toString(str);
+	        str = replaceAccents(str);
+	        str = removeNonWord(str)
+	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
+	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
+	            .replace(/\s+/g, '') //remove spaces
+	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
+	        return str;
+	    }
+	    module.exports = camelCase;
+
+
 
 /***/ },
 /* 34 */
@@ -5141,7 +5134,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(27);
+	var toString = __webpack_require__(32);
 	    /**
 	    * Replaces all accented chars with regular ones
 	    */
@@ -5183,7 +5176,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(27);
+	var toString = __webpack_require__(32);
 	    // This pattern is generated by the _build/pattern-removeNonWord.js script
 	    var PATTERN = /[^\x20\x2D0-9A-Z\x5Fa-z\xC0-\xD6\xD8-\xF6\xF8-\xFF]/g;
 
@@ -5203,7 +5196,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(27);
+	var toString = __webpack_require__(32);
 	    /**
 	     * "Safer" String.toLowerCase()
 	     */

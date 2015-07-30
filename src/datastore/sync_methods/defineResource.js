@@ -210,12 +210,9 @@ module.exports = function defineResource(definition) {
         var deps;
         if (fn.length === 1) {
           let match = fn[0].toString().match(/function.*?\(([\s\S]*?)\)/);
-          console.log(match);
           deps = match[1].split(',');
           deps = DSUtils.filter(deps, x => x);
-          console.log(deps);
           def.computed[field] = deps.concat(fn);
-          console.log(def.computed[field]);
           fn = def.computed[field];
           if (deps.length) {
             def.errorFn('Use the computed property array syntax for compatibility with minified code!');
