@@ -17,7 +17,7 @@ describe('DS#defineResource', function () {
     });
 
     assert.isTrue(Comment.getAdapter() === store.getAdapter(), 'should get the same default adapter');
-    assert.isTrue(Comment.getAdapter({ adapter: 'http' }) === store.getAdapter({ adapter: 'http' }), 'should get the same adapter');
+    assert.isTrue(Comment.getAdapter({adapter: 'http'}) === store.getAdapter({adapter: 'http'}), 'should get the same adapter');
 
     var weirdThing = store.defineResource({
       name: 'weird-thing'
@@ -31,8 +31,8 @@ describe('DS#defineResource', function () {
         assert.equal(1, _this.requests.length);
         assert.equal(_this.requests[0].url, 'hello/Comment');
         assert.equal(_this.requests[0].method, 'POST');
-        assert.equal(_this.requests[0].requestBody, JSON.stringify({ name: 'John' }));
-        _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({
+        assert.equal(_this.requests[0].requestBody, JSON.stringify({name: 'John'}));
+        _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson({
           name: 'John',
           id: 2
         }));
@@ -41,8 +41,8 @@ describe('DS#defineResource', function () {
       }
     }, 100);
 
-    return store.create('Comment', { name: 'John' }).then(function (comment) {
-      assert.deepEqual(JSON.stringify(comment), JSON.stringify({ name: 'John', id: 2 }));
+    return store.create('Comment', {name: 'John'}).then(function (comment) {
+      assert.deepEqual(JSON.stringify(comment), JSON.stringify({name: 'John', id: 2}));
       assert.equal(callCount, 1, 'overridden validate should have been called once');
       assert.equal(lifecycle.validate.callCount, 0, 'global validate should not have been called');
     });
@@ -139,6 +139,82 @@ describe('DS#defineResource', function () {
       }, 50);
     }, 50);
   });
+  it('should allow definition of computed properties as property accessors', function () {
+    var callCount = 0;
+
+    store.defineResource({
+      name: 'person',
+      computed: {
+        fullName: {
+          enumerable: true,
+          get: function () {
+            callCount++;
+            return this.first + ' ' + this.last;
+          }
+        }
+      }
+    });
+
+    store.defineResource({
+      name: 'dog',
+      computed: {
+        fullName: {
+          enumerable: true,
+          get: function () {
+            callCount++;
+            return this.first + ' ' + this.last;
+          }
+        }
+      }
+    });
+
+    store.inject('person', {
+      first: 'John',
+      last: 'Anderson',
+      email: 'john.anderson@test.com',
+      id: 1
+    });
+
+    store.inject('dog', {
+      first: 'doggy',
+      last: 'dog',
+      id: 1
+    });
+
+    var person = store.get('person', 1);
+    var dog = store.get('dog', 1);
+
+    assert.equal(person.fullName, 'John Anderson');
+    assert.equal(dog.fullName, 'doggy dog');
+    assert.equal(lifecycle.beforeInject.callCount, 2, 'beforeInject should have been called twice');
+    assert.equal(lifecycle.afterInject.callCount, 2, 'afterInject should have been called twice');
+
+    person.first = 'Johnny';
+
+    // digest loop hasn't happened yet
+    assert.equal(store.get('person', 1).first, 'Johnny');
+    assert.equal(store.get('dog', 1).fullName, 'doggy dog');
+
+    assert.equal(person.first, 'Johnny');
+    assert.equal(person.last, 'Anderson');
+    assert.equal(person.fullName, 'Johnny Anderson');
+
+    person.first = 'Jack';
+    dog.first = 'spot';
+
+    assert.equal(person.first, 'Jack');
+    assert.equal(person.last, 'Anderson');
+    assert.equal(person.fullName, 'Jack Anderson');
+    assert.equal(dog.fullName, 'spot dog');
+
+    // computed property function should not be called
+    // when a property changes that isn't a dependency
+    // of the computed property
+    person.email = 'ja@test.com';
+
+
+    assert.isTrue(callCount > 0);
+  });
   it('should work if idAttribute is a computed property computed property', function (done) {
     store.defineResource({
       name: 'person',
@@ -223,7 +299,7 @@ describe('DS#defineResource', function () {
       }
     });
 
-    newStore.registerAdapter('http', dsHttpAdapter, { default: true });
+    newStore.registerAdapter('http', dsHttpAdapter, {default: true});
 
     var Thing2 = newStore.defineResource({
       name: 'thing2',
@@ -257,7 +333,7 @@ describe('DS#defineResource', function () {
             assert.equal(3, _this.requests.length);
             assert.equal(_this.requests[2].url, 'http://foo.com/thing2/bar');
             assert.equal(_this.requests[2].method, 'POST');
-            _this.requests[2].respond(200, { 'Content-Type': 'text/plain' }, 'stuff3');
+            _this.requests[2].respond(200, {'Content-Type': 'text/plain'}, 'stuff3');
           } catch (err) {
             done(err);
           }
@@ -269,7 +345,7 @@ describe('DS#defineResource', function () {
           assert.equal(2, _this.requests.length);
           assert.equal(_this.requests[1].url, 'http://foo.com/thing2/count');
           assert.equal(_this.requests[1].method, 'POST');
-          _this.requests[1].respond(200, { 'Content-Type': 'text/plain' }, 'stuff2');
+          _this.requests[1].respond(200, {'Content-Type': 'text/plain'}, 'stuff2');
         } catch (err) {
           done(err);
         }
@@ -282,7 +358,7 @@ describe('DS#defineResource', function () {
         assert.equal(_this.requests[0].url, 'http://foo.com/thing2/test');
         assert.equal(_this.requests[0].method, 'POST');
         assert.equal(_this.requests[0].requestBody, 'thing2 payload');
-        _this.requests[0].respond(200, { 'Content-Type': 'text/plain' }, 'stuff');
+        _this.requests[0].respond(200, {'Content-Type': 'text/plain'}, 'stuff');
       } catch (err) {
         done(err);
       }
@@ -301,7 +377,7 @@ describe('DS#defineResource', function () {
     });
 
     newStore.registerAdapter('http2', dsHttpAdapter);
-    newStore.registerAdapter('http', dsHttpAdapter, { default: true });
+    newStore.registerAdapter('http', dsHttpAdapter, {default: true});
 
     var Thing = newStore.defineResource({
       name: 'thing',
@@ -335,7 +411,7 @@ describe('DS#defineResource', function () {
             console.log(_this.requests[3]);
             assert.equal(_this.requests[3].url, 'blah/1/test2');
             assert.equal(_this.requests[3].method, 'GET');
-            _this.requests[3].respond(200, { 'Content-Type': 'text/plain' }, 'bleh');
+            _this.requests[3].respond(200, {'Content-Type': 'text/plain'}, 'bleh');
 
           }, 100);
         });
@@ -344,7 +420,7 @@ describe('DS#defineResource', function () {
           assert.equal(3, _this.requests.length);
           assert.equal(_this.requests[2].url, 'blah/test2');
           assert.equal(_this.requests[2].method, 'GET');
-          _this.requests[2].respond(200, { 'Content-Type': 'text/plain' }, 'blah');
+          _this.requests[2].respond(200, {'Content-Type': 'text/plain'}, 'blah');
 
         }, 100);
       }).catch(done);
@@ -353,7 +429,7 @@ describe('DS#defineResource', function () {
         assert.equal(2, _this.requests.length);
         assert.equal(_this.requests[1].url, 'foo/count');
         assert.equal(_this.requests[1].method, 'GET');
-        _this.requests[1].respond(200, { 'Content-Type': 'text/plain' }, 'stuff2');
+        _this.requests[1].respond(200, {'Content-Type': 'text/plain'}, 'stuff2');
 
       }, 100);
     }).catch(done);
@@ -362,13 +438,13 @@ describe('DS#defineResource', function () {
       assert.equal(1, _this.requests.length);
       assert.equal(_this.requests[0].url, 'foo/test');
       assert.equal(_this.requests[0].method, 'GET');
-      _this.requests[0].respond(200, { 'Content-Type': 'text/plain' }, 'stuff');
+      _this.requests[0].respond(200, {'Content-Type': 'text/plain'}, 'stuff');
     }, 100);
   });
   it('should allow instance events', function (done) {
     var changed = false;
     var Foo = store.defineResource('foo');
-    var foo = Foo.inject({ id: 1 });
+    var foo = Foo.inject({id: 1});
 
     setTimeout(function () {
       if (!changed) {
@@ -386,7 +462,7 @@ describe('DS#defineResource', function () {
   it('should allow Resource change events', function (done) {
     var changed = false;
     var Foo = store.defineResource('foo');
-    var foo = Foo.inject({ id: 1 });
+    var foo = Foo.inject({id: 1});
 
     setTimeout(function () {
       if (!changed) {
@@ -427,8 +503,8 @@ describe('DS#defineResource', function () {
     assert.equal(Foo.name, 'foo');
     assert.equal(Bar.name, 'bar');
 
-    var foo = Foo.createInstance({ id: 1, type: 'foo', bazId: 10 });
-    var bar = Bar.createInstance({ id: 1, type: 'bar', bazId: 10 });
+    var foo = Foo.createInstance({id: 1, type: 'foo', bazId: 10});
+    var bar = Bar.createInstance({id: 1, type: 'bar', bazId: 10});
 
     assert.equal(foo.say(), 'Foo');
     assert.equal(bar.say(), 'Bar');
@@ -439,7 +515,7 @@ describe('DS#defineResource', function () {
   it('should allow instance events 2', function (done) {
     var changed = false;
     var Foo = store.defineResource('foo');
-    var foo = Foo.createInstance({ id: 1 });
+    var foo = Foo.createInstance({id: 1});
 
     setTimeout(function () {
       if (!changed) {
@@ -457,7 +533,7 @@ describe('DS#defineResource', function () {
   it('should allow Resource change events 2', function (done) {
     var changed = false;
     var Foo = store.defineResource('foo');
-    var foo = Foo.createInstance({ id: 1 });
+    var foo = Foo.createInstance({id: 1});
 
     setTimeout(function () {
       if (!changed) {
