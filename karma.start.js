@@ -7,6 +7,10 @@ var comment11, comment12, comment13, organization14, profile15, user10, user16, 
 
 var lifecycle = {};
 
+window.pprint = function (obj) {
+  console.log(JSON.stringify(obj, null, 2));
+};
+
 // Helper globals
 var fail = function (msg) {
     if (msg instanceof Error) {
@@ -39,6 +43,7 @@ var fail = function (msg) {
 
 // Setup before each test
 beforeEach(function () {
+  this.timeout(3000);
   lifecycle.beforeValidate = function (resourceName, attrs, cb) {
     lifecycle.beforeValidate.callCount += 1;
     cb(null, attrs);

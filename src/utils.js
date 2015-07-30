@@ -583,13 +583,15 @@ export default {
       if (typeof def.link === 'boolean' ? def.link : !!definition.linkRelations) {
         delete target[localField];
         let prop = {
-          enumerable,
-          set() {
-          }
+          enumerable
         };
         if (def.type === 'belongsTo') {
           prop.get = function () {
             return get(this, localKey) ? definition.getResource(relationName).get(get(this, localKey)) : undefined;
+          };
+          prop.set = function (parent) {
+            set(this, localKey, get(parent, definition.getResource(relationName).idAttribute));
+            return get(this, localField);
           };
         } else if (def.type === 'hasMany') {
           prop.get = function () {
@@ -603,10 +605,28 @@ export default {
             }
             return undefined;
           };
+          prop.set = function (children) {
+            if (foreignKey) {
+              forEach(children, child => {
+                set(child, foreignKey, get(this, definition.idAttribute));
+              });
+            } else if (localKeys) {
+              let keys = [];
+              forEach(children, child => {
+                keys.push(get(child, definition.getResource(relationName).idAttribute));
+              });
+              set(this, localKeys, keys);
+            }
+            return get(this, localField);
+          };
         } else if (def.type === 'hasOne') {
           if (localKey) {
             prop.get = function () {
               return get(this, localKey) ? definition.getResource(relationName).get(get(this, localKey)) : undefined;
+            };
+            prop.set = function (sibling) {
+              set(this, localKey, get(sibling, definition.getResource(relationName).idAttribute));
+              return get(this, localField);
             };
           } else {
             prop.get = function () {
@@ -618,6 +638,10 @@ export default {
               }
               return undefined;
             };
+            prop.set = function (sibling) {
+              set(sibling, foreignKey, get(this, definition.idAttribute));
+              return get(this, localField);
+            };
           }
         }
         if (def.get) {
@@ -626,7 +650,7 @@ export default {
             return def.get(definition, def, this, (...args) => orig.apply(this, args));
           };
         }
-        Object.defineProperty(target, def.localField, prop);
+        Object.defineProperty(target, localField, prop);
       }
     });
   }

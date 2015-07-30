@@ -206,23 +206,31 @@ module.exports = function defineResource(definition) {
         def.errorFn(`Computed property "${field}" conflicts with previously defined prototype method!`);
       }
       def.omit.push(field);
-      var deps;
-      if (fn.length === 1) {
-        let match = fn[0].toString().match(/function.*?\(([\s\S]*?)\)/);
-        deps = match[1].split(',');
-        def.computed[field] = deps.concat(fn);
-        fn = def.computed[field];
-        if (deps.length) {
-          def.errorFn('Use the computed property array syntax for compatibility with minified code!');
+      if (DSUtils.isArray(fn)) {
+        var deps;
+        if (fn.length === 1) {
+          let match = fn[0].toString().match(/function.*?\(([\s\S]*?)\)/);
+          console.log(match);
+          deps = match[1].split(',');
+          deps = DSUtils.filter(deps, x => x);
+          console.log(deps);
+          def.computed[field] = deps.concat(fn);
+          console.log(def.computed[field]);
+          fn = def.computed[field];
+          if (deps.length) {
+            def.errorFn('Use the computed property array syntax for compatibility with minified code!');
+          }
         }
+        deps = fn.slice(0, fn.length - 1);
+        DSUtils.forEach(deps, (val, index) => {
+          deps[index] = val.trim();
+        });
+        fn.deps = DSUtils.filter(deps, dep => {
+          return !!dep;
+        });
+      } else if (DSUtils.isObject(fn)) {
+        Object.defineProperty(def[_class].prototype, field, fn);
       }
-      deps = fn.slice(0, fn.length - 1);
-      DSUtils.forEach(deps, (val, index) => {
-        deps[index] = val.trim();
-      });
-      fn.deps = DSUtils.filter(deps, dep => {
-        return !!dep;
-      });
     });
 
     // add instance proxies of DS methods
