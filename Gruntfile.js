@@ -74,8 +74,36 @@ module.exports = function (grunt) {
         reporters: ['spec'],
         preprocessors: {}
       },
-      min: {
-        browsers: ['Chrome', 'Firefox', 'PhantomJS'],
+      minChrome: {
+        browsers: ['Chrome'],
+        options: {
+          files: [
+            'node_modules/es6-promise/dist/es6-promise.js',
+            'dist/js-data.min.js',
+            'bower_components/js-data-http/dist/js-data-http.js',
+            'bower_components/js-data-localstorage/dist/js-data-localstorage.js',
+            'karma.start.js',
+            'test/both/**/*.js',
+            'test/browser/**/*.js'
+          ]
+        }
+      },
+      minFirefox: {
+        browsers: ['Firefox'],
+        options: {
+          files: [
+            'node_modules/es6-promise/dist/es6-promise.js',
+            'dist/js-data.min.js',
+            'bower_components/js-data-http/dist/js-data-http.js',
+            'bower_components/js-data-localstorage/dist/js-data-localstorage.js',
+            'karma.start.js',
+            'test/both/**/*.js',
+            'test/browser/**/*.js'
+          ]
+        }
+      },
+      minPhantomJS: {
+        browsers: ['PhantomJS'],
         options: {
           files: [
             'node_modules/es6-promise/dist/es6-promise.js',
@@ -165,7 +193,7 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('n', ['mochaTest']);
-  grunt.registerTask('b', ['karma:ci', 'karma:min']);
+  grunt.registerTask('b', ['karma:ci', 'karma:minChrome', 'karma:minFirefox', 'karma:minPhantomJS']);
   grunt.registerTask('w', ['n', 'watch:n']);
 
   grunt.registerTask('test', ['build', 'n', 'b']);
