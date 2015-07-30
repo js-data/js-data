@@ -40,7 +40,7 @@ module.exports = function save(resourceName, id, options) {
       // only send changed properties to the adapter
       if (options.changesOnly) {
 
-        if (DSUtils.w) {
+        if (resource.observers[id] && typeof resource.observers[id] === 'function') {
           resource.observers[id].deliver();
         }
         let toKeep = [];

@@ -65,7 +65,7 @@ module.exports = function eject(resourceName, id, options) {
       delete resource.completedQueries[queryHash];
       delete resource.queryData[queryHash];
     });
-    if (DSUtils.w) {
+    if (resource.observers[id] && typeof resource.observers[id].close === 'function') {
       // stop observation
       resource.observers[id].close();
     }

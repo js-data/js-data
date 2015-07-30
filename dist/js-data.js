@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 2.2.3 - Homepage <http://www.js-data.io/>
+ * @version 2.3.0 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -84,10 +84,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new _datastoreIndex['default'](options);
 	  },
 	  version: {
-	    full: '2.2.3',
+	    full: '2.3.0',
 	    major: parseInt('2', 10),
-	    minor: parseInt('2', 10),
-	    patch: parseInt('3', 10),
+	    minor: parseInt('3', 10),
+	    patch: parseInt('0', 10),
 	    alpha: true ? 'false' : false,
 	    beta: true ? 'false' : false
 	  }
@@ -273,6 +273,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	defaultsPrototype.useClass = true;
 	defaultsPrototype.useFilter = false;
 	defaultsPrototype.validate = lifecycleNoopCb;
+	defaultsPrototype.watchChanges = !!_utils['default'].w;
 	defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
 	  var filtered = collection;
 	  var where = null;
@@ -1182,12 +1183,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (typeof def.link === 'boolean' ? def.link : !!definition.linkRelations) {
 	        delete target[localField];
 	        var prop = {
-	          enumerable: enumerable,
-	          set: function set() {}
+	          enumerable: enumerable
 	        };
 	        if (def.type === 'belongsTo') {
 	          prop.get = function () {
 	            return get(this, localKey) ? definition.getResource(relationName).get(get(this, localKey)) : undefined;
+	          };
+	          prop.set = function (parent) {
+	            set(this, localKey, get(parent, definition.getResource(relationName).idAttribute));
+	            return get(this, localField);
 	          };
 	        } else if (def.type === 'hasMany') {
 	          prop.get = function () {
@@ -1201,10 +1205,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            return undefined;
 	          };
+	          prop.set = function (children) {
+	            var _this2 = this;
+
+	            if (foreignKey) {
+	              forEach(children, function (child) {
+	                set(child, foreignKey, get(_this2, definition.idAttribute));
+	              });
+	            } else if (localKeys) {
+	              (function () {
+	                var keys = [];
+	                forEach(children, function (child) {
+	                  keys.push(get(child, definition.getResource(relationName).idAttribute));
+	                });
+	                set(_this2, localKeys, keys);
+	              })();
+	            }
+	            return get(this, localField);
+	          };
 	        } else if (def.type === 'hasOne') {
 	          if (localKey) {
 	            prop.get = function () {
 	              return get(this, localKey) ? definition.getResource(relationName).get(get(this, localKey)) : undefined;
+	            };
+	            prop.set = function (sibling) {
+	              set(this, localKey, get(sibling, definition.getResource(relationName).idAttribute));
+	              return get(this, localField);
 	            };
 	          } else {
 	            prop.get = function () {
@@ -1216,25 +1242,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	              }
 	              return undefined;
 	            };
+	            prop.set = function (sibling) {
+	              set(sibling, foreignKey, get(this, definition.idAttribute));
+	              return get(this, localField);
+	            };
 	          }
 	        }
 	        if (def.get) {
 	          (function () {
 	            var orig = prop.get;
 	            prop.get = function () {
-	              var _this2 = this;
+	              var _this3 = this;
 
 	              return def.get(definition, def, this, function () {
 	                for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
 	                  args[_key4] = arguments[_key4];
 	                }
 
-	                return orig.apply(_this2, args);
+	                return orig.apply(_this3, args);
 	              });
 	            };
 	          })();
 	        }
-	        Object.defineProperty(target, def.localField, prop);
+	        Object.defineProperty(target, localField, prop);
 	      }
 	    });
 	  }
@@ -1382,9 +1412,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var item = definition.get(_id);
 	    if (item) {
 	      var _ret = (function () {
-	        if (_utils['default'].w) {
+	        var observer = _this.store[_resourceName].observers[_id];
+	        if (observer && typeof observer === 'function') {
 	          // force observation handler to be fired for item if there are changes and `Object.observe` is not available
-	          _this.store[_resourceName].observers[_id].deliver();
+	          observer.deliver();
 	        }
 
 	        var ignoredChanges = _options.ignoredChanges || [];
@@ -1587,13 +1618,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    options.afterCreateCollection(options, arr);
 	    return arr;
 	  },
-	  defineResource: __webpack_require__(27),
+	  defineResource: __webpack_require__(29),
 	  digest: function digest() {
 	    this.observe.Platform.performMicrotaskCheckpoint();
 	  },
-	  eject: __webpack_require__(28),
-	  ejectAll: __webpack_require__(29),
-	  filter: __webpack_require__(30),
+	  eject: __webpack_require__(30),
+	  ejectAll: __webpack_require__(31),
+	  filter: __webpack_require__(32),
 
 	  // Return the item with the given primary key if its in the store.
 	  //
@@ -1658,7 +1689,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    return definition.get(_id) ? diffIsEmpty(definition.changes(_id)) : false;
 	  },
-	  inject: __webpack_require__(31),
+	  inject: __webpack_require__(33),
 
 	  // Return the timestamp from the last time the item with the given primary key was changed.
 	  //
@@ -1743,13 +1774,13 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	exports['default'] = {
-	  create: __webpack_require__(32),
-	  destroy: __webpack_require__(33),
-	  destroyAll: __webpack_require__(34),
-	  find: __webpack_require__(35),
-	  findAll: __webpack_require__(36),
-	  loadRelations: __webpack_require__(37),
-	  reap: __webpack_require__(38),
+	  create: __webpack_require__(34),
+	  destroy: __webpack_require__(35),
+	  destroyAll: __webpack_require__(36),
+	  find: __webpack_require__(37),
+	  findAll: __webpack_require__(38),
+	  loadRelations: __webpack_require__(39),
+	  reap: __webpack_require__(40),
 	  refresh: function refresh(resourceName, id, options) {
 	    var _this = this;
 	    var DSUtils = _this.utils;
@@ -1798,9 +1829,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      });
 	    });
 	  },
-	  save: __webpack_require__(39),
-	  update: __webpack_require__(40),
-	  updateAll: __webpack_require__(41)
+	  save: __webpack_require__(41),
+	  update: __webpack_require__(42),
+	  updateAll: __webpack_require__(43)
 	};
 
 /***/ },
@@ -2895,8 +2926,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(42);
-	var camelCase = __webpack_require__(43);
+	var toString = __webpack_require__(27);
+	var camelCase = __webpack_require__(28);
 	var upperCase = __webpack_require__(20);
 	    /**
 	     * camelCase + UPPERCASE first char
@@ -2914,7 +2945,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(42);
+	var toString = __webpack_require__(27);
 	    /**
 	     * "Safer" String.toUpperCase()
 	     */
@@ -3135,6 +3166,51 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
+	
+
+	    /**
+	     * Typecast a value to a String, using an empty string value for null or
+	     * undefined.
+	     */
+	    function toString(val){
+	        return val == null ? '' : val.toString();
+	    }
+
+	    module.exports = toString;
+
+
+
+
+/***/ },
+/* 28 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var toString = __webpack_require__(27);
+	var replaceAccents = __webpack_require__(44);
+	var removeNonWord = __webpack_require__(45);
+	var upperCase = __webpack_require__(20);
+	var lowerCase = __webpack_require__(46);
+	    /**
+	    * Convert string to camelCase text.
+	    */
+	    function camelCase(str){
+	        str = toString(str);
+	        str = replaceAccents(str);
+	        str = removeNonWord(str)
+	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
+	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
+	            .replace(/\s+/g, '') //remove spaces
+	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
+	        return str;
+	    }
+	    module.exports = camelCase;
+
+
+
+/***/ },
+/* 29 */
+/***/ function(module, exports, __webpack_require__) {
+
 	/*jshint evil:true, loopfunc:true*/
 
 	var _utils = __webpack_require__(2);
@@ -3337,23 +3413,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	          def.errorFn('Computed property "' + field + '" conflicts with previously defined prototype method!');
 	        }
 	        def.omit.push(field);
-	        var deps;
-	        if (fn.length === 1) {
-	          var match = fn[0].toString().match(/function.*?\(([\s\S]*?)\)/);
-	          deps = match[1].split(',');
-	          def.computed[field] = deps.concat(fn);
-	          fn = def.computed[field];
-	          if (deps.length) {
-	            def.errorFn('Use the computed property array syntax for compatibility with minified code!');
+	        if (_utils['default'].isArray(fn)) {
+	          var deps;
+	          if (fn.length === 1) {
+	            var match = fn[0].toString().match(/function.*?\(([\s\S]*?)\)/);
+	            console.log(match);
+	            deps = match[1].split(',');
+	            deps = _utils['default'].filter(deps, function (x) {
+	              return x;
+	            });
+	            console.log(deps);
+	            def.computed[field] = deps.concat(fn);
+	            console.log(def.computed[field]);
+	            fn = def.computed[field];
+	            if (deps.length) {
+	              def.errorFn('Use the computed property array syntax for compatibility with minified code!');
+	            }
 	          }
+	          deps = fn.slice(0, fn.length - 1);
+	          _utils['default'].forEach(deps, function (val, index) {
+	            deps[index] = val.trim();
+	          });
+	          fn.deps = _utils['default'].filter(deps, function (dep) {
+	            return !!dep;
+	          });
+	        } else if (_utils['default'].isObject(fn)) {
+	          Object.defineProperty(def[_class].prototype, field, fn);
 	        }
-	        deps = fn.slice(0, fn.length - 1);
-	        _utils['default'].forEach(deps, function (val, index) {
-	          deps[index] = val.trim();
-	        });
-	        fn.deps = _utils['default'].filter(deps, function (dep) {
-	          return !!dep;
-	        });
 	      });
 
 	      // add instance proxies of DS methods
@@ -3549,7 +3635,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 28 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -3620,7 +3706,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        delete resource.completedQueries[queryHash];
 	        delete resource.queryData[queryHash];
 	      });
-	      if (DSUtils.w) {
+	      if (resource.observers[id] && typeof resource.observers[id].close === 'function') {
 	        // stop observation
 	        resource.observers[id].close();
 	      }
@@ -3654,7 +3740,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 29 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -3703,7 +3789,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 30 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -3736,7 +3822,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 31 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _utils = __webpack_require__(2);
@@ -3959,7 +4045,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            resource.changeHistories[id] = [];
 
 	            // If we're in the browser, start observation
-	            if (_utils['default'].w) {
+	            if (definition.watchChanges) {
 	              resource.observers[id] = new _this.observe.ObjectObserver(item);
 	              resource.observers[id].open(_react, item);
 	            }
@@ -4000,7 +4086,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                resource.changeHistories[id].splice(0, resource.changeHistories[id].length);
 	              }
 	            }
-	            if (_utils['default'].w) {
+	            if (resource.observers[id] && typeof resource.observers[id] === 'function') {
 	              // force observation callback to be fired if there are any changes to the item and `Object.observe` is not available
 	              resource.observers[id].deliver();
 	            }
@@ -4073,7 +4159,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 32 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -4162,7 +4248,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 33 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -4229,7 +4315,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 34 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -4297,7 +4383,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 35 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* jshint -W082 */
@@ -4409,7 +4495,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 36 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* jshint -W082 */
@@ -4565,7 +4651,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 37 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -4668,7 +4754,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 38 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -4756,7 +4842,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 39 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -4808,7 +4894,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // only send changed properties to the adapter
 	    if (options.changesOnly) {
 
-	      if (DSUtils.w) {
+	      if (resource.observers[id] && typeof resource.observers[id] === 'function') {
 	        resource.observers[id].deliver();
 	      }
 	      var toKeep = [];
@@ -4861,7 +4947,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 40 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -4934,7 +5020,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 41 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -5023,55 +5109,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 42 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Typecast a value to a String, using an empty string value for null or
-	     * undefined.
-	     */
-	    function toString(val){
-	        return val == null ? '' : val.toString();
-	    }
-
-	    module.exports = toString;
-
-
-
-
-/***/ },
-/* 43 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(42);
-	var replaceAccents = __webpack_require__(44);
-	var removeNonWord = __webpack_require__(45);
-	var upperCase = __webpack_require__(20);
-	var lowerCase = __webpack_require__(46);
-	    /**
-	    * Convert string to camelCase text.
-	    */
-	    function camelCase(str){
-	        str = toString(str);
-	        str = replaceAccents(str);
-	        str = removeNonWord(str)
-	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
-	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
-	            .replace(/\s+/g, '') //remove spaces
-	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
-	        return str;
-	    }
-	    module.exports = camelCase;
-
-
-
-/***/ },
 /* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(42);
+	var toString = __webpack_require__(27);
 	    /**
 	    * Replaces all accented chars with regular ones
 	    */
@@ -5113,7 +5154,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(42);
+	var toString = __webpack_require__(27);
 	    // This pattern is generated by the _build/pattern-removeNonWord.js script
 	    var PATTERN = /[^\x20\x2D0-9A-Z\x5Fa-z\xC0-\xD6\xD8-\xF6\xF8-\xFF]/g;
 
@@ -5133,7 +5174,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toString = __webpack_require__(42);
+	var toString = __webpack_require__(27);
 	    /**
 	     * "Safer" String.toLowerCase()
 	     */

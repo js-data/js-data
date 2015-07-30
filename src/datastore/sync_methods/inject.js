@@ -212,7 +212,7 @@ function _inject(definition, resource, attrs, options) {
           resource.changeHistories[id] = [];
 
           // If we're in the browser, start observation
-          if (DSUtils.w) {
+          if (definition.watchChanges) {
             resource.observers[id] = new _this.observe.ObjectObserver(item);
             resource.observers[id].open(_react, item);
           }
@@ -253,7 +253,7 @@ function _inject(definition, resource, attrs, options) {
               resource.changeHistories[id].splice(0, resource.changeHistories[id].length);
             }
           }
-          if (DSUtils.w) {
+          if (resource.observers[id] && typeof resource.observers[id] === 'function') {
             // force observation callback to be fired if there are any changes to the item and `Object.observe` is not available
             resource.observers[id].deliver();
           }

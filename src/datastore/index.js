@@ -131,6 +131,7 @@ defaultsPrototype.upsert = !!DSUtils.w;
 defaultsPrototype.useClass = true;
 defaultsPrototype.useFilter = false;
 defaultsPrototype.validate = lifecycleNoopCb;
+defaultsPrototype.watchChanges = !!DSUtils.w;
 defaultsPrototype.defaultFilter = (collection, resourceName, params, options) => {
   let filtered = collection;
   let where = null;

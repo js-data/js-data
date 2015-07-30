@@ -44,9 +44,10 @@ export default {
 
     let item = definition.get(_id);
     if (item) {
-      if (DSUtils.w) {
+      let observer = _this.store[_resourceName].observers[_id];
+      if (observer && typeof observer === 'function') {
         // force observation handler to be fired for item if there are changes and `Object.observe` is not available
-        _this.store[_resourceName].observers[_id].deliver();
+        observer.deliver();
       }
 
       let ignoredChanges = _options.ignoredChanges || [];

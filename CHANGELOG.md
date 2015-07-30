@@ -1,3 +1,13 @@
+##### 2.3.0 - 30 July 2015
+
+###### Backwards compatible API changes
+- #186 - Add relation setters for convenience
+- #191 - Add ability to disable change detection
+- #192 - Add ability to configure computed property as a property accessor
+
+###### Backwards compatible bug fixes
+- #190 - computed properties false positive minified code warning
+
 ##### 2.2.3 - 22 July 2015
 
 ###### Backwards compatible bug fixes
