@@ -132,7 +132,7 @@ defaultsPrototype.useClass = true;
 defaultsPrototype.useFilter = false;
 defaultsPrototype.validate = lifecycleNoopCb;
 defaultsPrototype.watchChanges = !!DSUtils.w;
-defaultsPrototype.defaultFilter = (collection, resourceName, params, options) => {
+defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
   let filtered = collection;
   let where = null;
   let reserved = {
@@ -154,7 +154,7 @@ defaultsPrototype.defaultFilter = (collection, resourceName, params, options) =>
   }
 
   if (options.allowSimpleWhere) {
-    DSUtils.forOwn(params, (value, key) => {
+    DSUtils.forOwn(params, function (value, key) {
       if (!(key in reserved) && !(key in where)) {
         where[key] = {
           '==': value
@@ -168,16 +168,16 @@ defaultsPrototype.defaultFilter = (collection, resourceName, params, options) =>
   }
 
   if (where) {
-    filtered = DSUtils.filter(filtered, attrs => {
+    filtered = DSUtils.filter(filtered, function (attrs) {
       let first = true;
       let keep = true;
-      DSUtils.forOwn(where, (clause, field) => {
+      DSUtils.forOwn(where, function (clause, field) {
         if (!DSUtils._o(clause)) {
           clause = {
             '==': clause
           };
         }
-        DSUtils.forOwn(clause, (term, op) => {
+        DSUtils.forOwn(clause, function (term, op) {
           let expr;
           let isOr = op[0] === '|';
           let val = DSUtils.get(attrs, field);
@@ -258,7 +258,7 @@ defaultsPrototype.defaultFilter = (collection, resourceName, params, options) =>
   // Apply 'orderBy'
   if (orderBy) {
     let index = 0;
-    DSUtils.forEach(orderBy, (def, i) => {
+    DSUtils.forEach(orderBy, function (def, i) {
       if (DSUtils._s(def)) {
         orderBy[i] = [def, 'ASC'];
       } else if (!DSUtils._a(def)) {
@@ -272,7 +272,7 @@ defaultsPrototype.defaultFilter = (collection, resourceName, params, options) =>
         });
       }
     });
-    filtered = DSUtils.sort(filtered, (a, b) => compare(orderBy, index, a, b));
+    filtered = DSUtils.sort(filtered, function (a, b) { return compare(orderBy, index, a, b) });
   }
 
   let limit = DSUtils._n(params.limit) ? params.limit : null;
