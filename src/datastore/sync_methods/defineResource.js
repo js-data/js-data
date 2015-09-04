@@ -103,7 +103,7 @@ module.exports = function defineResource(definition) {
           }
           DSUtils.forEach(relatedModels[relationName], d => {
             d.type = type;
-            d.relation = relationName;
+            d.relation = defs.relationName || relationName;
             d.name = def.name;
             def.relationList.push(d);
             if (d.localField) {
