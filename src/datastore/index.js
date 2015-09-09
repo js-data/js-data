@@ -231,13 +231,13 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
             if (DSUtils._s(val)) {
               expr = val.toUpperCase().indexOf(term.toUpperCase()) !== -1
             } else {
-              expr = DSUtils.contains(val.toUpperCase(), term.toUpperCase())
+              expr = DSUtils.contains(val, term)
             }
           } else if (op === 'notLike') {
             if (DSUtils._s(val)) {
               expr = val.toUpperCase().indexOf(term.toUpperCase()) === -1
             } else {
-              expr = !DSUtils.contains(val.toUpperCase(), term.toUpperCase())
+              expr = !DSUtils.contains(val, term)
             }
           }
           if (expr !== undefined) {
