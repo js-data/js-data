@@ -1,3 +1,4 @@
+/* jshint eqeqeq:false */
 /**
  * Eject an item from the store, if it is currently in the store.
  *
@@ -8,87 +9,87 @@
  * @param options.clearEmptyQueries Whether to remove cached findAll queries that become empty as a result of this method call.
  * @returns The ejected item if one was ejected.
  */
-module.exports = function eject(resourceName, id, options) {
-  let _this = this;
-  let DSUtils = _this.utils;
-  let definition = _this.definitions[resourceName];
-  let resource = _this.store[resourceName];
-  let item;
-  let found = false;
+module.exports = function eject (resourceName, id, options) {
+  let _this = this
+  let DSUtils = _this.utils
+  let definition = _this.definitions[resourceName]
+  let resource = _this.store[resourceName]
+  let item
+  let found = false
 
-  id = DSUtils.resolveId(definition, id);
+  id = DSUtils.resolveId(definition, id)
 
   if (!definition) {
-    throw new _this.errors.NER(resourceName);
+    throw new _this.errors.NER(resourceName)
   } else if (!DSUtils._sn(id)) {
-    throw DSUtils._snErr('id');
+    throw DSUtils._snErr('id')
   }
 
-  options = DSUtils._(definition, options);
+  options = DSUtils._(definition, options)
 
-  options.logFn('eject', id, options);
+  options.logFn('eject', id, options)
 
   // find the item to eject
   for (var i = 0; i < resource.collection.length; i++) {
-    if (resource.collection[i][definition.idAttribute] == id) { // jshint ignore:line
-      item = resource.collection[i];
+    if (resource.collection[i][definition.idAttribute] == id) { // eslint-disable-line
+      item = resource.collection[i]
       // remove its expiration timestamp
-      resource.expiresHeap.remove(item);
-      found = true;
-      break;
+      resource.expiresHeap.remove(item)
+      found = true
+      break
     }
   }
   if (found) {
     // lifecycle
-    definition.beforeEject(options, item);
+    definition.beforeEject(options, item)
     if (options.notify) {
-      definition.emit('DS.beforeEject', definition, item);
+      definition.emit('DS.beforeEject', definition, item)
     }
 
     // find the item in any ($$injected) cached queries
-    let toRemove = [];
-    DSUtils.forOwn(resource.queryData, (items, queryHash) => {
+    let toRemove = []
+    DSUtils.forOwn(resource.queryData, function (items, queryHash) {
       if (items.$$injected) {
-        DSUtils.remove(items, item);
+        DSUtils.remove(items, item)
       }
       // optionally remove any empty queries
       if (!items.length && options.clearEmptyQueries) {
-        toRemove.push(queryHash);
+        toRemove.push(queryHash)
       }
-    });
+    })
 
     // clean up
-    DSUtils.forEach(resource.changeHistories[id], changeRecord => {
-      DSUtils.remove(resource.changeHistory, changeRecord);
-    });
-    DSUtils.forEach(toRemove, queryHash => {
-      delete resource.completedQueries[queryHash];
-      delete resource.queryData[queryHash];
-    });
+    DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
+      DSUtils.remove(resource.changeHistory, changeRecord)
+    })
+    DSUtils.forEach(toRemove, function (queryHash) {
+      delete resource.completedQueries[queryHash]
+      delete resource.queryData[queryHash]
+    })
     if (resource.observers[id] && typeof resource.observers[id].close === 'function') {
       // stop observation
-      resource.observers[id].close();
+      resource.observers[id].close()
     }
-    delete resource.observers[id];
-    delete resource.index[id];
-    delete resource.previousAttributes[id];
-    delete resource.completedQueries[id];
-    delete resource.pendingQueries[id];
-    delete resource.changeHistories[id];
-    delete resource.modified[id];
-    delete resource.saved[id];
+    delete resource.observers[id]
+    delete resource.index[id]
+    delete resource.previousAttributes[id]
+    delete resource.completedQueries[id]
+    delete resource.pendingQueries[id]
+    delete resource.changeHistories[id]
+    delete resource.modified[id]
+    delete resource.saved[id]
 
     // remove it from the store
-    resource.collection.splice(i, 1);
+    resource.collection.splice(i, 1)
     // collection has been modified
-    definition.handleChange(item);
+    definition.handleChange(item)
 
     // lifecycle
-    definition.afterEject(options, item);
+    definition.afterEject(options, item)
     if (options.notify) {
-      definition.emit('DS.afterEject', definition, item);
+      definition.emit('DS.afterEject', definition, item)
     }
 
-    return item;
+    return item
   }
-};
+}

@@ -16,68 +16,67 @@
  * @param options.beforeCreate Lifecycle hook.
  * @param options.afterCreate Lifecycle hook.
  */
-module.exports = function create(resourceName, attrs, options) {
-  let _this = this;
-  let DSUtils = _this.utils;
-  let definition = _this.definitions[resourceName];
-  let adapter;
+module.exports = function create (resourceName, attrs, options) {
+  let _this = this
+  let DSUtils = _this.utils
+  let definition = _this.definitions[resourceName]
+  let adapter
 
-  options = options || {};
-  attrs = attrs || {};
+  options = options || {}
+  attrs = attrs || {}
 
-  let rejectionError;
+  let rejectionError
   if (!definition) {
-    rejectionError = new _this.errors.NER(resourceName);
+    rejectionError = new _this.errors.NER(resourceName)
   } else if (!DSUtils._o(attrs)) {
-    rejectionError = DSUtils._oErr('attrs');
+    rejectionError = DSUtils._oErr('attrs')
   } else {
-    options = DSUtils._(definition, options);
+    options = DSUtils._(definition, options)
     if (options.upsert && DSUtils._sn(attrs[definition.idAttribute])) {
-      return _this.update(resourceName, attrs[definition.idAttribute], attrs, options);
+      return _this.update(resourceName, attrs[definition.idAttribute], attrs, options)
     }
-    options.logFn('create', attrs, options);
+    options.logFn('create', attrs, options)
   }
 
-  return new DSUtils.Promise((resolve, reject) => {
+  return new DSUtils.Promise(function (resolve, reject) {
     if (rejectionError) {
-      reject(rejectionError);
+      reject(rejectionError)
     } else {
-      resolve(attrs);
+      resolve(attrs)
     }
-
   })
     // start lifecycle
-    .then(attrs => options.beforeValidate.call(attrs, options, attrs))
-    .then(attrs => options.validate.call(attrs, options, attrs))
-    .then(attrs => options.afterValidate.call(attrs, options, attrs))
-    .then(attrs => options.beforeCreate.call(attrs, options, attrs))
-    .then(attrs => {
+    .then(function (attrs) { return options.beforeValidate.call(attrs, options, attrs) })
+    .then(function (attrs) { return options.validate.call(attrs, options, attrs) })
+    .then(function (attrs) { return options.afterValidate.call(attrs, options, attrs) })
+    .then(function (attrs) { return options.beforeCreate.call(attrs, options, attrs) })
+    .then(function (attrs) {
       if (options.notify) {
-        definition.emit('DS.beforeCreate', definition, attrs);
+        definition.emit('DS.beforeCreate', definition, attrs)
       }
-      adapter = _this.getAdapterName(options);
-      return _this.adapters[adapter].create(definition, DSUtils.omit(attrs, options.omit), options);
+      adapter = _this.getAdapterName(options)
+      return _this.adapters[adapter].create(definition, DSUtils.omit(attrs, options.omit), options)
     })
-    .then(attrs => options.afterCreate.call(attrs, options, attrs))
-    .then(attrs => {
+    .then(function (attrs) { return options.afterCreate.call(attrs, options, attrs) })
+    .then(function (attrs) {
       if (options.notify) {
-        definition.emit('DS.afterCreate', definition, attrs);
+        definition.emit('DS.afterCreate', definition, attrs)
       }
       if (options.cacheResponse) {
         // injected created intem into the store
-        let created = _this.inject(definition.name, attrs, options.orig());
-        let id = created[definition.idAttribute];
+        let created = _this.inject(definition.name, attrs, options.orig())
+        let id = created[definition.idAttribute]
         // mark item's `find` query as completed, so a subsequent `find` call for this item will resolve immediately
-        let resource = _this.store[resourceName];
-        resource.completedQueries[id] = new Date().getTime();
-        resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
-        return created;
+        let resource = _this.store[resourceName]
+        resource.completedQueries[id] = new Date().getTime()
+        resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id])
+        return created
       } else {
         // just return an un-injected instance
-        return _this.createInstance(resourceName, attrs, options);
+        return _this.createInstance(resourceName, attrs, options)
       }
     })
-    .then(item => {
-      return DSUtils.respond(item, {adapter}, options);
-    });
-};
+    .then(function (item) {
+      return DSUtils.respond(item, {adapter}, options)
+    })
+}

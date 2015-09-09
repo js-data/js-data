@@ -1,5 +1,5 @@
-import DSUtils from '../../utils';
-import DSErrors from '../../errors';
+import DSUtils from '../../utils'
+import DSErrors from '../../errors'
 
 /**
  * This is a beast of a file, but it's where a significant portion of the magic happens.
@@ -17,11 +17,11 @@ import DSErrors from '../../errors';
  * @returns {Function} Observer handler function
  * @private
  */
-function makeObserverHandler(definition, resource) {
-  var DS = this;
+function makeObserverHandler (definition, resource) {
+  var DS = this
 
   // using "var" avoids a JSHint error
-  var name = definition.name;
+  var name = definition.name
 
   /**
    * This will be called by observe-js when a new change record is available for the observed object
@@ -32,34 +32,34 @@ function makeObserverHandler(definition, resource) {
    * @param oldValueFn Function that can be used to get the previous value of a changed property
    * @param firstTime Whether this is the first time this function is being called for the given item. Will only be true once.
    */
-  return function _react(added, removed, changed, oldValueFn, firstTime) {
-    let target = this;
-    let item;
+  return function _react (added, removed, changed, oldValueFn, firstTime) {
+    let target = this
+    let item
 
     // Get the previous primary key of the observed item, in-case some knucklehead changed it
-    let innerId = (oldValueFn && oldValueFn(definition.idAttribute)) ? oldValueFn(definition.idAttribute) : target[definition.idAttribute];
+    let innerId = (oldValueFn && oldValueFn(definition.idAttribute)) ? oldValueFn(definition.idAttribute) : target[definition.idAttribute]
 
     // Ignore changes to relation links
-    DSUtils.forEach(definition.relationFields, field => {
-      delete added[field];
-      delete removed[field];
-      delete changed[field];
-    });
+    DSUtils.forEach(definition.relationFields, function (field) {
+      delete added[field]
+      delete removed[field]
+      delete changed[field]
+    })
 
     // Detect whether there are actually any changes
     if (!DSUtils.isEmpty(added) || !DSUtils.isEmpty(removed) || !DSUtils.isEmpty(changed) || firstTime) {
-      item = DS.get(name, innerId);
+      item = DS.get(name, innerId)
 
       // update item and collection "modified" timestamps
-      resource.modified[innerId] = DSUtils.updateTimestamp(resource.modified[innerId]);
+      resource.modified[innerId] = DSUtils.updateTimestamp(resource.modified[innerId])
 
       if (item && definition.instanceEvents) {
-        setTimeout(() => {
-          item.emit('DS.change', definition, item);
-        }, 0);
+        setTimeout(function () {
+          item.emit('DS.change', definition, item)
+        }, 0)
       }
 
-      definition.handleChange(item);
+      definition.handleChange(item)
 
       // Save a change record for the item
       if (definition.keepChangeHistory) {
@@ -70,34 +70,34 @@ function makeObserverHandler(definition, resource) {
           removed,
           changed,
           timestamp: resource.modified[innerId]
-        };
-        resource.changeHistories[innerId].push(changeRecord);
-        resource.changeHistory.push(changeRecord);
+        }
+        resource.changeHistories[innerId].push(changeRecord)
+        resource.changeHistory.push(changeRecord)
       }
     }
 
     // Recompute computed properties if any computed properties depend on changed properties
     if (definition.computed) {
-      item = item || DS.get(name, innerId);
-      DSUtils.forOwn(definition.computed, (fn, field) => {
-        let compute = false;
+      item = item || DS.get(name, innerId)
+      DSUtils.forOwn(definition.computed, function (fn, field) {
+        let compute = false
         // check if required fields changed
-        DSUtils.forEach(fn.deps, dep => {
+        DSUtils.forEach(fn.deps, function (dep) {
           if (dep in added || dep in removed || dep in changed || !(field in item)) {
-            compute = true;
+            compute = true
           }
-        });
-        compute = compute || !fn.deps.length;
+        })
+        compute = compute || !fn.deps.length
         if (compute) {
-          DSUtils.compute.call(item, fn, field);
+          DSUtils.compute.call(item, fn, field)
         }
-      });
+      })
     }
 
     if (definition.idAttribute in changed) {
-      definition.errorFn(`Doh! You just changed the primary key of an object! Your data for the "${name}" resource is now in an undefined (probably broken) state.`);
+      definition.errorFn(`Doh! You just changed the primary key of an object! Your data for the "${name}" resource is now in an undefined (probably broken) state.`)
     }
-  };
+  }
 }
 
 /**
@@ -110,174 +110,174 @@ function makeObserverHandler(definition, resource) {
  * @returns The injected data
  * @private
  */
-function _inject(definition, resource, attrs, options) {
-  let _this = this;
-  let injected;
+function _inject (definition, resource, attrs, options) {
+  let _this = this
+  let injected
 
   if (DSUtils._a(attrs)) {
     // have an array of objects, go ahead and inject each one individually and return the resulting array
-    injected = [];
+    injected = []
     for (var i = 0; i < attrs.length; i++) {
-      injected.push(_inject.call(_this, definition, resource, attrs[i], options));
+      injected.push(_inject.call(_this, definition, resource, attrs[i], options))
     }
   } else {
     // create the observer handler for the data to be injected
-    let _react = makeObserverHandler.call(_this, definition, resource);
+    let _react = makeObserverHandler.call(_this, definition, resource)
 
     // check if "idAttribute" is a computed property
-    let c = definition.computed;
-    let idA = definition.idAttribute;
+    let c = definition.computed
+    let idA = definition.idAttribute
     // compute the primary key if necessary
     if (c && c[idA]) {
-      let args = [];
-      DSUtils.forEach(c[idA].deps, dep => {
-        args.push(attrs[dep]);
-      });
-      attrs[idA] = c[idA][c[idA].length - 1].apply(attrs, args);
+      let args = []
+      DSUtils.forEach(c[idA].deps, function (dep) {
+        args.push(attrs[dep])
+      })
+      attrs[idA] = c[idA][c[idA].length - 1].apply(attrs, args)
     }
 
     if (!(idA in attrs)) {
       // we cannot inject any object into the store that does not have a primary key!
-      let error = new DSErrors.R(`${definition.name}.inject: "attrs" must contain the property specified by "idAttribute"!`);
-      options.errorFn(error);
-      throw error;
+      let error = new DSErrors.R(`${definition.name}.inject: "attrs" must contain the property specified by "idAttribute"!`)
+      options.errorFn(error)
+      throw error
     } else {
       try {
         // when injecting object that contain their nested relations, this code
         // will recursively inject them into their proper places in the data store.
         // Magic!
-        DSUtils.forEach(definition.relationList, def => {
-          let relationName = def.relation;
-          let relationDef = _this.definitions[relationName];
-          let toInject = attrs[def.localField];
+        DSUtils.forEach(definition.relationList, function (def) {
+          let relationName = def.relation
+          let relationDef = _this.definitions[relationName]
+          let toInject = attrs[def.localField]
           if (toInject) {
             if (!relationDef) {
-              throw new DSErrors.R(`${definition.name} relation is defined but the resource is not!`);
+              throw new DSErrors.R(`${definition.name} relation is defined but the resource is not!`)
             }
             // handle injecting hasMany relations
             if (DSUtils._a(toInject)) {
-              let items = [];
-              DSUtils.forEach(toInject, toInjectItem => {
+              let items = []
+              DSUtils.forEach(toInject, function (toInjectItem) {
                 if (toInjectItem !== _this.store[relationName].index[toInjectItem[relationDef.idAttribute]]) {
                   try {
-                    let injectedItem = relationDef.inject(toInjectItem, options.orig());
+                    let injectedItem = relationDef.inject(toInjectItem, options.orig())
                     if (def.foreignKey) {
-                      DSUtils.set(injectedItem, def.foreignKey, attrs[definition.idAttribute]);
+                      DSUtils.set(injectedItem, def.foreignKey, attrs[definition.idAttribute])
                     }
-                    items.push(injectedItem);
+                    items.push(injectedItem)
                   } catch (err) {
-                    options.errorFn(err, `Failed to inject ${def.type} relation: "${relationName}"!`);
+                    options.errorFn(err, `Failed to inject ${def.type} relation: "${relationName}"!`)
                   }
                 }
-              });
+              })
             } else {
               // handle injecting belongsTo and hasOne relations
               if (toInject !== _this.store[relationName].index[toInject[relationDef.idAttribute]]) {
                 try {
-                  let injected = relationDef.inject(attrs[def.localField], options.orig());
+                  let injected = relationDef.inject(attrs[def.localField], options.orig())
                   if (def.foreignKey) {
-                    DSUtils.set(injected, def.foreignKey, attrs[definition.idAttribute]);
+                    DSUtils.set(injected, def.foreignKey, attrs[definition.idAttribute])
                   }
                 } catch (err) {
-                  options.errorFn(err, `Failed to inject ${def.type} relation: "${relationName}"!`);
+                  options.errorFn(err, `Failed to inject ${def.type} relation: "${relationName}"!`)
                 }
               }
             }
           }
-        });
+        })
 
         // primary key of item being injected
-        let id = attrs[idA];
+        let id = attrs[idA]
         // item being injected
-        let item = definition.get(id);
+        let item = definition.get(id)
         // 0 if the item is new, otherwise the previous last modified timestamp of the item
-        let initialLastModified = item ? resource.modified[id] : 0;
+        let initialLastModified = item ? resource.modified[id] : 0
 
         // item is new
         if (!item) {
           if (attrs instanceof definition[definition['class']]) {
-            item = attrs;
+            item = attrs
           } else {
-            item = new definition[definition['class']]();
+            item = new definition[definition['class']]()
           }
           // remove relation properties from the item, since those relations have been injected by now
-          DSUtils.forEach(definition.relationList, def => {
-            delete attrs[def.localField];
-          });
+          DSUtils.forEach(definition.relationList, function (def) {
+            delete attrs[def.localField]
+          })
           // copy remaining properties to the injected item
-          DSUtils.deepMixIn(item, attrs);
+          DSUtils.deepMixIn(item, attrs)
 
           // add item to collection
-          resource.collection.push(item);
-          resource.changeHistories[id] = [];
+          resource.collection.push(item)
+          resource.changeHistories[id] = []
 
           // If we're in the browser, start observation
           if (definition.watchChanges) {
-            resource.observers[id] = new _this.observe.ObjectObserver(item);
-            resource.observers[id].open(_react, item);
+            resource.observers[id] = new _this.observe.ObjectObserver(item)
+            resource.observers[id].open(_react, item)
           }
 
           // index item
-          resource.index[id] = item;
+          resource.index[id] = item
           // fire observation handler for the first time
-          _react.call(item, {}, {}, {}, null, true);
+          _react.call(item, {}, {}, {}, null, true)
           // save "previous" attributes of the injected item, for change diffs later
-          resource.previousAttributes[id] = DSUtils.copy(item, null, null, null, definition.relationFields);
+          resource.previousAttributes[id] = DSUtils.copy(item, null, null, null, definition.relationFields)
         } else {
           // item is being re-injected
           // new properties take precedence
           if (options.onConflict === 'merge') {
-            DSUtils.deepMixIn(item, attrs);
+            DSUtils.deepMixIn(item, attrs)
           } else if (options.onConflict === 'replace') {
-            DSUtils.forOwn(item, (v, k) => {
+            DSUtils.forOwn(item, function (v, k) {
               if (k !== definition.idAttribute) {
                 if (!attrs.hasOwnProperty(k)) {
-                  delete item[k];
+                  delete item[k]
                 }
               }
-            });
-            DSUtils.forOwn(attrs, (v, k) => {
+            })
+            DSUtils.forOwn(attrs, function (v, k) {
               if (k !== definition.idAttribute) {
-                item[k] = v;
+                item[k] = v
               }
-            });
+            })
           }
 
           if (definition.resetHistoryOnInject) {
             // clear change history for item
-            resource.previousAttributes[id] = DSUtils.copy(item, null, null, null, definition.relationFields);
+            resource.previousAttributes[id] = DSUtils.copy(item, null, null, null, definition.relationFields)
             if (resource.changeHistories[id].length) {
-              DSUtils.forEach(resource.changeHistories[id], changeRecord => {
-                DSUtils.remove(resource.changeHistory, changeRecord);
-              });
-              resource.changeHistories[id].splice(0, resource.changeHistories[id].length);
+              DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
+                DSUtils.remove(resource.changeHistory, changeRecord)
+              })
+              resource.changeHistories[id].splice(0, resource.changeHistories[id].length)
             }
           }
           if (resource.observers[id] && typeof resource.observers[id] === 'function') {
             // force observation callback to be fired if there are any changes to the item and `Object.observe` is not available
-            resource.observers[id].deliver();
+            resource.observers[id].deliver()
           }
         }
         // update modified timestamp of item
-        resource.modified[id] = initialLastModified && resource.modified[id] === initialLastModified ? DSUtils.updateTimestamp(resource.modified[id]) : resource.modified[id];
+        resource.modified[id] = initialLastModified && resource.modified[id] === initialLastModified ? DSUtils.updateTimestamp(resource.modified[id]) : resource.modified[id]
 
         // reset expiry tracking for item
-        resource.expiresHeap.remove(item);
-        let timestamp = new Date().getTime();
+        resource.expiresHeap.remove(item)
+        let timestamp = new Date().getTime()
         resource.expiresHeap.push({
           item: item,
           timestamp: timestamp,
           expires: definition.maxAge ? timestamp + definition.maxAge : Number.MAX_VALUE
-        });
+        })
 
         // final injected item
-        injected = item;
+        injected = item
       } catch (err) {
-        options.errorFn(err, attrs);
+        options.errorFn(err, attrs)
       }
     }
   }
-  return injected;
+  return injected
 }
 
 /**
@@ -289,38 +289,38 @@ function _inject(definition, resource, attrs, options) {
  * @param options.notify Whether to emit the "DS.beforeInject" and "DS.afterInject" events.
  * @returns The injected data.
  */
-module.exports = function inject(resourceName, attrs, options) {
-  let _this = this;
-  let definition = _this.definitions[resourceName];
-  let resource = _this.store[resourceName];
-  let injected;
+module.exports = function inject (resourceName, attrs, options) {
+  let _this = this
+  let definition = _this.definitions[resourceName]
+  let resource = _this.store[resourceName]
+  let injected
 
   if (!definition) {
-    throw new DSErrors.NER(resourceName);
+    throw new DSErrors.NER(resourceName)
   } else if (!DSUtils._o(attrs) && !DSUtils._a(attrs)) {
-    throw new DSErrors.IA(`${resourceName}.inject: "attrs" must be an object or an array!`);
+    throw new DSErrors.IA(`${resourceName}.inject: "attrs" must be an object or an array!`)
   }
 
-  options = DSUtils._(definition, options);
-  options.logFn('inject', attrs, options);
+  options = DSUtils._(definition, options)
+  options.logFn('inject', attrs, options)
 
   // lifecycle
-  options.beforeInject(options, attrs);
+  options.beforeInject(options, attrs)
   if (options.notify) {
-    definition.emit('DS.beforeInject', definition, attrs);
+    definition.emit('DS.beforeInject', definition, attrs)
   }
 
   // start the recursive injection of data
-  injected = _inject.call(_this, definition, resource, attrs, options);
+  injected = _inject.call(_this, definition, resource, attrs, options)
 
   // collection was modified
-  definition.handleChange(injected);
+  definition.handleChange(injected)
 
   // lifecycle
-  options.afterInject(options, injected);
+  options.afterInject(options, injected)
   if (options.notify) {
-    definition.emit('DS.afterInject', definition, injected);
+    definition.emit('DS.afterInject', definition, injected)
   }
 
-  return injected;
-};
+  return injected
+}

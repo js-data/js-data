@@ -1,140 +1,141 @@
 /* jshint eqeqeq:false */
-import DSUtils from '../utils';
-import DSErrors from '../errors';
-import syncMethods from './sync_methods/index';
-import asyncMethods from './async_methods/index';
+import DSUtils from '../utils'
+import DSErrors from '../errors'
+import syncMethods from './sync_methods/index'
+import asyncMethods from './async_methods/index'
 
-function lifecycleNoopCb(resource, attrs, cb) {
-  cb(null, attrs);
+function lifecycleNoopCb (resource, attrs, cb) {
+  cb(null, attrs)
 }
 
-function lifecycleNoop(resource, attrs) {
-  return attrs;
+function lifecycleNoop (resource, attrs) {
+  return attrs
 }
 
-function compare(orderBy, index, a, b) {
-  let def = orderBy[index];
-  let cA = DSUtils.get(a, def[0]), cB = DSUtils.get(b, def[0]);
+function compare (orderBy, index, a, b) {
+  let def = orderBy[index]
+  let cA = DSUtils.get(a, def[0])
+  let cB = DSUtils.get(b, def[0])
   if (DSUtils._s(cA)) {
-    cA = DSUtils.upperCase(cA);
+    cA = DSUtils.upperCase(cA)
   }
   if (DSUtils._s(cB)) {
-    cB = DSUtils.upperCase(cB);
+    cB = DSUtils.upperCase(cB)
   }
   if (def[1] === 'DESC') {
     if (cB < cA) {
-      return -1;
+      return -1
     } else if (cB > cA) {
-      return 1;
+      return 1
     } else {
       if (index < orderBy.length - 1) {
-        return compare(orderBy, index + 1, a, b);
+        return compare(orderBy, index + 1, a, b)
       } else {
-        return 0;
+        return 0
       }
     }
   } else {
     if (cA < cB) {
-      return -1;
+      return -1
     } else if (cA > cB) {
-      return 1;
+      return 1
     } else {
       if (index < orderBy.length - 1) {
-        return compare(orderBy, index + 1, a, b);
+        return compare(orderBy, index + 1, a, b)
       } else {
-        return 0;
+        return 0
       }
     }
   }
 }
 
 class Defaults {
-  errorFn(a, b) {
+  errorFn (a, b) {
     if (this.error && typeof this.error === 'function') {
       try {
         if (typeof a === 'string') {
-          throw new Error(a);
+          throw new Error(a)
         } else {
-          throw a;
+          throw a
         }
       } catch (err) {
-        a = err;
+        a = err
       }
-      this.error(this.name || null, a || null, b || null);
+      this.error(this.name || null, a || null, b || null)
     }
   }
 }
 
-var defaultsPrototype = Defaults.prototype;
+var defaultsPrototype = Defaults.prototype
 
-defaultsPrototype.actions = {};
-defaultsPrototype.afterCreate = lifecycleNoopCb;
-defaultsPrototype.afterCreateCollection = lifecycleNoop;
-defaultsPrototype.afterCreateInstance = lifecycleNoop;
-defaultsPrototype.afterDestroy = lifecycleNoopCb;
-defaultsPrototype.afterEject = lifecycleNoop;
-defaultsPrototype.afterInject = lifecycleNoop;
-defaultsPrototype.afterReap = lifecycleNoop;
-defaultsPrototype.afterUpdate = lifecycleNoopCb;
-defaultsPrototype.afterValidate = lifecycleNoopCb;
-defaultsPrototype.allowSimpleWhere = true;
-defaultsPrototype.basePath = '';
-defaultsPrototype.beforeCreate = lifecycleNoopCb;
-defaultsPrototype.beforeCreateCollection = lifecycleNoop;
-defaultsPrototype.beforeCreateInstance = lifecycleNoop;
-defaultsPrototype.beforeDestroy = lifecycleNoopCb;
-defaultsPrototype.beforeEject = lifecycleNoop;
-defaultsPrototype.beforeInject = lifecycleNoop;
-defaultsPrototype.beforeReap = lifecycleNoop;
-defaultsPrototype.beforeUpdate = lifecycleNoopCb;
-defaultsPrototype.beforeValidate = lifecycleNoopCb;
-defaultsPrototype.bypassCache = false;
-defaultsPrototype.cacheResponse = !!DSUtils.w;
-defaultsPrototype.clearEmptyQueries = true;
-defaultsPrototype.computed = {};
-defaultsPrototype.defaultAdapter = 'http';
-defaultsPrototype.debug = false;
-defaultsPrototype.defaultValues = {};
-defaultsPrototype.eagerEject = false;
+defaultsPrototype.actions = {}
+defaultsPrototype.afterCreate = lifecycleNoopCb
+defaultsPrototype.afterCreateCollection = lifecycleNoop
+defaultsPrototype.afterCreateInstance = lifecycleNoop
+defaultsPrototype.afterDestroy = lifecycleNoopCb
+defaultsPrototype.afterEject = lifecycleNoop
+defaultsPrototype.afterInject = lifecycleNoop
+defaultsPrototype.afterReap = lifecycleNoop
+defaultsPrototype.afterUpdate = lifecycleNoopCb
+defaultsPrototype.afterValidate = lifecycleNoopCb
+defaultsPrototype.allowSimpleWhere = true
+defaultsPrototype.basePath = ''
+defaultsPrototype.beforeCreate = lifecycleNoopCb
+defaultsPrototype.beforeCreateCollection = lifecycleNoop
+defaultsPrototype.beforeCreateInstance = lifecycleNoop
+defaultsPrototype.beforeDestroy = lifecycleNoopCb
+defaultsPrototype.beforeEject = lifecycleNoop
+defaultsPrototype.beforeInject = lifecycleNoop
+defaultsPrototype.beforeReap = lifecycleNoop
+defaultsPrototype.beforeUpdate = lifecycleNoopCb
+defaultsPrototype.beforeValidate = lifecycleNoopCb
+defaultsPrototype.bypassCache = false
+defaultsPrototype.cacheResponse = !!DSUtils.w
+defaultsPrototype.clearEmptyQueries = true
+defaultsPrototype.computed = {}
+defaultsPrototype.defaultAdapter = 'http'
+defaultsPrototype.debug = false
+defaultsPrototype.defaultValues = {}
+defaultsPrototype.eagerEject = false
 // TODO: Implement eagerInject in DS#create
-defaultsPrototype.eagerInject = false;
-defaultsPrototype.endpoint = '';
-defaultsPrototype.error = console ? (a, b, c) => console[typeof console.error === 'function' ? 'error' : 'log'](a, b, c) : false;
-defaultsPrototype.fallbackAdapters = ['http'];
-defaultsPrototype.findStrictCache = false;
-defaultsPrototype.idAttribute = 'id';
-defaultsPrototype.ignoredChanges = [/\$/];
-defaultsPrototype.instanceEvents = !!DSUtils.w;
-defaultsPrototype.keepChangeHistory = false;
-defaultsPrototype.linkRelations = true;
-defaultsPrototype.log = console ? (a, b, c, d, e) => console[typeof console.info === 'function' ? 'info' : 'log'](a, b, c, d, e) : false;
+defaultsPrototype.eagerInject = false
+defaultsPrototype.endpoint = ''
+defaultsPrototype.error = console ? (a, b, c) => console[typeof console.error === 'function' ? 'error' : 'log'](a, b, c) : false
+defaultsPrototype.fallbackAdapters = ['http']
+defaultsPrototype.findStrictCache = false
+defaultsPrototype.idAttribute = 'id'
+defaultsPrototype.ignoredChanges = [/\$/]
+defaultsPrototype.instanceEvents = !!DSUtils.w
+defaultsPrototype.keepChangeHistory = false
+defaultsPrototype.linkRelations = true
+defaultsPrototype.log = console ? (a, b, c, d, e) => console[typeof console.info === 'function' ? 'info' : 'log'](a, b, c, d, e) : false
 
 defaultsPrototype.logFn = function (a, b, c, d) {
-  let _this = this;
+  let _this = this
   if (_this.debug && _this.log && typeof _this.log === 'function') {
-    _this.log(_this.name || null, a || null, b || null, c || null, d || null);
+    _this.log(_this.name || null, a || null, b || null, c || null, d || null)
   }
-};
+}
 
-defaultsPrototype.maxAge = false;
-defaultsPrototype.methods = {};
-defaultsPrototype.notify = !!DSUtils.w;
-defaultsPrototype.omit = [];
-defaultsPrototype.onConflict = 'merge';
-defaultsPrototype.reapAction = !!DSUtils.w ? 'inject' : 'none';
-defaultsPrototype.reapInterval = !!DSUtils.w ? 30000 : false;
-defaultsPrototype.relationsEnumerable = false;
-defaultsPrototype.resetHistoryOnInject = true;
-defaultsPrototype.returnMeta = false;
-defaultsPrototype.strategy = 'single';
-defaultsPrototype.upsert = !!DSUtils.w;
-defaultsPrototype.useClass = true;
-defaultsPrototype.useFilter = false;
-defaultsPrototype.validate = lifecycleNoopCb;
-defaultsPrototype.watchChanges = !!DSUtils.w;
-defaultsPrototype.defaultFilter = (collection, resourceName, params, options) => {
-  let filtered = collection;
-  let where = null;
+defaultsPrototype.maxAge = false
+defaultsPrototype.methods = {}
+defaultsPrototype.notify = !!DSUtils.w
+defaultsPrototype.omit = []
+defaultsPrototype.onConflict = 'merge'
+defaultsPrototype.reapAction = DSUtils.w ? 'inject' : 'none'
+defaultsPrototype.reapInterval = DSUtils.w ? 30000 : false
+defaultsPrototype.relationsEnumerable = false
+defaultsPrototype.resetHistoryOnInject = true
+defaultsPrototype.returnMeta = false
+defaultsPrototype.strategy = 'single'
+defaultsPrototype.upsert = !!DSUtils.w
+defaultsPrototype.useClass = true
+defaultsPrototype.useFilter = false
+defaultsPrototype.validate = lifecycleNoopCb
+defaultsPrototype.watchChanges = !!DSUtils.w
+defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
+  let filtered = collection
+  let where = null
   let reserved = {
     skip: '',
     offset: '',
@@ -142,125 +143,125 @@ defaultsPrototype.defaultFilter = (collection, resourceName, params, options) =>
     limit: '',
     orderBy: '',
     sort: ''
-  };
+  }
 
-  params = params || {};
-  options = options || {};
+  params = params || {}
+  options = options || {}
 
   if (DSUtils._o(params.where)) {
-    where = params.where;
+    where = params.where
   } else {
-    where = {};
+    where = {}
   }
 
   if (options.allowSimpleWhere) {
-    DSUtils.forOwn(params, (value, key) => {
+    DSUtils.forOwn(params, function (value, key) {
       if (!(key in reserved) && !(key in where)) {
         where[key] = {
           '==': value
-        };
+        }
       }
-    });
+    })
   }
 
   if (DSUtils.isEmpty(where)) {
-    where = null;
+    where = null
   }
 
   if (where) {
-    filtered = DSUtils.filter(filtered, attrs => {
-      let first = true;
-      let keep = true;
-      DSUtils.forOwn(where, (clause, field) => {
+    filtered = DSUtils.filter(filtered, function (attrs) {
+      let first = true
+      let keep = true
+      DSUtils.forOwn(where, function (clause, field) {
         if (!DSUtils._o(clause)) {
           clause = {
             '==': clause
-          };
+          }
         }
-        DSUtils.forOwn(clause, (term, op) => {
-          let expr;
-          let isOr = op[0] === '|';
-          let val = DSUtils.get(attrs, field);
-          op = isOr ? op.substr(1) : op;
+        DSUtils.forOwn(clause, function (term, op) {
+          let expr
+          let isOr = op[0] === '|'
+          let val = DSUtils.get(attrs, field)
+          op = isOr ? op.substr(1) : op
           if (op === '==') {
-            expr = val == term;
+            expr = val == term // eslint-disable-line
           } else if (op === '===') {
-            expr = val === term;
+            expr = val === term
           } else if (op === '!=') {
-            expr = val != term;
+            expr = val != term // eslint-disable-line
           } else if (op === '!==') {
-            expr = val !== term;
+            expr = val !== term
           } else if (op === '>') {
-            expr = val > term;
+            expr = val > term
           } else if (op === '>=') {
-            expr = val >= term;
+            expr = val >= term
           } else if (op === '<') {
-            expr = val < term;
+            expr = val < term
           } else if (op === '<=') {
-            expr = val <= term;
+            expr = val <= term
           } else if (op === 'isectEmpty') {
-            expr = !DSUtils.intersection((val || []), (term || [])).length;
+            expr = !DSUtils.intersection((val || []), (term || [])).length
           } else if (op === 'isectNotEmpty') {
-            expr = DSUtils.intersection((val || []), (term || [])).length;
+            expr = DSUtils.intersection((val || []), (term || [])).length
           } else if (op === 'in') {
             if (DSUtils._s(term)) {
-              expr = term.indexOf(val) !== -1;
+              expr = term.indexOf(val) !== -1
             } else {
-              expr = DSUtils.contains(term, val);
+              expr = DSUtils.contains(term, val)
             }
           } else if (op === 'notIn') {
             if (DSUtils._s(term)) {
-              expr = term.indexOf(val) === -1;
+              expr = term.indexOf(val) === -1
             } else {
-              expr = !DSUtils.contains(term, val);
+              expr = !DSUtils.contains(term, val)
             }
           } else if (op === 'contains') {
             if (DSUtils._s(val)) {
-              expr = val.indexOf(term) !== -1;
+              expr = val.indexOf(term) !== -1
             } else {
-              expr = DSUtils.contains(val, term);
+              expr = DSUtils.contains(val, term)
             }
           } else if (op === 'notContains') {
             if (DSUtils._s(val)) {
-              expr = val.indexOf(term) === -1;
+              expr = val.indexOf(term) === -1
             } else {
-              expr = !DSUtils.contains(val, term);
+              expr = !DSUtils.contains(val, term)
             }
           }
           if (expr !== undefined) {
-            keep = first ? expr : (isOr ? keep || expr : keep && expr);
+            keep = first ? expr : (isOr ? keep || expr : keep && expr)
           }
-          first = false;
-        });
-      });
-      return keep;
-    });
+          first = false
+        })
+      })
+      return keep
+    })
   }
 
-  let orderBy = null;
+  let orderBy = null
 
   if (DSUtils._s(params.orderBy)) {
     orderBy = [
       [params.orderBy, 'ASC']
-    ];
+    ]
   } else if (DSUtils._a(params.orderBy)) {
-    orderBy = params.orderBy;
+    orderBy = params.orderBy
   }
 
   if (!orderBy && DSUtils._s(params.sort)) {
     orderBy = [
       [params.sort, 'ASC']
-    ];
+    ]
   } else if (!orderBy && DSUtils._a(params.sort)) {
-    orderBy = params.sort;
+    orderBy = params.sort
   }
 
   // Apply 'orderBy'
   if (orderBy) {
-    let index = 0;
-    DSUtils.forEach(orderBy, (def, i) => {
+    let index = 0
+    DSUtils.forEach(orderBy, function (def, i) {
       if (DSUtils._s(def)) {
-        orderBy[i] = [def, 'ASC'];
+        orderBy[i] = [def, 'ASC']
       } else if (!DSUtils._a(def)) {
         throw new DSErrors.IA(`DS.filter("${resourceName}"[, params][, options]): ${DSUtils.toJson(def)}: Must be a string or an array!`, {
           params: {
@@ -269,154 +270,152 @@ defaultsPrototype.defaultFilter = (collection, resourceName, params, options) =>
               expected: 'string|array'
             }
           }
-        });
+        })
       }
-    });
-    filtered = DSUtils.sort(filtered, (a, b) => compare(orderBy, index, a, b));
+    })
+    filtered = DSUtils.sort(filtered, function (a, b) {
+      return compare(orderBy, index, a, b)
+    })
   }
 
-  let limit = DSUtils._n(params.limit) ? params.limit : null;
-  let skip = null;
+  let limit = DSUtils._n(params.limit) ? params.limit : null
+  let skip = null
 
   if (DSUtils._n(params.skip)) {
-    skip = params.skip;
+    skip = params.skip
   } else if (DSUtils._n(params.offset)) {
-    skip = params.offset;
+    skip = params.offset
   }
 
   // Apply 'limit' and 'skip'
   if (limit && skip) {
-    filtered = DSUtils.slice(filtered, skip, Math.min(filtered.length, skip + limit));
+    filtered = DSUtils.slice(filtered, skip, Math.min(filtered.length, skip + limit))
   } else if (DSUtils._n(limit)) {
-    filtered = DSUtils.slice(filtered, 0, Math.min(filtered.length, limit));
+    filtered = DSUtils.slice(filtered, 0, Math.min(filtered.length, limit))
   } else if (DSUtils._n(skip)) {
     if (skip < filtered.length) {
-      filtered = DSUtils.slice(filtered, skip);
+      filtered = DSUtils.slice(filtered, skip)
     } else {
-      filtered = [];
+      filtered = []
     }
   }
 
-  if (filtered === collection) {
-    return filtered.slice();
-  } else {
-    return filtered;
-  }
-};
+  return filtered === collection ? filtered.slice() : filtered
+}
 
 class DS {
-  constructor(options) {
-    let _this = this;
-    options = options || {};
+  constructor (options) {
+    let _this = this
+    options = options || {}
 
-    _this.store = {};
-    _this.definitions = {};
-    _this.adapters = {};
-    _this.defaults = new Defaults();
-    _this.observe = DSUtils.observe;
-    DSUtils.forOwn(options, (v, k) => {
+    _this.store = {}
+    _this.definitions = {}
+    _this.adapters = {}
+    _this.defaults = new Defaults()
+    _this.observe = DSUtils.observe
+    DSUtils.forOwn(options, function (v, k) {
       if (k === 'omit') {
-        _this.defaults.omit = v.concat(Defaults.prototype.omit);
+        _this.defaults.omit = v.concat(Defaults.prototype.omit)
       } else {
-        _this.defaults[k] = v;
+        _this.defaults[k] = v
       }
-    });
-    _this.defaults.logFn('new data store created', _this.defaults);
+    })
+    _this.defaults.logFn('new data store created', _this.defaults)
 
-    let P = DSUtils.Promise;
+    let P = DSUtils.Promise
 
     if (P && !P.prototype.spread) {
       P.prototype.spread = function (cb) {
         return this.then(function (arr) {
-          return cb.apply(this, arr);
-        });
-      };
+          return cb.apply(this, arr)
+        })
+      }
     }
 
-    DSUtils.Events(_this);
+    DSUtils.Events(_this)
   }
 
-  getAdapterName(options) {
-    let errorIfNotExist = false;
-    options = options || {};
-    this.defaults.logFn('getAdapterName', options);
+  getAdapterName (options) {
+    let errorIfNotExist = false
+    options = options || {}
+    this.defaults.logFn('getAdapterName', options)
     if (DSUtils._s(options)) {
-      errorIfNotExist = true;
+      errorIfNotExist = true
       options = {
         adapter: options
-      };
+      }
     }
     if (this.adapters[options.adapter]) {
-      return options.adapter;
+      return options.adapter
     } else if (errorIfNotExist) {
-      throw new Error(`${options.adapter} is not a registered adapter!`);
+      throw new Error(`${options.adapter} is not a registered adapter!`)
     } else {
-      return options.defaultAdapter;
+      return options.defaultAdapter
     }
   }
 
-  getAdapter(options) {
-    options = options || {};
-    this.defaults.logFn('getAdapter', options);
-    return this.adapters[this.getAdapterName(options)];
+  getAdapter (options) {
+    options = options || {}
+    this.defaults.logFn('getAdapter', options)
+    return this.adapters[this.getAdapterName(options)]
   }
 
-  registerAdapter(name, Adapter, options) {
-    let _this = this;
-    options = options || {};
-    _this.defaults.logFn('registerAdapter', name, Adapter, options);
+  registerAdapter (name, Adapter, options) {
+    let _this = this
+    options = options || {}
+    _this.defaults.logFn('registerAdapter', name, Adapter, options)
     if (DSUtils.isFunction(Adapter)) {
-      _this.adapters[name] = new Adapter(options);
+      _this.adapters[name] = new Adapter(options)
     } else {
-      _this.adapters[name] = Adapter;
+      _this.adapters[name] = Adapter
     }
     if (options.default) {
-      _this.defaults.defaultAdapter = name;
+      _this.defaults.defaultAdapter = name
     }
-    _this.defaults.logFn(`default adapter is ${_this.defaults.defaultAdapter}`);
+    _this.defaults.logFn(`default adapter is ${_this.defaults.defaultAdapter}`)
   }
 
-  is(resourceName, instance) {
-    let definition = this.definitions[resourceName];
+  is (resourceName, instance) {
+    let definition = this.definitions[resourceName]
     if (!definition) {
-      throw new DSErrors.NER(resourceName);
+      throw new DSErrors.NER(resourceName)
     }
-    return instance instanceof definition[definition.class];
+    return instance instanceof definition[definition.class]
   }
 
-  clear() {
-    let ejected = {};
+  clear () {
+    let ejected = {}
     DSUtils.forOwn(this.definitions, definition => {
-      let name = definition.name;
-      ejected[name] = definition.ejectAll();
-      this.store[name].completedQueries = {};
-      this.store[name].queryData = {};
-    });
-    return ejected;
+      let name = definition.name
+      ejected[name] = definition.ejectAll()
+      this.store[name].completedQueries = {}
+      this.store[name].queryData = {}
+    })
+    return ejected
   }
 }
 
-var dsPrototype = DS.prototype;
+var dsPrototype = DS.prototype
 
-dsPrototype.getAdapterName.shorthand = false;
-dsPrototype.getAdapter.shorthand = false;
-dsPrototype.registerAdapter.shorthand = false;
-dsPrototype.errors = DSErrors;
-dsPrototype.utils = DSUtils;
+dsPrototype.getAdapterName.shorthand = false
+dsPrototype.getAdapter.shorthand = false
+dsPrototype.registerAdapter.shorthand = false
+dsPrototype.errors = DSErrors
+dsPrototype.utils = DSUtils
 
-function addMethods(target, obj) {
-  DSUtils.forOwn(obj, (v, k) => {
-    target[k] = v;
+function addMethods (target, obj) {
+  DSUtils.forOwn(obj, function (v, k) {
+    target[k] = v
     target[k].before = function (fn) {
-      let orig = target[k];
+      let orig = target[k]
       target[k] = function (...args) {
-        return orig.apply(this, fn.apply(this, args) || args);
-      };
-    };
-  });
+        return orig.apply(this, fn.apply(this, args) || args)
+      }
+    }
+  })
 }
 
-addMethods(dsPrototype, syncMethods);
-addMethods(dsPrototype, asyncMethods);
+addMethods(dsPrototype, syncMethods)
+addMethods(dsPrototype, asyncMethods)
 
-export default DS;
+export default DS

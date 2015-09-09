@@ -1,6 +1,6 @@
-import DS from './datastore/index';
-import DSUtils from './utils';
-import DSErrors from './errors';
+import DS from './datastore/index'
+import DSUtils from './utils'
+import DSErrors from './errors'
 
 /**
  * The library export.
@@ -13,8 +13,8 @@ module.exports = {
   DS,
   DSUtils,
   DSErrors,
-  createStore(options) {
-    return new DS(options);
+  createStore (options) {
+    return new DS(options)
   },
   version: {
     full: '<%= pkg.version %>',
@@ -24,4 +24,4 @@ module.exports = {
     alpha: '<%= alpha %>' !== 'false' ? '<%= alpha %>' : false,
     beta: '<%= beta %>' !== 'false' ? '<%= beta %>' : false
   }
-};
+}

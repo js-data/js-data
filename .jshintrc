@@ -1,6 +1,7 @@
 {
   "node": false,
   "browser": true,
+  "asi": true,
   "esnext": true,
   "bitwise": true,
   "camelcase": true,
