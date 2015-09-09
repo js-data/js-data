@@ -1,3 +1,10 @@
+##### 2.4.0 - xx September 2015
+
+###### Other
+- #204 - Choose official code style for project
+- Switched unnecessary arrow functions back to regular functions to improve performance
+- Updated CONTRIBUTING.md
+
 ##### 2.3.0 - 30 July 2015
 
 ###### Backwards compatible API changes

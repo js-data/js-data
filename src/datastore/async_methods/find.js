@@ -15,92 +15,92 @@
  * @param options.findFallbackAdapters Array of names of adapters to use if using "fallback" strategy. Overrides "fallbackAdapters".
  * @returns The item.
  */
-module.exports = function find(resourceName, id, options) {
-  let _this = this;
-  let DSUtils = _this.utils;
-  let definition = _this.definitions[resourceName];
-  let resource = _this.store[resourceName];
-  let adapter;
+module.exports = function find (resourceName, id, options) {
+  let _this = this
+  let DSUtils = _this.utils
+  let definition = _this.definitions[resourceName]
+  let resource = _this.store[resourceName]
+  let adapter
 
-  return new DSUtils.Promise((resolve, reject) => {
+  return new DSUtils.Promise(function (resolve, reject) {
     if (!definition) {
-      reject(new _this.errors.NER(resourceName));
+      reject(new _this.errors.NER(resourceName))
     } else if (!DSUtils._sn(id)) {
-      reject(DSUtils._snErr('id'));
+      reject(DSUtils._snErr('id'))
     } else {
-      options = DSUtils._(definition, options);
-      options.logFn('find', id, options);
+      options = DSUtils._(definition, options)
+      options.logFn('find', id, options)
 
       if (options.params) {
-        options.params = DSUtils.copy(options.params);
+        options.params = DSUtils.copy(options.params)
       }
 
       if (options.bypassCache || !options.cacheResponse) {
-        delete resource.completedQueries[id];
+        delete resource.completedQueries[id]
       }
       if ((!options.findStrictCache || id in resource.completedQueries) && definition.get(id) && !options.bypassCache) {
         // resolve immediately with the cached item
-        resolve(definition.get(id));
+        resolve(definition.get(id))
       } else {
         // we're going to delegate to the adapter next
-        delete resource.completedQueries[id];
-        resolve();
+        delete resource.completedQueries[id]
+        resolve()
       }
     }
-  }).then(item => {
-      if (!item) {
-        if (!(id in resource.pendingQueries)) {
-          let promise;
-          let strategy = options.findStrategy || options.strategy;
+  }).then(function (item) {
+    if (!item) {
+      if (!(id in resource.pendingQueries)) {
+        let promise
+        let strategy = options.findStrategy || options.strategy
 
-          // try subsequent adapters if the preceeding one fails
-          if (strategy === 'fallback') {
-            function makeFallbackCall(index) {
-              adapter = definition.getAdapterName((options.findFallbackAdapters || options.fallbackAdapters)[index]);
-              return _this.adapters[adapter].find(definition, id, options)['catch'](err => {
-                index++;
-                if (index < options.fallbackAdapters.length) {
-                  return makeFallbackCall(index);
-                } else {
-                  return DSUtils.Promise.reject(err);
-                }
-              });
-            }
-
-            promise = makeFallbackCall(0);
-          } else {
-            adapter = definition.getAdapterName(options);
-            // just make a single attempt
-            promise = _this.adapters[adapter].find(definition, id, options);
+        // try subsequent adapters if the preceeding one fails
+        if (strategy === 'fallback') {
+          var makeFallbackCall = function (index) {
+            adapter = definition.getAdapterName((options.findFallbackAdapters || options.fallbackAdapters)[index])
+            return _this.adapters[adapter].find(definition, id, options)['catch'](err => {
+              index++
+              if (index < options.fallbackAdapters.length) {
+                return makeFallbackCall(index)
+              } else {
+                return DSUtils.Promise.reject(err)
+              }
+            })
           }
 
-          resource.pendingQueries[id] = promise.then(data => {
-            // Query is no longer pending
-            delete resource.pendingQueries[id];
-            if (options.cacheResponse) {
-              // inject the item into the data store
-              let injected = definition.inject(data, options.orig());
-              // mark the item as "cached"
-              resource.completedQueries[id] = new Date().getTime();
-              resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
-              return injected;
-            } else {
-              // just return an un-injected instance
-              return definition.createInstance(data, options.orig());
-            }
-          });
+          promise = makeFallbackCall(0)
+        } else {
+          adapter = definition.getAdapterName(options)
+          // just make a single attempt
+          promise = _this.adapters[adapter].find(definition, id, options)
         }
-        return resource.pendingQueries[id];
-      } else {
-        // resolve immediately with the item
-        return item;
+
+        resource.pendingQueries[id] = promise.then(function (data) {
+          // Query is no longer pending
+          delete resource.pendingQueries[id]
+          if (options.cacheResponse) {
+            // inject the item into the data store
+            let injected = definition.inject(data, options.orig())
+            // mark the item as "cached"
+            resource.completedQueries[id] = new Date().getTime()
+            resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id])
+            return injected
+          } else {
+            // just return an un-injected instance
+            return definition.createInstance(data, options.orig())
+          }
+        })
       }
-    }).then(item => {
-      return DSUtils.respond(item, {adapter}, options);
-    })['catch'](err => {
-    if (resource) {
-      delete resource.pendingQueries[id];
+      return resource.pendingQueries[id]
+    } else {
+      // resolve immediately with the item
+      return item
     }
-    return DSUtils.Promise.reject(err);
-  });
-};
+  }).then(function (item) {
+    return DSUtils.respond(item, {adapter}, options)
+  })['catch'](function (err) {
+    if (resource) {
+      delete resource.pendingQueries[id]
+    }
+    return DSUtils.Promise.reject(err)
+  })
+}

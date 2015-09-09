@@ -11,7 +11,7 @@
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
 	else if(typeof define === 'function' && define.amd)
-		define(factory);
+		define([], factory);
 	else if(typeof exports === 'object')
 		exports["JSData"] = factory();
 	else
@@ -20,41 +20,41 @@
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
-/******/
+
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
-/******/
+
 /******/ 		// Check if module is in cache
 /******/ 		if(installedModules[moduleId])
 /******/ 			return installedModules[moduleId].exports;
-/******/
+
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			exports: {},
 /******/ 			id: moduleId,
 /******/ 			loaded: false
 /******/ 		};
-/******/
+
 /******/ 		// Execute the module function
 /******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
+
 /******/ 		// Flag the module as loaded
 /******/ 		module.loaded = true;
-/******/
+
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-/******/
-/******/
+
+
 /******/ 	// expose the modules object (__webpack_modules__)
 /******/ 	__webpack_require__.m = modules;
-/******/
+
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
-/******/
+
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
-/******/
+
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
 /******/ })
@@ -84,12 +84,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new _datastoreIndex['default'](options);
 	  },
 	  version: {
-	    full: '2.3.0',
-	    major: parseInt('2', 10),
-	    minor: parseInt('3', 10),
-	    patch: parseInt('0', 10),
-	    alpha: true ? 'false' : false,
-	    beta: true ? 'false' : false
+	    full: '<%= pkg.version %>',
+	    major: parseInt('<%= major %>', 10),
+	    minor: parseInt('<%= minor %>', 10),
+	    patch: parseInt('<%= patch %>', 10),
+	    alpha:  true ? '<%= alpha %>' : false,
+	    beta:  true ? '<%= beta %>' : false
 	  }
 	};
 
@@ -107,9 +107,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _errors = __webpack_require__(3);
 
-	var _sync_methodsIndex = __webpack_require__(4);
+	var _sync_methodsIndex = __webpack_require__(30);
 
-	var _async_methodsIndex = __webpack_require__(5);
+	var _async_methodsIndex = __webpack_require__(36);
 
 	function lifecycleNoopCb(resource, attrs, cb) {
 	  cb(null, attrs);
@@ -131,8 +131,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _again = false;
 
 	    var def = orderBy[index];
-	    var cA = _utils['default'].get(a, def[0]),
-	        cB = _utils['default'].get(b, def[0]);
+	    var cA = _utils['default'].get(a, def[0]);
+	    var cB = _utils['default'].get(b, def[0]);
 	    if (_utils['default']._s(cA)) {
 	      cA = _utils['default'].upperCase(cA);
 	    }
@@ -263,8 +263,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	defaultsPrototype.notify = !!_utils['default'].w;
 	defaultsPrototype.omit = [];
 	defaultsPrototype.onConflict = 'merge';
-	defaultsPrototype.reapAction = !!_utils['default'].w ? 'inject' : 'none';
-	defaultsPrototype.reapInterval = !!_utils['default'].w ? 30000 : false;
+	defaultsPrototype.reapAction = _utils['default'].w ? 'inject' : 'none';
+	defaultsPrototype.reapInterval = _utils['default'].w ? 30000 : false;
 	defaultsPrototype.relationsEnumerable = false;
 	defaultsPrototype.resetHistoryOnInject = true;
 	defaultsPrototype.returnMeta = false;
@@ -325,50 +325,50 @@ return /******/ (function(modules) { // webpackBootstrap
 	          var val = _utils['default'].get(attrs, field);
 	          op = isOr ? op.substr(1) : op;
 	          if (op === '==') {
-	            expr = val == term;
+	            expr = val == term; // eslint-disable-line
 	          } else if (op === '===') {
-	            expr = val === term;
-	          } else if (op === '!=') {
-	            expr = val != term;
-	          } else if (op === '!==') {
-	            expr = val !== term;
-	          } else if (op === '>') {
-	            expr = val > term;
-	          } else if (op === '>=') {
-	            expr = val >= term;
-	          } else if (op === '<') {
-	            expr = val < term;
-	          } else if (op === '<=') {
-	            expr = val <= term;
-	          } else if (op === 'isectEmpty') {
-	            expr = !_utils['default'].intersection(val || [], term || []).length;
-	          } else if (op === 'isectNotEmpty') {
-	            expr = _utils['default'].intersection(val || [], term || []).length;
-	          } else if (op === 'in') {
-	            if (_utils['default']._s(term)) {
-	              expr = term.indexOf(val) !== -1;
-	            } else {
-	              expr = _utils['default'].contains(term, val);
-	            }
-	          } else if (op === 'notIn') {
-	            if (_utils['default']._s(term)) {
-	              expr = term.indexOf(val) === -1;
-	            } else {
-	              expr = !_utils['default'].contains(term, val);
-	            }
-	          } else if (op === 'contains') {
-	            if (_utils['default']._s(val)) {
-	              expr = val.indexOf(term) !== -1;
-	            } else {
-	              expr = _utils['default'].contains(val, term);
-	            }
-	          } else if (op === 'notContains') {
-	            if (_utils['default']._s(val)) {
-	              expr = val.indexOf(term) === -1;
-	            } else {
-	              expr = !_utils['default'].contains(val, term);
-	            }
-	          }
+	              expr = val === term;
+	            } else if (op === '!=') {
+	              expr = val != term; // eslint-disable-line
+	            } else if (op === '!==') {
+	                expr = val !== term;
+	              } else if (op === '>') {
+	                expr = val > term;
+	              } else if (op === '>=') {
+	                expr = val >= term;
+	              } else if (op === '<') {
+	                expr = val < term;
+	              } else if (op === '<=') {
+	                expr = val <= term;
+	              } else if (op === 'isectEmpty') {
+	                expr = !_utils['default'].intersection(val || [], term || []).length;
+	              } else if (op === 'isectNotEmpty') {
+	                expr = _utils['default'].intersection(val || [], term || []).length;
+	              } else if (op === 'in') {
+	                if (_utils['default']._s(term)) {
+	                  expr = term.indexOf(val) !== -1;
+	                } else {
+	                  expr = _utils['default'].contains(term, val);
+	                }
+	              } else if (op === 'notIn') {
+	                if (_utils['default']._s(term)) {
+	                  expr = term.indexOf(val) === -1;
+	                } else {
+	                  expr = !_utils['default'].contains(term, val);
+	                }
+	              } else if (op === 'contains') {
+	                if (_utils['default']._s(val)) {
+	                  expr = val.indexOf(term) !== -1;
+	                } else {
+	                  expr = _utils['default'].contains(val, term);
+	                }
+	              } else if (op === 'notContains') {
+	                if (_utils['default']._s(val)) {
+	                  expr = val.indexOf(term) === -1;
+	                } else {
+	                  expr = !_utils['default'].contains(val, term);
+	                }
+	              }
 	          if (expr !== undefined) {
 	            keep = first ? expr : isOr ? keep || expr : keep && expr;
 	          }
@@ -439,11 +439,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 
-	  if (filtered === collection) {
-	    return filtered.slice();
-	  } else {
-	    return filtered;
-	  }
+	  return filtered === collection ? filtered.slice() : filtered;
 	};
 
 	var DS = (function () {
@@ -592,25 +588,25 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _errors = __webpack_require__(3);
 
-	var BinaryHeap = __webpack_require__(7);
-	var forEach = __webpack_require__(8);
-	var slice = __webpack_require__(9);
-	var forOwn = __webpack_require__(13);
+	var BinaryHeap = __webpack_require__(4);
+	var forEach = __webpack_require__(5);
+	var slice = __webpack_require__(6);
+	var forOwn = __webpack_require__(7);
 	var contains = __webpack_require__(10);
-	var deepMixIn = __webpack_require__(14);
-	var pascalCase = __webpack_require__(19);
-	var remove = __webpack_require__(11);
-	var pick = __webpack_require__(15);
-	var _keys = __webpack_require__(16);
-	var sort = __webpack_require__(12);
-	var upperCase = __webpack_require__(20);
-	var get = __webpack_require__(17);
-	var set = __webpack_require__(18);
-	var observe = __webpack_require__(6);
-	var w = undefined;
+	var deepMixIn = __webpack_require__(12);
+	var pascalCase = __webpack_require__(14);
+	var remove = __webpack_require__(21);
+	var pick = __webpack_require__(22);
+	var _keys = __webpack_require__(23);
+	var sort = __webpack_require__(24);
+	var upperCase = __webpack_require__(19);
+	var get = __webpack_require__(25);
+	var set = __webpack_require__(27);
+	var observe = __webpack_require__(29);
+	var w = undefined,
+	    P = undefined;
 	var objectProto = Object.prototype;
 	var toString = objectProto.toString;
-	var P = undefined;
 
 	/**
 	 * Attempt to detect the global Promise constructor.
@@ -625,55 +621,60 @@ return /******/ (function(modules) { // webpackBootstrap
 	  console.error('js-data requires a global Promise constructor!');
 	}
 
-	var isArray = Array.isArray || function isArray(value) {
-	  return toString.call(value) == '[object Array]' || false;
-	};
+	function _isArray(value) {
+	  return toString.call(value) === '[object Array]' || false;
+	}
 
-	var isRegExp = function isRegExp(value) {
-	  return toString.call(value) == '[object RegExp]' || false;
-	};
+	var isArray = Array.isArray || _isArray;
+
+	function isRegExp(value) {
+	  return toString.call(value) === '[object RegExp]' || false;
+	}
 
 	// adapted from lodash.isString
-	var isString = function isString(value) {
-	  return typeof value == 'string' || value && typeof value == 'object' && toString.call(value) == '[object String]' || false;
-	};
+	function isString(value) {
+	  return typeof value === 'string' || value && typeof value === 'object' && toString.call(value) === '[object String]' || false;
+	}
 
-	var isObject = function isObject(value) {
-	  return toString.call(value) == '[object Object]' || false;
-	};
+	function isObject(value) {
+	  return toString.call(value) === '[object Object]' || false;
+	}
 
 	// adapted from lodash.isDate
-	var isDate = function isDate(value) {
-	  return value && typeof value == 'object' && toString.call(value) == '[object Date]' || false;
-	};
+	function isDate(value) {
+	  return value && typeof value === 'object' && toString.call(value) === '[object Date]' || false;
+	}
 
 	// adapted from lodash.isNumber
-	var isNumber = function isNumber(value) {
+	function isNumber(value) {
 	  var type = typeof value;
-	  return type == 'number' || value && type == 'object' && toString.call(value) == '[object Number]' || false;
-	};
+	  return type === 'number' || value && type === 'object' && toString.call(value) === '[object Number]' || false;
+	}
 
 	// adapted from lodash.isFunction
-	var isFunction = function isFunction(value) {
-	  return typeof value == 'function' || value && toString.call(value) === '[object Function]' || false;
-	};
+	function isFunction(value) {
+	  return typeof value === 'function' || value && toString.call(value) === '[object Function]' || false;
+	}
 
 	// shorthand argument checking functions, using these shaves 1.18 kb off of the minified build
-	var isStringOrNumber = function isStringOrNumber(value) {
+	function isStringOrNumber(value) {
 	  return isString(value) || isNumber(value);
-	};
-	var isStringOrNumberErr = function isStringOrNumberErr(field) {
+	}
+
+	function isStringOrNumberErr(field) {
 	  return new _errors['default'].IA('"' + field + '" must be a string or a number!');
-	};
-	var isObjectErr = function isObjectErr(field) {
+	}
+
+	function isObjectErr(field) {
 	  return new _errors['default'].IA('"' + field + '" must be an object!');
-	};
-	var isArrayErr = function isArrayErr(field) {
+	}
+
+	function isArrayErr(field) {
 	  return new _errors['default'].IA('"' + field + '" must be an array!');
-	};
+	}
 
 	// adapted from mout.isEmpty
-	var isEmpty = function isEmpty(val) {
+	function isEmpty(val) {
 	  if (val == null) {
 	    // jshint ignore:line
 	    // typeof null == 'object' so we check it first
@@ -690,10 +691,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  } else {
 	    return true;
 	  }
-	};
+	}
 
 	// Find the intersection between two arrays
-	var intersection = function intersection(array1, array2) {
+	function intersection(array1, array2) {
 	  if (!array1 || !array2) {
 	    return [];
 	  }
@@ -709,9 +710,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	  return result;
-	};
+	}
 
-	var filter = function filter(array, cb, thisObj) {
+	function filter(array, cb, thisObj) {
 	  var results = [];
 	  forEach(array, function (value, key, arr) {
 	    if (cb(value, key, arr)) {
@@ -719,7 +720,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }, thisObj);
 	  return results;
-	};
+	}
 
 	/**
 	 * Attempt to detect whether we are in the browser.
@@ -790,7 +791,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var isBlacklisted = observe.isBlacklisted;
 
 	// adapted from angular.copy
-	var copy = function copy(source, destination, stackSource, stackDest, blacklist) {
+	function copy(source, destination, stackSource, stackDest, blacklist) {
 	  if (!destination) {
 	    destination = source;
 	    if (source) {
@@ -859,10 +860,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	  return destination;
-	};
+	}
 
 	// adapted from angular.equals
-	var equals = function equals(_x, _x2) {
+	function equals(_x, _x2) {
 	  var _again = true;
 
 	  _function: while (_again) {
@@ -878,20 +879,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return false;
 	    }
 	    if (o1 !== o1 && o2 !== o2) {
+	      // eslint-disable-line
 	      return true;
 	    } // NaN === NaN
-	    var t1 = typeof o1,
-	        t2 = typeof o2,
-	        length,
-	        key,
-	        keySet;
+	    var t1 = typeof o1;
+	    var t2 = typeof o2;
+	    var length, key, keySet;
 	    if (t1 == t2) {
+	      // eslint-disable-line
 	      if (t1 == 'object') {
+	        // eslint-disable-line
 	        if (isArray(o1)) {
 	          if (!isArray(o2)) {
 	            return false;
 	          }
-	          if ((length = o1.length) == o2.length) {
+	          if ((length = o1.length) === o2.length) {
 	            // jshint ignore:line
 	            for (key = 0; key < length; key++) {
 	              if (!equals(o1[key], o2[key])) {
@@ -909,38 +911,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	          _again = true;
 	          continue _function;
 	        } else if (isRegExp(o1) && isRegExp(o2)) {
-	          return o1.toString() == o2.toString();
+	          return o1.toString() == o2.toString(); // eslint-disable-line
 	        } else {
-	          if (isArray(o2)) {
-	            return false;
-	          }
-	          keySet = {};
-	          for (key in o1) {
-	            if (key.charAt(0) === '$' || isFunction(o1[key])) {
-	              continue;
-	            }
-	            if (!equals(o1[key], o2[key])) {
+	            if (isArray(o2)) {
 	              return false;
 	            }
-	            keySet[key] = true;
-	          }
-	          for (key in o2) {
-	            if (!keySet.hasOwnProperty(key) && key.charAt(0) !== '$' && o2[key] !== undefined && !isFunction(o2[key])) {
-	              return false;
+	            keySet = {};
+	            for (key in o1) {
+	              if (key.charAt(0) === '$' || isFunction(o1[key])) {
+	                continue;
+	              }
+	              if (!equals(o1[key], o2[key])) {
+	                return false;
+	              }
+	              keySet[key] = true;
 	            }
+	            for (key in o2) {
+	              if (!keySet.hasOwnProperty(key) && key.charAt(0) !== '$' && o2[key] !== undefined && !isFunction(o2[key])) {
+	                return false;
+	              }
+	            }
+	            return true;
 	          }
-	          return true;
-	        }
 	      }
 	    }
 	    return false;
 	  }
-	};
+	}
 
 	/**
 	 * Given either an instance or the primary key of an instance, return the primary key.
 	 */
-	var resolveId = function resolveId(definition, idOrInstance) {
+	function resolveId(definition, idOrInstance) {
 	  if (isString(idOrInstance) || isNumber(idOrInstance)) {
 	    return idOrInstance;
 	  } else if (idOrInstance && definition) {
@@ -948,36 +950,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	  } else {
 	    return idOrInstance;
 	  }
-	};
+	}
 
 	/**
 	 * Given either an instance or the primary key of an instance, return the instance.
 	 */
-	var resolveItem = function resolveItem(resource, idOrInstance) {
+	function resolveItem(resource, idOrInstance) {
 	  if (resource && (isString(idOrInstance) || isNumber(idOrInstance))) {
 	    return resource.index[idOrInstance] || idOrInstance;
 	  } else {
 	    return idOrInstance;
 	  }
-	};
+	}
 
-	var isValidString = function isValidString(val) {
+	function isValidString(val) {
 	  return val != null && val !== ''; // jshint ignore:line
-	};
+	}
 
-	var join = function join(items, separator) {
+	function join(items, separator) {
 	  separator = separator || '';
 	  return filter(items, isValidString).join(separator);
-	};
+	}
 
-	var makePath = function makePath() {
+	function makePath() {
 	  for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
 	    args[_key2] = arguments[_key2];
 	  }
 
 	  var result = join(args, '/');
 	  return result.replace(/([^:\/]|^)\/{2,}/g, '$1/');
-	};
+	}
 
 	exports['default'] = {
 	  Promise: P,
@@ -1096,7 +1098,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 
 	      return new _this.Promise(function (resolve, reject) {
-
 	        args.push(function (err, result) {
 	          if (err) {
 	            reject(err);
@@ -1137,7 +1138,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var nu = undefined;
 
 	      if (typeof value === 'object' && value !== null && !(value instanceof Boolean) && !(value instanceof Date) && !(value instanceof Number) && !(value instanceof RegExp) && !(value instanceof String)) {
-
 	        // check if current object points back to itself
 	        var cur = ctx.cur;
 	        var parent = ctx.ctx;
@@ -1215,7 +1215,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (foreignKey) {
 	              forEach(children, function (child) {
-	                set(child, foreignKey, get(_this2, definition.idAttribute));
+	                set(child, foreignKey, get(this, definition.idAttribute));
 	              });
 	            } else if (localKeys) {
 	              (function () {
@@ -1277,7 +1277,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 3 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
@@ -1359,492 +1359,907 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _utils = __webpack_require__(2);
-
-	var _errors = __webpack_require__(3);
-
-	var NER = _errors['default'].NER;
-	var IA = _errors['default'].IA;
-	var R = _errors['default'].R;
-
-	var fakeId = 'DS_' + new Date().getTime();
-
-	function diffIsEmpty(diff) {
-	  return !(_utils['default'].isEmpty(diff.added) && _utils['default'].isEmpty(diff.removed) && _utils['default'].isEmpty(diff.changed));
-	}
-
-	function check(fnName, resourceName, id, options) {
-	  var _this = this;
-	  var definition = _this.definitions[resourceName];
-	  options = options || {};
-
-	  id = _utils['default'].resolveId(definition, id);
-	  if (!definition) {
-	    throw new NER(resourceName);
-	  } else if (!_utils['default']._sn(id)) {
-	    throw _utils['default']._snErr('id');
-	  }
-	  id = id === fakeId ? undefined : id;
-
-	  options = _utils['default']._(definition, options);
-
-	  options.logFn(fnName, id, options);
-
-	  return { _this: _this, definition: definition, _resourceName: resourceName, _id: id, _options: options };
-	}
-
-	exports['default'] = {
-
-	  // Return the changes for the given item, if any.
-	  //
-	  // @param resourceName The name of the type of resource of the item whose changes are to be returned.
-	  // @param id The primary key of the item whose changes are to be returned.
-	  // @param options Optional configuration.
-	  // @param options.ignoredChanges Array of strings or regular expressions of fields, the changes of which are to be ignored.
-	  // @returns The changes of the given item, if any.
-	  changes: function changes(resourceName, id, options) {
-	    var _check$call = check.call(this, 'changes', resourceName, id, options);
-
-	    var _this = _check$call._this;
-	    var definition = _check$call.definition;
-	    var _resourceName = _check$call._resourceName;
-	    var _id = _check$call._id;
-	    var _options = _check$call._options;
-
-	    var item = definition.get(_id);
-	    if (item) {
-	      var _ret = (function () {
-	        var observer = _this.store[_resourceName].observers[_id];
-	        if (observer && typeof observer === 'function') {
-	          // force observation handler to be fired for item if there are changes and `Object.observe` is not available
-	          observer.deliver();
-	        }
-
-	        var ignoredChanges = _options.ignoredChanges || [];
-	        // add linked relations to list of ignored changes
-	        _utils['default'].forEach(definition.relationFields, function (field) {
-	          if (!_utils['default'].contains(ignoredChanges, field)) {
-	            ignoredChanges.push(field);
-	          }
-	        });
-	        // calculate changes
-	        var diff = _utils['default'].diffObjectFromOldObject(item, _this.store[_resourceName].previousAttributes[_id], _utils['default'].equals, ignoredChanges);
-	        // remove functions from diff
-	        _utils['default'].forOwn(diff, function (changeset, name) {
-	          var toKeep = [];
-	          _utils['default'].forOwn(changeset, function (value, field) {
-	            if (!_utils['default'].isFunction(value)) {
-	              toKeep.push(field);
-	            }
-	          });
-	          diff[name] = _utils['default'].pick(diff[name], toKeep);
-	        });
-	        // definitely ignore changes to linked relations
-	        _utils['default'].forEach(definition.relationFields, function (field) {
-	          delete diff.added[field];
-	          delete diff.removed[field];
-	          delete diff.changed[field];
-	        });
-	        return {
-	          v: diff
-	        };
-	      })();
-
-	      if (typeof _ret === 'object') return _ret.v;
-	    }
-	  },
-
-	  // Return the change history of the given item, if any.
-	  //
-	  // @param resourceName The name of the type of resource of the item whose change history is to be returned.
-	  // @param id The primary key of the item whose change history is to be returned.
-	  // @returns The change history of the given item, if any.
-	  changeHistory: function changeHistory(resourceName, id) {
-	    var _check$call2 = check.call(this, 'changeHistory', resourceName, id || fakeId);
-
-	    var _this = _check$call2._this;
-	    var definition = _check$call2.definition;
-	    var _resourceName = _check$call2._resourceName;
-	    var _id = _check$call2._id;
-
-	    var resource = _this.store[_resourceName];
-
-	    if (!definition.keepChangeHistory) {
-	      definition.errorFn('changeHistory is disabled for this resource!');
-	    } else {
-	      if (_resourceName) {
-	        var item = definition.get(_id);
-	        if (item) {
-	          return resource.changeHistories[_id];
-	        }
-	      } else {
-	        return resource.changeHistory;
-	      }
-	    }
-	  },
-
-	  // Re-compute the computed properties of the given item.
-	  //
-	  // @param resourceName The name of the type of resource of the item whose computed properties are to be re-computed.
-	  // @param instance The instance whose computed properties are to be re-computed.
-	  // @returns The item whose computed properties were re-computed.
-	  compute: function compute(resourceName, instance) {
-	    var _this = this;
-	    var definition = _this.definitions[resourceName];
-
-	    instance = _utils['default'].resolveItem(_this.store[resourceName], instance);
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (!instance) {
-	      throw new R('Item not in the store!');
-	    } else if (!_utils['default']._o(instance) && !_utils['default']._sn(instance)) {
-	      throw new IA('"instance" must be an object, string or number!');
-	    }
-
-	    definition.logFn('compute', instance);
-
-	    // re-compute all computed properties
-	    _utils['default'].forOwn(definition.computed, function (fn, field) {
-	      _utils['default'].compute.call(instance, fn, field);
-	    });
-	    return instance;
-	  },
-
-	  // Factory function to create an instance of the specified Resource.
-	  //
-	  // @param resourceName The name of the type of resource of which to create an instance.
-	  // @param attrs Hash of properties with which to initialize the instance.
-	  // @param options Optional configuration.
-	  // @param options.defaults Default values with which to initialize the instance.
-	  // @returns The new instance.
-	  createInstance: function createInstance(resourceName, attrs, options) {
-	    var definition = this.definitions[resourceName];
-	    var item = undefined;
-
-	    attrs = attrs || {};
-
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (attrs && !_utils['default'].isObject(attrs)) {
-	      throw new IA('"attrs" must be an object!');
-	    }
-
-	    options = _utils['default']._(definition, options);
-	    options.logFn('createInstance', attrs, options);
-
-	    // lifecycle
-	    options.beforeCreateInstance(options, attrs);
-
-	    // grab instance constructor function from Resource definition
-	    var Constructor = definition[definition['class']];
-
-	    // create instance
-	    item = new Constructor();
-
-	    // add default values
-	    if (options.defaultValues) {
-	      _utils['default'].deepMixIn(item, options.defaultValues);
-	    }
-	    _utils['default'].deepMixIn(item, attrs);
-
-	    // compute computed properties
-	    if (definition.computed) {
-	      definition.compute(item);
-	    }
-	    // lifecycle
-	    options.afterCreateInstance(options, item);
-	    return item;
-	  },
-
-	  // Create a new collection of the specified Resource.
-	  //
-	  // @param resourceName The name of the type of resource of which to create a collection
-	  // @param arr Possibly empty array of data from which to create the collection.
-	  // @param params The criteria by which to filter items. Will be passed to `DS#findAll` if `fetch` is called. See http://www.js-data.io/docs/query-syntax
-	  // @param options Optional configuration.
-	  // @param options.notify Whether to call the beforeCreateCollection and afterCreateCollection lifecycle hooks..
-	  // @returns The new collection.
-	  createCollection: function createCollection(resourceName, arr, params, options) {
-	    var _this = this;
-	    var definition = _this.definitions[resourceName];
-
-	    arr = arr || [];
-	    params = params || {};
-
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (arr && !_utils['default'].isArray(arr)) {
-	      throw new IA('"arr" must be an array!');
-	    }
-
-	    options = _utils['default']._(definition, options);
-
-	    options.logFn('createCollection', arr, options);
-
-	    // lifecycle
-	    options.beforeCreateCollection(options, arr);
-
-	    // define the API for this collection
-	    Object.defineProperties(arr, {
-	      //  Call DS#findAll with the params of this collection, filling the collection with the results.
-	      fetch: {
-	        value: function value(params, options) {
-	          var __this = this;
-	          __this.params = params || __this.params;
-	          return definition.findAll(__this.params, options).then(function (data) {
-	            if (data === __this) {
-	              return __this;
-	            }
-	            data.unshift(__this.length);
-	            data.unshift(0);
-	            __this.splice.apply(__this, data);
-	            data.shift();
-	            data.shift();
-	            if (data.$$injected) {
-	              _this.store[resourceName].queryData[_utils['default'].toJson(__this.params)] = __this;
-	              __this.$$injected = true;
-	            }
-	            return __this;
-	          });
-	        }
-	      },
-	      // params for this collection. See http://www.js-data.io/docs/query-syntax
-	      params: {
-	        value: params,
-	        writable: true
-	      },
-	      // name of the resource type of this collection
-	      resourceName: {
-	        value: resourceName
-	      }
-	    });
-
-	    // lifecycle
-	    options.afterCreateCollection(options, arr);
-	    return arr;
-	  },
-	  defineResource: __webpack_require__(27),
-	  digest: function digest() {
-	    this.observe.Platform.performMicrotaskCheckpoint();
-	  },
-	  eject: __webpack_require__(28),
-	  ejectAll: __webpack_require__(29),
-	  filter: __webpack_require__(30),
-
-	  // Return the item with the given primary key if its in the store.
-	  //
-	  // @param resourceName The name of the type of resource of the item to retrieve.
-	  // @param id The primary key of the item to retrieve.
-	  // @returns The item with the given primary key if it's in the store.
-	  ///
-	  get: function get(resourceName, id) {
-	    var _check$call3 = check.call(this, 'get', resourceName, id);
-
-	    // return the item if it exists
-	    var _this = _check$call3._this;
-	    var _resourceName = _check$call3._resourceName;
-	    var _id = _check$call3._id;
-	    return _this.store[_resourceName].index[_id];
-	  },
-
-	  // Return the items in the store that have the given primary keys.
-	  //
-	  // @param resourceName The name of the type of resource of the items to retrieve.
-	  // @param ids The primary keys of the items to retrieve.
-	  // @returns The items with the given primary keys if they're in the store.
-	  getAll: function getAll(resourceName, ids) {
-	    var _this = this;
-	    var definition = _this.definitions[resourceName];
-	    var resource = _this.store[resourceName];
-	    var collection = [];
-
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (ids && !_utils['default']._a(ids)) {
-	      throw _utils['default']._aErr('ids');
-	    }
-
-	    definition.logFn('getAll', ids);
-
-	    if (_utils['default']._a(ids)) {
-	      // return just the items with the given primary keys
-	      var _length = ids.length;
-	      for (var i = 0; i < _length; i++) {
-	        if (resource.index[ids[i]]) {
-	          collection.push(resource.index[ids[i]]);
-	        }
-	      }
-	    } else {
-	      // most efficient of retrieving ALL items from the store
-	      collection = resource.collection.slice();
-	    }
-
-	    return collection;
-	  },
-
-	  // Return the whether the item with the given primary key has any changes.
-	  //
-	  // @param resourceName The name of the type of resource of the item.
-	  // @param id The primary key of the item.
-	  // @returns Whether the item with the given primary key has any changes.
-	  hasChanges: function hasChanges(resourceName, id) {
-	    var _check$call4 = check.call(this, 'hasChanges', resourceName, id);
-
-	    var definition = _check$call4.definition;
-	    var _id = _check$call4._id;
-
-	    return definition.get(_id) ? diffIsEmpty(definition.changes(_id)) : false;
-	  },
-	  inject: __webpack_require__(31),
-
-	  // Return the timestamp from the last time the item with the given primary key was changed.
-	  //
-	  // @param resourceName The name of the type of resource of the item.
-	  // @param id The primary key of the item.
-	  // @returns Timestamp from the last time the item was changed.
-	  lastModified: function lastModified(resourceName, id) {
-	    var _check$call5 = check.call(this, 'lastModified', resourceName, id || fakeId);
-
-	    var _this = _check$call5._this;
-	    var _resourceName = _check$call5._resourceName;
-	    var _id = _check$call5._id;
-
-	    var resource = _this.store[_resourceName];
-
-	    if (_id) {
-	      if (!(_id in resource.modified)) {
-	        resource.modified[_id] = 0;
-	      }
-	      return resource.modified[_id];
-	    }
-	    return resource.collectionModified;
-	  },
-
-	  // Return the timestamp from the last time the item with the given primary key was saved via an adapter.
-	  //
-	  // @param resourceName The name of the type of resource of the item.
-	  // @param id The primary key of the item.
-	  // @returns Timestamp from the last time the item was saved.
-	  lastSaved: function lastSaved(resourceName, id) {
-	    var _check$call6 = check.call(this, 'lastSaved', resourceName, id || fakeId);
-
-	    var _this = _check$call6._this;
-	    var _resourceName = _check$call6._resourceName;
-	    var _id = _check$call6._id;
-
-	    var resource = _this.store[_resourceName];
-
-	    if (!(_id in resource.saved)) {
-	      resource.saved[_id] = 0;
-	    }
-	    return resource.saved[_id];
-	  },
-
-	  // Return the previous attributes of the item with the given primary key before it was changed.
-	  //
-	  // @param resourceName The name of the type of resource of the item.
-	  // @param id The primary key of the item.
-	  // @returns The previous attributes of the item
-	  previous: function previous(resourceName, id) {
-	    var _check$call7 = check.call(this, 'previous', resourceName, id);
-
-	    var _this = _check$call7._this;
-	    var _resourceName = _check$call7._resourceName;
-	    var _id = _check$call7._id;
-
-	    var resource = _this.store[_resourceName];
-
-	    // return resource from cache
-	    return resource.previousAttributes[_id] ? _utils['default'].copy(resource.previousAttributes[_id]) : undefined;
-	  },
-
-	  // Revert all attributes of the item with the given primary key to their previous values.
-	  //
-	  // @param resourceName The name of the type of resource of the item.
-	  // @param id The primary key of the item.
-	  // @returns The reverted item
-	  revert: function revert(resourceName, id) {
-	    var _check$call8 = check.call(this, 'revert', resourceName, id);
-
-	    var _this = _check$call8._this;
-	    var definition = _check$call8.definition;
-	    var _resourceName = _check$call8._resourceName;
-	    var _id = _check$call8._id;
-
-	    return definition.inject(_this.previous(_resourceName, _id));
-	  }
-	};
+	/*!
+	 * yabh
+	 * @version 1.1.0 - Homepage <http://jmdobry.github.io/yabh/>
+	 * @author Jason Dobry <jason.dobry@gmail.com>
+	 * @copyright (c) 2015 Jason Dobry 
+	 * @license MIT <https://github.com/jmdobry/yabh/blob/master/LICENSE>
+	 * 
+	 * @overview Yet another Binary Heap.
+	 */
+	(function webpackUniversalModuleDefinition(root, factory) {
+		if(true)
+			module.exports = factory();
+		else if(typeof define === 'function' && define.amd)
+			define("yabh", factory);
+		else if(typeof exports === 'object')
+			exports["BinaryHeap"] = factory();
+		else
+			root["BinaryHeap"] = factory();
+	})(this, function() {
+	return /******/ (function(modules) { // webpackBootstrap
+	/******/ 	// The module cache
+	/******/ 	var installedModules = {};
+
+	/******/ 	// The require function
+	/******/ 	function __webpack_require__(moduleId) {
+
+	/******/ 		// Check if module is in cache
+	/******/ 		if(installedModules[moduleId])
+	/******/ 			return installedModules[moduleId].exports;
+
+	/******/ 		// Create a new module (and put it into the cache)
+	/******/ 		var module = installedModules[moduleId] = {
+	/******/ 			exports: {},
+	/******/ 			id: moduleId,
+	/******/ 			loaded: false
+	/******/ 		};
+
+	/******/ 		// Execute the module function
+	/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+
+	/******/ 		// Flag the module as loaded
+	/******/ 		module.loaded = true;
+
+	/******/ 		// Return the exports of the module
+	/******/ 		return module.exports;
+	/******/ 	}
+
+
+	/******/ 	// expose the modules object (__webpack_modules__)
+	/******/ 	__webpack_require__.m = modules;
+
+	/******/ 	// expose the module cache
+	/******/ 	__webpack_require__.c = installedModules;
+
+	/******/ 	// __webpack_public_path__
+	/******/ 	__webpack_require__.p = "";
+
+	/******/ 	// Load entry module and return exports
+	/******/ 	return __webpack_require__(0);
+	/******/ })
+	/************************************************************************/
+	/******/ ([
+	/* 0 */
+	/***/ function(module, exports, __webpack_require__) {
+
+		/**
+		 * @method bubbleUp
+		 * @param {array} heap The heap.
+		 * @param {function} weightFunc The weight function.
+		 * @param {number} n The index of the element to bubble up.
+		 */
+		function bubbleUp(heap, weightFunc, n) {
+		  var element = heap[n];
+		  var weight = weightFunc(element);
+		  // When at 0, an element can not go up any further.
+		  while (n > 0) {
+		    // Compute the parent element's index, and fetch it.
+		    var parentN = Math.floor((n + 1) / 2) - 1;
+		    var _parent = heap[parentN];
+		    // If the parent has a lesser weight, things are in order and we
+		    // are done.
+		    if (weight >= weightFunc(_parent)) {
+		      break;
+		    } else {
+		      heap[parentN] = element;
+		      heap[n] = _parent;
+		      n = parentN;
+		    }
+		  }
+		}
+
+		/**
+		 * @method bubbleDown
+		 * @param {array} heap The heap.
+		 * @param {function} weightFunc The weight function.
+		 * @param {number} n The index of the element to sink down.
+		 */
+		var bubbleDown = function bubbleDown(heap, weightFunc, n) {
+		  var length = heap.length;
+		  var node = heap[n];
+		  var nodeWeight = weightFunc(node);
+
+		  while (true) {
+		    var child2N = (n + 1) * 2,
+		        child1N = child2N - 1;
+		    var swap = null;
+		    if (child1N < length) {
+		      var child1 = heap[child1N],
+		          child1Weight = weightFunc(child1);
+		      // If the score is less than our node's, we need to swap.
+		      if (child1Weight < nodeWeight) {
+		        swap = child1N;
+		      }
+		    }
+		    // Do the same checks for the other child.
+		    if (child2N < length) {
+		      var child2 = heap[child2N],
+		          child2Weight = weightFunc(child2);
+		      if (child2Weight < (swap === null ? nodeWeight : weightFunc(heap[child1N]))) {
+		        swap = child2N;
+		      }
+		    }
+
+		    if (swap === null) {
+		      break;
+		    } else {
+		      heap[n] = heap[swap];
+		      heap[swap] = node;
+		      n = swap;
+		    }
+		  }
+		};
+
+		function BinaryHeap(weightFunc, compareFunc) {
+		  if (!weightFunc) {
+		    weightFunc = function (x) {
+		      return x;
+		    };
+		  }
+		  if (!compareFunc) {
+		    compareFunc = function (x, y) {
+		      return x === y;
+		    };
+		  }
+		  if (typeof weightFunc !== 'function') {
+		    throw new Error('BinaryHeap([weightFunc][, compareFunc]): "weightFunc" must be a function!');
+		  }
+		  if (typeof compareFunc !== 'function') {
+		    throw new Error('BinaryHeap([weightFunc][, compareFunc]): "compareFunc" must be a function!');
+		  }
+		  this.weightFunc = weightFunc;
+		  this.compareFunc = compareFunc;
+		  this.heap = [];
+		}
+
+		var BHProto = BinaryHeap.prototype;
+
+		BHProto.push = function (node) {
+		  this.heap.push(node);
+		  bubbleUp(this.heap, this.weightFunc, this.heap.length - 1);
+		};
+
+		BHProto.peek = function () {
+		  return this.heap[0];
+		};
+
+		BHProto.pop = function () {
+		  var front = this.heap[0];
+		  var end = this.heap.pop();
+		  if (this.heap.length > 0) {
+		    this.heap[0] = end;
+		    bubbleDown(this.heap, this.weightFunc, 0);
+		  }
+		  return front;
+		};
+
+		BHProto.remove = function (node) {
+		  var length = this.heap.length;
+		  for (var i = 0; i < length; i++) {
+		    if (this.compareFunc(this.heap[i], node)) {
+		      var removed = this.heap[i];
+		      var end = this.heap.pop();
+		      if (i !== length - 1) {
+		        this.heap[i] = end;
+		        bubbleUp(this.heap, this.weightFunc, i);
+		        bubbleDown(this.heap, this.weightFunc, i);
+		      }
+		      return removed;
+		    }
+		  }
+		  return null;
+		};
+
+		BHProto.removeAll = function () {
+		  this.heap = [];
+		};
+
+		BHProto.size = function () {
+		  return this.heap.length;
+		};
+
+		module.exports = BinaryHeap;
+
+	/***/ }
+	/******/ ])
+	});
+	;
 
 /***/ },
 /* 5 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	exports['default'] = {
-	  create: __webpack_require__(34),
-	  destroy: __webpack_require__(35),
-	  destroyAll: __webpack_require__(36),
-	  find: __webpack_require__(37),
-	  findAll: __webpack_require__(38),
-	  loadRelations: __webpack_require__(39),
-	  reap: __webpack_require__(40),
-	  refresh: function refresh(resourceName, id, options) {
-	    var _this = this;
-	    var DSUtils = _this.utils;
+	
 
-	    return new DSUtils.Promise(function (resolve, reject) {
-	      var definition = _this.definitions[resourceName];
-	      id = DSUtils.resolveId(_this.definitions[resourceName], id);
-	      if (!definition) {
-	        reject(new _this.errors.NER(resourceName));
-	      } else if (!DSUtils._sn(id)) {
-	        reject(DSUtils._snErr('id'));
-	      } else {
-	        options = DSUtils._(definition, options);
-	        options.bypassCache = true;
-	        options.logFn('refresh', id, options);
-	        resolve(_this.get(resourceName, id));
-	      }
-	    }).then(function (item) {
-	      return item ? _this.find(resourceName, id, options) : item;
-	    });
-	  },
-	  refreshAll: function refreshAll(resourceName, params, options) {
-	    var _this = this;
-	    var DSUtils = _this.utils;
-	    var definition = _this.definitions[resourceName];
-	    params = params || {};
+	    /**
+	     * Array forEach
+	     */
+	    function forEach(arr, callback, thisObj) {
+	        if (arr == null) {
+	            return;
+	        }
+	        var i = -1,
+	            len = arr.length;
+	        while (++i < len) {
+	            // we iterate over sparse items since there is no way to make it
+	            // work properly on IE 7-8. see #64
+	            if ( callback.call(thisObj, arr[i], i, arr) === false ) {
+	                break;
+	            }
+	        }
+	    }
 
-	    return new DSUtils.Promise(function (resolve, reject) {
-	      if (!definition) {
-	        reject(new _this.errors.NER(resourceName));
-	      } else if (!DSUtils._o(params)) {
-	        reject(DSUtils._oErr('params'));
-	      } else {
-	        options = DSUtils._(definition, options);
-	        options.bypassCache = true;
-	        options.logFn('refreshAll', params, options);
-	        resolve(_this.filter(resourceName, params, options));
-	      }
-	    }).then(function (existing) {
-	      options.bypassCache = true;
-	      return _this.findAll(resourceName, params, options).then(function (found) {
-	        DSUtils.forEach(existing, function (item) {
-	          if (found.indexOf(item) === -1) {
-	            definition.eject(item);
-	          }
-	        });
-	        return found;
-	      });
-	    });
-	  },
-	  save: __webpack_require__(41),
-	  update: __webpack_require__(42),
-	  updateAll: __webpack_require__(43)
-	};
+	    module.exports = forEach;
+
+
+
 
 /***/ },
 /* 6 */
+/***/ function(module, exports) {
+
+	
+
+	    /**
+	     * Create slice of source array or array-like object
+	     */
+	    function slice(arr, start, end){
+	        var len = arr.length;
+
+	        if (start == null) {
+	            start = 0;
+	        } else if (start < 0) {
+	            start = Math.max(len + start, 0);
+	        } else {
+	            start = Math.min(start, len);
+	        }
+
+	        if (end == null) {
+	            end = len;
+	        } else if (end < 0) {
+	            end = Math.max(len + end, 0);
+	        } else {
+	            end = Math.min(end, len);
+	        }
+
+	        var result = [];
+	        while (start < end) {
+	            result.push(arr[start++]);
+	        }
+
+	        return result;
+	    }
+
+	    module.exports = slice;
+
+
+
+
+/***/ },
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
+
+	var hasOwn = __webpack_require__(8);
+	var forIn = __webpack_require__(9);
+
+	    /**
+	     * Similar to Array/forEach but works over object properties and fixes Don't
+	     * Enum bug on IE.
+	     * based on: http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
+	     */
+	    function forOwn(obj, fn, thisObj){
+	        forIn(obj, function(val, key){
+	            if (hasOwn(obj, key)) {
+	                return fn.call(thisObj, obj[key], key, obj);
+	            }
+	        });
+	    }
+
+	    module.exports = forOwn;
+
+
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	
+
+	    /**
+	     * Safer Object.hasOwnProperty
+	     */
+	     function hasOwn(obj, prop){
+	         return Object.prototype.hasOwnProperty.call(obj, prop);
+	     }
+
+	     module.exports = hasOwn;
+
+
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var hasOwn = __webpack_require__(8);
+
+	    var _hasDontEnumBug,
+	        _dontEnums;
+
+	    function checkDontEnum(){
+	        _dontEnums = [
+	                'toString',
+	                'toLocaleString',
+	                'valueOf',
+	                'hasOwnProperty',
+	                'isPrototypeOf',
+	                'propertyIsEnumerable',
+	                'constructor'
+	            ];
+
+	        _hasDontEnumBug = true;
+
+	        for (var key in {'toString': null}) {
+	            _hasDontEnumBug = false;
+	        }
+	    }
+
+	    /**
+	     * Similar to Array/forEach but works over object properties and fixes Don't
+	     * Enum bug on IE.
+	     * based on: http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
+	     */
+	    function forIn(obj, fn, thisObj){
+	        var key, i = 0;
+	        // no need to check if argument is a real object that way we can use
+	        // it for arrays, functions, date, etc.
+
+	        //post-pone check till needed
+	        if (_hasDontEnumBug == null) checkDontEnum();
+
+	        for (key in obj) {
+	            if (exec(fn, obj, key, thisObj) === false) {
+	                break;
+	            }
+	        }
+
+
+	        if (_hasDontEnumBug) {
+	            var ctor = obj.constructor,
+	                isProto = !!ctor && obj === ctor.prototype;
+
+	            while (key = _dontEnums[i++]) {
+	                // For constructor, if it is a prototype object the constructor
+	                // is always non-enumerable unless defined otherwise (and
+	                // enumerated above).  For non-prototype objects, it will have
+	                // to be defined on this object, since it cannot be defined on
+	                // any prototype objects.
+	                //
+	                // For other [[DontEnum]] properties, check if the value is
+	                // different than Object prototype value.
+	                if (
+	                    (key !== 'constructor' ||
+	                        (!isProto && hasOwn(obj, key))) &&
+	                    obj[key] !== Object.prototype[key]
+	                ) {
+	                    if (exec(fn, obj, key, thisObj) === false) {
+	                        break;
+	                    }
+	                }
+	            }
+	        }
+	    }
+
+	    function exec(fn, obj, key, thisObj){
+	        return fn.call(thisObj, obj[key], key, obj);
+	    }
+
+	    module.exports = forIn;
+
+
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var indexOf = __webpack_require__(11);
+
+	    /**
+	     * If array contains values.
+	     */
+	    function contains(arr, val) {
+	        return indexOf(arr, val) !== -1;
+	    }
+	    module.exports = contains;
+
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports) {
+
+	
+
+	    /**
+	     * Array.indexOf
+	     */
+	    function indexOf(arr, item, fromIndex) {
+	        fromIndex = fromIndex || 0;
+	        if (arr == null) {
+	            return -1;
+	        }
+
+	        var len = arr.length,
+	            i = fromIndex < 0 ? len + fromIndex : fromIndex;
+	        while (i < len) {
+	            // we iterate over sparse items since there is no way to make it
+	            // work properly on IE 7-8. see #64
+	            if (arr[i] === item) {
+	                return i;
+	            }
+
+	            i++;
+	        }
+
+	        return -1;
+	    }
+
+	    module.exports = indexOf;
+
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var forOwn = __webpack_require__(7);
+	var isPlainObject = __webpack_require__(13);
+
+	    /**
+	     * Mixes objects into the target object, recursively mixing existing child
+	     * objects.
+	     */
+	    function deepMixIn(target, objects) {
+	        var i = 0,
+	            n = arguments.length,
+	            obj;
+
+	        while(++i < n){
+	            obj = arguments[i];
+	            if (obj) {
+	                forOwn(obj, copyProp, target);
+	            }
+	        }
+
+	        return target;
+	    }
+
+	    function copyProp(val, key) {
+	        var existing = this[key];
+	        if (isPlainObject(val) && isPlainObject(existing)) {
+	            deepMixIn(existing, val);
+	        } else {
+	            this[key] = val;
+	        }
+	    }
+
+	    module.exports = deepMixIn;
+
+
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports) {
+
+	
+
+	    /**
+	     * Checks if the value is created by the `Object` constructor.
+	     */
+	    function isPlainObject(value) {
+	        return (!!value && typeof value === 'object' &&
+	            value.constructor === Object);
+	    }
+
+	    module.exports = isPlainObject;
+
+
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var toString = __webpack_require__(15);
+	var camelCase = __webpack_require__(16);
+	var upperCase = __webpack_require__(19);
+	    /**
+	     * camelCase + UPPERCASE first char
+	     */
+	    function pascalCase(str){
+	        str = toString(str);
+	        return camelCase(str).replace(/^[a-z]/, upperCase);
+	    }
+
+	    module.exports = pascalCase;
+
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports) {
+
+	
+
+	    /**
+	     * Typecast a value to a String, using an empty string value for null or
+	     * undefined.
+	     */
+	    function toString(val){
+	        return val == null ? '' : val.toString();
+	    }
+
+	    module.exports = toString;
+
+
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var toString = __webpack_require__(15);
+	var replaceAccents = __webpack_require__(17);
+	var removeNonWord = __webpack_require__(18);
+	var upperCase = __webpack_require__(19);
+	var lowerCase = __webpack_require__(20);
+	    /**
+	    * Convert string to camelCase text.
+	    */
+	    function camelCase(str){
+	        str = toString(str);
+	        str = replaceAccents(str);
+	        str = removeNonWord(str)
+	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
+	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
+	            .replace(/\s+/g, '') //remove spaces
+	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
+	        return str;
+	    }
+	    module.exports = camelCase;
+
+
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var toString = __webpack_require__(15);
+	    /**
+	    * Replaces all accented chars with regular ones
+	    */
+	    function replaceAccents(str){
+	        str = toString(str);
+
+	        // verifies if the String has accents and replace them
+	        if (str.search(/[\xC0-\xFF]/g) > -1) {
+	            str = str
+	                    .replace(/[\xC0-\xC5]/g, "A")
+	                    .replace(/[\xC6]/g, "AE")
+	                    .replace(/[\xC7]/g, "C")
+	                    .replace(/[\xC8-\xCB]/g, "E")
+	                    .replace(/[\xCC-\xCF]/g, "I")
+	                    .replace(/[\xD0]/g, "D")
+	                    .replace(/[\xD1]/g, "N")
+	                    .replace(/[\xD2-\xD6\xD8]/g, "O")
+	                    .replace(/[\xD9-\xDC]/g, "U")
+	                    .replace(/[\xDD]/g, "Y")
+	                    .replace(/[\xDE]/g, "P")
+	                    .replace(/[\xE0-\xE5]/g, "a")
+	                    .replace(/[\xE6]/g, "ae")
+	                    .replace(/[\xE7]/g, "c")
+	                    .replace(/[\xE8-\xEB]/g, "e")
+	                    .replace(/[\xEC-\xEF]/g, "i")
+	                    .replace(/[\xF1]/g, "n")
+	                    .replace(/[\xF2-\xF6\xF8]/g, "o")
+	                    .replace(/[\xF9-\xFC]/g, "u")
+	                    .replace(/[\xFE]/g, "p")
+	                    .replace(/[\xFD\xFF]/g, "y");
+	        }
+	        return str;
+	    }
+	    module.exports = replaceAccents;
+
+
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var toString = __webpack_require__(15);
+	    // This pattern is generated by the _build/pattern-removeNonWord.js script
+	    var PATTERN = /[^\x20\x2D0-9A-Z\x5Fa-z\xC0-\xD6\xD8-\xF6\xF8-\xFF]/g;
+
+	    /**
+	     * Remove non-word chars.
+	     */
+	    function removeNonWord(str){
+	        str = toString(str);
+	        return str.replace(PATTERN, '');
+	    }
+
+	    module.exports = removeNonWord;
+
+
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var toString = __webpack_require__(15);
+	    /**
+	     * "Safer" String.toUpperCase()
+	     */
+	    function upperCase(str){
+	        str = toString(str);
+	        return str.toUpperCase();
+	    }
+	    module.exports = upperCase;
+
+
+
+/***/ },
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var toString = __webpack_require__(15);
+	    /**
+	     * "Safer" String.toLowerCase()
+	     */
+	    function lowerCase(str){
+	        str = toString(str);
+	        return str.toLowerCase();
+	    }
+
+	    module.exports = lowerCase;
+
+
+
+/***/ },
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var indexOf = __webpack_require__(11);
+
+	    /**
+	     * Remove a single item from the array.
+	     * (it won't remove duplicates, just a single item)
+	     */
+	    function remove(arr, item){
+	        var idx = indexOf(arr, item);
+	        if (idx !== -1) arr.splice(idx, 1);
+	    }
+
+	    module.exports = remove;
+
+
+
+/***/ },
+/* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var slice = __webpack_require__(6);
+
+	    /**
+	     * Return a copy of the object, filtered to only have values for the whitelisted keys.
+	     */
+	    function pick(obj, var_keys){
+	        var keys = typeof arguments[1] !== 'string'? arguments[1] : slice(arguments, 1),
+	            out = {},
+	            i = 0, key;
+	        while (key = keys[i++]) {
+	            out[key] = obj[key];
+	        }
+	        return out;
+	    }
+
+	    module.exports = pick;
+
+
+
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var forOwn = __webpack_require__(7);
+
+	    /**
+	     * Get object keys
+	     */
+	     var keys = Object.keys || function (obj) {
+	            var keys = [];
+	            forOwn(obj, function(val, key){
+	                keys.push(key);
+	            });
+	            return keys;
+	        };
+
+	    module.exports = keys;
+
+
+
+
+/***/ },
+/* 24 */
+/***/ function(module, exports) {
+
+	
+
+	    /**
+	     * Merge sort (http://en.wikipedia.org/wiki/Merge_sort)
+	     */
+	    function mergeSort(arr, compareFn) {
+	        if (arr == null) {
+	            return [];
+	        } else if (arr.length < 2) {
+	            return arr;
+	        }
+
+	        if (compareFn == null) {
+	            compareFn = defaultCompare;
+	        }
+
+	        var mid, left, right;
+
+	        mid   = ~~(arr.length / 2);
+	        left  = mergeSort( arr.slice(0, mid), compareFn );
+	        right = mergeSort( arr.slice(mid, arr.length), compareFn );
+
+	        return merge(left, right, compareFn);
+	    }
+
+	    function defaultCompare(a, b) {
+	        return a < b ? -1 : (a > b? 1 : 0);
+	    }
+
+	    function merge(left, right, compareFn) {
+	        var result = [];
+
+	        while (left.length && right.length) {
+	            if (compareFn(left[0], right[0]) <= 0) {
+	                // if 0 it should preserve same order (stable)
+	                result.push(left.shift());
+	            } else {
+	                result.push(right.shift());
+	            }
+	        }
+
+	        if (left.length) {
+	            result.push.apply(result, left);
+	        }
+
+	        if (right.length) {
+	            result.push.apply(result, right);
+	        }
+
+	        return result;
+	    }
+
+	    module.exports = mergeSort;
+
+
+
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var isPrimitive = __webpack_require__(26);
+
+	    /**
+	     * get "nested" object property
+	     */
+	    function get(obj, prop){
+	        var parts = prop.split('.'),
+	            last = parts.pop();
+
+	        while (prop = parts.shift()) {
+	            obj = obj[prop];
+	            if (obj == null) return;
+	        }
+
+	        return obj[last];
+	    }
+
+	    module.exports = get;
+
+
+
+
+/***/ },
+/* 26 */
+/***/ function(module, exports) {
+
+	
+
+	    /**
+	     * Checks if the object is a primitive
+	     */
+	    function isPrimitive(value) {
+	        // Using switch fallthrough because it's simple to read and is
+	        // generally fast: http://jsperf.com/testing-value-is-primitive/5
+	        switch (typeof value) {
+	            case "string":
+	            case "number":
+	            case "boolean":
+	                return true;
+	        }
+
+	        return value == null;
+	    }
+
+	    module.exports = isPrimitive;
+
+
+
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var namespace = __webpack_require__(28);
+
+	    /**
+	     * set "nested" object property
+	     */
+	    function set(obj, prop, val){
+	        var parts = (/^(.+)\.(.+)$/).exec(prop);
+	        if (parts){
+	            namespace(obj, parts[1])[parts[2]] = val;
+	        } else {
+	            obj[prop] = val;
+	        }
+	    }
+
+	    module.exports = set;
+
+
+
+
+/***/ },
+/* 28 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var forEach = __webpack_require__(5);
+
+	    /**
+	     * Create nested object if non-existent
+	     */
+	    function namespace(obj, path){
+	        if (!path) return obj;
+	        forEach(path.split('.'), function(key){
+	            if (!obj[key]) {
+	                obj[key] = {};
+	            }
+	            obj = obj[key];
+	        });
+	        return obj;
+	    }
+
+	    module.exports = namespace;
+
+
+
+
+/***/ },
+/* 29 */
+/***/ function(module, exports) {
 
 	/*
 	 * Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
@@ -2393,788 +2808,429 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 7 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/*!
-	 * yabh
-	 * @version 1.1.0 - Homepage <http://jmdobry.github.io/yabh/>
-	 * @author Jason Dobry <jason.dobry@gmail.com>
-	 * @copyright (c) 2015 Jason Dobry 
-	 * @license MIT <https://github.com/jmdobry/yabh/blob/master/LICENSE>
-	 * 
-	 * @overview Yet another Binary Heap.
-	 */
-	(function webpackUniversalModuleDefinition(root, factory) {
-		if(true)
-			module.exports = factory();
-		else if(typeof define === 'function' && define.amd)
-			define("yabh", factory);
-		else if(typeof exports === 'object')
-			exports["BinaryHeap"] = factory();
-		else
-			root["BinaryHeap"] = factory();
-	})(this, function() {
-	return /******/ (function(modules) { // webpackBootstrap
-	/******/ 	// The module cache
-	/******/ 	var installedModules = {};
+	var _utils = __webpack_require__(2);
 
-	/******/ 	// The require function
-	/******/ 	function __webpack_require__(moduleId) {
+	var _errors = __webpack_require__(3);
 
-	/******/ 		// Check if module is in cache
-	/******/ 		if(installedModules[moduleId])
-	/******/ 			return installedModules[moduleId].exports;
+	var NER = _errors['default'].NER;
+	var IA = _errors['default'].IA;
+	var R = _errors['default'].R;
 
-	/******/ 		// Create a new module (and put it into the cache)
-	/******/ 		var module = installedModules[moduleId] = {
-	/******/ 			exports: {},
-	/******/ 			id: moduleId,
-	/******/ 			loaded: false
-	/******/ 		};
+	var fakeId = 'DS_' + new Date().getTime();
 
-	/******/ 		// Execute the module function
-	/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+	function diffIsEmpty(diff) {
+	  return !(_utils['default'].isEmpty(diff.added) && _utils['default'].isEmpty(diff.removed) && _utils['default'].isEmpty(diff.changed));
+	}
 
-	/******/ 		// Flag the module as loaded
-	/******/ 		module.loaded = true;
+	function check(fnName, resourceName, id, options) {
+	  var _this = this;
+	  var definition = _this.definitions[resourceName];
+	  options = options || {};
 
-	/******/ 		// Return the exports of the module
-	/******/ 		return module.exports;
-	/******/ 	}
+	  id = _utils['default'].resolveId(definition, id);
+	  if (!definition) {
+	    throw new NER(resourceName);
+	  } else if (!_utils['default']._sn(id)) {
+	    throw _utils['default']._snErr('id');
+	  }
+	  id = id === fakeId ? undefined : id;
 
+	  options = _utils['default']._(definition, options);
 
-	/******/ 	// expose the modules object (__webpack_modules__)
-	/******/ 	__webpack_require__.m = modules;
+	  options.logFn(fnName, id, options);
 
-	/******/ 	// expose the module cache
-	/******/ 	__webpack_require__.c = installedModules;
+	  return { _this: _this, definition: definition, _resourceName: resourceName, _id: id, _options: options };
+	}
 
-	/******/ 	// __webpack_public_path__
-	/******/ 	__webpack_require__.p = "";
+	exports['default'] = {
+	  // Return the changes for the given item, if any.
+	  //
+	  // @param resourceName The name of the type of resource of the item whose changes are to be returned.
+	  // @param id The primary key of the item whose changes are to be returned.
+	  // @param options Optional configuration.
+	  // @param options.ignoredChanges Array of strings or regular expressions of fields, the changes of which are to be ignored.
+	  // @returns The changes of the given item, if any.
+	  changes: function changes(resourceName, id, options) {
+	    var _check$call = check.call(this, 'changes', resourceName, id, options);
 
-	/******/ 	// Load entry module and return exports
-	/******/ 	return __webpack_require__(0);
-	/******/ })
-	/************************************************************************/
-	/******/ ([
-	/* 0 */
-	/***/ function(module, exports, __webpack_require__) {
+	    var _this = _check$call._this;
+	    var definition = _check$call.definition;
+	    var _resourceName = _check$call._resourceName;
+	    var _id = _check$call._id;
+	    var _options = _check$call._options;
 
-		/**
-		 * @method bubbleUp
-		 * @param {array} heap The heap.
-		 * @param {function} weightFunc The weight function.
-		 * @param {number} n The index of the element to bubble up.
-		 */
-		function bubbleUp(heap, weightFunc, n) {
-		  var element = heap[n];
-		  var weight = weightFunc(element);
-		  // When at 0, an element can not go up any further.
-		  while (n > 0) {
-		    // Compute the parent element's index, and fetch it.
-		    var parentN = Math.floor((n + 1) / 2) - 1;
-		    var _parent = heap[parentN];
-		    // If the parent has a lesser weight, things are in order and we
-		    // are done.
-		    if (weight >= weightFunc(_parent)) {
-		      break;
-		    } else {
-		      heap[parentN] = element;
-		      heap[n] = _parent;
-		      n = parentN;
-		    }
-		  }
-		}
-
-		/**
-		 * @method bubbleDown
-		 * @param {array} heap The heap.
-		 * @param {function} weightFunc The weight function.
-		 * @param {number} n The index of the element to sink down.
-		 */
-		var bubbleDown = function bubbleDown(heap, weightFunc, n) {
-		  var length = heap.length;
-		  var node = heap[n];
-		  var nodeWeight = weightFunc(node);
-
-		  while (true) {
-		    var child2N = (n + 1) * 2,
-		        child1N = child2N - 1;
-		    var swap = null;
-		    if (child1N < length) {
-		      var child1 = heap[child1N],
-		          child1Weight = weightFunc(child1);
-		      // If the score is less than our node's, we need to swap.
-		      if (child1Weight < nodeWeight) {
-		        swap = child1N;
-		      }
-		    }
-		    // Do the same checks for the other child.
-		    if (child2N < length) {
-		      var child2 = heap[child2N],
-		          child2Weight = weightFunc(child2);
-		      if (child2Weight < (swap === null ? nodeWeight : weightFunc(heap[child1N]))) {
-		        swap = child2N;
-		      }
-		    }
-
-		    if (swap === null) {
-		      break;
-		    } else {
-		      heap[n] = heap[swap];
-		      heap[swap] = node;
-		      n = swap;
-		    }
-		  }
-		};
-
-		function BinaryHeap(weightFunc, compareFunc) {
-		  if (!weightFunc) {
-		    weightFunc = function (x) {
-		      return x;
-		    };
-		  }
-		  if (!compareFunc) {
-		    compareFunc = function (x, y) {
-		      return x === y;
-		    };
-		  }
-		  if (typeof weightFunc !== 'function') {
-		    throw new Error('BinaryHeap([weightFunc][, compareFunc]): "weightFunc" must be a function!');
-		  }
-		  if (typeof compareFunc !== 'function') {
-		    throw new Error('BinaryHeap([weightFunc][, compareFunc]): "compareFunc" must be a function!');
-		  }
-		  this.weightFunc = weightFunc;
-		  this.compareFunc = compareFunc;
-		  this.heap = [];
-		}
-
-		var BHProto = BinaryHeap.prototype;
-
-		BHProto.push = function (node) {
-		  this.heap.push(node);
-		  bubbleUp(this.heap, this.weightFunc, this.heap.length - 1);
-		};
-
-		BHProto.peek = function () {
-		  return this.heap[0];
-		};
-
-		BHProto.pop = function () {
-		  var front = this.heap[0];
-		  var end = this.heap.pop();
-		  if (this.heap.length > 0) {
-		    this.heap[0] = end;
-		    bubbleDown(this.heap, this.weightFunc, 0);
-		  }
-		  return front;
-		};
-
-		BHProto.remove = function (node) {
-		  var length = this.heap.length;
-		  for (var i = 0; i < length; i++) {
-		    if (this.compareFunc(this.heap[i], node)) {
-		      var removed = this.heap[i];
-		      var end = this.heap.pop();
-		      if (i !== length - 1) {
-		        this.heap[i] = end;
-		        bubbleUp(this.heap, this.weightFunc, i);
-		        bubbleDown(this.heap, this.weightFunc, i);
-		      }
-		      return removed;
-		    }
-		  }
-		  return null;
-		};
-
-		BHProto.removeAll = function () {
-		  this.heap = [];
-		};
-
-		BHProto.size = function () {
-		  return this.heap.length;
-		};
-
-		module.exports = BinaryHeap;
-
-	/***/ }
-	/******/ ])
-	});
-	;
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Array forEach
-	     */
-	    function forEach(arr, callback, thisObj) {
-	        if (arr == null) {
-	            return;
-	        }
-	        var i = -1,
-	            len = arr.length;
-	        while (++i < len) {
-	            // we iterate over sparse items since there is no way to make it
-	            // work properly on IE 7-8. see #64
-	            if ( callback.call(thisObj, arr[i], i, arr) === false ) {
-	                break;
-	            }
-	        }
-	    }
-
-	    module.exports = forEach;
-
-
-
-
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Create slice of source array or array-like object
-	     */
-	    function slice(arr, start, end){
-	        var len = arr.length;
-
-	        if (start == null) {
-	            start = 0;
-	        } else if (start < 0) {
-	            start = Math.max(len + start, 0);
-	        } else {
-	            start = Math.min(start, len);
+	    var item = definition.get(_id);
+	    if (item) {
+	      var _ret = (function () {
+	        var observer = _this.store[_resourceName].observers[_id];
+	        if (observer && typeof observer === 'function') {
+	          // force observation handler to be fired for item if there are changes and `Object.observe` is not available
+	          observer.deliver();
 	        }
 
-	        if (end == null) {
-	            end = len;
-	        } else if (end < 0) {
-	            end = Math.max(len + end, 0);
-	        } else {
-	            end = Math.min(end, len);
-	        }
-
-	        var result = [];
-	        while (start < end) {
-	            result.push(arr[start++]);
-	        }
-
-	        return result;
-	    }
-
-	    module.exports = slice;
-
-
-
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var indexOf = __webpack_require__(21);
-
-	    /**
-	     * If array contains values.
-	     */
-	    function contains(arr, val) {
-	        return indexOf(arr, val) !== -1;
-	    }
-	    module.exports = contains;
-
-
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var indexOf = __webpack_require__(21);
-
-	    /**
-	     * Remove a single item from the array.
-	     * (it won't remove duplicates, just a single item)
-	     */
-	    function remove(arr, item){
-	        var idx = indexOf(arr, item);
-	        if (idx !== -1) arr.splice(idx, 1);
-	    }
-
-	    module.exports = remove;
-
-
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Merge sort (http://en.wikipedia.org/wiki/Merge_sort)
-	     */
-	    function mergeSort(arr, compareFn) {
-	        if (arr == null) {
-	            return [];
-	        } else if (arr.length < 2) {
-	            return arr;
-	        }
-
-	        if (compareFn == null) {
-	            compareFn = defaultCompare;
-	        }
-
-	        var mid, left, right;
-
-	        mid   = ~~(arr.length / 2);
-	        left  = mergeSort( arr.slice(0, mid), compareFn );
-	        right = mergeSort( arr.slice(mid, arr.length), compareFn );
-
-	        return merge(left, right, compareFn);
-	    }
-
-	    function defaultCompare(a, b) {
-	        return a < b ? -1 : (a > b? 1 : 0);
-	    }
-
-	    function merge(left, right, compareFn) {
-	        var result = [];
-
-	        while (left.length && right.length) {
-	            if (compareFn(left[0], right[0]) <= 0) {
-	                // if 0 it should preserve same order (stable)
-	                result.push(left.shift());
-	            } else {
-	                result.push(right.shift());
-	            }
-	        }
-
-	        if (left.length) {
-	            result.push.apply(result, left);
-	        }
-
-	        if (right.length) {
-	            result.push.apply(result, right);
-	        }
-
-	        return result;
-	    }
-
-	    module.exports = mergeSort;
-
-
-
-
-/***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var hasOwn = __webpack_require__(22);
-	var forIn = __webpack_require__(23);
-
-	    /**
-	     * Similar to Array/forEach but works over object properties and fixes Don't
-	     * Enum bug on IE.
-	     * based on: http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
-	     */
-	    function forOwn(obj, fn, thisObj){
-	        forIn(obj, function(val, key){
-	            if (hasOwn(obj, key)) {
-	                return fn.call(thisObj, obj[key], key, obj);
-	            }
+	        var ignoredChanges = _options.ignoredChanges || [];
+	        // add linked relations to list of ignored changes
+	        _utils['default'].forEach(definition.relationFields, function (field) {
+	          if (!_utils['default'].contains(ignoredChanges, field)) {
+	            ignoredChanges.push(field);
+	          }
 	        });
-	    }
-
-	    module.exports = forOwn;
-
-
-
-
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var forOwn = __webpack_require__(13);
-	var isPlainObject = __webpack_require__(24);
-
-	    /**
-	     * Mixes objects into the target object, recursively mixing existing child
-	     * objects.
-	     */
-	    function deepMixIn(target, objects) {
-	        var i = 0,
-	            n = arguments.length,
-	            obj;
-
-	        while(++i < n){
-	            obj = arguments[i];
-	            if (obj) {
-	                forOwn(obj, copyProp, target);
+	        // calculate changes
+	        var diff = _utils['default'].diffObjectFromOldObject(item, _this.store[_resourceName].previousAttributes[_id], _utils['default'].equals, ignoredChanges);
+	        // remove functions from diff
+	        _utils['default'].forOwn(diff, function (changeset, name) {
+	          var toKeep = [];
+	          _utils['default'].forOwn(changeset, function (value, field) {
+	            if (!_utils['default'].isFunction(value)) {
+	              toKeep.push(field);
 	            }
-	        }
-
-	        return target;
-	    }
-
-	    function copyProp(val, key) {
-	        var existing = this[key];
-	        if (isPlainObject(val) && isPlainObject(existing)) {
-	            deepMixIn(existing, val);
-	        } else {
-	            this[key] = val;
-	        }
-	    }
-
-	    module.exports = deepMixIn;
-
-
-
-
-/***/ },
-/* 15 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var slice = __webpack_require__(9);
-
-	    /**
-	     * Return a copy of the object, filtered to only have values for the whitelisted keys.
-	     */
-	    function pick(obj, var_keys){
-	        var keys = typeof arguments[1] !== 'string'? arguments[1] : slice(arguments, 1),
-	            out = {},
-	            i = 0, key;
-	        while (key = keys[i++]) {
-	            out[key] = obj[key];
-	        }
-	        return out;
-	    }
-
-	    module.exports = pick;
-
-
-
-
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var forOwn = __webpack_require__(13);
-
-	    /**
-	     * Get object keys
-	     */
-	     var keys = Object.keys || function (obj) {
-	            var keys = [];
-	            forOwn(obj, function(val, key){
-	                keys.push(key);
-	            });
-	            return keys;
+	          });
+	          diff[name] = _utils['default'].pick(diff[name], toKeep);
+	        });
+	        // definitely ignore changes to linked relations
+	        _utils['default'].forEach(definition.relationFields, function (field) {
+	          delete diff.added[field];
+	          delete diff.removed[field];
+	          delete diff.changed[field];
+	        });
+	        return {
+	          v: diff
 	        };
+	      })();
 
-	    module.exports = keys;
+	      if (typeof _ret === 'object') return _ret.v;
+	    }
+	  },
 
+	  // Return the change history of the given item, if any.
+	  //
+	  // @param resourceName The name of the type of resource of the item whose change history is to be returned.
+	  // @param id The primary key of the item whose change history is to be returned.
+	  // @returns The change history of the given item, if any.
+	  changeHistory: function changeHistory(resourceName, id) {
+	    var _check$call2 = check.call(this, 'changeHistory', resourceName, id || fakeId);
 
+	    var _this = _check$call2._this;
+	    var definition = _check$call2.definition;
+	    var _resourceName = _check$call2._resourceName;
+	    var _id = _check$call2._id;
 
+	    var resource = _this.store[_resourceName];
 
-/***/ },
-/* 17 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var isPrimitive = __webpack_require__(26);
-
-	    /**
-	     * get "nested" object property
-	     */
-	    function get(obj, prop){
-	        var parts = prop.split('.'),
-	            last = parts.pop();
-
-	        while (prop = parts.shift()) {
-	            obj = obj[prop];
-	            if (obj == null) return;
+	    if (!definition.keepChangeHistory) {
+	      definition.errorFn('changeHistory is disabled for this resource!');
+	    } else {
+	      if (_resourceName) {
+	        var item = definition.get(_id);
+	        if (item) {
+	          return resource.changeHistories[_id];
 	        }
+	      } else {
+	        return resource.changeHistory;
+	      }
+	    }
+	  },
 
-	        return obj[last];
+	  // Re-compute the computed properties of the given item.
+	  //
+	  // @param resourceName The name of the type of resource of the item whose computed properties are to be re-computed.
+	  // @param instance The instance whose computed properties are to be re-computed.
+	  // @returns The item whose computed properties were re-computed.
+	  compute: function compute(resourceName, instance) {
+	    var _this = this;
+	    var definition = _this.definitions[resourceName];
+
+	    instance = _utils['default'].resolveItem(_this.store[resourceName], instance);
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (!instance) {
+	      throw new R('Item not in the store!');
+	    } else if (!_utils['default']._o(instance) && !_utils['default']._sn(instance)) {
+	      throw new IA('"instance" must be an object, string or number!');
 	    }
 
-	    module.exports = get;
+	    definition.logFn('compute', instance);
 
+	    // re-compute all computed properties
+	    _utils['default'].forOwn(definition.computed, function (fn, field) {
+	      _utils['default'].compute.call(instance, fn, field);
+	    });
+	    return instance;
+	  },
 
+	  // Factory function to create an instance of the specified Resource.
+	  //
+	  // @param resourceName The name of the type of resource of which to create an instance.
+	  // @param attrs Hash of properties with which to initialize the instance.
+	  // @param options Optional configuration.
+	  // @param options.defaults Default values with which to initialize the instance.
+	  // @returns The new instance.
+	  createInstance: function createInstance(resourceName, attrs, options) {
+	    var definition = this.definitions[resourceName];
+	    var item = undefined;
 
+	    attrs = attrs || {};
 
-/***/ },
-/* 18 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var namespace = __webpack_require__(25);
-
-	    /**
-	     * set "nested" object property
-	     */
-	    function set(obj, prop, val){
-	        var parts = (/^(.+)\.(.+)$/).exec(prop);
-	        if (parts){
-	            namespace(obj, parts[1])[parts[2]] = val;
-	        } else {
-	            obj[prop] = val;
-	        }
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (attrs && !_utils['default'].isObject(attrs)) {
+	      throw new IA('"attrs" must be an object!');
 	    }
 
-	    module.exports = set;
+	    options = _utils['default']._(definition, options);
+	    options.logFn('createInstance', attrs, options);
 
+	    // lifecycle
+	    options.beforeCreateInstance(options, attrs);
 
+	    // grab instance constructor function from Resource definition
+	    var Constructor = definition[definition['class']];
 
+	    // create instance
+	    item = new Constructor();
 
-/***/ },
-/* 19 */
-/***/ function(module, exports, __webpack_require__) {
+	    // add default values
+	    if (options.defaultValues) {
+	      _utils['default'].deepMixIn(item, options.defaultValues);
+	    }
+	    _utils['default'].deepMixIn(item, attrs);
 
-	var toString = __webpack_require__(32);
-	var camelCase = __webpack_require__(33);
-	var upperCase = __webpack_require__(20);
-	    /**
-	     * camelCase + UPPERCASE first char
-	     */
-	    function pascalCase(str){
-	        str = toString(str);
-	        return camelCase(str).replace(/^[a-z]/, upperCase);
+	    // compute computed properties
+	    if (definition.computed) {
+	      definition.compute(item);
+	    }
+	    // lifecycle
+	    options.afterCreateInstance(options, item);
+	    return item;
+	  },
+
+	  // Create a new collection of the specified Resource.
+	  //
+	  // @param resourceName The name of the type of resource of which to create a collection
+	  // @param arr Possibly empty array of data from which to create the collection.
+	  // @param params The criteria by which to filter items. Will be passed to `DS#findAll` if `fetch` is called. See http://www.js-data.io/docs/query-syntax
+	  // @param options Optional configuration.
+	  // @param options.notify Whether to call the beforeCreateCollection and afterCreateCollection lifecycle hooks..
+	  // @returns The new collection.
+	  createCollection: function createCollection(resourceName, arr, params, options) {
+	    var _this = this;
+	    var definition = _this.definitions[resourceName];
+
+	    arr = arr || [];
+	    params = params || {};
+
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (arr && !_utils['default'].isArray(arr)) {
+	      throw new IA('"arr" must be an array!');
 	    }
 
-	    module.exports = pascalCase;
+	    options = _utils['default']._(definition, options);
 
+	    options.logFn('createCollection', arr, options);
 
+	    // lifecycle
+	    options.beforeCreateCollection(options, arr);
 
-/***/ },
-/* 20 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(32);
-	    /**
-	     * "Safer" String.toUpperCase()
-	     */
-	    function upperCase(str){
-	        str = toString(str);
-	        return str.toUpperCase();
-	    }
-	    module.exports = upperCase;
-
-
-
-/***/ },
-/* 21 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Array.indexOf
-	     */
-	    function indexOf(arr, item, fromIndex) {
-	        fromIndex = fromIndex || 0;
-	        if (arr == null) {
-	            return -1;
-	        }
-
-	        var len = arr.length,
-	            i = fromIndex < 0 ? len + fromIndex : fromIndex;
-	        while (i < len) {
-	            // we iterate over sparse items since there is no way to make it
-	            // work properly on IE 7-8. see #64
-	            if (arr[i] === item) {
-	                return i;
+	    // define the API for this collection
+	    Object.defineProperties(arr, {
+	      //  Call DS#findAll with the params of this collection, filling the collection with the results.
+	      fetch: {
+	        value: function value(params, options) {
+	          var __this = this;
+	          __this.params = params || __this.params;
+	          return definition.findAll(__this.params, options).then(function (data) {
+	            if (data === __this) {
+	              return __this;
 	            }
-
-	            i++;
-	        }
-
-	        return -1;
-	    }
-
-	    module.exports = indexOf;
-
-
-
-/***/ },
-/* 22 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Safer Object.hasOwnProperty
-	     */
-	     function hasOwn(obj, prop){
-	         return Object.prototype.hasOwnProperty.call(obj, prop);
-	     }
-
-	     module.exports = hasOwn;
-
-
-
-
-/***/ },
-/* 23 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var hasOwn = __webpack_require__(22);
-
-	    var _hasDontEnumBug,
-	        _dontEnums;
-
-	    function checkDontEnum(){
-	        _dontEnums = [
-	                'toString',
-	                'toLocaleString',
-	                'valueOf',
-	                'hasOwnProperty',
-	                'isPrototypeOf',
-	                'propertyIsEnumerable',
-	                'constructor'
-	            ];
-
-	        _hasDontEnumBug = true;
-
-	        for (var key in {'toString': null}) {
-	            _hasDontEnumBug = false;
-	        }
-	    }
-
-	    /**
-	     * Similar to Array/forEach but works over object properties and fixes Don't
-	     * Enum bug on IE.
-	     * based on: http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
-	     */
-	    function forIn(obj, fn, thisObj){
-	        var key, i = 0;
-	        // no need to check if argument is a real object that way we can use
-	        // it for arrays, functions, date, etc.
-
-	        //post-pone check till needed
-	        if (_hasDontEnumBug == null) checkDontEnum();
-
-	        for (key in obj) {
-	            if (exec(fn, obj, key, thisObj) === false) {
-	                break;
+	            data.unshift(__this.length);
+	            data.unshift(0);
+	            __this.splice.apply(__this, data);
+	            data.shift();
+	            data.shift();
+	            if (data.$$injected) {
+	              _this.store[resourceName].queryData[_utils['default'].toJson(__this.params)] = __this;
+	              __this.$$injected = true;
 	            }
+	            return __this;
+	          });
 	        }
+	      },
+	      // params for this collection. See http://www.js-data.io/docs/query-syntax
+	      params: {
+	        value: params,
+	        writable: true
+	      },
+	      // name of the resource type of this collection
+	      resourceName: {
+	        value: resourceName
+	      }
+	    });
 
+	    // lifecycle
+	    options.afterCreateCollection(options, arr);
+	    return arr;
+	  },
+	  defineResource: __webpack_require__(31),
+	  digest: function digest() {
+	    this.observe.Platform.performMicrotaskCheckpoint();
+	  },
+	  eject: __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"./eject\""); e.code = 'MODULE_NOT_FOUND'; throw e; }())),
+	  ejectAll: __webpack_require__(33),
+	  filter: __webpack_require__(34),
 
-	        if (_hasDontEnumBug) {
-	            var ctor = obj.constructor,
-	                isProto = !!ctor && obj === ctor.prototype;
+	  // Return the item with the given primary key if its in the store.
+	  //
+	  // @param resourceName The name of the type of resource of the item to retrieve.
+	  // @param id The primary key of the item to retrieve.
+	  // @returns The item with the given primary key if it's in the store.
+	  // /
+	  get: function get(resourceName, id) {
+	    var _check$call3 = check.call(this, 'get', resourceName, id);
 
-	            while (key = _dontEnums[i++]) {
-	                // For constructor, if it is a prototype object the constructor
-	                // is always non-enumerable unless defined otherwise (and
-	                // enumerated above).  For non-prototype objects, it will have
-	                // to be defined on this object, since it cannot be defined on
-	                // any prototype objects.
-	                //
-	                // For other [[DontEnum]] properties, check if the value is
-	                // different than Object prototype value.
-	                if (
-	                    (key !== 'constructor' ||
-	                        (!isProto && hasOwn(obj, key))) &&
-	                    obj[key] !== Object.prototype[key]
-	                ) {
-	                    if (exec(fn, obj, key, thisObj) === false) {
-	                        break;
-	                    }
-	                }
-	            }
+	    // return the item if it exists
+	    var _this = _check$call3._this;
+	    var _resourceName = _check$call3._resourceName;
+	    var _id = _check$call3._id;
+	    return _this.store[_resourceName].index[_id];
+	  },
+
+	  // Return the items in the store that have the given primary keys.
+	  //
+	  // @param resourceName The name of the type of resource of the items to retrieve.
+	  // @param ids The primary keys of the items to retrieve.
+	  // @returns The items with the given primary keys if they're in the store.
+	  getAll: function getAll(resourceName, ids) {
+	    var _this = this;
+	    var definition = _this.definitions[resourceName];
+	    var resource = _this.store[resourceName];
+	    var collection = [];
+
+	    if (!definition) {
+	      throw new NER(resourceName);
+	    } else if (ids && !_utils['default']._a(ids)) {
+	      throw _utils['default']._aErr('ids');
+	    }
+
+	    definition.logFn('getAll', ids);
+
+	    if (_utils['default']._a(ids)) {
+	      // return just the items with the given primary keys
+	      var _length = ids.length;
+	      for (var i = 0; i < _length; i++) {
+	        if (resource.index[ids[i]]) {
+	          collection.push(resource.index[ids[i]]);
 	        }
+	      }
+	    } else {
+	      // most efficient of retrieving ALL items from the store
+	      collection = resource.collection.slice();
 	    }
 
-	    function exec(fn, obj, key, thisObj){
-	        return fn.call(thisObj, obj[key], key, obj);
+	    return collection;
+	  },
+
+	  // Return the whether the item with the given primary key has any changes.
+	  //
+	  // @param resourceName The name of the type of resource of the item.
+	  // @param id The primary key of the item.
+	  // @returns Whether the item with the given primary key has any changes.
+	  hasChanges: function hasChanges(resourceName, id) {
+	    var _check$call4 = check.call(this, 'hasChanges', resourceName, id);
+
+	    var definition = _check$call4.definition;
+	    var _id = _check$call4._id;
+
+	    return definition.get(_id) ? diffIsEmpty(definition.changes(_id)) : false;
+	  },
+	  inject: __webpack_require__(35),
+
+	  // Return the timestamp from the last time the item with the given primary key was changed.
+	  //
+	  // @param resourceName The name of the type of resource of the item.
+	  // @param id The primary key of the item.
+	  // @returns Timestamp from the last time the item was changed.
+	  lastModified: function lastModified(resourceName, id) {
+	    var _check$call5 = check.call(this, 'lastModified', resourceName, id || fakeId);
+
+	    var _this = _check$call5._this;
+	    var _resourceName = _check$call5._resourceName;
+	    var _id = _check$call5._id;
+
+	    var resource = _this.store[_resourceName];
+
+	    if (_id) {
+	      if (!(_id in resource.modified)) {
+	        resource.modified[_id] = 0;
+	      }
+	      return resource.modified[_id];
 	    }
+	    return resource.collectionModified;
+	  },
 
-	    module.exports = forIn;
+	  // Return the timestamp from the last time the item with the given primary key was saved via an adapter.
+	  //
+	  // @param resourceName The name of the type of resource of the item.
+	  // @param id The primary key of the item.
+	  // @returns Timestamp from the last time the item was saved.
+	  lastSaved: function lastSaved(resourceName, id) {
+	    var _check$call6 = check.call(this, 'lastSaved', resourceName, id || fakeId);
 
+	    var _this = _check$call6._this;
+	    var _resourceName = _check$call6._resourceName;
+	    var _id = _check$call6._id;
 
+	    var resource = _this.store[_resourceName];
 
+	    if (!(_id in resource.saved)) {
+	      resource.saved[_id] = 0;
+	    }
+	    return resource.saved[_id];
+	  },
+
+	  // Return the previous attributes of the item with the given primary key before it was changed.
+	  //
+	  // @param resourceName The name of the type of resource of the item.
+	  // @param id The primary key of the item.
+	  // @returns The previous attributes of the item
+	  previous: function previous(resourceName, id) {
+	    var _check$call7 = check.call(this, 'previous', resourceName, id);
+
+	    var _this = _check$call7._this;
+	    var _resourceName = _check$call7._resourceName;
+	    var _id = _check$call7._id;
+
+	    var resource = _this.store[_resourceName];
+
+	    // return resource from cache
+	    return resource.previousAttributes[_id] ? _utils['default'].copy(resource.previousAttributes[_id]) : undefined;
+	  },
+
+	  // Revert all attributes of the item with the given primary key to their previous values.
+	  //
+	  // @param resourceName The name of the type of resource of the item.
+	  // @param id The primary key of the item.
+	  // @returns The reverted item
+	  revert: function revert(resourceName, id) {
+	    var _check$call8 = check.call(this, 'revert', resourceName, id);
+
+	    var _this = _check$call8._this;
+	    var definition = _check$call8.definition;
+	    var _resourceName = _check$call8._resourceName;
+	    var _id = _check$call8._id;
+
+	    return definition.inject(_this.previous(_resourceName, _id));
+	  }
+	};
 
 /***/ },
-/* 24 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
-	
-
-	    /**
-	     * Checks if the value is created by the `Object` constructor.
-	     */
-	    function isPlainObject(value) {
-	        return (!!value && typeof value === 'object' &&
-	            value.constructor === Object);
-	    }
-
-	    module.exports = isPlainObject;
-
-
-
-
-/***/ },
-/* 25 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var forEach = __webpack_require__(8);
-
-	    /**
-	     * Create nested object if non-existent
-	     */
-	    function namespace(obj, path){
-	        if (!path) return obj;
-	        forEach(path.split('.'), function(key){
-	            if (!obj[key]) {
-	                obj[key] = {};
-	            }
-	            obj = obj[key];
-	        });
-	        return obj;
-	    }
-
-	    module.exports = namespace;
-
-
-
-
-/***/ },
-/* 26 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-	    /**
-	     * Checks if the object is a primitive
-	     */
-	    function isPrimitive(value) {
-	        // Using switch fallthrough because it's simple to read and is
-	        // generally fast: http://jsperf.com/testing-value-is-primitive/5
-	        switch (typeof value) {
-	            case "string":
-	            case "number":
-	            case "boolean":
-	                return true;
-	        }
-
-	        return value == null;
-	    }
-
-	    module.exports = isPrimitive;
-
-
-
-
-/***/ },
-/* 27 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/*jshint evil:true, loopfunc:true*/
+	/* jshint evil:true, loopfunc:true */
 
 	var _utils = __webpack_require__(2);
 
@@ -3183,9 +3239,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * These are DS methods that will be proxied by instances. e.g.
 	 *
-	 * var store = new JSData.DS();
-	 * var User = store.defineResource('user');
-	 * var user = User.createInstance({ id: 1 });
+	 * var store = new JSData.DS()
+	 * var User = store.defineResource('user')
+	 * var user = User.createInstance({ id: 1 })
 	 *
 	 * store.update(resourceName, id, attrs[, options]) // DS method
 	 * User.update(id, attrs[, options]) // DS method proxied on a Resource
@@ -3304,8 +3360,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      try {
 	        if (typeof def.useClass === 'function') {
-	          eval('function ' + _class + '() { def.useClass.call(this); }');
-	          def[_class] = eval(_class);
+	          eval('function ' + _class + '() { def.useClass.call(this); }'); // eslint-disable-line
+	          def[_class] = eval(_class); // eslint-disable-line
 	          def[_class].prototype = (function (proto) {
 	            function Ctor() {}
 
@@ -3313,8 +3369,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return new Ctor();
 	          })(def.useClass.prototype);
 	        } else {
-	          eval('function ' + _class + '() {}');
-	          def[_class] = eval(_class);
+	          eval('function ' + _class + '() {}'); // eslint-disable-line
+	          def[_class] = eval(_class); // eslint-disable-line
 	        }
 	      } catch (e) {
 	        def[_class] = function () {};
@@ -3326,8 +3382,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      });
 
 	      /**
-	       * var user = User.createInstance({ id: 1 });
-	       * user.set('foo', 'bar');
+	       * var user = User.createInstance({ id: 1 })
+	       * user.set('foo', 'bar')
 	       */
 	      def[_class].prototype.set = function (key, value) {
 	        var _this2 = this;
@@ -3344,8 +3400,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      };
 
 	      /**
-	       * var user = User.createInstance({ id: 1 });
-	       * user.get('id'); // 1
+	       * var user = User.createInstance({ id: 1 })
+	       * user.get('id') // 1
 	       */
 	      def[_class].prototype.get = function (key) {
 	        return _utils['default'].get(this, key);
@@ -3468,8 +3524,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      /**
 	       * Create the Resource shorthands that proxy DS methods. e.g.
 	       *
-	       * var store = new JSData.DS();
-	       * var User = store.defineResource('user');
+	       * var store = new JSData.DS()
+	       * var User = store.defineResource('user')
 	       *
 	       * store.update(resourceName, id, attrs[, options]) // DS method
 	       * User.update(id, attrs[, options]) // DS method proxied on a Resource
@@ -3560,8 +3616,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 	          config.method = config.method || 'GET';
 	          _utils['default'].deepMixIn(config, options);
-	          return new _utils['default'].Promise(function (r) {
-	            return r(config);
+	          return new _utils['default'].Promise(function (resolve) {
+	            return resolve(config);
 	          }).then(options.request || action.request).then(function (config) {
 	            return adapter.HTTP(config);
 	          }).then(options.response || action.response, options.responseError || action.responseError);
@@ -3597,114 +3653,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 28 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Eject an item from the store, if it is currently in the store.
-	 *
-	 * @param resourceName The name of the resource type of the item eject.
-	 * @param id The primary key of the item to eject.
-	 * @param options Optional configuration.
-	 * @param options.notify Whether to emit the "DS.beforeEject" and "DS.afterEject" events
-	 * @param options.clearEmptyQueries Whether to remove cached findAll queries that become empty as a result of this method call.
-	 * @returns The ejected item if one was ejected.
-	 */
-	module.exports = function eject(resourceName, id, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var definition = _this.definitions[resourceName];
-	  var resource = _this.store[resourceName];
-	  var item = undefined;
-	  var found = false;
-
-	  id = DSUtils.resolveId(definition, id);
-
-	  if (!definition) {
-	    throw new _this.errors.NER(resourceName);
-	  } else if (!DSUtils._sn(id)) {
-	    throw DSUtils._snErr('id');
-	  }
-
-	  options = DSUtils._(definition, options);
-
-	  options.logFn('eject', id, options);
-
-	  // find the item to eject
-	  for (var i = 0; i < resource.collection.length; i++) {
-	    if (resource.collection[i][definition.idAttribute] == id) {
-	      // jshint ignore:line
-	      item = resource.collection[i];
-	      // remove its expiration timestamp
-	      resource.expiresHeap.remove(item);
-	      found = true;
-	      break;
-	    }
-	  }
-	  if (found) {
-	    var _ret = (function () {
-	      // lifecycle
-	      definition.beforeEject(options, item);
-	      if (options.notify) {
-	        definition.emit('DS.beforeEject', definition, item);
-	      }
-
-	      // find the item in any ($$injected) cached queries
-	      var toRemove = [];
-	      DSUtils.forOwn(resource.queryData, function (items, queryHash) {
-	        if (items.$$injected) {
-	          DSUtils.remove(items, item);
-	        }
-	        // optionally remove any empty queries
-	        if (!items.length && options.clearEmptyQueries) {
-	          toRemove.push(queryHash);
-	        }
-	      });
-
-	      // clean up
-	      DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
-	        DSUtils.remove(resource.changeHistory, changeRecord);
-	      });
-	      DSUtils.forEach(toRemove, function (queryHash) {
-	        delete resource.completedQueries[queryHash];
-	        delete resource.queryData[queryHash];
-	      });
-	      if (resource.observers[id] && typeof resource.observers[id].close === 'function') {
-	        // stop observation
-	        resource.observers[id].close();
-	      }
-	      delete resource.observers[id];
-	      delete resource.index[id];
-	      delete resource.previousAttributes[id];
-	      delete resource.completedQueries[id];
-	      delete resource.pendingQueries[id];
-	      delete resource.changeHistories[id];
-	      delete resource.modified[id];
-	      delete resource.saved[id];
-
-	      // remove it from the store
-	      resource.collection.splice(i, 1);
-	      // collection has been modified
-	      definition.handleChange(item);
-
-	      // lifecycle
-	      definition.afterEject(options, item);
-	      if (options.notify) {
-	        definition.emit('DS.afterEject', definition, item);
-	      }
-
-	      return {
-	        v: item
-	      };
-	    })();
-
-	    if (typeof _ret === 'object') return _ret.v;
-	  }
-	};
-
-/***/ },
-/* 29 */
-/***/ function(module, exports, __webpack_require__) {
+/* 32 */,
+/* 33 */
+/***/ function(module, exports) {
 
 	/**
 	 * Eject a collection of items from the store, if any items currently in the store match the given criteria.
@@ -3753,8 +3704,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 30 */
-/***/ function(module, exports, __webpack_require__) {
+/* 34 */
+/***/ function(module, exports) {
 
 	/**
 	 * Return the subset of items currently in the store that match the given criteria.
@@ -3787,7 +3738,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 31 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _utils = __webpack_require__(2);
@@ -4125,53 +4076,75 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 32 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
-	
+	exports['default'] = {
+	  create: __webpack_require__(37),
+	  destroy: __webpack_require__(38),
+	  destroyAll: __webpack_require__(39),
+	  find: __webpack_require__(40),
+	  findAll: __webpack_require__(41),
+	  loadRelations: __webpack_require__(42),
+	  reap: __webpack_require__(43),
+	  refresh: function refresh(resourceName, id, options) {
+	    var _this = this;
+	    var DSUtils = _this.utils;
 
-	    /**
-	     * Typecast a value to a String, using an empty string value for null or
-	     * undefined.
-	     */
-	    function toString(val){
-	        return val == null ? '' : val.toString();
-	    }
+	    return new DSUtils.Promise(function (resolve, reject) {
+	      var definition = _this.definitions[resourceName];
+	      id = DSUtils.resolveId(_this.definitions[resourceName], id);
+	      if (!definition) {
+	        reject(new _this.errors.NER(resourceName));
+	      } else if (!DSUtils._sn(id)) {
+	        reject(DSUtils._snErr('id'));
+	      } else {
+	        options = DSUtils._(definition, options);
+	        options.bypassCache = true;
+	        options.logFn('refresh', id, options);
+	        resolve(_this.get(resourceName, id));
+	      }
+	    }).then(function (item) {
+	      return item ? _this.find(resourceName, id, options) : item;
+	    });
+	  },
+	  refreshAll: function refreshAll(resourceName, params, options) {
+	    var _this = this;
+	    var DSUtils = _this.utils;
+	    var definition = _this.definitions[resourceName];
+	    params = params || {};
 
-	    module.exports = toString;
-
-
-
+	    return new DSUtils.Promise(function (resolve, reject) {
+	      if (!definition) {
+	        reject(new _this.errors.NER(resourceName));
+	      } else if (!DSUtils._o(params)) {
+	        reject(DSUtils._oErr('params'));
+	      } else {
+	        options = DSUtils._(definition, options);
+	        options.bypassCache = true;
+	        options.logFn('refreshAll', params, options);
+	        resolve(_this.filter(resourceName, params, options));
+	      }
+	    }).then(function (existing) {
+	      options.bypassCache = true;
+	      return _this.findAll(resourceName, params, options).then(function (found) {
+	        DSUtils.forEach(existing, function (item) {
+	          if (found.indexOf(item) === -1) {
+	            definition.eject(item);
+	          }
+	        });
+	        return found;
+	      });
+	    });
+	  },
+	  save: __webpack_require__(44),
+	  update: __webpack_require__(45),
+	  updateAll: __webpack_require__(46)
+	};
 
 /***/ },
-/* 33 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(32);
-	var replaceAccents = __webpack_require__(44);
-	var removeNonWord = __webpack_require__(45);
-	var upperCase = __webpack_require__(20);
-	var lowerCase = __webpack_require__(46);
-	    /**
-	    * Convert string to camelCase text.
-	    */
-	    function camelCase(str){
-	        str = toString(str);
-	        str = replaceAccents(str);
-	        str = removeNonWord(str)
-	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
-	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
-	            .replace(/\s+/g, '') //remove spaces
-	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
-	        return str;
-	    }
-	    module.exports = camelCase;
-
-
-
-/***/ },
-/* 34 */
-/***/ function(module, exports, __webpack_require__) {
+/* 37 */
+/***/ function(module, exports) {
 
 	/**
 	 * Using an adapter, create a new item.
@@ -4260,8 +4233,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 35 */
-/***/ function(module, exports, __webpack_require__) {
+/* 38 */
+/***/ function(module, exports) {
 
 	/**
 	 * Using an adapter, destroy an item.
@@ -4279,8 +4252,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var _this = this;
 	  var DSUtils = _this.utils;
 	  var definition = _this.definitions[resourceName];
-	  var item = undefined;
-	  var adapter = undefined;
+	  var item = undefined,
+	      adapter = undefined;
 
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    id = DSUtils.resolveId(definition, id);
@@ -4328,8 +4301,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 36 */
-/***/ function(module, exports, __webpack_require__) {
+/* 39 */
+/***/ function(module, exports) {
 
 	/**
 	 * Using an adapter, destroy an item.
@@ -4397,8 +4370,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 37 */
-/***/ function(module, exports, __webpack_require__) {
+/* 40 */
+/***/ function(module, exports) {
 
 	/* jshint -W082 */
 
@@ -4457,21 +4430,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        // try subsequent adapters if the preceeding one fails
 	        if (strategy === 'fallback') {
-	          (function () {
-	            var makeFallbackCall = function makeFallbackCall(index) {
-	              adapter = definition.getAdapterName((options.findFallbackAdapters || options.fallbackAdapters)[index]);
-	              return _this.adapters[adapter].find(definition, id, options)['catch'](function (err) {
-	                index++;
-	                if (index < options.fallbackAdapters.length) {
-	                  return makeFallbackCall(index);
-	                } else {
-	                  return DSUtils.Promise.reject(err);
-	                }
-	              });
-	            };
+	          var makeFallbackCall = function makeFallbackCall(index) {
+	            adapter = definition.getAdapterName((options.findFallbackAdapters || options.fallbackAdapters)[index]);
+	            return _this.adapters[adapter].find(definition, id, options)['catch'](function (err) {
+	              index++;
+	              if (index < options.fallbackAdapters.length) {
+	                return makeFallbackCall(index);
+	              } else {
+	                return DSUtils.Promise.reject(err);
+	              }
+	            });
+	          };
 
-	            promise = makeFallbackCall(0);
-	          })();
+	          promise = makeFallbackCall(0);
 	        } else {
 	          adapter = definition.getAdapterName(options);
 	          // just make a single attempt
@@ -4510,8 +4481,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 38 */
-/***/ function(module, exports, __webpack_require__) {
+/* 41 */
+/***/ function(module, exports) {
 
 	/* jshint -W082 */
 	function processResults(data, resourceName, queryHash, options) {
@@ -4613,21 +4584,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        // try subsequent adapters if the preceeding one fails
 	        if (strategy === 'fallback') {
-	          (function () {
-	            var makeFallbackCall = function makeFallbackCall(index) {
-	              adapter = definition.getAdapterName((options.findAllFallbackAdapters || options.fallbackAdapters)[index]);
-	              return _this.adapters[adapter].findAll(definition, params, options)['catch'](function (err) {
-	                index++;
-	                if (index < options.fallbackAdapters.length) {
-	                  return makeFallbackCall(index);
-	                } else {
-	                  return DSUtils.Promise.reject(err);
-	                }
-	              });
-	            };
+	          var makeFallbackCall = function makeFallbackCall(index) {
+	            adapter = definition.getAdapterName((options.findAllFallbackAdapters || options.fallbackAdapters)[index]);
+	            return _this.adapters[adapter].findAll(definition, params, options)['catch'](function (err) {
+	              index++;
+	              if (index < options.fallbackAdapters.length) {
+	                return makeFallbackCall(index);
+	              } else {
+	                return DSUtils.Promise.reject(err);
+	              }
+	            });
+	          };
 
-	            promise = makeFallbackCall(0);
-	          })();
+	          promise = makeFallbackCall(0);
 	        } else {
 	          adapter = definition.getAdapterName(options);
 	          // just make a single attempt
@@ -4667,8 +4636,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 39 */
-/***/ function(module, exports, __webpack_require__) {
+/* 42 */
+/***/ function(module, exports) {
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -4771,8 +4740,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 40 */
-/***/ function(module, exports, __webpack_require__) {
+/* 43 */
+/***/ function(module, exports) {
 
 	/**
 	 * Find expired items of the specified resource type and perform the configured action.
@@ -4788,7 +4757,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var resource = _this.store[resourceName];
 
 	  return new DSUtils.Promise(function (resolve, reject) {
-
 	    if (!definition) {
 	      reject(new _this.errors.NER(resourceName));
 	    } else {
@@ -4860,8 +4828,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 41 */
-/***/ function(module, exports, __webpack_require__) {
+/* 44 */
+/***/ function(module, exports) {
 
 	/**
 	 * Save a single item in its present state.
@@ -4912,7 +4880,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    // only send changed properties to the adapter
 	    if (options.changesOnly) {
-
 	      if (resource.observers[id] && typeof resource.observers[id] === 'function') {
 	        resource.observers[id].deliver();
 	      }
@@ -4967,8 +4934,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 42 */
-/***/ function(module, exports, __webpack_require__) {
+/* 45 */
+/***/ function(module, exports) {
 
 	/**
 	 * Update a single item using the supplied properties hash.
@@ -5041,8 +5008,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 43 */
-/***/ function(module, exports, __webpack_require__) {
+/* 46 */
+/***/ function(module, exports) {
 
 	/**
 	 * Update a collection of items using the supplied properties hash.
@@ -5130,85 +5097,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	};
 
-/***/ },
-/* 44 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(32);
-	    /**
-	    * Replaces all accented chars with regular ones
-	    */
-	    function replaceAccents(str){
-	        str = toString(str);
-
-	        // verifies if the String has accents and replace them
-	        if (str.search(/[\xC0-\xFF]/g) > -1) {
-	            str = str
-	                    .replace(/[\xC0-\xC5]/g, "A")
-	                    .replace(/[\xC6]/g, "AE")
-	                    .replace(/[\xC7]/g, "C")
-	                    .replace(/[\xC8-\xCB]/g, "E")
-	                    .replace(/[\xCC-\xCF]/g, "I")
-	                    .replace(/[\xD0]/g, "D")
-	                    .replace(/[\xD1]/g, "N")
-	                    .replace(/[\xD2-\xD6\xD8]/g, "O")
-	                    .replace(/[\xD9-\xDC]/g, "U")
-	                    .replace(/[\xDD]/g, "Y")
-	                    .replace(/[\xDE]/g, "P")
-	                    .replace(/[\xE0-\xE5]/g, "a")
-	                    .replace(/[\xE6]/g, "ae")
-	                    .replace(/[\xE7]/g, "c")
-	                    .replace(/[\xE8-\xEB]/g, "e")
-	                    .replace(/[\xEC-\xEF]/g, "i")
-	                    .replace(/[\xF1]/g, "n")
-	                    .replace(/[\xF2-\xF6\xF8]/g, "o")
-	                    .replace(/[\xF9-\xFC]/g, "u")
-	                    .replace(/[\xFE]/g, "p")
-	                    .replace(/[\xFD\xFF]/g, "y");
-	        }
-	        return str;
-	    }
-	    module.exports = replaceAccents;
-
-
-
-/***/ },
-/* 45 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(32);
-	    // This pattern is generated by the _build/pattern-removeNonWord.js script
-	    var PATTERN = /[^\x20\x2D0-9A-Z\x5Fa-z\xC0-\xD6\xD8-\xF6\xF8-\xFF]/g;
-
-	    /**
-	     * Remove non-word chars.
-	     */
-	    function removeNonWord(str){
-	        str = toString(str);
-	        return str.replace(PATTERN, '');
-	    }
-
-	    module.exports = removeNonWord;
-
-
-
-/***/ },
-/* 46 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(32);
-	    /**
-	     * "Safer" String.toLowerCase()
-	     */
-	    function lowerCase(str){
-	        str = toString(str);
-	        return str.toLowerCase();
-	    }
-
-	    module.exports = lowerCase;
-
-
-
 /***/ }
 /******/ ])
 });
+;
