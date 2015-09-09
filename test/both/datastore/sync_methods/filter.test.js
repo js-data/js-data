@@ -198,6 +198,22 @@ describe('DS#filter', function () {
 
     assert.deepEqual(JSON.stringify(store.filter('post', params)), JSON.stringify([p1, p2, p3]), 'should accept "notContains" clause');
 
+    params.where = {
+      author: {
+        'like': 'adam'
+      }
+    };
+
+    assert.deepEqual(JSON.stringify(store.filter('post', params)), JSON.stringify([p4, p5]), 'should accept "like" clause');
+
+    params.where = {
+      author: {
+        'notLike': 'adam'
+      }
+    };
+
+    assert.deepEqual(JSON.stringify(store.filter('post', params)), JSON.stringify([p1, p2, p3]), 'should accept "notLike" clause');
+
     params.where = { age: { garbage: 'should have no effect' } };
 
     assert.deepEqual(JSON.stringify(store.filter('post', params)), JSON.stringify([p1, p2, p3, p4, p5]), 'should return all elements');
