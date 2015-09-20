@@ -1,5 +1,8 @@
 ##### 2.4.0 - xx September 2015
 
+###### Backwards compatible bug fixes
+- #215 - Javascript error when trying to merge model with null value for relation
+- 
 ###### Other
 - #204 - Choose official code style for project
 - Switched unnecessary arrow functions back to regular functions to improve performance

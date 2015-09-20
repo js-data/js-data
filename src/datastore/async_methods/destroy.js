@@ -52,10 +52,10 @@ module.exports = function destroy (resourceName, id, options) {
       definition.eject(id)
       return DSUtils.respond(id, {adapter}, options)
     })['catch'](function (err) {
-    // rollback by re-injecting the item into the store
-    if (options && options.eagerEject && item) {
-      definition.inject(item, { notify: false })
-    }
-    return DSUtils.Promise.reject(err)
-  })
+      // rollback by re-injecting the item into the store
+      if (options && options.eagerEject && item) {
+        definition.inject(item, { notify: false })
+      }
+      return DSUtils.Promise.reject(err)
+    })
 }

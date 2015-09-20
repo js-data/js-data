@@ -593,7 +593,9 @@ export default {
             return get(this, localKey) ? definition.getResource(relationName).get(get(this, localKey)) : undefined
           }
           prop.set = function (parent) {
-            set(this, localKey, get(parent, definition.getResource(relationName).idAttribute))
+            if (parent) {
+              set(this, localKey, get(parent, definition.getResource(relationName).idAttribute))
+            }
             return get(this, localField)
           }
         } else if (def.type === 'hasMany') {
@@ -609,16 +611,18 @@ export default {
             return undefined
           }
           prop.set = function (children) {
-            if (foreignKey) {
-              forEach(children, function (child) {
-                set(child, foreignKey, get(this, definition.idAttribute))
-              })
-            } else if (localKeys) {
-              let keys = []
-              forEach(children, function (child) {
-                keys.push(get(child, definition.getResource(relationName).idAttribute))
-              })
-              set(this, localKeys, keys)
+            if (children && children.length) {
+              if (foreignKey) {
+                forEach(children, function (child) {
+                  set(child, foreignKey, get(this, definition.idAttribute))
+                })
+              } else if (localKeys) {
+                let keys = []
+                forEach(children, function (child) {
+                  keys.push(get(child, definition.getResource(relationName).idAttribute))
+                })
+                set(this, localKeys, keys)
+              }
             }
             return get(this, localField)
           }
@@ -628,7 +632,9 @@ export default {
               return get(this, localKey) ? definition.getResource(relationName).get(get(this, localKey)) : undefined
             }
             prop.set = function (sibling) {
-              set(this, localKey, get(sibling, definition.getResource(relationName).idAttribute))
+              if (sibling) {
+                set(this, localKey, get(sibling, definition.getResource(relationName).idAttribute))
+              }
               return get(this, localField)
             }
           } else {
@@ -642,7 +648,9 @@ export default {
               return undefined
             }
             prop.set = function (sibling) {
-              set(sibling, foreignKey, get(this, definition.idAttribute))
+              if (sibling) {
+                set(sibling, foreignKey, get(this, definition.idAttribute))
+              }
               return get(this, localField)
             }
           }
