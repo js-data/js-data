@@ -80,6 +80,9 @@ function makeObserverHandler (definition, resource) {
     if (definition.computed) {
       item = item || DS.get(name, innerId)
       DSUtils.forOwn(definition.computed, function (fn, field) {
+        if (DSUtils._o(fn)) {
+          return
+        }
         let compute = false
         // check if required fields changed
         DSUtils.forEach(fn.deps, function (dep) {

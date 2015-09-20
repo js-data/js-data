@@ -1,6 +1,7 @@
 ##### 2.4.0 - xx September 2015
 
 ###### Backwards compatible bug fixes
+- #203 - createInstance/compute don't know about computed properties as property accessors
 - #215 - Javascript error when trying to merge model with null value for relation
 - #216 - Update remove circular to support File objects
 

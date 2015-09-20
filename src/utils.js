@@ -439,11 +439,13 @@ export default {
   compute (fn, field) {
     let _this = this
     let args = []
-    forEach(fn.deps, function (dep) {
-      args.push(get(_this, dep))
-    })
-    // compute property
-    set(_this, field, fn[fn.length - 1].apply(_this, args))
+    if (!isObject(fn)) {
+      forEach(fn.deps, function (dep) {
+        args.push(get(_this, dep))
+      })
+      // compute property
+      set(_this, field, fn[fn.length - 1].apply(_this, args))
+    }
   },
   contains,
   copy,
