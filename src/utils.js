@@ -19,7 +19,7 @@ let upperCase = require('mout/string/upperCase')
 let get = require('mout/object/get')
 let set = require('mout/object/set')
 let observe = require('../lib/observe-js/observe.js')
-let w, P
+let w, P, File
 let objectProto = Object.prototype
 let toString = objectProto.toString
 
@@ -32,8 +32,14 @@ let toString = objectProto.toString
  */
 try {
   P = Promise
-} catch (err) {
+} catch (e) {
   console.error('js-data requires a global Promise constructor!')
+}
+
+try {
+  File = window.File
+} catch (e) {
+  File = function () {}
 }
 
 function _isArray (value) {
@@ -535,7 +541,7 @@ export default {
       let i
       let nu
 
-      if (typeof value === 'object' && value !== null && !(value instanceof Boolean) && !(value instanceof Date) && !(value instanceof Number) && !(value instanceof RegExp) && !(value instanceof String)) {
+      if (typeof value === 'object' && value !== null && !(value instanceof Boolean) && !(value instanceof Date) && !(value instanceof Number) && !(value instanceof RegExp) && !(value instanceof String) && !(value instanceof File)) {
         // check if current object points back to itself
         let cur = ctx.cur
         var parent = ctx.ctx

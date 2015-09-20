@@ -2,7 +2,8 @@
 
 ###### Backwards compatible bug fixes
 - #215 - Javascript error when trying to merge model with null value for relation
-- 
+- #216 - Update remove circular to support File objects
+
 ###### Other
 - #204 - Choose official code style for project
 - Switched unnecessary arrow functions back to regular functions to improve performance
