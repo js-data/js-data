@@ -11,6 +11,10 @@ window.pprint = function (obj) {
   console.log(JSON.stringify(obj, null, 2));
 };
 
+window.objectsEqual = function (a, b, msg) {
+  assert.equal(JSON.stringify(a), JSON.stringify(b), msg || 'Expected objects or arrays to be equal');
+};
+
 // Helper globals
 var fail = function (msg) {
     if (msg instanceof Error) {

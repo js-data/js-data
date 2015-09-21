@@ -10,6 +10,9 @@ var JSData = require('./');
 
 var store, DSUtils, DSErrors;
 
+function objectsEqual (a, b, msg) {
+  assert.equal(JSON.stringify(a), JSON.stringify(b), msg || 'Expected objects or arrays to be equal');
+}
 var lifecycle = {};
 
 var globals = module.exports = {
@@ -39,7 +42,8 @@ var globals = module.exports = {
   TYPES_EXCEPT_FUNCTION: ['string', 123, 123.123, null, undefined, {}, [], true, false],
   assert: assert,
   sinon: sinon,
-  store: undefined
+  store: undefined,
+  objectsEqual: objectsEqual
 };
 
 var test = new mocha();

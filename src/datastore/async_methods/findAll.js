@@ -68,6 +68,8 @@ module.exports = function findAll (resourceName, params, options) {
         options.params = DSUtils.copy(options.params)
       }
 
+      DSUtils.applyScope(definition, params, options)
+
       // force a new request
       if (options.bypassCache || !options.cacheResponse) {
         delete resource.completedQueries[queryHash]

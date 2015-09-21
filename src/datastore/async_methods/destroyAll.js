@@ -26,6 +26,7 @@ module.exports = function destroyAll (resourceName, params, options) {
     } else {
       options = DSUtils._(definition, options)
       options.logFn('destroyAll', params, options)
+      DSUtils.applyScope(definition, params, options)
       resolve()
     }
   }).then(function () {

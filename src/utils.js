@@ -436,6 +436,25 @@ export default {
   _oErr: isObjectErr,
   _a: isArray,
   _aErr: isArrayErr,
+  applyScope (definition, params, options) {
+    let scope = options.scope
+    if (scope) {
+      if (isString(scope)) {
+        scope = [scope]
+      }
+    } else {
+      scope = []
+    }
+    scope.unshift('defaultScope')
+    forEach(scope, function (_scope) {
+      let scopeDef = options.scopes[_scope]
+      if (typeof scopeDef === 'function') {
+        deepMixIn(params, scopeDef(definition, params))
+      } else if (scopeDef) {
+        deepMixIn(params, scopeDef)
+      }
+    })
+  },
   compute (fn, field) {
     let _this = this
     let args = []

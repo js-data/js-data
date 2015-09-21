@@ -60,6 +60,7 @@ module.exports = function defineResource (definition) {
     this.defaultValues = {}
     this.methods = {}
     this.computed = {}
+    this.scopes = {}
     DSUtils.deepMixIn(this, options)
     let parent = _this.defaults
     if (definition.extends && definitions[definition.extends]) {
@@ -68,6 +69,7 @@ module.exports = function defineResource (definition) {
     DSUtils.fillIn(this.defaultValues, parent.defaultValues)
     DSUtils.fillIn(this.methods, parent.methods)
     DSUtils.fillIn(this.computed, parent.computed)
+    DSUtils.fillIn(this.scopes, parent.scopes)
     this.endpoint = ('endpoint' in options) ? options.endpoint : this.name
   }
 
