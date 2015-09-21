@@ -19,6 +19,7 @@ module.exports = function updateAll (resourceName, attrs, params, options) {
     } else {
       options = DSUtils._(definition, options)
       options.logFn('updateAll', attrs, params, options)
+      DSUtils.applyScope(definition, params, options)
       resolve(attrs)
     }
   })

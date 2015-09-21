@@ -487,4 +487,47 @@ describe('DS#filter', function () {
 
     assert.deepEqual(JSON.stringify(Thing.filter(params)), JSON.stringify([things[2], things[3]]), 'should filter by a nested key');
   });
+  it('should allow use of scopes', function () {
+    var store = new JSData.DS({
+      log: false,
+      scopes: {
+        defaultScope: {
+          foo: 'bar'
+        }
+      }
+    });
+    var Foo = store.defineResource({
+      name: 'foo',
+      scopes: {
+        second: {
+          beep: 'boop'
+        },
+        limit: {
+          limit: 1
+        }
+      }
+    });
+    var foos = Foo.inject([
+      { id: 1, foo: 'bar' },
+      { id: 2, beep: 'boop' },
+      { id: 3, foo: 'bar', beep: 'boop' },
+      { id: 4, foo: 'bar', beep: 'boop' },
+      { id: 5, foo: 'bar', beep: 'boop' },
+      { id: 6, foo: 'bar', beep: 'boop' },
+      { id: 7, foo: 'bar', beep: 'boop' },
+      { id: 8, foo: 'bar', beep: 'boop' }
+    ]);
+    objectsEqual(Foo.filter(null, {
+      scope: ['second', 'limit']
+    }), [foos[2]]);
+    objectsEqual(Foo.filter(null, {
+      scope: ['second']
+    }), Foo.filter({
+      foo: 'bar',
+      beep: 'boop'
+    }));
+    objectsEqual(Foo.filter(), Foo.filter({
+      foo: 'bar'
+    }));
+  });
 });

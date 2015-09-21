@@ -18,7 +18,10 @@ module.exports = function ejectAll (resourceName, params, options) {
     throw DSUtils._oErr('params')
   }
 
+  options = DSUtils._(definition, options)
   definition.logFn('ejectAll', params, options)
+
+  DSUtils.applyScope(definition, params, options)
 
   let resource = _this.store[resourceName]
   let queryHash = DSUtils.toJson(params)

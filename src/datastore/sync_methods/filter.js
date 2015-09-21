@@ -24,6 +24,8 @@ module.exports = function filter (resourceName, params, options) {
   options = DSUtils._(definition, options)
   options.logFn('filter', params, options)
 
+  DSUtils.applyScope(definition, params, options)
+
   // delegate filtering to DS#defaults.defaultFilter, which can be overridden by developers.
   return definition.defaultFilter.call(_this, _this.store[resourceName].collection, resourceName, params, options)
 }

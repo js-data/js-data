@@ -127,6 +127,7 @@ defaultsPrototype.reapInterval = DSUtils.w ? 30000 : false
 defaultsPrototype.relationsEnumerable = false
 defaultsPrototype.resetHistoryOnInject = true
 defaultsPrototype.returnMeta = false
+defaultsPrototype.scopes = {}
 defaultsPrototype.strategy = 'single'
 defaultsPrototype.upsert = !!DSUtils.w
 defaultsPrototype.useClass = true
