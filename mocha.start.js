@@ -128,6 +128,7 @@ beforeEach(function () {
     afterDestroy: lifecycle.afterDestroy,
     beforeInject: lifecycle.beforeInject,
     afterInject: lifecycle.afterInject,
+    linkRelations: true,
     log: false,
     methods: {
       say: function () {

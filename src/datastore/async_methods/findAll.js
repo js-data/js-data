@@ -118,21 +118,23 @@ module.exports = function findAll (resourceName, params, options) {
           promise = _this.adapters[adapter].findAll(definition, params, options)
         }
 
-        resource.pendingQueries[queryHash] = promise.then(function (data) {
-          // Query is no longer pending
-          delete resource.pendingQueries[queryHash]
-          if (options.cacheResponse) {
-            // inject the items into the data store
-            resource.queryData[queryHash] = processResults.call(_this, data, resourceName, queryHash, options)
-            resource.queryData[queryHash].$$injected = true
-            return resource.queryData[queryHash]
-          } else {
-            DSUtils.forEach(data, function (item, i) {
-              data[i] = definition.createInstance(item, options.orig())
-            })
-            return data
-          }
-        })
+        resource.pendingQueries[queryHash] = promise
+          .then(function (data) { return options.afterFindAll.call(data, options, data) })
+          .then(function (data) {
+            // Query is no longer pending
+            delete resource.pendingQueries[queryHash]
+            if (options.cacheResponse) {
+              // inject the items into the data store
+              resource.queryData[queryHash] = processResults.call(_this, data, resourceName, queryHash, options)
+              resource.queryData[queryHash].$$injected = true
+              return resource.queryData[queryHash]
+            } else {
+              DSUtils.forEach(data, function (item, i) {
+                data[i] = definition.createInstance(item, options.orig())
+              })
+              return data
+            }
+          })
       }
 
       return resource.pendingQueries[queryHash]

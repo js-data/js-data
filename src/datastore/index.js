@@ -74,7 +74,10 @@ defaultsPrototype.afterCreateCollection = lifecycleNoop
 defaultsPrototype.afterCreateInstance = lifecycleNoop
 defaultsPrototype.afterDestroy = lifecycleNoopCb
 defaultsPrototype.afterEject = lifecycleNoop
+defaultsPrototype.afterFind = lifecycleNoopCb
+defaultsPrototype.afterFindAll = lifecycleNoopCb
 defaultsPrototype.afterInject = lifecycleNoop
+defaultsPrototype.afterLoadRelations = lifecycleNoopCb
 defaultsPrototype.afterReap = lifecycleNoop
 defaultsPrototype.afterUpdate = lifecycleNoopCb
 defaultsPrototype.afterValidate = lifecycleNoopCb
@@ -107,7 +110,7 @@ defaultsPrototype.idAttribute = 'id'
 defaultsPrototype.ignoredChanges = [/\$/]
 defaultsPrototype.instanceEvents = !!DSUtils.w
 defaultsPrototype.keepChangeHistory = false
-defaultsPrototype.linkRelations = true
+defaultsPrototype.linkRelations = !!DSUtils.w
 defaultsPrototype.log = console ? (a, b, c, d, e) => console[typeof console.info === 'function' ? 'info' : 'log'](a, b, c, d, e) : false
 
 defaultsPrototype.logFn = function (a, b, c, d) {
