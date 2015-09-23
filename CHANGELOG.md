@@ -1,12 +1,14 @@
-##### 2.4.0 - xx September 2015
+##### 2.4.0 - 22 September 2015
 
 ###### Backwards compatible API changes
 - #179 - Implemented a feature like Sequelize Scopes
+- #217 - Add afterFind, afterFindAll, and afterLoadRelations hooks
 
-###### Backwards compatible bug fixes
+###### Bug fixes
 - #203 - createInstance/compute don't know about computed properties as property accessors
 - #215 - Javascript error when trying to merge model with null value for relation
 - #216 - Update remove circular to support File objects
+- #218 - linkRelations (like cacheResponse) should have defaulted to false on the server
 
 ###### Other
 - #204 - Choose official code style for project

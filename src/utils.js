@@ -438,6 +438,7 @@ export default {
   _aErr: isArrayErr,
   applyScope (definition, params, options) {
     let scope = options.scope
+    let _params = copy(params)
     if (scope) {
       if (isString(scope)) {
         scope = [scope]
@@ -449,11 +450,12 @@ export default {
     forEach(scope, function (_scope) {
       let scopeDef = options.scopes[_scope]
       if (typeof scopeDef === 'function') {
-        deepMixIn(params, scopeDef(definition, params))
+        deepMixIn(params, scopeDef(definition))
       } else if (scopeDef) {
         deepMixIn(params, scopeDef)
       }
     })
+    deepMixIn(params, _params)
   },
   compute (fn, field) {
     let _this = this

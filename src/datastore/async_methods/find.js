@@ -74,21 +74,23 @@ module.exports = function find (resourceName, id, options) {
           promise = _this.adapters[adapter].find(definition, id, options)
         }
 
-        resource.pendingQueries[id] = promise.then(function (data) {
-          // Query is no longer pending
-          delete resource.pendingQueries[id]
-          if (options.cacheResponse) {
-            // inject the item into the data store
-            let injected = definition.inject(data, options.orig())
-            // mark the item as "cached"
-            resource.completedQueries[id] = new Date().getTime()
-            resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id])
-            return injected
-          } else {
-            // just return an un-injected instance
-            return definition.createInstance(data, options.orig())
-          }
-        })
+        resource.pendingQueries[id] = promise
+          .then(function (data) { return options.afterFind.call(data, options, data) })
+          .then(function (data) {
+            // Query is no longer pending
+            delete resource.pendingQueries[id]
+            if (options.cacheResponse) {
+              // inject the item into the data store
+              let injected = definition.inject(data, options.orig())
+              // mark the item as "cached"
+              resource.completedQueries[id] = new Date().getTime()
+              resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id])
+              return injected
+            } else {
+              // just return an un-injected instance
+              return definition.createInstance(data, options.orig())
+            }
+          })
       }
       return resource.pendingQueries[id]
     } else {

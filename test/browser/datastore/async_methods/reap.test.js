@@ -1,5 +1,5 @@
 describe('DS#reap', function () {
-  it('should query the server for a collection', function () {
+  it('should eject expired items', function () {
     var _this = this;
     var Thing = store.defineResource({
       name: 'thing',
@@ -21,7 +21,7 @@ describe('DS#reap', function () {
       assert.equal(_this.requests[0].url, 'http://test.js-data.io/thing?foo=bar');
       assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(things));
-    }, 100);
+    }, 120);
 
     return Thing.findAll({ foo: 'bar' }).then(function (data) {
       assert.deepEqual(JSON.stringify(data), JSON.stringify(things));
@@ -39,7 +39,7 @@ describe('DS#reap', function () {
           } catch (err) {
             return reject(err);
           }
-        }, 90);
+        }, 120);
       });
     });
   });

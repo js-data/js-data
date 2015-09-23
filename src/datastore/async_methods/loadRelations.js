@@ -11,6 +11,7 @@ module.exports = function loadRelations (resourceName, instance, relations, opti
   let _this = this
   let {utils: DSUtils, errors: DSErrors} = _this
   let definition = _this.definitions[resourceName]
+  let _options
 
   return new DSUtils.Promise(function (resolve, reject) {
     if (DSUtils._sn(instance)) {
@@ -30,7 +31,7 @@ module.exports = function loadRelations (resourceName, instance, relations, opti
     } else if (!DSUtils._a(relations)) {
       reject(new DSErrors.IA('"relations" must be a string or an array!'))
     } else {
-      let _options = DSUtils._(definition, options)
+      _options = DSUtils._(definition, options)
       _options.logFn('loadRelations', instance, relations, _options)
 
       let tasks = []
@@ -85,5 +86,6 @@ module.exports = function loadRelations (resourceName, instance, relations, opti
 
       resolve(tasks)
     }
-  }).then(function (tasks) { return DSUtils.Promise.all(tasks) }).then(function () { return instance })
+  }).then(function (tasks) { return DSUtils.Promise.all(tasks) })
+    .then(function () { return _options.afterLoadRelations.call(instance, _options, instance) })
 }
