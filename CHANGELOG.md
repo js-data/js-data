@@ -2,6 +2,7 @@
 
 ###### Backwards compatible API changes
 - #179 - Implemented a feature like Sequelize Scopes
+- #201 - Feature request: hook into loadRelations
 - #217 - Add afterFind, afterFindAll, and afterLoadRelations hooks
 
 ###### Bug fixes
