@@ -367,12 +367,25 @@ module.exports = function defineResource (definition) {
     // mix in events
     DSUtils.Events(def)
 
+    // Queue for batching `DS.change` notifications into one (see below).
+    let notifyQueue = null
+
+    // Change notifications are batched until a task checkpoint (setTimeout).
+    // The event is eventually emitted with an array of accumulated instances.
+    // This avoids generating multiple `DS.change` notifications when injecting
+    // more than one instance synchronously.
     def.handleChange = function (data) {
       resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified)
       if (def.notify) {
-        setTimeout(() => {
-          def.emit('DS.change', def, data)
-        }, 0)
+        if (notifyQueue) {
+          notifyQueue.push(data)
+        } else {
+          notifyQueue = [data]
+          setTimeout(() => {
+            def.emit('DS.change', def, notifyQueue)
+            notifyQueue = null
+          }, 0)
+        }
       }
     }
 
