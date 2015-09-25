@@ -349,8 +349,6 @@ beforeEach(function () {
     user: user22
   };
 
-
-
   try {
     this.xhr = sinon.useFakeXMLHttpRequest();
     // Create an array to store requests
