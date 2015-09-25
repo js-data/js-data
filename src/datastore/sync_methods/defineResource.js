@@ -135,8 +135,7 @@ module.exports = function defineResource (definition) {
     var _class = def['class'] = DSUtils.pascalCase(def.name)
     try {
       if (typeof def.useClass === 'function') {
-        eval(`function ${_class}() { def.useClass.call(this); }`) // eslint-disable-line
-        def[_class] = eval(_class) // eslint-disable-line
+        def[_class] = new Function('def', `return function ${_class}() { def.useClass.call(this); }`)(def) // eslint-disable-line
         def[_class].prototype = (function (proto) {
           function Ctor () {
           }
@@ -145,8 +144,7 @@ module.exports = function defineResource (definition) {
           return new Ctor()
         })(def.useClass.prototype)
       } else {
-        eval(`function ${_class}() {}`) // eslint-disable-line
-        def[_class] = eval(_class) // eslint-disable-line
+        def[_class] = new Function(`return function ${_class}() {}`)() // eslint-disable-line
       }
     } catch (e) {
       def[_class] = function () {}
