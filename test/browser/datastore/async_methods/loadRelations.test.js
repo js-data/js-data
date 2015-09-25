@@ -386,7 +386,33 @@ describe('DS#loadRelations', function () {
       assert.deepEqual(DSUtils.toJson(foo.bars), DSUtils.toJson(barsData));
     });
   });
+describe('zero id value in relations', function() {
+  var Item, Client,
+    clientZero = {
+      id: 0,
+      name: 'Client Zero'
+    },
+    item5 = {
+      id: 5,
+      ClientId: clientZero.id
+    };
+  beforeEach(function() {
+    Item = store.defineResource({
+      name: 'item',
+      relations: {
+        hasOne: {
+          client: {
+            localKey: 'ClientId',
+            localField: 'Client'
+          }
+        }
+      }
+    });
 
+    Client = store.defineResource({
+      name: 'client'
+    });
+  });
   it('should call relation data in hasOne zero value for "localKey"', function (done) {
     var _this = this;
     setTimeout(function () {
@@ -396,16 +422,16 @@ describe('DS#loadRelations', function () {
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(item5));
     }, 60);
     return Item.find(item5.id)
-      .then(function(item) {
-        setTimeout(function () {
-          assert.equal(2, _this.requests.length);
-          assert.equal(_this.requests[1].url, 'http://test.js-data.io/client/' + clientZero.id);
-          assert.equal(_this.requests[1].method, 'GET');
-          _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(clientZero));
-          done();
-        }, 60);
-        return Item.loadRelations(item, ['client']);
-      });
+        .then(function(item) {
+          setTimeout(function () {
+            assert.equal(2, _this.requests.length);
+            assert.equal(_this.requests[1].url, 'http://test.js-data.io/client/' + clientZero.id);
+            assert.equal(_this.requests[1].method, 'GET');
+            _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(clientZero));
+            done();
+          }, 60);
+          return Item.loadRelations(item, ['client']);
+        });
   });
   it('should return relation data from "localField"', function() {
     var _this = this;
@@ -413,18 +439,20 @@ describe('DS#loadRelations', function () {
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(item5));
     }, 60);
     return Item.find(item5.id)
-      .then(function(item) {
-        setTimeout(function () {
-          assert.equal(2, _this.requests.length);
-          assert.equal(_this.requests[1].url, 'http://test.js-data.io/client/' + clientZero.id);
-          assert.equal(_this.requests[1].method, 'GET');
-          _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(clientZero));
-        }, 60);
-        return Item.loadRelations(item);
-      })
-      .then(function (item) {
-        assert.isObject(item.Client, 'Client "localField" is not an object');
-        assert.deepEqual(DSUtils.toJson(item.Client), DSUtils.toJson(clientZero));
-      });
+        .then(function(item) {
+          setTimeout(function () {
+            assert.equal(2, _this.requests.length);
+            assert.equal(_this.requests[1].url, 'http://test.js-data.io/client/' + clientZero.id);
+            assert.equal(_this.requests[1].method, 'GET');
+            _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(clientZero));
+          }, 60);
+          return Item.loadRelations(item);
+        })
+        .then(function (item) {
+          assert.isObject(item.Client, 'Client "localField" is not an object');
+          assert.deepEqual(DSUtils.toJson(item.Client), DSUtils.toJson(clientZero));
+        });
   });
+});
+
 });

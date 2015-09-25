@@ -84,12 +84,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new _datastoreIndex['default'](options);
 	  },
 	  version: {
-	    full: '<%= pkg.version %>',
-	    major: parseInt('<%= major %>', 10),
-	    minor: parseInt('<%= minor %>', 10),
-	    patch: parseInt('<%= patch %>', 10),
-	    alpha:  true ? '<%= alpha %>' : false,
-	    beta:  true ? '<%= beta %>' : false
+	    full: '2.4.0',
+	    major: parseInt('2', 10),
+	    minor: parseInt('4', 10),
+	    patch: parseInt('0', 10),
+	    alpha:  true ? 'false' : false,
+	    beta:  true ? 'false' : false
 	  }
 	};
 
