@@ -55,7 +55,7 @@ module.exports = function loadRelations (resourceName, instance, relations, opti
           }
 
           let defKey = def.localKey ? DSUtils.get(instance, def.localKey) : null
-          let hasDefKey = DSUtils.isEmpty(defKey)
+          let hasDefKey = !!(defKey || defKey === 0)
 
           if (def.type === 'hasMany') {
             let orig = __options.orig()

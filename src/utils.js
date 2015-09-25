@@ -659,7 +659,7 @@ export default {
           if (localKey) {
             prop.get = function () {
               let key = get(this, localKey);
-              let hasKey = isEmpty(key);
+              let hasKey = !!(key || key === 0);
               return hasKey ? definition.getResource(relationName).get(key) : undefined
             }
             prop.set = function (sibling) {

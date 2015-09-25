@@ -1270,7 +1270,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          if (localKey) {
 	            prop.get = function () {
 	              var key = get(this, localKey);
-	              var hasKey = isEmpty(key);
+	              var hasKey = !!(key || key === 0);
 	              return hasKey ? definition.getResource(relationName).get(key) : undefined;
 	            };
 	            prop.set = function (sibling) {
@@ -4872,7 +4872,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 
 	            var defKey = def.localKey ? DSUtils.get(instance, def.localKey) : null;
-	            var hasDefKey = DSUtils.isEmpty(defKey);
+	            var hasDefKey = !!(defKey || defKey === 0);
 
 	            if (def.type === 'hasMany') {
 	              var orig = __options.orig();
