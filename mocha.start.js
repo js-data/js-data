@@ -117,6 +117,7 @@ beforeEach(function () {
     beforeValidate: lifecycle.beforeValidate,
     cacheResponse: true,
     notify: true,
+    aggregateEvents: false,
     upsert: true,
     validate: lifecycle.validate,
     afterValidate: lifecycle.afterValidate,
