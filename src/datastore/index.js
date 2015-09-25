@@ -123,6 +123,7 @@ defaultsPrototype.logFn = function (a, b, c, d) {
 defaultsPrototype.maxAge = false
 defaultsPrototype.methods = {}
 defaultsPrototype.notify = !!DSUtils.w
+defaultsPrototype.aggregateEvents = false
 defaultsPrototype.omit = []
 defaultsPrototype.onConflict = 'merge'
 defaultsPrototype.reapAction = DSUtils.w ? 'inject' : 'none'

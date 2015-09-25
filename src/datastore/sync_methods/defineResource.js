@@ -365,12 +365,33 @@ module.exports = function defineResource (definition) {
     // mix in events
     DSUtils.Events(def)
 
+    // Queue for batching `DS.change` notifications into one (see below).
+    let notifyQueue = null
+
     def.handleChange = function (data) {
       resource.collectionModified = DSUtils.updateTimestamp(resource.collectionModified)
+      // Option `notify` disables change events.
       if (def.notify) {
-        setTimeout(() => {
-          def.emit('DS.change', def, data)
-        }, 0)
+        // Option `aggregateEvents` enables the batching of synchronous
+        // change events on the resource level. This is useful for subscribers
+        // that perform computationally costly work in response to a resource
+        // change.
+        if (def.aggregateEvents) {
+          if (notifyQueue) {
+            notifyQueue.push(data)
+          } else {
+            notifyQueue = [data]
+            setTimeout(() => {
+              def.emit('DS.change', def, notifyQueue)
+              notifyQueue = null
+            }, 0)
+          }
+        // Default notification behaviour: one event per instance.
+        } else {
+          setTimeout(() => {
+            def.emit('DS.change', def, data)
+          }, 0)
+        }
       }
     }
 

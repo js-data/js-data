@@ -313,11 +313,16 @@ module.exports = function inject (resourceName, attrs, options) {
     definition.emit('DS.beforeInject', definition, attrs)
   }
 
-  // start the recursive injection of data
+  // start the recursive injection of data; this will also call
+  // `definition.handleChange` for each item
   injected = _inject.call(_this, definition, resource, attrs, options)
 
-  // collection was modified
-  definition.handleChange(injected)
+  // If change aggregation is disabled, we emit a final event with all the
+  // inserted instances. If enabled, instance events will be aggregated into one
+  // for the same effect.
+  if (!definition.aggregateEvents) {
+    definition.handleChange(injected)
+  }
 
   // lifecycle
   options.afterInject(options, injected)
