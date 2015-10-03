@@ -179,10 +179,6 @@ module.exports = function defineResource (definition) {
       return DSUtils.get(this, key)
     }
 
-    if (def.instanceEvents) {
-      DSUtils.Events(def[_class].prototype)
-    }
-
     // Setup the relation links
     DSUtils.applyRelationGettersToTarget(_this, def, def[_class].prototype)
 

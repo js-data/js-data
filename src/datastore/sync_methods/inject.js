@@ -124,9 +124,6 @@ function _inject (definition, resource, attrs, options) {
       injected.push(_inject.call(_this, definition, resource, attrs[i], options))
     }
   } else {
-    // create the observer handler for the data to be injected
-    let _react = makeObserverHandler.call(_this, definition, resource)
-
     // check if "idAttribute" is a computed property
     let c = definition.computed
     let idA = definition.idAttribute
@@ -140,7 +137,6 @@ function _inject (definition, resource, attrs, options) {
     }
 
     if (!(idA in attrs)) {
-      // we cannot inject any object into the store that does not have a primary key!
       let error = new DSErrors.R(`${definition.name}.inject: "attrs" must contain the property specified by "idAttribute"!`)
       options.errorFn(error)
       throw error
@@ -203,6 +199,10 @@ function _inject (definition, resource, attrs, options) {
           } else {
             item = new definition[definition['class']]()
           }
+
+          if (definition.instanceEvents && typeof item.emit !== 'function') {
+            DSUtils.Events(item)
+          }
           // remove relation properties from the item, since those relations have been injected by now
           DSUtils.forEach(definition.relationList, function (def) {
             delete attrs[def.localField]
@@ -213,6 +213,9 @@ function _inject (definition, resource, attrs, options) {
           // add item to collection
           resource.collection.push(item)
           resource.changeHistories[id] = []
+
+          // create the observer handler for the data to be injected
+          let _react = makeObserverHandler.call(_this, definition, resource)
 
           // If we're in the browser, start observation
           if (definition.watchChanges) {

@@ -4,6 +4,9 @@
 - #187 - No way to hook into error events globally
 - #231 - Added hasMany relations linking using "foreignKeys" by @treyenelson
 
+###### Bug fixes
+- #229 - DS.change is emitted on an instance multiple times after only 1 modification
+
 ##### 2.4.0 - 22 September 2015
 
 ###### Backwards compatible API changes

@@ -159,6 +159,10 @@ export default {
     // create instance
     item = new Constructor()
 
+    if (definition.instanceEvents) {
+      DSUtils.Events(item)
+    }
+
     // add default values
     if (options.defaultValues) {
       DSUtils.deepMixIn(item, options.defaultValues)

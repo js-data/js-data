@@ -122,14 +122,16 @@ beforeEach(function () {
       say: function () {
         return 'hi';
       }
-    }
+    },
+    logFn: function () {},
+    errorFn: function () {}
   });
   dsHttpAdapter = new DSHttpAdapter({
     queryTransform: lifecycle.queryTransform,
     serialize: lifecycle.serialize,
     deserialize: lifecycle.deserialize,
-    log: function () {
-    }
+    log: function () {},
+    error: function () {}
   });
   store.registerAdapter('http', dsHttpAdapter, { default: true });
   dsLocalStorageAdapter = new DSLocalStorageAdapter();

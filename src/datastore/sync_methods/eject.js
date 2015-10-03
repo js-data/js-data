@@ -78,6 +78,9 @@ module.exports = function eject (resourceName, id, options) {
     delete resource.changeHistories[id]
     delete resource.modified[id]
     delete resource.saved[id]
+    if (definition.instanceEvents && item.off) {
+      item.off()
+    }
 
     // remove it from the store
     resource.collection.splice(i, 1)
