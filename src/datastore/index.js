@@ -104,6 +104,9 @@ defaultsPrototype.eagerEject = false
 defaultsPrototype.eagerInject = false
 defaultsPrototype.endpoint = ''
 defaultsPrototype.error = console ? (a, b, c) => console[typeof console.error === 'function' ? 'error' : 'log'](a, b, c) : false
+defaultsPrototype.errorHandler = function (...args) {
+  return DSUtils.Promise.reject(args[0])
+}
 defaultsPrototype.fallbackAdapters = ['http']
 defaultsPrototype.findStrictCache = false
 defaultsPrototype.idAttribute = 'id'
@@ -396,6 +399,16 @@ class DS {
       this.store[name].queryData = {}
     })
     return ejected
+  }
+
+  errorFn (...args) {
+    let options = args[args.length - 1]
+    let defaultHandler = this.defaults.errorHandler
+    let errorHandler = options ? options.errorHandler : defaultHandler
+    errorHandler = errorHandler || defaultHandler
+    return function (err) {
+      return errorHandler(err, ...args)
+    }
   }
 }
 

@@ -103,6 +103,6 @@ module.exports = function find (resourceName, id, options) {
     if (resource) {
       delete resource.pendingQueries[id]
     }
-    return DSUtils.Promise.reject(err)
+    return _this.errorFn('find', resourceName, id, options)(err)
   })
 }

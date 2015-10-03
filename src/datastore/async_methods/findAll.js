@@ -148,6 +148,6 @@ module.exports = function findAll (resourceName, params, options) {
     if (resource) {
       delete resource.pendingQueries[queryHash]
     }
-    return DSUtils.Promise.reject(err)
+    return _this.errorFn('findAll', resourceName, params, options)(err)
   })
 }

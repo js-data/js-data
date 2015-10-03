@@ -78,5 +78,5 @@ module.exports = function create (resourceName, attrs, options) {
     })
     .then(function (item) {
       return DSUtils.respond(item, {adapter}, options)
-    })
+    })['catch'](_this.errorFn('create', resourceName, attrs, options))
 }
