@@ -443,4 +443,25 @@ describe('DS#loadRelations', function () {
       assert.deepEqual(DSUtils.toJson(foo.bars), DSUtils.toJson(barsData));
     });
   });
+  it('should get objects from the server when loading foreignKeys', function () {
+    var _this = this;
+    User.inject(user10);
+
+    setTimeout(function () {
+      assert.equal(1, _this.requests.length);
+      assert.equal(_this.requests[0].url, 'http://test.js-data.io/group?where=%7B%22userIds%22:%7B%22contains%22:10%7D%7D');
+      assert.equal(_this.requests[0].method, 'GET');
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([
+        group1,
+        group2
+      ]));
+    }, 60);
+
+    return User.loadRelations(10, 'group', {
+      findStrictCache: true
+    }).then(function (user) {
+      assert.deepEqual(user.groups[0], Group.get(user.groups[0].id))
+      assert.deepEqual(user.groups[1], Group.get(user.groups[1].id))
+    });
+  });
 });

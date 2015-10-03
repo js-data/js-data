@@ -74,6 +74,7 @@ describe('DS#inject', function () {
     store.inject('organization', organization15);
     store.inject('comment', comment19);
     store.inject('profile', profile21);
+    store.inject('group', group1);
 
     // originals
     assert.equal(store.get('user', 10).name, user10.name);
@@ -87,6 +88,9 @@ describe('DS#inject', function () {
     assert.deepEqual(store.get('comment', 19).content, comment19.content);
     assert.deepEqual(store.get('profile', 21).id, profile21.id);
     assert.deepEqual(store.get('profile', 21).content, profile21.content);
+    assert.deepEqual(store.get('group', 1).id, group1.id);
+    assert.deepEqual(store.get('group', 1).name, group1.name);
+    assert.isArray(store.get('group', 1).userIds);
 
     // user10 relations
     assert.deepEqual(store.get('comment', 11), store.get('user', 10).comments[0]);
@@ -94,6 +98,12 @@ describe('DS#inject', function () {
     assert.deepEqual(store.get('comment', 13), store.get('user', 10).comments[2]);
     assert.deepEqual(store.get('organization', 14), store.get('user', 10).organization);
     assert.deepEqual(store.get('profile', 15), store.get('user', 10).profile);
+    assert.isArray(store.get('user', 10).groups);
+    assert.deepEqual(store.get('user', 10).groups[0], store.get('group', 1));
+
+    // group1 relations
+    assert.isArray(store.get('group', 1).users);
+    assert.deepEqual(store.get('group', 1).users[0], store.get('user', 10));
 
     // organization15 relations
     assert.deepEqual(store.get('user', 16), store.get('organization', 15).users[0]);

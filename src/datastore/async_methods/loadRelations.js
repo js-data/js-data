@@ -66,6 +66,13 @@ module.exports = function loadRelations (resourceName, instance, relations, opti
                 }
               }
               orig.localKeys = keys
+            } else if (def.foreignKeys) {
+              delete params[def.foreignKey]
+              params.where = {
+                [def.foreignKeys]: {
+                  contains: instance[definition.idAttribute]
+                }
+              }
             }
             task = relationDef.findAll(params, orig)
           } else if (def.type === 'hasOne') {
