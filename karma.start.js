@@ -4,6 +4,7 @@ var store, DSUtils, dsHttpAdapter, dsLocalStorageAdapter, p1, p2, p3, p4, p5, p6
 var Post, User, Organization, Comment, Profile;
 var user1, organization2, comment3, profile4;
 var comment11, comment12, comment13, organization14, profile15, user10, user16, user17, user18, organization15, user19, user20, comment19, user22, profile21;
+var group1, group2;
 
 var lifecycle = {};
 
@@ -153,6 +154,10 @@ beforeEach(function () {
         comment: {
           localField: 'comments',
           foreignKey: 'approvedBy'
+        },
+        group: {
+          localField: 'groups',
+          foreignKeys: 'userIds'
         }
       },
       hasOne: {
@@ -166,6 +171,18 @@ beforeEach(function () {
           parent: true,
           localKey: 'organizationId',
           localField: 'organization'
+        }
+      }
+    }
+  });
+
+  Group = store.defineResource({
+    name: 'group',
+    relations: {
+      hasMany: {
+        user: {
+          localField: 'users',
+          localKeys: 'userIds'
         }
       }
     }
@@ -261,7 +278,6 @@ beforeEach(function () {
     id: 4,
     userId: 1
   };
-
   comment11 = {
     id: 11,
     userId: 10,
@@ -312,6 +328,16 @@ beforeEach(function () {
     id: 18,
     organizationId: 15,
     name: 'test user 18'
+  };
+  group1 = {
+    name: 'group 1',
+    id: 1,
+    userIds: [10]
+  };
+  group2 = {
+    name: 'group 2',
+    id: 2,
+    userIds: [10]
   };
   organization15 = {
     name: 'Another Test Corp',

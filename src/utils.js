@@ -611,6 +611,7 @@ export default {
       let localKey = def.localKey
       let foreignKey = def.foreignKey
       let localKeys = def.localKeys
+      let foreignKeys = def.foreignKeys
       let enumerable = typeof def.enumerable === 'boolean' ? def.enumerable : !!definition.relationsEnumerable
       if (typeof def.link === 'boolean' ? def.link : !!definition.linkRelations) {
         delete target[localField]
@@ -636,14 +637,18 @@ export default {
             } else if (localKeys) {
               let keys = get(this, localKeys) || []
               return definition.getResource(relationName).getAll(isArray(keys) ? keys : _keys(keys))
+            } else if (foreignKeys) {
+              set(params, `where.${foreignKeys}.contains`, this[definition.idAttribute])
+              return definition.getResource(relationName).defaultFilter.call(store, store.store[relationName].collection, relationName, params)
             }
             return undefined
           }
           prop.set = function (children) {
             if (children && children.length) {
+              let id = get(this, definition.idAttribute)
               if (foreignKey) {
                 forEach(children, function (child) {
-                  set(child, foreignKey, get(this, definition.idAttribute))
+                  set(child, foreignKey, id)
                 })
               } else if (localKeys) {
                 let keys = []
@@ -651,6 +656,17 @@ export default {
                   keys.push(get(child, definition.getResource(relationName).idAttribute))
                 })
                 set(this, localKeys, keys)
+              } else if (foreignKeys) {
+                forEach(children, function (child) {
+                  let keys = get(child, foreignKeys)
+                  if (keys) {
+                    if (!contains(keys, id)) {
+                      keys.push(id)
+                    }
+                  } else {
+                    set(child, foreignKeys, [id])
+                  }
+                })
               }
             }
             return get(this, localField)
