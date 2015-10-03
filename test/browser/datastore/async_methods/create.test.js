@@ -3,11 +3,16 @@ describe('DS#create', function () {
     var _this = this;
 
     setTimeout(function () {
-      assert.equal(1, _this.requests.length);
-      assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
-      assert.equal(_this.requests[0].method, 'POST');
-      assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ author: 'John', age: 30 }));
-      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(p1));
+      try {
+        assert.equal(1, _this.requests.length, 'should only have 1 request so far');
+        assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts', 'url should be correct');
+        assert.equal(_this.requests[0].method, 'POST', 'method should be POST');
+        assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ author: 'John', age: 30 }), 'request body should be correct');
+        _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(p1));        
+      } catch (err) {
+        console.log(err.stack);
+        throw err;
+      }
     }, 100);
 
     return Post.create({ author: 'John', age: 30 }).then(function (post) {
@@ -18,7 +23,7 @@ describe('DS#create', function () {
       assert.equal(lifecycle.afterInject.callCount, 1, 'afterInject should have been called');
       assert.equal(lifecycle.serialize.callCount, 1, 'serialize should have been called');
       assert.equal(lifecycle.deserialize.callCount, 1, 'deserialize should have been called');
-      assert.deepEqual(JSON.stringify(Post.get(5)), JSON.stringify(p1));
+      assert.deepEqual(JSON.stringify(Post.get(5)), JSON.stringify(p1)), 'post should be correct';
     });
   });
   it('should create an item and save it to the server but not inject the result', function () {

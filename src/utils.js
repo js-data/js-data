@@ -164,36 +164,44 @@ try {
 function Events (target) {
   let events = {}
   target = target || this
-  target.on = function (type, func, ctx) {
-    events[type] = events[type] || []
-    events[type].push({
-      f: func,
-      c: ctx
-    })
-  }
-  target.off = function (type, func) {
-    let listeners = events[type]
-    if (!listeners) {
-      events = {}
-    } else if (func) {
-      for (let i = 0; i < listeners.length; i++) {
-        if (listeners[i].f === func) {
-          listeners.splice(i, 1)
-          break
+  Object.defineProperties(target, {
+    on: {
+      value: function (type, func, ctx) {
+        events[type] = events[type] || []
+        events[type].push({
+          f: func,
+          c: ctx
+        })
+      }
+    },
+    off: {
+      value: function (type, func) {
+        let listeners = events[type]
+        if (!listeners) {
+          events = {}
+        } else if (func) {
+          for (let i = 0; i < listeners.length; i++) {
+            if (listeners[i].f === func) {
+              listeners.splice(i, 1)
+              break
+            }
+          }
+        } else {
+          listeners.splice(0, listeners.length)
         }
       }
-    } else {
-      listeners.splice(0, listeners.length)
-    }
-  }
-  target.emit = function (...args) {
-    let listeners = events[args.shift()] || []
-    if (listeners) {
-      for (let i = 0; i < listeners.length; i++) {
-        listeners[i].f.apply(listeners[i].c, args)
+    },
+    emit: {
+      value: function (...args) {
+        let listeners = events[args.shift()] || []
+        if (listeners) {
+          for (let i = 0; i < listeners.length; i++) {
+            listeners[i].f.apply(listeners[i].c, args)
+          }
+        }
       }
     }
-  }
+  })
 }
 
 /**
