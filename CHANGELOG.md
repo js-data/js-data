@@ -1,3 +1,9 @@
+##### 2.5.0 - 03 October 2015
+
+###### Backwards compatible API changes
+- #187 - No way to hook into error events globally
+- #231 - Added hasMany relations linking using "foreignKeys" by @treyenelson
+
 ##### 2.4.0 - 22 September 2015
 
 ###### Backwards compatible API changes

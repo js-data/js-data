@@ -95,4 +95,5 @@ module.exports = function loadRelations (resourceName, instance, relations, opti
     }
   }).then(function (tasks) { return DSUtils.Promise.all(tasks) })
     .then(function () { return _options.afterLoadRelations.call(instance, _options, instance) })
+    .catch(_this.errorFn('loadRelations', resourceName, instance, relations, options))
 }

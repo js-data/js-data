@@ -66,4 +66,5 @@ module.exports = function updateAll (resourceName, attrs, params, options) {
     .then(function (items) {
       return DSUtils.respond(items, {adapter}, options)
     })
+    .catch(_this.errorFn('updateAll', resourceName, attrs, params, options))
 }

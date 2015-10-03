@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -48,7 +48,7 @@
     "jit-grunt": "0.9.1",
     "jshint": "2.8.0",
     "jshint-loader": "0.8.3",
-    "karma": "0.13.9",
+    "karma": "0.13.10",
     "karma-chai": "0.1.0",
     "karma-chrome-launcher": "0.2.0",
     "karma-coverage": "0.5.2",
@@ -58,10 +58,10 @@
     "karma-script-launcher": "0.1.0",
     "karma-sinon": "1.0.4",
     "karma-spec-reporter": "0.0.20",
-    "sinon": "1.16.1",
+    "sinon": "1.17.1",
     "standard": "5.3.1",
     "time-grunt": "1.2.1",
-    "webpack-dev-server": "1.11.0"
+    "webpack-dev-server": "1.12.0"
   },
   "standard": {
     "parser": "babel-eslint"

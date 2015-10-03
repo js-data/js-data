@@ -91,4 +91,5 @@ module.exports = function save (resourceName, id, options) {
     .then(function (item) {
       return DSUtils.respond(item, {adapter}, options)
     })
+    .catch(_this.errorFn('save', resourceName, id, options))
 }

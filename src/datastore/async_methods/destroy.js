@@ -56,6 +56,6 @@ module.exports = function destroy (resourceName, id, options) {
       if (options && options.eagerEject && item) {
         definition.inject(item, { notify: false })
       }
-      return DSUtils.Promise.reject(err)
+      return _this.errorFn('destroy', resourceName, id, options)(err)
     })
 }

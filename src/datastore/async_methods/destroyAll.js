@@ -58,6 +58,6 @@ module.exports = function destroyAll (resourceName, params, options) {
     if (options && options.eagerEject && ejected) {
       definition.inject(ejected, {notify: false})
     }
-    return DSUtils.Promise.reject(err)
+    return _this.errorFn('destroyAll', resourceName, params, options)(err)
   })
 }

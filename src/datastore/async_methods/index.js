@@ -24,6 +24,7 @@ export default {
         resolve(_this.get(resourceName, id))
       }
     }).then(function (item) { return item ? _this.find(resourceName, id, options) : item })
+      .catch(_this.errorFn('refresh', resourceName, id, options))
   },
   refreshAll (resourceName, params, options) {
     let _this = this
@@ -52,7 +53,7 @@ export default {
         })
         return found
       })
-    })
+    }).catch(_this.errorFn('refreshAll', resourceName, params, options))
   },
   save: require('./save'),
   update: require('./update'),

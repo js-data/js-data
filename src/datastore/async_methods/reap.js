@@ -71,5 +71,5 @@ module.exports = function reap (resourceName, options) {
       }
     }
     return items
-  })
+  }).catch(_this.errorFn('reap', resourceName, options))
 }
