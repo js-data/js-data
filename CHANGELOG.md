@@ -6,6 +6,7 @@
 
 ###### Bug fixes
 - #229 - DS.change is emitted on an instance multiple times after only 1 modification
+- #232 - Adapter default basepath is taken instead of definition basepath when using an action.
 
 ##### 2.4.0 - 22 September 2015
 
