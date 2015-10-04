@@ -1,4 +1,4 @@
-##### 2.5.0 - 03 October 2015
+##### 2.5.0 - 04 October 2015
 
 ###### Backwards compatible API changes
 - #187 - No way to hook into error events globally

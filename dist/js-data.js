@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 2.4.0 - Homepage <http://www.js-data.io/>
+ * @version 2.5.0 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -84,9 +84,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new _datastoreIndex['default'](options);
 	  },
 	  version: {
-	    full: '2.4.0',
+	    full: '2.5.0',
 	    major: parseInt('2', 10),
-	    minor: parseInt('4', 10),
+	    minor: parseInt('5', 10),
 	    patch: parseInt('0', 10),
 	    alpha:  true ? 'false' : false,
 	    beta:  true ? 'false' : false
@@ -243,6 +243,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	defaultsPrototype.error = console ? function (a, b, c) {
 	  return console[typeof console.error === 'function' ? 'error' : 'log'](a, b, c);
 	} : false;
+	defaultsPrototype.errorHandler = function () {
+	  return _utils['default'].Promise.reject(arguments[0]);
+	};
 	defaultsPrototype.fallbackAdapters = ['http'];
 	defaultsPrototype.findStrictCache = false;
 	defaultsPrototype.idAttribute = 'id';
@@ -541,6 +544,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	      });
 	      return ejected;
 	    }
+	  }, {
+	    key: 'errorFn',
+	    value: function errorFn() {
+	      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	        args[_key] = arguments[_key];
+	      }
+
+	      var options = args[args.length - 1];
+	      var defaultHandler = this.defaults.errorHandler;
+	      var errorHandler = options ? options.errorHandler : defaultHandler;
+	      errorHandler = errorHandler || defaultHandler;
+	      return function (err) {
+	        return errorHandler.apply(undefined, [err].concat(args));
+	      };
+	    }
 	  }]);
 
 	  return DS;
@@ -560,8 +578,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    target[k].before = function (fn) {
 	      var orig = target[k];
 	      target[k] = function () {
-	        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	          args[_key] = arguments[_key];
+	        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+	          args[_key2] = arguments[_key2];
 	        }
 
 	        return orig.apply(this, fn.apply(this, args) || args);
@@ -750,40 +768,48 @@ return /******/ (function(modules) { // webpackBootstrap
 	function Events(target) {
 	  var events = {};
 	  target = target || this;
-	  target.on = function (type, func, ctx) {
-	    events[type] = events[type] || [];
-	    events[type].push({
-	      f: func,
-	      c: ctx
-	    });
-	  };
-	  target.off = function (type, func) {
-	    var listeners = events[type];
-	    if (!listeners) {
-	      events = {};
-	    } else if (func) {
-	      for (var i = 0; i < listeners.length; i++) {
-	        if (listeners[i].f === func) {
-	          listeners.splice(i, 1);
-	          break;
+	  Object.defineProperties(target, {
+	    on: {
+	      value: function value(type, func, ctx) {
+	        events[type] = events[type] || [];
+	        events[type].push({
+	          f: func,
+	          c: ctx
+	        });
+	      }
+	    },
+	    off: {
+	      value: function value(type, func) {
+	        var listeners = events[type];
+	        if (!listeners) {
+	          events = {};
+	        } else if (func) {
+	          for (var i = 0; i < listeners.length; i++) {
+	            if (listeners[i].f === func) {
+	              listeners.splice(i, 1);
+	              break;
+	            }
+	          }
+	        } else {
+	          listeners.splice(0, listeners.length);
 	        }
 	      }
-	    } else {
-	      listeners.splice(0, listeners.length);
-	    }
-	  };
-	  target.emit = function () {
-	    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	      args[_key] = arguments[_key];
-	    }
+	    },
+	    emit: {
+	      value: function value() {
+	        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	          args[_key] = arguments[_key];
+	        }
 
-	    var listeners = events[args.shift()] || [];
-	    if (listeners) {
-	      for (var i = 0; i < listeners.length; i++) {
-	        listeners[i].f.apply(listeners[i].c, args);
+	        var listeners = events[args.shift()] || [];
+	        if (listeners) {
+	          for (var i = 0; i < listeners.length; i++) {
+	            listeners[i].f.apply(listeners[i].c, args);
+	          }
+	        }
 	      }
 	    }
-	  };
+	  });
 	}
 
 	/**
@@ -1213,6 +1239,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var localKey = def.localKey;
 	      var foreignKey = def.foreignKey;
 	      var localKeys = def.localKeys;
+	      var foreignKeys = def.foreignKeys;
 	      var enumerable = typeof def.enumerable === 'boolean' ? def.enumerable : !!definition.relationsEnumerable;
 	      if (typeof def.link === 'boolean' ? def.link : !!definition.linkRelations) {
 	        delete target[localField];
@@ -1238,6 +1265,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            } else if (localKeys) {
 	              var keys = get(this, localKeys) || [];
 	              return definition.getResource(relationName).getAll(isArray(keys) ? keys : _keys(keys));
+	            } else if (foreignKeys) {
+	              set(params, 'where.' + foreignKeys + '.contains', this[definition.idAttribute]);
+	              return definition.getResource(relationName).defaultFilter.call(store, store.store[relationName].collection, relationName, params);
 	            }
 	            return undefined;
 	          };
@@ -1245,19 +1275,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var _this2 = this;
 
 	            if (children && children.length) {
-	              if (foreignKey) {
-	                forEach(children, function (child) {
-	                  set(child, foreignKey, get(this, definition.idAttribute));
-	                });
-	              } else if (localKeys) {
-	                (function () {
-	                  var keys = [];
+	              (function () {
+	                var id = get(_this2, definition.idAttribute);
+	                if (foreignKey) {
 	                  forEach(children, function (child) {
-	                    keys.push(get(child, definition.getResource(relationName).idAttribute));
+	                    set(child, foreignKey, id);
 	                  });
-	                  set(_this2, localKeys, keys);
-	                })();
-	              }
+	                } else if (localKeys) {
+	                  (function () {
+	                    var keys = [];
+	                    forEach(children, function (child) {
+	                      keys.push(get(child, definition.getResource(relationName).idAttribute));
+	                    });
+	                    set(_this2, localKeys, keys);
+	                  })();
+	                } else if (foreignKeys) {
+	                  forEach(children, function (child) {
+	                    var keys = get(child, foreignKeys);
+	                    if (keys) {
+	                      if (!contains(keys, id)) {
+	                        keys.push(id);
+	                      }
+	                    } else {
+	                      set(child, foreignKeys, [id]);
+	                    }
+	                  });
+	                }
+	              })();
 	            }
 	            return get(this, localField);
 	          };
@@ -3026,6 +3070,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // create instance
 	    item = new Constructor();
 
+	    if (definition.instanceEvents) {
+	      _utils['default'].Events(item);
+	    }
+
 	    // add default values
 	    if (options.defaultValues) {
 	      _utils['default'].deepMixIn(item, options.defaultValues);
@@ -3394,8 +3442,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      try {
 	        if (typeof def.useClass === 'function') {
-	          eval('function ' + _class + '() { def.useClass.call(this); }'); // eslint-disable-line
-	          def[_class] = eval(_class); // eslint-disable-line
+	          def[_class] = new Function('def', 'return function ' + _class + '() { def.useClass.call(this); }')(def); // eslint-disable-line
 	          def[_class].prototype = (function (proto) {
 	            function Ctor() {}
 
@@ -3403,8 +3450,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return new Ctor();
 	          })(def.useClass.prototype);
 	        } else {
-	          eval('function ' + _class + '() {}'); // eslint-disable-line
-	          def[_class] = eval(_class); // eslint-disable-line
+	          def[_class] = new Function('return function ' + _class + '() {}')(); // eslint-disable-line
 	        }
 	      } catch (e) {
 	        def[_class] = function () {};
@@ -3440,10 +3486,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      def[_class].prototype.get = function (key) {
 	        return _utils['default'].get(this, key);
 	      };
-
-	      if (def.instanceEvents) {
-	        _utils['default'].Events(def[_class].prototype);
-	      }
 
 	      // Setup the relation links
 	      _utils['default'].applyRelationGettersToTarget(_this, def, def[_class].prototype);
@@ -3644,7 +3686,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          if (typeof options.getEndpoint === 'function') {
 	            config.url = options.getEndpoint(def, options);
 	          } else {
-	            var args = [options.basePath || adapter.defaults.basePath || def.basePath, adapter.getEndpoint(def, _utils['default']._sn(id) ? id : null, options)];
+	            var args = [options.basePath || def.basePath || adapter.defaults.basePath, adapter.getEndpoint(def, _utils['default']._sn(id) ? id : null, options)];
 	            if (_utils['default']._sn(id)) {
 	              args.push(id);
 	            }
@@ -3773,6 +3815,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      delete resource.changeHistories[id];
 	      delete resource.modified[id];
 	      delete resource.saved[id];
+	      if (definition.instanceEvents && item.off) {
+	        item.off();
+	      }
 
 	      // remove it from the store
 	      resource.collection.splice(i, 1);
@@ -4012,9 +4057,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      injected.push(_inject.call(_this, definition, resource, attrs[i], options));
 	    }
 	  } else {
-	    // create the observer handler for the data to be injected
-	    var _react = makeObserverHandler.call(_this, definition, resource);
-
 	    // check if "idAttribute" is a computed property
 	    var c = definition.computed;
 	    var idA = definition.idAttribute;
@@ -4030,7 +4072,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    if (!(idA in attrs)) {
-	      // we cannot inject any object into the store that does not have a primary key!
 	      var error = new _errors['default'].R(definition.name + '.inject: "attrs" must contain the property specified by "idAttribute"!');
 	      options.errorFn(error);
 	      throw error;
@@ -4044,7 +4085,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var relationName = def.relation;
 	            var relationDef = _this.definitions[relationName];
 	            var toInject = attrs[def.localField];
-	            if (toInject) {
+	            if (typeof def.inject === 'function') {
+	              def.inject(definition, def, attrs);
+	            } else if (toInject && def.inject !== false) {
 	              if (!relationDef) {
 	                throw new _errors['default'].R(definition.name + ' relation is defined but the resource is not!');
 	              }
@@ -4096,16 +4139,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	            } else {
 	              item = new definition[definition['class']]();
 	            }
+
+	            if (definition.instanceEvents && typeof item.emit !== 'function') {
+	              _utils['default'].Events(item);
+	            }
 	            // remove relation properties from the item, since those relations have been injected by now
 	            _utils['default'].forEach(definition.relationList, function (def) {
-	              delete attrs[def.localField];
+	              if (typeof def.link === 'boolean' ? def.link : !!definition.linkRelations) {
+	                delete attrs[def.localField];
+	              }
 	            });
+
 	            // copy remaining properties to the injected item
 	            _utils['default'].deepMixIn(item, attrs);
 
 	            // add item to collection
 	            resource.collection.push(item);
 	            resource.changeHistories[id] = [];
+
+	            // create the observer handler for the data to be injected
+	            var _react = makeObserverHandler.call(_this, definition, resource);
 
 	            // If we're in the browser, start observation
 	            if (definition.watchChanges) {
@@ -4251,7 +4304,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }).then(function (item) {
 	      return item ? _this.find(resourceName, id, options) : item;
-	    });
+	    })['catch'](_this.errorFn('refresh', resourceName, id, options));
 	  },
 	  refreshAll: function refreshAll(resourceName, params, options) {
 	    var _this = this;
@@ -4279,7 +4332,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	        return found;
 	      });
-	    });
+	    })['catch'](_this.errorFn('refreshAll', resourceName, params, options));
 	  },
 	  save: __webpack_require__(44),
 	  update: __webpack_require__(45),
@@ -4372,7 +4425,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }).then(function (item) {
 	    return DSUtils.respond(item, { adapter: adapter }, options);
-	  });
+	  })['catch'](_this.errorFn('create', resourceName, attrs, options));
 	};
 
 /***/ },
@@ -4438,7 +4491,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (options && options.eagerEject && item) {
 	      definition.inject(item, { notify: false });
 	    }
-	    return DSUtils.Promise.reject(err);
+	    return _this.errorFn('destroy', resourceName, id, options)(err);
 	  });
 	};
 
@@ -4507,7 +4560,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (options && options.eagerEject && ejected) {
 	      definition.inject(ejected, { notify: false });
 	    }
-	    return DSUtils.Promise.reject(err);
+	    return _this.errorFn('destroyAll', resourceName, params, options)(err);
 	  });
 	};
 
@@ -4619,7 +4672,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (resource) {
 	      delete resource.pendingQueries[id];
 	    }
-	    return DSUtils.Promise.reject(err);
+	    return _this.errorFn('find', resourceName, id, options)(err);
 	  });
 	};
 
@@ -4777,7 +4830,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (resource) {
 	      delete resource.pendingQueries[queryHash];
 	    }
-	    return DSUtils.Promise.reject(err);
+	    return _this.errorFn('findAll', resourceName, params, options)(err);
 	  });
 	};
 
@@ -4845,28 +4898,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	              };
 	            }
 
-	            if (def.type === 'hasMany') {
-	              var orig = __options.orig();
-	              if (def.localKeys) {
-	                delete params[def.foreignKey];
-	                var keys = DSUtils.get(instance, def.localKeys) || [];
-	                keys = DSUtils._a(keys) ? keys : DSUtils.keys(keys);
-	                params.where = _defineProperty({}, relationDef.idAttribute, {
-	                  'in': keys
-	                });
-	                orig.localKeys = keys;
+	            var orig = __options.orig();
+
+	            if (typeof def.load === 'function') {
+	              task = def.load(definition, def, instance, orig);
+	            } else {
+	              if (def.type === 'hasMany') {
+	                if (def.localKeys) {
+	                  delete params[def.foreignKey];
+	                  var keys = DSUtils.get(instance, def.localKeys) || [];
+	                  keys = DSUtils._a(keys) ? keys : DSUtils.keys(keys);
+	                  params.where = _defineProperty({}, relationDef.idAttribute, {
+	                    'in': keys
+	                  });
+	                  orig.localKeys = keys;
+	                } else if (def.foreignKeys) {
+	                  delete params[def.foreignKey];
+	                  params.where = _defineProperty({}, def.foreignKeys, {
+	                    contains: instance[definition.idAttribute]
+	                  });
+	                }
+	                task = relationDef.findAll(params, orig);
+	              } else if (def.type === 'hasOne') {
+	                if (def.localKey && DSUtils.get(instance, def.localKey)) {
+	                  task = relationDef.find(DSUtils.get(instance, def.localKey), orig);
+	                } else if (def.foreignKey) {
+	                  task = relationDef.findAll(params, orig).then(function (hasOnes) {
+	                    return hasOnes.length ? hasOnes[0] : null;
+	                  });
+	                }
+	              } else if (DSUtils.get(instance, def.localKey)) {
+	                task = relationDef.find(DSUtils.get(instance, def.localKey), orig);
 	              }
-	              task = relationDef.findAll(params, orig);
-	            } else if (def.type === 'hasOne') {
-	              if (def.localKey && DSUtils.get(instance, def.localKey)) {
-	                task = relationDef.find(DSUtils.get(instance, def.localKey), __options.orig());
-	              } else if (def.foreignKey) {
-	                task = relationDef.findAll(params, __options.orig()).then(function (hasOnes) {
-	                  return hasOnes.length ? hasOnes[0] : null;
-	                });
-	              }
-	            } else if (DSUtils.get(instance, def.localKey)) {
-	              task = relationDef.find(DSUtils.get(instance, def.localKey), __options.orig());
 	            }
 
 	            if (task) {
@@ -4882,7 +4945,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return DSUtils.Promise.all(tasks);
 	  }).then(function () {
 	    return _options.afterLoadRelations.call(instance, _options, instance);
-	  });
+	  })['catch'](_this.errorFn('loadRelations', resourceName, instance, relations, options));
 	};
 
 /***/ },
@@ -4969,7 +5032,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	    return items;
-	  });
+	  })['catch'](_this.errorFn('reap', resourceName, options));
 	};
 
 /***/ },
@@ -5073,7 +5136,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }).then(function (item) {
 	    return DSUtils.respond(item, { adapter: adapter }, options);
-	  });
+	  })['catch'](_this.errorFn('save', resourceName, id, options));
 	};
 
 /***/ },
@@ -5146,7 +5209,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }).then(function (item) {
 	    return DSUtils.respond(item, { adapter: adapter }, options);
-	  });
+	  })['catch'](_this.errorFn('update', resourceName, id, attrs, options));
 	};
 
 /***/ },
@@ -5236,7 +5299,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }).then(function (items) {
 	    return DSUtils.respond(items, { adapter: adapter }, options);
-	  });
+	  })['catch'](_this.errorFn('updateAll', resourceName, attrs, params, options));
 	};
 
 /***/ }
