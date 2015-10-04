@@ -2,6 +2,8 @@
 
 ###### Backwards compatible API changes
 - #187 - No way to hook into error events globally
+- #201 - Feature request: hook into loadRelations
+- #220 - Optionally disable injection of nested relations
 - #231 - Added hasMany relations linking using "foreignKeys" by @treyenelson
 
 ###### Bug fixes

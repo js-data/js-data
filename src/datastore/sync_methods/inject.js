@@ -149,7 +149,9 @@ function _inject (definition, resource, attrs, options) {
           let relationName = def.relation
           let relationDef = _this.definitions[relationName]
           let toInject = attrs[def.localField]
-          if (toInject) {
+          if (typeof def.inject === 'function') {
+            def.inject(definition, def, attrs)
+          } else if (toInject && def.inject !== false) {
             if (!relationDef) {
               throw new DSErrors.R(`${definition.name} relation is defined but the resource is not!`)
             }
@@ -205,8 +207,11 @@ function _inject (definition, resource, attrs, options) {
           }
           // remove relation properties from the item, since those relations have been injected by now
           DSUtils.forEach(definition.relationList, function (def) {
-            delete attrs[def.localField]
+            if (typeof def.link === 'boolean' ? def.link : !!definition.linkRelations) {
+              delete attrs[def.localField]
+            }
           })
+
           // copy remaining properties to the injected item
           DSUtils.deepMixIn(item, attrs)
 

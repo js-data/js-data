@@ -517,16 +517,16 @@ describe('DS#filter', function () {
       { id: 7, foo: 'bar', beep: 'boop' },
       { id: 8, foo: 'bar', beep: 'boop' }
     ]);
-    objectsEqual(Foo.filter(null, {
+    assert.objectsEqual(Foo.filter(null, {
       scope: ['second', 'limit']
     }), [foos[2]]);
-    objectsEqual(Foo.filter(null, {
+    assert.objectsEqual(Foo.filter(null, {
       scope: ['second']
     }), Foo.filter({
       foo: 'bar',
       beep: 'boop'
     }));
-    objectsEqual(Foo.filter(), Foo.filter({
+    assert.objectsEqual(Foo.filter(), Foo.filter({
       foo: 'bar'
     }));
   });

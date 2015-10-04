@@ -464,4 +464,39 @@ describe('DS#loadRelations', function () {
       assert.deepEqual(user.groups[1], Group.get(user.groups[1].id))
     });
   });
+  it('should allow custom load functions', function () {
+    var Foo = store.defineResource({
+      name: 'foo',
+      relations: {
+        hasMany: {
+          bar: {
+            localField: 'bars',
+            foreignKey: 'fooId',
+            load: function (Foo, relationDef, foo, options) {
+              return new DSUtils.Promise(function (resolve) {
+                return resolve(Bar.inject([{ id: 1, fooId: 1 }]));
+              });
+            }
+          }
+        }
+      }
+    });
+    var Bar = store.defineResource({
+      name: 'bar',
+      relations: {
+        belongsTo: {
+          foo: {
+            localField: 'foo',
+            localKey: 'fooId'
+          }
+        }
+      }
+    })
+    
+    var foo = Foo.inject({ id: 1 });
+
+    return foo.DSLoadRelations(['bar']).then(function (foo) {
+      assert.objectsEqual(foo.bars, [{ id: 1, fooId: 1 }]);
+    });
+  });
 });
