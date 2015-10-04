@@ -54,35 +54,40 @@ module.exports = function loadRelations (resourceName, instance, relations, opti
             }
           }
 
-          if (def.type === 'hasMany') {
-            let orig = __options.orig()
-            if (def.localKeys) {
-              delete params[def.foreignKey]
-              let keys = DSUtils.get(instance, def.localKeys) || []
-              keys = DSUtils._a(keys) ? keys : DSUtils.keys(keys)
-              params.where = {
-                [relationDef.idAttribute]: {
-                  'in': keys
+          let orig = __options.orig()
+
+          if (typeof def.load === 'function') {
+            task = def.load(definition, def, instance, orig)
+          } else {
+            if (def.type === 'hasMany') {
+              if (def.localKeys) {
+                delete params[def.foreignKey]
+                let keys = DSUtils.get(instance, def.localKeys) || []
+                keys = DSUtils._a(keys) ? keys : DSUtils.keys(keys)
+                params.where = {
+                  [relationDef.idAttribute]: {
+                    'in': keys
+                  }
+                }
+                orig.localKeys = keys
+              } else if (def.foreignKeys) {
+                delete params[def.foreignKey]
+                params.where = {
+                  [def.foreignKeys]: {
+                    contains: instance[definition.idAttribute]
+                  }
                 }
               }
-              orig.localKeys = keys
-            } else if (def.foreignKeys) {
-              delete params[def.foreignKey]
-              params.where = {
-                [def.foreignKeys]: {
-                  contains: instance[definition.idAttribute]
-                }
+              task = relationDef.findAll(params, orig)
+            } else if (def.type === 'hasOne') {
+              if (def.localKey && DSUtils.get(instance, def.localKey)) {
+                task = relationDef.find(DSUtils.get(instance, def.localKey), orig)
+              } else if (def.foreignKey) {
+                task = relationDef.findAll(params, orig).then(function (hasOnes) { return hasOnes.length ? hasOnes[0] : null })
               }
+            } else if (DSUtils.get(instance, def.localKey)) {
+              task = relationDef.find(DSUtils.get(instance, def.localKey), orig)
             }
-            task = relationDef.findAll(params, orig)
-          } else if (def.type === 'hasOne') {
-            if (def.localKey && DSUtils.get(instance, def.localKey)) {
-              task = relationDef.find(DSUtils.get(instance, def.localKey), __options.orig())
-            } else if (def.foreignKey) {
-              task = relationDef.findAll(params, __options.orig()).then(function (hasOnes) { return hasOnes.length ? hasOnes[0] : null })
-            }
-          } else if (DSUtils.get(instance, def.localKey)) {
-            task = relationDef.find(DSUtils.get(instance, def.localKey), __options.orig())
           }
 
           if (task) {
