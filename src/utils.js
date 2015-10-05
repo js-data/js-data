@@ -652,8 +652,10 @@ export default {
             return undefined
           }
           prop.set = function (children) {
+            var _this2 = this
+
             if (children && children.length) {
-              let id = get(this, definition.idAttribute)
+              let id = get(_this2, definition.idAttribute)
               if (foreignKey) {
                 forEach(children, function (child) {
                   set(child, foreignKey, id)

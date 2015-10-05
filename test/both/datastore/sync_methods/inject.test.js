@@ -251,6 +251,7 @@ describe('DS#inject', function () {
     assert.isTrue(Parent.get(1).children[1] instanceof Child.Child);
     assert.deepEqual(Child.filter({ parentId: 1 }), Parent.get(1).children);
   });
+
   it('should configure enumerability and linking of relations', function () {
     var Parent = store.defineResource({
       name: 'parent',
