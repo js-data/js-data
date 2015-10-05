@@ -179,10 +179,6 @@ module.exports = function defineResource (definition) {
       return DSUtils.get(this, key)
     }
 
-    if (def.instanceEvents) {
-      DSUtils.Events(def[_class].prototype)
-    }
-
     // Setup the relation links
     DSUtils.applyRelationGettersToTarget(_this, def, def[_class].prototype)
 
@@ -346,7 +342,7 @@ module.exports = function defineResource (definition) {
         if (typeof options.getEndpoint === 'function') {
           config.url = options.getEndpoint(def, options)
         } else {
-          let args = [options.basePath || adapter.defaults.basePath || def.basePath, adapter.getEndpoint(def, DSUtils._sn(id) ? id : null, options)]
+          let args = [options.basePath || def.basePath || adapter.defaults.basePath, adapter.getEndpoint(def, DSUtils._sn(id) ? id : null, options)]
           if (DSUtils._sn(id)) {
             args.push(id)
           }

@@ -74,6 +74,7 @@ describe('DS#inject', function () {
     store.inject('organization', organization15);
     store.inject('comment', comment19);
     store.inject('profile', profile21);
+    store.inject('group', group1);
 
     // originals
     assert.equal(store.get('user', 10).name, user10.name);
@@ -87,6 +88,9 @@ describe('DS#inject', function () {
     assert.deepEqual(store.get('comment', 19).content, comment19.content);
     assert.deepEqual(store.get('profile', 21).id, profile21.id);
     assert.deepEqual(store.get('profile', 21).content, profile21.content);
+    assert.deepEqual(store.get('group', 1).id, group1.id);
+    assert.deepEqual(store.get('group', 1).name, group1.name);
+    assert.isArray(store.get('group', 1).userIds);
 
     // user10 relations
     assert.deepEqual(store.get('comment', 11), store.get('user', 10).comments[0]);
@@ -94,6 +98,12 @@ describe('DS#inject', function () {
     assert.deepEqual(store.get('comment', 13), store.get('user', 10).comments[2]);
     assert.deepEqual(store.get('organization', 14), store.get('user', 10).organization);
     assert.deepEqual(store.get('profile', 15), store.get('user', 10).profile);
+    assert.isArray(store.get('user', 10).groups);
+    assert.deepEqual(store.get('user', 10).groups[0], store.get('group', 1));
+
+    // group1 relations
+    assert.isArray(store.get('group', 1).users);
+    assert.deepEqual(store.get('group', 1).users[0], store.get('user', 10));
 
     // organization15 relations
     assert.deepEqual(store.get('user', 16), store.get('organization', 15).users[0]);
@@ -298,11 +308,10 @@ describe('DS#inject', function () {
     });
 
     assert.isDefined(Child.get(child.id));
-    assert.isUndefined(child.parent, 'parent was injected but not linked');
-    assert.isDefined(Parent.get(child.parentId), 'parent was injected but not linked');
+    assert.isFalse(child.parent === Parent.get(child.parentId), 'parent was injected but not linked');
 
     assert.isDefined(OtherChild.get(otherChild.id));
-    assert.isDefined(otherChild.parent, 'parent was injected and linked');
+    assert.isTrue(otherChild.parent === Parent.get(otherChild.parentId), 'parent was injected and linked');
     assert.isDefined(Parent.get(otherChild.parentId), 'parent was injected and linked');
 
     var foundParent = false;
@@ -330,5 +339,153 @@ describe('DS#inject', function () {
       age: 30,
       id: 5
     }));
+  });
+  it('should not auto-inject relations where auto-injection has been disabled', function () {
+    var Foo = store.defineResource({
+      name: 'foo',
+      relations: {
+        hasMany: {
+          bar: {
+            localField: 'bars',
+            foreignKey: 'fooId',
+            inject: false
+          }
+        }
+      }
+    });
+    var Bar = store.defineResource({
+      name: 'bar',
+      relations: {
+        belongsTo: {
+          foo: {
+            localField: 'foo',
+            localKey: 'fooId'
+          }
+        }
+      }
+    })
+    var foo = Foo.inject({
+      id: 1,
+      bars: [
+        {
+          id: 1,
+          fooId: 1
+        },
+        {
+          id: 2,
+          fooId: 1
+        }
+      ]
+    });
+    assert.deepEqual(foo.bars, [], 'nothing should have been injected');
+  });
+  it('should allow custom relation injection logic', function () {
+    var Foo = store.defineResource({
+      name: 'foo',
+      relations: {
+        hasMany: {
+          bar: {
+            localField: 'bars',
+            foreignKey: 'fooId',
+            inject: function (Foo, relationDef, foo) {
+              var bars = store.inject(relationDef.relation, foo.test_bars);
+              for (var i = 0; i < bars.length; i++) {
+                bars[i].beep = 'boop';
+              }
+              delete foo.test_bars;
+            }
+          }
+        }
+      }
+    });
+    var Bar = store.defineResource({
+      name: 'bar',
+      relations: {
+        belongsTo: {
+          foo: {
+            localField: 'foo',
+            localKey: 'fooId'
+          }
+        }
+      }
+    })
+    var foo = Foo.inject({
+      id: 1,
+      test_bars: [
+        {
+          id: 1,
+          fooId: 1
+        },
+        {
+          id: 2,
+          fooId: 1
+        }
+      ]
+    });
+    assert.objectsEqual(foo.bars, [
+      {
+        id: 1,
+        fooId: 1,
+        beep: 'boop'
+      },
+      {
+        id: 2,
+        fooId: 1,
+        beep: 'boop'
+      }
+    ], 'bars should have been injected');
+  });
+  it('should not link relations nor delete field if "link" is false', function () {
+    var Foo = store.defineResource({
+      name: 'foo',
+      relations: {
+        hasMany: {
+          bar: {
+            localField: 'bars',
+            foreignKey: 'fooId',
+            link: false
+          }
+        }
+      }
+    });
+    var Bar = store.defineResource({
+      name: 'bar',
+      relations: {
+        belongsTo: {
+          foo: {
+            localField: 'foo',
+            localKey: 'fooId'
+          }
+        }
+      }
+    })
+    var foo = Foo.inject({
+      id: 1,
+      bars: [
+        {
+          id: 1,
+          fooId: 1
+        },
+        {
+          id: 2,
+          fooId: 1
+        }
+      ]
+    });
+    Bar.inject({
+      id: 3,
+      fooId: 1
+    });
+    assert.objectsEqual(foo.bars, [
+      {
+        id: 1,
+        fooId: 1
+      },
+      {
+        id: 2,
+        fooId: 1
+      }
+    ], 'bars should have been injected, but not linked');
+    assert.equal(Bar.getAll().length, 3, '3 bars should be in the store');
   });
 });

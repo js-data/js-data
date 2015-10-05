@@ -164,36 +164,44 @@ try {
 function Events (target) {
   let events = {}
   target = target || this
-  target.on = function (type, func, ctx) {
-    events[type] = events[type] || []
-    events[type].push({
-      f: func,
-      c: ctx
-    })
-  }
-  target.off = function (type, func) {
-    let listeners = events[type]
-    if (!listeners) {
-      events = {}
-    } else if (func) {
-      for (let i = 0; i < listeners.length; i++) {
-        if (listeners[i].f === func) {
-          listeners.splice(i, 1)
-          break
+  Object.defineProperties(target, {
+    on: {
+      value: function (type, func, ctx) {
+        events[type] = events[type] || []
+        events[type].push({
+          f: func,
+          c: ctx
+        })
+      }
+    },
+    off: {
+      value: function (type, func) {
+        let listeners = events[type]
+        if (!listeners) {
+          events = {}
+        } else if (func) {
+          for (let i = 0; i < listeners.length; i++) {
+            if (listeners[i].f === func) {
+              listeners.splice(i, 1)
+              break
+            }
+          }
+        } else {
+          listeners.splice(0, listeners.length)
         }
       }
-    } else {
-      listeners.splice(0, listeners.length)
-    }
-  }
-  target.emit = function (...args) {
-    let listeners = events[args.shift()] || []
-    if (listeners) {
-      for (let i = 0; i < listeners.length; i++) {
-        listeners[i].f.apply(listeners[i].c, args)
+    },
+    emit: {
+      value: function (...args) {
+        let listeners = events[args.shift()] || []
+        if (listeners) {
+          for (let i = 0; i < listeners.length; i++) {
+            listeners[i].f.apply(listeners[i].c, args)
+          }
+        }
       }
     }
-  }
+  })
 }
 
 /**
@@ -611,6 +619,7 @@ export default {
       let localKey = def.localKey
       let foreignKey = def.foreignKey
       let localKeys = def.localKeys
+      let foreignKeys = def.foreignKeys
       let enumerable = typeof def.enumerable === 'boolean' ? def.enumerable : !!definition.relationsEnumerable
       if (typeof def.link === 'boolean' ? def.link : !!definition.linkRelations) {
         delete target[localField]
@@ -636,6 +645,9 @@ export default {
             } else if (localKeys) {
               let keys = get(this, localKeys) || []
               return definition.getResource(relationName).getAll(isArray(keys) ? keys : _keys(keys))
+            } else if (foreignKeys) {
+              set(params, `where.${foreignKeys}.contains`, this[definition.idAttribute])
+              return definition.getResource(relationName).defaultFilter.call(store, store.store[relationName].collection, relationName, params)
             }
             return undefined
           }
@@ -643,9 +655,10 @@ export default {
             var _this2 = this
 
             if (children && children.length) {
+              let id = get(this, definition.idAttribute)
               if (foreignKey) {
                 forEach(children, function (child) {
-                  set(child, foreignKey, get(_this2, definition.idAttribute))
+                  set(child, foreignKey, id)
                 })
               } else if (localKeys) {
                 let keys = []
@@ -653,6 +666,17 @@ export default {
                   keys.push(get(child, definition.getResource(relationName).idAttribute))
                 })
                 set(this, localKeys, keys)
+              } else if (foreignKeys) {
+                forEach(children, function (child) {
+                  let keys = get(child, foreignKeys)
+                  if (keys) {
+                    if (!contains(keys, id)) {
+                      keys.push(id)
+                    }
+                  } else {
+                    set(child, foreignKeys, [id])
+                  }
+                })
               }
             }
             return get(this, localField)

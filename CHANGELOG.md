@@ -1,3 +1,15 @@
+##### 2.5.0 - 04 October 2015
+
+###### Backwards compatible API changes
+- #187 - No way to hook into error events globally
+- #201 - Feature request: hook into loadRelations
+- #220 - Optionally disable injection of nested relations
+- #231 - Added hasMany relations linking using "foreignKeys" by @treyenelson
+
+###### Bug fixes
+- #229 - DS.change is emitted on an instance multiple times after only 1 modification
+- #232 - Adapter default basepath is taken instead of definition basepath when using an action.
+
 ##### 2.4.0 - 22 September 2015
 
 ###### Backwards compatible API changes
