@@ -149,4 +149,69 @@ describe('DSUtils', function () {
       }, null, 2));
     });
   });
+
+  describe('Array set inconsistency', function () {
+    var Parent, Child;
+    beforeEach(function () {
+      Parent = store.defineResource({
+        name: 'parent',
+        relations: {
+          hasMany: {
+            child: {
+              localField: 'children',
+              foreignKey: 'parentId'
+            }
+          }
+        }
+      });
+
+      Child = store.defineResource({
+        name: 'child',
+        relations: {
+          belongsTo: {
+            parent: {
+              link: false,
+              localField: 'parent',
+              localKey: 'parentId'
+            }
+          }
+        }
+      });
+    });
+
+    it("defect reproduction", function () {
+      var p1 = Parent.inject({id: 1})
+      var c1 = Child.inject({id: 1000, parentId: 1})
+      var c2 = Child.inject({id: 1001, parentId: 1})
+      var c3 = Child.inject({id: 1002, parentId: 1})
+      var c4 = Child.inject({id: 1003, parentId: 1})
+
+      var pStored = Parent.get(1)
+      assert.isDefined(pStored)
+      assert.equal(pStored.id, 1)
+      assert.equal(pStored.children.length, 4)
+
+      pStored.children = [c2, c3, c4];
+
+      assert.equal(pStored.children.length, 4)
+
+      //Intuitively though, I'd expect this:
+      //assert.equal(pStored.children.length, 3)
+
+      //From initial defect reproduction, without the 'this' patch, these passed:
+      //assert.equal(pStored.children.length, 1)
+      //assert.equal(pStored.children[0].id, c1.id)
+    });
+
+    it('Still works on addition', function () {
+      var p1 = Parent.inject({id: 1})
+      var c1 = Child.inject({id: 1000})
+      var c2 = Child.inject({id: 1001})
+      p1.children = [c1, c2]
+      assert.equal(p1.children.length, 2)
+      assert.equal(p1.children[0].parentId, 1)
+    });
+  });
 });
+
+
