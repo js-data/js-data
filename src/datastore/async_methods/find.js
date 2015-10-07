@@ -38,7 +38,12 @@ module.exports = function find (resourceName, id, options) {
       if (options.bypassCache || !options.cacheResponse) {
         delete resource.completedQueries[id]
       }
-      if ((!options.findStrictCache || id in resource.completedQueries) && definition.get(id) && !options.bypassCache) {
+
+      let expired = options.maxAge && id in resource.completedQueries &&
+            resource.completedQueries[id] + options.maxAge < new Date().getTime()
+
+      if ((!options.findStrictCache || id in resource.completedQueries) && definition.get(id) &&
+            !options.bypassCache && !expired) {
         // resolve immediately with the cached item
         resolve(definition.get(id))
       } else {

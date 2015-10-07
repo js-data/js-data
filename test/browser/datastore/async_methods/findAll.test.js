@@ -43,6 +43,61 @@ describe('DS#findAll', function () {
       assert.equal(lifecycle.deserialize.callCount, 2, 'deserialize should have been called');
     });
   });
+  it('should query the server for a collection when expired', function () {
+    var _this = this;
+    Post.findAll();
+
+    assert.deepEqual(JSON.stringify(Post.getAll()), JSON.stringify([]), 'The posts should not be in the store yet');
+
+    setTimeout(function () {
+      assert.equal(1, _this.requests.length);
+      assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts');
+      assert.equal(_this.requests[0].method, 'GET');
+      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([p1, p2, p3, p4]));
+    }, 100);
+
+    // Should have no effect because there is already a pending query
+    return Post.findAll(null, { maxAge: -1 }).then(function (data) {
+      assert.deepEqual(JSON.stringify(data), JSON.stringify([p1, p2, p3, p4]));
+
+      assert.deepEqual(JSON.stringify(Post.getAll()), JSON.stringify([p1, p2, p3, p4]), 'The posts are now in the store');
+      assert.isNumber(Post.lastModified(5));
+      assert.isNumber(Post.lastSaved(5));
+      Post.find(p1.id); // should not trigger another XHR
+
+      assert.equal(1, _this.requests.length);
+
+      setTimeout(function () {
+        assert.equal(2, _this.requests.length);
+        assert.equal(_this.requests[1].url, 'http://test.js-data.io/posts');
+        assert.equal(_this.requests[1].method, 'GET');
+        _this.requests[1].respond(200, {'Content-Type': 'application/json'}, DSUtils.toJson([p1, p2, p3, p4]));
+      }, 100);
+
+      // Should make a request because the request was already completed but is expired
+      return Post.findAll(null, { maxAge: -1 });
+    }).then(function (data) {
+      assert.deepEqual(JSON.stringify(data), JSON.stringify([p1, p2, p3, p4]));
+      assert.equal(2, _this.requests.length);
+
+      // Should not make a request because the request was already completed and maxAge is null (not expired)
+      return Post.findAll(null, { maxAge: null });
+    }).then(function (data) {
+      assert.deepEqual(JSON.stringify(data), JSON.stringify([p1, p2, p3, p4]));
+      assert.equal(2, _this.requests.length);
+
+      // Should not make a request because the request was already completed and maxAge = 0 (not expired)
+      return Post.findAll(null, { maxAge: 0 });
+    }).then(function (data) {
+      assert.deepEqual(JSON.stringify(data), JSON.stringify([p1, p2, p3, p4]));
+      assert.equal(2, _this.requests.length);
+
+      assert.equal(lifecycle.beforeInject.callCount, 2, 'beforeInject should have been called');
+      assert.equal(lifecycle.afterInject.callCount, 2, 'afterInject should have been called');
+      assert.equal(lifecycle.serialize.callCount, 0, 'serialize should have been called');
+      assert.equal(lifecycle.deserialize.callCount, 2, 'deserialize should have been called');
+    });
+  });
   it('should fail when no "idAttribute" is present on an item in the response', function () {
     var _this = this;
 
