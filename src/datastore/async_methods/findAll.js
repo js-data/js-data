@@ -75,7 +75,11 @@ module.exports = function findAll (resourceName, params, options) {
         delete resource.completedQueries[queryHash]
         delete resource.queryData[queryHash]
       }
-      if (queryHash in resource.completedQueries) {
+
+      let expired = options.maxAge && queryHash in resource.completedQueries &&
+            resource.completedQueries[queryHash] + options.maxAge < new Date().getTime()
+
+      if (queryHash in resource.completedQueries && !expired) {
         if (options.useFilter) {
           if (options.localKeys) {
             resolve(definition.getAll(options.localKeys, options.orig()))
@@ -92,7 +96,7 @@ module.exports = function findAll (resourceName, params, options) {
       }
     }
   }).then(function (items) {
-    if (!(queryHash in resource.completedQueries)) {
+    if (!items) {
       if (!(queryHash in resource.pendingQueries)) {
         let promise
         let strategy = options.findAllStrategy || options.strategy
