@@ -1,3 +1,12 @@
+##### 2.6.0 - 08 October 2015
+
+###### Backwards compatible API changes
+- #234 - findAll should query adapter if previous query is expired.
+- #235 - Support maxAge in find/findAll requests by @antoinebrault
+
+###### Bug fixes
+- #236 - actions defined in defineResource are shared across definitions
+
 ##### 2.5.0 - 04 October 2015
 
 ###### Backwards compatible API changes

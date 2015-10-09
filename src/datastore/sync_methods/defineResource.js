@@ -61,6 +61,7 @@ module.exports = function defineResource (definition) {
     this.methods = {}
     this.computed = {}
     this.scopes = {}
+    this.actions = {}
     DSUtils.deepMixIn(this, options)
     let parent = _this.defaults
     if (definition.extends && definitions[definition.extends]) {
@@ -70,6 +71,7 @@ module.exports = function defineResource (definition) {
     DSUtils.fillIn(this.methods, parent.methods)
     DSUtils.fillIn(this.computed, parent.computed)
     DSUtils.fillIn(this.scopes, parent.scopes)
+    DSUtils.fillIn(this.actions, parent.actions)
     this.endpoint = ('endpoint' in options) ? options.endpoint : this.name
   }
 
@@ -350,10 +352,17 @@ module.exports = function defineResource (definition) {
           config.url = DSUtils.makePath.apply(null, args)
         }
         config.method = config.method || 'GET'
+        config.resourceName = def.name
         DSUtils.deepMixIn(config, options)
         return new DSUtils.Promise(function (resolve) { return resolve(config) })
           .then(options.request || action.request)
           .then(function (config) { return adapter.HTTP(config) })
+          .then(function (data) {
+            if (data && data.config) {
+              data.config.resourceName = def.name
+            }
+            return data
+          })
           .then(options.response || action.response, options.responseError || action.responseError)
       }
     })

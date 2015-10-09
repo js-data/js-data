@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 2.5.0 - Homepage <http://www.js-data.io/>
+ * @version 2.6.0 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -84,9 +84,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new _datastoreIndex['default'](options);
 	  },
 	  version: {
-	    full: '2.5.0',
+	    full: '2.6.0',
 	    major: parseInt('2', 10),
-	    minor: parseInt('5', 10),
+	    minor: parseInt('6', 10),
 	    patch: parseInt('0', 10),
 	    alpha:  true ? 'false' : false,
 	    beta:  true ? 'false' : false
@@ -3371,6 +3371,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.methods = {};
 	    this.computed = {};
 	    this.scopes = {};
+	    this.actions = {};
 	    _utils['default'].deepMixIn(this, options);
 	    var parent = _this.defaults;
 	    if (definition['extends'] && definitions[definition['extends']]) {
@@ -3380,6 +3381,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _utils['default'].fillIn(this.methods, parent.methods);
 	    _utils['default'].fillIn(this.computed, parent.computed);
 	    _utils['default'].fillIn(this.scopes, parent.scopes);
+	    _utils['default'].fillIn(this.actions, parent.actions);
 	    this.endpoint = 'endpoint' in options ? options.endpoint : this.name;
 	  }
 
@@ -3705,11 +3707,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	            config.url = _utils['default'].makePath.apply(null, args);
 	          }
 	          config.method = config.method || 'GET';
+	          config.resourceName = def.name;
 	          _utils['default'].deepMixIn(config, options);
 	          return new _utils['default'].Promise(function (resolve) {
 	            return resolve(config);
 	          }).then(options.request || action.request).then(function (config) {
 	            return adapter.HTTP(config);
+	          }).then(function (data) {
+	            if (data && data.config) {
+	              data.config.resourceName = def.name;
+	            }
+	            return data;
 	          }).then(options.response || action.response, options.responseError || action.responseError);
 	        };
 	      });
@@ -4629,7 +4637,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (options.bypassCache || !options.cacheResponse) {
 	        delete resource.completedQueries[id];
 	      }
-	      if ((!options.findStrictCache || id in resource.completedQueries) && definition.get(id) && !options.bypassCache) {
+
+	      var expired = options.maxAge && id in resource.completedQueries && resource.completedQueries[id] + options.maxAge < new Date().getTime();
+
+	      if ((!options.findStrictCache || id in resource.completedQueries) && definition.get(id) && !options.bypassCache && !expired) {
 	        // resolve immediately with the cached item
 	        resolve(definition.get(id));
 	      } else {
@@ -4780,7 +4791,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        delete resource.completedQueries[queryHash];
 	        delete resource.queryData[queryHash];
 	      }
-	      if (queryHash in resource.completedQueries) {
+
+	      var expired = options.maxAge && queryHash in resource.completedQueries && resource.completedQueries[queryHash] + options.maxAge < new Date().getTime();
+
+	      if (queryHash in resource.completedQueries && !expired) {
 	        if (options.useFilter) {
 	          if (options.localKeys) {
 	            resolve(definition.getAll(options.localKeys, options.orig()));
@@ -4797,7 +4811,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	  }).then(function (items) {
-	    if (!(queryHash in resource.completedQueries)) {
+	    if (!items) {
 	      if (!(queryHash in resource.pendingQueries)) {
 	        var promise = undefined;
 	        var strategy = options.findAllStrategy || options.strategy;
