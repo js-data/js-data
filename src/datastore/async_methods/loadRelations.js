@@ -55,6 +55,8 @@ module.exports = function loadRelations (resourceName, instance, relations, opti
           }
 
           let orig = __options.orig()
+          let defKey = def.localKey ? DSUtils.get(instance, def.localKey) : null
+          let hasDefKey = !!(defKey || defKey === 0)
 
           if (typeof def.load === 'function') {
             task = def.load(definition, def, instance, orig)
@@ -80,13 +82,13 @@ module.exports = function loadRelations (resourceName, instance, relations, opti
               }
               task = relationDef.findAll(params, orig)
             } else if (def.type === 'hasOne') {
-              if (def.localKey && DSUtils.get(instance, def.localKey)) {
-                task = relationDef.find(DSUtils.get(instance, def.localKey), orig)
+              if (def.localKey && hasDefKey) {
+                task = relationDef.find(defKey, orig)
               } else if (def.foreignKey) {
                 task = relationDef.findAll(params, orig).then(function (hasOnes) { return hasOnes.length ? hasOnes[0] : null })
               }
-            } else if (DSUtils.get(instance, def.localKey)) {
-              task = relationDef.find(DSUtils.get(instance, def.localKey), orig)
+            } else if (hasDefKey) {
+              task = relationDef.find(defKey, orig)
             }
           }
 
