@@ -1,3 +1,8 @@
+##### 2.6.1 - 12 October 2015
+
+###### Bug fixes
+- #223 - Zero value Id in relations fixed in #237 by @Pencroff
+
 ##### 2.6.0 - 08 October 2015
 
 ###### Backwards compatible API changes
