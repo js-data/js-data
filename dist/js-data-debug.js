@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 2.6.0 - Homepage <http://www.js-data.io/>
+ * @version 2.6.1 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -84,10 +84,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new _datastoreIndex['default'](options);
 	  },
 	  version: {
-	    full: '2.6.0',
+	    full: '2.6.1',
 	    major: parseInt('2', 10),
 	    minor: parseInt('6', 10),
-	    patch: parseInt('0', 10),
+	    patch: parseInt('1', 10),
 	    alpha:  true ? 'false' : false,
 	    beta:  true ? 'false' : false
 	  }
@@ -1313,7 +1313,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } else if (def.type === 'hasOne') {
 	          if (localKey) {
 	            prop.get = function () {
-	              return get(this, localKey) ? definition.getResource(relationName).get(get(this, localKey)) : undefined;
+	              var key = get(this, localKey);
+	              var hasKey = !!(key || key === 0);
+	              return hasKey ? definition.getResource(relationName).get(key) : undefined;
 	            };
 	            prop.set = function (sibling) {
 	              if (sibling) {
@@ -4937,6 +4939,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 
 	            var orig = __options.orig();
+	            var defKey = def.localKey ? DSUtils.get(instance, def.localKey) : null;
+	            var hasDefKey = !!(defKey || defKey === 0);
 
 	            if (typeof def.load === 'function') {
 	              task = def.load(definition, def, instance, orig);
@@ -4958,15 +4962,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	                task = relationDef.findAll(params, orig);
 	              } else if (def.type === 'hasOne') {
-	                if (def.localKey && DSUtils.get(instance, def.localKey)) {
-	                  task = relationDef.find(DSUtils.get(instance, def.localKey), orig);
+	                if (def.localKey && hasDefKey) {
+	                  task = relationDef.find(defKey, orig);
 	                } else if (def.foreignKey) {
 	                  task = relationDef.findAll(params, orig).then(function (hasOnes) {
 	                    return hasOnes.length ? hasOnes[0] : null;
 	                  });
 	                }
-	              } else if (DSUtils.get(instance, def.localKey)) {
-	                task = relationDef.find(DSUtils.get(instance, def.localKey), orig);
+	              } else if (hasDefKey) {
+	                task = relationDef.find(defKey, orig);
 	              }
 	            }
 
