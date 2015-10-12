@@ -682,7 +682,9 @@ export default {
         } else if (def.type === 'hasOne') {
           if (localKey) {
             prop.get = function () {
-              return get(this, localKey) ? definition.getResource(relationName).get(get(this, localKey)) : undefined
+              let key = get(this, localKey)
+              let hasKey = !!(key || key === 0)
+              return hasKey ? definition.getResource(relationName).get(key) : undefined
             }
             prop.set = function (sibling) {
               if (sibling) {
