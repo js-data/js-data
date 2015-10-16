@@ -10,6 +10,9 @@ var JSData = require('./');
 
 var store, DSUtils, DSErrors;
 
+assert.objectsEqual = function (a, b, msg) {
+  assert.deepEqual(JSON.parse(JSON.stringify(a)), JSON.parse(JSON.stringify(b)), msg || 'Expected objects or arrays to be equal');
+}
 var lifecycle = {};
 
 var globals = module.exports = {
@@ -124,6 +127,7 @@ beforeEach(function () {
     afterDestroy: lifecycle.afterDestroy,
     beforeInject: lifecycle.beforeInject,
     afterInject: lifecycle.afterInject,
+    linkRelations: true,
     log: false,
     methods: {
       say: function () {
@@ -145,6 +149,10 @@ beforeEach(function () {
         comment: {
           localField: 'comments',
           foreignKey: 'approvedBy'
+        },
+        group: {
+          localField: 'groups',
+          foreignKeys: 'userIds'
         }
       },
       hasOne: {
@@ -158,6 +166,18 @@ beforeEach(function () {
           parent: true,
           localKey: 'organizationId',
           localField: 'organization'
+        }
+      }
+    }
+  });
+
+  globals.Group = global.Group = store.defineResource({
+    name: 'group',
+    relations: {
+      hasMany: {
+        user: {
+          localField: 'users',
+          localKeys: 'userIds'
         }
       }
     }
@@ -297,6 +317,16 @@ beforeEach(function () {
     id: 18,
     organizationId: 15,
     name: 'test user 18'
+  };
+  globals.group1 = global.group1 = {
+    name: 'group 1',
+    id: 1,
+    userIds: [10]
+  };
+  globals.group2 = global.group2 = {
+    name: 'group 2',
+    id: 2,
+    userIds: [10]
   };
   globals.organization15 = global.organization15 = {
     name: 'Another Test Corp',

@@ -8,22 +8,24 @@
  * @param options Optional configuration.
  * @returns Matching items.
  */
-module.exports = function filter(resourceName, params, options) {
-  let _this = this;
-  let DSUtils = _this.utils;
-  let definition = _this.definitions[resourceName];
+module.exports = function filter (resourceName, params, options) {
+  let _this = this
+  let DSUtils = _this.utils
+  let definition = _this.definitions[resourceName]
 
   if (!definition) {
-    throw new _this.errors.NER(resourceName);
+    throw new _this.errors.NER(resourceName)
   } else if (params && !DSUtils._o(params)) {
-    throw DSUtils._oErr('params');
+    throw DSUtils._oErr('params')
   }
 
   // Protect against null
-  params = params || {};
-  options = DSUtils._(definition, options);
-  options.logFn('filter', params, options);
+  params = params || {}
+  options = DSUtils._(definition, options)
+  options.logFn('filter', params, options)
+
+  DSUtils.applyScope(definition, params, options)
 
   // delegate filtering to DS#defaults.defaultFilter, which can be overridden by developers.
-  return definition.defaultFilter.call(_this, _this.store[resourceName].collection, resourceName, params, options);
-};
+  return definition.defaultFilter.call(_this, _this.store[resourceName].collection, resourceName, params, options)
+}

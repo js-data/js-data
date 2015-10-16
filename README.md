@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="64" height="64" />
 
-## JSData [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/js-data/js-data?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![bower version](https://img.shields.io/bower/v/js-data.svg?style=flat-square)](https://www.npmjs.org/package/js-data) [![npm version](https://img.shields.io/npm/v/js-data.svg?style=flat-square)](https://www.npmjs.org/package/js-data) [![Circle CI](https://img.shields.io/circleci/project/js-data/js-data/master.svg?style=flat-square)](https://circleci.com/gh/js-data/js-data/tree/master) [![npm downloads](https://img.shields.io/npm/dm/js-data.svg?style=flat-square)](https://www.npmjs.org/package/js-data) [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/js-data/js-data/blob/master/LICENSE)
+## JSData [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/js-data/js-data?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Latest Release](https://img.shields.io/github/release/js-data/js-data.svg?style=flat-square)](https://github.com/js-data/js-data/releases) [![Circle CI](https://img.shields.io/circleci/project/js-data/js-data/master.svg?style=flat-square)](https://circleci.com/gh/js-data/js-data/tree/master) [![npm downloads](https://img.shields.io/npm/dm/js-data.svg?style=flat-square)](https://www.npmjs.org/package/js-data) [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/js-data/js-data/blob/master/LICENSE)
 
 Inspired by [Ember Data](https://github.com/emberjs/data), __JSData__ is the model layer you've been craving. It consists of a convenient __framework-agnostic__, __in-memory store__ for managing your data, which uses __adapters__ to communicate with various __persistence layers__.
 
@@ -20,17 +20,9 @@ JSData is getting popular and becoming a lot of work for me. I could use help wi
 
 [![MtnWestJS Conf 2015 Presentation](http://img.youtube.com/vi/8wxnnJA9FKw/0.jpg)](https://www.youtube.com/watch?v=8wxnnJA9FKw)
 
-__Status:__
-
-[![Latest Release](https://img.shields.io/github/release/js-data/js-data.svg?style=flat-square)](https://github.com/js-data/js-data/releases) [![Dependency Status](https://img.shields.io/gemnasium/js-data/js-data.svg?style=flat-square)](https://gemnasium.com/js-data/js-data) [![Coverage Status](https://img.shields.io/coveralls/js-data/js-data/master.svg?style=flat-square)](https://coveralls.io/r/js-data/js-data?branch=master) [![Codacity](https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg?style=flat-square)](https://www.codacy.com/public/jasondobry/js-data/dashboard)
-
-__Supported Platforms:__
-
-[![node version](https://img.shields.io/badge/Node-0.10%2B-green.svg?style=flat-square)](https://github.com/js-data/js-data) [![browsers](https://img.shields.io/badge/Browser-Chrome%2CFirefox%2CSafari%2COpera%2CIE%209%2B%2CiOS%20Safari%207.1%2B%2CAndroid%20Browser%202.3%2B-green.svg?style=flat-square)](https://github.com/js-data/js-data)
-
 ### Dependencies
 
-JSData requires the presence of the ES6 (ES2015) `Promise` constructor in the global environment. In the browser, `window.Promise` must be available. In Node, `global.Promise` must be available. Here is a handy library for polyfilling: https://github.com/jakearchibald/es6-promise.
+JSData requires the presence of the ES6-spec (ES2015) `Promise` constructor in the global environment. In the browser, `window.Promise` must be available. In Node, `global.Promise` must be available. Here is a handy library for polyfilling: https://github.com/jakearchibald/es6-promise.
 
 If you can't polyfill the environment, then configure JSData to use a specific `Promise` constructor directly: `JSData.DSUtils.Promise = MyPromiseLib;`. This direct configuration method is useful for telling JSData to use the Bluebird library or Angular's `$q`, etc.
 

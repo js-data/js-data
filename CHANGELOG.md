@@ -1,3 +1,47 @@
+##### 2.6.1 - 12 October 2015
+
+###### Bug fixes
+- #223 - Zero value Id in relations fixed in #237 by @Pencroff
+
+##### 2.6.0 - 08 October 2015
+
+###### Backwards compatible API changes
+- #234 - findAll should query adapter if previous query is expired.
+- #235 - Support maxAge in find/findAll requests by @antoinebrault
+
+###### Bug fixes
+- #236 - actions defined in defineResource are shared across definitions
+
+##### 2.5.0 - 04 October 2015
+
+###### Backwards compatible API changes
+- #187 - No way to hook into error events globally
+- #201 - Feature request: hook into loadRelations
+- #220 - Optionally disable injection of nested relations
+- #231 - Added hasMany relations linking using "foreignKeys" by @treyenelson
+
+###### Bug fixes
+- #229 - DS.change is emitted on an instance multiple times after only 1 modification
+- #232 - Adapter default basepath is taken instead of definition basepath when using an action.
+
+##### 2.4.0 - 22 September 2015
+
+###### Backwards compatible API changes
+- #179 - Implemented a feature like Sequelize Scopes
+- #201 - Feature request: hook into loadRelations
+- #217 - Add afterFind, afterFindAll, and afterLoadRelations hooks
+
+###### Bug fixes
+- #203 - createInstance/compute don't know about computed properties as property accessors
+- #215 - Javascript error when trying to merge model with null value for relation
+- #216 - Update remove circular to support File objects
+- #218 - linkRelations (like cacheResponse) should have defaulted to false on the server
+
+###### Other
+- #204 - Choose official code style for project
+- Switched unnecessary arrow functions back to regular functions to improve performance
+- Updated CONTRIBUTING.md
+
 ##### 2.3.0 - 30 July 2015
 
 ###### Backwards compatible API changes

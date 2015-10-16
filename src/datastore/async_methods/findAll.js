@@ -1,38 +1,38 @@
 /* jshint -W082 */
-function processResults(data, resourceName, queryHash, options) {
-  let _this = this;
-  let DSUtils = _this.utils;
-  let definition = _this.definitions[resourceName];
-  let resource = _this.store[resourceName];
-  let idAttribute = _this.definitions[resourceName].idAttribute;
-  let date = new Date().getTime();
+function processResults (data, resourceName, queryHash, options) {
+  let _this = this
+  let DSUtils = _this.utils
+  let definition = _this.definitions[resourceName]
+  let resource = _this.store[resourceName]
+  let idAttribute = _this.definitions[resourceName].idAttribute
+  let date = new Date().getTime()
 
-  data = data || [];
+  data = data || []
 
   // Query is no longer pending
-  delete resource.pendingQueries[queryHash];
-  resource.completedQueries[queryHash] = date;
+  delete resource.pendingQueries[queryHash]
+  resource.completedQueries[queryHash] = date
 
   // Merge the new values into the cache
-  let injected = definition.inject(data, options.orig());
+  let injected = definition.inject(data, options.orig())
 
   // Make sure each object is added to completedQueries
   if (DSUtils._a(injected)) {
-    DSUtils.forEach(injected, item => {
+    DSUtils.forEach(injected, function (item) {
       if (item) {
-        let id = item[idAttribute];
+        let id = item[idAttribute]
         if (id) {
-          resource.completedQueries[id] = date;
-          resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
+          resource.completedQueries[id] = date
+          resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id])
         }
       }
-    });
+    })
   } else {
-    options.errorFn('response is expected to be an array!');
-    resource.completedQueries[injected[idAttribute]] = date;
+    options.errorFn('response is expected to be an array!')
+    resource.completedQueries[injected[idAttribute]] = date
   }
 
-  return injected;
+  return injected
 }
 
 /**
@@ -45,105 +45,113 @@ function processResults(data, resourceName, queryHash, options) {
  * @param options.cacheResponse Whether to inject the found items into the data store.
  * @returns The items.
  */
-module.exports = function findAll(resourceName, params, options) {
-  let _this = this;
-  let DSUtils = _this.utils;
-  let definition = _this.definitions[resourceName];
-  let resource = _this.store[resourceName];
-  let queryHash, adapter;
+module.exports = function findAll (resourceName, params, options) {
+  let _this = this
+  let DSUtils = _this.utils
+  let definition = _this.definitions[resourceName]
+  let resource = _this.store[resourceName]
+  let queryHash, adapter
 
-  return new DSUtils.Promise((resolve, reject) => {
-    params = params || {};
+  return new DSUtils.Promise(function (resolve, reject) {
+    params = params || {}
 
     if (!_this.definitions[resourceName]) {
-      reject(new _this.errors.NER(resourceName));
+      reject(new _this.errors.NER(resourceName))
     } else if (!DSUtils._o(params)) {
-      reject(DSUtils._oErr('params'));
+      reject(DSUtils._oErr('params'))
     } else {
-      options = DSUtils._(definition, options);
-      queryHash = DSUtils.toJson(params);
-      options.logFn('findAll', params, options);
+      options = DSUtils._(definition, options)
+      queryHash = DSUtils.toJson(params)
+      options.logFn('findAll', params, options)
 
       if (options.params) {
-        options.params = DSUtils.copy(options.params);
+        options.params = DSUtils.copy(options.params)
       }
+
+      DSUtils.applyScope(definition, params, options)
 
       // force a new request
       if (options.bypassCache || !options.cacheResponse) {
-        delete resource.completedQueries[queryHash];
-        delete resource.queryData[queryHash];
+        delete resource.completedQueries[queryHash]
+        delete resource.queryData[queryHash]
       }
-      if (queryHash in resource.completedQueries) {
+
+      let expired = options.maxAge && queryHash in resource.completedQueries &&
+            resource.completedQueries[queryHash] + options.maxAge < new Date().getTime()
+
+      if (queryHash in resource.completedQueries && !expired) {
         if (options.useFilter) {
           if (options.localKeys) {
-            resolve(definition.getAll(options.localKeys, options.orig()));
+            resolve(definition.getAll(options.localKeys, options.orig()))
           } else {
             // resolve immediately by filtering data from the data store
-            resolve(definition.filter(params, options.orig()));
+            resolve(definition.filter(params, options.orig()))
           }
         } else {
           // resolve immediately by returning the cached array from the previously made query
-          resolve(resource.queryData[queryHash]);
+          resolve(resource.queryData[queryHash])
         }
       } else {
-        resolve();
+        resolve()
       }
     }
-  }).then(items => {
-      if (!(queryHash in resource.completedQueries)) {
-        if (!(queryHash in resource.pendingQueries)) {
-          let promise;
-          let strategy = options.findAllStrategy || options.strategy;
+  }).then(function (items) {
+    if (!items) {
+      if (!(queryHash in resource.pendingQueries)) {
+        let promise
+        let strategy = options.findAllStrategy || options.strategy
 
-          // try subsequent adapters if the preceeding one fails
-          if (strategy === 'fallback') {
-            function makeFallbackCall(index) {
-              adapter = definition.getAdapterName((options.findAllFallbackAdapters || options.fallbackAdapters)[index]);
-              return _this.adapters[adapter].findAll(definition, params, options)['catch'](err => {
-                index++;
-                if (index < options.fallbackAdapters.length) {
-                  return makeFallbackCall(index);
-                } else {
-                  return DSUtils.Promise.reject(err);
-                }
-              });
-            }
-
-            promise = makeFallbackCall(0);
-          } else {
-            adapter = definition.getAdapterName(options);
-            // just make a single attempt
-            promise = _this.adapters[adapter].findAll(definition, params, options);
+        // try subsequent adapters if the preceeding one fails
+        if (strategy === 'fallback') {
+          var makeFallbackCall = function (index) {
+            adapter = definition.getAdapterName((options.findAllFallbackAdapters || options.fallbackAdapters)[index])
+            return _this.adapters[adapter].findAll(definition, params, options)['catch'](function (err) {
+              index++
+              if (index < options.fallbackAdapters.length) {
+                return makeFallbackCall(index)
+              } else {
+                return DSUtils.Promise.reject(err)
+              }
+            })
           }
 
-          resource.pendingQueries[queryHash] = promise.then(data => {
-            // Query is no longer pending
-            delete resource.pendingQueries[queryHash];
-            if (options.cacheResponse) {
-              // inject the items into the data store
-              resource.queryData[queryHash] = processResults.call(_this, data, resourceName, queryHash, options);
-              resource.queryData[queryHash].$$injected = true;
-              return resource.queryData[queryHash];
-            } else {
-              DSUtils.forEach(data, (item, i) => {
-                data[i] = definition.createInstance(item, options.orig());
-              });
-              return data;
-            }
-          });
+          promise = makeFallbackCall(0)
+        } else {
+          adapter = definition.getAdapterName(options)
+          // just make a single attempt
+          promise = _this.adapters[adapter].findAll(definition, params, options)
         }
 
-        return resource.pendingQueries[queryHash];
-      } else {
-        // resolve immediately with the items
-        return items;
+        resource.pendingQueries[queryHash] = promise
+          .then(function (data) { return options.afterFindAll.call(data, options, data) })
+          .then(function (data) {
+            // Query is no longer pending
+            delete resource.pendingQueries[queryHash]
+            if (options.cacheResponse) {
+              // inject the items into the data store
+              resource.queryData[queryHash] = processResults.call(_this, data, resourceName, queryHash, options)
+              resource.queryData[queryHash].$$injected = true
+              return resource.queryData[queryHash]
+            } else {
+              DSUtils.forEach(data, function (item, i) {
+                data[i] = definition.createInstance(item, options.orig())
+              })
+              return data
+            }
+          })
       }
-    }).then(items => {
-      return DSUtils.respond(items, {adapter}, options);
-    })['catch'](err => {
-    if (resource) {
-      delete resource.pendingQueries[queryHash];
+
+      return resource.pendingQueries[queryHash]
+    } else {
+      // resolve immediately with the items
+      return items
     }
-    return DSUtils.Promise.reject(err);
-  });
-};
+  }).then(function (items) {
+    return DSUtils.respond(items, {adapter}, options)
+  })['catch'](function (err) {
+    if (resource) {
+      delete resource.pendingQueries[queryHash]
+    }
+    return _this.errorFn('findAll', resourceName, params, options)(err)
+  })
+}

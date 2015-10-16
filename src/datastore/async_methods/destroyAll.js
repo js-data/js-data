@@ -10,53 +10,54 @@
  * @param options.afterDestroy Lifecycle hook.
  * @returns The ejected items, if any.
  */
-module.exports = function destroyAll(resourceName, params, options) {
-  let _this = this;
-  let DSUtils = _this.utils;
-  let definition = _this.definitions[resourceName];
-  let ejected, toEject, adapter;
+module.exports = function destroyAll (resourceName, params, options) {
+  let _this = this
+  let DSUtils = _this.utils
+  let definition = _this.definitions[resourceName]
+  let ejected, toEject, adapter
 
-  params = params || {};
+  params = params || {}
 
-  return new DSUtils.Promise((resolve, reject) => {
+  return new DSUtils.Promise(function (resolve, reject) {
     if (!definition) {
-      reject(new _this.errors.NER(resourceName));
+      reject(new _this.errors.NER(resourceName))
     } else if (!DSUtils._o(params)) {
-      reject(DSUtils._oErr('attrs'));
+      reject(DSUtils._oErr('attrs'))
     } else {
-      options = DSUtils._(definition, options);
-      options.logFn('destroyAll', params, options);
-      resolve();
+      options = DSUtils._(definition, options)
+      options.logFn('destroyAll', params, options)
+      DSUtils.applyScope(definition, params, options)
+      resolve()
     }
-  }).then(() => {
-      // find items that are to be ejected from the store
-      toEject = definition.defaultFilter.call(_this, resourceName, params);
-      return options.beforeDestroy(options, toEject);
-    }).then(() => {
-      if (options.notify) {
-        definition.emit('DS.beforeDestroy', definition, toEject);
-      }
-      // don't wait for the adapter, remove the items from the store
-      if (options.eagerEject) {
-        ejected = definition.ejectAll(params);
-      }
-      adapter = definition.getAdapterName(options);
-      return _this.adapters[adapter].destroyAll(definition, params, options);
-    }).then(() => {
-      return options.afterDestroy(options, toEject);
-    }).then(() => {
-      if (options.notify) {
-        definition.emit('DS.afterDestroy', definition, toEject);
-      }
-      // make sure items are removed from the store
-      return ejected || definition.ejectAll(params);
-    }).then(items => {
-      return DSUtils.respond(items, {adapter}, options);
-    })['catch'](err => {
+  }).then(function () {
+    // find items that are to be ejected from the store
+    toEject = definition.defaultFilter.call(_this, resourceName, params)
+    return options.beforeDestroy(options, toEject)
+  }).then(function () {
+    if (options.notify) {
+      definition.emit('DS.beforeDestroy', definition, toEject)
+    }
+    // don't wait for the adapter, remove the items from the store
+    if (options.eagerEject) {
+      ejected = definition.ejectAll(params)
+    }
+    adapter = definition.getAdapterName(options)
+    return _this.adapters[adapter].destroyAll(definition, params, options)
+  }).then(function () {
+    return options.afterDestroy(options, toEject)
+  }).then(function () {
+    if (options.notify) {
+      definition.emit('DS.afterDestroy', definition, toEject)
+    }
+    // make sure items are removed from the store
+    return ejected || definition.ejectAll(params)
+  }).then(function (items) {
+    return DSUtils.respond(items, {adapter}, options)
+  })['catch'](function (err) {
     // rollback by re-injecting the items into the store
     if (options && options.eagerEject && ejected) {
-      definition.inject(ejected, {notify: false});
+      definition.inject(ejected, {notify: false})
     }
-    return DSUtils.Promise.reject(err);
-  });
-};
+    return _this.errorFn('destroyAll', resourceName, params, options)(err)
+  })
+}

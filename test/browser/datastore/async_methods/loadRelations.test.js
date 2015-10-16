@@ -443,4 +443,128 @@ describe('DS#loadRelations', function () {
       assert.deepEqual(DSUtils.toJson(foo.bars), DSUtils.toJson(barsData));
     });
   });
+  it('should get objects from the server when loading foreignKeys', function () {
+    var _this = this;
+    User.inject(user10);
+
+    setTimeout(function () {
+      assert.equal(1, _this.requests.length);
+      assert.equal(_this.requests[0].url, 'http://test.js-data.io/group?where=%7B%22userIds%22:%7B%22contains%22:10%7D%7D');
+      assert.equal(_this.requests[0].method, 'GET');
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([
+        group1,
+        group2
+      ]));
+    }, 60);
+
+    return User.loadRelations(10, 'group', {
+      findStrictCache: true
+    }).then(function (user) {
+      assert.deepEqual(user.groups[0], Group.get(user.groups[0].id))
+      assert.deepEqual(user.groups[1], Group.get(user.groups[1].id))
+    });
+  });
+  it('should allow custom load functions', function () {
+    var Foo = store.defineResource({
+      name: 'foo',
+      relations: {
+        hasMany: {
+          bar: {
+            localField: 'bars',
+            foreignKey: 'fooId',
+            load: function (Foo, relationDef, foo, options) {
+              return new DSUtils.Promise(function (resolve) {
+                return resolve(Bar.inject([{ id: 1, fooId: 1 }]));
+              });
+            }
+          }
+        }
+      }
+    });
+    var Bar = store.defineResource({
+      name: 'bar',
+      relations: {
+        belongsTo: {
+          foo: {
+            localField: 'foo',
+            localKey: 'fooId'
+          }
+        }
+      }
+    })
+    
+    var foo = Foo.inject({ id: 1 });
+
+    return foo.DSLoadRelations(['bar']).then(function (foo) {
+      assert.objectsEqual(foo.bars, [{ id: 1, fooId: 1 }]);
+    });
+  });
+  describe('zero id value in relations', function() {
+    var Item, Client,
+        clientZero = {
+          id: 0,
+          name: 'Client Zero'
+        },
+        item5 = {
+          id: 5,
+          ClientId: clientZero.id
+        };
+    beforeEach(function() {
+      Item = store.defineResource({
+        name: 'item',
+        relations: {
+          hasOne: {
+            client: {
+              localKey: 'ClientId',
+              localField: 'Client'
+            }
+          }
+        }
+      });
+
+      Client = store.defineResource({
+        name: 'client'
+      });
+    });
+    it('should call relation data in hasOne zero value for "localKey"', function (done) {
+      var _this = this;
+      setTimeout(function () {
+        assert.equal(1, _this.requests.length);
+        assert.equal(_this.requests[0].url, 'http://test.js-data.io/item/5');
+        assert.equal(_this.requests[0].method, 'GET');
+        _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(item5));
+      }, 60);
+      return Item.find(item5.id)
+        .then(function(item) {
+          setTimeout(function () {
+            assert.equal(2, _this.requests.length);
+            assert.equal(_this.requests[1].url, 'http://test.js-data.io/client/' + clientZero.id);
+            assert.equal(_this.requests[1].method, 'GET');
+            _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(clientZero));
+            done();
+          }, 60);
+          return Item.loadRelations(item, ['client']);
+        });
+    });
+    it('should return relation data from "localField"', function() {
+      var _this = this;
+      setTimeout(function () {
+        _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(item5));
+      }, 60);
+      return Item.find(item5.id)
+        .then(function(item) {
+          setTimeout(function () {
+            assert.equal(2, _this.requests.length);
+            assert.equal(_this.requests[1].url, 'http://test.js-data.io/client/' + clientZero.id);
+            assert.equal(_this.requests[1].method, 'GET');
+            _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(clientZero));
+          }, 60);
+          return Item.loadRelations(item);
+        })
+        .then(function (item) {
+          assert.isObject(item.Client, 'Client "localField" is not an object');
+          assert.deepEqual(DSUtils.toJson(item.Client), DSUtils.toJson(clientZero));
+        });
+    });
+  });
 });

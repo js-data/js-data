@@ -10,12 +10,15 @@ When submitting issues on GitHub, please include as much detail as possible to m
 
 [Github Issues](https://github.com/js-data/js-data/issues).
 
-#### Pull Requests
+#### Submitting Pull Requests
 
-1. Contribute to the issue that is the reason you'll be developing in the first place
+1. Contribute to the issue/discussion that is the reason you'll be developing in the first place
 1. Fork js-data
 1. `git clone git@github.com:<you>/js-data.git`
 1. `cd js-data; npm install; bower install;`
 1. Write your code, including relevant documentation and tests
-1. `grunt test` (build and test)
-1. Submit a PR and we'll review
+1. Run `grunt test` (build and test)
+1. Your code will be linted and checked for formatting, the tests will be run
+1. The `dist/` folder & files will be generated, do NOT commit `dist/*`! They will be committed when a release is cut.
+1. Submit your PR and we'll review!
+1. Thanks!

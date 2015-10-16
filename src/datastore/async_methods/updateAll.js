@@ -7,62 +7,64 @@
  * @param options Optional configuration.
  * @returns The updated items.
  */
-module.exports = function updateAll(resourceName, attrs, params, options) {
-  let _this = this;
-  let {utils: DSUtils, errors: DSErrors} = _this;
-  let definition = _this.definitions[resourceName];
-  let adapter;
+module.exports = function updateAll (resourceName, attrs, params, options) {
+  let _this = this
+  let {utils: DSUtils, errors: DSErrors} = _this
+  let definition = _this.definitions[resourceName]
+  let adapter
 
-  return new DSUtils.Promise((resolve, reject) => {
+  return new DSUtils.Promise(function (resolve, reject) {
     if (!definition) {
-      reject(new DSErrors.NER(resourceName));
+      reject(new DSErrors.NER(resourceName))
     } else {
-      options = DSUtils._(definition, options);
-      options.logFn('updateAll', attrs, params, options);
-      resolve(attrs);
+      options = DSUtils._(definition, options)
+      options.logFn('updateAll', attrs, params, options)
+      DSUtils.applyScope(definition, params, options)
+      resolve(attrs)
     }
   })
     // start lifecycle
-    .then(attrs => options.beforeValidate.call(attrs, options, attrs))
-    .then(attrs => options.validate.call(attrs, options, attrs))
-    .then(attrs => options.afterValidate.call(attrs, options, attrs))
-    .then(attrs => options.beforeUpdate.call(attrs, options, attrs))
-    .then(attrs => {
+    .then(function (attrs) { return options.beforeValidate.call(attrs, options, attrs) })
+    .then(function (attrs) { return options.validate.call(attrs, options, attrs) })
+    .then(function (attrs) { return options.afterValidate.call(attrs, options, attrs) })
+    .then(function (attrs) { return options.beforeUpdate.call(attrs, options, attrs) })
+    .then(function (attrs) {
       if (options.notify) {
-        definition.emit('DS.beforeUpdate', definition, attrs);
+        definition.emit('DS.beforeUpdate', definition, attrs)
       }
-      adapter = definition.getAdapterName(options);
-      return _this.adapters[adapter].updateAll(definition, DSUtils.omit(attrs, options.omit), params, options);
+      adapter = definition.getAdapterName(options)
+      return _this.adapters[adapter].updateAll(definition, DSUtils.omit(attrs, options.omit), params, options)
     })
-    .then(data => options.afterUpdate.call(data, options, data))
-    .then(data => {
+    .then(function (data) { return options.afterUpdate.call(data, options, data) })
+    .then(function (data) {
       if (options.notify) {
-        definition.emit('DS.afterUpdate', definition, attrs);
+        definition.emit('DS.afterUpdate', definition, attrs)
       }
-      let origOptions = options.orig();
+      let origOptions = options.orig()
       if (options.cacheResponse) {
         // inject the updated items into the store
-        let injected = definition.inject(data, origOptions);
-        let resource = _this.store[resourceName];
+        let injected = definition.inject(data, origOptions)
+        let resource = _this.store[resourceName]
         // mark the items as "saved"
         DSUtils.forEach(injected, i => {
-          let id = i[definition.idAttribute];
-          resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
+          let id = i[definition.idAttribute]
+          resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id])
           if (!definition.resetHistoryOnInject) {
-            resource.previousAttributes[id] = DSUtils.copy(i, null, null, null, definition.relationFields);
+            resource.previousAttributes[id] = DSUtils.copy(i, null, null, null, definition.relationFields)
           }
-        });
-        return injected;
+        })
+        return injected
       } else {
         // just return instances
-        let instances = [];
+        let instances = []
         DSUtils.forEach(data, item => {
-          instances.push(definition.createInstance(item, origOptions));
-        });
-        return instances;
+          instances.push(definition.createInstance(item, origOptions))
+        })
+        return instances
       }
     })
-    .then(items => {
-      return DSUtils.respond(items, {adapter}, options);
-    });
-};
+    .then(function (items) {
+      return DSUtils.respond(items, {adapter}, options)
+    })
+    .catch(_this.errorFn('updateAll', resourceName, attrs, params, options))
+}
