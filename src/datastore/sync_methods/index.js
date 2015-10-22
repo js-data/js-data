@@ -366,7 +366,7 @@ export default {
   // @param options Optional configuration.
   // @returns The reverted item
   revert (resourceName, id, options) {
-    let {_this, definition, _resourceName, _id, _options} = check.call(this, 'changes', resourceName, id, options)
+    let {_this, definition, _resourceName, _id, _options} = check.call(this, 'revert', resourceName, id, options)
 
     let preserve = _options.preserve || []
 
@@ -382,7 +382,7 @@ export default {
         throw new R('Item not in the store!')
       }
 
-      Object.keys(instance).forEach(function (key) {
+      DSUtils.forOwn(instance, function (value, key) {
         if (DSUtils.contains(preserve, key)) {
           injectObj[key] = instance[key]
         } else {
