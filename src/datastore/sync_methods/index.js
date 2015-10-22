@@ -377,10 +377,7 @@ export default {
       let previousInstance = _this.previous(_resourceName, _id)
       let injectObj = {}
 
-      // This may not be necessary, paranoia.
-      if (!instance) {
-        throw new R('Item not in the store!')
-      }
+      if (!instance) { return }
 
       DSUtils.forOwn(instance, function (value, key) {
         if (DSUtils.contains(preserve, key)) {
