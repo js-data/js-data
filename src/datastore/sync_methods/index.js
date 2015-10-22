@@ -363,10 +363,31 @@ export default {
   //
   // @param resourceName The name of the type of resource of the item.
   // @param id The primary key of the item.
+  // @param options Optional configuration.
   // @returns The reverted item
-  revert (resourceName, id) {
-    let {_this, definition, _resourceName, _id} = check.call(this, 'revert', resourceName, id)
+  revert (resourceName, id, options) {
+    let {_this, definition, _resourceName, _id, _options} = check.call(this, 'revert', resourceName, id, options)
 
-    return definition.inject(_this.previous(_resourceName, _id))
+    let preserve = _options.preserve || []
+
+    if (preserve.length === 0) {
+      return definition.inject(_this.previous(_resourceName, _id))
+    } else {
+      let instance = definition.get(id)
+      let previousInstance = _this.previous(_resourceName, _id)
+      let injectObj = {}
+
+      if (!instance) { return }
+
+      DSUtils.forOwn(instance, function (value, key) {
+        if (DSUtils.contains(preserve, key)) {
+          injectObj[key] = instance[key]
+        } else {
+          injectObj[key] = previousInstance[key]
+        }
+      })
+
+      return definition.inject(injectObj)
+    }
   }
 }
