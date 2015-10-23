@@ -19,13 +19,6 @@ module.exports = {
   module: {
     loaders: [
       { test: /(src)(.+)\.js$/, exclude: /node_modules/, loader: 'babel-loader?blacklist=useStrict&modules=commonStrict' }
-    ],
-    preLoaders: [
-      {
-        test: /(src)(.+)\.js$|(test)(.+)\.js$/, // include .js files
-        exclude: /node_modules/, // exclude any and all files in the node_modules folder
-        loader: "jshint-loader?failOnHint=true"
-      }
     ]
   },
   plugins: [

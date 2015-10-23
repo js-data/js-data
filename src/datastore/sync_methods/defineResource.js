@@ -23,6 +23,7 @@ let instanceMethods = [
   'loadRelations',
   'changeHistory',
   'changes',
+  'commit',
   'hasChanges',
   'lastModified',
   'lastSaved',

@@ -256,13 +256,7 @@ function _inject (definition, resource, attrs, options) {
 
           if (definition.resetHistoryOnInject) {
             // clear change history for item
-            resource.previousAttributes[id] = DSUtils.copy(item, null, null, null, definition.relationFields)
-            if (resource.changeHistories[id].length) {
-              DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
-                DSUtils.remove(resource.changeHistory, changeRecord)
-              })
-              resource.changeHistories[id].splice(0, resource.changeHistories[id].length)
-            }
+            _this.commit(definition.name, id)
           }
           if (resource.observers[id] && typeof resource.observers[id] === 'function') {
             // force observation callback to be fired if there are any changes to the item and `Object.observe` is not available

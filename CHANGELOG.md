@@ -1,3 +1,11 @@
+##### 2.7.1 - 21 October 2015
+
+###### Backwards compatible API changes
+- #243 - DS#commit
+
+###### Other
+- Dropped Grunt
+
 ##### 2.6.1 - 12 October 2015
 
 ###### Bug fixes

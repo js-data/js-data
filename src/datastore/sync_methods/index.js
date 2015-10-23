@@ -101,6 +101,23 @@ export default {
     }
   },
 
+  commit (resourceName, id) {
+    let {_this, definition, _resourceName, _id} = check.call(this, 'commit', resourceName, id)
+    let resource = _this.store[_resourceName]
+    let item = _this.store[_resourceName].index[_id]
+    if (item) {
+      resource.previousAttributes[_id] = DSUtils.copy(item, null, null, null, definition.relationFields)
+    }
+
+    if (resource.changeHistories[_id].length) {
+      DSUtils.forEach(resource.changeHistories[_id], function (changeRecord) {
+        DSUtils.remove(resource.changeHistory, changeRecord)
+      })
+      resource.changeHistories[_id].splice(0, resource.changeHistories[_id].length)
+    }
+    return item
+  },
+
   // Re-compute the computed properties of the given item.
   //
   // @param resourceName The name of the type of resource of the item whose computed properties are to be re-computed.

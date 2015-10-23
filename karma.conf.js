@@ -17,7 +17,7 @@ module.exports = function (config) {
 		],
 		autoWatch: false,
 		autoWatchBatchDelay: 4000,
-		browsers: ['Chrome'],
+		browsers: ['PhantomJS'],
 
 		// list of files / patterns to load in the browser
 		files: [
