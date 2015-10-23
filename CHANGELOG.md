@@ -1,7 +1,10 @@
-##### 2.7.1 - 21 October 2015
+##### 2.7.0 - 22 October 2015
 
 ###### Backwards compatible API changes
+- #205 - DS#revert should ignore omitted fields
 - #243 - DS#commit
+- #245 - Closes #205 by @internalfx
+- #248 - Fix `belongsTo` relation with zero value by @Pencroff
 
 ###### Other
 - Dropped Grunt

@@ -22,12 +22,11 @@ describe('DS#revert', function () {
     assert.equal(JSON.stringify(post), JSON.stringify(p1));
   });
   it('should preserve fields in the optional preserve array', function () {
-    Post.inject(p1);
-    var post = Post.get(5);
+    var post = Post.inject(p1);
     post.author = 'Jake';
     post.age = 20;
     post.DSRevert({preserve: ['age']});
-    p1.age = 20;
-    assert.equal(JSON.stringify(post), JSON.stringify(p1));
+    assert.equal(post.age, 20, 'The age of the post should have been preserved');
+    assert.equal(post.author, 'John', 'The author of the post should have been reverted');
   });
 });

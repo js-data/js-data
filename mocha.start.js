@@ -6,7 +6,7 @@ require('es6-promise').polyfill();
 var assert = require('chai').assert;
 var mocha = require('mocha');
 var sinon = require('sinon');
-var JSData = require('./');
+var JSData = require('./dist/js-data-debug.js');
 
 var store, DSUtils, DSErrors;
 

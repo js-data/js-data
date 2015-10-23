@@ -3,7 +3,7 @@ var pkg = require('../package.json');
 
 console.log('Creating dist/js-data-debug.js...');
 
-var file = fs.readFileSync('dist/js-data.js', { encoding: 'utf-8' });
+var file = fs.readFileSync('dist/js-data-debug.js', { encoding: 'utf-8' });
 
 var lines = file.split('\n');
 
@@ -19,6 +19,6 @@ file = newLines.join('\n');
 
 file += '\n';
 
-fs.writeFileSync('dist/js-data-debug.js', file, { encoding: 'utf-8' });
+fs.writeFileSync('dist/js-data.js', file, { encoding: 'utf-8' });
 
 console.log('Done!');

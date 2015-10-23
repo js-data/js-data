@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 2.6.1 - Homepage <http://www.js-data.io/>
+ * @version 2.7.0 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -84,10 +84,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new _datastoreIndex['default'](options);
 	  },
 	  version: {
-	    full: '2.6.1',
+	    full: '2.7.0',
 	    major: parseInt('2', 10),
-	    minor: parseInt('6', 10),
-	    patch: parseInt('1', 10),
+	    minor: parseInt('7', 10),
+	    patch: parseInt('0', 10),
 	    alpha:  true ? 'false' : false,
 	    beta:  true ? 'false' : false
 	  }
@@ -1248,7 +1248,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	        if (def.type === 'belongsTo') {
 	          prop.get = function () {
-	            return get(this, localKey) ? definition.getResource(relationName).get(get(this, localKey)) : undefined;
+	            var key = get(this, localKey);
+	            var hasKey = !!(key || key === 0);
+	            return hasKey ? definition.getResource(relationName).get(key) : undefined;
 	          };
 	          prop.set = function (parent) {
 	            if (parent) {
@@ -3016,6 +3018,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  },
 
+	  commit: function commit(resourceName, id) {
+	    var _check$call3 = check.call(this, 'commit', resourceName, id);
+
+	    var _this = _check$call3._this;
+	    var definition = _check$call3.definition;
+	    var _resourceName = _check$call3._resourceName;
+	    var _id = _check$call3._id;
+
+	    var resource = _this.store[_resourceName];
+	    var item = _this.store[_resourceName].index[_id];
+	    if (item) {
+	      resource.previousAttributes[_id] = _utils['default'].copy(item, null, null, null, definition.relationFields);
+	    }
+
+	    if (resource.changeHistories[_id].length) {
+	      _utils['default'].forEach(resource.changeHistories[_id], function (changeRecord) {
+	        _utils['default'].remove(resource.changeHistory, changeRecord);
+	      });
+	      resource.changeHistories[_id].splice(0, resource.changeHistories[_id].length);
+	    }
+	    return item;
+	  },
+
 	  // Re-compute the computed properties of the given item.
 	  //
 	  // @param resourceName The name of the type of resource of the item whose computed properties are to be re-computed.
@@ -3172,11 +3197,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // @returns The item with the given primary key if it's in the store.
 	  // /
 	  get: function get(resourceName, id) {
-	    var _check$call3 = check.call(this, 'get', resourceName, id);
+	    var _check$call4 = check.call(this, 'get', resourceName, id);
 
-	    var _this = _check$call3._this;
-	    var _resourceName = _check$call3._resourceName;
-	    var _id = _check$call3._id;
+	    var _this = _check$call4._this;
+	    var _resourceName = _check$call4._resourceName;
+	    var _id = _check$call4._id;
 
 	    // return the item if it exists
 	    return _this.store[_resourceName].index[_id];
@@ -3222,10 +3247,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // @param id The primary key of the item.
 	  // @returns Whether the item with the given primary key has any changes.
 	  hasChanges: function hasChanges(resourceName, id) {
-	    var _check$call4 = check.call(this, 'hasChanges', resourceName, id);
+	    var _check$call5 = check.call(this, 'hasChanges', resourceName, id);
 
-	    var definition = _check$call4.definition;
-	    var _id = _check$call4._id;
+	    var definition = _check$call5.definition;
+	    var _id = _check$call5._id;
 
 	    return definition.get(_id) ? diffIsEmpty(definition.changes(_id)) : false;
 	  },
@@ -3237,11 +3262,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // @param id The primary key of the item.
 	  // @returns Timestamp from the last time the item was changed.
 	  lastModified: function lastModified(resourceName, id) {
-	    var _check$call5 = check.call(this, 'lastModified', resourceName, id || fakeId);
+	    var _check$call6 = check.call(this, 'lastModified', resourceName, id || fakeId);
 
-	    var _this = _check$call5._this;
-	    var _resourceName = _check$call5._resourceName;
-	    var _id = _check$call5._id;
+	    var _this = _check$call6._this;
+	    var _resourceName = _check$call6._resourceName;
+	    var _id = _check$call6._id;
 
 	    var resource = _this.store[_resourceName];
 
@@ -3260,11 +3285,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // @param id The primary key of the item.
 	  // @returns Timestamp from the last time the item was saved.
 	  lastSaved: function lastSaved(resourceName, id) {
-	    var _check$call6 = check.call(this, 'lastSaved', resourceName, id || fakeId);
+	    var _check$call7 = check.call(this, 'lastSaved', resourceName, id || fakeId);
 
-	    var _this = _check$call6._this;
-	    var _resourceName = _check$call6._resourceName;
-	    var _id = _check$call6._id;
+	    var _this = _check$call7._this;
+	    var _resourceName = _check$call7._resourceName;
+	    var _id = _check$call7._id;
 
 	    var resource = _this.store[_resourceName];
 
@@ -3280,11 +3305,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // @param id The primary key of the item.
 	  // @returns The previous attributes of the item
 	  previous: function previous(resourceName, id) {
-	    var _check$call7 = check.call(this, 'previous', resourceName, id);
+	    var _check$call8 = check.call(this, 'previous', resourceName, id);
 
-	    var _this = _check$call7._this;
-	    var _resourceName = _check$call7._resourceName;
-	    var _id = _check$call7._id;
+	    var _this = _check$call8._this;
+	    var _resourceName = _check$call8._resourceName;
+	    var _id = _check$call8._id;
 
 	    var resource = _this.store[_resourceName];
 
@@ -3296,16 +3321,48 @@ return /******/ (function(modules) { // webpackBootstrap
 	  //
 	  // @param resourceName The name of the type of resource of the item.
 	  // @param id The primary key of the item.
+	  // @param options Optional configuration.
 	  // @returns The reverted item
-	  revert: function revert(resourceName, id) {
-	    var _check$call8 = check.call(this, 'revert', resourceName, id);
+	  revert: function revert(resourceName, id, options) {
+	    var _check$call9 = check.call(this, 'revert', resourceName, id, options);
 
-	    var _this = _check$call8._this;
-	    var definition = _check$call8.definition;
-	    var _resourceName = _check$call8._resourceName;
-	    var _id = _check$call8._id;
+	    var _this = _check$call9._this;
+	    var definition = _check$call9.definition;
+	    var _resourceName = _check$call9._resourceName;
+	    var _id = _check$call9._id;
+	    var _options = _check$call9._options;
 
-	    return definition.inject(_this.previous(_resourceName, _id));
+	    var preserve = _options.preserve || [];
+
+	    if (preserve.length === 0) {
+	      return definition.inject(_this.previous(_resourceName, _id));
+	    } else {
+	      var _ret2 = (function () {
+	        var instance = definition.get(id);
+	        var previousInstance = _this.previous(_resourceName, _id);
+	        var injectObj = {};
+
+	        if (!instance) {
+	          return {
+	            v: undefined
+	          };
+	        }
+
+	        _utils['default'].forOwn(instance, function (value, key) {
+	          if (_utils['default'].contains(preserve, key)) {
+	            injectObj[key] = instance[key];
+	          } else {
+	            injectObj[key] = previousInstance[key];
+	          }
+	        });
+
+	        return {
+	          v: definition.inject(injectObj)
+	        };
+	      })();
+
+	      if (typeof _ret2 === 'object') return _ret2.v;
+	    }
 	  }
 	};
 
@@ -3330,7 +3387,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * User.update(id, attrs[, options]) // DS method proxied on a Resource
 	 * user.DSUpdate(attrs[, options]) // DS method proxied on an Instance
 	 */
-	var instanceMethods = ['compute', 'eject', 'refresh', 'save', 'update', 'destroy', 'loadRelations', 'changeHistory', 'changes', 'hasChanges', 'lastModified', 'lastSaved', 'previous', 'revert'];
+	var instanceMethods = ['compute', 'eject', 'refresh', 'save', 'update', 'destroy', 'loadRelations', 'changeHistory', 'changes', 'commit', 'hasChanges', 'lastModified', 'lastSaved', 'previous', 'revert'];
 
 	module.exports = function defineResource(definition) {
 	  var _this = this;
@@ -4204,13 +4261,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (definition.resetHistoryOnInject) {
 	              // clear change history for item
-	              resource.previousAttributes[id] = _utils['default'].copy(item, null, null, null, definition.relationFields);
-	              if (resource.changeHistories[id].length) {
-	                _utils['default'].forEach(resource.changeHistories[id], function (changeRecord) {
-	                  _utils['default'].remove(resource.changeHistory, changeRecord);
-	                });
-	                resource.changeHistories[id].splice(0, resource.changeHistories[id].length);
-	              }
+	              _this.commit(definition.name, id);
 	            }
 	            if (resource.observers[id] && typeof resource.observers[id] === 'function') {
 	              // force observation callback to be fired if there are any changes to the item and `Object.observe` is not available

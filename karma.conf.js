@@ -12,8 +12,7 @@ module.exports = function (config) {
 			'karma-chrome-launcher',
 			'karma-phantomjs-launcher',
 			'karma-firefox-launcher',
-			'karma-coverage',
-			'karma-spec-reporter'
+			'karma-coverage'
 		],
 		autoWatch: false,
 		autoWatchBatchDelay: 4000,
@@ -30,7 +29,7 @@ module.exports = function (config) {
 			'test/browser/**/*.test.js'
 		],
 
-		reporters: ['spec', 'coverage'],
+		reporters: ['dots', 'coverage'],
 
 		preprocessors: {
 			'dist/js-data-debug.js': ['coverage']
