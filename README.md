@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="64" height="64" />
 
-## JSData [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/js-data/js-data?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Latest Release](https://img.shields.io/github/release/js-data/js-data.svg?style=flat-square)](https://github.com/js-data/js-data/releases) [![Circle CI](https://img.shields.io/circleci/project/js-data/js-data/master.svg?style=flat-square)](https://circleci.com/gh/js-data/js-data/tree/master) [![npm downloads](https://img.shields.io/npm/dm/js-data.svg?style=flat-square)](https://www.npmjs.org/package/js-data) [![Coverage Status](https://coveralls.io/repos/js-data/js-data/badge.svg?branch=master&service=github)](https://coveralls.io/github/js-data/js-data?branch=master)
+## JSData [![Slack Status](http://slack.js-data.io/badge.svg)](http://slack.js-data.io) [![Latest Release](https://img.shields.io/github/release/js-data/js-data.svg?style=flat-square)](https://github.com/js-data/js-data/releases) [![Circle CI](https://img.shields.io/circleci/project/js-data/js-data/master.svg?style=flat-square)](https://circleci.com/gh/js-data/js-data/tree/master) [![npm downloads](https://img.shields.io/npm/dm/js-data.svg?style=flat-square)](https://www.npmjs.org/package/js-data) [![Coverage Status](https://coveralls.io/repos/js-data/js-data/badge.svg?branch=master&service=github)](https://coveralls.io/github/js-data/js-data?branch=master)
 
 Inspired by [Ember Data](https://github.com/emberjs/data), __JSData__ is the model layer you've been craving. It consists of a convenient __framework-agnostic__, __in-memory store__ for managing your data, which uses __adapters__ to communicate with various __persistence layers__.
 
@@ -156,7 +156,7 @@ See an issue with or have a suggestion for the documentation? You can suggest ed
 [CHANGELOG.md](https://github.com/js-data/js-data/blob/master/CHANGELOG.md)
 
 ### Community
-- [Gitter Channel](https://gitter.im/js-data/js-data) - Better than IRC!
+- [Slack Channel](http://slack.js-data.io) [![Slack Status](http://slack.js-data.io/badge.svg)](http://slack.js-data.io) - Better than IRC!
 - [Announcements](http://www.js-data.io/blog)
 - [Mailing List](https://groups.io/org/groupsio/jsdata) - Ask your questions!
 - [Issues](https://github.com/js-data/js-data/issues) - Found a bug? Feature request? Submit an issue!
@@ -165,7 +165,7 @@ See an issue with or have a suggestion for the documentation? You can suggest ed
 
 ### Contributing
 
-First, support is handled via the [Gitter Channel](https://gitter.im/js-data/js-data) and the [Mailing List](https://groups.io/org/groupsio/jsdata). Ask your questions there.
+First, support is handled via the [Slack Channel](http://slack.js-data.io) and the [Mailing List](https://groups.io/org/groupsio/jsdata). Ask your questions there.
 
 When submitting issues on GitHub, please include as much detail as possible to make debugging quick and easy.
 
