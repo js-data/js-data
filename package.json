@@ -37,9 +37,11 @@
     "babel-eslint": "4.1.3",
     "babel-loader": "5.3.2",
     "chai": "3.4.0",
+    "codacy-coverage": "1.1.3",
     "coveralls": "2.11.4",
     "es6-promise": "3.0.2",
     "karma": "0.13.14",
+    "karma-browserstack-launcher": "~0.1.6",
     "karma-chai": "0.1.0",
     "karma-chrome-launcher": "0.2.1",
     "karma-coverage": "0.5.3",
@@ -60,18 +62,22 @@
     "parser": "babel-eslint"
   },
   "scripts": {
-    "lint": "node node_modules/standard/bin/cmd.js src/**/*.js",
-    "bundle": "node node_modules/webpack/bin/webpack.js --config webpack.config.js --colors",
-    "min": "node node_modules/uglify-js/bin/uglifyjs dist/js-data.js -o dist/js-data.min.js --source-map dist/js-data.min.map -v -m -c --screw-ie8",
+    "lint": "standard src/**/*.js",
+    "bundle": "webpack --config webpack.config.js --colors",
+    "min": "uglifyjs dist/js-data.js -o dist/js-data.min.js --source-map dist/js-data.min.map -v -m -c --screw-ie8",
     "debug": "node scripts/debug.js",
     "version": "node scripts/version.js",
     "banner": "node scripts/banner.js",
     "gzip": "echo gzipped size: $(cat dist/js-data.min.js | gzip -f9 | wc -c)kb",
     "build": "npm run lint && npm run bundle && npm run debug && npm run min && npm run version && npm run banner && npm run gzip",
-    "karma": "node node_modules/karma/bin/karma start",
+    "karma": "karma start",
     "mocha": "mocha --timeout 20000 --reporter dot mocha.start.js test/both/* test/both/datastore/* test/both/datastore/async_methods/* test/both/datastore/sync_methods/*",
-    "test": "npm run mocha && npm run karma",
-    "all": "npm run build && npm run test",
-    "ci": "npm run all && cat ./coverage/PhantomJS*/lcov.info | node_modules/coveralls/bin/coveralls.js"
+<<<<<<< HEAD
+	"test": "npm run build && npm run mocha && npm run karma",
+	"ci": "npm test && cat ./coverage/PhantomJS*/lcov.info | coveralls || true && cat ./coverage/PhantomJS*/lcov.info | codacy-coverage || true"
+=======
+    "test": "npm run build && npm run mocha && npm run karma",
+    "ci": "npm test && cat ./coverage/PhantomJS*/lcov.info | coveralls || true && cat ./coverage/PhantomJS*/lcov.info | codacy-coverage || true"
+>>>>>>> 3ca877c... Proper build fix
   }
 }

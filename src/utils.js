@@ -572,7 +572,16 @@ export default {
       let i
       let nu
 
-      if (typeof value === 'object' && value !== null && !(value instanceof Boolean) && !(value instanceof Date) && !(value instanceof Number) && !(value instanceof RegExp) && !(value instanceof String) && !(value instanceof File)) {
+      if (
+        typeof value === 'object' &&
+        value !== null &&
+        !(value instanceof Boolean) &&
+        !(value instanceof Date) &&
+        !(value instanceof Number) &&
+        !(value instanceof RegExp) &&
+        !(value instanceof String) &&
+        (!File || !(value instanceof File))
+      ) {
         // check if current object points back to itself
         let cur = ctx.cur
         var parent = ctx.ctx
