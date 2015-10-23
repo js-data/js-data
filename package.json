@@ -37,6 +37,7 @@
     "babel-eslint": "4.1.3",
     "babel-loader": "5.3.2",
     "chai": "3.4.0",
+    "codacy-coverage": "1.1.3",
     "coveralls": "2.11.4",
     "es6-promise": "3.0.2",
     "karma": "0.13.14",
@@ -72,6 +73,6 @@
     "mocha": "mocha --timeout 20000 --reporter dot mocha.start.js test/both/* test/both/datastore/* test/both/datastore/async_methods/* test/both/datastore/sync_methods/*",
     "test": "npm run mocha && npm run karma",
     "all": "npm run build && npm run test",
-    "ci": "npm run all && cat ./coverage/PhantomJS*/lcov.info | coveralls || true"
+    "ci": "npm run all && cat ./coverage/PhantomJS*/lcov.info | coveralls || true && cat ./coverage/PhantomJS*/lcov.info | codacy-coverage || true"
   }
 }
