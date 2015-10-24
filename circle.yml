@@ -3,3 +3,6 @@ dependencies:
     - bower install
   cache_directories:
     - "bower_components"
+test:
+  override:
+    - npm run ci
