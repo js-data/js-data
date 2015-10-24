@@ -72,6 +72,6 @@
     "karma": "karma start",
     "mocha": "mocha --timeout 20000 --reporter dot mocha.start.js test/both/* test/both/datastore/* test/both/datastore/async_methods/* test/both/datastore/sync_methods/*",
     "test": "npm run build && npm run mocha && npm run karma",
-    "ci": "npm run all && cat ./coverage/PhantomJS*/lcov.info | coveralls || true && cat ./coverage/PhantomJS*/lcov.info | codacy-coverage || true"
+    "ci": "npm test && cat ./coverage/PhantomJS*/lcov.info | coveralls || true && cat ./coverage/PhantomJS*/lcov.info | codacy-coverage || true"
   }
 }
