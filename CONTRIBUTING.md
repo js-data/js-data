@@ -22,3 +22,20 @@ When submitting issues on GitHub, please include as much detail as possible to m
 1. The `dist/` folder & files will be generated, do NOT commit `dist/*`! They will be committed when a release is cut.
 1. Submit your PR and we'll review!
 1. Thanks!
+
+#### Have write access?
+
+To cut a release:
+
+1. Checkout master
+1. Bump version in `package.json` appropriately
+1. Run `npm test`
+1. Update `CHANGELOG.md` appropriately
+1. Commit and push changes, including the `dist/` folder
+1. Make a GitHub release
+  - set tag name to version
+  - set release name to version
+  - set release body to changelog entry for the version
+  - attach the files in the `dist/` folder
+1. `git fetch origin`
+1. `npm publish .`
