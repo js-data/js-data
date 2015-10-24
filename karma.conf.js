@@ -10,13 +10,13 @@ var customLaunchers = {
 
 var browsers = ['PhantomJS'];
 if (
-	typeof process.env.BROWSERSTACK_USERNAME !== 'undefined' &&
-	typeof process.env.BROWSERSTACK_ACCESS_KEY !== 'undefined'
+	process.env.BROWSERSTACK_USERNAME &&
+	process.env.BROWSERSTACK_ACCESS_KEY
 ) {
 	browsers = browsers.concat(Object.keys(customLaunchers));
 }
 
-module.exports = function (config) {
+module.exports = function(config) {
 	config.set({
 		// base path, that will be used to resolve files and exclude
 		basePath: './',
