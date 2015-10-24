@@ -31,41 +31,65 @@
         <p><img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="64" height="64"></p>
 
 <h2>
-<a id="jsdata-----" class="anchor" href="#jsdata-----" aria-hidden="true"><span class="octicon octicon-link"></span></a>JSData <a href="http://slack.js-data.io"><img src="http://slack.js-data.io/badge.svg" alt="Slack Status"></a> <a href="https://github.com/js-data/js-data/releases"><img src="https://img.shields.io/github/release/js-data/js-data.svg?style=flat-square" alt="Latest Release"></a> <a href="https://circleci.com/gh/js-data/js-data/tree/master"><img src="https://img.shields.io/circleci/project/js-data/js-data/master.svg?style=flat-square" alt="Circle CI"></a> <a href="https://www.npmjs.org/package/js-data"><img src="https://img.shields.io/npm/dm/js-data.svg?style=flat-square" alt="npm downloads"></a> <a href="https://coveralls.io/github/js-data/js-data?branch=master"><img src="https://coveralls.io/repos/js-data/js-data/badge.svg?branch=master&amp;service=github" alt="Coverage Status"></a>
+<a id="jsdata------" class="anchor" href="#jsdata------" aria-hidden="true"><span class="octicon octicon-link"></span></a>JSData <a href="http://slack.js-data.io"><img src="http://slack.js-data.io/badge.svg" alt="Slack Status"></a> <a href="https://www.npmjs.org/package/js-data"><img src="https://img.shields.io/npm/v/js-data.svg?style=flat" alt="npm version"></a> <a href="https://circleci.com/gh/js-data/js-data/tree/master"><img src="https://img.shields.io/circleci/project/js-data/js-data/master.svg?style=flat" alt="Circle CI"></a> <a href="https://www.npmjs.org/package/js-data"><img src="https://img.shields.io/npm/dm/js-data.svg?style=flat" alt="npm downloads"></a> <a href="https://coveralls.io/github/js-data/js-data?branch=master"><img src="https://img.shields.io/coveralls/js-data/js-data/master.svg?style=flat" alt="Coverage Status"></a> <a href="https://www.codacy.com/app/jasondobry/js-data/dashboard"><img src="https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg" alt="Codacy"></a>
 </h2>
 
-<p>Inspired by <a href="https://github.com/emberjs/data">Ember Data</a>, <strong>JSData</strong> is the model layer you've been craving. It consists of a convenient <strong>framework-agnostic</strong>, <strong>in-memory store</strong> for managing your data, which uses <strong>adapters</strong> to communicate with various <strong>persistence layers</strong>.</p>
+<p>Inspired by <a href="https://github.com/emberjs/data">Ember Data</a>, <strong>JSData</strong> is the model layer you've been
+craving. It consists of a convenient <strong>framework-agnostic</strong>, <strong>in-memory store</strong>
+for managing your data, which uses <strong>adapters</strong> to communicate with various
+<strong>persistence layers</strong>.</p>
 
-<p>The most commonly used adapter is the <a href="http://www.js-data.io/docs/dshttpadapter">http adapter</a>, which is perfect for communicating with your RESTful backend. <a href="http://www.js-data.io/docs/dslocalstorageadapter">localStorage</a>, <a href="http://www.js-data.io/docs/dslocalforageadapter">localForage</a>, <a href="http://www.js-data.io/docs/dsfirebaseadapter">firebase</a> and <a href="http://www.js-data.io/docs/working-with-adapters">other adapters</a> are already available. On the server you could hook up to the <a href="http://www.js-data.io/docs/dssqladapter">SQL adapter (Postgres/MySQL/MariaDB/SQLite3)</a> and add in the <a href="http://www.js-data.io/docs/dsredisadapter">Redis adapter</a> as a caching layer for your read endpoints. More adapters are coming, and you're free to implement your own. See <a href="http://www.js-data.io/docs/working-with-adapters">Adapters</a>.</p>
+<p>The most commonly used adapter is the <a href="http://www.js-data.io/docs/dshttpadapter">http adapter</a>, which is perfect for
+communicating with your RESTful backend. <a href="http://www.js-data.io/docs/dslocalstorageadapter">localStorage</a>, <a href="http://www.js-data.io/docs/dslocalforageadapter">localForage</a>,
+<a href="http://www.js-data.io/docs/dsfirebaseadapter">firebase</a> and <a href="http://www.js-data.io/docs/working-with-adapters">other adapters</a> are already available. On the server you
+could hook up to the <a href="http://www.js-data.io/docs/dssqladapter">SQL adapter (Postgres/MySQL/MariaDB/SQLite3)</a> and add
+in the <a href="http://www.js-data.io/docs/dsredisadapter">Redis adapter</a> as a caching layer for your read endpoints. More
+adapters are coming, and you're free to implement your own. See <a href="http://www.js-data.io/docs/working-with-adapters">Adapters</a>.</p>
 
-<p>Unlike some libraries, JSData does not require the use of getters and setters, and doesn't decorate your data with a bunch of cruft. JSData's internal change detection (via <a href="https://github.com/Polymer/observe-js">observe-js</a> or <code>Object.observe</code> in supporting browsers) allows for powerful use cases and an easy avenue for implementing your own <a href="https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html">3-way data-binding</a>.</p>
+<p>Unlike some libraries, JSData does not require the use of getters and setters,
+and doesn't decorate your data with a bunch of cruft. JSData's internal change
+detection (via <a href="https://github.com/Polymer/observe-js">observe-js</a> or <code>Object.observe</code> in supporting browsers)
+allows for powerful use cases and an easy avenue for implementing your own
+<a href="https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html">3-way data-binding</a>.</p>
 
-<p>Supporting relations, computed properties, support for Node and the Browser, model lifecycle control and a slew of other features, JSData is the tool for <a href="http://confreaks.tv/videos/mwjs2015-give-your-data-the-respect-it-deserves">giving your data the respect it deserves</a>.</p>
+<p>Supporting relations, computed properties, support for Node and the Browser,
+model lifecycle control and a slew of other features, JSData is the tool for
+<a href="http://confreaks.tv/videos/mwjs2015-give-your-data-the-respect-it-deserves">giving your data the respect it deserves</a>.</p>
 
-<p>Written in ES6 and built for modern web development, JSData will save you thousands of lines of code <em>and</em> make you cooler.</p>
+<p>Written in ES6 and built for modern web development, JSData will save you
+thousands of lines of code <em>and</em> make you cooler.</p>
 
-<p>Support is handled via the <a href="https://groups.io/org/groupsio/jsdata">Mailing List</a>.</p>
+<p>Support is handled via the <a href="http://slack.js-data.io">Slack channel</a> or the <a href="https://groups.io/org/groupsio/jsdata">Mailing List</a>.</p>
 
 <h5>
 <a id="looking-for-contributors" class="anchor" href="#looking-for-contributors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Looking for contributors!</h5>
 
-<p>JSData is getting popular and becoming a lot of work for me. I could use help with tests, documentation, demos/examples, and adapters. Contact me if you want to help! jason dot dobry at gmail dot com</p>
+<p>JSData is getting popular and becoming a lot of work for me. I could use help
+with tests, documentation, demos/examples, and adapters. Contact me if you wan
+to help! jason dot dobry at gmail dot com</p>
 
 <p><a href="https://www.youtube.com/watch?v=8wxnnJA9FKw"><img src="http://img.youtube.com/vi/8wxnnJA9FKw/0.jpg" alt="MtnWestJS Conf 2015 Presentation"></a></p>
 
 <h3>
 <a id="dependencies" class="anchor" href="#dependencies" aria-hidden="true"><span class="octicon octicon-link"></span></a>Dependencies</h3>
 
-<p>JSData requires the presence of the ES6-spec (ES2015) <code>Promise</code> constructor in the global environment. In the browser, <code>window.Promise</code> must be available. In Node, <code>global.Promise</code> must be available. Here is a handy library for polyfilling: <a href="https://github.com/jakearchibald/es6-promise">https://github.com/jakearchibald/es6-promise</a>.</p>
+<p>JSData requires the presence of the ES6-spec (ES2015) <code>Promise</code> constructor in
+the global environment. In the browser, <code>window.Promise</code> must be available. In
+Node, <code>global.Promise</code> must be available. Here is a handy library for
+polyfilling: <a href="https://github.com/jakearchibald/es6-promise">https://github.com/jakearchibald/es6-promise</a>.</p>
 
-<p>If you can't polyfill the environment, then configure JSData to use a specific <code>Promise</code> constructor directly: <code>JSData.DSUtils.Promise = MyPromiseLib;</code>. This direct configuration method is useful for telling JSData to use the Bluebird library or Angular's <code>$q</code>, etc.</p>
+<p>If you can't polyfill the environment, then configure JSData to use a specific
+<code>Promise</code> constructor directly: <code>JSData.DSUtils.Promise = MyPromiseLib;</code>.
+This direct configuration method is useful for telling JSData to use the
+Bluebird library or Angular's <code>$q</code>, etc.</p>
 
 <h3>
 <a id="quick-start" class="anchor" href="#quick-start" aria-hidden="true"><span class="octicon octicon-link"></span></a>Quick Start</h3>
 
 <p><code>bower install --save js-data js-data-http</code> or <code>npm install --save js-data js-data-http</code>.</p>
 
-<p>Load <code>js-data-http.js</code> after <code>js-data.js</code>. See <a href="http://www.js-data.io/docs#use-with-webpack">installation instructions</a> for making js-data part of your r.js/browserify/webpack build.</p>
+<p>Load <code>js-data-http.js</code> after <code>js-data.js</code>. See <a href="http://www.js-data.io/docs#use-with-webpack">installation instructions</a>
+for making js-data part of your r.js/browserify/webpack build.</p>
 
 <div class="highlight highlight-source-js"><pre><span class="pl-c">// you can also require "js-data" if you're using AMD/CommonJS</span>
 <span class="pl-c">// e.g. var JSData = require('js-data'); var DSHttpAdapter = require('js-data-http');</span>
@@ -185,9 +209,11 @@ User.<span class="pl-c1">find</span>(<span class="pl-c1">1</span>)
 <li><a href="http://www.js-data.io/docs/dsdefaults">Configuration Options</a></li>
 <li><a href="http://www.js-data.io/docs/dsfirebaseadapter">DSFirebaseAdapter</a></li>
 <li><a href="http://www.js-data.io/docs/dshttpadapter">DSHttpAdapter</a></li>
+<li><a href="http://www.js-data.io/docs/dslevelupadapter">DSLevelUpAdapter</a></li>
 <li><a href="http://www.js-data.io/docs/dslocalforageadapter">DSLocalForageAdapter</a></li>
 <li><a href="http://www.js-data.io/docs/dslocalstorageadapter">DSLocalStorageAdapter</a></li>
 <li><a href="http://www.js-data.io/docs/dsmongodbadapter">DSMongoDBAdapter</a></li>
+<li><a href="http://www.js-data.io/docs/dsnedbadapter">DSNeDBAdapter</a></li>
 <li><a href="http://www.js-data.io/docs/dsredisadapter">DSRedisAdapter</a></li>
 <li><a href="http://www.js-data.io/docs/dsrethinkdbadapter">DSRethinkDBAdapter</a></li>
 <li><a href="http://www.js-data.io/docs/dssqladapter">DSSqlAdapter</a></li>
@@ -207,7 +233,7 @@ User.<span class="pl-c1">find</span>(<span class="pl-c1">1</span>)
 <a href="http://slack.js-data.io">Slack Channel</a> <a href="http://slack.js-data.io"><img src="http://slack.js-data.io/badge.svg" alt="Slack Status"></a> - Better than IRC!</li>
 <li><a href="http://www.js-data.io/blog">Announcements</a></li>
 <li>
-<a href="https://groups.io/org/groupsio/jsdata">Mailing List</a> - Ask your questions!</li>
+<a href="ml">Mailing List</a> - Ask your questions!</li>
 <li>
 <a href="https://github.com/js-data/js-data/issues">Issues</a> - Found a bug? Feature request? Submit an issue!</li>
 <li>
@@ -218,14 +244,19 @@ User.<span class="pl-c1">find</span>(<span class="pl-c1">1</span>)
 <h3>
 <a id="contributing" class="anchor" href="#contributing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributing</h3>
 
-<p>First, support is handled via the <a href="http://slack.js-data.io">Slack Channel</a> and the <a href="https://groups.io/org/groupsio/jsdata">Mailing List</a>. Ask your questions there.</p>
+<p>First, support is handled via the <a href="http://slack.js-data.io">Slack Channel</a> and the
+<a href="https://groups.io/org/groupsio/jsdata">Mailing List</a>. Ask your questions there.</p>
 
-<p>When submitting issues on GitHub, please include as much detail as possible to make debugging quick and easy.</p>
+<p>When submitting issues on GitHub, please include as much detail as possible to
+make debugging quick and easy.</p>
 
 <ul>
-<li>good - Your versions of Angular, JSData, etc, relevant console logs/error, code examples that revealed the issue</li>
-<li>better - A <a href="http://plnkr.co/">plnkr</a>, <a href="http://jsfiddle.net/">fiddle</a>, or <a href="http://jsbin.com/?html,output">bin</a> that demonstrates the issue</li>
-<li>best - A Pull Request that fixes the issue, including test coverage for the issue and the fix</li>
+<li>good - Your versions of Angular, JSData, etc, relevant console logs/error,
+code examples that revealed the issue</li>
+<li>better - A <a href="http://plnkr.co/">plnkr</a>, <a href="http://jsfiddle.net/">fiddle</a>, or
+<a href="http://jsbin.com/?html,output">bin</a> that demonstrates the issue</li>
+<li>best - A Pull Request that fixes the issue, including test coverage for the
+issue and the fix</li>
 </ul>
 
 <p><a href="https://github.com/js-data/js-data/issues">Github Issues</a>.</p>
@@ -234,14 +265,16 @@ User.<span class="pl-c1">find</span>(<span class="pl-c1">1</span>)
 <a id="pull-requests" class="anchor" href="#pull-requests" aria-hidden="true"><span class="octicon octicon-link"></span></a>Pull Requests</h4>
 
 <ol>
-<li>Contribute to the issue/discussion that is the reason you'll be developing in the first place</li>
+<li>Contribute to the issue/discussion that is the reason you'll be developing in
+the first place</li>
 <li>Fork js-data</li>
 <li><code>git clone git@github.com:&lt;you&gt;/js-data.git</code></li>
 <li><code>cd js-data; npm install; bower install;</code></li>
 <li>Write your code, including relevant documentation and tests</li>
 <li>Run <code>npm test</code> (build and test)</li>
 <li>Your code will be linted and checked for formatting, the tests will be run</li>
-<li>The <code>dist/</code> folder &amp; files will be generated, do NOT commit <code>dist/*</code>! They will be committed when a release is cut.</li>
+<li>The <code>dist/</code> folder &amp; files will be generated, do NOT commit <code>dist/*</code>! They
+will be committed when a release is cut.</li>
 <li>Submit your PR and we'll review!</li>
 <li>Thanks!</li>
 </ol>
