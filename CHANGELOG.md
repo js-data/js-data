@@ -3,6 +3,8 @@
 ###### Backwards compatible API changes
 - #211 - Add case insensitive filtering in query syntax
 
+##### 2.7.0 - 22 October 2015
+
 ###### Backwards compatible API changes
 - #205 - DS#revert should ignore omitted fields
 - #243 - DS#commit
