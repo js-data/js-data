@@ -149,8 +149,8 @@ function escape (pattern) {
   return pattern.replace(escapeRegExp, '\\$1')
 }
 
-function like (pattern) {
-  return new RegExp(`^${(escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.'))}$`)
+function like (pattern, flags) {
+  return new RegExp(`^${(escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.'))}$`, flags)
 }
 
 defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
@@ -235,10 +235,10 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
             } else {
               expr = !DSUtils.contains(term, val)
             }
-          } else if (op === 'like') {
-            expr = new RegExp(like(term)).exec(val) !== null
-          } else if (op === 'notLike') {
-            expr = new RegExp(like(term)).exec(val) === null
+          } else if (op.indexOf('like') === 0) {
+            expr = like(term, op.substr(4)).exec(val) !== null
+          } else if (op.indexOf('notLike') === 0) {
+            expr = like(term, op.substr(7)).exec(val) === null
           } else if (op === 'contains') {
             if (DSUtils._s(val)) {
               expr = val.indexOf(term) !== -1
