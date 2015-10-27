@@ -530,4 +530,39 @@ describe('DS#filter', function () {
       foo: 'bar'
     }));
   });
+  it('should support the "like" operator', function () {
+    var users = User.inject([
+      { id: 1, name: 'foo' },
+      { id: 2, name: 'xfoo' },
+      { id: 3, name: 'foox' },
+      { id: 4, name: 'xxfoo' },
+      { id: 5, name: 'fooxx' },
+      { id: 6, name: 'xxfooxx' },
+      { id: 7, name: 'xxfooxxfooxx' },
+      { id: 8, name: 'fooxxfoo' },
+      { id: 9, name: 'fooxfoo' },
+      { id: 10, name: 'fooxxfoox' },
+    ]);
+    assert.deepEqual(User.filter({ where: { name: { like: 'foo' } } }), [users[0]]);
+    assert.deepEqual(User.filter({ where: { name: { like: '_foo' } } }), [users[1]]);
+    assert.deepEqual(User.filter({ where: { name: { like: 'foo_' } } }), [users[2]]);
+    assert.deepEqual(User.filter({ where: { name: { like: '%foo' } } }), [users[0], users[1], users[3], users[7], users[8]]);
+    assert.deepEqual(User.filter({ where: { name: { like: 'foo%' } } }), [users[0], users[2], users[4], users[7], users[8], users[9]]);
+    assert.deepEqual(User.filter({ where: { name: { like: '%foo%' } } }), users);
+    assert.deepEqual(User.filter({ where: { name: { like: '%foo%foo%' } } }), [users[6], users[7], users[8], users[9]]);
+    assert.deepEqual(User.filter({ where: { name: { like: 'foo%foo' } } }), [users[7], users[8]]);
+    assert.deepEqual(User.filter({ where: { name: { like: 'foo_foo' } } }), [users[8]]);
+    assert.deepEqual(User.filter({ where: { name: { like: 'foo%foo_' } } }), [users[9]]);
+
+    assert.deepEqual(User.filter({ where: { name: { notLike: 'foo' } } }), [users[1], users[2], users[3], users[4], users[5], users[6], users[7], users[8], users[9]]);
+    assert.deepEqual(User.filter({ where: { name: { notLike: '_foo' } } }), [users[0], users[2], users[3], users[4], users[5], users[6], users[7], users[8], users[9]]);
+    assert.deepEqual(User.filter({ where: { name: { notLike: 'foo_' } } }), [users[0], users[1], users[3], users[4], users[5], users[6], users[7], users[8], users[9]]);
+    assert.deepEqual(User.filter({ where: { name: { notLike: '%foo' } } }), [users[2], users[4], users[5], users[6], users[9]]);
+    assert.deepEqual(User.filter({ where: { name: { notLike: 'foo%' } } }), [users[1], users[3], users[5], users[6]]);
+    assert.deepEqual(User.filter({ where: { name: { notLike: '%foo%' } } }), []);
+    assert.deepEqual(User.filter({ where: { name: { notLike: '%foo%foo%' } } }), [users[0], users[1], users[2], users[3], users[4], users[5]]);
+    assert.deepEqual(User.filter({ where: { name: { notLike: 'foo%foo' } } }), [users[0], users[1], users[2], users[3], users[4], users[5], users[6], users[9]]);
+    assert.deepEqual(User.filter({ where: { name: { notLike: 'foo_foo' } } }), [users[0], users[1], users[2], users[3], users[4], users[5], users[6], users[7], users[9]]);
+    assert.deepEqual(User.filter({ where: { name: { notLike: 'foo%foo_' } } }), [users[0], users[1], users[2], users[3], users[4], users[5], users[6], users[7], users[8]]);
+  })
 });

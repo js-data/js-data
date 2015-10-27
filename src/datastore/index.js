@@ -140,6 +140,19 @@ defaultsPrototype.useClass = true
 defaultsPrototype.useFilter = false
 defaultsPrototype.validate = lifecycleNoopCb
 defaultsPrototype.watchChanges = !!DSUtils.w
+
+let escapeRegExp = /([.*+?^=!:${}()|[\]\/\\])/g
+let percentRegExp = /%/g
+let underscoreRegExp = /_/g
+
+function escape (pattern) {
+  return pattern.replace(escapeRegExp, '\\$1')
+}
+
+function like (pattern) {
+  return new RegExp(`^${(escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.'))}$`)
+}
+
 defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
   let filtered = collection
   let where = null
@@ -222,6 +235,10 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
             } else {
               expr = !DSUtils.contains(term, val)
             }
+          } else if (op === 'like') {
+            expr = new RegExp(like(term)).exec(val) !== null
+          } else if (op === 'notLike') {
+            expr = new RegExp(like(term)).exec(val) === null
           } else if (op === 'contains') {
             if (DSUtils._s(val)) {
               expr = val.indexOf(term) !== -1

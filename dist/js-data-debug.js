@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 2.7.0 - Homepage <http://www.js-data.io/>
+ * @version 2.8.0 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -84,9 +84,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new _datastoreIndex['default'](options);
 	  },
 	  version: {
-	    full: '2.7.0',
+	    full: '2.8.0',
 	    major: parseInt('2', 10),
-	    minor: parseInt('7', 10),
+	    minor: parseInt('8', 10),
 	    patch: parseInt('0', 10),
 	    alpha:  true ? 'false' : false,
 	    beta:  true ? 'false' : false
@@ -281,6 +281,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	defaultsPrototype.useFilter = false;
 	defaultsPrototype.validate = lifecycleNoopCb;
 	defaultsPrototype.watchChanges = !!_utils['default'].w;
+
+	var escapeRegExp = /([.*+?^=!:${}()|[\]\/\\])/g;
+	var percentRegExp = /%/g;
+	var underscoreRegExp = /_/g;
+
+	function escape(pattern) {
+	  return pattern.replace(escapeRegExp, '\\$1');
+	}
+
+	function like(pattern) {
+	  return new RegExp('^' + escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.') + '$');
+	}
+
 	defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
 	  var filtered = collection;
 	  var where = null;
@@ -363,6 +376,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                } else {
 	                  expr = !_utils['default'].contains(term, val);
 	                }
+	              } else if (op === 'like') {
+	                expr = new RegExp(like(term)).exec(val) !== null;
+	              } else if (op === 'notLike') {
+	                expr = new RegExp(like(term)).exec(val) === null;
 	              } else if (op === 'contains') {
 	                if (_utils['default']._s(val)) {
 	                  expr = val.indexOf(term) !== -1;
@@ -1197,7 +1214,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var i = undefined;
 	      var nu = undefined;
 
-	      if (typeof value === 'object' && value !== null && !(value instanceof Boolean) && !(value instanceof Date) && !(value instanceof Number) && !(value instanceof RegExp) && !(value instanceof String) && !(value instanceof File)) {
+	      if (typeof value === 'object' && value !== null && !(value instanceof Boolean) && !(value instanceof Date) && !(value instanceof Number) && !(value instanceof RegExp) && !(value instanceof String) && (!File || !(value instanceof File))) {
 	        // check if current object points back to itself
 	        var cur = ctx.cur;
 	        var parent = ctx.ctx;

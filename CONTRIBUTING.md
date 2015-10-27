@@ -1,6 +1,6 @@
 # Contributing Guide
 
-First, support is handled via the [Gitter Channel](https://gitter.im/js-data/js-data) and the [Mailing List](https://groups.io/org/groupsio/jsdata). Ask your questions there.
+First, support is handled via the [Slack Channel](http://slack.js-data.io) and the [Mailing List](https://groups.io/org/groupsio/jsdata). Ask your questions there.
 
 When submitting issues on GitHub, please include as much detail as possible to make debugging quick and easy.
 
