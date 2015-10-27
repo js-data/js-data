@@ -251,6 +251,18 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
             } else {
               expr = !DSUtils.contains(val, term)
             }
+          } else if (op === 'like') {
+            if (DSUtils._s(val)) {
+              expr = val.toUpperCase().indexOf(term.toUpperCase()) !== -1
+            } else {
+              expr = DSUtils.contains(val, term)
+            }
+          } else if (op === 'notLike') {
+            if (DSUtils._s(val)) {
+              expr = val.toUpperCase().indexOf(term.toUpperCase()) === -1
+            } else {
+              expr = !DSUtils.contains(val, term)
+            }
           }
           if (expr !== undefined) {
             keep = first ? expr : (isOr ? keep || expr : keep && expr)
