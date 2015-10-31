@@ -17,6 +17,7 @@ node_modules
 coverage/
 doc/
 bower_components/
+junit/
 
 *.iml
 .idea/

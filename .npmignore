@@ -30,6 +30,7 @@ bower.json
 Gruntfile.js
 *.start.js
 karma.conf.js
+junit/
 test/
 lib/
 src/
