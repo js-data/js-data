@@ -492,7 +492,7 @@ describe('DS#loadRelations', function () {
         }
       }
     })
-    
+
     var foo = Foo.inject({ id: 1 });
 
     return foo.DSLoadRelations(['bar']).then(function (foo) {
@@ -620,6 +620,54 @@ describe('DS#loadRelations', function () {
             assert.isObject(item.Part, 'Part "localField" is not an object');
             assert.deepEqual(DSUtils.toJson(item.Part), DSUtils.toJson(partZero));
           });
+    });
+  });
+  it('should still work when linkRelations is false', function () {
+    var _this = this;
+    var store = new JSData.DS({
+      linkRelations: false
+    });
+    store.registerAdapter('http', dsHttpAdapter, { default: true });
+    var Foo = store.defineResource({
+      name: 'foo',
+      relations: {
+        hasMany: {
+          bar: {
+            localField: 'bars',
+            foreignKey: 'fooId'
+          }
+        },
+        belongsTo: {
+          beep: {
+            localField: 'beep',
+            localKey: 'beepId'
+          }
+        }
+      }
+    })
+    var Bar = store.defineResource('bar')
+    var Beep = store.defineResource('beep')
+
+    var foo = Foo.inject({
+      id: 1,
+      beepId: 2
+    })
+
+    setTimeout(function () {
+      assert.equal(2, _this.requests.length);
+      assert.equal(_this.requests[0].url, 'bar?fooId=1');
+      assert.equal(_this.requests[0].method, 'GET');
+      assert.equal(_this.requests[1].url, 'beep/2');
+      assert.equal(_this.requests[1].method, 'GET');
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([{ id: 3, fooId: 1 }]));
+      _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({ id: 2 }));
+    }, 60);
+
+    return foo.DSLoadRelations(['bar', 'beep']).then(function (foo) {
+      assert.objectsEqual(foo.bars, [{ id: 3, fooId: 1 }]);
+      assert.objectsEqual(foo.beep, { id: 2 });
+      assert.isTrue(foo.bars === foo.bars);
+      assert.isTrue(foo.beep === foo.beep);
     });
   });
 });

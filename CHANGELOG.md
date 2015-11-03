@@ -1,3 +1,9 @@
+##### 2.8.1 - 02 November 2015
+
+###### Backwards compatible bug fixes
+- #239 - loadRelations assumes cacheResponse and linkRelations options are true
+- #259, #260 - Reverting undefined keys by @davincho
+
 ##### 2.8.0 - 26 October 2015
 
 ###### Backwards compatible API changes

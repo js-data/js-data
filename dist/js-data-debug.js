@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 2.8.0 - Homepage <http://www.js-data.io/>
+ * @version 2.8.1 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -84,10 +84,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new _datastoreIndex['default'](options);
 	  },
 	  version: {
-	    full: '2.8.0',
+	    full: '2.8.1',
 	    major: parseInt('2', 10),
 	    minor: parseInt('8', 10),
-	    patch: parseInt('0', 10),
+	    patch: parseInt('1', 10),
 	    alpha:  true ? 'false' : false,
 	    beta:  true ? 'false' : false
 	  }
@@ -3360,14 +3360,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _options = _check$call9._options;
 
 	    var preserve = _options.preserve || [];
+	    var injectObj = {};
 
 	    if (preserve.length === 0) {
-	      return definition.inject(_this.previous(_resourceName, _id));
+	      injectObj = _this.previous(_resourceName, _id);
 	    } else {
 	      var _ret2 = (function () {
 	        var instance = definition.get(id);
 	        var previousInstance = _this.previous(_resourceName, _id);
-	        var injectObj = {};
 
 	        if (!instance) {
 	          return {
@@ -3382,14 +3382,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            injectObj[key] = previousInstance[key];
 	          }
 	        });
-
-	        return {
-	          v: definition.inject(injectObj)
-	        };
 	      })();
 
 	      if (typeof _ret2 === 'object') return _ret2.v;
 	    }
+
+	    return definition.inject(injectObj, {
+	      onConflict: 'replace'
+	    });
 	  }
 	};
 
@@ -5043,6 +5043,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 
 	            if (task) {
+	              if (!_options.linkRelations) {
+	                task = task.then(function (data) {
+	                  instance[def.localField] = data;
+	                });
+	              }
 	              tasks.push(task);
 	            }
 	          }

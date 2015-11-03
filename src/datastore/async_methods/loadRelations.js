@@ -93,6 +93,11 @@ module.exports = function loadRelations (resourceName, instance, relations, opti
           }
 
           if (task) {
+            if (!_options.linkRelations) {
+              task = task.then(function (data) {
+                instance[def.localField] = data
+              })
+            }
             tasks.push(task)
           }
         }
