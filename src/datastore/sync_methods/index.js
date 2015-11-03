@@ -386,13 +386,13 @@ export default {
     let {_this, definition, _resourceName, _id, _options} = check.call(this, 'revert', resourceName, id, options)
 
     let preserve = _options.preserve || []
+    let injectObj = {}
 
     if (preserve.length === 0) {
-      return definition.inject(_this.previous(_resourceName, _id))
+      injectObj = _this.previous(_resourceName, _id)
     } else {
       let instance = definition.get(id)
       let previousInstance = _this.previous(_resourceName, _id)
-      let injectObj = {}
 
       if (!instance) { return }
 
@@ -403,8 +403,10 @@ export default {
           injectObj[key] = previousInstance[key]
         }
       })
-
-      return definition.inject(injectObj)
     }
+
+    return definition.inject(injectObj, {
+      onConflict: 'replace'
+    })
   }
 }

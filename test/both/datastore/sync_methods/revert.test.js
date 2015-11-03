@@ -29,4 +29,12 @@ describe('DS#revert', function () {
     assert.equal(post.age, 20, 'The age of the post should have been preserved');
     assert.equal(post.author, 'John', 'The author of the post should have been reverted');
   });
+  it('should revert key which has not been injected', function() {
+    Post.inject(p1);
+    var post = Post.get(p1.id);
+    assert.isUndefined(post.newProperty);
+    post.newProperty = 'new Property';
+    post.DSRevert();
+    assert.isUndefined(post.newProperty);
+  });
 });
