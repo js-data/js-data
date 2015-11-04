@@ -290,4 +290,17 @@ describe('DS#defineResource', function () {
     assert.equal(foo.bar.id, 1);
     assert.isTrue(wasItActivated);
   });
+  it('should work with csp set to true', function () {
+    var store = new JSData.DS({
+      csp: true
+    });
+    var User = store.defineResource({
+      name: 'user'
+    });
+    var user = User.createInstance({ name: 'John' });
+    assert.isTrue(user instanceof User[User.class]);
+    assert.equal(User[User.class].name, '');
+
+    assert.equal(Post[Post.class].name, 'Post');
+  });
 });

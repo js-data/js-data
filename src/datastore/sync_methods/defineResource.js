@@ -138,7 +138,11 @@ module.exports = function defineResource (definition) {
     var _class = def['class'] = DSUtils.pascalCase(def.name)
     try {
       if (typeof def.useClass === 'function') {
-        def[_class] = new Function('def', `return function ${_class}() { def.useClass.call(this); }`)(def) // eslint-disable-line
+        if (def.csp) {
+          def[_class] = function () { def.useClass.call(this) }
+        } else {
+          def[_class] = new Function('def', `return function ${_class}() { def.useClass.call(this); }`)(def) // eslint-disable-line
+        }
         def[_class].prototype = (function (proto) {
           function Ctor () {
           }
@@ -146,6 +150,8 @@ module.exports = function defineResource (definition) {
           Ctor.prototype = proto
           return new Ctor()
         })(def.useClass.prototype)
+      } else if (def.csp) {
+        def[_class] = function () { }
       } else {
         def[_class] = new Function(`return function ${_class}() {}`)() // eslint-disable-line
       }

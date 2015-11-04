@@ -94,6 +94,7 @@ defaultsPrototype.beforeUpdate = lifecycleNoopCb
 defaultsPrototype.beforeValidate = lifecycleNoopCb
 defaultsPrototype.bypassCache = false
 defaultsPrototype.cacheResponse = !!DSUtils.w
+defaultsPrototype.csp = false
 defaultsPrototype.clearEmptyQueries = true
 defaultsPrototype.computed = {}
 defaultsPrototype.defaultAdapter = 'http'
