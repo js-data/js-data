@@ -1,3 +1,8 @@
+##### 2.8.2 - 04 November 2015
+
+###### Backwards compatible bug fixes
+- #258 - CSP violations due to use of new Function()
+
 ##### 2.8.1 - 02 November 2015
 
 ###### Backwards compatible bug fixes

@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 2.8.1 - Homepage <http://www.js-data.io/>
+ * @version 2.8.2 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2015 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -84,10 +84,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new _datastoreIndex['default'](options);
 	  },
 	  version: {
-	    full: '2.8.1',
+	    full: '2.8.2',
 	    major: parseInt('2', 10),
 	    minor: parseInt('8', 10),
-	    patch: parseInt('1', 10),
+	    patch: parseInt('2', 10),
 	    alpha:  true ? 'false' : false,
 	    beta:  true ? 'false' : false
 	  }
@@ -231,6 +231,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	defaultsPrototype.beforeValidate = lifecycleNoopCb;
 	defaultsPrototype.bypassCache = false;
 	defaultsPrototype.cacheResponse = !!_utils['default'].w;
+	defaultsPrototype.csp = false;
 	defaultsPrototype.clearEmptyQueries = true;
 	defaultsPrototype.computed = {};
 	defaultsPrototype.defaultAdapter = 'http';
@@ -3531,13 +3532,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      try {
 	        if (typeof def.useClass === 'function') {
-	          def[_class] = new Function('def', 'return function ' + _class + '() { def.useClass.call(this); }')(def); // eslint-disable-line
+	          if (def.csp) {
+	            def[_class] = function () {
+	              def.useClass.call(this);
+	            };
+	          } else {
+	            def[_class] = new Function('def', 'return function ' + _class + '() { def.useClass.call(this); }')(def); // eslint-disable-line
+	          }
 	          def[_class].prototype = (function (proto) {
 	            function Ctor() {}
 
 	            Ctor.prototype = proto;
 	            return new Ctor();
 	          })(def.useClass.prototype);
+	        } else if (def.csp) {
+	          def[_class] = function () {};
 	        } else {
 	          def[_class] = new Function('return function ' + _class + '() {}')(); // eslint-disable-line
 	        }
