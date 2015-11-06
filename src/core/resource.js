@@ -77,7 +77,11 @@ export function configure (options = {}) {
 }
 
 @basicIndex
-// Apply defaults
+@schema({
+  $$saved: {
+    enumerable: false
+  }
+})
 export class Resource {
   constructor (props) {
     configure(props)(this)
@@ -86,6 +90,13 @@ export class Resource {
   // Instance properties
 
   // Instance methods
+  touchSaved() {
+    let saved = new Date().getTime()
+    if (saved === this.$$saved) {
+      saved++
+    }
+    return this.$$saved = saved
+  }
 
   // Class properties
   static idAttribute = 'id'

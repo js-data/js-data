@@ -1,5 +1,5 @@
 
-class Persist {
+export class Persist {
   /* Instance methods */
   create(...args) {
     return this.constructor.create(this, ...args)
@@ -18,9 +18,7 @@ class Persist {
   }
 
   /* Static methods */
-  static create() {
-
-  }
+  static create = require('./create')
   static createEach() {
 
   }
@@ -52,5 +50,3 @@ class Persist {
 
   }
 }
-
-module.exports = Persist
