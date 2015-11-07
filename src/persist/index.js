@@ -1,12 +1,14 @@
+import {schema} from '../core/decorators'
 
+@schema({
+  $$saved: {
+    enumerable: false
+  }
+})
 export class Persist {
   /* Instance methods */
   create(...args) {
     return this.constructor.create(this, ...args)
-  }
-
-  save(...args) {
-    return this.constructor.save(this, ...args)
   }
 
   destroy(...args) {
@@ -17,11 +19,20 @@ export class Persist {
     return this.constructor.loadRelations(this, ...args)
   }
 
+  save(...args) {
+    return this.constructor.save(this, ...args)
+  }
+
+  touchSaved() {
+    let saved = new Date().getTime()
+    if (saved === this.$$saved) {
+      saved++
+    }
+    return this.$$saved = saved
+  }
+
   /* Static methods */
   static create = require('./create')
-  static createEach() {
-
-  }
   static find() {
 
   }

@@ -1,3 +1,2 @@
-let Resource = require('./resource')
-
-export Resource
+export * from './decorators'
+export * from './resource'

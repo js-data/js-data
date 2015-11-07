@@ -225,75 +225,75 @@ let toPromisify = [
 let isBlacklisted = observe.isBlacklisted
 
 // adapted from angular.copy
-function copy (source, destination, stackSource, stackDest, blacklist) {
-  if (!destination) {
-    destination = source
-    if (source) {
-      if (isArray(source)) {
-        destination = copy(source, [], stackSource, stackDest, blacklist)
-      } else if (isDate(source)) {
-        destination = new Date(source.getTime())
-      } else if (isRegExp(source)) {
-        destination = new RegExp(source.source, source.toString().match(/[^\/]*$/)[0])
-        destination.lastIndex = source.lastIndex
-      } else if (isObject(source)) {
-        destination = copy(source, Object.create(Object.getPrototypeOf(source)), stackSource, stackDest, blacklist)
+function copy (from, to, stackFrom, stackTo, blacklist) {
+  if (!to) {
+    to = from
+    if (from) {
+      if (isArray(from)) {
+        to = copy(from, [], stackFrom, stackTo, blacklist)
+      } else if (isDate(from)) {
+        to = new Date(from.getTime())
+      } else if (isRegExp(from)) {
+        to = new RegExp(from.source, from.toString().match(/[^\/]*$/)[0])
+        to.lastIndex = from.lastIndex
+      } else if (isObject(from)) {
+        to = copy(from, Object.create(Object.getPrototypeOf(from)), stackFrom, stackTo, blacklist)
       }
     }
   } else {
-    if (source === destination) {
+    if (from === to) {
       throw new Error('Cannot copy! Source and destination are identical.')
     }
 
-    stackSource = stackSource || []
-    stackDest = stackDest || []
+    stackFrom = stackFrom || []
+    stackTo = stackTo || []
 
-    if (isObject(source)) {
-      let index = stackSource.indexOf(source)
+    if (isObject(from)) {
+      let index = stackFrom.indexOf(from)
       if (index !== -1) {
-        return stackDest[index]
+        return stackTo[index]
       }
 
-      stackSource.push(source)
-      stackDest.push(destination)
+      stackFrom.push(from)
+      stackTo.push(to)
     }
 
     let result
-    if (isArray(source)) {
+    if (isArray(from)) {
       let i
-      destination.length = 0
-      for (i = 0; i < source.length; i++) {
-        result = copy(source[i], null, stackSource, stackDest, blacklist)
-        if (isObject(source[i])) {
-          stackSource.push(source[i])
-          stackDest.push(result)
+      to.length = 0
+      for (i = 0; i < from.length; i++) {
+        result = copy(from[i], null, stackFrom, stackTo, blacklist)
+        if (isObject(from[i])) {
+          stackFrom.push(from[i])
+          stackTo.push(result)
         }
-        destination.push(result)
+        to.push(result)
       }
     } else {
-      if (isArray(destination)) {
-        destination.length = 0
+      if (isArray(to)) {
+        to.length = 0
       } else {
-        forEach(destination, function (value, key) {
-          delete destination[key]
+        forEach(to, function (value, key) {
+          delete to[key]
         })
       }
-      for (let key in source) {
-        if (source.hasOwnProperty(key)) {
+      for (let key in from) {
+        if (from.hasOwnProperty(key)) {
           if (isBlacklisted(key, blacklist)) {
             continue
           }
-          result = copy(source[key], null, stackSource, stackDest, blacklist)
-          if (isObject(source[key])) {
-            stackSource.push(source[key])
-            stackDest.push(result)
+          result = copy(from[key], null, stackFrom, stackTo, blacklist)
+          if (isObject(from[key])) {
+            stackFrom.push(from[key])
+            stackTo.push(result)
           }
-          destination[key] = result
+          to[key] = result
         }
       }
     }
   }
-  return destination
+  return to
 }
 
 // adapted from angular.equals

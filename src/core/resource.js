@@ -1,4 +1,11 @@
-let schema = require('./schema')
+import * as decorators from './decorators'
+import * as utils from './utils'
+let isBrowser = false
+
+try {
+  isBrowser = !!window
+} catch (e) {
+}
 
 /**
  * Usage:
@@ -61,46 +68,32 @@ function basicIndex (target) {
  * })
  * class User extends JSData.Resource {...}
  */
-export function configure (options = {}) {
+export function configure (props = {}) {
   return function (target) {
-    for (var key in options) {
-      if (options.hasOwnProperty(key)) {
-        // TODO: Make deep copy
-        target[key] = options[key]
-      }
-    }
-    // See See https://gist.github.com/jmdobry/519a375009cd744b8348#file-schema-js
-    schema({
-      [target.idAttribute]: {}
-    })(target)
+    utils.forOwn(target, function (value, key) {
+      target[key] = utils.copy(value)
+    })
   }
 }
 
 @basicIndex
-@schema({
-  $$saved: {
-    enumerable: false
-  }
+@configure({
+  autoInject: isBrowser,
+  bypassCache: false,
+  csp: false,
+  defaultAdapter: 'http',
+  eagerEject: false,
+  idAttribute: 'id',
+  linkRelations: isBrowser,
+  relationsEnumerable: false,
+  returnMeta: false,
+  strategy: 'single',
+  useFilter: true
 })
 export class Resource {
   constructor (props) {
     configure(props)(this)
   }
-
-  // Instance properties
-
-  // Instance methods
-  touchSaved() {
-    let saved = new Date().getTime()
-    if (saved === this.$$saved) {
-      saved++
-    }
-    return this.$$saved = saved
-  }
-
-  // Class properties
-  static idAttribute = 'id'
-  static autoInject = true
 
   // Static methods
   static createInstance (props = {}) {
@@ -109,12 +102,14 @@ export class Resource {
   }
 
   static inject (props = {}) {
-    if (Array.isArray(props)) {
+    let singular = false
+    if (utils.isArray(props)) {
       props = props.map(this.createInstance)
     } else {
+      singular = true
       props = [this.createInstance(props)]
     }
-    return props.map(function (instance) {
+    let instances = props.map(function (instance) {
       let id = instance[this.idAttribute]
       if (!this.$$index[id]) {
         this.$$collection.push(instance)
@@ -122,6 +117,7 @@ export class Resource {
       this.$$index[id] = instance
       return instance
     }, this)
+    return singular ? instances[0] : instances
   }
 
   static get (id) {
@@ -140,9 +136,20 @@ export class Resource {
    *   localField: '_post'
    * })
    */
-  static belongsTo (Resource, options) {
-    // See https://gist.github.com/jmdobry/519a375009cd744b8348#file-belongsto-js
-    return belongsTo(Resource, options)(this)
+  static belongsTo (Resource, opts) {
+    return belongsTo(Resource, opts)(this)
+  }
+
+  static action (name, opts) {
+    return decorators.action(name, opts)(this)
+  }
+
+  static actions (opts) {
+    return decorators.actions(opts)(this)
+  }
+
+  static schema (opts) {
+    return decorators.schema(opts)(this)
   }
 
   /**
@@ -153,7 +160,7 @@ export class Resource {
   static extend (props = {}, classProps = {}) {
     let Child
 
-    // TODO: Port over the "useClass" feature
+    let _classProps = {}
 
     if (classProps.csp) {
       Child = function (props) {
@@ -172,6 +179,10 @@ export class Resource {
     }
 
     _inherits(Child, this)
+
+    configure(props)(Child.prototype)
+    configure(classProps)(Child)
+
     return Child
   }
 }

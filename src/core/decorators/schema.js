@@ -1,3 +1,5 @@
+import {forOwn} from '../utils'
+
 /**
  * Usage:
  *
@@ -28,10 +30,9 @@
  * user.first = "Bill"
  * user.name // "Bill Anderson"
  */
-export function schema (schema) {
+export function schema (opts = {}) {
   return function (target) {
-    for (var key in schema) {
-      let prop = schema[key]
+    forOwn(opts, function (prop, key) {
       let descriptor = {
         enumerable: prop.enumerable !== undefined ? prop.enumerable : true,
         writable: prop.writable ? prop.writable : true,
@@ -46,10 +47,6 @@ export function schema (schema) {
         descriptor.set = prop.set
       }
       Object.defineProperty(target.prototype, key, descriptor)
-    }
+    })
   }
-}
-
-export function applySchema (target, _schema) {
-  return schema(_schema)(target)
 }
