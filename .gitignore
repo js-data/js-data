@@ -21,3 +21,5 @@ junit/
 
 *.iml
 .idea/
+
+dist/js-data-tests.js

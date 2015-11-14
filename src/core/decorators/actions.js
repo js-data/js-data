@@ -1,7 +1,8 @@
-import {forOwn,isString,isObject,deepMixIn,isSorN,makePath,resolve,reject} from '../utils'
+import {fillIn,forOwn,isString,isObject,isSorN,makePath,resolve,reject} from '../utils'
+import {configure} from './configure'
 
 // TODO: Make actions part of the http adapter
-export function action (name = '', opts = {}) {
+export function action (name, opts) {
   if (!name || !isString(name)) {
     throw new TypeError('action(name[, opts]): Expected: string, Found: ' + typeof name)
   }
@@ -18,7 +19,8 @@ export function action (name = '', opts = {}) {
       }
       _opts = _opts || {}
       let adapter = this.getAdapter(opts.adapter || this.defaultAdapter || 'http')
-      let config = deepMixIn({}, opts)
+      let config = {}
+      fillIn(config, opts)
       if (!_opts.hasOwnProperty('endpoint') && config.endpoint) {
         _opts.endpoint = config.endpoint
       }
@@ -37,7 +39,7 @@ export function action (name = '', opts = {}) {
       }
       config.method = config.method || 'GET'
       config.resourceName = this.name
-      deepMixIn(config, _opts)
+      configure(config)(_opts)
       return resolve(config)
         .then(_opts.request || opts.request)
         .then(function (config) { return adapter.HTTP(config) })
@@ -49,6 +51,7 @@ export function action (name = '', opts = {}) {
         })
         .then(_opts.response || opts.response, _opts.responseError || opts.responseError)
     }
+    return target
   }
 }
 
@@ -57,5 +60,6 @@ export function actions (opts = {}) {
     forOwn(target, function (value, key) {
       action(key, value)(target)
     })
+    return target
   }
 }
