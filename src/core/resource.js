@@ -1,5 +1,6 @@
-import * as decorators from './decorators'
 import * as utils from './utils'
+import {action, actions, configure, schema} from './decorators'
+
 let isBrowser = false
 
 try {
@@ -21,33 +22,33 @@ try {
  * })
  * class Comment extends JSData.Resource {...}
  */
-export function belongsTo (Resource, options = {}) {
+export function belongsTo (relation, opts = {}) {
   return function (target) {
-    let localField = options.localField || Resource.name.toLowerCase()
-    let localKey = options.localKey || Resource.name.toLowerCase() + '_id'
+    let localField = opts.localField || relation.name.toLowerCase()
+    let localKey = opts.localKey || relation.name.toLowerCase() + '_id'
     let descriptor = {
+      enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
       get () {
-        return Resource.get(this[localKey])
+        return relation.get(this[localKey])
       },
       set (parent) {
-        this[localKey] = parent[Resource.idAttribute]
-      },
-      enumerable: options.enumerable !== undefined ? !!options.enumerable : false
+        this[localKey] = parent[relation.idAttribute]
+      }
     }
-    if (options.link === false || (options.link === undefined && !target.linkRelations)) {
+    if (opts.link === false || (opts.link === undefined && !target.linkRelations)) {
       delete descriptor.get
       delete descriptor.set
     }
-    if (options.get) {
+    if (opts.get) {
       let originalGet = descriptor.get
       descriptor.get = function () {
-        return options.get(target, Resource, this, originalGet ? (...args) => originalGet.apply(this, args) : undefined)
+        return opts.get(target, relation, this, originalGet ? (...args) => originalGet.apply(this, args) : undefined)
       }
     }
-    if (options.set) {
+    if (opts.set) {
       let originalSet = descriptor.set
-      descriptor.set = function (value) {
-        return options.set(target, Resource, this, value, originalSet ? (...args) => originalSet.apply(this, args) : undefined)
+      descriptor.set = function (parent) {
+        return opts.set(target, relation, this, parent, originalSet ? (...args) => originalSet.apply(this, args) : undefined)
       }
     }
     Object.defineProperty(target.prototype, localField, descriptor)
@@ -60,38 +61,14 @@ function basicIndex (target) {
   target.$$collection = []
 }
 
-/**
- * Usage:
- *
- * @configure({
- *   idAttribute: '_id'
- * })
- * class User extends JSData.Resource {...}
- */
-export function configure (props = {}) {
-  return function (target) {
-    utils.forOwn(target, function (value, key) {
-      target[key] = utils.copy(value)
-    })
-  }
-}
+// This is here so Babel will give us
+// the inheritance helpers which we
+// can re-use for the "extend" method
+class BaseResource {}
 
-@basicIndex
-@configure({
-  autoInject: isBrowser,
-  bypassCache: false,
-  csp: false,
-  defaultAdapter: 'http',
-  eagerEject: false,
-  idAttribute: 'id',
-  linkRelations: isBrowser,
-  relationsEnumerable: false,
-  returnMeta: false,
-  strategy: 'single',
-  useFilter: true
-})
-export class Resource {
-  constructor (props) {
+export class Resource extends BaseResource {
+  constructor (props = {}) {
+    super()
     configure(props)(this)
   }
 
@@ -101,7 +78,7 @@ export class Resource {
     return props instanceof Constructor ? props : new Constructor(props)
   }
 
-  static inject (props = {}) {
+  static inject (props) {
     let singular = false
     if (utils.isArray(props)) {
       props = props.map(this.createInstance)
@@ -136,20 +113,20 @@ export class Resource {
    *   localField: '_post'
    * })
    */
-  static belongsTo (Resource, opts) {
-    return belongsTo(Resource, opts)(this)
+  static belongsTo (resource, opts) {
+    return belongsTo(resource, opts)(this)
   }
 
   static action (name, opts) {
-    return decorators.action(name, opts)(this)
+    return action(name, opts)(this)
   }
 
   static actions (opts) {
-    return decorators.actions(opts)(this)
+    return actions(opts)(this)
   }
 
   static schema (opts) {
-    return decorators.schema(opts)(this)
+    return schema(opts)(this)
   }
 
   /**
@@ -159,26 +136,24 @@ export class Resource {
    */
   static extend (props = {}, classProps = {}) {
     let Child
-
-    let _classProps = {}
+    let Parent = this
 
     if (classProps.csp) {
       Child = function (props) {
-        _classCallCheck(this, Child)
-
-        _get(Object.getPrototypeOf(Child.prototype), 'constructor', this).call(this, props);
+        __callCheck__(this, Child)
+        Parent.call(this, props)
       }
     } else {
       // TODO: PascalCase(classProps.name)
       let name = classProps.name
       let func = `return function ${name}(props) {
-                    _classCallCheck(this, ${name})
-                    _get(Object.getPrototypeOf(${name}.prototype), 'constructor', this).call(this, props)
+                    __callCheck__(this, ${name})
+                    Parent.call(this, props)
                   }`
-      Child = new Function('_classCallCheck', '_get', func)(_classCallCheck, _get)
+      Child = new Function('__callCheck__', 'Parent', func)(__callCheck__, Parent) // eslint-disable-line
     }
 
-    _inherits(Child, this)
+    __inherits__(Child, this)
 
     configure(props)(Child.prototype)
     configure(classProps)(Child)
@@ -187,58 +162,17 @@ export class Resource {
   }
 }
 
-// TODO: Use Babel's helpers instead of these
-function _classCallCheck(instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError('Cannot call a class as a function');
-  }
-}
-
-var _get = function get(_x3, _x4, _x5) {
-  var _again = true;
-  _function: while (_again) {
-    var object = _x3,
-      property = _x4,
-      receiver = _x5;
-    _again = false;
-    if (object === null) object = Function.prototype;
-    var desc = Object.getOwnPropertyDescriptor(object, property);
-    if (desc === undefined) {
-      var parent = Object.getPrototypeOf(object);
-      if (parent === null) {
-        return undefined;
-      } else {
-        _x3 = parent;
-        _x4 = property;
-        _x5 = receiver;
-        _again = true;
-        desc = parent = undefined;
-        continue _function;
-      }
-    } else if ('value' in desc) {
-      return desc.value;
-    } else {
-      var getter = desc.get;
-      if (getter === undefined) {
-        return undefined;
-      }
-      return getter.call(receiver);
-    }
-  }
-};
-
-function _inherits(subClass, superClass) {
-  if (typeof superClass !== 'function' && superClass !== null) {
-    throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);
-  }
-  subClass.prototype = Object.create(superClass && superClass.prototype, {
-    constructor: {
-      value: subClass,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
-}
-
+basicIndex(Resource)
+configure({
+  autoInject: isBrowser,
+  bypassCache: false,
+  csp: false,
+  defaultAdapter: 'http',
+  eagerEject: false,
+  idAttribute: 'id',
+  linkRelations: isBrowser,
+  relationsEnumerable: false,
+  returnMeta: false,
+  strategy: 'single',
+  useFilter: true
+})(Resource)

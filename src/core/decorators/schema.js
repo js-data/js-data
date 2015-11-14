@@ -48,5 +48,6 @@ export function schema (opts = {}) {
       }
       Object.defineProperty(target.prototype, key, descriptor)
     })
+    return target
   }
 }

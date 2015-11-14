@@ -7,57 +7,58 @@ import {schema} from '../core/decorators'
 })
 export class Persist {
   /* Instance methods */
-  create(...args) {
+  create (...args) {
     return this.constructor.create(this, ...args)
   }
 
-  destroy(...args) {
+  destroy (...args) {
     return this.constructor.destroy(this, ...args)
   }
 
-  loadRelations(...args) {
+  loadRelations (...args) {
     return this.constructor.loadRelations(this, ...args)
   }
 
-  save(...args) {
+  save (...args) {
     return this.constructor.save(this, ...args)
   }
 
-  touchSaved() {
+  touchSaved () {
     let saved = new Date().getTime()
     if (saved === this.$$saved) {
       saved++
     }
-    return this.$$saved = saved
+    this.$$saved = saved
+    return this.$$saved
   }
 
   /* Static methods */
   static create = require('./create')
-  static find() {
+  static find () {
 
   }
-  static findAll() {
+  static findAll () {
 
   }
-  static save() {
+  static save () {
 
   }
-  static update() {
+  static update () {
 
   }
-  static updateAll() {
+  static updateAll () {
 
   }
-  static updateEach() {
+  static updateEach () {
 
   }
-  static destroy() {
+  static destroy () {
 
   }
-  static destroyAll() {
+  static destroyAll () {
 
   }
-  static loadRelations() {
+  static loadRelations () {
 
   }
 }

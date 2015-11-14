@@ -1,4 +1,3 @@
-export const forEach = Array.forEach
 export const isArray = Array.isArray
 export function forOwn (obj, fn, thisArg) {
   const keys = Object.keys(obj)
@@ -30,44 +29,51 @@ export function isFunction (value) {
 export function isSorN (value) {
   return isString(value) || isNumber(value)
 }
-export function try (value) {
+export function resolve (value) {
   return Promise.resolve(value)
 }
 export function reject (value) {
   return Promise.reject(value)
 }
-function isValidString (val) {
-  return (val != null && val !== '') // jshint ignore:line
+function isValidString (value) {
+  return (value != null && value !== '') // jshint ignore:line
 }
-function join (items, separator) {
-  separator = separator || ''
-  return filter(items, isValidString).join(separator)
+function join (items, separator = '') {
+  return items.filter(isValidString).join(separator)
 }
 export function makePath (...args) {
   let result = join(args, '/')
   return result.replace(/([^:\/]|^)\/{2,}/g, '$1/')
 }
+export function fillIn (dest, src) {
+  forOwn(src, function (value, key) {
+    if (dest[key] === undefined) {
+      dest[key] = value
+    }
+  })
+}
 export function isBlacklisted (prop, bl) {
   if (!bl || !bl.length) {
-    return false;
+    return false
   }
-  let matches;
+  let matches
   for (var i = 0; i < bl.length; i++) {
     if ((Object.prototype.toString.call(bl[i]) === '[object RegExp]' && bl[i].test(prop)) || bl[i] === prop) {
-      return matches = prop;
+      matches = prop
+      return matches
     }
   }
-  return !!matches;
+  return !!matches
 }
 export function omit (obj, bl) {
   let toRemove = []
-  forOwn(obj, function (v, k) {
-    if (isBlacklisted(k, bl)) {
-      toRemove.push(k)
+  forOwn(obj, function (value, key) {
+    if (isBlacklisted(key, bl)) {
+      toRemove.push(key)
     }
   })
-  forEach(toRemove, function (k) {
-    delete obj[k]
+  toRemove.forEach(function (key) {
+    delete obj[key]
   })
   return obj
 }
@@ -144,4 +150,75 @@ export function copy (from, to, stackFrom, stackTo, blacklist) {
     }
   }
   return to
+}
+
+export function sort (a, b, field) {
+  // Short-curcuit comparison if a and b are strictly equal
+  // This is absolutely necessary for indexed objects that
+  // don't have the idAttribute field
+  if (a === b) {
+    return 0
+  }
+  if (field) {
+    a = a[field]
+    b = b[field]
+  }
+  if (a === null && b === null) {
+    return 0
+  }
+
+  if (a === null) {
+    return -1
+  }
+
+  if (b === null) {
+    return 1
+  }
+
+  if (a < b) {
+    return -1
+  }
+
+  if (a > b) {
+    return 1
+  }
+
+  return 0
+}
+
+export function insertAt (array, index, value) {
+  array.splice(index, 0, value)
+  return array
+}
+
+export function removeAt (array, index) {
+  array.splice(index, 1)
+  return array
+}
+
+export function binarySearch (array, value, field) {
+  let lo = 0
+  let hi = array.length
+  let compared
+  let mid
+
+  while (lo < hi) {
+    mid = ((lo + hi) / 2) | 0
+    compared = sort(value, array[mid], field)
+    if (compared === 0) {
+      return {
+        found: true,
+        index: mid
+      }
+    } else if (compared < 0) {
+      hi = mid
+    } else {
+      lo = mid + 1
+    }
+  }
+
+  return {
+    found: false,
+    index: hi
+  }
 }

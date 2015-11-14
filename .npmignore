@@ -34,3 +34,4 @@ junit/
 test/
 lib/
 src/
+dist/js-data-tests.js
