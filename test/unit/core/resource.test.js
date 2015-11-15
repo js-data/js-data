@@ -1,4 +1,4 @@
-/* global Resource:true */
+/* global Resource:true, configure:true */
 import {assert} from 'chai'
 
 let isBrowser = false
@@ -37,19 +37,20 @@ export function init () {
       }
     })
     it('child should inherit static defaults', function () {
+      var key
       let Child = Resource.extend()
-      for (var key in defaults) {
+      for (key in defaults) {
         assert.equal(Child[key], defaults[key], key + ' should be ' + defaults[key])
       }
       class Child2 extends Resource {}
-      for (var key in defaults) {
+      for (key in defaults) {
         assert.equal(Child2[key], defaults[key], key + ' should be ' + defaults[key])
       }
     })
     it('child should override static defaults', function () {
-      /////////////////////////////////////////
-      // ES5 ways of creating a new Resource //
-      /////////////////////////////////////////
+      /**
+       * ES5 ways of creating a new Resource
+       */
       let Child = Resource.extend({}, {
         idAttribute: '_id'
       })
@@ -59,9 +60,9 @@ export function init () {
       //   idAttribute: '_id'
       // })
 
-      /////////////////////////////////////////
-      // ES6 ways of creating a new Resource //
-      /////////////////////////////////////////
+      /**
+       * ES6 ways of creating a new Resource
+       */
       class Child3 extends Resource {}
       configure({
         idAttribute: '_id'
@@ -72,9 +73,9 @@ export function init () {
         idAttribute: '_id'
       })
 
-      /////////////////////////////////////////
-      // ES7 ways of creating a new Resource //
-      /////////////////////////////////////////
+     /**
+       * ES7 ways of creating a new Resource
+       */
       class Child5 extends Resource {
         static idAttribute = '_id'
       }

@@ -1,4 +1,4 @@
-import {copy,forOwn} from '../utils'
+import {copy, forOwn} from '../utils'
 
 /**
  * Usage:

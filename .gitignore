@@ -21,5 +21,6 @@ junit/
 
 *.iml
 .idea/
-
+.vscode/
+jsconfig.json
 dist/js-data-tests.js
