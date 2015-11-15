@@ -16,6 +16,7 @@ module.exports = {
       {
         loader: 'babel-loader',
         include: [
+          path.resolve(__dirname, 'lib'),
           path.resolve(__dirname, 'src'),
           path.resolve(__dirname, 'test')
         ],

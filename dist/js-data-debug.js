@@ -1,12 +1,3 @@
-/*!
-* js-data
-* @version 2.8.2 - Homepage <http://www.js-data.io/>
-* @author Jason Dobry <jason.dobry@gmail.com>
-* @copyright (c) 2014-2015 Jason Dobry
-* @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
-*
-* @overview Robust framework-agnostic data store.
-*/
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -88,12 +79,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	var version = exports.version = {
-	  full: '2.8.2',
-	  major: parseInt('2', 10),
-	  minor: parseInt('8', 10),
-	  patch: parseInt('2', 10),
-	  alpha:  true ? 'false' : false,
-	  beta:  true ? 'false' : false
+	  full: '<%= pkg.version %>',
+	  major: parseInt('<%= major %>', 10),
+	  minor: parseInt('<%= minor %>', 10),
+	  patch: parseInt('<%= patch %>', 10),
+	  alpha:  true ? '<%= alpha %>' : false,
+	  beta:  true ? '<%= beta %>' : false
 	};
 
 /***/ },
@@ -321,10 +312,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.omit = omit;
 	exports.fromJson = fromJson;
 	exports.copy = copy;
-	exports.sort = sort;
-	exports.insertAt = insertAt;
-	exports.removeAt = removeAt;
-	exports.binarySearch = binarySearch;
 
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
@@ -488,77 +475,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return to;
 	}
 
-	function sort(a, b, field) {
-	  // Short-curcuit comparison if a and b are strictly equal
-	  // This is absolutely necessary for indexed objects that
-	  // don't have the idAttribute field
-	  if (a === b) {
-	    return 0;
-	  }
-	  if (field) {
-	    a = a[field];
-	    b = b[field];
-	  }
-	  if (a === null && b === null) {
-	    return 0;
-	  }
-
-	  if (a === null) {
-	    return -1;
-	  }
-
-	  if (b === null) {
-	    return 1;
-	  }
-
-	  if (a < b) {
-	    return -1;
-	  }
-
-	  if (a > b) {
-	    return 1;
-	  }
-
-	  return 0;
-	}
-
-	function insertAt(array, index, value) {
-	  array.splice(index, 0, value);
-	  return array;
-	}
-
-	function removeAt(array, index) {
-	  array.splice(index, 1);
-	  return array;
-	}
-
-	function binarySearch(array, value, field) {
-	  var lo = 0;
-	  var hi = array.length;
-	  var compared = undefined;
-	  var mid = undefined;
-
-	  while (lo < hi) {
-	    mid = (lo + hi) / 2 | 0;
-	    compared = sort(value, array[mid], field);
-	    if (compared === 0) {
-	      return {
-	        found: true,
-	        index: mid
-	      };
-	    } else if (compared < 0) {
-	      hi = mid;
-	    } else {
-	      lo = mid + 1;
-	    }
-	  }
-
-	  return {
-	    found: false,
-	    index: hi
-	  };
-	}
-
 /***/ },
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
@@ -677,6 +593,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _decorators = __webpack_require__(2);
 
+	var _mindex = __webpack_require__(8);
+
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -765,6 +683,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function basicIndex(target) {
 	  target.$$index = {};
 	  target.$$collection = [];
+	  console.log(_mindex.Index);
 	}
 
 	// This is here so Babel will give us
@@ -917,6 +836,421 @@ return /******/ (function(modules) { // webpackBootstrap
 	  strategy: 'single',
 	  useFilter: true
 	})(Resource);
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })(); // Copyright (c) 2015, InternalFX.
+
+	// Permission to use, copy, modify, and/or distribute this software for any purpose with or
+	// without fee is hereby granted, provided that the above copyright notice and this permission
+	// notice appear in all copies.
+
+	// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO
+	// THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT
+	// SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR
+	// ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+	// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE
+	// USE OR PERFORMANCE OF THIS SOFTWARE.
+
+	// Modifications
+	// Copyright 2015 Jason Dobry
+	//
+	// Summary of modifications:
+	// Converted to ES6 Class syntax
+	// Reworked dependencies so as to re-use code already in js-data
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.Index = undefined;
+
+	var _utils = __webpack_require__(4);
+
+	var _utils2 = __webpack_require__(9);
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Index = (function () {
+	  function Index() {
+	    var fieldList = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
+	    var idAttribute = arguments[1];
+
+	    _classCallCheck(this, Index);
+
+	    if (!(0, _utils.isArray)(fieldList)) {
+	      throw new Error('fieldList must be an array.');
+	    }
+
+	    this.fieldList = fieldList;
+	    this.idAttribute = idAttribute;
+	    this.isIndex = true;
+	    this.keys = [];
+	    this.values = [];
+	  }
+
+	  _createClass(Index, [{
+	    key: 'set',
+	    value: function set(keyList, value) {
+	      if (!(0, _utils.isArray)(keyList)) {
+	        keyList = [keyList];
+	      }
+
+	      var key = keyList.shift() || null;
+	      var pos = (0, _utils2.binarySearch)(this.keys, key);
+
+	      if (keyList.length === 0) {
+	        if (pos.found) {
+	          var dataLocation = (0, _utils2.binarySearch)(this.values[pos.index], value, this.idAttribute);
+	          if (!dataLocation.found) {
+	            (0, _utils2.insertAt)(this.values[pos.index], dataLocation.index, value);
+	          }
+	        } else {
+	          (0, _utils2.insertAt)(this.keys, pos.index, key);
+	          (0, _utils2.insertAt)(this.values, pos.index, [value]);
+	        }
+	      } else {
+	        if (pos.found) {
+	          this.values[pos.index].set(keyList, value);
+	        } else {
+	          (0, _utils2.insertAt)(this.keys, pos.index, key);
+	          var newIndex = new Index();
+	          newIndex.set(keyList, value);
+	          (0, _utils2.insertAt)(this.values, pos.index, newIndex);
+	        }
+	      }
+	    }
+	  }, {
+	    key: 'get',
+	    value: function get(keyList) {
+	      if (!(0, _utils.isArray)(keyList)) {
+	        keyList = [keyList];
+	      }
+
+	      var key = keyList.shift() || null;
+	      var pos = (0, _utils2.binarySearch)(this.keys, key);
+
+	      if (keyList.length === 0) {
+	        if (pos.found) {
+	          if (this.values[pos.index].isIndex) {
+	            return this.values[pos.index].getAll();
+	          } else {
+	            return this.values[pos.index];
+	          }
+	        } else {
+	          return [];
+	        }
+	      } else {
+	        if (pos.found) {
+	          return this.values[pos.index].get(keyList);
+	        } else {
+	          return [];
+	        }
+	      }
+	    }
+	  }, {
+	    key: 'getAll',
+	    value: function getAll() {
+	      var results = [];
+	      this.values.forEach(function (value) {
+	        if (value.isIndex) {
+	          results = results.concat(value.getAll());
+	        } else {
+	          results = results.concat(value);
+	        }
+	      });
+	      return results;
+	    }
+	  }, {
+	    key: 'query',
+	    value: function query(_query) {
+	      var leftKeys = undefined;
+	      var rightKeys = undefined;
+
+	      if (_query['>']) {
+	        leftKeys = _query['>'];
+	        _query.leftInclusive = false;
+	      } else if (_query['>=']) {
+	        leftKeys = _query['>='];
+	        _query.leftInclusive = true;
+	      }
+
+	      if (_query['<']) {
+	        rightKeys = _query['<'];
+	        _query.rightInclusive = false;
+	      } else if (_query['<=']) {
+	        rightKeys = _query['<='];
+	        _query.rightInclusive = true;
+	      }
+
+	      if (leftKeys.length !== rightKeys.length) {
+	        throw new Error('Key arrays must be same length');
+	      }
+
+	      return this.between(leftKeys, rightKeys, (0, _utils.omit)(_query, ['>', '>=', '<', '<=']));
+	    }
+	  }, {
+	    key: 'between',
+	    value: function between(leftKeys, rightKeys) {
+	      var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+	      if (!(0, _utils.isArray)(leftKeys)) {
+	        leftKeys = [leftKeys];
+	      }
+	      if (!(0, _utils.isArray)(rightKeys)) {
+	        rightKeys = [rightKeys];
+	      }
+	      (0, _utils.fillIn)(opts, {
+	        leftInclusive: true,
+	        rightInclusive: false,
+	        limit: undefined,
+	        offset: 0
+	      });
+
+	      var results = this._between(leftKeys, rightKeys, opts);
+
+	      if (opts.limit) {
+	        return results.slice(opts.offset, opts.limit + opts.offset);
+	      } else {
+	        return results.slice(opts.offset);
+	      }
+	    }
+	  }, {
+	    key: '_between',
+	    value: function _between(leftKeys, rightKeys, opts) {
+	      var results = [];
+
+	      var leftKey = leftKeys.shift();
+	      var rightKey = rightKeys.shift();
+
+	      var pos = undefined;
+
+	      if (leftKey !== undefined) {
+	        pos = (0, _utils2.binarySearch)(this.keys, leftKey);
+	      } else {
+	        pos = {
+	          found: false,
+	          index: 0
+	        };
+	      }
+
+	      if (leftKeys.length === 0) {
+	        if (pos.found && opts.leftInclusive === false) {
+	          pos.index += 1;
+	        }
+
+	        for (var i = pos.index; i < this.keys.length; i += 1) {
+	          if (rightKey !== undefined) {
+	            if (opts.rightInclusive) {
+	              if (this.keys[i] > rightKey) {
+	                break;
+	              }
+	            } else {
+	              if (this.keys[i] >= rightKey) {
+	                break;
+	              }
+	            }
+	          }
+
+	          if (this.values[i].isIndex) {
+	            results = results.concat(this.values[i].getAll());
+	          } else {
+	            results = results.concat(this.values[i]);
+	          }
+
+	          if (opts.limit) {
+	            if (results.length >= opts.limit + opts.offset) {
+	              break;
+	            }
+	          }
+	        }
+	      } else {
+	        for (var i = pos.index; i < this.keys.length; i += 1) {
+	          var currKey = this.keys[i];
+	          if (currKey > rightKey) {
+	            break;
+	          }
+
+	          if (this.values[i].isIndex) {
+	            if (currKey === leftKey) {
+	              results = results.concat(this.values[i]._between((0, _utils.copy)(leftKeys), rightKeys.map(function () {
+	                return undefined;
+	              }), opts));
+	            } else if (currKey === rightKey) {
+	              results = results.concat(this.values[i]._between(leftKeys.map(function () {
+	                return undefined;
+	              }), (0, _utils.copy)(rightKeys), opts));
+	            } else {
+	              results = results.concat(this.values[i].getAll());
+	            }
+	          } else {
+	            results = results.concat(this.values[i]);
+	          }
+
+	          if (opts.limit) {
+	            if (results.length >= opts.limit + opts.offset) {
+	              break;
+	            }
+	          }
+	        }
+	      }
+
+	      if (opts.limit) {
+	        return results.slice(0, opts.limit + opts.offset);
+	      } else {
+	        return results;
+	      }
+	    }
+	  }, {
+	    key: 'remove',
+	    value: function remove(keyList, value) {
+	      if (!(0, _utils.isArray)(keyList)) {
+	        keyList = [keyList];
+	      }
+
+	      var key = keyList.shift();
+	      var pos = (0, _utils2.binarySearch)(this.keys, key);
+
+	      if (keyList.length === 0) {
+	        if (pos.found) {
+	          var dataLocation = (0, _utils2.binarySearch)(this.values[pos.index], value, this.idAttribute);
+	          if (dataLocation.found) {
+	            (0, _utils2.removeAt)(this.values[pos.index], dataLocation.index);
+	            if (this.values[pos.index].length === 0) {
+	              (0, _utils2.removeAt)(this.keys, pos.index);
+	              (0, _utils2.removeAt)(this.values, pos.index);
+	            }
+	          }
+	        }
+	      } else {
+	        if (pos.found) {
+	          this.values[pos.index].delete(keyList, value);
+	        }
+	      }
+	    }
+	  }, {
+	    key: 'clear',
+	    value: function clear() {
+	      this.keys = [];
+	      this.values = [];
+	    }
+	  }, {
+	    key: 'insertRecord',
+	    value: function insertRecord(data) {
+	      var keyList = this.fieldList.map(function (field) {
+	        return data[field] || null;
+	      });
+
+	      this.set(keyList, data);
+	    }
+	  }, {
+	    key: 'removeRecord',
+	    value: function removeRecord(data) {
+	      var keyList = this.fieldList.map(function (field) {
+	        return data[field] || null;
+	      });
+
+	      this.remove(keyList, data);
+	    }
+	  }, {
+	    key: 'updateRecord',
+	    value: function updateRecord(data) {
+	      this.removeRecord(data);
+	      this.insertRecord(data);
+	    }
+	  }]);
+
+	  return Index;
+	})();
+
+	exports.Index = Index;
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.sort = sort;
+	exports.insertAt = insertAt;
+	exports.removeAt = removeAt;
+	exports.binarySearch = binarySearch;
+	function sort(a, b, field) {
+	  // Short-curcuit comparison if a and b are strictly equal
+	  // This is absolutely necessary for indexed objects that
+	  // don't have the idAttribute field
+	  if (a === b) {
+	    return 0;
+	  }
+	  if (field) {
+	    a = a[field];
+	    b = b[field];
+	  }
+	  if (a === null && b === null) {
+	    return 0;
+	  }
+
+	  if (a === null) {
+	    return -1;
+	  }
+
+	  if (b === null) {
+	    return 1;
+	  }
+
+	  if (a < b) {
+	    return -1;
+	  }
+
+	  if (a > b) {
+	    return 1;
+	  }
+
+	  return 0;
+	}
+
+	function insertAt(array, index, value) {
+	  array.splice(index, 0, value);
+	  return array;
+	}
+
+	function removeAt(array, index) {
+	  array.splice(index, 1);
+	  return array;
+	}
+
+	function binarySearch(array, value, field) {
+	  var lo = 0;
+	  var hi = array.length;
+	  var compared = undefined;
+	  var mid = undefined;
+
+	  while (lo < hi) {
+	    mid = (lo + hi) / 2 | 0;
+	    compared = sort(value, array[mid], field);
+	    if (compared === 0) {
+	      return {
+	        found: true,
+	        index: mid
+	      };
+	    } else if (compared < 0) {
+	      hi = mid;
+	    } else {
+	      lo = mid + 1;
+	    }
+	  }
+
+	  return {
+	    found: false,
+	    index: hi
+	  };
+	}
 
 /***/ }
 /******/ ])
