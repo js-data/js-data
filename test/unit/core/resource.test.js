@@ -41,16 +41,64 @@ export function init () {
       for (var key in defaults) {
         assert.equal(Child[key], defaults[key], key + ' should be ' + defaults[key])
       }
+      class Child2 extends Resource {}
+      for (var key in defaults) {
+        assert.equal(Child2[key], defaults[key], key + ' should be ' + defaults[key])
+      }
     })
     it('child should override static defaults', function () {
+      /////////////////////////////////////////
+      // ES5 ways of creating a new Resource //
+      /////////////////////////////////////////
       let Child = Resource.extend({}, {
         idAttribute: '_id'
       })
-      for (var key in defaults) {
-        if (key === 'idAttribute') {
-          assert.equal(Child.idAttribute, '_id', 'should be "_id"')
-        } else {
-          assert.equal(Child[key], defaults[key], key + ' should be ' + defaults[key])
+
+      // Not yet implemented in v3
+      // let Child2 = store.defineResource({
+      //   idAttribute: '_id'
+      // })
+
+      /////////////////////////////////////////
+      // ES6 ways of creating a new Resource //
+      /////////////////////////////////////////
+      class Child3 extends Resource {}
+      configure({
+        idAttribute: '_id'
+      })(Child3)
+
+      class Child4 extends Resource {}
+      Child4.configure({
+        idAttribute: '_id'
+      })
+
+      /////////////////////////////////////////
+      // ES7 ways of creating a new Resource //
+      /////////////////////////////////////////
+      class Child5 extends Resource {
+        static idAttribute = '_id'
+      }
+
+      // Doesn't work right now because of https://github.com/babel/babel/issues/2645
+      // @configure({
+      //   idAttribute: '_id'
+      // })
+      // class Child6 extends Resource {}
+
+      check(Child)
+      // check(Child2)
+      check(Child3)
+      check(Child4)
+      check(Child5)
+      // check(Child6)
+
+      function check (Class) {
+        for (var key in defaults) {
+          if (key === 'idAttribute') {
+            assert.equal(Class.idAttribute, '_id', 'should be "_id"')
+          } else {
+            assert.equal(Class[key], defaults[key], key + ' should be ' + defaults[key])
+          }
         }
       }
     })
