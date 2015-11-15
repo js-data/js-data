@@ -1,4 +1,4 @@
-import {fillIn,forOwn,isString,isObject,isSorN,makePath,resolve,reject} from '../utils'
+import {fillIn, forOwn, isString, isObject, isSorN, makePath, resolve, reject} from '../utils'
 import {configure} from './configure'
 
 // TODO: Make actions part of the http adapter

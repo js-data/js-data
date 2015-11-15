@@ -47,7 +47,7 @@
     ]
   },
   "scripts": {
-    "lint": "standard src/**/*.js test/**/*.js",
+    "lint": "standard src/**/*.js test/unit/**/*.js",
     "webpack": "webpack --config webpack.config.js --colors",
     "helpers": "node scripts/helpers.js",
     "bundle": "npm run webpack && npm run helpers",

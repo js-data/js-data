@@ -858,6 +858,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function schema(opts) {
 	      return (0, _decorators.schema)(opts)(this);
 	    }
+	  }, {
+	    key: 'configure',
+	    value: function configure(props) {
+	      return (0, _decorators.configure)(props)(this);
+	    }
 
 	    /**
 	     * Usage:

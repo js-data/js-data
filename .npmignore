@@ -20,6 +20,8 @@ bower_components/
 
 *.iml
 .idea/
+.vscode/
+jsconfig.json
 
 *.png
 CONTRIBUTING.md
