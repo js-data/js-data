@@ -1,5 +1,6 @@
 import * as utils from './utils'
 import {action, actions, configure, schema} from './decorators'
+import {Index} from '../../lib/mindex'
 
 let isBrowser = false
 
@@ -59,6 +60,7 @@ export function belongsTo (relation, opts = {}) {
 function basicIndex (target) {
   target.$$index = {}
   target.$$collection = []
+  console.log(Index)
 }
 
 // This is here so Babel will give us
