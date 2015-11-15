@@ -129,6 +129,10 @@ export class Resource extends BaseResource {
     return schema(opts)(this)
   }
 
+  static configure (props) {
+    return configure(props)(this)
+  }
+
   /**
    * Usage:
    *
