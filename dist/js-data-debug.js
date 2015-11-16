@@ -99,38 +99,56 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _decorators = __webpack_require__(2);
 
-	var _loop = function _loop(_key3) {
-	  if (_key3 === "default") return 'continue';
-	  Object.defineProperty(exports, _key3, {
+	var _loop = function _loop(_key4) {
+	  if (_key4 === "default") return 'continue';
+	  Object.defineProperty(exports, _key4, {
 	    enumerable: true,
 	    get: function get() {
-	      return _decorators[_key3];
+	      return _decorators[_key4];
 	    }
 	  });
 	};
 
-	for (var _key3 in _decorators) {
-	  var _ret = _loop(_key3);
+	for (var _key4 in _decorators) {
+	  var _ret = _loop(_key4);
 
 	  if (_ret === 'continue') continue;
 	}
 
 	var _resource = __webpack_require__(7);
 
-	var _loop2 = function _loop2(_key4) {
-	  if (_key4 === "default") return 'continue';
-	  Object.defineProperty(exports, _key4, {
+	var _loop2 = function _loop2(_key5) {
+	  if (_key5 === "default") return 'continue';
+	  Object.defineProperty(exports, _key5, {
 	    enumerable: true,
 	    get: function get() {
-	      return _resource[_key4];
+	      return _resource[_key5];
 	    }
 	  });
 	};
 
-	for (var _key4 in _resource) {
-	  var _ret2 = _loop2(_key4);
+	for (var _key5 in _resource) {
+	  var _ret2 = _loop2(_key5);
 
 	  if (_ret2 === 'continue') continue;
+	}
+
+	var _collection = __webpack_require__(8);
+
+	var _loop3 = function _loop3(_key6) {
+	  if (_key6 === "default") return 'continue';
+	  Object.defineProperty(exports, _key6, {
+	    enumerable: true,
+	    get: function get() {
+	      return _collection[_key6];
+	    }
+	  });
+	};
+
+	for (var _key6 in _collection) {
+	  var _ret3 = _loop3(_key6);
+
+	  if (_ret3 === 'continue') continue;
 	}
 
 	// Workaround for https://github.com/babel/babel/issues/2763
@@ -593,9 +611,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _decorators = __webpack_require__(2);
 
-	var _mindex = __webpack_require__(8);
+	var _collection = __webpack_require__(8);
 
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
@@ -683,7 +703,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	function basicIndex(target) {
 	  target.$$index = {};
 	  target.$$collection = [];
-	  console.log(_mindex.Index);
 	}
 
 	// This is here so Babel will give us
@@ -705,12 +724,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(Resource).call(this));
 
 	    (0, _decorators.configure)(props)(_this3);
+	    Object.defineProperty(_this3, '$$props', {
+	      value: {}
+	    });
 	    return _this3;
 	  }
 
 	  // Static methods
 
 	  _createClass(Resource, null, [{
+	    key: 'data',
+	    value: function data() {
+	      throw new Error(this.name + ': Did you forget to define a schema?');
+	    }
+	  }, {
+	    key: 'createIndex',
+	    value: function createIndex(keyList) {
+	      this.data().createIndex(keyList, this.idAttribute);
+	    }
+	  }, {
 	    key: 'createInstance',
 	    value: function createInstance() {
 	      var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
@@ -721,6 +753,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'inject',
 	    value: function inject(props) {
+	      var _this4 = this;
+
 	      var singular = false;
 	      if (utils.isArray(props)) {
 	        props = props.map(this.createInstance);
@@ -728,20 +762,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	        singular = true;
 	        props = [this.createInstance(props)];
 	      }
-	      var instances = props.map(function (instance) {
-	        var id = instance[this.idAttribute];
-	        if (!this.$$index[id]) {
-	          this.$$collection.push(instance);
+	      props.forEach(function (instance) {
+	        if (!_this4.data().get(instance[_this4.idAttribute]).length) {
+	          _this4.data().insertRecord(instance);
 	        }
-	        this.$$index[id] = instance;
-	        return instance;
-	      }, this);
-	      return singular ? instances[0] : instances;
+	      });
+	      return singular ? props[0] : props;
 	    }
 	  }, {
 	    key: 'get',
 	    value: function get(id) {
-	      return this.$$index[id];
+	      var instances = this.data().get(id);
+	      return instances.length ? instances[0] : undefined;
 	    }
 
 	    /**
@@ -815,6 +847,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	      (0, _decorators.configure)(props)(Child.prototype);
 	      (0, _decorators.configure)(classProps)(Child);
 
+	      (0, _decorators.schema)(_defineProperty({}, Child.idAttribute, {}))(Child);
+
+	      var collection = new _collection.Collection([], Child.idAttribute);
+
+	      Object.defineProperty(Child, 'getCollection', {
+	        value: function value() {
+	          if (this.__proto__.data === this.prototype.constructor.data) {
+	            throw new Error(this.name + ': Schemas are not inheritable, did you forget to define a schema?');
+	          }
+	          return collection;
+	        }
+	      });
+
 	      return Child;
 	    }
 	  }]);
@@ -839,6 +884,203 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.Collection = undefined;
+
+	var _utils = __webpack_require__(4);
+
+	var _mindex = __webpack_require__(9);
+
+	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Query = (function () {
+	  function Query(collection) {
+	    _classCallCheck(this, Query);
+
+	    this.collection = collection;
+	  }
+
+	  _createClass(Query, [{
+	    key: 'getData',
+	    value: function getData() {
+	      if (!this.data) {
+	        this.data = this.collection.index.getAll();
+	      }
+	      return this.data;
+	    }
+	  }, {
+	    key: 'between',
+	    value: function between(leftKeys, rightKeys, opts) {
+	      var collection = this.collection;
+	      var index = opts.index ? collection.indexes[opts.index] : collection.index;
+	      if (this.data) {
+	        throw new Error('Cannot access index after first operation!');
+	      }
+	      this.data = index.between(leftKeys, rightKeys, opts);
+	      return this;
+	    }
+	  }, {
+	    key: 'getAll',
+	    value: function getAll() {
+	      var keyList = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
+	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	      if (this.data) {
+	        throw new Error('Cannot access index after first operation!');
+	      }
+	      if (!keyList.length) {
+	        this.getData();
+	        return this;
+	      }
+	      var collection = this.collection;
+	      var index = opts.index ? collection.indexes[opts.index] : collection.index;
+	      this.data = index.get(keyList);
+	      return this;
+	    }
+	  }, {
+	    key: 'filter',
+	    value: function filter() {
+	      var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+	      console.log('filter', opts, this.getData().length);
+	      return this;
+	    }
+	  }, {
+	    key: 'skip',
+	    value: function skip(num) {
+	      if (!(0, _utils.isNumber)(num)) {
+	        throw new TypeError('skip: Expected number but found ' + (typeof num === 'undefined' ? 'undefined' : _typeof(num)) + '!');
+	      }
+	      var data = this.getData();
+	      if (num < data.length) {
+	        this.data = data.slice(num);
+	      } else {
+	        this.data = [];
+	      }
+	      return this;
+	    }
+	  }, {
+	    key: 'limit',
+	    value: function limit(num) {
+	      if (!(0, _utils.isNumber)(num)) {
+	        throw new TypeError('limit: Expected number but found ' + (typeof num === 'undefined' ? 'undefined' : _typeof(num)) + '!');
+	      }
+	      var data = this.getData();
+	      this.data = data.slice(0, Math.min(data.length, num));
+	      return this;
+	    }
+	  }, {
+	    key: 'forEach',
+	    value: function forEach(cb, thisArg) {
+	      this.getData().forEach(cb, thisArg);
+	      return this;
+	    }
+	  }, {
+	    key: 'map',
+	    value: function map(cb, thisArg) {
+	      this.data = this.getData().map(cb, thisArg);
+	      return this;
+	    }
+	  }, {
+	    key: 'run',
+	    value: function run() {
+	      var data = this.data;
+	      this.data = null;
+	      return data;
+	    }
+	  }]);
+
+	  return Query;
+	})();
+
+	var Collection = exports.Collection = (function () {
+	  function Collection() {
+	    var data = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
+	    var idAttribute = arguments.length <= 1 || arguments[1] === undefined ? 'id' : arguments[1];
+
+	    _classCallCheck(this, Collection);
+
+	    if (!(0, _utils.isArray)(data)) {
+	      throw new TypeError('new Collection([data]): data: Expected array. Found ' + (typeof data === 'undefined' ? 'undefined' : _typeof(data)));
+	    }
+	    this.idAttribute = idAttribute;
+	    this.index = new _mindex.Index([idAttribute], idAttribute);
+	    this.indexes = {};
+	    data.forEach(this.index.insertRecord, this.index);
+	  }
+
+	  _createClass(Collection, [{
+	    key: 'createIndex',
+	    value: function createIndex(name, keyList, idAttribute) {
+	      var index = this.indexes[name] = new _mindex.Index(keyList, idAttribute);
+	      this.index.visitAll(index.insertRecord, index);
+	      return this;
+	    }
+	  }, {
+	    key: 'query',
+	    value: function query() {
+	      return new Query(this);
+	    }
+	  }, {
+	    key: 'between',
+	    value: function between() {
+	      var _query;
+
+	      return (_query = this.query()).between.apply(_query, arguments).run();
+	    }
+	  }, {
+	    key: 'getAll',
+	    value: function getAll() {
+	      var _query2;
+
+	      return (_query2 = this.query()).getAll.apply(_query2, arguments).run();
+	    }
+	  }, {
+	    key: 'filter',
+	    value: function filter(opts) {
+	      return this.query().filter(opts).run();
+	    }
+	  }, {
+	    key: 'skip',
+	    value: function skip(num) {
+	      return this.query().skip(num).run();
+	    }
+	  }, {
+	    key: 'limit',
+	    value: function limit(num) {
+	      return this.query().limit(num).run();
+	    }
+	  }, {
+	    key: 'forEach',
+	    value: function forEach(cb, thisArg) {
+	      this.index.visitAll(cb, thisArg);
+	    }
+	  }, {
+	    key: 'map',
+	    value: function map(cb, thisArg) {
+	      var data = [];
+	      this.index.visitAll(function (value) {
+	        data.push(cb.call(thisArg, value));
+	      });
+	      return data;
+	    }
+	  }]);
+
+	  return Collection;
+	})();
+
+/***/ },
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -870,7 +1112,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _utils = __webpack_require__(4);
 
-	var _utils2 = __webpack_require__(9);
+	var _utils2 = __webpack_require__(10);
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -963,6 +1205,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      });
 	      return results;
+	    }
+	  }, {
+	    key: 'visitAll',
+	    value: function visitAll(cb, thisArg) {
+	      this.values.forEach(function (value) {
+	        if (value.isIndex) {
+	          value.visitAll(cb, thisArg);
+	        } else {
+	          value.forEach(cb, thisArg);
+	        }
+	      });
 	    }
 	  }, {
 	    key: 'query',
@@ -1169,7 +1422,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.Index = Index;
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports) {
 
 	"use strict";

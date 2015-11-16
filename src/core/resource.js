@@ -1,6 +1,6 @@
 import * as utils from './utils'
 import {action, actions, configure, schema} from './decorators'
-import {Index} from '../../lib/mindex'
+import {Collection} from './collection'
 
 let isBrowser = false
 
@@ -60,7 +60,6 @@ export function belongsTo (relation, opts = {}) {
 function basicIndex (target) {
   target.$$index = {}
   target.$$collection = []
-  console.log(Index)
 }
 
 // This is here so Babel will give us
@@ -72,9 +71,20 @@ export class Resource extends BaseResource {
   constructor (props = {}) {
     super()
     configure(props)(this)
+    Object.defineProperty(this, '$$props', {
+      value: {}
+    })
   }
 
   // Static methods
+  static data () {
+    throw new Error(`${this.name}: Did you forget to define a schema?`)
+  }
+
+  static createIndex (keyList) {
+    this.data().createIndex(keyList, this.idAttribute)
+  }
+
   static createInstance (props = {}) {
     let Constructor = this
     return props instanceof Constructor ? props : new Constructor(props)
@@ -88,19 +98,17 @@ export class Resource extends BaseResource {
       singular = true
       props = [this.createInstance(props)]
     }
-    let instances = props.map(function (instance) {
-      let id = instance[this.idAttribute]
-      if (!this.$$index[id]) {
-        this.$$collection.push(instance)
+    props.forEach(instance => {
+      if (!this.data().get(instance[this.idAttribute]).length) {
+        this.data().insertRecord(instance)
       }
-      this.$$index[id] = instance
-      return instance
-    }, this)
-    return singular ? instances[0] : instances
+    })
+    return singular ? props[0] : props
   }
 
   static get (id) {
-    return this.$$index[id]
+    let instances = this.data().get(id)
+    return instances.length ? instances[0] : undefined
   }
 
   /**
@@ -163,6 +171,21 @@ export class Resource extends BaseResource {
 
     configure(props)(Child.prototype)
     configure(classProps)(Child)
+
+    schema({
+      [Child.idAttribute]: {}
+    })(Child)
+
+    const collection = new Collection([], Child.idAttribute)
+
+    Object.defineProperty(Child, 'getCollection', {
+      value: function () {
+        if (this.__proto__.data === this.prototype.constructor.data) {
+          throw new Error(`${this.name}: Schemas are not inheritable, did you forget to define a schema?`)
+        }
+        return collection
+      }
+    })
 
     return Child
   }
