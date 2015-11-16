@@ -111,6 +111,18 @@ export class Resource extends BaseResource {
     return instances.length ? instances[0] : undefined
   }
 
+  static getAll (...args) {
+    return this.data().getAll(...args)
+  }
+
+  static filter (opts) {
+    return this.data().filter(opts)
+  }
+
+  static query () {
+    return this.data().query()
+  }
+
   /**
    * Usage:
    *

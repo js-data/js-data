@@ -111,5 +111,82 @@ export function init () {
         { id: 3 }
       ], 'should have limited none')
     })
+
+    it('should skip and limit', function () {
+      const data = [
+        { id: 2 },
+        { id: 3 },
+        { id: 5 },
+        { id: 6 },
+        { id: 4 },
+        { id: 1 }
+      ]
+      const collection = new Collection(data, 'id')
+      assert.deepEqual(collection.query().skip(1).limit(1).run(), [
+        { id: 2 }
+      ], 'should have skipped 1 and limited to 1')
+      assert.deepEqual(collection.query().skip(4).limit(2).run(), [
+        { id: 5 },
+        { id: 6 }
+      ], 'should have skipped 4 and limited to 2')
+      assert.deepEqual(collection.query().skip(5).limit(3).run(), [
+        { id: 6 }
+      ], 'should have skipped 5 and limited to 3')
+      assert.deepEqual(collection.query().skip(1).limit(7).run(), [
+        { id: 2 },
+        { id: 3 },
+        { id: 4 },
+        { id: 5 },
+        { id: 6 }
+      ], 'should have skipped 1 and limited to 5')
+    })
+
+    it('should support complex queries', function () {
+      const data = [
+        { id: 2, age: 18, role: 'admin' },
+        { id: 3, age: 19, role: 'admin' },
+        { id: 5, age: 19, role: 'admin' },
+        { id: 6, age: 19, role: 'owner' },
+        { id: 4, age: 22, role: 'owner' },
+        { id: 1, age: 23, role: 'owner' }
+      ]
+      const collection = new Collection(data, 'id')
+      collection.createIndex('ageRole', ['age', 'role'])
+      assert.deepEqual(
+        collection.getAll(19, { index: 'ageRole' }),
+        [
+          { id: 3, age: 19, role: 'admin' },
+          { id: 5, age: 19, role: 'admin' },
+          { id: 6, age: 19, role: 'owner' }
+        ],
+        'should have found all of age:19 using 1 keyList'
+      )
+      assert.deepEqual(
+        collection.getAll([19, 'admin'], { index: 'ageRole' }),
+        [
+          { id: 3, age: 19, role: 'admin' },
+          { id: 5, age: 19, role: 'admin' }
+        ],
+        'should have found age:19, role:admin'
+      )
+      assert.deepEqual(
+        collection.getAll([19, 'admin'], [19, 'owner'], { index: 'ageRole' }),
+        [
+          { id: 3, age: 19, role: 'admin' },
+          { id: 5, age: 19, role: 'admin' },
+          { id: 6, age: 19, role: 'owner' }
+        ],
+        'should have found all of age:19 using 2 keyLists'
+      )
+      assert.deepEqual(
+        collection.getAll([19, 'admin'], 23, { index: 'ageRole' }),
+        [
+          { id: 3, age: 19, role: 'admin' },
+          { id: 5, age: 19, role: 'admin' },
+          { id: 1, age: 23, role: 'owner' }
+        ],
+        'should have found age:19, role:admin and age:23'
+      )
+    })
   })
 }

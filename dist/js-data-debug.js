@@ -784,6 +784,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var instances = this.data().get(id);
 	      return instances.length ? instances[0] : undefined;
 	    }
+	  }, {
+	    key: 'getAll',
+	    value: function getAll() {
+	      var _data;
+
+	      return (_data = this.data()).getAll.apply(_data, arguments);
+	    }
+	  }, {
+	    key: 'filter',
+	    value: function filter(opts) {
+	      return this.data().filter(opts);
+	    }
+	  }, {
+	    key: 'query',
+	    value: function query() {
+	      return this.data().query();
+	    }
 
 	    /**
 	     * Usage:
@@ -940,8 +957,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return this;
 	    }
 	  }, {
-	    key: 'getAll',
-	    value: function getAll() {
+	    key: 'get',
+	    value: function get() {
 	      var keyList = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
 	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
@@ -955,6 +972,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var collection = this.collection;
 	      var index = opts.index ? collection.indexes[opts.index] : collection.index;
 	      this.data = index.get(keyList);
+	      return this;
+	    }
+	  }, {
+	    key: 'getAll',
+	    value: function getAll() {
+	      var _this = this;
+
+	      var opts = {};
+	      if (this.data) {
+	        throw new Error('Cannot access index after first operation!');
+	      }
+
+	      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	        args[_key] = arguments[_key];
+	      }
+
+	      if (!args.length || args.length === 1 && (0, _utils.isObject)(args[0])) {
+	        this.getData();
+	        return this;
+	      } else if (args.length && (0, _utils.isObject)(args[args.length - 1])) {
+	        opts = args[args.length - 1];
+	        args.pop();
+	      }
+	      var collection = this.collection;
+	      var index = opts.index ? collection.indexes[opts.index] : collection.index;
+	      this.data = [];
+	      args.forEach(function (keyList) {
+	        _this.data = _this.data.concat(index.get(keyList));
+	      });
 	      return this;
 	    }
 	  }, {
@@ -1006,6 +1052,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function run() {
 	      var data = this.data;
 	      this.data = null;
+	      this.params = null;
 	      return data;
 	    }
 	  }]);
@@ -1031,8 +1078,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  _createClass(Collection, [{
 	    key: 'createIndex',
-	    value: function createIndex(name, keyList, idAttribute) {
-	      var index = this.indexes[name] = new _mindex.Index(keyList, idAttribute);
+	    value: function createIndex(name, keyList) {
+	      var index = this.indexes[name] = new _mindex.Index(keyList, this.idAttribute);
 	      this.index.visitAll(index.insertRecord, index);
 	      return this;
 	    }
@@ -1049,11 +1096,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return (_query = this.query()).between.apply(_query, arguments).run();
 	    }
 	  }, {
-	    key: 'getAll',
-	    value: function getAll() {
+	    key: 'get',
+	    value: function get() {
 	      var _query2;
 
-	      return (_query2 = this.query()).getAll.apply(_query2, arguments).run();
+	      return (_query2 = this.query()).get.apply(_query2, arguments).run();
+	    }
+	  }, {
+	    key: 'getAll',
+	    value: function getAll() {
+	      var _query3;
+
+	      return (_query3 = this.query()).getAll.apply(_query3, arguments).run();
 	    }
 	  }, {
 	    key: 'filter',
@@ -1169,7 +1223,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          this.values[pos.index].set(keyList, value);
 	        } else {
 	          (0, _utils2.insertAt)(this.keys, pos.index, key);
-	          var newIndex = new Index();
+	          var newIndex = new Index([], this.idAttribute);
 	          newIndex.set(keyList, value);
 	          (0, _utils2.insertAt)(this.values, pos.index, newIndex);
 	        }
