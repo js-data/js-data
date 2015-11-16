@@ -74,24 +74,19 @@ export function init () {
       })
 
      /**
-       * ES7 ways of creating a new Resource
+       * ES7 way of creating a new Resource
        */
-      class Child5 extends Resource {
-        static idAttribute = '_id'
-      }
-
       // Doesn't work right now because of https://github.com/babel/babel/issues/2645
       // @configure({
       //   idAttribute: '_id'
       // })
-      // class Child6 extends Resource {}
+      // class Child5 extends Resource {}
 
       check(Child)
       // check(Child2)
       check(Child3)
       check(Child4)
-      check(Child5)
-      // check(Child6)
+      // check(Child5)
 
       function check (Class) {
         for (var key in defaults) {
