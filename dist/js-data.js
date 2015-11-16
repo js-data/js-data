@@ -108,38 +108,56 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _decorators = __webpack_require__(2);
 
-	var _loop = function _loop(_key3) {
-	  if (_key3 === "default") return 'continue';
-	  Object.defineProperty(exports, _key3, {
+	var _loop = function _loop(_key4) {
+	  if (_key4 === "default") return 'continue';
+	  Object.defineProperty(exports, _key4, {
 	    enumerable: true,
 	    get: function get() {
-	      return _decorators[_key3];
+	      return _decorators[_key4];
 	    }
 	  });
 	};
 
-	for (var _key3 in _decorators) {
-	  var _ret = _loop(_key3);
+	for (var _key4 in _decorators) {
+	  var _ret = _loop(_key4);
 
 	  if (_ret === 'continue') continue;
 	}
 
 	var _resource = __webpack_require__(7);
 
-	var _loop2 = function _loop2(_key4) {
-	  if (_key4 === "default") return 'continue';
-	  Object.defineProperty(exports, _key4, {
+	var _loop2 = function _loop2(_key5) {
+	  if (_key5 === "default") return 'continue';
+	  Object.defineProperty(exports, _key5, {
 	    enumerable: true,
 	    get: function get() {
-	      return _resource[_key4];
+	      return _resource[_key5];
 	    }
 	  });
 	};
 
-	for (var _key4 in _resource) {
-	  var _ret2 = _loop2(_key4);
+	for (var _key5 in _resource) {
+	  var _ret2 = _loop2(_key5);
 
 	  if (_ret2 === 'continue') continue;
+	}
+
+	var _collection = __webpack_require__(8);
+
+	var _loop3 = function _loop3(_key6) {
+	  if (_key6 === "default") return 'continue';
+	  Object.defineProperty(exports, _key6, {
+	    enumerable: true,
+	    get: function get() {
+	      return _collection[_key6];
+	    }
+	  });
+	};
+
+	for (var _key6 in _collection) {
+	  var _ret3 = _loop3(_key6);
+
+	  if (_ret3 === 'continue') continue;
 	}
 
 	// Workaround for https://github.com/babel/babel/issues/2763
@@ -844,6 +862,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      Object.defineProperty(Child, 'getCollection', {
 	        value: function value() {
+	          if (this.__proto__.data === this.prototype.constructor.data) {
+	            // eslint-disable-line
+	            throw new Error(this.name + ': Schemas are not inheritable, did you forget to define a schema?');
+	          }
 	          return collection;
 	        }
 	      });
@@ -902,7 +924,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    key: 'getData',
 	    value: function getData() {
 	      if (!this.data) {
-	        this.data = this.collection.getAll();
+	        this.data = this.collection.index.getAll();
 	      }
 	      return this.data;
 	    }
@@ -919,14 +941,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }, {
 	    key: 'getAll',
-	    value: function getAll(keyList) {
+	    value: function getAll() {
+	      var keyList = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
 	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-	      var collection = this.collection;
-	      var index = opts.index ? collection.indexes[opts.index] : collection.index;
 	      if (this.data) {
 	        throw new Error('Cannot access index after first operation!');
 	      }
+	      if (!keyList.length) {
+	        this.getData();
+	        return this;
+	      }
+	      var collection = this.collection;
+	      var index = opts.index ? collection.indexes[opts.index] : collection.index;
 	      this.data = index.get(keyList);
 	      return this;
 	    }
@@ -941,6 +968,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'skip',
 	    value: function skip(num) {
+	      if (!(0, _utils.isNumber)(num)) {
+	        throw new TypeError('skip: Expected number but found ' + (typeof num === 'undefined' ? 'undefined' : _typeof(num)) + '!');
+	      }
 	      var data = this.getData();
 	      if (num < data.length) {
 	        this.data = data.slice(num);
@@ -952,6 +982,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'limit',
 	    value: function limit(num) {
+	      if (!(0, _utils.isNumber)(num)) {
+	        throw new TypeError('limit: Expected number but found ' + (typeof num === 'undefined' ? 'undefined' : _typeof(num)) + '!');
+	      }
 	      var data = this.getData();
 	      this.data = data.slice(0, Math.min(data.length, num));
 	      return this;
