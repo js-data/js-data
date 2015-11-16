@@ -180,7 +180,7 @@ export class Resource extends BaseResource {
 
     Object.defineProperty(Child, 'getCollection', {
       value: function () {
-        if (this.__proto__.data === this.prototype.constructor.data) {
+        if (this.__proto__.data === this.prototype.constructor.data) { // eslint-disable-line
           throw new Error(`${this.name}: Schemas are not inheritable, did you forget to define a schema?`)
         }
         return collection
