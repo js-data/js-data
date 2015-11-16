@@ -1,4 +1,4 @@
-import {isArray, isNumber} from './utils'
+import {isArray, isNumber, isObject} from './utils'
 import {Index} from '../../lib/mindex'
 
 class Query {
@@ -23,7 +23,7 @@ class Query {
     return this
   }
 
-  getAll (keyList = [], opts = {}) {
+  get (keyList = [], opts = {}) {
     if (this.data) {
       throw new Error('Cannot access index after first operation!')
     }
@@ -34,6 +34,27 @@ class Query {
     const collection = this.collection
     const index = opts.index ? collection.indexes[opts.index] : collection.index
     this.data = index.get(keyList)
+    return this
+  }
+
+  getAll (...args) {
+    let opts = {}
+    if (this.data) {
+      throw new Error('Cannot access index after first operation!')
+    }
+    if (!args.length || args.length === 1 && isObject(args[0])) {
+      this.getData()
+      return this
+    } else if (args.length && isObject(args[args.length - 1])) {
+      opts = args[args.length - 1]
+      args.pop()
+    }
+    const collection = this.collection
+    const index = opts.index ? collection.indexes[opts.index] : collection.index
+    this.data = []
+    args.forEach(keyList => {
+      this.data = this.data.concat(index.get(keyList))
+    })
     return this
   }
 
@@ -77,6 +98,7 @@ class Query {
   run () {
     let data = this.data
     this.data = null
+    this.params = null
     return data
   }
 }
@@ -92,8 +114,8 @@ export class Collection {
     data.forEach(this.index.insertRecord, this.index)
   }
 
-  createIndex (name, keyList, idAttribute) {
-    const index = this.indexes[name] = new Index(keyList, idAttribute)
+  createIndex (name, keyList) {
+    const index = this.indexes[name] = new Index(keyList, this.idAttribute)
     this.index.visitAll(index.insertRecord, index)
     return this
   }
@@ -104,6 +126,10 @@ export class Collection {
 
   between (...args) {
     return this.query().between(...args).run()
+  }
+
+  get (...args) {
+    return this.query().get(...args).run()
   }
 
   getAll (...args) {
