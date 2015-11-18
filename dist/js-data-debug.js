@@ -1,12 +1,3 @@
-/*!
-* js-data
-* @version 2.8.2 - Homepage <http://www.js-data.io/>
-* @author Jason Dobry <jason.dobry@gmail.com>
-* @copyright (c) 2014-2015 Jason Dobry
-* @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
-*
-* @overview Robust framework-agnostic data store.
-*/
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -88,12 +79,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	var version = exports.version = {
-	  full: '2.8.2',
-	  major: parseInt('2', 10),
-	  minor: parseInt('8', 10),
-	  patch: parseInt('2', 10),
-	  alpha:  true ? 'false' : false,
-	  beta:  true ? 'false' : false
+	  full: '<%= pkg.version %>',
+	  major: parseInt('<%= major %>', 10),
+	  minor: parseInt('<%= minor %>', 10),
+	  patch: parseInt('<%= patch %>', 10),
+	  alpha:  true ? '<%= alpha %>' : false,
+	  beta:  true ? '<%= beta %>' : false
 	};
 
 /***/ },
@@ -124,7 +115,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_ret === 'continue') continue;
 	}
 
-	var _resource = __webpack_require__(7);
+	var _resource = __webpack_require__(10);
 
 	var _loop2 = function _loop2(_key5) {
 	  if (_key5 === "default") return 'continue';
@@ -142,7 +133,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_ret2 === 'continue') continue;
 	}
 
-	var _collection = __webpack_require__(8);
+	var _collection = __webpack_require__(7);
 
 	var _loop3 = function _loop3(_key6) {
 	  if (_key6 === "default") return 'continue';
@@ -547,6 +538,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _utils = __webpack_require__(4);
 
+	var _collection = __webpack_require__(7);
+
 	/**
 	 * Usage:
 	 *
@@ -581,21 +574,60 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
 	  return function (target) {
+	    // TODO: Test whether there already exists a schema
+	    var collection = new _collection.Collection([], target.idAttribute);
+	    target.data = function () {
+	      // TODO: Do I need this?
+	      if (this.__proto__.data === this.prototype.constructor.data) {
+	        // eslint-disable-line
+	        throw new Error(this.name + ': Schemas are not inheritable, did you forget to define a schema?');
+	      }
+	      return collection;
+	    };
 	    (0, _utils.forOwn)(opts, function (prop, key) {
 	      var descriptor = {
 	        enumerable: prop.enumerable !== undefined ? prop.enumerable : true,
 	        writable: prop.writable ? prop.writable : true,
 	        configurable: prop.configurable ? prop.configurable : false
 	      };
+	      if (prop.indexed) {
+	        delete descriptor.writable;
+	        // Update index
+	        // TODO: Make this configurable, ie. immediate or lazy update
+	        target.createIndex(key);
+	        descriptor.get = function () {
+	          return this.$$props[key];
+	        };
+	        descriptor.set = function (value) {
+	          this.$$props[key] = value;
+	          if (this.$$s) {
+	            target.data().updateRecord(this, { index: key });
+	          }
+	          return value;
+	        };
+	      }
 	      if (prop.get) {
-	        descriptor.writable = false;
+	        delete descriptor.writable;
 	        descriptor.get = prop.get;
 	      }
 	      if (prop.set) {
-	        descriptor.writable = false;
-	        descriptor.set = prop.set;
+	        delete descriptor.writable;
+	        if (descriptor.set) {
+	          (function () {
+	            var originalSet = descriptor.set;
+	            descriptor.set = function (value) {
+	              return prop.set.call(this, originalSet.call(this, value));
+	            };
+	          })();
+	        } else {
+	          descriptor.set = prop.set;
+	        }
 	      }
-	      Object.defineProperty(target.prototype, key, descriptor);
+	      // TODO: This won't work for properties of Object type, because all
+	      // instances will share the prototype value
+	      if (!descriptor.writable) {
+	        Object.defineProperty(target.prototype, key, descriptor);
+	      }
 	    });
 	    return target;
 	  };
@@ -612,319 +644,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.Resource = exports.belongsTo = undefined;
-
-	var _utils = __webpack_require__(4);
-
-	var utils = _interopRequireWildcard(_utils);
-
-	var _decorators = __webpack_require__(2);
-
-	var _collection = __webpack_require__(8);
-
-	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	var isBrowser = false;
-
-	try {
-	  isBrowser = !!window;
-	} catch (e) {}
-
-	/**
-	 * Usage:
-	 *
-	 * @belongsTo(User, {
-	 *   localKey: 'myUserId'
-	 * })
-	 * class Post extends JSData.Resource {...}
-	 *
-	 * @belongsTo(User)
-	 * @belongsTo(Post, {
-	 *   localField: '_post'
-	 * })
-	 * class Comment extends JSData.Resource {...}
-	 */
-	function _belongsTo(relation) {
-	  var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-	  return function (target) {
-	    var localField = opts.localField || relation.name.toLowerCase();
-	    var localKey = opts.localKey || relation.name.toLowerCase() + '_id';
-	    var descriptor = {
-	      enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
-	      get: function get() {
-	        return relation.get(this[localKey]);
-	      },
-	      set: function set(parent) {
-	        this[localKey] = parent[relation.idAttribute];
-	      }
-	    };
-	    if (opts.link === false || opts.link === undefined && !target.linkRelations) {
-	      delete descriptor.get;
-	      delete descriptor.set;
-	    }
-	    if (opts.get) {
-	      (function () {
-	        var originalGet = descriptor.get;
-	        descriptor.get = function () {
-	          var _this = this;
-
-	          return opts.get(target, relation, this, originalGet ? function () {
-	            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	              args[_key] = arguments[_key];
-	            }
-
-	            return originalGet.apply(_this, args);
-	          } : undefined);
-	        };
-	      })();
-	    }
-	    if (opts.set) {
-	      (function () {
-	        var originalSet = descriptor.set;
-	        descriptor.set = function (parent) {
-	          var _this2 = this;
-
-	          return opts.set(target, relation, this, parent, originalSet ? function () {
-	            for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-	              args[_key2] = arguments[_key2];
-	            }
-
-	            return originalSet.apply(_this2, args);
-	          } : undefined);
-	        };
-	      })();
-	    }
-	    Object.defineProperty(target.prototype, localField, descriptor);
-	    return target;
-	  };
-	}
-
-	exports.belongsTo = _belongsTo;
-	function basicIndex(target) {
-	  target.$$index = {};
-	  target.$$collection = [];
-	}
-
-	// This is here so Babel will give us
-	// the inheritance helpers which we
-	// can re-use for the "extend" method
-
-	var BaseResource = function BaseResource() {
-	  _classCallCheck(this, BaseResource);
-	};
-
-	var Resource = exports.Resource = (function (_BaseResource) {
-	  _inherits(Resource, _BaseResource);
-
-	  function Resource() {
-	    var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-	    _classCallCheck(this, Resource);
-
-	    var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(Resource).call(this));
-
-	    (0, _decorators.configure)(props)(_this3);
-	    Object.defineProperty(_this3, '$$props', {
-	      value: {}
-	    });
-	    return _this3;
-	  }
-
-	  // Static methods
-
-	  _createClass(Resource, null, [{
-	    key: 'data',
-	    value: function data() {
-	      throw new Error(this.name + ': Did you forget to define a schema?');
-	    }
-	  }, {
-	    key: 'createIndex',
-	    value: function createIndex(keyList) {
-	      this.data().createIndex(keyList, this.idAttribute);
-	    }
-	  }, {
-	    key: 'createInstance',
-	    value: function createInstance() {
-	      var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-	      var Constructor = this;
-	      return props instanceof Constructor ? props : new Constructor(props);
-	    }
-	  }, {
-	    key: 'inject',
-	    value: function inject(props) {
-	      var _this4 = this;
-
-	      var singular = false;
-	      if (utils.isArray(props)) {
-	        props = props.map(this.createInstance);
-	      } else {
-	        singular = true;
-	        props = [this.createInstance(props)];
-	      }
-	      props.forEach(function (instance) {
-	        if (!_this4.data().get(instance[_this4.idAttribute]).length) {
-	          _this4.data().insertRecord(instance);
-	        }
-	      });
-	      return singular ? props[0] : props;
-	    }
-	  }, {
-	    key: 'get',
-	    value: function get(id) {
-	      var instances = this.data().get(id);
-	      return instances.length ? instances[0] : undefined;
-	    }
-	  }, {
-	    key: 'getAll',
-	    value: function getAll() {
-	      var _data;
-
-	      return (_data = this.data()).getAll.apply(_data, arguments);
-	    }
-	  }, {
-	    key: 'filter',
-	    value: function filter(opts) {
-	      return this.data().filter(opts);
-	    }
-	  }, {
-	    key: 'query',
-	    value: function query() {
-	      return this.data().query();
-	    }
-
-	    /**
-	     * Usage:
-	     *
-	     * Post.belongsTo(User, {
-	     *   localKey: 'myUserId'
-	     * })
-	     *
-	     * Comment.belongsTo(User)
-	     * Comment.belongsTo(Post, {
-	     *   localField: '_post'
-	     * })
-	     */
-
-	  }, {
-	    key: 'belongsTo',
-	    value: function belongsTo(resource, opts) {
-	      return _belongsTo(resource, opts)(this);
-	    }
-	  }, {
-	    key: 'action',
-	    value: function action(name, opts) {
-	      return (0, _decorators.action)(name, opts)(this);
-	    }
-	  }, {
-	    key: 'actions',
-	    value: function actions(opts) {
-	      return (0, _decorators.actions)(opts)(this);
-	    }
-	  }, {
-	    key: 'schema',
-	    value: function schema(opts) {
-	      return (0, _decorators.schema)(opts)(this);
-	    }
-	  }, {
-	    key: 'configure',
-	    value: function configure(props) {
-	      return (0, _decorators.configure)(props)(this);
-	    }
-
-	    /**
-	     * Usage:
-	     *
-	     * var User = JSData.Resource.extend({...}, {...})
-	     */
-
-	  }, {
-	    key: 'extend',
-	    value: function extend() {
-	      var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-	      var classProps = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-	      var Child = undefined;
-	      var Parent = this;
-
-	      if (classProps.csp) {
-	        Child = function (props) {
-	          _classCallCheck(this, Child);
-	          Parent.call(this, props);
-	        };
-	      } else {
-	        // TODO: PascalCase(classProps.name)
-	        var name = classProps.name;
-	        var func = 'return function ' + name + '(props) {\n                    _classCallCheck(this, ' + name + ')\n                    Parent.call(this, props)\n                  }';
-	        Child = new Function('_classCallCheck', 'Parent', func)(_classCallCheck, Parent); // eslint-disable-line
-	      }
-
-	      _inherits(Child, this);
-
-	      (0, _decorators.configure)(props)(Child.prototype);
-	      (0, _decorators.configure)(classProps)(Child);
-
-	      (0, _decorators.schema)(_defineProperty({}, Child.idAttribute, {}))(Child);
-
-	      var collection = new _collection.Collection([], Child.idAttribute);
-
-	      Object.defineProperty(Child, 'getCollection', {
-	        value: function value() {
-	          if (this.__proto__.data === this.prototype.constructor.data) {
-	            // eslint-disable-line
-	            throw new Error(this.name + ': Schemas are not inheritable, did you forget to define a schema?');
-	          }
-	          return collection;
-	        }
-	      });
-
-	      return Child;
-	    }
-	  }]);
-
-	  return Resource;
-	})(BaseResource);
-
-	basicIndex(Resource);
-	(0, _decorators.configure)({
-	  autoInject: isBrowser,
-	  bypassCache: false,
-	  csp: false,
-	  defaultAdapter: 'http',
-	  eagerEject: false,
-	  idAttribute: 'id',
-	  linkRelations: isBrowser,
-	  relationsEnumerable: false,
-	  returnMeta: false,
-	  strategy: 'single',
-	  useFilter: true
-	})(Resource);
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
 	exports.Collection = undefined;
 
 	var _utils = __webpack_require__(4);
 
-	var _mindex = __webpack_require__(9);
+	var _mindex = __webpack_require__(8);
 
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
@@ -1079,6 +803,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _createClass(Collection, [{
 	    key: 'createIndex',
 	    value: function createIndex(name, keyList) {
+	      if ((0, _utils.isString)(name) && keyList === undefined) {
+	        keyList = [name];
+	      }
 	      var index = this.indexes[name] = new _mindex.Index(keyList, this.idAttribute);
 	      this.index.visitAll(index.insertRecord, index);
 	      return this;
@@ -1138,13 +865,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	      });
 	      return data;
 	    }
+	  }, {
+	    key: 'updateRecord',
+	    value: function updateRecord(record) {
+	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	      var index = opts.index ? this.indexes[opts.index] : this.index;
+	      index.updateRecord(record);
+	    }
 	  }]);
 
 	  return Collection;
 	})();
 
 /***/ },
-/* 9 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1176,7 +911,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _utils = __webpack_require__(4);
 
-	var _utils2 = __webpack_require__(10);
+	var _utils2 = __webpack_require__(9);
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1486,7 +1221,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.Index = Index;
 
 /***/ },
-/* 10 */
+/* 9 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1568,6 +1303,307 @@ return /******/ (function(modules) { // webpackBootstrap
 	    index: hi
 	  };
 	}
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.Resource = exports.belongsTo = undefined;
+
+	var _utils = __webpack_require__(4);
+
+	var utils = _interopRequireWildcard(_utils);
+
+	var _decorators = __webpack_require__(2);
+
+	var _collection = __webpack_require__(7);
+
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var isBrowser = false;
+
+	try {
+	  isBrowser = !!window;
+	} catch (e) {}
+
+	/**
+	 * Usage:
+	 *
+	 * @belongsTo(User, {
+	 *   localKey: 'myUserId'
+	 * })
+	 * class Post extends JSData.Resource {...}
+	 *
+	 * @belongsTo(User)
+	 * @belongsTo(Post, {
+	 *   localField: '_post'
+	 * })
+	 * class Comment extends JSData.Resource {...}
+	 */
+	function _belongsTo(relation) {
+	  var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	  return function (target) {
+	    var localField = opts.localField || relation.name.toLowerCase();
+	    var localKey = opts.localKey || relation.name.toLowerCase() + '_id';
+	    var descriptor = {
+	      enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
+	      get: function get() {
+	        return relation.get(this[localKey]);
+	      },
+	      set: function set(parent) {
+	        this[localKey] = parent[relation.idAttribute];
+	      }
+	    };
+	    if (opts.link === false || opts.link === undefined && !target.linkRelations) {
+	      delete descriptor.get;
+	      delete descriptor.set;
+	    }
+	    if (opts.get) {
+	      (function () {
+	        var originalGet = descriptor.get;
+	        descriptor.get = function () {
+	          var _this = this;
+
+	          return opts.get(target, relation, this, originalGet ? function () {
+	            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	              args[_key] = arguments[_key];
+	            }
+
+	            return originalGet.apply(_this, args);
+	          } : undefined);
+	        };
+	      })();
+	    }
+	    if (opts.set) {
+	      (function () {
+	        var originalSet = descriptor.set;
+	        descriptor.set = function (parent) {
+	          var _this2 = this;
+
+	          return opts.set(target, relation, this, parent, originalSet ? function () {
+	            for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+	              args[_key2] = arguments[_key2];
+	            }
+
+	            return originalSet.apply(_this2, args);
+	          } : undefined);
+	        };
+	      })();
+	    }
+	    Object.defineProperty(target.prototype, localField, descriptor);
+	    return target;
+	  };
+	}
+
+	// This is here so Babel will give us
+	// the inheritance helpers which we
+	// can re-use for the "extend" method
+	exports.belongsTo = _belongsTo;
+
+	var BaseResource = function BaseResource() {
+	  _classCallCheck(this, BaseResource);
+	};
+
+	var Resource = exports.Resource = (function (_BaseResource) {
+	  _inherits(Resource, _BaseResource);
+
+	  function Resource() {
+	    var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+	    _classCallCheck(this, Resource);
+
+	    var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(Resource).call(this));
+
+	    Object.defineProperty(_this3, '$$props', {
+	      writable: true,
+	      value: {}
+	    });
+	    Object.defineProperty(_this3, '$$s', {
+	      writable: true,
+	      value: false
+	    });
+	    (0, _decorators.configure)(props)(_this3);
+	    return _this3;
+	  }
+
+	  // Static methods
+
+	  _createClass(Resource, null, [{
+	    key: 'data',
+	    value: function data() {
+	      throw new Error(this.name + ': Did you forget to define a schema?');
+	    }
+	  }, {
+	    key: 'createIndex',
+	    value: function createIndex(name, keyList) {
+	      this.data().createIndex(name, keyList);
+	    }
+	  }, {
+	    key: 'createInstance',
+	    value: function createInstance(props) {
+	      var Constructor = this;
+	      return props instanceof Constructor ? props : new Constructor(props);
+	    }
+	  }, {
+	    key: 'inject',
+	    value: function inject(props) {
+	      var singular = false;
+	      if (utils.isArray(props)) {
+	        props = props.map(this.createInstance, this);
+	      } else {
+	        singular = true;
+	        props = [this.createInstance(props)];
+	      }
+	      var collection = this.data();
+	      props.forEach(function (instance) {
+	        collection.index.updateRecord(instance);
+	        instance.$$s = true;
+	        utils.forOwn(collection.indexes, function (index) {
+	          index.updateRecord(instance);
+	        });
+	      });
+	      return singular ? props[0] : props;
+	    }
+	  }, {
+	    key: 'get',
+	    value: function get(id) {
+	      var instances = this.data().get(id);
+	      return instances.length ? instances[0] : undefined;
+	    }
+	  }, {
+	    key: 'between',
+	    value: function between() {
+	      var _data;
+
+	      return (_data = this.data()).between.apply(_data, arguments);
+	    }
+	  }, {
+	    key: 'getAll',
+	    value: function getAll() {
+	      var _data2;
+
+	      return (_data2 = this.data()).getAll.apply(_data2, arguments);
+	    }
+	  }, {
+	    key: 'filter',
+	    value: function filter(opts) {
+	      return this.data().filter(opts);
+	    }
+	  }, {
+	    key: 'query',
+	    value: function query() {
+	      return this.data().query();
+	    }
+
+	    /**
+	     * Usage:
+	     *
+	     * Post.belongsTo(User, {
+	     *   localKey: 'myUserId'
+	     * })
+	     *
+	     * Comment.belongsTo(User)
+	     * Comment.belongsTo(Post, {
+	     *   localField: '_post'
+	     * })
+	     */
+
+	  }, {
+	    key: 'belongsTo',
+	    value: function belongsTo(resource, opts) {
+	      return _belongsTo(resource, opts)(this);
+	    }
+	  }, {
+	    key: 'action',
+	    value: function action(name, opts) {
+	      return (0, _decorators.action)(name, opts)(this);
+	    }
+	  }, {
+	    key: 'actions',
+	    value: function actions(opts) {
+	      return (0, _decorators.actions)(opts)(this);
+	    }
+	  }, {
+	    key: 'schema',
+	    value: function schema(opts) {
+	      return (0, _decorators.schema)(opts)(this);
+	    }
+	  }, {
+	    key: 'configure',
+	    value: function configure(props) {
+	      return (0, _decorators.configure)(props)(this);
+	    }
+
+	    /**
+	     * Usage:
+	     *
+	     * var User = JSData.Resource.extend({...}, {...})
+	     */
+
+	  }, {
+	    key: 'extend',
+	    value: function extend() {
+	      var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	      var classProps = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	      var Child = undefined;
+	      var Parent = this;
+
+	      if (classProps.csp) {
+	        Child = function (props) {
+	          _classCallCheck(this, Child);
+	          Parent.call(this, props);
+	        };
+	      } else {
+	        // TODO: PascalCase(classProps.name)
+	        var name = classProps.name;
+	        var func = 'return function ' + name + '(props) {\n                    _classCallCheck(this, ' + name + ')\n                    Parent.call(this, props)\n                  }';
+	        Child = new Function('_classCallCheck', 'Parent', func)(_classCallCheck, Parent); // eslint-disable-line
+	      }
+
+	      _inherits(Child, this);
+
+	      (0, _decorators.configure)(props)(Child.prototype);
+	      (0, _decorators.configure)(classProps)(Child);
+
+	      (0, _decorators.schema)(_defineProperty({}, Child.idAttribute, {}))(Child);
+
+	      return Child;
+	    }
+	  }]);
+
+	  return Resource;
+	})(BaseResource);
+
+	(0, _decorators.configure)({
+	  autoInject: isBrowser,
+	  bypassCache: false,
+	  csp: false,
+	  defaultAdapter: 'http',
+	  eagerEject: false,
+	  idAttribute: 'id',
+	  linkRelations: isBrowser,
+	  relationsEnumerable: false,
+	  returnMeta: false,
+	  strategy: 'single',
+	  useFilter: true
+	})(Resource);
 
 /***/ }
 /******/ ])

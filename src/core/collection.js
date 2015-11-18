@@ -1,4 +1,4 @@
-import {isArray, isNumber, isObject} from './utils'
+import {isArray, isNumber, isObject, isString} from './utils'
 import {Index} from '../../lib/mindex'
 
 class Query {
@@ -115,6 +115,9 @@ export class Collection {
   }
 
   createIndex (name, keyList) {
+    if (isString(name) && keyList === undefined) {
+      keyList = [name]
+    }
     const index = this.indexes[name] = new Index(keyList, this.idAttribute)
     this.index.visitAll(index.insertRecord, index)
     return this
@@ -158,5 +161,10 @@ export class Collection {
       data.push(cb.call(thisArg, value))
     })
     return data
+  }
+
+  updateRecord (record, opts = {}) {
+    const index = opts.index ? this.indexes[opts.index] : this.index
+    index.updateRecord(record)
   }
 }
