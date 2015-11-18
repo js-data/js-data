@@ -25,10 +25,5 @@
     "package.json",
     "karma.conf.js",
     "karma.start.js"
-  ],
-  "devDependencies": {
-    "observe-js": "0.5.5",
-    "js-data-http": ">=2.0.0",
-    "js-data-localstorage": ">=2.0.0"
-  }
+  ]
 }

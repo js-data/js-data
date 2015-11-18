@@ -57,11 +57,6 @@ export function belongsTo (relation, opts = {}) {
   }
 }
 
-function basicIndex (target) {
-  target.$$index = {}
-  target.$$collection = []
-}
-
 // This is here so Babel will give us
 // the inheritance helpers which we
 // can re-use for the "extend" method
@@ -70,10 +65,15 @@ class BaseResource {}
 export class Resource extends BaseResource {
   constructor (props = {}) {
     super()
-    configure(props)(this)
     Object.defineProperty(this, '$$props', {
+      writable: true,
       value: {}
     })
+    Object.defineProperty(this, '$$s', {
+      writable: true,
+      value: false
+    })
+    configure(props)(this)
   }
 
   // Static methods
@@ -81,11 +81,11 @@ export class Resource extends BaseResource {
     throw new Error(`${this.name}: Did you forget to define a schema?`)
   }
 
-  static createIndex (keyList) {
-    this.data().createIndex(keyList, this.idAttribute)
+  static createIndex (name, keyList) {
+    this.data().createIndex(name, keyList)
   }
 
-  static createInstance (props = {}) {
+  static createInstance (props) {
     let Constructor = this
     return props instanceof Constructor ? props : new Constructor(props)
   }
@@ -93,15 +93,18 @@ export class Resource extends BaseResource {
   static inject (props) {
     let singular = false
     if (utils.isArray(props)) {
-      props = props.map(this.createInstance)
+      props = props.map(this.createInstance, this)
     } else {
       singular = true
       props = [this.createInstance(props)]
     }
+    const collection = this.data()
     props.forEach(instance => {
-      if (!this.data().get(instance[this.idAttribute]).length) {
-        this.data().insertRecord(instance)
-      }
+      collection.index.updateRecord(instance)
+      instance.$$s = true
+      utils.forOwn(collection.indexes, function (index) {
+        index.updateRecord(instance)
+      })
     })
     return singular ? props[0] : props
   }
@@ -109,6 +112,10 @@ export class Resource extends BaseResource {
   static get (id) {
     let instances = this.data().get(id)
     return instances.length ? instances[0] : undefined
+  }
+
+  static between (...args) {
+    return this.data().between(...args)
   }
 
   static getAll (...args) {
@@ -188,22 +195,10 @@ export class Resource extends BaseResource {
       [Child.idAttribute]: {}
     })(Child)
 
-    const collection = new Collection([], Child.idAttribute)
-
-    Object.defineProperty(Child, 'getCollection', {
-      value: function () {
-        if (this.__proto__.data === this.prototype.constructor.data) { // eslint-disable-line
-          throw new Error(`${this.name}: Schemas are not inheritable, did you forget to define a schema?`)
-        }
-        return collection
-      }
-    })
-
     return Child
   }
 }
 
-basicIndex(Resource)
 configure({
   autoInject: isBrowser,
   bypassCache: false,

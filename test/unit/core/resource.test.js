@@ -98,5 +98,30 @@ export function init () {
         }
       }
     })
+    it('should allow schema definition', function () {
+      class Child extends Resource {}
+      Child.schema({
+        id: {},
+        age: { indexed: true },
+        role: { indexed: true }
+      })
+      Child.inject([
+        { id: 2, age: 18, role: 'admin' },
+        { id: 3, age: 19, role: 'dev' },
+        { id: 9, age: 19, role: 'admin' },
+        { id: 6, age: 19, role: 'owner' },
+        { id: 4, age: 22, role: 'dev' },
+        { id: 1, age: 23, role: 'owner' }
+      ])
+      assert.deepEqual(
+        Child.getAll(19, { index: 'age' }),
+        [
+          { id: 3, age: 19, role: 'dev' },
+          { id: 6, age: 19, role: 'owner' },
+          { id: 9, age: 19, role: 'admin' }
+        ],
+        'should have found all of age:19 using 1 keyList'
+      )
+    })
   })
 }

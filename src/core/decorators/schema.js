@@ -1,4 +1,5 @@
 import {forOwn} from '../utils'
+import {Collection} from '../collection'
 
 /**
  * Usage:
@@ -32,21 +33,57 @@ import {forOwn} from '../utils'
  */
 export function schema (opts = {}) {
   return function (target) {
+    // TODO: Test whether there already exists a schema
+    const collection = new Collection([], target.idAttribute)
+    target.data = function () {
+      // TODO: Do I need this?
+      if (this.__proto__.data === this.prototype.constructor.data) { // eslint-disable-line
+        throw new Error(`${this.name}: Schemas are not inheritable, did you forget to define a schema?`)
+      }
+      return collection
+    }
     forOwn(opts, function (prop, key) {
       let descriptor = {
         enumerable: prop.enumerable !== undefined ? prop.enumerable : true,
         writable: prop.writable ? prop.writable : true,
         configurable: prop.configurable ? prop.configurable : false
       }
+      if (prop.indexed) {
+        delete descriptor.writable
+        // Update index
+        // TODO: Make this configurable, ie. immediate or lazy update
+        target.createIndex(key)
+        descriptor.get = function () {
+          return this.$$props[key]
+        }
+        descriptor.set = function (value) {
+          this.$$props[key] = value
+          if (this.$$s) {
+            target.data().updateRecord(this, { index: key })
+          }
+          return value
+        }
+      }
       if (prop.get) {
-        descriptor.writable = false
+        delete descriptor.writable
         descriptor.get = prop.get
       }
       if (prop.set) {
-        descriptor.writable = false
-        descriptor.set = prop.set
+        delete descriptor.writable
+        if (descriptor.set) {
+          const originalSet = descriptor.set
+          descriptor.set = function (value) {
+            return prop.set.call(this, originalSet.call(this, value))
+          }
+        } else {
+          descriptor.set = prop.set
+        }
       }
-      Object.defineProperty(target.prototype, key, descriptor)
+      // TODO: This won't work for properties of Object type, because all
+      // instances will share the prototype value
+      if (!descriptor.writable) {
+        Object.defineProperty(target.prototype, key, descriptor)
+      }
     })
     return target
   }
