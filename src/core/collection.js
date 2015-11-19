@@ -13,7 +13,7 @@ class Query {
     return this.data
   }
 
-  between (leftKeys, rightKeys, opts) {
+  between (leftKeys, rightKeys, opts = {}) {
     const collection = this.collection
     const index = opts.index ? collection.indexes[opts.index] : collection.index
     if (this.data) {
@@ -26,6 +26,9 @@ class Query {
   get (keyList = [], opts = {}) {
     if (this.data) {
       throw new Error('Cannot access index after first operation!')
+    }
+    if (keyList && !isArray(keyList)) {
+      keyList = [keyList]
     }
     if (!keyList.length) {
       this.getData()

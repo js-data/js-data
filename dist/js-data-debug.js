@@ -115,7 +115,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_ret === 'continue') continue;
 	}
 
-	var _resource = __webpack_require__(10);
+	var _resource = __webpack_require__(15);
 
 	var _loop2 = function _loop2(_key5) {
 	  if (_key5 === "default") return 'continue';
@@ -133,7 +133,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_ret2 === 'continue') continue;
 	}
 
-	var _collection = __webpack_require__(7);
+	var _collection = __webpack_require__(12);
 
 	var _loop3 = function _loop3(_key6) {
 	  if (_key6 === "default") return 'continue';
@@ -182,7 +182,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_ret === 'continue') continue;
 	}
 
-	var _configure = __webpack_require__(5);
+	var _configure = __webpack_require__(10);
 
 	var _loop2 = function _loop2(_key5) {
 	  if (_key5 === "default") return 'continue';
@@ -200,7 +200,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_ret2 === 'continue') continue;
 	}
 
-	var _schema = __webpack_require__(6);
+	var _schema = __webpack_require__(11);
 
 	var _loop3 = function _loop3(_key6) {
 	  if (_key6 === "default") return 'continue';
@@ -235,7 +235,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _utils = __webpack_require__(4);
 
-	var _configure = __webpack_require__(5);
+	var _configure = __webpack_require__(10);
 
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
@@ -307,7 +307,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 4 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -333,6 +333,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
+	var deepMixIn = exports.deepMixIn = __webpack_require__(5);
 	var isArray = exports.isArray = Array.isArray;
 	function forOwn(obj, fn, thisArg) {
 	  var keys = Object.keys(obj);
@@ -497,6 +498,190 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var forOwn = __webpack_require__(6);
+	var isPlainObject = __webpack_require__(9);
+
+	    /**
+	     * Mixes objects into the target object, recursively mixing existing child
+	     * objects.
+	     */
+	    function deepMixIn(target, objects) {
+	        var i = 0,
+	            n = arguments.length,
+	            obj;
+
+	        while(++i < n){
+	            obj = arguments[i];
+	            if (obj) {
+	                forOwn(obj, copyProp, target);
+	            }
+	        }
+
+	        return target;
+	    }
+
+	    function copyProp(val, key) {
+	        var existing = this[key];
+	        if (isPlainObject(val) && isPlainObject(existing)) {
+	            deepMixIn(existing, val);
+	        } else {
+	            this[key] = val;
+	        }
+	    }
+
+	    module.exports = deepMixIn;
+
+
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var hasOwn = __webpack_require__(7);
+	var forIn = __webpack_require__(8);
+
+	    /**
+	     * Similar to Array/forEach but works over object properties and fixes Don't
+	     * Enum bug on IE.
+	     * based on: http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
+	     */
+	    function forOwn(obj, fn, thisObj){
+	        forIn(obj, function(val, key){
+	            if (hasOwn(obj, key)) {
+	                return fn.call(thisObj, obj[key], key, obj);
+	            }
+	        });
+	    }
+
+	    module.exports = forOwn;
+
+
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	
+
+	    /**
+	     * Safer Object.hasOwnProperty
+	     */
+	     function hasOwn(obj, prop){
+	         return Object.prototype.hasOwnProperty.call(obj, prop);
+	     }
+
+	     module.exports = hasOwn;
+
+
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var hasOwn = __webpack_require__(7);
+
+	    var _hasDontEnumBug,
+	        _dontEnums;
+
+	    function checkDontEnum(){
+	        _dontEnums = [
+	                'toString',
+	                'toLocaleString',
+	                'valueOf',
+	                'hasOwnProperty',
+	                'isPrototypeOf',
+	                'propertyIsEnumerable',
+	                'constructor'
+	            ];
+
+	        _hasDontEnumBug = true;
+
+	        for (var key in {'toString': null}) {
+	            _hasDontEnumBug = false;
+	        }
+	    }
+
+	    /**
+	     * Similar to Array/forEach but works over object properties and fixes Don't
+	     * Enum bug on IE.
+	     * based on: http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
+	     */
+	    function forIn(obj, fn, thisObj){
+	        var key, i = 0;
+	        // no need to check if argument is a real object that way we can use
+	        // it for arrays, functions, date, etc.
+
+	        //post-pone check till needed
+	        if (_hasDontEnumBug == null) checkDontEnum();
+
+	        for (key in obj) {
+	            if (exec(fn, obj, key, thisObj) === false) {
+	                break;
+	            }
+	        }
+
+
+	        if (_hasDontEnumBug) {
+	            var ctor = obj.constructor,
+	                isProto = !!ctor && obj === ctor.prototype;
+
+	            while (key = _dontEnums[i++]) {
+	                // For constructor, if it is a prototype object the constructor
+	                // is always non-enumerable unless defined otherwise (and
+	                // enumerated above).  For non-prototype objects, it will have
+	                // to be defined on this object, since it cannot be defined on
+	                // any prototype objects.
+	                //
+	                // For other [[DontEnum]] properties, check if the value is
+	                // different than Object prototype value.
+	                if (
+	                    (key !== 'constructor' ||
+	                        (!isProto && hasOwn(obj, key))) &&
+	                    obj[key] !== Object.prototype[key]
+	                ) {
+	                    if (exec(fn, obj, key, thisObj) === false) {
+	                        break;
+	                    }
+	                }
+	            }
+	        }
+	    }
+
+	    function exec(fn, obj, key, thisObj){
+	        return fn.call(thisObj, obj[key], key, obj);
+	    }
+
+	    module.exports = forIn;
+
+
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	
+
+	    /**
+	     * Checks if the value is created by the `Object` constructor.
+	     */
+	    function isPlainObject(value) {
+	        return (!!value && typeof value === 'object' &&
+	            value.constructor === Object);
+	    }
+
+	    module.exports = isPlainObject;
+
+
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
@@ -526,7 +711,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 6 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -538,7 +723,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _utils = __webpack_require__(4);
 
-	var _collection = __webpack_require__(7);
+	var _collection = __webpack_require__(12);
 
 	/**
 	 * Usage:
@@ -634,7 +819,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 7 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -648,7 +833,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _utils = __webpack_require__(4);
 
-	var _mindex = __webpack_require__(8);
+	var _mindex = __webpack_require__(13);
 
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
@@ -671,7 +856,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }, {
 	    key: 'between',
-	    value: function between(leftKeys, rightKeys, opts) {
+	    value: function between(leftKeys, rightKeys) {
+	      var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
 	      var collection = this.collection;
 	      var index = opts.index ? collection.indexes[opts.index] : collection.index;
 	      if (this.data) {
@@ -688,6 +875,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      if (this.data) {
 	        throw new Error('Cannot access index after first operation!');
+	      }
+	      if (keyList && !(0, _utils.isArray)(keyList)) {
+	        keyList = [keyList];
 	      }
 	      if (!keyList.length) {
 	        this.getData();
@@ -879,7 +1069,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	})();
 
 /***/ },
-/* 8 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -911,7 +1101,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _utils = __webpack_require__(4);
 
-	var _utils2 = __webpack_require__(9);
+	var _utils2 = __webpack_require__(14);
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1221,7 +1411,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.Index = Index;
 
 /***/ },
-/* 9 */
+/* 14 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1305,7 +1495,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 10 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1323,11 +1513,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _decorators = __webpack_require__(2);
 
-	var _collection = __webpack_require__(7);
+	var _collection = __webpack_require__(12);
 
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
@@ -1463,6 +1655,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'inject',
 	    value: function inject(props) {
+	      var _this4 = this;
+
 	      var singular = false;
 	      if (utils.isArray(props)) {
 	        props = props.map(this.createInstance, this);
@@ -1471,12 +1665,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	        props = [this.createInstance(props)];
 	      }
 	      var collection = this.data();
-	      props.forEach(function (instance) {
-	        collection.index.updateRecord(instance);
+	      var idAttribute = this.idAttribute;
+	      props = props.map(function (instance) {
+	        var id = instance[idAttribute];
+	        if (!id) {
+	          throw new TypeError('User#' + idAttribute + ': Expected string or number, found ' + (typeof id === 'undefined' ? 'undefined' : _typeof(id)) + '!');
+	        }
+	        var existing = _this4.get(id);
+	        if (existing) {
+	          if (_this4.onConflict === 'merge') {
+	            utils.deepMixIn(existing, instance);
+	          } else if (_this4.onConflict === 'replace') {
+	            utils.forOwn(existing, function (value, key) {
+	              if (key !== idAttribute) {
+	                if (!instance.hasOwnProperty(key)) {
+	                  delete existing[key];
+	                }
+	              }
+	            });
+	            utils.forOwn(instance, function (value, key) {
+	              if (key !== idAttribute) {
+	                existing[key] = value;
+	              }
+	            });
+	          }
+	          instance = existing;
+	        } else {
+	          collection.index.insertRecord(instance);
+	        }
 	        instance.$$s = true;
 	        utils.forOwn(collection.indexes, function (index) {
 	          index.updateRecord(instance);
 	        });
+	        return instance;
 	      });
 	      return singular ? props[0] : props;
 	    }
