@@ -99,12 +99,39 @@ export class Resource extends BaseResource {
       props = [this.createInstance(props)]
     }
     const collection = this.data()
-    props.forEach(instance => {
-      collection.index.updateRecord(instance)
+    const idAttribute = this.idAttribute
+    props = props.map(instance => {
+      const id = instance[idAttribute]
+      if (!id) {
+        throw new TypeError(`User#${idAttribute}: Expected string or number, found ${typeof id}!`)
+      }
+      const existing = this.get(id)
+      if (existing) {
+        if (this.onConflict === 'merge') {
+          utils.deepMixIn(existing, instance)
+        } else if (this.onConflict === 'replace') {
+          utils.forOwn(existing, (value, key) => {
+            if (key !== idAttribute) {
+              if (!instance.hasOwnProperty(key)) {
+                delete existing[key]
+              }
+            }
+          })
+          utils.forOwn(instance, (value, key) => {
+            if (key !== idAttribute) {
+              existing[key] = value
+            }
+          })
+        }
+        instance = existing
+      } else {
+        collection.index.insertRecord(instance)
+      }
       instance.$$s = true
       utils.forOwn(collection.indexes, function (index) {
         index.updateRecord(instance)
       })
+      return instance
     })
     return singular ? props[0] : props
   }

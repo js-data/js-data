@@ -1,3 +1,4 @@
+export const deepMixIn = require('mout/object/deepMixIn')
 export const isArray = Array.isArray
 export function forOwn (obj, fn, thisArg) {
   const keys = Object.keys(obj)

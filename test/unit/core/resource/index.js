@@ -1,5 +1,6 @@
 /* global Resource:true, configure:true */
 import {assert} from 'chai'
+import * as inject from './inject.test'
 
 let isBrowser = false
 
@@ -98,7 +99,7 @@ export function init () {
         }
       }
     })
-    it('should allow schema definition', function () {
+    it('should allow schema definition with basic indexes', function () {
       class Child extends Resource {}
       Child.schema({
         id: {},
@@ -123,5 +124,7 @@ export function init () {
         'should have found all of age:19 using 1 keyList'
       )
     })
+
+    inject.init()
   })
 }
