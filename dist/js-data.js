@@ -71,20 +71,46 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _core = __webpack_require__(1);
 
-	var _loop = function _loop(_key2) {
-	  if (_key2 === "default") return 'continue';
-	  Object.defineProperty(exports, _key2, {
+	var _loop = function _loop(_key3) {
+	  if (_key3 === "default") return 'continue';
+	  Object.defineProperty(exports, _key3, {
 	    enumerable: true,
 	    get: function get() {
-	      return _core[_key2];
+	      return _core[_key3];
 	    }
 	  });
 	};
 
-	for (var _key2 in _core) {
-	  var _ret = _loop(_key2);
+	for (var _key3 in _core) {
+	  var _ret = _loop(_key3);
 
 	  if (_ret === 'continue') continue;
+	}
+
+	var _datastore = __webpack_require__(16);
+
+	var _loop2 = function _loop2(_key4) {
+	  if (_key4 === "default") return 'continue';
+	  Object.defineProperty(exports, _key4, {
+	    enumerable: true,
+	    get: function get() {
+	      return _datastore[_key4];
+	    }
+	  });
+	};
+
+	for (var _key4 in _datastore) {
+	  var _ret2 = _loop2(_key4);
+
+	  if (_ret2 === 'continue') continue;
+	}
+
+	if (!Promise.prototype.spread) {
+	  Promise.prototype.spread = function (cb) {
+	    return this.then(function (arr) {
+	      return cb.apply(this, arr);
+	    });
+	  };
 	}
 
 	var version = exports.version = {
@@ -108,56 +134,74 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _decorators = __webpack_require__(2);
 
-	var _loop = function _loop(_key4) {
-	  if (_key4 === "default") return 'continue';
-	  Object.defineProperty(exports, _key4, {
-	    enumerable: true,
-	    get: function get() {
-	      return _decorators[_key4];
-	    }
-	  });
-	};
-
-	for (var _key4 in _decorators) {
-	  var _ret = _loop(_key4);
-
-	  if (_ret === 'continue') continue;
-	}
-
-	var _resource = __webpack_require__(7);
-
-	var _loop2 = function _loop2(_key5) {
+	var _loop = function _loop(_key5) {
 	  if (_key5 === "default") return 'continue';
 	  Object.defineProperty(exports, _key5, {
 	    enumerable: true,
 	    get: function get() {
-	      return _resource[_key5];
+	      return _decorators[_key5];
 	    }
 	  });
 	};
 
-	for (var _key5 in _resource) {
-	  var _ret2 = _loop2(_key5);
+	for (var _key5 in _decorators) {
+	  var _ret = _loop(_key5);
 
-	  if (_ret2 === 'continue') continue;
+	  if (_ret === 'continue') continue;
 	}
 
-	var _collection = __webpack_require__(8);
+	var _resource = __webpack_require__(15);
 
-	var _loop3 = function _loop3(_key6) {
+	var _loop2 = function _loop2(_key6) {
 	  if (_key6 === "default") return 'continue';
 	  Object.defineProperty(exports, _key6, {
 	    enumerable: true,
 	    get: function get() {
-	      return _collection[_key6];
+	      return _resource[_key6];
 	    }
 	  });
 	};
 
-	for (var _key6 in _collection) {
-	  var _ret3 = _loop3(_key6);
+	for (var _key6 in _resource) {
+	  var _ret2 = _loop2(_key6);
+
+	  if (_ret2 === 'continue') continue;
+	}
+
+	var _collection = __webpack_require__(12);
+
+	var _loop3 = function _loop3(_key7) {
+	  if (_key7 === "default") return 'continue';
+	  Object.defineProperty(exports, _key7, {
+	    enumerable: true,
+	    get: function get() {
+	      return _collection[_key7];
+	    }
+	  });
+	};
+
+	for (var _key7 in _collection) {
+	  var _ret3 = _loop3(_key7);
 
 	  if (_ret3 === 'continue') continue;
+	}
+
+	var _utils = __webpack_require__(4);
+
+	var _loop4 = function _loop4(_key8) {
+	  if (_key8 === "default") return 'continue';
+	  Object.defineProperty(exports, _key8, {
+	    enumerable: true,
+	    get: function get() {
+	      return _utils[_key8];
+	    }
+	  });
+	};
+
+	for (var _key8 in _utils) {
+	  var _ret4 = _loop4(_key8);
+
+	  if (_ret4 === 'continue') continue;
 	}
 
 	// Workaround for https://github.com/babel/babel/issues/2763
@@ -191,7 +235,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_ret === 'continue') continue;
 	}
 
-	var _configure = __webpack_require__(5);
+	var _configure = __webpack_require__(10);
 
 	var _loop2 = function _loop2(_key5) {
 	  if (_key5 === "default") return 'continue';
@@ -209,7 +253,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_ret2 === 'continue') continue;
 	}
 
-	var _schema = __webpack_require__(6);
+	var _schema = __webpack_require__(11);
 
 	var _loop3 = function _loop3(_key6) {
 	  if (_key6 === "default") return 'continue';
@@ -244,7 +288,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _utils = __webpack_require__(4);
 
-	var _configure = __webpack_require__(5);
+	var _configure = __webpack_require__(10);
 
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
@@ -316,7 +360,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 4 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -335,6 +379,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.reject = reject;
 	exports.makePath = makePath;
 	exports.fillIn = fillIn;
+	exports.makeBefore = makeBefore;
 	exports.isBlacklisted = isBlacklisted;
 	exports.omit = omit;
 	exports.fromJson = fromJson;
@@ -342,6 +387,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
+	var deepMixIn = exports.deepMixIn = __webpack_require__(5);
 	var isArray = exports.isArray = Array.isArray;
 	function forOwn(obj, fn, thisArg) {
 	  var keys = Object.keys(obj);
@@ -401,6 +447,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	      dest[key] = value;
 	    }
 	  });
+	}
+	function makeBefore(target, key) {
+	  return function (fn) {
+	    var original = target[key];
+	    target[key] = function () {
+	      for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+	        args[_key2] = arguments[_key2];
+	      }
+
+	      var result = fn.apply(target, args);
+	      if (result !== undefined && !isArray(result)) {
+	        result = [result];
+	      }
+	      return original.apply(target, result || args);
+	    };
+	    makeBefore(target, key);
+	  };
 	}
 	function isBlacklisted(prop, bl) {
 	  if (!bl || !bl.length) {
@@ -506,6 +569,190 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var forOwn = __webpack_require__(6);
+	var isPlainObject = __webpack_require__(9);
+
+	    /**
+	     * Mixes objects into the target object, recursively mixing existing child
+	     * objects.
+	     */
+	    function deepMixIn(target, objects) {
+	        var i = 0,
+	            n = arguments.length,
+	            obj;
+
+	        while(++i < n){
+	            obj = arguments[i];
+	            if (obj) {
+	                forOwn(obj, copyProp, target);
+	            }
+	        }
+
+	        return target;
+	    }
+
+	    function copyProp(val, key) {
+	        var existing = this[key];
+	        if (isPlainObject(val) && isPlainObject(existing)) {
+	            deepMixIn(existing, val);
+	        } else {
+	            this[key] = val;
+	        }
+	    }
+
+	    module.exports = deepMixIn;
+
+
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var hasOwn = __webpack_require__(7);
+	var forIn = __webpack_require__(8);
+
+	    /**
+	     * Similar to Array/forEach but works over object properties and fixes Don't
+	     * Enum bug on IE.
+	     * based on: http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
+	     */
+	    function forOwn(obj, fn, thisObj){
+	        forIn(obj, function(val, key){
+	            if (hasOwn(obj, key)) {
+	                return fn.call(thisObj, obj[key], key, obj);
+	            }
+	        });
+	    }
+
+	    module.exports = forOwn;
+
+
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	
+
+	    /**
+	     * Safer Object.hasOwnProperty
+	     */
+	     function hasOwn(obj, prop){
+	         return Object.prototype.hasOwnProperty.call(obj, prop);
+	     }
+
+	     module.exports = hasOwn;
+
+
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var hasOwn = __webpack_require__(7);
+
+	    var _hasDontEnumBug,
+	        _dontEnums;
+
+	    function checkDontEnum(){
+	        _dontEnums = [
+	                'toString',
+	                'toLocaleString',
+	                'valueOf',
+	                'hasOwnProperty',
+	                'isPrototypeOf',
+	                'propertyIsEnumerable',
+	                'constructor'
+	            ];
+
+	        _hasDontEnumBug = true;
+
+	        for (var key in {'toString': null}) {
+	            _hasDontEnumBug = false;
+	        }
+	    }
+
+	    /**
+	     * Similar to Array/forEach but works over object properties and fixes Don't
+	     * Enum bug on IE.
+	     * based on: http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
+	     */
+	    function forIn(obj, fn, thisObj){
+	        var key, i = 0;
+	        // no need to check if argument is a real object that way we can use
+	        // it for arrays, functions, date, etc.
+
+	        //post-pone check till needed
+	        if (_hasDontEnumBug == null) checkDontEnum();
+
+	        for (key in obj) {
+	            if (exec(fn, obj, key, thisObj) === false) {
+	                break;
+	            }
+	        }
+
+
+	        if (_hasDontEnumBug) {
+	            var ctor = obj.constructor,
+	                isProto = !!ctor && obj === ctor.prototype;
+
+	            while (key = _dontEnums[i++]) {
+	                // For constructor, if it is a prototype object the constructor
+	                // is always non-enumerable unless defined otherwise (and
+	                // enumerated above).  For non-prototype objects, it will have
+	                // to be defined on this object, since it cannot be defined on
+	                // any prototype objects.
+	                //
+	                // For other [[DontEnum]] properties, check if the value is
+	                // different than Object prototype value.
+	                if (
+	                    (key !== 'constructor' ||
+	                        (!isProto && hasOwn(obj, key))) &&
+	                    obj[key] !== Object.prototype[key]
+	                ) {
+	                    if (exec(fn, obj, key, thisObj) === false) {
+	                        break;
+	                    }
+	                }
+	            }
+	        }
+	    }
+
+	    function exec(fn, obj, key, thisObj){
+	        return fn.call(thisObj, obj[key], key, obj);
+	    }
+
+	    module.exports = forIn;
+
+
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	
+
+	    /**
+	     * Checks if the value is created by the `Object` constructor.
+	     */
+	    function isPlainObject(value) {
+	        return (!!value && typeof value === 'object' &&
+	            value.constructor === Object);
+	    }
+
+	    module.exports = isPlainObject;
+
+
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
@@ -535,7 +782,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 6 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -546,6 +793,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.schema = schema;
 
 	var _utils = __webpack_require__(4);
+
+	var _collection = __webpack_require__(12);
 
 	/**
 	 * Usage:
@@ -581,570 +830,275 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
 	  return function (target) {
+	    // TODO: Test whether there already exists a schema
+	    var collection = new _collection.Collection([], target.idAttribute);
+	    target.data = function () {
+	      // TODO: Do I need this?
+	      if (this.__proto__.data === this.prototype.constructor.data) {
+	        // eslint-disable-line
+	        throw new Error(this.name + ': Schemas are not inheritable, did you forget to define a schema?');
+	      }
+	      return collection;
+	    };
 	    (0, _utils.forOwn)(opts, function (prop, key) {
 	      var descriptor = {
 	        enumerable: prop.enumerable !== undefined ? prop.enumerable : true,
 	        writable: prop.writable ? prop.writable : true,
 	        configurable: prop.configurable ? prop.configurable : false
 	      };
+	      if (prop.indexed) {
+	        delete descriptor.writable;
+	        // Update index
+	        // TODO: Make this configurable, ie. immediate or lazy update
+	        target.createIndex(key);
+	        descriptor.get = function () {
+	          return this.$$props[key];
+	        };
+	        descriptor.set = function (value) {
+	          this.$$props[key] = value;
+	          if (this.$$s) {
+	            target.data().updateRecord(this, { index: key });
+	          }
+	          return value;
+	        };
+	      }
 	      if (prop.get) {
-	        descriptor.writable = false;
+	        delete descriptor.writable;
 	        descriptor.get = prop.get;
 	      }
 	      if (prop.set) {
-	        descriptor.writable = false;
-	        descriptor.set = prop.set;
+	        delete descriptor.writable;
+	        if (descriptor.set) {
+	          (function () {
+	            var originalSet = descriptor.set;
+	            descriptor.set = function (value) {
+	              return prop.set.call(this, originalSet.call(this, value));
+	            };
+	          })();
+	        } else {
+	          descriptor.set = prop.set;
+	        }
 	      }
-	      Object.defineProperty(target.prototype, key, descriptor);
+	      // TODO: This won't work for properties of Object type, because all
+	      // instances will share the prototype value
+	      if (!descriptor.writable) {
+	        Object.defineProperty(target.prototype, key, descriptor);
+	      }
 	    });
 	    return target;
 	  };
 	}
 
 /***/ },
-/* 7 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.Resource = exports.belongsTo = undefined;
+	exports.Collection = Collection;
 
 	var _utils = __webpack_require__(4);
-
-	var utils = _interopRequireWildcard(_utils);
 
 	var _decorators = __webpack_require__(2);
 
-	var _collection = __webpack_require__(8);
-
-	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	var isBrowser = false;
-
-	try {
-	  isBrowser = !!window;
-	} catch (e) {}
-
-	/**
-	 * Usage:
-	 *
-	 * @belongsTo(User, {
-	 *   localKey: 'myUserId'
-	 * })
-	 * class Post extends JSData.Resource {...}
-	 *
-	 * @belongsTo(User)
-	 * @belongsTo(Post, {
-	 *   localField: '_post'
-	 * })
-	 * class Comment extends JSData.Resource {...}
-	 */
-	function _belongsTo(relation) {
-	  var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-	  return function (target) {
-	    var localField = opts.localField || relation.name.toLowerCase();
-	    var localKey = opts.localKey || relation.name.toLowerCase() + '_id';
-	    var descriptor = {
-	      enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
-	      get: function get() {
-	        return relation.get(this[localKey]);
-	      },
-	      set: function set(parent) {
-	        this[localKey] = parent[relation.idAttribute];
-	      }
-	    };
-	    if (opts.link === false || opts.link === undefined && !target.linkRelations) {
-	      delete descriptor.get;
-	      delete descriptor.set;
-	    }
-	    if (opts.get) {
-	      (function () {
-	        var originalGet = descriptor.get;
-	        descriptor.get = function () {
-	          var _this = this;
-
-	          return opts.get(target, relation, this, originalGet ? function () {
-	            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	              args[_key] = arguments[_key];
-	            }
-
-	            return originalGet.apply(_this, args);
-	          } : undefined);
-	        };
-	      })();
-	    }
-	    if (opts.set) {
-	      (function () {
-	        var originalSet = descriptor.set;
-	        descriptor.set = function (parent) {
-	          var _this2 = this;
-
-	          return opts.set(target, relation, this, parent, originalSet ? function () {
-	            for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-	              args[_key2] = arguments[_key2];
-	            }
-
-	            return originalSet.apply(_this2, args);
-	          } : undefined);
-	        };
-	      })();
-	    }
-	    Object.defineProperty(target.prototype, localField, descriptor);
-	    return target;
-	  };
-	}
-
-	exports.belongsTo = _belongsTo;
-	function basicIndex(target) {
-	  target.$$index = {};
-	  target.$$collection = [];
-	}
-
-	// This is here so Babel will give us
-	// the inheritance helpers which we
-	// can re-use for the "extend" method
-
-	var BaseResource = function BaseResource() {
-	  _classCallCheck(this, BaseResource);
-	};
-
-	var Resource = exports.Resource = (function (_BaseResource) {
-	  _inherits(Resource, _BaseResource);
-
-	  function Resource() {
-	    var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-	    _classCallCheck(this, Resource);
-
-	    var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(Resource).call(this));
-
-	    (0, _decorators.configure)(props)(_this3);
-	    Object.defineProperty(_this3, '$$props', {
-	      value: {}
-	    });
-	    return _this3;
-	  }
-
-	  // Static methods
-
-	  _createClass(Resource, null, [{
-	    key: 'data',
-	    value: function data() {
-	      throw new Error(this.name + ': Did you forget to define a schema?');
-	    }
-	  }, {
-	    key: 'createIndex',
-	    value: function createIndex(keyList) {
-	      this.data().createIndex(keyList, this.idAttribute);
-	    }
-	  }, {
-	    key: 'createInstance',
-	    value: function createInstance() {
-	      var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-	      var Constructor = this;
-	      return props instanceof Constructor ? props : new Constructor(props);
-	    }
-	  }, {
-	    key: 'inject',
-	    value: function inject(props) {
-	      var _this4 = this;
-
-	      var singular = false;
-	      if (utils.isArray(props)) {
-	        props = props.map(this.createInstance);
-	      } else {
-	        singular = true;
-	        props = [this.createInstance(props)];
-	      }
-	      props.forEach(function (instance) {
-	        if (!_this4.data().get(instance[_this4.idAttribute]).length) {
-	          _this4.data().insertRecord(instance);
-	        }
-	      });
-	      return singular ? props[0] : props;
-	    }
-	  }, {
-	    key: 'get',
-	    value: function get(id) {
-	      var instances = this.data().get(id);
-	      return instances.length ? instances[0] : undefined;
-	    }
-	  }, {
-	    key: 'getAll',
-	    value: function getAll() {
-	      var _data;
-
-	      return (_data = this.data()).getAll.apply(_data, arguments);
-	    }
-	  }, {
-	    key: 'filter',
-	    value: function filter(opts) {
-	      return this.data().filter(opts);
-	    }
-	  }, {
-	    key: 'query',
-	    value: function query() {
-	      return this.data().query();
-	    }
-
-	    /**
-	     * Usage:
-	     *
-	     * Post.belongsTo(User, {
-	     *   localKey: 'myUserId'
-	     * })
-	     *
-	     * Comment.belongsTo(User)
-	     * Comment.belongsTo(Post, {
-	     *   localField: '_post'
-	     * })
-	     */
-
-	  }, {
-	    key: 'belongsTo',
-	    value: function belongsTo(resource, opts) {
-	      return _belongsTo(resource, opts)(this);
-	    }
-	  }, {
-	    key: 'action',
-	    value: function action(name, opts) {
-	      return (0, _decorators.action)(name, opts)(this);
-	    }
-	  }, {
-	    key: 'actions',
-	    value: function actions(opts) {
-	      return (0, _decorators.actions)(opts)(this);
-	    }
-	  }, {
-	    key: 'schema',
-	    value: function schema(opts) {
-	      return (0, _decorators.schema)(opts)(this);
-	    }
-	  }, {
-	    key: 'configure',
-	    value: function configure(props) {
-	      return (0, _decorators.configure)(props)(this);
-	    }
-
-	    /**
-	     * Usage:
-	     *
-	     * var User = JSData.Resource.extend({...}, {...})
-	     */
-
-	  }, {
-	    key: 'extend',
-	    value: function extend() {
-	      var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-	      var classProps = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-	      var Child = undefined;
-	      var Parent = this;
-
-	      if (classProps.csp) {
-	        Child = function (props) {
-	          _classCallCheck(this, Child);
-	          Parent.call(this, props);
-	        };
-	      } else {
-	        // TODO: PascalCase(classProps.name)
-	        var name = classProps.name;
-	        var func = 'return function ' + name + '(props) {\n                    _classCallCheck(this, ' + name + ')\n                    Parent.call(this, props)\n                  }';
-	        Child = new Function('_classCallCheck', 'Parent', func)(_classCallCheck, Parent); // eslint-disable-line
-	      }
-
-	      _inherits(Child, this);
-
-	      (0, _decorators.configure)(props)(Child.prototype);
-	      (0, _decorators.configure)(classProps)(Child);
-
-	      (0, _decorators.schema)(_defineProperty({}, Child.idAttribute, {}))(Child);
-
-	      var collection = new _collection.Collection([], Child.idAttribute);
-
-	      Object.defineProperty(Child, 'getCollection', {
-	        value: function value() {
-	          if (this.__proto__.data === this.prototype.constructor.data) {
-	            // eslint-disable-line
-	            throw new Error(this.name + ': Schemas are not inheritable, did you forget to define a schema?');
-	          }
-	          return collection;
-	        }
-	      });
-
-	      return Child;
-	    }
-	  }]);
-
-	  return Resource;
-	})(BaseResource);
-
-	basicIndex(Resource);
-	(0, _decorators.configure)({
-	  autoInject: isBrowser,
-	  bypassCache: false,
-	  csp: false,
-	  defaultAdapter: 'http',
-	  eagerEject: false,
-	  idAttribute: 'id',
-	  linkRelations: isBrowser,
-	  relationsEnumerable: false,
-	  returnMeta: false,
-	  strategy: 'single',
-	  useFilter: true
-	})(Resource);
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.Collection = undefined;
-
-	var _utils = __webpack_require__(4);
-
-	var _mindex = __webpack_require__(9);
+	var _mindex = __webpack_require__(13);
 
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	function Query(collection) {
+	  this.collection = collection;
+	}
 
-	var Query = (function () {
-	  function Query(collection) {
-	    _classCallCheck(this, Query);
-
-	    this.collection = collection;
-	  }
-
-	  _createClass(Query, [{
-	    key: 'getData',
-	    value: function getData() {
-	      if (!this.data) {
-	        this.data = this.collection.index.getAll();
-	      }
-	      return this.data;
+	(0, _decorators.configure)({
+	  getData: function getData() {
+	    if (!this.data) {
+	      this.data = this.collection.index.getAll();
 	    }
-	  }, {
-	    key: 'between',
-	    value: function between(leftKeys, rightKeys, opts) {
-	      var collection = this.collection;
-	      var index = opts.index ? collection.indexes[opts.index] : collection.index;
-	      if (this.data) {
-	        throw new Error('Cannot access index after first operation!');
-	      }
-	      this.data = index.between(leftKeys, rightKeys, opts);
+	    return this.data;
+	  },
+	  between: function between(leftKeys, rightKeys) {
+	    var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+	    var collection = this.collection;
+	    var index = opts.index ? collection.indexes[opts.index] : collection.index;
+	    if (this.data) {
+	      throw new Error('Cannot access index after first operation!');
+	    }
+	    this.data = index.between(leftKeys, rightKeys, opts);
+	    return this;
+	  },
+	  get: function get() {
+	    var keyList = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
+	    var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	    if (this.data) {
+	      throw new Error('Cannot access index after first operation!');
+	    }
+	    if (keyList && !(0, _utils.isArray)(keyList)) {
+	      keyList = [keyList];
+	    }
+	    if (!keyList.length) {
+	      this.getData();
 	      return this;
 	    }
-	  }, {
-	    key: 'get',
-	    value: function get() {
-	      var keyList = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
-	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	    var collection = this.collection;
+	    var index = opts.index ? collection.indexes[opts.index] : collection.index;
+	    this.data = index.get(keyList);
+	    return this;
+	  },
+	  getAll: function getAll() {
+	    var _this = this;
 
-	      if (this.data) {
-	        throw new Error('Cannot access index after first operation!');
-	      }
-	      if (!keyList.length) {
-	        this.getData();
-	        return this;
-	      }
-	      var collection = this.collection;
-	      var index = opts.index ? collection.indexes[opts.index] : collection.index;
-	      this.data = index.get(keyList);
-	      return this;
+	    var opts = {};
+	    if (this.data) {
+	      throw new Error('Cannot access index after first operation!');
 	    }
-	  }, {
-	    key: 'getAll',
-	    value: function getAll() {
-	      var _this = this;
 
-	      var opts = {};
-	      if (this.data) {
-	        throw new Error('Cannot access index after first operation!');
-	      }
+	    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	      args[_key] = arguments[_key];
+	    }
 
-	      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	        args[_key] = arguments[_key];
-	      }
+	    if (!args.length || args.length === 1 && (0, _utils.isObject)(args[0])) {
+	      this.getData();
+	      return this;
+	    } else if (args.length && (0, _utils.isObject)(args[args.length - 1])) {
+	      opts = args[args.length - 1];
+	      args.pop();
+	    }
+	    var collection = this.collection;
+	    var index = opts.index ? collection.indexes[opts.index] : collection.index;
+	    this.data = [];
+	    args.forEach(function (keyList) {
+	      _this.data = _this.data.concat(index.get(keyList));
+	    });
+	    return this;
+	  },
+	  filter: function filter() {
+	    var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
-	      if (!args.length || args.length === 1 && (0, _utils.isObject)(args[0])) {
-	        this.getData();
-	        return this;
-	      } else if (args.length && (0, _utils.isObject)(args[args.length - 1])) {
-	        opts = args[args.length - 1];
-	        args.pop();
-	      }
-	      var collection = this.collection;
-	      var index = opts.index ? collection.indexes[opts.index] : collection.index;
+	    console.log('filter', opts, this.getData().length);
+	    return this;
+	  },
+	  skip: function skip(num) {
+	    if (!(0, _utils.isNumber)(num)) {
+	      throw new TypeError('skip: Expected number but found ' + (typeof num === 'undefined' ? 'undefined' : _typeof(num)) + '!');
+	    }
+	    var data = this.getData();
+	    if (num < data.length) {
+	      this.data = data.slice(num);
+	    } else {
 	      this.data = [];
-	      args.forEach(function (keyList) {
-	        _this.data = _this.data.concat(index.get(keyList));
-	      });
-	      return this;
 	    }
-	  }, {
-	    key: 'filter',
-	    value: function filter() {
-	      var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-	      console.log('filter', opts, this.getData().length);
-	      return this;
+	    return this;
+	  },
+	  limit: function limit(num) {
+	    if (!(0, _utils.isNumber)(num)) {
+	      throw new TypeError('limit: Expected number but found ' + (typeof num === 'undefined' ? 'undefined' : _typeof(num)) + '!');
 	    }
-	  }, {
-	    key: 'skip',
-	    value: function skip(num) {
-	      if (!(0, _utils.isNumber)(num)) {
-	        throw new TypeError('skip: Expected number but found ' + (typeof num === 'undefined' ? 'undefined' : _typeof(num)) + '!');
-	      }
-	      var data = this.getData();
-	      if (num < data.length) {
-	        this.data = data.slice(num);
-	      } else {
-	        this.data = [];
-	      }
-	      return this;
-	    }
-	  }, {
-	    key: 'limit',
-	    value: function limit(num) {
-	      if (!(0, _utils.isNumber)(num)) {
-	        throw new TypeError('limit: Expected number but found ' + (typeof num === 'undefined' ? 'undefined' : _typeof(num)) + '!');
-	      }
-	      var data = this.getData();
-	      this.data = data.slice(0, Math.min(data.length, num));
-	      return this;
-	    }
-	  }, {
-	    key: 'forEach',
-	    value: function forEach(cb, thisArg) {
-	      this.getData().forEach(cb, thisArg);
-	      return this;
-	    }
-	  }, {
-	    key: 'map',
-	    value: function map(cb, thisArg) {
-	      this.data = this.getData().map(cb, thisArg);
-	      return this;
-	    }
-	  }, {
-	    key: 'run',
-	    value: function run() {
-	      var data = this.data;
-	      this.data = null;
-	      this.params = null;
-	      return data;
-	    }
-	  }]);
-
-	  return Query;
-	})();
-
-	var Collection = exports.Collection = (function () {
-	  function Collection() {
-	    var data = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
-	    var idAttribute = arguments.length <= 1 || arguments[1] === undefined ? 'id' : arguments[1];
-
-	    _classCallCheck(this, Collection);
-
-	    if (!(0, _utils.isArray)(data)) {
-	      throw new TypeError('new Collection([data]): data: Expected array. Found ' + (typeof data === 'undefined' ? 'undefined' : _typeof(data)));
-	    }
-	    this.idAttribute = idAttribute;
-	    this.index = new _mindex.Index([idAttribute], idAttribute);
-	    this.indexes = {};
-	    data.forEach(this.index.insertRecord, this.index);
+	    var data = this.getData();
+	    this.data = data.slice(0, Math.min(data.length, num));
+	    return this;
+	  },
+	  forEach: function forEach(cb, thisArg) {
+	    this.getData().forEach(cb, thisArg);
+	    return this;
+	  },
+	  map: function map(cb, thisArg) {
+	    this.data = this.getData().map(cb, thisArg);
+	    return this;
+	  },
+	  run: function run() {
+	    var data = this.data;
+	    this.data = null;
+	    this.params = null;
+	    return data;
 	  }
+	})(Query.prototype);
 
-	  _createClass(Collection, [{
-	    key: 'createIndex',
-	    value: function createIndex(name, keyList) {
-	      var index = this.indexes[name] = new _mindex.Index(keyList, this.idAttribute);
-	      this.index.visitAll(index.insertRecord, index);
-	      return this;
-	    }
-	  }, {
-	    key: 'query',
-	    value: function query() {
-	      return new Query(this);
-	    }
-	  }, {
-	    key: 'between',
-	    value: function between() {
-	      var _query;
+	function Collection() {
+	  var data = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
+	  var idAttribute = arguments.length <= 1 || arguments[1] === undefined ? 'id' : arguments[1];
 
-	      return (_query = this.query()).between.apply(_query, arguments).run();
-	    }
-	  }, {
-	    key: 'get',
-	    value: function get() {
-	      var _query2;
+	  if (!(0, _utils.isArray)(data)) {
+	    throw new TypeError('new Collection([data]): data: Expected array. Found ' + (typeof data === 'undefined' ? 'undefined' : _typeof(data)));
+	  }
+	  this.idAttribute = idAttribute;
+	  this.index = new _mindex.Index([idAttribute], idAttribute);
+	  this.indexes = {};
+	  data.forEach(this.index.insertRecord, this.index);
+	}
 
-	      return (_query2 = this.query()).get.apply(_query2, arguments).run();
+	(0, _decorators.configure)({
+	  createIndex: function createIndex(name, keyList) {
+	    if ((0, _utils.isString)(name) && keyList === undefined) {
+	      keyList = [name];
 	    }
-	  }, {
-	    key: 'getAll',
-	    value: function getAll() {
-	      var _query3;
+	    var index = this.indexes[name] = new _mindex.Index(keyList, this.idAttribute);
+	    this.index.visitAll(index.insertRecord, index);
+	    return this;
+	  },
+	  query: function query() {
+	    return new Query(this);
+	  },
+	  between: function between() {
+	    var _query;
 
-	      return (_query3 = this.query()).getAll.apply(_query3, arguments).run();
-	    }
-	  }, {
-	    key: 'filter',
-	    value: function filter(opts) {
-	      return this.query().filter(opts).run();
-	    }
-	  }, {
-	    key: 'skip',
-	    value: function skip(num) {
-	      return this.query().skip(num).run();
-	    }
-	  }, {
-	    key: 'limit',
-	    value: function limit(num) {
-	      return this.query().limit(num).run();
-	    }
-	  }, {
-	    key: 'forEach',
-	    value: function forEach(cb, thisArg) {
-	      this.index.visitAll(cb, thisArg);
-	    }
-	  }, {
-	    key: 'map',
-	    value: function map(cb, thisArg) {
-	      var data = [];
-	      this.index.visitAll(function (value) {
-	        data.push(cb.call(thisArg, value));
-	      });
-	      return data;
-	    }
-	  }]);
+	    return (_query = this.query()).between.apply(_query, arguments).run();
+	  },
+	  get: function get() {
+	    var _query2;
 
-	  return Collection;
-	})();
+	    return (_query2 = this.query()).get.apply(_query2, arguments).run();
+	  },
+	  getAll: function getAll() {
+	    var _query3;
+
+	    return (_query3 = this.query()).getAll.apply(_query3, arguments).run();
+	  },
+	  filter: function filter(opts) {
+	    return this.query().filter(opts).run();
+	  },
+	  skip: function skip(num) {
+	    return this.query().skip(num).run();
+	  },
+	  limit: function limit(num) {
+	    return this.query().limit(num).run();
+	  },
+	  forEach: function forEach(cb, thisArg) {
+	    this.index.visitAll(cb, thisArg);
+	  },
+	  map: function map(cb, thisArg) {
+	    var data = [];
+	    this.index.visitAll(function (value) {
+	      data.push(cb.call(thisArg, value));
+	    });
+	    return data;
+	  },
+	  updateRecord: function updateRecord(record) {
+	    var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	    var index = opts.index ? this.indexes[opts.index] : this.index;
+	    index.updateRecord(record);
+	  },
+	  removeRecord: function removeRecord(record) {
+	    var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	    var index = opts.index ? this.indexes[opts.index] : this.index;
+	    index.removeRecord(record);
+	  },
+	  remove: function remove(record) {
+	    this.index.removeRecord(record);
+	    (0, _utils.forOwn)(this.indexes, function (index, name) {
+	      index.removeRecord(record);
+	    });
+	  }
+	})(Collection.prototype);
 
 /***/ },
-/* 9 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1176,7 +1130,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _utils = __webpack_require__(4);
 
-	var _utils2 = __webpack_require__(10);
+	var _utils2 = __webpack_require__(14);
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1486,7 +1440,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.Index = Index;
 
 /***/ },
-/* 10 */
+/* 14 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1568,6 +1522,826 @@ return /******/ (function(modules) { // webpackBootstrap
 	    index: hi
 	  };
 	}
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.Resource = exports.belongsTo = undefined;
+
+	var _utils = __webpack_require__(4);
+
+	var utils = _interopRequireWildcard(_utils);
+
+	var _decorators = __webpack_require__(2);
+
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var isBrowser = false;
+
+	try {
+	  isBrowser = !!window;
+	} catch (e) {}
+
+	/**
+	 * Usage:
+	 *
+	 * @belongsTo(User, {
+	 *   localKey: 'myUserId'
+	 * })
+	 * class Post extends JSData.Resource {...}
+	 *
+	 * @belongsTo(User)
+	 * @belongsTo(Post, {
+	 *   localField: '_post'
+	 * })
+	 * class Comment extends JSData.Resource {...}
+	 */
+	function _belongsTo(relation) {
+	  var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	  return function (target) {
+	    var localField = opts.localField || relation.name.toLowerCase();
+	    var localKey = opts.localKey || relation.name.toLowerCase() + '_id';
+	    var descriptor = {
+	      enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
+	      get: function get() {
+	        return relation.get(this[localKey]);
+	      },
+	      set: function set(parent) {
+	        this[localKey] = parent[relation.idAttribute];
+	      }
+	    };
+	    if (opts.link === false || opts.link === undefined && !target.linkRelations) {
+	      delete descriptor.get;
+	      delete descriptor.set;
+	    }
+	    if (opts.get) {
+	      (function () {
+	        var originalGet = descriptor.get;
+	        descriptor.get = function () {
+	          var _this = this;
+
+	          return opts.get(target, relation, this, originalGet ? function () {
+	            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	              args[_key] = arguments[_key];
+	            }
+
+	            return originalGet.apply(_this, args);
+	          } : undefined);
+	        };
+	      })();
+	    }
+	    if (opts.set) {
+	      (function () {
+	        var originalSet = descriptor.set;
+	        descriptor.set = function (parent) {
+	          var _this2 = this;
+
+	          return opts.set(target, relation, this, parent, originalSet ? function () {
+	            for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+	              args[_key2] = arguments[_key2];
+	            }
+
+	            return originalSet.apply(_this2, args);
+	          } : undefined);
+	        };
+	      })();
+	    }
+	    Object.defineProperty(target.prototype, localField, descriptor);
+	    return target;
+	  };
+	}
+
+	// This is here so Babel will give us
+	// the inheritance helpers which we
+	// can re-use for the "extend" method
+	exports.belongsTo = _belongsTo;
+
+	var BaseResource = function BaseResource() {
+	  _classCallCheck(this, BaseResource);
+	};
+
+	var Resource = exports.Resource = (function (_BaseResource) {
+	  _inherits(Resource, _BaseResource);
+
+	  function Resource() {
+	    var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+	    _classCallCheck(this, Resource);
+
+	    var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(Resource).call(this));
+
+	    Object.defineProperty(_this3, '$$props', {
+	      writable: true,
+	      value: {}
+	    });
+	    Object.defineProperty(_this3, '$$s', {
+	      writable: true,
+	      value: false
+	    });
+	    (0, _decorators.configure)(props)(_this3);
+	    return _this3;
+	  }
+
+	  // Static methods
+
+	  _createClass(Resource, null, [{
+	    key: 'data',
+	    value: function data() {
+	      throw new Error(this.name + ': Did you forget to define a schema?');
+	    }
+	  }, {
+	    key: 'createIndex',
+	    value: function createIndex(name, keyList) {
+	      this.data().createIndex(name, keyList);
+	    }
+	  }, {
+	    key: 'createInstance',
+	    value: function createInstance(props) {
+	      var Constructor = this;
+	      return props instanceof Constructor ? props : new Constructor(props);
+	    }
+	  }, {
+	    key: 'is',
+	    value: function is(instance) {
+	      return instance instanceof this;
+	    }
+	  }, {
+	    key: 'inject',
+	    value: function inject(props) {
+	      var _this4 = this;
+
+	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	      var singular = false;
+	      if (utils.isArray(props)) {
+	        props = props.map(this.createInstance, this);
+	      } else {
+	        singular = true;
+	        props = [this.createInstance(props)];
+	      }
+	      var collection = this.data();
+	      var idAttribute = this.idAttribute;
+	      props = props.map(function (instance) {
+	        var id = instance[idAttribute];
+	        if (!id) {
+	          throw new TypeError('User#' + idAttribute + ': Expected string or number, found ' + (typeof id === 'undefined' ? 'undefined' : _typeof(id)) + '!');
+	        }
+	        var existing = _this4.get(id);
+	        if (existing) {
+	          var onConflict = opts.onConflict || _this4.onConflict;
+	          if (onConflict === 'merge') {
+	            utils.deepMixIn(existing, instance);
+	          } else if (onConflict === 'replace') {
+	            utils.forOwn(existing, function (value, key) {
+	              if (key !== idAttribute) {
+	                if (!instance.hasOwnProperty(key)) {
+	                  delete existing[key];
+	                }
+	              }
+	            });
+	            utils.forOwn(instance, function (value, key) {
+	              if (key !== idAttribute) {
+	                existing[key] = value;
+	              }
+	            });
+	          }
+	          instance = existing;
+	        } else {
+	          collection.index.insertRecord(instance);
+	        }
+	        instance.$$s = true;
+	        utils.forOwn(collection.indexes, function (index) {
+	          index.updateRecord(instance);
+	        });
+	        return instance;
+	      });
+	      return singular ? props[0] : props;
+	    }
+	  }, {
+	    key: 'eject',
+	    value: function eject(id) {
+	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	      var item = this.get(id);
+	      if (item) {
+	        this.data().remove(item);
+	      }
+	    }
+	  }, {
+	    key: 'ejectAll',
+	    value: function ejectAll(params) {
+	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	      var items = this.filter(params);
+	      var collection = this.data();
+	      items.forEach(function (item) {
+	        collection.remove(item);
+	      });
+	      return items;
+	    }
+	  }, {
+	    key: 'get',
+	    value: function get(id) {
+	      var instances = this.data().get(id);
+	      return instances.length ? instances[0] : undefined;
+	    }
+	  }, {
+	    key: 'between',
+	    value: function between() {
+	      var _data;
+
+	      return (_data = this.data()).between.apply(_data, arguments);
+	    }
+	  }, {
+	    key: 'getAll',
+	    value: function getAll() {
+	      var _data2;
+
+	      return (_data2 = this.data()).getAll.apply(_data2, arguments);
+	    }
+	  }, {
+	    key: 'filter',
+	    value: function filter(opts) {
+	      return this.data().filter(opts);
+	    }
+	  }, {
+	    key: 'query',
+	    value: function query() {
+	      return this.data().query();
+	    }
+
+	    /**
+	     * Usage:
+	     *
+	     * Post.belongsTo(User, {
+	     *   localKey: 'myUserId'
+	     * })
+	     *
+	     * Comment.belongsTo(User)
+	     * Comment.belongsTo(Post, {
+	     *   localField: '_post'
+	     * })
+	     */
+
+	  }, {
+	    key: 'belongsTo',
+	    value: function belongsTo(resource, opts) {
+	      return _belongsTo(resource, opts)(this);
+	    }
+	  }, {
+	    key: 'action',
+	    value: function action(name, opts) {
+	      return (0, _decorators.action)(name, opts)(this);
+	    }
+	  }, {
+	    key: 'actions',
+	    value: function actions(opts) {
+	      return (0, _decorators.actions)(opts)(this);
+	    }
+	  }, {
+	    key: 'schema',
+	    value: function schema(opts) {
+	      return (0, _decorators.schema)(opts)(this);
+	    }
+	  }, {
+	    key: 'configure',
+	    value: function configure(props) {
+	      return (0, _decorators.configure)(props)(this);
+	    }
+
+	    /**
+	     * Usage:
+	     *
+	     * var User = JSData.Resource.extend({...}, {...})
+	     */
+
+	  }, {
+	    key: 'extend',
+	    value: function extend() {
+	      var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	      var classProps = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	      var Child = undefined;
+	      var Parent = this;
+	      var _schema = classProps.schema || _defineProperty({}, classProps.idAttribute, {});
+	      _schema[classProps.idAttribute] = _schema[classProps.idAttribute] || {};
+
+	      if (classProps.csp) {
+	        Child = function (props) {
+	          _classCallCheck(this, Child);
+	          Parent.call(this, props);
+	        };
+	      } else {
+	        // TODO: PascalCase(classProps.name)
+	        var name = classProps.name;
+	        delete classProps.name;
+	        var func = 'return function ' + name + '(props) {\n                    _classCallCheck(this, ' + name + ')\n                    Parent.call(this, props)\n                  }';
+	        Child = new Function('_classCallCheck', 'Parent', func)(_classCallCheck, Parent); // eslint-disable-line
+	      }
+
+	      _inherits(Child, this);
+
+	      (0, _decorators.configure)(props)(Child.prototype);
+	      (0, _decorators.configure)(classProps)(Child);
+
+	      (0, _decorators.schema)(_schema)(Child);
+
+	      return Child;
+	    }
+	  }]);
+
+	  return Resource;
+	})(BaseResource);
+
+	(0, _decorators.configure)({
+	  autoInject: isBrowser,
+	  bypassCache: false,
+	  csp: false,
+	  defaultAdapter: 'http',
+	  eagerEject: false,
+	  idAttribute: 'id',
+	  linkRelations: isBrowser,
+	  onConflict: 'merge',
+	  relationsEnumerable: false,
+	  returnMeta: false,
+	  strategy: 'single',
+	  useFilter: true
+	})(Resource);
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.DS = DS;
+
+	var _core = __webpack_require__(1);
+
+	// import DSUtils from '../utils'
+	// import DSErrors from '../errors'
+
+	// function lifecycleNoopCb (resource, attrs, cb) {
+	//   cb(null, attrs)
+	// }
+
+	// function lifecycleNoop (resource, attrs) {
+	//   return attrs
+	// }
+
+	// function compare (orderBy, index, a, b) {
+	//   let def = orderBy[index]
+	//   let cA = DSUtils.get(a, def[0])
+	//   let cB = DSUtils.get(b, def[0])
+	//   if (DSUtils._s(cA)) {
+	//     cA = DSUtils.upperCase(cA)
+	//   }
+	//   if (DSUtils._s(cB)) {
+	//     cB = DSUtils.upperCase(cB)
+	//   }
+	//   if (def[1] === 'DESC') {
+	//     if (cB < cA) {
+	//       return -1
+	//     } else if (cB > cA) {
+	//       return 1
+	//     } else {
+	//       if (index < orderBy.length - 1) {
+	//         return compare(orderBy, index + 1, a, b)
+	//       } else {
+	//         return 0
+	//       }
+	//     }
+	//   } else {
+	//     if (cA < cB) {
+	//       return -1
+	//     } else if (cA > cB) {
+	//       return 1
+	//     } else {
+	//       if (index < orderBy.length - 1) {
+	//         return compare(orderBy, index + 1, a, b)
+	//       } else {
+	//         return 0
+	//       }
+	//     }
+	//   }
+	// }
+
+	// class Defaults {
+	//   errorFn (a, b) {
+	//     if (this.error && typeof this.error === 'function') {
+	//       try {
+	//         if (typeof a === 'string') {
+	//           throw new Error(a)
+	//         } else {
+	//           throw a
+	//         }
+	//       } catch (err) {
+	//         a = err
+	//       }
+	//       this.error(this.name || null, a || null, b || null)
+	//     }
+	//   }
+	// }
+
+	// var defaultsPrototype = Defaults.prototype
+
+	// defaultsPrototype.actions = {}
+	// defaultsPrototype.afterCreate = lifecycleNoopCb
+	// defaultsPrototype.afterCreateCollection = lifecycleNoop
+	// defaultsPrototype.afterCreateInstance = lifecycleNoop
+	// defaultsPrototype.afterDestroy = lifecycleNoopCb
+	// defaultsPrototype.afterEject = lifecycleNoop
+	// defaultsPrototype.afterFind = lifecycleNoopCb
+	// defaultsPrototype.afterFindAll = lifecycleNoopCb
+	// defaultsPrototype.afterInject = lifecycleNoop
+	// defaultsPrototype.afterLoadRelations = lifecycleNoopCb
+	// defaultsPrototype.afterReap = lifecycleNoop
+	// defaultsPrototype.afterUpdate = lifecycleNoopCb
+	// defaultsPrototype.afterValidate = lifecycleNoopCb
+	// defaultsPrototype.allowSimpleWhere = true
+	// defaultsPrototype.basePath = ''
+	// defaultsPrototype.beforeCreate = lifecycleNoopCb
+	// defaultsPrototype.beforeCreateCollection = lifecycleNoop
+	// defaultsPrototype.beforeCreateInstance = lifecycleNoop
+	// defaultsPrototype.beforeDestroy = lifecycleNoopCb
+	// defaultsPrototype.beforeEject = lifecycleNoop
+	// defaultsPrototype.beforeInject = lifecycleNoop
+	// defaultsPrototype.beforeReap = lifecycleNoop
+	// defaultsPrototype.beforeUpdate = lifecycleNoopCb
+	// defaultsPrototype.beforeValidate = lifecycleNoopCb
+	// defaultsPrototype.bypassCache = false
+	// defaultsPrototype.cacheResponse = !!DSUtils.w
+	// defaultsPrototype.csp = false
+	// defaultsPrototype.clearEmptyQueries = true
+	// defaultsPrototype.computed = {}
+	// defaultsPrototype.defaultAdapter = 'http'
+	// defaultsPrototype.debug = false
+	// defaultsPrototype.defaultValues = {}
+	// defaultsPrototype.eagerEject = false
+	// // TODO: Implement eagerInject in DS#create
+	// defaultsPrototype.eagerInject = false
+	// defaultsPrototype.endpoint = ''
+	// defaultsPrototype.error = console ? (a, b, c) => console[typeof console.error === 'function' ? 'error' : 'log'](a, b, c) : false
+	// defaultsPrototype.errorHandler = function (...args) {
+	//   return DSUtils.Promise.reject(args[0])
+	// }
+	// defaultsPrototype.fallbackAdapters = ['http']
+	// defaultsPrototype.findStrictCache = false
+	// defaultsPrototype.idAttribute = 'id'
+	// defaultsPrototype.ignoredChanges = [/\$/]
+	// defaultsPrototype.instanceEvents = !!DSUtils.w
+	// defaultsPrototype.keepChangeHistory = false
+	// defaultsPrototype.linkRelations = !!DSUtils.w
+	// defaultsPrototype.log = console ? (a, b, c, d, e) => console[typeof console.info === 'function' ? 'info' : 'log'](a, b, c, d, e) : false
+
+	// defaultsPrototype.logFn = function (a, b, c, d) {
+	//   let _this = this
+	//   if (_this.debug && _this.log && typeof _this.log === 'function') {
+	//     _this.log(_this.name || null, a || null, b || null, c || null, d || null)
+	//   }
+	// }
+
+	// defaultsPrototype.maxAge = false
+	// defaultsPrototype.methods = {}
+	// defaultsPrototype.notify = !!DSUtils.w
+	// defaultsPrototype.omit = []
+	// defaultsPrototype.onConflict = 'merge'
+	// defaultsPrototype.reapAction = DSUtils.w ? 'inject' : 'none'
+	// defaultsPrototype.reapInterval = DSUtils.w ? 30000 : false
+	// defaultsPrototype.relationsEnumerable = false
+	// defaultsPrototype.resetHistoryOnInject = true
+	// defaultsPrototype.returnMeta = false
+	// defaultsPrototype.scopes = {}
+	// defaultsPrototype.strategy = 'single'
+	// defaultsPrototype.upsert = !!DSUtils.w
+	// defaultsPrototype.useClass = true
+	// defaultsPrototype.useFilter = false
+	// defaultsPrototype.validate = lifecycleNoopCb
+	// defaultsPrototype.watchChanges = !!DSUtils.w
+
+	// let escapeRegExp = /([.*+?^=!:${}()|[\]\/\\])/g
+	// let percentRegExp = /%/g
+	// let underscoreRegExp = /_/g
+
+	// function escape (pattern) {
+	//   return pattern.replace(escapeRegExp, '\\$1')
+	// }
+
+	// function like (pattern, flags) {
+	//   return new RegExp(`^${(escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.'))}$`, flags)
+	// }
+
+	// defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
+	//   let filtered = collection
+	//   let where = null
+	//   let reserved = {
+	//     skip: '',
+	//     offset: '',
+	//     where: '',
+	//     limit: '',
+	//     orderBy: '',
+	//     sort: ''
+	//   }
+
+	//   params = params || {}
+	//   options = options || {}
+
+	//   if (DSUtils._o(params.where)) {
+	//     where = params.where
+	//   } else {
+	//     where = {}
+	//   }
+
+	//   if (options.allowSimpleWhere) {
+	//     DSUtils.forOwn(params, function (value, key) {
+	//       if (!(key in reserved) && !(key in where)) {
+	//         where[key] = {
+	//           '==': value
+	//         }
+	//       }
+	//     })
+	//   }
+
+	//   if (DSUtils.isEmpty(where)) {
+	//     where = null
+	//   }
+
+	//   if (where) {
+	//     filtered = DSUtils.filter(filtered, function (attrs) {
+	//       let first = true
+	//       let keep = true
+	//       DSUtils.forOwn(where, function (clause, field) {
+	//         if (!DSUtils._o(clause)) {
+	//           clause = {
+	//             '==': clause
+	//           }
+	//         }
+	//         DSUtils.forOwn(clause, function (term, op) {
+	//           let expr
+	//           let isOr = op[0] === '|'
+	//           let val = DSUtils.get(attrs, field)
+	//           op = isOr ? op.substr(1) : op
+	//           if (op === '==') {
+	//             expr = val == term // eslint-disable-line
+	//           } else if (op === '===') {
+	//             expr = val === term
+	//           } else if (op === '!=') {
+	//             expr = val != term // eslint-disable-line
+	//           } else if (op === '!==') {
+	//             expr = val !== term
+	//           } else if (op === '>') {
+	//             expr = val > term
+	//           } else if (op === '>=') {
+	//             expr = val >= term
+	//           } else if (op === '<') {
+	//             expr = val < term
+	//           } else if (op === '<=') {
+	//             expr = val <= term
+	//           } else if (op === 'isectEmpty') {
+	//             expr = !DSUtils.intersection((val || []), (term || [])).length
+	//           } else if (op === 'isectNotEmpty') {
+	//             expr = DSUtils.intersection((val || []), (term || [])).length
+	//           } else if (op === 'in') {
+	//             if (DSUtils._s(term)) {
+	//               expr = term.indexOf(val) !== -1
+	//             } else {
+	//               expr = DSUtils.contains(term, val)
+	//             }
+	//           } else if (op === 'notIn') {
+	//             if (DSUtils._s(term)) {
+	//               expr = term.indexOf(val) === -1
+	//             } else {
+	//               expr = !DSUtils.contains(term, val)
+	//             }
+	//           } else if (op.indexOf('like') === 0) {
+	//             expr = like(term, op.substr(4)).exec(val) !== null
+	//           } else if (op.indexOf('notLike') === 0) {
+	//             expr = like(term, op.substr(7)).exec(val) === null
+	//           } else if (op === 'contains') {
+	//             if (DSUtils._s(val)) {
+	//               expr = val.indexOf(term) !== -1
+	//             } else {
+	//               expr = DSUtils.contains(val, term)
+	//             }
+	//           } else if (op === 'notContains') {
+	//             if (DSUtils._s(val)) {
+	//               expr = val.indexOf(term) === -1
+	//             } else {
+	//               expr = !DSUtils.contains(val, term)
+	//             }
+	//           }
+	//           if (expr !== undefined) {
+	//             keep = first ? expr : (isOr ? keep || expr : keep && expr)
+	//           }
+	//           first = false
+	//         })
+	//       })
+	//       return keep
+	//     })
+	//   }
+
+	//   let orderBy = null
+
+	//   if (DSUtils._s(params.orderBy)) {
+	//     orderBy = [
+	//       [params.orderBy, 'ASC']
+	//     ]
+	//   } else if (DSUtils._a(params.orderBy)) {
+	//     orderBy = params.orderBy
+	//   }
+
+	//   if (!orderBy && DSUtils._s(params.sort)) {
+	//     orderBy = [
+	//       [params.sort, 'ASC']
+	//     ]
+	//   } else if (!orderBy && DSUtils._a(params.sort)) {
+	//     orderBy = params.sort
+	//   }
+
+	//   // Apply 'orderBy'
+	//   if (orderBy) {
+	//     let index = 0
+	//     DSUtils.forEach(orderBy, function (def, i) {
+	//       if (DSUtils._s(def)) {
+	//         orderBy[i] = [def, 'ASC']
+	//       } else if (!DSUtils._a(def)) {
+	//         throw new DSErrors.IA(`DS.filter("${resourceName}"[, params][, options]): ${DSUtils.toJson(def)}: Must be a string or an array!`, {
+	//           params: {
+	//             'orderBy[i]': {
+	//               actual: typeof def,
+	//               expected: 'string|array'
+	//             }
+	//           }
+	//         })
+	//       }
+	//     })
+	//     filtered = DSUtils.sort(filtered, function (a, b) {
+	//       return compare(orderBy, index, a, b)
+	//     })
+	//   }
+
+	//   let limit = DSUtils._n(params.limit) ? params.limit : null
+	//   let skip = null
+
+	//   if (DSUtils._n(params.skip)) {
+	//     skip = params.skip
+	//   } else if (DSUtils._n(params.offset)) {
+	//     skip = params.offset
+	//   }
+
+	//   // Apply 'limit' and 'skip'
+	//   if (limit && skip) {
+	//     filtered = DSUtils.slice(filtered, skip, Math.min(filtered.length, skip + limit))
+	//   } else if (DSUtils._n(limit)) {
+	//     filtered = DSUtils.slice(filtered, 0, Math.min(filtered.length, limit))
+	//   } else if (DSUtils._n(skip)) {
+	//     if (skip < filtered.length) {
+	//       filtered = DSUtils.slice(filtered, skip)
+	//     } else {
+	//       filtered = []
+	//     }
+	//   }
+
+	//   return filtered === collection ? filtered.slice() : filtered
+	// }
+
+	// class _DS {
+	//   constructor (options) {
+	//     let _this = this
+	//     options = options || {}
+
+	//     _this.store = {}
+	//     _this.definitions = {}
+	//     _this.adapters = {}
+	//     _this.defaults = new Defaults()
+	//     _this.observe = DSUtils.observe
+	//     DSUtils.forOwn(options, function (v, k) {
+	//       if (k === 'omit') {
+	//         _this.defaults.omit = v.concat(Defaults.prototype.omit)
+	//       } else {
+	//         _this.defaults[k] = v
+	//       }
+	//     })
+
+	//     DSUtils.Events(_this)
+	//   }
+
+	//   getAdapterName (options) {
+	//     let errorIfNotExist = false
+	//     options = options || {}
+	//     if (DSUtils._s(options)) {
+	//       errorIfNotExist = true
+	//       options = {
+	//         adapter: options
+	//       }
+	//     }
+	//     if (this.adapters[options.adapter]) {
+	//       return options.adapter
+	//     } else if (errorIfNotExist) {
+	//       throw new Error(`${options.adapter} is not a registered adapter!`)
+	//     } else {
+	//       return options.defaultAdapter
+	//     }
+	//   }
+
+	//   getAdapter (options) {
+	//     options = options || {}
+	//     return this.adapters[this.getAdapterName(options)]
+	//   }
+
+	//   registerAdapter (name, Adapter, options) {
+	//     let _this = this
+	//     options = options || {}
+	//     if (DSUtils.isFunction(Adapter)) {
+	//       _this.adapters[name] = new Adapter(options)
+	//     } else {
+	//       _this.adapters[name] = Adapter
+	//     }
+	//     if (options.default) {
+	//       _this.defaults.defaultAdapter = name
+	//     }
+	//   }
+
+	//   errorFn (...args) {
+	//     let options = args[args.length - 1]
+	//     let defaultHandler = this.defaults.errorHandler
+	//     let errorHandler = options ? options.errorHandler : defaultHandler
+	//     errorHandler = errorHandler || defaultHandler
+	//     return function (err) {
+	//       return errorHandler(err, ...args)
+	//     }
+	//   }
+	// }
+
+	// var dsPrototype = _DS.prototype
+
+	// dsPrototype.getAdapterName.shorthand = false
+	// dsPrototype.getAdapter.shorthand = false
+	// dsPrototype.registerAdapter.shorthand = false
+	// dsPrototype.errors = DSErrors
+	// dsPrototype.utils = DSUtils
+
+	function DS() {
+	  var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+	  this.definitions = {};
+	} /* jshint eqeqeq:false */
+
+	(0, _core.configure)({
+	  clear: function clear() {
+	    var ejected = {};
+	    (0, _core.forOwn)(this.definitions, function (definition) {
+	      var name = definition.name;
+	      ejected[name] = definition.ejectAll();
+	    });
+	    return ejected;
+	  },
+	  defineResource: function defineResource(opts) {
+	    var Child = _core.Resource.extend(opts.methods || {}, opts);
+	    this.definitions[Child.name] = Child;
+	    return Child;
+	  }
+	})(DS.prototype);
+
+	(0, _core.forOwn)(_core.Resource, function (value, key) {
+	  if ((0, _core.isFunction)(value)) {
+	    DS.prototype[key] = function (name) {
+	      var _definitions$name;
+
+	      if (!this.definitions[name]) {
+	        throw new Error(name + ' is not a registered Resource!');
+	      }
+
+	      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+	        args[_key - 1] = arguments[_key];
+	      }
+
+	      return (_definitions$name = this.definitions[name])[key].apply(_definitions$name, args);
+	    };
+	  }
+	});
 
 /***/ }
 /******/ ])

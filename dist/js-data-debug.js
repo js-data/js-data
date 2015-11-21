@@ -1,3 +1,12 @@
+/*!
+* js-data
+* @version 2.8.2 - Homepage <http://www.js-data.io/>
+* @author Jason Dobry <jason.dobry@gmail.com>
+* @copyright (c) 2014-2015 Jason Dobry
+* @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
+*
+* @overview Robust framework-agnostic data store.
+*/
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -62,29 +71,55 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _core = __webpack_require__(1);
 
-	var _loop = function _loop(_key2) {
-	  if (_key2 === "default") return 'continue';
-	  Object.defineProperty(exports, _key2, {
+	var _loop = function _loop(_key3) {
+	  if (_key3 === "default") return 'continue';
+	  Object.defineProperty(exports, _key3, {
 	    enumerable: true,
 	    get: function get() {
-	      return _core[_key2];
+	      return _core[_key3];
 	    }
 	  });
 	};
 
-	for (var _key2 in _core) {
-	  var _ret = _loop(_key2);
+	for (var _key3 in _core) {
+	  var _ret = _loop(_key3);
 
 	  if (_ret === 'continue') continue;
 	}
 
+	var _datastore = __webpack_require__(16);
+
+	var _loop2 = function _loop2(_key4) {
+	  if (_key4 === "default") return 'continue';
+	  Object.defineProperty(exports, _key4, {
+	    enumerable: true,
+	    get: function get() {
+	      return _datastore[_key4];
+	    }
+	  });
+	};
+
+	for (var _key4 in _datastore) {
+	  var _ret2 = _loop2(_key4);
+
+	  if (_ret2 === 'continue') continue;
+	}
+
+	if (!Promise.prototype.spread) {
+	  Promise.prototype.spread = function (cb) {
+	    return this.then(function (arr) {
+	      return cb.apply(this, arr);
+	    });
+	  };
+	}
+
 	var version = exports.version = {
-	  full: '<%= pkg.version %>',
-	  major: parseInt('<%= major %>', 10),
-	  minor: parseInt('<%= minor %>', 10),
-	  patch: parseInt('<%= patch %>', 10),
-	  alpha:  true ? '<%= alpha %>' : false,
-	  beta:  true ? '<%= beta %>' : false
+	  full: '2.8.2',
+	  major: parseInt('2', 10),
+	  minor: parseInt('8', 10),
+	  patch: parseInt('2', 10),
+	  alpha:  true ? 'false' : false,
+	  beta:  true ? 'false' : false
 	};
 
 /***/ },
@@ -99,56 +134,74 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _decorators = __webpack_require__(2);
 
-	var _loop = function _loop(_key4) {
-	  if (_key4 === "default") return 'continue';
-	  Object.defineProperty(exports, _key4, {
+	var _loop = function _loop(_key5) {
+	  if (_key5 === "default") return 'continue';
+	  Object.defineProperty(exports, _key5, {
 	    enumerable: true,
 	    get: function get() {
-	      return _decorators[_key4];
+	      return _decorators[_key5];
 	    }
 	  });
 	};
 
-	for (var _key4 in _decorators) {
-	  var _ret = _loop(_key4);
+	for (var _key5 in _decorators) {
+	  var _ret = _loop(_key5);
 
 	  if (_ret === 'continue') continue;
 	}
 
 	var _resource = __webpack_require__(15);
 
-	var _loop2 = function _loop2(_key5) {
-	  if (_key5 === "default") return 'continue';
-	  Object.defineProperty(exports, _key5, {
+	var _loop2 = function _loop2(_key6) {
+	  if (_key6 === "default") return 'continue';
+	  Object.defineProperty(exports, _key6, {
 	    enumerable: true,
 	    get: function get() {
-	      return _resource[_key5];
+	      return _resource[_key6];
 	    }
 	  });
 	};
 
-	for (var _key5 in _resource) {
-	  var _ret2 = _loop2(_key5);
+	for (var _key6 in _resource) {
+	  var _ret2 = _loop2(_key6);
 
 	  if (_ret2 === 'continue') continue;
 	}
 
 	var _collection = __webpack_require__(12);
 
-	var _loop3 = function _loop3(_key6) {
-	  if (_key6 === "default") return 'continue';
-	  Object.defineProperty(exports, _key6, {
+	var _loop3 = function _loop3(_key7) {
+	  if (_key7 === "default") return 'continue';
+	  Object.defineProperty(exports, _key7, {
 	    enumerable: true,
 	    get: function get() {
-	      return _collection[_key6];
+	      return _collection[_key7];
 	    }
 	  });
 	};
 
-	for (var _key6 in _collection) {
-	  var _ret3 = _loop3(_key6);
+	for (var _key7 in _collection) {
+	  var _ret3 = _loop3(_key7);
 
 	  if (_ret3 === 'continue') continue;
+	}
+
+	var _utils = __webpack_require__(4);
+
+	var _loop4 = function _loop4(_key8) {
+	  if (_key8 === "default") return 'continue';
+	  Object.defineProperty(exports, _key8, {
+	    enumerable: true,
+	    get: function get() {
+	      return _utils[_key8];
+	    }
+	  });
+	};
+
+	for (var _key8 in _utils) {
+	  var _ret4 = _loop4(_key8);
+
+	  if (_ret4 === 'continue') continue;
 	}
 
 	// Workaround for https://github.com/babel/babel/issues/2763
@@ -326,6 +379,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.reject = reject;
 	exports.makePath = makePath;
 	exports.fillIn = fillIn;
+	exports.makeBefore = makeBefore;
 	exports.isBlacklisted = isBlacklisted;
 	exports.omit = omit;
 	exports.fromJson = fromJson;
@@ -393,6 +447,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	      dest[key] = value;
 	    }
 	  });
+	}
+	function makeBefore(target, key) {
+	  return function (fn) {
+	    var original = target[key];
+	    target[key] = function () {
+	      for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+	        args[_key2] = arguments[_key2];
+	      }
+
+	      var result = fn.apply(target, args);
+	      if (result !== undefined && !isArray(result)) {
+	        result = [result];
+	      }
+	      return original.apply(target, result || args);
+	    };
+	    makeBefore(target, key);
+	  };
 	}
 	function isBlacklisted(prop, bl) {
 	  if (!bl || !bl.length) {
@@ -824,249 +895,207 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.Collection = undefined;
+	exports.Collection = Collection;
 
 	var _utils = __webpack_require__(4);
+
+	var _decorators = __webpack_require__(2);
 
 	var _mindex = __webpack_require__(13);
 
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	function Query(collection) {
+	  this.collection = collection;
+	}
 
-	var Query = (function () {
-	  function Query(collection) {
-	    _classCallCheck(this, Query);
-
-	    this.collection = collection;
-	  }
-
-	  _createClass(Query, [{
-	    key: 'getData',
-	    value: function getData() {
-	      if (!this.data) {
-	        this.data = this.collection.index.getAll();
-	      }
-	      return this.data;
+	(0, _decorators.configure)({
+	  getData: function getData() {
+	    if (!this.data) {
+	      this.data = this.collection.index.getAll();
 	    }
-	  }, {
-	    key: 'between',
-	    value: function between(leftKeys, rightKeys) {
-	      var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+	    return this.data;
+	  },
+	  between: function between(leftKeys, rightKeys) {
+	    var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
-	      var collection = this.collection;
-	      var index = opts.index ? collection.indexes[opts.index] : collection.index;
-	      if (this.data) {
-	        throw new Error('Cannot access index after first operation!');
-	      }
-	      this.data = index.between(leftKeys, rightKeys, opts);
+	    var collection = this.collection;
+	    var index = opts.index ? collection.indexes[opts.index] : collection.index;
+	    if (this.data) {
+	      throw new Error('Cannot access index after first operation!');
+	    }
+	    this.data = index.between(leftKeys, rightKeys, opts);
+	    return this;
+	  },
+	  get: function get() {
+	    var keyList = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
+	    var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	    if (this.data) {
+	      throw new Error('Cannot access index after first operation!');
+	    }
+	    if (keyList && !(0, _utils.isArray)(keyList)) {
+	      keyList = [keyList];
+	    }
+	    if (!keyList.length) {
+	      this.getData();
 	      return this;
 	    }
-	  }, {
-	    key: 'get',
-	    value: function get() {
-	      var keyList = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
-	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	    var collection = this.collection;
+	    var index = opts.index ? collection.indexes[opts.index] : collection.index;
+	    this.data = index.get(keyList);
+	    return this;
+	  },
+	  getAll: function getAll() {
+	    var _this = this;
 
-	      if (this.data) {
-	        throw new Error('Cannot access index after first operation!');
-	      }
-	      if (keyList && !(0, _utils.isArray)(keyList)) {
-	        keyList = [keyList];
-	      }
-	      if (!keyList.length) {
-	        this.getData();
-	        return this;
-	      }
-	      var collection = this.collection;
-	      var index = opts.index ? collection.indexes[opts.index] : collection.index;
-	      this.data = index.get(keyList);
-	      return this;
+	    var opts = {};
+	    if (this.data) {
+	      throw new Error('Cannot access index after first operation!');
 	    }
-	  }, {
-	    key: 'getAll',
-	    value: function getAll() {
-	      var _this = this;
 
-	      var opts = {};
-	      if (this.data) {
-	        throw new Error('Cannot access index after first operation!');
-	      }
+	    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	      args[_key] = arguments[_key];
+	    }
 
-	      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	        args[_key] = arguments[_key];
-	      }
+	    if (!args.length || args.length === 1 && (0, _utils.isObject)(args[0])) {
+	      this.getData();
+	      return this;
+	    } else if (args.length && (0, _utils.isObject)(args[args.length - 1])) {
+	      opts = args[args.length - 1];
+	      args.pop();
+	    }
+	    var collection = this.collection;
+	    var index = opts.index ? collection.indexes[opts.index] : collection.index;
+	    this.data = [];
+	    args.forEach(function (keyList) {
+	      _this.data = _this.data.concat(index.get(keyList));
+	    });
+	    return this;
+	  },
+	  filter: function filter() {
+	    var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
-	      if (!args.length || args.length === 1 && (0, _utils.isObject)(args[0])) {
-	        this.getData();
-	        return this;
-	      } else if (args.length && (0, _utils.isObject)(args[args.length - 1])) {
-	        opts = args[args.length - 1];
-	        args.pop();
-	      }
-	      var collection = this.collection;
-	      var index = opts.index ? collection.indexes[opts.index] : collection.index;
+	    console.log('filter', opts, this.getData().length);
+	    return this;
+	  },
+	  skip: function skip(num) {
+	    if (!(0, _utils.isNumber)(num)) {
+	      throw new TypeError('skip: Expected number but found ' + (typeof num === 'undefined' ? 'undefined' : _typeof(num)) + '!');
+	    }
+	    var data = this.getData();
+	    if (num < data.length) {
+	      this.data = data.slice(num);
+	    } else {
 	      this.data = [];
-	      args.forEach(function (keyList) {
-	        _this.data = _this.data.concat(index.get(keyList));
-	      });
-	      return this;
 	    }
-	  }, {
-	    key: 'filter',
-	    value: function filter() {
-	      var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-	      console.log('filter', opts, this.getData().length);
-	      return this;
+	    return this;
+	  },
+	  limit: function limit(num) {
+	    if (!(0, _utils.isNumber)(num)) {
+	      throw new TypeError('limit: Expected number but found ' + (typeof num === 'undefined' ? 'undefined' : _typeof(num)) + '!');
 	    }
-	  }, {
-	    key: 'skip',
-	    value: function skip(num) {
-	      if (!(0, _utils.isNumber)(num)) {
-	        throw new TypeError('skip: Expected number but found ' + (typeof num === 'undefined' ? 'undefined' : _typeof(num)) + '!');
-	      }
-	      var data = this.getData();
-	      if (num < data.length) {
-	        this.data = data.slice(num);
-	      } else {
-	        this.data = [];
-	      }
-	      return this;
-	    }
-	  }, {
-	    key: 'limit',
-	    value: function limit(num) {
-	      if (!(0, _utils.isNumber)(num)) {
-	        throw new TypeError('limit: Expected number but found ' + (typeof num === 'undefined' ? 'undefined' : _typeof(num)) + '!');
-	      }
-	      var data = this.getData();
-	      this.data = data.slice(0, Math.min(data.length, num));
-	      return this;
-	    }
-	  }, {
-	    key: 'forEach',
-	    value: function forEach(cb, thisArg) {
-	      this.getData().forEach(cb, thisArg);
-	      return this;
-	    }
-	  }, {
-	    key: 'map',
-	    value: function map(cb, thisArg) {
-	      this.data = this.getData().map(cb, thisArg);
-	      return this;
-	    }
-	  }, {
-	    key: 'run',
-	    value: function run() {
-	      var data = this.data;
-	      this.data = null;
-	      this.params = null;
-	      return data;
-	    }
-	  }]);
-
-	  return Query;
-	})();
-
-	var Collection = exports.Collection = (function () {
-	  function Collection() {
-	    var data = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
-	    var idAttribute = arguments.length <= 1 || arguments[1] === undefined ? 'id' : arguments[1];
-
-	    _classCallCheck(this, Collection);
-
-	    if (!(0, _utils.isArray)(data)) {
-	      throw new TypeError('new Collection([data]): data: Expected array. Found ' + (typeof data === 'undefined' ? 'undefined' : _typeof(data)));
-	    }
-	    this.idAttribute = idAttribute;
-	    this.index = new _mindex.Index([idAttribute], idAttribute);
-	    this.indexes = {};
-	    data.forEach(this.index.insertRecord, this.index);
+	    var data = this.getData();
+	    this.data = data.slice(0, Math.min(data.length, num));
+	    return this;
+	  },
+	  forEach: function forEach(cb, thisArg) {
+	    this.getData().forEach(cb, thisArg);
+	    return this;
+	  },
+	  map: function map(cb, thisArg) {
+	    this.data = this.getData().map(cb, thisArg);
+	    return this;
+	  },
+	  run: function run() {
+	    var data = this.data;
+	    this.data = null;
+	    this.params = null;
+	    return data;
 	  }
+	})(Query.prototype);
 
-	  _createClass(Collection, [{
-	    key: 'createIndex',
-	    value: function createIndex(name, keyList) {
-	      if ((0, _utils.isString)(name) && keyList === undefined) {
-	        keyList = [name];
-	      }
-	      var index = this.indexes[name] = new _mindex.Index(keyList, this.idAttribute);
-	      this.index.visitAll(index.insertRecord, index);
-	      return this;
-	    }
-	  }, {
-	    key: 'query',
-	    value: function query() {
-	      return new Query(this);
-	    }
-	  }, {
-	    key: 'between',
-	    value: function between() {
-	      var _query;
+	function Collection() {
+	  var data = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
+	  var idAttribute = arguments.length <= 1 || arguments[1] === undefined ? 'id' : arguments[1];
 
-	      return (_query = this.query()).between.apply(_query, arguments).run();
-	    }
-	  }, {
-	    key: 'get',
-	    value: function get() {
-	      var _query2;
+	  if (!(0, _utils.isArray)(data)) {
+	    throw new TypeError('new Collection([data]): data: Expected array. Found ' + (typeof data === 'undefined' ? 'undefined' : _typeof(data)));
+	  }
+	  this.idAttribute = idAttribute;
+	  this.index = new _mindex.Index([idAttribute], idAttribute);
+	  this.indexes = {};
+	  data.forEach(this.index.insertRecord, this.index);
+	}
 
-	      return (_query2 = this.query()).get.apply(_query2, arguments).run();
+	(0, _decorators.configure)({
+	  createIndex: function createIndex(name, keyList) {
+	    if ((0, _utils.isString)(name) && keyList === undefined) {
+	      keyList = [name];
 	    }
-	  }, {
-	    key: 'getAll',
-	    value: function getAll() {
-	      var _query3;
+	    var index = this.indexes[name] = new _mindex.Index(keyList, this.idAttribute);
+	    this.index.visitAll(index.insertRecord, index);
+	    return this;
+	  },
+	  query: function query() {
+	    return new Query(this);
+	  },
+	  between: function between() {
+	    var _query;
 
-	      return (_query3 = this.query()).getAll.apply(_query3, arguments).run();
-	    }
-	  }, {
-	    key: 'filter',
-	    value: function filter(opts) {
-	      return this.query().filter(opts).run();
-	    }
-	  }, {
-	    key: 'skip',
-	    value: function skip(num) {
-	      return this.query().skip(num).run();
-	    }
-	  }, {
-	    key: 'limit',
-	    value: function limit(num) {
-	      return this.query().limit(num).run();
-	    }
-	  }, {
-	    key: 'forEach',
-	    value: function forEach(cb, thisArg) {
-	      this.index.visitAll(cb, thisArg);
-	    }
-	  }, {
-	    key: 'map',
-	    value: function map(cb, thisArg) {
-	      var data = [];
-	      this.index.visitAll(function (value) {
-	        data.push(cb.call(thisArg, value));
-	      });
-	      return data;
-	    }
-	  }, {
-	    key: 'updateRecord',
-	    value: function updateRecord(record) {
-	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	    return (_query = this.query()).between.apply(_query, arguments).run();
+	  },
+	  get: function get() {
+	    var _query2;
 
-	      var index = opts.index ? this.indexes[opts.index] : this.index;
-	      index.updateRecord(record);
-	    }
-	  }]);
+	    return (_query2 = this.query()).get.apply(_query2, arguments).run();
+	  },
+	  getAll: function getAll() {
+	    var _query3;
 
-	  return Collection;
-	})();
+	    return (_query3 = this.query()).getAll.apply(_query3, arguments).run();
+	  },
+	  filter: function filter(opts) {
+	    return this.query().filter(opts).run();
+	  },
+	  skip: function skip(num) {
+	    return this.query().skip(num).run();
+	  },
+	  limit: function limit(num) {
+	    return this.query().limit(num).run();
+	  },
+	  forEach: function forEach(cb, thisArg) {
+	    this.index.visitAll(cb, thisArg);
+	  },
+	  map: function map(cb, thisArg) {
+	    var data = [];
+	    this.index.visitAll(function (value) {
+	      data.push(cb.call(thisArg, value));
+	    });
+	    return data;
+	  },
+	  updateRecord: function updateRecord(record) {
+	    var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	    var index = opts.index ? this.indexes[opts.index] : this.index;
+	    index.updateRecord(record);
+	  },
+	  removeRecord: function removeRecord(record) {
+	    var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	    var index = opts.index ? this.indexes[opts.index] : this.index;
+	    index.removeRecord(record);
+	  },
+	  remove: function remove(record) {
+	    this.index.removeRecord(record);
+	    (0, _utils.forOwn)(this.indexes, function (index, name) {
+	      index.removeRecord(record);
+	    });
+	  }
+	})(Collection.prototype);
 
 /***/ },
 /* 13 */
@@ -1513,8 +1542,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _decorators = __webpack_require__(2);
 
-	var _collection = __webpack_require__(12);
-
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -1653,9 +1680,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return props instanceof Constructor ? props : new Constructor(props);
 	    }
 	  }, {
+	    key: 'is',
+	    value: function is(instance) {
+	      return instance instanceof this;
+	    }
+	  }, {
 	    key: 'inject',
 	    value: function inject(props) {
 	      var _this4 = this;
+
+	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
 	      var singular = false;
 	      if (utils.isArray(props)) {
@@ -1673,9 +1707,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        var existing = _this4.get(id);
 	        if (existing) {
-	          if (_this4.onConflict === 'merge') {
+	          var onConflict = opts.onConflict || _this4.onConflict;
+	          if (onConflict === 'merge') {
 	            utils.deepMixIn(existing, instance);
-	          } else if (_this4.onConflict === 'replace') {
+	          } else if (onConflict === 'replace') {
 	            utils.forOwn(existing, function (value, key) {
 	              if (key !== idAttribute) {
 	                if (!instance.hasOwnProperty(key)) {
@@ -1700,6 +1735,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return instance;
 	      });
 	      return singular ? props[0] : props;
+	    }
+	  }, {
+	    key: 'eject',
+	    value: function eject(id) {
+	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	      var item = this.get(id);
+	      if (item) {
+	        this.data().remove(item);
+	      }
+	    }
+	  }, {
+	    key: 'ejectAll',
+	    value: function ejectAll(params) {
+	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	      var items = this.filter(params);
+	      var collection = this.data();
+	      items.forEach(function (item) {
+	        collection.remove(item);
+	      });
+	      return items;
 	    }
 	  }, {
 	    key: 'get',
@@ -1785,6 +1842,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      var Child = undefined;
 	      var Parent = this;
+	      var _schema = classProps.schema || _defineProperty({}, classProps.idAttribute, {});
+	      _schema[classProps.idAttribute] = _schema[classProps.idAttribute] || {};
 
 	      if (classProps.csp) {
 	        Child = function (props) {
@@ -1794,6 +1853,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      } else {
 	        // TODO: PascalCase(classProps.name)
 	        var name = classProps.name;
+	        delete classProps.name;
 	        var func = 'return function ' + name + '(props) {\n                    _classCallCheck(this, ' + name + ')\n                    Parent.call(this, props)\n                  }';
 	        Child = new Function('_classCallCheck', 'Parent', func)(_classCallCheck, Parent); // eslint-disable-line
 	      }
@@ -1803,7 +1863,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      (0, _decorators.configure)(props)(Child.prototype);
 	      (0, _decorators.configure)(classProps)(Child);
 
-	      (0, _decorators.schema)(_defineProperty({}, Child.idAttribute, {}))(Child);
+	      (0, _decorators.schema)(_schema)(Child);
 
 	      return Child;
 	    }
@@ -1820,11 +1880,473 @@ return /******/ (function(modules) { // webpackBootstrap
 	  eagerEject: false,
 	  idAttribute: 'id',
 	  linkRelations: isBrowser,
+	  onConflict: 'merge',
 	  relationsEnumerable: false,
 	  returnMeta: false,
 	  strategy: 'single',
 	  useFilter: true
 	})(Resource);
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.DS = DS;
+
+	var _core = __webpack_require__(1);
+
+	// import DSUtils from '../utils'
+	// import DSErrors from '../errors'
+
+	// function lifecycleNoopCb (resource, attrs, cb) {
+	//   cb(null, attrs)
+	// }
+
+	// function lifecycleNoop (resource, attrs) {
+	//   return attrs
+	// }
+
+	// function compare (orderBy, index, a, b) {
+	//   let def = orderBy[index]
+	//   let cA = DSUtils.get(a, def[0])
+	//   let cB = DSUtils.get(b, def[0])
+	//   if (DSUtils._s(cA)) {
+	//     cA = DSUtils.upperCase(cA)
+	//   }
+	//   if (DSUtils._s(cB)) {
+	//     cB = DSUtils.upperCase(cB)
+	//   }
+	//   if (def[1] === 'DESC') {
+	//     if (cB < cA) {
+	//       return -1
+	//     } else if (cB > cA) {
+	//       return 1
+	//     } else {
+	//       if (index < orderBy.length - 1) {
+	//         return compare(orderBy, index + 1, a, b)
+	//       } else {
+	//         return 0
+	//       }
+	//     }
+	//   } else {
+	//     if (cA < cB) {
+	//       return -1
+	//     } else if (cA > cB) {
+	//       return 1
+	//     } else {
+	//       if (index < orderBy.length - 1) {
+	//         return compare(orderBy, index + 1, a, b)
+	//       } else {
+	//         return 0
+	//       }
+	//     }
+	//   }
+	// }
+
+	// class Defaults {
+	//   errorFn (a, b) {
+	//     if (this.error && typeof this.error === 'function') {
+	//       try {
+	//         if (typeof a === 'string') {
+	//           throw new Error(a)
+	//         } else {
+	//           throw a
+	//         }
+	//       } catch (err) {
+	//         a = err
+	//       }
+	//       this.error(this.name || null, a || null, b || null)
+	//     }
+	//   }
+	// }
+
+	// var defaultsPrototype = Defaults.prototype
+
+	// defaultsPrototype.actions = {}
+	// defaultsPrototype.afterCreate = lifecycleNoopCb
+	// defaultsPrototype.afterCreateCollection = lifecycleNoop
+	// defaultsPrototype.afterCreateInstance = lifecycleNoop
+	// defaultsPrototype.afterDestroy = lifecycleNoopCb
+	// defaultsPrototype.afterEject = lifecycleNoop
+	// defaultsPrototype.afterFind = lifecycleNoopCb
+	// defaultsPrototype.afterFindAll = lifecycleNoopCb
+	// defaultsPrototype.afterInject = lifecycleNoop
+	// defaultsPrototype.afterLoadRelations = lifecycleNoopCb
+	// defaultsPrototype.afterReap = lifecycleNoop
+	// defaultsPrototype.afterUpdate = lifecycleNoopCb
+	// defaultsPrototype.afterValidate = lifecycleNoopCb
+	// defaultsPrototype.allowSimpleWhere = true
+	// defaultsPrototype.basePath = ''
+	// defaultsPrototype.beforeCreate = lifecycleNoopCb
+	// defaultsPrototype.beforeCreateCollection = lifecycleNoop
+	// defaultsPrototype.beforeCreateInstance = lifecycleNoop
+	// defaultsPrototype.beforeDestroy = lifecycleNoopCb
+	// defaultsPrototype.beforeEject = lifecycleNoop
+	// defaultsPrototype.beforeInject = lifecycleNoop
+	// defaultsPrototype.beforeReap = lifecycleNoop
+	// defaultsPrototype.beforeUpdate = lifecycleNoopCb
+	// defaultsPrototype.beforeValidate = lifecycleNoopCb
+	// defaultsPrototype.bypassCache = false
+	// defaultsPrototype.cacheResponse = !!DSUtils.w
+	// defaultsPrototype.csp = false
+	// defaultsPrototype.clearEmptyQueries = true
+	// defaultsPrototype.computed = {}
+	// defaultsPrototype.defaultAdapter = 'http'
+	// defaultsPrototype.debug = false
+	// defaultsPrototype.defaultValues = {}
+	// defaultsPrototype.eagerEject = false
+	// // TODO: Implement eagerInject in DS#create
+	// defaultsPrototype.eagerInject = false
+	// defaultsPrototype.endpoint = ''
+	// defaultsPrototype.error = console ? (a, b, c) => console[typeof console.error === 'function' ? 'error' : 'log'](a, b, c) : false
+	// defaultsPrototype.errorHandler = function (...args) {
+	//   return DSUtils.Promise.reject(args[0])
+	// }
+	// defaultsPrototype.fallbackAdapters = ['http']
+	// defaultsPrototype.findStrictCache = false
+	// defaultsPrototype.idAttribute = 'id'
+	// defaultsPrototype.ignoredChanges = [/\$/]
+	// defaultsPrototype.instanceEvents = !!DSUtils.w
+	// defaultsPrototype.keepChangeHistory = false
+	// defaultsPrototype.linkRelations = !!DSUtils.w
+	// defaultsPrototype.log = console ? (a, b, c, d, e) => console[typeof console.info === 'function' ? 'info' : 'log'](a, b, c, d, e) : false
+
+	// defaultsPrototype.logFn = function (a, b, c, d) {
+	//   let _this = this
+	//   if (_this.debug && _this.log && typeof _this.log === 'function') {
+	//     _this.log(_this.name || null, a || null, b || null, c || null, d || null)
+	//   }
+	// }
+
+	// defaultsPrototype.maxAge = false
+	// defaultsPrototype.methods = {}
+	// defaultsPrototype.notify = !!DSUtils.w
+	// defaultsPrototype.omit = []
+	// defaultsPrototype.onConflict = 'merge'
+	// defaultsPrototype.reapAction = DSUtils.w ? 'inject' : 'none'
+	// defaultsPrototype.reapInterval = DSUtils.w ? 30000 : false
+	// defaultsPrototype.relationsEnumerable = false
+	// defaultsPrototype.resetHistoryOnInject = true
+	// defaultsPrototype.returnMeta = false
+	// defaultsPrototype.scopes = {}
+	// defaultsPrototype.strategy = 'single'
+	// defaultsPrototype.upsert = !!DSUtils.w
+	// defaultsPrototype.useClass = true
+	// defaultsPrototype.useFilter = false
+	// defaultsPrototype.validate = lifecycleNoopCb
+	// defaultsPrototype.watchChanges = !!DSUtils.w
+
+	// let escapeRegExp = /([.*+?^=!:${}()|[\]\/\\])/g
+	// let percentRegExp = /%/g
+	// let underscoreRegExp = /_/g
+
+	// function escape (pattern) {
+	//   return pattern.replace(escapeRegExp, '\\$1')
+	// }
+
+	// function like (pattern, flags) {
+	//   return new RegExp(`^${(escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.'))}$`, flags)
+	// }
+
+	// defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
+	//   let filtered = collection
+	//   let where = null
+	//   let reserved = {
+	//     skip: '',
+	//     offset: '',
+	//     where: '',
+	//     limit: '',
+	//     orderBy: '',
+	//     sort: ''
+	//   }
+
+	//   params = params || {}
+	//   options = options || {}
+
+	//   if (DSUtils._o(params.where)) {
+	//     where = params.where
+	//   } else {
+	//     where = {}
+	//   }
+
+	//   if (options.allowSimpleWhere) {
+	//     DSUtils.forOwn(params, function (value, key) {
+	//       if (!(key in reserved) && !(key in where)) {
+	//         where[key] = {
+	//           '==': value
+	//         }
+	//       }
+	//     })
+	//   }
+
+	//   if (DSUtils.isEmpty(where)) {
+	//     where = null
+	//   }
+
+	//   if (where) {
+	//     filtered = DSUtils.filter(filtered, function (attrs) {
+	//       let first = true
+	//       let keep = true
+	//       DSUtils.forOwn(where, function (clause, field) {
+	//         if (!DSUtils._o(clause)) {
+	//           clause = {
+	//             '==': clause
+	//           }
+	//         }
+	//         DSUtils.forOwn(clause, function (term, op) {
+	//           let expr
+	//           let isOr = op[0] === '|'
+	//           let val = DSUtils.get(attrs, field)
+	//           op = isOr ? op.substr(1) : op
+	//           if (op === '==') {
+	//             expr = val == term // eslint-disable-line
+	//           } else if (op === '===') {
+	//             expr = val === term
+	//           } else if (op === '!=') {
+	//             expr = val != term // eslint-disable-line
+	//           } else if (op === '!==') {
+	//             expr = val !== term
+	//           } else if (op === '>') {
+	//             expr = val > term
+	//           } else if (op === '>=') {
+	//             expr = val >= term
+	//           } else if (op === '<') {
+	//             expr = val < term
+	//           } else if (op === '<=') {
+	//             expr = val <= term
+	//           } else if (op === 'isectEmpty') {
+	//             expr = !DSUtils.intersection((val || []), (term || [])).length
+	//           } else if (op === 'isectNotEmpty') {
+	//             expr = DSUtils.intersection((val || []), (term || [])).length
+	//           } else if (op === 'in') {
+	//             if (DSUtils._s(term)) {
+	//               expr = term.indexOf(val) !== -1
+	//             } else {
+	//               expr = DSUtils.contains(term, val)
+	//             }
+	//           } else if (op === 'notIn') {
+	//             if (DSUtils._s(term)) {
+	//               expr = term.indexOf(val) === -1
+	//             } else {
+	//               expr = !DSUtils.contains(term, val)
+	//             }
+	//           } else if (op.indexOf('like') === 0) {
+	//             expr = like(term, op.substr(4)).exec(val) !== null
+	//           } else if (op.indexOf('notLike') === 0) {
+	//             expr = like(term, op.substr(7)).exec(val) === null
+	//           } else if (op === 'contains') {
+	//             if (DSUtils._s(val)) {
+	//               expr = val.indexOf(term) !== -1
+	//             } else {
+	//               expr = DSUtils.contains(val, term)
+	//             }
+	//           } else if (op === 'notContains') {
+	//             if (DSUtils._s(val)) {
+	//               expr = val.indexOf(term) === -1
+	//             } else {
+	//               expr = !DSUtils.contains(val, term)
+	//             }
+	//           }
+	//           if (expr !== undefined) {
+	//             keep = first ? expr : (isOr ? keep || expr : keep && expr)
+	//           }
+	//           first = false
+	//         })
+	//       })
+	//       return keep
+	//     })
+	//   }
+
+	//   let orderBy = null
+
+	//   if (DSUtils._s(params.orderBy)) {
+	//     orderBy = [
+	//       [params.orderBy, 'ASC']
+	//     ]
+	//   } else if (DSUtils._a(params.orderBy)) {
+	//     orderBy = params.orderBy
+	//   }
+
+	//   if (!orderBy && DSUtils._s(params.sort)) {
+	//     orderBy = [
+	//       [params.sort, 'ASC']
+	//     ]
+	//   } else if (!orderBy && DSUtils._a(params.sort)) {
+	//     orderBy = params.sort
+	//   }
+
+	//   // Apply 'orderBy'
+	//   if (orderBy) {
+	//     let index = 0
+	//     DSUtils.forEach(orderBy, function (def, i) {
+	//       if (DSUtils._s(def)) {
+	//         orderBy[i] = [def, 'ASC']
+	//       } else if (!DSUtils._a(def)) {
+	//         throw new DSErrors.IA(`DS.filter("${resourceName}"[, params][, options]): ${DSUtils.toJson(def)}: Must be a string or an array!`, {
+	//           params: {
+	//             'orderBy[i]': {
+	//               actual: typeof def,
+	//               expected: 'string|array'
+	//             }
+	//           }
+	//         })
+	//       }
+	//     })
+	//     filtered = DSUtils.sort(filtered, function (a, b) {
+	//       return compare(orderBy, index, a, b)
+	//     })
+	//   }
+
+	//   let limit = DSUtils._n(params.limit) ? params.limit : null
+	//   let skip = null
+
+	//   if (DSUtils._n(params.skip)) {
+	//     skip = params.skip
+	//   } else if (DSUtils._n(params.offset)) {
+	//     skip = params.offset
+	//   }
+
+	//   // Apply 'limit' and 'skip'
+	//   if (limit && skip) {
+	//     filtered = DSUtils.slice(filtered, skip, Math.min(filtered.length, skip + limit))
+	//   } else if (DSUtils._n(limit)) {
+	//     filtered = DSUtils.slice(filtered, 0, Math.min(filtered.length, limit))
+	//   } else if (DSUtils._n(skip)) {
+	//     if (skip < filtered.length) {
+	//       filtered = DSUtils.slice(filtered, skip)
+	//     } else {
+	//       filtered = []
+	//     }
+	//   }
+
+	//   return filtered === collection ? filtered.slice() : filtered
+	// }
+
+	// class _DS {
+	//   constructor (options) {
+	//     let _this = this
+	//     options = options || {}
+
+	//     _this.store = {}
+	//     _this.definitions = {}
+	//     _this.adapters = {}
+	//     _this.defaults = new Defaults()
+	//     _this.observe = DSUtils.observe
+	//     DSUtils.forOwn(options, function (v, k) {
+	//       if (k === 'omit') {
+	//         _this.defaults.omit = v.concat(Defaults.prototype.omit)
+	//       } else {
+	//         _this.defaults[k] = v
+	//       }
+	//     })
+	//     _this.defaults.logFn('new data store created', _this.defaults)
+
+	//     DSUtils.Events(_this)
+	//   }
+
+	//   getAdapterName (options) {
+	//     let errorIfNotExist = false
+	//     options = options || {}
+	//     this.defaults.logFn('getAdapterName', options)
+	//     if (DSUtils._s(options)) {
+	//       errorIfNotExist = true
+	//       options = {
+	//         adapter: options
+	//       }
+	//     }
+	//     if (this.adapters[options.adapter]) {
+	//       return options.adapter
+	//     } else if (errorIfNotExist) {
+	//       throw new Error(`${options.adapter} is not a registered adapter!`)
+	//     } else {
+	//       return options.defaultAdapter
+	//     }
+	//   }
+
+	//   getAdapter (options) {
+	//     options = options || {}
+	//     this.defaults.logFn('getAdapter', options)
+	//     return this.adapters[this.getAdapterName(options)]
+	//   }
+
+	//   registerAdapter (name, Adapter, options) {
+	//     let _this = this
+	//     options = options || {}
+	//     _this.defaults.logFn('registerAdapter', name, Adapter, options)
+	//     if (DSUtils.isFunction(Adapter)) {
+	//       _this.adapters[name] = new Adapter(options)
+	//     } else {
+	//       _this.adapters[name] = Adapter
+	//     }
+	//     if (options.default) {
+	//       _this.defaults.defaultAdapter = name
+	//     }
+	//     _this.defaults.logFn(`default adapter is ${_this.defaults.defaultAdapter}`)
+	//   }
+
+	//   errorFn (...args) {
+	//     let options = args[args.length - 1]
+	//     let defaultHandler = this.defaults.errorHandler
+	//     let errorHandler = options ? options.errorHandler : defaultHandler
+	//     errorHandler = errorHandler || defaultHandler
+	//     return function (err) {
+	//       return errorHandler(err, ...args)
+	//     }
+	//   }
+	// }
+
+	// var dsPrototype = _DS.prototype
+
+	// dsPrototype.getAdapterName.shorthand = false
+	// dsPrototype.getAdapter.shorthand = false
+	// dsPrototype.registerAdapter.shorthand = false
+	// dsPrototype.errors = DSErrors
+	// dsPrototype.utils = DSUtils
+
+	function DS() {
+	  var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+	  this.definitions = {};
+	} /* jshint eqeqeq:false */
+
+	(0, _core.configure)({
+	  clear: function clear() {
+	    var ejected = {};
+	    (0, _core.forOwn)(this.definitions, function (definition) {
+	      var name = definition.name;
+	      ejected[name] = definition.ejectAll();
+	    });
+	    return ejected;
+	  },
+	  defineResource: function defineResource(opts) {
+	    var Child = _core.Resource.extend(opts.methods || {}, opts);
+	    this.definitions[Child.name] = Child;
+	    return Child;
+	  }
+	})(DS.prototype);
+
+	(0, _core.forOwn)(_core.Resource, function (value, key) {
+	  if ((0, _core.isFunction)(value)) {
+	    DS.prototype[key] = function (name) {
+	      var _definitions$name;
+
+	      if (!this.definitions[name]) {
+	        throw new Error(name + ' is not a registered Resource!');
+	      }
+
+	      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+	        args[_key - 1] = arguments[_key];
+	      }
+
+	      return (_definitions$name = this.definitions[name])[key].apply(_definitions$name, args);
+	    };
+	  }
+	});
 
 /***/ }
 /******/ ])
