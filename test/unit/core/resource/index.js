@@ -1,5 +1,7 @@
 /* global Resource:true, configure:true */
 import {assert} from 'chai'
+import * as createInstance from './createInstance.test'
+import * as eject from './eject.test'
 import * as inject from './inject.test'
 
 let isBrowser = false
@@ -17,6 +19,7 @@ const defaults = {
   eagerEject: false,
   idAttribute: 'id',
   linkRelations: isBrowser,
+  onConflict: 'merge',
   relationsEnumerable: false,
   returnMeta: false,
   strategy: 'single',
@@ -125,6 +128,8 @@ export function init () {
       )
     })
 
+    createInstance.init()
+    eject.init()
     inject.init()
   })
 }

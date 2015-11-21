@@ -5,47 +5,62 @@ export function init () {
   describe('inject', function () {
     it('should a static function', function () {
       assert.isFunction(Resource.inject)
-      let Child = Resource.extend({}, {
+      let User = Resource.extend({}, {
         idAttribute: '_id'
       })
-      class Child2 extends Resource {}
-      class Child3 extends Child2 {}
-      assert.isFunction(Child.inject)
-      assert.isFunction(Child2.inject)
-      assert.isTrue(Resource.inject === Child.inject)
-      assert.isTrue(Resource.inject === Child2.inject)
-      assert.isTrue(Child.inject === Child2.inject)
-      assert.isTrue(Child2.inject === Child3.inject)
+      class User2 extends Resource {}
+      class User3 extends User2 {}
+      assert.isFunction(User.inject)
+      assert.isFunction(User2.inject)
+      assert.isTrue(Resource.inject === User.inject)
+      assert.isTrue(Resource.inject === User2.inject)
+      assert.isTrue(User.inject === User2.inject)
+      assert.isTrue(User2.inject === User3.inject)
     })
     it('should inject new items into the store', function () {
-      class Child extends Resource {}
-      Child.schema({ id: {} })
+      class User extends Resource {}
+      User.schema({ id: {} })
 
-      const child = Child.inject({ id: 1 })
-      const children = Child.inject([{ id: 2 }, { id: 3 }])
-      assert.isTrue(Child.get(1) === child)
-      assert.deepEqual(Child.between([2], [3], {
+      const user = User.inject({ id: 1 })
+      const users = User.inject([{ id: 2 }, { id: 3 }])
+      assert.isTrue(User.get(1) === user)
+      assert.deepEqual(User.between([2], [3], {
         rightInclusive: true
-      }), children)
+      }), users)
     })
     it('should inject existing items into the store', function () {
-      class Child extends Resource {}
-      Child.schema({ id: {} })
+      class User extends Resource {}
+      User.schema({ id: {} })
 
-      const child = Child.inject({ id: 1 })
-      const children = Child.inject([{ id: 2 }, { id: 3 }])
-      const childAgain = Child.inject({ id: 1 })
-      const childrenAgain = Child.inject([{ id: 2 }, { id: 3 }])
-      assert.isTrue(Child.get(1) === child, 'original reference should still be valid')
-      assert.isTrue(Child.get(1) === childAgain, 'new reference should be valid')
-      assert.isTrue(child === childAgain, 'both references should point to the same object')
-      assert.deepEqual(Child.between([2], [3], {
+      const user = User.inject({ id: 1 })
+      const users = User.inject([{ id: 2 }, { id: 3 }])
+      const userAgain = User.inject({ id: 1 })
+      const usersAgain = User.inject([{ id: 2 }, { id: 3 }])
+      assert.isTrue(User.get(1) === user, 'original reference should still be valid')
+      assert.isTrue(User.get(1) === userAgain, 'new reference should be valid')
+      assert.isTrue(user === userAgain, 'both references should point to the same object')
+      assert.deepEqual(User.between([2], [3], {
         rightInclusive: true
-      }), children, 'injection of array should work')
-      assert.deepEqual(Child.between([2], [3], {
+      }), users, 'injection of array should work')
+      assert.deepEqual(User.between([2], [3], {
         rightInclusive: true
-      }), childrenAgain, 're-inject of array should work')
-      assert.deepEqual(children, childrenAgain, 'inject arrays should be equal')
+      }), usersAgain, 're-inject of array should work')
+      assert.deepEqual(users, usersAgain, 'inject arrays should be equal')
+    })
+    it('should replace existing items', function () {
+      class User extends Resource {}
+      User.schema({ id: {} })
+      const user = User.inject({ id: 1, foo: 'bar', beep: 'boop' })
+      assert.equal(user.id, 1)
+      assert.equal(user.foo, 'bar')
+      assert.equal(user.beep, 'boop')
+      assert.isUndefined(user.biz)
+      const existing = User.inject({ id: 1, biz: 'baz', foo: 'BAR' }, { onConflict: 'replace' })
+      assert.isTrue(user === existing)
+      assert.equal(user.id, 1)
+      assert.equal(user.biz, 'baz')
+      assert.equal(user.foo, 'BAR')
+      assert.isUndefined(user.beep)
     })
   })
 }

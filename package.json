@@ -60,7 +60,7 @@
     "buildv": "npm run build && npm run gzip",
     "karma": "karma start",
     "mocha": "mocha --timeout 20000 --reporter spec mocha.start.js",
-    "cover": "istanbul cover --hook-run-in-context node_modules/mocha/bin/_mocha -- --timeout 20000 --reporter dot mocha.start.js",
+    "cover": "istanbul cover -x dist/js-data-tests.js --hook-run-in-context node_modules/mocha/bin/_mocha -- --timeout 20000 --reporter dot mocha.start.js",
     "test": "npm run build && npm run cover",
     "ci": "npm test && cat coverage/lcov.info | coveralls || true && cat ./coverage/lcov.info | codacy-coverage || true"
   },

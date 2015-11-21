@@ -1,6 +1,5 @@
 import * as utils from './utils'
 import {action, actions, configure, schema} from './decorators'
-import {Collection} from './collection'
 
 let isBrowser = false
 
@@ -90,7 +89,11 @@ export class Resource extends BaseResource {
     return props instanceof Constructor ? props : new Constructor(props)
   }
 
-  static inject (props) {
+  static is (instance) {
+    return instance instanceof this
+  }
+
+  static inject (props, opts = {}) {
     let singular = false
     if (utils.isArray(props)) {
       props = props.map(this.createInstance, this)
@@ -107,9 +110,10 @@ export class Resource extends BaseResource {
       }
       const existing = this.get(id)
       if (existing) {
-        if (this.onConflict === 'merge') {
+        const onConflict = opts.onConflict || this.onConflict
+        if (onConflict === 'merge') {
           utils.deepMixIn(existing, instance)
-        } else if (this.onConflict === 'replace') {
+        } else if (onConflict === 'replace') {
           utils.forOwn(existing, (value, key) => {
             if (key !== idAttribute) {
               if (!instance.hasOwnProperty(key)) {
@@ -134,6 +138,22 @@ export class Resource extends BaseResource {
       return instance
     })
     return singular ? props[0] : props
+  }
+
+  static eject (id, opts = {}) {
+    const item = this.get(id)
+    if (item) {
+      this.data().remove(item)
+    }
+  }
+
+  static ejectAll (params, opts = {}) {
+    const items = this.filter(params)
+    const collection = this.data()
+    items.forEach(function (item) {
+      collection.remove(item)
+    })
+    return items
   }
 
   static get (id) {
@@ -197,6 +217,10 @@ export class Resource extends BaseResource {
   static extend (props = {}, classProps = {}) {
     let Child
     let Parent = this
+    const _schema = classProps.schema || {
+      [classProps.idAttribute]: {}
+    }
+    _schema[classProps.idAttribute] = _schema[classProps.idAttribute] || {}
 
     if (classProps.csp) {
       Child = function (props) {
@@ -206,6 +230,7 @@ export class Resource extends BaseResource {
     } else {
       // TODO: PascalCase(classProps.name)
       let name = classProps.name
+      delete classProps.name
       let func = `return function ${name}(props) {
                     __callCheck__(this, ${name})
                     Parent.call(this, props)
@@ -218,9 +243,7 @@ export class Resource extends BaseResource {
     configure(props)(Child.prototype)
     configure(classProps)(Child)
 
-    schema({
-      [Child.idAttribute]: {}
-    })(Child)
+    schema(_schema)(Child)
 
     return Child
   }
@@ -234,6 +257,7 @@ configure({
   eagerEject: false,
   idAttribute: 'id',
   linkRelations: isBrowser,
+  onConflict: 'merge',
   relationsEnumerable: false,
   returnMeta: false,
   strategy: 'single',
