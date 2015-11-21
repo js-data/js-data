@@ -1,5 +1,8 @@
 /* global JSData:true */
-import * as core from './core'
+import * as collection from './collection'
+import * as datastore from './datastore'
+import * as resource from './resource'
+import * as utils from './utils'
 import {assert} from 'chai'
 
 assert.objectsEqual = function (a, b, msg) {
@@ -19,12 +22,17 @@ export function init () {
     it('has all the right exports', function () {
       assert.isFunction(JSData.action, 'has the action decorator')
       assert.isFunction(JSData.actions, 'has the actions decorator')
+      assert.isFunction(JSData.Collection, 'has the Collection class')
       assert.isFunction(JSData.configure, 'has the configure decorator')
+      assert.isFunction(JSData.DS, 'has the DS class')
       assert.isFunction(JSData.schema, 'has the schema decorator')
       assert.isFunction(JSData.Resource, 'has the Resource class')
       assert.isObject(JSData.version, 'has a version')
     })
-    core.init()
+    collection.init()
+    datastore.init()
+    resource.init()
+    utils.init()
   })
 }
 
