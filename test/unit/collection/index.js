@@ -1,5 +1,6 @@
 /* global Collection:true, TYPES_EXCEPT_NUMBER:true */
 import {assert} from 'chai'
+import * as query from './query.test'
 
 export function init () {
   describe('Collection', function () {
@@ -188,5 +189,7 @@ export function init () {
         'should have found age:19, role:admin and age:23'
       )
     })
+
+    query.init()
   })
 }

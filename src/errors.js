@@ -1,7 +1,7 @@
 /**
  * Thrown during a method call when an argument passed into the method is invalid.
  */
-class IllegalArgumentError extends Error {
+export class IllegalArgumentError extends Error {
   constructor (message) {
     super()
     if (typeof Error.captureStackTrace === 'function') {
@@ -15,7 +15,7 @@ class IllegalArgumentError extends Error {
 /**
  * Thrown when an invariant is violated or unrecoverable error is encountered during execution.
  */
-class RuntimeError extends Error {
+export class RuntimeError extends Error {
   constructor (message) {
     super()
     if (typeof Error.captureStackTrace === 'function') {
@@ -29,7 +29,7 @@ class RuntimeError extends Error {
 /**
  * Thrown when attempting to access or work with a non-existent resource.
  */
-class NonexistentResourceError extends Error {
+export class NonexistentResourceError extends Error {
   constructor (resourceName) {
     super()
     if (typeof Error.captureStackTrace === 'function') {
@@ -40,11 +40,6 @@ class NonexistentResourceError extends Error {
   }
 }
 
-export default {
-  IllegalArgumentError,
-  IA: IllegalArgumentError,
-  RuntimeError,
-  R: RuntimeError,
-  NonexistentResourceError,
-  NER: NonexistentResourceError
-}
+export const IA = IllegalArgumentError
+export const R = RuntimeError
+export const NER = NonexistentResourceError

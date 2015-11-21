@@ -1,12 +1,7 @@
 /* jshint eqeqeq:false */
-import {
-  configure,
-  forOwn,
-  isFunction,
-  Resource
-} from '../core'
-// import DSUtils from '../utils'
-// import DSErrors from '../errors'
+import {configure} from '../decorators'
+import {forOwn, isFunction} from '../utils'
+import {Resource} from '../resource'
 
 // function lifecycleNoopCb (resource, attrs, cb) {
 //   cb(null, attrs)

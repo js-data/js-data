@@ -6,8 +6,10 @@ if (!Promise.prototype.spread) {
   }
 }
 
-export * from './core'
+export * from './collection'
 export * from './datastore'
+export * from './decorators'
+export * from './resource'
 
 export const version = {
   full: '<%= pkg.version %>',

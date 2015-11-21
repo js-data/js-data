@@ -6,7 +6,8 @@ export function init () {
     it('should a static function', function () {
       assert.isFunction(Resource.eject)
       let User = Resource.extend({}, {
-        idAttribute: '_id'
+        idAttribute: '_id',
+        name: 'user'
       })
       class User2 extends Resource {}
       class User3 extends User2 {}

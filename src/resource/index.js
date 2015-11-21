@@ -1,5 +1,5 @@
-import * as utils from './utils'
-import {action, actions, configure, schema} from './decorators'
+import * as utils from '../utils'
+import {action, actions, configure, schema} from '../decorators'
 
 let isBrowser = false
 
@@ -217,10 +217,15 @@ export class Resource extends BaseResource {
   static extend (props = {}, classProps = {}) {
     let Child
     let Parent = this
+
+    if (!classProps.name) {
+      throw new TypeError(`name: Expected string, found ${typeof classProps.name}!`)
+    }
     const _schema = classProps.schema || {
       [classProps.idAttribute]: {}
     }
     _schema[classProps.idAttribute] = _schema[classProps.idAttribute] || {}
+    classProps.shortname = classProps.shortname || utils.camelCase(classProps.name)
 
     if (classProps.csp) {
       Child = function (props) {
@@ -228,8 +233,7 @@ export class Resource extends BaseResource {
         Parent.call(this, props)
       }
     } else {
-      // TODO: PascalCase(classProps.name)
-      let name = classProps.name
+      let name = utils.pascalCase(classProps.name)
       delete classProps.name
       let func = `return function ${name}(props) {
                     __callCheck__(this, ${name})

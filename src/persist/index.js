@@ -1,4 +1,4 @@
-import {schema} from '../core/decorators'
+import {schema} from '../decorators'
 
 @schema({
   $$saved: {

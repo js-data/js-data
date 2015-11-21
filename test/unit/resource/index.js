@@ -1,7 +1,9 @@
-/* global Resource:true, configure:true */
+/* global JSData:true, Resource:true, configure:true */
 import {assert} from 'chai'
 import * as createInstance from './createInstance.test'
 import * as eject from './eject.test'
+import * as get from './get.test'
+import * as getAll from './getAll.test'
 import * as inject from './inject.test'
 
 let isBrowser = false
@@ -42,38 +44,44 @@ export function init () {
     })
     it('child should inherit static defaults', function () {
       var key
-      let Child = Resource.extend()
+      let User = Resource.extend({}, {
+        name: 'user'
+      })
       for (key in defaults) {
-        assert.equal(Child[key], defaults[key], key + ' should be ' + defaults[key])
+        assert.equal(User[key], defaults[key], key + ' should be ' + defaults[key])
       }
-      class Child2 extends Resource {}
+      class User2 extends Resource {}
       for (key in defaults) {
-        assert.equal(Child2[key], defaults[key], key + ' should be ' + defaults[key])
+        assert.equal(User2[key], defaults[key], key + ' should be ' + defaults[key])
       }
     })
     it('child should override static defaults', function () {
+      const store = new JSData.DS()
+
       /**
        * ES5 ways of creating a new Resource
        */
-      let Child = Resource.extend({}, {
-        idAttribute: '_id'
+      let User = Resource.extend({}, {
+        idAttribute: '_id',
+        name: 'user'
       })
 
       // Not yet implemented in v3
-      // let Child2 = store.defineResource({
-      //   idAttribute: '_id'
-      // })
+      let User2 = store.defineResource({
+        idAttribute: '_id',
+        name: 'user'
+      })
 
       /**
        * ES6 ways of creating a new Resource
        */
-      class Child3 extends Resource {}
+      class User3 extends Resource {}
       configure({
         idAttribute: '_id'
-      })(Child3)
+      })(User3)
 
-      class Child4 extends Resource {}
-      Child4.configure({
+      class User4 extends Resource {}
+      User4.configure({
         idAttribute: '_id'
       })
 
@@ -84,13 +92,13 @@ export function init () {
       // @configure({
       //   idAttribute: '_id'
       // })
-      // class Child5 extends Resource {}
+      // class User5 extends Resource {}
 
-      check(Child)
-      // check(Child2)
-      check(Child3)
-      check(Child4)
-      // check(Child5)
+      check(User)
+      // check(User2)
+      check(User3)
+      check(User4)
+      // check(User5)
 
       function check (Class) {
         for (var key in defaults) {
@@ -103,13 +111,13 @@ export function init () {
       }
     })
     it('should allow schema definition with basic indexes', function () {
-      class Child extends Resource {}
-      Child.schema({
+      class User extends Resource {}
+      User.schema({
         id: {},
         age: { indexed: true },
         role: { indexed: true }
       })
-      Child.inject([
+      User.inject([
         { id: 2, age: 18, role: 'admin' },
         { id: 3, age: 19, role: 'dev' },
         { id: 9, age: 19, role: 'admin' },
@@ -118,7 +126,7 @@ export function init () {
         { id: 1, age: 23, role: 'owner' }
       ])
       assert.deepEqual(
-        Child.getAll(19, { index: 'age' }),
+        User.getAll(19, { index: 'age' }),
         [
           { id: 3, age: 19, role: 'dev' },
           { id: 6, age: 19, role: 'owner' },
@@ -130,6 +138,8 @@ export function init () {
 
     createInstance.init()
     eject.init()
+    get.init()
+    getAll.init()
     inject.init()
   })
 }
