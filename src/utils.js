@@ -24,6 +24,17 @@ export function isFunction (value) {
 export function isSorN (value) {
   return isString(value) || isNumber(value)
 }
+export function get (object, prop){
+  const parts = prop.split('.')
+  const last = parts.pop()
+
+  while (prop = parts.shift()) {
+    object = object[prop]
+    if (object == null) return
+  }
+
+  return object[last]
+}
 export function forOwn (obj, fn, thisArg) {
   const keys = Object.keys(obj)
   const len = keys.length
@@ -50,6 +61,25 @@ export function resolve (value) {
 }
 export function reject (value) {
   return Promise.reject(value)
+}
+export function intersection (array1, array2) {
+  if (!array1 || !array2) {
+    return []
+  }
+  const result = []
+  let item
+  let i
+  const len = array1.length
+  for (i = 0; i < len; i++) {
+    item = array1[i]
+    if (result.indexOf(item) !== -1) {
+      continue
+    }
+    if (array2.indexOf(item) !== -1) {
+      result.push(item)
+    }
+  }
+  return result
 }
 function isValidString (value) {
   return (value != null && value !== '') // jshint ignore:line

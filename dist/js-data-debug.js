@@ -179,6 +179,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 	
+	exports.Query = _query4.Query;
+	
 	function Collection() {
 	  var data = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
 	  var idAttribute = arguments.length <= 1 || arguments[1] === undefined ? 'id' : arguments[1];
@@ -238,6 +240,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	    return data;
 	  },
+	  insert: function insert(record) {
+	    this.index.insertRecord(record);
+	    (0, _utils.forOwn)(this.indexes, function (index, name) {
+	      index.insertRecord(record);
+	    });
+	  },
+	  update: function update(record) {
+	    this.index.updateRecord(record);
+	    (0, _utils.forOwn)(this.indexes, function (index, name) {
+	      index.updateRecord(record);
+	    });
+	  },
+	  remove: function remove(record) {
+	    this.index.removeRecord(record);
+	    (0, _utils.forOwn)(this.indexes, function (index, name) {
+	      index.removeRecord(record);
+	    });
+	  },
+	  insertRecord: function insertRecord(record) {
+	    var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	
+	    var index = opts.index ? this.indexes[opts.index] : this.index;
+	    index.insertRecord(record);
+	  },
 	  updateRecord: function updateRecord(record) {
 	    var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 	
@@ -249,12 +275,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    var index = opts.index ? this.indexes[opts.index] : this.index;
 	    index.removeRecord(record);
-	  },
-	  remove: function remove(record) {
-	    this.index.removeRecord(record);
-	    (0, _utils.forOwn)(this.indexes, function (index, name) {
-	      index.removeRecord(record);
-	    });
 	  }
 	})(Collection.prototype);
 
@@ -277,6 +297,103 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function Query(collection) {
 	  this.collection = collection;
+	}
+	
+	var reserved = {
+	  skip: '',
+	  offset: '',
+	  where: '',
+	  limit: '',
+	  orderBy: '',
+	  sort: ''
+	};
+	
+	function compare(orderBy, index, a, b) {
+	  var def = orderBy[index];
+	  var cA = (0, _utils.get)(a, def[0]);
+	  var cB = (0, _utils.get)(b, def[0]);
+	  if (cA && (0, _utils.isString)(cA)) {
+	    cA = cA.toUpperCase();
+	  }
+	  if (cB && (0, _utils.isString)(cB)) {
+	    cB = cB.toUpperCase();
+	  }
+	  if (def[1] === 'DESC') {
+	    if (cB < cA) {
+	      return -1;
+	    } else if (cB > cA) {
+	      return 1;
+	    } else {
+	      if (index < orderBy.length - 1) {
+	        return compare(orderBy, index + 1, a, b);
+	      } else {
+	        return 0;
+	      }
+	    }
+	  } else {
+	    if (cA < cB) {
+	      return -1;
+	    } else if (cA > cB) {
+	      return 1;
+	    } else {
+	      if (index < orderBy.length - 1) {
+	        return compare(orderBy, index + 1, a, b);
+	      } else {
+	        return 0;
+	      }
+	    }
+	  }
+	}
+	
+	var escapeRegExp = /([.*+?^=!:${}()|[\]\/\\])/g;
+	var percentRegExp = /%/g;
+	var underscoreRegExp = /_/g;
+	
+	function escape(pattern) {
+	  return pattern.replace(escapeRegExp, '\\$1');
+	}
+	
+	function like(pattern, flags) {
+	  return new RegExp('^' + escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.') + '$', flags);
+	}
+	
+	function evaluate(value, op, predicate) {
+	  switch (op) {
+	    case '==':
+	      return value == predicate; // eslint-disable-line
+	    case '===':
+	      return value === predicate;
+	    case '!=':
+	      return value != predicate; // eslint-disable-line
+	    case '!==':
+	      return value !== predicate;
+	    case '>':
+	      return value > predicate;
+	    case '>=':
+	      return value >= predicate;
+	    case '<':
+	      return value < predicate;
+	    case '<=':
+	      return value <= predicate;
+	    case 'isectEmpty':
+	      return !(0, _utils.intersection)(value || [], predicate || []).length;
+	    case 'isectNotEmpty':
+	      return (0, _utils.intersection)(value || [], predicate || []).length;
+	    case 'in':
+	      return predicate.indexOf(value) !== -1;
+	    case 'notIn':
+	      return predicate.indexOf(value) === -1;
+	    case 'contains':
+	      return value.indexOf(predicate) !== -1;
+	    case 'notContains':
+	      return value.indexOf(predicate) === -1;
+	    default:
+	      if (op.indexOf('like') === 0) {
+	        return like(predicate, op.substr(4)).exec(value) !== null;
+	      } else if (op.indexOf('notLike') === 0) {
+	        return like(predicate, op.substr(7)).exec(value) === null;
+	      }
+	  }
 	}
 	
 	(0, _decorators.configure)({
@@ -344,9 +461,104 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return this;
 	  },
 	  filter: function filter() {
-	    var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	    var _this2 = this;
 	
-	    console.log('filter', opts, this.getData().length);
+	    var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	    var thisArg = arguments[1];
+	
+	    this.getData();
+	    if ((0, _utils.isObject)(opts)) {
+	      (function () {
+	        var where = {};
+	        // Filter
+	        if ((0, _utils.isObject)(opts.where)) {
+	          where = opts.where;
+	        }
+	        (0, _utils.forOwn)(opts, function (value, key) {
+	          if (!(key in reserved) && !(key in where)) {
+	            where[key] = {
+	              '==': value
+	            };
+	          }
+	        });
+	
+	        var fields = [];
+	        var ops = [];
+	        var predicates = [];
+	        (0, _utils.forOwn)(where, function (clause, field) {
+	          if (!(0, _utils.isObject)(clause)) {
+	            clause = {
+	              '==': clause
+	            };
+	          }
+	          (0, _utils.forOwn)(clause, function (expr, op) {
+	            fields.push(field);
+	            ops.push(op);
+	            predicates.push(expr);
+	          });
+	        });
+	        if (fields.length) {
+	          (function () {
+	            var i = undefined;
+	            var len = fields.length;
+	            _this2.data = _this2.data.filter(function (item) {
+	              var first = true;
+	              var keep = true;
+	
+	              for (i = 0; i < len; i++) {
+	                var op = ops[i];
+	                var isOr = op.charAt(0) === '|';
+	                op = isOr ? op.substr(1) : op;
+	                var expr = evaluate((0, _utils.get)(item, fields[i]), op, predicates[i]);
+	                if (expr !== undefined) {
+	                  keep = first ? expr : isOr ? keep || expr : keep && expr;
+	                }
+	                first = false;
+	              }
+	              return keep;
+	            });
+	          })();
+	        }
+	
+	        // Sort
+	        var orderBy = opts.orderBy || opts.sort;
+	
+	        if ((0, _utils.isString)(orderBy)) {
+	          orderBy = [[orderBy, 'ASC']];
+	        }
+	        if (!(0, _utils.isArray)(orderBy)) {
+	          orderBy = null;
+	        }
+	
+	        // Apply 'orderBy'
+	        if (orderBy) {
+	          (function () {
+	            var index = 0;
+	            orderBy.forEach(function (def, i) {
+	              if ((0, _utils.isString)(def)) {
+	                orderBy[i] = [def, 'ASC'];
+	              }
+	            });
+	            _this2.data.sort(function (a, b) {
+	              return compare(orderBy, index, a, b);
+	            });
+	          })();
+	        }
+	
+	        // Skip
+	        if ((0, _utils.isNumber)(opts.skip)) {
+	          _this2.skip(opts.skip);
+	        } else if ((0, _utils.isNumber)(opts.offset)) {
+	          _this2.skip(opts.offset);
+	        }
+	        // Limit
+	        if ((0, _utils.isNumber)(opts.limit)) {
+	          _this2.limit(opts.limit);
+	        }
+	      })();
+	    } else if ((0, _utils.isFunction)(opts)) {
+	      this.data = this.data.filter(opts, thisArg);
+	    }
 	    return this;
 	  },
 	  skip: function skip(num) {
@@ -401,10 +613,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.isNumber = isNumber;
 	exports.isFunction = isFunction;
 	exports.isSorN = isSorN;
+	exports.get = get;
 	exports.forOwn = forOwn;
 	exports.deepMixIn = deepMixIn;
 	exports.resolve = resolve;
 	exports.reject = reject;
+	exports.intersection = intersection;
 	exports.makePath = makePath;
 	exports.fillIn = fillIn;
 	exports.makeBefore = makeBefore;
@@ -443,6 +657,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	function isSorN(value) {
 	  return isString(value) || isNumber(value);
 	}
+	function get(object, prop) {
+	  var parts = prop.split('.');
+	  var last = parts.pop();
+	
+	  while (prop = parts.shift()) {
+	    object = object[prop];
+	    if (object == null) return;
+	  }
+	
+	  return object[last];
+	}
 	function forOwn(obj, fn, thisArg) {
 	  var keys = Object.keys(obj);
 	  var len = keys.length;
@@ -469,6 +694,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	function reject(value) {
 	  return Promise.reject(value);
+	}
+	function intersection(array1, array2) {
+	  if (!array1 || !array2) {
+	    return [];
+	  }
+	  var result = [];
+	  var item = undefined;
+	  var i = undefined;
+	  var len = array1.length;
+	  for (i = 0; i < len; i++) {
+	    item = array1[i];
+	    if (result.indexOf(item) !== -1) {
+	      continue;
+	    }
+	    if (array2.indexOf(item) !== -1) {
+	      result.push(item);
+	    }
+	  }
+	  return result;
 	}
 	function isValidString(value) {
 	  return value != null && value !== ''; // jshint ignore:line
@@ -1338,43 +1582,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	//   return attrs
 	// }
 	
-	// function compare (orderBy, index, a, b) {
-	//   let def = orderBy[index]
-	//   let cA = DSUtils.get(a, def[0])
-	//   let cB = DSUtils.get(b, def[0])
-	//   if (DSUtils._s(cA)) {
-	//     cA = DSUtils.upperCase(cA)
-	//   }
-	//   if (DSUtils._s(cB)) {
-	//     cB = DSUtils.upperCase(cB)
-	//   }
-	//   if (def[1] === 'DESC') {
-	//     if (cB < cA) {
-	//       return -1
-	//     } else if (cB > cA) {
-	//       return 1
-	//     } else {
-	//       if (index < orderBy.length - 1) {
-	//         return compare(orderBy, index + 1, a, b)
-	//       } else {
-	//         return 0
-	//       }
-	//     }
-	//   } else {
-	//     if (cA < cB) {
-	//       return -1
-	//     } else if (cA > cB) {
-	//       return 1
-	//     } else {
-	//       if (index < orderBy.length - 1) {
-	//         return compare(orderBy, index + 1, a, b)
-	//       } else {
-	//         return 0
-	//       }
-	//     }
-	//   }
-	// }
-	
 	// class Defaults {
 	//   errorFn (a, b) {
 	//     if (this.error && typeof this.error === 'function') {
@@ -1467,192 +1674,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	// defaultsPrototype.useFilter = false
 	// defaultsPrototype.validate = lifecycleNoopCb
 	// defaultsPrototype.watchChanges = !!DSUtils.w
-	
-	// let escapeRegExp = /([.*+?^=!:${}()|[\]\/\\])/g
-	// let percentRegExp = /%/g
-	// let underscoreRegExp = /_/g
-	
-	// function escape (pattern) {
-	//   return pattern.replace(escapeRegExp, '\\$1')
-	// }
-	
-	// function like (pattern, flags) {
-	//   return new RegExp(`^${(escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.'))}$`, flags)
-	// }
-	
-	// defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
-	//   let filtered = collection
-	//   let where = null
-	//   let reserved = {
-	//     skip: '',
-	//     offset: '',
-	//     where: '',
-	//     limit: '',
-	//     orderBy: '',
-	//     sort: ''
-	//   }
-	
-	//   params = params || {}
-	//   options = options || {}
-	
-	//   if (DSUtils._o(params.where)) {
-	//     where = params.where
-	//   } else {
-	//     where = {}
-	//   }
-	
-	//   if (options.allowSimpleWhere) {
-	//     DSUtils.forOwn(params, function (value, key) {
-	//       if (!(key in reserved) && !(key in where)) {
-	//         where[key] = {
-	//           '==': value
-	//         }
-	//       }
-	//     })
-	//   }
-	
-	//   if (DSUtils.isEmpty(where)) {
-	//     where = null
-	//   }
-	
-	//   if (where) {
-	//     filtered = DSUtils.filter(filtered, function (attrs) {
-	//       let first = true
-	//       let keep = true
-	//       DSUtils.forOwn(where, function (clause, field) {
-	//         if (!DSUtils._o(clause)) {
-	//           clause = {
-	//             '==': clause
-	//           }
-	//         }
-	//         DSUtils.forOwn(clause, function (term, op) {
-	//           let expr
-	//           let isOr = op[0] === '|'
-	//           let val = DSUtils.get(attrs, field)
-	//           op = isOr ? op.substr(1) : op
-	//           if (op === '==') {
-	//             expr = val == term // eslint-disable-line
-	//           } else if (op === '===') {
-	//             expr = val === term
-	//           } else if (op === '!=') {
-	//             expr = val != term // eslint-disable-line
-	//           } else if (op === '!==') {
-	//             expr = val !== term
-	//           } else if (op === '>') {
-	//             expr = val > term
-	//           } else if (op === '>=') {
-	//             expr = val >= term
-	//           } else if (op === '<') {
-	//             expr = val < term
-	//           } else if (op === '<=') {
-	//             expr = val <= term
-	//           } else if (op === 'isectEmpty') {
-	//             expr = !DSUtils.intersection((val || []), (term || [])).length
-	//           } else if (op === 'isectNotEmpty') {
-	//             expr = DSUtils.intersection((val || []), (term || [])).length
-	//           } else if (op === 'in') {
-	//             if (DSUtils._s(term)) {
-	//               expr = term.indexOf(val) !== -1
-	//             } else {
-	//               expr = DSUtils.contains(term, val)
-	//             }
-	//           } else if (op === 'notIn') {
-	//             if (DSUtils._s(term)) {
-	//               expr = term.indexOf(val) === -1
-	//             } else {
-	//               expr = !DSUtils.contains(term, val)
-	//             }
-	//           } else if (op.indexOf('like') === 0) {
-	//             expr = like(term, op.substr(4)).exec(val) !== null
-	//           } else if (op.indexOf('notLike') === 0) {
-	//             expr = like(term, op.substr(7)).exec(val) === null
-	//           } else if (op === 'contains') {
-	//             if (DSUtils._s(val)) {
-	//               expr = val.indexOf(term) !== -1
-	//             } else {
-	//               expr = DSUtils.contains(val, term)
-	//             }
-	//           } else if (op === 'notContains') {
-	//             if (DSUtils._s(val)) {
-	//               expr = val.indexOf(term) === -1
-	//             } else {
-	//               expr = !DSUtils.contains(val, term)
-	//             }
-	//           }
-	//           if (expr !== undefined) {
-	//             keep = first ? expr : (isOr ? keep || expr : keep && expr)
-	//           }
-	//           first = false
-	//         })
-	//       })
-	//       return keep
-	//     })
-	//   }
-	
-	//   let orderBy = null
-	
-	//   if (DSUtils._s(params.orderBy)) {
-	//     orderBy = [
-	//       [params.orderBy, 'ASC']
-	//     ]
-	//   } else if (DSUtils._a(params.orderBy)) {
-	//     orderBy = params.orderBy
-	//   }
-	
-	//   if (!orderBy && DSUtils._s(params.sort)) {
-	//     orderBy = [
-	//       [params.sort, 'ASC']
-	//     ]
-	//   } else if (!orderBy && DSUtils._a(params.sort)) {
-	//     orderBy = params.sort
-	//   }
-	
-	//   // Apply 'orderBy'
-	//   if (orderBy) {
-	//     let index = 0
-	//     DSUtils.forEach(orderBy, function (def, i) {
-	//       if (DSUtils._s(def)) {
-	//         orderBy[i] = [def, 'ASC']
-	//       } else if (!DSUtils._a(def)) {
-	//         throw new DSErrors.IA(`DS.filter("${resourceName}"[, params][, options]): ${DSUtils.toJson(def)}: Must be a string or an array!`, {
-	//           params: {
-	//             'orderBy[i]': {
-	//               actual: typeof def,
-	//               expected: 'string|array'
-	//             }
-	//           }
-	//         })
-	//       }
-	//     })
-	//     filtered = DSUtils.sort(filtered, function (a, b) {
-	//       return compare(orderBy, index, a, b)
-	//     })
-	//   }
-	
-	//   let limit = DSUtils._n(params.limit) ? params.limit : null
-	//   let skip = null
-	
-	//   if (DSUtils._n(params.skip)) {
-	//     skip = params.skip
-	//   } else if (DSUtils._n(params.offset)) {
-	//     skip = params.offset
-	//   }
-	
-	//   // Apply 'limit' and 'skip'
-	//   if (limit && skip) {
-	//     filtered = DSUtils.slice(filtered, skip, Math.min(filtered.length, skip + limit))
-	//   } else if (DSUtils._n(limit)) {
-	//     filtered = DSUtils.slice(filtered, 0, Math.min(filtered.length, limit))
-	//   } else if (DSUtils._n(skip)) {
-	//     if (skip < filtered.length) {
-	//       filtered = DSUtils.slice(filtered, skip)
-	//     } else {
-	//       filtered = []
-	//     }
-	//   }
-	
-	//   return filtered === collection ? filtered.slice() : filtered
-	// }
 	
 	// class _DS {
 	//   constructor (options) {
