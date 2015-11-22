@@ -32,6 +32,14 @@ for (var key in globals) {
 }
 test.globals(testGlobals)
 
+beforeEach(function () {
+  globals.p1 = global.p1 = { author: 'John', age: 30, id: 5 }
+  globals.p2 = global.p2 = { author: 'Sally', age: 31, id: 6 }
+  globals.p3 = global.p3 = { author: 'Mike', age: 32, id: 7 }
+  globals.p4 = global.p4 = { author: 'Adam', age: 33, id: 8 }
+  globals.p5 = global.p5 = { author: 'Adam', age: 33, id: 9 }
+})
+
 /*
 beforeEach(function () {
   lifecycle.beforeValidate = function (resourceName, attrs, cb) {
@@ -216,12 +224,6 @@ beforeEach(function () {
   lifecycle.serialize.callCount = 0
   lifecycle.deserialize.callCount = 0
   lifecycle.queryTransform.callCount = 0
-
-  globals.p1 = global.p1 = { author: 'John', age: 30, id: 5 }
-  globals.p2 = global.p2 = { author: 'Sally', age: 31, id: 6 }
-  globals.p3 = global.p3 = { author: 'Mike', age: 32, id: 7 }
-  globals.p4 = global.p4 = { author: 'Adam', age: 33, id: 8 }
-  globals.p5 = global.p5 = { author: 'Adam', age: 33, id: 9 }
 
   globals.user1 = global.user1 = {
     name: 'John Anderson',

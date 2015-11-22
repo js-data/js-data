@@ -2,6 +2,7 @@ import {Query} from './query'
 import {isArray, isString, forOwn} from '../utils'
 import {configure} from '../decorators'
 import {Index} from '../../lib/mindex'
+exports.Query = Query
 
 export function Collection (data = [], idAttribute = 'id') {
   if (!isArray(data)) {
@@ -63,6 +64,32 @@ configure({
     return data
   },
 
+  insert (record) {
+    this.index.insertRecord(record)
+    forOwn(this.indexes, function (index, name) {
+      index.insertRecord(record)
+    })
+  },
+
+  update (record) {
+    this.index.updateRecord(record)
+    forOwn(this.indexes, function (index, name) {
+      index.updateRecord(record)
+    })
+  },
+
+  remove (record) {
+    this.index.removeRecord(record)
+    forOwn(this.indexes, function (index, name) {
+      index.removeRecord(record)
+    })
+  },
+
+  insertRecord (record, opts = {}) {
+    const index = opts.index ? this.indexes[opts.index] : this.index
+    index.insertRecord(record)
+  },
+
   updateRecord (record, opts = {}) {
     const index = opts.index ? this.indexes[opts.index] : this.index
     index.updateRecord(record)
@@ -71,12 +98,5 @@ configure({
   removeRecord (record, opts = {}) {
     const index = opts.index ? this.indexes[opts.index] : this.index
     index.removeRecord(record)
-  },
-
-  remove (record) {
-    this.index.removeRecord(record)
-    forOwn(this.indexes, function (index, name) {
-      index.removeRecord(record)
-    })
   }
 })(Collection.prototype)

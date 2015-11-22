@@ -113,25 +113,6 @@ function isEmpty (val) {
   }
 }
 
-// Find the intersection between two arrays
-function intersection (array1, array2) {
-  if (!array1 || !array2) {
-    return []
-  }
-  let result = []
-  let item
-  for (let i = 0, length = array1.length; i < length; i++) {
-    item = array1[i]
-    if (contains(result, item)) {
-      continue
-    }
-    if (contains(array2, item)) {
-      result.push(item)
-    }
-  }
-  return result
-}
-
 function filter (array, cb, thisObj) {
   let results = []
   forEach(array, function (value, key, arr) {

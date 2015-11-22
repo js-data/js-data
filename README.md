@@ -8,24 +8,20 @@ for managing your data, which uses __adapters__ to communicate with various
 __persistence layers__.
 
 The most commonly used adapter is the [http adapter][http], which is perfect for
-communicating with your RESTful backend. [localStorage][3], [localForage][4],
+connecting your frontend to your backend. [localStorage][3], [localForage][4],
 [firebase][5] and [other adapters][6] are already available. On the server you
 could hook up to the [SQL adapter (Postgres/MySQL/MariaDB/SQLite3)][7] and add
 in the [Redis adapter][8] as a caching layer for your read endpoints. More
 adapters are coming, and you're free to implement your own. See [Adapters][9].
 
-Unlike some libraries, JSData does not require the use of getters and setters,
-and doesn't decorate your data with a bunch of cruft. JSData's internal change
-detection (via [observe-js][10] or `Object.observe` in supporting browsers)
-allows for powerful use cases and an easy avenue for implementing your own
-[3-way data-binding][11].
+Unlike some libraries, JSData does not require the use of getter and setter
+functions, and doesn't decorate your data with a bunch of cruft.
 
-Supporting relations, computed properties, support for Node and the Browser,
-model lifecycle control and a slew of other features, JSData is the tool for
-[giving your data the respect it deserves][12].
+Supporting relations, Node.js and the Browser, model lifecycle control and a
+slew of other features, JSData is the tool for [giving your data the respect it deserves][12].
 
 Written in ES6 and built for modern web development, JSData will save you
-thousands of lines of code _and_ make you cooler.
+thousands of lines of code.
 
 Support is handled via the [Slack channel][slack] or the [Mailing List][ml].
 
@@ -44,105 +40,77 @@ the global environment. In the browser, `window.Promise` must be available. In
 Node, `global.Promise` must be available. Here is a handy library for
 polyfilling: https://github.com/jakearchibald/es6-promise.
 
-If you can't polyfill the environment, then configure JSData to use a specific
-`Promise` constructor directly: `JSData.DSUtils.Promise = MyPromiseLib;`.
-This direct configuration method is useful for telling JSData to use the
-Bluebird library or Angular's `$q`, etc.
-
 ### Quick Start
-`bower install --save js-data js-data-http` or `npm install --save js-data js-data-http`.
+`npm install --save js-data js-data-http` or `bower install --save js-data js-data-http`.
 
 Load `js-data-http.js` after `js-data.js`. See [installation instructions][inst]
 for making js-data part of your r.js/browserify/webpack build.
 
 ```js
 // you can also require "js-data" if you're using AMD/CommonJS
-// e.g. var JSData = require('js-data'); var DSHttpAdapter = require('js-data-http');
-var store = new JSData.DS();
+// e.g.
+// var JSData = require('js-data');
+// var DSHttpAdapter = require('js-data-http');
+import {DSHttpAdapter} from 'js-data-http'
+import {DS, Resource} from 'js-data'
+const store = new DS();
 
 // register and use http by default for async operations
 store.registerAdapter('http', new DSHttpAdapter(), { default: true });
 
-// simplest model definition, just pass the name instead of an options hash
-// this is the same as "store.defineResource({ name: 'user' })"
-var User = store.defineResource('user');
-
-// Usually you'll define a resource by passing options
-var Comment = store.defineResource({
-  name: 'comment',
-  relations: {
-    belongsTo: {
-      user: {
-        // "join" field, name of field on a comment
-        // that is the primary key of the parent user
-        localKey: 'userId',
-
-        // name of the field on the comment where the
-        // parent user will be attached to the comment
-        // by js-data
-        localField: 'user'
-      }
-    }
-  }
-});
-
-var user;
+class User extends Resource {}
 
 // Example CRUD operations with default configuration
 // See http://www.js-data.io/docs/dsfind
 User.find(1)
-  .then(function (_user) {
-    _user; // { id: 1, name: 'John' }
+  .then(function (user) {
+    user // { id: 1, name: 'John' }
 
     // See http://www.js-data.io/docs/dsis
-    User.is(_user); // true
-    Comment.is(_user); // false
+    user instanceof User // true
+    user instanceof Comment // false
 
     // The user is in the store now
     // See http://www.js-data.io/docs/dsget
-    User.get(_user.id); // { id: 1, name: 'John' }
+    User.get(user.id) // { id: 1, name: 'John' }
 
-    user = _user;
+    user === User.get(user.id) // true
 
     // No need for another GET request, will resolve immediately
     // See http://www.js-data.io/docs/dsfind
-    return User.find(1);
+    return User.find(user.id)
   })
-  .then(function (_user) {
-    user === _user; // true
+  .then(function (user) {
+    user === User.get(user.id) // true
 
     // PUT /user/1 {name:"Johnny"}
     // See http://www.js-data.io/docs/dsupdate
-    return User.update(user.id, { name: 'Johnny' });
+    return User.update(user.id, { name: 'Johnny' })
   })
-  .then(function (_user) {
-    // identity mapping at play
-    user === _user; // true
-    user === User.get(_user.id); // true
+  .then(function (user) {
+    user === User.get(user.id) // true
 
-    user; // { id: 1, name: 'Johnny' }
+    user // { id: 1, name: 'Johnny' }
 
-    user.name = 'Billy';
+    user.name = 'Billy'
 
     // PUT /user/1 {id:1,name:"Billy"}
     // See http://www.js-data.io/docs/dssave
-    return User.save(1);
+    return User.save(user.id)
   })
-  .then(function (_user) {
-    // identity mapping at play
-    user === _user; // true
-    user === User.get(_user.id); // true
+  .then(function (user) {
+    user === User.get(user.id) // true
 
-    user; // { id: 1, name: 'Johnny' }
+    user // { id: 1, name: 'Johnny' }
 
     // DELETE /user/1
     // See http://www.js-data.io/docs/dsdestroy
-    return User.destroy(1);
+    return User.destroy(user.id)
   })
   .then(function () {
     // The user has also been removed from the in-memory store
-    User.get(1); // undefined
-  });
+    User.get(1) // undefined
+  })
 ```
 
 All your data are belong to you...
