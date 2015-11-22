@@ -2,6 +2,7 @@
 import {assert} from 'chai'
 import * as createInstance from './createInstance.test'
 import * as eject from './eject.test'
+import * as ejectAll from './ejectAll.test'
 import * as get from './get.test'
 import * as getAll from './getAll.test'
 import * as inject from './inject.test'
@@ -138,6 +139,7 @@ export function init () {
 
     createInstance.init()
     eject.init()
+    ejectAll.init()
     get.init()
     getAll.init()
     inject.init()

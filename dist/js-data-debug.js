@@ -1,12 +1,3 @@
-/*!
-* js-data
-* @version 2.8.2 - Homepage <http://www.js-data.io/>
-* @author Jason Dobry <jason.dobry@gmail.com>
-* @copyright (c) 2014-2015 Jason Dobry
-* @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
-*
-* @overview Robust framework-agnostic data store.
-*/
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -150,12 +141,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	
 	var version = exports.version = {
-	  full: '2.8.2',
-	  major: parseInt('2', 10),
-	  minor: parseInt('8', 10),
-	  patch: parseInt('2', 10),
-	  alpha:  true ? 'false' : false,
-	  beta:  true ? 'false' : false
+	  full: '<%= pkg.version %>',
+	  major: parseInt('<%= major %>', 10),
+	  minor: parseInt('<%= minor %>', 10),
+	  patch: parseInt('<%= patch %>', 10),
+	  alpha:  true ? '<%= alpha %>' : false,
+	  beta:  true ? '<%= beta %>' : false
 	};
 
 /***/ },
