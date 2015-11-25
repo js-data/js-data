@@ -56,6 +56,15 @@ export function belongsTo (relation, opts = {}) {
   }
 }
 
+function afterExec (opts, thisArg) {
+  return function (data) {
+    if (opts.autoInject) {
+      data = thisArg.inject(data)
+    }
+    return data
+  }
+}
+
 // This is here so Babel will give us
 // the inheritance helpers which we
 // can re-use for the "extend" method
@@ -73,6 +82,34 @@ export class Resource extends BaseResource {
       value: false
     })
     configure(props)(this)
+  }
+
+  // Instance methods
+  create (opts) {
+    const Ctor = this.constructor
+    return Ctor.create(this, opts).then(data => {
+      // Might need to find a better way to do this
+      if (data !== this && data[Ctor.idAttribute]) {
+        utils.forOwn(data, (value, key) => {
+          this[key] = value
+        })
+      }
+      return this
+    })
+  }
+
+  save (opts) {
+    const Ctor = this.constructor
+    const Opts = utils._(Ctor, opts)
+
+    const adapterName = Ctor.getAdapterName(Opts)
+    return Ctor.adapters[adapterName]
+      .update(Ctor, this[Ctor.idAttribute], this, Opts)
+  }
+
+  destroy (opts) {
+    const Ctor = this.constructor
+    return Ctor.destroy(this[Ctor.idAttribute], opts)
   }
 
   // Static methods
@@ -177,6 +214,121 @@ export class Resource extends BaseResource {
     return this.data().query()
   }
 
+  static getAdapter (opts) {
+    return this.adapters[this.getAdapterName(opts)]
+  }
+
+  static getAdapterName (opts) {
+    utils._(this, opts)
+    return opts.adapter || opts.defaultAdapter
+  }
+
+  static create (props = {}, opts = {}) {
+    const _this = this
+    utils._(_this, opts)
+
+    if (opts.upsert && props[_this.idAttribute]) {
+      return _this.update(props[_this.idAttribute], props, opts)
+    }
+    const adapterName = _this.getAdapterName(opts)
+    return _this.adapters[adapterName]
+      .create(_this, utils.omit(props, opts.omit), opts)
+      .then(afterExec(opts, _this))
+  }
+
+  static createMany (items = [], opts = {}) {
+    const _this = this
+    utils._(_this, opts)
+
+    if (opts.upsert) {
+      let hasId = true
+      items.forEach(function (item) {
+        hasId = hasId && item[_this.idAttribute]
+      })
+      if (hasId) {
+        return _this.updateMany(items, opts)
+      }
+    }
+    const adapterName = _this.getAdapterName(opts)
+    return _this.adapters[adapterName]
+      .createMany(
+        _this,
+        items.map(function (item) {
+          return utils.omit(item, opts.omit)
+        }),
+        opts
+      )
+      .then(afterExec(opts, _this))
+  }
+
+  static find (id, opts) {
+    const _this = this
+    utils._(_this, opts)
+
+    const adapterName = _this.getAdapterName(opts)
+    return _this.adapters[adapterName]
+      .find(_this, id, opts)
+      .then(afterExec(opts, _this))
+  }
+
+  static findAll (query, opts) {
+    const _this = this
+    utils._(_this, opts)
+
+    const adapterName = _this.getAdapterName(opts)
+    return _this.adapters[adapterName]
+      .findAll(_this, query, opts)
+      .then(afterExec(opts, _this))
+  }
+
+  static update (id, props, opts) {
+    const _this = this
+    utils._(_this, opts)
+
+    const adapterName = _this.getAdapterName(opts)
+    return _this.adapters[adapterName]
+      .update(_this, id, props, opts)
+      .then(afterExec(opts, _this))
+  }
+
+  static updateMany (items, opts) {
+    const _this = this
+    utils._(_this, opts)
+
+    const adapterName = _this.getAdapterName(opts)
+    return _this.adapters[adapterName]
+      .updateMany(_this, items, opts)
+      .then(afterExec(opts, _this))
+  }
+
+  static updateAll (query, props, opts) {
+    const _this = this
+    utils._(_this, opts)
+
+    const adapterName = _this.getAdapterName(opts)
+    return _this.adapters[adapterName]
+      .updateAll(_this, query, props, opts)
+      .then(afterExec(opts, _this))
+  }
+
+  static destroy (id, opts) {
+    const _this = this
+    utils._(_this, opts)
+
+    const adapterName = _this.getAdapterName(opts)
+    return _this.adapters[adapterName]
+      .destroy(_this, id, opts)
+  }
+
+  static destroyAll (query, props, opts) {
+    const _this = this
+    utils._(_this, opts)
+
+    const adapterName = _this.getAdapterName(opts)
+    return _this.adapters[adapterName]
+      .destroyAll(_this, query, opts)
+  }
+
   /**
    * Usage:
    *
@@ -214,11 +366,11 @@ export class Resource extends BaseResource {
    *
    * var User = JSData.Resource.extend({...}, {...})
    */
-  static extend (props = {}, classProps = {}) {
+  static extend (props = {}, classProps = {}, requireName = true) {
     let Child
     let Parent = this
 
-    if (!classProps.name) {
+    if (!classProps.name && requireName) {
       throw new TypeError(`name: Expected string, found ${typeof classProps.name}!`)
     }
     const _schema = classProps.schema || {
@@ -254,6 +406,7 @@ export class Resource extends BaseResource {
 }
 
 configure({
+  adapters: {},
   autoInject: isBrowser,
   bypassCache: false,
   csp: false,

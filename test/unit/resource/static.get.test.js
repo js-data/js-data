@@ -2,8 +2,8 @@
 import {assert} from 'chai'
 
 export function init () {
-  describe('get', function () {
-    it('should a static function', function () {
+  describe('static get', function () {
+    it('should be a static function', function () {
       assert.isFunction(Resource.get)
       let User = Resource.extend({}, {
         idAttribute: '_id',

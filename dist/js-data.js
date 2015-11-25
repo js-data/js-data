@@ -618,6 +618,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.deepMixIn = deepMixIn;
 	exports.resolve = resolve;
 	exports.reject = reject;
+	exports._ = _;
 	exports.intersection = intersection;
 	exports.makePath = makePath;
 	exports.fillIn = fillIn;
@@ -694,6 +695,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	function reject(value) {
 	  return Promise.reject(value);
+	}
+	function _(Resource, opts) {
+	  for (var key in Resource) {
+	    var value = Resource[key];
+	    if (opts[key] === undefined && !isFunction(value)) {
+	      opts[key] = value;
+	    }
+	  }
 	}
 	function intersection(array1, array2) {
 	  if (!array1 || !array2) {
@@ -1045,12 +1054,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * })
 	 * class User extends JSData.Resource {...}
 	 */
-	function configure() {
-	  var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	function configure(props) {
+	  var overwrite = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
 	
+	  props = props || {};
 	  return function (target) {
 	    (0, _utils.forOwn)(props, function (value, key) {
-	      target[key] = (0, _utils.copy)(value);
+	      if (target[key] === undefined || overwrite) {
+	        target[key] = (0, _utils.copy)(value);
+	      }
 	    });
 	    return target;
 	  };
@@ -1865,14 +1877,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      (function () {
 	        var originalGet = descriptor.get;
 	        descriptor.get = function () {
-	          var _this = this;
+	          var _this2 = this;
 	
 	          return opts.get(target, relation, this, originalGet ? function () {
 	            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
 	              args[_key] = arguments[_key];
 	            }
 	
-	            return originalGet.apply(_this, args);
+	            return originalGet.apply(_this2, args);
 	          } : undefined);
 	        };
 	      })();
@@ -1881,14 +1893,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      (function () {
 	        var originalSet = descriptor.set;
 	        descriptor.set = function (parent) {
-	          var _this2 = this;
+	          var _this3 = this;
 	
 	          return opts.set(target, relation, this, parent, originalSet ? function () {
 	            for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
 	              args[_key2] = arguments[_key2];
 	            }
 	
-	            return originalSet.apply(_this2, args);
+	            return originalSet.apply(_this3, args);
 	          } : undefined);
 	        };
 	      })();
@@ -1898,10 +1910,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	}
 	
+	exports.belongsTo = _belongsTo;
+	function afterExec(opts, thisArg) {
+	  return function (data) {
+	    if (opts.autoInject) {
+	      data = thisArg.inject(data);
+	    }
+	    return data;
+	  };
+	}
+	
 	// This is here so Babel will give us
 	// the inheritance helpers which we
 	// can re-use for the "extend" method
-	exports.belongsTo = _belongsTo;
 	
 	var BaseResource = function BaseResource() {
 	  _classCallCheck(this, BaseResource);
@@ -1915,23 +1936,57 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    _classCallCheck(this, Resource);
 	
-	    var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(Resource).call(this));
+	    var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(Resource).call(this));
 	
-	    Object.defineProperty(_this3, '$$props', {
+	    Object.defineProperty(_this4, '$$props', {
 	      writable: true,
 	      value: {}
 	    });
-	    Object.defineProperty(_this3, '$$s', {
+	    Object.defineProperty(_this4, '$$s', {
 	      writable: true,
 	      value: false
 	    });
-	    (0, _decorators.configure)(props)(_this3);
-	    return _this3;
+	    (0, _decorators.configure)(props)(_this4);
+	    return _this4;
 	  }
 	
-	  // Static methods
+	  // Instance methods
 	
-	  _createClass(Resource, null, [{
+	  _createClass(Resource, [{
+	    key: 'create',
+	    value: function create(opts) {
+	      var _this5 = this;
+	
+	      var Ctor = this.constructor;
+	      return Ctor.create(this, opts).then(function (data) {
+	        // Might need to find a better way to do this
+	        if (data !== _this5 && data[Ctor.idAttribute]) {
+	          utils.forOwn(data, function (value, key) {
+	            _this5[key] = value;
+	          });
+	        }
+	        return _this5;
+	      });
+	    }
+	  }, {
+	    key: 'save',
+	    value: function save(opts) {
+	      var Ctor = this.constructor;
+	      var Opts = utils._(Ctor, opts);
+	
+	      var adapterName = Ctor.getAdapterName(Opts);
+	      return Ctor.adapters[adapterName].update(Ctor, this[Ctor.idAttribute], this, Opts);
+	    }
+	  }, {
+	    key: 'destroy',
+	    value: function destroy(opts) {
+	      var Ctor = this.constructor;
+	      return Ctor.destroy(this[Ctor.idAttribute], opts);
+	    }
+	
+	    // Static methods
+	
+	  }], [{
 	    key: 'data',
 	    value: function data() {
 	      throw new Error(this.name + ': Did you forget to define a schema?');
@@ -1955,7 +2010,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'inject',
 	    value: function inject(props) {
-	      var _this4 = this;
+	      var _this6 = this;
 	
 	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 	
@@ -1973,9 +2028,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (!id) {
 	          throw new TypeError('User#' + idAttribute + ': Expected string or number, found ' + (typeof id === 'undefined' ? 'undefined' : _typeof(id)) + '!');
 	        }
-	        var existing = _this4.get(id);
+	        var existing = _this6.get(id);
 	        if (existing) {
-	          var onConflict = opts.onConflict || _this4.onConflict;
+	          var onConflict = opts.onConflict || _this6.onConflict;
 	          if (onConflict === 'merge') {
 	            utils.deepMixIn(existing, instance);
 	          } else if (onConflict === 'replace') {
@@ -2056,6 +2111,124 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function query() {
 	      return this.data().query();
 	    }
+	  }, {
+	    key: 'getAdapter',
+	    value: function getAdapter(opts) {
+	      return this.adapters[this.getAdapterName(opts)];
+	    }
+	  }, {
+	    key: 'getAdapterName',
+	    value: function getAdapterName(opts) {
+	      utils._(this, opts);
+	      return opts.adapter || opts.defaultAdapter;
+	    }
+	  }, {
+	    key: 'create',
+	    value: function create() {
+	      var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	
+	      var _this = this;
+	      utils._(_this, opts);
+	
+	      if (opts.upsert && props[_this.idAttribute]) {
+	        return _this.update(props[_this.idAttribute], props, opts);
+	      }
+	      var adapterName = _this.getAdapterName(opts);
+	      return _this.adapters[adapterName].create(_this, utils.omit(props, opts.omit), opts).then(afterExec(opts, _this));
+	    }
+	  }, {
+	    key: 'createMany',
+	    value: function createMany() {
+	      var items = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
+	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	
+	      var _this = this;
+	      utils._(_this, opts);
+	
+	      if (opts.upsert) {
+	        var _ret3 = (function () {
+	          var hasId = true;
+	          items.forEach(function (item) {
+	            hasId = hasId && item[_this.idAttribute];
+	          });
+	          if (hasId) {
+	            return {
+	              v: _this.updateMany(items, opts)
+	            };
+	          }
+	        })();
+	
+	        if ((typeof _ret3 === 'undefined' ? 'undefined' : _typeof(_ret3)) === "object") return _ret3.v;
+	      }
+	      var adapterName = _this.getAdapterName(opts);
+	      return _this.adapters[adapterName].createMany(_this, items.map(function (item) {
+	        return utils.omit(item, opts.omit);
+	      }), opts).then(afterExec(opts, _this));
+	    }
+	  }, {
+	    key: 'find',
+	    value: function find(id, opts) {
+	      var _this = this;
+	      utils._(_this, opts);
+	
+	      var adapterName = _this.getAdapterName(opts);
+	      return _this.adapters[adapterName].find(_this, id, opts).then(afterExec(opts, _this));
+	    }
+	  }, {
+	    key: 'findAll',
+	    value: function findAll(query, opts) {
+	      var _this = this;
+	      utils._(_this, opts);
+	
+	      var adapterName = _this.getAdapterName(opts);
+	      return _this.adapters[adapterName].findAll(_this, query, opts).then(afterExec(opts, _this));
+	    }
+	  }, {
+	    key: 'update',
+	    value: function update(id, props, opts) {
+	      var _this = this;
+	      utils._(_this, opts);
+	
+	      var adapterName = _this.getAdapterName(opts);
+	      return _this.adapters[adapterName].update(_this, id, props, opts).then(afterExec(opts, _this));
+	    }
+	  }, {
+	    key: 'updateMany',
+	    value: function updateMany(items, opts) {
+	      var _this = this;
+	      utils._(_this, opts);
+	
+	      var adapterName = _this.getAdapterName(opts);
+	      return _this.adapters[adapterName].updateMany(_this, items, opts).then(afterExec(opts, _this));
+	    }
+	  }, {
+	    key: 'updateAll',
+	    value: function updateAll(query, props, opts) {
+	      var _this = this;
+	      utils._(_this, opts);
+	
+	      var adapterName = _this.getAdapterName(opts);
+	      return _this.adapters[adapterName].updateAll(_this, query, props, opts).then(afterExec(opts, _this));
+	    }
+	  }, {
+	    key: 'destroy',
+	    value: function destroy(id, opts) {
+	      var _this = this;
+	      utils._(_this, opts);
+	
+	      var adapterName = _this.getAdapterName(opts);
+	      return _this.adapters[adapterName].destroy(_this, id, opts);
+	    }
+	  }, {
+	    key: 'destroyAll',
+	    value: function destroyAll(query, props, opts) {
+	      var _this = this;
+	      utils._(_this, opts);
+	
+	      var adapterName = _this.getAdapterName(opts);
+	      return _this.adapters[adapterName].destroyAll(_this, query, opts);
+	    }
 	
 	    /**
 	     * Usage:
@@ -2107,11 +2280,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function extend() {
 	      var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 	      var classProps = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	      var requireName = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
 	
 	      var Child = undefined;
 	      var Parent = this;
 	
-	      if (!classProps.name) {
+	      if (!classProps.name && requireName) {
 	        throw new TypeError('name: Expected string, found ' + _typeof(classProps.name) + '!');
 	      }
 	      var _schema = classProps.schema || _defineProperty({}, classProps.idAttribute, {});
@@ -2145,6 +2319,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	})(BaseResource);
 	
 	(0, _decorators.configure)({
+	  adapters: {},
 	  autoInject: isBrowser,
 	  bypassCache: false,
 	  csp: false,

@@ -8,10 +8,13 @@ import {copy, forOwn} from '../utils'
  * })
  * class User extends JSData.Resource {...}
  */
-export function configure (props = {}) {
+export function configure (props, overwrite = true) {
+  props = props || {}
   return function (target) {
     forOwn(props, function (value, key) {
-      target[key] = copy(value)
+      if (target[key] === undefined || overwrite) {
+        target[key] = copy(value)
+      }
     })
     return target
   }
