@@ -62,6 +62,14 @@ export function resolve (value) {
 export function reject (value) {
   return Promise.reject(value)
 }
+export function _ (Resource, opts) {
+  for (var key in Resource) {
+    let value = Resource[key]
+    if (opts[key] === undefined && !isFunction(value)) {
+      opts[key] = value
+    }
+  }
+}
 export function intersection (array1, array2) {
   if (!array1 || !array2) {
     return []

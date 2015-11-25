@@ -2,7 +2,7 @@
 import {assert} from 'chai'
 
 export function init () {
-  describe('createInstance', function () {
+  describe('static createInstance', function () {
     it('should create an instance', function () {
       const store = new JSData.DS()
       class Person extends Resource {

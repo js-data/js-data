@@ -1,11 +1,23 @@
 /* global JSData:true, Resource:true, configure:true */
 import {assert} from 'chai'
-import * as createInstance from './createInstance.test'
-import * as eject from './eject.test'
-import * as ejectAll from './ejectAll.test'
-import * as get from './get.test'
-import * as getAll from './getAll.test'
-import * as inject from './inject.test'
+import * as create from './create.test'
+import * as staticCreate from './static.create.test'
+import * as staticCreateInstance from './static.createInstance.test'
+import * as staticCreateMany from './static.createMany.test'
+import * as destroy from './destroy.test'
+import * as staticDestroy from './static.destroy.test'
+import * as staticDestroyAll from './static.destroyAll.test'
+import * as staticEject from './static.eject.test'
+import * as staticEjectAll from './static.ejectAll.test'
+import * as staticFind from './static.find.test'
+import * as staticFindAll from './static.findAll.test'
+import * as staticGet from './static.get.test'
+import * as staticGetAll from './static.getAll.test'
+import * as staticInject from './static.inject.test'
+import * as save from './save.test'
+import * as staticUpdate from './static.update.test'
+import * as staticUpdateMany from './static.updateMany.test'
+import * as staticUpdateAll from './static.updateAll.test'
 
 let isBrowser = false
 
@@ -137,11 +149,23 @@ export function init () {
       )
     })
 
-    createInstance.init()
-    eject.init()
-    ejectAll.init()
-    get.init()
-    getAll.init()
-    inject.init()
+    create.init()
+    staticCreate.init()
+    staticCreateInstance.init()
+    staticCreateMany.init()
+    destroy.init()
+    staticDestroy.init()
+    staticDestroyAll.init()
+    staticEject.init()
+    staticEjectAll.init()
+    staticFind.init()
+    staticFindAll.init()
+    staticGet.init()
+    staticGetAll.init()
+    staticInject.init()
+    save.init()
+    staticUpdate.init()
+    staticUpdateMany.init()
+    staticUpdateAll.init()
   })
 }

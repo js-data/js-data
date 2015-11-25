@@ -1,5 +1,6 @@
 'use strict'
 
+require('babel-polyfill');
 var mocha = require('mocha')
 var JSData = require('./dist/js-data-debug')
 var JSDataTests = require('./dist/js-data-tests')
