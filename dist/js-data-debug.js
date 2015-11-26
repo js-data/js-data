@@ -614,6 +614,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.isFunction = isFunction;
 	exports.isSorN = isSorN;
 	exports.get = get;
+	exports.set = set;
 	exports.forOwn = forOwn;
 	exports.deepMixIn = deepMixIn;
 	exports.resolve = resolve;
@@ -668,6 +669,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	
 	  return object[last];
+	}
+	function mkdirP(object, path) {
+	  if (!path) {
+	    return object;
+	  }
+	  var parts = path.split('.');
+	  parts.forEach(function (key) {
+	    if (!object[key]) {
+	      object[key] = {};
+	    }
+	    object = object[key];
+	  });
+	  return object;
+	}
+	var PATH = /^(.+)\.(.+)$/;
+	function set(object, path, value) {
+	  var parts = PATH.exec(path);
+	  if (parts) {
+	    mkdirP(object, parts[1])[parts[2]] = value;
+	  } else {
+	    object[path] = value;
+	  }
 	}
 	function forOwn(obj, fn, thisArg) {
 	  var keys = Object.keys(obj);
@@ -1131,7 +1154,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var descriptor = {
 	        enumerable: prop.enumerable !== undefined ? prop.enumerable : true,
 	        writable: prop.writable ? prop.writable : true,
-	        configurable: prop.configurable ? prop.configurable : false
+	        configurable: prop.configurable ? prop.configurable : true
 	      };
 	      if (prop.indexed) {
 	        delete descriptor.writable;
@@ -1819,7 +1842,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.Resource = exports.belongsTo = undefined;
+	exports.Resource = undefined;
 	
 	var _utils = __webpack_require__(3);
 	
@@ -1845,77 +1868,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  isBrowser = !!window;
 	} catch (e) {}
 	
-	/**
-	 * Usage:
-	 *
-	 * @belongsTo(User, {
-	 *   localKey: 'myUserId'
-	 * })
-	 * class Post extends JSData.Resource {...}
-	 *
-	 * @belongsTo(User)
-	 * @belongsTo(Post, {
-	 *   localField: '_post'
-	 * })
-	 * class Comment extends JSData.Resource {...}
-	 */
-	function _belongsTo(relation) {
-	  var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-	
-	  return function (target) {
-	    var localField = opts.localField || relation.name.toLowerCase();
-	    var localKey = opts.localKey || relation.name.toLowerCase() + '_id';
-	    var descriptor = {
-	      enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
-	      get: function get() {
-	        return relation.get(this[localKey]);
-	      },
-	      set: function set(parent) {
-	        this[localKey] = parent[relation.idAttribute];
-	      }
-	    };
-	    if (opts.link === false || opts.link === undefined && !target.linkRelations) {
-	      delete descriptor.get;
-	      delete descriptor.set;
-	    }
-	    if (opts.get) {
-	      (function () {
-	        var originalGet = descriptor.get;
-	        descriptor.get = function () {
-	          var _this2 = this;
-	
-	          return opts.get(target, relation, this, originalGet ? function () {
-	            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	              args[_key] = arguments[_key];
-	            }
-	
-	            return originalGet.apply(_this2, args);
-	          } : undefined);
-	        };
-	      })();
-	    }
-	    if (opts.set) {
-	      (function () {
-	        var originalSet = descriptor.set;
-	        descriptor.set = function (parent) {
-	          var _this3 = this;
-	
-	          return opts.set(target, relation, this, parent, originalSet ? function () {
-	            for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-	              args[_key2] = arguments[_key2];
-	            }
-	
-	            return originalSet.apply(_this3, args);
-	          } : undefined);
-	        };
-	      })();
-	    }
-	    Object.defineProperty(target.prototype, localField, descriptor);
-	    return target;
-	  };
-	}
-	
-	exports.belongsTo = _belongsTo;
 	function afterExec(opts, thisArg) {
 	  return function (data) {
 	    if (opts.autoInject) {
@@ -1941,18 +1893,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    _classCallCheck(this, Resource);
 	
-	    var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(Resource).call(this));
+	    var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(Resource).call(this));
 	
-	    Object.defineProperty(_this4, '$$props', {
+	    Object.defineProperty(_this2, '$$props', {
 	      writable: true,
 	      value: {}
 	    });
-	    Object.defineProperty(_this4, '$$s', {
+	    Object.defineProperty(_this2, '$$s', {
 	      writable: true,
 	      value: false
 	    });
-	    (0, _decorators.configure)(props)(_this4);
-	    return _this4;
+	    (0, _decorators.configure)(props)(_this2);
+	    return _this2;
 	  }
 	
 	  // Instance methods
@@ -1960,17 +1912,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _createClass(Resource, [{
 	    key: 'create',
 	    value: function create(opts) {
-	      var _this5 = this;
+	      var _this3 = this;
 	
 	      var Ctor = this.constructor;
 	      return Ctor.create(this, opts).then(function (data) {
 	        // Might need to find a better way to do this
-	        if (data !== _this5 && data[Ctor.idAttribute]) {
+	        if (data !== _this3 && data[Ctor.idAttribute]) {
 	          utils.forOwn(data, function (value, key) {
-	            _this5[key] = value;
+	            _this3[key] = value;
 	          });
 	        }
-	        return _this5;
+	        return _this3;
 	      });
 	    }
 	  }, {
@@ -2015,7 +1967,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'inject',
 	    value: function inject(props) {
-	      var _this6 = this;
+	      var _this4 = this;
 	
 	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 	
@@ -2033,9 +1985,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (!id) {
 	          throw new TypeError('User#' + idAttribute + ': Expected string or number, found ' + (typeof id === 'undefined' ? 'undefined' : _typeof(id)) + '!');
 	        }
-	        var existing = _this6.get(id);
+	        var existing = _this4.get(id);
 	        if (existing) {
-	          var onConflict = opts.onConflict || _this6.onConflict;
+	          var onConflict = opts.onConflict || _this4.onConflict;
 	          if (onConflict === 'merge') {
 	            utils.deepMixIn(existing, instance);
 	          } else if (onConflict === 'replace') {
@@ -2152,7 +2104,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      utils._(_this, opts);
 	
 	      if (opts.upsert) {
-	        var _ret3 = (function () {
+	        var _ret = (function () {
 	          var hasId = true;
 	          items.forEach(function (item) {
 	            hasId = hasId && item[_this.idAttribute];
@@ -2164,7 +2116,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 	        })();
 	
-	        if ((typeof _ret3 === 'undefined' ? 'undefined' : _typeof(_ret3)) === "object") return _ret3.v;
+	        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
 	      }
 	      var adapterName = _this.getAdapterName(opts);
 	      return _this.adapters[adapterName].createMany(_this, items.map(function (item) {
@@ -2251,7 +2203,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'belongsTo',
 	    value: function belongsTo(resource, opts) {
-	      return _belongsTo(resource, opts)(this);
+	      return (0, _decorators.belongsTo)(resource, opts)(this);
+	    }
+	
+	    /**
+	     * Usage:
+	     *
+	     * User.hasMany(Post, {
+	     *   localField: 'my_posts'
+	     * })
+	     */
+	
+	  }, {
+	    key: 'hasMany',
+	    value: function hasMany(resource, opts) {
+	      return (0, _decorators.hasMany)(resource, opts)(this);
 	    }
 	  }, {
 	    key: 'action',

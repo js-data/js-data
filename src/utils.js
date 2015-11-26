@@ -35,6 +35,28 @@ export function get (object, prop){
 
   return object[last]
 }
+function mkdirP(object, path){
+  if (!path) {
+    return object
+  }
+  const parts = path.split('.')
+  parts.forEach(function (key) {
+    if (!object[key]) {
+      object[key] = {}
+    }
+    object = object[key]
+  })
+  return object
+}
+const PATH = /^(.+)\.(.+)$/
+export function set (object, path, value){
+  const parts = PATH.exec(path)
+  if (parts) {
+    mkdirP(object, parts[1])[parts[2]] = value
+  } else {
+    object[path] = value
+  }
+}
 export function forOwn (obj, fn, thisArg) {
   const keys = Object.keys(obj)
   const len = keys.length
@@ -236,7 +258,7 @@ export function pascalCase (str) {
 export function camelCase (str) {
   str = pascalCase(str)
   if (str) {
-    return str.charAt(0).toLowerCase() + str.slice(1);
+    return str.charAt(0).toLowerCase() + str.slice(1)
   }
   return str
 }

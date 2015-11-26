@@ -35,5 +35,6 @@ karma.conf.js
 junit/
 test/
 lib/
+doc/
 src/
 dist/js-data-tests.js
