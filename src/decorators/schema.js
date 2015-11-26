@@ -46,7 +46,7 @@ export function schema (opts = {}) {
       let descriptor = {
         enumerable: prop.enumerable !== undefined ? prop.enumerable : true,
         writable: prop.writable ? prop.writable : true,
-        configurable: prop.configurable ? prop.configurable : false
+        configurable: prop.configurable ? prop.configurable : true
       }
       if (prop.indexed) {
         delete descriptor.writable

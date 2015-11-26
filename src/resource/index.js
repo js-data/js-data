@@ -1,59 +1,18 @@
 import * as utils from '../utils'
-import {action, actions, configure, schema} from '../decorators'
+import {
+  action,
+  actions,
+  belongsTo,
+  configure,
+  hasMany,
+  schema
+} from '../decorators'
 
 let isBrowser = false
 
 try {
   isBrowser = !!window
 } catch (e) {
-}
-
-/**
- * Usage:
- *
- * @belongsTo(User, {
- *   localKey: 'myUserId'
- * })
- * class Post extends JSData.Resource {...}
- *
- * @belongsTo(User)
- * @belongsTo(Post, {
- *   localField: '_post'
- * })
- * class Comment extends JSData.Resource {...}
- */
-export function belongsTo (relation, opts = {}) {
-  return function (target) {
-    let localField = opts.localField || relation.name.toLowerCase()
-    let localKey = opts.localKey || relation.name.toLowerCase() + '_id'
-    let descriptor = {
-      enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
-      get () {
-        return relation.get(this[localKey])
-      },
-      set (parent) {
-        this[localKey] = parent[relation.idAttribute]
-      }
-    }
-    if (opts.link === false || (opts.link === undefined && !target.linkRelations)) {
-      delete descriptor.get
-      delete descriptor.set
-    }
-    if (opts.get) {
-      let originalGet = descriptor.get
-      descriptor.get = function () {
-        return opts.get(target, relation, this, originalGet ? (...args) => originalGet.apply(this, args) : undefined)
-      }
-    }
-    if (opts.set) {
-      let originalSet = descriptor.set
-      descriptor.set = function (parent) {
-        return opts.set(target, relation, this, parent, originalSet ? (...args) => originalSet.apply(this, args) : undefined)
-      }
-    }
-    Object.defineProperty(target.prototype, localField, descriptor)
-    return target
-  }
 }
 
 function afterExec (opts, thisArg) {
@@ -343,6 +302,17 @@ export class Resource extends BaseResource {
    */
   static belongsTo (resource, opts) {
     return belongsTo(resource, opts)(this)
+  }
+
+  /**
+   * Usage:
+   *
+   * User.hasMany(Post, {
+   *   localField: 'my_posts'
+   * })
+   */
+  static hasMany (resource, opts) {
+    return hasMany(resource, opts)(this)
   }
 
   static action (name, opts) {
