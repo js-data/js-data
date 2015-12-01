@@ -63,5 +63,67 @@ export function init () {
       assert.equal(user.foo, 'BAR')
       assert.isUndefined(user.beep)
     })
+    it.only('should inject relations', function () {
+      // can inject items without relations
+      this.User.inject(this.data.user1)
+      this.Organization.inject(this.data.organization2)
+      this.Comment.inject(this.data.comment3)
+      this.Profile.inject(this.data.profile4)
+
+      assert.deepEqual(this.User.get(1).id, this.data.user1.id)
+      assert.deepEqual(this.Organization.get(2).id, this.data.organization2.id)
+      assert.deepEqual(this.Comment.get(3).id, this.data.comment3.id)
+      assert.deepEqual(this.Profile.get(4).id, this.data.profile4.id)
+
+      // can inject items with relations
+      this.User.inject(this.data.user10)
+      this.Organization.inject(this.data.organization15)
+      this.Comment.inject(this.data.comment19)
+      this.Profile.inject(this.data.profile21)
+      this.Group.inject(this.data.group1)
+
+      // originals
+      assert.equal(this.User.get(10).name, this.data.user10.name)
+      assert.equal(this.User.get(10).id, this.data.user10.id)
+      assert.equal(this.User.get(10).organizationId, this.data.user10.organizationId)
+      assert.isArray(this.User.get(10).comments)
+      assert.deepEqual(this.Organization.get(15).name, this.data.organization15.name)
+      assert.deepEqual(this.Organization.get(15).id, this.data.organization15.id)
+      assert.isArray(this.Organization.get(15).users)
+      assert.deepEqual(this.Comment.get(19).id, this.data.comment19.id)
+      assert.deepEqual(this.Comment.get(19).content, this.data.comment19.content)
+      assert.deepEqual(this.Profile.get(21).id, this.data.profile21.id)
+      assert.deepEqual(this.Profile.get(21).content, this.data.profile21.content)
+      assert.deepEqual(this.Group.get(1).id, this.data.group1.id)
+      assert.deepEqual(this.Group.get(1).name, this.data.group1.name)
+      assert.isArray(this.Group.get(1).userIds)
+
+      return
+
+      // user10 relations
+      assert.deepEqual(this.Comment.get(11), this.User.get(10).comments[0])
+      assert.deepEqual(this.Comment.get(12), this.User.get(10).comments[1])
+      assert.deepEqual(this.Comment.get(13), this.User.get(10).comments[2])
+      assert.deepEqual(this.Organization.get(14), this.User.get(10).organization)
+      assert.deepEqual(this.Profile.get(15), this.User.get(10).profile)
+      assert.isArray(this.User.get(10).groups)
+      assert.deepEqual(this.User.get(10).groups[0], this.Group.get(1))
+
+      // group1 relations
+      assert.isArray(this.Group.get(1).users)
+      assert.deepEqual(this.Group.get(1).users[0], this.User.get(10))
+
+      // organization15 relations
+      assert.deepEqual(this.User.get(16), this.Organization.get(15).users[0])
+      assert.deepEqual(this.User.get(17), this.Organization.get(15).users[1])
+      assert.deepEqual(this.User.get(18), this.Organization.get(15).users[2])
+
+      // comment19 relations
+      assert.deepEqual(this.User.get(20), this.Comment.get(19).user)
+      assert.deepEqual(this.User.get(19), this.Comment.get(19).approvedByUser)
+
+      // profile21 relations
+      assert.deepEqual(this.User.get(22), this.Profile.get(21).user)
+    })
   })
 }

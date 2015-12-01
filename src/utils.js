@@ -35,6 +35,17 @@ export function get (object, prop){
 
   return object[last]
 }
+export function unset (object, prop){
+  const parts = prop.split('.')
+  const last = parts.pop()
+
+  while (prop = parts.shift()) {
+    object = object[prop]
+    if (object == null) return
+  }
+
+  delete object[last]
+}
 function mkdirP(object, path){
   if (!path) {
     return object

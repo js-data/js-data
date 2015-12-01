@@ -33,12 +33,7 @@ export class Resource extends BaseResource {
   constructor (props = {}) {
     super()
     Object.defineProperty(this, '$$props', {
-      writable: true,
       value: {}
-    })
-    Object.defineProperty(this, '$$s', {
-      writable: true,
-      value: false
     })
     configure(props)(this)
   }
@@ -89,51 +84,104 @@ export class Resource extends BaseResource {
     return instance instanceof this
   }
 
-  static inject (props, opts = {}) {
+  static inject (items, opts = {}) {
+    const _this = this
     let singular = false
-    if (utils.isArray(props)) {
-      props = props.map(this.createInstance, this)
-    } else {
+    if (!utils.isArray(items)) {
+      items = [items]
       singular = true
-      props = [this.createInstance(props)]
     }
-    const collection = this.data()
-    const idAttribute = this.idAttribute
-    props = props.map(instance => {
-      const id = instance[idAttribute]
+    const collection = _this.data()
+    const idAttribute = _this.idAttribute
+    const relationList = _this.relationList || []
+    items.forEach(function (props) {
+      relationList.forEach(function (def) {
+        const Relation = def.Relation
+        const toInject = utils.get(props, def.localField)
+        if (!toInject) {
+          return
+        }
+        if (typeof def.inject === 'function') {
+          def.inject(_this, def, props)
+        } else if (def.inject !== false) {
+          if (utils.isArray(toInject)) {
+            toInject.forEach(function (toInjectItem) {
+              if (toInjectItem !== Relation.get(utils.get(toInjectItem, Relation.idAttribute))) {
+                try {
+                  const injected = Relation.inject(toInjectItem)
+                  if (def.foreignKey) {
+                    utils.set(injected, def.foreignKey, utils.get(props, idAttribute))
+                  }
+                } catch (err) {
+                  _this.errorFn(err, `Failed to inject ${def.type} relation: "${def.relation}"!`)
+                }
+              }
+            })
+            if (def.localKeys) {
+              utils.set(toInject, def.localKeys, toInject.map(function (injected) {
+                return utils.get(injected, Relation.idAttribute)
+              }))
+            }
+          } else {
+            // handle injecting belongsTo and hasOne relations
+            if (toInject !== Relation.get(Relation.idAttribute)) {
+              try {
+                const injected = Relation.inject(toInject)
+                if (def.localKey) {
+                  utils.set(props, def.localKey, utils.get(injected, Relation.idAttribute))
+                }
+                if (def.foreignKey) {
+                  utils.set(injected, def.foreignKey, utils.get(props, idAttribute))
+                }
+              } catch (err) {
+                _this.errorFn(err, `Failed to inject ${def.type} relation: "${def.relation}"!`)
+              }
+            }
+          }
+        }
+        // remove relation properties from the item, since those relations have been injected by now
+        if (typeof def.link === 'boolean' ? def.link : !!_this.linkRelations) {
+          utils.unset(props, def.localField)
+        }
+      })
+    })
+    items = items.map(function (props) {
+      const id = props[idAttribute]
       if (!id) {
         throw new TypeError(`User#${idAttribute}: Expected string or number, found ${typeof id}!`)
       }
-      const existing = this.get(id)
+      const existing = _this.get(id)
+
       if (existing) {
-        const onConflict = opts.onConflict || this.onConflict
+        const onConflict = opts.onConflict || _this.onConflict
         if (onConflict === 'merge') {
-          utils.deepMixIn(existing, instance)
+          utils.deepMixIn(existing, props)
         } else if (onConflict === 'replace') {
           utils.forOwn(existing, (value, key) => {
             if (key !== idAttribute) {
-              if (!instance.hasOwnProperty(key)) {
+              if (!props.hasOwnProperty(key)) {
                 delete existing[key]
               }
             }
           })
-          utils.forOwn(instance, (value, key) => {
+          utils.forOwn(props, (value, key) => {
             if (key !== idAttribute) {
               existing[key] = value
             }
           })
         }
-        instance = existing
+        props = existing
       } else {
-        collection.index.insertRecord(instance)
+        props = _this.createInstance(props)
+        props.$$props.$$s = true
+        collection.index.insertRecord(props)
       }
-      instance.$$s = true
       utils.forOwn(collection.indexes, function (index) {
-        index.updateRecord(instance)
+        index.updateRecord(props)
       })
-      return instance
+      return props
     })
-    return singular ? props[0] : props
+    return singular ? (items.length ? items[0] : undefined) : items
   }
 
   static eject (id, opts = {}) {
@@ -336,35 +384,50 @@ export class Resource extends BaseResource {
    *
    * var User = JSData.Resource.extend({...}, {...})
    */
-  static extend (props = {}, classProps = {}, requireName = true) {
+  static extend (props = {}, classProps = {}) {
     let Child
-    let Parent = this
+    const Parent = this
 
-    if (!classProps.name && requireName) {
+    if (!classProps.name) {
       throw new TypeError(`name: Expected string, found ${typeof classProps.name}!`)
     }
     const _schema = classProps.schema || {
       [classProps.idAttribute]: {}
     }
+    const initialize = props.initialize
+    delete props.initialize
     _schema[classProps.idAttribute] = _schema[classProps.idAttribute] || {}
     classProps.shortname = classProps.shortname || utils.camelCase(classProps.name)
 
-    if (classProps.csp) {
-      Child = function (props) {
-        __callCheck__(this, Child)
-        Parent.call(this, props)
-      }
+    if (props.hasOwnProperty('constructor')) {
+      Child = props.constructor
+      delete props.constructor
     } else {
-      let name = utils.pascalCase(classProps.name)
-      delete classProps.name
-      let func = `return function ${name}(props) {
-                    __callCheck__(this, ${name})
-                    Parent.call(this, props)
-                  }`
-      Child = new Function('__callCheck__', 'Parent', func)(__callCheck__, Parent) // eslint-disable-line
+      if (classProps.csp) {
+        Child = function (...args) {
+          __callCheck__(this, Child)
+          const _this = __possibleConstructorReturn__(this, Object.getPrototypeOf(Child).apply(this, args));
+          if (initialize) {
+            initialize.apply(this, args)
+          }
+          return _this
+        }
+      } else {
+        const name = utils.pascalCase(classProps.name)
+        delete classProps.name
+        const func = `return function ${name}() {
+                        __callCheck__(this, ${name})
+                        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(${name}).apply(this, arguments));
+                        if (initialize) {
+                          initialize.apply(this, arguments)
+                        }
+                        return _this
+                      }`
+        Child = new Function('__callCheck__', '__possibleConstructorReturn__', 'Parent', 'initialize', func)(__callCheck__, __possibleConstructorReturn__, Parent, initialize) // eslint-disable-line
+      }
     }
 
-    __inherits__(Child, this)
+    __inherits__(Child, Parent)
 
     configure(props)(Child.prototype)
     configure(classProps)(Child)
