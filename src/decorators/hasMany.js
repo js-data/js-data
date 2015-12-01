@@ -111,6 +111,19 @@ function applyHasMany (Resource, Relation, opts = {}) {
   // Finally, added property to prototype of target Resource
   Object.defineProperty(Resource.prototype, localField, descriptor)
 
+  if (!Resource.relationList) {
+    Resource.relationList = []
+  }
+  if (!Resource.relationFields) {
+    Resource.relationFields = []
+  }
+  opts.type = 'hasMany'
+  opts.name = Resource.name
+  opts.relation = Relation.name
+  opts.Relation = Relation
+  Resource.relationList.push(opts)
+  Resource.relationFields.push(localField)
+
   // Return target Resource for chaining
   return Resource
 }

@@ -57,66 +57,6 @@ describe('DS#inject', function () {
     assert.deepEqual(JSON.stringify(store.get('post', 7)), JSON.stringify(p3));
     assert.deepEqual(JSON.stringify(store.get('post', 8)), JSON.stringify(p4));
   });
-  it('should inject relations', function () {
-    // can inject items without relations
-    store.inject('user', user1);
-    store.inject('organization', organization2);
-    store.inject('comment', comment3);
-    store.inject('profile', profile4);
-
-    assert.deepEqual(store.get('user', 1).id, user1.id);
-    assert.deepEqual(store.get('organization', 2).id, organization2.id);
-    assert.deepEqual(store.get('comment', 3).id, comment3.id);
-    assert.deepEqual(store.get('profile', 4).id, profile4.id);
-
-    // can inject items with relations
-    store.inject('user', user10, 0);
-    store.inject('organization', organization15);
-    store.inject('comment', comment19);
-    store.inject('profile', profile21);
-    store.inject('group', group1);
-
-    // originals
-    assert.equal(store.get('user', 10).name, user10.name);
-    assert.equal(store.get('user', 10).id, user10.id);
-    assert.equal(store.get('user', 10).organizationId, user10.organizationId);
-    assert.isArray(store.get('user', 10).comments);
-    assert.deepEqual(store.get('organization', 15).name, organization15.name);
-    assert.deepEqual(store.get('organization', 15).id, organization15.id);
-    assert.isArray(store.get('organization', 15).users);
-    assert.deepEqual(store.get('comment', 19).id, comment19.id);
-    assert.deepEqual(store.get('comment', 19).content, comment19.content);
-    assert.deepEqual(store.get('profile', 21).id, profile21.id);
-    assert.deepEqual(store.get('profile', 21).content, profile21.content);
-    assert.deepEqual(store.get('group', 1).id, group1.id);
-    assert.deepEqual(store.get('group', 1).name, group1.name);
-    assert.isArray(store.get('group', 1).userIds);
-
-    // user10 relations
-    assert.deepEqual(store.get('comment', 11), store.get('user', 10).comments[0]);
-    assert.deepEqual(store.get('comment', 12), store.get('user', 10).comments[1]);
-    assert.deepEqual(store.get('comment', 13), store.get('user', 10).comments[2]);
-    assert.deepEqual(store.get('organization', 14), store.get('user', 10).organization);
-    assert.deepEqual(store.get('profile', 15), store.get('user', 10).profile);
-    assert.isArray(store.get('user', 10).groups);
-    assert.deepEqual(store.get('user', 10).groups[0], store.get('group', 1));
-
-    // group1 relations
-    assert.isArray(store.get('group', 1).users);
-    assert.deepEqual(store.get('group', 1).users[0], store.get('user', 10));
-
-    // organization15 relations
-    assert.deepEqual(store.get('user', 16), store.get('organization', 15).users[0]);
-    assert.deepEqual(store.get('user', 17), store.get('organization', 15).users[1]);
-    assert.deepEqual(store.get('user', 18), store.get('organization', 15).users[2]);
-
-    // comment19 relations
-    assert.deepEqual(store.get('user', 20), store.get('comment', 19).user);
-    assert.deepEqual(store.get('user', 19), store.get('comment', 19).approvedByUser);
-
-    // profile21 relations
-    assert.deepEqual(store.get('user', 22), store.get('profile', 21).user);
-  });
   it('should find inverse links', function () {
     store.inject('user', { organizationId: 5, id: 1 });
 

@@ -45,7 +45,8 @@ module.exports = {
                 if (typeof target[key] === 'string') {
                   target[key] = target[key]
                     .replace(/__callCheck__/gi, '_classCallCheck')
-                    .replace(/__inherits__/gi, '_inherits');
+                    .replace(/__inherits__/gi, '_inherits')
+                    .replace(/__possibleConstructorReturn__/gi, '_possibleConstructorReturn');
                 } else if (Array.isArray(target[key])) {
                   target[key].forEach(findAndReplace);
                 } else if (target[key] && isObject(target[key])) {

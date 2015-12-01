@@ -1,6 +1,7 @@
 'use strict'
 
 require('babel-polyfill');
+var assert = require('chai').assert;
 var mocha = require('mocha')
 var JSData = require('./dist/js-data-debug')
 var JSDataTests = require('./dist/js-data-tests')
@@ -34,11 +35,191 @@ for (var key in globals) {
 test.globals(testGlobals)
 
 beforeEach(function () {
-  globals.p1 = global.p1 = { author: 'John', age: 30, id: 5 }
-  globals.p2 = global.p2 = { author: 'Sally', age: 31, id: 6 }
-  globals.p3 = global.p3 = { author: 'Mike', age: 32, id: 7 }
-  globals.p4 = global.p4 = { author: 'Adam', age: 33, id: 8 }
-  globals.p5 = global.p5 = { author: 'Adam', age: 33, id: 9 }
+  this.data = {}
+  this.data.p1 = globals.p1 = global.p1 = { author: 'John', age: 30, id: 5 }
+  this.data.p2 = globals.p2 = global.p2 = { author: 'Sally', age: 31, id: 6 }
+  this.data.p3 = globals.p3 = global.p3 = { author: 'Mike', age: 32, id: 7 }
+  this.data.p4 = globals.p4 = global.p4 = { author: 'Adam', age: 33, id: 8 }
+  this.data.p5 = globals.p5 = global.p5 = { author: 'Adam', age: 33, id: 9 }
+  var Base = JSData.Resource.extend({}, {
+    name: 'base',
+    linkRelations: true
+  });
+  this.Post = Base.extend({}, {
+    name: 'post',
+    endpoint: '/posts'
+  })
+  this.User = Base.extend({}, {
+    name: 'user',
+    relations: {
+      hasOne: {
+        profile: {
+          localField: 'profile',
+          foreignKey: 'userId'
+        }
+      }
+    }
+  })
+  this.Group = Base.extend({}, {
+    name: 'group'
+  })
+  this.Organization = Base.extend({}, {
+    name: 'organization'
+  })
+  this.Profile = Base.extend({}, {
+    name: 'profile'
+  })
+  this.Comment = Base.extend({}, {
+    name: 'comment'
+  })
+  this.User.belongsTo(this.Organization, {
+    localField: 'organization',
+    localKey: 'organizationId'
+  })
+  this.User.hasMany(this.Comment, {
+    localField: 'comments',
+    foreignKey: 'approvedBy'
+  })
+  this.User.hasMany(this.Group, {
+    localField: 'groups',
+    foreignKeys: 'userIds'
+  })
+  this.Group.hasMany(this.User, {
+    localField: 'users',
+    localKeys: 'userIds'
+  })
+  this.Organization.hasMany(this.User, {
+    localField: 'users',
+    foreignKey: 'organizationId'
+  })
+  this.Profile.belongsTo(this.User, {
+    localField: 'user',
+    localKey: 'userId'
+  })
+  this.Comment.belongsTo(this.User, {
+    localField: 'user',
+    localKey: 'userId'
+  })
+  this.Comment.belongsTo(this.User, {
+    localField: 'approvedByUser',
+    localKey: 'approvedBy'
+  })
+  this.data.user1 = {
+    name: 'John Anderson',
+    id: 1,
+    organizationId: 2
+  }
+  this.data.organization2 = {
+    name: 'Test Corp 2',
+    id: 2
+  }
+  this.data.comment3 = {
+    content: 'test comment 3',
+    id: 3,
+    userId: 1
+  }
+  this.data.profile4 = {
+    content: 'test profile 4',
+    id: 4,
+    userId: 1
+  }
+
+  this.data.comment11 = {
+    id: 11,
+    userId: 10,
+    content: 'test comment 11'
+  }
+  this.data.comment12 = {
+    id: 12,
+    userId: 10,
+    content: 'test comment 12'
+  }
+  this.data.comment13 = {
+    id: 13,
+    userId: 10,
+    content: 'test comment 13'
+  }
+  this.data.organization14 = {
+    id: 14,
+    name: 'Test Corp'
+  }
+  this.data.profile15 = {
+    id: 15,
+    userId: 10,
+    email: 'john.anderson@test.com'
+  }
+  this.data.user10 = {
+    name: 'John Anderson',
+    id: 10,
+    organizationId: 14,
+    comments: [
+      this.data.comment11,
+      this.data.comment12,
+      this.data.comment13
+    ],
+    organization: this.data.organization14,
+    profile: this.data.profile15
+  }
+  this.data.user16 = {
+    id: 16,
+    organizationId: 15,
+    name: 'test user 16'
+  }
+  this.data.user17 = {
+    id: 17,
+    organizationId: 15,
+    name: 'test user 17'
+  }
+  this.data.user18 = {
+    id: 18,
+    organizationId: 15,
+    name: 'test user 18'
+  }
+  this.data.group1 = {
+    name: 'group 1',
+    id: 1,
+    userIds: [10]
+  }
+  this.data.group2 = {
+    name: 'group 2',
+    id: 2,
+    userIds: [10]
+  }
+  this.data.organization15 = {
+    name: 'Another Test Corp',
+    id: 15,
+    users: [
+      this.data.user16,
+      this.data.user17,
+      this.data.user18
+    ]
+  }
+  this.data.user19 = {
+    id: 19,
+    name: 'test user 19'
+  }
+  this.data.user20 = {
+    id: 20,
+    name: 'test user 20'
+  }
+  this.data.comment19 = {
+    content: 'test comment 19',
+    id: 19,
+    approvedBy: 19,
+    approvedByUser: this.data.user19,
+    userId: 20,
+    user: this.data.user20
+  }
+  this.data.user22 = {
+    id: 22,
+    name: 'test user 22'
+  }
+  this.data.profile21 = {
+    content: 'test profile 21',
+    id: 21,
+    userId: 22,
+    user: this.data.user22
+  }
 })
 
 /*
@@ -122,94 +303,6 @@ beforeEach(function () {
       }
     }
   })
-  globals.Post = global.Post = store.defineResource({
-    name: 'post',
-    keepChangeHistory: true,
-    endpoint: '/posts'
-  })
-  globals.User = global.User = store.defineResource({
-    name: 'user',
-    relations: {
-      hasMany: {
-        comment: {
-          localField: 'comments',
-          foreignKey: 'approvedBy'
-        },
-        group: {
-          localField: 'groups',
-          foreignKeys: 'userIds'
-        }
-      },
-      hasOne: {
-        profile: {
-          localField: 'profile',
-          foreignKey: 'userId'
-        }
-      },
-      belongsTo: {
-        organization: {
-          parent: true,
-          localKey: 'organizationId',
-          localField: 'organization'
-        }
-      }
-    }
-  })
-
-  globals.Group = global.Group = store.defineResource({
-    name: 'group',
-    relations: {
-      hasMany: {
-        user: {
-          localField: 'users',
-          localKeys: 'userIds'
-        }
-      }
-    }
-  })
-
-  globals.Organization = global.Organization = store.defineResource({
-    name: 'organization',
-    relations: {
-      hasMany: {
-        user: {
-          localField: 'users',
-          foreignKey: 'organizationId'
-        }
-      }
-    }
-  })
-
-  globals.Profile = global.Profile = store.defineResource({
-    name: 'profile',
-    relations: {
-      belongsTo: {
-        user: {
-          localField: 'user',
-          localKey: 'userId'
-        }
-      }
-    }
-  })
-
-  globals.Comment = global.Comment = store.defineResource({
-    name: 'comment',
-    relations: {
-      belongsTo: {
-        user: [
-          {
-            localField: 'user',
-            localKey: 'userId'
-          },
-          {
-            parent: true,
-            localField: 'approvedByUser',
-            localKey: 'approvedBy'
-          }
-        ]
-      }
-    }
-  })
 
   lifecycle.beforeValidate.callCount = 0
   lifecycle.validate.callCount = 0
@@ -225,123 +318,6 @@ beforeEach(function () {
   lifecycle.serialize.callCount = 0
   lifecycle.deserialize.callCount = 0
   lifecycle.queryTransform.callCount = 0
-
-  globals.user1 = global.user1 = {
-    name: 'John Anderson',
-    id: 1,
-    organizationId: 2
-  }
-  globals.organization2 = global.organization2 = {
-    name: 'Test Corp 2',
-    id: 2
-  }
-  globals.comment3 = global.comment3 = {
-    content: 'test comment 3',
-    id: 3,
-    userId: 1
-  }
-  globals.profile4 = global.profile4 = {
-    content: 'test profile 4',
-    id: 4,
-    userId: 1
-  }
-
-  globals.comment11 = global.comment11 = {
-    id: 11,
-    userId: 10,
-    content: 'test comment 11'
-  }
-  globals.comment12 = global.comment12 = {
-    id: 12,
-    userId: 10,
-    content: 'test comment 12'
-  }
-  globals.comment13 = global.comment13 = {
-    id: 13,
-    userId: 10,
-    content: 'test comment 13'
-  }
-  globals.organization14 = global.organization14 = {
-    id: 14,
-    name: 'Test Corp'
-  }
-  globals.profile15 = global.profile15 = {
-    id: 15,
-    userId: 10,
-    email: 'john.anderson@test.com'
-  }
-  globals.user10 = global.user10 = {
-    name: 'John Anderson',
-    id: 10,
-    organizationId: 14,
-    comments: [
-      globals.comment11,
-      globals.comment12,
-      globals.comment13
-    ],
-    organization: globals.organization14,
-    profile: globals.profile15
-  }
-  globals.user16 = global.user16 = {
-    id: 16,
-    organizationId: 15,
-    name: 'test user 16'
-  }
-  globals.user17 = global.user17 = {
-    id: 17,
-    organizationId: 15,
-    name: 'test user 17'
-  }
-  globals.user18 = global.user18 = {
-    id: 18,
-    organizationId: 15,
-    name: 'test user 18'
-  }
-  globals.group1 = global.group1 = {
-    name: 'group 1',
-    id: 1,
-    userIds: [10]
-  }
-  globals.group2 = global.group2 = {
-    name: 'group 2',
-    id: 2,
-    userIds: [10]
-  }
-  globals.organization15 = global.organization15 = {
-    name: 'Another Test Corp',
-    id: 15,
-    users: [
-      globals.user16,
-      globals.user17,
-      globals.user18
-    ]
-  }
-  globals.user19 = global.user19 = {
-    id: 19,
-    name: 'test user 19'
-  }
-  globals.user20 = global.user20 = {
-    id: 20,
-    name: 'test user 20'
-  }
-  globals.comment19 = global.comment19 = {
-    content: 'test comment 19',
-    id: 19,
-    approvedBy: 19,
-    approvedByUser: globals.user19,
-    userId: 20,
-    user: globals.user20
-  }
-  globals.user22 = global.user22 = {
-    id: 22,
-    name: 'test user 22'
-  }
-  globals.profile21 = global.profile21 = {
-    content: 'test profile 21',
-    id: 21,
-    userId: 22,
-    user: globals.user22
-  }
 
   globals.store = store
   global.store = globals.store

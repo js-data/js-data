@@ -13,9 +13,9 @@ import {get, set} from '../utils'
  */
 function applyBelongsTo (Resource, Relation, opts = {}) {
   // Choose field where the relation will be attached
-  const localField = opts.localField || Relation.name.toLowerCase()
+  const localField = opts.localField = opts.localField || Relation.name.toLowerCase()
   // Choose field that holds the primary key of the relation
-  const localKey = opts.localKey || Relation.name.toLowerCase() + '_id'
+  const localKey = opts.localKey = opts.localKey || Relation.name.toLowerCase() + '_id'
 
   // Setup configuration of the property
   const descriptor = {
@@ -70,6 +70,19 @@ function applyBelongsTo (Resource, Relation, opts = {}) {
 
   // Finally, added property to prototype of target Resource
   Object.defineProperty(Resource.prototype, localField, descriptor)
+
+  if (!Resource.relationList) {
+    Resource.relationList = []
+  }
+  if (!Resource.relationFields) {
+    Resource.relationFields = []
+  }
+  opts.type = 'belongsTo'
+  opts.name = Resource.name
+  opts.relation = Relation.name
+  opts.Relation = Relation
+  Resource.relationList.push(opts)
+  Resource.relationFields.push(localField)
 
   // Return target Resource for chaining
   return Resource

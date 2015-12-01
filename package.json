@@ -38,6 +38,7 @@
       "__callCheck__",
       "__get__",
       "__inherits__",
+      "__possibleConstructorReturn__",
       "describe",
       "it",
       "before",
