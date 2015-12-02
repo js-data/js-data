@@ -24,7 +24,7 @@ export function isFunction (value) {
 export function isSorN (value) {
   return isString(value) || isNumber(value)
 }
-export function get (object, prop){
+export function get (object, prop) {
   const parts = prop.split('.')
   const last = parts.pop()
 
@@ -35,7 +35,7 @@ export function get (object, prop){
 
   return object[last]
 }
-export function unset (object, prop){
+export function unset (object, prop) {
   const parts = prop.split('.')
   const last = parts.pop()
 
@@ -46,7 +46,7 @@ export function unset (object, prop){
 
   delete object[last]
 }
-function mkdirP(object, path){
+function mkdirP(object, path) {
   if (!path) {
     return object
   }
@@ -60,7 +60,7 @@ function mkdirP(object, path){
   return object
 }
 const PATH = /^(.+)\.(.+)$/
-export function set (object, path, value){
+export function set (object, path, value) {
   const parts = PATH.exec(path)
   if (parts) {
     mkdirP(object, parts[1])[parts[2]] = value

@@ -78,7 +78,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_ret === 'continue') continue;
 	}
 	
-	var _datastore = __webpack_require__(12);
+	var _datastore = __webpack_require__(13);
 	
 	var _loop2 = function _loop2(_key6) {
 	  if (_key6 === "default") return 'continue';
@@ -114,7 +114,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_ret3 === 'continue') continue;
 	}
 	
-	var _resource = __webpack_require__(13);
+	var _resource = __webpack_require__(14);
 	
 	var _loop4 = function _loop4(_key8) {
 	  if (_key8 === "default") return 'continue';
@@ -166,7 +166,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _decorators = __webpack_require__(4);
 	
-	var _mindex = __webpack_require__(10);
+	var _mindex = __webpack_require__(11);
 	
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 	
@@ -920,92 +920,110 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _actions = __webpack_require__(5);
 	
-	var _loop = function _loop(_key6) {
-	  if (_key6 === "default") return 'continue';
-	  Object.defineProperty(exports, _key6, {
+	var _loop = function _loop(_key7) {
+	  if (_key7 === "default") return 'continue';
+	  Object.defineProperty(exports, _key7, {
 	    enumerable: true,
 	    get: function get() {
-	      return _actions[_key6];
+	      return _actions[_key7];
 	    }
 	  });
 	};
 	
-	for (var _key6 in _actions) {
-	  var _ret = _loop(_key6);
+	for (var _key7 in _actions) {
+	  var _ret = _loop(_key7);
 	
 	  if (_ret === 'continue') continue;
 	}
 	
 	var _belongsTo = __webpack_require__(7);
 	
-	var _loop2 = function _loop2(_key7) {
-	  if (_key7 === "default") return 'continue';
-	  Object.defineProperty(exports, _key7, {
+	var _loop2 = function _loop2(_key8) {
+	  if (_key8 === "default") return 'continue';
+	  Object.defineProperty(exports, _key8, {
 	    enumerable: true,
 	    get: function get() {
-	      return _belongsTo[_key7];
+	      return _belongsTo[_key8];
 	    }
 	  });
 	};
 	
-	for (var _key7 in _belongsTo) {
-	  var _ret2 = _loop2(_key7);
+	for (var _key8 in _belongsTo) {
+	  var _ret2 = _loop2(_key8);
 	
 	  if (_ret2 === 'continue') continue;
 	}
 	
 	var _configure = __webpack_require__(6);
 	
-	var _loop3 = function _loop3(_key8) {
-	  if (_key8 === "default") return 'continue';
-	  Object.defineProperty(exports, _key8, {
+	var _loop3 = function _loop3(_key9) {
+	  if (_key9 === "default") return 'continue';
+	  Object.defineProperty(exports, _key9, {
 	    enumerable: true,
 	    get: function get() {
-	      return _configure[_key8];
+	      return _configure[_key9];
 	    }
 	  });
 	};
 	
-	for (var _key8 in _configure) {
-	  var _ret3 = _loop3(_key8);
+	for (var _key9 in _configure) {
+	  var _ret3 = _loop3(_key9);
 	
 	  if (_ret3 === 'continue') continue;
 	}
 	
 	var _hasMany = __webpack_require__(8);
 	
-	var _loop4 = function _loop4(_key9) {
-	  if (_key9 === "default") return 'continue';
-	  Object.defineProperty(exports, _key9, {
-	    enumerable: true,
-	    get: function get() {
-	      return _hasMany[_key9];
-	    }
-	  });
-	};
-	
-	for (var _key9 in _hasMany) {
-	  var _ret4 = _loop4(_key9);
-	
-	  if (_ret4 === 'continue') continue;
-	}
-	
-	var _schema = __webpack_require__(9);
-	
-	var _loop5 = function _loop5(_key10) {
+	var _loop4 = function _loop4(_key10) {
 	  if (_key10 === "default") return 'continue';
 	  Object.defineProperty(exports, _key10, {
 	    enumerable: true,
 	    get: function get() {
-	      return _schema[_key10];
+	      return _hasMany[_key10];
 	    }
 	  });
 	};
 	
-	for (var _key10 in _schema) {
-	  var _ret5 = _loop5(_key10);
+	for (var _key10 in _hasMany) {
+	  var _ret4 = _loop4(_key10);
+	
+	  if (_ret4 === 'continue') continue;
+	}
+	
+	var _hasOne = __webpack_require__(9);
+	
+	var _loop5 = function _loop5(_key11) {
+	  if (_key11 === "default") return 'continue';
+	  Object.defineProperty(exports, _key11, {
+	    enumerable: true,
+	    get: function get() {
+	      return _hasOne[_key11];
+	    }
+	  });
+	};
+	
+	for (var _key11 in _hasOne) {
+	  var _ret5 = _loop5(_key11);
 	
 	  if (_ret5 === 'continue') continue;
+	}
+	
+	var _schema = __webpack_require__(10);
+	
+	var _loop6 = function _loop6(_key12) {
+	  if (_key12 === "default") return 'continue';
+	  Object.defineProperty(exports, _key12, {
+	    enumerable: true,
+	    get: function get() {
+	      return _schema[_key12];
+	    }
+	  });
+	};
+	
+	for (var _key12 in _schema) {
+	  var _ret6 = _loop6(_key12);
+	
+	  if (_ret6 === 'continue') continue;
 	}
 	
 	// Workaround for https://github.com/babel/babel/issues/2763
@@ -1183,6 +1201,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (opts.link === false || opts.link === undefined && !Resource.linkRelations) {
 	    delete descriptor.get;
 	    delete descriptor.set;
+	    descriptor.writable = true;
 	  }
 	
 	  // Check for user-defined getter
@@ -1249,6 +1268,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  opts.Relation = Relation;
 	  Resource.relationList.push(opts);
 	  Resource.relationFields.push(localField);
+	  Resource.data().createIndex(localKey);
 	
 	  // Return target Resource for chaining
 	  return Resource;
@@ -1309,12 +1329,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 	
 	  // Choose field where the relation will be attached
-	  var localField = opts.localField || Relation.name.toLowerCase();
+	  var localField = opts.localField || (0, _utils.camelCase)(Relation.name) + 'Collection';
 	  // Choose field on related instances that holds the primary key of instances
 	  // of the target Resource
-	  var foreignKey = opts.foreignKey || Relation.name.toLowerCase() + '_id';
-	  var localKeys = opts.localKeys || Relation.name.toLowerCase() + '_ids';
-	  var foreignKeys = opts.foreignKeys || Relation.name.toLowerCase() + '_ids';
+	  var foreignKey = opts.foreignKey;
+	  var localKeys = opts.localKeys;
+	  var foreignKeys = opts.foreignKeys;
+	
+	  if (!foreignKey && !localKeys && !foreignKeys) {
+	    foreignKey = opts.foreignKey = (0, _utils.camelCase)(Resource.name) + 'Id';
+	  }
+	  if (foreignKey) {
+	    Relation.data().createIndex(foreignKey);
+	  }
 	
 	  // Setup configuration of the property
 	  var descriptor = {
@@ -1330,7 +1357,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var keys = (0, _utils.get)(this, localKeys) || [];
 	        var args = (0, _utils.isArray)(keys) ? keys : Object.keys(keys);
 	        // Make a slower retrieval using the ids in the "localKeys" array
-	        return Relation.getAll.apply(Resource, args);
+	        return Relation.getAll.apply(Relation, args);
 	      } else if (foreignKeys) {
 	        (0, _utils.set)(query, 'where.' + foreignKeys + '.contains', (0, _utils.get)(this, Resource.idAttribute));
 	        // Make a much slower retrieval
@@ -1380,6 +1407,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (opts.link === false || opts.link === undefined && !Resource.linkRelations) {
 	    delete descriptor.get;
 	    delete descriptor.set;
+	    descriptor.writable = true;
 	  }
 	
 	  // Check for user-defined getter
@@ -1487,6 +1515,158 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	exports.hasOne = hasOne;
+	
+	var _utils = __webpack_require__(3);
+	
+	/**
+	 * Steps to apply a "hasOne" relationship
+	 * 1. Choose the foreignKey and localKey
+	 * 2. Configure property descriptor, possibly including custom getter/setter
+	 * 3. Add property to prototype of target Resource
+	 *
+	 * The added property is where an instance of the related Resource will be
+	 * attached to an instance of the target Resource, e.g. if User hasOne
+	 * Profile and "localField" is set to "profile", "user.profile" will be a
+	 * reference to the profile.
+	 */
+	function applyHasOne(Resource, Relation) {
+	  var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+	
+	  // Choose field where the relation will be attached
+	  var localField = opts.localField = opts.localField || (0, _utils.camelCase)(Relation.name);
+	  // Choose field that holds the primary key of the relation
+	  var foreignKey = opts.foreignKey = opts.foreignKey || (0, _utils.camelCase)(Resource.name) + 'Id';
+	
+	  // Setup configuration of the property
+	  var descriptor = {
+	    // Whether the field specified by "localField" will show up in "for...in"
+	    enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
+	    // Set default method for retrieving the linked relation
+	    get: function get() {
+	      var items = Relation.getAll((0, _utils.get)(this, Resource.idAttribute), { index: foreignKey });
+	      return items && items.length ? items[0] : undefined;
+	    },
+	
+	    // Set default method for setting the linked relation
+	    set: function set(child) {
+	      (0, _utils.set)(child, foreignKey, (0, _utils.get)(this, Resource.idAttribute));
+	      return (0, _utils.get)(this, localField);
+	    }
+	  };
+	
+	  // Check whether the relation shouldn't actually be linked via a getter
+	  if (opts.link === false || opts.link === undefined && !Resource.linkRelations) {
+	    delete descriptor.get;
+	    delete descriptor.set;
+	  }
+	
+	  // Check for user-defined getter
+	  if (opts.get) {
+	    (function () {
+	      var originalGet = descriptor.get;
+	      // Set user-defined getter
+	      descriptor.get = function () {
+	        var _this = this;
+	
+	        // Call user-defined getter, passing in:
+	        //  - target Resource
+	        //  - related Resource
+	        //  - instance of target Resource
+	        //  - the original getter function, in case the user wants to use it
+	        return opts.get(Resource, Relation, this, originalGet ? function () {
+	          for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	            args[_key] = arguments[_key];
+	          }
+	
+	          return originalGet.apply(_this, args);
+	        } : undefined);
+	      };
+	    })();
+	  }
+	
+	  // Check for user-defined setter
+	  if (opts.set) {
+	    (function () {
+	      var originalSet = descriptor.set;
+	      // Set user-defined setter
+	      descriptor.set = function (child) {
+	        var _this2 = this;
+	
+	        // Call user-defined getter, passing in:
+	        //  - target Resource
+	        //  - related Resource
+	        //  - instance of target Resource
+	        //  - instance of related Resource
+	        //  - the original setter function, in case the user wants to use it
+	        return opts.set(Resource, Relation, this, child, originalSet ? function () {
+	          for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+	            args[_key2] = arguments[_key2];
+	          }
+	
+	          return originalSet.apply(_this2, args);
+	        } : undefined);
+	      };
+	    })();
+	  }
+	
+	  // Finally, added property to prototype of target Resource
+	  Object.defineProperty(Resource.prototype, localField, descriptor);
+	
+	  if (!Resource.relationList) {
+	    Resource.relationList = [];
+	  }
+	  if (!Resource.relationFields) {
+	    Resource.relationFields = [];
+	  }
+	  opts.type = 'hasOne';
+	  opts.name = Resource.name;
+	  opts.relation = Relation.name;
+	  opts.Relation = Relation;
+	  Resource.relationList.push(opts);
+	  Resource.relationFields.push(localField);
+	  Resource.data().createIndex(foreignKey);
+	
+	  // Return target Resource for chaining
+	  return Resource;
+	}
+	
+	/**
+	 * Usage:
+	 *
+	 * ES7 Usage:
+	 * import {hasOne, Resource} from 'js-data'
+	 * class User extends Resource {}
+	 * @hasOne(User, {...})
+	 * class Post extends Resource {}
+	 *
+	 * ES6 Usage:
+	 * import {hasOne, Resource} from 'js-data'
+	 * class User extends Resource {}
+	 * class Comment extends Resource {}
+	 * hasOne(User, {...})(Comment)
+	 *
+	 * ES5 Usage:
+	 * var JSData = require('js-data')
+	 * var User = JSData.Resource.extend()
+	 * var Comment = JSDataResource.extend()
+	 * JSData.hasOne(User, {...})(Comment)
+	 */
+	function hasOne(Resource, opts) {
+	  return function (target) {
+	    return applyHasOne(target, Resource, opts);
+	  };
+	}
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
 	exports.schema = schema;
 	
 	var _utils = __webpack_require__(3);
@@ -1531,7 +1711,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var collection = new _collection.Collection([], target.idAttribute);
 	    target.data = function () {
 	      // TODO: Do I need this?
-	      if (this.__proto__.data === this.prototype.constructor.data) {
+	      if (this.data === Object.getPrototypeOf(this).data) {
 	        // eslint-disable-line
 	        throw new Error(this.name + ': Schemas are not inheritable, did you forget to define a schema?');
 	      }
@@ -1587,7 +1767,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1601,7 +1781,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _decorators = __webpack_require__(4);
 	
-	var _utils2 = __webpack_require__(11);
+	var _utils2 = __webpack_require__(12);
 	
 	function Index() {
 	  var fieldList = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
@@ -1896,7 +2076,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	})(Index.prototype);
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1980,7 +2160,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1994,7 +2174,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _utils = __webpack_require__(3);
 	
-	var _resource = __webpack_require__(13);
+	var _resource = __webpack_require__(14);
 	
 	// function lifecycleNoopCb (resource, attrs, cb) {
 	//   cb(null, attrs)
@@ -2219,7 +2399,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2364,22 +2544,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	        relationList.forEach(function (def) {
 	          var Relation = def.Relation;
 	          var toInject = utils.get(props, def.localField);
-	          if (!toInject) {
-	            return;
-	          }
-	          if (typeof def.inject === 'function') {
+	          if (utils.isFunction(def.inject)) {
 	            def.inject(_this, def, props);
-	          } else if (def.inject !== false) {
+	          } else if (toInject && def.inject !== false) {
 	            if (utils.isArray(toInject)) {
 	              toInject.forEach(function (toInjectItem) {
 	                if (toInjectItem !== Relation.get(utils.get(toInjectItem, Relation.idAttribute))) {
 	                  try {
-	                    var injected = Relation.inject(toInjectItem);
 	                    if (def.foreignKey) {
-	                      utils.set(injected, def.foreignKey, utils.get(props, idAttribute));
+	                      utils.set(toInjectItem, def.foreignKey, utils.get(props, idAttribute));
 	                    }
+	                    Relation.inject(toInjectItem);
 	                  } catch (err) {
-	                    _this.errorFn(err, 'Failed to inject ' + def.type + ' relation: "' + def.relation + '"!');
+	                    throw new Error('Failed to inject ' + def.type + ' relation: "' + def.relation + '"!');
 	                  }
 	                }
 	              });
@@ -2392,15 +2569,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	              // handle injecting belongsTo and hasOne relations
 	              if (toInject !== Relation.get(Relation.idAttribute)) {
 	                try {
-	                  var injected = Relation.inject(toInject);
 	                  if (def.localKey) {
-	                    utils.set(props, def.localKey, utils.get(injected, Relation.idAttribute));
+	                    utils.set(props, def.localKey, utils.get(toInject, Relation.idAttribute));
 	                  }
 	                  if (def.foreignKey) {
-	                    utils.set(injected, def.foreignKey, utils.get(props, idAttribute));
+	                    utils.set(toInject, def.foreignKey, utils.get(props, idAttribute));
 	                  }
+	                  Relation.inject(toInject);
 	                } catch (err) {
-	                  _this.errorFn(err, 'Failed to inject ' + def.type + ' relation: "' + def.relation + '"!');
+	                  throw new Error('Failed to inject ' + def.type + ' relation: "' + def.relation + '"!');
 	                }
 	              }
 	            }
@@ -2412,7 +2589,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	      });
 	      items = items.map(function (props) {
-	        var id = props[idAttribute];
+	        var id = utils.get(props, idAttribute);
 	        if (!id) {
 	          throw new TypeError('User#' + idAttribute + ': Expected string or number, found ' + (typeof id === 'undefined' ? 'undefined' : _typeof(id)) + '!');
 	        }
@@ -2652,6 +2829,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function hasMany(resource, opts) {
 	      return (0, _decorators.hasMany)(resource, opts)(this);
 	    }
+	
+	    /**
+	     * Usage:
+	     *
+	     * User.hasOne(Profile, {
+	     *   localField: '_profile'
+	     * })
+	     */
+	
+	  }, {
+	    key: 'hasOne',
+	    value: function hasOne(resource, opts) {
+	      return (0, _decorators.hasOne)(resource, opts)(this);
+	    }
 	  }, {
 	    key: 'action',
 	    value: function action(name, opts) {
@@ -2681,12 +2872,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  }, {
 	    key: 'extend',
-	    value: function extend() {
-	      var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	    value: function extend(props) {
 	      var classProps = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 	
 	      var Child = undefined;
 	      var Parent = this;
+	      props = props || {};
 	
 	      if (!classProps.name) {
 	        throw new TypeError('name: Expected string, found ' + _typeof(classProps.name) + '!');

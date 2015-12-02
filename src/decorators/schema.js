@@ -37,7 +37,7 @@ export function schema (opts = {}) {
     const collection = new Collection([], target.idAttribute)
     target.data = function () {
       // TODO: Do I need this?
-      if (this.__proto__.data === this.prototype.constructor.data) { // eslint-disable-line
+      if (this.data === Object.getPrototypeOf(this).data) { // eslint-disable-line
         throw new Error(`${this.name}: Schemas are not inheritable, did you forget to define a schema?`)
       }
       return collection

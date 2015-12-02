@@ -50,15 +50,7 @@ beforeEach(function () {
     endpoint: '/posts'
   })
   this.User = Base.extend({}, {
-    name: 'user',
-    relations: {
-      hasOne: {
-        profile: {
-          localField: 'profile',
-          foreignKey: 'userId'
-        }
-      }
-    }
+    name: 'user'
   })
   this.Group = Base.extend({}, {
     name: 'group'
@@ -78,11 +70,19 @@ beforeEach(function () {
   })
   this.User.hasMany(this.Comment, {
     localField: 'comments',
+    foreignKey: 'userId'
+  })
+  this.User.hasMany(this.Comment, {
+    localField: 'approvedComments',
     foreignKey: 'approvedBy'
   })
   this.User.hasMany(this.Group, {
     localField: 'groups',
     foreignKeys: 'userIds'
+  })
+  this.User.hasOne(this.Profile, {
+    localField: 'profile',
+    foreignKey: 'userId'
   })
   this.Group.hasMany(this.User, {
     localField: 'users',

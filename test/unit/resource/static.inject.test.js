@@ -29,6 +29,20 @@ export function init () {
         rightInclusive: true
       }), users)
     })
+    it('should inject multiple items into the store', function () {
+
+      assert.deepEqual(this.Post.inject([
+        this.data.p1,
+        this.data.p2,
+        this.data.p3,
+        this.data.p4
+      ]), [this.data.p1, this.data.p2, this.data.p3, this.data.p4]);
+
+      assert.deepEqual(this.Post.get(5), this.data.p1)
+      assert.deepEqual(this.Post.get(6), this.data.p2)
+      assert.deepEqual(this.Post.get(7), this.data.p3)
+      assert.deepEqual(this.Post.get(8), this.data.p4)
+    })
     it('should inject existing items into the store', function () {
       class User extends Resource {}
       User.schema({ id: {} })
@@ -63,7 +77,7 @@ export function init () {
       assert.equal(user.foo, 'BAR')
       assert.isUndefined(user.beep)
     })
-    it.only('should inject relations', function () {
+    it('should inject relations', function () {
       // can inject items without relations
       this.User.inject(this.data.user1)
       this.Organization.inject(this.data.organization2)
@@ -98,8 +112,6 @@ export function init () {
       assert.deepEqual(this.Group.get(1).name, this.data.group1.name)
       assert.isArray(this.Group.get(1).userIds)
 
-      return
-
       // user10 relations
       assert.deepEqual(this.Comment.get(11), this.User.get(10).comments[0])
       assert.deepEqual(this.Comment.get(12), this.User.get(10).comments[1])
@@ -124,6 +136,347 @@ export function init () {
 
       // profile21 relations
       assert.deepEqual(this.User.get(22), this.Profile.get(21).user)
+    })
+    it('should find inverse links', function () {
+      this.User.inject({ organizationId: 5, id: 1 })
+
+      this.Organization.inject({ id: 5 })
+
+      assert.deepEqual(this.User.get(1).organization, { id: 5 })
+
+      assert.deepEqual(this.User.get(1).comments, [])
+      assert.deepEqual(this.User.get(1).approvedComments, [])
+
+      this.Comment.inject({ approvedBy: 1, id: 23 })
+
+      assert.equal(0, this.User.get(1).comments.length)
+      assert.equal(1, this.User.get(1).approvedComments.length)
+
+      this.Comment.inject({ approvedBy: 1, id: 44 })
+
+      assert.equal(0, this.User.get(1).comments.length)
+      assert.equal(2, this.User.get(1).approvedComments.length)
+    })
+    it('should inject cyclic dependencies', function () {
+      class Foo extends Resource {}
+      Foo.configure({
+        linkRelations: true
+      })
+      Foo.schema({
+        id: {}
+      })
+      Foo.hasMany(Foo, {
+        localField: 'children',
+        foreignKey: 'parentId'
+      })
+      const injected = Foo.inject([{
+        id: 1,
+        children: [
+          {
+            id: 2,
+            parentId: 1,
+            children: [
+              {
+                id: 4,
+                parentId: 2
+              },
+              {
+                id: 5,
+                parentId: 2
+              }
+            ]
+          },
+          {
+            id: 3,
+            parentId: 1,
+            children: [
+              {
+                id: 6,
+                parentId: 3
+              },
+              {
+                id: 7,
+                parentId: 3
+              }
+            ]
+          }
+        ]
+      }])
+
+      assert.equal(injected[0].id, 1)
+      assert.equal(injected[0].children[0].id, 2)
+      assert.equal(injected[0].children[1].id, 3)
+      assert.equal(injected[0].children[0].children[0].id, 4)
+      assert.equal(injected[0].children[0].children[1].id, 5)
+      assert.equal(injected[0].children[1].children[0].id, 6)
+      assert.equal(injected[0].children[1].children[1].id, 7)
+
+      assert.isDefined(Foo.get(1))
+      assert.isDefined(Foo.get(2))
+      assert.isDefined(Foo.get(3))
+      assert.isDefined(Foo.get(4))
+      assert.isDefined(Foo.get(5))
+      assert.isDefined(Foo.get(6))
+      assert.isDefined(Foo.get(7))
+    })
+    it('should work when injecting child relations multiple times', function () {
+      class Parent extends Resource {}
+      Parent.configure({
+        linkRelations: true
+      })
+      Parent.schema({
+        id: {}
+      })
+
+      class Child extends Resource {}
+      Child.configure({
+        linkRelations: true
+      })
+      Child.schema({
+        id: {}
+      })
+
+      Parent.hasMany(Child, {
+        localField: 'children'
+      })
+      Child.belongsTo(Parent)
+
+      Parent.inject({
+        id: 1,
+        name: 'parent1',
+        children: [{
+          id: 1,
+          name: 'child1'
+        }]
+      })
+
+      assert.isTrue(Parent.get(1).children[0] instanceof Child)
+
+      Parent.inject({
+        id: 1,
+        name: 'parent',
+        children: [
+          {
+            id: 1,
+            name: 'Child-1'
+          },
+          {
+            id: 2,
+            name: 'Child-2'
+          }
+        ]
+      })
+
+      assert.isTrue(Parent.get(1).children[0] instanceof Child)
+      assert.isTrue(Parent.get(1).children[1] instanceof Child)
+      assert.deepEqual(Child.filter({ parentId: 1 }), Parent.get(1).children)
+    })
+    it('should configure enumerability and linking of relations', function () {
+      class Parent extends Resource {}
+      Parent.configure({
+        linkRelations: true
+      })
+      Parent.schema({
+        id: {}
+      })
+
+      class Child extends Resource {}
+      Child.configure({
+        linkRelations: true
+      })
+      Child.schema({
+        id: {}
+      })
+
+      class OtherChild extends Resource {}
+      OtherChild.configure({
+        linkRelations: true
+      })
+      OtherChild.schema({
+        id: {}
+      })
+
+      Parent.hasMany(Child, {
+        localField: 'children'
+      })
+      Child.belongsTo(Parent, {
+        link: false
+      })
+      OtherChild.belongsTo(Parent, {
+        enumerable: true
+      })
+
+      const child = Child.inject({
+        id: 1,
+        parentId: 2,
+        parent: {
+          id: 2
+        }
+      })
+
+      const otherChild = OtherChild.inject({
+        id: 3,
+        parentId: 4,
+        parent: {
+          id: 4
+        }
+      })
+
+      assert.isDefined(Child.get(child.id))
+      assert.isFalse(child.parent === Parent.get(child.parentId), 'parent was injected but not linked')
+
+      assert.isDefined(OtherChild.get(otherChild.id))
+      assert.isTrue(otherChild.parent === Parent.get(otherChild.parentId), 'parent was injected and linked')
+      assert.isDefined(Parent.get(otherChild.parentId), 'parent was injected and linked')
+
+      let foundParent = false
+      for (var k in otherChild) {
+        if (k === 'parent' && otherChild[k] === otherChild.parent && otherChild[k] === Parent.get(otherChild.parentId)) {
+          foundParent = true
+        }
+      }
+      assert.isTrue(foundParent, 'parent is enumerable')
+    })
+    it('should replace existing items', function () {
+      let post = this.Post.inject(this.data.p1)
+      post.foo = 'bar'
+      post.beep = 'boop'
+      assert.deepEqual(post, {
+        author: 'John',
+        age: 30,
+        id: 5,
+        foo: 'bar',
+        beep: 'boop'
+      })
+      post = this.Post.inject(this.data.p1, { onConflict: 'replace' })
+      assert.deepEqual(post, {
+        author: 'John',
+        age: 30,
+        id: 5
+      })
+    })
+    it('should not auto-inject relations where auto-injection has been disabled', function () {
+      const Foo = Resource.extend(null, {
+        name: 'foo'
+      })
+      const Bar = Resource.extend(null, {
+        name: 'bar'
+      })
+      Foo.hasMany(Bar, {
+        localField: 'bars',
+        inject: false
+      })
+      Bar.belongsTo(Foo)
+      const foo = Foo.inject({
+        id: 1,
+        bars: [
+          {
+            id: 1,
+            fooId: 1
+          },
+          {
+            id: 2,
+            fooId: 1
+          }
+        ]
+      })
+      assert.deepEqual(Bar.getAll(), [], 'nothing should have been injected')
+    })
+    it('should allow custom relation injection logic', function () {
+      const Foo = Resource.extend(null, {
+        name: 'foo',
+        linkRelations: true
+      })
+      const Bar = Resource.extend(null, {
+        name: 'bar',
+        linkRelations: true
+      })
+      Foo.hasMany(Bar, {
+        localField: 'bars',
+        foreignKey: 'fooId',
+        inject: function (Foo, relationDef, foo) {
+          const bars = relationDef.Relation.inject(foo.test_bars)
+          for (var i = 0; i < bars.length; i++) {
+            bars[i].beep = 'boop'
+          }
+          delete foo.test_bars
+        }
+      })
+      Bar.belongsTo(Foo)
+      const foo = Foo.inject({
+        id: 1,
+        test_bars: [
+          {
+            id: 1,
+            fooId: 1
+          },
+          {
+            id: 2,
+            fooId: 1
+          }
+        ]
+      })
+      assert.deepEqual(foo.bars, [
+        {
+          id: 1,
+          fooId: 1,
+          beep: 'boop'
+        },
+        {
+          id: 2,
+          fooId: 1,
+          beep: 'boop'
+        }
+      ], 'bars should have been injected')
+    })
+    it('should not link relations nor delete field if "link" is false', function () {
+      class Foo extends Resource {}
+      Foo.configure({
+        linkRelations: true
+      })
+      Foo.schema({
+        id: {}
+      })
+      class Bar extends Resource {}
+      Bar.configure({
+        linkRelations: true
+      })
+      Bar.schema({
+        id: {}
+      })
+      Foo.hasMany(Bar, {
+        localField: 'bars',
+        link: false
+      })
+      Bar.belongsTo(Foo)
+      const foo = Foo.inject({
+        id: 1,
+        bars: [
+          {
+            id: 1,
+            fooId: 1
+          },
+          {
+            id: 2,
+            fooId: 1
+          }
+        ]
+      })
+      Bar.inject({
+        id: 3,
+        fooId: 1
+      })
+      assert.deepEqual(foo.bars, [
+        {
+          id: 1,
+          fooId: 1
+        },
+        {
+          id: 2,
+          fooId: 1
+        }
+      ], 'bars should have been injected, but not linked')
+      assert.equal(Bar.getAll().length, 3, '3 bars should be in the store')
     })
   })
 }
