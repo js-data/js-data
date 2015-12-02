@@ -2435,13 +2435,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  isBrowser = !!window;
 	} catch (e) {}
 	
-	function afterExec(opts, thisArg) {
-	  return function (data) {
-	    if (opts.autoInject) {
-	      data = thisArg.inject(data);
-	    }
-	    return data;
-	  };
+	function autoInject(resource, data, opts) {
+	  if (opts.autoInject) {
+	    return resource.inject(data);
+	  }
+	  return data;
 	}
 	
 	// This is here so Babel will give us
@@ -2633,6 +2631,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	      var item = this.get(id);
 	      if (item) {
+	        delete item.$$props.$$s;
 	        this.data().remove(item);
 	      }
 	    }
@@ -2690,112 +2689,250 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return opts.adapter || opts.defaultAdapter;
 	    }
 	  }, {
+	    key: 'beforeCreate',
+	    value: function beforeCreate() {}
+	  }, {
 	    key: 'create',
 	    value: function create() {
+	      var _this4 = this;
+	
 	      var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 	
-	      var _this = this;
-	      utils._(_this, opts);
+	      utils._(this, opts);
 	
-	      if (opts.upsert && props[_this.idAttribute]) {
-	        return _this.update(props[_this.idAttribute], props, opts);
+	      if (opts.upsert && utils.get(props, this.idAttribute)) {
+	        return this.update(utils.get(props, this.idAttribute), props, opts);
 	      }
-	      var adapterName = _this.getAdapterName(opts);
-	      return _this.adapters[adapterName].create(_this, utils.omit(props, opts.omit), opts).then(afterExec(opts, _this));
+	      return Promise.resolve(this.beforeCreate(props, opts)).then(function () {
+	        var adapterName = _this4.getAdapterName(opts);
+	        return _this4.adapters[adapterName].create(_this4, utils.omit(props, opts.omit), opts);
+	      }).then(function (data) {
+	        return Promise.resolve(_this4.afterCreate(data, opts)).then(function () {
+	          return autoInject(_this4, data, opts);
+	        });
+	      });
 	    }
+	  }, {
+	    key: 'afterCreate',
+	    value: function afterCreate() {}
+	  }, {
+	    key: 'beforeCreateMany',
+	    value: function beforeCreateMany() {}
 	  }, {
 	    key: 'createMany',
 	    value: function createMany() {
+	      var _this5 = this;
+	
 	      var items = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
 	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 	
-	      var _this = this;
-	      utils._(_this, opts);
+	      utils._(this, opts);
 	
 	      if (opts.upsert) {
 	        var _ret = (function () {
 	          var hasId = true;
 	          items.forEach(function (item) {
-	            hasId = hasId && item[_this.idAttribute];
+	            hasId = hasId && utils.get(item, this.idAttribute);
 	          });
 	          if (hasId) {
 	            return {
-	              v: _this.updateMany(items, opts)
+	              v: _this5.updateMany(items, opts)
 	            };
 	          }
 	        })();
 	
 	        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
 	      }
-	      var adapterName = _this.getAdapterName(opts);
-	      return _this.adapters[adapterName].createMany(_this, items.map(function (item) {
-	        return utils.omit(item, opts.omit);
-	      }), opts).then(afterExec(opts, _this));
+	      var adapterName = this.getAdapterName(opts);
+	      return Promise.resolve(this.beforeCreateMany(items, opts)).then(function () {
+	        return _this5.adapters[adapterName].createMany(_this5, items.map(function (item) {
+	          return utils.omit(item, opts.omit);
+	        }), opts);
+	      }).then(function (data) {
+	        return Promise.resolve(_this5.afterCreateMany(data, opts)).then(function (data) {
+	          return autoInject(_this5, data, opts);
+	        });
+	      });
 	    }
+	  }, {
+	    key: 'afterCreateMany',
+	    value: function afterCreateMany() {}
+	  }, {
+	    key: 'beforeFind',
+	    value: function beforeFind() {}
 	  }, {
 	    key: 'find',
-	    value: function find(id, opts) {
-	      var _this = this;
-	      utils._(_this, opts);
+	    value: function find(id) {
+	      var _this6 = this;
 	
-	      var adapterName = _this.getAdapterName(opts);
-	      return _this.adapters[adapterName].find(_this, id, opts).then(afterExec(opts, _this));
+	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	
+	      utils._(this, opts);
+	
+	      var adapterName = this.getAdapterName(opts);
+	      return Promise.resolve(this.beforeFind(id, opts)).then(function () {
+	        return _this6.adapters[adapterName].find(_this6, id, opts);
+	      }).then(function (data) {
+	        return Promise.resolve(_this6.afterFind(data, opts)).then(function (data) {
+	          return autoInject(_this6, data, opts);
+	        });
+	      });
 	    }
+	  }, {
+	    key: 'afterFind',
+	    value: function afterFind() {}
+	  }, {
+	    key: 'beforeFindAll',
+	    value: function beforeFindAll() {}
 	  }, {
 	    key: 'findAll',
-	    value: function findAll(query, opts) {
-	      var _this = this;
-	      utils._(_this, opts);
+	    value: function findAll() {
+	      var _this7 = this;
 	
-	      var adapterName = _this.getAdapterName(opts);
-	      return _this.adapters[adapterName].findAll(_this, query, opts).then(afterExec(opts, _this));
+	      var query = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	
+	      utils._(this, opts);
+	
+	      var adapterName = this.getAdapterName(opts);
+	      return Promise.resolve(this.beforeFindAll(query, opts)).then(function () {
+	        return _this7.adapters[adapterName].findAll(_this7, query, opts);
+	      }).then(function (data) {
+	        return Promise.resolve(_this7.afterFindAll(data, opts)).then(function (data) {
+	          return autoInject(_this7, data, opts);
+	        });
+	      });
 	    }
+	  }, {
+	    key: 'afterFindAll',
+	    value: function afterFindAll() {}
+	  }, {
+	    key: 'beforeUpdate',
+	    value: function beforeUpdate() {}
 	  }, {
 	    key: 'update',
-	    value: function update(id, props, opts) {
-	      var _this = this;
-	      utils._(_this, opts);
+	    value: function update(id) {
+	      var _this8 = this;
 	
-	      var adapterName = _this.getAdapterName(opts);
-	      return _this.adapters[adapterName].update(_this, id, props, opts).then(afterExec(opts, _this));
+	      var props = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	      var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+	
+	      utils._(this, opts);
+	
+	      var adapterName = this.getAdapterName(opts);
+	      return Promise.resolve(this.beforeUpdate(id, props, opts)).then(function () {
+	        return _this8.adapters[adapterName].update(_this8, id, props, opts);
+	      }).then(function (data) {
+	        return Promise.resolve(_this8.afterUpdate(id, data, opts)).then(function (data) {
+	          return autoInject(_this8, data, opts);
+	        });
+	      });
 	    }
+	  }, {
+	    key: 'afterUpdate',
+	    value: function afterUpdate() {}
+	  }, {
+	    key: 'beforeUpdateMany',
+	    value: function beforeUpdateMany() {}
 	  }, {
 	    key: 'updateMany',
-	    value: function updateMany(items, opts) {
-	      var _this = this;
-	      utils._(_this, opts);
+	    value: function updateMany() {
+	      var _this9 = this;
 	
-	      var adapterName = _this.getAdapterName(opts);
-	      return _this.adapters[adapterName].updateMany(_this, items, opts).then(afterExec(opts, _this));
+	      var items = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
+	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	
+	      utils._(this, opts);
+	
+	      var adapterName = this.getAdapterName(opts);
+	      return Promise.resolve(this.beforeUpdateMany(items, opts)).then(function () {
+	        return _this9.adapters[adapterName].updateMany(_this9, items, opts);
+	      }).then(function (data) {
+	        return Promise.resolve(_this9.afterUpdateMany(data, opts)).then(function (data) {
+	          return autoInject(_this9, data, opts);
+	        });
+	      });
 	    }
+	  }, {
+	    key: 'afterUpdateMany',
+	    value: function afterUpdateMany() {}
+	  }, {
+	    key: 'beforeUpdateAll',
+	    value: function beforeUpdateAll() {}
 	  }, {
 	    key: 'updateAll',
-	    value: function updateAll(query, props, opts) {
-	      var _this = this;
-	      utils._(_this, opts);
+	    value: function updateAll() {
+	      var query = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 	
-	      var adapterName = _this.getAdapterName(opts);
-	      return _this.adapters[adapterName].updateAll(_this, query, props, opts).then(afterExec(opts, _this));
+	      var _this10 = this;
+	
+	      var props = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	      var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+	
+	      utils._(this, opts);
+	
+	      var adapterName = this.getAdapterName(opts);
+	      return Promise.resolve(this.beforeUpdateAll(query, props, opts)).then(function () {
+	        return _this10.adapters[adapterName].updateAll(_this10, query, props, opts);
+	      }).then(function (data) {
+	        return Promise.resolve(_this10.afterUpdateAll(query, data, opts)).then(function (data) {
+	          return autoInject(_this10, data, opts);
+	        });
+	      });
 	    }
+	  }, {
+	    key: 'afterUpdateAll',
+	    value: function afterUpdateAll() {}
+	  }, {
+	    key: 'beforeDestroy',
+	    value: function beforeDestroy() {}
 	  }, {
 	    key: 'destroy',
-	    value: function destroy(id, opts) {
-	      var _this = this;
-	      utils._(_this, opts);
+	    value: function destroy(id) {
+	      var _this11 = this;
 	
-	      var adapterName = _this.getAdapterName(opts);
-	      return _this.adapters[adapterName].destroy(_this, id, opts);
+	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	
+	      utils._(this, opts);
+	
+	      var adapterName = this.getAdapterName(opts);
+	      return Promise.resolve(this.beforeDestroy(id, opts)).then(function () {
+	        return _this11.adapters[adapterName].destroy(_this11, id, opts);
+	      }).then(function () {
+	        return _this11.afterDestroy(id, opts);
+	      }).then(function () {
+	        return _this11.eject(id, opts);
+	      });
 	    }
 	  }, {
+	    key: 'afterDestroy',
+	    value: function afterDestroy() {}
+	  }, {
+	    key: 'beforeDestroyAll',
+	    value: function beforeDestroyAll() {}
+	  }, {
 	    key: 'destroyAll',
-	    value: function destroyAll(query, props, opts) {
-	      var _this = this;
-	      utils._(_this, opts);
+	    value: function destroyAll() {
+	      var _this12 = this;
 	
-	      var adapterName = _this.getAdapterName(opts);
-	      return _this.adapters[adapterName].destroyAll(_this, query, opts);
+	      var query = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	
+	      utils._(this, opts);
+	
+	      var adapterName = this.getAdapterName(opts);
+	      return this.beforeDestroyAll(query, opts).then(function () {
+	        return _this12.adapters[adapterName].destroyAll(_this12, query, opts);
+	      }).then(function () {
+	        return _this12.afterDestroyAll(query, opts);
+	      }).then(function () {
+	        return _this12.ejectAll(query, opts);
+	      });
 	    }
+	  }, {
+	    key: 'afterDestroyAll',
+	    value: function afterDestroyAll() {}
 	
 	    /**
 	     * Usage:
