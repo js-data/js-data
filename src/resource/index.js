@@ -16,13 +16,11 @@ try {
 } catch (e) {
 }
 
-function afterExec (opts, thisArg) {
-  return function (data) {
-    if (opts.autoInject) {
-      data = thisArg.inject(data)
-    }
-    return data
+function autoInject (resource, data, opts) {
+  if (opts.autoInject) {
+    return resource.inject(data)
   }
+  return data
 }
 
 // This is here so Babel will give us
@@ -185,6 +183,7 @@ export class Resource extends BaseResource {
   static eject (id, opts = {}) {
     const item = this.get(id)
     if (item) {
+      delete item.$$props.$$s
       this.data().remove(item)
     }
   }
@@ -228,111 +227,172 @@ export class Resource extends BaseResource {
     return opts.adapter || opts.defaultAdapter
   }
 
+  static beforeCreate () {}
   static create (props = {}, opts = {}) {
-    const _this = this
-    utils._(_this, opts)
+    utils._(this, opts)
 
-    if (opts.upsert && props[_this.idAttribute]) {
-      return _this.update(props[_this.idAttribute], props, opts)
+    if (opts.upsert && utils.get(props, this.idAttribute)) {
+      return this.update(utils.get(props, this.idAttribute), props, opts)
     }
-    const adapterName = _this.getAdapterName(opts)
-    return _this.adapters[adapterName]
-      .create(_this, utils.omit(props, opts.omit), opts)
-      .then(afterExec(opts, _this))
+    return Promise.resolve(this.beforeCreate(props, opts))
+      .then(() => {
+        const adapterName = this.getAdapterName(opts)
+        return this.adapters[adapterName]
+          .create(this, utils.omit(props, opts.omit), opts)
+      })
+      .then(data => {
+        return Promise.resolve(this.afterCreate(data, opts))
+          .then(() => autoInject(this, data, opts))
+      })
   }
+  static afterCreate () {}
 
+  static beforeCreateMany () {}
   static createMany (items = [], opts = {}) {
-    const _this = this
-    utils._(_this, opts)
+    utils._(this, opts)
 
     if (opts.upsert) {
       let hasId = true
       items.forEach(function (item) {
-        hasId = hasId && item[_this.idAttribute]
+        hasId = hasId && utils.get(item, this.idAttribute)
       })
       if (hasId) {
-        return _this.updateMany(items, opts)
+        return this.updateMany(items, opts)
       }
     }
-    const adapterName = _this.getAdapterName(opts)
-    return _this.adapters[adapterName]
-      .createMany(
-        _this,
-        items.map(function (item) {
-          return utils.omit(item, opts.omit)
-        }),
-        opts
-      )
-      .then(afterExec(opts, _this))
+    const adapterName = this.getAdapterName(opts)
+    return Promise.resolve(this.beforeCreateMany(items, opts))
+      .then(() => {
+        return this.adapters[adapterName]
+          .createMany(
+            this,
+            items.map(function (item) {
+              return utils.omit(item, opts.omit)
+            }),
+            opts
+          )
+      })
+      .then(data => {
+        return Promise.resolve(this.afterCreateMany(data, opts))
+          .then(data => autoInject(this, data, opts))
+      })
   }
+  static afterCreateMany () {}
 
-  static find (id, opts) {
-    const _this = this
-    utils._(_this, opts)
+  static beforeFind () {}
+  static find (id, opts = {}) {
+    utils._(this, opts)
 
-    const adapterName = _this.getAdapterName(opts)
-    return _this.adapters[adapterName]
-      .find(_this, id, opts)
-      .then(afterExec(opts, _this))
+    const adapterName = this.getAdapterName(opts)
+    return Promise.resolve(this.beforeFind(id, opts))
+      .then(() => {
+        return this.adapters[adapterName]
+          .find(this, id, opts)
+      })
+      .then(data => {
+        return Promise.resolve(this.afterFind(data, opts))
+          .then(data => autoInject(this, data, opts))
+      })
   }
+  static afterFind () {}
 
-  static findAll (query, opts) {
-    const _this = this
-    utils._(_this, opts)
+  static beforeFindAll () {}
+  static findAll (query = {}, opts = {}) {
+    utils._(this, opts)
 
-    const adapterName = _this.getAdapterName(opts)
-    return _this.adapters[adapterName]
-      .findAll(_this, query, opts)
-      .then(afterExec(opts, _this))
+    const adapterName = this.getAdapterName(opts)
+    return Promise.resolve(this.beforeFindAll(query, opts))
+      .then(() => {
+        return this.adapters[adapterName]
+          .findAll(this, query, opts)
+      })
+      .then(data => {
+        return Promise.resolve(this.afterFindAll(data, opts))
+          .then(data => autoInject(this, data, opts))
+      })
   }
+  static afterFindAll () {}
 
-  static update (id, props, opts) {
-    const _this = this
-    utils._(_this, opts)
+  static beforeUpdate () {}
+  static update (id, props = {}, opts = {}) {
+    utils._(this, opts)
 
-    const adapterName = _this.getAdapterName(opts)
-    return _this.adapters[adapterName]
-      .update(_this, id, props, opts)
-      .then(afterExec(opts, _this))
+    const adapterName = this.getAdapterName(opts)
+    return Promise.resolve(this.beforeUpdate(id, props, opts))
+      .then(() => {
+        return this.adapters[adapterName]
+          .update(this, id, props, opts)
+      })
+      .then(data => {
+        return Promise.resolve(this.afterUpdate(id, data, opts))
+          .then(data => autoInject(this, data, opts))
+      })
   }
+  static afterUpdate () {}
 
-  static updateMany (items, opts) {
-    const _this = this
-    utils._(_this, opts)
+  static beforeUpdateMany () {}
+  static updateMany (items = [], opts = {}) {
+    utils._(this, opts)
 
-    const adapterName = _this.getAdapterName(opts)
-    return _this.adapters[adapterName]
-      .updateMany(_this, items, opts)
-      .then(afterExec(opts, _this))
+    const adapterName = this.getAdapterName(opts)
+    return Promise.resolve(this.beforeUpdateMany(items, opts))
+      .then(() => {
+        return this.adapters[adapterName]
+          .updateMany(this, items, opts)
+      })
+      .then(data => {
+        return Promise.resolve(this.afterUpdateMany(data, opts))
+          .then(data => autoInject(this, data, opts))
+      })
   }
+  static afterUpdateMany () {}
 
-  static updateAll (query, props, opts) {
-    const _this = this
-    utils._(_this, opts)
+  static beforeUpdateAll () {}
+  static updateAll (query = {}, props = {}, opts = {}) {
+    utils._(this, opts)
 
-    const adapterName = _this.getAdapterName(opts)
-    return _this.adapters[adapterName]
-      .updateAll(_this, query, props, opts)
-      .then(afterExec(opts, _this))
+    const adapterName = this.getAdapterName(opts)
+    return Promise.resolve(this.beforeUpdateAll(query, props, opts))
+      .then(() => {
+        return this.adapters[adapterName]
+          .updateAll(this, query, props, opts)
+      })
+      .then(data => {
+        return Promise.resolve(this.afterUpdateAll(query, data, opts))
+          .then(data => autoInject(this, data, opts))
+      })
   }
+  static afterUpdateAll () {}
 
-  static destroy (id, opts) {
-    const _this = this
-    utils._(_this, opts)
+  static beforeDestroy () {}
+  static destroy (id, opts = {}) {
+    utils._(this, opts)
 
-    const adapterName = _this.getAdapterName(opts)
-    return _this.adapters[adapterName]
-      .destroy(_this, id, opts)
+    const adapterName = this.getAdapterName(opts)
+    return Promise.resolve(this.beforeDestroy(id, opts))
+      .then(() => {
+        return this.adapters[adapterName]
+          .destroy(this, id, opts)
+      })
+      .then(() => this.afterDestroy(id, opts))
+      .then(() => this.eject(id, opts))
   }
+  static afterDestroy () {}
 
-  static destroyAll (query, props, opts) {
-    const _this = this
-    utils._(_this, opts)
+  static beforeDestroyAll () {}
+  static destroyAll (query = {}, opts = {}) {
+    utils._(this, opts)
 
-    const adapterName = _this.getAdapterName(opts)
-    return _this.adapters[adapterName]
-      .destroyAll(_this, query, opts)
+    const adapterName = this.getAdapterName(opts)
+    return this.beforeDestroyAll(query, opts)
+      .then(() => {
+        return this.adapters[adapterName]
+          .destroyAll(this, query, opts)
+      })
+      .then(() => this.afterDestroyAll(query, opts))
+      .then(() => this.ejectAll(query, opts))
   }
+  static afterDestroyAll () {}
 
   /**
    * Usage:
@@ -416,7 +476,7 @@ export class Resource extends BaseResource {
       if (classProps.csp) {
         Child = function (...args) {
           __callCheck__(this, Child)
-          const _this = __possibleConstructorReturn__(this, Object.getPrototypeOf(Child).apply(this, args));
+          const _this = __possibleConstructorReturn__(this, Object.getPrototypeOf(Child).apply(this, args))
           if (initialize) {
             initialize.apply(this, args)
           }
