@@ -5,6 +5,7 @@ import {
   belongsTo,
   configure,
   hasMany,
+  hasOne,
   schema
 } from '../decorators'
 
@@ -98,22 +99,19 @@ export class Resource extends BaseResource {
       relationList.forEach(function (def) {
         const Relation = def.Relation
         const toInject = utils.get(props, def.localField)
-        if (!toInject) {
-          return
-        }
-        if (typeof def.inject === 'function') {
+        if (utils.isFunction(def.inject)) {
           def.inject(_this, def, props)
-        } else if (def.inject !== false) {
+        } else if (toInject && def.inject !== false) {
           if (utils.isArray(toInject)) {
             toInject.forEach(function (toInjectItem) {
               if (toInjectItem !== Relation.get(utils.get(toInjectItem, Relation.idAttribute))) {
                 try {
-                  const injected = Relation.inject(toInjectItem)
                   if (def.foreignKey) {
-                    utils.set(injected, def.foreignKey, utils.get(props, idAttribute))
+                    utils.set(toInjectItem, def.foreignKey, utils.get(props, idAttribute))
                   }
+                  Relation.inject(toInjectItem)
                 } catch (err) {
-                  _this.errorFn(err, `Failed to inject ${def.type} relation: "${def.relation}"!`)
+                  throw new Error(`Failed to inject ${def.type} relation: "${def.relation}"!`)
                 }
               }
             })
@@ -126,15 +124,15 @@ export class Resource extends BaseResource {
             // handle injecting belongsTo and hasOne relations
             if (toInject !== Relation.get(Relation.idAttribute)) {
               try {
-                const injected = Relation.inject(toInject)
                 if (def.localKey) {
-                  utils.set(props, def.localKey, utils.get(injected, Relation.idAttribute))
+                  utils.set(props, def.localKey, utils.get(toInject, Relation.idAttribute))
                 }
                 if (def.foreignKey) {
-                  utils.set(injected, def.foreignKey, utils.get(props, idAttribute))
+                  utils.set(toInject, def.foreignKey, utils.get(props, idAttribute))
                 }
+                Relation.inject(toInject)
               } catch (err) {
-                _this.errorFn(err, `Failed to inject ${def.type} relation: "${def.relation}"!`)
+                throw new Error(`Failed to inject ${def.type} relation: "${def.relation}"!`)
               }
             }
           }
@@ -146,7 +144,7 @@ export class Resource extends BaseResource {
       })
     })
     items = items.map(function (props) {
-      const id = props[idAttribute]
+      const id = utils.get(props, idAttribute)
       if (!id) {
         throw new TypeError(`User#${idAttribute}: Expected string or number, found ${typeof id}!`)
       }
@@ -363,6 +361,17 @@ export class Resource extends BaseResource {
     return hasMany(resource, opts)(this)
   }
 
+  /**
+   * Usage:
+   *
+   * User.hasOne(Profile, {
+   *   localField: '_profile'
+   * })
+   */
+  static hasOne (resource, opts) {
+    return hasOne(resource, opts)(this)
+  }
+
   static action (name, opts) {
     return action(name, opts)(this)
   }
@@ -384,9 +393,10 @@ export class Resource extends BaseResource {
    *
    * var User = JSData.Resource.extend({...}, {...})
    */
-  static extend (props = {}, classProps = {}) {
+  static extend (props, classProps = {}) {
     let Child
     const Parent = this
+    props = props || {}
 
     if (!classProps.name) {
       throw new TypeError(`name: Expected string, found ${typeof classProps.name}!`)

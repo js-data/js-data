@@ -1,4 +1,4 @@
-import {isArray, get, set} from '../utils'
+import {camelCase, isArray, get, set} from '../utils'
 
 /**
  * Steps to apply a "hasMany" relationship
@@ -13,12 +13,19 @@ import {isArray, get, set} from '../utils'
  */
 function applyHasMany (Resource, Relation, opts = {}) {
   // Choose field where the relation will be attached
-  const localField = opts.localField || Relation.name.toLowerCase()
+  const localField = opts.localField || `${camelCase(Relation.name)}Collection`
   // Choose field on related instances that holds the primary key of instances
   // of the target Resource
-  const foreignKey = opts.foreignKey || Relation.name.toLowerCase() + '_id'
-  const localKeys = opts.localKeys || Relation.name.toLowerCase() + '_ids'
-  const foreignKeys = opts.foreignKeys || Relation.name.toLowerCase() + '_ids'
+  let foreignKey = opts.foreignKey
+  const localKeys = opts.localKeys
+  const foreignKeys = opts.foreignKeys
+
+  if (!foreignKey && !localKeys && !foreignKeys) {
+    foreignKey = opts.foreignKey = `${camelCase(Resource.name)}Id`
+  }
+  if (foreignKey) {
+    Relation.data().createIndex(foreignKey)
+  }
 
   // Setup configuration of the property
   const descriptor = {
@@ -34,7 +41,7 @@ function applyHasMany (Resource, Relation, opts = {}) {
         const keys = get(this, localKeys) || []
         const args = isArray(keys) ? keys : Object.keys(keys)
         // Make a slower retrieval using the ids in the "localKeys" array
-        return Relation.getAll.apply(Resource, args)
+        return Relation.getAll.apply(Relation, args)
       } else if (foreignKeys) {
         set(query, `where.${foreignKeys}.contains`, get(this, Resource.idAttribute))
         // Make a much slower retrieval
@@ -77,6 +84,7 @@ function applyHasMany (Resource, Relation, opts = {}) {
   if (opts.link === false || (opts.link === undefined && !Resource.linkRelations)) {
     delete descriptor.get
     delete descriptor.set
+    descriptor.writable = true
   }
 
   // Check for user-defined getter
