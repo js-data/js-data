@@ -31,17 +31,16 @@ export function init () {
         create (resourceConfig, _props, Opts) {
           createCalled = true
           return new Promise(function (resolve, reject) {
-            _props[resourceConfig.idAttribute] = new Date().getTime()
             assert.isTrue(resourceConfig === User, 'should pass in the Resource')
-            assert.isTrue(_props === props, 'should pass in the props')
+            assert.deepEqual(_props, props, 'should pass in the props')
             assert.equal(Opts.autoInject, false, 'Opts are provided')
+            _props[resourceConfig.idAttribute] = new Date().getTime()
             resolve(_props)
           })
         }
       }
       const user = await User.create(props)
       assert.isTrue(createCalled, 'Adapter#create should have been called')
-      assert.isTrue(user === props, 'should pass in the props')
       assert.isDefined(user[User.idAttribute], 'new user has an id')
       assert.isFalse(user instanceof User, 'user is not a User')
       assert.isUndefined(User.get(user.id), 'user was not injected')
@@ -59,10 +58,10 @@ export function init () {
         create (resourceConfig, _props, Opts) {
           createCalled = true
           return new Promise(function (resolve, reject) {
-            _props[resourceConfig.idAttribute] = new Date().getTime()
             assert.isTrue(resourceConfig === User, 'should pass in the Resource')
-            assert.isTrue(_props === props, 'should pass in the props')
+            assert.deepEqual(_props, props, 'should pass in the props')
             assert.equal(Opts.autoInject, true, 'Opts are provided')
+            _props[resourceConfig.idAttribute] = new Date().getTime()
             resolve(_props)
           })
         }
@@ -71,8 +70,55 @@ export function init () {
       assert.isTrue(createCalled, 'Adapter#create should have been called')
       assert.isDefined(user[User.idAttribute], 'new user has an id')
       assert.isTrue(user instanceof User, 'user is a User')
-      assert.isTrue(User.get(user.id) === user, 'user was not injected')
+      assert.isTrue(User.get(user.id) === user, 'user not injected')
     })
-    it('should upsert')
+    it('should upsert', async function () {
+      const props = { name: 'John', id: 1 }
+      let createCalled = false
+      class User extends Resource {}
+      User.schema({ id: {} })
+      User.configure({
+        autoInject: true,
+        defaultAdapter: 'mock',
+        upsert: true,
+        update: sinon.stub().returns(Promise.resolve(props))
+      })
+
+      let user = await User.create(props)
+      assert.isTrue(User.update.calledOnce, 'User.update should have been called')
+    })
+    it('should return raw', async function () {
+      const props = { name: 'John' }
+      let createCalled = false
+      class User extends Resource {}
+      User.schema({ id: {} })
+      User.configure({
+        autoInject: true,
+        raw: true,
+        defaultAdapter: 'mock'
+      })
+      User.adapters.mock = {
+        create (resourceConfig, _props, Opts) {
+          createCalled = true
+          return new Promise(function (resolve, reject) {
+            assert.isTrue(resourceConfig === User, 'should pass in the Resource')
+            assert.deepEqual(_props, props, 'should pass in the props')
+            assert.equal(Opts.raw, true, 'Opts are provided')
+            _props[resourceConfig.idAttribute] = new Date().getTime()
+            resolve({
+              data: _props,
+              created: 1
+            })
+          })
+        }
+      }
+      let data = await User.create(props)
+      assert.isTrue(createCalled, 'Adapter#create should have been called')
+      assert.isDefined(data.data[User.idAttribute], 'new user has an id')
+      assert.isTrue(data.data instanceof User, 'user is a User')
+      assert.isTrue(User.get(data.data.id) === data.data, 'user was not injected')
+      assert.equal(data.adapter, 'mock', 'should have adapter name in response')
+      assert.equal(data.created, 1, 'should have other metadata in response')
+    })
   })
 }
