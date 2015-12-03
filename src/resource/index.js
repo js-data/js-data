@@ -17,7 +17,6 @@ try {
 }
 
 const handleResponse = function handleResponse (resource, data, opts, adapterName) {
-
   if (opts.raw) {
     data.adapter = adapterName
     if (opts.autoInject) {
