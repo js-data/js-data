@@ -624,7 +624,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.intersection = intersection;
 	exports.makePath = makePath;
 	exports.fillIn = fillIn;
-	exports.makeBefore = makeBefore;
 	exports.isBlacklisted = isBlacklisted;
 	exports.omit = omit;
 	exports.fromJson = fromJson;
@@ -780,23 +779,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      dest[key] = value;
 	    }
 	  });
-	}
-	function makeBefore(target, key) {
-	  return function (fn) {
-	    var original = target[key];
-	    target[key] = function () {
-	      for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-	        args[_key2] = arguments[_key2];
-	      }
-	
-	      var result = fn.apply(target, args);
-	      if (result !== undefined && !isArray(result)) {
-	        result = [result];
-	      }
-	      return original.apply(target, result || args);
-	    };
-	    makeBefore(target, key);
-	  };
 	}
 	function isBlacklisted(prop, bl) {
 	  if (!bl || !bl.length) {
@@ -2439,12 +2421,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  isBrowser = !!window;
 	} catch (e) {}
 	
-	function autoInject(resource, data, opts) {
-	  if (opts.autoInject) {
-	    return resource.inject(data);
+	var handleResponse = function handleResponse(resource, data, opts, adapterName) {
+	  if (opts.raw) {
+	    data.adapter = adapterName;
+	    if (opts.autoInject) {
+	      data.data = resource.inject(data.data);
+	    }
+	    return data;
+	  } else if (opts.autoInject) {
+	    data = resource.inject(data);
 	  }
 	  return data;
-	}
+	};
 	
 	// This is here so Babel will give us
 	// the inheritance helpers which we
@@ -2457,9 +2445,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Resource = exports.Resource = (function (_BaseResource) {
 	  _inherits(Resource, _BaseResource);
 	
-	  function Resource() {
-	    var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-	
+	  function Resource(props) {
 	    _classCallCheck(this, Resource);
 	
 	    var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(Resource).call(this));
@@ -2467,7 +2453,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Object.defineProperty(_this2, '$$props', {
 	      value: {}
 	    });
-	    (0, _decorators.configure)(props)(_this2);
+	    (0, _decorators.configure)(props || {})(_this2);
 	    return _this2;
 	  }
 	
@@ -2476,33 +2462,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _createClass(Resource, [{
 	    key: 'create',
 	    value: function create(opts) {
-	      var _this3 = this;
-	
-	      var Ctor = this.constructor;
-	      return Ctor.create(this, opts).then(function (data) {
-	        // Might need to find a better way to do this
-	        if (data !== _this3 && data[Ctor.idAttribute]) {
-	          utils.forOwn(data, function (value, key) {
-	            _this3[key] = value;
-	          });
-	        }
-	        return _this3;
-	      });
+	      return this.constructor.create(this, opts);
 	    }
 	  }, {
 	    key: 'save',
 	    value: function save(opts) {
 	      var Ctor = this.constructor;
-	      var Opts = utils._(Ctor, opts);
 	
-	      var adapterName = Ctor.getAdapterName(Opts);
-	      return Ctor.adapters[adapterName].update(Ctor, this[Ctor.idAttribute], this, Opts);
+	      var adapterName = Ctor.getAdapterName(opts);
+	      return Ctor.getAdapter(adapterName).update(Ctor, utils.get(this, Ctor.idAttribute), this, opts);
 	    }
 	  }, {
 	    key: 'destroy',
 	    value: function destroy(opts) {
 	      var Ctor = this.constructor;
-	      return Ctor.destroy(this[Ctor.idAttribute], opts);
+	      return Ctor.destroy(utils.get(this, Ctor.idAttribute), opts);
+	    }
+	  }, {
+	    key: 'toJSON',
+	    value: function toJSON() {
+	      return utils.copy(this);
 	    }
 	
 	    // Static methods
@@ -2520,8 +2499,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'createInstance',
 	    value: function createInstance(props) {
-	      var Constructor = this;
-	      return props instanceof Constructor ? props : new Constructor(props);
+	      var Ctor = this;
+	      return props instanceof Ctor ? props : new Ctor(props);
 	    }
 	  }, {
 	    key: 'is',
@@ -2530,18 +2509,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }, {
 	    key: 'inject',
-	    value: function inject(items) {
-	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-	
+	    value: function inject(items, opts) {
+	      opts = opts || {};
 	      var _this = this;
 	      var singular = false;
+	      var collection = _this.data();
+	      var idAttribute = _this.idAttribute;
+	      var relationList = _this.relationList || [];
 	      if (!utils.isArray(items)) {
 	        items = [items];
 	        singular = true;
 	      }
-	      var collection = _this.data();
-	      var idAttribute = _this.idAttribute;
-	      var relationList = _this.relationList || [];
 	      items.forEach(function (props) {
 	        relationList.forEach(function (def) {
 	          var Relation = def.Relation;
@@ -2630,9 +2608,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }, {
 	    key: 'eject',
-	    value: function eject(id) {
-	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-	
+	    value: function eject(id, opts) {
+	      opts = opts || {};
 	      var item = this.get(id);
 	      if (item) {
 	        delete item.$$props.$$s;
@@ -2641,9 +2618,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }, {
 	    key: 'ejectAll',
-	    value: function ejectAll(params) {
-	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-	
+	    value: function ejectAll(params, opts) {
+	      opts = opts || {};
 	      var items = this.filter(params);
 	      var collection = this.data();
 	      items.forEach(function (item) {
@@ -2684,12 +2660,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'getAdapter',
 	    value: function getAdapter(opts) {
-	      return this.adapters[this.getAdapterName(opts)];
+	      var adapter = this.getAdapterName(opts);
+	      if (!adapter) {
+	        throw new ReferenceError(adapter + ' not found!');
+	      }
+	      return this.adapters[adapter];
 	    }
 	  }, {
 	    key: 'getAdapterName',
 	    value: function getAdapterName(opts) {
-	      utils._(this, opts);
+	      opts = opts || {};
+	      if (utils.isString(opts)) {
+	        opts = { adapter: opts };
+	      }
 	      return opts.adapter || opts.defaultAdapter;
 	    }
 	  }, {
@@ -2697,24 +2680,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function beforeCreate() {}
 	  }, {
 	    key: 'create',
-	    value: function create() {
-	      var _this4 = this;
+	    value: function create(props, opts) {
+	      var _this3 = this;
 	
-	      var props = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	      var adapterName = undefined;
 	
+	      props = props || {};
+	      opts = opts || {};
 	      utils._(this, opts);
 	
 	      if (opts.upsert && utils.get(props, this.idAttribute)) {
 	        return this.update(utils.get(props, this.idAttribute), props, opts);
 	      }
-	      return this.beforeCreate(props, opts).then(function () {
-	        var adapterName = _this4.getAdapterName(opts);
-	        return _this4.adapters[adapterName].create(_this4, utils.omit(props, opts.omit), opts);
+	      return Promise.resolve(this.beforeCreate(props, opts)).then(function () {
+	        adapterName = _this3.getAdapterName(opts);
+	        return _this3.getAdapter(adapterName).create(_this3, _this3.prototype.toJSON.call(props), opts);
 	      }).then(function (data) {
-	        return _this4.afterCreate(data, opts);
-	      }).then(function (data) {
-	        return autoInject(_this4, data, opts);
+	        return Promise.resolve(_this3.afterCreate(data, opts)).then(function () {
+	          return handleResponse(_this3, data, opts, adapterName);
+	        });
 	      });
 	    }
 	  }, {
@@ -2725,12 +2709,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function beforeCreateMany() {}
 	  }, {
 	    key: 'createMany',
-	    value: function createMany() {
-	      var _this5 = this;
+	    value: function createMany(items, opts) {
+	      var _this4 = this;
 	
-	      var items = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
-	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	      var adapterName = undefined;
 	
+	      items = items || [];
+	      opts = opts || {};
 	      utils._(this, opts);
 	
 	      if (opts.upsert) {
@@ -2741,22 +2726,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	          });
 	          if (hasId) {
 	            return {
-	              v: _this5.updateMany(items, opts)
+	              v: _this4.updateMany(items, opts)
 	            };
 	          }
 	        })();
 	
 	        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
 	      }
-	      var adapterName = this.getAdapterName(opts);
-	      return this.beforeCreateMany(items, opts).then(function () {
-	        return _this5.adapters[adapterName].createMany(_this5, items.map(function (item) {
-	          return utils.omit(item, opts.omit);
+	
+	      return Promise.resolve(this.beforeCreateMany(items, opts)).then(function () {
+	        adapterName = _this4.getAdapterName(opts);
+	        return _this4.getAdapter(adapterName).createMany(_this4, items.map(function (item) {
+	          return _this4.prototype.toJSON.call(item);
 	        }), opts);
 	      }).then(function (data) {
-	        return _this5.afterCreateMany(data, opts);
-	      }).then(function (data) {
-	        return autoInject(_this5, data, opts);
+	        return Promise.resolve(_this4.afterCreateMany(data, opts)).then(function () {
+	          return handleResponse(_this4, data, opts, adapterName);
+	        });
 	      });
 	    }
 	  }, {
@@ -2767,20 +2753,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function beforeFind() {}
 	  }, {
 	    key: 'find',
-	    value: function find(id) {
-	      var _this6 = this;
+	    value: function find(id, opts) {
+	      var _this5 = this;
 	
-	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	      var adapterName = undefined;
 	
+	      opts = opts || {};
 	      utils._(this, opts);
 	
-	      var adapterName = this.getAdapterName(opts);
-	      return this.beforeFind(id, opts).then(function () {
-	        return _this6.adapters[adapterName].find(_this6, id, opts);
+	      return Promise.resolve(this.beforeFind(id, opts)).then(function () {
+	        adapterName = _this5.getAdapterName(opts);
+	        return _this5.getAdapter(adapterName).find(_this5, id, opts);
 	      }).then(function (data) {
-	        return _this6.afterFind(data, opts);
-	      }).then(function (data) {
-	        return autoInject(_this6, data, opts);
+	        return Promise.resolve(_this5.afterFind(data, opts)).then(function () {
+	          return handleResponse(_this5, data, opts, adapterName);
+	        });
 	      });
 	    }
 	  }, {
@@ -2791,21 +2778,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function beforeFindAll() {}
 	  }, {
 	    key: 'findAll',
-	    value: function findAll() {
-	      var _this7 = this;
+	    value: function findAll(query, opts) {
+	      var _this6 = this;
 	
-	      var query = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	      var adapterName = undefined;
 	
+	      query = query || {};
+	      opts = opts || {};
 	      utils._(this, opts);
 	
-	      var adapterName = this.getAdapterName(opts);
-	      return this.beforeFindAll(query, opts).then(function () {
-	        return _this7.adapters[adapterName].findAll(_this7, query, opts);
+	      return Promise.resolve(this.beforeFindAll(query, opts)).then(function () {
+	        adapterName = _this6.getAdapterName(opts);
+	        return _this6.getAdapter(adapterName).findAll(_this6, query, opts);
 	      }).then(function (data) {
-	        return _this7.afterFindAll(data, opts);
-	      }).then(function (data) {
-	        return autoInject(_this7, data, opts);
+	        return Promise.resolve(_this6.afterFindAll(data, opts)).then(function () {
+	          return handleResponse(_this6, data, opts, adapterName);
+	        });
 	      });
 	    }
 	  }, {
@@ -2816,21 +2804,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function beforeUpdate() {}
 	  }, {
 	    key: 'update',
-	    value: function update(id) {
-	      var _this8 = this;
+	    value: function update(id, props, opts) {
+	      var _this7 = this;
 	
-	      var props = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-	      var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+	      var adapterName = undefined;
 	
+	      props = props || {};
+	      opts = opts || {};
 	      utils._(this, opts);
 	
-	      var adapterName = this.getAdapterName(opts);
-	      return this.beforeUpdate(id, props, opts).then(function () {
-	        return _this8.adapters[adapterName].update(_this8, id, props, opts);
+	      return Promise.resolve(this.beforeUpdate(id, props, opts)).then(function () {
+	        adapterName = _this7.getAdapterName(opts);
+	        return _this7.getAdapter(adapterName).update(_this7, id, _this7.prototype.toJSON.call(props), opts);
 	      }).then(function (data) {
-	        return _this8.afterUpdate(id, data, opts);
-	      }).then(function (data) {
-	        return autoInject(_this8, data, opts);
+	        return Promise.resolve(_this7.afterUpdate(id, data, opts)).then(function () {
+	          return handleResponse(_this7, data, opts, adapterName);
+	        });
 	      });
 	    }
 	  }, {
@@ -2841,21 +2830,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function beforeUpdateMany() {}
 	  }, {
 	    key: 'updateMany',
-	    value: function updateMany() {
-	      var _this9 = this;
+	    value: function updateMany(items, opts) {
+	      var _this8 = this;
 	
-	      var items = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
-	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	      var adapterName = undefined;
 	
+	      items = items || [];
+	      opts = opts || {};
 	      utils._(this, opts);
 	
-	      var adapterName = this.getAdapterName(opts);
-	      return this.beforeUpdateMany(items, opts).then(function () {
-	        return _this9.adapters[adapterName].updateMany(_this9, items, opts);
+	      return Promise.resolve(this.beforeUpdateMany(items, opts)).then(function () {
+	        adapterName = _this8.getAdapterName(opts);
+	        return _this8.getAdapter(adapterName).updateMany(_this8, items, opts);
 	      }).then(function (data) {
-	        return _this9.afterUpdateMany(data, opts);
-	      }).then(function (data) {
-	        return autoInject(_this9, data, opts);
+	        return Promise.resolve(_this8.afterUpdateMany(data, opts)).then(function () {
+	          return handleResponse(_this8, data, opts, adapterName);
+	        });
 	      });
 	    }
 	  }, {
@@ -2866,23 +2856,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function beforeUpdateAll() {}
 	  }, {
 	    key: 'updateAll',
-	    value: function updateAll() {
-	      var query = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	    value: function updateAll(query, props, opts) {
+	      var _this9 = this;
 	
-	      var _this10 = this;
+	      var adapterName = undefined;
 	
-	      var props = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-	      var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-	
+	      query = query || {};
+	      props = props || {};
+	      opts = opts || {};
 	      utils._(this, opts);
 	
-	      var adapterName = this.getAdapterName(opts);
-	      return this.beforeUpdateAll(query, props, opts).then(function () {
-	        return _this10.adapters[adapterName].updateAll(_this10, query, props, opts);
+	      return Promise.resolve(this.beforeUpdateAll(query, props, opts)).then(function () {
+	        adapterName = _this9.getAdapterName(opts);
+	        return _this9.getAdapter(adapterName).updateAll(_this9, query, props, opts);
 	      }).then(function (data) {
-	        return _this10.afterUpdateAll(query, data, opts);
-	      }).then(function (data) {
-	        return autoInject(_this10, data, opts);
+	        return Promise.resolve(_this9.afterUpdateAll(query, data, opts)).then(function () {
+	          return handleResponse(_this9, data, opts, adapterName);
+	        });
 	      });
 	    }
 	  }, {
@@ -2893,20 +2883,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function beforeDestroy() {}
 	  }, {
 	    key: 'destroy',
-	    value: function destroy(id) {
-	      var _this11 = this;
+	    value: function destroy(id, opts) {
+	      var _this10 = this;
 	
-	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	      var adapterName = undefined;
 	
+	      opts = opts || {};
 	      utils._(this, opts);
 	
-	      var adapterName = this.getAdapterName(opts);
-	      return this.beforeDestroy(id, opts).then(function () {
-	        return _this11.adapters[adapterName].destroy(_this11, id, opts);
+	      return Promise.resolve(this.beforeDestroy(id, opts)).then(function () {
+	        adapterName = _this10.getAdapterName(opts);
+	        return _this10.getAdapter(adapterName).destroy(_this10, id, opts);
 	      }).then(function () {
-	        return _this11.afterDestroy(id, opts);
+	        return _this10.afterDestroy(id, opts);
 	      }).then(function () {
-	        return _this11.eject(id, opts);
+	        return _this10.eject(id, opts);
 	      });
 	    }
 	  }, {
@@ -2917,21 +2908,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function beforeDestroyAll() {}
 	  }, {
 	    key: 'destroyAll',
-	    value: function destroyAll() {
-	      var _this12 = this;
+	    value: function destroyAll(query, opts) {
+	      var _this11 = this;
 	
-	      var query = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-	      var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	      var adapterName = undefined;
 	
+	      query = query || {};
+	      opts = opts || {};
 	      utils._(this, opts);
 	
-	      var adapterName = this.getAdapterName(opts);
 	      return this.beforeDestroyAll(query, opts).then(function () {
-	        return _this12.adapters[adapterName].destroyAll(_this12, query, opts);
+	        adapterName = _this11.getAdapterName(opts);
+	        return _this11.getAdapter(adapterName).destroyAll(_this11, query, opts);
 	      }).then(function () {
-	        return _this12.afterDestroyAll(query, opts);
+	        return _this11.afterDestroyAll(query, opts);
 	      }).then(function () {
-	        return _this12.ejectAll(query, opts);
+	        return _this11.ejectAll(query, opts);
 	      });
 	    }
 	  }, {
@@ -3013,12 +3005,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  }, {
 	    key: 'extend',
-	    value: function extend(props) {
-	      var classProps = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-	
+	    value: function extend(props, classProps) {
 	      var Child = undefined;
 	      var Parent = this;
 	      props = props || {};
+	      classProps = classProps || {};
 	
 	      if (!classProps.name) {
 	        throw new TypeError('name: Expected string, found ' + _typeof(classProps.name) + '!');
@@ -3080,8 +3071,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  linkRelations: isBrowser,
 	  onConflict: 'merge',
 	  relationsEnumerable: false,
-	  returnMeta: false,
+	  raw: false,
 	  strategy: 'single',
+	  upsert: true,
 	  useFilter: true
 	})(Resource);
 
