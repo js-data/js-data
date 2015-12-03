@@ -2,6 +2,7 @@
 
 require('babel-polyfill');
 var assert = require('chai').assert;
+var sinon = require('sinon')
 var mocha = require('mocha')
 var JSData = require('./dist/js-data-debug')
 var JSDataTests = require('./dist/js-data-tests')
@@ -35,6 +36,7 @@ for (var key in globals) {
 test.globals(testGlobals)
 
 beforeEach(function () {
+  globals.sinon = global.sinon = sinon
   this.data = {}
   this.data.p1 = globals.p1 = global.p1 = { author: 'John', age: 30, id: 5 }
   this.data.p2 = globals.p2 = global.p2 = { author: 'Sally', age: 31, id: 6 }

@@ -139,19 +139,6 @@ export function fillIn (dest, src) {
     }
   })
 }
-export function makeBefore (target, key) {
-  return function (fn) {
-    const original = target[key]
-    target[key] = function (...args) {
-      let result = fn.apply(target, args)
-      if (result !== undefined && !isArray(result)) {
-        result = [result]
-      }
-      return original.apply(target, result || args)
-    }
-    makeBefore(target, key)
-  }
-}
 export function isBlacklisted (prop, bl) {
   if (!bl || !bl.length) {
     return false

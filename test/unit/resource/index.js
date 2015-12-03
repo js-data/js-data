@@ -36,8 +36,9 @@ const defaults = {
   linkRelations: isBrowser,
   onConflict: 'merge',
   relationsEnumerable: false,
-  returnMeta: false,
+  raw: false,
   strategy: 'single',
+  upsert: true,
   useFilter: true
 }
 

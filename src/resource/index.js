@@ -16,9 +16,16 @@ try {
 } catch (e) {
 }
 
-function autoInject (resource, data, opts) {
-  if (opts.autoInject) {
-    return resource.inject(data)
+const handleResponse = function handleResponse (resource, data, opts, adapterName) {
+
+  if (opts.raw) {
+    data.adapter = adapterName
+    if (opts.autoInject) {
+      data.data = resource.inject(data.data)
+    }
+    return data
+  } else if (opts.autoInject) {
+    data = resource.inject(data)
   }
   return data
 }
@@ -29,40 +36,34 @@ function autoInject (resource, data, opts) {
 class BaseResource {}
 
 export class Resource extends BaseResource {
-  constructor (props = {}) {
+  constructor (props) {
     super()
     Object.defineProperty(this, '$$props', {
       value: {}
     })
-    configure(props)(this)
+    configure(props || {})(this)
   }
 
   // Instance methods
   create (opts) {
-    const Ctor = this.constructor
-    return Ctor.create(this, opts).then(data => {
-      // Might need to find a better way to do this
-      if (data !== this && data[Ctor.idAttribute]) {
-        utils.forOwn(data, (value, key) => {
-          this[key] = value
-        })
-      }
-      return this
-    })
+    return this.constructor.create(this, opts)
   }
 
   save (opts) {
     const Ctor = this.constructor
-    const Opts = utils._(Ctor, opts)
 
-    const adapterName = Ctor.getAdapterName(Opts)
-    return Ctor.adapters[adapterName]
-      .update(Ctor, this[Ctor.idAttribute], this, Opts)
+    const adapterName = Ctor.getAdapterName(opts)
+    return Ctor.getAdapter(adapterName)
+      .update(Ctor, utils.get(this, Ctor.idAttribute), this, opts)
   }
 
   destroy (opts) {
     const Ctor = this.constructor
-    return Ctor.destroy(this[Ctor.idAttribute], opts)
+    return Ctor.destroy(utils.get(this, Ctor.idAttribute), opts)
+  }
+
+  toJSON () {
+    return utils.copy(this)
   }
 
   // Static methods
@@ -75,24 +76,25 @@ export class Resource extends BaseResource {
   }
 
   static createInstance (props) {
-    let Constructor = this
-    return props instanceof Constructor ? props : new Constructor(props)
+    let Ctor = this
+    return props instanceof Ctor ? props : new Ctor(props)
   }
 
   static is (instance) {
     return instance instanceof this
   }
 
-  static inject (items, opts = {}) {
+  static inject (items, opts) {
+    opts = opts || {}
     const _this = this
     let singular = false
+    const collection = _this.data()
+    const idAttribute = _this.idAttribute
+    const relationList = _this.relationList || []
     if (!utils.isArray(items)) {
       items = [items]
       singular = true
     }
-    const collection = _this.data()
-    const idAttribute = _this.idAttribute
-    const relationList = _this.relationList || []
     items.forEach(function (props) {
       relationList.forEach(function (def) {
         const Relation = def.Relation
@@ -180,7 +182,8 @@ export class Resource extends BaseResource {
     return singular ? (items.length ? items[0] : undefined) : items
   }
 
-  static eject (id, opts = {}) {
+  static eject (id, opts) {
+    opts = opts || {}
     const item = this.get(id)
     if (item) {
       delete item.$$props.$$s
@@ -188,7 +191,8 @@ export class Resource extends BaseResource {
     }
   }
 
-  static ejectAll (params, opts = {}) {
+  static ejectAll (params, opts) {
+    opts = opts || {}
     const items = this.filter(params)
     const collection = this.data()
     items.forEach(function (item) {
@@ -219,16 +223,27 @@ export class Resource extends BaseResource {
   }
 
   static getAdapter (opts) {
-    return this.adapters[this.getAdapterName(opts)]
+    const adapter = this.getAdapterName(opts)
+    if (!adapter) {
+      throw new ReferenceError(`${adapter} not found!`)
+    }
+    return this.adapters[adapter]
   }
 
   static getAdapterName (opts) {
-    utils._(this, opts)
+    opts = opts || {}
+    if (utils.isString(opts)) {
+      opts = { adapter: opts }
+    }
     return opts.adapter || opts.defaultAdapter
   }
 
   static beforeCreate () {}
-  static create (props = {}, opts = {}) {
+  static create (props, opts) {
+    let adapterName
+
+    props = props || {}
+    opts = opts || {}
     utils._(this, opts)
 
     if (opts.upsert && utils.get(props, this.idAttribute)) {
@@ -236,19 +251,23 @@ export class Resource extends BaseResource {
     }
     return Promise.resolve(this.beforeCreate(props, opts))
       .then(() => {
-        const adapterName = this.getAdapterName(opts)
-        return this.adapters[adapterName]
-          .create(this, utils.omit(props, opts.omit), opts)
+        adapterName = this.getAdapterName(opts)
+        return this.getAdapter(adapterName)
+          .create(this, this.prototype.toJSON.call(props), opts)
       })
       .then(data => {
         return Promise.resolve(this.afterCreate(data, opts))
-          .then(() => autoInject(this, data, opts))
+          .then(() => handleResponse(this, data, opts, adapterName))
       })
   }
   static afterCreate () {}
 
   static beforeCreateMany () {}
-  static createMany (items = [], opts = {}) {
+  static createMany (items, opts) {
+    let adapterName
+
+    items = items || []
+    opts = opts || {}
     utils._(this, opts)
 
     if (opts.upsert) {
@@ -260,118 +279,140 @@ export class Resource extends BaseResource {
         return this.updateMany(items, opts)
       }
     }
-    const adapterName = this.getAdapterName(opts)
+
     return Promise.resolve(this.beforeCreateMany(items, opts))
       .then(() => {
-        return this.adapters[adapterName]
+        adapterName = this.getAdapterName(opts)
+        return this.getAdapter(adapterName)
           .createMany(
             this,
-            items.map(function (item) {
-              return utils.omit(item, opts.omit)
-            }),
+            items.map(item => this.prototype.toJSON.call(item)),
             opts
           )
       })
       .then(data => {
         return Promise.resolve(this.afterCreateMany(data, opts))
-          .then(data => autoInject(this, data, opts))
+          .then(() => handleResponse(this, data, opts, adapterName))
       })
   }
   static afterCreateMany () {}
 
   static beforeFind () {}
-  static find (id, opts = {}) {
+  static find (id, opts) {
+    let adapterName
+
+    opts = opts || {}
     utils._(this, opts)
 
-    const adapterName = this.getAdapterName(opts)
     return Promise.resolve(this.beforeFind(id, opts))
       .then(() => {
-        return this.adapters[adapterName]
+        adapterName = this.getAdapterName(opts)
+        return this.getAdapter(adapterName)
           .find(this, id, opts)
       })
       .then(data => {
         return Promise.resolve(this.afterFind(data, opts))
-          .then(data => autoInject(this, data, opts))
+          .then(() => handleResponse(this, data, opts, adapterName))
       })
   }
   static afterFind () {}
 
   static beforeFindAll () {}
-  static findAll (query = {}, opts = {}) {
+  static findAll (query, opts) {
+    let adapterName
+
+    query = query || {}
+    opts = opts || {}
     utils._(this, opts)
 
-    const adapterName = this.getAdapterName(opts)
     return Promise.resolve(this.beforeFindAll(query, opts))
       .then(() => {
-        return this.adapters[adapterName]
+        adapterName = this.getAdapterName(opts)
+        return this.getAdapter(adapterName)
           .findAll(this, query, opts)
       })
       .then(data => {
         return Promise.resolve(this.afterFindAll(data, opts))
-          .then(data => autoInject(this, data, opts))
+          .then(() => handleResponse(this, data, opts, adapterName))
       })
   }
   static afterFindAll () {}
 
   static beforeUpdate () {}
-  static update (id, props = {}, opts = {}) {
+  static update (id, props, opts) {
+    let adapterName
+
+    props = props || {}
+    opts = opts || {}
     utils._(this, opts)
 
-    const adapterName = this.getAdapterName(opts)
     return Promise.resolve(this.beforeUpdate(id, props, opts))
       .then(() => {
-        return this.adapters[adapterName]
-          .update(this, id, props, opts)
+        adapterName = this.getAdapterName(opts)
+        return this.getAdapter(adapterName)
+          .update(this, id, this.prototype.toJSON.call(props), opts)
       })
       .then(data => {
         return Promise.resolve(this.afterUpdate(id, data, opts))
-          .then(data => autoInject(this, data, opts))
+          .then(() => handleResponse(this, data, opts, adapterName))
       })
   }
   static afterUpdate () {}
 
   static beforeUpdateMany () {}
-  static updateMany (items = [], opts = {}) {
+  static updateMany (items, opts) {
+    let adapterName
+
+    items = items || []
+    opts = opts || {}
     utils._(this, opts)
 
-    const adapterName = this.getAdapterName(opts)
     return Promise.resolve(this.beforeUpdateMany(items, opts))
       .then(() => {
-        return this.adapters[adapterName]
+        adapterName = this.getAdapterName(opts)
+        return this.getAdapter(adapterName)
           .updateMany(this, items, opts)
       })
       .then(data => {
         return Promise.resolve(this.afterUpdateMany(data, opts))
-          .then(data => autoInject(this, data, opts))
+          .then(() => handleResponse(this, data, opts, adapterName))
       })
   }
   static afterUpdateMany () {}
 
   static beforeUpdateAll () {}
-  static updateAll (query = {}, props = {}, opts = {}) {
+  static updateAll (query, props, opts) {
+    let adapterName
+
+    query = query || {}
+    props = props || {}
+    opts = opts || {}
     utils._(this, opts)
 
-    const adapterName = this.getAdapterName(opts)
     return Promise.resolve(this.beforeUpdateAll(query, props, opts))
       .then(() => {
-        return this.adapters[adapterName]
+        adapterName = this.getAdapterName(opts)
+        return this.getAdapter(adapterName)
           .updateAll(this, query, props, opts)
       })
       .then(data => {
         return Promise.resolve(this.afterUpdateAll(query, data, opts))
-          .then(data => autoInject(this, data, opts))
+          .then(() => handleResponse(this, data, opts, adapterName))
       })
   }
   static afterUpdateAll () {}
 
   static beforeDestroy () {}
-  static destroy (id, opts = {}) {
+  static destroy (id, opts) {
+    let adapterName
+
+    opts = opts || {}
     utils._(this, opts)
 
-    const adapterName = this.getAdapterName(opts)
     return Promise.resolve(this.beforeDestroy(id, opts))
       .then(() => {
-        return this.adapters[adapterName]
+        adapterName = this.getAdapterName(opts)
+        return this.getAdapter(adapterName)
           .destroy(this, id, opts)
       })
       .then(() => this.afterDestroy(id, opts))
@@ -380,13 +421,17 @@ export class Resource extends BaseResource {
   static afterDestroy () {}
 
   static beforeDestroyAll () {}
-  static destroyAll (query = {}, opts = {}) {
+  static destroyAll (query, opts) {
+    let adapterName
+
+    query = query || {}
+    opts = opts || {}
     utils._(this, opts)
 
-    const adapterName = this.getAdapterName(opts)
     return this.beforeDestroyAll(query, opts)
       .then(() => {
-        return this.adapters[adapterName]
+        adapterName = this.getAdapterName(opts)
+        return this.getAdapter(adapterName)
           .destroyAll(this, query, opts)
       })
       .then(() => this.afterDestroyAll(query, opts))
@@ -453,10 +498,11 @@ export class Resource extends BaseResource {
    *
    * var User = JSData.Resource.extend({...}, {...})
    */
-  static extend (props, classProps = {}) {
+  static extend (props, classProps) {
     let Child
     const Parent = this
     props = props || {}
+    classProps = classProps || {}
 
     if (!classProps.name) {
       throw new TypeError(`name: Expected string, found ${typeof classProps.name}!`)
@@ -519,7 +565,8 @@ configure({
   linkRelations: isBrowser,
   onConflict: 'merge',
   relationsEnumerable: false,
-  returnMeta: false,
+  raw: false,
   strategy: 'single',
+  upsert: true,
   useFilter: true
 })(Resource)
