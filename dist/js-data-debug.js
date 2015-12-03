@@ -2485,8 +2485,55 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }, {
 	    key: 'toJSON',
-	    value: function toJSON() {
-	      return utils.copy(this);
+	    value: function toJSON(opts) {
+	      var _this3 = this;
+	
+	      opts = opts || {};
+	      var Ctor = this.constructor;
+	      var json = this;
+	      if (this instanceof Resource) {
+	        json = {};
+	        utils.forOwn(this, function (value, key) {
+	          json[key] = value;
+	        });
+	        if (Ctor && Ctor.relationList && opts.with) {
+	          if (utils.isString(opts.with)) {
+	            opts.with = [opts.with];
+	          }
+	          Ctor.relationList.forEach(function (def) {
+	            var containedName = undefined;
+	            if (opts.with.indexOf(def.relation) !== -1) {
+	              containedName = def.relation;
+	            } else if (opts.with.indexOf(def.localField) !== -1) {
+	              containedName = def.localField;
+	            }
+	            if (containedName) {
+	              (function () {
+	                var optsCopy = { with: opts.with.slice() };
+	                optsCopy.with.splice(optsCopy.with.indexOf(containedName), 1);
+	                optsCopy.with.forEach(function (relation, i) {
+	                  if (relation && relation.indexOf(containedName) === 0 && relation.length >= containedName.length && relation[containedName.length] === '.') {
+	                    optsCopy.with[i] = relation.substr(containedName.length + 1);
+	                  } else {
+	                    optsCopy.with[i] = '';
+	                  }
+	                });
+	                var relationData = utils.get(_this3, def.localField);
+	                if (relationData) {
+	                  if (utils.isArray(relationData)) {
+	                    utils.set(json, def.localField, relationData.map(function (item) {
+	                      return def.Relation.prototype.toJSON.call(item, optsCopy);
+	                    }));
+	                  } else {
+	                    utils.set(json, def.localField, def.Relation.prototype.toJSON.call(relationData, optsCopy));
+	                  }
+	                }
+	              })();
+	            }
+	          });
+	        }
+	      }
+	      return json;
 	    }
 	
 	    // Static methods
@@ -2686,23 +2733,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'create',
 	    value: function create(props, opts) {
-	      var _this3 = this;
+	      var _this4 = this;
 	
 	      var adapterName = undefined;
 	
 	      props = props || {};
 	      opts = opts || {};
 	      utils._(this, opts);
+	      opts.op = 'create';
 	
 	      if (opts.upsert && utils.get(props, this.idAttribute)) {
 	        return this.update(utils.get(props, this.idAttribute), props, opts);
 	      }
 	      return Promise.resolve(this.beforeCreate(props, opts)).then(function () {
-	        adapterName = _this3.getAdapterName(opts);
-	        return _this3.getAdapter(adapterName).create(_this3, _this3.prototype.toJSON.call(props), opts);
+	        adapterName = _this4.getAdapterName(opts);
+	        return _this4.getAdapter(adapterName).create(_this4, _this4.prototype.toJSON.call(props, opts), opts);
 	      }).then(function (data) {
-	        return Promise.resolve(_this3.afterCreate(data, opts)).then(function () {
-	          return handleResponse(_this3, data, opts, adapterName);
+	        return Promise.resolve(_this4.afterCreate(data, opts)).then(function () {
+	          return handleResponse(_this4, data, opts, adapterName);
 	        });
 	      });
 	    }
@@ -2715,38 +2763,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'createMany',
 	    value: function createMany(items, opts) {
-	      var _this4 = this;
+	      var _this5 = this;
 	
 	      var adapterName = undefined;
 	
 	      items = items || [];
 	      opts = opts || {};
 	      utils._(this, opts);
+	      opts.op = 'createMany';
 	
 	      if (opts.upsert) {
-	        var _ret = (function () {
+	        var _ret2 = (function () {
 	          var hasId = true;
 	          items.forEach(function (item) {
 	            hasId = hasId && utils.get(item, this.idAttribute);
 	          });
 	          if (hasId) {
 	            return {
-	              v: _this4.updateMany(items, opts)
+	              v: _this5.updateMany(items, opts)
 	            };
 	          }
 	        })();
 	
-	        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+	        if ((typeof _ret2 === 'undefined' ? 'undefined' : _typeof(_ret2)) === "object") return _ret2.v;
 	      }
 	
 	      return Promise.resolve(this.beforeCreateMany(items, opts)).then(function () {
-	        adapterName = _this4.getAdapterName(opts);
-	        return _this4.getAdapter(adapterName).createMany(_this4, items.map(function (item) {
-	          return _this4.prototype.toJSON.call(item);
+	        adapterName = _this5.getAdapterName(opts);
+	        return _this5.getAdapter(adapterName).createMany(_this5, items.map(function (item) {
+	          return _this5.prototype.toJSON.call(item, opts);
 	        }), opts);
 	      }).then(function (data) {
-	        return Promise.resolve(_this4.afterCreateMany(data, opts)).then(function () {
-	          return handleResponse(_this4, data, opts, adapterName);
+	        return Promise.resolve(_this5.afterCreateMany(data, opts)).then(function () {
+	          return handleResponse(_this5, data, opts, adapterName);
 	        });
 	      });
 	    }
@@ -2759,19 +2808,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'find',
 	    value: function find(id, opts) {
-	      var _this5 = this;
+	      var _this6 = this;
 	
 	      var adapterName = undefined;
 	
 	      opts = opts || {};
 	      utils._(this, opts);
+	      opts.op = 'find';
 	
 	      return Promise.resolve(this.beforeFind(id, opts)).then(function () {
-	        adapterName = _this5.getAdapterName(opts);
-	        return _this5.getAdapter(adapterName).find(_this5, id, opts);
+	        adapterName = _this6.getAdapterName(opts);
+	        return _this6.getAdapter(adapterName).find(_this6, id, opts);
 	      }).then(function (data) {
-	        return Promise.resolve(_this5.afterFind(data, opts)).then(function () {
-	          return handleResponse(_this5, data, opts, adapterName);
+	        return Promise.resolve(_this6.afterFind(data, opts)).then(function () {
+	          return handleResponse(_this6, data, opts, adapterName);
 	        });
 	      });
 	    }
@@ -2784,20 +2834,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'findAll',
 	    value: function findAll(query, opts) {
-	      var _this6 = this;
+	      var _this7 = this;
 	
 	      var adapterName = undefined;
 	
 	      query = query || {};
 	      opts = opts || {};
 	      utils._(this, opts);
+	      opts.op = 'findAll';
 	
 	      return Promise.resolve(this.beforeFindAll(query, opts)).then(function () {
-	        adapterName = _this6.getAdapterName(opts);
-	        return _this6.getAdapter(adapterName).findAll(_this6, query, opts);
+	        adapterName = _this7.getAdapterName(opts);
+	        return _this7.getAdapter(adapterName).findAll(_this7, query, opts);
 	      }).then(function (data) {
-	        return Promise.resolve(_this6.afterFindAll(data, opts)).then(function () {
-	          return handleResponse(_this6, data, opts, adapterName);
+	        return Promise.resolve(_this7.afterFindAll(data, opts)).then(function () {
+	          return handleResponse(_this7, data, opts, adapterName);
 	        });
 	      });
 	    }
@@ -2810,20 +2861,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'update',
 	    value: function update(id, props, opts) {
-	      var _this7 = this;
+	      var _this8 = this;
 	
 	      var adapterName = undefined;
 	
 	      props = props || {};
 	      opts = opts || {};
 	      utils._(this, opts);
+	      opts.op = 'update';
 	
 	      return Promise.resolve(this.beforeUpdate(id, props, opts)).then(function () {
-	        adapterName = _this7.getAdapterName(opts);
-	        return _this7.getAdapter(adapterName).update(_this7, id, _this7.prototype.toJSON.call(props), opts);
+	        adapterName = _this8.getAdapterName(opts);
+	        return _this8.getAdapter(adapterName).update(_this8, id, _this8.prototype.toJSON.call(props, opts), opts);
 	      }).then(function (data) {
-	        return Promise.resolve(_this7.afterUpdate(id, data, opts)).then(function () {
-	          return handleResponse(_this7, data, opts, adapterName);
+	        return Promise.resolve(_this8.afterUpdate(id, data, opts)).then(function () {
+	          return handleResponse(_this8, data, opts, adapterName);
 	        });
 	      });
 	    }
@@ -2836,20 +2888,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'updateMany',
 	    value: function updateMany(items, opts) {
-	      var _this8 = this;
+	      var _this9 = this;
 	
 	      var adapterName = undefined;
 	
 	      items = items || [];
 	      opts = opts || {};
 	      utils._(this, opts);
+	      opts.op = 'updateMany';
 	
 	      return Promise.resolve(this.beforeUpdateMany(items, opts)).then(function () {
-	        adapterName = _this8.getAdapterName(opts);
-	        return _this8.getAdapter(adapterName).updateMany(_this8, items, opts);
+	        adapterName = _this9.getAdapterName(opts);
+	        return _this9.getAdapter(adapterName).updateMany(_this9, items.map(function (item) {
+	          return _this9.prototype.toJSON.call(item, opts);
+	        }), opts);
 	      }).then(function (data) {
-	        return Promise.resolve(_this8.afterUpdateMany(data, opts)).then(function () {
-	          return handleResponse(_this8, data, opts, adapterName);
+	        return Promise.resolve(_this9.afterUpdateMany(data, opts)).then(function () {
+	          return handleResponse(_this9, data, opts, adapterName);
 	        });
 	      });
 	    }
@@ -2862,7 +2917,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'updateAll',
 	    value: function updateAll(query, props, opts) {
-	      var _this9 = this;
+	      var _this10 = this;
 	
 	      var adapterName = undefined;
 	
@@ -2870,13 +2925,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      props = props || {};
 	      opts = opts || {};
 	      utils._(this, opts);
+	      opts.op = 'updateAll';
 	
 	      return Promise.resolve(this.beforeUpdateAll(query, props, opts)).then(function () {
-	        adapterName = _this9.getAdapterName(opts);
-	        return _this9.getAdapter(adapterName).updateAll(_this9, query, props, opts);
+	        adapterName = _this10.getAdapterName(opts);
+	        return _this10.getAdapter(adapterName).updateAll(_this10, query, props, opts);
 	      }).then(function (data) {
-	        return Promise.resolve(_this9.afterUpdateAll(query, data, opts)).then(function () {
-	          return handleResponse(_this9, data, opts, adapterName);
+	        return Promise.resolve(_this10.afterUpdateAll(query, data, opts)).then(function () {
+	          return handleResponse(_this10, data, opts, adapterName);
 	        });
 	      });
 	    }
@@ -2889,20 +2945,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'destroy',
 	    value: function destroy(id, opts) {
-	      var _this10 = this;
+	      var _this11 = this;
 	
 	      var adapterName = undefined;
 	
 	      opts = opts || {};
 	      utils._(this, opts);
+	      opts.op = 'destroy';
 	
 	      return Promise.resolve(this.beforeDestroy(id, opts)).then(function () {
-	        adapterName = _this10.getAdapterName(opts);
-	        return _this10.getAdapter(adapterName).destroy(_this10, id, opts);
+	        adapterName = _this11.getAdapterName(opts);
+	        return _this11.getAdapter(adapterName).destroy(_this11, id, opts);
 	      }).then(function () {
-	        return _this10.afterDestroy(id, opts);
+	        return _this11.afterDestroy(id, opts);
 	      }).then(function () {
-	        return _this10.eject(id, opts);
+	        return _this11.eject(id, opts);
 	      });
 	    }
 	  }, {
@@ -2914,21 +2971,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'destroyAll',
 	    value: function destroyAll(query, opts) {
-	      var _this11 = this;
+	      var _this12 = this;
 	
 	      var adapterName = undefined;
 	
 	      query = query || {};
 	      opts = opts || {};
 	      utils._(this, opts);
+	      opts.op = 'destroyAll';
 	
 	      return this.beforeDestroyAll(query, opts).then(function () {
-	        adapterName = _this11.getAdapterName(opts);
-	        return _this11.getAdapter(adapterName).destroyAll(_this11, query, opts);
+	        adapterName = _this12.getAdapterName(opts);
+	        return _this12.getAdapter(adapterName).destroyAll(_this12, query, opts);
 	      }).then(function () {
-	        return _this11.afterDestroyAll(query, opts);
+	        return _this12.afterDestroyAll(query, opts);
 	      }).then(function () {
-	        return _this11.ejectAll(query, opts);
+	        return _this12.ejectAll(query, opts);
 	      });
 	    }
 	  }, {

@@ -61,8 +61,49 @@ export class Resource extends BaseResource {
     return Ctor.destroy(utils.get(this, Ctor.idAttribute), opts)
   }
 
-  toJSON () {
-    return utils.copy(this)
+  toJSON (opts) {
+    opts = opts || {}
+    const Ctor = this.constructor
+    let json = this
+    if (this instanceof Resource) {
+      json = {}
+      utils.forOwn(this, function (value, key) {
+        json[key] = value
+      })
+      if (Ctor && Ctor.relationList && opts.with) {
+        if (utils.isString(opts.with)) {
+          opts.with = [opts.with]
+        }
+        Ctor.relationList.forEach(def => {
+          let containedName
+          if (opts.with.indexOf(def.relation) !== -1) {
+            containedName = def.relation
+          } else if (opts.with.indexOf(def.localField) !== -1) {
+            containedName = def.localField
+          }
+          if (containedName) {
+            const optsCopy = { with: opts.with.slice() }
+            optsCopy.with.splice(optsCopy.with.indexOf(containedName), 1)
+            optsCopy.with.forEach((relation, i) => {
+              if (relation && relation.indexOf(containedName) === 0 && relation.length >= containedName.length && relation[containedName.length] === '.') {
+                optsCopy.with[i] = relation.substr(containedName.length + 1)
+              } else {
+                optsCopy.with[i] = ''
+              }
+            })
+            const relationData = utils.get(this, def.localField)
+            if (relationData) {
+              if (utils.isArray(relationData)) {
+                utils.set(json, def.localField, relationData.map(item => def.Relation.prototype.toJSON.call(item, optsCopy)))
+              } else {
+                utils.set(json, def.localField, def.Relation.prototype.toJSON.call(relationData, optsCopy))
+              }
+            }
+          }
+        })
+      }
+    }
+    return json
   }
 
   // Static methods
@@ -244,6 +285,7 @@ export class Resource extends BaseResource {
     props = props || {}
     opts = opts || {}
     utils._(this, opts)
+    opts.op = 'create'
 
     if (opts.upsert && utils.get(props, this.idAttribute)) {
       return this.update(utils.get(props, this.idAttribute), props, opts)
@@ -252,7 +294,7 @@ export class Resource extends BaseResource {
       .then(() => {
         adapterName = this.getAdapterName(opts)
         return this.getAdapter(adapterName)
-          .create(this, this.prototype.toJSON.call(props), opts)
+          .create(this, this.prototype.toJSON.call(props, opts), opts)
       })
       .then(data => {
         return Promise.resolve(this.afterCreate(data, opts))
@@ -268,6 +310,7 @@ export class Resource extends BaseResource {
     items = items || []
     opts = opts || {}
     utils._(this, opts)
+    opts.op = 'createMany'
 
     if (opts.upsert) {
       let hasId = true
@@ -283,11 +326,7 @@ export class Resource extends BaseResource {
       .then(() => {
         adapterName = this.getAdapterName(opts)
         return this.getAdapter(adapterName)
-          .createMany(
-            this,
-            items.map(item => this.prototype.toJSON.call(item)),
-            opts
-          )
+          .createMany(this, items.map(item => this.prototype.toJSON.call(item, opts)), opts)
       })
       .then(data => {
         return Promise.resolve(this.afterCreateMany(data, opts))
@@ -302,6 +341,7 @@ export class Resource extends BaseResource {
 
     opts = opts || {}
     utils._(this, opts)
+    opts.op = 'find'
 
     return Promise.resolve(this.beforeFind(id, opts))
       .then(() => {
@@ -323,6 +363,7 @@ export class Resource extends BaseResource {
     query = query || {}
     opts = opts || {}
     utils._(this, opts)
+    opts.op = 'findAll'
 
     return Promise.resolve(this.beforeFindAll(query, opts))
       .then(() => {
@@ -344,12 +385,13 @@ export class Resource extends BaseResource {
     props = props || {}
     opts = opts || {}
     utils._(this, opts)
+    opts.op = 'update'
 
     return Promise.resolve(this.beforeUpdate(id, props, opts))
       .then(() => {
         adapterName = this.getAdapterName(opts)
         return this.getAdapter(adapterName)
-          .update(this, id, this.prototype.toJSON.call(props), opts)
+          .update(this, id, this.prototype.toJSON.call(props, opts), opts)
       })
       .then(data => {
         return Promise.resolve(this.afterUpdate(id, data, opts))
@@ -365,12 +407,13 @@ export class Resource extends BaseResource {
     items = items || []
     opts = opts || {}
     utils._(this, opts)
+    opts.op = 'updateMany'
 
     return Promise.resolve(this.beforeUpdateMany(items, opts))
       .then(() => {
         adapterName = this.getAdapterName(opts)
         return this.getAdapter(adapterName)
-          .updateMany(this, items, opts)
+          .updateMany(this, items.map(item => this.prototype.toJSON.call(item, opts)), opts)
       })
       .then(data => {
         return Promise.resolve(this.afterUpdateMany(data, opts))
@@ -387,6 +430,7 @@ export class Resource extends BaseResource {
     props = props || {}
     opts = opts || {}
     utils._(this, opts)
+    opts.op = 'updateAll'
 
     return Promise.resolve(this.beforeUpdateAll(query, props, opts))
       .then(() => {
@@ -407,6 +451,7 @@ export class Resource extends BaseResource {
 
     opts = opts || {}
     utils._(this, opts)
+    opts.op = 'destroy'
 
     return Promise.resolve(this.beforeDestroy(id, opts))
       .then(() => {
@@ -426,6 +471,7 @@ export class Resource extends BaseResource {
     query = query || {}
     opts = opts || {}
     utils._(this, opts)
+    opts.op = 'destroyAll'
 
     return this.beforeDestroyAll(query, opts)
       .then(() => {

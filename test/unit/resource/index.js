@@ -18,6 +18,7 @@ import * as save from './save.test'
 import * as staticUpdate from './static.update.test'
 import * as staticUpdateMany from './static.updateMany.test'
 import * as staticUpdateAll from './static.updateAll.test'
+import * as toJSON from './toJSON.test'
 
 let isBrowser = false
 
@@ -168,5 +169,6 @@ export function init () {
     staticUpdate.init()
     staticUpdateMany.init()
     staticUpdateAll.init()
+    toJSON.init()
   })
 }
