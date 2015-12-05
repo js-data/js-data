@@ -141,6 +141,9 @@ export function init () {
           assert.equal(changeTitleCallCount, 2, '"change:title" event should have fired twice')
           assert.equal(changeLevelCallCount, 1, '"change:level" event should have fired only once')
 
+          // remove event listeners
+          user.off()
+
           done()
         }, 5)
       }, 5)
