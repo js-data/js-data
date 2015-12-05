@@ -61,11 +61,17 @@ function mkdirP(object, path) {
 }
 const PATH = /^(.+)\.(.+)$/
 export function set (object, path, value) {
-  const parts = PATH.exec(path)
-  if (parts) {
-    mkdirP(object, parts[1])[parts[2]] = value
+  if (isObject(path)) {
+    forOwn(path, function (value, _path) {
+      set(object, _path, value)
+    })
   } else {
-    object[path] = value
+    const parts = PATH.exec(path)
+    if (parts) {
+      mkdirP(object, parts[1])[parts[2]] = value
+    } else {
+      object[path] = value
+    }
   }
 }
 export function forOwn (obj, fn, thisArg) {
@@ -259,4 +265,60 @@ export function camelCase (str) {
     return str.charAt(0).toLowerCase() + str.slice(1)
   }
   return str
+}
+export function Events (target, getter, setter) {
+  target = target || this
+  let _events = {}
+  if (!getter && !setter) {
+    getter = function () {
+      return _events
+    }
+    setter = function (value) {
+      _events = value
+    }
+  }
+  Object.defineProperties(target, {
+    on: {
+      value (type, func, ctx) {
+        if (!getter.call(this)) {
+          setter.call(this, {})
+        }
+        const events = getter.call(this)
+        events[type] = events[type] || []
+        events[type].push({
+          f: func,
+          c: ctx
+        })
+      }
+    },
+    off: {
+      value (type, func) {
+        const events = getter.call(this)
+        const listeners = events[type]
+        if (!listeners) {
+          setter.call(this, {})
+        } else if (func) {
+          for (let i = 0; i < listeners.length; i++) {
+            if (listeners[i].f === func) {
+              listeners.splice(i, 1)
+              break
+            }
+          }
+        } else {
+          listeners.splice(0, listeners.length)
+        }
+      }
+    },
+    emit: {
+      value (...args) {
+        const events = getter.call(this)
+        const listeners = events[args.shift()] || []
+        if (listeners) {
+          for (let i = 0; i < listeners.length; i++) {
+            listeners[i].f.apply(listeners[i].c, args)
+          }
+        }
+      }
+    }
+  })
 }

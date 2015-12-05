@@ -1,6 +1,7 @@
 /* global JSData:true */
 import * as collection from './collection'
 import * as datastore from './datastore'
+import * as decorators from './decorators'
 import * as resource from './resource'
 import * as utils from './utils'
 import {assert} from 'chai'
@@ -31,6 +32,7 @@ export function init () {
     })
     collection.init()
     datastore.init()
+    decorators.init()
     resource.init()
     utils.init()
   })

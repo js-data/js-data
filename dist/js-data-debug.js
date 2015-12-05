@@ -630,6 +630,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.copy = copy;
 	exports.pascalCase = pascalCase;
 	exports.camelCase = camelCase;
+	exports.Events = Events;
 	
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 	
@@ -696,11 +697,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	var PATH = /^(.+)\.(.+)$/;
 	function set(object, path, value) {
-	  var parts = PATH.exec(path);
-	  if (parts) {
-	    mkdirP(object, parts[1])[parts[2]] = value;
+	  if (isObject(path)) {
+	    forOwn(path, function (value, _path) {
+	      set(object, _path, value);
+	    });
 	  } else {
-	    object[path] = value;
+	    var parts = PATH.exec(path);
+	    if (parts) {
+	      mkdirP(object, parts[1])[parts[2]] = value;
+	    } else {
+	      object[path] = value;
+	    }
 	  }
 	}
 	function forOwn(obj, fn, thisArg) {
@@ -897,6 +904,67 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return str.charAt(0).toLowerCase() + str.slice(1);
 	  }
 	  return str;
+	}
+	function Events(target, getter, setter) {
+	  target = target || this;
+	  var _events = {};
+	  if (!getter && !setter) {
+	    getter = function () {
+	      return _events;
+	    };
+	    setter = function (value) {
+	      _events = value;
+	    };
+	  }
+	  Object.defineProperties(target, {
+	    on: {
+	      value: function value(type, func, ctx) {
+	        if (!getter.call(this)) {
+	          setter.call(this, {});
+	        }
+	        var events = getter.call(this);
+	        events[type] = events[type] || [];
+	        events[type].push({
+	          f: func,
+	          c: ctx
+	        });
+	      }
+	    },
+	    off: {
+	      value: function value(type, func) {
+	        var events = getter.call(this);
+	        var listeners = events[type];
+	        if (!listeners) {
+	          setter.call(this, {});
+	        } else if (func) {
+	          for (var i = 0; i < listeners.length; i++) {
+	            if (listeners[i].f === func) {
+	              listeners.splice(i, 1);
+	              break;
+	            }
+	          }
+	        } else {
+	          listeners.splice(0, listeners.length);
+	        }
+	      }
+	    },
+	    emit: {
+	      value: function value() {
+	        var events = getter.call(this);
+	
+	        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+	          args[_key2] = arguments[_key2];
+	        }
+	
+	        var listeners = events[args.shift()] || [];
+	        if (listeners) {
+	          for (var i = 0; i < listeners.length; i++) {
+	            listeners[i].f.apply(listeners[i].c, args);
+	          }
+	        }
+	      }
+	    }
+	  });
 	}
 
 /***/ },
@@ -1664,6 +1732,98 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _collection = __webpack_require__(1);
 	
+	function makeDescriptor(target, key, prop) {
+	  var descriptor = {
+	    enumerable: prop.enumerable !== undefined ? prop.enumerable : true,
+	    writable: prop.writable ? prop.writable : true,
+	    configurable: prop.configurable ? prop.configurable : true
+	  };
+	  if (prop.indexed || prop.track) {
+	    delete descriptor.writable;
+	    descriptor.get = function () {
+	      return this._get('props.' + key);
+	    };
+	    descriptor.set = function (value) {
+	      var _this = this;
+	
+	      var _get = this._get;
+	      var _set = this._set;
+	      var _unset = this._unset;
+	      if (prop.track && !_get('creating')) {
+	        (function () {
+	          var changing = _get('changing');
+	          var previous = _get('previous.' + key);
+	          var current = _get('props.' + key);
+	          var changed = _get('changed');
+	          if (!changing) {
+	            changed = [];
+	          }
+	          if (current !== value) {
+	            changed.push(key);
+	          }
+	          if (previous !== value) {
+	            _set('changes.' + key, value);
+	          } else {
+	            // TODO: this._unset
+	            _unset('changes.' + key);
+	          }
+	          if (!changing && changed.length) {
+	            _set('changed', changed);
+	            _set('changing', true);
+	            _set('eventId', setTimeout(function () {
+	              _unset('changed');
+	              _unset('eventId');
+	              _unset('changing');
+	              var i = undefined;
+	              for (i = 0; i < changed.length; i++) {
+	                _this.emit('change:' + changed[i], _this, (0, _utils.get)(_this, changed[i]));
+	              }
+	              _this.emit('change', _this, _get('changes'));
+	            }, 0));
+	          }
+	        })();
+	      }
+	      _set('props.' + key, value);
+	      if (_get('$') && prop.indexed) {
+	        target.data().updateRecord(this, { index: key });
+	      }
+	      return value;
+	    };
+	    if (prop.indexed) {
+	      // Update index
+	      // TODO: Make this configurable, ie. immediate or lazy update
+	      target.createIndex(key);
+	    }
+	  }
+	  if (prop.get) {
+	    delete descriptor.writable;
+	    if (descriptor.get) {
+	      (function () {
+	        var originalGet = descriptor.get;
+	        descriptor.get = function () {
+	          return prop.get.call(this, originalGet);
+	        };
+	      })();
+	    } else {
+	      descriptor.get = prop.get;
+	    }
+	  }
+	  if (prop.set) {
+	    delete descriptor.writable;
+	    if (descriptor.set) {
+	      (function () {
+	        var originalSet = descriptor.set;
+	        descriptor.set = function (value) {
+	          return prop.set.call(this, value, originalSet);
+	        };
+	      })();
+	    } else {
+	      descriptor.set = prop.set;
+	    }
+	  }
+	  return descriptor;
+	}
+	
 	/**
 	 * Usage:
 	 *
@@ -1709,44 +1869,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return collection;
 	    };
 	    (0, _utils.forOwn)(opts, function (prop, key) {
-	      var descriptor = {
-	        enumerable: prop.enumerable !== undefined ? prop.enumerable : true,
-	        writable: prop.writable ? prop.writable : true,
-	        configurable: prop.configurable ? prop.configurable : true
-	      };
-	      if (prop.indexed) {
-	        delete descriptor.writable;
-	        // Update index
-	        // TODO: Make this configurable, ie. immediate or lazy update
-	        target.createIndex(key);
-	        descriptor.get = function () {
-	          return this.$$props[key];
-	        };
-	        descriptor.set = function (value) {
-	          this.$$props[key] = value;
-	          if (this.$$s) {
-	            target.data().updateRecord(this, { index: key });
-	          }
-	          return value;
-	        };
-	      }
-	      if (prop.get) {
-	        delete descriptor.writable;
-	        descriptor.get = prop.get;
-	      }
-	      if (prop.set) {
-	        delete descriptor.writable;
-	        if (descriptor.set) {
-	          (function () {
-	            var originalSet = descriptor.set;
-	            descriptor.set = function (value) {
-	              return prop.set.call(this, originalSet.call(this, value));
-	            };
-	          })();
-	        } else {
-	          descriptor.set = prop.set;
-	        }
-	      }
+	      var descriptor = makeDescriptor(target, key, prop);
 	      // TODO: This won't work for properties of Object type, because all
 	      // instances will share the prototype value
 	      if (!descriptor.writable) {
@@ -2455,10 +2578,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(Resource).call(this));
 	
-	    Object.defineProperty(_this2, '$$props', {
-	      value: {}
+	    var $$props = {};
+	    Object.defineProperties(_this2, {
+	      _get: {
+	        value: function value(key) {
+	          return utils.get($$props, key);
+	        }
+	      },
+	      _set: {
+	        value: function value(key, _value) {
+	          return utils.set($$props, key, _value);
+	        }
+	      },
+	      _unset: {
+	        value: function value(key) {
+	          return utils.unset($$props, key);
+	        }
+	      }
 	    });
+	    _this2._set('creating', true);
 	    (0, _decorators.configure)(props || {})(_this2);
+	    _this2._unset('creating');
+	    _this2._set('previous', utils.copy(props));
 	    return _this2;
 	  }
 	
@@ -2484,6 +2625,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return Ctor.destroy(utils.get(this, Ctor.idAttribute), opts);
 	    }
 	  }, {
+	    key: 'get',
+	    value: function get(key) {
+	      return utils.get(this, key);
+	    }
+	  }, {
+	    key: 'set',
+	    value: function set(key, value, opts) {
+	      opts = opts || {};
+	      // TODO: implement "silent"
+	      return utils.set(this, key, value);
+	    }
+	  }, {
 	    key: 'toJSON',
 	    value: function toJSON(opts) {
 	      var _this3 = this;
@@ -2493,9 +2646,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var json = this;
 	      if (this instanceof Resource) {
 	        json = {};
-	        utils.forOwn(this, function (value, key) {
-	          json[key] = value;
-	        });
+	        utils.set(json, this);
 	        if (Ctor && Ctor.relationList && opts.with) {
 	          if (utils.isString(opts.with)) {
 	            opts.with = [opts.with];
@@ -2633,22 +2784,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	            utils.deepMixIn(existing, props);
 	          } else if (onConflict === 'replace') {
 	            utils.forOwn(existing, function (value, key) {
-	              if (key !== idAttribute) {
-	                if (!props.hasOwnProperty(key)) {
-	                  delete existing[key];
-	                }
+	              if (key !== idAttribute && !props.hasOwnProperty(key)) {
+	                delete existing[key];
 	              }
 	            });
-	            utils.forOwn(props, function (value, key) {
-	              if (key !== idAttribute) {
-	                existing[key] = value;
-	              }
-	            });
+	            existing.set(props);
 	          }
 	          props = existing;
 	        } else {
 	          props = _this.createInstance(props);
-	          props.$$props.$$s = true;
+	          props._set('$', true);
 	          collection.index.insertRecord(props);
 	        }
 	        utils.forOwn(collection.indexes, function (index) {
@@ -2664,7 +2809,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      opts = opts || {};
 	      var item = this.get(id);
 	      if (item) {
-	        delete item.$$props.$$s;
+	        item._set('$', undefined);
 	        this.data().remove(item);
 	      }
 	    }
@@ -2980,7 +3125,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      utils._(this, opts);
 	      opts.op = 'destroyAll';
 	
-	      return this.beforeDestroyAll(query, opts).then(function () {
+	      return Promise.resolve(this.beforeDestroyAll(query, opts)).then(function () {
 	        adapterName = _this12.getAdapterName(opts);
 	        return _this12.getAdapter(adapterName).destroyAll(_this12, query, opts);
 	      }).then(function () {
@@ -3139,6 +3284,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  upsert: true,
 	  useFilter: true
 	})(Resource);
+	
+	utils.Events(Resource.prototype, function () {
+	  return this._get('events');
+	}, function (value) {
+	  this._set('events', value);
+	});
 
 /***/ }
 /******/ ])

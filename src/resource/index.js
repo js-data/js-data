@@ -37,10 +37,22 @@ class BaseResource {}
 export class Resource extends BaseResource {
   constructor (props) {
     super()
-    Object.defineProperty(this, '$$props', {
-      value: {}
+    const $$props = {}
+    Object.defineProperties(this, {
+      _get: {
+        value: function (key) { return utils.get($$props, key) }
+      },
+      _set: {
+        value: function (key, value) { return utils.set($$props, key, value) }
+      },
+      _unset: {
+        value: function (key) { return utils.unset($$props, key) }
+      }
     })
+    this._set('creating', true)
     configure(props || {})(this)
+    this._unset('creating')
+    this._set('previous', utils.copy(props))
   }
 
   // Instance methods
@@ -61,15 +73,23 @@ export class Resource extends BaseResource {
     return Ctor.destroy(utils.get(this, Ctor.idAttribute), opts)
   }
 
+  ['get'] (key) {
+    return utils.get(this, key)
+  }
+
+  ['set'] (key, value, opts) {
+    opts = opts || {}
+    // TODO: implement "silent"
+    return utils.set(this, key, value)
+  }
+
   toJSON (opts) {
     opts = opts || {}
     const Ctor = this.constructor
     let json = this
     if (this instanceof Resource) {
       json = {}
-      utils.forOwn(this, function (value, key) {
-        json[key] = value
-      })
+      utils.set(json, this)
       if (Ctor && Ctor.relationList && opts.with) {
         if (utils.isString(opts.with)) {
           opts.with = [opts.with]
@@ -196,22 +216,16 @@ export class Resource extends BaseResource {
           utils.deepMixIn(existing, props)
         } else if (onConflict === 'replace') {
           utils.forOwn(existing, (value, key) => {
-            if (key !== idAttribute) {
-              if (!props.hasOwnProperty(key)) {
-                delete existing[key]
-              }
+            if (key !== idAttribute && !props.hasOwnProperty(key)) {
+              delete existing[key]
             }
           })
-          utils.forOwn(props, (value, key) => {
-            if (key !== idAttribute) {
-              existing[key] = value
-            }
-          })
+          existing.set(props)
         }
         props = existing
       } else {
         props = _this.createInstance(props)
-        props.$$props.$$s = true
+        props._set('$', true)
         collection.index.insertRecord(props)
       }
       utils.forOwn(collection.indexes, function (index) {
@@ -226,7 +240,7 @@ export class Resource extends BaseResource {
     opts = opts || {}
     const item = this.get(id)
     if (item) {
-      delete item.$$props.$$s
+      item._set('$', undefined)
       this.data().remove(item)
     }
   }
@@ -473,7 +487,7 @@ export class Resource extends BaseResource {
     utils._(this, opts)
     opts.op = 'destroyAll'
 
-    return this.beforeDestroyAll(query, opts)
+    return Promise.resolve(this.beforeDestroyAll(query, opts))
       .then(() => {
         adapterName = this.getAdapterName(opts)
         return this.getAdapter(adapterName)
@@ -615,3 +629,13 @@ configure({
   upsert: true,
   useFilter: true
 })(Resource)
+
+utils.Events(
+  Resource.prototype,
+  function () {
+    return this._get('events')
+  },
+  function (value) {
+    this._set('events', value)
+  }
+)
