@@ -8,7 +8,7 @@ export function init () {
 
       assert.throws(function () {
         User.data()
-      }, Error, 'User: Did you forget to define a schema?', 'should throw error if no schema')
+      }, Error, 'User.data(): Did you forget to define a schema?', 'should throw error if no schema has been defined')
 
       let didSetName = false
       let didSetRole = false
