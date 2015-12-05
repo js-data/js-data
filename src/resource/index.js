@@ -61,6 +61,7 @@ export class Resource extends BaseResource {
   }
 
   save (opts) {
+    // TODO: move actual save logic here
     const Ctor = this.constructor
 
     const adapterName = Ctor.getAdapterName(opts)
@@ -69,20 +70,45 @@ export class Resource extends BaseResource {
   }
 
   destroy (opts) {
+    // TODO: move actual destroy logic here
     const Ctor = this.constructor
     return Ctor.destroy(utils.get(this, Ctor.idAttribute), opts)
   }
 
+  // TODO: move logic for single-item async operations onto the instance.
+
+  /**
+   * Return the value at the given path for this instance.
+   *
+   * @param {string} key - Path of value to retrieve.
+   * @return {*} Value at path.
+   */
   ['get'] (key) {
     return utils.get(this, key)
   }
 
+  /**
+   * Set the value for a given key, or the values for the given keys if "key" is
+   * an object.
+   *
+   * @param {(string|Object)} key - Key to set or hash of key-value pairs to set.
+   * @param {?*} value - Value to set for the given key.
+   * @param {?Object} - Optional configuration. Properties:
+   *   - {boolean=true} silent - Whether to trigger change events.
+   */
   ['set'] (key, value, opts) {
     opts = opts || {}
     // TODO: implement "silent"
     return utils.set(this, key, value)
   }
 
+  /**
+   * Return a plain object representation of this instance.
+   *
+   * @param {?Object} opts - Optional configuration. Properties:
+   *   - {string[]} with - Array of relation names or relation fields to include in the representation.
+   * @return {Object} Plain object representation of instance.
+   */
   toJSON (opts) {
     opts = opts || {}
     const Ctor = this.constructor
@@ -126,24 +152,75 @@ export class Resource extends BaseResource {
     return json
   }
 
-  // Static methods
+  /**
+   * Static methods
+   */
+
+  /**
+   * Return a reference to the Collection instance of this Resource.
+   *
+   * Will throw an error if a schema has not been defined for this Resource.
+   * When the schema is defined, this method is replaced with one that can
+   * return the Collection instance.
+   *
+   * A schema can be created automatically if .extend is used to create the
+   * class, but ES6 or ES7 class definitions will need to use .schema(opts) or
+   * @schema(opts) to get the schema initialized.
+   *
+   * @throws {Error} Schema must already be defined for Resource.
+   * @return {Collection} The Collection instance of this Resource.
+   */
   static data () {
-    throw new Error(`${this.name}: Did you forget to define a schema?`)
+    throw new Error(`${this.name}.data(): Did you forget to define a schema?`)
   }
 
+  /**
+   * Create a new secondary index in the Collection instance of this Resource.
+   *
+   * @param {string} name - The name of the new secondary index
+   * @param {string[]} keyList - The list of keys to be used to create the index.
+   */
   static createIndex (name, keyList) {
     this.data().createIndex(name, keyList)
   }
 
+  /**
+   * Create a new instance of this Resource from the provided properties.
+   *
+   * @param {Object} props - The initial properties of the new instance.
+   * @return {Resource} The instance.
+   */
   static createInstance (props) {
     let Ctor = this
+    // Check to make sure "props" is not already an instance of this Resource.
     return props instanceof Ctor ? props : new Ctor(props)
   }
 
+  /**
+   * Check whether "instance" is actually an instance of this Resource.
+   *
+   * @param {Resource} The instance to check.
+   * @return {boolean} Whether "instance" is an instance of this Resource.
+   */
   static is (instance) {
     return instance instanceof this
   }
 
+  /**
+   * Insert the provided item or items into the Collection instance of this
+   * Resource.
+   *
+   * If an item is already in the collection then the provided item will either
+   * merge with or replace the existing item based on the value of the
+   * "onConflict" option.
+   *
+   * The collection's secondary indexes will be updated as each item is visited.
+   *
+   * @param {(Object|Object[]|Resource|Resource[])} items - The item or items to insert.
+   * @param {?Object} opts - Optional configuration. Properties:
+   *   - {string} onConflict - What to do when an item is already in the Collection instance. May be "merge" or "replace".
+   * @return {(Resource|Resource[])} Whether "instance" is an instance of this Resource.
+   */
   static inject (items, opts) {
     opts = opts || {}
     const _this = this
@@ -236,17 +313,30 @@ export class Resource extends BaseResource {
     return singular ? (items.length ? items[0] : undefined) : items
   }
 
-  static eject (id, opts) {
-    opts = opts || {}
+  /**
+   * Remove the instance with the given primary key from the Collection instance
+   * of this Resource.
+   *
+   * @param {(string|number)} id - The primary key of the instance to be removed.
+   * @return {Resource} The removed item, if any.
+   */
+  static eject (id) {
     const item = this.get(id)
     if (item) {
-      item._set('$', undefined)
+      item._unset('$')
       this.data().remove(item)
     }
+    return item
   }
 
-  static ejectAll (params, opts) {
-    opts = opts || {}
+  /**
+   * Remove the instances selected by "query" from the Collection instance of
+   * this Resource.
+   *
+   * @param {?Object} query - The query used to select instances to remove.
+   * @return {Resource[]} The removed instances, if any.
+   */
+  static ejectAll (params) {
     const items = this.filter(params)
     const collection = this.data()
     items.forEach(function (item) {
@@ -255,35 +345,68 @@ export class Resource extends BaseResource {
     return items
   }
 
+  /**
+   * Return the instance in the Collection instance of this Resource that has
+   * the given primary key, if such an instance can be found.
+   *
+   * @param {(string|number)} id - Primary key of the instance to retrieve.
+   * @return {?Resource} The instance or undefined.
+   */
   static get (id) {
-    let instances = this.data().get(id)
+    const instances = this.data().get(id)
     return instances.length ? instances[0] : undefined
   }
 
+  /**
+   * Proxy for Collection#between
+   */
   static between (...args) {
     return this.data().between(...args)
   }
 
+  /**
+   * Proxy for Collection#getAll
+   */
   static getAll (...args) {
     return this.data().getAll(...args)
   }
 
+  /**
+   * Proxy for Collection#filter
+   */
   static filter (opts) {
     return this.data().filter(opts)
   }
 
+  /**
+   * Proxy for Collection#query
+   */
   static query () {
     return this.data().query()
   }
 
-  static getAdapter (opts) {
-    const adapter = this.getAdapterName(opts)
+  /**
+   * Return the registered adapter with the given name or the default adapter if
+   * no name is provided.
+   *
+   * @param {?string} name - The name of the adapter to retrieve.
+   * @return {Adapter} The adapter, if any.
+   */
+  static getAdapter (name) {
+    const adapter = this.getAdapterName(name)
     if (!adapter) {
       throw new ReferenceError(`${adapter} not found!`)
     }
     return this.adapters[adapter]
   }
 
+  /**
+   * Return the name of a registered adapter based on the given name or options,
+   * or the name of the default adapter if no name provided
+   *
+   * @param {?Object} opts - The options, if any.
+   * @return {string} The name of the adapter.
+   */
   static getAdapterName (opts) {
     opts = opts || {}
     if (utils.isString(opts)) {
