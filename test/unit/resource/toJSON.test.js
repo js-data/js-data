@@ -130,7 +130,7 @@ export function init () {
           }
         ]
       })
-      assert.deepEqual(user.toJSON({
+      assert.objectsEqual(user.toJSON({
         with: ['organization']
       }), {
         id: 1,
@@ -138,7 +138,7 @@ export function init () {
         organizationId: 2,
         organization: user.organization
       }, 'should keep organization')
-      assert.deepEqual(user.toJSON({
+      assert.objectsEqual(user.toJSON({
         with: ['organization', 'comments']
       }), {
         id: 1,
@@ -147,7 +147,7 @@ export function init () {
         organization: user.organization,
         comments: user.comments
       }, 'should keep organization and comments')
-      assert.deepEqual(user.toJSON({
+      assert.objectsEqual(user.toJSON({
         with: ['organization', 'comments', 'comments.approvedByUser']
       }), {
         id: 1,
@@ -165,7 +165,7 @@ export function init () {
           this.Comment.get(4)
         ]
       }, 'should keep organization and comments and comments.approvedByUser')
-      assert.deepEqual(user.toJSON({
+      assert.objectsEqual(user.toJSON({
         with: [
           'organization',
           'comments',

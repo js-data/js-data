@@ -28,12 +28,12 @@ export function init () {
           track: true
         },
         name: {
-          get: function (...args) {
-            assert.equal(args.length, 0, 'no getter should be provided')
+          get: function (getter) {
+            assert.isFunction(getter, 'original getter should be provided')
             return 'foo'
           },
-          set: function (value, ...args) {
-            assert.equal(args.length, 0, 'no setter should be provided')
+          set: function (value, setter) {
+            assert.isFunction(setter, 'original setter should be provided')
             didSetName = value
           }
         },
@@ -147,6 +147,52 @@ export function init () {
           done()
         }, 5)
       }, 5)
+    })
+    it('should validate based on json-schema.org rules', function () {
+      class User extends Resource {}
+
+      User.setSchema({
+        id: {},
+        age: {
+          type: 'number'
+        },
+        title: {
+          type: ['string', 'null']
+        },
+        level: {}
+      })
+
+      const user = new User({ id: 1, age: 30, title: 'boss', level: 1 })
+
+      assert.throws(function () {
+        user.age = 'foo'
+      }, Error, 'type: Expected: number. Actual: string', 'should require a number')
+      assert.throws(function () {
+        user.age = {}
+      }, Error, 'type: Expected: number. Actual: object', 'should require a number')
+      assert.doesNotThrow(function () {
+        user.age = undefined
+      }, 'should accept undefined')
+      assert.throws(function () {
+        user.title = 1234
+      }, Error, 'type: Expected: string or null. Actual: number', 'should require a string or null')
+      assert.doesNotThrow(function () {
+        user.title = 'foo'
+      }, 'should accept a string')
+      assert.doesNotThrow(function () {
+        user.title = null
+      }, 'should accept null')
+      assert.doesNotThrow(function () {
+        user.title = undefined
+      }, 'should accept undefined')
+
+      assert.throws(function () {
+        new User({ age: 'foo' })
+      }, Error, 'type: Expected: number. Actual: string', 'should validate on create')
+
+      assert.doesNotThrow(function () {
+        new User({ age: 'foo' }, { noValidate: true })
+      }, 'should NOT validate on create')
     })
   })
 }

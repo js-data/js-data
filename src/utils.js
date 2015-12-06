@@ -15,8 +15,11 @@ export function isDate (value) {
   return (value && typeof value === 'object' && toString.call(value) === '[object Date]') || false
 }
 export function isNumber (value) {
-  let type = typeof value
+  const type = typeof value
   return type === 'number' || (value && type === 'object' && toString.call(value) === '[object Number]') || false
+}
+export function isBoolean (value) {
+  return toString.call(value) === '[object Boolean]'
 }
 export function isFunction (value) {
   return typeof value === 'function' || (value && toString.call(value) === '[object Function]') || false
