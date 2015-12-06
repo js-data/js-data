@@ -23,7 +23,7 @@ export function init () {
       const opts = {}
       let createCalled = false
       class User extends Resource {}
-      User.schema({ id: {} })
+      User.setSchema({ id: {} })
       User.configure({
         autoInject: false
       })

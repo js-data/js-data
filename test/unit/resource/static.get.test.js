@@ -20,7 +20,7 @@ export function init () {
     })
     it('should get an item from the store', function () {
       class User extends Resource {}
-      User.schema({ id: {} })
+      User.setSchema({ id: {} })
 
       const user = User.inject({ id: 1 })
       assert.isTrue(User.get(1) === user, 'should get the user from the store')

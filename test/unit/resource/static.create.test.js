@@ -22,7 +22,7 @@ export function init () {
       const props = { name: 'John' }
       let createCalled = false
       class User extends Resource {}
-      User.schema({ id: {} })
+      User.setSchema({ id: {} })
       User.configure({
         defaultAdapter: 'mock',
         autoInject: false
@@ -49,7 +49,7 @@ export function init () {
       const props = { name: 'John' }
       let createCalled = false
       class User extends Resource {}
-      User.schema({ id: {} })
+      User.setSchema({ id: {} })
       User.configure({
         autoInject: true,
         defaultAdapter: 'mock'
@@ -76,7 +76,7 @@ export function init () {
       const props = { name: 'John', id: 1 }
       let createCalled = false
       class User extends Resource {}
-      User.schema({ id: {} })
+      User.setSchema({ id: {} })
       User.configure({
         autoInject: true,
         defaultAdapter: 'mock',
@@ -91,7 +91,7 @@ export function init () {
       const props = { name: 'John' }
       let createCalled = false
       class User extends Resource {}
-      User.schema({ id: {} })
+      User.setSchema({ id: {} })
       User.configure({
         autoInject: true,
         raw: true,

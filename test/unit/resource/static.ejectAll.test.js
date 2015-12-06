@@ -20,7 +20,7 @@ export function init () {
     })
     it('should eject items that meet the criteria from the store', function () {
       class User extends Resource {}
-      User.schema({
+      User.setSchema({
         id: {}
       })
       User.inject([p1, p2, p3, p4, p5])
@@ -40,7 +40,7 @@ export function init () {
     })
     it('should eject all items from the store', function () {
       class User extends Resource {}
-      User.schema({
+      User.setSchema({
         id: {}
       })
       User.inject([p1, p2, p3, p4])
