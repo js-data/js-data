@@ -71,74 +71,92 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _collection = __webpack_require__(1);
 	
-	var _loop = function _loop(_key5) {
-	  if (_key5 === "default") return 'continue';
-	  Object.defineProperty(exports, _key5, {
-	    enumerable: true,
-	    get: function get() {
-	      return _collection[_key5];
-	    }
-	  });
-	};
-	
-	for (var _key5 in _collection) {
-	  var _ret = _loop(_key5);
-	
-	  if (_ret === 'continue') continue;
-	}
-	
-	var _datastore = __webpack_require__(14);
-	
-	var _loop2 = function _loop2(_key6) {
+	var _loop = function _loop(_key6) {
 	  if (_key6 === "default") return 'continue';
 	  Object.defineProperty(exports, _key6, {
 	    enumerable: true,
 	    get: function get() {
-	      return _datastore[_key6];
+	      return _collection[_key6];
 	    }
 	  });
 	};
 	
-	for (var _key6 in _datastore) {
-	  var _ret2 = _loop2(_key6);
+	for (var _key6 in _collection) {
+	  var _ret = _loop(_key6);
+	
+	  if (_ret === 'continue') continue;
+	}
+	
+	var _datastore = __webpack_require__(15);
+	
+	var _loop2 = function _loop2(_key7) {
+	  if (_key7 === "default") return 'continue';
+	  Object.defineProperty(exports, _key7, {
+	    enumerable: true,
+	    get: function get() {
+	      return _datastore[_key7];
+	    }
+	  });
+	};
+	
+	for (var _key7 in _datastore) {
+	  var _ret2 = _loop2(_key7);
 	
 	  if (_ret2 === 'continue') continue;
 	}
 	
 	var _decorators = __webpack_require__(4);
 	
-	var _loop3 = function _loop3(_key7) {
-	  if (_key7 === "default") return 'continue';
-	  Object.defineProperty(exports, _key7, {
-	    enumerable: true,
-	    get: function get() {
-	      return _decorators[_key7];
-	    }
-	  });
-	};
-	
-	for (var _key7 in _decorators) {
-	  var _ret3 = _loop3(_key7);
-	
-	  if (_ret3 === 'continue') continue;
-	}
-	
-	var _resource = __webpack_require__(15);
-	
-	var _loop4 = function _loop4(_key8) {
+	var _loop3 = function _loop3(_key8) {
 	  if (_key8 === "default") return 'continue';
 	  Object.defineProperty(exports, _key8, {
 	    enumerable: true,
 	    get: function get() {
-	      return _resource[_key8];
+	      return _decorators[_key8];
 	    }
 	  });
 	};
 	
-	for (var _key8 in _resource) {
-	  var _ret4 = _loop4(_key8);
+	for (var _key8 in _decorators) {
+	  var _ret3 = _loop3(_key8);
+	
+	  if (_ret3 === 'continue') continue;
+	}
+	
+	var _resource = __webpack_require__(16);
+	
+	var _loop4 = function _loop4(_key9) {
+	  if (_key9 === "default") return 'continue';
+	  Object.defineProperty(exports, _key9, {
+	    enumerable: true,
+	    get: function get() {
+	      return _resource[_key9];
+	    }
+	  });
+	};
+	
+	for (var _key9 in _resource) {
+	  var _ret4 = _loop4(_key9);
 	
 	  if (_ret4 === 'continue') continue;
+	}
+	
+	var _validate = __webpack_require__(12);
+	
+	var _loop5 = function _loop5(_key10) {
+	  if (_key10 === "default") return 'continue';
+	  Object.defineProperty(exports, _key10, {
+	    enumerable: true,
+	    get: function get() {
+	      return _validate[_key10];
+	    }
+	  });
+	};
+	
+	for (var _key10 in _validate) {
+	  var _ret5 = _loop5(_key10);
+	
+	  if (_ret5 === 'continue') continue;
 	}
 	
 	if (!Promise.prototype.spread) {
@@ -175,7 +193,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _decorators = __webpack_require__(4);
 	
-	var _mindex = __webpack_require__(12);
+	var _mindex = __webpack_require__(13);
 	
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 	
@@ -611,6 +629,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.isString = isString;
 	exports.isDate = isDate;
 	exports.isNumber = isNumber;
+	exports.isBoolean = isBoolean;
 	exports.isFunction = isFunction;
 	exports.isSorN = isSorN;
 	exports.get = get;
@@ -653,6 +672,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	function isNumber(value) {
 	  var type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
 	  return type === 'number' || value && type === 'object' && toString.call(value) === '[object Number]' || false;
+	}
+	function isBoolean(value) {
+	  return toString.call(value) === '[object Boolean]';
 	}
 	function isFunction(value) {
 	  return typeof value === 'function' || value && toString.call(value) === '[object Function]' || false;
@@ -1781,73 +1803,82 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _utils = __webpack_require__(3);
 	
+	var _validate = __webpack_require__(12);
+	
+	var _configure = __webpack_require__(6);
+	
 	var _initialize = __webpack_require__(10);
 	
 	function makeDescriptor(target, key, prop) {
 	  var descriptor = {
 	    enumerable: prop.enumerable !== undefined ? prop.enumerable : true,
-	    writable: prop.writable ? prop.writable : true,
-	    configurable: prop.configurable ? prop.configurable : true
+	    configurable: prop.configurable !== undefined ? prop.configurable : true
 	  };
-	  if (prop.indexed || prop.track) {
-	    delete descriptor.writable;
-	    descriptor.get = function () {
-	      return this._get('props.' + key);
-	    };
-	    descriptor.set = function (value) {
-	      var _this = this;
+	  descriptor.get = function () {
+	    return this._get('props.' + key);
+	  };
+	  descriptor.set = function (value) {
+	    var _this = this;
 	
-	      var _get = this._get;
-	      var _set = this._set;
-	      var _unset = this._unset;
-	      if (prop.track && !_get('creating')) {
-	        (function () {
-	          var changing = _get('changing');
-	          var previous = _get('previous.' + key);
-	          var current = _get('props.' + key);
-	          var changed = _get('changed');
-	          if (!changing) {
-	            changed = [];
-	          }
-	          if (current !== value) {
-	            changed.push(key);
-	          }
-	          if (previous !== value) {
-	            _set('changes.' + key, value);
-	          } else {
-	            // TODO: this._unset
-	            _unset('changes.' + key);
-	          }
-	          if (!changing && changed.length) {
-	            _set('changed', changed);
-	            _set('changing', true);
-	            _set('eventId', setTimeout(function () {
-	              _unset('changed');
-	              _unset('eventId');
-	              _unset('changing');
-	              var i = undefined;
-	              for (i = 0; i < changed.length; i++) {
-	                _this.emit('change:' + changed[i], _this, (0, _utils.get)(_this, changed[i]));
-	              }
-	              _this.emit('change', _this, _get('changes'));
-	            }, 0));
-	          }
-	        })();
+	    // TODO: rework this
+	    // if (isFunction(prop.validate) && !prop.validate(value)) {
+	    //   return false
+	    // }
+	    var _get = this._get;
+	    var _set = this._set;
+	    var _unset = this._unset;
+	    if (!_get('noValidate')) {
+	      var errors = (0, _validate.validate)(prop, value);
+	      if (errors) {
+	        throw new Error(errors.join(', '));
 	      }
-	      _set('props.' + key, value);
-	      if (_get('$') && prop.indexed) {
-	        target.data().updateRecord(this, { index: key });
-	      }
-	      return value;
-	    };
-	    if (prop.indexed) {
-	      // Update index
-	      // TODO: Make this configurable, ie. immediate or lazy update
-	      target.createIndex(key);
 	    }
+	    if (prop.track && !_get('creating')) {
+	      (function () {
+	        var changing = _get('changing');
+	        var previous = _get('previous.' + key);
+	        var current = _get('props.' + key);
+	        var changed = _get('changed');
+	        if (!changing) {
+	          changed = [];
+	        }
+	        if (current !== value) {
+	          changed.push(key);
+	        }
+	        if (previous !== value) {
+	          _set('changes.' + key, value);
+	        } else {
+	          // TODO: this._unset
+	          _unset('changes.' + key);
+	        }
+	        if (!changing && changed.length) {
+	          _set('changed', changed);
+	          _set('changing', true);
+	          _set('eventId', setTimeout(function () {
+	            _unset('changed');
+	            _unset('eventId');
+	            _unset('changing');
+	            var i = undefined;
+	            for (i = 0; i < changed.length; i++) {
+	              _this.emit('change:' + changed[i], _this, (0, _utils.get)(_this, changed[i]));
+	            }
+	            _this.emit('change', _this, _get('changes'));
+	          }, 0));
+	        }
+	      })();
+	    }
+	    _set('props.' + key, value);
+	    if (_get('$') && prop.indexed) {
+	      target.data().updateRecord(this, { index: key });
+	    }
+	    return value;
+	  };
+	  if (prop.indexed) {
+	    // Update index
+	    // TODO: Make this configurable, ie. immediate or lazy update
+	    target.createIndex(key);
 	  }
 	  if (prop.get) {
-	    delete descriptor.writable;
 	    if (descriptor.get) {
 	      (function () {
 	        var originalGet = descriptor.get;
@@ -1860,7 +1891,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	  if (prop.set) {
-	    delete descriptor.writable;
 	    if (descriptor.set) {
 	      (function () {
 	        var originalSet = descriptor.set;
@@ -1905,8 +1935,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * user.first = "Bill"
 	 * user.name // "Bill Anderson"
 	 */
-	function setSchema() {
-	  var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	function setSchema(opts) {
+	  opts || (opts = {});
 	
 	  return function (target) {
 	    try {
@@ -1916,7 +1946,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    target.schema || (target.schema = {});
-	    (0, _utils.deepMixIn)(target.schema, opts);
+	    (0, _configure.configure)(target.schema, opts);
 	
 	    (0, _utils.forOwn)(opts, function (prop, key) {
 	      var descriptor = makeDescriptor(target, key, prop);
@@ -1939,13 +1969,111 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	exports.rules = undefined;
+	exports.validate = validate;
+	
+	var _utils = __webpack_require__(3);
+	
+	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+	
+	var types = {
+	  array: _utils.isArray,
+	  boolean: _utils.isBoolean,
+	  integer: _utils.isNumber,
+	  number: _utils.isNumber,
+	  'null': function _null(value) {
+	    return value === null;
+	  },
+	  object: _utils.isObject,
+	  string: _utils.isString
+	};
+	
+	var rules = exports.rules = {
+	  type: function type(predicate, value) {
+	    if (value === undefined) {
+	      return;
+	    }
+	    if ((0, _utils.isString)(predicate)) {
+	      predicate = [predicate];
+	    }
+	    var errors = predicate.map(function (type) {
+	      var validator = types[type];
+	      if (!validator) {
+	        return 'type: Unknown type ' + predicate;
+	      }
+	      return validator(value) ? undefined : 1;
+	    });
+	    return errors.indexOf(undefined) !== -1 ? undefined : 'type: Expected: ' + predicate.join(' or ') + '. Actual: ' + (typeof value === 'undefined' ? 'undefined' : _typeof(value));
+	  },
+	  anyOf: function anyOf(schemas, value) {
+	    var validated = false;
+	    var allErrors = [];
+	    schemas.forEach(function (schema) {
+	      var errors = validate(schema, value);
+	      if (errors) {
+	        allErrors = allErrors.concat(errors);
+	      } else {
+	        validated = true;
+	      }
+	    });
+	    return validated ? undefined : allErrors;
+	  },
+	  allOf: function allOf(schemas, value) {
+	    var allErrors = [];
+	    schemas.forEach(function (schema) {
+	      allErrors = allErrors.concat(validate(schema, value) || []);
+	    });
+	    return allErrors.length ? undefined : allErrors;
+	  },
+	  oneOf: function oneOf(schemas, value) {
+	    var validated = false;
+	    var allErrors = [];
+	    schemas.forEach(function (schema) {
+	      var errors = validate(schema, value);
+	      if (errors) {
+	        allErrors = allErrors.concat(errors);
+	      } else if (validated) {
+	        allErrors = ['more than one schema validated'];
+	        validated = false;
+	        return false;
+	      } else {
+	        validated = true;
+	      }
+	    });
+	    return validated ? undefined : allErrors;
+	  }
+	};
+	
+	function validate(schema, value) {
+	  var errors = [];
+	  (0, _utils.forOwn)(schema, function (predicate, rule) {
+	    var validator = rules[rule];
+	    if (validator) {
+	      var err = validator(predicate, value);
+	      if (err) {
+	        errors.push(err);
+	      }
+	    }
+	  });
+	  return errors.length ? errors : undefined;
+	}
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
 	exports.Index = Index;
 	
 	var _utils = __webpack_require__(3);
 	
 	var _decorators = __webpack_require__(4);
 	
-	var _utils2 = __webpack_require__(13);
+	var _utils2 = __webpack_require__(14);
 	
 	function Index() {
 	  var fieldList = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
@@ -2240,7 +2368,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	})(Index.prototype);
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2324,7 +2452,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2338,7 +2466,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _utils = __webpack_require__(3);
 	
-	var _resource = __webpack_require__(15);
+	var _resource = __webpack_require__(16);
 	
 	// function lifecycleNoopCb (resource, attrs, cb) {
 	//   cb(null, attrs)
@@ -2558,7 +2686,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2575,6 +2703,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	var utils = _interopRequireWildcard(_utils);
 	
 	var _decorators = __webpack_require__(4);
+	
+	var _validate2 = __webpack_require__(12);
+	
+	var _validate = _interopRequireWildcard(_validate2);
 	
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 	
@@ -2618,11 +2750,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Resource = exports.Resource = (function (_BaseResource) {
 	  _inherits(Resource, _BaseResource);
 	
-	  function Resource(props) {
+	  function Resource(props, opts) {
 	    _classCallCheck(this, Resource);
 	
 	    var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(Resource).call(this));
 	
+	    props || (props = {});
+	    opts || (opts = {});
 	    var $$props = {};
 	    Object.defineProperties(_this2, {
 	      _get: {
@@ -2642,15 +2776,45 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    });
 	    _this2._set('creating', true);
-	    (0, _decorators.configure)(props || {})(_this2);
+	    if (opts.noValidate) {
+	      _this2._set('noValidate', true);
+	    }
+	    (0, _decorators.configure)(props)(_this2);
 	    _this2._unset('creating');
+	    _this2._unset('noValidate');
 	    _this2._set('previous', utils.copy(props));
 	    return _this2;
 	  }
 	
-	  // Instance methods
-	
 	  _createClass(Resource, [{
+	    key: 'schema',
+	    value: function schema(key) {
+	      var _schema = this.constructor.schema;
+	      return key ? _schema[key] : _schema;
+	    }
+	  }, {
+	    key: 'validate',
+	    value: function validate(obj, value) {
+	      var errors = [];
+	      var _schema = this.schema();
+	      if (!obj) {
+	        obj = this;
+	      } else if (utils.isString(obj)) {
+	        var prop = _schema[obj];
+	        if (prop) {
+	          errors = _validate.validate(prop, value) || [];
+	        }
+	      } else {
+	        utils.forOwn(_schema, function (prop, key) {
+	          errors = errors.concat(_validate.validate(prop, utils.get(obj, key)) || []);
+	        });
+	      }
+	      return errors.length ? errors : undefined;
+	    }
+	
+	    // Instance methods
+	
+	  }, {
 	    key: 'create',
 	    value: function create(opts) {
 	      return this.constructor.create(this, opts);

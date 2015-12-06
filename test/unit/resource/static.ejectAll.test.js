@@ -39,30 +39,27 @@ export function init () {
       assert.isUndefined(User.get(9))
     })
     it('should eject all items from the store', function () {
-      class User extends Resource {}
-      User.setSchema({
-        id: {}
-      })
-      User.inject([p1, p2, p3, p4])
+      const Post = this.Post
+      Post.inject([p1, p2, p3, p4])
 
-      assert.objectsEqual(User.get(5), p1)
-      assert.objectsEqual(User.get(6), p2)
-      assert.objectsEqual(User.get(7), p3)
-      assert.objectsEqual(User.get(8), p4)
+      assert.objectsEqual(Post.get(5), p1)
+      assert.objectsEqual(Post.get(6), p2)
+      assert.objectsEqual(Post.get(7), p3)
+      assert.objectsEqual(Post.get(8), p4)
 
       // TODO?
       // store.store.post.completedQueries.test = 'stuff'
 
       assert.doesNotThrow(function () {
-        User.ejectAll()
+        Post.ejectAll()
       })
 
       // TODO?
       // assert.objectsEqual(store.store.post.completedQueries, {})
-      assert.isUndefined(User.get(5))
-      assert.isUndefined(User.get(6))
-      assert.isUndefined(User.get(7))
-      assert.isUndefined(User.get(8))
+      assert.isUndefined(Post.get(5))
+      assert.isUndefined(Post.get(6))
+      assert.isUndefined(Post.get(7))
+      assert.isUndefined(Post.get(8))
     })
   })
 }

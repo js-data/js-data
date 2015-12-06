@@ -10,6 +10,7 @@ export * from './collection'
 export * from './datastore'
 export * from './decorators'
 export * from './resource'
+export * from './validate'
 
 export const version = {
   full: '<%= pkg.version %>',

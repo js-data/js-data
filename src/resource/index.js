@@ -9,6 +9,7 @@ import {
   initialize,
   setSchema
 } from '../decorators'
+import * as validate from '../validate'
 
 let isBrowser = false
 
@@ -36,8 +37,10 @@ const handleResponse = function handleResponse (resource, data, opts, adapterNam
 class BaseResource {}
 
 export class Resource extends BaseResource {
-  constructor (props) {
+  constructor (props, opts) {
     super()
+    props || (props = {})
+    opts || (opts = {})
     const $$props = {}
     Object.defineProperties(this, {
       _get: {
@@ -51,9 +54,36 @@ export class Resource extends BaseResource {
       }
     })
     this._set('creating', true)
-    configure(props || {})(this)
+    if (opts.noValidate) {
+      this._set('noValidate', true)
+    }
+    configure(props)(this)
     this._unset('creating')
+    this._unset('noValidate')
     this._set('previous', utils.copy(props))
+  }
+
+  schema (key) {
+    let _schema = this.constructor.schema
+    return key ? _schema[key] : _schema
+  }
+
+  validate (obj, value) {
+    let errors = []
+    let _schema = this.schema()
+    if (!obj) {
+      obj = this
+    } else if (utils.isString(obj)) {
+      const prop = _schema[obj]
+      if (prop) {
+        errors = validate.validate(prop, value) || []
+      }
+    } else {
+      utils.forOwn(_schema, function (prop, key) {
+        errors = errors.concat(validate.validate(prop, utils.get(obj, key)) || [])
+      })
+    }
+    return errors.length ? errors : undefined
   }
 
   // Instance methods

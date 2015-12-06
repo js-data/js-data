@@ -31,17 +31,17 @@ export function init () {
     })
     it('should inject multiple items into the store', function () {
 
-      assert.deepEqual(this.Post.inject([
+      assert.objectsEqual(this.Post.inject([
         this.data.p1,
         this.data.p2,
         this.data.p3,
         this.data.p4
       ]), [this.data.p1, this.data.p2, this.data.p3, this.data.p4]);
 
-      assert.deepEqual(this.Post.get(5), this.data.p1)
-      assert.deepEqual(this.Post.get(6), this.data.p2)
-      assert.deepEqual(this.Post.get(7), this.data.p3)
-      assert.deepEqual(this.Post.get(8), this.data.p4)
+      assert.objectsEqual(this.Post.get(5), this.data.p1)
+      assert.objectsEqual(this.Post.get(6), this.data.p2)
+      assert.objectsEqual(this.Post.get(7), this.data.p3)
+      assert.objectsEqual(this.Post.get(8), this.data.p4)
     })
     it('should inject existing items into the store', function () {
       class User extends Resource {}
@@ -142,10 +142,10 @@ export function init () {
 
       this.Organization.inject({ id: 5 })
 
-      assert.deepEqual(this.User.get(1).organization, { id: 5 })
+      assert.objectsEqual(this.User.get(1).organization, { id: 5 })
 
-      assert.deepEqual(this.User.get(1).comments, [])
-      assert.deepEqual(this.User.get(1).approvedComments, [])
+      assert.objectsEqual(this.User.get(1).comments, [])
+      assert.objectsEqual(this.User.get(1).approvedComments, [])
 
       this.Comment.inject({ approvedBy: 1, id: 23 })
 
@@ -341,7 +341,7 @@ export function init () {
       let post = this.Post.inject(this.data.p1)
       post.foo = 'bar'
       post.beep = 'boop'
-      assert.deepEqual(post, {
+      assert.objectsEqual(post, {
         author: 'John',
         age: 30,
         id: 5,
@@ -349,7 +349,7 @@ export function init () {
         beep: 'boop'
       })
       post = this.Post.inject(this.data.p1, { onConflict: 'replace' })
-      assert.deepEqual(post, {
+      assert.objectsEqual(post, {
         author: 'John',
         age: 30,
         id: 5
@@ -416,7 +416,7 @@ export function init () {
           }
         ]
       })
-      assert.deepEqual(foo.bars, [
+      assert.objectsEqual(foo.bars, [
         {
           id: 1,
           fooId: 1,

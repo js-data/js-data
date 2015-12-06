@@ -31,7 +31,7 @@ export function init () {
       User.create = function (_props, _opts) {
         createCalled = true
         return new Promise(function (resolve, reject) {
-          assert.deepEqual(_props, { name: 'John' }, 'should pass in the props')
+          assert.objectsEqual(_props, { name: 'John' }, 'should pass in the props')
           _props[User.idAttribute] = new Date().getTime()
           assert.isTrue(_props instanceof User, 'props is a User')
           assert.isTrue(_opts === opts, 'should pass in the opts')
