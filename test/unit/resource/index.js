@@ -127,7 +127,7 @@ export function init () {
     })
     it('should allow schema definition with basic indexes', function () {
       class User extends Resource {}
-      User.schema({
+      User.setSchema({
         id: {},
         age: { indexed: true },
         role: { indexed: true }

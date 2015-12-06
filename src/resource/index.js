@@ -6,7 +6,8 @@ import {
   configure,
   hasMany,
   hasOne,
-  schema
+  initialize,
+  setSchema
 } from '../decorators'
 
 let isBrowser = false
@@ -667,8 +668,12 @@ export class Resource extends BaseResource {
     return actions(opts)(this)
   }
 
-  static schema (opts) {
-    return schema(opts)(this)
+  static initialize (opts) {
+    return initialize(opts)(this)
+  }
+
+  static setSchema (opts) {
+    return setSchema(opts)(this)
   }
 
   static configure (props) {
@@ -730,7 +735,7 @@ export class Resource extends BaseResource {
     configure(props)(Child.prototype)
     configure(classProps)(Child)
 
-    schema(_schema)(Child)
+    setSchema(_schema)(Child)
 
     return Child
   }

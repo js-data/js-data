@@ -20,7 +20,7 @@ export function init () {
     })
     it('should inject new items into the store', function () {
       class User extends Resource {}
-      User.schema({ id: {} })
+      User.setSchema({ id: {} })
 
       const user = User.inject({ id: 1 })
       const users = User.inject([{ id: 2 }, { id: 3 }])
@@ -45,7 +45,7 @@ export function init () {
     })
     it('should inject existing items into the store', function () {
       class User extends Resource {}
-      User.schema({ id: {} })
+      User.setSchema({ id: {} })
 
       const user = User.inject({ id: 1 })
       const users = User.inject([{ id: 2 }, { id: 3 }])
@@ -64,7 +64,7 @@ export function init () {
     })
     it('should replace existing items', function () {
       class User extends Resource {}
-      User.schema({ id: {} })
+      User.setSchema({ id: {} })
       const user = User.inject({ id: 1, foo: 'bar', beep: 'boop' })
       assert.equal(user.id, 1)
       assert.equal(user.foo, 'bar')
@@ -162,7 +162,7 @@ export function init () {
       Foo.configure({
         linkRelations: true
       })
-      Foo.schema({
+      Foo.setSchema({
         id: {}
       })
       Foo.hasMany(Foo, {
@@ -224,7 +224,7 @@ export function init () {
       Parent.configure({
         linkRelations: true
       })
-      Parent.schema({
+      Parent.setSchema({
         id: {}
       })
 
@@ -232,7 +232,7 @@ export function init () {
       Child.configure({
         linkRelations: true
       })
-      Child.schema({
+      Child.setSchema({
         id: {}
       })
 
@@ -276,7 +276,7 @@ export function init () {
       Parent.configure({
         linkRelations: true
       })
-      Parent.schema({
+      Parent.setSchema({
         id: {}
       })
 
@@ -284,7 +284,7 @@ export function init () {
       Child.configure({
         linkRelations: true
       })
-      Child.schema({
+      Child.setSchema({
         id: {}
       })
 
@@ -292,7 +292,7 @@ export function init () {
       OtherChild.configure({
         linkRelations: true
       })
-      OtherChild.schema({
+      OtherChild.setSchema({
         id: {}
       })
 
@@ -434,14 +434,14 @@ export function init () {
       Foo.configure({
         linkRelations: true
       })
-      Foo.schema({
+      Foo.setSchema({
         id: {}
       })
       class Bar extends Resource {}
       Bar.configure({
         linkRelations: true
       })
-      Bar.schema({
+      Bar.setSchema({
         id: {}
       })
       Foo.hasMany(Bar, {

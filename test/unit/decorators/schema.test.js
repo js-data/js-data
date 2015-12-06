@@ -16,7 +16,7 @@ export function init () {
       let changeTitleCallCount = 0
       let changeLevelCallCount = 0
 
-      User.schema({
+      User.setSchema({
         id: {},
         age: {
           indexed: true

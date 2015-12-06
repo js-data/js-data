@@ -1,5 +1,5 @@
-import {forOwn, get} from '../utils'
-import {Collection} from '../collection'
+import {deepMixIn, forOwn, get} from '../utils'
+import {initialize} from './initialize'
 
 function makeDescriptor (target, key, prop) {
   const descriptor = {
@@ -115,17 +115,17 @@ function makeDescriptor (target, key, prop) {
  * user.first = "Bill"
  * user.name // "Bill Anderson"
  */
-export function schema (opts = {}) {
+export function setSchema (opts = {}) {
   return function (target) {
-    // TODO: Test whether there already exists a schema
-    const collection = new Collection([], target.idAttribute)
-    target.data = function () {
-      // TODO: Do I need this?
-      if (this.data === Object.getPrototypeOf(this).data) { // eslint-disable-line
-        throw new Error(`${this.name}: Schemas are not inheritable, did you forget to define a schema?`)
-      }
-      return collection
+    try {
+      target.data()
+    } catch (err) {
+      initialize(opts)(target)
     }
+
+    target.schema || (target.schema = {})
+    deepMixIn(target.schema, opts)
+
     forOwn(opts, function (prop, key) {
       const descriptor = makeDescriptor(target, key, prop)
       // TODO: This won't work for properties of Object type, because all
