@@ -1,25 +1,25 @@
-/* global Resource:true */
+/* global Model:true */
 import {assert} from 'chai'
 
 export function init () {
   describe('static inject', function () {
     it('should be a static function', function () {
-      assert.isFunction(Resource.inject)
-      let User = Resource.extend({}, {
+      assert.isFunction(Model.inject)
+      let User = Model.extend({}, {
         idAttribute: '_id',
         name: 'user'
       })
-      class User2 extends Resource {}
+      class User2 extends Model {}
       class User3 extends User2 {}
       assert.isFunction(User.inject)
       assert.isFunction(User2.inject)
-      assert.isTrue(Resource.inject === User.inject)
-      assert.isTrue(Resource.inject === User2.inject)
+      assert.isTrue(Model.inject === User.inject)
+      assert.isTrue(Model.inject === User2.inject)
       assert.isTrue(User.inject === User2.inject)
       assert.isTrue(User2.inject === User3.inject)
     })
     it('should inject new items into the store', function () {
-      class User extends Resource {}
+      class User extends Model {}
       User.setSchema({ id: {} })
 
       const user = User.inject({ id: 1 })
@@ -44,7 +44,7 @@ export function init () {
       assert.objectsEqual(this.Post.get(8), this.data.p4)
     })
     it('should inject existing items into the store', function () {
-      class User extends Resource {}
+      class User extends Model {}
       User.setSchema({ id: {} })
 
       const user = User.inject({ id: 1 })
@@ -63,7 +63,7 @@ export function init () {
       assert.deepEqual(users, usersAgain, 'inject arrays should be equal')
     })
     it('should replace existing items', function () {
-      class User extends Resource {}
+      class User extends Model {}
       User.setSchema({ id: {} })
       const user = User.inject({ id: 1, foo: 'bar', beep: 'boop' })
       assert.equal(user.id, 1)
@@ -158,7 +158,7 @@ export function init () {
       assert.equal(2, this.User.get(1).approvedComments.length)
     })
     it('should inject cyclic dependencies', function () {
-      class Foo extends Resource {}
+      class Foo extends Model {}
       Foo.configure({
         linkRelations: true
       })
@@ -220,7 +220,7 @@ export function init () {
       assert.isDefined(Foo.get(7))
     })
     it('should work when injecting child relations multiple times', function () {
-      class Parent extends Resource {}
+      class Parent extends Model {}
       Parent.configure({
         linkRelations: true
       })
@@ -228,7 +228,7 @@ export function init () {
         id: {}
       })
 
-      class Child extends Resource {}
+      class Child extends Model {}
       Child.configure({
         linkRelations: true
       })
@@ -272,7 +272,7 @@ export function init () {
       assert.deepEqual(Child.filter({ parentId: 1 }), Parent.get(1).children)
     })
     it('should configure enumerability and linking of relations', function () {
-      class Parent extends Resource {}
+      class Parent extends Model {}
       Parent.configure({
         linkRelations: true
       })
@@ -280,7 +280,7 @@ export function init () {
         id: {}
       })
 
-      class Child extends Resource {}
+      class Child extends Model {}
       Child.configure({
         linkRelations: true
       })
@@ -288,7 +288,7 @@ export function init () {
         id: {}
       })
 
-      class OtherChild extends Resource {}
+      class OtherChild extends Model {}
       OtherChild.configure({
         linkRelations: true
       })
@@ -356,10 +356,10 @@ export function init () {
       })
     })
     it('should not auto-inject relations where auto-injection has been disabled', function () {
-      const Foo = Resource.extend(null, {
+      const Foo = Model.extend(null, {
         name: 'foo'
       })
-      const Bar = Resource.extend(null, {
+      const Bar = Model.extend(null, {
         name: 'bar'
       })
       Foo.hasMany(Bar, {
@@ -383,11 +383,11 @@ export function init () {
       assert.deepEqual(Bar.getAll(), [], 'nothing should have been injected')
     })
     it('should allow custom relation injection logic', function () {
-      const Foo = Resource.extend(null, {
+      const Foo = Model.extend(null, {
         name: 'foo',
         linkRelations: true
       })
-      const Bar = Resource.extend(null, {
+      const Bar = Model.extend(null, {
         name: 'bar',
         linkRelations: true
       })
@@ -430,14 +430,14 @@ export function init () {
       ], 'bars should have been injected')
     })
     it('should not link relations nor delete field if "link" is false', function () {
-      class Foo extends Resource {}
+      class Foo extends Model {}
       Foo.configure({
         linkRelations: true
       })
       Foo.setSchema({
         id: {}
       })
-      class Bar extends Resource {}
+      class Bar extends Model {}
       Bar.configure({
         linkRelations: true
       })

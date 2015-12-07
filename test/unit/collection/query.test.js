@@ -514,7 +514,7 @@ export function init () {
           }
         }
       })
-      let Foo = store.defineResource({
+      let Foo = store.defineModel({
         name: 'foo',
         scopes: {
           second: {

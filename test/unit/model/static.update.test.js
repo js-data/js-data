@@ -1,20 +1,20 @@
-/* global Resource:true */
+/* global Model:true */
 import {assert} from 'chai'
 
 export function init () {
   describe('static update', function () {
     it('should be a static function', function () {
-      assert.isFunction(Resource.update)
-      let User = Resource.extend({}, {
+      assert.isFunction(Model.update)
+      let User = Model.extend({}, {
         idAttribute: '_id',
         name: 'user'
       })
-      class User2 extends Resource {}
+      class User2 extends Model {}
       class User3 extends User2 {}
       assert.isFunction(User.update)
       assert.isFunction(User2.update)
-      assert.isTrue(Resource.update === User.update)
-      assert.isTrue(Resource.update === User2.update)
+      assert.isTrue(Model.update === User.update)
+      assert.isTrue(Model.update === User2.update)
       assert.isTrue(User.update === User2.update)
       assert.isTrue(User2.update === User3.update)
     })
@@ -22,17 +22,17 @@ export function init () {
       const id = 1
       const props = { name: 'John' }
       let updateCalled = false
-      class User extends Resource {}
+      class User extends Model {}
       User.setSchema({ id: {} })
       User.configure({
         defaultAdapter: 'mock',
         autoInject: false
       })
       User.adapters.mock = {
-        update (resourceConfig, _id, _props, Opts) {
+        update (modelConfig, _id, _props, Opts) {
           updateCalled = true
           return new Promise(function (resolve, reject) {
-            assert.isTrue(resourceConfig === User, 'should pass in the Resource')
+            assert.isTrue(modelConfig === User, 'should pass in the Model')
             assert.deepEqual(_id, id, 'should pass in the id')
             assert.deepEqual(_props, props, 'should pass in the props')
             assert.equal(Opts.autoInject, false, 'Opts are provided')
@@ -52,17 +52,17 @@ export function init () {
       const id = 1
       const props = { name: 'John' }
       let updateCalled = false
-      class User extends Resource {}
+      class User extends Model {}
       User.setSchema({ id: {} })
       User.configure({
         autoInject: true,
         defaultAdapter: 'mock'
       })
       User.adapters.mock = {
-        update (resourceConfig, _id, _props, Opts) {
+        update (modelConfig, _id, _props, Opts) {
           updateCalled = true
           return new Promise(function (resolve, reject) {
-            assert.isTrue(resourceConfig === User, 'should pass in the Resource')
+            assert.isTrue(modelConfig === User, 'should pass in the Model')
             assert.deepEqual(_id, id, 'should pass in the id')
             assert.deepEqual(_props, props, 'should pass in the props')
             assert.equal(Opts.autoInject, true, 'Opts are provided')
@@ -82,7 +82,7 @@ export function init () {
       const id = 1
       const props = { name: 'John' }
       let updateCalled = false
-      class User extends Resource {}
+      class User extends Model {}
       User.setSchema({ id: {} })
       User.configure({
         autoInject: true,
@@ -90,10 +90,10 @@ export function init () {
         defaultAdapter: 'mock'
       })
       User.adapters.mock = {
-        update (resourceConfig, _id, _props, Opts) {
+        update (modelConfig, _id, _props, Opts) {
           updateCalled = true
           return new Promise(function (resolve, reject) {
-            assert.isTrue(resourceConfig === User, 'should pass in the Resource')
+            assert.isTrue(modelConfig === User, 'should pass in the Model')
             assert.deepEqual(_id, id, 'should pass in the id')
             assert.deepEqual(_props, props, 'should pass in the props')
             assert.equal(Opts.raw, true, 'Opts are provided')

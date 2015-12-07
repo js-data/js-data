@@ -1,25 +1,25 @@
-/* global Resource:true */
+/* global Model:true */
 import {assert} from 'chai'
 
 export function init () {
   describe('static getAll', function () {
     it('should be a static function', function () {
-      assert.isFunction(Resource.getAll)
-      let User = Resource.extend({}, {
+      assert.isFunction(Model.getAll)
+      let User = Model.extend({}, {
         idAttribute: '_id',
         name: 'user'
       })
-      class User2 extends Resource {}
+      class User2 extends Model {}
       class User3 extends User2 {}
       assert.isFunction(User.getAll)
       assert.isFunction(User2.getAll)
-      assert.isTrue(Resource.getAll === User.getAll)
-      assert.isTrue(Resource.getAll === User2.getAll)
+      assert.isTrue(Model.getAll === User.getAll)
+      assert.isTrue(Model.getAll === User2.getAll)
       assert.isTrue(User.getAll === User2.getAll)
       assert.isTrue(User2.getAll === User3.getAll)
     })
     it('should get multiple items from the store by primary key', function () {
-      class User extends Resource {}
+      class User extends Model {}
       User.setSchema({ id: {} })
 
       const user1 = User.inject({ id: 1 })

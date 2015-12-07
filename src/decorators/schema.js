@@ -114,7 +114,7 @@ function makeDescriptor (target, key, prop) {
  *     }
  *   }
  * })
- * class User extends JSData.Resource {...}
+ * class User extends JSData.Model {...}
  *
  * let user = new User()
  * user.role // "dev"

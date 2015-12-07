@@ -2,7 +2,7 @@
 import * as collection from './collection'
 import * as datastore from './datastore'
 import * as decorators from './decorators'
-import * as resource from './resource'
+import * as model from './model'
 import * as utils from './utils'
 import {assert} from 'chai'
 
@@ -31,13 +31,13 @@ export function init () {
       assert.isFunction(JSData.hasOne, 'has the hasOne decorator')
       assert.isFunction(JSData.initialize, 'has the initialize decorator')
       assert.isFunction(JSData.setSchema, 'has the schema decorator')
-      assert.isFunction(JSData.Resource, 'has the Resource class')
+      assert.isFunction(JSData.Model, 'has the Model class')
       assert.isObject(JSData.version, 'has a version')
     })
     collection.init()
     datastore.init()
     decorators.init()
-    resource.init()
+    model.init()
     utils.init()
   })
 }

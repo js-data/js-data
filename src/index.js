@@ -9,7 +9,7 @@ if (!Promise.prototype.spread) {
 export * from './collection'
 export * from './datastore'
 export * from './decorators'
-export * from './resource'
+export * from './model'
 export * from './validate'
 
 export const version = {

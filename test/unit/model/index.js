@@ -1,4 +1,4 @@
-/* global JSData:true, Resource:true, configure:true */
+/* global JSData:true, Model:true, configure:true */
 import {assert} from 'chai'
 import * as create from './create.test'
 import * as staticCreate from './static.create.test'
@@ -44,28 +44,28 @@ const defaults = {
 }
 
 export function init () {
-  describe('Resource', function () {
+  describe('Model', function () {
     it('should be a constructor function', function () {
-      assert.isFunction(Resource, 'should be a function')
-      let instance = new Resource()
-      assert.isTrue(instance instanceof Resource, 'instance should be an instance')
-      instance = new Resource({ foo: 'bar' })
+      assert.isFunction(Model, 'should be a function')
+      let instance = new Model()
+      assert.isTrue(instance instanceof Model, 'instance should be an instance')
+      instance = new Model({ foo: 'bar' })
       assert.deepEqual(instance, { foo: 'bar' }, 'instance should get initialization properties')
     })
     it('should have the correct static defaults', function () {
       for (var key in defaults) {
-        assert.equal(Resource[key], defaults[key], key + ' should be ' + defaults[key])
+        assert.equal(Model[key], defaults[key], key + ' should be ' + defaults[key])
       }
     })
     it('child should inherit static defaults', function () {
       var key
-      let User = Resource.extend({}, {
+      let User = Model.extend({}, {
         name: 'user'
       })
       for (key in defaults) {
         assert.equal(User[key], defaults[key], key + ' should be ' + defaults[key])
       }
-      class User2 extends Resource {}
+      class User2 extends Model {}
       for (key in defaults) {
         assert.equal(User2[key], defaults[key], key + ' should be ' + defaults[key])
       }
@@ -74,40 +74,40 @@ export function init () {
       const store = new JSData.DS()
 
       /**
-       * ES5 ways of creating a new Resource
+       * ES5 ways of creating a new Model
        */
-      let User = Resource.extend({}, {
+      let User = Model.extend({}, {
         idAttribute: '_id',
         name: 'user'
       })
 
       // Not yet implemented in v3
-      let User2 = store.defineResource({
+      let User2 = store.defineModel({
         idAttribute: '_id',
         name: 'user'
       })
 
       /**
-       * ES6 ways of creating a new Resource
+       * ES6 ways of creating a new Model
        */
-      class User3 extends Resource {}
+      class User3 extends Model {}
       configure({
         idAttribute: '_id'
       })(User3)
 
-      class User4 extends Resource {}
+      class User4 extends Model {}
       User4.configure({
         idAttribute: '_id'
       })
 
      /**
-       * ES7 way of creating a new Resource
+       * ES7 way of creating a new Model
        */
       // Doesn't work right now because of https://github.com/babel/babel/issues/2645
       // @configure({
       //   idAttribute: '_id'
       // })
-      // class User5 extends Resource {}
+      // class User5 extends Model {}
 
       check(User)
       // check(User2)
@@ -126,7 +126,7 @@ export function init () {
       }
     })
     it('should allow schema definition with basic indexes', function () {
-      class User extends Resource {}
+      class User extends Model {}
       User.setSchema({
         id: {},
         age: { indexed: true },

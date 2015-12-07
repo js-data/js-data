@@ -43,7 +43,7 @@ beforeEach(function () {
   this.data.p3 = globals.p3 = global.p3 = { author: 'Mike', age: 32, id: 7 }
   this.data.p4 = globals.p4 = global.p4 = { author: 'Adam', age: 33, id: 8 }
   this.data.p5 = globals.p5 = global.p5 = { author: 'Adam', age: 33, id: 9 }
-  var Base = JSData.Resource.extend({}, {
+  var Base = JSData.Model.extend({}, {
     name: 'base',
     linkRelations: true
   });
