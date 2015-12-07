@@ -1,20 +1,20 @@
-/* global Resource:true */
+/* global Model:true */
 import {assert} from 'chai'
 
 export function init () {
   describe('#toJSON', function () {
     it('should be an instance function', function () {
-      assert.isFunction(Resource.prototype.toJSON)
-      let User = Resource.extend({}, {
+      assert.isFunction(Model.prototype.toJSON)
+      let User = Model.extend({}, {
         idAttribute: '_id',
         name: 'user'
       })
-      class User2 extends Resource {}
+      class User2 extends Model {}
       class User3 extends User2 {}
       assert.isFunction(User.prototype.toJSON)
       assert.isFunction(User2.prototype.toJSON)
-      assert.isTrue(Resource.prototype.toJSON === User.prototype.toJSON)
-      assert.isTrue(Resource.prototype.toJSON === User2.prototype.toJSON)
+      assert.isTrue(Model.prototype.toJSON === User.prototype.toJSON)
+      assert.isTrue(Model.prototype.toJSON === User2.prototype.toJSON)
       assert.isTrue(User.prototype.toJSON === User2.prototype.toJSON)
       assert.isTrue(User2.prototype.toJSON === User3.prototype.toJSON)
     })

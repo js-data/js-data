@@ -104,9 +104,9 @@ export function resolve (value) {
 export function reject (value) {
   return Promise.reject(value)
 }
-export function _ (Resource, opts) {
-  for (var key in Resource) {
-    let value = Resource[key]
+export function _ (Model, opts) {
+  for (var key in Model) {
+    let value = Model[key]
     if (opts[key] === undefined && !isFunction(value)) {
       opts[key] = value
     }

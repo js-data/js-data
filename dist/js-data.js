@@ -123,19 +123,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_ret3 === 'continue') continue;
 	}
 	
-	var _resource = __webpack_require__(16);
+	var _model = __webpack_require__(16);
 	
 	var _loop4 = function _loop4(_key9) {
 	  if (_key9 === "default") return 'continue';
 	  Object.defineProperty(exports, _key9, {
 	    enumerable: true,
 	    get: function get() {
-	      return _resource[_key9];
+	      return _model[_key9];
 	    }
 	  });
 	};
 	
-	for (var _key9 in _resource) {
+	for (var _key9 in _model) {
 	  var _ret4 = _loop4(_key9);
 	
 	  if (_ret4 === 'continue') continue;
@@ -759,9 +759,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	function reject(value) {
 	  return Promise.reject(value);
 	}
-	function _(Resource, opts) {
-	  for (var key in Resource) {
-	    var value = Resource[key];
+	function _(Model, opts) {
+	  for (var key in Model) {
+	    var value = Model[key];
 	    if (opts[key] === undefined && !isFunction(value)) {
 	      opts[key] = value;
 	    }
@@ -1186,13 +1186,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        config.url = _utils.makePath.apply(null, args);
 	      }
 	      config.method = config.method || 'GET';
-	      config.resourceName = this.name;
+	      config.modelName = this.name;
 	      (0, _configure.configure)(config)(_opts);
 	      return (0, _utils.resolve)(config).then(_opts.request || opts.request).then(function (config) {
 	        return adapter.HTTP(config);
 	      }).then(function (data) {
 	        if (data && data.config) {
-	          data.config.resourceName = this.name;
+	          data.config.modelName = this.name;
 	        }
 	        return data;
 	      }).then(_opts.response || opts.response, _opts.responseError || opts.responseError);
@@ -1231,7 +1231,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @configure({
 	 *   idAttribute: '_id'
 	 * })
-	 * class User extends JSData.Resource {...}
+	 * class User extends JSData.Model {...}
 	 */
 	function configure(props) {
 	  var overwrite = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
@@ -1264,14 +1264,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Steps to apply a "belongsTo" relationship
 	 * 1. Choose the localField and localKey
 	 * 2. Configure property descriptor, possibly including custom getter/setter
-	 * 3. Add property to prototype of target Resource
+	 * 3. Add property to prototype of target Model
 	 *
-	 * The added property is where an instance of the related Resource will be
-	 * attached to an instance of the target Resource, e.g. if Comment belongsTo
+	 * The added property is where an instance of the related Model will be
+	 * attached to an instance of the target Model, e.g. if Comment belongsTo
 	 * User and "localField" is set to "user", "comment.user" will be a reference to
 	 * the user.
 	 */
-	function applyBelongsTo(Resource, Relation) {
+	function applyBelongsTo(Model, Relation) {
 	  var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 	
 	  // Choose field where the relation will be attached
@@ -1297,7 +1297,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	
 	  // Check whether the relation shouldn't actually be linked via a getter
-	  if (opts.link === false || opts.link === undefined && !Resource.linkRelations) {
+	  if (opts.link === false || opts.link === undefined && !Model.linkRelations) {
 	    delete descriptor.get;
 	    delete descriptor.set;
 	    descriptor.writable = true;
@@ -1312,11 +1312,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var _this = this;
 	
 	        // Call user-defined getter, passing in:
-	        //  - target Resource
-	        //  - related Resource
-	        //  - instance of target Resource
+	        //  - target Model
+	        //  - related Model
+	        //  - instance of target Model
 	        //  - the original getter function, in case the user wants to use it
-	        return opts.get(Resource, Relation, this, originalGet ? function () {
+	        return opts.get(Model, Relation, this, originalGet ? function () {
 	          for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
 	            args[_key] = arguments[_key];
 	          }
@@ -1336,12 +1336,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var _this2 = this;
 	
 	        // Call user-defined getter, passing in:
-	        //  - target Resource
-	        //  - related Resource
-	        //  - instance of target Resource
-	        //  - instance of related Resource
+	        //  - target Model
+	        //  - related Model
+	        //  - instance of target Model
+	        //  - instance of related Model
 	        //  - the original setter function, in case the user wants to use it
-	        return opts.set(Resource, Relation, this, parent, originalSet ? function () {
+	        return opts.set(Model, Relation, this, parent, originalSet ? function () {
 	          for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
 	            args[_key2] = arguments[_key2];
 	          }
@@ -1352,51 +1352,51 @@ return /******/ (function(modules) { // webpackBootstrap
 	    })();
 	  }
 	
-	  // Finally, added property to prototype of target Resource
-	  Object.defineProperty(Resource.prototype, localField, descriptor);
+	  // Finally, added property to prototype of target Model
+	  Object.defineProperty(Model.prototype, localField, descriptor);
 	
-	  if (!Resource.relationList) {
-	    Resource.relationList = [];
+	  if (!Model.relationList) {
+	    Model.relationList = [];
 	  }
-	  if (!Resource.relationFields) {
-	    Resource.relationFields = [];
+	  if (!Model.relationFields) {
+	    Model.relationFields = [];
 	  }
 	  opts.type = 'belongsTo';
-	  opts.name = Resource.name;
+	  opts.name = Model.name;
 	  opts.relation = Relation.name;
 	  opts.Relation = Relation;
-	  Resource.relationList.push(opts);
-	  Resource.relationFields.push(localField);
-	  Resource.data().createIndex(localKey);
+	  Model.relationList.push(opts);
+	  Model.relationFields.push(localField);
+	  Model.data().createIndex(localKey);
 	
-	  // Return target Resource for chaining
-	  return Resource;
+	  // Return target Model for chaining
+	  return Model;
 	}
 	
 	/**
 	 * Usage:
 	 *
 	 * ES7 Usage:
-	 * import {belongsTo, Resource} from 'js-data'
-	 * class User extends Resource {}
+	 * import {belongsTo, Model} from 'js-data'
+	 * class User extends Model {}
 	 * @belongsTo(User, {...})
-	 * class Post extends Resource {}
+	 * class Post extends Model {}
 	 *
 	 * ES6 Usage:
-	 * import {belongsTo, Resource} from 'js-data'
-	 * class User extends Resource {}
-	 * class Comment extends Resource {}
+	 * import {belongsTo, Model} from 'js-data'
+	 * class User extends Model {}
+	 * class Comment extends Model {}
 	 * belongsTo(User, {...})(Comment)
 	 *
 	 * ES5 Usage:
 	 * var JSData = require('js-data')
-	 * var User = JSData.Resource.extend()
-	 * var Comment = JSDataResource.extend()
+	 * var User = JSData.Model.extend()
+	 * var Comment = JSDataModel.extend()
 	 * JSData.belongsTo(User, {...})(Comment)
 	 */
-	function belongsTo(Resource, opts) {
+	function belongsTo(Model, opts) {
 	  return function (target) {
-	    return applyBelongsTo(target, Resource, opts);
+	    return applyBelongsTo(target, Model, opts);
 	  };
 	}
 
@@ -1417,26 +1417,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Steps to apply a "hasMany" relationship
 	 * 1. Choose the localField and foreignKey or localKeys
 	 * 2. Configure property descriptor, possibly including custom getter/setter
-	 * 3. Add property to prototype of target Resource
+	 * 3. Add property to prototype of target Model
 	 *
-	 * The added property is where instances of the related Resource will be
-	 * attached to an instance of the target Resource, e.g. if User hasMany Comment
+	 * The added property is where instances of the related Model will be
+	 * attached to an instance of the target Model, e.g. if User hasMany Comment
 	 * and "localField" is set to "comments", "user.comments" will be a reference to
 	 * the array of comments.
 	 */
-	function applyHasMany(Resource, Relation) {
+	function applyHasMany(Model, Relation) {
 	  var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 	
 	  // Choose field where the relation will be attached
 	  var localField = opts.localField || (0, _utils.camelCase)(Relation.name) + 'Collection';
 	  // Choose field on related instances that holds the primary key of instances
-	  // of the target Resource
+	  // of the target Model
 	  var foreignKey = opts.foreignKey;
 	  var localKeys = opts.localKeys;
 	  var foreignKeys = opts.foreignKeys;
 	
 	  if (!foreignKey && !localKeys && !foreignKeys) {
-	    foreignKey = opts.foreignKey = (0, _utils.camelCase)(Resource.name) + 'Id';
+	    foreignKey = opts.foreignKey = (0, _utils.camelCase)(Model.name) + 'Id';
 	  }
 	  if (foreignKey) {
 	    Relation.data().createIndex(foreignKey);
@@ -1451,14 +1451,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var query = {};
 	      if (foreignKey) {
 	        // Make a FAST retrieval of the relation using a secondary index
-	        return Relation.getAll((0, _utils.get)(this, Resource.idAttribute), { index: foreignKey });
+	        return Relation.getAll((0, _utils.get)(this, Model.idAttribute), { index: foreignKey });
 	      } else if (localKeys) {
 	        var keys = (0, _utils.get)(this, localKeys) || [];
 	        var args = (0, _utils.isArray)(keys) ? keys : Object.keys(keys);
 	        // Make a slower retrieval using the ids in the "localKeys" array
 	        return Relation.getAll.apply(Relation, args);
 	      } else if (foreignKeys) {
-	        (0, _utils.set)(query, 'where.' + foreignKeys + '.contains', (0, _utils.get)(this, Resource.idAttribute));
+	        (0, _utils.set)(query, 'where.' + foreignKeys + '.contains', (0, _utils.get)(this, Model.idAttribute));
 	        // Make a much slower retrieval
 	        return Relation.filter(query);
 	      }
@@ -1471,7 +1471,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	      if (children && children.length) {
 	        (function () {
-	          var id = (0, _utils.get)(_this, Resource.idAttribute);
+	          var id = (0, _utils.get)(_this, Model.idAttribute);
 	          if (foreignKey) {
 	            children.forEach(function (child) {
 	              (0, _utils.set)(child, foreignKey, id);
@@ -1503,7 +1503,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	
 	  // Check whether the relation shouldn't actually be linked via a getter
-	  if (opts.link === false || opts.link === undefined && !Resource.linkRelations) {
+	  if (opts.link === false || opts.link === undefined && !Model.linkRelations) {
 	    delete descriptor.get;
 	    delete descriptor.set;
 	    descriptor.writable = true;
@@ -1518,11 +1518,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var _this2 = this;
 	
 	        // Call user-defined getter, passing in:
-	        //  - target Resource
-	        //  - related Resource
-	        //  - instance of target Resource
+	        //  - target Model
+	        //  - related Model
+	        //  - instance of target Model
 	        //  - the original getter function, in case the user wants to use it
-	        return opts.get(Resource, Relation, this, originalGet ? function () {
+	        return opts.get(Model, Relation, this, originalGet ? function () {
 	          for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
 	            args[_key] = arguments[_key];
 	          }
@@ -1542,12 +1542,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var _this3 = this;
 	
 	        // Call user-defined getter, passing in:
-	        //  - target Resource
-	        //  - related Resource
-	        //  - instance of target Resource
-	        //  - instances of related Resource
+	        //  - target Model
+	        //  - related Model
+	        //  - instance of target Model
+	        //  - instances of related Model
 	        //  - the original setter function, in case the user wants to use it
-	        return opts.set(Resource, Relation, this, children, originalSet ? function () {
+	        return opts.set(Model, Relation, this, children, originalSet ? function () {
 	          for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
 	            args[_key2] = arguments[_key2];
 	          }
@@ -1558,50 +1558,50 @@ return /******/ (function(modules) { // webpackBootstrap
 	    })();
 	  }
 	
-	  // Finally, added property to prototype of target Resource
-	  Object.defineProperty(Resource.prototype, localField, descriptor);
+	  // Finally, added property to prototype of target Model
+	  Object.defineProperty(Model.prototype, localField, descriptor);
 	
-	  if (!Resource.relationList) {
-	    Resource.relationList = [];
+	  if (!Model.relationList) {
+	    Model.relationList = [];
 	  }
-	  if (!Resource.relationFields) {
-	    Resource.relationFields = [];
+	  if (!Model.relationFields) {
+	    Model.relationFields = [];
 	  }
 	  opts.type = 'hasMany';
-	  opts.name = Resource.name;
+	  opts.name = Model.name;
 	  opts.relation = Relation.name;
 	  opts.Relation = Relation;
-	  Resource.relationList.push(opts);
-	  Resource.relationFields.push(localField);
+	  Model.relationList.push(opts);
+	  Model.relationFields.push(localField);
 	
-	  // Return target Resource for chaining
-	  return Resource;
+	  // Return target Model for chaining
+	  return Model;
 	}
 	
 	/**
 	 * Usage:
 	 *
 	 * ES7 Usage:
-	 * import {hasMany, Resource} from 'js-data'
-	 * class Post extends Resource {}
+	 * import {hasMany, Model} from 'js-data'
+	 * class Post extends Model {}
 	 * @hasMany(Post, {...})
-	 * class User extends Resource {}
+	 * class User extends Model {}
 	 *
 	 * ES6 Usage:
-	 * import {hasMany, Resource} from 'js-data'
-	 * class User extends Resource {}
-	 * class Comment extends Resource {}
+	 * import {hasMany, Model} from 'js-data'
+	 * class User extends Model {}
+	 * class Comment extends Model {}
 	 * hasMany(Comment, {...})(User)
 	 *
 	 * ES5 Usage:
 	 * var JSData = require('js-data')
-	 * var User = JSData.Resource.extend()
-	 * var Comment = JSDataResource.extend()
+	 * var User = JSData.Model.extend()
+	 * var Comment = JSDataModel.extend()
 	 * JSData.hasMany(User, {...})(Comment)
 	 */
-	function hasMany(Resource, opts) {
+	function hasMany(Model, opts) {
 	  return function (target) {
-	    return applyHasMany(target, Resource, opts);
+	    return applyHasMany(target, Model, opts);
 	  };
 	}
 
@@ -1622,20 +1622,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Steps to apply a "hasOne" relationship
 	 * 1. Choose the foreignKey and localKey
 	 * 2. Configure property descriptor, possibly including custom getter/setter
-	 * 3. Add property to prototype of target Resource
+	 * 3. Add property to prototype of target Model
 	 *
-	 * The added property is where an instance of the related Resource will be
-	 * attached to an instance of the target Resource, e.g. if User hasOne
+	 * The added property is where an instance of the related Model will be
+	 * attached to an instance of the target Model, e.g. if User hasOne
 	 * Profile and "localField" is set to "profile", "user.profile" will be a
 	 * reference to the profile.
 	 */
-	function applyHasOne(Resource, Relation) {
+	function applyHasOne(Model, Relation) {
 	  var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 	
 	  // Choose field where the relation will be attached
 	  var localField = opts.localField = opts.localField || (0, _utils.camelCase)(Relation.name);
 	  // Choose field that holds the primary key of the relation
-	  var foreignKey = opts.foreignKey = opts.foreignKey || (0, _utils.camelCase)(Resource.name) + 'Id';
+	  var foreignKey = opts.foreignKey = opts.foreignKey || (0, _utils.camelCase)(Model.name) + 'Id';
 	
 	  // Setup configuration of the property
 	  var descriptor = {
@@ -1643,19 +1643,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
 	    // Set default method for retrieving the linked relation
 	    get: function get() {
-	      var items = Relation.getAll((0, _utils.get)(this, Resource.idAttribute), { index: foreignKey });
+	      var items = Relation.getAll((0, _utils.get)(this, Model.idAttribute), { index: foreignKey });
 	      return items && items.length ? items[0] : undefined;
 	    },
 	
 	    // Set default method for setting the linked relation
 	    set: function set(child) {
-	      (0, _utils.set)(child, foreignKey, (0, _utils.get)(this, Resource.idAttribute));
+	      (0, _utils.set)(child, foreignKey, (0, _utils.get)(this, Model.idAttribute));
 	      return (0, _utils.get)(this, localField);
 	    }
 	  };
 	
 	  // Check whether the relation shouldn't actually be linked via a getter
-	  if (opts.link === false || opts.link === undefined && !Resource.linkRelations) {
+	  if (opts.link === false || opts.link === undefined && !Model.linkRelations) {
 	    delete descriptor.get;
 	    delete descriptor.set;
 	  }
@@ -1669,11 +1669,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var _this = this;
 	
 	        // Call user-defined getter, passing in:
-	        //  - target Resource
-	        //  - related Resource
-	        //  - instance of target Resource
+	        //  - target Model
+	        //  - related Model
+	        //  - instance of target Model
 	        //  - the original getter function, in case the user wants to use it
-	        return opts.get(Resource, Relation, this, originalGet ? function () {
+	        return opts.get(Model, Relation, this, originalGet ? function () {
 	          for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
 	            args[_key] = arguments[_key];
 	          }
@@ -1693,12 +1693,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var _this2 = this;
 	
 	        // Call user-defined getter, passing in:
-	        //  - target Resource
-	        //  - related Resource
-	        //  - instance of target Resource
-	        //  - instance of related Resource
+	        //  - target Model
+	        //  - related Model
+	        //  - instance of target Model
+	        //  - instance of related Model
 	        //  - the original setter function, in case the user wants to use it
-	        return opts.set(Resource, Relation, this, child, originalSet ? function () {
+	        return opts.set(Model, Relation, this, child, originalSet ? function () {
 	          for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
 	            args[_key2] = arguments[_key2];
 	          }
@@ -1709,51 +1709,51 @@ return /******/ (function(modules) { // webpackBootstrap
 	    })();
 	  }
 	
-	  // Finally, added property to prototype of target Resource
-	  Object.defineProperty(Resource.prototype, localField, descriptor);
+	  // Finally, added property to prototype of target Model
+	  Object.defineProperty(Model.prototype, localField, descriptor);
 	
-	  if (!Resource.relationList) {
-	    Resource.relationList = [];
+	  if (!Model.relationList) {
+	    Model.relationList = [];
 	  }
-	  if (!Resource.relationFields) {
-	    Resource.relationFields = [];
+	  if (!Model.relationFields) {
+	    Model.relationFields = [];
 	  }
 	  opts.type = 'hasOne';
-	  opts.name = Resource.name;
+	  opts.name = Model.name;
 	  opts.relation = Relation.name;
 	  opts.Relation = Relation;
-	  Resource.relationList.push(opts);
-	  Resource.relationFields.push(localField);
-	  Resource.data().createIndex(foreignKey);
+	  Model.relationList.push(opts);
+	  Model.relationFields.push(localField);
+	  Model.data().createIndex(foreignKey);
 	
-	  // Return target Resource for chaining
-	  return Resource;
+	  // Return target Model for chaining
+	  return Model;
 	}
 	
 	/**
 	 * Usage:
 	 *
 	 * ES7 Usage:
-	 * import {hasOne, Resource} from 'js-data'
-	 * class User extends Resource {}
+	 * import {hasOne, Model} from 'js-data'
+	 * class User extends Model {}
 	 * @hasOne(User, {...})
-	 * class Post extends Resource {}
+	 * class Post extends Model {}
 	 *
 	 * ES6 Usage:
-	 * import {hasOne, Resource} from 'js-data'
-	 * class User extends Resource {}
-	 * class Comment extends Resource {}
+	 * import {hasOne, Model} from 'js-data'
+	 * class User extends Model {}
+	 * class Comment extends Model {}
 	 * hasOne(User, {...})(Comment)
 	 *
 	 * ES5 Usage:
 	 * var JSData = require('js-data')
-	 * var User = JSData.Resource.extend()
-	 * var Comment = JSDataResource.extend()
+	 * var User = JSData.Model.extend()
+	 * var Comment = JSDataModel.extend()
 	 * JSData.hasOne(User, {...})(Comment)
 	 */
-	function hasOne(Resource, opts) {
+	function hasOne(Model, opts) {
 	  return function (target) {
-	    return applyHasOne(target, Resource, opts);
+	    return applyHasOne(target, Model, opts);
 	  };
 	}
 
@@ -1925,7 +1925,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *     }
 	 *   }
 	 * })
-	 * class User extends JSData.Resource {...}
+	 * class User extends JSData.Model {...}
 	 *
 	 * let user = new User()
 	 * user.role // "dev"
@@ -2466,7 +2466,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _utils = __webpack_require__(3);
 	
-	var _resource = __webpack_require__(16);
+	var _model = __webpack_require__(16);
 	
 	// function lifecycleNoopCb (resource, attrs, cb) {
 	//   cb(null, attrs)
@@ -2660,20 +2660,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	    return ejected;
 	  },
-	  defineResource: function defineResource(opts) {
-	    var Child = _resource.Resource.extend(opts.methods || {}, opts);
+	  defineModel: function defineModel(opts) {
+	    var Child = _model.Model.extend(opts.methods || {}, opts);
 	    this.definitions[Child.name] = Child;
 	    return Child;
 	  }
 	})(DS.prototype);
 	
-	(0, _utils.forOwn)(_resource.Resource, function (value, key) {
+	DS.prototype.defineResource = DS.prototype.defineModel;
+	
+	(0, _utils.forOwn)(_model.Model, function (value, key) {
 	  if ((0, _utils.isFunction)(value)) {
 	    DS.prototype[key] = function (name) {
 	      var _definitions$name;
 	
 	      if (!this.definitions[name]) {
-	        throw new Error(name + ' is not a registered Resource!');
+	        throw new Error(name + ' is not a registered Model!');
 	      }
 	
 	      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
@@ -2696,7 +2698,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.Resource = undefined;
+	exports.Model = undefined;
 	
 	var _utils = __webpack_require__(3);
 	
@@ -2726,15 +2728,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  isBrowser = !!window;
 	} catch (e) {}
 	
-	var handleResponse = function handleResponse(resource, data, opts, adapterName) {
+	var handleResponse = function handleResponse(model, data, opts, adapterName) {
 	  if (opts.raw) {
 	    data.adapter = adapterName;
 	    if (opts.autoInject) {
-	      data.data = resource.inject(data.data);
+	      data.data = model.inject(data.data);
 	    }
 	    return data;
 	  } else if (opts.autoInject) {
-	    data = resource.inject(data);
+	    data = model.inject(data);
 	  }
 	  return data;
 	};
@@ -2743,17 +2745,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	// the inheritance helpers which we
 	// can re-use for the "extend" method
 	
-	var BaseResource = function BaseResource() {
-	  _classCallCheck(this, BaseResource);
+	var BaseModel = function BaseModel() {
+	  _classCallCheck(this, BaseModel);
 	};
 	
-	var Resource = exports.Resource = (function (_BaseResource) {
-	  _inherits(Resource, _BaseResource);
+	var Model = exports.Model = (function (_BaseModel) {
+	  _inherits(Model, _BaseModel);
 	
-	  function Resource(props, opts) {
-	    _classCallCheck(this, Resource);
+	  function Model(props, opts) {
+	    _classCallCheck(this, Model);
 	
-	    var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(Resource).call(this));
+	    var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(Model).call(this));
 	
 	    props || (props = {});
 	    opts || (opts = {});
@@ -2786,7 +2788,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return _this2;
 	  }
 	
-	  _createClass(Resource, [{
+	  _createClass(Model, [{
 	    key: 'schema',
 	    value: function schema(key) {
 	      var _schema = this.constructor.schema;
@@ -2885,7 +2887,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      opts = opts || {};
 	      var Ctor = this.constructor;
 	      var json = this;
-	      if (this instanceof Resource) {
+	      if (this instanceof Model) {
 	        json = {};
 	        utils.set(json, this);
 	        if (Ctor && Ctor.relationList && opts.with) {
@@ -2933,9 +2935,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	     */
 	
 	    /**
-	     * Return a reference to the Collection instance of this Resource.
+	     * Return a reference to the Collection instance of this Model.
 	     *
-	     * Will throw an error if a schema has not been defined for this Resource.
+	     * Will throw an error if a schema has not been defined for this Model.
 	     * When the schema is defined, this method is replaced with one that can
 	     * return the Collection instance.
 	     *
@@ -2943,8 +2945,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * class, but ES6 or ES7 class definitions will need to use .schema(opts) or
 	     * @schema(opts) to get the schema initialized.
 	     *
-	     * @throws {Error} Schema must already be defined for Resource.
-	     * @return {Collection} The Collection instance of this Resource.
+	     * @throws {Error} Schema must already be defined for Model.
+	     * @return {Collection} The Collection instance of this Model.
 	     */
 	
 	  }], [{
@@ -2954,7 +2956,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    /**
-	     * Create a new secondary index in the Collection instance of this Resource.
+	     * Create a new secondary index in the Collection instance of this Model.
 	     *
 	     * @param {string} name - The name of the new secondary index
 	     * @param {string[]} keyList - The list of keys to be used to create the index.
@@ -2967,25 +2969,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    /**
-	     * Create a new instance of this Resource from the provided properties.
+	     * Create a new instance of this Model from the provided properties.
 	     *
 	     * @param {Object} props - The initial properties of the new instance.
-	     * @return {Resource} The instance.
+	     * @return {Model} The instance.
 	     */
 	
 	  }, {
 	    key: 'createInstance',
 	    value: function createInstance(props) {
 	      var Ctor = this;
-	      // Check to make sure "props" is not already an instance of this Resource.
+	      // Check to make sure "props" is not already an instance of this Model.
 	      return props instanceof Ctor ? props : new Ctor(props);
 	    }
 	
 	    /**
-	     * Check whether "instance" is actually an instance of this Resource.
+	     * Check whether "instance" is actually an instance of this Model.
 	     *
-	     * @param {Resource} The instance to check.
-	     * @return {boolean} Whether "instance" is an instance of this Resource.
+	     * @param {Model} The instance to check.
+	     * @return {boolean} Whether "instance" is an instance of this Model.
 	     */
 	
 	  }, {
@@ -2996,7 +2998,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    /**
 	     * Insert the provided item or items into the Collection instance of this
-	     * Resource.
+	     * Model.
 	     *
 	     * If an item is already in the collection then the provided item will either
 	     * merge with or replace the existing item based on the value of the
@@ -3004,10 +3006,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	     *
 	     * The collection's secondary indexes will be updated as each item is visited.
 	     *
-	     * @param {(Object|Object[]|Resource|Resource[])} items - The item or items to insert.
+	     * @param {(Object|Object[]|Model|Model[])} items - The item or items to insert.
 	     * @param {?Object} opts - Optional configuration. Properties:
 	     *   - {string} onConflict - What to do when an item is already in the Collection instance. May be "merge" or "replace".
-	     * @return {(Resource|Resource[])} Whether "instance" is an instance of this Resource.
+	     * @return {(Model|Model[])} Whether "instance" is an instance of this Model.
 	     */
 	
 	  }, {
@@ -3106,10 +3108,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    /**
 	     * Remove the instance with the given primary key from the Collection instance
-	     * of this Resource.
+	     * of this Model.
 	     *
 	     * @param {(string|number)} id - The primary key of the instance to be removed.
-	     * @return {Resource} The removed item, if any.
+	     * @return {Model} The removed item, if any.
 	     */
 	
 	  }, {
@@ -3125,10 +3127,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    /**
 	     * Remove the instances selected by "query" from the Collection instance of
-	     * this Resource.
+	     * this Model.
 	     *
 	     * @param {?Object} query - The query used to select instances to remove.
-	     * @return {Resource[]} The removed instances, if any.
+	     * @return {Model[]} The removed instances, if any.
 	     */
 	
 	  }, {
@@ -3143,11 +3145,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    /**
-	     * Return the instance in the Collection instance of this Resource that has
+	     * Return the instance in the Collection instance of this Model that has
 	     * the given primary key, if such an instance can be found.
 	     *
 	     * @param {(string|number)} id - Primary key of the instance to retrieve.
-	     * @return {?Resource} The instance or undefined.
+	     * @return {?Model} The instance or undefined.
 	     */
 	
 	  }, {
@@ -3517,8 +3519,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  }, {
 	    key: 'belongsTo',
-	    value: function belongsTo(resource, opts) {
-	      return (0, _decorators.belongsTo)(resource, opts)(this);
+	    value: function belongsTo(model, opts) {
+	      return (0, _decorators.belongsTo)(model, opts)(this);
 	    }
 	
 	    /**
@@ -3531,8 +3533,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  }, {
 	    key: 'hasMany',
-	    value: function hasMany(resource, opts) {
-	      return (0, _decorators.hasMany)(resource, opts)(this);
+	    value: function hasMany(model, opts) {
+	      return (0, _decorators.hasMany)(model, opts)(this);
 	    }
 	
 	    /**
@@ -3545,8 +3547,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  }, {
 	    key: 'hasOne',
-	    value: function hasOne(resource, opts) {
-	      return (0, _decorators.hasOne)(resource, opts)(this);
+	    value: function hasOne(model, opts) {
+	      return (0, _decorators.hasOne)(model, opts)(this);
 	    }
 	  }, {
 	    key: 'action',
@@ -3577,7 +3579,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    /**
 	     * Usage:
 	     *
-	     * var User = JSData.Resource.extend({...}, {...})
+	     * var User = JSData.Model.extend({...}, {...})
 	     */
 	
 	  }, {
@@ -3634,8 +3636,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }]);
 	
-	  return Resource;
-	})(BaseResource);
+	  return Model;
+	})(BaseModel);
 	
 	(0, _decorators.configure)({
 	  adapters: {},
@@ -3652,9 +3654,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  strategy: 'single',
 	  upsert: true,
 	  useFilter: true
-	})(Resource);
+	})(Model);
 	
-	utils.Events(Resource.prototype, function () {
+	utils.Events(Model.prototype, function () {
 	  return this._get('events');
 	}, function (value) {
 	  this._set('events', value);

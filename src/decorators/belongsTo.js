@@ -4,14 +4,14 @@ import {get, set} from '../utils'
  * Steps to apply a "belongsTo" relationship
  * 1. Choose the localField and localKey
  * 2. Configure property descriptor, possibly including custom getter/setter
- * 3. Add property to prototype of target Resource
+ * 3. Add property to prototype of target Model
  *
- * The added property is where an instance of the related Resource will be
- * attached to an instance of the target Resource, e.g. if Comment belongsTo
+ * The added property is where an instance of the related Model will be
+ * attached to an instance of the target Model, e.g. if Comment belongsTo
  * User and "localField" is set to "user", "comment.user" will be a reference to
  * the user.
  */
-function applyBelongsTo (Resource, Relation, opts = {}) {
+function applyBelongsTo (Model, Relation, opts = {}) {
   // Choose field where the relation will be attached
   const localField = opts.localField = opts.localField || Relation.name.toLowerCase()
   // Choose field that holds the primary key of the relation
@@ -34,7 +34,7 @@ function applyBelongsTo (Resource, Relation, opts = {}) {
   }
 
   // Check whether the relation shouldn't actually be linked via a getter
-  if (opts.link === false || (opts.link === undefined && !Resource.linkRelations)) {
+  if (opts.link === false || (opts.link === undefined && !Model.linkRelations)) {
     delete descriptor.get
     delete descriptor.set
     descriptor.writable = true
@@ -46,11 +46,11 @@ function applyBelongsTo (Resource, Relation, opts = {}) {
     // Set user-defined getter
     descriptor.get = function () {
       // Call user-defined getter, passing in:
-      //  - target Resource
-      //  - related Resource
-      //  - instance of target Resource
+      //  - target Model
+      //  - related Model
+      //  - instance of target Model
       //  - the original getter function, in case the user wants to use it
-      return opts.get(Resource, Relation, this, originalGet ? (...args) => originalGet.apply(this, args) : undefined)
+      return opts.get(Model, Relation, this, originalGet ? (...args) => originalGet.apply(this, args) : undefined)
     }
   }
 
@@ -60,59 +60,59 @@ function applyBelongsTo (Resource, Relation, opts = {}) {
     // Set user-defined setter
     descriptor.set = function (parent) {
       // Call user-defined getter, passing in:
-      //  - target Resource
-      //  - related Resource
-      //  - instance of target Resource
-      //  - instance of related Resource
+      //  - target Model
+      //  - related Model
+      //  - instance of target Model
+      //  - instance of related Model
       //  - the original setter function, in case the user wants to use it
-      return opts.set(Resource, Relation, this, parent, originalSet ? (...args) => originalSet.apply(this, args) : undefined)
+      return opts.set(Model, Relation, this, parent, originalSet ? (...args) => originalSet.apply(this, args) : undefined)
     }
   }
 
-  // Finally, added property to prototype of target Resource
-  Object.defineProperty(Resource.prototype, localField, descriptor)
+  // Finally, added property to prototype of target Model
+  Object.defineProperty(Model.prototype, localField, descriptor)
 
-  if (!Resource.relationList) {
-    Resource.relationList = []
+  if (!Model.relationList) {
+    Model.relationList = []
   }
-  if (!Resource.relationFields) {
-    Resource.relationFields = []
+  if (!Model.relationFields) {
+    Model.relationFields = []
   }
   opts.type = 'belongsTo'
-  opts.name = Resource.name
+  opts.name = Model.name
   opts.relation = Relation.name
   opts.Relation = Relation
-  Resource.relationList.push(opts)
-  Resource.relationFields.push(localField)
-  Resource.data().createIndex(localKey)
+  Model.relationList.push(opts)
+  Model.relationFields.push(localField)
+  Model.data().createIndex(localKey)
 
-  // Return target Resource for chaining
-  return Resource
+  // Return target Model for chaining
+  return Model
 }
 
 /**
  * Usage:
  *
  * ES7 Usage:
- * import {belongsTo, Resource} from 'js-data'
- * class User extends Resource {}
+ * import {belongsTo, Model} from 'js-data'
+ * class User extends Model {}
  * @belongsTo(User, {...})
- * class Post extends Resource {}
+ * class Post extends Model {}
  *
  * ES6 Usage:
- * import {belongsTo, Resource} from 'js-data'
- * class User extends Resource {}
- * class Comment extends Resource {}
+ * import {belongsTo, Model} from 'js-data'
+ * class User extends Model {}
+ * class Comment extends Model {}
  * belongsTo(User, {...})(Comment)
  *
  * ES5 Usage:
  * var JSData = require('js-data')
- * var User = JSData.Resource.extend()
- * var Comment = JSDataResource.extend()
+ * var User = JSData.Model.extend()
+ * var Comment = JSDataModel.extend()
  * JSData.belongsTo(User, {...})(Comment)
  */
-export function belongsTo (Resource, opts) {
+export function belongsTo (Model, opts) {
   return function (target) {
-    return applyBelongsTo(target, Resource, opts)
+    return applyBelongsTo(target, Model, opts)
   }
 }

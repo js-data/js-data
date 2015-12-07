@@ -38,14 +38,14 @@ export function action (name, opts) {
         config.url = makePath.apply(null, args)
       }
       config.method = config.method || 'GET'
-      config.resourceName = this.name
+      config.modelName = this.name
       configure(config)(_opts)
       return resolve(config)
         .then(_opts.request || opts.request)
         .then(function (config) { return adapter.HTTP(config) })
         .then(function (data) {
           if (data && data.config) {
-            data.config.resourceName = this.name
+            data.config.modelName = this.name
           }
           return data
         })

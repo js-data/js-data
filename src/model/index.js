@@ -18,15 +18,15 @@ try {
 } catch (e) {
 }
 
-const handleResponse = function handleResponse (resource, data, opts, adapterName) {
+const handleResponse = function handleResponse (model, data, opts, adapterName) {
   if (opts.raw) {
     data.adapter = adapterName
     if (opts.autoInject) {
-      data.data = resource.inject(data.data)
+      data.data = model.inject(data.data)
     }
     return data
   } else if (opts.autoInject) {
-    data = resource.inject(data)
+    data = model.inject(data)
   }
   return data
 }
@@ -34,9 +34,9 @@ const handleResponse = function handleResponse (resource, data, opts, adapterNam
 // This is here so Babel will give us
 // the inheritance helpers which we
 // can re-use for the "extend" method
-class BaseResource {}
+class BaseModel {}
 
-export class Resource extends BaseResource {
+export class Model extends BaseModel {
   constructor (props, opts) {
     super()
     props || (props = {})
@@ -144,7 +144,7 @@ export class Resource extends BaseResource {
     opts = opts || {}
     const Ctor = this.constructor
     let json = this
-    if (this instanceof Resource) {
+    if (this instanceof Model) {
       json = {}
       utils.set(json, this)
       if (Ctor && Ctor.relationList && opts.with) {
@@ -188,9 +188,9 @@ export class Resource extends BaseResource {
    */
 
   /**
-   * Return a reference to the Collection instance of this Resource.
+   * Return a reference to the Collection instance of this Model.
    *
-   * Will throw an error if a schema has not been defined for this Resource.
+   * Will throw an error if a schema has not been defined for this Model.
    * When the schema is defined, this method is replaced with one that can
    * return the Collection instance.
    *
@@ -198,15 +198,15 @@ export class Resource extends BaseResource {
    * class, but ES6 or ES7 class definitions will need to use .schema(opts) or
    * @schema(opts) to get the schema initialized.
    *
-   * @throws {Error} Schema must already be defined for Resource.
-   * @return {Collection} The Collection instance of this Resource.
+   * @throws {Error} Schema must already be defined for Model.
+   * @return {Collection} The Collection instance of this Model.
    */
   static data () {
     throw new Error(`${this.name}.data(): Did you forget to define a schema?`)
   }
 
   /**
-   * Create a new secondary index in the Collection instance of this Resource.
+   * Create a new secondary index in the Collection instance of this Model.
    *
    * @param {string} name - The name of the new secondary index
    * @param {string[]} keyList - The list of keys to be used to create the index.
@@ -216,22 +216,22 @@ export class Resource extends BaseResource {
   }
 
   /**
-   * Create a new instance of this Resource from the provided properties.
+   * Create a new instance of this Model from the provided properties.
    *
    * @param {Object} props - The initial properties of the new instance.
-   * @return {Resource} The instance.
+   * @return {Model} The instance.
    */
   static createInstance (props) {
     let Ctor = this
-    // Check to make sure "props" is not already an instance of this Resource.
+    // Check to make sure "props" is not already an instance of this Model.
     return props instanceof Ctor ? props : new Ctor(props)
   }
 
   /**
-   * Check whether "instance" is actually an instance of this Resource.
+   * Check whether "instance" is actually an instance of this Model.
    *
-   * @param {Resource} The instance to check.
-   * @return {boolean} Whether "instance" is an instance of this Resource.
+   * @param {Model} The instance to check.
+   * @return {boolean} Whether "instance" is an instance of this Model.
    */
   static is (instance) {
     return instance instanceof this
@@ -239,7 +239,7 @@ export class Resource extends BaseResource {
 
   /**
    * Insert the provided item or items into the Collection instance of this
-   * Resource.
+   * Model.
    *
    * If an item is already in the collection then the provided item will either
    * merge with or replace the existing item based on the value of the
@@ -247,10 +247,10 @@ export class Resource extends BaseResource {
    *
    * The collection's secondary indexes will be updated as each item is visited.
    *
-   * @param {(Object|Object[]|Resource|Resource[])} items - The item or items to insert.
+   * @param {(Object|Object[]|Model|Model[])} items - The item or items to insert.
    * @param {?Object} opts - Optional configuration. Properties:
    *   - {string} onConflict - What to do when an item is already in the Collection instance. May be "merge" or "replace".
-   * @return {(Resource|Resource[])} Whether "instance" is an instance of this Resource.
+   * @return {(Model|Model[])} Whether "instance" is an instance of this Model.
    */
   static inject (items, opts) {
     opts = opts || {}
@@ -346,10 +346,10 @@ export class Resource extends BaseResource {
 
   /**
    * Remove the instance with the given primary key from the Collection instance
-   * of this Resource.
+   * of this Model.
    *
    * @param {(string|number)} id - The primary key of the instance to be removed.
-   * @return {Resource} The removed item, if any.
+   * @return {Model} The removed item, if any.
    */
   static eject (id) {
     const item = this.get(id)
@@ -362,10 +362,10 @@ export class Resource extends BaseResource {
 
   /**
    * Remove the instances selected by "query" from the Collection instance of
-   * this Resource.
+   * this Model.
    *
    * @param {?Object} query - The query used to select instances to remove.
-   * @return {Resource[]} The removed instances, if any.
+   * @return {Model[]} The removed instances, if any.
    */
   static ejectAll (params) {
     const items = this.filter(params)
@@ -377,11 +377,11 @@ export class Resource extends BaseResource {
   }
 
   /**
-   * Return the instance in the Collection instance of this Resource that has
+   * Return the instance in the Collection instance of this Model that has
    * the given primary key, if such an instance can be found.
    *
    * @param {(string|number)} id - Primary key of the instance to retrieve.
-   * @return {?Resource} The instance or undefined.
+   * @return {?Model} The instance or undefined.
    */
   static get (id) {
     const instances = this.data().get(id)
@@ -664,8 +664,8 @@ export class Resource extends BaseResource {
    *   localField: '_post'
    * })
    */
-  static belongsTo (resource, opts) {
-    return belongsTo(resource, opts)(this)
+  static belongsTo (model, opts) {
+    return belongsTo(model, opts)(this)
   }
 
   /**
@@ -675,8 +675,8 @@ export class Resource extends BaseResource {
    *   localField: 'my_posts'
    * })
    */
-  static hasMany (resource, opts) {
-    return hasMany(resource, opts)(this)
+  static hasMany (model, opts) {
+    return hasMany(model, opts)(this)
   }
 
   /**
@@ -686,8 +686,8 @@ export class Resource extends BaseResource {
    *   localField: '_profile'
    * })
    */
-  static hasOne (resource, opts) {
-    return hasOne(resource, opts)(this)
+  static hasOne (model, opts) {
+    return hasOne(model, opts)(this)
   }
 
   static action (name, opts) {
@@ -713,7 +713,7 @@ export class Resource extends BaseResource {
   /**
    * Usage:
    *
-   * var User = JSData.Resource.extend({...}, {...})
+   * var User = JSData.Model.extend({...}, {...})
    */
   static extend (props, classProps) {
     let Child
@@ -786,10 +786,10 @@ configure({
   strategy: 'single',
   upsert: true,
   useFilter: true
-})(Resource)
+})(Model)
 
 utils.Events(
-  Resource.prototype,
+  Model.prototype,
   function () {
     return this._get('events')
   },

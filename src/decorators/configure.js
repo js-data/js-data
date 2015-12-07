@@ -6,7 +6,7 @@ import {copy, forOwn} from '../utils'
  * @configure({
  *   idAttribute: '_id'
  * })
- * class User extends JSData.Resource {...}
+ * class User extends JSData.Model {...}
  */
 export function configure (props, overwrite = true) {
   props = props || {}

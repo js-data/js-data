@@ -1,20 +1,20 @@
-/* global Resource:true */
+/* global Model:true */
 import {assert} from 'chai'
 
 export function init () {
   describe('#create', function () {
     it('should be an instance function', function () {
-      assert.isFunction(Resource.prototype.create)
-      let User = Resource.extend({}, {
+      assert.isFunction(Model.prototype.create)
+      let User = Model.extend({}, {
         idAttribute: '_id',
         name: 'user'
       })
-      class User2 extends Resource {}
+      class User2 extends Model {}
       class User3 extends User2 {}
       assert.isFunction(User.prototype.create)
       assert.isFunction(User2.prototype.create)
-      assert.isTrue(Resource.prototype.create === User.prototype.create)
-      assert.isTrue(Resource.prototype.create === User2.prototype.create)
+      assert.isTrue(Model.prototype.create === User.prototype.create)
+      assert.isTrue(Model.prototype.create === User2.prototype.create)
       assert.isTrue(User.prototype.create === User2.prototype.create)
       assert.isTrue(User2.prototype.create === User3.prototype.create)
     })
@@ -22,7 +22,7 @@ export function init () {
       const props = { name: 'John' }
       const opts = {}
       let createCalled = false
-      class User extends Resource {}
+      class User extends Model {}
       User.setSchema({ id: {} })
       User.configure({
         autoInject: false

@@ -1,4 +1,4 @@
-/* global JSData:true, Resource:true, configure:true */
+/* global JSData:true, Model:true, configure:true */
 import {assert} from 'chai'
 import * as schema from './schema.test'
 

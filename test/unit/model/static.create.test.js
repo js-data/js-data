@@ -1,40 +1,40 @@
-/* global Resource:true */
+/* global Model:true */
 import {assert} from 'chai'
 
 export function init () {
   describe('static create', function () {
     it('should be a static function', function () {
-      assert.isFunction(Resource.create)
-      let User = Resource.extend({}, {
+      assert.isFunction(Model.create)
+      let User = Model.extend({}, {
         idAttribute: '_id',
         name: 'user'
       })
-      class User2 extends Resource {}
+      class User2 extends Model {}
       class User3 extends User2 {}
       assert.isFunction(User.create)
       assert.isFunction(User2.create)
-      assert.isTrue(Resource.create === User.create)
-      assert.isTrue(Resource.create === User2.create)
+      assert.isTrue(Model.create === User.create)
+      assert.isTrue(Model.create === User2.create)
       assert.isTrue(User.create === User2.create)
       assert.isTrue(User2.create === User3.create)
     })
     it('should create', async function () {
       const props = { name: 'John' }
       let createCalled = false
-      class User extends Resource {}
+      class User extends Model {}
       User.setSchema({ id: {} })
       User.configure({
         defaultAdapter: 'mock',
         autoInject: false
       })
       User.adapters.mock = {
-        create (resourceConfig, _props, Opts) {
+        create (modelConfig, _props, Opts) {
           createCalled = true
           return new Promise(function (resolve, reject) {
-            assert.isTrue(resourceConfig === User, 'should pass in the Resource')
+            assert.isTrue(modelConfig === User, 'should pass in the Model')
             assert.deepEqual(_props, props, 'should pass in the props')
             assert.equal(Opts.autoInject, false, 'Opts are provided')
-            _props[resourceConfig.idAttribute] = new Date().getTime()
+            _props[modelConfig.idAttribute] = new Date().getTime()
             resolve(_props)
           })
         }
@@ -48,20 +48,20 @@ export function init () {
     it('should create and auto-inject', async function () {
       const props = { name: 'John' }
       let createCalled = false
-      class User extends Resource {}
+      class User extends Model {}
       User.setSchema({ id: {} })
       User.configure({
         autoInject: true,
         defaultAdapter: 'mock'
       })
       User.adapters.mock = {
-        create (resourceConfig, _props, Opts) {
+        create (modelConfig, _props, Opts) {
           createCalled = true
           return new Promise(function (resolve, reject) {
-            assert.isTrue(resourceConfig === User, 'should pass in the Resource')
+            assert.isTrue(modelConfig === User, 'should pass in the Model')
             assert.deepEqual(_props, props, 'should pass in the props')
             assert.equal(Opts.autoInject, true, 'Opts are provided')
-            _props[resourceConfig.idAttribute] = new Date().getTime()
+            _props[modelConfig.idAttribute] = new Date().getTime()
             resolve(_props)
           })
         }
@@ -75,7 +75,7 @@ export function init () {
     it('should upsert', async function () {
       const props = { name: 'John', id: 1 }
       let createCalled = false
-      class User extends Resource {}
+      class User extends Model {}
       User.setSchema({ id: {} })
       User.configure({
         autoInject: true,
@@ -90,7 +90,7 @@ export function init () {
     it('should return raw', async function () {
       const props = { name: 'John' }
       let createCalled = false
-      class User extends Resource {}
+      class User extends Model {}
       User.setSchema({ id: {} })
       User.configure({
         autoInject: true,
@@ -98,13 +98,13 @@ export function init () {
         defaultAdapter: 'mock'
       })
       User.adapters.mock = {
-        create (resourceConfig, _props, Opts) {
+        create (modelConfig, _props, Opts) {
           createCalled = true
           return new Promise(function (resolve, reject) {
-            assert.isTrue(resourceConfig === User, 'should pass in the Resource')
+            assert.isTrue(modelConfig === User, 'should pass in the Model')
             assert.deepEqual(_props, props, 'should pass in the props')
             assert.equal(Opts.raw, true, 'Opts are provided')
-            _props[resourceConfig.idAttribute] = new Date().getTime()
+            _props[modelConfig.idAttribute] = new Date().getTime()
             resolve({
               data: _props,
               created: 1

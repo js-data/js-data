@@ -1,10 +1,10 @@
-/* global Resource:true */
+/* global Model:true */
 import {assert} from 'chai'
 
 export function init () {
   describe('schema', function () {
     it('should define properties on prototype', function (done) {
-      class User extends Resource {}
+      class User extends Model {}
 
       assert.throws(function () {
         User.data()
@@ -149,7 +149,7 @@ export function init () {
       }, 5)
     })
     it('should validate based on json-schema.org rules', function () {
-      class User extends Resource {}
+      class User extends Model {}
 
       User.setSchema({
         id: {},

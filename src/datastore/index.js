@@ -1,7 +1,7 @@
 /* jshint eqeqeq:false */
 import {configure} from '../decorators'
 import {forOwn, isFunction} from '../utils'
-import {Resource} from '../resource'
+import {Model} from '../model'
 
 // function lifecycleNoopCb (resource, attrs, cb) {
 //   cb(null, attrs)
@@ -199,18 +199,20 @@ configure({
     return ejected
   },
 
-  defineResource (opts) {
-    const Child = Resource.extend(opts.methods || {}, opts)
+  defineModel (opts) {
+    const Child = Model.extend(opts.methods || {}, opts)
     this.definitions[Child.name] = Child
     return Child
   }
 })(DS.prototype)
 
-forOwn(Resource, function (value, key) {
+DS.prototype.defineResource = DS.prototype.defineModel
+
+forOwn(Model, function (value, key) {
   if (isFunction(value)) {
     DS.prototype[key] = function (name, ...args) {
       if (!this.definitions[name]) {
-        throw new Error(`${name} is not a registered Resource!`)
+        throw new Error(`${name} is not a registered Model!`)
       }
       return this.definitions[name][key](...args)
     }

@@ -1,11 +1,11 @@
-/* global store:true, JSData:true, Resource:true */
+/* global store:true, JSData:true, Model:true */
 import {assert} from 'chai'
 
 export function init () {
   describe('static createInstance', function () {
     it('should create an instance', function () {
       const store = new JSData.DS()
-      class Person extends Resource {
+      class Person extends Model {
         say () {
           return 'hi'
         }
@@ -14,7 +14,7 @@ export function init () {
         }
       }
 
-      const Dog = Resource.extend({
+      const Dog = Model.extend({
         say: function () {
           return 'woof'
         }
@@ -22,7 +22,7 @@ export function init () {
         name: 'Dog'
       })
 
-      const Cat = store.defineResource({
+      const Cat = store.defineModel({
         name: 'Cat',
         methods: {
           say: function () {
