@@ -185,7 +185,8 @@ import {Model} from '../model'
 // dsPrototype.errors = DSErrors
 // dsPrototype.utils = DSUtils
 
-export function DS (opts = {}) {
+export function DS (opts) {
+  opts || (opts = {})
   this.definitions = {}
 }
 

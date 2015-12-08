@@ -76,29 +76,75 @@ export function init () {
       /**
        * ES5 ways of creating a new Model
        */
-      let User = Model.extend({}, {
+      const User = Model.extend({
+        initialize () {
+          this.foo = 'foo'
+        }
+      }, {
+        csp: true,
         idAttribute: '_id',
         name: 'user'
       })
+      const user = new User({ id: 1 })
+      assert.equal(user.foo, 'foo', 'initialize should have been called')
+      assert.isTrue(user instanceof User)
+      assert.isTrue(User.is(user))
+      assert.equal(User.name, '')
 
-      // Not yet implemented in v3
-      let User2 = store.defineModel({
+      const Post = Model.extend({
+        initialize () {
+          this.foo = 'foo'
+        }
+      }, {
         idAttribute: '_id',
-        name: 'user'
+        name: 'post'
       })
+      const post = new Post({ id: 1 })
+      assert.equal(post.foo, 'foo', 'initialize should have been called')
+      assert.isTrue(post instanceof Post)
+      assert.isTrue(Post.is(post))
+      assert.equal(Post.name, 'Post')
+
+      const Comment = store.defineModel({
+        idAttribute: '_id',
+        name: 'comment'
+      })
+      const comment = new Comment({ id: 1 })
+      assert.isTrue(comment instanceof Comment)
+      assert.isTrue(Comment.is(comment))
+      assert.equal(Comment.name, 'Comment')
+
+      const Label = Model.extend({
+        constructor: function MyLabel () {
+          Object.getPrototypeOf(this.constructor).apply(this, arguments)
+        }
+      })
+      const label = new Label({ id: 1 })
+      assert.isTrue(label instanceof Label)
+      assert.isTrue(Label.is(label))
+      assert.equal(Label.name, 'MyLabel')
+
 
       /**
        * ES6 ways of creating a new Model
        */
-      class User3 extends Model {}
+      class Profile extends Model {}
       configure({
         idAttribute: '_id'
-      })(User3)
+      })(Profile)
+      const profile = new Profile({ id: 1 })
+      assert.isTrue(profile instanceof Profile)
+      assert.isTrue(Profile.is(profile))
+      assert.equal(Profile.name, 'Profile')
 
-      class User4 extends Model {}
-      User4.configure({
+      class Type extends Model {}
+      Type.configure({
         idAttribute: '_id'
       })
+      const type = new Type({ id: 1 })
+      assert.isTrue(type instanceof Type)
+      assert.isTrue(Type.is(type))
+      assert.equal(Type.name, 'Type')
 
      /**
        * ES7 way of creating a new Model
@@ -108,22 +154,6 @@ export function init () {
       //   idAttribute: '_id'
       // })
       // class User5 extends Model {}
-
-      check(User)
-      // check(User2)
-      check(User3)
-      check(User4)
-      // check(User5)
-
-      function check (Class) {
-        for (var key in defaults) {
-          if (key === 'idAttribute') {
-            assert.equal(Class.idAttribute, '_id', 'should be "_id"')
-          } else {
-            assert.equal(Class[key], defaults[key], key + ' should be ' + defaults[key])
-          }
-        }
-      }
     })
     it('should allow schema definition with basic indexes', function () {
       class User extends Model {}

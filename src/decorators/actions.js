@@ -55,7 +55,8 @@ export function action (name, opts) {
   }
 }
 
-export function actions (opts = {}) {
+export function actions (opts) {
+  opts || (opts = {})
   return function (target) {
     forOwn(target, function (value, key) {
       action(key, value)(target)
