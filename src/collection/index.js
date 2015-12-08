@@ -85,17 +85,20 @@ configure({
     })
   },
 
-  insertRecord (record, opts = {}) {
+  insertRecord (record, opts) {
+    opts || (opts = {})
     const index = opts.index ? this.indexes[opts.index] : this.index
     index.insertRecord(record)
   },
 
-  updateRecord (record, opts = {}) {
+  updateRecord (record, opts) {
+    opts || (opts = {})
     const index = opts.index ? this.indexes[opts.index] : this.index
     index.updateRecord(record)
   },
 
-  removeRecord (record, opts = {}) {
+  removeRecord (record, opts) {
+    opts || (opts = {})
     const index = opts.index ? this.indexes[opts.index] : this.index
     index.removeRecord(record)
   }

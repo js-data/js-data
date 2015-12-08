@@ -119,7 +119,8 @@ configure({
     return this.data
   },
 
-  between (leftKeys, rightKeys, opts = {}) {
+  between (leftKeys, rightKeys, opts) {
+    opts || (opts = {})
     const collection = this.collection
     const index = opts.index ? collection.indexes[opts.index] : collection.index
     if (this.data) {
@@ -129,7 +130,8 @@ configure({
     return this
   },
 
-  get (keyList = [], opts = {}) {
+  get (keyList = [], opts) {
+    opts || (opts = {})
     if (this.data) {
       throw new Error('Cannot access index after first operation!')
     }
@@ -167,7 +169,8 @@ configure({
     return this
   },
 
-  filter (opts = {}, thisArg) {
+  filter (opts, thisArg) {
+    opts || (opts = {})
     this.getData()
     if (isObject(opts)) {
       let where = {}

@@ -128,7 +128,7 @@ export class Model extends BaseModel {
    *   - {boolean=true} silent - Whether to trigger change events.
    */
   ['set'] (key, value, opts) {
-    opts = opts || {}
+    opts || (opts = {})
     // TODO: implement "silent"
     return utils.set(this, key, value)
   }
@@ -141,7 +141,7 @@ export class Model extends BaseModel {
    * @return {Object} Plain object representation of instance.
    */
   toJSON (opts) {
-    opts = opts || {}
+    opts || (opts = {})
     const Ctor = this.constructor
     let json = this
     if (this instanceof Model) {
@@ -253,7 +253,7 @@ export class Model extends BaseModel {
    * @return {(Model|Model[])} Whether "instance" is an instance of this Model.
    */
   static inject (items, opts) {
-    opts = opts || {}
+    opts || (opts = {})
     const _this = this
     let singular = false
     const collection = _this.data()
@@ -439,7 +439,7 @@ export class Model extends BaseModel {
    * @return {string} The name of the adapter.
    */
   static getAdapterName (opts) {
-    opts = opts || {}
+    opts || (opts = {})
     if (utils.isString(opts)) {
       opts = { adapter: opts }
     }
@@ -450,8 +450,8 @@ export class Model extends BaseModel {
   static create (props, opts) {
     let adapterName
 
-    props = props || {}
-    opts = opts || {}
+    props || (props = {})
+    opts || (opts = {})
     utils._(this, opts)
     opts.op = 'create'
 
@@ -475,14 +475,14 @@ export class Model extends BaseModel {
   static createMany (items, opts) {
     let adapterName
 
-    items = items || []
-    opts = opts || {}
+    items || (items = [])
+    opts || (opts = {})
     utils._(this, opts)
     opts.op = 'createMany'
 
     if (opts.upsert) {
       let hasId = true
-      items.forEach(function (item) {
+      items.forEach(item => {
         hasId = hasId && utils.get(item, this.idAttribute)
       })
       if (hasId) {
@@ -507,7 +507,7 @@ export class Model extends BaseModel {
   static find (id, opts) {
     let adapterName
 
-    opts = opts || {}
+    opts || (opts = {})
     utils._(this, opts)
     opts.op = 'find'
 
@@ -528,8 +528,8 @@ export class Model extends BaseModel {
   static findAll (query, opts) {
     let adapterName
 
-    query = query || {}
-    opts = opts || {}
+    query || (query = {})
+    opts || (opts = {})
     utils._(this, opts)
     opts.op = 'findAll'
 
@@ -550,8 +550,8 @@ export class Model extends BaseModel {
   static update (id, props, opts) {
     let adapterName
 
-    props = props || {}
-    opts = opts || {}
+    props || (props = {})
+    opts || (opts = {})
     utils._(this, opts)
     opts.op = 'update'
 
@@ -572,8 +572,8 @@ export class Model extends BaseModel {
   static updateMany (items, opts) {
     let adapterName
 
-    items = items || []
-    opts = opts || {}
+    items || (items = [])
+    opts || (opts = {})
     utils._(this, opts)
     opts.op = 'updateMany'
 
@@ -594,9 +594,9 @@ export class Model extends BaseModel {
   static updateAll (query, props, opts) {
     let adapterName
 
-    query = query || {}
-    props = props || {}
-    opts = opts || {}
+    query || (query = {})
+    props || (props = {})
+    opts || (opts = {})
     utils._(this, opts)
     opts.op = 'updateAll'
 
@@ -617,7 +617,7 @@ export class Model extends BaseModel {
   static destroy (id, opts) {
     let adapterName
 
-    opts = opts || {}
+    opts || (opts = {})
     utils._(this, opts)
     opts.op = 'destroy'
 
@@ -627,8 +627,21 @@ export class Model extends BaseModel {
         return this.getAdapter(adapterName)
           .destroy(this, id, opts)
       })
-      .then(() => this.afterDestroy(id, opts))
-      .then(() => this.eject(id, opts))
+      .then(data => {
+        return Promise.resolve(this.afterDestroy(id, opts))
+          .then(() => {
+            if (opts.raw) {
+              data.adapter = adapterName
+              if (opts.autoEject) {
+                data.data = this.eject(id, opts)
+              }
+              return data
+            } else if (opts.autoEject) {
+              data = this.eject(id, opts)
+            }
+            return data
+          })
+      })
   }
   static afterDestroy () {}
 
@@ -636,8 +649,8 @@ export class Model extends BaseModel {
   static destroyAll (query, opts) {
     let adapterName
 
-    query = query || {}
-    opts = opts || {}
+    query || (query = {})
+    opts || (opts = {})
     utils._(this, opts)
     opts.op = 'destroyAll'
 
@@ -647,8 +660,21 @@ export class Model extends BaseModel {
         return this.getAdapter(adapterName)
           .destroyAll(this, query, opts)
       })
-      .then(() => this.afterDestroyAll(query, opts))
-      .then(() => this.ejectAll(query, opts))
+      .then(data => {
+        return Promise.resolve(this.afterDestroyAll(query, opts))
+          .then(() => {
+            if (opts.raw) {
+              data.adapter = adapterName
+              if (opts.autoEject) {
+                data.data = this.ejectAll(query, opts)
+              }
+              return data
+            } else if (opts.autoEject) {
+              data = this.ejectAll(query, opts)
+            }
+            return data
+          })
+      })
   }
   static afterDestroyAll () {}
 
@@ -721,21 +747,20 @@ export class Model extends BaseModel {
     props = props || {}
     classProps = classProps || {}
 
-    if (!classProps.name) {
-      throw new TypeError(`name: Expected string, found ${typeof classProps.name}!`)
-    }
     const _schema = classProps.schema || {
       [classProps.idAttribute]: {}
     }
     const initialize = props.initialize
     delete props.initialize
     _schema[classProps.idAttribute] = _schema[classProps.idAttribute] || {}
-    classProps.shortname = classProps.shortname || utils.camelCase(classProps.name)
 
     if (props.hasOwnProperty('constructor')) {
       Child = props.constructor
       delete props.constructor
     } else {
+      if (!classProps.name) {
+        throw new TypeError(`name: Expected string, found ${typeof classProps.name}!`)
+      }
       if (classProps.csp) {
         Child = function (...args) {
           __callCheck__(this, Child)
@@ -747,7 +772,6 @@ export class Model extends BaseModel {
         }
       } else {
         const name = utils.pascalCase(classProps.name)
-        delete classProps.name
         const func = `return function ${name}() {
                         __callCheck__(this, ${name})
                         var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(${name}).apply(this, arguments));
@@ -759,6 +783,9 @@ export class Model extends BaseModel {
         Child = new Function('__callCheck__', '__possibleConstructorReturn__', 'Parent', 'initialize', func)(__callCheck__, __possibleConstructorReturn__, Parent, initialize) // eslint-disable-line
       }
     }
+
+    classProps.shortname = classProps.shortname || utils.camelCase(Child.name || classProps.name)
+    delete classProps.name
 
     __inherits__(Child, Parent)
 
@@ -773,6 +800,7 @@ export class Model extends BaseModel {
 
 configure({
   adapters: {},
+  autoEject: true,
   autoInject: isBrowser,
   bypassCache: false,
   csp: false,

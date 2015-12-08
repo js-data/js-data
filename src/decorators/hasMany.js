@@ -11,7 +11,8 @@ import {camelCase, isArray, get, set} from '../utils'
  * and "localField" is set to "comments", "user.comments" will be a reference to
  * the array of comments.
  */
-function applyHasMany (Model, Relation, opts = {}) {
+function applyHasMany (Model, Relation, opts) {
+  opts || (opts = {})
   // Choose field where the relation will be attached
   const localField = opts.localField || `${camelCase(Relation.name)}Collection`
   // Choose field on related instances that holds the primary key of instances

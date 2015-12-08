@@ -11,7 +11,8 @@ import {get, set} from '../utils'
  * User and "localField" is set to "user", "comment.user" will be a reference to
  * the user.
  */
-function applyBelongsTo (Model, Relation, opts = {}) {
+function applyBelongsTo (Model, Relation, opts) {
+  opts || (opts = {})
   // Choose field where the relation will be attached
   const localField = opts.localField = opts.localField || Relation.name.toLowerCase()
   // Choose field that holds the primary key of the relation

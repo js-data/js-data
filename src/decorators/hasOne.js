@@ -11,7 +11,8 @@ import {camelCase, get, set} from '../utils'
  * Profile and "localField" is set to "profile", "user.profile" will be a
  * reference to the profile.
  */
-function applyHasOne (Model, Relation, opts = {}) {
+function applyHasOne (Model, Relation, opts) {
+  opts || (opts = {})
   // Choose field where the relation will be attached
   const localField = opts.localField = opts.localField || camelCase(Relation.name)
   // Choose field that holds the primary key of the relation

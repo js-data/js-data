@@ -276,21 +276,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	      index.removeRecord(record);
 	    });
 	  },
-	  insertRecord: function insertRecord(record) {
-	    var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-	
+	  insertRecord: function insertRecord(record, opts) {
+	    opts || (opts = {});
 	    var index = opts.index ? this.indexes[opts.index] : this.index;
 	    index.insertRecord(record);
 	  },
-	  updateRecord: function updateRecord(record) {
-	    var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-	
+	  updateRecord: function updateRecord(record, opts) {
+	    opts || (opts = {});
 	    var index = opts.index ? this.indexes[opts.index] : this.index;
 	    index.updateRecord(record);
 	  },
-	  removeRecord: function removeRecord(record) {
-	    var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-	
+	  removeRecord: function removeRecord(record, opts) {
+	    opts || (opts = {});
 	    var index = opts.index ? this.indexes[opts.index] : this.index;
 	    index.removeRecord(record);
 	  }
@@ -421,9 +418,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    return this.data;
 	  },
-	  between: function between(leftKeys, rightKeys) {
-	    var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-	
+	  between: function between(leftKeys, rightKeys, opts) {
+	    opts || (opts = {});
 	    var collection = this.collection;
 	    var index = opts.index ? collection.indexes[opts.index] : collection.index;
 	    if (this.data) {
@@ -434,8 +430,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  get: function get() {
 	    var keyList = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
-	    var opts = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	    var opts = arguments[1];
 	
+	    opts || (opts = {});
 	    if (this.data) {
 	      throw new Error('Cannot access index after first operation!');
 	    }
@@ -478,12 +475,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	    return this;
 	  },
-	  filter: function filter() {
+	  filter: function filter(opts, thisArg) {
 	    var _this2 = this;
 	
-	    var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-	    var thisArg = arguments[1];
-	
+	    opts || (opts = {});
 	    this.getData();
 	    if ((0, _utils.isObject)(opts)) {
 	      (function () {
@@ -1201,9 +1196,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	}
 	
-	function actions() {
-	  var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-	
+	function actions(opts) {
+	  opts || (opts = {});
 	  return function (target) {
 	    (0, _utils.forOwn)(target, function (value, key) {
 	      action(key, value)(target);
@@ -1271,9 +1265,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * User and "localField" is set to "user", "comment.user" will be a reference to
 	 * the user.
 	 */
-	function applyBelongsTo(Model, Relation) {
-	  var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-	
+	function applyBelongsTo(Model, Relation, opts) {
+	  opts || (opts = {});
 	  // Choose field where the relation will be attached
 	  var localField = opts.localField = opts.localField || Relation.name.toLowerCase();
 	  // Choose field that holds the primary key of the relation
@@ -1424,9 +1417,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * and "localField" is set to "comments", "user.comments" will be a reference to
 	 * the array of comments.
 	 */
-	function applyHasMany(Model, Relation) {
-	  var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-	
+	function applyHasMany(Model, Relation, opts) {
+	  opts || (opts = {});
 	  // Choose field where the relation will be attached
 	  var localField = opts.localField || (0, _utils.camelCase)(Relation.name) + 'Collection';
 	  // Choose field on related instances that holds the primary key of instances
@@ -1629,9 +1621,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Profile and "localField" is set to "profile", "user.profile" will be a
 	 * reference to the profile.
 	 */
-	function applyHasOne(Model, Relation) {
-	  var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-	
+	function applyHasOne(Model, Relation, opts) {
+	  opts || (opts = {});
 	  // Choose field where the relation will be attached
 	  var localField = opts.localField = opts.localField || (0, _utils.camelCase)(Relation.name);
 	  // Choose field that holds the primary key of the relation
@@ -1774,9 +1765,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return name + ': Schemas are not inheritable, did you forget to define a schema?';
 	}
 	
-	function initialize() {
-	  var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-	
+	function initialize(opts) {
+	  opts || (opts = {});
 	  return function (target) {
 	    var collection = new _collection.Collection([], target.idAttribute);
 	    target.data = function () {
@@ -2650,9 +2640,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	// dsPrototype.errors = DSErrors
 	// dsPrototype.utils = DSUtils
 	
-	function DS() {
-	  var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-	
+	function DS(opts) {
+	  opts || (opts = {});
 	  this.definitions = {};
 	} /* jshint eqeqeq:false */
 	
@@ -2871,7 +2860,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'set',
 	    value: function set(key, value, opts) {
-	      opts = opts || {};
+	      opts || (opts = {});
 	      // TODO: implement "silent"
 	      return utils.set(this, key, value);
 	    }
@@ -2889,7 +2878,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function toJSON(opts) {
 	      var _this3 = this;
 	
-	      opts = opts || {};
+	      opts || (opts = {});
 	      var Ctor = this.constructor;
 	      var json = this;
 	      if (this instanceof Model) {
@@ -3020,7 +3009,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'inject',
 	    value: function inject(items, opts) {
-	      opts = opts || {};
+	      opts || (opts = {});
 	      var _this = this;
 	      var singular = false;
 	      var collection = _this.data();
@@ -3237,7 +3226,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'getAdapterName',
 	    value: function getAdapterName(opts) {
-	      opts = opts || {};
+	      opts || (opts = {});
 	      if (utils.isString(opts)) {
 	        opts = { adapter: opts };
 	      }
@@ -3253,8 +3242,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	      var adapterName = undefined;
 	
-	      props = props || {};
-	      opts = opts || {};
+	      props || (props = {});
+	      opts || (opts = {});
 	      utils._(this, opts);
 	      opts.op = 'create';
 	
@@ -3283,8 +3272,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	      var adapterName = undefined;
 	
-	      items = items || [];
-	      opts = opts || {};
+	      items || (items = []);
+	      opts || (opts = {});
 	      utils._(this, opts);
 	      opts.op = 'createMany';
 	
@@ -3292,7 +3281,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var _ret2 = (function () {
 	          var hasId = true;
 	          items.forEach(function (item) {
-	            hasId = hasId && utils.get(item, this.idAttribute);
+	            hasId = hasId && utils.get(item, _this5.idAttribute);
 	          });
 	          if (hasId) {
 	            return {
@@ -3328,7 +3317,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	      var adapterName = undefined;
 	
-	      opts = opts || {};
+	      opts || (opts = {});
 	      utils._(this, opts);
 	      opts.op = 'find';
 	
@@ -3354,8 +3343,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	      var adapterName = undefined;
 	
-	      query = query || {};
-	      opts = opts || {};
+	      query || (query = {});
+	      opts || (opts = {});
 	      utils._(this, opts);
 	      opts.op = 'findAll';
 	
@@ -3381,8 +3370,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	      var adapterName = undefined;
 	
-	      props = props || {};
-	      opts = opts || {};
+	      props || (props = {});
+	      opts || (opts = {});
 	      utils._(this, opts);
 	      opts.op = 'update';
 	
@@ -3408,8 +3397,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	      var adapterName = undefined;
 	
-	      items = items || [];
-	      opts = opts || {};
+	      items || (items = []);
+	      opts || (opts = {});
 	      utils._(this, opts);
 	      opts.op = 'updateMany';
 	
@@ -3437,9 +3426,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	      var adapterName = undefined;
 	
-	      query = query || {};
-	      props = props || {};
-	      opts = opts || {};
+	      query || (query = {});
+	      props || (props = {});
+	      opts || (opts = {});
 	      utils._(this, opts);
 	      opts.op = 'updateAll';
 	
@@ -3465,17 +3454,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	      var adapterName = undefined;
 	
-	      opts = opts || {};
+	      opts || (opts = {});
 	      utils._(this, opts);
 	      opts.op = 'destroy';
 	
 	      return Promise.resolve(this.beforeDestroy(id, opts)).then(function () {
 	        adapterName = _this11.getAdapterName(opts);
 	        return _this11.getAdapter(adapterName).destroy(_this11, id, opts);
-	      }).then(function () {
-	        return _this11.afterDestroy(id, opts);
-	      }).then(function () {
-	        return _this11.eject(id, opts);
+	      }).then(function (data) {
+	        return Promise.resolve(_this11.afterDestroy(id, opts)).then(function () {
+	          if (opts.raw) {
+	            data.adapter = adapterName;
+	            if (opts.autoEject) {
+	              data.data = _this11.eject(id, opts);
+	            }
+	            return data;
+	          } else if (opts.autoEject) {
+	            data = _this11.eject(id, opts);
+	          }
+	          return data;
+	        });
 	      });
 	    }
 	  }, {
@@ -3491,18 +3489,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	      var adapterName = undefined;
 	
-	      query = query || {};
-	      opts = opts || {};
+	      query || (query = {});
+	      opts || (opts = {});
 	      utils._(this, opts);
 	      opts.op = 'destroyAll';
 	
 	      return Promise.resolve(this.beforeDestroyAll(query, opts)).then(function () {
 	        adapterName = _this12.getAdapterName(opts);
 	        return _this12.getAdapter(adapterName).destroyAll(_this12, query, opts);
-	      }).then(function () {
-	        return _this12.afterDestroyAll(query, opts);
-	      }).then(function () {
-	        return _this12.ejectAll(query, opts);
+	      }).then(function (data) {
+	        return Promise.resolve(_this12.afterDestroyAll(query, opts)).then(function () {
+	          if (opts.raw) {
+	            data.adapter = adapterName;
+	            if (opts.autoEject) {
+	              data.data = _this12.ejectAll(query, opts);
+	            }
+	            return data;
+	          } else if (opts.autoEject) {
+	            data = _this12.ejectAll(query, opts);
+	          }
+	          return data;
+	        });
 	      });
 	    }
 	  }, {
@@ -3595,19 +3602,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	      props = props || {};
 	      classProps = classProps || {};
 	
-	      if (!classProps.name) {
-	        throw new TypeError('name: Expected string, found ' + _typeof(classProps.name) + '!');
-	      }
 	      var _schema = classProps.schema || _defineProperty({}, classProps.idAttribute, {});
 	      var initialize = props.initialize;
 	      delete props.initialize;
 	      _schema[classProps.idAttribute] = _schema[classProps.idAttribute] || {};
-	      classProps.shortname = classProps.shortname || utils.camelCase(classProps.name);
 	
 	      if (props.hasOwnProperty('constructor')) {
 	        Child = props.constructor;
 	        delete props.constructor;
 	      } else {
+	        if (!classProps.name) {
+	          throw new TypeError('name: Expected string, found ' + _typeof(classProps.name) + '!');
+	        }
 	        if (classProps.csp) {
 	          Child = function () {
 	            _classCallCheck(this, Child);
@@ -3624,11 +3630,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	          };
 	        } else {
 	          var name = utils.pascalCase(classProps.name);
-	          delete classProps.name;
 	          var func = 'return function ' + name + '() {\n                        _classCallCheck(this, ' + name + ')\n                        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(' + name + ').apply(this, arguments));\n                        if (initialize) {\n                          initialize.apply(this, arguments)\n                        }\n                        return _this\n                      }';
 	          Child = new Function('_classCallCheck', '_possibleConstructorReturn', 'Parent', 'initialize', func)(_classCallCheck, _possibleConstructorReturn, Parent, initialize); // eslint-disable-line
 	        }
 	      }
+	
+	      classProps.shortname = classProps.shortname || utils.camelCase(Child.name || classProps.name);
+	      delete classProps.name;
 	
 	      _inherits(Child, Parent);
 	
@@ -3646,6 +3654,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	(0, _decorators.configure)({
 	  adapters: {},
+	  autoEject: true,
 	  autoInject: isBrowser,
 	  bypassCache: false,
 	  csp: false,
