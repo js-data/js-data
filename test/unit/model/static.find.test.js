@@ -28,7 +28,7 @@ export function init () {
         defaultAdapter: 'mock',
         autoInject: false
       })
-      User.adapters.mock = {
+      User.use('mock', {
         find (modelConfig, _id, Opts) {
           findCalled = true
           return new Promise(function (resolve, reject) {
@@ -38,7 +38,7 @@ export function init () {
             resolve(props)
           })
         }
-      }
+      })
       const user = await User.find(id, props)
       assert.isTrue(findCalled, 'Adapter#find should have been called')
       assert.deepEqual(user, props, 'user should have been found')
@@ -55,7 +55,7 @@ export function init () {
         autoInject: true,
         defaultAdapter: 'mock'
       })
-      User.adapters.mock = {
+      User.use('mock', {
         find (modelConfig, _id, Opts) {
           findCalled = true
           return new Promise(function (resolve, reject) {
@@ -65,7 +65,7 @@ export function init () {
             resolve(props)
           })
         }
-      }
+      })
       let user = await User.find(id, props)
       assert.isTrue(findCalled, 'Adapter#find should have been called')
       assert.deepEqual(user, props, 'user should have been found')
@@ -83,7 +83,7 @@ export function init () {
         raw: true,
         defaultAdapter: 'mock'
       })
-      User.adapters.mock = {
+      User.use('mock', {
         find (modelConfig, _id, Opts) {
           findCalled = true
           return new Promise(function (resolve, reject) {
@@ -96,7 +96,7 @@ export function init () {
             })
           })
         }
-      }
+      })
       let data = await User.find(id, props)
       assert.isTrue(findCalled, 'Adapter#find should have been called')
       assert.deepEqual(data.data, props, 'user should have been found')
