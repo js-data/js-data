@@ -87,7 +87,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_ret === 'continue') continue;
 	}
 	
-	var _datastore = __webpack_require__(15);
+	var _datastore = __webpack_require__(16);
 	
 	var _loop2 = function _loop2(_key7) {
 	  if (_key7 === "default") return 'continue';
@@ -123,7 +123,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_ret3 === 'continue') continue;
 	}
 	
-	var _model = __webpack_require__(16);
+	var _model = __webpack_require__(17);
 	
 	var _loop4 = function _loop4(_key9) {
 	  if (_key9 === "default") return 'continue';
@@ -193,7 +193,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _decorators = __webpack_require__(4);
 	
-	var _mindex = __webpack_require__(13);
+	var _mindex = __webpack_require__(14);
 	
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 	
@@ -996,128 +996,146 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _actions = __webpack_require__(5);
 	
-	var _loop = function _loop(_key8) {
-	  if (_key8 === "default") return 'continue';
-	  Object.defineProperty(exports, _key8, {
+	var _loop = function _loop(_key9) {
+	  if (_key9 === "default") return 'continue';
+	  Object.defineProperty(exports, _key9, {
 	    enumerable: true,
 	    get: function get() {
-	      return _actions[_key8];
+	      return _actions[_key9];
 	    }
 	  });
 	};
 	
-	for (var _key8 in _actions) {
-	  var _ret = _loop(_key8);
+	for (var _key9 in _actions) {
+	  var _ret = _loop(_key9);
 	
 	  if (_ret === 'continue') continue;
 	}
 	
 	var _belongsTo = __webpack_require__(7);
 	
-	var _loop2 = function _loop2(_key9) {
-	  if (_key9 === "default") return 'continue';
-	  Object.defineProperty(exports, _key9, {
+	var _loop2 = function _loop2(_key10) {
+	  if (_key10 === "default") return 'continue';
+	  Object.defineProperty(exports, _key10, {
 	    enumerable: true,
 	    get: function get() {
-	      return _belongsTo[_key9];
+	      return _belongsTo[_key10];
 	    }
 	  });
 	};
 	
-	for (var _key9 in _belongsTo) {
-	  var _ret2 = _loop2(_key9);
+	for (var _key10 in _belongsTo) {
+	  var _ret2 = _loop2(_key10);
 	
 	  if (_ret2 === 'continue') continue;
 	}
 	
 	var _configure = __webpack_require__(6);
 	
-	var _loop3 = function _loop3(_key10) {
-	  if (_key10 === "default") return 'continue';
-	  Object.defineProperty(exports, _key10, {
+	var _loop3 = function _loop3(_key11) {
+	  if (_key11 === "default") return 'continue';
+	  Object.defineProperty(exports, _key11, {
 	    enumerable: true,
 	    get: function get() {
-	      return _configure[_key10];
+	      return _configure[_key11];
 	    }
 	  });
 	};
 	
-	for (var _key10 in _configure) {
-	  var _ret3 = _loop3(_key10);
+	for (var _key11 in _configure) {
+	  var _ret3 = _loop3(_key11);
 	
 	  if (_ret3 === 'continue') continue;
 	}
 	
 	var _hasMany = __webpack_require__(8);
 	
-	var _loop4 = function _loop4(_key11) {
-	  if (_key11 === "default") return 'continue';
-	  Object.defineProperty(exports, _key11, {
+	var _loop4 = function _loop4(_key12) {
+	  if (_key12 === "default") return 'continue';
+	  Object.defineProperty(exports, _key12, {
 	    enumerable: true,
 	    get: function get() {
-	      return _hasMany[_key11];
+	      return _hasMany[_key12];
 	    }
 	  });
 	};
 	
-	for (var _key11 in _hasMany) {
-	  var _ret4 = _loop4(_key11);
+	for (var _key12 in _hasMany) {
+	  var _ret4 = _loop4(_key12);
 	
 	  if (_ret4 === 'continue') continue;
 	}
 	
 	var _hasOne = __webpack_require__(9);
 	
-	var _loop5 = function _loop5(_key12) {
-	  if (_key12 === "default") return 'continue';
-	  Object.defineProperty(exports, _key12, {
+	var _loop5 = function _loop5(_key13) {
+	  if (_key13 === "default") return 'continue';
+	  Object.defineProperty(exports, _key13, {
 	    enumerable: true,
 	    get: function get() {
-	      return _hasOne[_key12];
+	      return _hasOne[_key13];
 	    }
 	  });
 	};
 	
-	for (var _key12 in _hasOne) {
-	  var _ret5 = _loop5(_key12);
+	for (var _key13 in _hasOne) {
+	  var _ret5 = _loop5(_key13);
 	
 	  if (_ret5 === 'continue') continue;
 	}
 	
 	var _initialize = __webpack_require__(10);
 	
-	var _loop6 = function _loop6(_key13) {
-	  if (_key13 === "default") return 'continue';
-	  Object.defineProperty(exports, _key13, {
+	var _loop6 = function _loop6(_key14) {
+	  if (_key14 === "default") return 'continue';
+	  Object.defineProperty(exports, _key14, {
 	    enumerable: true,
 	    get: function get() {
-	      return _initialize[_key13];
+	      return _initialize[_key14];
 	    }
 	  });
 	};
 	
-	for (var _key13 in _initialize) {
-	  var _ret6 = _loop6(_key13);
+	for (var _key14 in _initialize) {
+	  var _ret6 = _loop6(_key14);
 	
 	  if (_ret6 === 'continue') continue;
 	}
 	
 	var _schema = __webpack_require__(11);
 	
-	var _loop7 = function _loop7(_key14) {
-	  if (_key14 === "default") return 'continue';
-	  Object.defineProperty(exports, _key14, {
+	var _loop7 = function _loop7(_key15) {
+	  if (_key15 === "default") return 'continue';
+	  Object.defineProperty(exports, _key15, {
 	    enumerable: true,
 	    get: function get() {
-	      return _schema[_key14];
+	      return _schema[_key15];
 	    }
 	  });
 	};
 	
-	for (var _key14 in _schema) {
-	  var _ret7 = _loop7(_key14);
+	for (var _key15 in _schema) {
+	  var _ret7 = _loop7(_key15);
 	
 	  if (_ret7 === 'continue') continue;
+	}
+	
+	var _use = __webpack_require__(13);
+	
+	var _loop8 = function _loop8(_key16) {
+	  if (_key16 === "default") return 'continue';
+	  Object.defineProperty(exports, _key16, {
+	    enumerable: true,
+	    get: function get() {
+	      return _use[_key16];
+	    }
+	  });
+	};
+	
+	for (var _key16 in _use) {
+	  var _ret8 = _loop8(_key16);
+	
+	  if (_ret8 === 'continue') continue;
 	}
 	
 	// Workaround for https://github.com/babel/babel/issues/2763
@@ -1772,7 +1790,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    target.data = function () {
 	      // TODO: Do I need this?
 	      if (this.data === Object.getPrototypeOf(this).data) {
-	        // eslint-disable-line
 	        throw new Error(errMsg(this.name));
 	      }
 	      return collection;
@@ -2057,13 +2074,40 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	exports.use = use;
+	
+	var _utils = __webpack_require__(3);
+	
+	function use(name, adapter, opts) {
+	  opts || (opts = {});
+	  return function (target) {
+	    if (target.adapters && target.adapters === Object.getPrototypeOf(target).adapters) {
+	      target.adapters = {};
+	      (0, _utils.fillIn)(target.adapters, Object.getPrototypeOf(target).adapters);
+	    }
+	    target.adapters[name] = adapter;
+	    if (opts === true || opts.default) {
+	      target.defaultAdapter = name;
+	    }
+	  };
+	}
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
 	exports.Index = Index;
 	
 	var _utils = __webpack_require__(3);
 	
 	var _decorators = __webpack_require__(4);
 	
-	var _utils2 = __webpack_require__(14);
+	var _utils2 = __webpack_require__(15);
 	
 	function Index() {
 	  var fieldList = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
@@ -2358,7 +2402,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	})(Index.prototype);
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2442,7 +2486,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2456,7 +2500,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _utils = __webpack_require__(3);
 	
-	var _model = __webpack_require__(16);
+	var _model = __webpack_require__(17);
 	
 	// function lifecycleNoopCb (resource, attrs, cb) {
 	//   cb(null, attrs)
@@ -2677,7 +2721,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2710,6 +2754,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var resolve = utils.resolve;
 	
 	var isBrowser = false;
 	
@@ -3245,11 +3291,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (opts.upsert && utils.get(props, this.idAttribute)) {
 	        return this.update(utils.get(props, this.idAttribute), props, opts);
 	      }
-	      return Promise.resolve(this.beforeCreate(props, opts)).then(function () {
+	      return resolve(this.beforeCreate(props, opts)).then(function () {
 	        adapterName = _this4.getAdapterName(opts);
 	        return _this4.getAdapter(adapterName).create(_this4, _this4.prototype.toJSON.call(props, opts), opts);
 	      }).then(function (data) {
-	        return Promise.resolve(_this4.afterCreate(data, opts)).then(function () {
+	        return resolve(_this4.afterCreate(data, opts)).then(function () {
 	          return handleResponse(_this4, data, opts, adapterName);
 	        });
 	      });
@@ -3288,13 +3334,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if ((typeof _ret2 === 'undefined' ? 'undefined' : _typeof(_ret2)) === "object") return _ret2.v;
 	      }
 	
-	      return Promise.resolve(this.beforeCreateMany(items, opts)).then(function () {
+	      return resolve(this.beforeCreateMany(items, opts)).then(function () {
 	        adapterName = _this5.getAdapterName(opts);
 	        return _this5.getAdapter(adapterName).createMany(_this5, items.map(function (item) {
 	          return _this5.prototype.toJSON.call(item, opts);
 	        }), opts);
 	      }).then(function (data) {
-	        return Promise.resolve(_this5.afterCreateMany(data, opts)).then(function () {
+	        return resolve(_this5.afterCreateMany(data, opts)).then(function () {
 	          return handleResponse(_this5, data, opts, adapterName);
 	        });
 	      });
@@ -3316,11 +3362,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      utils._(this, opts);
 	      opts.op = 'find';
 	
-	      return Promise.resolve(this.beforeFind(id, opts)).then(function () {
+	      return resolve(this.beforeFind(id, opts)).then(function () {
 	        adapterName = _this6.getAdapterName(opts);
 	        return _this6.getAdapter(adapterName).find(_this6, id, opts);
 	      }).then(function (data) {
-	        return Promise.resolve(_this6.afterFind(data, opts)).then(function () {
+	        return resolve(_this6.afterFind(data, opts)).then(function () {
 	          return handleResponse(_this6, data, opts, adapterName);
 	        });
 	      });
@@ -3343,11 +3389,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      utils._(this, opts);
 	      opts.op = 'findAll';
 	
-	      return Promise.resolve(this.beforeFindAll(query, opts)).then(function () {
+	      return resolve(this.beforeFindAll(query, opts)).then(function () {
 	        adapterName = _this7.getAdapterName(opts);
 	        return _this7.getAdapter(adapterName).findAll(_this7, query, opts);
 	      }).then(function (data) {
-	        return Promise.resolve(_this7.afterFindAll(data, opts)).then(function () {
+	        return resolve(_this7.afterFindAll(data, opts)).then(function () {
 	          return handleResponse(_this7, data, opts, adapterName);
 	        });
 	      });
@@ -3370,11 +3416,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      utils._(this, opts);
 	      opts.op = 'update';
 	
-	      return Promise.resolve(this.beforeUpdate(id, props, opts)).then(function () {
+	      return resolve(this.beforeUpdate(id, props, opts)).then(function () {
 	        adapterName = _this8.getAdapterName(opts);
 	        return _this8.getAdapter(adapterName).update(_this8, id, _this8.prototype.toJSON.call(props, opts), opts);
 	      }).then(function (data) {
-	        return Promise.resolve(_this8.afterUpdate(id, data, opts)).then(function () {
+	        return resolve(_this8.afterUpdate(id, data, opts)).then(function () {
 	          return handleResponse(_this8, data, opts, adapterName);
 	        });
 	      });
@@ -3397,13 +3443,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      utils._(this, opts);
 	      opts.op = 'updateMany';
 	
-	      return Promise.resolve(this.beforeUpdateMany(items, opts)).then(function () {
+	      return resolve(this.beforeUpdateMany(items, opts)).then(function () {
 	        adapterName = _this9.getAdapterName(opts);
 	        return _this9.getAdapter(adapterName).updateMany(_this9, items.map(function (item) {
 	          return _this9.prototype.toJSON.call(item, opts);
 	        }), opts);
 	      }).then(function (data) {
-	        return Promise.resolve(_this9.afterUpdateMany(data, opts)).then(function () {
+	        return resolve(_this9.afterUpdateMany(data, opts)).then(function () {
 	          return handleResponse(_this9, data, opts, adapterName);
 	        });
 	      });
@@ -3427,11 +3473,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      utils._(this, opts);
 	      opts.op = 'updateAll';
 	
-	      return Promise.resolve(this.beforeUpdateAll(query, props, opts)).then(function () {
+	      return resolve(this.beforeUpdateAll(query, props, opts)).then(function () {
 	        adapterName = _this10.getAdapterName(opts);
 	        return _this10.getAdapter(adapterName).updateAll(_this10, query, props, opts);
 	      }).then(function (data) {
-	        return Promise.resolve(_this10.afterUpdateAll(query, data, opts)).then(function () {
+	        return resolve(_this10.afterUpdateAll(query, data, opts)).then(function () {
 	          return handleResponse(_this10, data, opts, adapterName);
 	        });
 	      });
@@ -3453,11 +3499,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      utils._(this, opts);
 	      opts.op = 'destroy';
 	
-	      return Promise.resolve(this.beforeDestroy(id, opts)).then(function () {
+	      return resolve(this.beforeDestroy(id, opts)).then(function () {
 	        adapterName = _this11.getAdapterName(opts);
 	        return _this11.getAdapter(adapterName).destroy(_this11, id, opts);
 	      }).then(function (data) {
-	        return Promise.resolve(_this11.afterDestroy(id, opts)).then(function () {
+	        return resolve(_this11.afterDestroy(id, opts)).then(function () {
 	          if (opts.raw) {
 	            data.adapter = adapterName;
 	            if (opts.autoEject) {
@@ -3489,11 +3535,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      utils._(this, opts);
 	      opts.op = 'destroyAll';
 	
-	      return Promise.resolve(this.beforeDestroyAll(query, opts)).then(function () {
+	      return resolve(this.beforeDestroyAll(query, opts)).then(function () {
 	        adapterName = _this12.getAdapterName(opts);
 	        return _this12.getAdapter(adapterName).destroyAll(_this12, query, opts);
 	      }).then(function (data) {
-	        return Promise.resolve(_this12.afterDestroyAll(query, opts)).then(function () {
+	        return resolve(_this12.afterDestroyAll(query, opts)).then(function () {
 	          if (opts.raw) {
 	            data.adapter = adapterName;
 	            if (opts.autoEject) {
@@ -3581,6 +3627,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    key: 'configure',
 	    value: function configure(props) {
 	      return (0, _decorators.configure)(props)(this);
+	    }
+	  }, {
+	    key: 'use',
+	    value: function use(name, adapter, opts) {
+	      return (0, _decorators.use)(name, adapter, opts)(this);
 	    }
 	
 	    /**

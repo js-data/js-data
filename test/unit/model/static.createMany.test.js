@@ -27,7 +27,7 @@ export function init () {
         defaultAdapter: 'mock',
         autoInject: false
       })
-      User.adapters.mock = {
+      User.use('mock', {
         createMany (modelConfig, _props, Opts) {
           createCalled = true
           return new Promise(function (resolve, reject) {
@@ -38,7 +38,7 @@ export function init () {
             resolve(_props)
           })
         }
-      }
+      })
       const users = await User.createMany(props)
       assert.isTrue(createCalled, 'Adapter#createMany should have been called')
       assert.isDefined(users[0][User.idAttribute], 'new user has an id')
@@ -54,7 +54,7 @@ export function init () {
         autoInject: true,
         defaultAdapter: 'mock'
       })
-      User.adapters.mock = {
+      User.use('mock', {
         createMany (modelConfig, _props, Opts) {
           createCalled = true
           return new Promise(function (resolve, reject) {
@@ -65,7 +65,7 @@ export function init () {
             resolve(_props)
           })
         }
-      }
+      })
       let users = await User.createMany(props)
       assert.isTrue(createCalled, 'Adapter#createMany should have been called')
       assert.isDefined(users[0][User.idAttribute], 'new user has an id')
@@ -97,7 +97,7 @@ export function init () {
         raw: true,
         defaultAdapter: 'mock'
       })
-      User.adapters.mock = {
+      User.use('mock', {
         createMany (modelConfig, _props, Opts) {
           createCalled = true
           return new Promise(function (resolve, reject) {
@@ -111,7 +111,7 @@ export function init () {
             })
           })
         }
-      }
+      })
       let data = await User.createMany(props)
       assert.isTrue(createCalled, 'Adapter#createMany should have been called')
       assert.isDefined(data.data[0][User.idAttribute], 'new user has an id')

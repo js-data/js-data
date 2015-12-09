@@ -10,7 +10,7 @@ export function initialize (opts) {
     const collection = new Collection([], target.idAttribute)
     target.data = function () {
       // TODO: Do I need this?
-      if (this.data === Object.getPrototypeOf(this).data) { // eslint-disable-line
+      if (this.data === Object.getPrototypeOf(this).data) {
         throw new Error(errMsg(this.name))
       }
       return collection

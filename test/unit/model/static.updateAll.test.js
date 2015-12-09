@@ -29,7 +29,7 @@ export function init () {
         defaultAdapter: 'mock',
         autoInject: false
       })
-      User.adapters.mock = {
+      User.use('mock', {
         updateAll (modelConfig, _query, _props, Opts) {
           updateAllCalled = true
           return new Promise(function (resolve, reject) {
@@ -42,7 +42,7 @@ export function init () {
             resolve([_props])
           })
         }
-      }
+      })
       const users = await User.updateAll(query, props)
       assert.isTrue(updateAllCalled, 'Adapter#updateAll should have been called')
       assert.equal(users[0].foo, 'bar', 'user has a new field')
@@ -60,7 +60,7 @@ export function init () {
         autoInject: true,
         defaultAdapter: 'mock'
       })
-      User.adapters.mock = {
+      User.use('mock', {
         updateAll (modelConfig, _query, _props, Opts) {
           updateAllCalled = true
           return new Promise(function (resolve, reject) {
@@ -73,7 +73,7 @@ export function init () {
             resolve([_props])
           })
         }
-      }
+      })
       let users = await User.updateAll(query, props)
       assert.isTrue(updateAllCalled, 'Adapter#update should have been called')
       assert.equal(users[0].foo, 'bar', 'user has a new field')
@@ -92,7 +92,7 @@ export function init () {
         raw: true,
         defaultAdapter: 'mock'
       })
-      User.adapters.mock = {
+      User.use('mock', {
         updateAll (modelConfig, _query, _props, Opts) {
           updateAllCalled = true
           return new Promise(function (resolve, reject) {
@@ -108,7 +108,7 @@ export function init () {
             })
           })
         }
-      }
+      })
       let data = await User.updateAll(query, props)
       assert.isTrue(updateAllCalled, 'Adapter#update should have been called')
       assert.equal(data.data[0].foo, 'bar', 'user has a new field')

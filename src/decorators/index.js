@@ -5,6 +5,7 @@ export * from './hasMany'
 export * from './hasOne'
 export * from './initialize'
 export * from './schema'
+export * from './use'
 
 // Workaround for https://github.com/babel/babel/issues/2763
 export const DECORATORS = 'FIXME'

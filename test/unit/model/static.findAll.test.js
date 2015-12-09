@@ -29,7 +29,7 @@ export function init () {
         defaultAdapter: 'mock',
         autoInject: false
       })
-      User.adapters.mock = {
+      User.use('mock', {
         findAll (modelConfig, _query, Opts) {
           findAllCalled = true
           return new Promise(function (resolve, reject) {
@@ -39,7 +39,7 @@ export function init () {
             resolve(props)
           })
         }
-      }
+      })
       const users = await User.findAll(query, props)
       assert.isTrue(findAllCalled, 'Adapter#findAll should have been called')
       assert.deepEqual(users, props, 'user should have been found')
@@ -57,7 +57,7 @@ export function init () {
         autoInject: true,
         defaultAdapter: 'mock'
       })
-      User.adapters.mock = {
+      User.use('mock', {
         findAll (modelConfig, _query, Opts) {
           findAllCalled = true
           return new Promise(function (resolve, reject) {
@@ -67,7 +67,7 @@ export function init () {
             resolve(props)
           })
         }
-      }
+      })
       let users = await User.findAll(query, props)
       assert.isTrue(findAllCalled, 'Adapter#findAll should have been called')
       assert.objectsEqual(users, props, 'user should have been found')
@@ -86,7 +86,7 @@ export function init () {
         raw: true,
         defaultAdapter: 'mock'
       })
-      User.adapters.mock = {
+      User.use('mock', {
         findAll (modelConfig, _query, Opts) {
           findAllCalled = true
           return new Promise(function (resolve, reject) {
@@ -99,7 +99,7 @@ export function init () {
             })
           })
         }
-      }
+      })
       let data = await User.findAll(query, props)
       assert.isTrue(findAllCalled, 'Adapter#findAll should have been called')
       assert.objectsEqual(data.data, props, 'user should have been found')

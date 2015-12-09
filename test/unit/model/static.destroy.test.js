@@ -27,7 +27,7 @@ export function init () {
       User.configure({
         defaultAdapter: 'mock'
       })
-      User.adapters.mock = {
+      User.use('mock', {
         destroy (modelConfig, _id, Opts) {
           destroyCalled = true
           return new Promise(function (resolve, reject) {
@@ -37,7 +37,7 @@ export function init () {
             resolve()
           })
         }
-      }
+      })
       const user = User.inject(props)
       assert.isDefined(User.get(id), 'user should have been injected')
       const ejected = await User.destroy(id)
@@ -55,7 +55,7 @@ export function init () {
         defaultAdapter: 'mock',
         autoEject: false
       })
-      User.adapters.mock = {
+      User.use('mock', {
         destroy (modelConfig, _id, Opts) {
           destroyCalled = true
           return new Promise(function (resolve, reject) {
@@ -65,7 +65,7 @@ export function init () {
             resolve('foo')
           })
         }
-      }
+      })
       const user = User.inject(props)
       assert.isDefined(User.get(id), 'user should have been injected')
       const ejected = await User.destroy(id)
@@ -84,7 +84,7 @@ export function init () {
         defaultAdapter: 'mock',
         autoEject: true
       })
-      User.adapters.mock = {
+      User.use('mock', {
         destroy (modelConfig, _id, Opts) {
           destroyCalled = true
           return new Promise(function (resolve, reject) {
@@ -96,7 +96,7 @@ export function init () {
             })
           })
         }
-      }
+      })
       const user = User.inject(props)
       assert.isDefined(User.get(id), 'user should have been injected')
       const data = await User.destroy(id)
@@ -117,7 +117,7 @@ export function init () {
         defaultAdapter: 'mock',
         autoEject: false
       })
-      User.adapters.mock = {
+      User.use('mock', {
         destroy (modelConfig, _id, Opts) {
           destroyCalled = true
           return new Promise(function (resolve, reject) {
@@ -131,7 +131,7 @@ export function init () {
             })
           })
         }
-      }
+      })
       const user = User.inject(props)
       assert.isDefined(User.get(id), 'user should have been injected')
       const data = await User.destroy(id)

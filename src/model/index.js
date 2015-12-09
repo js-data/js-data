@@ -7,9 +7,14 @@ import {
   hasMany,
   hasOne,
   initialize,
-  setSchema
+  setSchema,
+  use
 } from '../decorators'
 import * as validate from '../validate'
+
+const {
+  resolve
+} = utils
 
 let isBrowser = false
 
@@ -458,14 +463,14 @@ export class Model extends BaseModel {
     if (opts.upsert && utils.get(props, this.idAttribute)) {
       return this.update(utils.get(props, this.idAttribute), props, opts)
     }
-    return Promise.resolve(this.beforeCreate(props, opts))
+    return resolve(this.beforeCreate(props, opts))
       .then(() => {
         adapterName = this.getAdapterName(opts)
         return this.getAdapter(adapterName)
           .create(this, this.prototype.toJSON.call(props, opts), opts)
       })
       .then(data => {
-        return Promise.resolve(this.afterCreate(data, opts))
+        return resolve(this.afterCreate(data, opts))
           .then(() => handleResponse(this, data, opts, adapterName))
       })
   }
@@ -490,14 +495,14 @@ export class Model extends BaseModel {
       }
     }
 
-    return Promise.resolve(this.beforeCreateMany(items, opts))
+    return resolve(this.beforeCreateMany(items, opts))
       .then(() => {
         adapterName = this.getAdapterName(opts)
         return this.getAdapter(adapterName)
           .createMany(this, items.map(item => this.prototype.toJSON.call(item, opts)), opts)
       })
       .then(data => {
-        return Promise.resolve(this.afterCreateMany(data, opts))
+        return resolve(this.afterCreateMany(data, opts))
           .then(() => handleResponse(this, data, opts, adapterName))
       })
   }
@@ -511,14 +516,14 @@ export class Model extends BaseModel {
     utils._(this, opts)
     opts.op = 'find'
 
-    return Promise.resolve(this.beforeFind(id, opts))
+    return resolve(this.beforeFind(id, opts))
       .then(() => {
         adapterName = this.getAdapterName(opts)
         return this.getAdapter(adapterName)
           .find(this, id, opts)
       })
       .then(data => {
-        return Promise.resolve(this.afterFind(data, opts))
+        return resolve(this.afterFind(data, opts))
           .then(() => handleResponse(this, data, opts, adapterName))
       })
   }
@@ -533,14 +538,14 @@ export class Model extends BaseModel {
     utils._(this, opts)
     opts.op = 'findAll'
 
-    return Promise.resolve(this.beforeFindAll(query, opts))
+    return resolve(this.beforeFindAll(query, opts))
       .then(() => {
         adapterName = this.getAdapterName(opts)
         return this.getAdapter(adapterName)
           .findAll(this, query, opts)
       })
       .then(data => {
-        return Promise.resolve(this.afterFindAll(data, opts))
+        return resolve(this.afterFindAll(data, opts))
           .then(() => handleResponse(this, data, opts, adapterName))
       })
   }
@@ -555,14 +560,14 @@ export class Model extends BaseModel {
     utils._(this, opts)
     opts.op = 'update'
 
-    return Promise.resolve(this.beforeUpdate(id, props, opts))
+    return resolve(this.beforeUpdate(id, props, opts))
       .then(() => {
         adapterName = this.getAdapterName(opts)
         return this.getAdapter(adapterName)
           .update(this, id, this.prototype.toJSON.call(props, opts), opts)
       })
       .then(data => {
-        return Promise.resolve(this.afterUpdate(id, data, opts))
+        return resolve(this.afterUpdate(id, data, opts))
           .then(() => handleResponse(this, data, opts, adapterName))
       })
   }
@@ -577,14 +582,14 @@ export class Model extends BaseModel {
     utils._(this, opts)
     opts.op = 'updateMany'
 
-    return Promise.resolve(this.beforeUpdateMany(items, opts))
+    return resolve(this.beforeUpdateMany(items, opts))
       .then(() => {
         adapterName = this.getAdapterName(opts)
         return this.getAdapter(adapterName)
           .updateMany(this, items.map(item => this.prototype.toJSON.call(item, opts)), opts)
       })
       .then(data => {
-        return Promise.resolve(this.afterUpdateMany(data, opts))
+        return resolve(this.afterUpdateMany(data, opts))
           .then(() => handleResponse(this, data, opts, adapterName))
       })
   }
@@ -600,14 +605,14 @@ export class Model extends BaseModel {
     utils._(this, opts)
     opts.op = 'updateAll'
 
-    return Promise.resolve(this.beforeUpdateAll(query, props, opts))
+    return resolve(this.beforeUpdateAll(query, props, opts))
       .then(() => {
         adapterName = this.getAdapterName(opts)
         return this.getAdapter(adapterName)
           .updateAll(this, query, props, opts)
       })
       .then(data => {
-        return Promise.resolve(this.afterUpdateAll(query, data, opts))
+        return resolve(this.afterUpdateAll(query, data, opts))
           .then(() => handleResponse(this, data, opts, adapterName))
       })
   }
@@ -621,14 +626,14 @@ export class Model extends BaseModel {
     utils._(this, opts)
     opts.op = 'destroy'
 
-    return Promise.resolve(this.beforeDestroy(id, opts))
+    return resolve(this.beforeDestroy(id, opts))
       .then(() => {
         adapterName = this.getAdapterName(opts)
         return this.getAdapter(adapterName)
           .destroy(this, id, opts)
       })
       .then(data => {
-        return Promise.resolve(this.afterDestroy(id, opts))
+        return resolve(this.afterDestroy(id, opts))
           .then(() => {
             if (opts.raw) {
               data.adapter = adapterName
@@ -654,14 +659,14 @@ export class Model extends BaseModel {
     utils._(this, opts)
     opts.op = 'destroyAll'
 
-    return Promise.resolve(this.beforeDestroyAll(query, opts))
+    return resolve(this.beforeDestroyAll(query, opts))
       .then(() => {
         adapterName = this.getAdapterName(opts)
         return this.getAdapter(adapterName)
           .destroyAll(this, query, opts)
       })
       .then(data => {
-        return Promise.resolve(this.afterDestroyAll(query, opts))
+        return resolve(this.afterDestroyAll(query, opts))
           .then(() => {
             if (opts.raw) {
               data.adapter = adapterName
@@ -734,6 +739,10 @@ export class Model extends BaseModel {
 
   static configure (props) {
     return configure(props)(this)
+  }
+
+  static use (name, adapter, opts) {
+    return use(name, adapter, opts)(this)
   }
 
   /**
