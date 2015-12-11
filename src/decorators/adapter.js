@@ -1,6 +1,6 @@
 import {fillIn} from '../utils'
 
-export function use (name, adapter, opts) {
+export function registerAdapter (name, adapter, opts) {
   opts || (opts = {})
   return function (target) {
     if (target.adapters && target.adapters === Object.getPrototypeOf(target).adapters) {

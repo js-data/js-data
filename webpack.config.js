@@ -11,6 +11,9 @@ module.exports = {
     libraryTarget: 'umd',
     library: 'JSData'
   },
+  externals: [
+    'chai'
+  ],
   module: {
     loaders: [
       {

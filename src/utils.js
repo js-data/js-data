@@ -131,16 +131,6 @@ export function intersection (array1, array2) {
   }
   return result
 }
-function isValidString (value) {
-  return (value != null && value !== '') // jshint ignore:line
-}
-function join (items, separator = '') {
-  return items.filter(isValidString).join(separator)
-}
-export function makePath (...args) {
-  let result = join(args, '/')
-  return result.replace(/([^:\/]|^)\/{2,}/g, '$1/')
-}
 export function fillIn (dest, src) {
   forOwn(src, function (value, key) {
     if (dest[key] === undefined) {
