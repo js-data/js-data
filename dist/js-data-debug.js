@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 2.8.2 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.1 - Homepage <http://www.js-data.io/>
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @copyright (c) 2014-2015 Jason Dobry
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -68,6 +68,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	exports.version = exports.utils = undefined;
 	
 	var _collection = __webpack_require__(1);
 	
@@ -87,7 +88,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_ret === 'continue') continue;
 	}
 	
-	var _datastore = __webpack_require__(16);
+	var _datastore = __webpack_require__(15);
 	
 	var _loop2 = function _loop2(_key7) {
 	  if (_key7 === "default") return 'continue';
@@ -123,7 +124,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_ret3 === 'continue') continue;
 	}
 	
-	var _model = __webpack_require__(17);
+	var _model = __webpack_require__(16);
 	
 	var _loop4 = function _loop4(_key9) {
 	  if (_key9 === "default") return 'continue';
@@ -141,7 +142,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_ret4 === 'continue') continue;
 	}
 	
-	var _validate = __webpack_require__(12);
+	var _validate = __webpack_require__(11);
 	
 	var _loop5 = function _loop5(_key10) {
 	  if (_key10 === "default") return 'continue';
@@ -159,6 +160,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_ret5 === 'continue') continue;
 	}
 	
+	var _utils2 = __webpack_require__(3);
+	
+	var _utils = _interopRequireWildcard(_utils2);
+	
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+	
 	if (!Promise.prototype.spread) {
 	  Promise.prototype.spread = function (cb) {
 	    return this.then(function (arr) {
@@ -167,12 +174,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	}
 	
+	exports.utils = _utils;
 	var version = exports.version = {
-	  full: '2.8.2',
-	  major: parseInt('2', 10),
-	  minor: parseInt('8', 10),
-	  patch: parseInt('2', 10),
-	  alpha:  true ? 'false' : false,
+	  full: '3.0.0-alpha.1',
+	  major: parseInt('3', 10),
+	  minor: parseInt('0', 10),
+	  patch: parseInt('0', 10),
+	  alpha:  true ? '1' : false,
 	  beta:  true ? 'false' : false
 	};
 
@@ -193,7 +201,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _decorators = __webpack_require__(4);
 	
-	var _mindex = __webpack_require__(14);
+	var _mindex = __webpack_require__(13);
 	
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 	
@@ -636,7 +644,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.reject = reject;
 	exports._ = _;
 	exports.intersection = intersection;
-	exports.makePath = makePath;
 	exports.fillIn = fillIn;
 	exports.isBlacklisted = isBlacklisted;
 	exports.omit = omit;
@@ -780,22 +787,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	  return result;
-	}
-	function isValidString(value) {
-	  return value != null && value !== ''; // jshint ignore:line
-	}
-	function join(items) {
-	  var separator = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
-	
-	  return items.filter(isValidString).join(separator);
-	}
-	function makePath() {
-	  for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	    args[_key] = arguments[_key];
-	  }
-	
-	  var result = join(args, '/');
-	  return result.replace(/([^:\/]|^)\/{2,}/g, '$1/');
 	}
 	function fillIn(dest, src) {
 	  forOwn(src, function (value, key) {
@@ -969,8 +960,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      value: function value() {
 	        var events = getter.call(this);
 	
-	        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-	          args[_key2] = arguments[_key2];
+	        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	          args[_key] = arguments[_key];
 	        }
 	
 	        var listeners = events[args.shift()] || [];
@@ -994,148 +985,130 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 	
-	var _actions = __webpack_require__(5);
+	var _belongsTo = __webpack_require__(5);
 	
-	var _loop = function _loop(_key9) {
-	  if (_key9 === "default") return 'continue';
-	  Object.defineProperty(exports, _key9, {
+	var _loop = function _loop(_key8) {
+	  if (_key8 === "default") return 'continue';
+	  Object.defineProperty(exports, _key8, {
 	    enumerable: true,
 	    get: function get() {
-	      return _actions[_key9];
+	      return _belongsTo[_key8];
 	    }
 	  });
 	};
 	
-	for (var _key9 in _actions) {
-	  var _ret = _loop(_key9);
+	for (var _key8 in _belongsTo) {
+	  var _ret = _loop(_key8);
 	
 	  if (_ret === 'continue') continue;
 	}
 	
-	var _belongsTo = __webpack_require__(7);
+	var _configure = __webpack_require__(6);
 	
-	var _loop2 = function _loop2(_key10) {
-	  if (_key10 === "default") return 'continue';
-	  Object.defineProperty(exports, _key10, {
+	var _loop2 = function _loop2(_key9) {
+	  if (_key9 === "default") return 'continue';
+	  Object.defineProperty(exports, _key9, {
 	    enumerable: true,
 	    get: function get() {
-	      return _belongsTo[_key10];
+	      return _configure[_key9];
 	    }
 	  });
 	};
 	
-	for (var _key10 in _belongsTo) {
-	  var _ret2 = _loop2(_key10);
+	for (var _key9 in _configure) {
+	  var _ret2 = _loop2(_key9);
 	
 	  if (_ret2 === 'continue') continue;
 	}
 	
-	var _configure = __webpack_require__(6);
+	var _hasMany = __webpack_require__(7);
 	
-	var _loop3 = function _loop3(_key11) {
-	  if (_key11 === "default") return 'continue';
-	  Object.defineProperty(exports, _key11, {
+	var _loop3 = function _loop3(_key10) {
+	  if (_key10 === "default") return 'continue';
+	  Object.defineProperty(exports, _key10, {
 	    enumerable: true,
 	    get: function get() {
-	      return _configure[_key11];
+	      return _hasMany[_key10];
 	    }
 	  });
 	};
 	
-	for (var _key11 in _configure) {
-	  var _ret3 = _loop3(_key11);
+	for (var _key10 in _hasMany) {
+	  var _ret3 = _loop3(_key10);
 	
 	  if (_ret3 === 'continue') continue;
 	}
 	
-	var _hasMany = __webpack_require__(8);
+	var _hasOne = __webpack_require__(8);
 	
-	var _loop4 = function _loop4(_key12) {
-	  if (_key12 === "default") return 'continue';
-	  Object.defineProperty(exports, _key12, {
+	var _loop4 = function _loop4(_key11) {
+	  if (_key11 === "default") return 'continue';
+	  Object.defineProperty(exports, _key11, {
 	    enumerable: true,
 	    get: function get() {
-	      return _hasMany[_key12];
+	      return _hasOne[_key11];
 	    }
 	  });
 	};
 	
-	for (var _key12 in _hasMany) {
-	  var _ret4 = _loop4(_key12);
+	for (var _key11 in _hasOne) {
+	  var _ret4 = _loop4(_key11);
 	
 	  if (_ret4 === 'continue') continue;
 	}
 	
-	var _hasOne = __webpack_require__(9);
+	var _initialize = __webpack_require__(9);
 	
-	var _loop5 = function _loop5(_key13) {
-	  if (_key13 === "default") return 'continue';
-	  Object.defineProperty(exports, _key13, {
+	var _loop5 = function _loop5(_key12) {
+	  if (_key12 === "default") return 'continue';
+	  Object.defineProperty(exports, _key12, {
 	    enumerable: true,
 	    get: function get() {
-	      return _hasOne[_key13];
+	      return _initialize[_key12];
 	    }
 	  });
 	};
 	
-	for (var _key13 in _hasOne) {
-	  var _ret5 = _loop5(_key13);
+	for (var _key12 in _initialize) {
+	  var _ret5 = _loop5(_key12);
 	
 	  if (_ret5 === 'continue') continue;
 	}
 	
-	var _initialize = __webpack_require__(10);
+	var _schema = __webpack_require__(10);
 	
-	var _loop6 = function _loop6(_key14) {
-	  if (_key14 === "default") return 'continue';
-	  Object.defineProperty(exports, _key14, {
+	var _loop6 = function _loop6(_key13) {
+	  if (_key13 === "default") return 'continue';
+	  Object.defineProperty(exports, _key13, {
 	    enumerable: true,
 	    get: function get() {
-	      return _initialize[_key14];
+	      return _schema[_key13];
 	    }
 	  });
 	};
 	
-	for (var _key14 in _initialize) {
-	  var _ret6 = _loop6(_key14);
+	for (var _key13 in _schema) {
+	  var _ret6 = _loop6(_key13);
 	
 	  if (_ret6 === 'continue') continue;
 	}
 	
-	var _schema = __webpack_require__(11);
+	var _adapter = __webpack_require__(12);
 	
-	var _loop7 = function _loop7(_key15) {
-	  if (_key15 === "default") return 'continue';
-	  Object.defineProperty(exports, _key15, {
+	var _loop7 = function _loop7(_key14) {
+	  if (_key14 === "default") return 'continue';
+	  Object.defineProperty(exports, _key14, {
 	    enumerable: true,
 	    get: function get() {
-	      return _schema[_key15];
+	      return _adapter[_key14];
 	    }
 	  });
 	};
 	
-	for (var _key15 in _schema) {
-	  var _ret7 = _loop7(_key15);
+	for (var _key14 in _adapter) {
+	  var _ret7 = _loop7(_key14);
 	
 	  if (_ret7 === 'continue') continue;
-	}
-	
-	var _use = __webpack_require__(13);
-	
-	var _loop8 = function _loop8(_key16) {
-	  if (_key16 === "default") return 'continue';
-	  Object.defineProperty(exports, _key16, {
-	    enumerable: true,
-	    get: function get() {
-	      return _use[_key16];
-	    }
-	  });
-	};
-	
-	for (var _key16 in _use) {
-	  var _ret8 = _loop8(_key16);
-	
-	  if (_ret8 === 'continue') continue;
 	}
 	
 	// Workaround for https://github.com/babel/babel/issues/2763
@@ -1143,124 +1116,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.action = action;
-	exports.actions = actions;
-	
-	var _utils = __webpack_require__(3);
-	
-	var _configure = __webpack_require__(6);
-	
-	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
-	
-	// TODO: Make actions part of the http adapter
-	function action(name, opts) {
-	  if (!name || !(0, _utils.isString)(name)) {
-	    throw new TypeError('action(name[, opts]): Expected: string, Found: ' + (typeof name === 'undefined' ? 'undefined' : _typeof(name)));
-	  }
-	  return function (target) {
-	    if (target[name]) {
-	      throw new Error('action(name[, opts]): ' + name + ' already exists on target!');
-	    }
-	    opts.request = opts.request || function (config) {
-	      return config;
-	    };
-	    opts.response = opts.response || function (response) {
-	      return response;
-	    };
-	    opts.responseError = opts.responseError || function (err) {
-	      return (0, _utils.reject)(err);
-	    };
-	    target[name] = function (id, _opts) {
-	      if ((0, _utils.isObject)(id)) {
-	        _opts = id;
-	      }
-	      _opts = _opts || {};
-	      var adapter = this.getAdapter(opts.adapter || this.defaultAdapter || 'http');
-	      var config = {};
-	      (0, _utils.fillIn)(config, opts);
-	      if (!_opts.hasOwnProperty('endpoint') && config.endpoint) {
-	        _opts.endpoint = config.endpoint;
-	      }
-	      if (typeof _opts.getEndpoint === 'function') {
-	        config.url = _opts.getEndpoint(this, _opts);
-	      } else {
-	        var args = [_opts.basePath || this.basePath || adapter.defaults.basePath, adapter.getEndpoint(this, (0, _utils.isSorN)(id) ? id : null, _opts)];
-	        if ((0, _utils.isSorN)(id)) {
-	          args.push(id);
-	        }
-	        args.push(opts.pathname || name);
-	        config.url = _utils.makePath.apply(null, args);
-	      }
-	      config.method = config.method || 'GET';
-	      config.modelName = this.name;
-	      (0, _configure.configure)(config)(_opts);
-	      return (0, _utils.resolve)(config).then(_opts.request || opts.request).then(function (config) {
-	        return adapter.HTTP(config);
-	      }).then(function (data) {
-	        if (data && data.config) {
-	          data.config.modelName = this.name;
-	        }
-	        return data;
-	      }).then(_opts.response || opts.response, _opts.responseError || opts.responseError);
-	    };
-	    return target;
-	  };
-	}
-	
-	function actions(opts) {
-	  opts || (opts = {});
-	  return function (target) {
-	    (0, _utils.forOwn)(target, function (value, key) {
-	      action(key, value)(target);
-	    });
-	    return target;
-	  };
-	}
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.configure = configure;
-	
-	var _utils = __webpack_require__(3);
-	
-	/**
-	 * Usage:
-	 *
-	 * @configure({
-	 *   idAttribute: '_id'
-	 * })
-	 * class User extends JSData.Model {...}
-	 */
-	function configure(props) {
-	  var overwrite = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
-	
-	  props = props || {};
-	  return function (target) {
-	    (0, _utils.forOwn)(props, function (value, key) {
-	      if (target[key] === undefined || overwrite) {
-	        target[key] = (0, _utils.copy)(value);
-	      }
-	    });
-	    return target;
-	  };
-	}
-
-/***/ },
-/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1412,7 +1267,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 8 */
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.configure = configure;
+	
+	var _utils = __webpack_require__(3);
+	
+	/**
+	 * Usage:
+	 *
+	 * @configure({
+	 *   idAttribute: '_id'
+	 * })
+	 * class User extends JSData.Model {...}
+	 */
+	function configure(props) {
+	  var overwrite = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+	
+	  props = props || {};
+	  return function (target) {
+	    (0, _utils.forOwn)(props, function (value, key) {
+	      if (target[key] === undefined || overwrite) {
+	        target[key] = (0, _utils.copy)(value);
+	      }
+	    });
+	    return target;
+	  };
+	}
+
+/***/ },
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1616,7 +1506,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 9 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1767,7 +1657,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 10 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1798,7 +1688,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 11 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1810,11 +1700,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _utils = __webpack_require__(3);
 	
-	var _validate = __webpack_require__(12);
+	var _validate = __webpack_require__(11);
 	
 	var _configure = __webpack_require__(6);
 	
-	var _initialize = __webpack_require__(10);
+	var _initialize = __webpack_require__(9);
 	
 	function makeDescriptor(target, key, prop) {
 	  var descriptor = {
@@ -1968,7 +1858,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 12 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2066,7 +1956,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 13 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2074,11 +1964,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.use = use;
+	exports.registerAdapter = registerAdapter;
 	
 	var _utils = __webpack_require__(3);
 	
-	function use(name, adapter, opts) {
+	function registerAdapter(name, adapter, opts) {
 	  opts || (opts = {});
 	  return function (target) {
 	    if (target.adapters && target.adapters === Object.getPrototypeOf(target).adapters) {
@@ -2093,7 +1983,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 14 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2107,7 +1997,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _decorators = __webpack_require__(4);
 	
-	var _utils2 = __webpack_require__(15);
+	var _utils2 = __webpack_require__(14);
 	
 	function Index() {
 	  var fieldList = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
@@ -2402,7 +2292,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	})(Index.prototype);
 
 /***/ },
-/* 15 */
+/* 14 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2486,7 +2376,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 16 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2500,7 +2390,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _utils = __webpack_require__(3);
 	
-	var _model = __webpack_require__(17);
+	var _model = __webpack_require__(16);
 	
 	// function lifecycleNoopCb (resource, attrs, cb) {
 	//   cb(null, attrs)
@@ -2726,7 +2616,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 17 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2744,7 +2634,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _decorators = __webpack_require__(4);
 	
-	var _validate2 = __webpack_require__(12);
+	var _validate2 = __webpack_require__(11);
 	
 	var _validate = _interopRequireWildcard(_validate2);
 	
@@ -3609,16 +3499,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return (0, _decorators.hasOne)(model, opts)(this);
 	    }
 	  }, {
-	    key: 'action',
-	    value: function action(name, opts) {
-	      return (0, _decorators.action)(name, opts)(this);
-	    }
-	  }, {
-	    key: 'actions',
-	    value: function actions(opts) {
-	      return (0, _decorators.actions)(opts)(this);
-	    }
-	  }, {
 	    key: 'initialize',
 	    value: function initialize(opts) {
 	      return (0, _decorators.initialize)(opts)(this);
@@ -3634,9 +3514,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return (0, _decorators.configure)(props)(this);
 	    }
 	  }, {
-	    key: 'use',
-	    value: function use(name, adapter, opts) {
-	      return (0, _decorators.use)(name, adapter, opts)(this);
+	    key: 'registerAdapter',
+	    value: function registerAdapter(name, adapter, opts) {
+	      return (0, _decorators.registerAdapter)(name, adapter, opts)(this);
 	    }
 	
 	    /**

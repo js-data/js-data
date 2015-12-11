@@ -28,7 +28,7 @@ export function init () {
         defaultAdapter: 'mock',
         autoInject: false
       })
-      User.use('mock', {
+      User.registerAdapter('mock', {
         update (modelConfig, _id, _props, Opts) {
           updateCalled = true
           return new Promise(function (resolve, reject) {
@@ -58,7 +58,7 @@ export function init () {
         autoInject: true,
         defaultAdapter: 'mock'
       })
-      User.use('mock', {
+      User.registerAdapter('mock', {
         update (modelConfig, _id, _props, Opts) {
           updateCalled = true
           return new Promise(function (resolve, reject) {
@@ -89,7 +89,7 @@ export function init () {
         raw: true,
         defaultAdapter: 'mock'
       })
-      User.use('mock', {
+      User.registerAdapter('mock', {
         update (modelConfig, _id, _props, Opts) {
           updateCalled = true
           return new Promise(function (resolve, reject) {

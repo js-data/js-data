@@ -21,8 +21,6 @@ assert.fail = function (msg) {
 export function init () {
   describe('JSData', function () {
     it('has all the right exports', function () {
-      assert.isFunction(JSData.action, 'has the action decorator')
-      assert.isFunction(JSData.actions, 'has the actions decorator')
       assert.isFunction(JSData.belongsTo, 'has the belongsTo decorator')
       assert.isFunction(JSData.Collection, 'has the Collection class')
       assert.isFunction(JSData.configure, 'has the configure decorator')

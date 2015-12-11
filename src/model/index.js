@@ -1,14 +1,12 @@
 import * as utils from '../utils'
 import {
-  action,
-  actions,
   belongsTo,
   configure,
   hasMany,
   hasOne,
   initialize,
   setSchema,
-  use
+  registerAdapter
 } from '../decorators'
 import * as validate from '../validate'
 
@@ -721,14 +719,6 @@ export class Model extends BaseModel {
     return hasOne(model, opts)(this)
   }
 
-  static action (name, opts) {
-    return action(name, opts)(this)
-  }
-
-  static actions (opts) {
-    return actions(opts)(this)
-  }
-
   static initialize (opts) {
     return initialize(opts)(this)
   }
@@ -741,8 +731,8 @@ export class Model extends BaseModel {
     return configure(props)(this)
   }
 
-  static use (name, adapter, opts) {
-    return use(name, adapter, opts)(this)
+  static registerAdapter (name, adapter, opts) {
+    return registerAdapter(name, adapter, opts)(this)
   }
 
   /**

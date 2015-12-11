@@ -28,7 +28,7 @@ export function init () {
       User.configure({
         defaultAdapter: 'mock'
       })
-      User.use('mock', {
+      User.registerAdapter('mock', {
         destroyAll (modelConfig, _query, Opts) {
           destroyAllCalled = true
           return new Promise(function (resolve, reject) {
@@ -57,7 +57,7 @@ export function init () {
         defaultAdapter: 'mock',
         autoEject: false
       })
-      User.use('mock', {
+      User.registerAdapter('mock', {
         destroyAll (modelConfig, _query, Opts) {
           destroyAllCalled = true
           return new Promise(function (resolve, reject) {
@@ -87,7 +87,7 @@ export function init () {
         defaultAdapter: 'mock',
         autoEject: true
       })
-      User.use('mock', {
+      User.registerAdapter('mock', {
         destroyAll (modelConfig, _query, Opts) {
           destroyAllCalled = true
           return new Promise(function (resolve, reject) {
@@ -121,7 +121,7 @@ export function init () {
         defaultAdapter: 'mock',
         autoEject: false
       })
-      User.use('mock', {
+      User.registerAdapter('mock', {
         destroyAll (modelConfig, _query, Opts) {
           destroyAllCalled = true
           return new Promise(function (resolve, reject) {

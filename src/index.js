@@ -11,6 +11,7 @@ export * from './datastore'
 export * from './decorators'
 export * from './model'
 export * from './validate'
+export * as utils from './utils'
 
 export const version = {
   full: '<%= pkg.version %>',
