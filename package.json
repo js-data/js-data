@@ -57,7 +57,7 @@
     "ci": "npm test && cat coverage/lcov.info | coveralls || true && cat ./coverage/lcov.info | codacy-coverage || true"
   },
   "devDependencies": {
-    "babel-core": "6.3.13",
+    "babel-core": "6.3.17",
     "babel-eslint": "4.1.6",
     "babel-loader": "6.2.0",
     "babel-plugin-syntax-async-functions": "6.3.13",
@@ -67,7 +67,7 @@
     "babel-preset-stage-0": "6.3.13",
     "chai": "3.4.1",
     "codacy-coverage": "1.1.3",
-    "coveralls": "2.11.4",
+    "coveralls": "2.11.6",
     "istanbul": "0.4.1",
     "mocha": "2.3.4",
     "sinon": "1.17.2",
