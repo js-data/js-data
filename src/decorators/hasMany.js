@@ -1,5 +1,7 @@
 import {camelCase, isArray, get, set} from '../utils'
 
+const op = 'hasMany'
+
 /**
  * Steps to apply a "hasMany" relationship
  * 1. Choose the localField and foreignKey or localKeys
@@ -160,6 +162,7 @@ function applyHasMany (Model, Relation, opts) {
  */
 export function hasMany (Model, opts) {
   return function (target) {
+    target.dbg(op, 'Model:', Model, 'opts:', opts)
     return applyHasMany(target, Model, opts)
   }
 }

@@ -1,5 +1,7 @@
 import {camelCase, get, set} from '../utils'
 
+const op = 'hasOne'
+
 /**
  * Steps to apply a "hasOne" relationship
  * 1. Choose the foreignKey and localKey
@@ -113,6 +115,7 @@ function applyHasOne (Model, Relation, opts) {
  */
 export function hasOne (Model, opts) {
   return function (target) {
+    target.dbg(op, 'Model:', Model, 'opts:', opts)
     return applyHasOne(target, Model, opts)
   }
 }

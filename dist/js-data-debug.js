@@ -1,12 +1,3 @@
-/*!
-* js-data
-* @version 3.0.0-alpha.1 - Homepage <http://www.js-data.io/>
-* @author Jason Dobry <jason.dobry@gmail.com>
-* @copyright (c) 2014-2015 Jason Dobry
-* @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
-*
-* @overview Robust framework-agnostic data store.
-*/
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -176,12 +167,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	exports.utils = _utils;
 	var version = exports.version = {
-	  full: '3.0.0-alpha.1',
-	  major: parseInt('3', 10),
-	  minor: parseInt('0', 10),
-	  patch: parseInt('0', 10),
-	  alpha:  true ? '1' : false,
-	  beta:  true ? 'false' : false
+	  full: '<%= pkg.version %>',
+	  major: parseInt('<%= major %>', 10),
+	  minor: parseInt('<%= minor %>', 10),
+	  patch: parseInt('<%= patch %>', 10),
+	  alpha:  true ? '<%= alpha %>' : false,
+	  beta:  true ? '<%= beta %>' : false
 	};
 
 /***/ },
@@ -1127,6 +1118,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _utils = __webpack_require__(3);
 	
+	var op = 'belongsTo';
+	
 	/**
 	 * Steps to apply a "belongsTo" relationship
 	 * 1. Choose the localField and localKey
@@ -1262,6 +1255,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	function belongsTo(Model, opts) {
 	  return function (target) {
+	    target.dbg(op, 'Model:', Model, 'opts:', opts);
 	    return applyBelongsTo(target, Model, opts);
 	  };
 	}
@@ -1313,6 +1307,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.hasMany = hasMany;
 	
 	var _utils = __webpack_require__(3);
+	
+	var op = 'hasMany';
 	
 	/**
 	 * Steps to apply a "hasMany" relationship
@@ -1501,6 +1497,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	function hasMany(Model, opts) {
 	  return function (target) {
+	    target.dbg(op, 'Model:', Model, 'opts:', opts);
 	    return applyHasMany(target, Model, opts);
 	  };
 	}
@@ -1517,6 +1514,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.hasOne = hasOne;
 	
 	var _utils = __webpack_require__(3);
+	
+	var op = 'hasOne';
 	
 	/**
 	 * Steps to apply a "hasOne" relationship
@@ -1652,6 +1651,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	function hasOne(Model, opts) {
 	  return function (target) {
+	    target.dbg(op, 'Model:', Model, 'opts:', opts);
 	    return applyHasOne(target, Model, opts);
 	  };
 	}
@@ -1673,9 +1673,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return name + ': Schemas are not inheritable, did you forget to define a schema?';
 	}
 	
+	var op = 'initialize';
+	
 	function initialize(opts) {
 	  opts || (opts = {});
 	  return function (target) {
+	    target.dbg(op, 'opts:', opts);
 	    var collection = new _collection.Collection([], target.idAttribute);
 	    target.data = function () {
 	      // TODO: Do I need this?
@@ -1705,6 +1708,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _configure = __webpack_require__(6);
 	
 	var _initialize = __webpack_require__(9);
+	
+	var op = 'setSchema';
 	
 	function makeDescriptor(target, key, prop) {
 	  var descriptor = {
@@ -1836,6 +1841,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  opts || (opts = {});
 	
 	  return function (target) {
+	    target.dbg(op, 'opts:', opts);
 	    try {
 	      target.data();
 	    } catch (err) {
@@ -1968,9 +1974,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _utils = __webpack_require__(3);
 	
+	var op = 'registerAdapter';
+	
 	function registerAdapter(name, adapter, opts) {
 	  opts || (opts = {});
+	  opts.op = op;
 	  return function (target) {
+	    target.dbg(op, 'name:', name, 'adapter:', adapter, 'opts:', opts);
 	    if (target.adapters && target.adapters === Object.getPrototypeOf(target).adapters) {
 	      target.adapters = {};
 	      (0, _utils.fillIn)(target.adapters, Object.getPrototypeOf(target).adapters);
@@ -2640,8 +2650,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 	
-	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-	
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 	
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -2895,6 +2903,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'createIndex',
 	    value: function createIndex(name, keyList) {
+	      this.dbg('createIndex', 'name:', name, 'keyList:', keyList);
 	      this.data().createIndex(name, keyList);
 	    }
 	
@@ -2945,8 +2954,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'inject',
 	    value: function inject(items, opts) {
-	      opts || (opts = {});
 	      var _this = this;
+	      var op = 'inject';
+	      _this.dbg(op, 'item(s):', items, 'opts:', opts);
+	      opts || (opts = {});
+	      opts.op = op;
 	      var singular = false;
 	      var collection = _this.data();
 	      var idAttribute = _this.idAttribute;
@@ -3046,7 +3058,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  }, {
 	    key: 'eject',
-	    value: function eject(id) {
+	    value: function eject(id, opts) {
+	      var op = 'eject';
+	      this.dbg(op, 'id:', id, 'opts:', opts);
+	      opts || (opts = {});
+	      opts.op = op;
 	      var item = this.get(id);
 	      if (item) {
 	        item._unset('$');
@@ -3065,7 +3081,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  }, {
 	    key: 'ejectAll',
-	    value: function ejectAll(params) {
+	    value: function ejectAll(params, opts) {
+	      var op = 'ejectAll';
+	      this.dbg(op, 'params:', params, 'opts:', opts);
+	      opts || (opts = {});
+	      opts.op = op;
 	      var items = this.filter(params);
 	      var collection = this.data();
 	      items.forEach(function (item) {
@@ -3085,6 +3105,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'get',
 	    value: function get(id) {
+	      this.dbg('get', 'id:', id);
 	      var instances = this.data().get(id);
 	      return instances.length ? instances[0] : undefined;
 	    }
@@ -3144,6 +3165,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'getAdapter',
 	    value: function getAdapter(name) {
+	      this.dbg('getAdapter', 'name:', name);
 	      var adapter = this.getAdapterName(name);
 	      if (!adapter) {
 	        throw new ReferenceError(adapter + ' not found!');
@@ -3176,12 +3198,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function create(props, opts) {
 	      var _this4 = this;
 	
+	      var op = 'create';
+	      this.dbg(op, 'props:', props, 'opts:', opts);
 	      var adapterName = undefined;
 	
 	      props || (props = {});
 	      opts || (opts = {});
 	      utils._(this, opts);
-	      opts.op = 'create';
+	      opts.op = op;
 	
 	      if (opts.upsert && utils.get(props, this.idAttribute)) {
 	        return this.update(utils.get(props, this.idAttribute), props, opts);
@@ -3206,12 +3230,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function createMany(items, opts) {
 	      var _this5 = this;
 	
+	      var op = 'createMany';
+	      this.dbg(op, 'items:', items, 'opts:', opts);
 	      var adapterName = undefined;
 	
 	      items || (items = []);
 	      opts || (opts = {});
 	      utils._(this, opts);
-	      opts.op = 'createMany';
+	      opts.op = op;
 	
 	      if (opts.upsert) {
 	        var _ret2 = (function () {
@@ -3251,11 +3277,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function find(id, opts) {
 	      var _this6 = this;
 	
+	      var op = 'find';
+	      this.dbg(op, 'id:', id, 'opts:', opts);
 	      var adapterName = undefined;
 	
 	      opts || (opts = {});
 	      utils._(this, opts);
-	      opts.op = 'find';
+	      opts.op = op;
 	
 	      return resolve(this.beforeFind(id, opts)).then(function () {
 	        adapterName = _this6.getAdapterName(opts);
@@ -3277,12 +3305,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function findAll(query, opts) {
 	      var _this7 = this;
 	
+	      var op = 'findAll';
+	      this.dbg(op, 'query:', query, 'opts:', opts);
 	      var adapterName = undefined;
 	
 	      query || (query = {});
 	      opts || (opts = {});
 	      utils._(this, opts);
-	      opts.op = 'findAll';
+	      opts.op = op;
 	
 	      return resolve(this.beforeFindAll(query, opts)).then(function () {
 	        adapterName = _this7.getAdapterName(opts);
@@ -3304,12 +3334,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function update(id, props, opts) {
 	      var _this8 = this;
 	
+	      var op = 'update';
+	      this.dbg(op, 'id:', id, 'props:', props, 'opts:', opts);
 	      var adapterName = undefined;
 	
 	      props || (props = {});
 	      opts || (opts = {});
 	      utils._(this, opts);
-	      opts.op = 'update';
+	      opts.op = op;
 	
 	      return resolve(this.beforeUpdate(id, props, opts)).then(function () {
 	        adapterName = _this8.getAdapterName(opts);
@@ -3331,12 +3363,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function updateMany(items, opts) {
 	      var _this9 = this;
 	
+	      var op = 'updateMany';
+	      this.dbg(op, 'items:', items, 'opts:', opts);
 	      var adapterName = undefined;
 	
 	      items || (items = []);
 	      opts || (opts = {});
 	      utils._(this, opts);
-	      opts.op = 'updateMany';
+	      opts.op = op;
 	
 	      return resolve(this.beforeUpdateMany(items, opts)).then(function () {
 	        adapterName = _this9.getAdapterName(opts);
@@ -3360,13 +3394,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function updateAll(query, props, opts) {
 	      var _this10 = this;
 	
+	      var op = 'updateAll';
+	      this.dbg(op, 'query:', query, 'props:', props, 'opts:', opts);
 	      var adapterName = undefined;
 	
 	      query || (query = {});
 	      props || (props = {});
 	      opts || (opts = {});
 	      utils._(this, opts);
-	      opts.op = 'updateAll';
+	      opts.op = op;
 	
 	      return resolve(this.beforeUpdateAll(query, props, opts)).then(function () {
 	        adapterName = _this10.getAdapterName(opts);
@@ -3388,11 +3424,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function destroy(id, opts) {
 	      var _this11 = this;
 	
+	      var op = 'destroy';
+	      this.dbg(op, 'id:', id, 'opts:', opts);
 	      var adapterName = undefined;
 	
 	      opts || (opts = {});
 	      utils._(this, opts);
-	      opts.op = 'destroy';
+	      opts.op = op;
 	
 	      return resolve(this.beforeDestroy(id, opts)).then(function () {
 	        adapterName = _this11.getAdapterName(opts);
@@ -3423,12 +3461,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function destroyAll(query, opts) {
 	      var _this12 = this;
 	
+	      var op = 'destroyAll';
+	      this.dbg(op, 'query:', query, 'opts:', opts);
 	      var adapterName = undefined;
 	
 	      query || (query = {});
 	      opts || (opts = {});
 	      utils._(this, opts);
-	      opts.op = 'destroyAll';
+	      opts.op = op;
 	
 	      return resolve(this.beforeDestroyAll(query, opts)).then(function () {
 	        adapterName = _this12.getAdapterName(opts);
@@ -3451,6 +3491,40 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'afterDestroyAll',
 	    value: function afterDestroyAll() {}
+	  }, {
+	    key: 'log',
+	    value: function log(level) {
+	      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+	        args[_key - 1] = arguments[_key];
+	      }
+	
+	      if (level && !args.length) {
+	        args.push(level);
+	        level = 'debug';
+	      }
+	      if (level === 'debug' && !this.debug) {
+	        return;
+	      }
+	      var prefix = level.toUpperCase() + ': (' + this.name + ')';
+	      if (console[level]) {
+	        var _console;
+	
+	        (_console = console)[level].apply(_console, [prefix].concat(args));
+	      } else {
+	        var _console2;
+	
+	        (_console2 = console).log.apply(_console2, [prefix].concat(args));
+	      }
+	    }
+	  }, {
+	    key: 'dbg',
+	    value: function dbg() {
+	      for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+	        args[_key2] = arguments[_key2];
+	      }
+	
+	      this.log.apply(this, ['debug'].concat(args));
+	    }
 	
 	    /**
 	     * Usage:
@@ -3528,15 +3602,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'extend',
 	    value: function extend(props, classProps) {
-	      var Child = undefined;
 	      var Parent = this;
-	      props = props || {};
-	      classProps = classProps || {};
+	      var Child = undefined;
 	
-	      var _schema = classProps.schema || _defineProperty({}, classProps.idAttribute, {});
+	      Parent.dbg('extend', 'props:', props, 'classProps:', classProps);
+	
+	      props || (props = {});
+	      classProps || (classProps = {});
+	
 	      var initialize = props.initialize;
 	      delete props.initialize;
-	      _schema[classProps.idAttribute] = _schema[classProps.idAttribute] || {};
 	
 	      if (props.hasOwnProperty('constructor')) {
 	        Child = props.constructor;
@@ -3549,8 +3624,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	          Child = function () {
 	            _classCallCheck(this, Child);
 	
-	            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	              args[_key] = arguments[_key];
+	            for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+	              args[_key3] = arguments[_key3];
 	            }
 	
 	            var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Child).apply(this, args));
@@ -3569,11 +3644,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      classProps.shortname = classProps.shortname || utils.camelCase(Child.name || classProps.name);
 	      delete classProps.name;
 	
+	      var _schema = classProps.schema || {};
+	      delete classProps.schema;
+	
 	      _inherits(Child, Parent);
 	
 	      (0, _decorators.configure)(props)(Child.prototype);
 	      (0, _decorators.configure)(classProps)(Child);
-	
+	      _schema[Child.idAttribute] = _schema[Child.idAttribute] || {};
 	      (0, _decorators.setSchema)(_schema)(Child);
 	
 	      return Child;
@@ -3590,6 +3668,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  bypassCache: false,
 	  csp: false,
 	  defaultAdapter: 'http',
+	  debug: false,
 	  eagerEject: false,
 	  idAttribute: 'id',
 	  linkRelations: isBrowser,
