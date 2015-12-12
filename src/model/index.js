@@ -215,6 +215,7 @@ export class Model extends BaseModel {
    * @param {string[]} keyList - The list of keys to be used to create the index.
    */
   static createIndex (name, keyList) {
+    this.dbg('createIndex', 'name:', name, 'keyList:', keyList)
     this.data().createIndex(name, keyList)
   }
 
@@ -256,8 +257,11 @@ export class Model extends BaseModel {
    * @return {(Model|Model[])} Whether "instance" is an instance of this Model.
    */
   static inject (items, opts) {
-    opts || (opts = {})
     const _this = this
+    const op = 'inject'
+    _this.dbg(op, 'item(s):', items, 'opts:', opts)
+    opts || (opts = {})
+    opts.op = op
     let singular = false
     const collection = _this.data()
     const idAttribute = _this.idAttribute
@@ -354,7 +358,11 @@ export class Model extends BaseModel {
    * @param {(string|number)} id - The primary key of the instance to be removed.
    * @return {Model} The removed item, if any.
    */
-  static eject (id) {
+  static eject (id, opts) {
+    const op = 'eject'
+    this.dbg(op, 'id:', id, 'opts:', opts)
+    opts || (opts = {})
+    opts.op = op
     const item = this.get(id)
     if (item) {
       item._unset('$')
@@ -370,7 +378,11 @@ export class Model extends BaseModel {
    * @param {?Object} query - The query used to select instances to remove.
    * @return {Model[]} The removed instances, if any.
    */
-  static ejectAll (params) {
+  static ejectAll (params, opts) {
+    const op = 'ejectAll'
+    this.dbg(op, 'params:', params, 'opts:', opts)
+    opts || (opts = {})
+    opts.op = op
     const items = this.filter(params)
     const collection = this.data()
     items.forEach(function (item) {
@@ -387,6 +399,7 @@ export class Model extends BaseModel {
    * @return {?Model} The instance or undefined.
    */
   static get (id) {
+    this.dbg('get', 'id:', id)
     const instances = this.data().get(id)
     return instances.length ? instances[0] : undefined
   }
@@ -427,6 +440,7 @@ export class Model extends BaseModel {
    * @return {Adapter} The adapter, if any.
    */
   static getAdapter (name) {
+    this.dbg('getAdapter', 'name:', name)
     const adapter = this.getAdapterName(name)
     if (!adapter) {
       throw new ReferenceError(`${adapter} not found!`)
@@ -451,12 +465,14 @@ export class Model extends BaseModel {
 
   static beforeCreate () {}
   static create (props, opts) {
+    const op = 'create'
+    this.dbg(op, 'props:', props, 'opts:', opts)
     let adapterName
 
     props || (props = {})
     opts || (opts = {})
     utils._(this, opts)
-    opts.op = 'create'
+    opts.op = op
 
     if (opts.upsert && utils.get(props, this.idAttribute)) {
       return this.update(utils.get(props, this.idAttribute), props, opts)
@@ -476,12 +492,14 @@ export class Model extends BaseModel {
 
   static beforeCreateMany () {}
   static createMany (items, opts) {
+    const op = 'createMany'
+    this.dbg(op, 'items:', items, 'opts:', opts)
     let adapterName
 
     items || (items = [])
     opts || (opts = {})
     utils._(this, opts)
-    opts.op = 'createMany'
+    opts.op = op
 
     if (opts.upsert) {
       let hasId = true
@@ -508,11 +526,13 @@ export class Model extends BaseModel {
 
   static beforeFind () {}
   static find (id, opts) {
+    const op = 'find'
+    this.dbg(op, 'id:', id, 'opts:', opts)
     let adapterName
 
     opts || (opts = {})
     utils._(this, opts)
-    opts.op = 'find'
+    opts.op = op
 
     return resolve(this.beforeFind(id, opts))
       .then(() => {
@@ -529,12 +549,14 @@ export class Model extends BaseModel {
 
   static beforeFindAll () {}
   static findAll (query, opts) {
+    const op = 'findAll'
+    this.dbg(op, 'query:', query, 'opts:', opts)
     let adapterName
 
     query || (query = {})
     opts || (opts = {})
     utils._(this, opts)
-    opts.op = 'findAll'
+    opts.op = op
 
     return resolve(this.beforeFindAll(query, opts))
       .then(() => {
@@ -551,12 +573,14 @@ export class Model extends BaseModel {
 
   static beforeUpdate () {}
   static update (id, props, opts) {
+    const op = 'update'
+    this.dbg(op, 'id:', id, 'props:', props, 'opts:', opts)
     let adapterName
 
     props || (props = {})
     opts || (opts = {})
     utils._(this, opts)
-    opts.op = 'update'
+    opts.op = op
 
     return resolve(this.beforeUpdate(id, props, opts))
       .then(() => {
@@ -573,12 +597,14 @@ export class Model extends BaseModel {
 
   static beforeUpdateMany () {}
   static updateMany (items, opts) {
+    const op = 'updateMany'
+    this.dbg(op, 'items:', items, 'opts:', opts)
     let adapterName
 
     items || (items = [])
     opts || (opts = {})
     utils._(this, opts)
-    opts.op = 'updateMany'
+    opts.op = op
 
     return resolve(this.beforeUpdateMany(items, opts))
       .then(() => {
@@ -595,13 +621,15 @@ export class Model extends BaseModel {
 
   static beforeUpdateAll () {}
   static updateAll (query, props, opts) {
+    const op = 'updateAll'
+    this.dbg(op, 'query:', query, 'props:', props, 'opts:', opts)
     let adapterName
 
     query || (query = {})
     props || (props = {})
     opts || (opts = {})
     utils._(this, opts)
-    opts.op = 'updateAll'
+    opts.op = op
 
     return resolve(this.beforeUpdateAll(query, props, opts))
       .then(() => {
@@ -618,11 +646,13 @@ export class Model extends BaseModel {
 
   static beforeDestroy () {}
   static destroy (id, opts) {
+    const op = 'destroy'
+    this.dbg(op, 'id:', id, 'opts:', opts)
     let adapterName
 
     opts || (opts = {})
     utils._(this, opts)
-    opts.op = 'destroy'
+    opts.op = op
 
     return resolve(this.beforeDestroy(id, opts))
       .then(() => {
@@ -650,12 +680,14 @@ export class Model extends BaseModel {
 
   static beforeDestroyAll () {}
   static destroyAll (query, opts) {
+    const op = 'destroyAll'
+    this.dbg(op, 'query:', query, 'opts:', opts)
     let adapterName
 
     query || (query = {})
     opts || (opts = {})
     utils._(this, opts)
-    opts.op = 'destroyAll'
+    opts.op = op
 
     return resolve(this.beforeDestroyAll(query, opts))
       .then(() => {
@@ -680,6 +712,26 @@ export class Model extends BaseModel {
       })
   }
   static afterDestroyAll () {}
+
+  static log (level, ...args) {
+    if (level && !args.length) {
+      args.push(level)
+      level = 'debug'
+    }
+    if (level === 'debug' && !this.debug) {
+      return
+    }
+    const prefix = `${level.toUpperCase()}: (${this.name})`
+    if (console[level]) {
+      console[level](prefix, ...args)
+    } else {
+      console.log(prefix, ...args)
+    }
+  }
+
+  static dbg (...args) {
+    this.log('debug', ...args)
+  }
 
   /**
    * Usage:
@@ -741,17 +793,16 @@ export class Model extends BaseModel {
    * var User = JSData.Model.extend({...}, {...})
    */
   static extend (props, classProps) {
-    let Child
     const Parent = this
-    props = props || {}
-    classProps = classProps || {}
+    let Child
 
-    const _schema = classProps.schema || {
-      [classProps.idAttribute]: {}
-    }
+    Parent.dbg('extend', 'props:', props, 'classProps:', classProps)
+
+    props || (props = {})
+    classProps || (classProps = {})
+
     const initialize = props.initialize
     delete props.initialize
-    _schema[classProps.idAttribute] = _schema[classProps.idAttribute] || {}
 
     if (props.hasOwnProperty('constructor')) {
       Child = props.constructor
@@ -786,11 +837,14 @@ export class Model extends BaseModel {
     classProps.shortname = classProps.shortname || utils.camelCase(Child.name || classProps.name)
     delete classProps.name
 
+    const _schema = classProps.schema || {}
+    delete classProps.schema
+
     __inherits__(Child, Parent)
 
     configure(props)(Child.prototype)
     configure(classProps)(Child)
-
+    _schema[Child.idAttribute] = _schema[Child.idAttribute] || {}
     setSchema(_schema)(Child)
 
     return Child
@@ -804,6 +858,7 @@ configure({
   bypassCache: false,
   csp: false,
   defaultAdapter: 'http',
+  debug: false,
   eagerEject: false,
   idAttribute: 'id',
   linkRelations: isBrowser,

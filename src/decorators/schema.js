@@ -6,6 +6,8 @@ import {validate} from '../validate'
 import {configure} from './configure'
 import {initialize} from './initialize'
 
+const op = 'setSchema'
+
 function makeDescriptor (target, key, prop) {
   const descriptor = {
     enumerable: prop.enumerable !== undefined ? prop.enumerable : true,
@@ -128,6 +130,7 @@ export function setSchema (opts) {
   opts || (opts = {})
 
   return function (target) {
+    target.dbg(op, 'opts:', opts)
     try {
       target.data()
     } catch (err) {

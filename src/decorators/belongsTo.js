@@ -1,5 +1,7 @@
 import {get, set} from '../utils'
 
+const op = 'belongsTo'
+
 /**
  * Steps to apply a "belongsTo" relationship
  * 1. Choose the localField and localKey
@@ -114,6 +116,7 @@ function applyBelongsTo (Model, Relation, opts) {
  */
 export function belongsTo (Model, opts) {
   return function (target) {
+    target.dbg(op, 'Model:', Model, 'opts:', opts)
     return applyBelongsTo(target, Model, opts)
   }
 }
