@@ -1,3 +1,27 @@
+##### 3.0.0-alpha.1 - 12 December 2015
+
+###### Breaking API changes
+- js-data now requires full ES5 compatibility from the runtime. The developer
+can add es5-shim for older browsers.
+- `DS` is now just a container for `Model` classes. It no longer stores data or
+metadata.
+- Settings are no longer inherited via the prototype. A base Model can be
+created which the remaining Models can extend.
+- A `Model` is essentially a constructor function, which can be used to create
+instance of the Model. A Model has static methods like `find` and `create`. The
+prototype of a Model defines behavior for instances of the Model. Models can be
+defined using ES6 class syntax. A Model must be "initialized" in order to be
+able to store data. A Model is automatically initialized if a schema is defined
+for the Model, or if the Model is created using the `.extend` method, or the
+legacy `DS#defineResource` or `DS#defineModel` methods.
+
+###### Other
+- As this is an alpha build of a complete rewrite from scratch, there is still a
+lot of work to be done. Some features from 2.x may not have been implemented yet
+and there are probably bugs. If you're willing to experiment with 3.x, your
+feedback is appreciated.
+- 3.0.0-alpha.1 gzipped is approximately 40% smaller than 2.8.2 gzipped.
+
 ##### 2.8.2 - 04 November 2015
 
 ###### Backwards compatible bug fixes

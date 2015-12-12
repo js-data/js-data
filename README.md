@@ -41,75 +41,156 @@ Node, `global.Promise` must be available. Here is a handy library for
 polyfilling: https://github.com/jakearchibald/es6-promise.
 
 ### Quick Start
+
+##### For use in a Browser
+
 `npm install --save js-data js-data-http` or `bower install --save js-data js-data-http`.
 
-Load `js-data-http.js` after `js-data.js`. See [installation instructions][inst]
-for making js-data part of your r.js/browserify/webpack build.
+(You may also substitute `js-data-http` for any one of the other client-side adapters.)
+
+##### For use in Node.js
+
+`npm install --save js-data axios js-data-http-node`
+
+(You may also substitute `js-data-http-node` for any one of the other server-side adapters.)
+
+See [installation instructions][inst] for making js-data part of your
+r.js/browserify/webpack build.
+
+__ES7:__
 
 ```js
-// you can also require "js-data" if you're using AMD/CommonJS
-// e.g.
-// var JSData = require('js-data');
-// var DSHttpAdapter = require('js-data-http');
-import {DSHttpAdapter} from 'js-data-http'
-import {DS, Resource} from 'js-data'
-const store = new DS();
+import {Model, registerAdapter} from 'js-data'
+import DSHttpAdapter from 'js-data-http'
 
+async function showExample() {
+  // "User" will use an http adapter by default
+  @registerAdapter('http', new DSHttpAdapter(), { default: true })
+  class User extends Model {}
+
+  // Allow "User" to store data
+  User.initialize()
+
+  let user = await User.find(1)
+
+  console.log(user) // { id: 1, name: 'John' }
+  console.log(user instanceof User) // true
+
+  // The user instance is stored in User now
+  console.log(User.get(user.id)) // { id: 1, name: 'John' }
+  console.log(user === User.get(user.id)) // true
+
+  // No need for another GET request, will resolve immediately
+  // See http://www.js-data.io/docs/dsfind
+  user = await User.find(user.id)
+
+  console.log(user === User.get(user.id)) // true
+
+  // PUT /user/1 {name:"Johnny"}
+  // See http://www.js-data.io/docs/dsupdate
+  user = await User.update(user.id, { name: 'Johnny' })
+
+  // The user instance stored in User has been updated
+  console.log(User.get(user.id)) // { id: 1, name: 'Johnny' }
+  console.log(user === User.get(user.id)) // true
+
+  await User.destroy(user.id)
+
+  // The user instance no longer stored in User
+  console.log(User.get(1)) // undefined
+}
+
+showExample()
+```
+
+__ES6:__
+
+```js
+import {Model, registerAdapter} from 'js-data'
+import DSHttpAdapter from 'js-data-http'
+
+function* showExample() {
+  class User extends Model {}
+
+  // "User" will use an http adapter by default
+  User.setAdapter('http', new DSHttpAdapter(), { default: true })
+
+  // Allow "User" to store data
+  User.initialize()
+
+  let user = yield User.find(1)
+
+  console.log(user) // { id: 1, name: 'John' }
+  console.log(user instanceof User) // true
+
+  // The user instance is stored in User now
+  console.log(User.get(user.id)) // { id: 1, name: 'John' }
+  console.log(user === User.get(user.id)) // true
+
+  // No need for another GET request, will resolve immediately
+  // See http://www.js-data.io/docs/dsfind
+  user = yield User.find(user.id)
+
+  console.log(user === User.get(user.id)) // true
+
+  // PUT /user/1 {name:"Johnny"}
+  // See http://www.js-data.io/docs/dsupdate
+  user = yield User.update(user.id, { name: 'Johnny' })
+
+  // The user instance stored in User has been updated
+  console.log(User.get(user.id)) // { id: 1, name: 'Johnny' }
+  console.log(user === User.get(user.id)) // true
+
+  yield User.destroy(user.id)
+
+  // The user instance no longer stored in User
+  console.log(User.get(1)) // undefined
+}
+
+showExample()
+```
+
+__ES5:__
+
+```js
+var User = JSData.Model.extend({}, { name: 'User' })
 // register and use http by default for async operations
-store.registerAdapter('http', new DSHttpAdapter(), { default: true });
-
-class User extends Resource {}
+User.registerAdapter('http', new DSHttpAdapter(), { default: true });
 
 // Example CRUD operations with default configuration
 // See http://www.js-data.io/docs/dsfind
 User.find(1)
   .then(function (user) {
-    user // { id: 1, name: 'John' }
+    console.log(user) // { id: 1, name: 'John' }
+    console.log(user instanceof User) // true
 
-    // See http://www.js-data.io/docs/dsis
-    user instanceof User // true
-    user instanceof Comment // false
-
-    // The user is in the store now
-    // See http://www.js-data.io/docs/dsget
-    User.get(user.id) // { id: 1, name: 'John' }
-
-    user === User.get(user.id) // true
+    // The user instance is stored in User now
+    console.log(User.get(user.id)) // { id: 1, name: 'John' }
+    console.log(user === User.get(user.id)) // true
 
     // No need for another GET request, will resolve immediately
     // See http://www.js-data.io/docs/dsfind
     return User.find(user.id)
   })
   .then(function (user) {
-    user === User.get(user.id) // true
+    console.log(user === User.get(user.id)) // true
 
     // PUT /user/1 {name:"Johnny"}
     // See http://www.js-data.io/docs/dsupdate
     return User.update(user.id, { name: 'Johnny' })
   })
   .then(function (user) {
-    user === User.get(user.id) // true
-
-    user // { id: 1, name: 'Johnny' }
-
-    user.name = 'Billy'
-
-    // PUT /user/1 {id:1,name:"Billy"}
-    // See http://www.js-data.io/docs/dssave
-    return User.save(user.id)
-  })
-  .then(function (user) {
-    user === User.get(user.id) // true
-
-    user // { id: 1, name: 'Johnny' }
+    // The user instance stored in User has been updated
+    console.log(User.get(user.id)) // { id: 1, name: 'Johnny' }
+    console.log(user === User.get(user.id)) // true
 
     // DELETE /user/1
     // See http://www.js-data.io/docs/dsdestroy
     return User.destroy(user.id)
   })
   .then(function () {
-    // The user has also been removed from the in-memory store
-    User.get(1) // undefined
+    // The user instance no longer stored in User
+    console.log(User.get(1)) // undefined
   })
 ```
 
