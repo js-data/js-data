@@ -463,7 +463,52 @@ export class Model extends BaseModel {
     return opts.adapter || opts.defaultAdapter
   }
 
+  /**
+   * Lifecycle hook. Called by `Model.create` after `Model.create` checks
+   * whether it can do an upsert and before `Model.create` tries to call the
+   * `create` method of an adapter.
+   *
+   * `Model.beforeCreate` will receive the same arguments that are passed to
+   * `Model.create`. If `Model.beforeCreate` returns a promise, `Model.create`
+   * will wait for the promise to resolve before continuing. If the promise
+   * rejects, then the promise returned by `Model.create` will reject. If
+   * `Model.beforeCreate` does not return a promise, `Model.create` will resume
+   * execution immediately.
+   *
+   * @param {Object} props - Properties object that was passed to Model#create.
+   * @param {Object} opts - Options object that was passed to Model#create.
+   */
   static beforeCreate () {}
+
+  /**
+   * The "C" in "CRUD", `Model.create` creates a single entity using the
+   * `create` method of an adapter. If the `props` passed to `Model.create`
+   * contain a primary key as configured by `Model.idAttribute` and
+   * `opts.upsert` is `true` of `Model.upsert` is `true` and `opts.upsert` is
+   * not `false`, then `Model.update` will be called instead.
+   *
+   * `Model.beforeCreate` is called and passed the same arguments passed to
+   * `Model.create.
+   *
+   * `props` and `opts` are passed to the `create` method of the adapter
+   * specified by `opts.adapter` or `Model.defaultAdapter.
+   *
+   * `Model.afterCreate` is called with the `data` argument returned by the
+   * adapter's `create` method and the `opts` argument passed to `Model.create`.
+   *
+   * If `opts.raw` is `true` or `Model.raw` is `true` and `opts.raw` is not
+   * `false`, then a result object is returned that contained the created entity
+   * and some metadata about the operation and its result.
+   *
+   * Otherwise, the promise returned by `Model.create` resolves with the created
+   * entity.
+   *
+   * @param {?Object} props - The properties from which to create the new entity.
+   * @param {?Object} opts - Optional configuration. Properties:
+   *   - {string} adapter - The name of the registered adapter to use.
+   *   - {boolean} raw - The name of the registered adapter to use.
+   * @return {Object} The created entity, or if `raw` is `true` then a result object.
+   */
   static create (props, opts) {
     const op = 'create'
     this.dbg(op, 'props:', props, 'opts:', opts)
