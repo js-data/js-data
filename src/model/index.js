@@ -465,8 +465,8 @@ export class Model extends BaseModel {
 
   /**
    * Lifecycle hook. Called by `Model.create` after `Model.create` checks
-   * whether it can do an upsert and before `Model.create` tries to call the
-   * `create` method of an adapter.
+   * whether it can do an upsert and before `Model.create` calls the `create`
+   * method of an adapter.
    *
    * `Model.beforeCreate` will receive the same arguments that are passed to
    * `Model.create`. If `Model.beforeCreate` returns a promise, `Model.create`
@@ -475,8 +475,8 @@ export class Model extends BaseModel {
    * `Model.beforeCreate` does not return a promise, `Model.create` will resume
    * execution immediately.
    *
-   * @param {Object} props - Properties object that was passed to Model#create.
-   * @param {Object} opts - Options object that was passed to Model#create.
+   * @param {Object} props - Properties object that was passed to `Model.create`.
+   * @param {Object} opts - Options object that was passed to `Model.create`.
    */
   static beforeCreate () {}
 
@@ -533,6 +533,21 @@ export class Model extends BaseModel {
           .then(() => handleResponse(this, data, opts, adapterName))
       })
   }
+
+  /**
+   * Lifecycle hook. Called by `Model.create` after `Model.create` call the
+   * `create` method of an adapter.
+   *
+   * `Model.afterCreate` will receive the `data` argument returned by the
+   * adapter's `create` method and the `opts` argument passed to `Model.create`.
+   * If `Model.afterCreate` returns a promise, `Model.create` will wait for the
+   * promise to resolve before continuing. If the promise rejects, then the
+   * promise returned by `Model.create` will reject. If `Model.afterCreate` does
+   * not return a promise, `Model.create` will resume execution immediately.
+   *
+   * @param {Object} data - Data object returned by the adapter's `create` method.
+   * @param {Object} opts - Options object that was passed to `Model.create`.
+   */
   static afterCreate () {}
 
   static beforeCreateMany () {}
