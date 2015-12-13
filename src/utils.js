@@ -28,6 +28,9 @@ export function isSorN (value) {
   return isString(value) || isNumber(value)
 }
 export function get (object, prop) {
+  if (!prop) {
+    return
+  }
   const parts = prop.split('.')
   const last = parts.pop()
 
@@ -49,7 +52,7 @@ export function unset (object, prop) {
 
   delete object[last]
 }
-function mkdirP(object, path) {
+function mkdirP (object, path) {
   if (!path) {
     return object
   }

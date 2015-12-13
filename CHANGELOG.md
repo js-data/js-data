@@ -1,7 +1,7 @@
 ##### 3.0.0-alpha.1 - 12 December 2015
 
 ###### Breaking API changes
-- js-data now requires full ES5 compatibility from the runtime. The developer
+- js-data now requires full ES5 support from the runtime. The developer
 can add es5-shim for older browsers.
 - `DS` is now just a container for `Model` classes. It no longer stores data or
 metadata.
@@ -14,6 +14,13 @@ defined using ES6 class syntax. A Model must be "initialized" in order to be
 able to store data. A Model is automatically initialized if a schema is defined
 for the Model, or if the Model is created using the `.extend` method, or the
 legacy `DS#defineResource` or `DS#defineModel` methods.
+- Use of `Object.observe` and the observe-js polyfill have been dropped in
+`3.0.0-alpha.1` (see https://esdiscuss.org/topic/an-update-on-object-observe),
+replaced with Backbone-style change detection (but unlike with Backbone, you can
+still treat instances like POJOs!) Change detection is now more “opt in”, so you
+can use it more wisely when you actually need, improving performance overall.
+- In  `3.0.0-alpha.1` Models (Resources) can now be defined with plain ES6
+classes
 
 ###### Other
 - As this is an alpha build of a complete rewrite from scratch, there is still a
@@ -21,6 +28,10 @@ lot of work to be done. Some features from 2.x may not have been implemented yet
 and there are probably bugs. If you're willing to experiment with 3.x, your
 feedback is appreciated.
 - 3.0.0-alpha.1 gzipped is approximately 40% smaller than 2.8.2 gzipped.
+- In `3.0.0-alpha.1`, the internal store (cache) of each Model (Resource)
+supports secondary indexes for blazing fast lookups on indexed keys. Where in
+2.x a `hasMany` property accessor performs a O(n) lookup, in `3.0.0-alpha.1` the
+lookup is performed in O(log n) time.
 
 ##### 2.8.2 - 04 November 2015
 

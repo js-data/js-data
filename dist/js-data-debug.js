@@ -676,6 +676,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return isString(value) || isNumber(value);
 	}
 	function get(object, prop) {
+	  if (!prop) {
+	    return;
+	  }
 	  var parts = prop.split('.');
 	  var last = parts.pop();
 	
@@ -3644,15 +3647,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	      classProps.shortname = classProps.shortname || utils.camelCase(Child.name || classProps.name);
 	      delete classProps.name;
 	
-	      var _schema = classProps.schema || {};
+	      var _schema = classProps.schema;
 	      delete classProps.schema;
 	
 	      _inherits(Child, Parent);
 	
 	      (0, _decorators.configure)(props)(Child.prototype);
 	      (0, _decorators.configure)(classProps)(Child);
-	      _schema[Child.idAttribute] = _schema[Child.idAttribute] || {};
-	      (0, _decorators.setSchema)(_schema)(Child);
+	      if (_schema) {
+	        (0, _decorators.setSchema)(_schema)(Child);
+	      } else {
+	        Child.initialize();
+	      }
 	
 	      return Child;
 	    }

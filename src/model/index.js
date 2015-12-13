@@ -837,15 +837,18 @@ export class Model extends BaseModel {
     classProps.shortname = classProps.shortname || utils.camelCase(Child.name || classProps.name)
     delete classProps.name
 
-    const _schema = classProps.schema || {}
+    const _schema = classProps.schema
     delete classProps.schema
 
     __inherits__(Child, Parent)
 
     configure(props)(Child.prototype)
     configure(classProps)(Child)
-    _schema[Child.idAttribute] = _schema[Child.idAttribute] || {}
-    setSchema(_schema)(Child)
+    if (_schema) {
+      setSchema(_schema)(Child)
+    } else {
+      Child.initialize()
+    }
 
     return Child
   }
