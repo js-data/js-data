@@ -10,7 +10,17 @@ import {
 } from '../utils'
 import {configure} from '../decorators'
 
+/**
+ * Query class used by the @{link Collection} class. An instance of `Query` is
+ * returned by {@link Model.query} and {@link Collection.query}.
+ * @class Query
+ * @param {Collection} collection - The collection on which this query operates.
+ */
 export function Query (collection) {
+  /**
+   * The collection on which this query operates.
+   * @type {Collection}
+   */
   this.collection = collection
 }
 
@@ -112,6 +122,11 @@ function evaluate (value, op, predicate) {
 }
 
 configure({
+  /**
+   * @memberof Query
+   * @instance
+   * @return {Array} The data in this query.
+   */
   getData () {
     if (!this.data) {
       this.data = this.collection.index.getAll()
@@ -119,6 +134,11 @@ configure({
     return this.data
   },
 
+  /**
+   * @memberof Query
+   * @instance
+   * @return {Query} A reference to itself for chaining.
+   */
   between (leftKeys, rightKeys, opts) {
     opts || (opts = {})
     const collection = this.collection
@@ -130,6 +150,11 @@ configure({
     return this
   },
 
+  /**
+   * @memberof Query
+   * @instance
+   * @return {Query} A reference to itself for chaining.
+   */
   get (keyList = [], opts) {
     opts || (opts = {})
     if (this.data) {
@@ -148,6 +173,19 @@ configure({
     return this
   },
 
+  /**
+   * @memberof Query
+   * @instance
+   * @param {(Array[]|...string|...number)} [keyLists] - KeyLists. If no
+   * arguments are provided then all of the data is selected. Otherwise one or
+   * more strings, numbers, or arrays of strings or numbers must be provided for
+   * selecting entities. If just strings or numbers are passed in, then they
+   * will each be wrapped in an array. Arrays of strings or numbers are usually
+   * provided when the selected index uses a compound key.
+   * @param {Object} [opts] - Configuration options.
+   * @param {string} [opts.index=Query#collection#idAttribute] - The secondary index to use. 
+   * @return {Query} A reference to itself for chaining.
+   */
   getAll (...args) {
     let opts = {}
     if (this.data) {
@@ -169,16 +207,24 @@ configure({
     return this
   },
 
-  filter (opts, thisArg) {
-    opts || (opts = {})
+  /**
+   * @memberof Query
+   * @instance
+   * @param {(Object|Function)} [queryOrFn={}] - Selection query or filter function.
+   * @param {Function} [thisArg] - Context to which to bind `queryOrFn` if
+   * `queryOrFn` is a function.
+   * @return {Query} A reference to itself for chaining.
+   */
+  filter (query, thisArg) {
+    query || (query = {})
     this.getData()
-    if (isObject(opts)) {
+    if (isObject(query)) {
       let where = {}
       // Filter
-      if (isObject(opts.where)) {
-        where = opts.where
+      if (isObject(query.where)) {
+        where = query.where
       }
-      forOwn(opts, function (value, key) {
+      forOwn(query, function (value, key) {
         if (!(key in reserved) && !(key in where)) {
           where[key] = {
             '==': value
@@ -223,7 +269,7 @@ configure({
       }
 
       // Sort
-      let orderBy = opts.orderBy || opts.sort
+      let orderBy = query.orderBy || query.sort
 
       if (isString(orderBy)) {
         orderBy = [
@@ -248,21 +294,27 @@ configure({
       }
 
       // Skip
-      if (isNumber(opts.skip)) {
-        this.skip(opts.skip)
-      } else if (isNumber(opts.offset)) {
-        this.skip(opts.offset)
+      if (isNumber(query.skip)) {
+        this.skip(query.skip)
+      } else if (isNumber(query.offset)) {
+        this.skip(query.offset)
       }
       // Limit
-      if (isNumber(opts.limit)) {
-        this.limit(opts.limit)
+      if (isNumber(query.limit)) {
+        this.limit(query.limit)
       }
-    } else if (isFunction(opts)) {
-      this.data = this.data.filter(opts, thisArg)
+    } else if (isFunction(query)) {
+      this.data = this.data.filter(query, thisArg)
     }
     return this
   },
 
+  /**
+   * @memberof Query
+   * @instance
+   * @param {number} num - The number of entities to skip.
+   * @return {Query} A reference to itself for chaining.
+   */
   skip (num) {
     if (!isNumber(num)) {
       throw new TypeError(`skip: Expected number but found ${typeof num}!`)
@@ -276,6 +328,12 @@ configure({
     return this
   },
 
+  /**
+   * @memberof Query
+   * @instance
+   * @param {number} num - The maximum number of entities to keep in the result.
+   * @return {Query} A reference to itself for chaining.
+   */
   limit (num) {
     if (!isNumber(num)) {
       throw new TypeError(`limit: Expected number but found ${typeof num}!`)
@@ -285,16 +343,35 @@ configure({
     return this
   },
 
-  forEach (cb, thisArg) {
-    this.getData().forEach(cb, thisArg)
+  /**
+   * @memberof Query
+   * @instance
+   * @param {Function} forEachFn - Iteration function.
+   * @param {*} [thisArg] - Context to which to bind `forEachFn`.
+   * @return {Query} A reference to itself for chaining.
+   */
+  forEach (forEachFn, thisArg) {
+    this.getData().forEach(forEachFn, thisArg)
     return this
   },
 
-  map (cb, thisArg) {
-    this.data = this.getData().map(cb, thisArg)
+  /**
+   * @memberof Query
+   * @instance
+   * @param {Function} mapFn - Mapping function.
+   * @param {*} [thisArg] - Context to which to bind `mapFn`.
+   * @return {Query} A reference to itself for chaining.
+   */
+  map (mapFn, thisArg) {
+    this.data = this.getData().map(mapFn, thisArg)
     return this
   },
 
+  /**
+   * @memberof Query
+   * @instance
+   * @return {Array} The result of executing this query.
+   */
   run () {
     let data = this.data
     this.data = null

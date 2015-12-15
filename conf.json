@@ -1,0 +1,15 @@
+{
+  "source": {
+    "includePattern": ".*js$"
+  },
+  "theme": "flatly",
+  "plugins": ["plugins/markdown"],
+  "opts": {
+    "template": "./node_modules/ink-docstrap/template",
+    "destination": "./doc/",
+    "recurse": true,
+    "verbose": true,
+    "readme": "./README.md",
+    "package": "./package.json"
+  }
+}

@@ -34,11 +34,24 @@ const handleResponse = function handleResponse (model, data, opts, adapterName) 
   return data
 }
 
-// This is here so Babel will give us
-// the inheritance helpers which we
-// can re-use for the "extend" method
+/**
+ * This is here so Babel will give us the inheritance helpers which we can
+ * re-use for the "extend" method.
+ * @ignore
+ */
 class BaseModel {}
 
+/**
+ * js-data's Model class.
+ * @class Model
+ * @example {@lang javascript}class User extends Model {} 
+ *
+ * @abstract
+ * @param {Object} [props] The initial properties of the new instance.
+ * @param {Object} [opts] Configuration options.
+ * @param {boolean} [opts.noValidate=false] Whether to skip validation on the
+ * initial properties.
+ */
 export class Model extends BaseModel {
   constructor (props, opts) {
     super()
@@ -89,7 +102,9 @@ export class Model extends BaseModel {
     return errors.length ? errors : undefined
   }
 
-  // Instance methods
+  /**
+   * @param {Object} [opts] Configuration options. @see {@link Model.create}.
+   */
   create (opts) {
     return this.constructor.create(this, opts)
   }
@@ -103,6 +118,9 @@ export class Model extends BaseModel {
       .update(Ctor, utils.get(this, Ctor.idAttribute), this, opts)
   }
 
+  /**
+   * @param {Object} [opts] Configuration options. @see {@link Model.destroy}.
+   */
   destroy (opts) {
     // TODO: move actual destroy logic here
     const Ctor = this.constructor
@@ -126,9 +144,9 @@ export class Model extends BaseModel {
    * an object.
    *
    * @param {(string|Object)} key - Key to set or hash of key-value pairs to set.
-   * @param {?*} value - Value to set for the given key.
-   * @param {?Object} - Optional configuration. Properties:
-   *   - {boolean=true} silent - Whether to trigger change events.
+   * @param {*} [value] - Value to set for the given key.
+   * @param {Object} [opts] - Optional configuration.
+   * - boolean [silent=false] - Whether to trigger change events.
    */
   ['set'] (key, value, opts) {
     opts || (opts = {})
@@ -426,7 +444,8 @@ export class Model extends BaseModel {
   }
 
   /**
-   * Proxy for Collection#query
+  * Proxy for `Model.data().query()`.
+   * @return {Query}
    */
   static query () {
     return this.data().query()
@@ -487,26 +506,21 @@ export class Model extends BaseModel {
    * `opts.upsert` is `true` of `Model.upsert` is `true` and `opts.upsert` is
    * not `false`, then `Model.update` will be called instead.
    *
-   * `Model.beforeCreate` is called and passed the same arguments passed to
-   * `Model.create.
-   *
-   * `props` and `opts` are passed to the `create` method of the adapter
-   * specified by `opts.adapter` or `Model.defaultAdapter.
-   *
-   * `Model.afterCreate` is called with the `data` argument returned by the
+   * 1. `Model.beforeCreate` is called and passed the same arguments passed to
+   * `Model.create`.
+   * 1. `props` and `opts` are passed to the `create` method of the adapter
+   * specified by `opts.adapter` or `Model.defaultAdapter`.
+   * 1. `Model.afterCreate` is called with the `data` argument returned by the
    * adapter's `create` method and the `opts` argument passed to `Model.create`.
-   *
-   * If `opts.raw` is `true` or `Model.raw` is `true` and `opts.raw` is not
+   * 1. If `opts.raw` is `true` or `Model.raw` is `true` and `opts.raw` is not
    * `false`, then a result object is returned that contained the created entity
-   * and some metadata about the operation and its result.
-   *
-   * Otherwise, the promise returned by `Model.create` resolves with the created
-   * entity.
+   * and some metadata about the operation and its result. Otherwise, the
+   * promise returned by `Model.create` resolves with the created entity.
    *
    * @param {?Object} props - The properties from which to create the new entity.
    * @param {?Object} opts - Optional configuration. Properties:
-   *   - {string} adapter - The name of the registered adapter to use.
-   *   - {boolean} raw - The name of the registered adapter to use.
+   * - string `adapter` - The name of the registered adapter to use.
+   * - Boolean `raw` - The name of the registered adapter to use.
    * @return {Object} The created entity, or if `raw` is `true` then a result object.
    */
   static create (props, opts) {
@@ -680,6 +694,12 @@ export class Model extends BaseModel {
   static afterUpdateMany () {}
 
   static beforeUpdateAll () {}
+  /**
+   * @param {Object} query={} - Selection query.
+   * @param {Object} props - Update to apply to selected entities.
+   * @param {Object} [opts] - Configuration options.
+   * @param {boolean} [opts.raw=false] TODO
+   */
   static updateAll (query, props, opts) {
     const op = 'updateAll'
     this.dbg(op, 'query:', query, 'props:', props, 'opts:', opts)
@@ -705,6 +725,12 @@ export class Model extends BaseModel {
   static afterUpdateAll () {}
 
   static beforeDestroy () {}
+
+  /**
+   * @param {(string|number)} id
+   * @param {Object} [opts] - Configuration options.
+   * @param {boolean} [opts.raw=false] TODO
+   */
   static destroy (id, opts) {
     const op = 'destroy'
     this.dbg(op, 'id:', id, 'opts:', opts)
