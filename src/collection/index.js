@@ -4,17 +4,44 @@ import {configure} from '../decorators'
 import {Index} from '../../lib/mindex'
 exports.Query = Query
 
+/**
+ * @class Collection
+ * @param {Array} [data=[]] - Initial set of entities to insert into the
+ * collection.
+ * @param {string} [idAttribute='id'] - Field to use as the unique identifier
+ * for each entity in the collection.
+ */
 export function Collection (data = [], idAttribute = 'id') {
   if (!isArray(data)) {
     throw new TypeError('new Collection([data]): data: Expected array. Found ' + typeof data)
   }
+  /**
+   * Field to use as the unique identifier for each entity in this collection.
+   * @type {string}
+   */
   this.idAttribute = idAttribute
+  /**
+   * The main index, which uses @{link Collection#idAttribute} as the key.
+   * @type {Index}
+   */
   this.index = new Index([idAttribute], idAttribute)
+  /**
+   * Object that holds the other secondary indexes of this collection.
+   * @type {Object.<string, Index>}
+   */
   this.indexes = {}
   data.forEach(this.index.insertRecord, this.index)
 }
 
 configure({
+  /**
+   * @memberof Collection
+   * @instance
+   * @param {string} name - The name of the new secondary index.
+   * @param {(string|string[])} keyList - Field of array of fields to use as the
+   * key for the new secondary index.
+   * @return {Collection} A reference to itself for chaining.
+   */
   createIndex (name, keyList) {
     if (isString(name) && keyList === undefined) {
       keyList = [name]
@@ -24,6 +51,11 @@ configure({
     return this
   },
 
+  /**
+   * @memberof Collection
+   * @instance
+   * @return {Query} New query object.
+   */
   query () {
     return new Query(this)
   },
@@ -64,6 +96,14 @@ configure({
     return data
   },
 
+  /**
+   * Instead a record into this collection, updating all indexes with the new
+   * record. See {@link Collection#insertRecord} to insert a record into only
+   * one index.
+   * @memberof Collection
+   * @instance
+   * @param {Object} record - The record to insert.
+   */
   insert (record) {
     this.index.insertRecord(record)
     forOwn(this.indexes, function (index, name) {
@@ -78,6 +118,11 @@ configure({
     })
   },
 
+  /**
+   * @memberof Collection
+   * @instance
+   * @param {Object} record - The record to be removed.
+   */
   remove (record) {
     this.index.removeRecord(record)
     forOwn(this.indexes, function (index, name) {
@@ -85,6 +130,18 @@ configure({
     })
   },
 
+  /**
+   * Instead a record into a single index of this collection. See
+   * {@link Collection#insert}
+   * to insert a record into all indexes at once.
+   * @memberof Collection
+   * @instance
+   * @param {Object} record - The record to insert.
+   * @param {Object} [opts] - Configuration options.
+   * @param {string} [opts.index] The index into which to insert the record. If
+   * you don't specify an index then the record will be inserted into the main
+   * index.
+   */
   insertRecord (record, opts) {
     opts || (opts = {})
     const index = opts.index ? this.indexes[opts.index] : this.index
