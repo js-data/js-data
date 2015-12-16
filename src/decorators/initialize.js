@@ -6,6 +6,11 @@ function errMsg (name) {
 
 const op = 'initialize'
 
+/**
+ * @memberof! module:js-data
+ * @return {Function} Invocation function, which accepts the target as the only
+ * parameter.
+ */
 export function initialize (opts) {
   opts || (opts = {})
   return function (target) {

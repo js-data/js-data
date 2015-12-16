@@ -11,8 +11,9 @@ import {
 import {configure} from '../decorators'
 
 /**
- * Query class used by the @{link Collection} class. An instance of `Query` is
- * returned by {@link Model.query} and {@link Collection.query}.
+ * A class used by the @{link Collection} class to build queries to be executed
+ * against the collection's data. An instance of `Query` is returned by
+ * {@link Model.query} and {@link Collection.query}.
  * @class Query
  * @param {Collection} collection - The collection on which this query operates.
  */
@@ -22,6 +23,11 @@ export function Query (collection) {
    * @type {Collection}
    */
   this.collection = collection
+  /**
+   * The data result of this query.
+   * @type {Array}
+   */
+  this.data = null
 }
 
 const reserved = {
@@ -123,6 +129,7 @@ function evaluate (value, op, predicate) {
 
 configure({
   /**
+   * Return the current data result of this query.
    * @memberof Query
    * @instance
    * @return {Array} The data in this query.
@@ -135,8 +142,30 @@ configure({
   },
 
   /**
+   * Find all entities between two boundaries.
+   *
+   * Get the entity whose primary key is 25
+   * ```js
+   * const users = query.between(18, 30, { index: 'age' }).run()
+   * ```
+   * Same as above
+   * ```js
+   * const users = query.between([18], [30], { index: 'age' }).run()
+   * ```
+   *
    * @memberof Query
    * @instance
+   * @param {Array} leftKeys - Keys defining the left boundary.
+   * @param {Array} rightKeys - Keys defining the right boundary.
+   * @param {Object} [opts] - Configuration options.
+   * @param {string} [opts.index] - Name of the secondary index to use in the
+   * query. If no index is specified, the main index is used.
+   * @param {boolean} [opts.leftInclusive=true] - Whether to include entities
+   * on the left boundary.
+   * @param {boolean} [opts.rightInclusive=false] - Whether to include entities
+   * on the left boundary.
+   * @param {boolean} [opts.limit] - Limit the result to a certain number.
+   * @param {boolean} [opts.offset] - The number of resulting entities to skip.
    * @return {Query} A reference to itself for chaining.
    */
   between (leftKeys, rightKeys, opts) {
@@ -151,8 +180,39 @@ configure({
   },
 
   /**
+   * Find the entity or entities that match the provided key.
+   *
+   * #### Example
+   *
+   * Get the entity whose primary key is 25
+   * ```js
+   * const entities = query.get(25).run()
+   * ```
+   * Same as above
+   * ```js
+   * const entities = query.get([25]).run()
+   * ```
+   * Get all users who are active and have the "admin" role
+   * ```js
+   * const activeAdmins = query.get(['active', 'admin'], {
+   *   index: 'activityAndRoles'
+   * }).run()
+   * ```
+   * Get all entities that match a certain weather condition
+   * ```js
+   * const niceDays = query.get(['sunny', 'humid', 'calm'], {
+   *   index: 'weatherConditions'
+   * }).run()
+   * ```
+   *
    * @memberof Query
    * @instance
+   * @param {Array} keyList - Key(s) defining the entity to retrieve. If
+   * `keyList` is not an array (i.e. for a single-value key), it will be
+   * wrapped in an array.
+   * @param {Object} [opts] - Configuration options.
+   * @param {string} [opts.string] - Name of the secondary index to use in the
+   * query. If no index is specified, the main index is used.
    * @return {Query} A reference to itself for chaining.
    */
   get (keyList = [], opts) {
@@ -174,16 +234,27 @@ configure({
   },
 
   /**
+   * Find the entity or entities that match the provided keyLists.
+   *
+   * #### Example
+   *
+   * Get the posts where "status" is "draft" or "inReview"
+   * ```js
+   * const posts = query.getAll('draft', 'inReview', { index: 'status' }).run()
+   * ```
+   * Same as above
+   * ```js
+   * const posts = getAll.get(['draft'], ['inReview'], { index: 'status' }).run()
+   * ```
+   *
    * @memberof Query
    * @instance
-   * @param {(Array[]|...string|...number)} [keyLists] - KeyLists. If no
-   * arguments are provided then all of the data is selected. Otherwise one or
-   * more strings, numbers, or arrays of strings or numbers must be provided for
-   * selecting entities. If just strings or numbers are passed in, then they
-   * will each be wrapped in an array. Arrays of strings or numbers are usually
-   * provided when the selected index uses a compound key.
+   * @param {...Array} [keyList] - Provide one or more keyLists, and all
+   * entities matching each keyList will be retrieved. If no keyLists are
+   * provided, all entities will be returned.
    * @param {Object} [opts] - Configuration options.
-   * @param {string} [opts.index=Query#collection#idAttribute] - The secondary index to use. 
+   * @param {string} [opts.index] - Name of the secondary index to use in the
+   * query. If no index is specified, the main index is used.
    * @return {Query} A reference to itself for chaining.
    */
   getAll (...args) {
@@ -208,9 +279,34 @@ configure({
   },
 
   /**
+   * Find the entity or entities that match the provided keyLists.
+   *
+   * #### Example
+   *
+   * Get the draft posts created less than three months
+   * ```js
+   * const posts = query.filter({
+   *   where: {
+   *     status: {
+   *       '==': 'draft'
+   *     },
+   *     created_at_timestamp: {
+   *       '>=': (new Date().getTime() - (1000 * 60 * 60 * 24 * 30 * 3)) // 3 months ago
+   *     }
+   *   }
+   * }).run()
+   * ```
+   * Use a custom filter function
+   * ```js
+   * const posts = query.filter(function (post) {
+   *   return post.isReady()
+   * }).run()
+   * ```
+   *
    * @memberof Query
    * @instance
-   * @param {(Object|Function)} [queryOrFn={}] - Selection query or filter function.
+   * @param {(Object|Function)} [queryOrFn={}] - Selection query or filter
+   * function.
    * @param {Function} [thisArg] - Context to which to bind `queryOrFn` if
    * `queryOrFn` is a function.
    * @return {Query} A reference to itself for chaining.
@@ -310,6 +406,15 @@ configure({
   },
 
   /**
+   * Skip a number of results.
+   *
+   * #### Example
+   *
+   * Get all but the first 10 draft posts
+   * ```js
+   * const posts = query.get('draft', { index: 'status' }).skip(10).run()
+   * ```
+   *
    * @memberof Query
    * @instance
    * @param {number} num - The number of entities to skip.
@@ -329,6 +434,15 @@ configure({
   },
 
   /**
+   * Limit the result.
+   *
+   * #### Example
+   *
+   * Get only the first 10 draft posts
+   * ```js
+   * const posts = query.get('draft', { index: 'status' }).limit(10).run()
+   * ```
+   *
    * @memberof Query
    * @instance
    * @param {number} num - The maximum number of entities to keep in the result.
@@ -373,9 +487,8 @@ configure({
    * @return {Array} The result of executing this query.
    */
   run () {
-    let data = this.data
+    const data = this.data
     this.data = null
-    this.params = null
     return data
   }
 })(Query.prototype)

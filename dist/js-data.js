@@ -166,6 +166,57 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 	
+	/**
+	 * Registered as `js-data` in NPM and Bower.
+	 * #### Script tag
+	 * ```js
+	 * window.JSData
+	 * ```
+	 * #### CommonJS
+	 * ```js
+	 * var JSData = require('js-data')
+	 * ```
+	 * #### ES6 Modules
+	 * ```js
+	 * import JSData from 'js-data'
+	 * ```
+	 * #### AMD
+	 * ```js
+	 * define('myApp', ['js-data'], function (JSData) { ... })
+	 * ```
+	 *
+	 * @module js-data
+	 * @property {Function} belongsTo - {@link module:js-data.exports.belongsTo belongsTo}
+	 * decorator function.
+	 * @property {Function} configure - {@link module:js-data.exports.configure configure}
+	 * decorator function.
+	 * @property {Function} Collection - {@link Collection} class.
+	 * @property {Function} DS - {@link DS} class.
+	 * @property {Function} hasMany - {@link module:js-data.exports.hasMany hasMany}
+	 * decorator function.
+	 * @property {Function} hasOne - {@link module:js-data.exports.hasOne hasOne}
+	 * decorator function.
+	 * @property {Function} initialize - {@link module:js-data.exports.initialize initialize}
+	 * decorator function.
+	 * @property {Function} Model - {@link Model} class.
+	 * @property {Function} registerAdapter - {@link registerAdapter} decorator
+	 * function.
+	 * @property {Function} setSchema - {@link setSchema} decorator function.
+	 * @property {Function} Query - {@link Query} class.
+	 * @property {Object} utils - Utility methods used by the `js-data` module. See
+	 * {@link module:js-data.module:utils utils}.
+	 * @property {Object} version - Details of the current version of the `js-data`
+	 * module.
+	 * @property {string} version.full - The full semver value.
+	 * @property {number} version.major - The major version number.
+	 * @property {number} version.minor - The minor version number.
+	 * @property {number} version.patch - The patch version number.
+	 * @property {(string|boolean)} version.alpha - The alpha version value,
+	 * otherwise `false` if the current version is not alpha.
+	 * @property {(string|boolean)} version.beta - The beta version value,
+	 * otherwise `false` if the current version is not beta.
+	 */
+	
 	if (!Promise.prototype.spread) {
 	  Promise.prototype.spread = function (cb) {
 	    return this.then(function (arr) {
@@ -174,7 +225,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	}
 	
-	exports.utils = _utils;
+	var utils = exports.utils = _utils;
+	
 	var version = exports.version = {
 	  full: '3.0.0-alpha.1',
 	  major: parseInt('3', 10),
@@ -207,6 +259,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	exports.Query = _query4.Query;
 	
+	/**
+	 * @class Collection
+	 * @param {Array} [data=[]] - Initial set of entities to insert into the
+	 * collection.
+	 * @param {string} [idAttribute='id'] - Field to use as the unique identifier
+	 * for each entity in the collection.
+	 */
 	function Collection() {
 	  var data = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
 	  var idAttribute = arguments.length <= 1 || arguments[1] === undefined ? 'id' : arguments[1];
@@ -214,13 +273,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!(0, _utils.isArray)(data)) {
 	    throw new TypeError('new Collection([data]): data: Expected array. Found ' + (typeof data === 'undefined' ? 'undefined' : _typeof(data)));
 	  }
+	  /**
+	   * Field to use as the unique identifier for each entity in this collection.
+	   * @type {string}
+	   */
 	  this.idAttribute = idAttribute;
+	  /**
+	   * The main index, which uses @{link Collection#idAttribute} as the key.
+	   * @type {Index}
+	   */
 	  this.index = new _mindex.Index([idAttribute], idAttribute);
+	  /**
+	   * Object that holds the other secondary indexes of this collection.
+	   * @type {Object.<string, Index>}
+	   */
 	  this.indexes = {};
 	  data.forEach(this.index.insertRecord, this.index);
 	}
 	
 	(0, _decorators.configure)({
+	  /**
+	   * @memberof Collection
+	   * @instance
+	   * @param {string} name - The name of the new secondary index.
+	   * @param {(string|string[])} keyList - Field of array of fields to use as the
+	   * key for the new secondary index.
+	   * @return {Collection} A reference to itself for chaining.
+	   */
+	
 	  createIndex: function createIndex(name, keyList) {
 	    if ((0, _utils.isString)(name) && keyList === undefined) {
 	      keyList = [name];
@@ -229,6 +309,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.index.visitAll(index.insertRecord, index);
 	    return this;
 	  },
+	
+	  /**
+	   * @memberof Collection
+	   * @instance
+	   * @return {Query} New query object.
+	   */
 	  query: function query() {
 	    return new _query4.Query(this);
 	  },
@@ -266,6 +352,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	    return data;
 	  },
+	
+	  /**
+	   * Instead a record into this collection, updating all indexes with the new
+	   * record. See {@link Collection#insertRecord} to insert a record into only
+	   * one index.
+	   * @memberof Collection
+	   * @instance
+	   * @param {Object} record - The record to insert.
+	   */
 	  insert: function insert(record) {
 	    this.index.insertRecord(record);
 	    (0, _utils.forOwn)(this.indexes, function (index, name) {
@@ -278,12 +373,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	      index.updateRecord(record);
 	    });
 	  },
+	
+	  /**
+	   * @memberof Collection
+	   * @instance
+	   * @param {Object} record - The record to be removed.
+	   */
 	  remove: function remove(record) {
 	    this.index.removeRecord(record);
 	    (0, _utils.forOwn)(this.indexes, function (index, name) {
 	      index.removeRecord(record);
 	    });
 	  },
+	
+	  /**
+	   * Instead a record into a single index of this collection. See
+	   * {@link Collection#insert}
+	   * to insert a record into all indexes at once.
+	   * @memberof Collection
+	   * @instance
+	   * @param {Object} record - The record to insert.
+	   * @param {Object} [opts] - Configuration options.
+	   * @param {string} [opts.index] The index into which to insert the record. If
+	   * you don't specify an index then the record will be inserted into the main
+	   * index.
+	   */
 	  insertRecord: function insertRecord(record, opts) {
 	    opts || (opts = {});
 	    var index = opts.index ? this.indexes[opts.index] : this.index;
@@ -318,8 +432,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 	
+	/**
+	 * A class used by the @{link Collection} class to build queries to be executed
+	 * against the collection's data. An instance of `Query` is returned by
+	 * {@link Model.query} and {@link Collection.query}.
+	 * @class Query
+	 * @param {Collection} collection - The collection on which this query operates.
+	 */
 	function Query(collection) {
+	  /**
+	   * The collection on which this query operates.
+	   * @type {Collection}
+	   */
 	  this.collection = collection;
+	  /**
+	   * The data result of this query.
+	   * @type {Array}
+	   */
+	  this.data = null;
 	}
 	
 	var reserved = {
@@ -420,12 +550,47 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	
 	(0, _decorators.configure)({
+	  /**
+	   * Return the current data result of this query.
+	   * @memberof Query
+	   * @instance
+	   * @return {Array} The data in this query.
+	   */
+	
 	  getData: function getData() {
 	    if (!this.data) {
 	      this.data = this.collection.index.getAll();
 	    }
 	    return this.data;
 	  },
+	
+	  /**
+	   * Find all entities between two boundaries.
+	   *
+	   * Get the entity whose primary key is 25
+	   * ```js
+	   * const users = query.between(18, 30, { index: 'age' }).run()
+	   * ```
+	   * Same as above
+	   * ```js
+	   * const users = query.between([18], [30], { index: 'age' }).run()
+	   * ```
+	   *
+	   * @memberof Query
+	   * @instance
+	   * @param {Array} leftKeys - Keys defining the left boundary.
+	   * @param {Array} rightKeys - Keys defining the right boundary.
+	   * @param {Object} [opts] - Configuration options.
+	   * @param {string} [opts.index] - Name of the secondary index to use in the
+	   * query. If no index is specified, the main index is used.
+	   * @param {boolean} [opts.leftInclusive=true] - Whether to include entities
+	   * on the left boundary.
+	   * @param {boolean} [opts.rightInclusive=false] - Whether to include entities
+	   * on the left boundary.
+	   * @param {boolean} [opts.limit] - Limit the result to a certain number.
+	   * @param {boolean} [opts.offset] - The number of resulting entities to skip.
+	   * @return {Query} A reference to itself for chaining.
+	   */
 	  between: function between(leftKeys, rightKeys, opts) {
 	    opts || (opts = {});
 	    var collection = this.collection;
@@ -436,6 +601,43 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.data = index.between(leftKeys, rightKeys, opts);
 	    return this;
 	  },
+	
+	  /**
+	   * Find the entity or entities that match the provided key.
+	   *
+	   * #### Example
+	   *
+	   * Get the entity whose primary key is 25
+	   * ```js
+	   * const entities = query.get(25).run()
+	   * ```
+	   * Same as above
+	   * ```js
+	   * const entities = query.get([25]).run()
+	   * ```
+	   * Get all users who are active and have the "admin" role
+	   * ```js
+	   * const activeAdmins = query.get(['active', 'admin'], {
+	   *   index: 'activityAndRoles'
+	   * }).run()
+	   * ```
+	   * Get all entities that match a certain weather condition
+	   * ```js
+	   * const niceDays = query.get(['sunny', 'humid', 'calm'], {
+	   *   index: 'weatherConditions'
+	   * }).run()
+	   * ```
+	   *
+	   * @memberof Query
+	   * @instance
+	   * @param {Array} keyList - Key(s) defining the entity to retrieve. If
+	   * `keyList` is not an array (i.e. for a single-value key), it will be
+	   * wrapped in an array.
+	   * @param {Object} [opts] - Configuration options.
+	   * @param {string} [opts.string] - Name of the secondary index to use in the
+	   * query. If no index is specified, the main index is used.
+	   * @return {Query} A reference to itself for chaining.
+	   */
 	  get: function get() {
 	    var keyList = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
 	    var opts = arguments[1];
@@ -456,6 +658,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.data = index.get(keyList);
 	    return this;
 	  },
+	
+	  /**
+	   * Find the entity or entities that match the provided keyLists.
+	   *
+	   * #### Example
+	   *
+	   * Get the posts where "status" is "draft" or "inReview"
+	   * ```js
+	   * const posts = query.getAll('draft', 'inReview', { index: 'status' }).run()
+	   * ```
+	   * Same as above
+	   * ```js
+	   * const posts = getAll.get(['draft'], ['inReview'], { index: 'status' }).run()
+	   * ```
+	   *
+	   * @memberof Query
+	   * @instance
+	   * @param {...Array} [keyList] - Provide one or more keyLists, and all
+	   * entities matching each keyList will be retrieved. If no keyLists are
+	   * provided, all entities will be returned.
+	   * @param {Object} [opts] - Configuration options.
+	   * @param {string} [opts.index] - Name of the secondary index to use in the
+	   * query. If no index is specified, the main index is used.
+	   * @return {Query} A reference to itself for chaining.
+	   */
 	  getAll: function getAll() {
 	    var _this = this;
 	
@@ -483,19 +710,53 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	    return this;
 	  },
-	  filter: function filter(opts, thisArg) {
+	
+	  /**
+	   * Find the entity or entities that match the provided keyLists.
+	   *
+	   * #### Example
+	   *
+	   * Get the draft posts created less than three months
+	   * ```js
+	   * const posts = query.filter({
+	   *   where: {
+	   *     status: {
+	   *       '==': 'draft'
+	   *     },
+	   *     created_at_timestamp: {
+	   *       '>=': (new Date().getTime() - (1000 * 60 * 60 * 24 * 30 * 3)) // 3 months ago
+	   *     }
+	   *   }
+	   * }).run()
+	   * ```
+	   * Use a custom filter function
+	   * ```js
+	   * const posts = query.filter(function (post) {
+	   *   return post.isReady()
+	   * }).run()
+	   * ```
+	   *
+	   * @memberof Query
+	   * @instance
+	   * @param {(Object|Function)} [queryOrFn={}] - Selection query or filter
+	   * function.
+	   * @param {Function} [thisArg] - Context to which to bind `queryOrFn` if
+	   * `queryOrFn` is a function.
+	   * @return {Query} A reference to itself for chaining.
+	   */
+	  filter: function filter(query, thisArg) {
 	    var _this2 = this;
 	
-	    opts || (opts = {});
+	    query || (query = {});
 	    this.getData();
-	    if ((0, _utils.isObject)(opts)) {
+	    if ((0, _utils.isObject)(query)) {
 	      (function () {
 	        var where = {};
 	        // Filter
-	        if ((0, _utils.isObject)(opts.where)) {
-	          where = opts.where;
+	        if ((0, _utils.isObject)(query.where)) {
+	          where = query.where;
 	        }
-	        (0, _utils.forOwn)(opts, function (value, key) {
+	        (0, _utils.forOwn)(query, function (value, key) {
 	          if (!(key in reserved) && !(key in where)) {
 	            where[key] = {
 	              '==': value
@@ -542,7 +803,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	
 	        // Sort
-	        var orderBy = opts.orderBy || opts.sort;
+	        var orderBy = query.orderBy || query.sort;
 	
 	        if ((0, _utils.isString)(orderBy)) {
 	          orderBy = [[orderBy, 'ASC']];
@@ -567,21 +828,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	
 	        // Skip
-	        if ((0, _utils.isNumber)(opts.skip)) {
-	          _this2.skip(opts.skip);
-	        } else if ((0, _utils.isNumber)(opts.offset)) {
-	          _this2.skip(opts.offset);
+	        if ((0, _utils.isNumber)(query.skip)) {
+	          _this2.skip(query.skip);
+	        } else if ((0, _utils.isNumber)(query.offset)) {
+	          _this2.skip(query.offset);
 	        }
 	        // Limit
-	        if ((0, _utils.isNumber)(opts.limit)) {
-	          _this2.limit(opts.limit);
+	        if ((0, _utils.isNumber)(query.limit)) {
+	          _this2.limit(query.limit);
 	        }
 	      })();
-	    } else if ((0, _utils.isFunction)(opts)) {
-	      this.data = this.data.filter(opts, thisArg);
+	    } else if ((0, _utils.isFunction)(query)) {
+	      this.data = this.data.filter(query, thisArg);
 	    }
 	    return this;
 	  },
+	
+	  /**
+	   * Skip a number of results.
+	   *
+	   * #### Example
+	   *
+	   * Get all but the first 10 draft posts
+	   * ```js
+	   * const posts = query.get('draft', { index: 'status' }).skip(10).run()
+	   * ```
+	   *
+	   * @memberof Query
+	   * @instance
+	   * @param {number} num - The number of entities to skip.
+	   * @return {Query} A reference to itself for chaining.
+	   */
 	  skip: function skip(num) {
 	    if (!(0, _utils.isNumber)(num)) {
 	      throw new TypeError('skip: Expected number but found ' + (typeof num === 'undefined' ? 'undefined' : _typeof(num)) + '!');
@@ -594,6 +871,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    return this;
 	  },
+	
+	  /**
+	   * Limit the result.
+	   *
+	   * #### Example
+	   *
+	   * Get only the first 10 draft posts
+	   * ```js
+	   * const posts = query.get('draft', { index: 'status' }).limit(10).run()
+	   * ```
+	   *
+	   * @memberof Query
+	   * @instance
+	   * @param {number} num - The maximum number of entities to keep in the result.
+	   * @return {Query} A reference to itself for chaining.
+	   */
 	  limit: function limit(num) {
 	    if (!(0, _utils.isNumber)(num)) {
 	      throw new TypeError('limit: Expected number but found ' + (typeof num === 'undefined' ? 'undefined' : _typeof(num)) + '!');
@@ -602,18 +895,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.data = data.slice(0, Math.min(data.length, num));
 	    return this;
 	  },
-	  forEach: function forEach(cb, thisArg) {
-	    this.getData().forEach(cb, thisArg);
+	
+	  /**
+	   * @memberof Query
+	   * @instance
+	   * @param {Function} forEachFn - Iteration function.
+	   * @param {*} [thisArg] - Context to which to bind `forEachFn`.
+	   * @return {Query} A reference to itself for chaining.
+	   */
+	  forEach: function forEach(forEachFn, thisArg) {
+	    this.getData().forEach(forEachFn, thisArg);
 	    return this;
 	  },
-	  map: function map(cb, thisArg) {
-	    this.data = this.getData().map(cb, thisArg);
+	
+	  /**
+	   * @memberof Query
+	   * @instance
+	   * @param {Function} mapFn - Mapping function.
+	   * @param {*} [thisArg] - Context to which to bind `mapFn`.
+	   * @return {Query} A reference to itself for chaining.
+	   */
+	  map: function map(mapFn, thisArg) {
+	    this.data = this.getData().map(mapFn, thisArg);
 	    return this;
 	  },
+	
+	  /**
+	   * @memberof Query
+	   * @instance
+	   * @return {Array} The result of executing this query.
+	   */
 	  run: function run() {
 	    var data = this.data;
 	    this.data = null;
-	    this.params = null;
 	    return data;
 	  }
 	})(Query.prototype);
@@ -646,44 +960,90 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.intersection = intersection;
 	exports.fillIn = fillIn;
 	exports.isBlacklisted = isBlacklisted;
-	exports.omit = omit;
 	exports.fromJson = fromJson;
 	exports.copy = copy;
 	exports.pascalCase = pascalCase;
 	exports.camelCase = camelCase;
-	exports.Events = Events;
+	exports.eventify = eventify;
 	
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 	
+	/**
+	 * @module utils
+	 * @memberof module:js-data
+	 */
+	
+	/**
+	 * Return whether the provided value is an array.
+	 * @method
+	 * @param {*} [value] - The value to test.
+	 */
 	var isArray = exports.isArray = Array.isArray;
+	/**
+	 * Return whether the provided value is an object type.
+	 * @param {*} [value] - The value to test.
+	 */
 	function isObject(value) {
 	  return toString.call(value) === '[object Object]' || false;
 	}
 	function isPlainObject(value) {
 	  return !!value && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && value.constructor === Object;
 	}
+	/**
+	 * Return whether the provided value is a regular expression type.
+	 * @param {*} [value] - The value to test.
+	 */
 	function isRegExp(value) {
 	  return toString.call(value) === '[object RegExp]' || false;
 	}
+	/**
+	 * Return whether the provided value is a string type.
+	 * @param {*} [value] - The value to test.
+	 */
 	function isString(value) {
 	  return typeof value === 'string' || value && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && toString.call(value) === '[object String]' || false;
 	}
+	/**
+	 * Return whether the provided value is a date type.
+	 * @param {*} [value] - The value to test.
+	 */
 	function isDate(value) {
 	  return value && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && toString.call(value) === '[object Date]' || false;
 	}
+	/**
+	 * Return whether the provided value is a number type.
+	 * @param {*} [value] - The value to test.
+	 */
 	function isNumber(value) {
 	  var type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
 	  return type === 'number' || value && type === 'object' && toString.call(value) === '[object Number]' || false;
 	}
+	/**
+	 * Return whether the provided value is a boolean type.
+	 * @param {*} [value] - The value to test.
+	 */
 	function isBoolean(value) {
 	  return toString.call(value) === '[object Boolean]';
 	}
+	/**
+	 * Return whether the provided value is a function.
+	 * @param {*} [value] - The value to test.
+	 */
 	function isFunction(value) {
 	  return typeof value === 'function' || value && toString.call(value) === '[object Function]' || false;
 	}
+	/**
+	 * Return whether the provided value is a string or a number.
+	 * @param {*} [value] - The value to test.
+	 */
 	function isSorN(value) {
 	  return isString(value) || isNumber(value);
 	}
+	/**
+	 * Get the value at the provided key or path.
+	 * @param {Object} object - The object from which to retrieve a property.
+	 * @param {string} prop - The key or path to the property.
+	 */
 	function get(object, prop) {
 	  if (!prop) {
 	    return;
@@ -698,6 +1058,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  return object[last];
 	}
+	/**
+	 * Unset the value at the provided key or path.
+	 * @param {Object} object - The object on which to unset a property.
+	 * @param {string} prop - The key or path to the property.
+	 */
 	function unset(object, prop) {
 	  var parts = prop.split('.');
 	  var last = parts.pop();
@@ -723,6 +1088,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return object;
 	}
 	var PATH = /^(.+)\.(.+)$/;
+	/**
+	 * Set the value at the provided key or path.
+	 * @param {Object} object - The object on which to set a property.
+	 * @param {(string|Object)} path - The key or path to the property. Can also
+	 * pass in an object of path/value pairs, which will all be set on the target
+	 * object.
+	 * @param {*} [value] - The value to set.
+	 */
 	function set(object, path, value) {
 	  if (isObject(path)) {
 	    forOwn(path, function (value, _path) {
@@ -737,6 +1110,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	}
+	/**
+	 * Iterate over an object's own enumerable properties.
+	 * @param {Object} object - The object whose properties are to be enumerated.
+	 * @param {Function} fn - Iteration function.
+	 * @param {Object} [thisArg] - Content to which to bind `fn`.
+	 */
 	function forOwn(obj, fn, thisArg) {
 	  var keys = Object.keys(obj);
 	  var len = keys.length;
@@ -745,6 +1124,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    fn.call(thisArg, obj[keys[i]], keys[i], obj);
 	  }
 	}
+	/**
+	 * Recursively shallow copy own enumberable properties from `source` to `dest`.
+	 * @param {Object} dest - The destination object.
+	 * @param {Object} source - The source object.
+	 */
 	function deepMixIn(dest, source) {
 	  if (source) {
 	    forOwn(source, function (value, key) {
@@ -758,12 +1142,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  return dest;
 	}
+	/**
+	 * Proxy for `Promise.resolve`.
+	 * @param {*} [value] - Value with which to resolve the Promise.
+	 * @return {Promise} Promise resolved with `value`.
+	 */
 	function resolve(value) {
 	  return Promise.resolve(value);
 	}
+	/**
+	 * Proxy for `Promise.reject`.
+	 * @param {*} [value] - Value with which to reject the Promise.
+	 * @return {Promise} Promise reject with `value`.
+	 */
 	function reject(value) {
 	  return Promise.reject(value);
 	}
+	/**
+	 * Shallow copy own enumerable non-function properties from `Model` to `opts`.
+	 * @param {Model} Model - The source Model.
+	 * @param {Object} opts - The target object.
+	 */
 	function _(Model, opts) {
 	  for (var key in Model) {
 	    var value = Model[key];
@@ -772,6 +1171,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	}
+	/**
+	 * Return the intersection of two arrays.
+	 * @param {Array} array1 - First array.
+	 * @param {Array} array2 - Second array.
+	 * @return {Array} Array of elements common to both arrays.
+	 */
 	function intersection(array1, array2) {
 	  if (!array1 || !array2) {
 	    return [];
@@ -791,6 +1196,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  return result;
 	}
+	/**
+	 * Shallow copy own enumerable properties from `src` to `dest` that are on `src`
+	 * but are missing from `dest.
+	 * @param {Object} dest - The destination object.
+	 * @param {Object} source - The source object.
+	 */
 	function fillIn(dest, src) {
 	  forOwn(src, function (value, key) {
 	    if (dest[key] === undefined) {
@@ -798,6 +1209,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  });
 	}
+	/**
+	 * Return whether `prop` is matched by any string or regular expression in `bl`.
+	 * @param {string} prop - The name of a property.
+	 * @param {Array} bl - Array of strings and regular expressions.
+	 * @return {boolean} Whether `prop` was matched.
+	 */
 	function isBlacklisted(prop, bl) {
 	  if (!bl || !bl.length) {
 	    return false;
@@ -811,22 +1228,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  return !!matches;
 	}
-	function omit(obj, bl) {
-	  var toRemove = [];
-	  forOwn(obj, function (value, key) {
-	    if (isBlacklisted(key, bl)) {
-	      toRemove.push(key);
-	    }
-	  });
-	  toRemove.forEach(function (key) {
-	    delete obj[key];
-	  });
-	  return obj;
-	}
+	/**
+	 * Proxy for `JSON.parse`.
+	 * @param {string} json - JSON to parse.
+	 * @return {Object} Parsed object.
+	 */
 	function fromJson(json) {
 	  return isString(json) ? JSON.parse(json) : json;
 	}
+	/**
+	 * Proxy for `JSON.stringify`.
+	 * @method
+	 * @param {*} value - Value to serialize to JSON.
+	 * @return {string} JSON string.
+	 */
 	var toJson = exports.toJson = JSON.stringify;
+	/**
+	 * Deep copy a value.
+	 * @param {*} from - Value to deep copy.
+	 * @return {*} Deep copy of `from`.
+	 */
 	function copy(from, to, stackFrom, stackTo, blacklist) {
 	  if (!to) {
 	    to = from;
@@ -906,9 +1327,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	function mapToPascal(x) {
 	  return x.replace(NON_ALPHA, '').replace(PASCAL_CASE, pascalize);
 	}
+	/**
+	 * Convert a string to pascalcase.
+	 * @param {string} str - String to convert.
+	 * @return {string} Converted string.
+	 */
 	function pascalCase(str) {
 	  return str.split(SPLIT).map(mapToPascal).join('');
 	}
+	/**
+	 * Convert a string to camelcase.
+	 * @param {string} str - String to convert.
+	 * @return {string} Converted string.
+	 */
 	function camelCase(str) {
 	  str = pascalCase(str);
 	  if (str) {
@@ -916,7 +1347,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  return str;
 	}
-	function Events(target, getter, setter) {
+	/**
+	 * Add eventing capabilities into the target object.
+	 * @param {Object} target - Target object.
+	 * @param {Function} [getter] - Custom getter for retrieving the object's event
+	 * listeners.
+	 * @param {Function} [setter] - Custom setter for setting the object's event
+	 * listeners.
+	 */
+	function eventify(target, getter, setter) {
 	  target = target || this;
 	  var _events = {};
 	  if (!getter && !setter) {
@@ -1123,11 +1562,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.belongsTo = belongsTo;
-	
 	var _utils = __webpack_require__(3);
 	
 	var op = 'belongsTo';
@@ -1142,6 +1576,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * attached to an instance of the target Model, e.g. if Comment belongsTo
 	 * User and "localField" is set to "user", "comment.user" will be a reference to
 	 * the user.
+	 *
+	 * @ignore
 	 */
 	function applyBelongsTo(Model, Relation, opts) {
 	  opts || (opts = {});
@@ -1245,32 +1681,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	
 	/**
-	 * Usage:
-	 *
-	 * ES7 Usage:
+	 * @memberof! module:js-data
+	 * @example
+	 * // ES6
 	 * import {belongsTo, Model} from 'js-data'
 	 * class User extends Model {}
-	 * @belongsTo(User, {...})
-	 * class Post extends Model {}
 	 *
-	 * ES6 Usage:
-	 * import {belongsTo, Model} from 'js-data'
-	 * class User extends Model {}
+	 * // @belongsTo(User) (ES7)
 	 * class Comment extends Model {}
-	 * belongsTo(User, {...})(Comment)
+	 * belongsTo(User)(Comment)
 	 *
-	 * ES5 Usage:
+	 * // ES5
 	 * var JSData = require('js-data')
-	 * var User = JSData.Model.extend()
-	 * var Comment = JSDataModel.extend()
-	 * JSData.belongsTo(User, {...})(Comment)
+	 * var User = JSData.Model.extend({}, { name: 'User' })
+	 * var Comment = JSDataModel.extend({}, { name: 'Comment' })
+	 * JSData.belongsTo(User)(Comment)
+	 *
+	 * @param {Model} Model - The Model the target belongs to.
+	 * @param {Object} [opts] - Configuration options.
+	 * @param {string} [opts.localField] - The field on the target where the relation
+	 * will be attached.
+	 * @return {Function} Invocation function, which accepts the target as the only
+	 * parameter.
 	 */
-	function belongsTo(Model, opts) {
+	exports.belongsTo = function (Model, opts) {
 	  return function (target) {
 	    target.dbg(op, 'Model:', Model, 'opts:', opts);
 	    return applyBelongsTo(target, Model, opts);
 	  };
-	}
+	};
 
 /***/ },
 /* 6 */
@@ -1286,19 +1725,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _utils = __webpack_require__(3);
 	
 	/**
-	 * Usage:
+	 * @memberof! module:js-data
+	 * @example
+	 * // ES6
+	 * import {configure, Model} from 'js-data'
 	 *
-	 * @configure({
-	 *   idAttribute: '_id'
-	 * })
-	 * class User extends JSData.Model {...}
+	 * // @configure(opts) (ES7)
+	 * class User extends JSData.Model {}
+	 * configure(opts)(User)
+	 *
+	 * // ES5
+	 * var JSData = require('js-data')
+	 * var User = JSData.Model.extend()
+	 * User.configure(opts)
+	 *
+	 * @param {Object} opts - Properties to apply to the target.
+	 * @param {boolean} [overwrite=true] - Whether to overwrite properties that
+	 * already exist on the target.
 	 */
-	function configure(props) {
+	function configure(opts) {
 	  var overwrite = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
 	
-	  props = props || {};
+	  opts = opts || {};
 	  return function (target) {
-	    (0, _utils.forOwn)(props, function (value, key) {
+	    (0, _utils.forOwn)(opts, function (value, key) {
 	      if (target[key] === undefined || overwrite) {
 	        target[key] = (0, _utils.copy)(value);
 	      }
@@ -1332,6 +1782,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * attached to an instance of the target Model, e.g. if User hasMany Comment
 	 * and "localField" is set to "comments", "user.comments" will be a reference to
 	 * the array of comments.
+	 *
+	 * @ignore
 	 */
 	function applyHasMany(Model, Relation, opts) {
 	  opts || (opts = {});
@@ -1487,25 +1939,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	
 	/**
-	 * Usage:
-	 *
-	 * ES7 Usage:
+	 * @memberof! module:js-data
+	 * @example
+	 * // ES6
 	 * import {hasMany, Model} from 'js-data'
-	 * class Post extends Model {}
-	 * @hasMany(Post, {...})
-	 * class User extends Model {}
-	 *
-	 * ES6 Usage:
-	 * import {hasMany, Model} from 'js-data'
-	 * class User extends Model {}
 	 * class Comment extends Model {}
-	 * hasMany(Comment, {...})(User)
 	 *
-	 * ES5 Usage:
+	 * // @hasMany(Comment)
+	 * class User extends Model {}
+	 * hasMany(Comment)(User)
+	 *
+	 * // ES5
 	 * var JSData = require('js-data')
-	 * var User = JSData.Model.extend()
-	 * var Comment = JSDataModel.extend()
-	 * JSData.hasMany(User, {...})(Comment)
+	 * var User = JSData.Model.extend({}, { name: 'User' })
+	 * var Comment = JSDataModel.extend({}, { name: 'Comment' })
+	 * JSData.hasMany(User)(Comment)
+	 *
+	 * @param {Model} Model - The Model of which the target has many.
+	 * @param {Object} [opts] - Configuration options.
+	 * @param {string} [opts.localField] - The field on the target where the relation
+	 * will be attached.
+	 * @return {Function} Invocation function, which accepts the target as the only
+	 * parameter.
 	 */
 	function hasMany(Model, opts) {
 	  return function (target) {
@@ -1539,6 +1994,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * attached to an instance of the target Model, e.g. if User hasOne
 	 * Profile and "localField" is set to "profile", "user.profile" will be a
 	 * reference to the profile.
+	 *
+	 * @ignore
 	 */
 	function applyHasOne(Model, Relation, opts) {
 	  opts || (opts = {});
@@ -1641,25 +2098,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	
 	/**
-	 * Usage:
-	 *
-	 * ES7 Usage:
+	 * @memberof! module:js-data
+	 * @example
+	 * // ES6
 	 * import {hasOne, Model} from 'js-data'
 	 * class User extends Model {}
-	 * @hasOne(User, {...})
-	 * class Post extends Model {}
 	 *
-	 * ES6 Usage:
-	 * import {hasOne, Model} from 'js-data'
-	 * class User extends Model {}
+	 * // @hasOne(User) (ES7)
 	 * class Comment extends Model {}
 	 * hasOne(User, {...})(Comment)
 	 *
-	 * ES5 Usage:
+	 * // ES5
 	 * var JSData = require('js-data')
-	 * var User = JSData.Model.extend()
-	 * var Comment = JSDataModel.extend()
+	 * var User = JSData.Model.extend({}, { name: 'User' })
+	 * var Comment = JSDataModel.extend({}, { name: 'Comment' })
 	 * JSData.hasOne(User, {...})(Comment)
+	 *
+	 * @param {Model} Model - The Model of which the target has one.
+	 * @param {Object} [opts] - Configuration options.
+	 * @param {string} [opts.localField] - The field on the target where the relation
+	 * will be attached.
+	 * @return {Function} Invocation function, which accepts the target as the only
+	 * parameter.
 	 */
 	function hasOne(Model, opts) {
 	  return function (target) {
@@ -1687,6 +2147,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var op = 'initialize';
 	
+	/**
+	 * @memberof! module:js-data
+	 * @return {Function} Invocation function, which accepts the target as the only
+	 * parameter.
+	 */
 	function initialize(opts) {
 	  opts || (opts = {});
 	  return function (target) {
@@ -1723,10 +2188,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var op = 'setSchema';
 	
-	function makeDescriptor(target, key, prop) {
+	/**
+	 * @param {Model} target - Target Model.
+	 * @param {string} key - Key for new property.
+	 * @param {Object} opts - Configuration options.
+	 * @ignore
+	 */
+	function makeDescriptor(target, key, opts) {
 	  var descriptor = {
-	    enumerable: prop.enumerable !== undefined ? prop.enumerable : true,
-	    configurable: prop.configurable !== undefined ? prop.configurable : true
+	    enumerable: opts.enumerable !== undefined ? opts.enumerable : true,
+	    configurable: opts.configurable !== undefined ? opts.configurable : true
 	  };
 	  descriptor.get = function () {
 	    return this._get('props.' + key);
@@ -1735,19 +2206,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _this = this;
 	
 	    // TODO: rework this
-	    // if (isFunction(prop.validate) && !prop.validate(value)) {
+	    // if (isFunction(opts.validate) && !opts.validate(value)) {
 	    //   return false
 	    // }
 	    var _get = this._get;
 	    var _set = this._set;
 	    var _unset = this._unset;
 	    if (!_get('noValidate')) {
-	      var errors = (0, _validate.validate)(prop, value);
+	      var errors = (0, _validate.validate)(opts, value);
 	      if (errors) {
 	        throw new Error(errors.join(', '));
 	      }
 	    }
-	    if (prop.track && !_get('creating')) {
+	    if (opts.track && !_get('creating')) {
 	      (function () {
 	        var changing = _get('changing');
 	        var previous = _get('previous.' + key);
@@ -1782,47 +2253,49 @@ return /******/ (function(modules) { // webpackBootstrap
 	      })();
 	    }
 	    _set('props.' + key, value);
-	    if (_get('$') && prop.indexed) {
+	    if (_get('$') && opts.indexed) {
 	      target.data().updateRecord(this, { index: key });
 	    }
 	    return value;
 	  };
-	  if (prop.indexed) {
+	  if (opts.indexed) {
 	    // Update index
 	    // TODO: Make this configurable, ie. immediate or lazy update
 	    target.createIndex(key);
 	  }
-	  if (prop.get) {
+	  if (opts.get) {
 	    if (descriptor.get) {
 	      (function () {
 	        var originalGet = descriptor.get;
 	        descriptor.get = function () {
-	          return prop.get.call(this, originalGet);
+	          return opts.get.call(this, originalGet);
 	        };
 	      })();
 	    } else {
-	      descriptor.get = prop.get;
+	      descriptor.get = opts.get;
 	    }
 	  }
-	  if (prop.set) {
+	  if (opts.set) {
 	    if (descriptor.set) {
 	      (function () {
 	        var originalSet = descriptor.set;
 	        descriptor.set = function (value) {
-	          return prop.set.call(this, value, originalSet);
+	          return opts.set.call(this, value, originalSet);
 	        };
 	      })();
 	    } else {
-	      descriptor.set = prop.set;
+	      descriptor.set = opts.set;
 	    }
 	  }
 	  return descriptor;
 	}
 	
 	/**
-	 * Usage:
-	 *
-	 * @schema({
+	 * @memberof! module:js-data
+	 * @example
+	 * // ES6
+	 * import {setSchema, Model} from 'js-data'
+	 * const properties = {
 	 *   first: {},
 	 *   last: {},
 	 *   role: {
@@ -1838,16 +2311,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *       return this
 	 *     }
 	 *   }
-	 * })
-	 * class User extends JSData.Model {...}
+	 * }
 	 *
-	 * let user = new User()
-	 * user.role // "dev"
-	 * user.name = 'John Anderson'
-	 * user.first // "John"
-	 * user.last // "Anderson"
-	 * user.first = "Bill"
-	 * user.name // "Bill Anderson"
+	 * // @setSchema(properties) (ES7)
+	 * class User extends Model {}
+	 * User.setSchema(properties)
+	 *
+	 * // ES5
+	 * var JSData = require('js-data')
+	 * var User = JSData.Model.extend({}, { name: 'User' })
+	 * User.setSchema(properties)
+	 *
+	 * @param {Object.<string, Object>} opts - Property configurations.
+	 * @return {Function} Invocation function, which accepts the target as the only
+	 * parameter.
 	 */
 	function setSchema(opts) {
 	  opts || (opts = {});
@@ -1988,16 +2465,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var op = 'registerAdapter';
 	
+	/**
+	 * Add the provided adapter to the target's "adapters" property, registering it
+	 * with the specified.
+	 * @memberof! module:js-data
+	 * @param {string} name - The name under which to register the adapter.
+	 * @param {Adapter} adapter - The adapter to register.
+	 * @param {Object} opts - Configuration options.
+	 * @param {boolean} [opts.default=false] - Whether to make the adapter the
+	 * default adapter for the target.
+	 * @return {Function} Invocation function, which accepts the target as the only
+	 * parameter.
+	 */
 	function registerAdapter(name, adapter, opts) {
 	  opts || (opts = {});
 	  opts.op = op;
 	  return function (target) {
 	    target.dbg(op, 'name:', name, 'adapter:', adapter, 'opts:', opts);
+	    // ES6 class inheritance copies static properties, so here we check to make
+	    // sure that the target's "adapters" property is not actually a reference to
+	    // the parent's "adapters" property.
 	    if (target.adapters && target.adapters === Object.getPrototypeOf(target).adapters) {
+	      // Give the target its own "adapters" hash.
 	      target.adapters = {};
+	      // Add back the adapters that were already registered with the parent.
 	      (0, _utils.fillIn)(target.adapters, Object.getPrototypeOf(target).adapters);
 	    }
+	    // Register the adapter
 	    target.adapters[name] = adapter;
+	    // Optionally make it the default adapter for the target.
 	    if (opts === true || opts.default) {
 	      target.defaultAdapter = name;
 	    }
@@ -2686,13 +3182,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return data;
 	};
 	
-	// This is here so Babel will give us
-	// the inheritance helpers which we
-	// can re-use for the "extend" method
+	/**
+	 * This is here so Babel will give us the inheritance helpers which we can
+	 * re-use for the "extend" method.
+	 * @ignore
+	 */
 	
 	var BaseModel = function BaseModel() {
 	  _classCallCheck(this, BaseModel);
 	};
+	
+	/**
+	 * js-data's Model class.
+	 * @class Model
+	 * @example {@lang javascript}class User extends Model {}
+	 *
+	 * @abstract
+	 * @param {Object} [props] The initial properties of the new instance.
+	 * @param {Object} [opts] Configuration options.
+	 * @param {boolean} [opts.noValidate=false] Whether to skip validation on the
+	 * initial properties.
+	 */
 	
 	var Model = exports.Model = (function (_BaseModel) {
 	  _inherits(Model, _BaseModel);
@@ -2759,7 +3269,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return errors.length ? errors : undefined;
 	    }
 	
-	    // Instance methods
+	    /**
+	     * @param {Object} [opts] Configuration options. @see {@link Model.create}.
+	     */
 	
 	  }, {
 	    key: 'create',
@@ -2775,6 +3287,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var adapterName = Ctor.getAdapterName(opts);
 	      return Ctor.getAdapter(adapterName).update(Ctor, utils.get(this, Ctor.idAttribute), this, opts);
 	    }
+	
+	    /**
+	     * @param {Object} [opts] Configuration options. @see {@link Model.destroy}.
+	     */
+	
 	  }, {
 	    key: 'destroy',
 	    value: function destroy(opts) {
@@ -2803,9 +3320,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * an object.
 	     *
 	     * @param {(string|Object)} key - Key to set or hash of key-value pairs to set.
-	     * @param {?*} value - Value to set for the given key.
-	     * @param {?Object} - Optional configuration. Properties:
-	     *   - {boolean=true} silent - Whether to trigger change events.
+	     * @param {*} [value] - Value to set for the given key.
+	     * @param {Object} [opts] - Optional configuration.
+	     * - boolean [silent=false] - Whether to trigger change events.
 	     */
 	
 	  }, {
@@ -3152,7 +3669,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    /**
-	     * Proxy for Collection#query
+	    * Proxy for `Model.data().query()`.
+	     * @return {Query}
 	     */
 	
 	  }, {
@@ -3197,9 +3715,52 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      return opts.adapter || opts.defaultAdapter;
 	    }
+	
+	    /**
+	     * Lifecycle hook. Called by `Model.create` after `Model.create` checks
+	     * whether it can do an upsert and before `Model.create` calls the `create`
+	     * method of an adapter.
+	     *
+	     * `Model.beforeCreate` will receive the same arguments that are passed to
+	     * `Model.create`. If `Model.beforeCreate` returns a promise, `Model.create`
+	     * will wait for the promise to resolve before continuing. If the promise
+	     * rejects, then the promise returned by `Model.create` will reject. If
+	     * `Model.beforeCreate` does not return a promise, `Model.create` will resume
+	     * execution immediately.
+	     *
+	     * @param {Object} props - Properties object that was passed to `Model.create`.
+	     * @param {Object} opts - Options object that was passed to `Model.create`.
+	     */
+	
 	  }, {
 	    key: 'beforeCreate',
 	    value: function beforeCreate() {}
+	
+	    /**
+	     * The "C" in "CRUD", `Model.create` creates a single entity using the
+	     * `create` method of an adapter. If the `props` passed to `Model.create`
+	     * contain a primary key as configured by `Model.idAttribute` and
+	     * `opts.upsert` is `true` of `Model.upsert` is `true` and `opts.upsert` is
+	     * not `false`, then `Model.update` will be called instead.
+	     *
+	     * 1. `Model.beforeCreate` is called and passed the same arguments passed to
+	     * `Model.create`.
+	     * 1. `props` and `opts` are passed to the `create` method of the adapter
+	     * specified by `opts.adapter` or `Model.defaultAdapter`.
+	     * 1. `Model.afterCreate` is called with the `data` argument returned by the
+	     * adapter's `create` method and the `opts` argument passed to `Model.create`.
+	     * 1. If `opts.raw` is `true` or `Model.raw` is `true` and `opts.raw` is not
+	     * `false`, then a result object is returned that contained the created entity
+	     * and some metadata about the operation and its result. Otherwise, the
+	     * promise returned by `Model.create` resolves with the created entity.
+	     *
+	     * @param {?Object} props - The properties from which to create the new entity.
+	     * @param {?Object} opts - Optional configuration. Properties:
+	     * - string `adapter` - The name of the registered adapter to use.
+	     * - Boolean `raw` - The name of the registered adapter to use.
+	     * @return {Object} The created entity, or if `raw` is `true` then a result object.
+	     */
+	
 	  }, {
 	    key: 'create',
 	    value: function create(props, opts) {
@@ -3226,6 +3787,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	      });
 	    }
+	
+	    /**
+	     * Lifecycle hook. Called by `Model.create` after `Model.create` call the
+	     * `create` method of an adapter.
+	     *
+	     * `Model.afterCreate` will receive the `data` argument returned by the
+	     * adapter's `create` method and the `opts` argument passed to `Model.create`.
+	     * If `Model.afterCreate` returns a promise, `Model.create` will wait for the
+	     * promise to resolve before continuing. If the promise rejects, then the
+	     * promise returned by `Model.create` will reject. If `Model.afterCreate` does
+	     * not return a promise, `Model.create` will resume execution immediately.
+	     *
+	     * @param {Object} data - Data object returned by the adapter's `create` method.
+	     * @param {Object} opts - Options object that was passed to `Model.create`.
+	     */
+	
 	  }, {
 	    key: 'afterCreate',
 	    value: function afterCreate() {}
@@ -3396,6 +3973,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'beforeUpdateAll',
 	    value: function beforeUpdateAll() {}
+	    /**
+	     * @param {Object} query={} - Selection query.
+	     * @param {Object} props - Update to apply to selected entities.
+	     * @param {Object} [opts] - Configuration options.
+	     * @param {boolean} [opts.raw=false] TODO
+	     */
+	
 	  }, {
 	    key: 'updateAll',
 	    value: function updateAll(query, props, opts) {
@@ -3426,6 +4010,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'beforeDestroy',
 	    value: function beforeDestroy() {}
+	
+	    /**
+	     * @param {(string|number)} id
+	     * @param {Object} [opts] - Configuration options.
+	     * @param {boolean} [opts.raw=false] TODO
+	     */
+	
 	  }, {
 	    key: 'destroy',
 	    value: function destroy(id, opts) {
@@ -3584,16 +4175,44 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function initialize(opts) {
 	      return (0, _decorators.initialize)(opts)(this);
 	    }
+	
+	    /**
+	     * Invoke the {@link module:js-data.exports.setSchema setSchema} decorator on
+	     * this Model.
+	     * @param {Object} opts - Property configurations.
+	     * @return {Model} A reference to the Model for chaining.
+	     */
+	
 	  }, {
 	    key: 'setSchema',
 	    value: function setSchema(opts) {
 	      return (0, _decorators.setSchema)(opts)(this);
 	    }
+	
+	    /**
+	     * Invoke the {@link module:js-data.exports.configure configure} decorator on
+	     * this Model.
+	     * @param {Object} opts - Configuration
+	     * @return {Model} A reference to the Model for chaining.
+	     */
+	
 	  }, {
 	    key: 'configure',
-	    value: function configure(props) {
-	      return (0, _decorators.configure)(props)(this);
+	    value: function configure(opts) {
+	      return (0, _decorators.configure)(opts)(this);
 	    }
+	
+	    /**
+	     * Invoke the {@link module:js-data.exports.registerAdapter registerAdapter}
+	     * decorator on this Model.
+	     * @param {string} name - The name of the adapter to register.
+	     * @param {Adapter} adapter - The adapter to register.
+	     * @param {Object} [opts] - Configuration options.
+	     * @param {boolean} [opts.default=false] - Whether to make the adapter the
+	     * default for this Model.
+	     * @return {Model} A reference to the Model for chaining.
+	     */
+	
 	  }, {
 	    key: 'registerAdapter',
 	    value: function registerAdapter(name, adapter, opts) {
@@ -3601,9 +4220,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    /**
-	     * Usage:
-	     *
-	     * var User = JSData.Model.extend({...}, {...})
+	     * @example
+	     * var User = JSData.Model.extend({}, { name: 'User' })
+	     * @param {Object} props={} - Properties to add to the prototype of the class.
+	     * @param {Function} [props.initialize] - Optional function to invoke during
+	     * construction of instances of the class. Will receive any arguments passed
+	     * to the constructor. "this" will refer to the instance being constructed.
+	     * @param {Object} classProps - Static properties to add to the class.
+	     * @param {string} classProps.name - Name of the class. Required.
+	     * @param {string} [classProps.idAttribute='id'] - Field to use as the unique
+	     * identifier for instances of the class.
+	     * @param {Object} [classProps.schema] - Value to pass to the {@link Model.setSchema setSchema}
+	     * method of the class after the class is created.
 	     */
 	
 	  }, {
@@ -3651,15 +4279,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	      classProps.shortname = classProps.shortname || utils.camelCase(Child.name || classProps.name);
 	      delete classProps.name;
 	
-	      var _schema = classProps.schema || {};
+	      var _schema = classProps.schema;
 	      delete classProps.schema;
 	
 	      _inherits(Child, Parent);
 	
 	      (0, _decorators.configure)(props)(Child.prototype);
 	      (0, _decorators.configure)(classProps)(Child);
-	      _schema[Child.idAttribute] = _schema[Child.idAttribute] || {};
-	      (0, _decorators.setSchema)(_schema)(Child);
+	      if (_schema) {
+	        (0, _decorators.setSchema)(_schema)(Child);
+	      } else {
+	        Child.initialize();
+	      }
 	
 	      return Child;
 	    }
@@ -3687,7 +4318,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  useFilter: true
 	})(Model);
 	
-	utils.Events(Model.prototype, function () {
+	utils.eventify(Model.prototype, function () {
 	  return this._get('events');
 	}, function (value) {
 	  this._set('events', value);

@@ -12,6 +12,8 @@ const op = 'hasMany'
  * attached to an instance of the target Model, e.g. if User hasMany Comment
  * and "localField" is set to "comments", "user.comments" will be a reference to
  * the array of comments.
+ *
+ * @ignore
  */
 function applyHasMany (Model, Relation, opts) {
   opts || (opts = {})
@@ -140,25 +142,28 @@ function applyHasMany (Model, Relation, opts) {
 }
 
 /**
- * Usage:
- *
- * ES7 Usage:
+ * @memberof! module:js-data
+ * @example
+ * // ES6
  * import {hasMany, Model} from 'js-data'
- * class Post extends Model {}
- * @hasMany(Post, {...})
- * class User extends Model {}
- *
- * ES6 Usage:
- * import {hasMany, Model} from 'js-data'
- * class User extends Model {}
  * class Comment extends Model {}
- * hasMany(Comment, {...})(User)
  *
- * ES5 Usage:
+ * // @hasMany(Comment)
+ * class User extends Model {}
+ * hasMany(Comment)(User)
+ *
+ * // ES5
  * var JSData = require('js-data')
- * var User = JSData.Model.extend()
- * var Comment = JSDataModel.extend()
- * JSData.hasMany(User, {...})(Comment)
+ * var User = JSData.Model.extend({}, { name: 'User' })
+ * var Comment = JSDataModel.extend({}, { name: 'Comment' })
+ * JSData.hasMany(User)(Comment)
+ *
+ * @param {Model} Model - The Model of which the target has many.
+ * @param {Object} [opts] - Configuration options.
+ * @param {string} [opts.localField] - The field on the target where the relation
+ * will be attached.
+ * @return {Function} Invocation function, which accepts the target as the only
+ * parameter.
  */
 export function hasMany (Model, opts) {
   return function (target) {
