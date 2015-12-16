@@ -11,5 +11,8 @@
     "verbose": true,
     "readme": "./README.md",
     "package": "./package.json"
+  },
+  "source": {
+    "excludePattern": "(sync_methods|old_utils)"
   }
 }

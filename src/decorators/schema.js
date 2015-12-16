@@ -8,29 +8,35 @@ import {initialize} from './initialize'
 
 const op = 'setSchema'
 
-function makeDescriptor (target, key, prop) {
+/**
+ * @param {Model} target - Target Model.
+ * @param {string} key - Key for new property.
+ * @param {Object} opts - Configuration options.
+ * @ignore
+ */
+function makeDescriptor (target, key, opts) {
   const descriptor = {
-    enumerable: prop.enumerable !== undefined ? prop.enumerable : true,
-    configurable: prop.configurable !== undefined ? prop.configurable : true
+    enumerable: opts.enumerable !== undefined ? opts.enumerable : true,
+    configurable: opts.configurable !== undefined ? opts.configurable : true
   }
   descriptor.get = function () {
     return this._get(`props.${key}`)
   }
   descriptor.set = function (value) {
     // TODO: rework this
-    // if (isFunction(prop.validate) && !prop.validate(value)) {
+    // if (isFunction(opts.validate) && !opts.validate(value)) {
     //   return false
     // }
     const _get = this._get
     const _set = this._set
     const _unset = this._unset
     if (!_get('noValidate')) {
-      const errors = validate(prop, value)
+      const errors = validate(opts, value)
       if (errors) {
         throw new Error(errors.join(', '))
       }
     }
-    if (prop.track && !_get('creating')) {
+    if (opts.track && !_get('creating')) {
       const changing = _get('changing')
       const previous = _get(`previous.${key}`)
       const current = _get(`props.${key}`)
@@ -63,43 +69,45 @@ function makeDescriptor (target, key, prop) {
       }
     }
     _set(`props.${key}`, value)
-    if (_get('$') && prop.indexed) {
+    if (_get('$') && opts.indexed) {
       target.data().updateRecord(this, { index: key })
     }
     return value
   }
-  if (prop.indexed) {
+  if (opts.indexed) {
     // Update index
     // TODO: Make this configurable, ie. immediate or lazy update
     target.createIndex(key)
   }
-  if (prop.get) {
+  if (opts.get) {
     if (descriptor.get) {
       const originalGet = descriptor.get
       descriptor.get = function () {
-        return prop.get.call(this, originalGet)
+        return opts.get.call(this, originalGet)
       }
     } else {
-      descriptor.get = prop.get
+      descriptor.get = opts.get
     }
   }
-  if (prop.set) {
+  if (opts.set) {
     if (descriptor.set) {
       const originalSet = descriptor.set
       descriptor.set = function (value) {
-        return prop.set.call(this, value, originalSet)
+        return opts.set.call(this, value, originalSet)
       }
     } else {
-      descriptor.set = prop.set
+      descriptor.set = opts.set
     }
   }
   return descriptor
 }
 
 /**
- * Usage:
- *
- * @schema({
+ * @memberof! module:js-data
+ * @example
+ * // ES6
+ * import {setSchema, Model} from 'js-data'
+ * const properties = {
  *   first: {},
  *   last: {},
  *   role: {
@@ -115,16 +123,20 @@ function makeDescriptor (target, key, prop) {
  *       return this
  *     }
  *   }
- * })
- * class User extends JSData.Model {...}
+ * }
  *
- * let user = new User()
- * user.role // "dev"
- * user.name = 'John Anderson'
- * user.first // "John"
- * user.last // "Anderson"
- * user.first = "Bill"
- * user.name // "Bill Anderson"
+ * // @setSchema(properties) (ES7)
+ * class User extends Model {}
+ * User.setSchema(properties)
+ *
+ * // ES5
+ * var JSData = require('js-data')
+ * var User = JSData.Model.extend({}, { name: 'User' })
+ * User.setSchema(properties)
+ *
+ * @param {Object.<string, Object>} opts - Property configurations.
+ * @return {Function} Invocation function, which accepts the target as the only
+ * parameter.
  */
 export function setSchema (opts) {
   opts || (opts = {})

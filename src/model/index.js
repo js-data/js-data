@@ -44,7 +44,7 @@ class BaseModel {}
 /**
  * js-data's Model class.
  * @class Model
- * @example {@lang javascript}class User extends Model {} 
+ * @example {@lang javascript}class User extends Model {}
  *
  * @abstract
  * @param {Object} [props] The initial properties of the new instance.
@@ -861,22 +861,53 @@ export class Model extends BaseModel {
     return initialize(opts)(this)
   }
 
+  /**
+   * Invoke the {@link module:js-data.exports.setSchema setSchema} decorator on
+   * this Model.
+   * @param {Object} opts - Property configurations.
+   * @return {Model} A reference to the Model for chaining.
+   */
   static setSchema (opts) {
     return setSchema(opts)(this)
   }
 
-  static configure (props) {
-    return configure(props)(this)
+  /**
+   * Invoke the {@link module:js-data.exports.configure configure} decorator on
+   * this Model.
+   * @param {Object} opts - Configuration
+   * @return {Model} A reference to the Model for chaining.
+   */
+  static configure (opts) {
+    return configure(opts)(this)
   }
 
+  /**
+   * Invoke the {@link module:js-data.exports.registerAdapter registerAdapter}
+   * decorator on this Model.
+   * @param {string} name - The name of the adapter to register.
+   * @param {Adapter} adapter - The adapter to register.
+   * @param {Object} [opts] - Configuration options.
+   * @param {boolean} [opts.default=false] - Whether to make the adapter the
+   * default for this Model.
+   * @return {Model} A reference to the Model for chaining.
+   */
   static registerAdapter (name, adapter, opts) {
     return registerAdapter(name, adapter, opts)(this)
   }
 
   /**
-   * Usage:
-   *
-   * var User = JSData.Model.extend({...}, {...})
+   * @example
+   * var User = JSData.Model.extend({}, { name: 'User' })
+   * @param {Object} props={} - Properties to add to the prototype of the class.
+   * @param {Function} [props.initialize] - Optional function to invoke during
+   * construction of instances of the class. Will receive any arguments passed
+   * to the constructor. "this" will refer to the instance being constructed.
+   * @param {Object} classProps - Static properties to add to the class.
+   * @param {string} classProps.name - Name of the class. Required.
+   * @param {string} [classProps.idAttribute='id'] - Field to use as the unique
+   * identifier for instances of the class.
+   * @param {Object} [classProps.schema] - Value to pass to the {@link Model.setSchema setSchema}
+   * method of the class after the class is created.
    */
   static extend (props, classProps) {
     const Parent = this
@@ -959,7 +990,7 @@ configure({
   useFilter: true
 })(Model)
 
-utils.Events(
+utils.eventify(
   Model.prototype,
   function () {
     return this._get('events')

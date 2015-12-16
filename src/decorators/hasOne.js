@@ -12,6 +12,8 @@ const op = 'hasOne'
  * attached to an instance of the target Model, e.g. if User hasOne
  * Profile and "localField" is set to "profile", "user.profile" will be a
  * reference to the profile.
+ *
+ * @ignore
  */
 function applyHasOne (Model, Relation, opts) {
   opts || (opts = {})
@@ -93,25 +95,28 @@ function applyHasOne (Model, Relation, opts) {
 }
 
 /**
- * Usage:
- *
- * ES7 Usage:
+ * @memberof! module:js-data
+ * @example
+ * // ES6
  * import {hasOne, Model} from 'js-data'
  * class User extends Model {}
- * @hasOne(User, {...})
- * class Post extends Model {}
  *
- * ES6 Usage:
- * import {hasOne, Model} from 'js-data'
- * class User extends Model {}
+ * // @hasOne(User) (ES7)
  * class Comment extends Model {}
  * hasOne(User, {...})(Comment)
  *
- * ES5 Usage:
+ * // ES5
  * var JSData = require('js-data')
- * var User = JSData.Model.extend()
- * var Comment = JSDataModel.extend()
+ * var User = JSData.Model.extend({}, { name: 'User' })
+ * var Comment = JSDataModel.extend({}, { name: 'Comment' })
  * JSData.hasOne(User, {...})(Comment)
+ *
+ * @param {Model} Model - The Model of which the target has one.
+ * @param {Object} [opts] - Configuration options.
+ * @param {string} [opts.localField] - The field on the target where the relation
+ * will be attached.
+ * @return {Function} Invocation function, which accepts the target as the only
+ * parameter.
  */
 export function hasOne (Model, opts) {
   return function (target) {

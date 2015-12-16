@@ -12,6 +12,8 @@ const op = 'belongsTo'
  * attached to an instance of the target Model, e.g. if Comment belongsTo
  * User and "localField" is set to "user", "comment.user" will be a reference to
  * the user.
+ *
+ * @ignore
  */
 function applyBelongsTo (Model, Relation, opts) {
   opts || (opts = {})
@@ -94,27 +96,30 @@ function applyBelongsTo (Model, Relation, opts) {
 }
 
 /**
- * Usage:
- *
- * ES7 Usage:
+ * @memberof! module:js-data
+ * @example
+ * // ES6
  * import {belongsTo, Model} from 'js-data'
  * class User extends Model {}
- * @belongsTo(User, {...})
- * class Post extends Model {}
  *
- * ES6 Usage:
- * import {belongsTo, Model} from 'js-data'
- * class User extends Model {}
+ * // @belongsTo(User) (ES7)
  * class Comment extends Model {}
- * belongsTo(User, {...})(Comment)
+ * belongsTo(User)(Comment)
  *
- * ES5 Usage:
+ * // ES5
  * var JSData = require('js-data')
- * var User = JSData.Model.extend()
- * var Comment = JSDataModel.extend()
- * JSData.belongsTo(User, {...})(Comment)
+ * var User = JSData.Model.extend({}, { name: 'User' })
+ * var Comment = JSDataModel.extend({}, { name: 'Comment' })
+ * JSData.belongsTo(User)(Comment)
+ *
+ * @param {Model} Model - The Model the target belongs to.
+ * @param {Object} [opts] - Configuration options.
+ * @param {string} [opts.localField] - The field on the target where the relation
+ * will be attached.
+ * @return {Function} Invocation function, which accepts the target as the only
+ * parameter.
  */
-export function belongsTo (Model, opts) {
+exports.belongsTo = function (Model, opts) {
   return function (target) {
     target.dbg(op, 'Model:', Model, 'opts:', opts)
     return applyBelongsTo(target, Model, opts)

@@ -5,11 +5,14 @@ const op = 'registerAdapter'
 /**
  * Add the provided adapter to the target's "adapters" property, registering it
  * with the specified.
- *
+ * @memberof! module:js-data
  * @param {string} name - The name under which to register the adapter.
  * @param {Adapter} adapter - The adapter to register.
- * @param {?Object} opts - Optional configuration. Properties:
- * - {boolean=false} default - Whether to make the adapter the default adapter for the target.
+ * @param {Object} opts - Configuration options.
+ * @param {boolean} [opts.default=false] - Whether to make the adapter the
+ * default adapter for the target.
+ * @return {Function} Invocation function, which accepts the target as the only
+ * parameter.
  */
 export function registerAdapter (name, adapter, opts) {
   opts || (opts = {})
