@@ -144,7 +144,7 @@ configure({
   /**
    * Find all entities between two boundaries.
    *
-   * Get the entity whose primary key is 25
+   * Get the users ages 18 to 30
    * ```js
    * const users = query.between(18, 30, { index: 'age' }).run()
    * ```
@@ -244,7 +244,7 @@ configure({
    * ```
    * Same as above
    * ```js
-   * const posts = getAll.get(['draft'], ['inReview'], { index: 'status' }).run()
+   * const posts = query.getAll(['draft'], ['inReview'], { index: 'status' }).run()
    * ```
    *
    * @memberof Query
@@ -279,7 +279,8 @@ configure({
   },
 
   /**
-   * Find the entity or entities that match the provided keyLists.
+   * Find the entity or entities that match the provided query or pass the
+   * provided filter function.
    *
    * #### Example
    *
@@ -458,6 +459,8 @@ configure({
   },
 
   /**
+   * Iterate over all entities.
+   *
    * @memberof Query
    * @instance
    * @param {Function} forEachFn - Iteration function.
@@ -470,6 +473,8 @@ configure({
   },
 
   /**
+   * Apply a mapping function to the result data.
+   *
    * @memberof Query
    * @instance
    * @param {Function} mapFn - Mapping function.
@@ -482,6 +487,8 @@ configure({
   },
 
   /**
+   * Complete the execution of the query and return the resulting data.
+   *
    * @memberof Query
    * @instance
    * @return {Array} The result of executing this query.
