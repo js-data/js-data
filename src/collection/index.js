@@ -1,5 +1,5 @@
 import {Query} from './query'
-import {isArray, isString, forOwn} from '../utils'
+import {isArray, isFunction, isString, eventify, forOwn} from '../utils'
 import {configure} from '../decorators'
 import {Index} from '../../lib/mindex'
 exports.Query = Query
@@ -13,7 +13,7 @@ exports.Query = Query
  */
 export function Collection (data = [], idAttribute = 'id') {
   if (!isArray(data)) {
-    throw new TypeError('new Collection([data]): data: Expected array. Found ' + typeof data)
+    throw new TypeError(`new Collection([data]): data: Expected array. Found ${typeof data}`)
   }
   /**
    * Field to use as the unique identifier for each entity in this collection.
@@ -30,10 +30,19 @@ export function Collection (data = [], idAttribute = 'id') {
    * @type {Object.<string, Index>}
    */
   this.indexes = {}
-  data.forEach(this.index.insertRecord, this.index)
+  data.forEach(record => {
+    this.index.insertRecord(record)
+    if (record && isFunction(record.on)) {
+      record.on('all', this._onModelEvent, this)
+    }
+  })
 }
 
 configure({
+  _onModelEvent (...args) {
+    this.emit(...args)
+  },
+
   /**
    * Create a new secondary index on the contents of the collection.
    *
@@ -295,6 +304,28 @@ configure({
   },
 
   /**
+   * Reduce the data in the collection to a single value and return the result.
+   *
+   * #### Example
+   *
+   * ```js
+   * const totalVotes = collection.reduce(function (prev, entity) {
+   *   return prev + entity.upVotes + entity.downVotes
+   * }, 0)
+   * ```
+   *
+   * @memberof Collection
+   * @instance
+   * @param {Function} callback - Reduction callback.
+   * @param {*} initialValue - Initial value of the reduction.
+   * @return {*} The result.
+   */
+  reduce (callback, initialValue) {
+    const data = this.getAll()
+    return data.reduce(callback, initialValue)
+  },
+
+  /**
    * Apply a mapping function to all entities.
    *
    * #### Example
@@ -321,7 +352,7 @@ configure({
 
   /**
    * Instead a record into this collection, updating all indexes with the new
-   * record. See {@link Collection#insertRecord} to insert a record into only
+   * record.
    * one index.
    * @memberof Collection
    * @instance
@@ -332,6 +363,9 @@ configure({
     forOwn(this.indexes, function (index, name) {
       index.insertRecord(record)
     })
+    if (record && isFunction(record.on)) {
+      record.on('all', this._onModelEvent, this)
+    }
   },
 
   /**
@@ -350,8 +384,7 @@ configure({
   },
 
   /**
-   * Remove the given record from all indexes in this collection. See
-   * {@link Collection#removeRecord} to remove a record from only one index.
+   * Remove the given record from all indexes in this collection.
    * @memberof Collection
    * @instance
    * @param {Object} record - The record to be removed.
@@ -361,23 +394,9 @@ configure({
     forOwn(this.indexes, function (index, name) {
       index.removeRecord(record)
     })
-  },
-
-  /**
-   * Instead a record into a single index of this collection. See
-   * {@link Collection#insert} to insert a record into all indexes at once.
-   * @memberof Collection
-   * @instance
-   * @param {Object} record - The record to insert.
-   * @param {Object} [opts] - Configuration options.
-   * @param {string} [opts.index] The index into which to insert the record. If
-   * you don't specify an index then the record will be inserted into the main
-   * index.
-   */
-  insertRecord (record, opts) {
-    opts || (opts = {})
-    const index = opts.index ? this.indexes[opts.index] : this.index
-    index.insertRecord(record)
+    if (record && isFunction(record.off)) {
+      record.off('all', this._onModelEvent, this)
+    }
   },
 
   /**
@@ -396,22 +415,15 @@ configure({
     opts || (opts = {})
     const index = opts.index ? this.indexes[opts.index] : this.index
     index.updateRecord(record)
-  },
-
-  /**
-   * Remove a record from a single index of this collection. See
-   * {@link Collection#remove} to remove a record from all indexes at once.
-   * @memberof Collection
-   * @instance
-   * @param {Object} record - The record to remove.
-   * @param {Object} [opts] - Configuration options.
-   * @param {string} [opts.index] The index from which to remove the record. If
-   * If you don't specify an index then the record will be removed from the main
-   * index.
-   */
-  removeRecord (record, opts) {
-    opts || (opts = {})
-    const index = opts.index ? this.indexes[opts.index] : this.index
-    index.removeRecord(record)
   }
 })(Collection.prototype)
+
+eventify(
+  Collection.prototype,
+  function () {
+    return this._events
+  },
+  function (value) {
+    this._events = value
+  }
+)

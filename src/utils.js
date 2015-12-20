@@ -433,12 +433,17 @@ export function eventify (target, getter, setter) {
     },
     emit: {
       value (...args) {
-        const events = getter.call(this)
-        const listeners = events[args.shift()] || []
-        if (listeners) {
-          for (let i = 0; i < listeners.length; i++) {
-            listeners[i].f.apply(listeners[i].c, args)
-          }
+        const events = getter.call(this) || {}
+        const type = args.shift()
+        let listeners = events[type] || []
+        let i
+        for (i = 0; i < listeners.length; i++) {
+          listeners[i].f.apply(listeners[i].c, args)
+        }
+        listeners = events.all || []
+        args.unshift(type)
+        for (i = 0; i < listeners.length; i++) {
+          listeners[i].f.apply(listeners[i].c, args)
         }
       }
     }
