@@ -267,6 +267,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * of each entity in the collection.
 	 */
 	function Collection() {
+	  var _this = this;
+	
 	  var data = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
 	  var idAttribute = arguments.length <= 1 || arguments[1] === undefined ? 'id' : arguments[1];
 	
@@ -288,10 +290,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @type {Object.<string, Index>}
 	   */
 	  this.indexes = {};
-	  data.forEach(this.index.insertRecord, this.index);
+	  data.forEach(function (record) {
+	    _this.index.insertRecord(record);
+	    if (record && (0, _utils.isFunction)(record.on)) {
+	      record.on('all', _this._onModelEvent, _this);
+	    }
+	  });
 	}
 	
 	(0, _decorators.configure)({
+	  _onModelEvent: function _onModelEvent() {
+	    this.emit.apply(this, arguments);
+	  },
+	
 	  /**
 	   * Create a new secondary index on the contents of the collection.
 	   *
@@ -314,7 +325,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * the name will also be the field that is used to index the collection.
 	   * @return {Collection} A reference to itself for chaining.
 	   */
-	
 	  createIndex: function createIndex(name, keyList) {
 	    if ((0, _utils.isString)(name) && keyList === undefined) {
 	      keyList = [name];
@@ -560,6 +570,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	
 	  /**
+	   * Reduce the data in the collection to a single value and return the result.
+	   *
+	   * #### Example
+	   *
+	   * ```js
+	   * const totalVotes = collection.reduce(function (prev, entity) {
+	   *   return prev + entity.upVotes + entity.downVotes
+	   * }, 0)
+	   * ```
+	   *
+	   * @memberof Collection
+	   * @instance
+	   * @param {Function} callback - Reduction callback.
+	   * @param {*} initialValue - Initial value of the reduction.
+	   * @return {*} The result.
+	   */
+	  reduce: function reduce(callback, initialValue) {
+	    var data = this.getAll();
+	    return data.reduce(callback, initialValue);
+	  },
+	
+	  /**
 	   * Apply a mapping function to all entities.
 	   *
 	   * #### Example
@@ -586,7 +618,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  /**
 	   * Instead a record into this collection, updating all indexes with the new
-	   * record. See {@link Collection#insertRecord} to insert a record into only
+	   * record.
 	   * one index.
 	   * @memberof Collection
 	   * @instance
@@ -597,6 +629,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    (0, _utils.forOwn)(this.indexes, function (index, name) {
 	      index.insertRecord(record);
 	    });
+	    if (record && (0, _utils.isFunction)(record.on)) {
+	      record.on('all', this._onModelEvent, this);
+	    }
 	  },
 	
 	  /**
@@ -615,8 +650,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	
 	  /**
-	   * Remove the given record from all indexes in this collection. See
-	   * {@link Collection#removeRecord} to remove a record from only one index.
+	   * Remove the given record from all indexes in this collection.
 	   * @memberof Collection
 	   * @instance
 	   * @param {Object} record - The record to be removed.
@@ -626,23 +660,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    (0, _utils.forOwn)(this.indexes, function (index, name) {
 	      index.removeRecord(record);
 	    });
-	  },
-	
-	  /**
-	   * Instead a record into a single index of this collection. See
-	   * {@link Collection#insert} to insert a record into all indexes at once.
-	   * @memberof Collection
-	   * @instance
-	   * @param {Object} record - The record to insert.
-	   * @param {Object} [opts] - Configuration options.
-	   * @param {string} [opts.index] The index into which to insert the record. If
-	   * you don't specify an index then the record will be inserted into the main
-	   * index.
-	   */
-	  insertRecord: function insertRecord(record, opts) {
-	    opts || (opts = {});
-	    var index = opts.index ? this.indexes[opts.index] : this.index;
-	    index.insertRecord(record);
+	    if (record && (0, _utils.isFunction)(record.off)) {
+	      record.off('all', this._onModelEvent, this);
+	    }
 	  },
 	
 	  /**
@@ -661,25 +681,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    opts || (opts = {});
 	    var index = opts.index ? this.indexes[opts.index] : this.index;
 	    index.updateRecord(record);
-	  },
-	
-	  /**
-	   * Remove a record from a single index of this collection. See
-	   * {@link Collection#remove} to remove a record from all indexes at once.
-	   * @memberof Collection
-	   * @instance
-	   * @param {Object} record - The record to remove.
-	   * @param {Object} [opts] - Configuration options.
-	   * @param {string} [opts.index] The index from which to remove the record. If
-	   * If you don't specify an index then the record will be removed from the main
-	   * index.
-	   */
-	  removeRecord: function removeRecord(record, opts) {
-	    opts || (opts = {});
-	    var index = opts.index ? this.indexes[opts.index] : this.index;
-	    index.removeRecord(record);
 	  }
 	})(Collection.prototype);
+	
+	(0, _utils.eventify)(Collection.prototype, function () {
+	  return this._events;
+	}, function (value) {
+	  this._events = value;
+	});
 
 /***/ },
 /* 2 */
@@ -1673,17 +1682,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    emit: {
 	      value: function value() {
-	        var events = getter.call(this);
+	        var events = getter.call(this) || {};
 	
 	        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
 	          args[_key] = arguments[_key];
 	        }
 	
-	        var listeners = events[args.shift()] || [];
-	        if (listeners) {
-	          for (var i = 0; i < listeners.length; i++) {
-	            listeners[i].f.apply(listeners[i].c, args);
-	          }
+	        var type = args.shift();
+	        var listeners = events[type] || [];
+	        var i = undefined;
+	        for (i = 0; i < listeners.length; i++) {
+	          listeners[i].f.apply(listeners[i].c, args);
+	        }
+	        listeners = events.all || [];
+	        args.unshift(type);
+	        for (i = 0; i < listeners.length; i++) {
+	          listeners[i].f.apply(listeners[i].c, args);
 	        }
 	      }
 	    }
@@ -3070,11 +3084,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.set(keyList, data);
 	  },
 	  removeRecord: function removeRecord(data) {
-	    var keyList = this.fieldList.map(function (field) {
-	      return data[field] || null;
-	    });
+	    var _this = this;
 	
-	    this.remove(keyList, data);
+	    var removed = undefined;
+	    this.values.forEach(function (value, i) {
+	      if (value.isIndex) {
+	        if (value.removeRecord(data)) {
+	          if (value.keys.length === 0) {
+	            (0, _utils2.removeAt)(_this.keys, i);
+	            (0, _utils2.removeAt)(_this.values, i);
+	          }
+	          removed = true;
+	          return false;
+	        }
+	      } else {
+	        var dataLocation = (0, _utils2.binarySearch)(value, data, _this.idAttribute);
+	        if (dataLocation.found) {
+	          (0, _utils2.removeAt)(value, dataLocation.index);
+	          if (value.length === 0) {
+	            (0, _utils2.removeAt)(_this.keys, i);
+	            (0, _utils2.removeAt)(_this.values, i);
+	          }
+	          removed = true;
+	          return false;
+	        }
+	      }
+	    });
+	    return removed ? data : undefined;
 	  },
 	  updateRecord: function updateRecord(data) {
 	    this.removeRecord(data);
@@ -3837,14 +3873,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            existing.set(props);
 	          }
 	          props = existing;
+	          collection.update(props);
 	        } else {
 	          props = _this.createInstance(props);
 	          props._set('$', true);
-	          collection.index.insertRecord(props);
+	          collection.insert(props);
 	        }
-	        utils.forOwn(collection.indexes, function (index) {
-	          index.updateRecord(props);
-	        });
 	        return props;
 	      });
 	      return singular ? items.length ? items[0] : undefined : items;

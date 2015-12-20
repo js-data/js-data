@@ -356,14 +356,12 @@ export class Model extends BaseModel {
           existing.set(props)
         }
         props = existing
+        collection.update(props)
       } else {
         props = _this.createInstance(props)
         props._set('$', true)
-        collection.index.insertRecord(props)
+        collection.insert(props)
       }
-      utils.forOwn(collection.indexes, function (index) {
-        index.updateRecord(props)
-      })
       return props
     })
     return singular ? (items.length ? items[0] : undefined) : items

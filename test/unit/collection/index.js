@@ -1,4 +1,4 @@
-/* global Collection:true, TYPES_EXCEPT_NUMBER:true */
+/* global Collection:true, TYPES_EXCEPT_NUMBER:true, TYPES_EXCEPT_ARRAY:true, Model:true, sinon:true */
 import {assert} from 'chai'
 import * as query from './query.test'
 
@@ -10,6 +10,20 @@ export function init () {
       assert.isTrue(collection instanceof Collection, 'collection should be an instance')
       collection = new Collection([], 'id')
       assert.equal(collection.idAttribute, 'id', 'collection should get initialization properties')
+
+      TYPES_EXCEPT_ARRAY.forEach(function (type) {
+        if (type === undefined) {
+          return
+        }
+        assert.throws(
+          function () {
+            new Collection(type)
+          },
+          TypeError,
+          `new Collection([data]): data: Expected array. Found ${typeof type}`,
+          'should throw on unacceptable type'
+        )
+      })
     })
 
     it('should accept initialization data', function () {
@@ -188,6 +202,126 @@ export function init () {
         ],
         'should have found age:19, role:admin and age:23'
       )
+    })
+
+    it('should forEach', function () {
+      const data = [
+        { id: 2 },
+        { id: 3 },
+        { id: 1 }
+      ]
+      const collection = new Collection(data, 'id')
+      let sum = 0
+      const expectedSum = data.reduce(function (prev, curr) {
+        return prev + curr.id
+      }, 0)
+      const ctx = {}
+      collection.forEach(function (item) {
+        sum = sum + item.id
+        assert.isTrue(this === ctx, 'should have correct context')
+      }, ctx)
+      assert.equal(sum, expectedSum, 'should have iterated over all items, producing expectedSum')
+    })
+
+    it('should reduce', function () {
+      const data = [
+        { id: 2 },
+        { id: 3 },
+        { id: 1 }
+      ]
+      const collection = new Collection(data, 'id')
+      const expectedSum = data.reduce(function (prev, curr) {
+        return prev + curr.id
+      }, 0)
+      const reduction = collection.reduce(function (prev, item) {
+        return prev + item.id
+      }, 0)
+      assert.equal(reduction, expectedSum, 'should have correctly reduce the items to a single value')
+    })
+
+    it('should map', function () {
+      const data = [
+        { id: 2 },
+        { id: 3 },
+        { id: 1 }
+      ]
+      const collection = new Collection(data, 'id')
+      const ctx = {}
+      const mapping = collection.map(function (item) {
+        assert.isTrue(this === ctx, 'should have correct context')
+        return item.id
+      }, ctx)
+      assert.isTrue(mapping.indexOf(1) !== -1)
+      assert.isTrue(mapping.indexOf(2) !== -1)
+      assert.isTrue(mapping.indexOf(3) !== -1)
+      assert.equal(mapping.length, 3)
+    })
+
+    it('should insert a record into all indexes', function () {
+      const data = [
+        { id: 2, age: 19 },
+        { id: 1, age: 27 }
+      ]
+      const collection = new Collection(data, 'id')
+      collection.createIndex('age')
+      collection.insert({ id: 3, age: 20 })
+      assert.equal(collection.get(1).length, 1)
+      assert.equal(collection.get(20, { index: 'age' }).length, 1)
+    })
+
+    it('should update a record in all indexes', function () {
+      const data = [
+        { id: 2, age: 19 },
+        { id: 1, age: 27 }
+      ]
+      const collection = new Collection(data, 'id')
+      collection.createIndex('age')
+      assert.equal(collection.get(27, { index: 'age' }).length, 1, 'should have one item with age 27')
+      data[1].age = 26
+      collection.update(data[1])
+      assert.equal(collection.get(26, { index: 'age' }).length, 1, 'should have one item with age 26')
+      assert.equal(collection.get(27, { index: 'age' }).length, 0, 'should have no items with age 27')
+    })
+
+    it('should update record in a single index', function () {
+      const data = [
+        { id: 2, age: 19 },
+        { id: 1, age: 27 }
+      ]
+      const collection = new Collection(data, 'id')
+      collection.createIndex('age')
+      assert.equal(collection.get(3).length, 0, 'should have no items with id 3')
+      assert.equal(collection.get(27, { index: 'age' }).length, 1, 'should have one item with age 27')
+      data[1].age = 26
+      data[1].id = 3
+      collection.updateRecord(data[1], { index: 'age' })
+      assert.equal(collection.get(3).length, 0, 'should have no items with id 3')
+      assert.equal(collection.get(26, { index: 'age' }).length, 1, 'should have one item with age 26')
+      assert.equal(collection.get(27, { index: 'age' }).length, 0, 'should have no items with age 27')
+      collection.updateRecord(data[1])
+      assert.equal(collection.get(1).length, 0, 'should have no items with id 1')
+      assert.equal(collection.get(3).length, 1, 'should have one item with id 3')
+    })
+
+    it('should bubble up model events', function (done) {
+      class User extends Model {}
+      const data = [
+        new User({ id: 2, age: 19 }),
+        new User({ id: 1, age: 27 })
+      ]
+      const collection = new Collection(data, 'id')
+      const listener = sinon.stub()
+      const listener2 = sinon.stub()
+      collection.on('foo', listener)
+      collection.on('all', listener2)
+      data[0].emit('foo', 'bar', 'biz', 'baz')
+      setTimeout(function () {
+        assert.isTrue(listener.calledOnce, 'listener should have been called once')
+        assert.deepEqual(listener.firstCall.args, ['bar', 'biz', 'baz' ], 'should have been called with the correct args')
+        assert.isTrue(listener2.calledOnce, 'listener2 should have been called once')
+        assert.deepEqual(listener2.firstCall.args, [ 'foo', 'bar', 'biz', 'baz' ], 'should have been called with the correct args')
+        done()
+      }, 10)
     })
 
     query.init()
