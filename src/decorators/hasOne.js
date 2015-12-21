@@ -88,7 +88,7 @@ function applyHasOne (Model, Relation, opts) {
   opts.Relation = Relation
   Model.relationList.push(opts)
   Model.relationFields.push(localField)
-  Model.data().createIndex(foreignKey)
+  Model.collection.createIndex(foreignKey)
 
   // Return target Model for chaining
   return Model

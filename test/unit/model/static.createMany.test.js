@@ -22,7 +22,6 @@ export function init () {
       const props = [{ name: 'John' }]
       let createCalled = false
       class User extends Model {}
-      User.initialize()
       User.configure({
         defaultAdapter: 'mock',
         autoInject: false
@@ -49,7 +48,6 @@ export function init () {
       const props = [{ name: 'John' }]
       let createCalled = false
       class User extends Model {}
-      User.initialize()
       User.configure({
         autoInject: true,
         defaultAdapter: 'mock'
@@ -76,7 +74,6 @@ export function init () {
       const props = [{ name: 'John', id: 1 }]
       let createCalled = false
       class User extends Model {}
-      User.initialize()
       User.configure({
         autoInject: true,
         defaultAdapter: 'mock',
@@ -91,7 +88,6 @@ export function init () {
       const props = [{ name: 'John' }]
       let createCalled = false
       class User extends Model {}
-      User.initialize()
       User.configure({
         autoInject: true,
         raw: true,

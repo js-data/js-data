@@ -88,7 +88,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_ret === 'continue') continue;
 	}
 	
-	var _datastore = __webpack_require__(15);
+	var _datastore = __webpack_require__(14);
 	
 	var _loop2 = function _loop2(_key7) {
 	  if (_key7 === "default") return 'continue';
@@ -124,7 +124,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_ret3 === 'continue') continue;
 	}
 	
-	var _model = __webpack_require__(16);
+	var _model = __webpack_require__(15);
 	
 	var _loop4 = function _loop4(_key9) {
 	  if (_key9 === "default") return 'continue';
@@ -142,7 +142,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_ret4 === 'continue') continue;
 	}
 	
-	var _validate = __webpack_require__(11);
+	var _validate = __webpack_require__(10);
 	
 	var _loop5 = function _loop5(_key10) {
 	  if (_key10 === "default") return 'continue';
@@ -253,7 +253,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _decorators = __webpack_require__(4);
 	
-	var _mindex = __webpack_require__(13);
+	var _mindex = __webpack_require__(12);
 	
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 	
@@ -1716,128 +1716,110 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _belongsTo = __webpack_require__(5);
 	
-	var _loop = function _loop(_key8) {
-	  if (_key8 === "default") return 'continue';
-	  Object.defineProperty(exports, _key8, {
+	var _loop = function _loop(_key7) {
+	  if (_key7 === "default") return 'continue';
+	  Object.defineProperty(exports, _key7, {
 	    enumerable: true,
 	    get: function get() {
-	      return _belongsTo[_key8];
+	      return _belongsTo[_key7];
 	    }
 	  });
 	};
 	
-	for (var _key8 in _belongsTo) {
-	  var _ret = _loop(_key8);
+	for (var _key7 in _belongsTo) {
+	  var _ret = _loop(_key7);
 	
 	  if (_ret === 'continue') continue;
 	}
 	
 	var _configure = __webpack_require__(6);
 	
-	var _loop2 = function _loop2(_key9) {
-	  if (_key9 === "default") return 'continue';
-	  Object.defineProperty(exports, _key9, {
+	var _loop2 = function _loop2(_key8) {
+	  if (_key8 === "default") return 'continue';
+	  Object.defineProperty(exports, _key8, {
 	    enumerable: true,
 	    get: function get() {
-	      return _configure[_key9];
+	      return _configure[_key8];
 	    }
 	  });
 	};
 	
-	for (var _key9 in _configure) {
-	  var _ret2 = _loop2(_key9);
+	for (var _key8 in _configure) {
+	  var _ret2 = _loop2(_key8);
 	
 	  if (_ret2 === 'continue') continue;
 	}
 	
 	var _hasMany = __webpack_require__(7);
 	
-	var _loop3 = function _loop3(_key10) {
-	  if (_key10 === "default") return 'continue';
-	  Object.defineProperty(exports, _key10, {
+	var _loop3 = function _loop3(_key9) {
+	  if (_key9 === "default") return 'continue';
+	  Object.defineProperty(exports, _key9, {
 	    enumerable: true,
 	    get: function get() {
-	      return _hasMany[_key10];
+	      return _hasMany[_key9];
 	    }
 	  });
 	};
 	
-	for (var _key10 in _hasMany) {
-	  var _ret3 = _loop3(_key10);
+	for (var _key9 in _hasMany) {
+	  var _ret3 = _loop3(_key9);
 	
 	  if (_ret3 === 'continue') continue;
 	}
 	
 	var _hasOne = __webpack_require__(8);
 	
-	var _loop4 = function _loop4(_key11) {
-	  if (_key11 === "default") return 'continue';
-	  Object.defineProperty(exports, _key11, {
+	var _loop4 = function _loop4(_key10) {
+	  if (_key10 === "default") return 'continue';
+	  Object.defineProperty(exports, _key10, {
 	    enumerable: true,
 	    get: function get() {
-	      return _hasOne[_key11];
+	      return _hasOne[_key10];
 	    }
 	  });
 	};
 	
-	for (var _key11 in _hasOne) {
-	  var _ret4 = _loop4(_key11);
+	for (var _key10 in _hasOne) {
+	  var _ret4 = _loop4(_key10);
 	
 	  if (_ret4 === 'continue') continue;
 	}
 	
-	var _initialize = __webpack_require__(9);
+	var _schema = __webpack_require__(9);
 	
-	var _loop5 = function _loop5(_key12) {
-	  if (_key12 === "default") return 'continue';
-	  Object.defineProperty(exports, _key12, {
+	var _loop5 = function _loop5(_key11) {
+	  if (_key11 === "default") return 'continue';
+	  Object.defineProperty(exports, _key11, {
 	    enumerable: true,
 	    get: function get() {
-	      return _initialize[_key12];
+	      return _schema[_key11];
 	    }
 	  });
 	};
 	
-	for (var _key12 in _initialize) {
-	  var _ret5 = _loop5(_key12);
+	for (var _key11 in _schema) {
+	  var _ret5 = _loop5(_key11);
 	
 	  if (_ret5 === 'continue') continue;
 	}
 	
-	var _schema = __webpack_require__(10);
+	var _adapter = __webpack_require__(11);
 	
-	var _loop6 = function _loop6(_key13) {
-	  if (_key13 === "default") return 'continue';
-	  Object.defineProperty(exports, _key13, {
+	var _loop6 = function _loop6(_key12) {
+	  if (_key12 === "default") return 'continue';
+	  Object.defineProperty(exports, _key12, {
 	    enumerable: true,
 	    get: function get() {
-	      return _schema[_key13];
+	      return _adapter[_key12];
 	    }
 	  });
 	};
 	
-	for (var _key13 in _schema) {
-	  var _ret6 = _loop6(_key13);
+	for (var _key12 in _adapter) {
+	  var _ret6 = _loop6(_key12);
 	
 	  if (_ret6 === 'continue') continue;
-	}
-	
-	var _adapter = __webpack_require__(12);
-	
-	var _loop7 = function _loop7(_key14) {
-	  if (_key14 === "default") return 'continue';
-	  Object.defineProperty(exports, _key14, {
-	    enumerable: true,
-	    get: function get() {
-	      return _adapter[_key14];
-	    }
-	  });
-	};
-	
-	for (var _key14 in _adapter) {
-	  var _ret7 = _loop7(_key14);
-	
-	  if (_ret7 === 'continue') continue;
 	}
 	
 	// Workaround for https://github.com/babel/babel/issues/2763
@@ -1961,7 +1943,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  opts.Relation = Relation;
 	  Model.relationList.push(opts);
 	  Model.relationFields.push(localField);
-	  Model.data().createIndex(localKey);
+	  Model.collection.createIndex(localKey);
 	
 	  // Return target Model for chaining
 	  return Model;
@@ -2086,7 +2068,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    foreignKey = opts.foreignKey = (0, _utils.camelCase)(Model.name) + 'Id';
 	  }
 	  if (foreignKey) {
-	    Relation.data().createIndex(foreignKey);
+	    Relation.collection.createIndex(foreignKey);
 	  }
 	
 	  // Setup configuration of the property
@@ -2378,7 +2360,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  opts.Relation = Relation;
 	  Model.relationList.push(opts);
 	  Model.relationFields.push(localField);
-	  Model.data().createIndex(foreignKey);
+	  Model.collection.createIndex(foreignKey);
 	
 	  // Return target Model for chaining
 	  return Model;
@@ -2424,54 +2406,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.initialize = initialize;
-	
-	var _collection = __webpack_require__(1);
-	
-	function errMsg(name) {
-	  return name + ': Schemas are not inheritable, did you forget to define a schema?';
-	}
-	
-	var op = 'initialize';
-	
-	/**
-	 * @memberof! module:js-data
-	 * @return {Function} Invocation function, which accepts the target as the only
-	 * parameter.
-	 */
-	function initialize(opts) {
-	  opts || (opts = {});
-	  return function (target) {
-	    target.dbg(op, 'opts:', opts);
-	    var collection = new _collection.Collection([], target.idAttribute);
-	    target.data = function () {
-	      // TODO: Do I need this?
-	      if (this.data === Object.getPrototypeOf(this).data) {
-	        throw new Error(errMsg(this.name));
-	      }
-	      return collection;
-	    };
-	  };
-	}
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
 	exports.setSchema = setSchema;
 	
 	var _utils = __webpack_require__(3);
 	
-	var _validate = __webpack_require__(11);
+	var _validate = __webpack_require__(10);
 	
 	var _configure = __webpack_require__(6);
-	
-	var _initialize = __webpack_require__(9);
 	
 	var op = 'setSchema';
 	
@@ -2541,7 +2482,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    _set('props.' + key, value);
 	    if (_get('$') && opts.indexed) {
-	      target.data().updateRecord(this, { index: key });
+	      target.collection.updateRecord(this, { index: key });
 	    }
 	    return value;
 	  };
@@ -2618,11 +2559,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  return function (target) {
 	    target.dbg(op, 'opts:', opts);
-	    try {
-	      target.data();
-	    } catch (err) {
-	      (0, _initialize.initialize)(opts)(target);
-	    }
 	
 	    target.schema || (target.schema = {});
 	    (0, _configure.configure)(target.schema, opts);
@@ -2640,7 +2576,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 11 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2738,8 +2674,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
+/* 11 */
+/***/ function(module, exports) {
 
 	'use strict';
 	
@@ -2747,9 +2683,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 	exports.registerAdapter = registerAdapter;
-	
-	var _utils = __webpack_require__(3);
-	
 	var op = 'registerAdapter';
 	
 	/**
@@ -2769,15 +2702,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  opts.op = op;
 	  return function (target) {
 	    target.dbg(op, 'name:', name, 'adapter:', adapter, 'opts:', opts);
-	    // ES6 class inheritance copies static properties, so here we check to make
-	    // sure that the target's "adapters" property is not actually a reference to
-	    // the parent's "adapters" property.
-	    if (target.adapters && target.adapters === Object.getPrototypeOf(target).adapters) {
-	      // Give the target its own "adapters" hash.
-	      target.adapters = {};
-	      // Add back the adapters that were already registered with the parent.
-	      (0, _utils.fillIn)(target.adapters, Object.getPrototypeOf(target).adapters);
-	    }
 	    // Register the adapter
 	    target.adapters[name] = adapter;
 	    // Optionally make it the default adapter for the target.
@@ -2788,7 +2712,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 13 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2802,7 +2726,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _decorators = __webpack_require__(4);
 	
-	var _utils2 = __webpack_require__(14);
+	var _utils2 = __webpack_require__(13);
 	
 	function Index() {
 	  var fieldList = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
@@ -3119,7 +3043,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	})(Index.prototype);
 
 /***/ },
-/* 14 */
+/* 13 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -3203,7 +3127,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 15 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3217,7 +3141,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _utils = __webpack_require__(3);
 	
-	var _model = __webpack_require__(16);
+	var _model = __webpack_require__(15);
 	
 	// function lifecycleNoopCb (resource, attrs, cb) {
 	//   cb(null, attrs)
@@ -3443,7 +3367,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 16 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3461,7 +3385,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _decorators = __webpack_require__(4);
 	
-	var _validate2 = __webpack_require__(11);
+	var _collection3 = __webpack_require__(1);
+	
+	var _validate2 = __webpack_require__(10);
 	
 	var _validate = _interopRequireWildcard(_validate2);
 	
@@ -3711,38 +3637,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	     */
 	
 	    /**
-	     * Return a reference to the Collection instance of this Model.
-	     *
-	     * Will throw an error if a schema has not been defined for this Model.
-	     * When the schema is defined, this method is replaced with one that can
-	     * return the Collection instance.
-	     *
-	     * A schema can be created automatically if .extend is used to create the
-	     * class, but ES6 or ES7 class definitions will need to use .schema(opts) or
-	     * @schema(opts) to get the schema initialized.
-	     *
-	     * @throws {Error} Schema must already be defined for Model.
-	     * @return {Collection} The Collection instance of this Model.
-	     */
-	
-	  }], [{
-	    key: 'data',
-	    value: function data() {
-	      throw new Error(this.name + '.data(): Did you forget to define a schema?');
-	    }
-	
-	    /**
 	     * Create a new secondary index in the Collection instance of this Model.
 	     *
 	     * @param {string} name - The name of the new secondary index
 	     * @param {string[]} keyList - The list of keys to be used to create the index.
 	     */
 	
-	  }, {
+	  }], [{
 	    key: 'createIndex',
 	    value: function createIndex(name, keyList) {
 	      this.dbg('createIndex', 'name:', name, 'keyList:', keyList);
-	      this.data().createIndex(name, keyList);
+	      this.collection.createIndex(name, keyList);
 	    }
 	
 	    /**
@@ -3798,7 +3703,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      opts || (opts = {});
 	      opts.op = op;
 	      var singular = false;
-	      var collection = _this.data();
+	      var collection = _this.collection;
 	      var idAttribute = _this.idAttribute;
 	      var relationList = _this.relationList || [];
 	      if (!utils.isArray(items)) {
@@ -3902,7 +3807,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var item = this.get(id);
 	      if (item) {
 	        item._unset('$');
-	        this.data().remove(item);
+	        this.collection.remove(item);
 	      }
 	      return item;
 	    }
@@ -3923,7 +3828,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      opts || (opts = {});
 	      opts.op = op;
 	      var items = this.filter(params);
-	      var collection = this.data();
+	      var collection = this.collection;
 	      items.forEach(function (item) {
 	        collection.remove(item);
 	      });
@@ -3942,7 +3847,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    key: 'get',
 	    value: function get(id) {
 	      this.dbg('get', 'id:', id);
-	      var instances = this.data().get(id);
+	      var instances = this.collection.get(id);
 	      return instances.length ? instances[0] : undefined;
 	    }
 	
@@ -3953,9 +3858,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'between',
 	    value: function between() {
-	      var _data;
+	      var _collection;
 	
-	      return (_data = this.data()).between.apply(_data, arguments);
+	      return (_collection = this.collection).between.apply(_collection, arguments);
 	    }
 	
 	    /**
@@ -3965,9 +3870,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'getAll',
 	    value: function getAll() {
-	      var _data2;
+	      var _collection2;
 	
-	      return (_data2 = this.data()).getAll.apply(_data2, arguments);
+	      return (_collection2 = this.collection).getAll.apply(_collection2, arguments);
 	    }
 	
 	    /**
@@ -3977,18 +3882,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'filter',
 	    value: function filter(opts) {
-	      return this.data().filter(opts);
+	      return this.collection.filter(opts);
 	    }
 	
 	    /**
-	    * Proxy for `Model.data().query()`.
+	    * Proxy for `Model.collection.query()`.
 	     * @return {Query}
 	     */
 	
 	  }, {
 	    key: 'query',
 	    value: function query() {
-	      return this.data().query();
+	      return this.collection.query();
 	    }
 	
 	    /**
@@ -4482,11 +4387,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function hasOne(model, opts) {
 	      return (0, _decorators.hasOne)(model, opts)(this);
 	    }
-	  }, {
-	    key: 'initialize',
-	    value: function initialize(opts) {
-	      return (0, _decorators.initialize)(opts)(this);
-	    }
 	
 	    /**
 	     * Invoke the {@link module:js-data.exports.setSchema setSchema} decorator on
@@ -4600,8 +4500,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      (0, _decorators.configure)(classProps)(Child);
 	      if (_schema) {
 	        (0, _decorators.setSchema)(_schema)(Child);
-	      } else {
-	        Child.initialize();
 	      }
 	
 	      return Child;
@@ -4612,7 +4510,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	})(BaseModel);
 	
 	(0, _decorators.configure)({
-	  adapters: {},
 	  autoEject: true,
 	  autoInject: isBrowser,
 	  bypassCache: false,
@@ -4629,6 +4526,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	  upsert: true,
 	  useFilter: true
 	})(Model);
+	
+	Model._adapters = {};
+	Object.defineProperty(Model, 'adapters', {
+	  get: function get() {
+	    var parentAdapters = Object.getPrototypeOf(this)._adapters;
+	    if (this._adapters === parentAdapters) {
+	      this._adapters = {};
+	      utils.fillIn(this._adapters, parentAdapters);
+	    }
+	    return this._adapters;
+	  }
+	});
+	Model._collection = new _collection3.Collection([], Model.idAttribute);
+	Object.defineProperty(Model, 'collection', {
+	  get: function get() {
+	    if (this._collection === Object.getPrototypeOf(this)._collection) {
+	      this._collection = new _collection3.Collection([], this.idAttribute);
+	    }
+	    return this._collection;
+	  }
+	});
 	
 	utils.eventify(Model.prototype, function () {
 	  return this._get('events');
