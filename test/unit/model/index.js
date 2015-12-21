@@ -1,4 +1,4 @@
-/* global JSData:true, Model:true, configure:true */
+/* global JSData:true, Model:true, configure:true, sinon:true */
 import {assert} from 'chai'
 import * as create from './create.test'
 import * as staticCreate from './static.create.test'
@@ -179,6 +179,16 @@ export function init () {
         ],
         'should have found all of age:19 using 1 keyList'
       )
+    })
+
+    it('should have events', function () {
+      class User extends Model {}
+      const listener = sinon.stub()
+      User.emit('foo')
+      User.on('bar', listener)
+      User.collection.emit('bar')
+      assert.isTrue(User._events !== Model._events)
+      assert.isTrue(listener.calledOnce)
     })
 
     create.init()
