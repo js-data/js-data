@@ -4509,15 +4509,92 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return Model;
 	})(BaseModel);
 	
-	(0, _decorators.configure)({
+	utils.fillIn(Model, {
+	  /**
+	   * Whether {@link Model.destroy} and {@link Model.destroyAll} should
+	   * automatically eject the specified item(s) from the Model's collection on
+	   * success.
+	   *
+	   * @memberof Model
+	   * @type {boolean}
+	   * @default true
+	   */
 	  autoEject: true,
+	
+	  /**
+	   * Whether {@link Model.create}, {@link Model.createMany},
+	   * {@link Model.update}, {@link Model.updateAll}, and {@link Model.updateMany}
+	   * should automatically inject the specified item(s) returned by the adapter
+	   * into the the Model's collection on success.
+	   *
+	   * __Defaults to `true` in the Browser.__
+	   *
+	   * __Defaults to `false` in Node.js__
+	   *
+	   * @memberof Model
+	   * @type {boolean}
+	   */
 	  autoInject: isBrowser,
 	  bypassCache: false,
+	
+	  /**
+	   * Whether to disallow the use of `new Function` in {@link Model.extend}.
+	   *
+	   * You may set this to `true` if you so desire, but the class (constructor
+	   * function) produced by {@link Model.extend} will not be a named function,
+	   * which makes for slightly less debuggability.
+	   *
+	   * @memberof Model
+	   * @type {boolean}
+	   * @default false
+	   */
 	  csp: false,
+	
+	  /**
+	   * The name of the registered adapter that should be used by default by any
+	   * of the Model's static methods that use an adapter.
+	   *
+	   * @memberof Model
+	   * @type {string}
+	   * @default http
+	   */
 	  defaultAdapter: 'http',
+	
+	  /**
+	   * Whether to enable debug-level logs.
+	   *
+	   * @memberof Model
+	   * @type {boolean}
+	   * @default false
+	   */
 	  debug: false,
 	  eagerEject: false,
+	
+	  /**
+	   * The field on instances of {@link Model} that should be used as the unique
+	   * identifier for instances of the Model.
+	   *
+	   * @memberof Model
+	   * @type {string}
+	   * @default id
+	   */
 	  idAttribute: 'id',
+	
+	  /**
+	   * Whether to add property accessors to the prototype of {@link Model} for
+	   * each of the Model's relations. For each relation, the property accessor
+	   * will be added as the field specified by the `localField` option of the
+	   * relation definition. A relation property accessor returns related data by
+	   * accessing the related Model. If the related Model's collection is empty,
+	   * then the property accessors won't return anything.
+	   *
+	   * __Defaults to `true` in the Browser.__
+	   *
+	   * __Defaults to `false` in Node.js__
+	   *
+	   * @memberof Model
+	   * @type {boolean}
+	   */
 	  linkRelations: isBrowser,
 	  onConflict: 'merge',
 	  relationsEnumerable: false,
@@ -4525,7 +4602,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  strategy: 'single',
 	  upsert: true,
 	  useFilter: true
-	})(Model);
+	});
 	
 	Model._adapters = {};
 	Object.defineProperty(Model, 'adapters', {
@@ -4543,8 +4620,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  get: function get() {
 	    if (this._collection === Object.getPrototypeOf(this)._collection) {
 	      this._collection = new _collection3.Collection([], this.idAttribute);
+	      this._collection.on('all', this.emit, this);
 	    }
 	    return this._collection;
+	  }
+	});
+	Model.__events = {};
+	Object.defineProperty(Model, '_events', {
+	  get: function get() {
+	    if (this.__events === Object.getPrototypeOf(this).__events) {
+	      this.__events = {};
+	    }
+	    return this.__events;
 	  }
 	});
 	
@@ -4552,6 +4639,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return this._get('events');
 	}, function (value) {
 	  this._set('events', value);
+	});
+	
+	utils.eventify(Model, function () {
+	  return this._events;
+	}, function (value) {
+	  this._events = value;
 	});
 
 /***/ }
