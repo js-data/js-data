@@ -4,7 +4,6 @@ import {
 } from '../utils'
 import {validate} from '../validate'
 import {configure} from './configure'
-import {initialize} from './initialize'
 
 const op = 'setSchema'
 
@@ -70,7 +69,7 @@ function makeDescriptor (target, key, opts) {
     }
     _set(`props.${key}`, value)
     if (_get('$') && opts.indexed) {
-      target.data().updateRecord(this, { index: key })
+      target.collection.updateRecord(this, { index: key })
     }
     return value
   }
@@ -143,11 +142,6 @@ export function setSchema (opts) {
 
   return function (target) {
     target.dbg(op, 'opts:', opts)
-    try {
-      target.data()
-    } catch (err) {
-      initialize(opts)(target)
-    }
 
     target.schema || (target.schema = {})
     configure(target.schema, opts)

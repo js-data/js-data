@@ -4,10 +4,10 @@ import {
   configure,
   hasMany,
   hasOne,
-  initialize,
   setSchema,
   registerAdapter
 } from '../decorators'
+import {Collection} from '../collection'
 import * as validate from '../validate'
 
 const {
@@ -209,24 +209,6 @@ export class Model extends BaseModel {
    */
 
   /**
-   * Return a reference to the Collection instance of this Model.
-   *
-   * Will throw an error if a schema has not been defined for this Model.
-   * When the schema is defined, this method is replaced with one that can
-   * return the Collection instance.
-   *
-   * A schema can be created automatically if .extend is used to create the
-   * class, but ES6 or ES7 class definitions will need to use .schema(opts) or
-   * @schema(opts) to get the schema initialized.
-   *
-   * @throws {Error} Schema must already be defined for Model.
-   * @return {Collection} The Collection instance of this Model.
-   */
-  static data () {
-    throw new Error(`${this.name}.data(): Did you forget to define a schema?`)
-  }
-
-  /**
    * Create a new secondary index in the Collection instance of this Model.
    *
    * @param {string} name - The name of the new secondary index
@@ -234,7 +216,7 @@ export class Model extends BaseModel {
    */
   static createIndex (name, keyList) {
     this.dbg('createIndex', 'name:', name, 'keyList:', keyList)
-    this.data().createIndex(name, keyList)
+    this.collection.createIndex(name, keyList)
   }
 
   /**
@@ -281,7 +263,7 @@ export class Model extends BaseModel {
     opts || (opts = {})
     opts.op = op
     let singular = false
-    const collection = _this.data()
+    const collection = _this.collection
     const idAttribute = _this.idAttribute
     const relationList = _this.relationList || []
     if (!utils.isArray(items)) {
@@ -382,7 +364,7 @@ export class Model extends BaseModel {
     const item = this.get(id)
     if (item) {
       item._unset('$')
-      this.data().remove(item)
+      this.collection.remove(item)
     }
     return item
   }
@@ -400,7 +382,7 @@ export class Model extends BaseModel {
     opts || (opts = {})
     opts.op = op
     const items = this.filter(params)
-    const collection = this.data()
+    const collection = this.collection
     items.forEach(function (item) {
       collection.remove(item)
     })
@@ -416,7 +398,7 @@ export class Model extends BaseModel {
    */
   static get (id) {
     this.dbg('get', 'id:', id)
-    const instances = this.data().get(id)
+    const instances = this.collection.get(id)
     return instances.length ? instances[0] : undefined
   }
 
@@ -424,29 +406,29 @@ export class Model extends BaseModel {
    * Proxy for Collection#between
    */
   static between (...args) {
-    return this.data().between(...args)
+    return this.collection.between(...args)
   }
 
   /**
    * Proxy for Collection#getAll
    */
   static getAll (...args) {
-    return this.data().getAll(...args)
+    return this.collection.getAll(...args)
   }
 
   /**
    * Proxy for Collection#filter
    */
   static filter (opts) {
-    return this.data().filter(opts)
+    return this.collection.filter(opts)
   }
 
   /**
-  * Proxy for `Model.data().query()`.
+  * Proxy for `Model.collection.query()`.
    * @return {Query}
    */
   static query () {
-    return this.data().query()
+    return this.collection.query()
   }
 
   /**
@@ -855,10 +837,6 @@ export class Model extends BaseModel {
     return hasOne(model, opts)(this)
   }
 
-  static initialize (opts) {
-    return initialize(opts)(this)
-  }
-
   /**
    * Invoke the {@link module:js-data.exports.setSchema setSchema} decorator on
    * this Model.
@@ -961,8 +939,6 @@ export class Model extends BaseModel {
     configure(classProps)(Child)
     if (_schema) {
       setSchema(_schema)(Child)
-    } else {
-      Child.initialize()
     }
 
     return Child
@@ -970,7 +946,6 @@ export class Model extends BaseModel {
 }
 
 configure({
-  adapters: {},
   autoEject: true,
   autoInject: isBrowser,
   bypassCache: false,
@@ -987,6 +962,27 @@ configure({
   upsert: true,
   useFilter: true
 })(Model)
+
+Model._adapters = {}
+Object.defineProperty(Model, 'adapters', {
+  get () {
+    const parentAdapters = Object.getPrototypeOf(this)._adapters
+    if (this._adapters === parentAdapters) {
+      this._adapters = {}
+      utils.fillIn(this._adapters, parentAdapters)
+    }
+    return this._adapters
+  }
+})
+Model._collection = new Collection([], Model.idAttribute)
+Object.defineProperty(Model, 'collection', {
+  get () {
+    if (this._collection === Object.getPrototypeOf(this)._collection) {
+      this._collection = new Collection([], this.idAttribute)
+    }
+    return this._collection
+  }
+})
 
 utils.eventify(
   Model.prototype,

@@ -27,7 +27,6 @@ export function init () {
       assert.isFunction(JSData.DS, 'has the DS class')
       assert.isFunction(JSData.hasMany, 'has the hasMany decorator')
       assert.isFunction(JSData.hasOne, 'has the hasOne decorator')
-      assert.isFunction(JSData.initialize, 'has the initialize decorator')
       assert.isFunction(JSData.setSchema, 'has the schema decorator')
       assert.isFunction(JSData.Model, 'has the Model class')
       assert.isObject(JSData.version, 'has a version')

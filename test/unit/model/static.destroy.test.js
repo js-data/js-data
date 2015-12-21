@@ -23,7 +23,6 @@ export function init () {
       const props = { id, name: 'John' }
       let destroyCalled = false
       class User extends Model {}
-      User.initialize()
       User.configure({
         defaultAdapter: 'mock'
       })
@@ -50,7 +49,6 @@ export function init () {
       const props = { id, name: 'John' }
       let destroyCalled = false
       class User extends Model {}
-      User.initialize()
       User.configure({
         defaultAdapter: 'mock',
         autoEject: false
@@ -78,7 +76,6 @@ export function init () {
       const props = { id, name: 'John' }
       let destroyCalled = false
       class User extends Model {}
-      User.initialize()
       User.configure({
         raw: true,
         defaultAdapter: 'mock',
@@ -111,7 +108,6 @@ export function init () {
       const props = { id, name: 'John' }
       let destroyCalled = false
       class User extends Model {}
-      User.initialize()
       User.configure({
         raw: true,
         defaultAdapter: 'mock',

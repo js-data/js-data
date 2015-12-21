@@ -89,7 +89,7 @@ function applyBelongsTo (Model, Relation, opts) {
   opts.Relation = Relation
   Model.relationList.push(opts)
   Model.relationFields.push(localField)
-  Model.data().createIndex(localKey)
+  Model.collection.createIndex(localKey)
 
   // Return target Model for chaining
   return Model

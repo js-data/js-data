@@ -29,7 +29,7 @@ function applyHasMany (Model, Relation, opts) {
     foreignKey = opts.foreignKey = `${camelCase(Model.name)}Id`
   }
   if (foreignKey) {
-    Relation.data().createIndex(foreignKey)
+    Relation.collection.createIndex(foreignKey)
   }
 
   // Setup configuration of the property

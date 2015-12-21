@@ -6,10 +6,6 @@ export function init () {
     it('should define properties on prototype', function (done) {
       class User extends Model {}
 
-      assert.throws(function () {
-        User.data()
-      }, Error, 'User.data(): Did you forget to define a schema?', 'should throw error if no schema has been defined')
-
       let didSetName = false
       let didSetRole = false
       let changeCallCount = 0
@@ -79,7 +75,7 @@ export function init () {
 
       assert.equal(user.id, 1, 'id should have a value')
       assert.isDefined(user.age, 30, 'age should have a value')
-      assert.isDefined(User.data().indexes.age, 'should have an age index')
+      assert.isDefined(User.collection.indexes.age, 'should have an age index')
       assert.isDefined(user.title, 'boss', 'title should have a value')
       assert.isDefined(user.level, 1, 'level should have a value')
       assert.equal(user.name, 'foo', 'should allow custom getter')
