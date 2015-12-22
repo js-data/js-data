@@ -38,9 +38,7 @@ const defaults = {
   onConflict: 'merge',
   relationsEnumerable: false,
   raw: false,
-  strategy: 'single',
-  upsert: true,
-  useFilter: true
+  upsert: true
 }
 
 export function init () {
