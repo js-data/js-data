@@ -191,13 +191,27 @@ declare module JSData {
     noValidate?: boolean;
   }
 
-  interface belongsTo { }
-  interface configure { }
-  interface hasMany { }
-  interface hasOne { }
-  interface initialize { }
-  interface setSchema { }
-  interface registerAdapter { }
+  function belongsTo(model, opts?: RelationOptions): ClassDecorator;
+  function configure(opts?: Object, overwrite?: boolean): ClassDecorator;
+  function hasMany(model, opts?: RelationOptions): ClassDecorator;
+  function hasOne(model, opts?: RelationOptions): ClassDecorator;
+  function setSchema(opts?: Object): ClassDecorator;
+
+  interface RelationOptions {
+    localField?: string;
+    foreignKey?: string;
+    foreignKeys?: string[];
+    localKey?: string;
+    localKeys?: string[];
+    get: (model, relation, instance?, originalGetter?: () => any) => any;
+    set: (model, relation, instance, children?, originalSetter?: (children) => void) => any;
+  }
+
+  /**
+   * Add the provided adapter to the target's "adapters" property, registering it
+   * with the specified.
+   */
+  function registerAdapter(name: string, adapter: Adapter, opts?: Object): ClassDecorator;
 
   /**
    * js-data's Model class.
@@ -360,9 +374,9 @@ declare module JSData {
     static beforeDestroyAll(query?: Object, opts?: Object): Promise<void> | void;
     static destroyAll<R>(query?: Object, opts?: Object): Promise<R[]>;
     static afterDestroyAll(query?: Object, opts?: Object): Promise<void> | void;
-    static belongsTo(model: Model<any>, opts?: Object): any;
-    static hasMany(model: Model<any>, opts?: Object): any;
-    static hasOne(model: Model<any>, opts?: Object): any;
+    static belongsTo(model: Model<any>, opts?: RelationOptions): any;
+    static hasMany(model: Model<any>, opts?: RelationOptions): any;
+    static hasOne(model: Model<any>, opts?: RelationOptions): any;
 
     /**
      * Invoke the `setSchema` decorator on this Model.
