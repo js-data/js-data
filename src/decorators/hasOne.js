@@ -28,11 +28,17 @@ function applyHasOne (Model, Relation, opts) {
     enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
     // Set default method for retrieving the linked relation
     get () {
+      if (!this._get('$')) {
+        return this._get(`links.${localField}`)
+      }
       const items = Relation.getAll(get(this, Model.idAttribute), { index: foreignKey })
-      return items && items.length ? items[0] : undefined
+      const item = items && items.length ? items[0] : undefined
+      this._set(`links.${localField}`, item)
+      return item
     },
     // Set default method for setting the linked relation
     set (child) {
+      this._set(`links.${localField}`, child)
       set(child, foreignKey, get(this, Model.idAttribute))
       return get(this, localField)
     }

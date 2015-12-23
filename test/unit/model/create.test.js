@@ -23,7 +23,6 @@ export function init () {
       const opts = {}
       let createCalled = false
       class User extends Model {}
-      User.setSchema({ id: {} })
       User.configure({
         autoInject: false
       })

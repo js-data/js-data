@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.1 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.2 - Homepage <http://www.js-data.io/>
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @copyright (c) 2014-2015 Jason Dobry
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -228,11 +228,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	var utils = exports.utils = _utils;
 	
 	var version = exports.version = {
-	  full: '3.0.0-alpha.1',
+	  full: '3.0.0-alpha.2',
 	  major: parseInt('3', 10),
 	  minor: parseInt('0', 10),
 	  patch: parseInt('0', 10),
-	  alpha:  true ? '1' : false,
+	  alpha:  true ? '2' : false,
 	  beta:  true ? 'false' : false
 	};
 
@@ -1861,12 +1861,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
 	    // Set default method for retrieving the linked relation
 	    get: function get() {
+	      if (!this._get('$')) {
+	        return this._get('links.' + localField);
+	      }
 	      var key = (0, _utils.get)(this, localKey);
-	      return key !== undefined ? Relation.get(key) : undefined;
+	      var item = key !== undefined ? Relation.get(key) : undefined;
+	      this._set('links.' + localField, item);
+	      return item;
 	    },
 	
 	    // Set default method for setting the linked relation
 	    set: function set(parent) {
+	      this._set('links.' + localField, parent);
 	      (0, _utils.set)(this, localKey, parent[Relation.idAttribute]);
 	      return (0, _utils.get)(this, localField);
 	    }
@@ -2077,27 +2083,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	    enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
 	    // Set default method for retrieving the linked relation
 	    get: function get() {
+	      if (!this._get('$')) {
+	        return this._get('links.' + localField);
+	      }
 	      var query = {};
+	      var items = undefined;
 	      if (foreignKey) {
 	        // Make a FAST retrieval of the relation using a secondary index
-	        return Relation.getAll((0, _utils.get)(this, Model.idAttribute), { index: foreignKey });
+	        items = Relation.getAll((0, _utils.get)(this, Model.idAttribute), { index: foreignKey });
 	      } else if (localKeys) {
 	        var keys = (0, _utils.get)(this, localKeys) || [];
 	        var args = (0, _utils.isArray)(keys) ? keys : Object.keys(keys);
 	        // Make a slower retrieval using the ids in the "localKeys" array
-	        return Relation.getAll.apply(Relation, args);
+	        items = Relation.getAll.apply(Relation, args);
 	      } else if (foreignKeys) {
 	        (0, _utils.set)(query, 'where.' + foreignKeys + '.contains', (0, _utils.get)(this, Model.idAttribute));
 	        // Make a much slower retrieval
-	        return Relation.filter(query);
+	        items = Relation.filter(query);
 	      }
-	      return undefined;
+	      this._set('links.' + localField, items);
+	      return items;
 	    },
 	
 	    // Set default method for setting the linked relation
 	    set: function set(children) {
 	      var _this = this;
 	
+	      this._set('links.' + localField, children);
 	      if (children && children.length) {
 	        (function () {
 	          var id = (0, _utils.get)(_this, Model.idAttribute);
@@ -2279,12 +2291,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
 	    // Set default method for retrieving the linked relation
 	    get: function get() {
+	      if (!this._get('$')) {
+	        return this._get('links.' + localField);
+	      }
 	      var items = Relation.getAll((0, _utils.get)(this, Model.idAttribute), { index: foreignKey });
-	      return items && items.length ? items[0] : undefined;
+	      var item = items && items.length ? items[0] : undefined;
+	      this._set('links.' + localField, item);
+	      return item;
 	    },
 	
 	    // Set default method for setting the linked relation
 	    set: function set(child) {
+	      this._set('links.' + localField, child);
 	      (0, _utils.set)(child, foreignKey, (0, _utils.get)(this, Model.idAttribute));
 	      return (0, _utils.get)(this, localField);
 	    }
@@ -2461,7 +2479,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (previous !== value) {
 	          _set('changes.' + key, value);
 	        } else {
-	          // TODO: this._unset
 	          _unset('changes.' + key);
 	        }
 	        if (!changing && changed.length) {
@@ -3454,21 +3471,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    props || (props = {});
 	    opts || (opts = {});
-	    var $$props = {};
+	    var _props = {};
 	    Object.defineProperties(_this2, {
 	      _get: {
 	        value: function value(key) {
-	          return utils.get($$props, key);
+	          return utils.get(_props, key);
 	        }
 	      },
 	      _set: {
-	        value: function value(key, _value) {
-	          return utils.set($$props, key, _value);
+	        value: function value(key, _value, opty) {
+	          return utils.set(_props, key, _value, opts);
 	        }
 	      },
 	      _unset: {
 	        value: function value(key) {
-	          return utils.unset($$props, key);
+	          return utils.unset(_props, key);
 	        }
 	      }
 	    });
@@ -3476,7 +3493,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (opts.noValidate) {
 	      _this2._set('noValidate', true);
 	    }
-	    (0, _decorators.configure)(props)(_this2);
+	    utils.fillIn(_this2, props);
 	    _this2._unset('creating');
 	    _this2._unset('noValidate');
 	    _this2._set('previous', utils.copy(props));
@@ -3712,42 +3729,56 @@ return /******/ (function(modules) { // webpackBootstrap
 	        items = [items];
 	        singular = true;
 	      }
-	      items.forEach(function (props) {
+	      items = items.map(function (props) {
+	        var id = utils.get(props, idAttribute);
+	        if (!utils.isSorN(id)) {
+	          throw new TypeError('User#' + idAttribute + ': Expected string or number, found ' + (typeof id === 'undefined' ? 'undefined' : _typeof(id)) + '!');
+	        }
+	        var existing = _this.get(id);
+	        if (props === existing) {
+	          return existing;
+	        }
+	
 	        relationList.forEach(function (def) {
 	          var Relation = def.Relation;
+	          var relationIdAttribute = Relation.idAttribute;
+	          var foreignKey = def.foreignKey;
+	
 	          var toInject = utils.get(props, def.localField);
+	
 	          if (utils.isFunction(def.inject)) {
 	            def.inject(_this, def, props);
 	          } else if (toInject && def.inject !== false) {
 	            if (utils.isArray(toInject)) {
-	              toInject.forEach(function (toInjectItem) {
-	                if (toInjectItem !== Relation.get(utils.get(toInjectItem, Relation.idAttribute))) {
+	              toInject = toInject.map(function (toInjectItem) {
+	                if (toInjectItem !== Relation.get(utils.get(toInjectItem, relationIdAttribute))) {
 	                  try {
-	                    if (def.foreignKey) {
-	                      utils.set(toInjectItem, def.foreignKey, utils.get(props, idAttribute));
+	                    if (foreignKey) {
+	                      utils.set(toInjectItem, foreignKey, id);
 	                    }
-	                    Relation.inject(toInjectItem);
+	                    toInjectItem = Relation.inject(toInjectItem);
 	                  } catch (err) {
-	                    throw new Error('Failed to inject ' + def.type + ' relation: "' + def.relation + '"!');
+	                    throw new Error('Failed to inject ' + def.type + ' relation: "' + def.relation + '"! ' + err.message);
 	                  }
 	                }
+	                return toInjectItem;
 	              });
 	              if (def.localKeys) {
-	                utils.set(toInject, def.localKeys, toInject.map(function (injected) {
-	                  return utils.get(injected, Relation.idAttribute);
+	                utils.set(props, def.localKeys, toInject.map(function (injected) {
+	                  return utils.get(injected, relationIdAttribute);
 	                }));
 	              }
 	            } else {
 	              // handle injecting belongsTo and hasOne relations
-	              if (toInject !== Relation.get(Relation.idAttribute)) {
+	              if (toInject !== Relation.get(utils.get(toInject, relationIdAttribute))) {
 	                try {
 	                  if (def.localKey) {
 	                    utils.set(props, def.localKey, utils.get(toInject, Relation.idAttribute));
 	                  }
-	                  if (def.foreignKey) {
+	                  if (foreignKey) {
 	                    utils.set(toInject, def.foreignKey, utils.get(props, idAttribute));
 	                  }
-	                  Relation.inject(toInject);
+	                  toInject = Relation.inject(toInject);
 	                } catch (err) {
 	                  throw new Error('Failed to inject ' + def.type + ' relation: "' + def.relation + '"!');
 	                }
@@ -3755,17 +3786,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	          }
 	          // remove relation properties from the item, since those relations have been injected by now
-	          if (typeof def.link === 'boolean' ? def.link : !!_this.linkRelations) {
+	          if (def.link || def.link === undefined && _this.linkRelations) {
 	            utils.unset(props, def.localField);
+	          } else {
+	            utils.set(props, def.localField, toInject);
 	          }
 	        });
-	      });
-	      items = items.map(function (props) {
-	        var id = utils.get(props, idAttribute);
-	        if (!id) {
-	          throw new TypeError('User#' + idAttribute + ': Expected string or number, found ' + (typeof id === 'undefined' ? 'undefined' : _typeof(id)) + '!');
-	        }
-	        var existing = _this.get(id);
 	
 	        if (existing) {
 	          var onConflict = opts.onConflict || _this.onConflict;
