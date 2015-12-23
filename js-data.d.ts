@@ -336,9 +336,9 @@ declare module JSData {
      */
     static afterCreate(data?: Object, opts?: Object): Promise<void> | void;
 
-    static beforeCreateMany(items?: Object[], opts?: Object): Promise<void[]> | void;
+    static beforeCreateMany(items?: Object[], opts?: Object): Promise<void> | void;
     static createMany<R>(items?: Object[], opts?: Object): Promise<R[]>;
-    static afterCreateMany(data?: Object[], opts?: Object): Promise<void[]> | void;
+    static afterCreateMany(data?: Object[], opts?: Object): Promise<void> | void;
     static beforeFind(id?: ID, opts?: Object): Promise<void> | void;
     static find<R>(id: ID, opts?: Object): Promise<R>;
     static afterFind(data?: Object, opts?: Object): Promise<void> | void;
@@ -348,15 +348,58 @@ declare module JSData {
     static beforeUpdate(id?: ID, props?: Object, opts?: Object): Promise<void> | void;
     static update<R>(id: ID, props?: Object, opts?: Object): Promise<R>;
     static afterUpdate(id?: ID, props?: Object, opts?: Object): Promise<void> | void;
-    static beforeUpdateMany(items?: Object[], opts?: Object): Promise<void[]> | void;
+    static beforeUpdateMany(items?: Object[], opts?: Object): Promise<void> | void;
     static updateMany<R>(items?: Object[], opts?: Object): Promise<R[]>;
-    static afterUpdateMany(data?: Object[], opts?: Object): Promise<void[]> | void;
-    static beforeUpdateAll(query?: Object, props?: Object, opts?: Object): Promise<void[]> | void;
+    static afterUpdateMany(data?: Object[], opts?: Object): Promise<void> | void;
+    static beforeUpdateAll(query?: Object, props?: Object, opts?: Object): Promise<void> | void;
     static updateAll<R>(query?: Object, props?: Object, opts?: Object): Promise<R[]>;
-    static afterUpdateAll(query?: Object, data?: Object[], opts?: Object): Promise<void[]> | void;
+    static afterUpdateAll(query?: Object, data?: Object[], opts?: Object): Promise<void> | void;
     static beforeDestroy(id?: ID, opts?: Object): Promise<void> | void;
     static destroy<R>(id: ID, opts?: Object): Promise<R>;
     static afterDestroy(data?: Object, opts?: Object): Promise<void> | void;
+    static beforeDestroyAll(query?: Object, opts?: Object): Promise<void> | void;
+    static destroyAll<R>(query?: Object, opts?: Object): Promise<R[]>;
+    static afterDestroyAll(query?: Object, opts?: Object): Promise<void> | void;
+    static belongsTo(model: Model<any>, opts?: Object): any;
+    static hasMany(model: Model<any>, opts?: Object): any;
+    static hasOne(model: Model<any>, opts?: Object): any;
+
+    /**
+     * Invoke the `setSchema` decorator on this Model.
+     */
+    static setSchema(opts?: Object): any;
+
+    /**
+     * Invoke the `configure` decorator on this Model.
+     */
+    static configure(opts?: Object): any;
+
+    /**
+     * Invoke the `registerAdapter` decorator on this Model.
+     */
+    static registerAdapter(name: string, adapter: Adapter, opts?: Object): Model<any>;
+
+    schema(key?: string): Object;
+    validate(obj?: Object): string[] | void;
+    create(opts?: Object): Promise<Model<R>>;
+    save(opts?: Object): Promise<Model<R>>;
+    destroy(opts?: Object): Promise<Model<R>>;
+
+    /**
+     * Return the value at the given path for this instance.
+     */
+    get(key: string): any;
+
+    /**
+     * Set the value for a given key, or the values for the given keys if "key" is
+     * an object.
+     */
+    set(key: string, value): any;
+
+    /**
+     * Return a plain object representation of this instance.
+     */
+    toJSON(opts?: Object): string;
   }
 
   interface Adapter { }
