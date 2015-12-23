@@ -76,6 +76,7 @@ module.exports = function save (resourceName, id, options) {
       } else if (options.cacheResponse) {
         // inject the reponse into the store, updating the item
         let injected = definition.inject(attrs, options.orig())
+        let id = injected[definition.idAttribute]
         // mark the item as "saved"
         resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id])
         if (!definition.resetHistoryOnInject) {
