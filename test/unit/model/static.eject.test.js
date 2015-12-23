@@ -20,7 +20,7 @@ export function init () {
     })
     it('should eject an item from the store', function () {
       class User extends Model {}
-      User.setSchema({ id: {}, age: { indexed: true } })
+      User.setSchema({ age: { indexed: true } })
 
       const user = User.inject({ id: 1, age: 30 })
       const user2 = User.inject({ id: 2, age: 31 })

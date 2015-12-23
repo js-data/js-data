@@ -23,7 +23,6 @@ export function init () {
       const props = { name: 'John' }
       let updateCalled = false
       class User extends Model {}
-      User.setSchema({ id: {} })
       User.configure({
         defaultAdapter: 'mock',
         autoInject: false
@@ -53,7 +52,6 @@ export function init () {
       const props = { name: 'John' }
       let updateCalled = false
       class User extends Model {}
-      User.setSchema({ id: {} })
       User.configure({
         autoInject: true,
         defaultAdapter: 'mock'
@@ -83,7 +81,6 @@ export function init () {
       const props = { name: 'John' }
       let updateCalled = false
       class User extends Model {}
-      User.setSchema({ id: {} })
       User.configure({
         autoInject: true,
         raw: true,

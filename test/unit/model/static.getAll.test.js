@@ -20,8 +20,6 @@ export function init () {
     })
     it('should get multiple items from the store by primary key', function () {
       class User extends Model {}
-      User.setSchema({ id: {} })
-
       const user1 = User.inject({ id: 1 })
       const user4 = User.inject({ id: 4 })
       const user3 = User.inject({ id: 3 })

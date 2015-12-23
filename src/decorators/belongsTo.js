@@ -28,11 +28,17 @@ function applyBelongsTo (Model, Relation, opts) {
     enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
     // Set default method for retrieving the linked relation
     get () {
+      if (!this._get('$')) {
+        return this._get(`links.${localField}`)
+      }
       const key = get(this, localKey)
-      return key !== undefined ? Relation.get(key) : undefined
+      const item = key !== undefined ? Relation.get(key) : undefined
+      this._set(`links.${localField}`, item)
+      return item
     },
     // Set default method for setting the linked relation
     set (parent) {
+      this._set(`links.${localField}`, parent)
       set(this, localKey, parent[Relation.idAttribute])
       return get(this, localField)
     }

@@ -38,9 +38,7 @@ const defaults = {
   onConflict: 'merge',
   relationsEnumerable: false,
   raw: false,
-  strategy: 'single',
-  upsert: true,
-  useFilter: true
+  upsert: true
 }
 
 export function init () {
@@ -158,7 +156,6 @@ export function init () {
     it('should allow schema definition with basic indexes', function () {
       class User extends Model {}
       User.setSchema({
-        id: {},
         age: { indexed: true },
         role: { indexed: true }
       })

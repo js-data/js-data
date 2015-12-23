@@ -20,9 +20,6 @@ export function init () {
     })
     it('should eject items that meet the criteria from the store', function () {
       class User extends Model {}
-      User.setSchema({
-        id: {}
-      })
       User.inject([p1, p2, p3, p4, p5])
       assert.isDefined(User.get(5))
       assert.isDefined(User.get(6))

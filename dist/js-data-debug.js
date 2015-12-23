@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.1 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.2 - Homepage <http://www.js-data.io/>
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @copyright (c) 2014-2015 Jason Dobry
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -228,11 +228,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	var utils = exports.utils = _utils;
 	
 	var version = exports.version = {
-	  full: '3.0.0-alpha.1',
+	  full: '3.0.0-alpha.2',
 	  major: parseInt('3', 10),
 	  minor: parseInt('0', 10),
 	  patch: parseInt('0', 10),
-	  alpha:  true ? '1' : false,
+	  alpha:  true ? '2' : false,
 	  beta:  true ? 'false' : false
 	};
 
@@ -1861,12 +1861,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
 	    // Set default method for retrieving the linked relation
 	    get: function get() {
+	      if (!this._get('$')) {
+	        return this._get('links.' + localField);
+	      }
 	      var key = (0, _utils.get)(this, localKey);
-	      return key !== undefined ? Relation.get(key) : undefined;
+	      var item = key !== undefined ? Relation.get(key) : undefined;
+	      this._set('links.' + localField, item);
+	      return item;
 	    },
 	
 	    // Set default method for setting the linked relation
 	    set: function set(parent) {
+	      this._set('links.' + localField, parent);
 	      (0, _utils.set)(this, localKey, parent[Relation.idAttribute]);
 	      return (0, _utils.get)(this, localField);
 	    }
@@ -2077,27 +2083,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	    enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
 	    // Set default method for retrieving the linked relation
 	    get: function get() {
+	      if (!this._get('$')) {
+	        return this._get('links.' + localField);
+	      }
 	      var query = {};
+	      var items = undefined;
 	      if (foreignKey) {
 	        // Make a FAST retrieval of the relation using a secondary index
-	        return Relation.getAll((0, _utils.get)(this, Model.idAttribute), { index: foreignKey });
+	        items = Relation.getAll((0, _utils.get)(this, Model.idAttribute), { index: foreignKey });
 	      } else if (localKeys) {
 	        var keys = (0, _utils.get)(this, localKeys) || [];
 	        var args = (0, _utils.isArray)(keys) ? keys : Object.keys(keys);
 	        // Make a slower retrieval using the ids in the "localKeys" array
-	        return Relation.getAll.apply(Relation, args);
+	        items = Relation.getAll.apply(Relation, args);
 	      } else if (foreignKeys) {
 	        (0, _utils.set)(query, 'where.' + foreignKeys + '.contains', (0, _utils.get)(this, Model.idAttribute));
 	        // Make a much slower retrieval
-	        return Relation.filter(query);
+	        items = Relation.filter(query);
 	      }
-	      return undefined;
+	      this._set('links.' + localField, items);
+	      return items;
 	    },
 	
 	    // Set default method for setting the linked relation
 	    set: function set(children) {
 	      var _this = this;
 	
+	      this._set('links.' + localField, children);
 	      if (children && children.length) {
 	        (function () {
 	          var id = (0, _utils.get)(_this, Model.idAttribute);
@@ -2279,12 +2291,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
 	    // Set default method for retrieving the linked relation
 	    get: function get() {
+	      if (!this._get('$')) {
+	        return this._get('links.' + localField);
+	      }
 	      var items = Relation.getAll((0, _utils.get)(this, Model.idAttribute), { index: foreignKey });
-	      return items && items.length ? items[0] : undefined;
+	      var item = items && items.length ? items[0] : undefined;
+	      this._set('links.' + localField, item);
+	      return item;
 	    },
 	
 	    // Set default method for setting the linked relation
 	    set: function set(child) {
+	      this._set('links.' + localField, child);
 	      (0, _utils.set)(child, foreignKey, (0, _utils.get)(this, Model.idAttribute));
 	      return (0, _utils.get)(this, localField);
 	    }
@@ -2461,7 +2479,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (previous !== value) {
 	          _set('changes.' + key, value);
 	        } else {
-	          // TODO: this._unset
 	          _unset('changes.' + key);
 	        }
 	        if (!changing && changed.length) {
@@ -3454,21 +3471,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    props || (props = {});
 	    opts || (opts = {});
-	    var $$props = {};
+	    var _props = {};
 	    Object.defineProperties(_this2, {
 	      _get: {
 	        value: function value(key) {
-	          return utils.get($$props, key);
+	          return utils.get(_props, key);
 	        }
 	      },
 	      _set: {
-	        value: function value(key, _value) {
-	          return utils.set($$props, key, _value);
+	        value: function value(key, _value, opty) {
+	          return utils.set(_props, key, _value, opts);
 	        }
 	      },
 	      _unset: {
 	        value: function value(key) {
-	          return utils.unset($$props, key);
+	          return utils.unset(_props, key);
 	        }
 	      }
 	    });
@@ -3476,7 +3493,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (opts.noValidate) {
 	      _this2._set('noValidate', true);
 	    }
-	    (0, _decorators.configure)(props)(_this2);
+	    utils.fillIn(_this2, props);
 	    _this2._unset('creating');
 	    _this2._unset('noValidate');
 	    _this2._set('previous', utils.copy(props));
@@ -3576,8 +3593,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    /**
 	     * Return a plain object representation of this instance.
 	     *
-	     * @param {?Object} opts - Optional configuration. Properties:
-	     *   - {string[]} with - Array of relation names or relation fields to include in the representation.
+	     * @param {Object} [opts] - Configuration options.
+	     * @param {string[]} [opts.with] - Array of relation names or relation fields
+	     * to include in the representation.
 	     * @return {Object} Plain object representation of instance.
 	     */
 	
@@ -3689,9 +3707,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * The collection's secondary indexes will be updated as each item is visited.
 	     *
 	     * @param {(Object|Object[]|Model|Model[])} items - The item or items to insert.
-	     * @param {?Object} opts - Optional configuration. Properties:
-	     *   - {string} onConflict - What to do when an item is already in the Collection instance. May be "merge" or "replace".
-	     * @return {(Model|Model[])} Whether "instance" is an instance of this Model.
+	     * @param {Object} [opts] - Configuration options.
+	     * @param {string} [opts.onConflict] - What to do when an item is already in
+	     * the Collection instance. Possible values are `merge` or `replace`.
+	     * @return {(Model|Model[])} The injected entity or entities.
 	     */
 	
 	  }, {
@@ -3710,42 +3729,56 @@ return /******/ (function(modules) { // webpackBootstrap
 	        items = [items];
 	        singular = true;
 	      }
-	      items.forEach(function (props) {
+	      items = items.map(function (props) {
+	        var id = utils.get(props, idAttribute);
+	        if (!utils.isSorN(id)) {
+	          throw new TypeError('User#' + idAttribute + ': Expected string or number, found ' + (typeof id === 'undefined' ? 'undefined' : _typeof(id)) + '!');
+	        }
+	        var existing = _this.get(id);
+	        if (props === existing) {
+	          return existing;
+	        }
+	
 	        relationList.forEach(function (def) {
 	          var Relation = def.Relation;
+	          var relationIdAttribute = Relation.idAttribute;
+	          var foreignKey = def.foreignKey;
+	
 	          var toInject = utils.get(props, def.localField);
+	
 	          if (utils.isFunction(def.inject)) {
 	            def.inject(_this, def, props);
 	          } else if (toInject && def.inject !== false) {
 	            if (utils.isArray(toInject)) {
-	              toInject.forEach(function (toInjectItem) {
-	                if (toInjectItem !== Relation.get(utils.get(toInjectItem, Relation.idAttribute))) {
+	              toInject = toInject.map(function (toInjectItem) {
+	                if (toInjectItem !== Relation.get(utils.get(toInjectItem, relationIdAttribute))) {
 	                  try {
-	                    if (def.foreignKey) {
-	                      utils.set(toInjectItem, def.foreignKey, utils.get(props, idAttribute));
+	                    if (foreignKey) {
+	                      utils.set(toInjectItem, foreignKey, id);
 	                    }
-	                    Relation.inject(toInjectItem);
+	                    toInjectItem = Relation.inject(toInjectItem);
 	                  } catch (err) {
-	                    throw new Error('Failed to inject ' + def.type + ' relation: "' + def.relation + '"!');
+	                    throw new Error('Failed to inject ' + def.type + ' relation: "' + def.relation + '"! ' + err.message);
 	                  }
 	                }
+	                return toInjectItem;
 	              });
 	              if (def.localKeys) {
-	                utils.set(toInject, def.localKeys, toInject.map(function (injected) {
-	                  return utils.get(injected, Relation.idAttribute);
+	                utils.set(props, def.localKeys, toInject.map(function (injected) {
+	                  return utils.get(injected, relationIdAttribute);
 	                }));
 	              }
 	            } else {
 	              // handle injecting belongsTo and hasOne relations
-	              if (toInject !== Relation.get(Relation.idAttribute)) {
+	              if (toInject !== Relation.get(utils.get(toInject, relationIdAttribute))) {
 	                try {
 	                  if (def.localKey) {
 	                    utils.set(props, def.localKey, utils.get(toInject, Relation.idAttribute));
 	                  }
-	                  if (def.foreignKey) {
+	                  if (foreignKey) {
 	                    utils.set(toInject, def.foreignKey, utils.get(props, idAttribute));
 	                  }
-	                  Relation.inject(toInject);
+	                  toInject = Relation.inject(toInject);
 	                } catch (err) {
 	                  throw new Error('Failed to inject ' + def.type + ' relation: "' + def.relation + '"!');
 	                }
@@ -3753,17 +3786,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	          }
 	          // remove relation properties from the item, since those relations have been injected by now
-	          if (typeof def.link === 'boolean' ? def.link : !!_this.linkRelations) {
+	          if (def.link || def.link === undefined && _this.linkRelations) {
 	            utils.unset(props, def.localField);
+	          } else {
+	            utils.set(props, def.localField, toInject);
 	          }
 	        });
-	      });
-	      items = items.map(function (props) {
-	        var id = utils.get(props, idAttribute);
-	        if (!id) {
-	          throw new TypeError('User#' + idAttribute + ': Expected string or number, found ' + (typeof id === 'undefined' ? 'undefined' : _typeof(id)) + '!');
-	        }
-	        var existing = _this.get(id);
 	
 	        if (existing) {
 	          var onConflict = opts.onConflict || _this.onConflict;
@@ -3816,7 +3844,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * Remove the instances selected by "query" from the Collection instance of
 	     * this Model.
 	     *
-	     * @param {?Object} query - The query used to select instances to remove.
+	     * @param {Object} [query] - The query used to select instances to remove.
 	     * @return {Model[]} The removed instances, if any.
 	     */
 	
@@ -3840,7 +3868,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * the given primary key, if such an instance can be found.
 	     *
 	     * @param {(string|number)} id - Primary key of the instance to retrieve.
-	     * @return {?Model} The instance or undefined.
+	     * @return {Model} The instance or undefined.
 	     */
 	
 	  }, {
@@ -3900,7 +3928,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * Return the registered adapter with the given name or the default adapter if
 	     * no name is provided.
 	     *
-	     * @param {?string} name - The name of the adapter to retrieve.
+	     * @param {string} [name]- The name of the adapter to retrieve.
 	     * @return {Adapter} The adapter, if any.
 	     */
 	
@@ -3919,7 +3947,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * Return the name of a registered adapter based on the given name or options,
 	     * or the name of the default adapter if no name provided
 	     *
-	     * @param {?Object} opts - The options, if any.
+	     * @param {Object} [opts] - The options, if any.
 	     * @return {string} The name of the adapter.
 	     */
 	
@@ -3971,11 +3999,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * and some metadata about the operation and its result. Otherwise, the
 	     * promise returned by `Model.create` resolves with the created entity.
 	     *
-	     * @param {?Object} props - The properties from which to create the new entity.
-	     * @param {?Object} opts - Optional configuration. Properties:
-	     * - string `adapter` - The name of the registered adapter to use.
-	     * - Boolean `raw` - The name of the registered adapter to use.
-	     * @return {Object} The created entity, or if `raw` is `true` then a result object.
+	     * @param {Object} props - The properties from which to create the new entity.
+	     * @param {Object} [opts] - Configuration options.
+	     * @param {string} [opts.adapter] - The name of the registered adapter to use.
+	     * @param {boolean} [opts.raw] - The name of the registered adapter to use.
+	     * @param {boolean} [opts.upsert] - Whether to call {@link Model.update}
+	     * instead if `props` has a primary key.
+	     * @return {Object} The created entity, or if `raw` is `true` then a result
+	     * object.
 	     */
 	
 	  }, {
@@ -4432,6 +4463,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    /**
+	     * Extend this Model and return a new child Model. Static properties on this
+	     * Model will be shallow copied to the child Model. The child Model's
+	     * prototype will point to the parent Model.
+	     *
 	     * @example
 	     * var User = JSData.Model.extend({}, { name: 'User' })
 	     * @param {Object} props={} - Properties to add to the prototype of the class.
@@ -4509,125 +4544,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return Model;
 	})(BaseModel);
 	
-	utils.fillIn(Model, {
-	  /**
-	   * Whether {@link Model.destroy} and {@link Model.destroyAll} should
-	   * automatically eject the specified item(s) from the Model's collection on
-	   * success.
-	   *
-	   * @memberof Model
-	   * @type {boolean}
-	   * @default true
-	   */
-	  autoEject: true,
+	// Why are these static properties not up in the Model class declaration?
+	// Because JSDoc doesn't parse static property initializers yet. :(
 	
-	  /**
-	   * Whether {@link Model.create}, {@link Model.createMany},
-	   * {@link Model.update}, {@link Model.updateAll}, and {@link Model.updateMany}
-	   * should automatically inject the specified item(s) returned by the adapter
-	   * into the the Model's collection on success.
-	   *
-	   * __Defaults to `true` in the Browser.__
-	   *
-	   * __Defaults to `false` in Node.js__
-	   *
-	   * @memberof Model
-	   * @type {boolean}
-	   */
-	  autoInject: isBrowser,
-	  bypassCache: false,
+	/**
+	 * @ignore
+	 */
 	
-	  /**
-	   * Whether to disallow the use of `new Function` in {@link Model.extend}.
-	   *
-	   * You may set this to `true` if you so desire, but the class (constructor
-	   * function) produced by {@link Model.extend} will not be a named function,
-	   * which makes for slightly less debuggability.
-	   *
-	   * @memberof Model
-	   * @type {boolean}
-	   * @default false
-	   */
-	  csp: false,
-	
-	  /**
-	   * The name of the registered adapter that should be used by default by any
-	   * of the Model's static methods that use an adapter.
-	   *
-	   * @memberof Model
-	   * @type {string}
-	   * @default http
-	   */
-	  defaultAdapter: 'http',
-	
-	  /**
-	   * Whether to enable debug-level logs.
-	   *
-	   * @memberof Model
-	   * @type {boolean}
-	   * @default false
-	   */
-	  debug: false,
-	  eagerEject: false,
-	
-	  /**
-	   * The field on instances of {@link Model} that should be used as the unique
-	   * identifier for instances of the Model.
-	   *
-	   * @memberof Model
-	   * @type {string}
-	   * @default id
-	   */
-	  idAttribute: 'id',
-	
-	  /**
-	   * Whether to add property accessors to the prototype of {@link Model} for
-	   * each of the Model's relations. For each relation, the property accessor
-	   * will be added as the field specified by the `localField` option of the
-	   * relation definition. A relation property accessor returns related data by
-	   * accessing the related Model. If the related Model's collection is empty,
-	   * then the property accessors won't return anything.
-	   *
-	   * __Defaults to `true` in the Browser.__
-	   *
-	   * __Defaults to `false` in Node.js__
-	   *
-	   * @memberof Model
-	   * @type {boolean}
-	   */
-	  linkRelations: isBrowser,
-	  onConflict: 'merge',
-	  relationsEnumerable: false,
-	  raw: false,
-	  strategy: 'single',
-	  upsert: true,
-	  useFilter: true
-	});
-	
-	Model._adapters = {};
-	Object.defineProperty(Model, 'adapters', {
-	  get: function get() {
-	    var parentAdapters = Object.getPrototypeOf(this)._adapters;
-	    if (this._adapters === parentAdapters) {
-	      this._adapters = {};
-	      utils.fillIn(this._adapters, parentAdapters);
-	    }
-	    return this._adapters;
-	  }
-	});
-	Model._collection = new _collection3.Collection([], Model.idAttribute);
-	Object.defineProperty(Model, 'collection', {
-	  get: function get() {
-	    if (this._collection === Object.getPrototypeOf(this)._collection) {
-	      this._collection = new _collection3.Collection([], this.idAttribute);
-	      this._collection.on('all', this.emit, this);
-	    }
-	    return this._collection;
-	  }
-	});
 	Model.__events = {};
+	
+	/**
+	 * Create a property where a Model's registered listeners can be stored.
+	 * @ignore
+	 */
 	Object.defineProperty(Model, '_events', {
 	  get: function get() {
+	    // Make sure that a Model always has _its own_ set of registered listeners.
+	    // This check has to be made because ES6 class inheritance shallow copies
+	    // static properties, which means a child model would only have a reference
+	    // to the parent model's listeners.
 	    if (this.__events === Object.getPrototypeOf(this).__events) {
 	      this.__events = {};
 	    }
@@ -4635,16 +4570,244 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	});
 	
-	utils.eventify(Model.prototype, function () {
-	  return this._get('events');
-	}, function (value) {
-	  this._set('events', value);
+	/**
+	 * @ignore
+	 */
+	Model._adapters = {};
+	
+	/**
+	 * Hash of adapters registered with this Model.
+	 *
+	 * @name adapters
+	 * @memberof Model
+	 * @type {Object}
+	 */
+	Object.defineProperty(Model, 'adapters', {
+	  get: function get() {
+	    var parentAdapters = Object.getPrototypeOf(this)._adapters;
+	    // Make sure that a Model always has _its own_ set of registered adapters.
+	    // This check has to be made because ES6 class inheritance shallow copies
+	    // static properties, which means a child model would only have a reference
+	    // to the parent model's adapters.
+	    if (this._adapters === parentAdapters) {
+	      this._adapters = {};
+	      utils.fillIn(this._adapters, parentAdapters);
+	    }
+	    return this._adapters;
+	  }
 	});
 	
+	/**
+	 * @ignore
+	 */
+	Model._collection = new _collection3.Collection([], 'id');
+	
+	/**
+	 * This Model's {@link Collection} instance. This is where instances of the
+	 * Model are stored if {@link Model.autoInject} is `true`.
+	 *
+	 * __You should use {@link Model.inject}, {@link Model.eject}, and
+	 * {@link Model.ejectAll} if you need to manually get data in and out of this
+	 * collection.__
+	 *
+	 * @name collection
+	 * @memberof Model
+	 * @type {Collection}
+	 */
+	Object.defineProperty(Model, 'collection', {
+	  get: function get() {
+	    // Make sure that a Model always has _its own_ collection. This check has to
+	    // be made because ES6 class inheritance shallow copies static properties,
+	    // which means a child Model would only have a reference to the parent
+	    // Model's collection.
+	    if (this._collection === Object.getPrototypeOf(this)._collection) {
+	      this._collection = new _collection3.Collection([], this.idAttribute);
+	      this._collection.on('all', this.emit, this);
+	    }
+	    return this._collection;
+	  }
+	});
+	
+	/**
+	 * Whether {@link Model.destroy} and {@link Model.destroyAll} should
+	 * automatically eject the specified item(s) from the Model's collection on
+	 * success.
+	 *
+	 * @memberof Model
+	 * @type {boolean}
+	 * @default true
+	 */
+	Model.autoEject = true;
+	
+	/**
+	 * Whether {@link Model.create}, {@link Model.createMany},
+	 * {@link Model.update}, {@link Model.updateAll}, and {@link Model.updateMany}
+	 * should automatically inject the specified item(s) returned by the adapter
+	 * into the the Model's collection on success.
+	 *
+	 * __Defaults to `true` in the Browser.__
+	 *
+	 * __Defaults to `false` in Node.js__
+	 *
+	 * @memberof Model
+	 * @type {boolean}
+	 */
+	Model.autoInject = isBrowser;
+	Model.bypassCache = false;
+	
+	/**
+	 * Whether to disallow the use of `new Function` in {@link Model.extend}.
+	 *
+	 * You may set this to `true` if you so desire, but the class (constructor
+	 * function) produced by {@link Model.extend} will not be a named function,
+	 * which makes for slightly less debuggability.
+	 *
+	 * @memberof Model
+	 * @type {boolean}
+	 * @default false
+	 */
+	Model.csp = false;
+	
+	/**
+	 * The name of the registered adapter that should be used by default by any
+	 * of the Model's static methods that use an adapter.
+	 *
+	 * @memberof Model
+	 * @type {string}
+	 * @default http
+	 */
+	Model.defaultAdapter = 'http';
+	
+	/**
+	 * Whether to enable debug-level logs.
+	 *
+	 * @memberof Model
+	 * @type {boolean}
+	 * @default false
+	 */
+	Model.debug = false;
+	Model.eagerEject = false;
+	
+	/**
+	 * The field on instances of {@link Model} that should be used as the unique
+	 * identifier for instances of the Model.
+	 *
+	 * @memberof Model
+	 * @type {string}
+	 * @default id
+	 */
+	Model.idAttribute = 'id';
+	
+	/**
+	 * Whether to add property accessors to the prototype of {@link Model} for
+	 * each of the Model's relations. For each relation, the property accessor
+	 * will be added as the field specified by the `localField` option of the
+	 * relation definition. A relation property accessor returns related data by
+	 * accessing the related Model. If the related Model's collection is empty,
+	 * then the property accessors won't return anything.
+	 *
+	 * __Defaults to `true` in the Browser.__
+	 *
+	 * __Defaults to `false` in Node.js__
+	 *
+	 * @memberof Model
+	 * @type {boolean}
+	 */
+	Model.linkRelations = isBrowser;
+	
+	/**
+	 * What to do when injecting an item into the Model's collection that shares a
+	 * primary key with an item already in the Model's collection.
+	 *
+	 * Possible values:
+	 * - merge
+	 * - replace
+	 *
+	 * Merge:
+	 *
+	 * Recursively shallow copy properties from the new item onto the existing
+	 * item.
+	 *
+	 * Replace:
+	 *
+	 * Shallow copy top-level properties from the new item onto the existing item.
+	 * Any top-level own properties of the existing item that are _not_ on the new
+	 * item will be removed.
+	 *
+	 * @memberof Model
+	 * @type {string}
+	 * @default merge
+	 */
+	Model.onConflict = 'merge';
+	
+	/**
+	 * Whether the relation property accessors should be enumerable. It's
+	 * recommended that this stay false.
+	 *
+	 * @memberof Model
+	 * @type {boolean}
+	 * @default false
+	 */
+	Model.relationsEnumerable = false;
+	
+	/**
+	 * Whether {@link Model.create}, {@link Model.createMany},
+	 * {@link Model.update}, {@link Model.updateAll}, {@link Model.updateMany},
+	 * {@link Model.find}, {@link Model.findAll}, {@link Model.destroy}, and
+	 * {@link Model.destroyAll} should return a raw result object that contains
+	 * both the instance data returned by the adapter _and_ metadata about the
+	 * operation.
+	 *
+	 * The default is to NOT return the result object, and instead return just the
+	 * instance data.
+	 *
+	 * @memberof Model
+	 * @type {boolean}
+	 * @default false
+	 */
+	Model.raw = false;
+	
+	/**
+	 * Whether {@link Model.create}, {@link Model.createMany},
+	 * {@link Model.update}, {@link Model.updateAll}, {@link Model.updateMany},
+	 * {@link Model.find}, {@link Model.findAll}, {@link Model.destroy}, and
+	 * {@link Model.destroyAll} should return a raw result object that contains
+	 * both the instance data returned by the adapter _and_ metadata about the
+	 * operation.
+	 *
+	 * The default is to NOT return the result object, and instead return just the
+	 * instance data.
+	 *
+	 * @memberof Model
+	 * @type {boolean}
+	 * @default false
+	 */
+	Model.upsert = true;
+	
+	/**
+	 * Allow Models themselves emit events. Any events emitted on a Model's
+	 * collection will also be emitted on the Model itself.
+	 *
+	 * A Model's registered listeners are stored on the Model's `__events` property.
+	 */
 	utils.eventify(Model, function () {
 	  return this._events;
 	}, function (value) {
 	  this._events = value;
+	});
+	
+	/**
+	 * Allow instancess to emit events. Any events emitted instances in a Model's
+	 * collection will also be emitted on the collection itself, and hence, on the
+	 * Model as well.
+	 *
+	 * An instance's registered listeners are stored in the instance's private data
+	 * hash.
+	 */
+	utils.eventify(Model.prototype, function () {
+	  return this._get('events');
+	}, function (value) {
+	  this._set('events', value);
 	});
 
 /***/ }

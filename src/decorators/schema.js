@@ -49,7 +49,6 @@ function makeDescriptor (target, key, opts) {
       if (previous !== value) {
         _set(`changes.${key}`, value)
       } else {
-        // TODO: this._unset
         _unset(`changes.${key}`)
       }
       if (!changing && changed.length) {

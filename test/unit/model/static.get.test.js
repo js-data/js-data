@@ -20,8 +20,6 @@ export function init () {
     })
     it('should get an item from the store', function () {
       class User extends Model {}
-      User.setSchema({ id: {} })
-
       const user = User.inject({ id: 1 })
       assert.isTrue(User.get(1) === user, 'should get the user from the store')
       assert.isUndefined(User.get(2), 'should return undefined if the item is not in the store')

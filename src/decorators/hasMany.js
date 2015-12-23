@@ -38,24 +38,30 @@ function applyHasMany (Model, Relation, opts) {
     enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
     // Set default method for retrieving the linked relation
     get () {
+      if (!this._get('$')) {
+        return this._get(`links.${localField}`)
+      }
       const query = {}
+      let items
       if (foreignKey) {
         // Make a FAST retrieval of the relation using a secondary index
-        return Relation.getAll(get(this, Model.idAttribute), { index: foreignKey })
+        items = Relation.getAll(get(this, Model.idAttribute), { index: foreignKey })
       } else if (localKeys) {
         const keys = get(this, localKeys) || []
         const args = isArray(keys) ? keys : Object.keys(keys)
         // Make a slower retrieval using the ids in the "localKeys" array
-        return Relation.getAll.apply(Relation, args)
+        items = Relation.getAll.apply(Relation, args)
       } else if (foreignKeys) {
         set(query, `where.${foreignKeys}.contains`, get(this, Model.idAttribute))
         // Make a much slower retrieval
-        return Relation.filter(query)
+        items = Relation.filter(query)
       }
-      return undefined
+      this._set(`links.${localField}`, items)
+      return items
     },
     // Set default method for setting the linked relation
     set (children) {
+      this._set(`links.${localField}`, children)
       if (children && children.length) {
         const id = get(this, Model.idAttribute)
         if (foreignKey) {

@@ -2,7 +2,6 @@
   "source": {
     "includePattern": ".*js$"
   },
-  "theme": "flatly",
   "plugins": ["plugins/markdown"],
   "opts": {
     "template": "./node_modules/ink-docstrap/template",
@@ -11,6 +10,11 @@
     "verbose": true,
     "readme": "./README.md",
     "package": "./package.json"
+  },
+  "templates": {
+    "theme": "cosmo",
+    "systemName": "js-data",
+    "copyright": "js-data Copyright © 2014-2015 Jason Dobry"
   },
   "source": {
     "excludePattern": "(sync_methods|old_utils)"
