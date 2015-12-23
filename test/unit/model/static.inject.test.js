@@ -20,8 +20,6 @@ export function init () {
     })
     it('should inject new items into the store', function () {
       class User extends Model {}
-      User.setSchema({ id: {} })
-
       const user = User.inject({ id: 1 })
       const users = User.inject([{ id: 2 }, { id: 3 }])
       assert.isTrue(User.get(1) === user)
@@ -45,8 +43,6 @@ export function init () {
     })
     it('should inject existing items into the store', function () {
       class User extends Model {}
-      User.setSchema({ id: {} })
-
       const user = User.inject({ id: 1 })
       const users = User.inject([{ id: 2 }, { id: 3 }])
       const userAgain = User.inject({ id: 1 })
@@ -64,7 +60,6 @@ export function init () {
     })
     it('should replace existing items', function () {
       class User extends Model {}
-      User.setSchema({ id: {} })
       const user = User.inject({ id: 1, foo: 'bar', beep: 'boop' })
       assert.equal(user.id, 1)
       assert.equal(user.foo, 'bar')
@@ -162,9 +157,6 @@ export function init () {
       Foo.configure({
         linkRelations: true
       })
-      Foo.setSchema({
-        id: {}
-      })
       Foo.hasMany(Foo, {
         localField: 'children',
         foreignKey: 'parentId'
@@ -224,16 +216,10 @@ export function init () {
       Parent.configure({
         linkRelations: true
       })
-      Parent.setSchema({
-        id: {}
-      })
 
       class Child extends Model {}
       Child.configure({
         linkRelations: true
-      })
-      Child.setSchema({
-        id: {}
       })
 
       Parent.hasMany(Child, {
@@ -276,24 +262,15 @@ export function init () {
       Parent.configure({
         linkRelations: true
       })
-      Parent.setSchema({
-        id: {}
-      })
 
       class Child extends Model {}
       Child.configure({
         linkRelations: true
       })
-      Child.setSchema({
-        id: {}
-      })
 
       class OtherChild extends Model {}
       OtherChild.configure({
         linkRelations: true
-      })
-      OtherChild.setSchema({
-        id: {}
       })
 
       Parent.hasMany(Child, {
@@ -323,7 +300,7 @@ export function init () {
       })
 
       assert.isDefined(Child.get(child.id))
-      assert.isFalse(child.parent === Parent.get(child.parentId), 'parent was injected but not linked')
+      assert.isTrue(child.parent === Parent.get(child.parentId))
 
       assert.isDefined(OtherChild.get(otherChild.id))
       assert.isTrue(otherChild.parent === Parent.get(otherChild.parentId), 'parent was injected and linked')
@@ -434,15 +411,9 @@ export function init () {
       Foo.configure({
         linkRelations: true
       })
-      Foo.setSchema({
-        id: {}
-      })
       class Bar extends Model {}
       Bar.configure({
         linkRelations: true
-      })
-      Bar.setSchema({
-        id: {}
       })
       Foo.hasMany(Bar, {
         localField: 'bars',
@@ -477,6 +448,77 @@ export function init () {
         }
       ], 'bars should have been injected, but not linked')
       assert.equal(Bar.getAll().length, 3, '3 bars should be in the store')
+    })
+    it('should inject 1,000 items', function () {
+      class User extends Model {}
+      let users = []
+      for (var i = 0; i < 1000; i++) {
+        users.push({
+          id: i,
+          name: 'john smith #' + i,
+          age: Math.floor(Math.random() * 100),
+          created: new Date().getTime(),
+          updated: new Date().getTime()
+        })
+      }
+      const start = new Date().getTime()
+      User.inject(users)
+      console.log('\tinject 1,000 users time taken: ', new Date().getTime() - start, 'ms')
+    })
+    it('should inject 10,000 items', function () {
+      class User extends Model {}
+      let users = []
+      for (var i = 0; i < 10000; i++) {
+        users.push({
+          id: i,
+          name: 'john smith #' + i,
+          age: Math.floor(Math.random() * 100),
+          created: new Date().getTime(),
+          updated: new Date().getTime()
+        })
+      }
+      const start = new Date().getTime()
+      User.inject(users)
+      console.log('\tinject 10,000 users time taken: ', new Date().getTime() - start, 'ms')
+    })
+    it('should inject 1,000 items where there is an index on "age"', function () {
+      class User extends Model {}
+      User.createIndex('age')
+      User.createIndex('created')
+      User.createIndex('updated')
+      let users = []
+      for (var i = 0; i < 1000; i++) {
+        users.push({
+          id: i,
+          name: 'john smith #' + i,
+          age: Math.floor(Math.random() * 100),
+          created: new Date().getTime(),
+          updated: new Date().getTime()
+        })
+      }
+      const start = new Date().getTime()
+      User.inject(users)
+      console.log('\tinject 1,000 users time taken: ', new Date().getTime() - start, 'ms')
+    })
+    it('should inject 10,000 items where there is an index on "age"', function () {
+      class User extends Model {}
+      User.createIndex('age')
+      User.createIndex('created')
+      User.createIndex('updated')
+      let users = []
+      for (var i = 0; i < 10000; i++) {
+        users.push({
+          id: i,
+          name: 'john smith #' + i,
+          age: Math.floor(Math.random() * 100),
+          created: new Date().getTime(),
+          updated: new Date().getTime()
+        })
+      }
+      const start = new Date().getTime()
+      User.inject(users)
+      console.log('\tinject 10,000 users time taken: ', new Date().getTime() - start, 'ms')
+      console.log('\tusers age 40-44', User.between(40, 45, { index: 'age' }).length)
     })
   })
 }

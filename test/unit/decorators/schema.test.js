@@ -1,4 +1,4 @@
-/* global Model:true */
+/* global Model:true, JSData:true */
 import {assert} from 'chai'
 
 export function init () {
@@ -13,7 +13,6 @@ export function init () {
       let changeLevelCallCount = 0
 
       User.setSchema({
-        id: {},
         age: {
           indexed: true
         },
@@ -122,14 +121,14 @@ export function init () {
 
         assert.isTrue(user._get('changing'), 'user should be changing')
         assert.deepEqual(user._get('changed'), ['title'], 'user title should be changing')
-        assert.isUndefined(user._get('changes.title'), 'user title should NOT have changes')
-        assert.equal(user._get('changes.level'), 2, 'user level should have a change')
+        assert.isUndefined(user._get('changes').title, 'user title should NOT have changes')
+        assert.equal(user._get('changes').level, 2, 'user level should have a change')
         assert.deepEqual(user._get('changes'), { level: 2 }, 'user should have 1 change')
 
         setTimeout(function () {
-          assert.isUndefined(user._get('changes.title'), 'user title should NOT have changes')
+          assert.isUndefined(user._get('changes').title, 'user title should NOT have changes')
           assert.deepEqual(user._get('changes'), { level: 2 }, 'user should have 1 change')
-          assert.equal(user._get('changes.level'), 2, 'user level should have a change')
+          assert.equal(user._get('changes').level, 2, 'user level should have a change')
           assert.isUndefined(user._get('changing'), 'user should NOT be changing')
           assert.isUndefined(user._get('changed'), 'user title should NOT be changing')
 
@@ -148,7 +147,6 @@ export function init () {
       class User extends Model {}
 
       User.setSchema({
-        id: {},
         age: {
           type: 'number'
         },

@@ -57,23 +57,29 @@ export class Model extends BaseModel {
     super()
     props || (props = {})
     opts || (opts = {})
-    const $$props = {}
+    const _props = {}
     Object.defineProperties(this, {
       _get: {
-        value: function (key) { return utils.get($$props, key) }
+        value (key) {
+          return utils.get(_props, key)
+        }
       },
       _set: {
-        value: function (key, value) { return utils.set($$props, key, value) }
+        value (key, value, opty) {
+          return utils.set(_props, key, value, opts)
+        }
       },
       _unset: {
-        value: function (key) { return utils.unset($$props, key) }
+        value (key) {
+          return utils.unset(_props, key)
+        }
       }
     })
     this._set('creating', true)
     if (opts.noValidate) {
       this._set('noValidate', true)
     }
-    configure(props)(this)
+    utils.fillIn(this, props)
     this._unset('creating')
     this._unset('noValidate')
     this._set('previous', utils.copy(props))
@@ -272,42 +278,56 @@ export class Model extends BaseModel {
       items = [items]
       singular = true
     }
-    items.forEach(function (props) {
+    items = items.map(function (props) {
+      const id = utils.get(props, idAttribute)
+      if (!utils.isSorN(id)) {
+        throw new TypeError(`User#${idAttribute}: Expected string or number, found ${typeof id}!`)
+      }
+      const existing = _this.get(id)
+      if (props === existing) {
+        return existing
+      }
+
       relationList.forEach(function (def) {
         const Relation = def.Relation
-        const toInject = utils.get(props, def.localField)
+        const relationIdAttribute = Relation.idAttribute
+        const foreignKey = def.foreignKey
+
+        let toInject = utils.get(props, def.localField)
+
         if (utils.isFunction(def.inject)) {
           def.inject(_this, def, props)
         } else if (toInject && def.inject !== false) {
           if (utils.isArray(toInject)) {
-            toInject.forEach(function (toInjectItem) {
-              if (toInjectItem !== Relation.get(utils.get(toInjectItem, Relation.idAttribute))) {
+            toInject = toInject.map(function (toInjectItem) {
+              if (toInjectItem !== Relation.get(utils.get(toInjectItem, relationIdAttribute))) {
                 try {
-                  if (def.foreignKey) {
-                    utils.set(toInjectItem, def.foreignKey, utils.get(props, idAttribute))
+                  if (foreignKey) {
+                    utils.set(toInjectItem, foreignKey, id)
                   }
-                  Relation.inject(toInjectItem)
+                  toInjectItem = Relation.inject(toInjectItem)
                 } catch (err) {
-                  throw new Error(`Failed to inject ${def.type} relation: "${def.relation}"!`)
+                  throw new Error(`Failed to inject ${def.type} relation: "${def.relation}"! ${err.message}`)
                 }
               }
+              return toInjectItem
             })
             if (def.localKeys) {
-              utils.set(toInject, def.localKeys, toInject.map(function (injected) {
-                return utils.get(injected, Relation.idAttribute)
+              utils.set(props, def.localKeys, toInject.map(function (injected) {
+                return utils.get(injected, relationIdAttribute)
               }))
             }
           } else {
             // handle injecting belongsTo and hasOne relations
-            if (toInject !== Relation.get(Relation.idAttribute)) {
+            if (toInject !== Relation.get(utils.get(toInject, relationIdAttribute))) {
               try {
                 if (def.localKey) {
                   utils.set(props, def.localKey, utils.get(toInject, Relation.idAttribute))
                 }
-                if (def.foreignKey) {
+                if (foreignKey) {
                   utils.set(toInject, def.foreignKey, utils.get(props, idAttribute))
                 }
-                Relation.inject(toInject)
+                toInject = Relation.inject(toInject)
               } catch (err) {
                 throw new Error(`Failed to inject ${def.type} relation: "${def.relation}"!`)
               }
@@ -315,17 +335,12 @@ export class Model extends BaseModel {
           }
         }
         // remove relation properties from the item, since those relations have been injected by now
-        if (typeof def.link === 'boolean' ? def.link : !!_this.linkRelations) {
+        if (def.link || (def.link === undefined && _this.linkRelations)) {
           utils.unset(props, def.localField)
+        } else {
+          utils.set(props, def.localField, toInject)
         }
       })
-    })
-    items = items.map(function (props) {
-      const id = utils.get(props, idAttribute)
-      if (!id) {
-        throw new TypeError(`User#${idAttribute}: Expected string or number, found ${typeof id}!`)
-      }
-      const existing = _this.get(id)
 
       if (existing) {
         const onConflict = opts.onConflict || _this.onConflict
