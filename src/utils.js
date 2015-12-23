@@ -19,6 +19,7 @@ let upperCase = require('mout/string/upperCase')
 let get = require('mout/object/get')
 let set = require('mout/object/set')
 let observe = require('../lib/observe-js/observe.js')
+let guid = require('mout/random/guid')
 let w, P, File
 let objectProto = Object.prototype
 let toString = objectProto.toString
@@ -498,6 +499,7 @@ export default {
     return isString(json) ? JSON.parse(json) : json
   },
   get,
+  guid,
   intersection,
   isArray,
   isBlacklisted,

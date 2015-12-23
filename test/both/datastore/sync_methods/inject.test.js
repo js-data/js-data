@@ -487,4 +487,14 @@ describe('DS#inject', function () {
     ], 'bars should have been injected, but not linked');
     assert.equal(Bar.getAll().length, 3, '3 bars should be in the store');
   });
+  it('should inject temporary item', function() {
+    var Foo = store.defineResource({
+      name: 'foo',
+      idAttribute: 'foo_id'
+    });
+
+    var foo = Foo.inject({bar: 'bar'}, {temporary: true});
+
+    assert(foo.foo_id != null);
+  });
 });

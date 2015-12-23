@@ -330,6 +330,18 @@ export default {
   },
   inject: require('./inject'),
 
+  // Return whether the item with the given primary key is a temporary item.
+  //
+  // @param resourceName The name of the type of resource of the item.
+  // @param id The primary key of the item.
+  // @returns Whether the item with the given primary key is a temporary item.
+  isNew (resourceName, id) {
+    let {_this, _resourceName, _id} = check.call(this, 'isNew', resourceName, id || fakeId)
+    let resource = _this.store[_resourceName]
+
+    return DSUtils.contains(resource.temporaryItems, _id);
+  },
+
   // Return the timestamp from the last time the item with the given primary key was changed.
   //
   // @param resourceName The name of the type of resource of the item.
