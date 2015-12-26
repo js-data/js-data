@@ -247,7 +247,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.Collection = Collection;
 	
-	var _query4 = __webpack_require__(2);
+	var _query2 = __webpack_require__(2);
 	
 	var _utils = __webpack_require__(3);
 	
@@ -257,7 +257,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 	
-	exports.Query = _query4.Query;
+	exports.Query = _query2.Query;
 	
 	/**
 	 * @class Collection
@@ -280,11 +280,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @type {string}
 	   */
 	  this.idAttribute = idAttribute;
+	
 	  /**
 	   * The main index, which uses @{link Collection#idAttribute} as the key.
 	   * @type {Index}
 	   */
-	  this.index = new _mindex.Index([idAttribute], idAttribute);
+	  this.index = new _mindex.Index([idAttribute], {
+	    hashCode: function hashCode(obj) {
+	      return (0, _utils.get)(obj, idAttribute);
+	    }
+	  });
 	  /**
 	   * Object that holds the other secondary indexes of this collection.
 	   * @type {Object.<string, Index>}
@@ -329,7 +334,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if ((0, _utils.isString)(name) && keyList === undefined) {
 	      keyList = [name];
 	    }
-	    var index = this.indexes[name] = new _mindex.Index(keyList, this.idAttribute);
+	    var idAttribute = this.idAttribute;
+	    var index = this.indexes[name] = new _mindex.Index(keyList, {
+	      hashCode: function hashCode(obj) {
+	        return (0, _utils.get)(obj, idAttribute);
+	      }
+	    });
 	    this.index.visitAll(index.insertRecord, index);
 	    return this;
 	  },
@@ -354,7 +364,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @return {Query} New query object.
 	   */
 	  query: function query() {
-	    return new _query4.Query(this);
+	    return new _query2.Query(this);
 	  },
 	
 	  /**
@@ -386,10 +396,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {boolean} [opts.offset] - The number of resulting entities to skip.
 	   * @return {Array} The result.
 	   */
-	  between: function between() {
-	    var _query;
-	
-	    return (_query = this.query()).between.apply(_query, arguments).run();
+	  between: function between(leftKeys, rightKeys, opts) {
+	    return this.query().between(leftKeys, rightKeys, opts).run();
 	  },
 	
 	  /**
@@ -430,10 +438,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * query. If no index is specified, the main index is used.
 	   * @return {Array} The result.
 	   */
-	  get: function get() {
-	    var _query2;
-	
-	    return (_query2 = this.query()).get.apply(_query2, arguments).run();
+	  get: function get(keyList, opts) {
+	    return this.query().get(keyList, opts).run();
 	  },
 	
 	  /**
@@ -463,9 +469,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @return {Array} The result.
 	   */
 	  getAll: function getAll() {
-	    var _query3;
+	    var _query;
 	
-	    return (_query3 = this.query()).getAll.apply(_query3, arguments).run();
+	    return (_query = this.query()).getAll.apply(_query, arguments).run();
 	  },
 	
 	  /**
@@ -500,12 +506,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @instance
 	   * @param {(Object|Function)} [queryOrFn={}] - Selection query or filter
 	   * function.
-	   * @param {Function} [thisArg] - Context to which to bind `queryOrFn` if
+	   * @param {Object} [thisArg] - Context to which to bind `queryOrFn` if
 	   * `queryOrFn` is a function.
 	   * @return {Array} The result.
 	   */
-	  filter: function filter(opts) {
-	    return this.query().filter(opts).run();
+	  filter: function filter(query, thisArg) {
+	    return this.query().filter(query, thisArg).run();
 	  },
 	
 	  /**
@@ -1247,6 +1253,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.pascalCase = pascalCase;
 	exports.camelCase = camelCase;
 	exports.eventify = eventify;
+	exports.uuid = uuid;
 	
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 	
@@ -1702,6 +1709,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	  });
+	}
+	
+	// RiveraGroup/node-tiny-uuid
+	// DO WTF YOU WANT TO PUBLIC LICENSE
+	function uuid(a, b) {
+	  for (b = a = ''; // b - result , a - numeric variable
+	  a++ < 36; b += a * 51 & 52 // if "a" is not 9 or 14 or 19 or 24
+	  ? //  return a random number or 4
+	  (a ^ 15 // if "a" is not 15
+	  ? // genetate a random number from 0 to 15
+	  8 ^ Math.random() * (a ^ 20 ? 16 : 4) // unless "a" is 20, in which case a random number from 8 to 11
+	  : 4 //  otherwise 4
+	  ).toString(16) : '-' //  in other cases (if "a" is 9,14,19,24) insert "-"
+	  ) {}
+	  return b;
 	}
 
 /***/ },
@@ -2745,20 +2767,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _utils2 = __webpack_require__(13);
 	
-	function Index() {
-	  var fieldList = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
-	  var idAttribute = arguments[1];
-	
-	  if (!(0, _utils.isArray)(fieldList)) {
-	    throw new Error('fieldList must be an array.');
-	  }
-	
-	  this.fieldList = fieldList;
-	  this.idAttribute = idAttribute;
-	  this.isIndex = true;
-	  this.keys = [];
-	  this.values = [];
-	} // Copyright (c) 2015, InternalFX.
+	var blacklist = { '>': 1, '>=': 1, '<': 1, '<=': 1 }; // Copyright (c) 2015, InternalFX.
 	
 	// Permission to use, copy, modify, and/or distribute this software for any purpose with or
 	// without fee is hereby granted, provided that the above copyright notice and this permission
@@ -2778,6 +2787,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	// Converted to ES6 Class syntax
 	// Reworked dependencies so as to re-use code already in js-data
 	
+	function Index(fieldList, opts) {
+	  fieldList || (fieldList = []);
+	
+	  if (!(0, _utils.isArray)(fieldList)) {
+	    throw new Error('fieldList must be an array.');
+	  }
+	
+	  opts || (opts = {});
+	  this.fieldList = fieldList;
+	  this.fieldGetter = opts.fieldGetter;
+	  this.hashCode = opts.hashCode;
+	  this.isIndex = true;
+	  this.keys = [];
+	  this.values = [];
+	}
+	
 	(0, _decorators.configure)({
 	  set: function set(keyList, value) {
 	    if (!(0, _utils.isArray)(keyList)) {
@@ -2789,7 +2814,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    if (keyList.length === 0) {
 	      if (pos.found) {
-	        var dataLocation = (0, _utils2.binarySearch)(this.values[pos.index], value, this.idAttribute);
+	        var dataLocation = (0, _utils2.binarySearch)(this.values[pos.index], value, this.hashCode);
 	        if (!dataLocation.found) {
 	          (0, _utils2.insertAt)(this.values[pos.index], dataLocation.index, value);
 	        }
@@ -2802,7 +2827,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.values[pos.index].set(keyList, value);
 	      } else {
 	        (0, _utils2.insertAt)(this.keys, pos.index, key);
-	        var newIndex = new Index([], this.idAttribute);
+	        var newIndex = new Index([], { hashCode: this.hashCode });
 	        newIndex.set(keyList, value);
 	        (0, _utils2.insertAt)(this.values, pos.index, newIndex);
 	      }
@@ -2878,7 +2903,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      throw new Error('Key arrays must be same length');
 	    }
 	
-	    return this.between(leftKeys, rightKeys, (0, _utils.omit)(_query, ['>', '>=', '<', '<=']));
+	    var _opts = {};
+	    (0, _utils.forOwn)(_query, function (value, key) {
+	      if (!blacklist[key]) {
+	        _opts[key] = value;
+	      }
+	    });
+	    return this.between(leftKeys, rightKeys, _opts);
 	  },
 	  between: function between(leftKeys, rightKeys) {
 	    var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
@@ -2988,6 +3019,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return results;
 	    }
 	  },
+	  peek: function peek() {
+	    if (this.values.length) {
+	      if (this.values[0].isIndex) {
+	        return this.values[0].peek();
+	      } else {
+	        return this.values[0];
+	      }
+	    }
+	    return [];
+	  },
 	  remove: function remove(keyList, value) {
 	    if (!(0, _utils.isArray)(keyList)) {
 	      keyList = [keyList];
@@ -2998,7 +3039,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    if (keyList.length === 0) {
 	      if (pos.found) {
-	        var dataLocation = (0, _utils2.binarySearch)(this.values[pos.index], value, this.idAttribute);
+	        var dataLocation = (0, _utils2.binarySearch)(this.values[pos.index], value, this.hashCode);
 	        if (dataLocation.found) {
 	          (0, _utils2.removeAt)(this.values[pos.index], dataLocation.index);
 	          if (this.values[pos.index].length === 0) {
@@ -3019,7 +3060,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  insertRecord: function insertRecord(data) {
 	    var keyList = this.fieldList.map(function (field) {
-	      return data[field] || null;
+	      if ((0, _utils.isFunction)(field)) {
+	        return field(data) || null;
+	      } else {
+	        return data[field] || null;
+	      }
 	    });
 	
 	    this.set(keyList, data);
@@ -3039,7 +3084,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          return false;
 	        }
 	      } else {
-	        var dataLocation = (0, _utils2.binarySearch)(value, data, _this.idAttribute);
+	        var dataLocation = (0, _utils2.binarySearch)(value, data, _this.hashCode);
 	        if (dataLocation.found) {
 	          (0, _utils2.removeAt)(value, dataLocation.index);
 	          if (value.length === 0) {
@@ -3072,16 +3117,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.insertAt = insertAt;
 	exports.removeAt = removeAt;
 	exports.binarySearch = binarySearch;
-	function sort(a, b, field) {
+	function sort(a, b, hashCode) {
 	  // Short-curcuit comparison if a and b are strictly equal
 	  // This is absolutely necessary for indexed objects that
 	  // don't have the idAttribute field
 	  if (a === b) {
 	    return 0;
 	  }
-	  if (field) {
-	    a = a[field];
-	    b = b[field];
+	  if (hashCode) {
+	    a = hashCode(a);
+	    b = hashCode(b);
 	  }
 	  if (a === null && b === null) {
 	    return 0;
@@ -3405,6 +3450,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 	
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+	
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 	
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -3584,6 +3631,66 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // TODO: implement "silent"
 	      return utils.set(this, key, value);
 	    }
+	  }, {
+	    key: 'hashCode',
+	    value: function hashCode() {
+	      return utils.get(this, this.constructor.idAttribute);
+	    }
+	  }, {
+	    key: 'changes',
+	    value: function changes(key) {
+	      if (key) {
+	        return this._get('changes.' + key);
+	      }
+	      return this._get('changes');
+	    }
+	  }, {
+	    key: 'changed',
+	    value: function changed() {
+	      return this._get('changed');
+	    }
+	  }, {
+	    key: 'hasChanges',
+	    value: function hasChanges() {
+	      return !!(this._get('changed') || []).length;
+	    }
+	  }, {
+	    key: 'commit',
+	    value: function commit() {
+	      this._unset('changed');
+	      this.set('changes', {});
+	      this._set('previous', utils.copy(this));
+	      return this;
+	    }
+	  }, {
+	    key: 'previous',
+	    value: function previous(key) {
+	      if (key) {
+	        return this._get('previous.' + key);
+	      }
+	      return this._get('previous');
+	    }
+	  }, {
+	    key: 'revert',
+	    value: function revert(opts) {
+	      var _this3 = this;
+	
+	      var previous = this._get('previous') || {};
+	      opts || (opts = {});
+	      opts.preserve || (opts.preserve = []);
+	      utils.forOwn(this, function (value, key) {
+	        if (key !== _this3.constructor.idAttribute && !previous.hasOwnProperty(key) && _this3.hasOwnProperty(key) && opts.preserve.indexOf(key) === -1) {
+	          delete _this3[key];
+	        }
+	      });
+	      utils.forOwn(previous, function (value, key) {
+	        if (opts.preserve.indexOf(key) === -1) {
+	          _this3[key] = value;
+	        }
+	      });
+	      this.commit();
+	      return this;
+	    }
 	
 	    /**
 	     * Return a plain object representation of this instance.
@@ -3597,7 +3704,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'toJSON',
 	    value: function toJSON(opts) {
-	      var _this3 = this;
+	      var _this4 = this;
 	
 	      opts || (opts = {});
 	      var Ctor = this.constructor;
@@ -3627,7 +3734,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    optsCopy.with[i] = '';
 	                  }
 	                });
-	                var relationData = utils.get(_this3, def.localField);
+	                var relationData = utils.get(_this4, def.localField);
 	                if (relationData) {
 	                  if (utils.isArray(relationData)) {
 	                    utils.set(json, def.localField, relationData.map(function (item) {
@@ -3690,6 +3797,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function is(instance) {
 	      return instance instanceof this;
 	    }
+	  }, {
+	    key: 'getAutoPkItems',
+	    value: function getAutoPkItems() {
+	      return this.getAll().filter(function (item) {
+	        return item._get('autoPk');
+	      });
+	    }
 	
 	    /**
 	     * Insert the provided item or items into the Collection instance of this
@@ -3726,8 +3840,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      items = items.map(function (props) {
 	        var id = utils.get(props, idAttribute);
+	        var autoPk = false;
 	        if (!utils.isSorN(id)) {
-	          throw new TypeError('User#' + idAttribute + ': Expected string or number, found ' + (typeof id === 'undefined' ? 'undefined' : _typeof(id)) + '!');
+	          if (opts.autoPk || opts.autoPk === undefined && _this.autoPk) {
+	            id = utils.uuid();
+	            utils.set(props, idAttribute, id);
+	            autoPk = true;
+	          } else {
+	            throw new TypeError('User#' + idAttribute + ': Expected string or number, found ' + (typeof id === 'undefined' ? 'undefined' : _typeof(id)) + '!');
+	          }
 	        }
 	        var existing = _this.get(id);
 	        if (props === existing) {
@@ -3805,6 +3926,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } else {
 	          props = _this.createInstance(props);
 	          props._set('$', true);
+	          if (autoPk) {
+	            props._set('autoPk', autoPk);
+	          }
 	          collection.insert(props);
 	        }
 	        return props;
@@ -3904,8 +4028,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  }, {
 	    key: 'filter',
-	    value: function filter(opts) {
-	      return this.collection.filter(opts);
+	    value: function filter(query, opts) {
+	      opts || (opts = {});
+	      return this.collection.filter(query, opts);
 	    }
 	
 	    /**
@@ -4007,7 +4132,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'create',
 	    value: function create(props, opts) {
-	      var _this4 = this;
+	      var _this5 = this;
 	
 	      var op = 'create';
 	      this.dbg(op, 'props:', props, 'opts:', opts);
@@ -4018,15 +4143,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	      utils._(this, opts);
 	      opts.op = op;
 	
-	      if (opts.upsert && utils.get(props, this.idAttribute)) {
+	      if (opts.upsert && utils.get(props, this.idAttribute) && (!this.is(props) || !props._get('autoPk'))) {
 	        return this.update(utils.get(props, this.idAttribute), props, opts);
 	      }
 	      return resolve(this.beforeCreate(props, opts)).then(function () {
-	        adapterName = _this4.getAdapterName(opts);
-	        return _this4.getAdapter(adapterName).create(_this4, _this4.prototype.toJSON.call(props, opts), opts);
+	        adapterName = _this5.getAdapterName(opts);
+	        return _this5.getAdapter(adapterName).create(_this5, _this5.prototype.toJSON.call(props, opts), opts);
 	      }).then(function (data) {
-	        return resolve(_this4.afterCreate(data, opts)).then(function () {
-	          return handleResponse(_this4, data, opts, adapterName);
+	        return resolve(_this5.afterCreate(data, opts)).then(function () {
+	          if (_this5.is(props) && props._get('$')) {
+	            _this5.eject(utils.get(props, _this5.idAttribute));
+	          }
+	          return handleResponse(_this5, data, opts, adapterName);
 	        });
 	      });
 	    }
@@ -4055,7 +4183,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'createMany',
 	    value: function createMany(items, opts) {
-	      var _this5 = this;
+	      var _this6 = this;
 	
 	      var op = 'createMany';
 	      this.dbg(op, 'items:', items, 'opts:', opts);
@@ -4070,11 +4198,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var _ret2 = (function () {
 	          var hasId = true;
 	          items.forEach(function (item) {
-	            hasId = hasId && utils.get(item, _this5.idAttribute);
+	            hasId = hasId && utils.get(item, _this6.idAttribute) && (!utils.isFunction(item._get) || !item._get('autoPk'));
 	          });
 	          if (hasId) {
 	            return {
-	              v: _this5.updateMany(items, opts)
+	              v: _this6.updateMany(items, opts)
 	            };
 	          }
 	        })();
@@ -4083,13 +4211,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	
 	      return resolve(this.beforeCreateMany(items, opts)).then(function () {
-	        adapterName = _this5.getAdapterName(opts);
-	        return _this5.getAdapter(adapterName).createMany(_this5, items.map(function (item) {
-	          return _this5.prototype.toJSON.call(item, opts);
+	        adapterName = _this6.getAdapterName(opts);
+	        return _this6.getAdapter(adapterName).createMany(_this6, items.map(function (item) {
+	          return _this6.prototype.toJSON.call(item, opts);
 	        }), opts);
 	      }).then(function (data) {
-	        return resolve(_this5.afterCreateMany(data, opts)).then(function () {
-	          return handleResponse(_this5, data, opts, adapterName);
+	        return resolve(_this6.afterCreateMany(data, opts)).then(function () {
+	          items.forEach(function (item) {
+	            if (_this6.is(item) && item._get('$')) {
+	              _this6.eject(utils.get(item, _this6.idAttribute));
+	            }
+	          });
+	          return handleResponse(_this6, data, opts, adapterName);
 	        });
 	      });
 	    }
@@ -4102,7 +4235,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'find',
 	    value: function find(id, opts) {
-	      var _this6 = this;
+	      var _this7 = this;
 	
 	      var op = 'find';
 	      this.dbg(op, 'id:', id, 'opts:', opts);
@@ -4113,11 +4246,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      opts.op = op;
 	
 	      return resolve(this.beforeFind(id, opts)).then(function () {
-	        adapterName = _this6.getAdapterName(opts);
-	        return _this6.getAdapter(adapterName).find(_this6, id, opts);
+	        adapterName = _this7.getAdapterName(opts);
+	        return _this7.getAdapter(adapterName).find(_this7, id, opts);
 	      }).then(function (data) {
-	        return resolve(_this6.afterFind(data, opts)).then(function () {
-	          return handleResponse(_this6, data, opts, adapterName);
+	        return resolve(_this7.afterFind(data, opts)).then(function () {
+	          return handleResponse(_this7, data, opts, adapterName);
 	        });
 	      });
 	    }
@@ -4130,7 +4263,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'findAll',
 	    value: function findAll(query, opts) {
-	      var _this7 = this;
+	      var _this8 = this;
 	
 	      var op = 'findAll';
 	      this.dbg(op, 'query:', query, 'opts:', opts);
@@ -4142,11 +4275,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      opts.op = op;
 	
 	      return resolve(this.beforeFindAll(query, opts)).then(function () {
-	        adapterName = _this7.getAdapterName(opts);
-	        return _this7.getAdapter(adapterName).findAll(_this7, query, opts);
+	        adapterName = _this8.getAdapterName(opts);
+	        return _this8.getAdapter(adapterName).findAll(_this8, query, opts);
 	      }).then(function (data) {
-	        return resolve(_this7.afterFindAll(data, opts)).then(function () {
-	          return handleResponse(_this7, data, opts, adapterName);
+	        return resolve(_this8.afterFindAll(data, opts)).then(function () {
+	          return handleResponse(_this8, data, opts, adapterName);
 	        });
 	      });
 	    }
@@ -4159,7 +4292,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'update',
 	    value: function update(id, props, opts) {
-	      var _this8 = this;
+	      var _this9 = this;
 	
 	      var op = 'update';
 	      this.dbg(op, 'id:', id, 'props:', props, 'opts:', opts);
@@ -4171,11 +4304,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      opts.op = op;
 	
 	      return resolve(this.beforeUpdate(id, props, opts)).then(function () {
-	        adapterName = _this8.getAdapterName(opts);
-	        return _this8.getAdapter(adapterName).update(_this8, id, _this8.prototype.toJSON.call(props, opts), opts);
+	        adapterName = _this9.getAdapterName(opts);
+	        return _this9.getAdapter(adapterName).update(_this9, id, _this9.prototype.toJSON.call(props, opts), opts);
 	      }).then(function (data) {
-	        return resolve(_this8.afterUpdate(id, data, opts)).then(function () {
-	          return handleResponse(_this8, data, opts, adapterName);
+	        return resolve(_this9.afterUpdate(id, data, opts)).then(function () {
+	          return handleResponse(_this9, data, opts, adapterName);
 	        });
 	      });
 	    }
@@ -4188,7 +4321,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'updateMany',
 	    value: function updateMany(items, opts) {
-	      var _this9 = this;
+	      var _this10 = this;
 	
 	      var op = 'updateMany';
 	      this.dbg(op, 'items:', items, 'opts:', opts);
@@ -4200,13 +4333,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      opts.op = op;
 	
 	      return resolve(this.beforeUpdateMany(items, opts)).then(function () {
-	        adapterName = _this9.getAdapterName(opts);
-	        return _this9.getAdapter(adapterName).updateMany(_this9, items.map(function (item) {
-	          return _this9.prototype.toJSON.call(item, opts);
+	        adapterName = _this10.getAdapterName(opts);
+	        return _this10.getAdapter(adapterName).updateMany(_this10, items.map(function (item) {
+	          return _this10.prototype.toJSON.call(item, opts);
 	        }), opts);
 	      }).then(function (data) {
-	        return resolve(_this9.afterUpdateMany(data, opts)).then(function () {
-	          return handleResponse(_this9, data, opts, adapterName);
+	        return resolve(_this10.afterUpdateMany(data, opts)).then(function () {
+	          return handleResponse(_this10, data, opts, adapterName);
 	        });
 	      });
 	    }
@@ -4226,7 +4359,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'updateAll',
 	    value: function updateAll(query, props, opts) {
-	      var _this10 = this;
+	      var _this11 = this;
 	
 	      var op = 'updateAll';
 	      this.dbg(op, 'query:', query, 'props:', props, 'opts:', opts);
@@ -4239,11 +4372,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      opts.op = op;
 	
 	      return resolve(this.beforeUpdateAll(query, props, opts)).then(function () {
-	        adapterName = _this10.getAdapterName(opts);
-	        return _this10.getAdapter(adapterName).updateAll(_this10, query, props, opts);
+	        adapterName = _this11.getAdapterName(opts);
+	        return _this11.getAdapter(adapterName).updateAll(_this11, query, props, opts);
 	      }).then(function (data) {
-	        return resolve(_this10.afterUpdateAll(query, data, opts)).then(function () {
-	          return handleResponse(_this10, data, opts, adapterName);
+	        return resolve(_this11.afterUpdateAll(query, data, opts)).then(function () {
+	          return handleResponse(_this11, data, opts, adapterName);
 	        });
 	      });
 	    }
@@ -4263,7 +4396,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'destroy',
 	    value: function destroy(id, opts) {
-	      var _this11 = this;
+	      var _this12 = this;
 	
 	      var op = 'destroy';
 	      this.dbg(op, 'id:', id, 'opts:', opts);
@@ -4274,18 +4407,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	      opts.op = op;
 	
 	      return resolve(this.beforeDestroy(id, opts)).then(function () {
-	        adapterName = _this11.getAdapterName(opts);
-	        return _this11.getAdapter(adapterName).destroy(_this11, id, opts);
+	        adapterName = _this12.getAdapterName(opts);
+	        return _this12.getAdapter(adapterName).destroy(_this12, id, opts);
 	      }).then(function (data) {
-	        return resolve(_this11.afterDestroy(id, opts)).then(function () {
+	        return resolve(_this12.afterDestroy(id, opts)).then(function () {
 	          if (opts.raw) {
 	            data.adapter = adapterName;
 	            if (opts.autoEject) {
-	              data.data = _this11.eject(id, opts);
+	              data.data = _this12.eject(id, opts);
 	            }
 	            return data;
 	          } else if (opts.autoEject) {
-	            data = _this11.eject(id, opts);
+	            data = _this12.eject(id, opts);
 	          }
 	          return data;
 	        });
@@ -4300,7 +4433,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'destroyAll',
 	    value: function destroyAll(query, opts) {
-	      var _this12 = this;
+	      var _this13 = this;
 	
 	      var op = 'destroyAll';
 	      this.dbg(op, 'query:', query, 'opts:', opts);
@@ -4312,18 +4445,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	      opts.op = op;
 	
 	      return resolve(this.beforeDestroyAll(query, opts)).then(function () {
-	        adapterName = _this12.getAdapterName(opts);
-	        return _this12.getAdapter(adapterName).destroyAll(_this12, query, opts);
+	        adapterName = _this13.getAdapterName(opts);
+	        return _this13.getAdapter(adapterName).destroyAll(_this13, query, opts);
 	      }).then(function (data) {
-	        return resolve(_this12.afterDestroyAll(query, opts)).then(function () {
+	        return resolve(_this13.afterDestroyAll(query, opts)).then(function () {
 	          if (opts.raw) {
 	            data.adapter = adapterName;
 	            if (opts.autoEject) {
-	              data.data = _this12.ejectAll(query, opts);
+	              data.data = _this13.ejectAll(query, opts);
 	            }
 	            return data;
 	          } else if (opts.autoEject) {
-	            data = _this12.ejectAll(query, opts);
+	            data = _this13.ejectAll(query, opts);
 	          }
 	          return data;
 	        });
@@ -4332,6 +4465,74 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'afterDestroyAll',
 	    value: function afterDestroyAll() {}
+	  }, {
+	    key: 'beforeLoadRelations',
+	    value: function beforeLoadRelations() {}
+	  }, {
+	    key: 'loadRelations',
+	    value: function loadRelations(id, relations, opts) {
+	      var _this14 = this;
+	
+	      var _this = this;
+	      var instance = _this.is(id) ? id : undefined;
+	      id = instance ? utils.get(instance, _this.idAttribute) : id;
+	      var op = 'loadRelations';
+	      _this.dbg(op, 'id:', id, 'relations:', relations, 'opts:', opts);
+	      relations || (relations = []);
+	      opts || (opts = {});
+	      var relationList = _this.relationList || [];
+	      utils._(_this, opts);
+	      opts.op = op;
+	      return resolve(_this.beforeLoadRelations(id, relations, opts)).then(function () {
+	        if (utils.isSorN(id) && !instance) {
+	          instance = _this.get(instance);
+	        }
+	        if (!instance) {
+	          throw new Error('You passed an id of an instance not found in the collection of the Model!');
+	        }
+	        if (utils.isString(relations)) {
+	          relations = [relations];
+	        }
+	        return Promise.all(relationList.map(function (def) {
+	          if (utils.isFunction(def.load)) {
+	            return def.load(_this, def, instance, opts);
+	          }
+	          var task = undefined;
+	          if (def.foreignKey) {
+	            task = def.Relation.findAll(_defineProperty({}, def.foreignKey, id), opts);
+	          } else if (def.localKey) {
+	            var key = utils.get(instance, def.localKey);
+	            if (utils.isSorN(key)) {
+	              task = def.Relation.find(key, opts);
+	            }
+	          } else if (def.localKeys) {
+	            task = def.Relation.findAll(_defineProperty({}, def.Relation.idAttribute, {
+	              'in': utils.get(instance, def.localKeys)
+	            }), opts);
+	          } else if (def.foreignKeys) {
+	            task = def.Relation.findAll(_defineProperty({}, def.Relation.idAttribute, {
+	              'contains': utils.get(instance, _this.idAttribute)
+	            }), opts);
+	          }
+	          if (task) {
+	            task = task.then(function (data) {
+	              if (opts.raw) {
+	                data = data.data;
+	              }
+	              utils.set(instance, def.localField, def.type === 'hasOne' ? data.length ? data[0] : undefined : data);
+	            });
+	          }
+	          return task;
+	        }));
+	      }).then(function () {
+	        return resolve(_this14.afterLoadRelations(instance, relations, opts)).then(function () {
+	          return instance;
+	        });
+	      });
+	    }
+	  }, {
+	    key: 'afterLoadRelations',
+	    value: function afterLoadRelations() {}
 	  }, {
 	    key: 'log',
 	    value: function log(level) {

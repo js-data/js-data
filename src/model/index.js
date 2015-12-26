@@ -160,6 +160,57 @@ export class Model extends BaseModel {
     return utils.set(this, key, value)
   }
 
+  hashCode () {
+    return utils.get(this, this.constructor.idAttribute)
+  }
+
+  changes (key) {
+    if (key) {
+      return this._get(`changes.${key}`)
+    }
+    return this._get('changes')
+  }
+
+  changed () {
+    return this._get('changed')
+  }
+
+  hasChanges () {
+    return !!(this._get('changed') || []).length
+  }
+
+  commit () {
+    this._unset('changed')
+    this.set('changes', {})
+    this._set('previous', utils.copy(this))
+    return this
+  }
+
+  previous (key) {
+    if (key) {
+      return this._get(`previous.${key}`)
+    }
+    return this._get('previous')
+  }
+
+  revert (opts) {
+    const previous = this._get('previous') || {}
+    opts || (opts = {})
+    opts.preserve || (opts.preserve = [])
+    utils.forOwn(this, (value, key) => {
+      if (key !== this.constructor.idAttribute && !previous.hasOwnProperty(key) && this.hasOwnProperty(key) && opts.preserve.indexOf(key) === -1) {
+        delete this[key]
+      }
+    })
+    utils.forOwn(previous, (value, key) => {
+      if (opts.preserve.indexOf(key) === -1) {
+        this[key] = value
+      }
+    })
+    this.commit()
+    return this
+  }
+
   /**
    * Return a plain object representation of this instance.
    *
@@ -248,6 +299,12 @@ export class Model extends BaseModel {
     return instance instanceof this
   }
 
+  static getAutoPkItems () {
+    return this.getAll().filter(function (item) {
+      return item._get('autoPk')
+    })
+  }
+
   /**
    * Insert the provided item or items into the Collection instance of this
    * Model.
@@ -279,9 +336,16 @@ export class Model extends BaseModel {
       singular = true
     }
     items = items.map(function (props) {
-      const id = utils.get(props, idAttribute)
+      let id = utils.get(props, idAttribute)
+      let autoPk = false
       if (!utils.isSorN(id)) {
-        throw new TypeError(`User#${idAttribute}: Expected string or number, found ${typeof id}!`)
+        if (opts.autoPk || (opts.autoPk === undefined && _this.autoPk)) {
+          id = utils.uuid()
+          utils.set(props, idAttribute, id)
+          autoPk = true
+        } else {
+          throw new TypeError(`User#${idAttribute}: Expected string or number, found ${typeof id}!`)
+        }
       }
       const existing = _this.get(id)
       if (props === existing) {
@@ -359,6 +423,9 @@ export class Model extends BaseModel {
       } else {
         props = _this.createInstance(props)
         props._set('$', true)
+        if (autoPk) {
+          props._set('autoPk', autoPk)
+        }
         collection.insert(props)
       }
       return props
@@ -436,8 +503,9 @@ export class Model extends BaseModel {
   /**
    * Proxy for Collection#filter
    */
-  static filter (opts) {
-    return this.collection.filter(opts)
+  static filter (query, opts) {
+    opts || (opts = {})
+    return this.collection.filter(query, opts)
   }
 
   /**
@@ -533,7 +601,7 @@ export class Model extends BaseModel {
     utils._(this, opts)
     opts.op = op
 
-    if (opts.upsert && utils.get(props, this.idAttribute)) {
+    if (opts.upsert && utils.get(props, this.idAttribute) && (!this.is(props) || !props._get('autoPk'))) {
       return this.update(utils.get(props, this.idAttribute), props, opts)
     }
     return resolve(this.beforeCreate(props, opts))
@@ -544,7 +612,12 @@ export class Model extends BaseModel {
       })
       .then(data => {
         return resolve(this.afterCreate(data, opts))
-          .then(() => handleResponse(this, data, opts, adapterName))
+          .then(() => {
+            if (this.is(props) && props._get('$')) {
+              this.eject(utils.get(props, this.idAttribute))
+            }
+            return handleResponse(this, data, opts, adapterName)
+          })
       })
   }
 
@@ -578,7 +651,7 @@ export class Model extends BaseModel {
     if (opts.upsert) {
       let hasId = true
       items.forEach(item => {
-        hasId = hasId && utils.get(item, this.idAttribute)
+        hasId = hasId && utils.get(item, this.idAttribute) && (!utils.isFunction(item._get) || !item._get('autoPk'))
       })
       if (hasId) {
         return this.updateMany(items, opts)
@@ -593,7 +666,14 @@ export class Model extends BaseModel {
       })
       .then(data => {
         return resolve(this.afterCreateMany(data, opts))
-          .then(() => handleResponse(this, data, opts, adapterName))
+          .then(() => {
+            items.forEach(item => {
+              if (this.is(item) && item._get('$')) {
+                this.eject(utils.get(item, this.idAttribute))
+              }
+            })
+            return handleResponse(this, data, opts, adapterName)
+          })
       })
   }
   static afterCreateMany () {}
@@ -798,6 +878,74 @@ export class Model extends BaseModel {
       })
   }
   static afterDestroyAll () {}
+
+  static beforeLoadRelations () {}
+  static loadRelations (id, relations, opts) {
+    const _this = this
+    let instance = _this.is(id) ? id : undefined
+    id = instance ? utils.get(instance, _this.idAttribute) : id
+    const op = 'loadRelations'
+    _this.dbg(op, 'id:', id, 'relations:', relations, 'opts:', opts)
+    relations || (relations = [])
+    opts || (opts = {})
+    const relationList = _this.relationList || []
+    utils._(_this, opts)
+    opts.op = op
+    return resolve(_this.beforeLoadRelations(id, relations, opts))
+      .then(() => {
+        if (utils.isSorN(id) && !instance) {
+          instance = _this.get(instance)
+        }
+        if (!instance) {
+          throw new Error('You passed an id of an instance not found in the collection of the Model!')
+        }
+        if (utils.isString(relations)) {
+          relations = [relations]
+        }
+        return Promise.all(relationList.map(function (def) {
+          if (utils.isFunction(def.load)) {
+            return def.load(_this, def, instance, opts)
+          }
+          let task
+          if (def.foreignKey) {
+            task = def.Relation.findAll({
+              [def.foreignKey]: id
+            }, opts)
+          } else if (def.localKey) {
+            const key = utils.get(instance, def.localKey)
+            if (utils.isSorN(key)) {
+              task = def.Relation.find(key, opts)
+            }
+          } else if (def.localKeys) {
+            task = def.Relation.findAll({
+              [def.Relation.idAttribute]: {
+                'in': utils.get(instance, def.localKeys)
+              }
+            }, opts)
+          } else if (def.foreignKeys) {
+            task = def.Relation.findAll({
+              [def.Relation.idAttribute]: {
+                'contains': utils.get(instance, _this.idAttribute)
+              }
+            }, opts)
+          }
+          if (task) {
+            task = task.then(function (data) {
+              if (opts.raw) {
+                data = data.data
+              }
+              utils.set(instance, def.localField, def.type === 'hasOne' ? (data.length ? data[0] : undefined) : data)
+            })
+          }
+          return task
+        }))
+      })
+      .then(() => {
+        return resolve(this.afterLoadRelations(instance, relations, opts))
+          .then(() => instance)
+      })
+  }
+  static afterLoadRelations () {}
 
   static log (level, ...args) {
     if (level && !args.length) {

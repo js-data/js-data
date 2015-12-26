@@ -520,5 +520,17 @@ export function init () {
       console.log('\tinject 10,000 users time taken: ', new Date().getTime() - start, 'ms')
       console.log('\tusers age 40-44', User.between(40, 45, { index: 'age' }).length)
     })
+    it('should inject temporary items', function () {
+      class User extends Model {}
+      const user = User.inject({
+        name: 'John'
+      }, { autoPk: true })
+      assert.isDefined(user.id)
+      assert.isTrue(user._get('autoPk'))
+      assert.isTrue(User.getAll()[0] === user)
+      assert.isTrue(User.getAutoPkItems()[0] === user)
+      assert.deepEqual(user.toJSON(), { name: 'John', id: user.id })
+      assert.equal(user.hashCode(), user.id)
+    })
   })
 }

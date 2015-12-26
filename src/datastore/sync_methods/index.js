@@ -31,53 +31,6 @@ function check (fnName, resourceName, id, options) {
 }
 
 export default {
-  // Return the changes for the given item, if any.
-  //
-  // @param resourceName The name of the type of resource of the item whose changes are to be returned.
-  // @param id The primary key of the item whose changes are to be returned.
-  // @param options Optional configuration.
-  // @param options.ignoredChanges Array of strings or regular expressions of fields, the changes of which are to be ignored.
-  // @returns The changes of the given item, if any.
-  changes (resourceName, id, options) {
-    let {_this, definition, _resourceName, _id, _options} = check.call(this, 'changes', resourceName, id, options)
-
-    let item = definition.get(_id)
-    if (item) {
-      let observer = _this.store[_resourceName].observers[_id]
-      if (observer && typeof observer === 'function') {
-        // force observation handler to be fired for item if there are changes and `Object.observe` is not available
-        observer.deliver()
-      }
-
-      let ignoredChanges = _options.ignoredChanges || []
-      // add linked relations to list of ignored changes
-      DSUtils.forEach(definition.relationFields, function (field) {
-        if (!DSUtils.contains(ignoredChanges, field)) {
-          ignoredChanges.push(field)
-        }
-      })
-      // calculate changes
-      let diff = DSUtils.diffObjectFromOldObject(item, _this.store[_resourceName].previousAttributes[_id], DSUtils.equals, ignoredChanges)
-      // remove functions from diff
-      DSUtils.forOwn(diff, function (changeset, name) {
-        let toKeep = []
-        DSUtils.forOwn(changeset, function (value, field) {
-          if (!DSUtils.isFunction(value)) {
-            toKeep.push(field)
-          }
-        })
-        diff[name] = DSUtils.pick(diff[name], toKeep)
-      })
-      // definitely ignore changes to linked relations
-      DSUtils.forEach(definition.relationFields, function (field) {
-        delete diff.added[field]
-        delete diff.removed[field]
-        delete diff.changed[field]
-      })
-      return diff
-    }
-  },
-
   // Return the change history of the given item, if any.
   //
   // @param resourceName The name of the type of resource of the item whose change history is to be returned.
@@ -99,23 +52,6 @@ export default {
         return resource.changeHistory
       }
     }
-  },
-
-  commit (resourceName, id) {
-    let {_this, definition, _resourceName, _id} = check.call(this, 'commit', resourceName, id)
-    let resource = _this.store[_resourceName]
-    let item = _this.store[_resourceName].index[_id]
-    if (item) {
-      resource.previousAttributes[_id] = DSUtils.copy(item, null, null, null, definition.relationFields)
-    }
-
-    if (resource.changeHistories[_id].length) {
-      DSUtils.forEach(resource.changeHistories[_id], function (changeRecord) {
-        DSUtils.remove(resource.changeHistory, changeRecord)
-      })
-      resource.changeHistories[_id].splice(0, resource.changeHistories[_id].length)
-    }
-    return item
   },
 
   // Re-compute the computed properties of the given item.
@@ -143,56 +79,6 @@ export default {
       DSUtils.compute.call(instance, fn, field)
     })
     return instance
-  },
-
-  // Factory function to create an instance of the specified Resource.
-  //
-  // @param resourceName The name of the type of resource of which to create an instance.
-  // @param attrs Hash of properties with which to initialize the instance.
-  // @param options Optional configuration.
-  // @param options.defaults Default values with which to initialize the instance.
-  // @returns The new instance.
-  createInstance (resourceName, attrs, options) {
-    let definition = this.definitions[resourceName]
-    let item
-
-    attrs = attrs || {}
-
-    if (!definition) {
-      throw new NER(resourceName)
-    } else if (attrs && !DSUtils.isObject(attrs)) {
-      throw new IA('"attrs" must be an object!')
-    }
-
-    options = DSUtils._(definition, options)
-    options.logFn('createInstance', attrs, options)
-
-    // lifecycle
-    options.beforeCreateInstance(options, attrs)
-
-    // grab instance constructor function from Resource definition
-    let Constructor = definition[definition.class]
-
-    // create instance
-    item = new Constructor()
-
-    if (definition.instanceEvents) {
-      DSUtils.Events(item)
-    }
-
-    // add default values
-    if (options.defaultValues) {
-      DSUtils.deepMixIn(item, options.defaultValues)
-    }
-    DSUtils.deepMixIn(item, attrs)
-
-    // compute computed properties
-    if (definition.computed) {
-      definition.compute(item)
-    }
-    // lifecycle
-    options.afterCreateInstance(options, item)
-    return item
   },
 
   // Create a new collection of the specified Resource.
@@ -263,72 +149,6 @@ export default {
     return arr
   },
   defineResource: require('./defineResource'),
-  digest () {
-    this.observe.Platform.performMicrotaskCheckpoint()
-  },
-  eject: require('./eject'),
-  ejectAll: require('./ejectAll'),
-  filter: require('./filter'),
-
-  // Return the item with the given primary key if its in the store.
-  //
-  // @param resourceName The name of the type of resource of the item to retrieve.
-  // @param id The primary key of the item to retrieve.
-  // @returns The item with the given primary key if it's in the store.
-  // /
-  get (resourceName, id) {
-    let {_this, _resourceName, _id} = check.call(this, 'get', resourceName, id)
-
-    // return the item if it exists
-    return _this.store[_resourceName].index[_id]
-  },
-
-  // Return the items in the store that have the given primary keys.
-  //
-  // @param resourceName The name of the type of resource of the items to retrieve.
-  // @param ids The primary keys of the items to retrieve.
-  // @returns The items with the given primary keys if they're in the store.
-  getAll (resourceName, ids) {
-    let _this = this
-    let definition = _this.definitions[resourceName]
-    let resource = _this.store[resourceName]
-    let collection = []
-
-    if (!definition) {
-      throw new NER(resourceName)
-    } else if (ids && !DSUtils._a(ids)) {
-      throw DSUtils._aErr('ids')
-    }
-
-    definition.logFn('getAll', ids)
-
-    if (DSUtils._a(ids)) {
-      // return just the items with the given primary keys
-      let length = ids.length
-      for (var i = 0; i < length; i++) {
-        if (resource.index[ids[i]]) {
-          collection.push(resource.index[ids[i]])
-        }
-      }
-    } else {
-      // most efficient of retrieving ALL items from the store
-      collection = resource.collection.slice()
-    }
-
-    return collection
-  },
-
-  // Return the whether the item with the given primary key has any changes.
-  //
-  // @param resourceName The name of the type of resource of the item.
-  // @param id The primary key of the item.
-  // @returns Whether the item with the given primary key has any changes.
-  hasChanges (resourceName, id) {
-    let {definition, _id} = check.call(this, 'hasChanges', resourceName, id)
-
-    return definition.get(_id) ? diffIsEmpty(definition.changes(_id)) : false
-  },
-  inject: require('./inject'),
 
   // Return the timestamp from the last time the item with the given primary key was changed.
   //
@@ -361,52 +181,5 @@ export default {
       resource.saved[_id] = 0
     }
     return resource.saved[_id]
-  },
-
-  // Return the previous attributes of the item with the given primary key before it was changed.
-  //
-  // @param resourceName The name of the type of resource of the item.
-  // @param id The primary key of the item.
-  // @returns The previous attributes of the item
-  previous (resourceName, id) {
-    let {_this, _resourceName, _id} = check.call(this, 'previous', resourceName, id)
-    let resource = _this.store[_resourceName]
-
-    // return resource from cache
-    return resource.previousAttributes[_id] ? DSUtils.copy(resource.previousAttributes[_id]) : undefined
-  },
-
-  // Revert all attributes of the item with the given primary key to their previous values.
-  //
-  // @param resourceName The name of the type of resource of the item.
-  // @param id The primary key of the item.
-  // @param options Optional configuration.
-  // @returns The reverted item
-  revert (resourceName, id, options) {
-    let {_this, definition, _resourceName, _id, _options} = check.call(this, 'revert', resourceName, id, options)
-
-    let preserve = _options.preserve || []
-    let injectObj = {}
-
-    if (preserve.length === 0) {
-      injectObj = _this.previous(_resourceName, _id)
-    } else {
-      let instance = definition.get(id)
-      let previousInstance = _this.previous(_resourceName, _id)
-
-      if (!instance) { return }
-
-      DSUtils.forOwn(instance, function (value, key) {
-        if (DSUtils.contains(preserve, key)) {
-          injectObj[key] = instance[key]
-        } else {
-          injectObj[key] = previousInstance[key]
-        }
-      })
-    }
-
-    return definition.inject(injectObj, {
-      onConflict: 'replace'
-    })
   }
 }
