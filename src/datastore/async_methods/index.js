@@ -1,10 +1,4 @@
 export default {
-  create: require('./create'),
-  destroy: require('./destroy'),
-  destroyAll: require('./destroyAll'),
-  find: require('./find'),
-  findAll: require('./findAll'),
-  loadRelations: require('./loadRelations'),
   reap: require('./reap'),
   refresh (resourceName, id, options) {
     let _this = this
@@ -54,8 +48,5 @@ export default {
         return found
       })
     }).catch(_this.errorFn('refreshAll', resourceName, params, options))
-  },
-  save: require('./save'),
-  update: require('./update'),
-  updateAll: require('./updateAll')
+  }
 }

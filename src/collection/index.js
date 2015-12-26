@@ -1,5 +1,5 @@
 import {Query} from './query'
-import {isArray, isFunction, isString, eventify, forOwn} from '../utils'
+import {isArray, isFunction, isString, eventify, forOwn, get} from '../utils'
 import {configure} from '../decorators'
 import {Index} from '../../lib/mindex'
 exports.Query = Query
@@ -20,11 +20,16 @@ export function Collection (data = [], idAttribute = 'id') {
    * @type {string}
    */
   this.idAttribute = idAttribute
+
   /**
    * The main index, which uses @{link Collection#idAttribute} as the key.
    * @type {Index}
    */
-  this.index = new Index([idAttribute], idAttribute)
+  this.index = new Index([idAttribute], {
+    hashCode (obj) {
+      return get(obj, idAttribute)
+    }
+  })
   /**
    * Object that holds the other secondary indexes of this collection.
    * @type {Object.<string, Index>}
@@ -69,7 +74,12 @@ configure({
     if (isString(name) && keyList === undefined) {
       keyList = [name]
     }
-    const index = this.indexes[name] = new Index(keyList, this.idAttribute)
+    const idAttribute = this.idAttribute
+    const index = this.indexes[name] = new Index(keyList, {
+      hashCode (obj) {
+        return get(obj, idAttribute)
+      }
+    })
     this.index.visitAll(index.insertRecord, index)
     return this
   },
@@ -126,8 +136,8 @@ configure({
    * @param {boolean} [opts.offset] - The number of resulting entities to skip.
    * @return {Array} The result.
    */
-  between (...args) {
-    return this.query().between(...args).run()
+  between (leftKeys, rightKeys, opts) {
+    return this.query().between(leftKeys, rightKeys, opts).run()
   },
 
   /**
@@ -168,8 +178,8 @@ configure({
    * query. If no index is specified, the main index is used.
    * @return {Array} The result.
    */
-  get (...args) {
-    return this.query().get(...args).run()
+  get (keyList, opts) {
+    return this.query().get(keyList, opts).run()
   },
 
   /**
@@ -234,12 +244,12 @@ configure({
    * @instance
    * @param {(Object|Function)} [queryOrFn={}] - Selection query or filter
    * function.
-   * @param {Function} [thisArg] - Context to which to bind `queryOrFn` if
+   * @param {Object} [thisArg] - Context to which to bind `queryOrFn` if
    * `queryOrFn` is a function.
    * @return {Array} The result.
    */
-  filter (opts) {
-    return this.query().filter(opts).run()
+  filter (query, thisArg) {
+    return this.query().filter(query, thisArg).run()
   },
 
   /**
