@@ -266,7 +266,7 @@ module.exports = function defineResource (definition) {
       changeHistories: {},
       changeHistory: [],
       collectionModified: 0,
-      temporaryItems: []
+      temporaryItems: {}
     }
 
     let resource = _this.store[def.name]

@@ -339,7 +339,7 @@ export default {
     let {_this, _resourceName, _id} = check.call(this, 'isNew', resourceName, id || fakeId)
     let resource = _this.store[_resourceName]
 
-    return DSUtils.contains(resource.temporaryItems, _id);
+    return !!resource.temporaryItems[_id]
   },
 
   // Return the timestamp from the last time the item with the given primary key was changed.

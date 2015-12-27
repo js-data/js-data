@@ -196,10 +196,8 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
       let first = true
       let keep = true
 
-      if (options.excludeTemporary) {
-        if (DSUtils.contains(resource.temporaryItems, attrs[idA])) {
-          return false
-        }
+      if (options.excludeTemporary && resource.temporaryItems[attrs[idA]]) {
+        return false
       }
 
       DSUtils.forOwn(where, function (clause, field) {
@@ -273,7 +271,7 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
     })
   } else if (options.excludeTemporary) {
     filtered = DSUtils.filter(filtered, function (attrs) {
-      return !DSUtils.contains(resource.temporaryItems, attrs[idA])
+      return resource.temporaryItems[attrs[idA]]
     })
   }
 
