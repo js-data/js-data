@@ -1,9 +1,9 @@
 /* global JSData:true */
-import * as collection from './collection'
-import * as datastore from './datastore'
-import * as decorators from './decorators'
-import * as model from './model'
-import * as utils from './utils'
+import * as collection from './collection/index'
+import * as datastore from './datastore/index'
+import * as decorators from './decorators/index'
+import * as model from './model/index'
+import * as utils from './utils/index'
 import {assert} from 'chai'
 
 assert.objectsEqual = function (a, b, msg) {

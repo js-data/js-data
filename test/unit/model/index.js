@@ -14,6 +14,7 @@ import * as staticFindAll from './static.findAll.test'
 import * as staticGet from './static.get.test'
 import * as staticGetAll from './static.getAll.test'
 import * as staticInject from './static.inject.test'
+import * as revert from './revert.test'
 import * as save from './save.test'
 import * as staticUpdate from './static.update.test'
 import * as staticUpdateMany from './static.updateMany.test'
@@ -188,6 +189,42 @@ export function init () {
       assert.isTrue(listener.calledOnce)
     })
 
+    it('should work with csp set to true', function () {
+      const User = Model.extend({}, {
+        csp: true,
+        name: 'user'
+      })
+      const user = new User({ name: 'John' })
+      assert.isTrue(user instanceof User)
+      assert.equal(User.name, '')
+
+      assert.equal(this.Post.name, 'Post')
+    })
+
+    it('should allow enhanced relation getters', function () {
+      let wasItActivated = false
+      class Foo extends Model {}
+      class Bar extends Model {}
+      Foo.belongsTo(Bar, {
+        localField: 'bar',
+        localKey: 'barId',
+        get: function (Foo, relation, foo, orig) {
+          // "relation.name" has relationship "relation.type" to "relation.relation"
+          wasItActivated = true
+          return orig()
+        }
+      })
+      const foo = Foo.inject({
+        id: 1,
+        barId: 1,
+        bar: {
+          id: 1
+        }
+      })
+      assert.equal(foo.bar.id, 1)
+      assert.isTrue(wasItActivated)
+    })
+
     create.init()
     staticCreate.init()
     staticCreateInstance.init()
@@ -202,6 +239,7 @@ export function init () {
     staticGet.init()
     staticGetAll.init()
     staticInject.init()
+    revert.init()
     save.init()
     staticUpdate.init()
     staticUpdateMany.init()

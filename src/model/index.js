@@ -1,4 +1,5 @@
-import * as utils from '../utils'
+/** global babelHelpers */
+import * as utils from '../utils.js'
 import {
   belongsTo,
   configure,
@@ -6,9 +7,9 @@ import {
   hasOne,
   setSchema,
   registerAdapter
-} from '../decorators'
-import {Collection} from '../collection'
-import * as validate from '../validate'
+} from '../decorators/index.js'
+import {Collection} from '../collection/index.js'
+import * as validate from '../validate/index.js'
 
 const {
   resolve
@@ -65,8 +66,8 @@ export class Model extends BaseModel {
         }
       },
       _set: {
-        value (key, value, opty) {
-          return utils.set(_props, key, value, opts)
+        value (key, value) {
+          return utils.set(_props, key, value)
         }
       },
       _unset: {
@@ -181,7 +182,7 @@ export class Model extends BaseModel {
 
   commit () {
     this._unset('changed')
-    this.set('changes', {})
+    this._set('changes', {})
     this._set('previous', utils.copy(this))
     return this
   }
@@ -1078,8 +1079,8 @@ export class Model extends BaseModel {
       }
       if (classProps.csp) {
         Child = function (...args) {
-          __callCheck__(this, Child)
-          const _this = __possibleConstructorReturn__(this, Object.getPrototypeOf(Child).apply(this, args))
+          babelHelpers.classCallCheck(this, Child)
+          const _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Child).apply(this, args))
           if (initialize) {
             initialize.apply(this, args)
           }
@@ -1089,13 +1090,13 @@ export class Model extends BaseModel {
         const name = utils.pascalCase(classProps.name)
         const func = `return function ${name}() {
                         __callCheck__(this, ${name})
-                        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(${name}).apply(this, arguments));
+                        var _this = __possibleConstructorReturn__(this, Object.getPrototypeOf(${name}).apply(this, arguments));
                         if (initialize) {
                           initialize.apply(this, arguments)
                         }
                         return _this
                       }`
-        Child = new Function('__callCheck__', '__possibleConstructorReturn__', 'Parent', 'initialize', func)(__callCheck__, __possibleConstructorReturn__, Parent, initialize) // eslint-disable-line
+        Child = new Function('__callCheck__', '__possibleConstructorReturn__', 'Parent', 'initialize', func)(babelHelpers.classCallCheck, babelHelpers.possibleConstructorReturn, Parent, initialize) // eslint-disable-line
       }
     }
 
@@ -1105,7 +1106,7 @@ export class Model extends BaseModel {
     const _schema = classProps.schema
     delete classProps.schema
 
-    __inherits__(Child, Parent)
+    babelHelpers.inherits(Child, Parent)
 
     configure(props)(Child.prototype)
     configure(classProps)(Child)

@@ -1,9 +1,9 @@
 import {
   forOwn,
   get
-} from '../utils'
-import {validate} from '../validate'
-import {configure} from './configure'
+} from '../utils.js'
+import {validate} from '../validate/index.js'
+import {configure} from './configure.js'
 
 const op = 'setSchema'
 

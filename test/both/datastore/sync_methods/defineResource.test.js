@@ -261,46 +261,4 @@ describe('DS#defineResource', function () {
     // clean up
     newStore.constructor.prototype.createInstance = orig;
   });
-  it('should allow enhanced relation getters', function () {
-    var wasItActivated = false;
-    var Foo = store.defineResource({
-      name: 'foo',
-      relations: {
-        belongsTo: {
-          bar: {
-            localField: 'bar',
-            localKey: 'barId',
-            get: function (Foo, relation, foo, orig) {
-              // "relation.name" has relationship "relation.type" to "relation.relation"
-              wasItActivated = true;
-              return orig();
-            }
-          }
-        }
-      }
-    });
-    store.defineResource('bar');
-    var foo = Foo.inject({
-      id: 1,
-      barId: 1,
-      bar: {
-        id: 1
-      }
-    });
-    assert.equal(foo.bar.id, 1);
-    assert.isTrue(wasItActivated);
-  });
-  it('should work with csp set to true', function () {
-    var store = new JSData.DS({
-      csp: true
-    });
-    var User = store.defineResource({
-      name: 'user'
-    });
-    var user = User.createInstance({ name: 'John' });
-    assert.isTrue(user instanceof User[User.class]);
-    assert.equal(User[User.class].name, '');
-
-    assert.equal(Post[Post.class].name, 'Post');
-  });
 });
