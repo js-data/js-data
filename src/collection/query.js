@@ -1,4 +1,5 @@
 import {
+  fillIn,
   forOwn,
   get,
   intersection,
@@ -7,8 +8,7 @@ import {
   isNumber,
   isObject,
   isString
-} from '../utils'
-import {configure} from '../decorators'
+} from '../utils.js'
 
 /**
  * A class used by the @{link Collection} class to build queries to be executed
@@ -127,7 +127,7 @@ function evaluate (value, op, predicate) {
   }
 }
 
-configure({
+fillIn(Query.prototype, {
   /**
    * Return the current data result of this query.
    * @memberof Query
@@ -498,4 +498,4 @@ configure({
     this.data = null
     return data
   }
-})(Query.prototype)
+})

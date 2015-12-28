@@ -57,13 +57,13 @@ if (!Promise.prototype.spread) {
   }
 }
 
-export * from './collection'
-export * from './datastore'
+export * from './collection/index.js'
+export * from './datastore/index.js'
 
-export * from './decorators'
-export * from './model'
-export * from './validate'
-import * as _utils from './utils'
+export * from './decorators/index.js'
+export * from './model/index.js'
+export * from './validate/index.js'
+import * as _utils from './utils.js'
 export const utils = _utils
 
 export const version = {

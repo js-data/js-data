@@ -1,4 +1,4 @@
-/* global Model:true */
+/* global Model */
 import {assert} from 'chai'
 
 export function init () {
@@ -39,6 +39,21 @@ export function init () {
       assert.deepEqual(User.getAll(1, 2, 3, 4, 5), [user1, user2, user3, user4, user5], 'should get the users by primary key')
       assert.deepEqual(User.getAll(5), [user5], 'should get the users by primary key')
       assert.deepEqual(User.getAll(), [user1, user2, user3, user4, user5], 'should get the users by primary key')
+    })
+    it('should return an array of all items in the store', function () {
+      assert.isArray(this.Post.getAll(), 'should be an array')
+      assert.equal(this.Post.getAll().length, 0, 'should be an empty array')
+      this.Post.inject(this.data.p1)
+      this.Post.inject(this.data.p2)
+      this.Post.inject(this.data.p3)
+      assert.isArray(this.Post.getAll(), 'should be an array')
+      assert.equal(this.Post.getAll().length, 3, 'should be an array of length 3')
+      assert.deepEqual(this.Post.getAll(), this.Post.filter())
+    })
+    it('should return results that match a set of ids', function () {
+      this.Post.inject([this.data.p1, this.data.p2, this.data.p3])
+      const posts = this.Post.getAll(5, 7)
+      assert.objectsEqual(posts, [this.data.p1, this.data.p3])
     })
   })
 }

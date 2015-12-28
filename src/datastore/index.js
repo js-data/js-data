@@ -1,7 +1,6 @@
 /* jshint eqeqeq:false */
-import {configure} from '../decorators'
-import {forOwn, isFunction} from '../utils'
-import {Model} from '../model'
+import {fillIn, forOwn, isFunction} from '../utils.js'
+import {Model} from '../model/index.js'
 
 // function lifecycleNoopCb (resource, attrs, cb) {
 //   cb(null, attrs)
@@ -190,7 +189,7 @@ export function DS (opts) {
   this.definitions = {}
 }
 
-configure({
+fillIn(DS.prototype, {
   clear () {
     const ejected = {}
     forOwn(this.definitions, definition => {
@@ -205,7 +204,7 @@ configure({
     this.definitions[Child.name] = Child
     return Child
   }
-})(DS.prototype)
+})
 
 DS.prototype.defineResource = DS.prototype.defineModel
 

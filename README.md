@@ -68,9 +68,6 @@ async function showExample() {
   @registerAdapter('http', new DSHttpAdapter(), { default: true })
   class User extends Model {}
 
-  // Allow "User" to store data
-  User.initialize()
-
   let user = await User.find(1)
 
   console.log(user) // { id: 1, name: 'John' }
@@ -113,10 +110,7 @@ function* showExample() {
   class User extends Model {}
 
   // "User" will use an http adapter by default
-  User.setAdapter('http', new DSHttpAdapter(), { default: true })
-
-  // Allow "User" to store data
-  User.initialize()
+  User.registerAdapter('http', new DSHttpAdapter(), { default: true })
 
   let user = yield User.find(1)
 
@@ -261,7 +255,7 @@ issue and the fix
 the first place
 1. Fork js-data
 1. `git clone git@github.com:<you>/js-data.git`
-1. `cd js-data; npm install; bower install;`
+1. `cd js-data; npm install;`
 1. Write your code, including relevant documentation and tests
 1. Run `npm test` (build and test)
 1. Your code will be linted and checked for formatting, the tests will be run

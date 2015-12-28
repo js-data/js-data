@@ -1,9 +1,6 @@
-export * from './belongsTo'
-export * from './configure'
-export * from './hasMany'
-export * from './hasOne'
-export * from './schema'
-export * from './adapter'
-
-// Workaround for https://github.com/babel/babel/issues/2763
-export const DECORATORS = 'FIXME'
+export * from './belongsTo.js'
+export * from './configure.js'
+export * from './hasMany.js'
+export * from './hasOne.js'
+export * from './schema.js'
+export * from './adapter.js'

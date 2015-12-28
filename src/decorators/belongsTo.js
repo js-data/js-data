@@ -1,4 +1,4 @@
-import {get, set} from '../utils'
+import {get, set} from '../utils.js'
 
 const op = 'belongsTo'
 
@@ -44,6 +44,9 @@ function applyBelongsTo (Model, Relation, opts) {
     }
   }
 
+  const originalGet = descriptor.get
+  const originalSet = descriptor.set
+
   // Check whether the relation shouldn't actually be linked via a getter
   if (opts.link === false || (opts.link === undefined && !Model.linkRelations)) {
     delete descriptor.get
@@ -53,7 +56,6 @@ function applyBelongsTo (Model, Relation, opts) {
 
   // Check for user-defined getter
   if (opts.get) {
-    const originalGet = descriptor.get
     // Set user-defined getter
     descriptor.get = function () {
       // Call user-defined getter, passing in:
@@ -63,11 +65,11 @@ function applyBelongsTo (Model, Relation, opts) {
       //  - the original getter function, in case the user wants to use it
       return opts.get(Model, Relation, this, originalGet ? (...args) => originalGet.apply(this, args) : undefined)
     }
+    delete descriptor.writable
   }
 
   // Check for user-defined setter
   if (opts.set) {
-    const originalSet = descriptor.set
     // Set user-defined setter
     descriptor.set = function (parent) {
       // Call user-defined getter, passing in:
@@ -78,6 +80,11 @@ function applyBelongsTo (Model, Relation, opts) {
       //  - the original setter function, in case the user wants to use it
       return opts.set(Model, Relation, this, parent, originalSet ? (...args) => originalSet.apply(this, args) : undefined)
     }
+    delete descriptor.writable
+  }
+
+  if (descriptor.get) {
+    descriptor.set || (descriptor.set = function () {})
   }
 
   // Finally, added property to prototype of target Model
@@ -125,7 +132,7 @@ function applyBelongsTo (Model, Relation, opts) {
  * @return {Function} Invocation function, which accepts the target as the only
  * parameter.
  */
-exports.belongsTo = function (Model, opts) {
+export function belongsTo (Model, opts) {
   return function (target) {
     target.dbg(op, 'Model:', Model, 'opts:', opts)
     return applyBelongsTo(target, Model, opts)
