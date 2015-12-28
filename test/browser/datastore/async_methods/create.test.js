@@ -270,4 +270,28 @@ describe('DS#create', function () {
       assert.deepEqual(JSON.stringify(Foo.get(1)), JSON.stringify({ first: 'John', last: 'Anderson', id: 1, fullName: 'John Anderson' }));
     });
   });
+  it('should create an temporary item with guid', function () {
+    var Foo = store.defineResource({
+      name: 'foo',
+      idAttribute: 'foo_id'
+    });
+
+    var _this = this;
+    var foo = Foo.inject({bar: 'bar'}, {temporary: true});
+    var data = JSON.stringify(foo);
+
+    setTimeout(function () {
+      assert.equal(1, _this.requests.length);
+      assert.equal(_this.requests[0].url, 'http://test.js-data.io/foo');
+      assert.equal(_this.requests[0].method, 'POST');
+      assert.equal(_this.requests[0].requestBody, data);
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({ name: 'foo', foo_id: 2 }));
+    }, 100);
+
+    return Foo.create(foo).then(function (f) {
+      assert.deepEqual(JSON.stringify(f), JSON.stringify({ name: 'foo', foo_id: 2 }), 'foo 1 should have been created');
+      assert.deepEqual(JSON.stringify(Foo.get(2)), JSON.stringify({ name: 'foo', foo_id: 2}));
+      assert(Foo.get(foo.foo_id) == null, 'Temporary ID should have been overwritten');
+    });
+  });
 });
