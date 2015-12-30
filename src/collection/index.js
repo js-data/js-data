@@ -1,2 +1,2 @@
-export * from './collection.js'
-export * from './query.js'
+export * from './collection'
+export * from './query'

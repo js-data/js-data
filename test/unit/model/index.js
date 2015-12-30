@@ -1,5 +1,7 @@
 /* global JSData:true, Model:true, configure:true, sinon:true */
 import {assert} from 'chai'
+import * as staticChanges from './static.changes.test'
+import * as changes from './changes.test'
 import * as create from './create.test'
 import * as staticCreate from './static.create.test'
 import * as staticCreateInstance from './static.createInstance.test'
@@ -12,14 +14,19 @@ import * as staticEjectAll from './static.ejectAll.test'
 import * as staticFind from './static.find.test'
 import * as staticFindAll from './static.findAll.test'
 import * as staticGet from './static.get.test'
+import * as get from './get.test'
 import * as staticGetAll from './static.getAll.test'
+import * as staticHasChanges from './static.hasChanges.test'
+import * as hasChanges from './hasChanges.test'
 import * as staticInject from './static.inject.test'
 import * as revert from './revert.test'
 import * as save from './save.test'
+import * as set from './set.test'
 import * as staticUpdate from './static.update.test'
 import * as staticUpdateMany from './static.updateMany.test'
 import * as staticUpdateAll from './static.updateAll.test'
 import * as toJSON from './toJSON.test'
+import * as unset from './unset.test'
 
 let isBrowser = false
 
@@ -225,6 +232,8 @@ export function init () {
       assert.isTrue(wasItActivated)
     })
 
+    staticChanges.init()
+    changes.init()
     create.init()
     staticCreate.init()
     staticCreateInstance.init()
@@ -237,13 +246,18 @@ export function init () {
     staticFind.init()
     staticFindAll.init()
     staticGet.init()
+    get.init()
     staticGetAll.init()
+    staticHasChanges.init()
+    hasChanges.init()
     staticInject.init()
     revert.init()
     save.init()
+    set.init()
     staticUpdate.init()
     staticUpdateMany.init()
     staticUpdateAll.init()
     toJSON.init()
+    unset.init()
   })
 }

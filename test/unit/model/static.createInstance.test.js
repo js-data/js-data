@@ -54,12 +54,12 @@ export function init () {
       assert.equal(cat.say(), 'meow')
       assert.equal(cat2.say(), 'meow')
 
-      assert.deepEqual(JSON.stringify(person), JSON.stringify({
+      assert.objectsEqual(person, {
         first: 'John',
         last: 'Anderson'
-      }))
-      assert.deepEqual(JSON.stringify(dog), JSON.stringify(dogAttrs))
-      assert.deepEqual(JSON.stringify(cat), JSON.stringify({}))
+      })
+      assert.objectsEqual(dog, dogAttrs)
+      assert.objectsEqual(cat, {})
 
       assert.isTrue(person instanceof Person)
       assert.isTrue(person2 instanceof Person)

@@ -1,3 +1,12 @@
+##### 3.0.0-alpha.3 - 19 December 2015
+
+- Implemented more methods from 2.x.
+- Better compatibility for the classes exposed by js-data.
+- Switched from Webpack to Rollup for a 7% smaller build
+(automatic tree-shaking) and built code that's simpler and easier to read.
+
+##### 3.0.0-alpha.2 - 22 December 2015
+
 ##### 3.0.0-alpha.1 - 12 December 2015
 
 ###### Breaking API changes

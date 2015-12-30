@@ -102,6 +102,7 @@ export function unset (object, prop) {
     if (object == null) return
   }
 
+  object[last] = undefined
   delete object[last]
 }
 function mkdirP (object, path) {
@@ -469,4 +470,27 @@ export function uuid (a, b) {
     '-' //  in other cases (if "a" is 9,14,19,24) insert "-"
   );
   return b
+}
+
+export function classCallCheck (instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError('Cannot call a class as a function');
+  }
+}
+
+export function possibleConstructorReturn (self, call) {
+  if (!self) {
+    throw new ReferenceError('this hasn\'t been initialised - super() hasn\'t been called')
+  }
+
+  return call && (typeof call === 'object' || typeof call === 'function') ? call : self
+}
+
+export function addHiddenPropsToTarget (target, props) {
+  forOwn(props, function (value, key) {
+    props[key] = {
+      value
+    }
+  })
+  Object.defineProperties(target, props)
 }

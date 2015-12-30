@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "3.0.0-alpha.2",
+  "version": "3.0.0-alpha.3",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -62,10 +62,10 @@
     "ci": "npm test && cat coverage/lcov.info | coveralls || true && cat ./coverage/lcov.info | codacy-coverage || true"
   },
   "devDependencies": {
-    "babel-core": "6.3.21",
+    "babel-core": "6.3.26",
     "babel-eslint": "4.1.6",
     "babel-plugin-syntax-async-functions": "6.3.13",
-    "babel-plugin-transform-regenerator": "6.3.18",
+    "babel-plugin-transform-regenerator": "6.3.26",
     "babel-polyfill": "6.3.14",
     "babel-preset-es2015-rollup": "1.0.0",
     "babel-preset-stage-0": "6.3.13",

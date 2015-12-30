@@ -1,6 +1,11 @@
 /* jshint eqeqeq:false */
-import {fillIn, forOwn, isFunction} from '../utils.js'
-import {Model} from '../model/index.js'
+import {
+  addHiddenPropsToTarget,
+  classCallCheck,
+  forOwn,
+  isFunction
+} from '../utils'
+import {Model} from '../model/index'
 
 // function lifecycleNoopCb (resource, attrs, cb) {
 //   cb(null, attrs)
@@ -185,11 +190,12 @@ import {Model} from '../model/index.js'
 // dsPrototype.utils = DSUtils
 
 export function DS (opts) {
+  classCallCheck(this, DS)
   opts || (opts = {})
   this.definitions = {}
 }
 
-fillIn(DS.prototype, {
+addHiddenPropsToTarget(DS.prototype, {
   clear () {
     const ejected = {}
     forOwn(this.definitions, definition => {

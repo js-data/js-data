@@ -1,5 +1,6 @@
 import {
-  fillIn,
+  addHiddenPropsToTarget,
+  classCallCheck,
   forOwn,
   get,
   intersection,
@@ -8,7 +9,7 @@ import {
   isNumber,
   isObject,
   isString
-} from '../utils.js'
+} from '../utils'
 
 /**
  * A class used by the @{link Collection} class to build queries to be executed
@@ -18,6 +19,8 @@ import {
  * @param {Collection} collection - The collection on which this query operates.
  */
 export function Query (collection) {
+  classCallCheck(this, Query)
+
   /**
    * The collection on which this query operates.
    * @type {Collection}
@@ -127,7 +130,7 @@ function evaluate (value, op, predicate) {
   }
 }
 
-fillIn(Query.prototype, {
+addHiddenPropsToTarget(Query.prototype, {
   /**
    * Return the current data result of this query.
    * @memberof Query

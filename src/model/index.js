@@ -1,5 +1,4 @@
-/** global babelHelpers */
-import * as utils from '../utils.js'
+import * as utils from '../utils'
 import {
   belongsTo,
   configure,
@@ -7,13 +6,21 @@ import {
   hasOne,
   setSchema,
   registerAdapter
-} from '../decorators/index.js'
-import {Collection} from '../collection/index.js'
-import * as validate from '../validate/index.js'
+} from '../decorators/index'
+import {Collection} from '../collection/index'
+import * as validate from '../validate/index'
 
 const {
   resolve
 } = utils
+const keysToSkip = {
+  length: 1,
+  name: 1,
+  arguments: 1,
+  prototype: 1,
+  caller: 1,
+  __super__: 1
+}
 
 let isBrowser = false
 
@@ -36,13 +43,6 @@ const handleResponse = function handleResponse (model, data, opts, adapterName) 
 }
 
 /**
- * This is here so Babel will give us the inheritance helpers which we can
- * re-use for the "extend" method.
- * @ignore
- */
-class BaseModel {}
-
-/**
  * js-data's Model class.
  * @class Model
  * @example {@lang javascript}class User extends Model {}
@@ -53,43 +53,47 @@ class BaseModel {}
  * @param {boolean} [opts.noValidate=false] Whether to skip validation on the
  * initial properties.
  */
-export class Model extends BaseModel {
-  constructor (props, opts) {
-    super()
-    props || (props = {})
-    opts || (opts = {})
-    const _props = {}
-    Object.defineProperties(this, {
-      _get: {
-        value (key) {
-          return utils.get(_props, key)
-        }
-      },
-      _set: {
-        value (key, value) {
-          return utils.set(_props, key, value)
-        }
-      },
-      _unset: {
-        value (key) {
-          return utils.unset(_props, key)
-        }
+export function Model (props, opts) {
+  utils.classCallCheck(this, Model)
+  props || (props = {})
+  opts || (opts = {})
+  const _props = {}
+  Object.defineProperties(this, {
+    _get: {
+      value (key) {
+        return utils.get(_props, key)
       }
-    })
-    this._set('creating', true)
-    if (opts.noValidate) {
-      this._set('noValidate', true)
+    },
+    _set: {
+      value (key, value) {
+        return utils.set(_props, key, value)
+      }
+    },
+    _unset: {
+      value (key) {
+        return utils.unset(_props, key)
+      }
     }
-    utils.fillIn(this, props)
-    this._unset('creating')
-    this._unset('noValidate')
-    this._set('previous', utils.copy(props))
+  })
+  this._set('creating', true)
+  if (opts.noValidate) {
+    this._set('noValidate', true)
   }
+  utils.fillIn(this, props)
+  this._unset('creating')
+  this._set('changes', {})
+  this._unset('noValidate')
+  this._set('previous', utils.copy(props))
+}
 
+/**
+ * Instance members
+ */
+utils.addHiddenPropsToTarget(Model.prototype, {
   schema (key) {
     let _schema = this.constructor.schema
     return key ? _schema[key] : _schema
-  }
+  },
 
   validate (obj, value) {
     let errors = []
@@ -107,14 +111,14 @@ export class Model extends BaseModel {
       })
     }
     return errors.length ? errors : undefined
-  }
+  },
 
   /**
    * @param {Object} [opts] Configuration options. @see {@link Model.create}.
    */
   create (opts) {
     return this.constructor.create(this, opts)
-  }
+  },
 
   save (opts) {
     // TODO: move actual save logic here
@@ -123,7 +127,7 @@ export class Model extends BaseModel {
     const adapterName = Ctor.getAdapterName(opts)
     return Ctor.getAdapter(adapterName)
       .update(Ctor, utils.get(this, Ctor.idAttribute), this, opts)
-  }
+  },
 
   /**
    * @param {Object} [opts] Configuration options. @see {@link Model.destroy}.
@@ -132,7 +136,7 @@ export class Model extends BaseModel {
     // TODO: move actual destroy logic here
     const Ctor = this.constructor
     return Ctor.destroy(utils.get(this, Ctor.idAttribute), opts)
-  }
+  },
 
   // TODO: move logic for single-item async operations onto the instance.
 
@@ -142,9 +146,9 @@ export class Model extends BaseModel {
    * @param {string} key - Path of value to retrieve.
    * @return {*} Value at path.
    */
-  ['get'] (key) {
+  get: function (key) {
     return utils.get(this, key)
-  }
+  },
 
   /**
    * Set the value for a given key, or the values for the given keys if "key" is
@@ -153,46 +157,72 @@ export class Model extends BaseModel {
    * @param {(string|Object)} key - Key to set or hash of key-value pairs to set.
    * @param {*} [value] - Value to set for the given key.
    * @param {Object} [opts] - Optional configuration.
-   * - boolean [silent=false] - Whether to trigger change events.
+   * @param {boolean} [opts.silent=false] - Whether to trigger change events.
    */
-  ['set'] (key, value, opts) {
+  set: function (key, value, opts) {
+    if (utils.isObject(key)) {
+      opts = value
+    }
     opts || (opts = {})
-    // TODO: implement "silent"
-    return utils.set(this, key, value)
-  }
+    if (opts.silent) {
+      this._set('silent', true)
+    }
+    utils.set(this, key, value)
+    if (!this._get('eventId')) {
+      this._unset('silent')
+    }
+  },
+
+  /**
+   * Unset the value for a given key.
+   *
+   * @param {string} key - Key to unset.
+   * @param {Object} [opts] - Optional configuration.
+   * @param {boolean} [opts.silent=false] - Whether to trigger change events.
+   */
+  unset (key, opts) {
+    opts || (opts = {})
+    if (opts.silent) {
+      this._set('silent', true)
+    }
+    utils.unset(this, key)
+    if (!this._get('eventId')) {
+      this._unset('silent')
+    }
+  },
 
   hashCode () {
     return utils.get(this, this.constructor.idAttribute)
-  }
+  },
 
   changes (key) {
     if (key) {
       return this._get(`changes.${key}`)
     }
     return this._get('changes')
-  }
+  },
 
   changed () {
     return this._get('changed')
-  }
+  },
 
   hasChanges () {
     return !!(this._get('changed') || []).length
-  }
+  },
 
   commit () {
     this._unset('changed')
     this._set('changes', {})
     this._set('previous', utils.copy(this))
     return this
-  }
+  },
 
   previous (key) {
     if (key) {
       return this._get(`previous.${key}`)
     }
     return this._get('previous')
-  }
+  },
 
   revert (opts) {
     const previous = this._get('previous') || {}
@@ -210,7 +240,7 @@ export class Model extends BaseModel {
     })
     this.commit()
     return this
-  }
+  },
 
   /**
    * Return a plain object representation of this instance.
@@ -262,10 +292,167 @@ export class Model extends BaseModel {
     }
     return json
   }
+})
+
+/**
+ * Static members
+ */
+utils.fillIn(Model, {
+  /**
+   * Whether {@link Model.destroy} and {@link Model.destroyAll} should
+   * automatically eject the specified item(s) from the Model's collection on
+   * success.
+   *
+   * @memberof Model
+   * @type {boolean}
+   * @default true
+   */
+  autoEject: true,
 
   /**
-   * Static methods
+   * Whether {@link Model.create}, {@link Model.createMany},
+   * {@link Model.update}, {@link Model.updateAll}, and {@link Model.updateMany}
+   * should automatically inject the specified item(s) returned by the adapter
+   * into the the Model's collection on success.
+   *
+   * __Defaults to `true` in the Browser.__
+   *
+   * __Defaults to `false` in Node.js__
+   *
+   * @memberof Model
+   * @type {boolean}
    */
+  autoInject: isBrowser,
+  bypassCache: false,
+
+  /**
+   * Whether to disallow the use of `new Function` in {@link Model.extend}.
+   *
+   * You may set this to `true` if you so desire, but the class (constructor
+   * function) produced by {@link Model.extend} will not be a named function,
+   * which makes for slightly less debuggability.
+   *
+   * @memberof Model
+   * @type {boolean}
+   * @default false
+   */
+  csp: false,
+
+  /**
+   * The name of the registered adapter that should be used by default by any
+   * of the Model's static methods that use an adapter.
+   *
+   * @memberof Model
+   * @type {string}
+   * @default http
+   */
+  defaultAdapter: 'http',
+
+  /**
+   * Whether to enable debug-level logs.
+   *
+   * @memberof Model
+   * @type {boolean}
+   * @default false
+   */
+  debug: false,
+  eagerEject: false,
+
+  /**
+   * The field on instances of {@link Model} that should be used as the unique
+   * identifier for instances of the Model.
+   *
+   * @memberof Model
+   * @type {string}
+   * @default id
+   */
+  idAttribute: 'id',
+
+  /**
+   * Whether to add property accessors to the prototype of {@link Model} for
+   * each of the Model's relations. For each relation, the property accessor
+   * will be added as the field specified by the `localField` option of the
+   * relation definition. A relation property accessor returns related data by
+   * accessing the related Model. If the related Model's collection is empty,
+   * then the property accessors won't return anything.
+   *
+   * __Defaults to `true` in the Browser.__
+   *
+   * __Defaults to `false` in Node.js__
+   *
+   * @memberof Model
+   * @type {boolean}
+   */
+  linkRelations: isBrowser,
+
+  /**
+   * What to do when injecting an item into the Model's collection that shares a
+   * primary key with an item already in the Model's collection.
+   *
+   * Possible values:
+   * - merge
+   * - replace
+   *
+   * Merge:
+   *
+   * Recursively shallow copy properties from the new item onto the existing
+   * item.
+   *
+   * Replace:
+   *
+   * Shallow copy top-level properties from the new item onto the existing item.
+   * Any top-level own properties of the existing item that are _not_ on the new
+   * item will be removed.
+   *
+   * @memberof Model
+   * @type {string}
+   * @default merge
+   */
+  onConflict: 'merge',
+
+  /**
+   * Whether the relation property accessors should be enumerable. It's
+   * recommended that this stay false.
+   *
+   * @memberof Model
+   * @type {boolean}
+   * @default false
+   */
+  relationsEnumerable: false,
+
+  /**
+   * Whether {@link Model.create}, {@link Model.createMany},
+   * {@link Model.update}, {@link Model.updateAll}, {@link Model.updateMany},
+   * {@link Model.find}, {@link Model.findAll}, {@link Model.destroy}, and
+   * {@link Model.destroyAll} should return a raw result object that contains
+   * both the instance data returned by the adapter _and_ metadata about the
+   * operation.
+   *
+   * The default is to NOT return the result object, and instead return just the
+   * instance data.
+   *
+   * @memberof Model
+   * @type {boolean}
+   * @default false
+   */
+  raw: false,
+
+  /**
+   * Whether {@link Model.create}, {@link Model.createMany},
+   * {@link Model.update}, {@link Model.updateAll}, {@link Model.updateMany},
+   * {@link Model.find}, {@link Model.findAll}, {@link Model.destroy}, and
+   * {@link Model.destroyAll} should return a raw result object that contains
+   * both the instance data returned by the adapter _and_ metadata about the
+   * operation.
+   *
+   * The default is to NOT return the result object, and instead return just the
+   * instance data.
+   *
+   * @memberof Model
+   * @type {boolean}
+   * @default false
+   */
+  upsert: true,
 
   /**
    * Create a new secondary index in the Collection instance of this Model.
@@ -273,10 +460,10 @@ export class Model extends BaseModel {
    * @param {string} name - The name of the new secondary index
    * @param {string[]} keyList - The list of keys to be used to create the index.
    */
-  static createIndex (name, keyList) {
+  createIndex (name, keyList) {
     this.dbg('createIndex', 'name:', name, 'keyList:', keyList)
     this.collection.createIndex(name, keyList)
-  }
+  },
 
   /**
    * Create a new instance of this Model from the provided properties.
@@ -284,11 +471,11 @@ export class Model extends BaseModel {
    * @param {Object} props - The initial properties of the new instance.
    * @return {Model} The instance.
    */
-  static createInstance (props) {
+  createInstance (props) {
     let Ctor = this
     // Check to make sure "props" is not already an instance of this Model.
     return props instanceof Ctor ? props : new Ctor(props)
-  }
+  },
 
   /**
    * Check whether "instance" is actually an instance of this Model.
@@ -296,15 +483,39 @@ export class Model extends BaseModel {
    * @param {Model} The instance to check.
    * @return {boolean} Whether "instance" is an instance of this Model.
    */
-  static is (instance) {
+  is (instance) {
     return instance instanceof this
-  }
+  },
 
-  static getAutoPkItems () {
+  getAutoPkItems () {
     return this.getAll().filter(function (item) {
       return item._get('autoPk')
     })
-  }
+  },
+
+  changes (id, key) {
+    this.dbg('changes', 'id:', id)
+    const instance = this.get(id)
+    if (instance) {
+      return instance.changes(key)
+    }
+  },
+
+  changed (id) {
+    this.dbg('changed', 'id:', id)
+    const instance = this.get(id)
+    if (instance) {
+      return instance.changed()
+    }
+  },
+
+  hasChanges (id) {
+    this.dbg('hasChanges', 'id:', id)
+    const instance = this.get(id)
+    if (instance) {
+      return instance.hasChanges()
+    }
+  },
 
   /**
    * Insert the provided item or items into the Collection instance of this
@@ -322,7 +533,7 @@ export class Model extends BaseModel {
    * the Collection instance. Possible values are `merge` or `replace`.
    * @return {(Model|Model[])} The injected entity or entities.
    */
-  static inject (items, opts) {
+  inject (items, opts) {
     const _this = this
     const op = 'inject'
     _this.dbg(op, 'item(s):', items, 'opts:', opts)
@@ -336,6 +547,7 @@ export class Model extends BaseModel {
       items = [items]
       singular = true
     }
+    const timestamp = new Date().getTime()
     items = items.map(function (props) {
       let id = utils.get(props, idAttribute)
       let autoPk = false
@@ -423,16 +635,16 @@ export class Model extends BaseModel {
         collection.update(props)
       } else {
         props = _this.createInstance(props)
-        props._set('$', true)
         if (autoPk) {
           props._set('autoPk', autoPk)
         }
         collection.insert(props)
       }
+      props._set('$', timestamp)
       return props
     })
     return singular ? (items.length ? items[0] : undefined) : items
-  }
+  },
 
   /**
    * Remove the instance with the given primary key from the Collection instance
@@ -441,7 +653,7 @@ export class Model extends BaseModel {
    * @param {(string|number)} id - The primary key of the instance to be removed.
    * @return {Model} The removed item, if any.
    */
-  static eject (id, opts) {
+  eject (id, opts) {
     const op = 'eject'
     this.dbg(op, 'id:', id, 'opts:', opts)
     opts || (opts = {})
@@ -452,7 +664,7 @@ export class Model extends BaseModel {
       this.collection.remove(item)
     }
     return item
-  }
+  },
 
   /**
    * Remove the instances selected by "query" from the Collection instance of
@@ -461,7 +673,7 @@ export class Model extends BaseModel {
    * @param {Object} [query] - The query used to select instances to remove.
    * @return {Model[]} The removed instances, if any.
    */
-  static ejectAll (params, opts) {
+  ejectAll (params, opts) {
     const op = 'ejectAll'
     this.dbg(op, 'params:', params, 'opts:', opts)
     opts || (opts = {})
@@ -472,7 +684,7 @@ export class Model extends BaseModel {
       collection.remove(item)
     })
     return items
-  }
+  },
 
   /**
    * Return the instance in the Collection instance of this Model that has
@@ -481,41 +693,41 @@ export class Model extends BaseModel {
    * @param {(string|number)} id - Primary key of the instance to retrieve.
    * @return {Model} The instance or undefined.
    */
-  static get (id) {
+  get: function (id) {
     this.dbg('get', 'id:', id)
     const instances = this.collection.get(id)
     return instances.length ? instances[0] : undefined
-  }
+  },
 
   /**
    * Proxy for Collection#between
    */
-  static between (...args) {
+  between (...args) {
     return this.collection.between(...args)
-  }
+  },
 
   /**
    * Proxy for Collection#getAll
    */
-  static getAll (...args) {
+  getAll (...args) {
     return this.collection.getAll(...args)
-  }
+  },
 
   /**
    * Proxy for Collection#filter
    */
-  static filter (query, opts) {
+  filter (query, opts) {
     opts || (opts = {})
     return this.collection.filter(query, opts)
-  }
+  },
 
   /**
   * Proxy for `Model.collection.query()`.
    * @return {Query}
    */
-  static query () {
+  query () {
     return this.collection.query()
-  }
+  },
 
   /**
    * Return the registered adapter with the given name or the default adapter if
@@ -524,14 +736,14 @@ export class Model extends BaseModel {
    * @param {string} [name]- The name of the adapter to retrieve.
    * @return {Adapter} The adapter, if any.
    */
-  static getAdapter (name) {
+  getAdapter (name) {
     this.dbg('getAdapter', 'name:', name)
     const adapter = this.getAdapterName(name)
     if (!adapter) {
       throw new ReferenceError(`${adapter} not found!`)
     }
     return this.adapters[adapter]
-  }
+  },
 
   /**
    * Return the name of a registered adapter based on the given name or options,
@@ -540,13 +752,13 @@ export class Model extends BaseModel {
    * @param {Object} [opts] - The options, if any.
    * @return {string} The name of the adapter.
    */
-  static getAdapterName (opts) {
+  getAdapterName (opts) {
     opts || (opts = {})
     if (utils.isString(opts)) {
       opts = { adapter: opts }
     }
     return opts.adapter || opts.defaultAdapter
-  }
+  },
 
   /**
    * Lifecycle hook. Called by `Model.create` after `Model.create` checks
@@ -563,7 +775,7 @@ export class Model extends BaseModel {
    * @param {Object} props - Properties object that was passed to `Model.create`.
    * @param {Object} opts - Options object that was passed to `Model.create`.
    */
-  static beforeCreate () {}
+  beforeCreate () {},
 
   /**
    * The "C" in "CRUD", `Model.create` creates a single entity using the
@@ -592,7 +804,7 @@ export class Model extends BaseModel {
    * @return {Object} The created entity, or if `raw` is `true` then a result
    * object.
    */
-  static create (props, opts) {
+  create (props, opts) {
     const op = 'create'
     this.dbg(op, 'props:', props, 'opts:', opts)
     let adapterName
@@ -620,7 +832,7 @@ export class Model extends BaseModel {
             return handleResponse(this, data, opts, adapterName)
           })
       })
-  }
+  },
 
   /**
    * Lifecycle hook. Called by `Model.create` after `Model.create` call the
@@ -636,10 +848,10 @@ export class Model extends BaseModel {
    * @param {Object} data - Data object returned by the adapter's `create` method.
    * @param {Object} opts - Options object that was passed to `Model.create`.
    */
-  static afterCreate () {}
+  afterCreate () {},
 
-  static beforeCreateMany () {}
-  static createMany (items, opts) {
+  beforeCreateMany () {},
+  createMany (items, opts) {
     const op = 'createMany'
     this.dbg(op, 'items:', items, 'opts:', opts)
     let adapterName
@@ -676,11 +888,11 @@ export class Model extends BaseModel {
             return handleResponse(this, data, opts, adapterName)
           })
       })
-  }
-  static afterCreateMany () {}
+  },
+  afterCreateMany () {},
 
-  static beforeFind () {}
-  static find (id, opts) {
+  beforeFind () {},
+  find (id, opts) {
     const op = 'find'
     this.dbg(op, 'id:', id, 'opts:', opts)
     let adapterName
@@ -699,11 +911,11 @@ export class Model extends BaseModel {
         return resolve(this.afterFind(data, opts))
           .then(() => handleResponse(this, data, opts, adapterName))
       })
-  }
-  static afterFind () {}
+  },
+  afterFind () {},
 
-  static beforeFindAll () {}
-  static findAll (query, opts) {
+  beforeFindAll () {},
+  findAll (query, opts) {
     const op = 'findAll'
     this.dbg(op, 'query:', query, 'opts:', opts)
     let adapterName
@@ -723,11 +935,11 @@ export class Model extends BaseModel {
         return resolve(this.afterFindAll(data, opts))
           .then(() => handleResponse(this, data, opts, adapterName))
       })
-  }
-  static afterFindAll () {}
+  },
+  afterFindAll () {},
 
-  static beforeUpdate () {}
-  static update (id, props, opts) {
+  beforeUpdate () {},
+  update (id, props, opts) {
     const op = 'update'
     this.dbg(op, 'id:', id, 'props:', props, 'opts:', opts)
     let adapterName
@@ -747,11 +959,11 @@ export class Model extends BaseModel {
         return resolve(this.afterUpdate(id, data, opts))
           .then(() => handleResponse(this, data, opts, adapterName))
       })
-  }
-  static afterUpdate () {}
+  },
+  afterUpdate () {},
 
-  static beforeUpdateMany () {}
-  static updateMany (items, opts) {
+  beforeUpdateMany () {},
+  updateMany (items, opts) {
     const op = 'updateMany'
     this.dbg(op, 'items:', items, 'opts:', opts)
     let adapterName
@@ -771,17 +983,17 @@ export class Model extends BaseModel {
         return resolve(this.afterUpdateMany(data, opts))
           .then(() => handleResponse(this, data, opts, adapterName))
       })
-  }
-  static afterUpdateMany () {}
+  },
+  afterUpdateMany () {},
 
-  static beforeUpdateAll () {}
+  beforeUpdateAll () {},
   /**
    * @param {Object} query={} - Selection query.
    * @param {Object} props - Update to apply to selected entities.
    * @param {Object} [opts] - Configuration options.
    * @param {boolean} [opts.raw=false] TODO
    */
-  static updateAll (query, props, opts) {
+  updateAll (query, props, opts) {
     const op = 'updateAll'
     this.dbg(op, 'query:', query, 'props:', props, 'opts:', opts)
     let adapterName
@@ -802,17 +1014,17 @@ export class Model extends BaseModel {
         return resolve(this.afterUpdateAll(query, data, opts))
           .then(() => handleResponse(this, data, opts, adapterName))
       })
-  }
-  static afterUpdateAll () {}
+  },
+  afterUpdateAll () {},
 
-  static beforeDestroy () {}
+  beforeDestroy () {},
 
   /**
    * @param {(string|number)} id
    * @param {Object} [opts] - Configuration options.
    * @param {boolean} [opts.raw=false] TODO
    */
-  static destroy (id, opts) {
+  destroy (id, opts) {
     const op = 'destroy'
     this.dbg(op, 'id:', id, 'opts:', opts)
     let adapterName
@@ -842,11 +1054,11 @@ export class Model extends BaseModel {
             return data
           })
       })
-  }
-  static afterDestroy () {}
+  },
+  afterDestroy () {},
 
-  static beforeDestroyAll () {}
-  static destroyAll (query, opts) {
+  beforeDestroyAll () {},
+  destroyAll (query, opts) {
     const op = 'destroyAll'
     this.dbg(op, 'query:', query, 'opts:', opts)
     let adapterName
@@ -877,11 +1089,11 @@ export class Model extends BaseModel {
             return data
           })
       })
-  }
-  static afterDestroyAll () {}
+  },
+  afterDestroyAll () {},
 
-  static beforeLoadRelations () {}
-  static loadRelations (id, relations, opts) {
+  beforeLoadRelations () {},
+  loadRelations (id, relations, opts) {
     const _this = this
     let instance = _this.is(id) ? id : undefined
     id = instance ? utils.get(instance, _this.idAttribute) : id
@@ -945,10 +1157,10 @@ export class Model extends BaseModel {
         return resolve(this.afterLoadRelations(instance, relations, opts))
           .then(() => instance)
       })
-  }
-  static afterLoadRelations () {}
+  },
+  afterLoadRelations () {},
 
-  static log (level, ...args) {
+  log (level, ...args) {
     if (level && !args.length) {
       args.push(level)
       level = 'debug'
@@ -962,11 +1174,11 @@ export class Model extends BaseModel {
     } else {
       console.log(prefix, ...args)
     }
-  }
+  },
 
-  static dbg (...args) {
+  dbg (...args) {
     this.log('debug', ...args)
-  }
+  },
 
   /**
    * Usage:
@@ -980,9 +1192,9 @@ export class Model extends BaseModel {
    *   localField: '_post'
    * })
    */
-  static belongsTo (model, opts) {
+  belongsTo (model, opts) {
     return belongsTo(model, opts)(this)
-  }
+  },
 
   /**
    * Usage:
@@ -991,9 +1203,9 @@ export class Model extends BaseModel {
    *   localField: 'my_posts'
    * })
    */
-  static hasMany (model, opts) {
+  hasMany (model, opts) {
     return hasMany(model, opts)(this)
-  }
+  },
 
   /**
    * Usage:
@@ -1002,9 +1214,9 @@ export class Model extends BaseModel {
    *   localField: '_profile'
    * })
    */
-  static hasOne (model, opts) {
+  hasOne (model, opts) {
     return hasOne(model, opts)(this)
-  }
+  },
 
   /**
    * Invoke the {@link module:js-data.exports.setSchema setSchema} decorator on
@@ -1012,9 +1224,9 @@ export class Model extends BaseModel {
    * @param {Object} opts - Property configurations.
    * @return {Model} A reference to the Model for chaining.
    */
-  static setSchema (opts) {
+  setSchema (opts) {
     return setSchema(opts)(this)
-  }
+  },
 
   /**
    * Invoke the {@link module:js-data.exports.configure configure} decorator on
@@ -1022,9 +1234,9 @@ export class Model extends BaseModel {
    * @param {Object} opts - Configuration
    * @return {Model} A reference to the Model for chaining.
    */
-  static configure (opts) {
+  configure (opts) {
     return configure(opts)(this)
-  }
+  },
 
   /**
    * Invoke the {@link module:js-data.exports.registerAdapter registerAdapter}
@@ -1036,9 +1248,9 @@ export class Model extends BaseModel {
    * default for this Model.
    * @return {Model} A reference to the Model for chaining.
    */
-  static registerAdapter (name, adapter, opts) {
+  registerAdapter (name, adapter, opts) {
     return registerAdapter(name, adapter, opts)(this)
-  }
+  },
 
   /**
    * Extend this Model and return a new child Model. Static properties on this
@@ -1058,7 +1270,7 @@ export class Model extends BaseModel {
    * @param {Object} [classProps.schema] - Value to pass to the {@link Model.setSchema setSchema}
    * method of the class after the class is created.
    */
-  static extend (props, classProps) {
+  extend (props, classProps) {
     const Parent = this
     let Child
 
@@ -1079,24 +1291,27 @@ export class Model extends BaseModel {
       }
       if (classProps.csp) {
         Child = function (...args) {
-          babelHelpers.classCallCheck(this, Child)
-          const _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Child).apply(this, args))
+          utils.classCallCheck(this, Child)
+          const _this = utils.possibleConstructorReturn(this, (Child.__super__ || Object.getPrototypeOf(Child)).apply(this, args))
           if (initialize) {
-            initialize.apply(this, args)
+            initialize.apply(_this, args)
           }
           return _this
         }
       } else {
         const name = utils.pascalCase(classProps.name)
         const func = `return function ${name}() {
-                        __callCheck__(this, ${name})
-                        var _this = __possibleConstructorReturn__(this, Object.getPrototypeOf(${name}).apply(this, arguments));
+                        classCallCheck(this, ${name})
+                        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+                          args[_key] = arguments[_key];
+                        }
+                        var _this = possibleConstructorReturn(this, (${name}.__super__ || Object.getPrototypeOf(${name})).apply(this, args));
                         if (initialize) {
-                          initialize.apply(this, arguments)
+                          initialize.apply(_this, arguments)
                         }
                         return _this
                       }`
-        Child = new Function('__callCheck__', '__possibleConstructorReturn__', 'Parent', 'initialize', func)(babelHelpers.classCallCheck, babelHelpers.possibleConstructorReturn, Parent, initialize) // eslint-disable-line
+        Child = new Function('classCallCheck', 'possibleConstructorReturn', 'Parent', 'initialize', func)(utils.classCallCheck, utils.possibleConstructorReturn, Parent, initialize) // eslint-disable-line
       }
     }
 
@@ -1106,7 +1321,34 @@ export class Model extends BaseModel {
     const _schema = classProps.schema
     delete classProps.schema
 
-    babelHelpers.inherits(Child, Parent)
+    Child.prototype = Object.create(Parent && Parent.prototype, {
+      constructor: {
+        value: Child,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    })
+
+    if (Parent && classProps.strictEs6Class) {
+      if (Object.setPrototypeOf) {
+        Object.setPrototypeOf(Child, Parent)
+      } else {
+        Child.__proto__ = Parent // eslint-disable-line
+      }
+    } else {
+      const keys = Object.getOwnPropertyNames(Parent)
+      keys.forEach(function (key) {
+        if (keysToSkip[key]) {
+          return
+        }
+        Object.defineProperty(Child, key, Object.getOwnPropertyDescriptor(Parent, key))
+      })
+    }
+    Object.defineProperty(Child, '__super__', {
+      configurable: true,
+      value: Parent
+    })
 
     configure(props)(Child.prototype)
     configure(classProps)(Child)
@@ -1116,246 +1358,109 @@ export class Model extends BaseModel {
 
     return Child
   }
-}
-
-// Why are these static properties not up in the Model class declaration?
-// Because JSDoc doesn't parse static property initializers yet. :(
-
-/**
- * @ignore
- */
-Model.__events = {}
-
-/**
- * Create a property where a Model's registered listeners can be stored.
- * @ignore
- */
-Object.defineProperty(Model, '_events', {
-  get () {
-    // Make sure that a Model always has _its own_ set of registered listeners.
-    // This check has to be made because ES6 class inheritance shallow copies
-    // static properties, which means a child model would only have a reference
-    // to the parent model's listeners.
-    if (this.__events === Object.getPrototypeOf(this).__events) {
-      this.__events = {}
-    }
-    return this.__events
-  }
 })
 
-/**
- * @ignore
- */
-Model._adapters = {}
+Object.defineProperties(Model, {
+  /**
+   * @ignore
+   */
+  __events: {
+    configurable: true,
+    value: {}
+  },
 
-/**
- * Hash of adapters registered with this Model.
- *
- * @name adapters
- * @memberof Model
- * @type {Object}
- */
-Object.defineProperty(Model, 'adapters', {
-  get () {
-    const parentAdapters = Object.getPrototypeOf(this)._adapters
-    // Make sure that a Model always has _its own_ set of registered adapters.
-    // This check has to be made because ES6 class inheritance shallow copies
-    // static properties, which means a child model would only have a reference
-    // to the parent model's adapters.
-    if (this._adapters === parentAdapters) {
-      this._adapters = {}
-      utils.fillIn(this._adapters, parentAdapters)
+  /**
+   * Create a property where a Model's registered listeners can be stored.
+   * @ignore
+   */
+  _events: {
+    get () {
+      // Make sure that a Model always has _its own_ set of registered listeners.
+      // This check has to be made because ES6 class inheritance shallow copies
+      // static properties, which means a child model would only have a reference
+      // to the parent model's listeners.
+      if (this.__events === (this.__super__ ? this.__super__ : Object.getPrototypeOf(this)).__events) {
+        Object.defineProperty(this, '__events', {
+          value: {}
+        })
+      }
+      return this.__events
     }
-    return this._adapters
+  },
+
+  /**
+   * @ignore
+   */
+  _adapters: {
+    configurable: true,
+    value: {}
+  },
+
+  /**
+   * Hash of adapters registered with this Model.
+   *
+   * @name adapters
+   * @memberof Model
+   * @type {Object}
+   */
+  adapters: {
+    get () {
+      const parentAdapters = (this.__super__ ? this.__super__ : Object.getPrototypeOf(this))._adapters
+      // Make sure that a Model always has _its own_ set of registered adapters.
+      // This check has to be made because ES6 class inheritance shallow copies
+      // static properties, which means a child model would only have a reference
+      // to the parent model's adapters.
+      if (this._adapters === parentAdapters) {
+        Object.defineProperty(this, '_adapters', {
+          value: {}
+        })
+        utils.fillIn(this._adapters, parentAdapters)
+      }
+      return this._adapters
+    }
+  },
+
+  /**
+   * @ignore
+   */
+  _collection: {
+    configurable: true,
+    value: new Collection([], 'id')
+  },
+
+  /**
+   * This Model's {@link Collection} instance. This is where instances of the
+   * Model are stored if {@link Model.autoInject} is `true`.
+   *
+   * __You should use {@link Model.inject}, {@link Model.eject}, and
+   * {@link Model.ejectAll} if you need to manually get data in and out of this
+   * collection.__
+   *
+   * @name collection
+   * @memberof Model
+   * @type {Collection}
+   */
+  collection: {
+    get () {
+      // Make sure that a Model always has _its own_ collection. This check has to
+      // be made because ES6 class inheritance shallow copies static properties,
+      // which means a child Model would only have a reference to the parent
+      // Model's collection.
+      if (this._collection === (this.__super__ ? this.__super__ : Object.getPrototypeOf(this))._collection) {
+        Object.defineProperty(this, '_collection', {
+          value: new Collection([], this.idAttribute)
+        })
+        this._collection.on('all', this.emit, this)
+        this._collection.createIndex('lastInjected', ['$'], {
+          fieldGetter (obj) {
+            return obj._get('$')
+          }
+        })
+      }
+      return this._collection
+    }
   }
 })
-
-/**
- * @ignore
- */
-Model._collection = new Collection([], 'id')
-
-/**
- * This Model's {@link Collection} instance. This is where instances of the
- * Model are stored if {@link Model.autoInject} is `true`.
- *
- * __You should use {@link Model.inject}, {@link Model.eject}, and
- * {@link Model.ejectAll} if you need to manually get data in and out of this
- * collection.__
- *
- * @name collection
- * @memberof Model
- * @type {Collection}
- */
-Object.defineProperty(Model, 'collection', {
-  get () {
-    // Make sure that a Model always has _its own_ collection. This check has to
-    // be made because ES6 class inheritance shallow copies static properties,
-    // which means a child Model would only have a reference to the parent
-    // Model's collection.
-    if (this._collection === Object.getPrototypeOf(this)._collection) {
-      this._collection = new Collection([], this.idAttribute)
-      this._collection.on('all', this.emit, this)
-    }
-    return this._collection
-  }
-})
-
-/**
- * Whether {@link Model.destroy} and {@link Model.destroyAll} should
- * automatically eject the specified item(s) from the Model's collection on
- * success.
- *
- * @memberof Model
- * @type {boolean}
- * @default true
- */
-Model.autoEject = true
-
-/**
- * Whether {@link Model.create}, {@link Model.createMany},
- * {@link Model.update}, {@link Model.updateAll}, and {@link Model.updateMany}
- * should automatically inject the specified item(s) returned by the adapter
- * into the the Model's collection on success.
- *
- * __Defaults to `true` in the Browser.__
- *
- * __Defaults to `false` in Node.js__
- *
- * @memberof Model
- * @type {boolean}
- */
-Model.autoInject = isBrowser
-Model.bypassCache = false
-
-/**
- * Whether to disallow the use of `new Function` in {@link Model.extend}.
- *
- * You may set this to `true` if you so desire, but the class (constructor
- * function) produced by {@link Model.extend} will not be a named function,
- * which makes for slightly less debuggability.
- *
- * @memberof Model
- * @type {boolean}
- * @default false
- */
-Model.csp = false
-
-/**
- * The name of the registered adapter that should be used by default by any
- * of the Model's static methods that use an adapter.
- *
- * @memberof Model
- * @type {string}
- * @default http
- */
-Model.defaultAdapter = 'http'
-
-/**
- * Whether to enable debug-level logs.
- *
- * @memberof Model
- * @type {boolean}
- * @default false
- */
-Model.debug = false
-Model.eagerEject = false
-
-/**
- * The field on instances of {@link Model} that should be used as the unique
- * identifier for instances of the Model.
- *
- * @memberof Model
- * @type {string}
- * @default id
- */
-Model.idAttribute = 'id'
-
-/**
- * Whether to add property accessors to the prototype of {@link Model} for
- * each of the Model's relations. For each relation, the property accessor
- * will be added as the field specified by the `localField` option of the
- * relation definition. A relation property accessor returns related data by
- * accessing the related Model. If the related Model's collection is empty,
- * then the property accessors won't return anything.
- *
- * __Defaults to `true` in the Browser.__
- *
- * __Defaults to `false` in Node.js__
- *
- * @memberof Model
- * @type {boolean}
- */
-Model.linkRelations = isBrowser
-
-/**
- * What to do when injecting an item into the Model's collection that shares a
- * primary key with an item already in the Model's collection.
- *
- * Possible values:
- * - merge
- * - replace
- *
- * Merge:
- *
- * Recursively shallow copy properties from the new item onto the existing
- * item.
- *
- * Replace:
- *
- * Shallow copy top-level properties from the new item onto the existing item.
- * Any top-level own properties of the existing item that are _not_ on the new
- * item will be removed.
- *
- * @memberof Model
- * @type {string}
- * @default merge
- */
-Model.onConflict = 'merge'
-
-/**
- * Whether the relation property accessors should be enumerable. It's
- * recommended that this stay false.
- *
- * @memberof Model
- * @type {boolean}
- * @default false
- */
-Model.relationsEnumerable = false
-
-/**
- * Whether {@link Model.create}, {@link Model.createMany},
- * {@link Model.update}, {@link Model.updateAll}, {@link Model.updateMany},
- * {@link Model.find}, {@link Model.findAll}, {@link Model.destroy}, and
- * {@link Model.destroyAll} should return a raw result object that contains
- * both the instance data returned by the adapter _and_ metadata about the
- * operation.
- *
- * The default is to NOT return the result object, and instead return just the
- * instance data.
- *
- * @memberof Model
- * @type {boolean}
- * @default false
- */
-Model.raw = false
-
-/**
- * Whether {@link Model.create}, {@link Model.createMany},
- * {@link Model.update}, {@link Model.updateAll}, {@link Model.updateMany},
- * {@link Model.find}, {@link Model.findAll}, {@link Model.destroy}, and
- * {@link Model.destroyAll} should return a raw result object that contains
- * both the instance data returned by the adapter _and_ metadata about the
- * operation.
- *
- * The default is to NOT return the result object, and instead return just the
- * instance data.
- *
- * @memberof Model
- * @type {boolean}
- * @default false
- */
-Model.upsert = true
 
 /**
  * Allow Models themselves emit events. Any events emitted on a Model's

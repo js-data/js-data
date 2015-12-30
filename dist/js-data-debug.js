@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.2 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.3 - Homepage <http://www.js-data.io/>
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @copyright (c) 2014-2015 Jason Dobry
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -19,30 +19,6 @@
     return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj;
   };
 
-  babelHelpers.classCallCheck = function (instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  };
-
-  babelHelpers.createClass = (function () {
-    function defineProperties(target, props) {
-      for (var i = 0; i < props.length; i++) {
-        var descriptor = props[i];
-        descriptor.enumerable = descriptor.enumerable || false;
-        descriptor.configurable = true;
-        if ("value" in descriptor) descriptor.writable = true;
-        Object.defineProperty(target, descriptor.key, descriptor);
-      }
-    }
-
-    return function (Constructor, protoProps, staticProps) {
-      if (protoProps) defineProperties(Constructor.prototype, protoProps);
-      if (staticProps) defineProperties(Constructor, staticProps);
-      return Constructor;
-    };
-  })();
-
   babelHelpers.defineProperty = function (obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, {
@@ -56,30 +32,6 @@
     }
 
     return obj;
-  };
-
-  babelHelpers.inherits = function (subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-    }
-
-    subClass.prototype = Object.create(superClass && superClass.prototype, {
-      constructor: {
-        value: subClass,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
-    if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
-  };
-
-  babelHelpers.possibleConstructorReturn = function (self, call) {
-    if (!self) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-
-    return call && (typeof call === "object" || typeof call === "function") ? call : self;
   };
 
   babelHelpers;
@@ -187,6 +139,7 @@
       if (object == null) return;
     }
 
+    object[last] = undefined;
     delete object[last];
   }
   function mkdirP(object, path) {
@@ -552,6 +505,29 @@
     return b;
   }
 
+  function classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError('Cannot call a class as a function');
+    }
+  }
+
+  function possibleConstructorReturn(self, call) {
+    if (!self) {
+      throw new ReferenceError('this hasn\'t been initialised - super() hasn\'t been called');
+    }
+
+    return call && ((typeof call === 'undefined' ? 'undefined' : babelHelpers.typeof(call)) === 'object' || typeof call === 'function') ? call : self;
+  }
+
+  function addHiddenPropsToTarget(target, props) {
+    forOwn(props, function (value, key) {
+      props[key] = {
+        value: value
+      };
+    });
+    Object.defineProperties(target, props);
+  }
+
   var _utils = Object.freeze({
     isArray: isArray,
     isObject: isObject,
@@ -579,7 +555,10 @@
     pascalCase: pascalCase,
     camelCase: camelCase,
     eventify: eventify,
-    uuid: uuid
+    uuid: uuid,
+    classCallCheck: classCallCheck,
+    possibleConstructorReturn: possibleConstructorReturn,
+    addHiddenPropsToTarget: addHiddenPropsToTarget
   });
 
   /**
@@ -590,6 +569,8 @@
    * @param {Collection} collection - The collection on which this query operates.
    */
   function Query(collection) {
+    classCallCheck(this, Query);
+
     /**
      * The collection on which this query operates.
      * @type {Collection}
@@ -699,7 +680,7 @@
     }
   }
 
-  fillIn(Query.prototype, {
+  addHiddenPropsToTarget(Query.prototype, {
     /**
      * Return the current data result of this query.
      * @memberof Query
@@ -1163,6 +1144,7 @@
   var blacklist = { '>': 1, '>=': 1, '<': 1, '<=': 1 };
 
   function Index(fieldList, opts) {
+    classCallCheck(this, Index);
     fieldList || (fieldList = []);
 
     if (!isArray(fieldList)) {
@@ -1178,7 +1160,7 @@
     this.values = [];
   }
 
-  fillIn(Index.prototype, {
+  addHiddenPropsToTarget(Index.prototype, {
     set: function set(keyList, value) {
       if (!isArray(keyList)) {
         keyList = [keyList];
@@ -1492,6 +1474,7 @@
     var data = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
     var idAttribute = arguments.length <= 1 || arguments[1] === undefined ? 'id' : arguments[1];
 
+    classCallCheck(this, Collection);
     if (!isArray(data)) {
       throw new TypeError('new Collection([data]): data: Expected array. Found ' + (typeof data === 'undefined' ? 'undefined' : babelHelpers.typeof(data)));
     }
@@ -1523,7 +1506,7 @@
     });
   }
 
-  fillIn(Collection.prototype, {
+  addHiddenPropsToTarget(Collection.prototype, {
     _onModelEvent: function _onModelEvent() {
       this.emit.apply(this, arguments);
     },
@@ -1550,16 +1533,16 @@
      * the name will also be the field that is used to index the collection.
      * @return {Collection} A reference to itself for chaining.
      */
-    createIndex: function createIndex(name, keyList) {
+    createIndex: function createIndex(name, keyList, opts) {
       if (isString(name) && keyList === undefined) {
         keyList = [name];
       }
+      opts || (opts = {});
       var idAttribute = this.idAttribute;
-      var index = this.indexes[name] = new Index(keyList, {
-        hashCode: function hashCode(obj) {
-          return get(obj, idAttribute);
-        }
-      });
+      opts.hashCode = function (obj) {
+        return get(obj, idAttribute);
+      };
+      var index = this.indexes[name] = new Index(keyList, opts);
       this.index.visitAll(index.insertRecord, index);
       return this;
     },
@@ -1916,309 +1899,6 @@
     this._events = value;
   });
 
-  var types = {
-    array: isArray,
-    boolean: isBoolean,
-    integer: isNumber,
-    number: isNumber,
-    'null': function _null(value) {
-      return value === null;
-    },
-    object: isObject,
-    string: isString
-  };
-
-  var rules = {
-    type: function type(predicate, value) {
-      if (value === undefined) {
-        return;
-      }
-      if (isString(predicate)) {
-        predicate = [predicate];
-      }
-      var errors = predicate.map(function (type) {
-        var validator = types[type];
-        if (!validator) {
-          return 'type: Unknown type ' + predicate;
-        }
-        return validator(value) ? undefined : 1;
-      });
-      return errors.indexOf(undefined) !== -1 ? undefined : 'type: Expected: ' + predicate.join(' or ') + '. Actual: ' + (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value));
-    },
-    anyOf: function anyOf(schemas, value) {
-      var validated = false;
-      var allErrors = [];
-      schemas.forEach(function (schema) {
-        var errors = validate(schema, value);
-        if (errors) {
-          allErrors = allErrors.concat(errors);
-        } else {
-          validated = true;
-        }
-      });
-      return validated ? undefined : allErrors;
-    },
-    allOf: function allOf(schemas, value) {
-      var allErrors = [];
-      schemas.forEach(function (schema) {
-        allErrors = allErrors.concat(validate(schema, value) || []);
-      });
-      return allErrors.length ? undefined : allErrors;
-    },
-    oneOf: function oneOf(schemas, value) {
-      var validated = false;
-      var allErrors = [];
-      schemas.forEach(function (schema) {
-        var errors = validate(schema, value);
-        if (errors) {
-          allErrors = allErrors.concat(errors);
-        } else if (validated) {
-          allErrors = ['more than one schema validated'];
-          validated = false;
-          return false;
-        } else {
-          validated = true;
-        }
-      });
-      return validated ? undefined : allErrors;
-    }
-  };
-
-  function validate(schema, value) {
-    var errors = [];
-    forOwn(schema, function (predicate, rule) {
-      var validator = rules[rule];
-      if (validator) {
-        var err = validator(predicate, value);
-        if (err) {
-          errors.push(err);
-        }
-      }
-    });
-    return errors.length ? errors : undefined;
-  }
-
-  /**
-   * @memberof! module:js-data
-   * @example
-   * // ES6
-   * import {configure, Model} from 'js-data'
-   *
-   * // @configure(opts) (ES7)
-   * class User extends JSData.Model {}
-   * configure(opts)(User)
-   *
-   * // ES5
-   * var JSData = require('js-data')
-   * var User = JSData.Model.extend()
-   * User.configure(opts)
-   *
-   * @param {Object} opts - Properties to apply to the target.
-   * @param {boolean} [overwrite=true] - Whether to overwrite properties that
-   * already exist on the target.
-   */
-  function configure(opts) {
-    var overwrite = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
-
-    opts = opts || {};
-    return function (target) {
-      forOwn(opts, function (value, key) {
-        if (target[key] === undefined || overwrite) {
-          target[key] = copy(value);
-        }
-      });
-      return target;
-    };
-  }
-
-  var op$3 = 'setSchema';
-
-  /**
-   * @param {Model} target - Target Model.
-   * @param {string} key - Key for new property.
-   * @param {Object} opts - Configuration options.
-   * @ignore
-   */
-  function makeDescriptor(target, key, opts) {
-    var descriptor = {
-      enumerable: opts.enumerable !== undefined ? opts.enumerable : true,
-      configurable: opts.configurable !== undefined ? opts.configurable : true
-    };
-    descriptor.get = function () {
-      return this._get('props.' + key);
-    };
-    descriptor.set = function (value) {
-      var _this = this;
-
-      // TODO: rework this
-      // if (isFunction(opts.validate) && !opts.validate(value)) {
-      //   return false
-      // }
-      var _get = this._get;
-      var _set = this._set;
-      var _unset = this._unset;
-      if (!_get('noValidate')) {
-        var errors = validate(opts, value);
-        if (errors) {
-          throw new Error(errors.join(', '));
-        }
-      }
-      if (opts.track && !_get('creating')) {
-        (function () {
-          var changing = _get('changing');
-          var previous = _get('previous.' + key);
-          var current = _get('props.' + key);
-          var changed = _get('changed');
-          if (!changing) {
-            changed = [];
-          }
-          if (current !== value) {
-            changed.push(key);
-          }
-          if (previous !== value) {
-            _set('changes.' + key, value);
-          } else {
-            _unset('changes.' + key);
-          }
-          if (!changing && changed.length) {
-            _set('changed', changed);
-            _set('changing', true);
-            _set('eventId', setTimeout(function () {
-              _unset('changed');
-              _unset('eventId');
-              _unset('changing');
-              var i = undefined;
-              for (i = 0; i < changed.length; i++) {
-                _this.emit('change:' + changed[i], _this, get(_this, changed[i]));
-              }
-              _this.emit('change', _this, _get('changes'));
-            }, 0));
-          }
-        })();
-      }
-      _set('props.' + key, value);
-      if (_get('$') && opts.indexed) {
-        target.collection.updateRecord(this, { index: key });
-      }
-      return value;
-    };
-    if (opts.indexed) {
-      // Update index
-      // TODO: Make this configurable, ie. immediate or lazy update
-      target.createIndex(key);
-    }
-    if (opts.get) {
-      if (descriptor.get) {
-        (function () {
-          var originalGet = descriptor.get;
-          descriptor.get = function () {
-            return opts.get.call(this, originalGet);
-          };
-        })();
-      } else {
-        descriptor.get = opts.get;
-      }
-    }
-    if (opts.set) {
-      if (descriptor.set) {
-        (function () {
-          var originalSet = descriptor.set;
-          descriptor.set = function (value) {
-            return opts.set.call(this, value, originalSet);
-          };
-        })();
-      } else {
-        descriptor.set = opts.set;
-      }
-    }
-    return descriptor;
-  }
-
-  /**
-   * @memberof! module:js-data
-   * @example
-   * // ES6
-   * import {setSchema, Model} from 'js-data'
-   * const properties = {
-   *   first: {},
-   *   last: {},
-   *   role: {
-   *     value: 'dev'
-   *   },
-   *   // computed property
-   *   name: {
-   *     get() { return `${this.first} ${this.last}` },
-   *     set(value) {
-   *       let parts = value.split(' ')
-   *       this.first = parts[0]
-   *       this.last = parts[1]
-   *       return this
-   *     }
-   *   }
-   * }
-   *
-   * // @setSchema(properties) (ES7)
-   * class User extends Model {}
-   * User.setSchema(properties)
-   *
-   * // ES5
-   * var JSData = require('js-data')
-   * var User = JSData.Model.extend({}, { name: 'User' })
-   * User.setSchema(properties)
-   *
-   * @param {Object.<string, Object>} opts - Property configurations.
-   * @return {Function} Invocation function, which accepts the target as the only
-   * parameter.
-   */
-  function setSchema(opts) {
-    opts || (opts = {});
-
-    return function (target) {
-      target.dbg(op$3, 'opts:', opts);
-
-      target.schema || (target.schema = {});
-      configure(target.schema, opts);
-
-      forOwn(opts, function (prop, key) {
-        var descriptor = makeDescriptor(target, key, prop);
-        // TODO: This won't work for properties of Object type, because all
-        // instances will share the prototype value
-        if (!descriptor.writable) {
-          Object.defineProperty(target.prototype, key, descriptor);
-        }
-      });
-      return target;
-    };
-  }
-
-  var op$4 = 'registerAdapter';
-
-  /**
-   * Add the provided adapter to the target's "adapters" property, registering it
-   * with the specified.
-   * @memberof! module:js-data
-   * @param {string} name - The name under which to register the adapter.
-   * @param {Adapter} adapter - The adapter to register.
-   * @param {Object} opts - Configuration options.
-   * @param {boolean} [opts.default=false] - Whether to make the adapter the
-   * default adapter for the target.
-   * @return {Function} Invocation function, which accepts the target as the only
-   * parameter.
-   */
-  function registerAdapter(name, adapter, opts) {
-    opts || (opts = {});
-    opts.op = op$4;
-    return function (target) {
-      target.dbg(op$4, 'name:', name, 'adapter:', adapter, 'opts:', opts);
-      // Register the adapter
-      target.adapters[name] = adapter;
-      // Optionally make it the default adapter for the target.
-      if (opts === true || opts.default) {
-        target.defaultAdapter = name;
-      }
-    };
-  }
-
   var op = 'belongsTo';
 
   /**
@@ -2375,6 +2055,39 @@
     };
   }
 
+  /**
+   * @memberof! module:js-data
+   * @example
+   * // ES6
+   * import {configure, Model} from 'js-data'
+   *
+   * // @configure(opts) (ES7)
+   * class User extends JSData.Model {}
+   * configure(opts)(User)
+   *
+   * // ES5
+   * var JSData = require('js-data')
+   * var User = JSData.Model.extend()
+   * User.configure(opts)
+   *
+   * @param {Object} opts - Properties to apply to the target.
+   * @param {boolean} [overwrite=true] - Whether to overwrite properties that
+   * already exist on the target.
+   */
+  function configure(opts) {
+    var overwrite = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+    opts = opts || {};
+    return function (target) {
+      forOwn(opts, function (value, key) {
+        if (target[key] === undefined || overwrite) {
+          target[key] = copy(value);
+        }
+      });
+      return target;
+    };
+  }
+
   var op$1 = 'hasMany';
 
   /**
@@ -2390,7 +2103,7 @@
    *
    * @ignore
    */
-  function applyHasMany(Model, Relation, opts) {
+  function applyHasMany(target, Relation, opts) {
     opts || (opts = {});
     // Choose field where the relation will be attached
     var localField = opts.localField || camelCase(Relation.name) + 'Collection';
@@ -2401,7 +2114,7 @@
     var foreignKeys = opts.foreignKeys;
 
     if (!foreignKey && !localKeys && !foreignKeys) {
-      foreignKey = opts.foreignKey = camelCase(Model.name) + 'Id';
+      foreignKey = opts.foreignKey = camelCase(target.name) + 'Id';
     }
     if (foreignKey) {
       Relation.collection.createIndex(foreignKey);
@@ -2420,14 +2133,14 @@
         var items = undefined;
         if (foreignKey) {
           // Make a FAST retrieval of the relation using a secondary index
-          items = Relation.getAll(get(this, Model.idAttribute), { index: foreignKey });
+          items = Relation.getAll(get(this, target.idAttribute), { index: foreignKey });
         } else if (localKeys) {
           var keys = get(this, localKeys) || [];
           var args = isArray(keys) ? keys : Object.keys(keys);
           // Make a slower retrieval using the ids in the "localKeys" array
           items = Relation.getAll.apply(Relation, args);
         } else if (foreignKeys) {
-          _set(query, 'where.' + foreignKeys + '.contains', get(this, Model.idAttribute));
+          _set(query, 'where.' + foreignKeys + '.contains', get(this, target.idAttribute));
           // Make a much slower retrieval
           items = Relation.filter(query);
         }
@@ -2442,7 +2155,7 @@
         this._set('links.' + localField, children);
         if (children && children.length) {
           (function () {
-            var id = get(_this, Model.idAttribute);
+            var id = get(_this, target.idAttribute);
             if (foreignKey) {
               children.forEach(function (child) {
                 _set(child, foreignKey, id);
@@ -2474,7 +2187,7 @@
     };
 
     // Check whether the relation shouldn't actually be linked via a getter
-    if (opts.link === false || opts.link === undefined && !Model.linkRelations) {
+    if (opts.link === false || opts.link === undefined && !target.linkRelations) {
       delete descriptor.get;
       delete descriptor.set;
       descriptor.writable = true;
@@ -2493,7 +2206,7 @@
           //  - related Model
           //  - instance of target Model
           //  - the original getter function, in case the user wants to use it
-          return opts.get(Model, Relation, this, originalGet ? function () {
+          return opts.get(target, Relation, this, originalGet ? function () {
             for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
               args[_key] = arguments[_key];
             }
@@ -2518,7 +2231,7 @@
           //  - instance of target Model
           //  - instances of related Model
           //  - the original setter function, in case the user wants to use it
-          return opts.set(Model, Relation, this, children, originalSet ? function () {
+          return opts.set(target, Relation, this, children, originalSet ? function () {
             for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
               args[_key2] = arguments[_key2];
             }
@@ -2530,23 +2243,23 @@
     }
 
     // Finally, added property to prototype of target Model
-    Object.defineProperty(Model.prototype, localField, descriptor);
+    Object.defineProperty(target.prototype, localField, descriptor);
 
-    if (!Model.relationList) {
-      Model.relationList = [];
+    if (!target.relationList) {
+      target.relationList = [];
     }
-    if (!Model.relationFields) {
-      Model.relationFields = [];
+    if (!target.relationFields) {
+      target.relationFields = [];
     }
     opts.type = 'hasMany';
-    opts.name = Model.name;
+    opts.name = target.name;
     opts.relation = Relation.name;
     opts.Relation = Relation;
-    Model.relationList.push(opts);
-    Model.relationFields.push(localField);
+    target.relationList.push(opts);
+    target.relationFields.push(localField);
 
     // Return target Model for chaining
-    return Model;
+    return target;
   }
 
   /**
@@ -2732,7 +2445,301 @@
     };
   }
 
+  var types = {
+    array: isArray,
+    boolean: isBoolean,
+    integer: isNumber,
+    number: isNumber,
+    'null': function _null(value) {
+      return value === null;
+    },
+    object: isObject,
+    string: isString
+  };
+
+  var rules = {
+    type: function type(predicate, value) {
+      if (value === undefined) {
+        return;
+      }
+      if (isString(predicate)) {
+        predicate = [predicate];
+      }
+      var errors = predicate.map(function (type) {
+        var validator = types[type];
+        if (!validator) {
+          return 'type: Unknown type ' + predicate;
+        }
+        return validator(value) ? undefined : 1;
+      });
+      return errors.indexOf(undefined) !== -1 ? undefined : 'type: Expected: ' + predicate.join(' or ') + '. Actual: ' + (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value));
+    },
+    anyOf: function anyOf(schemas, value) {
+      var validated = false;
+      var allErrors = [];
+      schemas.forEach(function (schema) {
+        var errors = validate(schema, value);
+        if (errors) {
+          allErrors = allErrors.concat(errors);
+        } else {
+          validated = true;
+        }
+      });
+      return validated ? undefined : allErrors;
+    },
+    allOf: function allOf(schemas, value) {
+      var allErrors = [];
+      schemas.forEach(function (schema) {
+        allErrors = allErrors.concat(validate(schema, value) || []);
+      });
+      return allErrors.length ? undefined : allErrors;
+    },
+    oneOf: function oneOf(schemas, value) {
+      var validated = false;
+      var allErrors = [];
+      schemas.forEach(function (schema) {
+        var errors = validate(schema, value);
+        if (errors) {
+          allErrors = allErrors.concat(errors);
+        } else if (validated) {
+          allErrors = ['more than one schema validated'];
+          validated = false;
+          return false;
+        } else {
+          validated = true;
+        }
+      });
+      return validated ? undefined : allErrors;
+    }
+  };
+
+  function validate(schema, value) {
+    var errors = [];
+    forOwn(schema, function (predicate, rule) {
+      var validator = rules[rule];
+      if (validator) {
+        var err = validator(predicate, value);
+        if (err) {
+          errors.push(err);
+        }
+      }
+    });
+    return errors.length ? errors : undefined;
+  }
+
+  var op$3 = 'setSchema';
+
+  /**
+   * @param {Model} target - Target Model.
+   * @param {string} key - Key for new property.
+   * @param {Object} opts - Configuration options.
+   * @ignore
+   */
+  function makeDescriptor(target, key, opts) {
+    var descriptor = {
+      enumerable: opts.enumerable !== undefined ? opts.enumerable : true
+    };
+    descriptor.get = function () {
+      return this._get('props.' + key);
+    };
+    descriptor.set = function (value) {
+      var _this = this;
+
+      // TODO: rework this
+      // if (isFunction(opts.validate) && !opts.validate(value)) {
+      //   return false
+      // }
+      var _get = this._get;
+      var _set = this._set;
+      var _unset = this._unset;
+      if (!_get('noValidate')) {
+        var errors = validate(opts, value);
+        if (errors) {
+          throw new Error(errors.join(', '));
+        }
+      }
+      if (opts.track && !_get('creating')) {
+        (function () {
+          var changing = _get('changing');
+          var previous = _get('previous.' + key);
+          var current = _get('props.' + key);
+          var changed = _get('changed');
+          if (!changing) {
+            changed = [];
+          }
+          var index = changed.indexOf(key);
+          if (current !== value && index === -1) {
+            changed.push(key);
+          }
+          if (previous !== value) {
+            _set('changes.' + key, value);
+          } else {
+            _unset('changes.' + key);
+            if (index >= 0) {
+              changed.splice(index, 1);
+            }
+          }
+          if (!changed.length) {
+            changing = false;
+            _unset('changing');
+            _unset('changed');
+            if (_get('eventId')) {
+              clearTimeout(_get('eventId'));
+              _unset('eventId');
+            }
+          }
+          if (!changing && changed.length) {
+            _set('changed', changed);
+            _set('changing', true);
+            _set('eventId', setTimeout(function () {
+              _unset('changed');
+              _unset('eventId');
+              _unset('changing');
+              if (!_get('silent')) {
+                var i = undefined;
+                for (i = 0; i < changed.length; i++) {
+                  _this.emit('change:' + changed[i], _this, get(_this, changed[i]));
+                }
+                _this.emit('change', _this, _get('changes'));
+              }
+              _unset('silent');
+            }, 0));
+          }
+        })();
+      }
+      _set('props.' + key, value);
+      if (_get('$') && opts.indexed) {
+        target.collection.updateRecord(this, { index: key });
+      }
+      return value;
+    };
+    if (opts.indexed) {
+      // Update index
+      // TODO: Make this configurable, ie. immediate or lazy update
+      target.createIndex(key);
+    }
+    if (opts.get) {
+      if (descriptor.get) {
+        (function () {
+          var originalGet = descriptor.get;
+          descriptor.get = function () {
+            return opts.get.call(this, originalGet);
+          };
+        })();
+      } else {
+        descriptor.get = opts.get;
+      }
+    }
+    if (opts.set) {
+      if (descriptor.set) {
+        (function () {
+          var originalSet = descriptor.set;
+          descriptor.set = function (value) {
+            return opts.set.call(this, value, originalSet);
+          };
+        })();
+      } else {
+        descriptor.set = opts.set;
+      }
+    }
+    return descriptor;
+  }
+
+  /**
+   * @memberof! module:js-data
+   * @example
+   * // ES6
+   * import {setSchema, Model} from 'js-data'
+   * const properties = {
+   *   first: {},
+   *   last: {},
+   *   role: {
+   *     value: 'dev'
+   *   },
+   *   // computed property
+   *   name: {
+   *     get() { return `${this.first} ${this.last}` },
+   *     set(value) {
+   *       let parts = value.split(' ')
+   *       this.first = parts[0]
+   *       this.last = parts[1]
+   *       return this
+   *     }
+   *   }
+   * }
+   *
+   * // @setSchema(properties) (ES7)
+   * class User extends Model {}
+   * User.setSchema(properties)
+   *
+   * // ES5
+   * var JSData = require('js-data')
+   * var User = JSData.Model.extend({}, { name: 'User' })
+   * User.setSchema(properties)
+   *
+   * @param {Object.<string, Object>} opts - Property configurations.
+   * @return {Function} Invocation function, which accepts the target as the only
+   * parameter.
+   */
+  function setSchema(opts) {
+    opts || (opts = {});
+
+    return function (target) {
+      target.dbg(op$3, 'opts:', opts);
+
+      target.schema || (target.schema = {});
+      configure(target.schema, opts);
+
+      forOwn(opts, function (prop, key) {
+        var descriptor = makeDescriptor(target, key, prop);
+        // TODO: This won't work for properties of Object type, because all
+        // instances will share the prototype value
+        if (!descriptor.writable) {
+          Object.defineProperty(target.prototype, key, descriptor);
+        }
+      });
+      return target;
+    };
+  }
+
+  var op$4 = 'registerAdapter';
+
+  /**
+   * Add the provided adapter to the target's "adapters" property, registering it
+   * with the specified.
+   * @memberof! module:js-data
+   * @param {string} name - The name under which to register the adapter.
+   * @param {Adapter} adapter - The adapter to register.
+   * @param {Object} opts - Configuration options.
+   * @param {boolean} [opts.default=false] - Whether to make the adapter the
+   * default adapter for the target.
+   * @return {Function} Invocation function, which accepts the target as the only
+   * parameter.
+   */
+  function registerAdapter(name, adapter, opts) {
+    opts || (opts = {});
+    opts.op = op$4;
+    return function (target) {
+      target.dbg(op$4, 'name:', name, 'adapter:', adapter, 'opts:', opts);
+      // Register the adapter
+      target.adapters[name] = adapter;
+      // Optionally make it the default adapter for the target.
+      if (opts === true || opts.default) {
+        target.defaultAdapter = name;
+      }
+    };
+  }
+
   var resolve = resolve$1;
+
+  var keysToSkip = {
+    length: 1,
+    name: 1,
+    arguments: 1,
+    prototype: 1,
+    caller: 1,
+    __super__: 1
+  };
 
   var isBrowser = false;
 
@@ -2754,16 +2761,6 @@
   };
 
   /**
-   * This is here so Babel will give us the inheritance helpers which we can
-   * re-use for the "extend" method.
-   * @ignore
-   */
-
-  var BaseModel = function BaseModel() {
-    babelHelpers.classCallCheck(this, BaseModel);
-  };
-
-  /**
    * js-data's Model class.
    * @class Model
    * @example {@lang javascript}class User extends Model {}
@@ -2774,1481 +2771,1406 @@
    * @param {boolean} [opts.noValidate=false] Whether to skip validation on the
    * initial properties.
    */
+  function Model(props, opts) {
+    classCallCheck(this, Model);
+    props || (props = {});
+    opts || (opts = {});
+    var _props = {};
+    Object.defineProperties(this, {
+      _get: {
+        value: function value(key) {
+          return get(_props, key);
+        }
+      },
+      _set: {
+        value: function value(key, _value) {
+          return _set(_props, key, _value);
+        }
+      },
+      _unset: {
+        value: function value(key) {
+          return unset(_props, key);
+        }
+      }
+    });
+    this._set('creating', true);
+    if (opts.noValidate) {
+      this._set('noValidate', true);
+    }
+    fillIn(this, props);
+    this._unset('creating');
+    this._set('changes', {});
+    this._unset('noValidate');
+    this._set('previous', copy(props));
+  }
 
-  var Model = (function (_BaseModel) {
-    babelHelpers.inherits(Model, _BaseModel);
+  /**
+   * Instance members
+   */
+  addHiddenPropsToTarget(Model.prototype, {
+    schema: function schema(key) {
+      var _schema = this.constructor.schema;
+      return key ? _schema[key] : _schema;
+    },
+    validate: function validate$$(obj, value) {
+      var errors = [];
+      var _schema = this.schema();
+      if (!obj) {
+        obj = this;
+      } else if (isString(obj)) {
+        var prop = _schema[obj];
+        if (prop) {
+          errors = validate(prop, value) || [];
+        }
+      } else {
+        forOwn(_schema, function (prop, key) {
+          errors = errors.concat(validate(prop, get(obj, key)) || []);
+        });
+      }
+      return errors.length ? errors : undefined;
+    },
 
-    function Model(props, opts) {
-      babelHelpers.classCallCheck(this, Model);
+    /**
+     * @param {Object} [opts] Configuration options. @see {@link Model.create}.
+     */
+    create: function create(opts) {
+      return this.constructor.create(this, opts);
+    },
+    save: function save(opts) {
+      // TODO: move actual save logic here
+      var Ctor = this.constructor;
 
-      var _this2 = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Model).call(this));
+      var adapterName = Ctor.getAdapterName(opts);
+      return Ctor.getAdapter(adapterName).update(Ctor, get(this, Ctor.idAttribute), this, opts);
+    },
+
+    /**
+     * @param {Object} [opts] Configuration options. @see {@link Model.destroy}.
+     */
+    destroy: function destroy(opts) {
+      // TODO: move actual destroy logic here
+      var Ctor = this.constructor;
+      return Ctor.destroy(get(this, Ctor.idAttribute), opts);
+    },
+
+    // TODO: move logic for single-item async operations onto the instance.
+
+    /**
+     * Return the value at the given path for this instance.
+     *
+     * @param {string} key - Path of value to retrieve.
+     * @return {*} Value at path.
+     */
+    get: function get$$(key) {
+      return get(this, key);
+    },
+
+    /**
+     * Set the value for a given key, or the values for the given keys if "key" is
+     * an object.
+     *
+     * @param {(string|Object)} key - Key to set or hash of key-value pairs to set.
+     * @param {*} [value] - Value to set for the given key.
+     * @param {Object} [opts] - Optional configuration.
+     * @param {boolean} [opts.silent=false] - Whether to trigger change events.
+     */
+    set: function set(key, value, opts) {
+      if (isObject(key)) {
+        opts = value;
+      }
+      opts || (opts = {});
+      if (opts.silent) {
+        this._set('silent', true);
+      }
+      _set(this, key, value);
+      if (!this._get('eventId')) {
+        this._unset('silent');
+      }
+    },
+
+    /**
+     * Unset the value for a given key.
+     *
+     * @param {string} key - Key to unset.
+     * @param {Object} [opts] - Optional configuration.
+     * @param {boolean} [opts.silent=false] - Whether to trigger change events.
+     */
+    unset: function unset$$(key, opts) {
+      opts || (opts = {});
+      if (opts.silent) {
+        this._set('silent', true);
+      }
+      unset(this, key);
+      if (!this._get('eventId')) {
+        this._unset('silent');
+      }
+    },
+    hashCode: function hashCode() {
+      return get(this, this.constructor.idAttribute);
+    },
+    changes: function changes(key) {
+      if (key) {
+        return this._get('changes.' + key);
+      }
+      return this._get('changes');
+    },
+    changed: function changed() {
+      return this._get('changed');
+    },
+    hasChanges: function hasChanges() {
+      return !!(this._get('changed') || []).length;
+    },
+    commit: function commit() {
+      this._unset('changed');
+      this._set('changes', {});
+      this._set('previous', copy(this));
+      return this;
+    },
+    previous: function previous(key) {
+      if (key) {
+        return this._get('previous.' + key);
+      }
+      return this._get('previous');
+    },
+    revert: function revert(opts) {
+      var _this2 = this;
+
+      var previous = this._get('previous') || {};
+      opts || (opts = {});
+      opts.preserve || (opts.preserve = []);
+      forOwn(this, function (value, key) {
+        if (key !== _this2.constructor.idAttribute && !previous.hasOwnProperty(key) && _this2.hasOwnProperty(key) && opts.preserve.indexOf(key) === -1) {
+          delete _this2[key];
+        }
+      });
+      forOwn(previous, function (value, key) {
+        if (opts.preserve.indexOf(key) === -1) {
+          _this2[key] = value;
+        }
+      });
+      this.commit();
+      return this;
+    },
+
+    /**
+     * Return a plain object representation of this instance.
+     *
+     * @param {Object} [opts] - Configuration options.
+     * @param {string[]} [opts.with] - Array of relation names or relation fields
+     * to include in the representation.
+     * @return {Object} Plain object representation of instance.
+     */
+    toJSON: function toJSON(opts) {
+      var _this3 = this;
+
+      opts || (opts = {});
+      var Ctor = this.constructor;
+      var json = this;
+      if (this instanceof Model) {
+        json = {};
+        _set(json, this);
+        if (Ctor && Ctor.relationList && opts.with) {
+          if (isString(opts.with)) {
+            opts.with = [opts.with];
+          }
+          Ctor.relationList.forEach(function (def) {
+            var containedName = undefined;
+            if (opts.with.indexOf(def.relation) !== -1) {
+              containedName = def.relation;
+            } else if (opts.with.indexOf(def.localField) !== -1) {
+              containedName = def.localField;
+            }
+            if (containedName) {
+              (function () {
+                var optsCopy = { with: opts.with.slice() };
+                optsCopy.with.splice(optsCopy.with.indexOf(containedName), 1);
+                optsCopy.with.forEach(function (relation, i) {
+                  if (relation && relation.indexOf(containedName) === 0 && relation.length >= containedName.length && relation[containedName.length] === '.') {
+                    optsCopy.with[i] = relation.substr(containedName.length + 1);
+                  } else {
+                    optsCopy.with[i] = '';
+                  }
+                });
+                var relationData = get(_this3, def.localField);
+                if (relationData) {
+                  if (isArray(relationData)) {
+                    _set(json, def.localField, relationData.map(function (item) {
+                      return def.Relation.prototype.toJSON.call(item, optsCopy);
+                    }));
+                  } else {
+                    _set(json, def.localField, def.Relation.prototype.toJSON.call(relationData, optsCopy));
+                  }
+                }
+              })();
+            }
+          });
+        }
+      }
+      return json;
+    }
+  });
+
+  /**
+   * Static members
+   */
+  fillIn(Model, {
+    /**
+     * Whether {@link Model.destroy} and {@link Model.destroyAll} should
+     * automatically eject the specified item(s) from the Model's collection on
+     * success.
+     *
+     * @memberof Model
+     * @type {boolean}
+     * @default true
+     */
+    autoEject: true,
+
+    /**
+     * Whether {@link Model.create}, {@link Model.createMany},
+     * {@link Model.update}, {@link Model.updateAll}, and {@link Model.updateMany}
+     * should automatically inject the specified item(s) returned by the adapter
+     * into the the Model's collection on success.
+     *
+     * __Defaults to `true` in the Browser.__
+     *
+     * __Defaults to `false` in Node.js__
+     *
+     * @memberof Model
+     * @type {boolean}
+     */
+    autoInject: isBrowser,
+    bypassCache: false,
+
+    /**
+     * Whether to disallow the use of `new Function` in {@link Model.extend}.
+     *
+     * You may set this to `true` if you so desire, but the class (constructor
+     * function) produced by {@link Model.extend} will not be a named function,
+     * which makes for slightly less debuggability.
+     *
+     * @memberof Model
+     * @type {boolean}
+     * @default false
+     */
+    csp: false,
+
+    /**
+     * The name of the registered adapter that should be used by default by any
+     * of the Model's static methods that use an adapter.
+     *
+     * @memberof Model
+     * @type {string}
+     * @default http
+     */
+    defaultAdapter: 'http',
+
+    /**
+     * Whether to enable debug-level logs.
+     *
+     * @memberof Model
+     * @type {boolean}
+     * @default false
+     */
+    debug: false,
+    eagerEject: false,
+
+    /**
+     * The field on instances of {@link Model} that should be used as the unique
+     * identifier for instances of the Model.
+     *
+     * @memberof Model
+     * @type {string}
+     * @default id
+     */
+    idAttribute: 'id',
+
+    /**
+     * Whether to add property accessors to the prototype of {@link Model} for
+     * each of the Model's relations. For each relation, the property accessor
+     * will be added as the field specified by the `localField` option of the
+     * relation definition. A relation property accessor returns related data by
+     * accessing the related Model. If the related Model's collection is empty,
+     * then the property accessors won't return anything.
+     *
+     * __Defaults to `true` in the Browser.__
+     *
+     * __Defaults to `false` in Node.js__
+     *
+     * @memberof Model
+     * @type {boolean}
+     */
+    linkRelations: isBrowser,
+
+    /**
+     * What to do when injecting an item into the Model's collection that shares a
+     * primary key with an item already in the Model's collection.
+     *
+     * Possible values:
+     * - merge
+     * - replace
+     *
+     * Merge:
+     *
+     * Recursively shallow copy properties from the new item onto the existing
+     * item.
+     *
+     * Replace:
+     *
+     * Shallow copy top-level properties from the new item onto the existing item.
+     * Any top-level own properties of the existing item that are _not_ on the new
+     * item will be removed.
+     *
+     * @memberof Model
+     * @type {string}
+     * @default merge
+     */
+    onConflict: 'merge',
+
+    /**
+     * Whether the relation property accessors should be enumerable. It's
+     * recommended that this stay false.
+     *
+     * @memberof Model
+     * @type {boolean}
+     * @default false
+     */
+    relationsEnumerable: false,
+
+    /**
+     * Whether {@link Model.create}, {@link Model.createMany},
+     * {@link Model.update}, {@link Model.updateAll}, {@link Model.updateMany},
+     * {@link Model.find}, {@link Model.findAll}, {@link Model.destroy}, and
+     * {@link Model.destroyAll} should return a raw result object that contains
+     * both the instance data returned by the adapter _and_ metadata about the
+     * operation.
+     *
+     * The default is to NOT return the result object, and instead return just the
+     * instance data.
+     *
+     * @memberof Model
+     * @type {boolean}
+     * @default false
+     */
+    raw: false,
+
+    /**
+     * Whether {@link Model.create}, {@link Model.createMany},
+     * {@link Model.update}, {@link Model.updateAll}, {@link Model.updateMany},
+     * {@link Model.find}, {@link Model.findAll}, {@link Model.destroy}, and
+     * {@link Model.destroyAll} should return a raw result object that contains
+     * both the instance data returned by the adapter _and_ metadata about the
+     * operation.
+     *
+     * The default is to NOT return the result object, and instead return just the
+     * instance data.
+     *
+     * @memberof Model
+     * @type {boolean}
+     * @default false
+     */
+    upsert: true,
+
+    /**
+     * Create a new secondary index in the Collection instance of this Model.
+     *
+     * @param {string} name - The name of the new secondary index
+     * @param {string[]} keyList - The list of keys to be used to create the index.
+     */
+    createIndex: function createIndex(name, keyList) {
+      this.dbg('createIndex', 'name:', name, 'keyList:', keyList);
+      this.collection.createIndex(name, keyList);
+    },
+
+    /**
+     * Create a new instance of this Model from the provided properties.
+     *
+     * @param {Object} props - The initial properties of the new instance.
+     * @return {Model} The instance.
+     */
+    createInstance: function createInstance(props) {
+      var Ctor = this;
+      // Check to make sure "props" is not already an instance of this Model.
+      return props instanceof Ctor ? props : new Ctor(props);
+    },
+
+    /**
+     * Check whether "instance" is actually an instance of this Model.
+     *
+     * @param {Model} The instance to check.
+     * @return {boolean} Whether "instance" is an instance of this Model.
+     */
+    is: function is(instance) {
+      return instance instanceof this;
+    },
+    getAutoPkItems: function getAutoPkItems() {
+      return this.getAll().filter(function (item) {
+        return item._get('autoPk');
+      });
+    },
+    changes: function changes(id, key) {
+      this.dbg('changes', 'id:', id);
+      var instance = this.get(id);
+      if (instance) {
+        return instance.changes(key);
+      }
+    },
+    changed: function changed(id) {
+      this.dbg('changed', 'id:', id);
+      var instance = this.get(id);
+      if (instance) {
+        return instance.changed();
+      }
+    },
+    hasChanges: function hasChanges(id) {
+      this.dbg('hasChanges', 'id:', id);
+      var instance = this.get(id);
+      if (instance) {
+        return instance.hasChanges();
+      }
+    },
+
+    /**
+     * Insert the provided item or items into the Collection instance of this
+     * Model.
+     *
+     * If an item is already in the collection then the provided item will either
+     * merge with or replace the existing item based on the value of the
+     * "onConflict" option.
+     *
+     * The collection's secondary indexes will be updated as each item is visited.
+     *
+     * @param {(Object|Object[]|Model|Model[])} items - The item or items to insert.
+     * @param {Object} [opts] - Configuration options.
+     * @param {string} [opts.onConflict] - What to do when an item is already in
+     * the Collection instance. Possible values are `merge` or `replace`.
+     * @return {(Model|Model[])} The injected entity or entities.
+     */
+    inject: function inject(items, opts) {
+      var _this = this;
+      var op = 'inject';
+      _this.dbg(op, 'item(s):', items, 'opts:', opts);
+      opts || (opts = {});
+      opts.op = op;
+      var singular = false;
+      var collection = _this.collection;
+      var idAttribute = _this.idAttribute;
+      var relationList = _this.relationList || [];
+      if (!isArray(items)) {
+        items = [items];
+        singular = true;
+      }
+      var timestamp = new Date().getTime();
+      items = items.map(function (props) {
+        var id = get(props, idAttribute);
+        var autoPk = false;
+        if (!isSorN(id)) {
+          if (opts.autoPk || opts.autoPk === undefined && _this.autoPk) {
+            id = uuid();
+            _set(props, idAttribute, id);
+            autoPk = true;
+          } else {
+            throw new TypeError('User#' + idAttribute + ': Expected string or number, found ' + (typeof id === 'undefined' ? 'undefined' : babelHelpers.typeof(id)) + '!');
+          }
+        }
+        var existing = _this.get(id);
+        if (props === existing) {
+          return existing;
+        }
+
+        relationList.forEach(function (def) {
+          var Relation = def.Relation;
+          var relationIdAttribute = Relation.idAttribute;
+          var foreignKey = def.foreignKey;
+
+          var toInject = get(props, def.localField);
+
+          if (isFunction(def.inject)) {
+            def.inject(_this, def, props);
+          } else if (toInject && def.inject !== false) {
+            if (isArray(toInject)) {
+              toInject = toInject.map(function (toInjectItem) {
+                if (toInjectItem !== Relation.get(get(toInjectItem, relationIdAttribute))) {
+                  try {
+                    if (foreignKey) {
+                      _set(toInjectItem, foreignKey, id);
+                    }
+                    toInjectItem = Relation.inject(toInjectItem);
+                  } catch (err) {
+                    throw new Error('Failed to inject ' + def.type + ' relation: "' + def.relation + '"! ' + err.message);
+                  }
+                }
+                return toInjectItem;
+              });
+              if (def.localKeys) {
+                _set(props, def.localKeys, toInject.map(function (injected) {
+                  return get(injected, relationIdAttribute);
+                }));
+              }
+            } else {
+              // handle injecting belongsTo and hasOne relations
+              if (toInject !== Relation.get(get(toInject, relationIdAttribute))) {
+                try {
+                  if (def.localKey) {
+                    _set(props, def.localKey, get(toInject, Relation.idAttribute));
+                  }
+                  if (foreignKey) {
+                    _set(toInject, def.foreignKey, get(props, idAttribute));
+                  }
+                  toInject = Relation.inject(toInject);
+                } catch (err) {
+                  throw new Error('Failed to inject ' + def.type + ' relation: "' + def.relation + '"!');
+                }
+              }
+            }
+          }
+          // remove relation properties from the item, since those relations have been injected by now
+          if (def.link || def.link === undefined && _this.linkRelations) {
+            unset(props, def.localField);
+          } else {
+            _set(props, def.localField, toInject);
+          }
+        });
+
+        if (existing) {
+          var onConflict = opts.onConflict || _this.onConflict;
+          if (onConflict === 'merge') {
+            deepMixIn(existing, props);
+          } else if (onConflict === 'replace') {
+            forOwn(existing, function (value, key) {
+              if (key !== idAttribute && !props.hasOwnProperty(key)) {
+                delete existing[key];
+              }
+            });
+            existing.set(props);
+          }
+          props = existing;
+          collection.update(props);
+        } else {
+          props = _this.createInstance(props);
+          if (autoPk) {
+            props._set('autoPk', autoPk);
+          }
+          collection.insert(props);
+        }
+        props._set('$', timestamp);
+        return props;
+      });
+      return singular ? items.length ? items[0] : undefined : items;
+    },
+
+    /**
+     * Remove the instance with the given primary key from the Collection instance
+     * of this Model.
+     *
+     * @param {(string|number)} id - The primary key of the instance to be removed.
+     * @return {Model} The removed item, if any.
+     */
+    eject: function eject(id, opts) {
+      var op = 'eject';
+      this.dbg(op, 'id:', id, 'opts:', opts);
+      opts || (opts = {});
+      opts.op = op;
+      var item = this.get(id);
+      if (item) {
+        item._unset('$');
+        this.collection.remove(item);
+      }
+      return item;
+    },
+
+    /**
+     * Remove the instances selected by "query" from the Collection instance of
+     * this Model.
+     *
+     * @param {Object} [query] - The query used to select instances to remove.
+     * @return {Model[]} The removed instances, if any.
+     */
+    ejectAll: function ejectAll(params, opts) {
+      var op = 'ejectAll';
+      this.dbg(op, 'params:', params, 'opts:', opts);
+      opts || (opts = {});
+      opts.op = op;
+      var items = this.filter(params);
+      var collection = this.collection;
+      items.forEach(function (item) {
+        collection.remove(item);
+      });
+      return items;
+    },
+
+    /**
+     * Return the instance in the Collection instance of this Model that has
+     * the given primary key, if such an instance can be found.
+     *
+     * @param {(string|number)} id - Primary key of the instance to retrieve.
+     * @return {Model} The instance or undefined.
+     */
+    get: function get(id) {
+      this.dbg('get', 'id:', id);
+      var instances = this.collection.get(id);
+      return instances.length ? instances[0] : undefined;
+    },
+
+    /**
+     * Proxy for Collection#between
+     */
+    between: function between() {
+      var _collection;
+
+      return (_collection = this.collection).between.apply(_collection, arguments);
+    },
+
+    /**
+     * Proxy for Collection#getAll
+     */
+    getAll: function getAll() {
+      var _collection2;
+
+      return (_collection2 = this.collection).getAll.apply(_collection2, arguments);
+    },
+
+    /**
+     * Proxy for Collection#filter
+     */
+    filter: function filter(query, opts) {
+      opts || (opts = {});
+      return this.collection.filter(query, opts);
+    },
+
+    /**
+    * Proxy for `Model.collection.query()`.
+     * @return {Query}
+     */
+    query: function query() {
+      return this.collection.query();
+    },
+
+    /**
+     * Return the registered adapter with the given name or the default adapter if
+     * no name is provided.
+     *
+     * @param {string} [name]- The name of the adapter to retrieve.
+     * @return {Adapter} The adapter, if any.
+     */
+    getAdapter: function getAdapter(name) {
+      this.dbg('getAdapter', 'name:', name);
+      var adapter = this.getAdapterName(name);
+      if (!adapter) {
+        throw new ReferenceError(adapter + ' not found!');
+      }
+      return this.adapters[adapter];
+    },
+
+    /**
+     * Return the name of a registered adapter based on the given name or options,
+     * or the name of the default adapter if no name provided
+     *
+     * @param {Object} [opts] - The options, if any.
+     * @return {string} The name of the adapter.
+     */
+    getAdapterName: function getAdapterName(opts) {
+      opts || (opts = {});
+      if (isString(opts)) {
+        opts = { adapter: opts };
+      }
+      return opts.adapter || opts.defaultAdapter;
+    },
+
+    /**
+     * Lifecycle hook. Called by `Model.create` after `Model.create` checks
+     * whether it can do an upsert and before `Model.create` calls the `create`
+     * method of an adapter.
+     *
+     * `Model.beforeCreate` will receive the same arguments that are passed to
+     * `Model.create`. If `Model.beforeCreate` returns a promise, `Model.create`
+     * will wait for the promise to resolve before continuing. If the promise
+     * rejects, then the promise returned by `Model.create` will reject. If
+     * `Model.beforeCreate` does not return a promise, `Model.create` will resume
+     * execution immediately.
+     *
+     * @param {Object} props - Properties object that was passed to `Model.create`.
+     * @param {Object} opts - Options object that was passed to `Model.create`.
+     */
+    beforeCreate: function beforeCreate() {},
+
+    /**
+     * The "C" in "CRUD", `Model.create` creates a single entity using the
+     * `create` method of an adapter. If the `props` passed to `Model.create`
+     * contain a primary key as configured by `Model.idAttribute` and
+     * `opts.upsert` is `true` of `Model.upsert` is `true` and `opts.upsert` is
+     * not `false`, then `Model.update` will be called instead.
+     *
+     * 1. `Model.beforeCreate` is called and passed the same arguments passed to
+     * `Model.create`.
+     * 1. `props` and `opts` are passed to the `create` method of the adapter
+     * specified by `opts.adapter` or `Model.defaultAdapter`.
+     * 1. `Model.afterCreate` is called with the `data` argument returned by the
+     * adapter's `create` method and the `opts` argument passed to `Model.create`.
+     * 1. If `opts.raw` is `true` or `Model.raw` is `true` and `opts.raw` is not
+     * `false`, then a result object is returned that contained the created entity
+     * and some metadata about the operation and its result. Otherwise, the
+     * promise returned by `Model.create` resolves with the created entity.
+     *
+     * @param {Object} props - The properties from which to create the new entity.
+     * @param {Object} [opts] - Configuration options.
+     * @param {string} [opts.adapter] - The name of the registered adapter to use.
+     * @param {boolean} [opts.raw] - The name of the registered adapter to use.
+     * @param {boolean} [opts.upsert] - Whether to call {@link Model.update}
+     * instead if `props` has a primary key.
+     * @return {Object} The created entity, or if `raw` is `true` then a result
+     * object.
+     */
+    create: function create(props, opts) {
+      var _this4 = this;
+
+      var op = 'create';
+      this.dbg(op, 'props:', props, 'opts:', opts);
+      var adapterName = undefined;
 
       props || (props = {});
       opts || (opts = {});
-      var _props = {};
-      Object.defineProperties(_this2, {
-        _get: {
-          value: function value(key) {
-            return get(_props, key);
+      _(this, opts);
+      opts.op = op;
+
+      if (opts.upsert && get(props, this.idAttribute) && (!this.is(props) || !props._get('autoPk'))) {
+        return this.update(get(props, this.idAttribute), props, opts);
+      }
+      return resolve(this.beforeCreate(props, opts)).then(function () {
+        adapterName = _this4.getAdapterName(opts);
+        return _this4.getAdapter(adapterName).create(_this4, _this4.prototype.toJSON.call(props, opts), opts);
+      }).then(function (data) {
+        return resolve(_this4.afterCreate(data, opts)).then(function () {
+          if (_this4.is(props) && props._get('$')) {
+            _this4.eject(get(props, _this4.idAttribute));
           }
-        },
-        _set: {
-          value: function value(key, _value) {
-            return _set(_props, key, _value);
+          return handleResponse(_this4, data, opts, adapterName);
+        });
+      });
+    },
+
+    /**
+     * Lifecycle hook. Called by `Model.create` after `Model.create` call the
+     * `create` method of an adapter.
+     *
+     * `Model.afterCreate` will receive the `data` argument returned by the
+     * adapter's `create` method and the `opts` argument passed to `Model.create`.
+     * If `Model.afterCreate` returns a promise, `Model.create` will wait for the
+     * promise to resolve before continuing. If the promise rejects, then the
+     * promise returned by `Model.create` will reject. If `Model.afterCreate` does
+     * not return a promise, `Model.create` will resume execution immediately.
+     *
+     * @param {Object} data - Data object returned by the adapter's `create` method.
+     * @param {Object} opts - Options object that was passed to `Model.create`.
+     */
+    afterCreate: function afterCreate() {},
+    beforeCreateMany: function beforeCreateMany() {},
+    createMany: function createMany(items, opts) {
+      var _this5 = this;
+
+      var op = 'createMany';
+      this.dbg(op, 'items:', items, 'opts:', opts);
+      var adapterName = undefined;
+
+      items || (items = []);
+      opts || (opts = {});
+      _(this, opts);
+      opts.op = op;
+
+      if (opts.upsert) {
+        var _ret2 = (function () {
+          var hasId = true;
+          items.forEach(function (item) {
+            hasId = hasId && get(item, _this5.idAttribute) && (!isFunction(item._get) || !item._get('autoPk'));
+          });
+          if (hasId) {
+            return {
+              v: _this5.updateMany(items, opts)
+            };
           }
-        },
-        _unset: {
-          value: function value(key) {
-            return unset(_props, key);
+        })();
+
+        if ((typeof _ret2 === 'undefined' ? 'undefined' : babelHelpers.typeof(_ret2)) === "object") return _ret2.v;
+      }
+
+      return resolve(this.beforeCreateMany(items, opts)).then(function () {
+        adapterName = _this5.getAdapterName(opts);
+        return _this5.getAdapter(adapterName).createMany(_this5, items.map(function (item) {
+          return _this5.prototype.toJSON.call(item, opts);
+        }), opts);
+      }).then(function (data) {
+        return resolve(_this5.afterCreateMany(data, opts)).then(function () {
+          items.forEach(function (item) {
+            if (_this5.is(item) && item._get('$')) {
+              _this5.eject(get(item, _this5.idAttribute));
+            }
+          });
+          return handleResponse(_this5, data, opts, adapterName);
+        });
+      });
+    },
+    afterCreateMany: function afterCreateMany() {},
+    beforeFind: function beforeFind() {},
+    find: function find(id, opts) {
+      var _this6 = this;
+
+      var op = 'find';
+      this.dbg(op, 'id:', id, 'opts:', opts);
+      var adapterName = undefined;
+
+      opts || (opts = {});
+      _(this, opts);
+      opts.op = op;
+
+      return resolve(this.beforeFind(id, opts)).then(function () {
+        adapterName = _this6.getAdapterName(opts);
+        return _this6.getAdapter(adapterName).find(_this6, id, opts);
+      }).then(function (data) {
+        return resolve(_this6.afterFind(data, opts)).then(function () {
+          return handleResponse(_this6, data, opts, adapterName);
+        });
+      });
+    },
+    afterFind: function afterFind() {},
+    beforeFindAll: function beforeFindAll() {},
+    findAll: function findAll(query, opts) {
+      var _this7 = this;
+
+      var op = 'findAll';
+      this.dbg(op, 'query:', query, 'opts:', opts);
+      var adapterName = undefined;
+
+      query || (query = {});
+      opts || (opts = {});
+      _(this, opts);
+      opts.op = op;
+
+      return resolve(this.beforeFindAll(query, opts)).then(function () {
+        adapterName = _this7.getAdapterName(opts);
+        return _this7.getAdapter(adapterName).findAll(_this7, query, opts);
+      }).then(function (data) {
+        return resolve(_this7.afterFindAll(data, opts)).then(function () {
+          return handleResponse(_this7, data, opts, adapterName);
+        });
+      });
+    },
+    afterFindAll: function afterFindAll() {},
+    beforeUpdate: function beforeUpdate() {},
+    update: function update(id, props, opts) {
+      var _this8 = this;
+
+      var op = 'update';
+      this.dbg(op, 'id:', id, 'props:', props, 'opts:', opts);
+      var adapterName = undefined;
+
+      props || (props = {});
+      opts || (opts = {});
+      _(this, opts);
+      opts.op = op;
+
+      return resolve(this.beforeUpdate(id, props, opts)).then(function () {
+        adapterName = _this8.getAdapterName(opts);
+        return _this8.getAdapter(adapterName).update(_this8, id, _this8.prototype.toJSON.call(props, opts), opts);
+      }).then(function (data) {
+        return resolve(_this8.afterUpdate(id, data, opts)).then(function () {
+          return handleResponse(_this8, data, opts, adapterName);
+        });
+      });
+    },
+    afterUpdate: function afterUpdate() {},
+    beforeUpdateMany: function beforeUpdateMany() {},
+    updateMany: function updateMany(items, opts) {
+      var _this9 = this;
+
+      var op = 'updateMany';
+      this.dbg(op, 'items:', items, 'opts:', opts);
+      var adapterName = undefined;
+
+      items || (items = []);
+      opts || (opts = {});
+      _(this, opts);
+      opts.op = op;
+
+      return resolve(this.beforeUpdateMany(items, opts)).then(function () {
+        adapterName = _this9.getAdapterName(opts);
+        return _this9.getAdapter(adapterName).updateMany(_this9, items.map(function (item) {
+          return _this9.prototype.toJSON.call(item, opts);
+        }), opts);
+      }).then(function (data) {
+        return resolve(_this9.afterUpdateMany(data, opts)).then(function () {
+          return handleResponse(_this9, data, opts, adapterName);
+        });
+      });
+    },
+    afterUpdateMany: function afterUpdateMany() {},
+    beforeUpdateAll: function beforeUpdateAll() {},
+
+    /**
+     * @param {Object} query={} - Selection query.
+     * @param {Object} props - Update to apply to selected entities.
+     * @param {Object} [opts] - Configuration options.
+     * @param {boolean} [opts.raw=false] TODO
+     */
+    updateAll: function updateAll(query, props, opts) {
+      var _this10 = this;
+
+      var op = 'updateAll';
+      this.dbg(op, 'query:', query, 'props:', props, 'opts:', opts);
+      var adapterName = undefined;
+
+      query || (query = {});
+      props || (props = {});
+      opts || (opts = {});
+      _(this, opts);
+      opts.op = op;
+
+      return resolve(this.beforeUpdateAll(query, props, opts)).then(function () {
+        adapterName = _this10.getAdapterName(opts);
+        return _this10.getAdapter(adapterName).updateAll(_this10, query, props, opts);
+      }).then(function (data) {
+        return resolve(_this10.afterUpdateAll(query, data, opts)).then(function () {
+          return handleResponse(_this10, data, opts, adapterName);
+        });
+      });
+    },
+    afterUpdateAll: function afterUpdateAll() {},
+    beforeDestroy: function beforeDestroy() {},
+
+    /**
+     * @param {(string|number)} id
+     * @param {Object} [opts] - Configuration options.
+     * @param {boolean} [opts.raw=false] TODO
+     */
+    destroy: function destroy(id, opts) {
+      var _this11 = this;
+
+      var op = 'destroy';
+      this.dbg(op, 'id:', id, 'opts:', opts);
+      var adapterName = undefined;
+
+      opts || (opts = {});
+      _(this, opts);
+      opts.op = op;
+
+      return resolve(this.beforeDestroy(id, opts)).then(function () {
+        adapterName = _this11.getAdapterName(opts);
+        return _this11.getAdapter(adapterName).destroy(_this11, id, opts);
+      }).then(function (data) {
+        return resolve(_this11.afterDestroy(id, opts)).then(function () {
+          if (opts.raw) {
+            data.adapter = adapterName;
+            if (opts.autoEject) {
+              data.data = _this11.eject(id, opts);
+            }
+            return data;
+          } else if (opts.autoEject) {
+            data = _this11.eject(id, opts);
           }
+          return data;
+        });
+      });
+    },
+    afterDestroy: function afterDestroy() {},
+    beforeDestroyAll: function beforeDestroyAll() {},
+    destroyAll: function destroyAll(query, opts) {
+      var _this12 = this;
+
+      var op = 'destroyAll';
+      this.dbg(op, 'query:', query, 'opts:', opts);
+      var adapterName = undefined;
+
+      query || (query = {});
+      opts || (opts = {});
+      _(this, opts);
+      opts.op = op;
+
+      return resolve(this.beforeDestroyAll(query, opts)).then(function () {
+        adapterName = _this12.getAdapterName(opts);
+        return _this12.getAdapter(adapterName).destroyAll(_this12, query, opts);
+      }).then(function (data) {
+        return resolve(_this12.afterDestroyAll(query, opts)).then(function () {
+          if (opts.raw) {
+            data.adapter = adapterName;
+            if (opts.autoEject) {
+              data.data = _this12.ejectAll(query, opts);
+            }
+            return data;
+          } else if (opts.autoEject) {
+            data = _this12.ejectAll(query, opts);
+          }
+          return data;
+        });
+      });
+    },
+    afterDestroyAll: function afterDestroyAll() {},
+    beforeLoadRelations: function beforeLoadRelations() {},
+    loadRelations: function loadRelations(id, relations, opts) {
+      var _this13 = this;
+
+      var _this = this;
+      var instance = _this.is(id) ? id : undefined;
+      id = instance ? get(instance, _this.idAttribute) : id;
+      var op = 'loadRelations';
+      _this.dbg(op, 'id:', id, 'relations:', relations, 'opts:', opts);
+      relations || (relations = []);
+      opts || (opts = {});
+      var relationList = _this.relationList || [];
+      _(_this, opts);
+      opts.op = op;
+      return resolve(_this.beforeLoadRelations(id, relations, opts)).then(function () {
+        if (isSorN(id) && !instance) {
+          instance = _this.get(instance);
+        }
+        if (!instance) {
+          throw new Error('You passed an id of an instance not found in the collection of the Model!');
+        }
+        if (isString(relations)) {
+          relations = [relations];
+        }
+        return Promise.all(relationList.map(function (def) {
+          if (isFunction(def.load)) {
+            return def.load(_this, def, instance, opts);
+          }
+          var task = undefined;
+          if (def.foreignKey) {
+            task = def.Relation.findAll(babelHelpers.defineProperty({}, def.foreignKey, id), opts);
+          } else if (def.localKey) {
+            var key = get(instance, def.localKey);
+            if (isSorN(key)) {
+              task = def.Relation.find(key, opts);
+            }
+          } else if (def.localKeys) {
+            task = def.Relation.findAll(babelHelpers.defineProperty({}, def.Relation.idAttribute, {
+              'in': get(instance, def.localKeys)
+            }), opts);
+          } else if (def.foreignKeys) {
+            task = def.Relation.findAll(babelHelpers.defineProperty({}, def.Relation.idAttribute, {
+              'contains': get(instance, _this.idAttribute)
+            }), opts);
+          }
+          if (task) {
+            task = task.then(function (data) {
+              if (opts.raw) {
+                data = data.data;
+              }
+              _set(instance, def.localField, def.type === 'hasOne' ? data.length ? data[0] : undefined : data);
+            });
+          }
+          return task;
+        }));
+      }).then(function () {
+        return resolve(_this13.afterLoadRelations(instance, relations, opts)).then(function () {
+          return instance;
+        });
+      });
+    },
+    afterLoadRelations: function afterLoadRelations() {},
+    log: function log(level) {
+      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+      }
+
+      if (level && !args.length) {
+        args.push(level);
+        level = 'debug';
+      }
+      if (level === 'debug' && !this.debug) {
+        return;
+      }
+      var prefix = level.toUpperCase() + ': (' + this.name + ')';
+      if (console[level]) {
+        var _console;
+
+        (_console = console)[level].apply(_console, [prefix].concat(args));
+      } else {
+        var _console2;
+
+        (_console2 = console).log.apply(_console2, [prefix].concat(args));
+      }
+    },
+    dbg: function dbg() {
+      for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+        args[_key2] = arguments[_key2];
+      }
+
+      this.log.apply(this, ['debug'].concat(args));
+    },
+
+    /**
+     * Usage:
+     *
+     * Post.belongsTo(User, {
+     *   localKey: 'myUserId'
+     * })
+     *
+     * Comment.belongsTo(User)
+     * Comment.belongsTo(Post, {
+     *   localField: '_post'
+     * })
+     */
+    belongsTo: function belongsTo$$(model, opts) {
+      return belongsTo(model, opts)(this);
+    },
+
+    /**
+     * Usage:
+     *
+     * User.hasMany(Post, {
+     *   localField: 'my_posts'
+     * })
+     */
+    hasMany: function hasMany$$(model, opts) {
+      return hasMany(model, opts)(this);
+    },
+
+    /**
+     * Usage:
+     *
+     * User.hasOne(Profile, {
+     *   localField: '_profile'
+     * })
+     */
+    hasOne: function hasOne$$(model, opts) {
+      return hasOne(model, opts)(this);
+    },
+
+    /**
+     * Invoke the {@link module:js-data.exports.setSchema setSchema} decorator on
+     * this Model.
+     * @param {Object} opts - Property configurations.
+     * @return {Model} A reference to the Model for chaining.
+     */
+    setSchema: function setSchema$$(opts) {
+      return setSchema(opts)(this);
+    },
+
+    /**
+     * Invoke the {@link module:js-data.exports.configure configure} decorator on
+     * this Model.
+     * @param {Object} opts - Configuration
+     * @return {Model} A reference to the Model for chaining.
+     */
+    configure: function configure$$(opts) {
+      return configure(opts)(this);
+    },
+
+    /**
+     * Invoke the {@link module:js-data.exports.registerAdapter registerAdapter}
+     * decorator on this Model.
+     * @param {string} name - The name of the adapter to register.
+     * @param {Adapter} adapter - The adapter to register.
+     * @param {Object} [opts] - Configuration options.
+     * @param {boolean} [opts.default=false] - Whether to make the adapter the
+     * default for this Model.
+     * @return {Model} A reference to the Model for chaining.
+     */
+    registerAdapter: function registerAdapter$$(name, adapter, opts) {
+      return registerAdapter(name, adapter, opts)(this);
+    },
+
+    /**
+     * Extend this Model and return a new child Model. Static properties on this
+     * Model will be shallow copied to the child Model. The child Model's
+     * prototype will point to the parent Model.
+     *
+     * @example
+     * var User = JSData.Model.extend({}, { name: 'User' })
+     * @param {Object} props={} - Properties to add to the prototype of the class.
+     * @param {Function} [props.initialize] - Optional function to invoke during
+     * construction of instances of the class. Will receive any arguments passed
+     * to the constructor. "this" will refer to the instance being constructed.
+     * @param {Object} classProps - Static properties to add to the class.
+     * @param {string} classProps.name - Name of the class. Required.
+     * @param {string} [classProps.idAttribute='id'] - Field to use as the unique
+     * identifier for instances of the class.
+     * @param {Object} [classProps.schema] - Value to pass to the {@link Model.setSchema setSchema}
+     * method of the class after the class is created.
+     */
+    extend: function extend(props, classProps) {
+      var Parent = this;
+      var Child = undefined;
+
+      Parent.dbg('extend', 'props:', props, 'classProps:', classProps);
+
+      props || (props = {});
+      classProps || (classProps = {});
+
+      var initialize = props.initialize;
+      delete props.initialize;
+
+      if (props.hasOwnProperty('constructor')) {
+        Child = props.constructor;
+        delete props.constructor;
+      } else {
+        if (!classProps.name) {
+          throw new TypeError('name: Expected string, found ' + babelHelpers.typeof(classProps.name) + '!');
+        }
+        if (classProps.csp) {
+          Child = function () {
+            classCallCheck(this, Child);
+
+            for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+              args[_key3] = arguments[_key3];
+            }
+
+            var _this = possibleConstructorReturn(this, (Child.__super__ || Object.getPrototypeOf(Child)).apply(this, args));
+            if (initialize) {
+              initialize.apply(_this, args);
+            }
+            return _this;
+          };
+        } else {
+          var name = pascalCase(classProps.name);
+          var func = 'return function ' + name + '() {\n                        classCallCheck(this, ' + name + ')\n                        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {\n                          args[_key] = arguments[_key];\n                        }\n                        var _this = possibleConstructorReturn(this, (' + name + '.__super__ || Object.getPrototypeOf(' + name + ')).apply(this, args));\n                        if (initialize) {\n                          initialize.apply(_this, arguments)\n                        }\n                        return _this\n                      }';
+          Child = new Function('classCallCheck', 'possibleConstructorReturn', 'Parent', 'initialize', func)(classCallCheck, possibleConstructorReturn, Parent, initialize); // eslint-disable-line
+        }
+      }
+
+      classProps.shortname = classProps.shortname || camelCase(Child.name || classProps.name);
+      delete classProps.name;
+
+      var _schema = classProps.schema;
+      delete classProps.schema;
+
+      Child.prototype = Object.create(Parent && Parent.prototype, {
+        constructor: {
+          value: Child,
+          enumerable: false,
+          writable: true,
+          configurable: true
         }
       });
-      _this2._set('creating', true);
-      if (opts.noValidate) {
-        _this2._set('noValidate', true);
-      }
-      fillIn(_this2, props);
-      _this2._unset('creating');
-      _this2._unset('noValidate');
-      _this2._set('previous', copy(props));
-      return _this2;
-    }
 
-    babelHelpers.createClass(Model, [{
-      key: 'schema',
-      value: function schema(key) {
-        var _schema = this.constructor.schema;
-        return key ? _schema[key] : _schema;
-      }
-    }, {
-      key: 'validate',
-      value: function validate$$(obj, value) {
-        var errors = [];
-        var _schema = this.schema();
-        if (!obj) {
-          obj = this;
-        } else if (isString(obj)) {
-          var prop = _schema[obj];
-          if (prop) {
-            errors = validate(prop, value) || [];
-          }
+      if (Parent && classProps.strictEs6Class) {
+        if (Object.setPrototypeOf) {
+          Object.setPrototypeOf(Child, Parent);
         } else {
-          forOwn(_schema, function (prop, key) {
-            errors = errors.concat(validate(prop, get(obj, key)) || []);
+          Child.__proto__ = Parent; // eslint-disable-line
+        }
+      } else {
+          var keys = Object.getOwnPropertyNames(Parent);
+          keys.forEach(function (key) {
+            if (keysToSkip[key]) {
+              return;
+            }
+            Object.defineProperty(Child, key, Object.getOwnPropertyDescriptor(Parent, key));
           });
         }
-        return errors.length ? errors : undefined;
+      Object.defineProperty(Child, '__super__', {
+        configurable: true,
+        value: Parent
+      });
+
+      configure(props)(Child.prototype);
+      configure(classProps)(Child);
+      if (_schema) {
+        setSchema(_schema)(Child);
       }
 
-      /**
-       * @param {Object} [opts] Configuration options. @see {@link Model.create}.
-       */
-
-    }, {
-      key: 'create',
-      value: function create(opts) {
-        return this.constructor.create(this, opts);
-      }
-    }, {
-      key: 'save',
-      value: function save(opts) {
-        // TODO: move actual save logic here
-        var Ctor = this.constructor;
-
-        var adapterName = Ctor.getAdapterName(opts);
-        return Ctor.getAdapter(adapterName).update(Ctor, get(this, Ctor.idAttribute), this, opts);
-      }
-
-      /**
-       * @param {Object} [opts] Configuration options. @see {@link Model.destroy}.
-       */
-
-    }, {
-      key: 'destroy',
-      value: function destroy(opts) {
-        // TODO: move actual destroy logic here
-        var Ctor = this.constructor;
-        return Ctor.destroy(get(this, Ctor.idAttribute), opts);
-      }
-
-      // TODO: move logic for single-item async operations onto the instance.
-
-      /**
-       * Return the value at the given path for this instance.
-       *
-       * @param {string} key - Path of value to retrieve.
-       * @return {*} Value at path.
-       */
-
-    }, {
-      key: 'get',
-      value: function get$$(key) {
-        return get(this, key);
-      }
-
-      /**
-       * Set the value for a given key, or the values for the given keys if "key" is
-       * an object.
-       *
-       * @param {(string|Object)} key - Key to set or hash of key-value pairs to set.
-       * @param {*} [value] - Value to set for the given key.
-       * @param {Object} [opts] - Optional configuration.
-       * - boolean [silent=false] - Whether to trigger change events.
-       */
-
-    }, {
-      key: 'set',
-      value: function set(key, value, opts) {
-        opts || (opts = {});
-        // TODO: implement "silent"
-        return _set(this, key, value);
-      }
-    }, {
-      key: 'hashCode',
-      value: function hashCode() {
-        return get(this, this.constructor.idAttribute);
-      }
-    }, {
-      key: 'changes',
-      value: function changes(key) {
-        if (key) {
-          return this._get('changes.' + key);
-        }
-        return this._get('changes');
-      }
-    }, {
-      key: 'changed',
-      value: function changed() {
-        return this._get('changed');
-      }
-    }, {
-      key: 'hasChanges',
-      value: function hasChanges() {
-        return !!(this._get('changed') || []).length;
-      }
-    }, {
-      key: 'commit',
-      value: function commit() {
-        this._unset('changed');
-        this._set('changes', {});
-        this._set('previous', copy(this));
-        return this;
-      }
-    }, {
-      key: 'previous',
-      value: function previous(key) {
-        if (key) {
-          return this._get('previous.' + key);
-        }
-        return this._get('previous');
-      }
-    }, {
-      key: 'revert',
-      value: function revert(opts) {
-        var _this3 = this;
-
-        var previous = this._get('previous') || {};
-        opts || (opts = {});
-        opts.preserve || (opts.preserve = []);
-        forOwn(this, function (value, key) {
-          if (key !== _this3.constructor.idAttribute && !previous.hasOwnProperty(key) && _this3.hasOwnProperty(key) && opts.preserve.indexOf(key) === -1) {
-            delete _this3[key];
-          }
-        });
-        forOwn(previous, function (value, key) {
-          if (opts.preserve.indexOf(key) === -1) {
-            _this3[key] = value;
-          }
-        });
-        this.commit();
-        return this;
-      }
-
-      /**
-       * Return a plain object representation of this instance.
-       *
-       * @param {Object} [opts] - Configuration options.
-       * @param {string[]} [opts.with] - Array of relation names or relation fields
-       * to include in the representation.
-       * @return {Object} Plain object representation of instance.
-       */
-
-    }, {
-      key: 'toJSON',
-      value: function toJSON(opts) {
-        var _this4 = this;
-
-        opts || (opts = {});
-        var Ctor = this.constructor;
-        var json = this;
-        if (this instanceof Model) {
-          json = {};
-          _set(json, this);
-          if (Ctor && Ctor.relationList && opts.with) {
-            if (isString(opts.with)) {
-              opts.with = [opts.with];
-            }
-            Ctor.relationList.forEach(function (def) {
-              var containedName = undefined;
-              if (opts.with.indexOf(def.relation) !== -1) {
-                containedName = def.relation;
-              } else if (opts.with.indexOf(def.localField) !== -1) {
-                containedName = def.localField;
-              }
-              if (containedName) {
-                (function () {
-                  var optsCopy = { with: opts.with.slice() };
-                  optsCopy.with.splice(optsCopy.with.indexOf(containedName), 1);
-                  optsCopy.with.forEach(function (relation, i) {
-                    if (relation && relation.indexOf(containedName) === 0 && relation.length >= containedName.length && relation[containedName.length] === '.') {
-                      optsCopy.with[i] = relation.substr(containedName.length + 1);
-                    } else {
-                      optsCopy.with[i] = '';
-                    }
-                  });
-                  var relationData = get(_this4, def.localField);
-                  if (relationData) {
-                    if (isArray(relationData)) {
-                      _set(json, def.localField, relationData.map(function (item) {
-                        return def.Relation.prototype.toJSON.call(item, optsCopy);
-                      }));
-                    } else {
-                      _set(json, def.localField, def.Relation.prototype.toJSON.call(relationData, optsCopy));
-                    }
-                  }
-                })();
-              }
-            });
-          }
-        }
-        return json;
-      }
-
-      /**
-       * Static methods
-       */
-
-      /**
-       * Create a new secondary index in the Collection instance of this Model.
-       *
-       * @param {string} name - The name of the new secondary index
-       * @param {string[]} keyList - The list of keys to be used to create the index.
-       */
-
-    }], [{
-      key: 'createIndex',
-      value: function createIndex(name, keyList) {
-        this.dbg('createIndex', 'name:', name, 'keyList:', keyList);
-        this.collection.createIndex(name, keyList);
-      }
-
-      /**
-       * Create a new instance of this Model from the provided properties.
-       *
-       * @param {Object} props - The initial properties of the new instance.
-       * @return {Model} The instance.
-       */
-
-    }, {
-      key: 'createInstance',
-      value: function createInstance(props) {
-        var Ctor = this;
-        // Check to make sure "props" is not already an instance of this Model.
-        return props instanceof Ctor ? props : new Ctor(props);
-      }
-
-      /**
-       * Check whether "instance" is actually an instance of this Model.
-       *
-       * @param {Model} The instance to check.
-       * @return {boolean} Whether "instance" is an instance of this Model.
-       */
-
-    }, {
-      key: 'is',
-      value: function is(instance) {
-        return instance instanceof this;
-      }
-    }, {
-      key: 'getAutoPkItems',
-      value: function getAutoPkItems() {
-        return this.getAll().filter(function (item) {
-          return item._get('autoPk');
-        });
-      }
-
-      /**
-       * Insert the provided item or items into the Collection instance of this
-       * Model.
-       *
-       * If an item is already in the collection then the provided item will either
-       * merge with or replace the existing item based on the value of the
-       * "onConflict" option.
-       *
-       * The collection's secondary indexes will be updated as each item is visited.
-       *
-       * @param {(Object|Object[]|Model|Model[])} items - The item or items to insert.
-       * @param {Object} [opts] - Configuration options.
-       * @param {string} [opts.onConflict] - What to do when an item is already in
-       * the Collection instance. Possible values are `merge` or `replace`.
-       * @return {(Model|Model[])} The injected entity or entities.
-       */
-
-    }, {
-      key: 'inject',
-      value: function inject(items, opts) {
-        var _this = this;
-        var op = 'inject';
-        _this.dbg(op, 'item(s):', items, 'opts:', opts);
-        opts || (opts = {});
-        opts.op = op;
-        var singular = false;
-        var collection = _this.collection;
-        var idAttribute = _this.idAttribute;
-        var relationList = _this.relationList || [];
-        if (!isArray(items)) {
-          items = [items];
-          singular = true;
-        }
-        items = items.map(function (props) {
-          var id = get(props, idAttribute);
-          var autoPk = false;
-          if (!isSorN(id)) {
-            if (opts.autoPk || opts.autoPk === undefined && _this.autoPk) {
-              id = uuid();
-              _set(props, idAttribute, id);
-              autoPk = true;
-            } else {
-              throw new TypeError('User#' + idAttribute + ': Expected string or number, found ' + (typeof id === 'undefined' ? 'undefined' : babelHelpers.typeof(id)) + '!');
-            }
-          }
-          var existing = _this.get(id);
-          if (props === existing) {
-            return existing;
-          }
-
-          relationList.forEach(function (def) {
-            var Relation = def.Relation;
-            var relationIdAttribute = Relation.idAttribute;
-            var foreignKey = def.foreignKey;
-
-            var toInject = get(props, def.localField);
-
-            if (isFunction(def.inject)) {
-              def.inject(_this, def, props);
-            } else if (toInject && def.inject !== false) {
-              if (isArray(toInject)) {
-                toInject = toInject.map(function (toInjectItem) {
-                  if (toInjectItem !== Relation.get(get(toInjectItem, relationIdAttribute))) {
-                    try {
-                      if (foreignKey) {
-                        _set(toInjectItem, foreignKey, id);
-                      }
-                      toInjectItem = Relation.inject(toInjectItem);
-                    } catch (err) {
-                      throw new Error('Failed to inject ' + def.type + ' relation: "' + def.relation + '"! ' + err.message);
-                    }
-                  }
-                  return toInjectItem;
-                });
-                if (def.localKeys) {
-                  _set(props, def.localKeys, toInject.map(function (injected) {
-                    return get(injected, relationIdAttribute);
-                  }));
-                }
-              } else {
-                // handle injecting belongsTo and hasOne relations
-                if (toInject !== Relation.get(get(toInject, relationIdAttribute))) {
-                  try {
-                    if (def.localKey) {
-                      _set(props, def.localKey, get(toInject, Relation.idAttribute));
-                    }
-                    if (foreignKey) {
-                      _set(toInject, def.foreignKey, get(props, idAttribute));
-                    }
-                    toInject = Relation.inject(toInject);
-                  } catch (err) {
-                    throw new Error('Failed to inject ' + def.type + ' relation: "' + def.relation + '"!');
-                  }
-                }
-              }
-            }
-            // remove relation properties from the item, since those relations have been injected by now
-            if (def.link || def.link === undefined && _this.linkRelations) {
-              unset(props, def.localField);
-            } else {
-              _set(props, def.localField, toInject);
-            }
-          });
-
-          if (existing) {
-            var onConflict = opts.onConflict || _this.onConflict;
-            if (onConflict === 'merge') {
-              deepMixIn(existing, props);
-            } else if (onConflict === 'replace') {
-              forOwn(existing, function (value, key) {
-                if (key !== idAttribute && !props.hasOwnProperty(key)) {
-                  delete existing[key];
-                }
-              });
-              existing.set(props);
-            }
-            props = existing;
-            collection.update(props);
-          } else {
-            props = _this.createInstance(props);
-            props._set('$', true);
-            if (autoPk) {
-              props._set('autoPk', autoPk);
-            }
-            collection.insert(props);
-          }
-          return props;
-        });
-        return singular ? items.length ? items[0] : undefined : items;
-      }
-
-      /**
-       * Remove the instance with the given primary key from the Collection instance
-       * of this Model.
-       *
-       * @param {(string|number)} id - The primary key of the instance to be removed.
-       * @return {Model} The removed item, if any.
-       */
-
-    }, {
-      key: 'eject',
-      value: function eject(id, opts) {
-        var op = 'eject';
-        this.dbg(op, 'id:', id, 'opts:', opts);
-        opts || (opts = {});
-        opts.op = op;
-        var item = this.get(id);
-        if (item) {
-          item._unset('$');
-          this.collection.remove(item);
-        }
-        return item;
-      }
-
-      /**
-       * Remove the instances selected by "query" from the Collection instance of
-       * this Model.
-       *
-       * @param {Object} [query] - The query used to select instances to remove.
-       * @return {Model[]} The removed instances, if any.
-       */
-
-    }, {
-      key: 'ejectAll',
-      value: function ejectAll(params, opts) {
-        var op = 'ejectAll';
-        this.dbg(op, 'params:', params, 'opts:', opts);
-        opts || (opts = {});
-        opts.op = op;
-        var items = this.filter(params);
-        var collection = this.collection;
-        items.forEach(function (item) {
-          collection.remove(item);
-        });
-        return items;
-      }
-
-      /**
-       * Return the instance in the Collection instance of this Model that has
-       * the given primary key, if such an instance can be found.
-       *
-       * @param {(string|number)} id - Primary key of the instance to retrieve.
-       * @return {Model} The instance or undefined.
-       */
-
-    }, {
-      key: 'get',
-      value: function get$$(id) {
-        this.dbg('get', 'id:', id);
-        var instances = this.collection.get(id);
-        return instances.length ? instances[0] : undefined;
-      }
-
-      /**
-       * Proxy for Collection#between
-       */
-
-    }, {
-      key: 'between',
-      value: function between() {
-        var _collection;
-
-        return (_collection = this.collection).between.apply(_collection, arguments);
-      }
-
-      /**
-       * Proxy for Collection#getAll
-       */
-
-    }, {
-      key: 'getAll',
-      value: function getAll() {
-        var _collection2;
-
-        return (_collection2 = this.collection).getAll.apply(_collection2, arguments);
-      }
-
-      /**
-       * Proxy for Collection#filter
-       */
-
-    }, {
-      key: 'filter',
-      value: function filter(query, opts) {
-        opts || (opts = {});
-        return this.collection.filter(query, opts);
-      }
-
-      /**
-      * Proxy for `Model.collection.query()`.
-       * @return {Query}
-       */
-
-    }, {
-      key: 'query',
-      value: function query() {
-        return this.collection.query();
-      }
-
-      /**
-       * Return the registered adapter with the given name or the default adapter if
-       * no name is provided.
-       *
-       * @param {string} [name]- The name of the adapter to retrieve.
-       * @return {Adapter} The adapter, if any.
-       */
-
-    }, {
-      key: 'getAdapter',
-      value: function getAdapter(name) {
-        this.dbg('getAdapter', 'name:', name);
-        var adapter = this.getAdapterName(name);
-        if (!adapter) {
-          throw new ReferenceError(adapter + ' not found!');
-        }
-        return this.adapters[adapter];
-      }
-
-      /**
-       * Return the name of a registered adapter based on the given name or options,
-       * or the name of the default adapter if no name provided
-       *
-       * @param {Object} [opts] - The options, if any.
-       * @return {string} The name of the adapter.
-       */
-
-    }, {
-      key: 'getAdapterName',
-      value: function getAdapterName(opts) {
-        opts || (opts = {});
-        if (isString(opts)) {
-          opts = { adapter: opts };
-        }
-        return opts.adapter || opts.defaultAdapter;
-      }
-
-      /**
-       * Lifecycle hook. Called by `Model.create` after `Model.create` checks
-       * whether it can do an upsert and before `Model.create` calls the `create`
-       * method of an adapter.
-       *
-       * `Model.beforeCreate` will receive the same arguments that are passed to
-       * `Model.create`. If `Model.beforeCreate` returns a promise, `Model.create`
-       * will wait for the promise to resolve before continuing. If the promise
-       * rejects, then the promise returned by `Model.create` will reject. If
-       * `Model.beforeCreate` does not return a promise, `Model.create` will resume
-       * execution immediately.
-       *
-       * @param {Object} props - Properties object that was passed to `Model.create`.
-       * @param {Object} opts - Options object that was passed to `Model.create`.
-       */
-
-    }, {
-      key: 'beforeCreate',
-      value: function beforeCreate() {}
-
-      /**
-       * The "C" in "CRUD", `Model.create` creates a single entity using the
-       * `create` method of an adapter. If the `props` passed to `Model.create`
-       * contain a primary key as configured by `Model.idAttribute` and
-       * `opts.upsert` is `true` of `Model.upsert` is `true` and `opts.upsert` is
-       * not `false`, then `Model.update` will be called instead.
-       *
-       * 1. `Model.beforeCreate` is called and passed the same arguments passed to
-       * `Model.create`.
-       * 1. `props` and `opts` are passed to the `create` method of the adapter
-       * specified by `opts.adapter` or `Model.defaultAdapter`.
-       * 1. `Model.afterCreate` is called with the `data` argument returned by the
-       * adapter's `create` method and the `opts` argument passed to `Model.create`.
-       * 1. If `opts.raw` is `true` or `Model.raw` is `true` and `opts.raw` is not
-       * `false`, then a result object is returned that contained the created entity
-       * and some metadata about the operation and its result. Otherwise, the
-       * promise returned by `Model.create` resolves with the created entity.
-       *
-       * @param {Object} props - The properties from which to create the new entity.
-       * @param {Object} [opts] - Configuration options.
-       * @param {string} [opts.adapter] - The name of the registered adapter to use.
-       * @param {boolean} [opts.raw] - The name of the registered adapter to use.
-       * @param {boolean} [opts.upsert] - Whether to call {@link Model.update}
-       * instead if `props` has a primary key.
-       * @return {Object} The created entity, or if `raw` is `true` then a result
-       * object.
-       */
-
-    }, {
-      key: 'create',
-      value: function create(props, opts) {
-        var _this5 = this;
-
-        var op = 'create';
-        this.dbg(op, 'props:', props, 'opts:', opts);
-        var adapterName = undefined;
-
-        props || (props = {});
-        opts || (opts = {});
-        _(this, opts);
-        opts.op = op;
-
-        if (opts.upsert && get(props, this.idAttribute) && (!this.is(props) || !props._get('autoPk'))) {
-          return this.update(get(props, this.idAttribute), props, opts);
-        }
-        return resolve(this.beforeCreate(props, opts)).then(function () {
-          adapterName = _this5.getAdapterName(opts);
-          return _this5.getAdapter(adapterName).create(_this5, _this5.prototype.toJSON.call(props, opts), opts);
-        }).then(function (data) {
-          return resolve(_this5.afterCreate(data, opts)).then(function () {
-            if (_this5.is(props) && props._get('$')) {
-              _this5.eject(get(props, _this5.idAttribute));
-            }
-            return handleResponse(_this5, data, opts, adapterName);
-          });
-        });
-      }
-
-      /**
-       * Lifecycle hook. Called by `Model.create` after `Model.create` call the
-       * `create` method of an adapter.
-       *
-       * `Model.afterCreate` will receive the `data` argument returned by the
-       * adapter's `create` method and the `opts` argument passed to `Model.create`.
-       * If `Model.afterCreate` returns a promise, `Model.create` will wait for the
-       * promise to resolve before continuing. If the promise rejects, then the
-       * promise returned by `Model.create` will reject. If `Model.afterCreate` does
-       * not return a promise, `Model.create` will resume execution immediately.
-       *
-       * @param {Object} data - Data object returned by the adapter's `create` method.
-       * @param {Object} opts - Options object that was passed to `Model.create`.
-       */
-
-    }, {
-      key: 'afterCreate',
-      value: function afterCreate() {}
-    }, {
-      key: 'beforeCreateMany',
-      value: function beforeCreateMany() {}
-    }, {
-      key: 'createMany',
-      value: function createMany(items, opts) {
-        var _this6 = this;
-
-        var op = 'createMany';
-        this.dbg(op, 'items:', items, 'opts:', opts);
-        var adapterName = undefined;
-
-        items || (items = []);
-        opts || (opts = {});
-        _(this, opts);
-        opts.op = op;
-
-        if (opts.upsert) {
-          var _ret2 = (function () {
-            var hasId = true;
-            items.forEach(function (item) {
-              hasId = hasId && get(item, _this6.idAttribute) && (!isFunction(item._get) || !item._get('autoPk'));
-            });
-            if (hasId) {
-              return {
-                v: _this6.updateMany(items, opts)
-              };
-            }
-          })();
-
-          if ((typeof _ret2 === 'undefined' ? 'undefined' : babelHelpers.typeof(_ret2)) === "object") return _ret2.v;
-        }
-
-        return resolve(this.beforeCreateMany(items, opts)).then(function () {
-          adapterName = _this6.getAdapterName(opts);
-          return _this6.getAdapter(adapterName).createMany(_this6, items.map(function (item) {
-            return _this6.prototype.toJSON.call(item, opts);
-          }), opts);
-        }).then(function (data) {
-          return resolve(_this6.afterCreateMany(data, opts)).then(function () {
-            items.forEach(function (item) {
-              if (_this6.is(item) && item._get('$')) {
-                _this6.eject(get(item, _this6.idAttribute));
-              }
-            });
-            return handleResponse(_this6, data, opts, adapterName);
-          });
-        });
-      }
-    }, {
-      key: 'afterCreateMany',
-      value: function afterCreateMany() {}
-    }, {
-      key: 'beforeFind',
-      value: function beforeFind() {}
-    }, {
-      key: 'find',
-      value: function find(id, opts) {
-        var _this7 = this;
-
-        var op = 'find';
-        this.dbg(op, 'id:', id, 'opts:', opts);
-        var adapterName = undefined;
-
-        opts || (opts = {});
-        _(this, opts);
-        opts.op = op;
-
-        return resolve(this.beforeFind(id, opts)).then(function () {
-          adapterName = _this7.getAdapterName(opts);
-          return _this7.getAdapter(adapterName).find(_this7, id, opts);
-        }).then(function (data) {
-          return resolve(_this7.afterFind(data, opts)).then(function () {
-            return handleResponse(_this7, data, opts, adapterName);
-          });
-        });
-      }
-    }, {
-      key: 'afterFind',
-      value: function afterFind() {}
-    }, {
-      key: 'beforeFindAll',
-      value: function beforeFindAll() {}
-    }, {
-      key: 'findAll',
-      value: function findAll(query, opts) {
-        var _this8 = this;
-
-        var op = 'findAll';
-        this.dbg(op, 'query:', query, 'opts:', opts);
-        var adapterName = undefined;
-
-        query || (query = {});
-        opts || (opts = {});
-        _(this, opts);
-        opts.op = op;
-
-        return resolve(this.beforeFindAll(query, opts)).then(function () {
-          adapterName = _this8.getAdapterName(opts);
-          return _this8.getAdapter(adapterName).findAll(_this8, query, opts);
-        }).then(function (data) {
-          return resolve(_this8.afterFindAll(data, opts)).then(function () {
-            return handleResponse(_this8, data, opts, adapterName);
-          });
-        });
-      }
-    }, {
-      key: 'afterFindAll',
-      value: function afterFindAll() {}
-    }, {
-      key: 'beforeUpdate',
-      value: function beforeUpdate() {}
-    }, {
-      key: 'update',
-      value: function update(id, props, opts) {
-        var _this9 = this;
-
-        var op = 'update';
-        this.dbg(op, 'id:', id, 'props:', props, 'opts:', opts);
-        var adapterName = undefined;
-
-        props || (props = {});
-        opts || (opts = {});
-        _(this, opts);
-        opts.op = op;
-
-        return resolve(this.beforeUpdate(id, props, opts)).then(function () {
-          adapterName = _this9.getAdapterName(opts);
-          return _this9.getAdapter(adapterName).update(_this9, id, _this9.prototype.toJSON.call(props, opts), opts);
-        }).then(function (data) {
-          return resolve(_this9.afterUpdate(id, data, opts)).then(function () {
-            return handleResponse(_this9, data, opts, adapterName);
-          });
-        });
-      }
-    }, {
-      key: 'afterUpdate',
-      value: function afterUpdate() {}
-    }, {
-      key: 'beforeUpdateMany',
-      value: function beforeUpdateMany() {}
-    }, {
-      key: 'updateMany',
-      value: function updateMany(items, opts) {
-        var _this10 = this;
-
-        var op = 'updateMany';
-        this.dbg(op, 'items:', items, 'opts:', opts);
-        var adapterName = undefined;
-
-        items || (items = []);
-        opts || (opts = {});
-        _(this, opts);
-        opts.op = op;
-
-        return resolve(this.beforeUpdateMany(items, opts)).then(function () {
-          adapterName = _this10.getAdapterName(opts);
-          return _this10.getAdapter(adapterName).updateMany(_this10, items.map(function (item) {
-            return _this10.prototype.toJSON.call(item, opts);
-          }), opts);
-        }).then(function (data) {
-          return resolve(_this10.afterUpdateMany(data, opts)).then(function () {
-            return handleResponse(_this10, data, opts, adapterName);
-          });
-        });
-      }
-    }, {
-      key: 'afterUpdateMany',
-      value: function afterUpdateMany() {}
-    }, {
-      key: 'beforeUpdateAll',
-      value: function beforeUpdateAll() {}
-      /**
-       * @param {Object} query={} - Selection query.
-       * @param {Object} props - Update to apply to selected entities.
-       * @param {Object} [opts] - Configuration options.
-       * @param {boolean} [opts.raw=false] TODO
-       */
-
-    }, {
-      key: 'updateAll',
-      value: function updateAll(query, props, opts) {
-        var _this11 = this;
-
-        var op = 'updateAll';
-        this.dbg(op, 'query:', query, 'props:', props, 'opts:', opts);
-        var adapterName = undefined;
-
-        query || (query = {});
-        props || (props = {});
-        opts || (opts = {});
-        _(this, opts);
-        opts.op = op;
-
-        return resolve(this.beforeUpdateAll(query, props, opts)).then(function () {
-          adapterName = _this11.getAdapterName(opts);
-          return _this11.getAdapter(adapterName).updateAll(_this11, query, props, opts);
-        }).then(function (data) {
-          return resolve(_this11.afterUpdateAll(query, data, opts)).then(function () {
-            return handleResponse(_this11, data, opts, adapterName);
-          });
-        });
-      }
-    }, {
-      key: 'afterUpdateAll',
-      value: function afterUpdateAll() {}
-    }, {
-      key: 'beforeDestroy',
-      value: function beforeDestroy() {}
-
-      /**
-       * @param {(string|number)} id
-       * @param {Object} [opts] - Configuration options.
-       * @param {boolean} [opts.raw=false] TODO
-       */
-
-    }, {
-      key: 'destroy',
-      value: function destroy(id, opts) {
-        var _this12 = this;
-
-        var op = 'destroy';
-        this.dbg(op, 'id:', id, 'opts:', opts);
-        var adapterName = undefined;
-
-        opts || (opts = {});
-        _(this, opts);
-        opts.op = op;
-
-        return resolve(this.beforeDestroy(id, opts)).then(function () {
-          adapterName = _this12.getAdapterName(opts);
-          return _this12.getAdapter(adapterName).destroy(_this12, id, opts);
-        }).then(function (data) {
-          return resolve(_this12.afterDestroy(id, opts)).then(function () {
-            if (opts.raw) {
-              data.adapter = adapterName;
-              if (opts.autoEject) {
-                data.data = _this12.eject(id, opts);
-              }
-              return data;
-            } else if (opts.autoEject) {
-              data = _this12.eject(id, opts);
-            }
-            return data;
-          });
-        });
-      }
-    }, {
-      key: 'afterDestroy',
-      value: function afterDestroy() {}
-    }, {
-      key: 'beforeDestroyAll',
-      value: function beforeDestroyAll() {}
-    }, {
-      key: 'destroyAll',
-      value: function destroyAll(query, opts) {
-        var _this13 = this;
-
-        var op = 'destroyAll';
-        this.dbg(op, 'query:', query, 'opts:', opts);
-        var adapterName = undefined;
-
-        query || (query = {});
-        opts || (opts = {});
-        _(this, opts);
-        opts.op = op;
-
-        return resolve(this.beforeDestroyAll(query, opts)).then(function () {
-          adapterName = _this13.getAdapterName(opts);
-          return _this13.getAdapter(adapterName).destroyAll(_this13, query, opts);
-        }).then(function (data) {
-          return resolve(_this13.afterDestroyAll(query, opts)).then(function () {
-            if (opts.raw) {
-              data.adapter = adapterName;
-              if (opts.autoEject) {
-                data.data = _this13.ejectAll(query, opts);
-              }
-              return data;
-            } else if (opts.autoEject) {
-              data = _this13.ejectAll(query, opts);
-            }
-            return data;
-          });
-        });
-      }
-    }, {
-      key: 'afterDestroyAll',
-      value: function afterDestroyAll() {}
-    }, {
-      key: 'beforeLoadRelations',
-      value: function beforeLoadRelations() {}
-    }, {
-      key: 'loadRelations',
-      value: function loadRelations(id, relations, opts) {
-        var _this14 = this;
-
-        var _this = this;
-        var instance = _this.is(id) ? id : undefined;
-        id = instance ? get(instance, _this.idAttribute) : id;
-        var op = 'loadRelations';
-        _this.dbg(op, 'id:', id, 'relations:', relations, 'opts:', opts);
-        relations || (relations = []);
-        opts || (opts = {});
-        var relationList = _this.relationList || [];
-        _(_this, opts);
-        opts.op = op;
-        return resolve(_this.beforeLoadRelations(id, relations, opts)).then(function () {
-          if (isSorN(id) && !instance) {
-            instance = _this.get(instance);
-          }
-          if (!instance) {
-            throw new Error('You passed an id of an instance not found in the collection of the Model!');
-          }
-          if (isString(relations)) {
-            relations = [relations];
-          }
-          return Promise.all(relationList.map(function (def) {
-            if (isFunction(def.load)) {
-              return def.load(_this, def, instance, opts);
-            }
-            var task = undefined;
-            if (def.foreignKey) {
-              task = def.Relation.findAll(babelHelpers.defineProperty({}, def.foreignKey, id), opts);
-            } else if (def.localKey) {
-              var key = get(instance, def.localKey);
-              if (isSorN(key)) {
-                task = def.Relation.find(key, opts);
-              }
-            } else if (def.localKeys) {
-              task = def.Relation.findAll(babelHelpers.defineProperty({}, def.Relation.idAttribute, {
-                'in': get(instance, def.localKeys)
-              }), opts);
-            } else if (def.foreignKeys) {
-              task = def.Relation.findAll(babelHelpers.defineProperty({}, def.Relation.idAttribute, {
-                'contains': get(instance, _this.idAttribute)
-              }), opts);
-            }
-            if (task) {
-              task = task.then(function (data) {
-                if (opts.raw) {
-                  data = data.data;
-                }
-                _set(instance, def.localField, def.type === 'hasOne' ? data.length ? data[0] : undefined : data);
-              });
-            }
-            return task;
-          }));
-        }).then(function () {
-          return resolve(_this14.afterLoadRelations(instance, relations, opts)).then(function () {
-            return instance;
-          });
-        });
-      }
-    }, {
-      key: 'afterLoadRelations',
-      value: function afterLoadRelations() {}
-    }, {
-      key: 'log',
-      value: function log(level) {
-        for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-          args[_key - 1] = arguments[_key];
-        }
-
-        if (level && !args.length) {
-          args.push(level);
-          level = 'debug';
-        }
-        if (level === 'debug' && !this.debug) {
-          return;
-        }
-        var prefix = level.toUpperCase() + ': (' + this.name + ')';
-        if (console[level]) {
-          var _console;
-
-          (_console = console)[level].apply(_console, [prefix].concat(args));
-        } else {
-          var _console2;
-
-          (_console2 = console).log.apply(_console2, [prefix].concat(args));
-        }
-      }
-    }, {
-      key: 'dbg',
-      value: function dbg() {
-        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-          args[_key2] = arguments[_key2];
-        }
-
-        this.log.apply(this, ['debug'].concat(args));
-      }
-
-      /**
-       * Usage:
-       *
-       * Post.belongsTo(User, {
-       *   localKey: 'myUserId'
-       * })
-       *
-       * Comment.belongsTo(User)
-       * Comment.belongsTo(Post, {
-       *   localField: '_post'
-       * })
-       */
-
-    }, {
-      key: 'belongsTo',
-      value: function belongsTo$$(model, opts) {
-        return belongsTo(model, opts)(this);
-      }
-
-      /**
-       * Usage:
-       *
-       * User.hasMany(Post, {
-       *   localField: 'my_posts'
-       * })
-       */
-
-    }, {
-      key: 'hasMany',
-      value: function hasMany$$(model, opts) {
-        return hasMany(model, opts)(this);
-      }
-
-      /**
-       * Usage:
-       *
-       * User.hasOne(Profile, {
-       *   localField: '_profile'
-       * })
-       */
-
-    }, {
-      key: 'hasOne',
-      value: function hasOne$$(model, opts) {
-        return hasOne(model, opts)(this);
-      }
-
-      /**
-       * Invoke the {@link module:js-data.exports.setSchema setSchema} decorator on
-       * this Model.
-       * @param {Object} opts - Property configurations.
-       * @return {Model} A reference to the Model for chaining.
-       */
-
-    }, {
-      key: 'setSchema',
-      value: function setSchema$$(opts) {
-        return setSchema(opts)(this);
-      }
-
-      /**
-       * Invoke the {@link module:js-data.exports.configure configure} decorator on
-       * this Model.
-       * @param {Object} opts - Configuration
-       * @return {Model} A reference to the Model for chaining.
-       */
-
-    }, {
-      key: 'configure',
-      value: function configure$$(opts) {
-        return configure(opts)(this);
-      }
-
-      /**
-       * Invoke the {@link module:js-data.exports.registerAdapter registerAdapter}
-       * decorator on this Model.
-       * @param {string} name - The name of the adapter to register.
-       * @param {Adapter} adapter - The adapter to register.
-       * @param {Object} [opts] - Configuration options.
-       * @param {boolean} [opts.default=false] - Whether to make the adapter the
-       * default for this Model.
-       * @return {Model} A reference to the Model for chaining.
-       */
-
-    }, {
-      key: 'registerAdapter',
-      value: function registerAdapter$$(name, adapter, opts) {
-        return registerAdapter(name, adapter, opts)(this);
-      }
-
-      /**
-       * Extend this Model and return a new child Model. Static properties on this
-       * Model will be shallow copied to the child Model. The child Model's
-       * prototype will point to the parent Model.
-       *
-       * @example
-       * var User = JSData.Model.extend({}, { name: 'User' })
-       * @param {Object} props={} - Properties to add to the prototype of the class.
-       * @param {Function} [props.initialize] - Optional function to invoke during
-       * construction of instances of the class. Will receive any arguments passed
-       * to the constructor. "this" will refer to the instance being constructed.
-       * @param {Object} classProps - Static properties to add to the class.
-       * @param {string} classProps.name - Name of the class. Required.
-       * @param {string} [classProps.idAttribute='id'] - Field to use as the unique
-       * identifier for instances of the class.
-       * @param {Object} [classProps.schema] - Value to pass to the {@link Model.setSchema setSchema}
-       * method of the class after the class is created.
-       */
-
-    }, {
-      key: 'extend',
-      value: function extend(props, classProps) {
-        var Parent = this;
-        var Child = undefined;
-
-        Parent.dbg('extend', 'props:', props, 'classProps:', classProps);
-
-        props || (props = {});
-        classProps || (classProps = {});
-
-        var initialize = props.initialize;
-        delete props.initialize;
-
-        if (props.hasOwnProperty('constructor')) {
-          Child = props.constructor;
-          delete props.constructor;
-        } else {
-          if (!classProps.name) {
-            throw new TypeError('name: Expected string, found ' + babelHelpers.typeof(classProps.name) + '!');
-          }
-          if (classProps.csp) {
-            Child = function () {
-              babelHelpers.classCallCheck(this, Child);
-
-              for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-                args[_key3] = arguments[_key3];
-              }
-
-              var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Child).apply(this, args));
-              if (initialize) {
-                initialize.apply(this, args);
-              }
-              return _this;
-            };
-          } else {
-            var name = pascalCase(classProps.name);
-            var func = 'return function ' + name + '() {\n                        __callCheck__(this, ' + name + ')\n                        var _this = __possibleConstructorReturn__(this, Object.getPrototypeOf(' + name + ').apply(this, arguments));\n                        if (initialize) {\n                          initialize.apply(this, arguments)\n                        }\n                        return _this\n                      }';
-            Child = new Function('__callCheck__', '__possibleConstructorReturn__', 'Parent', 'initialize', func)(babelHelpers.classCallCheck, babelHelpers.possibleConstructorReturn, Parent, initialize); // eslint-disable-line
-          }
-        }
-
-        classProps.shortname = classProps.shortname || camelCase(Child.name || classProps.name);
-        delete classProps.name;
-
-        var _schema = classProps.schema;
-        delete classProps.schema;
-
-        babelHelpers.inherits(Child, Parent);
-
-        configure(props)(Child.prototype);
-        configure(classProps)(Child);
-        if (_schema) {
-          setSchema(_schema)(Child);
-        }
-
-        return Child;
-      }
-    }]);
-    return Model;
-  })(BaseModel);
-
-  // Why are these static properties not up in the Model class declaration?
-  // Because JSDoc doesn't parse static property initializers yet. :(
-
-  /**
-   * @ignore
-   */
-  Model.__events = {};
-
-  /**
-   * Create a property where a Model's registered listeners can be stored.
-   * @ignore
-   */
-  Object.defineProperty(Model, '_events', {
-    get: function get() {
-      // Make sure that a Model always has _its own_ set of registered listeners.
-      // This check has to be made because ES6 class inheritance shallow copies
-      // static properties, which means a child model would only have a reference
-      // to the parent model's listeners.
-      if (this.__events === Object.getPrototypeOf(this).__events) {
-        this.__events = {};
-      }
-      return this.__events;
+      return Child;
     }
   });
 
-  /**
-   * @ignore
-   */
-  Model._adapters = {};
+  Object.defineProperties(Model, {
+    /**
+     * @ignore
+     */
+    __events: {
+      configurable: true,
+      value: {}
+    },
 
-  /**
-   * Hash of adapters registered with this Model.
-   *
-   * @name adapters
-   * @memberof Model
-   * @type {Object}
-   */
-  Object.defineProperty(Model, 'adapters', {
-    get: function get() {
-      var parentAdapters = Object.getPrototypeOf(this)._adapters;
-      // Make sure that a Model always has _its own_ set of registered adapters.
-      // This check has to be made because ES6 class inheritance shallow copies
-      // static properties, which means a child model would only have a reference
-      // to the parent model's adapters.
-      if (this._adapters === parentAdapters) {
-        this._adapters = {};
-        fillIn(this._adapters, parentAdapters);
+    /**
+     * Create a property where a Model's registered listeners can be stored.
+     * @ignore
+     */
+    _events: {
+      get: function get() {
+        // Make sure that a Model always has _its own_ set of registered listeners.
+        // This check has to be made because ES6 class inheritance shallow copies
+        // static properties, which means a child model would only have a reference
+        // to the parent model's listeners.
+        if (this.__events === (this.__super__ ? this.__super__ : Object.getPrototypeOf(this)).__events) {
+          Object.defineProperty(this, '__events', {
+            value: {}
+          });
+        }
+        return this.__events;
       }
-      return this._adapters;
+    },
+
+    /**
+     * @ignore
+     */
+    _adapters: {
+      configurable: true,
+      value: {}
+    },
+
+    /**
+     * Hash of adapters registered with this Model.
+     *
+     * @name adapters
+     * @memberof Model
+     * @type {Object}
+     */
+    adapters: {
+      get: function get() {
+        var parentAdapters = (this.__super__ ? this.__super__ : Object.getPrototypeOf(this))._adapters;
+        // Make sure that a Model always has _its own_ set of registered adapters.
+        // This check has to be made because ES6 class inheritance shallow copies
+        // static properties, which means a child model would only have a reference
+        // to the parent model's adapters.
+        if (this._adapters === parentAdapters) {
+          Object.defineProperty(this, '_adapters', {
+            value: {}
+          });
+          fillIn(this._adapters, parentAdapters);
+        }
+        return this._adapters;
+      }
+    },
+
+    /**
+     * @ignore
+     */
+    _collection: {
+      configurable: true,
+      value: new Collection([], 'id')
+    },
+
+    /**
+     * This Model's {@link Collection} instance. This is where instances of the
+     * Model are stored if {@link Model.autoInject} is `true`.
+     *
+     * __You should use {@link Model.inject}, {@link Model.eject}, and
+     * {@link Model.ejectAll} if you need to manually get data in and out of this
+     * collection.__
+     *
+     * @name collection
+     * @memberof Model
+     * @type {Collection}
+     */
+    collection: {
+      get: function get() {
+        // Make sure that a Model always has _its own_ collection. This check has to
+        // be made because ES6 class inheritance shallow copies static properties,
+        // which means a child Model would only have a reference to the parent
+        // Model's collection.
+        if (this._collection === (this.__super__ ? this.__super__ : Object.getPrototypeOf(this))._collection) {
+          Object.defineProperty(this, '_collection', {
+            value: new Collection([], this.idAttribute)
+          });
+          this._collection.on('all', this.emit, this);
+          this._collection.createIndex('lastInjected', ['$'], {
+            fieldGetter: function fieldGetter(obj) {
+              return obj._get('$');
+            }
+          });
+        }
+        return this._collection;
+      }
     }
   });
-
-  /**
-   * @ignore
-   */
-  Model._collection = new Collection([], 'id');
-
-  /**
-   * This Model's {@link Collection} instance. This is where instances of the
-   * Model are stored if {@link Model.autoInject} is `true`.
-   *
-   * __You should use {@link Model.inject}, {@link Model.eject}, and
-   * {@link Model.ejectAll} if you need to manually get data in and out of this
-   * collection.__
-   *
-   * @name collection
-   * @memberof Model
-   * @type {Collection}
-   */
-  Object.defineProperty(Model, 'collection', {
-    get: function get() {
-      // Make sure that a Model always has _its own_ collection. This check has to
-      // be made because ES6 class inheritance shallow copies static properties,
-      // which means a child Model would only have a reference to the parent
-      // Model's collection.
-      if (this._collection === Object.getPrototypeOf(this)._collection) {
-        this._collection = new Collection([], this.idAttribute);
-        this._collection.on('all', this.emit, this);
-      }
-      return this._collection;
-    }
-  });
-
-  /**
-   * Whether {@link Model.destroy} and {@link Model.destroyAll} should
-   * automatically eject the specified item(s) from the Model's collection on
-   * success.
-   *
-   * @memberof Model
-   * @type {boolean}
-   * @default true
-   */
-  Model.autoEject = true;
-
-  /**
-   * Whether {@link Model.create}, {@link Model.createMany},
-   * {@link Model.update}, {@link Model.updateAll}, and {@link Model.updateMany}
-   * should automatically inject the specified item(s) returned by the adapter
-   * into the the Model's collection on success.
-   *
-   * __Defaults to `true` in the Browser.__
-   *
-   * __Defaults to `false` in Node.js__
-   *
-   * @memberof Model
-   * @type {boolean}
-   */
-  Model.autoInject = isBrowser;
-  Model.bypassCache = false;
-
-  /**
-   * Whether to disallow the use of `new Function` in {@link Model.extend}.
-   *
-   * You may set this to `true` if you so desire, but the class (constructor
-   * function) produced by {@link Model.extend} will not be a named function,
-   * which makes for slightly less debuggability.
-   *
-   * @memberof Model
-   * @type {boolean}
-   * @default false
-   */
-  Model.csp = false;
-
-  /**
-   * The name of the registered adapter that should be used by default by any
-   * of the Model's static methods that use an adapter.
-   *
-   * @memberof Model
-   * @type {string}
-   * @default http
-   */
-  Model.defaultAdapter = 'http';
-
-  /**
-   * Whether to enable debug-level logs.
-   *
-   * @memberof Model
-   * @type {boolean}
-   * @default false
-   */
-  Model.debug = false;
-  Model.eagerEject = false;
-
-  /**
-   * The field on instances of {@link Model} that should be used as the unique
-   * identifier for instances of the Model.
-   *
-   * @memberof Model
-   * @type {string}
-   * @default id
-   */
-  Model.idAttribute = 'id';
-
-  /**
-   * Whether to add property accessors to the prototype of {@link Model} for
-   * each of the Model's relations. For each relation, the property accessor
-   * will be added as the field specified by the `localField` option of the
-   * relation definition. A relation property accessor returns related data by
-   * accessing the related Model. If the related Model's collection is empty,
-   * then the property accessors won't return anything.
-   *
-   * __Defaults to `true` in the Browser.__
-   *
-   * __Defaults to `false` in Node.js__
-   *
-   * @memberof Model
-   * @type {boolean}
-   */
-  Model.linkRelations = isBrowser;
-
-  /**
-   * What to do when injecting an item into the Model's collection that shares a
-   * primary key with an item already in the Model's collection.
-   *
-   * Possible values:
-   * - merge
-   * - replace
-   *
-   * Merge:
-   *
-   * Recursively shallow copy properties from the new item onto the existing
-   * item.
-   *
-   * Replace:
-   *
-   * Shallow copy top-level properties from the new item onto the existing item.
-   * Any top-level own properties of the existing item that are _not_ on the new
-   * item will be removed.
-   *
-   * @memberof Model
-   * @type {string}
-   * @default merge
-   */
-  Model.onConflict = 'merge';
-
-  /**
-   * Whether the relation property accessors should be enumerable. It's
-   * recommended that this stay false.
-   *
-   * @memberof Model
-   * @type {boolean}
-   * @default false
-   */
-  Model.relationsEnumerable = false;
-
-  /**
-   * Whether {@link Model.create}, {@link Model.createMany},
-   * {@link Model.update}, {@link Model.updateAll}, {@link Model.updateMany},
-   * {@link Model.find}, {@link Model.findAll}, {@link Model.destroy}, and
-   * {@link Model.destroyAll} should return a raw result object that contains
-   * both the instance data returned by the adapter _and_ metadata about the
-   * operation.
-   *
-   * The default is to NOT return the result object, and instead return just the
-   * instance data.
-   *
-   * @memberof Model
-   * @type {boolean}
-   * @default false
-   */
-  Model.raw = false;
-
-  /**
-   * Whether {@link Model.create}, {@link Model.createMany},
-   * {@link Model.update}, {@link Model.updateAll}, {@link Model.updateMany},
-   * {@link Model.find}, {@link Model.findAll}, {@link Model.destroy}, and
-   * {@link Model.destroyAll} should return a raw result object that contains
-   * both the instance data returned by the adapter _and_ metadata about the
-   * operation.
-   *
-   * The default is to NOT return the result object, and instead return just the
-   * instance data.
-   *
-   * @memberof Model
-   * @type {boolean}
-   * @default false
-   */
-  Model.upsert = true;
 
   /**
    * Allow Models themselves emit events. Any events emitted on a Model's
@@ -4459,11 +4381,12 @@
   // dsPrototype.utils = DSUtils
 
   function DS(opts) {
+    classCallCheck(this, DS);
     opts || (opts = {});
     this.definitions = {};
   }
 
-  fillIn(DS.prototype, {
+  addHiddenPropsToTarget(DS.prototype, {
     clear: function clear() {
       var ejected = {};
       forOwn(this.definitions, function (definition) {
@@ -4561,11 +4484,11 @@
   var utils = _utils;
 
   var version = {
-    full: '3.0.0-alpha.2',
+    full: '3.0.0-alpha.3',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10),
-    alpha: '2' !== 'false' ? '2' : false,
+    alpha: '3' !== 'false' ? '3' : false,
     beta: 'false' !== 'false' ? 'false' : false
   };
 
