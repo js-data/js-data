@@ -1,4 +1,4 @@
-##### 3.0.0-alpha.3 - 19 December 2015
+##### 3.0.0-alpha.3 - 29 December 2015
 
 - Implemented more methods from 2.x.
 - Better compatibility for the classes exposed by js-data.
