@@ -1423,7 +1423,6 @@
           return data[field] || null;
         }
       });
-
       this.set(keyList, data);
     },
     removeRecord: function removeRecord(data) {
@@ -2005,6 +2004,19 @@
 
     // Finally, added property to prototype of target Model
     Object.defineProperty(Model.prototype, localField, descriptor);
+    Object.defineProperty(Model.prototype, localKey, {
+      configurable: true,
+      enumerable: true,
+      get: function get$$() {
+        return this._get('props.' + localKey);
+      },
+      set: function set(value) {
+        this._set('props.' + localKey, value);
+        if (this._get('$')) {
+          Model.collection.indexes[localKey].updateRecord(this, { index: localKey });
+        }
+      }
+    });
 
     if (!Model.relationList) {
       Model.relationList = [];
@@ -2968,7 +2980,9 @@
       var json = this;
       if (this instanceof Model) {
         json = {};
-        _set(json, this);
+        for (var key in this) {
+          json[key] = this[key];
+        }
         if (Ctor && Ctor.relationList && opts.with) {
           if (isString(opts.with)) {
             opts.with = [opts.with];

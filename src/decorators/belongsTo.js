@@ -89,6 +89,19 @@ function applyBelongsTo (Model, Relation, opts) {
 
   // Finally, added property to prototype of target Model
   Object.defineProperty(Model.prototype, localField, descriptor)
+  Object.defineProperty(Model.prototype, localKey, {
+    configurable: true,
+    enumerable: true,
+    get () {
+      return this._get(`props.${localKey}`)
+    },
+    set (value) {
+      this._set(`props.${localKey}`, value)
+      if (this._get('$')) {
+        Model.collection.indexes[localKey].updateRecord(this, { index: localKey })
+      }
+    }
+  })
 
   if (!Model.relationList) {
     Model.relationList = []
