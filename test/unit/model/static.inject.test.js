@@ -134,7 +134,6 @@ export function init () {
     })
     it('should find inverse links', function () {
       this.User.inject({ organizationId: 5, id: 1 })
-
       this.Organization.inject({ id: 5 })
 
       assert.objectsEqual(this.User.get(1).organization, { id: 5 })
@@ -142,12 +141,12 @@ export function init () {
       assert.objectsEqual(this.User.get(1).comments, [])
       assert.objectsEqual(this.User.get(1).approvedComments, [])
 
-      this.Comment.inject({ approvedBy: 1, id: 23 })
+      const comment1 = this.Comment.inject({ approvedBy: 1, id: 23 })
 
       assert.equal(0, this.User.get(1).comments.length)
       assert.equal(1, this.User.get(1).approvedComments.length)
 
-      this.Comment.inject({ approvedBy: 1, id: 44 })
+      const comment2 = this.Comment.inject({ approvedBy: 1, id: 44 })
 
       assert.equal(0, this.User.get(1).comments.length)
       assert.equal(2, this.User.get(1).approvedComments.length)
@@ -416,10 +415,14 @@ export function init () {
         linkRelations: true
       })
       Foo.hasMany(Bar, {
+        foreignKey: 'fooId',
         localField: 'bars',
         link: false
       })
-      Bar.belongsTo(Foo)
+      Bar.belongsTo(Foo, {
+        localField: 'foo',
+        localKey: 'fooId'
+      })
       const foo = Foo.inject({
         id: 1,
         bars: [

@@ -256,7 +256,9 @@ utils.addHiddenPropsToTarget(Model.prototype, {
     let json = this
     if (this instanceof Model) {
       json = {}
-      utils.set(json, this)
+      for (var key in this) {
+        json[key] = this[key]
+      }
       if (Ctor && Ctor.relationList && opts.with) {
         if (utils.isString(opts.with)) {
           opts.with = [opts.with]

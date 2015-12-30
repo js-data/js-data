@@ -23,7 +23,7 @@ export function init () {
       assert.isTrue(this.User.prototype.toJSON.call(props) === props, 'should return passed in data')
     })
     it('should make json when an instance', function () {
-      const props = { name: 'John' }
+      const props = { name: 'John', organizationId: 5 }
       const user = new this.User(props)
       assert.isTrue(user.toJSON() !== props, 'should return copy of data')
       assert.deepEqual(user.toJSON(), props, 'copy should equal passed in data')
@@ -42,7 +42,8 @@ export function init () {
       assert.isTrue(user.toJSON() !== props, 'should return copy of data')
       assert.deepEqual(user.toJSON(), {
         name: 'John',
-        foo: 'foo'
+        foo: 'foo',
+        organizationId: undefined
       }, 'should return enumerable properties')
     })
     it('should keep relations when not an instance', function () {
