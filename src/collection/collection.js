@@ -1,6 +1,15 @@
-import {Query} from './query.js'
-import {eventify, fillIn, forOwn, get, isArray, isFunction, isString} from '../utils.js'
-import {Index} from '../../lib/mindex/index.js'
+import {Query} from './query'
+import {
+  addHiddenPropsToTarget,
+  classCallCheck,
+  eventify,
+  forOwn,
+  get,
+  isArray,
+  isFunction,
+  isString
+} from '../utils'
+import {Index} from '../../lib/mindex/index'
 
 /**
  * @class Collection
@@ -10,6 +19,7 @@ import {Index} from '../../lib/mindex/index.js'
  * of each entity in the collection.
  */
 export function Collection (data = [], idAttribute = 'id') {
+  classCallCheck(this, Collection)
   if (!isArray(data)) {
     throw new TypeError(`new Collection([data]): data: Expected array. Found ${typeof data}`)
   }
@@ -41,7 +51,7 @@ export function Collection (data = [], idAttribute = 'id') {
   })
 }
 
-fillIn(Collection.prototype, {
+addHiddenPropsToTarget(Collection.prototype, {
   _onModelEvent (...args) {
     this.emit(...args)
   },
@@ -68,16 +78,16 @@ fillIn(Collection.prototype, {
    * the name will also be the field that is used to index the collection.
    * @return {Collection} A reference to itself for chaining.
    */
-  createIndex (name, keyList) {
+  createIndex (name, keyList, opts) {
     if (isString(name) && keyList === undefined) {
       keyList = [name]
     }
+    opts || (opts = {})
     const idAttribute = this.idAttribute
-    const index = this.indexes[name] = new Index(keyList, {
-      hashCode (obj) {
-        return get(obj, idAttribute)
-      }
-    })
+    opts.hashCode = function (obj) {
+      return get(obj, idAttribute)
+    }
+    const index = this.indexes[name] = new Index(keyList, opts)
     this.index.visitAll(index.insertRecord, index)
     return this
   },

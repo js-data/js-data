@@ -86,7 +86,7 @@ export function init () {
       assert.equal(user.role, 'foo2', 'should allow custom setter')
       assert.equal(didSetRole, 'bar2', 'custom getter should be called')
 
-      assert.isUndefined(user._get('changes'), 'user should not have changes')
+      assert.deepEqual(user._get('changes'), {}, 'user should not have changes')
       assert.isUndefined(user._get('changing'), 'user should NOT be changing')
       assert.isUndefined(user._get('changed'), 'user title should NOT be changing')
 

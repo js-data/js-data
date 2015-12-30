@@ -1,4 +1,4 @@
-import {get, set} from '../utils.js'
+import {get, set} from '../utils'
 
 const op = 'belongsTo'
 

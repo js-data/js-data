@@ -465,7 +465,7 @@ export function init () {
       User.inject(users)
       console.log('\tinject 1,000 users time taken: ', new Date().getTime() - start, 'ms')
     })
-    it('should inject 10,000 items', function () {
+    it.skip('should inject 10,000 items', function () {
       class User extends Model {}
       let users = []
       for (var i = 0; i < 10000; i++) {
@@ -500,7 +500,7 @@ export function init () {
       User.inject(users)
       console.log('\tinject 1,000 users time taken: ', new Date().getTime() - start, 'ms')
     })
-    it('should inject 10,000 items where there is an index on "age"', function () {
+    it.skip('should inject 10,000 items where there is an index on "age"', function () {
       class User extends Model {}
       User.createIndex('age')
       User.createIndex('created')
