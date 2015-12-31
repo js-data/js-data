@@ -29,6 +29,15 @@ try {
 } catch (e) {
 }
 
+const noop = function (...args) {
+  const opts = args.pop()
+  if (opts.notify || (opts.notify === undefined && this.notify)) {
+    setTimeout(() => {
+      this.emit(opts.op, ...args)
+    })
+  }
+}
+
 const handleResponse = function handleResponse (model, data, opts, adapterName) {
   if (opts.raw) {
     data.adapter = adapterName
@@ -38,6 +47,11 @@ const handleResponse = function handleResponse (model, data, opts, adapterName) 
     return data
   } else if (opts.autoInject) {
     data = model.inject(data)
+  }
+  if (opts.notify || (opts.notify === undefined && model.notify)) {
+    setTimeout(function () {
+      model.emit(opts.op, data, opts)
+    })
   }
   return data
 }
@@ -120,14 +134,29 @@ utils.addHiddenPropsToTarget(Model.prototype, {
     return this.constructor.create(this, opts)
   },
 
+  beforeSave () {},
   save (opts) {
-    // TODO: move actual save logic here
     const Ctor = this.constructor
+    const op = 'save'
+    Ctor.dbg(op, 'instance:', this, 'opts:', opts)
+    let adapterName
 
-    const adapterName = Ctor.getAdapterName(opts)
-    return Ctor.getAdapter(adapterName)
-      .update(Ctor, utils.get(this, Ctor.idAttribute), this, opts)
+    opts || (opts = {})
+    utils._(Ctor, opts)
+    opts.op = op
+
+    return resolve(this.beforeSave(opts))
+      .then(() => {
+        adapterName = Ctor.getAdapterName(opts)
+        return Ctor.getAdapter(adapterName)
+          .update(Ctor, utils.get(this, Ctor.idAttribute), this.toJSON(opts), opts)
+      })
+      .then(data => {
+        return resolve(this.afterSave(opts))
+          .then(() => handleResponse(Ctor, data, opts, adapterName))
+      })
   },
+  afterSave () {},
 
   /**
    * @param {Object} [opts] Configuration options. @see {@link Model.destroy}.
@@ -200,10 +229,6 @@ utils.addHiddenPropsToTarget(Model.prototype, {
       return this._get(`changes.${key}`)
     }
     return this._get('changes')
-  },
-
-  changed () {
-    return this._get('changed')
   },
 
   hasChanges () {
@@ -313,9 +338,9 @@ utils.fillIn(Model, {
 
   /**
    * Whether {@link Model.create}, {@link Model.createMany},
-   * {@link Model.update}, {@link Model.updateAll}, and {@link Model.updateMany}
-   * should automatically inject the specified item(s) returned by the adapter
-   * into the the Model's collection on success.
+   * {@link Model.update}, {@link Model.updateAll}, {@link Model.updateMany},
+   * {@link Model.save}, should automatically inject the specified item(s)
+   * returned by the adapter into the the Model's collection on success.
    *
    * __Defaults to `true` in the Browser.__
    *
@@ -388,6 +413,18 @@ utils.fillIn(Model, {
   linkRelations: isBrowser,
 
   /**
+   * Whether this Model should emit lifecycle events during operation.
+   *
+   * __Defaults to `true` in the Browser.__
+   *
+   * __Defaults to `false` in Node.js__
+   *
+   * @memberof Model
+   * @type {boolean}
+   */
+  notify: isBrowser,
+
+  /**
    * What to do when injecting an item into the Model's collection that shares a
    * primary key with an item already in the Model's collection.
    *
@@ -423,7 +460,7 @@ utils.fillIn(Model, {
   relationsEnumerable: false,
 
   /**
-   * Whether {@link Model.create}, {@link Model.createMany},
+   * Whether {@link Model.create}, {@link Model.createMany}, {@link Model.save},
    * {@link Model.update}, {@link Model.updateAll}, {@link Model.updateMany},
    * {@link Model.find}, {@link Model.findAll}, {@link Model.destroy}, and
    * {@link Model.destroyAll} should return a raw result object that contains
@@ -440,61 +477,91 @@ utils.fillIn(Model, {
   raw: false,
 
   /**
-   * Whether {@link Model.create}, {@link Model.createMany},
-   * {@link Model.update}, {@link Model.updateAll}, {@link Model.updateMany},
-   * {@link Model.find}, {@link Model.findAll}, {@link Model.destroy}, and
-   * {@link Model.destroyAll} should return a raw result object that contains
-   * both the instance data returned by the adapter _and_ metadata about the
-   * operation.
-   *
-   * The default is to NOT return the result object, and instead return just the
-   * instance data.
+   * Whether {@link Model.create} and {@link Model.createMany} should instead
+   * call {@link Model.update} and {@link Model.updateMany} if the provided
+   * props/entities already contain a primary key.
    *
    * @memberof Model
    * @type {boolean}
-   * @default false
+   * @default true
    */
   upsert: true,
 
   /**
    * Create a new secondary index in the Collection instance of this Model.
    *
+   * @memberof Model
+   * @method
    * @param {string} name - The name of the new secondary index
-   * @param {string[]} keyList - The list of keys to be used to create the index.
+   * @param {string[]} fieldList - The list of keys to be used to create the index.
+   * @param {Object} [opts] - Configuration options.
+   * @param {Function} [opts.fieldGetter] - Getter function to be used to grab
+   * values off of instances for each field in the index's field list. Will be
+   * passed the instance and the field to be retrieved.
+   * @param {Function} [opts.hashCode] - Function used to return a unique
+   * identifier for each instance in the collection. Will be passed the instance.
    */
-  createIndex (name, keyList) {
-    this.dbg('createIndex', 'name:', name, 'keyList:', keyList)
-    this.collection.createIndex(name, keyList)
+  createIndex (name, fieldList, opts) {
+    this.dbg('createIndex', 'name:', name, 'fieldList:', fieldList, 'opts:', opts)
+    this.collection.createIndex(name, fieldList, opts)
   },
 
   /**
-   * Create a new instance of this Model from the provided properties.
+   * Return new instance of this Model from the given properties. Equivalent to
+   * `new Model([props][, opts])`. Returns `props` if `props` is already an
+   * instance of this Model.
    *
+   * @memberof Model
+   * @method
    * @param {Object} props - The initial properties of the new instance.
+   * @param {Object} [opts] - Configuration options.
+   * @param {boolean} [opts.noValidate=false] Whether to skip validation on the
+   * initial properties.
    * @return {Model} The instance.
    */
-  createInstance (props) {
+  createInstance (props, opts) {
     let Ctor = this
     // Check to make sure "props" is not already an instance of this Model.
-    return props instanceof Ctor ? props : new Ctor(props)
+    return props instanceof Ctor ? props : new Ctor(props, opts)
   },
 
   /**
-   * Check whether "instance" is actually an instance of this Model.
+   * Return whether `instance` is an instance of this Model.
    *
-   * @param {Model} The instance to check.
-   * @return {boolean} Whether "instance" is an instance of this Model.
+   * @memberof Model
+   * @method
+   * @param {Object} instance - The instance to check.
+   * @return {boolean} Whether `instance` is an instance of this Model.
    */
   is (instance) {
     return instance instanceof this
   },
 
+  /**
+   * Return the entities in this Model's collection that have a primary key that
+   * was automatically generated when they were injected into the collection.
+   *
+   * @memberof Model
+   * @method
+   * @return {Model[]} The entities where with autoPks.
+   */
   getAutoPkItems () {
     return this.getAll().filter(function (item) {
       return item._get('autoPk')
     })
   },
 
+  /**
+   * If the entity with the given primary key is currently in this Model's
+   * collection, return the result of calling {@link Model#changes} on that
+   * entity, otherwise return undefined.
+   *
+   * @memberof Model
+   * @method
+   * @param {string|number} id - The primary key of the entity.
+   * @param {string} [key] - If provided, only return changes to this field.
+   * @return {Object} Changes to the entity since the entity was instantiated.
+   */
   changes (id, key) {
     this.dbg('changes', 'id:', id)
     const instance = this.get(id)
@@ -503,14 +570,16 @@ utils.fillIn(Model, {
     }
   },
 
-  changed (id) {
-    this.dbg('changed', 'id:', id)
-    const instance = this.get(id)
-    if (instance) {
-      return instance.changed()
-    }
-  },
-
+  /**
+   * If the entity with the given primary key is currently in this Model's
+   * collection, return the result of calling {@link Model#hasChanges} on that
+   * entity, otherwise return undefined.
+   *
+   * @memberof Model
+   * @method
+   * @param {string|number} id - The primary key of the entity.
+   * @return {boolean} Whether the entity has any changes.
+   */
   hasChanges (id) {
     this.dbg('hasChanges', 'id:', id)
     const instance = this.get(id)
@@ -520,70 +589,112 @@ utils.fillIn(Model, {
   },
 
   /**
-   * Insert the provided item or items into the Collection instance of this
-   * Model.
+   * Insert the provided entity or entities into this Model's collection.
    *
-   * If an item is already in the collection then the provided item will either
-   * merge with or replace the existing item based on the value of the
-   * "onConflict" option.
+   * If an entity is already in the collection then the provided entity will
+   * either merge with or replace the existing item based on the value of the
+   * `onConflict` option.
    *
-   * The collection's secondary indexes will be updated as each item is visited.
+   * The collection's secondary indexes will be updated as each entity is
+   * visited.
    *
+   * @memberof Model
+   * @method
    * @param {(Object|Object[]|Model|Model[])} items - The item or items to insert.
    * @param {Object} [opts] - Configuration options.
+   * @param {boolean} [opts.autoPk] - Whether to generate primary keys for the
+   * entities to be injected. Useful for injecting temporary, unsaved data into
+   * the Model's collection.
    * @param {string} [opts.onConflict] - What to do when an item is already in
    * the Collection instance. Possible values are `merge` or `replace`.
    * @return {(Model|Model[])} The injected entity or entities.
    */
-  inject (items, opts) {
+  inject (entities, opts) {
     const _this = this
+
+    // For debuggability
     const op = 'inject'
-    _this.dbg(op, 'item(s):', items, 'opts:', opts)
+    _this.dbg(op, 'entities:', entities, 'opts:', opts)
+
+    // Default values for arguments
     opts || (opts = {})
+
+    // Fill in "opts" with the Model's configuration
+    utils._(_this, opts)
     opts.op = op
+
+    // Track whether just one or an array of entities is being injected
     let singular = false
     const collection = _this.collection
     const idAttribute = _this.idAttribute
     const relationList = _this.relationList || []
-    if (!utils.isArray(items)) {
-      items = [items]
+    const timestamp = new Date().getTime()
+    if (!utils.isArray(entities)) {
+      entities = [entities]
       singular = true
     }
-    const timestamp = new Date().getTime()
-    items = items.map(function (props) {
+
+    // Map the provided entities to injected entities.
+    // New entities will be injected. If any props map to existing entities,
+    // they will be merged into the existing entities according to the onConflict
+    // option.
+    entities = entities.map(function (props) {
       let id = utils.get(props, idAttribute)
+      // Track whether we had to generate an id for this entity
       let autoPk = false
+      // Validate that the primary key attached to the entity is a string or
+      // numer
       if (!utils.isSorN(id)) {
-        if (opts.autoPk || (opts.autoPk === undefined && _this.autoPk)) {
+        // No id found, generate one
+        if (opts.autoPk) {
           id = utils.uuid()
           utils.set(props, idAttribute, id)
           autoPk = true
         } else {
+          // Not going to generate one, throw an error
           throw new TypeError(`User#${idAttribute}: Expected string or number, found ${typeof id}!`)
         }
       }
+      // Grab existing entity if there is one
       const existing = _this.get(id)
+      // If the currently visited props are just reference to the existing
+      // entity, then there is nothing to be done. Exit early.
       if (props === existing) {
         return existing
       }
 
+      // Check the currently visited props for relations that need to be
+      // injected as well
       relationList.forEach(function (def) {
+        // A reference to the Model that this Model is related to
         const Relation = def.Relation
+        // The field used by the related Model as the primary key
         const relationIdAttribute = Relation.idAttribute
+        // Grab the foreign key in this relationship, if there is one
         const foreignKey = def.foreignKey
 
+        // Grab a reference to the related data attached or linked to the
+        // currently visited props
         let toInject = utils.get(props, def.localField)
 
+        // If the user provided a custom injection function for this relation,
+        // call it
         if (utils.isFunction(def.inject)) {
           def.inject(_this, def, props)
         } else if (toInject && def.inject !== false) {
+          // Otherwise, if there is something to be injected, inject it
           if (utils.isArray(toInject)) {
+            // Handle injecting hasMany relations
             toInject = toInject.map(function (toInjectItem) {
+              // Check that this item isn't the same item that is already in the
+              // store
               if (toInjectItem !== Relation.get(utils.get(toInjectItem, relationIdAttribute))) {
                 try {
+                  // Make sure this item has its foreignKey
                   if (foreignKey) {
                     utils.set(toInjectItem, foreignKey, id)
                   }
+                  // Finally inject this related item
                   toInjectItem = Relation.inject(toInjectItem)
                 } catch (err) {
                   throw new Error(`Failed to inject ${def.type} relation: "${def.relation}"! ${err.message}`)
@@ -591,21 +702,25 @@ utils.fillIn(Model, {
               }
               return toInjectItem
             })
+            // If it's the parent that has the localKeys
             if (def.localKeys) {
               utils.set(props, def.localKeys, toInject.map(function (injected) {
                 return utils.get(injected, relationIdAttribute)
               }))
             }
           } else {
-            // handle injecting belongsTo and hasOne relations
+            // Handle injecting belongsTo and hasOne relations
             if (toInject !== Relation.get(utils.get(toInject, relationIdAttribute))) {
               try {
+                // Make sure the parent has its localKey
                 if (def.localKey) {
                   utils.set(props, def.localKey, utils.get(toInject, Relation.idAttribute))
                 }
+                // Make sure this item has its localKey
                 if (foreignKey) {
                   utils.set(toInject, def.foreignKey, utils.get(props, idAttribute))
                 }
+                // Finally inject this related item
                 toInject = Relation.inject(toInject)
               } catch (err) {
                 throw new Error(`Failed to inject ${def.type} relation: "${def.relation}"!`)
@@ -613,15 +728,19 @@ utils.fillIn(Model, {
             }
           }
         }
-        // remove relation properties from the item, since those relations have been injected by now
         if (def.link || (def.link === undefined && _this.linkRelations)) {
+          // Remove relation properties from the item, since those relations
+          // have been injected by now
           utils.unset(props, def.localField)
         } else {
+          // Here, linking is turned off, so we setup a manual link
           utils.set(props, def.localField, toInject)
         }
       })
 
       if (existing) {
+        // Here, the currently visited props corresponds to an entity already
+        // in the collection, so we need to merge them
         const onConflict = opts.onConflict || _this.onConflict
         if (onConflict === 'merge') {
           utils.deepMixIn(existing, props)
@@ -634,66 +753,94 @@ utils.fillIn(Model, {
           existing.set(props)
         }
         props = existing
+        // Update all indexes in the collection
         collection.update(props)
       } else {
+        // Here, the currently visted props does not correspond to any entity
+        // in the collection, so make this props is an instance of this Model
+        // and insert it into the collection
         props = _this.createInstance(props)
         if (autoPk) {
+          // Flag this instance as one that had its primary key generated
           props._set('autoPk', autoPk)
         }
         collection.insert(props)
       }
+      // Track when this entity was injected
       props._set('$', timestamp)
       return props
     })
-    return singular ? (items.length ? items[0] : undefined) : items
+    // Finally, return the injected data
+    return singular ? (entities.length ? entities[0] : undefined) : entities
   },
 
   /**
-   * Remove the instance with the given primary key from the Collection instance
-   * of this Model.
+   * Remove the entity with the given primary key from this Model's collection.
    *
-   * @param {(string|number)} id - The primary key of the instance to be removed.
-   * @return {Model} The removed item, if any.
+   * @memberof Model
+   * @method
+   * @param {(string|number)} id - The primary key of the entity to be removed.
+   * @param {Object} [opts] - Configuration options.
+   * @return {Model} The removed entity, if any.
    */
   eject (id, opts) {
+    // For debuggability
     const op = 'eject'
     this.dbg(op, 'id:', id, 'opts:', opts)
+
+    // Default values for arguments
     opts || (opts = {})
     opts.op = op
-    const item = this.get(id)
-    if (item) {
-      item._unset('$')
-      this.collection.remove(item)
+    const instance = this.get(id)
+
+    // The instance is in the collection, remove it
+    if (instance) {
+      instance._unset('$')
+      this.collection.remove(instance)
     }
-    return item
+    return instance
   },
 
   /**
    * Remove the instances selected by "query" from the Collection instance of
    * this Model.
    *
-   * @param {Object} [query] - The query used to select instances to remove.
-   * @return {Model[]} The removed instances, if any.
+   * @memberof Model
+   * @method
+   * @param {Object} [query={}] - Selection query.
+   * @param {Object} [query.where] - Filtering criteria.
+   * @param {number} [query.skip] - Number to skip.
+   * @param {number} [query.limit] - Number to limit to.
+   * @param {Array} [query.orderBy] - Sorting criteria.
+   * @param {Object} [opts] - Configuration options.
+   * @return {Model[]} The removed entites, if any.
    */
-  ejectAll (params, opts) {
+  ejectAll (query, opts) {
+    // For debuggability
     const op = 'ejectAll'
-    this.dbg(op, 'params:', params, 'opts:', opts)
+    this.dbg(op, 'query:', query, 'opts:', opts)
+
+    // Default values for arguments
     opts || (opts = {})
     opts.op = op
-    const items = this.filter(params)
+    const entities = this.filter(query)
     const collection = this.collection
-    items.forEach(function (item) {
+
+    // Remove each selected entity from the collection
+    entities.forEach(function (item) {
       collection.remove(item)
     })
-    return items
+    return entities
   },
 
   /**
-   * Return the instance in the Collection instance of this Model that has
-   * the given primary key, if such an instance can be found.
+   * Return the entity in this Model's collection that has the given primary
+   * key, if such an entity can be found.
    *
-   * @param {(string|number)} id - Primary key of the instance to retrieve.
-   * @return {Model} The instance or undefined.
+   * @memberof Model
+   * @method
+   * @param {(string|number)} id - Primary key of the entity to retrieve.
+   * @return {Model} The entity or undefined.
    */
   get: function (id) {
     this.dbg('get', 'id:', id)
@@ -703,6 +850,9 @@ utils.fillIn(Model, {
 
   /**
    * Proxy for Collection#between
+   *
+   * @memberof Model
+   * @method
    */
   between (...args) {
     return this.collection.between(...args)
@@ -710,6 +860,9 @@ utils.fillIn(Model, {
 
   /**
    * Proxy for Collection#getAll
+   *
+   * @memberof Model
+   * @method
    */
   getAll (...args) {
     return this.collection.getAll(...args)
@@ -717,6 +870,9 @@ utils.fillIn(Model, {
 
   /**
    * Proxy for Collection#filter
+   *
+   * @memberof Model
+   * @method
    */
   filter (query, opts) {
     opts || (opts = {})
@@ -724,7 +880,10 @@ utils.fillIn(Model, {
   },
 
   /**
-  * Proxy for `Model.collection.query()`.
+   * Proxy for `Model.collection.query()`.
+   *
+   * @memberof Model
+   * @method
    * @return {Query}
    */
   query () {
@@ -735,6 +894,8 @@ utils.fillIn(Model, {
    * Return the registered adapter with the given name or the default adapter if
    * no name is provided.
    *
+   * @memberof Model
+   * @method
    * @param {string} [name]- The name of the adapter to retrieve.
    * @return {Adapter} The adapter, if any.
    */
@@ -749,8 +910,10 @@ utils.fillIn(Model, {
 
   /**
    * Return the name of a registered adapter based on the given name or options,
-   * or the name of the default adapter if no name provided
+   * or the name of the default adapter if no name provided.
    *
+   * @memberof Model
+   * @method
    * @param {Object} [opts] - The options, if any.
    * @return {string} The name of the adapter.
    */
@@ -763,137 +926,229 @@ utils.fillIn(Model, {
   },
 
   /**
-   * Lifecycle hook. Called by `Model.create` after `Model.create` checks
-   * whether it can do an upsert and before `Model.create` calls the `create`
-   * method of an adapter.
+   * Model lifecycle hook called by {@link Model.create}. If this method
+   * returns a promise then {@link Model.create} will wait for the promise
+   * to resolve before continuing.
    *
-   * `Model.beforeCreate` will receive the same arguments that are passed to
-   * `Model.create`. If `Model.beforeCreate` returns a promise, `Model.create`
-   * will wait for the promise to resolve before continuing. If the promise
-   * rejects, then the promise returned by `Model.create` will reject. If
-   * `Model.beforeCreate` does not return a promise, `Model.create` will resume
-   * execution immediately.
-   *
-   * @param {Object} props - Properties object that was passed to `Model.create`.
-   * @param {Object} opts - Options object that was passed to `Model.create`.
+   * @memberof Model
+   * @method
+   * @param {Object} props - The `props` argument passed to {@link Model.create}.
+   * @param {Object} opts - The `opts` argument passed to {@link Model.create}.
    */
-  beforeCreate () {},
+  beforeCreate: noop,
 
   /**
-   * The "C" in "CRUD", `Model.create` creates a single entity using the
-   * `create` method of an adapter. If the `props` passed to `Model.create`
-   * contain a primary key as configured by `Model.idAttribute` and
-   * `opts.upsert` is `true` of `Model.upsert` is `true` and `opts.upsert` is
-   * not `false`, then `Model.update` will be called instead.
+   * Using an adapter, create a new the entity from the provided `props`.
    *
-   * 1. `Model.beforeCreate` is called and passed the same arguments passed to
-   * `Model.create`.
-   * 1. `props` and `opts` are passed to the `create` method of the adapter
-   * specified by `opts.adapter` or `Model.defaultAdapter`.
-   * 1. `Model.afterCreate` is called with the `data` argument returned by the
-   * adapter's `create` method and the `opts` argument passed to `Model.create`.
-   * 1. If `opts.raw` is `true` or `Model.raw` is `true` and `opts.raw` is not
-   * `false`, then a result object is returned that contained the created entity
-   * and some metadata about the operation and its result. Otherwise, the
-   * promise returned by `Model.create` resolves with the created entity.
+   * {@link Model.beforeCreate} will be called before calling the adapter.
+   * {@link Model.afterCreate} will be called after calling the adapter.
    *
-   * @param {Object} props - The properties from which to create the new entity.
+   * @memberof Model
+   * @method
+   * @param {Object} props - The properties from which to create the entity.
    * @param {Object} [opts] - Configuration options.
-   * @param {string} [opts.adapter] - The name of the registered adapter to use.
-   * @param {boolean} [opts.raw] - The name of the registered adapter to use.
-   * @param {boolean} [opts.upsert] - Whether to call {@link Model.update}
-   * instead if `props` has a primary key.
-   * @return {Object} The created entity, or if `raw` is `true` then a result
-   * object.
+   * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
+   * {@link Model.defaultAdapter}.
+   * @param {boolean} [opts.autoInject] Whether to inject the resulting created
+   * data into this Model's collection upon success. Defaults to
+   * {@link Model.autoInject}.
+   * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
+   * to {@link Model.notify}.
+   * @param {boolean} [opts.raw] If `false`, return the created data. If
+   * `true` return a response object that includes the created data and metadata
+   * about the operation. Defaults to {@link Model.raw}.
+   * @param {string[]} [opts.with=[]] Relations to create in a cascading
+   * create if `props` contains nested relations. NOT performed in a transaction.
    */
   create (props, opts) {
+    // For debuggability
     const op = 'create'
     this.dbg(op, 'props:', props, 'opts:', opts)
-    let adapterName
 
+    // Default values for arguments
     props || (props = {})
     opts || (opts = {})
+
+    // Fill in "opts" with the Model's configuration
     utils._(this, opts)
     opts.op = op
 
+    // Check whether we should do an upsert instead
     if (opts.upsert && utils.get(props, this.idAttribute) && (!this.is(props) || !props._get('autoPk'))) {
       return this.update(utils.get(props, this.idAttribute), props, opts)
     }
+
+    let adapterName
+
+    // beforeCreate lifecycle hook
     return resolve(this.beforeCreate(props, opts))
       .then(() => {
+        // Select adapter to use
         adapterName = this.getAdapterName(opts)
+        // Now delegate to the adapter
         return this.getAdapter(adapterName)
           .create(this, this.prototype.toJSON.call(props, opts), opts)
       })
       .then(data => {
+        // afterCreate lifecycle hook
         return resolve(this.afterCreate(data, opts))
           .then(() => {
+            // If the created entity was already in this Model's collection via
+            // an autoPk id, remove it from the collection
             if (this.is(props) && props._get('$')) {
               this.eject(utils.get(props, this.idAttribute))
             }
+            // Possibly inject result and/or formulate result object
             return handleResponse(this, data, opts, adapterName)
           })
       })
   },
 
   /**
-   * Lifecycle hook. Called by `Model.create` after `Model.create` call the
-   * `create` method of an adapter.
+   * Model lifecycle hook called by {@link Model.create}. If this method
+   * returns a promise then {@link Model.create} will wait for the promise
+   * to resolve before continuing.
    *
-   * `Model.afterCreate` will receive the `data` argument returned by the
-   * adapter's `create` method and the `opts` argument passed to `Model.create`.
-   * If `Model.afterCreate` returns a promise, `Model.create` will wait for the
-   * promise to resolve before continuing. If the promise rejects, then the
-   * promise returned by `Model.create` will reject. If `Model.afterCreate` does
-   * not return a promise, `Model.create` will resume execution immediately.
-   *
-   * @param {Object} data - Data object returned by the adapter's `create` method.
-   * @param {Object} opts - Options object that was passed to `Model.create`.
+   * @memberof Model
+   * @method
+   * @param {Object} data - The `data` return by the adapter.
+   * @param {Object} opts - The `opts` argument passed to {@link Model.create}.
    */
-  afterCreate () {},
+  afterCreate: noop,
 
-  beforeCreateMany () {},
-  createMany (items, opts) {
+  /**
+   * Model lifecycle hook called by {@link Model.createMany}. If this method
+   * returns a promise then {@link Model.createMany} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @memberof Model
+   * @method
+   * @param {Array} entities - The `entities` argument passed to {@link Model.createMany}.
+   * @param {Object} opts - The `opts` argument passed to {@link Model.createMany}.
+   */
+  beforeCreateMany: noop,
+
+  /**
+   * Given an array of entities, batch create them via an adapter.
+   *
+   * {@link Model.beforeCreateMany} will be called before calling the adapter.
+   * {@link Model.afterCreateMany} will be called after calling the adapter.
+   *
+   * @memberof Model
+   * @method
+   * @param {Array} entities - Array up entities to be created.
+   * @param {Object} [opts] - Configuration options.
+   * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
+   * {@link Model.defaultAdapter}.
+   * @param {boolean} [opts.autoInject] Whether to inject the resulting created
+   * entities into this Model's collection. Defaults to {@link Model.autoInject}.
+   * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
+   * to {@link Model.notify}.
+   * @param {boolean} [opts.raw] If `false`, return the updated data. If
+   * `true` return a response object that includes the updated data and metadata
+   * about the operation. Defaults to {@link Model.raw}.
+   * @param {string[]} [opts.with=[]] Relations to create in a cascading create
+   * if the entities to be created have linked/nested relations. NOT performed
+   * in a transaction.
+   */
+  createMany (entities, opts) {
+    // For debuggability
     const op = 'createMany'
-    this.dbg(op, 'items:', items, 'opts:', opts)
-    let adapterName
+    this.dbg(op, 'entities:', entities, 'opts:', opts)
 
-    items || (items = [])
+    // Default values for arguments
+    entities || (entities = [])
     opts || (opts = {})
+
+    // Fill in "opts" with the Model's configuration
     utils._(this, opts)
     opts.op = op
 
+    // Check whether we should do an upsert instead
     if (opts.upsert) {
       let hasId = true
-      items.forEach(item => {
+      entities.forEach(item => {
         hasId = hasId && utils.get(item, this.idAttribute) && (!utils.isFunction(item._get) || !item._get('autoPk'))
       })
       if (hasId) {
-        return this.updateMany(items, opts)
+        return this.updateMany(entities, opts)
       }
     }
 
-    return resolve(this.beforeCreateMany(items, opts))
+    let adapterName
+
+    // beforeCreateMany lifecycle hook
+    return resolve(this.beforeCreateMany(entities, opts))
       .then(() => {
+        // Select adapter to use
         adapterName = this.getAdapterName(opts)
+        // Now delegate to the adapter
         return this.getAdapter(adapterName)
-          .createMany(this, items.map(item => this.prototype.toJSON.call(item, opts)), opts)
+          .createMany(this, entities.map(item => this.prototype.toJSON.call(item, opts)), opts)
       })
       .then(data => {
+        // afterCreateMany lifecycle hook
         return resolve(this.afterCreateMany(data, opts))
           .then(() => {
-            items.forEach(item => {
+            // If the created entities were already in this Model's collection
+            // via an autoPk id, remove them from the collection
+            entities.forEach(item => {
               if (this.is(item) && item._get('$')) {
                 this.eject(utils.get(item, this.idAttribute))
               }
             })
+            // Possibly inject result and/or formulate result object
             return handleResponse(this, data, opts, adapterName)
           })
       })
   },
-  afterCreateMany () {},
 
-  beforeFind () {},
+  /**
+   * Model lifecycle hook called by {@link Model.createMany}. If this method
+   * returns a promise then {@link Model.createMany} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @memberof Model
+   * @method
+   * @param {Array} entities - The `entities` argument passed to {@link Model.createMany}.
+   * @param {Object} opts - The `opts` argument passed to {@link Model.createMany}.
+   */
+  afterCreateMany: noop,
+
+  /**
+   * Model lifecycle hook called by {@link Model.find}. If this method
+   * returns a promise then {@link Model.find} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @memberof Model
+   * @method
+   * @param {(string|number)} id - The `id` argument passed to {@link Model.find}.
+   * @param {Object} opts - The `opts` argument passed to {@link Model.find}.
+   */
+  beforeFind: noop,
+
+  /**
+   * Retrieve via an adapter the entity with the given primary key. The returned
+   * entity will be injected into the Model's collection if `autoInject` is true.
+   *
+   * {@link Model.beforeFind} will be called before calling the adapter.
+   * {@link Model.afterFind} will be called after calling the adapter.
+   *
+   * @memberof Model
+   * @method
+   * @param {(string|number)} id - The primary key of the entity to retrieve.
+   * @param {Object} [opts] - Configuration options.
+   * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
+   * {@link Model.defaultAdapter}.
+   * @param {boolean} [opts.autoInject] Whether to inject the resulting updated
+   * data into this Model's collection. Defaults to {@link Model.autoInject}.
+   * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
+   * to {@link Model.notify}.
+   * @param {boolean} [opts.raw] If `false`, return the updated data. If
+   * `true` return a response object that includes the updated data and metadata
+   * about the operation. Defaults to {@link Model.raw}.
+   * @param {string[]} [opts.with=[]] Relations to eager load in the request.
+   */
   find (id, opts) {
     const op = 'find'
     this.dbg(op, 'id:', id, 'opts:', opts)
@@ -914,9 +1169,59 @@ utils.fillIn(Model, {
           .then(() => handleResponse(this, data, opts, adapterName))
       })
   },
-  afterFind () {},
 
-  beforeFindAll () {},
+  /**
+   * Model lifecycle hook called by {@link Model.find}. If this method
+   * returns a promise then {@link Model.find} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @memberof Model
+   * @method
+   * @param {string|number} id - The `id` argument passed to {@link Model.find}.
+   * @param {Object} opts - The `opts` argument passed to {@link Model.find}.
+   */
+  afterFind: noop,
+
+  /**
+   * Model lifecycle hook called by {@link Model.findAll}. If this method
+   * returns a promise then {@link Model.findAll} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @memberof Model
+   * @method
+   * @param {Object} query - The `query` argument passed to {@link Model.findAll}.
+   * @param {Object} opts - The `opts` argument passed to {@link Model.findAll}.
+   */
+  beforeFindAll: noop,
+
+  /**
+   * Using the `query` argument, select entities to pull from an adapter.
+   * Expects back from the adapter the array of selected entities. The returned
+   * entities will be injected into the Model's collection if `autoInject` is
+   * true.
+   *
+   * {@link Model.beforeFindAll} will be called before calling the adapter.
+   * {@link Model.afterFindAll} will be called after calling the adapter.
+   *
+   * @memberof Model
+   * @method
+   * @param {Object} [query={}] - Selection query.
+   * @param {Object} [query.where] - Filtering criteria.
+   * @param {number} [query.skip] - Number to skip.
+   * @param {number} [query.limit] - Number to limit to.
+   * @param {Array} [query.orderBy] - Sorting criteria.
+   * @param {Object} [opts] - Configuration options.
+   * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
+   * {@link Model.defaultAdapter}.
+   * @param {boolean} [opts.autoInject] Whether to inject the resulting updated
+   * data into this Model's collection. Defaults to {@link Model.autoInject}.
+   * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
+   * to {@link Model.notify}.
+   * @param {boolean} [opts.raw] If `false`, return the updated data. If
+   * `true` return a response object that includes the updated data and metadata
+   * about the operation. Defaults to {@link Model.raw}.
+   * @param {string[]} [opts.with=[]] Relations to eager load in the request.
+   */
   findAll (query, opts) {
     const op = 'findAll'
     this.dbg(op, 'query:', query, 'opts:', opts)
@@ -934,13 +1239,136 @@ utils.fillIn(Model, {
           .findAll(this, query, opts)
       })
       .then(data => {
-        return resolve(this.afterFindAll(data, opts))
+        return resolve(this.afterFindAll(query, data, opts))
           .then(() => handleResponse(this, data, opts, adapterName))
       })
   },
-  afterFindAll () {},
 
-  beforeUpdate () {},
+  /**
+   * Model lifecycle hook called by {@link Model.findAll}. If this method
+   * returns a promise then {@link Model.findAll} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @memberof Model
+   * @method
+   * @param {Object} query - The `query` argument passed to {@link Model.findAll}.
+   * @param {Object} data - The `data` returned by the adapter.
+   * @param {Object} opts - The `opts` argument passed to {@link Model.findAll}.
+   */
+  afterFindAll: noop,
+
+  /**
+   * Model lifecycle hook called by {@link Model.save}. If this method
+   * returns a promise then {@link Model.save} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @memberof Model
+   * @method
+   * @param {string|number} id - The `id` argument passed to {@link Model.save}.
+   * @param {Object} opts - The `opts` argument passed to {@link Model.save}.
+   */
+  beforeSave: noop,
+
+  /**
+   * If the entity with the given primary key is currently in this Model's
+   * collection, call the instance's {@link Model#save} method. If the entity
+   * is not in this Model's collection, the returned promise will be rejected.
+   *
+   * {@link Model.beforeSave} will be called before calling {@link Model#save}.
+   * {@link Model#beforeSave} will be called before saving the entity.
+   * {@link Model#afterSave} will be called after saving the entity.
+   * {@link Model.afterSave} will be called after calling {@link Model#save}.
+   *
+   * @memberof Model
+   * @method
+   * @param {(string|number)} id - The primary key of the entity to save.
+   * @param {Object} [opts] - Configuration options.
+   * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
+   * {@link Model.defaultAdapter}.
+   * @param {boolean} [opts.autoInject] Whether to inject the resulting updated
+   * data into this Model's collection upon success. Defaults to
+   * {@link Model.autoInject}.
+   * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
+   * to {@link Model.notify}.
+   * @param {boolean} [opts.raw] If `false`, return the updated data. If
+   * `true` return a response object that includes the updated data and metadata
+   * about the operation. Defaults to {@link Model.raw}.
+   * @param {string[]} [opts.with=[]] Relations to save in a cascading
+   * save if any of the entity's relations are linked to the entity.
+   * NOT performed in a transaction.
+   */
+  save (id, opts) {
+    const op = 'save'
+    const instance = this.get(id)
+
+    opts || (opts = {})
+    utils._(this, opts)
+    opts.op = op
+
+    return resolve(this.beforeSave(instance, opts))
+      .then(() => {
+        if (!instance) {
+          throw new Error(`instance with "${this.idAttribute}" of ${id} not in Model's collection!`)
+        }
+        return instance.save(opts)
+      })
+      .then(data => {
+        return resolve(this.afterSave(instance, opts))
+          .then(() => data)
+      })
+  },
+
+  /**
+   * Model lifecycle hook called by {@link Model.save}. If this method
+   * returns a promise then {@link Model.save} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @memberof Model
+   * @method
+   * @param {string|number} id - The `id` argument passed to {@link Model.save}.
+   * @param {Object} opts - The `opts` argument passed to {@link Model.save}.
+   */
+  afterSave: noop,
+
+  /**
+   * Model lifecycle hook called by {@link Model.update}. If this method
+   * returns a promise then {@link Model.update} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @memberof Model
+   * @method
+   * @param {string|number} id - The `id` argument passed to {@link Model.update}.
+   * @param {props} props - The `props` argument passed to {@link Model.update}.
+   * @param {Object} opts - The `opts` argument passed to {@link Model.update}.
+   */
+  beforeUpdate: noop,
+
+  /**
+   * Using an adapter, update the entity with the primary key specified by the
+   * `id` argument.
+   *
+   * {@link Model.beforeUpdate} will be called before updating the entity.
+   * {@link Model.afterUpdate} will be called after updating the entity.
+   *
+   * @memberof Model
+   * @method
+   * @param {(string|number)} id - The primary key of the entity to update.
+   * @param {Object} props - The update to apply to the entity.
+   * @param {Object} [opts] - Configuration options.
+   * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
+   * {@link Model.defaultAdapter}.
+   * @param {boolean} [opts.autoInject] Whether to inject the resulting updated
+   * data into this Model's collection upon success. Defaults to
+   * {@link Model.autoInject}.
+   * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
+   * to {@link Model.notify}.
+   * @param {boolean} [opts.raw] If `false`, return the updated data. If
+   * `true` return a response object that includes the updated data and metadata
+   * about the operation. Defaults to {@link Model.raw}.
+   * @param {string[]} [opts.with=[]] Relations to update in a cascading
+   * update if `props` contains nested updates to relations. NOT performed in a
+   * transaction.
+   */
   update (id, props, opts) {
     const op = 'update'
     this.dbg(op, 'id:', id, 'props:', props, 'opts:', opts)
@@ -962,38 +1390,134 @@ utils.fillIn(Model, {
           .then(() => handleResponse(this, data, opts, adapterName))
       })
   },
-  afterUpdate () {},
 
-  beforeUpdateMany () {},
-  updateMany (items, opts) {
+  /**
+   * Model lifecycle hook called by {@link Model.update}. If this method
+   * returns a promise then {@link Model.update} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @memberof Model
+   * @method
+   * @param {string|number} id - The `id` argument passed to {@link Model.update}.
+   * @param {props} props - The `props` argument passed to {@link Model.update}.
+   * @param {Object} opts - The `opts` argument passed to {@link Model.update}.
+   */
+  afterUpdate: noop,
+
+  /**
+   * Model lifecycle hook called by {@link Model.updateMany}. If this method
+   * returns a promise then {@link Model.updateMany} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @memberof Model
+   * @method
+   * @param {Array} entities - The `entities` argument passed to {@link Model.updateMany}.
+   * @param {Object} opts - The `opts` argument passed to {@link Model.updateMany}.
+   */
+  beforeUpdateMany: noop,
+
+  /**
+   * Given an array of updates, perform each of the updates via an adapter. Each
+   * "update" is a hash of properties with which to update an entity. Each
+   * update must contain the primary key to be updated.
+   *
+   * {@link Model.beforeUpdateMany} will be called before making the update.
+   * {@link Model.afterUpdateMany} will be called after making the update.
+   *
+   * @memberof Model
+   * @method
+   * @param {Array} entities - Array up entity updates.
+   * @param {Object} [opts] - Configuration options.
+   * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
+   * {@link Model.defaultAdapter}.
+   * @param {boolean} [opts.autoInject] Whether to inject the resulting updated
+   * data into this Model's collection. Defaults to {@link Model.autoInject}.
+   * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
+   * to {@link Model.notify}.
+   * @param {boolean} [opts.raw] If `false`, return the updated data. If
+   * `true` return a response object that includes the updated data and metadata
+   * about the operation. Defaults to {@link Model.raw}.
+   * @param {string[]} [opts.with=[]] Relations to update in a cascading
+   * update if each entity update contains nested updates for relations. NOT
+   * performed in a transaction.
+   */
+  updateMany (entities, opts) {
     const op = 'updateMany'
-    this.dbg(op, 'items:', items, 'opts:', opts)
+    this.dbg(op, 'entities:', entities, 'opts:', opts)
     let adapterName
 
-    items || (items = [])
+    entities || (entities = [])
     opts || (opts = {})
     utils._(this, opts)
     opts.op = op
 
-    return resolve(this.beforeUpdateMany(items, opts))
+    return resolve(this.beforeUpdateMany(entities, opts))
       .then(() => {
         adapterName = this.getAdapterName(opts)
         return this.getAdapter(adapterName)
-          .updateMany(this, items.map(item => this.prototype.toJSON.call(item, opts)), opts)
+          .updateMany(this, entities.map(item => this.prototype.toJSON.call(item, opts)), opts)
       })
       .then(data => {
         return resolve(this.afterUpdateMany(data, opts))
           .then(() => handleResponse(this, data, opts, adapterName))
       })
   },
-  afterUpdateMany () {},
 
-  beforeUpdateAll () {},
   /**
-   * @param {Object} query={} - Selection query.
+   * Model lifecycle hook called by {@link Model.updateMany}. If this method
+   * returns a promise then {@link Model.updateMany} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @memberof Model
+   * @method
+   * @param {Array} entities - The `entities` argument passed to {@link Model.updateMany}.
+   * @param {Object} opts - The `opts` argument passed to {@link Model.updateMany}.
+   */
+  afterUpdateMany: noop,
+
+  /**
+   * Model lifecycle hook called by {@link Model.updateAll}. If this method
+   * returns a promise then {@link Model.updateAll} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @memberof Model
+   * @method
+   * @param {Object} query - The `query` argument passed to {@link Model.updateAll}.
+   * @param {Object} props - The `props` argument passed to {@link Model.updateAll}.
+   * @param {Object} opts - The `opts` argument passed to {@link Model.updateAll}.
+   */
+  beforeUpdateAll: noop,
+
+  /**
+   * Using the `query` argument, perform the a single updated to the selected
+   * entities. Expects back from the adapter an array of the updated entities.
+   * The updated entities will be injected into the Model's collection if
+   * `autoInject` is true.
+   *
+   * {@link Model.beforeUpdateAll} will be called before making the update.
+   * {@link Model.afterUpdateAll} will be called after making the update.
+   *
+   * @memberof Model
+   * @method
+   * @param {Object} [query={}] - Selection query.
+   * @param {Object} [query.where] - Filtering criteria.
+   * @param {number} [query.skip] - Number to skip.
+   * @param {number} [query.limit] - Number to limit to.
+   * @param {Array} [query.orderBy] - Sorting criteria.
    * @param {Object} props - Update to apply to selected entities.
    * @param {Object} [opts] - Configuration options.
-   * @param {boolean} [opts.raw=false] TODO
+   * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
+   * {@link Model.defaultAdapter}.
+   * @param {boolean} [opts.autoInject] Whether to inject the resulting updated
+   * data into this Model's collection. Defaults to {@link Model.autoInject}.
+   * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
+   * to {@link Model.notify}.
+   * @param {boolean} [opts.raw] If `false`, return the updated data. If
+   * `true` return a response object that includes the updated data and metadata
+   * about the operation. Defaults to {@link Model.raw}.
+   * @param {string[]} [opts.with=[]] Relations to update in a cascading
+   * update if `props` contains nested updates to relations. NOT performed in a
+   * transaction.
    */
   updateAll (query, props, opts) {
     const op = 'updateAll'
@@ -1017,14 +1541,54 @@ utils.fillIn(Model, {
           .then(() => handleResponse(this, data, opts, adapterName))
       })
   },
-  afterUpdateAll () {},
-
-  beforeDestroy () {},
 
   /**
-   * @param {(string|number)} id
+   * Model lifecycle hook called by {@link Model.updateAll}. If this method
+   * returns a promise then {@link Model.updateAll} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @memberof Model
+   * @method
+   * @param {Object} query - The `query` argument passed to {@link Model.updateAll}.
+   * @param {Object} props - The `props` argument passed to {@link Model.updateAll}.
+   * @param {Object} opts - The `opts` argument passed to {@link Model.updateAll}.
+   */
+  afterUpdateAll: noop,
+
+  /**
+   * Model lifecycle hook called by {@link Model.destroy}. If this method
+   * returns a promise then {@link Model.destroy} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @memberof Model
+   * @method
+   * @param {string|number} id - The `id` argument passed to {@link Model.destroy}.
+   * @param {Object} opts - The `opts` argument passed to {@link Model.destroy}.
+   */
+  beforeDestroy: noop,
+
+  /**
+   * Using an adapter, destroy the entity with the primary key specified by the
+   * `id` argument.
+   *
+   * {@link Model.beforeDestroy} will be called before destroying the entity.
+   * {@link Model.afterDestroy} will be called after destroying the entity.
+   *
+   * @memberof Model
+   * @method
+   * @param {(string|number)} id - The primary key of the entity to destroy.
    * @param {Object} [opts] - Configuration options.
-   * @param {boolean} [opts.raw=false] TODO
+   * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
+   * {@link Model.defaultAdapter}.
+   * @param {boolean} [opts.autoEject] Whether to remove the entity from this
+   * Model's collection upon success. Defaults to {@link Model.autoEject}.
+   * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
+   * to {@link Model.notify}.
+   * @param {boolean} [opts.raw] If `false`, return the updated data. If
+   * `true` return a response object that includes the updated data and metadata
+   * about the operation. Defaults to {@link Model.raw}.
+   * @param {string[]} [opts.with=[]] Relations to destroy in a cascading
+   * delete. NOT performed in a transaction.
    */
   destroy (id, opts) {
     const op = 'destroy'
@@ -1057,9 +1621,58 @@ utils.fillIn(Model, {
           })
       })
   },
-  afterDestroy () {},
 
-  beforeDestroyAll () {},
+  /**
+   * Model lifecycle hook called by {@link Model.destroy}. If this method
+   * returns a promise then {@link Model.destroy} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @memberof Model
+   * @method
+   * @param {string|number} id - The `id` argument passed to {@link Model.destroy}.
+   * @param {Object} opts - The `opts` argument passed to {@link Model.destroy}.
+   */
+  afterDestroy: noop,
+
+  /**
+   * Model lifecycle hook called by {@link Model.destroyAll}. If this method
+   * returns a promise then {@link Model.destroyAll} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @memberof Model
+   * @method
+   * @param {query} query - The `query` argument passed to {@link Model.destroyAll}.
+   * @param {Object} opts - The `opts` argument passed to {@link Model.destroyAll}.
+   */
+  beforeDestroyAll: noop,
+
+  /**
+   * Using the `query` argument, destroy the selected entities via an adapter.
+   * If no `query` is provided then all entities will be destroyed.
+   *
+   * {@link Model.beforeDestroyAll} will be called before destroying the entities.
+   * {@link Model.afterDestroyAll} will be called after destroying the entities.
+   *
+   * @memberof Model
+   * @method
+   * @param {Object} [query={}] - Selection query.
+   * @param {Object} [query.where] - Filtering criteria.
+   * @param {number} [query.skip] - Number to skip.
+   * @param {number} [query.limit] - Number to limit to.
+   * @param {Array} [query.orderBy] - Sorting criteria.
+   * @param {Object} [opts] - Configuration options.
+   * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
+   * {@link Model.defaultAdapter}.
+   * @param {boolean} [opts.autoEject] Whether to remove the entities from this
+   * Model's collection upon success. Defaults to {@link Model.autoEject}.
+   * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
+   * to {@link Model.notify}.
+   * @param {boolean} [opts.raw] If `false`, return the updated data. If
+   * `true` return a response object that includes the updated data and metadata
+   * about the operation. Defaults to {@link Model.raw}.
+   * @param {string[]} [opts.with=[]] Relations to destroy in a cascading
+   * delete. NOT performed in a transaction.
+   */
   destroyAll (query, opts) {
     const op = 'destroyAll'
     this.dbg(op, 'query:', query, 'opts:', opts)
@@ -1092,9 +1705,20 @@ utils.fillIn(Model, {
           })
       })
   },
-  afterDestroyAll () {},
 
-  beforeLoadRelations () {},
+  /**
+   * Model lifecycle hook called by {@link Model.destroyAll}. If this method
+   * returns a promise then {@link Model.destroyAll} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @memberof Model
+   * @method
+   * @param {query} query - The `query` argument passed to {@link Model.destroyAll}.
+   * @param {Object} opts - The `opts` argument passed to {@link Model.destroyAll}.
+   */
+  afterDestroyAll: noop,
+
+  beforeLoadRelations: noop,
   loadRelations (id, relations, opts) {
     const _this = this
     let instance = _this.is(id) ? id : undefined
@@ -1160,7 +1784,7 @@ utils.fillIn(Model, {
           .then(() => instance)
       })
   },
-  afterLoadRelations () {},
+  afterLoadRelations: noop,
 
   log (level, ...args) {
     if (level && !args.length) {
