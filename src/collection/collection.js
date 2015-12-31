@@ -73,21 +73,21 @@ addHiddenPropsToTarget(Collection.prototype, {
    * @memberof Collection
    * @instance
    * @param {string} name - The name of the new secondary index.
-   * @param {string[]} [keyList] - Array of field names to use as the key or
-   * compound key of the new secondary index. If no keyList is provided, then
+   * @param {string[]} [fieldList] - Array of field names to use as the key or
+   * compound key of the new secondary index. If no fieldList is provided, then
    * the name will also be the field that is used to index the collection.
    * @return {Collection} A reference to itself for chaining.
    */
-  createIndex (name, keyList, opts) {
-    if (isString(name) && keyList === undefined) {
-      keyList = [name]
+  createIndex (name, fieldList, opts) {
+    if (isString(name) && fieldList === undefined) {
+      fieldList = [name]
     }
     opts || (opts = {})
     const idAttribute = this.idAttribute
-    opts.hashCode = function (obj) {
+    opts.hashCode = opts.hashCode || function (obj) {
       return get(obj, idAttribute)
     }
-    const index = this.indexes[name] = new Index(keyList, opts)
+    const index = this.indexes[name] = new Index(fieldList, opts)
     this.index.visitAll(index.insertRecord, index)
     return this
   },
