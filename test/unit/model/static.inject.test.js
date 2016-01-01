@@ -254,7 +254,7 @@ export function init () {
 
       assert.isTrue(Parent.get(1).children[0] instanceof Child)
       assert.isTrue(Parent.get(1).children[1] instanceof Child)
-      assert.deepEqual(Child.filter({ parentId: 1 }), Parent.get(1).children)
+      assert.deepEqual(Child.filter({ parent_id: 1 }), Parent.get(1).children)
     })
     it('should configure enumerability and linking of relations', function () {
       class Parent extends Model {}
@@ -466,7 +466,7 @@ export function init () {
       }
       const start = new Date().getTime()
       User.inject(users)
-      console.log('\tinject 1,000 users time taken: ', new Date().getTime() - start, 'ms')
+      // console.log('\tinject 1,000 users time taken: ', new Date().getTime() - start, 'ms')
     })
     it.skip('should inject 10,000 items', function () {
       class User extends Model {}
@@ -482,7 +482,7 @@ export function init () {
       }
       const start = new Date().getTime()
       User.inject(users)
-      console.log('\tinject 10,000 users time taken: ', new Date().getTime() - start, 'ms')
+      // console.log('\tinject 10,000 users time taken: ', new Date().getTime() - start, 'ms')
     })
     it('should inject 1,000 items where there is an index on "age"', function () {
       class User extends Model {}
@@ -501,7 +501,7 @@ export function init () {
       }
       const start = new Date().getTime()
       User.inject(users)
-      console.log('\tinject 1,000 users time taken: ', new Date().getTime() - start, 'ms')
+      // console.log('\tinject 1,000 users time taken: ', new Date().getTime() - start, 'ms')
     })
     it.skip('should inject 10,000 items where there is an index on "age"', function () {
       class User extends Model {}
@@ -520,8 +520,8 @@ export function init () {
       }
       const start = new Date().getTime()
       User.inject(users)
-      console.log('\tinject 10,000 users time taken: ', new Date().getTime() - start, 'ms')
-      console.log('\tusers age 40-44', User.between(40, 45, { index: 'age' }).length)
+      // console.log('\tinject 10,000 users time taken: ', new Date().getTime() - start, 'ms')
+      // console.log('\tusers age 40-44', User.between(40, 45, { index: 'age' }).length)
     })
     it('should inject temporary items', function () {
       class User extends Model {}

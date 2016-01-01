@@ -1,4 +1,4 @@
-{
+  {
   "source": {
     "includePattern": ".*js$"
   },
@@ -12,9 +12,9 @@
     "package": "./package.json"
   },
   "templates": {
-    "theme": "cosmo",
+    "theme": "lumen",
     "systemName": "js-data",
-    "copyright": "js-data Copyright © 2014-2015 Jason Dobry"
+    "copyright": "js-data Copyright © 2014-2016 Jason Dobry"
   },
   "source": {
     "excludePattern": "(sync_methods|old_utils)"

@@ -668,9 +668,9 @@
       case 'notIn':
         return predicate.indexOf(value) === -1;
       case 'contains':
-        return value.indexOf(predicate) !== -1;
+        return (value || []).indexOf(predicate) !== -1;
       case 'notContains':
-        return value.indexOf(predicate) === -1;
+        return (value || []).indexOf(predicate) === -1;
       default:
         if (op.indexOf('like') === 0) {
           return like(predicate, op.substr(4)).exec(value) !== null;
@@ -1053,6 +1053,26 @@
      */
     map: function map(mapFn, thisArg) {
       this.data = this.getData().map(mapFn, thisArg);
+      return this;
+    },
+
+    /**
+     * Return the result of calling the specified function on each item in this
+     * collection's main index.
+     * @memberof Query
+     * @instance
+     * @param {string} funcName - Name of function to call
+     * @parama {...*} [args] - Remaining arguments to be passed to the function.
+     * @return {Query} A reference to itself for chaining.
+     */
+    mapCall: function mapCall(funcName) {
+      for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+        args[_key2 - 1] = arguments[_key2];
+      }
+
+      this.data = this.getData().map(function (item) {
+        return item[funcName].apply(item, args);
+      });
       return this;
     },
 
@@ -1790,13 +1810,13 @@
      *
      * @memberof Collection
      * @instance
-     * @param {Function} callback - Reduction callback.
+     * @param {Function} cb - Reduction callback.
      * @param {*} initialValue - Initial value of the reduction.
      * @return {*} The result.
      */
-    reduce: function reduce(callback, initialValue) {
+    reduce: function reduce(cb, initialValue) {
       var data = this.getAll();
-      return data.reduce(callback, initialValue);
+      return data.reduce(cb, initialValue);
     },
 
     /**
@@ -1889,6 +1909,27 @@
       opts || (opts = {});
       var index = opts.index ? this.indexes[opts.index] : this.index;
       index.updateRecord(record);
+    },
+
+    /**
+     * Return the result of calling the specified function on each item in this
+     * collection's main index.
+     * @memberof Collection
+     * @instance
+     * @param {string} funcName - Name of function to call
+     * @parama {...*} [args] - Remaining arguments to be passed to the function.
+     * @return {Array} The result.
+     */
+    mapCall: function mapCall(funcName) {
+      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+      }
+
+      var data = [];
+      this.index.visitAll(function (item) {
+        data.push(item[funcName].apply(item, args));
+      });
+      return data;
     }
   });
 
@@ -2118,7 +2159,7 @@
   function applyHasMany(target, Relation, opts) {
     opts || (opts = {});
     // Choose field where the relation will be attached
-    var localField = opts.localField || camelCase(Relation.name) + 'Collection';
+    var localField = opts.localField = opts.localField || camelCase(Relation.name) + 'Collection';
     // Choose field on related instances that holds the primary key of instances
     // of the target Model
     var foreignKey = opts.foreignKey;
@@ -2126,7 +2167,7 @@
     var foreignKeys = opts.foreignKeys;
 
     if (!foreignKey && !localKeys && !foreignKeys) {
-      foreignKey = opts.foreignKey = camelCase(target.name) + 'Id';
+      foreignKey = opts.foreignKey = camelCase(target.name) + '_id';
     }
     if (foreignKey) {
       Relation.collection.createIndex(foreignKey);
@@ -3016,6 +3057,8 @@
         for (var key in this) {
           json[key] = this[key];
         }
+        // The user wants to include relations in the resulting plain object
+        // representation
         if (Ctor && Ctor.relationList && opts.with) {
           if (isString(opts.with)) {
             opts.with = [opts.with];
@@ -3030,6 +3073,8 @@
             if (containedName) {
               (function () {
                 var optsCopy = { with: opts.with.slice() };
+
+                // Prepare to recurse into deeply nested relations
                 optsCopy.with.splice(optsCopy.with.indexOf(containedName), 1);
                 optsCopy.with.forEach(function (relation, i) {
                   if (relation && relation.indexOf(containedName) === 0 && relation.length >= containedName.length && relation[containedName.length] === '.') {
@@ -3039,7 +3084,9 @@
                   }
                 });
                 var relationData = get(_this5, def.localField);
+
                 if (relationData) {
+                  // The actual recursion
                   if (isArray(relationData)) {
                     _set(json, def.localField, relationData.map(function (item) {
                       return def.Relation.prototype.toJSON.call(item, optsCopy);
@@ -3294,15 +3341,17 @@
      *
      * @memberof Model
      * @method
-     * @param {string|number} id - The primary key of the entity.
-     * @param {string} [key] - If provided, only return changes to this field.
-     * @return {Object} Changes to the entity since the entity was instantiated.
+     * @param {(string|number)} [id] - If provided, only return changes for the
+     * entity with the given primary key.
+     * @return {(Object|Array)} Changes to the entity since the entity was instantiated.
      */
-    changes: function changes(id, key) {
+    changes: function changes(id) {
       this.dbg('changes', 'id:', id);
-      var instance = this.get(id);
-      if (instance) {
-        return instance.changes(key);
+      if (isSorN(id)) {
+        var instance = this.get(id);
+        return instance ? instance.changes() : undefined;
+      } else {
+        return this.collection.mapCall('changes');
       }
     },
 
@@ -3311,16 +3360,36 @@
      * collection, return the result of calling {@link Model#hasChanges} on that
      * entity, otherwise return undefined.
      *
+     * If no primary key is provided, return whether any entity in this Model's
+     * collection has any changes.
+     *
      * @memberof Model
      * @method
-     * @param {string|number} id - The primary key of the entity.
-     * @return {boolean} Whether the entity has any changes.
+     * @param {(string|number)} [id] - The primary key of the entity.
+     * @return {boolean} Whether the entity has any changes, or whether any entity
+     * in this Model's collection has any changes.
      */
     hasChanges: function hasChanges(id) {
+      var _this6 = this;
+
       this.dbg('hasChanges', 'id:', id);
-      var instance = this.get(id);
-      if (instance) {
-        return instance.hasChanges();
+      if (isSorN(id)) {
+        var instance = this.get(id);
+        if (instance) {
+          return instance.hasChanges();
+        }
+      } else {
+        var _ret2 = (function () {
+          var hasChanges = false;
+          _this6.collection.forEach(function (item) {
+            hasChanges = hasChanges || item.hasChanges();
+          });
+          return {
+            v: hasChanges
+          };
+        })();
+
+        if ((typeof _ret2 === 'undefined' ? 'undefined' : babelHelpers.typeof(_ret2)) === "object") return _ret2.v;
       }
     },
 
@@ -3338,11 +3407,11 @@
      * @method
      * @param {(Object|Object[]|Model|Model[])} items - The item or items to insert.
      * @param {Object} [opts] - Configuration options.
-     * @param {boolean} [opts.autoPk] - Whether to generate primary keys for the
-     * entities to be injected. Useful for injecting temporary, unsaved data into
-     * the Model's collection.
+     * @param {boolean} [opts.autoPk={@link Model.autoPk}] - Whether to generate
+     * primary keys for the entities to be injected. Useful for injecting
+     * temporary, unsaved data into a Model's collection.
      * @param {string} [opts.onConflict] - What to do when an item is already in
-     * the Collection instance. Possible values are `merge` or `replace`.
+     * the Model's collection. Possible values are `merge` or `replace`.
      * @return {(Model|Model[])} The injected entity or entities.
      */
     inject: function inject(entities, opts) {
@@ -3589,6 +3658,7 @@
      *
      * @memberof Model
      * @method
+     * @return {Model[]}
      */
     between: function between() {
       var _collection;
@@ -3597,10 +3667,12 @@
     },
 
     /**
-     * Proxy for Collection#getAll
+     * Equivalent of `Model.collection.getAll([...ids][, opts])`. See
+     * {@link Collection#getAll}.
      *
      * @memberof Model
      * @method
+     * @return {Model[]} The selected entities
      */
     getAll: function getAll() {
       var _collection2;
@@ -3609,10 +3681,12 @@
     },
 
     /**
-     * Proxy for Collection#filter
+     * Equivalent of `Model.collection.filter([query][, opts])`. See
+     * {@link Collection#filter}.
      *
      * @memberof Model
      * @method
+     * @return {Model[]} The selected entities.
      */
     filter: function filter(query, opts) {
       opts || (opts = {});
@@ -3620,7 +3694,71 @@
     },
 
     /**
-     * Proxy for `Model.collection.query()`.
+     * Equivalent of `Model.collection.forEach(cb[, thisArg])`. See
+     * {@link Collection#forEach}.
+     *
+     * @memberof Model
+     * @method
+     */
+    forEach: function forEach(cb, thisArg) {
+      return this.collection.forEach(cb, thisArg);
+    },
+
+    /**
+     * Equivalent of `Model.collection.map(cb[, thisArg])`. See
+     * {@link Collection#map}.
+     *
+     * @memberof Model
+     * @method
+     * @return {Array} The result
+     */
+    map: function map(cb, thisArg) {
+      return this.collection.map(cb, thisArg);
+    },
+
+    /**
+     * Equivalent of `Model.collection.reduce(cb, initialValue)`. See
+     * {@link Collection#reducs}.
+     *
+     * @memberof Model
+     * @method
+     * @return {*} The result.
+     */
+    reduce: function reduce(cb, initialValue) {
+      return this.collection.reduce(cb, initialValue);
+    },
+
+    /**
+     * Equivalent of `Model.collection.mapCall(funcName[, ...args])`. See
+     * {@link Collection#mapCall}.
+     *
+     * @memberof Model
+     * @method
+     * @return {Array} The result
+     */
+    mapCall: function mapCall() {
+      var _collection3;
+
+      return (_collection3 = this.collection).mapCall.apply(_collection3, arguments);
+    },
+
+    /**
+     * Return the plain JSON representation of all items in this Model's
+     * collection.
+     *
+     * @memberof Model
+     * @method
+     * @param {Object} [opts] - Configuration options.
+     * @param {string[]} [opts.with] - Array of relation names or relation fields
+     * to include in the representation.
+     * @return {Model[]} The entities.
+     */
+    toJSON: function toJSON(opts) {
+      return this.mapCall('toJSON', opts);
+    },
+
+    /**
+     * Equivalent of `Model.collection.query()`. See {@link Collection#query}.
      *
      * @memberof Model
      * @method
@@ -3654,7 +3792,7 @@
      *
      * @memberof Model
      * @method
-     * @param {Object} [opts] - The options, if any.
+     * @param {(Object|string)} [opts] - The name of an adapter or options, if any.
      * @return {string} The name of the adapter.
      */
     getAdapterName: function getAdapterName(opts) {
@@ -3687,21 +3825,20 @@
      * @method
      * @param {Object} props - The properties from which to create the entity.
      * @param {Object} [opts] - Configuration options.
-     * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
-     * {@link Model.defaultAdapter}.
-     * @param {boolean} [opts.autoInject] Whether to inject the resulting created
-     * data into this Model's collection upon success. Defaults to
-     * {@link Model.autoInject}.
-     * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
-     * to {@link Model.notify}.
-     * @param {boolean} [opts.raw] If `false`, return the created data. If
-     * `true` return a response object that includes the created data and metadata
-     * about the operation. Defaults to {@link Model.raw}.
+     * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
+     * inject the resulting created data into this Model's collection upon success.
+     * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
+     * created data. If `true` return a response object that includes the created
+     * data and metadata about the operation.
      * @param {string[]} [opts.with=[]] Relations to create in a cascading
      * create if `props` contains nested relations. NOT performed in a transaction.
      */
     create: function create(props, opts) {
-      var _this6 = this;
+      var _this7 = this;
 
       // For debuggability
       var op = 'create';
@@ -3725,19 +3862,19 @@
       // beforeCreate lifecycle hook
       return resolve(this.beforeCreate(props, opts)).then(function () {
         // Select adapter to use
-        adapterName = _this6.getAdapterName(opts);
+        adapterName = _this7.getAdapterName(opts);
         // Now delegate to the adapter
-        return _this6.getAdapter(adapterName).create(_this6, _this6.prototype.toJSON.call(props, opts), opts);
+        return _this7.getAdapter(adapterName).create(_this7, _this7.prototype.toJSON.call(props, opts), opts);
       }).then(function (data) {
         // afterCreate lifecycle hook
-        return resolve(_this6.afterCreate(data, opts)).then(function () {
+        return resolve(_this7.afterCreate(data, opts)).then(function () {
           // If the created entity was already in this Model's collection via
           // an autoPk id, remove it from the collection
-          if (_this6.is(props) && props._get('$')) {
-            _this6.eject(get(props, _this6.idAttribute));
+          if (_this7.is(props) && props._get('$')) {
+            _this7.eject(get(props, _this7.idAttribute));
           }
           // Possibly inject result and/or formulate result object
-          return handleResponse(_this6, data, opts, adapterName);
+          return handleResponse(_this7, data, opts, adapterName);
         });
       });
     },
@@ -3776,21 +3913,21 @@
      * @method
      * @param {Array} entities - Array up entities to be created.
      * @param {Object} [opts] - Configuration options.
-     * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
-     * {@link Model.defaultAdapter}.
-     * @param {boolean} [opts.autoInject] Whether to inject the resulting created
-     * entities into this Model's collection. Defaults to {@link Model.autoInject}.
-     * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
-     * to {@link Model.notify}.
-     * @param {boolean} [opts.raw] If `false`, return the updated data. If
-     * `true` return a response object that includes the updated data and metadata
-     * about the operation. Defaults to {@link Model.raw}.
+     * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
+     * inject the resulting created entities into this Model's collection.
+     * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
+     * updated data. If `true` return a response object that includes the updated
+     * data and metadata about the operation.
      * @param {string[]} [opts.with=[]] Relations to create in a cascading create
      * if the entities to be created have linked/nested relations. NOT performed
      * in a transaction.
      */
     createMany: function createMany(entities, opts) {
-      var _this7 = this;
+      var _this8 = this;
 
       // For debuggability
       var op = 'createMany';
@@ -3806,19 +3943,19 @@
 
       // Check whether we should do an upsert instead
       if (opts.upsert) {
-        var _ret2 = (function () {
+        var _ret3 = (function () {
           var hasId = true;
           entities.forEach(function (item) {
-            hasId = hasId && get(item, _this7.idAttribute) && (!isFunction(item._get) || !item._get('autoPk'));
+            hasId = hasId && get(item, _this8.idAttribute) && (!isFunction(item._get) || !item._get('autoPk'));
           });
           if (hasId) {
             return {
-              v: _this7.updateMany(entities, opts)
+              v: _this8.updateMany(entities, opts)
             };
           }
         })();
 
-        if ((typeof _ret2 === 'undefined' ? 'undefined' : babelHelpers.typeof(_ret2)) === "object") return _ret2.v;
+        if ((typeof _ret3 === 'undefined' ? 'undefined' : babelHelpers.typeof(_ret3)) === "object") return _ret3.v;
       }
 
       var adapterName = undefined;
@@ -3826,23 +3963,23 @@
       // beforeCreateMany lifecycle hook
       return resolve(this.beforeCreateMany(entities, opts)).then(function () {
         // Select adapter to use
-        adapterName = _this7.getAdapterName(opts);
+        adapterName = _this8.getAdapterName(opts);
         // Now delegate to the adapter
-        return _this7.getAdapter(adapterName).createMany(_this7, entities.map(function (item) {
-          return _this7.prototype.toJSON.call(item, opts);
+        return _this8.getAdapter(adapterName).createMany(_this8, entities.map(function (item) {
+          return _this8.prototype.toJSON.call(item, opts);
         }), opts);
       }).then(function (data) {
         // afterCreateMany lifecycle hook
-        return resolve(_this7.afterCreateMany(data, opts)).then(function () {
+        return resolve(_this8.afterCreateMany(data, opts)).then(function () {
           // If the created entities were already in this Model's collection
           // via an autoPk id, remove them from the collection
           entities.forEach(function (item) {
-            if (_this7.is(item) && item._get('$')) {
-              _this7.eject(get(item, _this7.idAttribute));
+            if (_this8.is(item) && item._get('$')) {
+              _this8.eject(get(item, _this8.idAttribute));
             }
           });
           // Possibly inject result and/or formulate result object
-          return handleResponse(_this7, data, opts, adapterName);
+          return handleResponse(_this8, data, opts, adapterName);
         });
       });
     },
@@ -3882,19 +4019,19 @@
      * @method
      * @param {(string|number)} id - The primary key of the entity to retrieve.
      * @param {Object} [opts] - Configuration options.
-     * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
-     * {@link Model.defaultAdapter}.
-     * @param {boolean} [opts.autoInject] Whether to inject the resulting updated
-     * data into this Model's collection. Defaults to {@link Model.autoInject}.
-     * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
-     * to {@link Model.notify}.
-     * @param {boolean} [opts.raw] If `false`, return the updated data. If
-     * `true` return a response object that includes the updated data and metadata
-     * about the operation. Defaults to {@link Model.raw}.
+     * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
+     * inject the resulting data into this Model's collection.
+     * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
+     * updated data. If `true` return a response object that includes the updated
+     * data and metadata about the operation.
      * @param {string[]} [opts.with=[]] Relations to eager load in the request.
      */
     find: function find(id, opts) {
-      var _this8 = this;
+      var _this9 = this;
 
       var op = 'find';
       this.dbg(op, 'id:', id, 'opts:', opts);
@@ -3905,11 +4042,11 @@
       opts.op = op;
 
       return resolve(this.beforeFind(id, opts)).then(function () {
-        adapterName = _this8.getAdapterName(opts);
-        return _this8.getAdapter(adapterName).find(_this8, id, opts);
+        adapterName = _this9.getAdapterName(opts);
+        return _this9.getAdapter(adapterName).find(_this9, id, opts);
       }).then(function (data) {
-        return resolve(_this8.afterFind(data, opts)).then(function () {
-          return handleResponse(_this8, data, opts, adapterName);
+        return resolve(_this9.afterFind(data, opts)).then(function () {
+          return handleResponse(_this9, data, opts, adapterName);
         });
       });
     },
@@ -3921,7 +4058,7 @@
      *
      * @memberof Model
      * @method
-     * @param {string|number} id - The `id` argument passed to {@link Model.find}.
+     * @param {(string|number)} id - The `id` argument passed to {@link Model.find}.
      * @param {Object} opts - The `opts` argument passed to {@link Model.find}.
      */
     afterFind: noop,
@@ -3955,19 +4092,19 @@
      * @param {number} [query.limit] - Number to limit to.
      * @param {Array} [query.orderBy] - Sorting criteria.
      * @param {Object} [opts] - Configuration options.
-     * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
-     * {@link Model.defaultAdapter}.
-     * @param {boolean} [opts.autoInject] Whether to inject the resulting updated
-     * data into this Model's collection. Defaults to {@link Model.autoInject}.
-     * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
-     * to {@link Model.notify}.
-     * @param {boolean} [opts.raw] If `false`, return the updated data. If
-     * `true` return a response object that includes the updated data and metadata
-     * about the operation. Defaults to {@link Model.raw}.
+     * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
+     * inject the resulting data into this Model's collection.
+     * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
+     * resulting data. If `true` return a response object that includes the
+     * resulting data and metadata about the operation.
      * @param {string[]} [opts.with=[]] Relations to eager load in the request.
      */
     findAll: function findAll(query, opts) {
-      var _this9 = this;
+      var _this10 = this;
 
       var op = 'findAll';
       this.dbg(op, 'query:', query, 'opts:', opts);
@@ -3979,11 +4116,11 @@
       opts.op = op;
 
       return resolve(this.beforeFindAll(query, opts)).then(function () {
-        adapterName = _this9.getAdapterName(opts);
-        return _this9.getAdapter(adapterName).findAll(_this9, query, opts);
+        adapterName = _this10.getAdapterName(opts);
+        return _this10.getAdapter(adapterName).findAll(_this10, query, opts);
       }).then(function (data) {
-        return resolve(_this9.afterFindAll(query, data, opts)).then(function () {
-          return handleResponse(_this9, data, opts, adapterName);
+        return resolve(_this10.afterFindAll(query, data, opts)).then(function () {
+          return handleResponse(_this10, data, opts, adapterName);
         });
       });
     },
@@ -4008,7 +4145,7 @@
      *
      * @memberof Model
      * @method
-     * @param {string|number} id - The `id` argument passed to {@link Model.save}.
+     * @param {(string|number)} id - The `id` argument passed to {@link Model.save}.
      * @param {Object} opts - The `opts` argument passed to {@link Model.save}.
      */
     beforeSave: noop,
@@ -4027,22 +4164,21 @@
      * @method
      * @param {(string|number)} id - The primary key of the entity to save.
      * @param {Object} [opts] - Configuration options.
-     * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
-     * {@link Model.defaultAdapter}.
-     * @param {boolean} [opts.autoInject] Whether to inject the resulting updated
-     * data into this Model's collection upon success. Defaults to
-     * {@link Model.autoInject}.
-     * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
-     * to {@link Model.notify}.
-     * @param {boolean} [opts.raw] If `false`, return the updated data. If
-     * `true` return a response object that includes the updated data and metadata
-     * about the operation. Defaults to {@link Model.raw}.
+     * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
+     * inject the resulting updated data into this Model's collection.
+     * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
+     * updated data. If `true` return a response object that includes the updated
+     * data and metadata about the operation.
      * @param {string[]} [opts.with=[]] Relations to save in a cascading
      * save if any of the entity's relations are linked to the entity.
      * NOT performed in a transaction.
      */
     save: function save(id, opts) {
-      var _this10 = this;
+      var _this11 = this;
 
       var op = 'save';
       var instance = this.get(id);
@@ -4053,11 +4189,11 @@
 
       return resolve(this.beforeSave(instance, opts)).then(function () {
         if (!instance) {
-          throw new Error('instance with "' + _this10.idAttribute + '" of ' + id + ' not in Model\'s collection!');
+          throw new Error('instance with "' + _this11.idAttribute + '" of ' + id + ' not in Model\'s collection!');
         }
         return instance.save(opts);
       }).then(function (data) {
-        return resolve(_this10.afterSave(instance, opts)).then(function () {
+        return resolve(_this11.afterSave(instance, opts)).then(function () {
           return data;
         });
       });
@@ -4070,7 +4206,7 @@
      *
      * @memberof Model
      * @method
-     * @param {string|number} id - The `id` argument passed to {@link Model.save}.
+     * @param {(string|number)} id - The `id` argument passed to {@link Model.save}.
      * @param {Object} opts - The `opts` argument passed to {@link Model.save}.
      */
     afterSave: noop,
@@ -4082,7 +4218,7 @@
      *
      * @memberof Model
      * @method
-     * @param {string|number} id - The `id` argument passed to {@link Model.update}.
+     * @param {(string|number)} id - The `id` argument passed to {@link Model.update}.
      * @param {props} props - The `props` argument passed to {@link Model.update}.
      * @param {Object} opts - The `opts` argument passed to {@link Model.update}.
      */
@@ -4100,22 +4236,21 @@
      * @param {(string|number)} id - The primary key of the entity to update.
      * @param {Object} props - The update to apply to the entity.
      * @param {Object} [opts] - Configuration options.
-     * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
-     * {@link Model.defaultAdapter}.
-     * @param {boolean} [opts.autoInject] Whether to inject the resulting updated
-     * data into this Model's collection upon success. Defaults to
-     * {@link Model.autoInject}.
-     * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
-     * to {@link Model.notify}.
-     * @param {boolean} [opts.raw] If `false`, return the updated data. If
-     * `true` return a response object that includes the updated data and metadata
-     * about the operation. Defaults to {@link Model.raw}.
+     * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
+     * inject the resulting updated data into this Model's collection.
+     * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
+     * updated data. If `true` return a response object that includes the updated
+     * data and metadata about the operation.
      * @param {string[]} [opts.with=[]] Relations to update in a cascading
      * update if `props` contains nested updates to relations. NOT performed in a
      * transaction.
      */
     update: function update(id, props, opts) {
-      var _this11 = this;
+      var _this12 = this;
 
       var op = 'update';
       this.dbg(op, 'id:', id, 'props:', props, 'opts:', opts);
@@ -4127,11 +4262,11 @@
       opts.op = op;
 
       return resolve(this.beforeUpdate(id, props, opts)).then(function () {
-        adapterName = _this11.getAdapterName(opts);
-        return _this11.getAdapter(adapterName).update(_this11, id, _this11.prototype.toJSON.call(props, opts), opts);
+        adapterName = _this12.getAdapterName(opts);
+        return _this12.getAdapter(adapterName).update(_this12, id, _this12.prototype.toJSON.call(props, opts), opts);
       }).then(function (data) {
-        return resolve(_this11.afterUpdate(id, data, opts)).then(function () {
-          return handleResponse(_this11, data, opts, adapterName);
+        return resolve(_this12.afterUpdate(id, data, opts)).then(function () {
+          return handleResponse(_this12, data, opts, adapterName);
         });
       });
     },
@@ -4143,7 +4278,7 @@
      *
      * @memberof Model
      * @method
-     * @param {string|number} id - The `id` argument passed to {@link Model.update}.
+     * @param {(string|number)} id - The `id` argument passed to {@link Model.update}.
      * @param {props} props - The `props` argument passed to {@link Model.update}.
      * @param {Object} opts - The `opts` argument passed to {@link Model.update}.
      */
@@ -4173,21 +4308,21 @@
      * @method
      * @param {Array} entities - Array up entity updates.
      * @param {Object} [opts] - Configuration options.
-     * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
-     * {@link Model.defaultAdapter}.
-     * @param {boolean} [opts.autoInject] Whether to inject the resulting updated
-     * data into this Model's collection. Defaults to {@link Model.autoInject}.
-     * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
-     * to {@link Model.notify}.
-     * @param {boolean} [opts.raw] If `false`, return the updated data. If
-     * `true` return a response object that includes the updated data and metadata
-     * about the operation. Defaults to {@link Model.raw}.
+     * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
+     * inject the resulting updated data into this Model's collection.
+     * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
+     * updated data. If `true` return a response object that includes the updated
+     * data and metadata about the operation.
      * @param {string[]} [opts.with=[]] Relations to update in a cascading
      * update if each entity update contains nested updates for relations. NOT
      * performed in a transaction.
      */
     updateMany: function updateMany(entities, opts) {
-      var _this12 = this;
+      var _this13 = this;
 
       var op = 'updateMany';
       this.dbg(op, 'entities:', entities, 'opts:', opts);
@@ -4199,13 +4334,13 @@
       opts.op = op;
 
       return resolve(this.beforeUpdateMany(entities, opts)).then(function () {
-        adapterName = _this12.getAdapterName(opts);
-        return _this12.getAdapter(adapterName).updateMany(_this12, entities.map(function (item) {
-          return _this12.prototype.toJSON.call(item, opts);
+        adapterName = _this13.getAdapterName(opts);
+        return _this13.getAdapter(adapterName).updateMany(_this13, entities.map(function (item) {
+          return _this13.prototype.toJSON.call(item, opts);
         }), opts);
       }).then(function (data) {
-        return resolve(_this12.afterUpdateMany(data, opts)).then(function () {
-          return handleResponse(_this12, data, opts, adapterName);
+        return resolve(_this13.afterUpdateMany(data, opts)).then(function () {
+          return handleResponse(_this13, data, opts, adapterName);
         });
       });
     },
@@ -4253,21 +4388,21 @@
      * @param {Array} [query.orderBy] - Sorting criteria.
      * @param {Object} props - Update to apply to selected entities.
      * @param {Object} [opts] - Configuration options.
-     * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
-     * {@link Model.defaultAdapter}.
-     * @param {boolean} [opts.autoInject] Whether to inject the resulting updated
-     * data into this Model's collection. Defaults to {@link Model.autoInject}.
-     * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
-     * to {@link Model.notify}.
-     * @param {boolean} [opts.raw] If `false`, return the updated data. If
-     * `true` return a response object that includes the updated data and metadata
-     * about the operation. Defaults to {@link Model.raw}.
+     * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
+     * inject the resulting updated data into this Model's collection.
+     * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
+     * updated data. If `true` return a response object that includes the updated
+     * data and metadata about the operation.
      * @param {string[]} [opts.with=[]] Relations to update in a cascading
      * update if `props` contains nested updates to relations. NOT performed in a
      * transaction.
      */
     updateAll: function updateAll(query, props, opts) {
-      var _this13 = this;
+      var _this14 = this;
 
       var op = 'updateAll';
       this.dbg(op, 'query:', query, 'props:', props, 'opts:', opts);
@@ -4280,11 +4415,11 @@
       opts.op = op;
 
       return resolve(this.beforeUpdateAll(query, props, opts)).then(function () {
-        adapterName = _this13.getAdapterName(opts);
-        return _this13.getAdapter(adapterName).updateAll(_this13, query, props, opts);
+        adapterName = _this14.getAdapterName(opts);
+        return _this14.getAdapter(adapterName).updateAll(_this14, query, props, opts);
       }).then(function (data) {
-        return resolve(_this13.afterUpdateAll(query, data, opts)).then(function () {
-          return handleResponse(_this13, data, opts, adapterName);
+        return resolve(_this14.afterUpdateAll(query, data, opts)).then(function () {
+          return handleResponse(_this14, data, opts, adapterName);
         });
       });
     },
@@ -4309,7 +4444,7 @@
      *
      * @memberof Model
      * @method
-     * @param {string|number} id - The `id` argument passed to {@link Model.destroy}.
+     * @param {(string|number)} id - The `id` argument passed to {@link Model.destroy}.
      * @param {Object} opts - The `opts` argument passed to {@link Model.destroy}.
      */
     beforeDestroy: noop,
@@ -4325,20 +4460,20 @@
      * @method
      * @param {(string|number)} id - The primary key of the entity to destroy.
      * @param {Object} [opts] - Configuration options.
-     * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
-     * {@link Model.defaultAdapter}.
-     * @param {boolean} [opts.autoEject] Whether to remove the entity from this
-     * Model's collection upon success. Defaults to {@link Model.autoEject}.
-     * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
-     * to {@link Model.notify}.
-     * @param {boolean} [opts.raw] If `false`, return the updated data. If
-     * `true` return a response object that includes the updated data and metadata
-     * about the operation. Defaults to {@link Model.raw}.
+     * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.autoEject={@link Model.autoEject}] Whether to remove
+     * the entity from this Model's collection upon success.
+     * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
+     * ejected data (if any). If `true` return a response object that includes the
+     * ejected data (if any) and metadata about the operation.
      * @param {string[]} [opts.with=[]] Relations to destroy in a cascading
      * delete. NOT performed in a transaction.
      */
     destroy: function destroy(id, opts) {
-      var _this14 = this;
+      var _this15 = this;
 
       var op = 'destroy';
       this.dbg(op, 'id:', id, 'opts:', opts);
@@ -4349,18 +4484,18 @@
       opts.op = op;
 
       return resolve(this.beforeDestroy(id, opts)).then(function () {
-        adapterName = _this14.getAdapterName(opts);
-        return _this14.getAdapter(adapterName).destroy(_this14, id, opts);
+        adapterName = _this15.getAdapterName(opts);
+        return _this15.getAdapter(adapterName).destroy(_this15, id, opts);
       }).then(function (data) {
-        return resolve(_this14.afterDestroy(id, opts)).then(function () {
+        return resolve(_this15.afterDestroy(id, opts)).then(function () {
           if (opts.raw) {
             data.adapter = adapterName;
             if (opts.autoEject) {
-              data.data = _this14.eject(id, opts);
+              data.data = _this15.eject(id, opts);
             }
             return data;
           } else if (opts.autoEject) {
-            data = _this14.eject(id, opts);
+            data = _this15.eject(id, opts);
           }
           return data;
         });
@@ -4374,7 +4509,7 @@
      *
      * @memberof Model
      * @method
-     * @param {string|number} id - The `id` argument passed to {@link Model.destroy}.
+     * @param {(string|number)} id - The `id` argument passed to {@link Model.destroy}.
      * @param {Object} opts - The `opts` argument passed to {@link Model.destroy}.
      */
     afterDestroy: noop,
@@ -4406,20 +4541,20 @@
      * @param {number} [query.limit] - Number to limit to.
      * @param {Array} [query.orderBy] - Sorting criteria.
      * @param {Object} [opts] - Configuration options.
-     * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
-     * {@link Model.defaultAdapter}.
-     * @param {boolean} [opts.autoEject] Whether to remove the entities from this
-     * Model's collection upon success. Defaults to {@link Model.autoEject}.
-     * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
-     * to {@link Model.notify}.
-     * @param {boolean} [opts.raw] If `false`, return the updated data. If
-     * `true` return a response object that includes the updated data and metadata
-     * about the operation. Defaults to {@link Model.raw}.
+     * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.autoEject={@link Model.autoEject}] Whether to remove
+     * the entities from this Model's collection upon success.
+     * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
+     * ejected data (if any). If `true` return a response object that includes the
+     * ejected data (if any) and metadata about the operation.
      * @param {string[]} [opts.with=[]] Relations to destroy in a cascading
      * delete. NOT performed in a transaction.
      */
     destroyAll: function destroyAll(query, opts) {
-      var _this15 = this;
+      var _this16 = this;
 
       var op = 'destroyAll';
       this.dbg(op, 'query:', query, 'opts:', opts);
@@ -4431,18 +4566,18 @@
       opts.op = op;
 
       return resolve(this.beforeDestroyAll(query, opts)).then(function () {
-        adapterName = _this15.getAdapterName(opts);
-        return _this15.getAdapter(adapterName).destroyAll(_this15, query, opts);
+        adapterName = _this16.getAdapterName(opts);
+        return _this16.getAdapter(adapterName).destroyAll(_this16, query, opts);
       }).then(function (data) {
-        return resolve(_this15.afterDestroyAll(query, opts)).then(function () {
+        return resolve(_this16.afterDestroyAll(query, opts)).then(function () {
           if (opts.raw) {
             data.adapter = adapterName;
             if (opts.autoEject) {
-              data.data = _this15.ejectAll(query, opts);
+              data.data = _this16.ejectAll(query, opts);
             }
             return data;
           } else if (opts.autoEject) {
-            data = _this15.ejectAll(query, opts);
+            data = _this16.ejectAll(query, opts);
           }
           return data;
         });
@@ -4463,7 +4598,7 @@
 
     beforeLoadRelations: noop,
     loadRelations: function loadRelations(id, relations, opts) {
-      var _this16 = this;
+      var _this17 = this;
 
       var _this = this;
       var instance = _this.is(id) ? id : undefined;
@@ -4517,7 +4652,7 @@
           return task;
         }));
       }).then(function () {
-        return resolve(_this16.afterLoadRelations(instance, relations, opts)).then(function () {
+        return resolve(_this17.afterLoadRelations(instance, relations, opts)).then(function () {
           return instance;
         });
       });

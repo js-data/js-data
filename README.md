@@ -52,7 +52,7 @@ r.js/browserify/webpack build.
 
 __ES2016:__
 
-```js
+```javascript
 import {Model, registerAdapter} from 'js-data'
 import DSHttpAdapter from 'js-data-http'
 
@@ -90,7 +90,7 @@ showExample()
 
 __ES2015:__
 
-```js
+```javascript
 import {Model, registerAdapter} from 'js-data'
 import DSHttpAdapter from 'js-data-http'
 
@@ -129,7 +129,7 @@ showExample()
 
 __ES5:__
 
-```js
+```javascript
 var User = JSData.Model.extend({}, { name: 'User' })
 // register and use http by default for async operations
 User.registerAdapter('http', new DSHttpAdapter(), { default: true });

@@ -18,7 +18,7 @@ const op = 'hasMany'
 function applyHasMany (target, Relation, opts) {
   opts || (opts = {})
   // Choose field where the relation will be attached
-  const localField = opts.localField || `${camelCase(Relation.name)}Collection`
+  const localField = opts.localField = opts.localField || `${camelCase(Relation.name)}Collection`
   // Choose field on related instances that holds the primary key of instances
   // of the target Model
   let foreignKey = opts.foreignKey
@@ -26,7 +26,7 @@ function applyHasMany (target, Relation, opts) {
   const foreignKeys = opts.foreignKeys
 
   if (!foreignKey && !localKeys && !foreignKeys) {
-    foreignKey = opts.foreignKey = `${camelCase(target.name)}Id`
+    foreignKey = opts.foreignKey = `${camelCase(target.name)}_id`
   }
   if (foreignKey) {
     Relation.collection.createIndex(foreignKey)
