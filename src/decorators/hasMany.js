@@ -91,6 +91,9 @@ function applyHasMany (target, Relation, opts) {
     }
   }
 
+  const originalGet = descriptor.get
+  const originalSet = descriptor.set
+
   // Check whether the relation shouldn't actually be linked via a getter
   if (opts.link === false || (opts.link === undefined && !target.linkRelations)) {
     delete descriptor.get
@@ -100,7 +103,6 @@ function applyHasMany (target, Relation, opts) {
 
   // Check for user-defined getter
   if (opts.get) {
-    const originalGet = descriptor.get
     // Set user-defined getter
     descriptor.get = function () {
       // Call user-defined getter, passing in:
@@ -108,13 +110,12 @@ function applyHasMany (target, Relation, opts) {
       //  - related Model
       //  - instance of target Model
       //  - the original getter function, in case the user wants to use it
-      return opts.get(target, Relation, this, originalGet ? (...args) => originalGet.apply(this, args) : undefined)
+      return opts.get(target, Relation, this, () => originalGet.call(this))
     }
   }
 
   // Check for user-defined setter
   if (opts.set) {
-    const originalSet = descriptor.set
     // Set user-defined setter
     descriptor.set = function (children) {
       // Call user-defined getter, passing in:
@@ -123,7 +124,7 @@ function applyHasMany (target, Relation, opts) {
       //  - instance of target Model
       //  - instances of related Model
       //  - the original setter function, in case the user wants to use it
-      return opts.set(target, Relation, this, children, originalSet ? (...args) => originalSet.apply(this, args) : undefined)
+      return opts.set(target, Relation, this, children, value => originalSet.call(this, value === undefined ? children : value))
     }
   }
 
