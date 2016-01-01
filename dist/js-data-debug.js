@@ -2005,13 +2005,9 @@
         //  - related Model
         //  - instance of target Model
         //  - the original getter function, in case the user wants to use it
-        return opts.get(Model, Relation, this, originalGet ? function () {
-          for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-            args[_key] = arguments[_key];
-          }
-
-          return originalGet.apply(_this, args);
-        } : undefined);
+        return opts.get(Model, Relation, this, function () {
+          return originalGet.call(_this);
+        });
       };
       delete descriptor.writable;
     }
@@ -2028,13 +2024,9 @@
         //  - instance of target Model
         //  - instance of related Model
         //  - the original setter function, in case the user wants to use it
-        return opts.set(Model, Relation, this, parent, originalSet ? function () {
-          for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-            args[_key2] = arguments[_key2];
-          }
-
-          return originalSet.apply(_this2, args);
-        } : undefined);
+        return opts.set(Model, Relation, this, parent, function (value) {
+          return originalSet.call(_this2, value === undefined ? parent : value);
+        });
       };
       delete descriptor.writable;
     }
@@ -2239,6 +2231,9 @@
       }
     };
 
+    var originalGet = descriptor.get;
+    var originalSet = descriptor.set;
+
     // Check whether the relation shouldn't actually be linked via a getter
     if (opts.link === false || opts.link === undefined && !target.linkRelations) {
       delete descriptor.get;
@@ -2248,51 +2243,37 @@
 
     // Check for user-defined getter
     if (opts.get) {
-      (function () {
-        var originalGet = descriptor.get;
-        // Set user-defined getter
-        descriptor.get = function () {
-          var _this2 = this;
+      // Set user-defined getter
+      descriptor.get = function () {
+        var _this2 = this;
 
-          // Call user-defined getter, passing in:
-          //  - target Model
-          //  - related Model
-          //  - instance of target Model
-          //  - the original getter function, in case the user wants to use it
-          return opts.get(target, Relation, this, originalGet ? function () {
-            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-              args[_key] = arguments[_key];
-            }
-
-            return originalGet.apply(_this2, args);
-          } : undefined);
-        };
-      })();
+        // Call user-defined getter, passing in:
+        //  - target Model
+        //  - related Model
+        //  - instance of target Model
+        //  - the original getter function, in case the user wants to use it
+        return opts.get(target, Relation, this, function () {
+          return originalGet.call(_this2);
+        });
+      };
     }
 
     // Check for user-defined setter
     if (opts.set) {
-      (function () {
-        var originalSet = descriptor.set;
-        // Set user-defined setter
-        descriptor.set = function (children) {
-          var _this3 = this;
+      // Set user-defined setter
+      descriptor.set = function (children) {
+        var _this3 = this;
 
-          // Call user-defined getter, passing in:
-          //  - target Model
-          //  - related Model
-          //  - instance of target Model
-          //  - instances of related Model
-          //  - the original setter function, in case the user wants to use it
-          return opts.set(target, Relation, this, children, originalSet ? function () {
-            for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-              args[_key2] = arguments[_key2];
-            }
-
-            return originalSet.apply(_this3, args);
-          } : undefined);
-        };
-      })();
+        // Call user-defined getter, passing in:
+        //  - target Model
+        //  - related Model
+        //  - instance of target Model
+        //  - instances of related Model
+        //  - the original setter function, in case the user wants to use it
+        return opts.set(target, Relation, this, children, function (value) {
+          return originalSet.call(_this3, value === undefined ? children : value);
+        });
+      };
     }
 
     // Finally, added property to prototype of target Model

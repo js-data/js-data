@@ -63,7 +63,7 @@ function applyBelongsTo (Model, Relation, opts) {
       //  - related Model
       //  - instance of target Model
       //  - the original getter function, in case the user wants to use it
-      return opts.get(Model, Relation, this, originalGet ? (...args) => originalGet.apply(this, args) : undefined)
+      return opts.get(Model, Relation, this, () => originalGet.call(this))
     }
     delete descriptor.writable
   }
@@ -78,7 +78,7 @@ function applyBelongsTo (Model, Relation, opts) {
       //  - instance of target Model
       //  - instance of related Model
       //  - the original setter function, in case the user wants to use it
-      return opts.set(Model, Relation, this, parent, originalSet ? (...args) => originalSet.apply(this, args) : undefined)
+      return opts.set(Model, Relation, this, parent, value => originalSet.call(this, value === undefined ? parent : value))
     }
     delete descriptor.writable
   }
