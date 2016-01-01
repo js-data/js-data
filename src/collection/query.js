@@ -118,9 +118,9 @@ function evaluate (value, op, predicate) {
     case 'notIn':
       return predicate.indexOf(value) === -1
     case 'contains':
-      return value.indexOf(predicate) !== -1
+      return (value || []).indexOf(predicate) !== -1
     case 'notContains':
-      return value.indexOf(predicate) === -1
+      return (value || []).indexOf(predicate) === -1
     default:
       if (op.indexOf('like') === 0) {
         return like(predicate, op.substr(4)).exec(value) !== null
@@ -486,6 +486,22 @@ addHiddenPropsToTarget(Query.prototype, {
    */
   map (mapFn, thisArg) {
     this.data = this.getData().map(mapFn, thisArg)
+    return this
+  },
+
+  /**
+   * Return the result of calling the specified function on each item in this
+   * collection's main index.
+   * @memberof Query
+   * @instance
+   * @param {string} funcName - Name of function to call
+   * @parama {...*} [args] - Remaining arguments to be passed to the function.
+   * @return {Query} A reference to itself for chaining.
+   */
+  mapCall (funcName, ...args) {
+    this.data = this.getData().map(function (item) {
+      return item[funcName](...args)
+    })
     return this
   },
 

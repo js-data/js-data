@@ -284,6 +284,8 @@ utils.addHiddenPropsToTarget(Model.prototype, {
       for (var key in this) {
         json[key] = this[key]
       }
+      // The user wants to include relations in the resulting plain object
+      // representation
       if (Ctor && Ctor.relationList && opts.with) {
         if (utils.isString(opts.with)) {
           opts.with = [opts.with]
@@ -297,6 +299,8 @@ utils.addHiddenPropsToTarget(Model.prototype, {
           }
           if (containedName) {
             const optsCopy = { with: opts.with.slice() }
+
+            // Prepare to recurse into deeply nested relations
             optsCopy.with.splice(optsCopy.with.indexOf(containedName), 1)
             optsCopy.with.forEach((relation, i) => {
               if (relation && relation.indexOf(containedName) === 0 && relation.length >= containedName.length && relation[containedName.length] === '.') {
@@ -306,7 +310,9 @@ utils.addHiddenPropsToTarget(Model.prototype, {
               }
             })
             const relationData = utils.get(this, def.localField)
+
             if (relationData) {
+              // The actual recursion
               if (utils.isArray(relationData)) {
                 utils.set(json, def.localField, relationData.map(item => def.Relation.prototype.toJSON.call(item, optsCopy)))
               } else {
@@ -558,15 +564,17 @@ utils.fillIn(Model, {
    *
    * @memberof Model
    * @method
-   * @param {string|number} id - The primary key of the entity.
-   * @param {string} [key] - If provided, only return changes to this field.
-   * @return {Object} Changes to the entity since the entity was instantiated.
+   * @param {(string|number)} [id] - If provided, only return changes for the
+   * entity with the given primary key.
+   * @return {(Object|Array)} Changes to the entity since the entity was instantiated.
    */
-  changes (id, key) {
+  changes (id) {
     this.dbg('changes', 'id:', id)
-    const instance = this.get(id)
-    if (instance) {
-      return instance.changes(key)
+    if (utils.isSorN(id)) {
+      const instance = this.get(id)
+      return instance ? instance.changes() : undefined
+    } else {
+      return this.collection.mapCall('changes')
     }
   },
 
@@ -575,16 +583,28 @@ utils.fillIn(Model, {
    * collection, return the result of calling {@link Model#hasChanges} on that
    * entity, otherwise return undefined.
    *
+   * If no primary key is provided, return whether any entity in this Model's
+   * collection has any changes.
+   *
    * @memberof Model
    * @method
-   * @param {string|number} id - The primary key of the entity.
-   * @return {boolean} Whether the entity has any changes.
+   * @param {(string|number)} [id] - The primary key of the entity.
+   * @return {boolean} Whether the entity has any changes, or whether any entity
+   * in this Model's collection has any changes.
    */
   hasChanges (id) {
     this.dbg('hasChanges', 'id:', id)
-    const instance = this.get(id)
-    if (instance) {
-      return instance.hasChanges()
+    if (utils.isSorN(id)) {
+      const instance = this.get(id)
+      if (instance) {
+        return instance.hasChanges()
+      }
+    } else {
+      let hasChanges = false
+      this.collection.forEach(function (item) {
+        hasChanges = hasChanges || item.hasChanges()
+      })
+      return hasChanges
     }
   },
 
@@ -602,11 +622,11 @@ utils.fillIn(Model, {
    * @method
    * @param {(Object|Object[]|Model|Model[])} items - The item or items to insert.
    * @param {Object} [opts] - Configuration options.
-   * @param {boolean} [opts.autoPk] - Whether to generate primary keys for the
-   * entities to be injected. Useful for injecting temporary, unsaved data into
-   * the Model's collection.
+   * @param {boolean} [opts.autoPk={@link Model.autoPk}] - Whether to generate
+   * primary keys for the entities to be injected. Useful for injecting
+   * temporary, unsaved data into a Model's collection.
    * @param {string} [opts.onConflict] - What to do when an item is already in
-   * the Collection instance. Possible values are `merge` or `replace`.
+   * the Model's collection. Possible values are `merge` or `replace`.
    * @return {(Model|Model[])} The injected entity or entities.
    */
   inject (entities, opts) {
@@ -853,26 +873,31 @@ utils.fillIn(Model, {
    *
    * @memberof Model
    * @method
+   * @return {Model[]}
    */
   between (...args) {
     return this.collection.between(...args)
   },
 
   /**
-   * Proxy for Collection#getAll
+   * Equivalent of `Model.collection.getAll([...ids][, opts])`. See
+   * {@link Collection#getAll}.
    *
    * @memberof Model
    * @method
+   * @return {Model[]} The selected entities
    */
   getAll (...args) {
     return this.collection.getAll(...args)
   },
 
   /**
-   * Proxy for Collection#filter
+   * Equivalent of `Model.collection.filter([query][, opts])`. See
+   * {@link Collection#filter}.
    *
    * @memberof Model
    * @method
+   * @return {Model[]} The selected entities.
    */
   filter (query, opts) {
     opts || (opts = {})
@@ -880,7 +905,69 @@ utils.fillIn(Model, {
   },
 
   /**
-   * Proxy for `Model.collection.query()`.
+   * Equivalent of `Model.collection.forEach(cb[, thisArg])`. See
+   * {@link Collection#forEach}.
+   *
+   * @memberof Model
+   * @method
+   */
+  forEach (cb, thisArg) {
+    return this.collection.forEach(cb, thisArg)
+  },
+
+  /**
+   * Equivalent of `Model.collection.map(cb[, thisArg])`. See
+   * {@link Collection#map}.
+   *
+   * @memberof Model
+   * @method
+   * @return {Array} The result
+   */
+  map (cb, thisArg) {
+    return this.collection.map(cb, thisArg)
+  },
+
+  /**
+   * Equivalent of `Model.collection.reduce(cb, initialValue)`. See
+   * {@link Collection#reducs}.
+   *
+   * @memberof Model
+   * @method
+   * @return {*} The result.
+   */
+  reduce (cb, initialValue) {
+    return this.collection.reduce(cb, initialValue)
+  },
+
+  /**
+   * Equivalent of `Model.collection.mapCall(funcName[, ...args])`. See
+   * {@link Collection#mapCall}.
+   *
+   * @memberof Model
+   * @method
+   * @return {Array} The result
+   */
+  mapCall (...args) {
+    return this.collection.mapCall(...args)
+  },
+
+  /**
+   * Return the plain JSON representation of all items in this Model's
+   * collection.
+   *
+   * @memberof Model
+   * @method
+   * @param {Object} [opts] - Configuration options.
+   * @param {string[]} [opts.with] - Array of relation names or relation fields
+   * to include in the representation.
+   * @return {Model[]} The entities.
+   */
+  toJSON (opts) {
+    return this.mapCall('toJSON', opts)
+  },
+
+  /**
+   * Equivalent of `Model.collection.query()`. See {@link Collection#query}.
    *
    * @memberof Model
    * @method
@@ -914,7 +1001,7 @@ utils.fillIn(Model, {
    *
    * @memberof Model
    * @method
-   * @param {Object} [opts] - The options, if any.
+   * @param {(Object|string)} [opts] - The name of an adapter or options, if any.
    * @return {string} The name of the adapter.
    */
   getAdapterName (opts) {
@@ -947,16 +1034,15 @@ utils.fillIn(Model, {
    * @method
    * @param {Object} props - The properties from which to create the entity.
    * @param {Object} [opts] - Configuration options.
-   * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
-   * {@link Model.defaultAdapter}.
-   * @param {boolean} [opts.autoInject] Whether to inject the resulting created
-   * data into this Model's collection upon success. Defaults to
-   * {@link Model.autoInject}.
-   * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
-   * to {@link Model.notify}.
-   * @param {boolean} [opts.raw] If `false`, return the created data. If
-   * `true` return a response object that includes the created data and metadata
-   * about the operation. Defaults to {@link Model.raw}.
+   * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
+   * adapter to use.
+   * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
+   * inject the resulting created data into this Model's collection upon success.
+   * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
+   * lifecycle events.
+   * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
+   * created data. If `true` return a response object that includes the created
+   * data and metadata about the operation.
    * @param {string[]} [opts.with=[]] Relations to create in a cascading
    * create if `props` contains nested relations. NOT performed in a transaction.
    */
@@ -1038,15 +1124,15 @@ utils.fillIn(Model, {
    * @method
    * @param {Array} entities - Array up entities to be created.
    * @param {Object} [opts] - Configuration options.
-   * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
-   * {@link Model.defaultAdapter}.
-   * @param {boolean} [opts.autoInject] Whether to inject the resulting created
-   * entities into this Model's collection. Defaults to {@link Model.autoInject}.
-   * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
-   * to {@link Model.notify}.
-   * @param {boolean} [opts.raw] If `false`, return the updated data. If
-   * `true` return a response object that includes the updated data and metadata
-   * about the operation. Defaults to {@link Model.raw}.
+   * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
+   * adapter to use.
+   * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
+   * inject the resulting created entities into this Model's collection.
+   * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
+   * lifecycle events.
+   * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
+   * updated data. If `true` return a response object that includes the updated
+   * data and metadata about the operation.
    * @param {string[]} [opts.with=[]] Relations to create in a cascading create
    * if the entities to be created have linked/nested relations. NOT performed
    * in a transaction.
@@ -1138,15 +1224,15 @@ utils.fillIn(Model, {
    * @method
    * @param {(string|number)} id - The primary key of the entity to retrieve.
    * @param {Object} [opts] - Configuration options.
-   * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
-   * {@link Model.defaultAdapter}.
-   * @param {boolean} [opts.autoInject] Whether to inject the resulting updated
-   * data into this Model's collection. Defaults to {@link Model.autoInject}.
-   * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
-   * to {@link Model.notify}.
-   * @param {boolean} [opts.raw] If `false`, return the updated data. If
-   * `true` return a response object that includes the updated data and metadata
-   * about the operation. Defaults to {@link Model.raw}.
+   * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
+   * adapter to use.
+   * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
+   * inject the resulting data into this Model's collection.
+   * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
+   * lifecycle events.
+   * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
+   * updated data. If `true` return a response object that includes the updated
+   * data and metadata about the operation.
    * @param {string[]} [opts.with=[]] Relations to eager load in the request.
    */
   find (id, opts) {
@@ -1177,7 +1263,7 @@ utils.fillIn(Model, {
    *
    * @memberof Model
    * @method
-   * @param {string|number} id - The `id` argument passed to {@link Model.find}.
+   * @param {(string|number)} id - The `id` argument passed to {@link Model.find}.
    * @param {Object} opts - The `opts` argument passed to {@link Model.find}.
    */
   afterFind: noop,
@@ -1211,15 +1297,15 @@ utils.fillIn(Model, {
    * @param {number} [query.limit] - Number to limit to.
    * @param {Array} [query.orderBy] - Sorting criteria.
    * @param {Object} [opts] - Configuration options.
-   * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
-   * {@link Model.defaultAdapter}.
-   * @param {boolean} [opts.autoInject] Whether to inject the resulting updated
-   * data into this Model's collection. Defaults to {@link Model.autoInject}.
-   * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
-   * to {@link Model.notify}.
-   * @param {boolean} [opts.raw] If `false`, return the updated data. If
-   * `true` return a response object that includes the updated data and metadata
-   * about the operation. Defaults to {@link Model.raw}.
+   * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
+   * adapter to use.
+   * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
+   * inject the resulting data into this Model's collection.
+   * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
+   * lifecycle events.
+   * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
+   * resulting data. If `true` return a response object that includes the
+   * resulting data and metadata about the operation.
    * @param {string[]} [opts.with=[]] Relations to eager load in the request.
    */
   findAll (query, opts) {
@@ -1264,7 +1350,7 @@ utils.fillIn(Model, {
    *
    * @memberof Model
    * @method
-   * @param {string|number} id - The `id` argument passed to {@link Model.save}.
+   * @param {(string|number)} id - The `id` argument passed to {@link Model.save}.
    * @param {Object} opts - The `opts` argument passed to {@link Model.save}.
    */
   beforeSave: noop,
@@ -1283,16 +1369,15 @@ utils.fillIn(Model, {
    * @method
    * @param {(string|number)} id - The primary key of the entity to save.
    * @param {Object} [opts] - Configuration options.
-   * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
-   * {@link Model.defaultAdapter}.
-   * @param {boolean} [opts.autoInject] Whether to inject the resulting updated
-   * data into this Model's collection upon success. Defaults to
-   * {@link Model.autoInject}.
-   * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
-   * to {@link Model.notify}.
-   * @param {boolean} [opts.raw] If `false`, return the updated data. If
-   * `true` return a response object that includes the updated data and metadata
-   * about the operation. Defaults to {@link Model.raw}.
+   * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
+   * adapter to use.
+   * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
+   * inject the resulting updated data into this Model's collection.
+   * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
+   * lifecycle events.
+   * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
+   * updated data. If `true` return a response object that includes the updated
+   * data and metadata about the operation.
    * @param {string[]} [opts.with=[]] Relations to save in a cascading
    * save if any of the entity's relations are linked to the entity.
    * NOT performed in a transaction.
@@ -1325,7 +1410,7 @@ utils.fillIn(Model, {
    *
    * @memberof Model
    * @method
-   * @param {string|number} id - The `id` argument passed to {@link Model.save}.
+   * @param {(string|number)} id - The `id` argument passed to {@link Model.save}.
    * @param {Object} opts - The `opts` argument passed to {@link Model.save}.
    */
   afterSave: noop,
@@ -1337,7 +1422,7 @@ utils.fillIn(Model, {
    *
    * @memberof Model
    * @method
-   * @param {string|number} id - The `id` argument passed to {@link Model.update}.
+   * @param {(string|number)} id - The `id` argument passed to {@link Model.update}.
    * @param {props} props - The `props` argument passed to {@link Model.update}.
    * @param {Object} opts - The `opts` argument passed to {@link Model.update}.
    */
@@ -1355,16 +1440,15 @@ utils.fillIn(Model, {
    * @param {(string|number)} id - The primary key of the entity to update.
    * @param {Object} props - The update to apply to the entity.
    * @param {Object} [opts] - Configuration options.
-   * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
-   * {@link Model.defaultAdapter}.
-   * @param {boolean} [opts.autoInject] Whether to inject the resulting updated
-   * data into this Model's collection upon success. Defaults to
-   * {@link Model.autoInject}.
-   * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
-   * to {@link Model.notify}.
-   * @param {boolean} [opts.raw] If `false`, return the updated data. If
-   * `true` return a response object that includes the updated data and metadata
-   * about the operation. Defaults to {@link Model.raw}.
+   * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
+   * adapter to use.
+   * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
+   * inject the resulting updated data into this Model's collection.
+   * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
+   * lifecycle events.
+   * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
+   * updated data. If `true` return a response object that includes the updated
+   * data and metadata about the operation.
    * @param {string[]} [opts.with=[]] Relations to update in a cascading
    * update if `props` contains nested updates to relations. NOT performed in a
    * transaction.
@@ -1398,7 +1482,7 @@ utils.fillIn(Model, {
    *
    * @memberof Model
    * @method
-   * @param {string|number} id - The `id` argument passed to {@link Model.update}.
+   * @param {(string|number)} id - The `id` argument passed to {@link Model.update}.
    * @param {props} props - The `props` argument passed to {@link Model.update}.
    * @param {Object} opts - The `opts` argument passed to {@link Model.update}.
    */
@@ -1428,15 +1512,15 @@ utils.fillIn(Model, {
    * @method
    * @param {Array} entities - Array up entity updates.
    * @param {Object} [opts] - Configuration options.
-   * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
-   * {@link Model.defaultAdapter}.
-   * @param {boolean} [opts.autoInject] Whether to inject the resulting updated
-   * data into this Model's collection. Defaults to {@link Model.autoInject}.
-   * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
-   * to {@link Model.notify}.
-   * @param {boolean} [opts.raw] If `false`, return the updated data. If
-   * `true` return a response object that includes the updated data and metadata
-   * about the operation. Defaults to {@link Model.raw}.
+   * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
+   * adapter to use.
+   * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
+   * inject the resulting updated data into this Model's collection.
+   * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
+   * lifecycle events.
+   * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
+   * updated data. If `true` return a response object that includes the updated
+   * data and metadata about the operation.
    * @param {string[]} [opts.with=[]] Relations to update in a cascading
    * update if each entity update contains nested updates for relations. NOT
    * performed in a transaction.
@@ -1506,15 +1590,15 @@ utils.fillIn(Model, {
    * @param {Array} [query.orderBy] - Sorting criteria.
    * @param {Object} props - Update to apply to selected entities.
    * @param {Object} [opts] - Configuration options.
-   * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
-   * {@link Model.defaultAdapter}.
-   * @param {boolean} [opts.autoInject] Whether to inject the resulting updated
-   * data into this Model's collection. Defaults to {@link Model.autoInject}.
-   * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
-   * to {@link Model.notify}.
-   * @param {boolean} [opts.raw] If `false`, return the updated data. If
-   * `true` return a response object that includes the updated data and metadata
-   * about the operation. Defaults to {@link Model.raw}.
+   * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
+   * adapter to use.
+   * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
+   * inject the resulting updated data into this Model's collection.
+   * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
+   * lifecycle events.
+   * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
+   * updated data. If `true` return a response object that includes the updated
+   * data and metadata about the operation.
    * @param {string[]} [opts.with=[]] Relations to update in a cascading
    * update if `props` contains nested updates to relations. NOT performed in a
    * transaction.
@@ -1562,7 +1646,7 @@ utils.fillIn(Model, {
    *
    * @memberof Model
    * @method
-   * @param {string|number} id - The `id` argument passed to {@link Model.destroy}.
+   * @param {(string|number)} id - The `id` argument passed to {@link Model.destroy}.
    * @param {Object} opts - The `opts` argument passed to {@link Model.destroy}.
    */
   beforeDestroy: noop,
@@ -1578,15 +1662,15 @@ utils.fillIn(Model, {
    * @method
    * @param {(string|number)} id - The primary key of the entity to destroy.
    * @param {Object} [opts] - Configuration options.
-   * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
-   * {@link Model.defaultAdapter}.
-   * @param {boolean} [opts.autoEject] Whether to remove the entity from this
-   * Model's collection upon success. Defaults to {@link Model.autoEject}.
-   * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
-   * to {@link Model.notify}.
-   * @param {boolean} [opts.raw] If `false`, return the updated data. If
-   * `true` return a response object that includes the updated data and metadata
-   * about the operation. Defaults to {@link Model.raw}.
+   * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
+   * adapter to use.
+   * @param {boolean} [opts.autoEject={@link Model.autoEject}] Whether to remove
+   * the entity from this Model's collection upon success.
+   * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
+   * lifecycle events.
+   * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
+   * ejected data (if any). If `true` return a response object that includes the
+   * ejected data (if any) and metadata about the operation.
    * @param {string[]} [opts.with=[]] Relations to destroy in a cascading
    * delete. NOT performed in a transaction.
    */
@@ -1629,7 +1713,7 @@ utils.fillIn(Model, {
    *
    * @memberof Model
    * @method
-   * @param {string|number} id - The `id` argument passed to {@link Model.destroy}.
+   * @param {(string|number)} id - The `id` argument passed to {@link Model.destroy}.
    * @param {Object} opts - The `opts` argument passed to {@link Model.destroy}.
    */
   afterDestroy: noop,
@@ -1661,15 +1745,15 @@ utils.fillIn(Model, {
    * @param {number} [query.limit] - Number to limit to.
    * @param {Array} [query.orderBy] - Sorting criteria.
    * @param {Object} [opts] - Configuration options.
-   * @param {boolean} [opts.adapter] Name of the adapter to use. Defaults to
-   * {@link Model.defaultAdapter}.
-   * @param {boolean} [opts.autoEject] Whether to remove the entities from this
-   * Model's collection upon success. Defaults to {@link Model.autoEject}.
-   * @param {boolean} [opts.notify] Whether to emit lifecycle events. Defaults
-   * to {@link Model.notify}.
-   * @param {boolean} [opts.raw] If `false`, return the updated data. If
-   * `true` return a response object that includes the updated data and metadata
-   * about the operation. Defaults to {@link Model.raw}.
+   * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
+   * adapter to use.
+   * @param {boolean} [opts.autoEject={@link Model.autoEject}] Whether to remove
+   * the entities from this Model's collection upon success.
+   * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
+   * lifecycle events.
+   * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
+   * ejected data (if any). If `true` return a response object that includes the
+   * ejected data (if any) and metadata about the operation.
    * @param {string[]} [opts.with=[]] Relations to destroy in a cascading
    * delete. NOT performed in a transaction.
    */

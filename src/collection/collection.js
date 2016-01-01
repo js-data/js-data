@@ -334,13 +334,13 @@ addHiddenPropsToTarget(Collection.prototype, {
    *
    * @memberof Collection
    * @instance
-   * @param {Function} callback - Reduction callback.
+   * @param {Function} cb - Reduction callback.
    * @param {*} initialValue - Initial value of the reduction.
    * @return {*} The result.
    */
-  reduce (callback, initialValue) {
+  reduce (cb, initialValue) {
     const data = this.getAll()
-    return data.reduce(callback, initialValue)
+    return data.reduce(cb, initialValue)
   },
 
   /**
@@ -433,6 +433,23 @@ addHiddenPropsToTarget(Collection.prototype, {
     opts || (opts = {})
     const index = opts.index ? this.indexes[opts.index] : this.index
     index.updateRecord(record)
+  },
+
+  /**
+   * Return the result of calling the specified function on each item in this
+   * collection's main index.
+   * @memberof Collection
+   * @instance
+   * @param {string} funcName - Name of function to call
+   * @parama {...*} [args] - Remaining arguments to be passed to the function.
+   * @return {Array} The result.
+   */
+  mapCall (funcName, ...args) {
+    const data = []
+    this.index.visitAll(function (item) {
+      data.push(item[funcName](...args))
+    })
+    return data
   }
 })
 

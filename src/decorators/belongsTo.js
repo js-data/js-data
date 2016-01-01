@@ -20,7 +20,7 @@ function applyBelongsTo (Model, Relation, opts) {
   // Choose field where the relation will be attached
   const localField = opts.localField = opts.localField || Relation.name.toLowerCase()
   // Choose field that holds the primary key of the relation
-  const localKey = opts.localKey = opts.localKey || Relation.name.toLowerCase() + '_id'
+  const localKey = opts.localKey = opts.localKey || `${Relation.name.toLowerCase()}_id`
 
   // Setup configuration of the property
   const descriptor = {
