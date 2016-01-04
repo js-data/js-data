@@ -1,5 +1,7 @@
 /* global JSData:true, Model:true, configure:true, sinon:true */
 import {assert} from 'chai'
+import * as staticChanges from './static.changes.test'
+import * as changes from './changes.test'
 import * as create from './create.test'
 import * as staticCreate from './static.create.test'
 import * as staticCreateInstance from './static.createInstance.test'
@@ -12,13 +14,19 @@ import * as staticEjectAll from './static.ejectAll.test'
 import * as staticFind from './static.find.test'
 import * as staticFindAll from './static.findAll.test'
 import * as staticGet from './static.get.test'
+import * as get from './get.test'
 import * as staticGetAll from './static.getAll.test'
+import * as staticHasChanges from './static.hasChanges.test'
+import * as hasChanges from './hasChanges.test'
 import * as staticInject from './static.inject.test'
+import * as revert from './revert.test'
 import * as save from './save.test'
+import * as set from './set.test'
 import * as staticUpdate from './static.update.test'
 import * as staticUpdateMany from './static.updateMany.test'
 import * as staticUpdateAll from './static.updateAll.test'
 import * as toJSON from './toJSON.test'
+import * as unset from './unset.test'
 
 let isBrowser = false
 
@@ -188,6 +196,220 @@ export function init () {
       assert.isTrue(listener.calledOnce)
     })
 
+    it('should work with csp set to true', function () {
+      const User = Model.extend({}, {
+        csp: true,
+        name: 'user'
+      })
+      const user = new User({ name: 'John' })
+      assert.isTrue(user instanceof User)
+      assert.equal(User.name, '')
+
+      assert.equal(this.Post.name, 'Post')
+    })
+
+    it('should allow enhanced relation getters', function () {
+      let wasItActivated = false
+      class Foo extends Model {}
+      class Bar extends Model {}
+      Foo.belongsTo(Bar, {
+        localField: 'bar',
+        localKey: 'barId',
+        get: function (Foo, relation, foo, orig) {
+          // "relation.name" has relationship "relation.type" to "relation.relation"
+          wasItActivated = true
+          return orig()
+        }
+      })
+      const foo = Foo.inject({
+        id: 1,
+        barId: 1,
+        bar: {
+          id: 1
+        }
+      })
+      assert.equal(foo.bar.id, 1)
+      assert.isTrue(wasItActivated)
+    })
+    it('should update links', function () {
+      class Foo extends Model {}
+      class Bar extends Model {}
+      Foo.autoInject = true
+      Foo.linkRelations = true
+      Bar.autoInject = true
+      Bar.linkRelations = true
+      Foo.hasMany(Bar, {
+        localField: 'bars',
+        foreignKey: 'foo_id'
+      })
+      Bar.belongsTo(Foo, {
+        localField: 'foo',
+        localKey: 'foo_id'
+      })
+      const foo66 = Foo.inject({
+        id: 66
+      })
+      const foo77 = Foo.inject({
+        id: 77
+      })
+      const bar88 = Bar.inject({
+        id: 88,
+        foo_id: 66
+      })
+      assert.isTrue(bar88.foo === foo66)
+      assert.equal(66, bar88.foo_id)
+      bar88.foo_id = 77
+      assert.isTrue(bar88.foo === foo77)
+      assert.equal(77, bar88.foo_id)
+      bar88.foo = foo66
+      assert.isTrue(bar88.foo === foo66)
+      assert.equal(66, bar88.foo_id)
+      foo66.bars = [bar88]
+      assert.objectsEqual(foo66.bars, Bar.getAll())
+      assert.objectsEqual(foo77.bars, [])
+      foo77.bars = [bar88]
+      assert.objectsEqual(foo66.bars, [])
+      assert.objectsEqual(foo77.bars, Bar.getAll())
+    })
+    it('should allow instance events', function (done) {
+      let changed = false
+      class Foo extends Model {}
+      Foo.setSchema({
+        bar: { type: 'string', track: true }
+      })
+      const foo = Foo.inject({ id: 1 })
+
+      setTimeout(function () {
+        if (!changed) {
+          done('failed to fire change event')
+        }
+      }, 10)
+
+      foo.on('change', function () {
+        changed = true
+        done()
+      })
+
+      foo.bar = 'baz'
+    })
+    it('should allow Resource change events', function (done) {
+      let changed = false
+      class Foo extends Model {}
+      Foo.setSchema({
+        bar: { type: 'string', track: true }
+      })
+      const foo = Foo.inject({ id: 1 })
+
+      setTimeout(function () {
+        if (!changed) {
+          done('failed to fire change event')
+        }
+      }, 10)
+
+      Foo.on('change', function () {
+        changed = true
+        done()
+      })
+
+      foo.bar = 'baz'
+    })
+    it('should allow resources to extend other resources in ES6', function () {
+      class Baz extends Model {}
+      Baz.linkRelations = true
+      class Foo extends Model {
+        say () {
+          return this.constructor.name
+        }
+      }
+      Foo.linkRelations = true
+      Foo.belongsTo(Baz, {
+        localField: 'baz',
+        localKey: 'bazId'
+      })
+      class Bar extends Foo {}
+      assert.equal(Foo.name, 'Foo')
+      assert.equal(Bar.name, 'Bar')
+
+      const baz = Baz.inject({ id: 10 })
+
+      const foo = Foo.inject({ id: 1, type: 'foo', bazId: 10 })
+      const bar = Bar.inject({ id: 1, type: 'bar', bazId: 10 })
+      assert.isTrue(baz === foo.baz)
+      assert.isTrue(baz === bar.baz)
+
+      assert.equal(foo.say(), 'Foo')
+      assert.equal(bar.say(), 'Bar')
+    })
+    it('should allow resources to extend other resources in ES5', function () {
+      const Baz = Model.extend({}, { name: 'Baz', linkRelations: true })
+      const Foo = Model.extend({
+        say () {
+          return this.constructor.name
+        }
+      }, { name: 'Foo', linkRelations: true })
+      Foo.belongsTo(Baz, {
+        localField: 'baz',
+        localKey: 'bazId'
+      })
+      const Bar = Foo.extend({}, { name: 'Bar' })
+      assert.equal(Foo.name, 'Foo')
+      assert.equal(Bar.name, 'Bar')
+
+      const baz = Baz.inject({ id: 10 })
+
+      const foo = Foo.inject({ id: 1, type: 'foo', bazId: 10 })
+      const bar = Bar.inject({ id: 1, type: 'bar', bazId: 10 })
+      assert.isTrue(baz === foo.baz)
+      assert.isTrue(baz === bar.baz)
+
+      assert.equal(foo.say(), 'Foo')
+      assert.equal(bar.say(), 'Bar')
+    })
+    it('should allow instance events 2', function (done) {
+      let changed = false
+      class Foo extends Model {}
+      Foo.setSchema({
+        bar: { type: 'string', track: true }
+      })
+      const foo = Foo.inject({ id: 1 })
+
+      setTimeout(function () {
+        if (!changed) {
+          done('failed to fire change event')
+        }
+      }, 10)
+
+      foo.on('change', function (Foo, foo) {
+        changed = true
+        done()
+      })
+
+      foo.set('bar', 'baz')
+    })
+    it('should allow Resource change events 2', function (done) {
+      let changed = false
+      class Foo extends Model {}
+      Foo.setSchema({
+        bar: { type: 'string', track: true }
+      })
+      const foo = Foo.inject({ id: 1 })
+
+      setTimeout(function () {
+        if (!changed) {
+          done('failed to fire change event')
+        }
+      }, 10)
+
+      Foo.on('change', function (Foo, foo) {
+        changed = true
+        done()
+      })
+
+      foo.set('bar', 'baz')
+    })
+
+    staticChanges.init()
+    changes.init()
     create.init()
     staticCreate.init()
     staticCreateInstance.init()
@@ -200,12 +422,18 @@ export function init () {
     staticFind.init()
     staticFindAll.init()
     staticGet.init()
+    get.init()
     staticGetAll.init()
+    staticHasChanges.init()
+    hasChanges.init()
     staticInject.init()
+    revert.init()
     save.init()
+    set.init()
     staticUpdate.init()
     staticUpdateMany.init()
     staticUpdateAll.init()
     toJSON.init()
+    unset.init()
   })
 }

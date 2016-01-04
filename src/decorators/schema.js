@@ -2,7 +2,7 @@ import {
   forOwn,
   get
 } from '../utils'
-import {validate} from '../validate'
+import {validate} from '../validate/index'
 import {configure} from './configure'
 
 const op = 'setSchema'
@@ -15,8 +15,7 @@ const op = 'setSchema'
  */
 function makeDescriptor (target, key, opts) {
   const descriptor = {
-    enumerable: opts.enumerable !== undefined ? opts.enumerable : true,
-    configurable: opts.configurable !== undefined ? opts.configurable : true
+    enumerable: opts.enumerable !== undefined ? opts.enumerable : true
   }
   descriptor.get = function () {
     return this._get(`props.${key}`)
@@ -36,20 +35,33 @@ function makeDescriptor (target, key, opts) {
       }
     }
     if (opts.track && !_get('creating')) {
-      const changing = _get('changing')
+      let changing = _get('changing')
       const previous = _get(`previous.${key}`)
       const current = _get(`props.${key}`)
       let changed = _get('changed')
       if (!changing) {
         changed = []
       }
-      if (current !== value) {
+      const index = changed.indexOf(key)
+      if (current !== value && index === -1) {
         changed.push(key)
       }
       if (previous !== value) {
         _set(`changes.${key}`, value)
       } else {
         _unset(`changes.${key}`)
+        if (index >= 0) {
+          changed.splice(index, 1)
+        }
+      }
+      if (!changed.length) {
+        changing = false
+        _unset('changing')
+        _unset('changed')
+        if (_get('eventId')) {
+          clearTimeout(_get('eventId'))
+          _unset('eventId')
+        }
       }
       if (!changing && changed.length) {
         _set('changed', changed)
@@ -58,11 +70,14 @@ function makeDescriptor (target, key, opts) {
           _unset('changed')
           _unset('eventId')
           _unset('changing')
-          let i
-          for (i = 0; i < changed.length; i++) {
-            this.emit('change:' + changed[i], this, get(this, changed[i]))
+          if (!_get('silent')) {
+            let i
+            for (i = 0; i < changed.length; i++) {
+              this.emit('change:' + changed[i], this, get(this, changed[i]))
+            }
+            this.emit('change', this, _get('changes'))
           }
-          this.emit('change', this, _get('changes'))
+          _unset('silent')
         }, 0))
       }
     }

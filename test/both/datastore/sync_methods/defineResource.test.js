@@ -74,43 +74,6 @@ describe('DS#defineResource', function () {
     assert.equal(lifecycle.afterInject.callCount, 2, 'afterInject should have been called twice');
   });
 
-  it('should put getters and setters on instances', function () {
-    var Thing = store.defineResource({
-      name: 'thing',
-      computed: {
-        name: ['first', 'last', function (first, last) {
-          return first + ' ' + last;
-        }]
-      }
-    });
-
-    var thing = Thing.inject({
-      id: 1,
-      first: 'John',
-      last: 'Anderson'
-    });
-
-    assert.isTrue(store.is('thing', thing));
-    assert.isTrue(Thing.is(thing));
-
-    assert.equal(thing.get('first'), 'John');
-    assert.equal(thing.get('last'), 'Anderson');
-    assert.isUndefined(thing.get('foo'));
-    assert.equal(thing.get('name'), 'John Anderson');
-
-    thing.set('first', 'Sally');
-    assert.equal(thing.get('first'), 'Sally');
-    assert.equal(thing.get('last'), 'Anderson');
-    assert.equal(thing.get('name'), 'Sally Anderson');
-
-    thing.set('last', 'Jones');
-
-    assert.equal(thing.get('first'), 'Sally');
-    assert.equal(thing.get('last'), 'Jones');
-    assert.isUndefined(thing.get('foo'));
-    assert.equal(thing.get('name'), 'Sally Jones');
-  });
-
   it('should allow custom model class definitions', function () {
 
     function MyBaseBaseClass() {
@@ -260,47 +223,5 @@ describe('DS#defineResource', function () {
 
     // clean up
     newStore.constructor.prototype.createInstance = orig;
-  });
-  it('should allow enhanced relation getters', function () {
-    var wasItActivated = false;
-    var Foo = store.defineResource({
-      name: 'foo',
-      relations: {
-        belongsTo: {
-          bar: {
-            localField: 'bar',
-            localKey: 'barId',
-            get: function (Foo, relation, foo, orig) {
-              // "relation.name" has relationship "relation.type" to "relation.relation"
-              wasItActivated = true;
-              return orig();
-            }
-          }
-        }
-      }
-    });
-    store.defineResource('bar');
-    var foo = Foo.inject({
-      id: 1,
-      barId: 1,
-      bar: {
-        id: 1
-      }
-    });
-    assert.equal(foo.bar.id, 1);
-    assert.isTrue(wasItActivated);
-  });
-  it('should work with csp set to true', function () {
-    var store = new JSData.DS({
-      csp: true
-    });
-    var User = store.defineResource({
-      name: 'user'
-    });
-    var user = User.createInstance({ name: 'John' });
-    assert.isTrue(user instanceof User[User.class]);
-    assert.equal(User[User.class].name, '');
-
-    assert.equal(Post[Post.class].name, 'Post');
   });
 });

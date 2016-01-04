@@ -20,7 +20,7 @@ function applyBelongsTo (Model, Relation, opts) {
   // Choose field where the relation will be attached
   const localField = opts.localField = opts.localField || Relation.name.toLowerCase()
   // Choose field that holds the primary key of the relation
-  const localKey = opts.localKey = opts.localKey || Relation.name.toLowerCase() + '_id'
+  const localKey = opts.localKey = opts.localKey || `${Relation.name.toLowerCase()}_id`
 
   // Setup configuration of the property
   const descriptor = {
@@ -44,6 +44,9 @@ function applyBelongsTo (Model, Relation, opts) {
     }
   }
 
+  const originalGet = descriptor.get
+  const originalSet = descriptor.set
+
   // Check whether the relation shouldn't actually be linked via a getter
   if (opts.link === false || (opts.link === undefined && !Model.linkRelations)) {
     delete descriptor.get
@@ -53,7 +56,6 @@ function applyBelongsTo (Model, Relation, opts) {
 
   // Check for user-defined getter
   if (opts.get) {
-    const originalGet = descriptor.get
     // Set user-defined getter
     descriptor.get = function () {
       // Call user-defined getter, passing in:
@@ -61,13 +63,13 @@ function applyBelongsTo (Model, Relation, opts) {
       //  - related Model
       //  - instance of target Model
       //  - the original getter function, in case the user wants to use it
-      return opts.get(Model, Relation, this, originalGet ? (...args) => originalGet.apply(this, args) : undefined)
+      return opts.get(Model, Relation, this, () => originalGet.call(this))
     }
+    delete descriptor.writable
   }
 
   // Check for user-defined setter
   if (opts.set) {
-    const originalSet = descriptor.set
     // Set user-defined setter
     descriptor.set = function (parent) {
       // Call user-defined getter, passing in:
@@ -76,12 +78,30 @@ function applyBelongsTo (Model, Relation, opts) {
       //  - instance of target Model
       //  - instance of related Model
       //  - the original setter function, in case the user wants to use it
-      return opts.set(Model, Relation, this, parent, originalSet ? (...args) => originalSet.apply(this, args) : undefined)
+      return opts.set(Model, Relation, this, parent, value => originalSet.call(this, value === undefined ? parent : value))
     }
+    delete descriptor.writable
+  }
+
+  if (descriptor.get) {
+    descriptor.set || (descriptor.set = function () {})
   }
 
   // Finally, added property to prototype of target Model
   Object.defineProperty(Model.prototype, localField, descriptor)
+  Object.defineProperty(Model.prototype, localKey, {
+    configurable: true,
+    enumerable: true,
+    get () {
+      return this._get(`props.${localKey}`)
+    },
+    set (value) {
+      this._set(`props.${localKey}`, value)
+      if (this._get('$')) {
+        Model.collection.indexes[localKey].updateRecord(this, { index: localKey })
+      }
+    }
+  })
 
   if (!Model.relationList) {
     Model.relationList = []
@@ -125,7 +145,7 @@ function applyBelongsTo (Model, Relation, opts) {
  * @return {Function} Invocation function, which accepts the target as the only
  * parameter.
  */
-exports.belongsTo = function (Model, opts) {
+export function belongsTo (Model, opts) {
   return function (target) {
     target.dbg(op, 'Model:', Model, 'opts:', opts)
     return applyBelongsTo(target, Model, opts)

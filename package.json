@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "3.0.0-alpha.2",
+  "version": "3.0.0-alpha.3",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
   "standard": {
     "parser": "babel-eslint",
     "globals": [
+      "babelHelpers",
       "__callCheck__",
       "__get__",
       "__inherits__",
@@ -40,31 +41,33 @@
     ]
   },
   "scripts": {
+    "rollup": "rollup -c",
+    "rollup-tests": "rollup -c rollup-tests.config.js",
     "doc": "jsdoc -c conf.json src",
     "lint": "standard src/**/*.js test/**/*.js",
-    "webpack": "webpack --config webpack.config.js",
     "helpers": "node scripts/helpers.js",
-    "watch": "npm run webpack -- --watch",
     "min": "uglifyjs dist/js-data.js -o dist/js-data.min.js --source-map dist/js-data.min.map -v -m -c --screw-ie8",
     "debug": "node scripts/debug.js",
     "version": "node scripts/version.js",
     "banner": "node scripts/banner.js",
     "gzip": "echo gzipped size: $(cat dist/js-data.min.js | gzip -f9 | wc -c)kb",
-    "build": "npm run lint && npm run webpack && npm run debug && npm run min && npm run version && npm run banner",
+    "build": "npm run lint && npm run rollup && npm run debug && npm run min && npm run version && npm run banner",
     "karma": "karma start",
     "mocha": "mocha -t 20000 -R spec -r source-map-support/register mocha.start.js",
+    "r": "npm run rollup && npm run mocha",
+    "t": "npm run rollup-tests && npm run mocha",
+    "rt": "npm run rollup && npm run rollup-tests && npm run mocha",
     "cover": "istanbul cover -x dist/js-data-tests.js --hook-run-in-context node_modules/mocha/bin/_mocha -- -t 20000 -R dot -r source-map-support/register mocha.start.js",
-    "test": "npm run build && npm run cover",
+    "test": "npm run build && npm run rollup-tests && npm run cover",
     "ci": "npm test && cat coverage/lcov.info | coveralls || true && cat ./coverage/lcov.info | codacy-coverage || true"
   },
   "devDependencies": {
-    "babel-core": "6.3.21",
+    "babel-core": "6.3.26",
     "babel-eslint": "4.1.6",
-    "babel-loader": "6.2.0",
     "babel-plugin-syntax-async-functions": "6.3.13",
-    "babel-plugin-transform-regenerator": "6.3.18",
+    "babel-plugin-transform-regenerator": "6.3.26",
     "babel-polyfill": "6.3.14",
-    "babel-preset-es2015": "6.3.13",
+    "babel-preset-es2015-rollup": "1.0.0",
     "babel-preset-stage-0": "6.3.13",
     "chai": "3.4.1",
     "codacy-coverage": "1.1.3",
@@ -73,11 +76,12 @@
     "istanbul": "0.4.1",
     "jsdoc": "3.4.0",
     "mocha": "2.3.4",
+    "rollup": "0.22.0",
+    "rollup-plugin-babel": "2.2.0",
     "sinon": "1.17.2",
     "source-map-support": "0.4.0",
     "standard": "5.4.1",
-    "uglify-js": "2.6.1",
-    "webpack": "1.12.9"
+    "uglify-js": "2.6.1"
   },
   "dependencies": {}
 }

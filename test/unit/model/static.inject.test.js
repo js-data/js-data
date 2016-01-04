@@ -134,7 +134,6 @@ export function init () {
     })
     it('should find inverse links', function () {
       this.User.inject({ organizationId: 5, id: 1 })
-
       this.Organization.inject({ id: 5 })
 
       assert.objectsEqual(this.User.get(1).organization, { id: 5 })
@@ -142,12 +141,12 @@ export function init () {
       assert.objectsEqual(this.User.get(1).comments, [])
       assert.objectsEqual(this.User.get(1).approvedComments, [])
 
-      this.Comment.inject({ approvedBy: 1, id: 23 })
+      const comment1 = this.Comment.inject({ approvedBy: 1, id: 23 })
 
       assert.equal(0, this.User.get(1).comments.length)
       assert.equal(1, this.User.get(1).approvedComments.length)
 
-      this.Comment.inject({ approvedBy: 1, id: 44 })
+      const comment2 = this.Comment.inject({ approvedBy: 1, id: 44 })
 
       assert.equal(0, this.User.get(1).comments.length)
       assert.equal(2, this.User.get(1).approvedComments.length)
@@ -255,7 +254,7 @@ export function init () {
 
       assert.isTrue(Parent.get(1).children[0] instanceof Child)
       assert.isTrue(Parent.get(1).children[1] instanceof Child)
-      assert.deepEqual(Child.filter({ parentId: 1 }), Parent.get(1).children)
+      assert.deepEqual(Child.filter({ parent_id: 1 }), Parent.get(1).children)
     })
     it('should configure enumerability and linking of relations', function () {
       class Parent extends Model {}
@@ -416,10 +415,14 @@ export function init () {
         linkRelations: true
       })
       Foo.hasMany(Bar, {
+        foreignKey: 'fooId',
         localField: 'bars',
         link: false
       })
-      Bar.belongsTo(Foo)
+      Bar.belongsTo(Foo, {
+        localField: 'foo',
+        localKey: 'fooId'
+      })
       const foo = Foo.inject({
         id: 1,
         bars: [
@@ -463,9 +466,9 @@ export function init () {
       }
       const start = new Date().getTime()
       User.inject(users)
-      console.log('\tinject 1,000 users time taken: ', new Date().getTime() - start, 'ms')
+      // console.log('\tinject 1,000 users time taken: ', new Date().getTime() - start, 'ms')
     })
-    it('should inject 10,000 items', function () {
+    it.skip('should inject 10,000 items', function () {
       class User extends Model {}
       let users = []
       for (var i = 0; i < 10000; i++) {
@@ -479,7 +482,7 @@ export function init () {
       }
       const start = new Date().getTime()
       User.inject(users)
-      console.log('\tinject 10,000 users time taken: ', new Date().getTime() - start, 'ms')
+      // console.log('\tinject 10,000 users time taken: ', new Date().getTime() - start, 'ms')
     })
     it('should inject 1,000 items where there is an index on "age"', function () {
       class User extends Model {}
@@ -498,9 +501,9 @@ export function init () {
       }
       const start = new Date().getTime()
       User.inject(users)
-      console.log('\tinject 1,000 users time taken: ', new Date().getTime() - start, 'ms')
+      // console.log('\tinject 1,000 users time taken: ', new Date().getTime() - start, 'ms')
     })
-    it('should inject 10,000 items where there is an index on "age"', function () {
+    it.skip('should inject 10,000 items where there is an index on "age"', function () {
       class User extends Model {}
       User.createIndex('age')
       User.createIndex('created')
@@ -517,8 +520,20 @@ export function init () {
       }
       const start = new Date().getTime()
       User.inject(users)
-      console.log('\tinject 10,000 users time taken: ', new Date().getTime() - start, 'ms')
-      console.log('\tusers age 40-44', User.between(40, 45, { index: 'age' }).length)
+      // console.log('\tinject 10,000 users time taken: ', new Date().getTime() - start, 'ms')
+      // console.log('\tusers age 40-44', User.between(40, 45, { index: 'age' }).length)
+    })
+    it('should inject temporary items', function () {
+      class User extends Model {}
+      const user = User.inject({
+        name: 'John'
+      }, { autoPk: true })
+      assert.isDefined(user.id)
+      assert.isTrue(user._get('autoPk'))
+      assert.isTrue(User.getAll()[0] === user)
+      assert.isTrue(User.getAutoPkItems()[0] === user)
+      assert.deepEqual(user.toJSON(), { name: 'John', id: user.id })
+      assert.equal(user.hashCode(), user.id)
     })
   })
 }

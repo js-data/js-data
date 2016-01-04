@@ -1,7 +1,11 @@
 /* jshint eqeqeq:false */
-import {configure} from '../decorators'
-import {forOwn, isFunction} from '../utils'
-import {Model} from '../model'
+import {
+  addHiddenPropsToTarget,
+  classCallCheck,
+  forOwn,
+  isFunction
+} from '../utils'
+import {Model} from '../model/index'
 
 // function lifecycleNoopCb (resource, attrs, cb) {
 //   cb(null, attrs)
@@ -186,11 +190,12 @@ import {Model} from '../model'
 // dsPrototype.utils = DSUtils
 
 export function DS (opts) {
+  classCallCheck(this, DS)
   opts || (opts = {})
   this.definitions = {}
 }
 
-configure({
+addHiddenPropsToTarget(DS.prototype, {
   clear () {
     const ejected = {}
     forOwn(this.definitions, definition => {
@@ -205,7 +210,7 @@ configure({
     this.definitions[Child.name] = Child
     return Child
   }
-})(DS.prototype)
+})
 
 DS.prototype.defineResource = DS.prototype.defineModel
 

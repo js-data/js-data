@@ -1,65 +1,58 @@
-<img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="64" height="64" />
+<img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="96" height="96" />
 
-## JSData [![Slack Status][sl_b]][slack] [![npm version][npm_b]][npm_l] [![Circle CI][circle_b]][circle_l] [![npm downloads][dn_b]][dn_l] [![Coverage Status][cov_b]][cov_l] [![Codacy][cod_b]][cod_l]
+# [JSData](http://www.js-data.io/)
 
-Inspired by [Ember Data][ember], __JSData__ is the model layer you've been
-craving. It consists of a convenient __framework-agnostic__, __in-memory store__
-for managing your data, which uses __adapters__ to communicate with various
-__persistence layers__.
+[![Slack Status][sl_b]][slack]
+[![npm version][npm_b]][npm_l]
+[![Circle CI][circle_b]][circle_l]
+[![npm downloads][dn_b]][dn_l]
+[![Coverage Status][cov_b]][cov_l]
+[![Codacy][cod_b]][cod_l]
 
-The most commonly used adapter is the [http adapter][http], which is perfect for
-connecting your frontend to your backend. [localStorage][3], [localForage][4],
-[firebase][5] and [other adapters][6] are already available. On the server you
-could hook up to the [SQL adapter (Postgres/MySQL/MariaDB/SQLite3)][7] and add
-in the [Redis adapter][8] as a caching layer for your read endpoints. More
-adapters are coming, and you're free to implement your own. See [Adapters][9].
+JSData is a datastore-agnostic ORM for Node.js and the Browser.
 
-Unlike some libraries, JSData does not require the use of getter and setter
-functions, and doesn't decorate your data with a bunch of cruft.
+Adapters allow JSData to connect to various datastores such as Firebase, MySql,
+RethinkDB, MongoDB, localStorage, Redis, a REST API, etc. With JSData you can
+re-use your Models between environments, keep your data layer intact when
+transitioning between app frameworks, and work with a unified data API on the
+server and the client. JSData employs conventions for rapid development, but
+allows for endless customization in order to meet your particular needs. Think
+of it as the "Twitter Bootstrap" of JavaScript data layers.
 
-Supporting relations, Node.js and the Browser, model lifecycle control and a
-slew of other features, JSData is the tool for [giving your data the respect it deserves][12].
+To get started, check out <http://js-data.io>!
 
-Written in ES6 and built for modern web development, JSData will save you
-thousands of lines of code.
+## Table of contents
 
-Support is handled via the [Slack channel][slack] or the [Mailing List][ml].
+* [Quick start](#quick-start)
+* [Background](#background)
+* [Dependencies](#dependencies)
+* [Documentation](#documentation)
+* [API Reference](#api-reference)
+* [Support](#support)
+* [Community](#community)
+* [Contributing](#contributing)
+* [License](#license)
 
-##### Looking for contributors!
+## Quick Start
 
-JSData is getting popular and becoming a lot of work for me. I could use help
-with tests, documentation, demos/examples, and adapters. Contact me if you wan
-to help! jason dot dobry at gmail dot com
-
-[![MtnWestJS Conf 2015 Presentation][mtn_b]][mtn_l]
-
-### Dependencies
-
-JSData requires the presence of the ES6-spec (ES2015) `Promise` constructor in
-the global environment. In the browser, `window.Promise` must be available. In
-Node, `global.Promise` must be available. Here is a handy library for
-polyfilling: https://github.com/jakearchibald/es6-promise.
-
-### Quick Start
-
-##### For use in a Browser
+##### js-data + http adapter in the Browser
 
 `npm install --save js-data js-data-http` or `bower install --save js-data js-data-http`.
 
-(You may also substitute `js-data-http` for any one of the other client-side adapters.)
+(Substitute `js-data-http` for any one of the other client-side adapters.)
 
-##### For use in Node.js
+##### js-data + http adapter in Node.js
 
 `npm install --save js-data axios js-data-http-node`
 
-(You may also substitute `js-data-http-node` for any one of the other server-side adapters.)
+(Substitute `axios` and `js-data-http-node` for any one of the other server-side adapters.)
 
-See [installation instructions][inst] for making js-data part of your
+See [installation instructions][inst] for making JSData part of your
 r.js/browserify/webpack build.
 
-__ES7:__
+__ES2016:__
 
-```js
+```javascript
 import {Model, registerAdapter} from 'js-data'
 import DSHttpAdapter from 'js-data-http'
 
@@ -68,33 +61,25 @@ async function showExample() {
   @registerAdapter('http', new DSHttpAdapter(), { default: true })
   class User extends Model {}
 
-  // Allow "User" to store data
-  User.initialize()
-
   let user = await User.find(1)
 
   console.log(user) // { id: 1, name: 'John' }
   console.log(user instanceof User) // true
 
-  // The user instance is stored in User now
+  // The user instance is now stored in the User Model's collection
   console.log(User.get(user.id)) // { id: 1, name: 'John' }
   console.log(user === User.get(user.id)) // true
 
-  // No need for another GET request, will resolve immediately
-  // See http://www.js-data.io/docs/dsfind
-  user = await User.find(user.id)
-
-  console.log(user === User.get(user.id)) // true
+  user.name = 'Johnny'
 
   // PUT /user/1 {name:"Johnny"}
-  // See http://www.js-data.io/docs/dsupdate
-  user = await User.update(user.id, { name: 'Johnny' })
+  user = await user.save()
 
-  // The user instance stored in User has been updated
+  // The user instance has been updated
   console.log(User.get(user.id)) // { id: 1, name: 'Johnny' }
   console.log(user === User.get(user.id)) // true
 
-  await User.destroy(user.id)
+  await user.destroy()
 
   // The user instance no longer stored in User
   console.log(User.get(1)) // undefined
@@ -103,9 +88,9 @@ async function showExample() {
 showExample()
 ```
 
-__ES6:__
+__ES2015:__
 
-```js
+```javascript
 import {Model, registerAdapter} from 'js-data'
 import DSHttpAdapter from 'js-data-http'
 
@@ -113,35 +98,27 @@ function* showExample() {
   class User extends Model {}
 
   // "User" will use an http adapter by default
-  User.setAdapter('http', new DSHttpAdapter(), { default: true })
-
-  // Allow "User" to store data
-  User.initialize()
+  User.registerAdapter('http', new DSHttpAdapter(), { default: true })
 
   let user = yield User.find(1)
 
   console.log(user) // { id: 1, name: 'John' }
   console.log(user instanceof User) // true
 
-  // The user instance is stored in User now
+  // The user instance is now stored in the User Model's collection
   console.log(User.get(user.id)) // { id: 1, name: 'John' }
   console.log(user === User.get(user.id)) // true
 
-  // No need for another GET request, will resolve immediately
-  // See http://www.js-data.io/docs/dsfind
-  user = yield User.find(user.id)
-
-  console.log(user === User.get(user.id)) // true
+  user.name = 'Johnny'
 
   // PUT /user/1 {name:"Johnny"}
-  // See http://www.js-data.io/docs/dsupdate
-  user = yield User.update(user.id, { name: 'Johnny' })
+  user = yield user.save()
 
-  // The user instance stored in User has been updated
+  // The user instance has been updated
   console.log(User.get(user.id)) // { id: 1, name: 'Johnny' }
   console.log(user === User.get(user.id)) // true
 
-  yield User.destroy(user.id)
+  yield user.destroy()
 
   // The user instance no longer stored in User
   console.log(User.get(1)) // undefined
@@ -152,41 +129,33 @@ showExample()
 
 __ES5:__
 
-```js
+```javascript
 var User = JSData.Model.extend({}, { name: 'User' })
 // register and use http by default for async operations
 User.registerAdapter('http', new DSHttpAdapter(), { default: true });
 
 // Example CRUD operations with default configuration
-// See http://www.js-data.io/docs/dsfind
 User.find(1)
   .then(function (user) {
     console.log(user) // { id: 1, name: 'John' }
     console.log(user instanceof User) // true
 
-    // The user instance is stored in User now
+    // The user instance is now stored in the User Model's collection
     console.log(User.get(user.id)) // { id: 1, name: 'John' }
     console.log(user === User.get(user.id)) // true
 
-    // No need for another GET request, will resolve immediately
-    // See http://www.js-data.io/docs/dsfind
-    return User.find(user.id)
-  })
-  .then(function (user) {
-    console.log(user === User.get(user.id)) // true
+    user.name = 'Johnny'
 
     // PUT /user/1 {name:"Johnny"}
-    // See http://www.js-data.io/docs/dsupdate
-    return User.update(user.id, { name: 'Johnny' })
+    return user.save()
   })
   .then(function (user) {
-    // The user instance stored in User has been updated
+    // The user instance has been updated
     console.log(User.get(user.id)) // { id: 1, name: 'Johnny' }
     console.log(user === User.get(user.id)) // true
 
     // DELETE /user/1
-    // See http://www.js-data.io/docs/dsdestroy
-    return User.destroy(user.id)
+    return user.destroy()
   })
   .then(function () {
     // The user instance no longer stored in User
@@ -194,9 +163,41 @@ User.find(1)
   })
 ```
 
-All your data are belong to you...
+## Background
 
-### Guides
+Most ORMs only work with a single datastore. Even when written in JavaScript,
+most ORMs only work in Node.js _or_ the Browser. Wouldn't it be nice if you
+could use the same ORM on the client as you do on the backend? Wouldn't it be
+nice if you could switch databases without having to switch ORMs? Enter
+__JSData__.
+
+Originally inspired by the desire to have something like [Ember Data][ember]
+that worked in Angular.js and other frameworks, JSData was created. Turns out,
+JSData works in Node.js, so server-side adapters were written. JSData is the
+Model layer you've been craving. It consists of a convenient
+__framework-agnostic__, __datastore-agnostic__ ORM for managing your data, which
+uses __adapters__ to connect to various __persistence layers__.
+
+The most commonly used adapter is the [http adapter][http], which is perfect for
+connecting your frontend to your backend. [localStorage][3], [localForage][4],
+[Firebase][5] and [other adapters][6] are already available. On the server you
+could hook up to the [SQL adapter (Postgres/MySQL/MariaDB/SQLite3)][7] or the
+[MongoDB][8] adapter. More adapters are coming, and you're free to implement
+your own. See [Adapters][9].
+
+[![MtnWestJS Conf 2015 Presentation][mtn_b]][mtn_l]
+
+### Dependencies
+
+JSData requires the presence of a `Promise` constructor in the global
+environment. In the browser, `window.Promise` must be available. In Node.js,
+`global.Promise` must be available. Here is a handy library for polyfilling:
+https://github.com/jakearchibald/es6-promise.
+
+JSData also requires full ES5 support from the runtime. Here is a handy library
+for polyfilling: https://github.com/afarkas/html5shiv
+
+### Documentation
 - [Getting Started with js-data](http://www.js-data.io/docs/home)
 - [Resources/Models](http://www.js-data.io/docs/resources)
 - [Working with the Data Store](http://www.js-data.io/docs/working-with-the-data-store)
@@ -209,10 +210,12 @@ All your data are belong to you...
 - [JSData on the server](http://www.js-data.io/docs/jsdata-on-the-server)
 - [Angular + JSData](http://www.js-data.io/docs/js-data-angular)
 - [FAQ](http://www.js-data.io/docs/faq)
+- [CHANGELOG.md](https://github.com/js-data/js-data/blob/master/CHANGELOG.md)
 
-See an issue with or have a suggestion for the documentation? You can suggest edits right on the documentation pages! (There's a link at the top right of each page.)
+See an issue with the documentation? Have something to add? Click the "Suggest
+Edits" at the top right of each page and make your suggested changes!
 
-### API Documentation
+### API Reference
 - [DS](http://www.js-data.io/docs/ds)
 - [Configuration Options](http://www.js-data.io/docs/dsdefaults)
 - [DSFirebaseAdapter](http://www.js-data.io/docs/dsfirebaseadapter)
@@ -227,33 +230,31 @@ See an issue with or have a suggestion for the documentation? You can suggest ed
 - [DSSqlAdapter](http://www.js-data.io/docs/dssqladapter)
 - [js-data-schema](http://www.js-data.io/docs/js-data-schema)
 
-### Changelog
-[CHANGELOG.md](https://github.com/js-data/js-data/blob/master/CHANGELOG.md)
+### Support
+
+Support questions are handled via [StackOverflow][so], [Slack][slack], and the
+[Mailing List][ml]. Ask your questions there.
 
 ### Community
-- [Slack Channel](http://slack.js-data.io) [![Slack Status][sl_b]][slack] - Better than IRC!
+- [StackOverflow Channel][so]
+- [Slack Chat][slack] [![Slack Status][sl_b]][slack]
 - [Announcements](http://www.js-data.io/blog)
-- [Mailing List](ml) - Ask your questions!
-- [Issues](https://github.com/js-data/js-data/issues) - Found a bug? Feature request? Submit an issue!
-- [GitHub](https://github.com/js-data/js-data) - View the source code for JSData.
+- [Mailing List](ml)
+- [Issues Tracker](https://github.com/js-data/js-data/issues)
+- [GitHub](https://github.com/js-data/js-data)
 - [Contributing Guide](https://github.com/js-data/js-data/blob/master/CONTRIBUTING.md)
 
 ### Contributing
 
-First, support is handled via the [Slack Channel][slack] and the
-[Mailing List][ml]. Ask your questions there.
+When submitting bug reports or feature requests on GitHub, please include _as
+much detail as possible_.
 
-When submitting issues on GitHub, please include as much detail as possible to
-make debugging quick and easy.
-
-- good - Your versions of Angular, JSData, etc, relevant console logs/error,
-code examples that revealed the issue
+- good - Your versions of Angular, JSData, etc, relevant console logs, stack
+traces, code examples that revealed the issue, etc.
 - better - A [plnkr](http://plnkr.co/), [fiddle](http://jsfiddle.net/), or
 [bin](http://jsbin.com/?html,output) that demonstrates the issue
 - best - A Pull Request that fixes the issue, including test coverage for the
 issue and the fix
-
-[Github Issues](https://github.com/js-data/js-data/issues).
 
 #### Pull Requests
 
@@ -261,7 +262,7 @@ issue and the fix
 the first place
 1. Fork js-data
 1. `git clone git@github.com:<you>/js-data.git`
-1. `cd js-data; npm install; bower install;`
+1. `cd js-data; npm install;`
 1. Write your code, including relevant documentation and tests
 1. Run `npm test` (build and test)
 1. Your code will be linted and checked for formatting, the tests will be run
@@ -274,7 +275,7 @@ will be committed when a release is cut.
 
 The MIT License (MIT)
 
-Copyright (c) 2014-2015 Jason Dobry
+Copyright (c) 2014-2016 Jason Dobry
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -293,7 +294,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
 
 [sl_b]: http://slack.js-data.io/badge.svg
 [npm_b]: https://img.shields.io/npm/v/js-data.svg?style=flat
@@ -314,7 +314,7 @@ SOFTWARE.
 [5]: http://www.js-data.io/docs/dsfirebaseadapter
 [6]: http://www.js-data.io/docs/working-with-adapters
 [7]: http://www.js-data.io/docs/dssqladapter
-[8]: http://www.js-data.io/docs/dsredisadapter
+[8]: http://www.js-data.io/docs/dsmongodbadapter
 [9]: http://www.js-data.io/docs/working-with-adapters
 [10]: https://github.com/Polymer/observe-js
 [11]: https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html
@@ -326,3 +326,4 @@ SOFTWARE.
 
 [slack]: http://slack.js-data.io
 [ml]: https://groups.io/org/groupsio/jsdata
+[so]: http://stackoverflow.com/questions/tagged/jsdata
