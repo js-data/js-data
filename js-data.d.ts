@@ -217,13 +217,6 @@ declare module JSData {
    * js-data's Model class.
    */
   class Model<R> {
-
-    /**
-     * Create a new secondary index in the Collection instance of this Model.
-     */
-    static createIndex(name: string, keyList: string[]);
-
-
     schema(key?: string): Object;
     validate(obj?: Object): string[] | void;
     create(opts?: Object): Promise<Model<R>>;
@@ -245,9 +238,35 @@ declare module JSData {
      * Return a plain object representation of this instance.
      */
     toJSON(opts?: Object): string;
+
+    /**
+     * Extend this Model and return a new child Model. Static properties on this
+     * Model will be shallow copied to the child Model. The child Model's
+     * prototype will point to the parent Model.
+     */
+    static extend<R>(instanceProps?: Object, staticProps?: ModelOptions): ModelConstructor<R>;
   }
 
-  interface ModelStatic<R> {
+  interface ModelOptions {
+    autoEject?: boolean;
+    autoInject?: boolean;
+    bypassCache?: boolean;
+    csp?: boolean;
+    defaultAdapter?: string;
+    debug?: boolean;
+    eagerEject?: boolean;
+    endpoint?: string;
+    idAttribute?: string;
+    linkRelations?: boolean;
+    name?: string;
+    notify?: boolean;
+    onConflict?: string;
+    relationsEnumerable?: boolean;
+    raw?: boolean;
+    upsert?: boolean;
+  }
+
+  interface ModelConstructor<R> extends ModelOptions {
     new (properties: R, options: ModelOptions): Model<R>;
 
     /**
@@ -422,7 +441,14 @@ declare module JSData {
     /**
      * Invoke the `registerAdapter` decorator on this Model.
      */
-    registerAdapter(name: string, adapter: Adapter, opts?: Object): ModelStatic<R>;
+    registerAdapter(name: string, adapter: Adapter, opts?: Object): ModelConstructor<R>;
+
+    /**
+     * Extend this Model and return a new child Model. Static properties on this
+     * Model will be shallow copied to the child Model. The child Model's
+     * prototype will point to the parent Model.
+     */
+    extend<R>(instanceProps?: Object, staticProps?: ModelOptions): ModelConstructor<R>;
   }
 
   interface Adapter { }
