@@ -2127,8 +2127,7 @@ Object.defineProperties(Model, {
         utils.fillIn(this._adapters, parentAdapters)
       }
       return this._adapters
-    },
-    enumerable: true
+    }
   },
 
   /**
@@ -2169,8 +2168,7 @@ Object.defineProperties(Model, {
         })
       }
       return this._collection
-    },
-    enumerable: true
+    }
   }
 })
 
