@@ -383,6 +383,7 @@ addHiddenPropsToTarget(Collection.prototype, {
     })
     if (record && isFunction(record.on)) {
       record.on('all', this._onModelEvent, this)
+      this.emit('add', record)
     }
   },
 
@@ -414,6 +415,7 @@ addHiddenPropsToTarget(Collection.prototype, {
     })
     if (record && isFunction(record.off)) {
       record.off('all', this._onModelEvent, this)
+      this.emit('remove', record)
     }
   },
 

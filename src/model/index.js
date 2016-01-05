@@ -608,6 +608,8 @@ utils.fillIn(Model, {
     }
   },
 
+  beforeInject () {},
+
   /**
    * Insert the provided entity or entities into this Model's collection.
    *
@@ -642,6 +644,7 @@ utils.fillIn(Model, {
     // Fill in "opts" with the Model's configuration
     utils._(_this, opts)
     opts.op = op
+    this.beforeInject(entities, opts)
 
     // Track whether just one or an array of entities is being injected
     let singular = false
@@ -791,8 +794,14 @@ utils.fillIn(Model, {
       return props
     })
     // Finally, return the injected data
-    return singular ? (entities.length ? entities[0] : undefined) : entities
+    const result = singular ? (entities.length ? entities[0] : undefined) : entities
+    this.afterInject(result, opts)
+    return result
   },
+
+  afterInject () {},
+
+  beforeEject () {},
 
   /**
    * Remove the entity with the given primary key from this Model's collection.
@@ -811,6 +820,7 @@ utils.fillIn(Model, {
     // Default values for arguments
     opts || (opts = {})
     opts.op = op
+    this.beforeEject(id, opts)
     const instance = this.get(id)
 
     // The instance is in the collection, remove it
@@ -818,8 +828,13 @@ utils.fillIn(Model, {
       instance._unset('$')
       this.collection.remove(instance)
     }
+    this.afterEject(instance, opts)
     return instance
   },
+
+  afterEject () {},
+
+  beforeEjectAll () {},
 
   /**
    * Remove the instances selected by "query" from the Collection instance of
@@ -843,6 +858,7 @@ utils.fillIn(Model, {
     // Default values for arguments
     opts || (opts = {})
     opts.op = op
+    this.beforeEjectAll(query, opts)
     const entities = this.filter(query)
     const collection = this.collection
 
@@ -850,8 +866,11 @@ utils.fillIn(Model, {
     entities.forEach(function (item) {
       collection.remove(item)
     })
+    this.afterEjectAll(entities, query, opts)
     return entities
   },
+
+  afterEjectAll () {},
 
   /**
    * Return the entity in this Model's collection that has the given primary
@@ -2040,12 +2059,10 @@ utils.fillIn(Model, {
       }
     })
 
-    if (Parent && classProps.strictEs6Class) {
-      if (Object.setPrototypeOf) {
-        Object.setPrototypeOf(Child, Parent)
-      } else {
-        Child.__proto__ = Parent // eslint-disable-line
-      }
+    if (Object.setPrototypeOf) {
+      Object.setPrototypeOf(Child, Parent)
+    } else if (classProps.strictEs6Class) {
+      Child.__proto__ = Parent // eslint-disable-line
     } else {
       const keys = Object.getOwnPropertyNames(Parent)
       keys.forEach(function (key) {

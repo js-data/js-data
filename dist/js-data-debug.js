@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.3 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.4 - Homepage <http://www.js-data.io/>
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @copyright (c) 2014-2015 Jason Dobry
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -1859,6 +1859,7 @@
       });
       if (record && isFunction(record.on)) {
         record.on('all', this._onModelEvent, this);
+        this.emit('add', record);
       }
     },
 
@@ -1890,6 +1891,7 @@
       });
       if (record && isFunction(record.off)) {
         record.off('all', this._onModelEvent, this);
+        this.emit('remove', record);
       }
     },
 
@@ -3373,6 +3375,7 @@
         if ((typeof _ret2 === 'undefined' ? 'undefined' : babelHelpers.typeof(_ret2)) === "object") return _ret2.v;
       }
     },
+    beforeInject: function beforeInject() {},
 
     /**
      * Insert the provided entity or entities into this Model's collection.
@@ -3408,6 +3411,7 @@
       // Fill in "opts" with the Model's configuration
       _(_this, opts);
       opts.op = op;
+      this.beforeInject(entities, opts);
 
       // Track whether just one or an array of entities is being injected
       var singular = false;
@@ -3557,8 +3561,12 @@
         return props;
       });
       // Finally, return the injected data
-      return singular ? entities.length ? entities[0] : undefined : entities;
+      var result = singular ? entities.length ? entities[0] : undefined : entities;
+      this.afterInject(result, opts);
+      return result;
     },
+    afterInject: function afterInject() {},
+    beforeEject: function beforeEject() {},
 
     /**
      * Remove the entity with the given primary key from this Model's collection.
@@ -3577,6 +3585,7 @@
       // Default values for arguments
       opts || (opts = {});
       opts.op = op;
+      this.beforeEject(id, opts);
       var instance = this.get(id);
 
       // The instance is in the collection, remove it
@@ -3584,8 +3593,11 @@
         instance._unset('$');
         this.collection.remove(instance);
       }
+      this.afterEject(instance, opts);
       return instance;
     },
+    afterEject: function afterEject() {},
+    beforeEjectAll: function beforeEjectAll() {},
 
     /**
      * Remove the instances selected by "query" from the Collection instance of
@@ -3609,6 +3621,7 @@
       // Default values for arguments
       opts || (opts = {});
       opts.op = op;
+      this.beforeEjectAll(query, opts);
       var entities = this.filter(query);
       var collection = this.collection;
 
@@ -3616,8 +3629,10 @@
       entities.forEach(function (item) {
         collection.remove(item);
       });
+      this.afterEjectAll(entities, query, opts);
       return entities;
     },
+    afterEjectAll: function afterEjectAll() {},
 
     /**
      * Return the entity in this Model's collection that has the given primary
@@ -4817,12 +4832,10 @@
         }
       });
 
-      if (Parent && classProps.strictEs6Class) {
-        if (Object.setPrototypeOf) {
-          Object.setPrototypeOf(Child, Parent);
-        } else {
-          Child.__proto__ = Parent; // eslint-disable-line
-        }
+      if (Object.setPrototypeOf) {
+        Object.setPrototypeOf(Child, Parent);
+      } else if (classProps.strictEs6Class) {
+        Child.__proto__ = Parent; // eslint-disable-line
       } else {
           var keys = Object.getOwnPropertyNames(Parent);
           keys.forEach(function (key) {
@@ -5261,11 +5274,11 @@
   var utils = _utils;
 
   var version = {
-    full: '3.0.0-alpha.3',
+    full: '3.0.0-alpha.4',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10),
-    alpha: '3' !== 'false' ? '3' : false,
+    alpha: '4' !== 'false' ? '4' : false,
     beta: 'false' !== 'false' ? 'false' : false
   };
 
