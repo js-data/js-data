@@ -1,3 +1,8 @@
+##### 3.0.0-alpha.4 - 04 January 2016
+
+- Collections now fire "add" and "remove" events
+- Added before/after(Inject/Eject/EjectAll) lifecycle hooks
+
 ##### 3.0.0-alpha.3 - 29 December 2015
 
 - Implemented more methods from 2.x.
