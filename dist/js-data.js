@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.6 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.7 - Homepage <http://www.js-data.io/>
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @copyright (c) 2014-2015 Jason Dobry
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -5084,7 +5084,7 @@
     return this._events();
   }, function (value) {
     this._events(value);
-  });
+  }, true);
 
   /**
    * Allow instancess to emit events. Any events emitted instances in a Model's
@@ -5381,11 +5381,11 @@
   var utils = _utils;
 
   var version = {
-    full: '3.0.0-alpha.6',
+    full: '3.0.0-alpha.7',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10),
-    alpha: '6' !== 'false' ? '6' : false,
+    alpha: '7' !== 'false' ? '7' : false,
     beta: 'false' !== 'false' ? 'false' : false
   };
 
