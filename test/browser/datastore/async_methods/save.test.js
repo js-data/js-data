@@ -171,6 +171,38 @@ describe('DS#save', function () {
       assert.equal(err.message, 'id "6" not found in cache!');
     });
   });
+  it('should include the properties specified in the always option when saving with changesOnly', function () {
+    var _this = this;
+    Post.inject(p1);
+
+    var initialModified = Post.lastModified(5);
+    var initialSaved = Post.lastSaved(5);
+    var post1 = Post.get(5);
+
+    post1.author = 'Jake';
+
+    setTimeout(function () {
+      assert.equal(1, _this.requests.length);
+      assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5');
+      assert.equal(_this.requests[0].method, 'PUT');
+      assert.equal(_this.requests[0].requestBody, DSUtils.toJson({ author: 'Jake', id: 5 }));
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson({
+        author: 'Jake',
+        age: 30,
+        id: 5
+      }));
+    }, 100);
+
+    return Post.save(5, { changesOnly: true, always: ['id'] }).then(function (post) {
+      assert.deepEqual(JSON.stringify(post), JSON.stringify(post1), 'post 5 should have been saved');
+      assert.equal(post.author, 'Jake');
+      assert.equal(lifecycle.beforeUpdate.callCount, 1, 'beforeUpdate should have been called');
+      assert.equal(lifecycle.afterUpdate.callCount, 1, 'afterUpdate should have been called');
+      assert.deepEqual(JSON.stringify(Post.get(5)), JSON.stringify(post1));
+      assert.notEqual(Post.lastModified(5), initialModified);
+      assert.notEqual(Post.lastSaved(5), initialSaved);
+    });
+  });
   it('should save an item to the server using a different endpoint', function () {
     var _this = this;
     var post = Post.inject(p1);
