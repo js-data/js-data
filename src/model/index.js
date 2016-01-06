@@ -13,14 +13,6 @@ import * as validate from '../validate/index'
 const {
   resolve
 } = utils
-const keysToSkip = {
-  length: 1,
-  name: 1,
-  arguments: 1,
-  prototype: 1,
-  caller: 1,
-  __super__: 1
-}
 
 let isBrowser = false
 
@@ -2270,12 +2262,8 @@ utils.fillIn(Model, {
     } else if (classProps.strictEs6Class) {
       Child.__proto__ = Parent // eslint-disable-line
     } else {
-      const keys = Object.getOwnPropertyNames(Parent)
-      keys.forEach(function (key) {
-        if (keysToSkip[key]) {
-          return
-        }
-        Object.defineProperty(Child, key, Object.getOwnPropertyDescriptor(Parent, key))
+      utils.forOwn(Parent, function (value, key) {
+        Child[key] = value
       })
     }
     Object.defineProperty(Child, '__super__', {
