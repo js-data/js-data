@@ -18,7 +18,7 @@ export function registerAdapter (name, adapter, opts) {
   return function (target) {
     target.dbg(op, 'name:', name, 'adapter:', adapter, 'opts:', opts)
     // Register the adapter
-    target.adapters[name] = adapter
+    target.getAdapters()[name] = adapter
     // Optionally make it the default adapter for the target.
     if (opts === true || opts.default) {
       target.defaultAdapter = name

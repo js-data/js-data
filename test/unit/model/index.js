@@ -191,8 +191,8 @@ export function init () {
       const listener = sinon.stub()
       User.emit('foo')
       User.on('bar', listener)
-      User.collection.emit('bar')
-      assert.isTrue(User._events !== Model._events)
+      User.getCollection().emit('bar')
+      assert.isTrue(User._events() !== Model._events())
       assert.isTrue(listener.calledOnce)
     })
 

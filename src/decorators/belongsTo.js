@@ -98,7 +98,7 @@ function applyBelongsTo (Model, Relation, opts) {
     set (value) {
       this._set(`props.${localKey}`, value)
       if (this._get('$')) {
-        Model.collection.indexes[localKey].updateRecord(this, { index: localKey })
+        Model.getCollection().indexes[localKey].updateRecord(this, { index: localKey })
       }
     }
   })
@@ -115,7 +115,7 @@ function applyBelongsTo (Model, Relation, opts) {
   opts.Relation = Relation
   Model.relationList.push(opts)
   Model.relationFields.push(localField)
-  Model.collection.createIndex(localKey)
+  Model.getCollection().createIndex(localKey)
 
   // Return target Model for chaining
   return Model

@@ -197,7 +197,7 @@ export function reject (value) {
 export function _ (Model, opts) {
   for (var key in Model) {
     let value = Model[key]
-    if (opts[key] === undefined && !isFunction(value)) {
+    if (opts[key] === undefined && !isFunction(value) && key && key.indexOf('_') !== 0) {
       opts[key] = value
     }
   }

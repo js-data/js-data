@@ -74,7 +74,7 @@ export function init () {
 
       assert.equal(user.id, 1, 'id should have a value')
       assert.isDefined(user.age, 30, 'age should have a value')
-      assert.isDefined(User.collection.indexes.age, 'should have an age index')
+      assert.isDefined(User.getCollection().indexes.age, 'should have an age index')
       assert.isDefined(user.title, 'boss', 'title should have a value')
       assert.isDefined(user.level, 1, 'level should have a value')
       assert.equal(user.name, 'foo', 'should allow custom getter')

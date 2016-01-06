@@ -83,7 +83,7 @@ function makeDescriptor (target, key, opts) {
     }
     _set(`props.${key}`, value)
     if (_get('$') && opts.indexed) {
-      target.collection.updateRecord(this, { index: key })
+      target.getCollection().updateRecord(this, { index: key })
     }
     return value
   }
