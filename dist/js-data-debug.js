@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.5 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.6 - Homepage <http://www.js-data.io/>
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @copyright (c) 2014-2015 Jason Dobry
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -423,7 +423,7 @@
    * @param {Function} [setter] - Custom setter for setting the object's event
    * listeners.
    */
-  function eventify(target, getter, setter) {
+  function eventify(target, getter, setter, enumerable) {
     target = target || this;
     var _events = {};
     if (!getter && !setter) {
@@ -436,6 +436,7 @@
     }
     Object.defineProperties(target, {
       on: {
+        enumerable: !!enumerable,
         value: function value(type, func, ctx) {
           if (!getter.call(this)) {
             setter.call(this, {});
@@ -449,6 +450,7 @@
         }
       },
       off: {
+        enumerable: !!enumerable,
         value: function value(type, func) {
           var events = getter.call(this);
           var listeners = events[type];
@@ -467,6 +469,7 @@
         }
       },
       emit: {
+        enumerable: !!enumerable,
         value: function value() {
           var events = getter.call(this) || {};
 
@@ -2768,15 +2771,6 @@
 
   var resolve = resolve$1;
 
-  var keysToSkip = {
-    length: 1,
-    name: 1,
-    arguments: 1,
-    prototype: 1,
-    caller: 1,
-    __super__: 1
-  };
-
   var isBrowser = false;
 
   try {
@@ -5037,12 +5031,8 @@
       } else if (classProps.strictEs6Class) {
         Child.__proto__ = Parent; // eslint-disable-line
       } else {
-          var keys = Object.getOwnPropertyNames(Parent);
-          keys.forEach(function (key) {
-            if (keysToSkip[key]) {
-              return;
-            }
-            Object.defineProperty(Child, key, Object.getOwnPropertyDescriptor(Parent, key));
+          forOwn(Parent, function (value, key) {
+            Child[key] = value;
           });
         }
       Object.defineProperty(Child, '__super__', {
@@ -5396,11 +5386,11 @@
   var utils = _utils;
 
   var version = {
-    full: '3.0.0-alpha.5',
+    full: '3.0.0-alpha.6',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10),
-    alpha: '5' !== 'false' ? '5' : false,
+    alpha: '6' !== 'false' ? '6' : false,
     beta: 'false' !== 'false' ? 'false' : false
   };
 

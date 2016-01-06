@@ -1,3 +1,9 @@
+##### 3.0.0-alpha.6 - 05 January 2016
+
+- More fixes
+- Inheritance should work better in TypeScript
+- Better operational eventing
+
 ##### 3.0.0-alpha.4 - 04 January 2016
 
 - Collections now fire "add" and "remove" events

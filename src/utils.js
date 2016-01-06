@@ -389,7 +389,7 @@ export function camelCase (str) {
  * @param {Function} [setter] - Custom setter for setting the object's event
  * listeners.
  */
-export function eventify (target, getter, setter) {
+export function eventify (target, getter, setter, enumerable) {
   target = target || this
   let _events = {}
   if (!getter && !setter) {
@@ -402,6 +402,7 @@ export function eventify (target, getter, setter) {
   }
   Object.defineProperties(target, {
     on: {
+      enumerable: !!enumerable,
       value (type, func, ctx) {
         if (!getter.call(this)) {
           setter.call(this, {})
@@ -415,6 +416,7 @@ export function eventify (target, getter, setter) {
       }
     },
     off: {
+      enumerable: !!enumerable,
       value (type, func) {
         const events = getter.call(this)
         const listeners = events[type]
@@ -433,6 +435,7 @@ export function eventify (target, getter, setter) {
       }
     },
     emit: {
+      enumerable: !!enumerable,
       value (...args) {
         const events = getter.call(this) || {}
         const type = args.shift()
