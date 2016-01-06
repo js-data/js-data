@@ -2318,7 +2318,8 @@ utils.eventify(
   },
   function (value) {
     this._events(value)
-  }
+  },
+  true
 )
 
 /**
