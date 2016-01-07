@@ -51,6 +51,9 @@ module.exports = function save (resourceName, id, options) {
         for (key in changes.changed) {
           toKeep.push(key)
         }
+        DSUtils.forEach(options.always, property => {
+          toKeep.push(property)
+        })
         changes = DSUtils.pick(attrs, toKeep)
         // no changes? no save
         if (DSUtils.isEmpty(changes)) {
