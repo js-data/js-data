@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.7 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.8 - Homepage <http://www.js-data.io/>
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @copyright (c) 2014-2015 Jason Dobry
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -532,6 +532,58 @@
     Object.defineProperties(target, props);
   }
 
+  function extend(props, classProps) {
+    var Parent = this;
+    var Child = undefined;
+
+    props || (props = {});
+    classProps || (classProps = {});
+
+    if (props.hasOwnProperty('constructor')) {
+      Child = props.constructor;
+      delete props.constructor;
+    } else {
+      Child = function () {
+        classCallCheck(this, Child);
+
+        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+          args[_key2] = arguments[_key2];
+        }
+
+        var _this = possibleConstructorReturn(this, (Child.__super__ || Object.getPrototypeOf(Child)).apply(this, args));
+        return _this;
+      };
+    }
+
+    Child.prototype = Object.create(Parent && Parent.prototype, {
+      constructor: {
+        value: Child,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+
+    if (Object.setPrototypeOf) {
+      Object.setPrototypeOf(Child, Parent);
+    } else if (classProps.strictEs6Class) {
+      Child.__proto__ = Parent; // eslint-disable-line
+    } else {
+        forOwn(Parent, function (value, key) {
+          Child[key] = value;
+        });
+      }
+    Object.defineProperty(Child, '__super__', {
+      configurable: true,
+      value: Parent
+    });
+
+    deepMixIn(Child.prototype, props);
+    deepMixIn(Child, classProps);
+
+    return Child;
+  }
+
   var _utils = Object.freeze({
     isArray: isArray,
     isObject: isObject,
@@ -562,7 +614,8 @@
     uuid: uuid,
     classCallCheck: classCallCheck,
     possibleConstructorReturn: possibleConstructorReturn,
-    addHiddenPropsToTarget: addHiddenPropsToTarget
+    addHiddenPropsToTarget: addHiddenPropsToTarget,
+    extend: extend
   });
 
   /**
@@ -4818,8 +4871,9 @@
 
       var methods = opts.methods || {};
       delete opts.methods;
+      var Parent = self.models[opts.extends];
 
-      var Child = Model.extend(methods, opts);
+      var Child = (Parent || Model).extend(methods, opts);
       self.models[name] = Child;
 
       Child.getModel = function (name) {
@@ -4843,6 +4897,15 @@
     },
     collection: function collection(name) {
       return this.collections[name];
+    },
+    registerAdapter: function registerAdapter() {
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      forOwn(this.models, function (Model) {
+        Model.registerAdapter.apply(Model, args);
+      });
     }
   });
 
@@ -4910,11 +4973,11 @@
   var utils = _utils;
 
   var version = {
-    full: '3.0.0-alpha.7',
+    full: '3.0.0-alpha.8',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10),
-    alpha: '7' !== 'false' ? '7' : false,
+    alpha: '8' !== 'false' ? '8' : false,
     beta: 'false' !== 'false' ? 'false' : false
   };
 

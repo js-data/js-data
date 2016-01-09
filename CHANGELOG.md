@@ -1,3 +1,10 @@
+##### 3.0.0-alpha.8 - 09 January 2016
+
+###### Breaking API changes
+- The Model class is now stateless
+- All stateful functionality has been moved to the Collection class
+- The DS class no longer proxies Model methods.
+
 ##### 3.0.0-alpha.6 - 05 January 2016
 
 - More fixes

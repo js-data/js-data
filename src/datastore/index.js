@@ -2,6 +2,7 @@ import {
   addHiddenPropsToTarget,
   classCallCheck,
   fillIn,
+  forOwn,
   isObject,
   isString
 } from '../utils'
@@ -35,8 +36,9 @@ addHiddenPropsToTarget(DS.prototype, {
 
     const methods = opts.methods || {}
     delete opts.methods
+    const Parent = self.models[opts.extends]
 
-    const Child = Model.extend(methods, opts)
+    const Child = (Parent || Model).extend(methods, opts)
     self.models[name] = Child
 
     Child.getModel = function (name) {
@@ -63,6 +65,12 @@ addHiddenPropsToTarget(DS.prototype, {
 
   collection (name) {
     return this.collections[name]
+  },
+
+  registerAdapter (...args) {
+    forOwn(this.models, function (Model) {
+      Model.registerAdapter(...args)
+    })
   }
 })
 

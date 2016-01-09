@@ -497,3 +497,50 @@ export function addHiddenPropsToTarget (target, props) {
   })
   Object.defineProperties(target, props)
 }
+
+export function extend (props, classProps) {
+  const Parent = this
+  let Child
+
+  props || (props = {})
+  classProps || (classProps = {})
+
+  if (props.hasOwnProperty('constructor')) {
+    Child = props.constructor
+    delete props.constructor
+  } else {
+    Child = function (...args) {
+      classCallCheck(this, Child)
+      const _this = possibleConstructorReturn(this, (Child.__super__ || Object.getPrototypeOf(Child)).apply(this, args))
+      return _this
+    }
+  }
+
+  Child.prototype = Object.create(Parent && Parent.prototype, {
+    constructor: {
+      value: Child,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  })
+
+  if (Object.setPrototypeOf) {
+    Object.setPrototypeOf(Child, Parent)
+  } else if (classProps.strictEs6Class) {
+    Child.__proto__ = Parent // eslint-disable-line
+  } else {
+    forOwn(Parent, function (value, key) {
+      Child[key] = value
+    })
+  }
+  Object.defineProperty(Child, '__super__', {
+    configurable: true,
+    value: Parent
+  })
+
+  deepMixIn(Child.prototype, props)
+  deepMixIn(Child, classProps)
+
+  return Child
+}
