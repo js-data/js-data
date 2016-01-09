@@ -28,13 +28,13 @@ function applyHasOne (Model, Relation, opts) {
     enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
     // Set default method for retrieving the linked relation
     get () {
-      if (!this._get('$')) {
-        return this._get(`links.${localField}`)
-      }
-      const items = Relation.getAll(get(this, Model.idAttribute), { index: foreignKey })
-      const item = items && items.length ? items[0] : undefined
-      this._set(`links.${localField}`, item)
-      return item
+      // if (!this._get('$')) {
+      return this._get(`links.${localField}`)
+      // }
+      // const items = Relation.getAll(get(this, Model.idAttribute), { index: foreignKey })
+      // const item = items && items.length ? items[0] : undefined
+      // this._set(`links.${localField}`, item)
+      // return item
     },
     // Set default method for setting the linked relation
     set (child) {
@@ -94,7 +94,7 @@ function applyHasOne (Model, Relation, opts) {
   opts.Relation = Relation
   Model.relationList.push(opts)
   Model.relationFields.push(localField)
-  Model.getCollection().createIndex(foreignKey)
+  // Model.getCollection().createIndex(foreignKey)
 
   // Return target Model for chaining
   return Model

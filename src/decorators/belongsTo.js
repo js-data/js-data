@@ -4,7 +4,7 @@ const op = 'belongsTo'
 
 /**
  * Steps to apply a "belongsTo" relationship
- * 1. Choose the localField and localKey
+ * 1. Choose the localField and foreignKey
  * 2. Configure property descriptor, possibly including custom getter/setter
  * 3. Add property to prototype of target Model
  *
@@ -20,7 +20,7 @@ function applyBelongsTo (Model, Relation, opts) {
   // Choose field where the relation will be attached
   const localField = opts.localField = opts.localField || Relation.name.toLowerCase()
   // Choose field that holds the primary key of the relation
-  const localKey = opts.localKey = opts.localKey || `${Relation.name.toLowerCase()}_id`
+  const foreignKey = opts.foreignKey = opts.localKey || opts.foreignKey || `${Relation.name.toLowerCase()}_id`
 
   // Setup configuration of the property
   const descriptor = {
@@ -28,18 +28,18 @@ function applyBelongsTo (Model, Relation, opts) {
     enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
     // Set default method for retrieving the linked relation
     get () {
-      if (!this._get('$')) {
-        return this._get(`links.${localField}`)
-      }
-      const key = get(this, localKey)
-      const item = key !== undefined ? Relation.get(key) : undefined
-      this._set(`links.${localField}`, item)
-      return item
+      // if (!this._get('$')) {
+      return this._get(`links.${localField}`)
+      // }
+      // const key = get(this, foreignKey)
+      // const item = key !== undefined ? Relation.get(key) : undefined
+      // this._set(`links.${localField}`, item)
+      // return item
     },
     // Set default method for setting the linked relation
     set (parent) {
       this._set(`links.${localField}`, parent)
-      set(this, localKey, parent[Relation.idAttribute])
+      set(this, foreignKey, parent[Relation.idAttribute])
       return get(this, localField)
     }
   }
@@ -89,19 +89,19 @@ function applyBelongsTo (Model, Relation, opts) {
 
   // Finally, added property to prototype of target Model
   Object.defineProperty(Model.prototype, localField, descriptor)
-  Object.defineProperty(Model.prototype, localKey, {
-    configurable: true,
-    enumerable: true,
-    get () {
-      return this._get(`props.${localKey}`)
-    },
-    set (value) {
-      this._set(`props.${localKey}`, value)
-      if (this._get('$')) {
-        Model.getCollection().indexes[localKey].updateRecord(this, { index: localKey })
-      }
-    }
-  })
+  // Object.defineProperty(Model.prototype, foreignKey, {
+  //   configurable: true,
+  //   enumerable: true,
+  //   get () {
+  //     return this._get(`props.${foreignKey}`)
+  //   },
+  //   set (value) {
+  //     this._set(`props.${foreignKey}`, value)
+  //     // if (this._get('$')) {
+  //     //   Model.getCollection().indexes[foreignKey].updateRecord(this, { index: foreignKey })
+  //     // }
+  //   }
+  // })
 
   if (!Model.relationList) {
     Model.relationList = []
@@ -115,7 +115,7 @@ function applyBelongsTo (Model, Relation, opts) {
   opts.Relation = Relation
   Model.relationList.push(opts)
   Model.relationFields.push(localField)
-  Model.getCollection().createIndex(localKey)
+  // Model.getCollection().createIndex(localKey)
 
   // Return target Model for chaining
   return Model

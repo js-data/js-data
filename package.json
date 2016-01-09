@@ -62,7 +62,7 @@
     "ci": "npm test && cat coverage/lcov.info | coveralls || true && cat ./coverage/lcov.info | codacy-coverage || true"
   },
   "devDependencies": {
-    "babel-core": "6.3.26",
+    "babel-core": "6.4.0",
     "babel-eslint": "4.1.6",
     "babel-plugin-syntax-async-functions": "6.3.13",
     "babel-plugin-transform-regenerator": "6.3.26",

@@ -82,16 +82,16 @@ function makeDescriptor (target, key, opts) {
       }
     }
     _set(`props.${key}`, value)
-    if (_get('$') && opts.indexed) {
-      target.getCollection().updateRecord(this, { index: key })
-    }
+    // if (_get('$') && opts.indexed) {
+    //   target.getCollection().updateIndex(this, { index: key })
+    // }
     return value
   }
-  if (opts.indexed) {
-    // Update index
-    // TODO: Make this configurable, ie. immediate or lazy update
-    target.createIndex(key)
-  }
+  // if (opts.indexed) {
+  //   // Update index
+  //   // TODO: Make this configurable, ie. immediate or lazy update
+  //   target.createIndex(key)
+  // }
   if (opts.get) {
     if (descriptor.get) {
       const originalGet = descriptor.get

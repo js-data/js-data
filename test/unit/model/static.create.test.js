@@ -23,33 +23,6 @@ export function init () {
       let createCalled = false
       class User extends Model {}
       User.configure({
-        defaultAdapter: 'mock',
-        autoInject: false
-      })
-      User.registerAdapter('mock', {
-        create (modelConfig, _props, Opts) {
-          createCalled = true
-          return new Promise(function (resolve, reject) {
-            assert.isTrue(modelConfig === User, 'should pass in the Model')
-            assert.deepEqual(_props, props, 'should pass in the props')
-            assert.equal(Opts.autoInject, false, 'Opts are provided')
-            _props[modelConfig.idAttribute] = new Date().getTime()
-            resolve(_props)
-          })
-        }
-      })
-      const user = await User.create(props)
-      assert.isTrue(createCalled, 'Adapter#create should have been called')
-      assert.isDefined(user[User.idAttribute], 'new user has an id')
-      assert.isFalse(user instanceof User, 'user is not a User')
-      assert.isUndefined(User.get(user.id), 'user was not injected')
-    })
-    it('should create and auto-inject', async function () {
-      const props = { name: 'John' }
-      let createCalled = false
-      class User extends Model {}
-      User.configure({
-        autoInject: true,
         defaultAdapter: 'mock'
       })
       User.registerAdapter('mock', {
@@ -58,17 +31,16 @@ export function init () {
           return new Promise(function (resolve, reject) {
             assert.isTrue(modelConfig === User, 'should pass in the Model')
             assert.deepEqual(_props, props, 'should pass in the props')
-            assert.equal(Opts.autoInject, true, 'Opts are provided')
+            assert.equal(Opts.pojo, false, 'Opts are provided')
             _props[modelConfig.idAttribute] = new Date().getTime()
             resolve(_props)
           })
         }
       })
-      let user = await User.create(props)
+      const user = await User.create(props)
       assert.isTrue(createCalled, 'Adapter#create should have been called')
       assert.isDefined(user[User.idAttribute], 'new user has an id')
       assert.isTrue(user instanceof User, 'user is a User')
-      assert.isTrue(User.get(user.id) === user, 'user not injected')
     })
     it('should upsert', async function () {
       const props = { name: 'John', id: 1 }
@@ -89,7 +61,6 @@ export function init () {
       let createCalled = false
       class User extends Model {}
       User.configure({
-        autoInject: true,
         raw: true,
         defaultAdapter: 'mock'
       })
@@ -112,7 +83,6 @@ export function init () {
       assert.isTrue(createCalled, 'Adapter#create should have been called')
       assert.isDefined(data.data[User.idAttribute], 'new user has an id')
       assert.isTrue(data.data instanceof User, 'user is a User')
-      assert.isTrue(User.get(data.data.id) === data.data, 'user was not injected')
       assert.equal(data.adapter, 'mock', 'should have adapter name in response')
       assert.equal(data.created, 1, 'should have other metadata in response')
     })

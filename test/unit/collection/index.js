@@ -1,6 +1,9 @@
 /* global Collection:true, TYPES_EXCEPT_NUMBER:true, TYPES_EXCEPT_ARRAY:true, Model:true, sinon:true */
 import {assert} from 'chai'
+import * as add from './add.test'
 import * as query from './query.test'
+import * as remove from './remove.test'
+import * as removeAll from './removeAll.test'
 
 export function init () {
   describe('Collection', function () {
@@ -8,22 +11,7 @@ export function init () {
       assert.isFunction(Collection, 'should be a function')
       let collection = new Collection()
       assert.isTrue(collection instanceof Collection, 'collection should be an instance')
-      collection = new Collection([], 'id')
-      assert.equal(collection.idAttribute, 'id', 'collection should get initialization properties')
-
-      TYPES_EXCEPT_ARRAY.forEach(function (type) {
-        if (type === undefined) {
-          return
-        }
-        assert.throws(
-          function () {
-            new Collection(type)
-          },
-          TypeError,
-          `new Collection([data]): data: Expected array. Found ${typeof type}`,
-          'should throw on unacceptable type'
-        )
-      })
+      assert.equal(collection.modelId(), 'id', 'collection should get initialization properties')
     })
 
     it('should accept initialization data', function () {
@@ -32,7 +20,7 @@ export function init () {
         { id: 3 },
         { id: 1 }
       ]
-      const collection = new Collection(data, 'id')
+      const collection = new Collection(data)
       assert.deepEqual(collection.getAll(), [data[2], data[0], data[1]], 'data should be in order')
     })
 
@@ -45,7 +33,7 @@ export function init () {
       let count = 0
       let prev
       let isInOrder = true
-      const collection = new Collection(data, 'id')
+      const collection = new Collection(data)
       collection.forEach(function (value) {
         if (prev) {
           isInOrder = isInOrder && value.id > prev.id
@@ -69,7 +57,7 @@ export function init () {
         { id: 3 },
         { id: 1 }
       ]
-      const collection = new Collection(data, 'id')
+      const collection = new Collection(data)
       TYPES_EXCEPT_NUMBER.forEach(function (type) {
         assert.throws(
           function () {
@@ -97,7 +85,7 @@ export function init () {
         { id: 3 },
         { id: 1 }
       ]
-      const collection = new Collection(data, 'id')
+      const collection = new Collection(data)
       TYPES_EXCEPT_NUMBER.forEach(function (type) {
         assert.throws(
           function () {
@@ -136,7 +124,7 @@ export function init () {
         { id: 4 },
         { id: 1 }
       ]
-      const collection = new Collection(data, 'id')
+      const collection = new Collection(data)
       assert.deepEqual(collection.query().skip(1).limit(1).run(), [
         { id: 2 }
       ], 'should have skipped 1 and limited to 1')
@@ -165,7 +153,7 @@ export function init () {
         { id: 4, age: 22, role: 'owner' },
         { id: 1, age: 23, role: 'owner' }
       ]
-      const collection = new Collection(data, 'id')
+      const collection = new Collection(data)
       collection.createIndex('ageRole', ['age', 'role'])
       assert.deepEqual(
         collection.getAll(19, { index: 'ageRole' }),
@@ -210,7 +198,7 @@ export function init () {
         { id: 3 },
         { id: 1 }
       ]
-      const collection = new Collection(data, 'id')
+      const collection = new Collection(data)
       let sum = 0
       const expectedSum = data.reduce(function (prev, curr) {
         return prev + curr.id
@@ -229,7 +217,7 @@ export function init () {
         { id: 3 },
         { id: 1 }
       ]
-      const collection = new Collection(data, 'id')
+      const collection = new Collection(data)
       const expectedSum = data.reduce(function (prev, curr) {
         return prev + curr.id
       }, 0)
@@ -245,7 +233,7 @@ export function init () {
         { id: 3 },
         { id: 1 }
       ]
-      const collection = new Collection(data, 'id')
+      const collection = new Collection(data)
       const ctx = {}
       const mapping = collection.map(function (item) {
         assert.isTrue(this === ctx, 'should have correct context')
@@ -262,11 +250,11 @@ export function init () {
         { id: 2, age: 19 },
         { id: 1, age: 27 }
       ]
-      const collection = new Collection(data, 'id')
+      const collection = new Collection(data)
       collection.createIndex('age')
-      collection.insert({ id: 3, age: 20 })
-      assert.equal(collection.get(1).length, 1)
-      assert.equal(collection.get(20, { index: 'age' }).length, 1)
+      collection.add({ id: 3, age: 20 })
+      assert.isTrue(collection.get(1) === data[1])
+      assert.equal(collection.getAll(20, { index: 'age' }).length, 1)
     })
 
     it('should update a record in all indexes', function () {
@@ -274,13 +262,13 @@ export function init () {
         { id: 2, age: 19 },
         { id: 1, age: 27 }
       ]
-      const collection = new Collection(data, 'id')
+      const collection = new Collection(data)
       collection.createIndex('age')
-      assert.equal(collection.get(27, { index: 'age' }).length, 1, 'should have one item with age 27')
+      assert.equal(collection.getAll(27, { index: 'age' }).length, 1, 'should have one item with age 27')
       data[1].age = 26
-      collection.update(data[1])
-      assert.equal(collection.get(26, { index: 'age' }).length, 1, 'should have one item with age 26')
-      assert.equal(collection.get(27, { index: 'age' }).length, 0, 'should have no items with age 27')
+      collection.updateIndexes(data[1])
+      assert.equal(collection.getAll(26, { index: 'age' }).length, 1, 'should have one item with age 26')
+      assert.equal(collection.getAll(27, { index: 'age' }).length, 0, 'should have no items with age 27')
     })
 
     it('should update record in a single index', function () {
@@ -288,19 +276,19 @@ export function init () {
         { id: 2, age: 19 },
         { id: 1, age: 27 }
       ]
-      const collection = new Collection(data, 'id')
+      const collection = new Collection(data)
       collection.createIndex('age')
-      assert.equal(collection.get(3).length, 0, 'should have no items with id 3')
-      assert.equal(collection.get(27, { index: 'age' }).length, 1, 'should have one item with age 27')
+      assert.equal(collection.getAll(3).length, 0, 'should have no items with id 3')
+      assert.equal(collection.getAll(27, { index: 'age' }).length, 1, 'should have one item with age 27')
       data[1].age = 26
       data[1].id = 3
-      collection.updateRecord(data[1], { index: 'age' })
-      assert.equal(collection.get(3).length, 0, 'should have no items with id 3')
-      assert.equal(collection.get(26, { index: 'age' }).length, 1, 'should have one item with age 26')
-      assert.equal(collection.get(27, { index: 'age' }).length, 0, 'should have no items with age 27')
-      collection.updateRecord(data[1])
-      assert.equal(collection.get(1).length, 0, 'should have no items with id 1')
-      assert.equal(collection.get(3).length, 1, 'should have one item with id 3')
+      collection.updateIndex(data[1], { index: 'age' })
+      assert.equal(collection.getAll(3).length, 0, 'should have no items with id 3')
+      assert.equal(collection.getAll(26, { index: 'age' }).length, 1, 'should have one item with age 26')
+      assert.equal(collection.getAll(27, { index: 'age' }).length, 0, 'should have no items with age 27')
+      collection.updateIndex(data[1])
+      assert.equal(collection.getAll(1).length, 0, 'should have no items with id 1')
+      assert.equal(collection.getAll(3).length, 1, 'should have one item with id 3')
     })
 
     it('should bubble up model events', function (done) {
@@ -309,7 +297,7 @@ export function init () {
         new User({ id: 2, age: 19 }),
         new User({ id: 1, age: 27 })
       ]
-      const collection = new Collection(data, 'id')
+      const collection = new Collection(data)
       const listener = sinon.stub()
       const listener2 = sinon.stub()
       collection.on('foo', listener)
@@ -324,6 +312,9 @@ export function init () {
       }, 10)
     })
 
+    add.init()
     query.init()
+    remove.init()
+    removeAll.init()
   })
 }

@@ -14,9 +14,10 @@
 }(this, function (exports) { 'use strict';
 
   var babelHelpers = {};
-
-  babelHelpers.typeof = function (obj) {
-    return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj;
+  babelHelpers.typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+    return typeof obj;
+  } : function (obj) {
+    return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
   };
 
   babelHelpers.defineProperty = function (obj, key, value) {
@@ -605,6 +606,8 @@
     if (cB && isString(cB)) {
       cB = cB.toUpperCase();
     }
+    a || (a = null);
+    b || (b = null);
     if (def[1] === 'DESC') {
       if (cB < cA) {
         return -1;
@@ -1484,46 +1487,97 @@
   });
 
   /**
+   * Holds a set of Model instances. Use a Collection to store and manage
+   * instances of Model.
+   *
    * @class Collection
-   * @param {Array} [data=[]] - Initial set of entities to insert into the
+   * @param {Model[]} [models=[]] - Initial set of models to insert into the
    * collection.
-   * @param {string} [idAttribute='id'] - Field to use as the unique identifier
-   * of each entity in the collection.
+   * @param {Object} opts - Configuration options.
+   * @param {Model} opts.model - Reference to the Model type that will be stored
+   * by this Collection.
    */
-  function Collection() {
-    var _this = this;
+  function Collection(models, opts) {
+    var self = this;
 
-    var data = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
-    var idAttribute = arguments.length <= 1 || arguments[1] === undefined ? 'id' : arguments[1];
+    classCallCheck(self, Collection);
 
-    classCallCheck(this, Collection);
-    if (!isArray(data)) {
-      throw new TypeError('new Collection([data]): data: Expected array. Found ' + (typeof data === 'undefined' ? 'undefined' : babelHelpers.typeof(data)));
+    if (isObject(models) && !isArray(models)) {
+      opts = models;
+      models = [];
     }
-    /**
-     * Field to use as the unique identifier for each entity in this collection.
-     * @type {string}
-     */
-    this.idAttribute = idAttribute;
+
+    // Default values for arguments
+    models || (models = []);
+    opts || (opts = {});
 
     /**
-     * The main index, which uses @{link Collection#idAttribute} as the key.
+     * Reference to this Collection's Model.
+     * @type {Model}
+     */
+    self.model = opts.model;
+    self.idAttribute = opts.idAttribute;
+
+    /**
+     * Event listeners attached to this Collection.
+     * @type {Model}
+     * @private
+     */
+    self._listeners = {};
+
+    /**
+     * What to do when inserting a model into this Collection that shares a
+     * primary key with a model already in this Collection.
+     *
+     * Possible values:
+     * - merge
+     * - replace
+     *
+     * Merge:
+     *
+     * Recursively shallow copy properties from the new model onto the existing
+     * model.
+     *
+     * Replace:
+     *
+     * Shallow copy top-level properties from the new model onto the existing model.
+     * Any top-level own properties of the existing model that are _not_ on the new
+     * model will be removed.
+     *
+     * @memberof Collection
+     * @type {string}
+     * @default merge
+     */
+    this.onConflict = opts.onConflict || 'merge';
+
+    var idAttribute = self.modelId();
+
+    /**
+     * The main index, which uses @{link Collection#modelId} as the key.
      * @type {Index}
      */
-    this.index = new Index([idAttribute], {
+    self.index = new Index([idAttribute], {
       hashCode: function hashCode(obj) {
         return get(obj, idAttribute);
       }
     });
+
     /**
-     * Object that holds the other secondary indexes of this collection.
+     * Object that holds the secondary indexes of this collection.
      * @type {Object.<string, Index>}
      */
-    this.indexes = {};
-    data.forEach(function (record) {
-      _this.index.insertRecord(record);
-      if (record && isFunction(record.on)) {
-        record.on('all', _this._onModelEvent, _this);
+    self.indexes = {};
+    self.added = {};
+    self.autoPks = {};
+    self.createIndex('addedTimestamps', ['$'], {
+      fieldGetter: function fieldGetter(obj) {
+        return self.added[get(obj, idAttribute)];
+      }
+    });
+    models.forEach(function (model) {
+      self.index.insertRecord(model);
+      if (model && isFunction(model.on)) {
+        model.on('all', self._onModelEvent, self);
       }
     });
   }
@@ -1531,6 +1585,13 @@
   addHiddenPropsToTarget(Collection.prototype, {
     _onModelEvent: function _onModelEvent() {
       this.emit.apply(this, arguments);
+    },
+    modelId: function modelId(model) {
+      var self = this;
+      if (!model) {
+        return self.model ? self.model.idAttribute : self.idAttribute || 'id';
+      }
+      return get(model, self.modelId());
     },
 
     /**
@@ -1556,17 +1617,32 @@
      * @return {Collection} A reference to itself for chaining.
      */
     createIndex: function createIndex(name, fieldList, opts) {
+      var self = this;
       if (isString(name) && fieldList === undefined) {
         fieldList = [name];
       }
       opts || (opts = {});
-      var idAttribute = this.idAttribute;
       opts.hashCode = opts.hashCode || function (obj) {
-        return get(obj, idAttribute);
+        return self.modelId(obj);
       };
-      var index = this.indexes[name] = new Index(fieldList, opts);
-      this.index.visitAll(index.insertRecord, index);
-      return this;
+      var index = self.indexes[name] = new Index(fieldList, opts);
+      self.index.visitAll(index.insertRecord, index);
+      return self;
+    },
+
+    /**
+     * Return the entities in this Collection that have a primary key that
+     * was automatically generated when they were inserted.
+     *
+     * @memberof Collection
+     * @instance
+     * @return {Model[]} The models that have autoPks.
+     */
+    getAutoPkItems: function getAutoPkItems() {
+      var self = this;
+      return self.getAll().filter(function (model) {
+        return self.autoPks[self.modelId(model)];
+      });
     },
 
     /**
@@ -1626,51 +1702,22 @@
     },
 
     /**
-     * Find the entity or entities that match the provided key.
-     *
-     * Shortcut for `collection.query().get(keyList).run()`
-     *
-     * #### Example
-     *
-     * Get the entity whose primary key is 25
-     * ```js
-     * const entities = collection.get(25)
-     * ```
-     * Same as above
-     * ```js
-     * const entities = collection.get([25])
-     * ```
-     * Get all users who are active and have the "admin" role
-     * ```js
-     * const activeAdmins = collection.get(['active', 'admin'], {
-     *   index: 'activityAndRoles'
-     * })
-     * ```
-     * Get all entities that match a certain weather condition
-     * ```js
-     * const niceDays = collection.get(['sunny', 'humid', 'calm'], {
-     *   index: 'weatherConditions'
-     * })
-     * ```
+     * Get the model with the given id.
      *
      * @memberof Collection
      * @instance
-     * @param {Array} keyList - Key(s) defining the entity to retrieve. If
-     * `keyList` is not an array (i.e. for a single-value key), it will be
-     * wrapped in an array.
-     * @param {Object} [opts] - Configuration options.
-     * @param {string} [opts.string] - Name of the secondary index to use in the
-     * query. If no index is specified, the main index is used.
-     * @return {Array} The result.
+     * @param {(string|number)} id - The primary key of the model to get.
+     * @return {Model} The model with the given id.
      */
-    get: function get(keyList, opts) {
-      return this.query().get(keyList, opts).run();
+    get: function get(id) {
+      var instances = this.query().get(id).run();
+      return instances.length ? instances[0] : undefined;
     },
 
     /**
      * Find the entity or entities that match the provided keyLists.
      *
-     * Shortcut for `collection.query().getAll(keyList1, keyList2).run()`
+     * Shortcut for `collection.query().getAll(keyList1, keyList2, ...).run()`
      *
      * #### Example
      *
@@ -1846,57 +1893,266 @@
       });
       return data;
     },
+    beforeAdd: function beforeAdd() {},
 
     /**
-     * Instead a record into this collection, updating all indexes with the new
-     * record.
-     * one index.
+     * Insert the provided model or models.
+     *
+     * If a model is already in the collection then the provided model will
+     * either merge with or replace the existing model based on the value of the
+     * `onConflict` option.
+     *
+     * The collection's secondary indexes will be updated as each entity is
+     * visited.
+     *
      * @memberof Collection
      * @instance
-     * @param {Object} record - The record to insert.
+     * @param {(Object|Object[]|Model|Model[])} data - The model or models to insert.
+     * @param {Object} [opts] - Configuration options.
+     * @param {boolean} [opts.autoPk={@link Collection.autoPk}] - Whether to
+     * generate primary keys for the models to be inserted. Useful for inserting
+     * temporary, unsaved data into the collection.
+     * @param {string} [opts.onConflict] - What to do when a model is already in
+     * the collection. Possible values are `merge` or `replace`.
+     * @return {(Model|Model[])} The inserted model or models.
      */
-    insert: function insert(record) {
-      this.index.insertRecord(record);
-      forOwn(this.indexes, function (index, name) {
-        index.insertRecord(record);
-      });
-      if (record && isFunction(record.on)) {
-        record.on('all', this._onModelEvent, this);
-        this.emit('add', record);
+    add: function add(models, opts) {
+      var self = this;
+
+      // Default values for arguments
+      opts || (opts = {});
+
+      // Fill in "opts" with the Collection's configuration
+      _(self, opts);
+      models = self.beforeAdd(models, opts) || models;
+
+      // Track whether just one or an array of models is being inserted
+      var singular = false;
+      var idAttribute = self.modelId();
+      // TODO: fix
+      // const relationList = self.model ? self.model.relationList || [] : []
+      var relationList = [];
+      var timestamp = new Date().getTime();
+      if (!isArray(models)) {
+        models = [models];
+        singular = true;
       }
+
+      // Map the provided models to existing models.
+      // New models will be inserted. If any props map to existing models,
+      // they will be merged into the existing models according to the onConflict
+      // option.
+      models = models.map(function (props) {
+        var id = self.modelId(props);
+        // Track whether we had to generate an id for this model
+        // Validate that the primary key attached to the model is a string or
+        // number
+        var autoPk = false;
+        if (!isSorN(id)) {
+          // No id found, generate one
+          if (opts.autoPk) {
+            id = uuid();
+            _set(props, idAttribute, id);
+            autoPk = true;
+          } else {
+            // Not going to generate one, throw an error
+            throw new TypeError(idAttribute + ': Expected string or number, found ' + (typeof id === 'undefined' ? 'undefined' : babelHelpers.typeof(id)) + '!');
+          }
+        }
+        // Grab existing model if there is one
+        var existing = self.get(id);
+        // If the currently visited props are just reference to the existing
+        // model, then there is nothing to be done. Exit early.
+        if (props === existing) {
+          return existing;
+        }
+
+        // Check the currently visited props for relations that need to be
+        // inserted as well
+        relationList.forEach(function (def) {
+          // A reference to the Model that this Model is related to
+          var Relation = def.Relation;
+          // The field used by the related Model as the primary key
+          var relationIdAttribute = Relation.idAttribute;
+          // Grab the foreign key in this relationship, if there is one
+          var foreignKey = def.foreignKey;
+
+          // Grab a reference to the related data attached or linked to the
+          // currently visited props
+          var toInsert = get(props, def.localField);
+
+          // If the user provided a custom insertion function for this relation,
+          // call it
+          if (isFunction(def.insert)) {
+            def.insert(self, def, props);
+          } else if (toInsert && def.insert !== false) {
+            // Otherwise, if there is something to be inserted, insert it
+            if (isArray(toInsert)) {
+              // Handle inserting hasMany relations
+              toInsert = toInsert.map(function (toInsertItem) {
+                // Check that this item isn't the same item that is already in the
+                // store
+                if (toInsertItem !== Relation.get(get(toInsertItem, relationIdAttribute))) {
+                  try {
+                    // Make sure this item has its foreignKey
+                    if (foreignKey) {
+                      _set(toInsertItem, foreignKey, id);
+                    }
+                    // Finally insert this related item
+                    toInsertItem = Relation.add(toInsertItem);
+                  } catch (err) {
+                    throw new Error('Failed to insert ' + def.type + ' relation: "' + def.relation + '"! ' + err.message);
+                  }
+                }
+                return toInsertItem;
+              });
+              // If it's the parent that has the localKeys
+              if (def.localKeys) {
+                _set(props, def.localKeys, toInsert.map(function (inserted) {
+                  return get(inserted, relationIdAttribute);
+                }));
+              }
+            } else {
+              // Handle inserting belongsTo and hasOne relations
+              if (toInsert !== Relation.get(get(toInsert, relationIdAttribute))) {
+                try {
+                  // Make sure the parent has its foreignKey
+                  if (def.foreignKey) {
+                    _set(props, def.foreignKey, get(toInsert, Relation.idAttribute));
+                  }
+                  // Make sure this item has its foreignKey
+                  if (foreignKey) {
+                    _set(toInsert, def.foreignKey, id);
+                  }
+                  // Finally insert this related item
+                  toInsert = Relation.add(toInsert);
+                } catch (err) {
+                  throw new Error('Failed to insert ' + def.type + ' relation: "' + def.relation + '"!');
+                }
+              }
+            }
+          }
+          if (def.link || def.link === undefined && self.linkRelations) {
+            // Remove relation properties from the item, since those relations
+            // have been inserted by now
+            unset(props, def.localField);
+          } else {
+            // Here, linking is turned off, so we setup a manual link
+            _set(props, def.localField, toInsert);
+          }
+        });
+
+        if (existing) {
+          // Here, the currently visited props corresponds to an entity already
+          // in the collection, so we need to merge them
+          var onConflict = opts.onConflict || self.onConflict;
+          if (onConflict === 'merge') {
+            deepMixIn(existing, props);
+          } else if (onConflict === 'replace') {
+            forOwn(existing, function (value, key) {
+              if (key !== idAttribute && !props.hasOwnProperty(key)) {
+                delete existing[key];
+              }
+            });
+            existing.set(props);
+          }
+          props = existing;
+          // Update all indexes in the collection
+          self.updateIndexes(props);
+        } else {
+          // Here, the currently visted props does not correspond to any model
+          // in the collection, so make this props is an instance of this Model
+          // and insert it into the collection
+          props = self.model ? self.model.createInstance(props) : props;
+          self.index.insertRecord(props);
+          forOwn(self.indexes, function (index, name) {
+            index.insertRecord(props);
+          });
+          if (props && isFunction(props.on)) {
+            props.on('all', self._onModelEvent, self);
+            self.emit('add', props);
+          }
+        }
+        // Track when this model was added
+        self.added[id] = timestamp;
+        if (autoPk) {
+          self.autoPks[id] = props;
+        }
+        return props;
+      });
+      // Finally, return the inserted data
+      var result = singular ? models.length ? models[0] : undefined : models;
+      self.afterAdd(result, opts);
+      return result;
     },
+    afterAdd: function afterAdd() {},
+    beforeRemove: function beforeRemove() {},
 
     /**
-     * Update the given record's position in all indexes of this collection. See
-     * {@link Collection#updateRecord} to update a record's in only one of the
-     * indexes.
+     * Remove the model with the given id from this Collection.
+     *
      * @memberof Collection
-     * @instance
-     * @param {Object} record - The record to update.
+     * @method
+     * @param {(string|number)} id - The primary key of the entity to be removed.
+     * @param {Object} [opts] - Configuration options.
+     * @return {Model} The removed entity, if any.
      */
-    update: function update(record) {
-      this.index.updateRecord(record);
-      forOwn(this.indexes, function (index, name) {
-        index.updateRecord(record);
-      });
-    },
+    remove: function remove(id, opts) {
+      var self = this;
 
-    /**
-     * Remove the given record from all indexes in this collection.
-     * @memberof Collection
-     * @instance
-     * @param {Object} record - The record to be removed.
-     */
-    remove: function remove(record) {
-      this.index.removeRecord(record);
-      forOwn(this.indexes, function (index, name) {
-        index.removeRecord(record);
-      });
-      if (record && isFunction(record.off)) {
-        record.off('all', this._onModelEvent, this);
-        this.emit('remove', record);
+      // Default values for arguments
+      opts || (opts = {});
+      self.beforeRemove(id, opts);
+      var model = self.get(id);
+
+      // The model is in the collection, remove it
+      if (model) {
+        delete self.added[id];
+        delete self.autoPks[id];
+        self.index.removeRecord(model);
+        forOwn(self.indexes, function (index, name) {
+          index.removeRecord(model);
+        });
+        if (model && isFunction(model.off)) {
+          model.off('all', self._onModelEvent, self);
+          self.emit('remove', model);
+        }
       }
+      self.afterRemove(model, opts);
+      return model;
     },
+    afterRemove: function afterRemove() {},
+    beforeRemoveAll: function beforeRemoveAll() {},
+
+    /**
+     * Remove the instances selected by "query" from the Collection instance of
+     * this Model.
+     *
+     * @memberof Model
+     * @method
+     * @param {Object} [query={}] - Selection query.
+     * @param {Object} [query.where] - Filtering criteria.
+     * @param {number} [query.skip] - Number to skip.
+     * @param {number} [query.limit] - Number to limit to.
+     * @param {Array} [query.orderBy] - Sorting criteria.
+     * @param {Object} [opts] - Configuration options.
+     * @return {Model[]} The removed entites, if any.
+     */
+    removeAll: function removeAll(query, opts) {
+      var self = this;
+      // Default values for arguments
+      opts || (opts = {});
+      self.beforeRemoveAll(query, opts);
+      var models = self.filter(query);
+
+      // Remove each selected entity from the collection
+      models.forEach(function (item) {
+        self.remove(self.modelId(item));
+      });
+      self.afterRemoveAll(models, query, opts);
+      return models;
+    },
+    afterRemoveAll: function afterRemoveAll() {},
 
     /**
      * Update a record's position in a single index of this collection. See
@@ -1910,10 +2166,17 @@
      * position. If you don't specify an index then the record will be updated
      * in the main index.
      */
-    updateRecord: function updateRecord(record, opts) {
+    updateIndex: function updateIndex(record, opts) {
       opts || (opts = {});
       var index = opts.index ? this.indexes[opts.index] : this.index;
       index.updateRecord(record);
+    },
+    updateIndexes: function updateIndexes(record) {
+      var self = this;
+      self.index.updateRecord(record);
+      forOwn(self.indexes, function (index, name) {
+        index.updateRecord(record);
+      });
     },
 
     /**
@@ -1935,20 +2198,127 @@
         data.push(item[funcName].apply(item, args));
       });
       return data;
+    },
+
+    /**
+     * Return the plain JSON representation of all items in this collection.
+     * Assumes entities in this collection have a toJSON method.
+     *
+     * @memberof Collection
+     * @instance
+     * @param {Object} [opts] - Configuration options.
+     * @param {string[]} [opts.with] - Array of relation names or relation fields
+     * to include in the representation.
+     * @return {Array} The entities.
+     */
+    toJSON: function toJSON(opts) {
+      return this.mapCall('toJSON', opts);
+    },
+    end: function end(data, opts) {
+      var self = this;
+      if (opts.raw) {
+        if (opts.autoAdd) {
+          data.data = self.add(data.data, opts);
+        }
+        return data;
+      } else if (opts.autoAdd) {
+        data = self.add(data, opts);
+      }
+      return data;
+    },
+    create: function create(props, opts) {
+      var self = this;
+      var id = self.modelId(props);
+      return self.model.create(props, opts).then(function (data) {
+        // If the created model was already in this Collection via an autoPk id,
+        // remove it from the collection
+        // TODO: Fix this?
+        if (self.autoPks[id]) {
+          self.remove(id);
+        }
+        return self.end(data);
+      });
+    },
+    createMany: function createMany(models, opts) {
+      var self = this;
+      return self.model.createMany(models, opts).then(function (data) {
+        // If the created models were already in this Collection via an autoPk
+        // id, remove them from the Collection
+        // TODO: Fix this?
+        models.forEach(function (model) {
+          var id = self.modelId(model);
+          if (self.autoPks[id]) {
+            self.remove(id);
+          }
+        });
+        return self.end(data);
+      });
+    },
+    find: function find(id, opts) {
+      var self = this;
+      return self.model.find(id, opts).then(function (data) {
+        return self.end(data);
+      });
+    },
+    findAll: function findAll(query, opts) {
+      var self = this;
+      return self.model.findAll(query, opts).then(function (data) {
+        return self.end(data);
+      });
+    },
+    update: function update(id, props, opts) {
+      var self = this;
+      return self.model.update(id, props, opts).then(function (data) {
+        return self.end(data);
+      });
+    },
+    updateMany: function updateMany(models, opts) {
+      var self = this;
+      return self.model.updateMany(models, opts).then(function (data) {
+        return self.end(data);
+      });
+    },
+    updateAll: function updateAll(query, props, opts) {
+      var self = this;
+      return self.model.updateAll(query, props, opts).then(function (data) {
+        return self.end(data);
+      });
+    },
+    destroy: function destroy(id, opts) {
+      var self = this;
+      return self.model.destroy(id, opts).then(function (data) {
+        if (opts.raw) {
+          data.data = self.remove(id, opts);
+        } else {
+          data = self.remove(id, opts);
+        }
+        return data;
+      });
+    },
+    destroyAll: function destroyAll(query, opts) {
+      var self = this;
+      return self.model.destroyAll(query, opts).then(function (data) {
+        if (opts.raw) {
+          data.data = self.removeAll(query, opts);
+        } else {
+          data = self.removeAll(query, opts);
+        }
+        return data;
+      });
     }
   });
 
   eventify(Collection.prototype, function () {
-    return this._events;
+    return this._listeners;
   }, function (value) {
-    this._events = value;
+    this._listeners = value;
   });
 
   var op = 'belongsTo';
 
   /**
    * Steps to apply a "belongsTo" relationship
-   * 1. Choose the localField and localKey
+   * 1. Choose the localField and foreignKey
    * 2. Configure property descriptor, possibly including custom getter/setter
    * 3. Add property to prototype of target Model
    *
@@ -1964,27 +2334,27 @@
     // Choose field where the relation will be attached
     var localField = opts.localField = opts.localField || Relation.name.toLowerCase();
     // Choose field that holds the primary key of the relation
-    var localKey = opts.localKey = opts.localKey || Relation.name.toLowerCase() + '_id';
+    var foreignKey = opts.foreignKey = opts.localKey || opts.foreignKey || Relation.name.toLowerCase() + '_id';
 
     // Setup configuration of the property
     var descriptor = {
       // Whether the field specified by "localField" will show up in "for...in"
       enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
       // Set default method for retrieving the linked relation
-      get: function get$$() {
-        if (!this._get('$')) {
-          return this._get('links.' + localField);
-        }
-        var key = get(this, localKey);
-        var item = key !== undefined ? Relation.get(key) : undefined;
-        this._set('links.' + localField, item);
-        return item;
+      get: function get() {
+        // if (!this._get('$')) {
+        return this._get('links.' + localField);
+        // }
+        // const key = get(this, foreignKey)
+        // const item = key !== undefined ? Relation.get(key) : undefined
+        // this._set(`links.${localField}`, item)
+        // return item
       },
 
       // Set default method for setting the linked relation
       set: function set(parent) {
         this._set('links.' + localField, parent);
-        _set(this, localKey, parent[Relation.idAttribute]);
+        _set(this, foreignKey, parent[Relation.idAttribute]);
         return get(this, localField);
       }
     };
@@ -2042,19 +2412,19 @@
 
     // Finally, added property to prototype of target Model
     Object.defineProperty(Model.prototype, localField, descriptor);
-    Object.defineProperty(Model.prototype, localKey, {
-      configurable: true,
-      enumerable: true,
-      get: function get$$() {
-        return this._get('props.' + localKey);
-      },
-      set: function set(value) {
-        this._set('props.' + localKey, value);
-        if (this._get('$')) {
-          Model.getCollection().indexes[localKey].updateRecord(this, { index: localKey });
-        }
-      }
-    });
+    // Object.defineProperty(Model.prototype, foreignKey, {
+    //   configurable: true,
+    //   enumerable: true,
+    //   get () {
+    //     return this._get(`props.${foreignKey}`)
+    //   },
+    //   set (value) {
+    //     this._set(`props.${foreignKey}`, value)
+    //     // if (this._get('$')) {
+    //     //   Model.getCollection().indexes[foreignKey].updateRecord(this, { index: foreignKey })
+    //     // }
+    //   }
+    // })
 
     if (!Model.relationList) {
       Model.relationList = [];
@@ -2068,7 +2438,7 @@
     opts.Relation = Relation;
     Model.relationList.push(opts);
     Model.relationFields.push(localField);
-    Model.getCollection().createIndex(localKey);
+    // Model.getCollection().createIndex(localKey)
 
     // Return target Model for chaining
     return Model;
@@ -2156,7 +2526,7 @@
   function applyHasMany(target, Relation, opts) {
     opts || (opts = {});
     // Choose field where the relation will be attached
-    var localField = opts.localField = opts.localField || camelCase(Relation.name) + 'Collection';
+    var localField = opts.localField = opts.localField || camelCase(Relation.name) + '_collection';
     // Choose field on related instances that holds the primary key of instances
     // of the target Model
     var foreignKey = opts.foreignKey;
@@ -2166,36 +2536,36 @@
     if (!foreignKey && !localKeys && !foreignKeys) {
       foreignKey = opts.foreignKey = camelCase(target.name) + '_id';
     }
-    if (foreignKey) {
-      Relation.getCollection().createIndex(foreignKey);
-    }
+    // if (foreignKey) {
+    //   Relation.getCollection().createIndex(foreignKey)
+    // }
 
     // Setup configuration of the property
     var descriptor = {
       // Whether the field specified by "localField" will show up in "for...in"
       enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
       // Set default method for retrieving the linked relation
-      get: function get$$() {
-        if (!this._get('$')) {
-          return this._get('links.' + localField);
-        }
-        var query = {};
-        var items = undefined;
-        if (foreignKey) {
-          // Make a FAST retrieval of the relation using a secondary index
-          items = Relation.getAll(get(this, target.idAttribute), { index: foreignKey });
-        } else if (localKeys) {
-          var keys = get(this, localKeys) || [];
-          var args = isArray(keys) ? keys : Object.keys(keys);
-          // Make a slower retrieval using the ids in the "localKeys" array
-          items = Relation.getAll.apply(Relation, args);
-        } else if (foreignKeys) {
-          _set(query, 'where.' + foreignKeys + '.contains', get(this, target.idAttribute));
-          // Make a much slower retrieval
-          items = Relation.filter(query);
-        }
-        this._set('links.' + localField, items);
-        return items;
+      get: function get() {
+        // if (!this._get('$')) {
+        return this._get('links.' + localField);
+        // }
+        // const query = {}
+        // let items
+        // if (foreignKey) {
+        //   // Make a FAST retrieval of the relation using a secondary index
+        //   items = Relation.getAll(get(this, target.idAttribute), { index: foreignKey })
+        // } else if (localKeys) {
+        //   const keys = get(this, localKeys) || []
+        //   const args = isArray(keys) ? keys : Object.keys(keys)
+        //   // Make a slower retrieval using the ids in the "localKeys" array
+        //   items = Relation.getAll.apply(Relation, args)
+        // } else if (foreignKeys) {
+        //   set(query, `where.${foreignKeys}.contains`, get(this, target.idAttribute))
+        //   // Make a much slower retrieval
+        //   items = Relation.filter(query)
+        // }
+        // this._set(`links.${localField}`, items)
+        // return items
       },
 
       // Set default method for setting the linked relation
@@ -2359,14 +2729,14 @@
       // Whether the field specified by "localField" will show up in "for...in"
       enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
       // Set default method for retrieving the linked relation
-      get: function get$$() {
-        if (!this._get('$')) {
-          return this._get('links.' + localField);
-        }
-        var items = Relation.getAll(get(this, Model.idAttribute), { index: foreignKey });
-        var item = items && items.length ? items[0] : undefined;
-        this._set('links.' + localField, item);
-        return item;
+      get: function get() {
+        // if (!this._get('$')) {
+        return this._get('links.' + localField);
+        // }
+        // const items = Relation.getAll(get(this, Model.idAttribute), { index: foreignKey })
+        // const item = items && items.length ? items[0] : undefined
+        // this._set(`links.${localField}`, item)
+        // return item
       },
 
       // Set default method for setting the linked relation
@@ -2447,7 +2817,7 @@
     opts.Relation = Relation;
     Model.relationList.push(opts);
     Model.relationFields.push(localField);
-    Model.getCollection().createIndex(foreignKey);
+    // Model.getCollection().createIndex(foreignKey)
 
     // Return target Model for chaining
     return Model;
@@ -2647,16 +3017,16 @@
         })();
       }
       _set('props.' + key, value);
-      if (_get('$') && opts.indexed) {
-        target.getCollection().updateRecord(this, { index: key });
-      }
+      // if (_get('$') && opts.indexed) {
+      //   target.getCollection().updateIndex(this, { index: key })
+      // }
       return value;
     };
-    if (opts.indexed) {
-      // Update index
-      // TODO: Make this configurable, ie. immediate or lazy update
-      target.createIndex(key);
-    }
+    // if (opts.indexed) {
+    //   // Update index
+    //   // TODO: Make this configurable, ie. immediate or lazy update
+    //   target.createIndex(key)
+    // }
     if (opts.get) {
       if (descriptor.get) {
         (function () {
@@ -2771,12 +3141,6 @@
 
   var resolve = resolve$1;
 
-  var isBrowser = false;
-
-  try {
-    isBrowser = !!window;
-  } catch (e) {}
-
   var notify = function notify() {
     for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
       args[_key] = arguments[_key];
@@ -2804,11 +3168,13 @@
    * initial properties.
    */
   function Model(props, opts) {
-    classCallCheck(this, Model);
+    var self = this;
+    classCallCheck(self, Model);
+
     props || (props = {});
     opts || (opts = {});
     var _props = {};
-    Object.defineProperties(this, {
+    Object.defineProperties(self, {
       _get: {
         value: function value(key) {
           return get(_props, key);
@@ -2825,15 +3191,15 @@
         }
       }
     });
-    this._set('creating', true);
+    self._set('creating', true);
     if (opts.noValidate) {
-      this._set('noValidate', true);
+      self._set('noValidate', true);
     }
-    fillIn(this, props);
-    this._unset('creating');
-    this._set('changes', {});
-    this._unset('noValidate');
-    this._set('previous', copy(props));
+    fillIn(self, props);
+    self._unset('creating');
+    self._set('changes', {});
+    self._unset('noValidate');
+    self._set('previous', copy(props));
   }
 
   /**
@@ -2870,27 +3236,110 @@
     },
     beforeSave: function beforeSave() {},
     save: function save(opts) {
-      var _this2 = this;
+      var op = undefined,
+          adapter = undefined;
+      var self = this;
+      var Ctor = self.constructor;
 
-      var Ctor = this.constructor;
-      var op = 'save';
-      Ctor.dbg(op, 'instance:', this, 'opts:', opts);
-      var adapterName = undefined;
-
+      // Default values for arguments
       opts || (opts = {});
-      _(Ctor, opts);
-      opts.op = op;
 
-      return resolve(this.beforeSave(opts)).then(function () {
-        adapterName = Ctor.getAdapterName(opts);
-        return Ctor.getAdapter(adapterName).update(Ctor, get(_this2, Ctor.idAttribute), _this2.toJSON(opts), opts);
+      // Fill in "opts" with the Model's configuration
+      _(self, opts);
+      adapter = opts.adapter = self.getAdapterName(opts);
+
+      // beforeSave lifecycle hook
+      op = opts.op = 'beforeSave';
+      return resolve(self[op](opts)).then(function () {
+        // Now delegate to the adapter
+        op = opts.op = 'save';
+        Ctor.dbg(op, self, opts);
+        return self.getAdapter(adapter)[op](Ctor, self, opts);
       }).then(function (data) {
-        return resolve(_this2.afterSave(opts)).then(function () {
-          return Ctor.end(data, opts, adapterName);
+        // afterSave lifecycle hook
+        op = opts.op = 'afterSave';
+        return resolve(self[op](data, opts)).then(function (_data) {
+          // Allow for re-assignment from lifecycle hook
+          data = _data || data;
+          if (opts.raw) {
+            self.set(data.data);
+            data.data = self;
+          } else {
+            self.set(data);
+          }
+          return Ctor.end(data, opts);
         });
       });
     },
     afterSave: function afterSave() {},
+    beforeLoadRelations: function beforeLoadRelations() {},
+    loadRelations: function loadRelations(relations, opts) {
+      var op = undefined;
+      var self = this;
+      var Ctor = self.constructor;
+      var relationList = Ctor.relationList || [];
+
+      // Default values for arguments
+      relations || (relations = []);
+      opts || (opts = {});
+
+      // Fill in "opts" with the Model's configuration
+      _(Ctor, opts);
+      opts.adapter = Ctor.getAdapterName(opts);
+
+      // beforeLoadRelations lifecycle hook
+      op = opts.op = 'beforeLoadRelations';
+      return resolve(self[op](relations, opts)).then(function () {
+        if (isString(relations)) {
+          relations = [relations];
+        }
+        // Now delegate to the adapter
+        op = opts.op = 'loadRelations';
+        Ctor.dbg(op, self, relations, opts);
+        return Promise.all(relationList.map(function (def) {
+          if (isFunction(def.load)) {
+            return def.load(Ctor, def, self, opts);
+          }
+          var task = undefined;
+          if (def.type === 'hasMany' && def.foreignKey) {
+            // hasMany
+            task = def.Relation.findAll(babelHelpers.defineProperty({}, def.foreignKey, get(self, Ctor.idAttribute)), opts);
+          } else if (def.foreignKey) {
+            // belongsTo or hasOne
+            var key = get(self, def.foreignKey);
+            if (isSorN(key)) {
+              task = def.Relation.find(key, opts);
+            }
+          } else if (def.localKeys) {
+            // hasMany
+            task = def.Relation.findAll(babelHelpers.defineProperty({}, def.Relation.idAttribute, {
+              'in': get(self, def.localKeys)
+            }), opts);
+          } else if (def.foreignKeys) {
+            // hasMany
+            task = def.Relation.findAll(babelHelpers.defineProperty({}, def.Relation.idAttribute, {
+              'contains': get(self, Ctor.idAttribute)
+            }), opts);
+          }
+          if (task) {
+            task = task.then(function (data) {
+              if (opts.raw) {
+                data = data.data;
+              }
+              _set(self, def.localField, def.type === 'hasOne' ? data.length ? data[0] : undefined : data);
+            });
+          }
+          return task;
+        }));
+      }).then(function () {
+        // afterLoadRelations lifecycle hook
+        op = opts.op = 'afterLoadRelations';
+        return resolve(self[op](relations, opts)).then(function () {
+          return self;
+        });
+      });
+    },
+    afterLoadRelations: function afterLoadRelations() {},
 
     /**
      * @param {Object} [opts] Configuration options. @see {@link Model.destroy}.
@@ -2923,16 +3372,17 @@
      * @param {boolean} [opts.silent=false] - Whether to trigger change events.
      */
     set: function set(key, value, opts) {
+      var self = this;
       if (isObject(key)) {
         opts = value;
       }
       opts || (opts = {});
       if (opts.silent) {
-        this._set('silent', true);
+        self._set('silent', true);
       }
-      _set(this, key, value);
-      if (!this._get('eventId')) {
-        this._unset('silent');
+      _set(self, key, value);
+      if (!self._get('eventId')) {
+        self._unset('silent');
       }
     },
 
@@ -2978,88 +3428,26 @@
       return this._get('previous');
     },
     revert: function revert(opts) {
-      var _this3 = this;
+      var _this2 = this;
 
       var previous = this._get('previous') || {};
       opts || (opts = {});
       opts.preserve || (opts.preserve = []);
       forOwn(this, function (value, key) {
-        if (key !== _this3.constructor.idAttribute && !previous.hasOwnProperty(key) && _this3.hasOwnProperty(key) && opts.preserve.indexOf(key) === -1) {
-          delete _this3[key];
+        if (key !== _this2.constructor.idAttribute && !previous.hasOwnProperty(key) && _this2.hasOwnProperty(key) && opts.preserve.indexOf(key) === -1) {
+          delete _this2[key];
         }
       });
       forOwn(previous, function (value, key) {
         if (opts.preserve.indexOf(key) === -1) {
-          _this3[key] = value;
+          _this2[key] = value;
         }
       });
       this.commit();
       return this;
     },
-
-    /**
-     * Return a plain object representation of this instance.
-     *
-     * @param {Object} [opts] - Configuration options.
-     * @param {string[]} [opts.with] - Array of relation names or relation fields
-     * to include in the representation.
-     * @return {Object} Plain object representation of instance.
-     */
     toJSON: function toJSON(opts) {
-      var _this4 = this;
-
-      opts || (opts = {});
-      var Ctor = this.constructor;
-      var json = this;
-      if (this instanceof Model) {
-        json = {};
-        for (var key in this) {
-          json[key] = this[key];
-        }
-        // The user wants to include relations in the resulting plain object
-        // representation
-        if (Ctor && Ctor.relationList && opts.with) {
-          if (isString(opts.with)) {
-            opts.with = [opts.with];
-          }
-          Ctor.relationList.forEach(function (def) {
-            var containedName = undefined;
-            if (opts.with.indexOf(def.relation) !== -1) {
-              containedName = def.relation;
-            } else if (opts.with.indexOf(def.localField) !== -1) {
-              containedName = def.localField;
-            }
-            if (containedName) {
-              (function () {
-                var optsCopy = { with: opts.with.slice() };
-
-                // Prepare to recurse into deeply nested relations
-                optsCopy.with.splice(optsCopy.with.indexOf(containedName), 1);
-                optsCopy.with.forEach(function (relation, i) {
-                  if (relation && relation.indexOf(containedName) === 0 && relation.length >= containedName.length && relation[containedName.length] === '.') {
-                    optsCopy.with[i] = relation.substr(containedName.length + 1);
-                  } else {
-                    optsCopy.with[i] = '';
-                  }
-                });
-                var relationData = get(_this4, def.localField);
-
-                if (relationData) {
-                  // The actual recursion
-                  if (isArray(relationData)) {
-                    _set(json, def.localField, relationData.map(function (item) {
-                      return def.Relation.prototype.toJSON.call(item, optsCopy);
-                    }));
-                  } else {
-                    _set(json, def.localField, def.Relation.prototype.toJSON.call(relationData, optsCopy));
-                  }
-                }
-              })();
-            }
-          });
-        }
-      }
-      return json;
+      return this.constructor.toJSON(this, opts);
     }
   });
 
@@ -3081,25 +3469,6 @@
     _adaptersOwner: null,
 
     /**
-     * This Model's {@link Collection} instance. This is where instances of the
-     * Model are stored if {@link Model.autoInject} is `true`.
-     *
-     * __You should use {@link Model.inject}, {@link Model.eject}, and
-     * {@link Model.ejectAll} if you need to manually get data in and out of this
-     * collection.__
-     *
-     * @memberof Model
-     * @private
-     * @type {Collection}
-     */
-    _collection: null,
-
-    /**
-     * @ignore
-     */
-    _collectionOwner: null,
-
-    /**
      * Hash of registered listeners. Don't modify. Use {@link Model.on} and
      * {@link Model.off}.
      *
@@ -3112,33 +3481,6 @@
      * @ignore
      */
     _listenersOwner: null,
-
-    /**
-     * Whether {@link Model.destroy} and {@link Model.destroyAll} should
-     * automatically eject the specified item(s) from the Model's collection on
-     * success.
-     *
-     * @memberof Model
-     * @type {boolean}
-     * @default true
-     */
-    autoEject: true,
-
-    /**
-     * Whether {@link Model.create}, {@link Model.createMany},
-     * {@link Model.update}, {@link Model.updateAll}, {@link Model.updateMany},
-     * {@link Model.save}, should automatically inject the specified item(s)
-     * returned by the adapter into the the Model's collection on success.
-     *
-     * __Defaults to `true` in the Browser.__
-     *
-     * __Defaults to `false` in Node.js__
-     *
-     * @memberof Model
-     * @type {boolean}
-     */
-    autoInject: isBrowser,
-    bypassCache: false,
 
     /**
      * Whether to disallow the use of `new Function` in {@link Model.extend}.
@@ -3171,7 +3513,6 @@
      * @default false
      */
     debug: false,
-    eagerEject: false,
 
     /**
      * The field on instances of {@link Model} that should be used as the unique
@@ -3191,51 +3532,22 @@
      * accessing the related Model. If the related Model's collection is empty,
      * then the property accessors won't return anything.
      *
-     * __Defaults to `true` in the Browser.__
-     *
-     * __Defaults to `false` in Node.js__
-     *
      * @memberof Model
      * @type {boolean}
+     * @default true
      */
-    linkRelations: isBrowser,
+    linkRelations: true,
 
     /**
      * Whether this Model should emit operational events.
      *
-     * __Defaults to `true` in the Browser.__
-     *
-     * __Defaults to `false` in Node.js__
-     *
      * @memberof Model
      * @type {boolean}
+     * @default true
      */
-    notify: isBrowser,
+    notify: true,
 
-    /**
-     * What to do when injecting an item into the Model's collection that shares a
-     * primary key with an item already in the Model's collection.
-     *
-     * Possible values:
-     * - merge
-     * - replace
-     *
-     * Merge:
-     *
-     * Recursively shallow copy properties from the new item onto the existing
-     * item.
-     *
-     * Replace:
-     *
-     * Shallow copy top-level properties from the new item onto the existing item.
-     * Any top-level own properties of the existing item that are _not_ on the new
-     * item will be removed.
-     *
-     * @memberof Model
-     * @type {string}
-     * @default merge
-     */
-    onConflict: 'merge',
+    pojo: false,
 
     /**
      * Whether the relation property accessors should be enumerable. It's
@@ -3292,13 +3604,22 @@
     end: function end(data, opts) {
       var self = this;
       if (opts.raw) {
-        if (opts.autoInject) {
-          data.data = self.inject(data.data);
-        }
         _(opts, data);
-        return data;
-      } else if (opts.autoInject) {
-        data = self.inject(data);
+      }
+      if (!opts.pojo) {
+        var _data = opts.raw ? data.data : data;
+        if (isArray(_data)) {
+          _data = _data.map(function (item) {
+            return self.createInstance(item);
+          });
+        } else {
+          _data = self.createInstance(_data);
+        }
+        if (opts.raw) {
+          data.data = _data;
+        } else {
+          data = _data;
+        }
       }
       if (opts.notify) {
         setTimeout(function () {
@@ -3306,25 +3627,6 @@
         });
       }
       return data;
-    },
-
-    /**
-     * Create a new secondary index in the Collection instance of this Model.
-     *
-     * @memberof Model
-     * @method
-     * @param {string} name - The name of the new secondary index
-     * @param {string[]} fieldList - The list of keys to be used to create the index.
-     * @param {Object} [opts] - Configuration options.
-     * @param {Function} [opts.fieldGetter] - Getter function to be used to grab
-     * values off of instances for each field in the index's field list. Will be
-     * passed the instance and the field to be retrieved.
-     * @param {Function} [opts.hashCode] - Function used to return a unique
-     * identifier for each instance in the collection. Will be passed the instance.
-     */
-    createIndex: function createIndex(name, fieldList, opts) {
-      this.dbg('createIndex', 'name:', name, 'fieldList:', fieldList, 'opts:', opts);
-      this.getCollection().createIndex(name, fieldList, opts);
     },
 
     /**
@@ -3347,476 +3649,84 @@
     },
 
     /**
-     * Return whether `instance` is an instance of this Model.
+     * Return whether `instance` is an instance of this Model's instance class.
      *
      * @memberof Model
      * @method
      * @param {Object} instance - The instance to check.
-     * @return {boolean} Whether `instance` is an instance of this Model.
+     * @return {boolean} Whether `instance` is an instance of this Model's
+     * instance class.
      */
-    is: function is(instance) {
-      return instance instanceof this;
+    is: function is(instance, modelOnly) {
+      var self = this;
+      return self.instanceClass && !modelOnly ? instance instanceof self.instanceClass : instance instanceof self;
     },
 
     /**
-     * Return the entities in this Model's collection that have a primary key that
-     * was automatically generated when they were injected into the collection.
+     * Return a plain object representation of the given entity.
      *
-     * @memberof Model
+     * @memberOf Model
      * @method
-     * @return {Model[]} The entities where with autoPks.
-     */
-    getAutoPkItems: function getAutoPkItems() {
-      return this.getAll().filter(function (item) {
-        return item._get('autoPk');
-      });
-    },
-
-    /**
-     * If the entity with the given primary key is currently in this Model's
-     * collection, return the result of calling {@link Model#changes} on that
-     * entity, otherwise return undefined.
-     *
-     * @memberof Model
-     * @method
-     * @param {(string|number)} [id] - If provided, only return changes for the
-     * entity with the given primary key.
-     * @return {(Object|Array)} Changes to the entity since the entity was instantiated.
-     */
-    changes: function changes(id) {
-      this.dbg('changes', 'id:', id);
-      if (isSorN(id)) {
-        var instance = this.get(id);
-        return instance ? instance.changes() : undefined;
-      } else {
-        return this.getCollection().mapCall('changes');
-      }
-    },
-
-    /**
-     * If the entity with the given primary key is currently in this Model's
-     * collection, return the result of calling {@link Model#hasChanges} on that
-     * entity, otherwise return undefined.
-     *
-     * If no primary key is provided, return whether any entity in this Model's
-     * collection has any changes.
-     *
-     * @memberof Model
-     * @method
-     * @param {(string|number)} [id] - The primary key of the entity.
-     * @return {boolean} Whether the entity has any changes, or whether any entity
-     * in this Model's collection has any changes.
-     */
-    hasChanges: function hasChanges(id) {
-      var _this5 = this;
-
-      this.dbg('hasChanges', 'id:', id);
-      if (isSorN(id)) {
-        var instance = this.get(id);
-        if (instance) {
-          return instance.hasChanges();
-        }
-      } else {
-        var _ret2 = (function () {
-          var hasChanges = false;
-          _this5.getCollection().forEach(function (item) {
-            hasChanges = hasChanges || item.hasChanges();
-          });
-          return {
-            v: hasChanges
-          };
-        })();
-
-        if ((typeof _ret2 === 'undefined' ? 'undefined' : babelHelpers.typeof(_ret2)) === "object") return _ret2.v;
-      }
-    },
-    beforeInject: function beforeInject() {},
-
-    /**
-     * Insert the provided entity or entities into this Model's collection.
-     *
-     * If an entity is already in the collection then the provided entity will
-     * either merge with or replace the existing item based on the value of the
-     * `onConflict` option.
-     *
-     * The collection's secondary indexes will be updated as each entity is
-     * visited.
-     *
-     * @memberof Model
-     * @method
-     * @param {(Object|Object[]|Model|Model[])} items - The item or items to insert.
-     * @param {Object} [opts] - Configuration options.
-     * @param {boolean} [opts.autoPk={@link Model.autoPk}] - Whether to generate
-     * primary keys for the entities to be injected. Useful for injecting
-     * temporary, unsaved data into a Model's collection.
-     * @param {string} [opts.onConflict] - What to do when an item is already in
-     * the Model's collection. Possible values are `merge` or `replace`.
-     * @return {(Model|Model[])} The injected entity or entities.
-     */
-    inject: function inject(entities, opts) {
-      var _this = this;
-
-      // For debuggability
-      var op = 'inject';
-      _this.dbg(op, 'entities:', entities, 'opts:', opts);
-
-      // Default values for arguments
-      opts || (opts = {});
-
-      // Fill in "opts" with the Model's configuration
-      _(_this, opts);
-      opts.op = op;
-      entities = this.beforeInject(entities, opts) || entities;
-
-      // Track whether just one or an array of entities is being injected
-      var singular = false;
-      var collection = _this.getCollection();
-      var idAttribute = _this.idAttribute;
-      var relationList = _this.relationList || [];
-      var timestamp = new Date().getTime();
-      if (!isArray(entities)) {
-        entities = [entities];
-        singular = true;
-      }
-
-      // Map the provided entities to injected entities.
-      // New entities will be injected. If any props map to existing entities,
-      // they will be merged into the existing entities according to the onConflict
-      // option.
-      entities = entities.map(function (props) {
-        var id = get(props, idAttribute);
-        // Track whether we had to generate an id for this entity
-        var autoPk = false;
-        // Validate that the primary key attached to the entity is a string or
-        // numer
-        if (!isSorN(id)) {
-          // No id found, generate one
-          if (opts.autoPk) {
-            id = uuid();
-            _set(props, idAttribute, id);
-            autoPk = true;
-          } else {
-            // Not going to generate one, throw an error
-            throw new TypeError('User#' + idAttribute + ': Expected string or number, found ' + (typeof id === 'undefined' ? 'undefined' : babelHelpers.typeof(id)) + '!');
-          }
-        }
-        // Grab existing entity if there is one
-        var existing = _this.get(id);
-        // If the currently visited props are just reference to the existing
-        // entity, then there is nothing to be done. Exit early.
-        if (props === existing) {
-          return existing;
-        }
-
-        // Check the currently visited props for relations that need to be
-        // injected as well
-        relationList.forEach(function (def) {
-          // A reference to the Model that this Model is related to
-          var Relation = def.Relation;
-          // The field used by the related Model as the primary key
-          var relationIdAttribute = Relation.idAttribute;
-          // Grab the foreign key in this relationship, if there is one
-          var foreignKey = def.foreignKey;
-
-          // Grab a reference to the related data attached or linked to the
-          // currently visited props
-          var toInject = get(props, def.localField);
-
-          // If the user provided a custom injection function for this relation,
-          // call it
-          if (isFunction(def.inject)) {
-            def.inject(_this, def, props);
-          } else if (toInject && def.inject !== false) {
-            // Otherwise, if there is something to be injected, inject it
-            if (isArray(toInject)) {
-              // Handle injecting hasMany relations
-              toInject = toInject.map(function (toInjectItem) {
-                // Check that this item isn't the same item that is already in the
-                // store
-                if (toInjectItem !== Relation.get(get(toInjectItem, relationIdAttribute))) {
-                  try {
-                    // Make sure this item has its foreignKey
-                    if (foreignKey) {
-                      _set(toInjectItem, foreignKey, id);
-                    }
-                    // Finally inject this related item
-                    toInjectItem = Relation.inject(toInjectItem);
-                  } catch (err) {
-                    throw new Error('Failed to inject ' + def.type + ' relation: "' + def.relation + '"! ' + err.message);
-                  }
-                }
-                return toInjectItem;
-              });
-              // If it's the parent that has the localKeys
-              if (def.localKeys) {
-                _set(props, def.localKeys, toInject.map(function (injected) {
-                  return get(injected, relationIdAttribute);
-                }));
-              }
-            } else {
-              // Handle injecting belongsTo and hasOne relations
-              if (toInject !== Relation.get(get(toInject, relationIdAttribute))) {
-                try {
-                  // Make sure the parent has its localKey
-                  if (def.localKey) {
-                    _set(props, def.localKey, get(toInject, Relation.idAttribute));
-                  }
-                  // Make sure this item has its localKey
-                  if (foreignKey) {
-                    _set(toInject, def.foreignKey, get(props, idAttribute));
-                  }
-                  // Finally inject this related item
-                  toInject = Relation.inject(toInject);
-                } catch (err) {
-                  throw new Error('Failed to inject ' + def.type + ' relation: "' + def.relation + '"!');
-                }
-              }
-            }
-          }
-          if (def.link || def.link === undefined && _this.linkRelations) {
-            // Remove relation properties from the item, since those relations
-            // have been injected by now
-            unset(props, def.localField);
-          } else {
-            // Here, linking is turned off, so we setup a manual link
-            _set(props, def.localField, toInject);
-          }
-        });
-
-        if (existing) {
-          // Here, the currently visited props corresponds to an entity already
-          // in the collection, so we need to merge them
-          var onConflict = opts.onConflict || _this.onConflict;
-          if (onConflict === 'merge') {
-            deepMixIn(existing, props);
-          } else if (onConflict === 'replace') {
-            forOwn(existing, function (value, key) {
-              if (key !== idAttribute && !props.hasOwnProperty(key)) {
-                delete existing[key];
-              }
-            });
-            existing.set(props);
-          }
-          props = existing;
-          // Update all indexes in the collection
-          collection.update(props);
-        } else {
-          // Here, the currently visted props does not correspond to any entity
-          // in the collection, so make this props is an instance of this Model
-          // and insert it into the collection
-          props = _this.createInstance(props);
-          if (autoPk) {
-            // Flag this instance as one that had its primary key generated
-            props._set('autoPk', autoPk);
-          }
-          collection.insert(props);
-        }
-        // Track when this entity was injected
-        props._set('$', timestamp);
-        return props;
-      });
-      // Finally, return the injected data
-      var result = singular ? entities.length ? entities[0] : undefined : entities;
-      this.afterInject(result, opts);
-      return result;
-    },
-    afterInject: function afterInject() {},
-    beforeEject: function beforeEject() {},
-
-    /**
-     * Remove the entity with the given primary key from this Model's collection.
-     *
-     * @memberof Model
-     * @method
-     * @param {(string|number)} id - The primary key of the entity to be removed.
-     * @param {Object} [opts] - Configuration options.
-     * @return {Model} The removed entity, if any.
-     */
-    eject: function eject(id, opts) {
-      // For debuggability
-      var op = 'eject';
-      this.dbg(op, 'id:', id, 'opts:', opts);
-
-      // Default values for arguments
-      opts || (opts = {});
-      opts.op = op;
-      this.beforeEject(id, opts);
-      var instance = this.get(id);
-
-      // The instance is in the collection, remove it
-      if (instance) {
-        instance._unset('$');
-        this.getCollection().remove(instance);
-      }
-      this.afterEject(instance, opts);
-      return instance;
-    },
-    afterEject: function afterEject() {},
-    beforeEjectAll: function beforeEjectAll() {},
-
-    /**
-     * Remove the instances selected by "query" from the Collection instance of
-     * this Model.
-     *
-     * @memberof Model
-     * @method
-     * @param {Object} [query={}] - Selection query.
-     * @param {Object} [query.where] - Filtering criteria.
-     * @param {number} [query.skip] - Number to skip.
-     * @param {number} [query.limit] - Number to limit to.
-     * @param {Array} [query.orderBy] - Sorting criteria.
-     * @param {Object} [opts] - Configuration options.
-     * @return {Model[]} The removed entites, if any.
-     */
-    ejectAll: function ejectAll(query, opts) {
-      // For debuggability
-      var op = 'ejectAll';
-      this.dbg(op, 'query:', query, 'opts:', opts);
-
-      // Default values for arguments
-      opts || (opts = {});
-      opts.op = op;
-      this.beforeEjectAll(query, opts);
-      var entities = this.filter(query);
-      var collection = this.getCollection();
-
-      // Remove each selected entity from the collection
-      entities.forEach(function (item) {
-        collection.remove(item);
-      });
-      this.afterEjectAll(entities, query, opts);
-      return entities;
-    },
-    afterEjectAll: function afterEjectAll() {},
-
-    /**
-     * Return the entity in this Model's collection that has the given primary
-     * key, if such an entity can be found.
-     *
-     * @memberof Model
-     * @method
-     * @param {(string|number)} id - Primary key of the entity to retrieve.
-     * @return {Model} The entity or undefined.
-     */
-    get: function get(id) {
-      this.dbg('get', 'id:', id);
-      var instances = this.getCollection().get(id);
-      return instances.length ? instances[0] : undefined;
-    },
-
-    /**
-     * Proxy for Collection#between
-     *
-     * @memberof Model
-     * @method
-     * @return {Model[]}
-     */
-    between: function between() {
-      var _getCollection;
-
-      return (_getCollection = this.getCollection()).between.apply(_getCollection, arguments);
-    },
-
-    /**
-     * Equivalent of `Model.getCollection().getAll([...ids][, opts])`. See
-     * {@link Collection#getAll}.
-     *
-     * @memberof Model
-     * @method
-     * @return {Model[]} The selected entities
-     */
-    getAll: function getAll() {
-      var _getCollection2;
-
-      return (_getCollection2 = this.getCollection()).getAll.apply(_getCollection2, arguments);
-    },
-
-    /**
-     * Equivalent of `Model.getCollection().filter([query][, opts])`. See
-     * {@link Collection#filter}.
-     *
-     * @memberof Model
-     * @method
-     * @return {Model[]} The selected entities.
-     */
-    filter: function filter(query, opts) {
-      opts || (opts = {});
-      return this.getCollection().filter(query, opts);
-    },
-
-    /**
-     * Equivalent of `Model.getCollection().forEach(cb[, thisArg])`. See
-     * {@link Collection#forEach}.
-     *
-     * @memberof Model
-     * @method
-     */
-    forEach: function forEach(cb, thisArg) {
-      return this.getCollection().forEach(cb, thisArg);
-    },
-
-    /**
-     * Equivalent of `Model.getCollection().map(cb[, thisArg])`. See
-     * {@link Collection#map}.
-     *
-     * @memberof Model
-     * @method
-     * @return {Array} The result
-     */
-    map: function map(cb, thisArg) {
-      return this.getCollection().map(cb, thisArg);
-    },
-
-    /**
-     * Equivalent of `Model.getCollection().reduce(cb, initialValue)`. See
-     * {@link Collection#reducs}.
-     *
-     * @memberof Model
-     * @method
-     * @return {*} The result.
-     */
-    reduce: function reduce(cb, initialValue) {
-      return this.getCollection().reduce(cb, initialValue);
-    },
-
-    /**
-     * Equivalent of `Model.getCollection().mapCall(funcName[, ...args])`. See
-     * {@link Collection#mapCall}.
-     *
-     * @memberof Model
-     * @method
-     * @return {Array} The result
-     */
-    mapCall: function mapCall() {
-      var _getCollection3;
-
-      return (_getCollection3 = this.getCollection()).mapCall.apply(_getCollection3, arguments);
-    },
-
-    /**
-     * Return the plain JSON representation of all items in this Model's
-     * collection.
-     *
-     * @memberof Model
-     * @method
+     * @param {Object} - Entity of which to return the plain
+     * representation.
      * @param {Object} [opts] - Configuration options.
      * @param {string[]} [opts.with] - Array of relation names or relation fields
      * to include in the representation.
-     * @return {Model[]} The entities.
+     * @return {Object} Plain object representation of instance.
      */
-    toJSON: function toJSON(opts) {
-      return this.mapCall('toJSON', opts);
-    },
+    toJSON: function toJSON(data, opts) {
+      var self = this;
+      opts || (opts = {});
+      var json = data;
+      if (self.is(data)) {
+        json = {};
+        for (var key in data) {
+          json[key] = data[key];
+        }
+        // The user wants to include relations in the resulting plain object
+        // representation
+        if (self && self.relationList && opts.with) {
+          if (isString(opts.with)) {
+            opts.with = [opts.with];
+          }
+          self.relationList.forEach(function (def) {
+            var containedName = undefined;
+            if (opts.with.indexOf(def.relation) !== -1) {
+              containedName = def.relation;
+            } else if (opts.with.indexOf(def.localField) !== -1) {
+              containedName = def.localField;
+            }
+            if (containedName) {
+              (function () {
+                var optsCopy = { with: opts.with.slice() };
 
-    /**
-     * Equivalent of `Model.getCollection().query()`. See {@link Collection#query}.
-     *
-     * @memberof Model
-     * @method
-     * @return {Query}
-     */
-    query: function query() {
-      return this.getCollection().query();
+                // Prepare to recurse into deeply nested relations
+                optsCopy.with.splice(optsCopy.with.indexOf(containedName), 1);
+                optsCopy.with.forEach(function (relation, i) {
+                  if (relation && relation.indexOf(containedName) === 0 && relation.length >= containedName.length && relation[containedName.length] === '.') {
+                    optsCopy.with[i] = relation.substr(containedName.length + 1);
+                  } else {
+                    optsCopy.with[i] = '';
+                  }
+                });
+                var relationData = get(data, def.localField);
+
+                if (relationData) {
+                  // The actual recursion
+                  if (isArray(relationData)) {
+                    _set(json, def.localField, relationData.map(function (item) {
+                      return def.Relation.toJSON(item, optsCopy);
+                    }));
+                  } else {
+                    _set(json, def.localField, def.Relation.toJSON(relationData, optsCopy));
+                  }
+                }
+              })();
+            }
+          });
+        }
+      }
+      return json;
     },
 
     /**
@@ -3864,19 +3774,6 @@
       }
       return this._adapters;
     },
-    getCollection: function getCollection() {
-      if (this._collectionOwner !== this) {
-        this._collection = new Collection([], this.idAttribute);
-        this._collection.on('all', this.emit, this);
-        this._collection.createIndex('lastInjected', ['$'], {
-          fieldGetter: function fieldGetter(obj) {
-            return obj._get('$');
-          }
-        });
-        this._collectionOwner = this;
-      }
-      return this._collection;
-    },
 
     /**
      * Model lifecycle hook called by {@link Model.create}. If this method
@@ -3892,7 +3789,7 @@
 
     checkUpsertCreate: function checkUpsertCreate(props, opts) {
       var self = this;
-      return (opts.upsert || opts.upsert === undefined && self.upsert) && get(props, self.idAttribute) && (!self.is(props) || !props._get('autoPk'));
+      return (opts.upsert || opts.upsert === undefined && self.upsert) && get(props, self.idAttribute);
     },
 
     /**
@@ -3907,8 +3804,6 @@
      * @param {Object} [opts] - Configuration options.
      * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
      * adapter to use.
-     * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
-     * inject the resulting created data into this Model's collection upon success.
      * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
      * lifecycle events.
      * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
@@ -3942,7 +3837,7 @@
         props = _props || props;
         // Now delegate to the adapter
         op = opts.op = 'create';
-        var json = self.prototype.toJSON.call(props, opts);
+        var json = self.toJSON(props, opts);
         self.dbg(op, json, opts);
         return self.getAdapter(adapter)[op](self, json, opts);
       }).then(function (data) {
@@ -3951,13 +3846,7 @@
         return resolve(self[op](data, opts)).then(function (_data) {
           // Allow for re-assignment from lifecycle hook
           data = _data || data;
-          // If the created entity was already in self Model's collection via
-          // an autoPk id, remove it from the collection
-          // TODO: Fix this?
-          if (self.is(props) && props._get('$')) {
-            self.eject(get(props, self.idAttribute));
-          }
-          // Possibly inject result and/or formulate result object
+          // Possibly formulate result object
           return self.end(data, opts);
         });
       });
@@ -3991,7 +3880,7 @@
       var self = this;
       if (opts.upsert || opts.upsert === undefined && self.upsert) {
         return entities.reduce(function (hasId, item) {
-          return hasId && get(item, self.idAttribute) && (!isFunction(item._get) || !item._get('autoPk'));
+          return hasId && get(item, self.idAttribute);
         }, true);
       }
     },
@@ -4008,8 +3897,6 @@
      * @param {Object} [opts] - Configuration options.
      * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
      * adapter to use.
-     * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
-     * inject the resulting created entities into this Model's collection.
      * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
      * lifecycle events.
      * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
@@ -4045,7 +3932,7 @@
         // Now delegate to the adapter
         op = opts.op = 'createMany';
         var json = entities.map(function (item) {
-          return self.prototype.toJSON.call(item, opts);
+          return self.toJSON(item, opts);
         });
         self.dbg(op, json, opts);
         return self.getAdapter(adapter)[op](self, json, opts);
@@ -4055,14 +3942,6 @@
         return resolve(self[op](data, opts)).then(function (_data) {
           // Allow for re-assignment from lifecycle hook
           data = _data || data;
-          // If the created entities were already in this Model's collection
-          // via an autoPk id, remove them from the collection
-          // TODO: Fix this?
-          entities.forEach(function (item) {
-            if (self.is(item) && item._get('$')) {
-              self.eject(get(item, self.idAttribute));
-            }
-          });
           // Possibly inject result and/or formulate result object
           return self.end(data, opts);
         });
@@ -4094,8 +3973,7 @@
     beforeFind: notify,
 
     /**
-     * Retrieve via an adapter the entity with the given primary key. The returned
-     * entity will be injected into the Model's collection if `autoInject` is true.
+     * Retrieve via an adapter the entity with the given primary key.
      *
      * {@link Model.beforeFind} will be called before calling the adapter.
      * {@link Model.afterFind} will be called after calling the adapter.
@@ -4106,8 +3984,6 @@
      * @param {Object} [opts] - Configuration options.
      * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
      * adapter to use.
-     * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
-     * inject the resulting data into this Model's collection.
      * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
      * lifecycle events.
      * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
@@ -4174,9 +4050,7 @@
 
     /**
      * Using the `query` argument, select entities to pull from an adapter.
-     * Expects back from the adapter the array of selected entities. The returned
-     * entities will be injected into the Model's collection if `autoInject` is
-     * true.
+     * Expects back from the adapter the array of selected entities.
      *
      * {@link Model.beforeFindAll} will be called before calling the adapter.
      * {@link Model.afterFindAll} will be called after calling the adapter.
@@ -4191,8 +4065,6 @@
      * @param {Object} [opts] - Configuration options.
      * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
      * adapter to use.
-     * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
-     * inject the resulting data into this Model's collection.
      * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
      * lifecycle events.
      * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
@@ -4248,89 +4120,6 @@
     afterFindAll: notify,
 
     /**
-     * Model lifecycle hook called by {@link Model.save}. If this method
-     * returns a promise then {@link Model.save} will wait for the promise
-     * to resolve before continuing.
-     *
-     * @memberof Model
-     * @method
-     * @param {(string|number)} id - The `id` argument passed to {@link Model.save}.
-     * @param {Object} opts - The `opts` argument passed to {@link Model.save}.
-     */
-    beforeSave: notify,
-
-    /**
-     * If the entity with the given primary key is currently in this Model's
-     * collection, call the instance's {@link Model#save} method. If the entity
-     * is not in this Model's collection, the returned promise will be rejected.
-     *
-     * {@link Model.beforeSave} will be called before calling {@link Model#save}.
-     * {@link Model#beforeSave} will be called before saving the entity.
-     * {@link Model#afterSave} will be called after saving the entity.
-     * {@link Model.afterSave} will be called after calling {@link Model#save}.
-     *
-     * @memberof Model
-     * @method
-     * @param {(string|number)} id - The primary key of the entity to save.
-     * @param {Object} [opts] - Configuration options.
-     * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
-     * adapter to use.
-     * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
-     * inject the resulting updated data into this Model's collection.
-     * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
-     * lifecycle events.
-     * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
-     * updated data. If `true` return a response object that includes the updated
-     * data and metadata about the operation.
-     * @param {string[]} [opts.with=[]] Relations to save in a cascading
-     * save if any of the entity's relations are linked to the entity.
-     * NOT performed in a transaction.
-     */
-    save: function save(id, opts) {
-      var op = undefined;
-      var self = this;
-      var instance = self.get(id);
-
-      // Default values for arguments
-      opts || (opts = {});
-
-      // Fill in "opts" with the Model's configuration
-      _(self, opts);
-      opts.adapter = self.getAdapterName(opts);
-
-      // beforeSave lifecycle hook
-      op = opts.op = 'beforeSave';
-      return resolve(self[op](instance, opts)).then(function (_instance) {
-        instance = _instance || instance;
-        if (!instance) {
-          throw new Error('instance with "' + self.idAttribute + '" of ' + id + ' not in Model\'s collection!');
-        }
-        // Now delegate to the adapter
-        op = opts.op = 'save';
-        self.dbg(op, id, opts);
-        return instance[op](opts);
-      }).then(function (data) {
-        // afterSave lifecycle hook
-        op = opts.op = 'afterSave';
-        return resolve(self[op](instance, opts)).then(function () {
-          return data;
-        });
-      });
-    },
-
-    /**
-     * Model lifecycle hook called by {@link Model.save}. If this method
-     * returns a promise then {@link Model.save} will wait for the promise
-     * to resolve before continuing.
-     *
-     * @memberof Model
-     * @method
-     * @param {(string|number)} id - The `id` argument passed to {@link Model.save}.
-     * @param {Object} opts - The `opts` argument passed to {@link Model.save}.
-     */
-    afterSave: notify,
-
-    /**
      * Model lifecycle hook called by {@link Model.update}. If this method
      * returns a promise then {@link Model.update} will wait for the promise
      * to resolve before continuing.
@@ -4357,8 +4146,6 @@
      * @param {Object} [opts] - Configuration options.
      * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
      * adapter to use.
-     * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
-     * inject the resulting updated data into this Model's collection.
      * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
      * lifecycle events.
      * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
@@ -4388,7 +4175,7 @@
         props = _props || props;
         // Now delegate to the adapter
         op = opts.op = 'update';
-        var json = self.prototype.toJSON.call(props, opts);
+        var json = self.toJSON(props, opts);
         self.dbg(op, id, json, opts);
         return self.getAdapter(adapter)[op](self, id, json, opts);
       }).then(function (data) {
@@ -4442,8 +4229,6 @@
      * @param {Object} [opts] - Configuration options.
      * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
      * adapter to use.
-     * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
-     * inject the resulting updated data into this Model's collection.
      * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
      * lifecycle events.
      * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
@@ -4474,7 +4259,7 @@
         // Now delegate to the adapter
         op = opts.op = 'updateMany';
         var json = entities.map(function (item) {
-          return self.prototype.toJSON.call(item, opts);
+          return self.toJSON(item, opts);
         });
         self.dbg(op, json, opts);
         return self.getAdapter(adapter)[op](self, json, opts);
@@ -4518,8 +4303,6 @@
     /**
      * Using the `query` argument, perform the a single updated to the selected
      * entities. Expects back from the adapter an array of the updated entities.
-     * The updated entities will be injected into the Model's collection if
-     * `autoInject` is true.
      *
      * {@link Model.beforeUpdateAll} will be called before making the update.
      * {@link Model.afterUpdateAll} will be called after making the update.
@@ -4535,8 +4318,6 @@
      * @param {Object} [opts] - Configuration options.
      * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
      * adapter to use.
-     * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
-     * inject the resulting updated data into this Model's collection.
      * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
      * lifecycle events.
      * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
@@ -4567,7 +4348,7 @@
         props = _props || props;
         // Now delegate to the adapter
         op = opts.op = 'updateAll';
-        var json = self.prototype.toJSON.call(props, opts);
+        var json = self.toJSON(props, opts);
         self.dbg(op, query, json, opts);
         return self.getAdapter(adapter)[op](self, query, json, opts);
       }).then(function (data) {
@@ -4620,8 +4401,6 @@
      * @param {Object} [opts] - Configuration options.
      * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
      * adapter to use.
-     * @param {boolean} [opts.autoEject={@link Model.autoEject}] Whether to remove
-     * the entity from this Model's collection upon success.
      * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
      * lifecycle events.
      * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
@@ -4658,13 +4437,8 @@
           // Allow for re-assignment from lifecycle hook
           data = _data || data;
           if (opts.raw) {
-            if (opts.autoEject) {
-              data.data = self.eject(id, opts);
-            }
             _(opts, data);
             return data;
-          } else if (opts.autoEject) {
-            data = self.eject(id, opts);
           }
           return data;
         });
@@ -4712,8 +4486,6 @@
      * @param {Object} [opts] - Configuration options.
      * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
      * adapter to use.
-     * @param {boolean} [opts.autoEject={@link Model.autoEject}] Whether to remove
-     * the entities from this Model's collection upon success.
      * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
      * lifecycle events.
      * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
@@ -4751,13 +4523,8 @@
           // Allow for re-assignment from lifecycle hook
           data = _data || data;
           if (opts.raw) {
-            if (opts.autoEject) {
-              data.data = self.ejectAll(query, opts);
-            }
             _(opts, data);
             return data;
-          } else if (opts.autoEject) {
-            data = self.ejectAll(query, opts);
           }
           return data;
         });
@@ -4776,79 +4543,6 @@
      * @param {Object} opts - The `opts` argument passed to {@link Model.destroyAll}.
      */
     afterDestroyAll: notify,
-
-    beforeLoadRelations: notify,
-    loadRelations: function loadRelations(id, relations, opts) {
-      var op = undefined;
-      var self = this;
-      var relationList = self.relationList || [];
-      var instance = self.is(id) ? id : undefined;
-      id = instance ? get(instance, self.idAttribute) : id;
-
-      // Default values for arguments
-      relations || (relations = []);
-      opts || (opts = {});
-
-      // Fill in "opts" with the Model's configuration
-      _(self, opts);
-      opts.adapter = self.getAdapterName(opts);
-
-      // beforeLoadRelations lifecycle hook
-      op = opts.op = 'beforeLoadRelations';
-      return resolve(self[op](id, relations, opts)).then(function () {
-        if (isSorN(id) && !instance) {
-          instance = self.get(instance);
-        }
-        if (!instance) {
-          throw new Error('You passed an id of an instance not found in the collection of the Model!');
-        }
-        if (isString(relations)) {
-          relations = [relations];
-        }
-        // Now delegate to the adapter
-        op = opts.op = 'loadRelations';
-        self.dbg(op, instance, relations, opts);
-        return Promise.all(relationList.map(function (def) {
-          if (isFunction(def.load)) {
-            return def.load(self, def, instance, opts);
-          }
-          var task = undefined;
-          if (def.foreignKey) {
-            task = def.Relation.findAll(babelHelpers.defineProperty({}, def.foreignKey, id), opts);
-          } else if (def.localKey) {
-            var key = get(instance, def.localKey);
-            if (isSorN(key)) {
-              task = def.Relation.find(key, opts);
-            }
-          } else if (def.localKeys) {
-            task = def.Relation.findAll(babelHelpers.defineProperty({}, def.Relation.idAttribute, {
-              'in': get(instance, def.localKeys)
-            }), opts);
-          } else if (def.foreignKeys) {
-            task = def.Relation.findAll(babelHelpers.defineProperty({}, def.Relation.idAttribute, {
-              'contains': get(instance, self.idAttribute)
-            }), opts);
-          }
-          if (task) {
-            task = task.then(function (data) {
-              if (opts.raw) {
-                data = data.data;
-              }
-              _set(instance, def.localField, def.type === 'hasOne' ? data.length ? data[0] : undefined : data);
-            });
-          }
-          return task;
-        }));
-      }).then(function () {
-        // afterLoadRelations lifecycle hook
-        op = opts.op = 'afterLoadRelations';
-        return resolve(self[op](instance, relations, opts)).then(function () {
-          return instance;
-        });
-      });
-    },
-
-    afterLoadRelations: notify,
 
     log: function log(level) {
       for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
@@ -5075,8 +4769,7 @@
    */
 
   /**
-   * Allow Models themselves emit events. Any events emitted on a Model's
-   * collection will also be emitted on the Model itself.
+   * Allow Models themselves emit events.
    *
    * A Model's registered listeners are stored on the Model's `__events` property.
    */
@@ -5087,9 +4780,7 @@
   }, true);
 
   /**
-   * Allow instancess to emit events. Any events emitted instances in a Model's
-   * collection will also be emitted on the collection itself, and hence, on the
-   * Model as well.
+   * Allow instancess to emit events.
    *
    * An instance's registered listeners are stored in the instance's private data
    * hash.
@@ -5100,224 +4791,62 @@
     this._set('events', value);
   });
 
-  // function lifecycleNoopCb (resource, attrs, cb) {
-  //   cb(null, attrs)
-  // }
-
-  // function lifecycleNoop (resource, attrs) {
-  //   return attrs
-  // }
-
-  // class Defaults {
-  //   errorFn (a, b) {
-  //     if (this.error && typeof this.error === 'function') {
-  //       try {
-  //         if (typeof a === 'string') {
-  //           throw new Error(a)
-  //         } else {
-  //           throw a
-  //         }
-  //       } catch (err) {
-  //         a = err
-  //       }
-  //       this.error(this.name || null, a || null, b || null)
-  //     }
-  //   }
-  // }
-
-  // var defaultsPrototype = Defaults.prototype
-
-  // defaultsPrototype.actions = {}
-  // defaultsPrototype.afterCreate = lifecycleNoopCb
-  // defaultsPrototype.afterCreateCollection = lifecycleNoop
-  // defaultsPrototype.afterCreateInstance = lifecycleNoop
-  // defaultsPrototype.afterDestroy = lifecycleNoopCb
-  // defaultsPrototype.afterEject = lifecycleNoop
-  // defaultsPrototype.afterFind = lifecycleNoopCb
-  // defaultsPrototype.afterFindAll = lifecycleNoopCb
-  // defaultsPrototype.afterInject = lifecycleNoop
-  // defaultsPrototype.afterLoadRelations = lifecycleNoopCb
-  // defaultsPrototype.afterReap = lifecycleNoop
-  // defaultsPrototype.afterUpdate = lifecycleNoopCb
-  // defaultsPrototype.afterValidate = lifecycleNoopCb
-  // defaultsPrototype.allowSimpleWhere = true
-  // defaultsPrototype.basePath = ''
-  // defaultsPrototype.beforeCreate = lifecycleNoopCb
-  // defaultsPrototype.beforeCreateCollection = lifecycleNoop
-  // defaultsPrototype.beforeCreateInstance = lifecycleNoop
-  // defaultsPrototype.beforeDestroy = lifecycleNoopCb
-  // defaultsPrototype.beforeEject = lifecycleNoop
-  // defaultsPrototype.beforeInject = lifecycleNoop
-  // defaultsPrototype.beforeReap = lifecycleNoop
-  // defaultsPrototype.beforeUpdate = lifecycleNoopCb
-  // defaultsPrototype.beforeValidate = lifecycleNoopCb
-  // defaultsPrototype.bypassCache = false
-  // defaultsPrototype.cacheResponse = !!DSUtils.w
-  // defaultsPrototype.csp = false
-  // defaultsPrototype.clearEmptyQueries = true
-  // defaultsPrototype.computed = {}
-  // defaultsPrototype.defaultAdapter = 'http'
-  // defaultsPrototype.debug = false
-  // defaultsPrototype.defaultValues = {}
-  // defaultsPrototype.eagerEject = false
-  // // TODO: Implement eagerInject in DS#create
-  // defaultsPrototype.eagerInject = false
-  // defaultsPrototype.endpoint = ''
-  // defaultsPrototype.error = console ? (a, b, c) => console[typeof console.error === 'function' ? 'error' : 'log'](a, b, c) : false
-  // defaultsPrototype.errorHandler = function (...args) {
-  //   return DSUtils.Promise.reject(args[0])
-  // }
-  // defaultsPrototype.fallbackAdapters = ['http']
-  // defaultsPrototype.findStrictCache = false
-  // defaultsPrototype.idAttribute = 'id'
-  // defaultsPrototype.ignoredChanges = [/\$/]
-  // defaultsPrototype.instanceEvents = !!DSUtils.w
-  // defaultsPrototype.keepChangeHistory = false
-  // defaultsPrototype.linkRelations = !!DSUtils.w
-  // defaultsPrototype.log = console ? (a, b, c, d, e) => console[typeof console.info === 'function' ? 'info' : 'log'](a, b, c, d, e) : false
-
-  // defaultsPrototype.logFn = function (a, b, c, d) {
-  //   let _this = this
-  //   if (_this.debug && _this.log && typeof _this.log === 'function') {
-  //     _this.log(_this.name || null, a || null, b || null, c || null, d || null)
-  //   }
-  // }
-
-  // defaultsPrototype.maxAge = false
-  // defaultsPrototype.methods = {}
-  // defaultsPrototype.notify = !!DSUtils.w
-  // defaultsPrototype.omit = []
-  // defaultsPrototype.onConflict = 'merge'
-  // defaultsPrototype.reapAction = DSUtils.w ? 'inject' : 'none'
-  // defaultsPrototype.reapInterval = DSUtils.w ? 30000 : false
-  // defaultsPrototype.relationsEnumerable = false
-  // defaultsPrototype.resetHistoryOnInject = true
-  // defaultsPrototype.returnMeta = false
-  // defaultsPrototype.scopes = {}
-  // defaultsPrototype.strategy = 'single'
-  // defaultsPrototype.upsert = !!DSUtils.w
-  // defaultsPrototype.useClass = true
-  // defaultsPrototype.useFilter = false
-  // defaultsPrototype.validate = lifecycleNoopCb
-  // defaultsPrototype.watchChanges = !!DSUtils.w
-
-  // class _DS {
-  //   constructor (options) {
-  //     let _this = this
-  //     options = options || {}
-
-  //     _this.store = {}
-  //     _this.definitions = {}
-  //     _this.adapters = {}
-  //     _this.defaults = new Defaults()
-  //     _this.observe = DSUtils.observe
-  //     DSUtils.forOwn(options, function (v, k) {
-  //       if (k === 'omit') {
-  //         _this.defaults.omit = v.concat(Defaults.prototype.omit)
-  //       } else {
-  //         _this.defaults[k] = v
-  //       }
-  //     })
-
-  //     DSUtils.Events(_this)
-  //   }
-
-  //   getAdapterName (options) {
-  //     let errorIfNotExist = false
-  //     options = options || {}
-  //     if (DSUtils._s(options)) {
-  //       errorIfNotExist = true
-  //       options = {
-  //         adapter: options
-  //       }
-  //     }
-  //     if (this.adapters[options.adapter]) {
-  //       return options.adapter
-  //     } else if (errorIfNotExist) {
-  //       throw new Error(`${options.adapter} is not a registered adapter!`)
-  //     } else {
-  //       return options.defaultAdapter
-  //     }
-  //   }
-
-  //   getAdapter (options) {
-  //     options = options || {}
-  //     return this.adapters[this.getAdapterName(options)]
-  //   }
-
-  //   registerAdapter (name, Adapter, options) {
-  //     let _this = this
-  //     options = options || {}
-  //     if (DSUtils.isFunction(Adapter)) {
-  //       _this.adapters[name] = new Adapter(options)
-  //     } else {
-  //       _this.adapters[name] = Adapter
-  //     }
-  //     if (options.default) {
-  //       _this.defaults.defaultAdapter = name
-  //     }
-  //   }
-
-  //   errorFn (...args) {
-  //     let options = args[args.length - 1]
-  //     let defaultHandler = this.defaults.errorHandler
-  //     let errorHandler = options ? options.errorHandler : defaultHandler
-  //     errorHandler = errorHandler || defaultHandler
-  //     return function (err) {
-  //       return errorHandler(err, ...args)
-  //     }
-  //   }
-  // }
-
-  // var dsPrototype = _DS.prototype
-
-  // dsPrototype.getAdapterName.shorthand = false
-  // dsPrototype.getAdapter.shorthand = false
-  // dsPrototype.registerAdapter.shorthand = false
-  // dsPrototype.errors = DSErrors
-  // dsPrototype.utils = DSUtils
-
   function DS(opts) {
-    classCallCheck(this, DS);
+    var self = this;
+    classCallCheck(self, DS);
+
     opts || (opts = {});
-    this.definitions = {};
+    self.defaults = {};
+
+    for (var key in opts) {
+      self.defaults[key] = opts[key];
+    }
+    self.models = {};
+    self.collections = {};
   }
 
   addHiddenPropsToTarget(DS.prototype, {
-    clear: function clear() {
-      var ejected = {};
-      forOwn(this.definitions, function (definition) {
-        var name = definition.name;
-        ejected[name] = definition.ejectAll();
-      });
-      return ejected;
-    },
-    defineModel: function defineModel(opts) {
-      var Child = Model.extend(opts.methods || {}, opts);
-      this.definitions[Child.name] = Child;
+    defineModel: function defineModel(name, opts) {
+      var self = this;
+
+      if (isObject(name)) {
+        opts = name;
+        name = opts.name;
+      }
+      opts || (opts = {});
+      fillIn(opts, self.defaults);
+
+      var methods = opts.methods || {};
+      delete opts.methods;
+
+      var Child = Model.extend(methods, opts);
+      self.models[name] = Child;
+
+      Child.getModel = function (name) {
+        return self.models[name];
+      };
+
       return Child;
+    },
+    defineCollection: function defineCollection(name, opts, Ctor) {
+      var self = this;
+      opts || (opts = {});
+      if (isString(opts.model)) {
+        opts.model = self.models[name];
+      }
+      var collection = new (Ctor || Collection)([], opts);
+      self.collection[name] = collection;
+      return collection;
+    },
+    model: function model(name) {
+      return this.models[name];
+    },
+    collection: function collection(name) {
+      return this.collections[name];
     }
   });
 
   DS.prototype.defineResource = DS.prototype.defineModel;
-
-  forOwn(Model, function (value, key) {
-    if (isFunction(value)) {
-      DS.prototype[key] = function (name) {
-        var _definitions$name;
-
-        if (!this.definitions[name]) {
-          throw new Error(name + ' is not a registered Model!');
-        }
-
-        for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-          args[_key - 1] = arguments[_key];
-        }
-
-        return (_definitions$name = this.definitions[name])[key].apply(_definitions$name, args);
-      };
-    }
-  });
 
   /**
    * Registered as `js-data` in NPM and Bower.

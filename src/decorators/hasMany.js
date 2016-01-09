@@ -1,4 +1,9 @@
-import {camelCase, isArray, get, set} from '../utils'
+import {
+  camelCase,
+  // isArray,
+  get,
+  set
+} from '../utils'
 
 const op = 'hasMany'
 
@@ -18,7 +23,7 @@ const op = 'hasMany'
 function applyHasMany (target, Relation, opts) {
   opts || (opts = {})
   // Choose field where the relation will be attached
-  const localField = opts.localField = opts.localField || `${camelCase(Relation.name)}Collection`
+  const localField = opts.localField = opts.localField || `${camelCase(Relation.name)}_collection`
   // Choose field on related instances that holds the primary key of instances
   // of the target Model
   let foreignKey = opts.foreignKey
@@ -28,9 +33,9 @@ function applyHasMany (target, Relation, opts) {
   if (!foreignKey && !localKeys && !foreignKeys) {
     foreignKey = opts.foreignKey = `${camelCase(target.name)}_id`
   }
-  if (foreignKey) {
-    Relation.getCollection().createIndex(foreignKey)
-  }
+  // if (foreignKey) {
+  //   Relation.getCollection().createIndex(foreignKey)
+  // }
 
   // Setup configuration of the property
   const descriptor = {
@@ -38,26 +43,26 @@ function applyHasMany (target, Relation, opts) {
     enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
     // Set default method for retrieving the linked relation
     get () {
-      if (!this._get('$')) {
-        return this._get(`links.${localField}`)
-      }
-      const query = {}
-      let items
-      if (foreignKey) {
-        // Make a FAST retrieval of the relation using a secondary index
-        items = Relation.getAll(get(this, target.idAttribute), { index: foreignKey })
-      } else if (localKeys) {
-        const keys = get(this, localKeys) || []
-        const args = isArray(keys) ? keys : Object.keys(keys)
-        // Make a slower retrieval using the ids in the "localKeys" array
-        items = Relation.getAll.apply(Relation, args)
-      } else if (foreignKeys) {
-        set(query, `where.${foreignKeys}.contains`, get(this, target.idAttribute))
-        // Make a much slower retrieval
-        items = Relation.filter(query)
-      }
-      this._set(`links.${localField}`, items)
-      return items
+      // if (!this._get('$')) {
+      return this._get(`links.${localField}`)
+      // }
+      // const query = {}
+      // let items
+      // if (foreignKey) {
+      //   // Make a FAST retrieval of the relation using a secondary index
+      //   items = Relation.getAll(get(this, target.idAttribute), { index: foreignKey })
+      // } else if (localKeys) {
+      //   const keys = get(this, localKeys) || []
+      //   const args = isArray(keys) ? keys : Object.keys(keys)
+      //   // Make a slower retrieval using the ids in the "localKeys" array
+      //   items = Relation.getAll.apply(Relation, args)
+      // } else if (foreignKeys) {
+      //   set(query, `where.${foreignKeys}.contains`, get(this, target.idAttribute))
+      //   // Make a much slower retrieval
+      //   items = Relation.filter(query)
+      // }
+      // this._set(`links.${localField}`, items)
+      // return items
     },
     // Set default method for setting the linked relation
     set (children) {
