@@ -7,19 +7,11 @@ import {
   setSchema,
   registerAdapter
 } from '../decorators/index'
-import {Collection} from '../collection/index'
 import * as validate from '../validate/index'
 
 const {
   resolve
 } = utils
-
-let isBrowser = false
-
-try {
-  isBrowser = !!window
-} catch (e) {
-}
 
 const notify = function (...args) {
   const self = this
@@ -44,11 +36,13 @@ const notify = function (...args) {
  * initial properties.
  */
 export function Model (props, opts) {
-  utils.classCallCheck(this, Model)
+  const self = this
+  utils.classCallCheck(self, Model)
+
   props || (props = {})
   opts || (opts = {})
   const _props = {}
-  Object.defineProperties(this, {
+  Object.defineProperties(self, {
     _get: {
       value (key) {
         return utils.get(_props, key)
@@ -65,15 +59,15 @@ export function Model (props, opts) {
       }
     }
   })
-  this._set('creating', true)
+  self._set('creating', true)
   if (opts.noValidate) {
-    this._set('noValidate', true)
+    self._set('noValidate', true)
   }
-  utils.fillIn(this, props)
-  this._unset('creating')
-  this._set('changes', {})
-  this._unset('noValidate')
-  this._set('previous', utils.copy(props))
+  utils.fillIn(self, props)
+  self._unset('creating')
+  self._set('changes', {})
+  self._unset('noValidate')
+  self._set('previous', utils.copy(props))
 }
 
 /**
@@ -112,27 +106,116 @@ utils.addHiddenPropsToTarget(Model.prototype, {
 
   beforeSave () {},
   save (opts) {
-    const Ctor = this.constructor
-    const op = 'save'
-    Ctor.dbg(op, 'instance:', this, 'opts:', opts)
-    let adapterName
+    let op, adapter
+    const self = this
+    const Ctor = self.constructor
 
+    // Default values for arguments
     opts || (opts = {})
-    utils._(Ctor, opts)
-    opts.op = op
 
-    return resolve(this.beforeSave(opts))
-      .then(() => {
-        adapterName = Ctor.getAdapterName(opts)
-        return Ctor.getAdapter(adapterName)
-          .update(Ctor, utils.get(this, Ctor.idAttribute), this.toJSON(opts), opts)
+    // Fill in "opts" with the Model's configuration
+    utils._(self, opts)
+    adapter = opts.adapter = self.getAdapterName(opts)
+
+    // beforeSave lifecycle hook
+    op = opts.op = 'beforeSave'
+    return resolve(self[op](opts)).then(function () {
+      // Now delegate to the adapter
+      op = opts.op = 'save'
+      Ctor.dbg(op, self, opts)
+      return self.getAdapter(adapter)[op](Ctor, self, opts)
+    }).then(function (data) {
+      // afterSave lifecycle hook
+      op = opts.op = 'afterSave'
+      return resolve(self[op](data, opts)).then(function (_data) {
+        // Allow for re-assignment from lifecycle hook
+        data = _data || data
+        if (opts.raw) {
+          self.set(data.data)
+          data.data = self
+        } else {
+          self.set(data)
+        }
+        return Ctor.end(data, opts)
       })
-      .then(data => {
-        return resolve(this.afterSave(opts))
-          .then(() => Ctor.end(data, opts, adapterName))
-      })
+    })
   },
   afterSave () {},
+
+  beforeLoadRelations () {},
+  loadRelations (relations, opts) {
+    let op
+    const self = this
+    const Ctor = self.constructor
+    const relationList = Ctor.relationList || []
+
+    // Default values for arguments
+    relations || (relations = [])
+    opts || (opts = {})
+
+    // Fill in "opts" with the Model's configuration
+    utils._(Ctor, opts)
+    opts.adapter = Ctor.getAdapterName(opts)
+
+    // beforeLoadRelations lifecycle hook
+    op = opts.op = 'beforeLoadRelations'
+    return resolve(self[op](relations, opts)).then(function () {
+      if (utils.isString(relations)) {
+        relations = [relations]
+      }
+      // Now delegate to the adapter
+      op = opts.op = 'loadRelations'
+      Ctor.dbg(op, self, relations, opts)
+      return Promise.all(relationList.map(function (def) {
+        if (utils.isFunction(def.load)) {
+          return def.load(Ctor, def, self, opts)
+        }
+        let task
+        if (def.type === 'hasMany' && def.foreignKey) {
+          // hasMany
+          task = def.Relation.findAll({
+            [def.foreignKey]: utils.get(self, Ctor.idAttribute)
+          }, opts)
+        } else if (def.foreignKey) {
+          // belongsTo or hasOne
+          const key = utils.get(self, def.foreignKey)
+          if (utils.isSorN(key)) {
+            task = def.Relation.find(key, opts)
+          }
+        } else if (def.localKeys) {
+          // hasMany
+          task = def.Relation.findAll({
+            [def.Relation.idAttribute]: {
+              'in': utils.get(self, def.localKeys)
+            }
+          }, opts)
+        } else if (def.foreignKeys) {
+          // hasMany
+          task = def.Relation.findAll({
+            [def.Relation.idAttribute]: {
+              'contains': utils.get(self, Ctor.idAttribute)
+            }
+          }, opts)
+        }
+        if (task) {
+          task = task.then(function (data) {
+            if (opts.raw) {
+              data = data.data
+            }
+            utils.set(self, def.localField, def.type === 'hasOne' ? (data.length ? data[0] : undefined) : data)
+          })
+        }
+        return task
+      }))
+    }).then(function () {
+      // afterLoadRelations lifecycle hook
+      op = opts.op = 'afterLoadRelations'
+      return resolve(self[op](relations, opts)).then(function () {
+        return self
+      })
+    })
+  },
+  afterLoadRelations () {},
 
   /**
    * @param {Object} [opts] Configuration options. @see {@link Model.destroy}.
@@ -165,16 +248,17 @@ utils.addHiddenPropsToTarget(Model.prototype, {
    * @param {boolean} [opts.silent=false] - Whether to trigger change events.
    */
   set: function (key, value, opts) {
+    const self = this
     if (utils.isObject(key)) {
       opts = value
     }
     opts || (opts = {})
     if (opts.silent) {
-      this._set('silent', true)
+      self._set('silent', true)
     }
-    utils.set(this, key, value)
-    if (!this._get('eventId')) {
-      this._unset('silent')
+    utils.set(self, key, value)
+    if (!self._get('eventId')) {
+      self._unset('silent')
     }
   },
 
@@ -243,63 +327,8 @@ utils.addHiddenPropsToTarget(Model.prototype, {
     return this
   },
 
-  /**
-   * Return a plain object representation of this instance.
-   *
-   * @param {Object} [opts] - Configuration options.
-   * @param {string[]} [opts.with] - Array of relation names or relation fields
-   * to include in the representation.
-   * @return {Object} Plain object representation of instance.
-   */
   toJSON (opts) {
-    opts || (opts = {})
-    const Ctor = this.constructor
-    let json = this
-    if (this instanceof Model) {
-      json = {}
-      for (var key in this) {
-        json[key] = this[key]
-      }
-      // The user wants to include relations in the resulting plain object
-      // representation
-      if (Ctor && Ctor.relationList && opts.with) {
-        if (utils.isString(opts.with)) {
-          opts.with = [opts.with]
-        }
-        Ctor.relationList.forEach(def => {
-          let containedName
-          if (opts.with.indexOf(def.relation) !== -1) {
-            containedName = def.relation
-          } else if (opts.with.indexOf(def.localField) !== -1) {
-            containedName = def.localField
-          }
-          if (containedName) {
-            const optsCopy = { with: opts.with.slice() }
-
-            // Prepare to recurse into deeply nested relations
-            optsCopy.with.splice(optsCopy.with.indexOf(containedName), 1)
-            optsCopy.with.forEach((relation, i) => {
-              if (relation && relation.indexOf(containedName) === 0 && relation.length >= containedName.length && relation[containedName.length] === '.') {
-                optsCopy.with[i] = relation.substr(containedName.length + 1)
-              } else {
-                optsCopy.with[i] = ''
-              }
-            })
-            const relationData = utils.get(this, def.localField)
-
-            if (relationData) {
-              // The actual recursion
-              if (utils.isArray(relationData)) {
-                utils.set(json, def.localField, relationData.map(item => def.Relation.prototype.toJSON.call(item, optsCopy)))
-              } else {
-                utils.set(json, def.localField, def.Relation.prototype.toJSON.call(relationData, optsCopy))
-              }
-            }
-          }
-        })
-      }
-    }
-    return json
+    return this.constructor.toJSON(this, opts)
   }
 })
 
@@ -321,25 +350,6 @@ utils.fillIn(Model, {
   _adaptersOwner: null,
 
   /**
-   * This Model's {@link Collection} instance. This is where instances of the
-   * Model are stored if {@link Model.autoInject} is `true`.
-   *
-   * __You should use {@link Model.inject}, {@link Model.eject}, and
-   * {@link Model.ejectAll} if you need to manually get data in and out of this
-   * collection.__
-   *
-   * @memberof Model
-   * @private
-   * @type {Collection}
-   */
-  _collection: null,
-
-  /**
-   * @ignore
-   */
-  _collectionOwner: null,
-
-  /**
    * Hash of registered listeners. Don't modify. Use {@link Model.on} and
    * {@link Model.off}.
    *
@@ -352,33 +362,6 @@ utils.fillIn(Model, {
    * @ignore
    */
   _listenersOwner: null,
-
-  /**
-   * Whether {@link Model.destroy} and {@link Model.destroyAll} should
-   * automatically eject the specified item(s) from the Model's collection on
-   * success.
-   *
-   * @memberof Model
-   * @type {boolean}
-   * @default true
-   */
-  autoEject: true,
-
-  /**
-   * Whether {@link Model.create}, {@link Model.createMany},
-   * {@link Model.update}, {@link Model.updateAll}, {@link Model.updateMany},
-   * {@link Model.save}, should automatically inject the specified item(s)
-   * returned by the adapter into the the Model's collection on success.
-   *
-   * __Defaults to `true` in the Browser.__
-   *
-   * __Defaults to `false` in Node.js__
-   *
-   * @memberof Model
-   * @type {boolean}
-   */
-  autoInject: isBrowser,
-  bypassCache: false,
 
   /**
    * Whether to disallow the use of `new Function` in {@link Model.extend}.
@@ -411,7 +394,6 @@ utils.fillIn(Model, {
    * @default false
    */
   debug: false,
-  eagerEject: false,
 
   /**
    * The field on instances of {@link Model} that should be used as the unique
@@ -431,51 +413,22 @@ utils.fillIn(Model, {
    * accessing the related Model. If the related Model's collection is empty,
    * then the property accessors won't return anything.
    *
-   * __Defaults to `true` in the Browser.__
-   *
-   * __Defaults to `false` in Node.js__
-   *
    * @memberof Model
    * @type {boolean}
+   * @default true
    */
-  linkRelations: isBrowser,
+  linkRelations: true,
 
   /**
    * Whether this Model should emit operational events.
    *
-   * __Defaults to `true` in the Browser.__
-   *
-   * __Defaults to `false` in Node.js__
-   *
    * @memberof Model
    * @type {boolean}
+   * @default true
    */
-  notify: isBrowser,
+  notify: true,
 
-  /**
-   * What to do when injecting an item into the Model's collection that shares a
-   * primary key with an item already in the Model's collection.
-   *
-   * Possible values:
-   * - merge
-   * - replace
-   *
-   * Merge:
-   *
-   * Recursively shallow copy properties from the new item onto the existing
-   * item.
-   *
-   * Replace:
-   *
-   * Shallow copy top-level properties from the new item onto the existing item.
-   * Any top-level own properties of the existing item that are _not_ on the new
-   * item will be removed.
-   *
-   * @memberof Model
-   * @type {string}
-   * @default merge
-   */
-  onConflict: 'merge',
+  pojo: false,
 
   /**
    * Whether the relation property accessors should be enumerable. It's
@@ -533,13 +486,22 @@ utils.fillIn(Model, {
   end (data, opts) {
     const self = this
     if (opts.raw) {
-      if (opts.autoInject) {
-        data.data = self.inject(data.data)
-      }
       utils._(opts, data)
-      return data
-    } else if (opts.autoInject) {
-      data = self.inject(data)
+    }
+    if (!opts.pojo) {
+      let _data = opts.raw ? data.data : data
+      if (utils.isArray(_data)) {
+        _data = _data.map(function (item) {
+          return self.createInstance(item)
+        })
+      } else {
+        _data = self.createInstance(_data)
+      }
+      if (opts.raw) {
+        data.data = _data
+      } else {
+        data = _data
+      }
     }
     if (opts.notify) {
       setTimeout(function () {
@@ -547,25 +509,6 @@ utils.fillIn(Model, {
       })
     }
     return data
-  },
-
-  /**
-   * Create a new secondary index in the Collection instance of this Model.
-   *
-   * @memberof Model
-   * @method
-   * @param {string} name - The name of the new secondary index
-   * @param {string[]} fieldList - The list of keys to be used to create the index.
-   * @param {Object} [opts] - Configuration options.
-   * @param {Function} [opts.fieldGetter] - Getter function to be used to grab
-   * values off of instances for each field in the index's field list. Will be
-   * passed the instance and the field to be retrieved.
-   * @param {Function} [opts.hashCode] - Function used to return a unique
-   * identifier for each instance in the collection. Will be passed the instance.
-   */
-  createIndex (name, fieldList, opts) {
-    this.dbg('createIndex', 'name:', name, 'fieldList:', fieldList, 'opts:', opts)
-    this.getCollection().createIndex(name, fieldList, opts)
   },
 
   /**
@@ -588,468 +531,80 @@ utils.fillIn(Model, {
   },
 
   /**
-   * Return whether `instance` is an instance of this Model.
+   * Return whether `instance` is an instance of this Model's instance class.
    *
    * @memberof Model
    * @method
    * @param {Object} instance - The instance to check.
-   * @return {boolean} Whether `instance` is an instance of this Model.
+   * @return {boolean} Whether `instance` is an instance of this Model's
+   * instance class.
    */
-  is (instance) {
-    return instance instanceof this
+  is (instance, modelOnly) {
+    const self = this
+    return self.instanceClass && !modelOnly ? instance instanceof self.instanceClass : instance instanceof self
   },
 
   /**
-   * Return the entities in this Model's collection that have a primary key that
-   * was automatically generated when they were injected into the collection.
+   * Return a plain object representation of the given entity.
    *
-   * @memberof Model
+   * @memberOf Model
    * @method
-   * @return {Model[]} The entities where with autoPks.
-   */
-  getAutoPkItems () {
-    return this.getAll().filter(function (item) {
-      return item._get('autoPk')
-    })
-  },
-
-  /**
-   * If the entity with the given primary key is currently in this Model's
-   * collection, return the result of calling {@link Model#changes} on that
-   * entity, otherwise return undefined.
-   *
-   * @memberof Model
-   * @method
-   * @param {(string|number)} [id] - If provided, only return changes for the
-   * entity with the given primary key.
-   * @return {(Object|Array)} Changes to the entity since the entity was instantiated.
-   */
-  changes (id) {
-    this.dbg('changes', 'id:', id)
-    if (utils.isSorN(id)) {
-      const instance = this.get(id)
-      return instance ? instance.changes() : undefined
-    } else {
-      return this.getCollection().mapCall('changes')
-    }
-  },
-
-  /**
-   * If the entity with the given primary key is currently in this Model's
-   * collection, return the result of calling {@link Model#hasChanges} on that
-   * entity, otherwise return undefined.
-   *
-   * If no primary key is provided, return whether any entity in this Model's
-   * collection has any changes.
-   *
-   * @memberof Model
-   * @method
-   * @param {(string|number)} [id] - The primary key of the entity.
-   * @return {boolean} Whether the entity has any changes, or whether any entity
-   * in this Model's collection has any changes.
-   */
-  hasChanges (id) {
-    this.dbg('hasChanges', 'id:', id)
-    if (utils.isSorN(id)) {
-      const instance = this.get(id)
-      if (instance) {
-        return instance.hasChanges()
-      }
-    } else {
-      let hasChanges = false
-      this.getCollection().forEach(function (item) {
-        hasChanges = hasChanges || item.hasChanges()
-      })
-      return hasChanges
-    }
-  },
-
-  beforeInject () {},
-
-  /**
-   * Insert the provided entity or entities into this Model's collection.
-   *
-   * If an entity is already in the collection then the provided entity will
-   * either merge with or replace the existing item based on the value of the
-   * `onConflict` option.
-   *
-   * The collection's secondary indexes will be updated as each entity is
-   * visited.
-   *
-   * @memberof Model
-   * @method
-   * @param {(Object|Object[]|Model|Model[])} items - The item or items to insert.
-   * @param {Object} [opts] - Configuration options.
-   * @param {boolean} [opts.autoPk={@link Model.autoPk}] - Whether to generate
-   * primary keys for the entities to be injected. Useful for injecting
-   * temporary, unsaved data into a Model's collection.
-   * @param {string} [opts.onConflict] - What to do when an item is already in
-   * the Model's collection. Possible values are `merge` or `replace`.
-   * @return {(Model|Model[])} The injected entity or entities.
-   */
-  inject (entities, opts) {
-    const _this = this
-
-    // For debuggability
-    const op = 'inject'
-    _this.dbg(op, 'entities:', entities, 'opts:', opts)
-
-    // Default values for arguments
-    opts || (opts = {})
-
-    // Fill in "opts" with the Model's configuration
-    utils._(_this, opts)
-    opts.op = op
-    entities = this.beforeInject(entities, opts) || entities
-
-    // Track whether just one or an array of entities is being injected
-    let singular = false
-    const collection = _this.getCollection()
-    const idAttribute = _this.idAttribute
-    const relationList = _this.relationList || []
-    const timestamp = new Date().getTime()
-    if (!utils.isArray(entities)) {
-      entities = [entities]
-      singular = true
-    }
-
-    // Map the provided entities to injected entities.
-    // New entities will be injected. If any props map to existing entities,
-    // they will be merged into the existing entities according to the onConflict
-    // option.
-    entities = entities.map(function (props) {
-      let id = utils.get(props, idAttribute)
-      // Track whether we had to generate an id for this entity
-      let autoPk = false
-      // Validate that the primary key attached to the entity is a string or
-      // numer
-      if (!utils.isSorN(id)) {
-        // No id found, generate one
-        if (opts.autoPk) {
-          id = utils.uuid()
-          utils.set(props, idAttribute, id)
-          autoPk = true
-        } else {
-          // Not going to generate one, throw an error
-          throw new TypeError(`User#${idAttribute}: Expected string or number, found ${typeof id}!`)
-        }
-      }
-      // Grab existing entity if there is one
-      const existing = _this.get(id)
-      // If the currently visited props are just reference to the existing
-      // entity, then there is nothing to be done. Exit early.
-      if (props === existing) {
-        return existing
-      }
-
-      // Check the currently visited props for relations that need to be
-      // injected as well
-      relationList.forEach(function (def) {
-        // A reference to the Model that this Model is related to
-        const Relation = def.Relation
-        // The field used by the related Model as the primary key
-        const relationIdAttribute = Relation.idAttribute
-        // Grab the foreign key in this relationship, if there is one
-        const foreignKey = def.foreignKey
-
-        // Grab a reference to the related data attached or linked to the
-        // currently visited props
-        let toInject = utils.get(props, def.localField)
-
-        // If the user provided a custom injection function for this relation,
-        // call it
-        if (utils.isFunction(def.inject)) {
-          def.inject(_this, def, props)
-        } else if (toInject && def.inject !== false) {
-          // Otherwise, if there is something to be injected, inject it
-          if (utils.isArray(toInject)) {
-            // Handle injecting hasMany relations
-            toInject = toInject.map(function (toInjectItem) {
-              // Check that this item isn't the same item that is already in the
-              // store
-              if (toInjectItem !== Relation.get(utils.get(toInjectItem, relationIdAttribute))) {
-                try {
-                  // Make sure this item has its foreignKey
-                  if (foreignKey) {
-                    utils.set(toInjectItem, foreignKey, id)
-                  }
-                  // Finally inject this related item
-                  toInjectItem = Relation.inject(toInjectItem)
-                } catch (err) {
-                  throw new Error(`Failed to inject ${def.type} relation: "${def.relation}"! ${err.message}`)
-                }
-              }
-              return toInjectItem
-            })
-            // If it's the parent that has the localKeys
-            if (def.localKeys) {
-              utils.set(props, def.localKeys, toInject.map(function (injected) {
-                return utils.get(injected, relationIdAttribute)
-              }))
-            }
-          } else {
-            // Handle injecting belongsTo and hasOne relations
-            if (toInject !== Relation.get(utils.get(toInject, relationIdAttribute))) {
-              try {
-                // Make sure the parent has its localKey
-                if (def.localKey) {
-                  utils.set(props, def.localKey, utils.get(toInject, Relation.idAttribute))
-                }
-                // Make sure this item has its localKey
-                if (foreignKey) {
-                  utils.set(toInject, def.foreignKey, utils.get(props, idAttribute))
-                }
-                // Finally inject this related item
-                toInject = Relation.inject(toInject)
-              } catch (err) {
-                throw new Error(`Failed to inject ${def.type} relation: "${def.relation}"!`)
-              }
-            }
-          }
-        }
-        if (def.link || (def.link === undefined && _this.linkRelations)) {
-          // Remove relation properties from the item, since those relations
-          // have been injected by now
-          utils.unset(props, def.localField)
-        } else {
-          // Here, linking is turned off, so we setup a manual link
-          utils.set(props, def.localField, toInject)
-        }
-      })
-
-      if (existing) {
-        // Here, the currently visited props corresponds to an entity already
-        // in the collection, so we need to merge them
-        const onConflict = opts.onConflict || _this.onConflict
-        if (onConflict === 'merge') {
-          utils.deepMixIn(existing, props)
-        } else if (onConflict === 'replace') {
-          utils.forOwn(existing, (value, key) => {
-            if (key !== idAttribute && !props.hasOwnProperty(key)) {
-              delete existing[key]
-            }
-          })
-          existing.set(props)
-        }
-        props = existing
-        // Update all indexes in the collection
-        collection.update(props)
-      } else {
-        // Here, the currently visted props does not correspond to any entity
-        // in the collection, so make this props is an instance of this Model
-        // and insert it into the collection
-        props = _this.createInstance(props)
-        if (autoPk) {
-          // Flag this instance as one that had its primary key generated
-          props._set('autoPk', autoPk)
-        }
-        collection.insert(props)
-      }
-      // Track when this entity was injected
-      props._set('$', timestamp)
-      return props
-    })
-    // Finally, return the injected data
-    const result = singular ? (entities.length ? entities[0] : undefined) : entities
-    this.afterInject(result, opts)
-    return result
-  },
-
-  afterInject () {},
-
-  beforeEject () {},
-
-  /**
-   * Remove the entity with the given primary key from this Model's collection.
-   *
-   * @memberof Model
-   * @method
-   * @param {(string|number)} id - The primary key of the entity to be removed.
-   * @param {Object} [opts] - Configuration options.
-   * @return {Model} The removed entity, if any.
-   */
-  eject (id, opts) {
-    // For debuggability
-    const op = 'eject'
-    this.dbg(op, 'id:', id, 'opts:', opts)
-
-    // Default values for arguments
-    opts || (opts = {})
-    opts.op = op
-    this.beforeEject(id, opts)
-    const instance = this.get(id)
-
-    // The instance is in the collection, remove it
-    if (instance) {
-      instance._unset('$')
-      this.getCollection().remove(instance)
-    }
-    this.afterEject(instance, opts)
-    return instance
-  },
-
-  afterEject () {},
-
-  beforeEjectAll () {},
-
-  /**
-   * Remove the instances selected by "query" from the Collection instance of
-   * this Model.
-   *
-   * @memberof Model
-   * @method
-   * @param {Object} [query={}] - Selection query.
-   * @param {Object} [query.where] - Filtering criteria.
-   * @param {number} [query.skip] - Number to skip.
-   * @param {number} [query.limit] - Number to limit to.
-   * @param {Array} [query.orderBy] - Sorting criteria.
-   * @param {Object} [opts] - Configuration options.
-   * @return {Model[]} The removed entites, if any.
-   */
-  ejectAll (query, opts) {
-    // For debuggability
-    const op = 'ejectAll'
-    this.dbg(op, 'query:', query, 'opts:', opts)
-
-    // Default values for arguments
-    opts || (opts = {})
-    opts.op = op
-    this.beforeEjectAll(query, opts)
-    const entities = this.filter(query)
-    const collection = this.getCollection()
-
-    // Remove each selected entity from the collection
-    entities.forEach(function (item) {
-      collection.remove(item)
-    })
-    this.afterEjectAll(entities, query, opts)
-    return entities
-  },
-
-  afterEjectAll () {},
-
-  /**
-   * Return the entity in this Model's collection that has the given primary
-   * key, if such an entity can be found.
-   *
-   * @memberof Model
-   * @method
-   * @param {(string|number)} id - Primary key of the entity to retrieve.
-   * @return {Model} The entity or undefined.
-   */
-  get: function (id) {
-    this.dbg('get', 'id:', id)
-    const instances = this.getCollection().get(id)
-    return instances.length ? instances[0] : undefined
-  },
-
-  /**
-   * Proxy for Collection#between
-   *
-   * @memberof Model
-   * @method
-   * @return {Model[]}
-   */
-  between (...args) {
-    return this.getCollection().between(...args)
-  },
-
-  /**
-   * Equivalent of `Model.getCollection().getAll([...ids][, opts])`. See
-   * {@link Collection#getAll}.
-   *
-   * @memberof Model
-   * @method
-   * @return {Model[]} The selected entities
-   */
-  getAll (...args) {
-    return this.getCollection().getAll(...args)
-  },
-
-  /**
-   * Equivalent of `Model.getCollection().filter([query][, opts])`. See
-   * {@link Collection#filter}.
-   *
-   * @memberof Model
-   * @method
-   * @return {Model[]} The selected entities.
-   */
-  filter (query, opts) {
-    opts || (opts = {})
-    return this.getCollection().filter(query, opts)
-  },
-
-  /**
-   * Equivalent of `Model.getCollection().forEach(cb[, thisArg])`. See
-   * {@link Collection#forEach}.
-   *
-   * @memberof Model
-   * @method
-   */
-  forEach (cb, thisArg) {
-    return this.getCollection().forEach(cb, thisArg)
-  },
-
-  /**
-   * Equivalent of `Model.getCollection().map(cb[, thisArg])`. See
-   * {@link Collection#map}.
-   *
-   * @memberof Model
-   * @method
-   * @return {Array} The result
-   */
-  map (cb, thisArg) {
-    return this.getCollection().map(cb, thisArg)
-  },
-
-  /**
-   * Equivalent of `Model.getCollection().reduce(cb, initialValue)`. See
-   * {@link Collection#reducs}.
-   *
-   * @memberof Model
-   * @method
-   * @return {*} The result.
-   */
-  reduce (cb, initialValue) {
-    return this.getCollection().reduce(cb, initialValue)
-  },
-
-  /**
-   * Equivalent of `Model.getCollection().mapCall(funcName[, ...args])`. See
-   * {@link Collection#mapCall}.
-   *
-   * @memberof Model
-   * @method
-   * @return {Array} The result
-   */
-  mapCall (...args) {
-    return this.getCollection().mapCall(...args)
-  },
-
-  /**
-   * Return the plain JSON representation of all items in this Model's
-   * collection.
-   *
-   * @memberof Model
-   * @method
+   * @param {Object} - Entity of which to return the plain
+   * representation.
    * @param {Object} [opts] - Configuration options.
    * @param {string[]} [opts.with] - Array of relation names or relation fields
    * to include in the representation.
-   * @return {Model[]} The entities.
+   * @return {Object} Plain object representation of instance.
    */
-  toJSON (opts) {
-    return this.mapCall('toJSON', opts)
-  },
+  toJSON (data, opts) {
+    const self = this
+    opts || (opts = {})
+    let json = data
+    if (self.is(data)) {
+      json = {}
+      for (var key in data) {
+        json[key] = data[key]
+      }
+      // The user wants to include relations in the resulting plain object
+      // representation
+      if (self && self.relationList && opts.with) {
+        if (utils.isString(opts.with)) {
+          opts.with = [opts.with]
+        }
+        self.relationList.forEach(def => {
+          let containedName
+          if (opts.with.indexOf(def.relation) !== -1) {
+            containedName = def.relation
+          } else if (opts.with.indexOf(def.localField) !== -1) {
+            containedName = def.localField
+          }
+          if (containedName) {
+            const optsCopy = { with: opts.with.slice() }
 
-  /**
-   * Equivalent of `Model.getCollection().query()`. See {@link Collection#query}.
-   *
-   * @memberof Model
-   * @method
-   * @return {Query}
-   */
-  query () {
-    return this.getCollection().query()
+            // Prepare to recurse into deeply nested relations
+            optsCopy.with.splice(optsCopy.with.indexOf(containedName), 1)
+            optsCopy.with.forEach((relation, i) => {
+              if (relation && relation.indexOf(containedName) === 0 && relation.length >= containedName.length && relation[containedName.length] === '.') {
+                optsCopy.with[i] = relation.substr(containedName.length + 1)
+              } else {
+                optsCopy.with[i] = ''
+              }
+            })
+            const relationData = utils.get(data, def.localField)
+
+            if (relationData) {
+              // The actual recursion
+              if (utils.isArray(relationData)) {
+                utils.set(json, def.localField, relationData.map(item => def.Relation.toJSON(item, optsCopy)))
+              } else {
+                utils.set(json, def.localField, def.Relation.toJSON(relationData, optsCopy))
+              }
+            }
+          }
+        })
+      }
+    }
+    return json
   },
 
   /**
@@ -1099,20 +654,6 @@ utils.fillIn(Model, {
     return this._adapters
   },
 
-  getCollection () {
-    if (this._collectionOwner !== this) {
-      this._collection = new Collection([], this.idAttribute)
-      this._collection.on('all', this.emit, this)
-      this._collection.createIndex('lastInjected', ['$'], {
-        fieldGetter (obj) {
-          return obj._get('$')
-        }
-      })
-      this._collectionOwner = this
-    }
-    return this._collection
-  },
-
   /**
    * Model lifecycle hook called by {@link Model.create}. If this method
    * returns a promise then {@link Model.create} will wait for the promise
@@ -1128,8 +669,7 @@ utils.fillIn(Model, {
   checkUpsertCreate (props, opts) {
     const self = this
     return (opts.upsert || (opts.upsert === undefined && self.upsert)) &&
-          utils.get(props, self.idAttribute) &&
-          (!self.is(props) || !props._get('autoPk'))
+          utils.get(props, self.idAttribute)
   },
 
   /**
@@ -1144,8 +684,6 @@ utils.fillIn(Model, {
    * @param {Object} [opts] - Configuration options.
    * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
    * adapter to use.
-   * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
-   * inject the resulting created data into this Model's collection upon success.
    * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
    * lifecycle events.
    * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
@@ -1173,33 +711,24 @@ utils.fillIn(Model, {
 
     // beforeCreate lifecycle hook
     op = opts.op = 'beforeCreate'
-    return resolve(self[op](props, opts))
-      .then(function (_props) {
+    return resolve(self[op](props, opts)).then(function (_props) {
+      // Allow for re-assignment from lifecycle hook
+      props = _props || props
+      // Now delegate to the adapter
+      op = opts.op = 'create'
+      const json = self.toJSON(props, opts)
+      self.dbg(op, json, opts)
+      return self.getAdapter(adapter)[op](self, json, opts)
+    }).then(function (data) {
+      // afterCreate lifecycle hook
+      op = opts.op = 'afterCreate'
+      return resolve(self[op](data, opts)).then(function (_data) {
         // Allow for re-assignment from lifecycle hook
-        props = _props || props
-        // Now delegate to the adapter
-        op = opts.op = 'create'
-        const json = self.prototype.toJSON.call(props, opts)
-        self.dbg(op, json, opts)
-        return self.getAdapter(adapter)[op](self, json, opts)
+        data = _data || data
+        // Possibly formulate result object
+        return self.end(data, opts)
       })
-      .then(function (data) {
-        // afterCreate lifecycle hook
-        op = opts.op = 'afterCreate'
-        return resolve(self[op](data, opts))
-          .then(function (_data) {
-            // Allow for re-assignment from lifecycle hook
-            data = _data || data
-            // If the created entity was already in self Model's collection via
-            // an autoPk id, remove it from the collection
-            // TODO: Fix this?
-            if (self.is(props) && props._get('$')) {
-              self.eject(utils.get(props, self.idAttribute))
-            }
-            // Possibly inject result and/or formulate result object
-            return self.end(data, opts)
-          })
-      })
+    })
   },
 
   /**
@@ -1230,7 +759,7 @@ utils.fillIn(Model, {
     const self = this
     if (opts.upsert || (opts.upsert === undefined && self.upsert)) {
       return entities.reduce(function (hasId, item) {
-        return hasId && utils.get(item, self.idAttribute) && (!utils.isFunction(item._get) || !item._get('autoPk'))
+        return hasId && utils.get(item, self.idAttribute)
       }, true)
     }
   },
@@ -1247,8 +776,6 @@ utils.fillIn(Model, {
    * @param {Object} [opts] - Configuration options.
    * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
    * adapter to use.
-   * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
-   * inject the resulting created entities into this Model's collection.
    * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
    * lifecycle events.
    * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
@@ -1284,7 +811,7 @@ utils.fillIn(Model, {
         // Now delegate to the adapter
         op = opts.op = 'createMany'
         const json = entities.map(function (item) {
-          return self.prototype.toJSON.call(item, opts)
+          return self.toJSON(item, opts)
         })
         self.dbg(op, json, opts)
         return self.getAdapter(adapter)[op](self, json, opts)
@@ -1294,14 +821,6 @@ utils.fillIn(Model, {
         return resolve(self[op](data, opts)).then(function (_data) {
           // Allow for re-assignment from lifecycle hook
           data = _data || data
-          // If the created entities were already in this Model's collection
-          // via an autoPk id, remove them from the collection
-          // TODO: Fix this?
-          entities.forEach(item => {
-            if (self.is(item) && item._get('$')) {
-              self.eject(utils.get(item, self.idAttribute))
-            }
-          })
           // Possibly inject result and/or formulate result object
           return self.end(data, opts)
         })
@@ -1333,8 +852,7 @@ utils.fillIn(Model, {
   beforeFind: notify,
 
   /**
-   * Retrieve via an adapter the entity with the given primary key. The returned
-   * entity will be injected into the Model's collection if `autoInject` is true.
+   * Retrieve via an adapter the entity with the given primary key.
    *
    * {@link Model.beforeFind} will be called before calling the adapter.
    * {@link Model.afterFind} will be called after calling the adapter.
@@ -1345,8 +863,6 @@ utils.fillIn(Model, {
    * @param {Object} [opts] - Configuration options.
    * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
    * adapter to use.
-   * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
-   * inject the resulting data into this Model's collection.
    * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
    * lifecycle events.
    * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
@@ -1412,9 +928,7 @@ utils.fillIn(Model, {
 
   /**
    * Using the `query` argument, select entities to pull from an adapter.
-   * Expects back from the adapter the array of selected entities. The returned
-   * entities will be injected into the Model's collection if `autoInject` is
-   * true.
+   * Expects back from the adapter the array of selected entities.
    *
    * {@link Model.beforeFindAll} will be called before calling the adapter.
    * {@link Model.afterFindAll} will be called after calling the adapter.
@@ -1429,8 +943,6 @@ utils.fillIn(Model, {
    * @param {Object} [opts] - Configuration options.
    * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
    * adapter to use.
-   * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
-   * inject the resulting data into this Model's collection.
    * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
    * lifecycle events.
    * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
@@ -1485,89 +997,6 @@ utils.fillIn(Model, {
   afterFindAll: notify,
 
   /**
-   * Model lifecycle hook called by {@link Model.save}. If this method
-   * returns a promise then {@link Model.save} will wait for the promise
-   * to resolve before continuing.
-   *
-   * @memberof Model
-   * @method
-   * @param {(string|number)} id - The `id` argument passed to {@link Model.save}.
-   * @param {Object} opts - The `opts` argument passed to {@link Model.save}.
-   */
-  beforeSave: notify,
-
-  /**
-   * If the entity with the given primary key is currently in this Model's
-   * collection, call the instance's {@link Model#save} method. If the entity
-   * is not in this Model's collection, the returned promise will be rejected.
-   *
-   * {@link Model.beforeSave} will be called before calling {@link Model#save}.
-   * {@link Model#beforeSave} will be called before saving the entity.
-   * {@link Model#afterSave} will be called after saving the entity.
-   * {@link Model.afterSave} will be called after calling {@link Model#save}.
-   *
-   * @memberof Model
-   * @method
-   * @param {(string|number)} id - The primary key of the entity to save.
-   * @param {Object} [opts] - Configuration options.
-   * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
-   * adapter to use.
-   * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
-   * inject the resulting updated data into this Model's collection.
-   * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
-   * lifecycle events.
-   * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
-   * updated data. If `true` return a response object that includes the updated
-   * data and metadata about the operation.
-   * @param {string[]} [opts.with=[]] Relations to save in a cascading
-   * save if any of the entity's relations are linked to the entity.
-   * NOT performed in a transaction.
-   */
-  save (id, opts) {
-    let op
-    const self = this
-    let instance = self.get(id)
-
-    // Default values for arguments
-    opts || (opts = {})
-
-    // Fill in "opts" with the Model's configuration
-    utils._(self, opts)
-    opts.adapter = self.getAdapterName(opts)
-
-    // beforeSave lifecycle hook
-    op = opts.op = 'beforeSave'
-    return resolve(self[op](instance, opts))
-      .then(function (_instance) {
-        instance = _instance || instance
-        if (!instance) {
-          throw new Error(`instance with "${self.idAttribute}" of ${id} not in Model's collection!`)
-        }
-        // Now delegate to the adapter
-        op = opts.op = 'save'
-        self.dbg(op, id, opts)
-        return instance[op](opts)
-      })
-      .then(function (data) {
-        // afterSave lifecycle hook
-        op = opts.op = 'afterSave'
-        return resolve(self[op](instance, opts)).then(() => data)
-      })
-  },
-
-  /**
-   * Model lifecycle hook called by {@link Model.save}. If this method
-   * returns a promise then {@link Model.save} will wait for the promise
-   * to resolve before continuing.
-   *
-   * @memberof Model
-   * @method
-   * @param {(string|number)} id - The `id` argument passed to {@link Model.save}.
-   * @param {Object} opts - The `opts` argument passed to {@link Model.save}.
-   */
-  afterSave: notify,
-
-  /**
    * Model lifecycle hook called by {@link Model.update}. If this method
    * returns a promise then {@link Model.update} will wait for the promise
    * to resolve before continuing.
@@ -1594,8 +1023,6 @@ utils.fillIn(Model, {
    * @param {Object} [opts] - Configuration options.
    * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
    * adapter to use.
-   * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
-   * inject the resulting updated data into this Model's collection.
    * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
    * lifecycle events.
    * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
@@ -1624,7 +1051,7 @@ utils.fillIn(Model, {
       props = _props || props
       // Now delegate to the adapter
       op = opts.op = 'update'
-      const json = self.prototype.toJSON.call(props, opts)
+      const json = self.toJSON(props, opts)
       self.dbg(op, id, json, opts)
       return self.getAdapter(adapter)[op](self, id, json, opts)
     }).then(function (data) {
@@ -1678,8 +1105,6 @@ utils.fillIn(Model, {
    * @param {Object} [opts] - Configuration options.
    * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
    * adapter to use.
-   * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
-   * inject the resulting updated data into this Model's collection.
    * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
    * lifecycle events.
    * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
@@ -1709,7 +1134,7 @@ utils.fillIn(Model, {
       // Now delegate to the adapter
       op = opts.op = 'updateMany'
       const json = entities.map(function (item) {
-        return self.prototype.toJSON.call(item, opts)
+        return self.toJSON(item, opts)
       })
       self.dbg(op, json, opts)
       return self.getAdapter(adapter)[op](self, json, opts)
@@ -1753,8 +1178,6 @@ utils.fillIn(Model, {
   /**
    * Using the `query` argument, perform the a single updated to the selected
    * entities. Expects back from the adapter an array of the updated entities.
-   * The updated entities will be injected into the Model's collection if
-   * `autoInject` is true.
    *
    * {@link Model.beforeUpdateAll} will be called before making the update.
    * {@link Model.afterUpdateAll} will be called after making the update.
@@ -1770,8 +1193,6 @@ utils.fillIn(Model, {
    * @param {Object} [opts] - Configuration options.
    * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
    * adapter to use.
-   * @param {boolean} [opts.autoInject={@link Model.autoInject}] Whether to
-   * inject the resulting updated data into this Model's collection.
    * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
    * lifecycle events.
    * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
@@ -1801,7 +1222,7 @@ utils.fillIn(Model, {
       props = _props || props
       // Now delegate to the adapter
       op = opts.op = 'updateAll'
-      const json = self.prototype.toJSON.call(props, opts)
+      const json = self.toJSON(props, opts)
       self.dbg(op, query, json, opts)
       return self.getAdapter(adapter)[op](self, query, json, opts)
     }).then(function (data) {
@@ -1854,8 +1275,6 @@ utils.fillIn(Model, {
    * @param {Object} [opts] - Configuration options.
    * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
    * adapter to use.
-   * @param {boolean} [opts.autoEject={@link Model.autoEject}] Whether to remove
-   * the entity from this Model's collection upon success.
    * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
    * lifecycle events.
    * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
@@ -1891,13 +1310,8 @@ utils.fillIn(Model, {
         // Allow for re-assignment from lifecycle hook
         data = _data || data
         if (opts.raw) {
-          if (opts.autoEject) {
-            data.data = self.eject(id, opts)
-          }
           utils._(opts, data)
           return data
-        } else if (opts.autoEject) {
-          data = self.eject(id, opts)
         }
         return data
       })
@@ -1945,8 +1359,6 @@ utils.fillIn(Model, {
    * @param {Object} [opts] - Configuration options.
    * @param {boolean} [opts.adapter={@link Model.defaultAdapter}] Name of the
    * adapter to use.
-   * @param {boolean} [opts.autoEject={@link Model.autoEject}] Whether to remove
-   * the entities from this Model's collection upon success.
    * @param {boolean} [opts.notify={@link Model.notify}] Whether to emit
    * lifecycle events.
    * @param {boolean} [opts.raw={@link Model.raw}] If `false`, return the
@@ -1983,13 +1395,8 @@ utils.fillIn(Model, {
         // Allow for re-assignment from lifecycle hook
         data = _data || data
         if (opts.raw) {
-          if (opts.autoEject) {
-            data.data = self.ejectAll(query, opts)
-          }
           utils._(opts, data)
           return data
-        } else if (opts.autoEject) {
-          data = self.ejectAll(query, opts)
         }
         return data
       })
@@ -2008,84 +1415,6 @@ utils.fillIn(Model, {
    * @param {Object} opts - The `opts` argument passed to {@link Model.destroyAll}.
    */
   afterDestroyAll: notify,
-
-  beforeLoadRelations: notify,
-  loadRelations (id, relations, opts) {
-    let op
-    const self = this
-    const relationList = self.relationList || []
-    let instance = self.is(id) ? id : undefined
-    id = instance ? utils.get(instance, self.idAttribute) : id
-
-    // Default values for arguments
-    relations || (relations = [])
-    opts || (opts = {})
-
-    // Fill in "opts" with the Model's configuration
-    utils._(self, opts)
-    opts.adapter = self.getAdapterName(opts)
-
-    // beforeLoadRelations lifecycle hook
-    op = opts.op = 'beforeLoadRelations'
-    return resolve(self[op](id, relations, opts)).then(function () {
-      if (utils.isSorN(id) && !instance) {
-        instance = self.get(instance)
-      }
-      if (!instance) {
-        throw new Error('You passed an id of an instance not found in the collection of the Model!')
-      }
-      if (utils.isString(relations)) {
-        relations = [relations]
-      }
-      // Now delegate to the adapter
-      op = opts.op = 'loadRelations'
-      self.dbg(op, instance, relations, opts)
-      return Promise.all(relationList.map(function (def) {
-        if (utils.isFunction(def.load)) {
-          return def.load(self, def, instance, opts)
-        }
-        let task
-        if (def.foreignKey) {
-          task = def.Relation.findAll({
-            [def.foreignKey]: id
-          }, opts)
-        } else if (def.localKey) {
-          const key = utils.get(instance, def.localKey)
-          if (utils.isSorN(key)) {
-            task = def.Relation.find(key, opts)
-          }
-        } else if (def.localKeys) {
-          task = def.Relation.findAll({
-            [def.Relation.idAttribute]: {
-              'in': utils.get(instance, def.localKeys)
-            }
-          }, opts)
-        } else if (def.foreignKeys) {
-          task = def.Relation.findAll({
-            [def.Relation.idAttribute]: {
-              'contains': utils.get(instance, self.idAttribute)
-            }
-          }, opts)
-        }
-        if (task) {
-          task = task.then(function (data) {
-            if (opts.raw) {
-              data = data.data
-            }
-            utils.set(instance, def.localField, def.type === 'hasOne' ? (data.length ? data[0] : undefined) : data)
-          })
-        }
-        return task
-      }))
-    }).then(function () {
-      // afterLoadRelations lifecycle hook
-      op = opts.op = 'afterLoadRelations'
-      return resolve(self[op](instance, relations, opts)).then(function () {
-        return instance
-      })
-    })
-  },
-  afterLoadRelations: notify,
 
   log (level, ...args) {
     if (level && !args.length) {
@@ -2306,8 +1635,7 @@ utils.fillIn(Model, {
  */
 
 /**
- * Allow Models themselves emit events. Any events emitted on a Model's
- * collection will also be emitted on the Model itself.
+ * Allow Models themselves emit events.
  *
  * A Model's registered listeners are stored on the Model's `__events` property.
  */
@@ -2323,9 +1651,7 @@ utils.eventify(
 )
 
 /**
- * Allow instancess to emit events. Any events emitted instances in a Model's
- * collection will also be emitted on the collection itself, and hence, on the
- * Model as well.
+ * Allow instancess to emit events.
  *
  * An instance's registered listeners are stored in the instance's private data
  * hash.

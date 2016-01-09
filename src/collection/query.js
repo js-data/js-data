@@ -52,6 +52,8 @@ function compare (orderBy, index, a, b) {
   if (cB && isString(cB)) {
     cB = cB.toUpperCase()
   }
+  a || (a = null)
+  b || (b = null)
   if (def[1] === 'DESC') {
     if (cB < cA) {
       return -1

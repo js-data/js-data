@@ -19,14 +19,13 @@ export function init () {
       assert.isTrue(User2.prototype.revert === User3.prototype.revert)
     })
     it('should return the previous version of an item', function () {
-      this.Post.inject(this.data.p1)
-      var post = this.Post.get(5)
+      const post = new this.Post(this.data.p1)
       post.author = 'Jake'
       post.revert()
       assert.objectsEqual(post, this.data.p1)
     })
     it('should preserve fields in the optional preserve array', function () {
-      var post = this.Post.inject(this.data.p1)
+      const post = new this.Post(this.data.p1)
       post.author = 'Jake'
       post.age = 20
       post.revert({ preserve: ['age'] })
@@ -34,8 +33,7 @@ export function init () {
       assert.equal(post.author, 'John', 'The author of the post should have been reverted')
     })
     it('should revert key which has not been injected', function() {
-      this.Post.inject(this.data.p1)
-      var post = this.Post.get(this.data.p1.id)
+      const post = new this.Post(this.data.p1)
       assert.isUndefined(post.newProperty)
       post.newProperty = 'new Property'
       post.revert()

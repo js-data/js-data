@@ -1,52 +1,115 @@
 import {Query} from './query'
 import {
+  _,
   addHiddenPropsToTarget,
   classCallCheck,
+  deepMixIn,
   eventify,
   forOwn,
   get,
   isArray,
   isFunction,
-  isString
+  isObject,
+  isSorN,
+  isString,
+  set,
+  unset,
+  uuid
 } from '../utils'
 import {Index} from '../../lib/mindex/index'
 
 /**
+ * Holds a set of Model instances. Use a Collection to store and manage
+ * instances of Model.
+ *
  * @class Collection
- * @param {Array} [data=[]] - Initial set of entities to insert into the
+ * @param {Model[]} [models=[]] - Initial set of models to insert into the
  * collection.
- * @param {string} [idAttribute='id'] - Field to use as the unique identifier
- * of each entity in the collection.
+ * @param {Object} opts - Configuration options.
+ * @param {Model} opts.model - Reference to the Model type that will be stored
+ * by this Collection.
  */
-export function Collection (data = [], idAttribute = 'id') {
-  classCallCheck(this, Collection)
-  if (!isArray(data)) {
-    throw new TypeError(`new Collection([data]): data: Expected array. Found ${typeof data}`)
+export function Collection (models, opts) {
+  const self = this
+
+  classCallCheck(self, Collection)
+
+  if (isObject(models) && !isArray(models)) {
+    opts = models
+    models = []
   }
-  /**
-   * Field to use as the unique identifier for each entity in this collection.
-   * @type {string}
-   */
-  this.idAttribute = idAttribute
+
+  // Default values for arguments
+  models || (models = [])
+  opts || (opts = {})
 
   /**
-   * The main index, which uses @{link Collection#idAttribute} as the key.
+   * Reference to this Collection's Model.
+   * @type {Model}
+   */
+  self.model = opts.model
+  self.idAttribute = opts.idAttribute
+
+  /**
+   * Event listeners attached to this Collection.
+   * @type {Model}
+   * @private
+   */
+  self._listeners = {}
+
+  /**
+   * What to do when inserting a model into this Collection that shares a
+   * primary key with a model already in this Collection.
+   *
+   * Possible values:
+   * - merge
+   * - replace
+   *
+   * Merge:
+   *
+   * Recursively shallow copy properties from the new model onto the existing
+   * model.
+   *
+   * Replace:
+   *
+   * Shallow copy top-level properties from the new model onto the existing model.
+   * Any top-level own properties of the existing model that are _not_ on the new
+   * model will be removed.
+   *
+   * @memberof Collection
+   * @type {string}
+   * @default merge
+   */
+  this.onConflict = opts.onConflict || 'merge'
+
+  const idAttribute = self.modelId()
+
+  /**
+   * The main index, which uses @{link Collection#modelId} as the key.
    * @type {Index}
    */
-  this.index = new Index([idAttribute], {
+  self.index = new Index([idAttribute], {
     hashCode (obj) {
       return get(obj, idAttribute)
     }
   })
+
   /**
-   * Object that holds the other secondary indexes of this collection.
+   * Object that holds the secondary indexes of this collection.
    * @type {Object.<string, Index>}
    */
-  this.indexes = {}
-  data.forEach(record => {
-    this.index.insertRecord(record)
-    if (record && isFunction(record.on)) {
-      record.on('all', this._onModelEvent, this)
+  self.indexes = {}
+  self.added = {}
+  self.autoPks = {}
+  self.createIndex('addedTimestamps', ['$'], {
+    fieldGetter (obj) {
+      return self.added[get(obj, idAttribute)]
+    }
+  })
+  models.forEach(function (model) {
+    self.index.insertRecord(model)
+    if (model && isFunction(model.on)) {
+      model.on('all', self._onModelEvent, self)
     }
   })
 }
@@ -54,6 +117,14 @@ export function Collection (data = [], idAttribute = 'id') {
 addHiddenPropsToTarget(Collection.prototype, {
   _onModelEvent (...args) {
     this.emit(...args)
+  },
+
+  modelId (model) {
+    const self = this
+    if (!model) {
+      return self.model ? self.model.idAttribute : self.idAttribute || 'id'
+    }
+    return get(model, self.modelId())
   },
 
   /**
@@ -79,17 +150,32 @@ addHiddenPropsToTarget(Collection.prototype, {
    * @return {Collection} A reference to itself for chaining.
    */
   createIndex (name, fieldList, opts) {
+    const self = this
     if (isString(name) && fieldList === undefined) {
       fieldList = [name]
     }
     opts || (opts = {})
-    const idAttribute = this.idAttribute
     opts.hashCode = opts.hashCode || function (obj) {
-      return get(obj, idAttribute)
+      return self.modelId(obj)
     }
-    const index = this.indexes[name] = new Index(fieldList, opts)
-    this.index.visitAll(index.insertRecord, index)
-    return this
+    const index = self.indexes[name] = new Index(fieldList, opts)
+    self.index.visitAll(index.insertRecord, index)
+    return self
+  },
+
+  /**
+   * Return the entities in this Collection that have a primary key that
+   * was automatically generated when they were inserted.
+   *
+   * @memberof Collection
+   * @instance
+   * @return {Model[]} The models that have autoPks.
+   */
+  getAutoPkItems () {
+    const self = this
+    return self.getAll().filter(function (model) {
+      return self.autoPks[self.modelId(model)]
+    })
   },
 
   /**
@@ -149,51 +235,22 @@ addHiddenPropsToTarget(Collection.prototype, {
   },
 
   /**
-   * Find the entity or entities that match the provided key.
-   *
-   * Shortcut for `collection.query().get(keyList).run()`
-   *
-   * #### Example
-   *
-   * Get the entity whose primary key is 25
-   * ```js
-   * const entities = collection.get(25)
-   * ```
-   * Same as above
-   * ```js
-   * const entities = collection.get([25])
-   * ```
-   * Get all users who are active and have the "admin" role
-   * ```js
-   * const activeAdmins = collection.get(['active', 'admin'], {
-   *   index: 'activityAndRoles'
-   * })
-   * ```
-   * Get all entities that match a certain weather condition
-   * ```js
-   * const niceDays = collection.get(['sunny', 'humid', 'calm'], {
-   *   index: 'weatherConditions'
-   * })
-   * ```
+   * Get the model with the given id.
    *
    * @memberof Collection
    * @instance
-   * @param {Array} keyList - Key(s) defining the entity to retrieve. If
-   * `keyList` is not an array (i.e. for a single-value key), it will be
-   * wrapped in an array.
-   * @param {Object} [opts] - Configuration options.
-   * @param {string} [opts.string] - Name of the secondary index to use in the
-   * query. If no index is specified, the main index is used.
-   * @return {Array} The result.
+   * @param {(string|number)} id - The primary key of the model to get.
+   * @return {Model} The model with the given id.
    */
-  get (keyList, opts) {
-    return this.query().get(keyList, opts).run()
+  get (id) {
+    const instances = this.query().get(id).run()
+    return instances.length ? instances[0] : undefined
   },
 
   /**
    * Find the entity or entities that match the provided keyLists.
    *
-   * Shortcut for `collection.query().getAll(keyList1, keyList2).run()`
+   * Shortcut for `collection.query().getAll(keyList1, keyList2, ...).run()`
    *
    * #### Example
    *
@@ -368,56 +425,271 @@ addHiddenPropsToTarget(Collection.prototype, {
     return data
   },
 
-  /**
-   * Instead a record into this collection, updating all indexes with the new
-   * record.
-   * one index.
-   * @memberof Collection
-   * @instance
-   * @param {Object} record - The record to insert.
-   */
-  insert (record) {
-    this.index.insertRecord(record)
-    forOwn(this.indexes, function (index, name) {
-      index.insertRecord(record)
-    })
-    if (record && isFunction(record.on)) {
-      record.on('all', this._onModelEvent, this)
-      this.emit('add', record)
-    }
-  },
+  beforeAdd () {},
 
   /**
-   * Update the given record's position in all indexes of this collection. See
-   * {@link Collection#updateRecord} to update a record's in only one of the
-   * indexes.
+   * Insert the provided model or models.
+   *
+   * If a model is already in the collection then the provided model will
+   * either merge with or replace the existing model based on the value of the
+   * `onConflict` option.
+   *
+   * The collection's secondary indexes will be updated as each entity is
+   * visited.
+   *
    * @memberof Collection
    * @instance
-   * @param {Object} record - The record to update.
+   * @param {(Object|Object[]|Model|Model[])} data - The model or models to insert.
+   * @param {Object} [opts] - Configuration options.
+   * @param {boolean} [opts.autoPk={@link Collection.autoPk}] - Whether to
+   * generate primary keys for the models to be inserted. Useful for inserting
+   * temporary, unsaved data into the collection.
+   * @param {string} [opts.onConflict] - What to do when a model is already in
+   * the collection. Possible values are `merge` or `replace`.
+   * @return {(Model|Model[])} The inserted model or models.
    */
-  update (record) {
-    this.index.updateRecord(record)
-    forOwn(this.indexes, function (index, name) {
-      index.updateRecord(record)
+  add (models, opts) {
+    const self = this
+
+    // Default values for arguments
+    opts || (opts = {})
+
+    // Fill in "opts" with the Collection's configuration
+    _(self, opts)
+    models = self.beforeAdd(models, opts) || models
+
+    // Track whether just one or an array of models is being inserted
+    let singular = false
+    const idAttribute = self.modelId()
+    // TODO: fix
+    // const relationList = self.model ? self.model.relationList || [] : []
+    const relationList = []
+    const timestamp = new Date().getTime()
+    if (!isArray(models)) {
+      models = [models]
+      singular = true
+    }
+
+    // Map the provided models to existing models.
+    // New models will be inserted. If any props map to existing models,
+    // they will be merged into the existing models according to the onConflict
+    // option.
+    models = models.map(function (props) {
+      let id = self.modelId(props)
+      // Track whether we had to generate an id for this model
+      // Validate that the primary key attached to the model is a string or
+      // number
+      let autoPk = false
+      if (!isSorN(id)) {
+        // No id found, generate one
+        if (opts.autoPk) {
+          id = uuid()
+          set(props, idAttribute, id)
+          autoPk = true
+        } else {
+          // Not going to generate one, throw an error
+          throw new TypeError(`${idAttribute}: Expected string or number, found ${typeof id}!`)
+        }
+      }
+      // Grab existing model if there is one
+      const existing = self.get(id)
+      // If the currently visited props are just reference to the existing
+      // model, then there is nothing to be done. Exit early.
+      if (props === existing) {
+        return existing
+      }
+
+      // Check the currently visited props for relations that need to be
+      // inserted as well
+      relationList.forEach(function (def) {
+        // A reference to the Model that this Model is related to
+        const Relation = def.Relation
+        // The field used by the related Model as the primary key
+        const relationIdAttribute = Relation.idAttribute
+        // Grab the foreign key in this relationship, if there is one
+        const foreignKey = def.foreignKey
+
+        // Grab a reference to the related data attached or linked to the
+        // currently visited props
+        let toInsert = get(props, def.localField)
+
+        // If the user provided a custom insertion function for this relation,
+        // call it
+        if (isFunction(def.insert)) {
+          def.insert(self, def, props)
+        } else if (toInsert && def.insert !== false) {
+          // Otherwise, if there is something to be inserted, insert it
+          if (isArray(toInsert)) {
+            // Handle inserting hasMany relations
+            toInsert = toInsert.map(function (toInsertItem) {
+              // Check that this item isn't the same item that is already in the
+              // store
+              if (toInsertItem !== Relation.get(get(toInsertItem, relationIdAttribute))) {
+                try {
+                  // Make sure this item has its foreignKey
+                  if (foreignKey) {
+                    set(toInsertItem, foreignKey, id)
+                  }
+                  // Finally insert this related item
+                  toInsertItem = Relation.add(toInsertItem)
+                } catch (err) {
+                  throw new Error(`Failed to insert ${def.type} relation: "${def.relation}"! ${err.message}`)
+                }
+              }
+              return toInsertItem
+            })
+            // If it's the parent that has the localKeys
+            if (def.localKeys) {
+              set(props, def.localKeys, toInsert.map(function (inserted) {
+                return get(inserted, relationIdAttribute)
+              }))
+            }
+          } else {
+            // Handle inserting belongsTo and hasOne relations
+            if (toInsert !== Relation.get(get(toInsert, relationIdAttribute))) {
+              try {
+                // Make sure the parent has its foreignKey
+                if (def.foreignKey) {
+                  set(props, def.foreignKey, get(toInsert, Relation.idAttribute))
+                }
+                // Make sure this item has its foreignKey
+                if (foreignKey) {
+                  set(toInsert, def.foreignKey, id)
+                }
+                // Finally insert this related item
+                toInsert = Relation.add(toInsert)
+              } catch (err) {
+                throw new Error(`Failed to insert ${def.type} relation: "${def.relation}"!`)
+              }
+            }
+          }
+        }
+        if (def.link || (def.link === undefined && self.linkRelations)) {
+          // Remove relation properties from the item, since those relations
+          // have been inserted by now
+          unset(props, def.localField)
+        } else {
+          // Here, linking is turned off, so we setup a manual link
+          set(props, def.localField, toInsert)
+        }
+      })
+
+      if (existing) {
+        // Here, the currently visited props corresponds to an entity already
+        // in the collection, so we need to merge them
+        const onConflict = opts.onConflict || self.onConflict
+        if (onConflict === 'merge') {
+          deepMixIn(existing, props)
+        } else if (onConflict === 'replace') {
+          forOwn(existing, (value, key) => {
+            if (key !== idAttribute && !props.hasOwnProperty(key)) {
+              delete existing[key]
+            }
+          })
+          existing.set(props)
+        }
+        props = existing
+        // Update all indexes in the collection
+        self.updateIndexes(props)
+      } else {
+        // Here, the currently visted props does not correspond to any model
+        // in the collection, so make this props is an instance of this Model
+        // and insert it into the collection
+        props = self.model ? self.model.createInstance(props) : props
+        self.index.insertRecord(props)
+        forOwn(self.indexes, function (index, name) {
+          index.insertRecord(props)
+        })
+        if (props && isFunction(props.on)) {
+          props.on('all', self._onModelEvent, self)
+          self.emit('add', props)
+        }
+      }
+      // Track when this model was added
+      self.added[id] = timestamp
+      if (autoPk) {
+        self.autoPks[id] = props
+      }
+      return props
     })
+    // Finally, return the inserted data
+    const result = singular ? (models.length ? models[0] : undefined) : models
+    self.afterAdd(result, opts)
+    return result
   },
 
+  afterAdd () {},
+
+  beforeRemove () {},
+
   /**
-   * Remove the given record from all indexes in this collection.
+   * Remove the model with the given id from this Collection.
+   *
    * @memberof Collection
-   * @instance
-   * @param {Object} record - The record to be removed.
+   * @method
+   * @param {(string|number)} id - The primary key of the entity to be removed.
+   * @param {Object} [opts] - Configuration options.
+   * @return {Model} The removed entity, if any.
    */
-  remove (record) {
-    this.index.removeRecord(record)
-    forOwn(this.indexes, function (index, name) {
-      index.removeRecord(record)
-    })
-    if (record && isFunction(record.off)) {
-      record.off('all', this._onModelEvent, this)
-      this.emit('remove', record)
+  remove (id, opts) {
+    const self = this
+
+    // Default values for arguments
+    opts || (opts = {})
+    self.beforeRemove(id, opts)
+    const model = self.get(id)
+
+    // The model is in the collection, remove it
+    if (model) {
+      delete self.added[id]
+      delete self.autoPks[id]
+      self.index.removeRecord(model)
+      forOwn(self.indexes, function (index, name) {
+        index.removeRecord(model)
+      })
+      if (model && isFunction(model.off)) {
+        model.off('all', self._onModelEvent, self)
+        self.emit('remove', model)
+      }
     }
+    self.afterRemove(model, opts)
+    return model
   },
+
+  afterRemove () {},
+
+  beforeRemoveAll () {},
+
+  /**
+   * Remove the instances selected by "query" from the Collection instance of
+   * this Model.
+   *
+   * @memberof Model
+   * @method
+   * @param {Object} [query={}] - Selection query.
+   * @param {Object} [query.where] - Filtering criteria.
+   * @param {number} [query.skip] - Number to skip.
+   * @param {number} [query.limit] - Number to limit to.
+   * @param {Array} [query.orderBy] - Sorting criteria.
+   * @param {Object} [opts] - Configuration options.
+   * @return {Model[]} The removed entites, if any.
+   */
+  removeAll (query, opts) {
+    const self = this
+    // Default values for arguments
+    opts || (opts = {})
+    self.beforeRemoveAll(query, opts)
+    const models = self.filter(query)
+
+    // Remove each selected entity from the collection
+    models.forEach(function (item) {
+      self.remove(self.modelId(item))
+    })
+    self.afterRemoveAll(models, query, opts)
+    return models
+  },
+
+  afterRemoveAll () {},
 
   /**
    * Update a record's position in a single index of this collection. See
@@ -431,10 +703,18 @@ addHiddenPropsToTarget(Collection.prototype, {
    * position. If you don't specify an index then the record will be updated
    * in the main index.
    */
-  updateRecord (record, opts) {
+  updateIndex (record, opts) {
     opts || (opts = {})
     const index = opts.index ? this.indexes[opts.index] : this.index
     index.updateRecord(record)
+  },
+
+  updateIndexes (record) {
+    const self = this
+    self.index.updateRecord(record)
+    forOwn(self.indexes, function (index, name) {
+      index.updateRecord(record)
+    })
   },
 
   /**
@@ -452,15 +732,132 @@ addHiddenPropsToTarget(Collection.prototype, {
       data.push(item[funcName](...args))
     })
     return data
+  },
+
+  /**
+   * Return the plain JSON representation of all items in this collection.
+   * Assumes entities in this collection have a toJSON method.
+   *
+   * @memberof Collection
+   * @instance
+   * @param {Object} [opts] - Configuration options.
+   * @param {string[]} [opts.with] - Array of relation names or relation fields
+   * to include in the representation.
+   * @return {Array} The entities.
+   */
+  toJSON (opts) {
+    return this.mapCall('toJSON', opts)
+  },
+
+  end (data, opts) {
+    const self = this
+    if (opts.raw) {
+      if (opts.autoAdd) {
+        data.data = self.add(data.data, opts)
+      }
+      return data
+    } else if (opts.autoAdd) {
+      data = self.add(data, opts)
+    }
+    return data
+  },
+
+  create (props, opts) {
+    const self = this
+    const id = self.modelId(props)
+    return self.model.create(props, opts).then(function (data) {
+      // If the created model was already in this Collection via an autoPk id,
+      // remove it from the collection
+      // TODO: Fix this?
+      if (self.autoPks[id]) {
+        self.remove(id)
+      }
+      return self.end(data)
+    })
+  },
+
+  createMany (models, opts) {
+    const self = this
+    return self.model.createMany(models, opts).then(function (data) {
+      // If the created models were already in this Collection via an autoPk
+      // id, remove them from the Collection
+      // TODO: Fix this?
+      models.forEach(function (model) {
+        const id = self.modelId(model)
+        if (self.autoPks[id]) {
+          self.remove(id)
+        }
+      })
+      return self.end(data)
+    })
+  },
+
+  find (id, opts) {
+    const self = this
+    return self.model.find(id, opts).then(function (data) {
+      return self.end(data)
+    })
+  },
+
+  findAll (query, opts) {
+    const self = this
+    return self.model.findAll(query, opts).then(function (data) {
+      return self.end(data)
+    })
+  },
+
+  update (id, props, opts) {
+    const self = this
+    return self.model.update(id, props, opts).then(function (data) {
+      return self.end(data)
+    })
+  },
+
+  updateMany (models, opts) {
+    const self = this
+    return self.model.updateMany(models, opts).then(function (data) {
+      return self.end(data)
+    })
+  },
+
+  updateAll (query, props, opts) {
+    const self = this
+    return self.model.updateAll(query, props, opts).then(function (data) {
+      return self.end(data)
+    })
+  },
+
+  destroy (id, opts) {
+    const self = this
+    return self.model.destroy(id, opts).then(function (data) {
+      if (opts.raw) {
+        data.data = self.remove(id, opts)
+      } else {
+        data = self.remove(id, opts)
+      }
+      return data
+    })
+  },
+
+  destroyAll (query, opts) {
+    const self = this
+    return self.model.destroyAll(query, opts).then(function (data) {
+      if (opts.raw) {
+        data.data = self.removeAll(query, opts)
+      } else {
+        data = self.removeAll(query, opts)
+      }
+      return data
+    })
   }
 })
 
 eventify(
   Collection.prototype,
   function () {
-    return this._events
+    return this._listeners
   },
   function (value) {
-    this._events = value
+    this._listeners = value
   }
 )

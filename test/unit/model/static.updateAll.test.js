@@ -26,7 +26,6 @@ export function init () {
       class User extends Model {}
       User.configure({
         defaultAdapter: 'mock',
-        autoInject: false
       })
       User.registerAdapter('mock', {
         updateAll (modelConfig, _query, _props, Opts) {
@@ -35,7 +34,7 @@ export function init () {
             assert.isTrue(modelConfig === User, 'should pass in the Model')
             assert.deepEqual(_query, query, 'should pass in the query')
             assert.deepEqual(_props, props, 'should pass in the props')
-            assert.equal(Opts.autoInject, false, 'Opts are provided')
+            assert.equal(Opts.pojo, false, 'Opts are provided')
             _props.foo = 'bar'
             _props.id = id
             resolve([_props])
@@ -45,38 +44,7 @@ export function init () {
       const users = await User.updateAll(query, props)
       assert.isTrue(updateAllCalled, 'Adapter#updateAll should have been called')
       assert.equal(users[0].foo, 'bar', 'user has a new field')
-      assert.isFalse(users[0] instanceof User, 'user is not a User')
-      assert.isUndefined(User.get(users[0].id), 'user was not injected')
-    })
-    it('should update and auto-inject', async function () {
-      const id = 1
-      const query = { a: 'b' }
-      const props = { name: 'John' }
-      let updateAllCalled = false
-      class User extends Model {}
-      User.configure({
-        autoInject: true,
-        defaultAdapter: 'mock'
-      })
-      User.registerAdapter('mock', {
-        updateAll (modelConfig, _query, _props, Opts) {
-          updateAllCalled = true
-          return new Promise(function (resolve, reject) {
-            assert.isTrue(modelConfig === User, 'should pass in the Model')
-            assert.deepEqual(_query, query, 'should pass in the query')
-            assert.deepEqual(_props, props, 'should pass in the props')
-            assert.equal(Opts.autoInject, true, 'Opts are provided')
-            _props.foo = 'bar'
-            _props.id = id
-            resolve([_props])
-          })
-        }
-      })
-      let users = await User.updateAll(query, props)
-      assert.isTrue(updateAllCalled, 'Adapter#update should have been called')
-      assert.equal(users[0].foo, 'bar', 'user has a new field')
       assert.isTrue(users[0] instanceof User, 'user is a User')
-      assert.isTrue(User.get(users[0].id) === users[0], 'user was injected')
     })
     it('should return raw', async function () {
       const id = 1
@@ -85,7 +53,6 @@ export function init () {
       let updateAllCalled = false
       class User extends Model {}
       User.configure({
-        autoInject: true,
         raw: true,
         defaultAdapter: 'mock'
       })
@@ -110,7 +77,6 @@ export function init () {
       assert.isTrue(updateAllCalled, 'Adapter#update should have been called')
       assert.equal(data.data[0].foo, 'bar', 'user has a new field')
       assert.isTrue(data.data[0] instanceof User, 'user is a User')
-      assert.isTrue(User.get(data.data[0].id) === data.data[0], 'user was not injected')
       assert.equal(data.adapter, 'mock', 'should have adapter name in response')
       assert.equal(data.updated, 1, 'should have other metadata in response')
     })

@@ -56,36 +56,32 @@ __ES2016:__
 import {Model, registerAdapter} from 'js-data'
 import DSHttpAdapter from 'js-data-http'
 
-async function showExample() {
-  // "User" will use an http adapter by default
-  @registerAdapter('http', new DSHttpAdapter(), { default: true })
-  class User extends Model {}
+// "User" will use an http adapter by default
+@registerAdapter('http', new DSHttpAdapter(), { default: true })
+class User extends Model {}
 
-  let user = await User.find(1)
+let user = await User.find(1)
 
-  console.log(user) // { id: 1, name: 'John' }
-  console.log(user instanceof User) // true
+console.log(user) // { id: 1, name: 'John' }
+console.log(user instanceof User) // true
 
-  // The user instance is now stored in the User Model's collection
-  console.log(User.get(user.id)) // { id: 1, name: 'John' }
-  console.log(user === User.get(user.id)) // true
+// The user instance is now stored in the User Model's collection
+console.log(User.get(user.id)) // { id: 1, name: 'John' }
+console.log(user === User.get(user.id)) // true
 
-  user.name = 'Johnny'
+user.name = 'Johnny'
 
-  // PUT /user/1 {name:"Johnny"}
-  user = await user.save()
+// PUT /user/1 {name:"Johnny"}
+user = await user.save()
 
-  // The user instance has been updated
-  console.log(User.get(user.id)) // { id: 1, name: 'Johnny' }
-  console.log(user === User.get(user.id)) // true
+// The user instance has been updated
+console.log(User.get(user.id)) // { id: 1, name: 'Johnny' }
+console.log(user === User.get(user.id)) // true
 
-  await user.destroy()
+await user.destroy()
 
-  // The user instance no longer stored in User
-  console.log(User.get(1)) // undefined
-}
-
-showExample()
+// The user instance no longer stored in User
+console.log(User.get(1)) // undefined
 ```
 
 __ES2015:__
@@ -94,37 +90,33 @@ __ES2015:__
 import {Model, registerAdapter} from 'js-data'
 import DSHttpAdapter from 'js-data-http'
 
-function* showExample() {
-  class User extends Model {}
+class User extends Model {}
 
-  // "User" will use an http adapter by default
-  User.registerAdapter('http', new DSHttpAdapter(), { default: true })
+// "User" will use an http adapter by default
+User.registerAdapter('http', new DSHttpAdapter(), { default: true })
 
-  let user = yield User.find(1)
+let user = yield User.find(1)
 
-  console.log(user) // { id: 1, name: 'John' }
-  console.log(user instanceof User) // true
+console.log(user) // { id: 1, name: 'John' }
+console.log(user instanceof User) // true
 
-  // The user instance is now stored in the User Model's collection
-  console.log(User.get(user.id)) // { id: 1, name: 'John' }
-  console.log(user === User.get(user.id)) // true
+// The user instance is now stored in the User Model's collection
+console.log(User.get(user.id)) // { id: 1, name: 'John' }
+console.log(user === User.get(user.id)) // true
 
-  user.name = 'Johnny'
+user.name = 'Johnny'
 
-  // PUT /user/1 {name:"Johnny"}
-  user = yield user.save()
+// PUT /user/1 {name:"Johnny"}
+user = yield user.save()
 
-  // The user instance has been updated
-  console.log(User.get(user.id)) // { id: 1, name: 'Johnny' }
-  console.log(user === User.get(user.id)) // true
+// The user instance has been updated
+console.log(User.get(user.id)) // { id: 1, name: 'Johnny' }
+console.log(user === User.get(user.id)) // true
 
-  yield user.destroy()
+yield user.destroy()
 
-  // The user instance no longer stored in User
-  console.log(User.get(1)) // undefined
-}
-
-showExample()
+// The user instance no longer stored in User
+console.log(User.get(1)) // undefined
 ```
 
 __ES5:__

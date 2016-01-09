@@ -23,35 +23,7 @@ export function init () {
       const props = { id, name: 'John' }
       let findCalled = false
       class User extends Model {}
-      User.setSchema({ id: {} })
       User.configure({
-        defaultAdapter: 'mock',
-        autoInject: false
-      })
-      User.registerAdapter('mock', {
-        find (modelConfig, _id, Opts) {
-          findCalled = true
-          return new Promise(function (resolve, reject) {
-            assert.isTrue(modelConfig === User, 'should pass in the Model')
-            assert.deepEqual(_id, id, 'should pass in the id')
-            assert.equal(Opts.autoInject, false, 'Opts are provided')
-            resolve(props)
-          })
-        }
-      })
-      const user = await User.find(id, props)
-      assert.isTrue(findCalled, 'Adapter#find should have been called')
-      assert.deepEqual(user, props, 'user should have been found')
-      assert.isFalse(user instanceof User, 'user is not a User')
-      assert.isUndefined(User.get(user.id), 'user was not injected')
-    })
-    it('should find and auto-inject', async function () {
-      const id = 1
-      const props = { id, name: 'John' }
-      let findCalled = false
-      class User extends Model {}
-      User.configure({
-        autoInject: true,
         defaultAdapter: 'mock'
       })
       User.registerAdapter('mock', {
@@ -60,16 +32,15 @@ export function init () {
           return new Promise(function (resolve, reject) {
             assert.isTrue(modelConfig === User, 'should pass in the Model')
             assert.deepEqual(_id, id, 'should pass in the id')
-            assert.equal(Opts.autoInject, true, 'Opts are provided')
+            assert.equal(Opts.pojo, false, 'Opts are provided')
             resolve(props)
           })
         }
       })
-      let user = await User.find(id, props)
+      const user = await User.find(id)
       assert.isTrue(findCalled, 'Adapter#find should have been called')
       assert.deepEqual(user, props, 'user should have been found')
       assert.isTrue(user instanceof User, 'user is a User')
-      assert.isTrue(User.get(user.id) === user, 'user was injected')
     })
     it('should return raw', async function () {
       const id = 1
@@ -77,7 +48,6 @@ export function init () {
       let findCalled = false
       class User extends Model {}
       User.configure({
-        autoInject: true,
         raw: true,
         defaultAdapter: 'mock'
       })
@@ -95,11 +65,10 @@ export function init () {
           })
         }
       })
-      let data = await User.find(id, props)
+      let data = await User.find(id)
       assert.isTrue(findCalled, 'Adapter#find should have been called')
       assert.deepEqual(data.data, props, 'user should have been found')
       assert.isTrue(data.data instanceof User, 'user is a User')
-      assert.isTrue(User.get(data.data.id) === data.data, 'user was not injected')
       assert.equal(data.adapter, 'mock', 'should have adapter name in response')
       assert.equal(data.found, 1, 'should have other metadata in response')
     })
