@@ -5,6 +5,7 @@ import {
   classCallCheck,
   deepMixIn,
   eventify,
+  fillIn,
   forOwn,
   get,
   isArray,
@@ -13,7 +14,6 @@ import {
   isSorN,
   isString,
   set,
-  unset,
   uuid
 } from '../utils'
 import {Index} from '../../lib/mindex/index'
@@ -48,7 +48,21 @@ export function Collection (models, opts) {
    * @type {Model}
    */
   self.model = opts.model
+  /**
+   * Field to be used as the unique identifier for models in this collection.
+   * Defaults to `"id"` unless {@link Collection#model} is set, in which case
+   * this will default to {@link Model.idAttribute}.
+   * @type {string}
+   */
   self.idAttribute = opts.idAttribute
+
+  /**
+   * Any options set here will override any options of {@link Collection#model}.
+   * Useful for making multiple collection that use the same Model in different
+   * ways.
+   * @type {Object}
+   */
+  self.modelOpts = opts.modelOpts || {}
 
   /**
    * Event listeners attached to this Collection.
@@ -461,9 +475,7 @@ addHiddenPropsToTarget(Collection.prototype, {
     // Track whether just one or an array of models is being inserted
     let singular = false
     const idAttribute = self.modelId()
-    // TODO: fix
-    // const relationList = self.model ? self.model.relationList || [] : []
-    const relationList = []
+    const relationList = self.model ? self.model.relationList || [] : []
     const timestamp = new Date().getTime()
     if (!isArray(models)) {
       models = [models]
@@ -503,7 +515,10 @@ addHiddenPropsToTarget(Collection.prototype, {
       // inserted as well
       relationList.forEach(function (def) {
         // A reference to the Model that this Model is related to
-        const Relation = def.Relation
+        const Relation = def.getRelation()
+        if (!Relation.idAttribute) {
+          return
+        }
         // The field used by the related Model as the primary key
         const relationIdAttribute = Relation.idAttribute
         // Grab the foreign key in this relationship, if there is one
@@ -511,27 +526,27 @@ addHiddenPropsToTarget(Collection.prototype, {
 
         // Grab a reference to the related data attached or linked to the
         // currently visited props
-        let toInsert = get(props, def.localField)
+        let toInsert = get(props, def.getLocalField())
 
         // If the user provided a custom insertion function for this relation,
         // call it
-        if (isFunction(def.insert)) {
-          def.insert(self, def, props)
-        } else if (toInsert && def.insert !== false) {
-          // Otherwise, if there is something to be inserted, insert it
+        if (isFunction(def.add)) {
+          def.add(self, def, props)
+        } else if (toInsert && def.add !== false) {
+          // Otherwise, if there is something to be added, add it
           if (isArray(toInsert)) {
             // Handle inserting hasMany relations
             toInsert = toInsert.map(function (toInsertItem) {
               // Check that this item isn't the same item that is already in the
               // store
-              if (toInsertItem !== Relation.get(get(toInsertItem, relationIdAttribute))) {
+              if (!Relation.is(toInsertItem)) {
                 try {
                   // Make sure this item has its foreignKey
                   if (foreignKey) {
                     set(toInsertItem, foreignKey, id)
                   }
-                  // Finally insert this related item
-                  toInsertItem = Relation.add(toInsertItem)
+                  // Finally add this related item
+                  toInsertItem = Relation.createInstance(toInsertItem)
                 } catch (err) {
                   throw new Error(`Failed to insert ${def.type} relation: "${def.relation}"! ${err.message}`)
                 }
@@ -546,32 +561,21 @@ addHiddenPropsToTarget(Collection.prototype, {
             }
           } else {
             // Handle inserting belongsTo and hasOne relations
-            if (toInsert !== Relation.get(get(toInsert, relationIdAttribute))) {
+            if (!Relation.is(toInsert)) {
               try {
-                // Make sure the parent has its foreignKey
-                if (def.foreignKey) {
-                  set(props, def.foreignKey, get(toInsert, Relation.idAttribute))
-                }
                 // Make sure this item has its foreignKey
                 if (foreignKey) {
                   set(toInsert, def.foreignKey, id)
                 }
                 // Finally insert this related item
-                toInsert = Relation.add(toInsert)
+                toInsert = Relation.createInstance(toInsert)
               } catch (err) {
                 throw new Error(`Failed to insert ${def.type} relation: "${def.relation}"!`)
               }
             }
           }
         }
-        if (def.link || (def.link === undefined && self.linkRelations)) {
-          // Remove relation properties from the item, since those relations
-          // have been inserted by now
-          unset(props, def.localField)
-        } else {
-          // Here, linking is turned off, so we setup a manual link
-          set(props, def.localField, toInsert)
-        }
+        set(props, def.localField, toInsert)
       })
 
       if (existing) {
@@ -765,6 +769,8 @@ addHiddenPropsToTarget(Collection.prototype, {
   create (props, opts) {
     const self = this
     const id = self.modelId(props)
+    opts || (opts = {})
+    fillIn(opts, self.modelOpts)
     return self.model.create(props, opts).then(function (data) {
       // If the created model was already in this Collection via an autoPk id,
       // remove it from the collection
@@ -772,12 +778,14 @@ addHiddenPropsToTarget(Collection.prototype, {
       if (self.autoPks[id]) {
         self.remove(id)
       }
-      return self.end(data)
+      return self.end(data, opts)
     })
   },
 
   createMany (models, opts) {
     const self = this
+    opts || (opts = {})
+    fillIn(opts, self.modelOpts)
     return self.model.createMany(models, opts).then(function (data) {
       // If the created models were already in this Collection via an autoPk
       // id, remove them from the Collection
@@ -788,47 +796,59 @@ addHiddenPropsToTarget(Collection.prototype, {
           self.remove(id)
         }
       })
-      return self.end(data)
+      return self.end(data, opts)
     })
   },
 
   find (id, opts) {
     const self = this
+    opts || (opts = {})
+    fillIn(opts, self.modelOpts)
     return self.model.find(id, opts).then(function (data) {
-      return self.end(data)
+      return self.end(data, opts)
     })
   },
 
   findAll (query, opts) {
     const self = this
+    opts || (opts = {})
+    fillIn(opts, self.modelOpts)
     return self.model.findAll(query, opts).then(function (data) {
-      return self.end(data)
+      return self.end(data, opts)
     })
   },
 
   update (id, props, opts) {
     const self = this
+    opts || (opts = {})
+    fillIn(opts, self.modelOpts)
     return self.model.update(id, props, opts).then(function (data) {
-      return self.end(data)
+      return self.end(data, opts)
     })
   },
 
   updateMany (models, opts) {
     const self = this
+    opts || (opts = {})
+    fillIn(opts, self.modelOpts)
     return self.model.updateMany(models, opts).then(function (data) {
-      return self.end(data)
+      return self.end(data, opts)
     })
   },
 
   updateAll (query, props, opts) {
     const self = this
+    opts || (opts = {})
+    fillIn(opts, self.modelOpts)
     return self.model.updateAll(query, props, opts).then(function (data) {
-      return self.end(data)
+      return self.end(data, opts)
     })
   },
 
   destroy (id, opts) {
     const self = this
+    opts || (opts = {})
+    fillIn(opts, self.modelOpts)
     return self.model.destroy(id, opts).then(function (data) {
       if (opts.raw) {
         data.data = self.remove(id, opts)
@@ -841,6 +861,8 @@ addHiddenPropsToTarget(Collection.prototype, {
 
   destroyAll (query, opts) {
     const self = this
+    opts || (opts = {})
+    fillIn(opts, self.modelOpts)
     return self.model.destroyAll(query, opts).then(function (data) {
       if (opts.raw) {
         data.data = self.removeAll(query, opts)

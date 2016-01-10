@@ -32,6 +32,7 @@ addHiddenPropsToTarget(DS.prototype, {
       name = opts.name
     }
     opts || (opts = {})
+    opts.relations || (opts.relations = {})
     fillIn(opts, self.defaults)
 
     const methods = opts.methods || {}
@@ -44,6 +45,24 @@ addHiddenPropsToTarget(DS.prototype, {
     Child.getModel = function (name) {
       return self.models[name]
     }
+
+    forOwn(opts.relations, function (group, type) {
+      forOwn(group, function (relations, name) {
+        if (isObject(relations)) {
+          relations = [relations]
+        }
+        relations.forEach(function (def) {
+          const Relation = self.models[name] || name
+          if (type === 'belongsTo') {
+            return Child.belongsTo(Relation, def)
+          }
+          if (type === 'hasOne') {
+            return Child.hasOne(Relation, def)
+          }
+          return Child.hasMany(Relation, def)
+        })
+      })
+    })
 
     return Child
   },

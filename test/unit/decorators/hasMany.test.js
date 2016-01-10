@@ -12,16 +12,16 @@ export function init () {
       Bar.belongsTo(Foo)
       const foo = Foo.inject({ id: 1 })
       const foo2 = Foo.inject({ id: 2 })
-      assert.deepEqual(foo.bar_collection, [])
-      assert.deepEqual(foo2.bar_collection, [])
-      const bars = Bar.inject([{ foo_id: 1, id: 1 }])
-      const bars2 = Bar.inject([{ foo_id: 2, id: 2 }])
-      assert.deepEqual(foo.bar_collection, bars)
-      assert.deepEqual(foo2.bar_collection, bars2)
-      foo.bar_collection = bars2
-      foo2.bar_collection = bars
-      assert.deepEqual(foo2.bar_collection, bars)
-      assert.deepEqual(foo.bar_collection, bars2)
+      assert.deepEqual(foo.barCollection, [])
+      assert.deepEqual(foo2.barCollection, [])
+      const bars = Bar.inject([{ fooId: 1, id: 1 }])
+      const bars2 = Bar.inject([{ fooId: 2, id: 2 }])
+      assert.deepEqual(foo.barCollection, bars)
+      assert.deepEqual(foo2.barCollection, bars2)
+      foo.barCollection = bars2
+      foo2.barCollection = bars
+      assert.deepEqual(foo2.barCollection, bars)
+      assert.deepEqual(foo.barCollection, bars2)
     })
     it('should add property accessors to prototype of target and allow relation re-assignment (localKeys)', function () {
       class Foo extends Model {}
@@ -34,16 +34,16 @@ export function init () {
       Bar.belongsTo(Foo)
       const foo = Foo.inject({ id: 1, bar_ids: [1] })
       const foo2 = Foo.inject({ id: 2, bar_ids: [2] })
-      assert.deepEqual(foo.bar_collection, [])
-      assert.deepEqual(foo2.bar_collection, [])
-      const bars = Bar.inject([{ foo_id: 1, id: 1 }])
-      const bars2 = Bar.inject([{ foo_id: 2, id: 2 }])
-      assert.deepEqual(foo.bar_collection, bars)
-      assert.deepEqual(foo2.bar_collection, bars2)
-      foo.bar_collection = bars2
-      foo2.bar_collection = bars
-      assert.deepEqual(foo2.bar_collection, bars)
-      assert.deepEqual(foo.bar_collection, bars2)
+      assert.deepEqual(foo.barCollection, [])
+      assert.deepEqual(foo2.barCollection, [])
+      const bars = Bar.inject([{ fooId: 1, id: 1 }])
+      const bars2 = Bar.inject([{ fooId: 2, id: 2 }])
+      assert.deepEqual(foo.barCollection, bars)
+      assert.deepEqual(foo2.barCollection, bars2)
+      foo.barCollection = bars2
+      foo2.barCollection = bars
+      assert.deepEqual(foo2.barCollection, bars)
+      assert.deepEqual(foo.barCollection, bars2)
       assert.deepEqual(foo.bar_ids, [2])
       assert.deepEqual(foo2.bar_ids, [1])
     })

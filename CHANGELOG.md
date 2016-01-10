@@ -1,3 +1,9 @@
+##### 3.0.0-alpha.10 - 09 January 2016
+
+- (temporarily?) removed relation links
+- Added `Collection#modelOpts` option
+- Relations can be defined via `DS#defineModel`
+
 ##### 3.0.0-alpha.9 - 09 January 2016
 
 ###### Backwards compatible bug fixes

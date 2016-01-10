@@ -42,45 +42,6 @@ const reserved = {
   sort: ''
 }
 
-function compare (orderBy, index, a, b) {
-  const def = orderBy[index]
-  let cA = get(a, def[0])
-  let cB = get(b, def[0])
-  if (cA && isString(cA)) {
-    cA = cA.toUpperCase()
-  }
-  if (cB && isString(cB)) {
-    cB = cB.toUpperCase()
-  }
-  a || (a = null)
-  b || (b = null)
-  if (def[1] === 'DESC') {
-    if (cB < cA) {
-      return -1
-    } else if (cB > cA) {
-      return 1
-    } else {
-      if (index < orderBy.length - 1) {
-        return compare(orderBy, index + 1, a, b)
-      } else {
-        return 0
-      }
-    }
-  } else {
-    if (cA < cB) {
-      return -1
-    } else if (cA > cB) {
-      return 1
-    } else {
-      if (index < orderBy.length - 1) {
-        return compare(orderBy, index + 1, a, b)
-      } else {
-        return 0
-      }
-    }
-  }
-}
-
 const escapeRegExp = /([.*+?^=!:${}()|[\]\/\\])/g
 const percentRegExp = /%/g
 const underscoreRegExp = /_/g
@@ -89,50 +50,106 @@ function escape (pattern) {
   return pattern.replace(escapeRegExp, '\\$1')
 }
 
-function like (pattern, flags) {
-  return new RegExp(`^${(escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.'))}$`, flags)
-}
-
-function evaluate (value, op, predicate) {
-  switch (op) {
-    case '==':
-      return value == predicate // eslint-disable-line
-    case '===':
-      return value === predicate
-    case '!=':
-      return value != predicate // eslint-disable-line
-    case '!==':
-      return value !== predicate
-    case '>':
-      return value > predicate
-    case '>=':
-      return value >= predicate
-    case '<':
-      return value < predicate
-    case '<=':
-      return value <= predicate
-    case 'isectEmpty':
-      return !intersection((value || []), (predicate || [])).length
-    case 'isectNotEmpty':
-      return intersection((value || []), (predicate || [])).length
-    case 'in':
-      return predicate.indexOf(value) !== -1
-    case 'notIn':
-      return predicate.indexOf(value) === -1
-    case 'contains':
-      return (value || []).indexOf(predicate) !== -1
-    case 'notContains':
-      return (value || []).indexOf(predicate) === -1
-    default:
-      if (op.indexOf('like') === 0) {
-        return like(predicate, op.substr(4)).exec(value) !== null
-      } else if (op.indexOf('notLike') === 0) {
-        return like(predicate, op.substr(7)).exec(value) === null
-      }
+Query.ops = {
+  '==': function (value, predicate) {
+    return value == predicate // eslint-disable-line
+  },
+  '===': function (value, predicate) {
+    return value === predicate
+  },
+  '!=': function (value, predicate) {
+    return value != predicate // eslint-disable-line
+  },
+  '!==': function (value, predicate) {
+    return value !== predicate
+  },
+  '>': function (value, predicate) {
+    return value > predicate
+  },
+  '>=': function (value, predicate) {
+    return value >= predicate
+  },
+  '<': function (value, predicate) {
+    return value < predicate
+  },
+  '<=': function (value, predicate) {
+    return value <= predicate
+  },
+  'isectEmpty': function (value, predicate) {
+    return !intersection((value || []), (predicate || [])).length
+  },
+  'isectNotEmpty': function (value, predicate) {
+    return intersection((value || []), (predicate || [])).length
+  },
+  'in': function (value, predicate) {
+    return predicate.indexOf(value) !== -1
+  },
+  'notIn': function (value, predicate) {
+    return predicate.indexOf(value) === -1
+  },
+  'contains': function (value, predicate) {
+    return (value || []).indexOf(predicate) !== -1
+  },
+  'notContains': function (value, predicate) {
+    return (value || []).indexOf(predicate) === -1
   }
 }
 
 addHiddenPropsToTarget(Query.prototype, {
+  compare (orderBy, index, a, b) {
+    const def = orderBy[index]
+    let cA = get(a, def[0])
+    let cB = get(b, def[0])
+    if (cA && isString(cA)) {
+      cA = cA.toUpperCase()
+    }
+    if (cB && isString(cB)) {
+      cB = cB.toUpperCase()
+    }
+    a || (a = null)
+    b || (b = null)
+    if (def[1] === 'DESC') {
+      if (cB < cA) {
+        return -1
+      } else if (cB > cA) {
+        return 1
+      } else {
+        if (index < orderBy.length - 1) {
+          return this.compare(orderBy, index + 1, a, b)
+        } else {
+          return 0
+        }
+      }
+    } else {
+      if (cA < cB) {
+        return -1
+      } else if (cA > cB) {
+        return 1
+      } else {
+        if (index < orderBy.length - 1) {
+          return this.compare(orderBy, index + 1, a, b)
+        } else {
+          return 0
+        }
+      }
+    }
+  },
+
+  evaluate (value, op, predicate) {
+    if (Query.ops[op]) {
+      return Query.ops[op](value, predicate)
+    }
+    if (op.indexOf('like') === 0) {
+      return this.like(predicate, op.substr(4)).exec(value) !== null
+    } else if (op.indexOf('notLike') === 0) {
+      return this.like(predicate, op.substr(7)).exec(value) === null
+    }
+  },
+
+  like (pattern, flags) {
+    return new RegExp(`^${(escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.'))}$`, flags)
+  },
+
   /**
    * Return the current data result of this query.
    * @memberof Query
@@ -318,8 +335,9 @@ addHiddenPropsToTarget(Query.prototype, {
    * @return {Query} A reference to itself for chaining.
    */
   filter (query, thisArg) {
+    const self = this
     query || (query = {})
-    this.getData()
+    self.getData()
     if (isObject(query)) {
       let where = {}
       // Filter
@@ -352,7 +370,7 @@ addHiddenPropsToTarget(Query.prototype, {
       if (fields.length) {
         let i
         let len = fields.length
-        this.data = this.data.filter(function (item) {
+        self.data = self.data.filter(function (item) {
           let first = true
           let keep = true
 
@@ -360,7 +378,7 @@ addHiddenPropsToTarget(Query.prototype, {
             let op = ops[i]
             const isOr = op.charAt(0) === '|'
             op = isOr ? op.substr(1) : op
-            const expr = evaluate(get(item, fields[i]), op, predicates[i])
+            const expr = self.evaluate(get(item, fields[i]), op, predicates[i])
             if (expr !== undefined) {
               keep = first ? expr : (isOr ? keep || expr : keep && expr)
             }
@@ -390,25 +408,25 @@ addHiddenPropsToTarget(Query.prototype, {
             orderBy[i] = [def, 'ASC']
           }
         })
-        this.data.sort(function (a, b) {
-          return compare(orderBy, index, a, b)
+        self.data.sort(function (a, b) {
+          return self.compare(orderBy, index, a, b)
         })
       }
 
       // Skip
       if (isNumber(query.skip)) {
-        this.skip(query.skip)
+        self.skip(query.skip)
       } else if (isNumber(query.offset)) {
-        this.skip(query.offset)
+        self.skip(query.offset)
       }
       // Limit
       if (isNumber(query.limit)) {
-        this.limit(query.limit)
+        self.limit(query.limit)
       }
     } else if (isFunction(query)) {
-      this.data = this.data.filter(query, thisArg)
+      self.data = self.data.filter(query, thisArg)
     }
-    return this
+    return self
   },
 
   /**

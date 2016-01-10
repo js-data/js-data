@@ -406,20 +406,6 @@ utils.fillIn(Model, {
   idAttribute: 'id',
 
   /**
-   * Whether to add property accessors to the prototype of {@link Model} for
-   * each of the Model's relations. For each relation, the property accessor
-   * will be added as the field specified by the `localField` option of the
-   * relation definition. A relation property accessor returns related data by
-   * accessing the related Model. If the related Model's collection is empty,
-   * then the property accessors won't return anything.
-   *
-   * @memberof Model
-   * @type {boolean}
-   * @default true
-   */
-  linkRelations: true,
-
-  /**
    * Whether this Model should emit operational events.
    *
    * @memberof Model
