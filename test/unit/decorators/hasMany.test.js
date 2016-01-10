@@ -1,4 +1,4 @@
-/* global Model:true, JSData:true */
+/* global Model:true */
 import {assert} from 'chai'
 
 export function init () {

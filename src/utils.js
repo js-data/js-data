@@ -85,7 +85,7 @@ export function get (object, prop) {
   const parts = prop.split('.')
   const last = parts.pop()
 
-  while (prop = parts.shift()) {
+  while (prop = parts.shift()) { // eslint-disable-line
     object = object[prop]
     if (object == null) return
   }
@@ -101,7 +101,7 @@ export function unset (object, prop) {
   const parts = prop.split('.')
   const last = parts.pop()
 
-  while (prop = parts.shift()) {
+  while (prop = parts.shift()) { // eslint-disable-line
     object = object[prop]
     if (object == null) return
   }
@@ -458,18 +458,19 @@ export function eventify (target, getter, setter, enumerable) {
   })
 }
 
+/*eslint-disable*/
 // RiveraGroup/node-tiny-uuid
 // DO WTF YOU WANT TO PUBLIC LICENSE
 export function uuid (a, b) {
   for (
-    b=a=''; // b - result , a - numeric variable
-    a++<36;
-    b+=a*51&52 // if "a" is not 9 or 14 or 19 or 24
+    b = a = ''; // b - result , a - numeric variable
+    a++ < 36;
+    b += a * 51 & 52 // if "a" is not 9 or 14 or 19 or 24
     ?  //  return a random number or 4
     (
-      a^15 // if "a" is not 15
+      a ^ 15 // if "a" is not 15
       ? // genetate a random number from 0 to 15
-      8^Math.random()*(a^20?16:4) // unless "a" is 20, in which case a random number from 8 to 11
+      8 ^ Math.random() * (a ^ 20 ? 16 : 4) // unless "a" is 20, in which case a random number from 8 to 11
       :
       4 //  otherwise 4
     ).toString(16)
@@ -478,10 +479,11 @@ export function uuid (a, b) {
   );
   return b
 }
+/*eslint-enable*/
 
 export function classCallCheck (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
-    throw new TypeError('Cannot call a class as a function');
+    throw new TypeError('Cannot call a class as a function')
   }
 }
 

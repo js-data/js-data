@@ -1,36 +1,37 @@
-/* global Model:true */
-import {assert} from 'chai'
-
 export function init () {
   describe('#toJSON', function () {
     it('should be an instance function', function () {
-      assert.isFunction(Model.prototype.toJSON)
-      let User = Model.extend({}, {
+      const Test = this
+      Test.assert.isFunction(Test.JSData.Model.prototype.toJSON)
+      let User = Test.JSData.Model.extend({}, {
         idAttribute: '_id',
         name: 'user'
       })
-      class User2 extends Model {}
+      class User2 extends Test.JSData.Model {}
       class User3 extends User2 {}
-      assert.isFunction(User.prototype.toJSON)
-      assert.isFunction(User2.prototype.toJSON)
-      assert.isTrue(Model.prototype.toJSON === User.prototype.toJSON)
-      assert.isTrue(Model.prototype.toJSON === User2.prototype.toJSON)
-      assert.isTrue(User.prototype.toJSON === User2.prototype.toJSON)
-      assert.isTrue(User2.prototype.toJSON === User3.prototype.toJSON)
+      Test.assert.isFunction(User.prototype.toJSON)
+      Test.assert.isFunction(User2.prototype.toJSON)
+      Test.assert.isTrue(Test.JSData.Model.prototype.toJSON === User.prototype.toJSON)
+      Test.assert.isTrue(Test.JSData.Model.prototype.toJSON === User2.prototype.toJSON)
+      Test.assert.isTrue(User.prototype.toJSON === User2.prototype.toJSON)
+      Test.assert.isTrue(User2.prototype.toJSON === User3.prototype.toJSON)
     })
     it('should make json when not an instance', function () {
+      const Test = this
       const props = { name: 'John' }
-      assert.isTrue(this.User.prototype.toJSON.call(props) === props, 'should return passed in data')
+      Test.assert.isTrue(Test.User.prototype.toJSON.call(props) === props, 'should return passed in data')
     })
     it('should make json when an instance', function () {
+      const Test = this
       const props = { name: 'John', organizationId: 5 }
-      const user = new this.User(props)
-      assert.isTrue(user.toJSON() !== props, 'should return copy of data')
-      assert.deepEqual(user.toJSON(), props, 'copy should equal passed in data')
+      const user = new Test.User(props)
+      Test.assert.isTrue(user.toJSON() !== props, 'should return copy of data')
+      Test.assert.deepEqual(user.toJSON(), props, 'copy should equal passed in data')
     })
     it('should keep only enumerable properties', function () {
+      const Test = this
       const props = { name: 'John' }
-      const user = new this.User(props)
+      const user = new Test.User(props)
       Object.defineProperty(user, 'foo', {
         enumerable: true,
         value: 'foo'
@@ -39,14 +40,15 @@ export function init () {
         enumerable: false,
         value: 'bar'
       })
-      assert.isTrue(user.toJSON() !== props, 'should return copy of data')
-      assert.deepEqual(user.toJSON(), {
+      Test.assert.isTrue(user.toJSON() !== props, 'should return copy of data')
+      Test.assert.deepEqual(user.toJSON(), {
         name: 'John',
         foo: 'foo',
         organizationId: undefined
       }, 'should return enumerable properties')
     })
     it('should keep relations when not an instance', function () {
+      const Test = this
       const user = {
         name: 'John',
         organization: {
@@ -67,11 +69,12 @@ export function init () {
           }
         ]
       }
-      assert.isTrue(this.User.prototype.toJSON.call(user) === user, 'should return the same data')
-      assert.deepEqual(this.User.prototype.toJSON.call(user), user, 'returned data should be equal to passed in data')
+      Test.assert.isTrue(Test.User.prototype.toJSON.call(user) === user, 'should return the same data')
+      Test.assert.deepEqual(Test.User.prototype.toJSON.call(user), user, 'returned data should be equal to passed in data')
     })
     it('should remove relations when an instance', function () {
-      const user = this.User.inject({
+      const Test = this
+      const user = Test.User.inject({
         name: 'John',
         id: 1,
         organization: {
@@ -97,15 +100,16 @@ export function init () {
           }
         ]
       })
-      assert.isTrue(user.toJSON() !== user, 'should return copy of data')
-      assert.deepEqual(user.toJSON(), {
+      Test.assert.isTrue(user.toJSON() !== user, 'should return copy of data')
+      Test.assert.deepEqual(user.toJSON(), {
         id: 1,
         name: 'John',
         organizationId: 2
       }, 'returned data should not have relations')
     })
     it('should keep specified relations when an instance', function () {
-      const user = this.User.inject({
+      const Test = this
+      const user = Test.User.inject({
         name: 'John',
         id: 1,
         organization: {
@@ -131,7 +135,7 @@ export function init () {
           }
         ]
       })
-      assert.objectsEqual(user.toJSON({
+      Test.assert.objectsEqual(user.toJSON({
         with: ['organization']
       }), {
         id: 1,
@@ -139,7 +143,7 @@ export function init () {
         organizationId: 2,
         organization: user.organization
       }, 'should keep organization')
-      assert.objectsEqual(user.toJSON({
+      Test.assert.objectsEqual(user.toJSON({
         with: ['organization', 'comments']
       }), {
         id: 1,
@@ -148,7 +152,7 @@ export function init () {
         organization: user.organization,
         comments: user.comments
       }, 'should keep organization and comments')
-      assert.objectsEqual(user.toJSON({
+      Test.assert.objectsEqual(user.toJSON({
         with: ['organization', 'comments', 'comments.approvedByUser']
       }), {
         id: 1,
@@ -161,12 +165,12 @@ export function init () {
             userId: 1,
             text: 'foo',
             approvedBy: 5,
-            approvedByUser: this.User.get(5)
+            approvedByUser: Test.User.get(5)
           },
-          this.Comment.get(4)
+          Test.Comment.get(4)
         ]
       }, 'should keep organization and comments and comments.approvedByUser')
-      assert.objectsEqual(user.toJSON({
+      Test.assert.objectsEqual(user.toJSON({
         with: [
           'organization',
           'comments',
@@ -188,10 +192,10 @@ export function init () {
               name: 'Sally',
               id: 5,
               organizationId: 6,
-              organization: this.Organization.get(6)
+              organization: Test.Organization.get(6)
             }
           },
-          this.Comment.get(4)
+          Test.Comment.get(4)
         ]
       }, 'should keep organization and comments and comments.approvedByUser and comments.approvedByUser.organization')
     })

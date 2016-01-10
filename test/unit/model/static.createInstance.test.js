@@ -1,11 +1,9 @@
-/* global store:true, JSData:true, Model:true */
-import {assert} from 'chai'
-
 export function init () {
   describe('static createInstance', function () {
     it('should create an instance', function () {
-      const store = new JSData.DS()
-      class Person extends Model {
+      const Test = this
+      const store = new Test.JSData.DS()
+      class Person extends Test.JSData.Model {
         say () {
           return 'hi'
         }
@@ -14,7 +12,7 @@ export function init () {
         }
       }
 
-      const Dog = Model.extend({
+      const Dog = Test.JSData.Model.extend({
         say: function () {
           return 'woof'
         }
@@ -47,26 +45,26 @@ export function init () {
       const cat = Cat.createInstance()
       const cat2 = new Cat()
 
-      assert.equal(person.say(), 'hi')
-      assert.equal(person2.say(), 'hi')
-      assert.equal(dog.say(), 'woof')
-      assert.equal(dog2.say(), 'woof')
-      assert.equal(cat.say(), 'meow')
-      assert.equal(cat2.say(), 'meow')
+      Test.assert.equal(person.say(), 'hi')
+      Test.assert.equal(person2.say(), 'hi')
+      Test.assert.equal(dog.say(), 'woof')
+      Test.assert.equal(dog2.say(), 'woof')
+      Test.assert.equal(cat.say(), 'meow')
+      Test.assert.equal(cat2.say(), 'meow')
 
-      assert.objectsEqual(person, {
+      Test.assert.objectsEqual(person, {
         first: 'John',
         last: 'Anderson'
       })
-      assert.objectsEqual(dog, dogAttrs)
-      assert.objectsEqual(cat, {})
+      Test.assert.objectsEqual(dog, dogAttrs)
+      Test.assert.objectsEqual(cat, {})
 
-      assert.isTrue(person instanceof Person)
-      assert.isTrue(person2 instanceof Person)
-      assert.isTrue(dog instanceof Dog)
-      assert.isTrue(dog2 instanceof Dog)
-      assert.isTrue(cat instanceof Cat)
-      assert.isTrue(cat2 instanceof Cat)
+      Test.assert.isTrue(person instanceof Person)
+      Test.assert.isTrue(person2 instanceof Person)
+      Test.assert.isTrue(dog instanceof Dog)
+      Test.assert.isTrue(dog2 instanceof Dog)
+      Test.assert.isTrue(cat instanceof Cat)
+      Test.assert.isTrue(cat2 instanceof Cat)
     })
   })
 }

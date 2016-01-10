@@ -49,14 +49,6 @@
  * otherwise `false` if the current version is not beta.
  */
 
-if (!Promise.prototype.spread) {
-  Promise.prototype.spread = function (cb) {
-    return this.then(function (arr) {
-      return cb.apply(this, arr)
-    })
-  }
-}
-
 export * from './collection/index'
 export * from './datastore/index'
 

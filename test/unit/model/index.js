@@ -1,5 +1,3 @@
-/* global JSData:true, Model:true, Collection:true, configure:true, sinon:true */
-import {assert} from 'chai'
 import * as changes from './changes.test'
 import * as create from './create.test'
 import * as staticCreate from './static.create.test'
@@ -32,37 +30,41 @@ const defaults = {
 export function init () {
   describe('Model', function () {
     it('should be a constructor function', function () {
-      assert.isFunction(Model, 'should be a function')
-      let instance = new Model()
-      assert.isTrue(instance instanceof Model, 'instance should be an instance')
-      instance = new Model({ foo: 'bar' })
-      assert.deepEqual(instance, { foo: 'bar' }, 'instance should get initialization properties')
+      const Test = this
+      Test.assert.isFunction(Test.JSData.Model, 'should be a function')
+      let instance = new Test.JSData.Model()
+      Test.assert.isTrue(instance instanceof Test.JSData.Model, 'instance should be an instance')
+      instance = new Test.JSData.Model({ foo: 'bar' })
+      Test.assert.deepEqual(instance, { foo: 'bar' }, 'instance should get initialization properties')
     })
     it('should have the correct static defaults', function () {
+      const Test = this
       for (var key in defaults) {
-        assert.equal(Model[key], defaults[key], key + ' should be ' + defaults[key])
+        Test.assert.equal(Test.JSData.Model[key], defaults[key], key + ' should be ' + defaults[key])
       }
     })
     it('child should inherit static defaults', function () {
+      const Test = this
       var key
-      let User = Model.extend({}, {
+      let User = Test.JSData.Model.extend({}, {
         name: 'user'
       })
       for (key in defaults) {
-        assert.equal(User[key], defaults[key], key + ' should be ' + defaults[key])
+        Test.assert.equal(User[key], defaults[key], key + ' should be ' + defaults[key])
       }
-      class User2 extends Model {}
+      class User2 extends Test.JSData.Model {}
       for (key in defaults) {
-        assert.equal(User2[key], defaults[key], key + ' should be ' + defaults[key])
+        Test.assert.equal(User2[key], defaults[key], key + ' should be ' + defaults[key])
       }
     })
     it('child should override static defaults', function () {
-      const store = new JSData.DS()
+      const Test = this
+      const store = new Test.JSData.DS()
 
       /**
        * ES5 ways of creating a new Model
        */
-      const User = Model.extend({
+      const User = Test.JSData.Model.extend({
         initialize () {
           this.foo = 'foo'
         }
@@ -72,12 +74,12 @@ export function init () {
         name: 'user'
       })
       const user = new User({ id: 1 })
-      assert.equal(user.foo, 'foo', 'initialize should have been called')
-      assert.isTrue(user instanceof User)
-      assert.isTrue(User.is(user))
-      assert.equal(User.name, '')
+      Test.assert.equal(user.foo, 'foo', 'initialize should have been called')
+      Test.assert.isTrue(user instanceof User)
+      Test.assert.isTrue(User.is(user))
+      Test.assert.notEqual(User.name, 'User')
 
-      const Post = Model.extend({
+      const Post = Test.JSData.Model.extend({
         initialize () {
           this.foo = 'foo'
         }
@@ -86,51 +88,50 @@ export function init () {
         name: 'post'
       })
       const post = new Post({ id: 1 })
-      assert.equal(post.foo, 'foo', 'initialize should have been called')
-      assert.isTrue(post instanceof Post)
-      assert.isTrue(Post.is(post))
-      assert.equal(Post.name, 'Post')
+      Test.assert.equal(post.foo, 'foo', 'initialize should have been called')
+      Test.assert.isTrue(post instanceof Post)
+      Test.assert.isTrue(Post.is(post))
+      Test.assert.equal(Post.name, 'Post')
 
       const Comment = store.defineModel({
         idAttribute: '_id',
         name: 'comment'
       })
       const comment = new Comment({ id: 1 })
-      assert.isTrue(comment instanceof Comment)
-      assert.isTrue(Comment.is(comment))
-      assert.equal(Comment.name, 'Comment')
+      Test.assert.isTrue(comment instanceof Comment)
+      Test.assert.isTrue(Comment.is(comment))
+      Test.assert.equal(Comment.name, 'Comment')
 
-      const Label = Model.extend({
+      const Label = Test.JSData.Model.extend({
         constructor: function MyLabel () {
           Object.getPrototypeOf(this.constructor).apply(this, arguments)
         }
       })
       const label = new Label({ id: 1 })
-      assert.isTrue(label instanceof Label)
-      assert.isTrue(Label.is(label))
-      assert.equal(Label.name, 'MyLabel')
-
+      Test.assert.isTrue(label instanceof Label)
+      Test.assert.isTrue(Label.is(label))
+      Test.assert.equal(Label.name, 'MyLabel')
 
       /**
        * ES6 ways of creating a new Model
        */
-      class Profile extends Model {}
-      configure({
+      class Profile extends Test.JSData.Model {}
+      Profile.configure({
         idAttribute: '_id'
-      })(Profile)
+      })
       const profile = new Profile({ id: 1 })
-      assert.isTrue(profile instanceof Profile)
-      assert.isTrue(Profile.is(profile))
-      assert.equal(Profile.name, 'Profile')
+      Test.assert.isTrue(profile instanceof Profile)
+      Test.assert.isTrue(Profile.is(profile))
+      Test.assert.equal(Profile.name, 'Profile')
 
-      class Type extends Model {}
+      class Type extends Test.JSData.Model {}
       Type.configure({
         idAttribute: '_id'
       })
       const type = new Type({ id: 1 })
-      assert.isTrue(type instanceof Type)
-      assert.isTrue(Type.is(type))
-      assert.equal(Type.name, 'Type')
+      Test.assert.isTrue(type instanceof Type)
+      Test.assert.isTrue(Type.is(type))
+      Test.assert.equal(Type.name, 'Type')
 
      /**
        * ES7 way of creating a new Model
@@ -155,7 +156,7 @@ export function init () {
     //     { id: 4, age: 22, role: 'dev' },
     //     { id: 1, age: 23, role: 'owner' }
     //   ])
-    //   assert.deepEqual(
+    //   Test.assert.deepEqual(
     //     User.getAll(19, { index: 'age' }),
     //     [
     //       { id: 3, age: 19, role: 'dev' },
@@ -167,24 +168,26 @@ export function init () {
     // })
 
     it('should have events', function () {
-      class User extends Model {}
-      const listener = sinon.stub()
+      const Test = this
+      class User extends Test.JSData.Model {}
+      const listener = Test.sinon.stub()
       User.on('bar', listener)
       User.emit('bar')
-      assert.isTrue(User._events() !== Model._events())
-      assert.isTrue(listener.calledOnce)
+      Test.assert.isTrue(User._events() !== Test.JSData.Model._events())
+      Test.assert.isTrue(listener.calledOnce)
     })
 
     it('should work with csp set to true', function () {
-      const User = Model.extend({}, {
+      const Test = this
+      const User = Test.JSData.Model.extend({}, {
         csp: true,
         name: 'user'
       })
       const user = new User({ name: 'John' })
-      assert.isTrue(user instanceof User)
-      assert.equal(User.name, '')
+      Test.assert.isTrue(user instanceof User)
+      Test.assert.notEqual(User.name, 'User')
 
-      assert.equal(this.Post.name, 'Post')
+      Test.assert.equal(this.Post.name, 'Post')
     })
 
     // it('should allow enhanced relation getters', function () {
@@ -207,8 +210,8 @@ export function init () {
     //       id: 1
     //     }
     //   })
-    //   assert.equal(foo.bar.id, 1)
-    //   assert.isTrue(wasItActivated)
+    //   Test.assert.equal(foo.bar.id, 1)
+    //   Test.assert.isTrue(wasItActivated)
     // })
     // it('should update links', function () {
     //   class Foo extends Model {}
@@ -235,24 +238,25 @@ export function init () {
     //     id: 88,
     //     foo_id: 66
     //   })
-    //   assert.isTrue(bar88.foo === foo66)
-    //   assert.equal(66, bar88.foo_id)
+    //   Test.assert.isTrue(bar88.foo === foo66)
+    //   Test.assert.equal(66, bar88.foo_id)
     //   bar88.foo_id = 77
-    //   assert.isTrue(bar88.foo === foo77)
-    //   assert.equal(77, bar88.foo_id)
+    //   Test.assert.isTrue(bar88.foo === foo77)
+    //   Test.assert.equal(77, bar88.foo_id)
     //   bar88.foo = foo66
-    //   assert.isTrue(bar88.foo === foo66)
-    //   assert.equal(66, bar88.foo_id)
+    //   Test.assert.isTrue(bar88.foo === foo66)
+    //   Test.assert.equal(66, bar88.foo_id)
     //   foo66.bars = [bar88]
-    //   assert.objectsEqual(foo66.bars, Bar.getAll())
-    //   assert.objectsEqual(foo77.bars, [])
+    //   Test.assert.objectsEqual(foo66.bars, Bar.getAll())
+    //   Test.assert.objectsEqual(foo77.bars, [])
     //   foo77.bars = [bar88]
-    //   assert.objectsEqual(foo66.bars, [])
-    //   assert.objectsEqual(foo77.bars, Bar.getAll())
+    //   Test.assert.objectsEqual(foo66.bars, [])
+    //   Test.assert.objectsEqual(foo77.bars, Bar.getAll())
     // })
     it('should allow instance events', function (done) {
+      const Test = this
       let changed = false
-      class Foo extends Model {}
+      class Foo extends Test.JSData.Model {}
       Foo.setSchema({
         bar: { type: 'string', track: true }
       })
@@ -272,12 +276,13 @@ export function init () {
       foo.bar = 'baz'
     })
     it('should allow Resource change events', function (done) {
+      const Test = this
       let changed = false
-      class Foo extends Model {}
+      class Foo extends Test.JSData.Model {}
       Foo.setSchema({
         bar: { type: 'string', track: true }
       })
-      const fooCollection = new Collection([], {
+      const fooCollection = new Test.JSData.Collection([], {
         model: Foo
       })
       const foo = fooCollection.add({ id: 1 })
@@ -309,18 +314,18 @@ export function init () {
     //     foreignKey: 'bazId'
     //   })
     //   class Bar extends Foo {}
-    //   assert.equal(Foo.name, 'Foo')
-    //   assert.equal(Bar.name, 'Bar')
+    //   Test.assert.equal(Foo.name, 'Foo')
+    //   Test.assert.equal(Bar.name, 'Bar')
 
     //   const baz = Baz.inject({ id: 10 })
 
     //   const foo = Foo.inject({ id: 1, type: 'foo', bazId: 10 })
     //   const bar = Bar.inject({ id: 1, type: 'bar', bazId: 10 })
-    //   assert.isTrue(baz === foo.baz)
-    //   assert.isTrue(baz === bar.baz)
+    //   Test.assert.isTrue(baz === foo.baz)
+    //   Test.assert.isTrue(baz === bar.baz)
 
-    //   assert.equal(foo.say(), 'Foo')
-    //   assert.equal(bar.say(), 'Bar')
+    //   Test.assert.equal(foo.say(), 'Foo')
+    //   Test.assert.equal(bar.say(), 'Bar')
     // })
     // it('should allow resources to extend other resources in ES5', function () {
     //   const Baz = Model.extend({}, { name: 'Baz', linkRelations: true })
@@ -334,22 +339,23 @@ export function init () {
     //     foreignKey: 'bazId'
     //   })
     //   const Bar = Foo.extend({}, { name: 'Bar' })
-    //   assert.equal(Foo.name, 'Foo')
-    //   assert.equal(Bar.name, 'Bar')
+    //   Test.assert.equal(Foo.name, 'Foo')
+    //   Test.assert.equal(Bar.name, 'Bar')
 
     //   const baz = Baz.inject({ id: 10 })
 
     //   const foo = Foo.inject({ id: 1, type: 'foo', bazId: 10 })
     //   const bar = Bar.inject({ id: 1, type: 'bar', bazId: 10 })
-    //   assert.isTrue(baz === foo.baz)
-    //   assert.isTrue(baz === bar.baz)
+    //   Test.assert.isTrue(baz === foo.baz)
+    //   Test.assert.isTrue(baz === bar.baz)
 
-    //   assert.equal(foo.say(), 'Foo')
-    //   assert.equal(bar.say(), 'Bar')
+    //   Test.assert.equal(foo.say(), 'Foo')
+    //   Test.assert.equal(bar.say(), 'Bar')
     // })
     it('should allow instance events 2', function (done) {
+      const Test = this
       let changed = false
-      class Foo extends Model {}
+      class Foo extends Test.JSData.Model {}
       Foo.setSchema({
         bar: { type: 'string', track: true }
       })
@@ -369,12 +375,13 @@ export function init () {
       foo.set('bar', 'baz')
     })
     it('should allow Resource change events 2', function (done) {
+      const Test = this
       let changed = false
-      class Foo extends Model {}
+      class Foo extends Test.JSData.Model {}
       Foo.setSchema({
         bar: { type: 'string', track: true }
       })
-      const fooCollection = new Collection([], { model: Foo })
+      const fooCollection = new Test.JSData.Collection([], { model: Foo })
       const foo = fooCollection.add({ id: 1 })
 
       setTimeout(function () {

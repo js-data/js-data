@@ -1,28 +1,26 @@
-/* global JSData:true, Collection:true, Query:true, p1:true, p2:true, p3:true, p4:true, p5:true */
-import {assert} from 'chai'
-
 export function init () {
   describe('Query', function () {
     it('should correctly apply "where" predicates', function () {
-      const collection = new Collection([
-        p1,
-        p2,
-        p3,
-        p4,
-        p5
+      const Test = this
+      const collection = new Test.JSData.Collection([
+        Test.data.p1,
+        Test.data.p2,
+        Test.data.p3,
+        Test.data.p4,
+        Test.data.p5
       ], 'id')
       let params = {
         author: 'John'
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p1], 'should default a string to "=="')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p1], 'should default a string to "=="')
 
       params = {
         author: 'Adam',
         id: 9
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p5], 'should default a string to "=="')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p5], 'should default a string to "=="')
 
       params = {
         where: {
@@ -30,25 +28,25 @@ export function init () {
         }
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p1], 'should default a string to "=="')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p1], 'should default a string to "=="')
 
       params.where.author = {
         '==': 'John'
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p1], 'should accept normal "==" clause')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p1], 'should accept normal "==" clause')
 
       params.where.author = {
         '===': null
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [], 'should accept normal "===" clause')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [], 'should accept normal "===" clause')
 
       params.where.author = {
         '!=': 'John'
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p2, p3, p4, p5], 'should accept normal "!=" clause')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p2, Test.data.p3, Test.data.p4, Test.data.p5], 'should accept normal "!=" clause')
 
       params.where = {
         age: {
@@ -56,7 +54,7 @@ export function init () {
         }
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p3, p4, p5], 'should accept normal ">" clause')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p3, Test.data.p4, Test.data.p5], 'should accept normal ">" clause')
 
       params.where = {
         age: {
@@ -64,7 +62,7 @@ export function init () {
         }
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p2, p3, p4, p5], 'should accept normal ">=" clause')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p2, Test.data.p3, Test.data.p4, Test.data.p5], 'should accept normal ">=" clause')
 
       params.where = {
         age: {
@@ -72,7 +70,7 @@ export function init () {
         }
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p1], 'should accept normal "<" clause')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p1], 'should accept normal "<" clause')
 
       params.where = {
         age: {
@@ -81,7 +79,7 @@ export function init () {
         }
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p2, p3], 'should accept dual "<" and ">" clause')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p2, Test.data.p3], 'should accept dual "<" and ">" clause')
 
       params.where = {
         age: {
@@ -90,7 +88,7 @@ export function init () {
         }
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3, p4, p5], 'should accept or "<" and ">" clause')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p1, Test.data.p2, Test.data.p3, Test.data.p4, Test.data.p5], 'should accept or "<" and ">" clause')
 
       params.where = {
         age: {
@@ -101,7 +99,7 @@ export function init () {
         }
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p1, p2, p4, p5], 'should accept or "<=" and "==" clause')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p1, Test.data.p2, Test.data.p4, Test.data.p5], 'should accept or "<=" and "==" clause')
 
       params.where = {
         age: {
@@ -109,7 +107,7 @@ export function init () {
         }
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p1, p2], 'should accept normal "<=" clause')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p1, Test.data.p2], 'should accept normal "<=" clause')
 
       params.where = {
         age: {
@@ -120,7 +118,7 @@ export function init () {
         }
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p1, p4, p5], 'should accept normal "in" clause')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p1, Test.data.p4, Test.data.p5], 'should accept normal "in" clause')
 
       params.where = {
         author: {
@@ -128,7 +126,7 @@ export function init () {
         }
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p1], 'should accept normal "in" clause with a string')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p1], 'should accept normal "in" clause with a string')
 
       params.where = {
         author: {
@@ -136,7 +134,7 @@ export function init () {
         }
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p2, p3, p4, p5], 'should accept normal "notIn" clause with a string')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p2, Test.data.p3, Test.data.p4, Test.data.p5], 'should accept normal "notIn" clause with a string')
 
       params.where = {
         age: {
@@ -147,7 +145,7 @@ export function init () {
         }
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p2, p4], 'should accept and/or clause')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p2, Test.data.p4], 'should accept and/or clause')
 
       params.where = {
         id: {
@@ -155,63 +153,65 @@ export function init () {
         }
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3, p5], 'should accept notIn clause')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p1, Test.data.p2, Test.data.p3, Test.data.p5], 'should accept notIn clause')
 
       params.where = { age: { garbage: 'should have no effect' } }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3, p4, p5], 'should return all elements')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p1, Test.data.p2, Test.data.p3, Test.data.p4, Test.data.p5], 'should return all elements')
 
       params.where = { author: { like: 'Ada%' } }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p4, p5], 'should support like')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p4, Test.data.p5], 'should support like')
 
       params.where = { author: { like: '%a%' } }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p2, p4, p5], 'should support like')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p2, Test.data.p4, Test.data.p5], 'should support like')
 
       params.where = { author: { notLike: 'Ada%' } }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3], 'should support notLike')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p1, Test.data.p2, Test.data.p3], 'should support notLike')
     })
     it('should correctly apply "orderBy" predicates', function () {
-      const collection = new Collection([
-        p1,
-        p2,
-        p3,
-        p4
+      const Test = this
+      const collection = new Test.JSData.Collection([
+        Test.data.p1,
+        Test.data.p2,
+        Test.data.p3,
+        Test.data.p4
       ], 'id')
 
       let params = {
         orderBy: 'age'
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3, p4], 'should accept a single string and sort in ascending order for numbers')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p1, Test.data.p2, Test.data.p3, Test.data.p4], 'should accept a single string and sort in ascending order for numbers')
 
       params.orderBy = 'author'
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p4, p1, p3, p2], 'should accept a single string and sort in ascending for strings')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p4, Test.data.p1, Test.data.p3, Test.data.p2], 'should accept a single string and sort in ascending for strings')
 
       params.orderBy = [
         ['age', 'DESC']
       ]
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p4, p3, p2, p1], 'should accept an array of an array and sort in descending for numbers')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p4, Test.data.p3, Test.data.p2, Test.data.p1], 'should accept an array of an array and sort in descending for numbers')
 
       params.orderBy = [
         ['author', 'DESC']
       ]
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p2, p3, p1, p4], 'should accept an array of an array and sort in descending for strings')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p2, Test.data.p3, Test.data.p1, Test.data.p4], 'should accept an array of an array and sort in descending for strings')
 
       params.orderBy = ['age']
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3, p4], 'should accept an array of a string and sort in ascending for numbers')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p1, Test.data.p2, Test.data.p3, Test.data.p4], 'should accept an array of a string and sort in ascending for numbers')
 
       params.orderBy = ['author']
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p4, p1, p3, p2], 'should accept an array of a string and sort in ascending for strings')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p4, Test.data.p1, Test.data.p3, Test.data.p2], 'should accept an array of a string and sort in ascending for strings')
     })
     it('should work with multiple orderBy', function () {
+      const Test = this
       const items = [
         { id: 1, test: 1, test2: 1 },
         { id: 2, test: 2, test2: 2 },
@@ -226,7 +226,7 @@ export function init () {
         { id: 11, test: 2, test2: 5 },
         { id: 12, test: 3, test2: 6 }
       ]
-      const collection = new Collection(items, 'id')
+      const collection = new Test.JSData.Collection(items, 'id')
       let params = {}
 
       params.orderBy = [
@@ -235,7 +235,7 @@ export function init () {
         ['id', 'ASC']
       ]
 
-      assert.objectsEqual(collection.query().filter(params).run(), [
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [
         items[2],
         items[8],
         items[5],
@@ -256,7 +256,7 @@ export function init () {
         ['id', 'DESC']
       ]
 
-      assert.objectsEqual(collection.query().filter(params).run(), [
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [
         items[8],
         items[2],
         items[11],
@@ -272,122 +272,127 @@ export function init () {
       ])
     })
     it('should correctly apply "skip" predicates', function () {
-      const collection = new Collection([
-        p1,
-        p2,
-        p3,
-        p4
+      const Test = this
+      const collection = new Test.JSData.Collection([
+        Test.data.p1,
+        Test.data.p2,
+        Test.data.p3,
+        Test.data.p4
       ], 'id')
       let params = {
         skip: 1
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p2, p3, p4], 'should skip 1')
-      assert.objectsEqual(collection.query().skip(params.skip).run(), [p2, p3, p4], 'should skip 1')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p2, Test.data.p3, Test.data.p4], 'should skip 1')
+      Test.assert.objectsEqual(collection.query().skip(params.skip).run(), [Test.data.p2, Test.data.p3, Test.data.p4], 'should skip 1')
 
       params.skip = 2
-      assert.objectsEqual(collection.query().filter(params).run(), [p3, p4], 'should skip 2')
-      assert.objectsEqual(collection.query().skip(params.skip).run(), [p3, p4], 'should skip 2')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p3, Test.data.p4], 'should skip 2')
+      Test.assert.objectsEqual(collection.query().skip(params.skip).run(), [Test.data.p3, Test.data.p4], 'should skip 2')
 
       params.skip = 3
-      assert.objectsEqual(collection.query().filter(params).run(), [p4], 'should skip 3')
-      assert.objectsEqual(collection.query().skip(params.skip).run(), [p4], 'should skip 3')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p4], 'should skip 3')
+      Test.assert.objectsEqual(collection.query().skip(params.skip).run(), [Test.data.p4], 'should skip 3')
 
       params.skip = 4
-      assert.objectsEqual(collection.query().filter(params).run(), [], 'should skip 4')
-      assert.objectsEqual(collection.query().skip(params.skip).run(), [], 'should skip 4')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [], 'should skip 4')
+      Test.assert.objectsEqual(collection.query().skip(params.skip).run(), [], 'should skip 4')
     })
     it('should correctly apply "limit" predicates', function () {
-      const collection = new Collection([
-        p1,
-        p2,
-        p3,
-        p4
+      const Test = this
+      const collection = new Test.JSData.Collection([
+        Test.data.p1,
+        Test.data.p2,
+        Test.data.p3,
+        Test.data.p4
       ], 'id')
       let params = {
         limit: 1
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p1], 'should limit to 1')
-      assert.objectsEqual(collection.query().limit(params.limit).run(), [p1], 'should limit to 1')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p1], 'should limit to 1')
+      Test.assert.objectsEqual(collection.query().limit(params.limit).run(), [Test.data.p1], 'should limit to 1')
 
       params.limit = 2
-      assert.objectsEqual(collection.query().filter(params).run(), [p1, p2], 'should limit to 2')
-      assert.objectsEqual(collection.query().limit(params.limit).run(), [p1, p2], 'should limit to 2')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p1, Test.data.p2], 'should limit to 2')
+      Test.assert.objectsEqual(collection.query().limit(params.limit).run(), [Test.data.p1, Test.data.p2], 'should limit to 2')
 
       params.limit = 3
-      assert.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3], 'should limit to 3')
-      assert.objectsEqual(collection.query().limit(params.limit).run(), [p1, p2, p3], 'should limit to 3')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p1, Test.data.p2, Test.data.p3], 'should limit to 3')
+      Test.assert.objectsEqual(collection.query().limit(params.limit).run(), [Test.data.p1, Test.data.p2, Test.data.p3], 'should limit to 3')
 
       params.limit = 4
-      assert.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3, p4], 'should limit to 4')
-      assert.objectsEqual(collection.query().limit(params.limit).run(), [p1, p2, p3, p4], 'should limit to 4')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p1, Test.data.p2, Test.data.p3, Test.data.p4], 'should limit to 4')
+      Test.assert.objectsEqual(collection.query().limit(params.limit).run(), [Test.data.p1, Test.data.p2, Test.data.p3, Test.data.p4], 'should limit to 4')
     })
     it('should correctly apply "limit" and "skip" predicates together', function () {
-      const collection = new Collection([
-        p1,
-        p2,
-        p3,
-        p4
+      const Test = this
+      const collection = new Test.JSData.Collection([
+        Test.data.p1,
+        Test.data.p2,
+        Test.data.p3,
+        Test.data.p4
       ], 'id')
       let params = {
         limit: 1,
         skip: 1
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [p2], 'should limit to 1 and skip 2')
-      assert.objectsEqual(collection.query().skip(params.skip).limit(params.limit).run(), [p2], 'should limit to 1 and skip 2')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p2], 'should limit to 1 and skip 2')
+      Test.assert.objectsEqual(collection.query().skip(params.skip).limit(params.limit).run(), [Test.data.p2], 'should limit to 1 and skip 2')
 
       params.limit = 2
-      assert.objectsEqual(collection.query().filter(params).run(), [p2, p3], 'should limit to 2 and skip 1')
-      assert.objectsEqual(collection.query().skip(params.skip).limit(params.limit).run(), [p2, p3], 'should limit to 2 and skip 1')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p2, Test.data.p3], 'should limit to 2 and skip 1')
+      Test.assert.objectsEqual(collection.query().skip(params.skip).limit(params.limit).run(), [Test.data.p2, Test.data.p3], 'should limit to 2 and skip 1')
 
       params.skip = 2
-      assert.objectsEqual(collection.query().filter(params).run(), [p3, p4], 'should limit to 2 and skip 2')
-      assert.objectsEqual(collection.query().skip(params.skip).limit(params.limit).run(), [p3, p4], 'should limit to 2 and skip 2')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p3, Test.data.p4], 'should limit to 2 and skip 2')
+      Test.assert.objectsEqual(collection.query().skip(params.skip).limit(params.limit).run(), [Test.data.p3, Test.data.p4], 'should limit to 2 and skip 2')
 
       params.limit = 1
       params.skip = 3
-      assert.objectsEqual(collection.query().filter(params).run(), [p4], 'should limit to 1 and skip 3')
-      assert.objectsEqual(collection.query().skip(params.skip).limit(params.limit).run(), [p4], 'should limit to 1 and skip 3')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p4], 'should limit to 1 and skip 3')
+      Test.assert.objectsEqual(collection.query().skip(params.skip).limit(params.limit).run(), [Test.data.p4], 'should limit to 1 and skip 3')
 
       params.limit = 8
       params.skip = 0
-      assert.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3, p4], 'should return all items')
-      assert.objectsEqual(collection.query().skip(params.skip).limit(params.limit).run(), [p1, p2, p3, p4], 'should return all items')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p1, Test.data.p2, Test.data.p3, Test.data.p4], 'should return all items')
+      Test.assert.objectsEqual(collection.query().skip(params.skip).limit(params.limit).run(), [Test.data.p1, Test.data.p2, Test.data.p3, Test.data.p4], 'should return all items')
 
       params.limit = 1
       params.skip = 5
-      assert.objectsEqual(collection.query().filter(params).run(), [], 'should return nothing if skip if greater than the number of items')
-      assert.objectsEqual(collection.query().skip(params.skip).limit(params.limit).run(), [], 'should return nothing if skip if greater than the number of items')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [], 'should return nothing if skip if greater than the number of items')
+      Test.assert.objectsEqual(collection.query().skip(params.skip).limit(params.limit).run(), [], 'should return nothing if skip if greater than the number of items')
 
       params.limit = 8
       delete params.skip
-      assert.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3, p4], 'should return all items')
-      assert.throws(function () {
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [Test.data.p1, Test.data.p2, Test.data.p3, Test.data.p4], 'should return all items')
+      Test.assert.throws(function () {
         collection.query().skip(params.skip).limit(params.limit).run()
       }, TypeError, 'skip: Expected number but found undefined!', 'skip() should throw error if "num" is not a number')
 
       delete params.limit
       params.skip = 5
-      assert.objectsEqual(collection.query().filter(params).run(), [], 'should return nothing if skip if greater than the number of items')
-      assert.throws(function () {
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [], 'should return nothing if skip if greater than the number of items')
+      Test.assert.throws(function () {
         collection.query().skip(params.skip).limit(params.limit).run()
       }, TypeError, 'limit: Expected number but found undefined!', 'limit() should throw error if "num" is not a number')
     })
     it('should allow custom filter function', function () {
-      const collection = new Collection([
-        p1,
-        p2,
-        p3,
-        p4
+      const Test = this
+      const collection = new Test.JSData.Collection([
+        Test.data.p1,
+        Test.data.p2,
+        Test.data.p3,
+        Test.data.p4
       ], 'id')
 
-      assert.objectsEqual(collection.query().filter(function (item) {
+      Test.assert.objectsEqual(collection.query().filter(function (item) {
         return item.author === 'John' || item.age % 30 === 1
-      }).run(), [p1, p2], 'should keep p1 and p2')
+      }).run(), [Test.data.p1, Test.data.p2], 'should keep Test.data.p1 and Test.data.p2')
     })
     it('should order by nested keys', function () {
+      const Test = this
       let things = [
         {
           id: 1,
@@ -415,20 +420,21 @@ export function init () {
         }
       ]
 
-      const collection = new Collection(things, 'id')
+      const collection = new Test.JSData.Collection(things, 'id')
 
       let params = {
         orderBy: [['foo.bar', 'ASC']]
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [things[1], things[3], things[2], things[0]], 'should order by a nested key')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [things[1], things[3], things[2], things[0]], 'should order by a nested key')
 
       params = {
         orderBy: [['foo.bar', 'DESC']]
       }
-      assert.objectsEqual(collection.query().filter(params).run(), [things[0], things[2], things[3], things[1]], 'should order by a nested key')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [things[0], things[2], things[3], things[1]], 'should order by a nested key')
     })
     it('should filter by nested keys', function () {
+      const Test = this
       let things = [
         {
           id: 1,
@@ -456,7 +462,7 @@ export function init () {
         }
       ]
 
-      const collection = new Collection(things, 'id')
+      const collection = new Test.JSData.Collection(things, 'id')
 
       let params = {
         where: {
@@ -466,9 +472,10 @@ export function init () {
         }
       }
 
-      assert.objectsEqual(collection.query().filter(params).run(), [things[2], things[3]], 'should filter by a nested key')
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [things[2], things[3]], 'should filter by a nested key')
     })
     it('should support the "like" operator', function () {
+      const Test = this
       const users = [
         { id: 1, name: 'foo' },
         { id: 2, name: 'xfoo' },
@@ -479,34 +486,35 @@ export function init () {
         { id: 7, name: 'xxfooxxfooxx' },
         { id: 8, name: 'fooxxfoo' },
         { id: 9, name: 'fooxfoo' },
-        { id: 10, name: 'fooxxfoox' },
+        { id: 10, name: 'fooxxfoox' }
       ]
-      const collection = new Collection(users, 'id')
+      const collection = new Test.JSData.Collection(users, 'id')
 
-      assert.deepEqual(collection.query().filter({ where: { name: { like: 'foo' } } }).run(), [users[0]], 'foo')
-      assert.deepEqual(collection.query().filter({ where: { name: { like: '_foo' } } }).run(), [users[1]], '_foo')
-      assert.deepEqual(collection.query().filter({ where: { name: { like: 'foo_' } } }).run(), [users[2]], 'foo_')
-      assert.deepEqual(collection.query().filter({ where: { name: { like: '%foo' } } }).run(), [users[0], users[1], users[3], users[7], users[8]], '%foo')
-      assert.deepEqual(collection.query().filter({ where: { name: { likei: 'FOO%' } } }).run(), [users[0], users[2], users[4], users[7], users[8], users[9]], 'FOO%')
-      assert.deepEqual(collection.query().filter({ where: { name: { like: '%foo%' } } }).run(), users, '%foo%')
-      assert.deepEqual(collection.query().filter({ where: { name: { like: '%foo%foo%' } } }).run(), [users[6], users[7], users[8], users[9]], '%foo%foo%')
-      assert.deepEqual(collection.query().filter({ where: { name: { like: 'foo%foo' } } }).run(), [users[7], users[8]], 'foo%foo')
-      assert.deepEqual(collection.query().filter({ where: { name: { like: 'foo_foo' } } }).run(), [users[8]], 'foo_foo')
-      assert.deepEqual(collection.query().filter({ where: { name: { like: 'foo%foo_' } } }).run(), [users[9]], 'foo%foo')
+      Test.assert.deepEqual(collection.query().filter({ where: { name: { like: 'foo' } } }).run(), [users[0]], 'foo')
+      Test.assert.deepEqual(collection.query().filter({ where: { name: { like: '_foo' } } }).run(), [users[1]], '_foo')
+      Test.assert.deepEqual(collection.query().filter({ where: { name: { like: 'foo_' } } }).run(), [users[2]], 'foo_')
+      Test.assert.deepEqual(collection.query().filter({ where: { name: { like: '%foo' } } }).run(), [users[0], users[1], users[3], users[7], users[8]], '%foo')
+      Test.assert.deepEqual(collection.query().filter({ where: { name: { likei: 'FOO%' } } }).run(), [users[0], users[2], users[4], users[7], users[8], users[9]], 'FOO%')
+      Test.assert.deepEqual(collection.query().filter({ where: { name: { like: '%foo%' } } }).run(), users, '%foo%')
+      Test.assert.deepEqual(collection.query().filter({ where: { name: { like: '%foo%foo%' } } }).run(), [users[6], users[7], users[8], users[9]], '%foo%foo%')
+      Test.assert.deepEqual(collection.query().filter({ where: { name: { like: 'foo%foo' } } }).run(), [users[7], users[8]], 'foo%foo')
+      Test.assert.deepEqual(collection.query().filter({ where: { name: { like: 'foo_foo' } } }).run(), [users[8]], 'foo_foo')
+      Test.assert.deepEqual(collection.query().filter({ where: { name: { like: 'foo%foo_' } } }).run(), [users[9]], 'foo%foo')
 
-      assert.deepEqual(collection.query().filter({ where: { name: { notLike: 'foo' } } }).run(), [users[1], users[2], users[3], users[4], users[5], users[6], users[7], users[8], users[9]])
-      assert.deepEqual(collection.query().filter({ where: { name: { notLike: '_foo' } } }).run(), [users[0], users[2], users[3], users[4], users[5], users[6], users[7], users[8], users[9]])
-      assert.deepEqual(collection.query().filter({ where: { name: { notLike: 'foo_' } } }).run(), [users[0], users[1], users[3], users[4], users[5], users[6], users[7], users[8], users[9]])
-      assert.deepEqual(collection.query().filter({ where: { name: { notLike: '%foo' } } }).run(), [users[2], users[4], users[5], users[6], users[9]])
-      assert.deepEqual(collection.query().filter({ where: { name: { notLike: 'foo%' } } }).run(), [users[1], users[3], users[5], users[6]])
-      assert.deepEqual(collection.query().filter({ where: { name: { notLike: '%foo%' } } }).run(), [])
-      assert.deepEqual(collection.query().filter({ where: { name: { notLike: '%foo%foo%' } } }).run(), [users[0], users[1], users[2], users[3], users[4], users[5]])
-      assert.deepEqual(collection.query().filter({ where: { name: { notLike: 'foo%foo' } } }).run(), [users[0], users[1], users[2], users[3], users[4], users[5], users[6], users[9]])
-      assert.deepEqual(collection.query().filter({ where: { name: { notLike: 'foo_foo' } } }).run(), [users[0], users[1], users[2], users[3], users[4], users[5], users[6], users[7], users[9]])
-      assert.deepEqual(collection.query().filter({ where: { name: { notLike: 'foo%foo_' } } }).run(), [users[0], users[1], users[2], users[3], users[4], users[5], users[6], users[7], users[8]])
+      Test.assert.deepEqual(collection.query().filter({ where: { name: { notLike: 'foo' } } }).run(), [users[1], users[2], users[3], users[4], users[5], users[6], users[7], users[8], users[9]])
+      Test.assert.deepEqual(collection.query().filter({ where: { name: { notLike: '_foo' } } }).run(), [users[0], users[2], users[3], users[4], users[5], users[6], users[7], users[8], users[9]])
+      Test.assert.deepEqual(collection.query().filter({ where: { name: { notLike: 'foo_' } } }).run(), [users[0], users[1], users[3], users[4], users[5], users[6], users[7], users[8], users[9]])
+      Test.assert.deepEqual(collection.query().filter({ where: { name: { notLike: '%foo' } } }).run(), [users[2], users[4], users[5], users[6], users[9]])
+      Test.assert.deepEqual(collection.query().filter({ where: { name: { notLike: 'foo%' } } }).run(), [users[1], users[3], users[5], users[6]])
+      Test.assert.deepEqual(collection.query().filter({ where: { name: { notLike: '%foo%' } } }).run(), [])
+      Test.assert.deepEqual(collection.query().filter({ where: { name: { notLike: '%foo%foo%' } } }).run(), [users[0], users[1], users[2], users[3], users[4], users[5]])
+      Test.assert.deepEqual(collection.query().filter({ where: { name: { notLike: 'foo%foo' } } }).run(), [users[0], users[1], users[2], users[3], users[4], users[5], users[6], users[9]])
+      Test.assert.deepEqual(collection.query().filter({ where: { name: { notLike: 'foo_foo' } } }).run(), [users[0], users[1], users[2], users[3], users[4], users[5], users[6], users[7], users[9]])
+      Test.assert.deepEqual(collection.query().filter({ where: { name: { notLike: 'foo%foo_' } } }).run(), [users[0], users[1], users[2], users[3], users[4], users[5], users[6], users[7], users[8]])
     })
     it.skip('should allow use of scopes', function () {
-      const store = new JSData.DS({
+      const Test = this
+      const store = new Test.JSData.DS({
         log: false,
         scopes: {
           defaultScope: {
@@ -535,16 +543,16 @@ export function init () {
         { id: 7, foo: 'bar', beep: 'boop' },
         { id: 8, foo: 'bar', beep: 'boop' }
       ])
-      assert.objectsEqual(Foo.filter(null, {
+      Test.assert.objectsEqual(Foo.filter(null, {
         scope: ['second', 'limit']
       }), [foos[2]])
-      assert.objectsEqual(Foo.filter(null, {
+      Test.assert.objectsEqual(Foo.filter(null, {
         scope: ['second']
       }), Foo.filter({
         foo: 'bar',
         beep: 'boop'
       }))
-      assert.objectsEqual(Foo.filter(), Foo.filter({
+      Test.assert.objectsEqual(Foo.filter(), Foo.filter({
         foo: 'bar'
       }))
     })

@@ -1,36 +1,24 @@
-/* global JSData:true */
 import * as collection from './collection/index'
 import * as datastore from './datastore/index'
 import * as decorators from './decorators/index'
 import * as model from './model/index'
 import * as utils from './utils/index'
-import {assert} from 'chai'
-
-assert.objectsEqual = function (a, b, msg) {
-  assert.deepEqual(
-    JSON.parse(JSON.stringify(a)),
-    JSON.parse(JSON.stringify(b)),
-    msg || 'Expected objects or arrays to be equal'
-  )
-}
-
-assert.fail = function (msg) {
-  assert.equal(`should not reach this!: ${msg}`, 'failure')
-}
 
 export function init () {
   describe('JSData', function () {
     it('has all the right exports', function () {
-      assert.isFunction(JSData.belongsTo, 'has the belongsTo decorator')
-      assert.isFunction(JSData.Collection, 'has the Collection class')
-      assert.isFunction(JSData.configure, 'has the configure decorator')
-      assert.isFunction(JSData.DS, 'has the DS class')
-      assert.isFunction(JSData.hasMany, 'has the hasMany decorator')
-      assert.isFunction(JSData.hasOne, 'has the hasOne decorator')
-      assert.isFunction(JSData.setSchema, 'has the schema decorator')
-      assert.isFunction(JSData.Model, 'has the Model class')
-      assert.isObject(JSData.version, 'has a version')
+      const Test = this
+      Test.assert.isFunction(Test.JSData.belongsTo, 'has the belongsTo decorator')
+      Test.assert.isFunction(Test.JSData.Collection, 'has the Collection class')
+      Test.assert.isFunction(Test.JSData.configure, 'has the configure decorator')
+      Test.assert.isFunction(Test.JSData.DS, 'has the DS class')
+      Test.assert.isFunction(Test.JSData.hasMany, 'has the hasMany decorator')
+      Test.assert.isFunction(Test.JSData.hasOne, 'has the hasOne decorator')
+      Test.assert.isFunction(Test.JSData.setSchema, 'has the schema decorator')
+      Test.assert.isFunction(Test.JSData.Model, 'has the Model class')
+      Test.assert.isObject(Test.JSData.version, 'has a version')
     })
+
     collection.init()
     datastore.init()
     decorators.init()
@@ -39,14 +27,3 @@ export function init () {
   })
 }
 
-export const TYPES_EXCEPT_STRING = [123, 123.123, null, undefined, {}, [], true, false, function () {}]
-export const TYPES_EXCEPT_STRING_OR_ARRAY = [123, 123.123, null, undefined, {}, true, false, function () {}]
-export const TYPES_EXCEPT_STRING_OR_NUMBER = [null, undefined, {}, [], true, false, function () {}]
-export const TYPES_EXCEPT_STRING_OR_OBJECT = [123, 123.123, null, undefined, [], true, false, function () {}]
-export const TYPES_EXCEPT_STRING_OR_NUMBER_OBJECT = [null, undefined, [], true, false, function () {}]
-export const TYPES_EXCEPT_ARRAY = ['string', 123, 123.123, null, undefined, {}, true, false, function () {}]
-export const TYPES_EXCEPT_STRING_OR_ARRAY_OR_NUMBER = [null, undefined, {}, true, false, function () {}]
-export const TYPES_EXCEPT_NUMBER = ['string', null, undefined, {}, [], true, false, function () {}]
-export const TYPES_EXCEPT_OBJECT = ['string', 123, 123.123, null, undefined, true, false, function () {}]
-export const TYPES_EXCEPT_BOOLEAN = ['string', 123, 123.123, null, undefined, {}, [], function () {}]
-export const TYPES_EXCEPT_FUNCTION = ['string', 123, 123.123, null, undefined, {}, [], true, false]
