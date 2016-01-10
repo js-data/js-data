@@ -1,3 +1,8 @@
+##### 3.0.0-alpha.9 - 09 January 2016
+
+###### Backwards compatible bug fixes
+- Fixed a bug in IE where Object.prototype.toString !== window.toString
+
 ##### 3.0.0-alpha.8 - 09 January 2016
 
 ###### Breaking API changes

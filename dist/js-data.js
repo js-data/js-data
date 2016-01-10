@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.8 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.9 - Homepage <http://www.js-data.io/>
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @copyright (c) 2014-2015 Jason Dobry
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -41,6 +41,10 @@
    * @memberof module:js-data
    */
 
+  function toString(x) {
+    return Object.prototype.toString.call(x);
+  }
+
   /**
    * Return whether the provided value is an array.
    * @method
@@ -52,7 +56,7 @@
    * @param {*} [value] - The value to test.
    */
   function isObject(value) {
-    return toString.call(value) === '[object Object]' || false;
+    return toString(value) === '[object Object]' || false;
   }
   function isPlainObject(value) {
     return !!value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && value.constructor === Object;
@@ -62,21 +66,21 @@
    * @param {*} [value] - The value to test.
    */
   function isRegExp(value) {
-    return toString.call(value) === '[object RegExp]' || false;
+    return toString(value) === '[object RegExp]' || false;
   }
   /**
    * Return whether the provided value is a string type.
    * @param {*} [value] - The value to test.
    */
   function isString(value) {
-    return typeof value === 'string' || value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toString.call(value) === '[object String]' || false;
+    return typeof value === 'string' || value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toString(value) === '[object String]' || false;
   }
   /**
    * Return whether the provided value is a date type.
    * @param {*} [value] - The value to test.
    */
   function isDate(value) {
-    return value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toString.call(value) === '[object Date]' || false;
+    return value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toString(value) === '[object Date]' || false;
   }
   /**
    * Return whether the provided value is a number type.
@@ -84,21 +88,21 @@
    */
   function isNumber(value) {
     var type = typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value);
-    return type === 'number' || value && type === 'object' && toString.call(value) === '[object Number]' || false;
+    return type === 'number' || value && type === 'object' && toString(value) === '[object Number]' || false;
   }
   /**
    * Return whether the provided value is a boolean type.
    * @param {*} [value] - The value to test.
    */
   function isBoolean(value) {
-    return toString.call(value) === '[object Boolean]';
+    return toString(value) === '[object Boolean]';
   }
   /**
    * Return whether the provided value is a function.
    * @param {*} [value] - The value to test.
    */
   function isFunction(value) {
-    return typeof value === 'function' || value && toString.call(value) === '[object Function]' || false;
+    return typeof value === 'function' || value && toString(value) === '[object Function]' || false;
   }
   /**
    * Return whether the provided value is a string or a number.
@@ -290,7 +294,7 @@
     }
     var matches = undefined;
     for (var i = 0; i < bl.length; i++) {
-      if (Object.prototype.toString.call(bl[i]) === '[object RegExp]' && bl[i].test(prop) || bl[i] === prop) {
+      if (toString(bl[i]) === '[object RegExp]' && bl[i].test(prop) || bl[i] === prop) {
         matches = prop;
         return matches;
       }
@@ -4973,11 +4977,11 @@
   var utils = _utils;
 
   var version = {
-    full: '3.0.0-alpha.8',
+    full: '3.0.0-alpha.9',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10),
-    alpha: '8' !== 'false' ? '8' : false,
+    alpha: '9' !== 'false' ? '9' : false,
     beta: 'false' !== 'false' ? 'false' : false
   };
 
@@ -4997,4 +5001,4 @@
   exports.validate = validate;
 
 }));
-//# sourceMappingURL=js-data-debug.js.map
+//# sourceMappingURL=js-data.js.map

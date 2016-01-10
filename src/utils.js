@@ -3,6 +3,10 @@
  * @memberof module:js-data
  */
 
+function toString (x) {
+  return Object.prototype.toString.call(x)
+}
+
 /**
  * Return whether the provided value is an array.
  * @method
@@ -14,7 +18,7 @@ export const isArray = Array.isArray
  * @param {*} [value] - The value to test.
  */
 export function isObject (value) {
-  return toString.call(value) === '[object Object]' || false
+  return toString(value) === '[object Object]' || false
 }
 function isPlainObject (value) {
   return (!!value && typeof value === 'object' && value.constructor === Object)
@@ -24,21 +28,21 @@ function isPlainObject (value) {
  * @param {*} [value] - The value to test.
  */
 export function isRegExp (value) {
-  return toString.call(value) === '[object RegExp]' || false
+  return toString(value) === '[object RegExp]' || false
 }
 /**
  * Return whether the provided value is a string type.
  * @param {*} [value] - The value to test.
  */
 export function isString (value) {
-  return typeof value === 'string' || (value && typeof value === 'object' && toString.call(value) === '[object String]') || false
+  return typeof value === 'string' || (value && typeof value === 'object' && toString(value) === '[object String]') || false
 }
 /**
  * Return whether the provided value is a date type.
  * @param {*} [value] - The value to test.
  */
 export function isDate (value) {
-  return (value && typeof value === 'object' && toString.call(value) === '[object Date]') || false
+  return (value && typeof value === 'object' && toString(value) === '[object Date]') || false
 }
 /**
  * Return whether the provided value is a number type.
@@ -46,21 +50,21 @@ export function isDate (value) {
  */
 export function isNumber (value) {
   const type = typeof value
-  return type === 'number' || (value && type === 'object' && toString.call(value) === '[object Number]') || false
+  return type === 'number' || (value && type === 'object' && toString(value) === '[object Number]') || false
 }
 /**
  * Return whether the provided value is a boolean type.
  * @param {*} [value] - The value to test.
  */
 export function isBoolean (value) {
-  return toString.call(value) === '[object Boolean]'
+  return toString(value) === '[object Boolean]'
 }
 /**
  * Return whether the provided value is a function.
  * @param {*} [value] - The value to test.
  */
 export function isFunction (value) {
-  return typeof value === 'function' || (value && toString.call(value) === '[object Function]') || false
+  return typeof value === 'function' || (value && toString(value) === '[object Function]') || false
 }
 /**
  * Return whether the provided value is a string or a number.
@@ -252,7 +256,7 @@ export function isBlacklisted (prop, bl) {
   }
   let matches
   for (var i = 0; i < bl.length; i++) {
-    if ((Object.prototype.toString.call(bl[i]) === '[object RegExp]' && bl[i].test(prop)) || bl[i] === prop) {
+    if ((toString(bl[i]) === '[object RegExp]' && bl[i].test(prop)) || bl[i] === prop) {
       matches = prop
       return matches
     }
