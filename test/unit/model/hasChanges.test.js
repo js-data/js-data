@@ -1,42 +1,42 @@
-/* global Model:true */
-import {assert} from 'chai'
-
 export function init () {
   describe('#hasChanges', function () {
     it('should be an instance function', function () {
-      assert.isFunction(Model.prototype.hasChanges)
-      let User = Model.extend({}, {
+      const Test = this
+      Test.assert.isFunction(Test.JSData.Model.prototype.hasChanges)
+      let User = Test.JSData.Model.extend({}, {
         idAttribute: '_id',
         name: 'user'
       })
-      class User2 extends Model {}
+      class User2 extends Test.JSData.Model {}
       class User3 extends User2 {}
-      assert.isFunction(User.prototype.hasChanges)
-      assert.isFunction(User2.prototype.hasChanges)
-      assert.isTrue(Model.prototype.hasChanges === User.prototype.hasChanges)
-      assert.isTrue(Model.prototype.hasChanges === User2.prototype.hasChanges)
-      assert.isTrue(User.prototype.hasChanges === User2.prototype.hasChanges)
-      assert.isTrue(User2.prototype.hasChanges === User3.prototype.hasChanges)
+      Test.assert.isFunction(User.prototype.hasChanges)
+      Test.assert.isFunction(User2.prototype.hasChanges)
+      Test.assert.isTrue(Test.JSData.Model.prototype.hasChanges === User.prototype.hasChanges)
+      Test.assert.isTrue(Test.JSData.Model.prototype.hasChanges === User2.prototype.hasChanges)
+      Test.assert.isTrue(User.prototype.hasChanges === User2.prototype.hasChanges)
+      Test.assert.isTrue(User2.prototype.hasChanges === User3.prototype.hasChanges)
     })
     it('should return false if untracked fields are changed', function () {
-      const post = new this.Post(this.data.p1)
-      assert.isFalse(post.hasChanges())
+      const Test = this
+      const post = new Test.Post(Test.data.p1)
+      Test.assert.isFalse(post.hasChanges())
       post.author = 'Jake'
-      assert.isFalse(post.hasChanges())
+      Test.assert.isFalse(post.hasChanges())
     })
     it('should return true if a tracked field is changed', function () {
-      this.Post.setSchema({
+      const Test = this
+      Test.Post.setSchema({
         author: {
           type: 'string',
           track: true
         }
       })
-      const post = new this.Post(this.data.p1)
-      assert.isFalse(post.hasChanges())
+      const post = new Test.Post(Test.data.p1)
+      Test.assert.isFalse(post.hasChanges())
       post.author = 'Jake'
-      assert.isTrue(post.hasChanges())
+      Test.assert.isTrue(post.hasChanges())
       post.author = 'John'
-      assert.isFalse(post.hasChanges())
+      Test.assert.isFalse(post.hasChanges())
     })
   })
 }

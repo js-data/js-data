@@ -1,41 +1,40 @@
-/* global p1:true, p2:true, p3:true, p4:true, p5:true, Model:true */
-import {assert} from 'chai'
-
 export function init () {
   describe('#removeAll', function () {
     it('should eject items that meet the criteria from the store', function () {
-      this.User.debug = true
-      this.UserCollection.add([p1, p2, p3, p4, p5])
-      assert.isDefined(this.UserCollection.get(5))
-      assert.isDefined(this.UserCollection.get(6))
-      assert.isDefined(this.UserCollection.get(7))
-      assert.isDefined(this.UserCollection.get(8))
-      assert.isDefined(this.UserCollection.get(9))
-      assert.doesNotThrow(() => {
-        this.UserCollection.removeAll({ where: { author: 'Adam' } })
+      const Test = this
+      Test.User.debug = true
+      Test.UserCollection.add([Test.data.p1, Test.data.p2, Test.data.p3, Test.data.p4, Test.data.p5])
+      Test.assert.isDefined(Test.UserCollection.get(5))
+      Test.assert.isDefined(Test.UserCollection.get(6))
+      Test.assert.isDefined(Test.UserCollection.get(7))
+      Test.assert.isDefined(Test.UserCollection.get(8))
+      Test.assert.isDefined(Test.UserCollection.get(9))
+      Test.assert.doesNotThrow(function () {
+        Test.UserCollection.removeAll({ where: { author: 'Adam' } })
       })
-      assert.isDefined(this.UserCollection.get(5))
-      assert.isDefined(this.UserCollection.get(6))
-      assert.isDefined(this.UserCollection.get(7))
-      assert.isUndefined(this.UserCollection.get(8))
-      assert.isUndefined(this.UserCollection.get(9))
+      Test.assert.isDefined(Test.UserCollection.get(5))
+      Test.assert.isDefined(Test.UserCollection.get(6))
+      Test.assert.isDefined(Test.UserCollection.get(7))
+      Test.assert.isUndefined(Test.UserCollection.get(8))
+      Test.assert.isUndefined(Test.UserCollection.get(9))
     })
     it('should eject all items from the store', function () {
-      this.PostCollection.add([p1, p2, p3, p4])
+      const Test = this
+      Test.PostCollection.add([Test.data.p1, Test.data.p2, Test.data.p3, Test.data.p4])
 
-      assert.objectsEqual(this.PostCollection.get(5), p1)
-      assert.objectsEqual(this.PostCollection.get(6), p2)
-      assert.objectsEqual(this.PostCollection.get(7), p3)
-      assert.objectsEqual(this.PostCollection.get(8), p4)
+      Test.assert.objectsEqual(Test.PostCollection.get(5), Test.data.p1)
+      Test.assert.objectsEqual(Test.PostCollection.get(6), Test.data.p2)
+      Test.assert.objectsEqual(Test.PostCollection.get(7), Test.data.p3)
+      Test.assert.objectsEqual(Test.PostCollection.get(8), Test.data.p4)
 
-      assert.doesNotThrow(() => {
-        this.PostCollection.removeAll()
+      Test.assert.doesNotThrow(function () {
+        Test.PostCollection.removeAll()
       })
 
-      assert.isUndefined(this.PostCollection.get(5))
-      assert.isUndefined(this.PostCollection.get(6))
-      assert.isUndefined(this.PostCollection.get(7))
-      assert.isUndefined(this.PostCollection.get(8))
+      Test.assert.isUndefined(Test.PostCollection.get(5))
+      Test.assert.isUndefined(Test.PostCollection.get(6))
+      Test.assert.isUndefined(Test.PostCollection.get(7))
+      Test.assert.isUndefined(Test.PostCollection.get(8))
     })
   })
 }
