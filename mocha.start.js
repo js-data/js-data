@@ -4,7 +4,7 @@ require('babel-polyfill');
 var assert = require('chai').assert;
 var sinon = require('sinon')
 var mocha = require('mocha')
-var JSData = require('./dist/js-data-debug')
+var JSData = require('./dist/js-data')
 var JSDataTests = require('./dist/js-data-tests')
 
 var store

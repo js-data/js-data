@@ -1,11 +1,6 @@
 machine:
   node:
     version: 4.1.0
-dependencies:
-  pre:
-    - bower install
-  cache_directories:
-    - "bower_components"
 test:
   override:
     - npm run ci

@@ -36,7 +36,6 @@ function version(filepath) {
   });
 }
 
-version('dist/js-data-debug.js');
 version('dist/js-data.js');
 
 console.log('Done!');

@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "3.0.0-alpha.8",
+  "version": "3.0.0-alpha.9",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -9,7 +9,7 @@
   },
   "author": "Jason Dobry <jason.dobry@gmail.com> (http://www.pseudobry.com)",
   "license": "MIT",
-  "main": "./dist/js-data-debug.js",
+  "main": "./dist/js-data.js",
   "keywords": [
     "orm",
     "odm",
@@ -47,11 +47,10 @@
     "lint": "standard src/**/*.js test/**/*.js",
     "helpers": "node scripts/helpers.js",
     "min": "uglifyjs dist/js-data.js -o dist/js-data.min.js --source-map dist/js-data.min.map -v -m -c --screw-ie8",
-    "debug": "node scripts/debug.js",
     "version": "node scripts/version.js",
     "banner": "node scripts/banner.js",
     "gzip": "echo gzipped size: $(cat dist/js-data.min.js | gzip -f9 | wc -c)kb",
-    "build": "npm run lint && npm run rollup && npm run debug && npm run min && npm run version && npm run banner",
+    "build": "npm run lint && npm run rollup && npm run min && npm run version && npm run banner",
     "karma": "karma start",
     "mocha": "mocha -t 20000 -R spec -r source-map-support/register mocha.start.js",
     "r": "npm run rollup && npm run mocha",

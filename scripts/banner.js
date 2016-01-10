@@ -24,7 +24,6 @@ function addBanner(filepath) {
   }
 }
 
-addBanner('dist/js-data-debug.js');
 addBanner('dist/js-data.js');
 addBanner('dist/js-data.min.js');
 
