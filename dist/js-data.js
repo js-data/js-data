@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.9 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.10 - Homepage <http://www.js-data.io/>
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @copyright (c) 2014-2015 Jason Dobry
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -653,45 +653,6 @@
     sort: ''
   };
 
-  function compare(orderBy, index, a, b) {
-    var def = orderBy[index];
-    var cA = get(a, def[0]);
-    var cB = get(b, def[0]);
-    if (cA && isString(cA)) {
-      cA = cA.toUpperCase();
-    }
-    if (cB && isString(cB)) {
-      cB = cB.toUpperCase();
-    }
-    a || (a = null);
-    b || (b = null);
-    if (def[1] === 'DESC') {
-      if (cB < cA) {
-        return -1;
-      } else if (cB > cA) {
-        return 1;
-      } else {
-        if (index < orderBy.length - 1) {
-          return compare(orderBy, index + 1, a, b);
-        } else {
-          return 0;
-        }
-      }
-    } else {
-      if (cA < cB) {
-        return -1;
-      } else if (cA > cB) {
-        return 1;
-      } else {
-        if (index < orderBy.length - 1) {
-          return compare(orderBy, index + 1, a, b);
-        } else {
-          return 0;
-        }
-      }
-    }
-  }
-
   var escapeRegExp = /([.*+?^=!:${}()|[\]\/\\])/g;
   var percentRegExp = /%/g;
   var underscoreRegExp = /_/g;
@@ -700,57 +661,110 @@
     return pattern.replace(escapeRegExp, '\\$1');
   }
 
-  function like(pattern, flags) {
-    return new RegExp('^' + escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.') + '$', flags);
-  }
-
-  function evaluate(value, op, predicate) {
-    switch (op) {
-      case '==':
-        return value == predicate; // eslint-disable-line
-      case '===':
-        return value === predicate;
-      case '!=':
-        return value != predicate; // eslint-disable-line
-      case '!==':
-        return value !== predicate;
-      case '>':
-        return value > predicate;
-      case '>=':
-        return value >= predicate;
-      case '<':
-        return value < predicate;
-      case '<=':
-        return value <= predicate;
-      case 'isectEmpty':
-        return !intersection(value || [], predicate || []).length;
-      case 'isectNotEmpty':
-        return intersection(value || [], predicate || []).length;
-      case 'in':
-        return predicate.indexOf(value) !== -1;
-      case 'notIn':
-        return predicate.indexOf(value) === -1;
-      case 'contains':
-        return (value || []).indexOf(predicate) !== -1;
-      case 'notContains':
-        return (value || []).indexOf(predicate) === -1;
-      default:
-        if (op.indexOf('like') === 0) {
-          return like(predicate, op.substr(4)).exec(value) !== null;
-        } else if (op.indexOf('notLike') === 0) {
-          return like(predicate, op.substr(7)).exec(value) === null;
-        }
+  Query.ops = {
+    '==': function _(value, predicate) {
+      return value == predicate; // eslint-disable-line
+    },
+    '===': function _(value, predicate) {
+      return value === predicate;
+    },
+    '!=': function _(value, predicate) {
+      return value != predicate; // eslint-disable-line
+    },
+    '!==': function _(value, predicate) {
+      return value !== predicate;
+    },
+    '>': function _(value, predicate) {
+      return value > predicate;
+    },
+    '>=': function _(value, predicate) {
+      return value >= predicate;
+    },
+    '<': function _(value, predicate) {
+      return value < predicate;
+    },
+    '<=': function _(value, predicate) {
+      return value <= predicate;
+    },
+    'isectEmpty': function isectEmpty(value, predicate) {
+      return !intersection(value || [], predicate || []).length;
+    },
+    'isectNotEmpty': function isectNotEmpty(value, predicate) {
+      return intersection(value || [], predicate || []).length;
+    },
+    'in': function _in(value, predicate) {
+      return predicate.indexOf(value) !== -1;
+    },
+    'notIn': function notIn(value, predicate) {
+      return predicate.indexOf(value) === -1;
+    },
+    'contains': function contains(value, predicate) {
+      return (value || []).indexOf(predicate) !== -1;
+    },
+    'notContains': function notContains(value, predicate) {
+      return (value || []).indexOf(predicate) === -1;
     }
-  }
+  };
 
   addHiddenPropsToTarget(Query.prototype, {
+    compare: function compare(orderBy, index, a, b) {
+      var def = orderBy[index];
+      var cA = get(a, def[0]);
+      var cB = get(b, def[0]);
+      if (cA && isString(cA)) {
+        cA = cA.toUpperCase();
+      }
+      if (cB && isString(cB)) {
+        cB = cB.toUpperCase();
+      }
+      a || (a = null);
+      b || (b = null);
+      if (def[1] === 'DESC') {
+        if (cB < cA) {
+          return -1;
+        } else if (cB > cA) {
+          return 1;
+        } else {
+          if (index < orderBy.length - 1) {
+            return this.compare(orderBy, index + 1, a, b);
+          } else {
+            return 0;
+          }
+        }
+      } else {
+        if (cA < cB) {
+          return -1;
+        } else if (cA > cB) {
+          return 1;
+        } else {
+          if (index < orderBy.length - 1) {
+            return this.compare(orderBy, index + 1, a, b);
+          } else {
+            return 0;
+          }
+        }
+      }
+    },
+    evaluate: function evaluate(value, op, predicate) {
+      if (Query.ops[op]) {
+        return Query.ops[op](value, predicate);
+      }
+      if (op.indexOf('like') === 0) {
+        return this.like(predicate, op.substr(4)).exec(value) !== null;
+      } else if (op.indexOf('notLike') === 0) {
+        return this.like(predicate, op.substr(7)).exec(value) === null;
+      }
+    },
+    like: function like(pattern, flags) {
+      return new RegExp('^' + escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.') + '$', flags);
+    },
+
     /**
      * Return the current data result of this query.
      * @memberof Query
      * @instance
      * @return {Array} The data in this query.
      */
-
     getData: function getData() {
       if (!this.data) {
         this.data = this.collection.index.getAll();
@@ -940,10 +954,9 @@
      * @return {Query} A reference to itself for chaining.
      */
     filter: function filter(query, thisArg) {
-      var _this2 = this;
-
+      var self = this;
       query || (query = {});
-      this.getData();
+      self.getData();
       if (isObject(query)) {
         (function () {
           var where = {};
@@ -978,7 +991,7 @@
             (function () {
               var i = undefined;
               var len = fields.length;
-              _this2.data = _this2.data.filter(function (item) {
+              self.data = self.data.filter(function (item) {
                 var first = true;
                 var keep = true;
 
@@ -986,7 +999,7 @@
                   var op = ops[i];
                   var isOr = op.charAt(0) === '|';
                   op = isOr ? op.substr(1) : op;
-                  var expr = evaluate(get(item, fields[i]), op, predicates[i]);
+                  var expr = self.evaluate(get(item, fields[i]), op, predicates[i]);
                   if (expr !== undefined) {
                     keep = first ? expr : isOr ? keep || expr : keep && expr;
                   }
@@ -1016,27 +1029,27 @@
                   orderBy[i] = [def, 'ASC'];
                 }
               });
-              _this2.data.sort(function (a, b) {
-                return compare(orderBy, index, a, b);
+              self.data.sort(function (a, b) {
+                return self.compare(orderBy, index, a, b);
               });
             })();
           }
 
           // Skip
           if (isNumber(query.skip)) {
-            _this2.skip(query.skip);
+            self.skip(query.skip);
           } else if (isNumber(query.offset)) {
-            _this2.skip(query.offset);
+            self.skip(query.offset);
           }
           // Limit
           if (isNumber(query.limit)) {
-            _this2.limit(query.limit);
+            self.limit(query.limit);
           }
         })();
       } else if (isFunction(query)) {
-        this.data = this.data.filter(query, thisArg);
+        self.data = self.data.filter(query, thisArg);
       }
-      return this;
+      return self;
     },
 
     /**
@@ -1573,7 +1586,21 @@
      * @type {Model}
      */
     self.model = opts.model;
+    /**
+     * Field to be used as the unique identifier for models in this collection.
+     * Defaults to `"id"` unless {@link Collection#model} is set, in which case
+     * this will default to {@link Model.idAttribute}.
+     * @type {string}
+     */
     self.idAttribute = opts.idAttribute;
+
+    /**
+     * Any options set here will override any options of {@link Collection#model}.
+     * Useful for making multiple collection that use the same Model in different
+     * ways.
+     * @type {Object}
+     */
+    self.modelOpts = opts.modelOpts || {};
 
     /**
      * Event listeners attached to this Collection.
@@ -1986,9 +2013,7 @@
       // Track whether just one or an array of models is being inserted
       var singular = false;
       var idAttribute = self.modelId();
-      // TODO: fix
-      // const relationList = self.model ? self.model.relationList || [] : []
-      var relationList = [];
+      var relationList = self.model ? self.model.relationList || [] : [];
       var timestamp = new Date().getTime();
       if (!isArray(models)) {
         models = [models];
@@ -2028,7 +2053,10 @@
         // inserted as well
         relationList.forEach(function (def) {
           // A reference to the Model that this Model is related to
-          var Relation = def.Relation;
+          var Relation = def.getRelation();
+          if (!Relation.idAttribute) {
+            return;
+          }
           // The field used by the related Model as the primary key
           var relationIdAttribute = Relation.idAttribute;
           // Grab the foreign key in this relationship, if there is one
@@ -2036,27 +2064,27 @@
 
           // Grab a reference to the related data attached or linked to the
           // currently visited props
-          var toInsert = get(props, def.localField);
+          var toInsert = get(props, def.getLocalField());
 
           // If the user provided a custom insertion function for this relation,
           // call it
-          if (isFunction(def.insert)) {
-            def.insert(self, def, props);
-          } else if (toInsert && def.insert !== false) {
-            // Otherwise, if there is something to be inserted, insert it
+          if (isFunction(def.add)) {
+            def.add(self, def, props);
+          } else if (toInsert && def.add !== false) {
+            // Otherwise, if there is something to be added, add it
             if (isArray(toInsert)) {
               // Handle inserting hasMany relations
               toInsert = toInsert.map(function (toInsertItem) {
                 // Check that this item isn't the same item that is already in the
                 // store
-                if (toInsertItem !== Relation.get(get(toInsertItem, relationIdAttribute))) {
+                if (!Relation.is(toInsertItem)) {
                   try {
                     // Make sure this item has its foreignKey
                     if (foreignKey) {
                       _set(toInsertItem, foreignKey, id);
                     }
-                    // Finally insert this related item
-                    toInsertItem = Relation.add(toInsertItem);
+                    // Finally add this related item
+                    toInsertItem = Relation.createInstance(toInsertItem);
                   } catch (err) {
                     throw new Error('Failed to insert ' + def.type + ' relation: "' + def.relation + '"! ' + err.message);
                   }
@@ -2071,32 +2099,21 @@
               }
             } else {
               // Handle inserting belongsTo and hasOne relations
-              if (toInsert !== Relation.get(get(toInsert, relationIdAttribute))) {
+              if (!Relation.is(toInsert)) {
                 try {
-                  // Make sure the parent has its foreignKey
-                  if (def.foreignKey) {
-                    _set(props, def.foreignKey, get(toInsert, Relation.idAttribute));
-                  }
                   // Make sure this item has its foreignKey
                   if (foreignKey) {
                     _set(toInsert, def.foreignKey, id);
                   }
                   // Finally insert this related item
-                  toInsert = Relation.add(toInsert);
+                  toInsert = Relation.createInstance(toInsert);
                 } catch (err) {
                   throw new Error('Failed to insert ' + def.type + ' relation: "' + def.relation + '"!');
                 }
               }
             }
           }
-          if (def.link || def.link === undefined && self.linkRelations) {
-            // Remove relation properties from the item, since those relations
-            // have been inserted by now
-            unset(props, def.localField);
-          } else {
-            // Here, linking is turned off, so we setup a manual link
-            _set(props, def.localField, toInsert);
-          }
+          _set(props, def.localField, toInsert);
         });
 
         if (existing) {
@@ -2286,6 +2303,8 @@
     create: function create(props, opts) {
       var self = this;
       var id = self.modelId(props);
+      opts || (opts = {});
+      fillIn(opts, self.modelOpts);
       return self.model.create(props, opts).then(function (data) {
         // If the created model was already in this Collection via an autoPk id,
         // remove it from the collection
@@ -2293,11 +2312,13 @@
         if (self.autoPks[id]) {
           self.remove(id);
         }
-        return self.end(data);
+        return self.end(data, opts);
       });
     },
     createMany: function createMany(models, opts) {
       var self = this;
+      opts || (opts = {});
+      fillIn(opts, self.modelOpts);
       return self.model.createMany(models, opts).then(function (data) {
         // If the created models were already in this Collection via an autoPk
         // id, remove them from the Collection
@@ -2308,41 +2329,53 @@
             self.remove(id);
           }
         });
-        return self.end(data);
+        return self.end(data, opts);
       });
     },
     find: function find(id, opts) {
       var self = this;
+      opts || (opts = {});
+      fillIn(opts, self.modelOpts);
       return self.model.find(id, opts).then(function (data) {
-        return self.end(data);
+        return self.end(data, opts);
       });
     },
     findAll: function findAll(query, opts) {
       var self = this;
+      opts || (opts = {});
+      fillIn(opts, self.modelOpts);
       return self.model.findAll(query, opts).then(function (data) {
-        return self.end(data);
+        return self.end(data, opts);
       });
     },
     update: function update(id, props, opts) {
       var self = this;
+      opts || (opts = {});
+      fillIn(opts, self.modelOpts);
       return self.model.update(id, props, opts).then(function (data) {
-        return self.end(data);
+        return self.end(data, opts);
       });
     },
     updateMany: function updateMany(models, opts) {
       var self = this;
+      opts || (opts = {});
+      fillIn(opts, self.modelOpts);
       return self.model.updateMany(models, opts).then(function (data) {
-        return self.end(data);
+        return self.end(data, opts);
       });
     },
     updateAll: function updateAll(query, props, opts) {
       var self = this;
+      opts || (opts = {});
+      fillIn(opts, self.modelOpts);
       return self.model.updateAll(query, props, opts).then(function (data) {
-        return self.end(data);
+        return self.end(data, opts);
       });
     },
     destroy: function destroy(id, opts) {
       var self = this;
+      opts || (opts = {});
+      fillIn(opts, self.modelOpts);
       return self.model.destroy(id, opts).then(function (data) {
         if (opts.raw) {
           data.data = self.remove(id, opts);
@@ -2354,6 +2387,8 @@
     },
     destroyAll: function destroyAll(query, opts) {
       var self = this;
+      opts || (opts = {});
+      fillIn(opts, self.modelOpts);
       return self.model.destroyAll(query, opts).then(function (data) {
         if (opts.raw) {
           data.data = self.removeAll(query, opts);
@@ -2388,10 +2423,27 @@
    */
   function applyBelongsTo(Model, Relation, opts) {
     opts || (opts = {});
-    // Choose field where the relation will be attached
-    var localField = opts.localField = opts.localField || Relation.name.toLowerCase();
-    // Choose field that holds the primary key of the relation
-    var foreignKey = opts.foreignKey = opts.localKey || opts.foreignKey || Relation.name.toLowerCase() + '_id';
+
+    function getRelation() {
+      var fake = {
+        name: Relation
+      };
+      if (isString(Relation)) {
+        if (isFunction(Model.getModel)) {
+          return Model.getModel(Relation) || fake;
+        }
+        return fake;
+      }
+      return Relation;
+    }
+
+    function getLocalField() {
+      return opts.localField || camelCase(getRelation().name);
+    }
+
+    function getForeignKey() {
+      return opts.foreignKey || opts.localKey || camelCase(getRelation().name) + 'Id';
+    }
 
     // Setup configuration of the property
     var descriptor = {
@@ -2399,32 +2451,22 @@
       enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
       // Set default method for retrieving the linked relation
       get: function get() {
-        // if (!this._get('$')) {
-        return this._get('links.' + localField);
-        // }
-        // const key = get(this, foreignKey)
-        // const item = key !== undefined ? Relation.get(key) : undefined
-        // this._set(`links.${localField}`, item)
-        // return item
+        return this._get('links.' + getLocalField());
       },
 
       // Set default method for setting the linked relation
       set: function set(parent) {
-        this._set('links.' + localField, parent);
-        _set(this, foreignKey, parent[Relation.idAttribute]);
-        return get(this, localField);
+        if (!parent) {
+          return;
+        }
+        this._set('links.' + getLocalField(), parent);
+        _set(this, getForeignKey(), parent[getRelation().idAttribute]);
+        return get(this, getLocalField());
       }
     };
 
     var originalGet = descriptor.get;
     var originalSet = descriptor.set;
-
-    // Check whether the relation shouldn't actually be linked via a getter
-    if (opts.link === false || opts.link === undefined && !Model.linkRelations) {
-      delete descriptor.get;
-      delete descriptor.set;
-      descriptor.writable = true;
-    }
 
     // Check for user-defined getter
     if (opts.get) {
@@ -2437,7 +2479,7 @@
         //  - related Model
         //  - instance of target Model
         //  - the original getter function, in case the user wants to use it
-        return opts.get(Model, Relation, this, function () {
+        return opts.get(Model, getRelation(), this, function () {
           return originalGet.call(_this);
         });
       };
@@ -2456,7 +2498,7 @@
         //  - instance of target Model
         //  - instance of related Model
         //  - the original setter function, in case the user wants to use it
-        return opts.set(Model, Relation, this, parent, function (value) {
+        return opts.set(Model, getRelation(), this, parent, function (value) {
           return originalSet.call(_this2, value === undefined ? parent : value);
         });
       };
@@ -2468,20 +2510,7 @@
     }
 
     // Finally, added property to prototype of target Model
-    Object.defineProperty(Model.prototype, localField, descriptor);
-    // Object.defineProperty(Model.prototype, foreignKey, {
-    //   configurable: true,
-    //   enumerable: true,
-    //   get () {
-    //     return this._get(`props.${foreignKey}`)
-    //   },
-    //   set (value) {
-    //     this._set(`props.${foreignKey}`, value)
-    //     // if (this._get('$')) {
-    //     //   Model.getCollection().indexes[foreignKey].updateRecord(this, { index: foreignKey })
-    //     // }
-    //   }
-    // })
+    Object.defineProperty(Model.prototype, getLocalField(), descriptor);
 
     if (!Model.relationList) {
       Model.relationList = [];
@@ -2493,9 +2522,11 @@
     opts.name = Model.name;
     opts.relation = Relation.name;
     opts.Relation = Relation;
+    opts.getRelation = getRelation;
+    opts.getLocalField = getLocalField;
+    opts.getForeignKey = getForeignKey;
     Model.relationList.push(opts);
-    Model.relationFields.push(localField);
-    // Model.getCollection().createIndex(localKey)
+    Model.relationFields.push(getLocalField());
 
     // Return target Model for chaining
     return Model;
@@ -2518,17 +2549,17 @@
    * var Comment = JSDataModel.extend({}, { name: 'Comment' })
    * JSData.belongsTo(User)(Comment)
    *
-   * @param {Model} Model - The Model the target belongs to.
+   * @param {Model} Relation - The Relation the target belongs to.
    * @param {Object} [opts] - Configuration options.
    * @param {string} [opts.localField] - The field on the target where the relation
    * will be attached.
    * @return {Function} Invocation function, which accepts the target as the only
    * parameter.
    */
-  function belongsTo(Model, opts) {
-    return function (target) {
-      target.dbg(op, 'Model:', Model, 'opts:', opts);
-      return applyBelongsTo(target, Model, opts);
+  function belongsTo(Relation, opts) {
+    return function (Model) {
+      Model.dbg(op, Relation, opts);
+      return applyBelongsTo(Model, Relation, opts);
     };
   }
 
@@ -2580,10 +2611,26 @@
    *
    * @ignore
    */
-  function applyHasMany(target, Relation, opts) {
+  function applyHasMany(Model, Relation, opts) {
     opts || (opts = {});
-    // Choose field where the relation will be attached
-    var localField = opts.localField = opts.localField || camelCase(Relation.name) + '_collection';
+
+    function getRelation() {
+      var fake = {
+        name: Relation
+      };
+      if (isString(Relation)) {
+        if (isFunction(Model.getModel)) {
+          return Model.getModel(Relation) || fake;
+        }
+        return fake;
+      }
+      return Relation;
+    }
+
+    function getLocalField() {
+      return opts.localField || camelCase(getRelation().name) + 'Collection';
+    }
+
     // Choose field on related instances that holds the primary key of instances
     // of the target Model
     var foreignKey = opts.foreignKey;
@@ -2591,11 +2638,8 @@
     var foreignKeys = opts.foreignKeys;
 
     if (!foreignKey && !localKeys && !foreignKeys) {
-      foreignKey = opts.foreignKey = camelCase(target.name) + '_id';
+      foreignKey = opts.foreignKey = camelCase(Model.name) + 'Id';
     }
-    // if (foreignKey) {
-    //   Relation.getCollection().createIndex(foreignKey)
-    // }
 
     // Setup configuration of the property
     var descriptor = {
@@ -2603,36 +2647,20 @@
       enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
       // Set default method for retrieving the linked relation
       get: function get() {
-        // if (!this._get('$')) {
-        return this._get('links.' + localField);
-        // }
-        // const query = {}
-        // let items
-        // if (foreignKey) {
-        //   // Make a FAST retrieval of the relation using a secondary index
-        //   items = Relation.getAll(get(this, target.idAttribute), { index: foreignKey })
-        // } else if (localKeys) {
-        //   const keys = get(this, localKeys) || []
-        //   const args = isArray(keys) ? keys : Object.keys(keys)
-        //   // Make a slower retrieval using the ids in the "localKeys" array
-        //   items = Relation.getAll.apply(Relation, args)
-        // } else if (foreignKeys) {
-        //   set(query, `where.${foreignKeys}.contains`, get(this, target.idAttribute))
-        //   // Make a much slower retrieval
-        //   items = Relation.filter(query)
-        // }
-        // this._set(`links.${localField}`, items)
-        // return items
+        return this._get('links.' + getLocalField());
       },
 
       // Set default method for setting the linked relation
       set: function set(children) {
         var _this = this;
 
-        this._set('links.' + localField, children);
+        if (!children) {
+          return;
+        }
+        this._set('links.' + getLocalField(), children);
         if (children && children.length) {
           (function () {
-            var id = get(_this, target.idAttribute);
+            var id = get(_this, Model.idAttribute);
             if (foreignKey) {
               children.forEach(function (child) {
                 _set(child, foreignKey, id);
@@ -2641,7 +2669,7 @@
               (function () {
                 var keys = [];
                 children.forEach(function (child) {
-                  keys.push(get(child, Relation.idAttribute));
+                  keys.push(get(child, getRelation().idAttribute));
                 });
                 _set(_this, localKeys, keys);
               })();
@@ -2659,19 +2687,12 @@
             }
           })();
         }
-        return get(this, localField);
+        return get(this, getLocalField());
       }
     };
 
     var originalGet = descriptor.get;
     var originalSet = descriptor.set;
-
-    // Check whether the relation shouldn't actually be linked via a getter
-    if (opts.link === false || opts.link === undefined && !target.linkRelations) {
-      delete descriptor.get;
-      delete descriptor.set;
-      descriptor.writable = true;
-    }
 
     // Check for user-defined getter
     if (opts.get) {
@@ -2684,7 +2705,7 @@
         //  - related Model
         //  - instance of target Model
         //  - the original getter function, in case the user wants to use it
-        return opts.get(target, Relation, this, function () {
+        return opts.get(Model, getRelation(), this, function () {
           return originalGet.call(_this2);
         });
       };
@@ -2702,30 +2723,32 @@
         //  - instance of target Model
         //  - instances of related Model
         //  - the original setter function, in case the user wants to use it
-        return opts.set(target, Relation, this, children, function (value) {
+        return opts.set(Model, getRelation(), this, children, function (value) {
           return originalSet.call(_this3, value === undefined ? children : value);
         });
       };
     }
 
     // Finally, added property to prototype of target Model
-    Object.defineProperty(target.prototype, localField, descriptor);
+    Object.defineProperty(Model.prototype, getLocalField(), descriptor);
 
-    if (!target.relationList) {
-      target.relationList = [];
+    if (!Model.relationList) {
+      Model.relationList = [];
     }
-    if (!target.relationFields) {
-      target.relationFields = [];
+    if (!Model.relationFields) {
+      Model.relationFields = [];
     }
     opts.type = 'hasMany';
-    opts.name = target.name;
-    opts.relation = Relation.name;
-    opts.Relation = Relation;
-    target.relationList.push(opts);
-    target.relationFields.push(localField);
+    opts.name = Model.name;
+    opts.relation = getRelation().name;
+    opts.Relation = getRelation();
+    opts.getRelation = getRelation;
+    opts.getLocalField = getLocalField;
+    Model.relationList.push(opts);
+    Model.relationFields.push(getLocalField());
 
     // Return target Model for chaining
-    return target;
+    return Model;
   }
 
   /**
@@ -2752,10 +2775,10 @@
    * @return {Function} Invocation function, which accepts the target as the only
    * parameter.
    */
-  function hasMany(Model, opts) {
+  function hasMany(Relation, opts) {
     return function (target) {
-      target.dbg(op$1, 'Model:', Model, 'opts:', opts);
-      return applyHasMany(target, Model, opts);
+      target.dbg(op$1, Relation, opts);
+      return applyHasMany(target, Relation, opts);
     };
   }
 
@@ -2776,10 +2799,27 @@
    */
   function applyHasOne(Model, Relation, opts) {
     opts || (opts = {});
-    // Choose field where the relation will be attached
-    var localField = opts.localField = opts.localField || camelCase(Relation.name);
-    // Choose field that holds the primary key of the relation
-    var foreignKey = opts.foreignKey = opts.foreignKey || camelCase(Model.name) + 'Id';
+
+    function getRelation() {
+      var fake = {
+        name: Relation
+      };
+      if (isString(Relation)) {
+        if (isFunction(Model.getModel)) {
+          return Model.getModel(Relation) || fake;
+        }
+        return fake;
+      }
+      return Relation;
+    }
+
+    function getLocalField() {
+      return opts.localField || camelCase(getRelation().name);
+    }
+
+    function getForeignKey() {
+      return opts.foreignKey || opts.localKey || camelCase(Model.name) + 'Id';
+    }
 
     // Setup configuration of the property
     var descriptor = {
@@ -2787,28 +2827,19 @@
       enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
       // Set default method for retrieving the linked relation
       get: function get() {
-        // if (!this._get('$')) {
-        return this._get('links.' + localField);
-        // }
-        // const items = Relation.getAll(get(this, Model.idAttribute), { index: foreignKey })
-        // const item = items && items.length ? items[0] : undefined
-        // this._set(`links.${localField}`, item)
-        // return item
+        return this._get('links.' + getLocalField());
       },
 
       // Set default method for setting the linked relation
       set: function set(child) {
-        this._set('links.' + localField, child);
-        _set(child, foreignKey, get(this, Model.idAttribute));
-        return get(this, localField);
+        if (!child) {
+          return;
+        }
+        this._set('links.' + getLocalField(), child);
+        _set(child, getForeignKey(), get(this, Model.idAttribute));
+        return get(this, getLocalField());
       }
     };
-
-    // Check whether the relation shouldn't actually be linked via a getter
-    if (opts.link === false || opts.link === undefined && !Model.linkRelations) {
-      delete descriptor.get;
-      delete descriptor.set;
-    }
 
     // Check for user-defined getter
     if (opts.get) {
@@ -2860,7 +2891,7 @@
     }
 
     // Finally, added property to prototype of target Model
-    Object.defineProperty(Model.prototype, localField, descriptor);
+    Object.defineProperty(Model.prototype, getLocalField(), descriptor);
 
     if (!Model.relationList) {
       Model.relationList = [];
@@ -2872,9 +2903,11 @@
     opts.name = Model.name;
     opts.relation = Relation.name;
     opts.Relation = Relation;
+    opts.getRelation = getRelation;
+    opts.getLocalField = getLocalField;
+    opts.getForeignKey = getForeignKey;
     Model.relationList.push(opts);
-    Model.relationFields.push(localField);
-    // Model.getCollection().createIndex(foreignKey)
+    Model.relationFields.push(getLocalField());
 
     // Return target Model for chaining
     return Model;
@@ -3580,20 +3613,6 @@
      * @default id
      */
     idAttribute: 'id',
-
-    /**
-     * Whether to add property accessors to the prototype of {@link Model} for
-     * each of the Model's relations. For each relation, the property accessor
-     * will be added as the field specified by the `localField` option of the
-     * relation definition. A relation property accessor returns related data by
-     * accessing the related Model. If the related Model's collection is empty,
-     * then the property accessors won't return anything.
-     *
-     * @memberof Model
-     * @type {boolean}
-     * @default true
-     */
-    linkRelations: true,
 
     /**
      * Whether this Model should emit operational events.
@@ -4871,6 +4890,7 @@
         name = opts.name;
       }
       opts || (opts = {});
+      opts.relations || (opts.relations = {});
       fillIn(opts, self.defaults);
 
       var methods = opts.methods || {};
@@ -4883,6 +4903,24 @@
       Child.getModel = function (name) {
         return self.models[name];
       };
+
+      forOwn(opts.relations, function (group, type) {
+        forOwn(group, function (relations, name) {
+          if (isObject(relations)) {
+            relations = [relations];
+          }
+          relations.forEach(function (def) {
+            var Relation = self.models[name] || name;
+            if (type === 'belongsTo') {
+              return Child.belongsTo(Relation, def);
+            }
+            if (type === 'hasOne') {
+              return Child.hasOne(Relation, def);
+            }
+            return Child.hasMany(Relation, def);
+          });
+        });
+      });
 
       return Child;
     },
@@ -4977,11 +5015,11 @@
   var utils = _utils;
 
   var version = {
-    full: '3.0.0-alpha.9',
+    full: '3.0.0-alpha.10',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10),
-    alpha: '9' !== 'false' ? '9' : false,
+    alpha: '10' !== 'false' ? '10' : false,
     beta: 'false' !== 'false' ? 'false' : false
   };
 

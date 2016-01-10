@@ -24,7 +24,6 @@ const defaults = {
   csp: false,
   defaultAdapter: 'http',
   idAttribute: 'id',
-  linkRelations: true,
   relationsEnumerable: false,
   raw: false,
   upsert: true

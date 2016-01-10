@@ -4,6 +4,7 @@ import {assert} from 'chai'
 export function init () {
   describe('#removeAll', function () {
     it('should eject items that meet the criteria from the store', function () {
+      this.User.debug = true
       this.UserCollection.add([p1, p2, p3, p4, p5])
       assert.isDefined(this.UserCollection.get(5))
       assert.isDefined(this.UserCollection.get(6))

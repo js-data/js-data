@@ -1,7 +1,8 @@
 import {
   camelCase,
-  // isArray,
   get,
+  isFunction,
+  isString,
   set
 } from '../utils'
 
@@ -20,10 +21,26 @@ const op = 'hasMany'
  *
  * @ignore
  */
-function applyHasMany (target, Relation, opts) {
+function applyHasMany (Model, Relation, opts) {
   opts || (opts = {})
-  // Choose field where the relation will be attached
-  const localField = opts.localField = opts.localField || `${camelCase(Relation.name)}_collection`
+
+  function getRelation () {
+    const fake = {
+      name: Relation
+    }
+    if (isString(Relation)) {
+      if (isFunction(Model.getModel)) {
+        return Model.getModel(Relation) || fake
+      }
+      return fake
+    }
+    return Relation
+  }
+
+  function getLocalField () {
+    return opts.localField || `${camelCase(getRelation().name)}Collection`
+  }
+
   // Choose field on related instances that holds the primary key of instances
   // of the target Model
   let foreignKey = opts.foreignKey
@@ -31,11 +48,8 @@ function applyHasMany (target, Relation, opts) {
   const foreignKeys = opts.foreignKeys
 
   if (!foreignKey && !localKeys && !foreignKeys) {
-    foreignKey = opts.foreignKey = `${camelCase(target.name)}_id`
+    foreignKey = opts.foreignKey = `${camelCase(Model.name)}Id`
   }
-  // if (foreignKey) {
-  //   Relation.getCollection().createIndex(foreignKey)
-  // }
 
   // Setup configuration of the property
   const descriptor = {
@@ -43,32 +57,16 @@ function applyHasMany (target, Relation, opts) {
     enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
     // Set default method for retrieving the linked relation
     get () {
-      // if (!this._get('$')) {
-      return this._get(`links.${localField}`)
-      // }
-      // const query = {}
-      // let items
-      // if (foreignKey) {
-      //   // Make a FAST retrieval of the relation using a secondary index
-      //   items = Relation.getAll(get(this, target.idAttribute), { index: foreignKey })
-      // } else if (localKeys) {
-      //   const keys = get(this, localKeys) || []
-      //   const args = isArray(keys) ? keys : Object.keys(keys)
-      //   // Make a slower retrieval using the ids in the "localKeys" array
-      //   items = Relation.getAll.apply(Relation, args)
-      // } else if (foreignKeys) {
-      //   set(query, `where.${foreignKeys}.contains`, get(this, target.idAttribute))
-      //   // Make a much slower retrieval
-      //   items = Relation.filter(query)
-      // }
-      // this._set(`links.${localField}`, items)
-      // return items
+      return this._get(`links.${getLocalField()}`)
     },
     // Set default method for setting the linked relation
     set (children) {
-      this._set(`links.${localField}`, children)
+      if (!children) {
+        return
+      }
+      this._set(`links.${getLocalField()}`, children)
       if (children && children.length) {
-        const id = get(this, target.idAttribute)
+        const id = get(this, Model.idAttribute)
         if (foreignKey) {
           children.forEach(function (child) {
             set(child, foreignKey, id)
@@ -76,7 +74,7 @@ function applyHasMany (target, Relation, opts) {
         } else if (localKeys) {
           const keys = []
           children.forEach(function (child) {
-            keys.push(get(child, Relation.idAttribute))
+            keys.push(get(child, getRelation().idAttribute))
           })
           set(this, localKeys, keys)
         } else if (foreignKeys) {
@@ -92,19 +90,12 @@ function applyHasMany (target, Relation, opts) {
           })
         }
       }
-      return get(this, localField)
+      return get(this, getLocalField())
     }
   }
 
   const originalGet = descriptor.get
   const originalSet = descriptor.set
-
-  // Check whether the relation shouldn't actually be linked via a getter
-  if (opts.link === false || (opts.link === undefined && !target.linkRelations)) {
-    delete descriptor.get
-    delete descriptor.set
-    descriptor.writable = true
-  }
 
   // Check for user-defined getter
   if (opts.get) {
@@ -115,7 +106,7 @@ function applyHasMany (target, Relation, opts) {
       //  - related Model
       //  - instance of target Model
       //  - the original getter function, in case the user wants to use it
-      return opts.get(target, Relation, this, () => originalGet.call(this))
+      return opts.get(Model, getRelation(), this, () => originalGet.call(this))
     }
   }
 
@@ -129,28 +120,30 @@ function applyHasMany (target, Relation, opts) {
       //  - instance of target Model
       //  - instances of related Model
       //  - the original setter function, in case the user wants to use it
-      return opts.set(target, Relation, this, children, value => originalSet.call(this, value === undefined ? children : value))
+      return opts.set(Model, getRelation(), this, children, value => originalSet.call(this, value === undefined ? children : value))
     }
   }
 
   // Finally, added property to prototype of target Model
-  Object.defineProperty(target.prototype, localField, descriptor)
+  Object.defineProperty(Model.prototype, getLocalField(), descriptor)
 
-  if (!target.relationList) {
-    target.relationList = []
+  if (!Model.relationList) {
+    Model.relationList = []
   }
-  if (!target.relationFields) {
-    target.relationFields = []
+  if (!Model.relationFields) {
+    Model.relationFields = []
   }
   opts.type = 'hasMany'
-  opts.name = target.name
-  opts.relation = Relation.name
-  opts.Relation = Relation
-  target.relationList.push(opts)
-  target.relationFields.push(localField)
+  opts.name = Model.name
+  opts.relation = getRelation().name
+  opts.Relation = getRelation()
+  opts.getRelation = getRelation
+  opts.getLocalField = getLocalField
+  Model.relationList.push(opts)
+  Model.relationFields.push(getLocalField())
 
   // Return target Model for chaining
-  return target
+  return Model
 }
 
 /**
@@ -177,9 +170,9 @@ function applyHasMany (target, Relation, opts) {
  * @return {Function} Invocation function, which accepts the target as the only
  * parameter.
  */
-export function hasMany (Model, opts) {
+export function hasMany (Relation, opts) {
   return function (target) {
-    target.dbg(op, 'Model:', Model, 'opts:', opts)
-    return applyHasMany(target, Model, opts)
+    target.dbg(op, Relation, opts)
+    return applyHasMany(target, Relation, opts)
   }
 }

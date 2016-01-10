@@ -1,4 +1,10 @@
-import {camelCase, get, set} from '../utils'
+import {
+  camelCase,
+  get,
+  isFunction,
+  isString,
+  set
+} from '../utils'
 
 const op = 'hasOne'
 
@@ -17,10 +23,27 @@ const op = 'hasOne'
  */
 function applyHasOne (Model, Relation, opts) {
   opts || (opts = {})
-  // Choose field where the relation will be attached
-  const localField = opts.localField = opts.localField || camelCase(Relation.name)
-  // Choose field that holds the primary key of the relation
-  const foreignKey = opts.foreignKey = opts.foreignKey || `${camelCase(Model.name)}Id`
+
+  function getRelation () {
+    const fake = {
+      name: Relation
+    }
+    if (isString(Relation)) {
+      if (isFunction(Model.getModel)) {
+        return Model.getModel(Relation) || fake
+      }
+      return fake
+    }
+    return Relation
+  }
+
+  function getLocalField () {
+    return opts.localField || camelCase(getRelation().name)
+  }
+
+  function getForeignKey () {
+    return opts.foreignKey || opts.localKey || `${camelCase(Model.name)}Id`
+  }
 
   // Setup configuration of the property
   const descriptor = {
@@ -28,26 +51,17 @@ function applyHasOne (Model, Relation, opts) {
     enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
     // Set default method for retrieving the linked relation
     get () {
-      // if (!this._get('$')) {
-      return this._get(`links.${localField}`)
-      // }
-      // const items = Relation.getAll(get(this, Model.idAttribute), { index: foreignKey })
-      // const item = items && items.length ? items[0] : undefined
-      // this._set(`links.${localField}`, item)
-      // return item
+      return this._get(`links.${getLocalField()}`)
     },
     // Set default method for setting the linked relation
     set (child) {
-      this._set(`links.${localField}`, child)
-      set(child, foreignKey, get(this, Model.idAttribute))
-      return get(this, localField)
+      if (!child) {
+        return
+      }
+      this._set(`links.${getLocalField()}`, child)
+      set(child, getForeignKey(), get(this, Model.idAttribute))
+      return get(this, getLocalField())
     }
-  }
-
-  // Check whether the relation shouldn't actually be linked via a getter
-  if (opts.link === false || (opts.link === undefined && !Model.linkRelations)) {
-    delete descriptor.get
-    delete descriptor.set
   }
 
   // Check for user-defined getter
@@ -80,7 +94,7 @@ function applyHasOne (Model, Relation, opts) {
   }
 
   // Finally, added property to prototype of target Model
-  Object.defineProperty(Model.prototype, localField, descriptor)
+  Object.defineProperty(Model.prototype, getLocalField(), descriptor)
 
   if (!Model.relationList) {
     Model.relationList = []
@@ -92,9 +106,11 @@ function applyHasOne (Model, Relation, opts) {
   opts.name = Model.name
   opts.relation = Relation.name
   opts.Relation = Relation
+  opts.getRelation = getRelation
+  opts.getLocalField = getLocalField
+  opts.getForeignKey = getForeignKey
   Model.relationList.push(opts)
-  Model.relationFields.push(localField)
-  // Model.getCollection().createIndex(foreignKey)
+  Model.relationFields.push(getLocalField())
 
   // Return target Model for chaining
   return Model
