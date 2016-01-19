@@ -3,8 +3,32 @@
  * @memberof module:js-data
  */
 
-function toString (x) {
-  return Object.prototype.toString.call(x)
+const INFINITY = 1 / 0
+const MAX_INTEGER = 1.7976931348623157e+308
+const ARRAY_TAG = '[object Array]'
+const BOOL_TAG = '[object Boolean]'
+const DATE_TAG = '[object Date]'
+const FUNC_TAG = '[object Function]'
+const NUMBER_TAG = '[object Number]'
+const OBJECT_TAG = '[object Object]'
+const REGEXP_TAG = '[object RegExp]'
+const STRING_TAG = '[object String]'
+const objToString = Object.prototype.toString
+
+const toString = function (value) {
+  return objToString.call(value)
+}
+const toInteger = function (value) {
+  if (!value) {
+    return value === 0 ? value : 0
+  }
+  value = +value
+  if (value === INFINITY || value === -INFINITY) {
+    const sign = (value < 0 ? -1 : 1)
+    return sign * MAX_INTEGER
+  }
+  const remainder = value % 1
+  return value === value ? (remainder ? value - remainder : value) : 0
 }
 
 /**
@@ -18,7 +42,7 @@ export const isArray = Array.isArray
  * @param {*} [value] - The value to test.
  */
 export function isObject (value) {
-  return toString(value) === '[object Object]' || false
+  return toString(value) === OBJECT_TAG
 }
 function isPlainObject (value) {
   return (!!value && typeof value === 'object' && value.constructor === Object)
@@ -28,43 +52,64 @@ function isPlainObject (value) {
  * @param {*} [value] - The value to test.
  */
 export function isRegExp (value) {
-  return toString(value) === '[object RegExp]' || false
+  return toString(value) === REGEXP_TAG
 }
 /**
  * Return whether the provided value is a string type.
  * @param {*} [value] - The value to test.
  */
-export function isString (value) {
-  return typeof value === 'string' || (value && typeof value === 'object' && toString(value) === '[object String]') || false
+export const isString = function (value) {
+  return typeof value === 'string' || (value && typeof value === 'object' && toString(value) === STRING_TAG)
+}
+/**
+ * Return whether the provided value is null.
+ * @param {*} [value] - The value to test.
+ */
+export const isNull = function (value) {
+  return value === null
+}
+/**
+ * Return whether the provided value is undefined.
+ * @param {*} [value] - The value to test.
+ */
+export const isUndefined = function (value) {
+  return value === undefined
 }
 /**
  * Return whether the provided value is a date type.
  * @param {*} [value] - The value to test.
  */
-export function isDate (value) {
-  return (value && typeof value === 'object' && toString(value) === '[object Date]') || false
+export const isDate = function (value) {
+  return (value && typeof value === 'object' && toString(value) === DATE_TAG)
 }
 /**
  * Return whether the provided value is a number type.
  * @param {*} [value] - The value to test.
  */
-export function isNumber (value) {
+export const isNumber = function (value) {
   const type = typeof value
-  return type === 'number' || (value && type === 'object' && toString(value) === '[object Number]') || false
+  return type === 'number' || (value && type === 'object' && toString(value) === NUMBER_TAG)
+}
+/**
+ * Return whether the provided value is an integer.
+ * @param {*} [value] - The value to test.
+ */
+export const isInteger = function (value) {
+  return toString(value) === NUMBER_TAG && value == toInteger(value)
 }
 /**
  * Return whether the provided value is a boolean type.
  * @param {*} [value] - The value to test.
  */
 export function isBoolean (value) {
-  return toString(value) === '[object Boolean]'
+  return toString(value) === BOOL_TAG
 }
 /**
  * Return whether the provided value is a function.
  * @param {*} [value] - The value to test.
  */
 export function isFunction (value) {
-  return typeof value === 'function' || (value && toString(value) === '[object Function]') || false
+  return typeof value === 'function' || (value && toString(value) === FUNC_TAG)
 }
 /**
  * Return whether the provided value is a string or a number.

@@ -2,6 +2,7 @@ import * as collection from './collection/index'
 import * as datastore from './datastore/index'
 import * as decorators from './decorators/index'
 import * as model from './model/index'
+import * as schema from './schema/index'
 import * as utils from './utils/index'
 
 export function init () {
@@ -23,6 +24,7 @@ export function init () {
     datastore.init()
     decorators.init()
     model.init()
+    schema.init()
     utils.init()
   })
 }
