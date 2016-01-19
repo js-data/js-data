@@ -2,7 +2,6 @@ import {
   forOwn,
   get
 } from '../utils'
-import {validate} from '../validate/index'
 import {configure} from './configure'
 
 const op = 'setSchema'
@@ -28,12 +27,12 @@ function makeDescriptor (target, key, opts) {
     const _get = this._get
     const _set = this._set
     const _unset = this._unset
-    if (!_get('noValidate')) {
-      const errors = validate(opts, value)
-      if (errors) {
-        throw new Error(errors.join(', '))
-      }
-    }
+    // if (!_get('noValidate')) {
+    //   const errors = validate(opts, value)
+    //   if (errors) {
+    //     throw new Error(errors.join(', '))
+    //   }
+    // }
     if (opts.track && !_get('creating')) {
       let changing = _get('changing')
       const previous = _get(`previous.${key}`)

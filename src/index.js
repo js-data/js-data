@@ -54,7 +54,7 @@ export * from './datastore/index'
 
 export * from './decorators/index'
 export * from './model/index'
-export * from './validate/index'
+export * from './schema/index'
 import * as _utils from './utils'
 export const utils = _utils
 

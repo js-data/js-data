@@ -7,7 +7,6 @@ import {
   setSchema,
   registerAdapter
 } from '../decorators/index'
-import * as validate from '../validate/index'
 
 const {
   resolve
@@ -79,23 +78,23 @@ utils.addHiddenPropsToTarget(Model.prototype, {
     return key ? _schema[key] : _schema
   },
 
-  validate (obj, value) {
-    let errors = []
-    let _schema = this.schema()
-    if (!obj) {
-      obj = this
-    } else if (utils.isString(obj)) {
-      const prop = _schema[obj]
-      if (prop) {
-        errors = validate.validate(prop, value) || []
-      }
-    } else {
-      utils.forOwn(_schema, function (prop, key) {
-        errors = errors.concat(validate.validate(prop, utils.get(obj, key)) || [])
-      })
-    }
-    return errors.length ? errors : undefined
-  },
+  // validate (obj, value) {
+  //   let errors = []
+  //   let _schema = this.schema()
+  //   if (!obj) {
+  //     obj = this
+  //   } else if (utils.isString(obj)) {
+  //     const prop = _schema[obj]
+  //     if (prop) {
+  //       errors = validate.validate(prop, value) || []
+  //     }
+  //   } else {
+  //     utils.forOwn(_schema, function (prop, key) {
+  //       errors = errors.concat(validate.validate(prop, utils.get(obj, key)) || [])
+  //     })
+  //   }
+  //   return errors.length ? errors : undefined
+  // },
 
   /**
    * @param {Object} [opts] Configuration options. @see {@link Model.create}.
@@ -638,6 +637,10 @@ utils.fillIn(Model, {
       this._adaptersOwner = this
     }
     return this._adapters
+  },
+
+  getSchema () {
+    return this._schema
   },
 
   /**

@@ -10,7 +10,7 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
-  factory((global.JSData = {}));
+  (factory((global.JSData = {})));
 }(this, function (exports) { 'use strict';
 
   var babelHelpers = {};
@@ -36,14 +36,38 @@
   };
 
   babelHelpers;
+
   /**
    * @module utils
    * @memberof module:js-data
    */
 
-  function toString(x) {
-    return Object.prototype.toString.call(x);
-  }
+  var INFINITY = 1 / 0;
+  var MAX_INTEGER = 1.7976931348623157e+308;
+  var BOOL_TAG = '[object Boolean]';
+  var DATE_TAG = '[object Date]';
+  var FUNC_TAG = '[object Function]';
+  var NUMBER_TAG = '[object Number]';
+  var OBJECT_TAG = '[object Object]';
+  var REGEXP_TAG = '[object RegExp]';
+  var STRING_TAG = '[object String]';
+  var objToString = Object.prototype.toString;
+
+  var toString = function toString(value) {
+    return objToString.call(value);
+  };
+  var toInteger = function toInteger(value) {
+    if (!value) {
+      return value === 0 ? value : 0;
+    }
+    value = +value;
+    if (value === INFINITY || value === -INFINITY) {
+      var sign = value < 0 ? -1 : 1;
+      return sign * MAX_INTEGER;
+    }
+    var remainder = value % 1;
+    return value === value ? remainder ? value - remainder : value : 0;
+  };
 
   /**
    * Return whether the provided value is an array.
@@ -56,7 +80,7 @@
    * @param {*} [value] - The value to test.
    */
   function isObject(value) {
-    return toString(value) === '[object Object]' || false;
+    return toString(value) === OBJECT_TAG;
   }
   function isPlainObject(value) {
     return !!value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && value.constructor === Object;
@@ -66,43 +90,64 @@
    * @param {*} [value] - The value to test.
    */
   function isRegExp(value) {
-    return toString(value) === '[object RegExp]' || false;
+    return toString(value) === REGEXP_TAG;
   }
   /**
    * Return whether the provided value is a string type.
    * @param {*} [value] - The value to test.
    */
-  function isString(value) {
-    return typeof value === 'string' || value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toString(value) === '[object String]' || false;
-  }
+  var isString = function isString(value) {
+    return typeof value === 'string' || value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toString(value) === STRING_TAG;
+  };
+  /**
+   * Return whether the provided value is null.
+   * @param {*} [value] - The value to test.
+   */
+  var isNull = function isNull(value) {
+    return value === null;
+  };
+  /**
+   * Return whether the provided value is undefined.
+   * @param {*} [value] - The value to test.
+   */
+  var isUndefined = function isUndefined(value) {
+    return value === undefined;
+  };
   /**
    * Return whether the provided value is a date type.
    * @param {*} [value] - The value to test.
    */
-  function isDate(value) {
-    return value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toString(value) === '[object Date]' || false;
-  }
+  var isDate = function isDate(value) {
+    return value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toString(value) === DATE_TAG;
+  };
   /**
    * Return whether the provided value is a number type.
    * @param {*} [value] - The value to test.
    */
-  function isNumber(value) {
+  var isNumber = function isNumber(value) {
     var type = typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value);
-    return type === 'number' || value && type === 'object' && toString(value) === '[object Number]' || false;
-  }
+    return type === 'number' || value && type === 'object' && toString(value) === NUMBER_TAG;
+  };
+  /**
+   * Return whether the provided value is an integer.
+   * @param {*} [value] - The value to test.
+   */
+  var isInteger = function isInteger(value) {
+    return toString(value) === NUMBER_TAG && value == toInteger(value);
+  };
   /**
    * Return whether the provided value is a boolean type.
    * @param {*} [value] - The value to test.
    */
   function isBoolean(value) {
-    return toString(value) === '[object Boolean]';
+    return toString(value) === BOOL_TAG;
   }
   /**
    * Return whether the provided value is a function.
    * @param {*} [value] - The value to test.
    */
   function isFunction(value) {
-    return typeof value === 'function' || value && toString(value) === '[object Function]' || false;
+    return typeof value === 'function' || value && toString(value) === FUNC_TAG;
   }
   /**
    * Return whether the provided value is a string or a number.
@@ -592,13 +637,16 @@
     return _Child;
   }
 
-  var _utils = Object.freeze({
+var _utils = Object.freeze({
     isArray: isArray,
     isObject: isObject,
     isRegExp: isRegExp,
     isString: isString,
+    isNull: isNull,
+    isUndefined: isUndefined,
     isDate: isDate,
     isNumber: isNumber,
+    isInteger: isInteger,
     isBoolean: isBoolean,
     isFunction: isFunction,
     isSorN: isSorN,
@@ -3221,88 +3269,6 @@
     };
   }
 
-  var types = {
-    array: isArray,
-    boolean: isBoolean,
-    integer: isNumber,
-    number: isNumber,
-    'null': function _null(value) {
-      return value === null;
-    },
-    object: isObject,
-    string: isString
-  };
-
-  var rules = {
-    type: function type(predicate, value) {
-      if (value === undefined) {
-        return;
-      }
-      if (isString(predicate)) {
-        predicate = [predicate];
-      }
-      var errors = predicate.map(function (type) {
-        var validator = types[type];
-        if (!validator) {
-          return 'type: Unknown type ' + predicate;
-        }
-        return validator(value) ? undefined : 1;
-      });
-      return errors.indexOf(undefined) !== -1 ? undefined : 'type: Expected: ' + predicate.join(' or ') + '. Actual: ' + (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value));
-    },
-    anyOf: function anyOf(schemas, value) {
-      var validated = false;
-      var allErrors = [];
-      schemas.forEach(function (schema) {
-        var errors = validate(schema, value);
-        if (errors) {
-          allErrors = allErrors.concat(errors);
-        } else {
-          validated = true;
-        }
-      });
-      return validated ? undefined : allErrors;
-    },
-    allOf: function allOf(schemas, value) {
-      var allErrors = [];
-      schemas.forEach(function (schema) {
-        allErrors = allErrors.concat(validate(schema, value) || []);
-      });
-      return allErrors.length ? undefined : allErrors;
-    },
-    oneOf: function oneOf(schemas, value) {
-      var validated = false;
-      var allErrors = [];
-      schemas.forEach(function (schema) {
-        var errors = validate(schema, value);
-        if (errors) {
-          allErrors = allErrors.concat(errors);
-        } else if (validated) {
-          allErrors = ['more than one schema validated'];
-          validated = false;
-          return false;
-        } else {
-          validated = true;
-        }
-      });
-      return validated ? undefined : allErrors;
-    }
-  };
-
-  function validate(schema, value) {
-    var errors = [];
-    forOwn(schema, function (predicate, rule) {
-      var validator = rules[rule];
-      if (validator) {
-        var err = validator(predicate, value);
-        if (err) {
-          errors.push(err);
-        }
-      }
-    });
-    return errors.length ? errors : undefined;
-  }
-
   var op$3 = 'setSchema';
 
   /**
@@ -3328,12 +3294,12 @@
       var _get = this._get;
       var _set = this._set;
       var _unset = this._unset;
-      if (!_get('noValidate')) {
-        var errors = validate(opts, value);
-        if (errors) {
-          throw new Error(errors.join(', '));
-        }
-      }
+      // if (!_get('noValidate')) {
+      //   const errors = validate(opts, value)
+      //   if (errors) {
+      //     throw new Error(errors.join(', '))
+      //   }
+      // }
       if (opts.track && !_get('creating')) {
         (function () {
           var changing = _get('changing');
@@ -3577,23 +3543,24 @@
       var _schema = this.constructor.schema;
       return key ? _schema[key] : _schema;
     },
-    validate: function validate$$(obj, value) {
-      var errors = [];
-      var _schema = this.schema();
-      if (!obj) {
-        obj = this;
-      } else if (isString(obj)) {
-        var prop = _schema[obj];
-        if (prop) {
-          errors = validate(prop, value) || [];
-        }
-      } else {
-        forOwn(_schema, function (prop, key) {
-          errors = errors.concat(validate(prop, get(obj, key)) || []);
-        });
-      }
-      return errors.length ? errors : undefined;
-    },
+
+    // validate (obj, value) {
+    //   let errors = []
+    //   let _schema = this.schema()
+    //   if (!obj) {
+    //     obj = this
+    //   } else if (utils.isString(obj)) {
+    //     const prop = _schema[obj]
+    //     if (prop) {
+    //       errors = validate.validate(prop, value) || []
+    //     }
+    //   } else {
+    //     utils.forOwn(_schema, function (prop, key) {
+    //       errors = errors.concat(validate.validate(prop, utils.get(obj, key)) || [])
+    //     })
+    //   }
+    //   return errors.length ? errors : undefined
+    // },
 
     /**
      * @param {Object} [opts] Configuration options. @see {@link Model.create}.
@@ -4126,6 +4093,9 @@
         this._adaptersOwner = this;
       }
       return this._adapters;
+    },
+    getSchema: function getSchema() {
+      return this._schema;
     },
 
     /**
@@ -5230,6 +5200,561 @@
 
   DS.prototype.defineResource = DS.prototype.defineModel;
 
+  var types = {
+    array: isArray,
+    boolean: isBoolean,
+    integer: isInteger,
+    'null': isNull,
+    number: isNumber,
+    object: isObject,
+    string: isString
+  };
+
+  var typeGroupValidators = {};
+  var validationKeywords = {};
+
+  var segmentToString = function segmentToString(segment, prev) {
+    var str = '';
+    if (segment) {
+      if (isNumber(segment)) {
+        str += '[' + segment + ']';
+      } else if (prev) {
+        str += '.' + segment;
+      } else {
+        str += '' + segment;
+      }
+    }
+    return str;
+  };
+
+  var makePath = function makePath(opts) {
+    opts || (opts = {});
+    var path = '';
+    var segments = opts.path || [];
+    segments.forEach(function (segment) {
+      path += segmentToString(segment, path);
+    });
+    path += segmentToString(opts.prop, path);
+    return path;
+  };
+
+  var makeError = function makeError(actual, expected, opts) {
+    return {
+      expected: expected,
+      actual: '' + actual,
+      path: makePath(opts)
+    };
+  };
+
+  var addError = function addError(actual, expected, opts, errors) {
+    errors.push(makeError(actual, expected, opts));
+  };
+
+  var maxLengthCommon = function maxLengthCommon(keyword, value, schema, opts) {
+    var max = schema[keyword];
+    if (value.length > max) {
+      return makeError(value.length, 'length no more than ' + max, opts);
+    }
+  };
+
+  var minLengthCommon = function minLengthCommon(keyword, value, schema, opts) {
+    var min = schema[keyword];
+    if (value.length < min) {
+      return makeError(value.length, 'length no less than ' + min, opts);
+    }
+  };
+
+  var validateKeyword = function validateKeyword(op, value, schema, opts) {
+    return !isUndefined(schema[op]) && validationKeywords[op](value, schema, opts);
+  };
+
+  var runOps = function runOps(ops, value, schema, opts) {
+    var errors = [];
+    ops.forEach(function (op) {
+      errors = errors.concat(validateKeyword(op, value, schema, opts) || []);
+    });
+    return errors.length ? errors : undefined;
+  };
+
+  var ANY_OPS = ['enum', 'type', 'allOf', 'anyOf', 'oneOf', 'not'];
+  var ARRAY_OPS = ['items', 'maxItems', 'minItems', 'uniqueItems'];
+  var NUMERIC_OPS = ['multipleOf', 'maximum', 'minimum'];
+  var OBJECT_OPS = ['maxProperties', 'minProperties', 'required', 'properties', 'dependencies'];
+  var STRING_OPS = ['maxLength', 'minLength', 'pattern'];
+
+  /**
+   * http://json-schema.org/latest/json-schema-validation.html#anchor75
+   * @param {*} value
+   * @param {Object} [schema]
+   * @param {Object} [opts] Configuration options.
+   */
+  var validateAny = function validateAny(value, schema, opts) {
+    return runOps(ANY_OPS, value, schema, opts);
+  };
+
+  /**
+   * @param {*} value
+   * @param {Object} [schema]
+   * @param {Object} [opts]
+   */
+  var validate = function validate(value, schema, opts) {
+    var errors = [];
+    opts || (opts = {});
+    var shouldPop = undefined;
+    var prevProp = opts.prop;
+    if (isUndefined(schema)) {
+      return;
+    }
+    if (!isObject(schema)) {
+      throw new Error('Invalid schema at path: "' + opts.path + '"');
+    }
+    if (isUndefined(opts.path)) {
+      opts.path = [];
+    }
+    // Track our location as we recurse
+    if (!isUndefined(opts.prop)) {
+      shouldPop = true;
+      opts.path.push(opts.prop);
+      opts.prop = undefined;
+    }
+    // Validate against parent schema
+    if (schema['extends']) {
+      // opts.path = path
+      // opts.prop = prop
+      if (isFunction(schema['extends'].validate)) {
+        errors = errors.concat(schema['extends'].validate(value, opts) || []);
+      } else {
+        errors = errors.concat(validate(value, schema['extends'], opts) || []);
+      }
+    }
+    if (isUndefined(value)) {
+      // Check if property is required
+      if (schema.required === true) {
+        addError(value, 'a value', opts, errors);
+      }
+      if (shouldPop) {
+        opts.path.pop();
+        opts.prop = prevProp;
+      }
+      return errors.length ? errors : undefined;
+    }
+    errors = errors.concat(validateAny(value, schema, opts) || []);
+    if (shouldPop) {
+      opts.path.pop();
+      opts.prop = prevProp;
+    }
+    return errors.length ? errors : undefined;
+  };
+
+  fillIn(validationKeywords, {
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor82
+     */
+
+    allOf: function allOf(value, schema, opts) {
+      var allErrors = [];
+      schema.allOf.forEach(function (_schema) {
+        allErrors = allErrors.concat(validate(value, _schema, opts) || []);
+      });
+      return allErrors.length ? undefined : allErrors;
+    },
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor85
+     */
+    anyOf: function anyOf(value, schema, opts) {
+      var validated = false;
+      var allErrors = [];
+      schema.anyOf.forEach(function (_schema) {
+        var errors = validate(value, _schema, opts);
+        if (errors) {
+          allErrors = allErrors.concat(errors);
+        } else {
+          validated = true;
+        }
+      });
+      return validated ? undefined : allErrors;
+    },
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor70
+     */
+    dependencies: function dependencies(value, schema, opts) {
+      // TODO
+    },
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor76
+     */
+    enum: function _enum(value, schema, opts) {
+      var possibleValues = schema['enum'];
+      if (possibleValues.indexOf(value) === -1) {
+        return makeError(value, 'one of (' + possibleValues.join(', ') + ')', opts);
+      }
+    },
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor37
+     */
+    items: function items(value, schema, opts) {
+      opts || (opts = {});
+      // TODO: additionalItems
+      var items = schema.items;
+      var errors = [];
+      var checkingTuple = isArray(items);
+      var length = value.length;
+      for (var prop = 0; prop < length; prop++) {
+        if (checkingTuple) {
+          // Validating a tuple, instead of just checking each item against the
+          // same schema
+          items = schema.items[prop];
+        }
+        opts.prop = prop;
+        errors = errors.concat(validate(value[prop], items, opts) || []);
+      }
+      return errors.length ? errors : undefined;
+    },
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor17
+     */
+    maximum: function maximum(value, schema, opts) {
+      // Must be a number
+      var maximum = schema.maximum;
+      // Must be a boolean
+      // Depends on maximum
+      // default: false
+      var exclusiveMaximum = schema.exclusiveMaximum;
+      if ((typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === (typeof maximum === 'undefined' ? 'undefined' : babelHelpers.typeof(maximum)) && (exclusiveMaximum ? maximum < value : maximum <= value)) {
+        // TODO: Account for value of exclusiveMaximum in messaging
+        return makeError(value, 'no more than ' + maximum, opts);
+      }
+    },
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor42
+     */
+    maxItems: function maxItems(value, schema, opts) {
+      return maxLengthCommon('maxItems', value, schema, opts);
+    },
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor26
+     */
+    maxLength: function maxLength(value, schema, opts) {
+      return maxLengthCommon('maxLength', value, schema, opts);
+    },
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor54
+     */
+    maxProperties: function maxProperties(value, schema, opts) {
+      var maxProperties = schema.maxProperties;
+      var length = Object.keys(value).length;
+      if (length > maxProperties) {
+        return makeError(length, 'no more than ' + maxProperties + ' properties', opts);
+      }
+    },
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor21
+     */
+    minimum: function minimum(value, schema, opts) {
+      // Must be a number
+      var minimum = schema.minimum;
+      // Must be a boolean
+      // Depends on minimum
+      // default: false
+      var exclusiveMinimum = schema.exclusiveMinimum;
+      if ((typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === (typeof minimum === 'undefined' ? 'undefined' : babelHelpers.typeof(minimum)) && (exclusiveMinimum ? minimum > value : minimum >= value)) {
+        // TODO: Account for value of exclusiveMinimum in messaging
+        return makeError(value, 'no less than ' + minimum, opts);
+      }
+    },
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor42
+     */
+    minItems: function minItems(value, schema, opts) {
+      return minLengthCommon('minItems', value, schema, opts);
+    },
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor29
+     */
+    minLength: function minLength(value, schema, opts) {
+      return minLengthCommon('minLength', value, schema, opts);
+    },
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor57
+     */
+    minProperties: function minProperties(value, schema, opts) {
+      var minProperties = schema.minProperties;
+      var length = Object.keys(value).length;
+      if (length < minProperties) {
+        return makeError(length, 'no more than ' + minProperties + ' properties', opts);
+      }
+    },
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor14
+     */
+    multipleOf: function multipleOf(value, schema, opts) {
+      // TODO
+    },
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor91
+     */
+    not: function not(value, schema, opts) {
+      if (!validate(value, schema.not, opts)) {
+        // TODO: better messaging
+        return makeError('succeeded', 'should have failed', opts);
+      }
+    },
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor88
+     */
+    oneOf: function oneOf(value, schema, opts) {
+      var validated = false;
+      var allErrors = [];
+      schema.oneOf.forEach(function (_schema) {
+        var errors = validate(value, _schema, opts);
+        if (errors) {
+          allErrors = allErrors.concat(errors);
+        } else if (validated) {
+          allErrors = [makeError('valid against more than one', 'valid against only one', opts)];
+          validated = false;
+          return false;
+        } else {
+          validated = true;
+        }
+      });
+      return validated ? undefined : allErrors;
+    },
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor33
+     */
+    pattern: function pattern(value, schema, opts) {
+      var pattern = schema.pattern;
+      if (isString(value) && !value.match(pattern)) {
+        return makeError(value, pattern, opts);
+      }
+    },
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor64
+     */
+    properties: function properties(value, schema, opts) {
+      opts || (opts = {});
+      // Can be a boolean or an object
+      // Technically the default is an "empty schema", but here "true" is
+      // functionally the same
+      var additionalProperties = isUndefined(schema.additionalProperties) ? true : schema.additionalProperties;
+      // "s": The property set of the instance to validate.
+      var toValidate = {};
+      // "p": The property set from "properties".
+      // Default is an object
+      var properties = schema.properties || {};
+      // "pp": The property set from "patternProperties".
+      // Default is an object
+      var patternProperties = schema.patternProperties || {};
+      var errors = [];
+
+      // Collect set "s"
+      forOwn(value, function (_value, prop) {
+        toValidate[prop] = undefined;
+      });
+      // Remove from "s" all elements of "p", if any.
+      forOwn(properties || {}, function (_schema, prop) {
+        if (isUndefined(value[prop]) && !isUndefined(_schema['default'])) {
+          value[prop] = copy(_schema['default']);
+        }
+        opts.prop = prop;
+        errors = errors.concat(validate(value[prop], _schema, opts) || []);
+        delete toValidate[prop];
+      });
+      // For each regex in "pp", remove all elements of "s" which this regex
+      // matches.
+      forOwn(patternProperties, function (_schema, pattern) {
+        forOwn(toValidate, function (undef, prop) {
+          if (prop.match(pattern)) {
+            opts.prop = prop;
+            errors = errors.concat(validate(value[prop], _schema, opts) || []);
+            delete toValidate[prop];
+          }
+        });
+      });
+      var keys = Object.keys(toValidate);
+      // If "s" is not empty, validation fails
+      if (additionalProperties === false) {
+        if (keys.length) {
+          addError('extra fields: ' + keys.join(', '), 'no extra fields', opts, errors);
+        }
+      } else if (isObject(additionalProperties)) {
+        // Otherwise, validate according to provided schema
+        keys.forEach(function (prop) {
+          opts.prop = prop;
+          errors = errors.concat(validate(value[prop], additionalProperties, opts) || []);
+        });
+      }
+      return errors.length ? errors : undefined;
+    },
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor61
+     */
+    required: function required(value, schema, opts) {
+      var required = schema.required;
+      var errors = [];
+      if (!opts.existingOnly) {
+        required.forEach(function (prop) {
+          if (isUndefined(get(value, prop))) {
+            var prevProp = opts.prop;
+            opts.prop = prop;
+            addError(undefined, 'a value', opts, errors);
+            opts.prop = prevProp;
+          }
+        });
+      }
+      return errors.length ? errors : undefined;
+    },
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor79
+     */
+    type: function type(value, schema, opts) {
+      var type = schema.type;
+      var validType = undefined;
+      // Can be one of several types
+      if (isString(type)) {
+        type = [type];
+      }
+      // Try to match the value against an expected type
+      type.forEach(function (_type) {
+        // TODO: throw an error if type is not defined
+        if (types[_type](value, schema, opts)) {
+          // Matched a type
+          validType = _type;
+          return false;
+        }
+      });
+      // Value did not match any expected type
+      if (!validType) {
+        return makeError(value ? typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value) : '' + value, 'one of (' + type.join(', ') + ')', opts);
+      }
+      // Run keyword validators for matched type
+      // http://json-schema.org/latest/json-schema-validation.html#anchor12
+      var validator = typeGroupValidators[validType];
+      if (validator) {
+        return validator(value, schema, opts);
+      }
+    },
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor49
+     */
+    uniqueItems: function uniqueItems(value, schema, opts) {
+      if (value && value.length && schema.uniqueItems) {
+        var length = value.length;
+        var item = undefined,
+            i = undefined,
+            j = undefined;
+        // Check n - 1 items
+        for (i = length - 1; i > 0; i--) {
+          item = value[i];
+          // Only compare against unchecked items
+          for (j = i - 1; j >= 0; j--) {
+            // Found a duplicate
+            if (item === value[j]) {
+              return makeError(item, 'no duplicates', opts);
+            }
+          }
+        }
+      }
+    }
+  });
+
+  fillIn(typeGroupValidators, {
+    array: function array(value, schema, opts) {
+      return runOps(ARRAY_OPS, value, schema, opts);
+    },
+
+    integer: function integer(value, schema, opts) {
+      // Additional validations for numerics are the same
+      return typeGroupValidators.numeric(value, schema, opts);
+    },
+
+    number: function number(value, schema, opts) {
+      // Additional validations for numerics are the same
+      return typeGroupValidators.numeric(value, schema, opts);
+    },
+
+    /**
+     * See http://json-schema.org/latest/json-schema-validation.html#anchor13
+     * @param {*} value
+     * @param {Object} [schema]
+     * @param {Object} [opts] Configuration options.
+     */
+    numeric: function numeric(value, schema, opts) {
+      return runOps(NUMERIC_OPS, value, schema, opts);
+    },
+
+    /**
+     * See http://json-schema.org/latest/json-schema-validation.html#anchor53
+     * @param {*} value
+     * @param {Object} [schema]
+     * @param {Object} [opts] Configuration options.
+     */
+    object: function object(value, schema, opts) {
+      return runOps(OBJECT_OPS, value, schema, opts);
+    },
+
+    /**
+     * See http://json-schema.org/latest/json-schema-validation.html#anchor25
+     * @param {*} value
+     * @param {Object} [schema]
+     * @param {Object} [opts] Configuration options.
+     */
+    string: function string(value, schema, opts) {
+      return runOps(STRING_OPS, value, schema, opts);
+    }
+  });
+
+  /**
+   * js-data's Schema class.
+   * @class Schema
+   *
+   * @param {Object} definition Schema definition according to json-schema.org
+   */
+  function Schema(definition) {
+    // const self = this
+    definition || (definition = {});
+    // TODO: schema validation
+    fillIn(this, definition);
+
+    // TODO: rework this to make sure all possible keywords are converted
+    // if (definition.properties) {
+    //   forOwn(definition.properties, function (_definition, prop) {
+    //     definition.properties[prop] = new Schema(_definition)
+    //   })
+    // }
+  }
+
+  /**
+   * Validate the provided value against this schema.
+   *
+   * @param {*} value Value to validate.
+   * @param {Object} [opts] Configuration options.
+   * @return {(array|undefined)} Array of errors or `undefined` if valid.
+   */
+  Schema.prototype.validate = function (value, opts) {
+    return validate(value, this, opts);
+  };
+
   var utils = _utils;
 
   var version = {
@@ -5253,8 +5778,11 @@
   exports.setSchema = setSchema;
   exports.registerAdapter = registerAdapter;
   exports.Model = Model;
-  exports.rules = rules;
+  exports.types = types;
+  exports.typeGroupValidators = typeGroupValidators;
+  exports.validationKeywords = validationKeywords;
   exports.validate = validate;
+  exports.Schema = Schema;
 
 }));
 //# sourceMappingURL=js-data.js.map
