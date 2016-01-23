@@ -2,8 +2,6 @@ import {
   isString
 } from '../utils'
 
-const op = 'hasOne'
-
 /**
  * @ignore
  */
@@ -106,7 +104,6 @@ function applyHasOne (Mapper, Relation, opts) {
  */
 export function hasOne (Relation, opts) {
   return function (target) {
-    target.dbg(op, 'Relation:', Relation, 'opts:', opts)
     return applyHasOne(target, Relation, opts)
   }
 }
