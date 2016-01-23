@@ -12,7 +12,7 @@ export function init () {
       Test.assert.isFunction(Test.JSData.Collection, 'should be a function')
       let collection = new Test.JSData.Collection()
       Test.assert.isTrue(collection instanceof Test.JSData.Collection, 'collection should be an instance')
-      Test.assert.equal(collection.modelId(), 'id', 'collection should get initialization properties')
+      Test.assert.equal(collection.recordId(), 'id', 'collection should get initialization properties')
     })
 
     it('should accept initialization data', function () {
@@ -304,14 +304,16 @@ export function init () {
       Test.assert.equal(collection.getAll(3).length, 1, 'should have one item with id 3')
     })
 
-    it('should bubble up model events', function (done) {
+    it('should bubble up record events', function (done) {
       const Test = this
-      class User extends Test.JSData.Model {}
+      const mapper = new Test.JSData.Mapper()
       const data = [
-        new User({ id: 2, age: 19 }),
-        new User({ id: 1, age: 27 })
+        mapper.createRecord({ id: 2, age: 19 }),
+        mapper.createRecord({ id: 1, age: 27 })
       ]
-      const collection = new Test.JSData.Collection(data)
+      const collection = new Test.JSData.Collection(data, {
+        mapper
+      })
       const listener = Test.sinon.stub()
       const listener2 = Test.sinon.stub()
       collection.on('foo', listener)

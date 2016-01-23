@@ -12,7 +12,7 @@ import {
   isObject,
   isString,
   isUndefined
-} from '../utils'
+} from './utils'
 
 export const types = {
   array: isArray,

@@ -38,75 +38,94 @@ beforeEach(function () {
   Test.data.p3 = { author: 'Mike', age: 32, id: 7 }
   Test.data.p4 = { author: 'Adam', age: 33, id: 8 }
   Test.data.p5 = { author: 'Adam', age: 33, id: 9 }
-  var Base = Test.JSData.Model.extend({}, {
-    name: 'base',
-    linkRelations: true
-  });
-  Test.Post = Base.extend({}, {
-    name: 'post',
+  var store = Test.store = new Test.JSData.DataStore()
+  Test.Post = store.defineMapper('post', {
     endpoint: '/posts'
   })
-  Test.PostCollection = new Test.JSData.Collection({ model: Test.Post })
-  Test.User = Base.extend({}, {
-    name: 'user'
+  Test.PostCollection = store.getCollection('post')
+  Test.User = store.defineMapper('user', {
+    relations: {
+      belongsTo: {
+        organization: {
+          localField: 'organization',
+          foreignKey: 'organizationId'
+        }
+      },
+      hasMany: {
+        comment: [
+          {
+            localField: 'comments',
+            foreignKey: 'userId'
+          },
+          {
+            localField: 'approvedComments',
+            foreignKey: 'approvedBy'
+          }
+        ],
+        group: {
+          localField: 'groups',
+          foreignKeys: 'userIds'
+        }
+      },
+      hasOne: {
+        profile: {
+          localField: 'profile',
+          foreignKey: 'userId'
+        }
+      }
+    }
   })
-  Test.UserCollection = new Test.JSData.Collection({ model: Test.User })
-  Test.Group = Base.extend({}, {
-    name: 'group'
+  Test.UserCollection = store.getCollection('user')
+  Test.Group = store.defineMapper('group', {
+    relations: {
+      hasMany: {
+        user: {
+          localField: 'users',
+          localKeys: 'userIds'
+        }
+      }
+    }
   })
-  Test.GroupCollection = new Test.JSData.Collection({ model: Test.Group })
-  Test.Organization = Base.extend({}, {
-    name: 'organization'
+  Test.GroupCollection = store.getCollection('group')
+  Test.Organization = store.defineMapper('organization', {
+    relations: {
+      hasMany: {
+        user: {
+          localField: 'users',
+          foreignKey: 'organizationId'
+        }
+      }
+    }
   })
-  Test.OrganizationCollection = new Test.JSData.Collection({ model: Test.Organization })
-  Test.Profile = Base.extend({}, {
-    name: 'profile'
+  Test.OrganizationCollection = store.getCollection('organization')
+  Test.Profile = store.defineMapper('profile', {
+    relations: {
+      belongsTo: {
+        user: {
+          localField: 'user',
+          localKey: 'userId'
+        }
+      }
+    }
   })
-  Test.ProfileCollection = new Test.JSData.Collection({ model: Test.Profile })
-  Test.Comment = Base.extend({}, {
-    name: 'comment'
+  Test.ProfileCollection = store.getCollection('profile')
+  Test.Comment = store.defineMapper('comment', {
+    relations: {
+      belongsTo: {
+        user: [
+          {
+            localField: 'user',
+            localKey: 'userId'
+          },
+          {
+            localField: 'approvedByUser',
+            localKey: 'approvedBy'
+          }
+        ]
+      }
+    }
   })
-  Test.CommentCollection = new Test.JSData.Collection({ model: Test.Comment })
-  Test.User.belongsTo(Test.Organization, {
-    localField: 'organization',
-    localKey: 'organizationId'
-  })
-  Test.User.hasMany(Test.Comment, {
-    localField: 'comments',
-    foreignKey: 'userId'
-  })
-  Test.User.hasMany(Test.Comment, {
-    localField: 'approvedComments',
-    foreignKey: 'approvedBy'
-  })
-  Test.User.hasMany(Test.Group, {
-    localField: 'groups',
-    foreignKeys: 'userIds'
-  })
-  Test.User.hasOne(Test.Profile, {
-    localField: 'profile',
-    foreignKey: 'userId'
-  })
-  Test.Group.hasMany(Test.User, {
-    localField: 'users',
-    localKeys: 'userIds'
-  })
-  Test.Organization.hasMany(Test.User, {
-    localField: 'users',
-    foreignKey: 'organizationId'
-  })
-  Test.Profile.belongsTo(Test.User, {
-    localField: 'user',
-    localKey: 'userId'
-  })
-  Test.Comment.belongsTo(Test.User, {
-    localField: 'user',
-    localKey: 'userId'
-  })
-  Test.Comment.belongsTo(Test.User, {
-    localField: 'approvedByUser',
-    localKey: 'approvedBy'
-  })
+  Test.CommentCollection = store.getCollection('comment')
   Test.data.user1 = {
     name: 'John Anderson',
     id: 1,
