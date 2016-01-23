@@ -1,7 +1,10 @@
 import * as collection from './collection/index'
+// import * as container from './container/index'
 // import * as datastore from './datastore/index'
 // import * as decorators from './decorators/index'
-// import * as model from './model/index'
+// import * as linkedCollection from './linkedcollection/index'
+// import * as mapper from './mapper/index'
+// import * as record from './record/index'
 // import * as schema from './schema/index'
 // import * as utils from './utils/index'
 
@@ -28,9 +31,12 @@ export function init () {
     })
 
     collection.init()
+    // container.init()
     // datastore.init()
     // decorators.init()
-    // model.init()
+    // linkedcollection.init()
+    // mapper.init()
+    // record.init()
     // schema.init()
     // utils.init()
   })

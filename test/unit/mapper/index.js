@@ -1,22 +1,13 @@
-import * as changes from './changes.test'
 import * as create from './create.test'
-import * as staticCreate from './static.create.test'
-import * as staticCreateInstance from './static.createInstance.test'
-import * as staticCreateMany from './static.createMany.test'
+import * as createRecord from './createRecord.test'
+import * as createMany from './createMany.test'
 import * as destroy from './destroy.test'
-import * as staticDestroy from './static.destroy.test'
-import * as staticDestroyAll from './static.destroyAll.test'
-import * as staticFind from './static.find.test'
-import * as staticFindAll from './static.findAll.test'
-import * as get from './get.test'
-import * as hasChanges from './hasChanges.test'
-import * as revert from './revert.test'
-import * as save from './save.test'
-import * as set from './set.test'
-import * as staticUpdate from './static.update.test'
-import * as staticUpdateMany from './static.updateMany.test'
-import * as staticUpdateAll from './static.updateAll.test'
-import * as unset from './unset.test'
+import * as destroyAll from './destroyAll.test'
+import * as find from './find.test'
+import * as findAll from './findAll.test'
+import * as update from './update.test'
+import * as updateMany from './updateMany.test'
+import * as updateAll from './updateAll.test'
 
 const defaults = {
   csp: false,
@@ -28,7 +19,7 @@ const defaults = {
 }
 
 export function init () {
-  describe('Model', function () {
+  describe('Mapper', function () {
     it('should be a constructor function', function () {
       const Test = this
       Test.assert.isFunction(Test.JSData.Model, 'should be a function')
@@ -398,24 +389,15 @@ export function init () {
       foo.set('bar', 'baz')
     })
 
-    changes.init()
     create.init()
-    staticCreate.init()
-    staticCreateInstance.init()
-    staticCreateMany.init()
+    createRecord.init()
+    createMany.init()
     destroy.init()
-    staticDestroy.init()
-    staticDestroyAll.init()
-    staticFind.init()
-    staticFindAll.init()
-    get.init()
-    hasChanges.init()
-    revert.init()
-    save.init()
-    set.init()
-    staticUpdate.init()
-    staticUpdateMany.init()
-    staticUpdateAll.init()
-    unset.init()
+    destroyAll.init()
+    find.init()
+    findAll.init()
+    update.init()
+    updateMany.init()
+    updateAll.init()
   })
 }

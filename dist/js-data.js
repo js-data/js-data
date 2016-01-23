@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.10 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.11 - Homepage <http://www.js-data.io/>
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @copyright (c) 2014-2015 Jason Dobry
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -5754,11 +5754,11 @@ var utils = Object.freeze({
    */
 
   var version = {
-    full: '3.0.0-alpha.10',
+    full: '3.0.0-alpha.11',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10),
-    alpha: '10' !== 'false' ? '10' : false,
+    alpha: '11' !== 'false' ? '11' : false,
     beta: 'false' !== 'false' ? 'false' : false
   };
 
