@@ -9,7 +9,7 @@
 [![Coverage Status][cov_b]][cov_l]
 [![Codacy][cod_b]][cod_l]
 
-JSData is a datastore-agnostic ORM for Node.js and the Browser.
+JSData is a datastore-agnostic ORM/ODM for Node.js and the Browser.
 
 Adapters allow JSData to connect to various datastores such as Firebase, MySql,
 RethinkDB, MongoDB, localStorage, Redis, a REST API, etc. With JSData you can
@@ -50,94 +50,57 @@ To get started, check out <http://js-data.io>!
 See [installation instructions][inst] for making JSData part of your
 r.js/browserify/webpack build.
 
-__ES2016:__
-
 ```javascript
-import {Collection, Model, registerAdapter} from 'js-data'
-import DSHttpAdapter from 'js-data-http'
+import {DataStore} from 'js-data'
+import HttpAdapter from 'js-data-http'
 
-// "User" will use an http adapter by default
-@registerAdapter('http', new DSHttpAdapter(), { default: true })
-class User extends Model {}
-const UserCollection = new Collection({ model: User })
+const store = new DataStore()
+// "store" will use an http adapter by default
+store.registerAdapter('http', new HttpAdapter(), { default: true })
 
-let user = await UserCollection.find(1)
+store.defineMapper('user')
+const Users = store.getCollection('user')
+
+let user = await store.find('user', 1)
 
 console.log(user) // { id: 1, name: 'John' }
-console.log(user instanceof User) // true
 
-// The user instance is now stored in UserCollection
-console.log(UserCollection.get(user.id)) // { id: 1, name: 'John' }
-console.log(user === UserCollection.get(user.id)) // true
+// The user record is now stored in Users
+console.log(Users.get(user.id)) // { id: 1, name: 'John' }
+console.log(user === Users.get(user.id)) // true
 
 user.name = 'Johnny'
 
 // PUT /user/1 {name:"Johnny"}
 user = await user.save()
 
-// The user instance has been updated
-console.log(UserCollection.get(user.id)) // { id: 1, name: 'Johnny' }
-console.log(user === UserCollection.get(user.id)) // true
+// The user record has been updated
+console.log(Users.get(user.id)) // { id: 1, name: 'Johnny' }
+console.log(user === Users.get(user.id)) // true
 
 await user.destroy()
 
 // The user instance no longer stored in UserCollection
-console.log(UserCollection.get(1)) // undefined
-```
-
-__ES2015:__
-
-```javascript
-import {Collection, Model, registerAdapter} from 'js-data'
-import DSHttpAdapter from 'js-data-http'
-
-class User extends Model {}
-const UserCollection = new Collection({ model: User })
-
-// "User" will use an http adapter by default
-User.registerAdapter('http', new DSHttpAdapter(), { default: true })
-
-let user = yield UserCollection.find(1)
-
-console.log(user) // { id: 1, name: 'John' }
-console.log(user instanceof User) // true
-
-// The user instance is now stored in UserCollection
-console.log(UserCollection.get(user.id)) // { id: 1, name: 'John' }
-console.log(user === UserCollection.get(user.id)) // true
-
-user.name = 'Johnny'
-
-// PUT /user/1 {name:"Johnny"}
-user = yield user.save()
-
-// The user instance has been updated
-console.log(UserCollection.get(user.id)) // { id: 1, name: 'Johnny' }
-console.log(user === UserCollection.get(user.id)) // true
-
-yield user.destroy()
-
-// The user instance no longer stored in UserCollection
-console.log(UserCollection.get(1)) // undefined
+console.log(Users.get(1)) // undefined
 ```
 
 __ES5:__
 
 ```javascript
-var User = JSData.Model.extend({}, { name: 'User' })
-var UserCollection = new JSData.Collection({ model: User })
-// register and use http by default for async operations
-User.registerAdapter('http', new DSHttpAdapter(), { default: true });
+var store = new JSData.DataStore()
+// "store" will use an http adapter by default
+store.registerAdapter('http', new HttpAdapter(), { default: true })
 
-// Example CRUD operations with default configuration
-UserCollection.find(1)
+store.defineMapper('user')
+var Users = store.getCollection('user')
+
+store.find('user', 1)
   .then(function (user) {
     console.log(user) // { id: 1, name: 'John' }
-    console.log(user instanceof User) // true
 
-    // The user instance is now stored in UserCollection
-    console.log(UserCollection.get(user.id)) // { id: 1, name: 'John' }
-    console.log(user === UserCollection.get(user.id)) // true
+    // The user record is now stored in Users
+    console.log(Users.get(user.id)) // { id: 1, name: 'John' }
+    console.log(user === Users.get(user.id)) // true
 
     user.name = 'Johnny'
 
@@ -145,26 +108,25 @@ UserCollection.find(1)
     return user.save()
   })
   .then(function (user) {
-    // The user instance has been updated
-    console.log(UserCollection.get(user.id)) // { id: 1, name: 'Johnny' }
-    console.log(user === UserCollection.get(user.id)) // true
+    // The user record has been updated
+    console.log(Users.get(user.id)) // { id: 1, name: 'Johnny' }
+    console.log(user === Users.get(user.id)) // true
 
-    // DELETE /user/1
     return user.destroy()
   })
   .then(function () {
     // The user instance no longer stored in UserCollection
-    console.log(UserCollection.get(1)) // undefined
+    console.log(Users.get(1)) // undefined
   })
 ```
 
 ## Background
 
-Most ORMs only work with a single datastore. Even when written in JavaScript,
-most ORMs only work in Node.js _or_ the Browser. Wouldn't it be nice if you
-could use the same ORM on the client as you do on the backend? Wouldn't it be
-nice if you could switch databases without having to switch ORMs? Enter
-__JSData__.
+Most ORMs/ODMs only work with a single datastore. Even when written in
+JavaScript, most ORMs/ODMs only work in Node.js _or_ the Browser. Wouldn't it be
+nice if you could use the same ORM/ODM on the client as you do on the backend?
+Wouldn't it be nice if you could switch databases without having to switch out
+your data layer? Enter __JSData__.
 
 Originally inspired by the desire to have something like [Ember Data][ember]
 that worked in Angular.js and other frameworks, JSData was created. Turns out,
