@@ -4,8 +4,6 @@ import {
 } from '../utils'
 import {configure} from './configure'
 
-const op = 'setSchema'
-
 /**
  * @param {Model} target - Target Model.
  * @param {string} key - Key for new property.
@@ -154,8 +152,6 @@ export function setSchema (opts) {
   opts || (opts = {})
 
   return function (target) {
-    target.dbg(op, 'opts:', opts)
-
     target.schema || (target.schema = {})
     configure(target.schema, opts)
 

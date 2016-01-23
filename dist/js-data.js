@@ -2374,8 +2374,6 @@ var utils = Object.freeze({
     this._listeners = value;
   });
 
-  var op = 'belongsTo';
-
   /**
    * @ignore
    */
@@ -2481,7 +2479,6 @@ var utils = Object.freeze({
    */
   function belongsTo(Relation, opts) {
     return function (target) {
-      target.dbg(op, Relation, opts);
       return applyBelongsTo(target, Relation, opts);
     };
   }
@@ -2518,8 +2515,6 @@ var utils = Object.freeze({
       return target;
     };
   }
-
-  var op$1 = 'hasMany';
 
   /**
    * @ignore
@@ -2648,12 +2643,9 @@ var utils = Object.freeze({
    */
   function hasMany(Relation, opts) {
     return function (target) {
-      target.dbg(op$1, Relation, opts);
       return applyHasMany(target, Relation, opts);
     };
   }
-
-  var op$2 = 'hasOne';
 
   /**
    * @ignore
@@ -2757,12 +2749,9 @@ var utils = Object.freeze({
    */
   function hasOne(Relation, opts) {
     return function (target) {
-      target.dbg(op$2, 'Relation:', Relation, 'opts:', opts);
       return applyHasOne(target, Relation, opts);
     };
   }
-
-  var op$3 = 'setSchema';
 
   /**
    * @param {Model} target - Target Model.
@@ -2920,8 +2909,6 @@ var utils = Object.freeze({
     opts || (opts = {});
 
     return function (target) {
-      target.dbg(op$3, 'opts:', opts);
-
       target.schema || (target.schema = {});
       configure(target.schema, opts);
 
@@ -2937,7 +2924,7 @@ var utils = Object.freeze({
     };
   }
 
-  var op$4 = 'registerAdapter';
+  var op = 'registerAdapter';
 
   /**
    * Add the provided adapter to the target's "adapters" property, registering it
@@ -2953,9 +2940,8 @@ var utils = Object.freeze({
    */
   function registerAdapter(name, adapter, opts) {
     opts || (opts = {});
-    opts.op = op$4;
+    opts.op = op;
     return function (target) {
-      target.dbg(op$4, 'name:', name, 'adapter:', adapter, 'opts:', opts);
       // Register the adapter
       target.getAdapters()[name] = adapter;
       // Optionally make it the default adapter for the target.
@@ -4977,7 +4963,7 @@ var utils = Object.freeze({
       if (level === 'debug' && !this.debug) {
         return;
       }
-      var prefix = level.toUpperCase() + ': (' + this.name + ')';
+      var prefix = level.toUpperCase() + ': (' + (this.name || 'mapper') + ')';
       if (console[level]) {
         var _console;
 
@@ -5181,10 +5167,12 @@ var utils = Object.freeze({
       // For backwards compatibility with defineResource
       if (isObject(name)) {
         opts = name;
-        if (opts.name) {
+        if (!opts.name) {
           throw new Error('name is required!');
         }
         name = opts.name;
+      } else if (!isString(name)) {
+        throw new Error('name is required!');
       }
 
       // Default values for arguments

@@ -4,7 +4,8 @@ import {
   extend,
   fillIn,
   forOwn,
-  isObject
+  isObject,
+  isString
 } from './utils'
 import {
   registerAdapter
@@ -56,10 +57,12 @@ addHiddenPropsToTarget(Container.prototype, {
     // For backwards compatibility with defineResource
     if (isObject(name)) {
       opts = name
-      if (opts.name) {
-        throw new Error('name is required!');
+      if (!opts.name) {
+        throw new Error('name is required!')
       }
       name = opts.name
+    } else if (!isString(name)) {
+      throw new Error('name is required!')
     }
 
     // Default values for arguments

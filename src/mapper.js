@@ -1150,7 +1150,7 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
     if (level === 'debug' && !this.debug) {
       return
     }
-    const prefix = `${level.toUpperCase()}: (${this.name})`
+    const prefix = `${level.toUpperCase()}: (${this.name || 'mapper'})`
     if (console[level]) {
       console[level](prefix, ...args)
     } else {

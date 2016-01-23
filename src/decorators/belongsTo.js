@@ -2,8 +2,6 @@ import {
   isString
 } from '../utils'
 
-const op = 'belongsTo'
-
 /**
  * @ignore
  */
@@ -109,7 +107,6 @@ function applyBelongsTo (Mapper, Relation, opts) {
  */
 export function belongsTo (Relation, opts) {
   return function (target) {
-    target.dbg(op, Relation, opts)
     return applyBelongsTo(target, Relation, opts)
   }
 }

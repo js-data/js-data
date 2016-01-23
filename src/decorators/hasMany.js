@@ -2,8 +2,6 @@ import {
   isString
 } from '../utils'
 
-const op = 'hasMany'
-
 /**
  * @ignore
  */
@@ -131,7 +129,6 @@ function applyHasMany (Mapper, Relation, opts) {
  */
 export function hasMany (Relation, opts) {
   return function (target) {
-    target.dbg(op, Relation, opts)
     return applyHasMany(target, Relation, opts)
   }
 }

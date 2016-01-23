@@ -1,5 +1,5 @@
 import * as collection from './collection/index'
-// import * as container from './container/index'
+import * as container from './container/index'
 // import * as datastore from './datastore/index'
 // import * as decorators from './decorators/index'
 // import * as linkedCollection from './linkedcollection/index'
@@ -31,7 +31,7 @@ export function init () {
     })
 
     collection.init()
-    // container.init()
+    container.init()
     // datastore.init()
     // decorators.init()
     // linkedcollection.init()
