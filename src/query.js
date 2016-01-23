@@ -1,6 +1,7 @@
 import {
   addHiddenPropsToTarget,
   classCallCheck,
+  extend,
   forOwn,
   get,
   intersection,
@@ -9,7 +10,7 @@ import {
   isNumber,
   isObject,
   isString
-} from '../utils'
+} from './utils'
 
 /**
  * A class used by the @{link Collection} class to build queries to be executed
@@ -18,7 +19,7 @@ import {
  * @class Query
  * @param {Collection} collection - The collection on which this query operates.
  */
-export function Query (collection) {
+export default function Query (collection) {
   classCallCheck(this, Query)
 
   /**
@@ -32,6 +33,8 @@ export function Query (collection) {
    */
   this.data = null
 }
+
+Query.extend = extend
 
 const reserved = {
   skip: '',

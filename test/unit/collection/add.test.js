@@ -26,8 +26,7 @@ export function init () {
     })
     it('should inject existing items into the store', function () {
       const Test = this
-      class User extends Test.JSData.Model {}
-      const collection = new Test.JSData.Collection({ model: User })
+      const collection = new Test.JSData.Collection({ mapper: new Test.JSData.Mapper() })
 
       const user = collection.add({ id: 1 })
       const users = collection.add([{ id: 2 }, { id: 3 }])
@@ -46,8 +45,7 @@ export function init () {
     })
     it('should replace existing items', function () {
       const Test = this
-      class User extends Test.JSData.Model {}
-      const collection = new Test.JSData.Collection({ model: User })
+      const collection = new Test.JSData.Collection({ mapper: new Test.JSData.Mapper() })
       const user = collection.add({ id: 1, foo: 'bar', beep: 'boop' })
       Test.assert.equal(user.id, 1)
       Test.assert.equal(user.foo, 'bar')
@@ -140,7 +138,7 @@ export function init () {
     //   Test.assert.equal(2, Test.UserCollection.get(1).approvedComments.length)
     // })
     // it.skip('should inject cyclic dependencies', function () {
-    //   class Foo extends Test.JSData.Model {}
+    //   class Foo extends Test.JSData.Mapper {}
     //   Foo.configure({
     //     linkRelations: true
     //   })
@@ -199,12 +197,12 @@ export function init () {
     //   Test.assert.isDefined(Foo.get(7))
     // })
     // it.skip('should work when injecting child relations multiple times', function () {
-    //   class Parent extends Test.JSData.Model {}
+    //   class Parent extends Test.JSData.Mapper {}
     //   Parent.configure({
     //     linkRelations: true
     //   })
 
-    //   class Child extends Test.JSData.Model {}
+    //   class Child extends Test.JSData.Mapper {}
     //   Child.configure({
     //     linkRelations: true
     //   })
@@ -245,17 +243,17 @@ export function init () {
     //   Test.assert.deepEqual(Child.filter({ parent_id: 1 }), Parent.get(1).children)
     // })
     // it.skip('should configure enumerability and linking of relations', function () {
-    //   class Parent extends Test.JSData.Model {}
+    //   class Parent extends Test.JSData.Mapper {}
     //   Parent.configure({
     //     linkRelations: true
     //   })
 
-    //   class Child extends Test.JSData.Model {}
+    //   class Child extends Test.JSData.Mapper {}
     //   Child.configure({
     //     linkRelations: true
     //   })
 
-    //   class OtherChild extends Test.JSData.Model {}
+    //   class OtherChild extends Test.JSData.Mapper {}
     //   OtherChild.configure({
     //     linkRelations: true
     //   })
@@ -321,10 +319,10 @@ export function init () {
       })
     })
     // it.skip('should not auto-inject relations where auto-injection has been disabled', function () {
-    //   const Foo = Test.JSData.Model.extend(null, {
+    //   const Foo = Test.JSData.Mapper.extend(null, {
     //     name: 'foo'
     //   })
-    //   const Bar = Test.JSData.Model.extend(null, {
+    //   const Bar = Test.JSData.Mapper.extend(null, {
     //     name: 'bar'
     //   })
     //   Foo.hasMany(Bar, {
@@ -348,11 +346,11 @@ export function init () {
     //   Test.assert.deepEqual(Bar.getAll(), [], 'nothing should have been injected')
     // })
     // it.skip('should allow custom relation injection logic', function () {
-    //   const Foo = Test.JSData.Model.extend(null, {
+    //   const Foo = Test.JSData.Mapper.extend(null, {
     //     name: 'foo',
     //     linkRelations: true
     //   })
-    //   const Bar = Test.JSData.Model.extend(null, {
+    //   const Bar = Test.JSData.Mapper.extend(null, {
     //     name: 'bar',
     //     linkRelations: true
     //   })
@@ -395,11 +393,11 @@ export function init () {
     //   ], 'bars should have been injected')
     // })
     // it.skip('should not link relations nor delete field if "link" is false', function () {
-    //   class Foo extends Test.JSData.Model {}
+    //   class Foo extends Test.JSData.Mapper {}
     //   Foo.configure({
     //     linkRelations: true
     //   })
-    //   class Bar extends Test.JSData.Model {}
+    //   class Bar extends Test.JSData.Mapper {}
     //   Bar.configure({
     //     linkRelations: true
     //   })
@@ -457,7 +455,8 @@ export function init () {
       Test.UserCollection.add(users)
       // console.log('\tinject 1,000 users time taken: ', new Date().getTime() - start, 'ms')
     })
-    // it.skip('should inject 10,000 items', function () {
+    // it('should inject 10,000 items', function () {
+    //   const Test = this
     //   let users = []
     //   for (var i = 0; i < 10000; i++) {
     //     users.push({
@@ -470,12 +469,11 @@ export function init () {
     //   }
     //   const start = new Date().getTime()
     //   Test.UserCollection.add(users)
-    //   // console.log('\tinject 10,000 users time taken: ', new Date().getTime() - start, 'ms')
+    //   console.log('\tinject 10,000 users time taken: ', new Date().getTime() - start, 'ms')
     // })
     it('should inject 1,000 items where there is an index on "age"', function () {
       const Test = this
-      class User extends Test.JSData.Model {}
-      const collection = new Test.JSData.Collection({ model: User })
+      const collection = new Test.JSData.Collection({ mapper: new Test.JSData.Mapper() })
       collection.createIndex('age')
       collection.createIndex('created')
       collection.createIndex('updated')
@@ -494,7 +492,7 @@ export function init () {
       // console.log('\tinject 1,000 users time taken: ', new Date().getTime() - start, 'ms')
     })
     // it.skip('should inject 10,000 items where there is an index on "age"', function () {
-    //   class User extends Test.JSData.Model {}
+    //   class UserMapper extends Test.JSData.Mapper {}
     //   User.createIndex('age')
     //   User.createIndex('created')
     //   User.createIndex('updated')

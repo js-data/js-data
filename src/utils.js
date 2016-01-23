@@ -14,6 +14,18 @@ const OBJECT_TAG = '[object Object]'
 const REGEXP_TAG = '[object RegExp]'
 const STRING_TAG = '[object String]'
 const objToString = Object.prototype.toString
+let isBrowser
+
+/**
+ * Attempt to detect whether we are in the browser.
+ */
+try {
+  isBrowser = !!window
+} catch (e) {
+  isBrowser = false
+}
+
+export {isBrowser}
 
 const toString = function (value) {
   return objToString.call(value)
@@ -284,7 +296,7 @@ export function intersection (array1, array2) {
  */
 export function fillIn (dest, src) {
   forOwn(src, function (value, key) {
-    if (dest[key] === undefined) {
+    if (!dest.hasOwnProperty(key) || dest[key] === undefined) {
       dest[key] = value
     }
   })
@@ -526,13 +538,13 @@ export function uuid (a, b) {
 }
 /*eslint-enable*/
 
-export function classCallCheck (instance, Constructor) {
+export const classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError('Cannot call a class as a function')
   }
 }
 
-export function possibleConstructorReturn (self, call) {
+export const possibleConstructorReturn = function (self, call) {
   if (!self) {
     throw new ReferenceError('this hasn\'t been initialised - super() hasn\'t been called')
   }
@@ -540,7 +552,7 @@ export function possibleConstructorReturn (self, call) {
   return call && (typeof call === 'object' || typeof call === 'function') ? call : self
 }
 
-export function addHiddenPropsToTarget (target, props) {
+export const addHiddenPropsToTarget = function (target, props) {
   forOwn(props, function (value, key) {
     props[key] = {
       value
@@ -549,27 +561,27 @@ export function addHiddenPropsToTarget (target, props) {
   Object.defineProperties(target, props)
 }
 
-export function extend (props, classProps) {
-  const Parent = this
-  let Child
+export const extend = function (props, classProps) {
+  const SuperClass = this
+  let SubClass
 
   props || (props = {})
   classProps || (classProps = {})
 
   if (props.hasOwnProperty('constructor')) {
-    Child = props.constructor
+    SubClass = props.constructor
     delete props.constructor
   } else {
-    Child = function (...args) {
-      classCallCheck(this, Child)
-      const _this = possibleConstructorReturn(this, (Child.__super__ || Object.getPrototypeOf(Child)).apply(this, args))
+    SubClass = function (...args) {
+      classCallCheck(this, SubClass)
+      const _this = possibleConstructorReturn(this, (SubClass.__super__ || Object.getPrototypeOf(SubClass)).apply(this, args))
       return _this
     }
   }
 
-  Child.prototype = Object.create(Parent && Parent.prototype, {
+  SubClass.prototype = Object.create(SuperClass && SuperClass.prototype, {
     constructor: {
-      value: Child,
+      value: SubClass,
       enumerable: false,
       writable: true,
       configurable: true
@@ -577,21 +589,26 @@ export function extend (props, classProps) {
   })
 
   if (Object.setPrototypeOf) {
-    Object.setPrototypeOf(Child, Parent)
+    Object.setPrototypeOf(SubClass, SuperClass)
   } else if (classProps.strictEs6Class) {
-    Child.__proto__ = Parent // eslint-disable-line
+    SubClass.__proto__ = SuperClass // eslint-disable-line
   } else {
-    forOwn(Parent, function (value, key) {
-      Child[key] = value
+    forOwn(SuperClass, function (value, key) {
+      SubClass[key] = value
     })
   }
-  Object.defineProperty(Child, '__super__', {
+  Object.defineProperty(SubClass, '__super__', {
     configurable: true,
-    value: Parent
+    value: SuperClass
   })
 
-  deepMixIn(Child.prototype, props)
-  deepMixIn(Child, classProps)
+  addHiddenPropsToTarget(SubClass.prototype, props)
+  fillIn(SubClass, classProps)
 
-  return Child
+  return SubClass
+}
+
+export const getSuper = function (instance) {
+  const Ctor = instance.constructor
+  return (Ctor.__super__ || Object.getPrototypeOf(Ctor) || Ctor.__proto__)
 }

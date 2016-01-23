@@ -49,20 +49,38 @@
  * otherwise `false` if the current version is not beta.
  */
 
-export * from './collection/index'
-export * from './datastore/index'
-
-export * from './decorators/index'
-export * from './model/index'
-export * from './schema/index'
-import * as _utils from './utils'
-export const utils = _utils
-
-export const version = {
+const version = {
   full: '<%= pkg.version %>',
   major: parseInt('<%= major %>', 10),
   minor: parseInt('<%= minor %>', 10),
   patch: parseInt('<%= patch %>', 10),
   alpha: '<%= alpha %>' !== 'false' ? '<%= alpha %>' : false,
   beta: '<%= beta %>' !== 'false' ? '<%= beta %>' : false
+}
+
+import Collection from './collection'
+import Container from './container'
+import DataStore from './datastore'
+import LinkedCollection from './linkedcollection'
+import Mapper from './mapper'
+import Query from './query'
+import Record from './record'
+import * as utils from './utils'
+
+export * from './decorators/index'
+export * from './schema'
+
+const DS = DataStore
+
+export {
+  Collection,
+  Container,
+  DataStore,
+  DS, // Backwards compatiblity
+  LinkedCollection,
+  Mapper,
+  Query,
+  Record,
+  utils,
+  version
 }

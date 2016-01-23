@@ -522,7 +522,7 @@ export function init () {
           }
         }
       })
-      let Foo = store.defineModel({
+      let Foo = store.defineMapper({
         name: 'foo',
         scopes: {
           second: {
