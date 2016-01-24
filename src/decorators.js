@@ -41,7 +41,7 @@ function Relation (related, opts) {
   fillIn(self, opts)
 }
 
-export const relatedTo = function (mapper, related, opts) {
+const relatedTo = function (mapper, related, opts) {
   opts || (opts = {})
   if (!opts.type) {
     throw new Error('must specify relation type!')
@@ -57,8 +57,10 @@ export const relatedTo = function (mapper, related, opts) {
 }
 
 /**
- * @memberof! module:js-data
+ * TODO
  *
+ * @name module:js-data.belongsTo
+ * @method
  * @param {Mapper} related The relation the target belongs to.
  * @param {Object} opts Configuration options.
  * @param {string} opts.foreignKey The field that holds the primary key of the
@@ -77,8 +79,10 @@ export const belongsTo = function (related, opts) {
 }
 
 /**
- * @memberof! module:js-data
+ * TODO
  *
+ * @name module:js-data.hasMany
+ * @method
  * @param {Mapper} related The relation of which the target has many.
  * @param {Object} opts Configuration options.
  * @param {string} [opts.foreignKey] The field that holds the primary key of the
@@ -97,8 +101,10 @@ export const hasMany = function (related, opts) {
 }
 
 /**
- * @memberof! module:js-data
+ * TODO
  *
+ * @name module:js-data.hasOne
+ * @method
  * @param {Mapper} related The relation of which the target has one.
  * @param {Object} opts Configuration options.
  * @param {string} [opts.foreignKey] The field that holds the primary key of the
@@ -118,7 +124,9 @@ export const hasOne = function (related, opts) {
 
 /**
  * Register an adapter with the target. Target must have a "getAdapters" method.
- * @memberof! module:js-data
+ *
+ * @name module:js-data.registerAdapter
+ * @method
  * @param {string} name The name under which to register the adapter.
  * @param {Adapter} adapter The adapter to register.
  * @param {Object} opts Configuration options.

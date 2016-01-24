@@ -25,10 +25,6 @@ export function init () {
       Test.assert.isFunction(Test.JSData.Record, 'has the Record class')
       Test.assert.isFunction(Test.JSData.registerAdapter, 'has the registerAdapter class')
       Test.assert.isFunction(Test.JSData.Schema, 'has the Schema class')
-      Test.assert.isObject(Test.JSData.types, 'has the types object')
-      Test.assert.isObject(Test.JSData.typeGroupValidators, 'has the typeGroupValidators object')
-      Test.assert.isFunction(Test.JSData.validate, 'has the validate function')
-      Test.assert.isObject(Test.JSData.validationKeywords, 'has the validationKeywords object')
       Test.assert.isObject(Test.JSData.version, 'has a version')
     })
 

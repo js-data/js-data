@@ -20,6 +20,10 @@ const CONTAINER_DEFAULTS = {}
 /**
  * TODO
  *
+ * ```javascript
+ * import {Container} from 'js-data'
+ * ```
+ *
  * @class Container
  * @param {Object} [opts] Configuration options.
  * @return {Container}
@@ -38,6 +42,12 @@ export default function Container (opts) {
   self.MapperClass = self.MapperClass || Mapper
 }
 
+/**
+ * TODO
+ *
+ * @name Container.extend
+ * @method
+ */
 Container.extend = extend
 
 addHiddenPropsToTarget(Container.prototype, {

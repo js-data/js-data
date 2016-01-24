@@ -38,8 +38,39 @@
   babelHelpers;
 
   /**
-   * @module utils
+   * @name utils
    * @memberof module:js-data
+   * @type {Object}
+   * @property {Function} addHiddenPropsToTarget TODO
+   * @property {Function} classCallCheck TODO
+   * @property {Function} copy TODO
+   * @property {Function} deepMixIn TODO
+   * @property {Function} eventify TODO
+   * @property {Function} extend TODO
+   * @property {Function} fillIn TODO
+   * @property {Function} fromJson TODO
+   * @property {Function} get TODO
+   * @property {Function} getSuper TODO
+   * @property {Function} intersection TODO
+   * @property {Function} isArray TODO
+   * @property {Function} isBlacklisted TODO
+   * @property {boolean} isBrowser TODO
+   * @property {Function} isBoolean TODO
+   * @property {Function} isFunction TODO
+   * @property {Function} isInteger TODO
+   * @property {Function} isNull TODO
+   * @property {Function} isNumber TODO
+   * @property {Function} isObject TODO
+   * @property {Function} isRegExp TODO
+   * @property {Function} isSorN TODO
+   * @property {Function} isString TODO
+   * @property {Function} isUndefined TODO
+   * @property {Function} possibleConstructorReturn TODO
+   * @property {Function} reject TODO
+   * @property {Function} resolve TODO
+   * @property {Function} set TODO
+   * @property {Function} toJson TODO
+   * @property {Function} uuid TODO
    */
 
   var INFINITY = 1 / 0;
@@ -54,9 +85,7 @@
   var objToString = Object.prototype.toString;
   var isBrowser = undefined;
 
-  /**
-   * Attempt to detect whether we are in the browser.
-   */
+  // Attempt to detect whether we are in the browser.
   try {
     isBrowser = !!window;
   } catch (e) {
@@ -66,7 +95,6 @@
   var toString = function toString(value) {
     return objToString.call(value);
   };
-
   var toInteger = function toInteger(value) {
     if (!value) {
       return value === 0 ? value : 0;
@@ -79,125 +107,44 @@
     var remainder = value % 1;
     return value === value ? remainder ? value - remainder : value : 0;
   };
-
-  /**
-   * Return whether the provided value is an array.
-   *
-   * @method
-   * @param {*} [value] The value to test.
-   */
-  var isArray = Array.isArray;
-
-  /**
-   * Return whether the provided value is an object type.
-   *
-   * @param {*} [value] The value to test.
-   */
-  var isObject = function isObject(value) {
-    return toString(value) === OBJECT_TAG;
-  };
-
   var isPlainObject = function isPlainObject(value) {
     return !!value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && value.constructor === Object;
   };
-
-  /**
-   * Return whether the provided value is a regular expression type.
-   *
-   * @param {*} [value] The value to test.
-   */
-  var isRegExp = function isRegExp(value) {
-    return toString(value) === REGEXP_TAG;
-  };
-
-  /**
-   * Return whether the provided value is a string type.
-   *
-   * @param {*} [value] The value to test.
-   */
-  var isString = function isString(value) {
-    return typeof value === 'string' || value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toString(value) === STRING_TAG;
-  };
-
-  /**
-   * Return whether the provided value is null.
-   *
-   * @param {*} [value] The value to test.
-   */
-  var isNull = function isNull(value) {
-    return value === null;
-  };
-
-  /**
-   * Return whether the provided value is undefined.
-   *
-   * @param {*} [value] The value to test.
-   */
-  var isUndefined = function isUndefined(value) {
-    return value === undefined;
-  };
-
-  /**
-   * Return whether the provided value is a date type.
-   *
-   * @param {*} [value] The value to test.
-   */
+  var isArray = Array.isArray;
   var isDate = function isDate(value) {
     return value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toString(value) === DATE_TAG;
   };
-
-  /**
-   * Return whether the provided value is a number type.
-   *
-   * @param {*} [value] The value to test.
-   */
+  var isFunction = function isFunction(value) {
+    return typeof value === 'function' || value && toString(value) === FUNC_TAG;
+  };
+  var isInteger = function isInteger(value) {
+    return toString(value) === NUMBER_TAG && value == toInteger(value);
+  };
+  var isNull = function isNull(value) {
+    return value === null;
+  };
   var isNumber = function isNumber(value) {
     var type = typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value);
     return type === 'number' || value && type === 'object' && toString(value) === NUMBER_TAG;
   };
-
-  /**
-   * Return whether the provided value is an integer.
-   *
-   * @param {*} [value] The value to test.
-   */
-  var isInteger = function isInteger(value) {
-    return toString(value) === NUMBER_TAG && value == toInteger(value);
+  var isObject = function isObject(value) {
+    return toString(value) === OBJECT_TAG;
   };
-
-  /**
-   * Return whether the provided value is a boolean type.
-   *
-   * @param {*} [value] The value to test.
-   */
-  var isBoolean = function isBoolean(value) {
-    return toString(value) === BOOL_TAG;
+  var isRegExp = function isRegExp(value) {
+    return toString(value) === REGEXP_TAG;
   };
-
-  /**
-   * Return whether the provided value is a function.
-   *
-   * @param {*} [value] The value to test.
-   */
-  var isFunction = function isFunction(value) {
-    return typeof value === 'function' || value && toString(value) === FUNC_TAG;
-  };
-
-  /**
-   * Return whether the provided value is a string or a number.
-   *
-   * @param {*} [value] The value to test.
-   */
   var isSorN = function isSorN(value) {
     return isString(value) || isNumber(value);
   };
-
-  /**
-   * Get the value at the provided key or path.
-   *
-   * @param {Object} object The object from which to retrieve a property.
-   * @param {string} prop The key or path to the property.
-   */
+  var isString = function isString(value) {
+    return typeof value === 'string' || value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toString(value) === STRING_TAG;
+  };
+  var isUndefined = function isUndefined(value) {
+    return value === undefined;
+  };
+  var isBoolean = function isBoolean(value) {
+    return toString(value) === BOOL_TAG;
+  };
   var get = function get(object, prop) {
     if (!prop) {
       return;
@@ -213,7 +160,6 @@
 
     return object[last];
   };
-
   var mkdirP = function mkdirP(object, path) {
     if (!path) {
       return object;
@@ -232,6 +178,7 @@
   /**
    * Set the value at the provided key or path.
    *
+   * @ignore
    * @param {Object} object The object on which to set a property.
    * @param {(string|Object)} path The key or path to the property. Can also
    * pass in an object of path/value pairs, which will all be set on the target
@@ -255,6 +202,8 @@
 
   /**
    * Iterate over an object's own enumerable properties.
+   *
+   * @ignore
    * @param {Object} object The object whose properties are to be enumerated.
    * @param {Function} fn Iteration function.
    * @param {Object} [thisArg] Content to which to bind `fn`.
@@ -270,6 +219,8 @@
 
   /**
    * Recursively shallow copy own enumberable properties from `source` to `dest`.
+   *
+   * @ignore
    * @param {Object} dest The destination object.
    * @param {Object} source The source object.
    */
@@ -289,6 +240,8 @@
 
   /**
    * Proxy for `Promise.resolve`.
+   *
+   * @ignore
    * @param {*} [value] Value with which to resolve the Promise.
    * @return {Promise} Promise resolved with `value`.
    */
@@ -298,6 +251,8 @@
 
   /**
    * Proxy for `Promise.reject`.
+   *
+   * @ignore
    * @param {*} [value] Value with which to reject the Promise.
    * @return {Promise} Promise reject with `value`.
    */
@@ -311,6 +266,7 @@
    * - not a function
    * - does not start with "_"
    *
+   * @ignore
    * @param {Object} dest Destination object.
    * @param {Object} src Source object.
    */
@@ -326,6 +282,7 @@
   /**
    * Return the intersection of two arrays.
    *
+   * @ignore
    * @param {Array} array1 First array.
    * @param {Array} array2 Second array.
    * @return {Array} Array of elements common to both arrays.
@@ -354,6 +311,7 @@
    * Shallow copy own enumerable properties from `src` to `dest` that are on `src`
    * but are missing from `dest.
    *
+   * @ignore
    * @param {Object} dest The destination object.
    * @param {Object} source The source object.
    */
@@ -368,6 +326,7 @@
   /**
    * Return whether `prop` is matched by any string or regular expression in `bl`.
    *
+   * @ignore
    * @param {string} prop The name of a property.
    * @param {Array} bl Array of strings and regular expressions.
    * @return {boolean} Whether `prop` was matched.
@@ -389,6 +348,7 @@
   /**
    * Proxy for `JSON.parse`.
    *
+   * @ignore
    * @param {string} json JSON to parse.
    * @return {Object} Parsed object.
    */
@@ -399,7 +359,7 @@
   /**
    * Proxy for `JSON.stringify`.
    *
-   * @method
+   * @ignore
    * @param {*} value Value to serialize to JSON.
    * @return {string} JSON string.
    */
@@ -408,6 +368,7 @@
   /**
    * Deep copy a value.
    *
+   * @ignore
    * @param {*} from Value to deep copy.
    * @return {*} Deep copy of `from`.
    */
@@ -485,6 +446,7 @@
   /**
    * Add eventing capabilities into the target object.
    *
+   * @ignore
    * @param {Object} target Target object.
    * @param {Function} [getter] Custom getter for retrieving the object's event
    * listeners.
@@ -662,17 +624,17 @@
 var utils = Object.freeze({
     get isBrowser () { return isBrowser; },
     isArray: isArray,
+    isDate: isDate,
+    isFunction: isFunction,
+    isInteger: isInteger,
+    isNull: isNull,
+    isNumber: isNumber,
     isObject: isObject,
     isRegExp: isRegExp,
-    isString: isString,
-    isNull: isNull,
-    isUndefined: isUndefined,
-    isDate: isDate,
-    isNumber: isNumber,
-    isInteger: isInteger,
-    isBoolean: isBoolean,
-    isFunction: isFunction,
     isSorN: isSorN,
+    isString: isString,
+    isUndefined: isUndefined,
+    isBoolean: isBoolean,
     get: get,
     set: set,
     forOwn: forOwn,
@@ -696,9 +658,14 @@ var utils = Object.freeze({
   });
 
   /**
-   * A class used by the @{link Collection} class to build queries to be executed
+   * A class used by the {@link Collection} class to build queries to be executed
    * against the collection's data. An instance of `Query` is returned by
-   * {@link Model.query} and {@link Collection.query}.
+   * {@link Collection#query}.
+   *
+   * ```javascript
+   * import {Query} from 'js-data'
+   * ```
+   *
    * @class Query
    * @param {Collection} collection - The collection on which this query operates.
    */
@@ -707,16 +674,27 @@ var utils = Object.freeze({
 
     /**
      * The collection on which this query operates.
+     *
+     * @name Query#collection
      * @type {Collection}
      */
     this.collection = collection;
+
     /**
      * The data result of this query.
+     *
+     * @name Query#data
      * @type {Array}
      */
     this.data = null;
   }
 
+  /**
+   * TODO
+   *
+   * @name Query.extend
+   * @method
+   */
   Query.extend = extend;
 
   var reserved = {
@@ -736,6 +714,12 @@ var utils = Object.freeze({
     return pattern.replace(escapeRegExp, '\\$1');
   }
 
+  /**
+   * TODO
+   *
+   * @name Query.ops
+   * @type {Object}
+   */
   Query.ops = {
     '==': function _(value, predicate) {
       return value == predicate; // eslint-disable-line
@@ -836,8 +820,8 @@ var utils = Object.freeze({
 
     /**
      * Return the current data result of this query.
-     * @memberof Query
-     * @instance
+     * @name Query#getData
+     * @method
      * @return {Array} The data in this query.
      */
     getData: function getData() {
@@ -859,8 +843,8 @@ var utils = Object.freeze({
      * const users = query.between([18], [30], { index: 'age' }).run()
      * ```
      *
-     * @memberof Query
-     * @instance
+     * @name Query#between
+     * @method
      * @param {Array} leftKeys - Keys defining the left boundary.
      * @param {Array} rightKeys - Keys defining the right boundary.
      * @param {Object} [opts] - Configuration options.
@@ -911,8 +895,8 @@ var utils = Object.freeze({
      * }).run()
      * ```
      *
-     * @memberof Query
-     * @instance
+     * @name Query#get
+     * @method
      * @param {Array} keyList - Key(s) defining the entity to retrieve. If
      * `keyList` is not an array (i.e. for a single-value key), it will be
      * wrapped in an array.
@@ -956,8 +940,8 @@ var utils = Object.freeze({
      * const posts = query.getAll(['draft'], ['inReview'], { index: 'status' }).run()
      * ```
      *
-     * @memberof Query
-     * @instance
+     * @name Query#getAll
+     * @method
      * @param {...Array} [keyList] - Provide one or more keyLists, and all
      * entities matching each keyList will be retrieved. If no keyLists are
      * provided, all entities will be returned.
@@ -1020,8 +1004,8 @@ var utils = Object.freeze({
      * }).run()
      * ```
      *
-     * @memberof Query
-     * @instance
+     * @name Query#filter
+     * @method
      * @param {(Object|Function)} [queryOrFn={}] - Selection query or filter
      * function.
      * @param {Function} [thisArg] - Context to which to bind `queryOrFn` if
@@ -1137,8 +1121,8 @@ var utils = Object.freeze({
      * const posts = query.get('draft', { index: 'status' }).skip(10).run()
      * ```
      *
-     * @memberof Query
-     * @instance
+     * @name Query#skip
+     * @method
      * @param {number} num - The number of entities to skip.
      * @return {Query} A reference to itself for chaining.
      */
@@ -1165,8 +1149,8 @@ var utils = Object.freeze({
      * const posts = query.get('draft', { index: 'status' }).limit(10).run()
      * ```
      *
-     * @memberof Query
-     * @instance
+     * @name Query#limit
+     * @method
      * @param {number} num - The maximum number of entities to keep in the result.
      * @return {Query} A reference to itself for chaining.
      */
@@ -1182,8 +1166,8 @@ var utils = Object.freeze({
     /**
      * Iterate over all entities.
      *
-     * @memberof Query
-     * @instance
+     * @name Query#forEach
+     * @method
      * @param {Function} forEachFn - Iteration function.
      * @param {*} [thisArg] - Context to which to bind `forEachFn`.
      * @return {Query} A reference to itself for chaining.
@@ -1196,8 +1180,8 @@ var utils = Object.freeze({
     /**
      * Apply a mapping function to the result data.
      *
-     * @memberof Query
-     * @instance
+     * @name Query#map
+     * @method
      * @param {Function} mapFn - Mapping function.
      * @param {*} [thisArg] - Context to which to bind `mapFn`.
      * @return {Query} A reference to itself for chaining.
@@ -1210,8 +1194,8 @@ var utils = Object.freeze({
     /**
      * Return the result of calling the specified function on each item in this
      * collection's main index.
-     * @memberof Query
-     * @instance
+     * @name Query#mapCall
+     * @method
      * @param {string} funcName - Name of function to call
      * @parama {...*} [args] - Remaining arguments to be passed to the function.
      * @return {Query} A reference to itself for chaining.
@@ -1230,8 +1214,8 @@ var utils = Object.freeze({
     /**
      * Complete the execution of the query and return the resulting data.
      *
-     * @memberof Query
-     * @instance
+     * @name Query#run
+     * @method
      * @return {Array} The result of executing this query.
      */
     run: function run() {
@@ -1714,37 +1698,13 @@ var utils = Object.freeze({
     });
   }
 
-  Collection.extend = extend;
-
   /**
    * TODO
    *
-   * @name Collection#on
-   * @instance
+   * @name Collection.extend
    * @method
-   * @param {string} event TODO.
-   * @param {Function} handler TODO
    */
-
-  /**
-  * TODO
-  *
-  * @name Collection#off
-  * @instance
-  * @method
-  * @param {string} [event] TODO.
-  * @param {Function} [handler] TODO
-  */
-
-  /**
-  * TODO
-  *
-  * @name Collection#emit
-  * @instance
-  * @method
-  * @param {string} event TODO.
-  * @param {...*} [arg] TODO
-  */
+  Collection.extend = extend;
 
   addHiddenPropsToTarget(Collection.prototype, {
     /**
@@ -2372,6 +2332,33 @@ var utils = Object.freeze({
     }
   });
 
+  /**
+   * TODO
+   *
+   * @name Collection#on
+   * @method
+   * @param {string} event TODO.
+   * @param {Function} handler TODO
+   */
+
+  /**
+  * TODO
+  *
+  * @name Collection#off
+  * @method
+  * @param {string} [event] TODO.
+  * @param {Function} [handler] TODO
+  */
+
+  /**
+  * TODO
+  *
+  * @name Collection#emit
+  * @method
+  * @param {string} event TODO.
+  * @param {...*} [arg] TODO
+  */
+
   eventify(Collection.prototype, function () {
     return this._listeners;
   }, function (value) {
@@ -2431,8 +2418,10 @@ var utils = Object.freeze({
   };
 
   /**
-   * @memberof! module:js-data
+   * TODO
    *
+   * @name module:js-data.belongsTo
+   * @method
    * @param {Mapper} related The relation the target belongs to.
    * @param {Object} opts Configuration options.
    * @param {string} opts.foreignKey The field that holds the primary key of the
@@ -2451,8 +2440,10 @@ var utils = Object.freeze({
   };
 
   /**
-   * @memberof! module:js-data
+   * TODO
    *
+   * @name module:js-data.hasMany
+   * @method
    * @param {Mapper} related The relation of which the target has many.
    * @param {Object} opts Configuration options.
    * @param {string} [opts.foreignKey] The field that holds the primary key of the
@@ -2471,8 +2462,10 @@ var utils = Object.freeze({
   };
 
   /**
-   * @memberof! module:js-data
+   * TODO
    *
+   * @name module:js-data.hasOne
+   * @method
    * @param {Mapper} related The relation of which the target has one.
    * @param {Object} opts Configuration options.
    * @param {string} [opts.foreignKey] The field that holds the primary key of the
@@ -2492,7 +2485,9 @@ var utils = Object.freeze({
 
   /**
    * Register an adapter with the target. Target must have a "getAdapters" method.
-   * @memberof! module:js-data
+   *
+   * @name module:js-data.registerAdapter
+   * @method
    * @param {string} name The name under which to register the adapter.
    * @param {Adapter} adapter The adapter to register.
    * @param {Object} opts Configuration options.
@@ -2515,9 +2510,12 @@ var utils = Object.freeze({
 
   /**
    * js-data's Record class.
-   * @class Record
    *
-   * @abstract
+   * ```javascript
+   * import {Record} from 'js-data'
+   * ```
+   *
+   * @class Record
    * @param {Object} [props] The initial properties of the new Record instance.
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.noValidate=false] Whether to skip validation on the
@@ -2553,9 +2551,23 @@ var utils = Object.freeze({
     self._set('previous', copy(props));
   }
 
+  /**
+   * TODO
+   *
+   * @name Record.extend
+   * @method
+   */
   Record.extend = extend;
 
   addHiddenPropsToTarget(Record.prototype, {
+    /**
+     * TODO
+     *
+     * @name Record#_mapper
+     * @method
+     * @ignore
+     */
+
     _mapper: function _mapper() {
       if (!this.constructor.Mapper) {
         throw new Error('This RecordClass has no Mapper!');
@@ -2566,6 +2578,8 @@ var utils = Object.freeze({
     /**
      * Return the value at the given path for this instance.
      *
+     * @name Record#get
+     * @method
      * @param {string} key - Path of value to retrieve.
      * @return {*} Value at path.
      */
@@ -2577,6 +2591,8 @@ var utils = Object.freeze({
      * Set the value for a given key, or the values for the given keys if "key" is
      * an object.
      *
+     * @name Record#set
+     * @method
      * @param {(string|Object)} key - Key to set or hash of key-value pairs to set.
      * @param {*} [value] - Value to set for the given key.
      * @param {Object} [opts] - Optional configuration.
@@ -2600,6 +2616,8 @@ var utils = Object.freeze({
     /**
      * Unset the value for a given key.
      *
+     * @name Record#unset
+     * @method
      * @param {string} key - Key to unset.
      * @param {Object} [opts] - Optional configuration.
      * @param {boolean} [opts.silent=false] - Whether to trigger change events.
@@ -2607,10 +2625,25 @@ var utils = Object.freeze({
     unset: function unset(key, opts) {
       this.set(key, undefined, opts);
     },
+
+    /**
+     * TODO
+     *
+     * @name Record#hashCode
+     * @method
+     */
     hashCode: function hashCode() {
       var self = this;
       return get(self, self._mapper().idAttribute);
     },
+
+    /**
+     * TODO
+     *
+     * @name Record#changes
+     * @method
+     * @param {string} [key] TODO
+     */
     changes: function changes(key) {
       var self = this;
       if (key) {
@@ -2618,9 +2651,23 @@ var utils = Object.freeze({
       }
       return self._get('changes');
     },
+
+    /**
+     * TODO
+     *
+     * @name Record#hasChanges
+     * @method
+     */
     hasChanges: function hasChanges() {
       return !!(this._get('changed') || []).length;
     },
+
+    /**
+     * TODO
+     *
+     * @name Record#commit
+     * @method
+     */
     commit: function commit() {
       var self = this;
       self._set('changed'); // unset
@@ -2628,6 +2675,14 @@ var utils = Object.freeze({
       self._set('previous', copy(self));
       return self;
     },
+
+    /**
+     * TODO
+     *
+     * @name Record#previous
+     * @method
+     * @param {string} [key] TODO
+     */
     previous: function previous(key) {
       var self = this;
       if (key) {
@@ -2635,6 +2690,14 @@ var utils = Object.freeze({
       }
       return self._get('previous');
     },
+
+    /**
+     * TODO
+     *
+     * @name Record#revert
+     * @method
+     * @param {Object} [opts] Configuration options.
+     */
     revert: function revert(opts) {
       var self = this;
       var previous = self._get('previous') || {};
@@ -2653,6 +2716,14 @@ var utils = Object.freeze({
       self.commit();
       return self;
     },
+
+    /**
+     * TODO
+     *
+     * @name Record#schema
+     * @method
+     * @param {string} [key] TODO
+     */
     schema: function schema(key) {
       var _schema = this._mapper().schema;
       return key ? _schema[key] : _schema;
@@ -2677,12 +2748,32 @@ var utils = Object.freeze({
     // },
 
     /**
-     * @param {Object} [opts] Configuration options. @see {@link Model.create}.
+     * TODO
+     *
+     * @name Record#create
+     * @method
+     * @param {Object} [opts] Configuration options. See {@link Mapper#create}.
      */
     create: function create(opts) {
       return this._mapper().create(this, opts);
     },
+
+    /**
+     * TODO
+     *
+     * @name Record#beforeSave
+     * @method
+     * @param {Object} opts TODO
+     */
     beforeSave: function beforeSave() {},
+
+    /**
+     * TODO
+     *
+     * @name Record#save
+     * @method
+     * @param {Object} [opts] Configuration options. See {@link Mapper#create}.
+     */
     save: function save(opts) {
       var op = undefined,
           adapter = undefined;
@@ -2719,8 +2810,34 @@ var utils = Object.freeze({
         });
       });
     },
+
+    /**
+     * TODO
+     *
+     * @name Record#afterSave
+     * @method
+     * @param {Object} opts TODO
+     */
     afterSave: function afterSave() {},
+
+    /**
+     * TODO
+     *
+     * @name Record#beforeLoadRelations
+     * @method
+     * @param {string[]} relations TODO
+     * @param {Object} opts TODO
+     */
     beforeLoadRelations: function beforeLoadRelations() {},
+
+    /**
+     * TODO
+     *
+     * @name Record#loadRelations
+     * @method
+     * @param {string[]} [relations] TODO
+     * @param {Object} [opts] TODO
+     */
     loadRelations: function loadRelations(relations, opts) {
       var op = undefined;
       var self = this;
@@ -2787,9 +2904,22 @@ var utils = Object.freeze({
         });
       });
     },
+
+    /**
+     * TODO
+     *
+     * @name Record#afterLoadRelations
+     * @method
+     * @param {string[]} relations TODO
+     * @param {Object} opts TODO
+     */
     afterLoadRelations: function afterLoadRelations() {},
 
     /**
+     * TODO
+     *
+     * @name Record#destroy
+     * @method
      * @param {Object} [opts] Configuration options. @see {@link Model.destroy}.
      */
     destroy: function destroy(opts) {
@@ -2806,6 +2936,28 @@ var utils = Object.freeze({
   });
 
   /**
+   * Register a new event listener on this Record.
+   *
+   * @name Record#on
+   * @method
+   */
+
+  /**
+   * Remove an event listener from this Record.
+   *
+   * @name Record#off
+   * @method
+   */
+
+  /**
+   * Trigger an event on this Record.
+   *
+   * @name Record#emit
+   * @method
+   * @param {string} event Name of event to emit.
+   */
+
+  /**
    * Allow records to emit events.
    *
    * An record's registered listeners are stored in the record's private data.
@@ -2816,6 +2968,42 @@ var utils = Object.freeze({
     this._set('events', value);
   });
 
+  /**
+   * js-data's Schema class.
+   *
+   * ```javascript
+   * import {Schema} from 'js-data'
+   * ```
+   *
+   * @class Schema
+   * @param {Object} definition Schema definition according to json-schema.org
+   */
+  function Schema(definition) {
+    // const self = this
+    definition || (definition = {});
+    // TODO: schema validation
+    fillIn(this, definition);
+
+    // TODO: rework this to make sure all possible keywords are converted
+    // if (definition.properties) {
+    //   forOwn(definition.properties, function (_definition, prop) {
+    //     definition.properties[prop] = new Schema(_definition)
+    //   })
+    // }
+  }
+
+  /**
+   * @name Schema.extend
+   * @method
+   */
+  Schema.extend = extend;
+
+  /**
+   * TODO
+   *
+   * @name Schema.types
+   * @type {Object}
+   */
   var types = {
     array: isArray,
     boolean: isBoolean,
@@ -2826,9 +3014,25 @@ var utils = Object.freeze({
     string: isString
   };
 
+  /**
+   * TODO
+   *
+   * @name Schema.typeGroupValidators
+   * @type {Object}
+   */
   var typeGroupValidators = {};
+
+  /**
+   * TODO
+   *
+   * @name Schema.validationKeywords
+   * @type {Object}
+   */
   var validationKeywords = {};
 
+  /**
+   * @ignore
+   */
   var segmentToString = function segmentToString(segment, prev) {
     var str = '';
     if (segment) {
@@ -2843,6 +3047,9 @@ var utils = Object.freeze({
     return str;
   };
 
+  /**
+   * @ignore
+   */
   var makePath = function makePath(opts) {
     opts || (opts = {});
     var path = '';
@@ -2854,6 +3061,9 @@ var utils = Object.freeze({
     return path;
   };
 
+  /**
+   * @ignore
+   */
   var makeError = function makeError(actual, expected, opts) {
     return {
       expected: expected,
@@ -2862,10 +3072,16 @@ var utils = Object.freeze({
     };
   };
 
+  /**
+   * @ignore
+   */
   var addError = function addError(actual, expected, opts, errors) {
     errors.push(makeError(actual, expected, opts));
   };
 
+  /**
+   * @ignore
+   */
   var maxLengthCommon = function maxLengthCommon(keyword, value, schema, opts) {
     var max = schema[keyword];
     if (value.length > max) {
@@ -2873,6 +3089,9 @@ var utils = Object.freeze({
     }
   };
 
+  /**
+   * @ignore
+   */
   var minLengthCommon = function minLengthCommon(keyword, value, schema, opts) {
     var min = schema[keyword];
     if (value.length < min) {
@@ -2880,10 +3099,16 @@ var utils = Object.freeze({
     }
   };
 
+  /**
+   * @ignore
+   */
   var validateKeyword = function validateKeyword(op, value, schema, opts) {
     return !isUndefined(schema[op]) && validationKeywords[op](value, schema, opts);
   };
 
+  /**
+   * @ignore
+   */
   var runOps = function runOps(ops, value, schema, opts) {
     var errors = [];
     ops.forEach(function (op) {
@@ -2900,18 +3125,20 @@ var utils = Object.freeze({
 
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor75
-   * @param {*} value
-   * @param {Object} [schema]
-   * @param {Object} [opts] Configuration options.
+   * @ignore
    */
   var validateAny = function validateAny(value, schema, opts) {
     return runOps(ANY_OPS, value, schema, opts);
   };
 
   /**
-   * @param {*} value
-   * @param {Object} [schema]
-   * @param {Object} [opts]
+   * TODO
+   *
+   * @name Schema.validate
+   * @method
+   * @param {*} value TODO
+   * @param {Object} [schema] TODO
+   * @param {Object} [opts] Configuration options.
    */
   var validate = function validate(value, schema, opts) {
     var errors = [];
@@ -2962,9 +3189,33 @@ var utils = Object.freeze({
     return errors.length ? errors : undefined;
   };
 
+  Schema.types = types;
+  Schema.typeGroupValidators = typeGroupValidators;
+  Schema.validationKeywords = validationKeywords;
+  Schema.validate = validate;
+
+  /**
+   * Validate the provided value against this schema.
+   *
+   * @name Schema#validate
+   * @method
+   * @param {*} value Value to validate.
+   * @param {Object} [opts] Configuration options.
+   * @return {(array|undefined)} Array of errors or `undefined` if valid.
+   */
+  Schema.prototype.validate = function (value, opts) {
+    return Schema.validate(value, this, opts);
+  };
+
   fillIn(validationKeywords, {
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor82
+     *
+     * @name Schema.validationKeywords.allOf
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
 
     allOf: function allOf(value, schema, opts) {
@@ -2977,6 +3228,12 @@ var utils = Object.freeze({
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor85
+     *
+     * @name Schema.validationKeywords.anyOf
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     anyOf: function anyOf(value, schema, opts) {
       var validated = false;
@@ -2994,6 +3251,12 @@ var utils = Object.freeze({
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor70
+     *
+     * @name Schema.validationKeywords.dependencies
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     dependencies: function dependencies(value, schema, opts) {
       // TODO
@@ -3001,6 +3264,12 @@ var utils = Object.freeze({
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor76
+     *
+     * @name Schema.validationKeywords.enum
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     enum: function _enum(value, schema, opts) {
       var possibleValues = schema['enum'];
@@ -3011,6 +3280,12 @@ var utils = Object.freeze({
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor37
+     *
+     * @name Schema.validationKeywords.items
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     items: function items(value, schema, opts) {
       opts || (opts = {});
@@ -3033,6 +3308,12 @@ var utils = Object.freeze({
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor17
+     *
+     * @name Schema.validationKeywords.maximum
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     maximum: function maximum(value, schema, opts) {
       // Must be a number
@@ -3049,6 +3330,12 @@ var utils = Object.freeze({
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor42
+     *
+     * @name Schema.validationKeywords.maxItems
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     maxItems: function maxItems(value, schema, opts) {
       return maxLengthCommon('maxItems', value, schema, opts);
@@ -3056,6 +3343,12 @@ var utils = Object.freeze({
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor26
+     *
+     * @name Schema.validationKeywords.maxLength
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     maxLength: function maxLength(value, schema, opts) {
       return maxLengthCommon('maxLength', value, schema, opts);
@@ -3063,6 +3356,12 @@ var utils = Object.freeze({
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor54
+     *
+     * @name Schema.validationKeywords.maxProperties
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     maxProperties: function maxProperties(value, schema, opts) {
       var maxProperties = schema.maxProperties;
@@ -3074,6 +3373,12 @@ var utils = Object.freeze({
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor21
+     *
+     * @name Schema.validationKeywords.minimum
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     minimum: function minimum(value, schema, opts) {
       // Must be a number
@@ -3090,6 +3395,12 @@ var utils = Object.freeze({
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor42
+     *
+     * @name Schema.validationKeywords.minItems
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     minItems: function minItems(value, schema, opts) {
       return minLengthCommon('minItems', value, schema, opts);
@@ -3097,6 +3408,12 @@ var utils = Object.freeze({
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor29
+     *
+     * @name Schema.validationKeywords.minLength
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     minLength: function minLength(value, schema, opts) {
       return minLengthCommon('minLength', value, schema, opts);
@@ -3104,6 +3421,12 @@ var utils = Object.freeze({
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor57
+     *
+     * @name Schema.validationKeywords.minProperties
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     minProperties: function minProperties(value, schema, opts) {
       var minProperties = schema.minProperties;
@@ -3115,6 +3438,12 @@ var utils = Object.freeze({
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor14
+     *
+     * @name Schema.validationKeywords.multipleOf
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     multipleOf: function multipleOf(value, schema, opts) {
       // TODO
@@ -3122,6 +3451,12 @@ var utils = Object.freeze({
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor91
+     *
+     * @name Schema.validationKeywords.not
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     not: function not(value, schema, opts) {
       if (!validate(value, schema.not, opts)) {
@@ -3132,6 +3467,12 @@ var utils = Object.freeze({
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor88
+     *
+     * @name Schema.validationKeywords.oneOf
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     oneOf: function oneOf(value, schema, opts) {
       var validated = false;
@@ -3153,6 +3494,12 @@ var utils = Object.freeze({
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor33
+     *
+     * @name Schema.validationKeywords.pattern
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     pattern: function pattern(value, schema, opts) {
       var pattern = schema.pattern;
@@ -3163,6 +3510,12 @@ var utils = Object.freeze({
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor64
+     *
+     * @name Schema.validationKeywords.properties
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     properties: function properties(value, schema, opts) {
       opts || (opts = {});
@@ -3222,6 +3575,12 @@ var utils = Object.freeze({
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor61
+     *
+     * @name Schema.validationKeywords.required
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     required: function required(value, schema, opts) {
       var required = schema.required;
@@ -3241,6 +3600,12 @@ var utils = Object.freeze({
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor79
+     *
+     * @name Schema.validationKeywords.type
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     type: function type(value, schema, opts) {
       var type = schema.type;
@@ -3272,6 +3637,12 @@ var utils = Object.freeze({
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor49
+     *
+     * @name Schema.validationKeywords.uniqueItems
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     uniqueItems: function uniqueItems(value, schema, opts) {
       if (value && value.length && schema.uniqueItems) {
@@ -3295,81 +3666,92 @@ var utils = Object.freeze({
   });
 
   fillIn(typeGroupValidators, {
+    /**
+     * TODO
+     *
+     * @name Schema.typeGroupValidators.array
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
     array: function array(value, schema, opts) {
       return runOps(ARRAY_OPS, value, schema, opts);
     },
 
+    /**
+     * TODO
+     *
+     * @name Schema.typeGroupValidators.integer
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
     integer: function integer(value, schema, opts) {
       // Additional validations for numerics are the same
       return typeGroupValidators.numeric(value, schema, opts);
     },
 
+    /**
+     * TODO
+     *
+     * @name Schema.typeGroupValidators.number
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
     number: function number(value, schema, opts) {
       // Additional validations for numerics are the same
       return typeGroupValidators.numeric(value, schema, opts);
     },
 
     /**
-     * See http://json-schema.org/latest/json-schema-validation.html#anchor13
-     * @param {*} value
-     * @param {Object} [schema]
-     * @param {Object} [opts] Configuration options.
+     * TODO
+     *
+     * See http://json-schema.org/latest/json-schema-validation.html#anchor13.
+     *
+     * @name Schema.typeGroupValidators.numeric
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     numeric: function numeric(value, schema, opts) {
       return runOps(NUMERIC_OPS, value, schema, opts);
     },
 
     /**
-     * See http://json-schema.org/latest/json-schema-validation.html#anchor53
-     * @param {*} value
-     * @param {Object} [schema]
-     * @param {Object} [opts] Configuration options.
+     * TODO
+     *
+     * See http://json-schema.org/latest/json-schema-validation.html#anchor53.
+     *
+     * @name Schema.typeGroupValidators.object
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     object: function object(value, schema, opts) {
       return runOps(OBJECT_OPS, value, schema, opts);
     },
 
     /**
-     * See http://json-schema.org/latest/json-schema-validation.html#anchor25
-     * @param {*} value
-     * @param {Object} [schema]
-     * @param {Object} [opts] Configuration options.
+     * TODO
+     *
+     * See http://json-schema.org/latest/json-schema-validation.html#anchor25.
+     *
+     * @name Schema.typeGroupValidators.string
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
      */
     string: function string(value, schema, opts) {
       return runOps(STRING_OPS, value, schema, opts);
     }
   });
-
-  /**
-   * js-data's Schema class.
-   * @class Schema
-   *
-   * @param {Object} definition Schema definition according to json-schema.org
-   */
-  function Schema(definition) {
-    // const self = this
-    definition || (definition = {});
-    // TODO: schema validation
-    fillIn(this, definition);
-
-    // TODO: rework this to make sure all possible keywords are converted
-    // if (definition.properties) {
-    //   forOwn(definition.properties, function (_definition, prop) {
-    //     definition.properties[prop] = new Schema(_definition)
-    //   })
-    // }
-  }
-
-  /**
-   * Validate the provided value against this schema.
-   *
-   * @param {*} value Value to validate.
-   * @param {Object} [opts] Configuration options.
-   * @return {(array|undefined)} Array of errors or `undefined` if valid.
-   */
-  Schema.prototype.validate = function (value, opts) {
-    return validate(value, this, opts);
-  };
 
   var resolve = resolve$1;
 
@@ -3530,6 +3912,10 @@ var utils = Object.freeze({
   /**
    * js-data's Mapper class.
    *
+   * ```javascript
+   * import {Mapper} from 'js-data'
+   * ```
+   *
    * @class Mapper
    * @param {Object} [opts] Configuration options.
    */
@@ -3560,6 +3946,8 @@ var utils = Object.freeze({
    */
   addHiddenPropsToTarget(Mapper.prototype, {
     /**
+     * TODO
+     *
      * @name Mapper#end
      * @method
      */
@@ -4667,6 +5055,10 @@ var utils = Object.freeze({
   /**
    * TODO
    *
+   * ```javascript
+   * import {Container} from 'js-data'
+   * ```
+   *
    * @class Container
    * @param {Object} [opts] Configuration options.
    * @return {Container}
@@ -4685,6 +5077,12 @@ var utils = Object.freeze({
     self.MapperClass = self.MapperClass || Mapper;
   }
 
+  /**
+   * TODO
+   *
+   * @name Container.extend
+   * @method
+   */
   Container.extend = extend;
 
   addHiddenPropsToTarget(Container.prototype, {
@@ -4800,6 +5198,10 @@ var utils = Object.freeze({
 
   /**
    * TODO
+   *
+   * ```javascript
+   * import {LinkedCollection} from 'js-data'
+   * ```
    *
    * @class LinkedCollection
    * @extends Collection
@@ -4937,6 +5339,12 @@ var utils = Object.freeze({
     }
   });
 
+  /**
+   * TODO
+   *
+   * @name LinkedCollection.extend
+   * @method
+   */
   LinkedCollection.extend = extend;
 
   var DATASTORE_DEFAULTS = {
@@ -4945,6 +5353,10 @@ var utils = Object.freeze({
 
   /**
    * TODO
+   *
+   * ```javascript
+   * import {DataStore} from 'js-data'
+   * ```
    *
    * See {@link Container}.
    *
@@ -5223,6 +5635,13 @@ var utils = Object.freeze({
   });
 
   DataStore.prototype.defineResource = DataStore.prototype.defineMapper;
+
+  /**
+   * TODO
+   *
+   * @name DataStore.extend
+   * @method
+   */
   DataStore.extend = extend;
 
   /**
@@ -5245,35 +5664,23 @@ var utils = Object.freeze({
    * ```
    *
    * @module js-data
-   * @property {Function} belongsTo {@link module:js-data.exports.belongsTo belongsTo}
-   * decorator function.
-   * @property {Function} Collection {@link Collection} class.
-   * @property {Function} DS {@link DS} class.
-   * @property {Function} hasMany {@link module:js-data.exports.hasMany hasMany}
-   * decorator function.
-   * @property {Function} hasOne {@link module:js-data.exports.hasOne hasOne}
-   * decorator function.
-   * @property {Function} initialize {@link module:js-data.exports.initialize initialize}
-   * decorator function.
-   * @property {Function} Mapper {@link Mapper} class.
-   * @property {Function} registerAdapter {@link registerAdapter} decorator
-   * function.
-   * @property {Function} setSchema {@link setSchema} decorator function.
-   * @property {Function} Query {@link Query} class.
-   * @property {Object} utils Utility methods used by the `js-data` module. See
-   * {@link module:js-data.module:utils utils}.
-   * @property {Object} version Details of the current version of the `js-data`
-   * module.
-   * @property {string} version.full The full semver value.
-   * @property {number} version.major The major version number.
-   * @property {number} version.minor The minor version number.
-   * @property {number} version.patch The patch version number.
-   * @property {(string|boolean)} version.alpha The alpha version value,
-   * otherwise `false` if the current version is not alpha.
-   * @property {(string|boolean)} version.beta The beta version value,
-   * otherwise `false` if the current version is not beta.
    */
 
+  /**
+   * Details of the current version of the `js-data` module.
+   *
+   * @name version
+   * @memberof module:js-data
+   * @type {Object}
+   * @property {string} full The full semver value.
+   * @property {number} major The major version number.
+   * @property {number} minor The minor version number.
+   * @property {number} patch The patch version number.
+   * @property {(string|boolean)} alpha The alpha version value, otherwise `false`
+   * if the current version is not alpha.
+   * @property {(string|boolean)} beta The beta version value, otherwise `false`
+   * if the current version is not beta.
+   */
   var version = {
     full: '3.0.0-alpha.11',
     major: parseInt('3', 10),
@@ -5293,21 +5700,16 @@ var utils = Object.freeze({
   exports.Mapper = Mapper;
   exports.Query = Query;
   exports.Record = Record;
+  exports.Schema = Schema;
   exports.utils = utils;
   exports.version = version;
   exports.belongsToType = belongsToType;
   exports.hasManyType = hasManyType;
   exports.hasOneType = hasOneType;
-  exports.relatedTo = relatedTo;
   exports.belongsTo = belongsTo;
   exports.hasMany = hasMany;
   exports.hasOne = hasOne;
   exports.registerAdapter = registerAdapter;
-  exports.types = types;
-  exports.typeGroupValidators = typeGroupValidators;
-  exports.validationKeywords = validationKeywords;
-  exports.validate = validate;
-  exports.Schema = Schema;
 
 }));
 //# sourceMappingURL=js-data.js.map

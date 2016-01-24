@@ -18,9 +18,12 @@ import {
 
 /**
  * js-data's Record class.
- * @class Record
  *
- * @abstract
+ * ```javascript
+ * import {Record} from 'js-data'
+ * ```
+ *
+ * @class Record
  * @param {Object} [props] The initial properties of the new Record instance.
  * @param {Object} [opts] Configuration options.
  * @param {boolean} [opts.noValidate=false] Whether to skip validation on the
@@ -56,9 +59,22 @@ export default function Record (props, opts) {
   self._set('previous', copy(props))
 }
 
+/**
+ * TODO
+ *
+ * @name Record.extend
+ * @method
+ */
 Record.extend = extend
 
 addHiddenPropsToTarget(Record.prototype, {
+  /**
+   * TODO
+   *
+   * @name Record#_mapper
+   * @method
+   * @ignore
+   */
   _mapper () {
     if (!this.constructor.Mapper) {
       throw new Error('This RecordClass has no Mapper!')
@@ -69,6 +85,8 @@ addHiddenPropsToTarget(Record.prototype, {
   /**
    * Return the value at the given path for this instance.
    *
+   * @name Record#get
+   * @method
    * @param {string} key - Path of value to retrieve.
    * @return {*} Value at path.
    */
@@ -80,6 +98,8 @@ addHiddenPropsToTarget(Record.prototype, {
    * Set the value for a given key, or the values for the given keys if "key" is
    * an object.
    *
+   * @name Record#set
+   * @method
    * @param {(string|Object)} key - Key to set or hash of key-value pairs to set.
    * @param {*} [value] - Value to set for the given key.
    * @param {Object} [opts] - Optional configuration.
@@ -103,6 +123,8 @@ addHiddenPropsToTarget(Record.prototype, {
   /**
    * Unset the value for a given key.
    *
+   * @name Record#unset
+   * @method
    * @param {string} key - Key to unset.
    * @param {Object} [opts] - Optional configuration.
    * @param {boolean} [opts.silent=false] - Whether to trigger change events.
@@ -111,11 +133,24 @@ addHiddenPropsToTarget(Record.prototype, {
     this.set(key, undefined, opts)
   },
 
+  /**
+   * TODO
+   *
+   * @name Record#hashCode
+   * @method
+   */
   hashCode () {
     const self = this
     return get(self, self._mapper().idAttribute)
   },
 
+  /**
+   * TODO
+   *
+   * @name Record#changes
+   * @method
+   * @param {string} [key] TODO
+   */
   changes (key) {
     const self = this
     if (key) {
@@ -124,10 +159,22 @@ addHiddenPropsToTarget(Record.prototype, {
     return self._get('changes')
   },
 
+  /**
+   * TODO
+   *
+   * @name Record#hasChanges
+   * @method
+   */
   hasChanges () {
     return !!(this._get('changed') || []).length
   },
 
+  /**
+   * TODO
+   *
+   * @name Record#commit
+   * @method
+   */
   commit () {
     const self = this
     self._set('changed') // unset
@@ -136,6 +183,13 @@ addHiddenPropsToTarget(Record.prototype, {
     return self
   },
 
+  /**
+   * TODO
+   *
+   * @name Record#previous
+   * @method
+   * @param {string} [key] TODO
+   */
   previous (key) {
     const self = this
     if (key) {
@@ -144,6 +198,13 @@ addHiddenPropsToTarget(Record.prototype, {
     return self._get('previous')
   },
 
+  /**
+   * TODO
+   *
+   * @name Record#revert
+   * @method
+   * @param {Object} [opts] Configuration options.
+   */
   revert (opts) {
     const self = this
     const previous = self._get('previous') || {}
@@ -163,6 +224,13 @@ addHiddenPropsToTarget(Record.prototype, {
     return self
   },
 
+  /**
+   * TODO
+   *
+   * @name Record#schema
+   * @method
+   * @param {string} [key] TODO
+   */
   schema (key) {
     let _schema = this._mapper().schema
     return key ? _schema[key] : _schema
@@ -187,13 +255,32 @@ addHiddenPropsToTarget(Record.prototype, {
   // },
 
   /**
-   * @param {Object} [opts] Configuration options. @see {@link Model.create}.
+   * TODO
+   *
+   * @name Record#create
+   * @method
+   * @param {Object} [opts] Configuration options. See {@link Mapper#create}.
    */
   create (opts) {
     return this._mapper().create(this, opts)
   },
 
+  /**
+   * TODO
+   *
+   * @name Record#beforeSave
+   * @method
+   * @param {Object} opts TODO
+   */
   beforeSave () {},
+
+  /**
+   * TODO
+   *
+   * @name Record#save
+   * @method
+   * @param {Object} [opts] Configuration options. See {@link Mapper#create}.
+   */
   save (opts) {
     let op, adapter
     const self = this
@@ -229,9 +316,34 @@ addHiddenPropsToTarget(Record.prototype, {
       })
     })
   },
+
+  /**
+   * TODO
+   *
+   * @name Record#afterSave
+   * @method
+   * @param {Object} opts TODO
+   */
   afterSave () {},
 
+  /**
+   * TODO
+   *
+   * @name Record#beforeLoadRelations
+   * @method
+   * @param {string[]} relations TODO
+   * @param {Object} opts TODO
+   */
   beforeLoadRelations () {},
+
+  /**
+   * TODO
+   *
+   * @name Record#loadRelations
+   * @method
+   * @param {string[]} [relations] TODO
+   * @param {Object} [opts] TODO
+   */
   loadRelations (relations, opts) {
     let op
     const self = this
@@ -304,9 +416,22 @@ addHiddenPropsToTarget(Record.prototype, {
       })
     })
   },
+
+  /**
+   * TODO
+   *
+   * @name Record#afterLoadRelations
+   * @method
+   * @param {string[]} relations TODO
+   * @param {Object} opts TODO
+   */
   afterLoadRelations () {},
 
   /**
+   * TODO
+   *
+   * @name Record#destroy
+   * @method
    * @param {Object} [opts] Configuration options. @see {@link Model.destroy}.
    */
   destroy (opts) {
@@ -321,6 +446,28 @@ addHiddenPropsToTarget(Record.prototype, {
     return this._mapper().toJSON(this, opts)
   }
 })
+
+/**
+ * Register a new event listener on this Record.
+ *
+ * @name Record#on
+ * @method
+ */
+
+/**
+ * Remove an event listener from this Record.
+ *
+ * @name Record#off
+ * @method
+ */
+
+/**
+ * Trigger an event on this Record.
+ *
+ * @name Record#emit
+ * @method
+ * @param {string} event Name of event to emit.
+ */
 
 /**
  * Allow records to emit events.

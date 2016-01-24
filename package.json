@@ -43,7 +43,7 @@
   "scripts": {
     "rollup": "rollup -c",
     "rollup-tests": "rollup -c rollup-tests.config.js",
-    "doc": "jsdoc -c conf.json src",
+    "doc": "jsdoc -c conf.json src && node scripts/cleanup.js",
     "lint": "standard src/**/*.js test/**/*.js",
     "helpers": "node scripts/helpers.js",
     "min": "uglifyjs dist/js-data.js -o dist/js-data.min.js --source-map dist/js-data.min.map -v -m -c --screw-ie8",

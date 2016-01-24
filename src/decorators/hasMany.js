@@ -120,6 +120,7 @@ function applyHasMany (Mapper, Relation, opts) {
 /**
  * @memberof! module:js-data
  *
+ * @ignore
  * @param {Mapper} Relation - The relation of which the target has many.
  * @param {Object} opts - Configuration options.
  * @param {string} opts.localField The field on the target where the relation

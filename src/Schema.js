@@ -1,5 +1,6 @@
 import {
   copy,
+  extend,
   fillIn,
   forOwn,
   get,
@@ -14,7 +15,43 @@ import {
   isUndefined
 } from './utils'
 
-export const types = {
+/**
+ * js-data's Schema class.
+ *
+ * ```javascript
+ * import {Schema} from 'js-data'
+ * ```
+ *
+ * @class Schema
+ * @param {Object} definition Schema definition according to json-schema.org
+ */
+export default function Schema (definition) {
+  // const self = this
+  definition || (definition = {})
+  // TODO: schema validation
+  fillIn(this, definition)
+
+  // TODO: rework this to make sure all possible keywords are converted
+  // if (definition.properties) {
+  //   forOwn(definition.properties, function (_definition, prop) {
+  //     definition.properties[prop] = new Schema(_definition)
+  //   })
+  // }
+}
+
+/**
+ * @name Schema.extend
+ * @method
+ */
+Schema.extend = extend
+
+/**
+ * TODO
+ *
+ * @name Schema.types
+ * @type {Object}
+ */
+const types = {
   array: isArray,
   boolean: isBoolean,
   integer: isInteger,
@@ -24,9 +61,25 @@ export const types = {
   string: isString
 }
 
-export const typeGroupValidators = {}
-export const validationKeywords = {}
+/**
+ * TODO
+ *
+ * @name Schema.typeGroupValidators
+ * @type {Object}
+ */
+const typeGroupValidators = {}
 
+/**
+ * TODO
+ *
+ * @name Schema.validationKeywords
+ * @type {Object}
+ */
+const validationKeywords = {}
+
+/**
+ * @ignore
+ */
 const segmentToString = function (segment, prev) {
   let str = ''
   if (segment) {
@@ -41,6 +94,9 @@ const segmentToString = function (segment, prev) {
   return str
 }
 
+/**
+ * @ignore
+ */
 const makePath = function (opts) {
   opts || (opts = {})
   let path = ''
@@ -52,6 +108,9 @@ const makePath = function (opts) {
   return path
 }
 
+/**
+ * @ignore
+ */
 const makeError = function (actual, expected, opts) {
   return {
     expected,
@@ -60,10 +119,16 @@ const makeError = function (actual, expected, opts) {
   }
 }
 
+/**
+ * @ignore
+ */
 const addError = function (actual, expected, opts, errors) {
   errors.push(makeError(actual, expected, opts))
 }
 
+/**
+ * @ignore
+ */
 const maxLengthCommon = function (keyword, value, schema, opts) {
   const max = schema[keyword]
   if (value.length > max) {
@@ -71,6 +136,9 @@ const maxLengthCommon = function (keyword, value, schema, opts) {
   }
 }
 
+/**
+ * @ignore
+ */
 const minLengthCommon = function (keyword, value, schema, opts) {
   const min = schema[keyword]
   if (value.length < min) {
@@ -78,10 +146,16 @@ const minLengthCommon = function (keyword, value, schema, opts) {
   }
 }
 
+/**
+ * @ignore
+ */
 const validateKeyword = function (op, value, schema, opts) {
   return !isUndefined(schema[op]) && validationKeywords[op](value, schema, opts)
 }
 
+/**
+ * @ignore
+ */
 const runOps = function (ops, value, schema, opts) {
   let errors = []
   ops.forEach(function (op) {
@@ -98,18 +172,20 @@ const STRING_OPS = ['maxLength', 'minLength', 'pattern']
 
 /**
  * http://json-schema.org/latest/json-schema-validation.html#anchor75
- * @param {*} value
- * @param {Object} [schema]
- * @param {Object} [opts] Configuration options.
+ * @ignore
  */
 const validateAny = function (value, schema, opts) {
   return runOps(ANY_OPS, value, schema, opts)
 }
 
 /**
- * @param {*} value
- * @param {Object} [schema]
- * @param {Object} [opts]
+ * TODO
+ *
+ * @name Schema.validate
+ * @method
+ * @param {*} value TODO
+ * @param {Object} [schema] TODO
+ * @param {Object} [opts] Configuration options.
  */
 export const validate = function (value, schema, opts) {
   let errors = []
@@ -160,9 +236,33 @@ export const validate = function (value, schema, opts) {
   return errors.length ? errors : undefined
 }
 
+Schema.types = types
+Schema.typeGroupValidators = typeGroupValidators
+Schema.validationKeywords = validationKeywords
+Schema.validate = validate
+
+/**
+ * Validate the provided value against this schema.
+ *
+ * @name Schema#validate
+ * @method
+ * @param {*} value Value to validate.
+ * @param {Object} [opts] Configuration options.
+ * @return {(array|undefined)} Array of errors or `undefined` if valid.
+ */
+Schema.prototype.validate = function (value, opts) {
+  return Schema.validate(value, this, opts)
+}
+
 fillIn(validationKeywords, {
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor82
+   *
+   * @name Schema.validationKeywords.allOf
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   allOf (value, schema, opts) {
     let allErrors = []
@@ -174,6 +274,12 @@ fillIn(validationKeywords, {
 
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor85
+   *
+   * @name Schema.validationKeywords.anyOf
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   anyOf (value, schema, opts) {
     let validated = false
@@ -191,6 +297,12 @@ fillIn(validationKeywords, {
 
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor70
+   *
+   * @name Schema.validationKeywords.dependencies
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   dependencies (value, schema, opts) {
     // TODO
@@ -198,6 +310,12 @@ fillIn(validationKeywords, {
 
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor76
+   *
+   * @name Schema.validationKeywords.enum
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   enum (value, schema, opts) {
     const possibleValues = schema['enum']
@@ -208,6 +326,12 @@ fillIn(validationKeywords, {
 
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor37
+   *
+   * @name Schema.validationKeywords.items
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   items (value, schema, opts) {
     opts || (opts = {})
@@ -230,6 +354,12 @@ fillIn(validationKeywords, {
 
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor17
+   *
+   * @name Schema.validationKeywords.maximum
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   maximum (value, schema, opts) {
     // Must be a number
@@ -246,6 +376,12 @@ fillIn(validationKeywords, {
 
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor42
+   *
+   * @name Schema.validationKeywords.maxItems
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   maxItems (value, schema, opts) {
     return maxLengthCommon('maxItems', value, schema, opts)
@@ -253,6 +389,12 @@ fillIn(validationKeywords, {
 
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor26
+   *
+   * @name Schema.validationKeywords.maxLength
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   maxLength (value, schema, opts) {
     return maxLengthCommon('maxLength', value, schema, opts)
@@ -260,6 +402,12 @@ fillIn(validationKeywords, {
 
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor54
+   *
+   * @name Schema.validationKeywords.maxProperties
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   maxProperties (value, schema, opts) {
     const maxProperties = schema.maxProperties
@@ -271,6 +419,12 @@ fillIn(validationKeywords, {
 
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor21
+   *
+   * @name Schema.validationKeywords.minimum
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   minimum (value, schema, opts) {
     // Must be a number
@@ -287,6 +441,12 @@ fillIn(validationKeywords, {
 
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor42
+   *
+   * @name Schema.validationKeywords.minItems
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   minItems (value, schema, opts) {
     return minLengthCommon('minItems', value, schema, opts)
@@ -294,6 +454,12 @@ fillIn(validationKeywords, {
 
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor29
+   *
+   * @name Schema.validationKeywords.minLength
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   minLength (value, schema, opts) {
     return minLengthCommon('minLength', value, schema, opts)
@@ -301,6 +467,12 @@ fillIn(validationKeywords, {
 
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor57
+   *
+   * @name Schema.validationKeywords.minProperties
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   minProperties (value, schema, opts) {
     const minProperties = schema.minProperties
@@ -312,6 +484,12 @@ fillIn(validationKeywords, {
 
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor14
+   *
+   * @name Schema.validationKeywords.multipleOf
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   multipleOf (value, schema, opts) {
     // TODO
@@ -319,6 +497,12 @@ fillIn(validationKeywords, {
 
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor91
+   *
+   * @name Schema.validationKeywords.not
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   not (value, schema, opts) {
     if (!validate(value, schema.not, opts)) {
@@ -329,6 +513,12 @@ fillIn(validationKeywords, {
 
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor88
+   *
+   * @name Schema.validationKeywords.oneOf
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   oneOf (value, schema, opts) {
     let validated = false
@@ -350,6 +540,12 @@ fillIn(validationKeywords, {
 
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor33
+   *
+   * @name Schema.validationKeywords.pattern
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   pattern (value, schema, opts) {
     const pattern = schema.pattern
@@ -360,6 +556,12 @@ fillIn(validationKeywords, {
 
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor64
+   *
+   * @name Schema.validationKeywords.properties
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   properties (value, schema, opts) {
     opts || (opts = {})
@@ -419,6 +621,12 @@ fillIn(validationKeywords, {
 
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor61
+   *
+   * @name Schema.validationKeywords.required
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   required (value, schema, opts) {
     const required = schema.required
@@ -438,6 +646,12 @@ fillIn(validationKeywords, {
 
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor79
+   *
+   * @name Schema.validationKeywords.type
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   type (value, schema, opts) {
     let type = schema.type
@@ -469,6 +683,12 @@ fillIn(validationKeywords, {
 
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor49
+   *
+   * @name Schema.validationKeywords.uniqueItems
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   uniqueItems (value, schema, opts) {
     if (value && value.length && schema.uniqueItems) {
@@ -490,78 +710,89 @@ fillIn(validationKeywords, {
 })
 
 fillIn(typeGroupValidators, {
+  /**
+   * TODO
+   *
+   * @name Schema.typeGroupValidators.array
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
+   */
   array: function (value, schema, opts) {
     return runOps(ARRAY_OPS, value, schema, opts)
   },
 
+  /**
+   * TODO
+   *
+   * @name Schema.typeGroupValidators.integer
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
+   */
   integer: function (value, schema, opts) {
     // Additional validations for numerics are the same
     return typeGroupValidators.numeric(value, schema, opts)
   },
 
+  /**
+   * TODO
+   *
+   * @name Schema.typeGroupValidators.number
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
+   */
   number: function (value, schema, opts) {
     // Additional validations for numerics are the same
     return typeGroupValidators.numeric(value, schema, opts)
   },
 
   /**
-   * See http://json-schema.org/latest/json-schema-validation.html#anchor13
-   * @param {*} value
-   * @param {Object} [schema]
-   * @param {Object} [opts] Configuration options.
+   * TODO
+   *
+   * See http://json-schema.org/latest/json-schema-validation.html#anchor13.
+   *
+   * @name Schema.typeGroupValidators.numeric
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   numeric: function (value, schema, opts) {
     return runOps(NUMERIC_OPS, value, schema, opts)
   },
 
   /**
-   * See http://json-schema.org/latest/json-schema-validation.html#anchor53
-   * @param {*} value
-   * @param {Object} [schema]
-   * @param {Object} [opts] Configuration options.
+   * TODO
+   *
+   * See http://json-schema.org/latest/json-schema-validation.html#anchor53.
+   *
+   * @name Schema.typeGroupValidators.object
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   object: function (value, schema, opts) {
     return runOps(OBJECT_OPS, value, schema, opts)
   },
 
   /**
-   * See http://json-schema.org/latest/json-schema-validation.html#anchor25
-   * @param {*} value
-   * @param {Object} [schema]
-   * @param {Object} [opts] Configuration options.
+   * TODO
+   *
+   * See http://json-schema.org/latest/json-schema-validation.html#anchor25.
+   *
+   * @name Schema.typeGroupValidators.string
+   * @method
+   * @param {*} value TODO
+   * @param {Object} schema TODO
+   * @param {Object} opts TODO
    */
   string: function (value, schema, opts) {
     return runOps(STRING_OPS, value, schema, opts)
   }
 })
-
-/**
- * js-data's Schema class.
- * @class Schema
- *
- * @param {Object} definition Schema definition according to json-schema.org
- */
-export function Schema (definition) {
-  // const self = this
-  definition || (definition = {})
-  // TODO: schema validation
-  fillIn(this, definition)
-
-  // TODO: rework this to make sure all possible keywords are converted
-  // if (definition.properties) {
-  //   forOwn(definition.properties, function (_definition, prop) {
-  //     definition.properties[prop] = new Schema(_definition)
-  //   })
-  // }
-}
-
-/**
- * Validate the provided value against this schema.
- *
- * @param {*} value Value to validate.
- * @param {Object} [opts] Configuration options.
- * @return {(array|undefined)} Array of errors or `undefined` if valid.
- */
-Schema.prototype.validate = function (value, opts) {
-  return validate(value, this, opts)
-}

@@ -3,14 +3,14 @@ export function init () {
     it('executes correct validation keywords', function () {
       const Test = this
       const forOwn = Test.JSData.utils.forOwn
-      const validationKeywords = Test.JSData.validationKeywords
+      const validationKeywords = Test.JSData.Schema.validationKeywords
       const TARGET_KEYWORDS = ['items', 'maxItems', 'minItems', 'uniqueItems']
 
       forOwn(validationKeywords, function (func, key) {
         Test.sinon.spy(validationKeywords, key)
       })
 
-      const array = Test.JSData.typeGroupValidators.array
+      const array = Test.JSData.Schema.typeGroupValidators.array
 
       forOwn(validationKeywords, function (func, key) {
         Test.assert.equal(func.callCount, 0, `${key} should not have been called yet`)

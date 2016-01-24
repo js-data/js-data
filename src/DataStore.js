@@ -15,6 +15,10 @@ const DATASTORE_DEFAULTS = {
 /**
  * TODO
  *
+ * ```javascript
+ * import {DataStore} from 'js-data'
+ * ```
+ *
  * See {@link Container}.
  *
  * @class DataStore
@@ -293,6 +297,13 @@ const DataStore = Container.extend({
 })
 
 DataStore.prototype.defineResource = DataStore.prototype.defineMapper
+
+/**
+ * TODO
+ *
+ * @name DataStore.extend
+ * @method
+ */
 DataStore.extend = extend
 
 export {

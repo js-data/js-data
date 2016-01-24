@@ -167,37 +167,13 @@ export default function Collection (records, opts) {
   })
 }
 
-Collection.extend = extend
-
 /**
  * TODO
  *
- * @name Collection#on
- * @instance
+ * @name Collection.extend
  * @method
- * @param {string} event TODO.
- * @param {Function} handler TODO
  */
-
- /**
- * TODO
- *
- * @name Collection#off
- * @instance
- * @method
- * @param {string} [event] TODO.
- * @param {Function} [handler] TODO
- */
-
- /**
- * TODO
- *
- * @name Collection#emit
- * @instance
- * @method
- * @param {string} event TODO.
- * @param {...*} [arg] TODO
- */
+Collection.extend = extend
 
 addHiddenPropsToTarget(Collection.prototype, {
   /**
@@ -817,6 +793,33 @@ addHiddenPropsToTarget(Collection.prototype, {
     })
   }
 })
+
+/**
+ * TODO
+ *
+ * @name Collection#on
+ * @method
+ * @param {string} event TODO.
+ * @param {Function} handler TODO
+ */
+
+ /**
+ * TODO
+ *
+ * @name Collection#off
+ * @method
+ * @param {string} [event] TODO.
+ * @param {Function} [handler] TODO
+ */
+
+ /**
+ * TODO
+ *
+ * @name Collection#emit
+ * @method
+ * @param {string} event TODO.
+ * @param {...*} [arg] TODO
+ */
 
 eventify(
   Collection.prototype,
