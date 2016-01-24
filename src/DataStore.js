@@ -13,13 +13,38 @@ const DATASTORE_DEFAULTS = {
 }
 
 /**
- * TODO
+ * The `DataStore` class is an extension of {@link Container}. Not only does
+ * `DataStore` manage mappers, but also collections. `DataStore` implements the
+ * asynchronous {@link Mapper} methods, such as {@link Mapper#find} and
+ * {@link Mapper#create}. If you use the asynchronous `DataStore` methods
+ * instead of calling them directly on the mappers, then the results of the
+ * method calls will be inserted into the store's collections. You can think of
+ * a `DataStore` as an [Identity Map](https://en.wikipedia.org/wiki/Identity_map_pattern)
+ * for the [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping)
+ * (the Mappers).
  *
  * ```javascript
  * import {DataStore} from 'js-data'
  * ```
  *
- * See {@link Container}.
+ * @example
+ * import {DataStore} from 'js-data'
+ * import HttpAdapter from 'js-data-http'
+ * const store = new DataStore()
+ * const UserMapper = store.defineMapper('user')
+ *
+ * // Call "find" on "UserMapper" (Stateless ORM)
+ * UserMapper.find(1).then(function (user) {
+ *   // retrieved a "user" record via the http adapter, but that's it
+ *
+ *   // Call "find" on "store" for the "user" mapper (Stateful DataStore)
+ *   return store.find('user', 1)
+ * }).then(function (user) {
+ *   // not only was a "user" record retrieved, but it was added to the
+ *   // store's "user" collection
+ *   const cachedUser = store.getCollection('user').get(1)
+ *   user === cachedUser // true
+ * })
  *
  * @class DataStore
  * @extends Container

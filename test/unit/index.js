@@ -23,7 +23,6 @@ export function init () {
       Test.assert.isFunction(Test.JSData.Mapper, 'has the Mapper class')
       Test.assert.isFunction(Test.JSData.Query, 'has the Query class')
       Test.assert.isFunction(Test.JSData.Record, 'has the Record class')
-      Test.assert.isFunction(Test.JSData.registerAdapter, 'has the registerAdapter class')
       Test.assert.isFunction(Test.JSData.Schema, 'has the Schema class')
       Test.assert.isObject(Test.JSData.version, 'has a version')
     })

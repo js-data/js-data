@@ -14,9 +14,10 @@
   "templates": {
     "theme": "lumen",
     "systemName": "js-data",
-    "copyright": "js-data Copyright © 2014-2016 Jason Dobry"
-  },
-  "source": {
-    "excludePattern": "(sync_methods|old_utils)"
+    "copyright": "js-data Copyright © 2014-2016 Jason Dobry",
+    "outputSourceFiles": true,
+    "syntaxTheme": "dark",
+    "linenums": true,
+    "footer": "<div style=\"text-align:center\">Back to <a href=\"http://js-data.io\">js-data.io</a></div>"
   }
 }

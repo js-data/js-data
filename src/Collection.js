@@ -34,7 +34,7 @@ const COLLECTION_DEFAULTS = {
    * the collection will use the {@link Mapper#idAttribute} setting, and will
    * wrap records in {@link Mapper#RecordClass}.
    *
-   * ```javascript
+   * @example
    * import {Collection, Mapper} from 'js-data'
    *
    * class MyMapperClass extends Mapper {
@@ -42,7 +42,6 @@ const COLLECTION_DEFAULTS = {
    * }
    * const myMapper = new MyMapperClass()
    * const collection = new Collection(null, { mapper: myMapper })
-   * ```
    *
    * @name Collection#mapper
    * @type {Mapper}
@@ -87,24 +86,27 @@ const COLLECTION_DEFAULTS = {
 }
 
 /**
- * An ordered set of records.
- *
  * ```javascript
+ * import {Collection} from 'js-data'
+ * ```
+ *
+ * An ordered set of {@link Record} instances.
+ *
+ * @example
  * import {Collection, Record} from 'js-data'
  * const user1 = new Record({ id: 1 })
  * const user2 = new Record({ id: 2 })
  * const UserCollection = new Collection([user1, user2])
  * UserCollection.get(1) === user1 // true
- * ```
  *
  * @class Collection
  * @param {Array} [records] Initial set of records to insert into the
  * collection.
  * @param {Object} [opts] Configuration options.
- * @param {string} [opts.idAttribute] TODO
- * @param {string} [opts.onConflict=merge] TODO
- * @param {string} [opts.mapper] TODO
- * @param {Object} [opts.recordOpts=null] TODO
+ * @param {string} [opts.idAttribute] See {@link Collection#idAttribute}.
+ * @param {string} [opts.onConflict="merge"] See {@link Collection#onConflict}.
+ * @param {string} [opts.mapper] See {@link Collection#mapper}.
+ * @param {Object} [opts.recordOpts=null] See {@link Collection#recordOpts}.
  */
 export default function Collection (records, opts) {
   const self = this
@@ -124,6 +126,7 @@ export default function Collection (records, opts) {
   opts.recordOpts || (opts.recordOpts = {})
 
   fillIn(self, opts)
+  fillIn(self, COLLECTION_DEFAULTS)
 
   /**
    * Event listeners attached to this Collection.
@@ -167,13 +170,12 @@ export default function Collection (records, opts) {
 /**
  * Create a Collection subclass.
  *
- * ```javascript
+ * @example
  * var MyCollection = Collection.extend({
  *   foo: function () { return 'bar' }
  * })
  * var collection = new MyCollection()
  * collection.foo() // "bar"
- * ```
  *
  * @name Collection.extend
  * @method
@@ -363,14 +365,11 @@ addHiddenPropsToTarget(Collection.prototype, {
    *
    * Shortcut for `collection.query().between(18, 30, { index: 'age' }).run()`
    *
-   * Get all users ages 18 to 30:
-   * ```javascript
+   * @example <caption>Get all users ages 18 to 30</caption>
    * const users = collection.between(18, 30, { index: 'age' })
-   * ```
-   * Same as above:
-   * ```javascript
+   *
+   * @example <caption>Same as above</caption>
    * const users = collection.between([18], [30], { index: 'age' })
-   * ```
    *
    * @name Collection#between
    * @method
@@ -394,14 +393,11 @@ addHiddenPropsToTarget(Collection.prototype, {
   /**
    * Create a new secondary index on the contents of the collection.
    *
-   * Index users by age:
-   * ```javascript
+   * @example <caption>Index users by age</caption>
    * collection.createIndex('age')
-   * ```
-   * Index users by status and role:
-   * ```javascript
+   *
+   * @example <caption>Index users by status and role</caption>
    * collection.createIndex('statusAndRole', ['status', 'role'])
-   * ```
    *
    * @name Collection#createIndex
    * @method
@@ -431,8 +427,7 @@ addHiddenPropsToTarget(Collection.prototype, {
    *
    * Shortcut for `collection.query().filter(queryOrFn[, thisArg]).run()`
    *
-   * Get the draft posts created less than three months:
-   * ```javascript
+   * @example <caption>Get the draft posts created less than three months</caption>
    * const posts = collection.filter({
    *   where: {
    *     status: {
@@ -443,13 +438,11 @@ addHiddenPropsToTarget(Collection.prototype, {
    *     }
    *   }
    * })
-   * ```
-   * Use a custom filter function:
-   * ```javascript
+   *
+   * @example <caption>Use a custom filter function</caption>
    * const posts = collection.filter(function (post) {
    *   return post.isReady()
    * })
-   * ```
    *
    * @name Collection#filter
    * @method
@@ -466,11 +459,10 @@ addHiddenPropsToTarget(Collection.prototype, {
   /**
    * Iterate over all records.
    *
-   * ```javascript
+   * @example
    * collection.forEach(function (record) {
    *   // do something
    * })
-   * ```
    *
    * @name Collection#forEach
    * @method
@@ -500,14 +492,11 @@ addHiddenPropsToTarget(Collection.prototype, {
    *
    * Shortcut for `collection.query().getAll(keyList1, keyList2, ...).run()`
    *
-   * Get the posts where "status" is "draft" or "inReview":
-   * ```javascript
+   * @example <caption>Get the posts where "status" is "draft" or "inReview"</caption>
    * const posts = collection.getAll('draft', 'inReview', { index: 'status' })
-   * ```
-   * Same as above:
-   * ```javascript
+   *
+   * @example <caption>Same as above</caption>
    * const posts = collection.getAll(['draft'], ['inReview'], { index: 'status' })
-   * ```
    *
    * @name Collection#getAll
    * @method
@@ -528,9 +517,8 @@ addHiddenPropsToTarget(Collection.prototype, {
    *
    * Shortcut for `collection.query().limit(maximumNumber).run()`
    *
-   * ```javascript
+   * @example
    * const posts = collection.limit(10)
-   * ```
    *
    * @name Collection#limit
    * @method
@@ -544,11 +532,10 @@ addHiddenPropsToTarget(Collection.prototype, {
   /**
    * Apply a mapping function to all records.
    *
-   * ```javascript
+   * @example
    * const names = collection.map(function (user) {
    *   return user.name
    * })
-   * ```
    *
    * @name Collection#map
    * @method
@@ -586,7 +573,7 @@ addHiddenPropsToTarget(Collection.prototype, {
    * Return the primary key of the given, or if no record is provided, return the
    * name of the field that holds the primary key of records in this Collection.
    *
-   * @name Collection#record
+   * @name Collection#recordId
    * @method
    * @param {(Object|Record)} [record] The record whose primary key is to be
    * returned.
@@ -605,14 +592,12 @@ addHiddenPropsToTarget(Collection.prototype, {
    * Create a new query to be executed against the contents of the collection.
    * The result will be all or a subset of the contents of the collection.
    *
-   * Grab page 2 of users between ages 18 and 30:
-   * ```javascript
+   * @example <caption>Grab page 2 of users between ages 18 and 30</caption>
    * collection.query()
    *   .between(18, 30, { index: 'age' }) // between ages 18 and 30
    *   .skip(10) // second page
    *   .limit(10) // page size
    *   .run()
-   * ```
    *
    * @name Collection#query
    * @method
@@ -625,11 +610,10 @@ addHiddenPropsToTarget(Collection.prototype, {
   /**
    * Reduce the data in the collection to a single value and return the result.
    *
-   * ```javascript
+   * @example
    * const totalVotes = collection.reduce(function (prev, record) {
    *   return prev + record.upVotes + record.downVotes
    * }, 0)
-   * ```
    *
    * @name Collection#reduce
    * @method
@@ -705,9 +689,8 @@ addHiddenPropsToTarget(Collection.prototype, {
    *
    * Shortcut for `collection.query().skip(numberToSkip).run()`
    *
-   * ```javascript
+   * @example
    * const posts = collection.skip(10)
-   * ```
    *
    * @name Collection#skip
    * @method

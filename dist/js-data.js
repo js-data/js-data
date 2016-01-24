@@ -105,7 +105,7 @@
       return sign * MAX_INTEGER;
     }
     var remainder = value % 1;
-    return value === value ? remainder ? value - remainder : value : 0;
+    return value === value ? remainder ? value - remainder : value : 0; // eslint-disable-line
   };
   var isPlainObject = function isPlainObject(value) {
     return !!value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && value.constructor === Object;
@@ -118,7 +118,7 @@
     return typeof value === 'function' || value && toString(value) === FUNC_TAG;
   };
   var isInteger = function isInteger(value) {
-    return toString(value) === NUMBER_TAG && value == toInteger(value);
+    return toString(value) === NUMBER_TAG && value == toInteger(value); // eslint-disable-line
   };
   var isNull = function isNull(value) {
     return value === null;
@@ -601,7 +601,7 @@
 
   var getSuper = function getSuper(instance) {
     var Ctor = instance.constructor;
-    return Ctor.__super__ || Object.getPrototypeOf(Ctor) || Ctor.__proto__;
+    return Ctor.__super__ || Object.getPrototypeOf(Ctor) || Ctor.__proto__; // eslint-disable-line
   };
 
 var utils = Object.freeze({
@@ -1609,25 +1609,96 @@ var utils = Object.freeze({
     }
   });
 
+  var COLLECTION_DEFAULTS = {
+    /**
+     * Field to be used as the unique identifier for records in this collection.
+     * Defaults to `"id"` unless {@link Collection#mapper} is set, in which case
+     * this will default to {@link Mapper#idAttribute}.
+     *
+     * @name Collection#idAttribute
+     * @type {string}
+     * @default "id"
+     */
+    idAttribute: 'id',
+
+    /**
+     * Default Mapper for this collection. Optional. If a Mapper is provided, then
+     * the collection will use the {@link Mapper#idAttribute} setting, and will
+     * wrap records in {@link Mapper#RecordClass}.
+     *
+     * @example
+     * import {Collection, Mapper} from 'js-data'
+     *
+     * class MyMapperClass extends Mapper {
+     *   foo () { return 'bar' }
+     * }
+     * const myMapper = new MyMapperClass()
+     * const collection = new Collection(null, { mapper: myMapper })
+     *
+     * @name Collection#mapper
+     * @type {Mapper}
+     * @default null
+     */
+    mapper: null,
+
+    /**
+     * What to do when inserting a record into this Collection that shares a
+     * primary key with a record already in this Collection.
+     *
+     * Possible values:
+     * - merge
+     * - replace
+     *
+     * Merge:
+     *
+     * Recursively shallow copy properties from the new record onto the existing
+     * record.
+     *
+     * Replace:
+     *
+     * Shallow copy top-level properties from the new record onto the existing
+     * record. Any top-level own properties of the existing record that are _not_
+     * on the new record will be removed.
+     *
+     * @name Collection#onConflict
+     * @type {string}
+     * @default "merge"
+     */
+    onConflict: 'merge',
+
+    /**
+     * Options to be passed into {@link Mapper#createRecord} when wrapping records
+     * in {@link Mapper#RecordClass}.
+     *
+     * @name Collection#recordOpts
+     * @type {Object}
+     * @default null
+     */
+    recordOpts: null
+  };
+
   /**
-   * An ordered set of records.
-   *
    * ```javascript
+   * import {Collection} from 'js-data'
+   * ```
+   *
+   * An ordered set of {@link Record} instances.
+   *
+   * @example
    * import {Collection, Record} from 'js-data'
    * const user1 = new Record({ id: 1 })
    * const user2 = new Record({ id: 2 })
    * const UserCollection = new Collection([user1, user2])
    * UserCollection.get(1) === user1 // true
-   * ```
    *
    * @class Collection
    * @param {Array} [records] Initial set of records to insert into the
    * collection.
    * @param {Object} [opts] Configuration options.
-   * @param {string} [opts.idAttribute] TODO
-   * @param {string} [opts.onConflict=merge] TODO
-   * @param {string} [opts.mapper] TODO
-   * @param {Object} [opts.recordOpts=null] TODO
+   * @param {string} [opts.idAttribute] See {@link Collection#idAttribute}.
+   * @param {string} [opts.onConflict="merge"] See {@link Collection#onConflict}.
+   * @param {string} [opts.mapper] See {@link Collection#mapper}.
+   * @param {Object} [opts.recordOpts=null] See {@link Collection#recordOpts}.
    */
   function Collection(records, opts) {
     var self = this;
@@ -1647,6 +1718,7 @@ var utils = Object.freeze({
     opts.recordOpts || (opts.recordOpts = {});
 
     fillIn(self, opts);
+    fillIn(self, COLLECTION_DEFAULTS);
 
     /**
      * Event listeners attached to this Collection.
@@ -1690,13 +1762,12 @@ var utils = Object.freeze({
   /**
    * Create a Collection subclass.
    *
-   * ```javascript
+   * @example
    * var MyCollection = Collection.extend({
    *   foo: function () { return 'bar' }
    * })
    * var collection = new MyCollection()
    * collection.foo() // "bar"
-   * ```
    *
    * @name Collection.extend
    * @method
@@ -1887,14 +1958,11 @@ var utils = Object.freeze({
      *
      * Shortcut for `collection.query().between(18, 30, { index: 'age' }).run()`
      *
-     * Get all users ages 18 to 30:
-     * ```javascript
+     * @example <caption>Get all users ages 18 to 30</caption>
      * const users = collection.between(18, 30, { index: 'age' })
-     * ```
-     * Same as above:
-     * ```javascript
+     *
+     * @example <caption>Same as above</caption>
      * const users = collection.between([18], [30], { index: 'age' })
-     * ```
      *
      * @name Collection#between
      * @method
@@ -1918,14 +1986,11 @@ var utils = Object.freeze({
     /**
      * Create a new secondary index on the contents of the collection.
      *
-     * Index users by age:
-     * ```javascript
+     * @example <caption>Index users by age</caption>
      * collection.createIndex('age')
-     * ```
-     * Index users by status and role:
-     * ```javascript
+     *
+     * @example <caption>Index users by status and role</caption>
      * collection.createIndex('statusAndRole', ['status', 'role'])
-     * ```
      *
      * @name Collection#createIndex
      * @method
@@ -1955,8 +2020,7 @@ var utils = Object.freeze({
      *
      * Shortcut for `collection.query().filter(queryOrFn[, thisArg]).run()`
      *
-     * Get the draft posts created less than three months:
-     * ```javascript
+     * @example <caption>Get the draft posts created less than three months</caption>
      * const posts = collection.filter({
      *   where: {
      *     status: {
@@ -1967,13 +2031,11 @@ var utils = Object.freeze({
      *     }
      *   }
      * })
-     * ```
-     * Use a custom filter function:
-     * ```javascript
+     *
+     * @example <caption>Use a custom filter function</caption>
      * const posts = collection.filter(function (post) {
      *   return post.isReady()
      * })
-     * ```
      *
      * @name Collection#filter
      * @method
@@ -1990,11 +2052,10 @@ var utils = Object.freeze({
     /**
      * Iterate over all records.
      *
-     * ```javascript
+     * @example
      * collection.forEach(function (record) {
      *   // do something
      * })
-     * ```
      *
      * @name Collection#forEach
      * @method
@@ -2024,14 +2085,11 @@ var utils = Object.freeze({
      *
      * Shortcut for `collection.query().getAll(keyList1, keyList2, ...).run()`
      *
-     * Get the posts where "status" is "draft" or "inReview":
-     * ```javascript
+     * @example <caption>Get the posts where "status" is "draft" or "inReview"</caption>
      * const posts = collection.getAll('draft', 'inReview', { index: 'status' })
-     * ```
-     * Same as above:
-     * ```javascript
+     *
+     * @example <caption>Same as above</caption>
      * const posts = collection.getAll(['draft'], ['inReview'], { index: 'status' })
-     * ```
      *
      * @name Collection#getAll
      * @method
@@ -2054,9 +2112,8 @@ var utils = Object.freeze({
      *
      * Shortcut for `collection.query().limit(maximumNumber).run()`
      *
-     * ```javascript
+     * @example
      * const posts = collection.limit(10)
-     * ```
      *
      * @name Collection#limit
      * @method
@@ -2070,11 +2127,10 @@ var utils = Object.freeze({
     /**
      * Apply a mapping function to all records.
      *
-     * ```javascript
+     * @example
      * const names = collection.map(function (user) {
      *   return user.name
      * })
-     * ```
      *
      * @name Collection#map
      * @method
@@ -2116,7 +2172,7 @@ var utils = Object.freeze({
      * Return the primary key of the given, or if no record is provided, return the
      * name of the field that holds the primary key of records in this Collection.
      *
-     * @name Collection#record
+     * @name Collection#recordId
      * @method
      * @param {(Object|Record)} [record] The record whose primary key is to be
      * returned.
@@ -2135,14 +2191,12 @@ var utils = Object.freeze({
      * Create a new query to be executed against the contents of the collection.
      * The result will be all or a subset of the contents of the collection.
      *
-     * Grab page 2 of users between ages 18 and 30:
-     * ```javascript
+     * @example <caption>Grab page 2 of users between ages 18 and 30</caption>
      * collection.query()
      *   .between(18, 30, { index: 'age' }) // between ages 18 and 30
      *   .skip(10) // second page
      *   .limit(10) // page size
      *   .run()
-     * ```
      *
      * @name Collection#query
      * @method
@@ -2155,11 +2209,10 @@ var utils = Object.freeze({
     /**
      * Reduce the data in the collection to a single value and return the result.
      *
-     * ```javascript
+     * @example
      * const totalVotes = collection.reduce(function (prev, record) {
      *   return prev + record.upVotes + record.downVotes
      * }, 0)
-     * ```
      *
      * @name Collection#reduce
      * @method
@@ -2235,9 +2288,8 @@ var utils = Object.freeze({
      *
      * Shortcut for `collection.query().skip(numberToSkip).run()`
      *
-     * ```javascript
+     * @example
      * const posts = collection.skip(10)
-     * ```
      *
      * @name Collection#skip
      * @method
@@ -2447,31 +2499,6 @@ var utils = Object.freeze({
     opts.type = hasOneType;
     return function (target) {
       relatedTo(target, related, opts);
-    };
-  };
-
-  /**
-   * Register an adapter with the target. Target must have a "getAdapters" method.
-   *
-   * @name module:js-data.registerAdapter
-   * @method
-   * @param {string} name The name under which to register the adapter.
-   * @param {Adapter} adapter The adapter to register.
-   * @param {Object} opts Configuration options.
-   * @param {boolean} [opts.default=false] Whether to make the adapter the
-   * default adapter for the target.
-   * @return {Function} Invocation function, which accepts the target as the only
-   * parameter.
-   */
-  var registerAdapter = function registerAdapter(name, adapter, opts) {
-    opts || (opts = {});
-    return function (target) {
-      // Register the adapter
-      target.getAdapters()[name] = adapter;
-      // Optionally make it the default adapter for the target.
-      if (opts === true || opts.default) {
-        target.defaultAdapter = name;
-      }
     };
   };
 
@@ -3772,7 +3799,7 @@ var utils = Object.freeze({
      *
      * @name Mapper#defaultAdapter
      * @type {string}
-     * @default http
+     * @default "http"
      */
     defaultAdapter: 'http',
 
@@ -3793,6 +3820,15 @@ var utils = Object.freeze({
      * @default id
      */
     idAttribute: 'id',
+
+    /**
+     * Minimum amount of meta information required to start operating against a
+     * resource.
+     *
+     * @name Mapper#name
+     * @type {string}
+     */
+    name: null,
 
     /**
      * Whether this Mapper should emit operational events.
@@ -3889,11 +3925,29 @@ var utils = Object.freeze({
   };
 
   /**
-   * js-data's Mapper class.
-   *
    * ```javascript
    * import {Mapper} from 'js-data'
    * ```
+   *
+   * The core of JSData's [ORM/ODM][orm] implementation. Given a minimum amout of
+   * meta information about a resource, a Mapper can perform generic CRUD
+   * operations against that resource. Apart from its configuration, a Mapper is
+   * stateless. The particulars of various persistence layers has been abstracted
+   * into adapters, which a Mapper uses to perform its operations.
+   *
+   * The term "Mapper" comes from the [Data Mapper Pattern][pattern] described in
+   * Martin Fowler's [Patterns of Enterprise Application Architecture][book]. A
+   * Data Mapper moves data between [in-memory object instances][record] and a
+   * relational or document-based database. JSData's Mapper can work with any
+   * persistence layer you can write an adapter for.
+   *
+   * _("Model" is a heavily overloaded term and is avoided in this documentation
+   * to prevent confusion.)_
+   *
+   * [orm]: https://en.wikipedia.org/wiki/Object-relational_mapping
+   * [pattern]: https://en.wikipedia.org/wiki/Data_mapper_pattern
+   * [book]: http://martinfowler.com/books/eaa.html
+   * [record]: Record.html
    *
    * @class Mapper
    * @param {Object} [opts] Configuration options.
@@ -3905,6 +3959,11 @@ var utils = Object.freeze({
     opts || (opts = {});
     fillIn(self, opts);
     fillIn(self, copy(MAPPER_DEFAULTS));
+
+    if (!self.name) {
+      throw new Error('mapper cannot function without a name!');
+    }
+
     self._adapters || (self._adapters = {});
     self._listeners || (self._listeners = {});
 
@@ -4062,8 +4121,8 @@ var utils = Object.freeze({
      *
      * @name Mapper#getAdapter
      * @method
-     * @param {string} [name]- The name of the adapter to retrieve.
-     * @return {Adapter} The adapter, if any.
+     * @param {string} [name] The name of the adapter to retrieve.
+     * @return {Adapter} The adapter.
      */
     getAdapter: function getAdapter(name) {
       var self = this;
@@ -4969,8 +5028,7 @@ var utils = Object.freeze({
     },
 
     /**
-     * Invoke the {@link module:js-data.exports.registerAdapter registerAdapter}
-     * decorator on this Mapper.
+     * Register an adapter on this mapper under the given name.
      *
      * @name Mapper#registerAdapter
      * @method
@@ -4978,11 +5036,16 @@ var utils = Object.freeze({
      * @param {Adapter} adapter The adapter to register.
      * @param {Object} [opts] Configuration options.
      * @param {boolean} [opts.default=false] Whether to make the adapter the
-     * default for this Mapper.
-     * @return {Mapper} A reference to the Mapper for chaining.
+     * default adapter for this Mapper.
      */
-    registerAdapter: function registerAdapter$$(name, adapter, opts) {
-      return registerAdapter(name, adapter, opts)(this);
+    registerAdapter: function registerAdapter(name, adapter, opts) {
+      var self = this;
+      opts || (opts = {});
+      self.getAdapters()[name] = adapter;
+      // Optionally make it the default adapter for the target.
+      if (opts === true || opts.default) {
+        self.defaultAdapter = name;
+      }
     }
   });
 
@@ -5037,17 +5100,72 @@ var utils = Object.freeze({
     this._listeners = value;
   });
 
-  var CONTAINER_DEFAULTS = {};
-
   /**
-   * TODO
-   *
    * ```javascript
    * import {Container} from 'js-data'
    * ```
    *
+   * The `Container` class is a place to store {@link Mapper} instances.
+   *
+   * Without a container, you need to manage mappers yourself, including resolving
+   * circular dependencies among relations. All mappers in a container share the
+   * same adapters, so you don't have to add each adapter to all of your mappers.
+   *
+   * @example <caption>Without Container</caption>
+   * import {Mapper} from 'js-data'
+   * import HttpAdapter from 'js-data-http'
+   * const adapter = new HttpAdapter()
+   * const userMapper = new Mapper({ name: 'user' })
+   * userMapper.registerAdapter('http', adapter, { default: true })
+   * const commentMapper = new Mapper({ name: 'comment' })
+   * commentMapper.registerAdapter('http', adapter, { default: true })
+   *
+   * // This might be more difficult if the mappers were defined in different
+   * // modules.
+   * userMapper.hasMany(commentMapper, {
+   *   localField: 'comments',
+   *   foreignKey: 'userId'
+   * })
+   * commentMapper.belongsTo(userMapper, {
+   *   localField: 'user',
+   *   foreignKey: 'userId'
+   * })
+   *
+   * @example <caption>With Container</caption>
+   * import {Container} from 'js-data'
+   * import HttpAdapter from 'js-data-http'
+   * const container = new Container()
+   * // All mappers in container share adapters
+   * container.registerAdapter('http', new HttpAdapter(), { default: true })
+   *
+   * // These could be defined in separate modules without a problem.
+   * container.defineMapper('user', {
+   *   relations: {
+   *     hasMany: {
+   *       comment: {
+   *         localField: 'comments',
+   *         foreignKey: 'userId'
+   *       }
+   *     }
+   *   }
+   * })
+   * container.defineMapper('comment', {
+   *   relations: {
+   *     belongsTo: {
+   *       user: {
+   *         localField: 'user',
+   *         foreignKey: 'userId'
+   *       }
+   *     }
+   *   }
+   * })
+   *
    * @class Container
    * @param {Object} [opts] Configuration options.
+   * @param {Function} [opts.MapperClass] Constructor function to use in
+   * {@link Container#defineMapper} to create a new mapper.
+   * @param {Object} [opts.mapperDefaults] Defaults options to pass to
+   * {@link Container#MapperClass} when creating a new mapper.
    * @return {Container}
    */
   function Container(opts) {
@@ -5055,25 +5173,42 @@ var utils = Object.freeze({
     classCallCheck(self, Container);
 
     opts || (opts = {});
+    // Apply options provided by the user
     fillIn(self, opts);
-    fillIn(self, CONTAINER_DEFAULTS);
-
-    self._adapters = {};
-    self._mappers = {};
+    /**
+     * Defaults options to pass to {@link Container#MapperClass} when creating a
+     * new mapper.
+     *
+     * @name Container#mapperDefaults
+     * @type {Object}
+     */
     self.mapperDefaults = self.mapperDefaults || {};
+    /**
+     * Constructor function to use in {@link Container#defineMapper} to create a
+     * new mapper.
+     *
+     * @name Container#MapperClass
+     * @type {Function}
+     */
     self.MapperClass = self.MapperClass || Mapper;
+
+    // Initilize private data
+
+    // Holds the adapters, shared by all mappers in this container
+    self._adapters = {};
+    // The the mappers in this container
+    self._mappers = {};
   }
 
   /**
    * Create a Container subclass.
    *
-   * ```javascript
+   * @example
    * var MyContainer = Container.extend({
    *   foo: function () { return 'bar' }
    * })
    * var container = new MyContainer()
    * container.foo() // "bar"
-   * ```
    *
    * @name Container.extend
    * @method
@@ -5086,12 +5221,22 @@ var utils = Object.freeze({
 
   addHiddenPropsToTarget(Container.prototype, {
     /**
-     * TODO
+     * Create a new mapper and register it in this container.
+     *
+     * @example
+     * import {Container} from 'js-data'
+     * const container = new Container({
+     *   mapperDefaults: { foo: 'bar' }
+     * })
+     * const userMapper = container.defineMapper('user')
+     * userMapper.foo // "bar"
      *
      * @name Container#defineMapper
      * @method
-     * @param {string} name {@link Mapper#name}.
-     * @param {Object} [opts] Configuration options. Passed to {@link Mapper}.
+     * @param {string} name Name under which to register the new {@link Mapper}.
+     * {@link Mapper#name} will be set to this value.
+     * @param {Object} [opts] Configuration options. Passed to
+     * {@link Container#MapperClass} when creating the new {@link Mapper}.
      * @return {Mapper}
      */
 
@@ -5111,6 +5256,7 @@ var utils = Object.freeze({
 
       // Default values for arguments
       opts || (opts = {});
+      // Set Mapper#name
       opts.name = name;
       opts.relations || (opts.relations = {});
 
@@ -5155,7 +5301,42 @@ var utils = Object.freeze({
     },
 
     /**
-     * TODO
+     * Return the name of a registered adapter based on the given name or options,
+     * or the name of the default adapter if no name provided.
+     *
+     * @name Container#getAdapterName
+     * @method
+     * @param {(Object|string)} [opts] The name of an adapter or options, if any.
+     * @return {string} The name of the adapter.
+     */
+    getAdapterName: function getAdapterName(opts) {
+      opts || (opts = {});
+      if (isString(opts)) {
+        opts = { adapter: opts };
+      }
+      return opts.adapter || this.mapperDefaults.defaultAdapter;
+    },
+
+    /**
+     * Return the registered adapter with the given name or the default adapter if
+     * no name is provided.
+     *
+     * @name Container#getAdapter
+     * @method
+     * @param {string} [name] The name of the adapter to retrieve.
+     * @return {Adapter} The adapter.
+     */
+    getAdapter: function getAdapter(name) {
+      var self = this;
+      var adapter = self.getAdapterName(name);
+      if (!adapter) {
+        throw new ReferenceError(adapter + ' not found!');
+      }
+      return self.getAdapters()[adapter];
+    },
+
+    /**
+     * Return the registered adapters of this container.
      *
      * @name Container#getAdapters
      * @method
@@ -5166,7 +5347,13 @@ var utils = Object.freeze({
     },
 
     /**
-     * TODO
+     * Return the mapper registered under the specified name.
+     *
+     * @example
+     * import {Container} from 'js-data'
+     * const container = new Container()
+     * const userMapper = container.defineMapper('user')
+     * userMapper === container.getMapper('user') // true
      *
      * @name Container#getMapper
      * @method
@@ -5182,16 +5369,34 @@ var utils = Object.freeze({
     },
 
     /**
-     * TODO
+     * Register an adapter on this container under the given name. Adapters
+     * registered on a container are shared by all mappers in the container.
+     *
+     * @example
+     * import {Container} from 'js-data'
+     * import HttpAdapter from 'js-data-http'
+     * const container = new Container()
+     * container.registerAdapter('http', new HttpAdapter, { default: true })
      *
      * @name Container#registerAdapter
      * @method
-     * @param {string} name {@link Mapper#name}.
-     * @param {Adapter} adapter Adapter to register.
+     * @param {string} name The name of the adapter to register.
+     * @param {Adapter} adapter The adapter to register.
      * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.default=false] Whether to make the adapter the
+     * default adapter for all Mappers in this container.
      */
-    registerAdapter: function registerAdapter$$(name, adapter, opts) {
-      registerAdapter(name, adapter, opts)(this);
+    registerAdapter: function registerAdapter(name, adapter, opts) {
+      var self = this;
+      opts || (opts = {});
+      self.getAdapters()[name] = adapter;
+      // Optionally make it the default adapter for the target.
+      if (opts === true || opts.default) {
+        self.mapperDefaults.defaultAdapter = name;
+        forOwn(self._mappers, function (mapper) {
+          mapper.defaultAdapter = name;
+        });
+      }
     }
   });
 
@@ -5363,13 +5568,38 @@ var utils = Object.freeze({
   };
 
   /**
-   * TODO
+   * The `DataStore` class is an extension of {@link Container}. Not only does
+   * `DataStore` manage mappers, but also collections. `DataStore` implements the
+   * asynchronous {@link Mapper} methods, such as {@link Mapper#find} and
+   * {@link Mapper#create}. If you use the asynchronous `DataStore` methods
+   * instead of calling them directly on the mappers, then the results of the
+   * method calls will be inserted into the store's collections. You can think of
+   * a `DataStore` as an [Identity Map](https://en.wikipedia.org/wiki/Identity_map_pattern)
+   * for the [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping)
+   * (the Mappers).
    *
    * ```javascript
    * import {DataStore} from 'js-data'
    * ```
    *
-   * See {@link Container}.
+   * @example
+   * import {DataStore} from 'js-data'
+   * import HttpAdapter from 'js-data-http'
+   * const store = new DataStore()
+   * const UserMapper = store.defineMapper('user')
+   *
+   * // Call "find" on "UserMapper" (Stateless ORM)
+   * UserMapper.find(1).then(function (user) {
+   *   // retrieved a "user" record via the http adapter, but that's it
+   *
+   *   // Call "find" on "store" for the "user" mapper (Stateful DataStore)
+   *   return store.find('user', 1)
+   * }).then(function (user) {
+   *   // not only was a "user" record retrieved, but it was added to the
+   *   // store's "user" collection
+   *   const cachedUser = store.getCollection('user').get(1)
+   *   user === cachedUser // true
+   * })
    *
    * @class DataStore
    * @extends Container
@@ -5732,7 +5962,6 @@ var utils = Object.freeze({
   exports.belongsTo = belongsTo;
   exports.hasMany = hasMany;
   exports.hasOne = hasOne;
-  exports.registerAdapter = registerAdapter;
 
 }));
 //# sourceMappingURL=js-data.js.map

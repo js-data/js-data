@@ -68,6 +68,15 @@ const MAPPER_DEFAULTS = {
   idAttribute: 'id',
 
   /**
+   * Minimum amount of meta information required to start operating against a
+   * resource.
+   *
+   * @name Mapper#name
+   * @type {string}
+   */
+  name: null,
+
+  /**
    * Whether this Mapper should emit operational events.
    *
    * @name Mapper#notify
@@ -162,11 +171,29 @@ const MAPPER_DEFAULTS = {
 }
 
 /**
- * js-data's Mapper class.
- *
  * ```javascript
  * import {Mapper} from 'js-data'
  * ```
+ *
+ * The core of JSData's [ORM/ODM][orm] implementation. Given a minimum amout of
+ * meta information about a resource, a Mapper can perform generic CRUD
+ * operations against that resource. Apart from its configuration, a Mapper is
+ * stateless. The particulars of various persistence layers has been abstracted
+ * into adapters, which a Mapper uses to perform its operations.
+ *
+ * The term "Mapper" comes from the [Data Mapper Pattern][pattern] described in
+ * Martin Fowler's [Patterns of Enterprise Application Architecture][book]. A
+ * Data Mapper moves data between [in-memory object instances][record] and a
+ * relational or document-based database. JSData's Mapper can work with any
+ * persistence layer you can write an adapter for.
+ *
+ * _("Model" is a heavily overloaded term and is avoided in this documentation
+ * to prevent confusion.)_
+ *
+ * [orm]: https://en.wikipedia.org/wiki/Object-relational_mapping
+ * [pattern]: https://en.wikipedia.org/wiki/Data_mapper_pattern
+ * [book]: http://martinfowler.com/books/eaa.html
+ * [record]: Record.html
  *
  * @class Mapper
  * @param {Object} [opts] Configuration options.
@@ -178,6 +205,11 @@ export default function Mapper (opts) {
   opts || (opts = {})
   utils.fillIn(self, opts)
   utils.fillIn(self, utils.copy(MAPPER_DEFAULTS))
+
+  if (!self.name) {
+    throw new Error('mapper cannot function without a name!')
+  }
+
   self._adapters || (self._adapters = {})
   self._listeners || (self._listeners = {})
 
@@ -1231,6 +1263,7 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
    */
   registerAdapter (name, adapter, opts) {
     const self = this
+    opts || (opts = {})
     self.getAdapters()[name] = adapter
     // Optionally make it the default adapter for the target.
     if (opts === true || opts.default) {

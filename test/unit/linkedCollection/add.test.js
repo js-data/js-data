@@ -418,7 +418,7 @@ export function init () {
     // })
     it('should inject 1,000 items where there is an index on "age"', function () {
       const Test = this
-      const collection = new Test.JSData.Collection({ mapper: new Test.JSData.Mapper() })
+      const collection = new Test.JSData.Collection({ mapper: new Test.JSData.Mapper({ name: 'user' }) })
       collection.createIndex('age')
       collection.createIndex('created')
       collection.createIndex('updated')
