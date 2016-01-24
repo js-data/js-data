@@ -8,13 +8,12 @@ import {
   isString
 } from './utils'
 import {
+  belongsToType,
+  hasManyType,
+  hasOneType,
   registerAdapter
-} from './decorators/index'
-import Mapper from './mapper'
-
-const belongsToType = 'belongsTo'
-const hasManyType = 'hasMany'
-const hasOneType = 'hasOne'
+} from './decorators'
+import Mapper from './Mapper'
 
 const CONTAINER_DEFAULTS = {}
 

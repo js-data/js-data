@@ -1,14 +1,12 @@
 import * as utils from './utils'
 import {
   belongsTo,
-  configure,
   hasMany,
   hasOne,
-  setSchema,
   registerAdapter
-} from './decorators/index'
-import Record from './record'
-import {Schema} from './schema'
+} from './decorators'
+import Record from './Record'
+import {Schema} from './Schema'
 
 const {
   resolve
@@ -32,7 +30,7 @@ const MAPPER_DEFAULTS = {
    * @name Mapper#_adapters
    * @private
    */
-  _adapters: {},
+  _adapters: null,
 
   /**
    * Hash of registered listeners. Don't modify. Use {@link Mapper#on} and
@@ -150,7 +148,7 @@ const MAPPER_DEFAULTS = {
    */
   RecordClass: undefined,
 
-  schema: {},
+  schema: null,
 
   /**
    * Whether {@link Mapper#create} and {@link Mapper#createMany} should instead
@@ -177,9 +175,11 @@ export default function Mapper (opts) {
   opts || (opts = {})
   utils.fillIn(self, opts)
   utils.fillIn(self, utils.copy(MAPPER_DEFAULTS))
+  self._adapters || (self._adapters = {})
+  self._listeners || (self._listeners = {})
 
   if (!(self.schema instanceof Schema)) {
-    self.schema = new Schema(self.schema)
+    self.schema = new Schema(self.schema || {})
   }
 
   if (utils.isUndefined(self.RecordClass)) {
@@ -1211,32 +1211,6 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
    */
   hasOne (RelatedMapper, opts) {
     return hasOne(RelatedMapper, opts)(this)
-  },
-
-  /**
-   * Invoke the {@link module:js-data.exports.setSchema setSchema} decorator on
-   * this Mapper.
-   *
-   * @name Mapper#setSchema
-   * @method
-   * @param {Object} opts Property configurations.
-   * @return {Mapper} A reference to the Mapper for chaining.
-   */
-  setSchema (opts) {
-    return setSchema(opts)(this)
-  },
-
-  /**
-   * Invoke the {@link module:js-data.exports.configure configure} decorator on
-   * this Mapper.
-   *
-   * @name Mapper#configure
-   * @method
-   * @param {Object} opts Configuration
-   * @return {Mapper} A reference to the Mapper for chaining.
-   */
-  configure (opts) {
-    return configure(opts)(this)
   },
 
   /**

@@ -66,6 +66,7 @@
   var toString = function toString(value) {
     return objToString.call(value);
   };
+
   var toInteger = function toInteger(value) {
     if (!value) {
       return value === 0 ? value : 0;
@@ -81,97 +82,123 @@
 
   /**
    * Return whether the provided value is an array.
+   *
    * @method
-   * @param {*} [value] - The value to test.
+   * @param {*} [value] The value to test.
    */
   var isArray = Array.isArray;
+
   /**
    * Return whether the provided value is an object type.
-   * @param {*} [value] - The value to test.
+   *
+   * @param {*} [value] The value to test.
    */
-  function isObject(value) {
+  var isObject = function isObject(value) {
     return toString(value) === OBJECT_TAG;
-  }
-  function isPlainObject(value) {
+  };
+
+  var isPlainObject = function isPlainObject(value) {
     return !!value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && value.constructor === Object;
-  }
+  };
+
   /**
    * Return whether the provided value is a regular expression type.
-   * @param {*} [value] - The value to test.
+   *
+   * @param {*} [value] The value to test.
    */
-  function isRegExp(value) {
+  var isRegExp = function isRegExp(value) {
     return toString(value) === REGEXP_TAG;
-  }
+  };
+
   /**
    * Return whether the provided value is a string type.
-   * @param {*} [value] - The value to test.
+   *
+   * @param {*} [value] The value to test.
    */
   var isString = function isString(value) {
     return typeof value === 'string' || value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toString(value) === STRING_TAG;
   };
+
   /**
    * Return whether the provided value is null.
-   * @param {*} [value] - The value to test.
+   *
+   * @param {*} [value] The value to test.
    */
   var isNull = function isNull(value) {
     return value === null;
   };
+
   /**
    * Return whether the provided value is undefined.
-   * @param {*} [value] - The value to test.
+   *
+   * @param {*} [value] The value to test.
    */
   var isUndefined = function isUndefined(value) {
     return value === undefined;
   };
+
   /**
    * Return whether the provided value is a date type.
-   * @param {*} [value] - The value to test.
+   *
+   * @param {*} [value] The value to test.
    */
   var isDate = function isDate(value) {
     return value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toString(value) === DATE_TAG;
   };
+
   /**
    * Return whether the provided value is a number type.
-   * @param {*} [value] - The value to test.
+   *
+   * @param {*} [value] The value to test.
    */
   var isNumber = function isNumber(value) {
     var type = typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value);
     return type === 'number' || value && type === 'object' && toString(value) === NUMBER_TAG;
   };
+
   /**
    * Return whether the provided value is an integer.
-   * @param {*} [value] - The value to test.
+   *
+   * @param {*} [value] The value to test.
    */
   var isInteger = function isInteger(value) {
     return toString(value) === NUMBER_TAG && value == toInteger(value);
   };
+
   /**
    * Return whether the provided value is a boolean type.
-   * @param {*} [value] - The value to test.
+   *
+   * @param {*} [value] The value to test.
    */
-  function isBoolean(value) {
+  var isBoolean = function isBoolean(value) {
     return toString(value) === BOOL_TAG;
-  }
+  };
+
   /**
    * Return whether the provided value is a function.
-   * @param {*} [value] - The value to test.
+   *
+   * @param {*} [value] The value to test.
    */
-  function isFunction(value) {
+  var isFunction = function isFunction(value) {
     return typeof value === 'function' || value && toString(value) === FUNC_TAG;
-  }
+  };
+
   /**
    * Return whether the provided value is a string or a number.
-   * @param {*} [value] - The value to test.
+   *
+   * @param {*} [value] The value to test.
    */
-  function isSorN(value) {
+  var isSorN = function isSorN(value) {
     return isString(value) || isNumber(value);
-  }
+  };
+
   /**
    * Get the value at the provided key or path.
-   * @param {Object} object - The object from which to retrieve a property.
-   * @param {string} prop - The key or path to the property.
+   *
+   * @param {Object} object The object from which to retrieve a property.
+   * @param {string} prop The key or path to the property.
    */
-  function get(object, prop) {
+  var get = function get(object, prop) {
     if (!prop) {
       return;
     }
@@ -185,26 +212,9 @@
     }
 
     return object[last];
-  }
-  /**
-   * Unset the value at the provided key or path.
-   * @param {Object} object - The object on which to unset a property.
-   * @param {string} prop - The key or path to the property.
-   */
-  function unset(object, prop) {
-    var parts = prop.split('.');
-    var last = parts.pop();
+  };
 
-    while (prop = parts.shift()) {
-      // eslint-disable-line
-      object = object[prop];
-      if (object == null) return;
-    }
-
-    object[last] = undefined;
-    delete object[last];
-  }
-  function mkdirP(object, path) {
+  var mkdirP = function mkdirP(object, path) {
     if (!path) {
       return object;
     }
@@ -216,17 +226,19 @@
       object = object[key];
     });
     return object;
-  }
+  };
   var PATH = /^(.+)\.(.+)$/;
+
   /**
    * Set the value at the provided key or path.
-   * @param {Object} object - The object on which to set a property.
-   * @param {(string|Object)} path - The key or path to the property. Can also
+   *
+   * @param {Object} object The object on which to set a property.
+   * @param {(string|Object)} path The key or path to the property. Can also
    * pass in an object of path/value pairs, which will all be set on the target
    * object.
-   * @param {*} [value] - The value to set.
+   * @param {*} [value] The value to set.
    */
-  function set(object, path, value) {
+  var set = function set(object, path, value) {
     if (isObject(path)) {
       forOwn(path, function (value, _path) {
         set(object, _path, value);
@@ -239,27 +251,29 @@
         object[path] = value;
       }
     }
-  }
+  };
+
   /**
    * Iterate over an object's own enumerable properties.
-   * @param {Object} object - The object whose properties are to be enumerated.
-   * @param {Function} fn - Iteration function.
-   * @param {Object} [thisArg] - Content to which to bind `fn`.
+   * @param {Object} object The object whose properties are to be enumerated.
+   * @param {Function} fn Iteration function.
+   * @param {Object} [thisArg] Content to which to bind `fn`.
    */
-  function forOwn(obj, fn, thisArg) {
+  var forOwn = function forOwn(obj, fn, thisArg) {
     var keys = Object.keys(obj);
     var len = keys.length;
     var i = undefined;
     for (i = 0; i < len; i++) {
       fn.call(thisArg, obj[keys[i]], keys[i], obj);
     }
-  }
+  };
+
   /**
    * Recursively shallow copy own enumberable properties from `source` to `dest`.
-   * @param {Object} dest - The destination object.
-   * @param {Object} source - The source object.
+   * @param {Object} dest The destination object.
+   * @param {Object} source The source object.
    */
-  function deepMixIn(dest, source) {
+  var deepMixIn = function deepMixIn(dest, source) {
     if (source) {
       forOwn(source, function (value, key) {
         var existing = this[key];
@@ -271,43 +285,52 @@
       }, dest);
     }
     return dest;
-  }
+  };
+
   /**
    * Proxy for `Promise.resolve`.
-   * @param {*} [value] - Value with which to resolve the Promise.
+   * @param {*} [value] Value with which to resolve the Promise.
    * @return {Promise} Promise resolved with `value`.
    */
-  function resolve$1(value) {
+  var resolve$1 = function resolve(value) {
     return Promise.resolve(value);
-  }
+  };
+
   /**
    * Proxy for `Promise.reject`.
-   * @param {*} [value] - Value with which to reject the Promise.
+   * @param {*} [value] Value with which to reject the Promise.
    * @return {Promise} Promise reject with `value`.
    */
-  function reject(value) {
+  var reject = function reject(value) {
     return Promise.reject(value);
-  }
+  };
+
   /**
-   * Shallow copy own enumerable non-function properties from `Model` to `opts`.
-   * @param {Model} Model - The source Model.
-   * @param {Object} opts - The target object.
+   * Shallow copy properties from src to dest that meet the following criteria:
+   * - own enumerable
+   * - not a function
+   * - does not start with "_"
+   *
+   * @param {Object} dest Destination object.
+   * @param {Object} src Source object.
    */
-  function _(Model, opts) {
-    for (var key in Model) {
-      var value = Model[key];
-      if (opts[key] === undefined && !isFunction(value) && key && key.indexOf('_') !== 0) {
-        opts[key] = value;
+  var _ = function _(dest, src) {
+    for (var key in dest) {
+      var value = dest[key];
+      if (src[key] === undefined && !isFunction(value) && key && key.indexOf('_') !== 0) {
+        src[key] = value;
       }
     }
-  }
+  };
+
   /**
    * Return the intersection of two arrays.
-   * @param {Array} array1 - First array.
-   * @param {Array} array2 - Second array.
+   *
+   * @param {Array} array1 First array.
+   * @param {Array} array2 Second array.
    * @return {Array} Array of elements common to both arrays.
    */
-  function intersection(array1, array2) {
+  var intersection = function intersection(array1, array2) {
     if (!array1 || !array2) {
       return [];
     }
@@ -325,27 +348,31 @@
       }
     }
     return result;
-  }
+  };
+
   /**
    * Shallow copy own enumerable properties from `src` to `dest` that are on `src`
    * but are missing from `dest.
-   * @param {Object} dest - The destination object.
-   * @param {Object} source - The source object.
+   *
+   * @param {Object} dest The destination object.
+   * @param {Object} source The source object.
    */
-  function fillIn(dest, src) {
+  var fillIn = function fillIn(dest, src) {
     forOwn(src, function (value, key) {
       if (!dest.hasOwnProperty(key) || dest[key] === undefined) {
         dest[key] = value;
       }
     });
-  }
+  };
+
   /**
    * Return whether `prop` is matched by any string or regular expression in `bl`.
-   * @param {string} prop - The name of a property.
-   * @param {Array} bl - Array of strings and regular expressions.
+   *
+   * @param {string} prop The name of a property.
+   * @param {Array} bl Array of strings and regular expressions.
    * @return {boolean} Whether `prop` was matched.
    */
-  function isBlacklisted(prop, bl) {
+  var isBlacklisted = function isBlacklisted(prop, bl) {
     if (!bl || !bl.length) {
       return false;
     }
@@ -357,28 +384,34 @@
       }
     }
     return !!matches;
-  }
+  };
+
   /**
    * Proxy for `JSON.parse`.
-   * @param {string} json - JSON to parse.
+   *
+   * @param {string} json JSON to parse.
    * @return {Object} Parsed object.
    */
-  function fromJson(json) {
+  var fromJson = function fromJson(json) {
     return isString(json) ? JSON.parse(json) : json;
-  }
+  };
+
   /**
    * Proxy for `JSON.stringify`.
+   *
    * @method
-   * @param {*} value - Value to serialize to JSON.
+   * @param {*} value Value to serialize to JSON.
    * @return {string} JSON string.
    */
   var toJson = JSON.stringify;
+
   /**
    * Deep copy a value.
-   * @param {*} from - Value to deep copy.
+   *
+   * @param {*} from Value to deep copy.
    * @return {*} Deep copy of `from`.
    */
-  function copy(from, to, stackFrom, stackTo, blacklist) {
+  var copy = function copy(from, to, stackFrom, stackTo, blacklist) {
     if (!to) {
       to = from;
       if (from) {
@@ -447,45 +480,18 @@
       }
     }
     return to;
-  }
-  var SPLIT = /\s+/;
-  var NON_ALPHA = /[^A-Za-z]/g;
-  var PASCAL_CASE = /(\w)(\w*)/g;
-  function pascalize(g0, g1, g2) {
-    return '' + g1.toUpperCase() + g2.toLowerCase();
-  }
-  function mapToPascal(x) {
-    return x.replace(NON_ALPHA, '').replace(PASCAL_CASE, pascalize);
-  }
-  /**
-   * Convert a string to pascalcase.
-   * @param {string} str - String to convert.
-   * @return {string} Converted string.
-   */
-  function pascalCase(str) {
-    return str.split(SPLIT).map(mapToPascal).join('');
-  }
-  /**
-   * Convert a string to camelcase.
-   * @param {string} str - String to convert.
-   * @return {string} Converted string.
-   */
-  function camelCase(str) {
-    str = pascalCase(str);
-    if (str) {
-      return str.charAt(0).toLowerCase() + str.slice(1);
-    }
-    return str;
-  }
+  };
+
   /**
    * Add eventing capabilities into the target object.
-   * @param {Object} target - Target object.
-   * @param {Function} [getter] - Custom getter for retrieving the object's event
+   *
+   * @param {Object} target Target object.
+   * @param {Function} [getter] Custom getter for retrieving the object's event
    * listeners.
-   * @param {Function} [setter] - Custom setter for setting the object's event
+   * @param {Function} [setter] Custom setter for setting the object's event
    * listeners.
    */
-  function eventify(target, getter, setter, enumerable) {
+  var eventify = function eventify(target, getter, setter, enumerable) {
     target = target || this;
     var _events = {};
     if (!getter && !setter) {
@@ -553,12 +559,12 @@
         }
       }
     });
-  }
+  };
 
   /*eslint-disable*/
   // RiveraGroup/node-tiny-uuid
   // DO WTF YOU WANT TO PUBLIC LICENSE
-  function uuid(a, b) {
+  var uuid = function uuid(a, b) {
     for (b = a = ''; // b - result , a - numeric variable
     a++ < 36; b += a * 51 & 52 // if "a" is not 9 or 14 or 19 or 24
     ? //  return a random number or 4
@@ -569,7 +575,7 @@
     ).toString(16) : '-' //  in other cases (if "a" is 9,14,19,24) insert "-"
     ) {}
     return b;
-  }
+  };
   /*eslint-enable*/
 
   var classCallCheck = function classCallCheck(instance, Constructor) {
@@ -589,6 +595,7 @@
   var addHiddenPropsToTarget = function addHiddenPropsToTarget(target, props) {
     forOwn(props, function (value, key) {
       props[key] = {
+        writable: true,
         value: value
       };
     });
@@ -667,7 +674,6 @@ var utils = Object.freeze({
     isFunction: isFunction,
     isSorN: isSorN,
     get: get,
-    unset: unset,
     set: set,
     forOwn: forOwn,
     deepMixIn: deepMixIn,
@@ -680,8 +686,6 @@ var utils = Object.freeze({
     fromJson: fromJson,
     toJson: toJson,
     copy: copy,
-    pascalCase: pascalCase,
-    camelCase: camelCase,
     eventify: eventify,
     uuid: uuid,
     classCallCheck: classCallCheck,
@@ -821,9 +825,9 @@ var utils = Object.freeze({
         return Query.ops[op](value, predicate);
       }
       if (op.indexOf('like') === 0) {
-        return this.like(predicate, op.substr(4)).exec(value) !== null;
+        return !isNull(this.like(predicate, op.substr(4)).exec(value));
       } else if (op.indexOf('notLike') === 0) {
-        return this.like(predicate, op.substr(7)).exec(value) === null;
+        return isNull(this.like(predicate, op.substr(7)).exec(value));
       }
     },
     like: function like(pattern, flags) {
@@ -2374,15 +2378,14 @@ var utils = Object.freeze({
     this._listeners = value;
   });
 
-  /**
-   * @ignore
-   */
-  function applyBelongsTo(Mapper, Relation, opts) {
-    opts || (opts = {});
+  var belongsToType = 'belongsTo';
+  var hasManyType = 'hasMany';
+  var hasOneType = 'hasOne';
 
-    var getRelation = opts.getRelation || function () {
-      return Relation;
-    };
+  function Relation(related, opts) {
+    var self = this;
+
+    opts || (opts = {});
 
     var localField = opts.localField;
     if (!localField) {
@@ -2390,85 +2393,47 @@ var utils = Object.freeze({
     }
 
     var foreignKey = opts.foreignKey || opts.localKey;
-    if (!foreignKey) {
+    if (!foreignKey && (opts.type === belongsToType || opts.type === hasOneType)) {
       throw new Error('foreignKey is required');
     }
-
-    // if (isFunction(Mapper.RecordClass)) {
-    //   // Setup configuration of the property
-    //   const descriptor = {
-    //     // Whether the field specified by "localField" will show up in "for...in"
-    //     enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
-    //     // Set default method for retrieving the linked relation
-    //     get () {
-    //       return this._get(`links.${localField}`)
-    //     },
-    //     // Set default method for setting the linked relation
-    //     set (parent) {
-    //       const self = this
-    //       self._set(`links.${localField}`, parent)
-    //       set(self, foreignKey, parent ? get(parent, getRelation().idAttribute) : undefined)
-    //       return get(self, localField)
-    //     }
-    //   }
-
-    //   const originalGet = descriptor.get
-    //   const originalSet = descriptor.set
-
-    //   // Check for user-defined getter
-    //   if (opts.get) {
-    //     // Set user-defined getter
-    //     descriptor.get = function () {
-    //       // Call user-defined getter, passing in:
-    //       //  - target Mapper
-    //       //  - related Mapper
-    //       //  - instance of target Mapper
-    //       //  - the original getter function, in case the user wants to use it
-    //       return opts.get(Mapper, getRelation(), this, () => originalGet.call(this))
-    //     }
-    //     delete descriptor.writable
-    //   }
-
-    //   // Check for user-defined setter
-    //   if (opts.set) {
-    //     // Set user-defined setter
-    //     descriptor.set = function (parent) {
-    //       // Call user-defined getter, passing in:
-    //       //  - target Mapper
-    //       //  - related Mapper
-    //       //  - instance of target Mapper
-    //       //  - instance of related Mapper
-    //       //  - the original setter function, in case the user wants to use it
-    //       return opts.set(Mapper, getRelation(), this, parent, value => originalSet.call(this, value === undefined ? parent : value))
-    //     }
-    //     delete descriptor.writable
-    //   }
-
-    //   // Finally, added property to prototype of target Mapper
-    //   Object.defineProperty(Mapper.RecordClass.prototype, localField, descriptor)
-    // }
-
-    if (!Mapper.relationList) {
-      Mapper.relationList = [];
+    var localKeys = opts.localKeys;
+    var foreignKeys = opts.foreignKeys;
+    if (!foreignKey && !localKeys && !foreignKeys && opts.type === hasManyType) {
+      throw new Error('one of (foreignKey, localKeys, foreignKeys) is required');
     }
-    if (!Mapper.relationFields) {
-      Mapper.relationFields = [];
-    }
-    opts.type = 'belongsTo';
-    opts.name = Mapper.name;
-    opts.relation = isString(Relation) ? Relation : Relation.name;
-    opts.getRelation = getRelation;
-    Mapper.relationList.push(opts);
-    Mapper.relationFields.push(localField);
 
-    // Return target Mapper for chaining
-    return Mapper;
+    if (isString(related)) {
+      opts.relation = related;
+    } else if (related) {
+      opts.relation = related.name;
+    }
+
+    if (!related || isString(related) && !isFunction(opts.getRelation)) {
+      throw new Error('you must provide a reference to the related mapper!');
+    }
+
+    fillIn(self, opts);
   }
+
+  var relatedTo = function relatedTo(mapper, related, opts) {
+    opts || (opts = {});
+    if (!opts.type) {
+      throw new Error('must specify relation type!');
+    }
+    opts.mapper = mapper;
+    opts.name = mapper.name;
+    var relation = new Relation(related, opts);
+
+    mapper.relationList || (mapper.relationList = []);
+    mapper.relationFields || (mapper.relationFields = []);
+    mapper.relationList.push(relation);
+    mapper.relationFields.push(relation.localField);
+  };
 
   /**
    * @memberof! module:js-data
    *
-   * @param {Mapper} Relation The Relation the target belongs to.
+   * @param {Mapper} related The relation the target belongs to.
    * @param {Object} opts Configuration options.
    * @param {string} opts.foreignKey The field that holds the primary key of the
    * related record.
@@ -2477,470 +2442,67 @@ var utils = Object.freeze({
    * @return {Function} Invocation function, which accepts the target as the only
    * parameter.
    */
-  function belongsTo(Relation, opts) {
-    return function (target) {
-      return applyBelongsTo(target, Relation, opts);
-    };
-  }
-
-  /**
-   * @memberof! module:js-data
-   * @example
-   * // ES6
-   * import {configure, Model} from 'js-data'
-   *
-   * // @configure(opts) (ES7)
-   * class User extends JSData.Model {}
-   * configure(opts)(User)
-   *
-   * // ES5
-   * var JSData = require('js-data')
-   * var User = JSData.Model.extend()
-   * User.configure(opts)
-   *
-   * @param {Object} opts - Properties to apply to the target.
-   * @param {boolean} [overwrite=true] - Whether to overwrite properties that
-   * already exist on the target.
-   */
-  function configure(opts) {
-    var overwrite = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
-
-    opts = opts || {};
-    return function (target) {
-      forOwn(opts, function (value, key) {
-        if (target[key] === undefined || overwrite) {
-          target[key] = copy(value);
-        }
-      });
-      return target;
-    };
-  }
-
-  /**
-   * @ignore
-   */
-  function applyHasMany(Mapper, Relation, opts) {
+  var belongsTo = function belongsTo(related, opts) {
     opts || (opts = {});
-
-    var getRelation = opts.getRelation || function () {
-      return Relation;
-    };
-
-    var localField = opts.localField;
-    if (!localField) {
-      throw new Error('localField is required');
-    }
-
-    var foreignKey = opts.foreignKey;
-    var localKeys = opts.localKeys;
-    var foreignKeys = opts.foreignKeys;
-    if (!foreignKey && !localKeys && !foreignKeys) {
-      throw new Error('one of (foreignKey, localKeys, foreignKeys) is required');
-    }
-
-    // // Setup configuration of the property
-    // const descriptor = {
-    //   // Whether the field specified by "localField" will show up in "for...in"
-    //   enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
-    //   // Set default method for retrieving the linked relation
-    //   get () {
-    //     return this._get(`links.${getLocalField()}`)
-    //   },
-    //   // Set default method for setting the linked relation
-    //   set (children) {
-    //     if (!children) {
-    //       return
-    //     }
-    //     this._set(`links.${getLocalField()}`, children)
-    //     if (children && children.length) {
-    //       const id = get(this, Model.idAttribute)
-    //       if (foreignKey) {
-    //         children.forEach(function (child) {
-    //           set(child, foreignKey, id)
-    //         })
-    //       } else if (localKeys) {
-    //         const keys = []
-    //         children.forEach(function (child) {
-    //           keys.push(get(child, getRelation().idAttribute))
-    //         })
-    //         set(this, localKeys, keys)
-    //       } else if (foreignKeys) {
-    //         children.forEach(function (child) {
-    //           const keys = get(child, foreignKeys)
-    //           if (keys) {
-    //             if (keys.indexOf(id) === -1) {
-    //               keys.push(id)
-    //             }
-    //           } else {
-    //             set(child, foreignKeys, [id])
-    //           }
-    //         })
-    //       }
-    //     }
-    //     return get(this, getLocalField())
-    //   }
-    // }
-
-    // const originalGet = descriptor.get
-    // const originalSet = descriptor.set
-
-    // // Check for user-defined getter
-    // if (opts.get) {
-    //   // Set user-defined getter
-    //   descriptor.get = function () {
-    //     // Call user-defined getter, passing in:
-    //     //  - target Model
-    //     //  - related Model
-    //     //  - instance of target Model
-    //     //  - the original getter function, in case the user wants to use it
-    //     return opts.get(Model, getRelation(), this, () => originalGet.call(this))
-    //   }
-    // }
-
-    // // Check for user-defined setter
-    // if (opts.set) {
-    //   // Set user-defined setter
-    //   descriptor.set = function (children) {
-    //     // Call user-defined getter, passing in:
-    //     //  - target Model
-    //     //  - related Model
-    //     //  - instance of target Model
-    //     //  - instances of related Model
-    //     //  - the original setter function, in case the user wants to use it
-    //     return opts.set(Model, getRelation(), this, children, value => originalSet.call(this, value === undefined ? children : value))
-    //   }
-    // }
-
-    // // Finally, added property to prototype of target Model
-    // Object.defineProperty(Model.prototype, getLocalField(), descriptor)
-
-    if (!Mapper.relationList) {
-      Mapper.relationList = [];
-    }
-    if (!Mapper.relationFields) {
-      Mapper.relationFields = [];
-    }
-    opts.type = 'hasMany';
-    opts.name = Mapper.name;
-    opts.relation = isString(Relation) ? Relation : Relation.name;
-    opts.getRelation = getRelation;
-    Mapper.relationList.push(opts);
-    Mapper.relationFields.push(localField);
-
-    // Return target Mapper for chaining
-    return Mapper;
-  }
-
-  /**
-   * @memberof! module:js-data
-   *
-   * @param {Mapper} Relation - The relation of which the target has many.
-   * @param {Object} opts - Configuration options.
-   * @param {string} opts.localField The field on the target where the relation
-   * will be attached.
-   * @return {Function} Invocation function, which accepts the target as the only
-   * parameter.
-   */
-  function hasMany(Relation, opts) {
+    opts.type = belongsToType;
     return function (target) {
-      return applyHasMany(target, Relation, opts);
+      relatedTo(target, related, opts);
     };
-  }
-
-  /**
-   * @ignore
-   */
-  function applyHasOne(Mapper, Relation, opts) {
-    opts || (opts = {});
-
-    var getRelation = opts.getRelation || function () {
-      return Relation;
-    };
-
-    var localField = opts.localField;
-    if (!localField) {
-      throw new Error('localField is required');
-    }
-
-    var foreignKey = opts.foreignKey;
-    if (!foreignKey) {
-      throw new Error('foreignKey is required');
-    }
-
-    // // Setup configuration of the property
-    // const descriptor = {
-    //   // Whether the field specified by "localField" will show up in "for...in"
-    //   enumerable: opts.enumerable !== undefined ? !!opts.enumerable : false,
-    //   // Set default method for retrieving the linked relation
-    //   get () {
-    //     return this._get(`links.${getLocalField()}`)
-    //   },
-    //   // Set default method for setting the linked relation
-    //   set (child) {
-    //     if (!child) {
-    //       return
-    //     }
-    //     this._set(`links.${getLocalField()}`, child)
-    //     set(child, getForeignKey(), get(this, Model.idAttribute))
-    //     return get(this, getLocalField())
-    //   }
-    // }
-
-    // // Check for user-defined getter
-    // if (opts.get) {
-    //   const originalGet = descriptor.get
-    //   // Set user-defined getter
-    //   descriptor.get = function () {
-    //     // Call user-defined getter, passing in:
-    //     //  - target Model
-    //     //  - related Model
-    //     //  - instance of target Model
-    //     //  - the original getter function, in case the user wants to use it
-    //     return opts.get(Model, Relation, this, originalGet ? (...args) => originalGet.apply(this, args) : undefined)
-    //   }
-    // }
-
-    // // Check for user-defined setter
-    // if (opts.set) {
-    //   const originalSet = descriptor.set
-    //   // Set user-defined setter
-    //   descriptor.set = function (child) {
-    //     // Call user-defined getter, passing in:
-    //     //  - target Model
-    //     //  - related Model
-    //     //  - instance of target Model
-    //     //  - instance of related Model
-    //     //  - the original setter function, in case the user wants to use it
-    //     return opts.set(Model, Relation, this, child, originalSet ? (...args) => originalSet.apply(this, args) : undefined)
-    //   }
-    // }
-
-    // // Finally, added property to prototype of target Model
-    // Object.defineProperty(Model.prototype, getLocalField(), descriptor)
-
-    if (!Mapper.relationList) {
-      Mapper.relationList = [];
-    }
-    if (!Mapper.relationFields) {
-      Mapper.relationFields = [];
-    }
-    opts.type = 'hasOne';
-    opts.name = Mapper.name;
-    opts.relation = isString(Relation) ? Relation : Relation.name;
-    opts.getRelation = getRelation;
-    Mapper.relationList.push(opts);
-    Mapper.relationFields.push(localField);
-
-    // Return target Mapper for chaining
-    return Mapper;
-  }
+  };
 
   /**
    * @memberof! module:js-data
    *
-   * @param {Mapper} Relation The Relation of which the target has one.
+   * @param {Mapper} related The relation of which the target has many.
    * @param {Object} opts Configuration options.
-   * @param {string} opts.foreignKey The field that holds the primary key of the
+   * @param {string} [opts.foreignKey] The field that holds the primary key of the
    * related record.
-   * @param {string} opts.localField The field on the target where the relation
-   * will be attached.
+   * @param {string} opts.localField The field that holds a reference to the
+   * related record object.
    * @return {Function} Invocation function, which accepts the target as the only
    * parameter.
    */
-  function hasOne(Relation, opts) {
-    return function (target) {
-      return applyHasOne(target, Relation, opts);
-    };
-  }
-
-  /**
-   * @param {Model} target - Target Model.
-   * @param {string} key - Key for new property.
-   * @param {Object} opts - Configuration options.
-   * @ignore
-   */
-  function makeDescriptor(target, key, opts) {
-    var descriptor = {
-      enumerable: opts.enumerable !== undefined ? opts.enumerable : true
-    };
-    descriptor.get = function () {
-      return this._get('props.' + key);
-    };
-    descriptor.set = function (value) {
-      var _this = this;
-
-      // TODO: rework this
-      // if (isFunction(opts.validate) && !opts.validate(value)) {
-      //   return false
-      // }
-      var _get = this._get;
-      var _set = this._set;
-      var _unset = this._unset;
-      // if (!_get('noValidate')) {
-      //   const errors = validate(opts, value)
-      //   if (errors) {
-      //     throw new Error(errors.join(', '))
-      //   }
-      // }
-      if (opts.track && !_get('creating')) {
-        (function () {
-          var changing = _get('changing');
-          var previous = _get('previous.' + key);
-          var current = _get('props.' + key);
-          var changed = _get('changed');
-          if (!changing) {
-            changed = [];
-          }
-          var index = changed.indexOf(key);
-          if (current !== value && index === -1) {
-            changed.push(key);
-          }
-          if (previous !== value) {
-            _set('changes.' + key, value);
-          } else {
-            _unset('changes.' + key);
-            if (index >= 0) {
-              changed.splice(index, 1);
-            }
-          }
-          if (!changed.length) {
-            changing = false;
-            _unset('changing');
-            _unset('changed');
-            if (_get('eventId')) {
-              clearTimeout(_get('eventId'));
-              _unset('eventId');
-            }
-          }
-          if (!changing && changed.length) {
-            _set('changed', changed);
-            _set('changing', true);
-            _set('eventId', setTimeout(function () {
-              _unset('changed');
-              _unset('eventId');
-              _unset('changing');
-              if (!_get('silent')) {
-                var i = undefined;
-                for (i = 0; i < changed.length; i++) {
-                  _this.emit('change:' + changed[i], _this, get(_this, changed[i]));
-                }
-                _this.emit('change', _this, _get('changes'));
-              }
-              _unset('silent');
-            }, 0));
-          }
-        })();
-      }
-      _set('props.' + key, value);
-      // if (_get('$') && opts.indexed) {
-      //   target.getCollection().updateIndex(this, { index: key })
-      // }
-      return value;
-    };
-    // if (opts.indexed) {
-    //   // Update index
-    //   // TODO: Make this configurable, ie. immediate or lazy update
-    //   target.createIndex(key)
-    // }
-    if (opts.get) {
-      if (descriptor.get) {
-        (function () {
-          var originalGet = descriptor.get;
-          descriptor.get = function () {
-            return opts.get.call(this, originalGet);
-          };
-        })();
-      } else {
-        descriptor.get = opts.get;
-      }
-    }
-    if (opts.set) {
-      if (descriptor.set) {
-        (function () {
-          var originalSet = descriptor.set;
-          descriptor.set = function (value) {
-            return opts.set.call(this, value, originalSet);
-          };
-        })();
-      } else {
-        descriptor.set = opts.set;
-      }
-    }
-    return descriptor;
-  }
-
-  /**
-   * @memberof! module:js-data
-   * @example
-   * // ES6
-   * import {setSchema, Model} from 'js-data'
-   * const properties = {
-   *   first: {},
-   *   last: {},
-   *   role: {
-   *     value: 'dev'
-   *   },
-   *   // computed property
-   *   name: {
-   *     get() { return `${this.first} ${this.last}` },
-   *     set(value) {
-   *       let parts = value.split(' ')
-   *       this.first = parts[0]
-   *       this.last = parts[1]
-   *       return this
-   *     }
-   *   }
-   * }
-   *
-   * // @setSchema(properties) (ES7)
-   * class User extends Model {}
-   * User.setSchema(properties)
-   *
-   * // ES5
-   * var JSData = require('js-data')
-   * var User = JSData.Model.extend({}, { name: 'User' })
-   * User.setSchema(properties)
-   *
-   * @param {Object.<string, Object>} opts - Property configurations.
-   * @return {Function} Invocation function, which accepts the target as the only
-   * parameter.
-   */
-  function setSchema(opts) {
+  var hasMany = function hasMany(related, opts) {
     opts || (opts = {});
-
+    opts.type = hasManyType;
     return function (target) {
-      target.schema || (target.schema = {});
-      configure(target.schema, opts);
-
-      forOwn(opts, function (prop, key) {
-        var descriptor = makeDescriptor(target, key, prop);
-        // TODO: This won't work for properties of Object type, because all
-        // instances will share the prototype value
-        if (!descriptor.writable) {
-          Object.defineProperty(target.prototype, key, descriptor);
-        }
-      });
-      return target;
+      relatedTo(target, related, opts);
     };
-  }
-
-  var op = 'registerAdapter';
+  };
 
   /**
-   * Add the provided adapter to the target's "adapters" property, registering it
-   * with the specified.
    * @memberof! module:js-data
-   * @param {string} name - The name under which to register the adapter.
-   * @param {Adapter} adapter - The adapter to register.
-   * @param {Object} opts - Configuration options.
-   * @param {boolean} [opts.default=false] - Whether to make the adapter the
+   *
+   * @param {Mapper} related The relation of which the target has one.
+   * @param {Object} opts Configuration options.
+   * @param {string} [opts.foreignKey] The field that holds the primary key of the
+   * related record.
+   * @param {string} opts.localField The field that holds a reference to the
+   * related record object.
+   * @return {Function} Invocation function, which accepts the target as the only
+   * parameter.
+   */
+  var hasOne = function hasOne(related, opts) {
+    opts || (opts = {});
+    opts.type = hasOneType;
+    return function (target) {
+      relatedTo(target, related, opts);
+    };
+  };
+
+  /**
+   * Register an adapter with the target. Target must have a "getAdapters" method.
+   * @memberof! module:js-data
+   * @param {string} name The name under which to register the adapter.
+   * @param {Adapter} adapter The adapter to register.
+   * @param {Object} opts Configuration options.
+   * @param {boolean} [opts.default=false] Whether to make the adapter the
    * default adapter for the target.
    * @return {Function} Invocation function, which accepts the target as the only
    * parameter.
    */
-  function registerAdapter(name, adapter, opts) {
+  var registerAdapter = function registerAdapter(name, adapter, opts) {
     opts || (opts = {});
-    opts.op = op;
     return function (target) {
       // Register the adapter
       target.getAdapters()[name] = adapter;
@@ -2949,7 +2511,7 @@ var utils = Object.freeze({
         target.defaultAdapter = name;
       }
     };
-  }
+  };
 
   /**
    * js-data's Record class.
@@ -2985,9 +2547,9 @@ var utils = Object.freeze({
       self._set('noValidate', true);
     }
     fillIn(self, props);
-    self._set('creating');
+    self._set('creating'); // unset
     self._set('changes', {});
-    self._set('noValidate');
+    self._set('noValidate'); // unset
     self._set('previous', copy(props));
   }
 
@@ -2995,6 +2557,9 @@ var utils = Object.freeze({
 
   addHiddenPropsToTarget(Record.prototype, {
     _mapper: function _mapper() {
+      if (!this.constructor.Mapper) {
+        throw new Error('This RecordClass has no Mapper!');
+      }
       return this.constructor.Mapper;
     },
 
@@ -3028,7 +2593,7 @@ var utils = Object.freeze({
       }
       set(self, key, value);
       if (!self._get('eventId')) {
-        self._set('silent');
+        self._set('silent'); // unset
       }
     },
 
@@ -3058,7 +2623,7 @@ var utils = Object.freeze({
     },
     commit: function commit() {
       var self = this;
-      self._set('changed');
+      self._set('changed'); // unset
       self._set('changes', {});
       self._set('previous', copy(self));
       return self;
@@ -3830,7 +3395,7 @@ var utils = Object.freeze({
      * @name Mapper#_adapters
      * @private
      */
-    _adapters: {},
+    _adapters: null,
 
     /**
      * Hash of registered listeners. Don't modify. Use {@link Mapper#on} and
@@ -3948,7 +3513,7 @@ var utils = Object.freeze({
      */
     RecordClass: undefined,
 
-    schema: {},
+    schema: null,
 
     /**
      * Whether {@link Mapper#create} and {@link Mapper#createMany} should instead
@@ -3975,9 +3540,11 @@ var utils = Object.freeze({
     opts || (opts = {});
     fillIn(self, opts);
     fillIn(self, copy(MAPPER_DEFAULTS));
+    self._adapters || (self._adapters = {});
+    self._listeners || (self._listeners = {});
 
     if (!(self.schema instanceof Schema)) {
-      self.schema = new Schema(self.schema);
+      self.schema = new Schema(self.schema || {});
     }
 
     if (isUndefined(self.RecordClass)) {
@@ -5035,32 +4602,6 @@ var utils = Object.freeze({
     },
 
     /**
-     * Invoke the {@link module:js-data.exports.setSchema setSchema} decorator on
-     * this Mapper.
-     *
-     * @name Mapper#setSchema
-     * @method
-     * @param {Object} opts Property configurations.
-     * @return {Mapper} A reference to the Mapper for chaining.
-     */
-    setSchema: function setSchema$$(opts) {
-      return setSchema(opts)(this);
-    },
-
-    /**
-     * Invoke the {@link module:js-data.exports.configure configure} decorator on
-     * this Mapper.
-     *
-     * @name Mapper#configure
-     * @method
-     * @param {Object} opts Configuration
-     * @return {Mapper} A reference to the Mapper for chaining.
-     */
-    configure: function configure$$(opts) {
-      return configure(opts)(this);
-    },
-
-    /**
      * Invoke the {@link module:js-data.exports.registerAdapter registerAdapter}
      * decorator on this Mapper.
      *
@@ -5120,10 +4661,6 @@ var utils = Object.freeze({
   }, function (value) {
     this._listeners = value;
   });
-
-  var belongsToType = 'belongsTo';
-  var hasManyType = 'hasMany';
-  var hasOneType = 'hasOne';
 
   var CONTAINER_DEFAULTS = {};
 
@@ -5261,10 +4798,6 @@ var utils = Object.freeze({
     }
   });
 
-  var belongsToType$1 = 'belongsTo';
-  var hasManyType$1 = 'hasMany';
-  var hasOneType$1 = 'hasOne';
-
   /**
    * TODO
    *
@@ -5292,6 +4825,7 @@ var utils = Object.freeze({
       return self;
     },
     add: function add(records, opts) {
+      // console.log('add', this.mapper.name, records)
       var self = this;
       var datastore = self.datastore;
       var mapper = self.mapper;
@@ -5330,9 +4864,9 @@ var utils = Object.freeze({
           // data as quickly as possible
           var relatedCollection = datastore.getCollection(relationName);
           var type = def.type;
-          var isBelongsTo = type === belongsToType$1;
-          var isHasMany = type === hasManyType$1;
-          var isHasOne = type === hasOneType$1;
+          var isBelongsTo = type === belongsToType;
+          var isHasMany = type === hasManyType;
+          var isHasOne = type === hasOneType;
           var relatedData = undefined;
 
           records.forEach(function (record) {
@@ -5355,7 +4889,7 @@ var utils = Object.freeze({
                         set(toInsertItem, foreignKey, id);
                       }
                       // Finally add this related item
-                      toInsertItem = relatedCollection.add(relationName, toInsertItem);
+                      toInsertItem = relatedCollection.add(toInsertItem);
                     }
                     return toInsertItem;
                   });
@@ -5376,7 +4910,7 @@ var utils = Object.freeze({
                       set(relatedData, def.foreignKey, id);
                     }
                     // Finally insert this related item
-                    relatedData = relatedCollection.add(relationName, relatedData);
+                    relatedData = relatedCollection.add(relatedData);
                   }
                 }
                 set(record, localField, relatedData);
@@ -5496,8 +5030,9 @@ var utils = Object.freeze({
       var self = this;
       var mapper = getSuper(self).prototype.defineMapper.call(self, name, opts);
       mapper.relationList = mapper.relationList || [];
+
       mapper.relationList.forEach(function (def) {
-        // Conditionally add getters and setters to RecordClass prototype
+        // TODO: Conditionally add getters and setters to RecordClass prototype
       });
 
       // The datastore uses a subclass of Collection that is "datastore-aware"
@@ -5710,34 +5245,32 @@ var utils = Object.freeze({
    * ```
    *
    * @module js-data
-   * @property {Function} belongsTo - {@link module:js-data.exports.belongsTo belongsTo}
+   * @property {Function} belongsTo {@link module:js-data.exports.belongsTo belongsTo}
    * decorator function.
-   * @property {Function} configure - {@link module:js-data.exports.configure configure}
+   * @property {Function} Collection {@link Collection} class.
+   * @property {Function} DS {@link DS} class.
+   * @property {Function} hasMany {@link module:js-data.exports.hasMany hasMany}
    * decorator function.
-   * @property {Function} Collection - {@link Collection} class.
-   * @property {Function} DS - {@link DS} class.
-   * @property {Function} hasMany - {@link module:js-data.exports.hasMany hasMany}
+   * @property {Function} hasOne {@link module:js-data.exports.hasOne hasOne}
    * decorator function.
-   * @property {Function} hasOne - {@link module:js-data.exports.hasOne hasOne}
+   * @property {Function} initialize {@link module:js-data.exports.initialize initialize}
    * decorator function.
-   * @property {Function} initialize - {@link module:js-data.exports.initialize initialize}
-   * decorator function.
-   * @property {Function} Model - {@link Model} class.
-   * @property {Function} registerAdapter - {@link registerAdapter} decorator
+   * @property {Function} Mapper {@link Mapper} class.
+   * @property {Function} registerAdapter {@link registerAdapter} decorator
    * function.
-   * @property {Function} setSchema - {@link setSchema} decorator function.
-   * @property {Function} Query - {@link Query} class.
-   * @property {Object} utils - Utility methods used by the `js-data` module. See
+   * @property {Function} setSchema {@link setSchema} decorator function.
+   * @property {Function} Query {@link Query} class.
+   * @property {Object} utils Utility methods used by the `js-data` module. See
    * {@link module:js-data.module:utils utils}.
-   * @property {Object} version - Details of the current version of the `js-data`
+   * @property {Object} version Details of the current version of the `js-data`
    * module.
-   * @property {string} version.full - The full semver value.
-   * @property {number} version.major - The major version number.
-   * @property {number} version.minor - The minor version number.
-   * @property {number} version.patch - The patch version number.
-   * @property {(string|boolean)} version.alpha - The alpha version value,
+   * @property {string} version.full The full semver value.
+   * @property {number} version.major The major version number.
+   * @property {number} version.minor The minor version number.
+   * @property {number} version.patch The patch version number.
+   * @property {(string|boolean)} version.alpha The alpha version value,
    * otherwise `false` if the current version is not alpha.
-   * @property {(string|boolean)} version.beta - The beta version value,
+   * @property {(string|boolean)} version.beta The beta version value,
    * otherwise `false` if the current version is not beta.
    */
 
@@ -5762,11 +5295,13 @@ var utils = Object.freeze({
   exports.Record = Record;
   exports.utils = utils;
   exports.version = version;
+  exports.belongsToType = belongsToType;
+  exports.hasManyType = hasManyType;
+  exports.hasOneType = hasOneType;
+  exports.relatedTo = relatedTo;
   exports.belongsTo = belongsTo;
-  exports.configure = configure;
   exports.hasMany = hasMany;
   exports.hasOne = hasOne;
-  exports.setSchema = setSchema;
   exports.registerAdapter = registerAdapter;
   exports.types = types;
   exports.typeGroupValidators = typeGroupValidators;

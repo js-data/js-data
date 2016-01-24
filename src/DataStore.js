@@ -5,8 +5,8 @@ import {
   getSuper,
   isBrowser
 } from './utils'
-import Container from './container'
-import LinkedCollection from './linkedcollection'
+import Container from './Container'
+import LinkedCollection from './LinkedCollection'
 
 const DATASTORE_DEFAULTS = {
   linkRelations: isBrowser
@@ -100,8 +100,9 @@ const DataStore = Container.extend({
     const self = this
     const mapper = getSuper(self).prototype.defineMapper.call(self, name, opts)
     mapper.relationList = mapper.relationList || []
+
     mapper.relationList.forEach(function (def) {
-      // Conditionally add getters and setters to RecordClass prototype
+      // TODO: Conditionally add getters and setters to RecordClass prototype
     })
 
     // The datastore uses a subclass of Collection that is "datastore-aware"

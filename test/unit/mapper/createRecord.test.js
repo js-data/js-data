@@ -1,9 +1,9 @@
 export function init () {
-  describe('static createInstance', function () {
+  describe('createRecord', function () {
     it('should create an instance', function () {
       const Test = this
-      const store = new Test.JSData.DS()
-      class Person extends Test.JSData.Model {
+      const store = new Test.JSData.DataStore()
+      class Person extends Test.JSData.Record {
         say () {
           return 'hi'
         }
@@ -11,22 +11,28 @@ export function init () {
           return `${this.first} ${this.last}`
         }
       }
+      const PersonMapper = store.defineMapper('person', {
+        RecordClass: Person
+      })
 
-      const Dog = Test.JSData.Model.extend({
-        say: function () {
+      class Dog extends Test.JSData.Record {
+        say () {
           return 'woof'
         }
-      }, {
+      }
+      const DogMapper = store.defineMapper('dog', {
+        RecordClass: Dog,
         name: 'Dog'
       })
 
-      const Cat = store.defineModel({
-        name: 'Cat',
-        methods: {
-          say: function () {
-            return 'meow'
-          }
+      class Cat extends Test.JSData.Record {
+        say () {
+          return 'meow'
         }
+      }
+      const CatMapper = store.defineMapper('cat', {
+        name: 'Cat',
+        RecordClass: Cat
       })
 
       const personAttrs = {
@@ -38,11 +44,11 @@ export function init () {
         name: 'Spot'
       }
 
-      const person = Person.createInstance(personAttrs)
+      const person = PersonMapper.createRecord(personAttrs)
       const person2 = new Person(personAttrs)
-      const dog = Dog.createInstance(dogAttrs)
+      const dog = DogMapper.createRecord(dogAttrs)
       const dog2 = new Dog(dogAttrs)
-      const cat = Cat.createInstance()
+      const cat = CatMapper.createRecord()
       const cat2 = new Cat()
 
       Test.assert.equal(person.say(), 'hi')

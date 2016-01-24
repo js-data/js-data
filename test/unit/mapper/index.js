@@ -22,116 +22,10 @@ export function init () {
   describe('Mapper', function () {
     it('should be a constructor function', function () {
       const Test = this
-      Test.assert.isFunction(Test.JSData.Model, 'should be a function')
-      let instance = new Test.JSData.Model()
-      Test.assert.isTrue(instance instanceof Test.JSData.Model, 'instance should be an instance')
-      instance = new Test.JSData.Model({ foo: 'bar' })
-      Test.assert.deepEqual(instance, { foo: 'bar' }, 'instance should get initialization properties')
-    })
-    it('should have the correct static defaults', function () {
-      const Test = this
-      for (var key in defaults) {
-        Test.assert.equal(Test.JSData.Model[key], defaults[key], key + ' should be ' + defaults[key])
-      }
-    })
-    it('child should inherit static defaults', function () {
-      const Test = this
-      var key
-      let User = Test.JSData.Model.extend({}, {
-        name: 'user'
-      })
-      for (key in defaults) {
-        Test.assert.equal(User[key], defaults[key], key + ' should be ' + defaults[key])
-      }
-      class User2 extends Test.JSData.Model {}
-      for (key in defaults) {
-        Test.assert.equal(User2[key], defaults[key], key + ' should be ' + defaults[key])
-      }
-    })
-    it('child should override static defaults', function () {
-      const Test = this
-      const store = new Test.JSData.DS()
-
-      /**
-       * ES5 ways of creating a new Model
-       */
-      const User = Test.JSData.Model.extend({
-        initialize () {
-          this.foo = 'foo'
-        }
-      }, {
-        csp: true,
-        idAttribute: '_id',
-        name: 'user'
-      })
-      const user = new User({ id: 1 })
-      Test.assert.equal(user.foo, 'foo', 'initialize should have been called')
-      Test.assert.isTrue(user instanceof User)
-      Test.assert.isTrue(User.is(user))
-      Test.assert.notEqual(User.name, 'User')
-
-      const Post = Test.JSData.Model.extend({
-        initialize () {
-          this.foo = 'foo'
-        }
-      }, {
-        idAttribute: '_id',
-        name: 'post'
-      })
-      const post = new Post({ id: 1 })
-      Test.assert.equal(post.foo, 'foo', 'initialize should have been called')
-      Test.assert.isTrue(post instanceof Post)
-      Test.assert.isTrue(Post.is(post))
-      Test.assert.equal(Post.name, 'Post')
-
-      const Comment = store.defineModel({
-        idAttribute: '_id',
-        name: 'comment'
-      })
-      const comment = new Comment({ id: 1 })
-      Test.assert.isTrue(comment instanceof Comment)
-      Test.assert.isTrue(Comment.is(comment))
-      Test.assert.equal(Comment.name, 'Comment')
-
-      const Label = Test.JSData.Model.extend({
-        constructor: function MyLabel () {
-          Object.getPrototypeOf(this.constructor).apply(this, arguments)
-        }
-      })
-      const label = new Label({ id: 1 })
-      Test.assert.isTrue(label instanceof Label)
-      Test.assert.isTrue(Label.is(label))
-      Test.assert.equal(Label.name, 'MyLabel')
-
-      /**
-       * ES6 ways of creating a new Model
-       */
-      class Profile extends Test.JSData.Model {}
-      Profile.configure({
-        idAttribute: '_id'
-      })
-      const profile = new Profile({ id: 1 })
-      Test.assert.isTrue(profile instanceof Profile)
-      Test.assert.isTrue(Profile.is(profile))
-      Test.assert.equal(Profile.name, 'Profile')
-
-      class Type extends Test.JSData.Model {}
-      Type.configure({
-        idAttribute: '_id'
-      })
-      const type = new Type({ id: 1 })
-      Test.assert.isTrue(type instanceof Type)
-      Test.assert.isTrue(Type.is(type))
-      Test.assert.equal(Type.name, 'Type')
-
-     /**
-       * ES7 way of creating a new Model
-       */
-      // Doesn't work right now because of https://github.com/babel/babel/issues/2645
-      // @configure({
-      //   idAttribute: '_id'
-      // })
-      // class User5 extends Model {}
+      const Mapper = Test.JSData.Mapper
+      Test.assert.isFunction(Mapper)
+      const mapper = new Mapper()
+      Test.assert.isTrue(mapper instanceof Mapper)
     })
     // it('should allow schema definition with basic indexes', function () {
     //   class User extends Model {}
@@ -160,25 +54,11 @@ export function init () {
 
     it('should have events', function () {
       const Test = this
-      class User extends Test.JSData.Model {}
+      const User = new Test.JSData.Mapper()
       const listener = Test.sinon.stub()
       User.on('bar', listener)
       User.emit('bar')
-      Test.assert.isTrue(User._events() !== Test.JSData.Model._events())
       Test.assert.isTrue(listener.calledOnce)
-    })
-
-    it('should work with csp set to true', function () {
-      const Test = this
-      const User = Test.JSData.Model.extend({}, {
-        csp: true,
-        name: 'user'
-      })
-      const user = new User({ name: 'John' })
-      Test.assert.isTrue(user instanceof User)
-      Test.assert.notEqual(User.name, 'User')
-
-      Test.assert.equal(this.Post.name, 'Post')
     })
 
     // it('should allow enhanced relation getters', function () {
@@ -244,53 +124,53 @@ export function init () {
     //   Test.assert.objectsEqual(foo66.bars, [])
     //   Test.assert.objectsEqual(foo77.bars, Bar.getAll())
     // })
-    it('should allow instance events', function (done) {
-      const Test = this
-      let changed = false
-      class Foo extends Test.JSData.Model {}
-      Foo.setSchema({
-        bar: { type: 'string', track: true }
-      })
-      const foo = new Foo({ id: 1 })
+    // it('should allow instance events', function (done) {
+    //   const Test = this
+    //   let changed = false
+    //   class Foo extends Test.JSData.Mapper {}
+    //   Foo.setSchema({
+    //     bar: { type: 'string', track: true }
+    //   })
+    //   const foo = new Foo({ id: 1 })
 
-      setTimeout(function () {
-        if (!changed) {
-          done('failed to fire change event')
-        }
-      }, 10)
+    //   setTimeout(function () {
+    //     if (!changed) {
+    //       done('failed to fire change event')
+    //     }
+    //   }, 10)
 
-      foo.on('change', function () {
-        changed = true
-        done()
-      })
+    //   foo.on('change', function () {
+    //     changed = true
+    //     done()
+    //   })
 
-      foo.bar = 'baz'
-    })
-    it('should allow Resource change events', function (done) {
-      const Test = this
-      let changed = false
-      class Foo extends Test.JSData.Model {}
-      Foo.setSchema({
-        bar: { type: 'string', track: true }
-      })
-      const fooCollection = new Test.JSData.Collection([], {
-        model: Foo
-      })
-      const foo = fooCollection.add({ id: 1 })
+    //   foo.bar = 'baz'
+    // })
+    // it('should allow Resource change events', function (done) {
+    //   const Test = this
+    //   let changed = false
+    //   class Foo extends Test.JSData.Mapper {}
+    //   Foo.setSchema({
+    //     bar: { type: 'string', track: true }
+    //   })
+    //   const fooCollection = new Test.JSData.Collection([], {
+    //     model: Foo
+    //   })
+    //   const foo = fooCollection.add({ id: 1 })
 
-      setTimeout(function () {
-        if (!changed) {
-          done('failed to fire change event')
-        }
-      }, 10)
+    //   setTimeout(function () {
+    //     if (!changed) {
+    //       done('failed to fire change event')
+    //     }
+    //   }, 10)
 
-      fooCollection.on('change', function () {
-        changed = true
-        done()
-      })
+    //   fooCollection.on('change', function () {
+    //     changed = true
+    //     done()
+    //   })
 
-      foo.bar = 'baz'
-    })
+    //   foo.bar = 'baz'
+    // })
     // it('should allow resources to extend other resources in ES6', function () {
     //   class Baz extends Model {}
     //   Baz.linkRelations = true
@@ -343,51 +223,51 @@ export function init () {
     //   Test.assert.equal(foo.say(), 'Foo')
     //   Test.assert.equal(bar.say(), 'Bar')
     // })
-    it('should allow instance events 2', function (done) {
-      const Test = this
-      let changed = false
-      class Foo extends Test.JSData.Model {}
-      Foo.setSchema({
-        bar: { type: 'string', track: true }
-      })
-      const foo = new Foo({ id: 1 })
+    // it('should allow instance events 2', function (done) {
+    //   const Test = this
+    //   let changed = false
+    //   class Foo extends Test.JSData.Mapper {}
+    //   Foo.setSchema({
+    //     bar: { type: 'string', track: true }
+    //   })
+    //   const foo = new Foo({ id: 1 })
 
-      setTimeout(function () {
-        if (!changed) {
-          done('failed to fire change event')
-        }
-      }, 10)
+    //   setTimeout(function () {
+    //     if (!changed) {
+    //       done('failed to fire change event')
+    //     }
+    //   }, 10)
 
-      foo.on('change', function (Foo, foo) {
-        changed = true
-        done()
-      })
+    //   foo.on('change', function (Foo, foo) {
+    //     changed = true
+    //     done()
+    //   })
 
-      foo.set('bar', 'baz')
-    })
-    it('should allow Resource change events 2', function (done) {
-      const Test = this
-      let changed = false
-      class Foo extends Test.JSData.Model {}
-      Foo.setSchema({
-        bar: { type: 'string', track: true }
-      })
-      const fooCollection = new Test.JSData.Collection([], { model: Foo })
-      const foo = fooCollection.add({ id: 1 })
+    //   foo.set('bar', 'baz')
+    // })
+    // it('should allow Resource change events 2', function (done) {
+    //   const Test = this
+    //   let changed = false
+    //   class Foo extends Test.JSData.Mapper {}
+    //   Foo.setSchema({
+    //     bar: { type: 'string', track: true }
+    //   })
+    //   const fooCollection = new Test.JSData.Collection([], { model: Foo })
+    //   const foo = fooCollection.add({ id: 1 })
 
-      setTimeout(function () {
-        if (!changed) {
-          done('failed to fire change event')
-        }
-      }, 10)
+    //   setTimeout(function () {
+    //     if (!changed) {
+    //       done('failed to fire change event')
+    //     }
+    //   }, 10)
 
-      fooCollection.on('change', function (fooCollection, foo) {
-        changed = true
-        done()
-      })
+    //   fooCollection.on('change', function (fooCollection, foo) {
+    //     changed = true
+    //     done()
+    //   })
 
-      foo.set('bar', 'baz')
-    })
+    //   foo.set('bar', 'baz')
+    // })
 
     create.init()
     createRecord.init()
