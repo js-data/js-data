@@ -299,10 +299,22 @@ const DataStore = Container.extend({
 DataStore.prototype.defineResource = DataStore.prototype.defineMapper
 
 /**
- * TODO
+ * Create a DataStore subclass.
+ *
+ * ```javascript
+ * var MyDataStore = DataStore.extend({
+ *   foo: function () { return 'bar' }
+ * })
+ * var store = new MyDataStore()
+ * store.foo() // "bar"
+ * ```
  *
  * @name DataStore.extend
  * @method
+ * @param {Object} [props={}] Properties to add to the prototype of the
+ * subclass.
+ * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @return {Function} Subclass of DataStore.
  */
 DataStore.extend = extend
 

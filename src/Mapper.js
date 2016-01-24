@@ -2,8 +2,7 @@ import * as utils from './utils'
 import {
   belongsTo,
   hasMany,
-  hasOne,
-  registerAdapter
+  hasOne
 } from './decorators'
 import Record from './Record'
 import Schema from './Schema'
@@ -46,7 +45,7 @@ const MAPPER_DEFAULTS = {
    *
    * @name Mapper#defaultAdapter
    * @type {string}
-   * @default http
+   * @default "http"
    */
   defaultAdapter: 'http',
 
@@ -331,8 +330,8 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
    *
    * @name Mapper#getAdapter
    * @method
-   * @param {string} [name]- The name of the adapter to retrieve.
-   * @return {Adapter} The adapter, if any.
+   * @param {string} [name] The name of the adapter to retrieve.
+   * @return {Adapter} The adapter.
    */
   getAdapter (name) {
     const self = this
@@ -1220,8 +1219,7 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
   },
 
   /**
-   * Invoke the {@link module:js-data.exports.registerAdapter registerAdapter}
-   * decorator on this Mapper.
+   * Register an adapter on this mapper under the given name.
    *
    * @name Mapper#registerAdapter
    * @method
@@ -1229,16 +1227,28 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
    * @param {Adapter} adapter The adapter to register.
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.default=false] Whether to make the adapter the
-   * default for this Mapper.
-   * @return {Mapper} A reference to the Mapper for chaining.
+   * default adapter for this Mapper.
    */
   registerAdapter (name, adapter, opts) {
-    return registerAdapter(name, adapter, opts)(this)
+    const self = this
+    self.getAdapters()[name] = adapter
+    // Optionally make it the default adapter for the target.
+    if (opts === true || opts.default) {
+      self.defaultAdapter = name
+    }
   }
 })
 
 /**
  * Create a Mapper subclass.
+ *
+ * ```javascript
+ * var MyMapper = Mapper.extend({
+ *   foo: function () { return 'bar' }
+ * })
+ * var mapper = new MyMapper()
+ * mapper.foo() // "bar"
+ * ```
  *
  * @name Mapper.extend
  * @method

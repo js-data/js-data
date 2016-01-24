@@ -60,10 +60,22 @@ export default function Record (props, opts) {
 }
 
 /**
- * TODO
+ * Create a Record subclass.
+ *
+ * ```javascript
+ * var MyRecord = Record.extend({
+ *   foo: function () { return 'bar' }
+ * })
+ * var record = new MyRecord()
+ * record.foo() // "bar"
+ * ```
  *
  * @name Record.extend
  * @method
+ * @param {Object} [props={}] Properties to add to the prototype of the
+ * subclass.
+ * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @return {Function} Subclass of Record.
  */
 Record.extend = extend
 

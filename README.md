@@ -61,27 +61,29 @@ store.registerAdapter('http', new HttpAdapter(), { 'default': true })
 store.defineMapper('user')
 const Users = store.getCollection('user')
 
-let user = await store.find('user', 1)
+async function showExample () {
+  let user = await store.find('user', 1)
 
-console.log(user) // { id: 1, name: 'John' }
+  console.log(user) // { id: 1, name: 'John' }
 
-// The user record is now stored in Users
-console.log(Users.get(user.id)) // { id: 1, name: 'John' }
-console.log(user === Users.get(user.id)) // true
+  // The user record is now stored in Users
+  console.log(Users.get(user.id)) // { id: 1, name: 'John' }
+  console.log(user === Users.get(user.id)) // true
 
-user.name = 'Johnny'
+  user.name = 'Johnny'
 
-// PUT /user/1 {name:"Johnny"}
-user = await user.save()
+  // PUT /user/1 {name:"Johnny"}
+  user = await user.save()
 
-// The user record has been updated
-console.log(Users.get(user.id)) // { id: 1, name: 'Johnny' }
-console.log(user === Users.get(user.id)) // true
+  // The user record has been updated
+  console.log(Users.get(user.id)) // { id: 1, name: 'Johnny' }
+  console.log(user === Users.get(user.id)) // true
 
-await user.destroy()
+  await user.destroy()
 
-// The user instance no longer stored in UserCollection
-console.log(Users.get(1)) // undefined
+  // The user instance no longer stored in UserCollection
+  console.log(Users.get(1)) // undefined
+}
 ```
 
 __ES5:__
