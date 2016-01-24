@@ -159,10 +159,22 @@ const LinkedCollection = Collection.extend({
 })
 
 /**
- * TODO
+ * Create a LinkedCollection subclass.
+ *
+ * ```javascript
+ * var MyLinkedCollection = LinkedCollection.extend({
+ *   foo: function () { return 'bar' }
+ * })
+ * var collection = new MyLinkedCollection()
+ * collection.foo() // "bar"
+ * ```
  *
  * @name LinkedCollection.extend
  * @method
+ * @param {Object} [props={}] Properties to add to the prototype of the
+ * subclass.
+ * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @return {Function} Subclass of LinkedCollection.
  */
 LinkedCollection.extend = extend
 

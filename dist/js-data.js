@@ -523,23 +523,6 @@
     });
   };
 
-  /*eslint-disable*/
-  // RiveraGroup/node-tiny-uuid
-  // DO WTF YOU WANT TO PUBLIC LICENSE
-  var uuid = function uuid(a, b) {
-    for (b = a = ''; // b - result , a - numeric variable
-    a++ < 36; b += a * 51 & 52 // if "a" is not 9 or 14 or 19 or 24
-    ? //  return a random number or 4
-    (a ^ 15 // if "a" is not 15
-    ? // genetate a random number from 0 to 15
-    8 ^ Math.random() * (a ^ 20 ? 16 : 4) // unless "a" is 20, in which case a random number from 8 to 11
-    : 4 //  otherwise 4
-    ).toString(16) : '-' //  in other cases (if "a" is 9,14,19,24) insert "-"
-    ) {}
-    return b;
-  };
-  /*eslint-enable*/
-
   var classCallCheck = function classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError('Cannot call a class as a function');
@@ -649,7 +632,6 @@ var utils = Object.freeze({
     toJson: toJson,
     copy: copy,
     eventify: eventify,
-    uuid: uuid,
     classCallCheck: classCallCheck,
     possibleConstructorReturn: possibleConstructorReturn,
     addHiddenPropsToTarget: addHiddenPropsToTarget,
@@ -690,10 +672,22 @@ var utils = Object.freeze({
   }
 
   /**
-   * TODO
+   * Create a Query subclass.
+   *
+   * ```javascript
+   * var MyQuery = Query.extend({
+   *   foo: function () { return 'bar' }
+   * })
+   * var query = new MyQuery()
+   * query.foo() // "bar"
+   * ```
    *
    * @name Query.extend
    * @method
+   * @param {Object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {Object} [classProps={}] Static properties to add to the subclass.
+   * @return {Function} Subclass of Query.
    */
   Query.extend = extend;
 
@@ -1620,35 +1614,37 @@ var utils = Object.freeze({
    *
    * ```javascript
    * import {Collection, Record} from 'js-data'
-   * const record1 = new Record({ id: 1 })
-   * const record2 = new Record({ id: 2 })
-   * const UserCollection = new Collection([record1, record2])
-   * UserCollection.get(1) === record1 // true
+   * const user1 = new Record({ id: 1 })
+   * const user2 = new Record({ id: 2 })
+   * const UserCollection = new Collection([user1, user2])
+   * UserCollection.get(1) === user1 // true
    * ```
    *
    * @class Collection
    * @param {Array} [records] Initial set of records to insert into the
    * collection.
    * @param {Object} [opts] Configuration options.
-   * @param {boolean} [opts.autoPk=false] TODO
    * @param {string} [opts.idAttribute] TODO
    * @param {string} [opts.onConflict=merge] TODO
    * @param {string} [opts.mapper] TODO
-   * @param {Object} [opts.recordOpts={}] TODO
+   * @param {Object} [opts.recordOpts=null] TODO
    */
   function Collection(records, opts) {
     var self = this;
-
     classCallCheck(self, Collection);
 
     if (isObject(records) && !isArray(records)) {
       opts = records;
       records = [];
     }
+    if (isString(opts)) {
+      opts = { idAttribute: opts };
+    }
 
     // Default values for arguments
     records || (records = []);
     opts || (opts = {});
+    opts.recordOpts || (opts.recordOpts = {});
 
     fillIn(self, opts);
 
@@ -1682,15 +1678,8 @@ var utils = Object.freeze({
      */
     self.indexes = {};
 
-    /**
-     * Object that holds the autoPks of records which needed ids to be generated.
-     * @name Collection#autoPks
-     * @type {Object.<number, Object>}
-     */
-    self.autoPks = {};
-
     records.forEach(function (record) {
-      record = self.mapper ? self.mapper.createRecord(record) : record;
+      record = self.mapper ? self.mapper.createRecord(record, self.recordOpts) : record;
       self.index.insertRecord(record);
       if (record && isFunction(record.on)) {
         record.on('all', self._onRecordEvent, self);
@@ -1699,10 +1688,22 @@ var utils = Object.freeze({
   }
 
   /**
-   * TODO
+   * Create a Collection subclass.
+   *
+   * ```javascript
+   * var MyCollection = Collection.extend({
+   *   foo: function () { return 'bar' }
+   * })
+   * var collection = new MyCollection()
+   * collection.foo() // "bar"
+   * ```
    *
    * @name Collection.extend
    * @method
+   * @param {Object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {Object} [classProps={}] Static properties to add to the subclass.
+   * @return {Function} Subclass of Collection.
    */
   Collection.extend = extend;
 
@@ -1733,11 +1734,8 @@ var utils = Object.freeze({
      * @name Collection#add
      * @method
      * @param {(Object|Object[]|Record|Record[])} data The record or records to insert.
-     * @param {Object} [opts] - Configuration options.
-     * @param {boolean} [opts.autoPk={@link Collection.autoPk}] - Whether to
-     * generate primary keys for the records to be inserted. Useful for inserting
-     * temporary, unsaved data into the collection.
-     * @param {string} [opts.onConflict] - What to do when a record is already in
+     * @param {Object} [opts] Configuration options.
+     * @param {string} [opts.onConflict] What to do when a record is already in
      * the collection. Possible values are `merge` or `replace`.
      * @return {(Object|Object[]|Record|Record[])} The added record or records.
      */
@@ -1765,20 +1763,8 @@ var utils = Object.freeze({
       // option.
       records = records.map(function (record) {
         var id = self.recordId(record);
-        // Track whether we had to generate an id for this record
-        // Validate that the primary key attached to the record is a string or
-        // number
-        var autoPk = false;
         if (!isSorN(id)) {
-          // No id found, generate one
-          if (opts.autoPk) {
-            id = uuid();
-            set(record, idAttribute, id);
-            autoPk = true;
-          } else {
-            // Not going to generate one, throw an error
-            throw new TypeError(idAttribute + ': Expected string or number, found ' + (typeof id === 'undefined' ? 'undefined' : babelHelpers.typeof(id)) + '!');
-          }
+          throw new TypeError(idAttribute + ': Expected string or number, found ' + (typeof id === 'undefined' ? 'undefined' : babelHelpers.typeof(id)) + '!');
         }
         // Grab existing record if there is one
         var existing = self.get(id);
@@ -1809,24 +1795,21 @@ var utils = Object.freeze({
           // Here, the currently visted record does not correspond to any record
           // in the collection, so (optionally) instantiate this record and insert
           // it into the collection
-          record = self.mapper ? self.mapper.createRecord(record) : record;
+          record = self.mapper ? self.mapper.createRecord(record, self.recordOpts) : record;
           self.index.insertRecord(record);
           forOwn(self.indexes, function (index, name) {
             index.insertRecord(record);
           });
           if (record && isFunction(record.on)) {
             record.on('all', self._onRecordEvent, self);
-            // TODO: Make this more performant (batch events?)
-            self.emit('add', record);
           }
-        }
-        if (autoPk) {
-          self.autoPks[id] = record;
         }
         return record;
       });
       // Finally, return the inserted data
       var result = singular ? records.length ? records[0] : undefined : records;
+      // TODO: Make this more performant (batch events?)
+      self.emit('add', result);
       return self.afterAdd(records, opts, result) || result;
     },
 
@@ -2067,21 +2050,6 @@ var utils = Object.freeze({
     },
 
     /**
-     * Return the records in this Collection that have a primary key that
-     * was automatically generated when they were inserted.
-     *
-     * @name Collection#getAutoPkItems
-     * @method
-     * @return {(Object[]|Record[])} The records that have autoPks.
-     */
-    getAutoPkItems: function getAutoPkItems() {
-      var self = this;
-      return self.getAll().filter(function (record) {
-        return self.autoPks[self.recordId(record)];
-      });
-    },
-
-    /**
      * Limit the result.
      *
      * Shortcut for `collection.query().limit(maximumNumber).run()`
@@ -2223,7 +2191,6 @@ var utils = Object.freeze({
 
       // The record is in the collection, remove it
       if (record) {
-        delete self.autoPks[id];
         self.index.removeRecord(record);
         forOwn(self.indexes, function (index, name) {
           index.removeRecord(record);
@@ -2552,10 +2519,22 @@ var utils = Object.freeze({
   }
 
   /**
-   * TODO
+   * Create a Record subclass.
+   *
+   * ```javascript
+   * var MyRecord = Record.extend({
+   *   foo: function () { return 'bar' }
+   * })
+   * var record = new MyRecord()
+   * record.foo() // "bar"
+   * ```
    *
    * @name Record.extend
    * @method
+   * @param {Object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {Object} [classProps={}] Static properties to add to the subclass.
+   * @return {Function} Subclass of Record.
    */
   Record.extend = extend;
 
@@ -5010,6 +4989,14 @@ var utils = Object.freeze({
   /**
    * Create a Mapper subclass.
    *
+   * ```javascript
+   * var MyMapper = Mapper.extend({
+   *   foo: function () { return 'bar' }
+   * })
+   * var mapper = new MyMapper()
+   * mapper.foo() // "bar"
+   * ```
+   *
    * @name Mapper.extend
    * @method
    * @param {Object} [props={}] Properties to add to the prototype of the
@@ -5078,10 +5065,22 @@ var utils = Object.freeze({
   }
 
   /**
-   * TODO
+   * Create a Container subclass.
+   *
+   * ```javascript
+   * var MyContainer = Container.extend({
+   *   foo: function () { return 'bar' }
+   * })
+   * var container = new MyContainer()
+   * container.foo() // "bar"
+   * ```
    *
    * @name Container.extend
    * @method
+   * @param {Object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {Object} [classProps={}] Static properties to add to the subclass.
+   * @return {Function} Subclass of Container.
    */
   Container.extend = extend;
 
@@ -5340,10 +5339,22 @@ var utils = Object.freeze({
   });
 
   /**
-   * TODO
+   * Create a LinkedCollection subclass.
+   *
+   * ```javascript
+   * var MyLinkedCollection = LinkedCollection.extend({
+   *   foo: function () { return 'bar' }
+   * })
+   * var collection = new MyLinkedCollection()
+   * collection.foo() // "bar"
+   * ```
    *
    * @name LinkedCollection.extend
    * @method
+   * @param {Object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {Object} [classProps={}] Static properties to add to the subclass.
+   * @return {Function} Subclass of LinkedCollection.
    */
   LinkedCollection.extend = extend;
 
@@ -5637,10 +5648,22 @@ var utils = Object.freeze({
   DataStore.prototype.defineResource = DataStore.prototype.defineMapper;
 
   /**
-   * TODO
+   * Create a DataStore subclass.
+   *
+   * ```javascript
+   * var MyDataStore = DataStore.extend({
+   *   foo: function () { return 'bar' }
+   * })
+   * var store = new MyDataStore()
+   * store.foo() // "bar"
+   * ```
    *
    * @name DataStore.extend
    * @method
+   * @param {Object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {Object} [classProps={}] Static properties to add to the subclass.
+   * @return {Function} Subclass of DataStore.
    */
   DataStore.extend = extend;
 

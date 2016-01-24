@@ -46,10 +46,22 @@ export default function Query (collection) {
 }
 
 /**
- * TODO
+ * Create a Query subclass.
+ *
+ * ```javascript
+ * var MyQuery = Query.extend({
+ *   foo: function () { return 'bar' }
+ * })
+ * var query = new MyQuery()
+ * query.foo() // "bar"
+ * ```
  *
  * @name Query.extend
  * @method
+ * @param {Object} [props={}] Properties to add to the prototype of the
+ * subclass.
+ * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @return {Function} Subclass of Query.
  */
 Query.extend = extend
 

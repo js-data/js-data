@@ -511,17 +511,5 @@ export function init () {
     //   // console.log('\tinject 10,000 users time taken: ', new Date().getTime() - start, 'ms')
     //   // console.log('\tusers age 40-44', User.between(40, 45, { index: 'age' }).length)
     // })
-    it('should inject temporary items', function () {
-      const Test = this
-      const user = Test.UserCollection.add({
-        name: 'John'
-      }, { autoPk: true })
-      Test.assert.isDefined(user.id)
-      Test.assert.isTrue(Test.UserCollection.autoPks[user.id] === user)
-      Test.assert.isTrue(Test.UserCollection.getAll()[0] === user)
-      Test.assert.isTrue(Test.UserCollection.getAutoPkItems()[0] === user)
-      Test.assert.deepEqual(user.toJSON(), { name: 'John', id: user.id })
-      Test.assert.equal(user.hashCode(), user.id)
-    })
   })
 }
