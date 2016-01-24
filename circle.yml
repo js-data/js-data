@@ -6,5 +6,6 @@ test:
     - npm run ci
 general:
   artifacts:
-    - "dist"
     - "coverage"
+    - "doc"
+    - "dist"
