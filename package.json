@@ -58,7 +58,7 @@
     "rt": "npm run rollup && npm run rollup-tests && npm run mocha",
     "cover": "istanbul cover -x dist/js-data-tests.js --hook-run-in-context node_modules/mocha/bin/_mocha -- -t 20000 -R dot -r source-map-support/register mocha.start.js",
     "test": "npm run build && npm run rollup-tests && npm run cover",
-    "ci": "npm test && cat coverage/lcov.info | coveralls || true && cat ./coverage/lcov.info | codacy-coverage || true"
+    "ci": "npm test && cat coverage/lcov.info | coveralls || true && cat ./coverage/lcov.info | codacy-coverage || true; npm run doc"
   },
   "devDependencies": {
     "babel-core": "6.4.5",
