@@ -2,7 +2,6 @@ import {
   forOwn,
   get
 } from '../utils'
-import {configure} from './configure'
 
 /**
  * @param {Model} target - Target Model.
@@ -24,7 +23,6 @@ function makeDescriptor (target, key, opts) {
     // }
     const _get = this._get
     const _set = this._set
-    const _unset = this._unset
     // if (!_get('noValidate')) {
     //   const errors = validate(opts, value)
     //   if (errors) {
@@ -46,27 +44,27 @@ function makeDescriptor (target, key, opts) {
       if (previous !== value) {
         _set(`changes.${key}`, value)
       } else {
-        _unset(`changes.${key}`)
+        _set(`changes.${key}`) // unset
         if (index >= 0) {
           changed.splice(index, 1)
         }
       }
       if (!changed.length) {
         changing = false
-        _unset('changing')
-        _unset('changed')
+        _set('changing') // unset
+        _set('changed') // unset
         if (_get('eventId')) {
           clearTimeout(_get('eventId'))
-          _unset('eventId')
+          _set('eventId') // unset
         }
       }
       if (!changing && changed.length) {
         _set('changed', changed)
         _set('changing', true)
         _set('eventId', setTimeout(() => {
-          _unset('changed')
-          _unset('eventId')
-          _unset('changing')
+          _set('changed') // unset
+          _set('eventId') // unset
+          _set('changing') // unset
           if (!_get('silent')) {
             let i
             for (i = 0; i < changed.length; i++) {
@@ -74,7 +72,7 @@ function makeDescriptor (target, key, opts) {
             }
             this.emit('change', this, _get('changes'))
           }
-          _unset('silent')
+          _set('silent') // unset
         }, 0))
       }
     }
@@ -153,7 +151,9 @@ export function setSchema (opts) {
 
   return function (target) {
     target.schema || (target.schema = {})
-    configure(target.schema, opts)
+    forOwn(opts, function (value, key) {
+      target.schema[key] = value
+    })
 
     forOwn(opts, function (prop, key) {
       const descriptor = makeDescriptor(target, key, prop)

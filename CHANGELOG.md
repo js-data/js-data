@@ -1,3 +1,7 @@
+##### 3.0.0-alpha.11 - 23 January 2016
+
+- Refactored architecture into Record, Collection (and LinkedCollection), Mapper, Container, DataStore, and Schema
+
 ##### 3.0.0-alpha.10 - 09 January 2016
 
 - (temporarily?) removed relation links

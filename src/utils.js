@@ -30,6 +30,7 @@ export {isBrowser}
 const toString = function (value) {
   return objToString.call(value)
 }
+
 const toInteger = function (value) {
   if (!value) {
     return value === 0 ? value : 0
@@ -45,97 +46,123 @@ const toInteger = function (value) {
 
 /**
  * Return whether the provided value is an array.
+ *
  * @method
- * @param {*} [value] - The value to test.
+ * @param {*} [value] The value to test.
  */
 export const isArray = Array.isArray
+
 /**
  * Return whether the provided value is an object type.
- * @param {*} [value] - The value to test.
+ *
+ * @param {*} [value] The value to test.
  */
-export function isObject (value) {
+export const isObject = function (value) {
   return toString(value) === OBJECT_TAG
 }
-function isPlainObject (value) {
+
+const isPlainObject = function (value) {
   return (!!value && typeof value === 'object' && value.constructor === Object)
 }
+
 /**
  * Return whether the provided value is a regular expression type.
- * @param {*} [value] - The value to test.
+ *
+ * @param {*} [value] The value to test.
  */
-export function isRegExp (value) {
+export const isRegExp = function (value) {
   return toString(value) === REGEXP_TAG
 }
+
 /**
  * Return whether the provided value is a string type.
- * @param {*} [value] - The value to test.
+ *
+ * @param {*} [value] The value to test.
  */
 export const isString = function (value) {
   return typeof value === 'string' || (value && typeof value === 'object' && toString(value) === STRING_TAG)
 }
+
 /**
  * Return whether the provided value is null.
- * @param {*} [value] - The value to test.
+ *
+ * @param {*} [value] The value to test.
  */
 export const isNull = function (value) {
   return value === null
 }
+
 /**
  * Return whether the provided value is undefined.
- * @param {*} [value] - The value to test.
+ *
+ * @param {*} [value] The value to test.
  */
 export const isUndefined = function (value) {
   return value === undefined
 }
+
 /**
  * Return whether the provided value is a date type.
- * @param {*} [value] - The value to test.
+ *
+ * @param {*} [value] The value to test.
  */
 export const isDate = function (value) {
   return (value && typeof value === 'object' && toString(value) === DATE_TAG)
 }
+
 /**
  * Return whether the provided value is a number type.
- * @param {*} [value] - The value to test.
+ *
+ * @param {*} [value] The value to test.
  */
 export const isNumber = function (value) {
   const type = typeof value
   return type === 'number' || (value && type === 'object' && toString(value) === NUMBER_TAG)
 }
+
 /**
  * Return whether the provided value is an integer.
- * @param {*} [value] - The value to test.
+ *
+ * @param {*} [value] The value to test.
  */
 export const isInteger = function (value) {
   return toString(value) === NUMBER_TAG && value == toInteger(value)
 }
+
 /**
  * Return whether the provided value is a boolean type.
- * @param {*} [value] - The value to test.
+ *
+ * @param {*} [value] The value to test.
  */
-export function isBoolean (value) {
+export const isBoolean = function (value) {
   return toString(value) === BOOL_TAG
 }
+
 /**
  * Return whether the provided value is a function.
- * @param {*} [value] - The value to test.
+ *
+ * @param {*} [value] The value to test.
  */
-export function isFunction (value) {
+export const isFunction = function (value) {
   return typeof value === 'function' || (value && toString(value) === FUNC_TAG)
 }
+
 /**
  * Return whether the provided value is a string or a number.
- * @param {*} [value] - The value to test.
+ *
+ * @param {*} [value] The value to test.
  */
-export function isSorN (value) {
+export const isSorN = function (value) {
   return isString(value) || isNumber(value)
 }
+
 /**
  * Get the value at the provided key or path.
- * @param {Object} object - The object from which to retrieve a property.
- * @param {string} prop - The key or path to the property.
+ *
+ * @param {Object} object The object from which to retrieve a property.
+ * @param {string} prop The key or path to the property.
  */
-export function get (object, prop) {
+export const get = function (object, prop) {
   if (!prop) {
     return
   }
@@ -149,24 +176,8 @@ export function get (object, prop) {
 
   return object[last]
 }
-/**
- * Unset the value at the provided key or path.
- * @param {Object} object - The object on which to unset a property.
- * @param {string} prop - The key or path to the property.
- */
-export function unset (object, prop) {
-  const parts = prop.split('.')
-  const last = parts.pop()
 
-  while (prop = parts.shift()) { // eslint-disable-line
-    object = object[prop]
-    if (object == null) return
-  }
-
-  object[last] = undefined
-  delete object[last]
-}
-function mkdirP (object, path) {
+const mkdirP = function (object, path) {
   if (!path) {
     return object
   }
@@ -180,15 +191,17 @@ function mkdirP (object, path) {
   return object
 }
 const PATH = /^(.+)\.(.+)$/
+
 /**
  * Set the value at the provided key or path.
- * @param {Object} object - The object on which to set a property.
- * @param {(string|Object)} path - The key or path to the property. Can also
+ *
+ * @param {Object} object The object on which to set a property.
+ * @param {(string|Object)} path The key or path to the property. Can also
  * pass in an object of path/value pairs, which will all be set on the target
  * object.
- * @param {*} [value] - The value to set.
+ * @param {*} [value] The value to set.
  */
-export function set (object, path, value) {
+export const set = function (object, path, value) {
   if (isObject(path)) {
     forOwn(path, function (value, _path) {
       set(object, _path, value)
@@ -202,13 +215,14 @@ export function set (object, path, value) {
     }
   }
 }
+
 /**
  * Iterate over an object's own enumerable properties.
- * @param {Object} object - The object whose properties are to be enumerated.
- * @param {Function} fn - Iteration function.
- * @param {Object} [thisArg] - Content to which to bind `fn`.
+ * @param {Object} object The object whose properties are to be enumerated.
+ * @param {Function} fn Iteration function.
+ * @param {Object} [thisArg] Content to which to bind `fn`.
  */
-export function forOwn (obj, fn, thisArg) {
+export const forOwn = function (obj, fn, thisArg) {
   const keys = Object.keys(obj)
   const len = keys.length
   let i
@@ -216,12 +230,13 @@ export function forOwn (obj, fn, thisArg) {
     fn.call(thisArg, obj[keys[i]], keys[i], obj)
   }
 }
+
 /**
  * Recursively shallow copy own enumberable properties from `source` to `dest`.
- * @param {Object} dest - The destination object.
- * @param {Object} source - The source object.
+ * @param {Object} dest The destination object.
+ * @param {Object} source The source object.
  */
-export function deepMixIn (dest, source) {
+export const deepMixIn = function (dest, source) {
   if (source) {
     forOwn(source, function (value, key) {
       const existing = this[key]
@@ -234,42 +249,51 @@ export function deepMixIn (dest, source) {
   }
   return dest
 }
+
 /**
  * Proxy for `Promise.resolve`.
- * @param {*} [value] - Value with which to resolve the Promise.
+ * @param {*} [value] Value with which to resolve the Promise.
  * @return {Promise} Promise resolved with `value`.
  */
-export function resolve (value) {
+export const resolve = function (value) {
   return Promise.resolve(value)
 }
+
 /**
  * Proxy for `Promise.reject`.
- * @param {*} [value] - Value with which to reject the Promise.
+ * @param {*} [value] Value with which to reject the Promise.
  * @return {Promise} Promise reject with `value`.
  */
-export function reject (value) {
+export const reject = function (value) {
   return Promise.reject(value)
 }
+
 /**
- * Shallow copy own enumerable non-function properties from `Model` to `opts`.
- * @param {Model} Model - The source Model.
- * @param {Object} opts - The target object.
+ * Shallow copy properties from src to dest that meet the following criteria:
+ * - own enumerable
+ * - not a function
+ * - does not start with "_"
+ *
+ * @param {Object} dest Destination object.
+ * @param {Object} src Source object.
  */
-export function _ (Model, opts) {
-  for (var key in Model) {
-    let value = Model[key]
-    if (opts[key] === undefined && !isFunction(value) && key && key.indexOf('_') !== 0) {
-      opts[key] = value
+export const _ = function (dest, src) {
+  for (var key in dest) {
+    let value = dest[key]
+    if (src[key] === undefined && !isFunction(value) && key && key.indexOf('_') !== 0) {
+      src[key] = value
     }
   }
 }
+
 /**
  * Return the intersection of two arrays.
- * @param {Array} array1 - First array.
- * @param {Array} array2 - Second array.
+ *
+ * @param {Array} array1 First array.
+ * @param {Array} array2 Second array.
  * @return {Array} Array of elements common to both arrays.
  */
-export function intersection (array1, array2) {
+export const intersection = function (array1, array2) {
   if (!array1 || !array2) {
     return []
   }
@@ -288,26 +312,30 @@ export function intersection (array1, array2) {
   }
   return result
 }
+
 /**
  * Shallow copy own enumerable properties from `src` to `dest` that are on `src`
  * but are missing from `dest.
- * @param {Object} dest - The destination object.
- * @param {Object} source - The source object.
+ *
+ * @param {Object} dest The destination object.
+ * @param {Object} source The source object.
  */
-export function fillIn (dest, src) {
+export const fillIn = function (dest, src) {
   forOwn(src, function (value, key) {
     if (!dest.hasOwnProperty(key) || dest[key] === undefined) {
       dest[key] = value
     }
   })
 }
+
 /**
  * Return whether `prop` is matched by any string or regular expression in `bl`.
- * @param {string} prop - The name of a property.
- * @param {Array} bl - Array of strings and regular expressions.
+ *
+ * @param {string} prop The name of a property.
+ * @param {Array} bl Array of strings and regular expressions.
  * @return {boolean} Whether `prop` was matched.
  */
-export function isBlacklisted (prop, bl) {
+export const isBlacklisted = function (prop, bl) {
   if (!bl || !bl.length) {
     return false
   }
@@ -320,27 +348,33 @@ export function isBlacklisted (prop, bl) {
   }
   return !!matches
 }
+
 /**
  * Proxy for `JSON.parse`.
- * @param {string} json - JSON to parse.
+ *
+ * @param {string} json JSON to parse.
  * @return {Object} Parsed object.
  */
-export function fromJson (json) {
+export const fromJson = function (json) {
   return isString(json) ? JSON.parse(json) : json
 }
+
 /**
  * Proxy for `JSON.stringify`.
+ *
  * @method
- * @param {*} value - Value to serialize to JSON.
+ * @param {*} value Value to serialize to JSON.
  * @return {string} JSON string.
  */
 export const toJson = JSON.stringify
+
 /**
  * Deep copy a value.
- * @param {*} from - Value to deep copy.
+ *
+ * @param {*} from Value to deep copy.
  * @return {*} Deep copy of `from`.
  */
-export function copy (from, to, stackFrom, stackTo, blacklist) {
+export const copy = function (from, to, stackFrom, stackTo, blacklist) {
   if (!to) {
     to = from
     if (from) {
@@ -410,47 +444,17 @@ export function copy (from, to, stackFrom, stackTo, blacklist) {
   }
   return to
 }
-const SPLIT = /\s+/
-const NON_ALPHA = /[^A-Za-z]/g
-const PASCAL_CASE = /(\w)(\w*)/g
-function pascalize (g0, g1, g2) {
-  return `${g1.toUpperCase()}${g2.toLowerCase()}`
-}
-function mapToPascal (x) {
-  return x.replace(NON_ALPHA, '').replace(PASCAL_CASE, pascalize)
-}
-/**
- * Convert a string to pascalcase.
- * @param {string} str - String to convert.
- * @return {string} Converted string.
- */
-export function pascalCase (str) {
-  return str
-    .split(SPLIT)
-    .map(mapToPascal)
-    .join('')
-}
-/**
- * Convert a string to camelcase.
- * @param {string} str - String to convert.
- * @return {string} Converted string.
- */
-export function camelCase (str) {
-  str = pascalCase(str)
-  if (str) {
-    return str.charAt(0).toLowerCase() + str.slice(1)
-  }
-  return str
-}
+
 /**
  * Add eventing capabilities into the target object.
- * @param {Object} target - Target object.
- * @param {Function} [getter] - Custom getter for retrieving the object's event
+ *
+ * @param {Object} target Target object.
+ * @param {Function} [getter] Custom getter for retrieving the object's event
  * listeners.
- * @param {Function} [setter] - Custom setter for setting the object's event
+ * @param {Function} [setter] Custom setter for setting the object's event
  * listeners.
  */
-export function eventify (target, getter, setter, enumerable) {
+export const eventify = function (target, getter, setter, enumerable) {
   target = target || this
   let _events = {}
   if (!getter && !setter) {
@@ -518,7 +522,7 @@ export function eventify (target, getter, setter, enumerable) {
 /*eslint-disable*/
 // RiveraGroup/node-tiny-uuid
 // DO WTF YOU WANT TO PUBLIC LICENSE
-export function uuid (a, b) {
+export const uuid = function (a, b) {
   for (
     b = a = ''; // b - result , a - numeric variable
     a++ < 36;
@@ -555,6 +559,7 @@ export const possibleConstructorReturn = function (self, call) {
 export const addHiddenPropsToTarget = function (target, props) {
   forOwn(props, function (value, key) {
     props[key] = {
+      writable: true,
       value
     }
   })

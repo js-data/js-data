@@ -56,7 +56,7 @@ import HttpAdapter from 'js-data-http'
 
 const store = new DataStore()
 // "store" will use an http adapter by default
-store.registerAdapter('http', new HttpAdapter(), { default: true })
+store.registerAdapter('http', new HttpAdapter(), { 'default': true })
 
 store.defineMapper('user')
 const Users = store.getCollection('user')

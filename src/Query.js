@@ -7,6 +7,7 @@ import {
   intersection,
   isArray,
   isFunction,
+  isNull,
   isNumber,
   isObject,
   isString
@@ -143,9 +144,9 @@ addHiddenPropsToTarget(Query.prototype, {
       return Query.ops[op](value, predicate)
     }
     if (op.indexOf('like') === 0) {
-      return this.like(predicate, op.substr(4)).exec(value) !== null
+      return !isNull(this.like(predicate, op.substr(4)).exec(value))
     } else if (op.indexOf('notLike') === 0) {
-      return this.like(predicate, op.substr(7)).exec(value) === null
+      return isNull(this.like(predicate, op.substr(7)).exec(value))
     }
   },
 

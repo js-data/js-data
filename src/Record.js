@@ -50,9 +50,9 @@ export default function Record (props, opts) {
     self._set('noValidate', true)
   }
   fillIn(self, props)
-  self._set('creating')
+  self._set('creating') // unset
   self._set('changes', {})
-  self._set('noValidate')
+  self._set('noValidate') // unset
   self._set('previous', copy(props))
 }
 
@@ -60,6 +60,9 @@ Record.extend = extend
 
 addHiddenPropsToTarget(Record.prototype, {
   _mapper () {
+    if (!this.constructor.Mapper) {
+      throw new Error('This RecordClass has no Mapper!')
+    }
     return this.constructor.Mapper
   },
 
@@ -93,7 +96,7 @@ addHiddenPropsToTarget(Record.prototype, {
     }
     set(self, key, value)
     if (!self._get('eventId')) {
-      self._set('silent')
+      self._set('silent') // unset
     }
   },
 
@@ -127,7 +130,7 @@ addHiddenPropsToTarget(Record.prototype, {
 
   commit () {
     const self = this
-    self._set('changed')
+    self._set('changed') // unset
     self._set('changes', {})
     self._set('previous', copy(self))
     return self

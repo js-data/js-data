@@ -1,4 +1,4 @@
-import Query from './query'
+import Query from './Query'
 import {
   _,
   addHiddenPropsToTarget,

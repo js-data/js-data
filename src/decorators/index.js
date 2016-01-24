@@ -1,6 +1,0 @@
-export * from './belongsTo'
-export * from './configure'
-export * from './hasMany'
-export * from './hasOne'
-export * from './schema'
-export * from './adapter'

@@ -1,12 +1,12 @@
 import * as collection from './collection/index'
 import * as container from './container/index'
-// import * as datastore from './datastore/index'
+import * as datastore from './datastore/index'
 // import * as decorators from './decorators/index'
-// import * as linkedCollection from './linkedcollection/index'
-// import * as mapper from './mapper/index'
-// import * as record from './record/index'
-// import * as schema from './schema/index'
-// import * as utils from './utils/index'
+import * as linkedCollection from './linkedCollection/index'
+import * as mapper from './mapper/index'
+import * as record from './record/index'
+import * as schema from './schema/index'
+import * as utils from './utils/index'
 
 export function init () {
   describe('JSData', function () {
@@ -15,7 +15,6 @@ export function init () {
       Test.assert.isFunction(Test.JSData.belongsTo, 'has the belongsTo decorator')
       Test.assert.isFunction(Test.JSData.Collection, 'has the Collection class')
       Test.assert.isFunction(Test.JSData.Container, 'has the Container class')
-      Test.assert.isFunction(Test.JSData.configure, 'has the configure decorator')
       Test.assert.isFunction(Test.JSData.DataStore, 'has the DataStore class')
       Test.assert.isFunction(Test.JSData.DS, 'has the DS class')
       Test.assert.isFunction(Test.JSData.hasMany, 'has the hasMany decorator')
@@ -26,19 +25,22 @@ export function init () {
       Test.assert.isFunction(Test.JSData.Record, 'has the Record class')
       Test.assert.isFunction(Test.JSData.registerAdapter, 'has the registerAdapter class')
       Test.assert.isFunction(Test.JSData.Schema, 'has the Schema class')
-      Test.assert.isFunction(Test.JSData.setSchema, 'has the schema decorator')
+      Test.assert.isObject(Test.JSData.types, 'has the types object')
+      Test.assert.isObject(Test.JSData.typeGroupValidators, 'has the typeGroupValidators object')
+      Test.assert.isFunction(Test.JSData.validate, 'has the validate function')
+      Test.assert.isObject(Test.JSData.validationKeywords, 'has the validationKeywords object')
       Test.assert.isObject(Test.JSData.version, 'has a version')
     })
 
     collection.init()
     container.init()
-    // datastore.init()
+    datastore.init()
     // decorators.init()
-    // linkedcollection.init()
-    // mapper.init()
-    // record.init()
-    // schema.init()
-    // utils.init()
+    linkedCollection.init()
+    mapper.init()
+    record.init()
+    schema.init()
+    utils.init()
   })
 }
 

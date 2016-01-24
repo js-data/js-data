@@ -1,36 +1,26 @@
 export function init () {
-  describe('static destroyAll', function () {
-    it('should be a static function', function () {
+  describe('destroyAll', function () {
+    it('should be an instance method', function () {
       const Test = this
-      Test.assert.isFunction(Test.JSData.Model.destroyAll)
-      let User = Test.JSData.Model.extend({}, {
-        idAttribute: '_id',
-        name: 'user'
-      })
-      class User2 extends Test.JSData.Model {}
-      class User3 extends User2 {}
-      Test.assert.isFunction(User.destroyAll)
-      Test.assert.isFunction(User2.destroyAll)
-      Test.assert.isTrue(Test.JSData.Model.destroyAll === User.destroyAll)
-      Test.assert.isTrue(Test.JSData.Model.destroyAll === User2.destroyAll)
-      Test.assert.isTrue(User.destroyAll === User2.destroyAll)
-      Test.assert.isTrue(User2.destroyAll === User3.destroyAll)
+      const Mapper = Test.JSData.Mapper
+      const mapper = new Mapper()
+      Test.assert.isFunction(mapper.destroyAll)
+      Test.assert.isTrue(mapper.destroyAll === Mapper.prototype.destroyAll)
     })
     it('should destroyAll', async function () {
       const Test = this
       const query = {}
       let destroyAllCalled = false
-      class User extends Test.JSData.Model {}
-      User.configure({
+      const User = new Test.JSData.Mapper({
         defaultAdapter: 'mock'
       })
       User.registerAdapter('mock', {
-        destroyAll (modelConfig, _query, Opts) {
+        destroyAll (mapper, _query, Opts) {
           destroyAllCalled = true
           return new Promise(function (resolve, reject) {
-            Test.assert.isTrue(modelConfig === User, 'should pass in the Model')
+            Test.assert.isTrue(mapper === User, 'should pass in the Model')
             Test.assert.deepEqual(_query, query, 'should pass in the query')
-            Test.assert.equal(Opts.pojo, false, 'Opts are provided')
+            Test.assert.equal(Opts.raw, false, 'Opts are provided')
             resolve('foo')
           })
         }
@@ -43,16 +33,15 @@ export function init () {
       const Test = this
       const query = {}
       let destroyAllCalled = false
-      class User extends Test.JSData.Model {}
-      User.configure({
+      const User = new Test.JSData.Mapper({
         raw: true,
         defaultAdapter: 'mock'
       })
       User.registerAdapter('mock', {
-        destroyAll (modelConfig, _query, Opts) {
+        destroyAll (mapper, _query, Opts) {
           destroyAllCalled = true
           return new Promise(function (resolve, reject) {
-            Test.assert.isTrue(modelConfig === User, 'should pass in the Model')
+            Test.assert.isTrue(mapper === User, 'should pass in the Model')
             Test.assert.deepEqual(_query, query, 'should pass in the query')
             Test.assert.equal(Opts.raw, true, 'Opts are provided')
             resolve({

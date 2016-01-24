@@ -7,11 +7,12 @@ import {
   isObject,
   set
 } from './utils'
-import Collection from './collection'
-
-const belongsToType = 'belongsTo'
-const hasManyType = 'hasMany'
-const hasOneType = 'hasOne'
+import {
+  belongsToType,
+  hasManyType,
+  hasOneType
+} from './decorators'
+import Collection from './Collection'
 
 /**
  * TODO
@@ -41,6 +42,7 @@ const LinkedCollection = Collection.extend({
   },
 
   add (records, opts) {
+    // console.log('add', this.mapper.name, records)
     const self = this
     const datastore = self.datastore
     const mapper = self.mapper
@@ -103,7 +105,7 @@ const LinkedCollection = Collection.extend({
                     set(toInsertItem, foreignKey, id)
                   }
                   // Finally add this related item
-                  toInsertItem = relatedCollection.add(relationName, toInsertItem)
+                  toInsertItem = relatedCollection.add(toInsertItem)
                 }
                 return toInsertItem
               })
@@ -124,7 +126,7 @@ const LinkedCollection = Collection.extend({
                   set(relatedData, def.foreignKey, id)
                 }
                 // Finally insert this related item
-                relatedData = relatedCollection.add(relationName, relatedData)
+                relatedData = relatedCollection.add(relatedData)
               }
             }
             set(record, localField, relatedData)
