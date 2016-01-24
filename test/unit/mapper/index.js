@@ -9,22 +9,13 @@ import * as update from './update.test'
 import * as updateMany from './updateMany.test'
 import * as updateAll from './updateAll.test'
 
-const defaults = {
-  csp: false,
-  defaultAdapter: 'http',
-  idAttribute: 'id',
-  relationsEnumerable: false,
-  raw: false,
-  upsert: true
-}
-
 export function init () {
   describe('Mapper', function () {
     it('should be a constructor function', function () {
       const Test = this
       const Mapper = Test.JSData.Mapper
       Test.assert.isFunction(Mapper)
-      const mapper = new Mapper()
+      const mapper = new Mapper({ name: 'foo' })
       Test.assert.isTrue(mapper instanceof Mapper)
     })
     // it('should allow schema definition with basic indexes', function () {
@@ -54,7 +45,7 @@ export function init () {
 
     it('should have events', function () {
       const Test = this
-      const User = new Test.JSData.Mapper()
+      const User = new Test.JSData.Mapper({ name: 'user' })
       const listener = Test.sinon.stub()
       User.on('bar', listener)
       User.emit('bar')

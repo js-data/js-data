@@ -15,19 +15,17 @@ import {
 import Mapper from './Mapper'
 
 /**
- * The `Container` class is a place to store mappers.
- *
  * ```javascript
  * import {Container} from 'js-data'
  * ```
+ *
+ * The `Container` class is a place to store {@link Mapper} instances.
  *
  * Without a container, you need to manage mappers yourself, including resolving
  * circular dependencies among relations. All mappers in a container share the
  * same adapters, so you don't have to add each adapter to all of your mappers.
  *
- * Without `Container:
- *
- * ```javascript
+ * @example <caption>Without Container</caption>
  * import {Mapper} from 'js-data'
  * import HttpAdapter from 'js-data-http'
  * const adapter = new HttpAdapter()
@@ -36,7 +34,7 @@ import Mapper from './Mapper'
  * const commentMapper = new Mapper({ name: 'comment' })
  * commentMapper.registerAdapter('http', adapter, { default: true })
  *
- * // This would be more difficult if the mappers were defined in different
+ * // This might be more difficult if the mappers were defined in different
  * // modules.
  * userMapper.hasMany(commentMapper, {
  *   localField: 'comments',
@@ -46,11 +44,8 @@ import Mapper from './Mapper'
  *   localField: 'user',
  *   foreignKey: 'userId'
  * })
- * ```
  *
- * With `Container`:
- *
- * ```javascript
+ * @example <caption>With Container</caption>
  * import {Container} from 'js-data'
  * import HttpAdapter from 'js-data-http'
  * const container = new Container()
@@ -58,7 +53,7 @@ import Mapper from './Mapper'
  * container.registerAdapter('http', new HttpAdapter(), { default: true })
  *
  * // These could be defined in separate modules without a problem.
- * const userMapper = container.defineMapper('user', {
+ * container.defineMapper('user', {
  *   relations: {
  *     hasMany: {
  *       comment: {
@@ -68,7 +63,7 @@ import Mapper from './Mapper'
  *     }
  *   }
  * })
- * const commentMapper = container.defineMapper('comment', {
+ * container.defineMapper('comment', {
  *   relations: {
  *     belongsTo: {
  *       user: {
@@ -78,11 +73,10 @@ import Mapper from './Mapper'
  *     }
  *   }
  * })
- * ```
  *
  * @class Container
  * @param {Object} [opts] Configuration options.
- * @param {Function [opts.MapperClass] Constructor function to use in
+ * @param {Function} [opts.MapperClass] Constructor function to use in
  * {@link Container#defineMapper} to create a new mapper.
  * @param {Object} [opts.mapperDefaults] Defaults options to pass to
  * {@link Container#MapperClass} when creating a new mapper.
@@ -95,9 +89,21 @@ export default function Container (opts) {
   opts || (opts = {})
   // Apply options provided by the user
   fillIn(self, opts)
-  // Default mapper options
+  /**
+   * Defaults options to pass to {@link Container#MapperClass} when creating a
+   * new mapper.
+   *
+   * @name Container#mapperDefaults
+   * @type {Object}
+   */
   self.mapperDefaults = self.mapperDefaults || {}
-  // Default MapperClass
+  /**
+   * Constructor function to use in {@link Container#defineMapper} to create a
+   * new mapper.
+   *
+   * @name Container#MapperClass
+   * @type {Function}
+   */
   self.MapperClass = self.MapperClass || Mapper
 
   // Initilize private data
@@ -111,13 +117,12 @@ export default function Container (opts) {
 /**
  * Create a Container subclass.
  *
- * ```javascript
+ * @example
  * var MyContainer = Container.extend({
  *   foo: function () { return 'bar' }
  * })
  * var container = new MyContainer()
  * container.foo() // "bar"
- * ```
  *
  * @name Container.extend
  * @method
@@ -132,7 +137,7 @@ addHiddenPropsToTarget(Container.prototype, {
   /**
    * Create a new mapper and register it in this container.
    *
-   * ```javascript
+   * @example
    * import {Container} from 'js-data'
    * const container = new Container({
    *   mapperDefaults: { foo: 'bar' }
@@ -257,12 +262,11 @@ addHiddenPropsToTarget(Container.prototype, {
   /**
    * Return the mapper registered under the specified name.
    *
-   * ```javascript
+   * @example
    * import {Container} from 'js-data'
    * const container = new Container()
    * const userMapper = container.defineMapper('user')
    * userMapper === container.getMapper('user') // true
-   * ```
    *
    * @name Container#getMapper
    * @method
@@ -281,12 +285,11 @@ addHiddenPropsToTarget(Container.prototype, {
    * Register an adapter on this container under the given name. Adapters
    * registered on a container are shared by all mappers in the container.
    *
-   * ```javascript
+   * @example
    * import {Container} from 'js-data'
    * import HttpAdapter from 'js-data-http'
    * const container = new Container()
    * container.registerAdapter('http', new HttpAdapter, { default: true })
-   * ```
    *
    * @name Container#registerAdapter
    * @method
@@ -298,9 +301,11 @@ addHiddenPropsToTarget(Container.prototype, {
    */
   registerAdapter (name, adapter, opts) {
     const self = this
+    opts || (opts = {})
     self.getAdapters()[name] = adapter
     // Optionally make it the default adapter for the target.
     if (opts === true || opts.default) {
+      self.mapperDefaults.defaultAdapter = name
       forOwn(self._mappers, function (mapper) {
         mapper.defaultAdapter = name
       })

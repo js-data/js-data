@@ -306,7 +306,7 @@ export function init () {
 
     it('should bubble up record events', function (done) {
       const Test = this
-      const mapper = new Test.JSData.Mapper()
+      const mapper = new Test.JSData.Mapper({ name: 'user' })
       const data = [
         mapper.createRecord({ id: 2, age: 19 }),
         mapper.createRecord({ id: 1, age: 27 })

@@ -26,7 +26,7 @@ export function init () {
     })
     it('should inject existing items into the store', function () {
       const Test = this
-      const collection = new Test.JSData.Collection({ mapper: new Test.JSData.Mapper() })
+      const collection = new Test.JSData.Collection({ mapper: new Test.JSData.Mapper({ name: 'user' }) })
 
       const user = collection.add({ id: 1 })
       const users = collection.add([{ id: 2 }, { id: 3 }])
@@ -45,7 +45,7 @@ export function init () {
     })
     it('should replace existing items', function () {
       const Test = this
-      const collection = new Test.JSData.Collection({ mapper: new Test.JSData.Mapper() })
+      const collection = new Test.JSData.Collection({ mapper: new Test.JSData.Mapper({ name: 'user' }) })
       const user = collection.add({ id: 1, foo: 'bar', beep: 'boop' })
       Test.assert.equal(user.id, 1)
       Test.assert.equal(user.foo, 'bar')
@@ -473,7 +473,7 @@ export function init () {
     // })
     it('should inject 1,000 items where there is an index on "age"', function () {
       const Test = this
-      const collection = new Test.JSData.Collection({ mapper: new Test.JSData.Mapper() })
+      const collection = new Test.JSData.Collection({ mapper: new Test.JSData.Mapper({ name: 'user' }) })
       collection.createIndex('age')
       collection.createIndex('created')
       collection.createIndex('updated')

@@ -3,7 +3,7 @@ export function init () {
     it('should be an instance method', function () {
       const Test = this
       const Mapper = Test.JSData.Mapper
-      const mapper = new Mapper()
+      const mapper = new Mapper({ name: 'foo' })
       Test.assert.isFunction(mapper.destroyAll)
       Test.assert.isTrue(mapper.destroyAll === Mapper.prototype.destroyAll)
     })
@@ -12,6 +12,7 @@ export function init () {
       const query = {}
       let destroyAllCalled = false
       const User = new Test.JSData.Mapper({
+        name: 'user',
         defaultAdapter: 'mock'
       })
       User.registerAdapter('mock', {
@@ -34,6 +35,7 @@ export function init () {
       const query = {}
       let destroyAllCalled = false
       const User = new Test.JSData.Mapper({
+        name: 'user',
         raw: true,
         defaultAdapter: 'mock'
       })

@@ -36,7 +36,6 @@
 
 const INFINITY = 1 / 0
 const MAX_INTEGER = 1.7976931348623157e+308
-const ARRAY_TAG = '[object Array]'
 const BOOL_TAG = '[object Boolean]'
 const DATE_TAG = '[object Date]'
 const FUNC_TAG = '[object Function]'
@@ -69,7 +68,7 @@ const toInteger = function (value) {
     return sign * MAX_INTEGER
   }
   const remainder = value % 1
-  return value === value ? (remainder ? value - remainder : value) : 0
+  return value === value ? (remainder ? value - remainder : value) : 0 // eslint-disable-line
 }
 const isPlainObject = function (value) {
   return (!!value && typeof value === 'object' && value.constructor === Object)
@@ -82,7 +81,7 @@ export const isFunction = function (value) {
   return typeof value === 'function' || (value && toString(value) === FUNC_TAG)
 }
 export const isInteger = function (value) {
-  return toString(value) === NUMBER_TAG && value == toInteger(value)
+  return toString(value) === NUMBER_TAG && value == toInteger(value) // eslint-disable-line
 }
 export const isNull = function (value) {
   return value === null
@@ -554,5 +553,5 @@ export const extend = function (props, classProps) {
 
 export const getSuper = function (instance) {
   const Ctor = instance.constructor
-  return (Ctor.__super__ || Object.getPrototypeOf(Ctor) || Ctor.__proto__)
+  return (Ctor.__super__ || Object.getPrototypeOf(Ctor) || Ctor.__proto__) // eslint-disable-line
 }

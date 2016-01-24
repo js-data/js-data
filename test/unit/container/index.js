@@ -150,7 +150,7 @@ export function init () {
         foo: {},
         bar: {}
       })
-      Test.assert.equal(container.defaultAdapter, 'foo')
+      Test.assert.equal(container.mapperDefaults.defaultAdapter, 'foo')
     })
   })
 }
