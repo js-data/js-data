@@ -96,6 +96,7 @@ function applyBelongsTo (Mapper, Relation, opts) {
 /**
  * @memberof! module:js-data
  *
+ * @ignore
  * @param {Mapper} Relation The Relation the target belongs to.
  * @param {Object} opts Configuration options.
  * @param {string} opts.foreignKey The field that holds the primary key of the

@@ -5,7 +5,7 @@ export function init () {
   describe('typeGroupValidators', function () {
     it('has the right default validators', function () {
       const Test = this
-      const typeGroupValidators = Test.JSData.typeGroupValidators
+      const typeGroupValidators = Test.JSData.Schema.typeGroupValidators
       const EXPECTED_KEYS = [
         'array',
         'integer',

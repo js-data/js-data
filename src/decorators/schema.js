@@ -112,6 +112,7 @@ function makeDescriptor (target, key, opts) {
 
 /**
  * @memberof! module:js-data
+ * @ignore
  * @example
  * // ES6
  * import {setSchema, Model} from 'js-data'

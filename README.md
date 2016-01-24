@@ -19,7 +19,7 @@ server and the client. JSData employs conventions for rapid development, but
 allows for endless customization in order to meet your particular needs. Think
 of it as the "Twitter Bootstrap" of JavaScript data layers.
 
-To get started, check out <http://js-data.io>!
+To get started, check out [js-data.io](http://www.js-data.io)!
 
 ## Table of contents
 

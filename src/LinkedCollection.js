@@ -17,6 +17,10 @@ import Collection from './Collection'
 /**
  * TODO
  *
+ * ```javascript
+ * import {LinkedCollection} from 'js-data'
+ * ```
+ *
  * @class LinkedCollection
  * @extends Collection
  * @param {Array} [records] Initial set of records to insert into the
@@ -154,6 +158,12 @@ const LinkedCollection = Collection.extend({
   }
 })
 
+/**
+ * TODO
+ *
+ * @name LinkedCollection.extend
+ * @method
+ */
 LinkedCollection.extend = extend
 
 export {

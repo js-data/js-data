@@ -14,9 +14,14 @@ import {
 } from './utils'
 
 /**
- * A class used by the @{link Collection} class to build queries to be executed
+ * A class used by the {@link Collection} class to build queries to be executed
  * against the collection's data. An instance of `Query` is returned by
- * {@link Model.query} and {@link Collection.query}.
+ * {@link Collection#query}.
+ *
+ * ```javascript
+ * import {Query} from 'js-data'
+ * ```
+ *
  * @class Query
  * @param {Collection} collection - The collection on which this query operates.
  */
@@ -25,16 +30,27 @@ export default function Query (collection) {
 
   /**
    * The collection on which this query operates.
+   *
+   * @name Query#collection
    * @type {Collection}
    */
   this.collection = collection
+
   /**
    * The data result of this query.
+   *
+   * @name Query#data
    * @type {Array}
    */
   this.data = null
 }
 
+/**
+ * TODO
+ *
+ * @name Query.extend
+ * @method
+ */
 Query.extend = extend
 
 const reserved = {
@@ -54,6 +70,12 @@ function escape (pattern) {
   return pattern.replace(escapeRegExp, '\\$1')
 }
 
+/**
+ * TODO
+ *
+ * @name Query.ops
+ * @type {Object}
+ */
 Query.ops = {
   '==': function (value, predicate) {
     return value == predicate // eslint-disable-line
@@ -156,8 +178,8 @@ addHiddenPropsToTarget(Query.prototype, {
 
   /**
    * Return the current data result of this query.
-   * @memberof Query
-   * @instance
+   * @name Query#getData
+   * @method
    * @return {Array} The data in this query.
    */
   getData () {
@@ -179,8 +201,8 @@ addHiddenPropsToTarget(Query.prototype, {
    * const users = query.between([18], [30], { index: 'age' }).run()
    * ```
    *
-   * @memberof Query
-   * @instance
+   * @name Query#between
+   * @method
    * @param {Array} leftKeys - Keys defining the left boundary.
    * @param {Array} rightKeys - Keys defining the right boundary.
    * @param {Object} [opts] - Configuration options.
@@ -231,8 +253,8 @@ addHiddenPropsToTarget(Query.prototype, {
    * }).run()
    * ```
    *
-   * @memberof Query
-   * @instance
+   * @name Query#get
+   * @method
    * @param {Array} keyList - Key(s) defining the entity to retrieve. If
    * `keyList` is not an array (i.e. for a single-value key), it will be
    * wrapped in an array.
@@ -273,8 +295,8 @@ addHiddenPropsToTarget(Query.prototype, {
    * const posts = query.getAll(['draft'], ['inReview'], { index: 'status' }).run()
    * ```
    *
-   * @memberof Query
-   * @instance
+   * @name Query#getAll
+   * @method
    * @param {...Array} [keyList] - Provide one or more keyLists, and all
    * entities matching each keyList will be retrieved. If no keyLists are
    * provided, all entities will be returned.
@@ -330,8 +352,8 @@ addHiddenPropsToTarget(Query.prototype, {
    * }).run()
    * ```
    *
-   * @memberof Query
-   * @instance
+   * @name Query#filter
+   * @method
    * @param {(Object|Function)} [queryOrFn={}] - Selection query or filter
    * function.
    * @param {Function} [thisArg] - Context to which to bind `queryOrFn` if
@@ -443,8 +465,8 @@ addHiddenPropsToTarget(Query.prototype, {
    * const posts = query.get('draft', { index: 'status' }).skip(10).run()
    * ```
    *
-   * @memberof Query
-   * @instance
+   * @name Query#skip
+   * @method
    * @param {number} num - The number of entities to skip.
    * @return {Query} A reference to itself for chaining.
    */
@@ -471,8 +493,8 @@ addHiddenPropsToTarget(Query.prototype, {
    * const posts = query.get('draft', { index: 'status' }).limit(10).run()
    * ```
    *
-   * @memberof Query
-   * @instance
+   * @name Query#limit
+   * @method
    * @param {number} num - The maximum number of entities to keep in the result.
    * @return {Query} A reference to itself for chaining.
    */
@@ -488,8 +510,8 @@ addHiddenPropsToTarget(Query.prototype, {
   /**
    * Iterate over all entities.
    *
-   * @memberof Query
-   * @instance
+   * @name Query#forEach
+   * @method
    * @param {Function} forEachFn - Iteration function.
    * @param {*} [thisArg] - Context to which to bind `forEachFn`.
    * @return {Query} A reference to itself for chaining.
@@ -502,8 +524,8 @@ addHiddenPropsToTarget(Query.prototype, {
   /**
    * Apply a mapping function to the result data.
    *
-   * @memberof Query
-   * @instance
+   * @name Query#map
+   * @method
    * @param {Function} mapFn - Mapping function.
    * @param {*} [thisArg] - Context to which to bind `mapFn`.
    * @return {Query} A reference to itself for chaining.
@@ -516,8 +538,8 @@ addHiddenPropsToTarget(Query.prototype, {
   /**
    * Return the result of calling the specified function on each item in this
    * collection's main index.
-   * @memberof Query
-   * @instance
+   * @name Query#mapCall
+   * @method
    * @param {string} funcName - Name of function to call
    * @parama {...*} [args] - Remaining arguments to be passed to the function.
    * @return {Query} A reference to itself for chaining.
@@ -532,8 +554,8 @@ addHiddenPropsToTarget(Query.prototype, {
   /**
    * Complete the execution of the query and return the resulting data.
    *
-   * @memberof Query
-   * @instance
+   * @name Query#run
+   * @method
    * @return {Array} The result of executing this query.
    */
   run () {

@@ -6,9 +6,10 @@ export function init () {
     it('has the right exports', function () {
       const Test = this
       Test.assert.isFunction(Test.JSData.Schema)
-      Test.assert.isFunction(Test.JSData.validate)
-      Test.assert.isObject(Test.JSData.validationKeywords)
-      Test.assert.isObject(Test.JSData.typeGroupValidators)
+      Test.assert.isFunction(Test.JSData.Schema.validate)
+      Test.assert.isObject(Test.JSData.Schema.types)
+      Test.assert.isObject(Test.JSData.Schema.validationKeywords)
+      Test.assert.isObject(Test.JSData.Schema.typeGroupValidators)
     })
 
     it('should validate', function () {

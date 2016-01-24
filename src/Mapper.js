@@ -6,7 +6,7 @@ import {
   registerAdapter
 } from './decorators'
 import Record from './Record'
-import {Schema} from './Schema'
+import Schema from './Schema'
 
 const {
   resolve
@@ -165,6 +165,10 @@ const MAPPER_DEFAULTS = {
 /**
  * js-data's Mapper class.
  *
+ * ```javascript
+ * import {Mapper} from 'js-data'
+ * ```
+ *
  * @class Mapper
  * @param {Object} [opts] Configuration options.
  */
@@ -195,6 +199,8 @@ export default function Mapper (opts) {
  */
 utils.addHiddenPropsToTarget(Mapper.prototype, {
   /**
+   * TODO
+   *
    * @name Mapper#end
    * @method
    */

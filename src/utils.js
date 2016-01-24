@@ -1,6 +1,37 @@
 /**
- * @module utils
+ * @name utils
  * @memberof module:js-data
+ * @type {Object}
+ * @property {Function} addHiddenPropsToTarget TODO
+ * @property {Function} classCallCheck TODO
+ * @property {Function} copy TODO
+ * @property {Function} deepMixIn TODO
+ * @property {Function} eventify TODO
+ * @property {Function} extend TODO
+ * @property {Function} fillIn TODO
+ * @property {Function} fromJson TODO
+ * @property {Function} get TODO
+ * @property {Function} getSuper TODO
+ * @property {Function} intersection TODO
+ * @property {Function} isArray TODO
+ * @property {Function} isBlacklisted TODO
+ * @property {boolean} isBrowser TODO
+ * @property {Function} isBoolean TODO
+ * @property {Function} isFunction TODO
+ * @property {Function} isInteger TODO
+ * @property {Function} isNull TODO
+ * @property {Function} isNumber TODO
+ * @property {Function} isObject TODO
+ * @property {Function} isRegExp TODO
+ * @property {Function} isSorN TODO
+ * @property {Function} isString TODO
+ * @property {Function} isUndefined TODO
+ * @property {Function} possibleConstructorReturn TODO
+ * @property {Function} reject TODO
+ * @property {Function} resolve TODO
+ * @property {Function} set TODO
+ * @property {Function} toJson TODO
+ * @property {Function} uuid TODO
  */
 
 const INFINITY = 1 / 0
@@ -16,9 +47,7 @@ const STRING_TAG = '[object String]'
 const objToString = Object.prototype.toString
 let isBrowser
 
-/**
- * Attempt to detect whether we are in the browser.
- */
+// Attempt to detect whether we are in the browser.
 try {
   isBrowser = !!window
 } catch (e) {
@@ -30,7 +59,6 @@ export {isBrowser}
 const toString = function (value) {
   return objToString.call(value)
 }
-
 const toInteger = function (value) {
   if (!value) {
     return value === 0 ? value : 0
@@ -43,125 +71,44 @@ const toInteger = function (value) {
   const remainder = value % 1
   return value === value ? (remainder ? value - remainder : value) : 0
 }
-
-/**
- * Return whether the provided value is an array.
- *
- * @method
- * @param {*} [value] The value to test.
- */
-export const isArray = Array.isArray
-
-/**
- * Return whether the provided value is an object type.
- *
- * @param {*} [value] The value to test.
- */
-export const isObject = function (value) {
-  return toString(value) === OBJECT_TAG
-}
-
 const isPlainObject = function (value) {
   return (!!value && typeof value === 'object' && value.constructor === Object)
 }
-
-/**
- * Return whether the provided value is a regular expression type.
- *
- * @param {*} [value] The value to test.
- */
-export const isRegExp = function (value) {
-  return toString(value) === REGEXP_TAG
-}
-
-/**
- * Return whether the provided value is a string type.
- *
- * @param {*} [value] The value to test.
- */
-export const isString = function (value) {
-  return typeof value === 'string' || (value && typeof value === 'object' && toString(value) === STRING_TAG)
-}
-
-/**
- * Return whether the provided value is null.
- *
- * @param {*} [value] The value to test.
- */
-export const isNull = function (value) {
-  return value === null
-}
-
-/**
- * Return whether the provided value is undefined.
- *
- * @param {*} [value] The value to test.
- */
-export const isUndefined = function (value) {
-  return value === undefined
-}
-
-/**
- * Return whether the provided value is a date type.
- *
- * @param {*} [value] The value to test.
- */
+export const isArray = Array.isArray
 export const isDate = function (value) {
   return (value && typeof value === 'object' && toString(value) === DATE_TAG)
 }
-
-/**
- * Return whether the provided value is a number type.
- *
- * @param {*} [value] The value to test.
- */
+export const isFunction = function (value) {
+  return typeof value === 'function' || (value && toString(value) === FUNC_TAG)
+}
+export const isInteger = function (value) {
+  return toString(value) === NUMBER_TAG && value == toInteger(value)
+}
+export const isNull = function (value) {
+  return value === null
+}
 export const isNumber = function (value) {
   const type = typeof value
   return type === 'number' || (value && type === 'object' && toString(value) === NUMBER_TAG)
 }
-
-/**
- * Return whether the provided value is an integer.
- *
- * @param {*} [value] The value to test.
- */
-export const isInteger = function (value) {
-  return toString(value) === NUMBER_TAG && value == toInteger(value)
+export const isObject = function (value) {
+  return toString(value) === OBJECT_TAG
 }
-
-/**
- * Return whether the provided value is a boolean type.
- *
- * @param {*} [value] The value to test.
- */
-export const isBoolean = function (value) {
-  return toString(value) === BOOL_TAG
+export const isRegExp = function (value) {
+  return toString(value) === REGEXP_TAG
 }
-
-/**
- * Return whether the provided value is a function.
- *
- * @param {*} [value] The value to test.
- */
-export const isFunction = function (value) {
-  return typeof value === 'function' || (value && toString(value) === FUNC_TAG)
-}
-
-/**
- * Return whether the provided value is a string or a number.
- *
- * @param {*} [value] The value to test.
- */
 export const isSorN = function (value) {
   return isString(value) || isNumber(value)
 }
-
-/**
- * Get the value at the provided key or path.
- *
- * @param {Object} object The object from which to retrieve a property.
- * @param {string} prop The key or path to the property.
- */
+export const isString = function (value) {
+  return typeof value === 'string' || (value && typeof value === 'object' && toString(value) === STRING_TAG)
+}
+export const isUndefined = function (value) {
+  return value === undefined
+}
+export const isBoolean = function (value) {
+  return toString(value) === BOOL_TAG
+}
 export const get = function (object, prop) {
   if (!prop) {
     return
@@ -176,7 +123,6 @@ export const get = function (object, prop) {
 
   return object[last]
 }
-
 const mkdirP = function (object, path) {
   if (!path) {
     return object
@@ -195,6 +141,7 @@ const PATH = /^(.+)\.(.+)$/
 /**
  * Set the value at the provided key or path.
  *
+ * @ignore
  * @param {Object} object The object on which to set a property.
  * @param {(string|Object)} path The key or path to the property. Can also
  * pass in an object of path/value pairs, which will all be set on the target
@@ -218,6 +165,8 @@ export const set = function (object, path, value) {
 
 /**
  * Iterate over an object's own enumerable properties.
+ *
+ * @ignore
  * @param {Object} object The object whose properties are to be enumerated.
  * @param {Function} fn Iteration function.
  * @param {Object} [thisArg] Content to which to bind `fn`.
@@ -233,6 +182,8 @@ export const forOwn = function (obj, fn, thisArg) {
 
 /**
  * Recursively shallow copy own enumberable properties from `source` to `dest`.
+ *
+ * @ignore
  * @param {Object} dest The destination object.
  * @param {Object} source The source object.
  */
@@ -252,6 +203,8 @@ export const deepMixIn = function (dest, source) {
 
 /**
  * Proxy for `Promise.resolve`.
+ *
+ * @ignore
  * @param {*} [value] Value with which to resolve the Promise.
  * @return {Promise} Promise resolved with `value`.
  */
@@ -261,6 +214,8 @@ export const resolve = function (value) {
 
 /**
  * Proxy for `Promise.reject`.
+ *
+ * @ignore
  * @param {*} [value] Value with which to reject the Promise.
  * @return {Promise} Promise reject with `value`.
  */
@@ -274,6 +229,7 @@ export const reject = function (value) {
  * - not a function
  * - does not start with "_"
  *
+ * @ignore
  * @param {Object} dest Destination object.
  * @param {Object} src Source object.
  */
@@ -289,6 +245,7 @@ export const _ = function (dest, src) {
 /**
  * Return the intersection of two arrays.
  *
+ * @ignore
  * @param {Array} array1 First array.
  * @param {Array} array2 Second array.
  * @return {Array} Array of elements common to both arrays.
@@ -317,6 +274,7 @@ export const intersection = function (array1, array2) {
  * Shallow copy own enumerable properties from `src` to `dest` that are on `src`
  * but are missing from `dest.
  *
+ * @ignore
  * @param {Object} dest The destination object.
  * @param {Object} source The source object.
  */
@@ -331,6 +289,7 @@ export const fillIn = function (dest, src) {
 /**
  * Return whether `prop` is matched by any string or regular expression in `bl`.
  *
+ * @ignore
  * @param {string} prop The name of a property.
  * @param {Array} bl Array of strings and regular expressions.
  * @return {boolean} Whether `prop` was matched.
@@ -352,6 +311,7 @@ export const isBlacklisted = function (prop, bl) {
 /**
  * Proxy for `JSON.parse`.
  *
+ * @ignore
  * @param {string} json JSON to parse.
  * @return {Object} Parsed object.
  */
@@ -362,7 +322,7 @@ export const fromJson = function (json) {
 /**
  * Proxy for `JSON.stringify`.
  *
- * @method
+ * @ignore
  * @param {*} value Value to serialize to JSON.
  * @return {string} JSON string.
  */
@@ -371,6 +331,7 @@ export const toJson = JSON.stringify
 /**
  * Deep copy a value.
  *
+ * @ignore
  * @param {*} from Value to deep copy.
  * @return {*} Deep copy of `from`.
  */
@@ -448,6 +409,7 @@ export const copy = function (from, to, stackFrom, stackTo, blacklist) {
 /**
  * Add eventing capabilities into the target object.
  *
+ * @ignore
  * @param {Object} target Target object.
  * @param {Function} [getter] Custom getter for retrieving the object's event
  * listeners.
