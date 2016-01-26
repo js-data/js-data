@@ -54,11 +54,15 @@ r.js/browserify/webpack build.
 import {DataStore} from 'js-data'
 import HttpAdapter from 'js-data-http'
 
+// Create an empty data store
 const store = new DataStore()
+
 // "store" will use an http adapter by default
 store.registerAdapter('http', new HttpAdapter(), { 'default': true })
 
+// Define a new Mapper for a "user" resource
 store.defineMapper('user')
+// Get a reference to the store's "user" collection
 const Users = store.getCollection('user')
 
 async function showExample () {
@@ -89,11 +93,15 @@ async function showExample () {
 __ES5:__
 
 ```javascript
+// Create an empty data store
 var store = new JSData.DataStore()
+
 // "store" will use an http adapter by default
 store.registerAdapter('http', new HttpAdapter(), { default: true })
 
+// Define a new Mapper for a "user" resource
 store.defineMapper('user')
+// Get a reference to the store's "user" collection
 var Users = store.getCollection('user')
 
 store.find('user', 1)
