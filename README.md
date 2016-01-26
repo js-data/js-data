@@ -9,9 +9,10 @@
 [![Coverage Status][cov_b]][cov_l]
 [![Codacy][cod_b]][cod_l]
 
-JSData is a datastore-agnostic ORM/ODM for Node.js and the Browser.
+JSData is a framework-agnostic, datastore-agnostic ORM/ODM for Node.js and the
+Browser.
 
-Adapters allow JSData to connect to various datastores such as Firebase, MySql,
+Adapters allow JSData to connect to various data sources such as Firebase, MySql,
 RethinkDB, MongoDB, localStorage, Redis, a REST API, etc. With JSData you can
 re-use your Models between environments, keep your data layer intact when
 transitioning between app frameworks, and work with a unified data API on the
