@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>js-data Source: decorators.js</title>
+	<title>js-data Source: index.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -69,133 +69,116 @@
 		<div id="main">
 			
 
-		<h1 class="page-title">Source: decorators.js</h1>
+		<h1 class="page-title">Source: index.js</h1>
     
 <section>
     <article>
         <pre
-            class="sunlight-highlight-javascript linenums">import {
-  fillIn,
-  isFunction,
-  isString
-} from './utils'
+            class="sunlight-highlight-javascript linenums">/**
+ * Registered as `js-data` in NPM and Bower.
+ * #### Script tag
+ * ```js
+ * window.JSData
+ * ```
+ * #### CommonJS
+ * ```js
+ * var JSData = require('js-data')
+ * ```
+ * #### ES6 Modules
+ * ```js
+ * import JSData from 'js-data'
+ * ```
+ * #### AMD
+ * ```js
+ * define('myApp', ['js-data'], function (JSData) { ... })
+ * ```
+ *
+ * @module js-data
+ */
 
-export const belongsToType = 'belongsTo'
-export const hasManyType = 'hasMany'
-export const hasOneType = 'hasOne'
-
-function Relation (related, opts) {
-  const self = this
-
-  opts || (opts = {})
-
-  const localField = opts.localField
-  if (!localField) {
-    throw new Error('localField is required')
-  }
-
-  const foreignKey = opts.foreignKey || opts.localKey
-  if (!foreignKey &amp;&amp; (opts.type === belongsToType || opts.type === hasOneType)) {
-    throw new Error('foreignKey is required')
-  }
-  const localKeys = opts.localKeys
-  const foreignKeys = opts.foreignKeys
-  if (!foreignKey &amp;&amp; !localKeys &amp;&amp; !foreignKeys &amp;&amp; opts.type === hasManyType) {
-    throw new Error('one of (foreignKey, localKeys, foreignKeys) is required')
-  }
-
-  if (isString(related)) {
-    opts.relation = related
-  } else if (related) {
-    opts.relation = related.name
-  }
-
-  if (!related || (isString(related) &amp;&amp; !isFunction(opts.getRelation))) {
-    throw new Error('you must provide a reference to the related mapper!')
-  }
-
-  fillIn(self, opts)
-}
-
-const relatedTo = function (mapper, related, opts) {
-  opts || (opts = {})
-  if (!opts.type) {
-    throw new Error('must specify relation type!')
-  }
-  opts.mapper = mapper
-  opts.name = mapper.name
-  const relation = new Relation(related, opts)
-
-  mapper.relationList || (mapper.relationList = [])
-  mapper.relationFields || (mapper.relationFields = [])
-  mapper.relationList.push(relation)
-  mapper.relationFields.push(relation.localField)
+/**
+ * Details of the current version of the `js-data` module.
+ *
+ * @name version
+ * @memberof module:js-data
+ * @type {Object}
+ * @property {string} full The full semver value.
+ * @property {number} major The major version number.
+ * @property {number} minor The minor version number.
+ * @property {number} patch The patch version number.
+ * @property {(string|boolean)} alpha The alpha version value, otherwise `false`
+ * if the current version is not alpha.
+ * @property {(string|boolean)} beta The beta version value, otherwise `false`
+ * if the current version is not beta.
+ */
+const version = {
+  full: '&lt;%= pkg.version %>',
+  major: parseInt('&lt;%= major %>', 10),
+  minor: parseInt('&lt;%= minor %>', 10),
+  patch: parseInt('&lt;%= patch %>', 10),
+  alpha: '&lt;%= alpha %>' !== 'false' ? '&lt;%= alpha %>' : false,
+  beta: '&lt;%= beta %>' !== 'false' ? '&lt;%= beta %>' : false
 }
 
 /**
- * TODO
- *
- * @name module:js-data.belongsTo
- * @method
- * @param {Mapper} related The relation the target belongs to.
- * @param {Object} opts Configuration options.
- * @param {string} opts.foreignKey The field that holds the primary key of the
- * related record.
- * @param {string} opts.localField The field that holds a reference to the
- * related record object.
- * @return {Function} Invocation function, which accepts the target as the only
- * parameter.
+ * {@link Collection} class.
+ * @name module:js-data.Collection
  */
-export const belongsTo = function (related, opts) {
-  opts || (opts = {})
-  opts.type = belongsToType
-  return function (target) {
-    relatedTo(target, related, opts)
-  }
-}
-
+import Collection from './Collection'
 /**
- * TODO
- *
- * @name module:js-data.hasMany
- * @method
- * @param {Mapper} related The relation of which the target has many.
- * @param {Object} opts Configuration options.
- * @param {string} [opts.foreignKey] The field that holds the primary key of the
- * related record.
- * @param {string} opts.localField The field that holds a reference to the
- * related record object.
- * @return {Function} Invocation function, which accepts the target as the only
- * parameter.
+ * {@link Container} class.
+ * @name module:js-data.Container
  */
-export const hasMany = function (related, opts) {
-  opts || (opts = {})
-  opts.type = hasManyType
-  return function (target) {
-    relatedTo(target, related, opts)
-  }
-}
-
+import Container from './Container'
 /**
- * TODO
- *
- * @name module:js-data.hasOne
- * @method
- * @param {Mapper} related The relation of which the target has one.
- * @param {Object} opts Configuration options.
- * @param {string} [opts.foreignKey] The field that holds the primary key of the
- * related record.
- * @param {string} opts.localField The field that holds a reference to the
- * related record object.
- * @return {Function} Invocation function, which accepts the target as the only
- * parameter.
+ * {@link DataStore} class.
+ * @name module:js-data.DataStore
  */
-export const hasOne = function (related, opts) {
-  opts || (opts = {})
-  opts.type = hasOneType
-  return function (target) {
-    relatedTo(target, related, opts)
-  }
+import DataStore from './DataStore'
+/**
+ * {@link LinkedCollection} class.
+ * @name module:js-data.LinkedCollection
+ */
+import LinkedCollection from './LinkedCollection'
+/**
+ * {@link Mapper} class.
+ * @name module:js-data.Mapper
+ */
+import Mapper from './Mapper'
+/**
+ * {@link Query} class.
+ * @name module:js-data.Query
+ */
+import Query from './Query'
+/**
+ * {@link Record} class.
+ * @name module:js-data.Record
+ */
+import Record from './Record'
+/**
+ * {@link Schema} class.
+ * @name module:js-data.Schema
+ */
+import Schema from './Schema'
+
+import * as utils from './utils'
+
+export * from './decorators'
+
+const DS = DataStore
+
+export {
+  Collection,
+  Container,
+  DataStore,
+  DS, // Backwards compatiblity
+  LinkedCollection,
+  Mapper,
+  Query,
+  Record,
+  Schema,
+  utils,
+  version
 }
 </pre>
     </article>
@@ -242,7 +225,7 @@ export const hasOne = function (related, opts) {
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
 	
-		on 2016-01-26T23:35:58+00:00
+		on 2016-01-27T00:11:15+00:00
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>js-data Class: LinkedCollection</title>
+	<title>js-data Class: Collection</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -69,13 +69,13 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: LinkedCollection</h1>
+	<h1 class="page-title">Class: Collection</h1>
 <section>
 
 <header>
     
         <h2>
-        LinkedCollection
+        Collection
         </h2>
         
     
@@ -88,7 +88,7 @@
         
 <hr>
 <dt>
-    <h4 class="name" id="LinkedCollection"><span class="type-signature"></span>new LinkedCollection(<span class="optional">records</span>, <span class="optional">opts</span>)</h4>
+    <h4 class="name" id="Collection"><span class="type-signature"></span>new Collection(<span class="optional">records</span>, <span class="optional">opts</span>)</h4>
     
     
 </dt>
@@ -96,8 +96,7 @@
 
     
     <div class="description">
-        <p>TODO</p>
-<pre class="prettyprint source lang-javascript"><code>import {LinkedCollection} from 'js-data'</code></pre>
+        <pre class="prettyprint source lang-javascript"><code>import {Collection} from 'js-data'</code></pre><p>An ordered set of <a href="Record.html">Record</a> instances.</p>
     </div>
     
 
@@ -162,7 +161,7 @@
             
 
             <td class="description last"><p>Initial set of records to insert into the
-collection. See <a href="Collection.html">Collection</a>.</p></td>
+collection.</p></td>
         </tr>
 
     
@@ -196,7 +195,193 @@ collection. See <a href="Collection.html">Collection</a>.</p></td>
 
             
 
-            <td class="description last"><p>Configuration options. See <a href="Collection.html">Collection</a>.</p></td>
+            <td class="description last"><p>Configuration options.</p>
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>idAttribute</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>See <a href="Collection.html#idAttribute">Collection#idAttribute</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onConflict</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    "merge"
+                
+                </td>
+            
+
+            <td class="description last"><p>See <a href="Collection.html#onConflict">Collection#onConflict</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>mapper</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>See <a href="Collection.html#mapper">Collection#mapper</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>recordOpts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+
+            <td class="description last"><p>See <a href="Collection.html#recordOpts">Collection#recordOpts</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -240,8 +425,8 @@ collection. See <a href="Collection.html">Collection</a>.</p></td>
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="LinkedCollection.js.html">LinkedCollection.js</a>,
-				 <a href="LinkedCollection.js.html#sunlight-1-line-17">line 17</a>
+				<a href="Collection.js.html">Collection.js</a>,
+				 <a href="Collection.js.html#sunlight-1-line-88">line 88</a>
 			</li>
 		</ul>
 	</dd>
@@ -266,43 +451,22 @@ collection. See <a href="Collection.html">Collection</a>.</p></td>
     
 
     
-    <h5>Returns:</h5>
+
     
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
+        <h5>Example</h5>
         
-<span class="param-type"><a href="Mapper.html">Mapper</a></span>
+    <pre class="sunlight-highlight-javascript">import {Collection, Record} from &#x27;js-data&#x27;
+const user1 = new Record({ id: 1 })
+const user2 = new Record({ id: 2 })
+const UserCollection = new Collection([user1, user2])
+UserCollection.get(1) === user1 // true</pre>
 
-
-
-    </dd>
-</dl>
-
-
-        
 
     
 </dd>
 
     
     </div>
-
-    
-        <h3 class="subsection-title">Extends</h3>
-
-        
-
-
-    <ul>
-        <li><a href="Collection.html">Collection</a></li>
-    </ul>
-
 
     
 
@@ -355,15 +519,6 @@ this will default to <a href="Mapper.html#idAttribute">Mapper#idAttribute</a>.</
 
 	
 
-	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#idAttribute">Collection#idAttribute</a>
-			</li>
-		</ul>
-	</dd>
 	
 
     
@@ -453,15 +608,6 @@ this will default to <a href="Mapper.html#idAttribute">Mapper#idAttribute</a>.</
 	
 
 	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#index">Collection#index</a>
-			</li>
-		</ul>
-	</dd>
-	
 
     
 
@@ -542,15 +688,6 @@ this will default to <a href="Mapper.html#idAttribute">Mapper#idAttribute</a>.</
 
 	
 
-	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#indexes">Collection#indexes</a>
-			</li>
-		</ul>
-	</dd>
 	
 
     
@@ -634,15 +771,6 @@ wrap records in <a href="Mapper.html#RecordClass">Mapper#RecordClass</a>.</p>
 
 	
 
-	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#mapper">Collection#mapper</a>
-			</li>
-		</ul>
-	</dd>
 	
 
     
@@ -757,15 +885,6 @@ on the new record will be removed.</p>
 	
 
 	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#onConflict">Collection#onConflict</a>
-			</li>
-		</ul>
-	</dd>
-	
 
     
 
@@ -855,15 +974,6 @@ in <a href="Mapper.html#RecordClass">Mapper#RecordClass</a>.</p>
 	
 
 	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#recordOpts">Collection#recordOpts</a>
-			</li>
-		</ul>
-	</dd>
-	
 
     
 
@@ -933,12 +1043,7 @@ in <a href="Mapper.html#RecordClass">Mapper#RecordClass</a>.</p>
 
     
     <div class="description">
-        <p>Create a LinkedCollection subclass.</p>
-<pre class="prettyprint source lang-javascript"><code>var MyLinkedCollection = LinkedCollection.extend({
-  foo: function () { return 'bar' }
-})
-var collection = new MyLinkedCollection()
-collection.foo() // &quot;bar&quot;</code></pre>
+        <p>Create a Collection subclass.</p>
     </div>
     
 
@@ -1095,8 +1200,8 @@ subclass.</p></td>
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="LinkedCollection.js.html">LinkedCollection.js</a>,
-				 <a href="LinkedCollection.js.html#sunlight-1-line-161">line 161</a>
+				<a href="Collection.js.html">Collection.js</a>,
+				 <a href="Collection.js.html#sunlight-1-line-170">line 170</a>
 			</li>
 		</ul>
 	</dd>
@@ -1125,7 +1230,7 @@ subclass.</p></td>
     
             
 <div class="param-desc">
-    <p>Subclass of LinkedCollection.</p>
+    <p>Subclass of Collection.</p>
 </div>
 
 
@@ -1145,6 +1250,16 @@ subclass.</p></td>
 
 
         
+
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">var MyCollection = Collection.extend({
+  foo: function () { return &#x27;bar&#x27; }
+})
+var collection = new MyCollection()
+collection.foo() // &quot;bar&quot;</pre>
+
 
     
 </dd>
@@ -1351,15 +1466,6 @@ the collection. Possible values are <code>merge</code> or <code>replace</code>.<
 
 	
 
-	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#add">Collection#add</a>
-			</li>
-		</ul>
-	</dd>
 	
 
     
@@ -1584,15 +1690,6 @@ a value then <a href="Collection.html#remove">Collection#remove</a> will return 
 	
 
 	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#afterRemove">Collection#afterRemove</a>
-			</li>
-		</ul>
-	</dd>
-	
 
     
 
@@ -1781,15 +1878,6 @@ value.</p>
 	
 
 	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#afterRemoveAll">Collection#afterRemoveAll</a>
-			</li>
-		</ul>
-	</dd>
-	
 
     
 
@@ -1963,15 +2051,6 @@ re-assigned to the returned value.</p>
 	
 
 	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#beforeAdd">Collection#beforeAdd</a>
-			</li>
-		</ul>
-	</dd>
-	
 
     
 
@@ -2137,15 +2216,6 @@ re-assigned to the returned value.</p>
 	
 
 	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#beforeRemove">Collection#beforeRemove</a>
-			</li>
-		</ul>
-	</dd>
-	
 
     
 
@@ -2307,15 +2377,6 @@ re-assigned to the returned value.</p>
 
 	
 
-	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#beforeRemoveAll">Collection#beforeRemoveAll</a>
-			</li>
-		</ul>
-	</dd>
 	
 
     
@@ -2759,15 +2820,6 @@ on the left boundary.</p></td>
 	
 
 	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#between">Collection#between</a>
-			</li>
-		</ul>
-	</dd>
-	
 
     
 
@@ -2987,15 +3039,6 @@ the name will also be the field that is used to index the collection.</p></td>
 
 	
 
-	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#createIndex">Collection#createIndex</a>
-			</li>
-		</ul>
-	</dd>
 	
 
     
@@ -3217,15 +3260,6 @@ the name will also be the field that is used to index the collection.</p></td>
 	
 
 	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#emit">Collection#emit</a>
-			</li>
-		</ul>
-	</dd>
-	
 
     
 
@@ -3428,15 +3462,6 @@ function.</p></td>
 
 	
 
-	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#filter">Collection#filter</a>
-			</li>
-		</ul>
-	</dd>
 	
 
     
@@ -3667,15 +3692,6 @@ function.</p></td>
 	
 
 	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#forEach">Collection#forEach</a>
-			</li>
-		</ul>
-	</dd>
-	
 
     
 
@@ -3848,15 +3864,6 @@ function.</p></td>
 
 	
 
-	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#get">Collection#get</a>
-			</li>
-		</ul>
-	</dd>
 	
 
     
@@ -4137,15 +4144,6 @@ query. If no index is specified, the main index is used.</p></td>
 	
 
 	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#getAll">Collection#getAll</a>
-			</li>
-		</ul>
-	</dd>
-	
 
     
 
@@ -4320,15 +4318,6 @@ query. If no index is specified, the main index is used.</p></td>
 
 	
 
-	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#limit">Collection#limit</a>
-			</li>
-		</ul>
-	</dd>
 	
 
     
@@ -4542,15 +4531,6 @@ query. If no index is specified, the main index is used.</p></td>
 	
 
 	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#map">Collection#map</a>
-			</li>
-		</ul>
-	</dd>
-	
 
     
 
@@ -4721,15 +4701,6 @@ collection's main index.</p>
 
 	
 
-	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#mapCall">Collection#mapCall</a>
-			</li>
-		</ul>
-	</dd>
 	
 
     
@@ -4928,15 +4899,6 @@ that were added to this Collection by <a href="Collection.html#add">Collection#a
 	
 
 	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#method">Collection#method</a>
-			</li>
-		</ul>
-	</dd>
-	
 
     
 
@@ -5121,15 +5083,6 @@ that were added to this Collection by <a href="Collection.html#add">Collection#a
 	
 
 	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#off">Collection#off</a>
-			</li>
-		</ul>
-	</dd>
-	
 
     
 
@@ -5292,15 +5245,6 @@ that were added to this Collection by <a href="Collection.html#add">Collection#a
 	
 
 	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#on">Collection#on</a>
-			</li>
-		</ul>
-	</dd>
-	
 
     
 
@@ -5389,15 +5333,6 @@ The result will be all or a subset of the contents of the collection.</p>
 
 	
 
-	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#query">Collection#query</a>
-			</li>
-		</ul>
-	</dd>
 	
 
     
@@ -5590,15 +5525,6 @@ returned.</p></td>
 	
 
 	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#recordId">Collection#recordId</a>
-			</li>
-		</ul>
-	</dd>
-	
 
     
 
@@ -5788,15 +5714,6 @@ key.</p>
 
 	
 
-	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#reduce">Collection#reduce</a>
-			</li>
-		</ul>
-	</dd>
 	
 
     
@@ -6014,15 +5931,6 @@ key.</p>
 
 	
 
-	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#remove">Collection#remove</a>
-			</li>
-		</ul>
-	</dd>
 	
 
     
@@ -6411,15 +6319,6 @@ key.</p>
 	
 
 	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#removeAll">Collection#removeAll</a>
-			</li>
-		</ul>
-	</dd>
-	
 
     
 
@@ -6585,15 +6484,6 @@ key.</p>
 
 	
 
-	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#skip">Collection#skip</a>
-			</li>
-		</ul>
-	</dd>
 	
 
     
@@ -6838,15 +6728,6 @@ to include in the representation.</p></td>
 
 	
 
-	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#toJSON">Collection#toJSON</a>
-			</li>
-		</ul>
-	</dd>
 	
 
     
@@ -7120,15 +7001,6 @@ in the main index.</p></td>
 	
 
 	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#updateIndex">Collection#updateIndex</a>
-			</li>
-		</ul>
-	</dd>
-	
 
     
 
@@ -7311,15 +7183,6 @@ in the main index.</p></td>
 	
 
 	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="Collection.html#updateIndexes">Collection#updateIndexes</a>
-			</li>
-		</ul>
-	</dd>
-	
 
     
 
@@ -7430,7 +7293,7 @@ in the main index.</p></td>
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
 	
-		on 2016-01-26T23:35:58+00:00
+		on 2016-01-27T00:11:16+00:00
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>
