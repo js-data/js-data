@@ -17,18 +17,17 @@ RethinkDB, MongoDB, localStorage, Redis, a REST API, etc. With JSData you can
 re-use your Models between environments, keep your data layer intact when
 transitioning between app frameworks, and work with a unified data API on the
 server and the client. JSData employs conventions for rapid development, but
-allows for endless customization in order to meet your particular needs. Think
-of it as the "Twitter Bootstrap" of JavaScript data layers.
+allows for endless customization in order to meet your particular needs.
 
-To get started, check out [js-data.io](http://www.js-data.io)!
+For Getting Started guides, visit __[http://js-data.io](http://www.js-data.io)__!
 
 ## Table of contents
 
 * [Quick start](#quick-start)
 * [Background](#background)
 * [Dependencies](#dependencies)
-* [Documentation](#documentation)
-* [API Reference](#api-reference)
+* [Guides & Tutorials](#documentation)
+* [API Reference Docs](#api-reference)
 * [Support](#support)
 * [Community](#community)
 * [Contributing](#contributing)
@@ -165,7 +164,8 @@ https://github.com/jakearchibald/es6-promise.
 JSData also requires full ES5 support from the runtime. Here is a handy library
 for polyfilling: https://github.com/afarkas/html5shiv
 
-## Documentation
+## Guides & Tutorials
+- [Main Site](http://www.js-data.io)
 - [Getting Started with js-data](http://www.js-data.io/docs/home)
 - [Resources/Models](http://www.js-data.io/docs/resources)
 - [Working with the Data Store](http://www.js-data.io/docs/working-with-the-data-store)
@@ -183,20 +183,10 @@ for polyfilling: https://github.com/afarkas/html5shiv
 See an issue with the documentation? Have something to add? Click the "Suggest
 Edits" at the top right of each page and make your suggested changes!
 
-## API Reference
-- [DS](http://www.js-data.io/docs/ds)
-- [Configuration Options](http://www.js-data.io/docs/dsdefaults)
-- [DSFirebaseAdapter](http://www.js-data.io/docs/dsfirebaseadapter)
-- [DSHttpAdapter](http://www.js-data.io/docs/dshttpadapter)
-- [DSLevelUpAdapter](http://www.js-data.io/docs/dslevelupadapter)
-- [DSLocalForageAdapter](http://www.js-data.io/docs/dslocalforageadapter)
-- [DSLocalStorageAdapter](http://www.js-data.io/docs/dslocalstorageadapter)
-- [DSMongoDBAdapter](http://www.js-data.io/docs/dsmongodbadapter)
-- [DSNeDBAdapter](http://www.js-data.io/docs/dsnedbadapter)
-- [DSRedisAdapter](http://www.js-data.io/docs/dsredisadapter)
-- [DSRethinkDBAdapter](http://www.js-data.io/docs/dsrethinkdbadapter)
-- [DSSqlAdapter](http://www.js-data.io/docs/dssqladapter)
-- [js-data-schema](http://www.js-data.io/docs/js-data-schema)
+## API Reference Docs
+- [all](http://api.js-data.io/)
+- [js-data](http://api.js-data.io/js-data)
+- [js-data-http](http://api.js-data.io/js-data-http)
 
 ## Support
 
