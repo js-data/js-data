@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Js-data by js-data</title>
+    <title>JSData by js-data</title>
 
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/github-light.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -15,8 +15,8 @@
   <body>
     <div class="wrapper">
       <header>
-        <h1>Js-data</h1>
-        <p>Robust framework-agnostic in-memory data store.</p>
+        <h1>JSData</h1>
+        <p>Give your data the treatment it deserves with a framework-agnostic, datastore-agnostic JavaScript ORM built for ease of use and peace of mind. Works in Node.js and in the Browser.</p>
 
         <p class="view"><a href="https://github.com/js-data/js-data">View the Project on GitHub <small>js-data/js-data</small></a></p>
 
@@ -28,281 +28,17 @@
         </ul>
       </header>
       <section>
-        <p><img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="64" height="64"></p>
+        <p><img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="96" height="96"></p>
 
-<h2>
-<a id="jsdata------" class="anchor" href="#jsdata------" aria-hidden="true"><span class="octicon octicon-link"></span></a>JSData <a href="http://slack.js-data.io"><img src="http://slack.js-data.io/badge.svg" alt="Slack Status"></a> <a href="https://www.npmjs.org/package/js-data"><img src="https://img.shields.io/npm/v/js-data.svg?style=flat" alt="npm version"></a> <a href="https://circleci.com/gh/js-data/js-data/tree/master"><img src="https://img.shields.io/circleci/project/js-data/js-data/master.svg?style=flat" alt="Circle CI"></a> <a href="https://www.npmjs.org/package/js-data"><img src="https://img.shields.io/npm/dm/js-data.svg?style=flat" alt="npm downloads"></a> <a href="https://coveralls.io/github/js-data/js-data?branch=master"><img src="https://img.shields.io/coveralls/js-data/js-data/master.svg?style=flat" alt="Coverage Status"></a> <a href="https://www.codacy.com/app/jasondobry/js-data/dashboard"><img src="https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg" alt="Codacy"></a>
-</h2>
+<h1>
+<a id="js-data-api-reference-docs" class="anchor" href="#js-data-api-reference-docs" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>js-data API Reference Docs</h1>
 
-<p>Inspired by <a href="https://github.com/emberjs/data">Ember Data</a>, <strong>JSData</strong> is the model layer you've been
-craving. It consists of a convenient <strong>framework-agnostic</strong>, <strong>in-memory store</strong>
-for managing your data, which uses <strong>adapters</strong> to communicate with various
-<strong>persistence layers</strong>.</p>
-
-<p>The most commonly used adapter is the <a href="http://www.js-data.io/docs/dshttpadapter">http adapter</a>, which is perfect for
-communicating with your RESTful backend. <a href="http://www.js-data.io/docs/dslocalstorageadapter">localStorage</a>, <a href="http://www.js-data.io/docs/dslocalforageadapter">localForage</a>,
-<a href="http://www.js-data.io/docs/dsfirebaseadapter">firebase</a> and <a href="http://www.js-data.io/docs/working-with-adapters">other adapters</a> are already available. On the server you
-could hook up to the <a href="http://www.js-data.io/docs/dssqladapter">SQL adapter (Postgres/MySQL/MariaDB/SQLite3)</a> and add
-in the <a href="http://www.js-data.io/docs/dsredisadapter">Redis adapter</a> as a caching layer for your read endpoints. More
-adapters are coming, and you're free to implement your own. See <a href="http://www.js-data.io/docs/working-with-adapters">Adapters</a>.</p>
-
-<p>Unlike some libraries, JSData does not require the use of getters and setters,
-and doesn't decorate your data with a bunch of cruft. JSData's internal change
-detection (via <a href="https://github.com/Polymer/observe-js">observe-js</a> or <code>Object.observe</code> in supporting browsers)
-allows for powerful use cases and an easy avenue for implementing your own
-<a href="https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html">3-way data-binding</a>.</p>
-
-<p>Supporting relations, computed properties, support for Node and the Browser,
-model lifecycle control and a slew of other features, JSData is the tool for
-<a href="http://confreaks.tv/videos/mwjs2015-give-your-data-the-respect-it-deserves">giving your data the respect it deserves</a>.</p>
-
-<p>Written in ES6 and built for modern web development, JSData will save you
-thousands of lines of code <em>and</em> make you cooler.</p>
-
-<p>Support is handled via the <a href="http://slack.js-data.io">Slack channel</a> or the <a href="https://groups.io/org/groupsio/jsdata">Mailing List</a>.</p>
-
-<h5>
-<a id="looking-for-contributors" class="anchor" href="#looking-for-contributors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Looking for contributors!</h5>
-
-<p>JSData is getting popular and becoming a lot of work for me. I could use help
-with tests, documentation, demos/examples, and adapters. Contact me if you wan
-to help! jason dot dobry at gmail dot com</p>
-
-<p><a href="https://www.youtube.com/watch?v=8wxnnJA9FKw"><img src="http://img.youtube.com/vi/8wxnnJA9FKw/0.jpg" alt="MtnWestJS Conf 2015 Presentation"></a></p>
-
-<h3>
-<a id="dependencies" class="anchor" href="#dependencies" aria-hidden="true"><span class="octicon octicon-link"></span></a>Dependencies</h3>
-
-<p>JSData requires the presence of the ES6-spec (ES2015) <code>Promise</code> constructor in
-the global environment. In the browser, <code>window.Promise</code> must be available. In
-Node, <code>global.Promise</code> must be available. Here is a handy library for
-polyfilling: <a href="https://github.com/jakearchibald/es6-promise">https://github.com/jakearchibald/es6-promise</a>.</p>
-
-<p>If you can't polyfill the environment, then configure JSData to use a specific
-<code>Promise</code> constructor directly: <code>JSData.DSUtils.Promise = MyPromiseLib;</code>.
-This direct configuration method is useful for telling JSData to use the
-Bluebird library or Angular's <code>$q</code>, etc.</p>
-
-<h3>
-<a id="quick-start" class="anchor" href="#quick-start" aria-hidden="true"><span class="octicon octicon-link"></span></a>Quick Start</h3>
-
-<p><code>bower install --save js-data js-data-http</code> or <code>npm install --save js-data js-data-http</code>.</p>
-
-<p>Load <code>js-data-http.js</code> after <code>js-data.js</code>. See <a href="http://www.js-data.io/docs#use-with-webpack">installation instructions</a>
-for making js-data part of your r.js/browserify/webpack build.</p>
-
-<div class="highlight highlight-source-js"><pre><span class="pl-c">// you can also require "js-data" if you're using AMD/CommonJS</span>
-<span class="pl-c">// e.g. var JSData = require('js-data'); var DSHttpAdapter = require('js-data-http');</span>
-<span class="pl-k">var</span> store <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">JSData.DS</span>();
-
-<span class="pl-c">// register and use http by default for async operations</span>
-store.registerAdapter(<span class="pl-s"><span class="pl-pds">'</span>http<span class="pl-pds">'</span></span>, <span class="pl-k">new</span> <span class="pl-en">DSHttpAdapter</span>(), { <span class="pl-k">default</span><span class="pl-k">:</span> <span class="pl-c1">true</span> });
-
-<span class="pl-c">// simplest model definition, just pass the name instead of an options hash</span>
-<span class="pl-c">// this is the same as "store.defineResource({ name: 'user' })"</span>
-<span class="pl-k">var</span> User <span class="pl-k">=</span> store.defineResource(<span class="pl-s"><span class="pl-pds">'</span>user<span class="pl-pds">'</span></span>);
-
-<span class="pl-c">// Usually you'll define a resource by passing options</span>
-<span class="pl-k">var</span> Comment <span class="pl-k">=</span> store.defineResource({
-  name<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>comment<span class="pl-pds">'</span></span>,
-  relations<span class="pl-k">:</span> {
-    belongsTo<span class="pl-k">:</span> {
-      user<span class="pl-k">:</span> {
-        <span class="pl-c">// "join" field, name of field on a comment</span>
-        <span class="pl-c">// that is the primary key of the parent user</span>
-        localKey<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>userId<span class="pl-pds">'</span></span>,
-
-        <span class="pl-c">// name of the field on the comment where the</span>
-        <span class="pl-c">// parent user will be attached to the comment</span>
-        <span class="pl-c">// by js-data</span>
-        localField<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>user<span class="pl-pds">'</span></span>
-      }
-    }
-  }
-});
-
-<span class="pl-k">var</span> user;
-
-<span class="pl-c">// Example CRUD operations with default configuration</span>
-<span class="pl-c">// See http://www.js-data.io/docs/dsfind</span>
-User.<span class="pl-c1">find</span>(<span class="pl-c1">1</span>)
-  .then(<span class="pl-k">function</span> (<span class="pl-smi">_user</span>) {
-    _user; <span class="pl-c">// { id: 1, name: 'John' }</span>
-
-    <span class="pl-c">// See http://www.js-data.io/docs/dsis</span>
-    User.is(_user); <span class="pl-c">// true</span>
-    Comment.is(_user); <span class="pl-c">// false</span>
-
-    <span class="pl-c">// The user is in the store now</span>
-    <span class="pl-c">// See http://www.js-data.io/docs/dsget</span>
-    User.get(_user.<span class="pl-c1">id</span>); <span class="pl-c">// { id: 1, name: 'John' }</span>
-
-    user <span class="pl-k">=</span> _user;
-
-    <span class="pl-c">// No need for another GET request, will resolve immediately</span>
-    <span class="pl-c">// See http://www.js-data.io/docs/dsfind</span>
-    <span class="pl-k">return</span> User.<span class="pl-c1">find</span>(<span class="pl-c1">1</span>);
-  })
-  .then(<span class="pl-k">function</span> (<span class="pl-smi">_user</span>) {
-    user <span class="pl-k">===</span> _user; <span class="pl-c">// true</span>
-
-    <span class="pl-c">// PUT /user/1 {name:"Johnny"}</span>
-    <span class="pl-c">// See http://www.js-data.io/docs/dsupdate</span>
-    <span class="pl-k">return</span> User.update(user.<span class="pl-c1">id</span>, { name<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>Johnny<span class="pl-pds">'</span></span> });
-  })
-  .then(<span class="pl-k">function</span> (<span class="pl-smi">_user</span>) {
-    <span class="pl-c">// identity mapping at play</span>
-    user <span class="pl-k">===</span> _user; <span class="pl-c">// true</span>
-    user <span class="pl-k">===</span> User.get(_user.<span class="pl-c1">id</span>); <span class="pl-c">// true</span>
-
-    user; <span class="pl-c">// { id: 1, name: 'Johnny' }</span>
-
-    user.<span class="pl-c1">name</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>Billy<span class="pl-pds">'</span></span>;
-
-    <span class="pl-c">// PUT /user/1 {id:1,name:"Billy"}</span>
-    <span class="pl-c">// See http://www.js-data.io/docs/dssave</span>
-    <span class="pl-k">return</span> User.save(<span class="pl-c1">1</span>);
-  })
-  .then(<span class="pl-k">function</span> (<span class="pl-smi">_user</span>) {
-    <span class="pl-c">// identity mapping at play</span>
-    user <span class="pl-k">===</span> _user; <span class="pl-c">// true</span>
-    user <span class="pl-k">===</span> User.get(_user.<span class="pl-c1">id</span>); <span class="pl-c">// true</span>
-
-    user; <span class="pl-c">// { id: 1, name: 'Johnny' }</span>
-
-    <span class="pl-c">// DELETE /user/1</span>
-    <span class="pl-c">// See http://www.js-data.io/docs/dsdestroy</span>
-    <span class="pl-k">return</span> User.destroy(<span class="pl-c1">1</span>);
-  })
-  .then(<span class="pl-k">function</span> () {
-    <span class="pl-c">// The user has also been removed from the in-memory store</span>
-    User.get(<span class="pl-c1">1</span>); <span class="pl-c">// undefined</span>
-  });</pre></div>
-
-<p>All your data are belong to you...</p>
-
-<h3>
-<a id="guides" class="anchor" href="#guides" aria-hidden="true"><span class="octicon octicon-link"></span></a>Guides</h3>
+<p>For Getting Started guides, visit <strong><a href="http://www.js-data.io">http://js-data.io</a></strong>!</p>
 
 <ul>
-<li><a href="http://www.js-data.io/docs/home">Getting Started with js-data</a></li>
-<li><a href="http://www.js-data.io/docs/resources">Resources/Models</a></li>
-<li><a href="http://www.js-data.io/docs/working-with-the-data-store">Working with the Data Store</a></li>
-<li><a href="http://www.js-data.io/docs/working-with-adapters">Adapters</a></li>
-<li><a href="http://www.js-data.io/docs/model-lifecycle">Model Lifecycle</a></li>
-<li><a href="http://www.js-data.io/docs/custom-instance-behavior">Custom Instance Behavior</a></li>
-<li><a href="http://www.js-data.io/docs/computed-properties">Computed Properties</a></li>
-<li><a href="http://www.js-data.io/docs/relations">Relations</a></li>
-<li><a href="http://www.js-data.io/docs/schemata--validation">Schemata &amp; Validation</a></li>
-<li><a href="http://www.js-data.io/docs/jsdata-on-the-server">JSData on the server</a></li>
-<li><a href="http://www.js-data.io/docs/js-data-angular">Angular + JSData</a></li>
-<li><a href="http://www.js-data.io/docs/faq">FAQ</a></li>
+<li><a href="http://api.js-data.io/js-data/3.0.0-alpha.11/index.html">3.0.0-alpha.11</a></li>
+<li><a href="http://js-data.io/v2.8/docs/home">2.x</a></li>
 </ul>
-
-<p>See an issue with or have a suggestion for the documentation? You can suggest edits right on the documentation pages! (There's a link at the top right of each page.)</p>
-
-<h3>
-<a id="api-documentation" class="anchor" href="#api-documentation" aria-hidden="true"><span class="octicon octicon-link"></span></a>API Documentation</h3>
-
-<ul>
-<li><a href="http://www.js-data.io/docs/ds">DS</a></li>
-<li><a href="http://www.js-data.io/docs/dsdefaults">Configuration Options</a></li>
-<li><a href="http://www.js-data.io/docs/dsfirebaseadapter">DSFirebaseAdapter</a></li>
-<li><a href="http://www.js-data.io/docs/dshttpadapter">DSHttpAdapter</a></li>
-<li><a href="http://www.js-data.io/docs/dslevelupadapter">DSLevelUpAdapter</a></li>
-<li><a href="http://www.js-data.io/docs/dslocalforageadapter">DSLocalForageAdapter</a></li>
-<li><a href="http://www.js-data.io/docs/dslocalstorageadapter">DSLocalStorageAdapter</a></li>
-<li><a href="http://www.js-data.io/docs/dsmongodbadapter">DSMongoDBAdapter</a></li>
-<li><a href="http://www.js-data.io/docs/dsnedbadapter">DSNeDBAdapter</a></li>
-<li><a href="http://www.js-data.io/docs/dsredisadapter">DSRedisAdapter</a></li>
-<li><a href="http://www.js-data.io/docs/dsrethinkdbadapter">DSRethinkDBAdapter</a></li>
-<li><a href="http://www.js-data.io/docs/dssqladapter">DSSqlAdapter</a></li>
-<li><a href="http://www.js-data.io/docs/js-data-schema">js-data-schema</a></li>
-</ul>
-
-<h3>
-<a id="changelog" class="anchor" href="#changelog" aria-hidden="true"><span class="octicon octicon-link"></span></a>Changelog</h3>
-
-<p><a href="https://github.com/js-data/js-data/blob/master/CHANGELOG.md">CHANGELOG.md</a></p>
-
-<h3>
-<a id="community" class="anchor" href="#community" aria-hidden="true"><span class="octicon octicon-link"></span></a>Community</h3>
-
-<ul>
-<li>
-<a href="http://slack.js-data.io">Slack Channel</a> <a href="http://slack.js-data.io"><img src="http://slack.js-data.io/badge.svg" alt="Slack Status"></a> - Better than IRC!</li>
-<li><a href="http://www.js-data.io/blog">Announcements</a></li>
-<li>
-<a href="ml">Mailing List</a> - Ask your questions!</li>
-<li>
-<a href="https://github.com/js-data/js-data/issues">Issues</a> - Found a bug? Feature request? Submit an issue!</li>
-<li>
-<a href="https://github.com/js-data/js-data">GitHub</a> - View the source code for JSData.</li>
-<li><a href="https://github.com/js-data/js-data/blob/master/CONTRIBUTING.md">Contributing Guide</a></li>
-</ul>
-
-<h3>
-<a id="contributing" class="anchor" href="#contributing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributing</h3>
-
-<p>First, support is handled via the <a href="http://slack.js-data.io">Slack Channel</a> and the
-<a href="https://groups.io/org/groupsio/jsdata">Mailing List</a>. Ask your questions there.</p>
-
-<p>When submitting issues on GitHub, please include as much detail as possible to
-make debugging quick and easy.</p>
-
-<ul>
-<li>good - Your versions of Angular, JSData, etc, relevant console logs/error,
-code examples that revealed the issue</li>
-<li>better - A <a href="http://plnkr.co/">plnkr</a>, <a href="http://jsfiddle.net/">fiddle</a>, or
-<a href="http://jsbin.com/?html,output">bin</a> that demonstrates the issue</li>
-<li>best - A Pull Request that fixes the issue, including test coverage for the
-issue and the fix</li>
-</ul>
-
-<p><a href="https://github.com/js-data/js-data/issues">Github Issues</a>.</p>
-
-<h4>
-<a id="pull-requests" class="anchor" href="#pull-requests" aria-hidden="true"><span class="octicon octicon-link"></span></a>Pull Requests</h4>
-
-<ol>
-<li>Contribute to the issue/discussion that is the reason you'll be developing in
-the first place</li>
-<li>Fork js-data</li>
-<li><code>git clone git@github.com:&lt;you&gt;/js-data.git</code></li>
-<li><code>cd js-data; npm install; bower install;</code></li>
-<li>Write your code, including relevant documentation and tests</li>
-<li>Run <code>npm test</code> (build and test)</li>
-<li>Your code will be linted and checked for formatting, the tests will be run</li>
-<li>The <code>dist/</code> folder &amp; files will be generated, do NOT commit <code>dist/*</code>! They
-will be committed when a release is cut.</li>
-<li>Submit your PR and we'll review!</li>
-<li>Thanks!</li>
-</ol>
-
-<h3>
-<a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h3>
-
-<p>The MIT License (MIT)</p>
-
-<p>Copyright (c) 2014-2015 Jason Dobry</p>
-
-<p>Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:</p>
-
-<p>The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.</p>
-
-<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.</p>
       </section>
       <footer>
         <p>This project is maintained by <a href="https://github.com/js-data">js-data</a></p>
