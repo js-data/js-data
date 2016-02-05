@@ -18,7 +18,7 @@ function Relation (related, opts) {
     throw new Error('localField is required')
   }
 
-  const foreignKey = opts.foreignKey || opts.localKey
+  const foreignKey = opts.foreignKey = opts.foreignKey || opts.localKey
   if (!foreignKey && (opts.type === belongsToType || opts.type === hasOneType)) {
     throw new Error('foreignKey is required')
   }

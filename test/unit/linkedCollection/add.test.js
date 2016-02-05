@@ -43,14 +43,12 @@ export function init () {
       Test.assert.deepEqual(Test.CommentCollection.get(13), Test.UserCollection.get(10).comments[2])
       Test.assert.deepEqual(Test.OrganizationCollection.get(14), Test.UserCollection.get(10).organization)
       Test.assert.deepEqual(Test.ProfileCollection.get(15), Test.UserCollection.get(10).profile)
-      // Doesn't work without relation links
-      // Test.assert.isArray(Test.UserCollection.get(10).groups)
-      // Test.assert.deepEqual(Test.UserCollection.get(10).groups[0], Test.GroupCollection.get(1))
+      Test.assert.isArray(Test.UserCollection.get(10).groups)
+      Test.assert.deepEqual(Test.UserCollection.get(10).groups[0], Test.GroupCollection.get(1))
 
       // group1 relations
-      // Doesn't work without relation links
-      // Test.assert.isArray(Test.GroupCollection.get(1).users)
-      // Test.assert.deepEqual(Test.GroupCollection.get(1).users[0], Test.UserCollection.get(10))
+      Test.assert.isArray(Test.GroupCollection.get(1).users)
+      Test.assert.deepEqual(Test.GroupCollection.get(1).users[0], Test.UserCollection.get(10))
 
       // organization15 relations
       Test.assert.deepEqual(Test.UserCollection.get(16), Test.OrganizationCollection.get(15).users[0])
@@ -64,27 +62,26 @@ export function init () {
       // profile21 relations
       Test.assert.deepEqual(Test.UserCollection.get(22), Test.ProfileCollection.get(21).user)
     })
-    // Doesn't work without relation links
-    // it('should find inverse links', function () {
-    //   const Test = this
-    //   Test.UserCollection.add({ organizationId: 5, id: 1 })
-    //   Test.OrganizationCollection.add({ id: 5 })
+    it('should find inverse links', function () {
+      const Test = this
+      Test.UserCollection.add({ organizationId: 5, id: 1 })
+      Test.OrganizationCollection.add({ id: 5 })
 
-    //   Test.assert.objectsEqual(Test.UserCollection.get(1).organization, { id: 5 })
+      Test.assert.objectsEqual(Test.UserCollection.get(1).organization, { id: 5 })
 
-    //   Test.assert.objectsEqual(Test.UserCollection.get(1).comments, [])
-    //   Test.assert.objectsEqual(Test.UserCollection.get(1).approvedComments, [])
+      Test.assert.objectsEqual(Test.UserCollection.get(1).comments, [])
+      Test.assert.objectsEqual(Test.UserCollection.get(1).approvedComments, [])
 
-    //   Test.CommentCollection.add({ approvedBy: 1, id: 23 })
+      Test.CommentCollection.add({ approvedBy: 1, id: 23 })
 
-    //   Test.assert.equal(0, Test.UserCollection.get(1).comments.length)
-    //   Test.assert.equal(1, Test.UserCollection.get(1).approvedComments.length)
+      Test.assert.equal(0, Test.UserCollection.get(1).comments.length)
+      Test.assert.equal(1, Test.UserCollection.get(1).approvedComments.length)
 
-    //   Test.CommentCollection.add({ approvedBy: 1, id: 44 })
+      Test.CommentCollection.add({ approvedBy: 1, id: 44 })
 
-    //   Test.assert.equal(0, Test.UserCollection.get(1).comments.length)
-    //   Test.assert.equal(2, Test.UserCollection.get(1).approvedComments.length)
-    // })
+      Test.assert.equal(0, Test.UserCollection.get(1).comments.length)
+      Test.assert.equal(2, Test.UserCollection.get(1).approvedComments.length)
+    })
     it('should inject cyclic dependencies', function () {
       const Test = this
       const store = new Test.JSData.DataStore({
@@ -150,240 +147,284 @@ export function init () {
       Test.assert.isDefined(store.getCollection('foo').get(6))
       Test.assert.isDefined(store.getCollection('foo').get(7))
     })
-    // Doesn't work without relation links
-    // it('should work when injecting child relations multiple times', function () {
-    //   const Test = this
-    //   const store = new Test.JSData.DataStore({
-    //     linkRelations: true
-    //   })
-    //   store.defineMapper('parent', {
-    //     relations: {
-    //       hasMany: {
-    //         child: {
-    //           localField: 'children',
-    //           foreignKey: 'parentId'
-    //         }
-    //       }
-    //     }
-    //   })
-    //   const Child = store.defineMapper('child', {
-    //     relations: {
-    //       belongsTo: {
-    //         parent: {
-    //           localField: 'parent',
-    //           foreignKey: 'parentId'
-    //         }
-    //       }
-    //     }
-    //   })
-    //   store.getCollection('parent').add({
-    //     id: 1,
-    //     name: 'parent1',
-    //     children: [{
-    //       id: 1,
-    //       name: 'child1'
-    //     }]
-    //   })
+    it('should work when injecting child relations multiple times', function () {
+      const Test = this
+      const store = new Test.JSData.DataStore({
+        linkRelations: true
+      })
+      store.defineMapper('parent', {
+        relations: {
+          hasMany: {
+            child: {
+              localField: 'children',
+              foreignKey: 'parentId'
+            }
+          }
+        }
+      })
+      const Child = store.defineMapper('child', {
+        relations: {
+          belongsTo: {
+            parent: {
+              localField: 'parent',
+              foreignKey: 'parentId'
+            }
+          }
+        }
+      })
+      store.add('parent', {
+        id: 1,
+        name: 'parent1',
+        children: [{
+          id: 1,
+          name: 'child1'
+        }]
+      })
 
-    //   Test.assert.isTrue(store.getCollection('parent').get(1).children[0] instanceof Child.RecordClass)
+      Test.assert.isTrue(store.get('parent', 1).children[0] instanceof Child.RecordClass)
 
-    //   store.getCollection('parent').add({
-    //     id: 1,
-    //     name: 'parent',
-    //     children: [
-    //       {
-    //         id: 1,
-    //         name: 'Child-1'
-    //       },
-    //       {
-    //         id: 2,
-    //         name: 'Child-2'
-    //       }
-    //     ]
-    //   })
+      store.add('parent', {
+        id: 1,
+        name: 'parent',
+        children: [
+          {
+            id: 1,
+            name: 'Child-1'
+          },
+          {
+            id: 2,
+            name: 'Child-2'
+          }
+        ]
+      })
 
-    //   Test.assert.isTrue(store.getCollection('parent').get(1).children[0] instanceof Child.RecordClass)
-    //   Test.assert.isTrue(store.getCollection('parent').get(1).children[1] instanceof Child.RecordClass)
-    //   Test.assert.deepEqual(store.getCollection('child').filter({ parent_id: 1 }), store.getCollection('parent').get(1).children)
-    // })
-    // it.skip('should configure enumerability and linking of relations', function () {
-    //   class Parent extends Test.JSData.Mapper {}
-    //   Parent.configure({
-    //     linkRelations: true
-    //   })
+      Test.assert.isTrue(store.get('parent', 1).children[0] instanceof Child.RecordClass)
+      Test.assert.isTrue(store.get('parent', 1).children[1] instanceof Child.RecordClass)
+      Test.assert.deepEqual(store.filter('child', { parentId: 1 }), store.get('parent', 1).children)
+    })
+    it('should configure enumerability and linking of relations', function () {
+      const Test = this
 
-    //   class Child extends Test.JSData.Mapper {}
-    //   Child.configure({
-    //     linkRelations: true
-    //   })
+      const store = new Test.JSData.DataStore({
+        linkRelations: true
+      })
+      store.defineMapper('parent', {
+        relations: {
+          hasMany: {
+            child: {
+              localField: 'children',
+              foreignKey: 'parentId'
+            }
+          }
+        }
+      })
+      store.defineMapper('child', {
+        relations: {
+          belongsTo: {
+            parent: {
+              link: false,
+              localField: 'parent',
+              foreignKey: 'parentId'
+            }
+          }
+        }
+      })
+      store.defineMapper('otherChild', {
+        relations: {
+          belongsTo: {
+            parent: {
+              enumerable: false,
+              localField: 'parent',
+              foreignKey: 'parentId'
+            }
+          }
+        }
+      })
 
-    //   class OtherChild extends Test.JSData.Mapper {}
-    //   OtherChild.configure({
-    //     linkRelations: true
-    //   })
+      const child = store.add('child', {
+        id: 1,
+        parent: {
+          id: 2
+        }
+      })
 
-    //   Parent.hasMany(Child, {
-    //     localField: 'children'
-    //   })
-    //   Child.belongsTo(Parent, {
-    //     link: false
-    //   })
-    //   OtherChild.belongsTo(Parent, {
-    //     enumerable: true
-    //   })
+      const otherChild = store.add('otherChild', {
+        id: 3,
+        parent: {
+          id: 4
+        }
+      })
 
-    //   const child = Child.inject({
-    //     id: 1,
-    //     parentId: 2,
-    //     parent: {
-    //       id: 2
-    //     }
-    //   })
+      Test.assert.isDefined(store.get('child', child.id))
+      Test.assert.equal(child.parentId, 2)
+      Test.assert.isTrue(child.parent === store.get('parent', child.parentId))
 
-    //   const otherChild = OtherChild.inject({
-    //     id: 3,
-    //     parentId: 4,
-    //     parent: {
-    //       id: 4
-    //     }
-    //   })
+      Test.assert.isDefined(store.get('otherChild', otherChild.id))
+      Test.assert.equal(otherChild.parentId, 4)
+      Test.assert.isTrue(otherChild.parent === store.get('parent', otherChild.parentId), 'parent was injected and linked')
+      Test.assert.isDefined(store.get('parent', otherChild.parentId), 'parent was injected and linked')
 
-    //   Test.assert.isDefined(Child.get(child.id))
-    //   Test.assert.isTrue(child.parent === Parent.get(child.parentId))
-
-    //   Test.assert.isDefined(OtherChild.get(otherChild.id))
-    //   Test.assert.isTrue(otherChild.parent === Parent.get(otherChild.parentId), 'parent was injected and linked')
-    //   Test.assert.isDefined(Parent.get(otherChild.parentId), 'parent was injected and linked')
-
-    //   let foundParent = false
-    //   for (var k in otherChild) {
-    //     if (k === 'parent' && otherChild[k] === otherChild.parent && otherChild[k] === Parent.get(otherChild.parentId)) {
-    //       foundParent = true
-    //     }
-    //   }
-    //   Test.assert.isTrue(foundParent, 'parent is enumerable')
-    // })
-    // it.skip('should not auto-inject relations where auto-injection has been disabled', function () {
-    //   const Foo = Test.JSData.Mapper.extend(null, {
-    //     name: 'foo'
-    //   })
-    //   const Bar = Test.JSData.Mapper.extend(null, {
-    //     name: 'bar'
-    //   })
-    //   Foo.hasMany(Bar, {
-    //     localField: 'bars',
-    //     inject: false
-    //   })
-    //   Bar.belongsTo(Foo)
-    //   const foo = Foo.inject({
-    //     id: 1,
-    //     bars: [
-    //       {
-    //         id: 1,
-    //         fooId: 1
-    //       },
-    //       {
-    //         id: 2,
-    //         fooId: 1
-    //       }
-    //     ]
-    //   })
-    //   Test.assert.deepEqual(Bar.getAll(), [], 'nothing should have been injected')
-    // })
-    // it.skip('should allow custom relation injection logic', function () {
-    //   const Foo = Test.JSData.Mapper.extend(null, {
-    //     name: 'foo',
-    //     linkRelations: true
-    //   })
-    //   const Bar = Test.JSData.Mapper.extend(null, {
-    //     name: 'bar',
-    //     linkRelations: true
-    //   })
-    //   Foo.hasMany(Bar, {
-    //     localField: 'bars',
-    //     foreignKey: 'fooId',
-    //     inject: function (Foo, relationDef, foo) {
-    //       const bars = relationDef.Relation.inject(foo.test_bars)
-    //       for (var i = 0; i < bars.length; i++) {
-    //         bars[i].beep = 'boop'
-    //       }
-    //       delete foo.test_bars
-    //     }
-    //   })
-    //   Bar.belongsTo(Foo)
-    //   const foo = Foo.inject({
-    //     id: 1,
-    //     test_bars: [
-    //       {
-    //         id: 1,
-    //         fooId: 1
-    //       },
-    //       {
-    //         id: 2,
-    //         fooId: 1
-    //       }
-    //     ]
-    //   })
-    //   Test.assert.objectsEqual(foo.bars, [
-    //     {
-    //       id: 1,
-    //       fooId: 1,
-    //       beep: 'boop'
-    //     },
-    //     {
-    //       id: 2,
-    //       fooId: 1,
-    //       beep: 'boop'
-    //     }
-    //   ], 'bars should have been injected')
-    // })
-    // it.skip('should not link relations nor delete field if "link" is false', function () {
-    //   class Foo extends Test.JSData.Mapper {}
-    //   Foo.configure({
-    //     linkRelations: true
-    //   })
-    //   class Bar extends Test.JSData.Mapper {}
-    //   Bar.configure({
-    //     linkRelations: true
-    //   })
-    //   Foo.hasMany(Bar, {
-    //     foreignKey: 'fooId',
-    //     localField: 'bars',
-    //     link: false
-    //   })
-    //   Bar.belongsTo(Foo, {
-    //     localField: 'foo',
-    //     foreignKey: 'fooId'
-    //   })
-    //   const foo = Foo.inject({
-    //     id: 1,
-    //     bars: [
-    //       {
-    //         id: 1,
-    //         fooId: 1
-    //       },
-    //       {
-    //         id: 2,
-    //         fooId: 1
-    //       }
-    //     ]
-    //   })
-    //   Bar.inject({
-    //     id: 3,
-    //     fooId: 1
-    //   })
-    //   Test.assert.deepEqual(foo.bars, [
-    //     {
-    //       id: 1,
-    //       fooId: 1
-    //     },
-    //     {
-    //       id: 2,
-    //       fooId: 1
-    //     }
-    //   ], 'bars should have been injected, but not linked')
-    //   Test.assert.equal(Bar.getAll().length, 3, '3 bars should be in the store')
-    // })
+      let foundParent = false
+      let k
+      for (k in child) {
+        if (k === 'parent' && child[k] === child.parent && child[k] === store.get('parent', child.parentId)) {
+          foundParent = true
+        }
+      }
+      Test.assert.isTrue(foundParent, 'parent is enumerable')
+      foundParent = false
+      for (k in otherChild) {
+        if (k === 'parent' && otherChild[k] === otherChild.parent && otherChild[k] === store.get('parent', otherChild.parentId)) {
+          foundParent = true
+        }
+      }
+      Test.assert.isFalse(foundParent, 'parent is NOT enumerable')
+    })
+    it('should not auto-add relations where auto-add has been disabled', function () {
+      const Test = this
+      const store = new Test.JSData.DataStore({
+        linkRelations: false
+      })
+      store.defineMapper('foo', {
+        relations: {
+          hasMany: {
+            bar: {
+              localField: 'bars',
+              foreignKey: 'fooId',
+              add: false
+            }
+          }
+        }
+      })
+      store.defineMapper('bar', {
+        relations: {
+          belongsTo: {
+            foo: {
+              localField: 'foo',
+              foreignKey: 'fooId'
+            }
+          }
+        }
+      })
+      const bar1Json = {
+        id: 1
+      }
+      const bar2Json = {
+        id: 2
+      }
+      const foo = store.add('foo', {
+        id: 1,
+        bars: [bar1Json, bar2Json]
+      })
+      Test.assert.equal(bar1Json.fooId, 1)
+      Test.assert.equal(bar2Json.fooId, 1)
+      Test.assert.equal(foo.bars.length, 2)
+      Test.assert.deepEqual(store.getAll('bar'), [], 'nothing should have been injected')
+    })
+    it('should allow custom relation injection logic', function () {
+      const Test = this
+      const store = new Test.JSData.DataStore({
+        linkRelations: true
+      })
+      store.defineMapper('foo', {
+        relations: {
+          hasMany: {
+            bar: {
+              localField: 'bars',
+              foreignKey: 'fooId',
+              add (store, relationDef, foo) {
+                const bars = store.add(relationDef.relation, foo.test_bars)
+                bars.forEach(function (bar) {
+                  bar.beep = 'boop'
+                })
+                delete foo.test_bars
+              }
+            }
+          }
+        }
+      })
+      store.defineMapper('bar', {
+        relations: {
+          belongsTo: {
+            foo: {
+              localField: 'foo',
+              foreignKey: 'fooId'
+            }
+          }
+        }
+      })
+      const foo = store.add('foo', {
+        id: 1,
+        test_bars: [
+          {
+            id: 1,
+            fooId: 1
+          },
+          {
+            id: 2,
+            fooId: 1
+          }
+        ]
+      })
+      Test.assert.objectsEqual(foo.bars, [
+        {
+          id: 1,
+          fooId: 1,
+          beep: 'boop'
+        },
+        {
+          id: 2,
+          fooId: 1,
+          beep: 'boop'
+        }
+      ], 'bars should have been added')
+    })
+    it('should not link relations nor delete field if "link" is false', function () {
+      const Test = this
+      const store = new Test.JSData.DataStore({
+        linkRelations: true
+      })
+      store.defineMapper('foo', {
+        relations: {
+          hasMany: {
+            bar: {
+              localField: 'bars',
+              foreignKey: 'fooId',
+              link: false
+            }
+          }
+        }
+      })
+      store.defineMapper('bar', {
+        relations: {
+          belongsTo: {
+            foo: {
+              localField: 'foo',
+              foreignKey: 'fooId'
+            }
+          }
+        }
+      })
+      const foo = store.add('foo', {
+        id: 1,
+        bars: [
+          {
+            id: 1,
+            fooId: 1
+          },
+          {
+            id: 2,
+            fooId: 1
+          }
+        ]
+      })
+      store.add('bar', {
+        id: 3,
+        fooId: 1
+      })
+      Test.assert.equal(foo.bars.length, 2, 'bars should have been added, but not linked')
+      Test.assert.equal(store.getAll('bar').length, 3, '3 bars should be in the store')
+    })
     it('should inject 1,000 items', function () {
       const Test = this
       let users = []

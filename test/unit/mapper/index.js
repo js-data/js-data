@@ -52,69 +52,6 @@ export function init () {
       Test.assert.isTrue(listener.calledOnce)
     })
 
-    // it('should allow enhanced relation getters', function () {
-    //   let wasItActivated = false
-    //   class Foo extends Model {}
-    //   class Bar extends Model {}
-    //   Foo.belongsTo(Bar, {
-    //     localField: 'bar',
-    //     foreignKey: 'barId',
-    //     get: function (Foo, relation, foo, orig) {
-    //       // "relation.name" has relationship "relation.type" to "relation.relation"
-    //       wasItActivated = true
-    //       return orig()
-    //     }
-    //   })
-    //   const foo = Foo.inject({
-    //     id: 1,
-    //     barId: 1,
-    //     bar: {
-    //       id: 1
-    //     }
-    //   })
-    //   Test.assert.equal(foo.bar.id, 1)
-    //   Test.assert.isTrue(wasItActivated)
-    // })
-    // it('should update links', function () {
-    //   class Foo extends Model {}
-    //   class Bar extends Model {}
-    //   Foo.autoInject = true
-    //   Foo.linkRelations = true
-    //   Bar.autoInject = true
-    //   Bar.linkRelations = true
-    //   Foo.hasMany(Bar, {
-    //     localField: 'bars',
-    //     foreignKey: 'foo_id'
-    //   })
-    //   Bar.belongsTo(Foo, {
-    //     localField: 'foo',
-    //     foreignKey: 'foo_id'
-    //   })
-    //   const foo66 = Foo.inject({
-    //     id: 66
-    //   })
-    //   const foo77 = Foo.inject({
-    //     id: 77
-    //   })
-    //   const bar88 = Bar.inject({
-    //     id: 88,
-    //     foo_id: 66
-    //   })
-    //   Test.assert.isTrue(bar88.foo === foo66)
-    //   Test.assert.equal(66, bar88.foo_id)
-    //   bar88.foo_id = 77
-    //   Test.assert.isTrue(bar88.foo === foo77)
-    //   Test.assert.equal(77, bar88.foo_id)
-    //   bar88.foo = foo66
-    //   Test.assert.isTrue(bar88.foo === foo66)
-    //   Test.assert.equal(66, bar88.foo_id)
-    //   foo66.bars = [bar88]
-    //   Test.assert.objectsEqual(foo66.bars, Bar.getAll())
-    //   Test.assert.objectsEqual(foo77.bars, [])
-    //   foo77.bars = [bar88]
-    //   Test.assert.objectsEqual(foo66.bars, [])
-    //   Test.assert.objectsEqual(foo77.bars, Bar.getAll())
-    // })
     // it('should allow instance events', function (done) {
     //   const Test = this
     //   let changed = false

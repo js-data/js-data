@@ -1,10 +1,20 @@
 import {
+  addHiddenPropsToTarget,
   classCallCheck,
   extend,
   fillIn,
+  get,
   getSuper,
-  isBrowser
+  isArray,
+  isBrowser,
+  isUndefined,
+  set
 } from './utils'
+import {
+  belongsToType,
+  hasManyType,
+  hasOneType
+} from './decorators'
 import Container from './Container'
 import LinkedCollection from './LinkedCollection'
 
@@ -99,8 +109,7 @@ const DataStore = Container.extend({
   create (name, record, opts) {
     const self = this
     opts || (opts = {})
-    fillIn(opts, self.modelOpts)
-    return self.getMapper(name).create(record, opts).then(function (data) {
+    return getSuper(self).create(name, record, opts).then(function (data) {
       return self._end(name, data, opts)
     })
   },
@@ -119,8 +128,7 @@ const DataStore = Container.extend({
   createMany (name, records, opts) {
     const self = this
     opts || (opts = {})
-    fillIn(opts, self.modelOpts)
-    return self.getMapper(name).createMany(records, opts).then(function (data) {
+    return getSuper(self).createMany(name, records, opts).then(function (data) {
       return self._end(name, data, opts)
     })
   },
@@ -129,10 +137,6 @@ const DataStore = Container.extend({
     const self = this
     const mapper = getSuper(self).prototype.defineMapper.call(self, name, opts)
     mapper.relationList = mapper.relationList || []
-
-    mapper.relationList.forEach(function (def) {
-      // TODO: Conditionally add getters and setters to RecordClass prototype
-    })
 
     // The datastore uses a subclass of Collection that is "datastore-aware"
     const collection = self._collections[name] = new self.CollectionClass(null, {
@@ -151,6 +155,158 @@ const DataStore = Container.extend({
         return collection._added[collection.recordId(obj)]
       }
     })
+
+    const linkRelations = self.linkRelations
+
+    if (linkRelations) {
+      mapper.relationList.forEach(function (def) {
+        const relation = def.relation
+        const localField = def.localField
+        const path = `links.${localField}`
+        const foreignKey = def.foreignKey
+        const type = def.type
+        const link = isUndefined(def.link) ? linkRelations : def.link
+        const updateOpts = { index: foreignKey }
+        let descriptor
+
+        if (type === belongsToType) {
+          if (!collection.indexes[foreignKey]) {
+            collection.createIndex(foreignKey)
+          }
+
+          descriptor = {
+            get () {
+              const _self = this
+              if (!_self._get('$') || !link) {
+                return _self._get(path)
+              }
+              const key = get(_self, foreignKey)
+              const item = isUndefined(key) ? undefined : self.getCollection(relation).get(key)
+              _self._set(path, item)
+              return item
+            },
+            set (record) {
+              const _self = this
+              _self._set(path, record)
+              set(_self, foreignKey, self.getCollection(relation).recordId(record))
+              collection.updateIndex(_self, updateOpts)
+              return get(_self, localField)
+            }
+          }
+        } else if (type === hasManyType) {
+          const localKeys = def.localKeys
+          const foreignKeys = def.foreignKeys
+
+          // TODO: Handle case when belongsTo relation isn't ever defined
+          if (self._collections[relation] && foreignKey && !self.getCollection(relation).indexes[foreignKey]) {
+            self.getCollection(relation).createIndex(foreignKey)
+          }
+
+          descriptor = {
+            get () {
+              const _self = this
+              if (!_self._get('$') || !link) {
+                return _self._get(path)
+              }
+              const key = collection.recordId(_self)
+              let items
+              const relationCollection = self.getCollection(relation)
+
+              if (foreignKey) {
+                // Really fast retrieval
+                items = relationCollection.getAll(key, {
+                  index: foreignKey
+                })
+              } else if (localKeys) {
+                const keys = get(_self, localKeys) || []
+                const args = isArray(keys) ? keys : Object.keys(keys)
+                // Really fast retrieval
+                items = relationCollection.getAll.apply(relationCollection, args)
+              } else if (foreignKeys) {
+                const query = {}
+                set(query, `where.${foreignKeys}.contains`, key)
+                // Make a much slower retrieval
+                items = relationCollection.filter(query)
+              }
+
+              _self._set(path, items)
+              return items
+            },
+            set (records) {
+              const _self = this
+              const key = collection.recordId(_self)
+              const relationCollection = self.getCollection(relation)
+              _self._set(path, records)
+
+              if (foreignKey) {
+                records.forEach(function (record) {
+                  set(record, foreignKey, key)
+                  relationCollection.updateIndex(record, updateOpts)
+                })
+              } if (localKeys) {
+                set(_self, localKeys, records.map(function (record) {
+                  return relationCollection.recordId(record)
+                }))
+              } else if (foreignKeys) {
+                records.forEach(function (record) {
+                  const keys = get(record, foreignKeys)
+                  if (keys) {
+                    if (keys.indexOf(key) === -1) {
+                      keys.push(key)
+                    }
+                  } else {
+                    set(record, foreignKeys, [key])
+                  }
+                })
+              }
+              return get(_self, localField)
+            }
+          }
+        } else if (type === hasOneType) {
+          descriptor = {
+            get () {
+              const _self = this
+              if (!_self._get('$') || !link) {
+                return _self._get(path)
+              }
+              const key = collection.recordId(_self)
+              const items = self.getCollection(relation).getAll(key, {
+                index: foreignKey
+              })
+              const item = items.length ? items[0] : undefined
+              _self._set(path, item)
+              return item
+            },
+            set (record) {
+              const _self = this
+              const key = collection.recordId(_self)
+              _self._set(path, record)
+              set(record, foreignKey, key)
+              self.getCollection(relation).updateIndex(record, updateOpts)
+              return get(_self, localField)
+            }
+          }
+        }
+
+        if (descriptor) {
+          descriptor.enumerable = isUndefined(def.enumerable) ? true : def.enumerable
+          if (def.get) {
+            let origGet = descriptor.get
+            descriptor.get = function () {
+              return def.get(def, this, (...args) => origGet.apply(this, args))
+            }
+          }
+          if (opts.set) {
+            let origSet = descriptor.set
+            descriptor.set = function (related) {
+              return def.set(def, this, related, value => origSet.call(this, value === undefined ? related : value))
+            }
+          }
+          Object.defineProperty(mapper.RecordClass.prototype, localField, descriptor)
+        }
+      })
+    }
+
     return mapper
   },
 
@@ -168,8 +324,7 @@ const DataStore = Container.extend({
   destroy (name, id, opts) {
     const self = this
     opts || (opts = {})
-    fillIn(opts, self.modelOpts)
-    return self.getMapper(name).destroy(id, opts).then(function (data) {
+    return getSuper(self).destroy(name, id, opts).then(function (data) {
       if (opts.raw) {
         data.data = self.getCollection(name).remove(id, opts)
       } else {
@@ -182,7 +337,7 @@ const DataStore = Container.extend({
   /**
    * TODO
    *
-   * @name Mapper#destroyAll
+   * @name DataStore#destroyAll
    * @method
    * @param {string} name - Name of the {@link Mapper} to target.
    * @param {Object} [query] - Passed to {@link Mapper#destroyAll}.
@@ -193,8 +348,7 @@ const DataStore = Container.extend({
   destroyAll (name, query, opts) {
     const self = this
     opts || (opts = {})
-    fillIn(opts, self.modelOpts)
-    return self.getMapper(name).destroyAll(query, opts).then(function (data) {
+    return getSuper(self).destroyAll(name, query, opts).then(function (data) {
       if (opts.raw) {
         data.data = self.getCollection(name).removeAll(query, opts)
       } else {
@@ -217,8 +371,7 @@ const DataStore = Container.extend({
   find (name, id, opts) {
     const self = this
     opts || (opts = {})
-    fillIn(opts, self.modelOpts)
-    return self.getMapper(name).find(id, opts).then(function (data) {
+    return getSuper(self).find(name, id, opts).then(function (data) {
       return self._end(name, data, opts)
     })
   },
@@ -236,8 +389,7 @@ const DataStore = Container.extend({
   findAll (name, query, opts) {
     const self = this
     opts || (opts = {})
-    fillIn(opts, self.modelOpts)
-    return self.getMapper(name).findAll(query, opts).then(function (data) {
+    return getSuper(self).findAll(name, query, opts).then(function (data) {
       return self._end(name, data, opts)
     })
   },
@@ -273,8 +425,7 @@ const DataStore = Container.extend({
   update (name, id, record, opts) {
     const self = this
     opts || (opts = {})
-    fillIn(opts, self.modelOpts)
-    return self.getMapper(name).update(id, record, opts).then(function (data) {
+    return getSuper(self).update(name, id, record, opts).then(function (data) {
       return self._end(name, data, opts)
     })
   },
@@ -294,8 +445,7 @@ const DataStore = Container.extend({
   updateAll (name, query, props, opts) {
     const self = this
     opts || (opts = {})
-    fillIn(opts, self.modelOpts)
-    return self.getMapper(name).updateAll(query, props, opts).then(function (data) {
+    return getSuper(self).updateAll(name, query, props, opts).then(function (data) {
       return self._end(name, data, opts)
     })
   },
@@ -314,8 +464,7 @@ const DataStore = Container.extend({
   updateMany (name, records, opts) {
     const self = this
     opts || (opts = {})
-    fillIn(opts, self.modelOpts)
-    return self.getMapper(name).updateMany(records, opts).then(function (data) {
+    return getSuper(self).updateMany(records, opts).then(function (data) {
       return self._end(name, data, opts)
     })
   }
@@ -342,6 +491,35 @@ DataStore.prototype.defineResource = DataStore.prototype.defineMapper
  * @return {Function} Subclass of DataStore.
  */
 DataStore.extend = extend
+
+const toProxy = [
+  'add',
+  'between',
+  'createIndex',
+  'filter',
+  'get',
+  'getAll',
+  'query',
+  'remove',
+  'removeAll',
+  'toJson'
+]
+
+const methods = {}
+
+toProxy.forEach(function (method) {
+  methods[method] = function (name, ...args) {
+    return this.getCollection(name)[method](...args)
+  }
+})
+
+methods.inject = function (...args) {
+  // TODO: Fix logging
+  console.warn('deprecated')
+  return this.add(...args)
+}
+
+addHiddenPropsToTarget(DataStore.prototype, methods)
 
 export {
   DataStore as default

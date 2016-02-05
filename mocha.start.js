@@ -2,6 +2,7 @@
 
 require('babel-polyfill')
 
+// Setup global data once
 before(function () {
   var Test = this
   Test.assert = require('chai').assert
@@ -30,6 +31,7 @@ before(function () {
   Test.TYPES_EXCEPT_FUNCTION = ['string', 123, 123.123, null, undefined, {}, [], true, false]
 })
 
+// Clean setup for each test
 beforeEach(function () {
   var Test = this
   Test.data = {}
@@ -38,7 +40,9 @@ beforeEach(function () {
   Test.data.p3 = { author: 'Mike', age: 32, id: 7 }
   Test.data.p4 = { author: 'Adam', age: 33, id: 8 }
   Test.data.p5 = { author: 'Adam', age: 33, id: 9 }
-  var store = Test.store = new Test.JSData.DataStore()
+  var store = Test.store = new Test.JSData.DataStore({
+    linkRelations: true
+  })
   Test.Post = store.defineMapper('post', {
     endpoint: '/posts'
   })
@@ -244,4 +248,5 @@ beforeEach(function () {
   }
 })
 
+// Load the tests
 require('./dist/js-data-tests').init()

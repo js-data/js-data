@@ -4,7 +4,9 @@ import {
   get,
   getSuper,
   isArray,
+  isFunction,
   isObject,
+  isUndefined,
   set
 } from './utils'
 import {
@@ -46,33 +48,23 @@ const LinkedCollection = Collection.extend({
   },
 
   add (records, opts) {
-    // console.log('add', this.mapper.name, records)
     const self = this
     const datastore = self.datastore
     const mapper = self.mapper
     const relationList = mapper.relationList || []
     const timestamp = new Date().getTime()
+    const usesRecordClass = !!mapper.RecordClass
     let singular
-
-    records = getSuper(self).prototype.add.call(self, records, opts)
 
     if (isObject(records) && !isArray(records)) {
       singular = true
       records = [records]
     }
 
-    records.forEach(function (record) {
-      // Track when this record was added
-      self._added[self.recordId(record)] = timestamp
-    })
-
     if (relationList.length && records.length) {
       // Check the currently visited record for relations that need to be
       // inserted into their respective collections.
       mapper.relationList.forEach(function (def) {
-        if (def.add === false) {
-          return
-        }
         const relationName = def.relation
         // A reference to the Mapper that this Mapper is related to
         const Relation = datastore.getMapper(relationName)
@@ -88,6 +80,8 @@ const LinkedCollection = Collection.extend({
         const isBelongsTo = type === belongsToType
         const isHasMany = type === hasManyType
         const isHasOne = type === hasOneType
+        const idAttribute = mapper.idAttribute
+        const shouldAdd = isUndefined(def.add) ? true : !!def.add
         let relatedData
 
         records.forEach(function (record) {
@@ -95,21 +89,25 @@ const LinkedCollection = Collection.extend({
           // currently visited record
           relatedData = get(record, localField)
 
-          if (relatedData) {
-            const id = get(record, mapper.idAttribute)
+          if (isFunction(def.add)) {
+            def.add(datastore, def, record)
+          } else if (relatedData) {
+            const id = get(record, idAttribute)
             // Otherwise, if there is something to be added, add it
             if (isHasMany) {
               // Handle inserting hasMany relations
               relatedData = relatedData.map(function (toInsertItem) {
                 // Check that this item isn't the same item that is already in the
                 // store
-                if (toInsertItem !== relatedCollection.get(get(toInsertItem, relationIdAttribute))) {
+                if (toInsertItem !== relatedCollection.get(relatedCollection.recordId(toInsertItem))) {
                   // Make sure this item has its foreignKey
                   if (foreignKey) {
                     set(toInsertItem, foreignKey, id)
                   }
                   // Finally add this related item
-                  toInsertItem = relatedCollection.add(toInsertItem)
+                  if (shouldAdd) {
+                    toInsertItem = relatedCollection.add(toInsertItem)
+                  }
                 }
                 return toInsertItem
               })
@@ -125,12 +123,14 @@ const LinkedCollection = Collection.extend({
               if (relatedData !== relatedCollection.get(relatedDataId)) {
                 // Make sure foreignKey field is set
                 if (isBelongsTo) {
-                  set(record, def.foreignKey, relatedDataId)
+                  set(record, foreignKey, relatedDataId)
                 } else if (isHasOne) {
-                  set(relatedData, def.foreignKey, id)
+                  set(relatedData, foreignKey, id)
                 }
                 // Finally insert this related item
-                relatedData = relatedCollection.add(relatedData)
+                if (shouldAdd) {
+                  relatedData = relatedCollection.add(relatedData)
+                }
               }
             }
             set(record, localField, relatedData)
@@ -139,13 +139,31 @@ const LinkedCollection = Collection.extend({
       })
     }
 
+    records = getSuper(self).prototype.add.call(self, records, opts)
+
+    records.forEach(function (record) {
+      // Track when this record was added
+      self._added[self.recordId(record)] = timestamp
+
+      if (usesRecordClass) {
+        record._set('$', timestamp)
+      }
+    })
+
     return singular ? records[0] : records
   },
 
   remove (id, opts) {
     const self = this
     delete self._added[id]
-    return getSuper(self).prototype.remove.call(self, id, opts)
+    const record = getSuper(self).prototype.remove.call(self, id, opts)
+    if (record) {
+      const mapper = self.mapper
+      if (mapper.RecordClass) {
+        record._set('$') // unset
+      }
+    }
+    return record
   },
 
   removeAll (query, opts) {
