@@ -35,17 +35,11 @@ For Getting Started guides, visit __[http://js-data.io](http://www.js-data.io)__
 
 ## Quick Start
 
-##### js-data + http adapter in the Browser
+This example shows setting up JSData to use the Http adapter in the browser:
 
-`npm install --save js-data js-data-http` or `bower install --save js-data js-data-http`.
-
-(Substitute `js-data-http` for any one of the other client-side adapters.)
-
-##### js-data + http adapter in Node.js
-
-`npm install --save js-data axios js-data-http-node`
-
-(Substitute `axios` and `js-data-http-node` for any one of the other server-side adapters.)
+```
+npm i --save js-data js-data-http
+```
 
 See [installation instructions][inst] for making JSData part of your
 r.js/browserify/webpack build.
@@ -85,7 +79,7 @@ async function showExample () {
 
   await user.destroy()
 
-  // The user instance no longer stored in UserCollection
+  // The user instance no longer stored in Users
   console.log(Users.get(1)) // undefined
 }
 ```
@@ -125,18 +119,18 @@ store.find('user', 1)
     return user.destroy()
   })
   .then(function () {
-    // The user instance no longer stored in UserCollection
+    // The user instance no longer stored in Users
     console.log(Users.get(1)) // undefined
   })
 ```
 
 ## Background
 
-Most ORMs/ODMs only work with a single datastore. Even when written in
-JavaScript, most ORMs/ODMs only work in Node.js _or_ the Browser. Wouldn't it be
-nice if you could use the same ORM/ODM on the client as you do on the backend?
-Wouldn't it be nice if you could switch databases without having to switch out
-your data layer? Enter __JSData__.
+Most ORMs/ODMs only work with a single datastore, most JavaScript ORMs only work
+in Node.js _or_ the Browser. Wouldn't it be nice if you could use the same
+ORM/ODM on the client as you do on the backend? Wouldn't it be nice if you could
+switch databases without having to switch out your data layer code? Enter
+__JSData__.
 
 Originally inspired by the desire to have something like [Ember Data][ember]
 that worked in Angular.js and other frameworks, JSData was created. Turns out,
@@ -147,10 +141,10 @@ uses __adapters__ to connect to various __persistence layers__.
 
 The most commonly used adapter is the [http adapter][http], which is perfect for
 connecting your frontend to your backend. [localStorage][3], [localForage][4],
-[Firebase][5] and [other adapters][6] are already available. On the server you
-could hook up to the [SQL adapter (Postgres/MySQL/MariaDB/SQLite3)][7] or the
-[MongoDB][8] adapter. More adapters are coming, and you're free to implement
-your own. See [Adapters][9].
+[Firebase][5] and [other adapters][6] are available for the browser. On the
+server you could hook up to the [SQL adapter (Postgres/MySQL/MariaDB/SQLite3)][7]
+or the [MongoDB][8] adapter. More adapters are coming, and you're free to
+implement your own. See [Adapters][9].
 
 [![MtnWestJS Conf 2015 Presentation][mtn_b]][mtn_l]
 
@@ -181,7 +175,7 @@ for polyfilling: https://github.com/afarkas/html5shiv
 - [CHANGELOG.md](https://github.com/js-data/js-data/blob/master/CHANGELOG.md)
 
 See an issue with the documentation? Have something to add? Click the "Suggest
-Edits" at the top right of each page and make your suggested changes!
+Edits" button at the top right of each page and make your suggested changes!
 
 ## API Reference Docs
 - [all](http://api.js-data.io/)
@@ -220,7 +214,8 @@ issue and the fix
 the first place
 1. Fork js-data
 1. `git clone git@github.com:<you>/js-data.git`
-1. `cd js-data; npm install;`
+1. `cd js-data`
+1. `npm install`
 1. Write your code, including relevant documentation and tests
 1. Run `npm test` (build and test)
 1. Your code will be linted and checked for formatting, the tests will be run

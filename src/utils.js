@@ -551,7 +551,7 @@ export const extend = function (props, classProps) {
   return SubClass
 }
 
-export const getSuper = function (instance) {
-  const Ctor = instance.constructor
+export const getSuper = function (instance, isCtor) {
+  const Ctor = isCtor ? instance : instance.constructor
   return (Ctor.__super__ || Object.getPrototypeOf(Ctor) || Ctor.__proto__) // eslint-disable-line
 }

@@ -1,3 +1,14 @@
+import * as create from './create.test'
+import * as createMany from './createMany.test'
+import * as createRecord from './createRecord.test'
+import * as destroy from './destroy.test'
+import * as destroyAll from './destroyAll.test'
+import * as find from './find.test'
+import * as findAll from './findAll.test'
+import * as update from './update.test'
+import * as updateMany from './updateMany.test'
+import * as updateAll from './updateAll.test'
+
 export function init () {
   describe('Container', function () {
     it('should be a constructor function', function () {
@@ -152,5 +163,16 @@ export function init () {
       })
       Test.assert.equal(container.mapperDefaults.defaultAdapter, 'foo')
     })
+
+    create.init()
+    createMany.init()
+    createRecord.init()
+    destroy.init()
+    destroyAll.init()
+    find.init()
+    findAll.init()
+    update.init()
+    updateMany.init()
+    updateAll.init()
   })
 }

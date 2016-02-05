@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.11 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.12 - Homepage <http://www.js-data.io/>
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @copyright (c) 2014-2015 Jason Dobry
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -599,8 +599,8 @@
     return _SubClass;
   };
 
-  var getSuper = function getSuper(instance) {
-    var Ctor = instance.constructor;
+  var getSuper = function getSuper(instance, isCtor) {
+    var Ctor = isCtor ? instance : instance.constructor;
     return Ctor.__super__ || Object.getPrototypeOf(Ctor) || Ctor.__proto__; // eslint-disable-line
   };
 
@@ -1290,8 +1290,6 @@ var utils = Object.freeze({
     };
   }
 
-  var blacklist = { '>': 1, '>=': 1, '<': 1, '<=': 1 };
-
   function Index(fieldList, opts) {
     classCallCheck(this, Index);
     fieldList || (fieldList = []);
@@ -1384,38 +1382,6 @@ var utils = Object.freeze({
           value.forEach(cb, thisArg);
         }
       });
-    },
-    query: function query(_query) {
-      var leftKeys = undefined;
-      var rightKeys = undefined;
-
-      if (_query['>']) {
-        leftKeys = _query['>'];
-        _query.leftInclusive = false;
-      } else if (_query['>=']) {
-        leftKeys = _query['>='];
-        _query.leftInclusive = true;
-      }
-
-      if (_query['<']) {
-        rightKeys = _query['<'];
-        _query.rightInclusive = false;
-      } else if (_query['<=']) {
-        rightKeys = _query['<='];
-        _query.rightInclusive = true;
-      }
-
-      if (leftKeys.length !== rightKeys.length) {
-        throw new Error('Key arrays must be same length');
-      }
-
-      var _opts = {};
-      forOwn(_query, function (value, key) {
-        if (!blacklist[key]) {
-          _opts[key] = value;
-        }
-      });
-      return this.between(leftKeys, rightKeys, _opts);
     },
     between: function between(leftKeys, rightKeys) {
       var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
@@ -1823,7 +1789,7 @@ var utils = Object.freeze({
       // Track whether just one record or an array of records is being inserted
       var singular = false;
       var idAttribute = self.recordId();
-      if (!isArray(records)) {
+      if (isObject(records) && !isArray(records)) {
         records = [records];
         singular = true;
       }
@@ -2278,7 +2244,7 @@ var utils = Object.freeze({
 
       // Remove each selected record from the collection
       records.forEach(function (item) {
-        self.remove(self.recordId(item));
+        self.remove(self.recordId(item), opts);
       });
       return self.afterRemoveAll(query, opts, records) || records;
     },
@@ -2398,7 +2364,7 @@ var utils = Object.freeze({
       throw new Error('localField is required');
     }
 
-    var foreignKey = opts.foreignKey || opts.localKey;
+    var foreignKey = opts.foreignKey = opts.foreignKey || opts.localKey;
     if (!foreignKey && (opts.type === belongsToType || opts.type === hasOneType)) {
       throw new Error('foreignKey is required');
     }
@@ -5221,6 +5187,58 @@ var utils = Object.freeze({
 
   addHiddenPropsToTarget(Container.prototype, {
     /**
+     * TODO
+     *
+     * @name Container#create
+     * @method
+     * @param {string} name Name of the {@link Mapper} to target.
+     * @param {Object} record Passed to {@link Mapper#create}.
+     * @param {Object} [opts] Passed to {@link Mapper#create}. See
+     * {@link Mapper#create} for more configuration options.
+     * @return {Promise}
+     */
+
+    create: function create(name, record, opts) {
+      var self = this;
+      opts || (opts = {});
+      fillIn(opts, self.modelOpts);
+      return self.getMapper(name).create(record, opts);
+    },
+
+    /**
+     * TODO
+     *
+     * @name Container#createMany
+     * @method
+     * @param {string} name Name of the {@link Mapper} to target.
+     * @param {Array} records Passed to {@link Mapper#createMany}.
+     * @param {Object} [opts] Passed to {@link Mapper#createMany}. See
+     * {@link Mapper#createMany} for more configuration options.
+     * @return {Promise}
+     */
+    createMany: function createMany(name, records, opts) {
+      var self = this;
+      opts || (opts = {});
+      fillIn(opts, self.modelOpts);
+      return self.getMapper(name).createMany(records, opts);
+    },
+
+    /**
+     * Proxy for {@link Mapper#createRecord}.
+     *
+     * @name Container#createRecord
+     * @method
+     * @param {string} name Name of the {@link Mapper} to target.
+     * @param {Object} props Passed to {@link Mapper#createRecord}.
+     * @param {Object} [opts] Passed to {@link Mapper#createRecord}. See
+     * {@link Mapper#createRecord} for configuration options.
+     * @return {Promise}
+     */
+    createRecord: function createRecord(name, props, opts) {
+      return this.getMapper(name).createRecord(props, opts);
+    },
+
+    /**
      * Create a new mapper and register it in this container.
      *
      * @example
@@ -5239,7 +5257,6 @@ var utils = Object.freeze({
      * {@link Container#MapperClass} when creating the new {@link Mapper}.
      * @return {Mapper}
      */
-
     defineMapper: function defineMapper(name, opts) {
       var self = this;
 
@@ -5298,6 +5315,76 @@ var utils = Object.freeze({
       });
 
       return mapper;
+    },
+
+    /**
+     * TODO
+     *
+     * @name Container#destroy
+     * @method
+     * @param {string} name - Name of the {@link Mapper} to target.
+     * @param {(string|number)} id - Passed to {@link Mapper#destroy}.
+     * @param {Object} [opts] - Passed to {@link Mapper#destroy}. See
+     * {@link Mapper#destroy} for more configuration options.
+     * @return {Promise}
+     */
+    destroy: function destroy(name, id, opts) {
+      var self = this;
+      opts || (opts = {});
+      fillIn(opts, self.modelOpts);
+      return self.getMapper(name).destroy(id, opts);
+    },
+
+    /**
+     * TODO
+     *
+     * @name Container#destroyAll
+     * @method
+     * @param {string} name - Name of the {@link Mapper} to target.
+     * @param {Object} [query] - Passed to {@link Mapper#destroyAll}.
+     * @param {Object} [opts] - Passed to {@link Mapper#destroyAll}. See
+     * {@link Mapper#destroyAll} for more configuration options.
+     * @return {Promise}
+     */
+    destroyAll: function destroyAll(name, query, opts) {
+      var self = this;
+      opts || (opts = {});
+      fillIn(opts, self.modelOpts);
+      return self.getMapper(name).destroyAll(query, opts);
+    },
+
+    /**
+     * TODO
+     *
+     * @name Container#find
+     * @method
+     * @param {string} name - Name of the {@link Mapper} to target.
+     * @param {(string|number)} id - Passed to {@link Mapper#find}.
+     * @param {Object} [opts] - Passed to {@link Mapper#find}.
+     * @return {Promise}
+     */
+    find: function find(name, id, opts) {
+      var self = this;
+      opts || (opts = {});
+      fillIn(opts, self.modelOpts);
+      return self.getMapper(name).find(id, opts);
+    },
+
+    /**
+     * TODO
+     *
+     * @name Container#findAll
+     * @method
+     * @param {string} name - Name of the {@link Mapper} to target.
+     * @param {Object} [query] - Passed to {@link Model.findAll}.
+     * @param {Object} [opts] - Passed to {@link Model.findAll}.
+     * @return {Promise}
+     */
+    findAll: function findAll(name, query, opts) {
+      var self = this;
+      opts || (opts = {});
+      fillIn(opts, self.modelOpts);
+      return self.getMapper(name).findAll(query, opts);
     },
 
     /**
@@ -5397,6 +5484,62 @@ var utils = Object.freeze({
           mapper.defaultAdapter = name;
         });
       }
+    },
+
+    /**
+     * TODO
+     *
+     * @name Container#update
+     * @method
+     * @param {string} name - Name of the {@link Mapper} to target.
+     * @param {(string|number)} id - Passed to {@link Mapper#update}.
+     * @param {Object} record - Passed to {@link Mapper#update}.
+     * @param {Object} [opts] - Passed to {@link Mapper#update}. See
+     * {@link Mapper#update} for more configuration options.
+     * @return {Promise}
+     */
+    update: function update(name, id, record, opts) {
+      var self = this;
+      opts || (opts = {});
+      fillIn(opts, self.modelOpts);
+      return self.getMapper(name).update(id, record, opts);
+    },
+
+    /**
+     * TODO
+     *
+     * @name Container#updateAll
+     * @method
+     * @param {string} name - Name of the {@link Mapper} to target.
+     * @param {Object?} query - Passed to {@link Model.updateAll}.
+     * @param {Object} props - Passed to {@link Model.updateAll}.
+     * @param {Object} [opts] - Passed to {@link Model.updateAll}. See
+     * {@link Model.updateAll} for more configuration options.
+     * @return {Promise}
+     */
+    updateAll: function updateAll(name, query, props, opts) {
+      var self = this;
+      opts || (opts = {});
+      fillIn(opts, self.modelOpts);
+      return self.getMapper(name).updateAll(query, props, opts);
+    },
+
+    /**
+     * TODO
+     *
+     * @name Container#updateMany
+     * @method
+     * @param {string} name Name of the {@link Mapper} to target.
+     * @param {(Object[]|Record[])} records Passed to {@link Mapper#updateMany}.
+     * @param {Object} [opts] Passed to {@link Mapper#updateMany}. See
+     * {@link Mapper#updateMany} for more configuration options.
+     * @return {Promise}
+     */
+    updateMany: function updateMany(name, records, opts) {
+      var self = this;
+      opts || (opts = {});
+      fillIn(opts, self.modelOpts);
+      return self.getMapper(name).updateMany(records, opts);
     }
   });
 
@@ -5431,33 +5574,23 @@ var utils = Object.freeze({
       return self;
     },
     add: function add(records, opts) {
-      // console.log('add', this.mapper.name, records)
       var self = this;
       var datastore = self.datastore;
       var mapper = self.mapper;
       var relationList = mapper.relationList || [];
       var timestamp = new Date().getTime();
+      var usesRecordClass = !!mapper.RecordClass;
       var singular = undefined;
-
-      records = getSuper(self).prototype.add.call(self, records, opts);
 
       if (isObject(records) && !isArray(records)) {
         singular = true;
         records = [records];
       }
 
-      records.forEach(function (record) {
-        // Track when this record was added
-        self._added[self.recordId(record)] = timestamp;
-      });
-
       if (relationList.length && records.length) {
         // Check the currently visited record for relations that need to be
         // inserted into their respective collections.
         mapper.relationList.forEach(function (def) {
-          if (def.add === false) {
-            return;
-          }
           var relationName = def.relation;
           // A reference to the Mapper that this Mapper is related to
           var Relation = datastore.getMapper(relationName);
@@ -5473,6 +5606,8 @@ var utils = Object.freeze({
           var isBelongsTo = type === belongsToType;
           var isHasMany = type === hasManyType;
           var isHasOne = type === hasOneType;
+          var idAttribute = mapper.idAttribute;
+          var shouldAdd = isUndefined(def.add) ? true : !!def.add;
           var relatedData = undefined;
 
           records.forEach(function (record) {
@@ -5480,22 +5615,26 @@ var utils = Object.freeze({
             // currently visited record
             relatedData = get(record, localField);
 
-            if (relatedData) {
+            if (isFunction(def.add)) {
+              def.add(datastore, def, record);
+            } else if (relatedData) {
               (function () {
-                var id = get(record, mapper.idAttribute);
+                var id = get(record, idAttribute);
                 // Otherwise, if there is something to be added, add it
                 if (isHasMany) {
                   // Handle inserting hasMany relations
                   relatedData = relatedData.map(function (toInsertItem) {
                     // Check that this item isn't the same item that is already in the
                     // store
-                    if (toInsertItem !== relatedCollection.get(get(toInsertItem, relationIdAttribute))) {
+                    if (toInsertItem !== relatedCollection.get(relatedCollection.recordId(toInsertItem))) {
                       // Make sure this item has its foreignKey
                       if (foreignKey) {
                         set(toInsertItem, foreignKey, id);
                       }
                       // Finally add this related item
-                      toInsertItem = relatedCollection.add(toInsertItem);
+                      if (shouldAdd) {
+                        toInsertItem = relatedCollection.add(toInsertItem);
+                      }
                     }
                     return toInsertItem;
                   });
@@ -5511,12 +5650,14 @@ var utils = Object.freeze({
                   if (relatedData !== relatedCollection.get(relatedDataId)) {
                     // Make sure foreignKey field is set
                     if (isBelongsTo) {
-                      set(record, def.foreignKey, relatedDataId);
+                      set(record, foreignKey, relatedDataId);
                     } else if (isHasOne) {
-                      set(relatedData, def.foreignKey, id);
+                      set(relatedData, foreignKey, id);
                     }
                     // Finally insert this related item
-                    relatedData = relatedCollection.add(relatedData);
+                    if (shouldAdd) {
+                      relatedData = relatedCollection.add(relatedData);
+                    }
                   }
                 }
                 set(record, localField, relatedData);
@@ -5526,12 +5667,30 @@ var utils = Object.freeze({
         });
       }
 
+      records = getSuper(self).prototype.add.call(self, records, opts);
+
+      records.forEach(function (record) {
+        // Track when this record was added
+        self._added[self.recordId(record)] = timestamp;
+
+        if (usesRecordClass) {
+          record._set('$', timestamp);
+        }
+      });
+
       return singular ? records[0] : records;
     },
     remove: function remove(id, opts) {
       var self = this;
       delete self._added[id];
-      return getSuper(self).prototype.remove.call(self, id, opts);
+      var record = getSuper(self).prototype.remove.call(self, id, opts);
+      if (record) {
+        var mapper = self.mapper;
+        if (mapper.RecordClass) {
+          record._set('$'); // unset
+        }
+      }
+      return record;
     },
     removeAll: function removeAll(query, opts) {
       var self = this;
@@ -5654,8 +5813,7 @@ var utils = Object.freeze({
     create: function create(name, record, opts) {
       var self = this;
       opts || (opts = {});
-      fillIn(opts, self.modelOpts);
-      return self.getMapper(name).create(record, opts).then(function (data) {
+      return getSuper(self).create(name, record, opts).then(function (data) {
         return self._end(name, data, opts);
       });
     },
@@ -5674,8 +5832,7 @@ var utils = Object.freeze({
     createMany: function createMany(name, records, opts) {
       var self = this;
       opts || (opts = {});
-      fillIn(opts, self.modelOpts);
-      return self.getMapper(name).createMany(records, opts).then(function (data) {
+      return getSuper(self).createMany(name, records, opts).then(function (data) {
         return self._end(name, data, opts);
       });
     },
@@ -5683,10 +5840,6 @@ var utils = Object.freeze({
       var self = this;
       var mapper = getSuper(self).prototype.defineMapper.call(self, name, opts);
       mapper.relationList = mapper.relationList || [];
-
-      mapper.relationList.forEach(function (def) {
-        // TODO: Conditionally add getters and setters to RecordClass prototype
-      });
 
       // The datastore uses a subclass of Collection that is "datastore-aware"
       var collection = self._collections[name] = new self.CollectionClass(null, {
@@ -5705,6 +5858,176 @@ var utils = Object.freeze({
           return collection._added[collection.recordId(obj)];
         }
       });
+
+      var linkRelations = self.linkRelations;
+
+      if (linkRelations) {
+        mapper.relationList.forEach(function (def) {
+          var relation = def.relation;
+          var localField = def.localField;
+          var path = 'links.' + localField;
+          var foreignKey = def.foreignKey;
+          var type = def.type;
+          var link = isUndefined(def.link) ? linkRelations : def.link;
+          var updateOpts = { index: foreignKey };
+          var descriptor = undefined;
+
+          if (type === belongsToType) {
+            if (!collection.indexes[foreignKey]) {
+              collection.createIndex(foreignKey);
+            }
+
+            descriptor = {
+              get: function get$$() {
+                var _self = this;
+                if (!_self._get('$') || !link) {
+                  return _self._get(path);
+                }
+                var key = get(_self, foreignKey);
+                var item = isUndefined(key) ? undefined : self.getCollection(relation).get(key);
+                _self._set(path, item);
+                return item;
+              },
+              set: function set$$(record) {
+                var _self = this;
+                _self._set(path, record);
+                set(_self, foreignKey, self.getCollection(relation).recordId(record));
+                collection.updateIndex(_self, updateOpts);
+                return get(_self, localField);
+              }
+            };
+          } else if (type === hasManyType) {
+            (function () {
+              var localKeys = def.localKeys;
+              var foreignKeys = def.foreignKeys;
+
+              // TODO: Handle case when belongsTo relation isn't ever defined
+              if (self._collections[relation] && foreignKey && !self.getCollection(relation).indexes[foreignKey]) {
+                self.getCollection(relation).createIndex(foreignKey);
+              }
+
+              descriptor = {
+                get: function get$$() {
+                  var _self = this;
+                  if (!_self._get('$') || !link) {
+                    return _self._get(path);
+                  }
+                  var key = collection.recordId(_self);
+                  var items = undefined;
+                  var relationCollection = self.getCollection(relation);
+
+                  if (foreignKey) {
+                    // Really fast retrieval
+                    items = relationCollection.getAll(key, {
+                      index: foreignKey
+                    });
+                  } else if (localKeys) {
+                    var keys = get(_self, localKeys) || [];
+                    var args = isArray(keys) ? keys : Object.keys(keys);
+                    // Really fast retrieval
+                    items = relationCollection.getAll.apply(relationCollection, args);
+                  } else if (foreignKeys) {
+                    var query = {};
+                    set(query, 'where.' + foreignKeys + '.contains', key);
+                    // Make a much slower retrieval
+                    items = relationCollection.filter(query);
+                  }
+
+                  _self._set(path, items);
+                  return items;
+                },
+                set: function set$$(records) {
+                  var _self = this;
+                  var key = collection.recordId(_self);
+                  var relationCollection = self.getCollection(relation);
+                  _self._set(path, records);
+
+                  if (foreignKey) {
+                    records.forEach(function (record) {
+                      set(record, foreignKey, key);
+                      relationCollection.updateIndex(record, updateOpts);
+                    });
+                  }if (localKeys) {
+                    set(_self, localKeys, records.map(function (record) {
+                      return relationCollection.recordId(record);
+                    }));
+                  } else if (foreignKeys) {
+                    records.forEach(function (record) {
+                      var keys = get(record, foreignKeys);
+                      if (keys) {
+                        if (keys.indexOf(key) === -1) {
+                          keys.push(key);
+                        }
+                      } else {
+                        set(record, foreignKeys, [key]);
+                      }
+                    });
+                  }
+                  return get(_self, localField);
+                }
+              };
+            })();
+          } else if (type === hasOneType) {
+            descriptor = {
+              get: function get$$() {
+                var _self = this;
+                if (!_self._get('$') || !link) {
+                  return _self._get(path);
+                }
+                var key = collection.recordId(_self);
+                var items = self.getCollection(relation).getAll(key, {
+                  index: foreignKey
+                });
+                var item = items.length ? items[0] : undefined;
+                _self._set(path, item);
+                return item;
+              },
+              set: function set$$(record) {
+                var _self = this;
+                var key = collection.recordId(_self);
+                _self._set(path, record);
+                set(record, foreignKey, key);
+                self.getCollection(relation).updateIndex(record, updateOpts);
+                return get(_self, localField);
+              }
+            };
+          }
+
+          if (descriptor) {
+            descriptor.enumerable = isUndefined(def.enumerable) ? true : def.enumerable;
+            if (def.get) {
+              (function () {
+                var origGet = descriptor.get;
+                descriptor.get = function () {
+                  var _this = this;
+
+                  return def.get(def, this, function () {
+                    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+                      args[_key] = arguments[_key];
+                    }
+
+                    return origGet.apply(_this, args);
+                  });
+                };
+              })();
+            }
+            if (opts.set) {
+              (function () {
+                var origSet = descriptor.set;
+                descriptor.set = function (related) {
+                  var _this2 = this;
+
+                  return def.set(def, this, related, function (value) {
+                    return origSet.call(_this2, value === undefined ? related : value);
+                  });
+                };
+              })();
+            }
+            Object.defineProperty(mapper.RecordClass.prototype, localField, descriptor);
+          }
+        });
+      }
+
       return mapper;
     },
 
@@ -5722,8 +6045,7 @@ var utils = Object.freeze({
     destroy: function destroy(name, id, opts) {
       var self = this;
       opts || (opts = {});
-      fillIn(opts, self.modelOpts);
-      return self.getMapper(name).destroy(id, opts).then(function (data) {
+      return getSuper(self).destroy(name, id, opts).then(function (data) {
         if (opts.raw) {
           data.data = self.getCollection(name).remove(id, opts);
         } else {
@@ -5736,7 +6058,7 @@ var utils = Object.freeze({
     /**
      * TODO
      *
-     * @name Mapper#destroyAll
+     * @name DataStore#destroyAll
      * @method
      * @param {string} name - Name of the {@link Mapper} to target.
      * @param {Object} [query] - Passed to {@link Mapper#destroyAll}.
@@ -5747,8 +6069,7 @@ var utils = Object.freeze({
     destroyAll: function destroyAll(name, query, opts) {
       var self = this;
       opts || (opts = {});
-      fillIn(opts, self.modelOpts);
-      return self.getMapper(name).destroyAll(query, opts).then(function (data) {
+      return getSuper(self).destroyAll(name, query, opts).then(function (data) {
         if (opts.raw) {
           data.data = self.getCollection(name).removeAll(query, opts);
         } else {
@@ -5771,8 +6092,7 @@ var utils = Object.freeze({
     find: function find(name, id, opts) {
       var self = this;
       opts || (opts = {});
-      fillIn(opts, self.modelOpts);
-      return self.getMapper(name).find(id, opts).then(function (data) {
+      return getSuper(self).find(name, id, opts).then(function (data) {
         return self._end(name, data, opts);
       });
     },
@@ -5790,8 +6110,7 @@ var utils = Object.freeze({
     findAll: function findAll(name, query, opts) {
       var self = this;
       opts || (opts = {});
-      fillIn(opts, self.modelOpts);
-      return self.getMapper(name).findAll(query, opts).then(function (data) {
+      return getSuper(self).findAll(name, query, opts).then(function (data) {
         return self._end(name, data, opts);
       });
     },
@@ -5827,8 +6146,7 @@ var utils = Object.freeze({
     update: function update(name, id, record, opts) {
       var self = this;
       opts || (opts = {});
-      fillIn(opts, self.modelOpts);
-      return self.getMapper(name).update(id, record, opts).then(function (data) {
+      return getSuper(self).update(name, id, record, opts).then(function (data) {
         return self._end(name, data, opts);
       });
     },
@@ -5848,8 +6166,7 @@ var utils = Object.freeze({
     updateAll: function updateAll(name, query, props, opts) {
       var self = this;
       opts || (opts = {});
-      fillIn(opts, self.modelOpts);
-      return self.getMapper(name).updateAll(query, props, opts).then(function (data) {
+      return getSuper(self).updateAll(name, query, props, opts).then(function (data) {
         return self._end(name, data, opts);
       });
     },
@@ -5868,8 +6185,7 @@ var utils = Object.freeze({
     updateMany: function updateMany(name, records, opts) {
       var self = this;
       opts || (opts = {});
-      fillIn(opts, self.modelOpts);
-      return self.getMapper(name).updateMany(records, opts).then(function (data) {
+      return getSuper(self).updateMany(records, opts).then(function (data) {
         return self._end(name, data, opts);
       });
     }
@@ -5896,6 +6212,30 @@ var utils = Object.freeze({
    * @return {Function} Subclass of DataStore.
    */
   DataStore.extend = extend;
+
+  var toProxy = ['add', 'between', 'createIndex', 'filter', 'get', 'getAll', 'query', 'remove', 'removeAll', 'toJson'];
+
+  var methods = {};
+
+  toProxy.forEach(function (method) {
+    methods[method] = function (name) {
+      var _getCollection;
+
+      for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+        args[_key2 - 1] = arguments[_key2];
+      }
+
+      return (_getCollection = this.getCollection(name))[method].apply(_getCollection, args);
+    };
+  });
+
+  methods.inject = function () {
+    // TODO: Fix logging
+    console.warn('deprecated');
+    return this.add.apply(this, arguments);
+  };
+
+  addHiddenPropsToTarget(DataStore.prototype, methods);
 
   /**
    * Registered as `js-data` in NPM and Bower.
@@ -5935,12 +6275,12 @@ var utils = Object.freeze({
    * if the current version is not beta.
    */
   var version = {
-    full: '3.0.0-alpha.11',
+    full: '3.0.0-alpha.12',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10),
-    alpha: '11' !== 'false' ? '11' : false,
-    beta: 'false' !== 'false' ? 'false' : false
+    alpha: '12',
+    beta: 'false'
   };
 
   var DS = DataStore;

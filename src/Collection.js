@@ -230,7 +230,7 @@ addHiddenPropsToTarget(Collection.prototype, {
     // Track whether just one record or an array of records is being inserted
     let singular = false
     const idAttribute = self.recordId()
-    if (!isArray(records)) {
+    if (isObject(records) && !isArray(records)) {
       records = [records]
       singular = true
     }
@@ -679,7 +679,7 @@ addHiddenPropsToTarget(Collection.prototype, {
 
     // Remove each selected record from the collection
     records.forEach(function (item) {
-      self.remove(self.recordId(item))
+      self.remove(self.recordId(item), opts)
     })
     return self.afterRemoveAll(query, opts, records) || records
   },

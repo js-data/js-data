@@ -1,3 +1,10 @@
+##### 3.0.0-alpha.12 - 04 February 2016
+
+- Added back relation linking to DataStore and LinkedCollection
+- Container and DataStore now proxy a number of Collection methods
+- Container and DataStore now proxy Mapper#createRecord
+- Container now proxies async Mapper methods, not just DataStore
+
 ##### 3.0.0-alpha.11 - 25 January 2016
 
 - Refactored architecture into Record, Collection (and LinkedCollection), Mapper, Container, DataStore, and Schema
