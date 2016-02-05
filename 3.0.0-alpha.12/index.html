@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>js-data Index</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.dark.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.lumen.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">js-data</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-js-data.html">js-data</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Collection.html">Collection</a></li><li><a href="Container.html">Container</a></li><li><a href="DataStore.html">DataStore</a></li><li><a href="LinkedCollection.html">LinkedCollection</a></li><li><a href="Mapper.html">Mapper</a></li><li><a href="Query.html">Query</a></li><li><a href="Record.html">Record</a></li><li><a href="Schema.html">Schema</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+		<div class="col-sm-3 col-md-3">
+            <form class="navbar-form" role="search">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                    <div class="input-group-btn">
+                        <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-8">
+	
+		<div id="main">
+			
+
+	
+	
+
+
+
+    <h3>js-data 3.0.0-alpha.12</h3>
+
+
+
+
+
+
+
+
+
+	
+	
+
+
+
+
+
+    <section class="readme-section">
+        <article><p><img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="96" height="96" /></p>
+<h1><a href="http://www.js-data.io/">JSData</a></h1><p><a href="http://slack.js-data.io"><img src="http://slack.js-data.io/badge.svg" alt="Slack Status"></a>
+<a href="https://www.npmjs.org/package/js-data"><img src="https://img.shields.io/npm/v/js-data.svg?style=flat" alt="npm version"></a>
+<a href="https://circleci.com/gh/js-data/js-data/tree/master"><img src="https://img.shields.io/circleci/project/js-data/js-data/master.svg?style=flat" alt="Circle CI"></a>
+<a href="https://www.npmjs.org/package/js-data"><img src="https://img.shields.io/npm/dm/js-data.svg?style=flat" alt="npm downloads"></a>
+<a href="https://coveralls.io/github/js-data/js-data?branch=master"><img src="https://img.shields.io/coveralls/js-data/js-data/master.svg?style=flat" alt="Coverage Status"></a>
+<a href="https://www.codacy.com/app/jasondobry/js-data/dashboard"><img src="https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg" alt="Codacy"></a></p>
+<p>JSData is a framework-agnostic, datastore-agnostic ORM/ODM for Node.js and the
+Browser.</p>
+<p>Adapters allow JSData to connect to various data sources such as Firebase, MySql,
+RethinkDB, MongoDB, localStorage, Redis, a REST API, etc. With JSData you can
+re-use your Models between environments, keep your data layer intact when
+transitioning between app frameworks, and work with a unified data API on the
+server and the client. JSData employs conventions for rapid development, but
+allows for endless customization in order to meet your particular needs.</p>
+<p>For Getting Started guides, visit <strong><a href="http://www.js-data.io">http://js-data.io</a></strong>!</p>
+<h2>Table of contents</h2><ul>
+<li><a href="#quick-start">Quick start</a></li>
+<li><a href="#background">Background</a></li>
+<li><a href="#dependencies">Dependencies</a></li>
+<li><a href="#documentation">Guides &amp; Tutorials</a></li>
+<li><a href="#api-reference">API Reference Docs</a></li>
+<li><a href="#support">Support</a></li>
+<li><a href="#community">Community</a></li>
+<li><a href="#contributing">Contributing</a></li>
+<li><a href="#license">License</a></li>
+</ul>
+<h2>Quick Start</h2><p>This example shows setting up JSData to use the Http adapter in the browser:</p>
+<pre class="prettyprint source"><code>npm i --save js-data js-data-http</code></pre><p>See <a href="http://www.js-data.io/docs#use-with-webpack">installation instructions</a> for making JSData part of your
+r.js/browserify/webpack build.</p>
+<pre class="prettyprint source lang-javascript"><code>import {DataStore} from 'js-data'
+import HttpAdapter from 'js-data-http'
+
+// Create an empty data store
+const store = new DataStore()
+
+// &quot;store&quot; will use an http adapter by default
+store.registerAdapter('http', new HttpAdapter(), { 'default': true })
+
+// Define a new Mapper for a &quot;user&quot; resource
+store.defineMapper('user')
+// Get a reference to the store's &quot;user&quot; collection
+const Users = store.getCollection('user')
+
+async function showExample () {
+  let user = await store.find('user', 1)
+
+  console.log(user) // { id: 1, name: 'John' }
+
+  // The user record is now stored in Users
+  console.log(Users.get(user.id)) // { id: 1, name: 'John' }
+  console.log(user === Users.get(user.id)) // true
+
+  user.name = 'Johnny'
+
+  // PUT /user/1 {name:&quot;Johnny&quot;}
+  user = await user.save()
+
+  // The user record has been updated
+  console.log(Users.get(user.id)) // { id: 1, name: 'Johnny' }
+  console.log(user === Users.get(user.id)) // true
+
+  await user.destroy()
+
+  // The user instance no longer stored in Users
+  console.log(Users.get(1)) // undefined
+}</code></pre><p><strong>ES5:</strong></p>
+<pre class="prettyprint source lang-javascript"><code>// Create an empty data store
+var store = new JSData.DataStore()
+
+// &quot;store&quot; will use an http adapter by default
+store.registerAdapter('http', new HttpAdapter(), { default: true })
+
+// Define a new Mapper for a &quot;user&quot; resource
+store.defineMapper('user')
+// Get a reference to the store's &quot;user&quot; collection
+var Users = store.getCollection('user')
+
+store.find('user', 1)
+  .then(function (user) {
+    console.log(user) // { id: 1, name: 'John' }
+
+    // The user record is now stored in Users
+    console.log(Users.get(user.id)) // { id: 1, name: 'John' }
+    console.log(user === Users.get(user.id)) // true
+
+    user.name = 'Johnny'
+
+    // PUT /user/1 {name:&quot;Johnny&quot;}
+    return user.save()
+  })
+  .then(function (user) {
+    // The user record has been updated
+    console.log(Users.get(user.id)) // { id: 1, name: 'Johnny' }
+    console.log(user === Users.get(user.id)) // true
+
+    return user.destroy()
+  })
+  .then(function () {
+    // The user instance no longer stored in Users
+    console.log(Users.get(1)) // undefined
+  })</code></pre><h2>Background</h2><p>Most ORMs/ODMs only work with a single datastore, most JavaScript ORMs only work
+in Node.js <em>or</em> the Browser. Wouldn't it be nice if you could use the same
+ORM/ODM on the client as you do on the backend? Wouldn't it be nice if you could
+switch databases without having to switch out your data layer code? Enter
+<strong>JSData</strong>.</p>
+<p>Originally inspired by the desire to have something like <a href="https://github.com/emberjs/data">Ember Data</a>
+that worked in Angular.js and other frameworks, JSData was created. Turns out,
+JSData works in Node.js, so server-side adapters were written. JSData is the
+Model layer you've been craving. It consists of a convenient
+<strong>framework-agnostic</strong>, <strong>datastore-agnostic</strong> ORM for managing your data, which
+uses <strong>adapters</strong> to connect to various <strong>persistence layers</strong>.</p>
+<p>The most commonly used adapter is the <a href="http://www.js-data.io/docs/dshttpadapter">http adapter</a>, which is perfect for
+connecting your frontend to your backend. <a href="http://www.js-data.io/docs/dslocalstorageadapter">localStorage</a>, <a href="http://www.js-data.io/docs/dslocalforageadapter">localForage</a>,
+<a href="http://www.js-data.io/docs/dsfirebaseadapter">Firebase</a> and <a href="http://www.js-data.io/docs/working-with-adapters">other adapters</a> are available for the browser. On the
+server you could hook up to the <a href="http://www.js-data.io/docs/dssqladapter">SQL adapter (Postgres/MySQL/MariaDB/SQLite3)</a>
+or the <a href="http://www.js-data.io/docs/dsmongodbadapter">MongoDB</a> adapter. More adapters are coming, and you're free to
+implement your own. See <a href="http://www.js-data.io/docs/working-with-adapters">Adapters</a>.</p>
+<p><a href="https://www.youtube.com/watch?v=8wxnnJA9FKw"><img src="http://img.youtube.com/vi/8wxnnJA9FKw/0.jpg" alt="MtnWestJS Conf 2015 Presentation"></a></p>
+<h2>Dependencies</h2><p>JSData requires the presence of a <code>Promise</code> constructor in the global
+environment. In the browser, <code>window.Promise</code> must be available. In Node.js,
+<code>global.Promise</code> must be available. Here is a handy library for polyfilling:
+https://github.com/jakearchibald/es6-promise.</p>
+<p>JSData also requires full ES5 support from the runtime. Here is a handy library
+for polyfilling: https://github.com/afarkas/html5shiv</p>
+<h2>Guides &amp; Tutorials</h2><ul>
+<li><a href="http://www.js-data.io">Main Site</a></li>
+<li><a href="http://www.js-data.io/docs/home">Getting Started with js-data</a></li>
+<li><a href="http://www.js-data.io/docs/resources">Resources/Models</a></li>
+<li><a href="http://www.js-data.io/docs/working-with-the-data-store">Working with the Data Store</a></li>
+<li><a href="http://www.js-data.io/docs/working-with-adapters">Adapters</a></li>
+<li><a href="http://www.js-data.io/docs/model-lifecycle">Model Lifecycle</a></li>
+<li><a href="http://www.js-data.io/docs/custom-instance-behavior">Custom Instance Behavior</a></li>
+<li><a href="http://www.js-data.io/docs/computed-properties">Computed Properties</a></li>
+<li><a href="http://www.js-data.io/docs/relations">Relations</a></li>
+<li><a href="http://www.js-data.io/docs/schemata--validation">Schemata &amp; Validation</a></li>
+<li><a href="http://www.js-data.io/docs/jsdata-on-the-server">JSData on the server</a></li>
+<li><a href="http://www.js-data.io/docs/js-data-angular">Angular + JSData</a></li>
+<li><a href="http://www.js-data.io/docs/faq">FAQ</a></li>
+<li><a href="https://github.com/js-data/js-data/blob/master/CHANGELOG.md">CHANGELOG.md</a></li>
+</ul>
+<p>See an issue with the documentation? Have something to add? Click the &quot;Suggest
+Edits&quot; button at the top right of each page and make your suggested changes!</p>
+<h2>API Reference Docs</h2><ul>
+<li><a href="http://api.js-data.io/">all</a></li>
+<li><a href="http://api.js-data.io/js-data">js-data</a></li>
+<li><a href="http://api.js-data.io/js-data-http">js-data-http</a></li>
+</ul>
+<h2>Support</h2><p>Support questions are handled via <a href="http://stackoverflow.com/questions/tagged/jsdata">Stack Overflow</a>, <a href="http://slack.js-data.io">Slack</a>, and the
+<a href="https://groups.io/org/groupsio/jsdata">Mailing List</a>. Ask your questions there.</p>
+<h2>Community</h2><ul>
+<li><a href="http://stackoverflow.com/questions/tagged/jsdata">StackOverflow</a></li>
+<li><a href="http://slack.js-data.io">Slack chat</a> <a href="http://slack.js-data.io"><img src="http://slack.js-data.io/badge.svg" alt="Slack Status"></a></li>
+<li><a href="http://www.js-data.io/blog">Announcements</a></li>
+<li><a href="ml">Mailing List</a></li>
+<li><a href="https://github.com/js-data/js-data/issues">Issue Tracker</a></li>
+<li><a href="https://github.com/js-data/js-data">GitHub</a></li>
+<li><a href="https://github.com/js-data/js-data/blob/master/CONTRIBUTING.md">Contributing Guide</a></li>
+</ul>
+<h2>Contributing</h2><p>When submitting bug reports or feature requests on GitHub, please include <em>as
+much detail as possible</em>.</p>
+<ul>
+<li>good - Your versions of Angular, JSData, etc, relevant console logs, stack
+traces, code examples that revealed the issue, etc.</li>
+<li>better - A <a href="http://plnkr.co/">plnkr</a>, <a href="http://jsfiddle.net/">fiddle</a>, or
+<a href="http://jsbin.com/?html,output">bin</a> that demonstrates the issue</li>
+<li>best - A Pull Request that fixes the issue, including test coverage for the
+issue and the fix</li>
+</ul>
+<h4>Pull Requests</h4><ol>
+<li>Contribute to the issue/discussion that is the reason you'll be developing in
+the first place</li>
+<li>Fork js-data</li>
+<li><code>git clone git@github.com:&lt;you&gt;/js-data.git</code></li>
+<li><code>cd js-data</code></li>
+<li><code>npm install</code></li>
+<li>Write your code, including relevant documentation and tests</li>
+<li>Run <code>npm test</code> (build and test)</li>
+<li>Your code will be linted and checked for formatting, the tests will be run</li>
+<li>The <code>dist/</code> folder &amp; files will be generated, do NOT commit <code>dist/*</code>! They
+will be committed when a release is cut.</li>
+<li>Submit your PR and we'll review!</li>
+<li>Thanks!</li>
+</ol>
+<h2>License</h2><p>The MIT License (MIT)</p>
+<p>Copyright (c) 2014-2016 Jason Dobry</p>
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the &quot;Software&quot;), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:</p>
+<p>The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.</p>
+<p>THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.</p></article>
+    </section>
+
+
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+		<div class="col-md-3">
+			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+		</div>
+	
+
+</div>
+</div>
+
+<div class="modal fade" id="searchResults">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Search results</h4>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+<footer>
+
+	<div style="text-align:center">Back to <a href="http://js-data.io">js-data.io</a></div>
+
+
+	<span class="copyright">
+	js-data Copyright © 2014-2016 Jason Dobry
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
+	
+		on 2016-02-05T06:44:11+00:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+<script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			var id = $( heading ).attr( "id" );
+			return id && id.replace(/\~/g, '-inner-').replace(/\./g, '-static-') || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		SearcherDisplay.init();
+	});
+</script>
+
+</body>
+</html>

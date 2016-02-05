@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>js-data Source: Container.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.dark.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.lumen.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">js-data</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-js-data.html">js-data</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Collection.html">Collection</a></li><li><a href="Container.html">Container</a></li><li><a href="DataStore.html">DataStore</a></li><li><a href="LinkedCollection.html">LinkedCollection</a></li><li><a href="Mapper.html">Mapper</a></li><li><a href="Query.html">Query</a></li><li><a href="Record.html">Record</a></li><li><a href="Schema.html">Schema</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+		<div class="col-sm-3 col-md-3">
+            <form class="navbar-form" role="search">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                    <div class="input-group-btn">
+                        <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: Container.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">import {
+  addHiddenPropsToTarget,
+  classCallCheck,
+  extend,
+  fillIn,
+  forOwn,
+  isObject,
+  isString
+} from './utils'
+import {
+  belongsToType,
+  hasManyType,
+  hasOneType
+} from './decorators'
+import Mapper from './Mapper'
+
+/**
+ * ```javascript
+ * import {Container} from 'js-data'
+ * ```
+ *
+ * The `Container` class is a place to store {@link Mapper} instances.
+ *
+ * Without a container, you need to manage mappers yourself, including resolving
+ * circular dependencies among relations. All mappers in a container share the
+ * same adapters, so you don't have to add each adapter to all of your mappers.
+ *
+ * @example &lt;caption>Without Container&lt;/caption>
+ * import {Mapper} from 'js-data'
+ * import HttpAdapter from 'js-data-http'
+ * const adapter = new HttpAdapter()
+ * const userMapper = new Mapper({ name: 'user' })
+ * userMapper.registerAdapter('http', adapter, { default: true })
+ * const commentMapper = new Mapper({ name: 'comment' })
+ * commentMapper.registerAdapter('http', adapter, { default: true })
+ *
+ * // This might be more difficult if the mappers were defined in different
+ * // modules.
+ * userMapper.hasMany(commentMapper, {
+ *   localField: 'comments',
+ *   foreignKey: 'userId'
+ * })
+ * commentMapper.belongsTo(userMapper, {
+ *   localField: 'user',
+ *   foreignKey: 'userId'
+ * })
+ *
+ * @example &lt;caption>With Container&lt;/caption>
+ * import {Container} from 'js-data'
+ * import HttpAdapter from 'js-data-http'
+ * const container = new Container()
+ * // All mappers in container share adapters
+ * container.registerAdapter('http', new HttpAdapter(), { default: true })
+ *
+ * // These could be defined in separate modules without a problem.
+ * container.defineMapper('user', {
+ *   relations: {
+ *     hasMany: {
+ *       comment: {
+ *         localField: 'comments',
+ *         foreignKey: 'userId'
+ *       }
+ *     }
+ *   }
+ * })
+ * container.defineMapper('comment', {
+ *   relations: {
+ *     belongsTo: {
+ *       user: {
+ *         localField: 'user',
+ *         foreignKey: 'userId'
+ *       }
+ *     }
+ *   }
+ * })
+ *
+ * @class Container
+ * @param {Object} [opts] Configuration options.
+ * @param {Function} [opts.MapperClass] Constructor function to use in
+ * {@link Container#defineMapper} to create a new mapper.
+ * @param {Object} [opts.mapperDefaults] Defaults options to pass to
+ * {@link Container#MapperClass} when creating a new mapper.
+ * @return {Container}
+ */
+export default function Container (opts) {
+  const self = this
+  classCallCheck(self, Container)
+
+  opts || (opts = {})
+  // Apply options provided by the user
+  fillIn(self, opts)
+  /**
+   * Defaults options to pass to {@link Container#MapperClass} when creating a
+   * new mapper.
+   *
+   * @name Container#mapperDefaults
+   * @type {Object}
+   */
+  self.mapperDefaults = self.mapperDefaults || {}
+  /**
+   * Constructor function to use in {@link Container#defineMapper} to create a
+   * new mapper.
+   *
+   * @name Container#MapperClass
+   * @type {Function}
+   */
+  self.MapperClass = self.MapperClass || Mapper
+
+  // Initilize private data
+
+  // Holds the adapters, shared by all mappers in this container
+  self._adapters = {}
+  // The the mappers in this container
+  self._mappers = {}
+}
+
+/**
+ * Create a Container subclass.
+ *
+ * @example
+ * var MyContainer = Container.extend({
+ *   foo: function () { return 'bar' }
+ * })
+ * var container = new MyContainer()
+ * container.foo() // "bar"
+ *
+ * @name Container.extend
+ * @method
+ * @param {Object} [props={}] Properties to add to the prototype of the
+ * subclass.
+ * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @return {Function} Subclass of Container.
+ */
+Container.extend = extend
+
+addHiddenPropsToTarget(Container.prototype, {
+  /**
+   * TODO
+   *
+   * @name Container#create
+   * @method
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {Object} record Passed to {@link Mapper#create}.
+   * @param {Object} [opts] Passed to {@link Mapper#create}. See
+   * {@link Mapper#create} for more configuration options.
+   * @return {Promise}
+   */
+  create (name, record, opts) {
+    const self = this
+    opts || (opts = {})
+    fillIn(opts, self.modelOpts)
+    return self.getMapper(name).create(record, opts)
+  },
+
+  /**
+   * TODO
+   *
+   * @name Container#createMany
+   * @method
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {Array} records Passed to {@link Mapper#createMany}.
+   * @param {Object} [opts] Passed to {@link Mapper#createMany}. See
+   * {@link Mapper#createMany} for more configuration options.
+   * @return {Promise}
+   */
+  createMany (name, records, opts) {
+    const self = this
+    opts || (opts = {})
+    fillIn(opts, self.modelOpts)
+    return self.getMapper(name).createMany(records, opts)
+  },
+
+  /**
+   * Proxy for {@link Mapper#createRecord}.
+   *
+   * @name Container#createRecord
+   * @method
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {Object} props Passed to {@link Mapper#createRecord}.
+   * @param {Object} [opts] Passed to {@link Mapper#createRecord}. See
+   * {@link Mapper#createRecord} for configuration options.
+   * @return {Promise}
+   */
+  createRecord (name, props, opts) {
+    return this.getMapper(name).createRecord(props, opts)
+  },
+
+  /**
+   * Create a new mapper and register it in this container.
+   *
+   * @example
+   * import {Container} from 'js-data'
+   * const container = new Container({
+   *   mapperDefaults: { foo: 'bar' }
+   * })
+   * const userMapper = container.defineMapper('user')
+   * userMapper.foo // "bar"
+   *
+   * @name Container#defineMapper
+   * @method
+   * @param {string} name Name under which to register the new {@link Mapper}.
+   * {@link Mapper#name} will be set to this value.
+   * @param {Object} [opts] Configuration options. Passed to
+   * {@link Container#MapperClass} when creating the new {@link Mapper}.
+   * @return {Mapper}
+   */
+  defineMapper (name, opts) {
+    const self = this
+
+    // For backwards compatibility with defineResource
+    if (isObject(name)) {
+      opts = name
+      if (!opts.name) {
+        throw new Error('name is required!')
+      }
+      name = opts.name
+    } else if (!isString(name)) {
+      throw new Error('name is required!')
+    }
+
+    // Default values for arguments
+    opts || (opts = {})
+    // Set Mapper#name
+    opts.name = name
+    opts.relations || (opts.relations = {})
+
+    // Check if the user is overriding the datastore's default MapperClass
+    const MapperClass = opts.MapperClass || self.MapperClass
+    delete opts.MapperClass
+
+    // Apply the datastore's defaults to the options going into the mapper
+    fillIn(opts, self.mapperDefaults)
+
+    // Instantiate a mapper
+    const mapper = self._mappers[name] = new MapperClass(opts)
+    // Make sure the mapper's name is set
+    mapper.name = name
+    // All mappers in this datastore will share adapters
+    mapper._adapters = self.getAdapters()
+
+    // Setup the mapper's relations, including generating Mapper#relationList
+    // and Mapper#relationFields
+    forOwn(mapper.relations, function (group, type) {
+      forOwn(group, function (relations, _name) {
+        if (isObject(relations)) {
+          relations = [relations]
+        }
+        relations.forEach(function (def) {
+          def.getRelation = function () {
+            return self.getMapper(_name)
+          }
+          const Relation = self._mappers[_name] || _name
+          if (type === belongsToType) {
+            mapper.belongsTo(Relation, def)
+          } else if (type === hasOneType) {
+            mapper.hasOne(Relation, def)
+          } else if (type === hasManyType) {
+            mapper.hasMany(Relation, def)
+          }
+        })
+      })
+    })
+
+    return mapper
+  },
+
+  /**
+   * TODO
+   *
+   * @name Container#destroy
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {(string|number)} id - Passed to {@link Mapper#destroy}.
+   * @param {Object} [opts] - Passed to {@link Mapper#destroy}. See
+   * {@link Mapper#destroy} for more configuration options.
+   * @return {Promise}
+   */
+  destroy (name, id, opts) {
+    const self = this
+    opts || (opts = {})
+    fillIn(opts, self.modelOpts)
+    return self.getMapper(name).destroy(id, opts)
+  },
+
+  /**
+   * TODO
+   *
+   * @name Container#destroyAll
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {Object} [query] - Passed to {@link Mapper#destroyAll}.
+   * @param {Object} [opts] - Passed to {@link Mapper#destroyAll}. See
+   * {@link Mapper#destroyAll} for more configuration options.
+   * @return {Promise}
+   */
+  destroyAll (name, query, opts) {
+    const self = this
+    opts || (opts = {})
+    fillIn(opts, self.modelOpts)
+    return self.getMapper(name).destroyAll(query, opts)
+  },
+
+  /**
+   * TODO
+   *
+   * @name Container#find
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {(string|number)} id - Passed to {@link Mapper#find}.
+   * @param {Object} [opts] - Passed to {@link Mapper#find}.
+   * @return {Promise}
+   */
+  find (name, id, opts) {
+    const self = this
+    opts || (opts = {})
+    fillIn(opts, self.modelOpts)
+    return self.getMapper(name).find(id, opts)
+  },
+
+  /**
+   * TODO
+   *
+   * @name Container#findAll
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {Object} [query] - Passed to {@link Model.findAll}.
+   * @param {Object} [opts] - Passed to {@link Model.findAll}.
+   * @return {Promise}
+   */
+  findAll (name, query, opts) {
+    const self = this
+    opts || (opts = {})
+    fillIn(opts, self.modelOpts)
+    return self.getMapper(name).findAll(query, opts)
+  },
+
+  /**
+   * Return the name of a registered adapter based on the given name or options,
+   * or the name of the default adapter if no name provided.
+   *
+   * @name Container#getAdapterName
+   * @method
+   * @param {(Object|string)} [opts] The name of an adapter or options, if any.
+   * @return {string} The name of the adapter.
+   */
+  getAdapterName (opts) {
+    opts || (opts = {})
+    if (isString(opts)) {
+      opts = { adapter: opts }
+    }
+    return opts.adapter || this.mapperDefaults.defaultAdapter
+  },
+
+  /**
+   * Return the registered adapter with the given name or the default adapter if
+   * no name is provided.
+   *
+   * @name Container#getAdapter
+   * @method
+   * @param {string} [name] The name of the adapter to retrieve.
+   * @return {Adapter} The adapter.
+   */
+  getAdapter (name) {
+    const self = this
+    const adapter = self.getAdapterName(name)
+    if (!adapter) {
+      throw new ReferenceError(`${adapter} not found!`)
+    }
+    return self.getAdapters()[adapter]
+  },
+
+  /**
+   * Return the registered adapters of this container.
+   *
+   * @name Container#getAdapters
+   * @method
+   * @return {Adapter}
+   */
+  getAdapters () {
+    return this._adapters
+  },
+
+  /**
+   * Return the mapper registered under the specified name.
+   *
+   * @example
+   * import {Container} from 'js-data'
+   * const container = new Container()
+   * const userMapper = container.defineMapper('user')
+   * userMapper === container.getMapper('user') // true
+   *
+   * @name Container#getMapper
+   * @method
+   * @param {string} name {@link Mapper#name}.
+   * @return {Mapper}
+   */
+  getMapper (name) {
+    const mapper = this._mappers[name]
+    if (!mapper) {
+      throw new ReferenceError(`${name} is not a registered mapper!`)
+    }
+    return mapper
+  },
+
+  /**
+   * Register an adapter on this container under the given name. Adapters
+   * registered on a container are shared by all mappers in the container.
+   *
+   * @example
+   * import {Container} from 'js-data'
+   * import HttpAdapter from 'js-data-http'
+   * const container = new Container()
+   * container.registerAdapter('http', new HttpAdapter, { default: true })
+   *
+   * @name Container#registerAdapter
+   * @method
+   * @param {string} name The name of the adapter to register.
+   * @param {Adapter} adapter The adapter to register.
+   * @param {Object} [opts] Configuration options.
+   * @param {boolean} [opts.default=false] Whether to make the adapter the
+   * default adapter for all Mappers in this container.
+   */
+  registerAdapter (name, adapter, opts) {
+    const self = this
+    opts || (opts = {})
+    self.getAdapters()[name] = adapter
+    // Optionally make it the default adapter for the target.
+    if (opts === true || opts.default) {
+      self.mapperDefaults.defaultAdapter = name
+      forOwn(self._mappers, function (mapper) {
+        mapper.defaultAdapter = name
+      })
+    }
+  },
+
+  /**
+   * TODO
+   *
+   * @name Container#update
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {(string|number)} id - Passed to {@link Mapper#update}.
+   * @param {Object} record - Passed to {@link Mapper#update}.
+   * @param {Object} [opts] - Passed to {@link Mapper#update}. See
+   * {@link Mapper#update} for more configuration options.
+   * @return {Promise}
+   */
+  update (name, id, record, opts) {
+    const self = this
+    opts || (opts = {})
+    fillIn(opts, self.modelOpts)
+    return self.getMapper(name).update(id, record, opts)
+  },
+
+  /**
+   * TODO
+   *
+   * @name Container#updateAll
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {Object?} query - Passed to {@link Model.updateAll}.
+   * @param {Object} props - Passed to {@link Model.updateAll}.
+   * @param {Object} [opts] - Passed to {@link Model.updateAll}. See
+   * {@link Model.updateAll} for more configuration options.
+   * @return {Promise}
+   */
+  updateAll (name, query, props, opts) {
+    const self = this
+    opts || (opts = {})
+    fillIn(opts, self.modelOpts)
+    return self.getMapper(name).updateAll(query, props, opts)
+  },
+
+  /**
+   * TODO
+   *
+   * @name Container#updateMany
+   * @method
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {(Object[]|Record[])} records Passed to {@link Mapper#updateMany}.
+   * @param {Object} [opts] Passed to {@link Mapper#updateMany}. See
+   * {@link Mapper#updateMany} for more configuration options.
+   * @return {Promise}
+   */
+  updateMany (name, records, opts) {
+    const self = this
+    opts || (opts = {})
+    fillIn(opts, self.modelOpts)
+    return self.getMapper(name).updateMany(records, opts)
+  }
+})
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+<div class="modal fade" id="searchResults">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Search results</h4>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+<footer>
+
+	<div style="text-align:center">Back to <a href="http://js-data.io">js-data.io</a></div>
+
+
+	<span class="copyright">
+	js-data Copyright © 2014-2016 Jason Dobry
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
+	
+		on 2016-02-05T06:44:11+00:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+<script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			var id = $( heading ).attr( "id" );
+			return id && id.replace(/\~/g, '-inner-').replace(/\./g, '-static-') || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		SearcherDisplay.init();
+	});
+</script>
+
+</body>
+</html>
