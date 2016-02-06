@@ -14,20 +14,25 @@ export function init () {
       post.author = 'Jake'
       Test.assert.isFalse(post.hasChanges())
     })
-    // it('should return true if a tracked field is changed', function () {
-    //   const Test = this
-    //   Test.Post.setSchema({
-    //     author: {
-    //       type: 'string',
-    //       track: true
-    //     }
-    //   })
-    //   const post = new Test.Post(Test.data.p1)
-    //   Test.assert.isFalse(post.hasChanges())
-    //   post.author = 'Jake'
-    //   Test.assert.isTrue(post.hasChanges())
-    //   post.author = 'John'
-    //   Test.assert.isFalse(post.hasChanges())
-    // })
+    it('should return true if a tracked field is changed', function () {
+      const Test = this
+      const PostMapper = new Test.JSData.Mapper({
+        name: 'post',
+        schema: {
+          properties: {
+            author: {
+              type: 'string',
+              track: true
+            }
+          }
+        }
+      })
+      const post = PostMapper.createRecord(Test.data.p1)
+      Test.assert.isFalse(post.hasChanges())
+      post.author = 'Jake'
+      Test.assert.isTrue(post.hasChanges())
+      post.author = 'John'
+      Test.assert.isFalse(post.hasChanges())
+    })
   })
 }

@@ -163,6 +163,26 @@ export const set = function (object, path, value) {
 }
 
 /**
+ * Unset the value at the provided key or path.
+ *
+ * @ignore
+ * @param {Object} object The object from which to delete the property.
+ * @param {string} path The key or path to the property.
+ */
+export const unset = function (object, path) {
+  const parts = path.split('.')
+  const last = parts.pop()
+
+  while (path = parts.shift()) { // eslint-disable-line
+    object = object[path]
+    if (object == null) return
+  }
+
+  object[last] = undefined
+  delete object[last]
+}
+
+/**
  * Iterate over an object's own enumerable properties.
  *
  * @ignore
@@ -334,19 +354,23 @@ export const toJson = JSON.stringify
  * @param {*} from Value to deep copy.
  * @return {*} Deep copy of `from`.
  */
-export const copy = function (from, to, stackFrom, stackTo, blacklist) {
+export const copy = function (from, to, stackFrom, stackTo, blacklist, plain) {
   if (!to) {
     to = from
     if (from) {
       if (isArray(from)) {
-        to = copy(from, [], stackFrom, stackTo, blacklist)
+        to = copy(from, [], stackFrom, stackTo, blacklist, plain)
       } else if (isDate(from)) {
         to = new Date(from.getTime())
       } else if (isRegExp(from)) {
         to = new RegExp(from.source, from.toString().match(/[^\/]*$/)[0])
         to.lastIndex = from.lastIndex
       } else if (isObject(from)) {
-        to = copy(from, Object.create(Object.getPrototypeOf(from)), stackFrom, stackTo, blacklist)
+        if (plain) {
+          to = copy(from, {}, stackFrom, stackTo, blacklist, plain)
+        } else {
+          to = copy(from, Object.create(Object.getPrototypeOf(from)), stackFrom, stackTo, blacklist, plain)
+        }
       }
     }
   } else {
@@ -372,7 +396,7 @@ export const copy = function (from, to, stackFrom, stackTo, blacklist) {
       let i
       to.length = 0
       for (i = 0; i < from.length; i++) {
-        result = copy(from[i], null, stackFrom, stackTo, blacklist)
+        result = copy(from[i], null, stackFrom, stackTo, blacklist, plain)
         if (isObject(from[i])) {
           stackFrom.push(from[i])
           stackTo.push(result)
@@ -392,7 +416,7 @@ export const copy = function (from, to, stackFrom, stackTo, blacklist) {
           if (isBlacklisted(key, blacklist)) {
             continue
           }
-          result = copy(from[key], null, stackFrom, stackTo, blacklist)
+          result = copy(from[key], null, stackFrom, stackTo, blacklist, plain)
           if (isObject(from[key])) {
             stackFrom.push(from[key])
             stackTo.push(result)
@@ -403,6 +427,10 @@ export const copy = function (from, to, stackFrom, stackTo, blacklist) {
     }
   }
   return to
+}
+
+export const plainCopy = function (from) {
+  return copy(from, undefined, undefined, undefined, undefined, true)
 }
 
 /**

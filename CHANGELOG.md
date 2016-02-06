@@ -1,3 +1,7 @@
+##### 3.0.0-alpha.13 - 05 February 2016
+
+- Added back change detection
+
 ##### 3.0.0-alpha.12 - 04 February 2016
 
 - Added back relation linking to DataStore and LinkedCollection

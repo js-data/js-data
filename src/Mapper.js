@@ -1,4 +1,20 @@
-import * as utils from './utils'
+import {
+  _,
+  addHiddenPropsToTarget,
+  classCallCheck,
+  copy,
+  eventify,
+  extend,
+  fillIn,
+  forOwn,
+  get,
+  isArray,
+  isString,
+  isUndefined,
+  plainCopy,
+  resolve,
+  set
+} from './utils'
 import {
   belongsTo,
   hasMany,
@@ -7,9 +23,106 @@ import {
 import Record from './Record'
 import Schema from './Schema'
 
-const {
-  resolve
-} = utils
+const changingPath = 'changing'
+const changedPath = 'changed'
+const creatingPath = 'creating'
+const eventIdPath = 'eventId'
+const noValidatePath = 'noValidate'
+const silentPath = 'silent'
+const validationFailureMsg = 'validation failed'
+
+const makeDescriptor = function (mapper, target, prop, opts) {
+  const descriptor = {
+    enumerable: isUndefined(opts.enumerable) ? true : !!opts.enumerable
+  }
+  const keyPath = `props.${prop}`
+  const previousPath = `previous.${prop}`
+  const changesPath = `changes.${prop}`
+  descriptor.get = function () {
+    return this._get(keyPath)
+  }
+  descriptor.set = function (value) {
+    const self = this
+    const _get = self._get
+    const _set = self._set
+    const _unset = self._unset
+    if (!_get(noValidatePath)) {
+      const errors = opts.validate(value)
+      if (errors) {
+        const error = new Error(validationFailureMsg)
+        error.errors = errors
+        throw error
+      }
+    }
+    // TODO: Make it so tracking can be turned on for all properties instead of
+    // per-property
+    if (opts.track && !_get(creatingPath)) {
+      let changing = _get(changingPath)
+      const previous = _get(previousPath)
+      const current = _get(keyPath)
+      let changed = _get(changedPath)
+      if (!changing) {
+        changed = []
+      }
+      const index = changed.indexOf(prop)
+      if (current !== value && index === -1) {
+        changed.push(prop)
+      }
+      if (previous !== value) {
+        _set(changesPath, value)
+      } else {
+        _unset(changesPath)
+        if (index >= 0) {
+          changed.splice(index, 1)
+        }
+      }
+      if (!changed.length) {
+        changing = false
+        _unset(changingPath)
+        _unset(changedPath)
+        if (_get(eventIdPath)) {
+          clearTimeout(_get(eventIdPath))
+          _unset(eventIdPath)
+        }
+      }
+      if (!changing && changed.length) {
+        _set(changedPath, changed)
+        _set(changingPath, true)
+        // TODO: Optimize
+        _set(eventIdPath, setTimeout(() => {
+          _unset(changedPath)
+          _unset(eventIdPath)
+          _unset(changingPath)
+          // TODO: Optimize
+          if (!_get(silentPath)) {
+            let i
+            for (i = 0; i < changed.length; i++) {
+              self.emit('change:' + changed[i], self, get(self, changed[i]))
+            }
+            self.emit('change', self, _get('changes'))
+          }
+          _unset(silentPath)
+        }, 0))
+      }
+    }
+    _set(keyPath, value)
+    return value
+  }
+
+  return descriptor
+}
+
+const applySchema = function (mapper, schema, target) {
+  const properties = schema.properties || {}
+  forOwn(properties, function (opts, prop) {
+    const descriptor = makeDescriptor(mapper, target, prop, opts)
+    // TODO: This won't work for properties of Object type, because all
+    // instances will share the prototype value
+    if (descriptor) {
+      Object.defineProperty(target.prototype, prop, descriptor)
+    }
+  })
+}
 
 const notify = function (...args) {
   const self = this
@@ -200,11 +313,11 @@ const MAPPER_DEFAULTS = {
  */
 export default function Mapper (opts) {
   const self = this
-  utils.classCallCheck(self, Mapper)
+  classCallCheck(self, Mapper)
 
   opts || (opts = {})
-  utils.fillIn(self, opts)
-  utils.fillIn(self, utils.copy(MAPPER_DEFAULTS))
+  fillIn(self, opts)
+  fillIn(self, copy(MAPPER_DEFAULTS))
 
   if (!self.name) {
     throw new Error('mapper cannot function without a name!')
@@ -217,8 +330,11 @@ export default function Mapper (opts) {
     self.schema = new Schema(self.schema || {})
   }
 
-  if (utils.isUndefined(self.RecordClass)) {
+  if (isUndefined(self.RecordClass)) {
     self.RecordClass = Record.extend()
+
+    // TODO: Make this also work for user-provided RecordClass
+    applySchema(self, self.schema, self.RecordClass)
   }
   if (self.RecordClass) {
     self.RecordClass.Mapper = self
@@ -228,7 +344,7 @@ export default function Mapper (opts) {
 /**
  * Instance members
  */
-utils.addHiddenPropsToTarget(Mapper.prototype, {
+addHiddenPropsToTarget(Mapper.prototype, {
   /**
    * TODO
    *
@@ -238,10 +354,10 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
   end (data, opts) {
     const self = this
     if (opts.raw) {
-      utils._(opts, data)
+      _(opts, data)
     }
     let _data = opts.raw ? data.data : data
-    if (utils.isArray(_data)) {
+    if (isArray(_data)) {
       _data = _data.map(function (item) {
         return self.createRecord(item)
       })
@@ -313,11 +429,11 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
     opts || (opts = {})
     let json = record
     if (self.is(record)) {
-      json = utils.copy(record)
+      json = plainCopy(record)
       // The user wants to include relations in the resulting plain object
       // representation
       if (self && self.relationList && opts.with) {
-        if (utils.isString(opts.with)) {
+        if (isString(opts.with)) {
           opts.with = [opts.with]
         }
         self.relationList.forEach(def => {
@@ -339,14 +455,14 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
                 optsCopy.with[i] = ''
               }
             })
-            const relationData = utils.get(record, def.localField)
+            const relationData = get(record, def.localField)
 
             if (relationData) {
               // The actual recursion
-              if (utils.isArray(relationData)) {
-                utils.set(json, def.localField, relationData.map(item => def.getRelation().toJSON(item, optsCopy)))
+              if (isArray(relationData)) {
+                set(json, def.localField, relationData.map(item => def.getRelation().toJSON(item, optsCopy)))
               } else {
-                utils.set(json, def.localField, def.getRelation().toJSON(relationData, optsCopy))
+                set(json, def.localField, def.getRelation().toJSON(relationData, optsCopy))
               }
             }
           }
@@ -386,7 +502,7 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
    */
   getAdapterName (opts) {
     opts || (opts = {})
-    if (utils.isString(opts)) {
+    if (isString(opts)) {
       opts = { adapter: opts }
     }
     return opts.adapter || opts.defaultAdapter
@@ -419,7 +535,7 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
   checkUpsertCreate (props, opts) {
     const self = this
     return (opts.upsert || (opts.upsert === undefined && self.upsert)) &&
-          utils.get(props, self.idAttribute)
+          get(props, self.idAttribute)
   },
 
   /**
@@ -453,11 +569,11 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
 
     // Check whether we should do an upsert instead
     if (self.checkUpsertCreate(props, opts)) {
-      return self.update(utils.get(props, self.idAttribute), props, opts)
+      return self.update(get(props, self.idAttribute), props, opts)
     }
 
     // Fill in "opts" with the Mapper's configuration
-    utils._(self, opts)
+    _(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeCreate lifecycle hook
@@ -510,7 +626,7 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
     const self = this
     if (opts.upsert || (opts.upsert === undefined && self.upsert)) {
       return records.reduce(function (hasId, item) {
-        return hasId && utils.get(item, self.idAttribute)
+        return hasId && get(item, self.idAttribute)
       }, true)
     }
   },
@@ -551,7 +667,7 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
     }
 
     // Fill in "opts" with the Mapper's configuration
-    utils._(self, opts)
+    _(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeCreateMany lifecycle hook
@@ -631,7 +747,7 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
     opts || (opts = {})
 
     // Fill in "opts" with the Mappers's configuration
-    utils._(self, opts)
+    _(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeFind lifecycle hook
@@ -713,7 +829,7 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
     opts || (opts = {})
 
     // Fill in "opts" with the Mapper's configuration
-    utils._(self, opts)
+    _(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeFindAll lifecycle hook
@@ -796,7 +912,7 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
     opts || (opts = {})
 
     // Fill in "opts" with the Mapper's configuration
-    utils._(self, opts)
+    _(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeUpdate lifecycle hook
@@ -879,7 +995,7 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
     opts || (opts = {})
 
     // Fill in "opts" with the Mapper's configuration
-    utils._(self, opts)
+    _(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeUpdateMany lifecycle hook
@@ -969,7 +1085,7 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
     opts || (opts = {})
 
     // Fill in "opts" with the Mapper's configuration
-    utils._(self, opts)
+    _(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeUpdateAll lifecycle hook
@@ -1049,7 +1165,7 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
     opts || (opts = {})
 
     // Fill in "opts" with the Mapper's configuration
-    utils._(self, opts)
+    _(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeDestroy lifecycle hook
@@ -1068,7 +1184,7 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
         // Allow for re-assignment from lifecycle hook
         data = _data || data
         if (opts.raw) {
-          utils._(opts, data)
+          _(opts, data)
           return data
         }
         return data
@@ -1135,7 +1251,7 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
     opts || (opts = {})
 
     // Fill in "opts" with the Mapper's configuration
-    utils._(self, opts)
+    _(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeDestroyAll lifecycle hook
@@ -1154,7 +1270,7 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
         // Allow for re-assignment from lifecycle hook
         data = _data || data
         if (opts.raw) {
-          utils._(opts, data)
+          _(opts, data)
           return data
         }
         return data
@@ -1290,7 +1406,7 @@ utils.addHiddenPropsToTarget(Mapper.prototype, {
  * @param {Object} [classProps={}] Static properties to add to the subclass.
  * @return {Function} Subclass of Mapper.
  */
-Mapper.extend = utils.extend
+Mapper.extend = extend
 
 /**
  * Register a new event listener on this Mapper.
@@ -1317,7 +1433,7 @@ Mapper.extend = utils.extend
 /**
  * A Mapper's registered listeners are stored at {@link Mapper#_listeners}.
  */
-utils.eventify(
+eventify(
   Mapper.prototype,
   function () {
     return this._listeners
