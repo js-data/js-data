@@ -318,24 +318,25 @@ addHiddenPropsToTarget(Query.prototype, {
    * @return {Query} A reference to itself for chaining.
    */
   getAll (...args) {
+    const self = this
     let opts = {}
-    if (this.data) {
+    if (self.data) {
       throw new Error('Cannot access index after first operation!')
     }
     if (!args.length || args.length === 1 && isObject(args[0])) {
-      this.getData()
-      return this
+      self.getData()
+      return self
     } else if (args.length && isObject(args[args.length - 1])) {
       opts = args[args.length - 1]
       args.pop()
     }
-    const collection = this.collection
+    const collection = self.collection
     const index = opts.index ? collection.indexes[opts.index] : collection.index
-    this.data = []
-    args.forEach(keyList => {
-      this.data = this.data.concat(index.get(keyList))
+    self.data = []
+    args.forEach(function (keyList) {
+      self.data = self.data.concat(index.get(keyList))
     })
-    return this
+    return self
   },
 
   /**

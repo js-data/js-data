@@ -1,5 +1,5 @@
 export function init () {
-  describe('#recordId', function () {
+  describe('#forEach', function () {
     it('should work')
   })
 }

@@ -1,5 +1,5 @@
 export function init () {
-  describe('#recordId', function () {
+  describe('#getAll', function () {
     it('should work')
   })
 }

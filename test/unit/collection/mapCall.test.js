@@ -1,5 +1,5 @@
 export function init () {
-  describe('#createIndex', function () {
+  describe('#mapCall', function () {
     it('should work')
   })
 }

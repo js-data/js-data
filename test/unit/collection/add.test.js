@@ -24,7 +24,7 @@ export function init () {
       Test.assert.objectsEqual(Test.PostCollection.get(7), Test.data.p3)
       Test.assert.objectsEqual(Test.PostCollection.get(8), Test.data.p4)
     })
-    it('should inject existing items into the store', function () {
+    it('should inject existing items into the collection', function () {
       const Test = this
       const collection = new Test.JSData.Collection({ mapper: new Test.JSData.Mapper({ name: 'user' }) })
 
@@ -42,6 +42,18 @@ export function init () {
         rightInclusive: true
       }), usersAgain, 're-inject of array should work')
       Test.assert.deepEqual(users, usersAgain, 'inject arrays should be equal')
+    })
+    it('should insert a record into all indexes', function () {
+      const Test = this
+      const data = [
+        { id: 2, age: 19 },
+        { id: 1, age: 27 }
+      ]
+      const collection = new Test.JSData.Collection(data)
+      collection.createIndex('age')
+      collection.add({ id: 3, age: 20 })
+      Test.assert.isTrue(collection.get(1) === data[1])
+      Test.assert.equal(collection.getAll(20, { index: 'age' }).length, 1)
     })
     it('should replace existing items', function () {
       const Test = this
