@@ -19,6 +19,60 @@ export function init () {
       Test.assert.deepEqual(instance, { foo: 'bar' }, 'instance should get initialization properties')
     })
 
+    it('should allow instance events', function (done) {
+      const Test = this
+      let changed = false
+      const FooMapper = new Test.JSData.Mapper({
+        name: 'foo',
+        schema: {
+          properties: {
+            bar: { type: 'string', track: true }
+          }
+        }
+      })
+      const foo = FooMapper.createRecord({ id: 1 })
+
+      setTimeout(function () {
+        if (!changed) {
+          done('failed to fire change event')
+        }
+      }, 10)
+
+      foo.on('change', function () {
+        changed = true
+        done()
+      })
+
+      foo.bar = 'baz'
+    })
+
+    it('should allow instance events 2', function (done) {
+      const Test = this
+      let changed = false
+      const FooMapper = new Test.JSData.Mapper({
+        name: 'foo',
+        schema: {
+          properties: {
+            bar: { type: 'string', track: true }
+          }
+        }
+      })
+      const foo = FooMapper.createRecord({ id: 1 })
+
+      setTimeout(function () {
+        if (!changed) {
+          done('failed to fire change event')
+        }
+      }, 10)
+
+      foo.on('change', function (Foo, foo) {
+        changed = true
+        done()
+      })
+
+      foo.set('bar', 'baz')
+    })
+
     changes.init()
     create.init()
     destroy.init()

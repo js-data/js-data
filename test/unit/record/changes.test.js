@@ -19,22 +19,28 @@ export function init () {
       post.author = 'Jake'
       Test.assert.deepEqual(post.changes(), {})
     })
-    // it('should show changed tracked fields', function () {
-    //   const Test = this
-    //   Test.Post.setSchema({
-    //     author: {
-    //       type: 'string',
-    //       track: true
-    //     }
-    //   })
-    //   const post = new Test.Post(Test.data.p1)
-    //   Test.assert.deepEqual(post.changes(), {})
-    //   post.author = 'Jake'
-    //   Test.assert.deepEqual(post.changes(), {
-    //     author: 'Jake'
-    //   })
-    //   post.author = 'John'
-    //   Test.assert.deepEqual(post.changes(), {})
-    // })
+    it('should show changed tracked fields', function () {
+      const Test = this
+
+      const PostMapper = new Test.JSData.Mapper({
+        name: 'post',
+        schema: {
+          properties: {
+            author: {
+              type: 'string',
+              track: true
+            }
+          }
+        }
+      })
+      const post = PostMapper.createRecord(Test.data.p1)
+      Test.assert.deepEqual(post.changes(), {})
+      post.author = 'Jake'
+      Test.assert.deepEqual(post.changes(), {
+        author: 'Jake'
+      })
+      post.author = 'John'
+      Test.assert.deepEqual(post.changes(), {})
+    })
   })
 }

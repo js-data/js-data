@@ -341,6 +341,60 @@ export function init () {
       }, 10)
     })
 
+    it('should bubble up change events', function (done) {
+      const Test = this
+      let changed = false
+      const store = new Test.JSData.DataStore()
+      store.defineMapper('foo', {
+        schema: {
+          properties: {
+            bar: { type: 'string', track: true }
+          }
+        }
+      })
+      const foo = store.add('foo', { id: 1 })
+
+      setTimeout(function () {
+        if (!changed) {
+          done('failed to fire change event')
+        }
+      }, 10)
+
+      store.getCollection('foo').on('change', function () {
+        changed = true
+        done()
+      })
+
+      foo.bar = 'baz'
+    })
+
+    it('should bubble up change events 2', function (done) {
+      const Test = this
+      let changed = false
+      const store = new Test.JSData.DataStore()
+      store.defineMapper('foo', {
+        schema: {
+          properties: {
+            bar: { type: 'string', track: true }
+          }
+        }
+      })
+      const foo = store.add('foo', { id: 1 })
+
+      setTimeout(function () {
+        if (!changed) {
+          done('failed to fire change event')
+        }
+      }, 10)
+
+      store.getCollection('foo').on('change', function (fooCollection, foo) {
+        changed = true
+        done()
+      })
+
+      foo.set('bar', 'baz')
+    })
+
     add.init()
     between.init()
     createIndex.init()

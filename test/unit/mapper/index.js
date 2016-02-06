@@ -5,6 +5,7 @@ import * as destroy from './destroy.test'
 import * as destroyAll from './destroyAll.test'
 import * as find from './find.test'
 import * as findAll from './findAll.test'
+import * as toJSON from './toJSON.test'
 import * as update from './update.test'
 import * as updateMany from './updateMany.test'
 import * as updateAll from './updateAll.test'
@@ -52,151 +53,6 @@ export function init () {
       Test.assert.isTrue(listener.calledOnce)
     })
 
-    // it('should allow instance events', function (done) {
-    //   const Test = this
-    //   let changed = false
-    //   class Foo extends Test.JSData.Mapper {}
-    //   Foo.setSchema({
-    //     bar: { type: 'string', track: true }
-    //   })
-    //   const foo = new Foo({ id: 1 })
-
-    //   setTimeout(function () {
-    //     if (!changed) {
-    //       done('failed to fire change event')
-    //     }
-    //   }, 10)
-
-    //   foo.on('change', function () {
-    //     changed = true
-    //     done()
-    //   })
-
-    //   foo.bar = 'baz'
-    // })
-    // it('should allow Resource change events', function (done) {
-    //   const Test = this
-    //   let changed = false
-    //   class Foo extends Test.JSData.Mapper {}
-    //   Foo.setSchema({
-    //     bar: { type: 'string', track: true }
-    //   })
-    //   const fooCollection = new Test.JSData.Collection([], {
-    //     model: Foo
-    //   })
-    //   const foo = fooCollection.add({ id: 1 })
-
-    //   setTimeout(function () {
-    //     if (!changed) {
-    //       done('failed to fire change event')
-    //     }
-    //   }, 10)
-
-    //   fooCollection.on('change', function () {
-    //     changed = true
-    //     done()
-    //   })
-
-    //   foo.bar = 'baz'
-    // })
-    // it('should allow resources to extend other resources in ES6', function () {
-    //   class Baz extends Model {}
-    //   Baz.linkRelations = true
-    //   class Foo extends Model {
-    //     say () {
-    //       return this.constructor.name
-    //     }
-    //   }
-    //   Foo.linkRelations = true
-    //   Foo.belongsTo(Baz, {
-    //     localField: 'baz',
-    //     foreignKey: 'bazId'
-    //   })
-    //   class Bar extends Foo {}
-    //   Test.assert.equal(Foo.name, 'Foo')
-    //   Test.assert.equal(Bar.name, 'Bar')
-
-    //   const baz = Baz.inject({ id: 10 })
-
-    //   const foo = Foo.inject({ id: 1, type: 'foo', bazId: 10 })
-    //   const bar = Bar.inject({ id: 1, type: 'bar', bazId: 10 })
-    //   Test.assert.isTrue(baz === foo.baz)
-    //   Test.assert.isTrue(baz === bar.baz)
-
-    //   Test.assert.equal(foo.say(), 'Foo')
-    //   Test.assert.equal(bar.say(), 'Bar')
-    // })
-    // it('should allow resources to extend other resources in ES5', function () {
-    //   const Baz = Model.extend({}, { name: 'Baz', linkRelations: true })
-    //   const Foo = Model.extend({
-    //     say () {
-    //       return this.constructor.name
-    //     }
-    //   }, { name: 'Foo', linkRelations: true })
-    //   Foo.belongsTo(Baz, {
-    //     localField: 'baz',
-    //     foreignKey: 'bazId'
-    //   })
-    //   const Bar = Foo.extend({}, { name: 'Bar' })
-    //   Test.assert.equal(Foo.name, 'Foo')
-    //   Test.assert.equal(Bar.name, 'Bar')
-
-    //   const baz = Baz.inject({ id: 10 })
-
-    //   const foo = Foo.inject({ id: 1, type: 'foo', bazId: 10 })
-    //   const bar = Bar.inject({ id: 1, type: 'bar', bazId: 10 })
-    //   Test.assert.isTrue(baz === foo.baz)
-    //   Test.assert.isTrue(baz === bar.baz)
-
-    //   Test.assert.equal(foo.say(), 'Foo')
-    //   Test.assert.equal(bar.say(), 'Bar')
-    // })
-    // it('should allow instance events 2', function (done) {
-    //   const Test = this
-    //   let changed = false
-    //   class Foo extends Test.JSData.Mapper {}
-    //   Foo.setSchema({
-    //     bar: { type: 'string', track: true }
-    //   })
-    //   const foo = new Foo({ id: 1 })
-
-    //   setTimeout(function () {
-    //     if (!changed) {
-    //       done('failed to fire change event')
-    //     }
-    //   }, 10)
-
-    //   foo.on('change', function (Foo, foo) {
-    //     changed = true
-    //     done()
-    //   })
-
-    //   foo.set('bar', 'baz')
-    // })
-    // it('should allow Resource change events 2', function (done) {
-    //   const Test = this
-    //   let changed = false
-    //   class Foo extends Test.JSData.Mapper {}
-    //   Foo.setSchema({
-    //     bar: { type: 'string', track: true }
-    //   })
-    //   const fooCollection = new Test.JSData.Collection([], { model: Foo })
-    //   const foo = fooCollection.add({ id: 1 })
-
-    //   setTimeout(function () {
-    //     if (!changed) {
-    //       done('failed to fire change event')
-    //     }
-    //   }, 10)
-
-    //   fooCollection.on('change', function (fooCollection, foo) {
-    //     changed = true
-    //     done()
-    //   })
-
-    //   foo.set('bar', 'baz')
-    // })
-
     create.init()
     createRecord.init()
     createMany.init()
@@ -204,6 +60,7 @@ export function init () {
     destroyAll.init()
     find.init()
     findAll.init()
+    toJSON.init()
     update.init()
     updateMany.init()
     updateAll.init()

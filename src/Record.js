@@ -13,7 +13,8 @@ import {
   isSorN,
   isString,
   resolve,
-  set
+  set,
+  unset
 } from './utils'
 
 /**
@@ -46,17 +47,24 @@ export default function Record (props, opts) {
       value (key, value) {
         return set(_props, key, value)
       }
+    },
+    _unset: {
+      value (key) {
+        return unset(_props, key)
+      }
     }
   })
-  self._set('creating', true)
+  const _set = self._set
+  // TODO: Optimize these strings
+  _set('creating', true)
   if (opts.noValidate) {
-    self._set('noValidate', true)
+    _set('noValidate', true)
   }
   fillIn(self, props)
-  self._set('creating') // unset
-  self._set('changes', {})
-  self._set('noValidate') // unset
-  self._set('previous', copy(props))
+  _set('creating') // unset
+  _set('changes', {})
+  _set('noValidate') // unset
+  _set('previous', copy(props))
 }
 
 /**
@@ -454,8 +462,30 @@ addHiddenPropsToTarget(Record.prototype, {
 
   // TODO: move logic for single-item async operations onto the instance.
 
+  /**
+   * Return a plain object representation of this record. If the class from
+   * which this record was created has a mapper, then {@link Mapper#toJSON} will
+   * be called instead.
+   *
+   * @name Record#toJSON
+   * @method
+   * @param {Object} [opts] Configuration options.
+   * @param {string[]} [opts.with] Array of relation names or relation fields
+   * to include in the representation. Only available as an option if the class
+   * from which this record was created has a mapper.
+   * @return {Object} Plain object representation of this record.
+   */
   toJSON (opts) {
-    return this._mapper().toJSON(this, opts)
+    const mapper = this.constructor.Mapper
+    if (mapper) {
+      return mapper.toJSON(this, opts)
+    } else {
+      const json = {}
+      forOwn(this, function (prop, key) {
+        json[key] = copy(prop)
+      })
+      return json
+    }
   }
 })
 

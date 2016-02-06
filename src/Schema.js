@@ -32,11 +32,13 @@ export default function Schema (definition) {
   fillIn(this, definition)
 
   // TODO: rework this to make sure all possible keywords are converted
-  // if (definition.properties) {
-  //   forOwn(definition.properties, function (_definition, prop) {
-  //     definition.properties[prop] = new Schema(_definition)
-  //   })
-  // }
+  if (definition.properties) {
+    forOwn(definition.properties, function (_definition, prop) {
+      if (!(_definition instanceof Schema)) {
+        definition.properties[prop] = new Schema(_definition)
+      }
+    })
+  }
 }
 
 /**

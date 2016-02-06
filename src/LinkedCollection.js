@@ -6,6 +6,7 @@ import {
   isArray,
   isFunction,
   isObject,
+  isString,
   isUndefined,
   set
 } from './utils'
@@ -45,6 +46,17 @@ const LinkedCollection = Collection.extend({
       throw new Error('This collection must have a datastore!')
     }
     return self
+  },
+
+  _onRecordEvent (...args) {
+    const self = this
+    getSuper(self).prototype._onRecordEvent.apply(self, args)
+    const event = args[0]
+    // This is a very brute force method
+    // Lots of room for optimization
+    if (isString(event) && event.indexOf('change') === 0) {
+      self.updateIndexes(args[1])
+    }
   },
 
   add (records, opts) {
