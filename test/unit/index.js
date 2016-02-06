@@ -4,6 +4,7 @@ import * as datastore from './datastore/index'
 // import * as decorators from './decorators/index'
 import * as linkedCollection from './linkedCollection/index'
 import * as mapper from './mapper/index'
+import * as query from './query/index'
 import * as record from './record/index'
 import * as schema from './schema/index'
 import * as utils from './utils/index'
@@ -33,6 +34,7 @@ export function init () {
     // decorators.init()
     linkedCollection.init()
     mapper.init()
+    query.init()
     record.init()
     schema.init()
     utils.init()

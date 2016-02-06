@@ -299,7 +299,7 @@ const DataStore = Container.extend({
           if (opts.set) {
             let origSet = descriptor.set
             descriptor.set = function (related) {
-              return def.set(def, this, related, value => origSet.call(this, value === undefined ? related : value))
+              return def.set(def, this, related, (value) => origSet.call(this, value === undefined ? related : value))
             }
           }
           Object.defineProperty(mapper.RecordClass.prototype, localField, descriptor)

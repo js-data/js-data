@@ -976,10 +976,9 @@ var utils = Object.freeze({
      * @return {Query} A reference to itself for chaining.
      */
     getAll: function getAll() {
-      var _this = this;
-
+      var self = this;
       var opts = {};
-      if (this.data) {
+      if (self.data) {
         throw new Error('Cannot access index after first operation!');
       }
 
@@ -988,19 +987,19 @@ var utils = Object.freeze({
       }
 
       if (!args.length || args.length === 1 && isObject(args[0])) {
-        this.getData();
-        return this;
+        self.getData();
+        return self;
       } else if (args.length && isObject(args[args.length - 1])) {
         opts = args[args.length - 1];
         args.pop();
       }
-      var collection = this.collection;
+      var collection = self.collection;
       var index = opts.index ? collection.indexes[opts.index] : collection.index;
-      this.data = [];
+      self.data = [];
       args.forEach(function (keyList) {
-        _this.data = _this.data.concat(index.get(keyList));
+        self.data = self.data.concat(index.get(keyList));
       });
-      return this;
+      return self;
     },
 
     /**

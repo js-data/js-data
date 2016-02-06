@@ -436,7 +436,7 @@ addHiddenPropsToTarget(Mapper.prototype, {
         if (isString(opts.with)) {
           opts.with = [opts.with]
         }
-        self.relationList.forEach(def => {
+        self.relationList.forEach(function (def) {
           let containedName
           if (opts.with.indexOf(def.relation) !== -1) {
             containedName = def.relation
@@ -460,7 +460,9 @@ addHiddenPropsToTarget(Mapper.prototype, {
             if (relationData) {
               // The actual recursion
               if (isArray(relationData)) {
-                set(json, def.localField, relationData.map(item => def.getRelation().toJSON(item, optsCopy)))
+                set(json, def.localField, relationData.map(function (item) {
+                  return def.getRelation().toJSON(item, optsCopy)
+                }))
               } else {
                 set(json, def.localField, def.getRelation().toJSON(relationData, optsCopy))
               }
