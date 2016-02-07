@@ -195,10 +195,11 @@ addHiddenPropsToTarget(Query.prototype, {
    * @return {Array} The data in this query.
    */
   getData () {
-    if (!this.data) {
-      this.data = this.collection.index.getAll()
+    const self = this
+    if (!self.data) {
+      self.data = self.collection.index.getAll()
     }
-    return this.data
+    return self.data
   },
 
   /**
@@ -229,14 +230,13 @@ addHiddenPropsToTarget(Query.prototype, {
    * @return {Query} A reference to itself for chaining.
    */
   between (leftKeys, rightKeys, opts) {
+    const self = this
     opts || (opts = {})
-    const collection = this.collection
-    const index = opts.index ? collection.indexes[opts.index] : collection.index
-    if (this.data) {
+    if (self.data) {
       throw new Error('Cannot access index after first operation!')
     }
-    this.data = index.between(leftKeys, rightKeys, opts)
-    return this
+    self.data = self.collection.getIndex(opts.index).between(leftKeys, rightKeys, opts)
+    return self
   },
 
   /**
@@ -276,21 +276,20 @@ addHiddenPropsToTarget(Query.prototype, {
    * @return {Query} A reference to itself for chaining.
    */
   get (keyList = [], opts) {
+    const self = this
     opts || (opts = {})
-    if (this.data) {
+    if (self.data) {
       throw new Error('Cannot access index after first operation!')
     }
     if (keyList && !isArray(keyList)) {
       keyList = [keyList]
     }
     if (!keyList.length) {
-      this.getData()
-      return this
+      self.getData()
+      return self
     }
-    const collection = this.collection
-    const index = opts.index ? collection.indexes[opts.index] : collection.index
-    this.data = index.get(keyList)
-    return this
+    self.data = self.collection.getIndex(opts.index).get(keyList)
+    return self
   },
 
   /**
@@ -331,7 +330,7 @@ addHiddenPropsToTarget(Query.prototype, {
       args.pop()
     }
     const collection = self.collection
-    const index = opts.index ? collection.indexes[opts.index] : collection.index
+    const index = collection.getIndex(opts.index)
     self.data = []
     args.forEach(function (keyList) {
       self.data = self.data.concat(index.get(keyList))
