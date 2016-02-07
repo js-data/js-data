@@ -1,10 +1,16 @@
 import * as create from './create.test'
 import * as createMany from './createMany.test'
 import * as createRecord from './createRecord.test'
+import * as defineMapper from './defineMapper.test'
 import * as destroy from './destroy.test'
 import * as destroyAll from './destroyAll.test'
 import * as find from './find.test'
 import * as findAll from './findAll.test'
+import * as getAdapter from './getAdapter.test'
+import * as getAdapterName from './getAdapterName.test'
+import * as getAdapters from './getAdapters.test'
+import * as getMapper from './getMapper.test'
+import * as registerAdapter from './registerAdapter.test'
 import * as update from './update.test'
 import * as updateMany from './updateMany.test'
 import * as updateAll from './updateAll.test'
@@ -47,130 +53,19 @@ export function init () {
       Test.assert.isTrue(container.MapperClass === Foo)
     })
 
-    it('Container#defineMapper should be an instance method', function () {
-      const Test = this
-      const Container = Test.JSData.Container
-      const container = new Container()
-      Test.assert.isFunction(container.defineMapper)
-      Test.assert.isTrue(container.defineMapper === Container.prototype.defineMapper)
-    })
-    it('should create a new mapper', function () {
-      const Test = this
-      const Container = Test.JSData.Container
-      let container = new Container()
-      let mapper = container.defineMapper('foo')
-      Test.assert.isTrue(mapper === container._mappers.foo)
-      Test.assert.isTrue(mapper instanceof Test.JSData.Mapper)
-      Test.assert.isTrue(mapper.getAdapters() === container.getAdapters())
-
-      class Foo extends Test.JSData.Mapper {}
-      container = new Container({
-        MapperClass: Foo
-      })
-      mapper = container.defineMapper('foo')
-      Test.assert.isTrue(mapper === container._mappers.foo)
-      Test.assert.isTrue(mapper instanceof Foo)
-      Test.assert.isTrue(mapper.getAdapters() === container.getAdapters())
-
-      container = new Container({
-        mapperDefaults: {
-          foo: 'bar'
-        }
-      })
-      mapper = container.defineMapper('foo')
-      Test.assert.isTrue(mapper === container._mappers.foo)
-      Test.assert.isTrue(mapper instanceof Test.JSData.Mapper)
-      Test.assert.equal(mapper.foo, 'bar')
-      Test.assert.isTrue(mapper.getAdapters() === container.getAdapters())
-
-      container = new Container({
-        mapperDefaults: {
-          foo: 'bar'
-        }
-      })
-      mapper = container.defineMapper('foo', {
-        foo: 'beep'
-      })
-      Test.assert.isTrue(mapper === container._mappers.foo)
-      Test.assert.isTrue(mapper instanceof Test.JSData.Mapper)
-      Test.assert.equal(mapper.foo, 'beep')
-      Test.assert.isTrue(mapper.getAdapters() === container.getAdapters())
-
-      Test.assert.throws(function () {
-        mapper = container.defineMapper()
-      }, Error, 'name is required!')
-
-      Test.assert.throws(function () {
-        mapper = container.defineMapper({
-          foo: 'bar'
-        })
-      }, Error, 'name is required!')
-
-      mapper = container.defineMapper({
-        foo: 'bar',
-        name: 'foo'
-      })
-      Test.assert.equal(mapper.name, 'foo')
-    })
-
-    it('Container#getMapper should be an instance method', function () {
-      const Test = this
-      const Container = Test.JSData.Container
-      const container = new Container()
-      Test.assert.isFunction(container.getMapper)
-      Test.assert.isTrue(container.getMapper === Container.prototype.getMapper)
-    })
-
-    it('Container#getMapper should return the specified mapper', function () {
-      const Test = this
-      const Container = Test.JSData.Container
-      const container = new Container()
-      const foo = container.defineMapper('foo')
-      Test.assert.isTrue(foo === container.getMapper('foo'))
-      Test.assert.throws(function () {
-        container.getMapper('bar')
-      }, ReferenceError, 'bar is not a registered mapper!')
-    })
-
-    it('Container#getAdapters should return the adapters of the container', function () {
-      const Test = this
-      const Container = Test.JSData.Container
-      const container = new Container()
-      Test.assert.isTrue(container.getAdapters() === container._adapters)
-    })
-
-    it('Container#registerAdapter should be an instance method', function () {
-      const Test = this
-      const Container = Test.JSData.Container
-      const container = new Container()
-      Test.assert.isFunction(container.registerAdapter)
-      Test.assert.isTrue(container.registerAdapter === Container.prototype.registerAdapter)
-    })
-    it('Container#registerAdapter should register an adapter', function () {
-      const Test = this
-      const Container = Test.JSData.Container
-      const container = new Container()
-      container.registerAdapter('foo', {}, { 'default': true })
-      container.registerAdapter('bar', {})
-      Test.assert.deepEqual(container.getAdapters(), {
-        foo: {},
-        bar: {}
-      })
-      const mapper = container.defineMapper('foo')
-      Test.assert.deepEqual(mapper.getAdapters(), {
-        foo: {},
-        bar: {}
-      })
-      Test.assert.equal(container.mapperDefaults.defaultAdapter, 'foo')
-    })
-
     create.init()
     createMany.init()
     createRecord.init()
+    defineMapper.init()
     destroy.init()
     destroyAll.init()
     find.init()
     findAll.init()
+    getAdapter.init()
+    getAdapterName.init()
+    getAdapters.init()
+    getMapper.init()
+    registerAdapter.init()
     update.init()
     updateMany.init()
     updateAll.init()
