@@ -3,6 +3,7 @@ import {
   classCallCheck,
   extend,
   fillIn,
+  forOwn,
   get,
   getSuper,
   isArray,
@@ -146,6 +147,15 @@ const DataStore = Container.extend({
       datastore: self,
       // The mapper tied to the collection
       mapper
+    })
+
+    const schema = mapper.schema || {}
+    const properties = schema.properties || {}
+    // TODO: Make it possible index nested properties?
+    forOwn(properties, function (opts, prop) {
+      if (opts.indexed) {
+        collection.createIndex(prop)
+      }
     })
 
     // Create a secondary index on the "added" timestamps of records in the

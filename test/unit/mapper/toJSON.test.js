@@ -10,7 +10,7 @@ export function init () {
     it('should make json when not an instance', function () {
       const Test = this
       const props = { name: 'John' }
-      Test.assert.isTrue(Test.User.toJSON(props) === props, 'should return passed in data')
+      Test.assert.objectsEqual(Test.User.toJSON(props), props, 'should return passed in data')
     })
     it('should make json when the record class does not have a mapper', function () {
       const Test = this
@@ -69,8 +69,7 @@ export function init () {
           }
         ]
       }
-      Test.assert.isTrue(Test.User.toJSON(user) === user, 'should return the same data')
-      Test.assert.deepEqual(Test.User.toJSON(user), user, 'returned data should be equal to passed in data')
+      Test.assert.objectsEqual(Test.User.toJSON(user), user, 'returned data should be equal to passed in data')
     })
     it('should remove relations when an instance', function () {
       const Test = this

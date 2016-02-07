@@ -8,6 +8,7 @@ import {
   fillIn,
   forOwn,
   get,
+  getSuper,
   isArray,
   isString,
   isUndefined,
@@ -23,6 +24,7 @@ import {
 import Record from './Record'
 import Schema from './Schema'
 
+// These strings are cached for optimal performance of the change detection
 const changingPath = 'changing'
 const changedPath = 'changed'
 const creatingPath = 'creating'
@@ -31,65 +33,95 @@ const noValidatePath = 'noValidate'
 const silentPath = 'silent'
 const validationFailureMsg = 'validation failed'
 
-const makeDescriptor = function (mapper, target, prop, opts) {
+/**
+ * Assemble a property descriptor which will be added to the prototype of
+ * {@link Mapper#RecordClass}. This method is called when
+ * {@link Mapper#applySchema} is set to `true`.
+ *
+ * @ignore
+ */
+const makeDescriptor = function (prop, schema) {
   const descriptor = {
-    enumerable: isUndefined(opts.enumerable) ? true : !!opts.enumerable
+    // These properties are enumerable by default, but regardless of their
+    // enumerability, they won't be "own" properties of individual records
+    enumerable: isUndefined(schema.enumerable) ? true : !!schema.enumerable
   }
+  // Cache a few strings for optimal performance
   const keyPath = `props.${prop}`
   const previousPath = `previous.${prop}`
   const changesPath = `changes.${prop}`
+
   descriptor.get = function () {
     return this._get(keyPath)
   }
   descriptor.set = function (value) {
     const self = this
+    // These are accessed a lot
     const _get = self._get
     const _set = self._set
     const _unset = self._unset
+
+    // Optionally check that the new value passes validation
     if (!_get(noValidatePath)) {
-      const errors = opts.validate(value)
+      const errors = schema.validate(value)
       if (errors) {
+        // Immediately throw an error, preventing the record from getting into
+        // an invalid state
         const error = new Error(validationFailureMsg)
         error.errors = errors
         throw error
       }
     }
     // TODO: Make it so tracking can be turned on for all properties instead of
-    // per-property
-    if (opts.track && !_get(creatingPath)) {
-      let changing = _get(changingPath)
+    // only per-property
+    if (schema.track && !_get(creatingPath)) {
       const previous = _get(previousPath)
       const current = _get(keyPath)
+      let changing = _get(changingPath)
       let changed = _get(changedPath)
+
       if (!changing) {
+        // Track properties that are changing in the current event loop
         changed = []
       }
+
+      // Add changing properties to this array once at most
       const index = changed.indexOf(prop)
       if (current !== value && index === -1) {
         changed.push(prop)
       }
       if (previous !== value) {
+        // Value has changed
         _set(changesPath, value)
       } else {
+        // Value is back to original, so "un-track" this property
         _unset(changesPath)
         if (index >= 0) {
           changed.splice(index, 1)
         }
       }
+      // No changes in current event loop
       if (!changed.length) {
         changing = false
         _unset(changingPath)
         _unset(changedPath)
+        // Cancel pending change event
         if (_get(eventIdPath)) {
           clearTimeout(_get(eventIdPath))
           _unset(eventIdPath)
         }
       }
+      // Changes detected in current event loop
       if (!changing && changed.length) {
         _set(changedPath, changed)
         _set(changingPath, true)
+        // Saving the timeout id allows us to batch all changes in the same
+        // event loop into a single "change"
         // TODO: Optimize
         _set(eventIdPath, setTimeout(() => {
+          // Previous event loop where changes were gathered has ended, so
+          // notify any listeners of those changes and prepare for any new
+          // changes
           _unset(changedPath)
           _unset(eventIdPath)
           _unset(changingPath)
@@ -112,15 +144,21 @@ const makeDescriptor = function (mapper, target, prop, opts) {
   return descriptor
 }
 
-const applySchema = function (mapper, schema, target) {
+/**
+ * This changes properties defined in {@link Mapper#schema} from plain
+ * properties to ES5 getter/setter properties, which makes possible change
+ * tracking and validation on property assignment.
+ *
+ * @ignore
+ */
+const applySchema = function (schema, target) {
   const properties = schema.properties || {}
-  forOwn(properties, function (opts, prop) {
-    const descriptor = makeDescriptor(mapper, target, prop, opts)
-    // TODO: This won't work for properties of Object type, because all
-    // instances will share the prototype value
-    if (descriptor) {
-      Object.defineProperty(target.prototype, prop, descriptor)
-    }
+  forOwn(properties, function (schema, prop) {
+    Object.defineProperty(
+      target,
+      prop,
+      makeDescriptor(prop, schema)
+    )
   })
 }
 
@@ -152,6 +190,19 @@ const MAPPER_DEFAULTS = {
    * @private
    */
   _listeners: null,
+
+  /**
+   * Whether to augment {@link Mapper#RecordClass} with getter/setter property
+   * accessors according to the properties defined in {@link Mapper#schema}.
+   * This makes possible validation and change tracking on individual properties
+   * when using the dot (e.g. `user.name = "Bob"`) operator to modify a
+   * property.
+   *
+   * @name Mapper#applySchema
+   * @type {boolean}
+   * @default true
+   */
+  applySchema: true,
 
   /**
    * The name of the registered adapter that this Mapper should used by default.
@@ -332,12 +383,16 @@ export default function Mapper (opts) {
 
   if (isUndefined(self.RecordClass)) {
     self.RecordClass = Record.extend()
-
-    // TODO: Make this also work for user-provided RecordClass
-    applySchema(self, self.schema, self.RecordClass)
   }
+
   if (self.RecordClass) {
     self.RecordClass.Mapper = self
+
+    // We can only apply the schema to the prototype of self.RecordClass if the
+    // class extends Record
+    if (getSuper(self.RecordClass, true) === Record && self.applySchema) {
+      applySchema(self.schema, self.RecordClass.prototype)
+    }
   }
 }
 
@@ -427,9 +482,24 @@ addHiddenPropsToTarget(Mapper.prototype, {
   toJSON (record, opts) {
     const self = this
     opts || (opts = {})
-    let json = record
+    let json = {}
+    let properties
+    if (self.schema) {
+      properties = self.schema.properties || {}
+      // TODO: Make this work recursively
+      forOwn(properties, function (opts, prop) {
+        json[prop] = plainCopy(record[prop])
+      })
+    }
+    properties || (properties = {})
+    if (!opts.strict) {
+      forOwn(record, function (value, key) {
+        if (!properties[key]) {
+          json[key] = plainCopy(value)
+        }
+      })
+    }
     if (self.is(record)) {
-      json = plainCopy(record)
       // The user wants to include relations in the resulting plain object
       // representation
       if (self && self.relationList && opts.with) {

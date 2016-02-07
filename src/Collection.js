@@ -513,6 +513,18 @@ addHiddenPropsToTarget(Collection.prototype, {
   },
 
   /**
+   * Return the index with the given name. If no name is provided, return the
+   * main index. Throws an error if the specified index does not exist.
+   */
+  getIndex (name) {
+    const index = name ? this.indexes[name] : this.index
+    if (!index) {
+      throw new Error(`Index ${name} does not exist!`)
+    }
+    return index
+  },
+
+  /**
    * Limit the result.
    *
    * Shortcut for `collection.query().limit(maximumNumber).run()`
@@ -731,8 +743,7 @@ addHiddenPropsToTarget(Collection.prototype, {
    */
   updateIndex (record, opts) {
     opts || (opts = {})
-    const index = opts.index ? this.indexes[opts.index] : this.index
-    index.updateRecord(record)
+    this.getIndex(opts.index).updateRecord(record)
   },
 
   /**
