@@ -1,5 +1,5 @@
 export function init () {
-  describe('findAll', function () {
+  describe('#findAll', function () {
     it('should be an instance method', function () {
       const Test = this
       const DataStore = Test.JSData.DataStore

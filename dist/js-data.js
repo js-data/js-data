@@ -5636,23 +5636,6 @@ var utils = Object.freeze({
     },
 
     /**
-     * Return the name of a registered adapter based on the given name or options,
-     * or the name of the default adapter if no name provided.
-     *
-     * @name Container#getAdapterName
-     * @method
-     * @param {(Object|string)} [opts] The name of an adapter or options, if any.
-     * @return {string} The name of the adapter.
-     */
-    getAdapterName: function getAdapterName(opts) {
-      opts || (opts = {});
-      if (isString(opts)) {
-        opts = { adapter: opts };
-      }
-      return opts.adapter || this.mapperDefaults.defaultAdapter;
-    },
-
-    /**
      * Return the registered adapter with the given name or the default adapter if
      * no name is provided.
      *
@@ -5668,6 +5651,23 @@ var utils = Object.freeze({
         throw new ReferenceError(adapter + ' not found!');
       }
       return self.getAdapters()[adapter];
+    },
+
+    /**
+     * Return the name of a registered adapter based on the given name or options,
+     * or the name of the default adapter if no name provided.
+     *
+     * @name Container#getAdapterName
+     * @method
+     * @param {(Object|string)} [opts] The name of an adapter or options, if any.
+     * @return {string} The name of the adapter.
+     */
+    getAdapterName: function getAdapterName(opts) {
+      opts || (opts = {});
+      if (isString(opts)) {
+        opts = { adapter: opts };
+      }
+      return opts.adapter || this.mapperDefaults.defaultAdapter;
     },
 
     /**

@@ -1,5 +1,5 @@
 export function init () {
-  describe('update', function () {
+  describe('#update', function () {
     it('should be an instance method', function () {
       const Test = this
       const DataStore = Test.JSData.DataStore

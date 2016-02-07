@@ -10,7 +10,7 @@ import * as schema from './schema/index'
 import * as utils from './utils/index'
 
 export function init () {
-  describe('JSData', function () {
+  describe('Unit tests', function () {
     it('has all the right exports', function () {
       const Test = this
       Test.assert.isFunction(Test.JSData.belongsTo, 'has the belongsTo decorator')
@@ -40,4 +40,3 @@ export function init () {
     utils.init()
   })
 }
-
