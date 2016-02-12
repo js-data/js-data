@@ -5448,8 +5448,6 @@ var utils = Object.freeze({
 
     create: function create(name, record, opts) {
       var self = this;
-      opts || (opts = {});
-      fillIn(opts, self.modelOpts);
       return self.getMapper(name).create(record, opts);
     },
 
@@ -5466,8 +5464,6 @@ var utils = Object.freeze({
      */
     createMany: function createMany(name, records, opts) {
       var self = this;
-      opts || (opts = {});
-      fillIn(opts, self.modelOpts);
       return self.getMapper(name).createMany(records, opts);
     },
 
@@ -5578,8 +5574,6 @@ var utils = Object.freeze({
      */
     destroy: function destroy(name, id, opts) {
       var self = this;
-      opts || (opts = {});
-      fillIn(opts, self.modelOpts);
       return self.getMapper(name).destroy(id, opts);
     },
 
@@ -5596,8 +5590,6 @@ var utils = Object.freeze({
      */
     destroyAll: function destroyAll(name, query, opts) {
       var self = this;
-      opts || (opts = {});
-      fillIn(opts, self.modelOpts);
       return self.getMapper(name).destroyAll(query, opts);
     },
 
@@ -5613,8 +5605,6 @@ var utils = Object.freeze({
      */
     find: function find(name, id, opts) {
       var self = this;
-      opts || (opts = {});
-      fillIn(opts, self.modelOpts);
       return self.getMapper(name).find(id, opts);
     },
 
@@ -5630,8 +5620,6 @@ var utils = Object.freeze({
      */
     findAll: function findAll(name, query, opts) {
       var self = this;
-      opts || (opts = {});
-      fillIn(opts, self.modelOpts);
       return self.getMapper(name).findAll(query, opts);
     },
 
@@ -5748,8 +5736,6 @@ var utils = Object.freeze({
      */
     update: function update(name, id, record, opts) {
       var self = this;
-      opts || (opts = {});
-      fillIn(opts, self.modelOpts);
       return self.getMapper(name).update(id, record, opts);
     },
 
@@ -5767,8 +5753,6 @@ var utils = Object.freeze({
      */
     updateAll: function updateAll(name, query, props, opts) {
       var self = this;
-      opts || (opts = {});
-      fillIn(opts, self.modelOpts);
       return self.getMapper(name).updateAll(query, props, opts);
     },
 
@@ -5785,8 +5769,6 @@ var utils = Object.freeze({
      */
     updateMany: function updateMany(name, records, opts) {
       var self = this;
-      opts || (opts = {});
-      fillIn(opts, self.modelOpts);
       return self.getMapper(name).updateMany(records, opts);
     }
   });
@@ -6037,7 +6019,16 @@ var utils = Object.freeze({
       self.CollectionClass = self.CollectionClass || LinkedCollection;
       self._collections = {};
       fillIn(self, DATASTORE_DEFAULTS);
+      self._pendingQueries = {};
+      self._completedQueries = {};
       return self;
+    },
+    _callSuper: function _callSuper(method) {
+      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+      }
+
+      return getSuper(this).prototype[method].apply(this, args);
     },
 
     /**
@@ -6076,7 +6067,7 @@ var utils = Object.freeze({
     create: function create(name, record, opts) {
       var self = this;
       opts || (opts = {});
-      return getSuper(self).create(name, record, opts).then(function (data) {
+      return self._callSuper('create', name, record, opts).then(function (data) {
         return self._end(name, data, opts);
       });
     },
@@ -6095,13 +6086,15 @@ var utils = Object.freeze({
     createMany: function createMany(name, records, opts) {
       var self = this;
       opts || (opts = {});
-      return getSuper(self).createMany(name, records, opts).then(function (data) {
+      return self._callSuper('createMany', name, records, opts).then(function (data) {
         return self._end(name, data, opts);
       });
     },
     defineMapper: function defineMapper(name, opts) {
       var self = this;
       var mapper = getSuper(self).prototype.defineMapper.call(self, name, opts);
+      self._pendingQueries[name] = {};
+      self._completedQueries[name] = {};
       mapper.relationList = mapper.relationList || [];
 
       // The datastore uses a subclass of Collection that is "datastore-aware"
@@ -6195,9 +6188,9 @@ var utils = Object.freeze({
                     });
                   } else if (localKeys) {
                     var keys = get(_self, localKeys) || [];
-                    var args = isArray(keys) ? keys : Object.keys(keys);
+                    var _args = isArray(keys) ? keys : Object.keys(keys);
                     // Really fast retrieval
-                    items = relationCollection.getAll.apply(relationCollection, args);
+                    items = relationCollection.getAll.apply(relationCollection, _args);
                   } else if (foreignKeys) {
                     var query = {};
                     set(query, 'where.' + foreignKeys + '.contains', key);
@@ -6274,8 +6267,8 @@ var utils = Object.freeze({
                   var _this = this;
 
                   return def.get(def, this, function () {
-                    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-                      args[_key] = arguments[_key];
+                    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+                      args[_key2] = arguments[_key2];
                     }
 
                     return origGet.apply(_this, args);
@@ -6317,12 +6310,14 @@ var utils = Object.freeze({
     destroy: function destroy(name, id, opts) {
       var self = this;
       opts || (opts = {});
-      return getSuper(self).destroy(name, id, opts).then(function (data) {
+      return self._callSuper('destroy', name, id, opts).then(function (data) {
         if (opts.raw) {
           data.data = self.getCollection(name).remove(id, opts);
         } else {
           data = self.getCollection(name).remove(id, opts);
         }
+        delete self._pendingQueries[name][id];
+        delete self._completedQueries[name][id];
         return data;
       });
     },
@@ -6341,12 +6336,15 @@ var utils = Object.freeze({
     destroyAll: function destroyAll(name, query, opts) {
       var self = this;
       opts || (opts = {});
-      return getSuper(self).destroyAll(name, query, opts).then(function (data) {
+      return self._callSuper('destroyAll', name, query, opts).then(function (data) {
         if (opts.raw) {
           data.data = self.getCollection(name).removeAll(query, opts);
         } else {
           data = self.getCollection(name).removeAll(query, opts);
         }
+        var hash = self.hashQuery(name, query, opts);
+        delete self._pendingQueries[name][hash];
+        delete self._completedQueries[name][hash];
         return data;
       });
     },
@@ -6364,9 +6362,31 @@ var utils = Object.freeze({
     find: function find(name, id, opts) {
       var self = this;
       opts || (opts = {});
-      return getSuper(self).find(name, id, opts).then(function (data) {
-        return self._end(name, data, opts);
-      });
+      var pendingQuery = self._pendingQueries[name][id];
+
+      fillIn(opts, self.getMapper(name));
+
+      if (pendingQuery) {
+        return pendingQuery;
+      }
+      var item = self.cachedFind(name, id, opts);
+      var promise = undefined;
+
+      if (opts.force || !item) {
+        promise = self._pendingQueries[name][id] = self._callSuper('find', name, id, opts).then(function (data) {
+          delete self._pendingQueries[name][id];
+          return self._end(name, data, opts);
+        }, function (err) {
+          delete self._pendingQueries[name][id];
+          return reject(err);
+        }).then(function (data) {
+          self._completedQueries[name][id] = new Date().getTime();
+          return data;
+        });
+      } else {
+        promise = resolve(item);
+      }
+      return promise;
     },
 
     /**
@@ -6382,9 +6402,45 @@ var utils = Object.freeze({
     findAll: function findAll(name, query, opts) {
       var self = this;
       opts || (opts = {});
-      return getSuper(self).findAll(name, query, opts).then(function (data) {
-        return self._end(name, data, opts);
-      });
+      var hash = self.hashQuery(name, query, opts);
+      var pendingQuery = self._pendingQueries[name][hash];
+
+      fillIn(opts, self.getMapper(name));
+
+      if (pendingQuery) {
+        return pendingQuery;
+      }
+
+      var items = self.cachedFindAll(name, query, opts);
+      var promise = undefined;
+
+      if (opts.force || !items) {
+        promise = self._pendingQueries[name][hash] = self._callSuper('findAll', name, query, opts).then(function (data) {
+          delete self._pendingQueries[name][hash];
+          return self._end(name, data, opts);
+        }, function (err) {
+          delete self._pendingQueries[name][hash];
+          return reject(err);
+        }).then(function (data) {
+          self._completedQueries[name][hash] = new Date().getTime();
+          return data;
+        });
+      } else {
+        promise = resolve(items);
+      }
+      return promise;
+    },
+    cachedFind: function cachedFind(name, id, opts) {
+      return this.get(name, id, opts);
+    },
+    cachedFindAll: function cachedFindAll(name, query, opts) {
+      var self = this;
+      if (self._completedQueries[name][self.hashQuery(name, query, opts)]) {
+        return self.filter(name, query, opts);
+      }
+    },
+    hashQuery: function hashQuery(name, query, opts) {
+      return toJson(query);
     },
 
     /**
@@ -6418,7 +6474,7 @@ var utils = Object.freeze({
     update: function update(name, id, record, opts) {
       var self = this;
       opts || (opts = {});
-      return getSuper(self).update(name, id, record, opts).then(function (data) {
+      return self._callSuper('update', name, id, record, opts).then(function (data) {
         return self._end(name, data, opts);
       });
     },
@@ -6438,7 +6494,7 @@ var utils = Object.freeze({
     updateAll: function updateAll(name, query, props, opts) {
       var self = this;
       opts || (opts = {});
-      return getSuper(self).updateAll(name, query, props, opts).then(function (data) {
+      return self._callSuper('updateAll', name, query, props, opts).then(function (data) {
         return self._end(name, data, opts);
       });
     },
@@ -6457,7 +6513,7 @@ var utils = Object.freeze({
     updateMany: function updateMany(name, records, opts) {
       var self = this;
       opts || (opts = {});
-      return getSuper(self).updateMany(records, opts).then(function (data) {
+      return self._callSuper('updateMany', name, records, opts).then(function (data) {
         return self._end(name, data, opts);
       });
     }
@@ -6493,8 +6549,8 @@ var utils = Object.freeze({
     methods[method] = function (name) {
       var _getCollection;
 
-      for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-        args[_key2 - 1] = arguments[_key2];
+      for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+        args[_key3 - 1] = arguments[_key3];
       }
 
       return (_getCollection = this.getCollection(name))[method].apply(_getCollection, args);

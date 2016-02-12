@@ -147,8 +147,6 @@ addHiddenPropsToTarget(Container.prototype, {
    */
   create (name, record, opts) {
     const self = this
-    opts || (opts = {})
-    fillIn(opts, self.modelOpts)
     return self.getMapper(name).create(record, opts)
   },
 
@@ -165,8 +163,6 @@ addHiddenPropsToTarget(Container.prototype, {
    */
   createMany (name, records, opts) {
     const self = this
-    opts || (opts = {})
-    fillIn(opts, self.modelOpts)
     return self.getMapper(name).createMany(records, opts)
   },
 
@@ -277,8 +273,6 @@ addHiddenPropsToTarget(Container.prototype, {
    */
   destroy (name, id, opts) {
     const self = this
-    opts || (opts = {})
-    fillIn(opts, self.modelOpts)
     return self.getMapper(name).destroy(id, opts)
   },
 
@@ -295,8 +289,6 @@ addHiddenPropsToTarget(Container.prototype, {
    */
   destroyAll (name, query, opts) {
     const self = this
-    opts || (opts = {})
-    fillIn(opts, self.modelOpts)
     return self.getMapper(name).destroyAll(query, opts)
   },
 
@@ -312,8 +304,6 @@ addHiddenPropsToTarget(Container.prototype, {
    */
   find (name, id, opts) {
     const self = this
-    opts || (opts = {})
-    fillIn(opts, self.modelOpts)
     return self.getMapper(name).find(id, opts)
   },
 
@@ -329,8 +319,6 @@ addHiddenPropsToTarget(Container.prototype, {
    */
   findAll (name, query, opts) {
     const self = this
-    opts || (opts = {})
-    fillIn(opts, self.modelOpts)
     return self.getMapper(name).findAll(query, opts)
   },
 
@@ -447,8 +435,6 @@ addHiddenPropsToTarget(Container.prototype, {
    */
   update (name, id, record, opts) {
     const self = this
-    opts || (opts = {})
-    fillIn(opts, self.modelOpts)
     return self.getMapper(name).update(id, record, opts)
   },
 
@@ -466,8 +452,6 @@ addHiddenPropsToTarget(Container.prototype, {
    */
   updateAll (name, query, props, opts) {
     const self = this
-    opts || (opts = {})
-    fillIn(opts, self.modelOpts)
     return self.getMapper(name).updateAll(query, props, opts)
   },
 
@@ -484,8 +468,6 @@ addHiddenPropsToTarget(Container.prototype, {
    */
   updateMany (name, records, opts) {
     const self = this
-    opts || (opts = {})
-    fillIn(opts, self.modelOpts)
     return self.getMapper(name).updateMany(records, opts)
   }
 })

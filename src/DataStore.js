@@ -9,7 +9,10 @@ import {
   isArray,
   isBrowser,
   isUndefined,
-  set
+  reject,
+  resolve,
+  set,
+  toJson
 } from './utils'
 import {
   belongsToType,
@@ -71,7 +74,13 @@ const DataStore = Container.extend({
     self.CollectionClass = self.CollectionClass || LinkedCollection
     self._collections = {}
     fillIn(self, DATASTORE_DEFAULTS)
+    self._pendingQueries = {}
+    self._completedQueries = {}
     return self
+  },
+
+  _callSuper (method, ...args) {
+    return getSuper(this).prototype[method].apply(this, args)
   },
 
   /**
@@ -110,7 +119,7 @@ const DataStore = Container.extend({
   create (name, record, opts) {
     const self = this
     opts || (opts = {})
-    return getSuper(self).create(name, record, opts).then(function (data) {
+    return self._callSuper('create', name, record, opts).then(function (data) {
       return self._end(name, data, opts)
     })
   },
@@ -129,7 +138,7 @@ const DataStore = Container.extend({
   createMany (name, records, opts) {
     const self = this
     opts || (opts = {})
-    return getSuper(self).createMany(name, records, opts).then(function (data) {
+    return self._callSuper('createMany', name, records, opts).then(function (data) {
       return self._end(name, data, opts)
     })
   },
@@ -137,6 +146,8 @@ const DataStore = Container.extend({
   defineMapper (name, opts) {
     const self = this
     const mapper = getSuper(self).prototype.defineMapper.call(self, name, opts)
+    self._pendingQueries[name] = {}
+    self._completedQueries[name] = {}
     mapper.relationList = mapper.relationList || []
 
     // The datastore uses a subclass of Collection that is "datastore-aware"
@@ -334,12 +345,14 @@ const DataStore = Container.extend({
   destroy (name, id, opts) {
     const self = this
     opts || (opts = {})
-    return getSuper(self).destroy(name, id, opts).then(function (data) {
+    return self._callSuper('destroy', name, id, opts).then(function (data) {
       if (opts.raw) {
         data.data = self.getCollection(name).remove(id, opts)
       } else {
         data = self.getCollection(name).remove(id, opts)
       }
+      delete self._pendingQueries[name][id]
+      delete self._completedQueries[name][id]
       return data
     })
   },
@@ -358,12 +371,15 @@ const DataStore = Container.extend({
   destroyAll (name, query, opts) {
     const self = this
     opts || (opts = {})
-    return getSuper(self).destroyAll(name, query, opts).then(function (data) {
+    return self._callSuper('destroyAll', name, query, opts).then(function (data) {
       if (opts.raw) {
         data.data = self.getCollection(name).removeAll(query, opts)
       } else {
         data = self.getCollection(name).removeAll(query, opts)
       }
+      const hash = self.hashQuery(name, query, opts)
+      delete self._pendingQueries[name][hash]
+      delete self._completedQueries[name][hash]
       return data
     })
   },
@@ -381,9 +397,31 @@ const DataStore = Container.extend({
   find (name, id, opts) {
     const self = this
     opts || (opts = {})
-    return getSuper(self).find(name, id, opts).then(function (data) {
-      return self._end(name, data, opts)
-    })
+    const pendingQuery = self._pendingQueries[name][id]
+
+    fillIn(opts, self.getMapper(name))
+
+    if (pendingQuery) {
+      return pendingQuery
+    }
+    const item = self.cachedFind(name, id, opts)
+    let promise
+
+    if (opts.force || !item) {
+      promise = self._pendingQueries[name][id] = self._callSuper('find', name, id, opts).then(function (data) {
+        delete self._pendingQueries[name][id]
+        return self._end(name, data, opts)
+      }, function (err) {
+        delete self._pendingQueries[name][id]
+        return reject(err)
+      }).then(function (data) {
+        self._completedQueries[name][id] = new Date().getTime()
+        return data
+      })
+    } else {
+      promise = resolve(item)
+    }
+    return promise
   },
 
   /**
@@ -399,9 +437,48 @@ const DataStore = Container.extend({
   findAll (name, query, opts) {
     const self = this
     opts || (opts = {})
-    return getSuper(self).findAll(name, query, opts).then(function (data) {
-      return self._end(name, data, opts)
-    })
+    const hash = self.hashQuery(name, query, opts)
+    const pendingQuery = self._pendingQueries[name][hash]
+
+    fillIn(opts, self.getMapper(name))
+
+    if (pendingQuery) {
+      return pendingQuery
+    }
+
+    const items = self.cachedFindAll(name, query, opts)
+    let promise
+
+    if (opts.force || !items) {
+      promise = self._pendingQueries[name][hash] = self._callSuper('findAll', name, query, opts).then(function (data) {
+        delete self._pendingQueries[name][hash]
+        return self._end(name, data, opts)
+      }, function (err) {
+        delete self._pendingQueries[name][hash]
+        return reject(err)
+      }).then(function (data) {
+        self._completedQueries[name][hash] = new Date().getTime()
+        return data
+      })
+    } else {
+      promise = resolve(items)
+    }
+    return promise
+  },
+
+  cachedFind (name, id, opts) {
+    return this.get(name, id, opts)
+  },
+
+  cachedFindAll (name, query, opts) {
+    const self = this
+    if (self._completedQueries[name][self.hashQuery(name, query, opts)]) {
+      return self.filter(name, query, opts)
+    }
+  },
+
+  hashQuery (name, query, opts) {
+    return toJson(query)
   },
 
   /**
@@ -435,7 +512,7 @@ const DataStore = Container.extend({
   update (name, id, record, opts) {
     const self = this
     opts || (opts = {})
-    return getSuper(self).update(name, id, record, opts).then(function (data) {
+    return self._callSuper('update', name, id, record, opts).then(function (data) {
       return self._end(name, data, opts)
     })
   },
@@ -455,7 +532,7 @@ const DataStore = Container.extend({
   updateAll (name, query, props, opts) {
     const self = this
     opts || (opts = {})
-    return getSuper(self).updateAll(name, query, props, opts).then(function (data) {
+    return self._callSuper('updateAll', name, query, props, opts).then(function (data) {
       return self._end(name, data, opts)
     })
   },
@@ -474,7 +551,7 @@ const DataStore = Container.extend({
   updateMany (name, records, opts) {
     const self = this
     opts || (opts = {})
-    return getSuper(self).updateMany(records, opts).then(function (data) {
+    return self._callSuper('updateMany', name, records, opts).then(function (data) {
       return self._end(name, data, opts)
     })
   }
