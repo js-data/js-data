@@ -1,5 +1,5 @@
 export function init () {
-  describe('#destroyAll', function () {
+  describe('destroyAll', function () {
     it('should be an instance method', function () {
       const Test = this
       const DataStore = Test.JSData.DataStore

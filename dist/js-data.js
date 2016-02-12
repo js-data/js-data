@@ -843,6 +843,7 @@ var utils = Object.freeze({
       return new RegExp('^' + escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.') + '$', flags);
     },
 
+
     /**
      * Return the current data result of this query.
      * @name Query#getData
@@ -856,6 +857,7 @@ var utils = Object.freeze({
       }
       return self.data;
     },
+
 
     /**
      * Find all entities between two boundaries.
@@ -893,6 +895,7 @@ var utils = Object.freeze({
       self.data = self.collection.getIndex(opts.index).between(leftKeys, rightKeys, opts);
       return self;
     },
+
 
     /**
      * Find the entity or entities that match the provided key.
@@ -950,6 +953,7 @@ var utils = Object.freeze({
       return self;
     },
 
+
     /**
      * Find the entity or entities that match the provided keyLists.
      *
@@ -1000,6 +1004,7 @@ var utils = Object.freeze({
       });
       return self;
     },
+
 
     /**
      * Find the entity or entities that match the provided query or pass the
@@ -1134,6 +1139,7 @@ var utils = Object.freeze({
       return self;
     },
 
+
     /**
      * Skip a number of results.
      *
@@ -1162,6 +1168,7 @@ var utils = Object.freeze({
       return this;
     },
 
+
     /**
      * Limit the result.
      *
@@ -1186,6 +1193,7 @@ var utils = Object.freeze({
       return this;
     },
 
+
     /**
      * Iterate over all entities.
      *
@@ -1200,6 +1208,7 @@ var utils = Object.freeze({
       return this;
     },
 
+
     /**
      * Apply a mapping function to the result data.
      *
@@ -1213,6 +1222,7 @@ var utils = Object.freeze({
       this.data = this.getData().map(mapFn, thisArg);
       return this;
     },
+
 
     /**
      * Return the result of calling the specified function on each item in this
@@ -1233,6 +1243,7 @@ var utils = Object.freeze({
       });
       return this;
     },
+
 
     /**
      * Complete the execution of the query and return the resulting data.
@@ -1530,31 +1541,6 @@ var utils = Object.freeze({
       }
       return [];
     },
-    remove: function remove(keyList, value) {
-      if (!isArray(keyList)) {
-        keyList = [keyList];
-      }
-
-      var key = keyList.shift();
-      var pos = binarySearch(this.keys, key);
-
-      if (keyList.length === 0) {
-        if (pos.found) {
-          var dataLocation = binarySearch(this.values[pos.index], value, this.hashCode);
-          if (dataLocation.found) {
-            removeAt(this.values[pos.index], dataLocation.index);
-            if (this.values[pos.index].length === 0) {
-              removeAt(this.keys, pos.index);
-              removeAt(this.values, pos.index);
-            }
-          }
-        }
-      } else {
-        if (pos.found) {
-          this.values[pos.index].delete(keyList, value);
-        }
-      }
-    },
     clear: function clear() {
       this.keys = [];
       this.values = [];
@@ -1787,6 +1773,7 @@ var utils = Object.freeze({
       this.emit.apply(this, arguments);
     },
 
+
     /**
      * Insert the provided record or records.
      *
@@ -1879,6 +1866,7 @@ var utils = Object.freeze({
       return self.afterAdd(records, opts, result) || result;
     },
 
+
     /**
      * Lifecycle hook called by {@link Collection#add}. If this method returns a
      * value then {@link Collection#add} will return that same value.
@@ -1891,6 +1879,7 @@ var utils = Object.freeze({
      */
     afterAdd: function afterAdd() {},
 
+
     /**
      * Lifecycle hook called by {@link Collection#remove}. If this method returns
      * a value then {@link Collection#remove} will return that same value.
@@ -1902,6 +1891,7 @@ var utils = Object.freeze({
      * @param {Object} record The result that will be returned by {@link Collection#remove}.
      */
     afterRemove: function afterRemove() {},
+
 
     /**
      * Lifecycle hook called by {@link Collection#removeAll}. If this method
@@ -1916,6 +1906,7 @@ var utils = Object.freeze({
      */
     afterRemoveAll: function afterRemoveAll() {},
 
+
     /**
      * Lifecycle hook called by {@link Collection#add}. If this method returns a
      * value then the `records` argument in {@link Collection#add} will be
@@ -1928,6 +1919,7 @@ var utils = Object.freeze({
      */
     beforeAdd: function beforeAdd() {},
 
+
     /**
      * Lifecycle hook called by {@link Collection#remove}.
      *
@@ -1938,6 +1930,7 @@ var utils = Object.freeze({
      */
     beforeRemove: function beforeRemove() {},
 
+
     /**
      * Lifecycle hook called by {@link Collection#removeAll}.
      *
@@ -1947,6 +1940,7 @@ var utils = Object.freeze({
      * @param {Object} opts The `opts` argument passed to {@link Collection#removeAll}.
      */
     beforeRemoveAll: function beforeRemoveAll() {},
+
 
     /**
      * Find all records between two boundaries.
@@ -1978,6 +1972,7 @@ var utils = Object.freeze({
       return this.query().between(leftKeys, rightKeys, opts).run();
     },
 
+
     /**
      * Create a new secondary index on the contents of the collection.
      *
@@ -2008,6 +2003,7 @@ var utils = Object.freeze({
       self.index.visitAll(index.insertRecord, index);
       return self;
     },
+
 
     /**
      * Find the record or records that match the provided query or pass the
@@ -2044,6 +2040,7 @@ var utils = Object.freeze({
       return this.query().filter(query, thisArg).run();
     },
 
+
     /**
      * Iterate over all records.
      *
@@ -2062,6 +2059,7 @@ var utils = Object.freeze({
       this.index.visitAll(cb, thisArg);
     },
 
+
     /**
      * Get the record with the given id.
      *
@@ -2074,6 +2072,7 @@ var utils = Object.freeze({
       var instances = this.query().get(id).run();
       return instances.length ? instances[0] : undefined;
     },
+
 
     /**
      * Find the record or records that match the provided keyLists.
@@ -2102,6 +2101,7 @@ var utils = Object.freeze({
       return (_query = this.query()).getAll.apply(_query, arguments).run();
     },
 
+
     /**
      * Return the index with the given name. If no name is provided, return the
      * main index. Throws an error if the specified index does not exist.
@@ -2113,6 +2113,7 @@ var utils = Object.freeze({
       }
       return index;
     },
+
 
     /**
      * Limit the result.
@@ -2130,6 +2131,7 @@ var utils = Object.freeze({
     limit: function limit(num) {
       return this.query().limit(num).run();
     },
+
 
     /**
      * Apply a mapping function to all records.
@@ -2153,6 +2155,7 @@ var utils = Object.freeze({
       return data;
     },
 
+
     /**
      * Return the result of calling the specified function on each record in this
      * collection's main index.
@@ -2175,6 +2178,7 @@ var utils = Object.freeze({
       return data;
     },
 
+
     /**
      * Return the primary key of the given, or if no record is provided, return the
      * name of the field that holds the primary key of records in this Collection.
@@ -2193,6 +2197,7 @@ var utils = Object.freeze({
       var self = this;
       return self.mapper ? self.mapper.idAttribute : self.idAttribute || 'id';
     },
+
 
     /**
      * Create a new query to be executed against the contents of the collection.
@@ -2213,6 +2218,7 @@ var utils = Object.freeze({
       return new Query(this);
     },
 
+
     /**
      * Reduce the data in the collection to a single value and return the result.
      *
@@ -2231,6 +2237,7 @@ var utils = Object.freeze({
       var data = this.getAll();
       return data.reduce(cb, initialValue);
     },
+
 
     /**
      * Remove the record with the given id from this Collection.
@@ -2263,6 +2270,7 @@ var utils = Object.freeze({
       return self.afterRemove(id, opts, record) || record;
     },
 
+
     /**
      * Remove the record selected by "query" from this collection.
      *
@@ -2290,6 +2298,7 @@ var utils = Object.freeze({
       return self.afterRemoveAll(query, opts, records) || records;
     },
 
+
     /**
      * Skip a number of results.
      *
@@ -2307,6 +2316,7 @@ var utils = Object.freeze({
       return this.query().skip(num).run();
     },
 
+
     /**
      * Return the plain JSON representation of all items in this collection.
      * Assumes records in this collection have a toJSON method.
@@ -2321,6 +2331,7 @@ var utils = Object.freeze({
     toJSON: function toJSON(opts) {
       return this.mapCall('toJSON', opts);
     },
+
 
     /**
      * Update a record's position in a single index of this collection. See
@@ -2339,6 +2350,7 @@ var utils = Object.freeze({
       opts || (opts = {});
       this.getIndex(opts.index).updateRecord(record);
     },
+
 
     /**
      * TODO
@@ -2594,6 +2606,7 @@ var utils = Object.freeze({
       return this.constructor.Mapper;
     },
 
+
     /**
      * Return the value at the given path for this instance.
      *
@@ -2645,6 +2658,7 @@ var utils = Object.freeze({
       this.set(key, undefined, opts);
     },
 
+
     /**
      * TODO
      *
@@ -2655,6 +2669,7 @@ var utils = Object.freeze({
       var self = this;
       return get(self, self._mapper().idAttribute);
     },
+
 
     /**
      * TODO
@@ -2671,6 +2686,7 @@ var utils = Object.freeze({
       return self._get('changes');
     },
 
+
     /**
      * TODO
      *
@@ -2680,6 +2696,7 @@ var utils = Object.freeze({
     hasChanges: function hasChanges() {
       return !!(this._get('changed') || []).length;
     },
+
 
     /**
      * TODO
@@ -2695,6 +2712,7 @@ var utils = Object.freeze({
       return self;
     },
 
+
     /**
      * TODO
      *
@@ -2709,6 +2727,7 @@ var utils = Object.freeze({
       }
       return self._get('previous');
     },
+
 
     /**
      * TODO
@@ -2736,6 +2755,7 @@ var utils = Object.freeze({
       return self;
     },
 
+
     /**
      * TODO
      *
@@ -2747,6 +2767,7 @@ var utils = Object.freeze({
       var _schema = this._mapper().schema;
       return key ? _schema[key] : _schema;
     },
+
 
     // validate (obj, value) {
     //   let errors = []
@@ -2777,6 +2798,7 @@ var utils = Object.freeze({
       return this._mapper().create(this, opts);
     },
 
+
     /**
      * TODO
      *
@@ -2785,6 +2807,7 @@ var utils = Object.freeze({
      * @param {Object} opts TODO
      */
     beforeSave: function beforeSave() {},
+
 
     /**
      * TODO
@@ -2830,6 +2853,7 @@ var utils = Object.freeze({
       });
     },
 
+
     /**
      * TODO
      *
@@ -2838,6 +2862,7 @@ var utils = Object.freeze({
      * @param {Object} opts TODO
      */
     afterSave: function afterSave() {},
+
 
     /**
      * TODO
@@ -2848,6 +2873,7 @@ var utils = Object.freeze({
      * @param {Object} opts TODO
      */
     beforeLoadRelations: function beforeLoadRelations() {},
+
 
     /**
      * TODO
@@ -2924,6 +2950,7 @@ var utils = Object.freeze({
       });
     },
 
+
     /**
      * TODO
      *
@@ -2933,6 +2960,7 @@ var utils = Object.freeze({
      * @param {Object} opts TODO
      */
     afterLoadRelations: function afterLoadRelations() {},
+
 
     /**
      * TODO
@@ -2946,6 +2974,7 @@ var utils = Object.freeze({
       var Mapper = this._mapper();
       return Mapper.destroy(get(this, Mapper.idAttribute), opts);
     },
+
 
     // TODO: move logic for single-item async operations onto the instance.
 
@@ -3277,6 +3306,7 @@ var utils = Object.freeze({
       return allErrors.length ? undefined : allErrors;
     },
 
+
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor85
      *
@@ -3300,6 +3330,7 @@ var utils = Object.freeze({
       return validated ? undefined : allErrors;
     },
 
+
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor70
      *
@@ -3312,6 +3343,7 @@ var utils = Object.freeze({
     dependencies: function dependencies(value, schema, opts) {
       // TODO
     },
+
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor76
@@ -3328,6 +3360,7 @@ var utils = Object.freeze({
         return makeError(value, 'one of (' + possibleValues.join(', ') + ')', opts);
       }
     },
+
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor37
@@ -3357,6 +3390,7 @@ var utils = Object.freeze({
       return errors.length ? errors : undefined;
     },
 
+
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor17
      *
@@ -3379,6 +3413,7 @@ var utils = Object.freeze({
       }
     },
 
+
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor42
      *
@@ -3392,6 +3427,7 @@ var utils = Object.freeze({
       return maxLengthCommon('maxItems', value, schema, opts);
     },
 
+
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor26
      *
@@ -3404,6 +3440,7 @@ var utils = Object.freeze({
     maxLength: function maxLength(value, schema, opts) {
       return maxLengthCommon('maxLength', value, schema, opts);
     },
+
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor54
@@ -3421,6 +3458,7 @@ var utils = Object.freeze({
         return makeError(length, 'no more than ' + maxProperties + ' properties', opts);
       }
     },
+
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor21
@@ -3444,6 +3482,7 @@ var utils = Object.freeze({
       }
     },
 
+
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor42
      *
@@ -3457,6 +3496,7 @@ var utils = Object.freeze({
       return minLengthCommon('minItems', value, schema, opts);
     },
 
+
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor29
      *
@@ -3469,6 +3509,7 @@ var utils = Object.freeze({
     minLength: function minLength(value, schema, opts) {
       return minLengthCommon('minLength', value, schema, opts);
     },
+
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor57
@@ -3487,6 +3528,7 @@ var utils = Object.freeze({
       }
     },
 
+
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor14
      *
@@ -3499,6 +3541,7 @@ var utils = Object.freeze({
     multipleOf: function multipleOf(value, schema, opts) {
       // TODO
     },
+
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor91
@@ -3515,6 +3558,7 @@ var utils = Object.freeze({
         return makeError('succeeded', 'should have failed', opts);
       }
     },
+
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor88
@@ -3543,6 +3587,7 @@ var utils = Object.freeze({
       return validated ? undefined : allErrors;
     },
 
+
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor33
      *
@@ -3558,6 +3603,7 @@ var utils = Object.freeze({
         return makeError(value, pattern, opts);
       }
     },
+
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor64
@@ -3624,6 +3670,7 @@ var utils = Object.freeze({
       return errors.length ? errors : undefined;
     },
 
+
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor61
      *
@@ -3648,6 +3695,7 @@ var utils = Object.freeze({
       }
       return errors.length ? errors : undefined;
     },
+
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor79
@@ -3685,6 +3733,7 @@ var utils = Object.freeze({
         return validator(value, schema, opts);
       }
     },
+
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor49
@@ -4215,6 +4264,7 @@ var utils = Object.freeze({
       return data;
     },
 
+
     /**
      * Create an unsaved, uncached instance of this Mapper's
      * {@link Mapper#RecordClass}.
@@ -4236,6 +4286,7 @@ var utils = Object.freeze({
       return RecordClass ? props instanceof RecordClass ? props : new RecordClass(props, opts) : props;
     },
 
+
     /**
      * Return whether `record` is an instance of this Mappers's RecordClass.
      *
@@ -4249,6 +4300,7 @@ var utils = Object.freeze({
       var RecordClass = this.RecordClass;
       return RecordClass ? record instanceof RecordClass : false;
     },
+
 
     /**
      * Return a plain object representation of the given record.
@@ -4329,6 +4381,7 @@ var utils = Object.freeze({
       return json;
     },
 
+
     /**
      * Return the registered adapter with the given name or the default adapter if
      * no name is provided.
@@ -4348,6 +4401,7 @@ var utils = Object.freeze({
       return self.getAdapters()[adapter];
     },
 
+
     /**
      * Return the name of a registered adapter based on the given name or options,
      * or the name of the default adapter if no name provided.
@@ -4365,6 +4419,7 @@ var utils = Object.freeze({
       return opts.adapter || opts.defaultAdapter;
     },
 
+
     /**
      * @name Mapper#getAdapters
      * @method
@@ -4375,6 +4430,7 @@ var utils = Object.freeze({
     getSchema: function getSchema() {
       return this.schema;
     },
+
 
     /**
      * Mapper lifecycle hook called by {@link Mapper#create}. If this method
@@ -4392,6 +4448,7 @@ var utils = Object.freeze({
       var self = this;
       return (opts.upsert || opts.upsert === undefined && self.upsert) && get(props, self.idAttribute);
     },
+
 
     /**
      * Create and save a new the record using the provided `props`.
@@ -4454,6 +4511,7 @@ var utils = Object.freeze({
       });
     },
 
+
     /**
      * Mapper lifecycle hook called by {@link Mapper#create}. If this method
      * returns a promise then {@link Mapper#create} will wait for the promise
@@ -4486,6 +4544,7 @@ var utils = Object.freeze({
         }, true);
       }
     },
+
 
     /**
      * Given an array of records, batch create them via an adapter.
@@ -4550,6 +4609,7 @@ var utils = Object.freeze({
         });
       });
     },
+
 
     /**
      * Mapper lifecycle hook called by {@link Mapper#createMany}. If this method
@@ -4627,6 +4687,7 @@ var utils = Object.freeze({
         });
       });
     },
+
 
     /**
      * Mapper lifecycle hook called by {@link Mapper#find}. If this method
@@ -4710,6 +4771,7 @@ var utils = Object.freeze({
         });
       });
     },
+
 
     /**
      * Mapper lifecycle hook called by {@link Mapper#findAll}. If this method
@@ -4796,6 +4858,7 @@ var utils = Object.freeze({
       });
     },
 
+
     /**
      * Mapper lifecycle hook called by {@link Mapper#update}. If this method
      * returns a promise then {@link Mapper#update} will wait for the promise
@@ -4881,6 +4944,7 @@ var utils = Object.freeze({
         });
       });
     },
+
 
     /**
      * Mapper lifecycle hook called by {@link Mapper#updateMany}. If this method
@@ -4971,6 +5035,7 @@ var utils = Object.freeze({
       });
     },
 
+
     /**
      * Mapper lifecycle hook called by {@link Mapper#updateAll}. If this method
      * returns a promise then {@link Mapper#updateAll} will wait for the promise
@@ -5053,6 +5118,7 @@ var utils = Object.freeze({
         });
       });
     },
+
 
     /**
      * Mapper lifecycle hook called by {@link Mapper#destroy}. If this method
@@ -5141,6 +5207,7 @@ var utils = Object.freeze({
       });
     },
 
+
     /**
      * Mapper lifecycle hook called by {@link Mapper#destroyAll}. If this method
      * returns a promise then {@link Mapper#destroyAll} will wait for the promise
@@ -5182,6 +5249,7 @@ var utils = Object.freeze({
       }
     },
 
+
     /**
      * @name Mapper#dbg
      * @method
@@ -5193,6 +5261,7 @@ var utils = Object.freeze({
 
       this.log.apply(this, ['debug'].concat(args));
     },
+
 
     /**
      * Usage:
@@ -5213,6 +5282,7 @@ var utils = Object.freeze({
       return belongsTo(RelatedMapper, opts)(this);
     },
 
+
     /**
      * Usage:
      *
@@ -5227,6 +5297,7 @@ var utils = Object.freeze({
       return hasMany(RelatedMapper, opts)(this);
     },
 
+
     /**
      * Usage:
      *
@@ -5240,6 +5311,7 @@ var utils = Object.freeze({
     hasOne: function hasOne$$(RelatedMapper, opts) {
       return hasOne(RelatedMapper, opts)(this);
     },
+
 
     /**
      * Register an adapter on this mapper under the given name.
@@ -5451,6 +5523,7 @@ var utils = Object.freeze({
       return self.getMapper(name).create(record, opts);
     },
 
+
     /**
      * TODO
      *
@@ -5467,6 +5540,7 @@ var utils = Object.freeze({
       return self.getMapper(name).createMany(records, opts);
     },
 
+
     /**
      * Proxy for {@link Mapper#createRecord}.
      *
@@ -5481,6 +5555,7 @@ var utils = Object.freeze({
     createRecord: function createRecord(name, props, opts) {
       return this.getMapper(name).createRecord(props, opts);
     },
+
 
     /**
      * Create a new mapper and register it in this container.
@@ -5561,6 +5636,7 @@ var utils = Object.freeze({
       return mapper;
     },
 
+
     /**
      * TODO
      *
@@ -5576,6 +5652,7 @@ var utils = Object.freeze({
       var self = this;
       return self.getMapper(name).destroy(id, opts);
     },
+
 
     /**
      * TODO
@@ -5593,6 +5670,7 @@ var utils = Object.freeze({
       return self.getMapper(name).destroyAll(query, opts);
     },
 
+
     /**
      * TODO
      *
@@ -5608,6 +5686,7 @@ var utils = Object.freeze({
       return self.getMapper(name).find(id, opts);
     },
 
+
     /**
      * TODO
      *
@@ -5622,6 +5701,7 @@ var utils = Object.freeze({
       var self = this;
       return self.getMapper(name).findAll(query, opts);
     },
+
 
     /**
      * Return the registered adapter with the given name or the default adapter if
@@ -5641,6 +5721,7 @@ var utils = Object.freeze({
       return self.getAdapters()[adapter];
     },
 
+
     /**
      * Return the name of a registered adapter based on the given name or options,
      * or the name of the default adapter if no name provided.
@@ -5658,6 +5739,7 @@ var utils = Object.freeze({
       return opts.adapter || this.mapperDefaults.defaultAdapter;
     },
 
+
     /**
      * Return the registered adapters of this container.
      *
@@ -5668,6 +5750,7 @@ var utils = Object.freeze({
     getAdapters: function getAdapters() {
       return this._adapters;
     },
+
 
     /**
      * Return the mapper registered under the specified name.
@@ -5690,6 +5773,7 @@ var utils = Object.freeze({
       }
       return mapper;
     },
+
 
     /**
      * Register an adapter on this container under the given name. Adapters
@@ -5722,6 +5806,7 @@ var utils = Object.freeze({
       }
     },
 
+
     /**
      * TODO
      *
@@ -5739,6 +5824,7 @@ var utils = Object.freeze({
       return self.getMapper(name).update(id, record, opts);
     },
 
+
     /**
      * TODO
      *
@@ -5755,6 +5841,7 @@ var utils = Object.freeze({
       var self = this;
       return self.getMapper(name).updateAll(query, props, opts);
     },
+
 
     /**
      * TODO
@@ -6031,6 +6118,7 @@ var utils = Object.freeze({
       return getSuper(this).prototype[method].apply(this, args);
     },
 
+
     /**
      * TODO
      *
@@ -6053,6 +6141,7 @@ var utils = Object.freeze({
       return data;
     },
 
+
     /**
      * TODO
      *
@@ -6071,6 +6160,7 @@ var utils = Object.freeze({
         return self._end(name, data, opts);
       });
     },
+
 
     /**
      * TODO
@@ -6296,6 +6386,7 @@ var utils = Object.freeze({
       return mapper;
     },
 
+
     /**
      * TODO
      *
@@ -6321,6 +6412,7 @@ var utils = Object.freeze({
         return data;
       });
     },
+
 
     /**
      * TODO
@@ -6348,6 +6440,7 @@ var utils = Object.freeze({
         return data;
       });
     },
+
 
     /**
      * TODO
@@ -6388,6 +6481,7 @@ var utils = Object.freeze({
       }
       return promise;
     },
+
 
     /**
      * TODO
@@ -6443,6 +6537,7 @@ var utils = Object.freeze({
       return toJson(query);
     },
 
+
     /**
      * TODO
      *
@@ -6458,6 +6553,7 @@ var utils = Object.freeze({
       }
       return collection;
     },
+
 
     /**
      * TODO
@@ -6479,6 +6575,7 @@ var utils = Object.freeze({
       });
     },
 
+
     /**
      * TODO
      *
@@ -6498,6 +6595,7 @@ var utils = Object.freeze({
         return self._end(name, data, opts);
       });
     },
+
 
     /**
      * TODO

@@ -1,5 +1,5 @@
 export function init () {
-  describe('#toJSON', function () {
+  describe('toJSON', function () {
     it('should work')
   })
 }

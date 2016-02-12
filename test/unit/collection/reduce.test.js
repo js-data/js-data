@@ -1,5 +1,5 @@
 export function init () {
-  describe('#reduce', function () {
+  describe('reduce', function () {
     it('should reduce', function () {
       const Test = this
       const data = [

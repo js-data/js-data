@@ -1,5 +1,5 @@
 export function init () {
-  describe('#updateIndex', function () {
+  describe('updateIndex', function () {
     it('should update record in a single index', function () {
       const Test = this
       const data = [

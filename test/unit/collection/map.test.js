@@ -1,5 +1,5 @@
 export function init () {
-  describe('#map', function () {
+  describe('map', function () {
     it('should map', function () {
       const Test = this
       const data = [

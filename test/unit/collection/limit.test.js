@@ -1,5 +1,5 @@
 export function init () {
-  describe('#skip', function () {
+  describe('skip', function () {
     it('should limit', function () {
       const Test = this
       const data = [

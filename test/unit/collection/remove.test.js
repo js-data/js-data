@@ -1,5 +1,5 @@
 export function init () {
-  describe('#remove', function () {
+  describe('remove', function () {
     it('should remove an item from the collection', function () {
       const Test = this
       Test.UserCollection.createIndex('age')

@@ -1,5 +1,5 @@
 export function init () {
-  describe('#getAll', function () {
+  describe('getAll', function () {
     it('should support complex queries', function () {
       const Test = this
       const data = [

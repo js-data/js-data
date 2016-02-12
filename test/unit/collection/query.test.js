@@ -1,5 +1,5 @@
 export function init () {
-  describe('#query', function () {
+  describe('query', function () {
     it('should work')
   })
 }

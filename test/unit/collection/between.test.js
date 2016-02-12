@@ -1,5 +1,5 @@
 export function init () {
-  describe('#between', function () {
+  describe('between', function () {
     it('should work')
   })
 }

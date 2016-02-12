@@ -1,5 +1,5 @@
 export function init () {
-  describe('#filter', function () {
+  describe('filter', function () {
     it('should work', function () {
       const Test = this
       const collection = Test.PostCollection
@@ -8,6 +8,13 @@ export function init () {
       const p3 = Test.data.p3
       const p4 = Test.data.p4
       const p5 = Test.data.p5
+
+      p1.roles = ['admin']
+      p2.roles = ['admin', 'dev']
+      p3.roles = ['admin', 'dev']
+      p4.roles = []
+      p5.roles = ['admin', 'dev', 'owner']
+
       Test.store.add('post', [p1, p2, p3, p4, p5])
 
       let params = {
@@ -171,6 +178,30 @@ export function init () {
       params.where = { author: { notLike: 'Ada%' } }
 
       Test.assert.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3], 'should support notLike')
+
+      params.where = { roles: { isectEmpty: ['admin'] } }
+
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [p4], 'should support isectEmpty')
+
+      params.where = { roles: { isectNotEmpty: ['admin'] } }
+
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3, p5], 'should support isectNotEmpty')
+
+      params.where = { roles: { notContains: 'admin' } }
+
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [p4], 'should support notContains')
+
+      params.where = { age: { '!==': 33 } }
+
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3], 'should support !==')
+
+      params = undefined
+
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3, p4, p5], 'should do nothing')
+
+      params = { offset: 4 }
+
+      Test.assert.objectsEqual(collection.query().filter(params).run(), [p5], 'should support offset')
     })
     it('should allow custom filter function', function () {
       const Test = this
