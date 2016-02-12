@@ -1,5 +1,5 @@
 export function init () {
-  describe('#filter', function () {
+  describe('filter', function () {
     // Most filter tests are on the Query class
     it('should work', function () {
       const Test = this

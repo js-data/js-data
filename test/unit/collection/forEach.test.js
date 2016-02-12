@@ -1,5 +1,5 @@
 export function init () {
-  describe('#forEach', function () {
+  describe('forEach', function () {
     it('should visit all data', function () {
       const Test = this
       const data = [

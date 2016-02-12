@@ -1,5 +1,5 @@
 export function init () {
-  describe('#getIndex', function () {
+  describe('getIndex', function () {
     it('should work')
   })
 }

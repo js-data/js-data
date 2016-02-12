@@ -1,5 +1,5 @@
 export function init () {
-  describe('#removeAll', function () {
+  describe('removeAll', function () {
     it('should eject items that meet the criteria from the store', function () {
       const Test = this
       Test.User.debug = true

@@ -30,7 +30,7 @@ export function init () {
       Test.assert.isTrue(destroyAllCalled, 'Adapter#destroyAll should have been called')
       Test.assert.equal(result, 'foo', 'returned data')
     })
-    it('should return raw and not auto eject', async function () {
+    it('should return raw', async function () {
       const Test = this
       const query = {}
       let destroyAllCalled = false

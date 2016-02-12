@@ -1,5 +1,5 @@
 export function init () {
-  describe('#add', function () {
+  describe('add', function () {
     it('should inject relations', function () {
       const Test = this
 

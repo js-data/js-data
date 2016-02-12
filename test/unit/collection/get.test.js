@@ -1,5 +1,5 @@
 export function init () {
-  describe('#get', function () {
+  describe('get', function () {
     it('should get an item from the collection', function () {
       const Test = this
       const user = Test.UserCollection.add({ id: 1 })

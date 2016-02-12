@@ -1,5 +1,5 @@
 export function init () {
-  describe('#orderBy', function () {
+  describe('orderBy', function () {
     it('should work', function () {
       const Test = this
       const collection = Test.PostCollection

@@ -57,7 +57,7 @@ export function init () {
       Test.assert.isTrue(destroyCalled, 'Adapter#destroy should have been called')
       Test.assert.equal(data.adapter, 'mock', 'should have adapter name in response')
       Test.assert.equal(data.deleted, 1, 'should have other metadata in response')
-      Test.assert.equal(data.data, 'foo', 'ejected user should have been returned')
+      Test.assert.equal(data.data, 'foo', 'foo should have been returned')
     })
   })
 }

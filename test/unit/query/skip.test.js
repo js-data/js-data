@@ -1,5 +1,5 @@
 export function init () {
-  describe('#skip', function () {
+  describe('skip', function () {
     it('should correctly apply "skip" predicates', function () {
       const Test = this
       const p1 = Test.data.p1

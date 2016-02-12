@@ -1,5 +1,5 @@
 export function init () {
-  describe('#limit', function () {
+  describe('limit', function () {
     it('should correctly apply "limit" predicates', function () {
       const Test = this
       const p1 = Test.data.p1

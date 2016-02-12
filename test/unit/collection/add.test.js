@@ -1,5 +1,5 @@
 export function init () {
-  describe('#add', function () {
+  describe('add', function () {
     it('should inject new items into the collection', function () {
       const Test = this
       const collection = new Test.JSData.Collection()

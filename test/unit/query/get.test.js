@@ -1,5 +1,5 @@
 export function init () {
-  describe('between', function () {
+  describe('get', function () {
     it('should work')
 
     it('should not allow index access after operation', function () {
@@ -7,7 +7,7 @@ export function init () {
       const collection = Test.PostCollection
 
       Test.assert.throws(function () {
-        collection.query().filter().between().run()
+        collection.query().filter().get().run()
       }, Error)
     })
   })
