@@ -31,7 +31,6 @@
  * @property {Function} resolve TODO
  * @property {Function} set TODO
  * @property {Function} toJson TODO
- * @property {Function} uuid TODO
  */
 
 const INFINITY = 1 / 0
@@ -582,4 +581,42 @@ export const extend = function (props, classProps) {
 export const getSuper = function (instance, isCtor) {
   const Ctor = isCtor ? instance : instance.constructor
   return (Ctor.__super__ || Object.getPrototypeOf(Ctor) || Ctor.__proto__) // eslint-disable-line
+}
+
+function forRelation (opts, def, fn, ctx) {
+  const relationName = def.relation
+  let containedName = null
+  if (opts.with.indexOf(relationName) !== -1) {
+    containedName = relationName
+  } else if (opts.with.indexOf(def.localField) !== -1) {
+    containedName = def.localField
+  }
+  if (!containedName) {
+    return
+  }
+  let __opts = copy(opts)
+  __opts.with = opts.with.slice()
+  fillIn(__opts, def.getRelation())
+  const index = __opts.with.indexOf(containedName)
+  if (index >= 0) {
+    __opts.with.splice(index, 1)
+  }
+  __opts.with.forEach(function (relation, i) {
+    if (relation && relation.indexOf(containedName) === 0 && relation.length >= containedName.length && relation[containedName.length] === '.') {
+      __opts.with[i] = relation.substr(containedName.length + 1)
+    } else {
+      __opts.with[i] = ''
+    }
+  })
+  fn.call(ctx, def, __opts)
+}
+
+export const forEachRelation = function (mapper, opts, fn, ctx) {
+  const relationList = mapper.relationList || []
+  if (!relationList.length) {
+    return
+  }
+  relationList.forEach(function (def) {
+    forRelation(opts, def, fn, ctx)
+  })
 }

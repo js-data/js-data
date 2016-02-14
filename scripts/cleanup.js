@@ -2,7 +2,7 @@ var fs = require('fs')
 
 var pkg = require('../package.json')
 
-var path = './doc/js-data/' + pkg.version + '/styles/'
+var path = './doc/js-data-localstorage/' + pkg.version + '/styles/'
 
 var files = fs.readdirSync(path)
 files.forEach(function (file) {

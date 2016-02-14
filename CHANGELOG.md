@@ -1,3 +1,7 @@
+##### 3.0.0-alpha.14 -13 February 2016
+
+- Added utility for recursively visiting relations based on `opts.with`
+
 ##### 3.0.0-alpha.13 - 05 February 2016
 
 - Added back change detection

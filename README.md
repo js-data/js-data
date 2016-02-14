@@ -181,6 +181,7 @@ Edits" button at the top right of each page and make your suggested changes!
 - [all](http://api.js-data.io/)
 - [js-data](http://api.js-data.io/js-data)
 - [js-data-http](http://api.js-data.io/js-data-http)
+- [js-data-localstorage](http://api.js-data.io/js-data-localstorage)
 
 ## Support
 
