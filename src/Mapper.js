@@ -6,6 +6,7 @@ import {
   eventify,
   extend,
   fillIn,
+  forEachRelation,
   forOwn,
   get,
   getSuper,
@@ -506,36 +507,17 @@ addHiddenPropsToTarget(Mapper.prototype, {
         if (isString(opts.with)) {
           opts.with = [opts.with]
         }
-        self.relationList.forEach(function (def) {
-          let containedName
-          if (opts.with.indexOf(def.relation) !== -1) {
-            containedName = def.relation
-          } else if (opts.with.indexOf(def.localField) !== -1) {
-            containedName = def.localField
-          }
-          if (containedName) {
-            const optsCopy = { with: opts.with.slice() }
+        forEachRelation(self, opts, function (def, __opts) {
+          const relationData = get(record, def.localField)
 
-            // Prepare to recurse into deeply nested relations
-            optsCopy.with.splice(optsCopy.with.indexOf(containedName), 1)
-            optsCopy.with.forEach((relation, i) => {
-              if (relation && relation.indexOf(containedName) === 0 && relation.length >= containedName.length && relation[containedName.length] === '.') {
-                optsCopy.with[i] = relation.substr(containedName.length + 1)
-              } else {
-                optsCopy.with[i] = ''
-              }
-            })
-            const relationData = get(record, def.localField)
-
-            if (relationData) {
-              // The actual recursion
-              if (isArray(relationData)) {
-                set(json, def.localField, relationData.map(function (item) {
-                  return def.getRelation().toJSON(item, optsCopy)
-                }))
-              } else {
-                set(json, def.localField, def.getRelation().toJSON(relationData, optsCopy))
-              }
+          if (relationData) {
+            // The actual recursion
+            if (isArray(relationData)) {
+              set(json, def.localField, relationData.map(function (item) {
+                return def.getRelation().toJSON(item, __opts)
+              }))
+            } else {
+              set(json, def.localField, def.getRelation().toJSON(relationData, __opts))
             }
           }
         })

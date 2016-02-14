@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.13 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.14 - Homepage <http://www.js-data.io/>
 * @author Jason Dobry <jason.dobry@gmail.com>
 * @copyright (c) 2014-2015 Jason Dobry
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -70,7 +70,6 @@
    * @property {Function} resolve TODO
    * @property {Function} set TODO
    * @property {Function} toJson TODO
-   * @property {Function} uuid TODO
    */
 
   var INFINITY = 1 / 0;
@@ -633,6 +632,44 @@
     return Ctor.__super__ || Object.getPrototypeOf(Ctor) || Ctor.__proto__; // eslint-disable-line
   };
 
+  function forRelation(opts, def, fn, ctx) {
+    var relationName = def.relation;
+    var containedName = null;
+    if (opts.with.indexOf(relationName) !== -1) {
+      containedName = relationName;
+    } else if (opts.with.indexOf(def.localField) !== -1) {
+      containedName = def.localField;
+    }
+    if (!containedName) {
+      return;
+    }
+    var __opts = copy(opts);
+    __opts.with = opts.with.slice();
+    fillIn(__opts, def.getRelation());
+    var index = __opts.with.indexOf(containedName);
+    if (index >= 0) {
+      __opts.with.splice(index, 1);
+    }
+    __opts.with.forEach(function (relation, i) {
+      if (relation && relation.indexOf(containedName) === 0 && relation.length >= containedName.length && relation[containedName.length] === '.') {
+        __opts.with[i] = relation.substr(containedName.length + 1);
+      } else {
+        __opts.with[i] = '';
+      }
+    });
+    fn.call(ctx, def, __opts);
+  }
+
+  var forEachRelation = function forEachRelation(mapper, opts, fn, ctx) {
+    var relationList = mapper.relationList || [];
+    if (!relationList.length) {
+      return;
+    }
+    relationList.forEach(function (def) {
+      forRelation(opts, def, fn, ctx);
+    });
+  };
+
 var utils = Object.freeze({
     get isBrowser () { return isBrowser; },
     isArray: isArray,
@@ -667,7 +704,8 @@ var utils = Object.freeze({
     possibleConstructorReturn: possibleConstructorReturn,
     addHiddenPropsToTarget: addHiddenPropsToTarget,
     extend: extend,
-    getSuper: getSuper
+    getSuper: getSuper,
+    forEachRelation: forEachRelation
   });
 
   /**
@@ -4341,39 +4379,18 @@ var utils = Object.freeze({
           if (isString(opts.with)) {
             opts.with = [opts.with];
           }
-          self.relationList.forEach(function (def) {
-            var containedName = undefined;
-            if (opts.with.indexOf(def.relation) !== -1) {
-              containedName = def.relation;
-            } else if (opts.with.indexOf(def.localField) !== -1) {
-              containedName = def.localField;
-            }
-            if (containedName) {
-              (function () {
-                var optsCopy = { with: opts.with.slice() };
+          forEachRelation(self, opts, function (def, __opts) {
+            var relationData = get(record, def.localField);
 
-                // Prepare to recurse into deeply nested relations
-                optsCopy.with.splice(optsCopy.with.indexOf(containedName), 1);
-                optsCopy.with.forEach(function (relation, i) {
-                  if (relation && relation.indexOf(containedName) === 0 && relation.length >= containedName.length && relation[containedName.length] === '.') {
-                    optsCopy.with[i] = relation.substr(containedName.length + 1);
-                  } else {
-                    optsCopy.with[i] = '';
-                  }
-                });
-                var relationData = get(record, def.localField);
-
-                if (relationData) {
-                  // The actual recursion
-                  if (isArray(relationData)) {
-                    set(json, def.localField, relationData.map(function (item) {
-                      return def.getRelation().toJSON(item, optsCopy);
-                    }));
-                  } else {
-                    set(json, def.localField, def.getRelation().toJSON(relationData, optsCopy));
-                  }
-                }
-              })();
+            if (relationData) {
+              // The actual recursion
+              if (isArray(relationData)) {
+                set(json, def.localField, relationData.map(function (item) {
+                  return def.getRelation().toJSON(item, __opts);
+                }));
+              } else {
+                set(json, def.localField, def.getRelation().toJSON(relationData, __opts));
+              }
             }
           });
         }
@@ -6701,11 +6718,11 @@ var utils = Object.freeze({
    * if the current version is not beta.
    */
   var version = {
-    full: '3.0.0-alpha.13',
+    full: '3.0.0-alpha.14',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10),
-    alpha: '13',
+    alpha: '14',
     beta: 'false'
   };
 
