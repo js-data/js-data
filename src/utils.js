@@ -586,6 +586,7 @@ export const getSuper = function (instance, isCtor) {
 function forRelation (opts, def, fn, ctx) {
   const relationName = def.relation
   let containedName = null
+  opts.with || (opts.with = [])
   if (opts.with.indexOf(relationName) !== -1) {
     containedName = relationName
   } else if (opts.with.indexOf(def.localField) !== -1) {
