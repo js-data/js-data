@@ -165,7 +165,18 @@ const applySchema = function (schema, target) {
 
 const notify = function (...args) {
   const self = this
-  const opts = args.pop()
+  const opts = args[args.length - 1]
+  self.dbg(opts.op, ...args)
+  if (opts.notify || (opts.notify === undefined && self.notify)) {
+    setTimeout(() => {
+      self.emit(opts.op, ...args)
+    })
+  }
+}
+
+const notify2 = function (...args) {
+  const self = this
+  const opts = args[args.length - 2]
   self.dbg(opts.op, ...args)
   if (opts.notify || (opts.notify === undefined && self.notify)) {
     setTimeout(() => {
@@ -636,14 +647,86 @@ addHiddenPropsToTarget(Mapper.prototype, {
       // Allow for re-assignment from lifecycle hook
       props = _props || props
       // Now delegate to the adapter
-      op = opts.op = 'create'
       const json = self.toJSON(props, opts)
-      self.dbg(op, json, opts)
-      return resolve(self.getAdapter(adapter)[op](self, json, opts))
+      const fields = {}
+      opts.with || (opts.with = [])
+      const idAttribute = self.idAttribute
+      let tasks = []
+      forEachRelation(self, opts, function (def, __opts) {
+        const localField = def.localField
+        const relationData = get(json, localField)
+        const relatedMapper = def.getRelation()
+        if (!relationData) {
+          return
+        }
+        let task
+        if (def.type === 'hasMany') {
+          task = fields[localField] = relationData
+        } else if (def.type === 'hasOne') {
+          task = fields[localField] = relationData
+        } else if (def.type === 'belongsTo') {
+          // Create belongsTo relation first because we need a generated id to
+          // attach to the child
+          task = relatedMapper.create(relationData, __opts).then(function (data) {
+            fields[localField] = data
+            set(json, def.foreignKey, get(data, relatedMapper.idAttribute))
+          })
+        }
+        if (task) {
+          tasks.push(task)
+        }
+      })
+      return Promise.all(tasks).then(function () {
+        op = opts.op = 'create'
+        self.dbg(op, json, opts)
+        const _props = {}
+        forOwn(json, function (value, key) {
+          if (!(key in fields)) {
+            _props[key] = value
+          }
+        })
+        return resolve(self.getAdapter(adapter)[op](self, _props, opts))
+      }).then(function (data) {
+        const id = opts.raw ? get(data.data, idAttribute) : get(data, idAttribute)
+        tasks = []
+        forEachRelation(self, opts, function (def, __opts) {
+          const localField = def.localField
+          const relationData = fields[localField]
+          const relatedMapper = def.getRelation()
+          if (!relationData) {
+            return
+          }
+          let task
+          // Create hasMany and hasOne after the main create because we needed
+          // a generated id to attach to these items
+          if (def.type === 'hasMany') {
+            relationData.forEach(function (relationDataItem) {
+              set(relationDataItem, def.foreignKey, id)
+            })
+            task = relatedMapper.createMany(relationData, __opts).then(function (data) {
+              fields[localField] = data
+            })
+          } else if (def.type === 'hasOne') {
+            set(relationData, def.foreignKey, id)
+            task = relatedMapper.create(relationData, __opts).then(function (data) {
+              fields[localField] = data
+            })
+          }
+          if (task) {
+            tasks.push(task)
+          }
+        })
+        return Promise.all(tasks).then(function () {
+          forOwn(fields, function (value, key) {
+            set(opts.raw ? data.data : data, key, opts.raw ? value.data : value)
+          })
+          return data
+        })
+      })
     }).then(function (data) {
       // afterCreate lifecycle hook
       op = opts.op = 'afterCreate'
-      return resolve(self[op](data, opts)).then(function (_data) {
+      return resolve(self[op](props, opts, data)).then(function (_data) {
         // Allow for re-assignment from lifecycle hook
         data = _data || data
         // Possibly formulate result object
@@ -662,7 +745,7 @@ addHiddenPropsToTarget(Mapper.prototype, {
    * @param {Object} data The `data` return by the adapter.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#create}.
    */
-  afterCreate: notify,
+  afterCreate: notify2,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#createMany}. If this method
@@ -759,7 +842,7 @@ addHiddenPropsToTarget(Mapper.prototype, {
    * @param {Array} records The `records` argument passed to {@link Mapper#createMany}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#createMany}.
    */
-  afterCreateMany: notify,
+  afterCreateMany: notify2,
 
   /**
    * Mappers lifecycle hook called by {@link Mapper#find}. If this method
@@ -835,7 +918,7 @@ addHiddenPropsToTarget(Mapper.prototype, {
    * @param {(string|number)} id The `id` argument passed to {@link Mapper#find}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#find}.
    */
-  afterFind: notify,
+  afterFind: notify2,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#findAll}. If this method
@@ -918,7 +1001,7 @@ addHiddenPropsToTarget(Mapper.prototype, {
    * @param {Object} query The `query` argument passed to {@link Mapper#findAll}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#findAll}.
    */
-  afterFindAll: notify,
+  afterFindAll: notify2,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#update}. If this method
@@ -1002,7 +1085,7 @@ addHiddenPropsToTarget(Mapper.prototype, {
    * @param {props} props The `props` argument passed to {@link Mapper#update}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#update}.
    */
-  afterUpdate: notify,
+  afterUpdate: notify2,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#updateMany}. If this method
@@ -1086,7 +1169,7 @@ addHiddenPropsToTarget(Mapper.prototype, {
    * @param {Array} records The `records` argument passed to {@link Mapper#updateMany}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#updateMany}.
    */
-  afterUpdateMany: notify,
+  afterUpdateMany: notify2,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#updateAll}. If this method
@@ -1175,7 +1258,7 @@ addHiddenPropsToTarget(Mapper.prototype, {
    * @param {Object} props The `props` argument passed to {@link Mapper#updateAll}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#updateAll}.
    */
-  afterUpdateAll: notify,
+  afterUpdateAll: notify2,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#destroy}. If this method
@@ -1234,7 +1317,7 @@ addHiddenPropsToTarget(Mapper.prototype, {
     }).then(function (data) {
       // afterDestroy lifecycle hook
       op = opts.op = 'afterDestroy'
-      return resolve(self[op](data, opts)).then(function (_data) {
+      return resolve(self[op](id, opts, data)).then(function (_data) {
         // Allow for re-assignment from lifecycle hook
         data = _data || data
         if (opts.raw) {
@@ -1256,7 +1339,7 @@ addHiddenPropsToTarget(Mapper.prototype, {
    * @param {(string|number)} id The `id` argument passed to {@link Mapper#destroy}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#destroy}.
    */
-  afterDestroy: notify,
+  afterDestroy: notify2,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#destroyAll}. If this method
@@ -1320,7 +1403,7 @@ addHiddenPropsToTarget(Mapper.prototype, {
     }).then(function (data) {
       // afterDestroyAll lifecycle hook
       op = opts.op = 'afterDestroyAll'
-      return resolve(self[op](data, query, opts)).then(function (_data) {
+      return resolve(self[op](query, opts, data)).then(function (_data) {
         // Allow for re-assignment from lifecycle hook
         data = _data || data
         if (opts.raw) {
@@ -1343,7 +1426,7 @@ addHiddenPropsToTarget(Mapper.prototype, {
    * @param {query} query The `query` argument passed to {@link Mapper#destroyAll}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#destroyAll}.
    */
-  afterDestroyAll: notify,
+  afterDestroyAll: notify2,
 
   /**
    * @name Mapper#log
