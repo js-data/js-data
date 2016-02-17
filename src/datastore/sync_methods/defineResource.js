@@ -118,12 +118,17 @@ module.exports = function defineResource (definition) {
         })
       })
       if (def.relations.belongsTo) {
+        def.parents = {}
         DSUtils.forOwn(def.relations.belongsTo, function (relatedModel, modelName) {
           DSUtils.forEach(relatedModel, function (relation) {
             if (relation.parent) {
               def.parent = modelName
               def.parentKey = relation.localKey
               def.parentField = relation.localField
+              def.parents[modelName] = {
+                key: def.parentKey,
+                field: def.parentField
+              }
             }
           })
         })

@@ -303,4 +303,28 @@ describe('DS#defineResource', function () {
 
     assert.equal(Post[Post.class].name, 'Post');
   });
+
+  it('should add multiple parents to the parents property', function() {
+    var Permission = store.defineResource({
+      name: 'permission',
+      relations: {
+        belongsTo: {
+          user: {
+            parent: true,
+            localField: 'user',
+            localKey: 'userId'
+          },
+          group: {
+            parent: true,
+            localField: 'group',
+            localKey: 'groupId'
+          }
+        }
+      }
+    });
+
+    assert.property(Permission.parents, 'user')
+    assert.property(Permission.parents, 'group')
+    assert.lengthOf(Object.keys(Permission.parents), 2);
+  });
 });
