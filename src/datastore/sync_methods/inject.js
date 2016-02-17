@@ -134,6 +134,8 @@ function _inject (definition, resource, attrs, options) {
         args.push(attrs[dep])
       })
       attrs[idA] = c[idA][c[idA].length - 1].apply(attrs, args)
+    } else if (options.temporary) {
+      attrs[idA] = DSUtils.guid()
     }
 
     if (!(idA in attrs)) {
@@ -234,6 +236,10 @@ function _inject (definition, resource, attrs, options) {
           _react.call(item, {}, {}, {}, null, true)
           // save "previous" attributes of the injected item, for change diffs later
           resource.previousAttributes[id] = DSUtils.copy(item, null, null, null, definition.relationFields)
+          // mark item as temporary if guid has been generated
+          if (options.temporary) {
+            resource.temporaryItems[id] = true
+          }
         } else {
           // item is being re-injected
           // new properties take precedence

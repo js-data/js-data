@@ -20,6 +20,7 @@ module.exports = function create (resourceName, attrs, options) {
   let _this = this
   let DSUtils = _this.utils
   let definition = _this.definitions[resourceName]
+  let resource = _this.store[resourceName]
   let adapter
 
   options = options || {}
@@ -32,7 +33,7 @@ module.exports = function create (resourceName, attrs, options) {
     rejectionError = DSUtils._oErr('attrs')
   } else {
     options = DSUtils._(definition, options)
-    if (options.upsert && DSUtils._sn(attrs[definition.idAttribute])) {
+    if (options.upsert && DSUtils._sn(attrs[definition.idAttribute]) && !resource.temporaryItems[attrs[definition.idAttribute]]) {
       return _this.update(resourceName, attrs[definition.idAttribute], attrs, options)
     }
     options.logFn('create', attrs, options)

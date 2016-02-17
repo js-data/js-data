@@ -25,6 +25,7 @@ let instanceMethods = [
   'changes',
   'commit',
   'hasChanges',
+  'isNew',
   'lastModified',
   'lastSaved',
   'previous',
@@ -269,7 +270,8 @@ module.exports = function defineResource (definition) {
       observers: {},
       changeHistories: {},
       changeHistory: [],
-      collectionModified: 0
+      collectionModified: 0,
+      temporaryItems: {}
     }
 
     let resource = _this.store[def.name]

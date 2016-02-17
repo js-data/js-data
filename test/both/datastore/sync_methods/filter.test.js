@@ -564,5 +564,16 @@ describe('DS#filter', function () {
     assert.deepEqual(User.filter({ where: { name: { notLike: 'foo%foo' } } }), [users[0], users[1], users[2], users[3], users[4], users[5], users[6], users[9]]);
     assert.deepEqual(User.filter({ where: { name: { notLike: 'foo_foo' } } }), [users[0], users[1], users[2], users[3], users[4], users[5], users[6], users[7], users[9]]);
     assert.deepEqual(User.filter({ where: { name: { notLike: 'foo%foo_' } } }), [users[0], users[1], users[2], users[3], users[4], users[5], users[6], users[7], users[8]]);
-  })
+  });
+  it('should include temporary items when `excludeTemporary` is false', function() {
+    var user1 = User.inject({ name: 'foo' }, {temporary: true});
+    var user2 = User.inject({ id: 2, name: 'foo' });
+
+    assert(User.filter().length == 2);
+    assert(User.filter(null, {excludeTemporary: false}).length == 2);
+    assert(User.filter(null, {excludeTemporary: true}).length == 1);
+
+    assert(User.filter({name: 'foo'}, {excludeTemporary: true}).length == 1);
+    assert(User.filter({name: 'foo'}, {excludeTemporary: false}).length == 2);
+  });
 });

@@ -487,4 +487,53 @@ describe('DS#inject', function () {
     ], 'bars should have been injected, but not linked');
     assert.equal(Bar.getAll().length, 3, '3 bars should be in the store');
   });
+  it('should inject temporary item', function() {
+    var Foo = store.defineResource({
+      name: 'foo',
+      idAttribute: 'foo_id'
+    });
+
+    var foo = Foo.inject({bar: 'bar'}, {temporary: true});
+
+    assert(foo.foo_id != null);
+  });
+  it('should replace temporary item with real item from server, conserving any relations to other items', function() {
+    delete user1.id;
+
+    // Create item and related items referencing temporary ID
+    var user = store.inject('user', user1, {temporary: true});
+    var comment = {
+      id: 2,
+      approvedBy: user.id,
+      content: 'test comment 2'
+    };
+    var profile = {
+        author: 'John',
+        age: 30,
+        id: 5,
+        userId: user.id
+    };
+
+    // belongsTo relation
+    store.inject('organization', organization2);
+    assert.deepEqual(JSON.stringify(user.organization), JSON.stringify(organization2));
+
+    // hasMany relation
+    store.inject('comment', comment);
+    assert.deepEqual(JSON.stringify(user.comments[0]), JSON.stringify(comment));
+
+    // hasOne relation
+    store.inject('profile', profile);
+    assert.deepEqual(JSON.stringify(user.profile), JSON.stringify(profile));
+
+    // Inject item with real ID, replacing guid
+    var guid = user.id;
+    profile.userId = comment.approvedBy = user.id = 10;
+    user = store.inject('user', user, {replacingId: guid});
+
+    assert.deepEqual(JSON.stringify(user.organization), JSON.stringify(organization2));
+    assert.deepEqual(JSON.stringify(user.comments[0]), JSON.stringify(comment));
+    assert.deepEqual(JSON.stringify(user.profile), JSON.stringify(profile));
+
+  });
 });

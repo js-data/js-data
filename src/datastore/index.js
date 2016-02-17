@@ -155,6 +155,8 @@ function like (pattern, flags) {
 }
 
 defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
+  let idA = this.definitions[resourceName].idAttribute
+  let resource = this.store[resourceName]
   let filtered = collection
   let where = null
   let reserved = {
@@ -193,6 +195,11 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
     filtered = DSUtils.filter(filtered, function (attrs) {
       let first = true
       let keep = true
+
+      if (options.excludeTemporary && resource.temporaryItems[attrs[idA]]) {
+        return false
+      }
+
       DSUtils.forOwn(where, function (clause, field) {
         if (!DSUtils._o(clause)) {
           clause = {
@@ -259,7 +266,12 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
           first = false
         })
       })
+
       return keep
+    })
+  } else if (options.excludeTemporary) {
+    filtered = DSUtils.filter(filtered, function (attrs) {
+      return resource.temporaryItems[attrs[idA]]
     })
   }
 
