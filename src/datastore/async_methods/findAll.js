@@ -4,7 +4,7 @@ function processResults (data, resourceName, queryHash, options) {
   let DSUtils = _this.utils
   let definition = _this.definitions[resourceName]
   let resource = _this.store[resourceName]
-  let idAttribute = _this.definitions[resourceName].idAttribute
+  let idAttribute = definition.idAttribute
   let date = new Date().getTime()
 
   data = data || []

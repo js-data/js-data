@@ -155,8 +155,13 @@ function like (pattern, flags) {
 }
 
 defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
-  let idA = this.definitions[resourceName].idAttribute
-  let resource = this.store[resourceName]
+  let definition = this.definitions[resourceName]
+  let idA = 'id'
+  let resource
+  if (definition) {
+    idA = definition.idAttribute
+    resource = this.store[resourceName]
+  }
   let filtered = collection
   let where = null
   let reserved = {
@@ -196,7 +201,7 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
       let first = true
       let keep = true
 
-      if (options.excludeTemporary && resource.temporaryItems[attrs[idA]]) {
+      if (options.excludeTemporary && resource && resource.temporaryItems[attrs[idA]]) {
         return false
       }
 
@@ -269,7 +274,7 @@ defaultsPrototype.defaultFilter = function (collection, resourceName, params, op
 
       return keep
     })
-  } else if (options.excludeTemporary) {
+  } else if (options.excludeTemporary && resource) {
     filtered = DSUtils.filter(filtered, function (attrs) {
       return resource.temporaryItems[attrs[idA]]
     })
@@ -422,7 +427,7 @@ class DS {
 
   clear () {
     let ejected = {}
-    DSUtils.forOwn(this.definitions, definition => {
+    DSUtils.forOwn(this.definitions, (definition) => {
       let name = definition.name
       ejected[name] = definition.ejectAll()
       this.store[name].completedQueries = {}

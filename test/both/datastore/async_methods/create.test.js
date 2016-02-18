@@ -3,7 +3,7 @@ describe('DS#create', function () {
     return store.create('fruit loops', 5).then(function () {
       fail('should have rejected');
     }).catch(function (err) {
-      assert.isTrue(err instanceof store.errors.NonexistentResourceError);
+      assert.isTrue(err instanceof Error);
       assert.equal(err.message, 'fruit loops is not a registered resource!');
     });
   });

@@ -4,7 +4,7 @@ describe('DS#destroy', function () {
     tasks.push(store.destroy('does not exist', 5).then(function () {
       fail('should have rejected');
     }).catch(function (err) {
-      assert.isTrue(err instanceof store.errors.NonexistentResourceError);
+      assert.isTrue(err instanceof Error);
       assert.equal(err.message, 'does not exist is not a registered resource!');
     }));
 
@@ -12,7 +12,7 @@ describe('DS#destroy', function () {
       tasks.push(store.destroy('post', key).then(function () {
         fail('should have rejected');
       }).catch(function (err) {
-        assert.isTrue(err instanceof store.errors.IllegalArgumentError);
+        assert.isTrue(err instanceof Error);
         assert.equal(err.message, '"id" must be a string or a number!');
       }));
     });

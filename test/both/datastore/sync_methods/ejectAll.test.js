@@ -2,13 +2,13 @@ describe('DS#ejectAll', function () {
   it('should throw an error when method pre-conditions are not met', function () {
     assert.throws(function () {
       store.ejectAll('does not exist');
-    }, store.errors.NonexistentResourceError, 'does not exist is not a registered resource!');
+    }, Error, 'does not exist is not a registered resource!');
 
     DSUtils.forEach(TYPES_EXCEPT_OBJECT, function (key) {
       if (key) {
         assert.throws(function () {
           store.ejectAll('post', key);
-        }, store.errors.IllegalArgumentError, '"params" must be an object!');
+        }, Error, '"params" must be an object!');
       }
     });
   });

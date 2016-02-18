@@ -2,13 +2,13 @@ describe('DS#filter', function () {
   it('should throw an error when method pre-conditions are not met', function () {
     assert.throws(function () {
       store.filter('does not exist');
-    }, store.errors.NonexistentResourceError, 'does not exist is not a registered resource!');
+    }, Error, 'does not exist is not a registered resource!');
 
     DSUtils.forEach(TYPES_EXCEPT_OBJECT, function (key) {
       if (key) {
         assert.throws(function () {
           store.filter('post', key);
-        }, store.errors.IllegalArgumentError, '"params" must be an object!');
+        }, Error, '"params" must be an object!');
       }
     });
 
@@ -18,7 +18,7 @@ describe('DS#filter', function () {
       if (key) {
         assert.throws(function () {
           store.filter('post', {}, key);
-        }, store.errors.IllegalArgumentError, '"options" must be an object!');
+        }, Error, '"options" must be an object!');
       }
     });
 
@@ -569,11 +569,11 @@ describe('DS#filter', function () {
     var user1 = User.inject({ name: 'foo' }, {temporary: true});
     var user2 = User.inject({ id: 2, name: 'foo' });
 
-    assert(User.filter().length == 2);
-    assert(User.filter(null, {excludeTemporary: false}).length == 2);
-    assert(User.filter(null, {excludeTemporary: true}).length == 1);
+    assert.equal(User.filter().length, 2);
+    assert.equal(User.filter(null, {excludeTemporary: false}).length, 2);
+    assert.equal(User.filter(null, {excludeTemporary: true}).length, 1);
 
-    assert(User.filter({name: 'foo'}, {excludeTemporary: true}).length == 1);
-    assert(User.filter({name: 'foo'}, {excludeTemporary: false}).length == 2);
+    assert.equal(User.filter({name: 'foo'}, {excludeTemporary: true}).length, 1);
+    assert.equal(User.filter({name: 'foo'}, {excludeTemporary: false}).length, 2);
   });
 });

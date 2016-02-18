@@ -5,7 +5,7 @@ describe('DS#refresh', function () {
     tasks.push(store.refresh('does not exist', 5).then(function () {
       fail('should not have succeeded');
     }).catch(function (err) {
-      assert.isTrue(err instanceof store.errors.NonexistentResourceError);
+      assert.isTrue(err instanceof Error);
       assert.equal(err.message, 'does not exist is not a registered resource!');
     }));
 
@@ -13,7 +13,7 @@ describe('DS#refresh', function () {
       tasks.push(store.refresh('post', key).then(function () {
         fail('should not have succeeded');
       }).catch(function (err) {
-        assert.isTrue(err instanceof store.errors.IllegalArgumentError);
+        assert.isTrue(err instanceof Error);
         assert.equal(err.message, '"id" must be a string or a number!');
       }));
     });
@@ -23,7 +23,7 @@ describe('DS#refresh', function () {
         tasks.push(store.refresh('post', 5, key).then(function () {
           fail('should not have succeeded');
         }).catch(function (err) {
-          assert.isTrue(err instanceof store.errors.IllegalArgumentError);
+          assert.isTrue(err instanceof Error);
           assert.equal(err.message, '"options" must be an object!');
         }));
       }

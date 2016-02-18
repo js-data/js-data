@@ -119,6 +119,92 @@ describe('DS#find', function () {
       assert.equal(lifecycle.deserialize.callCount, 1, 'deserialize should have been called');
     });
   });
+  it('should get an item from the server but not store it if cacheResponse is false', function () {
+    var _this = this;
+    store.defaults.cacheResponse = false;
+    store.defaults.bypassCache = true;
+    store.defaults.linkRelations = false;
+
+    var _User = store.defineResource({
+      name: '_user',
+      relations: {
+        hasMany: {
+          _comment: {
+            localField: 'comments',
+            foreignKey: 'userId'
+          }
+        }
+      }
+    });
+
+    var _Post = store.defineResource({
+      name: '_post',
+      relations: {
+        hasMany: {
+          _comment: {
+            localField: 'comments',
+            foreignKey: 'postId'
+          }
+        },
+        belongsTo: {
+          _user: {
+            localField: 'user',
+            localKey: 'userId'
+          }
+        }
+      }
+    });
+
+    var _Comment = store.defineResource({
+      name: '_comment',
+      relations: {
+        belongsTo: {
+          _post: {
+            localField: 'post',
+            localKey: 'postId'
+          },
+          _user: {
+            localField: 'user',
+            localKey: 'userId'
+          }
+        }
+      }
+    });
+
+    setTimeout(function () {
+      assert.equal(1, _this.requests.length);
+      assert.equal(_this.requests[0].url, 'http://test.js-data.io/_user/5');
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, JSON.stringify({
+        id: 5,
+        comments: [
+          {
+            id: 6,
+            userId: 5,
+            postId: 3,
+            post: {
+              id: 3
+            }
+          },
+          {
+            id: 7,
+            userId: 5,
+            postId: 2,
+            post: {
+              id: 2
+            }
+          }
+        ]
+      }));
+    }, 100);
+
+    return _User.find(5, { cacheResponse: false, with: ['comment', 'comment.post'] }).then(function (user) {
+      assert.isTrue(_User.is(user));
+      assert.isTrue(_Comment.is(user.comments[0]));
+      assert.isTrue(_Comment.is(user.comments[1]));
+      assert.isTrue(_Post.is(user.comments[0].post));
+      assert.isTrue(_Post.is(user.comments[1].post));
+    });
+  });
   it('should correctly propagate errors', function () {
     var _this = this;
 

@@ -5,7 +5,7 @@ describe('DS#reap', function () {
     tasks.push(store.reap('does not exist').then(function () {
       fail('should not have succeeded');
     }).catch(function (err) {
-      assert.isTrue(err instanceof store.errors.NonexistentResourceError);
+      assert.isTrue(err instanceof Error);
       assert.equal(err.message, 'does not exist is not a registered resource!');
     }));
 
@@ -14,7 +14,7 @@ describe('DS#reap', function () {
         tasks.push(store.reap('post', 5).then(function () {
           fail('should not have succeeded');
         }).catch(function (err) {
-          assert.isTrue(err instanceof store.errors.IllegalArgumentError);
+          assert.isTrue(err instanceof Error);
           assert.equal(err.message, '"options" must be an object!');
         }));
       }

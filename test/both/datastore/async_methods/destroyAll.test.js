@@ -3,7 +3,7 @@ describe('DS#destroyAll', function () {
     return store.destroyAll('does not exist', {}).then(function () {
       fail('should have rejected');
     }).catch(function (err) {
-      assert.isTrue(err instanceof store.errors.NonexistentResourceError);
+      assert.isTrue(err instanceof Error);
       assert.equal(err.message, 'does not exist is not a registered resource!');
     });
   });

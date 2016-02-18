@@ -2,12 +2,12 @@ describe('DS#get', function () {
   it('should throw an error when method pre-conditions are not met', function () {
     assert.throws(function () {
       store.get('does not exist', {});
-    }, store.errors.NonexistentResourceError, 'does not exist is not a registered resource!');
+    }, Error, 'does not exist is not a registered resource!');
 
     DSUtils.forEach(TYPES_EXCEPT_STRING_OR_NUMBER, function (key) {
       assert.throws(function () {
         store.get('post', key);
-      }, store.errors.IllegalArgumentError, '"id" must be a string or a number!');
+      }, Error, '"id" must be a string or a number!');
     });
   });
   it('should return undefined if the query has never been made before', function () {

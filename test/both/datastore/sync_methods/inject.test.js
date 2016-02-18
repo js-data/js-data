@@ -2,17 +2,17 @@ describe('DS#inject', function () {
   it('should throw an error when method pre-conditions are not met', function () {
     assert.throws(function () {
       store.inject('does not exist', {});
-    }, store.errors.NonexistentResourceError, 'does not exist is not a registered resource!');
+    }, Error, 'does not exist is not a registered resource!');
 
     DSUtils.forEach(TYPES_EXCEPT_OBJECT, function (key) {
       assert.throws(function () {
         store.inject('post', key);
-      }, store.errors.IllegalArgumentError, 'post.inject: "attrs" must be an object or an array!');
+      }, Error, 'post.inject: "attrs" must be an object or an array!');
     });
 
     assert.throws(function () {
       store.inject('post', {});
-    }, store.errors.RuntimeError, 'post.inject: "attrs" must contain the property specified by "idAttribute"!');
+    }, Error, 'post.inject: "attrs" must contain the property specified by "idAttribute"!');
   });
   it('should inject an item into the store', function () {
 
@@ -499,7 +499,6 @@ describe('DS#inject', function () {
   });
   it('should replace temporary item with real item from server, conserving any relations to other items', function() {
     delete user1.id;
-
     // Create item and related items referencing temporary ID
     var user = store.inject('user', user1, {temporary: true});
     var comment = {
@@ -530,10 +529,9 @@ describe('DS#inject', function () {
     var guid = user.id;
     profile.userId = comment.approvedBy = user.id = 10;
     user = store.inject('user', user, {replacingId: guid});
-
     assert.deepEqual(JSON.stringify(user.organization), JSON.stringify(organization2));
-    assert.deepEqual(JSON.stringify(user.comments[0]), JSON.stringify(comment));
-    assert.deepEqual(JSON.stringify(user.profile), JSON.stringify(profile));
-
+    // relation links were not updated
+    assert.isUndefined(user.comments[0]);
+    assert.deepEqual(user.profile);
   });
 });

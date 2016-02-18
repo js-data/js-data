@@ -165,6 +165,27 @@ export default {
     }
 
     options = DSUtils._(definition, options)
+
+    const relationList = definition.relationList || []
+    if (relationList.length) {
+      DSUtils.forEach(relationList, function (def) {
+        const relationData = DSUtils.get(attrs, def.localField)
+        if (relationData) {
+          if (DSUtils.isArray(relationData)) {
+            const array = []
+            const Resource = definition.getResource(def.relation)
+            const _options = options.orig()
+            DSUtils.forEach(relationData, function (relationDataItem) {
+              array.push(Resource.createInstance(relationDataItem, _options))
+            })
+            DSUtils.set(attrs, def.localField, array)
+          } else if (DSUtils.isObject(relationData)) {
+            DSUtils.set(attrs, def.localField, definition.getResource(def.relation).createInstance(relationData, options.orig()))
+          }
+        }
+      })
+    }
+
     options.logFn('createInstance', attrs, options)
 
     // lifecycle
@@ -182,7 +203,7 @@ export default {
 
     // add default values
     if (options.defaultValues) {
-      DSUtils.deepMixIn(item, options.defaultValues)
+      DSUtils.deepMixIn(item, DSUtils.copy(options.defaultValues))
     }
     DSUtils.deepMixIn(item, attrs)
 

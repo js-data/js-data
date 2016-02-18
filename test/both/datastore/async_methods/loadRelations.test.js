@@ -5,7 +5,7 @@ describe('DS#loadRelations', function () {
     tasks.push(store.loadRelations('does not exist', user10, []).then(function () {
       fail('should have rejected');
     }).catch(function (err) {
-      assert.isTrue(err instanceof store.errors.NonexistentResourceError);
+      assert.isTrue(err instanceof Error);
       assert.equal(err.message, 'does not exist is not a registered resource!');
     }));
 
@@ -16,7 +16,7 @@ describe('DS#loadRelations', function () {
       tasks.push(store.loadRelations('user', key).then(function () {
         fail('should have rejected');
       }).catch(function (err) {
-        assert.isTrue(err instanceof store.errors.IllegalArgumentError);
+        assert.isTrue(err instanceof Error);
         assert.equal(err.message, '"instance(id)" must be a string, number or object!');
       }));
     });
@@ -26,7 +26,7 @@ describe('DS#loadRelations', function () {
         tasks.push(store.loadRelations('user', user10, key).then(function () {
           fail('should have rejected');
         }).catch(function (err) {
-          assert.isTrue(err instanceof store.errors.IllegalArgumentError);
+          assert.isTrue(err instanceof Error);
           assert.equal(err.message, '"relations" must be a string or an array!');
         }));
       }
@@ -37,7 +37,7 @@ describe('DS#loadRelations', function () {
         tasks.push(store.loadRelations('user', user10, [], key).then(function () {
           fail('should have rejected');
         }).catch(function (err) {
-          assert.isTrue(err instanceof store.errors.IllegalArgumentError);
+          assert.isTrue(err instanceof Error);
           assert.equal(err.message, '"options" must be an object!');
         }));
       }

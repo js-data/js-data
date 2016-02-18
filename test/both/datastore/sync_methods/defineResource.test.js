@@ -4,21 +4,21 @@ describe('DS#defineResource', function () {
       if (!DSUtils.isArray(key)) {
         assert.throws(function () {
           store.defineResource(key);
-        }, store.errors.IllegalArgumentError, '"definition" must be an object!');
+        }, Error, '"definition" must be an object!');
       }
     });
 
     DSUtils.forEach(TYPES_EXCEPT_STRING, function (key) {
       assert.throws(function () {
         store.defineResource({ name: key });
-      }, store.errors.IllegalArgumentError, '"name" must be a string!');
+      }, Error, '"name" must be a string!');
     });
 
     DSUtils.forEach(TYPES_EXCEPT_STRING, function (key) {
       if (key) {
         assert.throws(function () {
           store.defineResource({ name: 'name', idAttribute: key });
-        }, store.errors.IllegalArgumentError, '"idAttribute" must be a string!');
+        }, Error, '"idAttribute" must be a string!');
       }
     });
 
@@ -26,7 +26,7 @@ describe('DS#defineResource', function () {
 
     assert.throws(function () {
       store.defineResource('fake');
-    }, store.errors.RuntimeError, 'fake is already registered!');
+    }, Error, 'fake is already registered!');
 
     assert.doesNotThrow(function () {
       store.defineResource('new resource');

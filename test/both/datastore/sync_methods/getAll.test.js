@@ -2,13 +2,13 @@ describe('DS#getAll', function () {
   it('should throw an error when method pre-conditions are not met', function () {
     assert.throws(function () {
       store.getAll('does not exist');
-    }, store.errors.NonexistentResourceError, 'does not exist is not a registered resource!');
+    }, Error, 'does not exist is not a registered resource!');
 
     DSUtils.forEach(TYPES_EXCEPT_ARRAY, function (key) {
       if (key) {
         assert.throws(function () {
           store.getAll('post', key);
-        }, store.errors.IllegalArgumentError, '"ids" must be an array!');
+        }, Error, '"ids" must be an array!');
       }
     });
   });

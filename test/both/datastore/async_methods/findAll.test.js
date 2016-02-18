@@ -5,7 +5,7 @@ describe('DS#findAll', function () {
     tasks.push(store.findAll('does not exist', {}).then(function () {
       fail('should have rejected');
     }).catch(function (err) {
-      assert.isTrue(err instanceof store.errors.NonexistentResourceError);
+      assert.isTrue(err instanceof Error);
       assert.equal(err.message, 'does not exist is not a registered resource!');
     }));
 
@@ -14,7 +14,7 @@ describe('DS#findAll', function () {
         tasks.push(store.findAll('post', key, { cacheResponse: false }).then(function () {
           fail('should have rejected');
         }).catch(function (err) {
-          assert.isTrue(err instanceof store.errors.IllegalArgumentError);
+          assert.isTrue(err instanceof Error);
           assert.equal(err.message, '"params" must be an object!');
         }));
       }
@@ -25,7 +25,7 @@ describe('DS#findAll', function () {
         tasks.push(store.findAll('post', {}, key).then(function () {
           fail('should have rejected');
         }).catch(function (err) {
-          assert.isTrue(err instanceof store.errors.IllegalArgumentError);
+          assert.isTrue(err instanceof Error);
           assert.equal(err.message, '"options" must be an object!');
         }));
       }

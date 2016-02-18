@@ -2,7 +2,7 @@ describe('DS#hasChanges', function () {
   it('should throw an error when method pre-conditions are not met', function () {
     assert.throws(function () {
       store.hasChanges('does not exist', {});
-    }, store.errors.NonexistentResourceError, 'does not exist is not a registered resource!');
+    }, Error, 'does not exist is not a registered resource!');
   });
   it('should return false if the item is not in the store', function () {
     assert.isFalse(store.hasChanges('post', 5));

@@ -181,6 +181,9 @@ function _inject (definition, resource, attrs, options) {
                   if (def.foreignKey) {
                     DSUtils.set(injected, def.foreignKey, attrs[definition.idAttribute])
                   }
+                  if (def.localKey) {
+                    DSUtils.set(attrs, def.localKey, DSUtils.get(injected, relationDef.idAttribute))
+                  }
                 } catch (err) {
                   options.errorFn(err, `Failed to inject ${def.type} relation: "${relationName}"!`)
                 }

@@ -3,7 +3,7 @@ describe('DS#update', function () {
     store.update('does not exist', 5).then(function () {
       fail('should have rejected');
     }, function (err) {
-      assert.isTrue(err instanceof store.errors.NonexistentResourceError);
+      assert.isTrue(err instanceof Error);
       assert.equal(err.message, 'does not exist is not a registered resource!');
     });
 
@@ -11,7 +11,7 @@ describe('DS#update', function () {
       store.update('post', key).then(function () {
         fail('should have rejected');
       }, function (err) {
-        assert.isTrue(err instanceof store.errors.IllegalArgumentError);
+        assert.isTrue(err instanceof Error);
         assert.equal(err.message, '"id" must be a string or a number!');
       });
     });
@@ -21,7 +21,7 @@ describe('DS#update', function () {
         store.update('post', 5, {}, key).then(function () {
           fail('should have rejected');
         }, function (err) {
-          assert.isTrue(err instanceof store.errors.IllegalArgumentError);
+          assert.isTrue(err instanceof Error);
           assert.equal(err.message, '"options" must be an object!');
         });
       }

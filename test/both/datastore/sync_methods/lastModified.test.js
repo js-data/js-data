@@ -2,7 +2,7 @@ describe('DS#lastModified', function () {
   it('should throw an error when method pre-conditions are not met', function () {
     assert.throws(function () {
       store.lastModified('does not exist', {});
-    }, store.errors.NonexistentResourceError, 'does not exist is not a registered resource!');
+    }, Error, 'does not exist is not a registered resource!');
   });
   it('should update lastModified when an item is injected into the store', function () {
 

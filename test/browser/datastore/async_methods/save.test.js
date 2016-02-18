@@ -46,7 +46,7 @@ describe('DS#save', function () {
       assert.equal(lifecycle.afterInject.callCount, 2, 'afterInject should have been called');
       assert.equal(lifecycle.serialize.callCount, 1, 'serialize should have been called');
       assert.equal(lifecycle.deserialize.callCount, 1, 'deserialize should have been called');
-      assert.isTrue(err instanceof store.errors.RuntimeError);
+      assert.isTrue(err instanceof Error);
       assert.equal(err.message, 'id "6" not found in cache!');
     });
   });
@@ -167,7 +167,7 @@ describe('DS#save', function () {
       assert.equal(lifecycle.afterInject.callCount, 2, 'afterInject should have been called');
       assert.equal(lifecycle.serialize.callCount, 1, 'serialize should have been called');
       assert.equal(lifecycle.deserialize.callCount, 1, 'deserialize should have been called');
-      assert.isTrue(err instanceof store.errors.RuntimeError);
+      assert.isTrue(err instanceof Error);
       assert.equal(err.message, 'id "6" not found in cache!');
     });
   });

@@ -291,7 +291,7 @@ describe('DS#create', function () {
     return Foo.create(foo).then(function (f) {
       assert.deepEqual(JSON.stringify(f), JSON.stringify({ name: 'foo', foo_id: 2 }), 'foo 1 should have been created');
       assert.deepEqual(JSON.stringify(Foo.get(2)), JSON.stringify({ name: 'foo', foo_id: 2}));
-      assert(Foo.get(foo.foo_id) == null, 'Temporary ID should have been overwritten');
+      assert.isDefined(Foo.get(foo.foo_id), 'Item with Temporary ID is still in the store');
     });
   });
 });

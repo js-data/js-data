@@ -2,7 +2,7 @@ describe('DS#createInstance', function () {
   it('should throw an error when method pre-conditions are not met', function () {
     assert.throws(function () {
       store.createInstance('fruit loops');
-    }, store.errors.NonexistentResourceError, 'fruit loops is not a registered resource!');
+    }, Error, 'fruit loops is not a registered resource!');
 
     DSUtils.forEach(TYPES_EXCEPT_OBJECT, function (key) {
       if (!key) {
@@ -10,7 +10,7 @@ describe('DS#createInstance', function () {
       }
       assert.throws(function () {
         store.createInstance('post', key);
-      }, store.errors.IllegalArgumentError, '"attrs" must be an object!');
+      }, Error, '"attrs" must be an object!');
     });
 
     DSUtils.forEach(TYPES_EXCEPT_OBJECT, function (key) {
@@ -19,7 +19,7 @@ describe('DS#createInstance', function () {
       }
       assert.throws(function () {
         store.createInstance('post', {}, key);
-      }, store.errors.IllegalArgumentError, '"options" must be an object!');
+      }, Error, '"options" must be an object!');
     });
   });
 
