@@ -68,34 +68,32 @@ const store = new DataStore()
 // "store" will use an http adapter by default
 store.registerAdapter('http', new HttpAdapter(), { 'default': true })
 
-// Define a new Mapper for a "user" resource
+// Define a Mapper for a "user" resource
 store.defineMapper('user')
-// Get a reference to the store's "user" collection
-const Users = store.getCollection('user')
+```
 
-async function showExample () {
-  let user = await store.find('user', 1)
+```js
+// GET /user/1
+let user = await store.find('user', 1)
 
-  console.log(user) // { id: 1, name: 'John' }
+console.log(user) // { id: 1, name: 'John' }
 
-  // The user record is now stored in Users
-  console.log(Users.get(user.id)) // { id: 1, name: 'John' }
-  console.log(user === Users.get(user.id)) // true
+// The user record is now stored in Users
+console.log(store.get('user', user.id)) // { id: 1, name: 'John' }
+console.log(user === store.get('user', user.id)) // true
 
-  user.name = 'Johnny'
+// PUT /user/1 {name:"Johnny"}
+user = await store.update('user', user.id, { name: 'Johnny' })
 
-  // PUT /user/1 {name:"Johnny"}
-  user = await user.save()
+// The user record has been updated, and the change synced to the store
+console.log(store.get('user', user.id)) // { id: 1, name: 'Johnny' }
+console.log(user === store.get('user', user.id)) // true
 
-  // The user record has been updated
-  console.log(Users.get(user.id)) // { id: 1, name: 'Johnny' }
-  console.log(user === Users.get(user.id)) // true
+// DELETE /user/1
+await store.destroy('user', user.id)
 
-  await user.destroy()
-
-  // The user instance no longer stored in Users
-  console.log(Users.get(1)) // undefined
-}
+// The user instance no longer in the store
+console.log(store.get('user', 1)) // undefined
 ```
 
 __ES5:__
@@ -107,34 +105,32 @@ var store = new JSData.DataStore()
 // "store" will use an http adapter by default
 store.registerAdapter('http', new HttpAdapter(), { default: true })
 
-// Define a new Mapper for a "user" resource
+// Define a Mapper for a "user" resource
 store.defineMapper('user')
-// Get a reference to the store's "user" collection
-var Users = store.getCollection('user')
 
+// GET /user/1
 store.find('user', 1)
   .then(function (user) {
     console.log(user) // { id: 1, name: 'John' }
 
     // The user record is now stored in Users
-    console.log(Users.get(user.id)) // { id: 1, name: 'John' }
-    console.log(user === Users.get(user.id)) // true
-
-    user.name = 'Johnny'
+    console.log(store.get('user', user.id)) // { id: 1, name: 'John' }
+    console.log(user === store.get('user', user.id)) // true
 
     // PUT /user/1 {name:"Johnny"}
-    return user.save()
+    return await store.update('user', user.id, { name: 'Johnny' })
   })
   .then(function (user) {
-    // The user record has been updated
-    console.log(Users.get(user.id)) // { id: 1, name: 'Johnny' }
-    console.log(user === Users.get(user.id)) // true
+    // The user record has been updated, and the change synced to the store
+    console.log(store.get('user', user.id)) // { id: 1, name: 'Johnny' }
+    console.log(user === store.get('user', user.id)) // true
 
-    return user.destroy()
+    // DELETE /user/1
+    return store.destroy('user', user.id)
   })
   .then(function () {
-    // The user instance no longer stored in Users
-    console.log(Users.get(1)) // undefined
+    // The user instance no longer in the store
+    console.log(store.get('user', 1)) // undefined
   })
 ```
 
