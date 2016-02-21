@@ -1,48 +1,62 @@
 <img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="96" height="96" />
 
-# [JSData](http://www.js-data.io/)
+# [js-data](http://www.js-data.io/)
 
-[![Slack Status][sl_b]][slack]
-[![npm version][npm_b]][npm_l]
-[![Circle CI][circle_b]][circle_l]
-[![npm downloads][dn_b]][dn_l]
-[![Coverage Status][cov_b]][cov_l]
-[![Codacy][cod_b]][cod_l]
+[![Slack Status][b1]][b2]
+[![npm version][b3]][b4]
+[![Circle CI][b5]][b6]
+[![npm downloads][b7]][b8]
+[![Coverage Status][b9]][b10]
+[![Codacy][b11]][b12]
 
-JSData is a framework-agnostic, datastore-agnostic ORM/ODM for Node.js and the
+[b1]: http://slack.js-data.io/badge.svg
+[b2]: http://slack.js-data.io
+[b3]: https://img.shields.io/npm/v/js-data.svg?style=flat
+[b4]: https://www.npmjs.org/package/js-data
+[b5]: https://img.shields.io/circleci/project/js-data/js-data/master.svg?style=flat
+[b6]: https://circleci.com/gh/js-data
+[b7]: https://img.shields.io/npm/dm/js-data.svg?style=flat
+[b8]: https://www.npmjs.org/package/js-data
+[b9]: https://img.shields.io/coveralls/js-data/js-data/master.svg?style=flat
+[b10]: https://coveralls.io/github/js-data
+[b11]: https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg
+[b12]: https://www.codacy.com/app/jasondobry/js-data/dashboard
+
+js-data is a framework-agnostic, datastore-agnostic ORM/ODM for Node.js and the
 Browser.
 
-Adapters allow JSData to connect to various data sources such as Firebase, MySql,
-RethinkDB, MongoDB, localStorage, Redis, a REST API, etc. With JSData you can
-re-use your Models between environments, keep your data layer intact when
-transitioning between app frameworks, and work with a unified data API on the
-server and the client. JSData employs conventions for rapid development, but
-allows for endless customization in order to meet your particular needs.
+Adapters allow js-data to connect to various data sources such as Firebase,
+MySql, RethinkDB, MongoDB, localStorage, Redis, a REST API, etc. With js-data
+you can re-use your data modeling code between environments, keep your data
+layer intact when transitioning between app frameworks, and work with a unified
+data API on the server and the client. js-data employs conventions for rapid
+development, but allows for endless customization in order to meet your
+particular needs.
 
-For Getting Started guides, visit __[http://js-data.io](http://www.js-data.io)__!
+To get started, visit __[http://js-data.io](http://www.js-data.io)__.
 
 ## Table of contents
 
 * [Quick start](#quick-start)
 * [Background](#background)
 * [Dependencies](#dependencies)
-* [Guides & Tutorials](#documentation)
-* [API Reference Docs](#api-reference)
-* [Support](#support)
+* [Guides and Tutorials](#guides-and-tutorials)
+* [API Reference Docs](#api-reference-docs)
 * [Community](#community)
+* [Support](#support)
 * [Contributing](#contributing)
 * [License](#license)
 
 ## Quick Start
 
-This example shows setting up JSData to use the Http adapter in the browser:
+This example shows setting up js-data to use the Http adapter in the browser:
 
 ```
 npm i --save js-data js-data-http
 ```
 
-See [installation instructions][inst] for making JSData part of your
-r.js/browserify/webpack build.
+See [installation instructions](http://js-data.io/docs/installation) for more
+information.
 
 ```javascript
 import {DataStore} from 'js-data'
@@ -126,158 +140,74 @@ store.find('user', 1)
 
 ## Background
 
-Most ORMs/ODMs only work with a single datastore, most JavaScript ORMs only work
-in Node.js _or_ the Browser. Wouldn't it be nice if you could use the same
+Most ORMs/ODMs only work with a single datastore, and most JavaScript ORMs only
+work in Node.js _or_ the Browser. Wouldn't it be nice if you could use the same
 ORM/ODM on the client as you do on the backend? Wouldn't it be nice if you could
 switch databases without having to switch out your data layer code? Enter
-__JSData__.
+__js-data__.
 
-Originally inspired by the desire to have something like [Ember Data][ember]
-that worked in Angular.js and other frameworks, JSData was created. Turns out,
-JSData works in Node.js, so server-side adapters were written. JSData is the
+Originally inspired by the desire to have something like [Ember Data][1] that
+worked in Angular.js and other frameworks, js-data was created. Turns out,
+js-data works in Node.js, so server-side adapters were written. js-data is the
 Model layer you've been craving. It consists of a convenient
 __framework-agnostic__, __datastore-agnostic__ ORM for managing your data, which
 uses __adapters__ to connect to various __persistence layers__.
 
-The most commonly used adapter is the [http adapter][http], which is perfect for
+The most commonly used adapter is the [http adapter][2], which is perfect for
 connecting your frontend to your backend. [localStorage][3], [localForage][4],
 [Firebase][5] and [other adapters][6] are available for the browser. On the
 server you could hook up to the [SQL adapter (Postgres/MySQL/MariaDB/SQLite3)][7]
 or the [MongoDB][8] adapter. More adapters are coming, and you're free to
-implement your own. See [Adapters][9].
+implement your own. See [Adapters][6].
 
-[![MtnWestJS Conf 2015 Presentation][mtn_b]][mtn_l]
+[![MtnWestJS Conf 2015 Presentation][9]][10]
+
+[1]: https://github.com/emberjs/data
+[2]: https://github.com/js-data/js-data-http
+[3]: https://github.com/js-data/js-data-localstorage
+[4]: https://github.com/js-data/js-data-localforage
+[5]: https://github.com/js-data/js-data-firebase
+[6]: http://js-data.io/docs/adapters
+[7]: https://github.com/js-data/js-data-sql
+[8]: https://github.com/js-data/js-data-mongodb
+[9]: http://img.youtube.com/vi/8wxnnJA9FKw/0.jpg
+[10]: https://www.youtube.com/watch?v=8wxnnJA9FKw
 
 ## Dependencies
 
-JSData requires the presence of a `Promise` constructor in the global
-environment. In the browser, `window.Promise` must be available. In Node.js,
-`global.Promise` must be available. Here is a handy library for polyfilling:
-https://github.com/jakearchibald/es6-promise.
+js-data and its adapters depend on a global ES2015 `Promise` constructor. In
+the browser, `window.Promise` must be available. In Node.js, `global.Promise`
+must be available. Here is a handy [ES2015 Promise polyfill](https://github.com/jakearchibald/es6-promise)
+if you need it.
 
-JSData also requires full ES5 support from the runtime. Here is a handy library
-for polyfilling: https://github.com/afarkas/html5shiv
+js-data and its adapters require full ES5 support from the runtime. Here is a
+handy [ES5 polyfill](https://github.com/afarkas/html5shiv) if you need it.
 
-## Guides & Tutorials
-- [Main Site](http://www.js-data.io)
-- [Getting Started with js-data](http://www.js-data.io/docs/home)
-- [Resources/Models](http://www.js-data.io/docs/resources)
-- [Working with the Data Store](http://www.js-data.io/docs/working-with-the-data-store)
-- [Adapters](http://www.js-data.io/docs/working-with-adapters)
-- [Model Lifecycle](http://www.js-data.io/docs/model-lifecycle)
-- [Custom Instance Behavior](http://www.js-data.io/docs/custom-instance-behavior)
-- [Computed Properties](http://www.js-data.io/docs/computed-properties)
-- [Relations](http://www.js-data.io/docs/relations)
-- [Schemata & Validation](http://www.js-data.io/docs/schemata--validation)
-- [JSData on the server](http://www.js-data.io/docs/jsdata-on-the-server)
-- [Angular + JSData](http://www.js-data.io/docs/js-data-angular)
-- [FAQ](http://www.js-data.io/docs/faq)
-- [CHANGELOG.md](https://github.com/js-data/js-data/blob/master/CHANGELOG.md)
+## Guides and Tutorials
 
-See an issue with the documentation? Have something to add? Click the "Suggest
-Edits" button at the top right of each page and make your suggested changes!
+[Get started at http://js-data.io](http://js-data.io)
 
 ## API Reference Docs
-- [all](http://api.js-data.io/)
-- [js-data](http://api.js-data.io/js-data)
-- [js-data-http](http://api.js-data.io/js-data-http)
-- [js-data-localstorage](http://api.js-data.io/js-data-localstorage)
+
+[Visit http://api.js-data.io](http://api.js-data.io).
+
+## Community
+
+[Explore the Community](http://js-data.io/docs/community).
 
 ## Support
 
-Support questions are handled via [Stack Overflow][so], [Slack][slack], and the
-[Mailing List][ml]. Ask your questions there.
-
-## Community
-- [StackOverflow][so]
-- [Slack chat][slack] [![Slack Status][sl_b]][slack]
-- [Announcements](http://www.js-data.io/blog)
-- [Mailing List](ml)
-- [Issue Tracker](https://github.com/js-data/js-data/issues)
-- [GitHub](https://github.com/js-data/js-data)
-- [Contributing Guide](https://github.com/js-data/js-data/blob/master/CONTRIBUTING.md)
+[Find out how to Get Support](http://js-data.io/docs/support).
 
 ## Contributing
 
-When submitting bug reports or feature requests on GitHub, please include _as
-much detail as possible_.
-
-- good - Your versions of Angular, JSData, etc, relevant console logs, stack
-traces, code examples that revealed the issue, etc.
-- better - A [plnkr](http://plnkr.co/), [fiddle](http://jsfiddle.net/), or
-[bin](http://jsbin.com/?html,output) that demonstrates the issue
-- best - A Pull Request that fixes the issue, including test coverage for the
-issue and the fix
-
-#### Pull Requests
-
-1. Contribute to the issue/discussion that is the reason you'll be developing in
-the first place
-1. Fork js-data
-1. `git clone git@github.com:<you>/js-data.git`
-1. `cd js-data`
-1. `npm install`
-1. Write your code, including relevant documentation and tests
-1. Run `npm test` (build and test)
-1. Your code will be linted and checked for formatting, the tests will be run
-1. The `dist/` folder & files will be generated, do NOT commit `dist/*`! They
-will be committed when a release is cut.
-1. Submit your PR and we'll review!
-1. Thanks!
+[Read the Contributing Guide](http://js-data.io/docs/contributing).
 
 ## License
 
 The MIT License (MIT)
 
-Copyright (c) 2014-2016 Jason Dobry
+Copyright (c) 2014-2016 js-data Project Authors
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-[sl_b]: http://slack.js-data.io/badge.svg
-[npm_b]: https://img.shields.io/npm/v/js-data.svg?style=flat
-[npm_l]: https://www.npmjs.org/package/js-data
-[circle_b]: https://img.shields.io/circleci/project/js-data/js-data/master.svg?style=flat
-[circle_l]: https://circleci.com/gh/js-data/js-data/tree/master
-[dn_b]: https://img.shields.io/npm/dm/js-data.svg?style=flat
-[dn_l]: https://www.npmjs.org/package/js-data
-[cov_b]: https://img.shields.io/coveralls/js-data/js-data/master.svg?style=flat
-[cov_l]: https://coveralls.io/github/js-data/js-data?branch=master
-[cod_b]: https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg
-[cod_l]: https://www.codacy.com/app/jasondobry/js-data/dashboard
-
-[ember]: https://github.com/emberjs/data
-[http]: http://www.js-data.io/docs/dshttpadapter
-[3]: http://www.js-data.io/docs/dslocalstorageadapter
-[4]: http://www.js-data.io/docs/dslocalforageadapter
-[5]: http://www.js-data.io/docs/dsfirebaseadapter
-[6]: http://www.js-data.io/docs/working-with-adapters
-[7]: http://www.js-data.io/docs/dssqladapter
-[8]: http://www.js-data.io/docs/dsmongodbadapter
-[9]: http://www.js-data.io/docs/working-with-adapters
-[10]: https://github.com/Polymer/observe-js
-[11]: https://www.firebase.com/blog/2013-10-04-firebase-angular-data-binding.html
-[12]: http://confreaks.tv/videos/mwjs2015-give-your-data-the-respect-it-deserves
-[mtn_b]: http://img.youtube.com/vi/8wxnnJA9FKw/0.jpg
-[mtn_l]: https://www.youtube.com/watch?v=8wxnnJA9FKw
-
-[inst]: http://www.js-data.io/docs#use-with-webpack
-
-[slack]: http://slack.js-data.io
-[ml]: https://groups.io/org/groupsio/jsdata
-[so]: http://stackoverflow.com/questions/tagged/jsdata
+* [LICENSE](https://github.com/js-data/js-data/blob/master/LICENSE)
+* [AUTHORS](https://github.com/js-data/js-data/blob/master/AUTHORS)
