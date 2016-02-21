@@ -203,7 +203,8 @@ handy [ES5 polyfill](https://github.com/afarkas/html5shiv) if you need it.
 
 The MIT License (MIT)
 
-Copyright (c) 2014-2016 js-data Project Authors
+Copyright (c) 2014-2016 js-data project authors
 
 * [LICENSE](https://github.com/js-data/js-data/blob/master/LICENSE)
 * [AUTHORS](https://github.com/js-data/js-data/blob/master/AUTHORS)
+* [CONTRIBUTORS](https://github.com/js-data/js-data/blob/master/CONTRIBUTORS)
