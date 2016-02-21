@@ -14,6 +14,140 @@ import {
 } from './decorators'
 import Mapper from './Mapper'
 
+const toProxy = [
+  /**
+   * TODO
+   *
+   * @name Container#create
+   * @method
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {Object} record Passed to {@link Mapper#create}.
+   * @param {Object} [opts] Passed to {@link Mapper#create}. See
+   * {@link Mapper#create} for more configuration options.
+   * @return {Promise}
+   */
+  'create',
+
+  /**
+   * TODO
+   *
+   * @name Container#createMany
+   * @method
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {Array} records Passed to {@link Mapper#createMany}.
+   * @param {Object} [opts] Passed to {@link Mapper#createMany}. See
+   * {@link Mapper#createMany} for more configuration options.
+   * @return {Promise}
+   */
+  'createMany',
+
+  /**
+   * Proxy for {@link Mapper#createRecord}.
+   *
+   * @name Container#createRecord
+   * @method
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {Object} props Passed to {@link Mapper#createRecord}.
+   * @param {Object} [opts] Passed to {@link Mapper#createRecord}. See
+   * {@link Mapper#createRecord} for configuration options.
+   * @return {Promise}
+   */
+  'createRecord',
+
+  /**
+   * TODO
+   *
+   * @name Container#destroy
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {(string|number)} id - Passed to {@link Mapper#destroy}.
+   * @param {Object} [opts] - Passed to {@link Mapper#destroy}. See
+   * {@link Mapper#destroy} for more configuration options.
+   * @return {Promise}
+   */
+  'destroy',
+
+  /**
+   * TODO
+   *
+   * @name Container#destroyAll
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {Object} [query] - Passed to {@link Mapper#destroyAll}.
+   * @param {Object} [opts] - Passed to {@link Mapper#destroyAll}. See
+   * {@link Mapper#destroyAll} for more configuration options.
+   * @return {Promise}
+   */
+  'destroyAll',
+
+  /**
+   * TODO
+   *
+   * @name Container#find
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {(string|number)} id - Passed to {@link Mapper#find}.
+   * @param {Object} [opts] - Passed to {@link Mapper#find}.
+   * @return {Promise}
+   */
+  'find',
+
+  /**
+   * TODO
+   *
+   * @name Container#findAll
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {Object} [query] - Passed to {@link Model.findAll}.
+   * @param {Object} [opts] - Passed to {@link Model.findAll}.
+   * @return {Promise}
+   */
+  'findAll',
+
+  'is',
+
+  /**
+   * TODO
+   *
+   * @name Container#update
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {(string|number)} id - Passed to {@link Mapper#update}.
+   * @param {Object} record - Passed to {@link Mapper#update}.
+   * @param {Object} [opts] - Passed to {@link Mapper#update}. See
+   * {@link Mapper#update} for more configuration options.
+   * @return {Promise}
+   */
+  'update',
+
+  /**
+   * TODO
+   *
+   * @name Container#updateAll
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {Object?} query - Passed to {@link Model.updateAll}.
+   * @param {Object} props - Passed to {@link Model.updateAll}.
+   * @param {Object} [opts] - Passed to {@link Model.updateAll}. See
+   * {@link Model.updateAll} for more configuration options.
+   * @return {Promise}
+   */
+  'updateAll',
+
+  /**
+   * TODO
+   *
+   * @name Container#updateMany
+   * @method
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {(Object[]|Record[])} records Passed to {@link Mapper#updateMany}.
+   * @param {Object} [opts] Passed to {@link Mapper#updateMany}. See
+   * {@link Mapper#updateMany} for more configuration options.
+   * @return {Promise}
+   */
+  'updateMany'
+]
+
 /**
  * ```javascript
  * import {Container} from 'js-data'
@@ -135,53 +269,6 @@ Container.extend = extend
 
 addHiddenPropsToTarget(Container.prototype, {
   /**
-   * TODO
-   *
-   * @name Container#create
-   * @method
-   * @param {string} name Name of the {@link Mapper} to target.
-   * @param {Object} record Passed to {@link Mapper#create}.
-   * @param {Object} [opts] Passed to {@link Mapper#create}. See
-   * {@link Mapper#create} for more configuration options.
-   * @return {Promise}
-   */
-  create (name, record, opts) {
-    const self = this
-    return self.getMapper(name).create(record, opts)
-  },
-
-  /**
-   * TODO
-   *
-   * @name Container#createMany
-   * @method
-   * @param {string} name Name of the {@link Mapper} to target.
-   * @param {Array} records Passed to {@link Mapper#createMany}.
-   * @param {Object} [opts] Passed to {@link Mapper#createMany}. See
-   * {@link Mapper#createMany} for more configuration options.
-   * @return {Promise}
-   */
-  createMany (name, records, opts) {
-    const self = this
-    return self.getMapper(name).createMany(records, opts)
-  },
-
-  /**
-   * Proxy for {@link Mapper#createRecord}.
-   *
-   * @name Container#createRecord
-   * @method
-   * @param {string} name Name of the {@link Mapper} to target.
-   * @param {Object} props Passed to {@link Mapper#createRecord}.
-   * @param {Object} [opts] Passed to {@link Mapper#createRecord}. See
-   * {@link Mapper#createRecord} for configuration options.
-   * @return {Promise}
-   */
-  createRecord (name, props, opts) {
-    return this.getMapper(name).createRecord(props, opts)
-  },
-
-  /**
    * Create a new mapper and register it in this container.
    *
    * @example
@@ -258,68 +345,6 @@ addHiddenPropsToTarget(Container.prototype, {
     })
 
     return mapper
-  },
-
-  /**
-   * TODO
-   *
-   * @name Container#destroy
-   * @method
-   * @param {string} name - Name of the {@link Mapper} to target.
-   * @param {(string|number)} id - Passed to {@link Mapper#destroy}.
-   * @param {Object} [opts] - Passed to {@link Mapper#destroy}. See
-   * {@link Mapper#destroy} for more configuration options.
-   * @return {Promise}
-   */
-  destroy (name, id, opts) {
-    const self = this
-    return self.getMapper(name).destroy(id, opts)
-  },
-
-  /**
-   * TODO
-   *
-   * @name Container#destroyAll
-   * @method
-   * @param {string} name - Name of the {@link Mapper} to target.
-   * @param {Object} [query] - Passed to {@link Mapper#destroyAll}.
-   * @param {Object} [opts] - Passed to {@link Mapper#destroyAll}. See
-   * {@link Mapper#destroyAll} for more configuration options.
-   * @return {Promise}
-   */
-  destroyAll (name, query, opts) {
-    const self = this
-    return self.getMapper(name).destroyAll(query, opts)
-  },
-
-  /**
-   * TODO
-   *
-   * @name Container#find
-   * @method
-   * @param {string} name - Name of the {@link Mapper} to target.
-   * @param {(string|number)} id - Passed to {@link Mapper#find}.
-   * @param {Object} [opts] - Passed to {@link Mapper#find}.
-   * @return {Promise}
-   */
-  find (name, id, opts) {
-    const self = this
-    return self.getMapper(name).find(id, opts)
-  },
-
-  /**
-   * TODO
-   *
-   * @name Container#findAll
-   * @method
-   * @param {string} name - Name of the {@link Mapper} to target.
-   * @param {Object} [query] - Passed to {@link Model.findAll}.
-   * @param {Object} [opts] - Passed to {@link Model.findAll}.
-   * @return {Promise}
-   */
-  findAll (name, query, opts) {
-    const self = this
-    return self.getMapper(name).findAll(query, opts)
   },
 
   /**
@@ -419,55 +444,13 @@ addHiddenPropsToTarget(Container.prototype, {
         mapper.defaultAdapter = name
       })
     }
-  },
-
-  /**
-   * TODO
-   *
-   * @name Container#update
-   * @method
-   * @param {string} name - Name of the {@link Mapper} to target.
-   * @param {(string|number)} id - Passed to {@link Mapper#update}.
-   * @param {Object} record - Passed to {@link Mapper#update}.
-   * @param {Object} [opts] - Passed to {@link Mapper#update}. See
-   * {@link Mapper#update} for more configuration options.
-   * @return {Promise}
-   */
-  update (name, id, record, opts) {
-    const self = this
-    return self.getMapper(name).update(id, record, opts)
-  },
-
-  /**
-   * TODO
-   *
-   * @name Container#updateAll
-   * @method
-   * @param {string} name - Name of the {@link Mapper} to target.
-   * @param {Object?} query - Passed to {@link Model.updateAll}.
-   * @param {Object} props - Passed to {@link Model.updateAll}.
-   * @param {Object} [opts] - Passed to {@link Model.updateAll}. See
-   * {@link Model.updateAll} for more configuration options.
-   * @return {Promise}
-   */
-  updateAll (name, query, props, opts) {
-    const self = this
-    return self.getMapper(name).updateAll(query, props, opts)
-  },
-
-  /**
-   * TODO
-   *
-   * @name Container#updateMany
-   * @method
-   * @param {string} name Name of the {@link Mapper} to target.
-   * @param {(Object[]|Record[])} records Passed to {@link Mapper#updateMany}.
-   * @param {Object} [opts] Passed to {@link Mapper#updateMany}. See
-   * {@link Mapper#updateMany} for more configuration options.
-   * @return {Promise}
-   */
-  updateMany (name, records, opts) {
-    const self = this
-    return self.getMapper(name).updateMany(records, opts)
   }
 })
+
+const toAdd = {}
+toProxy.forEach(function (method) {
+  toAdd[method] = function (name, ...args) {
+    return this.getMapper(name)[method](...args)
+  }
+})
+addHiddenPropsToTarget(Container.prototype, toAdd)

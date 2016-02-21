@@ -72,5 +72,28 @@ export function init () {
       Test.assert.isTrue(cat instanceof Cat)
       Test.assert.isTrue(cat2 instanceof Cat)
     })
+    it('should create records on nested data', function () {
+      const Test = this
+      const store = Test.store
+      const userProps = {
+        name: 'John',
+        organization: {
+          name: 'Company Inc'
+        },
+        comments: [
+          {
+            content: 'foo'
+          }
+        ],
+        profile: {
+          email: 'john@email.com'
+        }
+      }
+      const user = store.createRecord('user', userProps)
+      Test.assert.isTrue(store.is('user', user), 'user should be a user record')
+      Test.assert.isTrue(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
+      Test.assert.isTrue(store.is('profile', user.profile), 'user.profile should be a profile record')
+      Test.assert.isTrue(store.is('organization', user.organization), 'user.organization should be a organization record')
+    })
   })
 }

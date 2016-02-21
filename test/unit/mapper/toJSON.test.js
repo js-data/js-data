@@ -47,7 +47,7 @@ export function init () {
       Test.assert.objectsEqual(Test.User.toJSON(user), expected, 'should return enumerable properties')
       Test.assert.objectsEqual(user.toJSON(), expected, 'should return enumerable properties')
     })
-    it('should keep relations when not an instance', function () {
+    it('should work when not a Record instance', function () {
       const Test = this
       const user = {
         name: 'John',
@@ -56,20 +56,15 @@ export function init () {
         },
         comments: [
           {
-            text: 'foo',
-            approvedByUser: {
-              name: 'Sally',
-              organization: {
-                name: 'Group Inc.'
-              }
-            }
+            text: 'foo'
           },
           {
             text: 'bar'
           }
         ]
       }
-      Test.assert.objectsEqual(Test.User.toJSON(user), user, 'returned data should be equal to passed in data')
+      Test.assert.objectsEqual(Test.User.toJSON(user), { name: 'John' }, 'returned data should not have relations')
+      Test.assert.objectsEqual(Test.User.toJSON(user, { withAll: true }), user, 'returned data should have all relations')
     })
     it('should remove relations when an instance', function () {
       const Test = this

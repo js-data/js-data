@@ -11,9 +11,7 @@ import {
   set
 } from './utils'
 import {
-  belongsToType,
-  hasManyType,
-  hasOneType
+  hasManyType
 } from './decorators'
 import Collection from './Collection'
 
@@ -84,27 +82,22 @@ const LinkedCollection = Collection.extend({
         const relationIdAttribute = Relation.idAttribute
         // Grab the foreign key in this relationship, if there is one
         const foreignKey = def.foreignKey
-        const localField = def.localField
         // A lot of this is an optimization for being able to insert a lot of
         // data as quickly as possible
         const relatedCollection = datastore.getCollection(relationName)
         const type = def.type
-        const isBelongsTo = type === belongsToType
         const isHasMany = type === hasManyType
-        const isHasOne = type === hasOneType
-        const idAttribute = mapper.idAttribute
         const shouldAdd = isUndefined(def.add) ? true : !!def.add
         let relatedData
 
         records.forEach(function (record) {
           // Grab a reference to the related data attached or linked to the
           // currently visited record
-          relatedData = get(record, localField)
+          relatedData = def.getLocalField(record)
 
           if (isFunction(def.add)) {
             def.add(datastore, def, record)
           } else if (relatedData) {
-            const id = get(record, idAttribute)
             // Otherwise, if there is something to be added, add it
             if (isHasMany) {
               // Handle inserting hasMany relations
@@ -114,7 +107,8 @@ const LinkedCollection = Collection.extend({
                 if (toInsertItem !== relatedCollection.get(relatedCollection.recordId(toInsertItem))) {
                   // Make sure this item has its foreignKey
                   if (foreignKey) {
-                    set(toInsertItem, foreignKey, id)
+                    // TODO: slow, could be optimized? But user loses hook
+                    def.setForeignKey(record, toInsertItem)
                   }
                   // Finally add this related item
                   if (shouldAdd) {
@@ -134,18 +128,14 @@ const LinkedCollection = Collection.extend({
               // Handle inserting belongsTo and hasOne relations
               if (relatedData !== relatedCollection.get(relatedDataId)) {
                 // Make sure foreignKey field is set
-                if (isBelongsTo) {
-                  set(record, foreignKey, relatedDataId)
-                } else if (isHasOne) {
-                  set(relatedData, foreignKey, id)
-                }
+                def.setForeignKey(record, relatedData)
                 // Finally insert this related item
                 if (shouldAdd) {
                   relatedData = relatedCollection.add(relatedData)
                 }
               }
             }
-            set(record, localField, relatedData)
+            def.setLocalField(record, relatedData)
           }
         })
       })
