@@ -515,6 +515,10 @@ addHiddenPropsToTarget(Collection.prototype, {
   /**
    * Return the index with the given name. If no name is provided, return the
    * main index. Throws an error if the specified index does not exist.
+   *
+   * @name Collection#getIndex
+   * @method
+   * @param {string} [name] The name of the index to retrieve.
    */
   getIndex (name) {
     const index = name ? this.indexes[name] : this.index
