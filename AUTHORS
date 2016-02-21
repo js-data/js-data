@@ -1,11 +1,13 @@
 # This is the official list of js-data project authors.
 #
-# Names should be added to this file as:
-#   Name or Organization <email address>
+# This file is auto-generatred
+#
+# Names are formatted as:
+#   # commits  Name or Organization <email address>
 # The email address is not required for organizations.
      1	David Madner <david.madner@gmx.net>
      2	InternalFX <bryan@internalfx.com>
-   324	Jason Dobry <jason.dobry@gmail.com>
+   325	Jason Dobry <jason.dobry@gmail.com>
      1	Ken Børge Viktil <ken.borge.viktil@evry.com>
      4	Kent C. Dodds <kent@doddsfamily.us>
      3	Matt Lewis <matthew.lewis@socialsignin.co.uk>

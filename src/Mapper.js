@@ -11,12 +11,11 @@ import {
   get,
   getSuper,
   isArray,
+  isObject,
   isString,
   isUndefined,
   plainCopy,
-  resolve,
-  set,
-  withoutRelations
+  resolve
 } from './utils'
 import {
   belongsTo,
@@ -464,7 +463,20 @@ addHiddenPropsToTarget(Mapper.prototype, {
    * @return {Object} The unsaved record.
    */
   createRecord (props, opts) {
-    const RecordClass = this.RecordClass
+    const self = this
+    const RecordClass = self.RecordClass
+    const relationList = self.relationList || []
+    relationList.forEach(function (def) {
+      const relatedMapper = def.getRelation()
+      const relationData = def.getLocalField(props)
+      if (isArray(relationData) && relationData.length && !relatedMapper.is(relationData[0])) {
+        def.setLocalField(props, relationData.map(function (relationDataItem) {
+          return def.getRelation().createRecord(relationDataItem)
+        }))
+      } else if (isObject(relationData) && !relatedMapper.is(relationData)) {
+        def.setLocalField(props, def.getRelation().createRecord(relationData))
+      }
+    })
     // Check to make sure "props" is not already an instance of this Mapper.
     return RecordClass ? (props instanceof RecordClass ? props : new RecordClass(props, opts)) : props
   },
@@ -498,9 +510,10 @@ addHiddenPropsToTarget(Mapper.prototype, {
   toJSON (record, opts) {
     const self = this
     opts || (opts = {})
+    const relationFields = (self ? self.relationFields : []) || []
     let json = {}
     let properties
-    if (self.schema) {
+    if (self && self.schema) {
       properties = self.schema.properties || {}
       // TODO: Make this work recursively
       forOwn(properties, function (opts, prop) {
@@ -510,33 +523,33 @@ addHiddenPropsToTarget(Mapper.prototype, {
     properties || (properties = {})
     if (!opts.strict) {
       forOwn(record, function (value, key) {
-        if (!properties[key]) {
+        if (!properties[key] && relationFields.indexOf(key) === -1) {
           json[key] = plainCopy(value)
         }
       })
     }
-    if (self.is(record)) {
-      // The user wants to include relations in the resulting plain object
-      // representation
-      if (self && self.relationList && opts.with) {
-        if (isString(opts.with)) {
-          opts.with = [opts.with]
-        }
-        forEachRelation(self, opts, function (def, __opts) {
-          const relationData = get(record, def.localField)
-
-          if (relationData) {
-            // The actual recursion
-            if (isArray(relationData)) {
-              set(json, def.localField, relationData.map(function (item) {
-                return def.getRelation().toJSON(item, __opts)
-              }))
-            } else {
-              set(json, def.localField, def.getRelation().toJSON(relationData, __opts))
-            }
-          }
-        })
+    // The user wants to include relations in the resulting plain object
+    // representation
+    if (self && opts.withAll) {
+      opts.with = relationFields.slice()
+    }
+    if (self && opts.with) {
+      if (isString(opts.with)) {
+        opts.with = [opts.with]
       }
+      forEachRelation(self, opts, function (def, __opts) {
+        const relationData = def.getLocalField(record)
+        if (relationData) {
+          // The actual recursion
+          if (isArray(relationData)) {
+            def.setLocalField(json, relationData.map(function (item) {
+              return def.getRelation().toJSON(item, __opts)
+            }))
+          } else {
+            def.setLocalField(json, def.getRelation().toJSON(relationData, __opts))
+          }
+        }
+      })
     }
     return json
   },
@@ -651,31 +664,30 @@ addHiddenPropsToTarget(Mapper.prototype, {
       // Allow for re-assignment from lifecycle hook
       props = _props || props
       // Now delegate to the adapter
-      const record = self.toJSON(props, opts)
       const belongsToRelationData = {}
       opts.with || (opts.with = [])
       let tasks = []
       forEachRelation(self, opts, function (def, __opts) {
-        const relationData = def.getLocalField(record)
+        const relationData = def.getLocalField(props)
         if (def.type === belongsToType && relationData) {
           // Create belongsTo relation first because we need a generated id to
           // attach to the child
           tasks.push(def.getRelation().create(relationData, __opts).then(function (data) {
             const relatedRecord = __opts.raw ? data.data : data
             def.setLocalField(belongsToRelationData, relatedRecord)
-            def.setForeignKey(record, relatedRecord)
+            def.setForeignKey(props, relatedRecord)
           }))
         }
       })
       return Promise.all(tasks).then(function () {
         op = opts.op = 'create'
-        self.dbg(op, record, opts)
-        return resolve(self.getAdapter(adapter)[op](self, withoutRelations(self, record), opts))
+        self.dbg(op, props, opts)
+        return resolve(self.getAdapter(adapter)[op](self, self.toJSON(props, { with: opts.pass || [] }), opts))
       }).then(function (data) {
         const createdRecord = opts.raw ? data.data : data
         tasks = []
         forEachRelation(self, opts, function (def, __opts) {
-          const relationData = def.getLocalField(record)
+          const relationData = def.getLocalField(props)
           if (!relationData) {
             return
           }
@@ -683,17 +695,17 @@ addHiddenPropsToTarget(Mapper.prototype, {
           // Create hasMany and hasOne after the main create because we needed
           // a generated id to attach to these items
           if (def.type === hasManyType) {
-            def.setForeignKey(record, relationData)
+            def.setForeignKey(createdRecord, relationData)
             task = def.getRelation().createMany(relationData, __opts).then(function (data) {
               def.setLocalField(createdRecord, opts.raw ? data.data : data)
             })
           } else if (def.type === hasOneType) {
-            def.setForeignKey(record, relationData)
+            def.setForeignKey(createdRecord, relationData)
             task = def.getRelation().create(relationData, __opts).then(function (data) {
               def.setLocalField(createdRecord, opts.raw ? data.data : data)
             })
-          } else if (def.type === belongsToType && def.get(belongsToRelationData)) {
-            def.setLocalField(createdRecord, def.get(belongsToRelationData))
+          } else if (def.type === belongsToType && def.getLocalField(belongsToRelationData)) {
+            def.setLocalField(createdRecord, def.getLocalField(belongsToRelationData))
           }
           if (task) {
             tasks.push(task)

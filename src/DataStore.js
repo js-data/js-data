@@ -201,7 +201,7 @@ const DataStore = Container.extend({
               if (!_self._get('$') || !link) {
                 return _self._get(path)
               }
-              const key = get(_self, foreignKey)
+              const key = def.getForeignKey(_self)
               const item = isUndefined(key) ? undefined : self.getCollection(relation).get(key)
               _self._set(path, item)
               return item
@@ -209,9 +209,9 @@ const DataStore = Container.extend({
             set (record) {
               const _self = this
               _self._set(path, record)
-              set(_self, foreignKey, self.getCollection(relation).recordId(record))
+              def.setForeignKey(_self, record)
               collection.updateIndex(_self, updateOpts)
-              return get(_self, localField)
+              return def.getLocalField(_self)
             }
           }
         } else if (type === hasManyType) {
@@ -229,7 +229,7 @@ const DataStore = Container.extend({
               if (!_self._get('$') || !link) {
                 return _self._get(path)
               }
-              const key = collection.recordId(_self)
+              const key = def.getForeignKey(_self)
               let items
               const relationCollection = self.getCollection(relation)
 
@@ -260,10 +260,12 @@ const DataStore = Container.extend({
               _self._set(path, records)
 
               if (foreignKey) {
-                records.forEach(function (record) {
-                  set(record, foreignKey, key)
-                  relationCollection.updateIndex(record, updateOpts)
-                })
+                def.setForeignKey(_self, records)
+                if (isArray(records)) {
+                  records.forEach(function (record) {
+                    relationCollection.updateIndex(record, updateOpts)
+                  })
+                }
               } if (localKeys) {
                 set(_self, localKeys, records.map(function (record) {
                   return relationCollection.recordId(record)
@@ -280,7 +282,7 @@ const DataStore = Container.extend({
                   }
                 })
               }
-              return get(_self, localField)
+              return def.getLocalField(_self)
             }
           }
         } else if (type === hasOneType) {
@@ -290,7 +292,7 @@ const DataStore = Container.extend({
               if (!_self._get('$') || !link) {
                 return _self._get(path)
               }
-              const key = collection.recordId(_self)
+              const key = def.getForeignKey(_self)
               const items = self.getCollection(relation).getAll(key, {
                 index: foreignKey
               })
@@ -300,11 +302,10 @@ const DataStore = Container.extend({
             },
             set (record) {
               const _self = this
-              const key = collection.recordId(_self)
               _self._set(path, record)
-              set(record, foreignKey, key)
+              def.setForeignKey(_self, record)
               self.getCollection(relation).updateIndex(record, updateOpts)
-              return get(_self, localField)
+              return def.getLocalField(_self)
             }
           }
         }

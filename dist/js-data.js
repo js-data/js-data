@@ -10,7 +10,7 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
-  (factory((global.JSData = {})));
+  (factory((global.JSData = global.JSData || {})));
 }(this, function (exports) { 'use strict';
 
   var babelHelpers = {};
@@ -635,7 +635,12 @@
   function forRelation(opts, def, fn, ctx) {
     var relationName = def.relation;
     var containedName = null;
+    opts || (opts = {});
     opts.with || (opts.with = []);
+    if (opts.withAll) {
+      fn.call(ctx, def, {});
+      return;
+    }
     if (opts.with.indexOf(relationName) !== -1) {
       containedName = relationName;
     } else if (opts.with.indexOf(def.localField) !== -1) {
@@ -669,17 +674,6 @@
     relationList.forEach(function (def) {
       forRelation(opts, def, fn, ctx);
     });
-  };
-
-  var withoutRelations = function withoutRelations(mapper, record) {
-    var _props = {};
-    var relationFields = mapper.relationFields || [];
-    forOwn(record, function (value, key) {
-      if (relationFields.indexOf(key) === -1) {
-        _props[key] = value;
-      }
-    });
-    return _props;
   };
 
 var utils = Object.freeze({
@@ -717,8 +711,7 @@ var utils = Object.freeze({
     addHiddenPropsToTarget: addHiddenPropsToTarget,
     extend: extend,
     getSuper: getSuper,
-    forEachRelation: forEachRelation,
-    withoutRelations: withoutRelations
+    forEachRelation: forEachRelation
   });
 
   /**
@@ -2560,7 +2553,7 @@ var utils = Object.freeze({
    * @return {Function} Invocation function, which accepts the target as the only
    * parameter.
    */
-  var belongsTo = function belongsTo(related, opts) {
+  var _belongsTo = function belongsTo(related, opts) {
     opts || (opts = {});
     opts.type = belongsToType;
     return function (target) {
@@ -2582,7 +2575,7 @@ var utils = Object.freeze({
    * @return {Function} Invocation function, which accepts the target as the only
    * parameter.
    */
-  var hasMany = function hasMany(related, opts) {
+  var _hasMany = function hasMany(related, opts) {
     opts || (opts = {});
     opts.type = hasManyType;
     return function (target) {
@@ -2604,7 +2597,7 @@ var utils = Object.freeze({
    * @return {Function} Invocation function, which accepts the target as the only
    * parameter.
    */
-  var hasOne = function hasOne(related, opts) {
+  var _hasOne = function hasOne(related, opts) {
     opts || (opts = {});
     opts.type = hasOneType;
     return function (target) {
@@ -4388,7 +4381,20 @@ var utils = Object.freeze({
      * @return {Object} The unsaved record.
      */
     createRecord: function createRecord(props, opts) {
-      var RecordClass = this.RecordClass;
+      var self = this;
+      var RecordClass = self.RecordClass;
+      var relationList = self.relationList || [];
+      relationList.forEach(function (def) {
+        var relatedMapper = def.getRelation();
+        var relationData = def.getLocalField(props);
+        if (isArray(relationData) && relationData.length && !relatedMapper.is(relationData[0])) {
+          def.setLocalField(props, relationData.map(function (relationDataItem) {
+            return def.getRelation().createRecord(relationDataItem);
+          }));
+        } else if (isObject(relationData) && !relatedMapper.is(relationData)) {
+          def.setLocalField(props, def.getRelation().createRecord(relationData));
+        }
+      });
       // Check to make sure "props" is not already an instance of this Mapper.
       return RecordClass ? props instanceof RecordClass ? props : new RecordClass(props, opts) : props;
     },
@@ -4424,9 +4430,10 @@ var utils = Object.freeze({
     toJSON: function toJSON(record, opts) {
       var self = this;
       opts || (opts = {});
+      var relationFields = (self ? self.relationFields : []) || [];
       var json = {};
       var properties = undefined;
-      if (self.schema) {
+      if (self && self.schema) {
         properties = self.schema.properties || {};
         // TODO: Make this work recursively
         forOwn(properties, function (opts, prop) {
@@ -4436,33 +4443,33 @@ var utils = Object.freeze({
       properties || (properties = {});
       if (!opts.strict) {
         forOwn(record, function (value, key) {
-          if (!properties[key]) {
+          if (!properties[key] && relationFields.indexOf(key) === -1) {
             json[key] = plainCopy(value);
           }
         });
       }
-      if (self.is(record)) {
-        // The user wants to include relations in the resulting plain object
-        // representation
-        if (self && self.relationList && opts.with) {
-          if (isString(opts.with)) {
-            opts.with = [opts.with];
-          }
-          forEachRelation(self, opts, function (def, __opts) {
-            var relationData = get(record, def.localField);
-
-            if (relationData) {
-              // The actual recursion
-              if (isArray(relationData)) {
-                set(json, def.localField, relationData.map(function (item) {
-                  return def.getRelation().toJSON(item, __opts);
-                }));
-              } else {
-                set(json, def.localField, def.getRelation().toJSON(relationData, __opts));
-              }
-            }
-          });
+      // The user wants to include relations in the resulting plain object
+      // representation
+      if (self && opts.withAll) {
+        opts.with = relationFields.slice();
+      }
+      if (self && opts.with) {
+        if (isString(opts.with)) {
+          opts.with = [opts.with];
         }
+        forEachRelation(self, opts, function (def, __opts) {
+          var relationData = def.getLocalField(record);
+          if (relationData) {
+            // The actual recursion
+            if (isArray(relationData)) {
+              def.setLocalField(json, relationData.map(function (item) {
+                return def.getRelation().toJSON(item, __opts);
+              }));
+            } else {
+              def.setLocalField(json, def.getRelation().toJSON(relationData, __opts));
+            }
+          }
+        });
       }
       return json;
     },
@@ -4581,31 +4588,30 @@ var utils = Object.freeze({
         // Allow for re-assignment from lifecycle hook
         props = _props || props;
         // Now delegate to the adapter
-        var record = self.toJSON(props, opts);
         var belongsToRelationData = {};
         opts.with || (opts.with = []);
         var tasks = [];
         forEachRelation(self, opts, function (def, __opts) {
-          var relationData = def.getLocalField(record);
+          var relationData = def.getLocalField(props);
           if (def.type === belongsToType && relationData) {
             // Create belongsTo relation first because we need a generated id to
             // attach to the child
             tasks.push(def.getRelation().create(relationData, __opts).then(function (data) {
               var relatedRecord = __opts.raw ? data.data : data;
               def.setLocalField(belongsToRelationData, relatedRecord);
-              def.setForeignKey(record, relatedRecord);
+              def.setForeignKey(props, relatedRecord);
             }));
           }
         });
         return Promise.all(tasks).then(function () {
           op = opts.op = 'create';
-          self.dbg(op, record, opts);
-          return resolve(self.getAdapter(adapter)[op](self, withoutRelations(self, record), opts));
+          self.dbg(op, props, opts);
+          return resolve(self.getAdapter(adapter)[op](self, self.toJSON(props, { with: opts.pass || [] }), opts));
         }).then(function (data) {
           var createdRecord = opts.raw ? data.data : data;
           tasks = [];
           forEachRelation(self, opts, function (def, __opts) {
-            var relationData = def.getLocalField(record);
+            var relationData = def.getLocalField(props);
             if (!relationData) {
               return;
             }
@@ -4613,17 +4619,17 @@ var utils = Object.freeze({
             // Create hasMany and hasOne after the main create because we needed
             // a generated id to attach to these items
             if (def.type === hasManyType) {
-              def.setForeignKey(record, relationData);
+              def.setForeignKey(createdRecord, relationData);
               task = def.getRelation().createMany(relationData, __opts).then(function (data) {
                 def.setLocalField(createdRecord, opts.raw ? data.data : data);
               });
             } else if (def.type === hasOneType) {
-              def.setForeignKey(record, relationData);
+              def.setForeignKey(createdRecord, relationData);
               task = def.getRelation().create(relationData, __opts).then(function (data) {
                 def.setLocalField(createdRecord, opts.raw ? data.data : data);
               });
-            } else if (def.type === belongsToType && def.get(belongsToRelationData)) {
-              def.setLocalField(createdRecord, def.get(belongsToRelationData));
+            } else if (def.type === belongsToType && def.getLocalField(belongsToRelationData)) {
+              def.setLocalField(createdRecord, def.getLocalField(belongsToRelationData));
             }
             if (task) {
               tasks.push(task);
@@ -5412,8 +5418,8 @@ var utils = Object.freeze({
      * @name Mapper#belongsTo
      * @method
      */
-    belongsTo: function belongsTo$$(RelatedMapper, opts) {
-      return belongsTo(RelatedMapper, opts)(this);
+    belongsTo: function belongsTo(RelatedMapper, opts) {
+      return _belongsTo(RelatedMapper, opts)(this);
     },
 
 
@@ -5427,8 +5433,8 @@ var utils = Object.freeze({
      * @name Mapper#hasMany
      * @method
      */
-    hasMany: function hasMany$$(RelatedMapper, opts) {
-      return hasMany(RelatedMapper, opts)(this);
+    hasMany: function hasMany(RelatedMapper, opts) {
+      return _hasMany(RelatedMapper, opts)(this);
     },
 
 
@@ -5442,8 +5448,8 @@ var utils = Object.freeze({
      * @name Mapper#hasOne
      * @method
      */
-    hasOne: function hasOne$$(RelatedMapper, opts) {
-      return hasOne(RelatedMapper, opts)(this);
+    hasOne: function hasOne(RelatedMapper, opts) {
+      return _hasOne(RelatedMapper, opts)(this);
     },
 
 
@@ -5519,6 +5525,137 @@ var utils = Object.freeze({
   }, function (value) {
     this._listeners = value;
   });
+
+  var toProxy = [
+  /**
+   * TODO
+   *
+   * @name Container#create
+   * @method
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {Object} record Passed to {@link Mapper#create}.
+   * @param {Object} [opts] Passed to {@link Mapper#create}. See
+   * {@link Mapper#create} for more configuration options.
+   * @return {Promise}
+   */
+  'create',
+
+  /**
+   * TODO
+   *
+   * @name Container#createMany
+   * @method
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {Array} records Passed to {@link Mapper#createMany}.
+   * @param {Object} [opts] Passed to {@link Mapper#createMany}. See
+   * {@link Mapper#createMany} for more configuration options.
+   * @return {Promise}
+   */
+  'createMany',
+
+  /**
+   * Proxy for {@link Mapper#createRecord}.
+   *
+   * @name Container#createRecord
+   * @method
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {Object} props Passed to {@link Mapper#createRecord}.
+   * @param {Object} [opts] Passed to {@link Mapper#createRecord}. See
+   * {@link Mapper#createRecord} for configuration options.
+   * @return {Promise}
+   */
+  'createRecord',
+
+  /**
+   * TODO
+   *
+   * @name Container#destroy
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {(string|number)} id - Passed to {@link Mapper#destroy}.
+   * @param {Object} [opts] - Passed to {@link Mapper#destroy}. See
+   * {@link Mapper#destroy} for more configuration options.
+   * @return {Promise}
+   */
+  'destroy',
+
+  /**
+   * TODO
+   *
+   * @name Container#destroyAll
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {Object} [query] - Passed to {@link Mapper#destroyAll}.
+   * @param {Object} [opts] - Passed to {@link Mapper#destroyAll}. See
+   * {@link Mapper#destroyAll} for more configuration options.
+   * @return {Promise}
+   */
+  'destroyAll',
+
+  /**
+   * TODO
+   *
+   * @name Container#find
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {(string|number)} id - Passed to {@link Mapper#find}.
+   * @param {Object} [opts] - Passed to {@link Mapper#find}.
+   * @return {Promise}
+   */
+  'find',
+
+  /**
+   * TODO
+   *
+   * @name Container#findAll
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {Object} [query] - Passed to {@link Model.findAll}.
+   * @param {Object} [opts] - Passed to {@link Model.findAll}.
+   * @return {Promise}
+   */
+  'findAll', 'is',
+
+  /**
+   * TODO
+   *
+   * @name Container#update
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {(string|number)} id - Passed to {@link Mapper#update}.
+   * @param {Object} record - Passed to {@link Mapper#update}.
+   * @param {Object} [opts] - Passed to {@link Mapper#update}. See
+   * {@link Mapper#update} for more configuration options.
+   * @return {Promise}
+   */
+  'update',
+
+  /**
+   * TODO
+   *
+   * @name Container#updateAll
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {Object?} query - Passed to {@link Model.updateAll}.
+   * @param {Object} props - Passed to {@link Model.updateAll}.
+   * @param {Object} [opts] - Passed to {@link Model.updateAll}. See
+   * {@link Model.updateAll} for more configuration options.
+   * @return {Promise}
+   */
+  'updateAll',
+
+  /**
+   * TODO
+   *
+   * @name Container#updateMany
+   * @method
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {(Object[]|Record[])} records Passed to {@link Mapper#updateMany}.
+   * @param {Object} [opts] Passed to {@link Mapper#updateMany}. See
+   * {@link Mapper#updateMany} for more configuration options.
+   * @return {Promise}
+   */
+  'updateMany'];
 
   /**
    * ```javascript
@@ -5641,57 +5778,6 @@ var utils = Object.freeze({
 
   addHiddenPropsToTarget(Container.prototype, {
     /**
-     * TODO
-     *
-     * @name Container#create
-     * @method
-     * @param {string} name Name of the {@link Mapper} to target.
-     * @param {Object} record Passed to {@link Mapper#create}.
-     * @param {Object} [opts] Passed to {@link Mapper#create}. See
-     * {@link Mapper#create} for more configuration options.
-     * @return {Promise}
-     */
-
-    create: function create(name, record, opts) {
-      var self = this;
-      return self.getMapper(name).create(record, opts);
-    },
-
-
-    /**
-     * TODO
-     *
-     * @name Container#createMany
-     * @method
-     * @param {string} name Name of the {@link Mapper} to target.
-     * @param {Array} records Passed to {@link Mapper#createMany}.
-     * @param {Object} [opts] Passed to {@link Mapper#createMany}. See
-     * {@link Mapper#createMany} for more configuration options.
-     * @return {Promise}
-     */
-    createMany: function createMany(name, records, opts) {
-      var self = this;
-      return self.getMapper(name).createMany(records, opts);
-    },
-
-
-    /**
-     * Proxy for {@link Mapper#createRecord}.
-     *
-     * @name Container#createRecord
-     * @method
-     * @param {string} name Name of the {@link Mapper} to target.
-     * @param {Object} props Passed to {@link Mapper#createRecord}.
-     * @param {Object} [opts] Passed to {@link Mapper#createRecord}. See
-     * {@link Mapper#createRecord} for configuration options.
-     * @return {Promise}
-     */
-    createRecord: function createRecord(name, props, opts) {
-      return this.getMapper(name).createRecord(props, opts);
-    },
-
-
-    /**
      * Create a new mapper and register it in this container.
      *
      * @example
@@ -5710,6 +5796,7 @@ var utils = Object.freeze({
      * {@link Container#MapperClass} when creating the new {@link Mapper}.
      * @return {Mapper}
      */
+
     defineMapper: function defineMapper(name, opts) {
       var self = this;
 
@@ -5768,72 +5855,6 @@ var utils = Object.freeze({
       });
 
       return mapper;
-    },
-
-
-    /**
-     * TODO
-     *
-     * @name Container#destroy
-     * @method
-     * @param {string} name - Name of the {@link Mapper} to target.
-     * @param {(string|number)} id - Passed to {@link Mapper#destroy}.
-     * @param {Object} [opts] - Passed to {@link Mapper#destroy}. See
-     * {@link Mapper#destroy} for more configuration options.
-     * @return {Promise}
-     */
-    destroy: function destroy(name, id, opts) {
-      var self = this;
-      return self.getMapper(name).destroy(id, opts);
-    },
-
-
-    /**
-     * TODO
-     *
-     * @name Container#destroyAll
-     * @method
-     * @param {string} name - Name of the {@link Mapper} to target.
-     * @param {Object} [query] - Passed to {@link Mapper#destroyAll}.
-     * @param {Object} [opts] - Passed to {@link Mapper#destroyAll}. See
-     * {@link Mapper#destroyAll} for more configuration options.
-     * @return {Promise}
-     */
-    destroyAll: function destroyAll(name, query, opts) {
-      var self = this;
-      return self.getMapper(name).destroyAll(query, opts);
-    },
-
-
-    /**
-     * TODO
-     *
-     * @name Container#find
-     * @method
-     * @param {string} name - Name of the {@link Mapper} to target.
-     * @param {(string|number)} id - Passed to {@link Mapper#find}.
-     * @param {Object} [opts] - Passed to {@link Mapper#find}.
-     * @return {Promise}
-     */
-    find: function find(name, id, opts) {
-      var self = this;
-      return self.getMapper(name).find(id, opts);
-    },
-
-
-    /**
-     * TODO
-     *
-     * @name Container#findAll
-     * @method
-     * @param {string} name - Name of the {@link Mapper} to target.
-     * @param {Object} [query] - Passed to {@link Model.findAll}.
-     * @param {Object} [opts] - Passed to {@link Model.findAll}.
-     * @return {Promise}
-     */
-    findAll: function findAll(name, query, opts) {
-      var self = this;
-      return self.getMapper(name).findAll(query, opts);
     },
 
 
@@ -5938,61 +5959,22 @@ var utils = Object.freeze({
           mapper.defaultAdapter = name;
         });
       }
-    },
-
-
-    /**
-     * TODO
-     *
-     * @name Container#update
-     * @method
-     * @param {string} name - Name of the {@link Mapper} to target.
-     * @param {(string|number)} id - Passed to {@link Mapper#update}.
-     * @param {Object} record - Passed to {@link Mapper#update}.
-     * @param {Object} [opts] - Passed to {@link Mapper#update}. See
-     * {@link Mapper#update} for more configuration options.
-     * @return {Promise}
-     */
-    update: function update(name, id, record, opts) {
-      var self = this;
-      return self.getMapper(name).update(id, record, opts);
-    },
-
-
-    /**
-     * TODO
-     *
-     * @name Container#updateAll
-     * @method
-     * @param {string} name - Name of the {@link Mapper} to target.
-     * @param {Object?} query - Passed to {@link Model.updateAll}.
-     * @param {Object} props - Passed to {@link Model.updateAll}.
-     * @param {Object} [opts] - Passed to {@link Model.updateAll}. See
-     * {@link Model.updateAll} for more configuration options.
-     * @return {Promise}
-     */
-    updateAll: function updateAll(name, query, props, opts) {
-      var self = this;
-      return self.getMapper(name).updateAll(query, props, opts);
-    },
-
-
-    /**
-     * TODO
-     *
-     * @name Container#updateMany
-     * @method
-     * @param {string} name Name of the {@link Mapper} to target.
-     * @param {(Object[]|Record[])} records Passed to {@link Mapper#updateMany}.
-     * @param {Object} [opts] Passed to {@link Mapper#updateMany}. See
-     * {@link Mapper#updateMany} for more configuration options.
-     * @return {Promise}
-     */
-    updateMany: function updateMany(name, records, opts) {
-      var self = this;
-      return self.getMapper(name).updateMany(records, opts);
     }
   });
+
+  var toAdd = {};
+  toProxy.forEach(function (method) {
+    toAdd[method] = function (name) {
+      var _getMapper;
+
+      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+      }
+
+      return (_getMapper = this.getMapper(name))[method].apply(_getMapper, args);
+    };
+  });
+  addHiddenPropsToTarget(Container.prototype, toAdd);
 
   /**
    * TODO
@@ -6064,70 +6046,60 @@ var utils = Object.freeze({
           var relationIdAttribute = Relation.idAttribute;
           // Grab the foreign key in this relationship, if there is one
           var foreignKey = def.foreignKey;
-          var localField = def.localField;
           // A lot of this is an optimization for being able to insert a lot of
           // data as quickly as possible
           var relatedCollection = datastore.getCollection(relationName);
           var type = def.type;
-          var isBelongsTo = type === belongsToType;
           var isHasMany = type === hasManyType;
-          var isHasOne = type === hasOneType;
-          var idAttribute = mapper.idAttribute;
           var shouldAdd = isUndefined(def.add) ? true : !!def.add;
           var relatedData = undefined;
 
           records.forEach(function (record) {
             // Grab a reference to the related data attached or linked to the
             // currently visited record
-            relatedData = get(record, localField);
+            relatedData = def.getLocalField(record);
 
             if (isFunction(def.add)) {
               def.add(datastore, def, record);
             } else if (relatedData) {
-              (function () {
-                var id = get(record, idAttribute);
-                // Otherwise, if there is something to be added, add it
-                if (isHasMany) {
-                  // Handle inserting hasMany relations
-                  relatedData = relatedData.map(function (toInsertItem) {
-                    // Check that this item isn't the same item that is already in the
-                    // store
-                    if (toInsertItem !== relatedCollection.get(relatedCollection.recordId(toInsertItem))) {
-                      // Make sure this item has its foreignKey
-                      if (foreignKey) {
-                        set(toInsertItem, foreignKey, id);
-                      }
-                      // Finally add this related item
-                      if (shouldAdd) {
-                        toInsertItem = relatedCollection.add(toInsertItem);
-                      }
+              // Otherwise, if there is something to be added, add it
+              if (isHasMany) {
+                // Handle inserting hasMany relations
+                relatedData = relatedData.map(function (toInsertItem) {
+                  // Check that this item isn't the same item that is already in the
+                  // store
+                  if (toInsertItem !== relatedCollection.get(relatedCollection.recordId(toInsertItem))) {
+                    // Make sure this item has its foreignKey
+                    if (foreignKey) {
+                      // TODO: slow, could be optimized? But user loses hook
+                      def.setForeignKey(record, toInsertItem);
                     }
-                    return toInsertItem;
-                  });
-                  // If it's the parent that has the localKeys
-                  if (def.localKeys) {
-                    set(record, def.localKeys, relatedData.map(function (inserted) {
-                      return get(inserted, relationIdAttribute);
-                    }));
-                  }
-                } else {
-                  var relatedDataId = get(relatedData, relationIdAttribute);
-                  // Handle inserting belongsTo and hasOne relations
-                  if (relatedData !== relatedCollection.get(relatedDataId)) {
-                    // Make sure foreignKey field is set
-                    if (isBelongsTo) {
-                      set(record, foreignKey, relatedDataId);
-                    } else if (isHasOne) {
-                      set(relatedData, foreignKey, id);
-                    }
-                    // Finally insert this related item
+                    // Finally add this related item
                     if (shouldAdd) {
-                      relatedData = relatedCollection.add(relatedData);
+                      toInsertItem = relatedCollection.add(toInsertItem);
                     }
+                  }
+                  return toInsertItem;
+                });
+                // If it's the parent that has the localKeys
+                if (def.localKeys) {
+                  set(record, def.localKeys, relatedData.map(function (inserted) {
+                    return get(inserted, relationIdAttribute);
+                  }));
+                }
+              } else {
+                var relatedDataId = get(relatedData, relationIdAttribute);
+                // Handle inserting belongsTo and hasOne relations
+                if (relatedData !== relatedCollection.get(relatedDataId)) {
+                  // Make sure foreignKey field is set
+                  def.setForeignKey(record, relatedData);
+                  // Finally insert this related item
+                  if (shouldAdd) {
+                    relatedData = relatedCollection.add(relatedData);
                   }
                 }
-                set(record, localField, relatedData);
-              })();
+              }
+              def.setLocalField(record, relatedData);
             }
           });
         });
@@ -6372,7 +6344,7 @@ var utils = Object.freeze({
                 if (!_self._get('$') || !link) {
                   return _self._get(path);
                 }
-                var key = get(_self, foreignKey);
+                var key = def.getForeignKey(_self);
                 var item = isUndefined(key) ? undefined : self.getCollection(relation).get(key);
                 _self._set(path, item);
                 return item;
@@ -6380,9 +6352,9 @@ var utils = Object.freeze({
               set: function set$$(record) {
                 var _self = this;
                 _self._set(path, record);
-                set(_self, foreignKey, self.getCollection(relation).recordId(record));
+                def.setForeignKey(_self, record);
                 collection.updateIndex(_self, updateOpts);
-                return get(_self, localField);
+                return def.getLocalField(_self);
               }
             };
           } else if (type === hasManyType) {
@@ -6401,7 +6373,7 @@ var utils = Object.freeze({
                   if (!_self._get('$') || !link) {
                     return _self._get(path);
                   }
-                  var key = collection.recordId(_self);
+                  var key = def.getForeignKey(_self);
                   var items = undefined;
                   var relationCollection = self.getCollection(relation);
 
@@ -6432,10 +6404,12 @@ var utils = Object.freeze({
                   _self._set(path, records);
 
                   if (foreignKey) {
-                    records.forEach(function (record) {
-                      set(record, foreignKey, key);
-                      relationCollection.updateIndex(record, updateOpts);
-                    });
+                    def.setForeignKey(_self, records);
+                    if (isArray(records)) {
+                      records.forEach(function (record) {
+                        relationCollection.updateIndex(record, updateOpts);
+                      });
+                    }
                   }if (localKeys) {
                     set(_self, localKeys, records.map(function (record) {
                       return relationCollection.recordId(record);
@@ -6452,7 +6426,7 @@ var utils = Object.freeze({
                       }
                     });
                   }
-                  return get(_self, localField);
+                  return def.getLocalField(_self);
                 }
               };
             })();
@@ -6463,7 +6437,7 @@ var utils = Object.freeze({
                 if (!_self._get('$') || !link) {
                   return _self._get(path);
                 }
-                var key = collection.recordId(_self);
+                var key = def.getForeignKey(_self);
                 var items = self.getCollection(relation).getAll(key, {
                   index: foreignKey
                 });
@@ -6473,11 +6447,10 @@ var utils = Object.freeze({
               },
               set: function set$$(record) {
                 var _self = this;
-                var key = collection.recordId(_self);
                 _self._set(path, record);
-                set(record, foreignKey, key);
+                def.setForeignKey(_self, record);
                 self.getCollection(relation).updateIndex(record, updateOpts);
-                return get(_self, localField);
+                return def.getLocalField(_self);
               }
             };
           }
@@ -6773,11 +6746,11 @@ var utils = Object.freeze({
    */
   DataStore.extend = extend;
 
-  var toProxy = ['add', 'between', 'createIndex', 'filter', 'get', 'getAll', 'query', 'remove', 'removeAll', 'toJson'];
+  var toProxy$1 = ['add', 'between', 'createIndex', 'filter', 'get', 'getAll', 'query', 'remove', 'removeAll', 'toJson'];
 
   var methods = {};
 
-  toProxy.forEach(function (method) {
+  toProxy$1.forEach(function (method) {
     methods[method] = function (name) {
       var _getCollection;
 
@@ -6859,9 +6832,9 @@ var utils = Object.freeze({
   exports.belongsToType = belongsToType;
   exports.hasManyType = hasManyType;
   exports.hasOneType = hasOneType;
-  exports.belongsTo = belongsTo;
-  exports.hasMany = hasMany;
-  exports.hasOne = hasOne;
+  exports.belongsTo = _belongsTo;
+  exports.hasMany = _hasMany;
+  exports.hasOne = _hasOne;
 
 }));
 //# sourceMappingURL=js-data.js.map

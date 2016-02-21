@@ -586,7 +586,12 @@ export const getSuper = function (instance, isCtor) {
 function forRelation (opts, def, fn, ctx) {
   const relationName = def.relation
   let containedName = null
+  opts || (opts = {})
   opts.with || (opts.with = [])
+  if (opts.withAll) {
+    fn.call(ctx, def, {})
+    return
+  }
   if (opts.with.indexOf(relationName) !== -1) {
     containedName = relationName
   } else if (opts.with.indexOf(def.localField) !== -1) {
@@ -620,15 +625,4 @@ export const forEachRelation = function (mapper, opts, fn, ctx) {
   relationList.forEach(function (def) {
     forRelation(opts, def, fn, ctx)
   })
-}
-
-export const withoutRelations = function (mapper, record) {
-  const _props = {}
-  const relationFields = mapper.relationFields || []
-  forOwn(record, function (value, key) {
-    if (relationFields.indexOf(key) === -1) {
-      _props[key] = value
-    }
-  })
-  return _props
 }
