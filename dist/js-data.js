@@ -1,8 +1,8 @@
 /*!
 * js-data
 * @version 3.0.0-alpha.15 - Homepage <http://www.js-data.io/>
-* @author js-data Project Authors
-* @copyright (c) 2014-2016 js-data Project Authors
+* @author js-data project authors
+* @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
 * @overview js-data is a framework-agnostic, datastore-agnostic ORM/ODM for Node.js and the Browser.
@@ -2149,6 +2149,10 @@ var utils = Object.freeze({
     /**
      * Return the index with the given name. If no name is provided, return the
      * main index. Throws an error if the specified index does not exist.
+     *
+     * @name Collection#getIndex
+     * @method
+     * @param {string} [name] The name of the index to retrieve.
      */
     getIndex: function getIndex(name) {
       var index = name ? this.indexes[name] : this.index;

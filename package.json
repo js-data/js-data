@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/js-data/js-data.git"
   },
-  "author": "js-data Project Authors",
+  "author": "js-data project authors",
   "license": "MIT",
   "main": "./dist/js-data.js",
   "keywords": [

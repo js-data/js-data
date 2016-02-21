@@ -39,5 +39,5 @@ favicon.ico
 karma.conf.js
 karma.start.js
 mocha.start.js
-webpack.config.js
 doc/
+.github

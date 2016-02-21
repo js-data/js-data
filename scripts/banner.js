@@ -4,8 +4,8 @@ var pkg = require('../package.json')
 var banner = '/*!\n' +
   '* js-data\n' +
   '* @version ' + pkg.version + ' - Homepage <http://www.js-data.io/>\n' +
-  '* @author js-data Project Authors\n' +
-  '* @copyright (c) 2014-2016 js-data Project Authors\n' +
+  '* @author js-data project authors\n' +
+  '* @copyright (c) 2014-2016 js-data project authors\n' +
   '* @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>\n' +
   '*\n' +
   '* @overview js-data is a framework-agnostic, datastore-agnostic ORM/ODM ' +
