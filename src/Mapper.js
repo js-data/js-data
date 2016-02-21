@@ -638,7 +638,11 @@ addHiddenPropsToTarget(Mapper.prototype, {
    * created data. If `true` return a response object that includes the created
    * data and metadata about the operation.
    * @param {string[]} [opts.with=[]] Relations to create in a cascading
-   * create if `props` contains nested relations. NOT performed in a transaction.
+   * create if `props` contains nested relations. NOT performed in a
+   * transaction. Each nested create will result in another {@link Mapper#create}
+   * or {@link Mapper#createMany} call.
+   * @param {string[]} [opts.pass=[]] Relations to send to the adapter as part
+   * of the payload. Normally relations are not sent.
    * @return {Promise}
    */
   create (props, opts) {
@@ -663,7 +667,8 @@ addHiddenPropsToTarget(Mapper.prototype, {
     return resolve(self[op](props, opts)).then(function (_props) {
       // Allow for re-assignment from lifecycle hook
       props = _props || props
-      // Now delegate to the adapter
+
+      // Deep pre-create belongsTo relations
       const belongsToRelationData = {}
       opts.with || (opts.with = [])
       let tasks = []
@@ -680,11 +685,13 @@ addHiddenPropsToTarget(Mapper.prototype, {
         }
       })
       return Promise.all(tasks).then(function () {
+        // Now delegate to the adapter for the main create
         op = opts.op = 'create'
         self.dbg(op, props, opts)
         return resolve(self.getAdapter(adapter)[op](self, self.toJSON(props, { with: opts.pass || [] }), opts))
       }).then(function (data) {
         const createdRecord = opts.raw ? data.data : data
+        // Deep post-create hasMany and hasOne relations
         tasks = []
         forEachRelation(self, opts, function (def, __opts) {
           const relationData = def.getLocalField(props)
@@ -777,9 +784,12 @@ addHiddenPropsToTarget(Mapper.prototype, {
    * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
    * updated data. If `true` return a response object that includes the updated
    * data and metadata about the operation.
-   * @param {string[]} [opts.with=[]] Relations to create in a cascading create
-   * if the records to be created have linked/nested relations. NOT performed
-   * in a transaction.
+   * @param {string[]} [opts.with=[]] Relations to create in a cascading
+   * create if `records` contains nested relations. NOT performed in a
+   * transaction. Each nested create will result in another {@link Mapper#createMany}
+   * call.
+   * @param {string[]} [opts.pass=[]] Relations to send to the adapter as part
+   * of the payload. Normally relations are not sent.
    * @return {Promise}
    */
   createMany (records, opts) {
@@ -801,27 +811,94 @@ addHiddenPropsToTarget(Mapper.prototype, {
 
     // beforeCreateMany lifecycle hook
     op = opts.op = 'beforeCreateMany'
-    return resolve(self[op](records, opts))
-      .then(function (_records) {
-        // Allow for re-assignment from lifecycle hook
-        records = _records || records
+    return resolve(self[op](records, opts)).then(function (_records) {
+      // Allow for re-assignment from lifecycle hook
+      records = _records || records
+
+      // Deep pre-create belongsTo relations
+      const belongsToRelationData = {}
+      opts.with || (opts.with = [])
+      let tasks = []
+      forEachRelation(self, opts, function (def, __opts) {
+        const relationData = records.map(function (record) {
+          return def.getLocalField(record)
+        }).filter(function (relatedRecord) {
+          return relatedRecord
+        })
+        if (def.type === belongsToType && relationData.length === records.length) {
+          // Create belongsTo relation first because we need a generated id to
+          // attach to the child
+          tasks.push(def.getRelation().createMany(relationData, __opts).then(function (data) {
+            const relatedRecords = __opts.raw ? data.data : data
+            def.setLocalField(belongsToRelationData, relatedRecords)
+            records.forEach(function (record, i) {
+              def.setForeignKey(record, relatedRecords[i])
+            })
+          }))
+        }
+      })
+      return Promise.all(tasks).then(function () {
         // Now delegate to the adapter
         op = opts.op = 'createMany'
-        const json = records.map(function (item) {
-          return self.toJSON(item, opts)
+        const json = records.map(function (record) {
+          return self.toJSON(record, { with: opts.pass || [] })
         })
-        self.dbg(op, json, opts)
+        self.dbg(op, records, opts)
         return resolve(self.getAdapter(adapter)[op](self, json, opts))
       }).then(function (data) {
-        // afterCreateMany lifecycle hook
-        op = opts.op = 'afterCreateMany'
-        return resolve(self[op](data, opts)).then(function (_data) {
-          // Allow for re-assignment from lifecycle hook
-          data = _data || data
-          // Possibly inject result and/or formulate result object
-          return self.end(data, opts)
+        const createdRecords = opts.raw ? data.data : data
+
+        // Deep post-create hasOne relations
+        tasks = []
+        forEachRelation(self, opts, function (def, __opts) {
+          const relationData = records.map(function (record) {
+            return def.getLocalField(record)
+          }).filter(function (relatedRecord) {
+            return relatedRecord
+          })
+          if (relationData.length !== records.length) {
+            return
+          }
+          const belongsToData = def.getLocalField(belongsToRelationData)
+          let task
+          // Create hasMany and hasOne after the main create because we needed
+          // a generated id to attach to these items
+          if (def.type === hasManyType) {
+            // Not supported
+            self.log('warn', 'deep createMany of hasMany type not supported!')
+          } else if (def.type === hasOneType) {
+            createdRecords.forEach(function (createdRecord, i) {
+              def.setForeignKey(createdRecord, relationData[i])
+            })
+            task = def.getRelation().createMany(relationData, __opts).then(function (data) {
+              const relatedData = opts.raw ? data.data : data
+              createdRecords.forEach(function (createdRecord, i) {
+                def.setLocalField(createdRecord, relatedData[i])
+              })
+            })
+          } else if (def.type === belongsToType && belongsToData && belongsToData.length === createdRecords.length) {
+            createdRecords.forEach(function (createdRecord, i) {
+              def.setLocalField(createdRecord, belongsToData[i])
+            })
+          }
+          if (task) {
+            tasks.push(task)
+          }
+        })
+        return Promise.all(tasks).then(function () {
+          return data
         })
       })
+    }).then(function (data) {
+      // afterCreateMany lifecycle hook
+      op = opts.op = 'afterCreateMany'
+      return resolve(self[op](data, opts)).then(function (_data) {
+        // Allow for re-assignment from lifecycle hook
+        data = _data || data
+        // Possibly inject result and/or formulate result object
+        return self.end(data, opts)
+      })
+    })
   },
 
   /**
