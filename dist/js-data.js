@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.14 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.15 - Homepage <http://www.js-data.io/>
 * @author js-data Project Authors
 * @copyright (c) 2014-2016 js-data Project Authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -6886,11 +6886,11 @@ var utils = Object.freeze({
    * if the current version is not beta.
    */
   var version = {
-    full: '3.0.0-alpha.14',
+    full: '3.0.0-alpha.15',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10),
-    alpha: '14',
+    alpha: '15',
     beta: 'false'
   };
 
