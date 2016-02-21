@@ -317,7 +317,7 @@ const DataStore = Container.extend({
               return def.get(def, this, (...args) => origGet.apply(this, args))
             }
           }
-          if (opts.set) {
+          if (def.set) {
             let origSet = descriptor.set
             descriptor.set = function (related) {
               return def.set(def, this, related, (value) => origSet.call(this, value === undefined ? related : value))

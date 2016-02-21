@@ -1,7 +1,11 @@
 import {
+  addHiddenPropsToTarget,
   fillIn,
+  get,
+  isArray,
   isFunction,
-  isString
+  isString,
+  set
 } from './utils'
 
 export const belongsToType = 'belongsTo'
@@ -30,16 +34,57 @@ function Relation (related, opts) {
 
   if (isString(related)) {
     opts.relation = related
+    if (!isFunction(opts.getRelation)) {
+      throw new Error('you must provide a reference to the related mapper!')
+    }
   } else if (related) {
     opts.relation = related.name
-  }
-
-  if (!related || (isString(related) && !isFunction(opts.getRelation))) {
-    throw new Error('you must provide a reference to the related mapper!')
+    Object.defineProperty(self, 'relatedMapper', {
+      value: related
+    })
   }
 
   fillIn(self, opts)
 }
+
+addHiddenPropsToTarget(Relation.prototype, {
+  getRelation () {
+    return this.relatedMapper
+  },
+  getLocalKeys (record) {
+
+  },
+  getForeignKey (record) {
+    if (this.type === belongsToType) {
+      return get(record, this.foreignKey)
+    }
+    return get(record, this.mapper.idAttribute)
+  },
+  setForeignKey (record, relatedRecord) {
+    const self = this
+    if (!record || !relatedRecord) {
+      return
+    }
+    if (self.type === belongsToType) {
+      set(record, self.foreignKey, get(relatedRecord, self.getRelation().idAttribute))
+    } else {
+      const idAttribute = self.mapper.idAttribute
+      if (isArray(relatedRecord)) {
+        relatedRecord.forEach(function (relatedRecordItem) {
+          set(relatedRecordItem, self.foreignKey, get(record, idAttribute))
+        })
+      } else {
+        set(relatedRecord, self.foreignKey, get(record, idAttribute))
+      }
+    }
+  },
+  getLocalField (record) {
+    return get(record, this.localField)
+  },
+  setLocalField (record, data) {
+    return set(record, this.localField, data)
+  }
+})
 
 const relatedTo = function (mapper, related, opts) {
   opts || (opts = {})

@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/js-data/js-data.git"
   },
-  "author": "Jason Dobry <jason.dobry@gmail.com> (http://www.pseudobry.com)",
+  "author": "js-data Project Authors",
   "license": "MIT",
   "main": "./dist/js-data.js",
   "keywords": [
@@ -53,6 +53,7 @@
     "rt": "npm run rollup && npm run rollup-tests && npm run mocha",
     "cover": "istanbul cover -x dist/js-data-tests.js --hook-run-in-context node_modules/mocha/bin/_mocha -- -t 20000 -R dot -r source-map-support/register mocha.start.js",
     "test": "npm run build && npm run rollup-tests && npm run cover",
+    "release": "npm test && node scripts/authors.js && npm run doc",
     "ci": "npm test && cat coverage/lcov.info | coveralls || true && cat ./coverage/lcov.info | codacy-coverage || true; npm run doc"
   },
   "devDependencies": {

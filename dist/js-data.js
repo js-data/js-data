@@ -1,11 +1,11 @@
 /*!
 * js-data
 * @version 3.0.0-alpha.14 - Homepage <http://www.js-data.io/>
-* @author Jason Dobry <jason.dobry@gmail.com>
-* @copyright (c) 2014-2015 Jason Dobry
+* @author js-data Project Authors
+* @copyright (c) 2014-2016 js-data Project Authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
 *
-* @overview Robust framework-agnostic data store.
+* @overview js-data is a framework-agnostic, datastore-agnostic ORM/ODM for Node.js and the Browser.
 */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -671,6 +671,17 @@
     });
   };
 
+  var withoutRelations = function withoutRelations(mapper, record) {
+    var _props = {};
+    var relationFields = mapper.relationFields || [];
+    forOwn(record, function (value, key) {
+      if (relationFields.indexOf(key) === -1) {
+        _props[key] = value;
+      }
+    });
+    return _props;
+  };
+
 var utils = Object.freeze({
     get isBrowser () { return isBrowser; },
     isArray: isArray,
@@ -706,7 +717,8 @@ var utils = Object.freeze({
     addHiddenPropsToTarget: addHiddenPropsToTarget,
     extend: extend,
     getSuper: getSuper,
-    forEachRelation: forEachRelation
+    forEachRelation: forEachRelation,
+    withoutRelations: withoutRelations
   });
 
   /**
@@ -2467,16 +2479,57 @@ var utils = Object.freeze({
 
     if (isString(related)) {
       opts.relation = related;
+      if (!isFunction(opts.getRelation)) {
+        throw new Error('you must provide a reference to the related mapper!');
+      }
     } else if (related) {
       opts.relation = related.name;
-    }
-
-    if (!related || isString(related) && !isFunction(opts.getRelation)) {
-      throw new Error('you must provide a reference to the related mapper!');
+      Object.defineProperty(self, 'relatedMapper', {
+        value: related
+      });
     }
 
     fillIn(self, opts);
   }
+
+  addHiddenPropsToTarget(Relation.prototype, {
+    getRelation: function getRelation() {
+      return this.relatedMapper;
+    },
+    getLocalKeys: function getLocalKeys(record) {},
+    getForeignKey: function getForeignKey(record) {
+      if (this.type === belongsToType) {
+        return get(record, this.foreignKey);
+      }
+      return get(record, this.mapper.idAttribute);
+    },
+    setForeignKey: function setForeignKey(record, relatedRecord) {
+      var self = this;
+      if (!record || !relatedRecord) {
+        return;
+      }
+      if (self.type === belongsToType) {
+        set(record, self.foreignKey, get(relatedRecord, self.getRelation().idAttribute));
+      } else {
+        (function () {
+          var idAttribute = self.mapper.idAttribute;
+          if (isArray(relatedRecord)) {
+            relatedRecord.forEach(function (relatedRecordItem) {
+              set(relatedRecordItem, self.foreignKey, get(record, idAttribute));
+            });
+          } else {
+            set(relatedRecord, self.foreignKey, get(record, idAttribute));
+          }
+        })();
+      }
+    },
+    getLocalField: function getLocalField(record) {
+      return get(record, this.localField);
+    },
+    setLocalField: function setLocalField(record, data) {
+      return set(record, this.localField, data);
+    }
+  });
 
   var relatedTo = function relatedTo(mapper, related, opts) {
     opts || (opts = {});
@@ -4528,79 +4581,55 @@ var utils = Object.freeze({
         // Allow for re-assignment from lifecycle hook
         props = _props || props;
         // Now delegate to the adapter
-        var json = self.toJSON(props, opts);
-        var fields = {};
+        var record = self.toJSON(props, opts);
+        var belongsToRelationData = {};
         opts.with || (opts.with = []);
-        var idAttribute = self.idAttribute;
         var tasks = [];
         forEachRelation(self, opts, function (def, __opts) {
-          var localField = def.localField;
-          var relationData = get(json, localField);
-          var relatedMapper = def.getRelation();
-          if (!relationData) {
-            return;
-          }
-          var task = undefined;
-          if (def.type === 'hasMany') {
-            task = fields[localField] = relationData;
-          } else if (def.type === 'hasOne') {
-            task = fields[localField] = relationData;
-          } else if (def.type === 'belongsTo') {
+          var relationData = def.getLocalField(record);
+          if (def.type === belongsToType && relationData) {
             // Create belongsTo relation first because we need a generated id to
             // attach to the child
-            task = relatedMapper.create(relationData, __opts).then(function (data) {
-              fields[localField] = data;
-              set(json, def.foreignKey, get(data, relatedMapper.idAttribute));
-            });
-          }
-          if (task) {
-            tasks.push(task);
+            tasks.push(def.getRelation().create(relationData, __opts).then(function (data) {
+              var relatedRecord = __opts.raw ? data.data : data;
+              def.setLocalField(belongsToRelationData, relatedRecord);
+              def.setForeignKey(record, relatedRecord);
+            }));
           }
         });
         return Promise.all(tasks).then(function () {
           op = opts.op = 'create';
-          self.dbg(op, json, opts);
-          var _props = {};
-          forOwn(json, function (value, key) {
-            if (!(key in fields)) {
-              _props[key] = value;
-            }
-          });
-          return resolve(self.getAdapter(adapter)[op](self, _props, opts));
+          self.dbg(op, record, opts);
+          return resolve(self.getAdapter(adapter)[op](self, withoutRelations(self, record), opts));
         }).then(function (data) {
-          var id = opts.raw ? get(data.data, idAttribute) : get(data, idAttribute);
+          var createdRecord = opts.raw ? data.data : data;
           tasks = [];
           forEachRelation(self, opts, function (def, __opts) {
-            var localField = def.localField;
-            var relationData = fields[localField];
-            var relatedMapper = def.getRelation();
+            var relationData = def.getLocalField(record);
             if (!relationData) {
               return;
             }
             var task = undefined;
             // Create hasMany and hasOne after the main create because we needed
             // a generated id to attach to these items
-            if (def.type === 'hasMany') {
-              relationData.forEach(function (relationDataItem) {
-                set(relationDataItem, def.foreignKey, id);
+            if (def.type === hasManyType) {
+              def.setForeignKey(record, relationData);
+              task = def.getRelation().createMany(relationData, __opts).then(function (data) {
+                def.setLocalField(createdRecord, opts.raw ? data.data : data);
               });
-              task = relatedMapper.createMany(relationData, __opts).then(function (data) {
-                fields[localField] = data;
+            } else if (def.type === hasOneType) {
+              def.setForeignKey(record, relationData);
+              task = def.getRelation().create(relationData, __opts).then(function (data) {
+                def.setLocalField(createdRecord, opts.raw ? data.data : data);
               });
-            } else if (def.type === 'hasOne') {
-              set(relationData, def.foreignKey, id);
-              task = relatedMapper.create(relationData, __opts).then(function (data) {
-                fields[localField] = data;
-              });
+            } else if (def.type === belongsToType && def.get(belongsToRelationData)) {
+              def.setLocalField(createdRecord, def.get(belongsToRelationData));
             }
             if (task) {
               tasks.push(task);
             }
           });
           return Promise.all(tasks).then(function () {
-            forOwn(fields, function (value, key) {
-              set(opts.raw ? data.data : data, key, opts.raw ? value.data : value);
-            });
             return data;
           });
         });
@@ -6471,7 +6500,7 @@ var utils = Object.freeze({
                 };
               })();
             }
-            if (opts.set) {
+            if (def.set) {
               (function () {
                 var origSet = descriptor.set;
                 descriptor.set = function (related) {

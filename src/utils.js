@@ -621,3 +621,14 @@ export const forEachRelation = function (mapper, opts, fn, ctx) {
     forRelation(opts, def, fn, ctx)
   })
 }
+
+export const withoutRelations = function (mapper, record) {
+  const _props = {}
+  const relationFields = mapper.relationFields || []
+  forOwn(record, function (value, key) {
+    if (relationFields.indexOf(key) === -1) {
+      _props[key] = value
+    }
+  })
+  return _props
+}

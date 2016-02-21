@@ -15,12 +15,16 @@ import {
   isUndefined,
   plainCopy,
   resolve,
-  set
+  set,
+  withoutRelations
 } from './utils'
 import {
   belongsTo,
+  belongsToType,
   hasMany,
-  hasOne
+  hasManyType,
+  hasOne,
+  hasOneType
 } from './decorators'
 import Record from './Record'
 import Schema from './Schema'
@@ -647,79 +651,55 @@ addHiddenPropsToTarget(Mapper.prototype, {
       // Allow for re-assignment from lifecycle hook
       props = _props || props
       // Now delegate to the adapter
-      const json = self.toJSON(props, opts)
-      const fields = {}
+      const record = self.toJSON(props, opts)
+      const belongsToRelationData = {}
       opts.with || (opts.with = [])
-      const idAttribute = self.idAttribute
       let tasks = []
       forEachRelation(self, opts, function (def, __opts) {
-        const localField = def.localField
-        const relationData = get(json, localField)
-        const relatedMapper = def.getRelation()
-        if (!relationData) {
-          return
-        }
-        let task
-        if (def.type === 'hasMany') {
-          task = fields[localField] = relationData
-        } else if (def.type === 'hasOne') {
-          task = fields[localField] = relationData
-        } else if (def.type === 'belongsTo') {
+        const relationData = def.getLocalField(record)
+        if (def.type === belongsToType && relationData) {
           // Create belongsTo relation first because we need a generated id to
           // attach to the child
-          task = relatedMapper.create(relationData, __opts).then(function (data) {
-            fields[localField] = data
-            set(json, def.foreignKey, get(data, relatedMapper.idAttribute))
-          })
-        }
-        if (task) {
-          tasks.push(task)
+          tasks.push(def.getRelation().create(relationData, __opts).then(function (data) {
+            const relatedRecord = __opts.raw ? data.data : data
+            def.setLocalField(belongsToRelationData, relatedRecord)
+            def.setForeignKey(record, relatedRecord)
+          }))
         }
       })
       return Promise.all(tasks).then(function () {
         op = opts.op = 'create'
-        self.dbg(op, json, opts)
-        const _props = {}
-        forOwn(json, function (value, key) {
-          if (!(key in fields)) {
-            _props[key] = value
-          }
-        })
-        return resolve(self.getAdapter(adapter)[op](self, _props, opts))
+        self.dbg(op, record, opts)
+        return resolve(self.getAdapter(adapter)[op](self, withoutRelations(self, record), opts))
       }).then(function (data) {
-        const id = opts.raw ? get(data.data, idAttribute) : get(data, idAttribute)
+        const createdRecord = opts.raw ? data.data : data
         tasks = []
         forEachRelation(self, opts, function (def, __opts) {
-          const localField = def.localField
-          const relationData = fields[localField]
-          const relatedMapper = def.getRelation()
+          const relationData = def.getLocalField(record)
           if (!relationData) {
             return
           }
           let task
           // Create hasMany and hasOne after the main create because we needed
           // a generated id to attach to these items
-          if (def.type === 'hasMany') {
-            relationData.forEach(function (relationDataItem) {
-              set(relationDataItem, def.foreignKey, id)
+          if (def.type === hasManyType) {
+            def.setForeignKey(record, relationData)
+            task = def.getRelation().createMany(relationData, __opts).then(function (data) {
+              def.setLocalField(createdRecord, opts.raw ? data.data : data)
             })
-            task = relatedMapper.createMany(relationData, __opts).then(function (data) {
-              fields[localField] = data
+          } else if (def.type === hasOneType) {
+            def.setForeignKey(record, relationData)
+            task = def.getRelation().create(relationData, __opts).then(function (data) {
+              def.setLocalField(createdRecord, opts.raw ? data.data : data)
             })
-          } else if (def.type === 'hasOne') {
-            set(relationData, def.foreignKey, id)
-            task = relatedMapper.create(relationData, __opts).then(function (data) {
-              fields[localField] = data
-            })
+          } else if (def.type === belongsToType && def.get(belongsToRelationData)) {
+            def.setLocalField(createdRecord, def.get(belongsToRelationData))
           }
           if (task) {
             tasks.push(task)
           }
         })
         return Promise.all(tasks).then(function () {
-          forOwn(fields, function (value, key) {
-            set(opts.raw ? data.data : data, key, opts.raw ? value.data : value)
-          })
           return data
         })
       })
