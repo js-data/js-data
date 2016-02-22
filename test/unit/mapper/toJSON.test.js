@@ -151,7 +151,7 @@ export function init () {
         name: 'John',
         organizationId: 2,
         organization: user.organization.toJSON(),
-        comments: user.comments.map(comment => comment.toJSON())
+        comments: user.comments.map((comment) => comment.toJSON())
       }
 
       Test.assert.objectsEqual(Test.User.toJSON(user, {

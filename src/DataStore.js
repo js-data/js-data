@@ -487,8 +487,8 @@ const DataStore = Container.extend({
    *
    * @name DataStore#getCollection
    * @method
-   * @param {string} name Name of the {@link DataStoreCollection} to retrieve.
-   * @return {DataStoreCollection}
+   * @param {string} name Name of the {@link LinkedCollection} to retrieve.
+   * @return {LinkedCollection}
    */
   getCollection (name) {
     const collection = this._collections[name]

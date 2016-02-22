@@ -6732,8 +6732,8 @@ var utils = Object.freeze({
      *
      * @name DataStore#getCollection
      * @method
-     * @param {string} name Name of the {@link DataStoreCollection} to retrieve.
-     * @return {DataStoreCollection}
+     * @param {string} name Name of the {@link LinkedCollection} to retrieve.
+     * @return {LinkedCollection}
      */
     getCollection: function getCollection(name) {
       var collection = this._collections[name];
