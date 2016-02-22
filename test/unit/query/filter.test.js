@@ -270,7 +270,7 @@ export function init () {
         { id: 7, name: 'xxfooxxfooxx' },
         { id: 8, name: 'fooxxfoo' },
         { id: 9, name: 'fooxfoo' },
-        { id: 10, name: 'fooxxfoox' },
+        { id: 10, name: 'fooxxfoox' }
       ]
       Test.store.add('user', users)
 
