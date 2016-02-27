@@ -28,21 +28,21 @@
 	</div>
 	<div class="navbar-collapse collapse" id="topNavigation">
 		<ul class="nav navbar-nav">
-			
+
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
 					<li><a href="module-js-data.html">js-data</a></li>
 				</ul>
 			</li>
-			
+
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
 					<li><a href="Collection.html">Collection</a></li><li><a href="Container.html">Container</a></li><li><a href="DataStore.html">DataStore</a></li><li><a href="LinkedCollection.html">LinkedCollection</a></li><li><a href="Mapper.html">Mapper</a></li><li><a href="Query.html">Query</a></li><li><a href="Record.html">Record</a></li><li><a href="Schema.html">Schema</a></li>
 				</ul>
 			</li>
-			
+
 		</ul>
 		<div class="col-sm-3 col-md-3">
             <form class="navbar-form" role="search">
@@ -63,244 +63,244 @@
 <div class="container" id="toc-content">
 <div class="row">
 
-	
+
 	<div class="col-md-8">
-	
+
 		<div id="main">
-			
+
 
 	<h1 class="page-title">Class: Container</h1>
 <section>
 
 <header>
-    
+
         <h2>
         Container
         </h2>
-        
-    
+
+
 </header>
 
 
 <article>
     <div class="container-overview">
-    
-        
+
+
 <hr>
 <dt>
     <h4 class="name" id="Container"><span class="type-signature"></span>new Container(<span class="optional">opts</span>)</h4>
-    
-    
+
+
 </dt>
 <dd>
 
-    
+
     <div class="description">
         <pre class="prettyprint source lang-javascript"><code>import {Container} from 'js-data'</code></pre><p>The <code>Container</code> class is a place to store <a href="Mapper.html">Mapper</a> instances.</p>
 <p>Without a container, you need to manage mappers yourself, including resolving
 circular dependencies among relations. All mappers in a container share the
 same adapters, so you don't have to add each adapter to all of your mappers.</p>
     </div>
-    
 
-    
 
-    
 
-    
-    
+
+
+
+
+
         <h5>Parameters:</h5>
-        
+
 
 <table class="params table table-striped">
     <thead>
     <tr>
-        
+
         <th>Name</th>
-        
+
 
         <th>Type</th>
 
-        
-        <th>Argument</th>
-        
 
-        
+        <th>Argument</th>
+
+
+
 
         <th class="last">Description</th>
     </tr>
     </thead>
 
     <tbody>
-    
+
 
         <tr>
-            
+
                 <td class="name"><code>opts</code></td>
-            
+
 
             <td class="type">
-            
-                
+
+
 <span class="param-type">Object</span>
 
 
 
-            
+
             </td>
 
-            
+
                 <td class="attributes">
-                
+
                     &lt;optional><br>
-                
 
-                
 
-                
+
+
+
                 </td>
-            
 
-            
+
+
 
             <td class="description last"><p>Configuration options.</p>
                 <h6 class="method-params-label method-subparams-label">Properties</h6>
-                
+
 
 <table class="params table table-striped">
     <thead>
     <tr>
-        
+
         <th>Name</th>
-        
+
 
         <th>Type</th>
 
-        
-        <th>Argument</th>
-        
 
-        
+        <th>Argument</th>
+
+
+
 
         <th class="last">Description</th>
     </tr>
     </thead>
 
     <tbody>
-    
+
 
         <tr>
-            
+
                 <td class="name"><code>MapperClass</code></td>
-            
+
 
             <td class="type">
-            
-                
+
+
 <span class="param-type">function</span>
 
 
 
-            
+
             </td>
 
-            
+
                 <td class="attributes">
-                
+
                     &lt;optional><br>
-                
 
-                
 
-                
+
+
+
                 </td>
-            
 
-            
+
+
 
             <td class="description last"><p>Constructor function to use in
 <a href="Container.html#defineMapper">Container#defineMapper</a> to create a new mapper.</p></td>
         </tr>
 
-    
+
 
         <tr>
-            
+
                 <td class="name"><code>mapperDefaults</code></td>
-            
+
 
             <td class="type">
-            
-                
+
+
 <span class="param-type">Object</span>
 
 
 
-            
+
             </td>
 
-            
+
                 <td class="attributes">
-                
+
                     &lt;optional><br>
-                
 
-                
 
-                
+
+
+
                 </td>
-            
 
-            
+
+
 
             <td class="description last"><p>Defaults options to pass to
 <a href="Container.html#MapperClass">Container#MapperClass</a> when creating a new mapper.</p></td>
         </tr>
 
-    
+
     </tbody>
 </table>
 
             </td>
         </tr>
 
-    
+
     </tbody>
 </table>
 
-    
 
-    
+
+
 <dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
 
 
 
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
 	<dd class="tag-source">
 		<ul class="dummy">
@@ -310,30 +310,30 @@ same adapters, so you don't have to add each adapter to all of your mappers.</p>
 			</li>
 		</ul>
 	</dd>
-	
 
-	
 
-	
 
-	
+
+
+
+
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
     <h5>Returns:</h5>
-    
-            
+
+
 
 
 <dl>
@@ -341,7 +341,7 @@ same adapters, so you don't have to add each adapter to all of your mappers.</p>
         Type
     </dt>
     <dd>
-        
+
 <span class="param-type"><a href="Container.html">Container</a></span>
 
 
@@ -350,13 +350,13 @@ same adapters, so you don't have to add each adapter to all of your mappers.</p>
 </dl>
 
 
-        
 
-    
+
+
         <h5>Examples</h5>
-        
+
         <p class="code-caption">Without Container</p>
-    
+
     <pre class="sunlight-highlight-javascript">import {Mapper} from &#x27;js-data&#x27;
 import HttpAdapter from &#x27;js-data-http&#x27;
 const adapter = new HttpAdapter()
@@ -377,7 +377,7 @@ commentMapper.belongsTo(userMapper, {
 })</pre>
 
         <p class="code-caption">With Container</p>
-    
+
     <pre class="sunlight-highlight-javascript">import {Container} from &#x27;js-data&#x27;
 import HttpAdapter from &#x27;js-data-http&#x27;
 const container = new Container()
@@ -407,85 +407,85 @@ container.defineMapper(&#x27;comment&#x27;, {
 })</pre>
 
 
-    
+
 </dd>
 
-    
+
     </div>
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
         <h3 class="subsection-title">Members</h3>
 
         <dl>
-            
+
 <hr>
 <dt class="name" id="MapperClass">
     <h4><span class="type-signature"></span>MapperClass<span class="type-signature"> :function</span></h4>
 
-    
+
 </dt>
 <dd>
-    
+
     <div class="description">
         <p>Constructor function to use in <a href="Container.html#defineMapper">Container#defineMapper</a> to create a
 new mapper.</p>
     </div>
-    
 
-    
+
+
         <h5>Type:</h5>
         <ul>
             <li>
-                
+
 <span class="param-type">function</span>
 
 
 
             </li>
         </ul>
-    
 
-    
+
+
 <dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
 
 
 
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
 	<dd class="tag-source">
 		<ul class="dummy">
@@ -495,79 +495,79 @@ new mapper.</p>
 			</li>
 		</ul>
 	</dd>
-	
 
-	
 
-	
 
-	
+
+
+
+
 </dl>
 
 
-    
+
 </dd>
 
-        
-            
+
+
 <hr>
 <dt class="name" id="mapperDefaults">
     <h4><span class="type-signature"></span>mapperDefaults<span class="type-signature"> :Object</span></h4>
 
-    
+
 </dt>
 <dd>
-    
+
     <div class="description">
         <p>Defaults options to pass to <a href="Container.html#MapperClass">Container#MapperClass</a> when creating a
 new mapper.</p>
     </div>
-    
 
-    
+
+
         <h5>Type:</h5>
         <ul>
             <li>
-                
+
 <span class="param-type">Object</span>
 
 
 
             </li>
         </ul>
-    
 
-    
+
+
 <dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
 
 
 
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
 	<dd class="tag-source">
 		<ul class="dummy">
@@ -577,190 +577,190 @@ new mapper.</p>
 			</li>
 		</ul>
 	</dd>
-	
 
-	
 
-	
 
-	
+
+
+
+
 </dl>
 
 
-    
+
 </dd>
 
         </dl>
-    
 
-    
+
+
         <h3 class="subsection-title">Methods</h3>
 
         <dl>
-            
+
 <hr>
 <dt>
     <h4 class="name" id=".extend"><span class="type-signature">&lt;static> </span>extend(<span class="optional">props</span>, <span class="optional">classProps</span>)</h4>
-    
-    
+
+
 </dt>
 <dd>
 
-    
+
     <div class="description">
         <p>Create a Container subclass.</p>
     </div>
-    
 
-    
 
-    
 
-    
-    
+
+
+
+
+
         <h5>Parameters:</h5>
-        
+
 
 <table class="params table table-striped">
     <thead>
     <tr>
-        
+
         <th>Name</th>
-        
+
 
         <th>Type</th>
 
-        
-        <th>Argument</th>
-        
 
-        
+        <th>Argument</th>
+
+
+
         <th>Default</th>
-        
+
 
         <th class="last">Description</th>
     </tr>
     </thead>
 
     <tbody>
-    
+
 
         <tr>
-            
+
                 <td class="name"><code>props</code></td>
-            
+
 
             <td class="type">
-            
-                
+
+
 <span class="param-type">Object</span>
 
 
 
-            
+
             </td>
 
-            
+
                 <td class="attributes">
-                
+
                     &lt;optional><br>
-                
 
-                
 
-                
+
+
+
                 </td>
-            
 
-            
+
+
                 <td class="default">
-                
+
                     {}
-                
+
                 </td>
-            
+
 
             <td class="description last"><p>Properties to add to the prototype of the
 subclass.</p></td>
         </tr>
 
-    
+
 
         <tr>
-            
+
                 <td class="name"><code>classProps</code></td>
-            
+
 
             <td class="type">
-            
-                
+
+
 <span class="param-type">Object</span>
 
 
 
-            
+
             </td>
 
-            
+
                 <td class="attributes">
-                
+
                     &lt;optional><br>
-                
 
-                
 
-                
+
+
+
                 </td>
-            
 
-            
+
+
                 <td class="default">
-                
+
                     {}
-                
+
                 </td>
-            
+
 
             <td class="description last"><p>Static properties to add to the subclass.</p></td>
         </tr>
 
-    
+
     </tbody>
 </table>
 
-    
 
-    
+
+
 <dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
 
 
 
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
 	<dd class="tag-source">
 		<ul class="dummy">
@@ -770,30 +770,30 @@ subclass.</p></td>
 			</li>
 		</ul>
 	</dd>
-	
 
-	
 
-	
 
-	
+
+
+
+
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
     <h5>Returns:</h5>
-    
-            
+
+
 <div class="param-desc">
     <p>Subclass of Container.</p>
 </div>
@@ -805,7 +805,7 @@ subclass.</p></td>
         Type
     </dt>
     <dd>
-        
+
 <span class="param-type">function</span>
 
 
@@ -814,11 +814,11 @@ subclass.</p></td>
 </dl>
 
 
-        
 
-    
+
+
         <h5>Example</h5>
-        
+
     <pre class="sunlight-highlight-javascript">var MyContainer = Container.extend({
   foo: function () { return &#x27;bar&#x27; }
 })
@@ -826,159 +826,159 @@ var container = new MyContainer()
 container.foo() // &quot;bar&quot;</pre>
 
 
-    
+
 </dd>
 
-        
-            
+
+
 <hr>
 <dt>
     <h4 class="name" id="defineMapper"><span class="type-signature"></span>defineMapper(name, <span class="optional">opts</span>)</h4>
-    
-    
+
+
 </dt>
 <dd>
 
-    
+
     <div class="description">
         <p>Create a new mapper and register it in this container.</p>
     </div>
-    
 
-    
 
-    
 
-    
-    
+
+
+
+
+
         <h5>Parameters:</h5>
-        
+
 
 <table class="params table table-striped">
     <thead>
     <tr>
-        
+
         <th>Name</th>
-        
+
 
         <th>Type</th>
 
-        
-        <th>Argument</th>
-        
 
-        
+        <th>Argument</th>
+
+
+
 
         <th class="last">Description</th>
     </tr>
     </thead>
 
     <tbody>
-    
+
 
         <tr>
-            
+
                 <td class="name"><code>name</code></td>
-            
+
 
             <td class="type">
-            
-                
+
+
 <span class="param-type">string</span>
 
 
 
-            
+
             </td>
 
-            
+
                 <td class="attributes">
-                
 
-                
 
-                
+
+
+
                 </td>
-            
 
-            
+
+
 
             <td class="description last"><p>Name under which to register the new <a href="Mapper.html">Mapper</a>.
 <a href="Mapper.html#name">Mapper#name</a> will be set to this value.</p></td>
         </tr>
 
-    
+
 
         <tr>
-            
+
                 <td class="name"><code>opts</code></td>
-            
+
 
             <td class="type">
-            
-                
+
+
 <span class="param-type">Object</span>
 
 
 
-            
+
             </td>
 
-            
+
                 <td class="attributes">
-                
+
                     &lt;optional><br>
-                
 
-                
 
-                
+
+
+
                 </td>
-            
 
-            
+
+
 
             <td class="description last"><p>Configuration options. Passed to
 <a href="Container.html#MapperClass">Container#MapperClass</a> when creating the new <a href="Mapper.html">Mapper</a>.</p></td>
         </tr>
 
-    
+
     </tbody>
 </table>
 
-    
 
-    
+
+
 <dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
 
 
 
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
 	<dd class="tag-source">
 		<ul class="dummy">
@@ -988,30 +988,30 @@ container.foo() // &quot;bar&quot;</pre>
 			</li>
 		</ul>
 	</dd>
-	
 
-	
 
-	
 
-	
+
+
+
+
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
     <h5>Returns:</h5>
-    
-            
+
+
 
 
 <dl>
@@ -1019,7 +1019,7 @@ container.foo() // &quot;bar&quot;</pre>
         Type
     </dt>
     <dd>
-        
+
 <span class="param-type"><a href="Mapper.html">Mapper</a></span>
 
 
@@ -1028,11 +1028,11 @@ container.foo() // &quot;bar&quot;</pre>
 </dl>
 
 
-        
 
-    
+
+
         <h5>Example</h5>
-        
+
     <pre class="sunlight-highlight-javascript">import {Container} from &#x27;js-data&#x27;
 const container = new Container({
   mapperDefaults: { foo: &#x27;bar&#x27; }
@@ -1041,126 +1041,126 @@ const userMapper = container.defineMapper(&#x27;user&#x27;)
 userMapper.foo // &quot;bar&quot;</pre>
 
 
-    
+
 </dd>
 
-        
-            
+
+
 <hr>
 <dt>
     <h4 class="name" id="getAdapter"><span class="type-signature"></span>getAdapter(<span class="optional">name</span>)</h4>
-    
-    
+
+
 </dt>
 <dd>
 
-    
+
     <div class="description">
         <p>Return the registered adapter with the given name or the default adapter if
 no name is provided.</p>
     </div>
-    
 
-    
 
-    
 
-    
-    
+
+
+
+
+
         <h5>Parameters:</h5>
-        
+
 
 <table class="params table table-striped">
     <thead>
     <tr>
-        
+
         <th>Name</th>
-        
+
 
         <th>Type</th>
 
-        
-        <th>Argument</th>
-        
 
-        
+        <th>Argument</th>
+
+
+
 
         <th class="last">Description</th>
     </tr>
     </thead>
 
     <tbody>
-    
+
 
         <tr>
-            
+
                 <td class="name"><code>name</code></td>
-            
+
 
             <td class="type">
-            
-                
+
+
 <span class="param-type">string</span>
 
 
 
-            
+
             </td>
 
-            
+
                 <td class="attributes">
-                
+
                     &lt;optional><br>
-                
 
-                
 
-                
+
+
+
                 </td>
-            
 
-            
+
+
 
             <td class="description last"><p>The name of the adapter to retrieve.</p></td>
         </tr>
 
-    
+
     </tbody>
 </table>
 
-    
 
-    
+
+
 <dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
 
 
 
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
 	<dd class="tag-source">
 		<ul class="dummy">
@@ -1170,30 +1170,30 @@ no name is provided.</p>
 			</li>
 		</ul>
 	</dd>
-	
 
-	
 
-	
 
-	
+
+
+
+
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
     <h5>Returns:</h5>
-    
-            
+
+
 <div class="param-desc">
     <p>The adapter.</p>
 </div>
@@ -1205,7 +1205,7 @@ no name is provided.</p>
         Type
     </dt>
     <dd>
-        
+
 <span class="param-type">Adapter</span>
 
 
@@ -1214,67 +1214,67 @@ no name is provided.</p>
 </dl>
 
 
-        
 
-    
+
+
 </dd>
 
-        
-            
+
+
 <hr>
 <dt>
     <h4 class="name" id="getAdapterName"><span class="type-signature"></span>getAdapterName(<span class="optional">opts</span>)</h4>
-    
-    
+
+
 </dt>
 <dd>
 
-    
+
     <div class="description">
         <p>Return the name of a registered adapter based on the given name or options,
 or the name of the default adapter if no name provided.</p>
     </div>
-    
 
-    
 
-    
 
-    
-    
+
+
+
+
+
         <h5>Parameters:</h5>
-        
+
 
 <table class="params table table-striped">
     <thead>
     <tr>
-        
+
         <th>Name</th>
-        
+
 
         <th>Type</th>
 
-        
-        <th>Argument</th>
-        
 
-        
+        <th>Argument</th>
+
+
+
 
         <th class="last">Description</th>
     </tr>
     </thead>
 
     <tbody>
-    
+
 
         <tr>
-            
+
                 <td class="name"><code>opts</code></td>
-            
+
 
             <td class="type">
-            
-                
+
+
 <span class="param-type">Object</span>
 |
 
@@ -1282,63 +1282,63 @@ or the name of the default adapter if no name provided.</p>
 
 
 
-            
+
             </td>
 
-            
+
                 <td class="attributes">
-                
+
                     &lt;optional><br>
-                
 
-                
 
-                
+
+
+
                 </td>
-            
 
-            
+
+
 
             <td class="description last"><p>The name of an adapter or options, if any.</p></td>
         </tr>
 
-    
+
     </tbody>
 </table>
 
-    
 
-    
+
+
 <dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
 
 
 
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
 	<dd class="tag-source">
 		<ul class="dummy">
@@ -1348,30 +1348,30 @@ or the name of the default adapter if no name provided.</p>
 			</li>
 		</ul>
 	</dd>
-	
 
-	
 
-	
 
-	
+
+
+
+
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
     <h5>Returns:</h5>
-    
-            
+
+
 <div class="param-desc">
     <p>The name of the adapter.</p>
 </div>
@@ -1383,7 +1383,7 @@ or the name of the default adapter if no name provided.</p>
         Type
     </dt>
     <dd>
-        
+
 <span class="param-type">string</span>
 
 
@@ -1392,65 +1392,65 @@ or the name of the default adapter if no name provided.</p>
 </dl>
 
 
-        
 
-    
+
+
 </dd>
 
-        
-            
+
+
 <hr>
 <dt>
     <h4 class="name" id="getAdapters"><span class="type-signature"></span>getAdapters()</h4>
-    
-    
+
+
 </dt>
 <dd>
 
-    
+
     <div class="description">
         <p>Return the registered adapters of this container.</p>
     </div>
-    
 
-    
 
-    
 
-    
-    
 
-    
+
+
+
+
+
+
 <dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
 
 
 
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
 	<dd class="tag-source">
 		<ul class="dummy">
@@ -1460,30 +1460,30 @@ or the name of the default adapter if no name provided.</p>
 			</li>
 		</ul>
 	</dd>
-	
 
-	
 
-	
 
-	
+
+
+
+
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
     <h5>Returns:</h5>
-    
-            
+
+
 
 
 <dl>
@@ -1491,7 +1491,7 @@ or the name of the default adapter if no name provided.</p>
         Type
     </dt>
     <dd>
-        
+
 <span class="param-type">Adapter</span>
 
 
@@ -1500,115 +1500,115 @@ or the name of the default adapter if no name provided.</p>
 </dl>
 
 
-        
 
-    
+
+
 </dd>
 
-        
-            
+
+
 <hr>
 <dt>
     <h4 class="name" id="getMapper"><span class="type-signature"></span>getMapper(name)</h4>
-    
-    
+
+
 </dt>
 <dd>
 
-    
+
     <div class="description">
         <p>Return the mapper registered under the specified name.</p>
     </div>
-    
 
-    
 
-    
 
-    
-    
+
+
+
+
+
         <h5>Parameters:</h5>
-        
+
 
 <table class="params table table-striped">
     <thead>
     <tr>
-        
+
         <th>Name</th>
-        
+
 
         <th>Type</th>
 
-        
 
-        
+
+
 
         <th class="last">Description</th>
     </tr>
     </thead>
 
     <tbody>
-    
+
 
         <tr>
-            
+
                 <td class="name"><code>name</code></td>
-            
+
 
             <td class="type">
-            
-                
+
+
 <span class="param-type">string</span>
 
 
 
-            
+
             </td>
 
-            
 
-            
+
+
 
             <td class="description last"><p><a href="Mapper.html#name">Mapper#name</a>.</p></td>
         </tr>
 
-    
+
     </tbody>
 </table>
 
-    
 
-    
+
+
 <dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
 
 
 
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
 	<dd class="tag-source">
 		<ul class="dummy">
@@ -1618,30 +1618,30 @@ or the name of the default adapter if no name provided.</p>
 			</li>
 		</ul>
 	</dd>
-	
 
-	
 
-	
 
-	
+
+
+
+
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
     <h5>Returns:</h5>
-    
-            
+
+
 
 
 <dl>
@@ -1649,7 +1649,7 @@ or the name of the default adapter if no name provided.</p>
         Type
     </dt>
     <dd>
-        
+
 <span class="param-type"><a href="Mapper.html">Mapper</a></span>
 
 
@@ -1658,272 +1658,272 @@ or the name of the default adapter if no name provided.</p>
 </dl>
 
 
-        
 
-    
+
+
         <h5>Example</h5>
-        
+
     <pre class="sunlight-highlight-javascript">import {Container} from &#x27;js-data&#x27;
 const container = new Container()
 const userMapper = container.defineMapper(&#x27;user&#x27;)
 userMapper === container.getMapper(&#x27;user&#x27;) // true</pre>
 
 
-    
+
 </dd>
 
-        
-            
+
+
 <hr>
 <dt>
     <h4 class="name" id="registerAdapter"><span class="type-signature"></span>registerAdapter(name, adapter, <span class="optional">opts</span>)</h4>
-    
-    
+
+
 </dt>
 <dd>
 
-    
+
     <div class="description">
         <p>Register an adapter on this container under the given name. Adapters
 registered on a container are shared by all mappers in the container.</p>
     </div>
-    
 
-    
 
-    
 
-    
-    
+
+
+
+
+
         <h5>Parameters:</h5>
-        
+
 
 <table class="params table table-striped">
     <thead>
     <tr>
-        
+
         <th>Name</th>
-        
+
 
         <th>Type</th>
 
-        
-        <th>Argument</th>
-        
 
-        
+        <th>Argument</th>
+
+
+
 
         <th class="last">Description</th>
     </tr>
     </thead>
 
     <tbody>
-    
+
 
         <tr>
-            
+
                 <td class="name"><code>name</code></td>
-            
+
 
             <td class="type">
-            
-                
+
+
 <span class="param-type">string</span>
 
 
 
-            
+
             </td>
 
-            
+
                 <td class="attributes">
-                
 
-                
 
-                
+
+
+
                 </td>
-            
 
-            
+
+
 
             <td class="description last"><p>The name of the adapter to register.</p></td>
         </tr>
 
-    
+
 
         <tr>
-            
+
                 <td class="name"><code>adapter</code></td>
-            
+
 
             <td class="type">
-            
-                
+
+
 <span class="param-type">Adapter</span>
 
 
 
-            
+
             </td>
 
-            
+
                 <td class="attributes">
-                
 
-                
 
-                
+
+
+
                 </td>
-            
 
-            
+
+
 
             <td class="description last"><p>The adapter to register.</p></td>
         </tr>
 
-    
+
 
         <tr>
-            
+
                 <td class="name"><code>opts</code></td>
-            
+
 
             <td class="type">
-            
-                
+
+
 <span class="param-type">Object</span>
 
 
 
-            
+
             </td>
 
-            
+
                 <td class="attributes">
-                
+
                     &lt;optional><br>
-                
 
-                
 
-                
+
+
+
                 </td>
-            
 
-            
+
+
 
             <td class="description last"><p>Configuration options.</p>
                 <h6 class="method-params-label method-subparams-label">Properties</h6>
-                
+
 
 <table class="params table table-striped">
     <thead>
     <tr>
-        
+
         <th>Name</th>
-        
+
 
         <th>Type</th>
 
-        
-        <th>Argument</th>
-        
 
-        
+        <th>Argument</th>
+
+
+
         <th>Default</th>
-        
+
 
         <th class="last">Description</th>
     </tr>
     </thead>
 
     <tbody>
-    
+
 
         <tr>
-            
+
                 <td class="name"><code>default</code></td>
-            
+
 
             <td class="type">
-            
-                
+
+
 <span class="param-type">boolean</span>
 
 
 
-            
+
             </td>
 
-            
+
                 <td class="attributes">
-                
+
                     &lt;optional><br>
-                
 
-                
 
-                
+
+
+
                 </td>
-            
 
-            
+
+
                 <td class="default">
-                
+
                     false
-                
+
                 </td>
-            
+
 
             <td class="description last"><p>Whether to make the adapter the
 default adapter for all Mappers in this container.</p></td>
         </tr>
 
-    
+
     </tbody>
 </table>
 
             </td>
         </tr>
 
-    
+
     </tbody>
 </table>
 
-    
 
-    
+
+
 <dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
 
 
 
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
 	<dd class="tag-source">
 		<ul class="dummy">
@@ -1933,46 +1933,46 @@ default adapter for all Mappers in this container.</p></td>
 			</li>
 		</ul>
 	</dd>
-	
 
-	
 
-	
 
-	
+
+
+
+
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
+
         <h5>Example</h5>
-        
+
     <pre class="sunlight-highlight-javascript">import {Container} from &#x27;js-data&#x27;
 import HttpAdapter from &#x27;js-data-http&#x27;
 const container = new Container()
 container.registerAdapter(&#x27;http&#x27;, new HttpAdapter, { default: true })</pre>
 
 
-    
+
 </dd>
 
         </dl>
-    
 
-    
 
-    
+
+
+
 </article>
 
 </section>
@@ -1985,11 +1985,11 @@ container.registerAdapter(&#x27;http&#x27;, new HttpAdapter, { default: true })<
 
 	<div class="clearfix"></div>
 
-	
+
 		<div class="col-md-3">
 			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
 		</div>
-	
+
 
 </div>
 </div>
@@ -2020,9 +2020,9 @@ container.registerAdapter(&#x27;http&#x27;, new HttpAdapter, { default: true })<
 
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
-	
+
 		on 2016-01-27T00:11:16+00:00
-	
+
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>
 </footer>
@@ -2100,6 +2100,23 @@ $( function () {
 
 
 <!--Google Analytics-->
+
+<script>
+  (function ( i, s, o, g, r, a, m ) {
+    i['GoogleAnalyticsObject'] = r;
+    i[r] = i[r] || function () {
+      (i[r].q = i[r].q || []).push( arguments )
+    }, i[r].l = 1 * new Date();
+    a = s.createElement( o ),
+      m = s.getElementsByTagName( o )[0];
+    a.async = 1;
+    a.src = g;
+    m.parentNode.insertBefore( a, m )
+  })( window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga' );
+
+  ga( 'create', 'UA-55528236-2', 'api.js-data.io' );
+  ga( 'send', 'pageview' );
+</script>
 
 
 <script type="text/javascript">
