@@ -14,10 +14,14 @@
   "templates": {
     "theme": "lumen",
     "systemName": "js-data",
-    "copyright": "js-data Copyright © 2014-2016 Jason Dobry",
+    "copyright": "js-data Copyright © 2014-2016 js-data project authors",
     "outputSourceFiles": true,
     "syntaxTheme": "dark",
     "linenums": true,
-    "footer": "<div style=\"text-align:center\">Back to <a href=\"http://js-data.io\">js-data.io</a></div>"
+    "footer": "<div style=\"text-align:center\">Back to <a href=\"http://js-data.io\">js-data.io</a></div>",
+    "analytics": {
+      "ua": "UA-55528236-2",
+      "domain": "api.js-data.io"
+    }
   }
 }
