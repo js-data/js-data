@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.15 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.16 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -9,7 +9,7 @@
 */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-  typeof define === 'function' && define.amd ? define(['exports'], factory) :
+  typeof define === 'function' && define.amd ? define('js-data', ['exports'], factory) :
   (factory((global.JSData = global.JSData || {})));
 }(this, function (exports) { 'use strict';
 
@@ -676,6 +676,17 @@
     });
   };
 
+  var omit = function omit(props, keys) {
+    // Remove relations
+    var _props = {};
+    forOwn(props, function (value, key) {
+      if (keys.indexOf(key) === -1) {
+        _props[key] = value;
+      }
+    });
+    return _props;
+  };
+
 var utils = Object.freeze({
     get isBrowser () { return isBrowser; },
     isArray: isArray,
@@ -711,7 +722,8 @@ var utils = Object.freeze({
     addHiddenPropsToTarget: addHiddenPropsToTarget,
     extend: extend,
     getSuper: getSuper,
-    forEachRelation: forEachRelation
+    forEachRelation: forEachRelation,
+    omit: omit
   });
 
   /**
@@ -6890,11 +6902,11 @@ var utils = Object.freeze({
    * if the current version is not beta.
    */
   var version = {
-    full: '3.0.0-alpha.15',
+    full: '3.0.0-alpha.16',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10),
-    alpha: '15',
+    alpha: '16',
     beta: 'false'
   };
 

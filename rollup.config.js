@@ -6,7 +6,10 @@ export default {
   sourceMap: 'dist/js-data.js.map',
   format: 'umd',
   moduleName: 'JSData',
+  moduleId: 'js-data',
   plugins: [
-    babel()
+    babel({
+      exclude: 'node_modules/**'
+    })
   ]
 }

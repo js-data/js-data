@@ -1,4 +1,12 @@
-##### 3.0.0-alpha.14 -13 February 2016
+##### 3.0.0-alpha.16 - 21 February 2016
+
+- Added "omit" utility method
+
+##### 3.0.0-alpha.15 - 21 February 2016
+
+- Couple of fixes
+
+##### 3.0.0-alpha.14 - 13 February 2016
 
 - Added utility for recursively visiting relations based on `opts.with`
 
