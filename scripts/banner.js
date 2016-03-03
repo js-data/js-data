@@ -14,7 +14,7 @@ var banner = '/*!\n' +
 
 console.log('Adding banner to dist/ files...')
 
-function addBanner(filepath) {
+function addBanner (filepath) {
   var contents = fs.readFileSync(filepath, {
     encoding: 'utf-8'
   })

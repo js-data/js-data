@@ -6,8 +6,9 @@ export default {
   sourceMap: 'dist/js-data-tests.js.map',
   format: 'umd',
   moduleName: 'JSDataTests',
-  external: 'chai:chai',
   plugins: [
-    babel()
+    babel({
+      exclude: 'node_modules/**'
+    })
   ]
 }

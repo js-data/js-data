@@ -626,3 +626,14 @@ export const forEachRelation = function (mapper, opts, fn, ctx) {
     forRelation(opts, def, fn, ctx)
   })
 }
+
+export const omit = function (props, keys) {
+  // Remove relations
+  const _props = {}
+  forOwn(props, function (value, key) {
+    if (keys.indexOf(key) === -1) {
+      _props[key] = value
+    }
+  })
+  return _props
+}
