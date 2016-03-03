@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>js-data Source: Record.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.dark.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.lumen.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">js-data</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-js-data.html">js-data</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Collection.html">Collection</a></li><li><a href="Container.html">Container</a></li><li><a href="DataStore.html">DataStore</a></li><li><a href="LinkedCollection.html">LinkedCollection</a></li><li><a href="Mapper.html">Mapper</a></li><li><a href="Query.html">Query</a></li><li><a href="Record.html">Record</a></li><li><a href="Schema.html">Schema</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+		<div class="col-sm-3 col-md-3">
+            <form class="navbar-form" role="search">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                    <div class="input-group-btn">
+                        <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: Record.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">import {
+  _,
+  addHiddenPropsToTarget,
+  classCallCheck,
+  copy,
+  eventify,
+  extend,
+  fillIn,
+  forOwn,
+  get,
+  isFunction,
+  isObject,
+  isSorN,
+  isString,
+  resolve,
+  set,
+  unset
+} from './utils'
+
+/**
+ * js-data's Record class.
+ *
+ * ```javascript
+ * import {Record} from 'js-data'
+ * ```
+ *
+ * @class Record
+ * @param {Object} [props] The initial properties of the new Record instance.
+ * @param {Object} [opts] Configuration options.
+ * @param {boolean} [opts.noValidate=false] Whether to skip validation on the
+ * initial properties.
+ */
+export default function Record (props, opts) {
+  const self = this
+  classCallCheck(self, Record)
+
+  props || (props = {})
+  opts || (opts = {})
+  const _props = {}
+  Object.defineProperties(self, {
+    _get: {
+      value (key) {
+        return get(_props, key)
+      }
+    },
+    _set: {
+      value (key, value) {
+        return set(_props, key, value)
+      }
+    },
+    _unset: {
+      value (key) {
+        return unset(_props, key)
+      }
+    }
+  })
+  const _set = self._set
+  // TODO: Optimize these strings
+  _set('creating', true)
+  if (opts.noValidate) {
+    _set('noValidate', true)
+  }
+  fillIn(self, props)
+  _set('creating') // unset
+  _set('changes', {})
+  _set('noValidate') // unset
+  _set('previous', copy(props))
+}
+
+/**
+ * Create a Record subclass.
+ *
+ * ```javascript
+ * var MyRecord = Record.extend({
+ *   foo: function () { return 'bar' }
+ * })
+ * var record = new MyRecord()
+ * record.foo() // "bar"
+ * ```
+ *
+ * @name Record.extend
+ * @method
+ * @param {Object} [props={}] Properties to add to the prototype of the
+ * subclass.
+ * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @return {Function} Subclass of Record.
+ */
+Record.extend = extend
+
+addHiddenPropsToTarget(Record.prototype, {
+  /**
+   * TODO
+   *
+   * @name Record#_mapper
+   * @method
+   * @ignore
+   */
+  _mapper () {
+    if (!this.constructor.Mapper) {
+      throw new Error('This RecordClass has no Mapper!')
+    }
+    return this.constructor.Mapper
+  },
+
+  /**
+   * Return the value at the given path for this instance.
+   *
+   * @name Record#get
+   * @method
+   * @param {string} key - Path of value to retrieve.
+   * @return {*} Value at path.
+   */
+  get: function (key) {
+    return get(this, key)
+  },
+
+  /**
+   * Set the value for a given key, or the values for the given keys if "key" is
+   * an object.
+   *
+   * @name Record#set
+   * @method
+   * @param {(string|Object)} key - Key to set or hash of key-value pairs to set.
+   * @param {*} [value] - Value to set for the given key.
+   * @param {Object} [opts] - Optional configuration.
+   * @param {boolean} [opts.silent=false] - Whether to trigger change events.
+   */
+  set: function (key, value, opts) {
+    const self = this
+    if (isObject(key)) {
+      opts = value
+    }
+    opts || (opts = {})
+    if (opts.silent) {
+      self._set('silent', true)
+    }
+    set(self, key, value)
+    if (!self._get('eventId')) {
+      self._set('silent') // unset
+    }
+  },
+
+  /**
+   * Unset the value for a given key.
+   *
+   * @name Record#unset
+   * @method
+   * @param {string} key - Key to unset.
+   * @param {Object} [opts] - Optional configuration.
+   * @param {boolean} [opts.silent=false] - Whether to trigger change events.
+   */
+  unset (key, opts) {
+    this.set(key, undefined, opts)
+  },
+
+  /**
+   * TODO
+   *
+   * @name Record#hashCode
+   * @method
+   */
+  hashCode () {
+    const self = this
+    return get(self, self._mapper().idAttribute)
+  },
+
+  /**
+   * TODO
+   *
+   * @name Record#changes
+   * @method
+   * @param {string} [key] TODO
+   */
+  changes (key) {
+    const self = this
+    if (key) {
+      return self._get(`changes.${key}`)
+    }
+    return self._get('changes')
+  },
+
+  /**
+   * TODO
+   *
+   * @name Record#hasChanges
+   * @method
+   */
+  hasChanges () {
+    return !!(this._get('changed') || []).length
+  },
+
+  /**
+   * TODO
+   *
+   * @name Record#commit
+   * @method
+   */
+  commit () {
+    const self = this
+    self._set('changed') // unset
+    self._set('changes', {})
+    self._set('previous', copy(self))
+    return self
+  },
+
+  /**
+   * TODO
+   *
+   * @name Record#previous
+   * @method
+   * @param {string} [key] TODO
+   */
+  previous (key) {
+    const self = this
+    if (key) {
+      return self._get(`previous.${key}`)
+    }
+    return self._get('previous')
+  },
+
+  /**
+   * TODO
+   *
+   * @name Record#revert
+   * @method
+   * @param {Object} [opts] Configuration options.
+   */
+  revert (opts) {
+    const self = this
+    const previous = self._get('previous') || {}
+    opts || (opts = {})
+    opts.preserve || (opts.preserve = [])
+    forOwn(self, (value, key) => {
+      if (key !== self._mapper().idAttribute &amp;&amp; !previous.hasOwnProperty(key) &amp;&amp; self.hasOwnProperty(key) &amp;&amp; opts.preserve.indexOf(key) === -1) {
+        delete self[key]
+      }
+    })
+    forOwn(previous, (value, key) => {
+      if (opts.preserve.indexOf(key) === -1) {
+        self[key] = value
+      }
+    })
+    self.commit()
+    return self
+  },
+
+  /**
+   * TODO
+   *
+   * @name Record#schema
+   * @method
+   * @param {string} [key] TODO
+   */
+  schema (key) {
+    let _schema = this._mapper().schema
+    return key ? _schema[key] : _schema
+  },
+
+  // validate (obj, value) {
+  //   let errors = []
+  //   let _schema = this.schema()
+  //   if (!obj) {
+  //     obj = this
+  //   } else if (utils.isString(obj)) {
+  //     const prop = _schema[obj]
+  //     if (prop) {
+  //       errors = validate.validate(prop, value) || []
+  //     }
+  //   } else {
+  //     utils.forOwn(_schema, function (prop, key) {
+  //       errors = errors.concat(validate.validate(prop, utils.get(obj, key)) || [])
+  //     })
+  //   }
+  //   return errors.length ? errors : undefined
+  // },
+
+  /**
+   * TODO
+   *
+   * @name Record#create
+   * @method
+   * @param {Object} [opts] Configuration options. See {@link Mapper#create}.
+   */
+  create (opts) {
+    return this._mapper().create(this, opts)
+  },
+
+  /**
+   * TODO
+   *
+   * @name Record#beforeSave
+   * @method
+   * @param {Object} opts TODO
+   */
+  beforeSave () {},
+
+  /**
+   * TODO
+   *
+   * @name Record#save
+   * @method
+   * @param {Object} [opts] Configuration options. See {@link Mapper#create}.
+   */
+  save (opts) {
+    let op, adapter
+    const self = this
+    const Mapper = self._mapper()
+
+    // Default values for arguments
+    opts || (opts = {})
+
+    // Fill in "opts" with the Model's configuration
+    _(self, opts)
+    adapter = opts.adapter = self.getAdapterName(opts)
+
+    // beforeSave lifecycle hook
+    op = opts.op = 'beforeSave'
+    return resolve(self[op](opts)).then(function () {
+      // Now delegate to the adapter
+      op = opts.op = 'save'
+      Mapper.dbg(op, self, opts)
+      return self.getAdapter(adapter)[op](Mapper, self, opts)
+    }).then(function (data) {
+      // afterSave lifecycle hook
+      op = opts.op = 'afterSave'
+      return resolve(self[op](data, opts)).then(function (_data) {
+        // Allow for re-assignment from lifecycle hook
+        data = _data || data
+        if (opts.raw) {
+          self.set(data.data)
+          data.data = self
+        } else {
+          self.set(data)
+        }
+        return Mapper.end(data, opts)
+      })
+    })
+  },
+
+  /**
+   * TODO
+   *
+   * @name Record#afterSave
+   * @method
+   * @param {Object} opts TODO
+   */
+  afterSave () {},
+
+  /**
+   * TODO
+   *
+   * @name Record#beforeLoadRelations
+   * @method
+   * @param {string[]} relations TODO
+   * @param {Object} opts TODO
+   */
+  beforeLoadRelations () {},
+
+  /**
+   * TODO
+   *
+   * @name Record#loadRelations
+   * @method
+   * @param {string[]} [relations] TODO
+   * @param {Object} [opts] TODO
+   */
+  loadRelations (relations, opts) {
+    let op
+    const self = this
+    const Mapper = self._mapper()
+    const relationList = Mapper.relationList || []
+
+    // Default values for arguments
+    relations || (relations = [])
+    opts || (opts = {})
+
+    // Fill in "opts" with the Model's configuration
+    _(Mapper, opts)
+    opts.adapter = Mapper.getAdapterName(opts)
+
+    // beforeLoadRelations lifecycle hook
+    op = opts.op = 'beforeLoadRelations'
+    return resolve(self[op](relations, opts)).then(function () {
+      if (isString(relations)) {
+        relations = [relations]
+      }
+      // Now delegate to the adapter
+      op = opts.op = 'loadRelations'
+      Mapper.dbg(op, self, relations, opts)
+      return Promise.all(relationList.map(function (def) {
+        if (isFunction(def.load)) {
+          return def.load(Mapper, def, self, opts)
+        }
+        let task
+        if (def.type === 'hasMany' &amp;&amp; def.foreignKey) {
+          // hasMany
+          task = def.getRelation().findAll({
+            [def.foreignKey]: get(self, Mapper.idAttribute)
+          }, opts)
+        } else if (def.foreignKey) {
+          // belongsTo or hasOne
+          const key = get(self, def.foreignKey)
+          if (isSorN(key)) {
+            task = def.getRelation().find(key, opts)
+          }
+        } else if (def.localKeys) {
+          // hasMany
+          task = def.getRelation().findAll({
+            [def.getRelation().idAttribute]: {
+              'in': get(self, def.localKeys)
+            }
+          }, opts)
+        } else if (def.foreignKeys) {
+          // hasMany
+          task = def.getRelation().findAll({
+            [def.getRelation().idAttribute]: {
+              'contains': get(self, Mapper.idAttribute)
+            }
+          }, opts)
+        }
+        if (task) {
+          task = task.then(function (data) {
+            if (opts.raw) {
+              data = data.data
+            }
+            set(self, def.localField, def.type === 'hasOne' ? (data.length ? data[0] : undefined) : data)
+          })
+        }
+        return task
+      }))
+    }).then(function () {
+      // afterLoadRelations lifecycle hook
+      op = opts.op = 'afterLoadRelations'
+      return resolve(self[op](relations, opts)).then(function () {
+        return self
+      })
+    })
+  },
+
+  /**
+   * TODO
+   *
+   * @name Record#afterLoadRelations
+   * @method
+   * @param {string[]} relations TODO
+   * @param {Object} opts TODO
+   */
+  afterLoadRelations () {},
+
+  /**
+   * TODO
+   *
+   * @name Record#destroy
+   * @method
+   * @param {Object} [opts] Configuration options. @see {@link Model.destroy}.
+   */
+  destroy (opts) {
+    // TODO: move actual destroy logic here
+    const Mapper = this._mapper()
+    return Mapper.destroy(get(this, Mapper.idAttribute), opts)
+  },
+
+  // TODO: move logic for single-item async operations onto the instance.
+
+  /**
+   * Return a plain object representation of this record. If the class from
+   * which this record was created has a mapper, then {@link Mapper#toJSON} will
+   * be called instead.
+   *
+   * @name Record#toJSON
+   * @method
+   * @param {Object} [opts] Configuration options.
+   * @param {string[]} [opts.with] Array of relation names or relation fields
+   * to include in the representation. Only available as an option if the class
+   * from which this record was created has a mapper.
+   * @return {Object} Plain object representation of this record.
+   */
+  toJSON (opts) {
+    const mapper = this.constructor.Mapper
+    if (mapper) {
+      return mapper.toJSON(this, opts)
+    } else {
+      const json = {}
+      forOwn(this, function (prop, key) {
+        json[key] = copy(prop)
+      })
+      return json
+    }
+  }
+})
+
+/**
+ * Register a new event listener on this Record.
+ *
+ * @name Record#on
+ * @method
+ */
+
+/**
+ * Remove an event listener from this Record.
+ *
+ * @name Record#off
+ * @method
+ */
+
+/**
+ * Trigger an event on this Record.
+ *
+ * @name Record#emit
+ * @method
+ * @param {string} event Name of event to emit.
+ */
+
+/**
+ * Allow records to emit events.
+ *
+ * An record's registered listeners are stored in the record's private data.
+ */
+eventify(
+  Record.prototype,
+  function () {
+    return this._get('events')
+  },
+  function (value) {
+    this._set('events', value)
+  }
+)
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+<div class="modal fade" id="searchResults">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Search results</h4>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+<footer>
+
+	<div style="text-align:center">Back to <a href="http://js-data.io">js-data.io</a></div>
+
+
+	<span class="copyright">
+	js-data Copyright © 2014-2016 js-data project authors
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
+	
+		on 2016-03-03T07:58:15-08:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+<script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			var id = $( heading ).attr( "id" );
+			return id && id.replace(/\~/g, '-inner-').replace(/\./g, '-static-') || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+<script>
+	(function ( i, s, o, g, r, a, m ) {
+		i['GoogleAnalyticsObject'] = r;
+		i[r] = i[r] || function () {
+			(i[r].q = i[r].q || []).push( arguments )
+		}, i[r].l = 1 * new Date();
+		a = s.createElement( o ),
+			m = s.getElementsByTagName( o )[0];
+		a.async = 1;
+		a.src = g;
+		m.parentNode.insertBefore( a, m )
+	})( window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga' );
+
+	ga( 'create', 'UA-55528236-2', 'api.js-data.io' );
+	ga( 'send', 'pageview' );
+</script>
+
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		SearcherDisplay.init();
+	});
+</script>
+
+</body>
+</html>

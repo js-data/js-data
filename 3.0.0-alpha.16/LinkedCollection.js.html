@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>js-data Source: LinkedCollection.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.dark.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.lumen.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">js-data</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-js-data.html">js-data</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Collection.html">Collection</a></li><li><a href="Container.html">Container</a></li><li><a href="DataStore.html">DataStore</a></li><li><a href="LinkedCollection.html">LinkedCollection</a></li><li><a href="Mapper.html">Mapper</a></li><li><a href="Query.html">Query</a></li><li><a href="Record.html">Record</a></li><li><a href="Schema.html">Schema</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+		<div class="col-sm-3 col-md-3">
+            <form class="navbar-form" role="search">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                    <div class="input-group-btn">
+                        <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: LinkedCollection.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">import {
+  classCallCheck,
+  extend,
+  get,
+  getSuper,
+  isArray,
+  isFunction,
+  isObject,
+  isString,
+  isUndefined,
+  set
+} from './utils'
+import {
+  hasManyType
+} from './decorators'
+import Collection from './Collection'
+
+/**
+ * TODO
+ *
+ * ```javascript
+ * import {LinkedCollection} from 'js-data'
+ * ```
+ *
+ * @class LinkedCollection
+ * @extends Collection
+ * @param {Array} [records] Initial set of records to insert into the
+ * collection. See {@link Collection}.
+ * @param {Object} [opts] Configuration options. See {@link Collection}.
+ * @return {Mapper}
+ */
+const LinkedCollection = Collection.extend({
+  constructor (records, opts) {
+    const self = this
+    classCallCheck(self, LinkedCollection)
+
+    getSuper(self).call(self, records, opts)
+
+    // Make sure this collection has somewhere to store "added" timestamps
+    self._added = {}
+
+    // Make sure this collection a reference to a datastore
+    if (!self.datastore) {
+      throw new Error('This collection must have a datastore!')
+    }
+    return self
+  },
+
+  _onRecordEvent (...args) {
+    const self = this
+    getSuper(self).prototype._onRecordEvent.apply(self, args)
+    const event = args[0]
+    // This is a very brute force method
+    // Lots of room for optimization
+    if (isString(event) &amp;&amp; event.indexOf('change') === 0) {
+      self.updateIndexes(args[1])
+    }
+  },
+
+  add (records, opts) {
+    const self = this
+    const datastore = self.datastore
+    const mapper = self.mapper
+    const relationList = mapper.relationList || []
+    const timestamp = new Date().getTime()
+    const usesRecordClass = !!mapper.RecordClass
+    let singular
+
+    if (isObject(records) &amp;&amp; !isArray(records)) {
+      singular = true
+      records = [records]
+    }
+
+    if (relationList.length &amp;&amp; records.length) {
+      // Check the currently visited record for relations that need to be
+      // inserted into their respective collections.
+      mapper.relationList.forEach(function (def) {
+        const relationName = def.relation
+        // A reference to the Mapper that this Mapper is related to
+        const Relation = datastore.getMapper(relationName)
+        // The field used by the related Mapper as the primary key
+        const relationIdAttribute = Relation.idAttribute
+        // Grab the foreign key in this relationship, if there is one
+        const foreignKey = def.foreignKey
+        // A lot of this is an optimization for being able to insert a lot of
+        // data as quickly as possible
+        const relatedCollection = datastore.getCollection(relationName)
+        const type = def.type
+        const isHasMany = type === hasManyType
+        const shouldAdd = isUndefined(def.add) ? true : !!def.add
+        let relatedData
+
+        records.forEach(function (record) {
+          // Grab a reference to the related data attached or linked to the
+          // currently visited record
+          relatedData = def.getLocalField(record)
+
+          if (isFunction(def.add)) {
+            def.add(datastore, def, record)
+          } else if (relatedData) {
+            // Otherwise, if there is something to be added, add it
+            if (isHasMany) {
+              // Handle inserting hasMany relations
+              relatedData = relatedData.map(function (toInsertItem) {
+                // Check that this item isn't the same item that is already in the
+                // store
+                if (toInsertItem !== relatedCollection.get(relatedCollection.recordId(toInsertItem))) {
+                  // Make sure this item has its foreignKey
+                  if (foreignKey) {
+                    // TODO: slow, could be optimized? But user loses hook
+                    def.setForeignKey(record, toInsertItem)
+                  }
+                  // Finally add this related item
+                  if (shouldAdd) {
+                    toInsertItem = relatedCollection.add(toInsertItem)
+                  }
+                }
+                return toInsertItem
+              })
+              // If it's the parent that has the localKeys
+              if (def.localKeys) {
+                set(record, def.localKeys, relatedData.map(function (inserted) {
+                  return get(inserted, relationIdAttribute)
+                }))
+              }
+            } else {
+              const relatedDataId = get(relatedData, relationIdAttribute)
+              // Handle inserting belongsTo and hasOne relations
+              if (relatedData !== relatedCollection.get(relatedDataId)) {
+                // Make sure foreignKey field is set
+                def.setForeignKey(record, relatedData)
+                // Finally insert this related item
+                if (shouldAdd) {
+                  relatedData = relatedCollection.add(relatedData)
+                }
+              }
+            }
+            def.setLocalField(record, relatedData)
+          }
+        })
+      })
+    }
+
+    records = getSuper(self).prototype.add.call(self, records, opts)
+
+    records.forEach(function (record) {
+      // Track when this record was added
+      self._added[self.recordId(record)] = timestamp
+
+      if (usesRecordClass) {
+        record._set('$', timestamp)
+      }
+    })
+
+    return singular ? records[0] : records
+  },
+
+  remove (id, opts) {
+    const self = this
+    delete self._added[id]
+    const record = getSuper(self).prototype.remove.call(self, id, opts)
+    if (record) {
+      const mapper = self.mapper
+      if (mapper.RecordClass) {
+        record._set('$') // unset
+      }
+    }
+    return record
+  },
+
+  removeAll (query, opts) {
+    const self = this
+    const records = getSuper(self).prototype.removeAll.call(self, query, opts)
+    records.forEach(function (record) {
+      delete self._added[self.recordId(record)]
+    })
+    return records
+  }
+})
+
+/**
+ * Create a LinkedCollection subclass.
+ *
+ * ```javascript
+ * var MyLinkedCollection = LinkedCollection.extend({
+ *   foo: function () { return 'bar' }
+ * })
+ * var collection = new MyLinkedCollection()
+ * collection.foo() // "bar"
+ * ```
+ *
+ * @name LinkedCollection.extend
+ * @method
+ * @param {Object} [props={}] Properties to add to the prototype of the
+ * subclass.
+ * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @return {Function} Subclass of LinkedCollection.
+ */
+LinkedCollection.extend = extend
+
+export {
+  LinkedCollection as default
+}
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+<div class="modal fade" id="searchResults">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Search results</h4>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+<footer>
+
+	<div style="text-align:center">Back to <a href="http://js-data.io">js-data.io</a></div>
+
+
+	<span class="copyright">
+	js-data Copyright © 2014-2016 js-data project authors
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
+	
+		on 2016-03-03T07:58:15-08:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+<script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			var id = $( heading ).attr( "id" );
+			return id && id.replace(/\~/g, '-inner-').replace(/\./g, '-static-') || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+<script>
+	(function ( i, s, o, g, r, a, m ) {
+		i['GoogleAnalyticsObject'] = r;
+		i[r] = i[r] || function () {
+			(i[r].q = i[r].q || []).push( arguments )
+		}, i[r].l = 1 * new Date();
+		a = s.createElement( o ),
+			m = s.getElementsByTagName( o )[0];
+		a.async = 1;
+		a.src = g;
+		m.parentNode.insertBefore( a, m )
+	})( window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga' );
+
+	ga( 'create', 'UA-55528236-2', 'api.js-data.io' );
+	ga( 'send', 'pageview' );
+</script>
+
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		SearcherDisplay.init();
+	});
+</script>
+
+</body>
+</html>
