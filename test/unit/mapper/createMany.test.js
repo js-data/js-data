@@ -31,19 +31,6 @@ export function init () {
       Test.assert.isDefined(users[0][User.idAttribute], 'new user has an id')
       Test.assert.isTrue(users[0] instanceof User.RecordClass, 'user is a record')
     })
-    it('should upsert', async function () {
-      const Test = this
-      const props = [{ name: 'John', id: 1 }]
-      const User = new Test.JSData.Mapper({
-        name: 'user',
-        defaultAdapter: 'mock',
-        upsert: true,
-        updateMany: Test.sinon.stub().returns(Promise.resolve(props))
-      })
-
-      await User.createMany(props)
-      Test.assert.isTrue(User.updateMany.calledOnce, 'User.updateMany should have been called')
-    })
     it('should return raw', async function () {
       const Test = this
       const props = [{ name: 'John' }]

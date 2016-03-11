@@ -18,12 +18,12 @@ export function init () {
         defaultAdapter: 'mock'
       })
       User.registerAdapter('mock', {
-        updateAll (mapper, _query, _props, Opts) {
+        updateAll (mapper, _props, _query, Opts) {
           updateAllCalled = true
           return new Promise(function (resolve, reject) {
             Test.assert.isTrue(mapper === User, 'should pass in the Mapper')
-            Test.assert.deepEqual(_query, query, 'should pass in the query')
             Test.assert.deepEqual(_props, props, 'should pass in the props')
+            Test.assert.deepEqual(_query, query, 'should pass in the query')
             Test.assert.equal(Opts.raw, false, 'Opts are provided')
             _props.foo = 'bar'
             _props.id = id
@@ -31,7 +31,7 @@ export function init () {
           })
         }
       })
-      const users = await User.updateAll(query, props)
+      const users = await User.updateAll(props, query)
       Test.assert.isTrue(updateAllCalled, 'Adapter#updateAll should have been called')
       Test.assert.equal(users[0].foo, 'bar', 'user has a new field')
       Test.assert.isTrue(users[0] instanceof User.RecordClass, 'user is a record')
@@ -48,12 +48,12 @@ export function init () {
         defaultAdapter: 'mock'
       })
       User.registerAdapter('mock', {
-        updateAll (mapper, _query, _props, Opts) {
+        updateAll (mapper, _props, _query, Opts) {
           updateAllCalled = true
           return new Promise(function (resolve, reject) {
             Test.assert.isTrue(mapper === User, 'should pass in the Mapper')
-            Test.assert.deepEqual(_query, query, 'should pass in the query')
             Test.assert.deepEqual(_props, props, 'should pass in the props')
+            Test.assert.deepEqual(_query, query, 'should pass in the query')
             Test.assert.equal(Opts.raw, true, 'Opts are provided')
             _props.foo = 'bar'
             _props.id = id
@@ -64,7 +64,7 @@ export function init () {
           })
         }
       })
-      let data = await User.updateAll(query, props)
+      let data = await User.updateAll(props, query)
       Test.assert.isTrue(updateAllCalled, 'Adapter#update should have been called')
       Test.assert.equal(data.data[0].foo, 'bar', 'user has a new field')
       Test.assert.isTrue(data.data[0] instanceof User.RecordClass, 'user is a record')

@@ -35,5 +35,6 @@ function version (filepath) {
 }
 
 version('dist/js-data.js')
+version('dist/js-data.min.js')
 
 console.log('Done!')
