@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.16 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.17 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -82,7 +82,7 @@
   var REGEXP_TAG = '[object RegExp]';
   var STRING_TAG = '[object String]';
   var objToString = Object.prototype.toString;
-  var isBrowser = undefined;
+  var isBrowser = void 0;
 
   // Attempt to detect whether we are in the browser.
   try {
@@ -231,7 +231,7 @@
   var forOwn = function forOwn(obj, fn, thisArg) {
     var keys = Object.keys(obj);
     var len = keys.length;
-    var i = undefined;
+    var i = void 0;
     for (i = 0; i < len; i++) {
       fn.call(thisArg, obj[keys[i]], keys[i], obj);
     }
@@ -312,8 +312,8 @@
       return [];
     }
     var result = [];
-    var item = undefined;
-    var i = undefined;
+    var item = void 0;
+    var i = void 0;
     var len = array1.length;
     for (i = 0; i < len; i++) {
       item = array1[i];
@@ -355,7 +355,7 @@
     if (!bl || !bl.length) {
       return false;
     }
-    var matches = undefined;
+    var matches = void 0;
     for (var i = 0; i < bl.length; i++) {
       if (toString(bl[i]) === '[object RegExp]' && bl[i].test(prop) || bl[i] === prop) {
         matches = prop;
@@ -429,9 +429,9 @@
         stackTo.push(to);
       }
 
-      var result = undefined;
+      var result = void 0;
       if (isArray(from)) {
-        var i = undefined;
+        var i = void 0;
         to.length = 0;
         for (i = 0; i < from.length; i++) {
           result = copy(from[i], null, stackFrom, stackTo, blacklist, plain);
@@ -537,7 +537,7 @@
 
           var type = args.shift();
           var listeners = events[type] || [];
-          var i = undefined;
+          var i = void 0;
           for (i = 0; i < listeners.length; i++) {
             listeners[i].f.apply(listeners[i].c, args);
           }
@@ -577,7 +577,7 @@
 
   var extend = function extend(props, classProps) {
     var SuperClass = this;
-    var _SubClass = undefined;
+    var _SubClass = void 0;
 
     props || (props = {});
     classProps || (classProps = {});
@@ -1132,7 +1132,7 @@ var utils = Object.freeze({
           });
           if (fields.length) {
             (function () {
-              var i = undefined;
+              var i = void 0;
               var len = fields.length;
               self.data = self.data.filter(function (item) {
                 var first = true;
@@ -1362,8 +1362,8 @@ var utils = Object.freeze({
   function binarySearch(array, value, field) {
     var lo = 0;
     var hi = array.length;
-    var compared = undefined;
-    var mid = undefined;
+    var compared = void 0;
+    var mid = void 0;
 
     while (lo < hi) {
       mid = (lo + hi) / 2 | 0;
@@ -1509,7 +1509,7 @@ var utils = Object.freeze({
       var leftKey = leftKeys.shift();
       var rightKey = rightKeys.shift();
 
-      var pos = undefined;
+      var pos = void 0;
 
       if (leftKey !== undefined) {
         pos = binarySearch(this.keys, leftKey);
@@ -1551,26 +1551,26 @@ var utils = Object.freeze({
           }
         }
       } else {
-        for (var i = pos.index; i < this.keys.length; i += 1) {
-          var currKey = this.keys[i];
+        for (var _i = pos.index; _i < this.keys.length; _i += 1) {
+          var currKey = this.keys[_i];
           if (currKey > rightKey) {
             break;
           }
 
-          if (this.values[i].isIndex) {
+          if (this.values[_i].isIndex) {
             if (currKey === leftKey) {
-              results = results.concat(this.values[i]._between(copy(leftKeys), rightKeys.map(function () {
+              results = results.concat(this.values[_i]._between(copy(leftKeys), rightKeys.map(function () {
                 return undefined;
               }), opts));
             } else if (currKey === rightKey) {
-              results = results.concat(this.values[i]._between(leftKeys.map(function () {
+              results = results.concat(this.values[_i]._between(leftKeys.map(function () {
                 return undefined;
               }), copy(rightKeys), opts));
             } else {
-              results = results.concat(this.values[i].getAll());
+              results = results.concat(this.values[_i].getAll());
             }
           } else {
-            results = results.concat(this.values[i]);
+            results = results.concat(this.values[_i]);
           }
 
           if (opts.limit) {
@@ -1614,7 +1614,7 @@ var utils = Object.freeze({
     removeRecord: function removeRecord(data) {
       var _this = this;
 
-      var removed = undefined;
+      var removed = void 0;
       this.values.forEach(function (value, i) {
         if (value.isIndex) {
           if (value.removeRecord(data)) {
@@ -2549,8 +2549,8 @@ var utils = Object.freeze({
     opts.name = mapper.name;
     var relation = new Relation(related, opts);
 
-    mapper.relationList || (mapper.relationList = []);
-    mapper.relationFields || (mapper.relationFields = []);
+    mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] });
+    mapper.relationFields || Object.defineProperty(mapper, 'relationFields', { value: [] });
     mapper.relationList.push(relation);
     mapper.relationFields.push(relation.localField);
   };
@@ -2918,8 +2918,8 @@ var utils = Object.freeze({
      * @param {Object} [opts] Configuration options. See {@link Mapper#create}.
      */
     save: function save(opts) {
-      var op = undefined,
-          adapter = undefined;
+      var op = void 0,
+          adapter = void 0;
       var self = this;
       var Mapper = self._mapper();
 
@@ -2985,7 +2985,7 @@ var utils = Object.freeze({
      * @param {Object} [opts] TODO
      */
     loadRelations: function loadRelations(relations, opts) {
-      var op = undefined;
+      var op = void 0;
       var self = this;
       var Mapper = self._mapper();
       var relationList = Mapper.relationList || [];
@@ -3011,7 +3011,7 @@ var utils = Object.freeze({
           if (isFunction(def.load)) {
             return def.load(Mapper, def, self, opts);
           }
-          var task = undefined;
+          var task = void 0;
           if (def.type === 'hasMany' && def.foreignKey) {
             // hasMany
             task = def.getRelation().findAll(babelHelpers.defineProperty({}, def.foreignKey, get(self, Mapper.idAttribute)), opts);
@@ -3324,7 +3324,7 @@ var utils = Object.freeze({
   var validate = function validate(value, schema, opts) {
     var errors = [];
     opts || (opts = {});
-    var shouldPop = undefined;
+    var shouldPop = void 0;
     var prevProp = opts.prop;
     if (isUndefined(schema)) {
       return;
@@ -3809,7 +3809,7 @@ var utils = Object.freeze({
      */
     type: function type(value, schema, opts) {
       var type = schema.type;
-      var validType = undefined;
+      var validType = void 0;
       // Can be one of several types
       if (isString(type)) {
         type = [type];
@@ -3848,9 +3848,9 @@ var utils = Object.freeze({
     uniqueItems: function uniqueItems(value, schema, opts) {
       if (value && value.length && schema.uniqueItems) {
         var length = value.length;
-        var item = undefined,
-            i = undefined,
-            j = undefined;
+        var item = void 0,
+            i = void 0,
+            j = void 0;
         // Check n - 1 items
         for (i = length - 1; i > 0; i--) {
           item = value[i];
@@ -4058,7 +4058,7 @@ var utils = Object.freeze({
               _unset(changingPath);
               // TODO: Optimize
               if (!_get(silentPath)) {
-                var i = undefined;
+                var i = void 0;
                 for (i = 0; i < changed.length; i++) {
                   self.emit('change:' + changed[i], self, get(self, changed[i]));
                 }
@@ -4190,11 +4190,12 @@ var utils = Object.freeze({
     /**
      * Whether this Mapper should emit operational events.
      *
+     * Defaults to `true` in the browser and `false` in Node.js
+     *
      * @name Mapper#notify
      * @type {boolean}
-     * @default true
      */
-    notify: true,
+    notify: isBrowser,
 
     /**
      * Whether {@link Mapper#create}, {@link Mapper#createMany}, {@link Mapper#save},
@@ -4267,18 +4268,7 @@ var utils = Object.freeze({
      */
     RecordClass: undefined,
 
-    schema: null,
-
-    /**
-     * Whether {@link Mapper#create} and {@link Mapper#createMany} should instead
-     * call {@link Mapper#update} and {@link Mapper#updateMany} if the provided
-     * record(s) already contain a primary key.
-     *
-     * @name Mapper#upsert
-     * @type {boolean}
-     * @default true
-     */
-    upsert: true
+    schema: null
   };
 
   /**
@@ -4348,34 +4338,28 @@ var utils = Object.freeze({
    */
   addHiddenPropsToTarget(Mapper.prototype, {
     /**
-     * TODO
-     *
-     * @name Mapper#end
+     * @name Mapper#_end
      * @method
+     * @private
      */
 
-    end: function end(data, opts) {
+    _end: function _end(data, opts) {
       var self = this;
       if (opts.raw) {
         _(opts, data);
       }
       var _data = opts.raw ? data.data : data;
-      if (isArray(_data)) {
+      if (isArray(_data) && _data.length && isObject(_data[0])) {
         _data = _data.map(function (item) {
           return self.createRecord(item);
         });
-      } else {
+      } else if (isObject(_data)) {
         _data = self.createRecord(_data);
       }
       if (opts.raw) {
         data.data = _data;
       } else {
         data = _data;
-      }
-      if (opts.notify) {
-        setTimeout(function () {
-          self.emit(opts.op, data, opts);
-        });
       }
       return data;
     },
@@ -4448,7 +4432,7 @@ var utils = Object.freeze({
       opts || (opts = {});
       var relationFields = (self ? self.relationFields : []) || [];
       var json = {};
-      var properties = undefined;
+      var properties = void 0;
       if (self && self.schema) {
         properties = self.schema.properties || {};
         // TODO: Make this work recursively
@@ -4553,12 +4537,6 @@ var utils = Object.freeze({
      */
     beforeCreate: notify,
 
-    checkUpsertCreate: function checkUpsertCreate(props, opts) {
-      var self = this;
-      return (opts.upsert || opts.upsert === undefined && self.upsert) && get(props, self.idAttribute);
-    },
-
-
     /**
      * Create and save a new the record using the provided `props`.
      *
@@ -4585,18 +4563,13 @@ var utils = Object.freeze({
      * @return {Promise}
      */
     create: function create(props, opts) {
-      var op = undefined,
-          adapter = undefined;
+      var op = void 0,
+          adapter = void 0;
       var self = this;
 
       // Default values for arguments
       props || (props = {});
       opts || (opts = {});
-
-      // Check whether we should do an upsert instead
-      if (self.checkUpsertCreate(props, opts)) {
-        return self.update(get(props, self.idAttribute), props, opts);
-      }
 
       // Fill in "opts" with the Mapper's configuration
       _(self, opts);
@@ -4606,7 +4579,7 @@ var utils = Object.freeze({
       op = opts.op = 'beforeCreate';
       return resolve(self[op](props, opts)).then(function (_props) {
         // Allow for re-assignment from lifecycle hook
-        props = _props || props;
+        props = isUndefined(_props) ? props : _props;
 
         // Deep pre-create belongsTo relations
         var belongsToRelationData = {};
@@ -4638,7 +4611,7 @@ var utils = Object.freeze({
             if (!relationData) {
               return;
             }
-            var task = undefined;
+            var task = void 0;
             // Create hasMany and hasOne after the main create because we needed
             // a generated id to attach to these items
             if (def.type === hasManyType) {
@@ -4662,14 +4635,13 @@ var utils = Object.freeze({
             return data;
           });
         });
-      }).then(function (data) {
+      }).then(function (result) {
+        result = self._end(result, opts);
         // afterCreate lifecycle hook
         op = opts.op = 'afterCreate';
-        return resolve(self[op](props, opts, data)).then(function (_data) {
+        return resolve(self[op](props, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          data = _data || data;
-          // Possibly formulate result object
-          return self.end(data, opts);
+          return isUndefined(_result) ? result : _result;
         });
       });
     },
@@ -4682,8 +4654,9 @@ var utils = Object.freeze({
      *
      * @name Mapper#afterCreate
      * @method
-     * @param {Object} data The `data` return by the adapter.
+     * @param {Object} props The `props` argument passed to {@link Mapper#create}.
      * @param {Object} opts The `opts` argument passed to {@link Mapper#create}.
+     * @param {*} result The result, if any.
      */
     afterCreate: notify2,
 
@@ -4698,16 +4671,6 @@ var utils = Object.freeze({
      * @param {Object} opts The `opts` argument passed to {@link Mapper#createMany}.
      */
     beforeCreateMany: notify,
-
-    checkUpsertCreateMany: function checkUpsertCreateMany(records, opts) {
-      var self = this;
-      if (opts.upsert || opts.upsert === undefined && self.upsert) {
-        return records.reduce(function (hasId, item) {
-          return hasId && get(item, self.idAttribute);
-        }, true);
-      }
-    },
-
 
     /**
      * Given an array of records, batch create them via an adapter.
@@ -4735,18 +4698,13 @@ var utils = Object.freeze({
      * @return {Promise}
      */
     createMany: function createMany(records, opts) {
-      var op = undefined,
-          adapter = undefined;
+      var op = void 0,
+          adapter = void 0;
       var self = this;
 
       // Default values for arguments
       records || (records = []);
       opts || (opts = {});
-
-      // Check whether we should do an upsert instead
-      if (self.checkUpsertCreateMany(records, opts)) {
-        return self.updateMany(records, opts);
-      }
 
       // Fill in "opts" with the Mapper's configuration
       _(self, opts);
@@ -4756,7 +4714,7 @@ var utils = Object.freeze({
       op = opts.op = 'beforeCreateMany';
       return resolve(self[op](records, opts)).then(function (_records) {
         // Allow for re-assignment from lifecycle hook
-        records = _records || records;
+        records = isUndefined(_records) ? records : _records;
 
         // Deep pre-create belongsTo relations
         var belongsToRelationData = {};
@@ -4803,7 +4761,7 @@ var utils = Object.freeze({
               return;
             }
             var belongsToData = def.getLocalField(belongsToRelationData);
-            var task = undefined;
+            var task = void 0;
             // Create hasMany and hasOne after the main create because we needed
             // a generated id to attach to these items
             if (def.type === hasManyType) {
@@ -4832,14 +4790,13 @@ var utils = Object.freeze({
             return data;
           });
         });
-      }).then(function (data) {
+      }).then(function (result) {
+        result = self._end(result, opts);
         // afterCreateMany lifecycle hook
         op = opts.op = 'afterCreateMany';
-        return resolve(self[op](data, opts)).then(function (_data) {
+        return resolve(self[op](records, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          data = _data || data;
-          // Possibly inject result and/or formulate result object
-          return self.end(data, opts);
+          return isUndefined(_result) ? result : _result;
         });
       });
     },
@@ -4854,6 +4811,7 @@ var utils = Object.freeze({
      * @method
      * @param {Array} records The `records` argument passed to {@link Mapper#createMany}.
      * @param {Object} opts The `opts` argument passed to {@link Mapper#createMany}.
+     * @param {*} result The result, if any.
      */
     afterCreateMany: notify2,
 
@@ -4890,8 +4848,8 @@ var utils = Object.freeze({
      * @return {Promise}
      */
     find: function find(id, opts) {
-      var op = undefined,
-          adapter = undefined;
+      var op = void 0,
+          adapter = void 0;
       var self = this;
 
       // Default values for arguments
@@ -4903,21 +4861,18 @@ var utils = Object.freeze({
 
       // beforeFind lifecycle hook
       op = opts.op = 'beforeFind';
-      return resolve(self[op](id, opts)).then(function (_id) {
-        // Allow for re-assignment from lifecycle hook
-        id = _id === undefined ? id : _id;
+      return resolve(self[op](id, opts)).then(function () {
         // Now delegate to the adapter
         op = opts.op = 'find';
         self.dbg(op, id, opts);
         return resolve(self.getAdapter(adapter)[op](self, id, opts));
-      }).then(function (data) {
+      }).then(function (result) {
+        result = self._end(result, opts);
         // afterFind lifecycle hook
         op = opts.op = 'afterFind';
-        return resolve(self[op](data, opts)).then(function (_data) {
+        return resolve(self[op](id, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          data = _data || data;
-          // Possibly inject result and/or formulate result object
-          return self.end(data, opts);
+          return isUndefined(_result) ? result : _result;
         });
       });
     },
@@ -4932,6 +4887,7 @@ var utils = Object.freeze({
      * @method
      * @param {(string|number)} id The `id` argument passed to {@link Mapper#find}.
      * @param {Object} opts The `opts` argument passed to {@link Mapper#find}.
+     * @param {*} result The result, if any.
      */
     afterFind: notify2,
 
@@ -4973,8 +4929,8 @@ var utils = Object.freeze({
      * @return {Promise}
      */
     findAll: function findAll(query, opts) {
-      var op = undefined,
-          adapter = undefined;
+      var op = void 0,
+          adapter = void 0;
       var self = this;
 
       // Default values for arguments
@@ -4987,21 +4943,18 @@ var utils = Object.freeze({
 
       // beforeFindAll lifecycle hook
       op = opts.op = 'beforeFindAll';
-      return resolve(self[op](query, opts)).then(function (_query) {
-        // Allow for re-assignment from lifecycle hook
-        query = _query || query;
+      return resolve(self[op](query, opts)).then(function () {
         // Now delegate to the adapter
         op = opts.op = 'findAll';
         self.dbg(op, query, opts);
         return resolve(self.getAdapter(adapter)[op](self, query, opts));
-      }).then(function (data) {
+      }).then(function (result) {
+        result = self._end(result, opts);
         // afterFindAll lifecycle hook
         op = opts.op = 'afterFindAll';
-        return resolve(self[op](data, query, opts)).then(function (_data) {
+        return resolve(self[op](query, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          data = _data || data;
-          // Possibly inject result and/or formulate result object
-          return self.end(data, opts);
+          return isUndefined(_result) ? result : _result;
         });
       });
     },
@@ -5014,9 +4967,9 @@ var utils = Object.freeze({
      *
      * @name Mapper#afterFindAll
      * @method
-     * @param {Object} data The `data` returned by the adapter.
      * @param {Object} query The `query` argument passed to {@link Mapper#findAll}.
      * @param {Object} opts The `opts` argument passed to {@link Mapper#findAll}.
+     * @param {*} result The result, if any.
      */
     afterFindAll: notify2,
 
@@ -5058,8 +5011,8 @@ var utils = Object.freeze({
      * @return {Promise}
      */
     update: function update(id, props, opts) {
-      var op = undefined,
-          adapter = undefined;
+      var op = void 0,
+          adapter = void 0;
       var self = this;
 
       // Default values for arguments
@@ -5074,20 +5027,19 @@ var utils = Object.freeze({
       op = opts.op = 'beforeUpdate';
       return resolve(self[op](id, props, opts)).then(function (_props) {
         // Allow for re-assignment from lifecycle hook
-        props = _props || props;
+        props = isUndefined(_props) ? props : _props;
         // Now delegate to the adapter
         op = opts.op = 'update';
         var json = self.toJSON(props, opts);
         self.dbg(op, id, json, opts);
         return resolve(self.getAdapter(adapter)[op](self, id, json, opts));
-      }).then(function (data) {
+      }).then(function (result) {
+        result = self._end(result, opts);
         // afterUpdate lifecycle hook
         op = opts.op = 'afterUpdate';
-        return resolve(self[op](id, data, opts)).then(function (_data) {
+        return resolve(self[op](id, props, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          data = _data || data;
-          // Possibly inject result and/or formulate result object
-          return self.end(data, opts);
+          return isUndefined(_result) ? result : _result;
         });
       });
     },
@@ -5103,6 +5055,7 @@ var utils = Object.freeze({
      * @param {(string|number)} id The `id` argument passed to {@link Mapper#update}.
      * @param {props} props The `props` argument passed to {@link Mapper#update}.
      * @param {Object} opts The `opts` argument passed to {@link Mapper#update}.
+     * @param {*} result The result, if any.
      */
     afterUpdate: notify2,
 
@@ -5143,8 +5096,8 @@ var utils = Object.freeze({
      * @return {Promise}
      */
     updateMany: function updateMany(records, opts) {
-      var op = undefined,
-          adapter = undefined;
+      var op = void 0,
+          adapter = void 0;
       var self = this;
 
       // Default values for arguments
@@ -5159,7 +5112,7 @@ var utils = Object.freeze({
       op = opts.op = 'beforeUpdateMany';
       return resolve(self[op](records, opts)).then(function (_records) {
         // Allow for re-assignment from lifecycle hook
-        records = _records || records;
+        records = isUndefined(_records) ? records : _records;
         // Now delegate to the adapter
         op = opts.op = 'updateMany';
         var json = records.map(function (item) {
@@ -5167,14 +5120,13 @@ var utils = Object.freeze({
         });
         self.dbg(op, json, opts);
         return resolve(self.getAdapter(adapter)[op](self, json, opts));
-      }).then(function (data) {
+      }).then(function (result) {
+        result = self._end(result, opts);
         // afterUpdateMany lifecycle hook
         op = opts.op = 'afterUpdateMany';
-        return resolve(self[op](data, opts)).then(function (_data) {
+        return resolve(self[op](records, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          data = _data || data;
-          // Possibly inject result and/or formulate result object
-          return self.end(data, opts);
+          return isUndefined(_result) ? result : _result;
         });
       });
     },
@@ -5189,6 +5141,7 @@ var utils = Object.freeze({
      * @method
      * @param {Array} records The `records` argument passed to {@link Mapper#updateMany}.
      * @param {Object} opts The `opts` argument passed to {@link Mapper#updateMany}.
+     * @param {*} result The result, if any.
      */
     afterUpdateMany: notify2,
 
@@ -5199,8 +5152,8 @@ var utils = Object.freeze({
      *
      * @name Mapper#beforeUpdateAll
      * @method
-     * @param {Object} query The `query` argument passed to {@link Mapper#updateAll}.
      * @param {Object} props The `props` argument passed to {@link Mapper#updateAll}.
+     * @param {Object} query The `query` argument passed to {@link Mapper#updateAll}.
      * @param {Object} opts The `opts` argument passed to {@link Mapper#updateAll}.
      */
     beforeUpdateAll: notify,
@@ -5214,12 +5167,12 @@ var utils = Object.freeze({
      *
      * @name Mapper#updateAll
      * @method
+     * @param {Object} props Update to apply to selected records.
      * @param {Object} [query={}] Selection query.
      * @param {Object} [query.where] Filtering criteria.
      * @param {number} [query.skip] Number to skip.
      * @param {number} [query.limit] Number to limit to.
      * @param {Array} [query.orderBy] Sorting criteria.
-     * @param {Object} props Update to apply to selected records.
      * @param {Object} [opts] Configuration options.
      * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
      * adapter to use.
@@ -5233,14 +5186,14 @@ var utils = Object.freeze({
      * transaction.
      * @return {Promise}
      */
-    updateAll: function updateAll(query, props, opts) {
-      var op = undefined,
-          adapter = undefined;
+    updateAll: function updateAll(props, query, opts) {
+      var op = void 0,
+          adapter = void 0;
       var self = this;
 
       // Default values for arguments
-      query || (query = {});
       props || (props = {});
+      query || (query = {});
       opts || (opts = {});
 
       // Fill in "opts" with the Mapper's configuration
@@ -5249,22 +5202,21 @@ var utils = Object.freeze({
 
       // beforeUpdateAll lifecycle hook
       op = opts.op = 'beforeUpdateAll';
-      return resolve(self[op](query, props, opts)).then(function (_props) {
+      return resolve(self[op](props, query, opts)).then(function (_props) {
         // Allow for re-assignment from lifecycle hook
-        props = _props || props;
+        props = isUndefined(_props) ? props : _props;
         // Now delegate to the adapter
         op = opts.op = 'updateAll';
         var json = self.toJSON(props, opts);
-        self.dbg(op, query, json, opts);
-        return resolve(self.getAdapter(adapter)[op](self, query, json, opts));
-      }).then(function (data) {
+        self.dbg(op, json, query, opts);
+        return resolve(self.getAdapter(adapter)[op](self, json, query, opts));
+      }).then(function (result) {
+        result = self._end(result, opts);
         // afterUpdateAll lifecycle hook
         op = opts.op = 'afterUpdateAll';
-        return resolve(self[op](query, data, opts)).then(function (_data) {
+        return resolve(self[op](props, query, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          data = _data || data;
-          // Possibly inject result and/or formulate result object
-          return self.end(data, opts);
+          return isUndefined(_result) ? result : _result;
         });
       });
     },
@@ -5277,9 +5229,10 @@ var utils = Object.freeze({
      *
      * @name Mapper#afterUpdateAll
      * @method
-     * @param {Object} query The `query` argument passed to {@link Mapper#updateAll}.
      * @param {Object} props The `props` argument passed to {@link Mapper#updateAll}.
+     * @param {Object} query The `query` argument passed to {@link Mapper#updateAll}.
      * @param {Object} opts The `opts` argument passed to {@link Mapper#updateAll}.
+     * @param {*} result The result, if any.
      */
     afterUpdateAll: notify2,
 
@@ -5318,8 +5271,8 @@ var utils = Object.freeze({
      * @return {Promise}
      */
     destroy: function destroy(id, opts) {
-      var op = undefined,
-          adapter = undefined;
+      var op = void 0,
+          adapter = void 0;
       var self = this;
 
       // Default values for arguments
@@ -5331,24 +5284,20 @@ var utils = Object.freeze({
 
       // beforeDestroy lifecycle hook
       op = opts.op = 'beforeDestroy';
-      return resolve(self[op](id, opts)).then(function (_id) {
-        // Allow for re-assignment from lifecycle hook
-        id = _id === undefined ? id : _id;
+      return resolve(self[op](id, opts)).then(function () {
         // Now delegate to the adapter
         op = opts.op = 'destroy';
         self.dbg(op, id, opts);
         return resolve(self.getAdapter(adapter)[op](self, id, opts));
-      }).then(function (data) {
+      }).then(function (result) {
+        if (opts.raw) {
+          _(opts, result);
+        }
         // afterDestroy lifecycle hook
         op = opts.op = 'afterDestroy';
-        return resolve(self[op](id, opts, data)).then(function (_data) {
+        return resolve(self[op](id, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          data = _data || data;
-          if (opts.raw) {
-            _(opts, data);
-            return data;
-          }
-          return data;
+          return isUndefined(_result) ? result : _result;
         });
       });
     },
@@ -5363,6 +5312,7 @@ var utils = Object.freeze({
      * @method
      * @param {(string|number)} id The `id` argument passed to {@link Mapper#destroy}.
      * @param {Object} opts The `opts` argument passed to {@link Mapper#destroy}.
+     * @param {*} result The result, if any.
      */
     afterDestroy: notify2,
 
@@ -5405,8 +5355,8 @@ var utils = Object.freeze({
      * @return {Promise}
      */
     destroyAll: function destroyAll(query, opts) {
-      var op = undefined,
-          adapter = undefined;
+      var op = void 0,
+          adapter = void 0;
       var self = this;
 
       // Default values for arguments
@@ -5419,24 +5369,20 @@ var utils = Object.freeze({
 
       // beforeDestroyAll lifecycle hook
       op = opts.op = 'beforeDestroyAll';
-      return resolve(self[op](query, opts)).then(function (_query) {
-        // Allow for re-assignment from lifecycle hook
-        query = _query || query;
+      return resolve(self[op](query, opts)).then(function () {
         // Now delegate to the adapter
         op = opts.op = 'destroyAll';
         self.dbg(op, query, opts);
         return resolve(self.getAdapter(adapter)[op](self, query, opts));
-      }).then(function (data) {
+      }).then(function (result) {
+        if (opts.raw) {
+          _(opts, result);
+        }
         // afterDestroyAll lifecycle hook
         op = opts.op = 'afterDestroyAll';
-        return resolve(self[op](query, opts, data)).then(function (_data) {
+        return resolve(self[op](query, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          data = _data || data;
-          if (opts.raw) {
-            _(opts, data);
-            return data;
-          }
-          return data;
+          return isUndefined(_result) ? result : _result;
         });
       });
     },
@@ -5452,6 +5398,7 @@ var utils = Object.freeze({
      * @param {*} data The `data` returned by the adapter.
      * @param {query} query The `query` argument passed to {@link Mapper#destroyAll}.
      * @param {Object} opts The `opts` argument passed to {@link Mapper#destroyAll}.
+     * @param {*} result The result, if any.
      */
     afterDestroyAll: notify2,
 
@@ -6122,7 +6069,7 @@ var utils = Object.freeze({
       var relationList = mapper.relationList || [];
       var timestamp = new Date().getTime();
       var usesRecordClass = !!mapper.RecordClass;
-      var singular = undefined;
+      var singular = void 0;
 
       if (isObject(records) && !isArray(records)) {
         singular = true;
@@ -6146,7 +6093,7 @@ var utils = Object.freeze({
           var type = def.type;
           var isHasMany = type === hasManyType;
           var shouldAdd = isUndefined(def.add) ? true : !!def.add;
-          var relatedData = undefined;
+          var relatedData = void 0;
 
           records.forEach(function (record) {
             // Grab a reference to the related data attached or linked to the
@@ -6255,6 +6202,14 @@ var utils = Object.freeze({
   LinkedCollection.extend = extend;
 
   var DATASTORE_DEFAULTS = {
+    /**
+     * Whether relations should be linked for records that are in the datastore.
+     *
+     * Defaults to `true` in the browser and `false` in Node.js
+     *
+     * @name DataStore#linkRelations
+     * @type {boolean}
+     */
     linkRelations: isBrowser
   };
 
@@ -6385,7 +6340,7 @@ var utils = Object.freeze({
       var mapper = getSuper(self).prototype.defineMapper.call(self, name, opts);
       self._pendingQueries[name] = {};
       self._completedQueries[name] = {};
-      mapper.relationList = mapper.relationList || [];
+      mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] });
 
       // The datastore uses a subclass of Collection that is "datastore-aware"
       var collection = self._collections[name] = new self.CollectionClass(null, {
@@ -6425,7 +6380,7 @@ var utils = Object.freeze({
           var type = def.type;
           var link = isUndefined(def.link) ? linkRelations : def.link;
           var updateOpts = { index: foreignKey };
-          var descriptor = undefined;
+          var descriptor = void 0;
 
           if (type === belongsToType) {
             if (!collection.indexes[foreignKey]) {
@@ -6468,7 +6423,7 @@ var utils = Object.freeze({
                     return _self._get(path);
                   }
                   var key = def.getForeignKey(_self);
-                  var items = undefined;
+                  var items = void 0;
                   var relationCollection = self.getCollection(relation);
 
                   if (foreignKey) {
@@ -6664,7 +6619,7 @@ var utils = Object.freeze({
         return pendingQuery;
       }
       var item = self.cachedFind(name, id, opts);
-      var promise = undefined;
+      var promise = void 0;
 
       if (opts.force || !item) {
         promise = self._pendingQueries[name][id] = self._callSuper('find', name, id, opts).then(function (data) {
@@ -6707,7 +6662,7 @@ var utils = Object.freeze({
       }
 
       var items = self.cachedFindAll(name, query, opts);
-      var promise = undefined;
+      var promise = void 0;
 
       if (opts.force || !items) {
         promise = self._pendingQueries[name][hash] = self._callSuper('findAll', name, query, opts).then(function (data) {
@@ -6902,11 +6857,11 @@ var utils = Object.freeze({
    * if the current version is not beta.
    */
   var version = {
-    full: '3.0.0-alpha.16',
+    full: '3.0.0-alpha.17',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10),
-    alpha: '16',
+    alpha: '17',
     beta: 'false'
   };
 

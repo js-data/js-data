@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "3.0.0-alpha.16",
+  "version": "3.0.0-alpha.17",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -39,7 +39,7 @@
     "rollup": "rollup -c",
     "rollup-tests": "rollup -c rollup-tests.config.js",
     "doc": "jsdoc -c conf.json src && node scripts/cleanup.js",
-    "lint": "standard src/**/*.js test/**/*.js scripts/*.js",
+    "lint": "repo-tools lint src/**/*.js test/**/*.js scripts/*.js",
     "helpers": "node scripts/helpers.js",
     "min": "uglifyjs dist/js-data.js -o dist/js-data.min.js --source-map dist/js-data.min.map -v -m -c --screw-ie8",
     "version": "node scripts/version.js",
@@ -53,30 +53,28 @@
     "rt": "npm run rollup && npm run rollup-tests && npm run mocha",
     "cover": "istanbul cover -x dist/js-data-tests.js --hook-run-in-context node_modules/mocha/bin/_mocha -- -t 20000 -R dot -r source-map-support/register mocha.start.js",
     "test": "npm run build && npm run rollup-tests && npm run cover",
-    "release": "npm test && node scripts/authors.js && npm run doc",
-    "ci": "npm test && cat coverage/lcov.info | coveralls || true && cat ./coverage/lcov.info | codacy-coverage || true; npm run doc"
+    "repo-tools": "repo-tools updates && repo-tools changelog && repo-tools authors",
+    "release": "npm test && npm run doc && npm run repo-tools",
+    "ci": "npm test && cat coverage/lcov.info | coveralls || true"
   },
   "devDependencies": {
-    "babel-core": "6.6.4",
-    "babel-eslint": "5.0.0",
+    "babel-core": "6.7.2",
     "babel-plugin-syntax-async-functions": "6.5.0",
-    "babel-plugin-transform-regenerator": "6.6.0",
-    "babel-polyfill": "6.6.1",
+    "babel-plugin-transform-regenerator": "6.6.5",
+    "babel-polyfill": "6.7.2",
     "babel-preset-es2015-rollup": "1.1.1",
     "babel-preset-stage-0": "6.5.0",
     "chai": "3.5.0",
-    "codacy-coverage": "1.1.3",
     "coveralls": "2.11.8",
     "ink-docstrap": "1.1.4",
     "istanbul": "0.4.2",
+    "js-data-repo-tools": "0.2.0",
     "jsdoc": "3.4.0",
     "mocha": "2.4.5",
     "rollup": "0.25.4",
     "rollup-plugin-babel": "2.4.0",
     "sinon": "1.17.3",
     "source-map-support": "0.4.0",
-    "standard": "6.0.7",
     "uglify-js": "2.6.2"
-  },
-  "dependencies": {}
+  }
 }

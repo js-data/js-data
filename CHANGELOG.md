@@ -1,4 +1,11 @@
-##### 3.0.0-alpha.16 - 21 February 2016
+##### 3.0.0-alpha.17 - 10 March 2016
+
+###### Breaking API changes
+- Removed `upsert` option from js-data core. `upsert` is now handled at the adapter level.
+- Fixed order of arguments to updateAll
+- Fixed how arguments are passed to the various lifecycle methods
+
+###### 3.0.0-alpha.16 - 21 February 2016
 
 - Added "omit" utility method
 

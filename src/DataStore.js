@@ -23,6 +23,14 @@ import Container from './Container'
 import LinkedCollection from './LinkedCollection'
 
 const DATASTORE_DEFAULTS = {
+  /**
+   * Whether relations should be linked for records that are in the datastore.
+   *
+   * Defaults to `true` in the browser and `false` in Node.js
+   *
+   * @name DataStore#linkRelations
+   * @type {boolean}
+   */
   linkRelations: isBrowser
 }
 
@@ -148,7 +156,7 @@ const DataStore = Container.extend({
     const mapper = getSuper(self).prototype.defineMapper.call(self, name, opts)
     self._pendingQueries[name] = {}
     self._completedQueries[name] = {}
-    mapper.relationList = mapper.relationList || []
+    mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] })
 
     // The datastore uses a subclass of Collection that is "datastore-aware"
     const collection = self._collections[name] = new self.CollectionClass(null, {

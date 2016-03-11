@@ -95,8 +95,8 @@ const relatedTo = function (mapper, related, opts) {
   opts.name = mapper.name
   const relation = new Relation(related, opts)
 
-  mapper.relationList || (mapper.relationList = [])
-  mapper.relationFields || (mapper.relationFields = [])
+  mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] })
+  mapper.relationFields || Object.defineProperty(mapper, 'relationFields', { value: [] })
   mapper.relationList.push(relation)
   mapper.relationFields.push(relation.localField)
 }
