@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.17 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.18 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -251,6 +251,27 @@
         if (isPlainObject(value) && isPlainObject(existing)) {
           deepMixIn(existing, value);
         } else {
+          this[key] = value;
+        }
+      }, dest);
+    }
+    return dest;
+  };
+
+  /**
+   * Recursively shallow fill in own enumberable properties from `source` to `dest`.
+   *
+   * @ignore
+   * @param {Object} dest The destination object.
+   * @param {Object} source The source object.
+   */
+  var deepFillIn = function deepFillIn(dest, source) {
+    if (source) {
+      forOwn(source, function (value, key) {
+        var existing = this[key];
+        if (isPlainObject(value) && isPlainObject(existing)) {
+          deepFillIn(existing, value);
+        } else if (!this.hasOwnProperty(key) || this[key] === undefined) {
           this[key] = value;
         }
       }, dest);
@@ -632,30 +653,46 @@
     return Ctor.__super__ || Object.getPrototypeOf(Ctor) || Ctor.__proto__; // eslint-disable-line
   };
 
-  function forRelation(opts, def, fn, ctx) {
+  var getIndex = function getIndex(list, relation) {
+    var index = -1;
+    list.forEach(function (_relation, i) {
+      if (_relation === relation) {
+        index = i;
+        return false;
+      } else if (isObject(_relation)) {
+        if (_relation.relation === relation) {
+          index = i;
+          return false;
+        }
+      }
+    });
+    return index;
+  };
+
+  var forRelation = function forRelation(opts, def, fn, ctx) {
     var relationName = def.relation;
     var containedName = null;
+    var index = void 0;
     opts || (opts = {});
     opts.with || (opts.with = []);
+
+    if ((index = getIndex(opts.with, relationName)) >= 0) {
+      containedName = relationName;
+    } else if ((index = getIndex(opts.with, def.localField)) >= 0) {
+      containedName = def.localField;
+    }
+
     if (opts.withAll) {
       fn.call(ctx, def, {});
       return;
-    }
-    if (opts.with.indexOf(relationName) !== -1) {
-      containedName = relationName;
-    } else if (opts.with.indexOf(def.localField) !== -1) {
-      containedName = def.localField;
-    }
-    if (!containedName) {
+    } else if (!containedName) {
       return;
     }
-    var __opts = copy(opts);
-    __opts.with = opts.with.slice();
+    var __opts = {};
     fillIn(__opts, def.getRelation());
-    var index = __opts.with.indexOf(containedName);
-    if (index >= 0) {
-      __opts.with.splice(index, 1);
-    }
+    fillIn(__opts, opts);
+    __opts.with = opts.with.slice();
+    __opts._activeWith = __opts.with.splice(index, 1)[0];
     __opts.with.forEach(function (relation, i) {
       if (relation && relation.indexOf(containedName) === 0 && relation.length >= containedName.length && relation[containedName.length] === '.') {
         __opts.with[i] = relation.substr(containedName.length + 1);
@@ -664,7 +701,7 @@
       }
     });
     fn.call(ctx, def, __opts);
-  }
+  };
 
   var forEachRelation = function forEachRelation(mapper, opts, fn, ctx) {
     var relationList = mapper.relationList || [];
@@ -706,6 +743,7 @@ var utils = Object.freeze({
     unset: unset,
     forOwn: forOwn,
     deepMixIn: deepMixIn,
+    deepFillIn: deepFillIn,
     resolve: resolve,
     reject: reject,
     _: _,
@@ -4122,23 +4160,6 @@ var utils = Object.freeze({
 
   var MAPPER_DEFAULTS = {
     /**
-     * Hash of registered adapters. Don't modify. Use {@link Mapper#registerAdapter}.
-     *
-     * @name Mapper#_adapters
-     * @private
-     */
-    _adapters: null,
-
-    /**
-     * Hash of registered listeners. Don't modify. Use {@link Mapper#on} and
-     * {@link Mapper#off}.
-     *
-     * @name Mapper#_listeners
-     * @private
-     */
-    _listeners: null,
-
-    /**
      * Whether to augment {@link Mapper#RecordClass} with getter/setter property
      * accessors according to the properties defined in {@link Mapper#schema}.
      * This makes possible validation and change tracking on individual properties
@@ -4214,6 +4235,66 @@ var utils = Object.freeze({
      */
     raw: false,
 
+    schema: null
+  };
+
+  /**
+   * ```javascript
+   * import {Mapper} from 'js-data'
+   * ```
+   *
+   * The core of JSData's [ORM/ODM][orm] implementation. Given a minimum amout of
+   * meta information about a resource, a Mapper can perform generic CRUD
+   * operations against that resource. Apart from its configuration, a Mapper is
+   * stateless. The particulars of various persistence layers has been abstracted
+   * into adapters, which a Mapper uses to perform its operations.
+   *
+   * The term "Mapper" comes from the [Data Mapper Pattern][pattern] described in
+   * Martin Fowler's [Patterns of Enterprise Application Architecture][book]. A
+   * Data Mapper moves data between [in-memory object instances][record] and a
+   * relational or document-based database. JSData's Mapper can work with any
+   * persistence layer you can write an adapter for.
+   *
+   * _("Model" is a heavily overloaded term and is avoided in this documentation
+   * to prevent confusion.)_
+   *
+   * [orm]: https://en.wikipedia.org/wiki/Object-relational_mapping
+   * [pattern]: https://en.wikipedia.org/wiki/Data_mapper_pattern
+   * [book]: http://martinfowler.com/books/eaa.html
+   * [record]: Record.html
+   *
+   * @class Mapper
+   * @param {Object} [opts] Configuration options.
+   */
+  function Mapper(opts) {
+    var self = this;
+    classCallCheck(self, Mapper);
+
+    opts || (opts = {});
+
+    /**
+     * Hash of registered adapters. Don't modify. Use {@link Mapper#registerAdapter}.
+     *
+     * @name Mapper#_adapters
+     * @private
+     */
+    Object.defineProperty(self, '_adapters', {
+      value: undefined,
+      writable: true
+    });
+
+    /**
+     * Hash of registered listeners. Don't modify. Use {@link Mapper#on} and
+     * {@link Mapper#off}.
+     *
+     * @name Mapper#_listeners
+     * @private
+     */
+    Object.defineProperty(self, '_listeners', {
+      value: undefined,
+      writable: true
+    });
+
     /**
      * Set the `false` to force the Mapper to work with POJO objects only.
      *
@@ -4266,44 +4347,11 @@ var utils = Object.freeze({
      * @name Mapper#RecordClass
      * @default {@link Record}
      */
-    RecordClass: undefined,
+    Object.defineProperty(self, 'RecordClass', {
+      value: undefined,
+      writable: true
+    });
 
-    schema: null
-  };
-
-  /**
-   * ```javascript
-   * import {Mapper} from 'js-data'
-   * ```
-   *
-   * The core of JSData's [ORM/ODM][orm] implementation. Given a minimum amout of
-   * meta information about a resource, a Mapper can perform generic CRUD
-   * operations against that resource. Apart from its configuration, a Mapper is
-   * stateless. The particulars of various persistence layers has been abstracted
-   * into adapters, which a Mapper uses to perform its operations.
-   *
-   * The term "Mapper" comes from the [Data Mapper Pattern][pattern] described in
-   * Martin Fowler's [Patterns of Enterprise Application Architecture][book]. A
-   * Data Mapper moves data between [in-memory object instances][record] and a
-   * relational or document-based database. JSData's Mapper can work with any
-   * persistence layer you can write an adapter for.
-   *
-   * _("Model" is a heavily overloaded term and is avoided in this documentation
-   * to prevent confusion.)_
-   *
-   * [orm]: https://en.wikipedia.org/wiki/Object-relational_mapping
-   * [pattern]: https://en.wikipedia.org/wiki/Data_mapper_pattern
-   * [book]: http://martinfowler.com/books/eaa.html
-   * [record]: Record.html
-   *
-   * @class Mapper
-   * @param {Object} [opts] Configuration options.
-   */
-  function Mapper(opts) {
-    var self = this;
-    classCallCheck(self, Mapper);
-
-    opts || (opts = {});
     fillIn(self, opts);
     fillIn(self, copy(MAPPER_DEFAULTS));
 
@@ -6857,11 +6905,11 @@ var utils = Object.freeze({
    * if the current version is not beta.
    */
   var version = {
-    full: '3.0.0-alpha.17',
+    full: '3.0.0-alpha.18',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10),
-    alpha: '17',
+    alpha: '18',
     beta: 'false'
   };
 

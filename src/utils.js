@@ -220,6 +220,27 @@ export const deepMixIn = function (dest, source) {
 }
 
 /**
+ * Recursively shallow fill in own enumberable properties from `source` to `dest`.
+ *
+ * @ignore
+ * @param {Object} dest The destination object.
+ * @param {Object} source The source object.
+ */
+export const deepFillIn = function (dest, source) {
+  if (source) {
+    forOwn(source, function (value, key) {
+      const existing = this[key]
+      if (isPlainObject(value) && isPlainObject(existing)) {
+        deepFillIn(existing, value)
+      } else if (!this.hasOwnProperty(key) || this[key] === undefined) {
+        this[key] = value
+      }
+    }, dest)
+  }
+  return dest
+}
+
+/**
  * Proxy for `Promise.resolve`.
  *
  * @ignore
@@ -583,30 +604,46 @@ export const getSuper = function (instance, isCtor) {
   return (Ctor.__super__ || Object.getPrototypeOf(Ctor) || Ctor.__proto__) // eslint-disable-line
 }
 
-function forRelation (opts, def, fn, ctx) {
+const getIndex = function (list, relation) {
+  let index = -1
+  list.forEach(function (_relation, i) {
+    if (_relation === relation) {
+      index = i
+      return false
+    } else if (isObject(_relation)) {
+      if (_relation.relation === relation) {
+        index = i
+        return false
+      }
+    }
+  })
+  return index
+}
+
+const forRelation = function (opts, def, fn, ctx) {
   const relationName = def.relation
   let containedName = null
+  let index
   opts || (opts = {})
   opts.with || (opts.with = [])
+
+  if ((index = getIndex(opts.with, relationName)) >= 0) {
+    containedName = relationName
+  } else if ((index = getIndex(opts.with, def.localField)) >= 0) {
+    containedName = def.localField
+  }
+
   if (opts.withAll) {
     fn.call(ctx, def, {})
     return
-  }
-  if (opts.with.indexOf(relationName) !== -1) {
-    containedName = relationName
-  } else if (opts.with.indexOf(def.localField) !== -1) {
-    containedName = def.localField
-  }
-  if (!containedName) {
+  } else if (!containedName) {
     return
   }
-  let __opts = copy(opts)
-  __opts.with = opts.with.slice()
+  let __opts = {}
   fillIn(__opts, def.getRelation())
-  const index = __opts.with.indexOf(containedName)
-  if (index >= 0) {
-    __opts.with.splice(index, 1)
-  }
+  fillIn(__opts, opts)
+  __opts.with = opts.with.slice()
+  __opts._activeWith = __opts.with.splice(index, 1)[0]
   __opts.with.forEach(function (relation, i) {
     if (relation && relation.indexOf(containedName) === 0 && relation.length >= containedName.length && relation[containedName.length] === '.') {
       __opts.with[i] = relation.substr(containedName.length + 1)

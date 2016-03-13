@@ -1,3 +1,10 @@
+##### 3.0.0-alpha.18 - 12 March 2016
+
+###### Backwards compatible API changes
+- Improved forEachRelation utility function to support filtering on "with" sub queries
+- Added deepFillIn utility function
+- Made some Mapper instance properties non-enumerable
+
 ##### 3.0.0-alpha.17 - 10 March 2016
 
 ###### Breaking API changes
