@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>js-data Source: utils.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.dark.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.lumen.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">js-data</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-js-data.html">js-data</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Collection.html">Collection</a></li><li><a href="Container.html">Container</a></li><li><a href="DataStore.html">DataStore</a></li><li><a href="LinkedCollection.html">LinkedCollection</a></li><li><a href="Mapper.html">Mapper</a></li><li><a href="Query.html">Query</a></li><li><a href="Record.html">Record</a></li><li><a href="Schema.html">Schema</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+		<div class="col-sm-3 col-md-3">
+            <form class="navbar-form" role="search">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                    <div class="input-group-btn">
+                        <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: utils.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">/**
+ * @name utils
+ * @memberof module:js-data
+ * @type {Object}
+ * @property {Function} addHiddenPropsToTarget TODO
+ * @property {Function} classCallCheck TODO
+ * @property {Function} copy TODO
+ * @property {Function} deepMixIn TODO
+ * @property {Function} eventify TODO
+ * @property {Function} extend TODO
+ * @property {Function} fillIn TODO
+ * @property {Function} fromJson TODO
+ * @property {Function} get TODO
+ * @property {Function} getSuper TODO
+ * @property {Function} intersection TODO
+ * @property {Function} isArray TODO
+ * @property {Function} isBlacklisted TODO
+ * @property {boolean} isBrowser TODO
+ * @property {Function} isBoolean TODO
+ * @property {Function} isFunction TODO
+ * @property {Function} isInteger TODO
+ * @property {Function} isNull TODO
+ * @property {Function} isNumber TODO
+ * @property {Function} isObject TODO
+ * @property {Function} isRegExp TODO
+ * @property {Function} isSorN TODO
+ * @property {Function} isString TODO
+ * @property {Function} isUndefined TODO
+ * @property {Function} possibleConstructorReturn TODO
+ * @property {Function} reject TODO
+ * @property {Function} resolve TODO
+ * @property {Function} set TODO
+ * @property {Function} toJson TODO
+ */
+
+const INFINITY = 1 / 0
+const MAX_INTEGER = 1.7976931348623157e+308
+const BOOL_TAG = '[object Boolean]'
+const DATE_TAG = '[object Date]'
+const FUNC_TAG = '[object Function]'
+const NUMBER_TAG = '[object Number]'
+const OBJECT_TAG = '[object Object]'
+const REGEXP_TAG = '[object RegExp]'
+const STRING_TAG = '[object String]'
+const objToString = Object.prototype.toString
+let isBrowser
+
+// Attempt to detect whether we are in the browser.
+try {
+  isBrowser = !!window
+} catch (e) {
+  isBrowser = false
+}
+
+export {isBrowser}
+
+const toString = function (value) {
+  return objToString.call(value)
+}
+const toInteger = function (value) {
+  if (!value) {
+    return value === 0 ? value : 0
+  }
+  value = +value
+  if (value === INFINITY || value === -INFINITY) {
+    const sign = (value &lt; 0 ? -1 : 1)
+    return sign * MAX_INTEGER
+  }
+  const remainder = value % 1
+  return value === value ? (remainder ? value - remainder : value) : 0 // eslint-disable-line
+}
+const isPlainObject = function (value) {
+  return (!!value &amp;&amp; typeof value === 'object' &amp;&amp; value.constructor === Object)
+}
+export const isArray = Array.isArray
+export const isDate = function (value) {
+  return (value &amp;&amp; typeof value === 'object' &amp;&amp; toString(value) === DATE_TAG)
+}
+export const isFunction = function (value) {
+  return typeof value === 'function' || (value &amp;&amp; toString(value) === FUNC_TAG)
+}
+export const isInteger = function (value) {
+  return toString(value) === NUMBER_TAG &amp;&amp; value == toInteger(value) // eslint-disable-line
+}
+export const isNull = function (value) {
+  return value === null
+}
+export const isNumber = function (value) {
+  const type = typeof value
+  return type === 'number' || (value &amp;&amp; type === 'object' &amp;&amp; toString(value) === NUMBER_TAG)
+}
+export const isObject = function (value) {
+  return toString(value) === OBJECT_TAG
+}
+export const isRegExp = function (value) {
+  return toString(value) === REGEXP_TAG
+}
+export const isSorN = function (value) {
+  return isString(value) || isNumber(value)
+}
+export const isString = function (value) {
+  return typeof value === 'string' || (value &amp;&amp; typeof value === 'object' &amp;&amp; toString(value) === STRING_TAG)
+}
+export const isUndefined = function (value) {
+  return value === undefined
+}
+export const isBoolean = function (value) {
+  return toString(value) === BOOL_TAG
+}
+export const get = function (object, prop) {
+  if (!prop) {
+    return
+  }
+  const parts = prop.split('.')
+  const last = parts.pop()
+
+  while (prop = parts.shift()) { // eslint-disable-line
+    object = object[prop]
+    if (object == null) return
+  }
+
+  return object[last]
+}
+const mkdirP = function (object, path) {
+  if (!path) {
+    return object
+  }
+  const parts = path.split('.')
+  parts.forEach(function (key) {
+    if (!object[key]) {
+      object[key] = {}
+    }
+    object = object[key]
+  })
+  return object
+}
+const PATH = /^(.+)\.(.+)$/
+
+/**
+ * Set the value at the provided key or path.
+ *
+ * @ignore
+ * @param {Object} object The object on which to set a property.
+ * @param {(string|Object)} path The key or path to the property. Can also
+ * pass in an object of path/value pairs, which will all be set on the target
+ * object.
+ * @param {*} [value] The value to set.
+ */
+export const set = function (object, path, value) {
+  if (isObject(path)) {
+    forOwn(path, function (value, _path) {
+      set(object, _path, value)
+    })
+  } else {
+    const parts = PATH.exec(path)
+    if (parts) {
+      mkdirP(object, parts[1])[parts[2]] = value
+    } else {
+      object[path] = value
+    }
+  }
+}
+
+/**
+ * Unset the value at the provided key or path.
+ *
+ * @ignore
+ * @param {Object} object The object from which to delete the property.
+ * @param {string} path The key or path to the property.
+ */
+export const unset = function (object, path) {
+  const parts = path.split('.')
+  const last = parts.pop()
+
+  while (path = parts.shift()) { // eslint-disable-line
+    object = object[path]
+    if (object == null) return
+  }
+
+  object[last] = undefined
+  delete object[last]
+}
+
+/**
+ * Iterate over an object's own enumerable properties.
+ *
+ * @ignore
+ * @param {Object} object The object whose properties are to be enumerated.
+ * @param {Function} fn Iteration function.
+ * @param {Object} [thisArg] Content to which to bind `fn`.
+ */
+export const forOwn = function (obj, fn, thisArg) {
+  const keys = Object.keys(obj)
+  const len = keys.length
+  let i
+  for (i = 0; i &lt; len; i++) {
+    fn.call(thisArg, obj[keys[i]], keys[i], obj)
+  }
+}
+
+/**
+ * Recursively shallow copy own enumberable properties from `source` to `dest`.
+ *
+ * @ignore
+ * @param {Object} dest The destination object.
+ * @param {Object} source The source object.
+ */
+export const deepMixIn = function (dest, source) {
+  if (source) {
+    forOwn(source, function (value, key) {
+      const existing = this[key]
+      if (isPlainObject(value) &amp;&amp; isPlainObject(existing)) {
+        deepMixIn(existing, value)
+      } else {
+        this[key] = value
+      }
+    }, dest)
+  }
+  return dest
+}
+
+/**
+ * Recursively shallow fill in own enumberable properties from `source` to `dest`.
+ *
+ * @ignore
+ * @param {Object} dest The destination object.
+ * @param {Object} source The source object.
+ */
+export const deepFillIn = function (dest, source) {
+  if (source) {
+    forOwn(source, function (value, key) {
+      const existing = this[key]
+      if (isPlainObject(value) &amp;&amp; isPlainObject(existing)) {
+        deepFillIn(existing, value)
+      } else if (!this.hasOwnProperty(key) || this[key] === undefined) {
+        this[key] = value
+      }
+    }, dest)
+  }
+  return dest
+}
+
+/**
+ * Proxy for `Promise.resolve`.
+ *
+ * @ignore
+ * @param {*} [value] Value with which to resolve the Promise.
+ * @return {Promise} Promise resolved with `value`.
+ */
+export const resolve = function (value) {
+  return Promise.resolve(value)
+}
+
+/**
+ * Proxy for `Promise.reject`.
+ *
+ * @ignore
+ * @param {*} [value] Value with which to reject the Promise.
+ * @return {Promise} Promise reject with `value`.
+ */
+export const reject = function (value) {
+  return Promise.reject(value)
+}
+
+/**
+ * Shallow copy properties from src to dest that meet the following criteria:
+ * - own enumerable
+ * - not a function
+ * - does not start with "_"
+ *
+ * @ignore
+ * @param {Object} dest Destination object.
+ * @param {Object} src Source object.
+ */
+export const _ = function (dest, src) {
+  for (var key in dest) {
+    let value = dest[key]
+    if (src[key] === undefined &amp;&amp; !isFunction(value) &amp;&amp; key &amp;&amp; key.indexOf('_') !== 0) {
+      src[key] = value
+    }
+  }
+}
+
+/**
+ * Return the intersection of two arrays.
+ *
+ * @ignore
+ * @param {Array} array1 First array.
+ * @param {Array} array2 Second array.
+ * @return {Array} Array of elements common to both arrays.
+ */
+export const intersection = function (array1, array2) {
+  if (!array1 || !array2) {
+    return []
+  }
+  const result = []
+  let item
+  let i
+  const len = array1.length
+  for (i = 0; i &lt; len; i++) {
+    item = array1[i]
+    if (result.indexOf(item) !== -1) {
+      continue
+    }
+    if (array2.indexOf(item) !== -1) {
+      result.push(item)
+    }
+  }
+  return result
+}
+
+/**
+ * Shallow copy own enumerable properties from `src` to `dest` that are on `src`
+ * but are missing from `dest.
+ *
+ * @ignore
+ * @param {Object} dest The destination object.
+ * @param {Object} source The source object.
+ */
+export const fillIn = function (dest, src) {
+  forOwn(src, function (value, key) {
+    if (!dest.hasOwnProperty(key) || dest[key] === undefined) {
+      dest[key] = value
+    }
+  })
+}
+
+/**
+ * Return whether `prop` is matched by any string or regular expression in `bl`.
+ *
+ * @ignore
+ * @param {string} prop The name of a property.
+ * @param {Array} bl Array of strings and regular expressions.
+ * @return {boolean} Whether `prop` was matched.
+ */
+export const isBlacklisted = function (prop, bl) {
+  if (!bl || !bl.length) {
+    return false
+  }
+  let matches
+  for (var i = 0; i &lt; bl.length; i++) {
+    if ((toString(bl[i]) === '[object RegExp]' &amp;&amp; bl[i].test(prop)) || bl[i] === prop) {
+      matches = prop
+      return matches
+    }
+  }
+  return !!matches
+}
+
+/**
+ * Proxy for `JSON.parse`.
+ *
+ * @ignore
+ * @param {string} json JSON to parse.
+ * @return {Object} Parsed object.
+ */
+export const fromJson = function (json) {
+  return isString(json) ? JSON.parse(json) : json
+}
+
+/**
+ * Proxy for `JSON.stringify`.
+ *
+ * @ignore
+ * @param {*} value Value to serialize to JSON.
+ * @return {string} JSON string.
+ */
+export const toJson = JSON.stringify
+
+/**
+ * Deep copy a value.
+ *
+ * @ignore
+ * @param {*} from Value to deep copy.
+ * @return {*} Deep copy of `from`.
+ */
+export const copy = function (from, to, stackFrom, stackTo, blacklist, plain) {
+  if (!to) {
+    to = from
+    if (from) {
+      if (isArray(from)) {
+        to = copy(from, [], stackFrom, stackTo, blacklist, plain)
+      } else if (isDate(from)) {
+        to = new Date(from.getTime())
+      } else if (isRegExp(from)) {
+        to = new RegExp(from.source, from.toString().match(/[^\/]*$/)[0])
+        to.lastIndex = from.lastIndex
+      } else if (isObject(from)) {
+        if (plain) {
+          to = copy(from, {}, stackFrom, stackTo, blacklist, plain)
+        } else {
+          to = copy(from, Object.create(Object.getPrototypeOf(from)), stackFrom, stackTo, blacklist, plain)
+        }
+      }
+    }
+  } else {
+    if (from === to) {
+      throw new Error('Cannot copy! Source and destination are identical.')
+    }
+
+    stackFrom = stackFrom || []
+    stackTo = stackTo || []
+
+    if (isObject(from)) {
+      let index = stackFrom.indexOf(from)
+      if (index !== -1) {
+        return stackTo[index]
+      }
+
+      stackFrom.push(from)
+      stackTo.push(to)
+    }
+
+    let result
+    if (isArray(from)) {
+      let i
+      to.length = 0
+      for (i = 0; i &lt; from.length; i++) {
+        result = copy(from[i], null, stackFrom, stackTo, blacklist, plain)
+        if (isObject(from[i])) {
+          stackFrom.push(from[i])
+          stackTo.push(result)
+        }
+        to.push(result)
+      }
+    } else {
+      if (isArray(to)) {
+        to.length = 0
+      } else {
+        forOwn(to, function (value, key) {
+          delete to[key]
+        })
+      }
+      for (var key in from) {
+        if (from.hasOwnProperty(key)) {
+          if (isBlacklisted(key, blacklist)) {
+            continue
+          }
+          result = copy(from[key], null, stackFrom, stackTo, blacklist, plain)
+          if (isObject(from[key])) {
+            stackFrom.push(from[key])
+            stackTo.push(result)
+          }
+          to[key] = result
+        }
+      }
+    }
+  }
+  return to
+}
+
+export const plainCopy = function (from) {
+  return copy(from, undefined, undefined, undefined, undefined, true)
+}
+
+/**
+ * Add eventing capabilities into the target object.
+ *
+ * @ignore
+ * @param {Object} target Target object.
+ * @param {Function} [getter] Custom getter for retrieving the object's event
+ * listeners.
+ * @param {Function} [setter] Custom setter for setting the object's event
+ * listeners.
+ */
+export const eventify = function (target, getter, setter, enumerable) {
+  target = target || this
+  let _events = {}
+  if (!getter &amp;&amp; !setter) {
+    getter = function () {
+      return _events
+    }
+    setter = function (value) {
+      _events = value
+    }
+  }
+  Object.defineProperties(target, {
+    on: {
+      enumerable: !!enumerable,
+      value (type, func, ctx) {
+        if (!getter.call(this)) {
+          setter.call(this, {})
+        }
+        const events = getter.call(this)
+        events[type] = events[type] || []
+        events[type].push({
+          f: func,
+          c: ctx
+        })
+      }
+    },
+    off: {
+      enumerable: !!enumerable,
+      value (type, func) {
+        const events = getter.call(this)
+        const listeners = events[type]
+        if (!listeners) {
+          setter.call(this, {})
+        } else if (func) {
+          for (let i = 0; i &lt; listeners.length; i++) {
+            if (listeners[i].f === func) {
+              listeners.splice(i, 1)
+              break
+            }
+          }
+        } else {
+          listeners.splice(0, listeners.length)
+        }
+      }
+    },
+    emit: {
+      enumerable: !!enumerable,
+      value (...args) {
+        const events = getter.call(this) || {}
+        const type = args.shift()
+        let listeners = events[type] || []
+        let i
+        for (i = 0; i &lt; listeners.length; i++) {
+          listeners[i].f.apply(listeners[i].c, args)
+        }
+        listeners = events.all || []
+        args.unshift(type)
+        for (i = 0; i &lt; listeners.length; i++) {
+          listeners[i].f.apply(listeners[i].c, args)
+        }
+      }
+    }
+  })
+}
+
+export const classCallCheck = function (instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError('Cannot call a class as a function')
+  }
+}
+
+export const possibleConstructorReturn = function (self, call) {
+  if (!self) {
+    throw new ReferenceError('this hasn\'t been initialised - super() hasn\'t been called')
+  }
+
+  return call &amp;&amp; (typeof call === 'object' || typeof call === 'function') ? call : self
+}
+
+export const addHiddenPropsToTarget = function (target, props) {
+  forOwn(props, function (value, key) {
+    props[key] = {
+      writable: true,
+      value
+    }
+  })
+  Object.defineProperties(target, props)
+}
+
+export const extend = function (props, classProps) {
+  const SuperClass = this
+  let SubClass
+
+  props || (props = {})
+  classProps || (classProps = {})
+
+  if (props.hasOwnProperty('constructor')) {
+    SubClass = props.constructor
+    delete props.constructor
+  } else {
+    SubClass = function (...args) {
+      classCallCheck(this, SubClass)
+      const _this = possibleConstructorReturn(this, (SubClass.__super__ || Object.getPrototypeOf(SubClass)).apply(this, args))
+      return _this
+    }
+  }
+
+  SubClass.prototype = Object.create(SuperClass &amp;&amp; SuperClass.prototype, {
+    constructor: {
+      value: SubClass,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  })
+
+  if (Object.setPrototypeOf) {
+    Object.setPrototypeOf(SubClass, SuperClass)
+  } else if (classProps.strictEs6Class) {
+    SubClass.__proto__ = SuperClass // eslint-disable-line
+  } else {
+    forOwn(SuperClass, function (value, key) {
+      SubClass[key] = value
+    })
+  }
+  Object.defineProperty(SubClass, '__super__', {
+    configurable: true,
+    value: SuperClass
+  })
+
+  addHiddenPropsToTarget(SubClass.prototype, props)
+  fillIn(SubClass, classProps)
+
+  return SubClass
+}
+
+export const getSuper = function (instance, isCtor) {
+  const Ctor = isCtor ? instance : instance.constructor
+  return (Ctor.__super__ || Object.getPrototypeOf(Ctor) || Ctor.__proto__) // eslint-disable-line
+}
+
+const getIndex = function (list, relation) {
+  let index = -1
+  list.forEach(function (_relation, i) {
+    if (_relation === relation) {
+      index = i
+      return false
+    } else if (isObject(_relation)) {
+      if (_relation.relation === relation) {
+        index = i
+        return false
+      }
+    }
+  })
+  return index
+}
+
+const forRelation = function (opts, def, fn, ctx) {
+  const relationName = def.relation
+  let containedName = null
+  let index
+  opts || (opts = {})
+  opts.with || (opts.with = [])
+
+  if ((index = getIndex(opts.with, relationName)) >= 0) {
+    containedName = relationName
+  } else if ((index = getIndex(opts.with, def.localField)) >= 0) {
+    containedName = def.localField
+  }
+
+  if (opts.withAll) {
+    fn.call(ctx, def, {})
+    return
+  } else if (!containedName) {
+    return
+  }
+  let __opts = {}
+  fillIn(__opts, def.getRelation())
+  fillIn(__opts, opts)
+  __opts.with = opts.with.slice()
+  __opts._activeWith = __opts.with.splice(index, 1)[0]
+  __opts.with.forEach(function (relation, i) {
+    if (relation &amp;&amp; relation.indexOf(containedName) === 0 &amp;&amp; relation.length >= containedName.length &amp;&amp; relation[containedName.length] === '.') {
+      __opts.with[i] = relation.substr(containedName.length + 1)
+    } else {
+      __opts.with[i] = ''
+    }
+  })
+  fn.call(ctx, def, __opts)
+}
+
+export const forEachRelation = function (mapper, opts, fn, ctx) {
+  const relationList = mapper.relationList || []
+  if (!relationList.length) {
+    return
+  }
+  relationList.forEach(function (def) {
+    forRelation(opts, def, fn, ctx)
+  })
+}
+
+export const omit = function (props, keys) {
+  // Remove relations
+  const _props = {}
+  forOwn(props, function (value, key) {
+    if (keys.indexOf(key) === -1) {
+      _props[key] = value
+    }
+  })
+  return _props
+}
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+<div class="modal fade" id="searchResults">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Search results</h4>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+<footer>
+
+	<div style="text-align:center">Back to <a href="http://js-data.io">js-data.io</a></div>
+
+
+	<span class="copyright">
+	js-data Copyright © 2014-2016 js-data project authors
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
+	
+		on 2016-03-12T16:15:04-08:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+<script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			var id = $( heading ).attr( "id" );
+			return id && id.replace(/\~/g, '-inner-').replace(/\./g, '-static-') || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+<script>
+	(function ( i, s, o, g, r, a, m ) {
+		i['GoogleAnalyticsObject'] = r;
+		i[r] = i[r] || function () {
+			(i[r].q = i[r].q || []).push( arguments )
+		}, i[r].l = 1 * new Date();
+		a = s.createElement( o ),
+			m = s.getElementsByTagName( o )[0];
+		a.async = 1;
+		a.src = g;
+		m.parentNode.insertBefore( a, m )
+	})( window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga' );
+
+	ga( 'create', 'UA-55528236-2', 'api.js-data.io' );
+	ga( 'send', 'pageview' );
+</script>
+
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		SearcherDisplay.init();
+	});
+</script>
+
+</body>
+</html>
