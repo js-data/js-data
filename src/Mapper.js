@@ -191,23 +191,6 @@ const notify2 = function (...args) {
 
 const MAPPER_DEFAULTS = {
   /**
-   * Hash of registered adapters. Don't modify. Use {@link Mapper#registerAdapter}.
-   *
-   * @name Mapper#_adapters
-   * @private
-   */
-  _adapters: null,
-
-  /**
-   * Hash of registered listeners. Don't modify. Use {@link Mapper#on} and
-   * {@link Mapper#off}.
-   *
-   * @name Mapper#_listeners
-   * @private
-   */
-  _listeners: null,
-
-  /**
    * Whether to augment {@link Mapper#RecordClass} with getter/setter property
    * accessors according to the properties defined in {@link Mapper#schema}.
    * This makes possible validation and change tracking on individual properties
@@ -283,6 +266,66 @@ const MAPPER_DEFAULTS = {
    */
   raw: false,
 
+  schema: null
+}
+
+/**
+ * ```javascript
+ * import {Mapper} from 'js-data'
+ * ```
+ *
+ * The core of JSData's [ORM/ODM][orm] implementation. Given a minimum amout of
+ * meta information about a resource, a Mapper can perform generic CRUD
+ * operations against that resource. Apart from its configuration, a Mapper is
+ * stateless. The particulars of various persistence layers has been abstracted
+ * into adapters, which a Mapper uses to perform its operations.
+ *
+ * The term "Mapper" comes from the [Data Mapper Pattern][pattern] described in
+ * Martin Fowler's [Patterns of Enterprise Application Architecture][book]. A
+ * Data Mapper moves data between [in-memory object instances][record] and a
+ * relational or document-based database. JSData's Mapper can work with any
+ * persistence layer you can write an adapter for.
+ *
+ * _("Model" is a heavily overloaded term and is avoided in this documentation
+ * to prevent confusion.)_
+ *
+ * [orm]: https://en.wikipedia.org/wiki/Object-relational_mapping
+ * [pattern]: https://en.wikipedia.org/wiki/Data_mapper_pattern
+ * [book]: http://martinfowler.com/books/eaa.html
+ * [record]: Record.html
+ *
+ * @class Mapper
+ * @param {Object} [opts] Configuration options.
+ */
+export default function Mapper (opts) {
+  const self = this
+  classCallCheck(self, Mapper)
+
+  opts || (opts = {})
+
+  /**
+   * Hash of registered adapters. Don't modify. Use {@link Mapper#registerAdapter}.
+   *
+   * @name Mapper#_adapters
+   * @private
+   */
+  Object.defineProperty(self, '_adapters', {
+    value: undefined,
+    writable: true
+  })
+
+  /**
+   * Hash of registered listeners. Don't modify. Use {@link Mapper#on} and
+   * {@link Mapper#off}.
+   *
+   * @name Mapper#_listeners
+   * @private
+   */
+  Object.defineProperty(self, '_listeners', {
+    value: undefined,
+    writable: true
+  })
+
   /**
    * Set the `false` to force the Mapper to work with POJO objects only.
    *
@@ -335,44 +378,11 @@ const MAPPER_DEFAULTS = {
    * @name Mapper#RecordClass
    * @default {@link Record}
    */
-  RecordClass: undefined,
+  Object.defineProperty(self, 'RecordClass', {
+    value: undefined,
+    writable: true
+  })
 
-  schema: null
-}
-
-/**
- * ```javascript
- * import {Mapper} from 'js-data'
- * ```
- *
- * The core of JSData's [ORM/ODM][orm] implementation. Given a minimum amout of
- * meta information about a resource, a Mapper can perform generic CRUD
- * operations against that resource. Apart from its configuration, a Mapper is
- * stateless. The particulars of various persistence layers has been abstracted
- * into adapters, which a Mapper uses to perform its operations.
- *
- * The term "Mapper" comes from the [Data Mapper Pattern][pattern] described in
- * Martin Fowler's [Patterns of Enterprise Application Architecture][book]. A
- * Data Mapper moves data between [in-memory object instances][record] and a
- * relational or document-based database. JSData's Mapper can work with any
- * persistence layer you can write an adapter for.
- *
- * _("Model" is a heavily overloaded term and is avoided in this documentation
- * to prevent confusion.)_
- *
- * [orm]: https://en.wikipedia.org/wiki/Object-relational_mapping
- * [pattern]: https://en.wikipedia.org/wiki/Data_mapper_pattern
- * [book]: http://martinfowler.com/books/eaa.html
- * [record]: Record.html
- *
- * @class Mapper
- * @param {Object} [opts] Configuration options.
- */
-export default function Mapper (opts) {
-  const self = this
-  classCallCheck(self, Mapper)
-
-  opts || (opts = {})
   fillIn(self, opts)
   fillIn(self, copy(MAPPER_DEFAULTS))
 
