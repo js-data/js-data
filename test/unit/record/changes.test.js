@@ -10,14 +10,45 @@ export function init () {
     it('should be empty right after an instance is created', function () {
       const Test = this
       const post = new Test.Post.RecordClass(Test.data.p1)
-      Test.assert.deepEqual(post.changes(), {})
+      Test.assert.objectsEqual(post.changes(), {
+        added: {},
+        removed: {},
+        changed: {}
+      })
     })
-    it('should stay empty if an untracked field changes', function () {
+    it('should detect tracked field changes', function () {
       const Test = this
       const post = new Test.Post.RecordClass(Test.data.p1)
-      Test.assert.deepEqual(post.changes(), {})
+      Test.assert.objectsEqual(post.changes(), {
+        added: {},
+        removed: {},
+        changed: {}
+      })
       post.author = 'Jake'
-      Test.assert.deepEqual(post.changes(), {})
+      Test.assert.objectsEqual(post.changes(), {
+        added: {},
+        removed: {},
+        changed: {
+          author: 'Jake'
+        }
+      })
+    })
+    it('should detect untracked field changes', function () {
+      const Test = this
+      const post = new Test.Post.RecordClass(Test.data.p1)
+      Test.assert.objectsEqual(post.changes(), {
+        added: {},
+        removed: {},
+        changed: {}
+      })
+      post.foo = 'bar'
+      Test.assert.objectsEqual(post.changes(), {
+        added: {
+          foo: 'bar'
+        },
+        removed: {},
+        changed: {}
+      })
     })
     it('should show changed tracked fields', function () {
       const Test = this
@@ -34,13 +65,25 @@ export function init () {
         }
       })
       const post = PostMapper.createRecord(Test.data.p1)
-      Test.assert.deepEqual(post.changes(), {})
+      Test.assert.objectsEqual(post.changes(), {
+        added: {},
+        removed: {},
+        changed: {}
+      })
       post.author = 'Jake'
-      Test.assert.deepEqual(post.changes(), {
-        author: 'Jake'
+      Test.assert.objectsEqual(post.changes(), {
+        added: {},
+        removed: {},
+        changed: {
+          author: 'Jake'
+        }
       })
       post.author = 'John'
-      Test.assert.deepEqual(post.changes(), {})
+      Test.assert.objectsEqual(post.changes(), {
+        added: {},
+        removed: {},
+        changed: {}
+      })
     })
   })
 }

@@ -1,21 +1,4 @@
-import {
-  _,
-  addHiddenPropsToTarget,
-  classCallCheck,
-  copy,
-  eventify,
-  extend,
-  fillIn,
-  forOwn,
-  get,
-  isFunction,
-  isObject,
-  isSorN,
-  isString,
-  resolve,
-  set,
-  unset
-} from './utils'
+import _ from './utils'
 
 /**
  * js-data's Record class.
@@ -32,7 +15,7 @@ import {
  */
 export default function Record (props, opts) {
   const self = this
-  classCallCheck(self, Record)
+  _.classCallCheck(self, Record)
 
   props || (props = {})
   opts || (opts = {})
@@ -40,17 +23,17 @@ export default function Record (props, opts) {
   Object.defineProperties(self, {
     _get: {
       value (key) {
-        return get(_props, key)
+        return _.get(_props, key)
       }
     },
     _set: {
       value (key, value) {
-        return set(_props, key, value)
+        return _.set(_props, key, value)
       }
     },
     _unset: {
       value (key) {
-        return unset(_props, key)
+        return _.unset(_props, key)
       }
     }
   })
@@ -60,11 +43,10 @@ export default function Record (props, opts) {
   if (opts.noValidate) {
     _set('noValidate', true)
   }
-  fillIn(self, props)
+  _.fillIn(self, props)
   _set('creating') // unset
-  _set('changes', {})
   _set('noValidate') // unset
-  _set('previous', copy(props))
+  _set('previous', _.copy(props))
 }
 
 /**
@@ -85,9 +67,9 @@ export default function Record (props, opts) {
  * @param {Object} [classProps={}] Static properties to add to the subclass.
  * @return {Function} Subclass of Record.
  */
-Record.extend = extend
+Record.extend = _.extend
 
-addHiddenPropsToTarget(Record.prototype, {
+_.addHiddenPropsToTarget(Record.prototype, {
   /**
    * TODO
    *
@@ -111,7 +93,7 @@ addHiddenPropsToTarget(Record.prototype, {
    * @return {*} Value at path.
    */
   get: function (key) {
-    return get(this, key)
+    return _.get(this, key)
   },
 
   /**
@@ -127,14 +109,14 @@ addHiddenPropsToTarget(Record.prototype, {
    */
   set: function (key, value, opts) {
     const self = this
-    if (isObject(key)) {
+    if (_.isObject(key)) {
       opts = value
     }
     opts || (opts = {})
     if (opts.silent) {
       self._set('silent', true)
     }
-    set(self, key, value)
+    _.set(self, key, value)
     if (!self._get('eventId')) {
       self._set('silent') // unset
     }
@@ -161,32 +143,36 @@ addHiddenPropsToTarget(Record.prototype, {
    */
   hashCode () {
     const self = this
-    return get(self, self._mapper().idAttribute)
+    return _.get(self, self._mapper().idAttribute)
   },
 
   /**
-   * TODO
+   * Return changes to this record since it was instantiated or
+   * {@link Record#commit} was called.
    *
    * @name Record#changes
    * @method
-   * @param {string} [key] TODO
+   * @param {Function} [equalsFn] Equality function. Default uses `===`.
+   * @param {Array} [ignore] Array of strings or RegExp of fields to ignore.
    */
-  changes (key) {
+  changes (equalsFn, ignore) {
     const self = this
-    if (key) {
-      return self._get(`changes.${key}`)
-    }
-    return self._get('changes')
+    return _.diffObjects(self, self._get('previous'), equalsFn, ignore)
   },
 
   /**
-   * TODO
+   * Return whether this record has changed since it was instantiated or
+   * {@link Record#commit} was called.
    *
    * @name Record#hasChanges
    * @method
+   * @param {Function} [equalsFn] Equality function. Default uses `===`.
+   * @param {Array} [ignore] Array of strings or RegExp of fields to ignore.
    */
-  hasChanges () {
-    return !!(this._get('changed') || []).length
+  hasChanges (equalsFn, ignore) {
+    const self = this
+    const quickHasChanges = !!(self._get('changed') || []).length
+    return quickHasChanges || _.areDifferent(self, self._get('previous'), equalsFn, ignore)
   },
 
   /**
@@ -198,8 +184,7 @@ addHiddenPropsToTarget(Record.prototype, {
   commit () {
     const self = this
     self._set('changed') // unset
-    self._set('changes', {})
-    self._set('previous', copy(self))
+    self._set('previous', _.copy(self))
     return self
   },
 
@@ -230,12 +215,12 @@ addHiddenPropsToTarget(Record.prototype, {
     const previous = self._get('previous') || {}
     opts || (opts = {})
     opts.preserve || (opts.preserve = [])
-    forOwn(self, (value, key) => {
+    _.forOwn(self, (value, key) => {
       if (key !== self._mapper().idAttribute && !previous.hasOwnProperty(key) && self.hasOwnProperty(key) && opts.preserve.indexOf(key) === -1) {
         delete self[key]
       }
     })
-    forOwn(previous, (value, key) => {
+    _.forOwn(previous, (value, key) => {
       if (opts.preserve.indexOf(key) === -1) {
         self[key] = value
       }
@@ -267,7 +252,7 @@ addHiddenPropsToTarget(Record.prototype, {
   //       errors = validate.validate(prop, value) || []
   //     }
   //   } else {
-  //     utils.forOwn(_schema, function (prop, key) {
+  //     utils. _.forOwn(_schema, function (prop, key) {
   //       errors = errors.concat(validate.validate(prop, utils.get(obj, key)) || [])
   //     })
   //   }
@@ -310,12 +295,12 @@ addHiddenPropsToTarget(Record.prototype, {
     opts || (opts = {})
 
     // Fill in "opts" with the Model's configuration
-    _(self, opts)
+    _._(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeSave lifecycle hook
     op = opts.op = 'beforeSave'
-    return resolve(self[op](opts)).then(function () {
+    return _.resolve(self[op](opts)).then(function () {
       // Now delegate to the adapter
       op = opts.op = 'save'
       Mapper.dbg(op, self, opts)
@@ -323,7 +308,7 @@ addHiddenPropsToTarget(Record.prototype, {
     }).then(function (data) {
       // afterSave lifecycle hook
       op = opts.op = 'afterSave'
-      return resolve(self[op](data, opts)).then(function (_data) {
+      return _.resolve(self[op](data, opts)).then(function (_data) {
         // Allow for re-assignment from lifecycle hook
         data = _data || data
         if (opts.raw) {
@@ -375,46 +360,46 @@ addHiddenPropsToTarget(Record.prototype, {
     opts || (opts = {})
 
     // Fill in "opts" with the Model's configuration
-    _(Mapper, opts)
+    _._(Mapper, opts)
     opts.adapter = Mapper.getAdapterName(opts)
 
     // beforeLoadRelations lifecycle hook
     op = opts.op = 'beforeLoadRelations'
-    return resolve(self[op](relations, opts)).then(function () {
-      if (isString(relations)) {
+    return _.resolve(self[op](relations, opts)).then(function () {
+      if (_.isString(relations)) {
         relations = [relations]
       }
       // Now delegate to the adapter
       op = opts.op = 'loadRelations'
       Mapper.dbg(op, self, relations, opts)
       return Promise.all(relationList.map(function (def) {
-        if (isFunction(def.load)) {
+        if (_.isFunction(def.load)) {
           return def.load(Mapper, def, self, opts)
         }
         let task
         if (def.type === 'hasMany' && def.foreignKey) {
           // hasMany
           task = def.getRelation().findAll({
-            [def.foreignKey]: get(self, Mapper.idAttribute)
+            [def.foreignKey]: _.get(self, Mapper.idAttribute)
           }, opts)
         } else if (def.foreignKey) {
           // belongsTo or hasOne
-          const key = get(self, def.foreignKey)
-          if (isSorN(key)) {
+          const key = _.get(self, def.foreignKey)
+          if (_.isSorN(key)) {
             task = def.getRelation().find(key, opts)
           }
         } else if (def.localKeys) {
           // hasMany
           task = def.getRelation().findAll({
             [def.getRelation().idAttribute]: {
-              'in': get(self, def.localKeys)
+              'in': _.get(self, def.localKeys)
             }
           }, opts)
         } else if (def.foreignKeys) {
           // hasMany
           task = def.getRelation().findAll({
             [def.getRelation().idAttribute]: {
-              'contains': get(self, Mapper.idAttribute)
+              'contains': _.get(self, Mapper.idAttribute)
             }
           }, opts)
         }
@@ -423,7 +408,7 @@ addHiddenPropsToTarget(Record.prototype, {
             if (opts.raw) {
               data = data.data
             }
-            set(self, def.localField, def.type === 'hasOne' ? (data.length ? data[0] : undefined) : data)
+            _.set(self, def.localField, def.type === 'hasOne' ? (data.length ? data[0] : undefined) : data)
           })
         }
         return task
@@ -431,7 +416,7 @@ addHiddenPropsToTarget(Record.prototype, {
     }).then(function () {
       // afterLoadRelations lifecycle hook
       op = opts.op = 'afterLoadRelations'
-      return resolve(self[op](relations, opts)).then(function () {
+      return _.resolve(self[op](relations, opts)).then(function () {
         return self
       })
     })
@@ -457,7 +442,7 @@ addHiddenPropsToTarget(Record.prototype, {
   destroy (opts) {
     // TODO: move actual destroy logic here
     const Mapper = this._mapper()
-    return Mapper.destroy(get(this, Mapper.idAttribute), opts)
+    return Mapper.destroy(_.get(this, Mapper.idAttribute), opts)
   },
 
   // TODO: move logic for single-item async operations onto the instance.
@@ -481,8 +466,8 @@ addHiddenPropsToTarget(Record.prototype, {
       return mapper.toJSON(this, opts)
     } else {
       const json = {}
-      forOwn(this, function (prop, key) {
-        json[key] = copy(prop)
+      _.forOwn(this, function (prop, key) {
+        json[key] = _.copy(prop)
       })
       return json
     }
@@ -516,7 +501,7 @@ addHiddenPropsToTarget(Record.prototype, {
  *
  * An record's registered listeners are stored in the record's private data.
  */
-eventify(
+_.eventify(
   Record.prototype,
   function () {
     return this._get('events')

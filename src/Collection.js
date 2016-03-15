@@ -1,20 +1,5 @@
+import _ from './utils'
 import Query from './Query'
-import {
-  _,
-  addHiddenPropsToTarget,
-  classCallCheck,
-  deepMixIn,
-  eventify,
-  extend,
-  fillIn,
-  forOwn,
-  get,
-  isArray,
-  isFunction,
-  isObject,
-  isSorN,
-  isString
-} from './utils'
 import {Index} from '../lib/mindex/index'
 
 const COLLECTION_DEFAULTS = {
@@ -110,13 +95,13 @@ const COLLECTION_DEFAULTS = {
  */
 export default function Collection (records, opts) {
   const self = this
-  classCallCheck(self, Collection)
+  _.classCallCheck(self, Collection)
 
-  if (isObject(records) && !isArray(records)) {
+  if (_.isObject(records) && !_.isArray(records)) {
     opts = records
     records = []
   }
-  if (isString(opts)) {
+  if (_.isString(opts)) {
     opts = { idAttribute: opts }
   }
 
@@ -125,8 +110,8 @@ export default function Collection (records, opts) {
   opts || (opts = {})
   opts.recordOpts || (opts.recordOpts = {})
 
-  fillIn(self, opts)
-  fillIn(self, COLLECTION_DEFAULTS)
+  _.fillIn(self, opts)
+  _.fillIn(self, COLLECTION_DEFAULTS)
 
   /**
    * Event listeners attached to this Collection.
@@ -147,7 +132,7 @@ export default function Collection (records, opts) {
    */
   self.index = new Index([idAttribute], {
     hashCode (obj) {
-      return get(obj, idAttribute)
+      return _.get(obj, idAttribute)
     }
   })
 
@@ -161,7 +146,7 @@ export default function Collection (records, opts) {
   records.forEach(function (record) {
     record = self.mapper ? self.mapper.createRecord(record, self.recordOpts) : record
     self.index.insertRecord(record)
-    if (record && isFunction(record.on)) {
+    if (record && _.isFunction(record.on)) {
       record.on('all', self._onRecordEvent, self)
     }
   })
@@ -184,9 +169,9 @@ export default function Collection (records, opts) {
  * @param {Object} [classProps={}] Static properties to add to the subclass.
  * @return {Function} Subclass of Collection.
  */
-Collection.extend = extend
+Collection.extend = _.extend
 
-addHiddenPropsToTarget(Collection.prototype, {
+_.addHiddenPropsToTarget(Collection.prototype, {
   /**
    * Used to bind to events emitted by records in this Collection.
    *
@@ -224,13 +209,13 @@ addHiddenPropsToTarget(Collection.prototype, {
     opts || (opts = {})
 
     // Fill in "opts" with the Collection's configuration
-    _(self, opts)
+    _._(self, opts)
     records = self.beforeAdd(records, opts) || records
 
     // Track whether just one record or an array of records is being inserted
     let singular = false
     const idAttribute = self.recordId()
-    if (isObject(records) && !isArray(records)) {
+    if (_.isObject(records) && !_.isArray(records)) {
       records = [records]
       singular = true
     }
@@ -241,7 +226,7 @@ addHiddenPropsToTarget(Collection.prototype, {
     // option.
     records = records.map(function (record) {
       let id = self.recordId(record)
-      if (!isSorN(id)) {
+      if (!_.isSorN(id)) {
         throw new TypeError(`${idAttribute}: Expected string or number, found ${typeof id}!`)
       }
       // Grab existing record if there is one
@@ -257,9 +242,9 @@ addHiddenPropsToTarget(Collection.prototype, {
         // in the collection, so we need to merge them
         const onConflict = opts.onConflict || self.onConflict
         if (onConflict === 'merge') {
-          deepMixIn(existing, record)
+          _.deepMixIn(existing, record)
         } else if (onConflict === 'replace') {
-          forOwn(existing, (value, key) => {
+          _.forOwn(existing, (value, key) => {
             if (key !== idAttribute && !record.hasOwnProperty(key)) {
               delete existing[key]
             }
@@ -275,10 +260,10 @@ addHiddenPropsToTarget(Collection.prototype, {
         // it into the collection
         record = self.mapper ? self.mapper.createRecord(record, self.recordOpts) : record
         self.index.insertRecord(record)
-        forOwn(self.indexes, function (index, name) {
+        _.forOwn(self.indexes, function (index, name) {
           index.insertRecord(record)
         })
-        if (record && isFunction(record.on)) {
+        if (record && _.isFunction(record.on)) {
           record.on('all', self._onRecordEvent, self)
         }
       }
@@ -409,7 +394,7 @@ addHiddenPropsToTarget(Collection.prototype, {
    */
   createIndex (name, fieldList, opts) {
     const self = this
-    if (isString(name) && fieldList === undefined) {
+    if (_.isString(name) && fieldList === undefined) {
       fieldList = [name]
     }
     opts || (opts = {})
@@ -598,7 +583,7 @@ addHiddenPropsToTarget(Collection.prototype, {
    */
   recordId (record) {
     if (record) {
-      return get(record, this.recordId())
+      return _.get(record, this.recordId())
     }
     const self = this
     return self.mapper ? self.mapper.idAttribute : self.idAttribute || 'id'
@@ -662,10 +647,10 @@ addHiddenPropsToTarget(Collection.prototype, {
     // The record is in the collection, remove it
     if (record) {
       self.index.removeRecord(record)
-      forOwn(self.indexes, function (index, name) {
+      _.forOwn(self.indexes, function (index, name) {
         index.removeRecord(record)
       })
-      if (record && isFunction(record.off)) {
+      if (record && _.isFunction(record.off)) {
         record.off('all', self._onRecordEvent, self)
         self.emit('remove', record)
       }
@@ -761,7 +746,7 @@ addHiddenPropsToTarget(Collection.prototype, {
   updateIndexes (record) {
     const self = this
     self.index.updateRecord(record)
-    forOwn(self.indexes, function (index, name) {
+    _.forOwn(self.indexes, function (index, name) {
       index.updateRecord(record)
     })
   }
@@ -794,7 +779,7 @@ addHiddenPropsToTarget(Collection.prototype, {
  * @param {...*} [arg] TODO
  */
 
-eventify(
+_.eventify(
   Collection.prototype,
   function () {
     return this._listeners

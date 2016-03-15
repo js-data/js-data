@@ -1,19 +1,4 @@
-import {
-  addHiddenPropsToTarget,
-  classCallCheck,
-  extend,
-  fillIn,
-  forOwn,
-  get,
-  getSuper,
-  isArray,
-  isBrowser,
-  isUndefined,
-  reject,
-  resolve,
-  set,
-  toJson
-} from './utils'
+import _ from './utils'
 import {
   belongsToType,
   hasManyType,
@@ -31,7 +16,7 @@ const DATASTORE_DEFAULTS = {
    * @name DataStore#linkRelations
    * @type {boolean}
    */
-  linkRelations: isBrowser
+  linkRelations: _.isBrowser
 }
 
 /**
@@ -76,19 +61,19 @@ const DATASTORE_DEFAULTS = {
 const DataStore = Container.extend({
   constructor (opts) {
     const self = this
-    classCallCheck(self, DataStore)
+    _.classCallCheck(self, DataStore)
 
-    getSuper(self).call(self, opts)
+    _.getSuper(self).call(self, opts)
     self.CollectionClass = self.CollectionClass || LinkedCollection
     self._collections = {}
-    fillIn(self, DATASTORE_DEFAULTS)
+    _.fillIn(self, DATASTORE_DEFAULTS)
     self._pendingQueries = {}
     self._completedQueries = {}
     return self
   },
 
   _callSuper (method, ...args) {
-    return getSuper(this).prototype[method].apply(this, args)
+    return _.getSuper(this).prototype[method].apply(this, args)
   },
 
   /**
@@ -153,7 +138,7 @@ const DataStore = Container.extend({
 
   defineMapper (name, opts) {
     const self = this
-    const mapper = getSuper(self).prototype.defineMapper.call(self, name, opts)
+    const mapper = _.getSuper(self).prototype.defineMapper.call(self, name, opts)
     self._pendingQueries[name] = {}
     self._completedQueries[name] = {}
     mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] })
@@ -171,7 +156,7 @@ const DataStore = Container.extend({
     const schema = mapper.schema || {}
     const properties = schema.properties || {}
     // TODO: Make it possible index nested properties?
-    forOwn(properties, function (opts, prop) {
+    _.forOwn(properties, function (opts, prop) {
       if (opts.indexed) {
         collection.createIndex(prop)
       }
@@ -194,7 +179,7 @@ const DataStore = Container.extend({
         const path = `links.${localField}`
         const foreignKey = def.foreignKey
         const type = def.type
-        const link = isUndefined(def.link) ? linkRelations : def.link
+        const link = _.isUndefined(def.link) ? linkRelations : def.link
         const updateOpts = { index: foreignKey }
         let descriptor
 
@@ -210,7 +195,7 @@ const DataStore = Container.extend({
                 return _self._get(path)
               }
               const key = def.getForeignKey(_self)
-              const item = isUndefined(key) ? undefined : self.getCollection(relation).get(key)
+              const item = _.isUndefined(key) ? undefined : self.getCollection(relation).get(key)
               _self._set(path, item)
               return item
             },
@@ -247,13 +232,13 @@ const DataStore = Container.extend({
                   index: foreignKey
                 })
               } else if (localKeys) {
-                const keys = get(_self, localKeys) || []
-                const args = isArray(keys) ? keys : Object.keys(keys)
+                const keys = _.get(_self, localKeys) || []
+                const args = _.isArray(keys) ? keys : Object.keys(keys)
                 // Really fast retrieval
                 items = relationCollection.getAll.apply(relationCollection, args)
               } else if (foreignKeys) {
                 const query = {}
-                set(query, `where.${foreignKeys}.contains`, key)
+                _.set(query, `where.${foreignKeys}.contains`, key)
                 // Make a much slower retrieval
                 items = relationCollection.filter(query)
               }
@@ -269,24 +254,24 @@ const DataStore = Container.extend({
 
               if (foreignKey) {
                 def.setForeignKey(_self, records)
-                if (isArray(records)) {
+                if (_.isArray(records)) {
                   records.forEach(function (record) {
                     relationCollection.updateIndex(record, updateOpts)
                   })
                 }
               } if (localKeys) {
-                set(_self, localKeys, records.map(function (record) {
+                _.set(_self, localKeys, records.map(function (record) {
                   return relationCollection.recordId(record)
                 }))
               } else if (foreignKeys) {
                 records.forEach(function (record) {
-                  const keys = get(record, foreignKeys)
+                  const keys = _.get(record, foreignKeys)
                   if (keys) {
                     if (keys.indexOf(key) === -1) {
                       keys.push(key)
                     }
                   } else {
-                    set(record, foreignKeys, [key])
+                    _.set(record, foreignKeys, [key])
                   }
                 })
               }
@@ -319,7 +304,7 @@ const DataStore = Container.extend({
         }
 
         if (descriptor) {
-          descriptor.enumerable = isUndefined(def.enumerable) ? true : def.enumerable
+          descriptor.enumerable = _.isUndefined(def.enumerable) ? true : def.enumerable
           if (def.get) {
             let origGet = descriptor.get
             descriptor.get = function () {
@@ -408,7 +393,7 @@ const DataStore = Container.extend({
     opts || (opts = {})
     const pendingQuery = self._pendingQueries[name][id]
 
-    fillIn(opts, self.getMapper(name))
+    _.fillIn(opts, self.getMapper(name))
 
     if (pendingQuery) {
       return pendingQuery
@@ -422,13 +407,13 @@ const DataStore = Container.extend({
         return self._end(name, data, opts)
       }, function (err) {
         delete self._pendingQueries[name][id]
-        return reject(err)
+        return _.reject(err)
       }).then(function (data) {
         self._completedQueries[name][id] = new Date().getTime()
         return data
       })
     } else {
-      promise = resolve(item)
+      promise = _.resolve(item)
     }
     return promise
   },
@@ -449,7 +434,7 @@ const DataStore = Container.extend({
     const hash = self.hashQuery(name, query, opts)
     const pendingQuery = self._pendingQueries[name][hash]
 
-    fillIn(opts, self.getMapper(name))
+    _.fillIn(opts, self.getMapper(name))
 
     if (pendingQuery) {
       return pendingQuery
@@ -464,13 +449,13 @@ const DataStore = Container.extend({
         return self._end(name, data, opts)
       }, function (err) {
         delete self._pendingQueries[name][hash]
-        return reject(err)
+        return _.reject(err)
       }).then(function (data) {
         self._completedQueries[name][hash] = new Date().getTime()
         return data
       })
     } else {
-      promise = resolve(items)
+      promise = _.resolve(items)
     }
     return promise
   },
@@ -487,7 +472,7 @@ const DataStore = Container.extend({
   },
 
   hashQuery (name, query, opts) {
-    return toJson(query)
+    return _.toJson(query)
   },
 
   /**
@@ -586,7 +571,7 @@ DataStore.prototype.defineResource = DataStore.prototype.defineMapper
  * @param {Object} [classProps={}] Static properties to add to the subclass.
  * @return {Function} Subclass of DataStore.
  */
-DataStore.extend = extend
+DataStore.extend = _.extend
 
 const toProxy = [
   'add',
@@ -615,7 +600,7 @@ methods.inject = function (...args) {
   return this.add(...args)
 }
 
-addHiddenPropsToTarget(DataStore.prototype, methods)
+_.addHiddenPropsToTarget(DataStore.prototype, methods)
 
 export {
   DataStore as default
