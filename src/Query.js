@@ -1,17 +1,4 @@
-import {
-  addHiddenPropsToTarget,
-  classCallCheck,
-  extend,
-  forOwn,
-  get,
-  intersection,
-  isArray,
-  isFunction,
-  isNull,
-  isNumber,
-  isObject,
-  isString
-} from './utils'
+import _ from './utils'
 
 /**
  * A class used by the {@link Collection} class to build queries to be executed
@@ -26,7 +13,7 @@ import {
  * @param {Collection} collection - The collection on which this query operates.
  */
 export default function Query (collection) {
-  classCallCheck(this, Query)
+  _.classCallCheck(this, Query)
 
   /**
    * The collection on which this query operates.
@@ -63,7 +50,7 @@ export default function Query (collection) {
  * @param {Object} [classProps={}] Static properties to add to the subclass.
  * @return {Function} Subclass of Query.
  */
-Query.extend = extend
+Query.extend = _.extend
 
 const reserved = {
   skip: '',
@@ -114,10 +101,10 @@ Query.ops = {
     return value <= predicate
   },
   'isectEmpty': function (value, predicate) {
-    return !intersection((value || []), (predicate || [])).length
+    return !_.intersection((value || []), (predicate || [])).length
   },
   'isectNotEmpty': function (value, predicate) {
-    return intersection((value || []), (predicate || [])).length
+    return _.intersection((value || []), (predicate || [])).length
   },
   'in': function (value, predicate) {
     return predicate.indexOf(value) !== -1
@@ -133,15 +120,15 @@ Query.ops = {
   }
 }
 
-addHiddenPropsToTarget(Query.prototype, {
+_.addHiddenPropsToTarget(Query.prototype, {
   compare (orderBy, index, a, b) {
     const def = orderBy[index]
-    let cA = get(a, def[0])
-    let cB = get(b, def[0])
-    if (cA && isString(cA)) {
+    let cA = _.get(a, def[0])
+    let cB = _.get(b, def[0])
+    if (cA && _.isString(cA)) {
       cA = cA.toUpperCase()
     }
-    if (cB && isString(cB)) {
+    if (cB && _.isString(cB)) {
       cB = cB.toUpperCase()
     }
     a || (a = null)
@@ -178,9 +165,9 @@ addHiddenPropsToTarget(Query.prototype, {
       return Query.ops[op](value, predicate)
     }
     if (op.indexOf('like') === 0) {
-      return !isNull(this.like(predicate, op.substr(4)).exec(value))
+      return !_.isNull(this.like(predicate, op.substr(4)).exec(value))
     } else if (op.indexOf('notLike') === 0) {
-      return isNull(this.like(predicate, op.substr(7)).exec(value))
+      return _.isNull(this.like(predicate, op.substr(7)).exec(value))
     }
   },
 
@@ -281,7 +268,7 @@ addHiddenPropsToTarget(Query.prototype, {
     if (self.data) {
       throw new Error('Cannot access index after first operation!')
     }
-    if (keyList && !isArray(keyList)) {
+    if (keyList && !_.isArray(keyList)) {
       keyList = [keyList]
     }
     if (!keyList.length) {
@@ -322,10 +309,10 @@ addHiddenPropsToTarget(Query.prototype, {
     if (self.data) {
       throw new Error('Cannot access index after first operation!')
     }
-    if (!args.length || args.length === 1 && isObject(args[0])) {
+    if (!args.length || args.length === 1 && _.isObject(args[0])) {
       self.getData()
       return self
-    } else if (args.length && isObject(args[args.length - 1])) {
+    } else if (args.length && _.isObject(args[args.length - 1])) {
       opts = args[args.length - 1]
       args.pop()
     }
@@ -376,13 +363,13 @@ addHiddenPropsToTarget(Query.prototype, {
     const self = this
     query || (query = {})
     self.getData()
-    if (isObject(query)) {
+    if (_.isObject(query)) {
       let where = {}
       // Filter
-      if (isObject(query.where)) {
+      if (_.isObject(query.where)) {
         where = query.where
       }
-      forOwn(query, function (value, key) {
+      _.forOwn(query, function (value, key) {
         if (!(key in reserved) && !(key in where)) {
           where[key] = {
             '==': value
@@ -393,13 +380,13 @@ addHiddenPropsToTarget(Query.prototype, {
       const fields = []
       const ops = []
       const predicates = []
-      forOwn(where, function (clause, field) {
-        if (!isObject(clause)) {
+      _.forOwn(where, function (clause, field) {
+        if (!_.isObject(clause)) {
           clause = {
             '==': clause
           }
         }
-        forOwn(clause, function (expr, op) {
+        _.forOwn(clause, function (expr, op) {
           fields.push(field)
           ops.push(op)
           predicates.push(expr)
@@ -416,7 +403,7 @@ addHiddenPropsToTarget(Query.prototype, {
             let op = ops[i]
             const isOr = op.charAt(0) === '|'
             op = isOr ? op.substr(1) : op
-            const expr = self.evaluate(get(item, fields[i]), op, predicates[i])
+            const expr = self.evaluate(_.get(item, fields[i]), op, predicates[i])
             if (expr !== undefined) {
               keep = first ? expr : (isOr ? keep || expr : keep && expr)
             }
@@ -429,12 +416,12 @@ addHiddenPropsToTarget(Query.prototype, {
       // Sort
       let orderBy = query.orderBy || query.sort
 
-      if (isString(orderBy)) {
+      if (_.isString(orderBy)) {
         orderBy = [
           [orderBy, 'ASC']
         ]
       }
-      if (!isArray(orderBy)) {
+      if (!_.isArray(orderBy)) {
         orderBy = null
       }
 
@@ -442,7 +429,7 @@ addHiddenPropsToTarget(Query.prototype, {
       if (orderBy) {
         let index = 0
         orderBy.forEach(function (def, i) {
-          if (isString(def)) {
+          if (_.isString(def)) {
             orderBy[i] = [def, 'ASC']
           }
         })
@@ -452,16 +439,16 @@ addHiddenPropsToTarget(Query.prototype, {
       }
 
       // Skip
-      if (isNumber(query.skip)) {
+      if (_.isNumber(query.skip)) {
         self.skip(query.skip)
-      } else if (isNumber(query.offset)) {
+      } else if (_.isNumber(query.offset)) {
         self.skip(query.offset)
       }
       // Limit
-      if (isNumber(query.limit)) {
+      if (_.isNumber(query.limit)) {
         self.limit(query.limit)
       }
-    } else if (isFunction(query)) {
+    } else if (_.isFunction(query)) {
       self.data = self.data.filter(query, thisArg)
     }
     return self
@@ -483,7 +470,7 @@ addHiddenPropsToTarget(Query.prototype, {
    * @return {Query} A reference to itself for chaining.
    */
   skip (num) {
-    if (!isNumber(num)) {
+    if (!_.isNumber(num)) {
       throw new TypeError(`skip: Expected number but found ${typeof num}!`)
     }
     const data = this.getData()
@@ -511,7 +498,7 @@ addHiddenPropsToTarget(Query.prototype, {
    * @return {Query} A reference to itself for chaining.
    */
   limit (num) {
-    if (!isNumber(num)) {
+    if (!_.isNumber(num)) {
       throw new TypeError(`limit: Expected number but found ${typeof num}!`)
     }
     const data = this.getData()

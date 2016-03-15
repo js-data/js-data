@@ -7,12 +7,12 @@ export function init () {
       Test.assert.isFunction(record.hasChanges)
       Test.assert.isTrue(record.hasChanges === Record.prototype.hasChanges)
     })
-    it('should return false if untracked fields are changed', function () {
+    it('should detect when untracked fields are changed', function () {
       const Test = this
       const post = new Test.Post.RecordClass(Test.data.p1)
       Test.assert.isFalse(post.hasChanges())
       post.author = 'Jake'
-      Test.assert.isFalse(post.hasChanges())
+      Test.assert.isTrue(post.hasChanges())
     })
     it('should return true if a tracked field is changed', function () {
       const Test = this

@@ -1,23 +1,4 @@
-import {
-  _,
-  addHiddenPropsToTarget,
-  classCallCheck,
-  copy,
-  eventify,
-  extend,
-  fillIn,
-  forEachRelation,
-  forOwn,
-  get,
-  getSuper,
-  isArray,
-  isBrowser,
-  isObject,
-  isString,
-  isUndefined,
-  plainCopy,
-  resolve
-} from './utils'
+import _ from './utils'
 import {
   belongsTo,
   belongsToType,
@@ -49,12 +30,11 @@ const makeDescriptor = function (prop, schema) {
   const descriptor = {
     // These properties are enumerable by default, but regardless of their
     // enumerability, they won't be "own" properties of individual records
-    enumerable: isUndefined(schema.enumerable) ? true : !!schema.enumerable
+    enumerable: _.isUndefined(schema.enumerable) ? true : !!schema.enumerable
   }
   // Cache a few strings for optimal performance
   const keyPath = `props.${prop}`
   const previousPath = `previous.${prop}`
-  const changesPath = `changes.${prop}`
 
   descriptor.get = function () {
     return this._get(keyPath)
@@ -95,12 +75,7 @@ const makeDescriptor = function (prop, schema) {
       if (current !== value && index === -1) {
         changed.push(prop)
       }
-      if (previous !== value) {
-        // Value has changed
-        _set(changesPath, value)
-      } else {
-        // Value is back to original, so "un-track" this property
-        _unset(changesPath)
+      if (previous === value) {
         if (index >= 0) {
           changed.splice(index, 1)
         }
@@ -134,9 +109,9 @@ const makeDescriptor = function (prop, schema) {
           if (!_get(silentPath)) {
             let i
             for (i = 0; i < changed.length; i++) {
-              self.emit('change:' + changed[i], self, get(self, changed[i]))
+              self.emit('change:' + changed[i], self, _.get(self, changed[i]))
             }
-            self.emit('change', self, _get('changes'))
+            self.emit('change', self, self.changes())
           }
           _unset(silentPath)
         }, 0))
@@ -158,7 +133,7 @@ const makeDescriptor = function (prop, schema) {
  */
 const applySchema = function (schema, target) {
   const properties = schema.properties || {}
-  forOwn(properties, function (schema, prop) {
+  _.forOwn(properties, function (schema, prop) {
     Object.defineProperty(
       target,
       prop,
@@ -247,7 +222,7 @@ const MAPPER_DEFAULTS = {
    * @name Mapper#notify
    * @type {boolean}
    */
-  notify: isBrowser,
+  notify: _.isBrowser,
 
   /**
    * Whether {@link Mapper#create}, {@link Mapper#createMany}, {@link Mapper#save},
@@ -286,7 +261,7 @@ const MAPPER_DEFAULTS = {
  * relational or document-based database. JSData's Mapper can work with any
  * persistence layer you can write an adapter for.
  *
- * _("Model" is a heavily overloaded term and is avoided in this documentation
+ * _._("Model" is a heavily overloaded term and is avoided in this documentation
  * to prevent confusion.)_
  *
  * [orm]: https://en.wikipedia.org/wiki/Object-relational_mapping
@@ -299,7 +274,7 @@ const MAPPER_DEFAULTS = {
  */
 export default function Mapper (opts) {
   const self = this
-  classCallCheck(self, Mapper)
+  _.classCallCheck(self, Mapper)
 
   opts || (opts = {})
 
@@ -383,8 +358,8 @@ export default function Mapper (opts) {
     writable: true
   })
 
-  fillIn(self, opts)
-  fillIn(self, copy(MAPPER_DEFAULTS))
+  _.fillIn(self, opts)
+  _.fillIn(self, _.copy(MAPPER_DEFAULTS))
 
   if (!self.name) {
     throw new Error('mapper cannot function without a name!')
@@ -397,7 +372,7 @@ export default function Mapper (opts) {
     self.schema = new Schema(self.schema || {})
   }
 
-  if (isUndefined(self.RecordClass)) {
+  if (_.isUndefined(self.RecordClass)) {
     self.RecordClass = Record.extend()
   }
 
@@ -406,7 +381,7 @@ export default function Mapper (opts) {
 
     // We can only apply the schema to the prototype of self.RecordClass if the
     // class extends Record
-    if (getSuper(self.RecordClass, true) === Record && self.applySchema) {
+    if (_.getSuper(self.RecordClass, true) === Record && self.applySchema) {
       applySchema(self.schema, self.RecordClass.prototype)
     }
   }
@@ -415,7 +390,7 @@ export default function Mapper (opts) {
 /**
  * Instance members
  */
-addHiddenPropsToTarget(Mapper.prototype, {
+_.addHiddenPropsToTarget(Mapper.prototype, {
   /**
    * @name Mapper#_end
    * @method
@@ -424,14 +399,14 @@ addHiddenPropsToTarget(Mapper.prototype, {
   _end (data, opts) {
     const self = this
     if (opts.raw) {
-      _(opts, data)
+      _._(opts, data)
     }
     let _data = opts.raw ? data.data : data
-    if (isArray(_data) && _data.length && isObject(_data[0])) {
+    if (_.isArray(_data) && _data.length && _.isObject(_data[0])) {
       _data = _data.map(function (item) {
         return self.createRecord(item)
       })
-    } else if (isObject(_data)) {
+    } else if (_.isObject(_data)) {
       _data = self.createRecord(_data)
     }
     if (opts.raw) {
@@ -464,11 +439,11 @@ addHiddenPropsToTarget(Mapper.prototype, {
     relationList.forEach(function (def) {
       const relatedMapper = def.getRelation()
       const relationData = def.getLocalField(props)
-      if (isArray(relationData) && relationData.length && !relatedMapper.is(relationData[0])) {
+      if (_.isArray(relationData) && relationData.length && !relatedMapper.is(relationData[0])) {
         def.setLocalField(props, relationData.map(function (relationDataItem) {
           return def.getRelation().createRecord(relationDataItem)
         }))
-      } else if (isObject(relationData) && !relatedMapper.is(relationData)) {
+      } else if (_.isObject(relationData) && !relatedMapper.is(relationData)) {
         def.setLocalField(props, def.getRelation().createRecord(relationData))
       }
     })
@@ -511,15 +486,15 @@ addHiddenPropsToTarget(Mapper.prototype, {
     if (self && self.schema) {
       properties = self.schema.properties || {}
       // TODO: Make this work recursively
-      forOwn(properties, function (opts, prop) {
-        json[prop] = plainCopy(record[prop])
+      _.forOwn(properties, function (opts, prop) {
+        json[prop] = _.plainCopy(record[prop])
       })
     }
     properties || (properties = {})
     if (!opts.strict) {
-      forOwn(record, function (value, key) {
+      _.forOwn(record, function (value, key) {
         if (!properties[key] && relationFields.indexOf(key) === -1) {
-          json[key] = plainCopy(value)
+          json[key] = _.plainCopy(value)
         }
       })
     }
@@ -529,14 +504,14 @@ addHiddenPropsToTarget(Mapper.prototype, {
       opts.with = relationFields.slice()
     }
     if (self && opts.with) {
-      if (isString(opts.with)) {
+      if (_.isString(opts.with)) {
         opts.with = [opts.with]
       }
-      forEachRelation(self, opts, function (def, __opts) {
+      _.forEachRelation(self, opts, function (def, __opts) {
         const relationData = def.getLocalField(record)
         if (relationData) {
           // The actual recursion
-          if (isArray(relationData)) {
+          if (_.isArray(relationData)) {
             def.setLocalField(json, relationData.map(function (item) {
               return def.getRelation().toJSON(item, __opts)
             }))
@@ -579,7 +554,7 @@ addHiddenPropsToTarget(Mapper.prototype, {
    */
   getAdapterName (opts) {
     opts || (opts = {})
-    if (isString(opts)) {
+    if (_.isString(opts)) {
       opts = { adapter: opts }
     }
     return opts.adapter || opts.defaultAdapter
@@ -643,20 +618,20 @@ addHiddenPropsToTarget(Mapper.prototype, {
     opts || (opts = {})
 
     // Fill in "opts" with the Mapper's configuration
-    _(self, opts)
+    _._(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeCreate lifecycle hook
     op = opts.op = 'beforeCreate'
-    return resolve(self[op](props, opts)).then(function (_props) {
+    return _.resolve(self[op](props, opts)).then(function (_props) {
       // Allow for re-assignment from lifecycle hook
-      props = isUndefined(_props) ? props : _props
+      props = _.isUndefined(_props) ? props : _props
 
       // Deep pre-create belongsTo relations
       const belongsToRelationData = {}
       opts.with || (opts.with = [])
       let tasks = []
-      forEachRelation(self, opts, function (def, __opts) {
+      _.forEachRelation(self, opts, function (def, __opts) {
         const relationData = def.getLocalField(props)
         if (def.type === belongsToType && relationData) {
           // Create belongsTo relation first because we need a generated id to
@@ -672,12 +647,12 @@ addHiddenPropsToTarget(Mapper.prototype, {
         // Now delegate to the adapter for the main create
         op = opts.op = 'create'
         self.dbg(op, props, opts)
-        return resolve(self.getAdapter(adapter)[op](self, self.toJSON(props, { with: opts.pass || [] }), opts))
+        return _.resolve(self.getAdapter(adapter)[op](self, self.toJSON(props, { with: opts.pass || [] }), opts))
       }).then(function (data) {
         const createdRecord = opts.raw ? data.data : data
         // Deep post-create hasMany and hasOne relations
         tasks = []
-        forEachRelation(self, opts, function (def, __opts) {
+        _.forEachRelation(self, opts, function (def, __opts) {
           const relationData = def.getLocalField(props)
           if (!relationData) {
             return
@@ -710,9 +685,9 @@ addHiddenPropsToTarget(Mapper.prototype, {
       result = self._end(result, opts)
       // afterCreate lifecycle hook
       op = opts.op = 'afterCreate'
-      return resolve(self[op](props, opts, result)).then(function (_result) {
+      return _.resolve(self[op](props, opts, result)).then(function (_result) {
         // Allow for re-assignment from lifecycle hook
-        return isUndefined(_result) ? result : _result
+        return _.isUndefined(_result) ? result : _result
       })
     })
   },
@@ -776,20 +751,20 @@ addHiddenPropsToTarget(Mapper.prototype, {
     opts || (opts = {})
 
     // Fill in "opts" with the Mapper's configuration
-    _(self, opts)
+    _._(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeCreateMany lifecycle hook
     op = opts.op = 'beforeCreateMany'
-    return resolve(self[op](records, opts)).then(function (_records) {
+    return _.resolve(self[op](records, opts)).then(function (_records) {
       // Allow for re-assignment from lifecycle hook
-      records = isUndefined(_records) ? records : _records
+      records = _.isUndefined(_records) ? records : _records
 
       // Deep pre-create belongsTo relations
       const belongsToRelationData = {}
       opts.with || (opts.with = [])
       let tasks = []
-      forEachRelation(self, opts, function (def, __opts) {
+      _.forEachRelation(self, opts, function (def, __opts) {
         const relationData = records.map(function (record) {
           return def.getLocalField(record)
         }).filter(function (relatedRecord) {
@@ -814,13 +789,13 @@ addHiddenPropsToTarget(Mapper.prototype, {
           return self.toJSON(record, { with: opts.pass || [] })
         })
         self.dbg(op, records, opts)
-        return resolve(self.getAdapter(adapter)[op](self, json, opts))
+        return _.resolve(self.getAdapter(adapter)[op](self, json, opts))
       }).then(function (data) {
         const createdRecords = opts.raw ? data.data : data
 
         // Deep post-create hasOne relations
         tasks = []
-        forEachRelation(self, opts, function (def, __opts) {
+        _.forEachRelation(self, opts, function (def, __opts) {
           const relationData = records.map(function (record) {
             return def.getLocalField(record)
           }).filter(function (relatedRecord) {
@@ -863,9 +838,9 @@ addHiddenPropsToTarget(Mapper.prototype, {
       result = self._end(result, opts)
       // afterCreateMany lifecycle hook
       op = opts.op = 'afterCreateMany'
-      return resolve(self[op](records, opts, result)).then(function (_result) {
+      return _.resolve(self[op](records, opts, result)).then(function (_result) {
         // Allow for re-assignment from lifecycle hook
-        return isUndefined(_result) ? result : _result
+        return _.isUndefined(_result) ? result : _result
       })
     })
   },
@@ -923,23 +898,23 @@ addHiddenPropsToTarget(Mapper.prototype, {
     opts || (opts = {})
 
     // Fill in "opts" with the Mappers's configuration
-    _(self, opts)
+    _._(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeFind lifecycle hook
     op = opts.op = 'beforeFind'
-    return resolve(self[op](id, opts)).then(function () {
+    return _.resolve(self[op](id, opts)).then(function () {
       // Now delegate to the adapter
       op = opts.op = 'find'
       self.dbg(op, id, opts)
-      return resolve(self.getAdapter(adapter)[op](self, id, opts))
+      return _.resolve(self.getAdapter(adapter)[op](self, id, opts))
     }).then(function (result) {
       result = self._end(result, opts)
       // afterFind lifecycle hook
       op = opts.op = 'afterFind'
-      return resolve(self[op](id, opts, result)).then(function (_result) {
+      return _.resolve(self[op](id, opts, result)).then(function (_result) {
         // Allow for re-assignment from lifecycle hook
-        return isUndefined(_result) ? result : _result
+        return _.isUndefined(_result) ? result : _result
       })
     })
   },
@@ -1003,23 +978,23 @@ addHiddenPropsToTarget(Mapper.prototype, {
     opts || (opts = {})
 
     // Fill in "opts" with the Mapper's configuration
-    _(self, opts)
+    _._(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeFindAll lifecycle hook
     op = opts.op = 'beforeFindAll'
-    return resolve(self[op](query, opts)).then(function () {
+    return _.resolve(self[op](query, opts)).then(function () {
       // Now delegate to the adapter
       op = opts.op = 'findAll'
       self.dbg(op, query, opts)
-      return resolve(self.getAdapter(adapter)[op](self, query, opts))
+      return _.resolve(self.getAdapter(adapter)[op](self, query, opts))
     }).then(function (result) {
       result = self._end(result, opts)
       // afterFindAll lifecycle hook
       op = opts.op = 'afterFindAll'
-      return resolve(self[op](query, opts, result)).then(function (_result) {
+      return _.resolve(self[op](query, opts, result)).then(function (_result) {
         // Allow for re-assignment from lifecycle hook
-        return isUndefined(_result) ? result : _result
+        return _.isUndefined(_result) ? result : _result
       })
     })
   },
@@ -1083,26 +1058,26 @@ addHiddenPropsToTarget(Mapper.prototype, {
     opts || (opts = {})
 
     // Fill in "opts" with the Mapper's configuration
-    _(self, opts)
+    _._(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeUpdate lifecycle hook
     op = opts.op = 'beforeUpdate'
-    return resolve(self[op](id, props, opts)).then(function (_props) {
+    return _.resolve(self[op](id, props, opts)).then(function (_props) {
       // Allow for re-assignment from lifecycle hook
-      props = isUndefined(_props) ? props : _props
+      props = _.isUndefined(_props) ? props : _props
       // Now delegate to the adapter
       op = opts.op = 'update'
       const json = self.toJSON(props, opts)
       self.dbg(op, id, json, opts)
-      return resolve(self.getAdapter(adapter)[op](self, id, json, opts))
+      return _.resolve(self.getAdapter(adapter)[op](self, id, json, opts))
     }).then(function (result) {
       result = self._end(result, opts)
       // afterUpdate lifecycle hook
       op = opts.op = 'afterUpdate'
-      return resolve(self[op](id, props, opts, result)).then(function (_result) {
+      return _.resolve(self[op](id, props, opts, result)).then(function (_result) {
         // Allow for re-assignment from lifecycle hook
-        return isUndefined(_result) ? result : _result
+        return _.isUndefined(_result) ? result : _result
       })
     })
   },
@@ -1166,28 +1141,28 @@ addHiddenPropsToTarget(Mapper.prototype, {
     opts || (opts = {})
 
     // Fill in "opts" with the Mapper's configuration
-    _(self, opts)
+    _._(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeUpdateMany lifecycle hook
     op = opts.op = 'beforeUpdateMany'
-    return resolve(self[op](records, opts)).then(function (_records) {
+    return _.resolve(self[op](records, opts)).then(function (_records) {
       // Allow for re-assignment from lifecycle hook
-      records = isUndefined(_records) ? records : _records
+      records = _.isUndefined(_records) ? records : _records
       // Now delegate to the adapter
       op = opts.op = 'updateMany'
       const json = records.map(function (item) {
         return self.toJSON(item, opts)
       })
       self.dbg(op, json, opts)
-      return resolve(self.getAdapter(adapter)[op](self, json, opts))
+      return _.resolve(self.getAdapter(adapter)[op](self, json, opts))
     }).then(function (result) {
       result = self._end(result, opts)
       // afterUpdateMany lifecycle hook
       op = opts.op = 'afterUpdateMany'
-      return resolve(self[op](records, opts, result)).then(function (_result) {
+      return _.resolve(self[op](records, opts, result)).then(function (_result) {
         // Allow for re-assignment from lifecycle hook
-        return isUndefined(_result) ? result : _result
+        return _.isUndefined(_result) ? result : _result
       })
     })
   },
@@ -1256,26 +1231,26 @@ addHiddenPropsToTarget(Mapper.prototype, {
     opts || (opts = {})
 
     // Fill in "opts" with the Mapper's configuration
-    _(self, opts)
+    _._(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeUpdateAll lifecycle hook
     op = opts.op = 'beforeUpdateAll'
-    return resolve(self[op](props, query, opts)).then(function (_props) {
+    return _.resolve(self[op](props, query, opts)).then(function (_props) {
       // Allow for re-assignment from lifecycle hook
-      props = isUndefined(_props) ? props : _props
+      props = _.isUndefined(_props) ? props : _props
       // Now delegate to the adapter
       op = opts.op = 'updateAll'
       const json = self.toJSON(props, opts)
       self.dbg(op, json, query, opts)
-      return resolve(self.getAdapter(adapter)[op](self, json, query, opts))
+      return _.resolve(self.getAdapter(adapter)[op](self, json, query, opts))
     }).then(function (result) {
       result = self._end(result, opts)
       // afterUpdateAll lifecycle hook
       op = opts.op = 'afterUpdateAll'
-      return resolve(self[op](props, query, opts, result)).then(function (_result) {
+      return _.resolve(self[op](props, query, opts, result)).then(function (_result) {
         // Allow for re-assignment from lifecycle hook
-        return isUndefined(_result) ? result : _result
+        return _.isUndefined(_result) ? result : _result
       })
     })
   },
@@ -1336,25 +1311,25 @@ addHiddenPropsToTarget(Mapper.prototype, {
     opts || (opts = {})
 
     // Fill in "opts" with the Mapper's configuration
-    _(self, opts)
+    _._(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeDestroy lifecycle hook
     op = opts.op = 'beforeDestroy'
-    return resolve(self[op](id, opts)).then(function () {
+    return _.resolve(self[op](id, opts)).then(function () {
       // Now delegate to the adapter
       op = opts.op = 'destroy'
       self.dbg(op, id, opts)
-      return resolve(self.getAdapter(adapter)[op](self, id, opts))
+      return _.resolve(self.getAdapter(adapter)[op](self, id, opts))
     }).then(function (result) {
       if (opts.raw) {
-        _(opts, result)
+        _._(opts, result)
       }
       // afterDestroy lifecycle hook
       op = opts.op = 'afterDestroy'
-      return resolve(self[op](id, opts, result)).then(function (_result) {
+      return _.resolve(self[op](id, opts, result)).then(function (_result) {
         // Allow for re-assignment from lifecycle hook
-        return isUndefined(_result) ? result : _result
+        return _.isUndefined(_result) ? result : _result
       })
     })
   },
@@ -1419,25 +1394,25 @@ addHiddenPropsToTarget(Mapper.prototype, {
     opts || (opts = {})
 
     // Fill in "opts" with the Mapper's configuration
-    _(self, opts)
+    _._(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeDestroyAll lifecycle hook
     op = opts.op = 'beforeDestroyAll'
-    return resolve(self[op](query, opts)).then(function () {
+    return _.resolve(self[op](query, opts)).then(function () {
       // Now delegate to the adapter
       op = opts.op = 'destroyAll'
       self.dbg(op, query, opts)
-      return resolve(self.getAdapter(adapter)[op](self, query, opts))
+      return _.resolve(self.getAdapter(adapter)[op](self, query, opts))
     }).then(function (result) {
       if (opts.raw) {
-        _(opts, result)
+        _._(opts, result)
       }
       // afterDestroyAll lifecycle hook
       op = opts.op = 'afterDestroyAll'
-      return resolve(self[op](query, opts, result)).then(function (_result) {
+      return _.resolve(self[op](query, opts, result)).then(function (_result) {
         // Allow for re-assignment from lifecycle hook
-        return isUndefined(_result) ? result : _result
+        return _.isUndefined(_result) ? result : _result
       })
     })
   },
@@ -1571,7 +1546,7 @@ addHiddenPropsToTarget(Mapper.prototype, {
  * @param {Object} [classProps={}] Static properties to add to the subclass.
  * @return {Function} Subclass of Mapper.
  */
-Mapper.extend = extend
+Mapper.extend = _.extend
 
 /**
  * Register a new event listener on this Mapper.
@@ -1598,7 +1573,7 @@ Mapper.extend = extend
 /**
  * A Mapper's registered listeners are stored at {@link Mapper#_listeners}.
  */
-eventify(
+_.eventify(
   Mapper.prototype,
   function () {
     return this._listeners

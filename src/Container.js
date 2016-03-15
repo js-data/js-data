@@ -1,12 +1,4 @@
-import {
-  addHiddenPropsToTarget,
-  classCallCheck,
-  extend,
-  fillIn,
-  forOwn,
-  isObject,
-  isString
-} from './utils'
+import _ from './utils'
 import {
   belongsToType,
   hasManyType,
@@ -218,11 +210,11 @@ const toProxy = [
  */
 export default function Container (opts) {
   const self = this
-  classCallCheck(self, Container)
+  _.classCallCheck(self, Container)
 
   opts || (opts = {})
   // Apply options provided by the user
-  fillIn(self, opts)
+  _.fillIn(self, opts)
   /**
    * Defaults options to pass to {@link Container#MapperClass} when creating a
    * new mapper.
@@ -265,9 +257,9 @@ export default function Container (opts) {
  * @param {Object} [classProps={}] Static properties to add to the subclass.
  * @return {Function} Subclass of Container.
  */
-Container.extend = extend
+Container.extend = _.extend
 
-addHiddenPropsToTarget(Container.prototype, {
+_.addHiddenPropsToTarget(Container.prototype, {
   /**
    * Create a new mapper and register it in this container.
    *
@@ -291,13 +283,13 @@ addHiddenPropsToTarget(Container.prototype, {
     const self = this
 
     // For backwards compatibility with defineResource
-    if (isObject(name)) {
+    if (_.isObject(name)) {
       opts = name
       if (!opts.name) {
         throw new Error('name is required!')
       }
       name = opts.name
-    } else if (!isString(name)) {
+    } else if (!_.isString(name)) {
       throw new Error('name is required!')
     }
 
@@ -312,7 +304,7 @@ addHiddenPropsToTarget(Container.prototype, {
     delete opts.MapperClass
 
     // Apply the datastore's defaults to the options going into the mapper
-    fillIn(opts, self.mapperDefaults)
+    _.fillIn(opts, self.mapperDefaults)
 
     // Instantiate a mapper
     const mapper = self._mappers[name] = new MapperClass(opts)
@@ -323,9 +315,9 @@ addHiddenPropsToTarget(Container.prototype, {
 
     // Setup the mapper's relations, including generating Mapper#relationList
     // and Mapper#relationFields
-    forOwn(mapper.relations, function (group, type) {
-      forOwn(group, function (relations, _name) {
-        if (isObject(relations)) {
+    _.forOwn(mapper.relations, function (group, type) {
+      _.forOwn(group, function (relations, _name) {
+        if (_.isObject(relations)) {
           relations = [relations]
         }
         relations.forEach(function (def) {
@@ -376,7 +368,7 @@ addHiddenPropsToTarget(Container.prototype, {
    */
   getAdapterName (opts) {
     opts || (opts = {})
-    if (isString(opts)) {
+    if (_.isString(opts)) {
       opts = { adapter: opts }
     }
     return opts.adapter || this.mapperDefaults.defaultAdapter
@@ -440,7 +432,7 @@ addHiddenPropsToTarget(Container.prototype, {
     // Optionally make it the default adapter for the target.
     if (opts === true || opts.default) {
       self.mapperDefaults.defaultAdapter = name
-      forOwn(self._mappers, function (mapper) {
+      _.forOwn(self._mappers, function (mapper) {
         mapper.defaultAdapter = name
       })
     }
@@ -453,4 +445,4 @@ toProxy.forEach(function (method) {
     return this.getMapper(name)[method](...args)
   }
 })
-addHiddenPropsToTarget(Container.prototype, toAdd)
+_.addHiddenPropsToTarget(Container.prototype, toAdd)

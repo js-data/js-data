@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.18 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.19 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -71,6 +71,9 @@
    * @property {Function} set TODO
    * @property {Function} toJson TODO
    */
+  var utils = {};
+
+  var _ = utils;
 
   var INFINITY = 1 / 0;
   var MAX_INTEGER = 1.7976931348623157e+308;
@@ -82,14 +85,15 @@
   var REGEXP_TAG = '[object RegExp]';
   var STRING_TAG = '[object String]';
   var objToString = Object.prototype.toString;
-  var isBrowser = void 0;
 
   // Attempt to detect whether we are in the browser.
   try {
-    isBrowser = !!window;
+    utils.isBrowser = !!window;
   } catch (e) {
-    isBrowser = false;
+    utils.isBrowser = false;
   }
+
+  utils.Promise = Promise;
 
   var toString = function toString(value) {
     return objToString.call(value);
@@ -109,42 +113,42 @@
   var isPlainObject = function isPlainObject(value) {
     return !!value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && value.constructor === Object;
   };
-  var isArray = Array.isArray;
-  var isDate = function isDate(value) {
+  utils.isArray = Array.isArray;
+  utils.isDate = function (value) {
     return value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toString(value) === DATE_TAG;
   };
-  var isFunction = function isFunction(value) {
+  utils.isFunction = function (value) {
     return typeof value === 'function' || value && toString(value) === FUNC_TAG;
   };
-  var isInteger = function isInteger(value) {
+  utils.isInteger = function (value) {
     return toString(value) === NUMBER_TAG && value == toInteger(value); // eslint-disable-line
   };
-  var isNull = function isNull(value) {
+  utils.isNull = function (value) {
     return value === null;
   };
-  var isNumber = function isNumber(value) {
+  utils.isNumber = function (value) {
     var type = typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value);
     return type === 'number' || value && type === 'object' && toString(value) === NUMBER_TAG;
   };
-  var isObject = function isObject(value) {
+  utils.isObject = function (value) {
     return toString(value) === OBJECT_TAG;
   };
-  var isRegExp = function isRegExp(value) {
+  utils.isRegExp = function (value) {
     return toString(value) === REGEXP_TAG;
   };
-  var isSorN = function isSorN(value) {
-    return isString(value) || isNumber(value);
+  utils.isSorN = function (value) {
+    return utils.isString(value) || utils.isNumber(value);
   };
-  var isString = function isString(value) {
+  utils.isString = function (value) {
     return typeof value === 'string' || value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toString(value) === STRING_TAG;
   };
-  var isUndefined = function isUndefined(value) {
+  utils.isUndefined = function (value) {
     return value === undefined;
   };
-  var isBoolean = function isBoolean(value) {
+  utils.isBoolean = function (value) {
     return toString(value) === BOOL_TAG;
   };
-  var get = function get(object, prop) {
+  utils.get = function (object, prop) {
     if (!prop) {
       return;
     }
@@ -184,10 +188,10 @@
    * object.
    * @param {*} [value] The value to set.
    */
-  var set = function set(object, path, value) {
-    if (isObject(path)) {
-      forOwn(path, function (value, _path) {
-        set(object, _path, value);
+  utils.set = function (object, path, value) {
+    if (utils.isObject(path)) {
+      utils.forOwn(path, function (value, _path) {
+        utils.set(object, _path, value);
       });
     } else {
       var parts = PATH.exec(path);
@@ -206,7 +210,7 @@
    * @param {Object} object The object from which to delete the property.
    * @param {string} path The key or path to the property.
    */
-  var unset = function unset(object, path) {
+  utils.unset = function (object, path) {
     var parts = path.split('.');
     var last = parts.pop();
 
@@ -228,7 +232,7 @@
    * @param {Function} fn Iteration function.
    * @param {Object} [thisArg] Content to which to bind `fn`.
    */
-  var forOwn = function forOwn(obj, fn, thisArg) {
+  utils.forOwn = function (obj, fn, thisArg) {
     var keys = Object.keys(obj);
     var len = keys.length;
     var i = void 0;
@@ -244,12 +248,12 @@
    * @param {Object} dest The destination object.
    * @param {Object} source The source object.
    */
-  var deepMixIn = function deepMixIn(dest, source) {
+  utils.deepMixIn = function (dest, source) {
     if (source) {
-      forOwn(source, function (value, key) {
+      utils.forOwn(source, function (value, key) {
         var existing = this[key];
         if (isPlainObject(value) && isPlainObject(existing)) {
-          deepMixIn(existing, value);
+          utils.deepMixIn(existing, value);
         } else {
           this[key] = value;
         }
@@ -265,12 +269,12 @@
    * @param {Object} dest The destination object.
    * @param {Object} source The source object.
    */
-  var deepFillIn = function deepFillIn(dest, source) {
+  utils.deepFillIn = function (dest, source) {
     if (source) {
-      forOwn(source, function (value, key) {
+      utils.forOwn(source, function (value, key) {
         var existing = this[key];
         if (isPlainObject(value) && isPlainObject(existing)) {
-          deepFillIn(existing, value);
+          utils.deeputils.FillIn(existing, value);
         } else if (!this.hasOwnProperty(key) || this[key] === undefined) {
           this[key] = value;
         }
@@ -286,8 +290,8 @@
    * @param {*} [value] Value with which to resolve the Promise.
    * @return {Promise} Promise resolved with `value`.
    */
-  var resolve = function resolve(value) {
-    return Promise.resolve(value);
+  utils.resolve = function (value) {
+    return utils.Promise.resolve(value);
   };
 
   /**
@@ -297,8 +301,8 @@
    * @param {*} [value] Value with which to reject the Promise.
    * @return {Promise} Promise reject with `value`.
    */
-  var reject = function reject(value) {
-    return Promise.reject(value);
+  utils.reject = function (value) {
+    return utils.Promise.reject(value);
   };
 
   /**
@@ -311,10 +315,10 @@
    * @param {Object} dest Destination object.
    * @param {Object} src Source object.
    */
-  var _ = function _(dest, src) {
+  utils._ = function (dest, src) {
     for (var key in dest) {
       var value = dest[key];
-      if (src[key] === undefined && !isFunction(value) && key && key.indexOf('_') !== 0) {
+      if (src[key] === undefined && !utils.isFunction(value) && key && key.indexOf('_') !== 0) {
         src[key] = value;
       }
     }
@@ -328,7 +332,7 @@
    * @param {Array} array2 Second array.
    * @return {Array} Array of elements common to both arrays.
    */
-  var intersection = function intersection(array1, array2) {
+  utils.intersection = function (array1, array2) {
     if (!array1 || !array2) {
       return [];
     }
@@ -356,8 +360,8 @@
    * @param {Object} dest The destination object.
    * @param {Object} source The source object.
    */
-  var fillIn = function fillIn(dest, src) {
-    forOwn(src, function (value, key) {
+  utils.fillIn = function (dest, src) {
+    utils.forOwn(src, function (value, key) {
       if (!dest.hasOwnProperty(key) || dest[key] === undefined) {
         dest[key] = value;
       }
@@ -372,13 +376,13 @@
    * @param {Array} bl Array of strings and regular expressions.
    * @return {boolean} Whether `prop` was matched.
    */
-  var isBlacklisted = function isBlacklisted(prop, bl) {
+  utils.isBlacklisted = function (prop, bl) {
     if (!bl || !bl.length) {
       return false;
     }
     var matches = void 0;
     for (var i = 0; i < bl.length; i++) {
-      if (toString(bl[i]) === '[object RegExp]' && bl[i].test(prop) || bl[i] === prop) {
+      if (toString(bl[i]) === REGEXP_TAG && bl[i].test(prop) || bl[i] === prop) {
         matches = prop;
         return matches;
       }
@@ -393,8 +397,8 @@
    * @param {string} json JSON to parse.
    * @return {Object} Parsed object.
    */
-  var fromJson = function fromJson(json) {
-    return isString(json) ? JSON.parse(json) : json;
+  utils.fromJson = function (json) {
+    return utils.isString(json) ? JSON.parse(json) : json;
   };
 
   /**
@@ -404,7 +408,7 @@
    * @param {*} value Value to serialize to JSON.
    * @return {string} JSON string.
    */
-  var toJson = JSON.stringify;
+  utils.toJson = JSON.stringify;
 
   /**
    * Deep copy a value.
@@ -413,22 +417,22 @@
    * @param {*} from Value to deep copy.
    * @return {*} Deep copy of `from`.
    */
-  var copy = function copy(from, to, stackFrom, stackTo, blacklist, plain) {
+  utils.copy = function (from, to, stackFrom, stackTo, blacklist, plain) {
     if (!to) {
       to = from;
       if (from) {
-        if (isArray(from)) {
-          to = copy(from, [], stackFrom, stackTo, blacklist, plain);
-        } else if (isDate(from)) {
+        if (utils.isArray(from)) {
+          to = utils.copy(from, [], stackFrom, stackTo, blacklist, plain);
+        } else if (utils.isDate(from)) {
           to = new Date(from.getTime());
-        } else if (isRegExp(from)) {
+        } else if (utils.isRegExp(from)) {
           to = new RegExp(from.source, from.toString().match(/[^\/]*$/)[0]);
           to.lastIndex = from.lastIndex;
-        } else if (isObject(from)) {
+        } else if (utils.isObject(from)) {
           if (plain) {
-            to = copy(from, {}, stackFrom, stackTo, blacklist, plain);
+            to = utils.copy(from, {}, stackFrom, stackTo, blacklist, plain);
           } else {
-            to = copy(from, Object.create(Object.getPrototypeOf(from)), stackFrom, stackTo, blacklist, plain);
+            to = utils.copy(from, Object.create(Object.getPrototypeOf(from)), stackFrom, stackTo, blacklist, plain);
           }
         }
       }
@@ -440,7 +444,7 @@
       stackFrom = stackFrom || [];
       stackTo = stackTo || [];
 
-      if (isObject(from)) {
+      if (utils.isObject(from)) {
         var index = stackFrom.indexOf(from);
         if (index !== -1) {
           return stackTo[index];
@@ -451,32 +455,32 @@
       }
 
       var result = void 0;
-      if (isArray(from)) {
+      if (utils.isArray(from)) {
         var i = void 0;
         to.length = 0;
         for (i = 0; i < from.length; i++) {
-          result = copy(from[i], null, stackFrom, stackTo, blacklist, plain);
-          if (isObject(from[i])) {
+          result = utils.copy(from[i], null, stackFrom, stackTo, blacklist, plain);
+          if (utils.isObject(from[i])) {
             stackFrom.push(from[i]);
             stackTo.push(result);
           }
           to.push(result);
         }
       } else {
-        if (isArray(to)) {
+        if (utils.isArray(to)) {
           to.length = 0;
         } else {
-          forOwn(to, function (value, key) {
+          utils.forOwn(to, function (value, key) {
             delete to[key];
           });
         }
         for (var key in from) {
           if (from.hasOwnProperty(key)) {
-            if (isBlacklisted(key, blacklist)) {
+            if (utils.isBlacklisted(key, blacklist)) {
               continue;
             }
-            result = copy(from[key], null, stackFrom, stackTo, blacklist, plain);
-            if (isObject(from[key])) {
+            result = utils.copy(from[key], null, stackFrom, stackTo, blacklist, plain);
+            if (utils.isObject(from[key])) {
               stackFrom.push(from[key]);
               stackTo.push(result);
             }
@@ -488,8 +492,8 @@
     return to;
   };
 
-  var plainCopy = function plainCopy(from) {
-    return copy(from, undefined, undefined, undefined, undefined, true);
+  utils.plainCopy = function (from) {
+    return utils.copy(from, undefined, undefined, undefined, undefined, true);
   };
 
   /**
@@ -502,7 +506,7 @@
    * @param {Function} [setter] Custom setter for setting the object's event
    * listeners.
    */
-  var eventify = function eventify(target, getter, setter, enumerable) {
+  utils.eventify = function (target, getter, setter, enumerable) {
     target = target || this;
     var _events = {};
     if (!getter && !setter) {
@@ -572,13 +576,13 @@
     });
   };
 
-  var classCallCheck = function classCallCheck(instance, Constructor) {
+  utils.classCallCheck = function (instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError('Cannot call a class as a function');
     }
   };
 
-  var possibleConstructorReturn = function possibleConstructorReturn(self, call) {
+  utils.possibleConstructorReturn = function (self, call) {
     if (!self) {
       throw new ReferenceError('this hasn\'t been initialised - super() hasn\'t been called');
     }
@@ -586,8 +590,8 @@
     return call && ((typeof call === 'undefined' ? 'undefined' : babelHelpers.typeof(call)) === 'object' || typeof call === 'function') ? call : self;
   };
 
-  var addHiddenPropsToTarget = function addHiddenPropsToTarget(target, props) {
-    forOwn(props, function (value, key) {
+  utils.addHiddenPropsToTarget = function (target, props) {
+    utils.forOwn(props, function (value, key) {
       props[key] = {
         writable: true,
         value: value
@@ -596,7 +600,7 @@
     Object.defineProperties(target, props);
   };
 
-  var extend = function extend(props, classProps) {
+  utils.extend = function (props, classProps) {
     var SuperClass = this;
     var _SubClass = void 0;
 
@@ -608,13 +612,13 @@
       delete props.constructor;
     } else {
       _SubClass = function SubClass() {
-        classCallCheck(this, _SubClass);
+        utils.classCallCheck(this, _SubClass);
 
         for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
           args[_key2] = arguments[_key2];
         }
 
-        var _this = possibleConstructorReturn(this, (_SubClass.__super__ || Object.getPrototypeOf(_SubClass)).apply(this, args));
+        var _this = utils.possibleConstructorReturn(this, (_SubClass.__super__ || Object.getPrototypeOf(_SubClass)).apply(this, args));
         return _this;
       };
     }
@@ -633,7 +637,7 @@
     } else if (classProps.strictEs6Class) {
       _SubClass.__proto__ = SuperClass; // eslint-disable-line
     } else {
-        forOwn(SuperClass, function (value, key) {
+        utils.forOwn(SuperClass, function (value, key) {
           _SubClass[key] = value;
         });
       }
@@ -642,13 +646,13 @@
       value: SuperClass
     });
 
-    addHiddenPropsToTarget(_SubClass.prototype, props);
-    fillIn(_SubClass, classProps);
+    utils.addHiddenPropsToTarget(_SubClass.prototype, props);
+    utils.fillIn(_SubClass, classProps);
 
     return _SubClass;
   };
 
-  var getSuper = function getSuper(instance, isCtor) {
+  utils.getSuper = function (instance, isCtor) {
     var Ctor = isCtor ? instance : instance.constructor;
     return Ctor.__super__ || Object.getPrototypeOf(Ctor) || Ctor.__proto__; // eslint-disable-line
   };
@@ -659,7 +663,7 @@
       if (_relation === relation) {
         index = i;
         return false;
-      } else if (isObject(_relation)) {
+      } else if (utils.isObject(_relation)) {
         if (_relation.relation === relation) {
           index = i;
           return false;
@@ -689,8 +693,8 @@
       return;
     }
     var __opts = {};
-    fillIn(__opts, def.getRelation());
-    fillIn(__opts, opts);
+    utils.fillIn(__opts, def.getRelation());
+    utils.fillIn(__opts, opts);
     __opts.with = opts.with.slice();
     __opts._activeWith = __opts.with.splice(index, 1)[0];
     __opts.with.forEach(function (relation, i) {
@@ -703,7 +707,7 @@
     fn.call(ctx, def, __opts);
   };
 
-  var forEachRelation = function forEachRelation(mapper, opts, fn, ctx) {
+  utils.forEachRelation = function (mapper, opts, fn, ctx) {
     var relationList = mapper.relationList || [];
     if (!relationList.length) {
       return;
@@ -713,10 +717,10 @@
     });
   };
 
-  var omit = function omit(props, keys) {
+  utils.omit = function (props, keys) {
     // Remove relations
     var _props = {};
-    forOwn(props, function (value, key) {
+    utils.forOwn(props, function (value, key) {
       if (keys.indexOf(key) === -1) {
         _props[key] = value;
       }
@@ -724,45 +728,70 @@
     return _props;
   };
 
-var utils = Object.freeze({
-    get isBrowser () { return isBrowser; },
-    isArray: isArray,
-    isDate: isDate,
-    isFunction: isFunction,
-    isInteger: isInteger,
-    isNull: isNull,
-    isNumber: isNumber,
-    isObject: isObject,
-    isRegExp: isRegExp,
-    isSorN: isSorN,
-    isString: isString,
-    isUndefined: isUndefined,
-    isBoolean: isBoolean,
-    get: get,
-    set: set,
-    unset: unset,
-    forOwn: forOwn,
-    deepMixIn: deepMixIn,
-    deepFillIn: deepFillIn,
-    resolve: resolve,
-    reject: reject,
-    _: _,
-    intersection: intersection,
-    fillIn: fillIn,
-    isBlacklisted: isBlacklisted,
-    fromJson: fromJson,
-    toJson: toJson,
-    copy: copy,
-    plainCopy: plainCopy,
-    eventify: eventify,
-    classCallCheck: classCallCheck,
-    possibleConstructorReturn: possibleConstructorReturn,
-    addHiddenPropsToTarget: addHiddenPropsToTarget,
-    extend: extend,
-    getSuper: getSuper,
-    forEachRelation: forEachRelation,
-    omit: omit
-  });
+  utils.equal = function (a, b) {
+    return a == b; // eslint-disable-line
+  };
+
+  utils.strictEqual = function (a, b) {
+    var _equal = a === b;
+    if (!_equal) {
+      if (utils.isObject(a) && utils.isObject(b)) {
+        utils.forOwn(a, function (value, key) {
+          _equal = _equal && utils.strictEqual(value, b[key]);
+        });
+        utils.forOwn(b, function (value, key) {
+          _equal = _equal && utils.strictEqual(value, a[key]);
+        });
+      } else if (utils.isArray(a) && utils.isArray(b)) {
+        a.forEach(function (value, i) {
+          _equal = _equal && utils.strictEqual(value, b[i]);
+        });
+      }
+    }
+    return _equal;
+  };
+
+  // a - the newer object
+  // b - the older object
+  utils.diffObjects = function (a, b, equalsFn, bl) {
+    var diff = {
+      added: {},
+      removed: {},
+      changed: {}
+    };
+    if (!utils.isFunction(equalsFn)) {
+      equalsFn = utils.strictEqual;
+    }
+
+    utils.forOwn(b, function (oldValue, key) {
+      var newValue = a[key];
+
+      if (utils.isBlacklisted(key, bl) || equalsFn(newValue, oldValue)) {
+        return;
+      }
+
+      if (utils.isUndefined(newValue)) {
+        diff.removed[key] = undefined;
+      } else if (!equalsFn(newValue, oldValue)) {
+        diff.changed[key] = newValue;
+      }
+    });
+
+    utils.forOwn(a, function (newValue, key) {
+      if (!utils.isUndefined(b[key]) || utils.isBlacklisted(key, bl)) {
+        return;
+      }
+      diff.added[key] = newValue;
+    });
+
+    return diff;
+  };
+
+  utils.areDifferent = function (a, b, equalsFn, bl) {
+    var diff = utils.diffObjects(a, b, equalsFn, bl);
+    var diffCount = Object.keys(diff.added).length + Object.keys(diff.removed).length + Object.keys(diff.changed).length;
+    return diffCount > 0;
+  };
 
   /**
    * A class used by the {@link Collection} class to build queries to be executed
@@ -777,7 +806,7 @@ var utils = Object.freeze({
    * @param {Collection} collection - The collection on which this query operates.
    */
   function Query(collection) {
-    classCallCheck(this, Query);
+    _.classCallCheck(this, Query);
 
     /**
      * The collection on which this query operates.
@@ -814,7 +843,7 @@ var utils = Object.freeze({
    * @param {Object} [classProps={}] Static properties to add to the subclass.
    * @return {Function} Subclass of Query.
    */
-  Query.extend = extend;
+  Query.extend = _.extend;
 
   var reserved = {
     skip: '',
@@ -865,10 +894,10 @@ var utils = Object.freeze({
       return value <= predicate;
     },
     'isectEmpty': function isectEmpty(value, predicate) {
-      return !intersection(value || [], predicate || []).length;
+      return !_.intersection(value || [], predicate || []).length;
     },
     'isectNotEmpty': function isectNotEmpty(value, predicate) {
-      return intersection(value || [], predicate || []).length;
+      return _.intersection(value || [], predicate || []).length;
     },
     'in': function _in(value, predicate) {
       return predicate.indexOf(value) !== -1;
@@ -884,15 +913,15 @@ var utils = Object.freeze({
     }
   };
 
-  addHiddenPropsToTarget(Query.prototype, {
+  _.addHiddenPropsToTarget(Query.prototype, {
     compare: function compare(orderBy, index, a, b) {
       var def = orderBy[index];
-      var cA = get(a, def[0]);
-      var cB = get(b, def[0]);
-      if (cA && isString(cA)) {
+      var cA = _.get(a, def[0]);
+      var cB = _.get(b, def[0]);
+      if (cA && _.isString(cA)) {
         cA = cA.toUpperCase();
       }
-      if (cB && isString(cB)) {
+      if (cB && _.isString(cB)) {
         cB = cB.toUpperCase();
       }
       a || (a = null);
@@ -928,9 +957,9 @@ var utils = Object.freeze({
         return Query.ops[op](value, predicate);
       }
       if (op.indexOf('like') === 0) {
-        return !isNull(this.like(predicate, op.substr(4)).exec(value));
+        return !_.isNull(this.like(predicate, op.substr(4)).exec(value));
       } else if (op.indexOf('notLike') === 0) {
-        return isNull(this.like(predicate, op.substr(7)).exec(value));
+        return _.isNull(this.like(predicate, op.substr(7)).exec(value));
       }
     },
     like: function like(pattern, flags) {
@@ -1036,7 +1065,7 @@ var utils = Object.freeze({
       if (self.data) {
         throw new Error('Cannot access index after first operation!');
       }
-      if (keyList && !isArray(keyList)) {
+      if (keyList && !_.isArray(keyList)) {
         keyList = [keyList];
       }
       if (!keyList.length) {
@@ -1083,10 +1112,10 @@ var utils = Object.freeze({
         args[_key] = arguments[_key];
       }
 
-      if (!args.length || args.length === 1 && isObject(args[0])) {
+      if (!args.length || args.length === 1 && _.isObject(args[0])) {
         self.getData();
         return self;
-      } else if (args.length && isObject(args[args.length - 1])) {
+      } else if (args.length && _.isObject(args[args.length - 1])) {
         opts = args[args.length - 1];
         args.pop();
       }
@@ -1138,14 +1167,14 @@ var utils = Object.freeze({
       var self = this;
       query || (query = {});
       self.getData();
-      if (isObject(query)) {
+      if (_.isObject(query)) {
         (function () {
           var where = {};
           // Filter
-          if (isObject(query.where)) {
+          if (_.isObject(query.where)) {
             where = query.where;
           }
-          forOwn(query, function (value, key) {
+          _.forOwn(query, function (value, key) {
             if (!(key in reserved) && !(key in where)) {
               where[key] = {
                 '==': value
@@ -1156,13 +1185,13 @@ var utils = Object.freeze({
           var fields = [];
           var ops = [];
           var predicates = [];
-          forOwn(where, function (clause, field) {
-            if (!isObject(clause)) {
+          _.forOwn(where, function (clause, field) {
+            if (!_.isObject(clause)) {
               clause = {
                 '==': clause
               };
             }
-            forOwn(clause, function (expr, op) {
+            _.forOwn(clause, function (expr, op) {
               fields.push(field);
               ops.push(op);
               predicates.push(expr);
@@ -1180,7 +1209,7 @@ var utils = Object.freeze({
                   var op = ops[i];
                   var isOr = op.charAt(0) === '|';
                   op = isOr ? op.substr(1) : op;
-                  var expr = self.evaluate(get(item, fields[i]), op, predicates[i]);
+                  var expr = self.evaluate(_.get(item, fields[i]), op, predicates[i]);
                   if (expr !== undefined) {
                     keep = first ? expr : isOr ? keep || expr : keep && expr;
                   }
@@ -1194,10 +1223,10 @@ var utils = Object.freeze({
           // Sort
           var orderBy = query.orderBy || query.sort;
 
-          if (isString(orderBy)) {
+          if (_.isString(orderBy)) {
             orderBy = [[orderBy, 'ASC']];
           }
-          if (!isArray(orderBy)) {
+          if (!_.isArray(orderBy)) {
             orderBy = null;
           }
 
@@ -1206,7 +1235,7 @@ var utils = Object.freeze({
             (function () {
               var index = 0;
               orderBy.forEach(function (def, i) {
-                if (isString(def)) {
+                if (_.isString(def)) {
                   orderBy[i] = [def, 'ASC'];
                 }
               });
@@ -1217,17 +1246,17 @@ var utils = Object.freeze({
           }
 
           // Skip
-          if (isNumber(query.skip)) {
+          if (_.isNumber(query.skip)) {
             self.skip(query.skip);
-          } else if (isNumber(query.offset)) {
+          } else if (_.isNumber(query.offset)) {
             self.skip(query.offset);
           }
           // Limit
-          if (isNumber(query.limit)) {
+          if (_.isNumber(query.limit)) {
             self.limit(query.limit);
           }
         })();
-      } else if (isFunction(query)) {
+      } else if (_.isFunction(query)) {
         self.data = self.data.filter(query, thisArg);
       }
       return self;
@@ -1250,7 +1279,7 @@ var utils = Object.freeze({
      * @return {Query} A reference to itself for chaining.
      */
     skip: function skip(num) {
-      if (!isNumber(num)) {
+      if (!_.isNumber(num)) {
         throw new TypeError('skip: Expected number but found ' + (typeof num === 'undefined' ? 'undefined' : babelHelpers.typeof(num)) + '!');
       }
       var data = this.getData();
@@ -1279,7 +1308,7 @@ var utils = Object.freeze({
      * @return {Query} A reference to itself for chaining.
      */
     limit: function limit(num) {
-      if (!isNumber(num)) {
+      if (!_.isNumber(num)) {
         throw new TypeError('limit: Expected number but found ' + (typeof num === 'undefined' ? 'undefined' : babelHelpers.typeof(num)) + '!');
       }
       var data = this.getData();
@@ -1425,10 +1454,10 @@ var utils = Object.freeze({
   }
 
   function Index(fieldList, opts) {
-    classCallCheck(this, Index);
+    _.classCallCheck(this, Index);
     fieldList || (fieldList = []);
 
-    if (!isArray(fieldList)) {
+    if (!_.isArray(fieldList)) {
       throw new Error('fieldList must be an array.');
     }
 
@@ -1441,9 +1470,9 @@ var utils = Object.freeze({
     this.values = [];
   }
 
-  addHiddenPropsToTarget(Index.prototype, {
+  _.addHiddenPropsToTarget(Index.prototype, {
     set: function set(keyList, value) {
-      if (!isArray(keyList)) {
+      if (!_.isArray(keyList)) {
         keyList = [keyList];
       }
 
@@ -1472,7 +1501,7 @@ var utils = Object.freeze({
       }
     },
     get: function get(keyList) {
-      if (!isArray(keyList)) {
+      if (!_.isArray(keyList)) {
         keyList = [keyList];
       }
 
@@ -1520,13 +1549,13 @@ var utils = Object.freeze({
     between: function between(leftKeys, rightKeys) {
       var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
-      if (!isArray(leftKeys)) {
+      if (!_.isArray(leftKeys)) {
         leftKeys = [leftKeys];
       }
-      if (!isArray(rightKeys)) {
+      if (!_.isArray(rightKeys)) {
         rightKeys = [rightKeys];
       }
-      fillIn(opts, {
+      _.fillIn(opts, {
         leftInclusive: true,
         rightInclusive: false,
         limit: undefined,
@@ -1641,7 +1670,7 @@ var utils = Object.freeze({
     },
     insertRecord: function insertRecord(data) {
       var keyList = this.fieldList.map(function (field) {
-        if (isFunction(field)) {
+        if (_.isFunction(field)) {
           return field(data) || null;
         } else {
           return data[field] || null;
@@ -1777,13 +1806,13 @@ var utils = Object.freeze({
    */
   function Collection(records, opts) {
     var self = this;
-    classCallCheck(self, Collection);
+    _.classCallCheck(self, Collection);
 
-    if (isObject(records) && !isArray(records)) {
+    if (_.isObject(records) && !_.isArray(records)) {
       opts = records;
       records = [];
     }
-    if (isString(opts)) {
+    if (_.isString(opts)) {
       opts = { idAttribute: opts };
     }
 
@@ -1792,8 +1821,8 @@ var utils = Object.freeze({
     opts || (opts = {});
     opts.recordOpts || (opts.recordOpts = {});
 
-    fillIn(self, opts);
-    fillIn(self, COLLECTION_DEFAULTS);
+    _.fillIn(self, opts);
+    _.fillIn(self, COLLECTION_DEFAULTS);
 
     /**
      * Event listeners attached to this Collection.
@@ -1814,7 +1843,7 @@ var utils = Object.freeze({
      */
     self.index = new Index([idAttribute], {
       hashCode: function hashCode(obj) {
-        return get(obj, idAttribute);
+        return _.get(obj, idAttribute);
       }
     });
 
@@ -1828,7 +1857,7 @@ var utils = Object.freeze({
     records.forEach(function (record) {
       record = self.mapper ? self.mapper.createRecord(record, self.recordOpts) : record;
       self.index.insertRecord(record);
-      if (record && isFunction(record.on)) {
+      if (record && _.isFunction(record.on)) {
         record.on('all', self._onRecordEvent, self);
       }
     });
@@ -1851,9 +1880,9 @@ var utils = Object.freeze({
    * @param {Object} [classProps={}] Static properties to add to the subclass.
    * @return {Function} Subclass of Collection.
    */
-  Collection.extend = extend;
+  Collection.extend = _.extend;
 
-  addHiddenPropsToTarget(Collection.prototype, {
+  _.addHiddenPropsToTarget(Collection.prototype, {
     /**
      * Used to bind to events emitted by records in this Collection.
      *
@@ -1893,13 +1922,13 @@ var utils = Object.freeze({
       opts || (opts = {});
 
       // Fill in "opts" with the Collection's configuration
-      _(self, opts);
+      _._(self, opts);
       records = self.beforeAdd(records, opts) || records;
 
       // Track whether just one record or an array of records is being inserted
       var singular = false;
       var idAttribute = self.recordId();
-      if (isObject(records) && !isArray(records)) {
+      if (_.isObject(records) && !_.isArray(records)) {
         records = [records];
         singular = true;
       }
@@ -1910,7 +1939,7 @@ var utils = Object.freeze({
       // option.
       records = records.map(function (record) {
         var id = self.recordId(record);
-        if (!isSorN(id)) {
+        if (!_.isSorN(id)) {
           throw new TypeError(idAttribute + ': Expected string or number, found ' + (typeof id === 'undefined' ? 'undefined' : babelHelpers.typeof(id)) + '!');
         }
         // Grab existing record if there is one
@@ -1926,9 +1955,9 @@ var utils = Object.freeze({
           // in the collection, so we need to merge them
           var onConflict = opts.onConflict || self.onConflict;
           if (onConflict === 'merge') {
-            deepMixIn(existing, record);
+            _.deepMixIn(existing, record);
           } else if (onConflict === 'replace') {
-            forOwn(existing, function (value, key) {
+            _.forOwn(existing, function (value, key) {
               if (key !== idAttribute && !record.hasOwnProperty(key)) {
                 delete existing[key];
               }
@@ -1944,10 +1973,10 @@ var utils = Object.freeze({
           // it into the collection
           record = self.mapper ? self.mapper.createRecord(record, self.recordOpts) : record;
           self.index.insertRecord(record);
-          forOwn(self.indexes, function (index, name) {
+          _.forOwn(self.indexes, function (index, name) {
             index.insertRecord(record);
           });
-          if (record && isFunction(record.on)) {
+          if (record && _.isFunction(record.on)) {
             record.on('all', self._onRecordEvent, self);
           }
         }
@@ -2086,7 +2115,7 @@ var utils = Object.freeze({
      */
     createIndex: function createIndex(name, fieldList, opts) {
       var self = this;
-      if (isString(name) && fieldList === undefined) {
+      if (_.isString(name) && fieldList === undefined) {
         fieldList = [name];
       }
       opts || (opts = {});
@@ -2290,7 +2319,7 @@ var utils = Object.freeze({
      */
     recordId: function recordId(record) {
       if (record) {
-        return get(record, this.recordId());
+        return _.get(record, this.recordId());
       }
       var self = this;
       return self.mapper ? self.mapper.idAttribute : self.idAttribute || 'id';
@@ -2357,10 +2386,10 @@ var utils = Object.freeze({
       // The record is in the collection, remove it
       if (record) {
         self.index.removeRecord(record);
-        forOwn(self.indexes, function (index, name) {
+        _.forOwn(self.indexes, function (index, name) {
           index.removeRecord(record);
         });
-        if (record && isFunction(record.off)) {
+        if (record && _.isFunction(record.off)) {
           record.off('all', self._onRecordEvent, self);
           self.emit('remove', record);
         }
@@ -2461,7 +2490,7 @@ var utils = Object.freeze({
     updateIndexes: function updateIndexes(record) {
       var self = this;
       self.index.updateRecord(record);
-      forOwn(self.indexes, function (index, name) {
+      _.forOwn(self.indexes, function (index, name) {
         index.updateRecord(record);
       });
     }
@@ -2494,7 +2523,7 @@ var utils = Object.freeze({
   * @param {...*} [arg] TODO
   */
 
-  eventify(Collection.prototype, function () {
+  _.eventify(Collection.prototype, function () {
     return this._listeners;
   }, function (value) {
     this._listeners = value;
@@ -2524,9 +2553,9 @@ var utils = Object.freeze({
       throw new Error('one of (foreignKey, localKeys, foreignKeys) is required');
     }
 
-    if (isString(related)) {
+    if (_.isString(related)) {
       opts.relation = related;
-      if (!isFunction(opts.getRelation)) {
+      if (!_.isFunction(opts.getRelation)) {
         throw new Error('you must provide a reference to the related mapper!');
       }
     } else if (related) {
@@ -2536,19 +2565,19 @@ var utils = Object.freeze({
       });
     }
 
-    fillIn(self, opts);
+    _.fillIn(self, opts);
   }
 
-  addHiddenPropsToTarget(Relation.prototype, {
+  _.addHiddenPropsToTarget(Relation.prototype, {
     getRelation: function getRelation() {
       return this.relatedMapper;
     },
     getLocalKeys: function getLocalKeys(record) {},
     getForeignKey: function getForeignKey(record) {
       if (this.type === belongsToType) {
-        return get(record, this.foreignKey);
+        return _.get(record, this.foreignKey);
       }
-      return get(record, this.mapper.idAttribute);
+      return _.get(record, this.mapper.idAttribute);
     },
     setForeignKey: function setForeignKey(record, relatedRecord) {
       var self = this;
@@ -2556,25 +2585,25 @@ var utils = Object.freeze({
         return;
       }
       if (self.type === belongsToType) {
-        set(record, self.foreignKey, get(relatedRecord, self.getRelation().idAttribute));
+        _.set(record, self.foreignKey, _.get(relatedRecord, self.getRelation().idAttribute));
       } else {
         (function () {
           var idAttribute = self.mapper.idAttribute;
-          if (isArray(relatedRecord)) {
+          if (_.isArray(relatedRecord)) {
             relatedRecord.forEach(function (relatedRecordItem) {
-              set(relatedRecordItem, self.foreignKey, get(record, idAttribute));
+              _.set(relatedRecordItem, self.foreignKey, _.get(record, idAttribute));
             });
           } else {
-            set(relatedRecord, self.foreignKey, get(record, idAttribute));
+            _.set(relatedRecord, self.foreignKey, _.get(record, idAttribute));
           }
         })();
       }
     },
     getLocalField: function getLocalField(record) {
-      return get(record, this.localField);
+      return _.get(record, this.localField);
     },
     setLocalField: function setLocalField(record, data) {
-      return set(record, this.localField, data);
+      return _.set(record, this.localField, data);
     }
   });
 
@@ -2674,7 +2703,7 @@ var utils = Object.freeze({
    */
   function Record(props, opts) {
     var self = this;
-    classCallCheck(self, Record);
+    _.classCallCheck(self, Record);
 
     props || (props = {});
     opts || (opts = {});
@@ -2682,17 +2711,17 @@ var utils = Object.freeze({
     Object.defineProperties(self, {
       _get: {
         value: function value(key) {
-          return get(_props, key);
+          return _.get(_props, key);
         }
       },
       _set: {
         value: function value(key, _value) {
-          return set(_props, key, _value);
+          return _.set(_props, key, _value);
         }
       },
       _unset: {
         value: function value(key) {
-          return unset(_props, key);
+          return _.unset(_props, key);
         }
       }
     });
@@ -2702,11 +2731,10 @@ var utils = Object.freeze({
     if (opts.noValidate) {
       _set('noValidate', true);
     }
-    fillIn(self, props);
+    _.fillIn(self, props);
     _set('creating'); // unset
-    _set('changes', {});
     _set('noValidate'); // unset
-    _set('previous', copy(props));
+    _set('previous', _.copy(props));
   }
 
   /**
@@ -2727,9 +2755,9 @@ var utils = Object.freeze({
    * @param {Object} [classProps={}] Static properties to add to the subclass.
    * @return {Function} Subclass of Record.
    */
-  Record.extend = extend;
+  Record.extend = _.extend;
 
-  addHiddenPropsToTarget(Record.prototype, {
+  _.addHiddenPropsToTarget(Record.prototype, {
     /**
      * TODO
      *
@@ -2754,8 +2782,8 @@ var utils = Object.freeze({
      * @param {string} key - Path of value to retrieve.
      * @return {*} Value at path.
      */
-    get: function get$$(key) {
-      return get(this, key);
+    get: function get(key) {
+      return _.get(this, key);
     },
 
     /**
@@ -2769,16 +2797,16 @@ var utils = Object.freeze({
      * @param {Object} [opts] - Optional configuration.
      * @param {boolean} [opts.silent=false] - Whether to trigger change events.
      */
-    set: function set$$(key, value, opts) {
+    set: function set(key, value, opts) {
       var self = this;
-      if (isObject(key)) {
+      if (_.isObject(key)) {
         opts = value;
       }
       opts || (opts = {});
       if (opts.silent) {
         self._set('silent', true);
       }
-      set(self, key, value);
+      _.set(self, key, value);
       if (!self._get('eventId')) {
         self._set('silent'); // unset
       }
@@ -2806,34 +2834,38 @@ var utils = Object.freeze({
      */
     hashCode: function hashCode() {
       var self = this;
-      return get(self, self._mapper().idAttribute);
+      return _.get(self, self._mapper().idAttribute);
     },
 
 
     /**
-     * TODO
+     * Return changes to this record since it was instantiated or
+     * {@link Record#commit} was called.
      *
      * @name Record#changes
      * @method
-     * @param {string} [key] TODO
+     * @param {Function} [equalsFn] Equality function. Default uses `===`.
+     * @param {Array} [ignore] Array of strings or RegExp of fields to ignore.
      */
-    changes: function changes(key) {
+    changes: function changes(equalsFn, ignore) {
       var self = this;
-      if (key) {
-        return self._get('changes.' + key);
-      }
-      return self._get('changes');
+      return _.diffObjects(self, self._get('previous'), equalsFn, ignore);
     },
 
 
     /**
-     * TODO
+     * Return whether this record has changed since it was instantiated or
+     * {@link Record#commit} was called.
      *
      * @name Record#hasChanges
      * @method
+     * @param {Function} [equalsFn] Equality function. Default uses `===`.
+     * @param {Array} [ignore] Array of strings or RegExp of fields to ignore.
      */
-    hasChanges: function hasChanges() {
-      return !!(this._get('changed') || []).length;
+    hasChanges: function hasChanges(equalsFn, ignore) {
+      var self = this;
+      var quickHasChanges = !!(self._get('changed') || []).length;
+      return quickHasChanges || _.areDifferent(self, self._get('previous'), equalsFn, ignore);
     },
 
 
@@ -2846,8 +2878,7 @@ var utils = Object.freeze({
     commit: function commit() {
       var self = this;
       self._set('changed'); // unset
-      self._set('changes', {});
-      self._set('previous', copy(self));
+      self._set('previous', _.copy(self));
       return self;
     },
 
@@ -2880,12 +2911,12 @@ var utils = Object.freeze({
       var previous = self._get('previous') || {};
       opts || (opts = {});
       opts.preserve || (opts.preserve = []);
-      forOwn(self, function (value, key) {
+      _.forOwn(self, function (value, key) {
         if (key !== self._mapper().idAttribute && !previous.hasOwnProperty(key) && self.hasOwnProperty(key) && opts.preserve.indexOf(key) === -1) {
           delete self[key];
         }
       });
-      forOwn(previous, function (value, key) {
+      _.forOwn(previous, function (value, key) {
         if (opts.preserve.indexOf(key) === -1) {
           self[key] = value;
         }
@@ -2919,7 +2950,7 @@ var utils = Object.freeze({
     //       errors = validate.validate(prop, value) || []
     //     }
     //   } else {
-    //     utils.forOwn(_schema, function (prop, key) {
+    //     utils. _.forOwn(_schema, function (prop, key) {
     //       errors = errors.concat(validate.validate(prop, utils.get(obj, key)) || [])
     //     })
     //   }
@@ -2965,12 +2996,12 @@ var utils = Object.freeze({
       opts || (opts = {});
 
       // Fill in "opts" with the Model's configuration
-      _(self, opts);
+      _._(self, opts);
       adapter = opts.adapter = self.getAdapterName(opts);
 
       // beforeSave lifecycle hook
       op = opts.op = 'beforeSave';
-      return resolve(self[op](opts)).then(function () {
+      return _.resolve(self[op](opts)).then(function () {
         // Now delegate to the adapter
         op = opts.op = 'save';
         Mapper.dbg(op, self, opts);
@@ -2978,7 +3009,7 @@ var utils = Object.freeze({
       }).then(function (data) {
         // afterSave lifecycle hook
         op = opts.op = 'afterSave';
-        return resolve(self[op](data, opts)).then(function (_data) {
+        return _.resolve(self[op](data, opts)).then(function (_data) {
           // Allow for re-assignment from lifecycle hook
           data = _data || data;
           if (opts.raw) {
@@ -3033,41 +3064,41 @@ var utils = Object.freeze({
       opts || (opts = {});
 
       // Fill in "opts" with the Model's configuration
-      _(Mapper, opts);
+      _._(Mapper, opts);
       opts.adapter = Mapper.getAdapterName(opts);
 
       // beforeLoadRelations lifecycle hook
       op = opts.op = 'beforeLoadRelations';
-      return resolve(self[op](relations, opts)).then(function () {
-        if (isString(relations)) {
+      return _.resolve(self[op](relations, opts)).then(function () {
+        if (_.isString(relations)) {
           relations = [relations];
         }
         // Now delegate to the adapter
         op = opts.op = 'loadRelations';
         Mapper.dbg(op, self, relations, opts);
         return Promise.all(relationList.map(function (def) {
-          if (isFunction(def.load)) {
+          if (_.isFunction(def.load)) {
             return def.load(Mapper, def, self, opts);
           }
           var task = void 0;
           if (def.type === 'hasMany' && def.foreignKey) {
             // hasMany
-            task = def.getRelation().findAll(babelHelpers.defineProperty({}, def.foreignKey, get(self, Mapper.idAttribute)), opts);
+            task = def.getRelation().findAll(babelHelpers.defineProperty({}, def.foreignKey, _.get(self, Mapper.idAttribute)), opts);
           } else if (def.foreignKey) {
             // belongsTo or hasOne
-            var key = get(self, def.foreignKey);
-            if (isSorN(key)) {
+            var key = _.get(self, def.foreignKey);
+            if (_.isSorN(key)) {
               task = def.getRelation().find(key, opts);
             }
           } else if (def.localKeys) {
             // hasMany
             task = def.getRelation().findAll(babelHelpers.defineProperty({}, def.getRelation().idAttribute, {
-              'in': get(self, def.localKeys)
+              'in': _.get(self, def.localKeys)
             }), opts);
           } else if (def.foreignKeys) {
             // hasMany
             task = def.getRelation().findAll(babelHelpers.defineProperty({}, def.getRelation().idAttribute, {
-              'contains': get(self, Mapper.idAttribute)
+              'contains': _.get(self, Mapper.idAttribute)
             }), opts);
           }
           if (task) {
@@ -3075,7 +3106,7 @@ var utils = Object.freeze({
               if (opts.raw) {
                 data = data.data;
               }
-              set(self, def.localField, def.type === 'hasOne' ? data.length ? data[0] : undefined : data);
+              _.set(self, def.localField, def.type === 'hasOne' ? data.length ? data[0] : undefined : data);
             });
           }
           return task;
@@ -3083,7 +3114,7 @@ var utils = Object.freeze({
       }).then(function () {
         // afterLoadRelations lifecycle hook
         op = opts.op = 'afterLoadRelations';
-        return resolve(self[op](relations, opts)).then(function () {
+        return _.resolve(self[op](relations, opts)).then(function () {
           return self;
         });
       });
@@ -3111,7 +3142,7 @@ var utils = Object.freeze({
     destroy: function destroy(opts) {
       // TODO: move actual destroy logic here
       var Mapper = this._mapper();
-      return Mapper.destroy(get(this, Mapper.idAttribute), opts);
+      return Mapper.destroy(_.get(this, Mapper.idAttribute), opts);
     },
 
 
@@ -3139,8 +3170,8 @@ var utils = Object.freeze({
       } else {
         var _ret = function () {
           var json = {};
-          forOwn(_this, function (prop, key) {
-            json[key] = copy(prop);
+          _.forOwn(_this, function (prop, key) {
+            json[key] = _.copy(prop);
           });
           return {
             v: json
@@ -3179,7 +3210,7 @@ var utils = Object.freeze({
    *
    * An record's registered listeners are stored in the record's private data.
    */
-  eventify(Record.prototype, function () {
+  _.eventify(Record.prototype, function () {
     return this._get('events');
   }, function (value) {
     this._set('events', value);
@@ -3199,11 +3230,11 @@ var utils = Object.freeze({
     // const self = this
     definition || (definition = {});
     // TODO: schema validation
-    fillIn(this, definition);
+    _.fillIn(this, definition);
 
     // TODO: rework this to make sure all possible keywords are converted
     if (definition.properties) {
-      forOwn(definition.properties, function (_definition, prop) {
+      _.forOwn(definition.properties, function (_definition, prop) {
         if (!(_definition instanceof Schema)) {
           definition.properties[prop] = new Schema(_definition);
         }
@@ -3215,7 +3246,7 @@ var utils = Object.freeze({
    * @name Schema.extend
    * @method
    */
-  Schema.extend = extend;
+  Schema.extend = _.extend;
 
   /**
    * TODO
@@ -3224,13 +3255,13 @@ var utils = Object.freeze({
    * @type {Object}
    */
   var types = {
-    array: isArray,
-    boolean: isBoolean,
-    integer: isInteger,
-    'null': isNull,
-    number: isNumber,
-    object: isObject,
-    string: isString
+    array: _.isArray,
+    boolean: _.isBoolean,
+    integer: _.isInteger,
+    'null': _.isNull,
+    number: _.isNumber,
+    object: _.isObject,
+    string: _.isString
   };
 
   /**
@@ -3255,7 +3286,7 @@ var utils = Object.freeze({
   var segmentToString = function segmentToString(segment, prev) {
     var str = '';
     if (segment) {
-      if (isNumber(segment)) {
+      if (_.isNumber(segment)) {
         str += '[' + segment + ']';
       } else if (prev) {
         str += '.' + segment;
@@ -3322,7 +3353,7 @@ var utils = Object.freeze({
    * @ignore
    */
   var validateKeyword = function validateKeyword(op, value, schema, opts) {
-    return !isUndefined(schema[op]) && validationKeywords[op](value, schema, opts);
+    return !_.isUndefined(schema[op]) && validationKeywords[op](value, schema, opts);
   };
 
   /**
@@ -3364,17 +3395,17 @@ var utils = Object.freeze({
     opts || (opts = {});
     var shouldPop = void 0;
     var prevProp = opts.prop;
-    if (isUndefined(schema)) {
+    if (_.isUndefined(schema)) {
       return;
     }
-    if (!isObject(schema)) {
+    if (!_.isObject(schema)) {
       throw new Error('Invalid schema at path: "' + opts.path + '"');
     }
-    if (isUndefined(opts.path)) {
+    if (_.isUndefined(opts.path)) {
       opts.path = [];
     }
     // Track our location as we recurse
-    if (!isUndefined(opts.prop)) {
+    if (!_.isUndefined(opts.prop)) {
       shouldPop = true;
       opts.path.push(opts.prop);
       opts.prop = undefined;
@@ -3383,13 +3414,13 @@ var utils = Object.freeze({
     if (schema['extends']) {
       // opts.path = path
       // opts.prop = prop
-      if (isFunction(schema['extends'].validate)) {
+      if (_.isFunction(schema['extends'].validate)) {
         errors = errors.concat(schema['extends'].validate(value, opts) || []);
       } else {
         errors = errors.concat(validate(value, schema['extends'], opts) || []);
       }
     }
-    if (isUndefined(value)) {
+    if (_.isUndefined(value)) {
       // Check if property is required
       if (schema.required === true) {
         addError(value, 'a value', opts, errors);
@@ -3426,7 +3457,7 @@ var utils = Object.freeze({
     return Schema.validate(value, this, opts);
   };
 
-  fillIn(validationKeywords, {
+  _.fillIn(validationKeywords, {
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor82
      *
@@ -3515,7 +3546,7 @@ var utils = Object.freeze({
       // TODO: additionalItems
       var items = schema.items;
       var errors = [];
-      var checkingTuple = isArray(items);
+      var checkingTuple = _.isArray(items);
       var length = value.length;
       for (var prop = 0; prop < length; prop++) {
         if (checkingTuple) {
@@ -3738,7 +3769,7 @@ var utils = Object.freeze({
      */
     pattern: function pattern(value, schema, opts) {
       var pattern = schema.pattern;
-      if (isString(value) && !value.match(pattern)) {
+      if (_.isString(value) && !value.match(pattern)) {
         return makeError(value, pattern, opts);
       }
     },
@@ -3758,7 +3789,7 @@ var utils = Object.freeze({
       // Can be a boolean or an object
       // Technically the default is an "empty schema", but here "true" is
       // functionally the same
-      var additionalProperties = isUndefined(schema.additionalProperties) ? true : schema.additionalProperties;
+      var additionalProperties = _.isUndefined(schema.additionalProperties) ? true : schema.additionalProperties;
       // "s": The property set of the instance to validate.
       var toValidate = {};
       // "p": The property set from "properties".
@@ -3770,13 +3801,13 @@ var utils = Object.freeze({
       var errors = [];
 
       // Collect set "s"
-      forOwn(value, function (_value, prop) {
+      _.forOwn(value, function (_value, prop) {
         toValidate[prop] = undefined;
       });
       // Remove from "s" all elements of "p", if any.
-      forOwn(properties || {}, function (_schema, prop) {
-        if (isUndefined(value[prop]) && !isUndefined(_schema['default'])) {
-          value[prop] = copy(_schema['default']);
+      _.forOwn(properties || {}, function (_schema, prop) {
+        if (_.isUndefined(value[prop]) && !_.isUndefined(_schema['default'])) {
+          value[prop] = _.copy(_schema['default']);
         }
         opts.prop = prop;
         errors = errors.concat(validate(value[prop], _schema, opts) || []);
@@ -3784,8 +3815,8 @@ var utils = Object.freeze({
       });
       // For each regex in "pp", remove all elements of "s" which this regex
       // matches.
-      forOwn(patternProperties, function (_schema, pattern) {
-        forOwn(toValidate, function (undef, prop) {
+      _.forOwn(patternProperties, function (_schema, pattern) {
+        _.forOwn(toValidate, function (undef, prop) {
           if (prop.match(pattern)) {
             opts.prop = prop;
             errors = errors.concat(validate(value[prop], _schema, opts) || []);
@@ -3799,7 +3830,7 @@ var utils = Object.freeze({
         if (keys.length) {
           addError('extra fields: ' + keys.join(', '), 'no extra fields', opts, errors);
         }
-      } else if (isObject(additionalProperties)) {
+      } else if (_.isObject(additionalProperties)) {
         // Otherwise, validate according to provided schema
         keys.forEach(function (prop) {
           opts.prop = prop;
@@ -3824,7 +3855,7 @@ var utils = Object.freeze({
       var errors = [];
       if (!opts.existingOnly) {
         required.forEach(function (prop) {
-          if (isUndefined(get(value, prop))) {
+          if (_.isUndefined(_.get(value, prop))) {
             var prevProp = opts.prop;
             opts.prop = prop;
             addError(undefined, 'a value', opts, errors);
@@ -3849,7 +3880,7 @@ var utils = Object.freeze({
       var type = schema.type;
       var validType = void 0;
       // Can be one of several types
-      if (isString(type)) {
+      if (_.isString(type)) {
         type = [type];
       }
       // Try to match the value against an expected type
@@ -3904,7 +3935,7 @@ var utils = Object.freeze({
     }
   });
 
-  fillIn(typeGroupValidators, {
+  _.fillIn(typeGroupValidators, {
     /**
      * TODO
      *
@@ -4012,12 +4043,11 @@ var utils = Object.freeze({
     var descriptor = {
       // These properties are enumerable by default, but regardless of their
       // enumerability, they won't be "own" properties of individual records
-      enumerable: isUndefined(schema.enumerable) ? true : !!schema.enumerable
+      enumerable: _.isUndefined(schema.enumerable) ? true : !!schema.enumerable
     };
     // Cache a few strings for optimal performance
     var keyPath = 'props.' + prop;
     var previousPath = 'previous.' + prop;
-    var changesPath = 'changes.' + prop;
 
     descriptor.get = function () {
       return this._get(keyPath);
@@ -4059,12 +4089,7 @@ var utils = Object.freeze({
           if (current !== value && index === -1) {
             changed.push(prop);
           }
-          if (previous !== value) {
-            // Value has changed
-            _set(changesPath, value);
-          } else {
-            // Value is back to original, so "un-track" this property
-            _unset(changesPath);
+          if (previous === value) {
             if (index >= 0) {
               changed.splice(index, 1);
             }
@@ -4098,9 +4123,9 @@ var utils = Object.freeze({
               if (!_get(silentPath)) {
                 var i = void 0;
                 for (i = 0; i < changed.length; i++) {
-                  self.emit('change:' + changed[i], self, get(self, changed[i]));
+                  self.emit('change:' + changed[i], self, _.get(self, changed[i]));
                 }
-                self.emit('change', self, _get('changes'));
+                self.emit('change', self, self.changes());
               }
               _unset(silentPath);
             }, 0));
@@ -4123,7 +4148,7 @@ var utils = Object.freeze({
    */
   var applySchema = function applySchema(schema, target) {
     var properties = schema.properties || {};
-    forOwn(properties, function (schema, prop) {
+    _.forOwn(properties, function (schema, prop) {
       Object.defineProperty(target, prop, makeDescriptor(prop, schema));
     });
   };
@@ -4216,7 +4241,7 @@ var utils = Object.freeze({
      * @name Mapper#notify
      * @type {boolean}
      */
-    notify: isBrowser,
+    notify: _.isBrowser,
 
     /**
      * Whether {@link Mapper#create}, {@link Mapper#createMany}, {@link Mapper#save},
@@ -4255,7 +4280,7 @@ var utils = Object.freeze({
    * relational or document-based database. JSData's Mapper can work with any
    * persistence layer you can write an adapter for.
    *
-   * _("Model" is a heavily overloaded term and is avoided in this documentation
+   * _._("Model" is a heavily overloaded term and is avoided in this documentation
    * to prevent confusion.)_
    *
    * [orm]: https://en.wikipedia.org/wiki/Object-relational_mapping
@@ -4268,7 +4293,7 @@ var utils = Object.freeze({
    */
   function Mapper(opts) {
     var self = this;
-    classCallCheck(self, Mapper);
+    _.classCallCheck(self, Mapper);
 
     opts || (opts = {});
 
@@ -4352,8 +4377,8 @@ var utils = Object.freeze({
       writable: true
     });
 
-    fillIn(self, opts);
-    fillIn(self, copy(MAPPER_DEFAULTS));
+    _.fillIn(self, opts);
+    _.fillIn(self, _.copy(MAPPER_DEFAULTS));
 
     if (!self.name) {
       throw new Error('mapper cannot function without a name!');
@@ -4366,7 +4391,7 @@ var utils = Object.freeze({
       self.schema = new Schema(self.schema || {});
     }
 
-    if (isUndefined(self.RecordClass)) {
+    if (_.isUndefined(self.RecordClass)) {
       self.RecordClass = Record.extend();
     }
 
@@ -4375,7 +4400,7 @@ var utils = Object.freeze({
 
       // We can only apply the schema to the prototype of self.RecordClass if the
       // class extends Record
-      if (getSuper(self.RecordClass, true) === Record && self.applySchema) {
+      if (_.getSuper(self.RecordClass, true) === Record && self.applySchema) {
         applySchema(self.schema, self.RecordClass.prototype);
       }
     }
@@ -4384,7 +4409,7 @@ var utils = Object.freeze({
   /**
    * Instance members
    */
-  addHiddenPropsToTarget(Mapper.prototype, {
+  _.addHiddenPropsToTarget(Mapper.prototype, {
     /**
      * @name Mapper#_end
      * @method
@@ -4394,14 +4419,14 @@ var utils = Object.freeze({
     _end: function _end(data, opts) {
       var self = this;
       if (opts.raw) {
-        _(opts, data);
+        _._(opts, data);
       }
       var _data = opts.raw ? data.data : data;
-      if (isArray(_data) && _data.length && isObject(_data[0])) {
+      if (_.isArray(_data) && _data.length && _.isObject(_data[0])) {
         _data = _data.map(function (item) {
           return self.createRecord(item);
         });
-      } else if (isObject(_data)) {
+      } else if (_.isObject(_data)) {
         _data = self.createRecord(_data);
       }
       if (opts.raw) {
@@ -4435,11 +4460,11 @@ var utils = Object.freeze({
       relationList.forEach(function (def) {
         var relatedMapper = def.getRelation();
         var relationData = def.getLocalField(props);
-        if (isArray(relationData) && relationData.length && !relatedMapper.is(relationData[0])) {
+        if (_.isArray(relationData) && relationData.length && !relatedMapper.is(relationData[0])) {
           def.setLocalField(props, relationData.map(function (relationDataItem) {
             return def.getRelation().createRecord(relationDataItem);
           }));
-        } else if (isObject(relationData) && !relatedMapper.is(relationData)) {
+        } else if (_.isObject(relationData) && !relatedMapper.is(relationData)) {
           def.setLocalField(props, def.getRelation().createRecord(relationData));
         }
       });
@@ -4484,15 +4509,15 @@ var utils = Object.freeze({
       if (self && self.schema) {
         properties = self.schema.properties || {};
         // TODO: Make this work recursively
-        forOwn(properties, function (opts, prop) {
-          json[prop] = plainCopy(record[prop]);
+        _.forOwn(properties, function (opts, prop) {
+          json[prop] = _.plainCopy(record[prop]);
         });
       }
       properties || (properties = {});
       if (!opts.strict) {
-        forOwn(record, function (value, key) {
+        _.forOwn(record, function (value, key) {
           if (!properties[key] && relationFields.indexOf(key) === -1) {
-            json[key] = plainCopy(value);
+            json[key] = _.plainCopy(value);
           }
         });
       }
@@ -4502,14 +4527,14 @@ var utils = Object.freeze({
         opts.with = relationFields.slice();
       }
       if (self && opts.with) {
-        if (isString(opts.with)) {
+        if (_.isString(opts.with)) {
           opts.with = [opts.with];
         }
-        forEachRelation(self, opts, function (def, __opts) {
+        _.forEachRelation(self, opts, function (def, __opts) {
           var relationData = def.getLocalField(record);
           if (relationData) {
             // The actual recursion
-            if (isArray(relationData)) {
+            if (_.isArray(relationData)) {
               def.setLocalField(json, relationData.map(function (item) {
                 return def.getRelation().toJSON(item, __opts);
               }));
@@ -4554,7 +4579,7 @@ var utils = Object.freeze({
      */
     getAdapterName: function getAdapterName(opts) {
       opts || (opts = {});
-      if (isString(opts)) {
+      if (_.isString(opts)) {
         opts = { adapter: opts };
       }
       return opts.adapter || opts.defaultAdapter;
@@ -4620,20 +4645,20 @@ var utils = Object.freeze({
       opts || (opts = {});
 
       // Fill in "opts" with the Mapper's configuration
-      _(self, opts);
+      _._(self, opts);
       adapter = opts.adapter = self.getAdapterName(opts);
 
       // beforeCreate lifecycle hook
       op = opts.op = 'beforeCreate';
-      return resolve(self[op](props, opts)).then(function (_props) {
+      return _.resolve(self[op](props, opts)).then(function (_props) {
         // Allow for re-assignment from lifecycle hook
-        props = isUndefined(_props) ? props : _props;
+        props = _.isUndefined(_props) ? props : _props;
 
         // Deep pre-create belongsTo relations
         var belongsToRelationData = {};
         opts.with || (opts.with = []);
         var tasks = [];
-        forEachRelation(self, opts, function (def, __opts) {
+        _.forEachRelation(self, opts, function (def, __opts) {
           var relationData = def.getLocalField(props);
           if (def.type === belongsToType && relationData) {
             // Create belongsTo relation first because we need a generated id to
@@ -4649,12 +4674,12 @@ var utils = Object.freeze({
           // Now delegate to the adapter for the main create
           op = opts.op = 'create';
           self.dbg(op, props, opts);
-          return resolve(self.getAdapter(adapter)[op](self, self.toJSON(props, { with: opts.pass || [] }), opts));
+          return _.resolve(self.getAdapter(adapter)[op](self, self.toJSON(props, { with: opts.pass || [] }), opts));
         }).then(function (data) {
           var createdRecord = opts.raw ? data.data : data;
           // Deep post-create hasMany and hasOne relations
           tasks = [];
-          forEachRelation(self, opts, function (def, __opts) {
+          _.forEachRelation(self, opts, function (def, __opts) {
             var relationData = def.getLocalField(props);
             if (!relationData) {
               return;
@@ -4687,9 +4712,9 @@ var utils = Object.freeze({
         result = self._end(result, opts);
         // afterCreate lifecycle hook
         op = opts.op = 'afterCreate';
-        return resolve(self[op](props, opts, result)).then(function (_result) {
+        return _.resolve(self[op](props, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          return isUndefined(_result) ? result : _result;
+          return _.isUndefined(_result) ? result : _result;
         });
       });
     },
@@ -4755,20 +4780,20 @@ var utils = Object.freeze({
       opts || (opts = {});
 
       // Fill in "opts" with the Mapper's configuration
-      _(self, opts);
+      _._(self, opts);
       adapter = opts.adapter = self.getAdapterName(opts);
 
       // beforeCreateMany lifecycle hook
       op = opts.op = 'beforeCreateMany';
-      return resolve(self[op](records, opts)).then(function (_records) {
+      return _.resolve(self[op](records, opts)).then(function (_records) {
         // Allow for re-assignment from lifecycle hook
-        records = isUndefined(_records) ? records : _records;
+        records = _.isUndefined(_records) ? records : _records;
 
         // Deep pre-create belongsTo relations
         var belongsToRelationData = {};
         opts.with || (opts.with = []);
         var tasks = [];
-        forEachRelation(self, opts, function (def, __opts) {
+        _.forEachRelation(self, opts, function (def, __opts) {
           var relationData = records.map(function (record) {
             return def.getLocalField(record);
           }).filter(function (relatedRecord) {
@@ -4793,13 +4818,13 @@ var utils = Object.freeze({
             return self.toJSON(record, { with: opts.pass || [] });
           });
           self.dbg(op, records, opts);
-          return resolve(self.getAdapter(adapter)[op](self, json, opts));
+          return _.resolve(self.getAdapter(adapter)[op](self, json, opts));
         }).then(function (data) {
           var createdRecords = opts.raw ? data.data : data;
 
           // Deep post-create hasOne relations
           tasks = [];
-          forEachRelation(self, opts, function (def, __opts) {
+          _.forEachRelation(self, opts, function (def, __opts) {
             var relationData = records.map(function (record) {
               return def.getLocalField(record);
             }).filter(function (relatedRecord) {
@@ -4842,9 +4867,9 @@ var utils = Object.freeze({
         result = self._end(result, opts);
         // afterCreateMany lifecycle hook
         op = opts.op = 'afterCreateMany';
-        return resolve(self[op](records, opts, result)).then(function (_result) {
+        return _.resolve(self[op](records, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          return isUndefined(_result) ? result : _result;
+          return _.isUndefined(_result) ? result : _result;
         });
       });
     },
@@ -4904,23 +4929,23 @@ var utils = Object.freeze({
       opts || (opts = {});
 
       // Fill in "opts" with the Mappers's configuration
-      _(self, opts);
+      _._(self, opts);
       adapter = opts.adapter = self.getAdapterName(opts);
 
       // beforeFind lifecycle hook
       op = opts.op = 'beforeFind';
-      return resolve(self[op](id, opts)).then(function () {
+      return _.resolve(self[op](id, opts)).then(function () {
         // Now delegate to the adapter
         op = opts.op = 'find';
         self.dbg(op, id, opts);
-        return resolve(self.getAdapter(adapter)[op](self, id, opts));
+        return _.resolve(self.getAdapter(adapter)[op](self, id, opts));
       }).then(function (result) {
         result = self._end(result, opts);
         // afterFind lifecycle hook
         op = opts.op = 'afterFind';
-        return resolve(self[op](id, opts, result)).then(function (_result) {
+        return _.resolve(self[op](id, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          return isUndefined(_result) ? result : _result;
+          return _.isUndefined(_result) ? result : _result;
         });
       });
     },
@@ -4986,23 +5011,23 @@ var utils = Object.freeze({
       opts || (opts = {});
 
       // Fill in "opts" with the Mapper's configuration
-      _(self, opts);
+      _._(self, opts);
       adapter = opts.adapter = self.getAdapterName(opts);
 
       // beforeFindAll lifecycle hook
       op = opts.op = 'beforeFindAll';
-      return resolve(self[op](query, opts)).then(function () {
+      return _.resolve(self[op](query, opts)).then(function () {
         // Now delegate to the adapter
         op = opts.op = 'findAll';
         self.dbg(op, query, opts);
-        return resolve(self.getAdapter(adapter)[op](self, query, opts));
+        return _.resolve(self.getAdapter(adapter)[op](self, query, opts));
       }).then(function (result) {
         result = self._end(result, opts);
         // afterFindAll lifecycle hook
         op = opts.op = 'afterFindAll';
-        return resolve(self[op](query, opts, result)).then(function (_result) {
+        return _.resolve(self[op](query, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          return isUndefined(_result) ? result : _result;
+          return _.isUndefined(_result) ? result : _result;
         });
       });
     },
@@ -5068,26 +5093,26 @@ var utils = Object.freeze({
       opts || (opts = {});
 
       // Fill in "opts" with the Mapper's configuration
-      _(self, opts);
+      _._(self, opts);
       adapter = opts.adapter = self.getAdapterName(opts);
 
       // beforeUpdate lifecycle hook
       op = opts.op = 'beforeUpdate';
-      return resolve(self[op](id, props, opts)).then(function (_props) {
+      return _.resolve(self[op](id, props, opts)).then(function (_props) {
         // Allow for re-assignment from lifecycle hook
-        props = isUndefined(_props) ? props : _props;
+        props = _.isUndefined(_props) ? props : _props;
         // Now delegate to the adapter
         op = opts.op = 'update';
         var json = self.toJSON(props, opts);
         self.dbg(op, id, json, opts);
-        return resolve(self.getAdapter(adapter)[op](self, id, json, opts));
+        return _.resolve(self.getAdapter(adapter)[op](self, id, json, opts));
       }).then(function (result) {
         result = self._end(result, opts);
         // afterUpdate lifecycle hook
         op = opts.op = 'afterUpdate';
-        return resolve(self[op](id, props, opts, result)).then(function (_result) {
+        return _.resolve(self[op](id, props, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          return isUndefined(_result) ? result : _result;
+          return _.isUndefined(_result) ? result : _result;
         });
       });
     },
@@ -5153,28 +5178,28 @@ var utils = Object.freeze({
       opts || (opts = {});
 
       // Fill in "opts" with the Mapper's configuration
-      _(self, opts);
+      _._(self, opts);
       adapter = opts.adapter = self.getAdapterName(opts);
 
       // beforeUpdateMany lifecycle hook
       op = opts.op = 'beforeUpdateMany';
-      return resolve(self[op](records, opts)).then(function (_records) {
+      return _.resolve(self[op](records, opts)).then(function (_records) {
         // Allow for re-assignment from lifecycle hook
-        records = isUndefined(_records) ? records : _records;
+        records = _.isUndefined(_records) ? records : _records;
         // Now delegate to the adapter
         op = opts.op = 'updateMany';
         var json = records.map(function (item) {
           return self.toJSON(item, opts);
         });
         self.dbg(op, json, opts);
-        return resolve(self.getAdapter(adapter)[op](self, json, opts));
+        return _.resolve(self.getAdapter(adapter)[op](self, json, opts));
       }).then(function (result) {
         result = self._end(result, opts);
         // afterUpdateMany lifecycle hook
         op = opts.op = 'afterUpdateMany';
-        return resolve(self[op](records, opts, result)).then(function (_result) {
+        return _.resolve(self[op](records, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          return isUndefined(_result) ? result : _result;
+          return _.isUndefined(_result) ? result : _result;
         });
       });
     },
@@ -5245,26 +5270,26 @@ var utils = Object.freeze({
       opts || (opts = {});
 
       // Fill in "opts" with the Mapper's configuration
-      _(self, opts);
+      _._(self, opts);
       adapter = opts.adapter = self.getAdapterName(opts);
 
       // beforeUpdateAll lifecycle hook
       op = opts.op = 'beforeUpdateAll';
-      return resolve(self[op](props, query, opts)).then(function (_props) {
+      return _.resolve(self[op](props, query, opts)).then(function (_props) {
         // Allow for re-assignment from lifecycle hook
-        props = isUndefined(_props) ? props : _props;
+        props = _.isUndefined(_props) ? props : _props;
         // Now delegate to the adapter
         op = opts.op = 'updateAll';
         var json = self.toJSON(props, opts);
         self.dbg(op, json, query, opts);
-        return resolve(self.getAdapter(adapter)[op](self, json, query, opts));
+        return _.resolve(self.getAdapter(adapter)[op](self, json, query, opts));
       }).then(function (result) {
         result = self._end(result, opts);
         // afterUpdateAll lifecycle hook
         op = opts.op = 'afterUpdateAll';
-        return resolve(self[op](props, query, opts, result)).then(function (_result) {
+        return _.resolve(self[op](props, query, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          return isUndefined(_result) ? result : _result;
+          return _.isUndefined(_result) ? result : _result;
         });
       });
     },
@@ -5327,25 +5352,25 @@ var utils = Object.freeze({
       opts || (opts = {});
 
       // Fill in "opts" with the Mapper's configuration
-      _(self, opts);
+      _._(self, opts);
       adapter = opts.adapter = self.getAdapterName(opts);
 
       // beforeDestroy lifecycle hook
       op = opts.op = 'beforeDestroy';
-      return resolve(self[op](id, opts)).then(function () {
+      return _.resolve(self[op](id, opts)).then(function () {
         // Now delegate to the adapter
         op = opts.op = 'destroy';
         self.dbg(op, id, opts);
-        return resolve(self.getAdapter(adapter)[op](self, id, opts));
+        return _.resolve(self.getAdapter(adapter)[op](self, id, opts));
       }).then(function (result) {
         if (opts.raw) {
-          _(opts, result);
+          _._(opts, result);
         }
         // afterDestroy lifecycle hook
         op = opts.op = 'afterDestroy';
-        return resolve(self[op](id, opts, result)).then(function (_result) {
+        return _.resolve(self[op](id, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          return isUndefined(_result) ? result : _result;
+          return _.isUndefined(_result) ? result : _result;
         });
       });
     },
@@ -5412,25 +5437,25 @@ var utils = Object.freeze({
       opts || (opts = {});
 
       // Fill in "opts" with the Mapper's configuration
-      _(self, opts);
+      _._(self, opts);
       adapter = opts.adapter = self.getAdapterName(opts);
 
       // beforeDestroyAll lifecycle hook
       op = opts.op = 'beforeDestroyAll';
-      return resolve(self[op](query, opts)).then(function () {
+      return _.resolve(self[op](query, opts)).then(function () {
         // Now delegate to the adapter
         op = opts.op = 'destroyAll';
         self.dbg(op, query, opts);
-        return resolve(self.getAdapter(adapter)[op](self, query, opts));
+        return _.resolve(self.getAdapter(adapter)[op](self, query, opts));
       }).then(function (result) {
         if (opts.raw) {
-          _(opts, result);
+          _._(opts, result);
         }
         // afterDestroyAll lifecycle hook
         op = opts.op = 'afterDestroyAll';
-        return resolve(self[op](query, opts, result)).then(function (_result) {
+        return _.resolve(self[op](query, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          return isUndefined(_result) ? result : _result;
+          return _.isUndefined(_result) ? result : _result;
         });
       });
     },
@@ -5582,7 +5607,7 @@ var utils = Object.freeze({
    * @param {Object} [classProps={}] Static properties to add to the subclass.
    * @return {Function} Subclass of Mapper.
    */
-  Mapper.extend = extend;
+  Mapper.extend = _.extend;
 
   /**
    * Register a new event listener on this Mapper.
@@ -5609,7 +5634,7 @@ var utils = Object.freeze({
   /**
    * A Mapper's registered listeners are stored at {@link Mapper#_listeners}.
    */
-  eventify(Mapper.prototype, function () {
+  _.eventify(Mapper.prototype, function () {
     return this._listeners;
   }, function (value) {
     this._listeners = value;
@@ -5816,11 +5841,11 @@ var utils = Object.freeze({
    */
   function Container(opts) {
     var self = this;
-    classCallCheck(self, Container);
+    _.classCallCheck(self, Container);
 
     opts || (opts = {});
     // Apply options provided by the user
-    fillIn(self, opts);
+    _.fillIn(self, opts);
     /**
      * Defaults options to pass to {@link Container#MapperClass} when creating a
      * new mapper.
@@ -5863,9 +5888,9 @@ var utils = Object.freeze({
    * @param {Object} [classProps={}] Static properties to add to the subclass.
    * @return {Function} Subclass of Container.
    */
-  Container.extend = extend;
+  Container.extend = _.extend;
 
-  addHiddenPropsToTarget(Container.prototype, {
+  _.addHiddenPropsToTarget(Container.prototype, {
     /**
      * Create a new mapper and register it in this container.
      *
@@ -5890,13 +5915,13 @@ var utils = Object.freeze({
       var self = this;
 
       // For backwards compatibility with defineResource
-      if (isObject(name)) {
+      if (_.isObject(name)) {
         opts = name;
         if (!opts.name) {
           throw new Error('name is required!');
         }
         name = opts.name;
-      } else if (!isString(name)) {
+      } else if (!_.isString(name)) {
         throw new Error('name is required!');
       }
 
@@ -5911,7 +5936,7 @@ var utils = Object.freeze({
       delete opts.MapperClass;
 
       // Apply the datastore's defaults to the options going into the mapper
-      fillIn(opts, self.mapperDefaults);
+      _.fillIn(opts, self.mapperDefaults);
 
       // Instantiate a mapper
       var mapper = self._mappers[name] = new MapperClass(opts);
@@ -5922,9 +5947,9 @@ var utils = Object.freeze({
 
       // Setup the mapper's relations, including generating Mapper#relationList
       // and Mapper#relationFields
-      forOwn(mapper.relations, function (group, type) {
-        forOwn(group, function (relations, _name) {
-          if (isObject(relations)) {
+      _.forOwn(mapper.relations, function (group, type) {
+        _.forOwn(group, function (relations, _name) {
+          if (_.isObject(relations)) {
             relations = [relations];
           }
           relations.forEach(function (def) {
@@ -5977,7 +6002,7 @@ var utils = Object.freeze({
      */
     getAdapterName: function getAdapterName(opts) {
       opts || (opts = {});
-      if (isString(opts)) {
+      if (_.isString(opts)) {
         opts = { adapter: opts };
       }
       return opts.adapter || this.mapperDefaults.defaultAdapter;
@@ -6044,7 +6069,7 @@ var utils = Object.freeze({
       // Optionally make it the default adapter for the target.
       if (opts === true || opts.default) {
         self.mapperDefaults.defaultAdapter = name;
-        forOwn(self._mappers, function (mapper) {
+        _.forOwn(self._mappers, function (mapper) {
           mapper.defaultAdapter = name;
         });
       }
@@ -6063,7 +6088,7 @@ var utils = Object.freeze({
       return (_getMapper = this.getMapper(name))[method].apply(_getMapper, args);
     };
   });
-  addHiddenPropsToTarget(Container.prototype, toAdd);
+  _.addHiddenPropsToTarget(Container.prototype, toAdd);
 
   /**
    * TODO
@@ -6082,9 +6107,9 @@ var utils = Object.freeze({
   var LinkedCollection = Collection.extend({
     constructor: function constructor(records, opts) {
       var self = this;
-      classCallCheck(self, LinkedCollection);
+      _.classCallCheck(self, LinkedCollection);
 
-      getSuper(self).call(self, records, opts);
+      _.getSuper(self).call(self, records, opts);
 
       // Make sure this collection has somewhere to store "added" timestamps
       self._added = {};
@@ -6102,11 +6127,11 @@ var utils = Object.freeze({
         args[_key] = arguments[_key];
       }
 
-      getSuper(self).prototype._onRecordEvent.apply(self, args);
+      _.getSuper(self).prototype._onRecordEvent.apply(self, args);
       var event = args[0];
       // This is a very brute force method
       // Lots of room for optimization
-      if (isString(event) && event.indexOf('change') === 0) {
+      if (_.isString(event) && event.indexOf('change') === 0) {
         self.updateIndexes(args[1]);
       }
     },
@@ -6119,7 +6144,7 @@ var utils = Object.freeze({
       var usesRecordClass = !!mapper.RecordClass;
       var singular = void 0;
 
-      if (isObject(records) && !isArray(records)) {
+      if (_.isObject(records) && !_.isArray(records)) {
         singular = true;
         records = [records];
       }
@@ -6140,7 +6165,7 @@ var utils = Object.freeze({
           var relatedCollection = datastore.getCollection(relationName);
           var type = def.type;
           var isHasMany = type === hasManyType;
-          var shouldAdd = isUndefined(def.add) ? true : !!def.add;
+          var shouldAdd = _.isUndefined(def.add) ? true : !!def.add;
           var relatedData = void 0;
 
           records.forEach(function (record) {
@@ -6148,7 +6173,7 @@ var utils = Object.freeze({
             // currently visited record
             relatedData = def.getLocalField(record);
 
-            if (isFunction(def.add)) {
+            if (_.isFunction(def.add)) {
               def.add(datastore, def, record);
             } else if (relatedData) {
               // Otherwise, if there is something to be added, add it
@@ -6172,12 +6197,12 @@ var utils = Object.freeze({
                 });
                 // If it's the parent that has the localKeys
                 if (def.localKeys) {
-                  set(record, def.localKeys, relatedData.map(function (inserted) {
-                    return get(inserted, relationIdAttribute);
+                  _.set(record, def.localKeys, relatedData.map(function (inserted) {
+                    return _.get(inserted, relationIdAttribute);
                   }));
                 }
               } else {
-                var relatedDataId = get(relatedData, relationIdAttribute);
+                var relatedDataId = _.get(relatedData, relationIdAttribute);
                 // Handle inserting belongsTo and hasOne relations
                 if (relatedData !== relatedCollection.get(relatedDataId)) {
                   // Make sure foreignKey field is set
@@ -6194,7 +6219,7 @@ var utils = Object.freeze({
         });
       }
 
-      records = getSuper(self).prototype.add.call(self, records, opts);
+      records = _.getSuper(self).prototype.add.call(self, records, opts);
 
       records.forEach(function (record) {
         // Track when this record was added
@@ -6210,7 +6235,7 @@ var utils = Object.freeze({
     remove: function remove(id, opts) {
       var self = this;
       delete self._added[id];
-      var record = getSuper(self).prototype.remove.call(self, id, opts);
+      var record = _.getSuper(self).prototype.remove.call(self, id, opts);
       if (record) {
         var mapper = self.mapper;
         if (mapper.RecordClass) {
@@ -6221,7 +6246,7 @@ var utils = Object.freeze({
     },
     removeAll: function removeAll(query, opts) {
       var self = this;
-      var records = getSuper(self).prototype.removeAll.call(self, query, opts);
+      var records = _.getSuper(self).prototype.removeAll.call(self, query, opts);
       records.forEach(function (record) {
         delete self._added[self.recordId(record)];
       });
@@ -6247,7 +6272,7 @@ var utils = Object.freeze({
    * @param {Object} [classProps={}] Static properties to add to the subclass.
    * @return {Function} Subclass of LinkedCollection.
    */
-  LinkedCollection.extend = extend;
+  LinkedCollection.extend = _.extend;
 
   var DATASTORE_DEFAULTS = {
     /**
@@ -6258,7 +6283,7 @@ var utils = Object.freeze({
      * @name DataStore#linkRelations
      * @type {boolean}
      */
-    linkRelations: isBrowser
+    linkRelations: _.isBrowser
   };
 
   /**
@@ -6303,12 +6328,12 @@ var utils = Object.freeze({
   var DataStore = Container.extend({
     constructor: function constructor(opts) {
       var self = this;
-      classCallCheck(self, DataStore);
+      _.classCallCheck(self, DataStore);
 
-      getSuper(self).call(self, opts);
+      _.getSuper(self).call(self, opts);
       self.CollectionClass = self.CollectionClass || LinkedCollection;
       self._collections = {};
-      fillIn(self, DATASTORE_DEFAULTS);
+      _.fillIn(self, DATASTORE_DEFAULTS);
       self._pendingQueries = {};
       self._completedQueries = {};
       return self;
@@ -6318,7 +6343,7 @@ var utils = Object.freeze({
         args[_key - 1] = arguments[_key];
       }
 
-      return getSuper(this).prototype[method].apply(this, args);
+      return _.getSuper(this).prototype[method].apply(this, args);
     },
 
 
@@ -6385,7 +6410,7 @@ var utils = Object.freeze({
     },
     defineMapper: function defineMapper(name, opts) {
       var self = this;
-      var mapper = getSuper(self).prototype.defineMapper.call(self, name, opts);
+      var mapper = _.getSuper(self).prototype.defineMapper.call(self, name, opts);
       self._pendingQueries[name] = {};
       self._completedQueries[name] = {};
       mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] });
@@ -6403,7 +6428,7 @@ var utils = Object.freeze({
       var schema = mapper.schema || {};
       var properties = schema.properties || {};
       // TODO: Make it possible index nested properties?
-      forOwn(properties, function (opts, prop) {
+      _.forOwn(properties, function (opts, prop) {
         if (opts.indexed) {
           collection.createIndex(prop);
         }
@@ -6426,7 +6451,7 @@ var utils = Object.freeze({
           var path = 'links.' + localField;
           var foreignKey = def.foreignKey;
           var type = def.type;
-          var link = isUndefined(def.link) ? linkRelations : def.link;
+          var link = _.isUndefined(def.link) ? linkRelations : def.link;
           var updateOpts = { index: foreignKey };
           var descriptor = void 0;
 
@@ -6436,17 +6461,17 @@ var utils = Object.freeze({
             }
 
             descriptor = {
-              get: function get$$() {
+              get: function get() {
                 var _self = this;
                 if (!_self._get('$') || !link) {
                   return _self._get(path);
                 }
                 var key = def.getForeignKey(_self);
-                var item = isUndefined(key) ? undefined : self.getCollection(relation).get(key);
+                var item = _.isUndefined(key) ? undefined : self.getCollection(relation).get(key);
                 _self._set(path, item);
                 return item;
               },
-              set: function set$$(record) {
+              set: function set(record) {
                 var _self = this;
                 _self._set(path, record);
                 def.setForeignKey(_self, record);
@@ -6465,7 +6490,7 @@ var utils = Object.freeze({
               }
 
               descriptor = {
-                get: function get$$() {
+                get: function get() {
                   var _self = this;
                   if (!_self._get('$') || !link) {
                     return _self._get(path);
@@ -6480,13 +6505,13 @@ var utils = Object.freeze({
                       index: foreignKey
                     });
                   } else if (localKeys) {
-                    var keys = get(_self, localKeys) || [];
-                    var _args = isArray(keys) ? keys : Object.keys(keys);
+                    var keys = _.get(_self, localKeys) || [];
+                    var _args = _.isArray(keys) ? keys : Object.keys(keys);
                     // Really fast retrieval
                     items = relationCollection.getAll.apply(relationCollection, _args);
                   } else if (foreignKeys) {
                     var query = {};
-                    set(query, 'where.' + foreignKeys + '.contains', key);
+                    _.set(query, 'where.' + foreignKeys + '.contains', key);
                     // Make a much slower retrieval
                     items = relationCollection.filter(query);
                   }
@@ -6494,7 +6519,7 @@ var utils = Object.freeze({
                   _self._set(path, items);
                   return items;
                 },
-                set: function set$$(records) {
+                set: function set(records) {
                   var _self = this;
                   var key = collection.recordId(_self);
                   var relationCollection = self.getCollection(relation);
@@ -6502,24 +6527,24 @@ var utils = Object.freeze({
 
                   if (foreignKey) {
                     def.setForeignKey(_self, records);
-                    if (isArray(records)) {
+                    if (_.isArray(records)) {
                       records.forEach(function (record) {
                         relationCollection.updateIndex(record, updateOpts);
                       });
                     }
                   }if (localKeys) {
-                    set(_self, localKeys, records.map(function (record) {
+                    _.set(_self, localKeys, records.map(function (record) {
                       return relationCollection.recordId(record);
                     }));
                   } else if (foreignKeys) {
                     records.forEach(function (record) {
-                      var keys = get(record, foreignKeys);
+                      var keys = _.get(record, foreignKeys);
                       if (keys) {
                         if (keys.indexOf(key) === -1) {
                           keys.push(key);
                         }
                       } else {
-                        set(record, foreignKeys, [key]);
+                        _.set(record, foreignKeys, [key]);
                       }
                     });
                   }
@@ -6529,7 +6554,7 @@ var utils = Object.freeze({
             })();
           } else if (type === hasOneType) {
             descriptor = {
-              get: function get$$() {
+              get: function get() {
                 var _self = this;
                 if (!_self._get('$') || !link) {
                   return _self._get(path);
@@ -6542,7 +6567,7 @@ var utils = Object.freeze({
                 _self._set(path, item);
                 return item;
               },
-              set: function set$$(record) {
+              set: function set(record) {
                 var _self = this;
                 _self._set(path, record);
                 def.setForeignKey(_self, record);
@@ -6553,7 +6578,7 @@ var utils = Object.freeze({
           }
 
           if (descriptor) {
-            descriptor.enumerable = isUndefined(def.enumerable) ? true : def.enumerable;
+            descriptor.enumerable = _.isUndefined(def.enumerable) ? true : def.enumerable;
             if (def.get) {
               (function () {
                 var origGet = descriptor.get;
@@ -6661,7 +6686,7 @@ var utils = Object.freeze({
       opts || (opts = {});
       var pendingQuery = self._pendingQueries[name][id];
 
-      fillIn(opts, self.getMapper(name));
+      _.fillIn(opts, self.getMapper(name));
 
       if (pendingQuery) {
         return pendingQuery;
@@ -6675,13 +6700,13 @@ var utils = Object.freeze({
           return self._end(name, data, opts);
         }, function (err) {
           delete self._pendingQueries[name][id];
-          return reject(err);
+          return _.reject(err);
         }).then(function (data) {
           self._completedQueries[name][id] = new Date().getTime();
           return data;
         });
       } else {
-        promise = resolve(item);
+        promise = _.resolve(item);
       }
       return promise;
     },
@@ -6703,7 +6728,7 @@ var utils = Object.freeze({
       var hash = self.hashQuery(name, query, opts);
       var pendingQuery = self._pendingQueries[name][hash];
 
-      fillIn(opts, self.getMapper(name));
+      _.fillIn(opts, self.getMapper(name));
 
       if (pendingQuery) {
         return pendingQuery;
@@ -6718,13 +6743,13 @@ var utils = Object.freeze({
           return self._end(name, data, opts);
         }, function (err) {
           delete self._pendingQueries[name][hash];
-          return reject(err);
+          return _.reject(err);
         }).then(function (data) {
           self._completedQueries[name][hash] = new Date().getTime();
           return data;
         });
       } else {
-        promise = resolve(items);
+        promise = _.resolve(items);
       }
       return promise;
     },
@@ -6738,7 +6763,7 @@ var utils = Object.freeze({
       }
     },
     hashQuery: function hashQuery(name, query, opts) {
-      return toJson(query);
+      return _.toJson(query);
     },
 
 
@@ -6841,7 +6866,7 @@ var utils = Object.freeze({
    * @param {Object} [classProps={}] Static properties to add to the subclass.
    * @return {Function} Subclass of DataStore.
    */
-  DataStore.extend = extend;
+  DataStore.extend = _.extend;
 
   var toProxy$1 = ['add', 'between', 'createIndex', 'filter', 'get', 'getAll', 'query', 'remove', 'removeAll', 'toJson'];
 
@@ -6865,7 +6890,7 @@ var utils = Object.freeze({
     return this.add.apply(this, arguments);
   };
 
-  addHiddenPropsToTarget(DataStore.prototype, methods);
+  _.addHiddenPropsToTarget(DataStore.prototype, methods);
 
   /**
    * Registered as `js-data` in NPM and Bower.
@@ -6905,11 +6930,11 @@ var utils = Object.freeze({
    * if the current version is not beta.
    */
   var version = {
-    full: '3.0.0-alpha.18',
+    full: '3.0.0-alpha.19',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10),
-    alpha: '18',
+    alpha: '19',
     beta: 'false'
   };
 
@@ -6924,7 +6949,7 @@ var utils = Object.freeze({
   exports.Query = Query;
   exports.Record = Record;
   exports.Schema = Schema;
-  exports.utils = utils;
+  exports.utils = _;
   exports.version = version;
   exports.belongsToType = belongsToType;
   exports.hasManyType = hasManyType;

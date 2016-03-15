@@ -32,6 +32,9 @@
  * @property {Function} set TODO
  * @property {Function} toJson TODO
  */
+const utils = {}
+
+export default utils
 
 const INFINITY = 1 / 0
 const MAX_INTEGER = 1.7976931348623157e+308
@@ -43,16 +46,15 @@ const OBJECT_TAG = '[object Object]'
 const REGEXP_TAG = '[object RegExp]'
 const STRING_TAG = '[object String]'
 const objToString = Object.prototype.toString
-let isBrowser
 
 // Attempt to detect whether we are in the browser.
 try {
-  isBrowser = !!window
+  utils.isBrowser = !!window
 } catch (e) {
-  isBrowser = false
+  utils.isBrowser = false
 }
 
-export {isBrowser}
+utils.Promise = Promise
 
 const toString = function (value) {
   return objToString.call(value)
@@ -72,42 +74,42 @@ const toInteger = function (value) {
 const isPlainObject = function (value) {
   return (!!value && typeof value === 'object' && value.constructor === Object)
 }
-export const isArray = Array.isArray
-export const isDate = function (value) {
+utils.isArray = Array.isArray
+utils.isDate = function (value) {
   return (value && typeof value === 'object' && toString(value) === DATE_TAG)
 }
-export const isFunction = function (value) {
+utils.isFunction = function (value) {
   return typeof value === 'function' || (value && toString(value) === FUNC_TAG)
 }
-export const isInteger = function (value) {
+utils.isInteger = function (value) {
   return toString(value) === NUMBER_TAG && value == toInteger(value) // eslint-disable-line
 }
-export const isNull = function (value) {
+utils.isNull = function (value) {
   return value === null
 }
-export const isNumber = function (value) {
+utils.isNumber = function (value) {
   const type = typeof value
   return type === 'number' || (value && type === 'object' && toString(value) === NUMBER_TAG)
 }
-export const isObject = function (value) {
+utils.isObject = function (value) {
   return toString(value) === OBJECT_TAG
 }
-export const isRegExp = function (value) {
+utils.isRegExp = function (value) {
   return toString(value) === REGEXP_TAG
 }
-export const isSorN = function (value) {
-  return isString(value) || isNumber(value)
+utils.isSorN = function (value) {
+  return utils.isString(value) || utils.isNumber(value)
 }
-export const isString = function (value) {
+utils.isString = function (value) {
   return typeof value === 'string' || (value && typeof value === 'object' && toString(value) === STRING_TAG)
 }
-export const isUndefined = function (value) {
+utils.isUndefined = function (value) {
   return value === undefined
 }
-export const isBoolean = function (value) {
+utils.isBoolean = function (value) {
   return toString(value) === BOOL_TAG
 }
-export const get = function (object, prop) {
+utils.get = function (object, prop) {
   if (!prop) {
     return
   }
@@ -146,10 +148,10 @@ const PATH = /^(.+)\.(.+)$/
  * object.
  * @param {*} [value] The value to set.
  */
-export const set = function (object, path, value) {
-  if (isObject(path)) {
-    forOwn(path, function (value, _path) {
-      set(object, _path, value)
+utils.set = function (object, path, value) {
+  if (utils.isObject(path)) {
+    utils.forOwn(path, function (value, _path) {
+      utils.set(object, _path, value)
     })
   } else {
     const parts = PATH.exec(path)
@@ -168,7 +170,7 @@ export const set = function (object, path, value) {
  * @param {Object} object The object from which to delete the property.
  * @param {string} path The key or path to the property.
  */
-export const unset = function (object, path) {
+utils.unset = function (object, path) {
   const parts = path.split('.')
   const last = parts.pop()
 
@@ -189,7 +191,7 @@ export const unset = function (object, path) {
  * @param {Function} fn Iteration function.
  * @param {Object} [thisArg] Content to which to bind `fn`.
  */
-export const forOwn = function (obj, fn, thisArg) {
+utils.forOwn = function (obj, fn, thisArg) {
   const keys = Object.keys(obj)
   const len = keys.length
   let i
@@ -205,12 +207,12 @@ export const forOwn = function (obj, fn, thisArg) {
  * @param {Object} dest The destination object.
  * @param {Object} source The source object.
  */
-export const deepMixIn = function (dest, source) {
+utils.deepMixIn = function (dest, source) {
   if (source) {
-    forOwn(source, function (value, key) {
+    utils.forOwn(source, function (value, key) {
       const existing = this[key]
       if (isPlainObject(value) && isPlainObject(existing)) {
-        deepMixIn(existing, value)
+        utils.deepMixIn(existing, value)
       } else {
         this[key] = value
       }
@@ -226,12 +228,12 @@ export const deepMixIn = function (dest, source) {
  * @param {Object} dest The destination object.
  * @param {Object} source The source object.
  */
-export const deepFillIn = function (dest, source) {
+utils.deepFillIn = function (dest, source) {
   if (source) {
-    forOwn(source, function (value, key) {
+    utils.forOwn(source, function (value, key) {
       const existing = this[key]
       if (isPlainObject(value) && isPlainObject(existing)) {
-        deepFillIn(existing, value)
+        utils.deeputils.FillIn(existing, value)
       } else if (!this.hasOwnProperty(key) || this[key] === undefined) {
         this[key] = value
       }
@@ -247,8 +249,8 @@ export const deepFillIn = function (dest, source) {
  * @param {*} [value] Value with which to resolve the Promise.
  * @return {Promise} Promise resolved with `value`.
  */
-export const resolve = function (value) {
-  return Promise.resolve(value)
+utils.resolve = function (value) {
+  return utils.Promise.resolve(value)
 }
 
 /**
@@ -258,8 +260,8 @@ export const resolve = function (value) {
  * @param {*} [value] Value with which to reject the Promise.
  * @return {Promise} Promise reject with `value`.
  */
-export const reject = function (value) {
-  return Promise.reject(value)
+utils.reject = function (value) {
+  return utils.Promise.reject(value)
 }
 
 /**
@@ -272,10 +274,10 @@ export const reject = function (value) {
  * @param {Object} dest Destination object.
  * @param {Object} src Source object.
  */
-export const _ = function (dest, src) {
+utils._ = function (dest, src) {
   for (var key in dest) {
     let value = dest[key]
-    if (src[key] === undefined && !isFunction(value) && key && key.indexOf('_') !== 0) {
+    if (src[key] === undefined && !utils.isFunction(value) && key && key.indexOf('_') !== 0) {
       src[key] = value
     }
   }
@@ -289,7 +291,7 @@ export const _ = function (dest, src) {
  * @param {Array} array2 Second array.
  * @return {Array} Array of elements common to both arrays.
  */
-export const intersection = function (array1, array2) {
+utils.intersection = function (array1, array2) {
   if (!array1 || !array2) {
     return []
   }
@@ -317,8 +319,8 @@ export const intersection = function (array1, array2) {
  * @param {Object} dest The destination object.
  * @param {Object} source The source object.
  */
-export const fillIn = function (dest, src) {
-  forOwn(src, function (value, key) {
+utils.fillIn = function (dest, src) {
+  utils.forOwn(src, function (value, key) {
     if (!dest.hasOwnProperty(key) || dest[key] === undefined) {
       dest[key] = value
     }
@@ -333,13 +335,13 @@ export const fillIn = function (dest, src) {
  * @param {Array} bl Array of strings and regular expressions.
  * @return {boolean} Whether `prop` was matched.
  */
-export const isBlacklisted = function (prop, bl) {
+utils.isBlacklisted = function (prop, bl) {
   if (!bl || !bl.length) {
     return false
   }
   let matches
   for (var i = 0; i < bl.length; i++) {
-    if ((toString(bl[i]) === '[object RegExp]' && bl[i].test(prop)) || bl[i] === prop) {
+    if ((toString(bl[i]) === REGEXP_TAG && bl[i].test(prop)) || bl[i] === prop) {
       matches = prop
       return matches
     }
@@ -354,8 +356,8 @@ export const isBlacklisted = function (prop, bl) {
  * @param {string} json JSON to parse.
  * @return {Object} Parsed object.
  */
-export const fromJson = function (json) {
-  return isString(json) ? JSON.parse(json) : json
+utils.fromJson = function (json) {
+  return utils.isString(json) ? JSON.parse(json) : json
 }
 
 /**
@@ -365,7 +367,7 @@ export const fromJson = function (json) {
  * @param {*} value Value to serialize to JSON.
  * @return {string} JSON string.
  */
-export const toJson = JSON.stringify
+utils.toJson = JSON.stringify
 
 /**
  * Deep copy a value.
@@ -374,22 +376,22 @@ export const toJson = JSON.stringify
  * @param {*} from Value to deep copy.
  * @return {*} Deep copy of `from`.
  */
-export const copy = function (from, to, stackFrom, stackTo, blacklist, plain) {
+utils.copy = function (from, to, stackFrom, stackTo, blacklist, plain) {
   if (!to) {
     to = from
     if (from) {
-      if (isArray(from)) {
-        to = copy(from, [], stackFrom, stackTo, blacklist, plain)
-      } else if (isDate(from)) {
+      if (utils.isArray(from)) {
+        to = utils.copy(from, [], stackFrom, stackTo, blacklist, plain)
+      } else if (utils.isDate(from)) {
         to = new Date(from.getTime())
-      } else if (isRegExp(from)) {
+      } else if (utils.isRegExp(from)) {
         to = new RegExp(from.source, from.toString().match(/[^\/]*$/)[0])
         to.lastIndex = from.lastIndex
-      } else if (isObject(from)) {
+      } else if (utils.isObject(from)) {
         if (plain) {
-          to = copy(from, {}, stackFrom, stackTo, blacklist, plain)
+          to = utils.copy(from, {}, stackFrom, stackTo, blacklist, plain)
         } else {
-          to = copy(from, Object.create(Object.getPrototypeOf(from)), stackFrom, stackTo, blacklist, plain)
+          to = utils.copy(from, Object.create(Object.getPrototypeOf(from)), stackFrom, stackTo, blacklist, plain)
         }
       }
     }
@@ -401,7 +403,7 @@ export const copy = function (from, to, stackFrom, stackTo, blacklist, plain) {
     stackFrom = stackFrom || []
     stackTo = stackTo || []
 
-    if (isObject(from)) {
+    if (utils.isObject(from)) {
       let index = stackFrom.indexOf(from)
       if (index !== -1) {
         return stackTo[index]
@@ -412,32 +414,32 @@ export const copy = function (from, to, stackFrom, stackTo, blacklist, plain) {
     }
 
     let result
-    if (isArray(from)) {
+    if (utils.isArray(from)) {
       let i
       to.length = 0
       for (i = 0; i < from.length; i++) {
-        result = copy(from[i], null, stackFrom, stackTo, blacklist, plain)
-        if (isObject(from[i])) {
+        result = utils.copy(from[i], null, stackFrom, stackTo, blacklist, plain)
+        if (utils.isObject(from[i])) {
           stackFrom.push(from[i])
           stackTo.push(result)
         }
         to.push(result)
       }
     } else {
-      if (isArray(to)) {
+      if (utils.isArray(to)) {
         to.length = 0
       } else {
-        forOwn(to, function (value, key) {
+        utils.forOwn(to, function (value, key) {
           delete to[key]
         })
       }
       for (var key in from) {
         if (from.hasOwnProperty(key)) {
-          if (isBlacklisted(key, blacklist)) {
+          if (utils.isBlacklisted(key, blacklist)) {
             continue
           }
-          result = copy(from[key], null, stackFrom, stackTo, blacklist, plain)
-          if (isObject(from[key])) {
+          result = utils.copy(from[key], null, stackFrom, stackTo, blacklist, plain)
+          if (utils.isObject(from[key])) {
             stackFrom.push(from[key])
             stackTo.push(result)
           }
@@ -449,8 +451,8 @@ export const copy = function (from, to, stackFrom, stackTo, blacklist, plain) {
   return to
 }
 
-export const plainCopy = function (from) {
-  return copy(from, undefined, undefined, undefined, undefined, true)
+utils.plainCopy = function (from) {
+  return utils.copy(from, undefined, undefined, undefined, undefined, true)
 }
 
 /**
@@ -463,7 +465,7 @@ export const plainCopy = function (from) {
  * @param {Function} [setter] Custom setter for setting the object's event
  * listeners.
  */
-export const eventify = function (target, getter, setter, enumerable) {
+utils.eventify = function (target, getter, setter, enumerable) {
   target = target || this
   let _events = {}
   if (!getter && !setter) {
@@ -528,13 +530,13 @@ export const eventify = function (target, getter, setter, enumerable) {
   })
 }
 
-export const classCallCheck = function (instance, Constructor) {
+utils.classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError('Cannot call a class as a function')
   }
 }
 
-export const possibleConstructorReturn = function (self, call) {
+utils.possibleConstructorReturn = function (self, call) {
   if (!self) {
     throw new ReferenceError('this hasn\'t been initialised - super() hasn\'t been called')
   }
@@ -542,8 +544,8 @@ export const possibleConstructorReturn = function (self, call) {
   return call && (typeof call === 'object' || typeof call === 'function') ? call : self
 }
 
-export const addHiddenPropsToTarget = function (target, props) {
-  forOwn(props, function (value, key) {
+utils.addHiddenPropsToTarget = function (target, props) {
+  utils.forOwn(props, function (value, key) {
     props[key] = {
       writable: true,
       value
@@ -552,7 +554,7 @@ export const addHiddenPropsToTarget = function (target, props) {
   Object.defineProperties(target, props)
 }
 
-export const extend = function (props, classProps) {
+utils.extend = function (props, classProps) {
   const SuperClass = this
   let SubClass
 
@@ -564,8 +566,8 @@ export const extend = function (props, classProps) {
     delete props.constructor
   } else {
     SubClass = function (...args) {
-      classCallCheck(this, SubClass)
-      const _this = possibleConstructorReturn(this, (SubClass.__super__ || Object.getPrototypeOf(SubClass)).apply(this, args))
+      utils.classCallCheck(this, SubClass)
+      const _this = utils.possibleConstructorReturn(this, (SubClass.__super__ || Object.getPrototypeOf(SubClass)).apply(this, args))
       return _this
     }
   }
@@ -584,7 +586,7 @@ export const extend = function (props, classProps) {
   } else if (classProps.strictEs6Class) {
     SubClass.__proto__ = SuperClass // eslint-disable-line
   } else {
-    forOwn(SuperClass, function (value, key) {
+    utils.forOwn(SuperClass, function (value, key) {
       SubClass[key] = value
     })
   }
@@ -593,13 +595,13 @@ export const extend = function (props, classProps) {
     value: SuperClass
   })
 
-  addHiddenPropsToTarget(SubClass.prototype, props)
-  fillIn(SubClass, classProps)
+  utils.addHiddenPropsToTarget(SubClass.prototype, props)
+  utils.fillIn(SubClass, classProps)
 
   return SubClass
 }
 
-export const getSuper = function (instance, isCtor) {
+utils.getSuper = function (instance, isCtor) {
   const Ctor = isCtor ? instance : instance.constructor
   return (Ctor.__super__ || Object.getPrototypeOf(Ctor) || Ctor.__proto__) // eslint-disable-line
 }
@@ -610,7 +612,7 @@ const getIndex = function (list, relation) {
     if (_relation === relation) {
       index = i
       return false
-    } else if (isObject(_relation)) {
+    } else if (utils.isObject(_relation)) {
       if (_relation.relation === relation) {
         index = i
         return false
@@ -640,8 +642,8 @@ const forRelation = function (opts, def, fn, ctx) {
     return
   }
   let __opts = {}
-  fillIn(__opts, def.getRelation())
-  fillIn(__opts, opts)
+  utils.fillIn(__opts, def.getRelation())
+  utils.fillIn(__opts, opts)
   __opts.with = opts.with.slice()
   __opts._activeWith = __opts.with.splice(index, 1)[0]
   __opts.with.forEach(function (relation, i) {
@@ -654,7 +656,7 @@ const forRelation = function (opts, def, fn, ctx) {
   fn.call(ctx, def, __opts)
 }
 
-export const forEachRelation = function (mapper, opts, fn, ctx) {
+utils.forEachRelation = function (mapper, opts, fn, ctx) {
   const relationList = mapper.relationList || []
   if (!relationList.length) {
     return
@@ -664,13 +666,80 @@ export const forEachRelation = function (mapper, opts, fn, ctx) {
   })
 }
 
-export const omit = function (props, keys) {
+utils.omit = function (props, keys) {
   // Remove relations
   const _props = {}
-  forOwn(props, function (value, key) {
+  utils.forOwn(props, function (value, key) {
     if (keys.indexOf(key) === -1) {
       _props[key] = value
     }
   })
   return _props
+}
+
+utils.equal = function (a, b) {
+  return a == b // eslint-disable-line
+}
+
+utils.strictEqual = function (a, b) {
+  let _equal = a === b
+  if (!_equal) {
+    if (utils.isObject(a) && utils.isObject(b)) {
+      utils.forOwn(a, function (value, key) {
+        _equal = _equal && utils.strictEqual(value, b[key])
+      })
+      utils.forOwn(b, function (value, key) {
+        _equal = _equal && utils.strictEqual(value, a[key])
+      })
+    } else if (utils.isArray(a) && utils.isArray(b)) {
+      a.forEach(function (value, i) {
+        _equal = _equal && utils.strictEqual(value, b[i])
+      })
+    }
+  }
+  return _equal
+}
+
+// a - the newer object
+// b - the older object
+utils.diffObjects = function (a, b, equalsFn, bl) {
+  const diff = {
+    added: {},
+    removed: {},
+    changed: {}
+  }
+  if (!utils.isFunction(equalsFn)) {
+    equalsFn = utils.strictEqual
+  }
+
+  utils.forOwn(b, function (oldValue, key) {
+    const newValue = a[key]
+
+    if (utils.isBlacklisted(key, bl) || equalsFn(newValue, oldValue)) {
+      return
+    }
+
+    if (utils.isUndefined(newValue)) {
+      diff.removed[key] = undefined
+    } else if (!equalsFn(newValue, oldValue)) {
+      diff.changed[key] = newValue
+    }
+  })
+
+  utils.forOwn(a, function (newValue, key) {
+    if (!utils.isUndefined(b[key]) || utils.isBlacklisted(key, bl)) {
+      return
+    }
+    diff.added[key] = newValue
+  })
+
+  return diff
+}
+
+utils.areDifferent = function (a, b, equalsFn, bl) {
+  const diff = utils.diffObjects(a, b, equalsFn, bl)
+  const diffCount = Object.keys(diff.added).length +
+    Object.keys(diff.removed).length +
+    Object.keys(diff.changed).length
+  return diffCount > 0
 }

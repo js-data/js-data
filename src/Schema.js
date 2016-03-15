@@ -1,19 +1,4 @@
-import {
-  copy,
-  extend,
-  fillIn,
-  forOwn,
-  get,
-  isArray,
-  isBoolean,
-  isFunction,
-  isInteger,
-  isNumber,
-  isNull,
-  isObject,
-  isString,
-  isUndefined
-} from './utils'
+import _ from './utils'
 
 /**
  * js-data's Schema class.
@@ -29,11 +14,11 @@ export default function Schema (definition) {
   // const self = this
   definition || (definition = {})
   // TODO: schema validation
-  fillIn(this, definition)
+  _.fillIn(this, definition)
 
   // TODO: rework this to make sure all possible keywords are converted
   if (definition.properties) {
-    forOwn(definition.properties, function (_definition, prop) {
+    _.forOwn(definition.properties, function (_definition, prop) {
       if (!(_definition instanceof Schema)) {
         definition.properties[prop] = new Schema(_definition)
       }
@@ -45,7 +30,7 @@ export default function Schema (definition) {
  * @name Schema.extend
  * @method
  */
-Schema.extend = extend
+Schema.extend = _.extend
 
 /**
  * TODO
@@ -54,13 +39,13 @@ Schema.extend = extend
  * @type {Object}
  */
 const types = {
-  array: isArray,
-  boolean: isBoolean,
-  integer: isInteger,
-  'null': isNull,
-  number: isNumber,
-  object: isObject,
-  string: isString
+  array: _.isArray,
+  boolean: _.isBoolean,
+  integer: _.isInteger,
+  'null': _.isNull,
+  number: _.isNumber,
+  object: _.isObject,
+  string: _.isString
 }
 
 /**
@@ -85,7 +70,7 @@ const validationKeywords = {}
 const segmentToString = function (segment, prev) {
   let str = ''
   if (segment) {
-    if (isNumber(segment)) {
+    if (_.isNumber(segment)) {
       str += `[${segment}]`
     } else if (prev) {
       str += `.${segment}`
@@ -152,7 +137,7 @@ const minLengthCommon = function (keyword, value, schema, opts) {
  * @ignore
  */
 const validateKeyword = function (op, value, schema, opts) {
-  return !isUndefined(schema[op]) && validationKeywords[op](value, schema, opts)
+  return !_.isUndefined(schema[op]) && validationKeywords[op](value, schema, opts)
 }
 
 /**
@@ -194,17 +179,17 @@ export const validate = function (value, schema, opts) {
   opts || (opts = {})
   let shouldPop
   let prevProp = opts.prop
-  if (isUndefined(schema)) {
+  if (_.isUndefined(schema)) {
     return
   }
-  if (!isObject(schema)) {
+  if (!_.isObject(schema)) {
     throw new Error(`Invalid schema at path: "${opts.path}"`)
   }
-  if (isUndefined(opts.path)) {
+  if (_.isUndefined(opts.path)) {
     opts.path = []
   }
   // Track our location as we recurse
-  if (!isUndefined(opts.prop)) {
+  if (!_.isUndefined(opts.prop)) {
     shouldPop = true
     opts.path.push(opts.prop)
     opts.prop = undefined
@@ -213,13 +198,13 @@ export const validate = function (value, schema, opts) {
   if (schema['extends']) {
     // opts.path = path
     // opts.prop = prop
-    if (isFunction(schema['extends'].validate)) {
+    if (_.isFunction(schema['extends'].validate)) {
       errors = errors.concat(schema['extends'].validate(value, opts) || [])
     } else {
       errors = errors.concat(validate(value, schema['extends'], opts) || [])
     }
   }
-  if (isUndefined(value)) {
+  if (_.isUndefined(value)) {
     // Check if property is required
     if (schema.required === true) {
       addError(value, 'a value', opts, errors)
@@ -256,7 +241,7 @@ Schema.prototype.validate = function (value, opts) {
   return Schema.validate(value, this, opts)
 }
 
-fillIn(validationKeywords, {
+_.fillIn(validationKeywords, {
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor82
    *
@@ -340,7 +325,7 @@ fillIn(validationKeywords, {
     // TODO: additionalItems
     let items = schema.items
     let errors = []
-    const checkingTuple = isArray(items)
+    const checkingTuple = _.isArray(items)
     const length = value.length
     for (var prop = 0; prop < length; prop++) {
       if (checkingTuple) {
@@ -551,7 +536,7 @@ fillIn(validationKeywords, {
    */
   pattern (value, schema, opts) {
     const pattern = schema.pattern
-    if (isString(value) && !value.match(pattern)) {
+    if (_.isString(value) && !value.match(pattern)) {
       return makeError(value, pattern, opts)
     }
   },
@@ -570,7 +555,7 @@ fillIn(validationKeywords, {
     // Can be a boolean or an object
     // Technically the default is an "empty schema", but here "true" is
     // functionally the same
-    const additionalProperties = isUndefined(schema.additionalProperties) ? true : schema.additionalProperties
+    const additionalProperties = _.isUndefined(schema.additionalProperties) ? true : schema.additionalProperties
     // "s": The property set of the instance to validate.
     const toValidate = {}
     // "p": The property set from "properties".
@@ -582,13 +567,13 @@ fillIn(validationKeywords, {
     let errors = []
 
     // Collect set "s"
-    forOwn(value, function (_value, prop) {
+    _.forOwn(value, function (_value, prop) {
       toValidate[prop] = undefined
     })
     // Remove from "s" all elements of "p", if any.
-    forOwn(properties || {}, function (_schema, prop) {
-      if (isUndefined(value[prop]) && !isUndefined(_schema['default'])) {
-        value[prop] = copy(_schema['default'])
+    _.forOwn(properties || {}, function (_schema, prop) {
+      if (_.isUndefined(value[prop]) && !_.isUndefined(_schema['default'])) {
+        value[prop] = _.copy(_schema['default'])
       }
       opts.prop = prop
       errors = errors.concat(validate(value[prop], _schema, opts) || [])
@@ -596,8 +581,8 @@ fillIn(validationKeywords, {
     })
     // For each regex in "pp", remove all elements of "s" which this regex
     // matches.
-    forOwn(patternProperties, function (_schema, pattern) {
-      forOwn(toValidate, function (undef, prop) {
+    _.forOwn(patternProperties, function (_schema, pattern) {
+      _.forOwn(toValidate, function (undef, prop) {
         if (prop.match(pattern)) {
           opts.prop = prop
           errors = errors.concat(validate(value[prop], _schema, opts) || [])
@@ -611,7 +596,7 @@ fillIn(validationKeywords, {
       if (keys.length) {
         addError(`extra fields: ${keys.join(', ')}`, 'no extra fields', opts, errors)
       }
-    } else if (isObject(additionalProperties)) {
+    } else if (_.isObject(additionalProperties)) {
       // Otherwise, validate according to provided schema
       keys.forEach(function (prop) {
         opts.prop = prop
@@ -635,7 +620,7 @@ fillIn(validationKeywords, {
     let errors = []
     if (!opts.existingOnly) {
       required.forEach(function (prop) {
-        if (isUndefined(get(value, prop))) {
+        if (_.isUndefined(_.get(value, prop))) {
           const prevProp = opts.prop
           opts.prop = prop
           addError(undefined, 'a value', opts, errors)
@@ -659,7 +644,7 @@ fillIn(validationKeywords, {
     let type = schema.type
     let validType
     // Can be one of several types
-    if (isString(type)) {
+    if (_.isString(type)) {
       type = [type]
     }
     // Try to match the value against an expected type
@@ -711,7 +696,7 @@ fillIn(validationKeywords, {
   }
 })
 
-fillIn(typeGroupValidators, {
+_.fillIn(typeGroupValidators, {
   /**
    * TODO
    *

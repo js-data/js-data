@@ -1,15 +1,4 @@
-import {
-  classCallCheck,
-  extend,
-  get,
-  getSuper,
-  isArray,
-  isFunction,
-  isObject,
-  isString,
-  isUndefined,
-  set
-} from './utils'
+import _ from './utils'
 import {
   hasManyType
 } from './decorators'
@@ -32,9 +21,9 @@ import Collection from './Collection'
 const LinkedCollection = Collection.extend({
   constructor (records, opts) {
     const self = this
-    classCallCheck(self, LinkedCollection)
+    _.classCallCheck(self, LinkedCollection)
 
-    getSuper(self).call(self, records, opts)
+    _.getSuper(self).call(self, records, opts)
 
     // Make sure this collection has somewhere to store "added" timestamps
     self._added = {}
@@ -48,11 +37,11 @@ const LinkedCollection = Collection.extend({
 
   _onRecordEvent (...args) {
     const self = this
-    getSuper(self).prototype._onRecordEvent.apply(self, args)
+    _.getSuper(self).prototype._onRecordEvent.apply(self, args)
     const event = args[0]
     // This is a very brute force method
     // Lots of room for optimization
-    if (isString(event) && event.indexOf('change') === 0) {
+    if (_.isString(event) && event.indexOf('change') === 0) {
       self.updateIndexes(args[1])
     }
   },
@@ -66,7 +55,7 @@ const LinkedCollection = Collection.extend({
     const usesRecordClass = !!mapper.RecordClass
     let singular
 
-    if (isObject(records) && !isArray(records)) {
+    if (_.isObject(records) && !_.isArray(records)) {
       singular = true
       records = [records]
     }
@@ -87,7 +76,7 @@ const LinkedCollection = Collection.extend({
         const relatedCollection = datastore.getCollection(relationName)
         const type = def.type
         const isHasMany = type === hasManyType
-        const shouldAdd = isUndefined(def.add) ? true : !!def.add
+        const shouldAdd = _.isUndefined(def.add) ? true : !!def.add
         let relatedData
 
         records.forEach(function (record) {
@@ -95,7 +84,7 @@ const LinkedCollection = Collection.extend({
           // currently visited record
           relatedData = def.getLocalField(record)
 
-          if (isFunction(def.add)) {
+          if (_.isFunction(def.add)) {
             def.add(datastore, def, record)
           } else if (relatedData) {
             // Otherwise, if there is something to be added, add it
@@ -119,12 +108,12 @@ const LinkedCollection = Collection.extend({
               })
               // If it's the parent that has the localKeys
               if (def.localKeys) {
-                set(record, def.localKeys, relatedData.map(function (inserted) {
-                  return get(inserted, relationIdAttribute)
+                _.set(record, def.localKeys, relatedData.map(function (inserted) {
+                  return _.get(inserted, relationIdAttribute)
                 }))
               }
             } else {
-              const relatedDataId = get(relatedData, relationIdAttribute)
+              const relatedDataId = _.get(relatedData, relationIdAttribute)
               // Handle inserting belongsTo and hasOne relations
               if (relatedData !== relatedCollection.get(relatedDataId)) {
                 // Make sure foreignKey field is set
@@ -141,7 +130,7 @@ const LinkedCollection = Collection.extend({
       })
     }
 
-    records = getSuper(self).prototype.add.call(self, records, opts)
+    records = _.getSuper(self).prototype.add.call(self, records, opts)
 
     records.forEach(function (record) {
       // Track when this record was added
@@ -158,7 +147,7 @@ const LinkedCollection = Collection.extend({
   remove (id, opts) {
     const self = this
     delete self._added[id]
-    const record = getSuper(self).prototype.remove.call(self, id, opts)
+    const record = _.getSuper(self).prototype.remove.call(self, id, opts)
     if (record) {
       const mapper = self.mapper
       if (mapper.RecordClass) {
@@ -170,7 +159,7 @@ const LinkedCollection = Collection.extend({
 
   removeAll (query, opts) {
     const self = this
-    const records = getSuper(self).prototype.removeAll.call(self, query, opts)
+    const records = _.getSuper(self).prototype.removeAll.call(self, query, opts)
     records.forEach(function (record) {
       delete self._added[self.recordId(record)]
     })
@@ -196,7 +185,7 @@ const LinkedCollection = Collection.extend({
  * @param {Object} [classProps={}] Static properties to add to the subclass.
  * @return {Function} Subclass of LinkedCollection.
  */
-LinkedCollection.extend = extend
+LinkedCollection.extend = _.extend
 
 export {
   LinkedCollection as default

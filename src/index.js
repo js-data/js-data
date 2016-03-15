@@ -85,7 +85,7 @@ import Record from './Record'
  */
 import Schema from './Schema'
 
-import * as utils from './utils'
+import utils from './utils'
 
 export * from './decorators'
 

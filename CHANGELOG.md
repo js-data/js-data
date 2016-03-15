@@ -1,3 +1,11 @@
+##### 3.0.0-alpha.19 - 14 March 2016
+
+###### Breaking API changes
+- Passive change detection now possible with changes to Record#changes() and Record#hasChanges(), see #313
+
+###### Other
+- Now easier to customize utility functions (when necessary, should be rare)
+
 ##### 3.0.0-alpha.18 - 12 March 2016
 
 ###### Backwards compatible API changes
