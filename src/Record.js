@@ -152,12 +152,14 @@ _.addHiddenPropsToTarget(Record.prototype, {
    *
    * @name Record#changes
    * @method
-   * @param {Function} [equalsFn] Equality function. Default uses `===`.
-   * @param {Array} [ignore] Array of strings or RegExp of fields to ignore.
+   * @param [opts] Configuration options.
+   * @param {Function} [opts.equalsFn] Equality function. Default uses `===`.
+   * @param {Array} [opts.ignore] Array of strings or RegExp of fields to ignore.
    */
-  changes (equalsFn, ignore) {
+  changes (opts) {
     const self = this
-    return _.diffObjects(self, self._get('previous'), equalsFn, ignore)
+    opts || (opts = {})
+    return _.diffObjects(self, self._get('previous'), opts)
   },
 
   /**
@@ -166,13 +168,14 @@ _.addHiddenPropsToTarget(Record.prototype, {
    *
    * @name Record#hasChanges
    * @method
-   * @param {Function} [equalsFn] Equality function. Default uses `===`.
-   * @param {Array} [ignore] Array of strings or RegExp of fields to ignore.
+   * @param [opts] Configuration options.
+   * @param {Function} [opts.equalsFn] Equality function. Default uses `===`.
+   * @param {Array} [opts.ignore] Array of strings or RegExp of fields to ignore.
    */
-  hasChanges (equalsFn, ignore) {
+  hasChanges (opts) {
     const self = this
     const quickHasChanges = !!(self._get('changed') || []).length
-    return quickHasChanges || _.areDifferent(self, self._get('previous'), equalsFn, ignore)
+    return quickHasChanges || _.areDifferent(self, self._get('previous'), opts)
   },
 
   /**

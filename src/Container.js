@@ -8,7 +8,19 @@ import Mapper from './Mapper'
 
 const toProxy = [
   /**
-   * TODO
+   * Proxy for {@link Mapper#count}.
+   *
+   * @name Container#count
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {Object} [query] - Passed to {@link Model.count}.
+   * @param {Object} [opts] - Passed to {@link Model.count}.
+   * @return {Promise}
+   */
+  'count',
+
+  /**
+   * Proxy for {@link Mapper#create}.
    *
    * @name Container#create
    * @method
@@ -21,7 +33,7 @@ const toProxy = [
   'create',
 
   /**
-   * TODO
+   * Proxy for {@link Mapper#createMany}.
    *
    * @name Container#createMany
    * @method
@@ -47,7 +59,17 @@ const toProxy = [
   'createRecord',
 
   /**
-   * TODO
+   * Proxy for {@link Mapper#dbg}.
+   *
+   * @name Container#dbg
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {...*} args - Passed to {@link Mapper#dbg}.
+   */
+  'dbg',
+
+  /**
+   * Proxy for {@link Mapper#destroy}.
    *
    * @name Container#destroy
    * @method
@@ -60,7 +82,7 @@ const toProxy = [
   'destroy',
 
   /**
-   * TODO
+   * Proxy for {@link Mapper#destroyAll}.
    *
    * @name Container#destroyAll
    * @method
@@ -73,7 +95,17 @@ const toProxy = [
   'destroyAll',
 
   /**
-   * TODO
+   * Proxy for {@link Mapper#find}.
+   *
+   * @name Container#emit
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {...*} args - Passed to {@link Mapper#emit}.
+   */
+  'emit',
+
+  /**
+   * Proxy for {@link Mapper#find}.
    *
    * @name Container#find
    * @method
@@ -85,7 +117,7 @@ const toProxy = [
   'find',
 
   /**
-   * TODO
+   * Proxy for {@link Mapper#createRecord}.
    *
    * @name Container#findAll
    * @method
@@ -96,10 +128,80 @@ const toProxy = [
    */
   'findAll',
 
+  /**
+   * Proxy for {@link Mapper#is}.
+   *
+   * @name Container#getSchema
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   */
+  'getSchema',
+
+  /**
+   * Proxy for {@link Mapper#is}.
+   *
+   * @name Container#is
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {...*} args - Passed to {@link Mapper#is}.
+   */
   'is',
 
   /**
-   * TODO
+   * Proxy for {@link Mapper#log}.
+   *
+   * @name Container#log
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {...*} args - Passed to {@link Mapper#log}.
+   */
+  'log',
+
+  /**
+   * Proxy for {@link Mapper#off}.
+   *
+   * @name Container#off
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {...*} args - Passed to {@link Mapper#off}.
+   */
+  'off',
+
+  /**
+   * Proxy for {@link Mapper#on}.
+   *
+   * @name Container#on
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {...*} args - Passed to {@link Mapper#on}.
+   */
+  'on',
+
+  /**
+   * Proxy for {@link Mapper#sum}.
+   *
+   * @name Container#sum
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {string} field - Passed to {@link Model.sum}.
+   * @param {Object} [query] - Passed to {@link Model.sum}.
+   * @param {Object} [opts] - Passed to {@link Model.sum}.
+   * @return {Promise}
+   */
+  'sum',
+
+  /**
+   * Proxy for {@link Mapper#toJSON}.
+   *
+   * @name Container#toJSON
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {...*} args - Passed to {@link Mapper#toJSON}.
+   */
+  'toJSON',
+
+  /**
+   * Proxy for {@link Mapper#update}.
    *
    * @name Container#update
    * @method
@@ -113,7 +215,7 @@ const toProxy = [
   'update',
 
   /**
-   * TODO
+   * Proxy for {@link Mapper#updateAll}.
    *
    * @name Container#updateAll
    * @method
@@ -127,7 +229,7 @@ const toProxy = [
   'updateAll',
 
   /**
-   * TODO
+   * Proxy for {@link Mapper#updateMany}.
    *
    * @name Container#updateMany
    * @method

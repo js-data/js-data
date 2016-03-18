@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.19 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.20 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -753,7 +753,10 @@
 
   // a - the newer object
   // b - the older object
-  utils.diffObjects = function (a, b, equalsFn, bl) {
+  utils.diffObjects = function (a, b, opts) {
+    opts || (opts = {});
+    var equalsFn = opts.equalsFn;
+    var bl = opts.ignore;
     var diff = {
       added: {},
       removed: {},
@@ -787,8 +790,9 @@
     return diff;
   };
 
-  utils.areDifferent = function (a, b, equalsFn, bl) {
-    var diff = utils.diffObjects(a, b, equalsFn, bl);
+  utils.areDifferent = function (a, b, opts) {
+    opts || (opts = {});
+    var diff = utils.diffObjects(a, b, opts);
     var diffCount = Object.keys(diff.added).length + Object.keys(diff.removed).length + Object.keys(diff.changed).length;
     return diffCount > 0;
   };
@@ -2844,12 +2848,14 @@
      *
      * @name Record#changes
      * @method
-     * @param {Function} [equalsFn] Equality function. Default uses `===`.
-     * @param {Array} [ignore] Array of strings or RegExp of fields to ignore.
+     * @param [opts] Configuration options.
+     * @param {Function} [opts.equalsFn] Equality function. Default uses `===`.
+     * @param {Array} [opts.ignore] Array of strings or RegExp of fields to ignore.
      */
-    changes: function changes(equalsFn, ignore) {
+    changes: function changes(opts) {
       var self = this;
-      return _.diffObjects(self, self._get('previous'), equalsFn, ignore);
+      opts || (opts = {});
+      return _.diffObjects(self, self._get('previous'), opts);
     },
 
 
@@ -2859,13 +2865,14 @@
      *
      * @name Record#hasChanges
      * @method
-     * @param {Function} [equalsFn] Equality function. Default uses `===`.
-     * @param {Array} [ignore] Array of strings or RegExp of fields to ignore.
+     * @param [opts] Configuration options.
+     * @param {Function} [opts.equalsFn] Equality function. Default uses `===`.
+     * @param {Array} [opts.ignore] Array of strings or RegExp of fields to ignore.
      */
-    hasChanges: function hasChanges(equalsFn, ignore) {
+    hasChanges: function hasChanges(opts) {
       var self = this;
       var quickHasChanges = !!(self._get('changed') || []).length;
-      return quickHasChanges || _.areDifferent(self, self._get('previous'), equalsFn, ignore);
+      return quickHasChanges || _.areDifferent(self, self._get('previous'), opts);
     },
 
 
@@ -4599,6 +4606,89 @@
 
 
     /**
+     * Mapper lifecycle hook called by {@link Mapper#count}. If this method
+     * returns a promise then {@link Mapper#count} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeCount
+     * @method
+     * @param {Object} query The `query` argument passed to {@link Mapper#count}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#count}.
+     */
+    beforeCount: notify,
+
+    /**
+     * Using the `query` argument, select records to pull from an adapter.
+     * Expects back from the adapter the array of selected records.
+     *
+     * {@link Mapper#beforeCount} will be called before calling the adapter.
+     * {@link Mapper#afterCount} will be called after calling the adapter.
+     *
+     * @name Mapper#count
+     * @method
+     * @param {Object} [query={}] Selection query.
+     * @param {Object} [query.where] Filtering criteria.
+     * @param {number} [query.skip] Number to skip.
+     * @param {number} [query.limit] Number to limit to.
+     * @param {Array} [query.orderBy] Sorting criteria.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * resulting data. If `true` return a response object that includes the
+     * resulting data and metadata about the operation.
+     * @return {Promise}
+     */
+    count: function count(query, opts) {
+      var op = void 0,
+          adapter = void 0;
+      var self = this;
+
+      // Default values for arguments
+      query || (query = {});
+      opts || (opts = {});
+
+      // Fill in "opts" with the Mapper's configuration
+      _._(self, opts);
+      adapter = opts.adapter = self.getAdapterName(opts);
+
+      // beforeCount lifecycle hook
+      op = opts.op = 'beforeCount';
+      return _.resolve(self[op](query, opts)).then(function () {
+        // Now delegate to the adapter
+        op = opts.op = 'count';
+        self.dbg(op, query, opts);
+        return _.resolve(self.getAdapter(adapter)[op](self, query, opts));
+      }).then(function (result) {
+        if (opts.raw) {
+          _._(opts, result);
+        }
+        // afterCount lifecycle hook
+        op = opts.op = 'afterCount';
+        return _.resolve(self[op](query, opts, result)).then(function (_result) {
+          // Allow for re-assignment from lifecycle hook
+          return _.isUndefined(_result) ? result : _result;
+        });
+      });
+    },
+
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#count}. If this method
+     * returns a promise then {@link Mapper#count} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterCount
+     * @method
+     * @param {Object} query The `query` argument passed to {@link Mapper#count}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#count}.
+     * @param {*} result The result, if any.
+     */
+    afterCount: notify2,
+
+    /**
      * Mapper lifecycle hook called by {@link Mapper#create}. If this method
      * returns a promise then {@link Mapper#create} will wait for the promise
      * to resolve before continuing.
@@ -5045,6 +5135,91 @@
      * @param {*} result The result, if any.
      */
     afterFindAll: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#sum}. If this method
+     * returns a promise then {@link Mapper#sum} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeSum
+     * @method
+     * @param {string} field The `field` argument passed to {@link Mapper#sum}.
+     * @param {Object} query The `query` argument passed to {@link Mapper#sum}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#sum}.
+     */
+    beforeSum: notify,
+
+    /**
+     * Using the `query` argument, select records to pull from an adapter.
+     * Expects back from the adapter the array of selected records.
+     *
+     * {@link Mapper#beforeSum} will be called before calling the adapter.
+     * {@link Mapper#afterSum} will be called after calling the adapter.
+     *
+     * @name Mapper#sum
+     * @method
+     * @param {string} field The field to sum.
+     * @param {Object} [query={}] Selection query.
+     * @param {Object} [query.where] Filtering criteria.
+     * @param {number} [query.skip] Number to skip.
+     * @param {number} [query.limit] Number to limit to.
+     * @param {Array} [query.orderBy] Sorting criteria.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * resulting data. If `true` return a response object that includes the
+     * resulting data and metadata about the operation.
+     * @return {Promise}
+     */
+    sum: function sum(field, query, opts) {
+      var op = void 0,
+          adapter = void 0;
+      var self = this;
+
+      // Default values for arguments
+      query || (query = {});
+      opts || (opts = {});
+
+      // Fill in "opts" with the Mapper's configuration
+      _._(self, opts);
+      adapter = opts.adapter = self.getAdapterName(opts);
+
+      // beforeSum lifecycle hook
+      op = opts.op = 'beforeSum';
+      return _.resolve(self[op](field, query, opts)).then(function () {
+        // Now delegate to the adapter
+        op = opts.op = 'sum';
+        self.dbg(op, query, opts);
+        return _.resolve(self.getAdapter(adapter)[op](self, field, query, opts));
+      }).then(function (result) {
+        if (opts.raw) {
+          _._(opts, result);
+        }
+        // afterSum lifecycle hook
+        op = opts.op = 'afterSum';
+        return _.resolve(self[op](field, query, opts, result)).then(function (_result) {
+          // Allow for re-assignment from lifecycle hook
+          return _.isUndefined(_result) ? result : _result;
+        });
+      });
+    },
+
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#sum}. If this method
+     * returns a promise then {@link Mapper#sum} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterSum
+     * @method
+     * @param {Object} query The `query` argument passed to {@link Mapper#sum}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#sum}.
+     * @param {*} result The result, if any.
+     */
+    afterSum: notify2,
 
     /**
      * Mapper lifecycle hook called by {@link Mapper#update}. If this method
@@ -5642,7 +5817,19 @@
 
   var toProxy = [
   /**
-   * TODO
+   * Proxy for {@link Mapper#count}.
+   *
+   * @name Container#count
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {Object} [query] - Passed to {@link Model.count}.
+   * @param {Object} [opts] - Passed to {@link Model.count}.
+   * @return {Promise}
+   */
+  'count',
+
+  /**
+   * Proxy for {@link Mapper#create}.
    *
    * @name Container#create
    * @method
@@ -5655,7 +5842,7 @@
   'create',
 
   /**
-   * TODO
+   * Proxy for {@link Mapper#createMany}.
    *
    * @name Container#createMany
    * @method
@@ -5681,7 +5868,17 @@
   'createRecord',
 
   /**
-   * TODO
+   * Proxy for {@link Mapper#dbg}.
+   *
+   * @name Container#dbg
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {...*} args - Passed to {@link Mapper#dbg}.
+   */
+  'dbg',
+
+  /**
+   * Proxy for {@link Mapper#destroy}.
    *
    * @name Container#destroy
    * @method
@@ -5694,7 +5891,7 @@
   'destroy',
 
   /**
-   * TODO
+   * Proxy for {@link Mapper#destroyAll}.
    *
    * @name Container#destroyAll
    * @method
@@ -5707,7 +5904,17 @@
   'destroyAll',
 
   /**
-   * TODO
+   * Proxy for {@link Mapper#find}.
+   *
+   * @name Container#emit
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {...*} args - Passed to {@link Mapper#emit}.
+   */
+  'emit',
+
+  /**
+   * Proxy for {@link Mapper#find}.
    *
    * @name Container#find
    * @method
@@ -5719,7 +5926,7 @@
   'find',
 
   /**
-   * TODO
+   * Proxy for {@link Mapper#createRecord}.
    *
    * @name Container#findAll
    * @method
@@ -5728,10 +5935,82 @@
    * @param {Object} [opts] - Passed to {@link Model.findAll}.
    * @return {Promise}
    */
-  'findAll', 'is',
+  'findAll',
 
   /**
-   * TODO
+   * Proxy for {@link Mapper#is}.
+   *
+   * @name Container#getSchema
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   */
+  'getSchema',
+
+  /**
+   * Proxy for {@link Mapper#is}.
+   *
+   * @name Container#is
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {...*} args - Passed to {@link Mapper#is}.
+   */
+  'is',
+
+  /**
+   * Proxy for {@link Mapper#log}.
+   *
+   * @name Container#log
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {...*} args - Passed to {@link Mapper#log}.
+   */
+  'log',
+
+  /**
+   * Proxy for {@link Mapper#off}.
+   *
+   * @name Container#off
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {...*} args - Passed to {@link Mapper#off}.
+   */
+  'off',
+
+  /**
+   * Proxy for {@link Mapper#on}.
+   *
+   * @name Container#on
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {...*} args - Passed to {@link Mapper#on}.
+   */
+  'on',
+
+  /**
+   * Proxy for {@link Mapper#sum}.
+   *
+   * @name Container#sum
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {string} field - Passed to {@link Model.sum}.
+   * @param {Object} [query] - Passed to {@link Model.sum}.
+   * @param {Object} [opts] - Passed to {@link Model.sum}.
+   * @return {Promise}
+   */
+  'sum',
+
+  /**
+   * Proxy for {@link Mapper#toJSON}.
+   *
+   * @name Container#toJSON
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {...*} args - Passed to {@link Mapper#toJSON}.
+   */
+  'toJSON',
+
+  /**
+   * Proxy for {@link Mapper#update}.
    *
    * @name Container#update
    * @method
@@ -5745,7 +6024,7 @@
   'update',
 
   /**
-   * TODO
+   * Proxy for {@link Mapper#updateAll}.
    *
    * @name Container#updateAll
    * @method
@@ -5759,7 +6038,7 @@
   'updateAll',
 
   /**
-   * TODO
+   * Proxy for {@link Mapper#updateMany}.
    *
    * @name Container#updateMany
    * @method
@@ -6930,11 +7209,11 @@
    * if the current version is not beta.
    */
   var version = {
-    full: '3.0.0-alpha.19',
+    full: '3.0.0-alpha.20',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10),
-    alpha: '19',
+    alpha: '20',
     beta: 'false'
   };
 

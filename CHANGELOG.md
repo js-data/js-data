@@ -1,3 +1,11 @@
+##### 3.0.0-alpha.20 - 18 March 2016
+
+###### Breaking API changes
+- Switched Record#changes and Record#hasChanges to using an options argument
+
+###### Backwards compatible API changes
+- Passive change detection now possible with changes to Record#changes() and Record#hasChanges(), see #313
+
 ##### 3.0.0-alpha.19 - 14 March 2016
 
 ###### Breaking API changes
