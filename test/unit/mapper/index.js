@@ -1,3 +1,4 @@
+import * as count from './count.test'
 import * as create from './create.test'
 import * as createRecord from './createRecord.test'
 import * as createMany from './createMany.test'
@@ -5,6 +6,7 @@ import * as destroy from './destroy.test'
 import * as destroyAll from './destroyAll.test'
 import * as find from './find.test'
 import * as findAll from './findAll.test'
+import * as sum from './sum.test'
 import * as toJSON from './toJSON.test'
 import * as update from './update.test'
 import * as updateMany from './updateMany.test'
@@ -29,6 +31,7 @@ export function init () {
       Test.assert.isTrue(listener.calledOnce)
     })
 
+    count.init()
     create.init()
     createRecord.init()
     createMany.init()
@@ -36,6 +39,7 @@ export function init () {
     destroyAll.init()
     find.init()
     findAll.init()
+    sum.init()
     toJSON.init()
     update.init()
     updateMany.init()

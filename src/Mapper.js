@@ -573,6 +573,87 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
   },
 
   /**
+   * Mapper lifecycle hook called by {@link Mapper#count}. If this method
+   * returns a promise then {@link Mapper#count} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @name Mapper#beforeCount
+   * @method
+   * @param {Object} query The `query` argument passed to {@link Mapper#count}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#count}.
+   */
+  beforeCount: notify,
+
+  /**
+   * Using the `query` argument, select records to pull from an adapter.
+   * Expects back from the adapter the array of selected records.
+   *
+   * {@link Mapper#beforeCount} will be called before calling the adapter.
+   * {@link Mapper#afterCount} will be called after calling the adapter.
+   *
+   * @name Mapper#count
+   * @method
+   * @param {Object} [query={}] Selection query.
+   * @param {Object} [query.where] Filtering criteria.
+   * @param {number} [query.skip] Number to skip.
+   * @param {number} [query.limit] Number to limit to.
+   * @param {Array} [query.orderBy] Sorting criteria.
+   * @param {Object} [opts] Configuration options.
+   * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+   * adapter to use.
+   * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+   * lifecycle events.
+   * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+   * resulting data. If `true` return a response object that includes the
+   * resulting data and metadata about the operation.
+   * @return {Promise}
+   */
+  count (query, opts) {
+    let op, adapter
+    const self = this
+
+    // Default values for arguments
+    query || (query = {})
+    opts || (opts = {})
+
+    // Fill in "opts" with the Mapper's configuration
+    _._(self, opts)
+    adapter = opts.adapter = self.getAdapterName(opts)
+
+    // beforeCount lifecycle hook
+    op = opts.op = 'beforeCount'
+    return _.resolve(self[op](query, opts)).then(function () {
+      // Now delegate to the adapter
+      op = opts.op = 'count'
+      self.dbg(op, query, opts)
+      return _.resolve(self.getAdapter(adapter)[op](self, query, opts))
+    }).then(function (result) {
+      if (opts.raw) {
+        _._(opts, result)
+      }
+      // afterCount lifecycle hook
+      op = opts.op = 'afterCount'
+      return _.resolve(self[op](query, opts, result)).then(function (_result) {
+        // Allow for re-assignment from lifecycle hook
+        return _.isUndefined(_result) ? result : _result
+      })
+    })
+  },
+
+  /**
+   * Mapper lifecycle hook called by {@link Mapper#count}. If this method
+   * returns a promise then {@link Mapper#count} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @name Mapper#afterCount
+   * @method
+   * @param {Object} query The `query` argument passed to {@link Mapper#count}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#count}.
+   * @param {*} result The result, if any.
+   */
+  afterCount: notify2,
+
+  /**
    * Mapper lifecycle hook called by {@link Mapper#create}. If this method
    * returns a promise then {@link Mapper#create} will wait for the promise
    * to resolve before continuing.
@@ -1011,6 +1092,89 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
    * @param {*} result The result, if any.
    */
   afterFindAll: notify2,
+
+  /**
+   * Mapper lifecycle hook called by {@link Mapper#sum}. If this method
+   * returns a promise then {@link Mapper#sum} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @name Mapper#beforeSum
+   * @method
+   * @param {string} field The `field` argument passed to {@link Mapper#sum}.
+   * @param {Object} query The `query` argument passed to {@link Mapper#sum}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#sum}.
+   */
+  beforeSum: notify,
+
+  /**
+   * Using the `query` argument, select records to pull from an adapter.
+   * Expects back from the adapter the array of selected records.
+   *
+   * {@link Mapper#beforeSum} will be called before calling the adapter.
+   * {@link Mapper#afterSum} will be called after calling the adapter.
+   *
+   * @name Mapper#sum
+   * @method
+   * @param {string} field The field to sum.
+   * @param {Object} [query={}] Selection query.
+   * @param {Object} [query.where] Filtering criteria.
+   * @param {number} [query.skip] Number to skip.
+   * @param {number} [query.limit] Number to limit to.
+   * @param {Array} [query.orderBy] Sorting criteria.
+   * @param {Object} [opts] Configuration options.
+   * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+   * adapter to use.
+   * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+   * lifecycle events.
+   * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+   * resulting data. If `true` return a response object that includes the
+   * resulting data and metadata about the operation.
+   * @return {Promise}
+   */
+  sum (field, query, opts) {
+    let op, adapter
+    const self = this
+
+    // Default values for arguments
+    query || (query = {})
+    opts || (opts = {})
+
+    // Fill in "opts" with the Mapper's configuration
+    _._(self, opts)
+    adapter = opts.adapter = self.getAdapterName(opts)
+
+    // beforeSum lifecycle hook
+    op = opts.op = 'beforeSum'
+    return _.resolve(self[op](field, query, opts)).then(function () {
+      // Now delegate to the adapter
+      op = opts.op = 'sum'
+      self.dbg(op, query, opts)
+      return _.resolve(self.getAdapter(adapter)[op](self, field, query, opts))
+    }).then(function (result) {
+      if (opts.raw) {
+        _._(opts, result)
+      }
+      // afterSum lifecycle hook
+      op = opts.op = 'afterSum'
+      return _.resolve(self[op](field, query, opts, result)).then(function (_result) {
+        // Allow for re-assignment from lifecycle hook
+        return _.isUndefined(_result) ? result : _result
+      })
+    })
+  },
+
+  /**
+   * Mapper lifecycle hook called by {@link Mapper#sum}. If this method
+   * returns a promise then {@link Mapper#sum} will wait for the promise
+   * to resolve before continuing.
+   *
+   * @name Mapper#afterSum
+   * @method
+   * @param {Object} query The `query` argument passed to {@link Mapper#sum}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#sum}.
+   * @param {*} result The result, if any.
+   */
+  afterSum: notify2,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#update}. If this method

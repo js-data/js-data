@@ -702,7 +702,10 @@ utils.strictEqual = function (a, b) {
 
 // a - the newer object
 // b - the older object
-utils.diffObjects = function (a, b, equalsFn, bl) {
+utils.diffObjects = function (a, b, opts) {
+  opts || (opts = {})
+  let equalsFn = opts.equalsFn
+  let bl = opts.ignore
   const diff = {
     added: {},
     removed: {},
@@ -736,8 +739,9 @@ utils.diffObjects = function (a, b, equalsFn, bl) {
   return diff
 }
 
-utils.areDifferent = function (a, b, equalsFn, bl) {
-  const diff = utils.diffObjects(a, b, equalsFn, bl)
+utils.areDifferent = function (a, b, opts) {
+  opts || (opts = {})
+  const diff = utils.diffObjects(a, b, opts)
   const diffCount = Object.keys(diff.added).length +
     Object.keys(diff.removed).length +
     Object.keys(diff.changed).length

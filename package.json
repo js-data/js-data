@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "3.0.0-alpha.19",
+  "version": "3.0.0-alpha.20",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -41,7 +41,7 @@
     "doc": "jsdoc -c conf.json src && node scripts/cleanup.js",
     "lint": "repo-tools lint src/**/*.js test/**/*.js scripts/*.js",
     "helpers": "node scripts/helpers.js",
-    "min": "uglifyjs dist/js-data.js -o dist/js-data.min.js --source-map dist/js-data.min.map -v -m -c --screw-ie8",
+    "min": "uglifyjs dist/js-data.js -o dist/js-data.min.js --source-map dist/js-data.min.map --source-map-url js-data.min.map -v -m -c --screw-ie8",
     "version": "node scripts/version.js",
     "banner": "node scripts/banner.js",
     "gzip": "echo gzipped size: $(cat dist/js-data.min.js | gzip -f9 | wc -c)kb",
