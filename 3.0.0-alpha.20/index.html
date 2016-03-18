@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>js-data Index</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.dark.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.lumen.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">js-data</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-js-data.html">js-data</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Collection.html">Collection</a></li><li><a href="Container.html">Container</a></li><li><a href="DataStore.html">DataStore</a></li><li><a href="LinkedCollection.html">LinkedCollection</a></li><li><a href="Mapper.html">Mapper</a></li><li><a href="Query.html">Query</a></li><li><a href="Record.html">Record</a></li><li><a href="Schema.html">Schema</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+		<div class="col-sm-3 col-md-3">
+            <form class="navbar-form" role="search">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                    <div class="input-group-btn">
+                        <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-8">
+	
+		<div id="main">
+			
+
+	
+	
+
+
+
+    <h3>js-data 3.0.0-alpha.20</h3>
+
+
+
+
+
+
+
+
+
+	
+	
+
+
+
+
+
+    <section class="readme-section">
+        <article><p><img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="96" height="96" /></p>
+<h1><a href="http://www.js-data.io/">js-data</a></h1><p><a href="http://slack.js-data.io"><img src="http://slack.js-data.io/badge.svg" alt="Slack Status"></a>
+<a href="https://www.npmjs.org/package/js-data"><img src="https://img.shields.io/npm/v/js-data.svg?style=flat" alt="npm version"></a>
+<a href="https://circleci.com/gh/js-data"><img src="https://img.shields.io/circleci/project/js-data/js-data/master.svg?style=flat" alt="Circle CI"></a>
+<a href="https://www.npmjs.org/package/js-data"><img src="https://img.shields.io/npm/dm/js-data.svg?style=flat" alt="npm downloads"></a>
+<a href="https://coveralls.io/github/js-data"><img src="https://img.shields.io/coveralls/js-data/js-data/master.svg?style=flat" alt="Coverage Status"></a>
+<a href="https://www.codacy.com/app/jasondobry/js-data/dashboard"><img src="https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg" alt="Codacy"></a></p>
+<p>js-data is a framework-agnostic, datastore-agnostic ORM/ODM for Node.js and the
+Browser.</p>
+<p>Adapters allow js-data to connect to various data sources such as Firebase,
+MySql, RethinkDB, MongoDB, localStorage, Redis, a REST API, etc. With js-data
+you can re-use your data modeling code between environments, keep your data
+layer intact when transitioning between app frameworks, and work with a unified
+data API on the server and the client. js-data employs conventions for rapid
+development, but allows for endless customization in order to meet your
+particular needs.</p>
+<p>To get started, visit <strong><a href="http://www.js-data.io">http://js-data.io</a></strong>.</p>
+<h2>Table of contents</h2><ul>
+<li><a href="#quick-start">Quick start</a></li>
+<li><a href="#background">Background</a></li>
+<li><a href="#dependencies">Dependencies</a></li>
+<li><a href="#guides-and-tutorials">Guides and Tutorials</a></li>
+<li><a href="#api-reference-docs">API Reference Docs</a></li>
+<li><a href="#community">Community</a></li>
+<li><a href="#support">Support</a></li>
+<li><a href="#contributing">Contributing</a></li>
+<li><a href="#license">License</a></li>
+</ul>
+<h2>Quick Start</h2><p>This example shows setting up js-data to use the Http adapter in the browser:</p>
+<pre class="prettyprint source"><code>npm i --save js-data js-data-http</code></pre><p>See <a href="http://js-data.io/docs/installation">installation instructions</a> for more
+information.</p>
+<pre class="prettyprint source lang-javascript"><code>import {DataStore} from 'js-data'
+import HttpAdapter from 'js-data-http'
+
+// Create an empty data store
+const store = new DataStore()
+
+// &quot;store&quot; will use an http adapter by default
+store.registerAdapter('http', new HttpAdapter(), { 'default': true })
+
+// Define a Mapper for a &quot;user&quot; resource
+store.defineMapper('user')</code></pre><pre class="prettyprint source lang-js"><code>// GET /user/1
+let user = await store.find('user', 1)
+
+console.log(user) // { id: 1, name: 'John' }
+
+// The user record is now stored in Users
+console.log(store.get('user', user.id)) // { id: 1, name: 'John' }
+console.log(user === store.get('user', user.id)) // true
+
+// PUT /user/1 {name:&quot;Johnny&quot;}
+user = await store.update('user', user.id, { name: 'Johnny' })
+
+// The user record has been updated, and the change synced to the store
+console.log(store.get('user', user.id)) // { id: 1, name: 'Johnny' }
+console.log(user === store.get('user', user.id)) // true
+
+// DELETE /user/1
+await store.destroy('user', user.id)
+
+// The user instance no longer in the store
+console.log(store.get('user', 1)) // undefined</code></pre><p><strong>ES5:</strong></p>
+<pre class="prettyprint source lang-javascript"><code>// Create an empty data store
+var store = new JSData.DataStore()
+
+// &quot;store&quot; will use an http adapter by default
+store.registerAdapter('http', new HttpAdapter(), { default: true })
+
+// Define a Mapper for a &quot;user&quot; resource
+store.defineMapper('user')
+
+// GET /user/1
+store.find('user', 1)
+  .then(function (user) {
+    console.log(user) // { id: 1, name: 'John' }
+
+    // The user record is now stored in Users
+    console.log(store.get('user', user.id)) // { id: 1, name: 'John' }
+    console.log(user === store.get('user', user.id)) // true
+
+    // PUT /user/1 {name:&quot;Johnny&quot;}
+    return await store.update('user', user.id, { name: 'Johnny' })
+  })
+  .then(function (user) {
+    // The user record has been updated, and the change synced to the store
+    console.log(store.get('user', user.id)) // { id: 1, name: 'Johnny' }
+    console.log(user === store.get('user', user.id)) // true
+
+    // DELETE /user/1
+    return store.destroy('user', user.id)
+  })
+  .then(function () {
+    // The user instance no longer in the store
+    console.log(store.get('user', 1)) // undefined
+  })</code></pre><h2>Background</h2><p>Most ORMs/ODMs only work with a single datastore, and most JavaScript ORMs only
+work in Node.js <em>or</em> the Browser. Wouldn't it be nice if you could use the same
+ORM/ODM on the client as you do on the backend? Wouldn't it be nice if you could
+switch databases without having to switch out your data layer code? Enter
+<strong>js-data</strong>.</p>
+<p>Originally inspired by the desire to have something like <a href="https://github.com/emberjs/data">Ember Data</a> that
+worked in Angular.js and other frameworks, js-data was created. Turns out,
+js-data works in Node.js, so server-side adapters were written. js-data is the
+Model layer you've been craving. It consists of a convenient
+<strong>framework-agnostic</strong>, <strong>datastore-agnostic</strong> ORM for managing your data, which
+uses <strong>adapters</strong> to connect to various <strong>persistence layers</strong>.</p>
+<p>The most commonly used adapter is the <a href="https://github.com/js-data/js-data-http">http adapter</a>, which is perfect for
+connecting your frontend to your backend. <a href="https://github.com/js-data/js-data-localstorage">localStorage</a>, <a href="https://github.com/js-data/js-data-localforage">localForage</a>,
+<a href="https://github.com/js-data/js-data-firebase">Firebase</a> and <a href="http://js-data.io/docs/adapters">other adapters</a> are available for the browser. On the
+server you could hook up to the <a href="https://github.com/js-data/js-data-sql">SQL adapter (Postgres/MySQL/MariaDB/SQLite3)</a>
+or the <a href="https://github.com/js-data/js-data-mongodb">MongoDB</a> adapter. More adapters are coming, and you're free to
+implement your own. See <a href="http://js-data.io/docs/adapters">Adapters</a>.</p>
+<p><a href="https://www.youtube.com/watch?v=8wxnnJA9FKw"><img src="http://img.youtube.com/vi/8wxnnJA9FKw/0.jpg" alt="MtnWestJS Conf 2015 Presentation"></a></p>
+<h2>Dependencies</h2><p>js-data and its adapters depend on a global ES2015 <code>Promise</code> constructor. In
+the browser, <code>window.Promise</code> must be available. In Node.js, <code>global.Promise</code>
+must be available. Here is a handy <a href="https://github.com/jakearchibald/es6-promise">ES2015 Promise polyfill</a>
+if you need it.</p>
+<p>js-data and its adapters require full ES5 support from the runtime. Here is a
+handy <a href="https://github.com/afarkas/html5shiv">ES5 polyfill</a> if you need it.</p>
+<h2>Guides and Tutorials</h2><p><a href="http://js-data.io">Get started at http://js-data.io</a></p>
+<h2>API Reference Docs</h2><p><a href="http://api.js-data.io">Visit http://api.js-data.io</a>.</p>
+<h2>Community</h2><p><a href="http://js-data.io/docs/community">Explore the Community</a>.</p>
+<h2>Support</h2><p><a href="http://js-data.io/docs/support">Find out how to Get Support</a>.</p>
+<h2>Contributing</h2><p><a href="http://js-data.io/docs/contributing">Read the Contributing Guide</a>.</p>
+<h2>License</h2><p>The MIT License (MIT)</p>
+<p>Copyright (c) 2014-2016 js-data project authors</p>
+<ul>
+<li><a href="https://github.com/js-data/js-data/blob/master/LICENSE">LICENSE</a></li>
+<li><a href="https://github.com/js-data/js-data/blob/master/AUTHORS">AUTHORS</a></li>
+<li><a href="https://github.com/js-data/js-data/blob/master/CONTRIBUTORS">CONTRIBUTORS</a></li>
+</ul></article>
+    </section>
+
+
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+		<div class="col-md-3">
+			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+		</div>
+	
+
+</div>
+</div>
+
+<div class="modal fade" id="searchResults">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Search results</h4>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+<footer>
+
+	<div style="text-align:center">Back to <a href="http://js-data.io">js-data.io</a></div>
+
+
+	<span class="copyright">
+	js-data Copyright © 2014-2016 js-data project authors
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
+	
+		on 2016-03-18T09:00:38-07:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+<script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			var id = $( heading ).attr( "id" );
+			return id && id.replace(/\~/g, '-inner-').replace(/\./g, '-static-') || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+<script>
+	(function ( i, s, o, g, r, a, m ) {
+		i['GoogleAnalyticsObject'] = r;
+		i[r] = i[r] || function () {
+			(i[r].q = i[r].q || []).push( arguments )
+		}, i[r].l = 1 * new Date();
+		a = s.createElement( o ),
+			m = s.getElementsByTagName( o )[0];
+		a.async = 1;
+		a.src = g;
+		m.parentNode.insertBefore( a, m )
+	})( window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga' );
+
+	ga( 'create', 'UA-55528236-2', 'api.js-data.io' );
+	ga( 'send', 'pageview' );
+</script>
+
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		SearcherDisplay.init();
+	});
+</script>
+
+</body>
+</html>
