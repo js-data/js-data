@@ -5,6 +5,10 @@
 
 ###### Backwards compatible API changes
 - Passive change detection now possible with changes to Record#changes() and Record#hasChanges(), see #313
+- Added sum and count methods
+
+###### Backwards compatible big fixes
+- Container and DataStore now proxy all Mapper methods
 
 ##### 3.0.0-alpha.19 - 14 March 2016
 
