@@ -35,6 +35,16 @@
     return obj;
   };
 
+  babelHelpers.toConsumableArray = function (arr) {
+    if (Array.isArray(arr)) {
+      for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
+
+      return arr2;
+    } else {
+      return Array.from(arr);
+    }
+  };
+
   babelHelpers;
 
   /**
@@ -4270,6 +4280,289 @@
     schema: null
   };
 
+  var LIFECYCLE_METHODS = {
+    /**
+     * Using the `query` argument, select records to pull from an adapter.
+     * Expects back from the adapter the array of selected records.
+     *
+     * {@link Mapper#beforeCount} will be called before calling the adapter.
+     * {@link Mapper#afterCount} will be called after calling the adapter.
+     *
+     * @name Mapper#count
+     * @method
+     * @param {Object} [query={}] Selection query.
+     * @param {Object} [query.where] Filtering criteria.
+     * @param {number} [query.skip] Number to skip.
+     * @param {number} [query.limit] Number to limit to.
+     * @param {Array} [query.orderBy] Sorting criteria.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * resulting data. If `true` return a response object that includes the
+     * resulting data and metadata about the operation.
+     * @return {Promise}
+     */
+    count: {
+      types: [],
+      defaults: [{}, {}],
+      skip: true
+    },
+
+    /**
+     * Using an adapter, destroy the record with the primary key specified by the
+     * `id` argument.
+     *
+     * {@link Mapper#beforeDestroy} will be called before destroying the record.
+     * {@link Mapper#afterDestroy} will be called after destroying the record.
+     *
+     * @name Mapper#destroy
+     * @method
+     * @param {(string|number)} id The primary key of the record to destroy.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * ejected data (if any). If `true` return a response object that includes the
+     * ejected data (if any) and metadata about the operation.
+     * @param {string[]} [opts.with=[]] Relations to destroy in a cascading
+     * delete. NOT performed in a transaction.
+     * @return {Promise}
+     */
+    destroy: {
+      types: [],
+      defaults: [{}, {}],
+      skip: true
+    },
+
+    /**
+     * Using the `query` argument, destroy the selected records via an adapter.
+     * If no `query` is provided then all records will be destroyed.
+     *
+     * {@link Mapper#beforeDestroyAll} will be called before destroying the records.
+     * {@link Mapper#afterDestroyAll} will be called after destroying the records.
+     *
+     * @name Mapper#destroyAll
+     * @method
+     * @param {Object} [query={}] Selection query.
+     * @param {Object} [query.where] Filtering criteria.
+     * @param {number} [query.skip] Number to skip.
+     * @param {number} [query.limit] Number to limit to.
+     * @param {Array} [query.orderBy] Sorting criteria.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * ejected data (if any). If `true` return a response object that includes the
+     * ejected data (if any) and metadata about the operation.
+     * @param {string[]} [opts.with=[]] Relations to destroy in a cascading
+     * delete. NOT performed in a transaction.
+     * @return {Promise}
+     */
+    destroyAll: {
+      types: [],
+      defaults: [{}, {}],
+      skip: true
+    },
+
+    /**
+     * Retrieve via an adapter the record with the given primary key.
+     *
+     * {@link Mapper#beforeFind} will be called before calling the adapter.
+     * {@link Mapper#afterFind} will be called after calling the adapter.
+     *
+     * @name Mapper#find
+     * @method
+     * @param {(string|number)} id The primary key of the record to retrieve.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * updated data. If `true` return a response object that includes the updated
+     * data and metadata about the operation.
+     * @param {string[]} [opts.with=[]] Relations to eager load in the request.
+     * @return {Promise}
+     */
+    find: {
+      types: [],
+      defaults: [undefined, {}]
+    },
+
+    /**
+     * Using the `query` argument, select records to pull from an adapter.
+     * Expects back from the adapter the array of selected records.
+     *
+     * {@link Mapper#beforeFindAll} will be called before calling the adapter.
+     * {@link Mapper#afterFindAll} will be called after calling the adapter.
+     *
+     * @name Mapper#findAll
+     * @method
+     * @param {Object} [query={}] Selection query.
+     * @param {Object} [query.where] Filtering criteria.
+     * @param {number} [query.skip] Number to skip.
+     * @param {number} [query.limit] Number to limit to.
+     * @param {Array} [query.orderBy] Sorting criteria.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * resulting data. If `true` return a response object that includes the
+     * resulting data and metadata about the operation.
+     * @param {string[]} [opts.with=[]] Relations to eager load in the request.
+     * @return {Promise}
+     */
+    findAll: {
+      types: [],
+      defaults: [{}, {}]
+    },
+
+    /**
+     * Using the `query` argument, select records to pull from an adapter.
+     * Expects back from the adapter the array of selected records.
+     *
+     * {@link Mapper#beforeSum} will be called before calling the adapter.
+     * {@link Mapper#afterSum} will be called after calling the adapter.
+     *
+     * @name Mapper#sum
+     * @method
+     * @param {string} field The field to sum.
+     * @param {Object} [query={}] Selection query.
+     * @param {Object} [query.where] Filtering criteria.
+     * @param {number} [query.skip] Number to skip.
+     * @param {number} [query.limit] Number to limit to.
+     * @param {Array} [query.orderBy] Sorting criteria.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * resulting data. If `true` return a response object that includes the
+     * resulting data and metadata about the operation.
+     * @return {Promise}
+     */
+    sum: {
+      types: [],
+      defaults: [undefined, {}, {}],
+      skip: true
+    },
+
+    /**
+     * Using an adapter, update the record with the primary key specified by the
+     * `id` argument.
+     *
+     * {@link Mapper#beforeUpdate} will be called before updating the record.
+     * {@link Mapper#afterUpdate} will be called after updating the record.
+     *
+     * @name Mapper#update
+     * @method
+     * @param {(string|number)} id The primary key of the record to update.
+     * @param {Object} props The update to apply to the record.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * updated data. If `true` return a response object that includes the updated
+     * data and metadata about the operation.
+     * @param {string[]} [opts.with=[]] Relations to update in a cascading
+     * update if `props` contains nested updates to relations. NOT performed in a
+     * transaction.
+     * @return {Promise}
+     */
+    update: {
+      types: [],
+      defaults: [undefined, {}, {}],
+      beforeAssign: 1,
+      adapterArgs: function adapterArgs(mapper, id, props, opts) {
+        return [id, mapper.toJSON(props, opts), opts];
+      }
+    },
+
+    /**
+     * Using the `query` argument, perform the a single updated to the selected
+     * records. Expects back from the adapter an array of the updated records.
+     *
+     * {@link Mapper#beforeUpdateAll} will be called before making the update.
+     * {@link Mapper#afterUpdateAll} will be called after making the update.
+     *
+     * @name Mapper#updateAll
+     * @method
+     * @param {Object} props Update to apply to selected records.
+     * @param {Object} [query={}] Selection query.
+     * @param {Object} [query.where] Filtering criteria.
+     * @param {number} [query.skip] Number to skip.
+     * @param {number} [query.limit] Number to limit to.
+     * @param {Array} [query.orderBy] Sorting criteria.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * updated data. If `true` return a response object that includes the updated
+     * data and metadata about the operation.
+     * @param {string[]} [opts.with=[]] Relations to update in a cascading
+     * update if `props` contains nested updates to relations. NOT performed in a
+     * transaction.
+     * @return {Promise}
+     */
+    updateAll: {
+      types: [],
+      defaults: [{}, {}, {}],
+      beforeAssign: 0,
+      adapterArgs: function adapterArgs(mapper, props, query, opts) {
+        return [mapper.toJSON(props, opts), query, opts];
+      }
+    },
+
+    /**
+     * Given an array of updates, perform each of the updates via an adapter. Each
+     * "update" is a hash of properties with which to update an record. Each
+     * update must contain the primary key to be updated.
+     *
+     * {@link Mapper#beforeUpdateMany} will be called before making the update.
+     * {@link Mapper#afterUpdateMany} will be called after making the update.
+     *
+     * @name Mapper#updateMany
+     * @method
+     * @param {Array} records Array up record updates.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * updated data. If `true` return a response object that includes the updated
+     * data and metadata about the operation.
+     * @param {string[]} [opts.with=[]] Relations to update in a cascading
+     * update if each record update contains nested updates for relations. NOT
+     * performed in a transaction.
+     * @return {Promise}
+     */
+    updateMany: {
+      types: [],
+      defaults: [[], {}],
+      beforeAssign: 0,
+      adapterArgs: function adapterArgs(mapper, records, opts) {
+        return [records.map(function (record) {
+          return mapper.toJSON(record, opts);
+        }), opts];
+      }
+    }
+  };
+
   /**
    * ```javascript
    * import {Mapper} from 'js-data'
@@ -4323,7 +4616,7 @@
      * @private
      */
     Object.defineProperty(self, '_listeners', {
-      value: undefined,
+      value: {},
       writable: true
     });
 
@@ -4392,7 +4685,6 @@
     }
 
     self._adapters || (self._adapters = {});
-    self._listeners || (self._listeners = {});
 
     if (!(self.schema instanceof Schema)) {
       self.schema = new Schema(self.schema || {});
@@ -4413,22 +4705,22 @@
     }
   }
 
-  /**
-   * Instance members
-   */
-  _.addHiddenPropsToTarget(Mapper.prototype, {
+  var methodDescriptors = {
     /**
      * @name Mapper#_end
      * @method
      * @private
      */
 
-    _end: function _end(data, opts) {
+    _end: function _end(result, opts, skip) {
       var self = this;
       if (opts.raw) {
-        _._(opts, data);
+        _._(opts, result);
       }
-      var _data = opts.raw ? data.data : data;
+      if (skip) {
+        return result;
+      }
+      var _data = opts.raw ? result.data : result;
       if (_.isArray(_data) && _data.length && _.isObject(_data[0])) {
         _data = _data.map(function (item) {
           return self.createRecord(item);
@@ -4437,241 +4729,11 @@
         _data = self.createRecord(_data);
       }
       if (opts.raw) {
-        data.data = _data;
+        result.data = _data;
       } else {
-        data = _data;
+        result = _data;
       }
-      return data;
-    },
-
-
-    /**
-     * Create an unsaved, uncached instance of this Mapper's
-     * {@link Mapper#RecordClass}.
-     *
-     * Returns `props` if `props` is already an instance of
-     * {@link Mapper#RecordClass}.
-     *
-     * @name Mapper#createRecord
-     * @method
-     * @param {Object} props The initial properties of the new unsaved record.
-     * @param {Object} [opts] Configuration options.
-     * @param {boolean} [opts.noValidate=false] Whether to skip validation on the
-     * initial properties.
-     * @return {Object} The unsaved record.
-     */
-    createRecord: function createRecord(props, opts) {
-      var self = this;
-      var RecordClass = self.RecordClass;
-      var relationList = self.relationList || [];
-      relationList.forEach(function (def) {
-        var relatedMapper = def.getRelation();
-        var relationData = def.getLocalField(props);
-        if (_.isArray(relationData) && relationData.length && !relatedMapper.is(relationData[0])) {
-          def.setLocalField(props, relationData.map(function (relationDataItem) {
-            return def.getRelation().createRecord(relationDataItem);
-          }));
-        } else if (_.isObject(relationData) && !relatedMapper.is(relationData)) {
-          def.setLocalField(props, def.getRelation().createRecord(relationData));
-        }
-      });
-      // Check to make sure "props" is not already an instance of this Mapper.
-      return RecordClass ? props instanceof RecordClass ? props : new RecordClass(props, opts) : props;
-    },
-
-
-    /**
-     * Return whether `record` is an instance of this Mappers's RecordClass.
-     *
-     * @name Mapper#is
-     * @method
-     * @param {Object} record The record to check.
-     * @return {boolean} Whether `record` is an instance of this Mappers's
-     * {@ link Mapper#RecordClass}.
-     */
-    is: function is(record) {
-      var RecordClass = this.RecordClass;
-      return RecordClass ? record instanceof RecordClass : false;
-    },
-
-
-    /**
-     * Return a plain object representation of the given record.
-     *
-     * @name Mapper#toJSON
-     * @method
-     * @param {Object} record Record from which to create a plain object
-     * representation.
-     * @param {Object} [opts] Configuration options.
-     * @param {string[]} [opts.with] Array of relation names or relation fields
-     * to include in the representation.
-     * @return {Object} Plain object representation of the record.
-     */
-    toJSON: function toJSON(record, opts) {
-      var self = this;
-      opts || (opts = {});
-      var relationFields = (self ? self.relationFields : []) || [];
-      var json = {};
-      var properties = void 0;
-      if (self && self.schema) {
-        properties = self.schema.properties || {};
-        // TODO: Make this work recursively
-        _.forOwn(properties, function (opts, prop) {
-          json[prop] = _.plainCopy(record[prop]);
-        });
-      }
-      properties || (properties = {});
-      if (!opts.strict) {
-        _.forOwn(record, function (value, key) {
-          if (!properties[key] && relationFields.indexOf(key) === -1) {
-            json[key] = _.plainCopy(value);
-          }
-        });
-      }
-      // The user wants to include relations in the resulting plain object
-      // representation
-      if (self && opts.withAll) {
-        opts.with = relationFields.slice();
-      }
-      if (self && opts.with) {
-        if (_.isString(opts.with)) {
-          opts.with = [opts.with];
-        }
-        _.forEachRelation(self, opts, function (def, __opts) {
-          var relationData = def.getLocalField(record);
-          if (relationData) {
-            // The actual recursion
-            if (_.isArray(relationData)) {
-              def.setLocalField(json, relationData.map(function (item) {
-                return def.getRelation().toJSON(item, __opts);
-              }));
-            } else {
-              def.setLocalField(json, def.getRelation().toJSON(relationData, __opts));
-            }
-          }
-        });
-      }
-      return json;
-    },
-
-
-    /**
-     * Return the registered adapter with the given name or the default adapter if
-     * no name is provided.
-     *
-     * @name Mapper#getAdapter
-     * @method
-     * @param {string} [name] The name of the adapter to retrieve.
-     * @return {Adapter} The adapter.
-     */
-    getAdapter: function getAdapter(name) {
-      var self = this;
-      self.dbg('getAdapter', 'name:', name);
-      var adapter = self.getAdapterName(name);
-      if (!adapter) {
-        throw new ReferenceError(adapter + ' not found!');
-      }
-      return self.getAdapters()[adapter];
-    },
-
-
-    /**
-     * Return the name of a registered adapter based on the given name or options,
-     * or the name of the default adapter if no name provided.
-     *
-     * @name Mapper#getAdapterName
-     * @method
-     * @param {(Object|string)} [opts] The name of an adapter or options, if any.
-     * @return {string} The name of the adapter.
-     */
-    getAdapterName: function getAdapterName(opts) {
-      opts || (opts = {});
-      if (_.isString(opts)) {
-        opts = { adapter: opts };
-      }
-      return opts.adapter || opts.defaultAdapter;
-    },
-
-
-    /**
-     * @name Mapper#getAdapters
-     * @method
-     */
-    getAdapters: function getAdapters() {
-      return this._adapters;
-    },
-    getSchema: function getSchema() {
-      return this.schema;
-    },
-
-
-    /**
-     * Mapper lifecycle hook called by {@link Mapper#count}. If this method
-     * returns a promise then {@link Mapper#count} will wait for the promise
-     * to resolve before continuing.
-     *
-     * @name Mapper#beforeCount
-     * @method
-     * @param {Object} query The `query` argument passed to {@link Mapper#count}.
-     * @param {Object} opts The `opts` argument passed to {@link Mapper#count}.
-     */
-    beforeCount: notify,
-
-    /**
-     * Using the `query` argument, select records to pull from an adapter.
-     * Expects back from the adapter the array of selected records.
-     *
-     * {@link Mapper#beforeCount} will be called before calling the adapter.
-     * {@link Mapper#afterCount} will be called after calling the adapter.
-     *
-     * @name Mapper#count
-     * @method
-     * @param {Object} [query={}] Selection query.
-     * @param {Object} [query.where] Filtering criteria.
-     * @param {number} [query.skip] Number to skip.
-     * @param {number} [query.limit] Number to limit to.
-     * @param {Array} [query.orderBy] Sorting criteria.
-     * @param {Object} [opts] Configuration options.
-     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
-     * adapter to use.
-     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
-     * lifecycle events.
-     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
-     * resulting data. If `true` return a response object that includes the
-     * resulting data and metadata about the operation.
-     * @return {Promise}
-     */
-    count: function count(query, opts) {
-      var op = void 0,
-          adapter = void 0;
-      var self = this;
-
-      // Default values for arguments
-      query || (query = {});
-      opts || (opts = {});
-
-      // Fill in "opts" with the Mapper's configuration
-      _._(self, opts);
-      adapter = opts.adapter = self.getAdapterName(opts);
-
-      // beforeCount lifecycle hook
-      op = opts.op = 'beforeCount';
-      return _.resolve(self[op](query, opts)).then(function () {
-        // Now delegate to the adapter
-        op = opts.op = 'count';
-        self.dbg(op, query, opts);
-        return _.resolve(self.getAdapter(adapter)[op](self, query, opts));
-      }).then(function (result) {
-        if (opts.raw) {
-          _._(opts, result);
-        }
-        // afterCount lifecycle hook
-        op = opts.op = 'afterCount';
-        return _.resolve(self[op](query, opts, result)).then(function (_result) {
-          // Allow for re-assignment from lifecycle hook
-          return _.isUndefined(_result) ? result : _result;
-        });
-      });
+      return result;
     },
 
 
@@ -4693,12 +4755,288 @@
      * returns a promise then {@link Mapper#create} will wait for the promise
      * to resolve before continuing.
      *
+     * @name Mapper#afterCreate
+     * @method
+     * @param {Object} props The `props` argument passed to {@link Mapper#create}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#create}.
+     * @param {*} result The result, if any.
+     */
+    afterCreate: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#createMany}. If this method
+     * returns a promise then {@link Mapper#createMany} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterCreateMany
+     * @method
+     * @param {Array} records The `records` argument passed to {@link Mapper#createMany}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#createMany}.
+     * @param {*} result The result, if any.
+     */
+    afterCreateMany: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#destroy}. If this method
+     * returns a promise then {@link Mapper#destroy} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterDestroy
+     * @method
+     * @param {(string|number)} id The `id` argument passed to {@link Mapper#destroy}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#destroy}.
+     * @param {*} result The result, if any.
+     */
+    afterDestroy: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#destroyAll}. If this method
+     * returns a promise then {@link Mapper#destroyAll} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterDestroyAll
+     * @method
+     * @param {*} data The `data` returned by the adapter.
+     * @param {query} query The `query` argument passed to {@link Mapper#destroyAll}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#destroyAll}.
+     * @param {*} result The result, if any.
+     */
+    afterDestroyAll: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#find}. If this method
+     * returns a promise then {@link Mapper#find} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterFind
+     * @method
+     * @param {(string|number)} id The `id` argument passed to {@link Mapper#find}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#find}.
+     * @param {*} result The result, if any.
+     */
+    afterFind: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#findAll}. If this method
+     * returns a promise then {@link Mapper#findAll} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterFindAll
+     * @method
+     * @param {Object} query The `query` argument passed to {@link Mapper#findAll}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#findAll}.
+     * @param {*} result The result, if any.
+     */
+    afterFindAll: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#sum}. If this method
+     * returns a promise then {@link Mapper#sum} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterSum
+     * @method
+     * @param {Object} query The `query` argument passed to {@link Mapper#sum}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#sum}.
+     * @param {*} result The result, if any.
+     */
+    afterSum: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#update}. If this method
+     * returns a promise then {@link Mapper#update} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterUpdate
+     * @method
+     * @param {(string|number)} id The `id` argument passed to {@link Mapper#update}.
+     * @param {props} props The `props` argument passed to {@link Mapper#update}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#update}.
+     * @param {*} result The result, if any.
+     */
+    afterUpdate: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#updateAll}. If this method
+     * returns a promise then {@link Mapper#updateAll} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterUpdateAll
+     * @method
+     * @param {Object} props The `props` argument passed to {@link Mapper#updateAll}.
+     * @param {Object} query The `query` argument passed to {@link Mapper#updateAll}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#updateAll}.
+     * @param {*} result The result, if any.
+     */
+    afterUpdateAll: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#updateMany}. If this method
+     * returns a promise then {@link Mapper#updateMany} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterUpdateMany
+     * @method
+     * @param {Array} records The `records` argument passed to {@link Mapper#updateMany}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#updateMany}.
+     * @param {*} result The result, if any.
+     */
+    afterUpdateMany: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#create}. If this method
+     * returns a promise then {@link Mapper#create} will wait for the promise
+     * to resolve before continuing.
+     *
      * @name Mapper#beforeCreate
      * @method
      * @param {Object} props The `props` argument passed to {@link Mapper#create}.
      * @param {Object} opts The `opts` argument passed to {@link Mapper#create}.
      */
     beforeCreate: notify,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#createMany}. If this method
+     * returns a promise then {@link Mapper#createMany} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeCreateMany
+     * @method
+     * @param {Array} records The `records` argument passed to {@link Mapper#createMany}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#createMany}.
+     */
+    beforeCreateMany: notify,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#count}. If this method
+     * returns a promise then {@link Mapper#count} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeCount
+     * @method
+     * @param {Object} query The `query` argument passed to {@link Mapper#count}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#count}.
+     */
+    beforeCount: notify,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#destroy}. If this method
+     * returns a promise then {@link Mapper#destroy} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeDestroy
+     * @method
+     * @param {(string|number)} id The `id` argument passed to {@link Mapper#destroy}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#destroy}.
+     */
+    beforeDestroy: notify,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#destroyAll}. If this method
+     * returns a promise then {@link Mapper#destroyAll} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeDestroyAll
+     * @method
+     * @param {query} query The `query` argument passed to {@link Mapper#destroyAll}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#destroyAll}.
+     */
+    beforeDestroyAll: notify,
+
+    /**
+     * Mappers lifecycle hook called by {@link Mapper#find}. If this method
+     * returns a promise then {@link Mapper#find} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeFind
+     * @method
+     * @param {(string|number)} id The `id` argument passed to {@link Mapper#find}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#find}.
+     */
+    beforeFind: notify,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#findAll}. If this method
+     * returns a promise then {@link Mapper#findAll} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeFindAll
+     * @method
+     * @param {Object} query The `query` argument passed to {@link Mapper#findAll}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#findAll}.
+     */
+    beforeFindAll: notify,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#sum}. If this method
+     * returns a promise then {@link Mapper#sum} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeSum
+     * @method
+     * @param {string} field The `field` argument passed to {@link Mapper#sum}.
+     * @param {Object} query The `query` argument passed to {@link Mapper#sum}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#sum}.
+     */
+    beforeSum: notify,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#update}. If this method
+     * returns a promise then {@link Mapper#update} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeUpdate
+     * @method
+     * @param {(string|number)} id The `id` argument passed to {@link Mapper#update}.
+     * @param {props} props The `props` argument passed to {@link Mapper#update}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#update}.
+     */
+    beforeUpdate: notify,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#updateAll}. If this method
+     * returns a promise then {@link Mapper#updateAll} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeUpdateAll
+     * @method
+     * @param {Object} props The `props` argument passed to {@link Mapper#updateAll}.
+     * @param {Object} query The `query` argument passed to {@link Mapper#updateAll}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#updateAll}.
+     */
+    beforeUpdateAll: notify,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#updateMany}. If this method
+     * returns a promise then {@link Mapper#updateMany} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeUpdateMany
+     * @method
+     * @param {Array} records The `records` argument passed to {@link Mapper#updateMany}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#updateMany}.
+     */
+    beforeUpdateMany: notify,
+
+    /**
+     * Usage:
+     *
+     * Post.belongsTo(User, {
+     *   localKey: 'myUserId'
+     * })
+     *
+     * Comment.belongsTo(User)
+     * Comment.belongsTo(Post, {
+     *   localField: '_post'
+     * })
+     *
+     * @name Mapper#belongsTo
+     * @method
+     */
+    belongsTo: function belongsTo(RelatedMapper, opts) {
+      return _belongsTo(RelatedMapper, opts)(this);
+    },
+
 
     /**
      * Create and save a new the record using the provided `props`.
@@ -4809,31 +5147,6 @@
       });
     },
 
-
-    /**
-     * Mapper lifecycle hook called by {@link Mapper#create}. If this method
-     * returns a promise then {@link Mapper#create} will wait for the promise
-     * to resolve before continuing.
-     *
-     * @name Mapper#afterCreate
-     * @method
-     * @param {Object} props The `props` argument passed to {@link Mapper#create}.
-     * @param {Object} opts The `opts` argument passed to {@link Mapper#create}.
-     * @param {*} result The result, if any.
-     */
-    afterCreate: notify2,
-
-    /**
-     * Mapper lifecycle hook called by {@link Mapper#createMany}. If this method
-     * returns a promise then {@link Mapper#createMany} will wait for the promise
-     * to resolve before continuing.
-     *
-     * @name Mapper#beforeCreateMany
-     * @method
-     * @param {Array} records The `records` argument passed to {@link Mapper#createMany}.
-     * @param {Object} opts The `opts` argument passed to {@link Mapper#createMany}.
-     */
-    beforeCreateMany: notify,
 
     /**
      * Given an array of records, batch create them via an adapter.
@@ -4966,716 +5279,37 @@
 
 
     /**
-     * Mapper lifecycle hook called by {@link Mapper#createMany}. If this method
-     * returns a promise then {@link Mapper#createMany} will wait for the promise
-     * to resolve before continuing.
+     * Create an unsaved, uncached instance of this Mapper's
+     * {@link Mapper#RecordClass}.
      *
-     * @name Mapper#afterCreateMany
+     * Returns `props` if `props` is already an instance of
+     * {@link Mapper#RecordClass}.
+     *
+     * @name Mapper#createRecord
      * @method
-     * @param {Array} records The `records` argument passed to {@link Mapper#createMany}.
-     * @param {Object} opts The `opts` argument passed to {@link Mapper#createMany}.
-     * @param {*} result The result, if any.
-     */
-    afterCreateMany: notify2,
-
-    /**
-     * Mappers lifecycle hook called by {@link Mapper#find}. If this method
-     * returns a promise then {@link Mapper#find} will wait for the promise
-     * to resolve before continuing.
-     *
-     * @name Mapper#beforeFind
-     * @method
-     * @param {(string|number)} id The `id` argument passed to {@link Mapper#find}.
-     * @param {Object} opts The `opts` argument passed to {@link Mapper#find}.
-     */
-    beforeFind: notify,
-
-    /**
-     * Retrieve via an adapter the record with the given primary key.
-     *
-     * {@link Mapper#beforeFind} will be called before calling the adapter.
-     * {@link Mapper#afterFind} will be called after calling the adapter.
-     *
-     * @name Mapper#find
-     * @method
-     * @param {(string|number)} id The primary key of the record to retrieve.
+     * @param {Object} props The initial properties of the new unsaved record.
      * @param {Object} [opts] Configuration options.
-     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
-     * adapter to use.
-     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
-     * lifecycle events.
-     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
-     * updated data. If `true` return a response object that includes the updated
-     * data and metadata about the operation.
-     * @param {string[]} [opts.with=[]] Relations to eager load in the request.
-     * @return {Promise}
+     * @param {boolean} [opts.noValidate=false] Whether to skip validation on the
+     * initial properties.
+     * @return {Object} The unsaved record.
      */
-    find: function find(id, opts) {
-      var op = void 0,
-          adapter = void 0;
+    createRecord: function createRecord(props, opts) {
       var self = this;
-
-      // Default values for arguments
-      opts || (opts = {});
-
-      // Fill in "opts" with the Mappers's configuration
-      _._(self, opts);
-      adapter = opts.adapter = self.getAdapterName(opts);
-
-      // beforeFind lifecycle hook
-      op = opts.op = 'beforeFind';
-      return _.resolve(self[op](id, opts)).then(function () {
-        // Now delegate to the adapter
-        op = opts.op = 'find';
-        self.dbg(op, id, opts);
-        return _.resolve(self.getAdapter(adapter)[op](self, id, opts));
-      }).then(function (result) {
-        result = self._end(result, opts);
-        // afterFind lifecycle hook
-        op = opts.op = 'afterFind';
-        return _.resolve(self[op](id, opts, result)).then(function (_result) {
-          // Allow for re-assignment from lifecycle hook
-          return _.isUndefined(_result) ? result : _result;
-        });
-      });
-    },
-
-
-    /**
-     * Mapper lifecycle hook called by {@link Mapper#find}. If this method
-     * returns a promise then {@link Mapper#find} will wait for the promise
-     * to resolve before continuing.
-     *
-     * @name Mapper#afterFind
-     * @method
-     * @param {(string|number)} id The `id` argument passed to {@link Mapper#find}.
-     * @param {Object} opts The `opts` argument passed to {@link Mapper#find}.
-     * @param {*} result The result, if any.
-     */
-    afterFind: notify2,
-
-    /**
-     * Mapper lifecycle hook called by {@link Mapper#findAll}. If this method
-     * returns a promise then {@link Mapper#findAll} will wait for the promise
-     * to resolve before continuing.
-     *
-     * @name Mapper#beforeFindAll
-     * @method
-     * @param {Object} query The `query` argument passed to {@link Mapper#findAll}.
-     * @param {Object} opts The `opts` argument passed to {@link Mapper#findAll}.
-     */
-    beforeFindAll: notify,
-
-    /**
-     * Using the `query` argument, select records to pull from an adapter.
-     * Expects back from the adapter the array of selected records.
-     *
-     * {@link Mapper#beforeFindAll} will be called before calling the adapter.
-     * {@link Mapper#afterFindAll} will be called after calling the adapter.
-     *
-     * @name Mapper#findAll
-     * @method
-     * @param {Object} [query={}] Selection query.
-     * @param {Object} [query.where] Filtering criteria.
-     * @param {number} [query.skip] Number to skip.
-     * @param {number} [query.limit] Number to limit to.
-     * @param {Array} [query.orderBy] Sorting criteria.
-     * @param {Object} [opts] Configuration options.
-     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
-     * adapter to use.
-     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
-     * lifecycle events.
-     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
-     * resulting data. If `true` return a response object that includes the
-     * resulting data and metadata about the operation.
-     * @param {string[]} [opts.with=[]] Relations to eager load in the request.
-     * @return {Promise}
-     */
-    findAll: function findAll(query, opts) {
-      var op = void 0,
-          adapter = void 0;
-      var self = this;
-
-      // Default values for arguments
-      query || (query = {});
-      opts || (opts = {});
-
-      // Fill in "opts" with the Mapper's configuration
-      _._(self, opts);
-      adapter = opts.adapter = self.getAdapterName(opts);
-
-      // beforeFindAll lifecycle hook
-      op = opts.op = 'beforeFindAll';
-      return _.resolve(self[op](query, opts)).then(function () {
-        // Now delegate to the adapter
-        op = opts.op = 'findAll';
-        self.dbg(op, query, opts);
-        return _.resolve(self.getAdapter(adapter)[op](self, query, opts));
-      }).then(function (result) {
-        result = self._end(result, opts);
-        // afterFindAll lifecycle hook
-        op = opts.op = 'afterFindAll';
-        return _.resolve(self[op](query, opts, result)).then(function (_result) {
-          // Allow for re-assignment from lifecycle hook
-          return _.isUndefined(_result) ? result : _result;
-        });
-      });
-    },
-
-
-    /**
-     * Mapper lifecycle hook called by {@link Mapper#findAll}. If this method
-     * returns a promise then {@link Mapper#findAll} will wait for the promise
-     * to resolve before continuing.
-     *
-     * @name Mapper#afterFindAll
-     * @method
-     * @param {Object} query The `query` argument passed to {@link Mapper#findAll}.
-     * @param {Object} opts The `opts` argument passed to {@link Mapper#findAll}.
-     * @param {*} result The result, if any.
-     */
-    afterFindAll: notify2,
-
-    /**
-     * Mapper lifecycle hook called by {@link Mapper#sum}. If this method
-     * returns a promise then {@link Mapper#sum} will wait for the promise
-     * to resolve before continuing.
-     *
-     * @name Mapper#beforeSum
-     * @method
-     * @param {string} field The `field` argument passed to {@link Mapper#sum}.
-     * @param {Object} query The `query` argument passed to {@link Mapper#sum}.
-     * @param {Object} opts The `opts` argument passed to {@link Mapper#sum}.
-     */
-    beforeSum: notify,
-
-    /**
-     * Using the `query` argument, select records to pull from an adapter.
-     * Expects back from the adapter the array of selected records.
-     *
-     * {@link Mapper#beforeSum} will be called before calling the adapter.
-     * {@link Mapper#afterSum} will be called after calling the adapter.
-     *
-     * @name Mapper#sum
-     * @method
-     * @param {string} field The field to sum.
-     * @param {Object} [query={}] Selection query.
-     * @param {Object} [query.where] Filtering criteria.
-     * @param {number} [query.skip] Number to skip.
-     * @param {number} [query.limit] Number to limit to.
-     * @param {Array} [query.orderBy] Sorting criteria.
-     * @param {Object} [opts] Configuration options.
-     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
-     * adapter to use.
-     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
-     * lifecycle events.
-     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
-     * resulting data. If `true` return a response object that includes the
-     * resulting data and metadata about the operation.
-     * @return {Promise}
-     */
-    sum: function sum(field, query, opts) {
-      var op = void 0,
-          adapter = void 0;
-      var self = this;
-
-      // Default values for arguments
-      query || (query = {});
-      opts || (opts = {});
-
-      // Fill in "opts" with the Mapper's configuration
-      _._(self, opts);
-      adapter = opts.adapter = self.getAdapterName(opts);
-
-      // beforeSum lifecycle hook
-      op = opts.op = 'beforeSum';
-      return _.resolve(self[op](field, query, opts)).then(function () {
-        // Now delegate to the adapter
-        op = opts.op = 'sum';
-        self.dbg(op, query, opts);
-        return _.resolve(self.getAdapter(adapter)[op](self, field, query, opts));
-      }).then(function (result) {
-        if (opts.raw) {
-          _._(opts, result);
+      var RecordClass = self.RecordClass;
+      var relationList = self.relationList || [];
+      relationList.forEach(function (def) {
+        var relatedMapper = def.getRelation();
+        var relationData = def.getLocalField(props);
+        if (_.isArray(relationData) && relationData.length && !relatedMapper.is(relationData[0])) {
+          def.setLocalField(props, relationData.map(function (relationDataItem) {
+            return def.getRelation().createRecord(relationDataItem);
+          }));
+        } else if (_.isObject(relationData) && !relatedMapper.is(relationData)) {
+          def.setLocalField(props, def.getRelation().createRecord(relationData));
         }
-        // afterSum lifecycle hook
-        op = opts.op = 'afterSum';
-        return _.resolve(self[op](field, query, opts, result)).then(function (_result) {
-          // Allow for re-assignment from lifecycle hook
-          return _.isUndefined(_result) ? result : _result;
-        });
       });
-    },
-
-
-    /**
-     * Mapper lifecycle hook called by {@link Mapper#sum}. If this method
-     * returns a promise then {@link Mapper#sum} will wait for the promise
-     * to resolve before continuing.
-     *
-     * @name Mapper#afterSum
-     * @method
-     * @param {Object} query The `query` argument passed to {@link Mapper#sum}.
-     * @param {Object} opts The `opts` argument passed to {@link Mapper#sum}.
-     * @param {*} result The result, if any.
-     */
-    afterSum: notify2,
-
-    /**
-     * Mapper lifecycle hook called by {@link Mapper#update}. If this method
-     * returns a promise then {@link Mapper#update} will wait for the promise
-     * to resolve before continuing.
-     *
-     * @name Mapper#beforeUpdate
-     * @method
-     * @param {(string|number)} id The `id` argument passed to {@link Mapper#update}.
-     * @param {props} props The `props` argument passed to {@link Mapper#update}.
-     * @param {Object} opts The `opts` argument passed to {@link Mapper#update}.
-     */
-    beforeUpdate: notify,
-
-    /**
-     * Using an adapter, update the record with the primary key specified by the
-     * `id` argument.
-     *
-     * {@link Mapper#beforeUpdate} will be called before updating the record.
-     * {@link Mapper#afterUpdate} will be called after updating the record.
-     *
-     * @name Mapper#update
-     * @method
-     * @param {(string|number)} id The primary key of the record to update.
-     * @param {Object} props The update to apply to the record.
-     * @param {Object} [opts] Configuration options.
-     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
-     * adapter to use.
-     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
-     * lifecycle events.
-     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
-     * updated data. If `true` return a response object that includes the updated
-     * data and metadata about the operation.
-     * @param {string[]} [opts.with=[]] Relations to update in a cascading
-     * update if `props` contains nested updates to relations. NOT performed in a
-     * transaction.
-     * @return {Promise}
-     */
-    update: function update(id, props, opts) {
-      var op = void 0,
-          adapter = void 0;
-      var self = this;
-
-      // Default values for arguments
-      props || (props = {});
-      opts || (opts = {});
-
-      // Fill in "opts" with the Mapper's configuration
-      _._(self, opts);
-      adapter = opts.adapter = self.getAdapterName(opts);
-
-      // beforeUpdate lifecycle hook
-      op = opts.op = 'beforeUpdate';
-      return _.resolve(self[op](id, props, opts)).then(function (_props) {
-        // Allow for re-assignment from lifecycle hook
-        props = _.isUndefined(_props) ? props : _props;
-        // Now delegate to the adapter
-        op = opts.op = 'update';
-        var json = self.toJSON(props, opts);
-        self.dbg(op, id, json, opts);
-        return _.resolve(self.getAdapter(adapter)[op](self, id, json, opts));
-      }).then(function (result) {
-        result = self._end(result, opts);
-        // afterUpdate lifecycle hook
-        op = opts.op = 'afterUpdate';
-        return _.resolve(self[op](id, props, opts, result)).then(function (_result) {
-          // Allow for re-assignment from lifecycle hook
-          return _.isUndefined(_result) ? result : _result;
-        });
-      });
-    },
-
-
-    /**
-     * Mapper lifecycle hook called by {@link Mapper#update}. If this method
-     * returns a promise then {@link Mapper#update} will wait for the promise
-     * to resolve before continuing.
-     *
-     * @name Mapper#afterUpdate
-     * @method
-     * @param {(string|number)} id The `id` argument passed to {@link Mapper#update}.
-     * @param {props} props The `props` argument passed to {@link Mapper#update}.
-     * @param {Object} opts The `opts` argument passed to {@link Mapper#update}.
-     * @param {*} result The result, if any.
-     */
-    afterUpdate: notify2,
-
-    /**
-     * Mapper lifecycle hook called by {@link Mapper#updateMany}. If this method
-     * returns a promise then {@link Mapper#updateMany} will wait for the promise
-     * to resolve before continuing.
-     *
-     * @name Mapper#beforeUpdateMany
-     * @method
-     * @param {Array} records The `records` argument passed to {@link Mapper#updateMany}.
-     * @param {Object} opts The `opts` argument passed to {@link Mapper#updateMany}.
-     */
-    beforeUpdateMany: notify,
-
-    /**
-     * Given an array of updates, perform each of the updates via an adapter. Each
-     * "update" is a hash of properties with which to update an record. Each
-     * update must contain the primary key to be updated.
-     *
-     * {@link Mapper#beforeUpdateMany} will be called before making the update.
-     * {@link Mapper#afterUpdateMany} will be called after making the update.
-     *
-     * @name Mapper#updateMany
-     * @method
-     * @param {Array} records Array up record updates.
-     * @param {Object} [opts] Configuration options.
-     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
-     * adapter to use.
-     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
-     * lifecycle events.
-     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
-     * updated data. If `true` return a response object that includes the updated
-     * data and metadata about the operation.
-     * @param {string[]} [opts.with=[]] Relations to update in a cascading
-     * update if each record update contains nested updates for relations. NOT
-     * performed in a transaction.
-     * @return {Promise}
-     */
-    updateMany: function updateMany(records, opts) {
-      var op = void 0,
-          adapter = void 0;
-      var self = this;
-
-      // Default values for arguments
-      records || (records = []);
-      opts || (opts = {});
-
-      // Fill in "opts" with the Mapper's configuration
-      _._(self, opts);
-      adapter = opts.adapter = self.getAdapterName(opts);
-
-      // beforeUpdateMany lifecycle hook
-      op = opts.op = 'beforeUpdateMany';
-      return _.resolve(self[op](records, opts)).then(function (_records) {
-        // Allow for re-assignment from lifecycle hook
-        records = _.isUndefined(_records) ? records : _records;
-        // Now delegate to the adapter
-        op = opts.op = 'updateMany';
-        var json = records.map(function (item) {
-          return self.toJSON(item, opts);
-        });
-        self.dbg(op, json, opts);
-        return _.resolve(self.getAdapter(adapter)[op](self, json, opts));
-      }).then(function (result) {
-        result = self._end(result, opts);
-        // afterUpdateMany lifecycle hook
-        op = opts.op = 'afterUpdateMany';
-        return _.resolve(self[op](records, opts, result)).then(function (_result) {
-          // Allow for re-assignment from lifecycle hook
-          return _.isUndefined(_result) ? result : _result;
-        });
-      });
-    },
-
-
-    /**
-     * Mapper lifecycle hook called by {@link Mapper#updateMany}. If this method
-     * returns a promise then {@link Mapper#updateMany} will wait for the promise
-     * to resolve before continuing.
-     *
-     * @name Mapper#afterUpdateMany
-     * @method
-     * @param {Array} records The `records` argument passed to {@link Mapper#updateMany}.
-     * @param {Object} opts The `opts` argument passed to {@link Mapper#updateMany}.
-     * @param {*} result The result, if any.
-     */
-    afterUpdateMany: notify2,
-
-    /**
-     * Mapper lifecycle hook called by {@link Mapper#updateAll}. If this method
-     * returns a promise then {@link Mapper#updateAll} will wait for the promise
-     * to resolve before continuing.
-     *
-     * @name Mapper#beforeUpdateAll
-     * @method
-     * @param {Object} props The `props` argument passed to {@link Mapper#updateAll}.
-     * @param {Object} query The `query` argument passed to {@link Mapper#updateAll}.
-     * @param {Object} opts The `opts` argument passed to {@link Mapper#updateAll}.
-     */
-    beforeUpdateAll: notify,
-
-    /**
-     * Using the `query` argument, perform the a single updated to the selected
-     * records. Expects back from the adapter an array of the updated records.
-     *
-     * {@link Mapper#beforeUpdateAll} will be called before making the update.
-     * {@link Mapper#afterUpdateAll} will be called after making the update.
-     *
-     * @name Mapper#updateAll
-     * @method
-     * @param {Object} props Update to apply to selected records.
-     * @param {Object} [query={}] Selection query.
-     * @param {Object} [query.where] Filtering criteria.
-     * @param {number} [query.skip] Number to skip.
-     * @param {number} [query.limit] Number to limit to.
-     * @param {Array} [query.orderBy] Sorting criteria.
-     * @param {Object} [opts] Configuration options.
-     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
-     * adapter to use.
-     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
-     * lifecycle events.
-     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
-     * updated data. If `true` return a response object that includes the updated
-     * data and metadata about the operation.
-     * @param {string[]} [opts.with=[]] Relations to update in a cascading
-     * update if `props` contains nested updates to relations. NOT performed in a
-     * transaction.
-     * @return {Promise}
-     */
-    updateAll: function updateAll(props, query, opts) {
-      var op = void 0,
-          adapter = void 0;
-      var self = this;
-
-      // Default values for arguments
-      props || (props = {});
-      query || (query = {});
-      opts || (opts = {});
-
-      // Fill in "opts" with the Mapper's configuration
-      _._(self, opts);
-      adapter = opts.adapter = self.getAdapterName(opts);
-
-      // beforeUpdateAll lifecycle hook
-      op = opts.op = 'beforeUpdateAll';
-      return _.resolve(self[op](props, query, opts)).then(function (_props) {
-        // Allow for re-assignment from lifecycle hook
-        props = _.isUndefined(_props) ? props : _props;
-        // Now delegate to the adapter
-        op = opts.op = 'updateAll';
-        var json = self.toJSON(props, opts);
-        self.dbg(op, json, query, opts);
-        return _.resolve(self.getAdapter(adapter)[op](self, json, query, opts));
-      }).then(function (result) {
-        result = self._end(result, opts);
-        // afterUpdateAll lifecycle hook
-        op = opts.op = 'afterUpdateAll';
-        return _.resolve(self[op](props, query, opts, result)).then(function (_result) {
-          // Allow for re-assignment from lifecycle hook
-          return _.isUndefined(_result) ? result : _result;
-        });
-      });
-    },
-
-
-    /**
-     * Mapper lifecycle hook called by {@link Mapper#updateAll}. If this method
-     * returns a promise then {@link Mapper#updateAll} will wait for the promise
-     * to resolve before continuing.
-     *
-     * @name Mapper#afterUpdateAll
-     * @method
-     * @param {Object} props The `props` argument passed to {@link Mapper#updateAll}.
-     * @param {Object} query The `query` argument passed to {@link Mapper#updateAll}.
-     * @param {Object} opts The `opts` argument passed to {@link Mapper#updateAll}.
-     * @param {*} result The result, if any.
-     */
-    afterUpdateAll: notify2,
-
-    /**
-     * Mapper lifecycle hook called by {@link Mapper#destroy}. If this method
-     * returns a promise then {@link Mapper#destroy} will wait for the promise
-     * to resolve before continuing.
-     *
-     * @name Mapper#beforeDestroy
-     * @method
-     * @param {(string|number)} id The `id` argument passed to {@link Mapper#destroy}.
-     * @param {Object} opts The `opts` argument passed to {@link Mapper#destroy}.
-     */
-    beforeDestroy: notify,
-
-    /**
-     * Using an adapter, destroy the record with the primary key specified by the
-     * `id` argument.
-     *
-     * {@link Mapper#beforeDestroy} will be called before destroying the record.
-     * {@link Mapper#afterDestroy} will be called after destroying the record.
-     *
-     * @name Mapper#destroy
-     * @method
-     * @param {(string|number)} id The primary key of the record to destroy.
-     * @param {Object} [opts] Configuration options.
-     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
-     * adapter to use.
-     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
-     * lifecycle events.
-     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
-     * ejected data (if any). If `true` return a response object that includes the
-     * ejected data (if any) and metadata about the operation.
-     * @param {string[]} [opts.with=[]] Relations to destroy in a cascading
-     * delete. NOT performed in a transaction.
-     * @return {Promise}
-     */
-    destroy: function destroy(id, opts) {
-      var op = void 0,
-          adapter = void 0;
-      var self = this;
-
-      // Default values for arguments
-      opts || (opts = {});
-
-      // Fill in "opts" with the Mapper's configuration
-      _._(self, opts);
-      adapter = opts.adapter = self.getAdapterName(opts);
-
-      // beforeDestroy lifecycle hook
-      op = opts.op = 'beforeDestroy';
-      return _.resolve(self[op](id, opts)).then(function () {
-        // Now delegate to the adapter
-        op = opts.op = 'destroy';
-        self.dbg(op, id, opts);
-        return _.resolve(self.getAdapter(adapter)[op](self, id, opts));
-      }).then(function (result) {
-        if (opts.raw) {
-          _._(opts, result);
-        }
-        // afterDestroy lifecycle hook
-        op = opts.op = 'afterDestroy';
-        return _.resolve(self[op](id, opts, result)).then(function (_result) {
-          // Allow for re-assignment from lifecycle hook
-          return _.isUndefined(_result) ? result : _result;
-        });
-      });
-    },
-
-
-    /**
-     * Mapper lifecycle hook called by {@link Mapper#destroy}. If this method
-     * returns a promise then {@link Mapper#destroy} will wait for the promise
-     * to resolve before continuing.
-     *
-     * @name Mapper#afterDestroy
-     * @method
-     * @param {(string|number)} id The `id` argument passed to {@link Mapper#destroy}.
-     * @param {Object} opts The `opts` argument passed to {@link Mapper#destroy}.
-     * @param {*} result The result, if any.
-     */
-    afterDestroy: notify2,
-
-    /**
-     * Mapper lifecycle hook called by {@link Mapper#destroyAll}. If this method
-     * returns a promise then {@link Mapper#destroyAll} will wait for the promise
-     * to resolve before continuing.
-     *
-     * @name Mapper#beforeDestroyAll
-     * @method
-     * @param {query} query The `query` argument passed to {@link Mapper#destroyAll}.
-     * @param {Object} opts The `opts` argument passed to {@link Mapper#destroyAll}.
-     */
-    beforeDestroyAll: notify,
-
-    /**
-     * Using the `query` argument, destroy the selected records via an adapter.
-     * If no `query` is provided then all records will be destroyed.
-     *
-     * {@link Mapper#beforeDestroyAll} will be called before destroying the records.
-     * {@link Mapper#afterDestroyAll} will be called after destroying the records.
-     *
-     * @name Mapper#destroyAll
-     * @method
-     * @param {Object} [query={}] Selection query.
-     * @param {Object} [query.where] Filtering criteria.
-     * @param {number} [query.skip] Number to skip.
-     * @param {number} [query.limit] Number to limit to.
-     * @param {Array} [query.orderBy] Sorting criteria.
-     * @param {Object} [opts] Configuration options.
-     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
-     * adapter to use.
-     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
-     * lifecycle events.
-     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
-     * ejected data (if any). If `true` return a response object that includes the
-     * ejected data (if any) and metadata about the operation.
-     * @param {string[]} [opts.with=[]] Relations to destroy in a cascading
-     * delete. NOT performed in a transaction.
-     * @return {Promise}
-     */
-    destroyAll: function destroyAll(query, opts) {
-      var op = void 0,
-          adapter = void 0;
-      var self = this;
-
-      // Default values for arguments
-      query || (query = {});
-      opts || (opts = {});
-
-      // Fill in "opts" with the Mapper's configuration
-      _._(self, opts);
-      adapter = opts.adapter = self.getAdapterName(opts);
-
-      // beforeDestroyAll lifecycle hook
-      op = opts.op = 'beforeDestroyAll';
-      return _.resolve(self[op](query, opts)).then(function () {
-        // Now delegate to the adapter
-        op = opts.op = 'destroyAll';
-        self.dbg(op, query, opts);
-        return _.resolve(self.getAdapter(adapter)[op](self, query, opts));
-      }).then(function (result) {
-        if (opts.raw) {
-          _._(opts, result);
-        }
-        // afterDestroyAll lifecycle hook
-        op = opts.op = 'afterDestroyAll';
-        return _.resolve(self[op](query, opts, result)).then(function (_result) {
-          // Allow for re-assignment from lifecycle hook
-          return _.isUndefined(_result) ? result : _result;
-        });
-      });
-    },
-
-
-    /**
-     * Mapper lifecycle hook called by {@link Mapper#destroyAll}. If this method
-     * returns a promise then {@link Mapper#destroyAll} will wait for the promise
-     * to resolve before continuing.
-     *
-     * @name Mapper#afterDestroyAll
-     * @method
-     * @param {*} data The `data` returned by the adapter.
-     * @param {query} query The `query` argument passed to {@link Mapper#destroyAll}.
-     * @param {Object} opts The `opts` argument passed to {@link Mapper#destroyAll}.
-     * @param {*} result The result, if any.
-     */
-    afterDestroyAll: notify2,
-
-    /**
-     * @name Mapper#log
-     * @method
-     */
-    log: function log(level) {
-      for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-        args[_key3 - 1] = arguments[_key3];
-      }
-
-      if (level && !args.length) {
-        args.push(level);
-        level = 'debug';
-      }
-      if (level === 'debug' && !this.debug) {
-        return;
-      }
-      var prefix = level.toUpperCase() + ': (' + (this.name || 'mapper') + ')';
-      if (console[level]) {
-        var _console;
-
-        (_console = console)[level].apply(_console, [prefix].concat(args));
-      } else {
-        var _console2;
-
-        (_console2 = console).log.apply(_console2, [prefix].concat(args));
-      }
+      // Check to make sure "props" is not already an instance of this Mapper.
+      return RecordClass ? props instanceof RecordClass ? props : new RecordClass(props, opts) : props;
     },
 
 
@@ -5684,8 +5318,8 @@
      * @method
      */
     dbg: function dbg() {
-      for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-        args[_key4] = arguments[_key4];
+      for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+        args[_key3] = arguments[_key3];
       }
 
       this.log.apply(this, ['debug'].concat(args));
@@ -5693,22 +5327,52 @@
 
 
     /**
-     * Usage:
+     * Return the registered adapter with the given name or the default adapter if
+     * no name is provided.
      *
-     * Post.belongsTo(User, {
-     *   localKey: 'myUserId'
-     * })
+     * @name Mapper#getAdapter
+     * @method
+     * @param {string} [name] The name of the adapter to retrieve.
+     * @return {Adapter} The adapter.
+     */
+    getAdapter: function getAdapter(name) {
+      var self = this;
+      self.dbg('getAdapter', 'name:', name);
+      var adapter = self.getAdapterName(name);
+      if (!adapter) {
+        throw new ReferenceError(adapter + ' not found!');
+      }
+      return self.getAdapters()[adapter];
+    },
+
+
+    /**
+     * Return the name of a registered adapter based on the given name or options,
+     * or the name of the default adapter if no name provided.
      *
-     * Comment.belongsTo(User)
-     * Comment.belongsTo(Post, {
-     *   localField: '_post'
-     * })
-     *
-     * @name Mapper#belongsTo
+     * @name Mapper#getAdapterName
+     * @method
+     * @param {(Object|string)} [opts] The name of an adapter or options, if any.
+     * @return {string} The name of the adapter.
+     */
+    getAdapterName: function getAdapterName(opts) {
+      opts || (opts = {});
+      if (_.isString(opts)) {
+        opts = { adapter: opts };
+      }
+      return opts.adapter || opts.defaultAdapter;
+    },
+
+
+    /**
+     * @name Mapper#getAdapters
      * @method
      */
-    belongsTo: function belongsTo(RelatedMapper, opts) {
-      return _belongsTo(RelatedMapper, opts)(this);
+    getAdapters: function getAdapters() {
+      return this._adapters;
+    },
+    getSchema: function getSchema() {
+      return this.schema;
     },
 
 
@@ -5743,6 +5407,50 @@
 
 
     /**
+     * Return whether `record` is an instance of this Mappers's RecordClass.
+     *
+     * @name Mapper#is
+     * @method
+     * @param {Object} record The record to check.
+     * @return {boolean} Whether `record` is an instance of this Mappers's
+     * {@ link Mapper#RecordClass}.
+     */
+    is: function is(record) {
+      var RecordClass = this.RecordClass;
+      return RecordClass ? record instanceof RecordClass : false;
+    },
+
+
+    /**
+     * @name Mapper#log
+     * @method
+     */
+    log: function log(level) {
+      for (var _len4 = arguments.length, args = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
+        args[_key4 - 1] = arguments[_key4];
+      }
+
+      if (level && !args.length) {
+        args.push(level);
+        level = 'debug';
+      }
+      if (level === 'debug' && !this.debug) {
+        return;
+      }
+      var prefix = level.toUpperCase() + ': (' + (this.name || 'mapper') + ')';
+      if (console[level]) {
+        var _console;
+
+        (_console = console)[level].apply(_console, [prefix].concat(args));
+      } else {
+        var _console2;
+
+        (_console2 = console).log.apply(_console2, [prefix].concat(args));
+      }
+    },
+
+
+    /**
      * Register an adapter on this mapper under the given name.
      *
      * @name Mapper#registerAdapter
@@ -5761,8 +5469,128 @@
       if (opts === true || opts.default) {
         self.defaultAdapter = name;
       }
+    },
+
+
+    /**
+     * Return a plain object representation of the given record.
+     *
+     * @name Mapper#toJSON
+     * @method
+     * @param {Object} record Record from which to create a plain object
+     * representation.
+     * @param {Object} [opts] Configuration options.
+     * @param {string[]} [opts.with] Array of relation names or relation fields
+     * to include in the representation.
+     * @return {Object} Plain object representation of the record.
+     */
+    toJSON: function toJSON(record, opts) {
+      var self = this;
+      opts || (opts = {});
+      var relationFields = (self ? self.relationFields : []) || [];
+      var json = {};
+      var properties = void 0;
+      if (self && self.schema) {
+        properties = self.schema.properties || {};
+        // TODO: Make this work recursively
+        _.forOwn(properties, function (opts, prop) {
+          json[prop] = _.plainCopy(record[prop]);
+        });
+      }
+      properties || (properties = {});
+      if (!opts.strict) {
+        _.forOwn(record, function (value, key) {
+          if (!properties[key] && relationFields.indexOf(key) === -1) {
+            json[key] = _.plainCopy(value);
+          }
+        });
+      }
+      // The user wants to include relations in the resulting plain object
+      // representation
+      if (self && opts.withAll) {
+        opts.with = relationFields.slice();
+      }
+      if (self && opts.with) {
+        if (_.isString(opts.with)) {
+          opts.with = [opts.with];
+        }
+        _.forEachRelation(self, opts, function (def, __opts) {
+          var relationData = def.getLocalField(record);
+          if (relationData) {
+            // The actual recursion
+            if (_.isArray(relationData)) {
+              def.setLocalField(json, relationData.map(function (item) {
+                return def.getRelation().toJSON(item, __opts);
+              }));
+            } else {
+              def.setLocalField(json, def.getRelation().toJSON(relationData, __opts));
+            }
+          }
+        });
+      }
+      return json;
     }
+  };
+
+  /**
+   * This generates the code for each lifecycle method defined in the
+   * LIFECYCLE_METHODS configuration object.
+   */
+  _.forOwn(LIFECYCLE_METHODS, function (config, name) {
+    var upper = '' + name.charAt(0).toUpperCase() + name.substr(1);
+    var before = 'before' + upper;
+    var after = 'after' + upper;
+
+    methodDescriptors[name] = function () {
+      for (var _len5 = arguments.length, args = Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+        args[_key5] = arguments[_key5];
+      }
+
+      var op = void 0,
+          adapter = void 0;
+      var self = this;
+
+      // Default values for arguments
+      config.defaults.forEach(function (value, i) {
+        if (_.isUndefined(args[i])) {
+          args[i] = _.copy(value);
+        }
+      });
+
+      var opts = args[args.length - 1];
+
+      // Fill in "opts" with the Mapper's configuration
+      _._(self, opts);
+      adapter = opts.adapter = self.getAdapterName(opts);
+
+      // before lifecycle hook
+      op = opts.op = before;
+      return _.resolve(self[op].apply(self, babelHelpers.toConsumableArray(args))).then(function (_value) {
+        var _self$getAdapter;
+
+        if (!_.isUndefined(config.beforeAssign)) {
+          // Allow for re-assignment from lifecycle hook
+          args[config.beforeAssign] = _.isUndefined(_value) ? args[config.beforeAssign] : _value;
+        }
+        // Now delegate to the adapter
+        op = opts.op = name;
+        args = config.adapterArgs ? config.adapterArgs.apply(config, [self].concat(babelHelpers.toConsumableArray(args))) : args;
+        self.dbg.apply(self, [op].concat(babelHelpers.toConsumableArray(args)));
+        return _.resolve((_self$getAdapter = self.getAdapter(adapter))[op].apply(_self$getAdapter, [self].concat(babelHelpers.toConsumableArray(args))));
+      }).then(function (result) {
+        result = self._end(result, opts, !!config.skip);
+        args.push(result);
+        // after lifecycle hook
+        op = opts.op = after;
+        return _.resolve(self[op].apply(self, babelHelpers.toConsumableArray(args))).then(function (_result) {
+          // Allow for re-assignment from lifecycle hook
+          return _.isUndefined(_result) ? result : _result;
+        });
+      });
+    };
   });
+
+  _.addHiddenPropsToTarget(Mapper.prototype, methodDescriptors);
 
   /**
    * Create a Mapper subclass.
