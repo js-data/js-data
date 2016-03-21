@@ -747,3 +747,26 @@ utils.areDifferent = function (a, b, opts) {
     Object.keys(diff.changed).length
   return diffCount > 0
 }
+
+utils.logify = function (target, defaultNamespace) {
+  utils.addHiddenPropsToTarget(target, {
+    dbg (...args) {
+      this.log('debug', ...args)
+    },
+    log (level, ...args) {
+      if (level && !args.length) {
+        args.push(level)
+        level = 'debug'
+      }
+      if (level === 'debug' && !this.debug) {
+        return
+      }
+      const prefix = `${level.toUpperCase()}: (${this.name || defaultNamespace})`
+      if (console[level]) {
+        console[level](prefix, ...args)
+      } else {
+        console.log(prefix, ...args)
+      }
+    }
+  })
+}

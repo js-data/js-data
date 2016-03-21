@@ -174,7 +174,7 @@ const validateAny = function (value, schema, opts) {
  * @param {Object} [schema] TODO
  * @param {Object} [opts] Configuration options.
  */
-export const validate = function (value, schema, opts) {
+const validate = function (value, schema, opts) {
   let errors = []
   opts || (opts = {})
   let shouldPop
@@ -228,18 +228,170 @@ Schema.typeGroupValidators = typeGroupValidators
 Schema.validationKeywords = validationKeywords
 Schema.validate = validate
 
+// These strings are cached for optimal performance of the change detection
+// boolean - Whether a Record is changing in the current execution frame
+const changingPath = 'changing'
+// string[] - Properties that have changed in the current execution frame
+const changedPath = 'changed'
+// boolean - Whether a Record is currently being instantiated
+const creatingPath = 'creating'
+// number - The setTimeout change event id of a Record, if any
+const eventIdPath = 'eventId'
+// boolean - Whether to skip validation for a Record's currently changing property
+const noValidatePath = 'noValidate'
+// boolean - Whether to skip change notification for a Record's currently
+// changing property
+const silentPath = 'silent'
+const validationFailureMsg = 'validation failed'
+
 /**
- * Validate the provided value against this schema.
+ * Assemble a property descriptor which will be added to the prototype of
+ * {@link Mapper#RecordClass}. This method is called when
+ * {@link Mapper#applySchema} is set to `true`.
  *
- * @name Schema#validate
- * @method
- * @param {*} value Value to validate.
- * @param {Object} [opts] Configuration options.
- * @return {(array|undefined)} Array of errors or `undefined` if valid.
+ * TODO: Make this more configurable, i.e. not so tied to the Record class.
+ *
+ * @ignore
  */
-Schema.prototype.validate = function (value, opts) {
-  return Schema.validate(value, this, opts)
+const makeDescriptor = function (prop, schema, opts) {
+  const descriptor = {
+    // These properties are enumerable by default, but regardless of their
+    // enumerability, they won't be "own" properties of individual records
+    enumerable: _.isUndefined(schema.enumerable) ? true : !!schema.enumerable
+  }
+  // Cache a few strings for optimal performance
+  const keyPath = `props.${prop}`
+  const previousPath = `previous.${prop}`
+  const getter = opts.getter
+  const setter = opts.setter
+  const unsetter = opts.unsetter
+
+  descriptor.get = function () {
+    return this._get(keyPath)
+  }
+  descriptor.set = function (value) {
+    const self = this
+    // These are accessed a lot
+    const _get = self[getter]
+    const _set = self[setter]
+    const _unset = self[unsetter]
+
+    // Optionally check that the new value passes validation
+    if (!_get(noValidatePath)) {
+      const errors = schema.validate(value)
+      if (errors) {
+        // Immediately throw an error, preventing the record from getting into
+        // an invalid state
+        const error = new Error(validationFailureMsg)
+        error.errors = errors
+        throw error
+      }
+    }
+    // TODO: Make it so tracking can be turned on for all properties instead of
+    // only per-property
+    if (schema.track && !_get(creatingPath)) {
+      const previous = _get(previousPath)
+      const current = _get(keyPath)
+      let changing = _get(changingPath)
+      let changed = _get(changedPath)
+
+      if (!changing) {
+        // Track properties that are changing in the current event loop
+        changed = []
+      }
+
+      // Add changing properties to this array once at most
+      const index = changed.indexOf(prop)
+      if (current !== value && index === -1) {
+        changed.push(prop)
+      }
+      if (previous === value) {
+        if (index >= 0) {
+          changed.splice(index, 1)
+        }
+      }
+      // No changes in current event loop
+      if (!changed.length) {
+        changing = false
+        _unset(changingPath)
+        _unset(changedPath)
+        // Cancel pending change event
+        if (_get(eventIdPath)) {
+          clearTimeout(_get(eventIdPath))
+          _unset(eventIdPath)
+        }
+      }
+      // Changes detected in current event loop
+      if (!changing && changed.length) {
+        _set(changedPath, changed)
+        _set(changingPath, true)
+        // Saving the timeout id allows us to batch all changes in the same
+        // event loop into a single "change"
+        // TODO: Optimize
+        _set(eventIdPath, setTimeout(() => {
+          // Previous event loop where changes were gathered has ended, so
+          // notify any listeners of those changes and prepare for any new
+          // changes
+          _unset(changedPath)
+          _unset(eventIdPath)
+          _unset(changingPath)
+          // TODO: Optimize
+          if (!_get(silentPath)) {
+            let i
+            for (i = 0; i < changed.length; i++) {
+              self.emit('change:' + changed[i], self, _.get(self, changed[i]))
+            }
+            self.emit('change', self, self.changes())
+          }
+          _unset(silentPath)
+        }, 0))
+      }
+    }
+    _set(keyPath, value)
+    return value
+  }
+
+  return descriptor
 }
+
+_.addHiddenPropsToTarget(Schema.prototype, {
+  /**
+   * This adds ES5 getters/setters to the target based on the "properties" in
+   * this Schema, which makes possible change tracking and validation on
+   * property assignment.
+   *
+   * @name Schema#validate
+   * @method
+   * @param {Object} target The prototype to which to apply this schema.
+   */
+  apply (target, opts) {
+    opts || (opts = {})
+    opts.getter = opts.getter || '_get'
+    opts.setter = opts.setter || '_set'
+    opts.unsetter = opts.unsetter || '_unset'
+    const properties = this.properties || {}
+    _.forOwn(properties, function (schema, prop) {
+      Object.defineProperty(
+        target,
+        prop,
+        makeDescriptor(prop, schema, opts)
+      )
+    })
+  },
+
+  /**
+   * Validate the provided value against this schema.
+   *
+   * @name Schema#validate
+   * @method
+   * @param {*} value Value to validate.
+   * @param {Object} [opts] Configuration options.
+   * @return {(array|undefined)} Array of errors or `undefined` if valid.
+   */
+  validate (value, opts) {
+    return Schema.validate(value, this, opts)
+  }
+})
 
 _.fillIn(validationKeywords, {
   /**
