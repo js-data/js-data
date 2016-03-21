@@ -5,17 +5,6 @@ export function init () {
         const Test = this
         let user = Test.store.add('user', { id: 1, name: 'John' })
         Test.assert.objectsEqual(user, { id: 1, name: 'John' })
-        let originalWarn = console.warn
-        console.warn = Test.sinon.spy()
-        try {
-          user = Test.store.inject('user', { id: 1, name: 'John' })
-          Test.assert.isTrue(console.warn.calledOnce)
-          console.warn = originalWarn
-        } catch (err) {
-          console.warn = originalWarn
-          throw err
-        }
-        Test.assert.objectsEqual(user, { id: 1, name: 'John' })
       })
     })
     describe('between', function () {

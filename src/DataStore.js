@@ -595,11 +595,18 @@ toProxy.forEach(function (method) {
 })
 
 methods.inject = function (...args) {
-  // TODO: Fix logging
-  console.warn('deprecated')
   return this.add(...args)
 }
 
+methods.eject = function (...args) {
+  return this.remove(...args)
+}
+
+methods.ejectAll = function (...args) {
+  return this.removeAll(...args)
+}
+
+_.logify(DataStore.prototype, 'DataStore')
 _.addHiddenPropsToTarget(DataStore.prototype, methods)
 
 export {
