@@ -4,8 +4,8 @@ import {
   hasManyType,
   hasOneType
 } from './decorators'
-import {Container} from './Container'
-import {LinkedCollection} from './LinkedCollection'
+import Container from './Container'
+import LinkedCollection from './LinkedCollection'
 
 const DATASTORE_DEFAULTS = {
   /**
@@ -19,80 +19,23 @@ const DATASTORE_DEFAULTS = {
   linkRelations: utils.isBrowser
 }
 
-/**
- * The `DataStore` class is an extension of {@link Container}. Not only does
- * `DataStore` manage mappers, but also collections. `DataStore` implements the
- * asynchronous {@link Mapper} methods, such as {@link Mapper#find} and
- * {@link Mapper#create}. If you use the asynchronous `DataStore` methods
- * instead of calling them directly on the mappers, then the results of the
- * method calls will be inserted into the store's collections. You can think of
- * a `DataStore` as an [Identity Map](https://en.wikipedia.org/wiki/Identity_map_pattern)
- * for the [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping)
- * (the Mappers).
- *
- * ```javascript
- * import {DataStore} from 'js-data'
- * ```
- *
- * @example
- * import {DataStore} from 'js-data'
- * import HttpAdapter from 'js-data-http'
- * const store = new DataStore()
- * const UserMapper = store.defineMapper('user')
- *
- * // Call "find" on "UserMapper" (Stateless ORM)
- * UserMapper.find(1).then(function (user) {
- *   // retrieved a "user" record via the http adapter, but that's it
- *
- *   // Call "find" on "store" for the "user" mapper (Stateful DataStore)
- *   return store.find('user', 1)
- * }).then(function (user) {
- *   // not only was a "user" record retrieved, but it was added to the
- *   // store's "user" collection
- *   const cachedUser = store.getCollection('user').get(1)
- *   user === cachedUser // true
- * })
- *
- * @class DataStore
- * @extends Container
- * @param {Object} [opts] Configuration options. See {@link Container}.
- * @return {DataStore}
- */
-/* tslint:disable:variable-name */
-export class DataStore extends Container {
-  /* tslint:enable:variable-name */
-  collectionClass: any
-  _collections: any
-  _pendingQueries: any
-  _completedQueries: any
-  linkRelations: boolean
-  add: Function
-  between: Function
-  createIndex: Function
-  filter: Function
-  get: Function
-  getAll: Function
-  query: Function
-  remove: Function
-  removeAll: Function
-  toJson: Function
-  constructor (opts?: any) {
-    super(opts)
+const props = {
+  constructor: function DataStore (opts) {
     const self = this
     utils.classCallCheck(self, DataStore)
+    DataStore.__super__.call(self, opts)
 
-    utils.getSuper(self).call(self, opts)
     self.collectionClass = self.collectionClass || LinkedCollection
     self._collections = {}
     utils.fillIn(self, DATASTORE_DEFAULTS)
     self._pendingQueries = {}
     self._completedQueries = {}
     return self
-  }
+  },
 
   _callSuper (method, ...args) {
-    return super[method].apply(this, args)
-  }
+    return this.constructor.__super__.prototype[method].apply(this, args)
+  },
 
   /**
    * TODO
@@ -106,7 +49,7 @@ export class DataStore extends Container {
    * @param {Object} [opts] Configuration options.
    * @return {(Object|Array)} Result.
    */
-  _end (name, data, opts?: any) {
+  _end (name, data, opts) {
     if (opts.raw) {
       data.data = this.getCollection(name).add(data.data, opts)
       return data
@@ -114,7 +57,18 @@ export class DataStore extends Container {
       data = this.getCollection(name).add(data, opts)
     }
     return data
-  }
+  },
+
+  cachedFind (name, id, opts) {
+    return this.get(name, id, opts)
+  },
+
+  cachedFindAll (name, query, opts) {
+    const self = this
+    if (self._completedQueries[name][self.hashQuery(name, query, opts)]) {
+      return self.filter(name, query, opts)
+    }
+  },
 
   /**
    * TODO
@@ -127,13 +81,13 @@ export class DataStore extends Container {
    * {@link Mapper#create} for more configuration options.
    * @return {Promise}
    */
-  create (name, record, opts?: any) {
+  create (name, record, opts) {
     const self = this
     opts || (opts = {})
     return self._callSuper('create', name, record, opts).then(function (data) {
       return self._end(name, data, opts)
     })
-  }
+  },
 
   /**
    * TODO
@@ -146,15 +100,15 @@ export class DataStore extends Container {
    * {@link Mapper#createMany} for more configuration options.
    * @return {Promise}
    */
-  createMany (name, records, opts?: any) {
+  createMany (name, records, opts) {
     const self = this
     opts || (opts = {})
     return self._callSuper('createMany', name, records, opts).then(function (data) {
       return self._end(name, data, opts)
     })
-  }
+  },
 
-  defineMapper (name: string, opts?: any) {
+  defineMapper (name, opts) {
     const self = this
     const mapper = utils.getSuper(self).prototype.defineMapper.call(self, name, opts)
     self._pendingQueries[name] = {}
@@ -162,7 +116,7 @@ export class DataStore extends Container {
     mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] })
 
     // The datastore uses a subclass of Collection that is "datastore-aware"
-    const collection = self._collections[name] = new self.collectionClass(null, {
+    const collection = self._collections[name] = new self.collectionClass(null, { // eslint-disable-line
       // Make sure the collection has somewhere to store "added" timestamps
       _added: {},
       // Give the collection a reference to this datastore
@@ -341,7 +295,7 @@ export class DataStore extends Container {
     }
 
     return mapper
-  }
+  },
 
   /**
    * TODO
@@ -354,7 +308,7 @@ export class DataStore extends Container {
    * {@link Mapper#destroy} for more configuration options.
    * @return {Promise}
    */
-  destroy (name, id, opts?: any) {
+  destroy (name, id, opts) {
     const self = this
     opts || (opts = {})
     return self._callSuper('destroy', name, id, opts).then(function (data) {
@@ -367,7 +321,7 @@ export class DataStore extends Container {
       delete self._completedQueries[name][id]
       return data
     })
-  }
+  },
 
   /**
    * TODO
@@ -380,7 +334,7 @@ export class DataStore extends Container {
    * {@link Mapper#destroyAll} for more configuration options.
    * @return {Promise}
    */
-  destroyAll (name, query, opts?: any) {
+  destroyAll (name, query, opts) {
     const self = this
     opts || (opts = {})
     return self._callSuper('destroyAll', name, query, opts).then(function (data) {
@@ -394,7 +348,15 @@ export class DataStore extends Container {
       delete self._completedQueries[name][hash]
       return data
     })
-  }
+  },
+
+  eject (id, opts) {
+    return this.remove(id, opts)
+  },
+
+  ejectAll (query, opts) {
+    return this.removeAll(query, opts)
+  },
 
   /**
    * TODO
@@ -406,7 +368,7 @@ export class DataStore extends Container {
    * @param {Object} [opts] - Passed to {@link Mapper#find}.
    * @return {Promise}
    */
-  find (name, id, opts?: any) {
+  find (name, id, opts) {
     const self = this
     opts || (opts = {})
     const pendingQuery = self._pendingQueries[name][id]
@@ -434,7 +396,7 @@ export class DataStore extends Container {
       promise = utils.resolve(item)
     }
     return promise
-  }
+  },
 
   /**
    * TODO
@@ -446,7 +408,7 @@ export class DataStore extends Container {
    * @param {Object} [opts] - Passed to {@link Model.findAll}.
    * @return {Promise}
    */
-  findAll (name, query, opts?: any) {
+  findAll (name, query, opts) {
     const self = this
     opts || (opts = {})
     const hash = self.hashQuery(name, query, opts)
@@ -476,22 +438,7 @@ export class DataStore extends Container {
       promise = utils.resolve(items)
     }
     return promise
-  }
-
-  cachedFind (name, id, opts?: any) {
-    return this.get(name, id, opts)
-  }
-
-  cachedFindAll (name, query, opts?: any) {
-    const self = this
-    if (self._completedQueries[name][self.hashQuery(name, query, opts)]) {
-      return self.filter(name, query, opts)
-    }
-  }
-
-  hashQuery (name, query, opts?: any) {
-    return utils.toJson(query)
-  }
+  },
 
   /**
    * TODO
@@ -507,7 +454,15 @@ export class DataStore extends Container {
       throw new ReferenceError(`${name} is not a registered collection!`)
     }
     return collection
-  }
+  },
+
+  hashQuery (name, query, opts) {
+    return utils.toJson(query)
+  },
+
+  inject (records, opts) {
+    return this.add(records, opts)
+  },
 
   /**
    * TODO
@@ -521,13 +476,13 @@ export class DataStore extends Container {
    * {@link Mapper#update} for more configuration options.
    * @return {Promise}
    */
-  update (name, id, record, opts?: any) {
+  update (name, id, record, opts) {
     const self = this
     opts || (opts = {})
     return self._callSuper('update', name, id, record, opts).then(function (data) {
       return self._end(name, data, opts)
     })
-  }
+  },
 
   /**
    * TODO
@@ -535,19 +490,19 @@ export class DataStore extends Container {
    * @name DataStore#updateAll
    * @method
    * @param {string} name - Name of the {@link Mapper} to target.
-   * @param {Object?} query - Passed to {@link Model.updateAll}.
-   * @param {Object} props - Passed to {@link Model.updateAll}.
-   * @param {Object} [opts] - Passed to {@link Model.updateAll}. See
-   * {@link Model.updateAll} for more configuration options.
+   * @param {Object} props - Passed to {@link Mapper#updateAll}.
+   * @param {Object} [query] - Passed to {@link Mapper#updateAll}.
+   * @param {Object} [opts] - Passed to {@link Mapper#updateAll}. See
+   * {@link Mapper#updateAll} for more configuration options.
    * @return {Promise}
    */
-  updateAll (name, query, props, opts?: any) {
+  updateAll (name, props, query, opts) {
     const self = this
     opts || (opts = {})
     return self._callSuper('updateAll', name, query, props, opts).then(function (data) {
       return self._end(name, data, opts)
     })
-  }
+  },
 
   /**
    * TODO
@@ -560,7 +515,7 @@ export class DataStore extends Container {
    * {@link Mapper#updateMany} for more configuration options.
    * @return {Promise}
    */
-  updateMany (name, records, opts?: any) {
+  updateMany (name, records, opts) {
     const self = this
     opts || (opts = {})
     return self._callSuper('updateMany', name, records, opts).then(function (data) {
@@ -568,25 +523,6 @@ export class DataStore extends Container {
     })
   }
 }
-
-/**
- * Create a DataStore subclass.
- *
- * ```javascript
- * var MyDataStore = DataStore.extend({
- *   foo: function () { return 'bar' }
- * })
- * var store = new MyDataStore()
- * store.foo() // "bar"
- * ```
- *
- * @name DataStore.extend
- * @method
- * @param {Object} [props={}] Properties to add to the prototype of the
- * subclass.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @return {Function} Subclass of DataStore.
- */
 
 const toProxy = [
   'add',
@@ -601,26 +537,49 @@ const toProxy = [
   'toJson'
 ]
 
-const methods: any = {}
-
 toProxy.forEach(function (method) {
-  methods[method] = function (name, ...args) {
+  props[method] = function (name, ...args) {
     return this.getCollection(name)[method](...args)
   }
 })
 
-methods.inject = function (...args) {
-  return this.add(...args)
-}
-
-methods.eject = function (...args) {
-  return this.remove(...args)
-}
-
-methods.ejectAll = function (...args) {
-  return this.removeAll(...args)
-}
-
-utils.logify(DataStore.prototype, 'DataStore')
-utils.addHiddenPropsToTarget(DataStore.prototype, methods)
-utils.hidePrototypeMethods(DataStore)
+/**
+ * The `DataStore` class is an extension of {@link Container}. Not only does
+ * `DataStore` manage mappers, but also collections. `DataStore` implements the
+ * asynchronous {@link Mapper} methods, such as {@link Mapper#find} and
+ * {@link Mapper#create}. If you use the asynchronous `DataStore` methods
+ * instead of calling them directly on the mappers, then the results of the
+ * method calls will be inserted into the store's collections. You can think of
+ * a `DataStore` as an [Identity Map](https://en.wikipedia.org/wiki/Identity_map_pattern)
+ * for the [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping)
+ * (the Mappers).
+ *
+ * ```javascript
+ * import {DataStore} from 'js-data'
+ * ```
+ *
+ * @example
+ * import {DataStore} from 'js-data'
+ * import HttpAdapter from 'js-data-http'
+ * const store = new DataStore()
+ * const UserMapper = store.defineMapper('user')
+ *
+ * // Call "find" on "UserMapper" (Stateless ORM)
+ * UserMapper.find(1).then(function (user) {
+ *   // retrieved a "user" record via the http adapter, but that's it
+ *
+ *   // Call "find" on "store" for the "user" mapper (Stateful DataStore)
+ *   return store.find('user', 1)
+ * }).then(function (user) {
+ *   // not only was a "user" record retrieved, but it was added to the
+ *   // store's "user" collection
+ *   const cachedUser = store.getCollection('user').get(1)
+ *   user === cachedUser // true
+ * })
+ *
+ * @class DataStore
+ * @extends Container
+ * @param {Object} [opts] Configuration options. See {@link Container}.
+ * @return {DataStore}
+ */
+export default Container.extend(props)

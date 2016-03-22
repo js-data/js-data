@@ -1,4 +1,5 @@
 import utils from './utils'
+import Component from './Component'
 import {
   belongsTo,
   belongsToType,
@@ -7,8 +8,8 @@ import {
   hasOne,
   hasOneType
 } from './decorators'
-import {Record} from './Record'
-import {Schema} from './Schema'
+import Record from './Record'
+import Schema from './Schema'
 
 const notify = function (...args) {
   const self = this
@@ -195,13 +196,14 @@ const MAPPER_DEFAULTS = {
  * [record]: Record.html
  *
  * @class Mapper
+ * @extends Component
  * @param {Object} [opts] Configuration options.
  */
-export class Mapper {
-  constructor (opts?: any) {
+export default Component.extend({
+  constructor: function Mapper (opts) {
     const self = this
     utils.classCallCheck(self, Mapper)
-
+    Mapper.__super__.call(self)
     opts || (opts = {})
 
     /**
@@ -310,46 +312,7 @@ export class Mapper {
         self.schema.apply(self.recordClass.prototype)
       }
     }
-  }
-
-  /**
-   * Create a Mapper subclass.
-   *
-   * ```javascript
-   * var MyMapper = Mapper.extend({
-   *   foo: function () { return 'bar' }
-   * })
-   * var mapper = new MyMapper()
-   * mapper.foo() // "bar"
-   * ```
-   *
-   * @name Mapper.extend
-   * @method
-   * @param {Object} [props={}] Properties to add to the prototype of the
-   * subclass.
-   * @param {Object} [classProps={}] Static properties to add to the subclass.
-   * @return {Function} Subclass of Mapper.
-   */
-  static extend = utils.extend
-
-  _adapters: Object
-  name: string
-  applySchema: boolean
-  defaultAdapter: string
-  debug: boolean
-  idAttribute: string
-  lifecycleMethods: any
-  notify: boolean
-  raw: boolean
-  schema: Schema
-  recordClass: any
-  relationList: Array<any>
-  relationFields: Array<string>
-  on: Function
-  off: Function
-  emit: Function
-  dbg: Function
-  log: Function
+  },
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#count}. If this method
@@ -362,7 +325,7 @@ export class Mapper {
    * @param {Object} opts The `opts` argument passed to {@link Mapper#count}.
    * @param {*} result The result, if any.
    */
-  afterCount = notify2
+  afterCount: notify2,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#create}. If this method
@@ -375,7 +338,7 @@ export class Mapper {
    * @param {Object} opts The `opts` argument passed to {@link Mapper#create}.
    * @param {*} result The result, if any.
    */
-  afterCreate = notify2
+  afterCreate: notify2,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#createMany}. If this method
@@ -388,7 +351,7 @@ export class Mapper {
    * @param {Object} opts The `opts` argument passed to {@link Mapper#createMany}.
    * @param {*} result The result, if any.
    */
-  afterCreateMany = notify2
+  afterCreateMany: notify2,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#destroy}. If this method
@@ -401,7 +364,7 @@ export class Mapper {
    * @param {Object} opts The `opts` argument passed to {@link Mapper#destroy}.
    * @param {*} result The result, if any.
    */
-  afterDestroy = notify2
+  afterDestroy: notify2,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#destroyAll}. If this method
@@ -415,7 +378,7 @@ export class Mapper {
    * @param {Object} opts The `opts` argument passed to {@link Mapper#destroyAll}.
    * @param {*} result The result, if any.
    */
-  afterDestroyAll = notify2
+  afterDestroyAll: notify2,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#find}. If this method
@@ -428,7 +391,7 @@ export class Mapper {
    * @param {Object} opts The `opts` argument passed to {@link Mapper#find}.
    * @param {*} result The result, if any.
    */
-  afterFind = notify2
+  afterFind: notify2,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#findAll}. If this method
@@ -441,7 +404,7 @@ export class Mapper {
    * @param {Object} opts The `opts` argument passed to {@link Mapper#findAll}.
    * @param {*} result The result, if any.
    */
-  afterFindAll = notify2
+  afterFindAll: notify2,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#sum}. If this method
@@ -454,7 +417,7 @@ export class Mapper {
    * @param {Object} opts The `opts` argument passed to {@link Mapper#sum}.
    * @param {*} result The result, if any.
    */
-  afterSum = notify2
+  afterSum: notify2,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#update}. If this method
@@ -468,7 +431,7 @@ export class Mapper {
    * @param {Object} opts The `opts` argument passed to {@link Mapper#update}.
    * @param {*} result The result, if any.
    */
-  afterUpdate = notify2
+  afterUpdate: notify2,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#updateAll}. If this method
@@ -482,7 +445,7 @@ export class Mapper {
    * @param {Object} opts The `opts` argument passed to {@link Mapper#updateAll}.
    * @param {*} result The result, if any.
    */
-  afterUpdateAll = notify2
+  afterUpdateAll: notify2,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#updateMany}. If this method
@@ -495,7 +458,7 @@ export class Mapper {
    * @param {Object} opts The `opts` argument passed to {@link Mapper#updateMany}.
    * @param {*} result The result, if any.
    */
-  afterUpdateMany = notify2
+  afterUpdateMany: notify2,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#create}. If this method
@@ -507,7 +470,7 @@ export class Mapper {
    * @param {Object} props The `props` argument passed to {@link Mapper#create}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#create}.
    */
-  beforeCreate = notify
+  beforeCreate: notify,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#createMany}. If this method
@@ -519,7 +482,7 @@ export class Mapper {
    * @param {Array} records The `records` argument passed to {@link Mapper#createMany}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#createMany}.
    */
-  beforeCreateMany = notify
+  beforeCreateMany: notify,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#count}. If this method
@@ -531,7 +494,7 @@ export class Mapper {
    * @param {Object} query The `query` argument passed to {@link Mapper#count}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#count}.
    */
-  beforeCount = notify
+  beforeCount: notify,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#destroy}. If this method
@@ -543,7 +506,7 @@ export class Mapper {
    * @param {(string|number)} id The `id` argument passed to {@link Mapper#destroy}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#destroy}.
    */
-  beforeDestroy = notify
+  beforeDestroy: notify,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#destroyAll}. If this method
@@ -555,7 +518,7 @@ export class Mapper {
    * @param {query} query The `query` argument passed to {@link Mapper#destroyAll}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#destroyAll}.
    */
-  beforeDestroyAll = notify
+  beforeDestroyAll: notify,
 
   /**
    * Mappers lifecycle hook called by {@link Mapper#find}. If this method
@@ -567,7 +530,7 @@ export class Mapper {
    * @param {(string|number)} id The `id` argument passed to {@link Mapper#find}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#find}.
    */
-  beforeFind = notify
+  beforeFind: notify,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#findAll}. If this method
@@ -579,7 +542,7 @@ export class Mapper {
    * @param {Object} query The `query` argument passed to {@link Mapper#findAll}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#findAll}.
    */
-  beforeFindAll = notify
+  beforeFindAll: notify,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#sum}. If this method
@@ -592,7 +555,7 @@ export class Mapper {
    * @param {Object} query The `query` argument passed to {@link Mapper#sum}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#sum}.
    */
-  beforeSum = notify
+  beforeSum: notify,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#update}. If this method
@@ -605,7 +568,7 @@ export class Mapper {
    * @param {props} props The `props` argument passed to {@link Mapper#update}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#update}.
    */
-  beforeUpdate = notify
+  beforeUpdate: notify,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#updateAll}. If this method
@@ -618,7 +581,7 @@ export class Mapper {
    * @param {Object} query The `query` argument passed to {@link Mapper#updateAll}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#updateAll}.
    */
-  beforeUpdateAll = notify
+  beforeUpdateAll: notify,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#updateMany}. If this method
@@ -630,14 +593,14 @@ export class Mapper {
    * @param {Array} records The `records` argument passed to {@link Mapper#updateMany}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#updateMany}.
    */
-  beforeUpdateMany = notify
+  beforeUpdateMany: notify,
 
   /**
    * @name Mapper#_end
    * @method
    * @private
    */
-  _end (result: any, opts?: any, skip?: boolean) {
+  _end (result, opts, skip) {
     const self = this
     if (opts.raw) {
       utils._(opts, result)
@@ -659,7 +622,7 @@ export class Mapper {
       result = _data
     }
     return result
-  }
+  },
 
   /**
    * Usage:
@@ -678,7 +641,7 @@ export class Mapper {
    */
   belongsTo (relatedMapper, opts) {
     return belongsTo(relatedMapper, opts)(this)
-  }
+  },
 
   /**
    * Using the `query` argument, select records to pull from an adapter.
@@ -706,7 +669,7 @@ export class Mapper {
    */
   count (query, opts) {
     return this.crud('count', query, opts)
-  }
+  },
 
   /**
    * Create and save a new the record using the provided `props`.
@@ -814,11 +777,11 @@ export class Mapper {
         return utils.isUndefined(_result) ? result : _result
       })
     })
-  }
+  },
 
   createInstance (props, opts) {
     return this.createRecord(props, opts)
-  }
+  },
 
   /**
    * Given an array of records, batch create them via an adapter.
@@ -946,7 +909,7 @@ export class Mapper {
         return utils.isUndefined(_result) ? result : _result
       })
     })
-  }
+  },
 
   /**
    * Create an unsaved, uncached instance of this Mapper's
@@ -963,7 +926,7 @@ export class Mapper {
    * initial properties.
    * @return {Object} The unsaved record.
    */
-  createRecord (props?: any, opts?: any) {
+  createRecord (props, opts) {
     const self = this
     const recordClass = self.recordClass
     const relationList = self.relationList || []
@@ -979,8 +942,8 @@ export class Mapper {
       }
     })
     // Check to make sure "props" is not already an instance of this Mapper.
-    return recordClass ? (props instanceof recordClass ? props : new recordClass(props, opts)) : props
-  }
+    return recordClass ? (props instanceof recordClass ? props : new recordClass(props, opts)) : props // eslint-disable-line
+  },
 
   /**
    * Lifecycle invocation method.
@@ -1039,7 +1002,7 @@ export class Mapper {
         return utils.isUndefined(_result) ? result : _result
       })
     })
-  }
+  },
 
   /**
    * Using an adapter, destroy the record with the primary key specified by the
@@ -1065,7 +1028,7 @@ export class Mapper {
    */
   destroy (id, opts) {
     return this.crud('destroy', id, opts)
-  }
+  },
 
   /**
    * Using the `query` argument, destroy the selected records via an adapter.
@@ -1095,7 +1058,7 @@ export class Mapper {
    */
   destroyAll (query, opts) {
     return this.crud('destroyAll', query, opts)
-  }
+  },
 
   /**
    * Retrieve via an adapter the record with the given primary key.
@@ -1119,7 +1082,7 @@ export class Mapper {
    */
   find (id, opts) {
     return this.crud('find', id, opts)
-  }
+  },
 
   /**
    * Using the `query` argument, select records to pull from an adapter.
@@ -1148,7 +1111,7 @@ export class Mapper {
    */
   findAll (query, opts) {
     return this.crud('findAll', query, opts)
-  }
+  },
 
   /**
    * Return the registered adapter with the given name or the default adapter if
@@ -1167,7 +1130,7 @@ export class Mapper {
       throw new ReferenceError(`${adapter} not found!`)
     }
     return self.getAdapters()[adapter]
-  }
+  },
 
   /**
    * Return the name of a registered adapter based on the given name or options,
@@ -1184,7 +1147,7 @@ export class Mapper {
       opts = { adapter: opts }
     }
     return opts.adapter || opts.defaultAdapter
-  }
+  },
 
   /**
    * @name Mapper#getAdapters
@@ -1192,11 +1155,11 @@ export class Mapper {
    */
   getAdapters () {
     return this._adapters
-  }
+  },
 
   getSchema () {
     return this.schema
-  }
+  },
 
   /**
    * Usage:
@@ -1210,7 +1173,7 @@ export class Mapper {
    */
   hasMany (relatedMapper, opts) {
     return hasMany(relatedMapper, opts)(this)
-  }
+  },
 
   /**
    * Usage:
@@ -1224,7 +1187,7 @@ export class Mapper {
    */
   hasOne (relatedMapper, opts) {
     return hasOne(relatedMapper, opts)(this)
-  }
+  },
 
   /**
    * Return whether `record` is an instance of this Mappers's recordClass.
@@ -1238,7 +1201,7 @@ export class Mapper {
   is (record) {
     const recordClass = this.recordClass
     return recordClass ? record instanceof recordClass : false
-  }
+  },
 
   /**
    * Register an adapter on this mapper under the given name.
@@ -1259,7 +1222,7 @@ export class Mapper {
     if (opts === true || opts.default) {
       self.defaultAdapter = name
     }
-  }
+  },
 
   /**
    * Using the `query` argument, select records to pull from an adapter.
@@ -1288,7 +1251,7 @@ export class Mapper {
    */
   sum (field, query, opts) {
     return this.crud('sum', field, query, opts)
-  }
+  },
 
   /**
    * Return a plain object representation of the given record.
@@ -1347,7 +1310,7 @@ export class Mapper {
       })
     }
     return json
-  }
+  },
 
   /**
    * Using an adapter, update the record with the primary key specified by the
@@ -1375,7 +1338,7 @@ export class Mapper {
    */
   update (id, props, opts) {
     return this.crud('update', id, props, opts)
-  }
+  },
 
   /**
    * Using the `query` argument, perform the a single updated to the selected
@@ -1407,7 +1370,7 @@ export class Mapper {
    */
   updateAll (props, query, opts) {
     return this.crud('updateAll', props, query, opts)
-  }
+  },
 
   /**
    * Given an array of updates, perform each of the updates via an adapter. Each
@@ -1436,52 +1399,4 @@ export class Mapper {
   updateMany (records, opts) {
     return this.crud('updateMany', records, opts)
   }
-}
-
-/**
- * @name Mapper#dbg
- * @method
- */
-
-/**
- * @name Mapper#log
- * @method
- */
-utils.logify(Mapper.prototype, 'Mapper')
-
-/**
- * Register a new event listener on this Mapper.
- *
- * @name Mapper#on
- * @method
- */
-
-/**
- * Remove an event listener from this Mapper.
- *
- * @name Mapper#off
- * @method
- */
-
-/**
- * Trigger an event on this Mapper.
- *
- * @name Mapper#emit
- * @method
- * @param {string} event Name of event to emit.
- */
-
-/**
- * A Mapper's registered listeners are stored at {@link Mapper#_listeners}.
- */
-utils.eventify(
-  Mapper.prototype,
-  function () {
-    return this._listeners
-  },
-  function (value) {
-    this._listeners = value
-  }
-)
-
-utils.hidePrototypeMethods(Mapper)
+})
