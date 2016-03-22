@@ -29,8 +29,8 @@ export function init () {
       Test.assert.deepEqual(store._mappers, {})
       Test.assert.deepEqual(store._collections, {})
       Test.assert.deepEqual(store.mapperDefaults, {})
-      Test.assert.isTrue(store.MapperClass === Test.JSData.Mapper)
-      Test.assert.isTrue(store.CollectionClass === Test.JSData.LinkedCollection)
+      Test.assert.isTrue(store.mapperClass === Test.JSData.Mapper)
+      Test.assert.isTrue(store.collectionClass === Test.JSData.LinkedCollection)
       Test.assert.equal(store.linkRelations, Test.JSData.utils.isBrowser)
     })
     it('should accept overrides', function () {
@@ -39,7 +39,7 @@ export function init () {
       class Foo {}
       class Bar {}
       const store = new DataStore({
-        MapperClass: Foo,
+        mapperClass: Foo,
         CollectionClass: Bar,
         foo: 'bar',
         linkRelations: true,
@@ -54,7 +54,7 @@ export function init () {
       Test.assert.deepEqual(store.mapperDefaults, {
         idAttribute: '_id'
       })
-      Test.assert.isTrue(store.MapperClass === Foo)
+      Test.assert.isTrue(store.mapperClass === Foo)
       Test.assert.isTrue(store.CollectionClass === Bar)
       Test.assert.isTrue(store.linkRelations)
     })

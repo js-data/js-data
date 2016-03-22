@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "module": "es2015",
+    "target": "es6",
+    "declaration": true,
+    "noEmitHelpers": true,
+    "outDir": ".tmp",
+    "listFiles": true
+  },
+  "files": [
+    "src/index.ts"
+  ]
+}

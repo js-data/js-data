@@ -35,72 +35,64 @@
  * @property {(string|boolean)} beta The beta version value, otherwise `false`
  * if the current version is not beta.
  */
-const version = {
+export const version = {
+  alpha: '<%= alpha %>' !== 'false' ? '<%= alpha %>' : false,
+  beta: '<%= beta %>' !== 'false' ? '<%= beta %>' : false,
   full: '<%= pkg.version %>',
   major: parseInt('<%= major %>', 10),
   minor: parseInt('<%= minor %>', 10),
-  patch: parseInt('<%= patch %>', 10),
-  alpha: '<%= alpha %>' !== 'false' ? '<%= alpha %>' : false,
-  beta: '<%= beta %>' !== 'false' ? '<%= beta %>' : false
+  patch: parseInt('<%= patch %>', 10)
 }
+
+import utils from './utils'
+export {utils}
+
+export * from './decorators'
 
 /**
  * {@link Collection} class.
  * @name module:js-data.Collection
  */
-import Collection from './Collection'
+export * from './Collection'
+
 /**
  * {@link Container} class.
  * @name module:js-data.Container
  */
-import Container from './Container'
+export * from './Container'
+
 /**
  * {@link DataStore} class.
  * @name module:js-data.DataStore
  */
-import DataStore from './DataStore'
+export * from './DataStore'
+
 /**
  * {@link LinkedCollection} class.
  * @name module:js-data.LinkedCollection
  */
-import LinkedCollection from './LinkedCollection'
+export * from './LinkedCollection'
+
 /**
  * {@link Mapper} class.
  * @name module:js-data.Mapper
  */
-import Mapper from './Mapper'
+export * from './Mapper'
+
 /**
  * {@link Query} class.
  * @name module:js-data.Query
  */
-import Query from './Query'
+export * from './Query'
+
 /**
  * {@link Record} class.
  * @name module:js-data.Record
  */
-import Record from './Record'
+export * from './Record'
+
 /**
  * {@link Schema} class.
  * @name module:js-data.Schema
  */
-import Schema from './Schema'
-
-import utils from './utils'
-
-export * from './decorators'
-
-const DS = DataStore
-
-export {
-  Collection,
-  Container,
-  DataStore,
-  DS, // Backwards compatiblity
-  LinkedCollection,
-  Mapper,
-  Query,
-  Record,
-  Schema,
-  utils,
-  version
-}
+export * from './Schema'

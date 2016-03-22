@@ -1,4 +1,4 @@
-export function sort (a, b, hashCode) {
+export function sort (a, b, hashCode?: any) {
   // Short-curcuit comparison if a and b are strictly equal
   // This is absolutely necessary for indexed objects that
   // don't have the idAttribute field
@@ -42,7 +42,7 @@ export function removeAt (array, index) {
   return array
 }
 
-export function binarySearch (array, value, field) {
+export function binarySearch (array, value, field?: any) {
   let lo = 0
   let hi = array.length
   let compared

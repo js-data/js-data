@@ -1,4 +1,22 @@
-import _ from './utils'
+import utils from './utils'
+import {Collection} from './Collection'
+
+const reserved = {
+  limit: '',
+  offset: '',
+  orderBy: '',
+  skip: '',
+  sort: '',
+  where: ''
+}
+
+const escapeRegExp = /([.*+?^=!:${}()|[\]\/\\])/g
+const percentRegExp = /%/g
+const underscoreRegExp = /_/g
+
+const escape = function (pattern) {
+  return pattern.replace(escapeRegExp, '\\$1')
+}
 
 /**
  * A class used by the {@link Collection} class to build queries to be executed
@@ -12,123 +30,111 @@ import _ from './utils'
  * @class Query
  * @param {Collection} collection - The collection on which this query operates.
  */
-export default function Query (collection) {
-  _.classCallCheck(this, Query)
-
+export class Query {
   /**
-   * The collection on which this query operates.
+   * TODO
    *
-   * @name Query#collection
-   * @type {Collection}
+   * @name Query.ops
+   * @type {Object}
    */
-  this.collection = collection
-
-  /**
-   * The data result of this query.
-   *
-   * @name Query#data
-   * @type {Array}
-   */
-  this.data = null
-}
-
-/**
- * Create a Query subclass.
- *
- * ```javascript
- * var MyQuery = Query.extend({
- *   foo: function () { return 'bar' }
- * })
- * var query = new MyQuery()
- * query.foo() // "bar"
- * ```
- *
- * @name Query.extend
- * @method
- * @param {Object} [props={}] Properties to add to the prototype of the
- * subclass.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @return {Function} Subclass of Query.
- */
-Query.extend = _.extend
-
-const reserved = {
-  skip: '',
-  offset: '',
-  where: '',
-  limit: '',
-  orderBy: '',
-  sort: ''
-}
-
-const escapeRegExp = /([.*+?^=!:${}()|[\]\/\\])/g
-const percentRegExp = /%/g
-const underscoreRegExp = /_/g
-
-function escape (pattern) {
-  return pattern.replace(escapeRegExp, '\\$1')
-}
-
-/**
- * TODO
- *
- * @name Query.ops
- * @type {Object}
- */
-Query.ops = {
-  '==': function (value, predicate) {
-    return value == predicate // eslint-disable-line
-  },
-  '===': function (value, predicate) {
-    return value === predicate
-  },
-  '!=': function (value, predicate) {
-    return value != predicate // eslint-disable-line
-  },
-  '!==': function (value, predicate) {
-    return value !== predicate
-  },
-  '>': function (value, predicate) {
-    return value > predicate
-  },
-  '>=': function (value, predicate) {
-    return value >= predicate
-  },
-  '<': function (value, predicate) {
-    return value < predicate
-  },
-  '<=': function (value, predicate) {
-    return value <= predicate
-  },
-  'isectEmpty': function (value, predicate) {
-    return !_.intersection((value || []), (predicate || [])).length
-  },
-  'isectNotEmpty': function (value, predicate) {
-    return _.intersection((value || []), (predicate || [])).length
-  },
-  'in': function (value, predicate) {
-    return predicate.indexOf(value) !== -1
-  },
-  'notIn': function (value, predicate) {
-    return predicate.indexOf(value) === -1
-  },
-  'contains': function (value, predicate) {
-    return (value || []).indexOf(predicate) !== -1
-  },
-  'notContains': function (value, predicate) {
-    return (value || []).indexOf(predicate) === -1
+  static ops = {
+    '==': function (value, predicate) {
+      /* tslint:disable:triple-equals */
+      return value == predicate
+      /* tslint:enable:triple-equals */
+    },
+    '===': function (value, predicate) {
+      return value === predicate
+    },
+    '!=': function (value, predicate) {
+      /* tslint:disable:triple-equals */
+      return value != predicate
+      /* tslint:enable:triple-equals */
+    },
+    '!==': function (value, predicate) {
+      return value !== predicate
+    },
+    '>': function (value, predicate) {
+      return value > predicate
+    },
+    '>=': function (value, predicate) {
+      return value >= predicate
+    },
+    '<': function (value, predicate) {
+      return value < predicate
+    },
+    '<=': function (value, predicate) {
+      return value <= predicate
+    },
+    'isectEmpty': function (value, predicate) {
+      return !utils.intersection((value || []), (predicate || [])).length
+    },
+    'isectNotEmpty': function (value, predicate) {
+      return utils.intersection((value || []), (predicate || [])).length
+    },
+    'in': function (value, predicate) {
+      return predicate.indexOf(value) !== -1
+    },
+    'notIn': function (value, predicate) {
+      return predicate.indexOf(value) === -1
+    },
+    'contains': function (value, predicate) {
+      return (value || []).indexOf(predicate) !== -1
+    },
+    'notContains': function (value, predicate) {
+      return (value || []).indexOf(predicate) === -1
+    }
   }
-}
 
-_.addHiddenPropsToTarget(Query.prototype, {
+  /**
+   * Create a Query subclass.
+   *
+   * ```javascript
+   * var MyQuery = Query.extend({
+   *   foo: function () { return 'bar' }
+   * })
+   * var query = new MyQuery()
+   * query.foo() // "bar"
+   * ```
+   *
+   * @name Query.extend
+   * @method
+   * @param {Object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {Object} [classProps={}] Static properties to add to the subclass.
+   * @return {Function} Subclass of Query.
+   */
+  static extend = utils.extend
+  collection: Collection
+  data: Array<any>
+  constructor(collection?: Collection) {
+    utils.classCallCheck(this, Query)
+
+    /**
+     * The collection on which this query operates.
+     *
+     * @name Query#collection
+     * @type {Collection}
+     */
+    this.collection = collection
+
+    /**
+     * The data result of this query.
+     *
+     * @name Query#data
+     * @type {Array}
+     */
+    this.data = null
+  }
+
   compare (orderBy, index, a, b) {
     const def = orderBy[index]
-    let cA = _.get(a, def[0])
-    let cB = _.get(b, def[0])
-    if (cA && _.isString(cA)) {
+    let cA = utils.get(a, def[0])
+    let cB = utils.get(b, def[0])
+    if (cA && utils.isString(cA)) {
       cA = cA.toUpperCase()
     }
-    if (cB && _.isString(cB)) {
+    if (cB && utils.isString(cB)) {
       cB = cB.toUpperCase()
     }
     a || (a = null)
@@ -158,22 +164,22 @@ _.addHiddenPropsToTarget(Query.prototype, {
         }
       }
     }
-  },
+  }
 
   evaluate (value, op, predicate) {
     if (Query.ops[op]) {
       return Query.ops[op](value, predicate)
     }
     if (op.indexOf('like') === 0) {
-      return !_.isNull(this.like(predicate, op.substr(4)).exec(value))
+      return !utils.isNull(this.like(predicate, op.substr(4)).exec(value))
     } else if (op.indexOf('notLike') === 0) {
-      return _.isNull(this.like(predicate, op.substr(7)).exec(value))
+      return utils.isNull(this.like(predicate, op.substr(7)).exec(value))
     }
-  },
+  }
 
   like (pattern, flags) {
     return new RegExp(`^${(escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.'))}$`, flags)
-  },
+  }
 
   /**
    * Return the current data result of this query.
@@ -187,7 +193,7 @@ _.addHiddenPropsToTarget(Query.prototype, {
       self.data = self.collection.index.getAll()
     }
     return self.data
-  },
+  }
 
   /**
    * Find all entities between two boundaries.
@@ -216,7 +222,7 @@ _.addHiddenPropsToTarget(Query.prototype, {
    * @param {boolean} [opts.offset] - The number of resulting entities to skip.
    * @return {Query} A reference to itself for chaining.
    */
-  between (leftKeys, rightKeys, opts) {
+  between (leftKeys, rightKeys, opts?: any) {
     const self = this
     opts || (opts = {})
     if (self.data) {
@@ -224,7 +230,7 @@ _.addHiddenPropsToTarget(Query.prototype, {
     }
     self.data = self.collection.getIndex(opts.index).between(leftKeys, rightKeys, opts)
     return self
-  },
+  }
 
   /**
    * Find the entity or entities that match the provided key.
@@ -262,13 +268,13 @@ _.addHiddenPropsToTarget(Query.prototype, {
    * query. If no index is specified, the main index is used.
    * @return {Query} A reference to itself for chaining.
    */
-  get (keyList = [], opts) {
+  get (keyList = [], opts?: any) {
     const self = this
     opts || (opts = {})
     if (self.data) {
       throw new Error('Cannot access index after first operation!')
     }
-    if (keyList && !_.isArray(keyList)) {
+    if (keyList && !utils.isArray(keyList)) {
       keyList = [keyList]
     }
     if (!keyList.length) {
@@ -277,7 +283,7 @@ _.addHiddenPropsToTarget(Query.prototype, {
     }
     self.data = self.collection.getIndex(opts.index).get(keyList)
     return self
-  },
+  }
 
   /**
    * Find the entity or entities that match the provided keyLists.
@@ -305,14 +311,14 @@ _.addHiddenPropsToTarget(Query.prototype, {
    */
   getAll (...args) {
     const self = this
-    let opts = {}
+    let opts: any = {}
     if (self.data) {
       throw new Error('Cannot access index after first operation!')
     }
-    if (!args.length || args.length === 1 && _.isObject(args[0])) {
+    if (!args.length || args.length === 1 && utils.isObject(args[0])) {
       self.getData()
       return self
-    } else if (args.length && _.isObject(args[args.length - 1])) {
+    } else if (args.length && utils.isObject(args[args.length - 1])) {
       opts = args[args.length - 1]
       args.pop()
     }
@@ -323,7 +329,7 @@ _.addHiddenPropsToTarget(Query.prototype, {
       self.data = self.data.concat(index.get(keyList))
     })
     return self
-  },
+  }
 
   /**
    * Find the entity or entities that match the provided query or pass the
@@ -363,13 +369,13 @@ _.addHiddenPropsToTarget(Query.prototype, {
     const self = this
     query || (query = {})
     self.getData()
-    if (_.isObject(query)) {
+    if (utils.isObject(query)) {
       let where = {}
       // Filter
-      if (_.isObject(query.where)) {
+      if (utils.isObject(query.where)) {
         where = query.where
       }
-      _.forOwn(query, function (value, key) {
+      utils.forOwn(query, function (value, key) {
         if (!(key in reserved) && !(key in where)) {
           where[key] = {
             '==': value
@@ -380,13 +386,13 @@ _.addHiddenPropsToTarget(Query.prototype, {
       const fields = []
       const ops = []
       const predicates = []
-      _.forOwn(where, function (clause, field) {
-        if (!_.isObject(clause)) {
+      utils.forOwn(where, function (clause, field) {
+        if (!utils.isObject(clause)) {
           clause = {
             '==': clause
           }
         }
-        _.forOwn(clause, function (expr, op) {
+        utils.forOwn(clause, function (expr, op) {
           fields.push(field)
           ops.push(op)
           predicates.push(expr)
@@ -403,7 +409,7 @@ _.addHiddenPropsToTarget(Query.prototype, {
             let op = ops[i]
             const isOr = op.charAt(0) === '|'
             op = isOr ? op.substr(1) : op
-            const expr = self.evaluate(_.get(item, fields[i]), op, predicates[i])
+            const expr = self.evaluate(utils.get(item, fields[i]), op, predicates[i])
             if (expr !== undefined) {
               keep = first ? expr : (isOr ? keep || expr : keep && expr)
             }
@@ -416,12 +422,12 @@ _.addHiddenPropsToTarget(Query.prototype, {
       // Sort
       let orderBy = query.orderBy || query.sort
 
-      if (_.isString(orderBy)) {
+      if (utils.isString(orderBy)) {
         orderBy = [
           [orderBy, 'ASC']
         ]
       }
-      if (!_.isArray(orderBy)) {
+      if (!utils.isArray(orderBy)) {
         orderBy = null
       }
 
@@ -429,7 +435,7 @@ _.addHiddenPropsToTarget(Query.prototype, {
       if (orderBy) {
         let index = 0
         orderBy.forEach(function (def, i) {
-          if (_.isString(def)) {
+          if (utils.isString(def)) {
             orderBy[i] = [def, 'ASC']
           }
         })
@@ -439,20 +445,20 @@ _.addHiddenPropsToTarget(Query.prototype, {
       }
 
       // Skip
-      if (_.isNumber(query.skip)) {
+      if (utils.isNumber(query.skip)) {
         self.skip(query.skip)
-      } else if (_.isNumber(query.offset)) {
+      } else if (utils.isNumber(query.offset)) {
         self.skip(query.offset)
       }
       // Limit
-      if (_.isNumber(query.limit)) {
+      if (utils.isNumber(query.limit)) {
         self.limit(query.limit)
       }
-    } else if (_.isFunction(query)) {
+    } else if (utils.isFunction(query)) {
       self.data = self.data.filter(query, thisArg)
     }
     return self
-  },
+  }
 
   /**
    * Skip a number of results.
@@ -470,7 +476,7 @@ _.addHiddenPropsToTarget(Query.prototype, {
    * @return {Query} A reference to itself for chaining.
    */
   skip (num) {
-    if (!_.isNumber(num)) {
+    if (!utils.isNumber(num)) {
       throw new TypeError(`skip: Expected number but found ${typeof num}!`)
     }
     const data = this.getData()
@@ -480,7 +486,7 @@ _.addHiddenPropsToTarget(Query.prototype, {
       this.data = []
     }
     return this
-  },
+  }
 
   /**
    * Limit the result.
@@ -498,13 +504,13 @@ _.addHiddenPropsToTarget(Query.prototype, {
    * @return {Query} A reference to itself for chaining.
    */
   limit (num) {
-    if (!_.isNumber(num)) {
+    if (!utils.isNumber(num)) {
       throw new TypeError(`limit: Expected number but found ${typeof num}!`)
     }
     const data = this.getData()
     this.data = data.slice(0, Math.min(data.length, num))
     return this
-  },
+  }
 
   /**
    * Iterate over all entities.
@@ -518,7 +524,7 @@ _.addHiddenPropsToTarget(Query.prototype, {
   forEach (forEachFn, thisArg) {
     this.getData().forEach(forEachFn, thisArg)
     return this
-  },
+  }
 
   /**
    * Apply a mapping function to the result data.
@@ -532,7 +538,7 @@ _.addHiddenPropsToTarget(Query.prototype, {
   map (mapFn, thisArg) {
     this.data = this.getData().map(mapFn, thisArg)
     return this
-  },
+  }
 
   /**
    * Return the result of calling the specified function on each item in this
@@ -548,7 +554,7 @@ _.addHiddenPropsToTarget(Query.prototype, {
       return item[funcName](...args)
     })
     return this
-  },
+  }
 
   /**
    * Complete the execution of the query and return the resulting data.
@@ -562,4 +568,6 @@ _.addHiddenPropsToTarget(Query.prototype, {
     this.data = null
     return data
   }
-})
+}
+
+utils.hidePrototypeMethods(Query)
