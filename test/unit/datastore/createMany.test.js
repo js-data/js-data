@@ -18,7 +18,7 @@ export function init () {
       }, { 'default': true })
       const users = await Test.store.createMany('user', props)
       Test.assert.isDefined(users[0][Test.store.getMapper('user').idAttribute], 'new user has an id')
-      Test.assert.isTrue(users[0] instanceof Test.store.getMapper('user').RecordClass, 'user is a record')
+      Test.assert.isTrue(users[0] instanceof Test.store.getMapper('user').recordClass, 'user is a record')
     })
   })
 }

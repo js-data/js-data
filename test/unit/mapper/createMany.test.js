@@ -29,7 +29,7 @@ export function init () {
       const users = await User.createMany(props)
       Test.assert.isTrue(createCalled, 'Adapter#createMany should have been called')
       Test.assert.isDefined(users[0][User.idAttribute], 'new user has an id')
-      Test.assert.isTrue(users[0] instanceof User.RecordClass, 'user is a record')
+      Test.assert.isTrue(users[0] instanceof User.recordClass, 'user is a record')
     })
     it('should return raw', async function () {
       const Test = this
@@ -58,7 +58,7 @@ export function init () {
       let data = await User.createMany(props)
       Test.assert.isTrue(createCalled, 'Adapter#createMany should have been called')
       Test.assert.isDefined(data.data[0][User.idAttribute], 'new user has an id')
-      Test.assert.isTrue(data.data[0] instanceof User.RecordClass, 'user is a record')
+      Test.assert.isTrue(data.data[0] instanceof User.recordClass, 'user is a record')
       Test.assert.equal(data.adapter, 'mock', 'should have adapter name in response')
       Test.assert.equal(data.created, 1, 'should have other metadata in response')
     })

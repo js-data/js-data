@@ -1,10 +1,10 @@
-import _ from './utils'
+import utils from './utils'
 import {
   belongsToType,
   hasManyType,
   hasOneType
 } from './decorators'
-import Mapper from './Mapper'
+import {Mapper} from './Mapper'
 
 const toProxy = [
   /**
@@ -304,64 +304,67 @@ const toProxy = [
  *
  * @class Container
  * @param {Object} [opts] Configuration options.
- * @param {Function} [opts.MapperClass] Constructor function to use in
+ * @param {Function} [opts.mapperClass] Constructor function to use in
  * {@link Container#defineMapper} to create a new mapper.
  * @param {Object} [opts.mapperDefaults] Defaults options to pass to
- * {@link Container#MapperClass} when creating a new mapper.
+ * {@link Container#mapperClass} when creating a new mapper.
  * @return {Container}
  */
-export default function Container (opts) {
-  const self = this
-  _.classCallCheck(self, Container)
-
-  opts || (opts = {})
-  // Apply options provided by the user
-  _.fillIn(self, opts)
+export class Container {
   /**
-   * Defaults options to pass to {@link Container#MapperClass} when creating a
-   * new mapper.
+   * Create a Container subclass.
    *
-   * @name Container#mapperDefaults
-   * @type {Object}
-   */
-  self.mapperDefaults = self.mapperDefaults || {}
-  /**
-   * Constructor function to use in {@link Container#defineMapper} to create a
-   * new mapper.
+   * @example
+   * var MyContainer = Container.extend({
+   *   foo: function () { return 'bar' }
+   * })
+   * var container = new MyContainer()
+   * container.foo() // "bar"
    *
-   * @name Container#MapperClass
-   * @type {Function}
+   * @name Container.extend
+   * @method
+   * @param {Object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {Object} [classProps={}] Static properties to add to the subclass.
+   * @return {Function} Subclass of Container.
    */
-  self.MapperClass = self.MapperClass || Mapper
+  static extend = utils.extend
+  mapperDefaults: any
+  mapperClass: any
+  _adapters: any
+  _mappers: any
+  constructor (opts?: any) {
+    const self = this
+    utils.classCallCheck(self, Container)
+    opts || (opts = {})
 
-  // Initilize private data
+    // Apply options provided by the user
+    utils.fillIn(self, opts)
+    /**
+     * Defaults options to pass to {@link Container#mapperClass} when creating a
+     * new mapper.
+     *
+     * @name Container#mapperDefaults
+     * @type {Object}
+     */
+    self.mapperDefaults = self.mapperDefaults || {}
+    /**
+     * Constructor function to use in {@link Container#defineMapper} to create a
+     * new mapper.
+     *
+     * @name Container#mapperClass
+     * @type {Function}
+     */
+    self.mapperClass = self.mapperClass || Mapper
 
-  // Holds the adapters, shared by all mappers in this container
-  self._adapters = {}
-  // The the mappers in this container
-  self._mappers = {}
-}
+    // Initilize private data
 
-/**
- * Create a Container subclass.
- *
- * @example
- * var MyContainer = Container.extend({
- *   foo: function () { return 'bar' }
- * })
- * var container = new MyContainer()
- * container.foo() // "bar"
- *
- * @name Container.extend
- * @method
- * @param {Object} [props={}] Properties to add to the prototype of the
- * subclass.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @return {Function} Subclass of Container.
- */
-Container.extend = _.extend
+    // Holds the adapters, shared by all mappers in this container
+    self._adapters = {}
+    // The the mappers in this container
+    self._mappers = {}
+  }
 
-_.addHiddenPropsToTarget(Container.prototype, {
   /**
    * Create a new mapper and register it in this container.
    *
@@ -378,20 +381,20 @@ _.addHiddenPropsToTarget(Container.prototype, {
    * @param {string} name Name under which to register the new {@link Mapper}.
    * {@link Mapper#name} will be set to this value.
    * @param {Object} [opts] Configuration options. Passed to
-   * {@link Container#MapperClass} when creating the new {@link Mapper}.
+   * {@link Container#mapperClass} when creating the new {@link Mapper}.
    * @return {Mapper}
    */
-  defineMapper (name, opts) {
+  defineMapper (name: string, opts?: any): Mapper {
     const self = this
 
     // For backwards compatibility with defineResource
-    if (_.isObject(name)) {
+    if (utils.isObject(name)) {
       opts = name
       if (!opts.name) {
         throw new Error('name is required!')
       }
       name = opts.name
-    } else if (!_.isString(name)) {
+    } else if (!utils.isString(name)) {
       throw new Error('name is required!')
     }
 
@@ -401,15 +404,15 @@ _.addHiddenPropsToTarget(Container.prototype, {
     opts.name = name
     opts.relations || (opts.relations = {})
 
-    // Check if the user is overriding the datastore's default MapperClass
-    const MapperClass = opts.MapperClass || self.MapperClass
-    delete opts.MapperClass
+    // Check if the user is overriding the datastore's default mapperClass
+    const mapperClass = opts.mapperClass || self.mapperClass
+    delete opts.mapperClass
 
     // Apply the datastore's defaults to the options going into the mapper
-    _.fillIn(opts, self.mapperDefaults)
+    utils.fillIn(opts, self.mapperDefaults)
 
     // Instantiate a mapper
-    const mapper = self._mappers[name] = new MapperClass(opts)
+    const mapper = self._mappers[name] = new mapperClass(opts)
     // Make sure the mapper's name is set
     mapper.name = name
     // All mappers in this datastore will share adapters
@@ -417,29 +420,33 @@ _.addHiddenPropsToTarget(Container.prototype, {
 
     // Setup the mapper's relations, including generating Mapper#relationList
     // and Mapper#relationFields
-    _.forOwn(mapper.relations, function (group, type) {
-      _.forOwn(group, function (relations, _name) {
-        if (_.isObject(relations)) {
+    utils.forOwn(mapper.relations, function (group, type) {
+      utils.forOwn(group, function (relations, _name) {
+        if (utils.isObject(relations)) {
           relations = [relations]
         }
         relations.forEach(function (def) {
           def.getRelation = function () {
             return self.getMapper(_name)
           }
-          const Relation = self._mappers[_name] || _name
+          const relatedMapper = self._mappers[_name] || _name
           if (type === belongsToType) {
-            mapper.belongsTo(Relation, def)
+            mapper.belongsTo(relatedMapper, def)
           } else if (type === hasOneType) {
-            mapper.hasOne(Relation, def)
+            mapper.hasOne(relatedMapper, def)
           } else if (type === hasManyType) {
-            mapper.hasMany(Relation, def)
+            mapper.hasMany(relatedMapper, def)
           }
         })
       })
     })
 
     return mapper
-  },
+  }
+
+  defineResource (name, opts) {
+    return this.defineMapper(name, opts)
+  }
 
   /**
    * Return the registered adapter with the given name or the default adapter if
@@ -457,7 +464,7 @@ _.addHiddenPropsToTarget(Container.prototype, {
       throw new ReferenceError(`${adapter} not found!`)
     }
     return self.getAdapters()[adapter]
-  },
+  }
 
   /**
    * Return the name of a registered adapter based on the given name or options,
@@ -468,13 +475,13 @@ _.addHiddenPropsToTarget(Container.prototype, {
    * @param {(Object|string)} [opts] The name of an adapter or options, if any.
    * @return {string} The name of the adapter.
    */
-  getAdapterName (opts) {
+  getAdapterName (opts?: any) {
     opts || (opts = {})
-    if (_.isString(opts)) {
+    if (utils.isString(opts)) {
       opts = { adapter: opts }
     }
     return opts.adapter || this.mapperDefaults.defaultAdapter
-  },
+  }
 
   /**
    * Return the registered adapters of this container.
@@ -485,7 +492,7 @@ _.addHiddenPropsToTarget(Container.prototype, {
    */
   getAdapters () {
     return this._adapters
-  },
+  }
 
   /**
    * Return the mapper registered under the specified name.
@@ -507,7 +514,7 @@ _.addHiddenPropsToTarget(Container.prototype, {
       throw new ReferenceError(`${name} is not a registered mapper!`)
     }
     return mapper
-  },
+  }
 
   /**
    * Register an adapter on this container under the given name. Adapters
@@ -527,19 +534,19 @@ _.addHiddenPropsToTarget(Container.prototype, {
    * @param {boolean} [opts.default=false] Whether to make the adapter the
    * default adapter for all Mappers in this container.
    */
-  registerAdapter (name, adapter, opts) {
+  registerAdapter (name: string, adapter, opts?: any) {
     const self = this
     opts || (opts = {})
     self.getAdapters()[name] = adapter
     // Optionally make it the default adapter for the target.
     if (opts === true || opts.default) {
       self.mapperDefaults.defaultAdapter = name
-      _.forOwn(self._mappers, function (mapper) {
+      utils.forOwn(self._mappers, function (mapper) {
         mapper.defaultAdapter = name
       })
     }
   }
-})
+}
 
 const toAdd = {}
 toProxy.forEach(function (method) {
@@ -547,4 +554,6 @@ toProxy.forEach(function (method) {
     return this.getMapper(name)[method](...args)
   }
 })
-_.addHiddenPropsToTarget(Container.prototype, toAdd)
+utils.addHiddenPropsToTarget(Container.prototype, toAdd)
+
+utils.hidePrototypeMethods(Container)

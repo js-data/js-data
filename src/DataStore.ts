@@ -1,11 +1,11 @@
-import _ from './utils'
+import utils from './utils'
 import {
   belongsToType,
   hasManyType,
   hasOneType
 } from './decorators'
-import Container from './Container'
-import LinkedCollection from './LinkedCollection'
+import {Container} from './Container'
+import {LinkedCollection} from './LinkedCollection'
 
 const DATASTORE_DEFAULTS = {
   /**
@@ -16,7 +16,7 @@ const DATASTORE_DEFAULTS = {
    * @name DataStore#linkRelations
    * @type {boolean}
    */
-  linkRelations: _.isBrowser
+  linkRelations: utils.isBrowser
 }
 
 /**
@@ -58,23 +58,41 @@ const DATASTORE_DEFAULTS = {
  * @param {Object} [opts] Configuration options. See {@link Container}.
  * @return {DataStore}
  */
-const DataStore = Container.extend({
-  constructor (opts) {
+/* tslint:disable:variable-name */
+export class DataStore extends Container {
+  /* tslint:enable:variable-name */
+  collectionClass: any
+  _collections: any
+  _pendingQueries: any
+  _completedQueries: any
+  linkRelations: boolean
+  add: Function
+  between: Function
+  createIndex: Function
+  filter: Function
+  get: Function
+  getAll: Function
+  query: Function
+  remove: Function
+  removeAll: Function
+  toJson: Function
+  constructor (opts?: any) {
+    super(opts)
     const self = this
-    _.classCallCheck(self, DataStore)
+    utils.classCallCheck(self, DataStore)
 
-    _.getSuper(self).call(self, opts)
-    self.CollectionClass = self.CollectionClass || LinkedCollection
+    utils.getSuper(self).call(self, opts)
+    self.collectionClass = self.collectionClass || LinkedCollection
     self._collections = {}
-    _.fillIn(self, DATASTORE_DEFAULTS)
+    utils.fillIn(self, DATASTORE_DEFAULTS)
     self._pendingQueries = {}
     self._completedQueries = {}
     return self
-  },
+  }
 
   _callSuper (method, ...args) {
-    return _.getSuper(this).prototype[method].apply(this, args)
-  },
+    return super[method].apply(this, args)
+  }
 
   /**
    * TODO
@@ -88,7 +106,7 @@ const DataStore = Container.extend({
    * @param {Object} [opts] Configuration options.
    * @return {(Object|Array)} Result.
    */
-  _end (name, data, opts) {
+  _end (name, data, opts?: any) {
     if (opts.raw) {
       data.data = this.getCollection(name).add(data.data, opts)
       return data
@@ -96,7 +114,7 @@ const DataStore = Container.extend({
       data = this.getCollection(name).add(data, opts)
     }
     return data
-  },
+  }
 
   /**
    * TODO
@@ -109,13 +127,13 @@ const DataStore = Container.extend({
    * {@link Mapper#create} for more configuration options.
    * @return {Promise}
    */
-  create (name, record, opts) {
+  create (name, record, opts?: any) {
     const self = this
     opts || (opts = {})
     return self._callSuper('create', name, record, opts).then(function (data) {
       return self._end(name, data, opts)
     })
-  },
+  }
 
   /**
    * TODO
@@ -128,23 +146,23 @@ const DataStore = Container.extend({
    * {@link Mapper#createMany} for more configuration options.
    * @return {Promise}
    */
-  createMany (name, records, opts) {
+  createMany (name, records, opts?: any) {
     const self = this
     opts || (opts = {})
     return self._callSuper('createMany', name, records, opts).then(function (data) {
       return self._end(name, data, opts)
     })
-  },
+  }
 
-  defineMapper (name, opts) {
+  defineMapper (name: string, opts?: any) {
     const self = this
-    const mapper = _.getSuper(self).prototype.defineMapper.call(self, name, opts)
+    const mapper = utils.getSuper(self).prototype.defineMapper.call(self, name, opts)
     self._pendingQueries[name] = {}
     self._completedQueries[name] = {}
     mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] })
 
     // The datastore uses a subclass of Collection that is "datastore-aware"
-    const collection = self._collections[name] = new self.CollectionClass(null, {
+    const collection = self._collections[name] = new self.collectionClass(null, {
       // Make sure the collection has somewhere to store "added" timestamps
       _added: {},
       // Give the collection a reference to this datastore
@@ -156,7 +174,7 @@ const DataStore = Container.extend({
     const schema = mapper.schema || {}
     const properties = schema.properties || {}
     // TODO: Make it possible index nested properties?
-    _.forOwn(properties, function (opts, prop) {
+    utils.forOwn(properties, function (opts, prop) {
       if (opts.indexed) {
         collection.createIndex(prop)
       }
@@ -179,7 +197,7 @@ const DataStore = Container.extend({
         const path = `links.${localField}`
         const foreignKey = def.foreignKey
         const type = def.type
-        const link = _.isUndefined(def.link) ? linkRelations : def.link
+        const link = utils.isUndefined(def.link) ? linkRelations : def.link
         const updateOpts = { index: foreignKey }
         let descriptor
 
@@ -195,7 +213,7 @@ const DataStore = Container.extend({
                 return _self._get(path)
               }
               const key = def.getForeignKey(_self)
-              const item = _.isUndefined(key) ? undefined : self.getCollection(relation).get(key)
+              const item = utils.isUndefined(key) ? undefined : self.getCollection(relation).get(key)
               _self._set(path, item)
               return item
             },
@@ -232,13 +250,13 @@ const DataStore = Container.extend({
                   index: foreignKey
                 })
               } else if (localKeys) {
-                const keys = _.get(_self, localKeys) || []
-                const args = _.isArray(keys) ? keys : Object.keys(keys)
+                const keys = utils.get(_self, localKeys) || []
+                const args = utils.isArray(keys) ? keys : Object.keys(keys)
                 // Really fast retrieval
                 items = relationCollection.getAll.apply(relationCollection, args)
               } else if (foreignKeys) {
                 const query = {}
-                _.set(query, `where.${foreignKeys}.contains`, key)
+                utils.set(query, `where.${foreignKeys}.contains`, key)
                 // Make a much slower retrieval
                 items = relationCollection.filter(query)
               }
@@ -254,24 +272,24 @@ const DataStore = Container.extend({
 
               if (foreignKey) {
                 def.setForeignKey(_self, records)
-                if (_.isArray(records)) {
+                if (utils.isArray(records)) {
                   records.forEach(function (record) {
                     relationCollection.updateIndex(record, updateOpts)
                   })
                 }
               } if (localKeys) {
-                _.set(_self, localKeys, records.map(function (record) {
+                utils.set(_self, localKeys, records.map(function (record) {
                   return relationCollection.recordId(record)
                 }))
               } else if (foreignKeys) {
                 records.forEach(function (record) {
-                  const keys = _.get(record, foreignKeys)
+                  const keys = utils.get(record, foreignKeys)
                   if (keys) {
                     if (keys.indexOf(key) === -1) {
                       keys.push(key)
                     }
                   } else {
-                    _.set(record, foreignKeys, [key])
+                    utils.set(record, foreignKeys, [key])
                   }
                 })
               }
@@ -304,7 +322,7 @@ const DataStore = Container.extend({
         }
 
         if (descriptor) {
-          descriptor.enumerable = _.isUndefined(def.enumerable) ? true : def.enumerable
+          descriptor.enumerable = utils.isUndefined(def.enumerable) ? true : def.enumerable
           if (def.get) {
             let origGet = descriptor.get
             descriptor.get = function () {
@@ -317,13 +335,13 @@ const DataStore = Container.extend({
               return def.set(def, this, related, (value) => origSet.call(this, value === undefined ? related : value))
             }
           }
-          Object.defineProperty(mapper.RecordClass.prototype, localField, descriptor)
+          Object.defineProperty(mapper.recordClass.prototype, localField, descriptor)
         }
       })
     }
 
     return mapper
-  },
+  }
 
   /**
    * TODO
@@ -336,7 +354,7 @@ const DataStore = Container.extend({
    * {@link Mapper#destroy} for more configuration options.
    * @return {Promise}
    */
-  destroy (name, id, opts) {
+  destroy (name, id, opts?: any) {
     const self = this
     opts || (opts = {})
     return self._callSuper('destroy', name, id, opts).then(function (data) {
@@ -349,7 +367,7 @@ const DataStore = Container.extend({
       delete self._completedQueries[name][id]
       return data
     })
-  },
+  }
 
   /**
    * TODO
@@ -362,7 +380,7 @@ const DataStore = Container.extend({
    * {@link Mapper#destroyAll} for more configuration options.
    * @return {Promise}
    */
-  destroyAll (name, query, opts) {
+  destroyAll (name, query, opts?: any) {
     const self = this
     opts || (opts = {})
     return self._callSuper('destroyAll', name, query, opts).then(function (data) {
@@ -376,7 +394,7 @@ const DataStore = Container.extend({
       delete self._completedQueries[name][hash]
       return data
     })
-  },
+  }
 
   /**
    * TODO
@@ -388,12 +406,12 @@ const DataStore = Container.extend({
    * @param {Object} [opts] - Passed to {@link Mapper#find}.
    * @return {Promise}
    */
-  find (name, id, opts) {
+  find (name, id, opts?: any) {
     const self = this
     opts || (opts = {})
     const pendingQuery = self._pendingQueries[name][id]
 
-    _.fillIn(opts, self.getMapper(name))
+    utils.fillIn(opts, self.getMapper(name))
 
     if (pendingQuery) {
       return pendingQuery
@@ -407,16 +425,16 @@ const DataStore = Container.extend({
         return self._end(name, data, opts)
       }, function (err) {
         delete self._pendingQueries[name][id]
-        return _.reject(err)
+        return utils.reject(err)
       }).then(function (data) {
         self._completedQueries[name][id] = new Date().getTime()
         return data
       })
     } else {
-      promise = _.resolve(item)
+      promise = utils.resolve(item)
     }
     return promise
-  },
+  }
 
   /**
    * TODO
@@ -428,13 +446,13 @@ const DataStore = Container.extend({
    * @param {Object} [opts] - Passed to {@link Model.findAll}.
    * @return {Promise}
    */
-  findAll (name, query, opts) {
+  findAll (name, query, opts?: any) {
     const self = this
     opts || (opts = {})
     const hash = self.hashQuery(name, query, opts)
     const pendingQuery = self._pendingQueries[name][hash]
 
-    _.fillIn(opts, self.getMapper(name))
+    utils.fillIn(opts, self.getMapper(name))
 
     if (pendingQuery) {
       return pendingQuery
@@ -449,31 +467,31 @@ const DataStore = Container.extend({
         return self._end(name, data, opts)
       }, function (err) {
         delete self._pendingQueries[name][hash]
-        return _.reject(err)
+        return utils.reject(err)
       }).then(function (data) {
         self._completedQueries[name][hash] = new Date().getTime()
         return data
       })
     } else {
-      promise = _.resolve(items)
+      promise = utils.resolve(items)
     }
     return promise
-  },
+  }
 
-  cachedFind (name, id, opts) {
+  cachedFind (name, id, opts?: any) {
     return this.get(name, id, opts)
-  },
+  }
 
-  cachedFindAll (name, query, opts) {
+  cachedFindAll (name, query, opts?: any) {
     const self = this
     if (self._completedQueries[name][self.hashQuery(name, query, opts)]) {
       return self.filter(name, query, opts)
     }
-  },
+  }
 
-  hashQuery (name, query, opts) {
-    return _.toJson(query)
-  },
+  hashQuery (name, query, opts?: any) {
+    return utils.toJson(query)
+  }
 
   /**
    * TODO
@@ -489,7 +507,7 @@ const DataStore = Container.extend({
       throw new ReferenceError(`${name} is not a registered collection!`)
     }
     return collection
-  },
+  }
 
   /**
    * TODO
@@ -503,13 +521,13 @@ const DataStore = Container.extend({
    * {@link Mapper#update} for more configuration options.
    * @return {Promise}
    */
-  update (name, id, record, opts) {
+  update (name, id, record, opts?: any) {
     const self = this
     opts || (opts = {})
     return self._callSuper('update', name, id, record, opts).then(function (data) {
       return self._end(name, data, opts)
     })
-  },
+  }
 
   /**
    * TODO
@@ -523,13 +541,13 @@ const DataStore = Container.extend({
    * {@link Model.updateAll} for more configuration options.
    * @return {Promise}
    */
-  updateAll (name, query, props, opts) {
+  updateAll (name, query, props, opts?: any) {
     const self = this
     opts || (opts = {})
     return self._callSuper('updateAll', name, query, props, opts).then(function (data) {
       return self._end(name, data, opts)
     })
-  },
+  }
 
   /**
    * TODO
@@ -542,16 +560,14 @@ const DataStore = Container.extend({
    * {@link Mapper#updateMany} for more configuration options.
    * @return {Promise}
    */
-  updateMany (name, records, opts) {
+  updateMany (name, records, opts?: any) {
     const self = this
     opts || (opts = {})
     return self._callSuper('updateMany', name, records, opts).then(function (data) {
       return self._end(name, data, opts)
     })
   }
-})
-
-DataStore.prototype.defineResource = DataStore.prototype.defineMapper
+}
 
 /**
  * Create a DataStore subclass.
@@ -571,7 +587,6 @@ DataStore.prototype.defineResource = DataStore.prototype.defineMapper
  * @param {Object} [classProps={}] Static properties to add to the subclass.
  * @return {Function} Subclass of DataStore.
  */
-DataStore.extend = _.extend
 
 const toProxy = [
   'add',
@@ -586,7 +601,7 @@ const toProxy = [
   'toJson'
 ]
 
-const methods = {}
+const methods: any = {}
 
 toProxy.forEach(function (method) {
   methods[method] = function (name, ...args) {
@@ -606,9 +621,6 @@ methods.ejectAll = function (...args) {
   return this.removeAll(...args)
 }
 
-_.logify(DataStore.prototype, 'DataStore')
-_.addHiddenPropsToTarget(DataStore.prototype, methods)
-
-export {
-  DataStore as default
-}
+utils.logify(DataStore.prototype, 'DataStore')
+utils.addHiddenPropsToTarget(DataStore.prototype, methods)
+utils.hidePrototypeMethods(DataStore)

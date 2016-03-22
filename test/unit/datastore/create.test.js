@@ -18,7 +18,7 @@ export function init () {
       }, { 'default': true })
       const user = await Test.store.create('user', props)
       Test.assert.isDefined(user[Test.store.getMapper('user').idAttribute], 'new user has an id')
-      Test.assert.isTrue(user instanceof Test.store.getMapper('user').RecordClass, 'user is a record')
+      Test.assert.isTrue(user instanceof Test.store.getMapper('user').recordClass, 'user is a record')
     })
   })
 }

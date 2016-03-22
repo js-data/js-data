@@ -41,3 +41,5 @@ karma.start.js
 mocha.start.js
 doc/
 .github
+.tmp
+typings

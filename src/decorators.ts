@@ -1,4 +1,4 @@
-import _ from './utils'
+import utils from './utils'
 
 export const belongsToType = 'belongsTo'
 export const hasManyType = 'hasMany'
@@ -24,9 +24,9 @@ function Relation (related, opts) {
     throw new Error('one of (foreignKey, localKeys, foreignKeys) is required')
   }
 
-  if (_.isString(related)) {
+  if (utils.isString(related)) {
     opts.relation = related
-    if (!_.isFunction(opts.getRelation)) {
+    if (!utils.isFunction(opts.getRelation)) {
       throw new Error('you must provide a reference to the related mapper!')
     }
   } else if (related) {
@@ -36,10 +36,10 @@ function Relation (related, opts) {
     })
   }
 
-  _.fillIn(self, opts)
+  utils.fillIn(self, opts)
 }
 
-_.addHiddenPropsToTarget(Relation.prototype, {
+utils.addHiddenPropsToTarget(Relation.prototype, {
   getRelation () {
     return this.relatedMapper
   },
@@ -48,9 +48,9 @@ _.addHiddenPropsToTarget(Relation.prototype, {
   },
   getForeignKey (record) {
     if (this.type === belongsToType) {
-      return _.get(record, this.foreignKey)
+      return utils.get(record, this.foreignKey)
     }
-    return _.get(record, this.mapper.idAttribute)
+    return utils.get(record, this.mapper.idAttribute)
   },
   setForeignKey (record, relatedRecord) {
     const self = this
@@ -58,23 +58,23 @@ _.addHiddenPropsToTarget(Relation.prototype, {
       return
     }
     if (self.type === belongsToType) {
-      _.set(record, self.foreignKey, _.get(relatedRecord, self.getRelation().idAttribute))
+      utils.set(record, self.foreignKey, utils.get(relatedRecord, self.getRelation().idAttribute))
     } else {
       const idAttribute = self.mapper.idAttribute
-      if (_.isArray(relatedRecord)) {
+      if (utils.isArray(relatedRecord)) {
         relatedRecord.forEach(function (relatedRecordItem) {
-          _.set(relatedRecordItem, self.foreignKey, _.get(record, idAttribute))
+          utils.set(relatedRecordItem, self.foreignKey, utils.get(record, idAttribute))
         })
       } else {
-        _.set(relatedRecord, self.foreignKey, _.get(record, idAttribute))
+        utils.set(relatedRecord, self.foreignKey, utils.get(record, idAttribute))
       }
     }
   },
   getLocalField (record) {
-    return _.get(record, this.localField)
+    return utils.get(record, this.localField)
   },
   setLocalField (record, data) {
-    return _.set(record, this.localField, data)
+    return utils.set(record, this.localField, data)
   }
 })
 

@@ -1,4 +1,5 @@
-import _ from './utils'
+import utils from './utils'
+import {Diff} from './utils'
 
 /**
  * js-data's Record class.
@@ -13,63 +14,72 @@ import _ from './utils'
  * @param {boolean} [opts.noValidate=false] Whether to skip validation on the
  * initial properties.
  */
-export default function Record (props, opts) {
-  const self = this
-  _.classCallCheck(self, Record)
+export class Record {
+  static mapper: any
 
-  props || (props = {})
-  opts || (opts = {})
-  const _props = {}
-  Object.defineProperties(self, {
-    _get: {
-      value (key) {
-        return _.get(_props, key)
+  /**
+   * Create a Record subclass.
+   *
+   * ```javascript
+   * var MyRecord = Record.extend({
+   *   foo: function () { return 'bar' }
+   * })
+   * var record = new MyRecord()
+   * record.foo() // "bar"
+   * ```
+   *
+   * @name Record.extend
+   * @method
+   * @param {Object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {Object} [classProps={}] Static properties to add to the subclass.
+   * @return {Function} Subclass of Record.
+   */
+  static extend = utils.extend
+
+  constructor (props?: Object, opts?: any) {
+    const self = this
+    utils.classCallCheck(self, Record)
+
+    props || (props = {})
+    opts || (opts = {})
+    const _props = {}
+    Object.defineProperties(self, {
+      _get: {
+        enumerable: false,
+        value (key) {
+          return utils.get(_props, key)
+        }
+      },
+      _set: {
+        enumerable: false,
+        value (key, value) {
+          return utils.set(_props, key, value)
+        }
+      },
+      _unset: {
+        enumerable: false,
+        value (key) {
+          return utils.unset(_props, key)
+        }
       }
-    },
-    _set: {
-      value (key, value) {
-        return _.set(_props, key, value)
-      }
-    },
-    _unset: {
-      value (key) {
-        return _.unset(_props, key)
-      }
+    })
+    const _set = self._set
+    // TODO: Optimize these strings
+    _set('creating', true)
+    if (opts.noValidate) {
+      _set('noValidate', true)
     }
-  })
-  const _set = self._set
-  // TODO: Optimize these strings
-  _set('creating', true)
-  if (opts.noValidate) {
-    _set('noValidate', true)
+    utils.fillIn(self, props)
+    _set('creating', false)
+    _set('noValidate', false)
+    _set('previous', utils.copy(props))
   }
-  _.fillIn(self, props)
-  _set('creating') // unset
-  _set('noValidate') // unset
-  _set('previous', _.copy(props))
-}
 
-/**
- * Create a Record subclass.
- *
- * ```javascript
- * var MyRecord = Record.extend({
- *   foo: function () { return 'bar' }
- * })
- * var record = new MyRecord()
- * record.foo() // "bar"
- * ```
- *
- * @name Record.extend
- * @method
- * @param {Object} [props={}] Properties to add to the prototype of the
- * subclass.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @return {Function} Subclass of Record.
- */
-Record.extend = _.extend
+  _set (prop: any, value?: any) {}
+  _get (prop: string): any {}
+  _unset (prop: any) {}
 
-_.addHiddenPropsToTarget(Record.prototype, {
   /**
    * TODO
    *
@@ -78,11 +88,12 @@ _.addHiddenPropsToTarget(Record.prototype, {
    * @ignore
    */
   _mapper () {
-    if (!this.constructor.Mapper) {
-      throw new Error('This RecordClass has no Mapper!')
+    const ctor: any = this.constructor
+    if (!ctor.mapper) {
+      throw new Error('This recordClass has no Mapper!')
     }
-    return this.constructor.Mapper
-  },
+    return ctor.mapper
+  }
 
   /**
    * Return the value at the given path for this instance.
@@ -92,9 +103,9 @@ _.addHiddenPropsToTarget(Record.prototype, {
    * @param {string} key - Path of value to retrieve.
    * @return {*} Value at path.
    */
-  get: function (key) {
-    return _.get(this, key)
-  },
+  'get' (key: string): any {
+    return utils.get(this, key)
+  }
 
   /**
    * Set the value for a given key, or the values for the given keys if "key" is
@@ -107,20 +118,20 @@ _.addHiddenPropsToTarget(Record.prototype, {
    * @param {Object} [opts] - Optional configuration.
    * @param {boolean} [opts.silent=false] - Whether to trigger change events.
    */
-  set: function (key, value, opts) {
+  'set' (key: string, value?: any, opts?: any): void {
     const self = this
-    if (_.isObject(key)) {
+    if (utils.isObject(key)) {
       opts = value
     }
     opts || (opts = {})
     if (opts.silent) {
       self._set('silent', true)
     }
-    _.set(self, key, value)
+    utils.set(self, key, value)
     if (!self._get('eventId')) {
       self._set('silent') // unset
     }
-  },
+  }
 
   /**
    * Unset the value for a given key.
@@ -131,9 +142,9 @@ _.addHiddenPropsToTarget(Record.prototype, {
    * @param {Object} [opts] - Optional configuration.
    * @param {boolean} [opts.silent=false] - Whether to trigger change events.
    */
-  unset (key, opts) {
+  unset (key: string, opts?: any): void {
     this.set(key, undefined, opts)
-  },
+  }
 
   /**
    * TODO
@@ -141,10 +152,10 @@ _.addHiddenPropsToTarget(Record.prototype, {
    * @name Record#hashCode
    * @method
    */
-  hashCode () {
+  hashCode (): string|number {
     const self = this
-    return _.get(self, self._mapper().idAttribute)
-  },
+    return utils.get(self, self._mapper().idAttribute)
+  }
 
   /**
    * Return changes to this record since it was instantiated or
@@ -156,11 +167,11 @@ _.addHiddenPropsToTarget(Record.prototype, {
    * @param {Function} [opts.equalsFn] Equality function. Default uses `===`.
    * @param {Array} [opts.ignore] Array of strings or RegExp of fields to ignore.
    */
-  changes (opts) {
+  changes (opts?: any): Diff {
     const self = this
     opts || (opts = {})
-    return _.diffObjects(self, self._get('previous'), opts)
-  },
+    return utils.diffObjects(self, self._get('previous'), opts)
+  }
 
   /**
    * Return whether this record has changed since it was instantiated or
@@ -175,8 +186,8 @@ _.addHiddenPropsToTarget(Record.prototype, {
   hasChanges (opts) {
     const self = this
     const quickHasChanges = !!(self._get('changed') || []).length
-    return quickHasChanges || _.areDifferent(self, self._get('previous'), opts)
-  },
+    return quickHasChanges || utils.areDifferent(self, self._get('previous'), opts)
+  }
 
   /**
    * TODO
@@ -187,9 +198,9 @@ _.addHiddenPropsToTarget(Record.prototype, {
   commit () {
     const self = this
     self._set('changed') // unset
-    self._set('previous', _.copy(self))
+    self._set('previous', utils.copy(self))
     return self
-  },
+  }
 
   /**
    * TODO
@@ -204,7 +215,7 @@ _.addHiddenPropsToTarget(Record.prototype, {
       return self._get(`previous.${key}`)
     }
     return self._get('previous')
-  },
+  }
 
   /**
    * TODO
@@ -218,19 +229,19 @@ _.addHiddenPropsToTarget(Record.prototype, {
     const previous = self._get('previous') || {}
     opts || (opts = {})
     opts.preserve || (opts.preserve = [])
-    _.forOwn(self, (value, key) => {
+    utils.forOwn(self, (value, key) => {
       if (key !== self._mapper().idAttribute && !previous.hasOwnProperty(key) && self.hasOwnProperty(key) && opts.preserve.indexOf(key) === -1) {
         delete self[key]
       }
     })
-    _.forOwn(previous, (value, key) => {
+    utils.forOwn(previous, (value, key) => {
       if (opts.preserve.indexOf(key) === -1) {
         self[key] = value
       }
     })
     self.commit()
     return self
-  },
+  }
 
   /**
    * TODO
@@ -242,7 +253,7 @@ _.addHiddenPropsToTarget(Record.prototype, {
   schema (key) {
     let _schema = this._mapper().schema
     return key ? _schema[key] : _schema
-  },
+  }
 
   // validate (obj, value) {
   //   let errors = []
@@ -255,7 +266,7 @@ _.addHiddenPropsToTarget(Record.prototype, {
   //       errors = validate.validate(prop, value) || []
   //     }
   //   } else {
-  //     utils. _.forOwn(_schema, function (prop, key) {
+  //     utils. utils.forOwn(_schema, function (prop, key) {
   //       errors = errors.concat(validate.validate(prop, utils.get(obj, key)) || [])
   //     })
   //   }
@@ -271,7 +282,7 @@ _.addHiddenPropsToTarget(Record.prototype, {
    */
   create (opts) {
     return this._mapper().create(this, opts)
-  },
+  }
 
   /**
    * TODO
@@ -280,7 +291,7 @@ _.addHiddenPropsToTarget(Record.prototype, {
    * @method
    * @param {Object} opts TODO
    */
-  beforeSave () {},
+  beforeSave () {}
 
   /**
    * TODO
@@ -292,26 +303,26 @@ _.addHiddenPropsToTarget(Record.prototype, {
   save (opts) {
     let op, adapter
     const self = this
-    const Mapper = self._mapper()
+    const mapper = self._mapper()
 
     // Default values for arguments
     opts || (opts = {})
 
     // Fill in "opts" with the Model's configuration
-    _._(self, opts)
-    adapter = opts.adapter = self.getAdapterName(opts)
+    utils._(self, opts)
+    adapter = opts.adapter = mapper.getAdapterName(opts)
 
     // beforeSave lifecycle hook
     op = opts.op = 'beforeSave'
-    return _.resolve(self[op](opts)).then(function () {
+    return utils.resolve(self[op](opts)).then(function () {
       // Now delegate to the adapter
       op = opts.op = 'save'
-      Mapper.dbg(op, self, opts)
-      return self.getAdapter(adapter)[op](Mapper, self, opts)
+      mapper.dbg(op, self, opts)
+      return mapper.getAdapter(adapter)[op](mapper, self, opts)
     }).then(function (data) {
       // afterSave lifecycle hook
       op = opts.op = 'afterSave'
-      return _.resolve(self[op](data, opts)).then(function (_data) {
+      return utils.resolve(self[op](data, opts)).then(function (_data) {
         // Allow for re-assignment from lifecycle hook
         data = _data || data
         if (opts.raw) {
@@ -320,10 +331,10 @@ _.addHiddenPropsToTarget(Record.prototype, {
         } else {
           self.set(data)
         }
-        return Mapper.end(data, opts)
+        return mapper.end(data, opts)
       })
     })
-  },
+  }
 
   /**
    * TODO
@@ -332,7 +343,7 @@ _.addHiddenPropsToTarget(Record.prototype, {
    * @method
    * @param {Object} opts TODO
    */
-  afterSave () {},
+  afterSave () {}
 
   /**
    * TODO
@@ -342,7 +353,7 @@ _.addHiddenPropsToTarget(Record.prototype, {
    * @param {string[]} relations TODO
    * @param {Object} opts TODO
    */
-  beforeLoadRelations () {},
+  beforeLoadRelations () {}
 
   /**
    * TODO
@@ -355,54 +366,54 @@ _.addHiddenPropsToTarget(Record.prototype, {
   loadRelations (relations, opts) {
     let op
     const self = this
-    const Mapper = self._mapper()
-    const relationList = Mapper.relationList || []
+    const mapper = self._mapper()
+    const relationList = mapper.relationList || []
 
     // Default values for arguments
     relations || (relations = [])
     opts || (opts = {})
 
     // Fill in "opts" with the Model's configuration
-    _._(Mapper, opts)
-    opts.adapter = Mapper.getAdapterName(opts)
+    utils._(mapper, opts)
+    opts.adapter = mapper.getAdapterName(opts)
 
     // beforeLoadRelations lifecycle hook
     op = opts.op = 'beforeLoadRelations'
-    return _.resolve(self[op](relations, opts)).then(function () {
-      if (_.isString(relations)) {
+    return utils.resolve(self[op](relations, opts)).then(function () {
+      if (utils.isString(relations)) {
         relations = [relations]
       }
       // Now delegate to the adapter
       op = opts.op = 'loadRelations'
-      Mapper.dbg(op, self, relations, opts)
+      mapper.dbg(op, self, relations, opts)
       return Promise.all(relationList.map(function (def) {
-        if (_.isFunction(def.load)) {
-          return def.load(Mapper, def, self, opts)
+        if (utils.isFunction(def.load)) {
+          return def.load(mapper, def, self, opts)
         }
         let task
         if (def.type === 'hasMany' && def.foreignKey) {
           // hasMany
           task = def.getRelation().findAll({
-            [def.foreignKey]: _.get(self, Mapper.idAttribute)
+            [def.foreignKey]: utils.get(self, mapper.idAttribute)
           }, opts)
         } else if (def.foreignKey) {
           // belongsTo or hasOne
-          const key = _.get(self, def.foreignKey)
-          if (_.isSorN(key)) {
+          const key = utils.get(self, def.foreignKey)
+          if (utils.isSorN(key)) {
             task = def.getRelation().find(key, opts)
           }
         } else if (def.localKeys) {
           // hasMany
           task = def.getRelation().findAll({
             [def.getRelation().idAttribute]: {
-              'in': _.get(self, def.localKeys)
+              'in': utils.get(self, def.localKeys)
             }
           }, opts)
         } else if (def.foreignKeys) {
           // hasMany
           task = def.getRelation().findAll({
             [def.getRelation().idAttribute]: {
-              'contains': _.get(self, Mapper.idAttribute)
+              'contains': utils.get(self, mapper.idAttribute)
             }
           }, opts)
         }
@@ -411,7 +422,7 @@ _.addHiddenPropsToTarget(Record.prototype, {
             if (opts.raw) {
               data = data.data
             }
-            _.set(self, def.localField, def.type === 'hasOne' ? (data.length ? data[0] : undefined) : data)
+            utils.set(self, def.localField, def.type === 'hasOne' ? (data.length ? data[0] : undefined) : data)
           })
         }
         return task
@@ -419,11 +430,11 @@ _.addHiddenPropsToTarget(Record.prototype, {
     }).then(function () {
       // afterLoadRelations lifecycle hook
       op = opts.op = 'afterLoadRelations'
-      return _.resolve(self[op](relations, opts)).then(function () {
+      return utils.resolve(self[op](relations, opts)).then(function () {
         return self
       })
     })
-  },
+  }
 
   /**
    * TODO
@@ -433,7 +444,7 @@ _.addHiddenPropsToTarget(Record.prototype, {
    * @param {string[]} relations TODO
    * @param {Object} opts TODO
    */
-  afterLoadRelations () {},
+  afterLoadRelations () {}
 
   /**
    * TODO
@@ -444,9 +455,9 @@ _.addHiddenPropsToTarget(Record.prototype, {
    */
   destroy (opts) {
     // TODO: move actual destroy logic here
-    const Mapper = this._mapper()
-    return Mapper.destroy(_.get(this, Mapper.idAttribute), opts)
-  },
+    const mapper = this._mapper()
+    return mapper.destroy(utils.get(this, mapper.idAttribute), opts)
+  }
 
   // TODO: move logic for single-item async operations onto the instance.
 
@@ -464,18 +475,19 @@ _.addHiddenPropsToTarget(Record.prototype, {
    * @return {Object} Plain object representation of this record.
    */
   toJSON (opts) {
-    const mapper = this.constructor.Mapper
+    const ctor: any = this.constructor
+    const mapper = ctor.mapper
     if (mapper) {
       return mapper.toJSON(this, opts)
     } else {
       const json = {}
-      _.forOwn(this, function (prop, key) {
-        json[key] = _.copy(prop)
+      utils.forOwn(this, function (prop, key) {
+        json[key] = utils.copy(prop)
       })
       return json
     }
   }
-})
+}
 
 /**
  * Register a new event listener on this Record.
@@ -504,7 +516,7 @@ _.addHiddenPropsToTarget(Record.prototype, {
  *
  * An record's registered listeners are stored in the record's private data.
  */
-_.eventify(
+utils.eventify(
   Record.prototype,
   function () {
     return this._get('events')
@@ -513,3 +525,5 @@ _.eventify(
     this._set('events', value)
   }
 )
+
+utils.hidePrototypeMethods(Record)

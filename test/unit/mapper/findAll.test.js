@@ -31,7 +31,7 @@ export function init () {
       const users = await User.findAll(query)
       Test.assert.isTrue(findAllCalled, 'Adapter#findAll should have been called')
       Test.assert.deepEqual(users, props, 'user should have been found')
-      Test.assert.isTrue(users[0] instanceof User.RecordClass, 'user is a record')
+      Test.assert.isTrue(users[0] instanceof User.recordClass, 'user is a record')
     })
     it('should return raw', async function () {
       const Test = this
@@ -61,7 +61,7 @@ export function init () {
       let data = await User.findAll(query)
       Test.assert.isTrue(findAllCalled, 'Adapter#findAll should have been called')
       Test.assert.objectsEqual(data.data, props, 'user should have been found')
-      Test.assert.isTrue(data.data[0] instanceof User.RecordClass, 'user is a record')
+      Test.assert.isTrue(data.data[0] instanceof User.recordClass, 'user is a record')
       Test.assert.equal(data.adapter, 'mock', 'should have adapter name in response')
       Test.assert.equal(data.found, 1, 'should have other metadata in response')
     })

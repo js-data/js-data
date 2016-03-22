@@ -31,7 +31,7 @@ export function init () {
       const users = await User.updateMany(props)
       Test.assert.isTrue(updateManyCalled, 'Adapter#updateMany should have been called')
       Test.assert.equal(users[0].foo, 'bar', 'user has a new field')
-      Test.assert.isTrue(users[0] instanceof User.RecordClass, 'user is a record')
+      Test.assert.isTrue(users[0] instanceof User.recordClass, 'user is a record')
     })
     it('should return raw', async function () {
       const Test = this
@@ -61,7 +61,7 @@ export function init () {
       let data = await User.updateMany(props)
       Test.assert.isTrue(updateManyCalled, 'Adapter#update should have been called')
       Test.assert.equal(data.data[0].foo, 'bar', 'user has a new field')
-      Test.assert.isTrue(data.data[0] instanceof User.RecordClass, 'user is a record')
+      Test.assert.isTrue(data.data[0] instanceof User.recordClass, 'user is a record')
       Test.assert.equal(data.adapter, 'mock', 'should have adapter name in response')
       Test.assert.equal(data.updated, 1, 'should have other metadata in response')
     })

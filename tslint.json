@@ -1,0 +1,56 @@
+{
+  "rules": {
+    "member-ordering": [
+      true,
+      "public-before-private",
+      "static-before-instance",
+      "variables-before-functions"
+    ],
+    "curly": true,
+    "no-unused-variable": true,
+    "radix": true,
+    "triple-equals": true,
+    "eofline": true,
+    "indent": [true, "spaces"],
+    "no-trailing-whitespace": true,
+    "object-literal-sort-keys": true,
+    "class-name": true,
+    "comment-format": [true, "check-space"],
+    "jsdoc-format": true,
+    "no-consecutive-blank-lines": true,
+    "no-constructor-vars": true,
+    "one-line": [
+      true,
+      "check-catch",
+      "check-finally",
+      "check-else",
+      "check-open-brace",
+      "check-whitespace"
+    ],
+    "quotemark": [
+      true,
+      "single"
+    ],
+    "semicolon": [
+      true,
+      "never"
+    ],
+    "variable-name": [
+      true,
+      "check-format",
+      "allow-leading-underscore",
+      "allow-trailing-underscore",
+      "ban-keywords"
+    ],
+    "whitespace": [
+      true,
+      "check-branch",
+      "check-decl",
+      "check-operator",
+      "check-module",
+      "check-seperator",
+      "check-type",
+      "check-typecast"
+    ]
+  }
+}

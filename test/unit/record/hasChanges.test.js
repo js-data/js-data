@@ -9,7 +9,7 @@ export function init () {
     })
     it('should detect when untracked fields are changed', function () {
       const Test = this
-      const post = new Test.Post.RecordClass(Test.data.p1)
+      const post = new Test.Post.recordClass(Test.data.p1)
       Test.assert.isFalse(post.hasChanges())
       post.author = 'Jake'
       Test.assert.isTrue(post.hasChanges())

@@ -19,7 +19,7 @@ export function init () {
       }, { 'default': true })
       const users = await Test.store.updateAll('user', query, props)
       Test.assert.equal(users[0].foo, 'bar', 'user was updated')
-      Test.assert.isTrue(users[0] instanceof Test.store.getMapper('user').RecordClass, 'user is a record')
+      Test.assert.isTrue(users[0] instanceof Test.store.getMapper('user').recordClass, 'user is a record')
     })
   })
 }

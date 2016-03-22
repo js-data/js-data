@@ -17,31 +17,38 @@
 // Summary of modifications:
 // Converted to ES6 Class syntax
 // Reworked dependencies so as to re-use code already in js-data
-import _ from '../../src/utils'
+// Converted to TypeScript
+import utils from '../../src/utils'
 import {binarySearch, insertAt, removeAt} from './utils'
 
 const blacklist = { '>': 1, '>=': 1, '<': 1, '<=': 1 }
 
-export function Index (fieldList, opts) {
-  _.classCallCheck(this, Index)
-  fieldList || (fieldList = [])
+export class Index {
+  fieldList: Array<string>
+  fieldGetter: Function
+  hashCode: Function
+  isIndex: boolean
+  keys: Array<any>
+  values: Array<any>
+  constructor (fieldList, opts) {
+    utils.classCallCheck(this, Index)
+    fieldList || (fieldList = [])
 
-  if (!_.isArray(fieldList)) {
-    throw new Error('fieldList must be an array.')
+    if (!utils.isArray(fieldList)) {
+      throw new Error('fieldList must be an array.')
+    }
+
+    opts || (opts = {})
+    this.fieldList = fieldList
+    this.fieldGetter = opts.fieldGetter
+    this.hashCode = opts.hashCode
+    this.isIndex = true
+    this.keys = []
+    this.values = []
   }
 
-  opts || (opts = {})
-  this.fieldList = fieldList
-  this.fieldGetter = opts.fieldGetter
-  this.hashCode = opts.hashCode
-  this.isIndex = true
-  this.keys = []
-  this.values = []
-}
-
-_.addHiddenPropsToTarget(Index.prototype, {
-  set (keyList, value) {
-    if (!_.isArray(keyList)) {
+  'set' (keyList, value) {
+    if (!utils.isArray(keyList)) {
       keyList = [keyList]
     }
 
@@ -68,10 +75,10 @@ _.addHiddenPropsToTarget(Index.prototype, {
         insertAt(this.values, pos.index, newIndex)
       }
     }
-  },
+  }
 
-  get (keyList) {
-    if (!_.isArray(keyList)) {
+  'get' (keyList) {
+    if (!utils.isArray(keyList)) {
       keyList = [keyList]
     }
 
@@ -95,7 +102,7 @@ _.addHiddenPropsToTarget(Index.prototype, {
         return []
       }
     }
-  },
+  }
 
   getAll () {
     let results = []
@@ -107,9 +114,9 @@ _.addHiddenPropsToTarget(Index.prototype, {
       }
     })
     return results
-  },
+  }
 
-  visitAll (cb, thisArg) {
+  visitAll (cb, thisArg?: any) {
     this.values.forEach(function (value) {
       if (value.isIndex) {
         value.visitAll(cb, thisArg)
@@ -117,16 +124,17 @@ _.addHiddenPropsToTarget(Index.prototype, {
         value.forEach(cb, thisArg)
       }
     })
-  },
+  }
 
-  between (leftKeys, rightKeys, opts = {}) {
-    if (!_.isArray(leftKeys)) {
+  between (leftKeys, rightKeys, opts?: any) {
+    opts || (opts = {})
+    if (!utils.isArray(leftKeys)) {
       leftKeys = [leftKeys]
     }
-    if (!_.isArray(rightKeys)) {
+    if (!utils.isArray(rightKeys)) {
       rightKeys = [rightKeys]
     }
-    _.fillIn(opts, {
+    utils.fillIn(opts, {
       leftInclusive: true,
       rightInclusive: false,
       limit: undefined,
@@ -140,7 +148,7 @@ _.addHiddenPropsToTarget(Index.prototype, {
     } else {
       return results.slice(opts.offset)
     }
-  },
+  }
 
   _between (leftKeys, rightKeys, opts) {
     let results = []
@@ -192,9 +200,9 @@ _.addHiddenPropsToTarget(Index.prototype, {
 
         if (this.values[i].isIndex) {
           if (currKey === leftKey) {
-            results = results.concat(this.values[i]._between(copy(leftKeys), rightKeys.map(function () { return undefined }), opts))
+            results = results.concat(this.values[i]._between(utils.copy(leftKeys), rightKeys.map(function () { return undefined }), opts))
           } else if (currKey === rightKey) {
-            results = results.concat(this.values[i]._between(leftKeys.map(function () { return undefined }), copy(rightKeys), opts))
+            results = results.concat(this.values[i]._between(leftKeys.map(function () { return undefined }), utils.copy(rightKeys), opts))
           } else {
             results = results.concat(this.values[i].getAll())
           }
@@ -215,7 +223,7 @@ _.addHiddenPropsToTarget(Index.prototype, {
     } else {
       return results
     }
-  },
+  }
 
   peek () {
     if (this.values.length) {
@@ -226,23 +234,23 @@ _.addHiddenPropsToTarget(Index.prototype, {
       }
     }
     return []
-  },
+  }
 
   clear () {
     this.keys = []
     this.values = []
-  },
+  }
 
   insertRecord (data) {
-    let keyList = this.fieldList.map(function (field) {
-      if (_.isFunction(field)) {
+    let keyList = this.fieldList.map(function (field: any) {
+      if (utils.isFunction(field)) {
         return field(data) || null
       } else {
         return data[field] || null
       }
     })
     this.set(keyList, data)
-  },
+  }
 
   removeRecord (data) {
     let removed
@@ -270,10 +278,12 @@ _.addHiddenPropsToTarget(Index.prototype, {
       }
     })
     return removed ? data : undefined
-  },
+  }
 
   updateRecord (data) {
     this.removeRecord(data)
     this.insertRecord(data)
   }
-})
+}
+
+utils.hidePrototypeMethods(Index)

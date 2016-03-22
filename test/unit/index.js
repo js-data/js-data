@@ -17,7 +17,6 @@ export function init () {
       Test.assert.isFunction(Test.JSData.Collection, 'has the Collection class')
       Test.assert.isFunction(Test.JSData.Container, 'has the Container class')
       Test.assert.isFunction(Test.JSData.DataStore, 'has the DataStore class')
-      Test.assert.isFunction(Test.JSData.DS, 'has the DS class')
       Test.assert.isFunction(Test.JSData.hasMany, 'has the hasMany decorator')
       Test.assert.isFunction(Test.JSData.hasOne, 'has the hasOne decorator')
       Test.assert.isFunction(Test.JSData.LinkedCollection, 'has the LinkedCollection class')

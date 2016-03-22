@@ -1,5 +1,6 @@
-import _ from './utils'
-import Query from './Query'
+import utils from './utils'
+import {Query} from './Query'
+import {Mapper} from './Mapper'
 import {Index} from '../lib/mindex/index'
 
 const COLLECTION_DEFAULTS = {
@@ -17,7 +18,7 @@ const COLLECTION_DEFAULTS = {
   /**
    * Default Mapper for this collection. Optional. If a Mapper is provided, then
    * the collection will use the {@link Mapper#idAttribute} setting, and will
-   * wrap records in {@link Mapper#RecordClass}.
+   * wrap records in {@link Mapper#recordClass}.
    *
    * @example
    * import {Collection, Mapper} from 'js-data'
@@ -61,7 +62,7 @@ const COLLECTION_DEFAULTS = {
 
   /**
    * Options to be passed into {@link Mapper#createRecord} when wrapping records
-   * in {@link Mapper#RecordClass}.
+   * in {@link Mapper#recordClass}.
    *
    * @name Collection#recordOpts
    * @type {Object}
@@ -93,85 +94,96 @@ const COLLECTION_DEFAULTS = {
  * @param {string} [opts.mapper] See {@link Collection#mapper}.
  * @param {Object} [opts.recordOpts=null] See {@link Collection#recordOpts}.
  */
-export default function Collection (records, opts) {
-  const self = this
-  _.classCallCheck(self, Collection)
-
-  if (_.isObject(records) && !_.isArray(records)) {
-    opts = records
-    records = []
-  }
-  if (_.isString(opts)) {
-    opts = { idAttribute: opts }
-  }
-
-  // Default values for arguments
-  records || (records = [])
-  opts || (opts = {})
-  opts.recordOpts || (opts.recordOpts = {})
-
-  _.fillIn(self, opts)
-  _.fillIn(self, COLLECTION_DEFAULTS)
-
+export class Collection {
   /**
-   * Event listeners attached to this Collection.
+   * Create a Collection subclass.
    *
-   * @name Collection#_listeners
-   * @instance
-   * @type {Object}
-   * @private
+   * @example
+   * var MyCollection = Collection.extend({
+   *   foo: function () { return 'bar' }
+   * })
+   * var collection = new MyCollection()
+   * collection.foo() // "bar"
+   *
+   * @name Collection.extend
+   * @method
+   * @param {Object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {Object} [classProps={}] Static properties to add to the subclass.
+   * @return {Function} Subclass of Collection.
    */
-  self._listeners = {}
+  static extend = utils.extend
+  _listeners: any
+  idAttribute: string
+  onConflict: string
+  recordOpts: any
+  index: Index
+  indexes: any
+  mapper: Mapper
+  on: Function
+  off: Function
+  emit: Function
+  dbg: Function
+  log: Function
+  constructor (records?: Array<any>, opts?: any) {
+    const self = this
+    utils.classCallCheck(self, Collection)
 
-  const idAttribute = self.recordId()
-
-  /**
-   * The main index, which uses @{link Collection#recordId} as the key.
-   * @name Collection#index
-   * @type {Index}
-   */
-  self.index = new Index([idAttribute], {
-    hashCode (obj) {
-      return _.get(obj, idAttribute)
+    if (utils.isObject(records) && !utils.isArray(records)) {
+      opts = records
+      records = []
     }
-  })
-
-  /**
-   * Object that holds the secondary indexes of this collection.
-   * @name Collection#indexes
-   * @type {Object.<string, Index>}
-   */
-  self.indexes = {}
-
-  records.forEach(function (record) {
-    record = self.mapper ? self.mapper.createRecord(record, self.recordOpts) : record
-    self.index.insertRecord(record)
-    if (record && _.isFunction(record.on)) {
-      record.on('all', self._onRecordEvent, self)
+    if (utils.isString(opts)) {
+      opts = { idAttribute: opts }
     }
-  })
-}
 
-/**
- * Create a Collection subclass.
- *
- * @example
- * var MyCollection = Collection.extend({
- *   foo: function () { return 'bar' }
- * })
- * var collection = new MyCollection()
- * collection.foo() // "bar"
- *
- * @name Collection.extend
- * @method
- * @param {Object} [props={}] Properties to add to the prototype of the
- * subclass.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @return {Function} Subclass of Collection.
- */
-Collection.extend = _.extend
+    // Default values for arguments
+    records || (records = [])
+    opts || (opts = {})
+    opts.recordOpts || (opts.recordOpts = {})
 
-_.addHiddenPropsToTarget(Collection.prototype, {
+    utils.fillIn(self, opts)
+    utils.fillIn(self, COLLECTION_DEFAULTS)
+
+    /**
+     * Event listeners attached to this Collection.
+     *
+     * @name Collection#_listeners
+     * @instance
+     * @type {Object}
+     * @private
+     */
+    self._listeners = {}
+
+    const idAttribute = self.recordId()
+
+    /**
+     * The main index, which uses @{link Collection#recordId} as the key.
+     * @name Collection#index
+     * @type {Index}
+     */
+    self.index = new Index([idAttribute], {
+      hashCode (obj) {
+        return utils.get(obj, idAttribute)
+      }
+    })
+
+    /**
+     * Object that holds the secondary indexes of this collection.
+     * @name Collection#indexes
+     * @type {Object.<string, Index>}
+     */
+    self.indexes = {}
+
+    records.forEach(function (record) {
+      record = self.mapper ? self.mapper.createRecord(record, self.recordOpts) : record
+      self.index.insertRecord(record)
+      if (record && utils.isFunction(record.on)) {
+        record.on('all', self._onRecordEvent, self)
+      }
+    })
+  }
+
   /**
    * Used to bind to events emitted by records in this Collection.
    *
@@ -182,7 +194,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
    */
   _onRecordEvent (...args) {
     this.emit(...args)
-  },
+  }
 
   /**
    * Insert the provided record or records.
@@ -202,20 +214,20 @@ _.addHiddenPropsToTarget(Collection.prototype, {
    * the collection. Possible values are `merge` or `replace`.
    * @return {(Object|Object[]|Record|Record[])} The added record or records.
    */
-  add (records, opts) {
+  add (records, opts?: any) {
     const self = this
 
     // Default values for arguments
     opts || (opts = {})
 
     // Fill in "opts" with the Collection's configuration
-    _._(self, opts)
+    utils._(self, opts)
     records = self.beforeAdd(records, opts) || records
 
     // Track whether just one record or an array of records is being inserted
     let singular = false
     const idAttribute = self.recordId()
-    if (_.isObject(records) && !_.isArray(records)) {
+    if (utils.isObject(records) && !utils.isArray(records)) {
       records = [records]
       singular = true
     }
@@ -226,7 +238,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
     // option.
     records = records.map(function (record) {
       let id = self.recordId(record)
-      if (!_.isSorN(id)) {
+      if (!utils.isSorN(id)) {
         throw new TypeError(`${idAttribute}: Expected string or number, found ${typeof id}!`)
       }
       // Grab existing record if there is one
@@ -242,9 +254,9 @@ _.addHiddenPropsToTarget(Collection.prototype, {
         // in the collection, so we need to merge them
         const onConflict = opts.onConflict || self.onConflict
         if (onConflict === 'merge') {
-          _.deepMixIn(existing, record)
+          utils.deepMixIn(existing, record)
         } else if (onConflict === 'replace') {
-          _.forOwn(existing, (value, key) => {
+          utils.forOwn(existing, (value, key) => {
             if (key !== idAttribute && !record.hasOwnProperty(key)) {
               delete existing[key]
             }
@@ -260,10 +272,10 @@ _.addHiddenPropsToTarget(Collection.prototype, {
         // it into the collection
         record = self.mapper ? self.mapper.createRecord(record, self.recordOpts) : record
         self.index.insertRecord(record)
-        _.forOwn(self.indexes, function (index, name) {
+        utils.forOwn(self.indexes, function (index, name) {
           index.insertRecord(record)
         })
-        if (record && _.isFunction(record.on)) {
+        if (record && utils.isFunction(record.on)) {
           record.on('all', self._onRecordEvent, self)
         }
       }
@@ -274,7 +286,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
     // TODO: Make this more performant (batch events?)
     self.emit('add', result)
     return self.afterAdd(records, opts, result) || result
-  },
+  }
 
   /**
    * Lifecycle hook called by {@link Collection#add}. If this method returns a
@@ -286,7 +298,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
    * that were added to this Collection by {@link Collection#add}.
    * @param {Object} opts The `opts` argument passed to {@link Collection#add}.
    */
-  afterAdd () {},
+  afterAdd (...args: Array<any>) {}
 
   /**
    * Lifecycle hook called by {@link Collection#remove}. If this method returns
@@ -298,7 +310,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
    * @param {Object} opts The `opts` argument passed to {@link Collection#remove}.
    * @param {Object} record The result that will be returned by {@link Collection#remove}.
    */
-  afterRemove () {},
+  afterRemove (...args: Array<any>) {}
 
   /**
    * Lifecycle hook called by {@link Collection#removeAll}. If this method
@@ -311,7 +323,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
    * @param {Object} opts The `opts` argument passed to {@link Collection#removeAll}.
    * @param {Object} records The result that will be returned by {@link Collection#removeAll}.
    */
-  afterRemoveAll () {},
+  afterRemoveAll (...args: Array<any>) {}
 
   /**
    * Lifecycle hook called by {@link Collection#add}. If this method returns a
@@ -323,7 +335,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
    * @param {(Object|Object[]|Record|Record[])} records The `records` argument passed to {@link Collection#add}.
    * @param {Object} opts The `opts` argument passed to {@link Collection#add}.
    */
-  beforeAdd () {},
+  beforeAdd (...args: Array<any>) {}
 
   /**
    * Lifecycle hook called by {@link Collection#remove}.
@@ -333,7 +345,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
    * @param {(string|number)} id The `id` argument passed to {@link Collection#remove}.
    * @param {Object} opts The `opts` argument passed to {@link Collection#remove}.
    */
-  beforeRemove () {},
+  beforeRemove (...args: Array<any>) {}
 
   /**
    * Lifecycle hook called by {@link Collection#removeAll}.
@@ -343,7 +355,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
    * @param {Object} query The `query` argument passed to {@link Collection#removeAll}.
    * @param {Object} opts The `opts` argument passed to {@link Collection#removeAll}.
    */
-  beforeRemoveAll () {},
+  beforeRemoveAll (...args: Array<any>) {}
 
   /**
    * Find all records between two boundaries.
@@ -371,9 +383,9 @@ _.addHiddenPropsToTarget(Collection.prototype, {
    * @param {boolean} [opts.offset] The number of resulting records to skip.
    * @return {Array} The result.
    */
-  between (leftKeys, rightKeys, opts) {
+  between (leftKeys, rightKeys, opts?: any) {
     return this.query().between(leftKeys, rightKeys, opts).run()
-  },
+  }
 
   /**
    * Create a new secondary index on the contents of the collection.
@@ -392,9 +404,9 @@ _.addHiddenPropsToTarget(Collection.prototype, {
    * the name will also be the field that is used to index the collection.
    * @return {Collection} A reference to itself for chaining.
    */
-  createIndex (name, fieldList, opts) {
+  createIndex (name, fieldList, opts?: any) {
     const self = this
-    if (_.isString(name) && fieldList === undefined) {
+    if (utils.isString(name) && fieldList === undefined) {
       fieldList = [name]
     }
     opts || (opts = {})
@@ -404,7 +416,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
     const index = self.indexes[name] = new Index(fieldList, opts)
     self.index.visitAll(index.insertRecord, index)
     return self
-  },
+  }
 
   /**
    * Find the record or records that match the provided query or pass the
@@ -437,9 +449,9 @@ _.addHiddenPropsToTarget(Collection.prototype, {
    * `queryOrFn` is a function.
    * @return {Array} The result.
    */
-  filter (query, thisArg) {
+  filter (query, thisArg?: any) {
     return this.query().filter(query, thisArg).run()
-  },
+  }
 
   /**
    * Iterate over all records.
@@ -457,7 +469,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
    */
   forEach (cb, thisArg) {
     this.index.visitAll(cb, thisArg)
-  },
+  }
 
   /**
    * Get the record with the given id.
@@ -470,7 +482,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
   get (id) {
     const instances = this.query().get(id).run()
     return instances.length ? instances[0] : undefined
-  },
+  }
 
   /**
    * Find the record or records that match the provided keyLists.
@@ -495,7 +507,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
    */
   getAll (...args) {
     return this.query().getAll(...args).run()
-  },
+  }
 
   /**
    * Return the index with the given name. If no name is provided, return the
@@ -511,7 +523,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
       throw new Error(`Index ${name} does not exist!`)
     }
     return index
-  },
+  }
 
   /**
    * Limit the result.
@@ -528,7 +540,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
    */
   limit (num) {
     return this.query().limit(num).run()
-  },
+  }
 
   /**
    * Apply a mapping function to all records.
@@ -550,7 +562,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
       data.push(cb.call(thisArg, value))
     })
     return data
-  },
+  }
 
   /**
    * Return the result of calling the specified function on each record in this
@@ -568,7 +580,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
       data.push(record[funcName](...args))
     })
     return data
-  },
+  }
 
   /**
    * Return the primary key of the given, or if no record is provided, return the
@@ -581,13 +593,13 @@ _.addHiddenPropsToTarget(Collection.prototype, {
    * @return {(string|number)} Primary key or name of field that holds primary
    * key.
    */
-  recordId (record) {
+  recordId (record?: any) {
     if (record) {
-      return _.get(record, this.recordId())
+      return utils.get(record, this.recordId())
     }
     const self = this
     return self.mapper ? self.mapper.idAttribute : self.idAttribute || 'id'
-  },
+  }
 
   /**
    * Create a new query to be executed against the contents of the collection.
@@ -606,7 +618,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
    */
   query () {
     return new Query(this)
-  },
+  }
 
   /**
    * Reduce the data in the collection to a single value and return the result.
@@ -625,7 +637,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
   reduce (cb, initialValue) {
     const data = this.getAll()
     return data.reduce(cb, initialValue)
-  },
+  }
 
   /**
    * Remove the record with the given id from this Collection.
@@ -636,7 +648,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
    * @param {Object} [opts] - Configuration options.
    * @return {Object|Record} The removed record, if any.
    */
-  remove (id, opts) {
+  remove (id, opts?: any) {
     const self = this
 
     // Default values for arguments
@@ -647,16 +659,16 @@ _.addHiddenPropsToTarget(Collection.prototype, {
     // The record is in the collection, remove it
     if (record) {
       self.index.removeRecord(record)
-      _.forOwn(self.indexes, function (index, name) {
+      utils.forOwn(self.indexes, function (index, name) {
         index.removeRecord(record)
       })
-      if (record && _.isFunction(record.off)) {
+      if (record && utils.isFunction(record.off)) {
         record.off('all', self._onRecordEvent, self)
         self.emit('remove', record)
       }
     }
     return self.afterRemove(id, opts, record) || record
-  },
+  }
 
   /**
    * Remove the record selected by "query" from this collection.
@@ -671,7 +683,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
    * @param {Object} [opts] - Configuration options.
    * @return {(Object[]|Record[])} The removed records, if any.
    */
-  removeAll (query, opts) {
+  removeAll (query, opts?: any) {
     const self = this
     // Default values for arguments
     opts || (opts = {})
@@ -683,7 +695,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
       self.remove(self.recordId(item), opts)
     })
     return self.afterRemoveAll(query, opts, records) || records
-  },
+  }
 
   /**
    * Skip a number of results.
@@ -700,7 +712,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
    */
   skip (num) {
     return this.query().skip(num).run()
-  },
+  }
 
   /**
    * Return the plain JSON representation of all items in this collection.
@@ -715,7 +727,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
    */
   toJSON (opts) {
     return this.mapCall('toJSON', opts)
-  },
+  }
 
   /**
    * Update a record's position in a single index of this collection. See
@@ -730,10 +742,10 @@ _.addHiddenPropsToTarget(Collection.prototype, {
    * position. If you don't specify an index then the record will be updated
    * in the main index.
    */
-  updateIndex (record, opts) {
+  updateIndex (record, opts?: any) {
     opts || (opts = {})
     this.getIndex(opts.index).updateRecord(record)
-  },
+  }
 
   /**
    * TODO
@@ -746,11 +758,11 @@ _.addHiddenPropsToTarget(Collection.prototype, {
   updateIndexes (record) {
     const self = this
     self.index.updateRecord(record)
-    _.forOwn(self.indexes, function (index, name) {
+    utils.forOwn(self.indexes, function (index, name) {
       index.updateRecord(record)
     })
   }
-})
+}
 
 /**
  * TODO
@@ -761,7 +773,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
  * @param {Function} handler TODO
  */
 
- /**
+/**
  * TODO
  *
  * @name Collection#off
@@ -770,7 +782,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
  * @param {Function} [handler] TODO
  */
 
- /**
+/**
  * TODO
  *
  * @name Collection#emit
@@ -779,7 +791,7 @@ _.addHiddenPropsToTarget(Collection.prototype, {
  * @param {...*} [arg] TODO
  */
 
-_.eventify(
+utils.eventify(
   Collection.prototype,
   function () {
     return this._listeners
@@ -788,3 +800,5 @@ _.eventify(
     this._listeners = value
   }
 )
+
+utils.hidePrototypeMethods(Collection)
