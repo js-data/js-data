@@ -45,7 +45,7 @@ const STRING_TAG = '[object String]'
 const objToString = Object.prototype.toString
 const PATH = /^(.+)\.(.+)$/
 
-const toInteger = function (value: number): number {
+const toInteger = function (value) {
   if (!value) {
     return 0
   }
@@ -56,10 +56,10 @@ const toInteger = function (value: number): number {
     return sign * MAX_INTEGER
   }
   const remainder = value % 1
-  return value === value ? (remainder ? value - remainder : value) : 0
+  return value === value ? (remainder ? value - remainder : value) : 0 // eslint-disable-line
 }
 
-const toStr = function (value: any): string {
+const toStr = function (value) {
   return objToString.call(value)
 }
 
@@ -67,7 +67,7 @@ const isPlainObject = function (value) {
   return (!!value && typeof value === 'object' && value.constructor === Object)
 }
 
-const mkdirP = function (object: Object, path: string) {
+const mkdirP = function (object, path) {
   if (!path) {
     return object
   }
@@ -79,12 +79,6 @@ const mkdirP = function (object: Object, path: string) {
     object = object[key]
   })
   return object
-}
-
-export interface Diff {
-  added: any
-  changed: any
-  removed: any
 }
 
 const utils = {
@@ -105,7 +99,7 @@ const utils = {
    * @param {Object} dest Destination object.
    * @param {Object} src Source object.
    */
-  _: function (dest: any, src: any): void {
+  _: function (dest, src) {
     for (var key in dest) {
       let value = dest[key]
       if (src[key] === undefined && !utils.isFunction(value) && key && key.indexOf('_') !== 0) {
@@ -119,7 +113,7 @@ const utils = {
    *
    * @ignore
    */
-  _forRelation: function (opts: any, def: any, fn: Function, ctx: Object): void {
+  _forRelation: function (opts, def, fn, ctx) {
     const relationName = def.relation
     let containedName = null
     let index
@@ -138,12 +132,12 @@ const utils = {
     } else if (!containedName) {
       return
     }
-    let optsCopy: any = {}
+    let optsCopy = {}
     utils.fillIn(optsCopy, def.getRelation())
     utils.fillIn(optsCopy, opts)
     optsCopy.with = opts.with.slice()
     optsCopy._activeWith = optsCopy.with.splice(index, 1)[0]
-    optsCopy.with.forEach(function (relation: any, i: number): void {
+    optsCopy.with.forEach(function (relation, i) {
       if (relation && relation.indexOf(containedName) === 0 && relation.length >= containedName.length && relation[containedName.length] === '.') {
         optsCopy.with[i] = relation.substr(containedName.length + 1)
       } else {
@@ -158,7 +152,7 @@ const utils = {
    *
    * @ignore
    */
-  _getIndex: function (list: Array<any>, relation: any): number {
+  _getIndex: function (list, relation) {
     let index = -1
     list.forEach(function (_relation, i) {
       if (_relation === relation) {
@@ -179,9 +173,9 @@ const utils = {
    *
    * @ignore
    */
-  addHiddenPropsToTarget: function (target: Object, props: Object): void {
-    const map: PropertyDescriptorMap = {}
-    utils.forOwn(props, function (value: any, key: string): void {
+  addHiddenPropsToTarget: function (target, props) {
+    const map = {}
+    utils.forOwn(props, function (value, key) {
       map[key] = {
         writable: true,
         value
@@ -195,7 +189,7 @@ const utils = {
    *
    * @ignore
    */
-  areDifferent: function (a: Object, b: Object, opts: any): boolean {
+  areDifferent: function (a, b, opts) {
     opts || (opts = {})
     const diff = utils.diffObjects(a, b, opts)
     const diffCount = Object.keys(diff.added).length +
@@ -209,7 +203,7 @@ const utils = {
    *
    * @ignore
    */
-  classCallCheck: function (instance: Object, ctor: Function): void {
+  classCallCheck: function (instance, ctor) {
     if (!(instance instanceof ctor)) {
       throw new TypeError('Cannot call a class as a function')
     }
@@ -222,7 +216,7 @@ const utils = {
    * @param {*} from Value to deep copy.
    * @return {*} Deep copy of `from`.
    */
-  copy: function (from: any, to?: any, stackFrom?: any, stackTo?: any, blacklist?: Array<any>, plain?: boolean): any {
+  copy: function (from, to, stackFrom, stackTo, blacklist, plain) {
     if (!to) {
       to = from
       if (from) {
@@ -275,7 +269,7 @@ const utils = {
         if (utils.isArray(to)) {
           to.length = 0
         } else {
-          utils.forOwn(to, function (value: any, key: string): void {
+          utils.forOwn(to, function (value, key) {
             delete to[key]
           })
         }
@@ -304,9 +298,9 @@ const utils = {
    * @param {Object} dest The destination object.
    * @param {Object} source The source object.
    */
-  deepFillIn: function (dest: Object, source: Object): Object {
+  deepFillIn: function (dest, source) {
     if (source) {
-      utils.forOwn(source, function (value: any, key: string): void {
+      utils.forOwn(source, function (value, key) {
         const existing = dest[key]
         if (isPlainObject(value) && isPlainObject(existing)) {
           utils.deepFillIn(existing, value)
@@ -325,9 +319,9 @@ const utils = {
    * @param {Object} dest The destination object.
    * @param {Object} source The source object.
    */
-  deepMixIn: function (dest: Object, source: Object): Object {
+  deepMixIn: function (dest, source) {
     if (source) {
-      utils.forOwn(source, function (value: any, key: string): void {
+      utils.forOwn(source, function (value, key) {
         const existing = dest[key]
         if (isPlainObject(value) && isPlainObject(existing)) {
           utils.deepMixIn(existing, value)
@@ -344,7 +338,7 @@ const utils = {
    * @param {Object} b Comparison object.
    * @return {Object} Diff.
    */
-  diffObjects: function (a: any, b: any, opts: any): Diff {
+  diffObjects: function (a, b, opts) {
     opts || (opts = {})
     let equalsFn = opts.equalsFn
     let bl = opts.ignore
@@ -357,7 +351,7 @@ const utils = {
       equalsFn = utils.strictEqual
     }
 
-    utils.forOwn(b, function (oldValue: any, key: string): void {
+    utils.forOwn(b, function (oldValue, key) {
       const newValue = a[key]
 
       if (utils.isBlacklisted(key, bl) || equalsFn(newValue, oldValue)) {
@@ -371,7 +365,7 @@ const utils = {
       }
     })
 
-    utils.forOwn(a, function (newValue: any, key: string): void {
+    utils.forOwn(a, function (newValue, key) {
       if (!utils.isUndefined(b[key]) || utils.isBlacklisted(key, bl)) {
         return
       }
@@ -386,10 +380,8 @@ const utils = {
    *
    * @ignore
    */
-  equal: function (a: any, b: any): boolean {
-    /* tslint:disable:triple-equals */
-    return a == b
-    /* tslint:enable:triple-equals */
+  equal: function (a, b) {
+    return a == b // eslint-disable-line
   },
 
   /**
@@ -402,7 +394,7 @@ const utils = {
    * @param {Function} [setter] Custom setter for setting the object's event
    * listeners.
    */
-  eventify: function (target: any, getter: Function, setter: Function, enumerable?: boolean) {
+  eventify: function (target, getter, setter, enumerable) {
     target = target || this
     let _events = {}
     if (!getter && !setter) {
@@ -472,7 +464,7 @@ const utils = {
    *
    * @ignore
    */
-  extend: function (props?: any, classProps?: any): Function {
+  extend: function (props, classProps) {
     const superClass = this
     let subClass
 
@@ -499,13 +491,13 @@ const utils = {
       }
     })
 
-    const obj: any = Object
+    const obj = Object
     if (obj.setPrototypeOf) {
       obj.setPrototypeOf(subClass, superClass)
     } else if (classProps.strictEs6Class) {
-      subClass.__proto__ = superClass
+      subClass.__proto__ = superClass // eslint-disable-line
     } else {
-      utils.forOwn(superClass, function (value: any, key: string): void {
+      utils.forOwn(superClass, function (value, key) {
         subClass[key] = value
       })
     }
@@ -528,8 +520,8 @@ const utils = {
    * @param {Object} dest The destination object.
    * @param {Object} source The source object.
    */
-  fillIn: function (dest: Object, src: Object): void {
-    utils.forOwn(src, function (value: any, key: string): void {
+  fillIn: function (dest, src) {
+    utils.forOwn(src, function (value, key) {
       if (!dest.hasOwnProperty(key) || dest[key] === undefined) {
         dest[key] = value
       }
@@ -541,12 +533,12 @@ const utils = {
    *
    * @ignore
    */
-  forEachRelation: function (mapper: any, opts: any, fn: Function, ctx?: any) {
+  forEachRelation: function (mapper, opts, fn, ctx) {
     const relationList = mapper.relationList || []
     if (!relationList.length) {
       return
     }
-    relationList.forEach(function (def: any): void {
+    relationList.forEach(function (def) {
       utils._forRelation(opts, def, fn, ctx)
     })
   },
@@ -559,7 +551,7 @@ const utils = {
    * @param {Function} fn Iteration function.
    * @param {Object} [thisArg] Content to which to bind `fn`.
    */
-  forOwn: function (obj: any, fn: Function, thisArg?: Object): void {
+  forOwn: function (obj, fn, thisArg) {
     const keys = Object.keys(obj)
     const len = keys.length
     let i
@@ -575,7 +567,7 @@ const utils = {
    * @param {string} json JSON to parse.
    * @return {Object} Parsed object.
    */
-  fromJson: function (json: any): any {
+  fromJson: function (json) {
     return utils.isString(json) ? JSON.parse(json) : json
   },
 
@@ -584,20 +576,18 @@ const utils = {
    *
    * @ignore
    */
-  'get': function (object: Object, prop: string): any {
+  'get': function (object, prop) {
     if (!prop) {
       return
     }
     const parts = prop.split('.')
     const last = parts.pop()
 
-    while (prop = parts.shift()) {
+    while (prop = parts.shift()) { // eslint-disable-line
       object = object[prop]
-      /* tslint:disable:triple-equals */
-      if (object == null) {
+      if (object == null) { // eslint-disable-line
         return
       }
-      /* tslint:enable:triple-equals */
     }
 
     return object[last]
@@ -608,27 +598,9 @@ const utils = {
    *
    * @ignore
    */
-  getSuper: function (instance: any, isCtor?: boolean): Function {
+  getSuper: function (instance, isCtor) {
     const ctor = isCtor ? instance : instance.constructor
-    return (ctor.__super__ || Object.getPrototypeOf(ctor) || ctor.__proto__)
-  },
-
-  /**
-   * TODO
-   *
-   * @ignore
-   */
-  hidePrototypeMethods: function (ctor: Function) {
-    const descriptors = {}
-    utils.forOwn(ctor.prototype, function (value: any, key: string): void {
-      if (!utils.isFunction(value)) {
-        return
-      }
-      descriptors[key] = {
-        enumerable: false,
-        value
-      }
-    })
+    return (ctor.__super__ || Object.getPrototypeOf(ctor) || ctor.__proto__) // eslint-disable-line
   },
 
   /**
@@ -639,7 +611,7 @@ const utils = {
    * @param {Array} array2 Second array.
    * @return {Array} Array of elements common to both arrays.
    */
-  intersection: function (array1: Array<any>, array2: Array<any>): Array<any> {
+  intersection: function (array1, array2) {
     if (!array1 || !array2) {
       return []
     }
@@ -674,7 +646,7 @@ const utils = {
    * @param {Array} bl Array of strings and regular expressions.
    * @return {boolean} Whether `prop` was matched.
    */
-  isBlacklisted: function (prop: string, bl: Array<any>): boolean {
+  isBlacklisted: function (prop, bl) {
     if (!bl || !bl.length) {
       return false
     }
@@ -693,7 +665,7 @@ const utils = {
    *
    * @ignore
    */
-  isBoolean: function (value: any): boolean {
+  isBoolean: function (value) {
     return toStr(value) === BOOL_TAG
   },
 
@@ -709,7 +681,7 @@ const utils = {
    *
    * @ignore
    */
-  isDate: function (value: any): boolean {
+  isDate: function (value) {
     return (value && typeof value === 'object' && toStr(value) === DATE_TAG)
   },
 
@@ -718,7 +690,7 @@ const utils = {
    *
    * @ignore
    */
-  isFunction: function (value: any): boolean {
+  isFunction: function (value) {
     return typeof value === 'function' || (value && toStr(value) === FUNC_TAG)
   },
 
@@ -727,10 +699,8 @@ const utils = {
    *
    * @ignore
    */
-  isInteger: function (value: any): boolean {
-    /* tslint:disable:triple-equals */
-    return toStr(value) === NUMBER_TAG && value == toInteger(value)
-    /* tslint:enable:triple-equals */
+  isInteger: function (value) {
+    return toStr(value) === NUMBER_TAG && value == toInteger(value) // eslint-disable-line
   },
 
   /**
@@ -738,7 +708,7 @@ const utils = {
    *
    * @ignore
    */
-  isNull: function (value: any): boolean {
+  isNull: function (value) {
     return value === null
   },
 
@@ -747,7 +717,7 @@ const utils = {
    *
    * @ignore
    */
-  isNumber: function (value: any): boolean {
+  isNumber: function (value) {
     const type = typeof value
     return type === 'number' || (value && type === 'object' && toStr(value) === NUMBER_TAG)
   },
@@ -757,7 +727,7 @@ const utils = {
    *
    * @ignore
    */
-  isObject: function (value: any): boolean {
+  isObject: function (value) {
     return toStr(value) === OBJECT_TAG
   },
 
@@ -766,7 +736,7 @@ const utils = {
    *
    * @ignore
    */
-  isRegExp: function (value: any): boolean {
+  isRegExp: function (value) {
     return toStr(value) === REGEXP_TAG
   },
 
@@ -775,7 +745,7 @@ const utils = {
    *
    * @ignore
    */
-  isSorN: function (value: any): boolean {
+  isSorN: function (value) {
     return utils.isString(value) || utils.isNumber(value)
   },
 
@@ -784,7 +754,7 @@ const utils = {
    *
    * @ignore
    */
-  isString: function (value: any): boolean {
+  isString: function (value) {
     return typeof value === 'string' || (value && typeof value === 'object' && toStr(value) === STRING_TAG)
   },
 
@@ -793,7 +763,7 @@ const utils = {
    *
    * @ignore
    */
-  isUndefined: function (value: any): boolean {
+  isUndefined: function (value) {
     return value === undefined
   },
 
@@ -802,7 +772,7 @@ const utils = {
    *
    * @ignore
    */
-  logify: function (target, defaultNamespace): void {
+  logify: function (target) {
     utils.addHiddenPropsToTarget(target, {
       dbg (...args) {
         this.log('debug', ...args)
@@ -815,7 +785,7 @@ const utils = {
         if (level === 'debug' && !this.debug) {
           return
         }
-        const prefix = `${level.toUpperCase()}: (${this.name || defaultNamespace})`
+        const prefix = `${level.toUpperCase()}: (${this.name || this.constructor.name})`
         if (console[level]) {
           console[level](prefix, ...args)
         } else {
@@ -830,10 +800,10 @@ const utils = {
    *
    * @ignore
    */
-  omit: function (props: Object, keys: Array<string>): Object {
+  omit: function (props, keys) {
     // Remove relations
-    const _props: any = {}
-    utils.forOwn(props, function (value: any, key: string): void {
+    const _props = {}
+    utils.forOwn(props, function (value, key) {
       if (keys.indexOf(key) === -1) {
         _props[key] = value
       }
@@ -846,7 +816,7 @@ const utils = {
    *
    * @ignore
    */
-  plainCopy: function (from: any): any {
+  plainCopy: function (from) {
     return utils.copy(from, undefined, undefined, undefined, undefined, true)
   },
 
@@ -855,7 +825,7 @@ const utils = {
    *
    * @ignore
    */
-  possibleConstructorReturn: function (self: Object, call: Object|Function): Object {
+  possibleConstructorReturn: function (self, call) {
     if (!self) {
       throw new ReferenceError('this hasn\'t been initialised - super() hasn\'t been called')
     }
@@ -870,7 +840,7 @@ const utils = {
    * @param {*} [value] Value with which to reject the Promise.
    * @return {Promise} Promise reject with `value`.
    */
-  reject: function (value: any): Promise<any> {
+  reject: function (value) {
     return utils.Promise.reject(value)
   },
 
@@ -881,7 +851,7 @@ const utils = {
    * @param {*} [value] Value with which to resolve the Promise.
    * @return {Promise} Promise resolved with `value`.
    */
-  resolve: function (value: any): Promise<any> {
+  resolve: function (value) {
     return utils.Promise.resolve(value)
   },
 
@@ -895,9 +865,9 @@ const utils = {
    * object.
    * @param {*} [value] The value to set.
    */
-  set: function (object: Object, path: string, value?: any): void {
+  set: function (object, path, value) {
     if (utils.isObject(path)) {
-      utils.forOwn(path, function (value: any, _path: string): void {
+      utils.forOwn(path, function (value, _path) {
         utils.set(object, _path, value)
       })
     } else {
@@ -915,18 +885,18 @@ const utils = {
    *
    * @ignore
    */
-  strictEqual: function (a: any, b: any): boolean {
+  strictEqual: function (a, b) {
     let _equal = a === b
     if (!_equal) {
       if (utils.isObject(a) && utils.isObject(b)) {
-        utils.forOwn(a, function (value: any, key: string): void {
+        utils.forOwn(a, function (value, key) {
           _equal = _equal && utils.strictEqual(value, b[key])
         })
-        utils.forOwn(b, function (value: any, key: string): void {
+        utils.forOwn(b, function (value, key) {
           _equal = _equal && utils.strictEqual(value, a[key])
         })
       } else if (utils.isArray(a) && utils.isArray(b)) {
-        a.forEach(function (value: any, i: number): void {
+        a.forEach(function (value, i) {
           _equal = _equal && utils.strictEqual(value, b[i])
         })
       }
@@ -950,17 +920,15 @@ const utils = {
    * @param {Object} object The object from which to delete the property.
    * @param {string} path The key or path to the property.
    */
-  unset: function (object: Object, path: string): void {
+  unset: function (object, path) {
     const parts = path.split('.')
     const last = parts.pop()
 
-    while (path = parts.shift()) {
+    while (path = parts.shift()) { // eslint-disable-line
       object = object[path]
-      /* tslint:disable:triple-equals */
-      if (object == null) {
+      if (object == null) { // eslint-disable-line
         return
       }
-      /* tslint:enable:triple-equals */
     }
 
     object[last] = undefined

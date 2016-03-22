@@ -1,595 +1,365 @@
-// Type definitions for JSData v3
-// Project: https://github.com/js-data/js-data
-// Definitions by: Robert Porter <robertp.dev@gmail.com>
-
 declare module JSData {
-  type ID = number | string;
-
-  class Collection<R> {
-    new(data?: R[], idAttribute?: string): this;
-
-    /**
-     * Create a new secondary index on the contents of the collection.
-     */
-    createIndex(name: string, keyList: string[]): Collection<R>;
-
-    /**
-     * Create a new query to be executed against the contents of the collection.
-     * The result will be all or a subset of the contents of the collection.
-     */
-    query(): Query<R>;
-
-    /**
-     * Find all entities between two boundaries.
-     */
-    between(leftKeys: string[], rightKeys: string[], options: QueryOptions): R[];
-
-    /**
-     * Find the entity or entities that match the provided key.
-     */
-    get(keyList: string[], options: QueryOptionsBase): R[];
-
-    /**
-     * Find the entity or entities that match the provided keyLists.
-     */
-    getAll(keyList: string[], options: QueryOptionsBase): R[];
-
-    /**
-     * Find the entity or entities that match the provided query or pass the
-     * provided filter function.
-     */
-    filter(query: Object | Function): R[];
-
-    /**
-     * Skip a number of results.
-     */
-    skip(number: Number): R[];
-
-    /**
-     * Limit the result.
-     */
-    limit(number: Number): R[];
-
-    /**
-     * Iterate over all entities.
-     */
-    forEach(fn: Function, thisArg?);
-
-    /**
-     * Reduce the data in the collection to a single value and return the result.
-     */
-    reduce<T>(callback: Function, initialValue: T): T;
-
-    /**
-     * Apply a mapping function to all entities.
-     */
-    map<T>(fn: (each: R) => T, thisArg?): T[];
-
-    /**
-     * Instead a record into this collection, updating all indexes with the new
-     * record.
-     */
-    insert(record: R);
-
-    /**
-     * Update the given record's position in all indexes of this collection. See
-     * updateRecord() to update a record's in only one of the indexes.
-     */
-    update(record: R);
-
-    /**
-     * Remove the given record from all indexes in this collection.
-     */
-    remove(record: R);
-
-    /**
-     * Update a record's position in a single index of this collection. See
-     * update() to update a record's position in all indexes at once.
-     */
-    updateRecord(record: R, options: QueryOptionsBase);
+  export const version: {
+    alpha: string|boolean
+    beta: string|boolean
+    full: string
+    major: number
+    minor: number
+    patch: number
   }
-
-  /**
-   * A class used by the Collection class to build queries to be executed
-   * against the collection's data. An instance of `Query` is returned by
-   * Model.query() and Collection.query().
-   */
-  class Query<R> {
-    new(collection: Collection<R>): this;
-
-    /**
-     * Return the current data result of this query.
-     */
-    getData(): R[];
-
-    /**
-     * Find all entities between two boundaries.
-     */
-    between(leftKeys: string[], rightKeys: string[], options: QueryOptions): Query<R>;
-
-    /**
-     * Find the entity or entities that match the provided key.
-     */
-    get(keyList: string[], options: QueryOptionsBase): Query<R>;
-
-    /**
-     * Find the entity or entities that match the provided keyLists.
-     */
-    getAll(keyList: string[], options: QueryOptionsBase): Query<R>;
-
-    /**
-     * Find the entity or entities that match the provided query or pass the
-     * provided filter function.
-     */
-    filter(query: Object | Function, thisArg?): Query<R>;
-
-    /**
-     * Skip a number of results.
-     */
-    skip(number: Number): Query<R>;
-
-    /**
-     * Limit the result.
-     */
-    limit(number: Number): Query<R>;
-
-    /**
-     * Iterate over all entities.
-     */
-    forEach(fn: Function, thisArg?): Query<R>;
-
-    /**
-     * Apply a mapping function to the result data.
-     */
-    map(fn: Function, thisArg?): Query<R>;
-
-    /**
-     * Complete the execution of the query and return the resulting data.
-     */
-    run(): R[];
+  export interface Diff {
+    added: any
+    changed: any
+    removed: any
   }
-
-  interface QueryOptionsBase {
-    /**
-     * Name of the secondary index to use in the query. If no index is
-     * specified, the main index is used.
-     */
-    index?: string;
+  export const utils: {
+    Promise: PromiseConstructor
+    _(dest: any, src: any): void
+    _forRelation(opts: any, def: any, fn: Function, ctx: Object): void
+    _getIndex(list: any[], relation: any): number
+    addHiddenPropsToTarget(target: Object, props: Object): void
+    areDifferent(a: Object, b: Object, opts: any): boolean
+    classCallCheck(instance: Object, ctor: Function): void
+    copy(from: any, to?: any, stackFrom?: any, stackTo?: any, blacklist?: any[], plain?: boolean): any
+    deepFillIn(dest: Object, source: Object): Object
+    deepMixIn(dest: Object, source: Object): Object
+    diffObjects(a: any, b: any, opts: any): Diff
+    equal(a: any, b: any): boolean
+    eventify(target: any, getter: Function, setter: Function, enumerable?: boolean): void
+    extend(props?: any, classProps?: any): Function
+    fillIn(dest: Object, src: Object): void
+    forEachRelation(mapper: any, opts: any, fn: Function, ctx?: any): void
+    forOwn(obj: any, fn: Function, thisArg?: Object): void
+    fromJson(json: any): any
+    'get'(object: Object, prop: string): any
+    getSuper(instance: any, isCtor?: boolean): Function
+    intersection(array1: any[], array2: any[]): any[]
+    isArray(arg: any): boolean
+    isBlacklisted(prop: string, bl: any[]): boolean
+    isBoolean(value: any): boolean
+    isBrowser: boolean
+    isDate(value: any): boolean
+    isFunction(value: any): boolean
+    isInteger(value: any): boolean
+    isNull(value: any): boolean
+    isNumber(value: any): boolean
+    isObject(value: any): boolean
+    isRegExp(value: any): boolean
+    isSorN(value: any): boolean
+    isString(value: any): boolean
+    isUndefined(value: any): boolean
+    logify(target: any, defaultNamespace: any): void
+    omit(props: Object, keys: string[]): Object
+    plainCopy(from: any): any
+    possibleConstructorReturn(self: Object, call: Object | Function): Object
+    reject(value: any): Promise<any>
+    resolve(value: any): Promise<any>
+    set(object: Object, path: string, value?: any): void
+    strictEqual(a: any, b: any): boolean
+    toJson(value: any, replacer?: Function, space?: number): string
+    unset(object: Object, path: string): void
   }
-
-  interface QueryOptions extends QueryOptionsBase {
-    /**
-     * Whether to include entities on the left boundary.
-     */
-    leftInclusive?: boolean;
-
-    /**
-     * Whether to include entities on the left boundary.
-     */
-    rightInclusive?: boolean;
-
-    /**
-     * Limit the result to a certain number.
-     */
-    limit?: boolean;
-
-    /**
-     * The number of resulting entities to skip.
-     */
-    offset?: boolean;
+  export class Component {
+    static extend(instanceProps?: any, classProps?: any): any
+    _listeners: Object
+    dbg(...args: any[]): void
+    emit(key?: string, ...args: any[]): void
+    log(level: string, ...args: any[]): void
+    off(key?: string, handler?: Function): void
+    on(key?: string, handler?: Function): void
   }
-
-  class DS {
-    new(): this;
-    clear(): Model<any>[];
-    defineModel<R>(options: ModelOptions): Model<R>;
+  export class Record extends Component {
+    static mapper: Mapper
+    constructor(props?: any, opts?: any)
+    _set(prop: any, value?: any): void
+    _get(prop: string): any
+    _unset(prop: any): void
+    _mapper(): Mapper
+    afterLoadRelations(): void
+    afterSave(): void
+    beforeSave(): void
+    beforeLoadRelations(): void
+    changes(opts?: any): Diff
+    commit(): this
+    create(opts?: any): Promise<Record>
+    destroy(opts?: any): Promise<any>
+    loadRelations(relations: any, opts?: any): Promise<this>
+    'get'(key: string): any
+    hasChanges(opts?: any): boolean
+    hashCode(): string|number
+    previous(key: any): any
+    revert(opts?: any): this
+    save(opts?: any): Promise<this>
+    'set'(key: string, value?: any, opts?: any): void
+    toJSON(opts?: any): any
+    unset(key: string, opts?: any): void
   }
-
-  interface ModelOptions {
-    [key: string]: any;
-    methods?: { [name: string]: Function };
-    noValidate?: boolean;
+  export class Mapper extends Component {
+    _adapters: Object
+    applySchema: boolean
+    name: string
+    defaultAdapter: string
+    debug: boolean
+    idAttribute: string
+    lifecycleMethods: any
+    notify: boolean
+    raw: boolean
+    recordClass: any
+    relationList: any[]
+    relationFields: string[]
+    schema: Schema
+    constructor(opts?: any)
+    afterCount(query: any, opts: any, result: any): any
+    afterCreate(props: any, opts: any, result: any): any
+    afterCreateMany(records: any[], opts: any, result: any): any
+    afterDestroy(id: string|number, opts: any, result: any): any
+    afterDestroyAll(query: any, opts: any, result: any): any
+    afterFind(id: string|number, opts: any, result: any): any
+    afterFindAll(query: any, opts: any, result: any): any
+    afterSum(field: string, query:any, opts: any, result: any): any
+    afterUpdate(id: string|number, opts: any, result: any): any
+    afterUpdateAll(props: any, query: any, opts: any, result: any): any
+    afterUpdateMany(records: any[], opts: any, result: any): any
+    beforeCreate(props: any, opts: any): any
+    beforeCreateMany(records: any[], opts: any): any
+    beforeCount(query: any, opts: any): any
+    beforeDestroy(id: string|number, opts: any): any
+    beforeDestroyAll(query: any, opts: any): any
+    beforeFind(id: string|number, opts: any): any
+    beforeFindAll(query: any, opts: any): any
+    beforeSum(field: string, query: any, opts: any): any
+    beforeUpdate(id: string|number, opts: any): any
+    beforeUpdateAll(query: any, opts: any): any
+    beforeUpdateMany(records: any[], opts: any): any
+    _end(result: any, opts: any, skip?: boolean): any
+    belongsTo(relatedMapper: any, opts: any): void
+    count(query: any, opts?: any): Promise<any>
+    create(props: any, opts?: any): Promise<any>
+    createInstance(props: any, opts?: any): any
+    createMany(records: any[], opts?: any): Promise<any>
+    createRecord(props?: any, opts?: any): any
+    crud(method: any, ...args: any[]): Promise<any>
+    destroy(id: string|number, opts?: any): Promise<any>
+    destroyAll(query: any, opts?: any): Promise<any>
+    find(id: string|number, opts?: any): Promise<any>
+    findAll(query: any, opts?: any): Promise<any>
+    getAdapter(name: any): any
+    getAdapterName(opts?: any): any
+    getAdapters(): any
+    getSchema(): Schema
+    hasMany(relatedMapper: any, opts: any): void
+    hasOne(relatedMapper: any, opts: any): void
+    is(record: any): boolean
+    registerAdapter(name: string, adapter: any, opts?: any): void
+    sum(field: string, query: any, opts?: any): Promise<any>
+    toJSON(record: any, opts?: any): {}
+    update(id: string|number, props: any, opts?: any): Promise<any>
+    updateAll(props: any, query: any, opts?: any): Promise<any>
+    updateMany(records: any[], opts?: any): Promise<any>
   }
-
-  function belongsTo(model, opts?: RelationOptions): ClassDecorator;
-  function configure(opts?: Object, overwrite?: boolean): ClassDecorator;
-  function hasMany(model, opts?: RelationOptions): ClassDecorator;
-  function hasOne(model, opts?: RelationOptions): ClassDecorator;
-  function setSchema(opts?: Object): ClassDecorator;
-
-  interface RelationOptions {
-    localField?: string;
-    foreignKey?: string;
-    foreignKeys?: string[];
-    localKey?: string;
-    localKeys?: string[];
-    get: (model, relation, instance?, originalGetter?: () => any) => any;
-    set: (model, relation, instance, children?, originalSetter?: (children) => void) => any;
+  export class Collection extends Component {
+    idAttribute: string
+    onConflict: string
+    recordOpts: any
+    index: Index
+    indexes: any
+    mapper: Mapper
+    constructor(records?: any[], opts?: any)
+    _onRecordEvent(...args: any[]): void
+    add(records: any, opts?: any): any
+    afterAdd(...args: any[]): void
+    afterRemove(...args: any[]): void
+    afterRemoveAll(...args: any[]): void
+    beforeAdd(...args: any[]): void
+    beforeRemove(...args: any[]): void
+    beforeRemoveAll(...args: any[]): void
+    between(leftKeys: any, rightKeys: any, opts?: any): any[]
+    createIndex(name: any, fieldList: any, opts?: any): this
+    filter(query: any, thisArg?: any): any[]
+    forEach(cb: Function, thisArg?: any): void
+    get(id: string|number): any
+    getAll(...args: any[]): any[]
+    getIndex(name: string): any
+    limit(num: number): any[]
+    map(cb: any, thisArg: any): any[]
+    mapCall(funcName: string, ...args: any[]): any[]
+    recordId(record?: any): any
+    query(): Query
+    reduce(cb: Function, initialValue: any): any
+    remove(id: string|number, opts?: any): any
+    removeAll(query: any, opts?: any): void | any[]
+    skip(num: number): any[]
+    toJSON(opts?: any): any[]
+    updateIndex(record: any, opts?: any): void
+    updateIndexes(record: any): void
   }
-
-  /**
-   * Add the provided adapter to the target's "adapters" property, registering it
-   * with the specified.
-   */
-  function registerAdapter(name: string, adapter: Adapter, opts?: Object): ClassDecorator;
-
-  /**
-   * js-data's Model class.
-   */
-  class Model<R> {
-    schema(key?: string): Object;
-    validate(obj?: Object): string[] | void;
-    create(opts?: Object): Promise<Model<R>>;
-    save(opts?: Object): Promise<Model<R>>;
-    destroy(opts?: Object): Promise<Model<R>>;
-
-    /**
-     * Return the value at the given path for this instance.
-     */
-    get(key: string): any;
-
-    /**
-     * Set the value for a given key, or the values for the given keys if "key" is
-     * an object.
-     */
-    set(key: string, value): any;
-
-    /**
-     * Return a plain object representation of this instance.
-     */
-    toJSON(opts?: Object): string;
-
-    /**
-     * Extend this Model and return a new child Model. Static properties on this
-     * Model will be shallow copied to the child Model. The child Model's
-     * prototype will point to the parent Model.
-     */
-    static extend<R>(instanceProps?: Object, staticProps?: ModelOptions): ModelConstructor<R>;
+  export class LinkedCollection extends Collection {
+    _added: Object
+    datastore: DataStore
   }
-
-  interface ModelOptions {
-    autoEject?: boolean;
-    autoInject?: boolean;
-    bypassCache?: boolean;
-    csp?: boolean;
-    defaultAdapter?: string;
-    debug?: boolean;
-    eagerEject?: boolean;
-    endpoint?: string;
-    idAttribute?: string;
-    linkRelations?: boolean;
-    name?: string;
-    notify?: boolean;
-    onConflict?: string;
-    relationsEnumerable?: boolean;
-    raw?: boolean;
-    upsert?: boolean;
+  export class Container extends Component {
+    mapperDefaults: any
+    mapperClass: typeof Mapper
+    _adapters: Object
+    _mappers: Object
+    constructor(opts?: any)
+    defineMapper(name: string, opts?: any): Mapper
+    defineResource(name: string, opts?: any): Mapper
+    getAdapter(name: any): any
+    getAdapterName(opts?: any): string
+    getAdapters(): any
+    getMapper(name: string): Mapper
+    registerAdapter(name: string, adapter: any, opts?: any): void
   }
-
-  interface ModelConstructor<R> extends ModelOptions {
-    new (properties: R, options: ModelOptions): Model<R>;
-
-    /**
-     * Create a new secondary index in the Collection instance of this Model.
-     */
-    createIndex(name: string, keyList: string[]);
-
-    /**
-     * Create a new instance of this Model from the provided properties.
-     */
-    createInstance(props: Object): Model<R>;
-
-    /**
-     * Check whether "instance" is actually an instance of this Model.
-     */
-    is(instance): boolean;
-
-    /**
-     * Insert the provided item or items into the Collection instance of this
-     * Model.
-     *
-     * If an item is already in the collection then the provided item will either
-     * merge with or replace the existing item based on the value of the
-     * "onConflict" option.
-     *
-     * The collection's secondary indexes will be updated as each item is visited.
-     */
-    inject(items: Model<R> | Object, options?: Object): Model<R>;
-
-    /**
-     * Insert the provided item or items into the Collection instance of this
-     * Model.
-     *
-     * If an item is already in the collection then the provided item will either
-     * merge with or replace the existing item based on the value of the
-     * "onConflict" option.
-     *
-     * The collection's secondary indexes will be updated as each item is visited.
-     */
-    inject(items: Model<R>[] | Object[], options?: Object): Model<R>[];
-
-    /**
-     * Remove the instance with the given primary key from the Collection instance
-     * of this Model.
-     */
-    eject(id: ID): Model<R> | void;
-
-    /**
-     * Remove the instances selected by "query" from the Collection instance of
-     * this Model.
-     */
-    ejectAll(query: Object): Model<R>[];
-
-    /**
-     * Return the instance in the Collection instance of this Model that has
-     * the given primary key, if such an instance can be found.
-     */
-    get(id: ID): Model<R> | void;
-
-    /**
-     * Proxy for Collection.between()
-     */
-    getAll(keyList: string[], options: QueryOptionsBase): R[];
-
-    /**
-     * Proxy for Collection.filter()
-     */
-    filter(query: Object | Function): R[];
-
-    /**
-     * Proxy for `Collection.query()`.
-     */
-    query(): Query<R>;
-
-    /**
-     * Return the registered adapter with the given name or the default adapter if
-     * no name is provided.
-     */
-    getAdapter(name?: string): Adapter;
-
-    /**
-     * Return the name of a registered adapter based on the given name or options,
-     * or the name of the default adapter if no name provided
-     */
-    getAdapterName(options: Object): string;
-
-    /**
-     * Lifecycle hook. Called by `Model.create` after `Model.create` checks
-     * whether it can do an upsert and before `Model.create` calls the `create`
-     * method of an adapter.
-     *
-     * `Model.beforeCreate` will receive the same arguments that are passed to
-     * `Model.create`. If `Model.beforeCreate` returns a promise, `Model.create`
-     * will wait for the promise to resolve before continuing. If the promise
-     * rejects, then the promise returned by `Model.create` will reject. If
-     * `Model.beforeCreate` does not return a promise, `Model.create` will resume
-     * execution immediately.
-     */
-    beforeCreate(props?: Object, opts?: Object): Promise<void> | void;
-
-    /**
-     * The "C" in "CRUD", `Model.create` creates a single entity using the
-     * `create` method of an adapter. If the `props` passed to `Model.create`
-     * contain a primary key as configured by `Model.idAttribute` and
-     * `opts.upsert` is `true` of `Model.upsert` is `true` and `opts.upsert` is
-     * not `false`, then `Model.update` will be called instead.
-     *
-     * 1. `Model.beforeCreate` is called and passed the same arguments passed to
-     * `Model.create`.
-     * 1. `props` and `opts` are passed to the `create` method of the adapter
-     * specified by `opts.adapter` or `Model.defaultAdapter`.
-     * 1. `Model.afterCreate` is called with the `data` argument returned by the
-     * adapter's `create` method and the `opts` argument passed to `Model.create`.
-     * 1. If `opts.raw` is `true` or `Model.raw` is `true` and `opts.raw` is not
-     * `false`, then a result object is returned that contained the created entity
-     * and some metadata about the operation and its result. Otherwise, the
-     * promise returned by `Model.create` resolves with the created entity.
-     */
-    create(props?: Object, opts?: Object): Promise<R>;
-
-    /**
-     * Lifecycle hook. Called by `Model.create` after `Model.create` call the
-     * `create` method of an adapter.
-     *
-     * `Model.afterCreate` will receive the `data` argument returned by the
-     * adapter's `create` method and the `opts` argument passed to `Model.create`.
-     * If `Model.afterCreate` returns a promise, `Model.create` will wait for the
-     * promise to resolve before continuing. If the promise rejects, then the
-     * promise returned by `Model.create` will reject. If `Model.afterCreate` does
-     * not return a promise, `Model.create` will resume execution immediately.
-     */
-    afterCreate(data?: Object, opts?: Object): Promise<void> | void;
-
-    beforeCreateMany(items?: Object[], opts?: Object): Promise<void> | void;
-    createMany(items?: Object[], opts?: Object): Promise<R[]>;
-    afterCreateMany(data?: Object[], opts?: Object): Promise<void> | void;
-    beforeFind(id?: ID, opts?: Object): Promise<void> | void;
-    find(id: ID, opts?: Object): Promise<R>;
-    afterFind(data?: Object, opts?: Object): Promise<void> | void;
-    beforeFindAll(query?: Object, opts?: Object): Promise<void> | void;
-    findAll(query?: Object, opts?: Object): Promise<R[]>;
-    afterFindAll(query?: Object, opts?: Object): Promise<void> | void;
-    beforeUpdate(id?: ID, props?: Object, opts?: Object): Promise<void> | void;
-    update(id: ID, props?: Object, opts?: Object): Promise<R>;
-    afterUpdate(id?: ID, props?: Object, opts?: Object): Promise<void> | void;
-    beforeUpdateMany(items?: Object[], opts?: Object): Promise<void> | void;
-    updateMany(items?: Object[], opts?: Object): Promise<R[]>;
-    afterUpdateMany(data?: Object[], opts?: Object): Promise<void> | void;
-    beforeUpdateAll(query?: Object, props?: Object, opts?: Object): Promise<void> | void;
-    updateAll(query?: Object, props?: Object, opts?: Object): Promise<R[]>;
-    afterUpdateAll(query?: Object, data?: Object[], opts?: Object): Promise<void> | void;
-    beforeDestroy(id?: ID, opts?: Object): Promise<void> | void;
-    destroy(id: ID, opts?: Object): Promise<R>;
-    afterDestroy(data?: Object, opts?: Object): Promise<void> | void;
-    beforeDestroyAll(query?: Object, opts?: Object): Promise<void> | void;
-    destroyAll(query?: Object, opts?: Object): Promise<R[]>;
-    afterDestroyAll(query?: Object, opts?: Object): Promise<void> | void;
-    belongsTo(model: Model<any>, opts?: RelationOptions): any;
-    hasMany(model: Model<any>, opts?: RelationOptions): any;
-    hasOne(model: Model<any>, opts?: RelationOptions): any;
-
-    /**
-     * Invoke the `setSchema` decorator on this Model.
-     */
-    setSchema(opts?: Object): any;
-
-    /**
-     * Invoke the `configure` decorator on this Model.
-     */
-    configure(opts?: Object): any;
-
-    /**
-     * Invoke the `registerAdapter` decorator on this Model.
-     */
-    registerAdapter(name: string, adapter: Adapter, opts?: Object): ModelConstructor<R>;
-
-    /**
-     * Extend this Model and return a new child Model. Static properties on this
-     * Model will be shallow copied to the child Model. The child Model's
-     * prototype will point to the parent Model.
-     */
-    extend<R>(instanceProps?: Object, staticProps?: ModelOptions): ModelConstructor<R>;
+  export class DataStore extends Container {
+    collectionClass: typeof LinkedCollection
+    _collections: Object
+    _pendingQueries: Object
+    _completedQueries: Object
+    linkRelations: boolean
+    constructor(opts?: any)
+    add(mapperName: string, records: any[]|any, opts?: any): any[]|any
+    between(mapperName: string, leftKeys: any, rightKeys: any, opts?: any): any[]
+    createIndex(mapperName: string, name: any, fieldList: any, opts?: any): LinkedCollection
+    filter(mapperName: string, query: any, thisArg?: any): any[]
+    get(mapperName: string, id: string|number): any
+    getAll(mapperName: string, ...args: any[]): any[]
+    query(mapperName: string): Query
+    remove(mapperName: string, id: string|number, opts?: any): any
+    removeAll(mapperName: string, query?: any, opts?: any): void | any[]
+    toJson(mapperName: string, opts?: any): any[]
+    _callSuper(method: string, ...args: any[]): any
+    _end(mapperName: string, data: any, opts?: any): any
+    create(mapperName: string, record: any, opts?: any): Promise<any>
+    createMany(mapperName: string, records: any, opts?: any): Promise<any[]|any>
+    defineMapper(mapperName: string, opts?: any): Mapper
+    destroy(mapperName: string, id: any, opts?: any): Promise<any>
+    destroyAll(mapperName: string, query?: any, opts?: any): Promise<any>
+    find(mapperName: string, id: any, opts?: any): Promise<any>
+    findAll(mapperName: string, query?: any, opts?: any): Promise<any>
+    cachedFind(mapperName: string, id: any, opts?: any): any
+    cachedFindAll(mapperName: string, query: any, opts?: any): any
+    hashQuery(mapperName: string, query: any, opts?: any): string
+    getCollection(mapperName: string): LinkedCollection
+    update(mapperName: string, id: any, record: any, opts?: any): Promise<any>
+    updateAll(mapperName: string, props: any, query?: any, opts?: any): Promise<any[]|any>
+    updateMany(mapperName: string, records: any, opts?: any): Promise<any[]|any>
   }
-
-  interface Adapter { }
-
-  module rules {
-    function type(predicate: string[], value): string | void;
-    function anyOf(schemas: Array<Object>, value): string[] | void;
-    function oneOf(schemas: Array<Object>, value): string[] | void;
+  export class Query extends Component {
+    static ops: {
+      '=='(value: any, predicate: any): boolean
+      '==='(value: any, predicate: any): boolean
+      '!='(value: any, predicate: any): boolean
+      '!=='(value: any, predicate: any): boolean
+      '>'(value: any, predicate: any): boolean
+      '>='(value: any, predicate: any): boolean
+      '<'(value: any, predicate: any): boolean
+      '<='(value: any, predicate: any): boolean
+      'isectEmpty'(value: any, predicate: any): boolean
+      'isectNotEmpty'(value: any, predicate: any): number
+      'in'(value: any, predicate: any): boolean
+      'notIn'(value: any, predicate: any): boolean
+      'contains'(value: any, predicate: any): boolean
+      'notContains'(value: any, predicate: any): boolean
+    }
+    collection: Collection|LinkedCollection
+    data: any[]
+    constructor(collection?: Collection)
+    compare(orderBy: any, index: any, a: any, b: any): any
+    evaluate(value: any, op: string, predicate: any): boolean
+    like(pattern: any, flags: any): RegExp
+    getData(): any[]
+    between(leftKeys: any, rightKeys: any, opts?: any): this
+    get(keyList?: any[], opts?: any): this
+    getAll(...args: any[]): this
+    filter(query: any, thisArg?: any): this
+    skip(num: number): this
+    limit(num: number): this
+    forEach(forEachFn: Function, thisArg?: any): this
+    map(mapFn: Function, thisArg?: any): this
+    mapCall(funcName: string, ...args: any[]): this
+    run(): any[]
   }
-
-  function validate(schema: Object, value): string[] | void;
-
-  module utils {
-    /**
-     * Return whether the provided value is an array.
-     */
-    function isArray(value): boolean;
-
-    /**
-     * Return whether the provided value is an object type.
-     */
-    function isObject(value): boolean;
-
-    /**
-     * Return whether the provided value is a regular expression type.
-     */
-    function isRegExp(value): boolean;
-
-    /**
-     * Return whether the provided value is a string type.
-     */
-    function isString(value): boolean;
-
-    /**
-     * Return whether the provided value is a date type.
-     */
-    function isDate(value): boolean;
-
-    /**
-     * Return whether the provided value is a number type.
-     */
-    function isNumber(value): boolean;
-
-    /**
-     * Return whether the provided value is a boolean type.
-     */
-    function isBoolean(value): boolean;
-
-    /**
-     * Return whether the provided value is a function.
-     */
-    function isFunction(value): boolean;
-
-    /**
-     * Return whether the provided value is a string or a number.
-     */
-    function isSorN(value): boolean;
-
-    /**
-     * Get the value at the provided key or path.
-     */
-    function get(object: Object, prop: string): any;
-
-    /**
-     * Unset the value at the provided key or path.
-     */
-    function unset(object: Object, prop: string): any;
-
-    /**
-     * Set the value at the provided key or path.
-     */
-    function set(object: Object, prop: string, value): any;
-
-    /**
-     * Iterate over an object's own enumerable properties.
-     */
-    function forOwn(object: Object, fn: Function, thisArg?);
-
-    /**
-     * Recursively shallow copy own enumberable properties from `src` to `dest`.
-     */
-    function deepMixIn(dest: Object, src: Object): Object;
-
-    /**
-     * Proxy for `Promise.resolve`.
-     */
-    function resolve(value): Promise<any>;
-
-    /**
-     * Proxy for `Promise.reject`.
-     */
-    function reject(value): Promise<any>;
-
-    /**
-     * Shallow copy own enumerable non-function properties from `src` to `dest`.
-     */
-    function _(src: Object, dest: Object);
-
-    /**
-     * Return the intersection of two arrays.
-     */
-    function intersection(first: Array<any>, second: Array<any>): Array<any>;
-
-    /**
-     * Shallow copy own enumerable properties from `src` to `dest` that are on `src`
-     * but are missing from `dest.
-     */
-    function fillIn(dest: Object, src: Object);
-
-    /**
-     * Return whether `prop` is matched by any string or regular expression in `blacklist`.
-     */
-    function isBlacklisted(prop, blacklist: Array<any>): boolean;
-
-    /**
-     * Proxy for `JSON.parse`.
-     */
-    function fromJson(json: string | Object): Object;
-
-    /**
-     * Proxy for `JSON.stringify`.
-     */
-    function toJson(value: Object, replacer?: Function | Array<string | number>, space?: string | number): string;
-
-    /**
-     * Deep copy a value.
-     */
-    function copy(from, to?, stackFrom?, stackTo?, blacklist?): any;
-
-    /**
-     * Convert a string to pascalcase.
-     */
-    function pascalCase(str: string): string;
-
-    /**
-     * Convert a string to camelcase.
-     */
-    function camelCase(str: string): string;
+  export interface SchemaValidationError {
+    expected: any
+    actual: string
+    path: string
   }
+  export class Schema extends Component {
+    static types: {
+      array(value: any): boolean
+      boolean(value: any): boolean
+      integer(value: any): boolean
+      'null'(value: any): boolean
+      number(value: any): boolean
+      object(value: any): boolean
+      string(value: any): boolean
+    }
+    static typeGroupValidators: {
+      array(value: any, schema: any, opts: any): SchemaValidationError[]
+      integer(value: any, schema: any, opts: any): SchemaValidationError[]
+      number(value: any, schema: any, opts: any): SchemaValidationError[]
+      numeric(value: any, schema: any, opts: any): SchemaValidationError[]
+      object(value: any, schema: any, opts: any): SchemaValidationError[]
+      string(value: any, schema: any, opts: any): SchemaValidationError[]
+    }
+    static validationKeywords: {
+      allOf(value: any, schema: any, opts: any): SchemaValidationError[]
+      anyOf(value: any, schema: any, opts: any): SchemaValidationError[]
+      dependencies(value: any, schema: any, opts: any): void
+      enum(value: any, schema: any, opts: any): SchemaValidationError
+      items(value: any, schema: any, opts: any): SchemaValidationError[]
+      maximum(value: any, schema: any, opts: any): SchemaValidationError
+      maxItems(value: any, schema: any, opts: any): SchemaValidationError
+      maxLength(value: any, schema: any, opts: any): SchemaValidationError
+      maxProperties(value: any, schema: any, opts: any): SchemaValidationError
+      minimum(value: any, schema: any, opts: any): SchemaValidationError
+      minItems(value: any, schema: any, opts: any): SchemaValidationError
+      minLength(value: any, schema: any, opts: any): SchemaValidationError
+      minProperties(value: any, schema: any, opts: any): SchemaValidationError
+      multipleOf(value: any, schema: any, opts: any): SchemaValidationError
+      not(value: any, schema: any, opts: any): SchemaValidationError
+      oneOf(value: any, schema: any, opts: any): SchemaValidationError[]
+      pattern(value: any, schema: any, opts: any): SchemaValidationError
+      properties(value: any, schema: any, opts: any): SchemaValidationError[]
+      required(value: any, schema: any, opts: any): SchemaValidationError[]
+      type(value: any, schema: any, opts: any): SchemaValidationError
+      uniqueItems(value: any, schema: any, opts: any): SchemaValidationError
+    }
+    static validate(value: any, schema: any, opts: any): SchemaValidationError[]
+    properties: any
+    constructor(definition: any)
+    apply(target: any, opts?: any): void
+    validate(value: any, opts?: any): SchemaValidationError[]
+  }
+  export class Index {
+    fieldList: string[]
+    fieldGetter: Function
+    hashCode: Function
+    isIndex: boolean
+    keys: any[]
+    values: any[]
+    constructor(fieldList: string[], opts?: any)
+    'set'(keyList: any[], value: any): void
+    'get'(keyList: any[]): any
+    getAll(): any[]
+    visitAll(cb: Function, thisArg?: any): void
+    between(leftKeys: any, rightKeys: any, opts?: any): any[]
+    _between(leftKeys: any, rightKeys: any, opts: any): any[]
+    peek(): any
+    clear(): void
+    insertRecord(data: any): void
+    removeRecord(data: any): any
+    updateRecord(data: any): void
+  }
+  export const belongsToType: string
+  export const hasManyType: string
+  export const hasOneType: string
+  export const belongsTo: (related: any, opts: any) => (target: any) => void
+  export const hasMany: (related: any, opts: any) => (target: any) => void
+  export const hasOne: (related: any, opts: any) => (target: any) => void
 }
 
 declare module 'js-data' {
-  export = JSData;
+  export = JSData
 }

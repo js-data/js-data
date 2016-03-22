@@ -1,7 +1,7 @@
 import utils from './utils'
-import {Query} from './Query'
-import {Mapper} from './Mapper'
-import {Index} from '../lib/mindex/index'
+import Component from './Component'
+import Query from './Query'
+import Index from '../lib/mindex/index'
 
 const COLLECTION_DEFAULTS = {
   /**
@@ -86,6 +86,7 @@ const COLLECTION_DEFAULTS = {
  * UserCollection.get(1) === user1 // true
  *
  * @class Collection
+ * @extends Component
  * @param {Array} [records] Initial set of records to insert into the
  * collection.
  * @param {Object} [opts] Configuration options.
@@ -94,40 +95,11 @@ const COLLECTION_DEFAULTS = {
  * @param {string} [opts.mapper] See {@link Collection#mapper}.
  * @param {Object} [opts.recordOpts=null] See {@link Collection#recordOpts}.
  */
-export class Collection {
-  /**
-   * Create a Collection subclass.
-   *
-   * @example
-   * var MyCollection = Collection.extend({
-   *   foo: function () { return 'bar' }
-   * })
-   * var collection = new MyCollection()
-   * collection.foo() // "bar"
-   *
-   * @name Collection.extend
-   * @method
-   * @param {Object} [props={}] Properties to add to the prototype of the
-   * subclass.
-   * @param {Object} [classProps={}] Static properties to add to the subclass.
-   * @return {Function} Subclass of Collection.
-   */
-  static extend = utils.extend
-  _listeners: any
-  idAttribute: string
-  onConflict: string
-  recordOpts: any
-  index: Index
-  indexes: any
-  mapper: Mapper
-  on: Function
-  off: Function
-  emit: Function
-  dbg: Function
-  log: Function
-  constructor (records?: Array<any>, opts?: any) {
+export default Component.extend({
+  constructor: function Collection (records, opts) {
     const self = this
     utils.classCallCheck(self, Collection)
+    Collection.__super__.call(self)
 
     if (utils.isObject(records) && !utils.isArray(records)) {
       opts = records
@@ -144,16 +116,6 @@ export class Collection {
 
     utils.fillIn(self, opts)
     utils.fillIn(self, COLLECTION_DEFAULTS)
-
-    /**
-     * Event listeners attached to this Collection.
-     *
-     * @name Collection#_listeners
-     * @instance
-     * @type {Object}
-     * @private
-     */
-    self._listeners = {}
 
     const idAttribute = self.recordId()
 
@@ -182,7 +144,7 @@ export class Collection {
         record.on('all', self._onRecordEvent, self)
       }
     })
-  }
+  },
 
   /**
    * Used to bind to events emitted by records in this Collection.
@@ -194,7 +156,7 @@ export class Collection {
    */
   _onRecordEvent (...args) {
     this.emit(...args)
-  }
+  },
 
   /**
    * Insert the provided record or records.
@@ -214,7 +176,7 @@ export class Collection {
    * the collection. Possible values are `merge` or `replace`.
    * @return {(Object|Object[]|Record|Record[])} The added record or records.
    */
-  add (records, opts?: any) {
+  add (records, opts) {
     const self = this
 
     // Default values for arguments
@@ -239,7 +201,7 @@ export class Collection {
     records = records.map(function (record) {
       let id = self.recordId(record)
       if (!utils.isSorN(id)) {
-        throw new TypeError(`${idAttribute}: Expected string or number, found ${typeof id}!`)
+        throw new TypeError(`Collection#add: Expected string or number for ${idAttribute}, found ${typeof id}!`)
       }
       // Grab existing record if there is one
       const existing = self.get(id)
@@ -286,7 +248,7 @@ export class Collection {
     // TODO: Make this more performant (batch events?)
     self.emit('add', result)
     return self.afterAdd(records, opts, result) || result
-  }
+  },
 
   /**
    * Lifecycle hook called by {@link Collection#add}. If this method returns a
@@ -298,7 +260,7 @@ export class Collection {
    * that were added to this Collection by {@link Collection#add}.
    * @param {Object} opts The `opts` argument passed to {@link Collection#add}.
    */
-  afterAdd (...args: Array<any>) {}
+  afterAdd () {},
 
   /**
    * Lifecycle hook called by {@link Collection#remove}. If this method returns
@@ -310,7 +272,7 @@ export class Collection {
    * @param {Object} opts The `opts` argument passed to {@link Collection#remove}.
    * @param {Object} record The result that will be returned by {@link Collection#remove}.
    */
-  afterRemove (...args: Array<any>) {}
+  afterRemove () {},
 
   /**
    * Lifecycle hook called by {@link Collection#removeAll}. If this method
@@ -323,7 +285,7 @@ export class Collection {
    * @param {Object} opts The `opts` argument passed to {@link Collection#removeAll}.
    * @param {Object} records The result that will be returned by {@link Collection#removeAll}.
    */
-  afterRemoveAll (...args: Array<any>) {}
+  afterRemoveAll () {},
 
   /**
    * Lifecycle hook called by {@link Collection#add}. If this method returns a
@@ -335,7 +297,7 @@ export class Collection {
    * @param {(Object|Object[]|Record|Record[])} records The `records` argument passed to {@link Collection#add}.
    * @param {Object} opts The `opts` argument passed to {@link Collection#add}.
    */
-  beforeAdd (...args: Array<any>) {}
+  beforeAdd () {},
 
   /**
    * Lifecycle hook called by {@link Collection#remove}.
@@ -345,7 +307,7 @@ export class Collection {
    * @param {(string|number)} id The `id` argument passed to {@link Collection#remove}.
    * @param {Object} opts The `opts` argument passed to {@link Collection#remove}.
    */
-  beforeRemove (...args: Array<any>) {}
+  beforeRemove () {},
 
   /**
    * Lifecycle hook called by {@link Collection#removeAll}.
@@ -355,7 +317,7 @@ export class Collection {
    * @param {Object} query The `query` argument passed to {@link Collection#removeAll}.
    * @param {Object} opts The `opts` argument passed to {@link Collection#removeAll}.
    */
-  beforeRemoveAll (...args: Array<any>) {}
+  beforeRemoveAll () {},
 
   /**
    * Find all records between two boundaries.
@@ -383,9 +345,9 @@ export class Collection {
    * @param {boolean} [opts.offset] The number of resulting records to skip.
    * @return {Array} The result.
    */
-  between (leftKeys, rightKeys, opts?: any) {
+  between (leftKeys, rightKeys, opts) {
     return this.query().between(leftKeys, rightKeys, opts).run()
-  }
+  },
 
   /**
    * Create a new secondary index on the contents of the collection.
@@ -404,7 +366,7 @@ export class Collection {
    * the name will also be the field that is used to index the collection.
    * @return {Collection} A reference to itself for chaining.
    */
-  createIndex (name, fieldList, opts?: any) {
+  createIndex (name, fieldList, opts) {
     const self = this
     if (utils.isString(name) && fieldList === undefined) {
       fieldList = [name]
@@ -416,7 +378,7 @@ export class Collection {
     const index = self.indexes[name] = new Index(fieldList, opts)
     self.index.visitAll(index.insertRecord, index)
     return self
-  }
+  },
 
   /**
    * Find the record or records that match the provided query or pass the
@@ -449,9 +411,9 @@ export class Collection {
    * `queryOrFn` is a function.
    * @return {Array} The result.
    */
-  filter (query, thisArg?: any) {
+  filter (query, thisArg) {
     return this.query().filter(query, thisArg).run()
-  }
+  },
 
   /**
    * Iterate over all records.
@@ -469,7 +431,7 @@ export class Collection {
    */
   forEach (cb, thisArg) {
     this.index.visitAll(cb, thisArg)
-  }
+  },
 
   /**
    * Get the record with the given id.
@@ -482,7 +444,7 @@ export class Collection {
   get (id) {
     const instances = this.query().get(id).run()
     return instances.length ? instances[0] : undefined
-  }
+  },
 
   /**
    * Find the record or records that match the provided keyLists.
@@ -507,7 +469,7 @@ export class Collection {
    */
   getAll (...args) {
     return this.query().getAll(...args).run()
-  }
+  },
 
   /**
    * Return the index with the given name. If no name is provided, return the
@@ -523,7 +485,7 @@ export class Collection {
       throw new Error(`Index ${name} does not exist!`)
     }
     return index
-  }
+  },
 
   /**
    * Limit the result.
@@ -540,7 +502,7 @@ export class Collection {
    */
   limit (num) {
     return this.query().limit(num).run()
-  }
+  },
 
   /**
    * Apply a mapping function to all records.
@@ -562,7 +524,7 @@ export class Collection {
       data.push(cb.call(thisArg, value))
     })
     return data
-  }
+  },
 
   /**
    * Return the result of calling the specified function on each record in this
@@ -580,7 +542,7 @@ export class Collection {
       data.push(record[funcName](...args))
     })
     return data
-  }
+  },
 
   /**
    * Return the primary key of the given, or if no record is provided, return the
@@ -593,13 +555,13 @@ export class Collection {
    * @return {(string|number)} Primary key or name of field that holds primary
    * key.
    */
-  recordId (record?: any) {
+  recordId (record) {
     if (record) {
       return utils.get(record, this.recordId())
     }
     const self = this
     return self.mapper ? self.mapper.idAttribute : self.idAttribute || 'id'
-  }
+  },
 
   /**
    * Create a new query to be executed against the contents of the collection.
@@ -618,7 +580,7 @@ export class Collection {
    */
   query () {
     return new Query(this)
-  }
+  },
 
   /**
    * Reduce the data in the collection to a single value and return the result.
@@ -637,7 +599,7 @@ export class Collection {
   reduce (cb, initialValue) {
     const data = this.getAll()
     return data.reduce(cb, initialValue)
-  }
+  },
 
   /**
    * Remove the record with the given id from this Collection.
@@ -648,7 +610,7 @@ export class Collection {
    * @param {Object} [opts] - Configuration options.
    * @return {Object|Record} The removed record, if any.
    */
-  remove (id, opts?: any) {
+  remove (id, opts) {
     const self = this
 
     // Default values for arguments
@@ -668,7 +630,7 @@ export class Collection {
       }
     }
     return self.afterRemove(id, opts, record) || record
-  }
+  },
 
   /**
    * Remove the record selected by "query" from this collection.
@@ -683,7 +645,7 @@ export class Collection {
    * @param {Object} [opts] - Configuration options.
    * @return {(Object[]|Record[])} The removed records, if any.
    */
-  removeAll (query, opts?: any) {
+  removeAll (query, opts) {
     const self = this
     // Default values for arguments
     opts || (opts = {})
@@ -695,7 +657,7 @@ export class Collection {
       self.remove(self.recordId(item), opts)
     })
     return self.afterRemoveAll(query, opts, records) || records
-  }
+  },
 
   /**
    * Skip a number of results.
@@ -712,7 +674,7 @@ export class Collection {
    */
   skip (num) {
     return this.query().skip(num).run()
-  }
+  },
 
   /**
    * Return the plain JSON representation of all items in this collection.
@@ -727,7 +689,7 @@ export class Collection {
    */
   toJSON (opts) {
     return this.mapCall('toJSON', opts)
-  }
+  },
 
   /**
    * Update a record's position in a single index of this collection. See
@@ -742,10 +704,10 @@ export class Collection {
    * position. If you don't specify an index then the record will be updated
    * in the main index.
    */
-  updateIndex (record, opts?: any) {
+  updateIndex (record, opts) {
     opts || (opts = {})
     this.getIndex(opts.index).updateRecord(record)
-  }
+  },
 
   /**
    * TODO
@@ -762,43 +724,4 @@ export class Collection {
       index.updateRecord(record)
     })
   }
-}
-
-/**
- * TODO
- *
- * @name Collection#on
- * @method
- * @param {string} event TODO.
- * @param {Function} handler TODO
- */
-
-/**
- * TODO
- *
- * @name Collection#off
- * @method
- * @param {string} [event] TODO.
- * @param {Function} [handler] TODO
- */
-
-/**
- * TODO
- *
- * @name Collection#emit
- * @method
- * @param {string} event TODO.
- * @param {...*} [arg] TODO
- */
-
-utils.eventify(
-  Collection.prototype,
-  function () {
-    return this._listeners
-  },
-  function (value) {
-    this._listeners = value
-  }
-)
-
-utils.hidePrototypeMethods(Collection)
+})

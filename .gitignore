@@ -26,5 +26,3 @@ jsconfig.json
 dist/js-data-tests.js
 dist/js-data-tests.js.map
 doc/
-.tmp
-typings/

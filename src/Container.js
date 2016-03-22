@@ -1,10 +1,11 @@
 import utils from './utils'
+import Component from './Component'
 import {
   belongsToType,
   hasManyType,
   hasOneType
 } from './decorators'
-import {Mapper} from './Mapper'
+import Mapper from './Mapper'
 
 const toProxy = [
   /**
@@ -242,6 +243,229 @@ const toProxy = [
   'updateMany'
 ]
 
+const props = {
+  constructor: function Container (opts) {
+    const self = this
+    utils.classCallCheck(self, Container)
+    Container.__super__.call(self)
+    opts || (opts = {})
+
+    // Apply options provided by the user
+    utils.fillIn(self, opts)
+    /**
+     * Defaults options to pass to {@link Container#mapperClass} when creating a
+     * new mapper.
+     *
+     * @name Container#mapperDefaults
+     * @type {Object}
+     */
+    self.mapperDefaults = self.mapperDefaults || {}
+    /**
+     * Constructor function to use in {@link Container#defineMapper} to create a
+     * new mapper.
+     *
+     * @name Container#mapperClass
+     * @type {Function}
+     */
+    self.mapperClass = self.mapperClass || Mapper
+
+    // Initilize private data
+
+    // Holds the adapters, shared by all mappers in this container
+    self._adapters = {}
+    // The the mappers in this container
+    self._mappers = {}
+  },
+
+  /**
+   * Create a new mapper and register it in this container.
+   *
+   * @example
+   * import {Container} from 'js-data'
+   * const container = new Container({
+   *   mapperDefaults: { foo: 'bar' }
+   * })
+   * const userMapper = container.defineMapper('user')
+   * userMapper.foo // "bar"
+   *
+   * @name Container#defineMapper
+   * @method
+   * @param {string} name Name under which to register the new {@link Mapper}.
+   * {@link Mapper#name} will be set to this value.
+   * @param {Object} [opts] Configuration options. Passed to
+   * {@link Container#mapperClass} when creating the new {@link Mapper}.
+   * @return {Mapper}
+   */
+  defineMapper (name, opts) {
+    const self = this
+
+    // For backwards compatibility with defineResource
+    if (utils.isObject(name)) {
+      opts = name
+      if (!opts.name) {
+        throw new Error('name is required!')
+      }
+      name = opts.name
+    } else if (!utils.isString(name)) {
+      throw new Error('name is required!')
+    }
+
+    // Default values for arguments
+    opts || (opts = {})
+    // Set Mapper#name
+    opts.name = name
+    opts.relations || (opts.relations = {})
+
+    // Check if the user is overriding the datastore's default mapperClass
+    const mapperClass = opts.mapperClass || self.mapperClass
+    delete opts.mapperClass
+
+    // Apply the datastore's defaults to the options going into the mapper
+    utils.fillIn(opts, self.mapperDefaults)
+
+    // Instantiate a mapper
+    const mapper = self._mappers[name] = new mapperClass(opts) // eslint-disable-line
+    // Make sure the mapper's name is set
+    mapper.name = name
+    // All mappers in this datastore will share adapters
+    mapper._adapters = self.getAdapters()
+
+    // Setup the mapper's relations, including generating Mapper#relationList
+    // and Mapper#relationFields
+    utils.forOwn(mapper.relations, function (group, type) {
+      utils.forOwn(group, function (relations, _name) {
+        if (utils.isObject(relations)) {
+          relations = [relations]
+        }
+        relations.forEach(function (def) {
+          def.getRelation = function () {
+            return self.getMapper(_name)
+          }
+          const relatedMapper = self._mappers[_name] || _name
+          if (type === belongsToType) {
+            mapper.belongsTo(relatedMapper, def)
+          } else if (type === hasOneType) {
+            mapper.hasOne(relatedMapper, def)
+          } else if (type === hasManyType) {
+            mapper.hasMany(relatedMapper, def)
+          }
+        })
+      })
+    })
+
+    return mapper
+  },
+
+  defineResource (name, opts) {
+    return this.defineMapper(name, opts)
+  },
+
+  /**
+   * Return the registered adapter with the given name or the default adapter if
+   * no name is provided.
+   *
+   * @name Container#getAdapter
+   * @method
+   * @param {string} [name] The name of the adapter to retrieve.
+   * @return {Adapter} The adapter.
+   */
+  getAdapter (name) {
+    const self = this
+    const adapter = self.getAdapterName(name)
+    if (!adapter) {
+      throw new ReferenceError(`${adapter} not found!`)
+    }
+    return self.getAdapters()[adapter]
+  },
+
+  /**
+   * Return the name of a registered adapter based on the given name or options,
+   * or the name of the default adapter if no name provided.
+   *
+   * @name Container#getAdapterName
+   * @method
+   * @param {(Object|string)} [opts] The name of an adapter or options, if any.
+   * @return {string} The name of the adapter.
+   */
+  getAdapterName (opts) {
+    opts || (opts = {})
+    if (utils.isString(opts)) {
+      opts = { adapter: opts }
+    }
+    return opts.adapter || this.mapperDefaults.defaultAdapter
+  },
+
+  /**
+   * Return the registered adapters of this container.
+   *
+   * @name Container#getAdapters
+   * @method
+   * @return {Adapter}
+   */
+  getAdapters () {
+    return this._adapters
+  },
+
+  /**
+   * Return the mapper registered under the specified name.
+   *
+   * @example
+   * import {Container} from 'js-data'
+   * const container = new Container()
+   * const userMapper = container.defineMapper('user')
+   * userMapper === container.getMapper('user') // true
+   *
+   * @name Container#getMapper
+   * @method
+   * @param {string} name {@link Mapper#name}.
+   * @return {Mapper}
+   */
+  getMapper (name) {
+    const mapper = this._mappers[name]
+    if (!mapper) {
+      throw new ReferenceError(`${name} is not a registered mapper!`)
+    }
+    return mapper
+  },
+
+  /**
+   * Register an adapter on this container under the given name. Adapters
+   * registered on a container are shared by all mappers in the container.
+   *
+   * @example
+   * import {Container} from 'js-data'
+   * import HttpAdapter from 'js-data-http'
+   * const container = new Container()
+   * container.registerAdapter('http', new HttpAdapter, { default: true })
+   *
+   * @name Container#registerAdapter
+   * @method
+   * @param {string} name The name of the adapter to register.
+   * @param {Adapter} adapter The adapter to register.
+   * @param {Object} [opts] Configuration options.
+   * @param {boolean} [opts.default=false] Whether to make the adapter the
+   * default adapter for all Mappers in this container.
+   */
+  registerAdapter (name, adapter, opts) {
+    const self = this
+    opts || (opts = {})
+    self.getAdapters()[name] = adapter
+    // Optionally make it the default adapter for the target.
+    if (opts === true || opts.default) {
+      self.mapperDefaults.defaultAdapter = name
+      utils.forOwn(self._mappers, function (mapper) {
+        mapper.defaultAdapter = name
+      })
+    }
+  }
+}
+
+toProxy.forEach(function (method) {
+  props[method] = function (name, ...args) {
+    return this.getMapper(name)[method](...args)
+  }
+})
+
 /**
  * ```javascript
  * import {Container} from 'js-data'
@@ -303,6 +527,7 @@ const toProxy = [
  * })
  *
  * @class Container
+ * @extends Component
  * @param {Object} [opts] Configuration options.
  * @param {Function} [opts.mapperClass] Constructor function to use in
  * {@link Container#defineMapper} to create a new mapper.
@@ -310,250 +535,4 @@ const toProxy = [
  * {@link Container#mapperClass} when creating a new mapper.
  * @return {Container}
  */
-export class Container {
-  /**
-   * Create a Container subclass.
-   *
-   * @example
-   * var MyContainer = Container.extend({
-   *   foo: function () { return 'bar' }
-   * })
-   * var container = new MyContainer()
-   * container.foo() // "bar"
-   *
-   * @name Container.extend
-   * @method
-   * @param {Object} [props={}] Properties to add to the prototype of the
-   * subclass.
-   * @param {Object} [classProps={}] Static properties to add to the subclass.
-   * @return {Function} Subclass of Container.
-   */
-  static extend = utils.extend
-  mapperDefaults: any
-  mapperClass: any
-  _adapters: any
-  _mappers: any
-  constructor (opts?: any) {
-    const self = this
-    utils.classCallCheck(self, Container)
-    opts || (opts = {})
-
-    // Apply options provided by the user
-    utils.fillIn(self, opts)
-    /**
-     * Defaults options to pass to {@link Container#mapperClass} when creating a
-     * new mapper.
-     *
-     * @name Container#mapperDefaults
-     * @type {Object}
-     */
-    self.mapperDefaults = self.mapperDefaults || {}
-    /**
-     * Constructor function to use in {@link Container#defineMapper} to create a
-     * new mapper.
-     *
-     * @name Container#mapperClass
-     * @type {Function}
-     */
-    self.mapperClass = self.mapperClass || Mapper
-
-    // Initilize private data
-
-    // Holds the adapters, shared by all mappers in this container
-    self._adapters = {}
-    // The the mappers in this container
-    self._mappers = {}
-  }
-
-  /**
-   * Create a new mapper and register it in this container.
-   *
-   * @example
-   * import {Container} from 'js-data'
-   * const container = new Container({
-   *   mapperDefaults: { foo: 'bar' }
-   * })
-   * const userMapper = container.defineMapper('user')
-   * userMapper.foo // "bar"
-   *
-   * @name Container#defineMapper
-   * @method
-   * @param {string} name Name under which to register the new {@link Mapper}.
-   * {@link Mapper#name} will be set to this value.
-   * @param {Object} [opts] Configuration options. Passed to
-   * {@link Container#mapperClass} when creating the new {@link Mapper}.
-   * @return {Mapper}
-   */
-  defineMapper (name: string, opts?: any): Mapper {
-    const self = this
-
-    // For backwards compatibility with defineResource
-    if (utils.isObject(name)) {
-      opts = name
-      if (!opts.name) {
-        throw new Error('name is required!')
-      }
-      name = opts.name
-    } else if (!utils.isString(name)) {
-      throw new Error('name is required!')
-    }
-
-    // Default values for arguments
-    opts || (opts = {})
-    // Set Mapper#name
-    opts.name = name
-    opts.relations || (opts.relations = {})
-
-    // Check if the user is overriding the datastore's default mapperClass
-    const mapperClass = opts.mapperClass || self.mapperClass
-    delete opts.mapperClass
-
-    // Apply the datastore's defaults to the options going into the mapper
-    utils.fillIn(opts, self.mapperDefaults)
-
-    // Instantiate a mapper
-    const mapper = self._mappers[name] = new mapperClass(opts)
-    // Make sure the mapper's name is set
-    mapper.name = name
-    // All mappers in this datastore will share adapters
-    mapper._adapters = self.getAdapters()
-
-    // Setup the mapper's relations, including generating Mapper#relationList
-    // and Mapper#relationFields
-    utils.forOwn(mapper.relations, function (group, type) {
-      utils.forOwn(group, function (relations, _name) {
-        if (utils.isObject(relations)) {
-          relations = [relations]
-        }
-        relations.forEach(function (def) {
-          def.getRelation = function () {
-            return self.getMapper(_name)
-          }
-          const relatedMapper = self._mappers[_name] || _name
-          if (type === belongsToType) {
-            mapper.belongsTo(relatedMapper, def)
-          } else if (type === hasOneType) {
-            mapper.hasOne(relatedMapper, def)
-          } else if (type === hasManyType) {
-            mapper.hasMany(relatedMapper, def)
-          }
-        })
-      })
-    })
-
-    return mapper
-  }
-
-  defineResource (name, opts) {
-    return this.defineMapper(name, opts)
-  }
-
-  /**
-   * Return the registered adapter with the given name or the default adapter if
-   * no name is provided.
-   *
-   * @name Container#getAdapter
-   * @method
-   * @param {string} [name] The name of the adapter to retrieve.
-   * @return {Adapter} The adapter.
-   */
-  getAdapter (name) {
-    const self = this
-    const adapter = self.getAdapterName(name)
-    if (!adapter) {
-      throw new ReferenceError(`${adapter} not found!`)
-    }
-    return self.getAdapters()[adapter]
-  }
-
-  /**
-   * Return the name of a registered adapter based on the given name or options,
-   * or the name of the default adapter if no name provided.
-   *
-   * @name Container#getAdapterName
-   * @method
-   * @param {(Object|string)} [opts] The name of an adapter or options, if any.
-   * @return {string} The name of the adapter.
-   */
-  getAdapterName (opts?: any) {
-    opts || (opts = {})
-    if (utils.isString(opts)) {
-      opts = { adapter: opts }
-    }
-    return opts.adapter || this.mapperDefaults.defaultAdapter
-  }
-
-  /**
-   * Return the registered adapters of this container.
-   *
-   * @name Container#getAdapters
-   * @method
-   * @return {Adapter}
-   */
-  getAdapters () {
-    return this._adapters
-  }
-
-  /**
-   * Return the mapper registered under the specified name.
-   *
-   * @example
-   * import {Container} from 'js-data'
-   * const container = new Container()
-   * const userMapper = container.defineMapper('user')
-   * userMapper === container.getMapper('user') // true
-   *
-   * @name Container#getMapper
-   * @method
-   * @param {string} name {@link Mapper#name}.
-   * @return {Mapper}
-   */
-  getMapper (name) {
-    const mapper = this._mappers[name]
-    if (!mapper) {
-      throw new ReferenceError(`${name} is not a registered mapper!`)
-    }
-    return mapper
-  }
-
-  /**
-   * Register an adapter on this container under the given name. Adapters
-   * registered on a container are shared by all mappers in the container.
-   *
-   * @example
-   * import {Container} from 'js-data'
-   * import HttpAdapter from 'js-data-http'
-   * const container = new Container()
-   * container.registerAdapter('http', new HttpAdapter, { default: true })
-   *
-   * @name Container#registerAdapter
-   * @method
-   * @param {string} name The name of the adapter to register.
-   * @param {Adapter} adapter The adapter to register.
-   * @param {Object} [opts] Configuration options.
-   * @param {boolean} [opts.default=false] Whether to make the adapter the
-   * default adapter for all Mappers in this container.
-   */
-  registerAdapter (name: string, adapter, opts?: any) {
-    const self = this
-    opts || (opts = {})
-    self.getAdapters()[name] = adapter
-    // Optionally make it the default adapter for the target.
-    if (opts === true || opts.default) {
-      self.mapperDefaults.defaultAdapter = name
-      utils.forOwn(self._mappers, function (mapper) {
-        mapper.defaultAdapter = name
-      })
-    }
-  }
-}
-
-const toAdd = {}
-toProxy.forEach(function (method) {
-  toAdd[method] = function (name, ...args) {
-    return this.getMapper(name)[method](...args)
-  }
-})
-utils.addHiddenPropsToTarget(Container.prototype, toAdd)
-
-utils.hidePrototypeMethods(Container)
+export default Component.extend(props)

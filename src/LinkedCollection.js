@@ -2,7 +2,7 @@ import utils from './utils'
 import {
   hasManyType
 } from './decorators'
-import {Collection} from './Collection'
+import Collection from './Collection'
 
 /**
  * TODO
@@ -18,14 +18,11 @@ import {Collection} from './Collection'
  * @param {Object} [opts] Configuration options. See {@link Collection}.
  * @return {Mapper}
  */
-/* tslint:disable:variable-name */
-export const LinkedCollection = Collection.extend({
-  /* tslint:enable:variable-name */
-  constructor (records, opts) {
+export default Collection.extend({
+  constructor: function LinkedCollection (records, opts) {
     const self = this
     utils.classCallCheck(self, LinkedCollection)
-
-    utils.getSuper(self).call(self, records, opts)
+    LinkedCollection.__super__.call(self, records, opts)
 
     // Make sure this collection has somewhere to store "added" timestamps
     self._added = {}
@@ -168,24 +165,3 @@ export const LinkedCollection = Collection.extend({
     return records
   }
 })
-
-/**
- * Create a LinkedCollection subclass.
- *
- * ```javascript
- * var MyLinkedCollection = LinkedCollection.extend({
- *   foo: function () { return 'bar' }
- * })
- * var collection = new MyLinkedCollection()
- * collection.foo() // "bar"
- * ```
- *
- * @name LinkedCollection.extend
- * @method
- * @param {Object} [props={}] Properties to add to the prototype of the
- * subclass.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @return {Function} Subclass of LinkedCollection.
- */
-
-utils.hidePrototypeMethods(LinkedCollection)

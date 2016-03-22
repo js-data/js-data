@@ -1,4 +1,5 @@
 import utils from './utils'
+import Component from './Component'
 
 /**
  * TODO
@@ -662,7 +663,7 @@ const validationFailureMsg = 'validation failed'
  * @ignore
  */
 const makeDescriptor = function (prop, schema, opts) {
-  const descriptor: PropertyDescriptor = {
+  const descriptor = {
     // These properties are enumerable by default, but regardless of their
     // enumerability, they won't be "own" properties of individual records
     enumerable: utils.isUndefined(schema.enumerable) ? true : !!schema.enumerable
@@ -690,7 +691,7 @@ const makeDescriptor = function (prop, schema, opts) {
       if (errors) {
         // Immediately throw an error, preventing the record from getting into
         // an invalid state
-        const error: any = new Error(validationFailureMsg)
+        const error = new Error(validationFailureMsg)
         error.errors = errors
         throw error
       }
@@ -864,20 +865,11 @@ const typeGroupValidators = {
  * ```
  *
  * @class Schema
+ * @extends Component
  * @param {Object} definition Schema definition according to json-schema.org
  */
-export class Schema {
-  /**
-   * @name Schema.extend
-   * @method
-   */
-  static extend = utils.extend
-  static types = types
-  static typeGroupValidators = typeGroupValidators
-  static validationKeywords = validationKeywords
-  static validate = validate
-  properties: any
-  constructor (definition: any) {
+export default Component.extend({
+  constructor: function Schema (definition) {
     // const self = this
     definition || (definition = {})
     // TODO: schema validation
@@ -891,7 +883,7 @@ export class Schema {
         }
       })
     }
-  }
+  },
 
   /**
    * This adds ES5 getters/setters to the target based on the "properties" in
@@ -902,7 +894,7 @@ export class Schema {
    * @method
    * @param {Object} target The prototype to which to apply this schema.
    */
-  apply (target, opts?: any) {
+  apply (target, opts) {
     opts || (opts = {})
     opts.getter = opts.getter || '_get'
     opts.setter = opts.setter || '_set'
@@ -915,7 +907,7 @@ export class Schema {
         makeDescriptor(prop, schema, opts)
       )
     })
-  }
+  },
 
   /**
    * Validate the provided value against this schema.
@@ -927,6 +919,11 @@ export class Schema {
    * @return {(array|undefined)} Array of errors or `undefined` if valid.
    */
   validate (value, opts) {
-    return Schema.validate(value, this, opts)
+    return validate(value, this, opts)
   }
-}
+}, {
+  typeGroupValidators,
+  types,
+  validate,
+  validationKeywords
+})

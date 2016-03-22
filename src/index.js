@@ -44,8 +44,7 @@ export const version = {
   patch: parseInt('<%= patch %>', 10)
 }
 
-import utils from './utils'
-export {utils}
+export utils from './utils'
 
 export * from './decorators'
 
@@ -53,46 +52,46 @@ export * from './decorators'
  * {@link Collection} class.
  * @name module:js-data.Collection
  */
-export * from './Collection'
+export Collection from './Collection'
 
 /**
  * {@link Container} class.
  * @name module:js-data.Container
  */
-export * from './Container'
+export Container from './Container'
 
 /**
  * {@link DataStore} class.
  * @name module:js-data.DataStore
  */
-export * from './DataStore'
+export DataStore from './DataStore'
 
 /**
  * {@link LinkedCollection} class.
  * @name module:js-data.LinkedCollection
  */
-export * from './LinkedCollection'
+export LinkedCollection from './LinkedCollection'
 
 /**
  * {@link Mapper} class.
  * @name module:js-data.Mapper
  */
-export * from './Mapper'
+export Mapper from './Mapper'
 
 /**
  * {@link Query} class.
  * @name module:js-data.Query
  */
-export * from './Query'
+export Query from './Query'
 
 /**
  * {@link Record} class.
  * @name module:js-data.Record
  */
-export * from './Record'
+export Record from './Record'
 
 /**
  * {@link Schema} class.
  * @name module:js-data.Schema
  */
-export * from './Schema'
+export Schema from './Schema'
