@@ -1,3 +1,14 @@
+##### 3.0.0-alpha.21 - xx March 2016
+
+###### Backwards compatible API changes
+- #195 - Add "with" to remove/removeAll (eject/ejectAll) to also remove relations
+
+###### Backwards compatible bug fixes
+- #263 - orderBy with undefined values doesn't order (though null works)
+
+###### Other
+- Updated js-data.d.ts
+
 ##### 3.0.0-alpha.20 - 18 March 2016
 
 ###### Breaking API changes
@@ -5,7 +16,7 @@
 
 ###### Backwards compatible API changes
 - Passive change detection now possible with changes to Record#changes() and Record#hasChanges(), see #313
-- Added sum and count methods
+- #283 - Added sum and count methods
 
 ###### Backwards compatible big fixes
 - Container and DataStore now proxy all Mapper methods

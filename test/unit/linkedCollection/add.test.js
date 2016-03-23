@@ -181,7 +181,7 @@ export function init () {
         }]
       })
 
-      Test.assert.isTrue(store.get('parent', 1).children[0] instanceof Child.RecordClass)
+      Test.assert.isTrue(store.get('parent', 1).children[0] instanceof Child.recordClass)
 
       store.add('parent', {
         id: 1,
@@ -198,8 +198,8 @@ export function init () {
         ]
       })
 
-      Test.assert.isTrue(store.get('parent', 1).children[0] instanceof Child.RecordClass)
-      Test.assert.isTrue(store.get('parent', 1).children[1] instanceof Child.RecordClass)
+      Test.assert.isTrue(store.get('parent', 1).children[0] instanceof Child.recordClass)
+      Test.assert.isTrue(store.get('parent', 1).children[1] instanceof Child.recordClass)
       Test.assert.deepEqual(store.filter('child', { parentId: 1 }), store.get('parent', 1).children)
     })
 

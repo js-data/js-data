@@ -18,7 +18,7 @@ export function init () {
 
       class Foo extends Test.JSData.Mapper {}
       container = new Container({
-        MapperClass: Foo
+        mapperClass: Foo
       })
       mapper = container.defineMapper('foo')
       Test.assert.isTrue(mapper === container._mappers.foo)

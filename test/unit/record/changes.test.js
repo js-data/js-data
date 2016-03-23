@@ -9,7 +9,7 @@ export function init () {
     })
     it('should be empty right after an instance is created', function () {
       const Test = this
-      const post = new Test.Post.RecordClass(Test.data.p1)
+      const post = new Test.Post.recordClass(Test.data.p1)
       Test.assert.objectsEqual(post.changes(), {
         added: {},
         removed: {},
@@ -18,7 +18,7 @@ export function init () {
     })
     it('should detect tracked field changes', function () {
       const Test = this
-      const post = new Test.Post.RecordClass(Test.data.p1)
+      const post = new Test.Post.recordClass(Test.data.p1)
       Test.assert.objectsEqual(post.changes(), {
         added: {},
         removed: {},
@@ -35,7 +35,7 @@ export function init () {
     })
     it('should detect untracked field changes', function () {
       const Test = this
-      const post = new Test.Post.RecordClass(Test.data.p1)
+      const post = new Test.Post.recordClass(Test.data.p1)
       Test.assert.objectsEqual(post.changes(), {
         added: {},
         removed: {},

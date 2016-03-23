@@ -1,4 +1,5 @@
-import _ from './utils'
+import utils from './utils'
+import Component from './Component'
 import {
   belongsToType,
   hasManyType,
@@ -242,126 +243,40 @@ const toProxy = [
   'updateMany'
 ]
 
-/**
- * ```javascript
- * import {Container} from 'js-data'
- * ```
- *
- * The `Container` class is a place to store {@link Mapper} instances.
- *
- * Without a container, you need to manage mappers yourself, including resolving
- * circular dependencies among relations. All mappers in a container share the
- * same adapters, so you don't have to add each adapter to all of your mappers.
- *
- * @example <caption>Without Container</caption>
- * import {Mapper} from 'js-data'
- * import HttpAdapter from 'js-data-http'
- * const adapter = new HttpAdapter()
- * const userMapper = new Mapper({ name: 'user' })
- * userMapper.registerAdapter('http', adapter, { default: true })
- * const commentMapper = new Mapper({ name: 'comment' })
- * commentMapper.registerAdapter('http', adapter, { default: true })
- *
- * // This might be more difficult if the mappers were defined in different
- * // modules.
- * userMapper.hasMany(commentMapper, {
- *   localField: 'comments',
- *   foreignKey: 'userId'
- * })
- * commentMapper.belongsTo(userMapper, {
- *   localField: 'user',
- *   foreignKey: 'userId'
- * })
- *
- * @example <caption>With Container</caption>
- * import {Container} from 'js-data'
- * import HttpAdapter from 'js-data-http'
- * const container = new Container()
- * // All mappers in container share adapters
- * container.registerAdapter('http', new HttpAdapter(), { default: true })
- *
- * // These could be defined in separate modules without a problem.
- * container.defineMapper('user', {
- *   relations: {
- *     hasMany: {
- *       comment: {
- *         localField: 'comments',
- *         foreignKey: 'userId'
- *       }
- *     }
- *   }
- * })
- * container.defineMapper('comment', {
- *   relations: {
- *     belongsTo: {
- *       user: {
- *         localField: 'user',
- *         foreignKey: 'userId'
- *       }
- *     }
- *   }
- * })
- *
- * @class Container
- * @param {Object} [opts] Configuration options.
- * @param {Function} [opts.MapperClass] Constructor function to use in
- * {@link Container#defineMapper} to create a new mapper.
- * @param {Object} [opts.mapperDefaults] Defaults options to pass to
- * {@link Container#MapperClass} when creating a new mapper.
- * @return {Container}
- */
-export default function Container (opts) {
-  const self = this
-  _.classCallCheck(self, Container)
+const props = {
+  constructor: function Container (opts) {
+    const self = this
+    utils.classCallCheck(self, Container)
+    Container.__super__.call(self)
+    opts || (opts = {})
 
-  opts || (opts = {})
-  // Apply options provided by the user
-  _.fillIn(self, opts)
-  /**
-   * Defaults options to pass to {@link Container#MapperClass} when creating a
-   * new mapper.
-   *
-   * @name Container#mapperDefaults
-   * @type {Object}
-   */
-  self.mapperDefaults = self.mapperDefaults || {}
-  /**
-   * Constructor function to use in {@link Container#defineMapper} to create a
-   * new mapper.
-   *
-   * @name Container#MapperClass
-   * @type {Function}
-   */
-  self.MapperClass = self.MapperClass || Mapper
+    // Apply options provided by the user
+    utils.fillIn(self, opts)
+    /**
+     * Defaults options to pass to {@link Container#mapperClass} when creating a
+     * new mapper.
+     *
+     * @name Container#mapperDefaults
+     * @type {Object}
+     */
+    self.mapperDefaults = self.mapperDefaults || {}
+    /**
+     * Constructor function to use in {@link Container#defineMapper} to create a
+     * new mapper.
+     *
+     * @name Container#mapperClass
+     * @type {Function}
+     */
+    self.mapperClass = self.mapperClass || Mapper
 
-  // Initilize private data
+    // Initilize private data
 
-  // Holds the adapters, shared by all mappers in this container
-  self._adapters = {}
-  // The the mappers in this container
-  self._mappers = {}
-}
+    // Holds the adapters, shared by all mappers in this container
+    self._adapters = {}
+    // The the mappers in this container
+    self._mappers = {}
+  },
 
-/**
- * Create a Container subclass.
- *
- * @example
- * var MyContainer = Container.extend({
- *   foo: function () { return 'bar' }
- * })
- * var container = new MyContainer()
- * container.foo() // "bar"
- *
- * @name Container.extend
- * @method
- * @param {Object} [props={}] Properties to add to the prototype of the
- * subclass.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @return {Function} Subclass of Container.
- */
-Container.extend = _.extend
-
-_.addHiddenPropsToTarget(Container.prototype, {
   /**
    * Create a new mapper and register it in this container.
    *
@@ -378,20 +293,20 @@ _.addHiddenPropsToTarget(Container.prototype, {
    * @param {string} name Name under which to register the new {@link Mapper}.
    * {@link Mapper#name} will be set to this value.
    * @param {Object} [opts] Configuration options. Passed to
-   * {@link Container#MapperClass} when creating the new {@link Mapper}.
+   * {@link Container#mapperClass} when creating the new {@link Mapper}.
    * @return {Mapper}
    */
   defineMapper (name, opts) {
     const self = this
 
     // For backwards compatibility with defineResource
-    if (_.isObject(name)) {
+    if (utils.isObject(name)) {
       opts = name
       if (!opts.name) {
         throw new Error('name is required!')
       }
       name = opts.name
-    } else if (!_.isString(name)) {
+    } else if (!utils.isString(name)) {
       throw new Error('name is required!')
     }
 
@@ -401,15 +316,15 @@ _.addHiddenPropsToTarget(Container.prototype, {
     opts.name = name
     opts.relations || (opts.relations = {})
 
-    // Check if the user is overriding the datastore's default MapperClass
-    const MapperClass = opts.MapperClass || self.MapperClass
-    delete opts.MapperClass
+    // Check if the user is overriding the datastore's default mapperClass
+    const mapperClass = opts.mapperClass || self.mapperClass
+    delete opts.mapperClass
 
     // Apply the datastore's defaults to the options going into the mapper
-    _.fillIn(opts, self.mapperDefaults)
+    utils.fillIn(opts, self.mapperDefaults)
 
     // Instantiate a mapper
-    const mapper = self._mappers[name] = new MapperClass(opts)
+    const mapper = self._mappers[name] = new mapperClass(opts) // eslint-disable-line
     // Make sure the mapper's name is set
     mapper.name = name
     // All mappers in this datastore will share adapters
@@ -417,28 +332,32 @@ _.addHiddenPropsToTarget(Container.prototype, {
 
     // Setup the mapper's relations, including generating Mapper#relationList
     // and Mapper#relationFields
-    _.forOwn(mapper.relations, function (group, type) {
-      _.forOwn(group, function (relations, _name) {
-        if (_.isObject(relations)) {
+    utils.forOwn(mapper.relations, function (group, type) {
+      utils.forOwn(group, function (relations, _name) {
+        if (utils.isObject(relations)) {
           relations = [relations]
         }
         relations.forEach(function (def) {
           def.getRelation = function () {
             return self.getMapper(_name)
           }
-          const Relation = self._mappers[_name] || _name
+          const relatedMapper = self._mappers[_name] || _name
           if (type === belongsToType) {
-            mapper.belongsTo(Relation, def)
+            mapper.belongsTo(relatedMapper, def)
           } else if (type === hasOneType) {
-            mapper.hasOne(Relation, def)
+            mapper.hasOne(relatedMapper, def)
           } else if (type === hasManyType) {
-            mapper.hasMany(Relation, def)
+            mapper.hasMany(relatedMapper, def)
           }
         })
       })
     })
 
     return mapper
+  },
+
+  defineResource (name, opts) {
+    return this.defineMapper(name, opts)
   },
 
   /**
@@ -470,7 +389,7 @@ _.addHiddenPropsToTarget(Container.prototype, {
    */
   getAdapterName (opts) {
     opts || (opts = {})
-    if (_.isString(opts)) {
+    if (utils.isString(opts)) {
       opts = { adapter: opts }
     }
     return opts.adapter || this.mapperDefaults.defaultAdapter
@@ -534,17 +453,86 @@ _.addHiddenPropsToTarget(Container.prototype, {
     // Optionally make it the default adapter for the target.
     if (opts === true || opts.default) {
       self.mapperDefaults.defaultAdapter = name
-      _.forOwn(self._mappers, function (mapper) {
+      utils.forOwn(self._mappers, function (mapper) {
         mapper.defaultAdapter = name
       })
     }
   }
-})
+}
 
-const toAdd = {}
 toProxy.forEach(function (method) {
-  toAdd[method] = function (name, ...args) {
+  props[method] = function (name, ...args) {
     return this.getMapper(name)[method](...args)
   }
 })
-_.addHiddenPropsToTarget(Container.prototype, toAdd)
+
+/**
+ * ```javascript
+ * import {Container} from 'js-data'
+ * ```
+ *
+ * The `Container` class is a place to store {@link Mapper} instances.
+ *
+ * Without a container, you need to manage mappers yourself, including resolving
+ * circular dependencies among relations. All mappers in a container share the
+ * same adapters, so you don't have to add each adapter to all of your mappers.
+ *
+ * @example <caption>Without Container</caption>
+ * import {Mapper} from 'js-data'
+ * import HttpAdapter from 'js-data-http'
+ * const adapter = new HttpAdapter()
+ * const userMapper = new Mapper({ name: 'user' })
+ * userMapper.registerAdapter('http', adapter, { default: true })
+ * const commentMapper = new Mapper({ name: 'comment' })
+ * commentMapper.registerAdapter('http', adapter, { default: true })
+ *
+ * // This might be more difficult if the mappers were defined in different
+ * // modules.
+ * userMapper.hasMany(commentMapper, {
+ *   localField: 'comments',
+ *   foreignKey: 'userId'
+ * })
+ * commentMapper.belongsTo(userMapper, {
+ *   localField: 'user',
+ *   foreignKey: 'userId'
+ * })
+ *
+ * @example <caption>With Container</caption>
+ * import {Container} from 'js-data'
+ * import HttpAdapter from 'js-data-http'
+ * const container = new Container()
+ * // All mappers in container share adapters
+ * container.registerAdapter('http', new HttpAdapter(), { default: true })
+ *
+ * // These could be defined in separate modules without a problem.
+ * container.defineMapper('user', {
+ *   relations: {
+ *     hasMany: {
+ *       comment: {
+ *         localField: 'comments',
+ *         foreignKey: 'userId'
+ *       }
+ *     }
+ *   }
+ * })
+ * container.defineMapper('comment', {
+ *   relations: {
+ *     belongsTo: {
+ *       user: {
+ *         localField: 'user',
+ *         foreignKey: 'userId'
+ *       }
+ *     }
+ *   }
+ * })
+ *
+ * @class Container
+ * @extends Component
+ * @param {Object} [opts] Configuration options.
+ * @param {Function} [opts.mapperClass] Constructor function to use in
+ * {@link Container#defineMapper} to create a new mapper.
+ * @param {Object} [opts.mapperDefaults] Defaults options to pass to
+ * {@link Container#mapperClass} when creating a new mapper.
+ * @return {Container}
+ */
+export default Component.extend(props)

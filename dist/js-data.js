@@ -81,9 +81,6 @@
    * @property {Function} set TODO
    * @property {Function} toJson TODO
    */
-  var utils = {};
-
-  var _ = utils;
 
   var INFINITY = 1 / 0;
   var MAX_INTEGER = 1.7976931348623157e+308;
@@ -95,23 +92,13 @@
   var REGEXP_TAG = '[object RegExp]';
   var STRING_TAG = '[object String]';
   var objToString = Object.prototype.toString;
+  var PATH = /^(.+)\.(.+)$/;
 
-  // Attempt to detect whether we are in the browser.
-  try {
-    utils.isBrowser = !!window;
-  } catch (e) {
-    utils.isBrowser = false;
-  }
-
-  utils.Promise = Promise;
-
-  var toString = function toString(value) {
-    return objToString.call(value);
-  };
   var toInteger = function toInteger(value) {
     if (!value) {
-      return value === 0 ? value : 0;
+      return 0;
     }
+    // Coerce to number
     value = +value;
     if (value === INFINITY || value === -INFINITY) {
       var sign = value < 0 ? -1 : 1;
@@ -120,59 +107,15 @@
     var remainder = value % 1;
     return value === value ? remainder ? value - remainder : value : 0; // eslint-disable-line
   };
+
+  var toStr = function toStr(value) {
+    return objToString.call(value);
+  };
+
   var isPlainObject = function isPlainObject(value) {
     return !!value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && value.constructor === Object;
   };
-  utils.isArray = Array.isArray;
-  utils.isDate = function (value) {
-    return value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toString(value) === DATE_TAG;
-  };
-  utils.isFunction = function (value) {
-    return typeof value === 'function' || value && toString(value) === FUNC_TAG;
-  };
-  utils.isInteger = function (value) {
-    return toString(value) === NUMBER_TAG && value == toInteger(value); // eslint-disable-line
-  };
-  utils.isNull = function (value) {
-    return value === null;
-  };
-  utils.isNumber = function (value) {
-    var type = typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value);
-    return type === 'number' || value && type === 'object' && toString(value) === NUMBER_TAG;
-  };
-  utils.isObject = function (value) {
-    return toString(value) === OBJECT_TAG;
-  };
-  utils.isRegExp = function (value) {
-    return toString(value) === REGEXP_TAG;
-  };
-  utils.isSorN = function (value) {
-    return utils.isString(value) || utils.isNumber(value);
-  };
-  utils.isString = function (value) {
-    return typeof value === 'string' || value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toString(value) === STRING_TAG;
-  };
-  utils.isUndefined = function (value) {
-    return value === undefined;
-  };
-  utils.isBoolean = function (value) {
-    return toString(value) === BOOL_TAG;
-  };
-  utils.get = function (object, prop) {
-    if (!prop) {
-      return;
-    }
-    var parts = prop.split('.');
-    var last = parts.pop();
 
-    while (prop = parts.shift()) {
-      // eslint-disable-line
-      object = object[prop];
-      if (object == null) return;
-    }
-
-    return object[last];
-  };
   var mkdirP = function mkdirP(object, path) {
     if (!path) {
       return object;
@@ -186,660 +129,1127 @@
     });
     return object;
   };
-  var PATH = /^(.+)\.(.+)$/;
 
-  /**
-   * Set the value at the provided key or path.
-   *
-   * @ignore
-   * @param {Object} object The object on which to set a property.
-   * @param {(string|Object)} path The key or path to the property. Can also
-   * pass in an object of path/value pairs, which will all be set on the target
-   * object.
-   * @param {*} [value] The value to set.
-   */
-  utils.set = function (object, path, value) {
-    if (utils.isObject(path)) {
-      utils.forOwn(path, function (value, _path) {
-        utils.set(object, _path, value);
+  var utils = {
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    Promise: Promise,
+
+    /**
+     * Shallow copy properties from src to dest that meet the following criteria:
+     * - own enumerable
+     * - not a function
+     * - does not start with "_"
+     *
+     * @ignore
+     * @param {Object} dest Destination object.
+     * @param {Object} src Source object.
+     */
+    _: function _(dest, src) {
+      for (var key in dest) {
+        var value = dest[key];
+        if (src[key] === undefined && !utils.isFunction(value) && key && key.indexOf('_') !== 0) {
+          src[key] = value;
+        }
+      }
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    _forRelation: function _forRelation(opts, def, fn, ctx) {
+      var relationName = def.relation;
+      var containedName = null;
+      var index = void 0;
+      opts || (opts = {});
+      opts.with || (opts.with = []);
+
+      if ((index = utils._getIndex(opts.with, relationName)) >= 0) {
+        containedName = relationName;
+      } else if ((index = utils._getIndex(opts.with, def.localField)) >= 0) {
+        containedName = def.localField;
+      }
+
+      if (opts.withAll) {
+        fn.call(ctx, def, {});
+        return;
+      } else if (!containedName) {
+        return;
+      }
+      var optsCopy = {};
+      utils.fillIn(optsCopy, def.getRelation());
+      utils.fillIn(optsCopy, opts);
+      optsCopy.with = opts.with.slice();
+      optsCopy._activeWith = optsCopy.with.splice(index, 1)[0];
+      optsCopy.with.forEach(function (relation, i) {
+        if (relation && relation.indexOf(containedName) === 0 && relation.length >= containedName.length && relation[containedName.length] === '.') {
+          optsCopy.with[i] = relation.substr(containedName.length + 1);
+        } else {
+          optsCopy.with[i] = '';
+        }
       });
-    } else {
-      var parts = PATH.exec(path);
-      if (parts) {
-        mkdirP(object, parts[1])[parts[2]] = value;
-      } else {
-        object[path] = value;
-      }
-    }
-  };
+      fn.call(ctx, def, optsCopy);
+    },
 
-  /**
-   * Unset the value at the provided key or path.
-   *
-   * @ignore
-   * @param {Object} object The object from which to delete the property.
-   * @param {string} path The key or path to the property.
-   */
-  utils.unset = function (object, path) {
-    var parts = path.split('.');
-    var last = parts.pop();
-
-    while (path = parts.shift()) {
-      // eslint-disable-line
-      object = object[path];
-      if (object == null) return;
-    }
-
-    object[last] = undefined;
-    delete object[last];
-  };
-
-  /**
-   * Iterate over an object's own enumerable properties.
-   *
-   * @ignore
-   * @param {Object} object The object whose properties are to be enumerated.
-   * @param {Function} fn Iteration function.
-   * @param {Object} [thisArg] Content to which to bind `fn`.
-   */
-  utils.forOwn = function (obj, fn, thisArg) {
-    var keys = Object.keys(obj);
-    var len = keys.length;
-    var i = void 0;
-    for (i = 0; i < len; i++) {
-      fn.call(thisArg, obj[keys[i]], keys[i], obj);
-    }
-  };
-
-  /**
-   * Recursively shallow copy own enumberable properties from `source` to `dest`.
-   *
-   * @ignore
-   * @param {Object} dest The destination object.
-   * @param {Object} source The source object.
-   */
-  utils.deepMixIn = function (dest, source) {
-    if (source) {
-      utils.forOwn(source, function (value, key) {
-        var existing = this[key];
-        if (isPlainObject(value) && isPlainObject(existing)) {
-          utils.deepMixIn(existing, value);
-        } else {
-          this[key] = value;
-        }
-      }, dest);
-    }
-    return dest;
-  };
-
-  /**
-   * Recursively shallow fill in own enumberable properties from `source` to `dest`.
-   *
-   * @ignore
-   * @param {Object} dest The destination object.
-   * @param {Object} source The source object.
-   */
-  utils.deepFillIn = function (dest, source) {
-    if (source) {
-      utils.forOwn(source, function (value, key) {
-        var existing = this[key];
-        if (isPlainObject(value) && isPlainObject(existing)) {
-          utils.deeputils.FillIn(existing, value);
-        } else if (!this.hasOwnProperty(key) || this[key] === undefined) {
-          this[key] = value;
-        }
-      }, dest);
-    }
-    return dest;
-  };
-
-  /**
-   * Proxy for `Promise.resolve`.
-   *
-   * @ignore
-   * @param {*} [value] Value with which to resolve the Promise.
-   * @return {Promise} Promise resolved with `value`.
-   */
-  utils.resolve = function (value) {
-    return utils.Promise.resolve(value);
-  };
-
-  /**
-   * Proxy for `Promise.reject`.
-   *
-   * @ignore
-   * @param {*} [value] Value with which to reject the Promise.
-   * @return {Promise} Promise reject with `value`.
-   */
-  utils.reject = function (value) {
-    return utils.Promise.reject(value);
-  };
-
-  /**
-   * Shallow copy properties from src to dest that meet the following criteria:
-   * - own enumerable
-   * - not a function
-   * - does not start with "_"
-   *
-   * @ignore
-   * @param {Object} dest Destination object.
-   * @param {Object} src Source object.
-   */
-  utils._ = function (dest, src) {
-    for (var key in dest) {
-      var value = dest[key];
-      if (src[key] === undefined && !utils.isFunction(value) && key && key.indexOf('_') !== 0) {
-        src[key] = value;
-      }
-    }
-  };
-
-  /**
-   * Return the intersection of two arrays.
-   *
-   * @ignore
-   * @param {Array} array1 First array.
-   * @param {Array} array2 Second array.
-   * @return {Array} Array of elements common to both arrays.
-   */
-  utils.intersection = function (array1, array2) {
-    if (!array1 || !array2) {
-      return [];
-    }
-    var result = [];
-    var item = void 0;
-    var i = void 0;
-    var len = array1.length;
-    for (i = 0; i < len; i++) {
-      item = array1[i];
-      if (result.indexOf(item) !== -1) {
-        continue;
-      }
-      if (array2.indexOf(item) !== -1) {
-        result.push(item);
-      }
-    }
-    return result;
-  };
-
-  /**
-   * Shallow copy own enumerable properties from `src` to `dest` that are on `src`
-   * but are missing from `dest.
-   *
-   * @ignore
-   * @param {Object} dest The destination object.
-   * @param {Object} source The source object.
-   */
-  utils.fillIn = function (dest, src) {
-    utils.forOwn(src, function (value, key) {
-      if (!dest.hasOwnProperty(key) || dest[key] === undefined) {
-        dest[key] = value;
-      }
-    });
-  };
-
-  /**
-   * Return whether `prop` is matched by any string or regular expression in `bl`.
-   *
-   * @ignore
-   * @param {string} prop The name of a property.
-   * @param {Array} bl Array of strings and regular expressions.
-   * @return {boolean} Whether `prop` was matched.
-   */
-  utils.isBlacklisted = function (prop, bl) {
-    if (!bl || !bl.length) {
-      return false;
-    }
-    var matches = void 0;
-    for (var i = 0; i < bl.length; i++) {
-      if (toString(bl[i]) === REGEXP_TAG && bl[i].test(prop) || bl[i] === prop) {
-        matches = prop;
-        return matches;
-      }
-    }
-    return !!matches;
-  };
-
-  /**
-   * Proxy for `JSON.parse`.
-   *
-   * @ignore
-   * @param {string} json JSON to parse.
-   * @return {Object} Parsed object.
-   */
-  utils.fromJson = function (json) {
-    return utils.isString(json) ? JSON.parse(json) : json;
-  };
-
-  /**
-   * Proxy for `JSON.stringify`.
-   *
-   * @ignore
-   * @param {*} value Value to serialize to JSON.
-   * @return {string} JSON string.
-   */
-  utils.toJson = JSON.stringify;
-
-  /**
-   * Deep copy a value.
-   *
-   * @ignore
-   * @param {*} from Value to deep copy.
-   * @return {*} Deep copy of `from`.
-   */
-  utils.copy = function (from, to, stackFrom, stackTo, blacklist, plain) {
-    if (!to) {
-      to = from;
-      if (from) {
-        if (utils.isArray(from)) {
-          to = utils.copy(from, [], stackFrom, stackTo, blacklist, plain);
-        } else if (utils.isDate(from)) {
-          to = new Date(from.getTime());
-        } else if (utils.isRegExp(from)) {
-          to = new RegExp(from.source, from.toString().match(/[^\/]*$/)[0]);
-          to.lastIndex = from.lastIndex;
-        } else if (utils.isObject(from)) {
-          if (plain) {
-            to = utils.copy(from, {}, stackFrom, stackTo, blacklist, plain);
-          } else {
-            to = utils.copy(from, Object.create(Object.getPrototypeOf(from)), stackFrom, stackTo, blacklist, plain);
-          }
-        }
-      }
-    } else {
-      if (from === to) {
-        throw new Error('Cannot copy! Source and destination are identical.');
-      }
-
-      stackFrom = stackFrom || [];
-      stackTo = stackTo || [];
-
-      if (utils.isObject(from)) {
-        var index = stackFrom.indexOf(from);
-        if (index !== -1) {
-          return stackTo[index];
-        }
-
-        stackFrom.push(from);
-        stackTo.push(to);
-      }
-
-      var result = void 0;
-      if (utils.isArray(from)) {
-        var i = void 0;
-        to.length = 0;
-        for (i = 0; i < from.length; i++) {
-          result = utils.copy(from[i], null, stackFrom, stackTo, blacklist, plain);
-          if (utils.isObject(from[i])) {
-            stackFrom.push(from[i]);
-            stackTo.push(result);
-          }
-          to.push(result);
-        }
-      } else {
-        if (utils.isArray(to)) {
-          to.length = 0;
-        } else {
-          utils.forOwn(to, function (value, key) {
-            delete to[key];
-          });
-        }
-        for (var key in from) {
-          if (from.hasOwnProperty(key)) {
-            if (utils.isBlacklisted(key, blacklist)) {
-              continue;
-            }
-            result = utils.copy(from[key], null, stackFrom, stackTo, blacklist, plain);
-            if (utils.isObject(from[key])) {
-              stackFrom.push(from[key]);
-              stackTo.push(result);
-            }
-            to[key] = result;
-          }
-        }
-      }
-    }
-    return to;
-  };
-
-  utils.plainCopy = function (from) {
-    return utils.copy(from, undefined, undefined, undefined, undefined, true);
-  };
-
-  /**
-   * Add eventing capabilities into the target object.
-   *
-   * @ignore
-   * @param {Object} target Target object.
-   * @param {Function} [getter] Custom getter for retrieving the object's event
-   * listeners.
-   * @param {Function} [setter] Custom setter for setting the object's event
-   * listeners.
-   */
-  utils.eventify = function (target, getter, setter, enumerable) {
-    target = target || this;
-    var _events = {};
-    if (!getter && !setter) {
-      getter = function getter() {
-        return _events;
-      };
-      setter = function setter(value) {
-        _events = value;
-      };
-    }
-    Object.defineProperties(target, {
-      on: {
-        enumerable: !!enumerable,
-        value: function value(type, func, ctx) {
-          if (!getter.call(this)) {
-            setter.call(this, {});
-          }
-          var events = getter.call(this);
-          events[type] = events[type] || [];
-          events[type].push({
-            f: func,
-            c: ctx
-          });
-        }
-      },
-      off: {
-        enumerable: !!enumerable,
-        value: function value(type, func) {
-          var events = getter.call(this);
-          var listeners = events[type];
-          if (!listeners) {
-            setter.call(this, {});
-          } else if (func) {
-            for (var i = 0; i < listeners.length; i++) {
-              if (listeners[i].f === func) {
-                listeners.splice(i, 1);
-                break;
-              }
-            }
-          } else {
-            listeners.splice(0, listeners.length);
-          }
-        }
-      },
-      emit: {
-        enumerable: !!enumerable,
-        value: function value() {
-          var events = getter.call(this) || {};
-
-          for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-            args[_key] = arguments[_key];
-          }
-
-          var type = args.shift();
-          var listeners = events[type] || [];
-          var i = void 0;
-          for (i = 0; i < listeners.length; i++) {
-            listeners[i].f.apply(listeners[i].c, args);
-          }
-          listeners = events.all || [];
-          args.unshift(type);
-          for (i = 0; i < listeners.length; i++) {
-            listeners[i].f.apply(listeners[i].c, args);
-          }
-        }
-      }
-    });
-  };
-
-  utils.classCallCheck = function (instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError('Cannot call a class as a function');
-    }
-  };
-
-  utils.possibleConstructorReturn = function (self, call) {
-    if (!self) {
-      throw new ReferenceError('this hasn\'t been initialised - super() hasn\'t been called');
-    }
-
-    return call && ((typeof call === 'undefined' ? 'undefined' : babelHelpers.typeof(call)) === 'object' || typeof call === 'function') ? call : self;
-  };
-
-  utils.addHiddenPropsToTarget = function (target, props) {
-    utils.forOwn(props, function (value, key) {
-      props[key] = {
-        writable: true,
-        value: value
-      };
-    });
-    Object.defineProperties(target, props);
-  };
-
-  utils.extend = function (props, classProps) {
-    var SuperClass = this;
-    var _SubClass = void 0;
-
-    props || (props = {});
-    classProps || (classProps = {});
-
-    if (props.hasOwnProperty('constructor')) {
-      _SubClass = props.constructor;
-      delete props.constructor;
-    } else {
-      _SubClass = function SubClass() {
-        utils.classCallCheck(this, _SubClass);
-
-        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-          args[_key2] = arguments[_key2];
-        }
-
-        var _this = utils.possibleConstructorReturn(this, (_SubClass.__super__ || Object.getPrototypeOf(_SubClass)).apply(this, args));
-        return _this;
-      };
-    }
-
-    _SubClass.prototype = Object.create(SuperClass && SuperClass.prototype, {
-      constructor: {
-        value: _SubClass,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
-
-    if (Object.setPrototypeOf) {
-      Object.setPrototypeOf(_SubClass, SuperClass);
-    } else if (classProps.strictEs6Class) {
-      _SubClass.__proto__ = SuperClass; // eslint-disable-line
-    } else {
-        utils.forOwn(SuperClass, function (value, key) {
-          _SubClass[key] = value;
-        });
-      }
-    Object.defineProperty(_SubClass, '__super__', {
-      configurable: true,
-      value: SuperClass
-    });
-
-    utils.addHiddenPropsToTarget(_SubClass.prototype, props);
-    utils.fillIn(_SubClass, classProps);
-
-    return _SubClass;
-  };
-
-  utils.getSuper = function (instance, isCtor) {
-    var Ctor = isCtor ? instance : instance.constructor;
-    return Ctor.__super__ || Object.getPrototypeOf(Ctor) || Ctor.__proto__; // eslint-disable-line
-  };
-
-  var getIndex = function getIndex(list, relation) {
-    var index = -1;
-    list.forEach(function (_relation, i) {
-      if (_relation === relation) {
-        index = i;
-        return false;
-      } else if (utils.isObject(_relation)) {
-        if (_relation.relation === relation) {
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    _getIndex: function _getIndex(list, relation) {
+      var index = -1;
+      list.forEach(function (_relation, i) {
+        if (_relation === relation) {
           index = i;
           return false;
+        } else if (utils.isObject(_relation)) {
+          if (_relation.relation === relation) {
+            index = i;
+            return false;
+          }
         }
+      });
+      return index;
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    addHiddenPropsToTarget: function addHiddenPropsToTarget(target, props) {
+      var map = {};
+      utils.forOwn(props, function (value, key) {
+        map[key] = {
+          writable: true,
+          value: value
+        };
+      });
+      Object.defineProperties(target, map);
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    areDifferent: function areDifferent(a, b, opts) {
+      opts || (opts = {});
+      var diff = utils.diffObjects(a, b, opts);
+      var diffCount = Object.keys(diff.added).length + Object.keys(diff.removed).length + Object.keys(diff.changed).length;
+      return diffCount > 0;
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    classCallCheck: function classCallCheck(instance, ctor) {
+      if (!(instance instanceof ctor)) {
+        throw new TypeError('Cannot call a class as a function');
       }
-    });
-    return index;
-  };
+    },
 
-  var forRelation = function forRelation(opts, def, fn, ctx) {
-    var relationName = def.relation;
-    var containedName = null;
-    var index = void 0;
-    opts || (opts = {});
-    opts.with || (opts.with = []);
-
-    if ((index = getIndex(opts.with, relationName)) >= 0) {
-      containedName = relationName;
-    } else if ((index = getIndex(opts.with, def.localField)) >= 0) {
-      containedName = def.localField;
-    }
-
-    if (opts.withAll) {
-      fn.call(ctx, def, {});
-      return;
-    } else if (!containedName) {
-      return;
-    }
-    var __opts = {};
-    utils.fillIn(__opts, def.getRelation());
-    utils.fillIn(__opts, opts);
-    __opts.with = opts.with.slice();
-    __opts._activeWith = __opts.with.splice(index, 1)[0];
-    __opts.with.forEach(function (relation, i) {
-      if (relation && relation.indexOf(containedName) === 0 && relation.length >= containedName.length && relation[containedName.length] === '.') {
-        __opts.with[i] = relation.substr(containedName.length + 1);
+    /**
+     * Deep copy a value.
+     *
+     * @ignore
+     * @param {*} from Value to deep copy.
+     * @return {*} Deep copy of `from`.
+     */
+    copy: function copy(from, to, stackFrom, stackTo, blacklist, plain) {
+      if (!to) {
+        to = from;
+        if (from) {
+          if (utils.isArray(from)) {
+            to = utils.copy(from, [], stackFrom, stackTo, blacklist, plain);
+          } else if (utils.isDate(from)) {
+            to = new Date(from.getTime());
+          } else if (utils.isRegExp(from)) {
+            to = new RegExp(from.source, from.toString().match(/[^\/]*$/)[0]);
+            to.lastIndex = from.lastIndex;
+          } else if (utils.isObject(from)) {
+            if (plain) {
+              to = utils.copy(from, {}, stackFrom, stackTo, blacklist, plain);
+            } else {
+              to = utils.copy(from, Object.create(Object.getPrototypeOf(from)), stackFrom, stackTo, blacklist, plain);
+            }
+          }
+        }
       } else {
-        __opts.with[i] = '';
-      }
-    });
-    fn.call(ctx, def, __opts);
-  };
-
-  utils.forEachRelation = function (mapper, opts, fn, ctx) {
-    var relationList = mapper.relationList || [];
-    if (!relationList.length) {
-      return;
-    }
-    relationList.forEach(function (def) {
-      forRelation(opts, def, fn, ctx);
-    });
-  };
-
-  utils.omit = function (props, keys) {
-    // Remove relations
-    var _props = {};
-    utils.forOwn(props, function (value, key) {
-      if (keys.indexOf(key) === -1) {
-        _props[key] = value;
-      }
-    });
-    return _props;
-  };
-
-  utils.equal = function (a, b) {
-    return a == b; // eslint-disable-line
-  };
-
-  utils.strictEqual = function (a, b) {
-    var _equal = a === b;
-    if (!_equal) {
-      if (utils.isObject(a) && utils.isObject(b)) {
-        utils.forOwn(a, function (value, key) {
-          _equal = _equal && utils.strictEqual(value, b[key]);
-        });
-        utils.forOwn(b, function (value, key) {
-          _equal = _equal && utils.strictEqual(value, a[key]);
-        });
-      } else if (utils.isArray(a) && utils.isArray(b)) {
-        a.forEach(function (value, i) {
-          _equal = _equal && utils.strictEqual(value, b[i]);
-        });
-      }
-    }
-    return _equal;
-  };
-
-  // a - the newer object
-  // b - the older object
-  utils.diffObjects = function (a, b, opts) {
-    opts || (opts = {});
-    var equalsFn = opts.equalsFn;
-    var bl = opts.ignore;
-    var diff = {
-      added: {},
-      removed: {},
-      changed: {}
-    };
-    if (!utils.isFunction(equalsFn)) {
-      equalsFn = utils.strictEqual;
-    }
-
-    utils.forOwn(b, function (oldValue, key) {
-      var newValue = a[key];
-
-      if (utils.isBlacklisted(key, bl) || equalsFn(newValue, oldValue)) {
-        return;
-      }
-
-      if (utils.isUndefined(newValue)) {
-        diff.removed[key] = undefined;
-      } else if (!equalsFn(newValue, oldValue)) {
-        diff.changed[key] = newValue;
-      }
-    });
-
-    utils.forOwn(a, function (newValue, key) {
-      if (!utils.isUndefined(b[key]) || utils.isBlacklisted(key, bl)) {
-        return;
-      }
-      diff.added[key] = newValue;
-    });
-
-    return diff;
-  };
-
-  utils.areDifferent = function (a, b, opts) {
-    opts || (opts = {});
-    var diff = utils.diffObjects(a, b, opts);
-    var diffCount = Object.keys(diff.added).length + Object.keys(diff.removed).length + Object.keys(diff.changed).length;
-    return diffCount > 0;
-  };
-
-  utils.logify = function (target, defaultNamespace) {
-    utils.addHiddenPropsToTarget(target, {
-      dbg: function dbg() {
-        for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-          args[_key3] = arguments[_key3];
+        if (from === to) {
+          throw new Error('Cannot copy! Source and destination are identical.');
         }
 
-        this.log.apply(this, ['debug'].concat(args));
-      },
-      log: function log(level) {
-        for (var _len4 = arguments.length, args = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
-          args[_key4 - 1] = arguments[_key4];
+        stackFrom = stackFrom || [];
+        stackTo = stackTo || [];
+
+        if (utils.isObject(from)) {
+          var index = stackFrom.indexOf(from);
+          if (index !== -1) {
+            return stackTo[index];
+          }
+
+          stackFrom.push(from);
+          stackTo.push(to);
         }
 
-        if (level && !args.length) {
-          args.push(level);
-          level = 'debug';
+        var result = void 0;
+        if (utils.isArray(from)) {
+          var i = void 0;
+          to.length = 0;
+          for (i = 0; i < from.length; i++) {
+            result = utils.copy(from[i], null, stackFrom, stackTo, blacklist, plain);
+            if (utils.isObject(from[i])) {
+              stackFrom.push(from[i]);
+              stackTo.push(result);
+            }
+            to.push(result);
+          }
+        } else {
+          if (utils.isArray(to)) {
+            to.length = 0;
+          } else {
+            utils.forOwn(to, function (value, key) {
+              delete to[key];
+            });
+          }
+          for (var key in from) {
+            if (from.hasOwnProperty(key)) {
+              if (utils.isBlacklisted(key, blacklist)) {
+                continue;
+              }
+              result = utils.copy(from[key], null, stackFrom, stackTo, blacklist, plain);
+              if (utils.isObject(from[key])) {
+                stackFrom.push(from[key]);
+                stackTo.push(result);
+              }
+              to[key] = result;
+            }
+          }
         }
-        if (level === 'debug' && !this.debug) {
+      }
+      return to;
+    },
+
+    /**
+     * Recursively shallow fill in own enumberable properties from `source` to `dest`.
+     *
+     * @ignore
+     * @param {Object} dest The destination object.
+     * @param {Object} source The source object.
+     */
+    deepFillIn: function deepFillIn(dest, source) {
+      if (source) {
+        utils.forOwn(source, function (value, key) {
+          var existing = dest[key];
+          if (isPlainObject(value) && isPlainObject(existing)) {
+            utils.deepFillIn(existing, value);
+          } else if (!dest.hasOwnProperty(key) || dest[key] === undefined) {
+            dest[key] = value;
+          }
+        });
+      }
+      return dest;
+    },
+
+    /**
+     * Recursively shallow copy own enumberable properties from `source` to `dest`.
+     *
+     * @ignore
+     * @param {Object} dest The destination object.
+     * @param {Object} source The source object.
+     */
+    deepMixIn: function deepMixIn(dest, source) {
+      if (source) {
+        utils.forOwn(source, function (value, key) {
+          var existing = dest[key];
+          if (isPlainObject(value) && isPlainObject(existing)) {
+            utils.deepMixIn(existing, value);
+          } else {
+            dest[key] = value;
+          }
+        });
+      }
+      return dest;
+    },
+
+    /**
+     * @param {Object} a Base object.
+     * @param {Object} b Comparison object.
+     * @return {Object} Diff.
+     */
+    diffObjects: function diffObjects(a, b, opts) {
+      opts || (opts = {});
+      var equalsFn = opts.equalsFn;
+      var bl = opts.ignore;
+      var diff = {
+        added: {},
+        changed: {},
+        removed: {}
+      };
+      if (!utils.isFunction(equalsFn)) {
+        equalsFn = utils.strictEqual;
+      }
+
+      utils.forOwn(b, function (oldValue, key) {
+        var newValue = a[key];
+
+        if (utils.isBlacklisted(key, bl) || equalsFn(newValue, oldValue)) {
           return;
         }
-        var prefix = level.toUpperCase() + ': (' + (this.name || defaultNamespace) + ')';
-        if (console[level]) {
-          var _console;
 
-          (_console = console)[level].apply(_console, [prefix].concat(args));
-        } else {
-          var _console2;
+        if (utils.isUndefined(newValue)) {
+          diff.removed[key] = undefined;
+        } else if (!equalsFn(newValue, oldValue)) {
+          diff.changed[key] = newValue;
+        }
+      });
 
-          (_console2 = console).log.apply(_console2, [prefix].concat(args));
+      utils.forOwn(a, function (newValue, key) {
+        if (!utils.isUndefined(b[key]) || utils.isBlacklisted(key, bl)) {
+          return;
+        }
+        diff.added[key] = newValue;
+      });
+
+      return diff;
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    equal: function equal(a, b) {
+      return a == b; // eslint-disable-line
+    },
+
+    /**
+     * Add eventing capabilities into the target object.
+     *
+     * @ignore
+     * @param {Object} target Target object.
+     * @param {Function} [getter] Custom getter for retrieving the object's event
+     * listeners.
+     * @param {Function} [setter] Custom setter for setting the object's event
+     * listeners.
+     */
+    eventify: function eventify(target, getter, setter, enumerable) {
+      target = target || this;
+      var _events = {};
+      if (!getter && !setter) {
+        getter = function getter() {
+          return _events;
+        };
+        setter = function setter(value) {
+          _events = value;
+        };
+      }
+      Object.defineProperties(target, {
+        emit: {
+          enumerable: !!enumerable,
+          value: function value() {
+            var events = getter.call(this) || {};
+
+            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+              args[_key] = arguments[_key];
+            }
+
+            var type = args.shift();
+            var listeners = events[type] || [];
+            var i = void 0;
+            for (i = 0; i < listeners.length; i++) {
+              listeners[i].f.apply(listeners[i].c, args);
+            }
+            listeners = events.all || [];
+            args.unshift(type);
+            for (i = 0; i < listeners.length; i++) {
+              listeners[i].f.apply(listeners[i].c, args);
+            }
+          }
+        },
+        off: {
+          enumerable: !!enumerable,
+          value: function value(type, func) {
+            var events = getter.call(this);
+            var listeners = events[type];
+            if (!listeners) {
+              setter.call(this, {});
+            } else if (func) {
+              for (var i = 0; i < listeners.length; i++) {
+                if (listeners[i].f === func) {
+                  listeners.splice(i, 1);
+                  break;
+                }
+              }
+            } else {
+              listeners.splice(0, listeners.length);
+            }
+          }
+        },
+        on: {
+          enumerable: !!enumerable,
+          value: function value(type, func, ctx) {
+            if (!getter.call(this)) {
+              setter.call(this, {});
+            }
+            var events = getter.call(this);
+            events[type] = events[type] || [];
+            events[type].push({
+              c: ctx,
+              f: func
+            });
+          }
+        }
+      });
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    extend: function extend(props, classProps) {
+      var superClass = this;
+      var _subClass = void 0;
+
+      props || (props = {});
+      classProps || (classProps = {});
+
+      if (props.hasOwnProperty('constructor')) {
+        _subClass = props.constructor;
+        delete props.constructor;
+      } else {
+        _subClass = function subClass() {
+          utils.classCallCheck(this, _subClass);
+
+          for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+            args[_key2] = arguments[_key2];
+          }
+
+          var _this = utils.possibleConstructorReturn(this, (_subClass.__super__ || Object.getPrototypeOf(_subClass)).apply(this, args));
+          return _this;
+        };
+      }
+
+      _subClass.prototype = Object.create(superClass && superClass.prototype, {
+        constructor: {
+          configurable: true,
+          enumerable: false,
+          value: _subClass,
+          writable: true
+        }
+      });
+
+      var obj = Object;
+      if (obj.setPrototypeOf) {
+        obj.setPrototypeOf(_subClass, superClass);
+      } else if (classProps.strictEs6Class) {
+        _subClass.__proto__ = superClass; // eslint-disable-line
+      } else {
+          utils.forOwn(superClass, function (value, key) {
+            _subClass[key] = value;
+          });
+        }
+      Object.defineProperty(_subClass, '__super__', {
+        configurable: true,
+        value: superClass
+      });
+
+      utils.addHiddenPropsToTarget(_subClass.prototype, props);
+      utils.fillIn(_subClass, classProps);
+
+      return _subClass;
+    },
+
+    /**
+     * Shallow copy own enumerable properties from `src` to `dest` that are on `src`
+     * but are missing from `dest.
+     *
+     * @ignore
+     * @param {Object} dest The destination object.
+     * @param {Object} source The source object.
+     */
+    fillIn: function fillIn(dest, src) {
+      utils.forOwn(src, function (value, key) {
+        if (!dest.hasOwnProperty(key) || dest[key] === undefined) {
+          dest[key] = value;
+        }
+      });
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    forEachRelation: function forEachRelation(mapper, opts, fn, ctx) {
+      var relationList = mapper.relationList || [];
+      if (!relationList.length) {
+        return;
+      }
+      relationList.forEach(function (def) {
+        utils._forRelation(opts, def, fn, ctx);
+      });
+    },
+
+    /**
+     * Iterate over an object's own enumerable properties.
+     *
+     * @ignore
+     * @param {Object} object The object whose properties are to be enumerated.
+     * @param {Function} fn Iteration function.
+     * @param {Object} [thisArg] Content to which to bind `fn`.
+     */
+    forOwn: function forOwn(obj, fn, thisArg) {
+      var keys = Object.keys(obj);
+      var len = keys.length;
+      var i = void 0;
+      for (i = 0; i < len; i++) {
+        fn.call(thisArg, obj[keys[i]], keys[i], obj);
+      }
+    },
+
+    /**
+     * Proxy for `JSON.parse`.
+     *
+     * @ignore
+     * @param {string} json JSON to parse.
+     * @return {Object} Parsed object.
+     */
+    fromJson: function fromJson(json) {
+      return utils.isString(json) ? JSON.parse(json) : json;
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    'get': function get(object, prop) {
+      if (!prop) {
+        return;
+      }
+      var parts = prop.split('.');
+      var last = parts.pop();
+
+      while (prop = parts.shift()) {
+        // eslint-disable-line
+        object = object[prop];
+        if (object == null) {
+          // eslint-disable-line
+          return;
         }
       }
-    });
+
+      return object[last];
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    getSuper: function getSuper(instance, isCtor) {
+      var ctor = isCtor ? instance : instance.constructor;
+      return ctor.__super__ || Object.getPrototypeOf(ctor) || ctor.__proto__; // eslint-disable-line
+    },
+
+    /**
+     * Return the intersection of two arrays.
+     *
+     * @ignore
+     * @param {Array} array1 First array.
+     * @param {Array} array2 Second array.
+     * @return {Array} Array of elements common to both arrays.
+     */
+    intersection: function intersection(array1, array2) {
+      if (!array1 || !array2) {
+        return [];
+      }
+      var result = [];
+      var item = void 0;
+      var i = void 0;
+      var len = array1.length;
+      for (i = 0; i < len; i++) {
+        item = array1[i];
+        if (result.indexOf(item) !== -1) {
+          continue;
+        }
+        if (array2.indexOf(item) !== -1) {
+          result.push(item);
+        }
+      }
+      return result;
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isArray: Array.isArray,
+
+    /**
+     * Return whether `prop` is matched by any string or regular expression in `bl`.
+     *
+     * @ignore
+     * @param {string} prop The name of a property.
+     * @param {Array} bl Array of strings and regular expressions.
+     * @return {boolean} Whether `prop` was matched.
+     */
+    isBlacklisted: function isBlacklisted(prop, bl) {
+      if (!bl || !bl.length) {
+        return false;
+      }
+      var matches = void 0;
+      for (var i = 0; i < bl.length; i++) {
+        if (toStr(bl[i]) === REGEXP_TAG && bl[i].test(prop) || bl[i] === prop) {
+          matches = prop;
+          return matches;
+        }
+      }
+      return !!matches;
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isBoolean: function isBoolean(value) {
+      return toStr(value) === BOOL_TAG;
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isBrowser: false,
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isDate: function isDate(value) {
+      return value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toStr(value) === DATE_TAG;
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isFunction: function isFunction(value) {
+      return typeof value === 'function' || value && toStr(value) === FUNC_TAG;
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isInteger: function isInteger(value) {
+      return toStr(value) === NUMBER_TAG && value == toInteger(value); // eslint-disable-line
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isNull: function isNull(value) {
+      return value === null;
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isNumber: function isNumber(value) {
+      var type = typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value);
+      return type === 'number' || value && type === 'object' && toStr(value) === NUMBER_TAG;
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isObject: function isObject(value) {
+      return toStr(value) === OBJECT_TAG;
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isRegExp: function isRegExp(value) {
+      return toStr(value) === REGEXP_TAG;
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isSorN: function isSorN(value) {
+      return utils.isString(value) || utils.isNumber(value);
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isString: function isString(value) {
+      return typeof value === 'string' || value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toStr(value) === STRING_TAG;
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isUndefined: function isUndefined(value) {
+      return value === undefined;
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    logify: function logify(target) {
+      utils.addHiddenPropsToTarget(target, {
+        dbg: function dbg() {
+          for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+            args[_key3] = arguments[_key3];
+          }
+
+          this.log.apply(this, ['debug'].concat(args));
+        },
+        log: function log(level) {
+          for (var _len4 = arguments.length, args = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
+            args[_key4 - 1] = arguments[_key4];
+          }
+
+          if (level && !args.length) {
+            args.push(level);
+            level = 'debug';
+          }
+          if (level === 'debug' && !this.debug) {
+            return;
+          }
+          var prefix = level.toUpperCase() + ': (' + (this.name || this.constructor.name) + ')';
+          if (console[level]) {
+            var _console;
+
+            (_console = console)[level].apply(_console, [prefix].concat(args));
+          } else {
+            var _console2;
+
+            (_console2 = console).log.apply(_console2, [prefix].concat(args));
+          }
+        }
+      });
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    omit: function omit(props, keys) {
+      // Remove relations
+      var _props = {};
+      utils.forOwn(props, function (value, key) {
+        if (keys.indexOf(key) === -1) {
+          _props[key] = value;
+        }
+      });
+      return _props;
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    plainCopy: function plainCopy(from) {
+      return utils.copy(from, undefined, undefined, undefined, undefined, true);
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    possibleConstructorReturn: function possibleConstructorReturn(self, call) {
+      if (!self) {
+        throw new ReferenceError('this hasn\'t been initialised - super() hasn\'t been called');
+      }
+
+      return call && ((typeof call === 'undefined' ? 'undefined' : babelHelpers.typeof(call)) === 'object' || typeof call === 'function') ? call : self;
+    },
+
+    /**
+     * Proxy for `Promise.reject`.
+     *
+     * @ignore
+     * @param {*} [value] Value with which to reject the Promise.
+     * @return {Promise} Promise reject with `value`.
+     */
+    reject: function reject(value) {
+      return utils.Promise.reject(value);
+    },
+
+    /**
+     * Proxy for `Promise.resolve`.
+     *
+     * @ignore
+     * @param {*} [value] Value with which to resolve the Promise.
+     * @return {Promise} Promise resolved with `value`.
+     */
+    resolve: function resolve(value) {
+      return utils.Promise.resolve(value);
+    },
+
+    /**
+     * Set the value at the provided key or path.
+     *
+     * @ignore
+     * @param {Object} object The object on which to set a property.
+     * @param {(string|Object)} path The key or path to the property. Can also
+     * pass in an object of path/value pairs, which will all be set on the target
+     * object.
+     * @param {*} [value] The value to set.
+     */
+    set: function set(object, path, value) {
+      if (utils.isObject(path)) {
+        utils.forOwn(path, function (value, _path) {
+          utils.set(object, _path, value);
+        });
+      } else {
+        var parts = PATH.exec(path);
+        if (parts) {
+          mkdirP(object, parts[1])[parts[2]] = value;
+        } else {
+          object[path] = value;
+        }
+      }
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    strictEqual: function strictEqual(a, b) {
+      var _equal = a === b;
+      if (!_equal) {
+        if (utils.isObject(a) && utils.isObject(b)) {
+          utils.forOwn(a, function (value, key) {
+            _equal = _equal && utils.strictEqual(value, b[key]);
+          });
+          utils.forOwn(b, function (value, key) {
+            _equal = _equal && utils.strictEqual(value, a[key]);
+          });
+        } else if (utils.isArray(a) && utils.isArray(b)) {
+          a.forEach(function (value, i) {
+            _equal = _equal && utils.strictEqual(value, b[i]);
+          });
+        }
+      }
+      return _equal;
+    },
+
+    /**
+     * Proxy for `JSON.stringify`.
+     *
+     * @ignore
+     * @param {*} value Value to serialize to JSON.
+     * @return {string} JSON string.
+     */
+    toJson: JSON.stringify,
+
+    /**
+     * Unset the value at the provided key or path.
+     *
+     * @ignore
+     * @param {Object} object The object from which to delete the property.
+     * @param {string} path The key or path to the property.
+     */
+    unset: function unset(object, path) {
+      var parts = path.split('.');
+      var last = parts.pop();
+
+      while (path = parts.shift()) {
+        // eslint-disable-line
+        object = object[path];
+        if (object == null) {
+          // eslint-disable-line
+          return;
+        }
+      }
+
+      object[last] = undefined;
+    }
+  };
+
+  // Attempt to detect whether we are in the browser.
+  try {
+    utils.isBrowser = !!window;
+  } catch (e) {
+    utils.isBrowser = false;
+  }
+
+  var utils$1 = utils;
+
+  var belongsToType = 'belongsTo';
+  var hasManyType = 'hasMany';
+  var hasOneType = 'hasOne';
+
+  function Relation(related, opts) {
+    var self = this;
+
+    opts || (opts = {});
+
+    var localField = opts.localField;
+    if (!localField) {
+      throw new Error('localField is required');
+    }
+
+    var foreignKey = opts.foreignKey = opts.foreignKey || opts.localKey;
+    if (!foreignKey && (opts.type === belongsToType || opts.type === hasOneType)) {
+      throw new Error('foreignKey is required');
+    }
+    var localKeys = opts.localKeys;
+    var foreignKeys = opts.foreignKeys;
+    if (!foreignKey && !localKeys && !foreignKeys && opts.type === hasManyType) {
+      throw new Error('one of (foreignKey, localKeys, foreignKeys) is required');
+    }
+
+    if (utils$1.isString(related)) {
+      opts.relation = related;
+      if (!utils$1.isFunction(opts.getRelation)) {
+        throw new Error('you must provide a reference to the related mapper!');
+      }
+    } else if (related) {
+      opts.relation = related.name;
+      Object.defineProperty(self, 'relatedMapper', {
+        value: related
+      });
+    }
+
+    utils$1.fillIn(self, opts);
+  }
+
+  utils$1.addHiddenPropsToTarget(Relation.prototype, {
+    getRelation: function getRelation() {
+      return this.relatedMapper;
+    },
+    getLocalKeys: function getLocalKeys(record) {},
+    getForeignKey: function getForeignKey(record) {
+      if (this.type === belongsToType) {
+        return utils$1.get(record, this.foreignKey);
+      }
+      return utils$1.get(record, this.mapper.idAttribute);
+    },
+    setForeignKey: function setForeignKey(record, relatedRecord) {
+      var self = this;
+      if (!record || !relatedRecord) {
+        return;
+      }
+      if (self.type === belongsToType) {
+        utils$1.set(record, self.foreignKey, utils$1.get(relatedRecord, self.getRelation().idAttribute));
+      } else {
+        (function () {
+          var idAttribute = self.mapper.idAttribute;
+          if (utils$1.isArray(relatedRecord)) {
+            relatedRecord.forEach(function (relatedRecordItem) {
+              utils$1.set(relatedRecordItem, self.foreignKey, utils$1.get(record, idAttribute));
+            });
+          } else {
+            utils$1.set(relatedRecord, self.foreignKey, utils$1.get(record, idAttribute));
+          }
+        })();
+      }
+    },
+    getLocalField: function getLocalField(record) {
+      return utils$1.get(record, this.localField);
+    },
+    setLocalField: function setLocalField(record, data) {
+      return utils$1.set(record, this.localField, data);
+    }
+  });
+
+  var relatedTo = function relatedTo(mapper, related, opts) {
+    opts || (opts = {});
+    if (!opts.type) {
+      throw new Error('must specify relation type!');
+    }
+    opts.mapper = mapper;
+    opts.name = mapper.name;
+    var relation = new Relation(related, opts);
+
+    mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] });
+    mapper.relationFields || Object.defineProperty(mapper, 'relationFields', { value: [] });
+    mapper.relationList.push(relation);
+    mapper.relationFields.push(relation.localField);
+  };
+
+  /**
+   * TODO
+   *
+   * @name module:js-data.belongsTo
+   * @method
+   * @param {Mapper} related The relation the target belongs to.
+   * @param {Object} opts Configuration options.
+   * @param {string} opts.foreignKey The field that holds the primary key of the
+   * related record.
+   * @param {string} opts.localField The field that holds a reference to the
+   * related record object.
+   * @return {Function} Invocation function, which accepts the target as the only
+   * parameter.
+   */
+  var _belongsTo = function belongsTo(related, opts) {
+    opts || (opts = {});
+    opts.type = belongsToType;
+    return function (target) {
+      relatedTo(target, related, opts);
+    };
+  };
+
+  /**
+   * TODO
+   *
+   * @name module:js-data.hasMany
+   * @method
+   * @param {Mapper} related The relation of which the target has many.
+   * @param {Object} opts Configuration options.
+   * @param {string} [opts.foreignKey] The field that holds the primary key of the
+   * related record.
+   * @param {string} opts.localField The field that holds a reference to the
+   * related record object.
+   * @return {Function} Invocation function, which accepts the target as the only
+   * parameter.
+   */
+  var _hasMany = function hasMany(related, opts) {
+    opts || (opts = {});
+    opts.type = hasManyType;
+    return function (target) {
+      relatedTo(target, related, opts);
+    };
+  };
+
+  /**
+   * TODO
+   *
+   * @name module:js-data.hasOne
+   * @method
+   * @param {Mapper} related The relation of which the target has one.
+   * @param {Object} opts Configuration options.
+   * @param {string} [opts.foreignKey] The field that holds the primary key of the
+   * related record.
+   * @param {string} opts.localField The field that holds a reference to the
+   * related record object.
+   * @return {Function} Invocation function, which accepts the target as the only
+   * parameter.
+   */
+  var _hasOne = function hasOne(related, opts) {
+    opts || (opts = {});
+    opts.type = hasOneType;
+    return function (target) {
+      relatedTo(target, related, opts);
+    };
+  };
+
+  function Component() {
+    /**
+     * Event listeners attached to this Component.
+     *
+     * @name Component#_listeners
+     * @instance
+     * @type {Object}
+     * @private
+     */
+    this._listeners = {};
+  }
+
+  /**
+   * Create a subclass of this component.
+   *
+   * @name Component.extend
+   * @method
+   * @param {Object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {Object} [classProps={}] Static properties to add to the subclass.
+   * @return {Function} Subclass of this component.
+   */
+  Component.extend = utils$1.extend;
+
+  /**
+   * @name Component#dbg
+   * @method
+   */
+  /**
+   * @name Component#log
+   * @method
+   */
+  utils$1.logify(Component.prototype);
+
+  /**
+   * Register a new event listener on this Mapper.
+   *
+   * @name Mapper#on
+   * @method
+   */
+  /**
+   * Remove an event listener from this Mapper.
+   *
+   * @name Mapper#off
+   * @method
+   */
+  /**
+   * Trigger an event on this Mapper.
+   *
+   * @name Mapper#emit
+   * @method
+   * @param {string} event Name of event to emit.
+   */
+  utils$1.eventify(Component.prototype, function () {
+    return this._listeners;
+  }, function (value) {
+    this._listeners = value;
+  });
+
+  var reserved = {
+    limit: '',
+    offset: '',
+    orderBy: '',
+    skip: '',
+    sort: '',
+    where: ''
+  };
+
+  var escapeRegExp = /([.*+?^=!:${}()|[\]\/\\])/g;
+  var percentRegExp = /%/g;
+  var underscoreRegExp = /_/g;
+
+  var escape = function escape(pattern) {
+    return pattern.replace(escapeRegExp, '\\$1');
   };
 
   /**
@@ -852,184 +1262,29 @@
    * ```
    *
    * @class Query
+   * @extends Component
    * @param {Collection} collection - The collection on which this query operates.
    */
-  function Query(collection) {
-    _.classCallCheck(this, Query);
+  var Query = Component.extend({
+    constructor: function Query(collection) {
+      utils$1.classCallCheck(this, Query);
 
-    /**
-     * The collection on which this query operates.
-     *
-     * @name Query#collection
-     * @type {Collection}
-     */
-    this.collection = collection;
+      /**
+       * The collection on which this query operates.
+       *
+       * @name Query#collection
+       * @type {Collection}
+       */
+      this.collection = collection;
 
-    /**
-     * The data result of this query.
-     *
-     * @name Query#data
-     * @type {Array}
-     */
-    this.data = null;
-  }
-
-  /**
-   * Create a Query subclass.
-   *
-   * ```javascript
-   * var MyQuery = Query.extend({
-   *   foo: function () { return 'bar' }
-   * })
-   * var query = new MyQuery()
-   * query.foo() // "bar"
-   * ```
-   *
-   * @name Query.extend
-   * @method
-   * @param {Object} [props={}] Properties to add to the prototype of the
-   * subclass.
-   * @param {Object} [classProps={}] Static properties to add to the subclass.
-   * @return {Function} Subclass of Query.
-   */
-  Query.extend = _.extend;
-
-  var reserved = {
-    skip: '',
-    offset: '',
-    where: '',
-    limit: '',
-    orderBy: '',
-    sort: ''
-  };
-
-  var escapeRegExp = /([.*+?^=!:${}()|[\]\/\\])/g;
-  var percentRegExp = /%/g;
-  var underscoreRegExp = /_/g;
-
-  function escape(pattern) {
-    return pattern.replace(escapeRegExp, '\\$1');
-  }
-
-  /**
-   * TODO
-   *
-   * @name Query.ops
-   * @type {Object}
-   */
-  Query.ops = {
-    '==': function _(value, predicate) {
-      return value == predicate; // eslint-disable-line
+      /**
+       * The data result of this query.
+       *
+       * @name Query#data
+       * @type {Array}
+       */
+      this.data = null;
     },
-    '===': function _(value, predicate) {
-      return value === predicate;
-    },
-    '!=': function _(value, predicate) {
-      return value != predicate; // eslint-disable-line
-    },
-    '!==': function _(value, predicate) {
-      return value !== predicate;
-    },
-    '>': function _(value, predicate) {
-      return value > predicate;
-    },
-    '>=': function _(value, predicate) {
-      return value >= predicate;
-    },
-    '<': function _(value, predicate) {
-      return value < predicate;
-    },
-    '<=': function _(value, predicate) {
-      return value <= predicate;
-    },
-    'isectEmpty': function isectEmpty(value, predicate) {
-      return !_.intersection(value || [], predicate || []).length;
-    },
-    'isectNotEmpty': function isectNotEmpty(value, predicate) {
-      return _.intersection(value || [], predicate || []).length;
-    },
-    'in': function _in(value, predicate) {
-      return predicate.indexOf(value) !== -1;
-    },
-    'notIn': function notIn(value, predicate) {
-      return predicate.indexOf(value) === -1;
-    },
-    'contains': function contains(value, predicate) {
-      return (value || []).indexOf(predicate) !== -1;
-    },
-    'notContains': function notContains(value, predicate) {
-      return (value || []).indexOf(predicate) === -1;
-    }
-  };
-
-  _.addHiddenPropsToTarget(Query.prototype, {
-    compare: function compare(orderBy, index, a, b) {
-      var def = orderBy[index];
-      var cA = _.get(a, def[0]);
-      var cB = _.get(b, def[0]);
-      if (cA && _.isString(cA)) {
-        cA = cA.toUpperCase();
-      }
-      if (cB && _.isString(cB)) {
-        cB = cB.toUpperCase();
-      }
-      a || (a = null);
-      b || (b = null);
-      if (def[1] === 'DESC') {
-        if (cB < cA) {
-          return -1;
-        } else if (cB > cA) {
-          return 1;
-        } else {
-          if (index < orderBy.length - 1) {
-            return this.compare(orderBy, index + 1, a, b);
-          } else {
-            return 0;
-          }
-        }
-      } else {
-        if (cA < cB) {
-          return -1;
-        } else if (cA > cB) {
-          return 1;
-        } else {
-          if (index < orderBy.length - 1) {
-            return this.compare(orderBy, index + 1, a, b);
-          } else {
-            return 0;
-          }
-        }
-      }
-    },
-    evaluate: function evaluate(value, op, predicate) {
-      if (Query.ops[op]) {
-        return Query.ops[op](value, predicate);
-      }
-      if (op.indexOf('like') === 0) {
-        return !_.isNull(this.like(predicate, op.substr(4)).exec(value));
-      } else if (op.indexOf('notLike') === 0) {
-        return _.isNull(this.like(predicate, op.substr(7)).exec(value));
-      }
-    },
-    like: function like(pattern, flags) {
-      return new RegExp('^' + escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.') + '$', flags);
-    },
-
-
-    /**
-     * Return the current data result of this query.
-     * @name Query#getData
-     * @method
-     * @return {Array} The data in this query.
-     */
-    getData: function getData() {
-      var self = this;
-      if (!self.data) {
-        self.data = self.collection.index.getAll();
-      }
-      return self.data;
-    },
-
 
     /**
      * Find all entities between two boundaries.
@@ -1066,6 +1321,208 @@
       }
       self.data = self.collection.getIndex(opts.index).between(leftKeys, rightKeys, opts);
       return self;
+    },
+    compare: function compare(orderBy, index, a, b) {
+      var def = orderBy[index];
+      var cA = utils$1.get(a, def[0]);
+      var cB = utils$1.get(b, def[0]);
+      if (cA && utils$1.isString(cA)) {
+        cA = cA.toUpperCase();
+      }
+      if (cB && utils$1.isString(cB)) {
+        cB = cB.toUpperCase();
+      }
+      if (a === undefined) {
+        a = null;
+      }
+      if (b === undefined) {
+        b = null;
+      }
+      if (def[1] === 'DESC') {
+        if (cB < cA) {
+          return -1;
+        } else if (cB > cA) {
+          return 1;
+        } else {
+          if (index < orderBy.length - 1) {
+            return this.compare(orderBy, index + 1, a, b);
+          } else {
+            return 0;
+          }
+        }
+      } else {
+        if (cA < cB) {
+          return -1;
+        } else if (cA > cB) {
+          return 1;
+        } else {
+          if (index < orderBy.length - 1) {
+            return this.compare(orderBy, index + 1, a, b);
+          } else {
+            return 0;
+          }
+        }
+      }
+    },
+    evaluate: function evaluate(value, op, predicate) {
+      var ops = this.constructor.ops;
+      if (ops[op]) {
+        return ops[op](value, predicate);
+      }
+      if (op.indexOf('like') === 0) {
+        return !utils$1.isNull(this.like(predicate, op.substr(4)).exec(value));
+      } else if (op.indexOf('notLike') === 0) {
+        return utils$1.isNull(this.like(predicate, op.substr(7)).exec(value));
+      }
+    },
+
+
+    /**
+     * Find the entity or entities that match the provided query or pass the
+     * provided filter function.
+     *
+     * #### Example
+     *
+     * Get the draft posts created less than three months
+     * ```js
+     * const posts = query.filter({
+     *   where: {
+     *     status: {
+     *       '==': 'draft'
+     *     },
+     *     created_at_timestamp: {
+     *       '>=': (new Date().getTime() - (1000 * 60 * 60 * 24 * 30 * 3)) // 3 months ago
+     *     }
+     *   }
+     * }).run()
+     * ```
+     * Use a custom filter function
+     * ```js
+     * const posts = query.filter(function (post) {
+     *   return post.isReady()
+     * }).run()
+     * ```
+     *
+     * @name Query#filter
+     * @method
+     * @param {(Object|Function)} [queryOrFn={}] - Selection query or filter
+     * function.
+     * @param {Function} [thisArg] - Context to which to bind `queryOrFn` if
+     * `queryOrFn` is a function.
+     * @return {Query} A reference to itself for chaining.
+     */
+    filter: function filter(query, thisArg) {
+      var self = this;
+      query || (query = {});
+      self.getData();
+      if (utils$1.isObject(query)) {
+        (function () {
+          var where = {};
+          // Filter
+          if (utils$1.isObject(query.where)) {
+            where = query.where;
+          }
+          utils$1.forOwn(query, function (value, key) {
+            if (!(key in reserved) && !(key in where)) {
+              where[key] = {
+                '==': value
+              };
+            }
+          });
+
+          var fields = [];
+          var ops = [];
+          var predicates = [];
+          utils$1.forOwn(where, function (clause, field) {
+            if (!utils$1.isObject(clause)) {
+              clause = {
+                '==': clause
+              };
+            }
+            utils$1.forOwn(clause, function (expr, op) {
+              fields.push(field);
+              ops.push(op);
+              predicates.push(expr);
+            });
+          });
+          if (fields.length) {
+            (function () {
+              var i = void 0;
+              var len = fields.length;
+              self.data = self.data.filter(function (item) {
+                var first = true;
+                var keep = true;
+
+                for (i = 0; i < len; i++) {
+                  var op = ops[i];
+                  var isOr = op.charAt(0) === '|';
+                  op = isOr ? op.substr(1) : op;
+                  var expr = self.evaluate(utils$1.get(item, fields[i]), op, predicates[i]);
+                  if (expr !== undefined) {
+                    keep = first ? expr : isOr ? keep || expr : keep && expr;
+                  }
+                  first = false;
+                }
+                return keep;
+              });
+            })();
+          }
+
+          // Sort
+          var orderBy = query.orderBy || query.sort;
+
+          if (utils$1.isString(orderBy)) {
+            orderBy = [[orderBy, 'ASC']];
+          }
+          if (!utils$1.isArray(orderBy)) {
+            orderBy = null;
+          }
+
+          // Apply 'orderBy'
+          if (orderBy) {
+            (function () {
+              var index = 0;
+              orderBy.forEach(function (def, i) {
+                if (utils$1.isString(def)) {
+                  orderBy[i] = [def, 'ASC'];
+                }
+              });
+              self.data.sort(function (a, b) {
+                return self.compare(orderBy, index, a, b);
+              });
+            })();
+          }
+
+          // Skip
+          if (utils$1.isNumber(query.skip)) {
+            self.skip(query.skip);
+          } else if (utils$1.isNumber(query.offset)) {
+            self.skip(query.offset);
+          }
+          // Limit
+          if (utils$1.isNumber(query.limit)) {
+            self.limit(query.limit);
+          }
+        })();
+      } else if (utils$1.isFunction(query)) {
+        self.data = self.data.filter(query, thisArg);
+      }
+      return self;
+    },
+
+
+    /**
+     * Iterate over all entities.
+     *
+     * @name Query#forEach
+     * @method
+     * @param {Function} forEachFn - Iteration function.
+     * @param {*} [thisArg] - Context to which to bind `forEachFn`.
+     * @return {Query} A reference to itself for chaining.
+     */
+    forEach: function forEach(forEachFn, thisArg) {
+      this.getData().forEach(forEachFn, thisArg);
+      return this;
     },
 
 
@@ -1105,16 +1562,14 @@
      * query. If no index is specified, the main index is used.
      * @return {Query} A reference to itself for chaining.
      */
-    get: function get() {
-      var keyList = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
-      var opts = arguments[1];
-
+    get: function get(keyList, opts) {
       var self = this;
+      keyList || (keyList = []);
       opts || (opts = {});
       if (self.data) {
         throw new Error('Cannot access index after first operation!');
       }
-      if (keyList && !_.isArray(keyList)) {
+      if (keyList && !utils$1.isArray(keyList)) {
         keyList = [keyList];
       }
       if (!keyList.length) {
@@ -1161,10 +1616,10 @@
         args[_key] = arguments[_key];
       }
 
-      if (!args.length || args.length === 1 && _.isObject(args[0])) {
+      if (!args.length || args.length === 1 && utils$1.isObject(args[0])) {
         self.getData();
         return self;
-      } else if (args.length && _.isObject(args[args.length - 1])) {
+      } else if (args.length && utils$1.isObject(args[args.length - 1])) {
         opts = args[args.length - 1];
         args.pop();
       }
@@ -1179,165 +1634,20 @@
 
 
     /**
-     * Find the entity or entities that match the provided query or pass the
-     * provided filter function.
-     *
-     * #### Example
-     *
-     * Get the draft posts created less than three months
-     * ```js
-     * const posts = query.filter({
-     *   where: {
-     *     status: {
-     *       '==': 'draft'
-     *     },
-     *     created_at_timestamp: {
-     *       '>=': (new Date().getTime() - (1000 * 60 * 60 * 24 * 30 * 3)) // 3 months ago
-     *     }
-     *   }
-     * }).run()
-     * ```
-     * Use a custom filter function
-     * ```js
-     * const posts = query.filter(function (post) {
-     *   return post.isReady()
-     * }).run()
-     * ```
-     *
-     * @name Query#filter
+     * Return the current data result of this query.
+     * @name Query#getData
      * @method
-     * @param {(Object|Function)} [queryOrFn={}] - Selection query or filter
-     * function.
-     * @param {Function} [thisArg] - Context to which to bind `queryOrFn` if
-     * `queryOrFn` is a function.
-     * @return {Query} A reference to itself for chaining.
+     * @return {Array} The data in this query.
      */
-    filter: function filter(query, thisArg) {
+    getData: function getData() {
       var self = this;
-      query || (query = {});
-      self.getData();
-      if (_.isObject(query)) {
-        (function () {
-          var where = {};
-          // Filter
-          if (_.isObject(query.where)) {
-            where = query.where;
-          }
-          _.forOwn(query, function (value, key) {
-            if (!(key in reserved) && !(key in where)) {
-              where[key] = {
-                '==': value
-              };
-            }
-          });
-
-          var fields = [];
-          var ops = [];
-          var predicates = [];
-          _.forOwn(where, function (clause, field) {
-            if (!_.isObject(clause)) {
-              clause = {
-                '==': clause
-              };
-            }
-            _.forOwn(clause, function (expr, op) {
-              fields.push(field);
-              ops.push(op);
-              predicates.push(expr);
-            });
-          });
-          if (fields.length) {
-            (function () {
-              var i = void 0;
-              var len = fields.length;
-              self.data = self.data.filter(function (item) {
-                var first = true;
-                var keep = true;
-
-                for (i = 0; i < len; i++) {
-                  var op = ops[i];
-                  var isOr = op.charAt(0) === '|';
-                  op = isOr ? op.substr(1) : op;
-                  var expr = self.evaluate(_.get(item, fields[i]), op, predicates[i]);
-                  if (expr !== undefined) {
-                    keep = first ? expr : isOr ? keep || expr : keep && expr;
-                  }
-                  first = false;
-                }
-                return keep;
-              });
-            })();
-          }
-
-          // Sort
-          var orderBy = query.orderBy || query.sort;
-
-          if (_.isString(orderBy)) {
-            orderBy = [[orderBy, 'ASC']];
-          }
-          if (!_.isArray(orderBy)) {
-            orderBy = null;
-          }
-
-          // Apply 'orderBy'
-          if (orderBy) {
-            (function () {
-              var index = 0;
-              orderBy.forEach(function (def, i) {
-                if (_.isString(def)) {
-                  orderBy[i] = [def, 'ASC'];
-                }
-              });
-              self.data.sort(function (a, b) {
-                return self.compare(orderBy, index, a, b);
-              });
-            })();
-          }
-
-          // Skip
-          if (_.isNumber(query.skip)) {
-            self.skip(query.skip);
-          } else if (_.isNumber(query.offset)) {
-            self.skip(query.offset);
-          }
-          // Limit
-          if (_.isNumber(query.limit)) {
-            self.limit(query.limit);
-          }
-        })();
-      } else if (_.isFunction(query)) {
-        self.data = self.data.filter(query, thisArg);
+      if (!self.data) {
+        self.data = self.collection.index.getAll();
       }
-      return self;
+      return self.data;
     },
-
-
-    /**
-     * Skip a number of results.
-     *
-     * #### Example
-     *
-     * Get all but the first 10 draft posts
-     * ```js
-     * const posts = query.get('draft', { index: 'status' }).skip(10).run()
-     * ```
-     *
-     * @name Query#skip
-     * @method
-     * @param {number} num - The number of entities to skip.
-     * @return {Query} A reference to itself for chaining.
-     */
-    skip: function skip(num) {
-      if (!_.isNumber(num)) {
-        throw new TypeError('skip: Expected number but found ' + (typeof num === 'undefined' ? 'undefined' : babelHelpers.typeof(num)) + '!');
-      }
-      var data = this.getData();
-      if (num < data.length) {
-        this.data = data.slice(num);
-      } else {
-        this.data = [];
-      }
-      return this;
+    like: function like(pattern, flags) {
+      return new RegExp('^' + escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.') + '$', flags);
     },
 
 
@@ -1357,26 +1667,11 @@
      * @return {Query} A reference to itself for chaining.
      */
     limit: function limit(num) {
-      if (!_.isNumber(num)) {
+      if (!utils$1.isNumber(num)) {
         throw new TypeError('limit: Expected number but found ' + (typeof num === 'undefined' ? 'undefined' : babelHelpers.typeof(num)) + '!');
       }
       var data = this.getData();
       this.data = data.slice(0, Math.min(data.length, num));
-      return this;
-    },
-
-
-    /**
-     * Iterate over all entities.
-     *
-     * @name Query#forEach
-     * @method
-     * @param {Function} forEachFn - Iteration function.
-     * @param {*} [thisArg] - Context to which to bind `forEachFn`.
-     * @return {Query} A reference to itself for chaining.
-     */
-    forEach: function forEach(forEachFn, thisArg) {
-      this.getData().forEach(forEachFn, thisArg);
       return this;
     },
 
@@ -1428,6 +1723,86 @@
       var data = this.data;
       this.data = null;
       return data;
+    },
+
+
+    /**
+     * Skip a number of results.
+     *
+     * #### Example
+     *
+     * Get all but the first 10 draft posts
+     * ```js
+     * const posts = query.get('draft', { index: 'status' }).skip(10).run()
+     * ```
+     *
+     * @name Query#skip
+     * @method
+     * @param {number} num - The number of entities to skip.
+     * @return {Query} A reference to itself for chaining.
+     */
+    skip: function skip(num) {
+      if (!utils$1.isNumber(num)) {
+        throw new TypeError('skip: Expected number but found ' + (typeof num === 'undefined' ? 'undefined' : babelHelpers.typeof(num)) + '!');
+      }
+      var data = this.getData();
+      if (num < data.length) {
+        this.data = data.slice(num);
+      } else {
+        this.data = [];
+      }
+      return this;
+    }
+  }, {
+    /**
+     * TODO
+     *
+     * @name Query.ops
+     * @type {Object}
+     */
+    ops: {
+      '==': function _(value, predicate) {
+        return value == predicate; // eslint-disable-line
+      },
+      '===': function _(value, predicate) {
+        return value === predicate;
+      },
+      '!=': function _(value, predicate) {
+        return value != predicate; // eslint-disable-line
+      },
+      '!==': function _(value, predicate) {
+        return value !== predicate;
+      },
+      '>': function _(value, predicate) {
+        return value > predicate;
+      },
+      '>=': function _(value, predicate) {
+        return value >= predicate;
+      },
+      '<': function _(value, predicate) {
+        return value < predicate;
+      },
+      '<=': function _(value, predicate) {
+        return value <= predicate;
+      },
+      'isectEmpty': function isectEmpty(value, predicate) {
+        return !utils$1.intersection(value || [], predicate || []).length;
+      },
+      'isectNotEmpty': function isectNotEmpty(value, predicate) {
+        return utils$1.intersection(value || [], predicate || []).length;
+      },
+      'in': function _in(value, predicate) {
+        return predicate.indexOf(value) !== -1;
+      },
+      'notIn': function notIn(value, predicate) {
+        return predicate.indexOf(value) === -1;
+      },
+      'contains': function contains(value, predicate) {
+        return (value || []).indexOf(predicate) !== -1;
+      },
+      'notContains': function notContains(value, predicate) {
+        return (value || []).indexOf(predicate) === -1;
+      }
     }
   });
 
@@ -1503,10 +1878,10 @@
   }
 
   function Index(fieldList, opts) {
-    _.classCallCheck(this, Index);
+    utils$1.classCallCheck(this, Index);
     fieldList || (fieldList = []);
 
-    if (!_.isArray(fieldList)) {
+    if (!utils$1.isArray(fieldList)) {
       throw new Error('fieldList must be an array.');
     }
 
@@ -1519,9 +1894,9 @@
     this.values = [];
   }
 
-  _.addHiddenPropsToTarget(Index.prototype, {
-    set: function set(keyList, value) {
-      if (!_.isArray(keyList)) {
+  utils$1.addHiddenPropsToTarget(Index.prototype, {
+    'set': function set(keyList, value) {
+      if (!utils$1.isArray(keyList)) {
         keyList = [keyList];
       }
 
@@ -1549,8 +1924,8 @@
         }
       }
     },
-    get: function get(keyList) {
-      if (!_.isArray(keyList)) {
+    'get': function get(keyList) {
+      if (!utils$1.isArray(keyList)) {
         keyList = [keyList];
       }
 
@@ -1595,16 +1970,15 @@
         }
       });
     },
-    between: function between(leftKeys, rightKeys) {
-      var opts = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-      if (!_.isArray(leftKeys)) {
+    between: function between(leftKeys, rightKeys, opts) {
+      opts || (opts = {});
+      if (!utils$1.isArray(leftKeys)) {
         leftKeys = [leftKeys];
       }
-      if (!_.isArray(rightKeys)) {
+      if (!utils$1.isArray(rightKeys)) {
         rightKeys = [rightKeys];
       }
-      _.fillIn(opts, {
+      utils$1.fillIn(opts, {
         leftInclusive: true,
         rightInclusive: false,
         limit: undefined,
@@ -1675,13 +2049,13 @@
 
           if (this.values[_i].isIndex) {
             if (currKey === leftKey) {
-              results = results.concat(this.values[_i]._between(copy(leftKeys), rightKeys.map(function () {
+              results = results.concat(this.values[_i]._between(utils$1.copy(leftKeys), rightKeys.map(function () {
                 return undefined;
               }), opts));
             } else if (currKey === rightKey) {
               results = results.concat(this.values[_i]._between(leftKeys.map(function () {
                 return undefined;
-              }), copy(rightKeys), opts));
+              }), utils$1.copy(rightKeys), opts));
             } else {
               results = results.concat(this.values[_i].getAll());
             }
@@ -1719,7 +2093,7 @@
     },
     insertRecord: function insertRecord(data) {
       var keyList = this.fieldList.map(function (field) {
-        if (_.isFunction(field)) {
+        if (utils$1.isFunction(field)) {
           return field(data) || null;
         } else {
           return data[field] || null;
@@ -1777,7 +2151,7 @@
     /**
      * Default Mapper for this collection. Optional. If a Mapper is provided, then
      * the collection will use the {@link Mapper#idAttribute} setting, and will
-     * wrap records in {@link Mapper#RecordClass}.
+     * wrap records in {@link Mapper#recordClass}.
      *
      * @example
      * import {Collection, Mapper} from 'js-data'
@@ -1821,7 +2195,7 @@
 
     /**
      * Options to be passed into {@link Mapper#createRecord} when wrapping records
-     * in {@link Mapper#RecordClass}.
+     * in {@link Mapper#recordClass}.
      *
      * @name Collection#recordOpts
      * @type {Object}
@@ -1845,6 +2219,7 @@
    * UserCollection.get(1) === user1 // true
    *
    * @class Collection
+   * @extends Component
    * @param {Array} [records] Initial set of records to insert into the
    * collection.
    * @param {Object} [opts] Configuration options.
@@ -1853,85 +2228,57 @@
    * @param {string} [opts.mapper] See {@link Collection#mapper}.
    * @param {Object} [opts.recordOpts=null] See {@link Collection#recordOpts}.
    */
-  function Collection(records, opts) {
-    var self = this;
-    _.classCallCheck(self, Collection);
+  var Collection = Component.extend({
+    constructor: function Collection(records, opts) {
+      var self = this;
+      utils$1.classCallCheck(self, Collection);
+      Collection.__super__.call(self);
 
-    if (_.isObject(records) && !_.isArray(records)) {
-      opts = records;
-      records = [];
-    }
-    if (_.isString(opts)) {
-      opts = { idAttribute: opts };
-    }
-
-    // Default values for arguments
-    records || (records = []);
-    opts || (opts = {});
-    opts.recordOpts || (opts.recordOpts = {});
-
-    _.fillIn(self, opts);
-    _.fillIn(self, COLLECTION_DEFAULTS);
-
-    /**
-     * Event listeners attached to this Collection.
-     *
-     * @name Collection#_listeners
-     * @instance
-     * @type {Object}
-     * @private
-     */
-    self._listeners = {};
-
-    var idAttribute = self.recordId();
-
-    /**
-     * The main index, which uses @{link Collection#recordId} as the key.
-     * @name Collection#index
-     * @type {Index}
-     */
-    self.index = new Index([idAttribute], {
-      hashCode: function hashCode(obj) {
-        return _.get(obj, idAttribute);
+      if (utils$1.isObject(records) && !utils$1.isArray(records)) {
+        opts = records;
+        records = [];
       }
-    });
-
-    /**
-     * Object that holds the secondary indexes of this collection.
-     * @name Collection#indexes
-     * @type {Object.<string, Index>}
-     */
-    self.indexes = {};
-
-    records.forEach(function (record) {
-      record = self.mapper ? self.mapper.createRecord(record, self.recordOpts) : record;
-      self.index.insertRecord(record);
-      if (record && _.isFunction(record.on)) {
-        record.on('all', self._onRecordEvent, self);
+      if (utils$1.isString(opts)) {
+        opts = { idAttribute: opts };
       }
-    });
-  }
 
-  /**
-   * Create a Collection subclass.
-   *
-   * @example
-   * var MyCollection = Collection.extend({
-   *   foo: function () { return 'bar' }
-   * })
-   * var collection = new MyCollection()
-   * collection.foo() // "bar"
-   *
-   * @name Collection.extend
-   * @method
-   * @param {Object} [props={}] Properties to add to the prototype of the
-   * subclass.
-   * @param {Object} [classProps={}] Static properties to add to the subclass.
-   * @return {Function} Subclass of Collection.
-   */
-  Collection.extend = _.extend;
+      // Default values for arguments
+      records || (records = []);
+      opts || (opts = {});
+      opts.recordOpts || (opts.recordOpts = {});
 
-  _.addHiddenPropsToTarget(Collection.prototype, {
+      utils$1.fillIn(self, opts);
+      utils$1.fillIn(self, COLLECTION_DEFAULTS);
+
+      var idAttribute = self.recordId();
+
+      /**
+       * The main index, which uses @{link Collection#recordId} as the key.
+       * @name Collection#index
+       * @type {Index}
+       */
+      self.index = new Index([idAttribute], {
+        hashCode: function hashCode(obj) {
+          return utils$1.get(obj, idAttribute);
+        }
+      });
+
+      /**
+       * Object that holds the secondary indexes of this collection.
+       * @name Collection#indexes
+       * @type {Object.<string, Index>}
+       */
+      self.indexes = {};
+
+      records.forEach(function (record) {
+        record = self.mapper ? self.mapper.createRecord(record, self.recordOpts) : record;
+        self.index.insertRecord(record);
+        if (record && utils$1.isFunction(record.on)) {
+          record.on('all', self._onRecordEvent, self);
+        }
+      });
+    },
+
     /**
      * Used to bind to events emitted by records in this Collection.
      *
@@ -1940,7 +2287,6 @@
      * @private
      * @param {...*} [arg] Args passed to {@link Collection#emit}.
      */
-
     _onRecordEvent: function _onRecordEvent() {
       this.emit.apply(this, arguments);
     },
@@ -1971,13 +2317,13 @@
       opts || (opts = {});
 
       // Fill in "opts" with the Collection's configuration
-      _._(self, opts);
+      utils$1._(self, opts);
       records = self.beforeAdd(records, opts) || records;
 
       // Track whether just one record or an array of records is being inserted
       var singular = false;
       var idAttribute = self.recordId();
-      if (_.isObject(records) && !_.isArray(records)) {
+      if (utils$1.isObject(records) && !utils$1.isArray(records)) {
         records = [records];
         singular = true;
       }
@@ -1988,8 +2334,8 @@
       // option.
       records = records.map(function (record) {
         var id = self.recordId(record);
-        if (!_.isSorN(id)) {
-          throw new TypeError(idAttribute + ': Expected string or number, found ' + (typeof id === 'undefined' ? 'undefined' : babelHelpers.typeof(id)) + '!');
+        if (!utils$1.isSorN(id)) {
+          throw new TypeError('Collection#add: Expected string or number for ' + idAttribute + ', found ' + (typeof id === 'undefined' ? 'undefined' : babelHelpers.typeof(id)) + '!');
         }
         // Grab existing record if there is one
         var existing = self.get(id);
@@ -2004,9 +2350,9 @@
           // in the collection, so we need to merge them
           var onConflict = opts.onConflict || self.onConflict;
           if (onConflict === 'merge') {
-            _.deepMixIn(existing, record);
+            utils$1.deepMixIn(existing, record);
           } else if (onConflict === 'replace') {
-            _.forOwn(existing, function (value, key) {
+            utils$1.forOwn(existing, function (value, key) {
               if (key !== idAttribute && !record.hasOwnProperty(key)) {
                 delete existing[key];
               }
@@ -2022,10 +2368,10 @@
           // it into the collection
           record = self.mapper ? self.mapper.createRecord(record, self.recordOpts) : record;
           self.index.insertRecord(record);
-          _.forOwn(self.indexes, function (index, name) {
+          utils$1.forOwn(self.indexes, function (index, name) {
             index.insertRecord(record);
           });
-          if (record && _.isFunction(record.on)) {
+          if (record && utils$1.isFunction(record.on)) {
             record.on('all', self._onRecordEvent, self);
           }
         }
@@ -2164,7 +2510,7 @@
      */
     createIndex: function createIndex(name, fieldList, opts) {
       var self = this;
-      if (_.isString(name) && fieldList === undefined) {
+      if (utils$1.isString(name) && fieldList === undefined) {
         fieldList = [name];
       }
       opts || (opts = {});
@@ -2368,7 +2714,7 @@
      */
     recordId: function recordId(record) {
       if (record) {
-        return _.get(record, this.recordId());
+        return utils$1.get(record, this.recordId());
       }
       var self = this;
       return self.mapper ? self.mapper.idAttribute : self.idAttribute || 'id';
@@ -2435,10 +2781,10 @@
       // The record is in the collection, remove it
       if (record) {
         self.index.removeRecord(record);
-        _.forOwn(self.indexes, function (index, name) {
+        utils$1.forOwn(self.indexes, function (index, name) {
           index.removeRecord(record);
         });
-        if (record && _.isFunction(record.off)) {
+        if (record && utils$1.isFunction(record.off)) {
           record.off('all', self._onRecordEvent, self);
           self.emit('remove', record);
         }
@@ -2539,203 +2885,11 @@
     updateIndexes: function updateIndexes(record) {
       var self = this;
       self.index.updateRecord(record);
-      _.forOwn(self.indexes, function (index, name) {
+      utils$1.forOwn(self.indexes, function (index, name) {
         index.updateRecord(record);
       });
     }
   });
-
-  /**
-   * TODO
-   *
-   * @name Collection#on
-   * @method
-   * @param {string} event TODO.
-   * @param {Function} handler TODO
-   */
-
-  /**
-  * TODO
-  *
-  * @name Collection#off
-  * @method
-  * @param {string} [event] TODO.
-  * @param {Function} [handler] TODO
-  */
-
-  /**
-  * TODO
-  *
-  * @name Collection#emit
-  * @method
-  * @param {string} event TODO.
-  * @param {...*} [arg] TODO
-  */
-
-  _.eventify(Collection.prototype, function () {
-    return this._listeners;
-  }, function (value) {
-    this._listeners = value;
-  });
-
-  var belongsToType = 'belongsTo';
-  var hasManyType = 'hasMany';
-  var hasOneType = 'hasOne';
-
-  function Relation(related, opts) {
-    var self = this;
-
-    opts || (opts = {});
-
-    var localField = opts.localField;
-    if (!localField) {
-      throw new Error('localField is required');
-    }
-
-    var foreignKey = opts.foreignKey = opts.foreignKey || opts.localKey;
-    if (!foreignKey && (opts.type === belongsToType || opts.type === hasOneType)) {
-      throw new Error('foreignKey is required');
-    }
-    var localKeys = opts.localKeys;
-    var foreignKeys = opts.foreignKeys;
-    if (!foreignKey && !localKeys && !foreignKeys && opts.type === hasManyType) {
-      throw new Error('one of (foreignKey, localKeys, foreignKeys) is required');
-    }
-
-    if (_.isString(related)) {
-      opts.relation = related;
-      if (!_.isFunction(opts.getRelation)) {
-        throw new Error('you must provide a reference to the related mapper!');
-      }
-    } else if (related) {
-      opts.relation = related.name;
-      Object.defineProperty(self, 'relatedMapper', {
-        value: related
-      });
-    }
-
-    _.fillIn(self, opts);
-  }
-
-  _.addHiddenPropsToTarget(Relation.prototype, {
-    getRelation: function getRelation() {
-      return this.relatedMapper;
-    },
-    getLocalKeys: function getLocalKeys(record) {},
-    getForeignKey: function getForeignKey(record) {
-      if (this.type === belongsToType) {
-        return _.get(record, this.foreignKey);
-      }
-      return _.get(record, this.mapper.idAttribute);
-    },
-    setForeignKey: function setForeignKey(record, relatedRecord) {
-      var self = this;
-      if (!record || !relatedRecord) {
-        return;
-      }
-      if (self.type === belongsToType) {
-        _.set(record, self.foreignKey, _.get(relatedRecord, self.getRelation().idAttribute));
-      } else {
-        (function () {
-          var idAttribute = self.mapper.idAttribute;
-          if (_.isArray(relatedRecord)) {
-            relatedRecord.forEach(function (relatedRecordItem) {
-              _.set(relatedRecordItem, self.foreignKey, _.get(record, idAttribute));
-            });
-          } else {
-            _.set(relatedRecord, self.foreignKey, _.get(record, idAttribute));
-          }
-        })();
-      }
-    },
-    getLocalField: function getLocalField(record) {
-      return _.get(record, this.localField);
-    },
-    setLocalField: function setLocalField(record, data) {
-      return _.set(record, this.localField, data);
-    }
-  });
-
-  var relatedTo = function relatedTo(mapper, related, opts) {
-    opts || (opts = {});
-    if (!opts.type) {
-      throw new Error('must specify relation type!');
-    }
-    opts.mapper = mapper;
-    opts.name = mapper.name;
-    var relation = new Relation(related, opts);
-
-    mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] });
-    mapper.relationFields || Object.defineProperty(mapper, 'relationFields', { value: [] });
-    mapper.relationList.push(relation);
-    mapper.relationFields.push(relation.localField);
-  };
-
-  /**
-   * TODO
-   *
-   * @name module:js-data.belongsTo
-   * @method
-   * @param {Mapper} related The relation the target belongs to.
-   * @param {Object} opts Configuration options.
-   * @param {string} opts.foreignKey The field that holds the primary key of the
-   * related record.
-   * @param {string} opts.localField The field that holds a reference to the
-   * related record object.
-   * @return {Function} Invocation function, which accepts the target as the only
-   * parameter.
-   */
-  var _belongsTo = function belongsTo(related, opts) {
-    opts || (opts = {});
-    opts.type = belongsToType;
-    return function (target) {
-      relatedTo(target, related, opts);
-    };
-  };
-
-  /**
-   * TODO
-   *
-   * @name module:js-data.hasMany
-   * @method
-   * @param {Mapper} related The relation of which the target has many.
-   * @param {Object} opts Configuration options.
-   * @param {string} [opts.foreignKey] The field that holds the primary key of the
-   * related record.
-   * @param {string} opts.localField The field that holds a reference to the
-   * related record object.
-   * @return {Function} Invocation function, which accepts the target as the only
-   * parameter.
-   */
-  var _hasMany = function hasMany(related, opts) {
-    opts || (opts = {});
-    opts.type = hasManyType;
-    return function (target) {
-      relatedTo(target, related, opts);
-    };
-  };
-
-  /**
-   * TODO
-   *
-   * @name module:js-data.hasOne
-   * @method
-   * @param {Mapper} related The relation of which the target has one.
-   * @param {Object} opts Configuration options.
-   * @param {string} [opts.foreignKey] The field that holds the primary key of the
-   * related record.
-   * @param {string} opts.localField The field that holds a reference to the
-   * related record object.
-   * @return {Function} Invocation function, which accepts the target as the only
-   * parameter.
-   */
-  var _hasOne = function hasOne(related, opts) {
-    opts || (opts = {});
-    opts.type = hasOneType;
-    return function (target) {
-      relatedTo(target, related, opts);
-    };
-  };
 
   /**
    * js-data's Record class.
@@ -2745,68 +2899,52 @@
    * ```
    *
    * @class Record
+   * @extends Component
    * @param {Object} [props] The initial properties of the new Record instance.
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.noValidate=false] Whether to skip validation on the
    * initial properties.
    */
-  function Record(props, opts) {
-    var self = this;
-    _.classCallCheck(self, Record);
+  var Record = Component.extend({
+    constructor: function Record(props, opts) {
+      var self = this;
+      utils$1.classCallCheck(self, Record);
 
-    props || (props = {});
-    opts || (opts = {});
-    var _props = {};
-    Object.defineProperties(self, {
-      _get: {
-        value: function value(key) {
-          return _.get(_props, key);
+      props || (props = {});
+      opts || (opts = {});
+      var _props = {};
+      Object.defineProperties(self, {
+        _get: {
+          enumerable: false,
+          value: function value(key) {
+            return utils$1.get(_props, key);
+          }
+        },
+        _set: {
+          enumerable: false,
+          value: function value(key, _value) {
+            return utils$1.set(_props, key, _value);
+          }
+        },
+        _unset: {
+          enumerable: false,
+          value: function value(key) {
+            return utils$1.unset(_props, key);
+          }
         }
-      },
-      _set: {
-        value: function value(key, _value) {
-          return _.set(_props, key, _value);
-        }
-      },
-      _unset: {
-        value: function value(key) {
-          return _.unset(_props, key);
-        }
+      });
+      var _set = self._set;
+      // TODO: Optimize these strings
+      _set('creating', true);
+      if (opts.noValidate) {
+        _set('noValidate', true);
       }
-    });
-    var _set = self._set;
-    // TODO: Optimize these strings
-    _set('creating', true);
-    if (opts.noValidate) {
-      _set('noValidate', true);
-    }
-    _.fillIn(self, props);
-    _set('creating'); // unset
-    _set('noValidate'); // unset
-    _set('previous', _.copy(props));
-  }
+      utils$1.fillIn(self, props);
+      _set('creating', false);
+      _set('noValidate', false);
+      _set('previous', utils$1.copy(props));
+    },
 
-  /**
-   * Create a Record subclass.
-   *
-   * ```javascript
-   * var MyRecord = Record.extend({
-   *   foo: function () { return 'bar' }
-   * })
-   * var record = new MyRecord()
-   * record.foo() // "bar"
-   * ```
-   *
-   * @name Record.extend
-   * @method
-   * @param {Object} [props={}] Properties to add to the prototype of the
-   * subclass.
-   * @param {Object} [classProps={}] Static properties to add to the subclass.
-   * @return {Function} Subclass of Record.
-   */
-  Record.extend = _.extend;
-
-  _.addHiddenPropsToTarget(Record.prototype, {
     /**
      * TODO
      *
@@ -2814,77 +2952,54 @@
      * @method
      * @ignore
      */
-
     _mapper: function _mapper() {
-      if (!this.constructor.Mapper) {
-        throw new Error('This RecordClass has no Mapper!');
+      if (!this.constructor.mapper) {
+        throw new Error('This recordClass has no Mapper!');
       }
-      return this.constructor.Mapper;
-    },
-
-
-    /**
-     * Return the value at the given path for this instance.
-     *
-     * @name Record#get
-     * @method
-     * @param {string} key - Path of value to retrieve.
-     * @return {*} Value at path.
-     */
-    get: function get(key) {
-      return _.get(this, key);
-    },
-
-    /**
-     * Set the value for a given key, or the values for the given keys if "key" is
-     * an object.
-     *
-     * @name Record#set
-     * @method
-     * @param {(string|Object)} key - Key to set or hash of key-value pairs to set.
-     * @param {*} [value] - Value to set for the given key.
-     * @param {Object} [opts] - Optional configuration.
-     * @param {boolean} [opts.silent=false] - Whether to trigger change events.
-     */
-    set: function set(key, value, opts) {
-      var self = this;
-      if (_.isObject(key)) {
-        opts = value;
-      }
-      opts || (opts = {});
-      if (opts.silent) {
-        self._set('silent', true);
-      }
-      _.set(self, key, value);
-      if (!self._get('eventId')) {
-        self._set('silent'); // unset
-      }
-    },
-
-    /**
-     * Unset the value for a given key.
-     *
-     * @name Record#unset
-     * @method
-     * @param {string} key - Key to unset.
-     * @param {Object} [opts] - Optional configuration.
-     * @param {boolean} [opts.silent=false] - Whether to trigger change events.
-     */
-    unset: function unset(key, opts) {
-      this.set(key, undefined, opts);
+      return this.constructor.mapper;
     },
 
 
     /**
      * TODO
      *
-     * @name Record#hashCode
+     * @name Record#afterLoadRelations
      * @method
+     * @param {string[]} relations TODO
+     * @param {Object} opts TODO
      */
-    hashCode: function hashCode() {
-      var self = this;
-      return _.get(self, self._mapper().idAttribute);
-    },
+    afterLoadRelations: function afterLoadRelations() {},
+
+
+    /**
+     * TODO
+     *
+     * @name Record#afterSave
+     * @method
+     * @param {Object} opts TODO
+     */
+    afterSave: function afterSave() {},
+
+
+    /**
+     * TODO
+     *
+     * @name Record#beforeLoadRelations
+     * @method
+     * @param {string[]} relations TODO
+     * @param {Object} opts TODO
+     */
+    beforeLoadRelations: function beforeLoadRelations() {},
+
+
+    /**
+     * TODO
+     *
+     * @name Record#beforeSave
+     * @method
+     * @param {Object} opts TODO
+     */
+    beforeSave: function beforeSave() {},
 
 
     /**
@@ -2900,7 +3015,60 @@
     changes: function changes(opts) {
       var self = this;
       opts || (opts = {});
-      return _.diffObjects(self, self._get('previous'), opts);
+      return utils$1.diffObjects(self, self._get('previous'), opts);
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name Record#commit
+     * @method
+     */
+    commit: function commit() {
+      var self = this;
+      self._set('changed'); // unset
+      self._set('previous', utils$1.copy(self));
+      return self;
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name Record#create
+     * @method
+     * @param {Object} [opts] Configuration options. See {@link Mapper#create}.
+     */
+    create: function create(opts) {
+      return this._mapper().create(this, opts);
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name Record#destroy
+     * @method
+     * @param {Object} [opts] Configuration options. @see {@link Model.destroy}.
+     */
+    destroy: function destroy(opts) {
+      // TODO: move actual destroy logic here
+      var mapper = this._mapper();
+      return mapper.destroy(utils$1.get(this, mapper.idAttribute), opts);
+    },
+
+
+    /**
+     * Return the value at the given path for this instance.
+     *
+     * @name Record#get
+     * @method
+     * @param {string} key - Path of value to retrieve.
+     * @return {*} Value at path.
+     */
+    'get': function get(key) {
+      return utils$1.get(this, key);
     },
 
 
@@ -2917,21 +3085,95 @@
     hasChanges: function hasChanges(opts) {
       var self = this;
       var quickHasChanges = !!(self._get('changed') || []).length;
-      return quickHasChanges || _.areDifferent(self, self._get('previous'), opts);
+      return quickHasChanges || utils$1.areDifferent(self, self._get('previous'), opts);
     },
 
 
     /**
      * TODO
      *
-     * @name Record#commit
+     * @name Record#hashCode
      * @method
      */
-    commit: function commit() {
+    hashCode: function hashCode() {
       var self = this;
-      self._set('changed'); // unset
-      self._set('previous', _.copy(self));
-      return self;
+      return utils$1.get(self, self._mapper().idAttribute);
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name Record#loadRelations
+     * @method
+     * @param {string[]} [relations] TODO
+     * @param {Object} [opts] TODO
+     */
+    loadRelations: function loadRelations(relations, opts) {
+      var op = void 0;
+      var self = this;
+      var mapper = self._mapper();
+      var relationList = mapper.relationList || [];
+
+      // Default values for arguments
+      relations || (relations = []);
+      opts || (opts = {});
+
+      // Fill in "opts" with the Model's configuration
+      utils$1._(mapper, opts);
+      opts.adapter = mapper.getAdapterName(opts);
+
+      // beforeLoadRelations lifecycle hook
+      op = opts.op = 'beforeLoadRelations';
+      return utils$1.resolve(self[op](relations, opts)).then(function () {
+        if (utils$1.isString(relations)) {
+          relations = [relations];
+        }
+        // Now delegate to the adapter
+        op = opts.op = 'loadRelations';
+        mapper.dbg(op, self, relations, opts);
+        return Promise.all(relationList.map(function (def) {
+          if (utils$1.isFunction(def.load)) {
+            return def.load(mapper, def, self, opts);
+          }
+          var task = void 0;
+          if (def.type === 'hasMany' && def.foreignKey) {
+            // hasMany
+            task = def.getRelation().findAll(babelHelpers.defineProperty({}, def.foreignKey, utils$1.get(self, mapper.idAttribute)), opts);
+          } else if (def.foreignKey) {
+            // belongsTo or hasOne
+            var key = utils$1.get(self, def.foreignKey);
+            if (utils$1.isSorN(key)) {
+              task = def.getRelation().find(key, opts);
+            }
+          } else if (def.localKeys) {
+            // hasMany
+            task = def.getRelation().findAll(babelHelpers.defineProperty({}, def.getRelation().idAttribute, {
+              'in': utils$1.get(self, def.localKeys)
+            }), opts);
+          } else if (def.foreignKeys) {
+            // hasMany
+            task = def.getRelation().findAll(babelHelpers.defineProperty({}, def.getRelation().idAttribute, {
+              'contains': utils$1.get(self, mapper.idAttribute)
+            }), opts);
+          }
+          if (task) {
+            task = task.then(function (data) {
+              if (opts.raw) {
+                data = data.data;
+              }
+              utils$1.set(self, def.localField, def.type === 'hasOne' ? data.length ? data[0] : undefined : data);
+            });
+          }
+          return task;
+        }));
+      }).then(function () {
+        // afterLoadRelations lifecycle hook
+        op = opts.op = 'afterLoadRelations';
+        return utils$1.resolve(self[op](relations, opts)).then(function () {
+          return self;
+        });
+      });
     },
 
 
@@ -2963,12 +3205,12 @@
       var previous = self._get('previous') || {};
       opts || (opts = {});
       opts.preserve || (opts.preserve = []);
-      _.forOwn(self, function (value, key) {
+      utils$1.forOwn(self, function (value, key) {
         if (key !== self._mapper().idAttribute && !previous.hasOwnProperty(key) && self.hasOwnProperty(key) && opts.preserve.indexOf(key) === -1) {
           delete self[key];
         }
       });
-      _.forOwn(previous, function (value, key) {
+      utils$1.forOwn(previous, function (value, key) {
         if (opts.preserve.indexOf(key) === -1) {
           self[key] = value;
         }
@@ -2976,59 +3218,6 @@
       self.commit();
       return self;
     },
-
-
-    /**
-     * TODO
-     *
-     * @name Record#schema
-     * @method
-     * @param {string} [key] TODO
-     */
-    schema: function schema(key) {
-      var _schema = this._mapper().schema;
-      return key ? _schema[key] : _schema;
-    },
-
-
-    // validate (obj, value) {
-    //   let errors = []
-    //   let _schema = this.schema()
-    //   if (!obj) {
-    //     obj = this
-    //   } else if (utils.isString(obj)) {
-    //     const prop = _schema[obj]
-    //     if (prop) {
-    //       errors = validate.validate(prop, value) || []
-    //     }
-    //   } else {
-    //     utils. _.forOwn(_schema, function (prop, key) {
-    //       errors = errors.concat(validate.validate(prop, utils.get(obj, key)) || [])
-    //     })
-    //   }
-    //   return errors.length ? errors : undefined
-    // },
-
-    /**
-     * TODO
-     *
-     * @name Record#create
-     * @method
-     * @param {Object} [opts] Configuration options. See {@link Mapper#create}.
-     */
-    create: function create(opts) {
-      return this._mapper().create(this, opts);
-    },
-
-
-    /**
-     * TODO
-     *
-     * @name Record#beforeSave
-     * @method
-     * @param {Object} opts TODO
-     */
-    beforeSave: function beforeSave() {},
 
 
     /**
@@ -3042,26 +3231,26 @@
       var op = void 0,
           adapter = void 0;
       var self = this;
-      var Mapper = self._mapper();
+      var mapper = self._mapper();
 
       // Default values for arguments
       opts || (opts = {});
 
       // Fill in "opts" with the Model's configuration
-      _._(self, opts);
-      adapter = opts.adapter = self.getAdapterName(opts);
+      utils$1._(self, opts);
+      adapter = opts.adapter = mapper.getAdapterName(opts);
 
       // beforeSave lifecycle hook
       op = opts.op = 'beforeSave';
-      return _.resolve(self[op](opts)).then(function () {
+      return utils$1.resolve(self[op](opts)).then(function () {
         // Now delegate to the adapter
         op = opts.op = 'save';
-        Mapper.dbg(op, self, opts);
-        return self.getAdapter(adapter)[op](Mapper, self, opts);
+        mapper.dbg(op, self, opts);
+        return mapper.getAdapter(adapter)[op](mapper, self, opts);
       }).then(function (data) {
         // afterSave lifecycle hook
         op = opts.op = 'afterSave';
-        return _.resolve(self[op](data, opts)).then(function (_data) {
+        return utils$1.resolve(self[op](data, opts)).then(function (_data) {
           // Allow for re-assignment from lifecycle hook
           data = _data || data;
           if (opts.raw) {
@@ -3070,131 +3259,36 @@
           } else {
             self.set(data);
           }
-          return Mapper.end(data, opts);
+          return mapper.end(data, opts);
         });
       });
     },
 
 
     /**
-     * TODO
+     * Set the value for a given key, or the values for the given keys if "key" is
+     * an object.
      *
-     * @name Record#afterSave
+     * @name Record#set
      * @method
-     * @param {Object} opts TODO
+     * @param {(string|Object)} key - Key to set or hash of key-value pairs to set.
+     * @param {*} [value] - Value to set for the given key.
+     * @param {Object} [opts] - Optional configuration.
+     * @param {boolean} [opts.silent=false] - Whether to trigger change events.
      */
-    afterSave: function afterSave() {},
-
-
-    /**
-     * TODO
-     *
-     * @name Record#beforeLoadRelations
-     * @method
-     * @param {string[]} relations TODO
-     * @param {Object} opts TODO
-     */
-    beforeLoadRelations: function beforeLoadRelations() {},
-
-
-    /**
-     * TODO
-     *
-     * @name Record#loadRelations
-     * @method
-     * @param {string[]} [relations] TODO
-     * @param {Object} [opts] TODO
-     */
-    loadRelations: function loadRelations(relations, opts) {
-      var op = void 0;
+    'set': function set(key, value, opts) {
       var self = this;
-      var Mapper = self._mapper();
-      var relationList = Mapper.relationList || [];
-
-      // Default values for arguments
-      relations || (relations = []);
+      if (utils$1.isObject(key)) {
+        opts = value;
+      }
       opts || (opts = {});
-
-      // Fill in "opts" with the Model's configuration
-      _._(Mapper, opts);
-      opts.adapter = Mapper.getAdapterName(opts);
-
-      // beforeLoadRelations lifecycle hook
-      op = opts.op = 'beforeLoadRelations';
-      return _.resolve(self[op](relations, opts)).then(function () {
-        if (_.isString(relations)) {
-          relations = [relations];
-        }
-        // Now delegate to the adapter
-        op = opts.op = 'loadRelations';
-        Mapper.dbg(op, self, relations, opts);
-        return Promise.all(relationList.map(function (def) {
-          if (_.isFunction(def.load)) {
-            return def.load(Mapper, def, self, opts);
-          }
-          var task = void 0;
-          if (def.type === 'hasMany' && def.foreignKey) {
-            // hasMany
-            task = def.getRelation().findAll(babelHelpers.defineProperty({}, def.foreignKey, _.get(self, Mapper.idAttribute)), opts);
-          } else if (def.foreignKey) {
-            // belongsTo or hasOne
-            var key = _.get(self, def.foreignKey);
-            if (_.isSorN(key)) {
-              task = def.getRelation().find(key, opts);
-            }
-          } else if (def.localKeys) {
-            // hasMany
-            task = def.getRelation().findAll(babelHelpers.defineProperty({}, def.getRelation().idAttribute, {
-              'in': _.get(self, def.localKeys)
-            }), opts);
-          } else if (def.foreignKeys) {
-            // hasMany
-            task = def.getRelation().findAll(babelHelpers.defineProperty({}, def.getRelation().idAttribute, {
-              'contains': _.get(self, Mapper.idAttribute)
-            }), opts);
-          }
-          if (task) {
-            task = task.then(function (data) {
-              if (opts.raw) {
-                data = data.data;
-              }
-              _.set(self, def.localField, def.type === 'hasOne' ? data.length ? data[0] : undefined : data);
-            });
-          }
-          return task;
-        }));
-      }).then(function () {
-        // afterLoadRelations lifecycle hook
-        op = opts.op = 'afterLoadRelations';
-        return _.resolve(self[op](relations, opts)).then(function () {
-          return self;
-        });
-      });
-    },
-
-
-    /**
-     * TODO
-     *
-     * @name Record#afterLoadRelations
-     * @method
-     * @param {string[]} relations TODO
-     * @param {Object} opts TODO
-     */
-    afterLoadRelations: function afterLoadRelations() {},
-
-
-    /**
-     * TODO
-     *
-     * @name Record#destroy
-     * @method
-     * @param {Object} [opts] Configuration options. @see {@link Model.destroy}.
-     */
-    destroy: function destroy(opts) {
-      // TODO: move actual destroy logic here
-      var Mapper = this._mapper();
-      return Mapper.destroy(_.get(this, Mapper.idAttribute), opts);
+      if (opts.silent) {
+        self._set('silent', true);
+      }
+      utils$1.set(self, key, value);
+      if (!self._get('eventId')) {
+        self._set('silent'); // unset
+      }
     },
 
 
@@ -3216,14 +3310,14 @@
     toJSON: function toJSON(opts) {
       var _this = this;
 
-      var mapper = this.constructor.Mapper;
+      var mapper = this.constructor.mapper;
       if (mapper) {
         return mapper.toJSON(this, opts);
       } else {
         var _ret = function () {
           var json = {};
-          _.forOwn(_this, function (prop, key) {
-            json[key] = _.copy(prop);
+          utils$1.forOwn(_this, function (prop, key) {
+            json[key] = utils$1.copy(prop);
           });
           return {
             v: json
@@ -3232,73 +3326,33 @@
 
         if ((typeof _ret === 'undefined' ? 'undefined' : babelHelpers.typeof(_ret)) === "object") return _ret.v;
       }
+    },
+
+
+    /**
+     * Unset the value for a given key.
+     *
+     * @name Record#unset
+     * @method
+     * @param {string} key - Key to unset.
+     * @param {Object} [opts] - Optional configuration.
+     * @param {boolean} [opts.silent=false] - Whether to trigger change events.
+     */
+    unset: function unset(key, opts) {
+      this.set(key, undefined, opts);
     }
   });
-
-  /**
-   * Register a new event listener on this Record.
-   *
-   * @name Record#on
-   * @method
-   */
-
-  /**
-   * Remove an event listener from this Record.
-   *
-   * @name Record#off
-   * @method
-   */
-
-  /**
-   * Trigger an event on this Record.
-   *
-   * @name Record#emit
-   * @method
-   * @param {string} event Name of event to emit.
-   */
 
   /**
    * Allow records to emit events.
    *
    * An record's registered listeners are stored in the record's private data.
    */
-  _.eventify(Record.prototype, function () {
+  utils$1.eventify(Record.prototype, function () {
     return this._get('events');
   }, function (value) {
     this._set('events', value);
   });
-
-  /**
-   * js-data's Schema class.
-   *
-   * ```javascript
-   * import {Schema} from 'js-data'
-   * ```
-   *
-   * @class Schema
-   * @param {Object} definition Schema definition according to json-schema.org
-   */
-  function Schema(definition) {
-    // const self = this
-    definition || (definition = {});
-    // TODO: schema validation
-    _.fillIn(this, definition);
-
-    // TODO: rework this to make sure all possible keywords are converted
-    if (definition.properties) {
-      _.forOwn(definition.properties, function (_definition, prop) {
-        if (!(_definition instanceof Schema)) {
-          definition.properties[prop] = new Schema(_definition);
-        }
-      });
-    }
-  }
-
-  /**
-   * @name Schema.extend
-   * @method
-   */
-  Schema.extend = _.extend;
 
   /**
    * TODO
@@ -3307,30 +3361,14 @@
    * @type {Object}
    */
   var types = {
-    array: _.isArray,
-    boolean: _.isBoolean,
-    integer: _.isInteger,
-    'null': _.isNull,
-    number: _.isNumber,
-    object: _.isObject,
-    string: _.isString
+    array: utils$1.isArray,
+    boolean: utils$1.isBoolean,
+    integer: utils$1.isInteger,
+    'null': utils$1.isNull,
+    number: utils$1.isNumber,
+    object: utils$1.isObject,
+    string: utils$1.isString
   };
-
-  /**
-   * TODO
-   *
-   * @name Schema.typeGroupValidators
-   * @type {Object}
-   */
-  var typeGroupValidators = {};
-
-  /**
-   * TODO
-   *
-   * @name Schema.validationKeywords
-   * @type {Object}
-   */
-  var validationKeywords = {};
 
   /**
    * @ignore
@@ -3338,7 +3376,7 @@
   var segmentToString = function segmentToString(segment, prev) {
     var str = '';
     if (segment) {
-      if (_.isNumber(segment)) {
+      if (utils$1.isNumber(segment)) {
         str += '[' + segment + ']';
       } else if (prev) {
         str += '.' + segment;
@@ -3402,266 +3440,12 @@
   };
 
   /**
-   * @ignore
-   */
-  var validateKeyword = function validateKeyword(op, value, schema, opts) {
-    return !_.isUndefined(schema[op]) && validationKeywords[op](value, schema, opts);
-  };
-
-  /**
-   * @ignore
-   */
-  var runOps = function runOps(ops, value, schema, opts) {
-    var errors = [];
-    ops.forEach(function (op) {
-      errors = errors.concat(validateKeyword(op, value, schema, opts) || []);
-    });
-    return errors.length ? errors : undefined;
-  };
-
-  var ANY_OPS = ['enum', 'type', 'allOf', 'anyOf', 'oneOf', 'not'];
-  var ARRAY_OPS = ['items', 'maxItems', 'minItems', 'uniqueItems'];
-  var NUMERIC_OPS = ['multipleOf', 'maximum', 'minimum'];
-  var OBJECT_OPS = ['maxProperties', 'minProperties', 'required', 'properties', 'dependencies'];
-  var STRING_OPS = ['maxLength', 'minLength', 'pattern'];
-
-  /**
-   * http://json-schema.org/latest/json-schema-validation.html#anchor75
-   * @ignore
-   */
-  var validateAny = function validateAny(value, schema, opts) {
-    return runOps(ANY_OPS, value, schema, opts);
-  };
-
-  /**
    * TODO
    *
-   * @name Schema.validate
-   * @method
-   * @param {*} value TODO
-   * @param {Object} [schema] TODO
-   * @param {Object} [opts] Configuration options.
+   * @name Schema.validationKeywords
+   * @type {Object}
    */
-  var validate = function validate(value, schema, opts) {
-    var errors = [];
-    opts || (opts = {});
-    var shouldPop = void 0;
-    var prevProp = opts.prop;
-    if (_.isUndefined(schema)) {
-      return;
-    }
-    if (!_.isObject(schema)) {
-      throw new Error('Invalid schema at path: "' + opts.path + '"');
-    }
-    if (_.isUndefined(opts.path)) {
-      opts.path = [];
-    }
-    // Track our location as we recurse
-    if (!_.isUndefined(opts.prop)) {
-      shouldPop = true;
-      opts.path.push(opts.prop);
-      opts.prop = undefined;
-    }
-    // Validate against parent schema
-    if (schema['extends']) {
-      // opts.path = path
-      // opts.prop = prop
-      if (_.isFunction(schema['extends'].validate)) {
-        errors = errors.concat(schema['extends'].validate(value, opts) || []);
-      } else {
-        errors = errors.concat(validate(value, schema['extends'], opts) || []);
-      }
-    }
-    if (_.isUndefined(value)) {
-      // Check if property is required
-      if (schema.required === true) {
-        addError(value, 'a value', opts, errors);
-      }
-      if (shouldPop) {
-        opts.path.pop();
-        opts.prop = prevProp;
-      }
-      return errors.length ? errors : undefined;
-    }
-    errors = errors.concat(validateAny(value, schema, opts) || []);
-    if (shouldPop) {
-      opts.path.pop();
-      opts.prop = prevProp;
-    }
-    return errors.length ? errors : undefined;
-  };
-
-  Schema.types = types;
-  Schema.typeGroupValidators = typeGroupValidators;
-  Schema.validationKeywords = validationKeywords;
-  Schema.validate = validate;
-
-  // These strings are cached for optimal performance of the change detection
-  // boolean - Whether a Record is changing in the current execution frame
-  var changingPath = 'changing';
-  // string[] - Properties that have changed in the current execution frame
-  var changedPath = 'changed';
-  // boolean - Whether a Record is currently being instantiated
-  var creatingPath = 'creating';
-  // number - The setTimeout change event id of a Record, if any
-  var eventIdPath = 'eventId';
-  // boolean - Whether to skip validation for a Record's currently changing property
-  var noValidatePath = 'noValidate';
-  // boolean - Whether to skip change notification for a Record's currently
-  // changing property
-  var silentPath = 'silent';
-  var validationFailureMsg = 'validation failed';
-
-  /**
-   * Assemble a property descriptor which will be added to the prototype of
-   * {@link Mapper#RecordClass}. This method is called when
-   * {@link Mapper#applySchema} is set to `true`.
-   *
-   * TODO: Make this more configurable, i.e. not so tied to the Record class.
-   *
-   * @ignore
-   */
-  var makeDescriptor = function makeDescriptor(prop, schema, opts) {
-    var descriptor = {
-      // These properties are enumerable by default, but regardless of their
-      // enumerability, they won't be "own" properties of individual records
-      enumerable: _.isUndefined(schema.enumerable) ? true : !!schema.enumerable
-    };
-    // Cache a few strings for optimal performance
-    var keyPath = 'props.' + prop;
-    var previousPath = 'previous.' + prop;
-    var getter = opts.getter;
-    var setter = opts.setter;
-    var unsetter = opts.unsetter;
-
-    descriptor.get = function () {
-      return this._get(keyPath);
-    };
-    descriptor.set = function (value) {
-      var self = this;
-      // These are accessed a lot
-      var _get = self[getter];
-      var _set = self[setter];
-      var _unset = self[unsetter];
-
-      // Optionally check that the new value passes validation
-      if (!_get(noValidatePath)) {
-        var errors = schema.validate(value);
-        if (errors) {
-          // Immediately throw an error, preventing the record from getting into
-          // an invalid state
-          var error = new Error(validationFailureMsg);
-          error.errors = errors;
-          throw error;
-        }
-      }
-      // TODO: Make it so tracking can be turned on for all properties instead of
-      // only per-property
-      if (schema.track && !_get(creatingPath)) {
-        (function () {
-          var previous = _get(previousPath);
-          var current = _get(keyPath);
-          var changing = _get(changingPath);
-          var changed = _get(changedPath);
-
-          if (!changing) {
-            // Track properties that are changing in the current event loop
-            changed = [];
-          }
-
-          // Add changing properties to this array once at most
-          var index = changed.indexOf(prop);
-          if (current !== value && index === -1) {
-            changed.push(prop);
-          }
-          if (previous === value) {
-            if (index >= 0) {
-              changed.splice(index, 1);
-            }
-          }
-          // No changes in current event loop
-          if (!changed.length) {
-            changing = false;
-            _unset(changingPath);
-            _unset(changedPath);
-            // Cancel pending change event
-            if (_get(eventIdPath)) {
-              clearTimeout(_get(eventIdPath));
-              _unset(eventIdPath);
-            }
-          }
-          // Changes detected in current event loop
-          if (!changing && changed.length) {
-            _set(changedPath, changed);
-            _set(changingPath, true);
-            // Saving the timeout id allows us to batch all changes in the same
-            // event loop into a single "change"
-            // TODO: Optimize
-            _set(eventIdPath, setTimeout(function () {
-              // Previous event loop where changes were gathered has ended, so
-              // notify any listeners of those changes and prepare for any new
-              // changes
-              _unset(changedPath);
-              _unset(eventIdPath);
-              _unset(changingPath);
-              // TODO: Optimize
-              if (!_get(silentPath)) {
-                var i = void 0;
-                for (i = 0; i < changed.length; i++) {
-                  self.emit('change:' + changed[i], self, _.get(self, changed[i]));
-                }
-                self.emit('change', self, self.changes());
-              }
-              _unset(silentPath);
-            }, 0));
-          }
-        })();
-      }
-      _set(keyPath, value);
-      return value;
-    };
-
-    return descriptor;
-  };
-
-  _.addHiddenPropsToTarget(Schema.prototype, {
-    /**
-     * This adds ES5 getters/setters to the target based on the "properties" in
-     * this Schema, which makes possible change tracking and validation on
-     * property assignment.
-     *
-     * @name Schema#validate
-     * @method
-     * @param {Object} target The prototype to which to apply this schema.
-     */
-
-    apply: function apply(target, opts) {
-      opts || (opts = {});
-      opts.getter = opts.getter || '_get';
-      opts.setter = opts.setter || '_set';
-      opts.unsetter = opts.unsetter || '_unset';
-      var properties = this.properties || {};
-      _.forOwn(properties, function (schema, prop) {
-        Object.defineProperty(target, prop, makeDescriptor(prop, schema, opts));
-      });
-    },
-
-
-    /**
-     * Validate the provided value against this schema.
-     *
-     * @name Schema#validate
-     * @method
-     * @param {*} value Value to validate.
-     * @param {Object} [opts] Configuration options.
-     * @return {(array|undefined)} Array of errors or `undefined` if valid.
-     */
-    validate: function validate(value, opts) {
-      return Schema.validate(value, this, opts);
-    }
-  });
-
-  _.fillIn(validationKeywords, {
+  var validationKeywords = {
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor82
      *
@@ -3675,7 +3459,7 @@
     allOf: function allOf(value, schema, opts) {
       var allErrors = [];
       schema.allOf.forEach(function (_schema) {
-        allErrors = allErrors.concat(validate(value, _schema, opts) || []);
+        allErrors = allErrors.concat(_validate(value, _schema, opts) || []);
       });
       return allErrors.length ? undefined : allErrors;
     },
@@ -3694,7 +3478,7 @@
       var validated = false;
       var allErrors = [];
       schema.anyOf.forEach(function (_schema) {
-        var errors = validate(value, _schema, opts);
+        var errors = _validate(value, _schema, opts);
         if (errors) {
           allErrors = allErrors.concat(errors);
         } else {
@@ -3750,7 +3534,7 @@
       // TODO: additionalItems
       var items = schema.items;
       var errors = [];
-      var checkingTuple = _.isArray(items);
+      var checkingTuple = utils$1.isArray(items);
       var length = value.length;
       for (var prop = 0; prop < length; prop++) {
         if (checkingTuple) {
@@ -3759,7 +3543,7 @@
           items = schema.items[prop];
         }
         opts.prop = prop;
-        errors = errors.concat(validate(value[prop], items, opts) || []);
+        errors = errors.concat(_validate(value[prop], items, opts) || []);
       }
       return errors.length ? errors : undefined;
     },
@@ -3927,7 +3711,7 @@
      * @param {Object} opts TODO
      */
     not: function not(value, schema, opts) {
-      if (!validate(value, schema.not, opts)) {
+      if (!_validate(value, schema.not, opts)) {
         // TODO: better messaging
         return makeError('succeeded', 'should have failed', opts);
       }
@@ -3947,7 +3731,7 @@
       var validated = false;
       var allErrors = [];
       schema.oneOf.forEach(function (_schema) {
-        var errors = validate(value, _schema, opts);
+        var errors = _validate(value, _schema, opts);
         if (errors) {
           allErrors = allErrors.concat(errors);
         } else if (validated) {
@@ -3973,7 +3757,7 @@
      */
     pattern: function pattern(value, schema, opts) {
       var pattern = schema.pattern;
-      if (_.isString(value) && !value.match(pattern)) {
+      if (utils$1.isString(value) && !value.match(pattern)) {
         return makeError(value, pattern, opts);
       }
     },
@@ -3993,7 +3777,7 @@
       // Can be a boolean or an object
       // Technically the default is an "empty schema", but here "true" is
       // functionally the same
-      var additionalProperties = _.isUndefined(schema.additionalProperties) ? true : schema.additionalProperties;
+      var additionalProperties = utils$1.isUndefined(schema.additionalProperties) ? true : schema.additionalProperties;
       // "s": The property set of the instance to validate.
       var toValidate = {};
       // "p": The property set from "properties".
@@ -4005,25 +3789,25 @@
       var errors = [];
 
       // Collect set "s"
-      _.forOwn(value, function (_value, prop) {
+      utils$1.forOwn(value, function (_value, prop) {
         toValidate[prop] = undefined;
       });
       // Remove from "s" all elements of "p", if any.
-      _.forOwn(properties || {}, function (_schema, prop) {
-        if (_.isUndefined(value[prop]) && !_.isUndefined(_schema['default'])) {
-          value[prop] = _.copy(_schema['default']);
+      utils$1.forOwn(properties || {}, function (_schema, prop) {
+        if (utils$1.isUndefined(value[prop]) && !utils$1.isUndefined(_schema['default'])) {
+          value[prop] = utils$1.copy(_schema['default']);
         }
         opts.prop = prop;
-        errors = errors.concat(validate(value[prop], _schema, opts) || []);
+        errors = errors.concat(_validate(value[prop], _schema, opts) || []);
         delete toValidate[prop];
       });
       // For each regex in "pp", remove all elements of "s" which this regex
       // matches.
-      _.forOwn(patternProperties, function (_schema, pattern) {
-        _.forOwn(toValidate, function (undef, prop) {
+      utils$1.forOwn(patternProperties, function (_schema, pattern) {
+        utils$1.forOwn(toValidate, function (undef, prop) {
           if (prop.match(pattern)) {
             opts.prop = prop;
-            errors = errors.concat(validate(value[prop], _schema, opts) || []);
+            errors = errors.concat(_validate(value[prop], _schema, opts) || []);
             delete toValidate[prop];
           }
         });
@@ -4034,11 +3818,11 @@
         if (keys.length) {
           addError('extra fields: ' + keys.join(', '), 'no extra fields', opts, errors);
         }
-      } else if (_.isObject(additionalProperties)) {
+      } else if (utils$1.isObject(additionalProperties)) {
         // Otherwise, validate according to provided schema
         keys.forEach(function (prop) {
           opts.prop = prop;
-          errors = errors.concat(validate(value[prop], additionalProperties, opts) || []);
+          errors = errors.concat(_validate(value[prop], additionalProperties, opts) || []);
         });
       }
       return errors.length ? errors : undefined;
@@ -4059,7 +3843,7 @@
       var errors = [];
       if (!opts.existingOnly) {
         required.forEach(function (prop) {
-          if (_.isUndefined(_.get(value, prop))) {
+          if (utils$1.isUndefined(utils$1.get(value, prop))) {
             var prevProp = opts.prop;
             opts.prop = prop;
             addError(undefined, 'a value', opts, errors);
@@ -4084,7 +3868,7 @@
       var type = schema.type;
       var validType = void 0;
       // Can be one of several types
-      if (_.isString(type)) {
+      if (utils$1.isString(type)) {
         type = [type];
       }
       // Try to match the value against an expected type
@@ -4137,9 +3921,233 @@
         }
       }
     }
-  });
+  };
 
-  _.fillIn(typeGroupValidators, {
+  /**
+   * @ignore
+   */
+  var validateKeyword = function validateKeyword(op, value, schema, opts) {
+    return !utils$1.isUndefined(schema[op]) && validationKeywords[op](value, schema, opts);
+  };
+
+  /**
+   * @ignore
+   */
+  var runOps = function runOps(ops, value, schema, opts) {
+    var errors = [];
+    ops.forEach(function (op) {
+      errors = errors.concat(validateKeyword(op, value, schema, opts) || []);
+    });
+    return errors.length ? errors : undefined;
+  };
+
+  var ANY_OPS = ['enum', 'type', 'allOf', 'anyOf', 'oneOf', 'not'];
+  var ARRAY_OPS = ['items', 'maxItems', 'minItems', 'uniqueItems'];
+  var NUMERIC_OPS = ['multipleOf', 'maximum', 'minimum'];
+  var OBJECT_OPS = ['maxProperties', 'minProperties', 'required', 'properties', 'dependencies'];
+  var STRING_OPS = ['maxLength', 'minLength', 'pattern'];
+
+  /**
+   * http://json-schema.org/latest/json-schema-validation.html#anchor75
+   * @ignore
+   */
+  var validateAny = function validateAny(value, schema, opts) {
+    return runOps(ANY_OPS, value, schema, opts);
+  };
+
+  /**
+   * TODO
+   *
+   * @name Schema.validate
+   * @method
+   * @param {*} value TODO
+   * @param {Object} [schema] TODO
+   * @param {Object} [opts] Configuration options.
+   */
+  var _validate = function _validate(value, schema, opts) {
+    var errors = [];
+    opts || (opts = {});
+    var shouldPop = void 0;
+    var prevProp = opts.prop;
+    if (utils$1.isUndefined(schema)) {
+      return;
+    }
+    if (!utils$1.isObject(schema)) {
+      throw new Error('Invalid schema at path: "' + opts.path + '"');
+    }
+    if (utils$1.isUndefined(opts.path)) {
+      opts.path = [];
+    }
+    // Track our location as we recurse
+    if (!utils$1.isUndefined(opts.prop)) {
+      shouldPop = true;
+      opts.path.push(opts.prop);
+      opts.prop = undefined;
+    }
+    // Validate against parent schema
+    if (schema['extends']) {
+      // opts.path = path
+      // opts.prop = prop
+      if (utils$1.isFunction(schema['extends'].validate)) {
+        errors = errors.concat(schema['extends'].validate(value, opts) || []);
+      } else {
+        errors = errors.concat(_validate(value, schema['extends'], opts) || []);
+      }
+    }
+    if (utils$1.isUndefined(value)) {
+      // Check if property is required
+      if (schema.required === true) {
+        addError(value, 'a value', opts, errors);
+      }
+      if (shouldPop) {
+        opts.path.pop();
+        opts.prop = prevProp;
+      }
+      return errors.length ? errors : undefined;
+    }
+    errors = errors.concat(validateAny(value, schema, opts) || []);
+    if (shouldPop) {
+      opts.path.pop();
+      opts.prop = prevProp;
+    }
+    return errors.length ? errors : undefined;
+  };
+
+  // These strings are cached for optimal performance of the change detection
+  // boolean - Whether a Record is changing in the current execution frame
+  var changingPath = 'changing';
+  // string[] - Properties that have changed in the current execution frame
+  var changedPath = 'changed';
+  // boolean - Whether a Record is currently being instantiated
+  var creatingPath = 'creating';
+  // number - The setTimeout change event id of a Record, if any
+  var eventIdPath = 'eventId';
+  // boolean - Whether to skip validation for a Record's currently changing property
+  var noValidatePath = 'noValidate';
+  // boolean - Whether to skip change notification for a Record's currently
+  // changing property
+  var silentPath = 'silent';
+  var validationFailureMsg = 'validation failed';
+
+  /**
+   * Assemble a property descriptor which will be added to the prototype of
+   * {@link Mapper#recordClass}. This method is called when
+   * {@link Mapper#applySchema} is set to `true`.
+   *
+   * TODO: Make this more configurable, i.e. not so tied to the Record class.
+   *
+   * @ignore
+   */
+  var makeDescriptor = function makeDescriptor(prop, schema, opts) {
+    var descriptor = {
+      // These properties are enumerable by default, but regardless of their
+      // enumerability, they won't be "own" properties of individual records
+      enumerable: utils$1.isUndefined(schema.enumerable) ? true : !!schema.enumerable
+    };
+    // Cache a few strings for optimal performance
+    var keyPath = 'props.' + prop;
+    var previousPath = 'previous.' + prop;
+    var getter = opts.getter;
+    var setter = opts.setter;
+    var unsetter = opts.unsetter;
+
+    descriptor.get = function () {
+      return this._get(keyPath);
+    };
+    descriptor.set = function (value) {
+      var self = this;
+      // These are accessed a lot
+      var _get = self[getter];
+      var _set = self[setter];
+      var _unset = self[unsetter];
+
+      // Optionally check that the new value passes validation
+      if (!_get(noValidatePath)) {
+        var errors = schema.validate(value);
+        if (errors) {
+          // Immediately throw an error, preventing the record from getting into
+          // an invalid state
+          var error = new Error(validationFailureMsg);
+          error.errors = errors;
+          throw error;
+        }
+      }
+      // TODO: Make it so tracking can be turned on for all properties instead of
+      // only per-property
+      if (schema.track && !_get(creatingPath)) {
+        (function () {
+          var previous = _get(previousPath);
+          var current = _get(keyPath);
+          var changing = _get(changingPath);
+          var changed = _get(changedPath);
+
+          if (!changing) {
+            // Track properties that are changing in the current event loop
+            changed = [];
+          }
+
+          // Add changing properties to this array once at most
+          var index = changed.indexOf(prop);
+          if (current !== value && index === -1) {
+            changed.push(prop);
+          }
+          if (previous === value) {
+            if (index >= 0) {
+              changed.splice(index, 1);
+            }
+          }
+          // No changes in current event loop
+          if (!changed.length) {
+            changing = false;
+            _unset(changingPath);
+            _unset(changedPath);
+            // Cancel pending change event
+            if (_get(eventIdPath)) {
+              clearTimeout(_get(eventIdPath));
+              _unset(eventIdPath);
+            }
+          }
+          // Changes detected in current event loop
+          if (!changing && changed.length) {
+            _set(changedPath, changed);
+            _set(changingPath, true);
+            // Saving the timeout id allows us to batch all changes in the same
+            // event loop into a single "change"
+            // TODO: Optimize
+            _set(eventIdPath, setTimeout(function () {
+              // Previous event loop where changes were gathered has ended, so
+              // notify any listeners of those changes and prepare for any new
+              // changes
+              _unset(changedPath);
+              _unset(eventIdPath);
+              _unset(changingPath);
+              // TODO: Optimize
+              if (!_get(silentPath)) {
+                var i = void 0;
+                for (i = 0; i < changed.length; i++) {
+                  self.emit('change:' + changed[i], self, utils$1.get(self, changed[i]));
+                }
+                self.emit('change', self, self.changes());
+              }
+              _unset(silentPath);
+            }, 0));
+          }
+        })();
+      }
+      _set(keyPath, value);
+      return value;
+    };
+
+    return descriptor;
+  };
+
+  /**
+   * TODO
+   *
+   * @name Schema.typeGroupValidators
+   * @type {Object}
+   */
+  var typeGroupValidators = {
     /**
      * TODO
      *
@@ -4225,6 +4233,74 @@
     string: function string(value, schema, opts) {
       return runOps(STRING_OPS, value, schema, opts);
     }
+  };
+
+  /**
+   * js-data's Schema class.
+   *
+   * ```javascript
+   * import {Schema} from 'js-data'
+   * ```
+   *
+   * @class Schema
+   * @extends Component
+   * @param {Object} definition Schema definition according to json-schema.org
+   */
+  var Schema = Component.extend({
+    constructor: function Schema(definition) {
+      // const self = this
+      definition || (definition = {});
+      // TODO: schema validation
+      utils$1.fillIn(this, definition);
+
+      // TODO: rework this to make sure all possible keywords are converted
+      if (definition.properties) {
+        utils$1.forOwn(definition.properties, function (_definition, prop) {
+          if (!(_definition instanceof Schema)) {
+            definition.properties[prop] = new Schema(_definition);
+          }
+        });
+      }
+    },
+
+    /**
+     * This adds ES5 getters/setters to the target based on the "properties" in
+     * this Schema, which makes possible change tracking and validation on
+     * property assignment.
+     *
+     * @name Schema#validate
+     * @method
+     * @param {Object} target The prototype to which to apply this schema.
+     */
+    apply: function apply(target, opts) {
+      opts || (opts = {});
+      opts.getter = opts.getter || '_get';
+      opts.setter = opts.setter || '_set';
+      opts.unsetter = opts.unsetter || '_unset';
+      var properties = this.properties || {};
+      utils$1.forOwn(properties, function (schema, prop) {
+        Object.defineProperty(target, prop, makeDescriptor(prop, schema, opts));
+      });
+    },
+
+
+    /**
+     * Validate the provided value against this schema.
+     *
+     * @name Schema#validate
+     * @method
+     * @param {*} value Value to validate.
+     * @param {Object} [opts] Configuration options.
+     * @return {(array|undefined)} Array of errors or `undefined` if valid.
+     */
+    validate: function validate(value, opts) {
+      return _validate(value, this, opts);
+    }
+  }, {
+    typeGroupValidators: typeGroupValidators,
+    types: types,
+    validate: _validate,
+    validationKeywords: validationKeywords
   });
 
   var notify = function notify() {
@@ -4259,7 +4335,7 @@
 
   var MAPPER_DEFAULTS = {
     /**
-     * Whether to augment {@link Mapper#RecordClass} with getter/setter property
+     * Whether to augment {@link Mapper#recordClass} with getter/setter property
      * accessors according to the properties defined in {@link Mapper#schema}.
      * This makes possible validation and change tracking on individual properties
      * when using the dot (e.g. `user.name = "Bob"`) operator to modify a
@@ -4272,15 +4348,6 @@
     applySchema: true,
 
     /**
-     * The name of the registered adapter that this Mapper should used by default.
-     *
-     * @name Mapper#defaultAdapter
-     * @type {string}
-     * @default "http"
-     */
-    defaultAdapter: 'http',
-
-    /**
      * Whether to enable debug-level logs.
      *
      * @name Mapper#debug
@@ -4288,6 +4355,15 @@
      * @default false
      */
     debug: false,
+
+    /**
+     * The name of the registered adapter that this Mapper should used by default.
+     *
+     * @name Mapper#defaultAdapter
+     * @type {string}
+     * @default "http"
+     */
+    defaultAdapter: 'http',
 
     /**
      * The field used as the unique identifier on records handled by this Mapper.
@@ -4300,58 +4376,61 @@
 
     lifecycleMethods: {
       count: {
-        types: [],
         defaults: [{}, {}],
-        skip: true
+        skip: true,
+        types: []
       },
       destroy: {
-        types: [],
         defaults: [{}, {}],
-        skip: true
+        skip: true,
+        types: []
       },
       destroyAll: {
-        types: [],
         defaults: [{}, {}],
-        skip: true
+        skip: true,
+        types: []
       },
       find: {
-        types: [],
-        defaults: [undefined, {}]
+        defaults: [undefined, {}],
+        types: []
       },
       findAll: {
-        types: [],
-        defaults: [{}, {}]
+        defaults: [{}, {}],
+        types: []
       },
       sum: {
-        types: [],
         defaults: [undefined, {}, {}],
-        skip: true
+        skip: true,
+        types: []
       },
       update: {
-        types: [],
-        defaults: [undefined, {}, {}],
-        beforeAssign: 1,
         adapterArgs: function adapterArgs(mapper, id, props, opts) {
           return [id, mapper.toJSON(props, opts), opts];
-        }
+        },
+
+        beforeAssign: 1,
+        defaults: [undefined, {}, {}],
+        types: []
       },
       updateAll: {
-        types: [],
-        defaults: [{}, {}, {}],
-        beforeAssign: 0,
         adapterArgs: function adapterArgs(mapper, props, query, opts) {
           return [mapper.toJSON(props, opts), query, opts];
-        }
+        },
+
+        beforeAssign: 0,
+        defaults: [{}, {}, {}],
+        types: []
       },
       updateMany: {
-        types: [],
-        defaults: [[], {}],
-        beforeAssign: 0,
         adapterArgs: function adapterArgs(mapper, records, opts) {
           return [records.map(function (record) {
             return mapper.toJSON(record, opts);
           }), opts];
-        }
+        },
+
+        beforeAssign: 0,
+        defaults: [[], {}],
+        types: []
       }
     },
 
@@ -4372,7 +4451,7 @@
      * @name Mapper#notify
      * @type {boolean}
      */
-    notify: _.isBrowser,
+    notify: utils$1.isBrowser,
 
     /**
      * Whether {@link Mapper#create}, {@link Mapper#createMany}, {@link Mapper#save},
@@ -4411,7 +4490,7 @@
    * relational or document-based database. JSData's Mapper can work with any
    * persistence layer you can write an adapter for.
    *
-   * _._("Model" is a heavily overloaded term and is avoided in this documentation
+   * utils._("Model" is a heavily overloaded term and is avoided in this documentation
    * to prevent confusion.)_
    *
    * [orm]: https://en.wikipedia.org/wiki/Object-relational_mapping
@@ -4420,153 +4499,123 @@
    * [record]: Record.html
    *
    * @class Mapper
+   * @extends Component
    * @param {Object} [opts] Configuration options.
    */
-  function Mapper(opts) {
-    var self = this;
-    _.classCallCheck(self, Mapper);
-
-    opts || (opts = {});
-
-    /**
-     * Hash of registered adapters. Don't modify. Use {@link Mapper#registerAdapter}.
-     *
-     * @name Mapper#_adapters
-     * @private
-     */
-    Object.defineProperty(self, '_adapters', {
-      value: undefined,
-      writable: true
-    });
-
-    /**
-     * Hash of registered listeners. Don't modify. Use {@link Mapper#on} and
-     * {@link Mapper#off}.
-     *
-     * @name Mapper#_listeners
-     * @private
-     */
-    Object.defineProperty(self, '_listeners', {
-      value: {},
-      writable: true
-    });
-
-    /**
-     * Set the `false` to force the Mapper to work with POJO objects only.
-     *
-     * ```javascript
-     * import {Mapper, Record} from 'js-data'
-     * const UserMapper = new Mapper({ RecordClass: false })
-     * UserMapper.RecordClass // false
-     * const user = UserMapper#createRecord()
-     * user instanceof Record // false
-     * ```
-     *
-     * Set to a custom class to have records wrapped in your custom class.
-     *
-     * ```javascript
-     * import {Mapper, Record} from 'js-data'
-     *  // Custom class
-     * class User {
-     *   constructor (props = {}) {
-     *     for (var key in props) {
-     *       if (props.hasOwnProperty(key)) {
-     *         this[key] = props[key]
-     *       }
-     *     }
-     *   }
-     * }
-     * const UserMapper = new Mapper({ RecordClass: User })
-     * UserMapper.RecordClass // function User() {}
-     * const user = UserMapper#createRecord()
-     * user instanceof Record // false
-     * user instanceof User // true
-     * ```
-     *
-     * Extend the {@link Record} class.
-     *
-     * ```javascript
-     * import {Mapper, Record} from 'js-data'
-     *  // Custom class
-     * class User extends Record {
-     *   constructor () {
-     *     super(props)
-     *   }
-     * }
-     * const UserMapper = new Mapper({ RecordClass: User })
-     * UserMapper.RecordClass // function User() {}
-     * const user = UserMapper#createRecord()
-     * user instanceof Record // true
-     * user instanceof User // true
-     * ```
-     *
-     * @name Mapper#RecordClass
-     * @default {@link Record}
-     */
-    Object.defineProperty(self, 'RecordClass', {
-      value: undefined,
-      writable: true
-    });
-
-    _.fillIn(self, opts);
-    _.fillIn(self, _.copy(MAPPER_DEFAULTS));
-
-    if (!self.name) {
-      throw new Error('mapper cannot function without a name!');
-    }
-
-    self._adapters || (self._adapters = {});
-
-    if (!(self.schema instanceof Schema)) {
-      self.schema = new Schema(self.schema || {});
-    }
-
-    if (_.isUndefined(self.RecordClass)) {
-      self.RecordClass = Record.extend();
-    }
-
-    if (self.RecordClass) {
-      self.RecordClass.Mapper = self;
-
-      // We can only apply the schema to the prototype of self.RecordClass if the
-      // class extends Record
-      if (_.getSuper(self.RecordClass, true) === Record && self.schema && self.schema.apply && self.applySchema) {
-        self.schema.apply(self.RecordClass.prototype);
-      }
-    }
-  }
-
-  _.addHiddenPropsToTarget(Mapper.prototype, {
-    /**
-     * @name Mapper#_end
-     * @method
-     * @private
-     */
-
-    _end: function _end(result, opts, skip) {
+  var Mapper = Component.extend({
+    constructor: function Mapper(opts) {
       var self = this;
-      if (opts.raw) {
-        _._(opts, result);
-      }
-      if (skip) {
-        return result;
-      }
-      var _data = opts.raw ? result.data : result;
-      if (_.isArray(_data) && _data.length && _.isObject(_data[0])) {
-        _data = _data.map(function (item) {
-          return self.createRecord(item);
-        });
-      } else if (_.isObject(_data)) {
-        _data = self.createRecord(_data);
-      }
-      if (opts.raw) {
-        result.data = _data;
-      } else {
-        result = _data;
-      }
-      return result;
-    },
+      utils$1.classCallCheck(self, Mapper);
+      Mapper.__super__.call(self);
+      opts || (opts = {});
 
+      /**
+       * Hash of registered adapters. Don't modify. Use {@link Mapper#registerAdapter}.
+       *
+       * @name Mapper#_adapters
+       * @private
+       */
+      Object.defineProperty(self, '_adapters', {
+        value: undefined,
+        writable: true
+      });
+
+      /**
+       * Hash of registered listeners. Don't modify. Use {@link Mapper#on} and
+       * {@link Mapper#off}.
+       *
+       * @name Mapper#_listeners
+       * @private
+       */
+      Object.defineProperty(self, '_listeners', {
+        value: {},
+        writable: true
+      });
+
+      /**
+       * Set the `false` to force the Mapper to work with POJO objects only.
+       *
+       * ```javascript
+       * import {Mapper, Record} from 'js-data'
+       * const UserMapper = new Mapper({ recordClass: false })
+       * UserMapper.recordClass // false
+       * const user = UserMapper#createRecord()
+       * user instanceof Record // false
+       * ```
+       *
+       * Set to a custom class to have records wrapped in your custom class.
+       *
+       * ```javascript
+       * import {Mapper, Record} from 'js-data'
+       *  // Custom class
+       * class User {
+       *   constructor (props = {}) {
+       *     for (var key in props) {
+       *       if (props.hasOwnProperty(key)) {
+       *         this[key] = props[key]
+       *       }
+       *     }
+       *   }
+       * }
+       * const UserMapper = new Mapper({ recordClass: User })
+       * UserMapper.recordClass // function User() {}
+       * const user = UserMapper#createRecord()
+       * user instanceof Record // false
+       * user instanceof User // true
+       * ```
+       *
+       * Extend the {@link Record} class.
+       *
+       * ```javascript
+       * import {Mapper, Record} from 'js-data'
+       *  // Custom class
+       * class User extends Record {
+       *   constructor () {
+       *     super(props)
+       *   }
+       * }
+       * const UserMapper = new Mapper({ recordClass: User })
+       * UserMapper.recordClass // function User() {}
+       * const user = UserMapper#createRecord()
+       * user instanceof Record // true
+       * user instanceof User // true
+       * ```
+       *
+       * @name Mapper#recordClass
+       * @default {@link Record}
+       */
+      Object.defineProperty(self, 'recordClass', {
+        value: undefined,
+        writable: true
+      });
+
+      utils$1.fillIn(self, opts);
+      utils$1.fillIn(self, utils$1.copy(MAPPER_DEFAULTS));
+
+      if (!self.name) {
+        throw new Error('mapper cannot function without a name!');
+      }
+
+      self._adapters || (self._adapters = {});
+
+      if (!(self.schema instanceof Schema)) {
+        self.schema = new Schema(self.schema || {});
+      }
+
+      if (utils$1.isUndefined(self.recordClass)) {
+        self.recordClass = Record.extend();
+      }
+
+      if (self.recordClass) {
+        self.recordClass.mapper = self;
+
+        // We can only apply the schema to the prototype of self.recordClass if the
+        // class extends Record
+        if (utils$1.getSuper(self.recordClass, true) === Record && self.schema && self.schema.apply && self.applySchema) {
+          self.schema.apply(self.recordClass.prototype);
+        }
+      }
+    },
 
     /**
      * Mapper lifecycle hook called by {@link Mapper#count}. If this method
@@ -4850,6 +4899,36 @@
     beforeUpdateMany: notify,
 
     /**
+     * @name Mapper#_end
+     * @method
+     * @private
+     */
+    _end: function _end(result, opts, skip) {
+      var self = this;
+      if (opts.raw) {
+        utils$1._(opts, result);
+      }
+      if (skip) {
+        return result;
+      }
+      var _data = opts.raw ? result.data : result;
+      if (utils$1.isArray(_data) && _data.length && utils$1.isObject(_data[0])) {
+        _data = _data.map(function (item) {
+          return self.createRecord(item);
+        });
+      } else if (utils$1.isObject(_data)) {
+        _data = self.createRecord(_data);
+      }
+      if (opts.raw) {
+        result.data = _data;
+      } else {
+        result = _data;
+      }
+      return result;
+    },
+
+
+    /**
      * Usage:
      *
      * Post.belongsTo(User, {
@@ -4864,8 +4943,8 @@
      * @name Mapper#belongsTo
      * @method
      */
-    belongsTo: function belongsTo(RelatedMapper, opts) {
-      return _belongsTo(RelatedMapper, opts)(this);
+    belongsTo: function belongsTo(relatedMapper, opts) {
+      return _belongsTo(relatedMapper, opts)(this);
     },
 
 
@@ -4933,41 +5012,41 @@
       opts || (opts = {});
 
       // Fill in "opts" with the Mapper's configuration
-      _._(self, opts);
+      utils$1._(self, opts);
       adapter = opts.adapter = self.getAdapterName(opts);
 
       // beforeCreate lifecycle hook
       op = opts.op = 'beforeCreate';
-      return _.resolve(self[op](props, opts)).then(function (_props) {
+      return utils$1.resolve(self[op](props, opts)).then(function (_props) {
         // Allow for re-assignment from lifecycle hook
-        props = _.isUndefined(_props) ? props : _props;
+        props = utils$1.isUndefined(_props) ? props : _props;
 
         // Deep pre-create belongsTo relations
         var belongsToRelationData = {};
         opts.with || (opts.with = []);
         var tasks = [];
-        _.forEachRelation(self, opts, function (def, __opts) {
+        utils$1.forEachRelation(self, opts, function (def, optsCopy) {
           var relationData = def.getLocalField(props);
           if (def.type === belongsToType && relationData) {
             // Create belongsTo relation first because we need a generated id to
             // attach to the child
-            tasks.push(def.getRelation().create(relationData, __opts).then(function (data) {
-              var relatedRecord = __opts.raw ? data.data : data;
+            tasks.push(def.getRelation().create(relationData, optsCopy).then(function (data) {
+              var relatedRecord = optsCopy.raw ? data.data : data;
               def.setLocalField(belongsToRelationData, relatedRecord);
               def.setForeignKey(props, relatedRecord);
             }));
           }
         });
-        return Promise.all(tasks).then(function () {
+        return utils$1.Promise.all(tasks).then(function () {
           // Now delegate to the adapter for the main create
           op = opts.op = 'create';
           self.dbg(op, props, opts);
-          return _.resolve(self.getAdapter(adapter)[op](self, self.toJSON(props, { with: opts.pass || [] }), opts));
+          return utils$1.resolve(self.getAdapter(adapter)[op](self, self.toJSON(props, { with: opts.pass || [] }), opts));
         }).then(function (data) {
           var createdRecord = opts.raw ? data.data : data;
           // Deep post-create hasMany and hasOne relations
           tasks = [];
-          _.forEachRelation(self, opts, function (def, __opts) {
+          utils$1.forEachRelation(self, opts, function (def, optsCopy) {
             var relationData = def.getLocalField(props);
             if (!relationData) {
               return;
@@ -4977,12 +5056,12 @@
             // a generated id to attach to these items
             if (def.type === hasManyType) {
               def.setForeignKey(createdRecord, relationData);
-              task = def.getRelation().createMany(relationData, __opts).then(function (data) {
+              task = def.getRelation().createMany(relationData, optsCopy).then(function (data) {
                 def.setLocalField(createdRecord, opts.raw ? data.data : data);
               });
             } else if (def.type === hasOneType) {
               def.setForeignKey(createdRecord, relationData);
-              task = def.getRelation().create(relationData, __opts).then(function (data) {
+              task = def.getRelation().create(relationData, optsCopy).then(function (data) {
                 def.setLocalField(createdRecord, opts.raw ? data.data : data);
               });
             } else if (def.type === belongsToType && def.getLocalField(belongsToRelationData)) {
@@ -4992,7 +5071,7 @@
               tasks.push(task);
             }
           });
-          return Promise.all(tasks).then(function () {
+          return utils$1.Promise.all(tasks).then(function () {
             return data;
           });
         });
@@ -5000,14 +5079,14 @@
         result = self._end(result, opts);
         // afterCreate lifecycle hook
         op = opts.op = 'afterCreate';
-        return _.resolve(self[op](props, opts, result)).then(function (_result) {
+        return utils$1.resolve(self[op](props, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          return _.isUndefined(_result) ? result : _result;
+          return utils$1.isUndefined(_result) ? result : _result;
         });
       });
     },
-    createInstance: function createInstance() {
-      return this.createRecord.apply(this, arguments);
+    createInstance: function createInstance(props, opts) {
+      return this.createRecord(props, opts);
     },
 
 
@@ -5046,20 +5125,20 @@
       opts || (opts = {});
 
       // Fill in "opts" with the Mapper's configuration
-      _._(self, opts);
+      utils$1._(self, opts);
       adapter = opts.adapter = self.getAdapterName(opts);
 
       // beforeCreateMany lifecycle hook
       op = opts.op = 'beforeCreateMany';
-      return _.resolve(self[op](records, opts)).then(function (_records) {
+      return utils$1.resolve(self[op](records, opts)).then(function (_records) {
         // Allow for re-assignment from lifecycle hook
-        records = _.isUndefined(_records) ? records : _records;
+        records = utils$1.isUndefined(_records) ? records : _records;
 
         // Deep pre-create belongsTo relations
         var belongsToRelationData = {};
         opts.with || (opts.with = []);
         var tasks = [];
-        _.forEachRelation(self, opts, function (def, __opts) {
+        utils$1.forEachRelation(self, opts, function (def, optsCopy) {
           var relationData = records.map(function (record) {
             return def.getLocalField(record);
           }).filter(function (relatedRecord) {
@@ -5068,8 +5147,8 @@
           if (def.type === belongsToType && relationData.length === records.length) {
             // Create belongsTo relation first because we need a generated id to
             // attach to the child
-            tasks.push(def.getRelation().createMany(relationData, __opts).then(function (data) {
-              var relatedRecords = __opts.raw ? data.data : data;
+            tasks.push(def.getRelation().createMany(relationData, optsCopy).then(function (data) {
+              var relatedRecords = optsCopy.raw ? data.data : data;
               def.setLocalField(belongsToRelationData, relatedRecords);
               records.forEach(function (record, i) {
                 def.setForeignKey(record, relatedRecords[i]);
@@ -5077,20 +5156,20 @@
             }));
           }
         });
-        return Promise.all(tasks).then(function () {
+        return utils$1.Promise.all(tasks).then(function () {
           // Now delegate to the adapter
           op = opts.op = 'createMany';
           var json = records.map(function (record) {
             return self.toJSON(record, { with: opts.pass || [] });
           });
           self.dbg(op, records, opts);
-          return _.resolve(self.getAdapter(adapter)[op](self, json, opts));
+          return utils$1.resolve(self.getAdapter(adapter)[op](self, json, opts));
         }).then(function (data) {
           var createdRecords = opts.raw ? data.data : data;
 
           // Deep post-create hasOne relations
           tasks = [];
-          _.forEachRelation(self, opts, function (def, __opts) {
+          utils$1.forEachRelation(self, opts, function (def, optsCopy) {
             var relationData = records.map(function (record) {
               return def.getLocalField(record);
             }).filter(function (relatedRecord) {
@@ -5110,7 +5189,7 @@
               createdRecords.forEach(function (createdRecord, i) {
                 def.setForeignKey(createdRecord, relationData[i]);
               });
-              task = def.getRelation().createMany(relationData, __opts).then(function (data) {
+              task = def.getRelation().createMany(relationData, optsCopy).then(function (data) {
                 var relatedData = opts.raw ? data.data : data;
                 createdRecords.forEach(function (createdRecord, i) {
                   def.setLocalField(createdRecord, relatedData[i]);
@@ -5125,7 +5204,7 @@
               tasks.push(task);
             }
           });
-          return Promise.all(tasks).then(function () {
+          return utils$1.Promise.all(tasks).then(function () {
             return data;
           });
         });
@@ -5133,9 +5212,9 @@
         result = self._end(result, opts);
         // afterCreateMany lifecycle hook
         op = opts.op = 'afterCreateMany';
-        return _.resolve(self[op](records, opts, result)).then(function (_result) {
+        return utils$1.resolve(self[op](records, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          return _.isUndefined(_result) ? result : _result;
+          return utils$1.isUndefined(_result) ? result : _result;
         });
       });
     },
@@ -5143,10 +5222,10 @@
 
     /**
      * Create an unsaved, uncached instance of this Mapper's
-     * {@link Mapper#RecordClass}.
+     * {@link Mapper#recordClass}.
      *
      * Returns `props` if `props` is already an instance of
-     * {@link Mapper#RecordClass}.
+     * {@link Mapper#recordClass}.
      *
      * @name Mapper#createRecord
      * @method
@@ -5158,21 +5237,21 @@
      */
     createRecord: function createRecord(props, opts) {
       var self = this;
-      var RecordClass = self.RecordClass;
+      var recordClass = self.recordClass;
       var relationList = self.relationList || [];
       relationList.forEach(function (def) {
         var relatedMapper = def.getRelation();
         var relationData = def.getLocalField(props);
-        if (_.isArray(relationData) && relationData.length && !relatedMapper.is(relationData[0])) {
+        if (utils$1.isArray(relationData) && relationData.length && !relatedMapper.is(relationData[0])) {
           def.setLocalField(props, relationData.map(function (relationDataItem) {
             return def.getRelation().createRecord(relationDataItem);
           }));
-        } else if (_.isObject(relationData) && !relatedMapper.is(relationData)) {
+        } else if (utils$1.isObject(relationData) && !relatedMapper.is(relationData)) {
           def.setLocalField(props, def.getRelation().createRecord(relationData));
         }
       });
       // Check to make sure "props" is not already an instance of this Mapper.
-      return RecordClass ? props instanceof RecordClass ? props : new RecordClass(props, opts) : props;
+      return recordClass ? props instanceof recordClass ? props : new recordClass(props, opts) : props; // eslint-disable-line
     },
 
 
@@ -5205,39 +5284,39 @@
 
       // Default values for arguments
       config.defaults.forEach(function (value, i) {
-        if (_.isUndefined(args[i])) {
-          args[i] = _.copy(value);
+        if (utils$1.isUndefined(args[i])) {
+          args[i] = utils$1.copy(value);
         }
       });
 
       var opts = args[args.length - 1];
 
       // Fill in "opts" with the Mapper's configuration
-      _._(self, opts);
+      utils$1._(self, opts);
       adapter = opts.adapter = self.getAdapterName(opts);
 
       // before lifecycle hook
       op = opts.op = before;
-      return _.resolve(self[op].apply(self, babelHelpers.toConsumableArray(args))).then(function (_value) {
+      return utils$1.resolve(self[op].apply(self, babelHelpers.toConsumableArray(args))).then(function (_value) {
         var _self$getAdapter;
 
-        if (!_.isUndefined(config.beforeAssign)) {
+        if (!utils$1.isUndefined(config.beforeAssign)) {
           // Allow for re-assignment from lifecycle hook
-          args[config.beforeAssign] = _.isUndefined(_value) ? args[config.beforeAssign] : _value;
+          args[config.beforeAssign] = utils$1.isUndefined(_value) ? args[config.beforeAssign] : _value;
         }
         // Now delegate to the adapter
         op = opts.op = method;
         args = config.adapterArgs ? config.adapterArgs.apply(config, [self].concat(babelHelpers.toConsumableArray(args))) : args;
         self.dbg.apply(self, [op].concat(babelHelpers.toConsumableArray(args)));
-        return _.resolve((_self$getAdapter = self.getAdapter(adapter))[op].apply(_self$getAdapter, [self].concat(babelHelpers.toConsumableArray(args))));
+        return utils$1.resolve((_self$getAdapter = self.getAdapter(adapter))[op].apply(_self$getAdapter, [self].concat(babelHelpers.toConsumableArray(args))));
       }).then(function (result) {
         result = self._end(result, opts, !!config.skip);
         args.push(result);
         // after lifecycle hook
         op = opts.op = after;
-        return _.resolve(self[op].apply(self, babelHelpers.toConsumableArray(args))).then(function (_result) {
+        return utils$1.resolve(self[op].apply(self, babelHelpers.toConsumableArray(args))).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          return _.isUndefined(_result) ? result : _result;
+          return utils$1.isUndefined(_result) ? result : _result;
         });
       });
     },
@@ -5387,7 +5466,7 @@
      */
     getAdapterName: function getAdapterName(opts) {
       opts || (opts = {});
-      if (_.isString(opts)) {
+      if (utils$1.isString(opts)) {
         opts = { adapter: opts };
       }
       return opts.adapter || opts.defaultAdapter;
@@ -5416,8 +5495,8 @@
      * @name Mapper#hasMany
      * @method
      */
-    hasMany: function hasMany(RelatedMapper, opts) {
-      return _hasMany(RelatedMapper, opts)(this);
+    hasMany: function hasMany(relatedMapper, opts) {
+      return _hasMany(relatedMapper, opts)(this);
     },
 
 
@@ -5431,23 +5510,23 @@
      * @name Mapper#hasOne
      * @method
      */
-    hasOne: function hasOne(RelatedMapper, opts) {
-      return _hasOne(RelatedMapper, opts)(this);
+    hasOne: function hasOne(relatedMapper, opts) {
+      return _hasOne(relatedMapper, opts)(this);
     },
 
 
     /**
-     * Return whether `record` is an instance of this Mappers's RecordClass.
+     * Return whether `record` is an instance of this Mappers's recordClass.
      *
      * @name Mapper#is
      * @method
      * @param {Object} record The record to check.
      * @return {boolean} Whether `record` is an instance of this Mappers's
-     * {@ link Mapper#RecordClass}.
+     * {@ link Mapper#recordClass}.
      */
     is: function is(record) {
-      var RecordClass = this.RecordClass;
-      return RecordClass ? record instanceof RecordClass : false;
+      var recordClass = this.recordClass;
+      return recordClass ? record instanceof recordClass : false;
     },
 
 
@@ -5524,15 +5603,15 @@
       if (self && self.schema) {
         properties = self.schema.properties || {};
         // TODO: Make this work recursively
-        _.forOwn(properties, function (opts, prop) {
-          json[prop] = _.plainCopy(record[prop]);
+        utils$1.forOwn(properties, function (opts, prop) {
+          json[prop] = utils$1.plainCopy(record[prop]);
         });
       }
       properties || (properties = {});
       if (!opts.strict) {
-        _.forOwn(record, function (value, key) {
+        utils$1.forOwn(record, function (value, key) {
           if (!properties[key] && relationFields.indexOf(key) === -1) {
-            json[key] = _.plainCopy(value);
+            json[key] = utils$1.plainCopy(value);
           }
         });
       }
@@ -5542,19 +5621,19 @@
         opts.with = relationFields.slice();
       }
       if (self && opts.with) {
-        if (_.isString(opts.with)) {
+        if (utils$1.isString(opts.with)) {
           opts.with = [opts.with];
         }
-        _.forEachRelation(self, opts, function (def, __opts) {
+        utils$1.forEachRelation(self, opts, function (def, optsCopy) {
           var relationData = def.getLocalField(record);
           if (relationData) {
             // The actual recursion
-            if (_.isArray(relationData)) {
+            if (utils$1.isArray(relationData)) {
               def.setLocalField(json, relationData.map(function (item) {
-                return def.getRelation().toJSON(item, __opts);
+                return def.getRelation().toJSON(item, optsCopy);
               }));
             } else {
-              def.setLocalField(json, def.getRelation().toJSON(relationData, __opts));
+              def.setLocalField(json, def.getRelation().toJSON(relationData, optsCopy));
             }
           }
         });
@@ -5652,68 +5731,6 @@
     updateMany: function updateMany(records, opts) {
       return this.crud('updateMany', records, opts);
     }
-  });
-
-  /**
-   * Create a Mapper subclass.
-   *
-   * ```javascript
-   * var MyMapper = Mapper.extend({
-   *   foo: function () { return 'bar' }
-   * })
-   * var mapper = new MyMapper()
-   * mapper.foo() // "bar"
-   * ```
-   *
-   * @name Mapper.extend
-   * @method
-   * @param {Object} [props={}] Properties to add to the prototype of the
-   * subclass.
-   * @param {Object} [classProps={}] Static properties to add to the subclass.
-   * @return {Function} Subclass of Mapper.
-   */
-  Mapper.extend = _.extend;
-
-  /**
-   * @name Mapper#dbg
-   * @method
-   */
-
-  /**
-   * @name Mapper#log
-   * @method
-   */
-  _.logify(Mapper.prototype, 'Mapper');
-
-  /**
-   * Register a new event listener on this Mapper.
-   *
-   * @name Mapper#on
-   * @method
-   */
-
-  /**
-   * Remove an event listener from this Mapper.
-   *
-   * @name Mapper#off
-   * @method
-   */
-
-  /**
-   * Trigger an event on this Mapper.
-   *
-   * @name Mapper#emit
-   * @method
-   * @param {string} event Name of event to emit.
-   */
-
-  /**
-   * A Mapper's registered listeners are stored at {@link Mapper#_listeners}.
-   */
-  _.eventify(Mapper.prototype, function () {
-    return this._listeners;
-  }, function (value) {
-    this._listeners = value;
   });
 
   var toProxy = [
@@ -5951,126 +5968,40 @@
    */
   'updateMany'];
 
-  /**
-   * ```javascript
-   * import {Container} from 'js-data'
-   * ```
-   *
-   * The `Container` class is a place to store {@link Mapper} instances.
-   *
-   * Without a container, you need to manage mappers yourself, including resolving
-   * circular dependencies among relations. All mappers in a container share the
-   * same adapters, so you don't have to add each adapter to all of your mappers.
-   *
-   * @example <caption>Without Container</caption>
-   * import {Mapper} from 'js-data'
-   * import HttpAdapter from 'js-data-http'
-   * const adapter = new HttpAdapter()
-   * const userMapper = new Mapper({ name: 'user' })
-   * userMapper.registerAdapter('http', adapter, { default: true })
-   * const commentMapper = new Mapper({ name: 'comment' })
-   * commentMapper.registerAdapter('http', adapter, { default: true })
-   *
-   * // This might be more difficult if the mappers were defined in different
-   * // modules.
-   * userMapper.hasMany(commentMapper, {
-   *   localField: 'comments',
-   *   foreignKey: 'userId'
-   * })
-   * commentMapper.belongsTo(userMapper, {
-   *   localField: 'user',
-   *   foreignKey: 'userId'
-   * })
-   *
-   * @example <caption>With Container</caption>
-   * import {Container} from 'js-data'
-   * import HttpAdapter from 'js-data-http'
-   * const container = new Container()
-   * // All mappers in container share adapters
-   * container.registerAdapter('http', new HttpAdapter(), { default: true })
-   *
-   * // These could be defined in separate modules without a problem.
-   * container.defineMapper('user', {
-   *   relations: {
-   *     hasMany: {
-   *       comment: {
-   *         localField: 'comments',
-   *         foreignKey: 'userId'
-   *       }
-   *     }
-   *   }
-   * })
-   * container.defineMapper('comment', {
-   *   relations: {
-   *     belongsTo: {
-   *       user: {
-   *         localField: 'user',
-   *         foreignKey: 'userId'
-   *       }
-   *     }
-   *   }
-   * })
-   *
-   * @class Container
-   * @param {Object} [opts] Configuration options.
-   * @param {Function} [opts.MapperClass] Constructor function to use in
-   * {@link Container#defineMapper} to create a new mapper.
-   * @param {Object} [opts.mapperDefaults] Defaults options to pass to
-   * {@link Container#MapperClass} when creating a new mapper.
-   * @return {Container}
-   */
-  function Container(opts) {
-    var self = this;
-    _.classCallCheck(self, Container);
+  var props = {
+    constructor: function Container(opts) {
+      var self = this;
+      utils$1.classCallCheck(self, Container);
+      Container.__super__.call(self);
+      opts || (opts = {});
 
-    opts || (opts = {});
-    // Apply options provided by the user
-    _.fillIn(self, opts);
-    /**
-     * Defaults options to pass to {@link Container#MapperClass} when creating a
-     * new mapper.
-     *
-     * @name Container#mapperDefaults
-     * @type {Object}
-     */
-    self.mapperDefaults = self.mapperDefaults || {};
-    /**
-     * Constructor function to use in {@link Container#defineMapper} to create a
-     * new mapper.
-     *
-     * @name Container#MapperClass
-     * @type {Function}
-     */
-    self.MapperClass = self.MapperClass || Mapper;
+      // Apply options provided by the user
+      utils$1.fillIn(self, opts);
+      /**
+       * Defaults options to pass to {@link Container#mapperClass} when creating a
+       * new mapper.
+       *
+       * @name Container#mapperDefaults
+       * @type {Object}
+       */
+      self.mapperDefaults = self.mapperDefaults || {};
+      /**
+       * Constructor function to use in {@link Container#defineMapper} to create a
+       * new mapper.
+       *
+       * @name Container#mapperClass
+       * @type {Function}
+       */
+      self.mapperClass = self.mapperClass || Mapper;
 
-    // Initilize private data
+      // Initilize private data
 
-    // Holds the adapters, shared by all mappers in this container
-    self._adapters = {};
-    // The the mappers in this container
-    self._mappers = {};
-  }
+      // Holds the adapters, shared by all mappers in this container
+      self._adapters = {};
+      // The the mappers in this container
+      self._mappers = {};
+    },
 
-  /**
-   * Create a Container subclass.
-   *
-   * @example
-   * var MyContainer = Container.extend({
-   *   foo: function () { return 'bar' }
-   * })
-   * var container = new MyContainer()
-   * container.foo() // "bar"
-   *
-   * @name Container.extend
-   * @method
-   * @param {Object} [props={}] Properties to add to the prototype of the
-   * subclass.
-   * @param {Object} [classProps={}] Static properties to add to the subclass.
-   * @return {Function} Subclass of Container.
-   */
-  Container.extend = _.extend;
-
-  _.addHiddenPropsToTarget(Container.prototype, {
     /**
      * Create a new mapper and register it in this container.
      *
@@ -6087,21 +6018,20 @@
      * @param {string} name Name under which to register the new {@link Mapper}.
      * {@link Mapper#name} will be set to this value.
      * @param {Object} [opts] Configuration options. Passed to
-     * {@link Container#MapperClass} when creating the new {@link Mapper}.
+     * {@link Container#mapperClass} when creating the new {@link Mapper}.
      * @return {Mapper}
      */
-
     defineMapper: function defineMapper(name, opts) {
       var self = this;
 
       // For backwards compatibility with defineResource
-      if (_.isObject(name)) {
+      if (utils$1.isObject(name)) {
         opts = name;
         if (!opts.name) {
           throw new Error('name is required!');
         }
         name = opts.name;
-      } else if (!_.isString(name)) {
+      } else if (!utils$1.isString(name)) {
         throw new Error('name is required!');
       }
 
@@ -6111,15 +6041,15 @@
       opts.name = name;
       opts.relations || (opts.relations = {});
 
-      // Check if the user is overriding the datastore's default MapperClass
-      var MapperClass = opts.MapperClass || self.MapperClass;
-      delete opts.MapperClass;
+      // Check if the user is overriding the datastore's default mapperClass
+      var mapperClass = opts.mapperClass || self.mapperClass;
+      delete opts.mapperClass;
 
       // Apply the datastore's defaults to the options going into the mapper
-      _.fillIn(opts, self.mapperDefaults);
+      utils$1.fillIn(opts, self.mapperDefaults);
 
       // Instantiate a mapper
-      var mapper = self._mappers[name] = new MapperClass(opts);
+      var mapper = self._mappers[name] = new mapperClass(opts); // eslint-disable-line
       // Make sure the mapper's name is set
       mapper.name = name;
       // All mappers in this datastore will share adapters
@@ -6127,28 +6057,31 @@
 
       // Setup the mapper's relations, including generating Mapper#relationList
       // and Mapper#relationFields
-      _.forOwn(mapper.relations, function (group, type) {
-        _.forOwn(group, function (relations, _name) {
-          if (_.isObject(relations)) {
+      utils$1.forOwn(mapper.relations, function (group, type) {
+        utils$1.forOwn(group, function (relations, _name) {
+          if (utils$1.isObject(relations)) {
             relations = [relations];
           }
           relations.forEach(function (def) {
             def.getRelation = function () {
               return self.getMapper(_name);
             };
-            var Relation = self._mappers[_name] || _name;
+            var relatedMapper = self._mappers[_name] || _name;
             if (type === belongsToType) {
-              mapper.belongsTo(Relation, def);
+              mapper.belongsTo(relatedMapper, def);
             } else if (type === hasOneType) {
-              mapper.hasOne(Relation, def);
+              mapper.hasOne(relatedMapper, def);
             } else if (type === hasManyType) {
-              mapper.hasMany(Relation, def);
+              mapper.hasMany(relatedMapper, def);
             }
           });
         });
       });
 
       return mapper;
+    },
+    defineResource: function defineResource(name, opts) {
+      return this.defineMapper(name, opts);
     },
 
 
@@ -6182,7 +6115,7 @@
      */
     getAdapterName: function getAdapterName(opts) {
       opts || (opts = {});
-      if (_.isString(opts)) {
+      if (utils$1.isString(opts)) {
         opts = { adapter: opts };
       }
       return opts.adapter || this.mapperDefaults.defaultAdapter;
@@ -6249,16 +6182,15 @@
       // Optionally make it the default adapter for the target.
       if (opts === true || opts.default) {
         self.mapperDefaults.defaultAdapter = name;
-        _.forOwn(self._mappers, function (mapper) {
+        utils$1.forOwn(self._mappers, function (mapper) {
           mapper.defaultAdapter = name;
         });
       }
     }
-  });
+  };
 
-  var toAdd = {};
   toProxy.forEach(function (method) {
-    toAdd[method] = function (name) {
+    props[method] = function (name) {
       var _getMapper;
 
       for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
@@ -6268,7 +6200,77 @@
       return (_getMapper = this.getMapper(name))[method].apply(_getMapper, args);
     };
   });
-  _.addHiddenPropsToTarget(Container.prototype, toAdd);
+
+  /**
+   * ```javascript
+   * import {Container} from 'js-data'
+   * ```
+   *
+   * The `Container` class is a place to store {@link Mapper} instances.
+   *
+   * Without a container, you need to manage mappers yourself, including resolving
+   * circular dependencies among relations. All mappers in a container share the
+   * same adapters, so you don't have to add each adapter to all of your mappers.
+   *
+   * @example <caption>Without Container</caption>
+   * import {Mapper} from 'js-data'
+   * import HttpAdapter from 'js-data-http'
+   * const adapter = new HttpAdapter()
+   * const userMapper = new Mapper({ name: 'user' })
+   * userMapper.registerAdapter('http', adapter, { default: true })
+   * const commentMapper = new Mapper({ name: 'comment' })
+   * commentMapper.registerAdapter('http', adapter, { default: true })
+   *
+   * // This might be more difficult if the mappers were defined in different
+   * // modules.
+   * userMapper.hasMany(commentMapper, {
+   *   localField: 'comments',
+   *   foreignKey: 'userId'
+   * })
+   * commentMapper.belongsTo(userMapper, {
+   *   localField: 'user',
+   *   foreignKey: 'userId'
+   * })
+   *
+   * @example <caption>With Container</caption>
+   * import {Container} from 'js-data'
+   * import HttpAdapter from 'js-data-http'
+   * const container = new Container()
+   * // All mappers in container share adapters
+   * container.registerAdapter('http', new HttpAdapter(), { default: true })
+   *
+   * // These could be defined in separate modules without a problem.
+   * container.defineMapper('user', {
+   *   relations: {
+   *     hasMany: {
+   *       comment: {
+   *         localField: 'comments',
+   *         foreignKey: 'userId'
+   *       }
+   *     }
+   *   }
+   * })
+   * container.defineMapper('comment', {
+   *   relations: {
+   *     belongsTo: {
+   *       user: {
+   *         localField: 'user',
+   *         foreignKey: 'userId'
+   *       }
+   *     }
+   *   }
+   * })
+   *
+   * @class Container
+   * @extends Component
+   * @param {Object} [opts] Configuration options.
+   * @param {Function} [opts.mapperClass] Constructor function to use in
+   * {@link Container#defineMapper} to create a new mapper.
+   * @param {Object} [opts.mapperDefaults] Defaults options to pass to
+   * {@link Container#mapperClass} when creating a new mapper.
+   * @return {Container}
+   */
+  var Container = Component.extend(props);
 
   /**
    * TODO
@@ -6285,11 +6287,10 @@
    * @return {Mapper}
    */
   var LinkedCollection = Collection.extend({
-    constructor: function constructor(records, opts) {
+    constructor: function LinkedCollection(records, opts) {
       var self = this;
-      _.classCallCheck(self, LinkedCollection);
-
-      _.getSuper(self).call(self, records, opts);
+      utils$1.classCallCheck(self, LinkedCollection);
+      LinkedCollection.__super__.call(self, records, opts);
 
       // Make sure this collection has somewhere to store "added" timestamps
       self._added = {};
@@ -6300,6 +6301,7 @@
       }
       return self;
     },
+
     _onRecordEvent: function _onRecordEvent() {
       var self = this;
 
@@ -6307,11 +6309,11 @@
         args[_key] = arguments[_key];
       }
 
-      _.getSuper(self).prototype._onRecordEvent.apply(self, args);
+      utils$1.getSuper(self).prototype._onRecordEvent.apply(self, args);
       var event = args[0];
       // This is a very brute force method
       // Lots of room for optimization
-      if (_.isString(event) && event.indexOf('change') === 0) {
+      if (utils$1.isString(event) && event.indexOf('change') === 0) {
         self.updateIndexes(args[1]);
       }
     },
@@ -6321,10 +6323,10 @@
       var mapper = self.mapper;
       var relationList = mapper.relationList || [];
       var timestamp = new Date().getTime();
-      var usesRecordClass = !!mapper.RecordClass;
+      var usesRecordClass = !!mapper.recordClass;
       var singular = void 0;
 
-      if (_.isObject(records) && !_.isArray(records)) {
+      if (utils$1.isObject(records) && !utils$1.isArray(records)) {
         singular = true;
         records = [records];
       }
@@ -6335,9 +6337,9 @@
         mapper.relationList.forEach(function (def) {
           var relationName = def.relation;
           // A reference to the Mapper that this Mapper is related to
-          var Relation = datastore.getMapper(relationName);
+          var relatedMapper = datastore.getMapper(relationName);
           // The field used by the related Mapper as the primary key
-          var relationIdAttribute = Relation.idAttribute;
+          var relationIdAttribute = relatedMapper.idAttribute;
           // Grab the foreign key in this relationship, if there is one
           var foreignKey = def.foreignKey;
           // A lot of this is an optimization for being able to insert a lot of
@@ -6345,7 +6347,7 @@
           var relatedCollection = datastore.getCollection(relationName);
           var type = def.type;
           var isHasMany = type === hasManyType;
-          var shouldAdd = _.isUndefined(def.add) ? true : !!def.add;
+          var shouldAdd = utils$1.isUndefined(def.add) ? true : !!def.add;
           var relatedData = void 0;
 
           records.forEach(function (record) {
@@ -6353,7 +6355,7 @@
             // currently visited record
             relatedData = def.getLocalField(record);
 
-            if (_.isFunction(def.add)) {
+            if (utils$1.isFunction(def.add)) {
               def.add(datastore, def, record);
             } else if (relatedData) {
               // Otherwise, if there is something to be added, add it
@@ -6377,12 +6379,12 @@
                 });
                 // If it's the parent that has the localKeys
                 if (def.localKeys) {
-                  _.set(record, def.localKeys, relatedData.map(function (inserted) {
-                    return _.get(inserted, relationIdAttribute);
+                  utils$1.set(record, def.localKeys, relatedData.map(function (inserted) {
+                    return utils$1.get(inserted, relationIdAttribute);
                   }));
                 }
               } else {
-                var relatedDataId = _.get(relatedData, relationIdAttribute);
+                var relatedDataId = utils$1.get(relatedData, relationIdAttribute);
                 // Handle inserting belongsTo and hasOne relations
                 if (relatedData !== relatedCollection.get(relatedDataId)) {
                   // Make sure foreignKey field is set
@@ -6399,7 +6401,7 @@
         });
       }
 
-      records = _.getSuper(self).prototype.add.call(self, records, opts);
+      records = utils$1.getSuper(self).prototype.add.call(self, records, opts);
 
       records.forEach(function (record) {
         // Track when this record was added
@@ -6414,11 +6416,11 @@
     },
     remove: function remove(id, opts) {
       var self = this;
-      delete self._added[id];
-      var record = _.getSuper(self).prototype.remove.call(self, id, opts);
+      var mapper = self.mapper;
+      var record = utils$1.getSuper(self).prototype.remove.call(self, id, opts);
       if (record) {
-        var mapper = self.mapper;
-        if (mapper.RecordClass) {
+        delete self._added[id];
+        if (mapper.recordClass) {
           record._set('$'); // unset
         }
       }
@@ -6426,33 +6428,17 @@
     },
     removeAll: function removeAll(query, opts) {
       var self = this;
-      var records = _.getSuper(self).prototype.removeAll.call(self, query, opts);
+      var mapper = self.mapper;
+      var records = utils$1.getSuper(self).prototype.removeAll.call(self, query, opts);
       records.forEach(function (record) {
         delete self._added[self.recordId(record)];
+        if (mapper.recordClass) {
+          record._set('$'); // unset
+        }
       });
       return records;
     }
   });
-
-  /**
-   * Create a LinkedCollection subclass.
-   *
-   * ```javascript
-   * var MyLinkedCollection = LinkedCollection.extend({
-   *   foo: function () { return 'bar' }
-   * })
-   * var collection = new MyLinkedCollection()
-   * collection.foo() // "bar"
-   * ```
-   *
-   * @name LinkedCollection.extend
-   * @method
-   * @param {Object} [props={}] Properties to add to the prototype of the
-   * subclass.
-   * @param {Object} [classProps={}] Static properties to add to the subclass.
-   * @return {Function} Subclass of LinkedCollection.
-   */
-  LinkedCollection.extend = _.extend;
 
   var DATASTORE_DEFAULTS = {
     /**
@@ -6463,67 +6449,29 @@
      * @name DataStore#linkRelations
      * @type {boolean}
      */
-    linkRelations: _.isBrowser
+    linkRelations: utils$1.isBrowser
   };
 
-  /**
-   * The `DataStore` class is an extension of {@link Container}. Not only does
-   * `DataStore` manage mappers, but also collections. `DataStore` implements the
-   * asynchronous {@link Mapper} methods, such as {@link Mapper#find} and
-   * {@link Mapper#create}. If you use the asynchronous `DataStore` methods
-   * instead of calling them directly on the mappers, then the results of the
-   * method calls will be inserted into the store's collections. You can think of
-   * a `DataStore` as an [Identity Map](https://en.wikipedia.org/wiki/Identity_map_pattern)
-   * for the [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping)
-   * (the Mappers).
-   *
-   * ```javascript
-   * import {DataStore} from 'js-data'
-   * ```
-   *
-   * @example
-   * import {DataStore} from 'js-data'
-   * import HttpAdapter from 'js-data-http'
-   * const store = new DataStore()
-   * const UserMapper = store.defineMapper('user')
-   *
-   * // Call "find" on "UserMapper" (Stateless ORM)
-   * UserMapper.find(1).then(function (user) {
-   *   // retrieved a "user" record via the http adapter, but that's it
-   *
-   *   // Call "find" on "store" for the "user" mapper (Stateful DataStore)
-   *   return store.find('user', 1)
-   * }).then(function (user) {
-   *   // not only was a "user" record retrieved, but it was added to the
-   *   // store's "user" collection
-   *   const cachedUser = store.getCollection('user').get(1)
-   *   user === cachedUser // true
-   * })
-   *
-   * @class DataStore
-   * @extends Container
-   * @param {Object} [opts] Configuration options. See {@link Container}.
-   * @return {DataStore}
-   */
-  var DataStore = Container.extend({
-    constructor: function constructor(opts) {
+  var props$1 = {
+    constructor: function DataStore(opts) {
       var self = this;
-      _.classCallCheck(self, DataStore);
+      utils$1.classCallCheck(self, DataStore);
+      DataStore.__super__.call(self, opts);
 
-      _.getSuper(self).call(self, opts);
-      self.CollectionClass = self.CollectionClass || LinkedCollection;
+      self.collectionClass = self.collectionClass || LinkedCollection;
       self._collections = {};
-      _.fillIn(self, DATASTORE_DEFAULTS);
+      utils$1.fillIn(self, DATASTORE_DEFAULTS);
       self._pendingQueries = {};
       self._completedQueries = {};
       return self;
     },
+
     _callSuper: function _callSuper(method) {
       for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
         args[_key - 1] = arguments[_key];
       }
 
-      return _.getSuper(this).prototype[method].apply(this, args);
+      return this.constructor.__super__.prototype[method].apply(this, args);
     },
 
 
@@ -6547,6 +6495,15 @@
         data = this.getCollection(name).add(data, opts);
       }
       return data;
+    },
+    cachedFind: function cachedFind(name, id, opts) {
+      return this.get(name, id, opts);
+    },
+    cachedFindAll: function cachedFindAll(name, query, opts) {
+      var self = this;
+      if (self._completedQueries[name][self.hashQuery(name, query, opts)]) {
+        return self.filter(name, query, opts);
+      }
     },
 
 
@@ -6590,13 +6547,13 @@
     },
     defineMapper: function defineMapper(name, opts) {
       var self = this;
-      var mapper = _.getSuper(self).prototype.defineMapper.call(self, name, opts);
+      var mapper = utils$1.getSuper(self).prototype.defineMapper.call(self, name, opts);
       self._pendingQueries[name] = {};
       self._completedQueries[name] = {};
       mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] });
 
       // The datastore uses a subclass of Collection that is "datastore-aware"
-      var collection = self._collections[name] = new self.CollectionClass(null, {
+      var collection = self._collections[name] = new self.collectionClass(null, { // eslint-disable-line
         // Make sure the collection has somewhere to store "added" timestamps
         _added: {},
         // Give the collection a reference to this datastore
@@ -6608,7 +6565,7 @@
       var schema = mapper.schema || {};
       var properties = schema.properties || {};
       // TODO: Make it possible index nested properties?
-      _.forOwn(properties, function (opts, prop) {
+      utils$1.forOwn(properties, function (opts, prop) {
         if (opts.indexed) {
           collection.createIndex(prop);
         }
@@ -6631,7 +6588,7 @@
           var path = 'links.' + localField;
           var foreignKey = def.foreignKey;
           var type = def.type;
-          var link = _.isUndefined(def.link) ? linkRelations : def.link;
+          var link = utils$1.isUndefined(def.link) ? linkRelations : def.link;
           var updateOpts = { index: foreignKey };
           var descriptor = void 0;
 
@@ -6647,7 +6604,7 @@
                   return _self._get(path);
                 }
                 var key = def.getForeignKey(_self);
-                var item = _.isUndefined(key) ? undefined : self.getCollection(relation).get(key);
+                var item = utils$1.isUndefined(key) ? undefined : self.getCollection(relation).get(key);
                 _self._set(path, item);
                 return item;
               },
@@ -6685,13 +6642,13 @@
                       index: foreignKey
                     });
                   } else if (localKeys) {
-                    var keys = _.get(_self, localKeys) || [];
-                    var _args = _.isArray(keys) ? keys : Object.keys(keys);
+                    var keys = utils$1.get(_self, localKeys) || [];
+                    var _args = utils$1.isArray(keys) ? keys : Object.keys(keys);
                     // Really fast retrieval
                     items = relationCollection.getAll.apply(relationCollection, _args);
                   } else if (foreignKeys) {
                     var query = {};
-                    _.set(query, 'where.' + foreignKeys + '.contains', key);
+                    utils$1.set(query, 'where.' + foreignKeys + '.contains', key);
                     // Make a much slower retrieval
                     items = relationCollection.filter(query);
                   }
@@ -6707,24 +6664,24 @@
 
                   if (foreignKey) {
                     def.setForeignKey(_self, records);
-                    if (_.isArray(records)) {
+                    if (utils$1.isArray(records)) {
                       records.forEach(function (record) {
                         relationCollection.updateIndex(record, updateOpts);
                       });
                     }
                   }if (localKeys) {
-                    _.set(_self, localKeys, records.map(function (record) {
+                    utils$1.set(_self, localKeys, records.map(function (record) {
                       return relationCollection.recordId(record);
                     }));
                   } else if (foreignKeys) {
                     records.forEach(function (record) {
-                      var keys = _.get(record, foreignKeys);
+                      var keys = utils$1.get(record, foreignKeys);
                       if (keys) {
                         if (keys.indexOf(key) === -1) {
                           keys.push(key);
                         }
                       } else {
-                        _.set(record, foreignKeys, [key]);
+                        utils$1.set(record, foreignKeys, [key]);
                       }
                     });
                   }
@@ -6758,7 +6715,7 @@
           }
 
           if (descriptor) {
-            descriptor.enumerable = _.isUndefined(def.enumerable) ? true : def.enumerable;
+            descriptor.enumerable = utils$1.isUndefined(def.enumerable) ? true : def.enumerable;
             if (def.get) {
               (function () {
                 var origGet = descriptor.get;
@@ -6787,7 +6744,7 @@
                 };
               })();
             }
-            Object.defineProperty(mapper.RecordClass.prototype, localField, descriptor);
+            Object.defineProperty(mapper.recordClass.prototype, localField, descriptor);
           }
         });
       }
@@ -6849,6 +6806,12 @@
         return data;
       });
     },
+    eject: function eject(id, opts) {
+      return this.remove(id, opts);
+    },
+    ejectAll: function ejectAll(query, opts) {
+      return this.removeAll(query, opts);
+    },
 
 
     /**
@@ -6866,7 +6829,7 @@
       opts || (opts = {});
       var pendingQuery = self._pendingQueries[name][id];
 
-      _.fillIn(opts, self.getMapper(name));
+      utils$1.fillIn(opts, self.getMapper(name));
 
       if (pendingQuery) {
         return pendingQuery;
@@ -6880,13 +6843,13 @@
           return self._end(name, data, opts);
         }, function (err) {
           delete self._pendingQueries[name][id];
-          return _.reject(err);
+          return utils$1.reject(err);
         }).then(function (data) {
           self._completedQueries[name][id] = new Date().getTime();
           return data;
         });
       } else {
-        promise = _.resolve(item);
+        promise = utils$1.resolve(item);
       }
       return promise;
     },
@@ -6908,7 +6871,7 @@
       var hash = self.hashQuery(name, query, opts);
       var pendingQuery = self._pendingQueries[name][hash];
 
-      _.fillIn(opts, self.getMapper(name));
+      utils$1.fillIn(opts, self.getMapper(name));
 
       if (pendingQuery) {
         return pendingQuery;
@@ -6923,27 +6886,15 @@
           return self._end(name, data, opts);
         }, function (err) {
           delete self._pendingQueries[name][hash];
-          return _.reject(err);
+          return utils$1.reject(err);
         }).then(function (data) {
           self._completedQueries[name][hash] = new Date().getTime();
           return data;
         });
       } else {
-        promise = _.resolve(items);
+        promise = utils$1.resolve(items);
       }
       return promise;
-    },
-    cachedFind: function cachedFind(name, id, opts) {
-      return this.get(name, id, opts);
-    },
-    cachedFindAll: function cachedFindAll(name, query, opts) {
-      var self = this;
-      if (self._completedQueries[name][self.hashQuery(name, query, opts)]) {
-        return self.filter(name, query, opts);
-      }
-    },
-    hashQuery: function hashQuery(name, query, opts) {
-      return _.toJson(query);
     },
 
 
@@ -6961,6 +6912,66 @@
         throw new ReferenceError(name + ' is not a registered collection!');
       }
       return collection;
+    },
+    hashQuery: function hashQuery(name, query, opts) {
+      return utils$1.toJson(query);
+    },
+    inject: function inject(records, opts) {
+      return this.add(records, opts);
+    },
+    remove: function remove(name, id, opts) {
+      var self = this;
+      var record = self.getCollection(name).remove(id, opts);
+      if (record) {
+        self.removeRelated(name, [record], opts);
+      }
+      return record;
+    },
+    removeAll: function removeAll(name, query, opts) {
+      var self = this;
+      var records = self.getCollection(name).removeAll(query, opts);
+      if (records.length) {
+        self.removeRelated(name, records, opts);
+      }
+      return records;
+    },
+    removeRelated: function removeRelated(name, records, opts) {
+      var self = this;
+      utils$1.forEachRelation(self.getMapper(name), opts, function (def, optsCopy) {
+        records.forEach(function (record) {
+          var relatedData = void 0;
+          var query = void 0;
+          if (def.foreignKey && (def.type === 'hasOne' || def.type === 'hasMany')) {
+            query = babelHelpers.defineProperty({}, def.foreignKey, def.getForeignKey(record));
+          } else if (def.type === 'hasMany' && def.localKeys) {
+            query = {
+              where: babelHelpers.defineProperty({}, def.getRelation().idAttribute, {
+                'in': utils$1.get(record, def.localKeys)
+              })
+            };
+          } else if (def.type === 'hasMany' && def.foreignKeys) {
+            query = {
+              where: babelHelpers.defineProperty({}, def.foreignKeys, {
+                'contains': def.getForeignKey(record)
+              })
+            };
+          } else if (def.type === 'belongsTo') {
+            relatedData = self.remove(def.relation, def.getForeignKey(record), optsCopy);
+          }
+          if (query) {
+            relatedData = self.removeAll(def.relation, query, optsCopy);
+          }
+          if (relatedData) {
+            if (utils$1.isArray(relatedData) && !relatedData.length) {
+              return;
+            }
+            if (def.type === 'hasOne') {
+              relatedData = relatedData[0];
+            }
+            def.setLocalField(record, relatedData);
+          }
+        });
+      });
     },
 
 
@@ -6991,13 +7002,13 @@
      * @name DataStore#updateAll
      * @method
      * @param {string} name - Name of the {@link Mapper} to target.
-     * @param {Object?} query - Passed to {@link Model.updateAll}.
-     * @param {Object} props - Passed to {@link Model.updateAll}.
-     * @param {Object} [opts] - Passed to {@link Model.updateAll}. See
-     * {@link Model.updateAll} for more configuration options.
+     * @param {Object} props - Passed to {@link Mapper#updateAll}.
+     * @param {Object} [query] - Passed to {@link Mapper#updateAll}.
+     * @param {Object} [opts] - Passed to {@link Mapper#updateAll}. See
+     * {@link Mapper#updateAll} for more configuration options.
      * @return {Promise}
      */
-    updateAll: function updateAll(name, query, props, opts) {
+    updateAll: function updateAll(name, props, query, opts) {
       var self = this;
       opts || (opts = {});
       return self._callSuper('updateAll', name, query, props, opts).then(function (data) {
@@ -7024,36 +7035,12 @@
         return self._end(name, data, opts);
       });
     }
-  });
+  };
 
-  DataStore.prototype.defineResource = DataStore.prototype.defineMapper;
-
-  /**
-   * Create a DataStore subclass.
-   *
-   * ```javascript
-   * var MyDataStore = DataStore.extend({
-   *   foo: function () { return 'bar' }
-   * })
-   * var store = new MyDataStore()
-   * store.foo() // "bar"
-   * ```
-   *
-   * @name DataStore.extend
-   * @method
-   * @param {Object} [props={}] Properties to add to the prototype of the
-   * subclass.
-   * @param {Object} [classProps={}] Static properties to add to the subclass.
-   * @return {Function} Subclass of DataStore.
-   */
-  DataStore.extend = _.extend;
-
-  var toProxy$1 = ['add', 'between', 'createIndex', 'filter', 'get', 'getAll', 'query', 'remove', 'removeAll', 'toJson'];
-
-  var methods = {};
+  var toProxy$1 = ['add', 'between', 'createIndex', 'filter', 'get', 'getAll', 'query', 'toJson'];
 
   toProxy$1.forEach(function (method) {
-    methods[method] = function (name) {
+    props$1[method] = function (name) {
       var _getCollection;
 
       for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
@@ -7064,20 +7051,46 @@
     };
   });
 
-  methods.inject = function () {
-    return this.add.apply(this, arguments);
-  };
-
-  methods.eject = function () {
-    return this.remove.apply(this, arguments);
-  };
-
-  methods.ejectAll = function () {
-    return this.removeAll.apply(this, arguments);
-  };
-
-  _.logify(DataStore.prototype, 'DataStore');
-  _.addHiddenPropsToTarget(DataStore.prototype, methods);
+  /**
+   * The `DataStore` class is an extension of {@link Container}. Not only does
+   * `DataStore` manage mappers, but also collections. `DataStore` implements the
+   * asynchronous {@link Mapper} methods, such as {@link Mapper#find} and
+   * {@link Mapper#create}. If you use the asynchronous `DataStore` methods
+   * instead of calling them directly on the mappers, then the results of the
+   * method calls will be inserted into the store's collections. You can think of
+   * a `DataStore` as an [Identity Map](https://en.wikipedia.org/wiki/Identity_map_pattern)
+   * for the [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping)
+   * (the Mappers).
+   *
+   * ```javascript
+   * import {DataStore} from 'js-data'
+   * ```
+   *
+   * @example
+   * import {DataStore} from 'js-data'
+   * import HttpAdapter from 'js-data-http'
+   * const store = new DataStore()
+   * const UserMapper = store.defineMapper('user')
+   *
+   * // Call "find" on "UserMapper" (Stateless ORM)
+   * UserMapper.find(1).then(function (user) {
+   *   // retrieved a "user" record via the http adapter, but that's it
+   *
+   *   // Call "find" on "store" for the "user" mapper (Stateful DataStore)
+   *   return store.find('user', 1)
+   * }).then(function (user) {
+   *   // not only was a "user" record retrieved, but it was added to the
+   *   // store's "user" collection
+   *   const cachedUser = store.getCollection('user').get(1)
+   *   user === cachedUser // true
+   * })
+   *
+   * @class DataStore
+   * @extends Container
+   * @param {Object} [opts] Configuration options. See {@link Container}.
+   * @return {DataStore}
+   */
+  var _DataStore = Container.extend(props$1);
 
   /**
    * Registered as `js-data` in NPM and Bower.
@@ -7117,27 +7130,24 @@
    * if the current version is not beta.
    */
   var version = {
+    alpha: '20',
+    beta: 'false',
     full: '3.0.0-alpha.20',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
-    patch: parseInt('0', 10),
-    alpha: '20',
-    beta: 'false'
+    patch: parseInt('0', 10)
   };
 
-  var DS = DataStore;
-
+  exports.version = version;
+  exports.utils = utils$1;
   exports.Collection = Collection;
   exports.Container = Container;
-  exports.DataStore = DataStore;
-  exports.DS = DS;
+  exports.DataStore = _DataStore;
   exports.LinkedCollection = LinkedCollection;
   exports.Mapper = Mapper;
   exports.Query = Query;
   exports.Record = Record;
   exports.Schema = Schema;
-  exports.utils = _;
-  exports.version = version;
   exports.belongsToType = belongsToType;
   exports.hasManyType = hasManyType;
   exports.hasOneType = hasOneType;

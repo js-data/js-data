@@ -22,7 +22,7 @@ export function init () {
       Test.assert.equal(callCount, 1, 'find should have been called once')
       Test.assert.isNumber(Test.store._completedQueries.user[id])
       Test.assert.objectsEqual(user, props, 'user should have been found')
-      Test.assert.isTrue(user instanceof Test.User.RecordClass, 'user is a record')
+      Test.assert.isTrue(user instanceof Test.User.recordClass, 'user is a record')
       Test.assert.isTrue(user === await Test.store.find('user', id), 'should return the cached user')
       Test.assert.equal(callCount, 1, 'find should have been called once')
       Test.assert.isTrue(user === await Test.store.find('user', id, { force: true }), 'should make a new query')

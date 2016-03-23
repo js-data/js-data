@@ -1,4 +1,4 @@
-import _ from './utils'
+import utils from './utils'
 import {
   belongsToType,
   hasManyType,
@@ -16,64 +16,25 @@ const DATASTORE_DEFAULTS = {
    * @name DataStore#linkRelations
    * @type {boolean}
    */
-  linkRelations: _.isBrowser
+  linkRelations: utils.isBrowser
 }
 
-/**
- * The `DataStore` class is an extension of {@link Container}. Not only does
- * `DataStore` manage mappers, but also collections. `DataStore` implements the
- * asynchronous {@link Mapper} methods, such as {@link Mapper#find} and
- * {@link Mapper#create}. If you use the asynchronous `DataStore` methods
- * instead of calling them directly on the mappers, then the results of the
- * method calls will be inserted into the store's collections. You can think of
- * a `DataStore` as an [Identity Map](https://en.wikipedia.org/wiki/Identity_map_pattern)
- * for the [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping)
- * (the Mappers).
- *
- * ```javascript
- * import {DataStore} from 'js-data'
- * ```
- *
- * @example
- * import {DataStore} from 'js-data'
- * import HttpAdapter from 'js-data-http'
- * const store = new DataStore()
- * const UserMapper = store.defineMapper('user')
- *
- * // Call "find" on "UserMapper" (Stateless ORM)
- * UserMapper.find(1).then(function (user) {
- *   // retrieved a "user" record via the http adapter, but that's it
- *
- *   // Call "find" on "store" for the "user" mapper (Stateful DataStore)
- *   return store.find('user', 1)
- * }).then(function (user) {
- *   // not only was a "user" record retrieved, but it was added to the
- *   // store's "user" collection
- *   const cachedUser = store.getCollection('user').get(1)
- *   user === cachedUser // true
- * })
- *
- * @class DataStore
- * @extends Container
- * @param {Object} [opts] Configuration options. See {@link Container}.
- * @return {DataStore}
- */
-const DataStore = Container.extend({
-  constructor (opts) {
+const props = {
+  constructor: function DataStore (opts) {
     const self = this
-    _.classCallCheck(self, DataStore)
+    utils.classCallCheck(self, DataStore)
+    DataStore.__super__.call(self, opts)
 
-    _.getSuper(self).call(self, opts)
-    self.CollectionClass = self.CollectionClass || LinkedCollection
+    self.collectionClass = self.collectionClass || LinkedCollection
     self._collections = {}
-    _.fillIn(self, DATASTORE_DEFAULTS)
+    utils.fillIn(self, DATASTORE_DEFAULTS)
     self._pendingQueries = {}
     self._completedQueries = {}
     return self
   },
 
   _callSuper (method, ...args) {
-    return _.getSuper(this).prototype[method].apply(this, args)
+    return this.constructor.__super__.prototype[method].apply(this, args)
   },
 
   /**
@@ -96,6 +57,17 @@ const DataStore = Container.extend({
       data = this.getCollection(name).add(data, opts)
     }
     return data
+  },
+
+  cachedFind (name, id, opts) {
+    return this.get(name, id, opts)
+  },
+
+  cachedFindAll (name, query, opts) {
+    const self = this
+    if (self._completedQueries[name][self.hashQuery(name, query, opts)]) {
+      return self.filter(name, query, opts)
+    }
   },
 
   /**
@@ -138,13 +110,13 @@ const DataStore = Container.extend({
 
   defineMapper (name, opts) {
     const self = this
-    const mapper = _.getSuper(self).prototype.defineMapper.call(self, name, opts)
+    const mapper = utils.getSuper(self).prototype.defineMapper.call(self, name, opts)
     self._pendingQueries[name] = {}
     self._completedQueries[name] = {}
     mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] })
 
     // The datastore uses a subclass of Collection that is "datastore-aware"
-    const collection = self._collections[name] = new self.CollectionClass(null, {
+    const collection = self._collections[name] = new self.collectionClass(null, { // eslint-disable-line
       // Make sure the collection has somewhere to store "added" timestamps
       _added: {},
       // Give the collection a reference to this datastore
@@ -156,7 +128,7 @@ const DataStore = Container.extend({
     const schema = mapper.schema || {}
     const properties = schema.properties || {}
     // TODO: Make it possible index nested properties?
-    _.forOwn(properties, function (opts, prop) {
+    utils.forOwn(properties, function (opts, prop) {
       if (opts.indexed) {
         collection.createIndex(prop)
       }
@@ -179,7 +151,7 @@ const DataStore = Container.extend({
         const path = `links.${localField}`
         const foreignKey = def.foreignKey
         const type = def.type
-        const link = _.isUndefined(def.link) ? linkRelations : def.link
+        const link = utils.isUndefined(def.link) ? linkRelations : def.link
         const updateOpts = { index: foreignKey }
         let descriptor
 
@@ -195,7 +167,7 @@ const DataStore = Container.extend({
                 return _self._get(path)
               }
               const key = def.getForeignKey(_self)
-              const item = _.isUndefined(key) ? undefined : self.getCollection(relation).get(key)
+              const item = utils.isUndefined(key) ? undefined : self.getCollection(relation).get(key)
               _self._set(path, item)
               return item
             },
@@ -232,13 +204,13 @@ const DataStore = Container.extend({
                   index: foreignKey
                 })
               } else if (localKeys) {
-                const keys = _.get(_self, localKeys) || []
-                const args = _.isArray(keys) ? keys : Object.keys(keys)
+                const keys = utils.get(_self, localKeys) || []
+                const args = utils.isArray(keys) ? keys : Object.keys(keys)
                 // Really fast retrieval
                 items = relationCollection.getAll.apply(relationCollection, args)
               } else if (foreignKeys) {
                 const query = {}
-                _.set(query, `where.${foreignKeys}.contains`, key)
+                utils.set(query, `where.${foreignKeys}.contains`, key)
                 // Make a much slower retrieval
                 items = relationCollection.filter(query)
               }
@@ -254,24 +226,24 @@ const DataStore = Container.extend({
 
               if (foreignKey) {
                 def.setForeignKey(_self, records)
-                if (_.isArray(records)) {
+                if (utils.isArray(records)) {
                   records.forEach(function (record) {
                     relationCollection.updateIndex(record, updateOpts)
                   })
                 }
               } if (localKeys) {
-                _.set(_self, localKeys, records.map(function (record) {
+                utils.set(_self, localKeys, records.map(function (record) {
                   return relationCollection.recordId(record)
                 }))
               } else if (foreignKeys) {
                 records.forEach(function (record) {
-                  const keys = _.get(record, foreignKeys)
+                  const keys = utils.get(record, foreignKeys)
                   if (keys) {
                     if (keys.indexOf(key) === -1) {
                       keys.push(key)
                     }
                   } else {
-                    _.set(record, foreignKeys, [key])
+                    utils.set(record, foreignKeys, [key])
                   }
                 })
               }
@@ -304,7 +276,7 @@ const DataStore = Container.extend({
         }
 
         if (descriptor) {
-          descriptor.enumerable = _.isUndefined(def.enumerable) ? true : def.enumerable
+          descriptor.enumerable = utils.isUndefined(def.enumerable) ? true : def.enumerable
           if (def.get) {
             let origGet = descriptor.get
             descriptor.get = function () {
@@ -317,7 +289,7 @@ const DataStore = Container.extend({
               return def.set(def, this, related, (value) => origSet.call(this, value === undefined ? related : value))
             }
           }
-          Object.defineProperty(mapper.RecordClass.prototype, localField, descriptor)
+          Object.defineProperty(mapper.recordClass.prototype, localField, descriptor)
         }
       })
     }
@@ -378,6 +350,14 @@ const DataStore = Container.extend({
     })
   },
 
+  eject (id, opts) {
+    return this.remove(id, opts)
+  },
+
+  ejectAll (query, opts) {
+    return this.removeAll(query, opts)
+  },
+
   /**
    * TODO
    *
@@ -393,7 +373,7 @@ const DataStore = Container.extend({
     opts || (opts = {})
     const pendingQuery = self._pendingQueries[name][id]
 
-    _.fillIn(opts, self.getMapper(name))
+    utils.fillIn(opts, self.getMapper(name))
 
     if (pendingQuery) {
       return pendingQuery
@@ -407,13 +387,13 @@ const DataStore = Container.extend({
         return self._end(name, data, opts)
       }, function (err) {
         delete self._pendingQueries[name][id]
-        return _.reject(err)
+        return utils.reject(err)
       }).then(function (data) {
         self._completedQueries[name][id] = new Date().getTime()
         return data
       })
     } else {
-      promise = _.resolve(item)
+      promise = utils.resolve(item)
     }
     return promise
   },
@@ -434,7 +414,7 @@ const DataStore = Container.extend({
     const hash = self.hashQuery(name, query, opts)
     const pendingQuery = self._pendingQueries[name][hash]
 
-    _.fillIn(opts, self.getMapper(name))
+    utils.fillIn(opts, self.getMapper(name))
 
     if (pendingQuery) {
       return pendingQuery
@@ -449,30 +429,15 @@ const DataStore = Container.extend({
         return self._end(name, data, opts)
       }, function (err) {
         delete self._pendingQueries[name][hash]
-        return _.reject(err)
+        return utils.reject(err)
       }).then(function (data) {
         self._completedQueries[name][hash] = new Date().getTime()
         return data
       })
     } else {
-      promise = _.resolve(items)
+      promise = utils.resolve(items)
     }
     return promise
-  },
-
-  cachedFind (name, id, opts) {
-    return this.get(name, id, opts)
-  },
-
-  cachedFindAll (name, query, opts) {
-    const self = this
-    if (self._completedQueries[name][self.hashQuery(name, query, opts)]) {
-      return self.filter(name, query, opts)
-    }
-  },
-
-  hashQuery (name, query, opts) {
-    return _.toJson(query)
   },
 
   /**
@@ -489,6 +454,75 @@ const DataStore = Container.extend({
       throw new ReferenceError(`${name} is not a registered collection!`)
     }
     return collection
+  },
+
+  hashQuery (name, query, opts) {
+    return utils.toJson(query)
+  },
+
+  inject (records, opts) {
+    return this.add(records, opts)
+  },
+
+  remove (name, id, opts) {
+    const self = this
+    const record = self.getCollection(name).remove(id, opts)
+    if (record) {
+      self.removeRelated(name, [record], opts)
+    }
+    return record
+  },
+
+  removeAll (name, query, opts) {
+    const self = this
+    const records = self.getCollection(name).removeAll(query, opts)
+    if (records.length) {
+      self.removeRelated(name, records, opts)
+    }
+    return records
+  },
+
+  removeRelated (name, records, opts) {
+    const self = this
+    utils.forEachRelation(self.getMapper(name), opts, function (def, optsCopy) {
+      records.forEach(function (record) {
+        let relatedData
+        let query
+        if (def.foreignKey && (def.type === 'hasOne' || def.type === 'hasMany')) {
+          query = { [def.foreignKey]: def.getForeignKey(record) }
+        } else if (def.type === 'hasMany' && def.localKeys) {
+          query = {
+            where: {
+              [def.getRelation().idAttribute]: {
+                'in': utils.get(record, def.localKeys)
+              }
+            }
+          }
+        } else if (def.type === 'hasMany' && def.foreignKeys) {
+          query = {
+            where: {
+              [def.foreignKeys]: {
+                'contains': def.getForeignKey(record)
+              }
+            }
+          }
+        } else if (def.type === 'belongsTo') {
+          relatedData = self.remove(def.relation, def.getForeignKey(record), optsCopy)
+        }
+        if (query) {
+          relatedData = self.removeAll(def.relation, query, optsCopy)
+        }
+        if (relatedData) {
+          if (utils.isArray(relatedData) && !relatedData.length) {
+            return
+          }
+          if (def.type === 'hasOne') {
+            relatedData = relatedData[0]
+          }
+          def.setLocalField(record, relatedData)
+        }
+      })
+    })
   },
 
   /**
@@ -517,13 +551,13 @@ const DataStore = Container.extend({
    * @name DataStore#updateAll
    * @method
    * @param {string} name - Name of the {@link Mapper} to target.
-   * @param {Object?} query - Passed to {@link Model.updateAll}.
-   * @param {Object} props - Passed to {@link Model.updateAll}.
-   * @param {Object} [opts] - Passed to {@link Model.updateAll}. See
-   * {@link Model.updateAll} for more configuration options.
+   * @param {Object} props - Passed to {@link Mapper#updateAll}.
+   * @param {Object} [query] - Passed to {@link Mapper#updateAll}.
+   * @param {Object} [opts] - Passed to {@link Mapper#updateAll}. See
+   * {@link Mapper#updateAll} for more configuration options.
    * @return {Promise}
    */
-  updateAll (name, query, props, opts) {
+  updateAll (name, props, query, opts) {
     const self = this
     opts || (opts = {})
     return self._callSuper('updateAll', name, query, props, opts).then(function (data) {
@@ -549,29 +583,7 @@ const DataStore = Container.extend({
       return self._end(name, data, opts)
     })
   }
-})
-
-DataStore.prototype.defineResource = DataStore.prototype.defineMapper
-
-/**
- * Create a DataStore subclass.
- *
- * ```javascript
- * var MyDataStore = DataStore.extend({
- *   foo: function () { return 'bar' }
- * })
- * var store = new MyDataStore()
- * store.foo() // "bar"
- * ```
- *
- * @name DataStore.extend
- * @method
- * @param {Object} [props={}] Properties to add to the prototype of the
- * subclass.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @return {Function} Subclass of DataStore.
- */
-DataStore.extend = _.extend
+}
 
 const toProxy = [
   'add',
@@ -581,34 +593,52 @@ const toProxy = [
   'get',
   'getAll',
   'query',
-  'remove',
-  'removeAll',
   'toJson'
 ]
 
-const methods = {}
-
 toProxy.forEach(function (method) {
-  methods[method] = function (name, ...args) {
+  props[method] = function (name, ...args) {
     return this.getCollection(name)[method](...args)
   }
 })
 
-methods.inject = function (...args) {
-  return this.add(...args)
-}
-
-methods.eject = function (...args) {
-  return this.remove(...args)
-}
-
-methods.ejectAll = function (...args) {
-  return this.removeAll(...args)
-}
-
-_.logify(DataStore.prototype, 'DataStore')
-_.addHiddenPropsToTarget(DataStore.prototype, methods)
-
-export {
-  DataStore as default
-}
+/**
+ * The `DataStore` class is an extension of {@link Container}. Not only does
+ * `DataStore` manage mappers, but also collections. `DataStore` implements the
+ * asynchronous {@link Mapper} methods, such as {@link Mapper#find} and
+ * {@link Mapper#create}. If you use the asynchronous `DataStore` methods
+ * instead of calling them directly on the mappers, then the results of the
+ * method calls will be inserted into the store's collections. You can think of
+ * a `DataStore` as an [Identity Map](https://en.wikipedia.org/wiki/Identity_map_pattern)
+ * for the [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping)
+ * (the Mappers).
+ *
+ * ```javascript
+ * import {DataStore} from 'js-data'
+ * ```
+ *
+ * @example
+ * import {DataStore} from 'js-data'
+ * import HttpAdapter from 'js-data-http'
+ * const store = new DataStore()
+ * const UserMapper = store.defineMapper('user')
+ *
+ * // Call "find" on "UserMapper" (Stateless ORM)
+ * UserMapper.find(1).then(function (user) {
+ *   // retrieved a "user" record via the http adapter, but that's it
+ *
+ *   // Call "find" on "store" for the "user" mapper (Stateful DataStore)
+ *   return store.find('user', 1)
+ * }).then(function (user) {
+ *   // not only was a "user" record retrieved, but it was added to the
+ *   // store's "user" collection
+ *   const cachedUser = store.getCollection('user').get(1)
+ *   user === cachedUser // true
+ * })
+ *
+ * @class DataStore
+ * @extends Container
+ * @param {Object} [opts] Configuration options. See {@link Container}.
+ * @return {DataStore}
+ */
+export default Container.extend(props)

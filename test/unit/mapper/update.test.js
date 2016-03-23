@@ -33,7 +33,7 @@ export function init () {
       const user = await User.update(id, props)
       Test.assert.isTrue(updateCalled, 'Adapter#update should have been called')
       Test.assert.equal(user.foo, 'bar', 'user has a new field')
-      Test.assert.isTrue(user instanceof User.RecordClass, 'user is a record')
+      Test.assert.isTrue(user instanceof User.recordClass, 'user is a record')
     })
     it('should return raw', async function () {
       const Test = this
@@ -65,7 +65,7 @@ export function init () {
       let data = await User.update(id, props)
       Test.assert.isTrue(updateCalled, 'Adapter#update should have been called')
       Test.assert.equal(data.data.foo, 'bar', 'user has a new field')
-      Test.assert.isTrue(data.data instanceof User.RecordClass, 'user is a record')
+      Test.assert.isTrue(data.data instanceof User.recordClass, 'user is a record')
       Test.assert.equal(data.adapter, 'mock', 'should have adapter name in response')
       Test.assert.equal(data.updated, 1, 'should have other metadata in response')
     })

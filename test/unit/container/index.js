@@ -31,14 +31,14 @@ export function init () {
       Test.assert.deepEqual(container._adapters, {})
       Test.assert.deepEqual(container._mappers, {})
       Test.assert.deepEqual(container.mapperDefaults, {})
-      Test.assert.isTrue(container.MapperClass === Test.JSData.Mapper)
+      Test.assert.isTrue(container.mapperClass === Test.JSData.Mapper)
     })
     it('should accept overrides', function () {
       const Test = this
       const Container = Test.JSData.Container
       class Foo {}
       const container = new Container({
-        MapperClass: Foo,
+        mapperClass: Foo,
         foo: 'bar',
         mapperDefaults: {
           idAttribute: '_id'
@@ -50,7 +50,7 @@ export function init () {
       Test.assert.deepEqual(container.mapperDefaults, {
         idAttribute: '_id'
       })
-      Test.assert.isTrue(container.MapperClass === Foo)
+      Test.assert.isTrue(container.mapperClass === Foo)
     })
 
     create.init()

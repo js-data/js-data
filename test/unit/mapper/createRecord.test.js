@@ -12,7 +12,7 @@ export function init () {
         }
       }
       const PersonMapper = store.defineMapper('person', {
-        RecordClass: Person
+        recordClass: Person
       })
 
       class Dog extends Test.JSData.Record {
@@ -21,7 +21,7 @@ export function init () {
         }
       }
       const DogMapper = store.defineMapper('dog', {
-        RecordClass: Dog,
+        recordClass: Dog,
         name: 'Dog'
       })
 
@@ -32,7 +32,7 @@ export function init () {
       }
       const CatMapper = store.defineMapper('cat', {
         name: 'Cat',
-        RecordClass: Cat
+        recordClass: Cat
       })
 
       const personAttrs = {

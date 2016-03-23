@@ -1,4 +1,5 @@
-import _ from './utils'
+import utils from './utils'
+import Component from './Component'
 import {
   belongsTo,
   belongsToType,
@@ -34,7 +35,7 @@ const notify2 = function (...args) {
 
 const MAPPER_DEFAULTS = {
   /**
-   * Whether to augment {@link Mapper#RecordClass} with getter/setter property
+   * Whether to augment {@link Mapper#recordClass} with getter/setter property
    * accessors according to the properties defined in {@link Mapper#schema}.
    * This makes possible validation and change tracking on individual properties
    * when using the dot (e.g. `user.name = "Bob"`) operator to modify a
@@ -47,15 +48,6 @@ const MAPPER_DEFAULTS = {
   applySchema: true,
 
   /**
-   * The name of the registered adapter that this Mapper should used by default.
-   *
-   * @name Mapper#defaultAdapter
-   * @type {string}
-   * @default "http"
-   */
-  defaultAdapter: 'http',
-
-  /**
    * Whether to enable debug-level logs.
    *
    * @name Mapper#debug
@@ -63,6 +55,15 @@ const MAPPER_DEFAULTS = {
    * @default false
    */
   debug: false,
+
+  /**
+   * The name of the registered adapter that this Mapper should used by default.
+   *
+   * @name Mapper#defaultAdapter
+   * @type {string}
+   * @default "http"
+   */
+  defaultAdapter: 'http',
 
   /**
    * The field used as the unique identifier on records handled by this Mapper.
@@ -75,58 +76,58 @@ const MAPPER_DEFAULTS = {
 
   lifecycleMethods: {
     count: {
-      types: [],
       defaults: [{}, {}],
-      skip: true
+      skip: true,
+      types: []
     },
     destroy: {
-      types: [],
       defaults: [{}, {}],
-      skip: true
+      skip: true,
+      types: []
     },
     destroyAll: {
-      types: [],
       defaults: [{}, {}],
-      skip: true
+      skip: true,
+      types: []
     },
     find: {
-      types: [],
-      defaults: [undefined, {}]
+      defaults: [undefined, {}],
+      types: []
     },
     findAll: {
-      types: [],
-      defaults: [{}, {}]
+      defaults: [{}, {}],
+      types: []
     },
     sum: {
-      types: [],
       defaults: [undefined, {}, {}],
-      skip: true
+      skip: true,
+      types: []
     },
     update: {
-      types: [],
-      defaults: [undefined, {}, {}],
-      beforeAssign: 1,
       adapterArgs (mapper, id, props, opts) {
         return [id, mapper.toJSON(props, opts), opts]
-      }
+      },
+      beforeAssign: 1,
+      defaults: [undefined, {}, {}],
+      types: []
     },
     updateAll: {
-      types: [],
-      defaults: [{}, {}, {}],
-      beforeAssign: 0,
       adapterArgs (mapper, props, query, opts) {
         return [mapper.toJSON(props, opts), query, opts]
-      }
+      },
+      beforeAssign: 0,
+      defaults: [{}, {}, {}],
+      types: []
     },
     updateMany: {
-      types: [],
-      defaults: [[], {}],
-      beforeAssign: 0,
       adapterArgs (mapper, records, opts) {
         return [records.map(function (record) {
           return mapper.toJSON(record, opts)
         }), opts]
-      }
+      },
+      beforeAssign: 0,
+      defaults: [[], {}],
+      types: []
     }
   },
 
@@ -147,7 +148,7 @@ const MAPPER_DEFAULTS = {
    * @name Mapper#notify
    * @type {boolean}
    */
-  notify: _.isBrowser,
+  notify: utils.isBrowser,
 
   /**
    * Whether {@link Mapper#create}, {@link Mapper#createMany}, {@link Mapper#save},
@@ -186,7 +187,7 @@ const MAPPER_DEFAULTS = {
  * relational or document-based database. JSData's Mapper can work with any
  * persistence layer you can write an adapter for.
  *
- * _._("Model" is a heavily overloaded term and is avoided in this documentation
+ * utils._("Model" is a heavily overloaded term and is avoided in this documentation
  * to prevent confusion.)_
  *
  * [orm]: https://en.wikipedia.org/wiki/Object-relational_mapping
@@ -195,150 +196,122 @@ const MAPPER_DEFAULTS = {
  * [record]: Record.html
  *
  * @class Mapper
+ * @extends Component
  * @param {Object} [opts] Configuration options.
  */
-export default function Mapper (opts) {
-  const self = this
-  _.classCallCheck(self, Mapper)
-
-  opts || (opts = {})
-
-  /**
-   * Hash of registered adapters. Don't modify. Use {@link Mapper#registerAdapter}.
-   *
-   * @name Mapper#_adapters
-   * @private
-   */
-  Object.defineProperty(self, '_adapters', {
-    value: undefined,
-    writable: true
-  })
-
-  /**
-   * Hash of registered listeners. Don't modify. Use {@link Mapper#on} and
-   * {@link Mapper#off}.
-   *
-   * @name Mapper#_listeners
-   * @private
-   */
-  Object.defineProperty(self, '_listeners', {
-    value: {},
-    writable: true
-  })
-
-  /**
-   * Set the `false` to force the Mapper to work with POJO objects only.
-   *
-   * ```javascript
-   * import {Mapper, Record} from 'js-data'
-   * const UserMapper = new Mapper({ RecordClass: false })
-   * UserMapper.RecordClass // false
-   * const user = UserMapper#createRecord()
-   * user instanceof Record // false
-   * ```
-   *
-   * Set to a custom class to have records wrapped in your custom class.
-   *
-   * ```javascript
-   * import {Mapper, Record} from 'js-data'
-   *  // Custom class
-   * class User {
-   *   constructor (props = {}) {
-   *     for (var key in props) {
-   *       if (props.hasOwnProperty(key)) {
-   *         this[key] = props[key]
-   *       }
-   *     }
-   *   }
-   * }
-   * const UserMapper = new Mapper({ RecordClass: User })
-   * UserMapper.RecordClass // function User() {}
-   * const user = UserMapper#createRecord()
-   * user instanceof Record // false
-   * user instanceof User // true
-   * ```
-   *
-   * Extend the {@link Record} class.
-   *
-   * ```javascript
-   * import {Mapper, Record} from 'js-data'
-   *  // Custom class
-   * class User extends Record {
-   *   constructor () {
-   *     super(props)
-   *   }
-   * }
-   * const UserMapper = new Mapper({ RecordClass: User })
-   * UserMapper.RecordClass // function User() {}
-   * const user = UserMapper#createRecord()
-   * user instanceof Record // true
-   * user instanceof User // true
-   * ```
-   *
-   * @name Mapper#RecordClass
-   * @default {@link Record}
-   */
-  Object.defineProperty(self, 'RecordClass', {
-    value: undefined,
-    writable: true
-  })
-
-  _.fillIn(self, opts)
-  _.fillIn(self, _.copy(MAPPER_DEFAULTS))
-
-  if (!self.name) {
-    throw new Error('mapper cannot function without a name!')
-  }
-
-  self._adapters || (self._adapters = {})
-
-  if (!(self.schema instanceof Schema)) {
-    self.schema = new Schema(self.schema || {})
-  }
-
-  if (_.isUndefined(self.RecordClass)) {
-    self.RecordClass = Record.extend()
-  }
-
-  if (self.RecordClass) {
-    self.RecordClass.Mapper = self
-
-    // We can only apply the schema to the prototype of self.RecordClass if the
-    // class extends Record
-    if (_.getSuper(self.RecordClass, true) === Record && self.schema && self.schema.apply && self.applySchema) {
-      self.schema.apply(self.RecordClass.prototype)
-    }
-  }
-}
-
-_.addHiddenPropsToTarget(Mapper.prototype, {
-  /**
-   * @name Mapper#_end
-   * @method
-   * @private
-   */
-  _end (result, opts, skip) {
+export default Component.extend({
+  constructor: function Mapper (opts) {
     const self = this
-    if (opts.raw) {
-      _._(opts, result)
+    utils.classCallCheck(self, Mapper)
+    Mapper.__super__.call(self)
+    opts || (opts = {})
+
+    /**
+     * Hash of registered adapters. Don't modify. Use {@link Mapper#registerAdapter}.
+     *
+     * @name Mapper#_adapters
+     * @private
+     */
+    Object.defineProperty(self, '_adapters', {
+      value: undefined,
+      writable: true
+    })
+
+    /**
+     * Hash of registered listeners. Don't modify. Use {@link Mapper#on} and
+     * {@link Mapper#off}.
+     *
+     * @name Mapper#_listeners
+     * @private
+     */
+    Object.defineProperty(self, '_listeners', {
+      value: {},
+      writable: true
+    })
+
+    /**
+     * Set the `false` to force the Mapper to work with POJO objects only.
+     *
+     * ```javascript
+     * import {Mapper, Record} from 'js-data'
+     * const UserMapper = new Mapper({ recordClass: false })
+     * UserMapper.recordClass // false
+     * const user = UserMapper#createRecord()
+     * user instanceof Record // false
+     * ```
+     *
+     * Set to a custom class to have records wrapped in your custom class.
+     *
+     * ```javascript
+     * import {Mapper, Record} from 'js-data'
+     *  // Custom class
+     * class User {
+     *   constructor (props = {}) {
+     *     for (var key in props) {
+     *       if (props.hasOwnProperty(key)) {
+     *         this[key] = props[key]
+     *       }
+     *     }
+     *   }
+     * }
+     * const UserMapper = new Mapper({ recordClass: User })
+     * UserMapper.recordClass // function User() {}
+     * const user = UserMapper#createRecord()
+     * user instanceof Record // false
+     * user instanceof User // true
+     * ```
+     *
+     * Extend the {@link Record} class.
+     *
+     * ```javascript
+     * import {Mapper, Record} from 'js-data'
+     *  // Custom class
+     * class User extends Record {
+     *   constructor () {
+     *     super(props)
+     *   }
+     * }
+     * const UserMapper = new Mapper({ recordClass: User })
+     * UserMapper.recordClass // function User() {}
+     * const user = UserMapper#createRecord()
+     * user instanceof Record // true
+     * user instanceof User // true
+     * ```
+     *
+     * @name Mapper#recordClass
+     * @default {@link Record}
+     */
+    Object.defineProperty(self, 'recordClass', {
+      value: undefined,
+      writable: true
+    })
+
+    utils.fillIn(self, opts)
+    utils.fillIn(self, utils.copy(MAPPER_DEFAULTS))
+
+    if (!self.name) {
+      throw new Error('mapper cannot function without a name!')
     }
-    if (skip) {
-      return result
+
+    self._adapters || (self._adapters = {})
+
+    if (!(self.schema instanceof Schema)) {
+      self.schema = new Schema(self.schema || {})
     }
-    let _data = opts.raw ? result.data : result
-    if (_.isArray(_data) && _data.length && _.isObject(_data[0])) {
-      _data = _data.map(function (item) {
-        return self.createRecord(item)
-      })
-    } else if (_.isObject(_data)) {
-      _data = self.createRecord(_data)
+
+    if (utils.isUndefined(self.recordClass)) {
+      self.recordClass = Record.extend()
     }
-    if (opts.raw) {
-      result.data = _data
-    } else {
-      result = _data
+
+    if (self.recordClass) {
+      self.recordClass.mapper = self
+
+      // We can only apply the schema to the prototype of self.recordClass if the
+      // class extends Record
+      if (utils.getSuper(self.recordClass, true) === Record && self.schema && self.schema.apply && self.applySchema) {
+        self.schema.apply(self.recordClass.prototype)
+      }
     }
-    return result
   },
 
   /**
@@ -623,6 +596,35 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
   beforeUpdateMany: notify,
 
   /**
+   * @name Mapper#_end
+   * @method
+   * @private
+   */
+  _end (result, opts, skip) {
+    const self = this
+    if (opts.raw) {
+      utils._(opts, result)
+    }
+    if (skip) {
+      return result
+    }
+    let _data = opts.raw ? result.data : result
+    if (utils.isArray(_data) && _data.length && utils.isObject(_data[0])) {
+      _data = _data.map(function (item) {
+        return self.createRecord(item)
+      })
+    } else if (utils.isObject(_data)) {
+      _data = self.createRecord(_data)
+    }
+    if (opts.raw) {
+      result.data = _data
+    } else {
+      result = _data
+    }
+    return result
+  },
+
+  /**
    * Usage:
    *
    * Post.belongsTo(User, {
@@ -637,8 +639,8 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
    * @name Mapper#belongsTo
    * @method
    */
-  belongsTo (RelatedMapper, opts) {
-    return belongsTo(RelatedMapper, opts)(this)
+  belongsTo (relatedMapper, opts) {
+    return belongsTo(relatedMapper, opts)(this)
   },
 
   /**
@@ -703,41 +705,41 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
     opts || (opts = {})
 
     // Fill in "opts" with the Mapper's configuration
-    _._(self, opts)
+    utils._(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeCreate lifecycle hook
     op = opts.op = 'beforeCreate'
-    return _.resolve(self[op](props, opts)).then(function (_props) {
+    return utils.resolve(self[op](props, opts)).then(function (_props) {
       // Allow for re-assignment from lifecycle hook
-      props = _.isUndefined(_props) ? props : _props
+      props = utils.isUndefined(_props) ? props : _props
 
       // Deep pre-create belongsTo relations
       const belongsToRelationData = {}
       opts.with || (opts.with = [])
       let tasks = []
-      _.forEachRelation(self, opts, function (def, __opts) {
+      utils.forEachRelation(self, opts, function (def, optsCopy) {
         const relationData = def.getLocalField(props)
         if (def.type === belongsToType && relationData) {
           // Create belongsTo relation first because we need a generated id to
           // attach to the child
-          tasks.push(def.getRelation().create(relationData, __opts).then(function (data) {
-            const relatedRecord = __opts.raw ? data.data : data
+          tasks.push(def.getRelation().create(relationData, optsCopy).then(function (data) {
+            const relatedRecord = optsCopy.raw ? data.data : data
             def.setLocalField(belongsToRelationData, relatedRecord)
             def.setForeignKey(props, relatedRecord)
           }))
         }
       })
-      return Promise.all(tasks).then(function () {
+      return utils.Promise.all(tasks).then(function () {
         // Now delegate to the adapter for the main create
         op = opts.op = 'create'
         self.dbg(op, props, opts)
-        return _.resolve(self.getAdapter(adapter)[op](self, self.toJSON(props, { with: opts.pass || [] }), opts))
+        return utils.resolve(self.getAdapter(adapter)[op](self, self.toJSON(props, { with: opts.pass || [] }), opts))
       }).then(function (data) {
         const createdRecord = opts.raw ? data.data : data
         // Deep post-create hasMany and hasOne relations
         tasks = []
-        _.forEachRelation(self, opts, function (def, __opts) {
+        utils.forEachRelation(self, opts, function (def, optsCopy) {
           const relationData = def.getLocalField(props)
           if (!relationData) {
             return
@@ -747,12 +749,12 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
           // a generated id to attach to these items
           if (def.type === hasManyType) {
             def.setForeignKey(createdRecord, relationData)
-            task = def.getRelation().createMany(relationData, __opts).then(function (data) {
+            task = def.getRelation().createMany(relationData, optsCopy).then(function (data) {
               def.setLocalField(createdRecord, opts.raw ? data.data : data)
             })
           } else if (def.type === hasOneType) {
             def.setForeignKey(createdRecord, relationData)
-            task = def.getRelation().create(relationData, __opts).then(function (data) {
+            task = def.getRelation().create(relationData, optsCopy).then(function (data) {
               def.setLocalField(createdRecord, opts.raw ? data.data : data)
             })
           } else if (def.type === belongsToType && def.getLocalField(belongsToRelationData)) {
@@ -762,7 +764,7 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
             tasks.push(task)
           }
         })
-        return Promise.all(tasks).then(function () {
+        return utils.Promise.all(tasks).then(function () {
           return data
         })
       })
@@ -770,15 +772,15 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
       result = self._end(result, opts)
       // afterCreate lifecycle hook
       op = opts.op = 'afterCreate'
-      return _.resolve(self[op](props, opts, result)).then(function (_result) {
+      return utils.resolve(self[op](props, opts, result)).then(function (_result) {
         // Allow for re-assignment from lifecycle hook
-        return _.isUndefined(_result) ? result : _result
+        return utils.isUndefined(_result) ? result : _result
       })
     })
   },
 
-  createInstance (...args) {
-    return this.createRecord(...args)
+  createInstance (props, opts) {
+    return this.createRecord(props, opts)
   },
 
   /**
@@ -815,20 +817,20 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
     opts || (opts = {})
 
     // Fill in "opts" with the Mapper's configuration
-    _._(self, opts)
+    utils._(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeCreateMany lifecycle hook
     op = opts.op = 'beforeCreateMany'
-    return _.resolve(self[op](records, opts)).then(function (_records) {
+    return utils.resolve(self[op](records, opts)).then(function (_records) {
       // Allow for re-assignment from lifecycle hook
-      records = _.isUndefined(_records) ? records : _records
+      records = utils.isUndefined(_records) ? records : _records
 
       // Deep pre-create belongsTo relations
       const belongsToRelationData = {}
       opts.with || (opts.with = [])
       let tasks = []
-      _.forEachRelation(self, opts, function (def, __opts) {
+      utils.forEachRelation(self, opts, function (def, optsCopy) {
         const relationData = records.map(function (record) {
           return def.getLocalField(record)
         }).filter(function (relatedRecord) {
@@ -837,8 +839,8 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
         if (def.type === belongsToType && relationData.length === records.length) {
           // Create belongsTo relation first because we need a generated id to
           // attach to the child
-          tasks.push(def.getRelation().createMany(relationData, __opts).then(function (data) {
-            const relatedRecords = __opts.raw ? data.data : data
+          tasks.push(def.getRelation().createMany(relationData, optsCopy).then(function (data) {
+            const relatedRecords = optsCopy.raw ? data.data : data
             def.setLocalField(belongsToRelationData, relatedRecords)
             records.forEach(function (record, i) {
               def.setForeignKey(record, relatedRecords[i])
@@ -846,20 +848,20 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
           }))
         }
       })
-      return Promise.all(tasks).then(function () {
+      return utils.Promise.all(tasks).then(function () {
         // Now delegate to the adapter
         op = opts.op = 'createMany'
         const json = records.map(function (record) {
           return self.toJSON(record, { with: opts.pass || [] })
         })
         self.dbg(op, records, opts)
-        return _.resolve(self.getAdapter(adapter)[op](self, json, opts))
+        return utils.resolve(self.getAdapter(adapter)[op](self, json, opts))
       }).then(function (data) {
         const createdRecords = opts.raw ? data.data : data
 
         // Deep post-create hasOne relations
         tasks = []
-        _.forEachRelation(self, opts, function (def, __opts) {
+        utils.forEachRelation(self, opts, function (def, optsCopy) {
           const relationData = records.map(function (record) {
             return def.getLocalField(record)
           }).filter(function (relatedRecord) {
@@ -879,7 +881,7 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
             createdRecords.forEach(function (createdRecord, i) {
               def.setForeignKey(createdRecord, relationData[i])
             })
-            task = def.getRelation().createMany(relationData, __opts).then(function (data) {
+            task = def.getRelation().createMany(relationData, optsCopy).then(function (data) {
               const relatedData = opts.raw ? data.data : data
               createdRecords.forEach(function (createdRecord, i) {
                 def.setLocalField(createdRecord, relatedData[i])
@@ -894,7 +896,7 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
             tasks.push(task)
           }
         })
-        return Promise.all(tasks).then(function () {
+        return utils.Promise.all(tasks).then(function () {
           return data
         })
       })
@@ -902,19 +904,19 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
       result = self._end(result, opts)
       // afterCreateMany lifecycle hook
       op = opts.op = 'afterCreateMany'
-      return _.resolve(self[op](records, opts, result)).then(function (_result) {
+      return utils.resolve(self[op](records, opts, result)).then(function (_result) {
         // Allow for re-assignment from lifecycle hook
-        return _.isUndefined(_result) ? result : _result
+        return utils.isUndefined(_result) ? result : _result
       })
     })
   },
 
   /**
    * Create an unsaved, uncached instance of this Mapper's
-   * {@link Mapper#RecordClass}.
+   * {@link Mapper#recordClass}.
    *
    * Returns `props` if `props` is already an instance of
-   * {@link Mapper#RecordClass}.
+   * {@link Mapper#recordClass}.
    *
    * @name Mapper#createRecord
    * @method
@@ -926,21 +928,21 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
    */
   createRecord (props, opts) {
     const self = this
-    const RecordClass = self.RecordClass
+    const recordClass = self.recordClass
     const relationList = self.relationList || []
     relationList.forEach(function (def) {
       const relatedMapper = def.getRelation()
       const relationData = def.getLocalField(props)
-      if (_.isArray(relationData) && relationData.length && !relatedMapper.is(relationData[0])) {
+      if (utils.isArray(relationData) && relationData.length && !relatedMapper.is(relationData[0])) {
         def.setLocalField(props, relationData.map(function (relationDataItem) {
           return def.getRelation().createRecord(relationDataItem)
         }))
-      } else if (_.isObject(relationData) && !relatedMapper.is(relationData)) {
+      } else if (utils.isObject(relationData) && !relatedMapper.is(relationData)) {
         def.setLocalField(props, def.getRelation().createRecord(relationData))
       }
     })
     // Check to make sure "props" is not already an instance of this Mapper.
-    return RecordClass ? (props instanceof RecordClass ? props : new RecordClass(props, opts)) : props
+    return recordClass ? (props instanceof recordClass ? props : new recordClass(props, opts)) : props // eslint-disable-line
   },
 
   /**
@@ -967,37 +969,37 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
 
     // Default values for arguments
     config.defaults.forEach(function (value, i) {
-      if (_.isUndefined(args[i])) {
-        args[i] = _.copy(value)
+      if (utils.isUndefined(args[i])) {
+        args[i] = utils.copy(value)
       }
     })
 
     const opts = args[args.length - 1]
 
     // Fill in "opts" with the Mapper's configuration
-    _._(self, opts)
+    utils._(self, opts)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // before lifecycle hook
     op = opts.op = before
-    return _.resolve(self[op](...args)).then(function (_value) {
-      if (!_.isUndefined(config.beforeAssign)) {
+    return utils.resolve(self[op](...args)).then(function (_value) {
+      if (!utils.isUndefined(config.beforeAssign)) {
         // Allow for re-assignment from lifecycle hook
-        args[config.beforeAssign] = _.isUndefined(_value) ? args[config.beforeAssign] : _value
+        args[config.beforeAssign] = utils.isUndefined(_value) ? args[config.beforeAssign] : _value
       }
       // Now delegate to the adapter
       op = opts.op = method
       args = config.adapterArgs ? config.adapterArgs(self, ...args) : args
       self.dbg(op, ...args)
-      return _.resolve(self.getAdapter(adapter)[op](self, ...args))
+      return utils.resolve(self.getAdapter(adapter)[op](self, ...args))
     }).then(function (result) {
       result = self._end(result, opts, !!config.skip)
       args.push(result)
       // after lifecycle hook
       op = opts.op = after
-      return _.resolve(self[op](...args)).then(function (_result) {
+      return utils.resolve(self[op](...args)).then(function (_result) {
         // Allow for re-assignment from lifecycle hook
-        return _.isUndefined(_result) ? result : _result
+        return utils.isUndefined(_result) ? result : _result
       })
     })
   },
@@ -1141,7 +1143,7 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
    */
   getAdapterName (opts) {
     opts || (opts = {})
-    if (_.isString(opts)) {
+    if (utils.isString(opts)) {
       opts = { adapter: opts }
     }
     return opts.adapter || opts.defaultAdapter
@@ -1169,8 +1171,8 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
    * @name Mapper#hasMany
    * @method
    */
-  hasMany (RelatedMapper, opts) {
-    return hasMany(RelatedMapper, opts)(this)
+  hasMany (relatedMapper, opts) {
+    return hasMany(relatedMapper, opts)(this)
   },
 
   /**
@@ -1183,22 +1185,22 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
    * @name Mapper#hasOne
    * @method
    */
-  hasOne (RelatedMapper, opts) {
-    return hasOne(RelatedMapper, opts)(this)
+  hasOne (relatedMapper, opts) {
+    return hasOne(relatedMapper, opts)(this)
   },
 
   /**
-   * Return whether `record` is an instance of this Mappers's RecordClass.
+   * Return whether `record` is an instance of this Mappers's recordClass.
    *
    * @name Mapper#is
    * @method
    * @param {Object} record The record to check.
    * @return {boolean} Whether `record` is an instance of this Mappers's
-   * {@ link Mapper#RecordClass}.
+   * {@ link Mapper#recordClass}.
    */
   is (record) {
-    const RecordClass = this.RecordClass
-    return RecordClass ? record instanceof RecordClass : false
+    const recordClass = this.recordClass
+    return recordClass ? record instanceof recordClass : false
   },
 
   /**
@@ -1272,15 +1274,15 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
     if (self && self.schema) {
       properties = self.schema.properties || {}
       // TODO: Make this work recursively
-      _.forOwn(properties, function (opts, prop) {
-        json[prop] = _.plainCopy(record[prop])
+      utils.forOwn(properties, function (opts, prop) {
+        json[prop] = utils.plainCopy(record[prop])
       })
     }
     properties || (properties = {})
     if (!opts.strict) {
-      _.forOwn(record, function (value, key) {
+      utils.forOwn(record, function (value, key) {
         if (!properties[key] && relationFields.indexOf(key) === -1) {
-          json[key] = _.plainCopy(value)
+          json[key] = utils.plainCopy(value)
         }
       })
     }
@@ -1290,19 +1292,19 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
       opts.with = relationFields.slice()
     }
     if (self && opts.with) {
-      if (_.isString(opts.with)) {
+      if (utils.isString(opts.with)) {
         opts.with = [opts.with]
       }
-      _.forEachRelation(self, opts, function (def, __opts) {
+      utils.forEachRelation(self, opts, function (def, optsCopy) {
         const relationData = def.getLocalField(record)
         if (relationData) {
           // The actual recursion
-          if (_.isArray(relationData)) {
+          if (utils.isArray(relationData)) {
             def.setLocalField(json, relationData.map(function (item) {
-              return def.getRelation().toJSON(item, __opts)
+              return def.getRelation().toJSON(item, optsCopy)
             }))
           } else {
-            def.setLocalField(json, def.getRelation().toJSON(relationData, __opts))
+            def.setLocalField(json, def.getRelation().toJSON(relationData, optsCopy))
           }
         }
       })
@@ -1398,69 +1400,3 @@ _.addHiddenPropsToTarget(Mapper.prototype, {
     return this.crud('updateMany', records, opts)
   }
 })
-
-/**
- * Create a Mapper subclass.
- *
- * ```javascript
- * var MyMapper = Mapper.extend({
- *   foo: function () { return 'bar' }
- * })
- * var mapper = new MyMapper()
- * mapper.foo() // "bar"
- * ```
- *
- * @name Mapper.extend
- * @method
- * @param {Object} [props={}] Properties to add to the prototype of the
- * subclass.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @return {Function} Subclass of Mapper.
- */
-Mapper.extend = _.extend
-
-/**
- * @name Mapper#dbg
- * @method
- */
-
-/**
- * @name Mapper#log
- * @method
- */
-_.logify(Mapper.prototype, 'Mapper')
-
-/**
- * Register a new event listener on this Mapper.
- *
- * @name Mapper#on
- * @method
- */
-
-/**
- * Remove an event listener from this Mapper.
- *
- * @name Mapper#off
- * @method
- */
-
-/**
- * Trigger an event on this Mapper.
- *
- * @name Mapper#emit
- * @method
- * @param {string} event Name of event to emit.
- */
-
-/**
- * A Mapper's registered listeners are stored at {@link Mapper#_listeners}.
- */
-_.eventify(
-  Mapper.prototype,
-  function () {
-    return this._listeners
-  },
-  function (value) {
-    this._listeners = value
-  }
-)
