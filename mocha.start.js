@@ -7,7 +7,7 @@ before(function () {
   var Test = this
   Test.assert = require('chai').assert
   Test.sinon = require('sinon')
-  Test.JSData = require('./dist/js-data')
+  Test.JSData = require('./dist/js-data.js')
   Test.assert.objectsEqual = function (a, b, msg) {
     Test.assert.deepEqual(
       JSON.parse(JSON.stringify(a)),

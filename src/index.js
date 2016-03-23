@@ -44,54 +44,73 @@ export const version = {
   patch: parseInt('<%= patch %>', 10)
 }
 
-export utils from './utils'
-
-export * from './decorators'
+import utils from './utils'
 
 /**
  * {@link Collection} class.
  * @name module:js-data.Collection
  */
-export Collection from './Collection'
+import Collection from './Collection'
+
+/**
+ * {@link Component} class.
+ * @name module:js-data.Component
+ */
+import Component from './Component'
 
 /**
  * {@link Container} class.
  * @name module:js-data.Container
  */
-export Container from './Container'
+import Container from './Container'
 
 /**
  * {@link DataStore} class.
  * @name module:js-data.DataStore
  */
-export DataStore from './DataStore'
+import DataStore from './DataStore'
 
 /**
  * {@link LinkedCollection} class.
  * @name module:js-data.LinkedCollection
  */
-export LinkedCollection from './LinkedCollection'
+import LinkedCollection from './LinkedCollection'
 
 /**
  * {@link Mapper} class.
  * @name module:js-data.Mapper
  */
-export Mapper from './Mapper'
+import Mapper from './Mapper'
 
 /**
  * {@link Query} class.
  * @name module:js-data.Query
  */
-export Query from './Query'
+import Query from './Query'
 
 /**
  * {@link Record} class.
  * @name module:js-data.Record
  */
-export Record from './Record'
+import Record from './Record'
 
 /**
  * {@link Schema} class.
  * @name module:js-data.Schema
  */
-export Schema from './Schema'
+import Schema from './Schema'
+
+export * from './decorators'
+
+export {
+  Collection,
+  Component,
+  Container,
+  DataStore,
+  LinkedCollection,
+  Mapper,
+  Query,
+  Record,
+  Schema,
+  utils
+}

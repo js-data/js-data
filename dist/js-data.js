@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.20 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.21 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -1016,165 +1016,6 @@
   }
 
   var utils$1 = utils;
-
-  var belongsToType = 'belongsTo';
-  var hasManyType = 'hasMany';
-  var hasOneType = 'hasOne';
-
-  function Relation(related, opts) {
-    var self = this;
-
-    opts || (opts = {});
-
-    var localField = opts.localField;
-    if (!localField) {
-      throw new Error('localField is required');
-    }
-
-    var foreignKey = opts.foreignKey = opts.foreignKey || opts.localKey;
-    if (!foreignKey && (opts.type === belongsToType || opts.type === hasOneType)) {
-      throw new Error('foreignKey is required');
-    }
-    var localKeys = opts.localKeys;
-    var foreignKeys = opts.foreignKeys;
-    if (!foreignKey && !localKeys && !foreignKeys && opts.type === hasManyType) {
-      throw new Error('one of (foreignKey, localKeys, foreignKeys) is required');
-    }
-
-    if (utils$1.isString(related)) {
-      opts.relation = related;
-      if (!utils$1.isFunction(opts.getRelation)) {
-        throw new Error('you must provide a reference to the related mapper!');
-      }
-    } else if (related) {
-      opts.relation = related.name;
-      Object.defineProperty(self, 'relatedMapper', {
-        value: related
-      });
-    }
-
-    utils$1.fillIn(self, opts);
-  }
-
-  utils$1.addHiddenPropsToTarget(Relation.prototype, {
-    getRelation: function getRelation() {
-      return this.relatedMapper;
-    },
-    getLocalKeys: function getLocalKeys(record) {},
-    getForeignKey: function getForeignKey(record) {
-      if (this.type === belongsToType) {
-        return utils$1.get(record, this.foreignKey);
-      }
-      return utils$1.get(record, this.mapper.idAttribute);
-    },
-    setForeignKey: function setForeignKey(record, relatedRecord) {
-      var self = this;
-      if (!record || !relatedRecord) {
-        return;
-      }
-      if (self.type === belongsToType) {
-        utils$1.set(record, self.foreignKey, utils$1.get(relatedRecord, self.getRelation().idAttribute));
-      } else {
-        (function () {
-          var idAttribute = self.mapper.idAttribute;
-          if (utils$1.isArray(relatedRecord)) {
-            relatedRecord.forEach(function (relatedRecordItem) {
-              utils$1.set(relatedRecordItem, self.foreignKey, utils$1.get(record, idAttribute));
-            });
-          } else {
-            utils$1.set(relatedRecord, self.foreignKey, utils$1.get(record, idAttribute));
-          }
-        })();
-      }
-    },
-    getLocalField: function getLocalField(record) {
-      return utils$1.get(record, this.localField);
-    },
-    setLocalField: function setLocalField(record, data) {
-      return utils$1.set(record, this.localField, data);
-    }
-  });
-
-  var relatedTo = function relatedTo(mapper, related, opts) {
-    opts || (opts = {});
-    if (!opts.type) {
-      throw new Error('must specify relation type!');
-    }
-    opts.mapper = mapper;
-    opts.name = mapper.name;
-    var relation = new Relation(related, opts);
-
-    mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] });
-    mapper.relationFields || Object.defineProperty(mapper, 'relationFields', { value: [] });
-    mapper.relationList.push(relation);
-    mapper.relationFields.push(relation.localField);
-  };
-
-  /**
-   * TODO
-   *
-   * @name module:js-data.belongsTo
-   * @method
-   * @param {Mapper} related The relation the target belongs to.
-   * @param {Object} opts Configuration options.
-   * @param {string} opts.foreignKey The field that holds the primary key of the
-   * related record.
-   * @param {string} opts.localField The field that holds a reference to the
-   * related record object.
-   * @return {Function} Invocation function, which accepts the target as the only
-   * parameter.
-   */
-  var _belongsTo = function belongsTo(related, opts) {
-    opts || (opts = {});
-    opts.type = belongsToType;
-    return function (target) {
-      relatedTo(target, related, opts);
-    };
-  };
-
-  /**
-   * TODO
-   *
-   * @name module:js-data.hasMany
-   * @method
-   * @param {Mapper} related The relation of which the target has many.
-   * @param {Object} opts Configuration options.
-   * @param {string} [opts.foreignKey] The field that holds the primary key of the
-   * related record.
-   * @param {string} opts.localField The field that holds a reference to the
-   * related record object.
-   * @return {Function} Invocation function, which accepts the target as the only
-   * parameter.
-   */
-  var _hasMany = function hasMany(related, opts) {
-    opts || (opts = {});
-    opts.type = hasManyType;
-    return function (target) {
-      relatedTo(target, related, opts);
-    };
-  };
-
-  /**
-   * TODO
-   *
-   * @name module:js-data.hasOne
-   * @method
-   * @param {Mapper} related The relation of which the target has one.
-   * @param {Object} opts Configuration options.
-   * @param {string} [opts.foreignKey] The field that holds the primary key of the
-   * related record.
-   * @param {string} opts.localField The field that holds a reference to the
-   * related record object.
-   * @return {Function} Invocation function, which accepts the target as the only
-   * parameter.
-   */
-  var _hasOne = function hasOne(related, opts) {
-    opts || (opts = {});
-    opts.type = hasOneType;
-    return function (target) {
-      relatedTo(target, related, opts);
-    };
-  };
 
   function Component() {
     /**
@@ -2891,6 +2732,165 @@
     }
   });
 
+  var belongsToType = 'belongsTo';
+  var hasManyType = 'hasMany';
+  var hasOneType = 'hasOne';
+
+  function Relation(related, opts) {
+    var self = this;
+
+    opts || (opts = {});
+
+    var localField = opts.localField;
+    if (!localField) {
+      throw new Error('localField is required');
+    }
+
+    var foreignKey = opts.foreignKey = opts.foreignKey || opts.localKey;
+    if (!foreignKey && (opts.type === belongsToType || opts.type === hasOneType)) {
+      throw new Error('foreignKey is required');
+    }
+    var localKeys = opts.localKeys;
+    var foreignKeys = opts.foreignKeys;
+    if (!foreignKey && !localKeys && !foreignKeys && opts.type === hasManyType) {
+      throw new Error('one of (foreignKey, localKeys, foreignKeys) is required');
+    }
+
+    if (utils$1.isString(related)) {
+      opts.relation = related;
+      if (!utils$1.isFunction(opts.getRelation)) {
+        throw new Error('you must provide a reference to the related mapper!');
+      }
+    } else if (related) {
+      opts.relation = related.name;
+      Object.defineProperty(self, 'relatedMapper', {
+        value: related
+      });
+    }
+
+    utils$1.fillIn(self, opts);
+  }
+
+  utils$1.addHiddenPropsToTarget(Relation.prototype, {
+    getRelation: function getRelation() {
+      return this.relatedMapper;
+    },
+    getLocalKeys: function getLocalKeys(record) {},
+    getForeignKey: function getForeignKey(record) {
+      if (this.type === belongsToType) {
+        return utils$1.get(record, this.foreignKey);
+      }
+      return utils$1.get(record, this.mapper.idAttribute);
+    },
+    setForeignKey: function setForeignKey(record, relatedRecord) {
+      var self = this;
+      if (!record || !relatedRecord) {
+        return;
+      }
+      if (self.type === belongsToType) {
+        utils$1.set(record, self.foreignKey, utils$1.get(relatedRecord, self.getRelation().idAttribute));
+      } else {
+        (function () {
+          var idAttribute = self.mapper.idAttribute;
+          if (utils$1.isArray(relatedRecord)) {
+            relatedRecord.forEach(function (relatedRecordItem) {
+              utils$1.set(relatedRecordItem, self.foreignKey, utils$1.get(record, idAttribute));
+            });
+          } else {
+            utils$1.set(relatedRecord, self.foreignKey, utils$1.get(record, idAttribute));
+          }
+        })();
+      }
+    },
+    getLocalField: function getLocalField(record) {
+      return utils$1.get(record, this.localField);
+    },
+    setLocalField: function setLocalField(record, data) {
+      return utils$1.set(record, this.localField, data);
+    }
+  });
+
+  var relatedTo = function relatedTo(mapper, related, opts) {
+    opts || (opts = {});
+    if (!opts.type) {
+      throw new Error('must specify relation type!');
+    }
+    opts.mapper = mapper;
+    opts.name = mapper.name;
+    var relation = new Relation(related, opts);
+
+    mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] });
+    mapper.relationFields || Object.defineProperty(mapper, 'relationFields', { value: [] });
+    mapper.relationList.push(relation);
+    mapper.relationFields.push(relation.localField);
+  };
+
+  /**
+   * TODO
+   *
+   * @name module:js-data.belongsTo
+   * @method
+   * @param {Mapper} related The relation the target belongs to.
+   * @param {Object} opts Configuration options.
+   * @param {string} opts.foreignKey The field that holds the primary key of the
+   * related record.
+   * @param {string} opts.localField The field that holds a reference to the
+   * related record object.
+   * @return {Function} Invocation function, which accepts the target as the only
+   * parameter.
+   */
+  var _belongsTo = function belongsTo(related, opts) {
+    opts || (opts = {});
+    opts.type = belongsToType;
+    return function (target) {
+      relatedTo(target, related, opts);
+    };
+  };
+
+  /**
+   * TODO
+   *
+   * @name module:js-data.hasMany
+   * @method
+   * @param {Mapper} related The relation of which the target has many.
+   * @param {Object} opts Configuration options.
+   * @param {string} [opts.foreignKey] The field that holds the primary key of the
+   * related record.
+   * @param {string} opts.localField The field that holds a reference to the
+   * related record object.
+   * @return {Function} Invocation function, which accepts the target as the only
+   * parameter.
+   */
+  var _hasMany = function hasMany(related, opts) {
+    opts || (opts = {});
+    opts.type = hasManyType;
+    return function (target) {
+      relatedTo(target, related, opts);
+    };
+  };
+
+  /**
+   * TODO
+   *
+   * @name module:js-data.hasOne
+   * @method
+   * @param {Mapper} related The relation of which the target has one.
+   * @param {Object} opts Configuration options.
+   * @param {string} [opts.foreignKey] The field that holds the primary key of the
+   * related record.
+   * @param {string} opts.localField The field that holds a reference to the
+   * related record object.
+   * @return {Function} Invocation function, which accepts the target as the only
+   * parameter.
+   */
+  var _hasOne = function hasOne(related, opts) {
+    opts || (opts = {});
+    opts.type = hasOneType;
+    return function (target) {
+      relatedTo(target, related, opts);
+    };
+  };
+
   /**
    * js-data's Record class.
    *
@@ -3099,6 +3099,10 @@
       var self = this;
       return utils$1.get(self, self._mapper().idAttribute);
     },
+    isValid: function isValid(opts) {
+      var self = this;
+      return !!self._mapper().validate(self, opts);
+    },
 
 
     /**
@@ -3221,47 +3225,16 @@
 
 
     /**
-     * TODO
+     * Delegates to {@link Mapper#update}.
      *
      * @name Record#save
      * @method
      * @param {Object} [opts] Configuration options. See {@link Mapper#create}.
      */
     save: function save(opts) {
-      var op = void 0,
-          adapter = void 0;
       var self = this;
       var mapper = self._mapper();
-
-      // Default values for arguments
-      opts || (opts = {});
-
-      // Fill in "opts" with the Model's configuration
-      utils$1._(self, opts);
-      adapter = opts.adapter = mapper.getAdapterName(opts);
-
-      // beforeSave lifecycle hook
-      op = opts.op = 'beforeSave';
-      return utils$1.resolve(self[op](opts)).then(function () {
-        // Now delegate to the adapter
-        op = opts.op = 'save';
-        mapper.dbg(op, self, opts);
-        return mapper.getAdapter(adapter)[op](mapper, self, opts);
-      }).then(function (data) {
-        // afterSave lifecycle hook
-        op = opts.op = 'afterSave';
-        return utils$1.resolve(self[op](data, opts)).then(function (_data) {
-          // Allow for re-assignment from lifecycle hook
-          data = _data || data;
-          if (opts.raw) {
-            self.set(data.data);
-            data.data = self;
-          } else {
-            self.set(data);
-          }
-          return mapper.end(data, opts);
-        });
-      });
+      return mapper.update(utils$1.get(self, mapper.idAttribute), self, opts);
     },
 
 
@@ -3340,6 +3313,9 @@
      */
     unset: function unset(key, opts) {
       this.set(key, undefined, opts);
+    },
+    validate: function validate(opts) {
+      return this._mapper().validate(this, opts);
     }
   });
 
@@ -5730,6 +5706,31 @@
      */
     updateMany: function updateMany(records, opts) {
       return this.crud('updateMany', records, opts);
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name Mapper#validate
+     * @method
+     * @param {Object|Array} record The record or records to validate.
+     * @param {Object} [opts] Configuration options.
+     */
+    validate: function validate(record, opts) {
+      var self = this;
+      if (!self.getSchema()) {
+        throw new Error('no schema!');
+      }
+      if (utils$1.isArray(record)) {
+        return record.map(function (_record) {
+          return self.schema.validate(_record, opts);
+        });
+      } else if (utils$1.isObject(record)) {
+        return self.schema.validate(record, opts);
+      } else {
+        throw new Error('not a record!');
+      }
     }
   });
 
@@ -7090,7 +7091,7 @@
    * @param {Object} [opts] Configuration options. See {@link Container}.
    * @return {DataStore}
    */
-  var _DataStore = Container.extend(props$1);
+  var DataStore = Container.extend(props$1);
 
   /**
    * Registered as `js-data` in NPM and Bower.
@@ -7130,24 +7131,25 @@
    * if the current version is not beta.
    */
   var version = {
-    alpha: '20',
+    alpha: '21',
     beta: 'false',
-    full: '3.0.0-alpha.20',
+    full: '3.0.0-alpha.21',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10)
   };
 
   exports.version = version;
-  exports.utils = utils$1;
   exports.Collection = Collection;
+  exports.Component = Component;
   exports.Container = Container;
-  exports.DataStore = _DataStore;
+  exports.DataStore = DataStore;
   exports.LinkedCollection = LinkedCollection;
   exports.Mapper = Mapper;
   exports.Query = Query;
   exports.Record = Record;
   exports.Schema = Schema;
+  exports.utils = utils$1;
   exports.belongsToType = belongsToType;
   exports.hasManyType = hasManyType;
   exports.hasOneType = hasOneType;

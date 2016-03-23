@@ -1,7 +1,8 @@
-##### 3.0.0-alpha.21 - xx March 2016
+##### 3.0.0-alpha.21 - 22 March 2016
 
 ###### Backwards compatible API changes
 - #195 - Add "with" to remove/removeAll (eject/ejectAll) to also remove relations
+- Added `Mapper#validate(record[, opts])`, `Record#validate([opts])` and `Record#isValid()`
 
 ###### Backwards compatible bug fixes
 - #263 - orderBy with undefined values doesn't order (though null works)

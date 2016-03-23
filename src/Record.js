@@ -199,6 +199,11 @@ const Record = Component.extend({
     return utils.get(self, self._mapper().idAttribute)
   },
 
+  isValid (opts) {
+    const self = this
+    return !!self._mapper().validate(self, opts)
+  },
+
   /**
    * TODO
    *
@@ -322,46 +327,16 @@ const Record = Component.extend({
   },
 
   /**
-   * TODO
+   * Delegates to {@link Mapper#update}.
    *
    * @name Record#save
    * @method
    * @param {Object} [opts] Configuration options. See {@link Mapper#create}.
    */
   save (opts) {
-    let op, adapter
     const self = this
     const mapper = self._mapper()
-
-    // Default values for arguments
-    opts || (opts = {})
-
-    // Fill in "opts" with the Model's configuration
-    utils._(self, opts)
-    adapter = opts.adapter = mapper.getAdapterName(opts)
-
-    // beforeSave lifecycle hook
-    op = opts.op = 'beforeSave'
-    return utils.resolve(self[op](opts)).then(function () {
-      // Now delegate to the adapter
-      op = opts.op = 'save'
-      mapper.dbg(op, self, opts)
-      return mapper.getAdapter(adapter)[op](mapper, self, opts)
-    }).then(function (data) {
-      // afterSave lifecycle hook
-      op = opts.op = 'afterSave'
-      return utils.resolve(self[op](data, opts)).then(function (_data) {
-        // Allow for re-assignment from lifecycle hook
-        data = _data || data
-        if (opts.raw) {
-          self.set(data.data)
-          data.data = self
-        } else {
-          self.set(data)
-        }
-        return mapper.end(data, opts)
-      })
-    })
+    return mapper.update(utils.get(self, mapper.idAttribute), self, opts)
   },
 
   /**
@@ -429,6 +404,10 @@ const Record = Component.extend({
    */
   unset (key, opts) {
     this.set(key, undefined, opts)
+  },
+
+  validate (opts) {
+    return this._mapper().validate(this, opts)
   }
 })
 

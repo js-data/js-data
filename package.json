@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "3.0.0-alpha.20",
+  "version": "3.0.0-alpha.21",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -10,6 +10,7 @@
   "author": "js-data project authors",
   "license": "MIT",
   "main": "./dist/js-data.js",
+  "jsnext:main": "dist/js-data.es2015.js",
   "keywords": [
     "orm",
     "odm",
@@ -40,11 +41,12 @@
     "doc": "jsdoc -c conf.json src && node scripts/cleanup.js",
     "lint": "repo-tools lint src/**/*.js test/**/*.js scripts/*.js lib/**/*.js",
     "bundle": "rollup -c",
+    "bundle2": "rollup -c rollup-es2015.config.js",
     "min": "uglifyjs dist/js-data.js -o dist/js-data.min.js --source-map dist/js-data.min.map --source-map-url js-data.min.map -v -m -c --screw-ie8",
     "version": "node scripts/version.js",
     "banner": "node scripts/banner.js",
     "gzip": "echo gzipped size: $(cat dist/js-data.min.js | gzip -f9 | wc -c)kb",
-    "build": "npm run lint && npm run bundle && npm run min && npm run version && npm run banner",
+    "build": "npm run lint && npm run bundle && npm run bundle2 && npm run min && npm run version && npm run banner",
     "karma": "karma start",
     "mocha": "mocha -t 20000 -R spec -r source-map-support/register mocha.start.js",
     "r": "npm run bundle && npm run mocha",
@@ -57,10 +59,10 @@
     "ci": "npm test && cat coverage/lcov.info | coveralls || true"
   },
   "devDependencies": {
-    "babel-core": "6.7.2",
+    "babel-core": "6.7.4",
     "babel-plugin-syntax-async-functions": "6.5.0",
     "babel-plugin-transform-regenerator": "6.6.5",
-    "babel-polyfill": "6.7.2",
+    "babel-polyfill": "6.7.4",
     "babel-preset-es2015-rollup": "1.1.1",
     "babel-preset-stage-0": "6.5.0",
     "chai": "3.5.0",

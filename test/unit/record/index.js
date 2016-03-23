@@ -7,6 +7,7 @@ import * as revert from './revert.test'
 import * as save from './save.test'
 import * as set from './set.test'
 import * as unset from './unset.test'
+import * as validate from './validate.test'
 
 export function init () {
   describe('Record', function () {
@@ -82,5 +83,6 @@ export function init () {
     save.init()
     set.init()
     unset.init()
+    validate.init()
   })
 }

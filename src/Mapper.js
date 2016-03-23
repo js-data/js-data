@@ -1398,5 +1398,29 @@ export default Component.extend({
    */
   updateMany (records, opts) {
     return this.crud('updateMany', records, opts)
+  },
+
+  /**
+   * TODO
+   *
+   * @name Mapper#validate
+   * @method
+   * @param {Object|Array} record The record or records to validate.
+   * @param {Object} [opts] Configuration options.
+   */
+  validate (record, opts) {
+    const self = this
+    if (!self.getSchema()) {
+      throw new Error('no schema!')
+    }
+    if (utils.isArray(record)) {
+      return record.map(function (_record) {
+        return self.schema.validate(_record, opts)
+      })
+    } else if (utils.isObject(record)) {
+      return self.schema.validate(record, opts)
+    } else {
+      throw new Error('not a record!')
+    }
   }
 })
