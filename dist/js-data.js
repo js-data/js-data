@@ -1332,8 +1332,12 @@
       if (cB && utils$1.isString(cB)) {
         cB = cB.toUpperCase();
       }
-      a || (a = null);
-      b || (b = null);
+      if (a === undefined) {
+        a = null;
+      }
+      if (b === undefined) {
+        b = null;
+      }
       if (def[1] === 'DESC') {
         if (cB < cA) {
           return -1;
@@ -6412,10 +6416,10 @@
     },
     remove: function remove(id, opts) {
       var self = this;
-      delete self._added[id];
+      var mapper = self.mapper;
       var record = utils$1.getSuper(self).prototype.remove.call(self, id, opts);
       if (record) {
-        var mapper = self.mapper;
+        delete self._added[id];
         if (mapper.recordClass) {
           record._set('$'); // unset
         }
@@ -6424,9 +6428,13 @@
     },
     removeAll: function removeAll(query, opts) {
       var self = this;
+      var mapper = self.mapper;
       var records = utils$1.getSuper(self).prototype.removeAll.call(self, query, opts);
       records.forEach(function (record) {
         delete self._added[self.recordId(record)];
+        if (mapper.recordClass) {
+          record._set('$'); // unset
+        }
       });
       return records;
     }
@@ -6911,6 +6919,60 @@
     inject: function inject(records, opts) {
       return this.add(records, opts);
     },
+    remove: function remove(name, id, opts) {
+      var self = this;
+      var record = self.getCollection(name).remove(id, opts);
+      if (record) {
+        self.removeRelated(name, [record], opts);
+      }
+      return record;
+    },
+    removeAll: function removeAll(name, query, opts) {
+      var self = this;
+      var records = self.getCollection(name).removeAll(query, opts);
+      if (records.length) {
+        self.removeRelated(name, records, opts);
+      }
+      return records;
+    },
+    removeRelated: function removeRelated(name, records, opts) {
+      var self = this;
+      utils$1.forEachRelation(self.getMapper(name), opts, function (def, optsCopy) {
+        records.forEach(function (record) {
+          var relatedData = void 0;
+          var query = void 0;
+          if (def.foreignKey && (def.type === 'hasOne' || def.type === 'hasMany')) {
+            query = babelHelpers.defineProperty({}, def.foreignKey, def.getForeignKey(record));
+          } else if (def.type === 'hasMany' && def.localKeys) {
+            query = {
+              where: babelHelpers.defineProperty({}, def.getRelation().idAttribute, {
+                'in': utils$1.get(record, def.localKeys)
+              })
+            };
+          } else if (def.type === 'hasMany' && def.foreignKeys) {
+            query = {
+              where: babelHelpers.defineProperty({}, def.foreignKeys, {
+                'contains': def.getForeignKey(record)
+              })
+            };
+          } else if (def.type === 'belongsTo') {
+            relatedData = self.remove(def.relation, def.getForeignKey(record), optsCopy);
+          }
+          if (query) {
+            relatedData = self.removeAll(def.relation, query, optsCopy);
+          }
+          if (relatedData) {
+            if (utils$1.isArray(relatedData) && !relatedData.length) {
+              return;
+            }
+            if (def.type === 'hasOne') {
+              relatedData = relatedData[0];
+            }
+            def.setLocalField(record, relatedData);
+          }
+        });
+      });
+    },
 
 
     /**
@@ -6975,7 +7037,7 @@
     }
   };
 
-  var toProxy$1 = ['add', 'between', 'createIndex', 'filter', 'get', 'getAll', 'query', 'remove', 'removeAll', 'toJson'];
+  var toProxy$1 = ['add', 'between', 'createIndex', 'filter', 'get', 'getAll', 'query', 'toJson'];
 
   toProxy$1.forEach(function (method) {
     props$1[method] = function (name) {

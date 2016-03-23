@@ -145,10 +145,10 @@ export default Collection.extend({
 
   remove (id, opts) {
     const self = this
-    delete self._added[id]
+    const mapper = self.mapper
     const record = utils.getSuper(self).prototype.remove.call(self, id, opts)
     if (record) {
-      const mapper = self.mapper
+      delete self._added[id]
       if (mapper.recordClass) {
         record._set('$') // unset
       }
@@ -158,9 +158,13 @@ export default Collection.extend({
 
   removeAll (query, opts) {
     const self = this
+    const mapper = self.mapper
     const records = utils.getSuper(self).prototype.removeAll.call(self, query, opts)
     records.forEach(function (record) {
       delete self._added[self.recordId(record)]
+      if (mapper.recordClass) {
+        record._set('$') // unset
+      }
     })
     return records
   }
