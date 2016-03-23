@@ -99,8 +99,12 @@ export default Component.extend({
     if (cB && utils.isString(cB)) {
       cB = cB.toUpperCase()
     }
-    a || (a = null)
-    b || (b = null)
+    if (a === undefined) {
+      a = null
+    }
+    if (b === undefined) {
+      b = null
+    }
     if (def[1] === 'DESC') {
       if (cB < cA) {
         return -1

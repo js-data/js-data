@@ -464,6 +464,67 @@ const props = {
     return this.add(records, opts)
   },
 
+  remove (name, id, opts) {
+    const self = this
+    const record = self.getCollection(name).remove(id, opts)
+    if (record) {
+      self.removeRelated(name, [record], opts)
+    }
+    return record
+  },
+
+  removeAll (name, query, opts) {
+    const self = this
+    const records = self.getCollection(name).removeAll(query, opts)
+    if (records.length) {
+      self.removeRelated(name, records, opts)
+    }
+    return records
+  },
+
+  removeRelated (name, records, opts) {
+    const self = this
+    utils.forEachRelation(self.getMapper(name), opts, function (def, optsCopy) {
+      records.forEach(function (record) {
+        let relatedData
+        let query
+        if (def.foreignKey && (def.type === 'hasOne' || def.type === 'hasMany')) {
+          query = { [def.foreignKey]: def.getForeignKey(record) }
+        } else if (def.type === 'hasMany' && def.localKeys) {
+          query = {
+            where: {
+              [def.getRelation().idAttribute]: {
+                'in': utils.get(record, def.localKeys)
+              }
+            }
+          }
+        } else if (def.type === 'hasMany' && def.foreignKeys) {
+          query = {
+            where: {
+              [def.foreignKeys]: {
+                'contains': def.getForeignKey(record)
+              }
+            }
+          }
+        } else if (def.type === 'belongsTo') {
+          relatedData = self.remove(def.relation, def.getForeignKey(record), optsCopy)
+        }
+        if (query) {
+          relatedData = self.removeAll(def.relation, query, optsCopy)
+        }
+        if (relatedData) {
+          if (utils.isArray(relatedData) && !relatedData.length) {
+            return
+          }
+          if (def.type === 'hasOne') {
+            relatedData = relatedData[0]
+          }
+          def.setLocalField(record, relatedData)
+        }
+      })
+    })
+  },
+
   /**
    * TODO
    *
@@ -532,8 +593,6 @@ const toProxy = [
   'get',
   'getAll',
   'query',
-  'remove',
-  'removeAll',
   'toJson'
 ]
 
