@@ -11,6 +11,7 @@ import * as toJSON from './toJSON.test'
 import * as update from './update.test'
 import * as updateMany from './updateMany.test'
 import * as updateAll from './updateAll.test'
+import * as validate from './validate.test'
 
 export function init () {
   describe('Mapper', function () {
@@ -44,5 +45,6 @@ export function init () {
     update.init()
     updateMany.init()
     updateAll.init()
+    validate.init()
   })
 }
