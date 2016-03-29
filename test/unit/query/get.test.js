@@ -1,14 +1,17 @@
-export function init () {
-  describe('get', function () {
-    it('should work')
+import {
+  beforeEach,
+  JSData
+} from '../../_setup'
+import test from 'ava'
 
-    it('should not allow index access after operation', function () {
-      const Test = this
-      const collection = Test.PostCollection
+test.beforeEach(beforeEach)
 
-      Test.assert.throws(function () {
-        collection.query().filter().get().run()
-      }, Error)
-    })
-  })
-}
+test.todo('should work')
+
+test('should not allow index access after operation', (t) => {
+  const collection = t.context.PostCollection
+
+  t.throws(function () {
+    collection.query().filter().get().run()
+  }, Error)
+})

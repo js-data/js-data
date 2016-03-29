@@ -1,5 +1,3 @@
-export function init () {
-  describe('createIndex', function () {
-    it('should work')
-  })
-}
+import test from 'ava'
+
+test.todo('should work')

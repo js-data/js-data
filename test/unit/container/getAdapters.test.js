@@ -1,17 +1,19 @@
-export function init () {
-  describe('getAdapters', function () {
-    it('should be an instance method', function () {
-      const Test = this
-      const DataStore = Test.JSData.DataStore
-      const store = new DataStore()
-      Test.assert.isFunction(store.getAdapters)
-      Test.assert.isTrue(store.getAdapters === DataStore.prototype.getAdapters)
-    })
-    it('should return the adapters of the container', function () {
-      const Test = this
-      const Container = Test.JSData.Container
-      const container = new Container()
-      Test.assert.isTrue(container.getAdapters() === container._adapters)
-    })
-  })
-}
+import {
+  beforeEach,
+  JSData
+} from '../../_setup'
+import test from 'ava'
+
+test.beforeEach(beforeEach)
+
+test('should be an instance method', (t) => {
+  const DataStore = JSData.DataStore
+  const store = new DataStore()
+  t.is(typeof store.getAdapters, 'function')
+  t.ok(store.getAdapters === DataStore.prototype.getAdapters)
+})
+test('should return the adapters of the container', (t) => {
+  const Container = JSData.Container
+  const container = new Container()
+  t.ok(container.getAdapters() === container._adapters)
+})

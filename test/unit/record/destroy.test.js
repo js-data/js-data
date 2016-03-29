@@ -1,12 +1,15 @@
-export function init () {
-  describe('destroy', function () {
-    it('should be an instance method', function () {
-      const Test = this
-      const Record = Test.JSData.Record
-      const record = new Record()
-      Test.assert.isFunction(record.destroy)
-      Test.assert.isTrue(record.destroy === Record.prototype.destroy)
-    })
-    it('should be tested')
-  })
-}
+import {
+  beforeEach,
+  JSData
+} from '../../_setup'
+import test from 'ava'
+
+test.beforeEach(beforeEach)
+
+test('should be an instance method', (t) => {
+  const Record = JSData.Record
+  const record = new Record()
+  t.is(typeof record.destroy, 'function')
+  t.ok(record.destroy === Record.prototype.destroy)
+})
+test.todo('should be tested')

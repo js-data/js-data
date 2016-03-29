@@ -1,73 +1,40 @@
-import * as create from './create.test'
-import * as createMany from './createMany.test'
-import * as createRecord from './createRecord.test'
-import * as defineMapper from './defineMapper.test'
-import * as destroy from './destroy.test'
-import * as destroyAll from './destroyAll.test'
-import * as find from './find.test'
-import * as findAll from './findAll.test'
-import * as getAdapter from './getAdapter.test'
-import * as getAdapterName from './getAdapterName.test'
-import * as getAdapters from './getAdapters.test'
-import * as getMapper from './getMapper.test'
-import * as registerAdapter from './registerAdapter.test'
-import * as update from './update.test'
-import * as updateMany from './updateMany.test'
-import * as updateAll from './updateAll.test'
+import {
+  beforeEach,
+  JSData
+} from '../../_setup'
+import test from 'ava'
 
-export function init () {
-  describe('Container', function () {
-    it('should be a constructor function', function () {
-      const Test = this
-      const Container = Test.JSData.Container
-      Test.assert.isFunction(Container)
-      const container = new Container()
-      Test.assert.isTrue(container instanceof Container)
-    })
-    it('should initialize with defaults', function () {
-      const Test = this
-      const Container = Test.JSData.Container
-      const container = new Container()
-      Test.assert.deepEqual(container._adapters, {})
-      Test.assert.deepEqual(container._mappers, {})
-      Test.assert.deepEqual(container.mapperDefaults, {})
-      Test.assert.isTrue(container.mapperClass === Test.JSData.Mapper)
-    })
-    it('should accept overrides', function () {
-      const Test = this
-      const Container = Test.JSData.Container
-      class Foo {}
-      const container = new Container({
-        mapperClass: Foo,
-        foo: 'bar',
-        mapperDefaults: {
-          idAttribute: '_id'
-        }
-      })
-      Test.assert.deepEqual(container._adapters, {})
-      Test.assert.deepEqual(container._mappers, {})
-      Test.assert.equal(container.foo, 'bar')
-      Test.assert.deepEqual(container.mapperDefaults, {
-        idAttribute: '_id'
-      })
-      Test.assert.isTrue(container.mapperClass === Foo)
-    })
+test.beforeEach(beforeEach)
 
-    create.init()
-    createMany.init()
-    createRecord.init()
-    defineMapper.init()
-    destroy.init()
-    destroyAll.init()
-    find.init()
-    findAll.init()
-    getAdapter.init()
-    getAdapterName.init()
-    getAdapters.init()
-    getMapper.init()
-    registerAdapter.init()
-    update.init()
-    updateMany.init()
-    updateAll.init()
+test('should be a constructor function', (t) => {
+  const Container = JSData.Container
+  t.is(typeof Container, 'function')
+  const container = new Container()
+  t.ok(container instanceof Container)
+})
+test('should initialize with defaults', (t) => {
+  const Container = JSData.Container
+  const container = new Container()
+  t.same(container._adapters, {})
+  t.same(container._mappers, {})
+  t.same(container.mapperDefaults, {})
+  t.ok(container.mapperClass === JSData.Mapper)
+})
+test('should accept overrides', (t) => {
+  const Container = JSData.Container
+  class Foo {}
+  const container = new Container({
+    mapperClass: Foo,
+    foo: 'bar',
+    mapperDefaults: {
+      idAttribute: '_id'
+    }
   })
-}
+  t.same(container._adapters, {})
+  t.same(container._mappers, {})
+  t.is(container.foo, 'bar')
+  t.same(container.mapperDefaults, {
+    idAttribute: '_id'
+  })
+  t.ok(container.mapperClass === Foo)
+})

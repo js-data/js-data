@@ -1,24 +1,26 @@
-export function init () {
-  describe('create', function () {
-    it('should be an instance method', function () {
-      const Test = this
-      const DataStore = Test.JSData.DataStore
-      const store = new DataStore()
-      Test.assert.isFunction(store.create)
-      Test.assert.isTrue(store.create === DataStore.prototype.create)
-    })
-    it('should create', async function () {
-      const Test = this
-      const props = { name: 'John' }
-      Test.store.registerAdapter('mock', {
-        create () {
-          props.id = 1
-          return Test.JSData.utils.resolve(props)
-        }
-      }, { 'default': true })
-      const user = await Test.store.create('user', props)
-      Test.assert.isDefined(user[Test.store.getMapper('user').idAttribute], 'new user has an id')
-      Test.assert.isTrue(user instanceof Test.store.getMapper('user').recordClass, 'user is a record')
-    })
-  })
-}
+import {
+  beforeEach,
+  JSData
+} from '../../_setup'
+import test from 'ava'
+
+test.beforeEach(beforeEach)
+
+test('should be an instance method', (t) => {
+  const DataStore = JSData.DataStore
+  const store = new DataStore()
+  t.is(typeof store.create, 'function')
+  t.ok(store.create === DataStore.prototype.create)
+})
+test('should create', async (t) => {
+  const props = { name: 'John' }
+  t.context.store.registerAdapter('mock', {
+    create () {
+      props.id = 1
+      return JSData.utils.resolve(props)
+    }
+  }, { 'default': true })
+  const user = await t.context.store.create('user', props)
+  t.ok(user[t.context.store.getMapper('user').idAttribute], 'new user has an id')
+  t.ok(user instanceof t.context.store.getMapper('user').recordClass, 'user is a record')
+})

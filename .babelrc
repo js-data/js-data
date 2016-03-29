@@ -1,4 +1,0 @@
-{
-  "presets": ["es2015-rollup", "stage-0"],
-  "plugins": ["syntax-async-functions", "transform-regenerator"]
-}

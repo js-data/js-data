@@ -1,122 +1,88 @@
-export function init () {
-  describe('proxied Collection methods', function () {
-    describe('add', function () {
-      it('should work', function () {
-        const Test = this
-        let user = Test.store.add('user', { id: 1, name: 'John' })
-        Test.assert.objectsEqual(user, { id: 1, name: 'John' })
-      })
-    })
-    describe('between', function () {
-      it('should work')
-    })
-    describe('createIndex', function () {
-      it('should work')
-    })
-    describe('filter', function () {
-      it('should work')
-    })
-    describe('get', function () {
-      it('should work')
-    })
-    describe('getAll', function () {
-      it('should work')
-    })
-    describe('query', function () {
-      it('should work')
-    })
-    describe('remove', function () {
-      it('should work')
-      it('should remove relations', function () {
-        const Test = this
+import {
+  beforeEach,
+  JSData
+} from '../../_setup'
+import test from 'ava'
 
-        let user = Test.store.add('user', Test.data.user10)
-        let comments = Test.store.add('organization', Test.data.organization15)
-        Test.store.add('comment', Test.data.comment19)
-        Test.store.add('profile', Test.data.profile21)
+test.beforeEach(beforeEach)
 
-        Test.assert.equal(Test.store.filter('comment', { userId: user.id }).length, 3)
-        Test.assert.isDefined(Test.store.get('organization', user.organizationId))
-        Test.assert.equal(Test.store.filter('profile', { userId: user.id }).length, 1)
+test('add should work', (t) => {
+  let user = t.context.store.add('user', { id: 1, name: 'John' })
+  t.context.objectsEqual(user, { id: 1, name: 'John' })
+})
+test('remove should remove relations', (t) => {
+  let user = t.context.store.add('user', t.context.data.user10)
+  let comments = t.context.store.add('organization', t.context.data.organization15)
+  t.context.store.add('comment', t.context.data.comment19)
+  t.context.store.add('profile', t.context.data.profile21)
 
-        let removedUser = Test.store.remove('user', user.id, { with: ['organization'] })
+  t.is(t.context.store.filter('comment', { userId: user.id }).length, 3)
+  t.ok(t.context.store.get('organization', user.organizationId))
+  t.is(t.context.store.filter('profile', { userId: user.id }).length, 1)
 
-        Test.assert.isTrue(user === removedUser)
-        Test.assert.equal(Test.store.filter('comment', { userId: user.id }).length, 3)
-        Test.assert.isUndefined(Test.store.get('organization', user.organizationId))
-        Test.assert.isDefined(removedUser.organization)
-        Test.assert.equal(Test.store.filter('profile', { userId: user.id }).length, 1)
-      })
-      it('should remove relations 2', function () {
-        const Test = this
+  let removedUser = t.context.store.remove('user', user.id, { with: ['organization'] })
 
-        let user = Test.store.add('user', Test.data.user10)
-        let comments = Test.store.add('organization', Test.data.organization15)
-        Test.store.add('comment', Test.data.comment19)
-        Test.store.add('profile', Test.data.profile21)
+  t.ok(user === removedUser)
+  t.is(t.context.store.filter('comment', { userId: user.id }).length, 3)
+  t.notOk(t.context.store.get('organization', user.organizationId))
+  t.ok(removedUser.organization)
+  t.is(t.context.store.filter('profile', { userId: user.id }).length, 1)
+})
+test('remove should remove multiple relations', (t) => {
+  let user = t.context.store.add('user', t.context.data.user10)
+  let comments = t.context.store.add('organization', t.context.data.organization15)
+  t.context.store.add('comment', t.context.data.comment19)
+  t.context.store.add('profile', t.context.data.profile21)
 
-        Test.assert.equal(Test.store.filter('comment', { userId: user.id }).length, 3)
-        Test.assert.isDefined(Test.store.get('organization', user.organizationId))
-        Test.assert.equal(Test.store.filter('profile', { userId: user.id }).length, 1)
+  t.is(t.context.store.filter('comment', { userId: user.id }).length, 3)
+  t.ok(t.context.store.get('organization', user.organizationId))
+  t.is(t.context.store.filter('profile', { userId: user.id }).length, 1)
 
-        let removedUser = Test.store.remove('user', user.id, { with: ['organization', 'comment', 'profile'] })
+  let removedUser = t.context.store.remove('user', user.id, { with: ['organization', 'comment', 'profile'] })
 
-        Test.assert.isTrue(user === removedUser)
-        Test.assert.equal(Test.store.filter('comment', { userId: user.id }).length, 0)
-        Test.assert.equal(removedUser.comments.length, 3)
-        Test.assert.isUndefined(Test.store.get('organization', user.organizationId))
-        Test.assert.isDefined(removedUser.organization)
-        Test.assert.equal(Test.store.filter('profile', { userId: user.id }).length, 0)
-        Test.assert.isDefined(removedUser.profile)
-      })
-    })
-    describe('removeAll', function () {
-      it('should work')
-      it('should remove relations', function () {
-        const Test = this
+  t.ok(user === removedUser)
+  t.is(t.context.store.filter('comment', { userId: user.id }).length, 0)
+  t.is(removedUser.comments.length, 3)
+  t.notOk(t.context.store.get('organization', user.organizationId))
+  t.ok(removedUser.organization)
+  t.is(t.context.store.filter('profile', { userId: user.id }).length, 0)
+  t.ok(removedUser.profile)
+})
+test('removeAll should remove relations', (t) => {
+  let user = t.context.store.add('user', t.context.data.user10)
+  let comments = t.context.store.add('organization', t.context.data.organization15)
+  t.context.store.add('comment', t.context.data.comment19)
+  t.context.store.add('profile', t.context.data.profile21)
 
-        let user = Test.store.add('user', Test.data.user10)
-        let comments = Test.store.add('organization', Test.data.organization15)
-        Test.store.add('comment', Test.data.comment19)
-        Test.store.add('profile', Test.data.profile21)
+  t.is(t.context.store.filter('comment', { userId: user.id }).length, 3)
+  t.ok(t.context.store.get('organization', user.organizationId))
+  t.is(t.context.store.filter('profile', { userId: user.id }).length, 1)
 
-        Test.assert.equal(Test.store.filter('comment', { userId: user.id }).length, 3)
-        Test.assert.isDefined(Test.store.get('organization', user.organizationId))
-        Test.assert.equal(Test.store.filter('profile', { userId: user.id }).length, 1)
+  let removedUsers = t.context.store.removeAll('user', {}, { with: ['organization'] })
 
-        let removedUsers = Test.store.removeAll('user', {}, { with: ['organization'] })
+  t.ok(user === removedUsers[0])
+  t.is(t.context.store.filter('comment', { userId: user.id }).length, 3)
+  t.notOk(t.context.store.get('organization', user.organizationId))
+  t.ok(removedUsers[0].organization)
+  t.is(t.context.store.filter('profile', { userId: user.id }).length, 1)
+})
+test('removeAll should remove multiple relations', (t) => {
+  let user = t.context.store.add('user', t.context.data.user10)
+  let comments = t.context.store.add('organization', t.context.data.organization15)
+  t.context.store.add('comment', t.context.data.comment19)
+  t.context.store.add('profile', t.context.data.profile21)
 
-        Test.assert.isTrue(user === removedUsers[0])
-        Test.assert.equal(Test.store.filter('comment', { userId: user.id }).length, 3)
-        Test.assert.isUndefined(Test.store.get('organization', user.organizationId))
-        Test.assert.isDefined(removedUsers[0].organization)
-        Test.assert.equal(Test.store.filter('profile', { userId: user.id }).length, 1)
-      })
-      it('should remove relations 2', function () {
-        const Test = this
+  t.is(t.context.store.filter('comment', { userId: user.id }).length, 3)
+  t.ok(t.context.store.get('organization', user.organizationId))
+  t.is(t.context.store.filter('profile', { userId: user.id }).length, 1)
 
-        let user = Test.store.add('user', Test.data.user10)
-        let comments = Test.store.add('organization', Test.data.organization15)
-        Test.store.add('comment', Test.data.comment19)
-        Test.store.add('profile', Test.data.profile21)
+  let removedUsers = t.context.store.removeAll('user', {}, { with: ['organization', 'comment', 'profile'] })
 
-        Test.assert.equal(Test.store.filter('comment', { userId: user.id }).length, 3)
-        Test.assert.isDefined(Test.store.get('organization', user.organizationId))
-        Test.assert.equal(Test.store.filter('profile', { userId: user.id }).length, 1)
-
-        let removedUsers = Test.store.removeAll('user', {}, { with: ['organization', 'comment', 'profile'] })
-
-        Test.assert.isTrue(user === removedUsers[0])
-        Test.assert.equal(Test.store.filter('comment', { userId: user.id }).length, 0)
-        Test.assert.equal(removedUsers[0].comments.length, 3)
-        Test.assert.isUndefined(Test.store.get('organization', user.organizationId))
-        Test.assert.isDefined(removedUsers[0].organization)
-        Test.assert.equal(Test.store.filter('profile', { userId: user.id }).length, 0)
-        Test.assert.isDefined(removedUsers[0].profile)
-      })
-    })
-    describe('toJson', function () {
-      it('should work')
-    })
-  })
-}
+  t.ok(user === removedUsers[0])
+  t.is(t.context.store.filter('comment', { userId: user.id }).length, 0)
+  t.is(removedUsers[0].comments.length, 3)
+  t.notOk(t.context.store.get('organization', user.organizationId))
+  t.ok(removedUsers[0].organization)
+  t.is(t.context.store.filter('profile', { userId: user.id }).length, 0)
+  t.ok(removedUsers[0].profile)
+})

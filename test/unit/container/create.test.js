@@ -1,12 +1,15 @@
-export function init () {
-  describe('create', function () {
-    it('should be an instance method', function () {
-      const Test = this
-      const DataStore = Test.JSData.DataStore
-      const store = new DataStore()
-      Test.assert.isFunction(store.create)
-      Test.assert.isTrue(store.create === DataStore.prototype.create)
-    })
-    it('should work')
-  })
-}
+import {
+  beforeEach,
+  JSData
+} from '../../_setup'
+import test from 'ava'
+
+test.beforeEach(beforeEach)
+
+test('should be an instance method', (t) => {
+  const DataStore = JSData.DataStore
+  const store = new DataStore()
+  t.is(typeof store.create, 'function')
+  t.ok(store.create === DataStore.prototype.create)
+})
+test.todo('should work')

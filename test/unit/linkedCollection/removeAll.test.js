@@ -1,40 +1,41 @@
-export function init () {
-  describe('removeAll', function () {
-    it('should eject items that meet the criteria from the store', function () {
-      const Test = this
-      Test.User.debug = true
-      Test.UserCollection.add([Test.data.p1, Test.data.p2, Test.data.p3, Test.data.p4, Test.data.p5])
-      Test.assert.isDefined(Test.UserCollection.get(5))
-      Test.assert.isDefined(Test.UserCollection.get(6))
-      Test.assert.isDefined(Test.UserCollection.get(7))
-      Test.assert.isDefined(Test.UserCollection.get(8))
-      Test.assert.isDefined(Test.UserCollection.get(9))
-      Test.assert.doesNotThrow(function () {
-        Test.UserCollection.removeAll({ where: { author: 'Adam' } })
-      })
-      Test.assert.isDefined(Test.UserCollection.get(5))
-      Test.assert.isDefined(Test.UserCollection.get(6))
-      Test.assert.isDefined(Test.UserCollection.get(7))
-      Test.assert.isUndefined(Test.UserCollection.get(8))
-      Test.assert.isUndefined(Test.UserCollection.get(9))
-    })
-    it('should eject all items from the store', function () {
-      const Test = this
-      Test.PostCollection.add([Test.data.p1, Test.data.p2, Test.data.p3, Test.data.p4])
+import {
+  beforeEach
+} from '../../_setup'
+import test from 'ava'
 
-      Test.assert.objectsEqual(Test.PostCollection.get(5), Test.data.p1)
-      Test.assert.objectsEqual(Test.PostCollection.get(6), Test.data.p2)
-      Test.assert.objectsEqual(Test.PostCollection.get(7), Test.data.p3)
-      Test.assert.objectsEqual(Test.PostCollection.get(8), Test.data.p4)
+test.beforeEach(beforeEach)
 
-      Test.assert.doesNotThrow(function () {
-        Test.PostCollection.removeAll()
-      })
-
-      Test.assert.isUndefined(Test.PostCollection.get(5))
-      Test.assert.isUndefined(Test.PostCollection.get(6))
-      Test.assert.isUndefined(Test.PostCollection.get(7))
-      Test.assert.isUndefined(Test.PostCollection.get(8))
-    })
+test('should eject items that meet the criteria from the store', (t) => {
+  t.context.User.debug = true
+  t.context.UserCollection.add([t.context.data.p1, t.context.data.p2, t.context.data.p3, t.context.data.p4, t.context.data.p5])
+  t.ok(t.context.UserCollection.get(5))
+  t.ok(t.context.UserCollection.get(6))
+  t.ok(t.context.UserCollection.get(7))
+  t.ok(t.context.UserCollection.get(8))
+  t.ok(t.context.UserCollection.get(9))
+  t.notThrows(function () {
+    t.context.UserCollection.removeAll({ where: { author: 'Adam' } })
   })
-}
+  t.ok(t.context.UserCollection.get(5))
+  t.ok(t.context.UserCollection.get(6))
+  t.ok(t.context.UserCollection.get(7))
+  t.notOk(t.context.UserCollection.get(8))
+  t.notOk(t.context.UserCollection.get(9))
+})
+test('should eject all items from the store', (t) => {
+  t.context.PostCollection.add([t.context.data.p1, t.context.data.p2, t.context.data.p3, t.context.data.p4])
+
+  t.context.objectsEqual(t.context.PostCollection.get(5), t.context.data.p1)
+  t.context.objectsEqual(t.context.PostCollection.get(6), t.context.data.p2)
+  t.context.objectsEqual(t.context.PostCollection.get(7), t.context.data.p3)
+  t.context.objectsEqual(t.context.PostCollection.get(8), t.context.data.p4)
+
+  t.notThrows(function () {
+    t.context.PostCollection.removeAll()
+  })
+
+  t.notOk(t.context.PostCollection.get(5))
+  t.notOk(t.context.PostCollection.get(6))
+  t.notOk(t.context.PostCollection.get(7))
+  t.notOk(t.context.PostCollection.get(8))
+})

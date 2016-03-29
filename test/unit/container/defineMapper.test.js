@@ -1,69 +1,71 @@
-export function init () {
-  describe('defineMapper', function () {
-    it('should be an instance method', function () {
-      const Test = this
-      const DataStore = Test.JSData.DataStore
-      const store = new DataStore()
-      Test.assert.isFunction(store.defineMapper)
-      Test.assert.isTrue(store.defineMapper === DataStore.prototype.defineMapper)
-    })
-    it('should create a new mapper', function () {
-      const Test = this
-      const Container = Test.JSData.Container
-      let container = new Container()
-      let mapper = container.defineMapper('foo')
-      Test.assert.isTrue(mapper === container._mappers.foo)
-      Test.assert.isTrue(mapper instanceof Test.JSData.Mapper)
-      Test.assert.isTrue(mapper.getAdapters() === container.getAdapters())
+import {
+  beforeEach,
+  JSData
+} from '../../_setup'
+import test from 'ava'
 
-      class Foo extends Test.JSData.Mapper {}
-      container = new Container({
-        mapperClass: Foo
-      })
-      mapper = container.defineMapper('foo')
-      Test.assert.isTrue(mapper === container._mappers.foo)
-      Test.assert.isTrue(mapper instanceof Foo)
-      Test.assert.isTrue(mapper.getAdapters() === container.getAdapters())
+test.beforeEach(beforeEach)
 
-      container = new Container({
-        mapperDefaults: {
-          foo: 'bar'
-        }
-      })
-      mapper = container.defineMapper('foo')
-      Test.assert.isTrue(mapper === container._mappers.foo)
-      Test.assert.isTrue(mapper instanceof Test.JSData.Mapper)
-      Test.assert.equal(mapper.foo, 'bar')
-      Test.assert.isTrue(mapper.getAdapters() === container.getAdapters())
+test('should be an instance method', (t) => {
+  const DataStore = JSData.DataStore
+  const store = new DataStore()
+  t.is(typeof store.defineMapper, 'function')
+  t.ok(store.defineMapper === DataStore.prototype.defineMapper)
+})
+test('should create a new mapper', (t) => {
+  const Container = JSData.Container
+  let container = new Container()
+  let mapper = container.defineMapper('foo')
+  t.ok(mapper === container._mappers.foo)
+  t.ok(mapper instanceof JSData.Mapper)
+  t.ok(mapper.getAdapters() === container.getAdapters())
 
-      container = new Container({
-        mapperDefaults: {
-          foo: 'bar'
-        }
-      })
-      mapper = container.defineMapper('foo', {
-        foo: 'beep'
-      })
-      Test.assert.isTrue(mapper === container._mappers.foo)
-      Test.assert.isTrue(mapper instanceof Test.JSData.Mapper)
-      Test.assert.equal(mapper.foo, 'beep')
-      Test.assert.isTrue(mapper.getAdapters() === container.getAdapters())
-
-      Test.assert.throws(function () {
-        mapper = container.defineMapper()
-      }, Error, 'name is required!')
-
-      Test.assert.throws(function () {
-        mapper = container.defineMapper({
-          foo: 'bar'
-        })
-      }, Error, 'name is required!')
-
-      mapper = container.defineMapper({
-        foo: 'bar',
-        name: 'foo'
-      })
-      Test.assert.equal(mapper.name, 'foo')
-    })
+  class Foo extends JSData.Mapper {}
+  container = new Container({
+    mapperClass: Foo
   })
-}
+  mapper = container.defineMapper('foo')
+  t.ok(mapper === container._mappers.foo)
+  t.ok(mapper instanceof Foo)
+  t.ok(mapper.getAdapters() === container.getAdapters())
+
+  container = new Container({
+    mapperDefaults: {
+      foo: 'bar'
+    }
+  })
+  mapper = container.defineMapper('foo')
+  t.ok(mapper === container._mappers.foo)
+  t.ok(mapper instanceof JSData.Mapper)
+  t.is(mapper.foo, 'bar')
+  t.ok(mapper.getAdapters() === container.getAdapters())
+
+  container = new Container({
+    mapperDefaults: {
+      foo: 'bar'
+    }
+  })
+  mapper = container.defineMapper('foo', {
+    foo: 'beep'
+  })
+  t.ok(mapper === container._mappers.foo)
+  t.ok(mapper instanceof JSData.Mapper)
+  t.is(mapper.foo, 'beep')
+  t.ok(mapper.getAdapters() === container.getAdapters())
+
+  t.throws(function () {
+    mapper = container.defineMapper()
+  }, Error, 'name is required!')
+
+  t.throws(function () {
+    mapper = container.defineMapper({
+      foo: 'bar'
+    })
+  }, Error, 'name is required!')
+
+  mapper = container.defineMapper({
+    foo: 'bar',
+    name: 'foo'
+  })
+  t.is(mapper.name, 'foo')
+})

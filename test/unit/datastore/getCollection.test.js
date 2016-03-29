@@ -1,21 +1,22 @@
-export function init () {
-  describe('getCollection', function () {
-    it('should be an instance method', function () {
-      const Test = this
-      const DataStore = Test.JSData.DataStore
-      const store = new DataStore()
-      Test.assert.isFunction(store.getCollection)
-      Test.assert.isTrue(store.getCollection === DataStore.prototype.getCollection)
-    })
-    it('should get a collection', function () {
-      const Test = this
-      Test.assert.isTrue(Test.UserCollection === Test.store.getCollection('user'))
-    })
-    it('should throw an error', function () {
-      const Test = this
-      Test.assert.throws(function () {
-        Test.store.getCollection('foo')
-      }, ReferenceError, 'foo is not a registered collection!')
-    })
-  })
-}
+import {
+  beforeEach,
+  JSData
+} from '../../_setup'
+import test from 'ava'
+
+test.beforeEach(beforeEach)
+
+test('should be an instance method', (t) => {
+  const DataStore = JSData.DataStore
+  const store = new DataStore()
+  t.is(typeof store.getCollection, 'function')
+  t.ok(store.getCollection === DataStore.prototype.getCollection)
+})
+test('should get a collection', (t) => {
+  t.ok(t.context.UserCollection === t.context.store.getCollection('user'))
+})
+test('should throw an error', (t) => {
+  t.throws(function () {
+    t.context.store.getCollection('foo')
+  }, ReferenceError, 'foo is not a registered collection!')
+})

@@ -1,38 +1,39 @@
-export function init () {
-  describe('hasChanges', function () {
-    it('should be an instance method', function () {
-      const Test = this
-      const Record = Test.JSData.Record
-      const record = new Record()
-      Test.assert.isFunction(record.hasChanges)
-      Test.assert.isTrue(record.hasChanges === Record.prototype.hasChanges)
-    })
-    it('should detect when untracked fields are changed', function () {
-      const Test = this
-      const post = new Test.Post.recordClass(Test.data.p1)
-      Test.assert.isFalse(post.hasChanges())
-      post.author = 'Jake'
-      Test.assert.isTrue(post.hasChanges())
-    })
-    it('should return true if a tracked field is changed', function () {
-      const Test = this
-      const PostMapper = new Test.JSData.Mapper({
-        name: 'post',
-        schema: {
-          properties: {
-            author: {
-              type: 'string',
-              track: true
-            }
-          }
+import {
+  beforeEach,
+  JSData
+} from '../../_setup'
+import test from 'ava'
+
+test.beforeEach(beforeEach)
+
+test('should be an instance method', (t) => {
+  const Record = JSData.Record
+  const record = new Record()
+  t.is(typeof record.hasChanges, 'function')
+  t.ok(record.hasChanges === Record.prototype.hasChanges)
+})
+test('should detect when untracked fields are changed', (t) => {
+  const post = new t.context.Post.recordClass(t.context.data.p1)
+  t.false(post.hasChanges())
+  post.author = 'Jake'
+  t.ok(post.hasChanges())
+})
+test('should return true if a tracked field is changed', (t) => {
+  const PostMapper = new JSData.Mapper({
+    name: 'post',
+    schema: {
+      properties: {
+        author: {
+          type: 'string',
+          track: true
         }
-      })
-      const post = PostMapper.createRecord(Test.data.p1)
-      Test.assert.isFalse(post.hasChanges())
-      post.author = 'Jake'
-      Test.assert.isTrue(post.hasChanges())
-      post.author = 'John'
-      Test.assert.isFalse(post.hasChanges())
-    })
+      }
+    }
   })
-}
+  const post = PostMapper.createRecord(t.context.data.p1)
+  t.false(post.hasChanges())
+  post.author = 'Jake'
+  t.ok(post.hasChanges())
+  post.author = 'John'
+  t.false(post.hasChanges())
+})

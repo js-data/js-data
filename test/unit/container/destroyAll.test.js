@@ -1,12 +1,15 @@
-export function init () {
-  describe('destroyAll', function () {
-    it('should be an instance method', function () {
-      const Test = this
-      const DataStore = Test.JSData.DataStore
-      const store = new DataStore()
-      Test.assert.isFunction(store.destroyAll)
-      Test.assert.isTrue(store.destroyAll === DataStore.prototype.destroyAll)
-    })
-    it('should work')
-  })
-}
+import {
+  beforeEach,
+  JSData
+} from '../../_setup'
+import test from 'ava'
+
+test.beforeEach(beforeEach)
+
+test('should be an instance method', (t) => {
+  const DataStore = JSData.DataStore
+  const store = new DataStore()
+  t.is(typeof store.destroyAll, 'function')
+  t.ok(store.destroyAll === DataStore.prototype.destroyAll)
+})
+test.todo('should work')
