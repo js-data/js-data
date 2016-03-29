@@ -33,7 +33,7 @@ data API on the server and the client. JSData employs conventions for rapid
 development, but allows for endless customization in order to meet your
 particular needs.
 
-To get started, visit the main website at __[http://js-data.io](http://www.js-data.io)__.
+To get started, visit the main website at __[http://js-data.io](http://www.js-data.io/v3.0/docs/home)__.
 
 ## Links
 
