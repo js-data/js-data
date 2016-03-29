@@ -1,3 +1,8 @@
+##### 3.0.0-alpha.22 - xx March 2016
+
+###### Other
+- Switched from mocha/istanbul to ava/nyc for parallel tests
+
 ##### 3.0.0-alpha.21 - 22 March 2016
 
 ###### Backwards compatible API changes

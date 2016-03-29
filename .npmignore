@@ -43,3 +43,4 @@ doc/
 .github
 .tmp
 typings
+.nyc_output

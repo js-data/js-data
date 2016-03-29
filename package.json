@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "3.0.0-alpha.21",
+  "version": "3.0.0-alpha.22",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -25,13 +25,9 @@
     "localstorage"
   ],
   "standard": { "parser": "babel-eslint" },
-  "babel": {
-    "presets": ["es2015-rollup", "stage-0"],
-    "plugins": ["syntax-async-functions", "transform-regenerator"]
-  },
+  "babel": { "presets": ["es2015-rollup"] },
   "ava": { "files": ["test/**/*.test.js"] },
   "scripts": {
-    "rollup-tests": "rollup -c rollup-tests.config.js",
     "doc": "jsdoc -c conf.json src && node scripts/cleanup.js",
     "lint": "repo-tools lint src/**/*.js test/**/*.js scripts/*.js lib/**/*.js",
     "bundle": "rollup -c -o dist/js-data.js -m dist/js-data.js.map -f umd",
@@ -43,8 +39,6 @@
     "build": "npm run bundle && npm run min && npm run version && npm run banner",
     "ava": "ava",
     "r": "npm run bundle && ava",
-    "t": "npm run rollup-tests && ava",
-    "rt": "npm run bundle && ava",
     "cover": "nyc ava",
     "report-html": "nyc report --reporter=html",
     "test": "npm run lint && npm run build && npm run cover",
@@ -55,12 +49,7 @@
   "devDependencies": {
     "ava": "0.13.0",
     "babel-core": "6.7.4",
-    "babel-plugin-syntax-async-functions": "6.5.0",
-    "babel-plugin-transform-regenerator": "6.6.5",
-    "babel-polyfill": "6.7.4",
     "babel-preset-es2015-rollup": "1.1.1",
-    "babel-preset-stage-0": "6.5.0",
-    "chai": "3.5.0",
     "coveralls": "2.11.9",
     "ink-docstrap": "1.1.4",
     "js-data-repo-tools": "0.2.0",
@@ -69,7 +58,6 @@
     "rollup": "0.25.7",
     "rollup-plugin-babel": "2.4.0",
     "sinon": "1.17.3",
-    "source-map-support": "0.4.0",
     "uglify-js": "2.6.2"
   }
 }
