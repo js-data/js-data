@@ -1,24 +1,26 @@
-export function init () {
-  describe('updateMany', function () {
-    it('should be an instance method', function () {
-      const Test = this
-      const DataStore = Test.JSData.DataStore
-      const store = new DataStore()
-      Test.assert.isFunction(store.updateMany)
-      Test.assert.isTrue(store.updateMany === DataStore.prototype.updateMany)
-    })
-    it('should updateMany', async function () {
-      const Test = this
-      const props = [{ id: 1, name: 'John' }]
-      Test.store.registerAdapter('mock', {
-        updateMany () {
-          props[0].foo = 'bar'
-          return Test.JSData.utils.resolve(props)
-        }
-      }, { 'default': true })
-      const users = await Test.store.updateMany('user', props)
-      Test.assert.equal(users[0].foo, 'bar', 'user was updated')
-      Test.assert.isTrue(users[0] instanceof Test.store.getMapper('user').recordClass, 'user is a record')
-    })
-  })
-}
+import {
+  beforeEach,
+  JSData
+} from '../../_setup'
+import test from 'ava'
+
+test.beforeEach(beforeEach)
+
+test('should be an instance method', (t) => {
+  const DataStore = JSData.DataStore
+  const store = new DataStore()
+  t.is(typeof store.updateMany, 'function')
+  t.ok(store.updateMany === DataStore.prototype.updateMany)
+})
+test('should updateMany', async (t) => {
+  const props = [{ id: 1, name: 'John' }]
+  t.context.store.registerAdapter('mock', {
+    updateMany () {
+      props[0].foo = 'bar'
+      return JSData.utils.resolve(props)
+    }
+  }, { 'default': true })
+  const users = await t.context.store.updateMany('user', props)
+  t.is(users[0].foo, 'bar', 'user was updated')
+  t.ok(users[0] instanceof t.context.store.getMapper('user').recordClass, 'user is a record')
+})

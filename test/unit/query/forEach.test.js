@@ -1,20 +1,23 @@
-export function init () {
-  describe('forEach', function () {
-    it('should work', function () {
-      const Test = this
-      const collection = Test.PostCollection
-      const p1 = Test.data.p1
-      const p2 = Test.data.p2
-      const p3 = Test.data.p3
-      const p4 = Test.data.p4
-      const p5 = Test.data.p5
+import {
+  beforeEach,
+  JSData
+} from '../../_setup'
+import test from 'ava'
 
-      Test.store.add('post', [p1, p2, p3, p4, p5])
-      let count = 0
-      collection.query().forEach(function () {
-        count++
-      }).run()
-      Test.assert.equal(count, 5)
-    })
-  })
-}
+test.beforeEach(beforeEach)
+
+test('should work', (t) => {
+  const collection = t.context.PostCollection
+  const p1 = t.context.data.p1
+  const p2 = t.context.data.p2
+  const p3 = t.context.data.p3
+  const p4 = t.context.data.p4
+  const p5 = t.context.data.p5
+
+  t.context.store.add('post', [p1, p2, p3, p4, p5])
+  let count = 0
+  collection.query().forEach(function () {
+    count++
+  }).run()
+  t.is(count, 5)
+})

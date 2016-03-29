@@ -1,26 +1,26 @@
-export function init () {
-  describe('get', function () {
-    it('should be an instance method', function () {
-      const Test = this
-      const Record = Test.JSData.Record
-      const record = new Record()
-      Test.assert.isFunction(record.get)
-      Test.assert.isTrue(record.get === Record.prototype.get)
-    })
-    it('should return a property', function () {
-      const Test = this
-      const user = new Test.JSData.Record({ foo: 'bar' })
-      Test.assert.equal(user.get('foo'), 'bar')
-    })
-    it('should return undefined if the property does not exist', function () {
-      const Test = this
-      const user = new Test.JSData.Record()
-      Test.assert.isUndefined(user.get('foo'))
-    })
-    it('should return a nested property', function () {
-      const Test = this
-      const user = new Test.JSData.Record({ address: { state: 'TX' } })
-      Test.assert.equal(user.get('address.state'), 'TX')
-    })
-  })
-}
+import {
+  beforeEach,
+  JSData
+} from '../../_setup'
+import test from 'ava'
+
+test.beforeEach(beforeEach)
+
+test('should be an instance method', (t) => {
+  const Record = JSData.Record
+  const record = new Record()
+  t.is(typeof record.get, 'function')
+  t.ok(record.get === Record.prototype.get)
+})
+test('should return a property', (t) => {
+  const user = new JSData.Record({ foo: 'bar' })
+  t.is(user.get('foo'), 'bar')
+})
+test('should return undefined if the property does not exist', (t) => {
+  const user = new JSData.Record()
+  t.notOk(user.get('foo'))
+})
+test('should return a nested property', (t) => {
+  const user = new JSData.Record({ address: { state: 'TX' } })
+  t.is(user.get('address.state'), 'TX')
+})

@@ -1,89 +1,87 @@
-export function init () {
-  describe('changes', function () {
-    it('should be an instance method', function () {
-      const Test = this
-      const Record = Test.JSData.Record
-      const record = new Record()
-      Test.assert.isFunction(record.changes)
-      Test.assert.isTrue(record.changes === Record.prototype.changes)
-    })
-    it('should be empty right after an instance is created', function () {
-      const Test = this
-      const post = new Test.Post.recordClass(Test.data.p1)
-      Test.assert.objectsEqual(post.changes(), {
-        added: {},
-        removed: {},
-        changed: {}
-      })
-    })
-    it('should detect tracked field changes', function () {
-      const Test = this
-      const post = new Test.Post.recordClass(Test.data.p1)
-      Test.assert.objectsEqual(post.changes(), {
-        added: {},
-        removed: {},
-        changed: {}
-      })
-      post.author = 'Jake'
-      Test.assert.objectsEqual(post.changes(), {
-        added: {},
-        removed: {},
-        changed: {
-          author: 'Jake'
-        }
-      })
-    })
-    it('should detect untracked field changes', function () {
-      const Test = this
-      const post = new Test.Post.recordClass(Test.data.p1)
-      Test.assert.objectsEqual(post.changes(), {
-        added: {},
-        removed: {},
-        changed: {}
-      })
-      post.foo = 'bar'
-      Test.assert.objectsEqual(post.changes(), {
-        added: {
-          foo: 'bar'
-        },
-        removed: {},
-        changed: {}
-      })
-    })
-    it('should show changed tracked fields', function () {
-      const Test = this
+import {
+  beforeEach,
+  JSData
+} from '../../_setup'
+import test from 'ava'
 
-      const PostMapper = new Test.JSData.Mapper({
-        name: 'post',
-        schema: {
-          properties: {
-            author: {
-              type: 'string',
-              track: true
-            }
-          }
-        }
-      })
-      const post = PostMapper.createRecord(Test.data.p1)
-      Test.assert.objectsEqual(post.changes(), {
-        added: {},
-        removed: {},
-        changed: {}
-      })
-      post.author = 'Jake'
-      Test.assert.objectsEqual(post.changes(), {
-        added: {},
-        removed: {},
-        changed: {
-          author: 'Jake'
-        }
-      })
-      post.author = 'John'
-      Test.assert.objectsEqual(post.changes(), {
-        added: {},
-        removed: {},
-        changed: {}
-      })
-    })
+test.beforeEach(beforeEach)
+
+test('should be an instance method', (t) => {
+  const Record = JSData.Record
+  const record = new Record()
+  t.is(typeof record.changes, 'function')
+  t.ok(record.changes === Record.prototype.changes)
+})
+test('should be empty right after an instance is created', (t) => {
+  const post = new t.context.Post.recordClass(t.context.data.p1)
+  t.context.objectsEqual(post.changes(), {
+    added: {},
+    removed: {},
+    changed: {}
   })
-}
+})
+test('should detect tracked field changes', (t) => {
+  const post = new t.context.Post.recordClass(t.context.data.p1)
+  t.context.objectsEqual(post.changes(), {
+    added: {},
+    removed: {},
+    changed: {}
+  })
+  post.author = 'Jake'
+  t.context.objectsEqual(post.changes(), {
+    added: {},
+    removed: {},
+    changed: {
+      author: 'Jake'
+    }
+  })
+})
+test('should detect untracked field changes', (t) => {
+  const post = new t.context.Post.recordClass(t.context.data.p1)
+  t.context.objectsEqual(post.changes(), {
+    added: {},
+    removed: {},
+    changed: {}
+  })
+  post.foo = 'bar'
+  t.context.objectsEqual(post.changes(), {
+    added: {
+      foo: 'bar'
+    },
+    removed: {},
+    changed: {}
+  })
+})
+test('should show changed tracked fields', (t) => {
+  const PostMapper = new JSData.Mapper({
+    name: 'post',
+    schema: {
+      properties: {
+        author: {
+          type: 'string',
+          track: true
+        }
+      }
+    }
+  })
+  const post = PostMapper.createRecord(t.context.data.p1)
+  t.context.objectsEqual(post.changes(), {
+    added: {},
+    removed: {},
+    changed: {}
+  })
+  post.author = 'Jake'
+  t.context.objectsEqual(post.changes(), {
+    added: {},
+    removed: {},
+    changed: {
+      author: 'Jake'
+    }
+  })
+  post.author = 'John'
+  t.context.objectsEqual(post.changes(), {
+    added: {},
+    removed: {},
+    changed: {}
+  })
+})
