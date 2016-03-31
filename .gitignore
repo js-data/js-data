@@ -3,3 +3,4 @@ dist/
 doc/
 coverage/
 junit/
+.nyc_output
