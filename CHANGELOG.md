@@ -1,4 +1,8 @@
-##### 3.0.0-alpha.22 - xx March 2016
+##### 3.0.0-alpha.22 - 31 March 2016
+
+###### Backwards compatible API changes
+- Containers and DataStores now bubble up Mapper events
+- DataStores now bubble up Collection events
 
 ###### Other
 - Switched from mocha/istanbul to ava/nyc for parallel tests

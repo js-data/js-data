@@ -361,21 +361,6 @@ test('should inject 1,000 items', (t) => {
   t.context.UserCollection.add(users)
   // console.log('\tinject 1,000 users time taken: ', new Date().getTime() - start, 'ms')
 })
-test.skip('should inject 10,000 items', (t) => {
-  let users = []
-  for (var i = 0; i < 10000; i++) {
-    users.push({
-      id: i,
-      name: 'john smith #' + i,
-      age: Math.floor(Math.random() * 100),
-      created: new Date().getTime(),
-      updated: new Date().getTime()
-    })
-  }
-  const start = new Date().getTime()
-  t.context.UserCollection.add(users)
-  console.log('\tinject 10,000 users time taken: ', new Date().getTime() - start, 'ms')
-})
 test('should inject 1,000 items where there is an index on "age"', (t) => {
   const collection = new JSData.Collection({ mapper: new JSData.Mapper({ name: 'user' }) })
   collection.createIndex('age')
@@ -394,25 +379,4 @@ test('should inject 1,000 items where there is an index on "age"', (t) => {
   // const start = new Date().getTime()
   collection.add(users)
   // console.log('\tinject 1,000 users time taken: ', new Date().getTime() - start, 'ms')
-})
-test.skip('should inject 10,000 items where there is an index on "age"', (t) => {
-  const store = new JSData.DataStore()
-  store.defineMapper('user')
-  store.createIndex('user', 'age')
-  store.createIndex('user', 'created')
-  store.createIndex('user', 'updated')
-  let users = []
-  for (var i = 0; i < 10000; i++) {
-    users.push({
-      id: i,
-      name: 'john smith #' + i,
-      age: Math.floor(Math.random() * 100),
-      created: new Date().getTime(),
-      updated: new Date().getTime()
-    })
-  }
-  // const start = new Date().getTime()
-  store.add('user', users)
-  // console.log('\tinject 10,000 users time taken: ', new Date().getTime() - start, 'ms')
-  // console.log('\tusers age 40-44', User.between(40, 45, { index: 'age' }).length)
 })
