@@ -2,6 +2,7 @@ import {
   beforeEach,
   JSData
 } from '../../_setup'
+import sinon from 'sinon'
 import test from 'ava'
 
 test.beforeEach(beforeEach)
@@ -47,4 +48,47 @@ test('should accept overrides', (t) => {
   t.ok(store.mapperClass === Foo)
   t.ok(store.CollectionClass === Bar)
   t.ok(store.linkRelations)
+})
+test('should have events', (t) => {
+  const store = new JSData.DataStore()
+  const listener = sinon.stub()
+  store.on('bar', listener)
+  store.emit('bar')
+  t.ok(listener.calledOnce)
+})
+test('should proxy Mapper events', (t) => {
+  const store = new JSData.DataStore()
+  store.defineMapper('user')
+  const listener = sinon.stub()
+  store.on('bar', listener)
+  store.getMapper('user').emit('bar', 'foo')
+  t.ok(listener.calledOnce)
+  t.same(listener.firstCall.args, ['user', 'foo'])
+})
+test('should proxy all Mapper events', (t) => {
+  const store = new JSData.DataStore()
+  store.defineMapper('user')
+  const listener = sinon.stub()
+  store.on('all', listener)
+  store.getMapper('user').emit('bar', 'foo')
+  t.ok(listener.calledOnce)
+  t.same(listener.firstCall.args, ['bar', 'user', 'foo'])
+})
+test('should proxy Collection events', (t) => {
+  const store = new JSData.DataStore()
+  store.defineMapper('user')
+  const listener = sinon.stub()
+  store.on('bar', listener)
+  store.getCollection('user').emit('bar', 'foo')
+  t.ok(listener.calledOnce)
+  t.same(listener.firstCall.args, ['user', 'foo'])
+})
+test('should proxy all Collection events', (t) => {
+  const store = new JSData.DataStore()
+  store.defineMapper('user')
+  const listener = sinon.stub()
+  store.on('all', listener)
+  store.getCollection('user').emit('bar', 'foo')
+  t.ok(listener.calledOnce)
+  t.same(listener.firstCall.args, ['bar', 'user', 'foo'])
 })

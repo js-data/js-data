@@ -59,6 +59,30 @@ const props = {
     return data
   },
 
+  /**
+   * Proxy for {@link Container#on}. If an event was emitted by a Mapper or
+   * Collection in the DataStore, then the name of the Mapper or Collection will
+   * be prepended to the arugments passed to the provided event handler.
+   *
+   * @name DataStore#on
+   * @method
+   * @param {...*} args - Passed to {@link Container#on}.
+   */
+
+  /**
+   * Used to bind to events emitted by collections in this store.
+   *
+   * @name DataStore#_onCollectionEvent
+   * @method
+   * @private
+   * @param {string} name Name of the collection that emitted the event.
+   * @param {...*} [args] Args passed to {@link Collection#emit}.
+   */
+  _onCollectionEvent (name, ...args) {
+    const type = args.shift()
+    this.emit(type, name, ...args)
+  },
+
   cachedFind (name, id, opts) {
     return this.get(name, id, opts)
   },
@@ -140,6 +164,10 @@ const props = {
       fieldGetter (obj) {
         return collection._added[collection.recordId(obj)]
       }
+    })
+
+    collection.on('all', function (...args) {
+      self._onCollectionEvent(name, ...args)
     })
 
     const linkRelations = self.linkRelations

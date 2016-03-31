@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.21 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.22 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -5825,16 +5825,6 @@
   /**
    * Proxy for {@link Mapper#find}.
    *
-   * @name Container#emit
-   * @method
-   * @param {string} name - Name of the {@link Mapper} to target.
-   * @param {...*} args - Passed to {@link Mapper#emit}.
-   */
-  'emit',
-
-  /**
-   * Proxy for {@link Mapper#find}.
-   *
    * @name Container#find
    * @method
    * @param {string} name - Name of the {@link Mapper} to target.
@@ -5884,26 +5874,6 @@
    * @param {...*} args - Passed to {@link Mapper#log}.
    */
   'log',
-
-  /**
-   * Proxy for {@link Mapper#off}.
-   *
-   * @name Container#off
-   * @method
-   * @param {string} name - Name of the {@link Mapper} to target.
-   * @param {...*} args - Passed to {@link Mapper#off}.
-   */
-  'off',
-
-  /**
-   * Proxy for {@link Mapper#on}.
-   *
-   * @name Container#on
-   * @method
-   * @param {string} name - Name of the {@link Mapper} to target.
-   * @param {...*} args - Passed to {@link Mapper#on}.
-   */
-  'on',
 
   /**
    * Proxy for {@link Mapper#sum}.
@@ -6004,6 +5974,35 @@
     },
 
     /**
+     * Proxy for {@link Component#on}. If an event was emitted by a Mapper in the
+     * Container, then the name of the Mapper will be prepended to the arugments
+     * passed to the provided event handler.
+     *
+     * @name Container#on
+     * @method
+     * @param {...*} args - Passed to {@link Component#on}.
+     */
+
+    /**
+     * Used to bind to events emitted by mappers in this container.
+     *
+     * @name Container#_onMapperEvent
+     * @method
+     * @private
+     * @param {string} name Name of the mapper that emitted the event.
+     * @param {...*} [args] Args passed to {@link Mapper#emit}.
+     */
+    _onMapperEvent: function _onMapperEvent(name) {
+      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+      }
+
+      var type = args.shift();
+      this.emit.apply(this, [type, name].concat(args));
+    },
+
+
+    /**
      * Create a new mapper and register it in this container.
      *
      * @example
@@ -6055,6 +6054,14 @@
       mapper.name = name;
       // All mappers in this datastore will share adapters
       mapper._adapters = self.getAdapters();
+
+      mapper.on('all', function () {
+        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+          args[_key2] = arguments[_key2];
+        }
+
+        self._onMapperEvent.apply(self, [name].concat(args));
+      });
 
       // Setup the mapper's relations, including generating Mapper#relationList
       // and Mapper#relationFields
@@ -6194,8 +6201,8 @@
     props[method] = function (name) {
       var _getMapper;
 
-      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-        args[_key - 1] = arguments[_key];
+      for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+        args[_key3 - 1] = arguments[_key3];
       }
 
       return (_getMapper = this.getMapper(name))[method].apply(_getMapper, args);
@@ -6497,6 +6504,35 @@
       }
       return data;
     },
+
+
+    /**
+     * Proxy for {@link Container#on}. If an event was emitted by a Mapper or
+     * Collection in the DataStore, then the name of the Mapper or Collection will
+     * be prepended to the arugments passed to the provided event handler.
+     *
+     * @name DataStore#on
+     * @method
+     * @param {...*} args - Passed to {@link Container#on}.
+     */
+
+    /**
+     * Used to bind to events emitted by collections in this store.
+     *
+     * @name DataStore#_onCollectionEvent
+     * @method
+     * @private
+     * @param {string} name Name of the collection that emitted the event.
+     * @param {...*} [args] Args passed to {@link Collection#emit}.
+     */
+    _onCollectionEvent: function _onCollectionEvent(name) {
+      for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+        args[_key2 - 1] = arguments[_key2];
+      }
+
+      var type = args.shift();
+      this.emit.apply(this, [type, name].concat(args));
+    },
     cachedFind: function cachedFind(name, id, opts) {
       return this.get(name, id, opts);
     },
@@ -6578,6 +6614,14 @@
         fieldGetter: function fieldGetter(obj) {
           return collection._added[collection.recordId(obj)];
         }
+      });
+
+      collection.on('all', function () {
+        for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+          args[_key3] = arguments[_key3];
+        }
+
+        self._onCollectionEvent.apply(self, [name].concat(args));
       });
 
       var linkRelations = self.linkRelations;
@@ -6724,8 +6768,8 @@
                   var _this = this;
 
                   return def.get(def, this, function () {
-                    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-                      args[_key2] = arguments[_key2];
+                    for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+                      args[_key4] = arguments[_key4];
                     }
 
                     return origGet.apply(_this, args);
@@ -7044,8 +7088,8 @@
     props$1[method] = function (name) {
       var _getCollection;
 
-      for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-        args[_key3 - 1] = arguments[_key3];
+      for (var _len5 = arguments.length, args = Array(_len5 > 1 ? _len5 - 1 : 0), _key5 = 1; _key5 < _len5; _key5++) {
+        args[_key5 - 1] = arguments[_key5];
       }
 
       return (_getCollection = this.getCollection(name))[method].apply(_getCollection, args);
@@ -7131,9 +7175,9 @@
    * if the current version is not beta.
    */
   var version = {
-    alpha: '21',
+    alpha: '22',
     beta: 'false',
-    full: '3.0.0-alpha.21',
+    full: '3.0.0-alpha.22',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10)

@@ -98,16 +98,6 @@ const toProxy = [
   /**
    * Proxy for {@link Mapper#find}.
    *
-   * @name Container#emit
-   * @method
-   * @param {string} name - Name of the {@link Mapper} to target.
-   * @param {...*} args - Passed to {@link Mapper#emit}.
-   */
-  'emit',
-
-  /**
-   * Proxy for {@link Mapper#find}.
-   *
    * @name Container#find
    * @method
    * @param {string} name - Name of the {@link Mapper} to target.
@@ -157,26 +147,6 @@ const toProxy = [
    * @param {...*} args - Passed to {@link Mapper#log}.
    */
   'log',
-
-  /**
-   * Proxy for {@link Mapper#off}.
-   *
-   * @name Container#off
-   * @method
-   * @param {string} name - Name of the {@link Mapper} to target.
-   * @param {...*} args - Passed to {@link Mapper#off}.
-   */
-  'off',
-
-  /**
-   * Proxy for {@link Mapper#on}.
-   *
-   * @name Container#on
-   * @method
-   * @param {string} name - Name of the {@link Mapper} to target.
-   * @param {...*} args - Passed to {@link Mapper#on}.
-   */
-  'on',
 
   /**
    * Proxy for {@link Mapper#sum}.
@@ -278,6 +248,30 @@ const props = {
   },
 
   /**
+   * Proxy for {@link Component#on}. If an event was emitted by a Mapper in the
+   * Container, then the name of the Mapper will be prepended to the arugments
+   * passed to the provided event handler.
+   *
+   * @name Container#on
+   * @method
+   * @param {...*} args - Passed to {@link Component#on}.
+   */
+
+  /**
+   * Used to bind to events emitted by mappers in this container.
+   *
+   * @name Container#_onMapperEvent
+   * @method
+   * @private
+   * @param {string} name Name of the mapper that emitted the event.
+   * @param {...*} [args] Args passed to {@link Mapper#emit}.
+   */
+  _onMapperEvent (name, ...args) {
+    const type = args.shift()
+    this.emit(type, name, ...args)
+  },
+
+  /**
    * Create a new mapper and register it in this container.
    *
    * @example
@@ -329,6 +323,10 @@ const props = {
     mapper.name = name
     // All mappers in this datastore will share adapters
     mapper._adapters = self.getAdapters()
+
+    mapper.on('all', function (...args) {
+      self._onMapperEvent(name, ...args)
+    })
 
     // Setup the mapper's relations, including generating Mapper#relationList
     // and Mapper#relationFields
