@@ -44,3 +44,9 @@ doc/
 .tmp
 typings
 .nyc_output
+*.config.js
+*.json
+*.png
+*.yml
+.mailmap
+.gitignore
