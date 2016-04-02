@@ -15,25 +15,26 @@ test('should be an instance method', (t) => {
 test('should createMany', async (t) => {
   const props = [{ name: 'John' }]
   let createCalled = false
-  const User = new JSData.Mapper({
+  const UserMapper = new JSData.Mapper({
     name: 'user',
     defaultAdapter: 'mock'
   })
-  User.registerAdapter('mock', {
+  const user = new UserMapper.recordClass({ foo: 'bar' })
+  UserMapper.registerAdapter('mock', {
     createMany (mapper, _props, Opts) {
       createCalled = true
       return new Promise(function (resolve, reject) {
-        t.ok(mapper === User, 'should pass in the Model')
+        t.ok(mapper === UserMapper, 'should pass in the Model')
         t.same(_props, props, 'should pass in the props')
         _props[0][mapper.idAttribute] = new Date().getTime()
         resolve(_props)
       })
     }
   })
-  const users = await User.createMany(props)
+  const users = await UserMapper.createMany(props)
   t.ok(createCalled, 'Adapter#createMany should have been called')
-  t.ok(users[0][User.idAttribute], 'new user has an id')
-  t.ok(users[0] instanceof User.recordClass, 'user is a record')
+  t.ok(users[0][UserMapper.idAttribute], 'new user has an id')
+  t.ok(users[0] instanceof UserMapper.recordClass, 'user is a record')
 })
 test('should return raw', async (t) => {
   const props = [{ name: 'John' }]
