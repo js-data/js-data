@@ -63,10 +63,10 @@ declare module JSData {
     static extend(instanceProps?: any, classProps?: any): any
     _listeners: Object
     dbg(...args: any[]): void
-    emit(key?: string, ...args: any[]): void
+    emit(key: string, ...args: any[]): void
     log(level: string, ...args: any[]): void
     off(key?: string, handler?: Function): void
-    on(key?: string, handler?: Function): void
+    on(key: string, handler: Function, ctx?: any): void
   }
   export class Record extends Component {
     static mapper: Mapper
@@ -104,7 +104,7 @@ declare module JSData {
     lifecycleMethods: any
     notify: boolean
     raw: boolean
-    recordClass: any
+    recordClass: typeof Record
     relationList: any[]
     relationFields: string[]
     schema: Schema

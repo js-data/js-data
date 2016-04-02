@@ -248,13 +248,17 @@ const props = {
   },
 
   /**
+   * Register a new event listener on this Container.
+   *
    * Proxy for {@link Component#on}. If an event was emitted by a Mapper in the
    * Container, then the name of the Mapper will be prepended to the arugments
-   * passed to the provided event handler.
+   * passed to the listener.
    *
    * @name Container#on
    * @method
-   * @param {...*} args - Passed to {@link Component#on}.
+   * @param {string} event Name of event to subsribe to.
+   * @param {Function} listener Listener function to handle the event.
+   * @param {*} [ctx] Optional content in which to invoke the listener.
    */
 
   /**

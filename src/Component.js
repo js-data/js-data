@@ -35,23 +35,31 @@ Component.extend = utils.extend
 utils.logify(Component.prototype)
 
 /**
- * Register a new event listener on this Mapper.
+ * Register a new event listener on this Component.
  *
- * @name Mapper#on
+ * @name Component#on
  * @method
+ * @param {string} event Name of event to subsribe to.
+ * @param {Function} listener Listener function to handle the event.
+ * @param {*} [ctx] Optional content in which to invoke the listener.
  */
 /**
- * Remove an event listener from this Mapper.
+ * Remove an event listener from this Component. If no listener is provided,
+ * then all listeners for the specified event will be removed. If no event is
+ * specified then all listeners for all events will be removed.
  *
- * @name Mapper#off
+ * @name Component#off
  * @method
+ * @param {string} [event] Name of event to unsubsribe to.
+ * @param {Function} [listener] Listener to remove.
  */
 /**
- * Trigger an event on this Mapper.
+ * Trigger an event on this Component.
  *
- * @name Mapper#emit
+ * @name Component#emit
  * @method
  * @param {string} event Name of event to emit.
+ * @param {...*} [args] Arguments to pass to any listeners.
  */
 utils.eventify(
   Component.prototype,
