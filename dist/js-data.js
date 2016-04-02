@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.26 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.27 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -4489,16 +4489,7 @@
      */
     raw: false,
 
-    schema: null,
-
-    /**
-     * If `true`, causes methods like {@link Mapper#create} and {@link Mapper#find}
-     * to pass returned data through {@link Mapper#createRecord}.
-     *
-     * @name Mapper#wrap
-     * @type {boolean}
-     */
-    wrap: true
+    schema: null
   };
 
   /**
@@ -4954,19 +4945,13 @@
         return result;
       }
       var _data = opts.raw ? result.data : result;
-      if (opts.wrap) {
-        if (utils$1.isFunction(opts.wrap)) {
-          _data = opts.wrap(_data, opts);
+      if (_data && utils$1.isFunction(self.wrap)) {
+        _data = self.wrap(_data, opts);
+        if (opts.raw) {
+          result.data = _data;
         } else {
-          if (_data) {
-            _data = self.createRecord(_data);
-          }
+          result = _data;
         }
-      }
-      if (opts.raw) {
-        result.data = _data;
-      } else {
-        result = _data;
       }
       return result;
     },
@@ -5807,6 +5792,19 @@
       } else {
         throw new Error('not a record!');
       }
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name Mapper#wrap
+     * @method
+     * @param {Object|Array} data The data to be wrapped.
+     * @param {Object} [opts] Configuration options.
+     */
+    wrap: function wrap(data, opts) {
+      return this.createRecord(data, opts);
     }
   });
 
@@ -7259,9 +7257,9 @@
    * if the current version is not beta.
    */
   var version = {
-    alpha: '26',
+    alpha: '27',
     beta: 'false',
-    full: '3.0.0-alpha.26',
+    full: '3.0.0-alpha.27',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10)
