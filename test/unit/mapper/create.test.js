@@ -36,6 +36,31 @@ test('should create', async (t) => {
   t.ok(user[User.idAttribute], 'new user has an id')
   t.ok(user instanceof User.recordClass, 'user is a record')
 })
+test('should create without wrapping', async (t) => {
+  const props = { name: 'John' }
+  let createCalled = false
+  const User = new JSData.Mapper({
+    name: 'user',
+    defaultAdapter: 'mock',
+    wrap: false
+  })
+  User.registerAdapter('mock', {
+    create (mapper, _props, Opts) {
+      createCalled = true
+      return new Promise(function (resolve, reject) {
+        t.ok(mapper === User, 'should pass in the JSData.Mapper')
+        t.same(_props, props, 'should pass in the props')
+        t.is(Opts.raw, false, 'Opts are provided')
+        _props[mapper.idAttribute] = new Date().getTime()
+        resolve(_props)
+      })
+    }
+  })
+  const user = await User.create(props)
+  t.ok(createCalled, 'Adapter#create should have been called')
+  t.ok(user[User.idAttribute], 'new user has an id')
+  t.notOk(user instanceof User.recordClass, 'user is NOT a record')
+})
 test('should return raw', async (t) => {
   const props = { name: 'John' }
   let createCalled = false

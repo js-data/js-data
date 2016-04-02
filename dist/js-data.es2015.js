@@ -4474,16 +4474,7 @@ var MAPPER_DEFAULTS = {
    */
   raw: false,
 
-  schema: null,
-
-  /**
-   * If `true`, causes methods like {@link Mapper#create} and {@link Mapper#find}
-   * to pass returned data through {@link Mapper#createRecord}.
-   *
-   * @name Mapper#wrap
-   * @type {boolean}
-   */
-  wrap: true
+  schema: null
 };
 
 /**
@@ -4939,19 +4930,13 @@ var Mapper = Component.extend({
       return result;
     }
     var _data = opts.raw ? result.data : result;
-    if (opts.wrap) {
-      if (utils$1.isFunction(opts.wrap)) {
-        _data = opts.wrap(_data, opts);
+    if (_data && utils$1.isFunction(self.wrap)) {
+      _data = self.wrap(_data, opts);
+      if (opts.raw) {
+        result.data = _data;
       } else {
-        if (_data) {
-          _data = self.createRecord(_data);
-        }
+        result = _data;
       }
-    }
-    if (opts.raw) {
-      result.data = _data;
-    } else {
-      result = _data;
     }
     return result;
   },
@@ -5792,6 +5777,19 @@ var Mapper = Component.extend({
     } else {
       throw new Error('not a record!');
     }
+  },
+
+
+  /**
+   * TODO
+   *
+   * @name Mapper#wrap
+   * @method
+   * @param {Object|Array} data The data to be wrapped.
+   * @param {Object} [opts] Configuration options.
+   */
+  wrap: function wrap(data, opts) {
+    return this.createRecord(data, opts);
   }
 });
 

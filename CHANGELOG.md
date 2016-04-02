@@ -1,3 +1,8 @@
+##### 3.0.0-alpha.27 - 02 April 2016
+
+###### Backwards compatible bug fixes
+- Quick fix for wrap functionality
+
 ##### 3.0.0-alpha.26 - 02 April 2016
 
 ###### Backwards compatible changes

@@ -167,16 +167,7 @@ const MAPPER_DEFAULTS = {
    */
   raw: false,
 
-  schema: null,
-
-  /**
-   * If `true`, causes methods like {@link Mapper#create} and {@link Mapper#find}
-   * to pass returned data through {@link Mapper#createRecord}.
-   *
-   * @name Mapper#wrap
-   * @type {boolean}
-   */
-  wrap: true
+  schema: null
 }
 
 /**
@@ -627,19 +618,13 @@ export default Component.extend({
       return result
     }
     let _data = opts.raw ? result.data : result
-    if (opts.wrap) {
-      if (utils.isFunction(opts.wrap)) {
-        _data = opts.wrap(_data, opts)
+    if (_data && utils.isFunction(self.wrap)) {
+      _data = self.wrap(_data, opts)
+      if (opts.raw) {
+        result.data = _data
       } else {
-        if (_data) {
-          _data = self.createRecord(_data)
-        }
+        result = _data
       }
-    }
-    if (opts.raw) {
-      result.data = _data
-    } else {
-      result = _data
     }
     return result
   },
@@ -1450,5 +1435,17 @@ export default Component.extend({
     } else {
       throw new Error('not a record!')
     }
+  },
+
+  /**
+   * TODO
+   *
+   * @name Mapper#wrap
+   * @method
+   * @param {Object|Array} data The data to be wrapped.
+   * @param {Object} [opts] Configuration options.
+   */
+  wrap (data, opts) {
+    return this.createRecord(data, opts)
   }
 })
