@@ -99,7 +99,7 @@ const utils = {
    * @param {Object} dest Destination object.
    * @param {Object} src Source object.
    */
-  _: function (dest, src) {
+  _ (dest, src) {
     for (var key in dest) {
       let value = dest[key]
       if (src[key] === undefined && !utils.isFunction(value) && key && key.indexOf('_') !== 0) {
@@ -113,7 +113,7 @@ const utils = {
    *
    * @ignore
    */
-  _forRelation: function (opts, def, fn, ctx) {
+  _forRelation (opts, def, fn, ctx) {
     const relationName = def.relation
     let containedName = null
     let index
@@ -152,7 +152,7 @@ const utils = {
    *
    * @ignore
    */
-  _getIndex: function (list, relation) {
+  _getIndex (list, relation) {
     let index = -1
     list.forEach(function (_relation, i) {
       if (_relation === relation) {
@@ -173,7 +173,7 @@ const utils = {
    *
    * @ignore
    */
-  addHiddenPropsToTarget: function (target, props) {
+  addHiddenPropsToTarget (target, props) {
     const map = {}
     utils.forOwn(props, function (value, key) {
       map[key] = {
@@ -189,7 +189,7 @@ const utils = {
    *
    * @ignore
    */
-  areDifferent: function (a, b, opts) {
+  areDifferent (a, b, opts) {
     opts || (opts = {})
     const diff = utils.diffObjects(a, b, opts)
     const diffCount = Object.keys(diff.added).length +
@@ -203,7 +203,7 @@ const utils = {
    *
    * @ignore
    */
-  classCallCheck: function (instance, ctor) {
+  classCallCheck (instance, ctor) {
     if (!(instance instanceof ctor)) {
       throw new TypeError('Cannot call a class as a function')
     }
@@ -216,7 +216,7 @@ const utils = {
    * @param {*} from Value to deep copy.
    * @return {*} Deep copy of `from`.
    */
-  copy: function (from, to, stackFrom, stackTo, blacklist, plain) {
+  copy (from, to, stackFrom, stackTo, blacklist, plain) {
     if (!to) {
       to = from
       if (from) {
@@ -298,7 +298,7 @@ const utils = {
    * @param {Object} dest The destination object.
    * @param {Object} source The source object.
    */
-  deepFillIn: function (dest, source) {
+  deepFillIn (dest, source) {
     if (source) {
       utils.forOwn(source, function (value, key) {
         const existing = dest[key]
@@ -319,7 +319,7 @@ const utils = {
    * @param {Object} dest The destination object.
    * @param {Object} source The source object.
    */
-  deepMixIn: function (dest, source) {
+  deepMixIn (dest, source) {
     if (source) {
       utils.forOwn(source, function (value, key) {
         const existing = dest[key]
@@ -338,7 +338,7 @@ const utils = {
    * @param {Object} b Comparison object.
    * @return {Object} Diff.
    */
-  diffObjects: function (a, b, opts) {
+  diffObjects (a, b, opts) {
     opts || (opts = {})
     let equalsFn = opts.equalsFn
     let bl = opts.ignore
@@ -380,7 +380,7 @@ const utils = {
    *
    * @ignore
    */
-  equal: function (a, b) {
+  equal (a, b) {
     return a == b // eslint-disable-line
   },
 
@@ -394,7 +394,7 @@ const utils = {
    * @param {Function} [setter] Custom setter for setting the object's event
    * listeners.
    */
-  eventify: function (target, getter, setter, enumerable) {
+  eventify (target, getter, setter, enumerable) {
     target = target || this
     let _events = {}
     if (!getter && !setter) {
@@ -464,7 +464,7 @@ const utils = {
    *
    * @ignore
    */
-  extend: function (props, classProps) {
+  extend (props, classProps) {
     const superClass = this
     let subClass
 
@@ -520,7 +520,7 @@ const utils = {
    * @param {Object} dest The destination object.
    * @param {Object} source The source object.
    */
-  fillIn: function (dest, src) {
+  fillIn (dest, src) {
     utils.forOwn(src, function (value, key) {
       if (!dest.hasOwnProperty(key) || dest[key] === undefined) {
         dest[key] = value
@@ -533,7 +533,7 @@ const utils = {
    *
    * @ignore
    */
-  forEachRelation: function (mapper, opts, fn, ctx) {
+  forEachRelation (mapper, opts, fn, ctx) {
     const relationList = mapper.relationList || []
     if (!relationList.length) {
       return
@@ -551,7 +551,7 @@ const utils = {
    * @param {Function} fn Iteration function.
    * @param {Object} [thisArg] Content to which to bind `fn`.
    */
-  forOwn: function (obj, fn, thisArg) {
+  forOwn (obj, fn, thisArg) {
     const keys = Object.keys(obj)
     const len = keys.length
     let i
@@ -567,7 +567,7 @@ const utils = {
    * @param {string} json JSON to parse.
    * @return {Object} Parsed object.
    */
-  fromJson: function (json) {
+  fromJson (json) {
     return utils.isString(json) ? JSON.parse(json) : json
   },
 
@@ -598,7 +598,7 @@ const utils = {
    *
    * @ignore
    */
-  getSuper: function (instance, isCtor) {
+  getSuper (instance, isCtor) {
     const ctor = isCtor ? instance : instance.constructor
     return (ctor.__super__ || Object.getPrototypeOf(ctor) || ctor.__proto__) // eslint-disable-line
   },
@@ -611,7 +611,7 @@ const utils = {
    * @param {Array} array2 Second array.
    * @return {Array} Array of elements common to both arrays.
    */
-  intersection: function (array1, array2) {
+  intersection (array1, array2) {
     if (!array1 || !array2) {
       return []
     }
@@ -646,7 +646,7 @@ const utils = {
    * @param {Array} bl Array of strings and regular expressions.
    * @return {boolean} Whether `prop` was matched.
    */
-  isBlacklisted: function (prop, bl) {
+  isBlacklisted (prop, bl) {
     if (!bl || !bl.length) {
       return false
     }
@@ -665,7 +665,7 @@ const utils = {
    *
    * @ignore
    */
-  isBoolean: function (value) {
+  isBoolean (value) {
     return toStr(value) === BOOL_TAG
   },
 
@@ -681,7 +681,7 @@ const utils = {
    *
    * @ignore
    */
-  isDate: function (value) {
+  isDate (value) {
     return (value && typeof value === 'object' && toStr(value) === DATE_TAG)
   },
 
@@ -690,7 +690,7 @@ const utils = {
    *
    * @ignore
    */
-  isFunction: function (value) {
+  isFunction (value) {
     return typeof value === 'function' || (value && toStr(value) === FUNC_TAG)
   },
 
@@ -699,7 +699,7 @@ const utils = {
    *
    * @ignore
    */
-  isInteger: function (value) {
+  isInteger (value) {
     return toStr(value) === NUMBER_TAG && value == toInteger(value) // eslint-disable-line
   },
 
@@ -708,7 +708,7 @@ const utils = {
    *
    * @ignore
    */
-  isNull: function (value) {
+  isNull (value) {
     return value === null
   },
 
@@ -717,7 +717,7 @@ const utils = {
    *
    * @ignore
    */
-  isNumber: function (value) {
+  isNumber (value) {
     const type = typeof value
     return type === 'number' || (value && type === 'object' && toStr(value) === NUMBER_TAG)
   },
@@ -727,7 +727,7 @@ const utils = {
    *
    * @ignore
    */
-  isObject: function (value) {
+  isObject (value) {
     return toStr(value) === OBJECT_TAG
   },
 
@@ -736,7 +736,7 @@ const utils = {
    *
    * @ignore
    */
-  isRegExp: function (value) {
+  isRegExp (value) {
     return toStr(value) === REGEXP_TAG
   },
 
@@ -745,7 +745,7 @@ const utils = {
    *
    * @ignore
    */
-  isSorN: function (value) {
+  isSorN (value) {
     return utils.isString(value) || utils.isNumber(value)
   },
 
@@ -754,7 +754,7 @@ const utils = {
    *
    * @ignore
    */
-  isString: function (value) {
+  isString (value) {
     return typeof value === 'string' || (value && typeof value === 'object' && toStr(value) === STRING_TAG)
   },
 
@@ -763,7 +763,7 @@ const utils = {
    *
    * @ignore
    */
-  isUndefined: function (value) {
+  isUndefined (value) {
     return value === undefined
   },
 
@@ -772,7 +772,7 @@ const utils = {
    *
    * @ignore
    */
-  logify: function (target) {
+  logify (target) {
     utils.addHiddenPropsToTarget(target, {
       dbg (...args) {
         this.log('debug', ...args)
@@ -800,7 +800,7 @@ const utils = {
    *
    * @ignore
    */
-  omit: function (props, keys) {
+  omit (props, keys) {
     // Remove relations
     const _props = {}
     utils.forOwn(props, function (value, key) {
@@ -816,7 +816,7 @@ const utils = {
    *
    * @ignore
    */
-  plainCopy: function (from) {
+  plainCopy (from) {
     return utils.copy(from, undefined, undefined, undefined, undefined, true)
   },
 
@@ -825,7 +825,7 @@ const utils = {
    *
    * @ignore
    */
-  possibleConstructorReturn: function (self, call) {
+  possibleConstructorReturn (self, call) {
     if (!self) {
       throw new ReferenceError('this hasn\'t been initialised - super() hasn\'t been called')
     }
@@ -840,7 +840,7 @@ const utils = {
    * @param {*} [value] Value with which to reject the Promise.
    * @return {Promise} Promise reject with `value`.
    */
-  reject: function (value) {
+  reject (value) {
     return utils.Promise.reject(value)
   },
 
@@ -851,7 +851,7 @@ const utils = {
    * @param {*} [value] Value with which to resolve the Promise.
    * @return {Promise} Promise resolved with `value`.
    */
-  resolve: function (value) {
+  resolve (value) {
     return utils.Promise.resolve(value)
   },
 
@@ -885,7 +885,7 @@ const utils = {
    *
    * @ignore
    */
-  strictEqual: function (a, b) {
+  strictEqual (a, b) {
     let _equal = a === b
     if (!_equal) {
       if (utils.isObject(a) && utils.isObject(b)) {
@@ -920,7 +920,7 @@ const utils = {
    * @param {Object} object The object from which to delete the property.
    * @param {string} path The key or path to the property.
    */
-  unset: function (object, path) {
+  unset (object, path) {
     const parts = path.split('.')
     const last = parts.pop()
 

@@ -300,7 +300,16 @@ export default Component.extend({
     }
 
     if (utils.isUndefined(self.recordClass)) {
-      self.recordClass = Record.extend()
+      self.recordClass = Record.extend({
+        constructor: (function () {
+          var subClass = function Record (...args) {
+            utils.classCallCheck(this, subClass)
+            const _this = utils.possibleConstructorReturn(this, (subClass.__super__ || Object.getPrototypeOf(subClass)).apply(this, args))
+            return _this
+          }
+          return subClass
+        })()
+      })
     }
 
     if (self.recordClass) {
@@ -927,6 +936,7 @@ export default Component.extend({
    * @return {Object} The unsaved record.
    */
   createRecord (props, opts) {
+    props || (props = {})
     const self = this
     const recordClass = self.recordClass
     const relationList = self.relationList || []
@@ -935,10 +945,10 @@ export default Component.extend({
       const relationData = def.getLocalField(props)
       if (utils.isArray(relationData) && relationData.length && !relatedMapper.is(relationData[0])) {
         def.setLocalField(props, relationData.map(function (relationDataItem) {
-          return def.getRelation().createRecord(relationDataItem)
+          return def.getRelation().createRecord(relationDataItem, opts)
         }))
       } else if (utils.isObject(relationData) && !relatedMapper.is(relationData)) {
-        def.setLocalField(props, def.getRelation().createRecord(relationData))
+        def.setLocalField(props, def.getRelation().createRecord(relationData, opts))
       }
     })
     // Check to make sure "props" is not already an instance of this Mapper.

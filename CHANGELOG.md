@@ -1,3 +1,10 @@
+##### 3.0.0-alpha.24 - 01 April 2016
+
+###### Backwards compatible bug fixes
+- Some fixes for js-data.d.ts
+- Added argument check to Mapper#createRecord
+- Made Record instances print nicer
+
 ##### 3.0.0-alpha.23 - 01 April 2016
 
 ###### Breaking changes

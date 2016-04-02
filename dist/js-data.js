@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.23 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.24 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -157,6 +157,7 @@
       }
     },
 
+
     /**
      * TODO
      *
@@ -196,6 +197,7 @@
       fn.call(ctx, def, optsCopy);
     },
 
+
     /**
      * TODO
      *
@@ -217,6 +219,7 @@
       return index;
     },
 
+
     /**
      * TODO
      *
@@ -233,6 +236,7 @@
       Object.defineProperties(target, map);
     },
 
+
     /**
      * TODO
      *
@@ -245,6 +249,7 @@
       return diffCount > 0;
     },
 
+
     /**
      * TODO
      *
@@ -255,6 +260,7 @@
         throw new TypeError('Cannot call a class as a function');
       }
     },
+
 
     /**
      * Deep copy a value.
@@ -338,6 +344,7 @@
       return to;
     },
 
+
     /**
      * Recursively shallow fill in own enumberable properties from `source` to `dest`.
      *
@@ -359,6 +366,7 @@
       return dest;
     },
 
+
     /**
      * Recursively shallow copy own enumberable properties from `source` to `dest`.
      *
@@ -379,6 +387,7 @@
       }
       return dest;
     },
+
 
     /**
      * @param {Object} a Base object.
@@ -422,6 +431,7 @@
       return diff;
     },
 
+
     /**
      * TODO
      *
@@ -430,6 +440,7 @@
     equal: function equal(a, b) {
       return a == b; // eslint-disable-line
     },
+
 
     /**
      * Add eventing capabilities into the target object.
@@ -511,6 +522,7 @@
       });
     },
 
+
     /**
      * TODO
      *
@@ -569,6 +581,7 @@
       return _subClass;
     },
 
+
     /**
      * Shallow copy own enumerable properties from `src` to `dest` that are on `src`
      * but are missing from `dest.
@@ -585,6 +598,7 @@
       });
     },
 
+
     /**
      * TODO
      *
@@ -599,6 +613,7 @@
         utils._forRelation(opts, def, fn, ctx);
       });
     },
+
 
     /**
      * Iterate over an object's own enumerable properties.
@@ -617,6 +632,7 @@
       }
     },
 
+
     /**
      * Proxy for `JSON.parse`.
      *
@@ -627,6 +643,7 @@
     fromJson: function fromJson(json) {
       return utils.isString(json) ? JSON.parse(json) : json;
     },
+
 
     /**
      * TODO
@@ -662,6 +679,7 @@
       return ctor.__super__ || Object.getPrototypeOf(ctor) || ctor.__proto__; // eslint-disable-line
     },
 
+
     /**
      * Return the intersection of two arrays.
      *
@@ -689,6 +707,7 @@
       }
       return result;
     },
+
 
     /**
      * TODO
@@ -719,6 +738,7 @@
       return !!matches;
     },
 
+
     /**
      * TODO
      *
@@ -727,6 +747,7 @@
     isBoolean: function isBoolean(value) {
       return toStr(value) === BOOL_TAG;
     },
+
 
     /**
      * TODO
@@ -744,6 +765,7 @@
       return value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toStr(value) === DATE_TAG;
     },
 
+
     /**
      * TODO
      *
@@ -752,6 +774,7 @@
     isFunction: function isFunction(value) {
       return typeof value === 'function' || value && toStr(value) === FUNC_TAG;
     },
+
 
     /**
      * TODO
@@ -762,6 +785,7 @@
       return toStr(value) === NUMBER_TAG && value == toInteger(value); // eslint-disable-line
     },
 
+
     /**
      * TODO
      *
@@ -770,6 +794,7 @@
     isNull: function isNull(value) {
       return value === null;
     },
+
 
     /**
      * TODO
@@ -781,6 +806,7 @@
       return type === 'number' || value && type === 'object' && toStr(value) === NUMBER_TAG;
     },
 
+
     /**
      * TODO
      *
@@ -789,6 +815,7 @@
     isObject: function isObject(value) {
       return toStr(value) === OBJECT_TAG;
     },
+
 
     /**
      * TODO
@@ -799,6 +826,7 @@
       return toStr(value) === REGEXP_TAG;
     },
 
+
     /**
      * TODO
      *
@@ -807,6 +835,7 @@
     isSorN: function isSorN(value) {
       return utils.isString(value) || utils.isNumber(value);
     },
+
 
     /**
      * TODO
@@ -817,6 +846,7 @@
       return typeof value === 'string' || value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toStr(value) === STRING_TAG;
     },
 
+
     /**
      * TODO
      *
@@ -825,6 +855,7 @@
     isUndefined: function isUndefined(value) {
       return value === undefined;
     },
+
 
     /**
      * TODO
@@ -866,6 +897,7 @@
       });
     },
 
+
     /**
      * TODO
      *
@@ -882,6 +914,7 @@
       return _props;
     },
 
+
     /**
      * TODO
      *
@@ -890,6 +923,7 @@
     plainCopy: function plainCopy(from) {
       return utils.copy(from, undefined, undefined, undefined, undefined, true);
     },
+
 
     /**
      * TODO
@@ -904,6 +938,7 @@
       return call && ((typeof call === 'undefined' ? 'undefined' : babelHelpers.typeof(call)) === 'object' || typeof call === 'function') ? call : self;
     },
 
+
     /**
      * Proxy for `Promise.reject`.
      *
@@ -915,6 +950,7 @@
       return utils.Promise.reject(value);
     },
 
+
     /**
      * Proxy for `Promise.resolve`.
      *
@@ -925,6 +961,7 @@
     resolve: function resolve(value) {
       return utils.Promise.resolve(value);
     },
+
 
     /**
      * Set the value at the provided key or path.
@@ -974,6 +1011,7 @@
       }
       return _equal;
     },
+
 
     /**
      * Proxy for `JSON.stringify`.
@@ -4587,7 +4625,21 @@
       }
 
       if (utils$1.isUndefined(self.recordClass)) {
-        self.recordClass = Record.extend();
+        self.recordClass = Record.extend({
+          constructor: function () {
+            var subClass = function Record() {
+              utils$1.classCallCheck(this, subClass);
+
+              for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+                args[_key3] = arguments[_key3];
+              }
+
+              var _this = utils$1.possibleConstructorReturn(this, (subClass.__super__ || Object.getPrototypeOf(subClass)).apply(this, args));
+              return _this;
+            };
+            return subClass;
+          }()
+        });
       }
 
       if (self.recordClass) {
@@ -5220,6 +5272,7 @@
      * @return {Object} The unsaved record.
      */
     createRecord: function createRecord(props, opts) {
+      props || (props = {});
       var self = this;
       var recordClass = self.recordClass;
       var relationList = self.relationList || [];
@@ -5228,10 +5281,10 @@
         var relationData = def.getLocalField(props);
         if (utils$1.isArray(relationData) && relationData.length && !relatedMapper.is(relationData[0])) {
           def.setLocalField(props, relationData.map(function (relationDataItem) {
-            return def.getRelation().createRecord(relationDataItem);
+            return def.getRelation().createRecord(relationDataItem, opts);
           }));
         } else if (utils$1.isObject(relationData) && !relatedMapper.is(relationData)) {
-          def.setLocalField(props, def.getRelation().createRecord(relationData));
+          def.setLocalField(props, def.getRelation().createRecord(relationData, opts));
         }
       });
       // Check to make sure "props" is not already an instance of this Mapper.
@@ -5249,8 +5302,8 @@
      * @return {Promise}
      */
     crud: function crud(method) {
-      for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-        args[_key3 - 1] = arguments[_key3];
+      for (var _len4 = arguments.length, args = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
+        args[_key4 - 1] = arguments[_key4];
       }
 
       var self = this;
@@ -7191,9 +7244,9 @@
    * if the current version is not beta.
    */
   var version = {
-    alpha: '23',
+    alpha: '24',
     beta: 'false',
-    full: '3.0.0-alpha.23',
+    full: '3.0.0-alpha.24',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10)
