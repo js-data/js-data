@@ -49,14 +49,17 @@ const props = {
    * @param {Object} [opts] Configuration options.
    * @return {(Object|Array)} Result.
    */
-  _end (name, data, opts) {
-    if (opts.raw) {
-      data.data = this.getCollection(name).add(data.data, opts)
-      return data
-    } else {
-      data = this.getCollection(name).add(data, opts)
+  _end (name, result, opts) {
+    let _data = opts.raw ? result.data : result
+    if (_data && utils.isFunction(this.addToCache)) {
+      _data = this.addToCache(name, _data, opts)
+      if (opts.raw) {
+        result.data = _data
+      } else {
+        result = _data
+      }
     }
-    return data
+    return result
   },
 
   /**
@@ -85,6 +88,19 @@ const props = {
   _onCollectionEvent (name, ...args) {
     const type = args.shift()
     this.emit(type, name, ...args)
+  },
+
+  /**
+   * TODO
+   *
+   * @name DataStore#addToCache
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {*} data - Data from which data should be selected for add.
+   * @param {Object} [opts] - Configuration options.
+   */
+  addToCache (name, data, opts) {
+    return this.getCollection(name).add(data, opts)
   },
 
   cachedFind (name, id, opts) {

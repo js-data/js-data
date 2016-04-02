@@ -1210,7 +1210,7 @@ var Query = Component.extend({
     if (b === undefined) {
       b = null;
     }
-    if (def[1] === 'DESC') {
+    if (def[1].toUpperCase() === 'DESC') {
       if (cB < cA) {
         return -1;
       } else if (cB > cA) {
@@ -6558,14 +6558,17 @@ var props$1 = {
    * @param {Object} [opts] Configuration options.
    * @return {(Object|Array)} Result.
    */
-  _end: function _end(name, data, opts) {
-    if (opts.raw) {
-      data.data = this.getCollection(name).add(data.data, opts);
-      return data;
-    } else {
-      data = this.getCollection(name).add(data, opts);
+  _end: function _end(name, result, opts) {
+    var _data = opts.raw ? result.data : result;
+    if (_data && utils$1.isFunction(this.addToCache)) {
+      _data = this.addToCache(name, _data, opts);
+      if (opts.raw) {
+        result.data = _data;
+      } else {
+        result = _data;
+      }
     }
-    return data;
+    return result;
   },
 
 
@@ -6599,6 +6602,20 @@ var props$1 = {
 
     var type = args.shift();
     this.emit.apply(this, [type, name].concat(args));
+  },
+
+
+  /**
+   * TODO
+   *
+   * @name DataStore#addToCache
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {*} data - Data from which data should be selected for add.
+   * @param {Object} [opts] - Configuration options.
+   */
+  addToCache: function addToCache(name, data, opts) {
+    return this.getCollection(name).add(data, opts);
   },
   cachedFind: function cachedFind(name, id, opts) {
     return this.get(name, id, opts);
