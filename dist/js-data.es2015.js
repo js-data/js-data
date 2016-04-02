@@ -142,6 +142,7 @@ var utils = {
     }
   },
 
+
   /**
    * TODO
    *
@@ -181,6 +182,7 @@ var utils = {
     fn.call(ctx, def, optsCopy);
   },
 
+
   /**
    * TODO
    *
@@ -202,6 +204,7 @@ var utils = {
     return index;
   },
 
+
   /**
    * TODO
    *
@@ -218,6 +221,7 @@ var utils = {
     Object.defineProperties(target, map);
   },
 
+
   /**
    * TODO
    *
@@ -230,6 +234,7 @@ var utils = {
     return diffCount > 0;
   },
 
+
   /**
    * TODO
    *
@@ -240,6 +245,7 @@ var utils = {
       throw new TypeError('Cannot call a class as a function');
     }
   },
+
 
   /**
    * Deep copy a value.
@@ -323,6 +329,7 @@ var utils = {
     return to;
   },
 
+
   /**
    * Recursively shallow fill in own enumberable properties from `source` to `dest`.
    *
@@ -344,6 +351,7 @@ var utils = {
     return dest;
   },
 
+
   /**
    * Recursively shallow copy own enumberable properties from `source` to `dest`.
    *
@@ -364,6 +372,7 @@ var utils = {
     }
     return dest;
   },
+
 
   /**
    * @param {Object} a Base object.
@@ -407,6 +416,7 @@ var utils = {
     return diff;
   },
 
+
   /**
    * TODO
    *
@@ -415,6 +425,7 @@ var utils = {
   equal: function equal(a, b) {
     return a == b; // eslint-disable-line
   },
+
 
   /**
    * Add eventing capabilities into the target object.
@@ -496,6 +507,7 @@ var utils = {
     });
   },
 
+
   /**
    * TODO
    *
@@ -554,6 +566,7 @@ var utils = {
     return _subClass;
   },
 
+
   /**
    * Shallow copy own enumerable properties from `src` to `dest` that are on `src`
    * but are missing from `dest.
@@ -570,6 +583,7 @@ var utils = {
     });
   },
 
+
   /**
    * TODO
    *
@@ -584,6 +598,7 @@ var utils = {
       utils._forRelation(opts, def, fn, ctx);
     });
   },
+
 
   /**
    * Iterate over an object's own enumerable properties.
@@ -602,6 +617,7 @@ var utils = {
     }
   },
 
+
   /**
    * Proxy for `JSON.parse`.
    *
@@ -612,6 +628,7 @@ var utils = {
   fromJson: function fromJson(json) {
     return utils.isString(json) ? JSON.parse(json) : json;
   },
+
 
   /**
    * TODO
@@ -647,6 +664,7 @@ var utils = {
     return ctor.__super__ || Object.getPrototypeOf(ctor) || ctor.__proto__; // eslint-disable-line
   },
 
+
   /**
    * Return the intersection of two arrays.
    *
@@ -674,6 +692,7 @@ var utils = {
     }
     return result;
   },
+
 
   /**
    * TODO
@@ -704,6 +723,7 @@ var utils = {
     return !!matches;
   },
 
+
   /**
    * TODO
    *
@@ -712,6 +732,7 @@ var utils = {
   isBoolean: function isBoolean(value) {
     return toStr(value) === BOOL_TAG;
   },
+
 
   /**
    * TODO
@@ -729,6 +750,7 @@ var utils = {
     return value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toStr(value) === DATE_TAG;
   },
 
+
   /**
    * TODO
    *
@@ -737,6 +759,7 @@ var utils = {
   isFunction: function isFunction(value) {
     return typeof value === 'function' || value && toStr(value) === FUNC_TAG;
   },
+
 
   /**
    * TODO
@@ -747,6 +770,7 @@ var utils = {
     return toStr(value) === NUMBER_TAG && value == toInteger(value); // eslint-disable-line
   },
 
+
   /**
    * TODO
    *
@@ -755,6 +779,7 @@ var utils = {
   isNull: function isNull(value) {
     return value === null;
   },
+
 
   /**
    * TODO
@@ -766,6 +791,7 @@ var utils = {
     return type === 'number' || value && type === 'object' && toStr(value) === NUMBER_TAG;
   },
 
+
   /**
    * TODO
    *
@@ -774,6 +800,7 @@ var utils = {
   isObject: function isObject(value) {
     return toStr(value) === OBJECT_TAG;
   },
+
 
   /**
    * TODO
@@ -784,6 +811,7 @@ var utils = {
     return toStr(value) === REGEXP_TAG;
   },
 
+
   /**
    * TODO
    *
@@ -792,6 +820,7 @@ var utils = {
   isSorN: function isSorN(value) {
     return utils.isString(value) || utils.isNumber(value);
   },
+
 
   /**
    * TODO
@@ -802,6 +831,7 @@ var utils = {
     return typeof value === 'string' || value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toStr(value) === STRING_TAG;
   },
 
+
   /**
    * TODO
    *
@@ -810,6 +840,7 @@ var utils = {
   isUndefined: function isUndefined(value) {
     return value === undefined;
   },
+
 
   /**
    * TODO
@@ -851,6 +882,7 @@ var utils = {
     });
   },
 
+
   /**
    * TODO
    *
@@ -867,6 +899,7 @@ var utils = {
     return _props;
   },
 
+
   /**
    * TODO
    *
@@ -875,6 +908,7 @@ var utils = {
   plainCopy: function plainCopy(from) {
     return utils.copy(from, undefined, undefined, undefined, undefined, true);
   },
+
 
   /**
    * TODO
@@ -889,6 +923,7 @@ var utils = {
     return call && ((typeof call === 'undefined' ? 'undefined' : babelHelpers.typeof(call)) === 'object' || typeof call === 'function') ? call : self;
   },
 
+
   /**
    * Proxy for `Promise.reject`.
    *
@@ -900,6 +935,7 @@ var utils = {
     return utils.Promise.reject(value);
   },
 
+
   /**
    * Proxy for `Promise.resolve`.
    *
@@ -910,6 +946,7 @@ var utils = {
   resolve: function resolve(value) {
     return utils.Promise.resolve(value);
   },
+
 
   /**
    * Set the value at the provided key or path.
@@ -959,6 +996,7 @@ var utils = {
     }
     return _equal;
   },
+
 
   /**
    * Proxy for `JSON.stringify`.
@@ -4572,7 +4610,21 @@ var Mapper = Component.extend({
     }
 
     if (utils$1.isUndefined(self.recordClass)) {
-      self.recordClass = Record.extend();
+      self.recordClass = Record.extend({
+        constructor: function () {
+          var subClass = function Record() {
+            utils$1.classCallCheck(this, subClass);
+
+            for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+              args[_key3] = arguments[_key3];
+            }
+
+            var _this = utils$1.possibleConstructorReturn(this, (subClass.__super__ || Object.getPrototypeOf(subClass)).apply(this, args));
+            return _this;
+          };
+          return subClass;
+        }()
+      });
     }
 
     if (self.recordClass) {
@@ -5205,6 +5257,7 @@ var Mapper = Component.extend({
    * @return {Object} The unsaved record.
    */
   createRecord: function createRecord(props, opts) {
+    props || (props = {});
     var self = this;
     var recordClass = self.recordClass;
     var relationList = self.relationList || [];
@@ -5213,10 +5266,10 @@ var Mapper = Component.extend({
       var relationData = def.getLocalField(props);
       if (utils$1.isArray(relationData) && relationData.length && !relatedMapper.is(relationData[0])) {
         def.setLocalField(props, relationData.map(function (relationDataItem) {
-          return def.getRelation().createRecord(relationDataItem);
+          return def.getRelation().createRecord(relationDataItem, opts);
         }));
       } else if (utils$1.isObject(relationData) && !relatedMapper.is(relationData)) {
-        def.setLocalField(props, def.getRelation().createRecord(relationData));
+        def.setLocalField(props, def.getRelation().createRecord(relationData, opts));
       }
     });
     // Check to make sure "props" is not already an instance of this Mapper.
@@ -5234,8 +5287,8 @@ var Mapper = Component.extend({
    * @return {Promise}
    */
   crud: function crud(method) {
-    for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-      args[_key3 - 1] = arguments[_key3];
+    for (var _len4 = arguments.length, args = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
+      args[_key4 - 1] = arguments[_key4];
     }
 
     var self = this;

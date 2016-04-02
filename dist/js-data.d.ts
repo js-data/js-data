@@ -137,7 +137,7 @@ declare module JSData {
     create(props: any, opts?: any): Promise<any>
     createInstance(props: any, opts?: any): any
     createMany(records: any[], opts?: any): Promise<any>
-    createRecord(props?: any, opts?: any): any
+    createRecord(props?: any, opts?: any): Record
     crud(method: any, ...args: any[]): Promise<any>
     destroy(id: string|number, opts?: any): Promise<any>
     destroyAll(query: any, opts?: any): Promise<any>
@@ -203,6 +203,7 @@ declare module JSData {
     _adapters: Object
     _mappers: Object
     constructor(opts?: any)
+    createRecord(name: string, props?: any, opts?: any): Record
     defineMapper(name: string, opts?: any): Mapper
     defineResource(name: string, opts?: any): Mapper
     getAdapter(name: any): any
