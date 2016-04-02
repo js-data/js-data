@@ -105,7 +105,7 @@ export default Component.extend({
     if (b === undefined) {
       b = null
     }
-    if (def[1] === 'DESC') {
+    if (def[1].toUpperCase() === 'DESC') {
       if (cB < cA) {
         return -1
       } else if (cB > cA) {
