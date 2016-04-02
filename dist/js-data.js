@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.25 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.26 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -2961,19 +2961,16 @@
       var _props = {};
       Object.defineProperties(self, {
         _get: {
-          enumerable: false,
           value: function value(key) {
             return utils$1.get(_props, key);
           }
         },
         _set: {
-          enumerable: false,
           value: function value(key, _value) {
             return utils$1.set(_props, key, _value);
           }
         },
         _unset: {
-          enumerable: false,
           value: function value(key) {
             return utils$1.unset(_props, key);
           }
@@ -4492,7 +4489,16 @@
      */
     raw: false,
 
-    schema: null
+    schema: null,
+
+    /**
+     * If `true`, causes methods like {@link Mapper#create} and {@link Mapper#find}
+     * to pass returned data through {@link Mapper#createRecord}.
+     *
+     * @name Mapper#wrap
+     * @type {boolean}
+     */
+    wrap: true
   };
 
   /**
@@ -4948,12 +4954,14 @@
         return result;
       }
       var _data = opts.raw ? result.data : result;
-      if (utils$1.isArray(_data) && _data.length && utils$1.isObject(_data[0])) {
-        _data = _data.map(function (item) {
-          return self.createRecord(item);
-        });
-      } else if (utils$1.isObject(_data)) {
-        _data = self.createRecord(_data);
+      if (opts.wrap) {
+        if (utils$1.isFunction(opts.wrap)) {
+          _data = opts.wrap(_data, opts);
+        } else {
+          if (_data) {
+            _data = self.createRecord(_data);
+          }
+        }
       }
       if (opts.raw) {
         result.data = _data;
@@ -5274,17 +5282,24 @@
     createRecord: function createRecord(props, opts) {
       props || (props = {});
       var self = this;
+      if (utils$1.isArray(props)) {
+        return props.map(function (_props) {
+          return self.createRecord(_props, opts);
+        });
+      }
+      if (!utils$1.isObject(props)) {
+        throw new Error('Cannot create a record from ' + props + '!');
+      }
       var recordClass = self.recordClass;
       var relationList = self.relationList || [];
       relationList.forEach(function (def) {
         var relatedMapper = def.getRelation();
         var relationData = def.getLocalField(props);
-        if (utils$1.isArray(relationData) && relationData.length && !relatedMapper.is(relationData[0])) {
-          def.setLocalField(props, relationData.map(function (relationDataItem) {
-            return def.getRelation().createRecord(relationDataItem, opts);
-          }));
-        } else if (utils$1.isObject(relationData) && !relatedMapper.is(relationData)) {
-          def.setLocalField(props, def.getRelation().createRecord(relationData, opts));
+        if (relationData && !relatedMapper.is(relationData)) {
+          if (utils$1.isArray(relationData) && (!relationData.length || relatedMapper.is(relationData[0]))) {
+            return;
+          }
+          def.setLocalField(props, relatedMapper.createRecord(relationData, opts));
         }
       });
       // Check to make sure "props" is not already an instance of this Mapper.
@@ -7244,9 +7259,9 @@
    * if the current version is not beta.
    */
   var version = {
-    alpha: '25',
+    alpha: '26',
     beta: 'false',
-    full: '3.0.0-alpha.25',
+    full: '3.0.0-alpha.26',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10)

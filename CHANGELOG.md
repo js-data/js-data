@@ -1,3 +1,8 @@
+##### 3.0.0-alpha.26 - 02 April 2016
+
+###### Backwards compatible changes
+- Improved Mapper#createRecord, and made it easier to work with non-standard responses
+
 ##### 3.0.0-alpha.25 - 01 April 2016
 
 ###### Backwards compatible bug fixes

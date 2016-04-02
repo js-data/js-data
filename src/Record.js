@@ -24,24 +24,9 @@ const Record = Component.extend({
     opts || (opts = {})
     const _props = {}
     Object.defineProperties(self, {
-      _get: {
-        enumerable: false,
-        value (key) {
-          return utils.get(_props, key)
-        }
-      },
-      _set: {
-        enumerable: false,
-        value (key, value) {
-          return utils.set(_props, key, value)
-        }
-      },
-      _unset: {
-        enumerable: false,
-        value (key) {
-          return utils.unset(_props, key)
-        }
-      }
+      _get: { value (key) { return utils.get(_props, key) } },
+      _set: { value (key, value) { return utils.set(_props, key, value) } },
+      _unset: { value (key) { return utils.unset(_props, key) } }
     })
     const _set = self._set
     // TODO: Optimize these strings

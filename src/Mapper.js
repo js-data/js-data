@@ -167,7 +167,16 @@ const MAPPER_DEFAULTS = {
    */
   raw: false,
 
-  schema: null
+  schema: null,
+
+  /**
+   * If `true`, causes methods like {@link Mapper#create} and {@link Mapper#find}
+   * to pass returned data through {@link Mapper#createRecord}.
+   *
+   * @name Mapper#wrap
+   * @type {boolean}
+   */
+  wrap: true
 }
 
 /**
@@ -618,12 +627,14 @@ export default Component.extend({
       return result
     }
     let _data = opts.raw ? result.data : result
-    if (utils.isArray(_data) && _data.length && utils.isObject(_data[0])) {
-      _data = _data.map(function (item) {
-        return self.createRecord(item)
-      })
-    } else if (utils.isObject(_data)) {
-      _data = self.createRecord(_data)
+    if (opts.wrap) {
+      if (utils.isFunction(opts.wrap)) {
+        _data = opts.wrap(_data, opts)
+      } else {
+        if (_data) {
+          _data = self.createRecord(_data)
+        }
+      }
     }
     if (opts.raw) {
       result.data = _data
@@ -938,17 +949,24 @@ export default Component.extend({
   createRecord (props, opts) {
     props || (props = {})
     const self = this
+    if (utils.isArray(props)) {
+      return props.map(function (_props) {
+        return self.createRecord(_props, opts)
+      })
+    }
+    if (!utils.isObject(props)) {
+      throw new Error('Cannot create a record from ' + props + '!')
+    }
     const recordClass = self.recordClass
     const relationList = self.relationList || []
     relationList.forEach(function (def) {
       const relatedMapper = def.getRelation()
       const relationData = def.getLocalField(props)
-      if (utils.isArray(relationData) && relationData.length && !relatedMapper.is(relationData[0])) {
-        def.setLocalField(props, relationData.map(function (relationDataItem) {
-          return def.getRelation().createRecord(relationDataItem, opts)
-        }))
-      } else if (utils.isObject(relationData) && !relatedMapper.is(relationData)) {
-        def.setLocalField(props, def.getRelation().createRecord(relationData, opts))
+      if (relationData && !relatedMapper.is(relationData)) {
+        if (utils.isArray(relationData) && (!relationData.length || relatedMapper.is(relationData[0]))) {
+          return
+        }
+        def.setLocalField(props, relatedMapper.createRecord(relationData, opts))
       }
     })
     // Check to make sure "props" is not already an instance of this Mapper.
