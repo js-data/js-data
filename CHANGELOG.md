@@ -1,3 +1,11 @@
+##### 3.0.0-alpha.23 - 01 April 2016
+
+###### Breaking changes
+- Moved `js-data.d.ts` to `dist/js-data.d.ts`
+
+###### Other
+- Fixed some JSDoc comments
+
 ##### 3.0.0-alpha.22 - 31 March 2016
 
 ###### Backwards compatible API changes

@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "3.0.0-alpha.22",
+  "version": "3.0.0-alpha.23",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -24,9 +24,19 @@
     "http",
     "localstorage"
   ],
-  "standard": { "parser": "babel-eslint" },
-  "babel": { "presets": ["es2015-rollup"] },
-  "ava": { "files": ["test/**/*.test.js"] },
+  "standard": {
+    "parser": "babel-eslint"
+  },
+  "babel": {
+    "presets": [
+      "es2015-rollup"
+    ]
+  },
+  "ava": {
+    "files": [
+      "test/**/*.test.js"
+    ]
+  },
   "scripts": {
     "doc": "jsdoc -c conf.json src && node scripts/cleanup.js",
     "lint": "repo-tools lint src/**/*.js test/**/*.js scripts/*.js lib/**/*.js",
@@ -59,5 +69,8 @@
     "rollup-plugin-babel": "2.4.0",
     "sinon": "1.17.3",
     "uglify-js": "2.6.2"
+  },
+  "optionalDependencies": {
+    "rx-lite": "^4.0.8"
   }
 }

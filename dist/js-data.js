@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.22 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.23 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -1052,23 +1052,31 @@
   utils$1.logify(Component.prototype);
 
   /**
-   * Register a new event listener on this Mapper.
+   * Register a new event listener on this Component.
    *
-   * @name Mapper#on
+   * @name Component#on
    * @method
+   * @param {string} event Name of event to subsribe to.
+   * @param {Function} listener Listener function to handle the event.
+   * @param {*} [ctx] Optional content in which to invoke the listener.
    */
   /**
-   * Remove an event listener from this Mapper.
+   * Remove an event listener from this Component. If no listener is provided,
+   * then all listeners for the specified event will be removed. If no event is
+   * specified then all listeners for all events will be removed.
    *
-   * @name Mapper#off
+   * @name Component#off
    * @method
+   * @param {string} [event] Name of event to unsubsribe to.
+   * @param {Function} [listener] Listener to remove.
    */
   /**
-   * Trigger an event on this Mapper.
+   * Trigger an event on this Component.
    *
-   * @name Mapper#emit
+   * @name Component#emit
    * @method
    * @param {string} event Name of event to emit.
+   * @param {...*} [args] Arguments to pass to any listeners.
    */
   utils$1.eventify(Component.prototype, function () {
     return this._listeners;
@@ -5974,13 +5982,17 @@
     },
 
     /**
+     * Register a new event listener on this Container.
+     *
      * Proxy for {@link Component#on}. If an event was emitted by a Mapper in the
      * Container, then the name of the Mapper will be prepended to the arugments
-     * passed to the provided event handler.
+     * passed to the listener.
      *
      * @name Container#on
      * @method
-     * @param {...*} args - Passed to {@link Component#on}.
+     * @param {string} event Name of event to subsribe to.
+     * @param {Function} listener Listener function to handle the event.
+     * @param {*} [ctx] Optional content in which to invoke the listener.
      */
 
     /**
@@ -6507,13 +6519,17 @@
 
 
     /**
+     * Register a new event listener on this DataStore.
+     *
      * Proxy for {@link Container#on}. If an event was emitted by a Mapper or
      * Collection in the DataStore, then the name of the Mapper or Collection will
      * be prepended to the arugments passed to the provided event handler.
      *
      * @name DataStore#on
      * @method
-     * @param {...*} args - Passed to {@link Container#on}.
+     * @param {string} event Name of event to subsribe to.
+     * @param {Function} listener Listener function to handle the event.
+     * @param {*} [ctx] Optional content in which to invoke the listener.
      */
 
     /**
@@ -7175,9 +7191,9 @@
    * if the current version is not beta.
    */
   var version = {
-    alpha: '22',
+    alpha: '23',
     beta: 'false',
-    full: '3.0.0-alpha.22',
+    full: '3.0.0-alpha.23',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10)

@@ -60,13 +60,17 @@ const props = {
   },
 
   /**
+   * Register a new event listener on this DataStore.
+   *
    * Proxy for {@link Container#on}. If an event was emitted by a Mapper or
    * Collection in the DataStore, then the name of the Mapper or Collection will
    * be prepended to the arugments passed to the provided event handler.
    *
    * @name DataStore#on
    * @method
-   * @param {...*} args - Passed to {@link Container#on}.
+   * @param {string} event Name of event to subsribe to.
+   * @param {Function} listener Listener function to handle the event.
+   * @param {*} [ctx] Optional content in which to invoke the listener.
    */
 
   /**
