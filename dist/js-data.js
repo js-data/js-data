@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-alpha.24 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-alpha.25 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -7244,9 +7244,9 @@
    * if the current version is not beta.
    */
   var version = {
-    alpha: '24',
+    alpha: '25',
     beta: 'false',
-    full: '3.0.0-alpha.24',
+    full: '3.0.0-alpha.25',
     major: parseInt('3', 10),
     minor: parseInt('0', 10),
     patch: parseInt('0', 10)

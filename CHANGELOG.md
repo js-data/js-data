@@ -1,3 +1,8 @@
+##### 3.0.0-alpha.25 - 01 April 2016
+
+###### Backwards compatible bug fixes
+- Removed accidental rx-lite optional dependency
+
 ##### 3.0.0-alpha.24 - 01 April 2016
 
 ###### Backwards compatible bug fixes
