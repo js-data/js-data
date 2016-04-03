@@ -8,7 +8,7 @@ test.beforeEach(beforeEach)
 
 test('add should work', (t) => {
   let user = t.context.store.add('user', { id: 1, name: 'John' })
-  t.context.objectsEqual(user, { id: 1, name: 'John' })
+  t.context.objectsEqual(t, user, { id: 1, name: 'John' })
 })
 test('remove should remove relations', (t) => {
   let user = t.context.store.add('user', t.context.data.user10)

@@ -14,7 +14,7 @@ test('should be an instance method', (t) => {
 })
 test('should be empty right after an instance is created', (t) => {
   const post = new t.context.Post.recordClass(t.context.data.p1)
-  t.context.objectsEqual(post.changes(), {
+  t.context.objectsEqual(t, post.changes(), {
     added: {},
     removed: {},
     changed: {}
@@ -22,13 +22,13 @@ test('should be empty right after an instance is created', (t) => {
 })
 test('should detect tracked field changes', (t) => {
   const post = new t.context.Post.recordClass(t.context.data.p1)
-  t.context.objectsEqual(post.changes(), {
+  t.context.objectsEqual(t, post.changes(), {
     added: {},
     removed: {},
     changed: {}
   })
   post.author = 'Jake'
-  t.context.objectsEqual(post.changes(), {
+  t.context.objectsEqual(t, post.changes(), {
     added: {},
     removed: {},
     changed: {
@@ -38,13 +38,13 @@ test('should detect tracked field changes', (t) => {
 })
 test('should detect untracked field changes', (t) => {
   const post = new t.context.Post.recordClass(t.context.data.p1)
-  t.context.objectsEqual(post.changes(), {
+  t.context.objectsEqual(t, post.changes(), {
     added: {},
     removed: {},
     changed: {}
   })
   post.foo = 'bar'
-  t.context.objectsEqual(post.changes(), {
+  t.context.objectsEqual(t, post.changes(), {
     added: {
       foo: 'bar'
     },
@@ -65,13 +65,13 @@ test('should show changed tracked fields', (t) => {
     }
   })
   const post = PostMapper.createRecord(t.context.data.p1)
-  t.context.objectsEqual(post.changes(), {
+  t.context.objectsEqual(t, post.changes(), {
     added: {},
     removed: {},
     changed: {}
   })
   post.author = 'Jake'
-  t.context.objectsEqual(post.changes(), {
+  t.context.objectsEqual(t, post.changes(), {
     added: {},
     removed: {},
     changed: {
@@ -79,7 +79,7 @@ test('should show changed tracked fields', (t) => {
     }
   })
   post.author = 'John'
-  t.context.objectsEqual(post.changes(), {
+  t.context.objectsEqual(t, post.changes(), {
     added: {},
     removed: {},
     changed: {}

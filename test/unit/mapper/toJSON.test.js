@@ -14,20 +14,20 @@ test('should be an instance method', (t) => {
 })
 test('should make json when not an instance', (t) => {
   const props = { name: 'John' }
-  t.context.objectsEqual(t.context.User.toJSON(props), props, 'should return passed in data')
+  t.context.objectsEqual(t, t.context.User.toJSON(props), props, 'should return passed in data')
 })
 test('should make json when the record class does not have a mapper', (t) => {
   const props = { name: 'John' }
   const record = new JSData.Record(props)
   t.false(record.toJSON() === props, 'should not return passed in data')
-  t.context.objectsEqual(record.toJSON(), props, 'should be deeply equal')
+  t.context.objectsEqual(t, record.toJSON(), props, 'should be deeply equal')
 })
 test('should make json when an instance', (t) => {
   const props = { name: 'John', organizationId: 5 }
   const user = t.context.User.createRecord(props)
   t.ok(t.context.User.toJSON(user) !== props, 'should return copy of data')
-  t.context.objectsEqual(t.context.User.toJSON(user), props, 'copy should equal passed in data')
-  t.context.objectsEqual(user.toJSON(), props, 'copy should equal passed in data')
+  t.context.objectsEqual(t, t.context.User.toJSON(user), props, 'copy should equal passed in data')
+  t.context.objectsEqual(t, user.toJSON(), props, 'copy should equal passed in data')
 })
 test('should keep only enumerable properties', (t) => {
   const props = { name: 'John' }
@@ -45,8 +45,8 @@ test('should keep only enumerable properties', (t) => {
     name: 'John',
     foo: 'foo'
   }
-  t.context.objectsEqual(t.context.User.toJSON(user), expected, 'should return enumerable properties')
-  t.context.objectsEqual(user.toJSON(), expected, 'should return enumerable properties')
+  t.context.objectsEqual(t, t.context.User.toJSON(user), expected, 'should return enumerable properties')
+  t.context.objectsEqual(t, user.toJSON(), expected, 'should return enumerable properties')
 })
 test('should work when not a Record instance', (t) => {
   const user = {
@@ -63,8 +63,8 @@ test('should work when not a Record instance', (t) => {
       }
     ]
   }
-  t.context.objectsEqual(t.context.User.toJSON(user), { name: 'John' }, 'returned data should not have relations')
-  t.context.objectsEqual(t.context.User.toJSON(user, { withAll: true }), user, 'returned data should have all relations')
+  t.context.objectsEqual(t, t.context.User.toJSON(user), { name: 'John' }, 'returned data should not have relations')
+  t.context.objectsEqual(t, t.context.User.toJSON(user, { withAll: true }), user, 'returned data should have all relations')
 })
 test('should remove relations when an instance', (t) => {
   const user = t.context.store.add('user', {
@@ -100,8 +100,8 @@ test('should remove relations when an instance', (t) => {
     name: 'John',
     organizationId: 2
   }
-  t.context.objectsEqual(t.context.User.toJSON(user), expected, 'returned data should not have relations')
-  t.context.objectsEqual(user.toJSON(), expected, 'returned data should not have relations')
+  t.context.objectsEqual(t, t.context.User.toJSON(user), expected, 'returned data should not have relations')
+  t.context.objectsEqual(t, user.toJSON(), expected, 'returned data should not have relations')
 })
 test('should keep specified relations when an instance', (t) => {
   const user = t.context.store.add('user', {
@@ -137,10 +137,10 @@ test('should keep specified relations when an instance', (t) => {
     organization: user.organization.toJSON()
   }
 
-  t.context.objectsEqual(t.context.User.toJSON(user, {
+  t.context.objectsEqual(t, t.context.User.toJSON(user, {
     with: ['organization']
   }), expected, 'should keep organization')
-  t.context.objectsEqual(user.toJSON({
+  t.context.objectsEqual(t, user.toJSON({
     with: ['organization']
   }), expected, 'should keep organization')
 
@@ -152,10 +152,10 @@ test('should keep specified relations when an instance', (t) => {
     comments: user.comments.map((comment) => comment.toJSON())
   }
 
-  t.context.objectsEqual(t.context.User.toJSON(user, {
+  t.context.objectsEqual(t, t.context.User.toJSON(user, {
     with: ['organization', 'comments']
   }), expected, 'should keep organization and comments')
-  t.context.objectsEqual(user.toJSON({
+  t.context.objectsEqual(t, user.toJSON({
     with: ['organization', 'comments']
   }), expected, 'should keep organization and comments')
 
@@ -176,10 +176,10 @@ test('should keep specified relations when an instance', (t) => {
     ]
   }
 
-  t.context.objectsEqual(t.context.User.toJSON(user, {
+  t.context.objectsEqual(t, t.context.User.toJSON(user, {
     with: ['organization', 'comments', 'comments.approvedByUser']
   }), expected, 'should keep organization and comments and comments.approvedByUser')
-  t.context.objectsEqual(user.toJSON({
+  t.context.objectsEqual(t, user.toJSON({
     with: ['organization', 'comments', 'comments.approvedByUser']
   }), expected, 'should keep organization and comments and comments.approvedByUser')
 
@@ -205,7 +205,7 @@ test('should keep specified relations when an instance', (t) => {
     ]
   }
 
-  t.context.objectsEqual(t.context.User.toJSON(user, {
+  t.context.objectsEqual(t, t.context.User.toJSON(user, {
     with: [
       'organization',
       'comments',
@@ -214,7 +214,7 @@ test('should keep specified relations when an instance', (t) => {
     ]
   }), expected, 'should keep organization and comments and comments.approvedByUser and comments.approvedByUser.organization')
 
-  t.context.objectsEqual(user.toJSON({
+  t.context.objectsEqual(t, user.toJSON({
     with: [
       'organization',
       'comments',

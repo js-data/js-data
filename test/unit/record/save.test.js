@@ -27,7 +27,7 @@ test('can create itself', async (t) => {
   const FooMapper = store.defineMapper('foo')
   let foo = store.createRecord('foo', { foo: 'bar' })
   let createdFoo = await foo.save()
-  t.context.objectsEqual(createdFoo, { id: 1, foo: 'bar' })
+  t.context.objectsEqual(t, createdFoo, { id: 1, foo: 'bar' })
   t.ok(createdFoo instanceof FooMapper.recordClass)
   t.ok(store.get('foo', 1) === createdFoo)
 
@@ -35,7 +35,7 @@ test('can create itself', async (t) => {
   BarMapper.registerAdapter('mock', mockAdapter, { default: true })
   let bar = BarMapper.createRecord({ bar: 'foo' })
   let createdBar = await bar.save()
-  t.context.objectsEqual(createdBar, { id: 2, bar: 'foo' })
+  t.context.objectsEqual(t, createdBar, { id: 2, bar: 'foo' })
   t.ok(createdBar instanceof BarMapper.recordClass)
 })
 
@@ -51,7 +51,7 @@ test('can update itself', async (t) => {
   const FooMapper = store.defineMapper('foo')
   let foo = store.add('foo', { id: 1, foo: 'bar' })
   let updateFoo = await foo.save()
-  t.context.objectsEqual(updateFoo, { id: 1, foo: 'bar', beep: 'boop' })
+  t.context.objectsEqual(t, updateFoo, { id: 1, foo: 'bar', beep: 'boop' })
   t.ok(updateFoo instanceof FooMapper.recordClass)
   t.ok(store.get('foo', 1) === updateFoo)
   t.ok(foo === updateFoo)
@@ -60,14 +60,15 @@ test('can update itself', async (t) => {
   BarMapper.registerAdapter('mock', mockAdapter, { default: true })
   let bar = BarMapper.createRecord({ id: 1, bar: 'foo' })
   let updatedBar = await bar.save()
-  t.context.objectsEqual(updatedBar, { id: 1, bar: 'foo', beep: 'boop' })
+  t.context.objectsEqual(t, updatedBar, { id: 1, bar: 'foo', beep: 'boop' })
   t.ok(updatedBar instanceof BarMapper.recordClass)
 })
 
 test('can update itself with changes only', async (t) => {
   const mockAdapter = {
     update (mapper, id, props, opts) {
-      t.context.objectsEqual(props, { bar: 'bar', bing: 'bang', beep: null })
+      t.context.objectsEqual(t, props, { bar: 'bar', bing: 'bang', beep: null })
+      props.id = 1
       return Promise.resolve(JSON.parse(JSON.stringify(props)))
     }
   }
@@ -78,7 +79,8 @@ test('can update itself with changes only', async (t) => {
   let bar = BarMapper.createRecord({ id: 1, bar: 'foo', beep: 'boop' })
   bar.bing = 'bang'
   bar.bar = 'bar'
+  bar.beep = null
   let updatedBar = await bar.save({ changesOnly: true })
-  t.context.objectsEqual(updatedBar, { id: 1, bar: 'bar', bing: 'bang', beep: null })
+  t.context.objectsEqual(t, updatedBar, { id: 1, bar: 'bar', bing: 'bang', beep: null })
   t.ok(updatedBar instanceof BarMapper.recordClass)
 })

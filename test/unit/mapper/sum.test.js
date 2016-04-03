@@ -63,6 +63,6 @@ test('should return raw', async (t) => {
   })
   let data = await User.sum('age', query)
   t.ok(sumCalled, 'Adapter#sum should have been called')
-  t.context.objectsEqual(data.data, 30, 'sum should be 30')
+  t.context.objectsEqual(t, data.data, 30, 'sum should be 30')
   t.is(data.adapter, 'mock', 'should have adapter name in response')
 })

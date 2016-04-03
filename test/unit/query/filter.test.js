@@ -26,14 +26,14 @@ test('should work', (t) => {
     author: 'John'
   }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p1], 'should default a string to "=="')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p1], 'should default a string to "=="')
 
   params = {
     author: 'Adam',
     id: 9
   }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p5], 'should default a string to "=="')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p5], 'should default a string to "=="')
 
   params = {
     where: {
@@ -41,25 +41,25 @@ test('should work', (t) => {
     }
   }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p1], 'should default a string to "=="')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p1], 'should default a string to "=="')
 
   params.where.author = {
     '==': 'John'
   }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p1], 'should accept normal "==" clause')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p1], 'should accept normal "==" clause')
 
   params.where.author = {
     '===': null
   }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [], 'should accept normal "===" clause')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [], 'should accept normal "===" clause')
 
   params.where.author = {
     '!=': 'John'
   }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p2, p3, p4, p5], 'should accept normal "!=" clause')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p2, p3, p4, p5], 'should accept normal "!=" clause')
 
   params.where = {
     age: {
@@ -67,7 +67,7 @@ test('should work', (t) => {
     }
   }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p3, p4, p5], 'should accept normal ">" clause')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p3, p4, p5], 'should accept normal ">" clause')
 
   params.where = {
     age: {
@@ -75,7 +75,7 @@ test('should work', (t) => {
     }
   }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p2, p3, p4, p5], 'should accept normal ">=" clause')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p2, p3, p4, p5], 'should accept normal ">=" clause')
 
   params.where = {
     age: {
@@ -83,7 +83,7 @@ test('should work', (t) => {
     }
   }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p1], 'should accept normal "<" clause')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p1], 'should accept normal "<" clause')
 
   params.where = {
     age: {
@@ -92,7 +92,7 @@ test('should work', (t) => {
     }
   }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p2, p3], 'should accept dual "<" and ">" clause')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p2, p3], 'should accept dual "<" and ">" clause')
 
   params.where = {
     age: {
@@ -101,7 +101,7 @@ test('should work', (t) => {
     }
   }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3, p4, p5], 'should accept or "<" and ">" clause')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p1, p2, p3, p4, p5], 'should accept or "<" and ">" clause')
 
   params.where = {
     age: {
@@ -112,7 +112,7 @@ test('should work', (t) => {
     }
   }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p1, p2, p4, p5], 'should accept or "<=" and "==" clause')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p1, p2, p4, p5], 'should accept or "<=" and "==" clause')
 
   params.where = {
     age: {
@@ -120,7 +120,7 @@ test('should work', (t) => {
     }
   }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p1, p2], 'should accept normal "<=" clause')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p1, p2], 'should accept normal "<=" clause')
 
   params.where = {
     age: {
@@ -131,7 +131,7 @@ test('should work', (t) => {
     }
   }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p1, p4, p5], 'should accept normal "in" clause')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p1, p4, p5], 'should accept normal "in" clause')
 
   params.where = {
     author: {
@@ -139,7 +139,7 @@ test('should work', (t) => {
     }
   }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p1], 'should accept normal "in" clause with a string')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p1], 'should accept normal "in" clause with a string')
 
   params.where = {
     author: {
@@ -147,7 +147,7 @@ test('should work', (t) => {
     }
   }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p2, p3, p4, p5], 'should accept normal "notIn" clause with a string')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p2, p3, p4, p5], 'should accept normal "notIn" clause with a string')
 
   params.where = {
     age: {
@@ -158,7 +158,7 @@ test('should work', (t) => {
     }
   }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p2, p4], 'should accept and/or clause')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p2, p4], 'should accept and/or clause')
 
   params.where = {
     id: {
@@ -166,47 +166,47 @@ test('should work', (t) => {
     }
   }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3, p5], 'should accept notIn clause')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p1, p2, p3, p5], 'should accept notIn clause')
 
   params.where = { age: { garbage: 'should have no effect' } }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3, p4, p5], 'should return all elements')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p1, p2, p3, p4, p5], 'should return all elements')
 
   params.where = { author: { like: 'Ada%' } }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p4, p5], 'should support like')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p4, p5], 'should support like')
 
   params.where = { author: { like: '%a%' } }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p2, p4, p5], 'should support like')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p2, p4, p5], 'should support like')
 
   params.where = { author: { notLike: 'Ada%' } }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3], 'should support notLike')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p1, p2, p3], 'should support notLike')
 
   params.where = { roles: { isectEmpty: ['admin'] } }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p4], 'should support isectEmpty')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p4], 'should support isectEmpty')
 
   params.where = { roles: { isectNotEmpty: ['admin'] } }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3, p5], 'should support isectNotEmpty')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p1, p2, p3, p5], 'should support isectNotEmpty')
 
   params.where = { roles: { notContains: 'admin' } }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p4], 'should support notContains')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p4], 'should support notContains')
 
   params.where = { age: { '!==': 33 } }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3], 'should support !==')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p1, p2, p3], 'should support !==')
 
   params = undefined
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3, p4, p5], 'should do nothing')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p1, p2, p3, p4, p5], 'should do nothing')
 
   params = { offset: 4 }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p5], 'should support offset')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p5], 'should support offset')
 })
 test('should allow custom filter function', (t) => {
   const p1 = t.context.data.p1
@@ -215,7 +215,7 @@ test('should allow custom filter function', (t) => {
   const p4 = t.context.data.p4
   t.context.store.add('post', [p1, p2, p3, p4])
 
-  t.context.objectsEqual(t.context.store.query('post').filter(function (item) {
+  t.context.objectsEqual(t, t.context.store.query('post').filter(function (item) {
     return item.author === 'John' || item.age % 30 === 1
   }).run(), [p1, p2], 'should keep p1 and p2')
 })
@@ -259,7 +259,7 @@ test('should filter by nested keys', (t) => {
     }
   }
 
-  t.context.objectsEqual(store.query('thing').filter(params).run(), [things[2], things[3]], 'should filter by a nested key')
+  t.context.objectsEqual(t, store.query('thing').filter(params).run(), [things[2], things[3]], 'should filter by a nested key')
 })
 test('should support the "like" operator', (t) => {
   const users = [
@@ -276,25 +276,25 @@ test('should support the "like" operator', (t) => {
   ]
   t.context.store.add('user', users)
 
-  t.context.objectsEqual(t.context.store.query('user').filter({ where: { name: { like: 'foo' } } }).run(), [users[0]], 'foo')
-  t.context.objectsEqual(t.context.store.query('user').filter({ where: { name: { like: '_foo' } } }).run(), [users[1]], '_foo')
-  t.context.objectsEqual(t.context.store.query('user').filter({ where: { name: { like: 'foo_' } } }).run(), [users[2]], 'foo_')
-  t.context.objectsEqual(t.context.store.query('user').filter({ where: { name: { like: '%foo' } } }).run(), [users[0], users[1], users[3], users[7], users[8]], '%foo')
-  t.context.objectsEqual(t.context.store.query('user').filter({ where: { name: { likei: 'FOO%' } } }).run(), [users[0], users[2], users[4], users[7], users[8], users[9]], 'FOO%')
-  t.context.objectsEqual(t.context.store.query('user').filter({ where: { name: { like: '%foo%' } } }).run(), users, '%foo%')
-  t.context.objectsEqual(t.context.store.query('user').filter({ where: { name: { like: '%foo%foo%' } } }).run(), [users[6], users[7], users[8], users[9]], '%foo%foo%')
-  t.context.objectsEqual(t.context.store.query('user').filter({ where: { name: { like: 'foo%foo' } } }).run(), [users[7], users[8]], 'foo%foo')
-  t.context.objectsEqual(t.context.store.query('user').filter({ where: { name: { like: 'foo_foo' } } }).run(), [users[8]], 'foo_foo')
-  t.context.objectsEqual(t.context.store.query('user').filter({ where: { name: { like: 'foo%foo_' } } }).run(), [users[9]], 'foo%foo')
+  t.context.objectsEqual(t, t.context.store.query('user').filter({ where: { name: { like: 'foo' } } }).run(), [users[0]], 'foo')
+  t.context.objectsEqual(t, t.context.store.query('user').filter({ where: { name: { like: '_foo' } } }).run(), [users[1]], '_foo')
+  t.context.objectsEqual(t, t.context.store.query('user').filter({ where: { name: { like: 'foo_' } } }).run(), [users[2]], 'foo_')
+  t.context.objectsEqual(t, t.context.store.query('user').filter({ where: { name: { like: '%foo' } } }).run(), [users[0], users[1], users[3], users[7], users[8]], '%foo')
+  t.context.objectsEqual(t, t.context.store.query('user').filter({ where: { name: { likei: 'FOO%' } } }).run(), [users[0], users[2], users[4], users[7], users[8], users[9]], 'FOO%')
+  t.context.objectsEqual(t, t.context.store.query('user').filter({ where: { name: { like: '%foo%' } } }).run(), users, '%foo%')
+  t.context.objectsEqual(t, t.context.store.query('user').filter({ where: { name: { like: '%foo%foo%' } } }).run(), [users[6], users[7], users[8], users[9]], '%foo%foo%')
+  t.context.objectsEqual(t, t.context.store.query('user').filter({ where: { name: { like: 'foo%foo' } } }).run(), [users[7], users[8]], 'foo%foo')
+  t.context.objectsEqual(t, t.context.store.query('user').filter({ where: { name: { like: 'foo_foo' } } }).run(), [users[8]], 'foo_foo')
+  t.context.objectsEqual(t, t.context.store.query('user').filter({ where: { name: { like: 'foo%foo_' } } }).run(), [users[9]], 'foo%foo')
 
-  t.context.objectsEqual(t.context.store.query('user').filter({ where: { name: { notLike: 'foo' } } }).run(), [users[1], users[2], users[3], users[4], users[5], users[6], users[7], users[8], users[9]])
-  t.context.objectsEqual(t.context.store.query('user').filter({ where: { name: { notLike: '_foo' } } }).run(), [users[0], users[2], users[3], users[4], users[5], users[6], users[7], users[8], users[9]])
-  t.context.objectsEqual(t.context.store.query('user').filter({ where: { name: { notLike: 'foo_' } } }).run(), [users[0], users[1], users[3], users[4], users[5], users[6], users[7], users[8], users[9]])
-  t.context.objectsEqual(t.context.store.query('user').filter({ where: { name: { notLike: '%foo' } } }).run(), [users[2], users[4], users[5], users[6], users[9]])
-  t.context.objectsEqual(t.context.store.query('user').filter({ where: { name: { notLike: 'foo%' } } }).run(), [users[1], users[3], users[5], users[6]])
-  t.context.objectsEqual(t.context.store.query('user').filter({ where: { name: { notLike: '%foo%' } } }).run(), [])
-  t.context.objectsEqual(t.context.store.query('user').filter({ where: { name: { notLike: '%foo%foo%' } } }).run(), [users[0], users[1], users[2], users[3], users[4], users[5]])
-  t.context.objectsEqual(t.context.store.query('user').filter({ where: { name: { notLike: 'foo%foo' } } }).run(), [users[0], users[1], users[2], users[3], users[4], users[5], users[6], users[9]])
-  t.context.objectsEqual(t.context.store.query('user').filter({ where: { name: { notLike: 'foo_foo' } } }).run(), [users[0], users[1], users[2], users[3], users[4], users[5], users[6], users[7], users[9]])
-  t.context.objectsEqual(t.context.store.query('user').filter({ where: { name: { notLike: 'foo%foo_' } } }).run(), [users[0], users[1], users[2], users[3], users[4], users[5], users[6], users[7], users[8]])
+  t.context.objectsEqual(t, t.context.store.query('user').filter({ where: { name: { notLike: 'foo' } } }).run(), [users[1], users[2], users[3], users[4], users[5], users[6], users[7], users[8], users[9]])
+  t.context.objectsEqual(t, t.context.store.query('user').filter({ where: { name: { notLike: '_foo' } } }).run(), [users[0], users[2], users[3], users[4], users[5], users[6], users[7], users[8], users[9]])
+  t.context.objectsEqual(t, t.context.store.query('user').filter({ where: { name: { notLike: 'foo_' } } }).run(), [users[0], users[1], users[3], users[4], users[5], users[6], users[7], users[8], users[9]])
+  t.context.objectsEqual(t, t.context.store.query('user').filter({ where: { name: { notLike: '%foo' } } }).run(), [users[2], users[4], users[5], users[6], users[9]])
+  t.context.objectsEqual(t, t.context.store.query('user').filter({ where: { name: { notLike: 'foo%' } } }).run(), [users[1], users[3], users[5], users[6]])
+  t.context.objectsEqual(t, t.context.store.query('user').filter({ where: { name: { notLike: '%foo%' } } }).run(), [])
+  t.context.objectsEqual(t, t.context.store.query('user').filter({ where: { name: { notLike: '%foo%foo%' } } }).run(), [users[0], users[1], users[2], users[3], users[4], users[5]])
+  t.context.objectsEqual(t, t.context.store.query('user').filter({ where: { name: { notLike: 'foo%foo' } } }).run(), [users[0], users[1], users[2], users[3], users[4], users[5], users[6], users[9]])
+  t.context.objectsEqual(t, t.context.store.query('user').filter({ where: { name: { notLike: 'foo_foo' } } }).run(), [users[0], users[1], users[2], users[3], users[4], users[5], users[6], users[7], users[9]])
+  t.context.objectsEqual(t, t.context.store.query('user').filter({ where: { name: { notLike: 'foo%foo_' } } }).run(), [users[0], users[1], users[2], users[3], users[4], users[5], users[6], users[7], users[8]])
 })

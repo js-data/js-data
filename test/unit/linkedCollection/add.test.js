@@ -70,10 +70,10 @@ test('should find inverse links', (t) => {
   t.context.UserCollection.add({ organizationId: 5, id: 1 })
   t.context.OrganizationCollection.add({ id: 5 })
 
-  t.context.objectsEqual(t.context.UserCollection.get(1).organization, { id: 5 })
+  t.context.objectsEqual(t, t.context.UserCollection.get(1).organization, { id: 5 })
 
-  t.context.objectsEqual(t.context.UserCollection.get(1).comments, [])
-  t.context.objectsEqual(t.context.UserCollection.get(1).approvedComments, [])
+  t.context.objectsEqual(t, t.context.UserCollection.get(1).comments, [])
+  t.context.objectsEqual(t, t.context.UserCollection.get(1).approvedComments, [])
 
   t.context.CommentCollection.add({ approvedBy: 1, id: 23 })
 
@@ -288,7 +288,7 @@ test('should allow custom relation injection logic', (t) => {
       }
     ]
   })
-  t.context.objectsEqual(foo.bars, [
+  t.context.objectsEqual(t, foo.bars, [
     {
       id: 1,
       fooId: 1,

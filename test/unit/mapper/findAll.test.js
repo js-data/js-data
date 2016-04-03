@@ -34,7 +34,7 @@ test('should findAll', async (t) => {
   })
   const users = await User.findAll(query)
   t.ok(findAllCalled, 'Adapter#findAll should have been called')
-  t.context.objectsEqual(users, props, 'user should have been found')
+  t.context.objectsEqual(t, users, props, 'user should have been found')
   t.ok(users[0] instanceof User.recordClass, 'user is a record')
 })
 test('should return raw', async (t) => {
@@ -63,7 +63,7 @@ test('should return raw', async (t) => {
   })
   let data = await User.findAll(query)
   t.ok(findAllCalled, 'Adapter#findAll should have been called')
-  t.context.objectsEqual(data.data, props, 'user should have been found')
+  t.context.objectsEqual(t, data.data, props, 'user should have been found')
   t.ok(data.data[0] instanceof User.recordClass, 'user is a record')
   t.is(data.adapter, 'mock', 'should have adapter name in response')
   t.is(data.found, 1, 'should have other metadata in response')

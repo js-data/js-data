@@ -20,8 +20,15 @@ export const TYPES_EXCEPT_FUNCTION = ['string', 123, 123.123, null, undefined, {
 
 // Clean setup for each test
 export const beforeEach = function (t) {
-  t.context.objectsEqual = function (a, b, msg) {
+  t.context.objectsEqual = function (t, a, b, msg) {
     t.same(
+      JSON.parse(JSON.stringify(a)),
+      JSON.parse(JSON.stringify(b)),
+      msg || 'Expected objects or arrays to be equal'
+    )
+  }
+  t.context.objectsNotEqual = function (t, a, b, msg) {
+    t.notSame(
       JSON.parse(JSON.stringify(a)),
       JSON.parse(JSON.stringify(b)),
       msg || 'Expected objects or arrays to be equal'

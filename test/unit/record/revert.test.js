@@ -16,7 +16,7 @@ test('should return the previous version of an item', (t) => {
   const post = new t.context.Post.recordClass(t.context.data.p1)
   post.author = 'Jake'
   post.revert()
-  t.context.objectsEqual(post, t.context.data.p1)
+  t.context.objectsEqual(t, post, t.context.data.p1)
 })
 test('should preserve fields in the optional preserve array', (t) => {
   const post = new t.context.Post.recordClass(t.context.data.p1)

@@ -20,7 +20,7 @@ test('should work', (t) => {
     author: 'John'
   }
 
-  t.context.objectsEqual(collection.filter(params), [p1], 'should default a string to "=="')
+  t.context.objectsEqual(t, collection.filter(params), [p1], 'should default a string to "=="')
 })
 test.skip('should allow use of scopes', (t) => {
   const store = new JSData.DataStore({
@@ -50,16 +50,16 @@ test.skip('should allow use of scopes', (t) => {
     { id: 7, foo: 'bar', beep: 'boop' },
     { id: 8, foo: 'bar', beep: 'boop' }
   ])
-  t.context.objectsEqual(store.filter('foo', null, {
+  t.context.objectsEqual(t, store.filter('foo', null, {
     scope: ['second', 'limit']
   }), [foos[2]])
-  t.context.objectsEqual(store.filter('foo', null, {
+  t.context.objectsEqual(t, store.filter('foo', null, {
     scope: ['second']
   }), store.filter('foo', {
     foo: 'bar',
     beep: 'boop'
   }))
-  t.context.objectsEqual(store.filter('foo'), store.filter('foo', {
+  t.context.objectsEqual(t, store.filter('foo'), store.filter('foo', {
     foo: 'bar'
   }))
 })

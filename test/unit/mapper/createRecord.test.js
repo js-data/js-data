@@ -69,12 +69,12 @@ test('should create an instance', (t) => {
   t.is(cat.say(), 'meow')
   t.is(cat2.say(), 'meow')
 
-  t.context.objectsEqual(person, {
+  t.context.objectsEqual(t, person, {
     first: 'John',
     last: 'Anderson'
   })
-  t.context.objectsEqual(dog, dogAttrs)
-  t.context.objectsEqual(cat, {})
+  t.context.objectsEqual(t, dog, dogAttrs)
+  t.context.objectsEqual(t, cat, {})
 
   t.ok(person instanceof Person)
   t.ok(person2 instanceof Person)

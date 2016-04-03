@@ -25,10 +25,10 @@ test('should eject items that meet the criteria from the store', (t) => {
 test('should eject all items from the store', (t) => {
   t.context.PostCollection.add([t.context.data.p1, t.context.data.p2, t.context.data.p3, t.context.data.p4])
 
-  t.context.objectsEqual(t.context.PostCollection.get(5), t.context.data.p1)
-  t.context.objectsEqual(t.context.PostCollection.get(6), t.context.data.p2)
-  t.context.objectsEqual(t.context.PostCollection.get(7), t.context.data.p3)
-  t.context.objectsEqual(t.context.PostCollection.get(8), t.context.data.p4)
+  t.context.objectsEqual(t, t.context.PostCollection.get(5), t.context.data.p1)
+  t.context.objectsEqual(t, t.context.PostCollection.get(6), t.context.data.p2)
+  t.context.objectsEqual(t, t.context.PostCollection.get(7), t.context.data.p3)
+  t.context.objectsEqual(t, t.context.PostCollection.get(8), t.context.data.p4)
 
   t.notThrows(function () {
     t.context.PostCollection.removeAll()
