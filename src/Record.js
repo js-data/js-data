@@ -1,6 +1,16 @@
 import utils from './utils'
 import Component from './Component'
 
+const superMethod = function (mapper, name) {
+  const store = mapper.datastore
+  if (store && store[name]) {
+    return function (...args) {
+      return store[name](mapper.name, ...args)
+    }
+  }
+  return mapper[name].bind(mapper)
+}
+
 /**
  * js-data's Record class.
  *
@@ -115,8 +125,7 @@ const Record = Component.extend({
     const self = this
     opts || (opts = {})
     const mapper = self._mapper()
-    let method = opts.destroy || mapper.destroy.bind(mapper)
-    return method(utils.get(self, mapper.idAttribute), opts)
+    return superMethod(mapper, 'destroy')(utils.get(self, mapper.idAttribute), opts)
   },
 
   /**
@@ -175,11 +184,14 @@ const Record = Component.extend({
     let op
     const self = this
     const mapper = self._mapper()
-    const relationList = mapper.relationList || []
 
     // Default values for arguments
     relations || (relations = [])
+    if (utils.isString(relations)) {
+      relations = [relations]
+    }
     opts || (opts = {})
+    opts.with = relations
 
     // Fill in "opts" with the Model's configuration
     utils._(mapper, opts)
@@ -194,47 +206,49 @@ const Record = Component.extend({
       // Now delegate to the adapter
       op = opts.op = 'loadRelations'
       mapper.dbg(op, self, relations, opts)
-      return Promise.all(relationList.map(function (def) {
+      let tasks = []
+      let task
+      utils.forEachRelation(mapper, opts, function (def, optsCopy) {
+        const relatedMapper = def.getRelation()
+        optsCopy.raw = false
         if (utils.isFunction(def.load)) {
-          return def.load(mapper, def, self, opts)
-        }
-        let task
-        if (def.type === 'hasMany' && def.foreignKey) {
-          // hasMany
-          task = def.getRelation().findAll({
-            [def.foreignKey]: utils.get(self, mapper.idAttribute)
-          }, opts)
-        } else if (def.foreignKey) {
-          // belongsTo or hasOne
+          task = def.load(mapper, def, self, opts)
+        } else if (def.type === 'hasMany') {
+          if (def.foreignKey) {
+            task = superMethod(relatedMapper, 'findAll')({
+              [def.foreignKey]: utils.get(self, mapper.idAttribute)
+            }, optsCopy)
+          } else if (def.localKeys) {
+            task = superMethod(relatedMapper, 'findAll')({
+              where: {
+                [relatedMapper.idAttribute]: {
+                  'in': utils.get(self, def.localKeys)
+                }
+              }
+            })
+          } else if (def.foreignKeys) {
+            task = superMethod(relatedMapper, 'findAll')({
+              where: {
+                [def.foreignKeys]: {
+                  'contains': utils.get(self, mapper.idAttribute)
+                }
+              }
+            }, opts)
+          }
+        } else if (def.type === 'belongsTo' || def.type === 'hasOne') {
           const key = utils.get(self, def.foreignKey)
           if (utils.isSorN(key)) {
-            task = def.getRelation().find(key, opts)
+            task = superMethod(relatedMapper, 'find')(key, optsCopy)
           }
-        } else if (def.localKeys) {
-          // hasMany
-          task = def.getRelation().findAll({
-            [def.getRelation().idAttribute]: {
-              'in': utils.get(self, def.localKeys)
-            }
-          }, opts)
-        } else if (def.foreignKeys) {
-          // hasMany
-          task = def.getRelation().findAll({
-            [def.getRelation().idAttribute]: {
-              'contains': utils.get(self, mapper.idAttribute)
-            }
-          }, opts)
         }
         if (task) {
-          task = task.then(function (data) {
-            if (opts.raw) {
-              data = data.data
-            }
-            utils.set(self, def.localField, def.type === 'hasOne' ? (data.length ? data[0] : undefined) : data)
+          task = task.then(function (relatedData) {
+            def.setLocalField(self, relatedData)
           })
+          tasks.push(task)
         }
-        return task
-      }))
+      })
+      return Promise.all(tasks)
     }).then(function () {
       // afterLoadRelations lifecycle hook
       op = opts.op = 'afterLoadRelations'
@@ -268,7 +282,7 @@ const Record = Component.extend({
    */
   revert (opts) {
     const self = this
-    const previous = self._get('previous') || {}
+    const previous = self._get('previous')
     opts || (opts = {})
     opts.preserve || (opts.preserve = [])
     utils.forOwn(self, (value, key) => {
@@ -304,11 +318,10 @@ const Record = Component.extend({
     const self = this
     opts || (opts = {})
     const mapper = self._mapper()
-    let method = opts.create || mapper.create.bind(mapper)
     const id = utils.get(self, mapper.idAttribute)
     let props = self
     if (utils.isUndefined(id)) {
-      return method(props, opts)
+      return superMethod(mapper, 'create')(props, opts)
     }
     if (opts.changesOnly) {
       const changes = self.changes(opts)
@@ -316,8 +329,7 @@ const Record = Component.extend({
       utils.fillIn(props, changes.added)
       utils.fillIn(props, changes.changed)
     }
-    method = opts.update || mapper.update.bind(mapper)
-    return method(id, props, opts)
+    return superMethod(mapper, 'update')(id, props, opts)
   },
 
   /**

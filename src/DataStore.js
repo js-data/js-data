@@ -169,37 +169,6 @@ const props = {
       mapper
     })
 
-    const recordClass = mapper.recordClass
-    if (recordClass && utils.isFunction(recordClass.extend)) {
-      mapper.recordClass = recordClass.extend({
-        constructor: (function () {
-          var subClass = function DataStoreRecord (...args) {
-            utils.classCallCheck(this, subClass)
-            const _this = utils.possibleConstructorReturn(this, (subClass.__super__ || Object.getPrototypeOf(subClass)).apply(this, args))
-            return _this
-          }
-          return subClass
-        })(),
-        destroy (opts) {
-          opts || (opts = {})
-          opts.destroy = function (id, opts) {
-            return self.destroy(name, id, opts)
-          }
-          return utils.getSuper(this).prototype.destroy.call(this, opts)
-        },
-        save (opts) {
-          opts || (opts = {})
-          opts.create = function (props, opts) {
-            return self.create(name, props, opts)
-          }
-          opts.update = function (id, props, opts) {
-            return self.update(name, id, props, opts)
-          }
-          return utils.getSuper(this).prototype.save.call(this, opts)
-        }
-      })
-    }
-
     const schema = mapper.schema || {}
     const properties = schema.properties || {}
     // TODO: Make it possible index nested properties?
@@ -232,7 +201,7 @@ const props = {
         const type = def.type
         const link = utils.isUndefined(def.link) ? linkRelations : def.link
         const updateOpts = { index: foreignKey }
-        let descriptor
+        let descriptor, load
 
         if (type === belongsToType) {
           if (!collection.indexes[foreignKey]) {
@@ -242,20 +211,25 @@ const props = {
           descriptor = {
             get () {
               const _self = this
+              let item = _self._get(path)
               if (!_self._get('$') || !link) {
-                return _self._get(path)
+                return item
               }
               const key = def.getForeignKey(_self)
-              const item = utils.isUndefined(key) ? undefined : self.getCollection(relation).get(key)
+              item = (utils.isUndefined(key) ? undefined : self.get(relation, key)) || item
               _self._set(path, item)
               return item
             },
             set (record) {
               const _self = this
-              _self._set(path, record)
-              def.setForeignKey(_self, record)
-              collection.updateIndex(_self, updateOpts)
-              return def.getLocalField(_self)
+              if (record) {
+                _self._set(path, record)
+                def.setForeignKey(_self, record)
+              } else {
+                _self._set(path, undefined)
+                utils.set(_self, def.foreignKey, undefined)
+              }
+              return record
             }
           }
         } else if (type === hasManyType) {
@@ -270,49 +244,48 @@ const props = {
           descriptor = {
             get () {
               const _self = this
+              let items = _self._get(path)
               if (!_self._get('$') || !link) {
-                return _self._get(path)
+                return items
               }
               const key = def.getForeignKey(_self)
-              let items
               const relationCollection = self.getCollection(relation)
+              let storeItems
 
               if (foreignKey) {
                 // Really fast retrieval
-                items = relationCollection.getAll(key, {
+                storeItems = relationCollection.getAll(key, {
                   index: foreignKey
                 })
               } else if (localKeys) {
                 const keys = utils.get(_self, localKeys) || []
                 const args = utils.isArray(keys) ? keys : Object.keys(keys)
                 // Really fast retrieval
-                items = relationCollection.getAll.apply(relationCollection, args)
+                storeItems = relationCollection.getAll.apply(relationCollection, args)
               } else if (foreignKeys) {
                 const query = {}
                 utils.set(query, `where.${foreignKeys}.contains`, key)
                 // Make a much slower retrieval
-                items = relationCollection.filter(query)
+                storeItems = relationCollection.filter(query)
               }
 
+              if (!items || storeItems.length) {
+                items = storeItems
+              }
               _self._set(path, items)
               return items
             },
             set (records) {
               const _self = this
-              const key = collection.recordId(_self)
-              const relationCollection = self.getCollection(relation)
+              const key = utils.get(_self, mapper.idAttribute)
               _self._set(path, records)
 
               if (foreignKey) {
                 def.setForeignKey(_self, records)
-                if (utils.isArray(records)) {
-                  records.forEach(function (record) {
-                    relationCollection.updateIndex(record, updateOpts)
-                  })
-                }
               } if (localKeys) {
+                const relatedIdAttribute = def.getRelation().idAttribute
                 utils.set(_self, localKeys, records.map(function (record) {
-                  return relationCollection.recordId(record)
+                  return utils.get(record, relatedIdAttribute)
                 }))
               } else if (foreignKeys) {
                 records.forEach(function (record) {
@@ -326,32 +299,41 @@ const props = {
                   }
                 })
               }
-              return def.getLocalField(_self)
+              return records
             }
           }
         } else if (type === hasOneType) {
           descriptor = {
             get () {
               const _self = this
+              let item = _self._get(path)
               if (!_self._get('$') || !link) {
-                return _self._get(path)
+                return item
               }
               const key = def.getForeignKey(_self)
-              const items = self.getCollection(relation).getAll(key, {
+              const items = self.getAll(relation, key, {
                 index: foreignKey
               })
-              const item = items.length ? items[0] : undefined
+              item = (items.length ? items[0] : undefined) || item
               _self._set(path, item)
               return item
             },
             set (record) {
               const _self = this
-              _self._set(path, record)
-              def.setForeignKey(_self, record)
-              self.getCollection(relation).updateIndex(record, updateOpts)
-              return def.getLocalField(_self)
+              if (record) {
+                def.setForeignKey(_self, record)
+                _self._set(path, record)
+              } else {
+                utils.set(_self, def.foreignKey, undefined)
+                _self._set(path, undefined)
+              }
+              return record
             }
           }
+        }
+
+        if (load && !def.load) {
+          def.load = load
         }
 
         if (descriptor) {

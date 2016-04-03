@@ -11,7 +11,7 @@ test('should be a constructor function', (t) => {
   let instance = new JSData.Record()
   t.ok(instance instanceof JSData.Record, 'instance should be an instance')
   instance = new JSData.Record({ foo: 'bar' })
-  t.context.objectsEqual(instance, { foo: 'bar' }, 'instance should get initialization properties')
+  t.context.objectsEqual(t, instance, { foo: 'bar' }, 'instance should get initialization properties')
 })
 
 test.cb('should allow instance events (assignment operator)', (t) => {

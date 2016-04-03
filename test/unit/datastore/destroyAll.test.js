@@ -26,7 +26,7 @@ test('should destroyAll', async (t) => {
   }, { 'default': true })
   const result = await t.context.store.destroyAll('user', query)
   t.ok(destroyCalled, 'Adapter#destroyAll should have been called')
-  t.context.objectsEqual(result, users, 'returned data')
+  t.context.objectsEqual(t, result, users, 'returned data')
 })
 test('should return raw', async (t) => {
   const query = { name: 'John' }
@@ -49,5 +49,5 @@ test('should return raw', async (t) => {
   t.notOk(t.context.store.get('user', 1))
   t.is(result.adapter, 'mock', 'should have adapter name in response')
   t.is(result.deleted, 1, 'should have other metadata in response')
-  t.context.objectsEqual(result.data, users, 'ejected users should have been returned')
+  t.context.objectsEqual(t, result.data, users, 'ejected users should have been returned')
 })

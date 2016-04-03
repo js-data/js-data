@@ -31,7 +31,7 @@ test('should create indexes for indexed properties', (t) => {
     { id: 1, age: 23, role: 'owner' }
   ])
 
-  t.context.objectsEqual(
+  t.context.objectsEqual(t,
     store.getAll('user', 19, { index: 'age' }).map(function (user) {
       return user.toJSON()
     }),

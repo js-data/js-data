@@ -61,6 +61,6 @@ test('should return raw', async (t) => {
   })
   let data = await User.count(query)
   t.ok(countCalled, 'Adapter#count should have been called')
-  t.context.objectsEqual(data.data, 1, 'count should be 1')
+  t.context.objectsEqual(t, data.data, 1, 'count should be 1')
   t.is(data.adapter, 'mock', 'should have adapter name in response')
 })

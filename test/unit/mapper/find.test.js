@@ -33,7 +33,7 @@ test('should find', async (t) => {
   })
   const user = await User.find(id)
   t.ok(findCalled, 'Adapter#find should have been called')
-  t.context.objectsEqual(user, props, 'user should have been found')
+  t.context.objectsEqual(t, user, props, 'user should have been found')
   t.ok(user instanceof User.recordClass, 'user is a record')
 })
 test('should return raw', async (t) => {
@@ -61,7 +61,7 @@ test('should return raw', async (t) => {
   })
   let data = await User.find(id)
   t.ok(findCalled, 'Adapter#find should have been called')
-  t.context.objectsEqual(data.data, props, 'user should have been found')
+  t.context.objectsEqual(t, data.data, props, 'user should have been found')
   t.ok(data.data instanceof User.recordClass, 'user is a record')
   t.is(data.adapter, 'mock', 'should have adapter name in response')
   t.is(data.found, 1, 'should have other metadata in response')

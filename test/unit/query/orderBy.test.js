@@ -18,31 +18,31 @@ test('should work', (t) => {
     orderBy: 'age'
   }
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3, p4], 'should accept a single string and sort in ascending order for numbers')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p1, p2, p3, p4], 'should accept a single string and sort in ascending order for numbers')
 
   params.orderBy = 'author'
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p4, p1, p3, p2], 'should accept a single string and sort in ascending for strings')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p4, p1, p3, p2], 'should accept a single string and sort in ascending for strings')
 
   params.orderBy = [
     ['age', 'DESC']
   ]
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p4, p3, p2, p1], 'should accept an array of an array and sort in descending for numbers')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p4, p3, p2, p1], 'should accept an array of an array and sort in descending for numbers')
 
   params.orderBy = [
     ['author', 'DESC']
   ]
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p2, p3, p1, p4], 'should accept an array of an array and sort in descending for strings')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p2, p3, p1, p4], 'should accept an array of an array and sort in descending for strings')
 
   params.orderBy = ['age']
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3, p4], 'should accept an array of a string and sort in ascending for numbers')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p1, p2, p3, p4], 'should accept an array of a string and sort in ascending for numbers')
 
   params.orderBy = ['author']
 
-  t.context.objectsEqual(collection.query().filter(params).run(), [p4, p1, p3, p2], 'should accept an array of a string and sort in ascending for strings')
+  t.context.objectsEqual(t, collection.query().filter(params).run(), [p4, p1, p3, p2], 'should accept an array of a string and sort in ascending for strings')
 })
 test('should work with multiple orderBy', (t) => {
   const store = new JSData.DataStore()
@@ -70,7 +70,7 @@ test('should work with multiple orderBy', (t) => {
     ['id', 'ASC']
   ]
 
-  t.context.objectsEqual(store.query('item').filter(params).run(), [
+  t.context.objectsEqual(t, store.query('item').filter(params).run(), [
     items[2],
     items[8],
     items[5],
@@ -91,7 +91,7 @@ test('should work with multiple orderBy', (t) => {
     ['id', 'DESC']
   ]
 
-  t.context.objectsEqual(store.query('item').filter(params).run(), [
+  t.context.objectsEqual(t, store.query('item').filter(params).run(), [
     items[8],
     items[2],
     items[11],
@@ -142,10 +142,10 @@ test('should order by nested keys', (t) => {
     orderBy: [['foo.bar', 'ASC']]
   }
 
-  t.context.objectsEqual(store.query('thing').filter(params).run(), [things[1], things[3], things[2], things[0]], 'should order by a nested key')
+  t.context.objectsEqual(t, store.query('thing').filter(params).run(), [things[1], things[3], things[2], things[0]], 'should order by a nested key')
 
   params = {
     orderBy: [['foo.bar', 'DESC']]
   }
-  t.context.objectsEqual(store.query('thing').filter(params).run(), [things[0], things[2], things[3], things[1]], 'should order by a nested key')
+  t.context.objectsEqual(t, store.query('thing').filter(params).run(), [things[0], things[2], things[3], things[1]], 'should order by a nested key')
 })

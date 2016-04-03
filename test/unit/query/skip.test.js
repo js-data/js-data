@@ -16,18 +16,18 @@ test('should correctly apply "skip" predicates', (t) => {
     skip: 1
   }
 
-  t.context.objectsEqual(t.context.store.query('post').filter(params).run(), [p2, p3, p4], 'should skip 1')
-  t.context.objectsEqual(t.context.store.query('post').skip(params.skip).run(), [p2, p3, p4], 'should skip 1')
+  t.context.objectsEqual(t, t.context.store.query('post').filter(params).run(), [p2, p3, p4], 'should skip 1')
+  t.context.objectsEqual(t, t.context.store.query('post').skip(params.skip).run(), [p2, p3, p4], 'should skip 1')
 
   params.skip = 2
-  t.context.objectsEqual(t.context.store.query('post').filter(params).run(), [p3, p4], 'should skip 2')
-  t.context.objectsEqual(t.context.store.query('post').skip(params.skip).run(), [p3, p4], 'should skip 2')
+  t.context.objectsEqual(t, t.context.store.query('post').filter(params).run(), [p3, p4], 'should skip 2')
+  t.context.objectsEqual(t, t.context.store.query('post').skip(params.skip).run(), [p3, p4], 'should skip 2')
 
   params.skip = 3
-  t.context.objectsEqual(t.context.store.query('post').filter(params).run(), [p4], 'should skip 3')
-  t.context.objectsEqual(t.context.store.query('post').skip(params.skip).run(), [p4], 'should skip 3')
+  t.context.objectsEqual(t, t.context.store.query('post').filter(params).run(), [p4], 'should skip 3')
+  t.context.objectsEqual(t, t.context.store.query('post').skip(params.skip).run(), [p4], 'should skip 3')
 
   params.skip = 4
-  t.context.objectsEqual(t.context.store.query('post').filter(params).run(), [], 'should skip 4')
-  t.context.objectsEqual(t.context.store.query('post').skip(params.skip).run(), [], 'should skip 4')
+  t.context.objectsEqual(t, t.context.store.query('post').filter(params).run(), [], 'should skip 4')
+  t.context.objectsEqual(t, t.context.store.query('post').skip(params.skip).run(), [], 'should skip 4')
 })

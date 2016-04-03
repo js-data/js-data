@@ -16,17 +16,17 @@ test('should inject new items into the collection', (t) => {
   }), users)
 })
 test('should inject multiple items into the collection', (t) => {
-  t.context.objectsEqual(t.context.PostCollection.add([
+  t.context.objectsEqual(t, t.context.PostCollection.add([
     t.context.data.p1,
     t.context.data.p2,
     t.context.data.p3,
     t.context.data.p4
   ]), [t.context.data.p1, t.context.data.p2, t.context.data.p3, t.context.data.p4])
 
-  t.context.objectsEqual(t.context.PostCollection.get(5), t.context.data.p1)
-  t.context.objectsEqual(t.context.PostCollection.get(6), t.context.data.p2)
-  t.context.objectsEqual(t.context.PostCollection.get(7), t.context.data.p3)
-  t.context.objectsEqual(t.context.PostCollection.get(8), t.context.data.p4)
+  t.context.objectsEqual(t, t.context.PostCollection.get(5), t.context.data.p1)
+  t.context.objectsEqual(t, t.context.PostCollection.get(6), t.context.data.p2)
+  t.context.objectsEqual(t, t.context.PostCollection.get(7), t.context.data.p3)
+  t.context.objectsEqual(t, t.context.PostCollection.get(8), t.context.data.p4)
 })
 test('should inject existing items into the collection', (t) => {
   const collection = new JSData.Collection({ mapper: new JSData.Mapper({ name: 'user' }) })
@@ -75,7 +75,7 @@ test('should replace existing items', (t) => {
   let post = t.context.PostCollection.add(t.context.data.p1)
   post.foo = 'bar'
   post.beep = 'boop'
-  t.context.objectsEqual(post, {
+  t.context.objectsEqual(t, post, {
     author: 'John',
     age: 30,
     id: 5,
@@ -83,7 +83,7 @@ test('should replace existing items', (t) => {
     beep: 'boop'
   })
   post = t.context.PostCollection.add(t.context.data.p1, { onConflict: 'replace' })
-  t.context.objectsEqual(post, {
+  t.context.objectsEqual(t, post, {
     author: 'John',
     age: 30,
     id: 5

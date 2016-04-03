@@ -328,6 +328,8 @@ const props = {
     // All mappers in this datastore will share adapters
     mapper._adapters = self.getAdapters()
 
+    mapper.datastore = self
+
     mapper.on('all', function (...args) {
       self._onMapperEvent(name, ...args)
     })
