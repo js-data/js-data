@@ -26,6 +26,7 @@ function addBanner (filepath) {
 }
 
 addBanner('dist/js-data.js')
+addBanner('dist/js-data.es2015.js')
 addBanner('dist/js-data.min.js')
 
 console.log('Done!')

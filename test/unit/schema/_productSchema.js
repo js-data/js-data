@@ -1,4 +1,4 @@
-module.exports = productSchema = {
+export const productSchema = {
   $schema: 'http://json-schema.org/draft-04/schema#',
   title: 'Product',
   description: 'A product from Acme\'s catalog',

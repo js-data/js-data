@@ -1,6 +1,7 @@
 import {
   beforeEach,
-  JSData
+  JSData,
+  sinon
 } from '../../_setup'
 import test from 'ava'
 

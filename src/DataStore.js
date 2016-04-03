@@ -180,14 +180,22 @@ const props = {
           }
           return subClass
         })(),
+        destroy (opts) {
+          opts || (opts = {})
+          opts.destroy = function (id, opts) {
+            return self.destroy(name, id, opts)
+          }
+          return utils.getSuper(this).prototype.destroy.call(this, opts)
+        },
         save (opts) {
+          opts || (opts = {})
           opts.create = function (props, opts) {
             return self.create(name, props, opts)
           }
           opts.update = function (id, props, opts) {
             return self.update(name, id, props, opts)
           }
-          return this.constructor.prototype.save.call(this, opts)
+          return utils.getSuper(this).prototype.save.call(this, opts)
         }
       })
     }

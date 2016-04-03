@@ -4,7 +4,7 @@ import {
 } from '../../_setup'
 import test from 'ava'
 
-import productSchema from './_productSchema'
+import {productSchema} from './_productSchema'
 
 test.beforeEach(beforeEach)
 
