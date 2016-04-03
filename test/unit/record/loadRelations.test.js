@@ -9,7 +9,6 @@ test.beforeEach(beforeEach)
 test('should be an instance method', (t) => {
   const Record = JSData.Record
   const record = new Record()
-  t.is(typeof record.create, 'function')
-  t.ok(record.create === Record.prototype.create)
+  t.is(typeof record.loadRelations, 'function')
+  t.ok(record.loadRelations === Record.prototype.loadRelations)
 })
-test.todo('should be tested')

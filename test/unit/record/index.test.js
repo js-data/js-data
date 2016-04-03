@@ -65,3 +65,16 @@ test.cb('should allow instance events (setter method)', (t) => {
 
   foo.set('bar', 'baz')
 })
+
+test('should throw if a Record class does not have a Mapper', (t) => {
+  const record = new JSData.Record()
+  t.throws(() => {
+    record._mapper()
+  }, Error, 'This recordClass has no Mapper!')
+})
+
+test('hashCode should work', (t) => {
+  const BarMapper = new JSData.Mapper({ name: 'bar', idAttribute: '_id' })
+  let bar = BarMapper.createRecord({ _id: 1 })
+  t.is(bar.hashCode(), 1)
+})

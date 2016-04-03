@@ -13,7 +13,6 @@ test('should be an instance method', (t) => {
   t.ok(mapper.count === Mapper.prototype.count)
 })
 test('should count', async (t) => {
-
   const query = { id: 1 }
   const id = 1
   const props = [{ id, name: 'John' }]
@@ -38,7 +37,6 @@ test('should count', async (t) => {
   t.same(count, 1, 'count should be 1')
 })
 test('should return raw', async (t) => {
-
   const query = { id: 1 }
   const id = 1
   const props = [{ id, name: 'John' }]

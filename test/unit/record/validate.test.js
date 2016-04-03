@@ -3,7 +3,7 @@ import {
   JSData
 } from '../../_setup'
 import test from 'ava'
-import productSchema from '../schema/_productSchema'
+import {productSchema} from '../schema/_productSchema'
 
 test.beforeEach(beforeEach)
 
@@ -32,6 +32,7 @@ test('should validate', (t) => {
 
   let errors = product.validate()
 
+  t.ok(product.isValid())
   t.notOk(errors)
 
   product = ProductMapper.createRecord({
@@ -50,7 +51,8 @@ test('should validate', (t) => {
   }, {
     noValidate: true
   })
-  errors = ProductMapper.validate(product)
+  errors = product.validate()
+  t.notOk(product.isValid())
   t.same(
     errors,
     [

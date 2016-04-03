@@ -104,27 +104,19 @@ const Record = Component.extend({
   },
 
   /**
-   * TODO
-   *
-   * @name Record#create
-   * @method
-   * @param {Object} [opts] Configuration options. See {@link Mapper#create}.
-   */
-  create (opts) {
-    return this._mapper().create(this, opts)
-  },
-
-  /**
-   * TODO
+   * Call {@link Mapper#destroy} using this record's primary key.
    *
    * @name Record#destroy
    * @method
-   * @param {Object} [opts] Configuration options. @see {@link Model.destroy}.
+   * @param {Object} [opts] Configuration options passed to {@link Mapper#destroy}.
+   * @return {Promise} The result of calling {@link Mapper#destroy}.
    */
   destroy (opts) {
-    // TODO: move actual destroy logic here
-    const mapper = this._mapper()
-    return mapper.destroy(utils.get(this, mapper.idAttribute), opts)
+    const self = this
+    opts || (opts = {})
+    const mapper = self._mapper()
+    let method = opts.destroy || mapper.destroy.bind(mapper)
+    return method(utils.get(self, mapper.idAttribute), opts)
   },
 
   /**
@@ -168,7 +160,7 @@ const Record = Component.extend({
 
   isValid (opts) {
     const self = this
-    return !!self._mapper().validate(self, opts)
+    return !self._mapper().validate(self, opts)
   },
 
   /**
@@ -312,18 +304,20 @@ const Record = Component.extend({
     const self = this
     opts || (opts = {})
     const mapper = self._mapper()
+    let method = opts.create || mapper.create.bind(mapper)
     const id = utils.get(self, mapper.idAttribute)
     let props = self
     if (utils.isUndefined(id)) {
-      return (opts.create || mapper.create)(props, opts)
+      return method(props, opts)
     }
     if (opts.changesOnly) {
       const changes = self.changes(opts)
       props = {}
-      utils.fillIn(props, changes.added || {})
-      utils.fillIn(props, changes.changed || {})
+      utils.fillIn(props, changes.added)
+      utils.fillIn(props, changes.changed)
     }
-    return (opts.update || mapper.update)(id, props, opts)
+    method = opts.update || mapper.update.bind(mapper)
+    return method(id, props, opts)
   },
 
   /**

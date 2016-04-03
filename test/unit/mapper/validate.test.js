@@ -3,7 +3,7 @@ import {
   JSData
 } from '../../_setup'
 import test from 'ava'
-import productSchema from '../schema/_productSchema'
+import {productSchema} from '../schema/_productSchema'
 
 test.beforeEach(beforeEach)
 
