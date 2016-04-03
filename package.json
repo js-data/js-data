@@ -49,7 +49,7 @@
     "build": "npm run bundle && npm run min && npm run version && npm run banner",
     "ava": "ava",
     "r": "npm run bundle && ava",
-    "cover": "nyc ava",
+    "cover": "nyc --cache ava",
     "report-html": "nyc report --reporter=html",
     "test": "npm run lint && npm run build && npm run cover",
     "repo-tools": "repo-tools updates && repo-tools changelog && repo-tools authors",
@@ -65,7 +65,7 @@
     "js-data-repo-tools": "0.2.0",
     "jsdoc": "3.4.0",
     "nyc": "6.1.1",
-    "rollup": "0.25.7",
+    "rollup": "0.25.8",
     "rollup-plugin-babel": "2.4.0",
     "sinon": "1.17.3",
     "uglify-js": "2.6.2"

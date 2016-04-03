@@ -169,6 +169,29 @@ const props = {
       mapper
     })
 
+    const recordClass = mapper.recordClass
+    if (recordClass && utils.isFunction(recordClass.extend)) {
+      mapper.recordClass = recordClass.extend({
+        constructor: (function () {
+          var subClass = function DataStoreRecord (...args) {
+            utils.classCallCheck(this, subClass)
+            const _this = utils.possibleConstructorReturn(this, (subClass.__super__ || Object.getPrototypeOf(subClass)).apply(this, args))
+            return _this
+          }
+          return subClass
+        })(),
+        save (opts) {
+          opts.create = function (props, opts) {
+            return self.create(name, props, opts)
+          }
+          opts.update = function (id, props, opts) {
+            return self.update(name, id, props, opts)
+          }
+          return this.constructor.prototype.save.call(this, opts)
+        }
+      })
+    }
+
     const schema = mapper.schema || {}
     const properties = schema.properties || {}
     // TODO: Make it possible index nested properties?

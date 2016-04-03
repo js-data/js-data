@@ -67,30 +67,12 @@ const Record = Component.extend({
   /**
    * TODO
    *
-   * @name Record#afterSave
-   * @method
-   * @param {Object} opts TODO
-   */
-  afterSave () {},
-
-  /**
-   * TODO
-   *
    * @name Record#beforeLoadRelations
    * @method
    * @param {string[]} relations TODO
    * @param {Object} opts TODO
    */
   beforeLoadRelations () {},
-
-  /**
-   * TODO
-   *
-   * @name Record#beforeSave
-   * @method
-   * @param {Object} opts TODO
-   */
-  beforeSave () {},
 
   /**
    * Return changes to this record since it was instantiated or
@@ -312,16 +294,36 @@ const Record = Component.extend({
   },
 
   /**
-   * Delegates to {@link Mapper#update}.
+   * Delegates to {@link Mapper#create} or {@link Mapper#update}.
    *
    * @name Record#save
    * @method
    * @param {Object} [opts] Configuration options. See {@link Mapper#create}.
+   * @param [opts] Configuration options.
+   * @param {boolean} [opts.changesOnly] Equality function. Default uses `===`.
+   * @param {Function} [opts.equalsFn] Passed to {@link Record#changes} when
+   * `changesOnly` is `true`.
+   * @param {Array} [opts.ignore] Passed to {@link Record#changes} when
+   * `changesOnly` is `true`.
+   * @return {Promise} The result of calling {@link Mapper#create} or
+   * {@link Mapper#update}.
    */
   save (opts) {
     const self = this
+    opts || (opts = {})
     const mapper = self._mapper()
-    return mapper.update(utils.get(self, mapper.idAttribute), self, opts)
+    const id = utils.get(self, mapper.idAttribute)
+    let props = self
+    if (utils.isUndefined(id)) {
+      return (opts.create || mapper.create)(props, opts)
+    }
+    if (opts.changesOnly) {
+      const changes = self.changes(opts)
+      props = {}
+      utils.fillIn(props, changes.added || {})
+      utils.fillIn(props, changes.changed || {})
+    }
+    return (opts.update || mapper.update)(id, props, opts)
   },
 
   /**
