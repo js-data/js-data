@@ -3002,32 +3002,12 @@ var Record = Component.extend({
   /**
    * TODO
    *
-   * @name Record#afterSave
-   * @method
-   * @param {Object} opts TODO
-   */
-  afterSave: function afterSave() {},
-
-
-  /**
-   * TODO
-   *
    * @name Record#beforeLoadRelations
    * @method
    * @param {string[]} relations TODO
    * @param {Object} opts TODO
    */
   beforeLoadRelations: function beforeLoadRelations() {},
-
-
-  /**
-   * TODO
-   *
-   * @name Record#beforeSave
-   * @method
-   * @param {Object} opts TODO
-   */
-  beforeSave: function beforeSave() {},
 
 
   /**
@@ -3253,16 +3233,36 @@ var Record = Component.extend({
 
 
   /**
-   * Delegates to {@link Mapper#update}.
+   * Delegates to {@link Mapper#create} or {@link Mapper#update}.
    *
    * @name Record#save
    * @method
    * @param {Object} [opts] Configuration options. See {@link Mapper#create}.
+   * @param [opts] Configuration options.
+   * @param {boolean} [opts.changesOnly] Equality function. Default uses `===`.
+   * @param {Function} [opts.equalsFn] Passed to {@link Record#changes} when
+   * `changesOnly` is `true`.
+   * @param {Array} [opts.ignore] Passed to {@link Record#changes} when
+   * `changesOnly` is `true`.
+   * @return {Promise} The result of calling {@link Mapper#create} or
+   * {@link Mapper#update}.
    */
   save: function save(opts) {
     var self = this;
+    opts || (opts = {});
     var mapper = self._mapper();
-    return mapper.update(utils$1.get(self, mapper.idAttribute), self, opts);
+    var id = utils$1.get(self, mapper.idAttribute);
+    var props = self;
+    if (utils$1.isUndefined(id)) {
+      return (opts.create || mapper.create)(props, opts);
+    }
+    if (opts.changesOnly) {
+      var changes = self.changes(opts);
+      props = {};
+      utils$1.fillIn(props, changes.added || {});
+      utils$1.fillIn(props, changes.changed || {});
+    }
+    return (opts.update || mapper.update)(id, props, opts);
   },
 
 
@@ -6683,6 +6683,34 @@ var props$1 = {
       mapper: mapper
     });
 
+    var recordClass = mapper.recordClass;
+    if (recordClass && utils$1.isFunction(recordClass.extend)) {
+      mapper.recordClass = recordClass.extend({
+        constructor: function () {
+          var subClass = function DataStoreRecord() {
+            utils$1.classCallCheck(this, subClass);
+
+            for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+              args[_key3] = arguments[_key3];
+            }
+
+            var _this = utils$1.possibleConstructorReturn(this, (subClass.__super__ || Object.getPrototypeOf(subClass)).apply(this, args));
+            return _this;
+          };
+          return subClass;
+        }(),
+        save: function save(opts) {
+          opts.create = function (props, opts) {
+            return self.create(name, props, opts);
+          };
+          opts.update = function (id, props, opts) {
+            return self.update(name, id, props, opts);
+          };
+          return this.constructor.prototype.save.call(this, opts);
+        }
+      });
+    }
+
     var schema = mapper.schema || {};
     var properties = schema.properties || {};
     // TODO: Make it possible index nested properties?
@@ -6701,8 +6729,8 @@ var props$1 = {
     });
 
     collection.on('all', function () {
-      for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-        args[_key3] = arguments[_key3];
+      for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+        args[_key4] = arguments[_key4];
       }
 
       self._onCollectionEvent.apply(self, [name].concat(args));
@@ -6849,14 +6877,14 @@ var props$1 = {
             (function () {
               var origGet = descriptor.get;
               descriptor.get = function () {
-                var _this = this;
+                var _this2 = this;
 
                 return def.get(def, this, function () {
-                  for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-                    args[_key4] = arguments[_key4];
+                  for (var _len5 = arguments.length, args = Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+                    args[_key5] = arguments[_key5];
                   }
 
-                  return origGet.apply(_this, args);
+                  return origGet.apply(_this2, args);
                 });
               };
             })();
@@ -6865,10 +6893,10 @@ var props$1 = {
             (function () {
               var origSet = descriptor.set;
               descriptor.set = function (related) {
-                var _this2 = this;
+                var _this3 = this;
 
                 return def.set(def, this, related, function (value) {
-                  return origSet.call(_this2, value === undefined ? related : value);
+                  return origSet.call(_this3, value === undefined ? related : value);
                 });
               };
             })();
@@ -7172,8 +7200,8 @@ toProxy$1.forEach(function (method) {
   props$1[method] = function (name) {
     var _getCollection;
 
-    for (var _len5 = arguments.length, args = Array(_len5 > 1 ? _len5 - 1 : 0), _key5 = 1; _key5 < _len5; _key5++) {
-      args[_key5 - 1] = arguments[_key5];
+    for (var _len6 = arguments.length, args = Array(_len6 > 1 ? _len6 - 1 : 0), _key6 = 1; _key6 < _len6; _key6++) {
+      args[_key6 - 1] = arguments[_key6];
     }
 
     return (_getCollection = this.getCollection(name))[method].apply(_getCollection, args);
