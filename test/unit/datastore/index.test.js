@@ -23,7 +23,6 @@ test('should initialize with defaults', (t) => {
   t.same(store.mapperDefaults, {})
   t.ok(store.mapperClass === JSData.Mapper)
   t.ok(store.collectionClass === JSData.LinkedCollection)
-  t.is(store.linkRelations, JSData.utils.isBrowser)
 })
 test('should accept overrides', (t) => {
   const DataStore = JSData.DataStore

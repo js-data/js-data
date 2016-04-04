@@ -11,6 +11,11 @@ test('relation links should stay up-to-date', (t) => {
     linkRelations: true
   })
   store.defineMapper('foo', {
+    schema: {
+      properties: {
+        id: { type: 'number' }
+      }
+    },
     relations: {
       hasMany: {
         bar: {
@@ -21,6 +26,12 @@ test('relation links should stay up-to-date', (t) => {
     }
   })
   store.defineMapper('bar', {
+    schema: {
+      properties: {
+        id: { type: 'number' },
+        foo_id: { type: 'number' }
+      }
+    },
     relations: {
       belongsTo: {
         foo: {
@@ -52,13 +63,11 @@ test('relation links should stay up-to-date', (t) => {
   foo77.bars = [bar88]
   t.ok(foo77.bars[0] === store.getAll('bar')[0])
   t.is(bar88.foo_id, 77)
-  // TODO: Fix this, the link is out-of-date
-  t.context.objectsEqual(t, foo66.bars, [bar88])
+  t.context.objectsEqual(t, foo66.bars, [])
   foo66.bars = [bar88]
   t.ok(foo66.bars[0] === store.getAll('bar')[0])
   t.is(bar88.foo_id, 66)
-  // TODO: Fix this, the link is out-of-date
-  t.context.objectsEqual(t, foo77.bars, [bar88])
+  t.context.objectsEqual(t, foo77.bars, [])
 })
 test('should allow enhanced relation getters', (t) => {
   let wasItActivated = false
@@ -101,14 +110,16 @@ test('should allow enhanced relation getters', (t) => {
   t.ok(wasItActivated)
 })
 test('should configure enumerability and linking of relations', (t) => {
-  const store = new JSData.DataStore({
-    linkRelations: true
-  })
+  const store = new JSData.DataStore()
   store.defineMapper('parent', {
     relations: {
       hasMany: {
         child: {
           localField: 'children',
+          foreignKey: 'parentId'
+        },
+        otherChild: {
+          localField: 'otherChildren',
           foreignKey: 'parentId'
         }
       }
@@ -118,7 +129,6 @@ test('should configure enumerability and linking of relations', (t) => {
     relations: {
       belongsTo: {
         parent: {
-          link: false,
           localField: 'parent',
           foreignKey: 'parentId'
         }

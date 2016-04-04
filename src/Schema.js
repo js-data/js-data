@@ -675,9 +675,7 @@ const makeDescriptor = function (prop, schema, opts) {
   const setter = opts.setter
   const unsetter = opts.unsetter
 
-  descriptor.get = function () {
-    return this._get(keyPath)
-  }
+  descriptor.get = function () { return this._get(keyPath) }
   descriptor.set = function (value) {
     const self = this
     // These are accessed a lot

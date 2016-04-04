@@ -1,6 +1,8 @@
 import utils from './utils'
 import {
-  hasManyType
+  belongsToType,
+  hasManyType,
+  hasOneType
 } from './decorators'
 import Collection from './Collection'
 
@@ -52,12 +54,15 @@ export default Collection.extend({
     const relationList = mapper.relationList || []
     const timestamp = new Date().getTime()
     const usesRecordClass = !!mapper.recordClass
+    const idAttribute = mapper.idAttribute
     let singular
 
     if (utils.isObject(records) && !utils.isArray(records)) {
       singular = true
       records = [records]
     }
+
+    records = utils.getSuper(self).prototype.add.call(self, records, opts)
 
     if (relationList.length && records.length) {
       // Check the currently visited record for relations that need to be
@@ -82,9 +87,10 @@ export default Collection.extend({
           // Grab a reference to the related data attached or linked to the
           // currently visited record
           relatedData = def.getLocalField(record)
+          const id = utils.get(record, idAttribute)
 
           if (utils.isFunction(def.add)) {
-            def.add(datastore, def, record)
+            relatedData = def.add(datastore, def, record)
           } else if (relatedData) {
             // Otherwise, if there is something to be added, add it
             if (isHasMany) {
@@ -106,7 +112,7 @@ export default Collection.extend({
                 return toInsertItem
               })
               // If it's the parent that has the localKeys
-              if (def.localKeys) {
+              if (def.localKeys && !utils.get(record, def.localKeys)) {
                 utils.set(record, def.localKeys, relatedData.map(function (inserted) {
                   return utils.get(inserted, relationIdAttribute)
                 }))
@@ -123,13 +129,52 @@ export default Collection.extend({
                 }
               }
             }
+          }
+
+          if (!relatedData || (utils.isArray(relatedData) && !relatedData.length)) {
+            if (type === belongsToType) {
+              const relatedId = utils.get(record, foreignKey)
+              if (!utils.isUndefined(relatedId)) {
+                relatedData = relatedCollection.get(relatedId)
+              }
+            } else if (type === hasOneType) {
+              const _records = relatedCollection.filter({
+                [foreignKey]: id
+              })
+              relatedData = _records.length ? _records[0] : undefined
+            } else if (type === hasManyType) {
+              if (foreignKey) {
+                const _records = relatedCollection.filter({
+                  [foreignKey]: id
+                })
+                relatedData = _records.length ? _records : undefined
+              } else if (def.localKeys) {
+                const _records = relatedCollection.filter({
+                  where: {
+                    [relationIdAttribute]: {
+                      'in': utils.get(record, def.localKeys || [])
+                    }
+                  }
+                })
+                relatedData = _records.length ? _records : undefined
+              } else if (def.foreignKeys) {
+                const _records = relatedCollection.filter({
+                  where: {
+                    [def.foreignKeys]: {
+                      'contains': id
+                    }
+                  }
+                })
+                relatedData = _records.length ? _records : undefined
+              }
+            }
+          }
+          if (relatedData) {
             def.setLocalField(record, relatedData)
           }
         })
       })
     }
-
-    records = utils.getSuper(self).prototype.add.call(self, records, opts)
 
     records.forEach(function (record) {
       // Track when this record was added

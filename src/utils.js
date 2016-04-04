@@ -529,6 +529,25 @@ const utils = {
   },
 
   /**
+   * Find the index of something according to the given checker function.
+   *
+   * @ignore
+   * @param {Array} array The array to search.
+   * @param {Function} fn Checker function.
+   * @param {number} Index if found or -1 if not found.
+   */
+  findIndex (array, fn) {
+    let index = -1
+    array.forEach(function (record, i) {
+      if (fn(record)) {
+        index = i
+        return false
+      }
+    })
+    return index
+  },
+
+  /**
    * TODO
    *
    * @ignore
@@ -800,6 +819,18 @@ const utils = {
    *
    * @ignore
    */
+  noDupeAdd (array, record, fn) {
+    const index = this.findIndex(array, fn)
+    if (index < 0) {
+      array.push(record)
+    }
+  },
+
+  /**
+   * TODO
+   *
+   * @ignore
+   */
   omit (props, keys) {
     // Remove relations
     const _props = {}
@@ -842,6 +873,18 @@ const utils = {
    */
   reject (value) {
     return utils.Promise.reject(value)
+  },
+
+  /**
+   * TODO
+   *
+   * @ignore
+   */
+  remove (array, fn) {
+    const index = this.findIndex(array, fn)
+    if (index >= 0) {
+      array.splice(index, 1)
+    }
   },
 
   /**

@@ -300,12 +300,12 @@ export default Component.extend({
     }
 
     if (utils.isUndefined(self.recordClass)) {
-      self.recordClass = Record.extend({
+      const superClass = Record
+      self.recordClass = superClass.extend({
         constructor: (function () {
-          var subClass = function Record (...args) {
+          var subClass = function Record (props, opts) {
             utils.classCallCheck(this, subClass)
-            const _this = utils.possibleConstructorReturn(this, (subClass.__super__ || Object.getPrototypeOf(subClass)).apply(this, args))
-            return _this
+            superClass.call(this, props, opts)
           }
           return subClass
         })()
@@ -951,7 +951,7 @@ export default Component.extend({
         if (utils.isArray(relationData) && (!relationData.length || relatedMapper.is(relationData[0]))) {
           return
         }
-        def.setLocalField(props, relatedMapper.createRecord(relationData, opts))
+        utils.set(props, def.localField, relatedMapper.createRecord(relationData, opts))
       }
     })
     // Check to make sure "props" is not already an instance of this Mapper.
@@ -1293,11 +1293,11 @@ export default Component.extend({
     }
     properties || (properties = {})
     if (!opts.strict) {
-      utils.forOwn(record, function (value, key) {
+      for (var key in record) {
         if (!properties[key] && relationFields.indexOf(key) === -1) {
-          json[key] = utils.plainCopy(value)
+          json[key] = utils.plainCopy(record[key])
         }
-      })
+      }
     }
     // The user wants to include relations in the resulting plain object
     // representation
