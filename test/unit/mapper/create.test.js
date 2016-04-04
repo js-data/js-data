@@ -235,7 +235,7 @@ test('should nested create everything in opts.with', async (t) => {
   clear()
 
   t.is(createCalledCount.user, 8)
-  t.is(createCalledCount.comment, 6)
+  t.is(createCalledCount.comment, 9)
   t.is(createCalledCount.profile, 4)
   t.is(createCalledCount.organization, 2)
 })
@@ -555,7 +555,7 @@ test('should combine opts.with and opts.pass', async (t) => {
   clear()
 
   t.is(createCalledCount.user, 8)
-  t.is(createCalledCount.comment, 4)
+  t.is(createCalledCount.comment, 6)
   t.is(createCalledCount.profile, 2)
   t.notOk(createCalledCount.organization)
 })

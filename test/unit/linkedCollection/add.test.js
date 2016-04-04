@@ -96,6 +96,12 @@ test('should inject cyclic dependencies', (t) => {
           localField: 'children',
           foreignKey: 'parentId'
         }
+      },
+      belongsTo: {
+        foo: {
+          localField: 'parent',
+          foreignKey: 'parentId'
+        }
       }
     }
   })
@@ -239,8 +245,8 @@ test('should not auto-add relations where auto-add has been disabled', (t) => {
     id: 1,
     bars: [bar1Json, bar2Json]
   })
-  t.is(bar1Json.fooId, 1)
-  t.is(bar2Json.fooId, 1)
+  t.is(foo.bars[0].fooId, 1)
+  t.is(foo.bars[1].fooId, 1)
   t.is(foo.bars.length, 2)
   t.same(store.getAll('bar'), [], 'nothing should have been injected')
 })
@@ -301,7 +307,7 @@ test('should allow custom relation injection logic', (t) => {
     }
   ], 'bars should have been added')
 })
-test('should not link relations nor delete field if "link" is false', (t) => {
+test('should update links', (t) => {
   const store = new JSData.DataStore({
     linkRelations: true
   })
@@ -310,8 +316,7 @@ test('should not link relations nor delete field if "link" is false', (t) => {
       hasMany: {
         bar: {
           localField: 'bars',
-          foreignKey: 'fooId',
-          link: false
+          foreignKey: 'fooId'
         }
       }
     }
@@ -343,7 +348,7 @@ test('should not link relations nor delete field if "link" is false', (t) => {
     id: 3,
     fooId: 1
   })
-  t.is(foo.bars.length, 2, 'bars should have been added, but not linked')
+  t.is(foo.bars.length, 3, 'bars should have been added, but not linked')
   t.is(store.getAll('bar').length, 3, '3 bars should be in the store')
 })
 test('should inject 1,000 items', (t) => {

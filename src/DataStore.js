@@ -7,16 +7,14 @@ import {
 import Container from './Container'
 import LinkedCollection from './LinkedCollection'
 
-const DATASTORE_DEFAULTS = {
-  /**
-   * Whether relations should be linked for records that are in the datastore.
-   *
-   * Defaults to `true` in the browser and `false` in Node.js
-   *
-   * @name DataStore#linkRelations
-   * @type {boolean}
-   */
-  linkRelations: utils.isBrowser
+const DATASTORE_DEFAULTS = {}
+
+const safeSet = function (record, field, value) {
+  if (record._set) {
+    record._set(field, value)
+  } else {
+    utils.set(record, field, value)
+  }
 }
 
 const props = {
@@ -190,170 +188,280 @@ const props = {
       self._onCollectionEvent(name, ...args)
     })
 
-    const linkRelations = self.linkRelations
+    const idAttribute = mapper.idAttribute
 
-    if (linkRelations) {
-      mapper.relationList.forEach(function (def) {
-        const relation = def.relation
-        const localField = def.localField
-        const path = `links.${localField}`
-        const foreignKey = def.foreignKey
-        const type = def.type
-        const link = utils.isUndefined(def.link) ? linkRelations : def.link
-        const updateOpts = { index: foreignKey }
-        let descriptor, load
+    mapper.relationList.forEach(function (def) {
+      const relation = def.relation
+      const localField = def.localField
+      const path = `links.${localField}`
+      const foreignKey = def.foreignKey
+      const type = def.type
+      const updateOpts = { index: foreignKey }
+      let descriptor
 
-        if (type === belongsToType) {
-          if (!collection.indexes[foreignKey]) {
-            collection.createIndex(foreignKey)
-          }
+      const getter = function () { return this._get(path) }
 
-          descriptor = {
-            get () {
-              const _self = this
-              let item = _self._get(path)
-              if (!_self._get('$') || !link) {
-                return item
-              }
-              const key = def.getForeignKey(_self)
-              item = (utils.isUndefined(key) ? undefined : self.get(relation, key)) || item
-              _self._set(path, item)
-              return item
-            },
-            set (record) {
-              const _self = this
-              if (record) {
-                _self._set(path, record)
-                def.setForeignKey(_self, record)
-              } else {
-                _self._set(path, undefined)
-                utils.set(_self, def.foreignKey, undefined)
-              }
-              return record
+      if (type === belongsToType) {
+        if (!collection.indexes[foreignKey]) {
+          collection.createIndex(foreignKey)
+        }
+
+        descriptor = {
+          get: getter,
+          set (record) {
+            const _self = this
+            const current = this._get(path)
+            if (record === current) {
+              return current
             }
-          }
-        } else if (type === hasManyType) {
-          const localKeys = def.localKeys
-          const foreignKeys = def.foreignKeys
+            const id = utils.get(_self, idAttribute)
+            const inverseDef = def.getInverse(mapper)
 
-          // TODO: Handle case when belongsTo relation isn't ever defined
-          if (self._collections[relation] && foreignKey && !self.getCollection(relation).indexes[foreignKey]) {
-            self.getCollection(relation).createIndex(foreignKey)
-          }
+            if (record) {
+              const relatedIdAttribute = def.getRelation().idAttribute
+              const relatedId = utils.get(record, relatedIdAttribute)
 
-          descriptor = {
-            get () {
-              const _self = this
-              let items = _self._get(path)
-              if (!_self._get('$') || !link) {
-                return items
-              }
-              const key = def.getForeignKey(_self)
-              const relationCollection = self.getCollection(relation)
-              let storeItems
-
-              if (foreignKey) {
-                // Really fast retrieval
-                storeItems = relationCollection.getAll(key, {
-                  index: foreignKey
-                })
-              } else if (localKeys) {
-                const keys = utils.get(_self, localKeys) || []
-                const args = utils.isArray(keys) ? keys : Object.keys(keys)
-                // Really fast retrieval
-                storeItems = relationCollection.getAll.apply(relationCollection, args)
-              } else if (foreignKeys) {
-                const query = {}
-                utils.set(query, `where.${foreignKeys}.contains`, key)
-                // Make a much slower retrieval
-                storeItems = relationCollection.filter(query)
+              // Prefer store record
+              if (!utils.isUndefined(relatedId)) {
+                record = self.get(relation, relatedId) || record
               }
 
-              if (!items || storeItems.length) {
-                items = storeItems
-              }
-              _self._set(path, items)
-              return items
-            },
-            set (records) {
-              const _self = this
-              const key = utils.get(_self, mapper.idAttribute)
-              _self._set(path, records)
+              // Set locals
+              _self._set(path, record)
+              safeSet(_self, foreignKey, relatedId)
+              collection.updateIndex(_self, updateOpts)
 
-              if (foreignKey) {
-                def.setForeignKey(_self, records)
-              } if (localKeys) {
-                const relatedIdAttribute = def.getRelation().idAttribute
-                utils.set(_self, localKeys, records.map(function (record) {
-                  return utils.get(record, relatedIdAttribute)
-                }))
-              } else if (foreignKeys) {
-                records.forEach(function (record) {
-                  const keys = utils.get(record, foreignKeys)
-                  if (keys) {
-                    if (keys.indexOf(key) === -1) {
-                      keys.push(key)
-                    }
-                  } else {
-                    utils.set(record, foreignKeys, [key])
-                  }
+              // Update (set) inverse relation
+              if (inverseDef.type === hasOneType) {
+                utils.set(record, inverseDef.localField, _self)
+              } else if (inverseDef.type === hasManyType) {
+                const children = utils.get(record, inverseDef.localField)
+                utils.noDupeAdd(children, _self, function (_record) {
+                  return id === utils.get(_record, idAttribute)
                 })
               }
-              return records
-            }
-          }
-        } else if (type === hasOneType) {
-          descriptor = {
-            get () {
-              const _self = this
-              let item = _self._get(path)
-              if (!_self._get('$') || !link) {
-                return item
+            } else {
+              // Unset locals
+              _self._set(path, undefined)
+              safeSet(_self, foreignKey, undefined)
+              collection.updateIndex(_self, updateOpts)
+
+              // Update (unset) inverse relation
+              if (inverseDef.type === hasOneType) {
+                utils.set(record, inverseDef.localField, undefined)
+              } else if (inverseDef.type === hasManyType) {
+                const children = utils.get(record, inverseDef.localField)
+                utils.remove(children, function (_record) {
+                  return id === utils.get(_record, idAttribute)
+                })
               }
-              const key = def.getForeignKey(_self)
-              const items = self.getAll(relation, key, {
-                index: foreignKey
+            }
+            if (current) {
+              const children = utils.get(current, inverseDef.localField)
+              utils.remove(children, function (_record) {
+                return id === utils.get(_record, idAttribute)
               })
-              item = (items.length ? items[0] : undefined) || item
-              _self._set(path, item)
-              return item
-            },
-            set (record) {
-              const _self = this
-              if (record) {
-                def.setForeignKey(_self, record)
-                _self._set(path, record)
-              } else {
-                utils.set(_self, def.foreignKey, undefined)
-                _self._set(path, undefined)
+            }
+            return record
+          }
+        }
+
+        if (mapper.recordClass.prototype.hasOwnProperty(foreignKey)) {
+          const superClass = mapper.recordClass
+          mapper.recordClass = superClass.extend({
+            constructor: (function () {
+              var subClass = function Record (props, opts) {
+                utils.classCallCheck(this, subClass)
+                superClass.call(this, props, opts)
               }
-              return record
+              return subClass
+            })()
+          })
+        }
+        Object.defineProperty(mapper.recordClass.prototype, foreignKey, {
+          enumerable: true,
+          get () { return this._get(foreignKey) },
+          set (value) {
+            const _self = this
+            if (utils.isUndefined(value)) {
+              // Unset locals
+              utils.set(_self, localField, undefined)
+            } else {
+              safeSet(_self, foreignKey, value)
+              let storeRecord = self.get(relation, value)
+              if (storeRecord) {
+                utils.set(_self, localField, storeRecord)
+              }
             }
           }
+        })
+      } else if (type === hasManyType) {
+        const localKeys = def.localKeys
+        const foreignKeys = def.foreignKeys
+
+        // TODO: Handle case when belongsTo relation isn't ever defined
+        if (self._collections[relation] && foreignKey && !self.getCollection(relation).indexes[foreignKey]) {
+          self.getCollection(relation).createIndex(foreignKey)
         }
 
-        if (load && !def.load) {
-          def.load = load
-        }
+        descriptor = {
+          get () {
+            const _self = this
+            let current = getter.call(_self)
+            if (!current) {
+              _self._set(path, [])
+            }
+            return getter.call(_self)
+          },
+          set (records) {
+            const _self = this
+            records || (records = [])
+            if (records && !utils.isArray(records)) {
+              records = [records]
+            }
+            const id = utils.get(_self, idAttribute)
+            const relatedIdAttribute = def.getRelation().idAttribute
+            const inverseDef = def.getInverse(mapper)
+            const inverseLocalField = inverseDef.localField
+            let linked = _self._get(path)
+            if (!linked) {
+              linked = []
+            }
 
-        if (descriptor) {
-          descriptor.enumerable = utils.isUndefined(def.enumerable) ? true : def.enumerable
-          if (def.get) {
-            let origGet = descriptor.get
-            descriptor.get = function () {
-              return def.get(def, this, (...args) => origGet.apply(this, args))
+            const current = linked
+            linked = []
+            const toLink = {}
+            records.forEach(function (record) {
+              const relatedId = utils.get(record, relatedIdAttribute)
+              if (!utils.isUndefined(relatedId)) {
+                // Prefer store record
+                record = self.get(relation, relatedId) || record
+                toLink[relatedId] = record
+              }
+              linked.push(record)
+            })
+            if (foreignKey) {
+              records.forEach(function (record) {
+                // Update (set) inverse relation
+                safeSet(record, foreignKey, id)
+                self.getCollection(relation).updateIndex(record, updateOpts)
+                utils.set(record, inverseLocalField, _self)
+              })
+              current.forEach(function (record) {
+                const relatedId = utils.get(record, relatedIdAttribute)
+                if (!utils.isUndefined(relatedId) && !toLink.hasOwnProperty(relatedId)) {
+                  // Update (unset) inverse relation
+                  safeSet(record, foreignKey, undefined)
+                  self.getCollection(relation).updateIndex(record, updateOpts)
+                  utils.set(record, inverseLocalField, undefined)
+                }
+              })
+            } else if (localKeys) {
+              const _localKeys = []
+              records.forEach(function (record) {
+                // Update (set) inverse relation
+                utils.set(record, inverseLocalField, _self)
+                _localKeys.push(utils.get(record, relatedIdAttribute))
+              })
+              // Update locals
+              utils.set(_self, localKeys, _localKeys)
+              // Update (unset) inverse relation
+              current.forEach(function (record) {
+                const relatedId = utils.get(record, relatedIdAttribute)
+                if (!utils.isUndefined(relatedId) && !toLink.hasOwnProperty(relatedId)) {
+                  // Update inverse relation
+                  utils.set(record, inverseLocalField, undefined)
+                }
+              })
+            } else if (foreignKeys) {
+              // Update (set) inverse relation
+              records.forEach(function (record) {
+                const _localKeys = utils.get(record, foreignKeys) || []
+                utils.noDupeAdd(_localKeys, id, function (_key) {
+                  return id === _key
+                })
+                const _localField = utils.get(record, inverseLocalField) || []
+                utils.noDupeAdd(_localField, _self, function (_record) {
+                  return id === utils.get(_record, idAttribute)
+                })
+              })
+              // Update (unset) inverse relation
+              current.forEach(function (record) {
+                const _localKeys = utils.get(record, foreignKeys) || []
+                utils.remove(_localKeys, function (_key) {
+                  return id === _key
+                })
+                const _localField = utils.get(record, inverseLocalField) || []
+                utils.remove(_localField, function (_record) {
+                  return id === utils.get(_record, idAttribute)
+                })
+              })
             }
+
+            _self._set(path, linked)
+            return linked
           }
-          if (def.set) {
-            let origSet = descriptor.set
-            descriptor.set = function (related) {
-              return def.set(def, this, related, (value) => origSet.call(this, value === undefined ? related : value))
-            }
-          }
-          Object.defineProperty(mapper.recordClass.prototype, localField, descriptor)
         }
-      })
-    }
+      } else if (type === hasOneType) {
+        // TODO: Handle case when belongsTo relation isn't ever defined
+        if (self._collections[relation] && foreignKey && !self.getCollection(relation).indexes[foreignKey]) {
+          self.getCollection(relation).createIndex(foreignKey)
+        }
+        descriptor = {
+          get: getter,
+          set (record) {
+            const _self = this
+            const current = this._get(path)
+            if (record === current) {
+              return current
+            }
+            const relatedId = utils.get(record, def.getRelation().idAttribute)
+            const inverseLocalField = def.getInverse(mapper).localField
+            // Update (unset) inverse relation
+            if (current) {
+              safeSet(current, foreignKey, undefined)
+              self.getCollection(relation).updateIndex(current, updateOpts)
+              utils.set(current, inverseLocalField, undefined)
+            }
+            if (record) {
+              // Prefer store record
+              if (!utils.isUndefined(relatedId)) {
+                record = self.get(relation, relatedId) || record
+              }
+
+              // Set locals
+              _self._set(path, record)
+
+              // Update (set) inverse relation
+              safeSet(record, foreignKey, utils.get(_self, idAttribute))
+              self.getCollection(relation).updateIndex(record, updateOpts)
+              utils.set(record, inverseLocalField, _self)
+            } else {
+              // Set locals
+              _self._set(path, undefined)
+            }
+            return record
+          }
+        }
+      }
+
+      if (descriptor) {
+        descriptor.enumerable = utils.isUndefined(def.enumerable) ? true : def.enumerable
+        if (def.get) {
+          let origGet = descriptor.get
+          descriptor.get = function () {
+            return def.get(def, this, (...args) => origGet.apply(this, args))
+          }
+        }
+        if (def.set) {
+          let origSet = descriptor.set
+          descriptor.set = function (related) {
+            return def.set(def, this, related, (value) => origSet.call(this, value === undefined ? related : value))
+          }
+        }
+        Object.defineProperty(mapper.recordClass.prototype, localField, descriptor)
+      }
+    })
 
     return mapper
   },
@@ -549,9 +657,9 @@ const props = {
       records.forEach(function (record) {
         let relatedData
         let query
-        if (def.foreignKey && (def.type === 'hasOne' || def.type === 'hasMany')) {
+        if (def.foreignKey && (def.type === hasOneType || def.type === hasManyType)) {
           query = { [def.foreignKey]: def.getForeignKey(record) }
-        } else if (def.type === 'hasMany' && def.localKeys) {
+        } else if (def.type === hasManyType && def.localKeys) {
           query = {
             where: {
               [def.getRelation().idAttribute]: {
@@ -559,7 +667,7 @@ const props = {
               }
             }
           }
-        } else if (def.type === 'hasMany' && def.foreignKeys) {
+        } else if (def.type === hasManyType && def.foreignKeys) {
           query = {
             where: {
               [def.foreignKeys]: {
@@ -567,7 +675,7 @@ const props = {
               }
             }
           }
-        } else if (def.type === 'belongsTo') {
+        } else if (def.type === belongsToType) {
           relatedData = self.remove(def.relation, def.getForeignKey(record), optsCopy)
         }
         if (query) {
@@ -577,7 +685,7 @@ const props = {
           if (utils.isArray(relatedData) && !relatedData.length) {
             return
           }
-          if (def.type === 'hasOne') {
+          if (def.type === hasOneType) {
             relatedData = relatedData[0]
           }
           def.setLocalField(record, relatedData)

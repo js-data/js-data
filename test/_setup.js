@@ -110,7 +110,7 @@ export const beforeEach = function (t) {
       belongsTo: {
         user: {
           localField: 'user',
-          localKey: 'userId'
+          foreignKey: 'userId'
         }
       }
     }
@@ -122,11 +122,11 @@ export const beforeEach = function (t) {
         user: [
           {
             localField: 'user',
-            localKey: 'userId'
+            foreignKey: 'userId'
           },
           {
             localField: 'approvedByUser',
-            localKey: 'approvedBy'
+            foreignKey: 'approvedBy'
           }
         ]
       }

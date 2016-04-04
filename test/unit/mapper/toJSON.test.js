@@ -104,7 +104,8 @@ test('should remove relations when an instance', (t) => {
   t.context.objectsEqual(t, user.toJSON(), expected, 'returned data should not have relations')
 })
 test('should keep specified relations when an instance', (t) => {
-  const user = t.context.store.add('user', {
+  const store = t.context.store
+  const user = store.add('user', {
     name: 'John',
     id: 1,
     organization: {
@@ -170,9 +171,9 @@ test('should keep specified relations when an instance', (t) => {
         userId: 1,
         text: 'foo',
         approvedBy: 5,
-        approvedByUser: t.context.store.get('user', 5).toJSON()
+        approvedByUser: store.get('user', 5).toJSON()
       },
-      t.context.store.get('comment', 4).toJSON()
+      store.get('comment', 4)
     ]
   }
 
@@ -198,7 +199,7 @@ test('should keep specified relations when an instance', (t) => {
           name: 'Sally',
           id: 5,
           organizationId: 6,
-          organization: t.context.store.get('organization', 6).toJSON()
+          organization: store.get('organization', 6).toJSON()
         }
       },
       t.context.store.get('comment', 4).toJSON()

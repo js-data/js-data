@@ -75,6 +75,22 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
   },
   setLocalField (record, data) {
     return utils.set(record, this.localField, data)
+  },
+  getInverse (mapper) {
+    const self = this
+    if (self.inverse) {
+      return self.inverse
+    }
+    self.getRelation().relationList.forEach(function (def) {
+      if (def.getRelation() === mapper) {
+        if (def.foreignKey && def.foreignKey !== self.foreignKey) {
+          return
+        }
+        self.inverse = def
+        return false
+      }
+    })
+    return self.inverse
   }
 })
 
