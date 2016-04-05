@@ -318,7 +318,7 @@ const props = {
             }
             if (current) {
               if (inverseDef.type === hasOneType) {
-                utils.set(children, inverseDef.localField, undefined)
+                utils.set(current, inverseDef.localField, undefined)
               } else if (inverseDef.type === hasManyType) {
                 const children = utils.get(current, inverseDef.localField)
                 utils.remove(children, function (_record) {

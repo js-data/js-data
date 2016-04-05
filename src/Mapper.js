@@ -765,7 +765,7 @@ export default Component.extend({
           }))
         } else if (def.type === hasManyType && def.localKeys) {
           // Create his hasMany relation first because it uses localKeys
-          task.push(relatedMapper.createMany(relationData, optsCopy)).then(function (data) {
+          tasks.push(relatedMapper.createMany(relationData, optsCopy)).then(function (data) {
             def.setLocalField(belongsToRelationData, data)
             utils.set(props, def.localKeys, data.map(function (record) {
               return utils.get(record, relatedIdAttribute)

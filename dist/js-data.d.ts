@@ -28,6 +28,7 @@ declare module JSData {
     eventify(target: any, getter: Function, setter: Function, enumerable?: boolean): void
     extend(props?: any, classProps?: any): Function
     fillIn(dest: Object, src: Object): void
+    findIndex(array: any[], fn: Function): void
     forEachRelation(mapper: any, opts: any, fn: Function, ctx?: any): void
     forOwn(obj: any, fn: Function, thisArg?: Object): void
     fromJson(json: any): any
@@ -49,10 +50,12 @@ declare module JSData {
     isString(value: any): boolean
     isUndefined(value: any): boolean
     logify(target: any, defaultNamespace: any): void
+    noDupeAdd(array: any[], record: any, fn: Function): void
     omit(props: Object, keys: string[]): Object
     plainCopy(from: any): any
     possibleConstructorReturn(self: Object, call: Object | Function): Object
     reject(value: any): Promise<any>
+    remove(array: any[], fn: Function): void
     resolve(value: any): Promise<any>
     set(object: Object, path: string, value?: any): void
     strictEqual(a: any, b: any): boolean
@@ -220,7 +223,12 @@ declare module JSData {
     linkRelations: boolean
     constructor(opts?: any)
     add(mapperName: string, records: any[]|any, opts?: any): any[]|any
+    addToCache(mapperName: string, data: any, opts: any): any
     between(mapperName: string, leftKeys: any, rightKeys: any, opts?: any): any[]
+    cachedFind(mapperName: string, id: string|number, opts: any): any
+    cachedFindAll(mapperName: string, hash: string, opts: any): any
+    cacheFind(mapperName: string, data: any, id: string|number, opts: any): void
+    cacheFindAll(mapperName: string, data: any, hash: string, opts: any): void
     createIndex(mapperName: string, name: any, fieldList: any, opts?: any): LinkedCollection
     filter(mapperName: string, query: any, thisArg?: any): any[]
     get(mapperName: string, id: string|number): any
