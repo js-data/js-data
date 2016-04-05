@@ -100,12 +100,11 @@ const utils = {
    * @param {Object} src Source object.
    */
   _ (dest, src) {
-    for (var key in dest) {
-      let value = dest[key]
-      if (src[key] === undefined && !utils.isFunction(value) && key && key.indexOf('_') !== 0) {
-        src[key] = value
+    utils.forOwn(src, function (value, key) {
+      if (key && utils.isUndefined(dest[key]) && !utils.isFunction(value) && key.indexOf('_') !== 0) {
+        dest[key] = value
       }
-    }
+    })
   },
 
   /**
@@ -526,6 +525,7 @@ const utils = {
         dest[key] = value
       }
     })
+    return dest
   },
 
   /**

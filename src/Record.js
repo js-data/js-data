@@ -194,7 +194,7 @@ const Record = Component.extend({
     opts.with = relations
 
     // Fill in "opts" with the Model's configuration
-    utils._(mapper, opts)
+    utils._(opts, mapper)
     opts.adapter = mapper.getAdapterName(opts)
 
     // beforeLoadRelations lifecycle hook

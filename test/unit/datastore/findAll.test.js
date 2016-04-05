@@ -24,7 +24,7 @@ test('should findAll', async (t) => {
   }, { 'default': true })
   const users = await t.context.store.findAll('user', query)
   t.is(callCount, 1, 'findAll should have been called once')
-  t.is(typeof t.context.store._completedQueries.user[t.context.store.hashQuery('user', query)], 'number')
+  t.is(typeof t.context.store._completedQueries.user[t.context.store.hashQuery('user', query)], 'function')
   t.context.objectsEqual(t, users, props, 'users should have been found')
   t.ok(users[0] instanceof t.context.User.recordClass, 'user is a record')
   t.context.objectsEqual(t, await t.context.store.findAll('user', query), users, 'should return the cached users')

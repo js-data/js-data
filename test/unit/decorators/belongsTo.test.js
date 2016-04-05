@@ -6,17 +6,73 @@ import test from 'ava'
 
 test.beforeEach(beforeEach)
 
-test.skip('should add property accessors to prototype of target and allow relation re-assignment using defaults', (t) => {
-  class Foo extends Model {}
-  Foo.linkRelations = true
-  class Bar extends Model {}
-  Bar.linkRelations = true
-  Bar.belongsTo(Foo)
-  const foo = Foo.inject({ id: 1 })
-  const foo2 = Foo.inject({ id: 2 })
-  const bar = Bar.inject({ id: 1, fooId: 1 })
-  const bar2 = Bar.inject({ id: 2, fooId: 1 })
-  const bar3 = Bar.inject({ id: 3 })
+test('should check relation configuration', (t) => {
+  let mapper = new JSData.Mapper({ name: 'foo' })
+  let mapper2 = new JSData.Mapper({ name: 'bar' })
+
+  t.throws(() => {
+    JSData.belongsTo(mapper2, {
+      foreignKey: 'm_id'
+    })(mapper)
+  }, Error, 'localField is required!')
+
+  t.throws(() => {
+    JSData.belongsTo(mapper2, {
+      localField: 'm'
+    })(mapper)
+  }, Error, 'foreignKey is required!')
+
+  t.throws(() => {
+    JSData.belongsTo('mapper2', {
+      localField: 'm',
+      foreignKey: 'm_id'
+    })(mapper)
+  }, Error, 'you must provide a reference to the related mapper!')
+
+  t.notThrows(() => {
+    JSData.belongsTo('mapper2', {
+      localField: 'm',
+      foreignKey: 'm_id',
+      getRelation () {
+        return mapper2
+      }
+    })(mapper)
+  })
+
+  t.throws(() => {
+    JSData.belongsTo(undefined, {
+      localField: 'm',
+      foreignKey: 'm_id'
+    })(mapper)
+  }, Error, 'no relation provided!')
+})
+test('should add property accessors to prototype of target and allow relation re-assignment using defaults', (t) => {
+  const store = new JSData.DataStore()
+  store.defineMapper('foo', {
+    relations: {
+      hasMany: {
+        bar: {
+          localField: 'bars',
+          foreignKey: 'fooId'
+        }
+      }
+    }
+  })
+  store.defineMapper('bar', {
+    relations: {
+      belongsTo: {
+        foo: {
+          localField: 'foo',
+          foreignKey: 'fooId'
+        }
+      }
+    }
+  })
+  const foo = store.add('foo', { id: 1 })
+  const foo2 = store.add('foo', { id: 2 })
+  const bar = store.add('bar', { id: 1, fooId: 1 })
+  const bar2 = store.add('bar', { id: 2, fooId: 1 })
+  const bar3 = store.add('bar', { id: 3 })
   t.true(bar.foo === foo)
   t.true(bar2.foo === foo)
   t.notOk(bar3.foo)
@@ -26,53 +82,33 @@ test.skip('should add property accessors to prototype of target and allow relati
   t.true(bar2.foo === foo)
   t.true(bar3.foo === foo)
 })
-test.skip('should add property accessors to prototype of target and allow relation re-assignment using customizations', (t) => {
-  class Foo extends Model {}
-  Foo.linkRelations = true
-  class Bar extends Model {}
-  Bar.linkRelations = true
-  Bar.belongsTo(Foo, {
-    localField: '_foo',
-    foreignKey: 'fooId'
-  })
-  const foo = Foo.inject({ id: 1 })
-  const foo2 = Foo.inject({ id: 2 })
-  const bar = Bar.inject({ id: 1, fooId: 1 })
-  const bar2 = Bar.inject({ id: 2, fooId: 1 })
-  const bar3 = Bar.inject({ id: 3 })
-  t.true(bar._foo === foo)
-  t.true(bar2._foo === foo)
-  t.notOk(bar3._foo)
-  bar._foo = foo2
-  bar3._foo = foo
-  t.true(bar._foo === foo2)
-  t.true(bar2._foo === foo)
-  t.true(bar3._foo === foo)
-})
-test.skip('should allow custom getter and setter', (t) => {
-  class Foo extends Model {}
-  Foo.linkRelations = true
-  class Bar extends Model {}
-  Bar.linkRelations = true
-  let getCalled = 0
-  let setCalled = 0
-  Bar.belongsTo(Foo, {
-    localField: '_foo',
-    foreignKey: 'fooId',
-    get: function (Model, Relation, bar, originalGet) {
-      getCalled++
-      return originalGet()
-    },
-    set: function (Model, Relation, bar, foo, originalSet) {
-      setCalled++
-      originalSet()
+test('should add property accessors to prototype of target and allow relation re-assignment using customizations', (t) => {
+  const store = new JSData.DataStore()
+  store.defineMapper('foo', {
+    relations: {
+      hasMany: {
+        bar: {
+          localField: 'bars',
+          foreignKey: 'fooId'
+        }
+      }
     }
   })
-  const foo = Foo.inject({ id: 1 })
-  const foo2 = Foo.inject({ id: 2 })
-  const bar = Bar.inject({ id: 1, fooId: 1 })
-  const bar2 = Bar.inject({ id: 2, fooId: 1 })
-  const bar3 = Bar.inject({ id: 3 })
+  store.defineMapper('bar', {
+    relations: {
+      belongsTo: {
+        foo: {
+          localField: '_foo',
+          foreignKey: 'fooId'
+        }
+      }
+    }
+  })
+  const foo = store.add('foo', { id: 1 })
+  const foo2 = store.add('foo', { id: 2 })
+  const bar = store.add('bar', { id: 1, fooId: 1 })
+  const bar2 = store.add('bar', { id: 2, fooId: 1 })
+  const bar3 = store.add('bar', { id: 3 })
   t.true(bar._foo === foo)
   t.true(bar2._foo === foo)
   t.notOk(bar3._foo)
@@ -81,22 +117,52 @@ test.skip('should allow custom getter and setter', (t) => {
   t.true(bar._foo === foo2)
   t.true(bar2._foo === foo)
   t.true(bar3._foo === foo)
-  t.is(getCalled, 8)
-  t.is(setCalled, 2)
 })
-test.skip('should still allow re-assignment when linking is disabled', (t) => {
-  class Foo extends Model {}
-  class Bar extends Model {}
-  Foo.hasMany(Bar, {
-    localField: 'bars'
+test('should allow custom getter and setter', (t) => {
+  const store = new JSData.DataStore()
+  store.defineMapper('foo', {
+    relations: {
+      hasMany: {
+        bar: {
+          localField: 'bars',
+          foreignKey: 'fooId'
+        }
+      }
+    }
   })
-  Bar.belongsTo(Foo)
-  const foo = Foo.inject({ id: 1, bars: [{ id: 1 }] })
-  const foo2 = Foo.inject({ id: 2, bars: [{ id: 2 }] })
-  t.is(foo.bars.length, 1)
-  t.is(foo2.bars.length, 1)
-  Bar.get(1).foo = foo2
-  Bar.get(2).foo = foo
-  t.true(Bar.get(1).foo === foo2)
-  t.true(Bar.get(2).foo === foo)
+  store.defineMapper('bar', {
+    relations: {
+      belongsTo: {
+        foo: {
+          localField: '_foo',
+          foreignKey: 'fooId',
+          get: function (Relation, bar, originalGet) {
+            getCalled++
+            return originalGet()
+          },
+          set: function (Relation, bar, foo, originalSet) {
+            setCalled++
+            originalSet()
+          }
+        }
+      }
+    }
+  })
+  let getCalled = 0
+  let setCalled = 0
+  const foo = store.add('foo', { id: 1 })
+  const foo2 = store.add('foo', { id: 2 })
+  const bar = store.add('bar', { id: 1, fooId: 1 })
+  const bar2 = store.add('bar', { id: 2, fooId: 1 })
+  const bar3 = store.add('bar', { id: 3 })
+  t.true(bar._foo === foo)
+  t.true(bar2._foo === foo)
+  t.notOk(bar3._foo)
+  bar._foo = foo2
+  bar3._foo = foo
+  t.true(bar._foo === foo2)
+  t.true(bar2._foo === foo)
+  t.true(bar3._foo === foo)
+  t.is(getCalled, 9)
+  t.is(setCalled, 6)
 })
