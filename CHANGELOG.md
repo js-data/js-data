@@ -1,3 +1,16 @@
+##### 3.0.0-alpha.29 - 05 April 2016
+
+###### Breaking changes
+- Reworked DataStore relation linking to no longer uses dynamic getters.
+Instead, links are updated as records are added to the store or when the
+assignment operators are used to re-assign relaitons.
+- DataStore now upgrades the Record classes that it touches so that things like
+Record#save and Record#destroy will use the DataStore's methods instead of the
+Mapper's methods.
+
+###### Backwards compatible changes
+- Other tweaks
+
 ##### 3.0.0-alpha.28 - 02 April 2016
 
 ###### Backwards compatible changes
