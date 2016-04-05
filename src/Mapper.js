@@ -1,5 +1,7 @@
 import utils from './utils'
 import Component from './Component'
+import Record from './Record'
+import Schema from './Schema'
 import {
   belongsTo,
   belongsToType,
@@ -8,32 +10,91 @@ import {
   hasOne,
   hasOneType
 } from './decorators'
-import Record from './Record'
-import Schema from './Schema'
 
-const notify = function (...args) {
-  const self = this
-  const opts = args[args.length - 1]
-  self.dbg(opts.op, ...args)
-  if (opts.notify || (opts.notify === undefined && self.notify)) {
-    setTimeout(() => {
-      self.emit(opts.op, ...args)
-    })
+const makeNotify = function (num) {
+  return function (...args) {
+    const self = this
+    const opts = args[args.length - num]
+    self.dbg(opts.op, ...args)
+    if (opts.notify || (opts.notify === undefined && self.notify)) {
+      setTimeout(() => {
+        self.emit(opts.op, ...args)
+      })
+    }
   }
 }
 
-const notify2 = function (...args) {
-  const self = this
-  const opts = args[args.length - 2]
-  self.dbg(opts.op, ...args)
-  if (opts.notify || (opts.notify === undefined && self.notify)) {
-    setTimeout(() => {
-      self.emit(opts.op, ...args)
-    })
+// These are the default implementations of all of the lifecycle hooks
+const notify = makeNotify(1)
+const notify2 = makeNotify(2)
+
+// This object provides meta information used by Mapper#crud to actually
+// execute each lifecycle method
+const LIFECYCLE_METHODS = {
+  count: {
+    defaults: [{}, {}],
+    skip: true,
+    types: []
+  },
+  destroy: {
+    defaults: [{}, {}],
+    skip: true,
+    types: []
+  },
+  destroyAll: {
+    defaults: [{}, {}],
+    skip: true,
+    types: []
+  },
+  find: {
+    defaults: [undefined, {}],
+    types: []
+  },
+  findAll: {
+    defaults: [{}, {}],
+    types: []
+  },
+  sum: {
+    defaults: [undefined, {}, {}],
+    skip: true,
+    types: []
+  },
+  update: {
+    adapterArgs (mapper, id, props, opts) {
+      return [id, mapper.toJSON(props, opts), opts]
+    },
+    beforeAssign: 1,
+    defaults: [undefined, {}, {}],
+    types: []
+  },
+  updateAll: {
+    adapterArgs (mapper, props, query, opts) {
+      return [mapper.toJSON(props, opts), query, opts]
+    },
+    beforeAssign: 0,
+    defaults: [{}, {}, {}],
+    types: []
+  },
+  updateMany: {
+    adapterArgs (mapper, records, opts) {
+      return [records.map(function (record) {
+        return mapper.toJSON(record, opts)
+      }), opts]
+    },
+    beforeAssign: 0,
+    defaults: [[], {}],
+    types: []
   }
 }
 
 const MAPPER_DEFAULTS = {
+  /**
+   * Hash of registered adapters. Don't modify directly. Use {@link Mapper#registerAdapter}.
+   *
+   * @name Mapper#_adapters
+   */
+  _adapters: {},
+
   /**
    * Whether to augment {@link Mapper#recordClass} with getter/setter property
    * accessors according to the properties defined in {@link Mapper#schema}.
@@ -74,72 +135,6 @@ const MAPPER_DEFAULTS = {
    */
   idAttribute: 'id',
 
-  lifecycleMethods: {
-    count: {
-      defaults: [{}, {}],
-      skip: true,
-      types: []
-    },
-    destroy: {
-      defaults: [{}, {}],
-      skip: true,
-      types: []
-    },
-    destroyAll: {
-      defaults: [{}, {}],
-      skip: true,
-      types: []
-    },
-    find: {
-      defaults: [undefined, {}],
-      types: []
-    },
-    findAll: {
-      defaults: [{}, {}],
-      types: []
-    },
-    sum: {
-      defaults: [undefined, {}, {}],
-      skip: true,
-      types: []
-    },
-    update: {
-      adapterArgs (mapper, id, props, opts) {
-        return [id, mapper.toJSON(props, opts), opts]
-      },
-      beforeAssign: 1,
-      defaults: [undefined, {}, {}],
-      types: []
-    },
-    updateAll: {
-      adapterArgs (mapper, props, query, opts) {
-        return [mapper.toJSON(props, opts), query, opts]
-      },
-      beforeAssign: 0,
-      defaults: [{}, {}, {}],
-      types: []
-    },
-    updateMany: {
-      adapterArgs (mapper, records, opts) {
-        return [records.map(function (record) {
-          return mapper.toJSON(record, opts)
-        }), opts]
-      },
-      beforeAssign: 0,
-      defaults: [[], {}],
-      types: []
-    }
-  },
-
-  /**
-   * Minimum amount of meta information required to start operating against a
-   * resource.
-   *
-   * @name Mapper#name
-   * @type {string}
-   */
-  name: null,
-
   /**
    * Whether this Mapper should emit operational events.
    *
@@ -165,9 +160,7 @@ const MAPPER_DEFAULTS = {
    * @type {boolean}
    * @default false
    */
-  raw: false,
-
-  schema: null
+  raw: false
 }
 
 /**
@@ -187,7 +180,7 @@ const MAPPER_DEFAULTS = {
  * relational or document-based database. JSData's Mapper can work with any
  * persistence layer you can write an adapter for.
  *
- * utils._("Model" is a heavily overloaded term and is avoided in this documentation
+ * _("Model" is a heavily overloaded term and is avoided in this documentation
  * to prevent confusion.)_
  *
  * [orm]: https://en.wikipedia.org/wiki/Object-relational_mapping
@@ -197,7 +190,25 @@ const MAPPER_DEFAULTS = {
  *
  * @class Mapper
  * @extends Component
- * @param {Object} [opts] Configuration options.
+ * @param {Object} opts Configuration options.
+ * @param {boolean} [opts.applySchema=true] Whether to apply this Mapper's
+ * {@link Schema} to the prototype of this Mapper's Record class. The enables
+ * features like active change detection, validation during use of the
+ * assignment operator, etc.
+ * @param {boolean} [opts.debug=false] Wether to log debugging information
+ * during operation.
+ * @param {string} [opts.defaultAdapter=http] The name of the adapter to use by
+ * default.
+ * @param {string} [opts.idAttribute=id] The field that uniquely identifies
+ * Records that this Mapper will be dealing with. Typically called a primary
+ * key.
+ * @param {string} opts.name The name for this Mapper. This is the minimum
+ * amount of meta information required for a Mapper to be able to execute CRUD
+ * operations for a "Resource".
+ * @param {boolean} [opts.notify] Whether to emit lifecycle events.
+ * @param {boolean} [opts.raw=false] Whether lifecycle methods should return a
+ * more detailed reponse object instead of just a Record instance or Record
+ * instances.
  */
 export default Component.extend({
   constructor: function Mapper (opts) {
@@ -206,99 +217,102 @@ export default Component.extend({
     Mapper.__super__.call(self)
     opts || (opts = {})
 
-    /**
-     * Hash of registered adapters. Don't modify. Use {@link Mapper#registerAdapter}.
-     *
-     * @name Mapper#_adapters
-     * @private
-     */
-    Object.defineProperty(self, '_adapters', {
-      value: undefined,
-      writable: true
+    // Prepare certain properties to be non-enumerable
+    Object.defineProperties(self, {
+      _adapters: {
+        value: undefined,
+        writable: true
+      },
+
+      /**
+       * Set the `false` to force the Mapper to work with POJO objects only.
+       *
+       * ```javascript
+       * import {Mapper, Record} from 'js-data'
+       * const UserMapper = new Mapper({ recordClass: false })
+       * UserMapper.recordClass // false
+       * const user = UserMapper#createRecord()
+       * user instanceof Record // false
+       * ```
+       *
+       * Set to a custom class to have records wrapped in your custom class.
+       *
+       * ```javascript
+       * import {Mapper, Record} from 'js-data'
+       *  // Custom class
+       * class User {
+       *   constructor (props = {}) {
+       *     for (var key in props) {
+       *       if (props.hasOwnProperty(key)) {
+       *         this[key] = props[key]
+       *       }
+       *     }
+       *   }
+       * }
+       * const UserMapper = new Mapper({ recordClass: User })
+       * UserMapper.recordClass // function User() {}
+       * const user = UserMapper#createRecord()
+       * user instanceof Record // false
+       * user instanceof User // true
+       * ```
+       *
+       * Extend the {@link Record} class.
+       *
+       * ```javascript
+       * import {Mapper, Record} from 'js-data'
+       *  // Custom class
+       * class User extends Record {
+       *   constructor () {
+       *     super(props)
+       *   }
+       * }
+       * const UserMapper = new Mapper({ recordClass: User })
+       * UserMapper.recordClass // function User() {}
+       * const user = UserMapper#createRecord()
+       * user instanceof Record // true
+       * user instanceof User // true
+       * ```
+       *
+       * @name Mapper#recordClass
+       * @default {@link Record}
+       */
+      recordClass: {
+        value: undefined,
+        writable: true
+      },
+
+      lifecycleMethods: {
+        value: LIFECYCLE_METHODS
+      },
+
+      schema: {
+        value: undefined,
+        writable: true
+      }
     })
 
-    /**
-     * Hash of registered listeners. Don't modify. Use {@link Mapper#on} and
-     * {@link Mapper#off}.
-     *
-     * @name Mapper#_listeners
-     * @private
-     */
-    Object.defineProperty(self, '_listeners', {
-      value: {},
-      writable: true
-    })
-
-    /**
-     * Set the `false` to force the Mapper to work with POJO objects only.
-     *
-     * ```javascript
-     * import {Mapper, Record} from 'js-data'
-     * const UserMapper = new Mapper({ recordClass: false })
-     * UserMapper.recordClass // false
-     * const user = UserMapper#createRecord()
-     * user instanceof Record // false
-     * ```
-     *
-     * Set to a custom class to have records wrapped in your custom class.
-     *
-     * ```javascript
-     * import {Mapper, Record} from 'js-data'
-     *  // Custom class
-     * class User {
-     *   constructor (props = {}) {
-     *     for (var key in props) {
-     *       if (props.hasOwnProperty(key)) {
-     *         this[key] = props[key]
-     *       }
-     *     }
-     *   }
-     * }
-     * const UserMapper = new Mapper({ recordClass: User })
-     * UserMapper.recordClass // function User() {}
-     * const user = UserMapper#createRecord()
-     * user instanceof Record // false
-     * user instanceof User // true
-     * ```
-     *
-     * Extend the {@link Record} class.
-     *
-     * ```javascript
-     * import {Mapper, Record} from 'js-data'
-     *  // Custom class
-     * class User extends Record {
-     *   constructor () {
-     *     super(props)
-     *   }
-     * }
-     * const UserMapper = new Mapper({ recordClass: User })
-     * UserMapper.recordClass // function User() {}
-     * const user = UserMapper#createRecord()
-     * user instanceof Record // true
-     * user instanceof User // true
-     * ```
-     *
-     * @name Mapper#recordClass
-     * @default {@link Record}
-     */
-    Object.defineProperty(self, 'recordClass', {
-      value: undefined,
-      writable: true
-    })
-
+    // Apply user-provided configuration
     utils.fillIn(self, opts)
+    // Fill in any missing options with the defaults
     utils.fillIn(self, utils.copy(MAPPER_DEFAULTS))
 
+    /**
+     * Minimum amount of meta information required for a Mapper to be able to
+     * execute CRUD operations for a "Resource".
+     *
+     * @name Mapper#name
+     * @type {string}
+     */
     if (!self.name) {
-      throw new Error('mapper cannot function without a name!')
+      throw new Error('name is required!')
     }
 
-    self._adapters || (self._adapters = {})
-
+    // Setup schema, with an empty default schema if necessary
     if (!(self.schema instanceof Schema)) {
       self.schema = new Schema(self.schema || {})
     }
 
+    // Create a subclass of Record that's tied to this Mapper
     if (utils.isUndefined(self.recordClass)) {
       const superClass = Record
       self.recordClass = superClass.extend({
@@ -605,6 +619,14 @@ export default Component.extend({
   beforeUpdateMany: notify,
 
   /**
+   * This method is called at the end of most lifecycle methods. It does the
+   * following:
+   *
+   * 1. If `opts.raw` is `true`, add this Mapper's configuration to the `opts`
+   * argument as metadata for the operation.
+   * 2. Wrap the result data appropriately using {@link Mapper#wrap}, which
+   * calls {@link Mapper#createRecord}.
+   *
    * @name Mapper#_end
    * @method
    * @private
@@ -612,7 +634,7 @@ export default Component.extend({
   _end (result, opts, skip) {
     const self = this
     if (opts.raw) {
-      utils._(opts, result)
+      utils._(result, opts)
     }
     if (skip) {
       return result
@@ -630,8 +652,10 @@ export default Component.extend({
   },
 
   /**
-   * Usage:
+   * Define a belongsTo relationship. Only useful if you're managing your
+   * Mappers manually and not using a Container or DataStore component.
    *
+   * ```
    * Post.belongsTo(User, {
    *   localKey: 'myUserId'
    * })
@@ -640,6 +664,7 @@ export default Component.extend({
    * Comment.belongsTo(Post, {
    *   localField: '_post'
    * })
+   * ```
    *
    * @name Mapper#belongsTo
    * @method
@@ -710,7 +735,7 @@ export default Component.extend({
     opts || (opts = {})
 
     // Fill in "opts" with the Mapper's configuration
-    utils._(self, opts)
+    utils._(opts, self)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeCreate lifecycle hook
@@ -725,14 +750,27 @@ export default Component.extend({
       let tasks = []
       utils.forEachRelation(self, opts, function (def, optsCopy) {
         const relationData = def.getLocalField(props)
-        if (def.type === belongsToType && relationData) {
+        const relatedMapper = def.getRelation()
+        const relatedIdAttribute = relatedMapper.idAttribute
+        optsCopy.raw = false
+        if (!relationData) {
+          return
+        }
+        if (def.type === belongsToType) {
           // Create belongsTo relation first because we need a generated id to
           // attach to the child
-          tasks.push(def.getRelation().create(relationData, optsCopy).then(function (data) {
-            const relatedRecord = optsCopy.raw ? data.data : data
-            def.setLocalField(belongsToRelationData, relatedRecord)
-            def.setForeignKey(props, relatedRecord)
+          tasks.push(relatedMapper.create(relationData, optsCopy).then(function (data) {
+            def.setLocalField(belongsToRelationData, data)
+            def.setForeignKey(props, data)
           }))
+        } else if (def.type === hasManyType && def.localKeys) {
+          // Create his hasMany relation first because it uses localKeys
+          task.push(relatedMapper.createMany(relationData, optsCopy)).then(function (data) {
+            def.setLocalField(belongsToRelationData, data)
+            utils.set(props, def.localKeys, data.map(function (record) {
+              return utils.get(record, relatedIdAttribute)
+            }))
+          })
         }
       })
       return utils.Promise.all(tasks).then(function () {
@@ -752,7 +790,7 @@ export default Component.extend({
           let task
           // Create hasMany and hasOne after the main create because we needed
           // a generated id to attach to these items
-          if (def.type === hasManyType) {
+          if (def.type === hasManyType && def.foreignKey) {
             def.setForeignKey(createdRecord, relationData)
             task = def.getRelation().createMany(relationData, optsCopy).then(function (data) {
               def.setLocalField(createdRecord, opts.raw ? data.data : data)
@@ -822,7 +860,7 @@ export default Component.extend({
     opts || (opts = {})
 
     // Fill in "opts" with the Mapper's configuration
-    utils._(self, opts)
+    utils._(opts, self)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // beforeCreateMany lifecycle hook
@@ -925,11 +963,12 @@ export default Component.extend({
    *
    * @name Mapper#createRecord
    * @method
-   * @param {Object} props The initial properties of the new unsaved record.
+   * @param {Object|Array} props The properties for the Record instance or an
+   * array of property objects for the Record instances.
    * @param {Object} [opts] Configuration options.
-   * @param {boolean} [opts.noValidate=false] Whether to skip validation on the
-   * initial properties.
-   * @return {Object} The unsaved record.
+   * @param {boolean} [opts.noValidate=false] Whether to skip validation when
+   * the Record instances are created.
+   * @return {Object|Array} The Record instance or Record instances.
    */
   createRecord (props, opts) {
     props || (props = {})
@@ -990,7 +1029,7 @@ export default Component.extend({
     const opts = args[args.length - 1]
 
     // Fill in "opts" with the Mapper's configuration
-    utils._(self, opts)
+    utils._(opts, self)
     adapter = opts.adapter = self.getAdapterName(opts)
 
     // before lifecycle hook
@@ -1165,21 +1204,30 @@ export default Component.extend({
   /**
    * @name Mapper#getAdapters
    * @method
+   * @return {Object} This Mapper's adapters
    */
   getAdapters () {
     return this._adapters
   },
 
+  /**
+   * Returns this Mapper's schema.
+   *
+   * @return {Schema} This Mapper's schema.
+   */
   getSchema () {
     return this.schema
   },
 
   /**
-   * Usage:
+   * Defines a hasMany relationship. Only useful if you're managing your
+   * Mappers manually and not using a Container or DataStore component.
    *
+   * ```
    * User.hasMany(Post, {
    *   localField: 'my_posts'
    * })
+   * ```
    *
    * @name Mapper#hasMany
    * @method
@@ -1189,11 +1237,14 @@ export default Component.extend({
   },
 
   /**
-   * Usage:
+   * Defines a hasOne relationship. Only useful if you're managing your
+   * Mappers manually and not using a Container or DataStore component.
    *
+   * ```
    * User.hasOne(Profile, {
    *   localField: '_profile'
    * })
+   * ```
    *
    * @name Mapper#hasOne
    * @method
@@ -1203,13 +1254,13 @@ export default Component.extend({
   },
 
   /**
-   * Return whether `record` is an instance of this Mappers's recordClass.
+   * Return whether `record` is an instance of this Mapper's recordClass.
    *
    * @name Mapper#is
    * @method
    * @param {Object} record The record to check.
-   * @return {boolean} Whether `record` is an instance of this Mappers's
-   * {@ link Mapper#recordClass}.
+   * @return {boolean} Whether `record` is an instance of this Mapper's
+   * {@link Mapper#recordClass}.
    */
   is (record) {
     const recordClass = this.recordClass
@@ -1414,36 +1465,42 @@ export default Component.extend({
   },
 
   /**
-   * TODO
+   * Validate the given record or records according to this Mapper's
+   * {@link Schema}. No return value means no errors.
    *
    * @name Mapper#validate
    * @method
    * @param {Object|Array} record The record or records to validate.
-   * @param {Object} [opts] Configuration options.
+   * @param {Object} [opts] Configuration options. Passed to
+   * {@link Schema#validate}.
+   * @return {Array} Array of errors or undefined if no errors.
    */
   validate (record, opts) {
     const self = this
-    if (!self.getSchema()) {
-      throw new Error('no schema!')
+    const schema = self.getSchema()
+    if (!schema) {
+      throw new Error(`${self.name} mapper has no schema!`)
     }
     if (utils.isArray(record)) {
       return record.map(function (_record) {
-        return self.schema.validate(_record, opts)
+        return schema.validate(_record, opts)
       })
     } else if (utils.isObject(record)) {
-      return self.schema.validate(record, opts)
+      return schema.validate(record, opts)
     } else {
       throw new Error('not a record!')
     }
   },
 
   /**
-   * TODO
+   * Method used to wrap data returned by an adapter with this Mapper's Record
+   * class.
    *
    * @name Mapper#wrap
    * @method
    * @param {Object|Array} data The data to be wrapped.
-   * @param {Object} [opts] Configuration options.
+   * @param {Object} [opts] Configuration options. Passed to {@link Mapper#createRecord}.
+   * @return {Object|Array}
    */
   wrap (data, opts) {
     return this.createRecord(data, opts)

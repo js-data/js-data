@@ -11,17 +11,17 @@ function Relation (related, opts) {
 
   const localField = opts.localField
   if (!localField) {
-    throw new Error('localField is required')
+    throw new Error('localField is required!')
   }
 
   const foreignKey = opts.foreignKey = opts.foreignKey || opts.localKey
   if (!foreignKey && (opts.type === belongsToType || opts.type === hasOneType)) {
-    throw new Error('foreignKey is required')
+    throw new Error('foreignKey is required!')
   }
   const localKeys = opts.localKeys
   const foreignKeys = opts.foreignKeys
   if (!foreignKey && !localKeys && !foreignKeys && opts.type === hasManyType) {
-    throw new Error('one of (foreignKey, localKeys, foreignKeys) is required')
+    throw new Error('one of (foreignKey, localKeys, foreignKeys) is required!')
   }
 
   if (utils.isString(related)) {
@@ -34,7 +34,14 @@ function Relation (related, opts) {
     Object.defineProperty(self, 'relatedMapper', {
       value: related
     })
+  } else {
+    throw new Error('no relation provided!')
   }
+
+  Object.defineProperty(self, 'inverse', {
+    value: undefined,
+    writable: true
+  })
 
   utils.fillIn(self, opts)
 }
@@ -95,13 +102,11 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
 })
 
 const relatedTo = function (mapper, related, opts) {
-  opts || (opts = {})
-  if (!opts.type) {
-    throw new Error('must specify relation type!')
-  }
-  opts.mapper = mapper
   opts.name = mapper.name
   const relation = new Relation(related, opts)
+  Object.defineProperty(relation, 'mapper', {
+    value: mapper
+  })
 
   mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] })
   mapper.relationFields || Object.defineProperty(mapper, 'relationFields', { value: [] })

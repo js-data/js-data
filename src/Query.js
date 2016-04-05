@@ -1,6 +1,7 @@
 import utils from './utils'
 import Component from './Component'
 
+// Reserved words used by JSData's Query Syntax
 const reserved = {
   limit: '',
   offset: '',
@@ -10,10 +11,10 @@ const reserved = {
   where: ''
 }
 
+// Used by our JavaScript implementation of the LIKE operator
 const escapeRegExp = /([.*+?^=!:${}()|[\]\/\\])/g
 const percentRegExp = /%/g
 const underscoreRegExp = /_/g
-
 const escape = function (pattern) {
   return pattern.replace(escapeRegExp, '\\$1')
 }
@@ -21,7 +22,7 @@ const escape = function (pattern) {
 /**
  * A class used by the {@link Collection} class to build queries to be executed
  * against the collection's data. An instance of `Query` is returned by
- * {@link Collection#query}.
+ * {@link Collection#query}. Query instances are typically short-lived.
  *
  * ```javascript
  * import {Query} from 'js-data'
@@ -29,27 +30,28 @@ const escape = function (pattern) {
  *
  * @class Query
  * @extends Component
- * @param {Collection} collection - The collection on which this query operates.
+ * @param {Collection} collection The collection on which this query operates.
  */
 export default Component.extend({
   constructor: function Query (collection) {
-    utils.classCallCheck(this, Query)
+    const self = this
+    utils.classCallCheck(self, Query)
 
     /**
-     * The collection on which this query operates.
+     * The {@link Collection} on which this query operates.
      *
      * @name Query#collection
      * @type {Collection}
      */
-    this.collection = collection
+    self.collection = collection
 
     /**
-     * The data result of this query.
+     * The current data result of this query.
      *
      * @name Query#data
      * @type {Array}
      */
-    this.data = null
+    self.data = null
   },
 
   /**
@@ -89,6 +91,18 @@ export default Component.extend({
     return self
   },
 
+  /**
+   * The comparison function used by the Query class.
+   *
+   * @name Query#compare
+   * @method
+   * @param {Array} orderBy An orderBy clause used for sorting and sub-sorting.
+   * @param {number} index The index of the current orderBy clause being used.
+   * @param {*} a The first item in the comparison.
+   * @param {*} b The second item in the comparison.
+   * @return {number} -1 if `b` should preceed `a`. 0 if `a` and `b` are equal.
+   * 1 if `a` should preceed `b`.
+   */
   compare (orderBy, index, a, b) {
     const def = orderBy[index]
     let cA = utils.get(a, def[0])
@@ -106,32 +120,33 @@ export default Component.extend({
       b = null
     }
     if (def[1].toUpperCase() === 'DESC') {
-      if (cB < cA) {
-        return -1
-      } else if (cB > cA) {
-        return 1
-      } else {
-        if (index < orderBy.length - 1) {
-          return this.compare(orderBy, index + 1, a, b)
-        } else {
-          return 0
-        }
-      }
+      const temp = cB
+      cB = cA
+      cA = temp
+    }
+    if (cA < cB) {
+      return -1
+    } else if (cA > cB) {
+      return 1
     } else {
-      if (cA < cB) {
-        return -1
-      } else if (cA > cB) {
-        return 1
+      if (index < orderBy.length - 1) {
+        return this.compare(orderBy, index + 1, a, b)
       } else {
-        if (index < orderBy.length - 1) {
-          return this.compare(orderBy, index + 1, a, b)
-        } else {
-          return 0
-        }
+        return 0
       }
     }
   },
 
+  /**
+   * Predicate evaluation function used by the Query class.
+   *
+   * @name Query#evaluate
+   * @method
+   * @param {*} value The value to evaluate.
+   * @param {string} op The operator to use in this evaluation.
+   * @param {*} predicate The predicate to use in this evaluation.
+   * @return {boolean} Whether the value passed the evaluation or not.
+   */
   evaluate (value, op, predicate) {
     const ops = this.constructor.ops
     if (ops[op]) {

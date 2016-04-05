@@ -10,11 +10,20 @@ import LinkedCollection from './LinkedCollection'
 const DATASTORE_DEFAULTS = {}
 
 const safeSet = function (record, field, value) {
-  if (record._set) {
+  if (record && record._set) {
     record._set(field, value)
   } else {
     utils.set(record, field, value)
   }
+}
+
+const cachedFn = function (name, hashOrId, opts) {
+  const self = this
+  const cached = self._completedQueries[name][hashOrId]
+  if (utils.isFunction(cached)) {
+    return cached(name, hashOrId, opts)
+  }
+  return cached
 }
 
 const props = {
@@ -101,14 +110,75 @@ const props = {
     return this.getCollection(name).add(data, opts)
   },
 
-  cachedFind (name, id, opts) {
-    return this.get(name, id, opts)
+  /**
+   * Retrieve a cached `find` result, if any.
+   *
+   * @name DataStore#cachedFind
+   * @method
+   * @param {string} name The `name` argument passed to {@link DataStore#find}.
+   * @param {(string|number)} id The `id` argument passed to {@link DataStore#find}.
+   * @param {Object} opts The `opts` argument passed to {@link DataStore#find}.
+   */
+  cachedFind: cachedFn,
+
+  /**
+   * Retrieve a cached `findAll` result, if any.
+   *
+   * @name DataStore#cachedFindAll
+   * @method
+   * @param {string} name The `name` argument passed to {@link DataStore#findAll}.
+   * @param {string} hash The result of calling {@link DataStore#hashQuery} on
+   * the `query` argument passed to {@link DataStore#findAll}.
+   * @param {Object} opts The `opts` argument passed to {@link DataStore#findAll}.
+   */
+  cachedFindAll: cachedFn,
+
+  /**
+   * Cache a `find` result. The default implementation does the following:
+   *
+   * ```
+   * // Find and return the record from the data store
+   * return this.get(name, id)
+   * ```
+   *
+   * Override this method to customize.
+   *
+   * @name DataStore#cacheFind
+   * @method
+   * @param {string} name The `name` argument passed to {@link DataStore#find}.
+   * @param {*} data The result to cache.
+   * @param {(string|number)} id The `id` argument passed to {@link DataStore#find}.
+   * @param {Object} opts The `opts` argument passed to {@link DataStore#find}.
+   */
+  cacheFind (name, data, id, opts) {
+    const self = this
+    self._completedQueries[name][id] = function (name, id, opts) {
+      return self.get(name, id)
+    }
   },
 
-  cachedFindAll (name, query, opts) {
+  /**
+   * Cache a `findAll` result. The default implementation does the following:
+   *
+   * ```
+   * // Find and return the records from the data store
+   * return this.filter(name, utils.fromJson(hash))
+   * ```
+   *
+   * Override this method to customize.
+   *
+   * @name DataStore#cacheFindAll
+   * @method
+   * @param {string} name The `name` argument passed to {@link DataStore#findAll}.
+   * @param {*} data The result to cache.
+   * @param {string} hash The result of calling {@link DataStore#hashQuery} on
+   * the `query` argument passed to {@link DataStore#findAll}.
+   * @param {Object} opts The `opts` argument passed to {@link DataStore#findAll}.
+   */
+  cacheFindAll (name, data, hash, opts) {
     const self = this
-    if (self._completedQueries[name][self.hashQuery(name, query, opts)]) {
-      return self.filter(name, query, opts)
+    self._completedQueries[name][hash] = function (name, hash, opts) {
+      return self.filter(name, utils.fromJson(hash))
     }
   },
 
@@ -245,22 +315,16 @@ const props = {
               _self._set(path, undefined)
               safeSet(_self, foreignKey, undefined)
               collection.updateIndex(_self, updateOpts)
-
-              // Update (unset) inverse relation
+            }
+            if (current) {
               if (inverseDef.type === hasOneType) {
-                utils.set(record, inverseDef.localField, undefined)
+                utils.set(children, inverseDef.localField, undefined)
               } else if (inverseDef.type === hasManyType) {
-                const children = utils.get(record, inverseDef.localField)
+                const children = utils.get(current, inverseDef.localField)
                 utils.remove(children, function (_record) {
                   return id === utils.get(_record, idAttribute)
                 })
               }
-            }
-            if (current) {
-              const children = utils.get(current, inverseDef.localField)
-              utils.remove(children, function (_record) {
-                return id === utils.get(_record, idAttribute)
-              })
             }
             return record
           }
@@ -374,17 +438,6 @@ const props = {
                 }
               })
             } else if (foreignKeys) {
-              // Update (set) inverse relation
-              records.forEach(function (record) {
-                const _localKeys = utils.get(record, foreignKeys) || []
-                utils.noDupeAdd(_localKeys, id, function (_key) {
-                  return id === _key
-                })
-                const _localField = utils.get(record, inverseLocalField) || []
-                utils.noDupeAdd(_localField, _self, function (_record) {
-                  return id === utils.get(_record, idAttribute)
-                })
-              })
               // Update (unset) inverse relation
               current.forEach(function (record) {
                 const _localKeys = utils.get(record, foreignKeys) || []
@@ -393,6 +446,17 @@ const props = {
                 })
                 const _localField = utils.get(record, inverseLocalField) || []
                 utils.remove(_localField, function (_record) {
+                  return id === utils.get(_record, idAttribute)
+                })
+              })
+              // Update (set) inverse relation
+              records.forEach(function (record) {
+                const _localKeys = utils.get(record, foreignKeys) || []
+                utils.noDupeAdd(_localKeys, id, function (_key) {
+                  return id === _key
+                })
+                const _localField = utils.get(record, inverseLocalField) || []
+                utils.noDupeAdd(_localField, _self, function (_record) {
                   return id === utils.get(_record, idAttribute)
                 })
               })
@@ -553,13 +617,12 @@ const props = {
     if (opts.force || !item) {
       promise = self._pendingQueries[name][id] = self._callSuper('find', name, id, opts).then(function (data) {
         delete self._pendingQueries[name][id]
-        return self._end(name, data, opts)
+        const result = self._end(name, data, opts)
+        self.cacheFind(name, result, id, opts)
+        return result
       }, function (err) {
         delete self._pendingQueries[name][id]
         return utils.reject(err)
-      }).then(function (data) {
-        self._completedQueries[name][id] = new Date().getTime()
-        return data
       })
     } else {
       promise = utils.resolve(item)
@@ -589,19 +652,18 @@ const props = {
       return pendingQuery
     }
 
-    const items = self.cachedFindAll(name, query, opts)
+    const items = self.cachedFindAll(name, hash, opts)
     let promise
 
     if (opts.force || !items) {
       promise = self._pendingQueries[name][hash] = self._callSuper('findAll', name, query, opts).then(function (data) {
         delete self._pendingQueries[name][hash]
-        return self._end(name, data, opts)
+        const result = self._end(name, data, opts)
+        self.cacheFindAll(name, result, hash, opts)
+        return result
       }, function (err) {
         delete self._pendingQueries[name][hash]
         return utils.reject(err)
-      }).then(function (data) {
-        self._completedQueries[name][hash] = new Date().getTime()
-        return data
       })
     } else {
       promise = utils.resolve(items)

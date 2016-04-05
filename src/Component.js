@@ -2,14 +2,14 @@ import utils from './utils'
 
 export default function Component () {
   /**
-   * Event listeners attached to this Component.
+   * Event listeners attached to this Component. Do not modify. Use
+   * {@link Component#on} and {@link Component#off} instead.
    *
    * @name Component#_listeners
    * @instance
    * @type {Object}
-   * @private
    */
-  this._listeners = {}
+  Object.defineProperty(this, '_listeners', { value: {} })
 }
 
 /**
@@ -25,10 +25,14 @@ export default function Component () {
 Component.extend = utils.extend
 
 /**
+ * TODO
+ *
  * @name Component#dbg
  * @method
  */
 /**
+ * TODO
+ *
  * @name Component#log
  * @method
  */

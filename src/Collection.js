@@ -16,26 +16,6 @@ const COLLECTION_DEFAULTS = {
   idAttribute: 'id',
 
   /**
-   * Default Mapper for this collection. Optional. If a Mapper is provided, then
-   * the collection will use the {@link Mapper#idAttribute} setting, and will
-   * wrap records in {@link Mapper#recordClass}.
-   *
-   * @example
-   * import {Collection, Mapper} from 'js-data'
-   *
-   * class MyMapperClass extends Mapper {
-   *   foo () { return 'bar' }
-   * }
-   * const myMapper = new MyMapperClass()
-   * const collection = new Collection(null, { mapper: myMapper })
-   *
-   * @name Collection#mapper
-   * @type {Mapper}
-   * @default null
-   */
-  mapper: null,
-
-  /**
    * What to do when inserting a record into this Collection that shares a
    * primary key with a record already in this Collection.
    *
@@ -58,17 +38,7 @@ const COLLECTION_DEFAULTS = {
    * @type {string}
    * @default "merge"
    */
-  onConflict: 'merge',
-
-  /**
-   * Options to be passed into {@link Mapper#createRecord} when wrapping records
-   * in {@link Mapper#recordClass}.
-   *
-   * @name Collection#recordOpts
-   * @type {Object}
-   * @default null
-   */
-  recordOpts: null
+  onConflict: 'merge'
 }
 
 /**
@@ -93,7 +63,6 @@ const COLLECTION_DEFAULTS = {
  * @param {string} [opts.idAttribute] See {@link Collection#idAttribute}.
  * @param {string} [opts.onConflict="merge"] See {@link Collection#onConflict}.
  * @param {string} [opts.mapper] See {@link Collection#mapper}.
- * @param {Object} [opts.recordOpts=null] See {@link Collection#recordOpts}.
  */
 export default Component.extend({
   constructor: function Collection (records, opts) {
@@ -112,33 +81,66 @@ export default Component.extend({
     // Default values for arguments
     records || (records = [])
     opts || (opts = {})
-    opts.recordOpts || (opts.recordOpts = {})
+
+    /**
+     * Default Mapper for this collection. Optional. If a Mapper is provided, then
+     * the collection will use the {@link Mapper#idAttribute} setting, and will
+     * wrap records in {@link Mapper#recordClass}.
+     *
+     * @example
+     * import {Collection, Mapper} from 'js-data'
+     *
+     * class MyMapperClass extends Mapper {
+     *   foo () { return 'bar' }
+     * }
+     * const myMapper = new MyMapperClass()
+     * const collection = new Collection(null, { mapper: myMapper })
+     *
+     * @name Collection#mapper
+     * @type {Mapper}
+     * @default null
+     */
+    Object.defineProperty(self, 'mapper', {
+      value: undefined,
+      writable: true
+    })
 
     utils.fillIn(self, opts)
-    utils.fillIn(self, COLLECTION_DEFAULTS)
+    utils.fillIn(self, utils.copy(COLLECTION_DEFAULTS))
 
     const idAttribute = self.recordId()
 
-    /**
-     * The main index, which uses @{link Collection#recordId} as the key.
-     * @name Collection#index
-     * @type {Index}
-     */
-    self.index = new Index([idAttribute], {
-      hashCode (obj) {
-        return utils.get(obj, idAttribute)
+    Object.defineProperties(self, {
+      /**
+       * The main index, which uses @{link Collection#recordId} as the key.
+       *
+       * @name Collection#index
+       * @type {Index}
+       */
+      index: {
+        value: new Index([idAttribute], {
+          hashCode (obj) {
+            return utils.get(obj, idAttribute)
+          }
+        })
+      },
+
+      /**
+       * Object that holds the secondary indexes of this collection.
+       *
+       * @name Collection#indexes
+       * @type {Object.<string, Index>}
+       */
+      indexes: {
+        value: {}
       }
     })
 
-    /**
-     * Object that holds the secondary indexes of this collection.
-     * @name Collection#indexes
-     * @type {Object.<string, Index>}
-     */
-    self.indexes = {}
+    const mapper = self.mapper
 
+    // Insert initial data into the collection
     records.forEach(function (record) {
-      record = self.mapper ? self.mapper.createRecord(record, self.recordOpts) : record
+      record = mapper ? mapper.createRecord(record, opts) : record
       self.index.insertRecord(record)
       if (record && utils.isFunction(record.on)) {
         record.on('all', self._onRecordEvent, self)
@@ -183,7 +185,7 @@ export default Component.extend({
     opts || (opts = {})
 
     // Fill in "opts" with the Collection's configuration
-    utils._(self, opts)
+    utils._(opts, self)
     records = self.beforeAdd(records, opts) || records
 
     // Track whether just one record or an array of records is being inserted
@@ -232,7 +234,7 @@ export default Component.extend({
         // Here, the currently visted record does not correspond to any record
         // in the collection, so (optionally) instantiate this record and insert
         // it into the collection
-        record = self.mapper ? self.mapper.createRecord(record, self.recordOpts) : record
+        record = self.mapper ? self.mapper.createRecord(record, opts) : record
         self.index.insertRecord(record)
         utils.forOwn(self.indexes, function (index, name) {
           index.insertRecord(record)
@@ -556,10 +558,10 @@ export default Component.extend({
    * key.
    */
   recordId (record) {
-    if (record) {
-      return utils.get(record, this.recordId())
-    }
     const self = this
+    if (record) {
+      return utils.get(record, self.recordId())
+    }
     return self.mapper ? self.mapper.idAttribute : self.idAttribute || 'id'
   },
 
