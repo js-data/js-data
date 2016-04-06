@@ -7,6 +7,7 @@ import {
 import Container from './Container'
 import LinkedCollection from './LinkedCollection'
 
+const DOMAIN = 'DataStore'
 const DATASTORE_DEFAULTS = {}
 
 const safeSet = function (record, field, value) {
@@ -682,7 +683,7 @@ const props = {
   getCollection (name) {
     const collection = this._collections[name]
     if (!collection) {
-      throw new ReferenceError(`${name} is not a registered collection!`)
+      throw utils.err(`${DOMAIN}#getCollection`, name)(404, 'collection')
     }
     return collection
   },

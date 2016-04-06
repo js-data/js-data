@@ -1,23 +1,19 @@
-import {
-  beforeEach,
-  JSData
-} from '../../_setup'
-import test from 'ava'
+import { assert, JSData } from '../../_setup'
 
-test.beforeEach(beforeEach)
-
-test('should be an instance method', (t) => {
-  const DataStore = JSData.DataStore
-  const store = new DataStore()
-  t.is(typeof store.getMapper, 'function')
-  t.ok(store.getMapper === DataStore.prototype.getMapper)
-})
-test('should return the specified mapper', (t) => {
-  const Container = JSData.Container
-  const container = new Container()
-  const foo = container.defineMapper('foo')
-  t.ok(foo === container.getMapper('foo'))
-  t.throws(function () {
-    container.getMapper('bar')
-  }, ReferenceError, 'bar is not a registered mapper!')
+describe('Container#getMapper', function () {
+  it('should be an instance method', function () {
+    const Container = JSData.Container
+    const store = new Container()
+    assert.equal(typeof store.getMapper, 'function')
+    assert.strictEqual(store.getMapper, Container.prototype.getMapper)
+  })
+  it('should return the specified mapper', function () {
+    const Container = JSData.Container
+    const container = new Container()
+    const foo = container.defineMapper('foo')
+    assert.strictEqual(foo, container.getMapper('foo'))
+    assert.throws(function () {
+      container.getMapper('bar')
+    }, Error, '[Container#getMapper:bar] mapper not found\nhttp://www.js-data.io/v3.0/docs/errors#404')
+  })
 })

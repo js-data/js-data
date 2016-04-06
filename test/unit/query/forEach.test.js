@@ -1,23 +1,19 @@
-import {
-  beforeEach,
-  JSData
-} from '../../_setup'
-import test from 'ava'
+import { assert, JSData } from '../../_setup'
 
-test.beforeEach(beforeEach)
+describe('Query#forEach', function () {
+  it('should work', function () {
+    const collection = this.PostCollection
+    const p1 = this.data.p1
+    const p2 = this.data.p2
+    const p3 = this.data.p3
+    const p4 = this.data.p4
+    const p5 = this.data.p5
 
-test('should work', (t) => {
-  const collection = t.context.PostCollection
-  const p1 = t.context.data.p1
-  const p2 = t.context.data.p2
-  const p3 = t.context.data.p3
-  const p4 = t.context.data.p4
-  const p5 = t.context.data.p5
-
-  t.context.store.add('post', [p1, p2, p3, p4, p5])
-  let count = 0
-  collection.query().forEach(function () {
-    count++
-  }).run()
-  t.is(count, 5)
+    this.store.add('post', [p1, p2, p3, p4, p5])
+    let count = 0
+    collection.query().forEach(function () {
+      count++
+    }).run()
+    assert.equal(count, 5)
+  })
 })

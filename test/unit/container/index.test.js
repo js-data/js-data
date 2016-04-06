@@ -1,66 +1,64 @@
-import {
-  beforeEach,
-  JSData,
-  sinon
-} from '../../_setup'
-import test from 'ava'
+import { assert, JSData, sinon } from '../../_setup'
 
-test.beforeEach(beforeEach)
-
-test('should be a constructor function', (t) => {
-  const Container = JSData.Container
-  t.is(typeof Container, 'function')
-  const container = new Container()
-  t.ok(container instanceof Container)
-})
-test('should initialize with defaults', (t) => {
-  const Container = JSData.Container
-  const container = new Container()
-  t.same(container._adapters, {})
-  t.same(container._mappers, {})
-  t.same(container.mapperDefaults, {})
-  t.ok(container.mapperClass === JSData.Mapper)
-})
-test('should accept overrides', (t) => {
-  const Container = JSData.Container
-  class Foo {}
-  const container = new Container({
-    mapperClass: Foo,
-    foo: 'bar',
-    mapperDefaults: {
+describe('Container', function () {
+  it('should be a constructor function', function () {
+    const Container = JSData.Container
+    assert.equal(typeof Container, 'function')
+    const container = new Container()
+    assert(container instanceof Container)
+    assert.deepEqual(container._adapters, {})
+    assert.deepEqual(container._mappers, {})
+    assert.deepEqual(container.mapperDefaults, {})
+    assert.strictEqual(container.mapperClass, JSData.Mapper)
+  })
+  it('should accept overrides', function () {
+    const Container = JSData.Container
+    class Foo {}
+    const container = new Container({
+      mapperClass: Foo,
+      foo: 'bar',
+      mapperDefaults: {
+        idAttribute: '_id'
+      }
+    })
+    assert.deepEqual(container._adapters, {})
+    assert.deepEqual(container._mappers, {})
+    assert.equal(container.foo, 'bar')
+    assert.deepEqual(container.mapperDefaults, {
       idAttribute: '_id'
-    }
+    })
+    assert.strictEqual(container.mapperClass, Foo)
   })
-  t.same(container._adapters, {})
-  t.same(container._mappers, {})
-  t.is(container.foo, 'bar')
-  t.same(container.mapperDefaults, {
-    idAttribute: '_id'
+  it('should have events', function () {
+    const store = new JSData.Container()
+    const listener = sinon.stub()
+    store.on('bar', listener)
+    store.emit('bar')
+    assert(listener.calledOnce)
   })
-  t.ok(container.mapperClass === Foo)
-})
-test('should have events', (t) => {
-  const store = new JSData.DataStore()
-  const listener = sinon.stub()
-  store.on('bar', listener)
-  store.emit('bar')
-  t.ok(listener.calledOnce)
-})
-test('should proxy Mapper events', (t) => {
-  const store = new JSData.DataStore()
-  store.defineMapper('user')
-  const listener = sinon.stub()
-  store.on('bar', listener)
-  store.getMapper('user').emit('bar', 'foo')
-  t.ok(listener.calledOnce)
-  t.same(listener.firstCall.args, ['user', 'foo'])
-})
-test('should proxy all Mapper events', (t) => {
-  const store = new JSData.DataStore()
-  store.defineMapper('user')
-  const listener = sinon.stub()
-  store.on('all', listener)
-  store.getMapper('user').emit('bar', 'foo')
-  t.ok(listener.calledOnce)
-  t.same(listener.firstCall.args, ['bar', 'user', 'foo'])
+  it('should proxy Mapper events', function () {
+    const store = new JSData.Container()
+    store.defineMapper('user')
+    const listener = sinon.stub()
+    store.on('bar', listener)
+    store.getMapper('user').emit('bar', 'foo')
+    assert(listener.calledOnce)
+    assert.deepEqual(listener.firstCall.args, ['user', 'foo'])
+  })
+  it('should proxy all Mapper events', function () {
+    const store = new JSData.Container()
+    store.defineMapper('user')
+    const listener = sinon.stub()
+    store.on('all', listener)
+    store.getMapper('user').emit('bar', 'foo')
+    assert(listener.calledOnce)
+    assert.deepEqual(listener.firstCall.args, ['bar', 'user', 'foo'])
+  })
+  it('should proxy Mapper methods', function () {
+    const store = new JSData.Container()
+    store.defineMapper('user')
+    assert.doesNotThrow(() => {
+      assert.deepEqual(store.toJSON('user', { id: 1 }), { id: 1 })
+    })
+  })
 })

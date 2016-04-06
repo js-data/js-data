@@ -1,17 +1,13 @@
-import {
-  beforeEach,
-  JSData
-} from '../../_setup'
-import test from 'ava'
+import { assert, JSData } from '../../_setup'
 
-test.beforeEach(beforeEach)
+describe('Query#getAll', function () {
+  it('should work')
 
-test.todo('should work')
+  it('should not allow index access after operation', function () {
+    const collection = this.PostCollection
 
-test('should not allow index access after operation', (t) => {
-  const collection = t.context.PostCollection
-
-  t.throws(function () {
-    collection.query().filter().getAll().run()
-  }, Error)
+    assert.throws(function () {
+      collection.query().filter().getAll().run()
+    }, Error)
+  })
 })

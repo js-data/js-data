@@ -3,6 +3,8 @@ import Component from './Component'
 import Query from './Query'
 import Index from '../lib/mindex/index'
 
+const DOMAIN = 'Collection'
+
 const COLLECTION_DEFAULTS = {
   /**
    * Field to be used as the unique identifier for records in this collection.
@@ -70,7 +72,7 @@ export default Component.extend({
     utils.classCallCheck(self, Collection)
     Collection.__super__.call(self)
 
-    if (utils.isObject(records) && !utils.isArray(records)) {
+    if (records && !utils.isArray(records)) {
       opts = records
       records = []
     }
@@ -136,16 +138,10 @@ export default Component.extend({
       }
     })
 
-    const mapper = self.mapper
-
     // Insert initial data into the collection
-    records.forEach(function (record) {
-      record = mapper ? mapper.createRecord(record, opts) : record
-      self.index.insertRecord(record)
-      if (record && utils.isFunction(record.on)) {
-        record.on('all', self._onRecordEvent, self)
-      }
-    })
+    if (records) {
+      self.add(records)
+    }
   },
 
   /**
@@ -191,9 +187,13 @@ export default Component.extend({
     // Track whether just one record or an array of records is being inserted
     let singular = false
     const idAttribute = self.recordId()
-    if (utils.isObject(records) && !utils.isArray(records)) {
-      records = [records]
-      singular = true
+    if (!utils.isArray(records)) {
+      if (utils.isObject(records)) {
+        records = [records]
+        singular = true
+      } else {
+        throw utils.err(`${DOMAIN}#add`, 'records')(400, 'object or array', records)
+      }
     }
 
     // Map the provided records to existing records.
@@ -203,7 +203,7 @@ export default Component.extend({
     records = records.map(function (record) {
       let id = self.recordId(record)
       if (!utils.isSorN(id)) {
-        throw new TypeError(`Collection#add: Expected string or number for ${idAttribute}, found ${typeof id}!`)
+        throw utils.err(`${DOMAIN}#add`, `record.${idAttribute}`)(400, 'string or number', id)
       }
       // Grab existing record if there is one
       const existing = self.get(id)
@@ -226,6 +226,8 @@ export default Component.extend({
             }
           })
           existing.set(record)
+        } else {
+          throw utils.err(`${DOMAIN}#add`, 'opts.onConflict')(400, 'one of (merge, replace)', onConflict, true)
         }
         record = existing
         // Update all indexes in the collection
@@ -246,7 +248,7 @@ export default Component.extend({
       return record
     })
     // Finally, return the inserted data
-    const result = singular ? (records.length ? records[0] : undefined) : records
+    const result = singular ? records[0] : records
     // TODO: Make this more performant (batch events?)
     self.emit('add', result)
     return self.afterAdd(records, opts, result) || result
@@ -484,7 +486,7 @@ export default Component.extend({
   getIndex (name) {
     const index = name ? this.indexes[name] : this.index
     if (!index) {
-      throw new Error(`Index ${name} does not exist!`)
+      throw utils.err(`${DOMAIN}#getIndex`, name)(404, 'index')
     }
     return index
   },
@@ -562,7 +564,7 @@ export default Component.extend({
     if (record) {
       return utils.get(record, self.recordId())
     }
-    return self.mapper ? self.mapper.idAttribute : self.idAttribute || 'id'
+    return self.mapper ? self.mapper.idAttribute : self.idAttribute
   },
 
   /**

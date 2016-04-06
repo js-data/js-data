@@ -1,15 +1,11 @@
-import {
-  beforeEach,
-  JSData
-} from '../../_setup'
-import test from 'ava'
+import { assert, JSData } from '../../_setup'
 
-test.beforeEach(beforeEach)
-
-test('should be an instance method', (t) => {
-  const DataStore = JSData.DataStore
-  const store = new DataStore()
-  t.is(typeof store.updateAll, 'function')
-  t.ok(store.updateAll === DataStore.prototype.updateAll)
+describe('Container#find', function () {
+  it('should be an instance method', function () {
+    const Container = JSData.Container
+    const store = new Container()
+    assert.equal(typeof store.updateAll, 'function')
+    assert.strictEqual(store.updateAll, Container.prototype.updateAll)
+  })
+  it('should work')
 })
-test.todo('should work')

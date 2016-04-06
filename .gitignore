@@ -23,7 +23,8 @@ junit/
 .idea/
 .vscode/
 jsconfig.json
-dist/js-data-tests.js
-dist/js-data-tests.js.map
-doc/
+
 .nyc_output
+coverage/
+doc/
+node_modules/

@@ -1,8 +1,30 @@
+import { assert } from 'chai'
 import * as JSData from '../src/index'
 import sinon from 'sinon'
 
+assert.objectsEqual = function (a, b, msg) {
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(a)),
+    JSON.parse(JSON.stringify(b)),
+    msg || 'Expected objects or arrays to be equal'
+  )
+}
+
+assert.objectsNotEqual = function (a, b, msg) {
+  assert.notDeepEqual(
+    JSON.parse(JSON.stringify(a)),
+    JSON.parse(JSON.stringify(b)),
+    msg || 'Expected objects or arrays to be equal'
+  )
+}
+
+assert.fail = function (msg) {
+  assert.equal('should not reach this!: ' + msg, 'failure')
+}
+
 // Setup global data once
 export {
+  assert,
   JSData,
   sinon
 }
@@ -15,42 +37,26 @@ export const TYPES_EXCEPT_ARRAY = ['string', 123, 123.123, null, undefined, {}, 
 export const TYPES_EXCEPT_STRING_OR_ARRAY_OR_NUMBER = [null, undefined, {}, true, false, function () {}]
 export const TYPES_EXCEPT_NUMBER = ['string', null, undefined, {}, [], true, false, function () {}]
 export const TYPES_EXCEPT_OBJECT = ['string', 123, 123.123, null, undefined, true, false, function () {}]
+export const TYPES_EXCEPT_OBJECT_OR_ARRAY = ['string', 123, 123.123, null, undefined, true, false, function () {}]
 export const TYPES_EXCEPT_BOOLEAN = ['string', 123, 123.123, null, undefined, {}, [], function () {}]
 export const TYPES_EXCEPT_FUNCTION = ['string', 123, 123.123, null, undefined, {}, [], true, false]
 
 // Clean setup for each test
-export const beforeEach = function (t) {
-  t.context.objectsEqual = function (t, a, b, msg) {
-    t.same(
-      JSON.parse(JSON.stringify(a)),
-      JSON.parse(JSON.stringify(b)),
-      msg || 'Expected objects or arrays to be equal'
-    )
-  }
-  t.context.objectsNotEqual = function (t, a, b, msg) {
-    t.notSame(
-      JSON.parse(JSON.stringify(a)),
-      JSON.parse(JSON.stringify(b)),
-      msg || 'Expected objects or arrays to be equal'
-    )
-  }
-  t.context.fail = function (msg) {
-    t.is('should not reach this!: ' + msg, 'failure')
-  }
-  t.context.data = {}
-  t.context.data.p1 = { author: 'John', age: 30, id: 5 }
-  t.context.data.p2 = { author: 'Sally', age: 31, id: 6 }
-  t.context.data.p3 = { author: 'Mike', age: 32, id: 7 }
-  t.context.data.p4 = { author: 'Adam', age: 33, id: 8 }
-  t.context.data.p5 = { author: 'Adam', age: 33, id: 9 }
-  var store = t.context.store = new JSData.DataStore({
+beforeEach(function () {
+  this.data = {}
+  this.data.p1 = { author: 'John', age: 30, id: 5 }
+  this.data.p2 = { author: 'Sally', age: 31, id: 6 }
+  this.data.p3 = { author: 'Mike', age: 32, id: 7 }
+  this.data.p4 = { author: 'Adam', age: 33, id: 8 }
+  this.data.p5 = { author: 'Adam', age: 33, id: 9 }
+  const store = this.store = new JSData.DataStore({
     linkRelations: true
   })
-  t.context.Post = store.defineMapper('post', {
+  this.Post = store.defineMapper('post', {
     endpoint: '/posts'
   })
-  t.context.PostCollection = store.getCollection('post')
-  t.context.User = store.defineMapper('user', {
+  this.PostCollection = store.getCollection('post')
+  this.User = store.defineMapper('user', {
     relations: {
       belongsTo: {
         organization: {
@@ -82,8 +88,8 @@ export const beforeEach = function (t) {
       }
     }
   })
-  t.context.UserCollection = store.getCollection('user')
-  t.context.Group = store.defineMapper('group', {
+  this.UserCollection = store.getCollection('user')
+  this.Group = store.defineMapper('group', {
     relations: {
       hasMany: {
         user: {
@@ -93,8 +99,8 @@ export const beforeEach = function (t) {
       }
     }
   })
-  t.context.GroupCollection = store.getCollection('group')
-  t.context.Organization = store.defineMapper('organization', {
+  this.GroupCollection = store.getCollection('group')
+  this.Organization = store.defineMapper('organization', {
     relations: {
       hasMany: {
         user: {
@@ -104,8 +110,8 @@ export const beforeEach = function (t) {
       }
     }
   })
-  t.context.OrganizationCollection = store.getCollection('organization')
-  t.context.Profile = store.defineMapper('profile', {
+  this.OrganizationCollection = store.getCollection('organization')
+  this.Profile = store.defineMapper('profile', {
     relations: {
       belongsTo: {
         user: {
@@ -115,8 +121,8 @@ export const beforeEach = function (t) {
       }
     }
   })
-  t.context.ProfileCollection = store.getCollection('profile')
-  t.context.Comment = store.defineMapper('comment', {
+  this.ProfileCollection = store.getCollection('profile')
+  this.Comment = store.defineMapper('comment', {
     relations: {
       belongsTo: {
         user: [
@@ -132,121 +138,168 @@ export const beforeEach = function (t) {
       }
     }
   })
-  t.context.CommentCollection = store.getCollection('comment')
-  t.context.data.user1 = {
+  this.CommentCollection = store.getCollection('comment')
+  this.data.user1 = {
     name: 'John Anderson',
     id: 1,
     organizationId: 2
   }
-  t.context.data.organization2 = {
+  this.data.organization2 = {
     name: 'Test Corp 2',
     id: 2
   }
-  t.context.data.comment3 = {
+  this.data.comment3 = {
     content: 'test comment 3',
     id: 3,
     userId: 1
   }
-  t.context.data.profile4 = {
+  this.data.profile4 = {
     content: 'test profile 4',
     id: 4,
     userId: 1
   }
 
-  t.context.data.comment11 = {
+  this.data.comment11 = {
     id: 11,
     userId: 10,
     content: 'test comment 11'
   }
-  t.context.data.comment12 = {
+  this.data.comment12 = {
     id: 12,
     userId: 10,
     content: 'test comment 12'
   }
-  t.context.data.comment13 = {
+  this.data.comment13 = {
     id: 13,
     userId: 10,
     content: 'test comment 13'
   }
-  t.context.data.organization14 = {
+  this.data.organization14 = {
     id: 14,
     name: 'Test Corp'
   }
-  t.context.data.profile15 = {
+  this.data.profile15 = {
     id: 15,
     userId: 10,
-    email: 'john.anderson@t.context.com'
+    email: 'john.anderson@this.com'
   }
-  t.context.data.user10 = {
+  this.data.user10 = {
     name: 'John Anderson',
     id: 10,
     organizationId: 14,
     comments: [
-      t.context.data.comment11,
-      t.context.data.comment12,
-      t.context.data.comment13
+      this.data.comment11,
+      this.data.comment12,
+      this.data.comment13
     ],
-    organization: t.context.data.organization14,
-    profile: t.context.data.profile15
+    organization: this.data.organization14,
+    profile: this.data.profile15
   }
-  t.context.data.user16 = {
+  this.data.user16 = {
     id: 16,
     organizationId: 15,
     name: 'test user 16'
   }
-  t.context.data.user17 = {
+  this.data.user17 = {
     id: 17,
     organizationId: 15,
     name: 'test user 17'
   }
-  t.context.data.user18 = {
+  this.data.user18 = {
     id: 18,
     organizationId: 15,
     name: 'test user 18'
   }
-  t.context.data.group1 = {
+  this.data.group1 = {
     name: 'group 1',
     id: 1,
     userIds: [10]
   }
-  t.context.data.group2 = {
+  this.data.group2 = {
     name: 'group 2',
     id: 2,
     userIds: [10]
   }
-  t.context.data.organization15 = {
+  this.data.group3 = {
+    name: 'group 3',
+    id: 3,
+    userIds: [1]
+  }
+  this.data.organization15 = {
     name: 'Another Test Corp',
     id: 15,
     users: [
-      t.context.data.user16,
-      t.context.data.user17,
-      t.context.data.user18
+      this.data.user16,
+      this.data.user17,
+      this.data.user18
     ]
   }
-  t.context.data.user19 = {
+  this.data.user19 = {
     id: 19,
     name: 'test user 19'
   }
-  t.context.data.user20 = {
+  this.data.user20 = {
     id: 20,
     name: 'test user 20'
   }
-  t.context.data.comment19 = {
+  this.data.comment19 = {
     content: 'test comment 19',
     id: 19,
     approvedBy: 19,
-    approvedByUser: t.context.data.user19,
+    approvedByUser: this.data.user19,
     userId: 20,
-    user: t.context.data.user20
+    user: this.data.user20
   }
-  t.context.data.user22 = {
+  this.data.user22 = {
     id: 22,
     name: 'test user 22'
   }
-  t.context.data.profile21 = {
+  this.data.profile21 = {
     content: 'test profile 21',
     id: 21,
     userId: 22,
-    user: t.context.data.user22
+    user: this.data.user22
   }
-}
+})
+
+after(function () {
+  var tests = []
+  var duration = 0
+  var passed = 0
+  var failed = 0
+  this.test.parent.suites.forEach(function (suite) {
+    suite.tests.forEach(function (test) {
+      if (test.state !== 'passed' && test.state !== 'failed') {
+        return
+      }
+      duration += test.duration
+
+      var report = {
+        name: suite.title + ':' + test.title,
+        result: test.state === 'passed',
+        message: test.state,
+        duration: test.duration
+      }
+
+      if (report.result) {
+        passed++
+      } else {
+        failed++
+        if (test.$errors && test.$errors.length) {
+          report.message = test.$errors[0]
+        }
+      }
+      tests.push(report)
+    })
+  })
+  try {
+    window.global_test_results = {
+      passed: passed,
+      failed: failed,
+      total: passed + failed,
+      duration: duration,
+      tests: tests
+    }
+  } catch (err) {
+  }
+})

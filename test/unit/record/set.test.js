@@ -1,105 +1,101 @@
-import {
-  beforeEach,
-  JSData
-} from '../../_setup'
-import test from 'ava'
+import { assert, JSData } from '../../_setup'
 
-test.beforeEach(beforeEach)
-
-test('should be an instance method', (t) => {
-  const Record = JSData.Record
-  const record = new Record()
-  t.is(typeof record.save, 'function')
-  t.ok(record.save === Record.prototype.save)
-})
-test('should set a property', (t) => {
-  const user = new JSData.Record()
-  t.notOk(user.foo)
-  user.set('foo', 'bar')
-  t.is(user.foo, 'bar')
-})
-test('should set a nested property', (t) => {
-  const user = new JSData.Record()
-  t.notOk(user.address)
-  user.set('address.state', 'TX')
-  t.is(user.address.state, 'TX')
-})
-test('should set multiple properties', (t) => {
-  const user = new JSData.Record()
-  t.notOk(user.foo)
-  t.notOk(user.beep)
-  user.set({
-    foo: 'bar',
-    beep: 'boop'
+describe('Record#set', function () {
+  it('should be an instance method', function () {
+    const Record = JSData.Record
+    const record = new Record()
+    assert.equal(typeof record.save, 'function')
+    assert.strictEqual(record.save, Record.prototype.save)
   })
-  t.is(user.foo, 'bar')
-  t.is(user.beep, 'boop')
-})
-test.cb('should trigger change events', (t) => {
-  const UserMapper = new JSData.Mapper({
-    name: 'user',
-    schema: {
-      properties: {
-        foo: { type: 'string', track: true },
-        beep: { type: 'string', track: true }
+  it('should set a property', function () {
+    const user = new JSData.Record()
+    assert(!user.foo)
+    user.set('foo', 'bar')
+    assert.equal(user.foo, 'bar')
+  })
+  it('should set a nested property', function () {
+    const user = new JSData.Record()
+    assert(!user.address)
+    user.set('address.state', 'TX')
+    assert.equal(user.address.state, 'TX')
+  })
+  it('should set multiple properties', function () {
+    const user = new JSData.Record()
+    assert(!user.foo)
+    assert(!user.beep)
+    user.set({
+      foo: 'bar',
+      beep: 'boop'
+    })
+    assert.equal(user.foo, 'bar')
+    assert.equal(user.beep, 'boop')
+  })
+  it('should trigger change events', function (done) {
+    const UserMapper = new JSData.Mapper({
+      name: 'user',
+      schema: {
+        properties: {
+          foo: { type: 'string', track: true },
+          beep: { type: 'string', track: true }
+        }
       }
-    }
+    })
+    let triggers = 0
+    const user = UserMapper.createRecord()
+    user.on('change', function () {
+      triggers++
+    })
+    user.on('change:foo', function () {
+      triggers++
+    })
+    user.on('change:beep', function () {
+      triggers++
+    })
+    assert(!user.foo)
+    assert(!user.beep)
+    user.set({
+      foo: 'bar',
+      beep: 'boop'
+    })
+    assert.equal(user.foo, 'bar')
+    assert.equal(user.beep, 'boop')
+    setTimeout(function () {
+      assert.equal(triggers, 3, 'three events should have fired')
+      done()
+    }, 10)
   })
-  let triggers = 0
-  const user = UserMapper.createRecord()
-  user.on('change', (t) => {
-    triggers++
-  })
-  user.on('change:foo', (t) => {
-    triggers++
-  })
-  user.on('change:beep', (t) => {
-    triggers++
-  })
-  t.notOk(user.foo)
-  t.notOk(user.beep)
-  user.set({
-    foo: 'bar',
-    beep: 'boop'
-  })
-  t.is(user.foo, 'bar')
-  t.is(user.beep, 'boop')
-  setTimeout(function () {
-    t.is(triggers, 3, 'three events should have fired')
-    t.end()
-  }, 10)
-})
-test.cb('should support "silent" option', (t) => {
-  const UserMapper = new JSData.Mapper({
-    name: 'user',
-    schema: {
-      properties: {
-        foo: { type: 'string', track: true },
-        beep: { type: 'string', track: true }
+  it('should support "silent" option', function (done) {
+    const UserMapper = new JSData.Mapper({
+      name: 'user',
+      schema: {
+        properties: {
+          foo: { type: 'string', track: true },
+          beep: { type: 'string', track: true }
+        }
       }
-    }
+    })
+    let triggers = 0
+    const user = UserMapper.createRecord()
+    user.on('change', function () {
+      triggers++
+    })
+    user.on('change:foo', function () {
+      triggers++
+    })
+    user.on('change:beep', function () {
+      triggers++
+    })
+    assert(!user.foo)
+    assert(!user.beep)
+    user.set({
+      foo: 'bar'
+    }, { silent: true })
+    user.set('beep', 'boop', { silent: true })
+    assert.equal(user.foo, 'bar')
+    assert.equal(user.beep, 'boop')
+    setTimeout(function () {
+      assert.equal(triggers, 0, 'no events should have fired')
+      done()
+    }, 10)
   })
-  let triggers = 0
-  const user = UserMapper.createRecord()
-  user.on('change', (t) => {
-    triggers++
-  })
-  user.on('change:foo', (t) => {
-    triggers++
-  })
-  user.on('change:beep', (t) => {
-    triggers++
-  })
-  t.notOk(user.foo)
-  t.notOk(user.beep)
-  user.set({
-    foo: 'bar'
-  }, { silent: true })
-  user.set('beep', 'boop', { silent: true })
-  t.is(user.foo, 'bar')
-  t.is(user.beep, 'boop')
-  setTimeout(function () {
-    t.is(triggers, 0, 'no events should have fired')
-    t.end()
-  }, 10)
 })

@@ -26,12 +26,13 @@
  * @property {Function} isSorN TODO
  * @property {Function} isString TODO
  * @property {Function} isUndefined TODO
- * @property {Function} possibleConstructorReturn TODO
  * @property {Function} reject TODO
  * @property {Function} resolve TODO
  * @property {Function} set TODO
  * @property {Function} toJson TODO
  */
+
+const DOMAIN = 'utils'
 
 const INFINITY = 1 / 0
 const MAX_INTEGER = 1.7976931348623157e+308
@@ -44,6 +45,11 @@ const REGEXP_TAG = '[object RegExp]'
 const STRING_TAG = '[object String]'
 const objToString = Object.prototype.toString
 const PATH = /^(.+)\.(.+)$/
+
+const ERRORS = {
+  '400' () { return `expected: ${arguments[0]}, found: ${arguments[2] ? arguments[1] : typeof arguments[1]}` },
+  '404' () { return `${arguments[0]} not found` }
+}
 
 const toInteger = function (value) {
   if (!value) {
@@ -204,7 +210,7 @@ const utils = {
    */
   classCallCheck (instance, ctor) {
     if (!(instance instanceof ctor)) {
-      throw new TypeError('Cannot call a class as a function')
+      throw utils.err(`${ctor.name}`)(500, 'Cannot call a class as a function')
     }
   },
 
@@ -236,7 +242,7 @@ const utils = {
       }
     } else {
       if (from === to) {
-        throw new Error('Cannot copy! Source and destination are identical.')
+        throw utils.err(`${DOMAIN}.copy`)(500, 'Cannot copy! Source and destination are identical.')
       }
 
       stackFrom = stackFrom || []
@@ -376,11 +382,21 @@ const utils = {
 
   /**
    * TODO
-   *
-   * @ignore
    */
   equal (a, b) {
     return a == b // eslint-disable-line
+  },
+
+  /**
+   * TODO
+   */
+  err (domain, target) {
+    return function (code) {
+      const prefix = `[${domain}:${target}] `
+      let message = ERRORS[code].apply(null, Array.prototype.slice.call(arguments, 1))
+      message = `${prefix}${message}\nhttp://www.js-data.io/v3.0/docs/errors#${code}`
+      return new Error(message)
+    }
   },
 
   /**
@@ -393,20 +409,15 @@ const utils = {
    * @param {Function} [setter] Custom setter for setting the object's event
    * listeners.
    */
-  eventify (target, getter, setter, enumerable) {
+  eventify (target, getter, setter) {
     target = target || this
     let _events = {}
     if (!getter && !setter) {
-      getter = function () {
-        return _events
-      }
-      setter = function (value) {
-        _events = value
-      }
+      getter = function () { return _events }
+      setter = function (value) { _events = value }
     }
     Object.defineProperties(target, {
       emit: {
-        enumerable: !!enumerable,
         value (...args) {
           const events = getter.call(this) || {}
           const type = args.shift()
@@ -423,7 +434,6 @@ const utils = {
         }
       },
       off: {
-        enumerable: !!enumerable,
         value (type, func) {
           const events = getter.call(this)
           const listeners = events[type]
@@ -442,7 +452,6 @@ const utils = {
         }
       },
       on: {
-        enumerable: !!enumerable,
         value (type, func, ctx) {
           if (!getter.call(this)) {
             setter.call(this, {})
@@ -476,11 +485,11 @@ const utils = {
     } else {
       subClass = function (...args) {
         utils.classCallCheck(this, subClass)
-        const _this = utils.possibleConstructorReturn(this, (subClass.__super__ || Object.getPrototypeOf(subClass)).apply(this, args))
-        return _this
+        superClass.apply(this, args)
       }
     }
 
+    // Setup inheritance of instance members
     subClass.prototype = Object.create(superClass && superClass.prototype, {
       constructor: {
         configurable: true,
@@ -491,6 +500,7 @@ const utils = {
     })
 
     const obj = Object
+    // Setup inheritance of static members
     if (obj.setPrototypeOf) {
       obj.setPrototypeOf(subClass, superClass)
     } else if (classProps.strictEs6Class) {
@@ -538,6 +548,9 @@ const utils = {
    */
   findIndex (array, fn) {
     let index = -1
+    if (!array) {
+      return index
+    }
     array.forEach(function (record, i) {
       if (fn(record)) {
         index = i
@@ -820,6 +833,9 @@ const utils = {
    * @ignore
    */
   noDupeAdd (array, record, fn) {
+    if (!array) {
+      return
+    }
     const index = this.findIndex(array, fn)
     if (index < 0) {
       array.push(record)
@@ -852,19 +868,6 @@ const utils = {
   },
 
   /**
-   * TODO
-   *
-   * @ignore
-   */
-  possibleConstructorReturn (self, call) {
-    if (!self) {
-      throw new ReferenceError('this hasn\'t been initialised - super() hasn\'t been called')
-    }
-
-    return call && (typeof call === 'object' || typeof call === 'function') ? call : self
-  },
-
-  /**
    * Proxy for `Promise.reject`.
    *
    * @ignore
@@ -881,6 +884,9 @@ const utils = {
    * @ignore
    */
   remove (array, fn) {
+    if (!array || !array.length) {
+      return
+    }
     const index = this.findIndex(array, fn)
     if (index >= 0) {
       array.splice(index, 1)

@@ -1,30 +1,26 @@
-import {
-  beforeEach,
-  JSData
-} from '../../_setup'
-import test from 'ava'
+import { assert, JSData } from '../../_setup'
 
-test.beforeEach(beforeEach)
-
-test('should be an instance method', (t) => {
-  const Record = JSData.Record
-  const record = new Record()
-  t.is(typeof record.previous, 'function')
-  t.ok(record.previous === Record.prototype.previous)
-})
-test('should hold previous data', (t) => {
-  const post = new t.context.Post.recordClass(t.context.data.p1)
-  t.context.objectsEqual(t, post, post.previous())
-  post.foo = 'bar'
-  t.context.objectsNotEqual(t, post, post.previous())
-  delete post.foo
-  t.context.objectsEqual(t, post, post.previous())
-})
-test('should hold previous data for a specified key', (t) => {
-  const post = new t.context.Post.recordClass(t.context.data.p1)
-  t.is('John', post.previous('author'))
-  post.author = 'Arnold'
-  t.is('John', post.previous('author'))
-  post.author = 'John'
-  t.is('John', post.previous('author'))
+describe('Record#previous', function () {
+  it('should be an instance method', function () {
+    const Record = JSData.Record
+    const record = new Record()
+    assert.equal(typeof record.previous, 'function')
+    assert.strictEqual(record.previous, Record.prototype.previous)
+  })
+  it('should hold previous data', function () {
+    const post = new this.Post.recordClass(this.data.p1)
+    assert.objectsEqual(post, post.previous())
+    post.foo = 'bar'
+    assert.objectsNotEqual(post, post.previous())
+    delete post.foo
+    assert.objectsEqual(post, post.previous())
+  })
+  it('should hold previous data for a specified key', function () {
+    const post = new this.Post.recordClass(this.data.p1)
+    assert.equal('John', post.previous('author'))
+    post.author = 'Arnold'
+    assert.equal('John', post.previous('author'))
+    post.author = 'John'
+    assert.equal('John', post.previous('author'))
+  })
 })

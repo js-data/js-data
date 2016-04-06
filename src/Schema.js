@@ -1,6 +1,8 @@
 import utils from './utils'
 import Component from './Component'
 
+const DOMAIN = 'Schema'
+
 /**
  * TODO
  *
@@ -597,7 +599,7 @@ const validate = function (value, schema, opts) {
     return
   }
   if (!utils.isObject(schema)) {
-    throw new Error(`Invalid schema at path: "${opts.path}"`)
+    throw utils.err(`${DOMAIN}#validate`)(500, `Invalid schema at path: "${opts.path}"`)
   }
   if (utils.isUndefined(opts.path)) {
     opts.path = []

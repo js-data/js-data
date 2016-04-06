@@ -1,6 +1,8 @@
 import utils from './utils'
 import Component from './Component'
 
+const DOMAIN = 'Record'
+
 const superMethod = function (mapper, name) {
   const store = mapper.datastore
   if (store && store[name]) {
@@ -58,10 +60,12 @@ const Record = Component.extend({
    * @ignore
    */
   _mapper () {
-    if (!this.constructor.mapper) {
-      throw new Error('This recordClass has no Mapper!')
+    const self = this
+    const mapper = self.constructor.mapper
+    if (!mapper) {
+      throw utils.err(`${DOMAIN}#_mapper`, '')(404, 'mapper')
     }
-    return this.constructor.mapper
+    return mapper
   },
 
   /**
@@ -200,9 +204,6 @@ const Record = Component.extend({
     // beforeLoadRelations lifecycle hook
     op = opts.op = 'beforeLoadRelations'
     return utils.resolve(self[op](relations, opts)).then(function () {
-      if (utils.isString(relations)) {
-        relations = [relations]
-      }
       // Now delegate to the adapter
       op = opts.op = 'loadRelations'
       mapper.dbg(op, self, relations, opts)
@@ -213,11 +214,16 @@ const Record = Component.extend({
         optsCopy.raw = false
         if (utils.isFunction(def.load)) {
           task = def.load(mapper, def, self, opts)
-        } else if (def.type === 'hasMany') {
+        } else if (def.type === 'hasMany' || def.type === 'hasOne') {
           if (def.foreignKey) {
             task = superMethod(relatedMapper, 'findAll')({
               [def.foreignKey]: utils.get(self, mapper.idAttribute)
-            }, optsCopy)
+            }, optsCopy).then(function (relatedData) {
+              if (def.type === 'hasOne') {
+                return relatedData.length ? relatedData[0] : undefined
+              }
+              return relatedData
+            })
           } else if (def.localKeys) {
             task = superMethod(relatedMapper, 'findAll')({
               where: {
@@ -235,7 +241,7 @@ const Record = Component.extend({
               }
             }, opts)
           }
-        } else if (def.type === 'belongsTo' || def.type === 'hasOne') {
+        } else if (def.type === 'belongsTo') {
           const key = utils.get(self, def.foreignKey)
           if (utils.isSorN(key)) {
             task = superMethod(relatedMapper, 'find')(key, optsCopy)

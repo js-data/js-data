@@ -7,6 +7,8 @@ import {
 } from './decorators'
 import Mapper from './Mapper'
 
+const DOMAIN = 'Container'
+
 const toProxy = [
   /**
    * Proxy for {@link Mapper#count}.
@@ -300,12 +302,10 @@ const props = {
     // For backwards compatibility with defineResource
     if (utils.isObject(name)) {
       opts = name
-      if (!opts.name) {
-        throw new Error('name is required!')
-      }
       name = opts.name
-    } else if (!utils.isString(name)) {
-      throw new Error('name is required!')
+    }
+    if (!utils.isString(name)) {
+      throw utils.err(`${DOMAIN}#defineMapper`, 'name')(400, 'string', name)
     }
 
     // Default values for arguments
@@ -323,6 +323,7 @@ const props = {
 
     // Instantiate a mapper
     const mapper = self._mappers[name] = new mapperClass(opts) // eslint-disable-line
+    mapper.relations || (mapper.relations = {})
     // Make sure the mapper's name is set
     mapper.name = name
     // All mappers in this datastore will share adapters
@@ -377,7 +378,7 @@ const props = {
     const self = this
     const adapter = self.getAdapterName(name)
     if (!adapter) {
-      throw new ReferenceError(`${adapter} not found!`)
+      throw utils.err(`${DOMAIN}#getAdapter`, 'name')(400, 'string', name)
     }
     return self.getAdapters()[adapter]
   },
@@ -427,7 +428,7 @@ const props = {
   getMapper (name) {
     const mapper = this._mappers[name]
     if (!mapper) {
-      throw new ReferenceError(`${name} is not a registered mapper!`)
+      throw utils.err(`${DOMAIN}#getMapper`, name)(404, 'mapper')
     }
     return mapper
   },

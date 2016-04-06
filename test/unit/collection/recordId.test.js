@@ -1,3 +1,3 @@
-import test from 'ava'
-
-test.todo('should work')
+describe('Collection#recordId', function () {
+  it('should work')
+})

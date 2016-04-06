@@ -1,3 +1,10 @@
+##### 3.0.0-alpha.30 - xx April 2016
+
+###### Other
+- Switched back to Mocha from Ava
+- Added Karma tests with Sauce Labs browser testing
+- Improved test coverage
+
 ##### 3.0.0-alpha.29 - 05 April 2016
 
 ###### Breaking changes

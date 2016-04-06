@@ -1,3 +1,3 @@
-import test from 'ava'
-
-test.todo('should be tested')
+describe('utils', function () {
+  it('should be tested')
+})

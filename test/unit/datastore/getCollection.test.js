@@ -1,22 +1,17 @@
-import {
-  beforeEach,
-  JSData
-} from '../../_setup'
-import test from 'ava'
+import { assert, JSData } from '../../_setup'
 
-test.beforeEach(beforeEach)
+describe('DataStore#getCollection', function () {
+  it('should work', function () {
+    const DataStore = JSData.DataStore
+    const store = new DataStore()
+    assert.equal(typeof store.getCollection, 'function')
+    assert.strictEqual(store.getCollection, DataStore.prototype.getCollection)
 
-test('should be an instance method', (t) => {
-  const DataStore = JSData.DataStore
-  const store = new DataStore()
-  t.is(typeof store.getCollection, 'function')
-  t.ok(store.getCollection === DataStore.prototype.getCollection)
-})
-test('should get a collection', (t) => {
-  t.ok(t.context.UserCollection === t.context.store.getCollection('user'))
-})
-test('should throw an error', (t) => {
-  t.throws(function () {
-    t.context.store.getCollection('foo')
-  }, ReferenceError, 'foo is not a registered collection!')
+    store.defineMapper('user')
+    assert.strictEqual(store._collections.user, store.getCollection('user'))
+
+    assert.throws(function () {
+      store.getCollection('foo')
+    }, Error, '[DataStore#getCollection:foo] collection not found\nhttp://www.js-data.io/v3.0/docs/errors#404')
+  })
 })
