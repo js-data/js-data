@@ -1,6 +1,9 @@
 import utils from './utils'
 import Component from './Component'
 
+const DOMAIN = 'Query'
+const INDEX_ERR = 'Index inaccessible after first operation'
+
 // Reserved words used by JSData's Query Syntax
 const reserved = {
   limit: '',
@@ -85,7 +88,7 @@ export default Component.extend({
     const self = this
     opts || (opts = {})
     if (self.data) {
-      throw new Error('Cannot access index after first operation!')
+      throw utils.err(`${DOMAIN}#between`)(500, 'Cannot access index')
     }
     self.data = self.collection.getIndex(opts.index).between(leftKeys, rightKeys, opts)
     return self
@@ -343,7 +346,7 @@ export default Component.extend({
     keyList || (keyList = [])
     opts || (opts = {})
     if (self.data) {
-      throw new Error('Cannot access index after first operation!')
+      throw utils.err(`${DOMAIN}#get`)(500, INDEX_ERR)
     }
     if (keyList && !utils.isArray(keyList)) {
       keyList = [keyList]
@@ -384,7 +387,7 @@ export default Component.extend({
     const self = this
     let opts = {}
     if (self.data) {
-      throw new Error('Cannot access index after first operation!')
+      throw utils.err(`${DOMAIN}#getAll`)(500, INDEX_ERR)
     }
     if (!args.length || args.length === 1 && utils.isObject(args[0])) {
       self.getData()
@@ -437,7 +440,7 @@ export default Component.extend({
    */
   limit (num) {
     if (!utils.isNumber(num)) {
-      throw new TypeError(`limit: Expected number but found ${typeof num}!`)
+      throw utils.err(`${DOMAIN}#limit`, 'num')(400, 'number', num)
     }
     const data = this.getData()
     this.data = data.slice(0, Math.min(data.length, num))
@@ -504,7 +507,7 @@ export default Component.extend({
    */
   skip (num) {
     if (!utils.isNumber(num)) {
-      throw new TypeError(`skip: Expected number but found ${typeof num}!`)
+      throw utils.err(`${DOMAIN}#skip`, 'num')(400, 'number', num)
     }
     const data = this.getData()
     if (num < data.length) {

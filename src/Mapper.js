@@ -11,6 +11,8 @@ import {
   hasOneType
 } from './decorators'
 
+const DOMAIN = 'Mapper'
+
 const makeNotify = function (num) {
   return function (...args) {
     const self = this
@@ -304,7 +306,7 @@ export default Component.extend({
      * @type {string}
      */
     if (!self.name) {
-      throw new Error('name is required!')
+      throw utils.err(`new ${DOMAIN}`, 'opts.name')(400, 'string', self.name)
     }
 
     // Setup schema, with an empty default schema if necessary
@@ -765,12 +767,12 @@ export default Component.extend({
           }))
         } else if (def.type === hasManyType && def.localKeys) {
           // Create his hasMany relation first because it uses localKeys
-          tasks.push(relatedMapper.createMany(relationData, optsCopy)).then(function (data) {
+          tasks.push(relatedMapper.createMany(relationData, optsCopy).then(function (data) {
             def.setLocalField(belongsToRelationData, data)
             utils.set(props, def.localKeys, data.map(function (record) {
               return utils.get(record, relatedIdAttribute)
             }))
-          })
+          }))
         }
       })
       return utils.Promise.all(tasks).then(function () {
@@ -787,20 +789,23 @@ export default Component.extend({
           if (!relationData) {
             return
           }
+          optsCopy.raw = false
           let task
           // Create hasMany and hasOne after the main create because we needed
           // a generated id to attach to these items
           if (def.type === hasManyType && def.foreignKey) {
             def.setForeignKey(createdRecord, relationData)
             task = def.getRelation().createMany(relationData, optsCopy).then(function (data) {
-              def.setLocalField(createdRecord, opts.raw ? data.data : data)
+              def.setLocalField(createdRecord, data)
             })
           } else if (def.type === hasOneType) {
             def.setForeignKey(createdRecord, relationData)
             task = def.getRelation().create(relationData, optsCopy).then(function (data) {
-              def.setLocalField(createdRecord, opts.raw ? data.data : data)
+              def.setLocalField(createdRecord, data)
             })
           } else if (def.type === belongsToType && def.getLocalField(belongsToRelationData)) {
+            def.setLocalField(createdRecord, def.getLocalField(belongsToRelationData))
+          } else if (def.type === hasManyType && def.localKeys && def.getLocalField(belongsToRelationData)) {
             def.setLocalField(createdRecord, def.getLocalField(belongsToRelationData))
           }
           if (task) {
@@ -979,7 +984,7 @@ export default Component.extend({
       })
     }
     if (!utils.isObject(props)) {
-      throw new Error('Cannot create a record from ' + props + '!')
+      throw utils.err(`${DOMAIN}#createRecord`, 'props')(400, 'array or object', props)
     }
     const recordClass = self.recordClass
     const relationList = self.relationList || []
@@ -1010,7 +1015,7 @@ export default Component.extend({
     const self = this
     const config = self.lifecycleMethods[method]
     if (!config) {
-      throw new Error(`${method}: No such CRUD method!`)
+      throw utils.err(`${DOMAIN}#crud`, method)(404, 'method')
     }
 
     const upper = `${method.charAt(0).toUpperCase()}${method.substr(1)}`
@@ -1179,7 +1184,7 @@ export default Component.extend({
     self.dbg('getAdapter', 'name:', name)
     const adapter = self.getAdapterName(name)
     if (!adapter) {
-      throw new ReferenceError(`${adapter} not found!`)
+      throw utils.err(`${DOMAIN}#getAdapter`, 'name')(400, 'string', name)
     }
     return self.getAdapters()[adapter]
   },
@@ -1478,18 +1483,22 @@ export default Component.extend({
   validate (record, opts) {
     const self = this
     const schema = self.getSchema()
-    if (!schema) {
-      throw new Error(`${self.name} mapper has no schema!`)
-    }
     if (utils.isArray(record)) {
-      return record.map(function (_record) {
+      const errors = record.map(function (_record) {
         return schema.validate(_record, opts)
       })
-    } else if (utils.isObject(record)) {
-      return schema.validate(record, opts)
-    } else {
-      throw new Error('not a record!')
+      let hasErrors = false
+      errors.forEach(function (err) {
+        if (err) {
+          hasErrors = true
+        }
+      })
+      if (hasErrors) {
+        return errors
+      }
+      return undefined
     }
+    return schema.validate(record, opts)
   },
 
   /**

@@ -4,10 +4,15 @@
 
 [![Slack Status][b1]][b2]
 [![npm version][b3]][b4]
-[![Circle CI][b5]][b6]
 [![npm downloads][b7]][b8]
+[![Circle CI][b5]][b6]
 [![Coverage Status][b9]][b10]
 [![Codacy][b11]][b12]
+
+[![Sauce Test Status][b13]][b14]
+
+[![Circle CI][b5]][b6]
+[![Circle CI][b15]][b6]
 
 [b1]: http://slack.js-data.io/badge.svg
 [b2]: http://slack.js-data.io
@@ -21,6 +26,9 @@
 [b10]: https://coveralls.io/github/js-data
 [b11]: https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg
 [b12]: https://www.codacy.com/app/jasondobry/js-data/dashboard
+[b13]: https://saucelabs.com/browser-matrix/jsdata.svg
+[b14]: https://saucelabs.com/u/jsdata
+[b15]: https://img.shields.io/badge/Node.js-v4.1.0-brightgreen.svg
 
 JSData is a framework-agnostic, datastore-agnostic ORM/ODM for Node.js and the
 Browser.

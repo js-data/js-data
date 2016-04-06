@@ -1,3 +1,3 @@
-import test from 'ava'
-
-test.todo('should work')
+describe('Collection#query', function () {
+  it('should work')
+})

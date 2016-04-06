@@ -6,6 +6,8 @@ import {
 } from './decorators'
 import Collection from './Collection'
 
+const DOMAIN = 'LinkedCollection'
+
 /**
  * TODO
  *
@@ -27,11 +29,13 @@ export default Collection.extend({
     LinkedCollection.__super__.call(self, records, opts)
 
     // Make sure this collection has somewhere to store "added" timestamps
-    self._added = {}
+    Object.defineProperty(self, '_added', {
+      value: {}
+    })
 
-    // Make sure this collection a reference to a datastore
+    // Make sure this collection has a reference to a datastore
     if (!self.datastore) {
-      throw new Error('This collection must have a datastore!')
+      throw utils.err(`new ${DOMAIN}`, 'opts.datastore')(400, 'DataStore', self.datastore)
     }
     return self
   },
@@ -51,7 +55,7 @@ export default Collection.extend({
     const self = this
     const datastore = self.datastore
     const mapper = self.mapper
-    const relationList = mapper.relationList || []
+    const relationList = mapper.relationList
     const timestamp = new Date().getTime()
     const usesRecordClass = !!mapper.recordClass
     const idAttribute = mapper.idAttribute
@@ -111,12 +115,6 @@ export default Collection.extend({
                 }
                 return toInsertItem
               })
-              // If it's the parent that has the localKeys
-              if (def.localKeys && !utils.get(record, def.localKeys)) {
-                utils.set(record, def.localKeys, relatedData.map(function (inserted) {
-                  return utils.get(inserted, relationIdAttribute)
-                }))
-              }
             } else {
               const relatedDataId = utils.get(relatedData, relationIdAttribute)
               // Handle inserting belongsTo and hasOne relations
@@ -148,11 +146,11 @@ export default Collection.extend({
                   [foreignKey]: id
                 })
                 relatedData = _records.length ? _records : undefined
-              } else if (def.localKeys) {
+              } else if (def.localKeys && utils.get(record, def.localKeys)) {
                 const _records = relatedCollection.filter({
                   where: {
                     [relationIdAttribute]: {
-                      'in': utils.get(record, def.localKeys || [])
+                      'in': utils.get(record, def.localKeys)
                     }
                   }
                 })
@@ -171,6 +169,7 @@ export default Collection.extend({
           }
           if (relatedData) {
             def.setLocalField(record, relatedData)
+          } else {
           }
         })
       })

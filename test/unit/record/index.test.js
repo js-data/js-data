@@ -1,80 +1,76 @@
-import {
-  beforeEach,
-  JSData
-} from '../../_setup'
-import test from 'ava'
+import { assert, JSData } from '../../_setup'
 
-test.beforeEach(beforeEach)
+describe('Record', function () {
+  it('should be a constructor function', function () {
+    assert.equal(typeof JSData.Record, 'function', 'should be a function')
+    let instance = new JSData.Record()
+    assert(instance instanceof JSData.Record, 'instance should be an instance')
+    instance = new JSData.Record({ foo: 'bar' })
+    assert.objectsEqual(instance, { foo: 'bar' }, 'instance should get initialization properties')
+  })
 
-test('should be a constructor function', (t) => {
-  t.is(typeof JSData.Record, 'function', 'should be a function')
-  let instance = new JSData.Record()
-  t.ok(instance instanceof JSData.Record, 'instance should be an instance')
-  instance = new JSData.Record({ foo: 'bar' })
-  t.context.objectsEqual(t, instance, { foo: 'bar' }, 'instance should get initialization properties')
-})
-
-test.cb('should allow instance events (assignment operator)', (t) => {
-  let changed = false
-  const FooMapper = new JSData.Mapper({
-    name: 'foo',
-    schema: {
-      properties: {
-        bar: { type: 'string', track: true }
+  it('should allow instance events (assignment operator)', function (done) {
+    let changed = false
+    const FooMapper = new JSData.Mapper({
+      name: 'foo',
+      schema: {
+        properties: {
+          bar: { type: 'string', track: true }
+        }
       }
-    }
-  })
-  const foo = FooMapper.createRecord({ id: 1 })
+    })
+    const foo = FooMapper.createRecord({ id: 1 })
 
-  setTimeout(() => {
-    if (!changed) {
-      t.end('failed to fire change event')
-    }
-  }, 1000)
-
-  foo.on('change', (Foo, foo) => {
-    changed = true
-    t.end()
-  })
-
-  foo.bar = 'baz'
-})
-
-test.cb('should allow instance events (setter method)', (t) => {
-  let changed = false
-  const FooMapper = new JSData.Mapper({
-    name: 'foo',
-    schema: {
-      properties: {
-        bar: { type: 'string', track: true }
+    setTimeout(() => {
+      if (!changed) {
+        done('failed to fire change event')
       }
-    }
-  })
-  const foo = FooMapper.createRecord({ id: 1 })
+    }, 1000)
 
-  setTimeout(() => {
-    if (!changed) {
-      t.end('failed to fire change event')
-    }
-  }, 1000)
+    foo.on('change', (Foo, foo) => {
+      changed = true
+      done()
+    })
 
-  foo.on('change', (Foo, foo) => {
-    changed = true
-    t.end()
+    foo.bar = 'baz'
   })
 
-  foo.set('bar', 'baz')
-})
+  it('should allow instance events (setter method)', function (done) {
+    let changed = false
+    const FooMapper = new JSData.Mapper({
+      name: 'foo',
+      schema: {
+        properties: {
+          bar: { type: 'string', track: true }
+        }
+      }
+    })
+    const foo = FooMapper.createRecord({ id: 1 })
 
-test('should throw if a Record class does not have a Mapper', (t) => {
-  const record = new JSData.Record()
-  t.throws(() => {
-    record._mapper()
-  }, Error, 'This recordClass has no Mapper!')
-})
+    setTimeout(() => {
+      if (!changed) {
+        done('failed to fire change event')
+      }
+    }, 1000)
 
-test('hashCode should work', (t) => {
-  const BarMapper = new JSData.Mapper({ name: 'bar', idAttribute: '_id' })
-  let bar = BarMapper.createRecord({ _id: 1 })
-  t.is(bar.hashCode(), 1)
+    foo.on('change', (Foo, foo) => {
+      changed = true
+      done()
+    })
+
+    foo.set('bar', 'baz')
+  })
+
+  it('should throw if a Record class does not have a Mapper', function () {
+    const record = new JSData.Record()
+    assert.throws(() => {
+      record._mapper()
+    }, Error, '[Record#_mapper:] mapper not found\nhttp://www.js-data.io/v3.0/docs/errors#404')
+  })
+
+  it('hashCode should work', function () {
+    const BarMapper = new JSData.Mapper({ name: 'bar', idAttribute: '_id' })
+    let bar = BarMapper.createRecord({ _id: 1 })
+    assert.equal(bar.hashCode(), 1)
+  })
 })

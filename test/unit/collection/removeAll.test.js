@@ -1,42 +1,38 @@
-import {
-  beforeEach,
-  JSData
-} from '../../_setup'
-import test from 'ava'
+import { assert, JSData } from '../../_setup'
 
-test.beforeEach(beforeEach)
-
-test('should eject items that meet the criteria from the store', (t) => {
-  t.context.User.debug = true
-  t.context.UserCollection.add([t.context.data.p1, t.context.data.p2, t.context.data.p3, t.context.data.p4, t.context.data.p5])
-  t.ok(t.context.UserCollection.get(5))
-  t.ok(t.context.UserCollection.get(6))
-  t.ok(t.context.UserCollection.get(7))
-  t.ok(t.context.UserCollection.get(8))
-  t.ok(t.context.UserCollection.get(9))
-  t.notThrows(function () {
-    t.context.UserCollection.removeAll({ where: { author: 'Adam' } })
+describe('Collection#removeAll', function () {
+  it('should eject items that meet the criteria from the store', function () {
+    this.User.debug = true
+    this.UserCollection.add([this.data.p1, this.data.p2, this.data.p3, this.data.p4, this.data.p5])
+    assert(this.UserCollection.get(5))
+    assert(this.UserCollection.get(6))
+    assert(this.UserCollection.get(7))
+    assert(this.UserCollection.get(8))
+    assert(this.UserCollection.get(9))
+    assert.doesNotThrow(() => {
+      this.UserCollection.removeAll({ where: { author: 'Adam' } })
+    })
+    assert(this.UserCollection.get(5))
+    assert(this.UserCollection.get(6))
+    assert(this.UserCollection.get(7))
+    assert(!this.UserCollection.get(8))
+    assert(!this.UserCollection.get(9))
   })
-  t.ok(t.context.UserCollection.get(5))
-  t.ok(t.context.UserCollection.get(6))
-  t.ok(t.context.UserCollection.get(7))
-  t.notOk(t.context.UserCollection.get(8))
-  t.notOk(t.context.UserCollection.get(9))
-})
-test('should eject all items from the store', (t) => {
-  t.context.PostCollection.add([t.context.data.p1, t.context.data.p2, t.context.data.p3, t.context.data.p4])
+  it('should eject all items from the store', function () {
+    this.PostCollection.add([this.data.p1, this.data.p2, this.data.p3, this.data.p4])
 
-  t.context.objectsEqual(t, t.context.PostCollection.get(5), t.context.data.p1)
-  t.context.objectsEqual(t, t.context.PostCollection.get(6), t.context.data.p2)
-  t.context.objectsEqual(t, t.context.PostCollection.get(7), t.context.data.p3)
-  t.context.objectsEqual(t, t.context.PostCollection.get(8), t.context.data.p4)
+    assert.objectsEqual(this.PostCollection.get(5), this.data.p1)
+    assert.objectsEqual(this.PostCollection.get(6), this.data.p2)
+    assert.objectsEqual(this.PostCollection.get(7), this.data.p3)
+    assert.objectsEqual(this.PostCollection.get(8), this.data.p4)
 
-  t.notThrows(function () {
-    t.context.PostCollection.removeAll()
+    assert.doesNotThrow(() => {
+      this.PostCollection.removeAll()
+    })
+
+    assert(!this.PostCollection.get(5))
+    assert(!this.PostCollection.get(6))
+    assert(!this.PostCollection.get(7))
+    assert(!this.PostCollection.get(8))
   })
-
-  t.notOk(t.context.PostCollection.get(5))
-  t.notOk(t.context.PostCollection.get(6))
-  t.notOk(t.context.PostCollection.get(7))
-  t.notOk(t.context.PostCollection.get(8))
 })

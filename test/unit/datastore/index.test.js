@@ -1,93 +1,88 @@
-import {
-  beforeEach,
-  JSData
-} from '../../_setup'
-import sinon from 'sinon'
-import test from 'ava'
+import { assert, JSData, sinon } from '../../_setup'
 
-test.beforeEach(beforeEach)
-
-test('should be a constructor function', (t) => {
-  const DataStore = JSData.DataStore
-  t.is(typeof DataStore, 'function')
-  const store = new DataStore()
-  t.ok(store instanceof DataStore)
-  t.ok(JSData.utils.getSuper(store) === JSData.Container)
-})
-test('should initialize with defaults', (t) => {
-  const DataStore = JSData.DataStore
-  const store = new DataStore()
-  t.same(store._adapters, {})
-  t.same(store._mappers, {})
-  t.same(store._collections, {})
-  t.same(store.mapperDefaults, {})
-  t.ok(store.mapperClass === JSData.Mapper)
-  t.ok(store.collectionClass === JSData.LinkedCollection)
-})
-test('should accept overrides', (t) => {
-  const DataStore = JSData.DataStore
-  class Foo {}
-  class Bar {}
-  const store = new DataStore({
-    mapperClass: Foo,
-    CollectionClass: Bar,
-    foo: 'bar',
-    linkRelations: true,
-    mapperDefaults: {
+describe('DataStore', function () {
+  it('should be a constructor function', function () {
+    const DataStore = JSData.DataStore
+    assert.equal(typeof DataStore, 'function')
+    const store = new DataStore()
+    assert(store instanceof DataStore)
+    assert.strictEqual(JSData.utils.getSuper(store), JSData.Container)
+  })
+  it('should initialize with defaults', function () {
+    const DataStore = JSData.DataStore
+    const store = new DataStore()
+    assert.deepEqual(store._adapters, {})
+    assert.deepEqual(store._mappers, {})
+    assert.deepEqual(store._collections, {})
+    assert.deepEqual(store.mapperDefaults, {})
+    assert.strictEqual(store.mapperClass, JSData.Mapper)
+    assert.strictEqual(store.collectionClass, JSData.LinkedCollection)
+  })
+  it('should accept overrides', function () {
+    const DataStore = JSData.DataStore
+    class Foo {}
+    class Bar {}
+    const store = new DataStore({
+      mapperClass: Foo,
+      CollectionClass: Bar,
+      foo: 'bar',
+      linkRelations: true,
+      mapperDefaults: {
+        idAttribute: '_id'
+      }
+    })
+    assert.deepEqual(store._adapters, {})
+    assert.deepEqual(store._mappers, {})
+    assert.deepEqual(store._collections, {})
+    assert.equal(store.foo, 'bar')
+    assert.deepEqual(store.mapperDefaults, {
       idAttribute: '_id'
-    }
+    })
+    assert.strictEqual(store.mapperClass, Foo)
+    assert.strictEqual(store.CollectionClass, Bar)
+    assert(store.linkRelations)
   })
-  t.same(store._adapters, {})
-  t.same(store._mappers, {})
-  t.same(store._collections, {})
-  t.is(store.foo, 'bar')
-  t.same(store.mapperDefaults, {
-    idAttribute: '_id'
+  it('should have events', function () {
+    const store = new JSData.DataStore()
+    const listener = sinon.stub()
+    store.on('bar', listener)
+    store.emit('bar')
+    assert(listener.calledOnce)
   })
-  t.ok(store.mapperClass === Foo)
-  t.ok(store.CollectionClass === Bar)
-  t.ok(store.linkRelations)
-})
-test('should have events', (t) => {
-  const store = new JSData.DataStore()
-  const listener = sinon.stub()
-  store.on('bar', listener)
-  store.emit('bar')
-  t.ok(listener.calledOnce)
-})
-test('should proxy Mapper events', (t) => {
-  const store = new JSData.DataStore()
-  store.defineMapper('user')
-  const listener = sinon.stub()
-  store.on('bar', listener)
-  store.getMapper('user').emit('bar', 'foo')
-  t.ok(listener.calledOnce)
-  t.same(listener.firstCall.args, ['user', 'foo'])
-})
-test('should proxy all Mapper events', (t) => {
-  const store = new JSData.DataStore()
-  store.defineMapper('user')
-  const listener = sinon.stub()
-  store.on('all', listener)
-  store.getMapper('user').emit('bar', 'foo')
-  t.ok(listener.calledOnce)
-  t.same(listener.firstCall.args, ['bar', 'user', 'foo'])
-})
-test('should proxy Collection events', (t) => {
-  const store = new JSData.DataStore()
-  store.defineMapper('user')
-  const listener = sinon.stub()
-  store.on('bar', listener)
-  store.getCollection('user').emit('bar', 'foo')
-  t.ok(listener.calledOnce)
-  t.same(listener.firstCall.args, ['user', 'foo'])
-})
-test('should proxy all Collection events', (t) => {
-  const store = new JSData.DataStore()
-  store.defineMapper('user')
-  const listener = sinon.stub()
-  store.on('all', listener)
-  store.getCollection('user').emit('bar', 'foo')
-  t.ok(listener.calledOnce)
-  t.same(listener.firstCall.args, ['bar', 'user', 'foo'])
+  it('should proxy Mapper events', function () {
+    const store = new JSData.DataStore()
+    store.defineMapper('user')
+    const listener = sinon.stub()
+    store.on('bar', listener)
+    store.getMapper('user').emit('bar', 'foo')
+    assert(listener.calledOnce)
+    assert.deepEqual(listener.firstCall.args, ['user', 'foo'])
+  })
+  it('should proxy all Mapper events', function () {
+    const store = new JSData.DataStore()
+    store.defineMapper('user')
+    const listener = sinon.stub()
+    store.on('all', listener)
+    store.getMapper('user').emit('bar', 'foo')
+    assert(listener.calledOnce)
+    assert.deepEqual(listener.firstCall.args, ['bar', 'user', 'foo'])
+  })
+  it('should proxy Collection events', function () {
+    const store = new JSData.DataStore()
+    store.defineMapper('user')
+    const listener = sinon.stub()
+    store.on('bar', listener)
+    store.getCollection('user').emit('bar', 'foo')
+    assert(listener.calledOnce)
+    assert.deepEqual(listener.firstCall.args, ['user', 'foo'])
+  })
+  it('should proxy all Collection events', function () {
+    const store = new JSData.DataStore()
+    store.defineMapper('user')
+    const listener = sinon.stub()
+    store.on('all', listener)
+    store.getCollection('user').emit('bar', 'foo')
+    assert(listener.calledOnce)
+    assert.deepEqual(listener.firstCall.args, ['bar', 'user', 'foo'])
+  })
 })

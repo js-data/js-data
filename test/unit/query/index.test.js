@@ -1,14 +1,10 @@
-import {
-  beforeEach,
-  JSData
-} from '../../_setup'
-import test from 'ava'
+import { assert, JSData } from '../../_setup'
 
-test.beforeEach(beforeEach)
-
-test('should be a constructor function', (t) => {
-  t.is(typeof JSData.Query, 'function', 'should be a function')
-  let query = new JSData.Query()
-  t.ok(query instanceof JSData.Query, 'query should be an instance')
+describe('Query', function () {
+  it('should be a constructor function', function () {
+    assert.equal(typeof JSData.Query, 'function', 'should be a function')
+    let query = new JSData.Query()
+    assert(query instanceof JSData.Query, 'query should be an instance')
+  })
+  it('should be tested')
 })
-test.todo('should be tested')

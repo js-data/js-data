@@ -4,30 +4,33 @@ export const belongsToType = 'belongsTo'
 export const hasManyType = 'hasMany'
 export const hasOneType = 'hasOne'
 
+const DOMAIN = 'Relation'
+
 function Relation (related, opts) {
   const self = this
+  const DOMAIN_ERR = `new ${DOMAIN}`
 
   opts || (opts = {})
 
   const localField = opts.localField
   if (!localField) {
-    throw new Error('localField is required!')
+    throw utils.err(DOMAIN_ERR, 'opts.localField')(400, 'string', localField)
   }
 
   const foreignKey = opts.foreignKey = opts.foreignKey || opts.localKey
   if (!foreignKey && (opts.type === belongsToType || opts.type === hasOneType)) {
-    throw new Error('foreignKey is required!')
+    throw utils.err(DOMAIN_ERR, 'opts.foreignKey')(400, 'string', foreignKey)
   }
   const localKeys = opts.localKeys
   const foreignKeys = opts.foreignKeys
   if (!foreignKey && !localKeys && !foreignKeys && opts.type === hasManyType) {
-    throw new Error('one of (foreignKey, localKeys, foreignKeys) is required!')
+    throw utils.err(DOMAIN_ERR, 'opts.<foreignKey|localKeys|foreignKeys>')(400, 'string', foreignKey)
   }
 
   if (utils.isString(related)) {
     opts.relation = related
     if (!utils.isFunction(opts.getRelation)) {
-      throw new Error('you must provide a reference to the related mapper!')
+      throw utils.err(DOMAIN_ERR, 'opts.getRelation')(400, 'function', opts.getRelation)
     }
   } else if (related) {
     opts.relation = related.name
@@ -35,7 +38,7 @@ function Relation (related, opts) {
       value: related
     })
   } else {
-    throw new Error('no relation provided!')
+    throw utils.err(DOMAIN_ERR, 'related')(400, 'Mapper or string', related)
   }
 
   Object.defineProperty(self, 'inverse', {
@@ -49,9 +52,6 @@ function Relation (related, opts) {
 utils.addHiddenPropsToTarget(Relation.prototype, {
   getRelation () {
     return this.relatedMapper
-  },
-  getLocalKeys (record) {
-
   },
   getForeignKey (record) {
     if (this.type === belongsToType) {

@@ -1,80 +1,76 @@
-import {
-  beforeEach,
-  JSData
-} from '../../_setup'
-import test from 'ava'
+import { assert, JSData } from '../../_setup'
 
-test.beforeEach(beforeEach)
-
-test('should be an instance method', (t) => {
-  const DataStore = JSData.DataStore
-  const store = new DataStore()
-  t.is(typeof store.findAll, 'function')
-  t.ok(store.findAll === DataStore.prototype.findAll)
-})
-test('should findAll', async (t) => {
-  const query = { name: 'John' }
-  const props = [{ id: 1, name: 'John' }]
-  let callCount = 0
-  t.context.store.registerAdapter('mock', {
-    findAll () {
-      callCount++
-      return JSData.utils.resolve(props)
-    }
-  }, { 'default': true })
-  const users = await t.context.store.findAll('user', query)
-  t.is(callCount, 1, 'findAll should have been called once')
-  t.is(typeof t.context.store._completedQueries.user[t.context.store.hashQuery('user', query)], 'function')
-  t.context.objectsEqual(t, users, props, 'users should have been found')
-  t.ok(users[0] instanceof t.context.User.recordClass, 'user is a record')
-  t.context.objectsEqual(t, await t.context.store.findAll('user', query), users, 'should return the cached users')
-  t.is(callCount, 1, 'findAll should have been called once')
-  t.context.objectsEqual(t, await t.context.store.findAll('user', query, { force: true }), props, 'should make a new query')
-  t.is(callCount, 2, 'findAll should have been called twice')
-  t.context.objectsEqual(t, await t.context.store.findAll('user', query), props, 'should return the cached users')
-  t.is(callCount, 2, 'findAll should have been called twice')
-})
-test('should return pending query', async (t) => {
-  const query = { name: 'John' }
-  const props = [{ id: 1, name: 'John' }]
-  let callCount = 0
-  t.context.store.registerAdapter('mock', {
-    findAll () {
-      callCount++
-      return new Promise(function (resolve) {
-        setTimeout(function () {
-          resolve(props)
-        }, 300)
-      })
-    }
-  }, { 'default': true })
-  const results = await Promise.all([
-    t.context.store.findAll('user', query),
-    t.context.store.findAll('user', query)
-  ])
-  t.is(callCount, 1, 'findAll should have been called once')
-  t.context.objectsEqual(t, results[0], props, 'users should have been found')
-  t.context.objectsEqual(t, results[1], props, 'users should have been found')
-  t.ok(results[0][0] === results[1][0], 'users are the same object')
-})
-test('should delete pending query on error', (t) => {
-  const query = { name: 'John' }
-  let callCount = 0
-  t.context.store.registerAdapter('mock', {
-    findAll () {
-      callCount++
-      return new Promise(function (resolve, reject) {
-        setTimeout(function () {
-          reject('foo')
-        }, 300)
-      })
-    }
-  }, { 'default': true })
-  const pendingQuery = t.context.store.findAll('user', query)
-  t.ok(t.context.store._pendingQueries.user[t.context.store.hashQuery('user', query)])
-  return pendingQuery.catch(function (err) {
-    t.is(callCount, 1, 'findAll should have been called once')
-    t.notOk(t.context.store._pendingQueries.user[t.context.store.hashQuery('user', query)])
-    t.is(err, 'foo')
+describe('DataStore#findAll', function () {
+  it('should be an instance method', function () {
+    const DataStore = JSData.DataStore
+    const store = new DataStore()
+    assert.equal(typeof store.findAll, 'function')
+    assert.strictEqual(store.findAll, DataStore.prototype.findAll)
+  })
+  it('should findAll', async function () {
+    const query = { name: 'John' }
+    const props = [{ id: 1, name: 'John' }]
+    let callCount = 0
+    this.store.registerAdapter('mock', {
+      findAll () {
+        callCount++
+        return JSData.utils.resolve(props)
+      }
+    }, { 'default': true })
+    const users = await this.store.findAll('user', query)
+    assert.equal(callCount, 1, 'findAll should have been called once')
+    assert.equal(typeof this.store._completedQueries.user[this.store.hashQuery('user', query)], 'function')
+    assert.objectsEqual(users, props, 'users should have been found')
+    assert(users[0] instanceof this.User.recordClass, 'user is a record')
+    assert.objectsEqual(await this.store.findAll('user', query), users, 'should return the cached users')
+    assert.equal(callCount, 1, 'findAll should have been called once')
+    assert.objectsEqual(await this.store.findAll('user', query, { force: true }), props, 'should make a new query')
+    assert.equal(callCount, 2, 'findAll should have been called twice')
+    assert.objectsEqual(await this.store.findAll('user', query), props, 'should return the cached users')
+    assert.equal(callCount, 2, 'findAll should have been called twice')
+  })
+  it('should return pending query', async function () {
+    const query = { name: 'John' }
+    const props = [{ id: 1, name: 'John' }]
+    let callCount = 0
+    this.store.registerAdapter('mock', {
+      findAll () {
+        callCount++
+        return new Promise(function (resolve) {
+          setTimeout(function () {
+            resolve(props)
+          }, 300)
+        })
+      }
+    }, { 'default': true })
+    const results = await Promise.all([
+      this.store.findAll('user', query),
+      this.store.findAll('user', query)
+    ])
+    assert.equal(callCount, 1, 'findAll should have been called once')
+    assert.objectsEqual(results[0], props, 'users should have been found')
+    assert.objectsEqual(results[1], props, 'users should have been found')
+    assert.strictEqual(results[0][0], results[1][0], 'users are the same object')
+  })
+  it('should delete pending query on error', function () {
+    const query = { name: 'John' }
+    let callCount = 0
+    this.store.registerAdapter('mock', {
+      findAll () {
+        callCount++
+        return new Promise(function (resolve, reject) {
+          setTimeout(function () {
+            reject('foo')
+          }, 300)
+        })
+      }
+    }, { 'default': true })
+    const pendingQuery = this.store.findAll('user', query)
+    assert(this.store._pendingQueries.user[this.store.hashQuery('user', query)])
+    return pendingQuery.catch((err) => {
+      assert.equal(callCount, 1, 'findAll should have been called once')
+      assert(!this.store._pendingQueries.user[this.store.hashQuery('user', query)])
+      assert.equal(err, 'foo')
+    })
   })
 })

@@ -1,19 +1,15 @@
-import {
-  beforeEach,
-  JSData
-} from '../../_setup'
-import test from 'ava'
+import { assert, JSData } from '../../_setup'
 
-test.beforeEach(beforeEach)
-
-test('should be an instance method', (t) => {
-  const DataStore = JSData.DataStore
-  const store = new DataStore()
-  t.is(typeof store.getAdapters, 'function')
-  t.ok(store.getAdapters === DataStore.prototype.getAdapters)
-})
-test('should return the adapters of the container', (t) => {
-  const Container = JSData.Container
-  const container = new Container()
-  t.ok(container.getAdapters() === container._adapters)
+describe('Container#getAdapters', function () {
+  it('should be an instance method', function () {
+    const Container = JSData.Container
+    const store = new Container()
+    assert.equal(typeof store.getAdapters, 'function')
+    assert.strictEqual(store.getAdapters, Container.prototype.getAdapters)
+  })
+  it('should return the adapters of the container', function () {
+    const Container = JSData.Container
+    const container = new Container()
+    assert.strictEqual(container.getAdapters(), container._adapters)
+  })
 })

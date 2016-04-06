@@ -35,14 +35,7 @@
  * @property {(string|boolean)} beta The beta version value, otherwise `false`
  * if the current version is not beta.
  */
-export const version = {
-  alpha: '<%= alpha %>' !== 'false' ? '<%= alpha %>' : false,
-  beta: '<%= beta %>' !== 'false' ? '<%= beta %>' : false,
-  full: '<%= pkg.version %>',
-  major: parseInt('<%= major %>', 10),
-  minor: parseInt('<%= minor %>', 10),
-  patch: parseInt('<%= patch %>', 10)
-}
+export const version = '<%= version %>'
 
 import utils from './utils'
 
@@ -69,6 +62,12 @@ import Container from './Container'
  * @name module:js-data.DataStore
  */
 import DataStore from './DataStore'
+
+/**
+ * {@link Index} class.
+ * @name module:js-data.Index
+ */
+import Index from '../lib/mindex/index'
 
 /**
  * {@link LinkedCollection} class.
@@ -107,6 +106,7 @@ export {
   Component,
   Container,
   DataStore,
+  Index,
   LinkedCollection,
   Mapper,
   Query,
