@@ -12,13 +12,16 @@
 
 [![Circle CI][b5]][b6]
 [![Circle CI][b15]][b6]
+[![Circle CI][b16]][b6]
+[![Circle CI][b17]][b6]
+[![Circle CI][b18]][b6]
 
 [b1]: http://slack.js-data.io/badge.svg
 [b2]: http://slack.js-data.io
 [b3]: https://img.shields.io/npm/v/js-data.svg?style=flat
 [b4]: https://www.npmjs.org/package/js-data
-[b5]: https://img.shields.io/circleci/project/js-data/js-data/master.svg?style=flat
-[b6]: https://circleci.com/gh/js-data
+[b5]: https://img.shields.io/travis/js-data/js-data.svg?style=flat
+[b6]: https://travis-ci.org/js-data/js-data
 [b7]: https://img.shields.io/npm/dm/js-data.svg?style=flat
 [b8]: https://www.npmjs.org/package/js-data
 [b9]: https://img.shields.io/coveralls/js-data/js-data/master.svg?style=flat
@@ -27,7 +30,10 @@
 [b12]: https://www.codacy.com/app/jasondobry/js-data/dashboard
 [b13]: https://saucelabs.com/browser-matrix/jsdata.svg
 [b14]: https://saucelabs.com/u/jsdata
-[b15]: https://img.shields.io/badge/Node.js-v4.1.0-brightgreen.svg
+[b15]: https://img.shields.io/badge/Node.js-v5.x-brightgreen.svg
+[b16]: https://img.shields.io/badge/Node.js-v4.x-brightgreen.svg
+[b17]: https://img.shields.io/badge/Node.js-v0.12.x-brightgreen.svg
+[b18]: https://img.shields.io/badge/Node.js-v0.10.x-brightgreen.svg
 
 JSData is a framework-agnostic, datastore-agnostic ORM/ODM for Node.js and the
 Browser.
