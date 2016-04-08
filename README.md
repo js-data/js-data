@@ -5,7 +5,6 @@
 [![Slack Status][b1]][b2]
 [![npm version][b3]][b4]
 [![npm downloads][b7]][b8]
-[![Circle CI][b5]][b6]
 [![Coverage Status][b9]][b10]
 [![Codacy][b11]][b12]
 
