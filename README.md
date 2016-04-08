@@ -8,7 +8,11 @@
 [![Coverage Status][b9]][b10]
 [![Codacy][b11]][b12]
 
+__Browser tests__
+
 [![Sauce Test Status][b13]][b14]
+
+__Node.js tests__
 
 [![Circle CI][b5]][b6]
 [![Circle CI][b15]][b6]
@@ -20,7 +24,7 @@
 [b2]: http://slack.js-data.io
 [b3]: https://img.shields.io/npm/v/js-data.svg?style=flat
 [b4]: https://www.npmjs.org/package/js-data
-[b5]: https://img.shields.io/travis/js-data/js-data.svg?style=flat
+[b5]: https://img.shields.io/travis/js-data/js-data/v3.svg?style=flat
 [b6]: https://travis-ci.org/js-data/js-data
 [b7]: https://img.shields.io/npm/dm/js-data.svg?style=flat
 [b8]: https://www.npmjs.org/package/js-data
