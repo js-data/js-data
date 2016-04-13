@@ -28,8 +28,8 @@ __Node.js tests__
 [b6]: https://travis-ci.org/js-data/js-data
 [b7]: https://img.shields.io/npm/dm/js-data.svg?style=flat
 [b8]: https://www.npmjs.org/package/js-data
-[b9]: https://img.shields.io/coveralls/js-data/js-data/master.svg?style=flat
-[b10]: https://coveralls.io/github/js-data
+[b9]: https://img.shields.io/codecov/c/github/js-data/js-data/v3.svg?style=flat
+[b10]: https://codecov.io/github/js-data/js-data
 [b11]: https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg
 [b12]: https://www.codacy.com/app/jasondobry/js-data/dashboard
 [b13]: https://saucelabs.com/browser-matrix/jsdata.svg
