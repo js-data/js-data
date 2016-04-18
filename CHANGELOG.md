@@ -1,4 +1,6 @@
-##### 3.0.0-alpha.30 - xx April 2016
+##### 3.0.0-beta.1 - 17 April 2016
+
+Official beta release.
 
 ###### Other
 - Switched back to Mocha from Ava
