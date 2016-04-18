@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "3.0.0-alpha.29",
+  "version": "3.0.0-beta.1",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -61,7 +61,7 @@
     "ci": "npm test && nyc report --reporter=lcov | codecov"
   },
   "devDependencies": {
-    "babel-core": "6.7.5",
+    "babel-core": "6.7.6",
     "babel-plugin-syntax-async-functions": "6.5.0",
     "babel-plugin-transform-es2015-modules-umd": "6.6.5",
     "babel-plugin-transform-regenerator": "6.6.5",
@@ -82,7 +82,7 @@
     "karma-sauce-launcher": "0.3.1",
     "karma-sinon": "1.0.4",
     "mocha": "2.4.5",
-    "nyc": "6.2.1",
+    "nyc": "6.4.0",
     "phantomjs-prebuilt": "2.1.7",
     "rollup": "0.25.8",
     "rollup-plugin-babel": "2.4.0",
