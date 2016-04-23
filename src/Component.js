@@ -1,5 +1,8 @@
 import utils from './utils'
 
+/**
+ * @class Component
+ */
 export default function Component () {
   /**
    * Event listeners attached to this Component. Do not modify. Use

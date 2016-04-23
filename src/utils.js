@@ -1,35 +1,12 @@
 /**
- * @name utils
- * @memberof module:js-data
+ * Utility methods used by JSData.
+ *
+ * @example
+ * import {utils} from 'js-data'
+ * console.log(utils.isString('foo')) // true
+ *
+ * @namespace utils
  * @type {Object}
- * @property {Function} addHiddenPropsToTarget TODO
- * @property {Function} classCallCheck TODO
- * @property {Function} copy TODO
- * @property {Function} deepMixIn TODO
- * @property {Function} eventify TODO
- * @property {Function} extend TODO
- * @property {Function} fillIn TODO
- * @property {Function} fromJson TODO
- * @property {Function} get TODO
- * @property {Function} getSuper TODO
- * @property {Function} intersection TODO
- * @property {Function} isArray TODO
- * @property {Function} isBlacklisted TODO
- * @property {boolean} isBrowser TODO
- * @property {Function} isBoolean TODO
- * @property {Function} isFunction TODO
- * @property {Function} isInteger TODO
- * @property {Function} isNull TODO
- * @property {Function} isNumber TODO
- * @property {Function} isObject TODO
- * @property {Function} isRegExp TODO
- * @property {Function} isSorN TODO
- * @property {Function} isString TODO
- * @property {Function} isUndefined TODO
- * @property {Function} reject TODO
- * @property {Function} resolve TODO
- * @property {Function} set TODO
- * @property {Function} toJson TODO
  */
 
 const DOMAIN = 'utils'
@@ -89,21 +66,33 @@ const mkdirP = function (object, path) {
 
 const utils = {
   /**
-   * TODO
+   * Reference to the Promise constructor used by JSData. Defaults to
+   * `window.Promise` or `global.Promise`.
    *
-   * @ignore
+   * @example <caption>Make JSData use a different `Promise` constructor</caption>
+   * import Promise from 'bluebird'
+   * import {utils} from 'js-data'
+   * utils.Promise = Promise
+   *
+   * @name utils.Promise
+   * @since 3.0.0
+   * @type {Function}
    */
   Promise: Promise,
 
   /**
-   * Shallow copy properties from src to dest that meet the following criteria:
+   * Shallow copy properties that meet the following criteria from `src` to
+   * `dest`:
+   *
    * - own enumerable
    * - not a function
    * - does not start with "_"
    *
-   * @ignore
+   * @name utils._
    * @param {Object} dest Destination object.
    * @param {Object} src Source object.
+   * @private
+   * @since 3.0.0
    */
   _ (dest, src) {
     utils.forOwn(src, function (value, key) {
@@ -116,7 +105,8 @@ const utils = {
   /**
    * TODO
    *
-   * @ignore
+   * @name utils._forRelation
+   * @private
    */
   _forRelation (opts, def, fn, ctx) {
     const relationName = def.relation
@@ -155,7 +145,8 @@ const utils = {
   /**
    * TODO
    *
-   * @ignore
+   * @name utils._getIndex
+   * @private
    */
   _getIndex (list, relation) {
     let index = -1
@@ -174,9 +165,12 @@ const utils = {
   },
 
   /**
-   * TODO
+   * Define hidden (non-enumerable), writable properties on `target` from the
+   * provided `props`.
    *
-   * @ignore
+   * @name utils.addHiddenPropsToTarget
+   * @param {Object} target That to which `props` should be added.
+   * @param {Object} props Properties to be added to `target`.
    */
   addHiddenPropsToTarget (target, props) {
     const map = {}

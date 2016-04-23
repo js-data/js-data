@@ -166,10 +166,6 @@ const MAPPER_DEFAULTS = {
 }
 
 /**
- * ```javascript
- * import {Mapper} from 'js-data'
- * ```
- *
  * The core of JSData's [ORM/ODM][orm] implementation. Given a minimum amout of
  * meta information about a resource, a Mapper can perform generic CRUD
  * operations against that resource. Apart from its configuration, a Mapper is
@@ -189,6 +185,17 @@ const MAPPER_DEFAULTS = {
  * [pattern]: https://en.wikipedia.org/wiki/Data_mapper_pattern
  * [book]: http://martinfowler.com/books/eaa.html
  * [record]: Record.html
+ *
+ * @example <caption>Import and instantiate</caption>
+ * import {Mapper} from 'js-data'
+ *
+ * const UserService = new Mapper({ name: 'user' })
+ *
+ * @example <caption>Using the Container component</caption>
+ * import {Container} from 'js-data'
+ *
+ * const store = new Container()
+ * store.defineMapper('user')
  *
  * @class Mapper
  * @extends Component
@@ -227,19 +234,16 @@ export default Component.extend({
       },
 
       /**
-       * Set the `false` to force the Mapper to work with POJO objects only.
+       * Set to `false` to force the Mapper to work with POJO objects only.
        *
-       * ```javascript
+       * @example <caption>Use POJOs only.</caption>
        * import {Mapper, Record} from 'js-data'
        * const UserMapper = new Mapper({ recordClass: false })
        * UserMapper.recordClass // false
        * const user = UserMapper#createRecord()
        * user instanceof Record // false
-       * ```
        *
-       * Set to a custom class to have records wrapped in your custom class.
-       *
-       * ```javascript
+       * @example <caption>Set to a custom class to have records wrapped in your custom class.</caption>
        * import {Mapper, Record} from 'js-data'
        *  // Custom class
        * class User {
@@ -256,11 +260,9 @@ export default Component.extend({
        * const user = UserMapper#createRecord()
        * user instanceof Record // false
        * user instanceof User // true
-       * ```
        *
-       * Extend the {@link Record} class.
        *
-       * ```javascript
+       * @example <caption>Extend the {@link Record} class.</caption>
        * import {Mapper, Record} from 'js-data'
        *  // Custom class
        * class User extends Record {
@@ -273,7 +275,6 @@ export default Component.extend({
        * const user = UserMapper#createRecord()
        * user instanceof Record // true
        * user instanceof User // true
-       * ```
        *
        * @name Mapper#recordClass
        * @default {@link Record}
@@ -344,8 +345,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#count} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#afterCount
-   * @method
+   * @method Mapper#afterCount
+   * @since 3.0.0
    * @param {Object} query The `query` argument passed to {@link Mapper#count}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#count}.
    * @param {*} result The result, if any.
@@ -357,8 +358,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#create} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#afterCreate
-   * @method
+   * @method Mapper#afterCreate
+   * @since 3.0.0
    * @param {Object} props The `props` argument passed to {@link Mapper#create}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#create}.
    * @param {*} result The result, if any.
@@ -370,8 +371,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#createMany} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#afterCreateMany
-   * @method
+   * @method Mapper#afterCreateMany
+   * @since 3.0.0
    * @param {Array} records The `records` argument passed to {@link Mapper#createMany}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#createMany}.
    * @param {*} result The result, if any.
@@ -383,8 +384,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#destroy} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#afterDestroy
-   * @method
+   * @method Mapper#afterDestroy
+   * @since 3.0.0
    * @param {(string|number)} id The `id` argument passed to {@link Mapper#destroy}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#destroy}.
    * @param {*} result The result, if any.
@@ -396,8 +397,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#destroyAll} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#afterDestroyAll
-   * @method
+   * @method Mapper#afterDestroyAll
+   * @since 3.0.0
    * @param {*} data The `data` returned by the adapter.
    * @param {query} query The `query` argument passed to {@link Mapper#destroyAll}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#destroyAll}.
@@ -410,8 +411,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#find} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#afterFind
-   * @method
+   * @method Mapper#afterFind
+   * @since 3.0.0
    * @param {(string|number)} id The `id` argument passed to {@link Mapper#find}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#find}.
    * @param {*} result The result, if any.
@@ -423,8 +424,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#findAll} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#afterFindAll
-   * @method
+   * @method Mapper#afterFindAll
+   * @since 3.0.0
    * @param {Object} query The `query` argument passed to {@link Mapper#findAll}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#findAll}.
    * @param {*} result The result, if any.
@@ -436,8 +437,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#sum} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#afterSum
-   * @method
+   * @method Mapper#afterSum
+   * @since 3.0.0
    * @param {Object} query The `query` argument passed to {@link Mapper#sum}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#sum}.
    * @param {*} result The result, if any.
@@ -449,8 +450,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#update} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#afterUpdate
-   * @method
+   * @method Mapper#afterUpdate
+   * @since 3.0.0
    * @param {(string|number)} id The `id` argument passed to {@link Mapper#update}.
    * @param {props} props The `props` argument passed to {@link Mapper#update}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#update}.
@@ -463,8 +464,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#updateAll} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#afterUpdateAll
-   * @method
+   * @method Mapper#afterUpdateAll
+   * @since 3.0.0
    * @param {Object} props The `props` argument passed to {@link Mapper#updateAll}.
    * @param {Object} query The `query` argument passed to {@link Mapper#updateAll}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#updateAll}.
@@ -477,8 +478,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#updateMany} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#afterUpdateMany
-   * @method
+   * @method Mapper#afterUpdateMany
+   * @since 3.0.0
    * @param {Array} records The `records` argument passed to {@link Mapper#updateMany}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#updateMany}.
    * @param {*} result The result, if any.
@@ -490,8 +491,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#create} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#beforeCreate
-   * @method
+   * @method Mapper#beforeCreate
+   * @since 3.0.0
    * @param {Object} props The `props` argument passed to {@link Mapper#create}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#create}.
    */
@@ -502,8 +503,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#createMany} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#beforeCreateMany
-   * @method
+   * @method Mapper#beforeCreateMany
+   * @since 3.0.0
    * @param {Array} records The `records` argument passed to {@link Mapper#createMany}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#createMany}.
    */
@@ -514,8 +515,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#count} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#beforeCount
-   * @method
+   * @method Mapper#beforeCount
+   * @since 3.0.0
    * @param {Object} query The `query` argument passed to {@link Mapper#count}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#count}.
    */
@@ -526,8 +527,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#destroy} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#beforeDestroy
-   * @method
+   * @method Mapper#beforeDestroy
+   * @since 3.0.0
    * @param {(string|number)} id The `id` argument passed to {@link Mapper#destroy}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#destroy}.
    */
@@ -538,8 +539,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#destroyAll} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#beforeDestroyAll
-   * @method
+   * @method Mapper#beforeDestroyAll
+   * @since 3.0.0
    * @param {query} query The `query` argument passed to {@link Mapper#destroyAll}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#destroyAll}.
    */
@@ -550,8 +551,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#find} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#beforeFind
-   * @method
+   * @method Mapper#beforeFind
+   * @since 3.0.0
    * @param {(string|number)} id The `id` argument passed to {@link Mapper#find}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#find}.
    */
@@ -562,8 +563,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#findAll} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#beforeFindAll
-   * @method
+   * @method Mapper#beforeFindAll
+   * @since 3.0.0
    * @param {Object} query The `query` argument passed to {@link Mapper#findAll}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#findAll}.
    */
@@ -574,8 +575,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#sum} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#beforeSum
-   * @method
+   * @method Mapper#beforeSum
+   * @since 3.0.0
    * @param {string} field The `field` argument passed to {@link Mapper#sum}.
    * @param {Object} query The `query` argument passed to {@link Mapper#sum}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#sum}.
@@ -587,8 +588,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#update} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#beforeUpdate
-   * @method
+   * @method Mapper#beforeUpdate
+   * @since 3.0.0
    * @param {(string|number)} id The `id` argument passed to {@link Mapper#update}.
    * @param {props} props The `props` argument passed to {@link Mapper#update}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#update}.
@@ -600,8 +601,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#updateAll} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#beforeUpdateAll
-   * @method
+   * @method Mapper#beforeUpdateAll
+   * @since 3.0.0
    * @param {Object} props The `props` argument passed to {@link Mapper#updateAll}.
    * @param {Object} query The `query` argument passed to {@link Mapper#updateAll}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#updateAll}.
@@ -613,8 +614,8 @@ export default Component.extend({
    * returns a promise then {@link Mapper#updateMany} will wait for the promise
    * to resolve before continuing.
    *
-   * @name Mapper#beforeUpdateMany
-   * @method
+   * @method Mapper#beforeUpdateMany
+   * @since 3.0.0
    * @param {Array} records The `records` argument passed to {@link Mapper#updateMany}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#updateMany}.
    */
@@ -629,8 +630,8 @@ export default Component.extend({
    * 2. Wrap the result data appropriately using {@link Mapper#wrap}, which
    * calls {@link Mapper#createRecord}.
    *
-   * @name Mapper#_end
-   * @method
+   * @method Mapper#_end
+   * @since 3.0.0
    * @private
    */
   _end (result, opts, skip) {
@@ -668,8 +669,8 @@ export default Component.extend({
    * })
    * ```
    *
-   * @name Mapper#belongsTo
-   * @method
+   * @method Mapper#belongsTo
+   * @since 3.0.0
    */
   belongsTo (relatedMapper, opts) {
     return belongsTo(relatedMapper, opts)(this)
@@ -682,8 +683,8 @@ export default Component.extend({
    * {@link Mapper#beforeCount} will be called before calling the adapter.
    * {@link Mapper#afterCount} will be called after calling the adapter.
    *
-   * @name Mapper#count
-   * @method
+   * @method Mapper#count
+   * @since 3.0.0
    * @param {Object} [query={}] Selection query.
    * @param {Object} [query.where] Filtering criteria.
    * @param {number} [query.skip] Number to skip.
@@ -709,8 +710,8 @@ export default Component.extend({
    * {@link Mapper#beforeCreate} will be called before calling the adapter.
    * {@link Mapper#afterCreate} will be called after calling the adapter.
    *
-   * @name Mapper#create
-   * @method
+   * @method Mapper#create
+   * @since 3.0.0
    * @param {Object} props The properties for the new record.
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
@@ -837,8 +838,8 @@ export default Component.extend({
    * {@link Mapper#beforeCreateMany} will be called before calling the adapter.
    * {@link Mapper#afterCreateMany} will be called after calling the adapter.
    *
-   * @name Mapper#createMany
-   * @method
+   * @method Mapper#createMany
+   * @since 3.0.0
    * @param {Array} records Array of records to be created in one batch.
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
@@ -966,8 +967,8 @@ export default Component.extend({
    * Returns `props` if `props` is already an instance of
    * {@link Mapper#recordClass}.
    *
-   * @name Mapper#createRecord
-   * @method
+   * @method Mapper#createRecord
+   * @since 3.0.0
    * @param {Object|Array} props The properties for the Record instance or an
    * array of property objects for the Record instances.
    * @param {Object} [opts] Configuration options.
@@ -1005,8 +1006,8 @@ export default Component.extend({
   /**
    * Lifecycle invocation method.
    *
-   * @name Mapper#crud
-   * @method
+   * @method Mapper#crud
+   * @since 3.0.0
    * @param {string} method Name of the lifecycle method to invoke.
    * @param {...*} args Arguments to pass to the lifecycle method.
    * @return {Promise}
@@ -1068,8 +1069,8 @@ export default Component.extend({
    * {@link Mapper#beforeDestroy} will be called before destroying the record.
    * {@link Mapper#afterDestroy} will be called after destroying the record.
    *
-   * @name Mapper#destroy
-   * @method
+   * @method Mapper#destroy
+   * @since 3.0.0
    * @param {(string|number)} id The primary key of the record to destroy.
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
@@ -1094,8 +1095,8 @@ export default Component.extend({
    * {@link Mapper#beforeDestroyAll} will be called before destroying the records.
    * {@link Mapper#afterDestroyAll} will be called after destroying the records.
    *
-   * @name Mapper#destroyAll
-   * @method
+   * @method Mapper#destroyAll
+   * @since 3.0.0
    * @param {Object} [query={}] Selection query.
    * @param {Object} [query.where] Filtering criteria.
    * @param {number} [query.skip] Number to skip.
@@ -1123,8 +1124,8 @@ export default Component.extend({
    * {@link Mapper#beforeFind} will be called before calling the adapter.
    * {@link Mapper#afterFind} will be called after calling the adapter.
    *
-   * @name Mapper#find
-   * @method
+   * @method Mapper#find
+   * @since 3.0.0
    * @param {(string|number)} id The primary key of the record to retrieve.
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
@@ -1148,8 +1149,8 @@ export default Component.extend({
    * {@link Mapper#beforeFindAll} will be called before calling the adapter.
    * {@link Mapper#afterFindAll} will be called after calling the adapter.
    *
-   * @name Mapper#findAll
-   * @method
+   * @method Mapper#findAll
+   * @since 3.0.0
    * @param {Object} [query={}] Selection query.
    * @param {Object} [query.where] Filtering criteria.
    * @param {number} [query.skip] Number to skip.
@@ -1174,8 +1175,8 @@ export default Component.extend({
    * Return the registered adapter with the given name or the default adapter if
    * no name is provided.
    *
-   * @name Mapper#getAdapter
-   * @method
+   * @method Mapper#getAdapter
+   * @since 3.0.0
    * @param {string} [name] The name of the adapter to retrieve.
    * @return {Adapter} The adapter.
    */
@@ -1193,8 +1194,8 @@ export default Component.extend({
    * Return the name of a registered adapter based on the given name or options,
    * or the name of the default adapter if no name provided.
    *
-   * @name Mapper#getAdapterName
-   * @method
+   * @method Mapper#getAdapterName
+   * @since 3.0.0
    * @param {(Object|string)} [opts] The name of an adapter or options, if any.
    * @return {string} The name of the adapter.
    */
@@ -1207,8 +1208,8 @@ export default Component.extend({
   },
 
   /**
-   * @name Mapper#getAdapters
-   * @method
+   * @method Mapper#getAdapters
+   * @since 3.0.0
    * @return {Object} This Mapper's adapters
    */
   getAdapters () {
@@ -1218,6 +1219,8 @@ export default Component.extend({
   /**
    * Returns this Mapper's schema.
    *
+   * @method Mapper#getAdapters
+   * @since 3.0.0
    * @return {Schema} This Mapper's schema.
    */
   getSchema () {
@@ -1234,8 +1237,8 @@ export default Component.extend({
    * })
    * ```
    *
-   * @name Mapper#hasMany
-   * @method
+   * @method Mapper#hasMany
+   * @since 3.0.0
    */
   hasMany (relatedMapper, opts) {
     return hasMany(relatedMapper, opts)(this)
@@ -1251,8 +1254,8 @@ export default Component.extend({
    * })
    * ```
    *
-   * @name Mapper#hasOne
-   * @method
+   * @method Mapper#hasOne
+   * @since 3.0.0
    */
   hasOne (relatedMapper, opts) {
     return hasOne(relatedMapper, opts)(this)
@@ -1261,8 +1264,8 @@ export default Component.extend({
   /**
    * Return whether `record` is an instance of this Mapper's recordClass.
    *
-   * @name Mapper#is
-   * @method
+   * @method Mapper#is
+   * @since 3.0.0
    * @param {Object} record The record to check.
    * @return {boolean} Whether `record` is an instance of this Mapper's
    * {@link Mapper#recordClass}.
@@ -1275,8 +1278,8 @@ export default Component.extend({
   /**
    * Register an adapter on this mapper under the given name.
    *
-   * @name Mapper#registerAdapter
-   * @method
+   * @method Mapper#registerAdapter
+   * @since 3.0.0
    * @param {string} name The name of the adapter to register.
    * @param {Adapter} adapter The adapter to register.
    * @param {Object} [opts] Configuration options.
@@ -1300,8 +1303,8 @@ export default Component.extend({
    * {@link Mapper#beforeSum} will be called before calling the adapter.
    * {@link Mapper#afterSum} will be called after calling the adapter.
    *
-   * @name Mapper#sum
-   * @method
+   * @method Mapper#sum
+   * @since 3.0.0
    * @param {string} field The field to sum.
    * @param {Object} [query={}] Selection query.
    * @param {Object} [query.where] Filtering criteria.
@@ -1325,8 +1328,8 @@ export default Component.extend({
   /**
    * Return a plain object representation of the given record.
    *
-   * @name Mapper#toJSON
-   * @method
+   * @method Mapper#toJSON
+   * @since 3.0.0
    * @param {Object} record Record from which to create a plain object
    * representation.
    * @param {Object} [opts] Configuration options.
@@ -1388,8 +1391,8 @@ export default Component.extend({
    * {@link Mapper#beforeUpdate} will be called before updating the record.
    * {@link Mapper#afterUpdate} will be called after updating the record.
    *
-   * @name Mapper#update
-   * @method
+   * @method Mapper#update
+   * @since 3.0.0
    * @param {(string|number)} id The primary key of the record to update.
    * @param {Object} props The update to apply to the record.
    * @param {Object} [opts] Configuration options.
@@ -1416,8 +1419,8 @@ export default Component.extend({
    * {@link Mapper#beforeUpdateAll} will be called before making the update.
    * {@link Mapper#afterUpdateAll} will be called after making the update.
    *
-   * @name Mapper#updateAll
-   * @method
+   * @method Mapper#updateAll
+   * @since 3.0.0
    * @param {Object} props Update to apply to selected records.
    * @param {Object} [query={}] Selection query.
    * @param {Object} [query.where] Filtering criteria.
@@ -1449,8 +1452,8 @@ export default Component.extend({
    * {@link Mapper#beforeUpdateMany} will be called before making the update.
    * {@link Mapper#afterUpdateMany} will be called after making the update.
    *
-   * @name Mapper#updateMany
-   * @method
+   * @method Mapper#updateMany
+   * @since 3.0.0
    * @param {Array} records Array up record updates.
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
@@ -1473,8 +1476,8 @@ export default Component.extend({
    * Validate the given record or records according to this Mapper's
    * {@link Schema}. No return value means no errors.
    *
-   * @name Mapper#validate
-   * @method
+   * @method Mapper#validate
+   * @since 3.0.0
    * @param {Object|Array} record The record or records to validate.
    * @param {Object} [opts] Configuration options. Passed to
    * {@link Schema#validate}.
@@ -1505,8 +1508,8 @@ export default Component.extend({
    * Method used to wrap data returned by an adapter with this Mapper's Record
    * class.
    *
-   * @name Mapper#wrap
-   * @method
+   * @method Mapper#wrap
+   * @since 3.0.0
    * @param {Object|Array} data The data to be wrapped.
    * @param {Object} [opts] Configuration options. Passed to {@link Mapper#createRecord}.
    * @return {Object|Array}
@@ -1515,3 +1518,14 @@ export default Component.extend({
     return this.createRecord(data, opts)
   }
 })
+
+ /**
+ * Create a subclass of this Mapper.
+ *
+ * @method Mapper.extend
+ * @since 3.0.0
+ * @param {Object} [props={}] Properties to add to the prototype of the
+ * subclass.
+ * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @return {Function} Subclass of this Mapper.
+ */

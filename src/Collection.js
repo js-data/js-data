@@ -44,10 +44,6 @@ const COLLECTION_DEFAULTS = {
 }
 
 /**
- * ```javascript
- * import {Collection} from 'js-data'
- * ```
- *
  * An ordered set of {@link Record} instances.
  *
  * @example
@@ -59,6 +55,7 @@ const COLLECTION_DEFAULTS = {
  *
  * @class Collection
  * @extends Component
+ * @type {Function}
  * @param {Array} [records] Initial set of records to insert into the
  * collection.
  * @param {Object} [opts] Configuration options.
@@ -147,8 +144,8 @@ export default Component.extend({
   /**
    * Used to bind to events emitted by records in this Collection.
    *
-   * @name Collection#_onRecordEvent
-   * @method
+   * @method Collection#_onRecordEvent
+   * @since 3.0.0
    * @private
    * @param {...*} [arg] Args passed to {@link Collection#emit}.
    */
@@ -166,8 +163,8 @@ export default Component.extend({
    * The collection's secondary indexes will be updated as each record is
    * visited.
    *
-   * @name Collection#add
-   * @method
+   * @method Collection#add
+   * @since 3.0.0
    * @param {(Object|Object[]|Record|Record[])} data The record or records to insert.
    * @param {Object} [opts] Configuration options.
    * @param {string} [opts.onConflict] What to do when a record is already in
@@ -258,8 +255,8 @@ export default Component.extend({
    * Lifecycle hook called by {@link Collection#add}. If this method returns a
    * value then {@link Collection#add} will return that same value.
    *
-   * @name Collection#method
-   * @method
+   * @method Collection#method
+   * @since 3.0.0
    * @param {(Object|Object[]|Record|Record[])} result The record or records
    * that were added to this Collection by {@link Collection#add}.
    * @param {Object} opts The `opts` argument passed to {@link Collection#add}.
@@ -270,8 +267,8 @@ export default Component.extend({
    * Lifecycle hook called by {@link Collection#remove}. If this method returns
    * a value then {@link Collection#remove} will return that same value.
    *
-   * @name Collection#afterRemove
-   * @method
+   * @method Collection#afterRemove
+   * @since 3.0.0
    * @param {(string|number)} id The `id` argument passed to {@link Collection#remove}.
    * @param {Object} opts The `opts` argument passed to {@link Collection#remove}.
    * @param {Object} record The result that will be returned by {@link Collection#remove}.
@@ -283,8 +280,8 @@ export default Component.extend({
    * returns a value then {@link Collection#removeAll} will return that same
    * value.
    *
-   * @name Collection#afterRemoveAll
-   * @method
+   * @method Collection#afterRemoveAll
+   * @since 3.0.0
    * @param {Object} query The `query` argument passed to {@link Collection#removeAll}.
    * @param {Object} opts The `opts` argument passed to {@link Collection#removeAll}.
    * @param {Object} records The result that will be returned by {@link Collection#removeAll}.
@@ -296,8 +293,8 @@ export default Component.extend({
    * value then the `records` argument in {@link Collection#add} will be
    * re-assigned to the returned value.
    *
-   * @name Collection#beforeAdd
-   * @method
+   * @method Collection#beforeAdd
+   * @since 3.0.0
    * @param {(Object|Object[]|Record|Record[])} records The `records` argument passed to {@link Collection#add}.
    * @param {Object} opts The `opts` argument passed to {@link Collection#add}.
    */
@@ -306,8 +303,8 @@ export default Component.extend({
   /**
    * Lifecycle hook called by {@link Collection#remove}.
    *
-   * @name Collection#beforeRemove
-   * @method
+   * @method Collection#beforeRemove
+   * @since 3.0.0
    * @param {(string|number)} id The `id` argument passed to {@link Collection#remove}.
    * @param {Object} opts The `opts` argument passed to {@link Collection#remove}.
    */
@@ -316,8 +313,8 @@ export default Component.extend({
   /**
    * Lifecycle hook called by {@link Collection#removeAll}.
    *
-   * @name Collection#beforeRemoveAll
-   * @method
+   * @method Collection#beforeRemoveAll
+   * @since 3.0.0
    * @param {Object} query The `query` argument passed to {@link Collection#removeAll}.
    * @param {Object} opts The `opts` argument passed to {@link Collection#removeAll}.
    */
@@ -334,8 +331,8 @@ export default Component.extend({
    * @example <caption>Same as above</caption>
    * const users = collection.between([18], [30], { index: 'age' })
    *
-   * @name Collection#between
-   * @method
+   * @method Collection#between
+   * @since 3.0.0
    * @param {Array} leftKeys Keys defining the left boundary.
    * @param {Array} rightKeys Keys defining the right boundary.
    * @param {Object} [opts] Configuration options.
@@ -362,8 +359,8 @@ export default Component.extend({
    * @example <caption>Index users by status and role</caption>
    * collection.createIndex('statusAndRole', ['status', 'role'])
    *
-   * @name Collection#createIndex
-   * @method
+   * @method Collection#createIndex
+   * @since 3.0.0
    * @param {string} name - The name of the new secondary index.
    * @param {string[]} [fieldList] - Array of field names to use as the key or
    * compound key of the new secondary index. If no fieldList is provided, then
@@ -407,8 +404,8 @@ export default Component.extend({
    *   return post.isReady()
    * })
    *
-   * @name Collection#filter
-   * @method
+   * @method Collection#filter
+   * @since 3.0.0
    * @param {(Object|Function)} [queryOrFn={}] - Selection query or filter
    * function.
    * @param {Object} [thisArg] - Context to which to bind `queryOrFn` if
@@ -427,8 +424,8 @@ export default Component.extend({
    *   // do something
    * })
    *
-   * @name Collection#forEach
-   * @method
+   * @method Collection#forEach
+   * @since 3.0.0
    * @param {Function} forEachFn - Iteration function.
    * @param {*} [thisArg] - Context to which to bind `forEachFn`.
    * @return {Array} The result.
@@ -440,8 +437,8 @@ export default Component.extend({
   /**
    * Get the record with the given id.
    *
-   * @name Collection#get
-   * @method
+   * @method Collection#get
+   * @since 3.0.0
    * @param {(string|number)} id - The primary key of the record to get.
    * @return {(Object|Record)} The record with the given id.
    */
@@ -461,8 +458,8 @@ export default Component.extend({
    * @example <caption>Same as above</caption>
    * const posts = collection.getAll(['draft'], ['inReview'], { index: 'status' })
    *
-   * @name Collection#getAll
-   * @method
+   * @method Collection#getAll
+   * @since 3.0.0
    * @param {...Array} [keyList] - Provide one or more keyLists, and all
    * records matching each keyList will be retrieved. If no keyLists are
    * provided, all records will be returned.
@@ -479,8 +476,8 @@ export default Component.extend({
    * Return the index with the given name. If no name is provided, return the
    * main index. Throws an error if the specified index does not exist.
    *
-   * @name Collection#getIndex
-   * @method
+   * @method Collection#getIndex
+   * @since 3.0.0
    * @param {string} [name] The name of the index to retrieve.
    */
   getIndex (name) {
@@ -499,8 +496,8 @@ export default Component.extend({
    * @example
    * const posts = collection.limit(10)
    *
-   * @name Collection#limit
-   * @method
+   * @method Collection#limit
+   * @since 3.0.0
    * @param {number} num - The maximum number of records to keep in the result.
    * @return {Array} The result.
    */
@@ -516,8 +513,8 @@ export default Component.extend({
    *   return user.name
    * })
    *
-   * @name Collection#map
-   * @method
+   * @method Collection#map
+   * @since 3.0.0
    * @param {Function} mapFn - Mapping function.
    * @param {*} [thisArg] - Context to which to bind `mapFn`.
    * @return {Array} The result of the mapping.
@@ -534,8 +531,8 @@ export default Component.extend({
    * Return the result of calling the specified function on each record in this
    * collection's main index.
    *
-   * @name Collection#mapCall
-   * @method
+   * @method Collection#mapCall
+   * @since 3.0.0
    * @param {string} funcName - Name of function to call
    * @parama {...*} [args] - Remaining arguments to be passed to the function.
    * @return {Array} The result.
@@ -552,8 +549,8 @@ export default Component.extend({
    * Return the primary key of the given, or if no record is provided, return the
    * name of the field that holds the primary key of records in this Collection.
    *
-   * @name Collection#recordId
-   * @method
+   * @method Collection#recordId
+   * @since 3.0.0
    * @param {(Object|Record)} [record] The record whose primary key is to be
    * returned.
    * @return {(string|number)} Primary key or name of field that holds primary
@@ -578,8 +575,8 @@ export default Component.extend({
    *   .limit(10) // page size
    *   .run()
    *
-   * @name Collection#query
-   * @method
+   * @method Collection#query
+   * @since 3.0.0
    * @return {Query} New query object.
    */
   query () {
@@ -594,8 +591,8 @@ export default Component.extend({
    *   return prev + record.upVotes + record.downVotes
    * }, 0)
    *
-   * @name Collection#reduce
-   * @method
+   * @method Collection#reduce
+   * @since 3.0.0
    * @param {Function} cb - Reduction callback.
    * @param {*} initialValue - Initial value of the reduction.
    * @return {*} The result.
@@ -608,8 +605,8 @@ export default Component.extend({
   /**
    * Remove the record with the given id from this Collection.
    *
-   * @name Collection#remove
-   * @method
+   * @method Collection#remove
+   * @since 3.0.0
    * @param {(string|number)} id - The primary key of the record to be removed.
    * @param {Object} [opts] - Configuration options.
    * @return {Object|Record} The removed record, if any.
@@ -639,8 +636,8 @@ export default Component.extend({
   /**
    * Remove the record selected by "query" from this collection.
    *
-   * @name Collection#removeAll
-   * @method
+   * @method Collection#removeAll
+   * @since 3.0.0
    * @param {Object} [query={}] - Selection query.
    * @param {Object} [query.where] - Filtering criteria.
    * @param {number} [query.skip] - Number to skip.
@@ -671,8 +668,8 @@ export default Component.extend({
    * @example
    * const posts = collection.skip(10)
    *
-   * @name Collection#skip
-   * @method
+   * @method Collection#skip
+   * @since 3.0.0
    * @param {number} num - The number of records to skip.
    * @return {Array} The result.
    */
@@ -684,8 +681,8 @@ export default Component.extend({
    * Return the plain JSON representation of all items in this collection.
    * Assumes records in this collection have a toJSON method.
    *
-   * @name Collection#toJSON
-   * @method
+   * @method Collection#toJSON
+   * @since 3.0.0
    * @param {Object} [opts] - Configuration options.
    * @param {string[]} [opts.with] - Array of relation names or relation fields
    * to include in the representation.
@@ -700,8 +697,8 @@ export default Component.extend({
    * {@link Collection#updateIndexes} to update a record's position in all
    * indexes at once.
    *
-   * @name Collection#updateIndex
-   * @method
+   * @method Collection#updateIndex
+   * @since 3.0.0
    * @param {Object} record - The record to update.
    * @param {Object} [opts] - Configuration options.
    * @param {string} [opts.index] The index in which to update the record's
@@ -716,8 +713,8 @@ export default Component.extend({
   /**
    * TODO
    *
-   * @name Collection#updateIndexes
-   * @method
+   * @method Collection#updateIndexes
+   * @since 3.0.0
    * @param {Object} record - TODO
    * @param {Object} [opts] - Configuration options.
    */
