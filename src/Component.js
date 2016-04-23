@@ -18,12 +18,12 @@ export default function Component () {
 /**
  * Create a subclass of this component.
  *
- * @name Component.extend
- * @method
+ * @method Component.extend
+ * @static
  * @param {Object} [props={}] Properties to add to the prototype of the
  * subclass.
  * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @return {Function} Subclass of this component.
+ * @returns {Constructor} Subclass of this component.
  */
 Component.extend = utils.extend
 
@@ -44,6 +44,27 @@ utils.logify(Component.prototype)
 /**
  * Register a new event listener on this Component.
  *
+ * @example <caption>Listen for the "add" event on a collection</caption>
+ * collection.on('add', (records) => {
+ *   console.log(records) // [...]
+ * })
+ *
+ * @example <caption>Listen for "change" events on a record</caption>
+ * post.on('change', (record, changes) => {
+ *   console.log(changes) // { changed: { title: 'Modeling your data' } }
+ * })
+ * post.title = 'Modeling your data'
+ *
+ * @example <caption>Listen for all "afterCreate" events in a DataStore</caption>
+ * store.on('afterCreate', (mapperName, props, opts, result) => {
+ *   console.log(mapperName) // "post"
+ *   console.log(props.id) // undefined
+ *   console.log(result.id) // 1234
+ * })
+ * store.create('post', { title: 'Modeling your data' }).then((post) => {
+ *   console.log(post.id) // 1234
+ * })
+ *
  * @name Component#on
  * @method
  * @param {string} event Name of event to subsribe to.
@@ -55,6 +76,15 @@ utils.logify(Component.prototype)
  * then all listeners for the specified event will be removed. If no event is
  * specified then all listeners for all events will be removed.
  *
+ * @example <caption>Remove a listener to a single event</caption>
+ * collection.off('add', handler)
+ *
+ * @example <caption>Remove all listeners to a single event</caption>
+ * record.off('change')
+ *
+ * @example <caption>Remove all listeners to all events</caption>
+ * store.off()
+ *
  * @name Component#off
  * @method
  * @param {string} [event] Name of event to unsubsribe to.
@@ -62,6 +92,12 @@ utils.logify(Component.prototype)
  */
 /**
  * Trigger an event on this Component.
+ *
+ * @example
+ * collection.on('foo', (msg) => {
+ *   console.log(msg) // "bar"
+ * })
+ * collection.emit('foo', 'bar')
  *
  * @name Component#emit
  * @method

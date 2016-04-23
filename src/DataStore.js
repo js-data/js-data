@@ -55,7 +55,7 @@ const props = {
    * add the data.
    * @param {Object} data TODO.
    * @param {Object} [opts] Configuration options.
-   * @return {(Object|Array)} Result.
+   * @returns {(Object|Array)} Result.
    */
   _end (name, result, opts) {
     let _data = opts.raw ? result.data : result
@@ -192,7 +192,7 @@ const props = {
    * @param {Object} record Passed to {@link Mapper#create}.
    * @param {Object} [opts] Passed to {@link Mapper#create}. See
    * {@link Mapper#create} for more configuration options.
-   * @return {Promise}
+   * @returns {Promise}
    */
   create (name, record, opts) {
     const self = this
@@ -211,7 +211,7 @@ const props = {
    * @param {Array} records Passed to {@link Mapper#createMany}.
    * @param {Object} [opts] Passed to {@link Mapper#createMany}. See
    * {@link Mapper#createMany} for more configuration options.
-   * @return {Promise}
+   * @returns {Promise}
    */
   createMany (name, records, opts) {
     const self = this
@@ -540,7 +540,7 @@ const props = {
    * @param {(string|number)} id - Passed to {@link Mapper#destroy}.
    * @param {Object} [opts] - Passed to {@link Mapper#destroy}. See
    * {@link Mapper#destroy} for more configuration options.
-   * @return {Promise}
+   * @returns {Promise}
    */
   destroy (name, id, opts) {
     const self = this
@@ -566,7 +566,7 @@ const props = {
    * @param {Object} [query] - Passed to {@link Mapper#destroyAll}.
    * @param {Object} [opts] - Passed to {@link Mapper#destroyAll}. See
    * {@link Mapper#destroyAll} for more configuration options.
-   * @return {Promise}
+   * @returns {Promise}
    */
   destroyAll (name, query, opts) {
     const self = this
@@ -600,7 +600,7 @@ const props = {
    * @param {string} name - Name of the {@link Mapper} to target.
    * @param {(string|number)} id - Passed to {@link Mapper#find}.
    * @param {Object} [opts] - Passed to {@link Mapper#find}.
-   * @return {Promise}
+   * @returns {Promise}
    */
   find (name, id, opts) {
     const self = this
@@ -639,7 +639,7 @@ const props = {
    * @param {string} name - Name of the {@link Mapper} to target.
    * @param {Object} [query] - Passed to {@link Model.findAll}.
    * @param {Object} [opts] - Passed to {@link Model.findAll}.
-   * @return {Promise}
+   * @returns {Promise}
    */
   findAll (name, query, opts) {
     const self = this
@@ -678,7 +678,7 @@ const props = {
    * @name DataStore#getCollection
    * @method
    * @param {string} name Name of the {@link LinkedCollection} to retrieve.
-   * @return {LinkedCollection}
+   * @returns {LinkedCollection}
    */
   getCollection (name) {
     const collection = this._collections[name]
@@ -767,7 +767,7 @@ const props = {
    * @param {Object} record - Passed to {@link Mapper#update}.
    * @param {Object} [opts] - Passed to {@link Mapper#update}. See
    * {@link Mapper#update} for more configuration options.
-   * @return {Promise}
+   * @returns {Promise}
    */
   update (name, id, record, opts) {
     const self = this
@@ -787,7 +787,7 @@ const props = {
    * @param {Object} [query] - Passed to {@link Mapper#updateAll}.
    * @param {Object} [opts] - Passed to {@link Mapper#updateAll}. See
    * {@link Mapper#updateAll} for more configuration options.
-   * @return {Promise}
+   * @returns {Promise}
    */
   updateAll (name, props, query, opts) {
     const self = this
@@ -806,7 +806,7 @@ const props = {
    * @param {(Object[]|Record[])} records Passed to {@link Mapper#updateMany}.
    * @param {Object} [opts] Passed to {@link Mapper#updateMany}. See
    * {@link Mapper#updateMany} for more configuration options.
-   * @return {Promise}
+   * @returns {Promise}
    */
   updateMany (name, records, opts) {
     const self = this
@@ -871,6 +871,32 @@ toProxy.forEach(function (method) {
  * @class DataStore
  * @extends Container
  * @param {Object} [opts] Configuration options. See {@link Container}.
- * @return {DataStore}
+ * @returns {DataStore}
  */
 export default Container.extend(props)
+
+/**
+ * Create a subclass of this DataStore.
+ *
+ * @example <caption>Extend the class in a cross-browser manner.</caption>
+ * import {DataStore} from 'js-data'
+ * const CustomDataStoreClass = DataStore.extend({
+ *   foo () { return 'bar' }
+ * })
+ * const customDataStore = new CustomDataStoreClass({ name: 'test' })
+ * console.log(customDataStore.foo()) // "bar"
+ *
+ * @example <caption>Extend the class using ES2015 class syntax.</caption>
+ * class CustomDataStoreClass extends DataStore {
+ *   foo () { return 'bar' }
+ * }
+ * const customDataStore = new CustomDataStoreClass({ name: 'test' })
+ * console.log(customDataStore.foo()) // "bar"
+ *
+ * @method DataStore.extend
+ * @param {Object} [props={}] Properties to add to the prototype of the
+ * subclass.
+ * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @returns {Constructor} Subclass of this DataStore.
+ * @since 3.0.0
+ */

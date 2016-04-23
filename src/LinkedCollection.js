@@ -20,7 +20,7 @@ const DOMAIN = 'LinkedCollection'
  * @param {Array} [records] Initial set of records to insert into the
  * collection. See {@link Collection}.
  * @param {Object} [opts] Configuration options. See {@link Collection}.
- * @return {Mapper}
+ * @returns {Mapper}
  */
 export default Collection.extend({
   constructor: function LinkedCollection (records, opts) {

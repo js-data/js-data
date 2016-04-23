@@ -213,7 +213,7 @@ const utils = {
    *
    * @ignore
    * @param {*} from Value to deep copy.
-   * @return {*} Deep copy of `from`.
+   * @returns {*} Deep copy of `from`.
    */
   copy (from, to, stackFrom, stackTo, blacklist, plain) {
     if (!to) {
@@ -335,7 +335,7 @@ const utils = {
   /**
    * @param {Object} a Base object.
    * @param {Object} b Comparison object.
-   * @return {Object} Diff.
+   * @returns {Object} Diff.
    */
   diffObjects (a, b, opts) {
     opts || (opts = {})
@@ -591,7 +591,7 @@ const utils = {
    *
    * @ignore
    * @param {string} json JSON to parse.
-   * @return {Object} Parsed object.
+   * @returns {Object} Parsed object.
    */
   fromJson (json) {
     return utils.isString(json) ? JSON.parse(json) : json
@@ -635,7 +635,7 @@ const utils = {
    * @ignore
    * @param {Array} array1 First array.
    * @param {Array} array2 Second array.
-   * @return {Array} Array of elements common to both arrays.
+   * @returns {Array} Array of elements common to both arrays.
    */
   intersection (array1, array2) {
     if (!array1 || !array2) {
@@ -670,7 +670,7 @@ const utils = {
    * @ignore
    * @param {string} prop The name of a property.
    * @param {Array} bl Array of strings and regular expressions.
-   * @return {boolean} Whether `prop` was matched.
+   * @returns {boolean} Whether `prop` was matched.
    */
   isBlacklisted (prop, bl) {
     if (!bl || !bl.length) {
@@ -866,7 +866,7 @@ const utils = {
    *
    * @ignore
    * @param {*} [value] Value with which to reject the Promise.
-   * @return {Promise} Promise reject with `value`.
+   * @returns {Promise} Promise reject with `value`.
    */
   reject (value) {
     return utils.Promise.reject(value)
@@ -892,7 +892,7 @@ const utils = {
    *
    * @ignore
    * @param {*} [value] Value with which to resolve the Promise.
-   * @return {Promise} Promise resolved with `value`.
+   * @returns {Promise} Promise resolved with `value`.
    */
   resolve (value) {
     return utils.Promise.resolve(value)
@@ -952,7 +952,7 @@ const utils = {
    *
    * @ignore
    * @param {*} value Value to serialize to JSON.
-   * @return {string} JSON string.
+   * @returns {string} JSON string.
    */
   toJson: JSON.stringify,
 

@@ -18,7 +18,7 @@ const toProxy = [
    * @param {string} name - Name of the {@link Mapper} to target.
    * @param {Object} [query] - Passed to {@link Model.count}.
    * @param {Object} [opts] - Passed to {@link Model.count}.
-   * @return {Promise}
+   * @returns {Promise}
    */
   'count',
 
@@ -31,7 +31,7 @@ const toProxy = [
    * @param {Object} record Passed to {@link Mapper#create}.
    * @param {Object} [opts] Passed to {@link Mapper#create}. See
    * {@link Mapper#create} for more configuration options.
-   * @return {Promise}
+   * @returns {Promise}
    */
   'create',
 
@@ -44,7 +44,7 @@ const toProxy = [
    * @param {Array} records Passed to {@link Mapper#createMany}.
    * @param {Object} [opts] Passed to {@link Mapper#createMany}. See
    * {@link Mapper#createMany} for more configuration options.
-   * @return {Promise}
+   * @returns {Promise}
    */
   'createMany',
 
@@ -57,7 +57,7 @@ const toProxy = [
    * @param {Object} props Passed to {@link Mapper#createRecord}.
    * @param {Object} [opts] Passed to {@link Mapper#createRecord}. See
    * {@link Mapper#createRecord} for configuration options.
-   * @return {Promise}
+   * @returns {Promise}
    */
   'createRecord',
 
@@ -80,7 +80,7 @@ const toProxy = [
    * @param {(string|number)} id - Passed to {@link Mapper#destroy}.
    * @param {Object} [opts] - Passed to {@link Mapper#destroy}. See
    * {@link Mapper#destroy} for more configuration options.
-   * @return {Promise}
+   * @returns {Promise}
    */
   'destroy',
 
@@ -93,7 +93,7 @@ const toProxy = [
    * @param {Object} [query] - Passed to {@link Mapper#destroyAll}.
    * @param {Object} [opts] - Passed to {@link Mapper#destroyAll}. See
    * {@link Mapper#destroyAll} for more configuration options.
-   * @return {Promise}
+   * @returns {Promise}
    */
   'destroyAll',
 
@@ -105,7 +105,7 @@ const toProxy = [
    * @param {string} name - Name of the {@link Mapper} to target.
    * @param {(string|number)} id - Passed to {@link Mapper#find}.
    * @param {Object} [opts] - Passed to {@link Mapper#find}.
-   * @return {Promise}
+   * @returns {Promise}
    */
   'find',
 
@@ -117,7 +117,7 @@ const toProxy = [
    * @param {string} name - Name of the {@link Mapper} to target.
    * @param {Object} [query] - Passed to {@link Model.findAll}.
    * @param {Object} [opts] - Passed to {@link Model.findAll}.
-   * @return {Promise}
+   * @returns {Promise}
    */
   'findAll',
 
@@ -159,7 +159,7 @@ const toProxy = [
    * @param {string} field - Passed to {@link Model.sum}.
    * @param {Object} [query] - Passed to {@link Model.sum}.
    * @param {Object} [opts] - Passed to {@link Model.sum}.
-   * @return {Promise}
+   * @returns {Promise}
    */
   'sum',
 
@@ -183,7 +183,7 @@ const toProxy = [
    * @param {Object} record - Passed to {@link Mapper#update}.
    * @param {Object} [opts] - Passed to {@link Mapper#update}. See
    * {@link Mapper#update} for more configuration options.
-   * @return {Promise}
+   * @returns {Promise}
    */
   'update',
 
@@ -197,7 +197,7 @@ const toProxy = [
    * @param {Object} props - Passed to {@link Model.updateAll}.
    * @param {Object} [opts] - Passed to {@link Model.updateAll}. See
    * {@link Model.updateAll} for more configuration options.
-   * @return {Promise}
+   * @returns {Promise}
    */
   'updateAll',
 
@@ -210,7 +210,7 @@ const toProxy = [
    * @param {(Object[]|Record[])} records Passed to {@link Mapper#updateMany}.
    * @param {Object} [opts] Passed to {@link Mapper#updateMany}. See
    * {@link Mapper#updateMany} for more configuration options.
-   * @return {Promise}
+   * @returns {Promise}
    */
   'updateMany'
 ]
@@ -294,7 +294,7 @@ const props = {
    * {@link Mapper#name} will be set to this value.
    * @param {Object} [opts] Configuration options. Passed to
    * {@link Container#mapperClass} when creating the new {@link Mapper}.
-   * @return {Mapper}
+   * @returns {Mapper}
    */
   defineMapper (name, opts) {
     const self = this
@@ -372,7 +372,7 @@ const props = {
    * @name Container#getAdapter
    * @method
    * @param {string} [name] The name of the adapter to retrieve.
-   * @return {Adapter} The adapter.
+   * @returns {Adapter} The adapter.
    */
   getAdapter (name) {
     const self = this
@@ -390,7 +390,7 @@ const props = {
    * @name Container#getAdapterName
    * @method
    * @param {(Object|string)} [opts] The name of an adapter or options, if any.
-   * @return {string} The name of the adapter.
+   * @returns {string} The name of the adapter.
    */
   getAdapterName (opts) {
     opts || (opts = {})
@@ -405,7 +405,7 @@ const props = {
    *
    * @name Container#getAdapters
    * @method
-   * @return {Adapter}
+   * @returns {Adapter}
    */
   getAdapters () {
     return this._adapters
@@ -423,7 +423,7 @@ const props = {
    * @name Container#getMapper
    * @method
    * @param {string} name {@link Mapper#name}.
-   * @return {Mapper}
+   * @returns {Mapper}
    */
   getMapper (name) {
     const mapper = this._mappers[name]
@@ -538,6 +538,32 @@ toProxy.forEach(function (method) {
  * {@link Container#defineMapper} to create a new mapper.
  * @param {Object} [opts.mapperDefaults] Defaults options to pass to
  * {@link Container#mapperClass} when creating a new mapper.
- * @return {Container}
+ * @returns {Container}
  */
 export default Component.extend(props)
+
+/**
+ * Create a subclass of this Container.
+ *
+ * @example <caption>Extend the class in a cross-browser manner.</caption>
+ * import {Container} from 'js-data'
+ * const CustomContainerClass = Container.extend({
+ *   foo () { return 'bar' }
+ * })
+ * const customContainer = new CustomContainerClass({ name: 'test' })
+ * console.log(customContainer.foo()) // "bar"
+ *
+ * @example <caption>Extend the class using ES2015 class syntax.</caption>
+ * class CustomContainerClass extends Container {
+ *   foo () { return 'bar' }
+ * }
+ * const customContainer = new CustomContainerClass({ name: 'test' })
+ * console.log(customContainer.foo()) // "bar"
+ *
+ * @method Container.extend
+ * @param {Object} [props={}] Properties to add to the prototype of the
+ * subclass.
+ * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @returns {Constructor} Subclass of this Container.
+ * @since 3.0.0
+ */

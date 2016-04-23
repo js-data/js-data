@@ -82,7 +82,7 @@ export default Component.extend({
    * on the left boundary.
    * @param {boolean} [opts.limit] - Limit the result to a certain number.
    * @param {boolean} [opts.offset] - The number of resulting entities to skip.
-   * @return {Query} A reference to itself for chaining.
+   * @returns {Query} A reference to itself for chaining.
    */
   between (leftKeys, rightKeys, opts) {
     const self = this
@@ -103,7 +103,7 @@ export default Component.extend({
    * @param {number} index The index of the current orderBy clause being used.
    * @param {*} a The first item in the comparison.
    * @param {*} b The second item in the comparison.
-   * @return {number} -1 if `b` should preceed `a`. 0 if `a` and `b` are equal.
+   * @returns {number} -1 if `b` should preceed `a`. 0 if `a` and `b` are equal.
    * 1 if `a` should preceed `b`.
    */
   compare (orderBy, index, a, b) {
@@ -148,7 +148,7 @@ export default Component.extend({
    * @param {*} value The value to evaluate.
    * @param {string} op The operator to use in this evaluation.
    * @param {*} predicate The predicate to use in this evaluation.
-   * @return {boolean} Whether the value passed the evaluation or not.
+   * @returns {boolean} Whether the value passed the evaluation or not.
    */
   evaluate (value, op, predicate) {
     const ops = this.constructor.ops
@@ -194,7 +194,7 @@ export default Component.extend({
    * function.
    * @param {Function} [thisArg] - Context to which to bind `queryOrFn` if
    * `queryOrFn` is a function.
-   * @return {Query} A reference to itself for chaining.
+   * @returns {Query} A reference to itself for chaining.
    */
   filter (query, thisArg) {
     const self = this
@@ -298,7 +298,7 @@ export default Component.extend({
    * @method
    * @param {Function} forEachFn - Iteration function.
    * @param {*} [thisArg] - Context to which to bind `forEachFn`.
-   * @return {Query} A reference to itself for chaining.
+   * @returns {Query} A reference to itself for chaining.
    */
   forEach (forEachFn, thisArg) {
     this.getData().forEach(forEachFn, thisArg)
@@ -339,7 +339,7 @@ export default Component.extend({
    * @param {Object} [opts] - Configuration options.
    * @param {string} [opts.string] - Name of the secondary index to use in the
    * query. If no index is specified, the main index is used.
-   * @return {Query} A reference to itself for chaining.
+   * @returns {Query} A reference to itself for chaining.
    */
   get (keyList, opts) {
     const self = this
@@ -381,7 +381,7 @@ export default Component.extend({
    * @param {Object} [opts] - Configuration options.
    * @param {string} [opts.index] - Name of the secondary index to use in the
    * query. If no index is specified, the main index is used.
-   * @return {Query} A reference to itself for chaining.
+   * @returns {Query} A reference to itself for chaining.
    */
   getAll (...args) {
     const self = this
@@ -409,7 +409,7 @@ export default Component.extend({
    * Return the current data result of this query.
    * @name Query#getData
    * @method
-   * @return {Array} The data in this query.
+   * @returns {Array} The data in this query.
    */
   getData () {
     const self = this
@@ -436,7 +436,7 @@ export default Component.extend({
    * @name Query#limit
    * @method
    * @param {number} num - The maximum number of entities to keep in the result.
-   * @return {Query} A reference to itself for chaining.
+   * @returns {Query} A reference to itself for chaining.
    */
   limit (num) {
     if (!utils.isNumber(num)) {
@@ -454,7 +454,7 @@ export default Component.extend({
    * @method
    * @param {Function} mapFn - Mapping function.
    * @param {*} [thisArg] - Context to which to bind `mapFn`.
-   * @return {Query} A reference to itself for chaining.
+   * @returns {Query} A reference to itself for chaining.
    */
   map (mapFn, thisArg) {
     this.data = this.getData().map(mapFn, thisArg)
@@ -468,7 +468,7 @@ export default Component.extend({
    * @method
    * @param {string} funcName - Name of function to call
    * @parama {...*} [args] - Remaining arguments to be passed to the function.
-   * @return {Query} A reference to itself for chaining.
+   * @returns {Query} A reference to itself for chaining.
    */
   mapCall (funcName, ...args) {
     this.data = this.getData().map(function (item) {
@@ -482,7 +482,7 @@ export default Component.extend({
    *
    * @name Query#run
    * @method
-   * @return {Array} The result of executing this query.
+   * @returns {Array} The result of executing this query.
    */
   run () {
     const data = this.data
@@ -503,7 +503,7 @@ export default Component.extend({
    * @name Query#skip
    * @method
    * @param {number} num - The number of entities to skip.
-   * @return {Query} A reference to itself for chaining.
+   * @returns {Query} A reference to itself for chaining.
    */
   skip (num) {
     if (!utils.isNumber(num)) {

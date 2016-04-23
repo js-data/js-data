@@ -91,9 +91,13 @@ const LIFECYCLE_METHODS = {
 
 const MAPPER_DEFAULTS = {
   /**
-   * Hash of registered adapters. Don't modify directly. Use {@link Mapper#registerAdapter}.
+   * Hash of registered adapters. Don't modify directly. Use
+   * {@link Mapper#registerAdapter} instead.
    *
+   * @default {}
    * @name Mapper#_adapters
+   * @see http://www.js-data.io/v3.0/docs/connecting-to-a-data-source
+   * @since 3.0.0
    */
   _adapters: {},
 
@@ -104,36 +108,41 @@ const MAPPER_DEFAULTS = {
    * when using the dot (e.g. `user.name = "Bob"`) operator to modify a
    * property.
    *
-   * @name Mapper#applySchema
-   * @type {boolean}
    * @default true
+   * @name Mapper#applySchema
+   * @since 3.0.0
+   * @type {boolean}
    */
   applySchema: true,
 
   /**
    * Whether to enable debug-level logs.
    *
-   * @name Mapper#debug
-   * @type {boolean}
    * @default false
+   * @name Mapper#debug
+   * @since 3.0.0
+   * @type {boolean}
    */
   debug: false,
 
   /**
    * The name of the registered adapter that this Mapper should used by default.
    *
-   * @name Mapper#defaultAdapter
-   * @type {string}
    * @default "http"
+   * @name Mapper#defaultAdapter
+   * @see http://www.js-data.io/v3.0/docs/connecting-to-a-data-source
+   * @since 3.0.0
+   * @type {string}
    */
   defaultAdapter: 'http',
 
   /**
    * The field used as the unique identifier on records handled by this Mapper.
    *
-   * @name Mapper#idAttribute
-   * @type {string}
    * @default id
+   * @name Mapper#idAttribute
+   * @since 3.0.0
+   * @type {string}
    */
   idAttribute: 'id',
 
@@ -143,24 +152,26 @@ const MAPPER_DEFAULTS = {
    * Defaults to `true` in the browser and `false` in Node.js
    *
    * @name Mapper#notify
+   * @since 3.0.0
    * @type {boolean}
    */
   notify: utils.isBrowser,
 
   /**
-   * Whether {@link Mapper#create}, {@link Mapper#createMany}, {@link Mapper#save},
+   * Whether {@link Mapper#create}, {@link Mapper#createMany},
    * {@link Mapper#update}, {@link Mapper#updateAll}, {@link Mapper#updateMany},
-   * {@link Mapper#find}, {@link Mapper#findAll}, {@link Mapper#destroy}, and
-   * {@link Mapper#destroyAll} should return a raw result object that contains
-   * both the instance data returned by the adapter _and_ metadata about the
-   * operation.
+   * {@link Mapper#find}, {@link Mapper#findAll}, {@link Mapper#destroy},
+   * {@link Mapper#destroyAll}, {@link Mapper#count}, and {@link Mapper#sum}
+   * should return a raw result object that contains both the instance data
+   * returned by the adapter _and_ metadata about the operation.
    *
    * The default is to NOT return the result object, and instead return just the
    * instance data.
    *
-   * @name Mapper#raw
-   * @type {boolean}
    * @default false
+   * @name Mapper#raw
+   * @since 3.0.0
+   * @type {boolean}
    */
   raw: false
 }
@@ -169,7 +180,7 @@ const MAPPER_DEFAULTS = {
  * The core of JSData's [ORM/ODM][orm] implementation. Given a minimum amout of
  * meta information about a resource, a Mapper can perform generic CRUD
  * operations against that resource. Apart from its configuration, a Mapper is
- * stateless. The particulars of various persistence layers has been abstracted
+ * stateless. The particulars of various persistence layers have been abstracted
  * into adapters, which a Mapper uses to perform its operations.
  *
  * The term "Mapper" comes from the [Data Mapper Pattern][pattern] described in
@@ -191,7 +202,7 @@ const MAPPER_DEFAULTS = {
  *
  * const UserService = new Mapper({ name: 'user' })
  *
- * @example <caption>Using the Container component</caption>
+ * @example <caption>Define a Mapper using the Container component</caption>
  * import {Container} from 'js-data'
  *
  * const store = new Container()
@@ -200,24 +211,18 @@ const MAPPER_DEFAULTS = {
  * @class Mapper
  * @extends Component
  * @param {Object} opts Configuration options.
- * @param {boolean} [opts.applySchema=true] Whether to apply this Mapper's
- * {@link Schema} to the prototype of this Mapper's Record class. The enables
- * features like active change detection, validation during use of the
- * assignment operator, etc.
- * @param {boolean} [opts.debug=false] Wether to log debugging information
- * during operation.
- * @param {string} [opts.defaultAdapter=http] The name of the adapter to use by
- * default.
- * @param {string} [opts.idAttribute=id] The field that uniquely identifies
- * Records that this Mapper will be dealing with. Typically called a primary
- * key.
- * @param {string} opts.name The name for this Mapper. This is the minimum
- * amount of meta information required for a Mapper to be able to execute CRUD
- * operations for a "Resource".
- * @param {boolean} [opts.notify] Whether to emit lifecycle events.
- * @param {boolean} [opts.raw=false] Whether lifecycle methods should return a
- * more detailed reponse object instead of just a Record instance or Record
- * instances.
+ * @param {boolean} [opts.applySchema=true] See {@link Mapper#applySchema}.
+ * @param {boolean} [opts.debug=false] See {@link Mapper#debug}.
+ * @param {string} [opts.defaultAdapter=http] See {@link Mapper#defaultAdapter}.
+ * @param {string} [opts.idAttribute=id] See {@link Mapper#idAttribute}.
+ * @param {string} opts.name See {@link Mapper#name}.
+ * @param {boolean} [opts.notify] See {@link Mapper#notify}.
+ * @param {boolean} [opts.raw=false] See {@link Mapper#raw}.
+ * @param {Function|boolean} [opts.recordClass] See {@link Mapper#recordClass}.
+ * @returns {Mapper} A new {@link Mapper} instance.
+ * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#mapper
+ * @see http://www.js-data.io/v3.0/docs/modeling-your-data
+ * @since 3.0.0
  */
 export default Component.extend({
   constructor: function Mapper (opts) {
@@ -278,6 +283,8 @@ export default Component.extend({
        *
        * @name Mapper#recordClass
        * @default {@link Record}
+       * @see Record
+       * @since 3.0.0
        */
       recordClass: {
         value: undefined,
@@ -288,6 +295,14 @@ export default Component.extend({
         value: LIFECYCLE_METHODS
       },
 
+      /**
+       * This Mapper's {@link Schema}.
+       *
+       * @name Mapper#schema
+       * @see Schema
+       * @since 3.0.0
+       * @type {Schema}
+       */
       schema: {
         value: undefined,
         writable: true
@@ -300,8 +315,9 @@ export default Component.extend({
     utils.fillIn(self, utils.copy(MAPPER_DEFAULTS))
 
     /**
-     * Minimum amount of meta information required for a Mapper to be able to
-     * execute CRUD operations for a "Resource".
+     * The name for this Mapper. This is the minimum amount of meta information
+     * required for a Mapper to be able to execute CRUD operations for a
+     * Resource.
      *
      * @name Mapper#name
      * @type {string}
@@ -346,10 +362,10 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#afterCount
-   * @since 3.0.0
    * @param {Object} query The `query` argument passed to {@link Mapper#count}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#count}.
    * @param {*} result The result, if any.
+   * @since 3.0.0
    */
   afterCount: notify2,
 
@@ -359,10 +375,10 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#afterCreate
-   * @since 3.0.0
    * @param {Object} props The `props` argument passed to {@link Mapper#create}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#create}.
    * @param {*} result The result, if any.
+   * @since 3.0.0
    */
   afterCreate: notify2,
 
@@ -372,10 +388,10 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#afterCreateMany
-   * @since 3.0.0
    * @param {Array} records The `records` argument passed to {@link Mapper#createMany}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#createMany}.
    * @param {*} result The result, if any.
+   * @since 3.0.0
    */
   afterCreateMany: notify2,
 
@@ -385,10 +401,10 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#afterDestroy
-   * @since 3.0.0
    * @param {(string|number)} id The `id` argument passed to {@link Mapper#destroy}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#destroy}.
    * @param {*} result The result, if any.
+   * @since 3.0.0
    */
   afterDestroy: notify2,
 
@@ -398,11 +414,11 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#afterDestroyAll
-   * @since 3.0.0
    * @param {*} data The `data` returned by the adapter.
    * @param {query} query The `query` argument passed to {@link Mapper#destroyAll}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#destroyAll}.
    * @param {*} result The result, if any.
+   * @since 3.0.0
    */
   afterDestroyAll: notify2,
 
@@ -412,10 +428,10 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#afterFind
-   * @since 3.0.0
    * @param {(string|number)} id The `id` argument passed to {@link Mapper#find}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#find}.
    * @param {*} result The result, if any.
+   * @since 3.0.0
    */
   afterFind: notify2,
 
@@ -425,10 +441,10 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#afterFindAll
-   * @since 3.0.0
    * @param {Object} query The `query` argument passed to {@link Mapper#findAll}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#findAll}.
    * @param {*} result The result, if any.
+   * @since 3.0.0
    */
   afterFindAll: notify2,
 
@@ -438,10 +454,10 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#afterSum
-   * @since 3.0.0
    * @param {Object} query The `query` argument passed to {@link Mapper#sum}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#sum}.
    * @param {*} result The result, if any.
+   * @since 3.0.0
    */
   afterSum: notify2,
 
@@ -451,11 +467,11 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#afterUpdate
-   * @since 3.0.0
    * @param {(string|number)} id The `id` argument passed to {@link Mapper#update}.
    * @param {props} props The `props` argument passed to {@link Mapper#update}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#update}.
    * @param {*} result The result, if any.
+   * @since 3.0.0
    */
   afterUpdate: notify2,
 
@@ -465,11 +481,11 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#afterUpdateAll
-   * @since 3.0.0
    * @param {Object} props The `props` argument passed to {@link Mapper#updateAll}.
    * @param {Object} query The `query` argument passed to {@link Mapper#updateAll}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#updateAll}.
    * @param {*} result The result, if any.
+   * @since 3.0.0
    */
   afterUpdateAll: notify2,
 
@@ -479,10 +495,10 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#afterUpdateMany
-   * @since 3.0.0
    * @param {Array} records The `records` argument passed to {@link Mapper#updateMany}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#updateMany}.
    * @param {*} result The result, if any.
+   * @since 3.0.0
    */
   afterUpdateMany: notify2,
 
@@ -492,9 +508,9 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#beforeCreate
-   * @since 3.0.0
    * @param {Object} props The `props` argument passed to {@link Mapper#create}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#create}.
+   * @since 3.0.0
    */
   beforeCreate: notify,
 
@@ -504,9 +520,9 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#beforeCreateMany
-   * @since 3.0.0
    * @param {Array} records The `records` argument passed to {@link Mapper#createMany}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#createMany}.
+   * @since 3.0.0
    */
   beforeCreateMany: notify,
 
@@ -516,9 +532,9 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#beforeCount
-   * @since 3.0.0
    * @param {Object} query The `query` argument passed to {@link Mapper#count}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#count}.
+   * @since 3.0.0
    */
   beforeCount: notify,
 
@@ -528,9 +544,9 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#beforeDestroy
-   * @since 3.0.0
    * @param {(string|number)} id The `id` argument passed to {@link Mapper#destroy}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#destroy}.
+   * @since 3.0.0
    */
   beforeDestroy: notify,
 
@@ -540,9 +556,9 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#beforeDestroyAll
-   * @since 3.0.0
    * @param {query} query The `query` argument passed to {@link Mapper#destroyAll}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#destroyAll}.
+   * @since 3.0.0
    */
   beforeDestroyAll: notify,
 
@@ -552,9 +568,9 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#beforeFind
-   * @since 3.0.0
    * @param {(string|number)} id The `id` argument passed to {@link Mapper#find}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#find}.
+   * @since 3.0.0
    */
   beforeFind: notify,
 
@@ -564,9 +580,9 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#beforeFindAll
-   * @since 3.0.0
    * @param {Object} query The `query` argument passed to {@link Mapper#findAll}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#findAll}.
+   * @since 3.0.0
    */
   beforeFindAll: notify,
 
@@ -576,10 +592,10 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#beforeSum
-   * @since 3.0.0
    * @param {string} field The `field` argument passed to {@link Mapper#sum}.
    * @param {Object} query The `query` argument passed to {@link Mapper#sum}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#sum}.
+   * @since 3.0.0
    */
   beforeSum: notify,
 
@@ -589,10 +605,10 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#beforeUpdate
-   * @since 3.0.0
    * @param {(string|number)} id The `id` argument passed to {@link Mapper#update}.
    * @param {props} props The `props` argument passed to {@link Mapper#update}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#update}.
+   * @since 3.0.0
    */
   beforeUpdate: notify,
 
@@ -602,10 +618,10 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#beforeUpdateAll
-   * @since 3.0.0
    * @param {Object} props The `props` argument passed to {@link Mapper#updateAll}.
    * @param {Object} query The `query` argument passed to {@link Mapper#updateAll}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#updateAll}.
+   * @since 3.0.0
    */
   beforeUpdateAll: notify,
 
@@ -615,9 +631,9 @@ export default Component.extend({
    * to resolve before continuing.
    *
    * @method Mapper#beforeUpdateMany
-   * @since 3.0.0
    * @param {Array} records The `records` argument passed to {@link Mapper#updateMany}.
    * @param {Object} opts The `opts` argument passed to {@link Mapper#updateMany}.
+   * @since 3.0.0
    */
   beforeUpdateMany: notify,
 
@@ -631,8 +647,8 @@ export default Component.extend({
    * calls {@link Mapper#createRecord}.
    *
    * @method Mapper#_end
-   * @since 3.0.0
    * @private
+   * @since 3.0.0
    */
   _end (result, opts, skip) {
     const self = this
@@ -677,14 +693,24 @@ export default Component.extend({
   },
 
   /**
-   * Using the `query` argument, select records to pull from an adapter.
-   * Expects back from the adapter the array of selected records.
+   * Select records according to the `query` argument and return the count.
    *
    * {@link Mapper#beforeCount} will be called before calling the adapter.
    * {@link Mapper#afterCount} will be called after calling the adapter.
    *
+   * @example
+   * import {Container} from 'js-data'
+   * import RethinkDBAdapter from 'js-data-rethinkdb'
+   * const store = new Container()
+   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true })
+   * store.defineMapper('post')
+   *
+   * // Get the number of published blog posts
+   * store.count('post', { status: 'published' }).then((numPublished) => {
+   *   console.log(numPublished) // e.g. 45
+   * })
+   *
    * @method Mapper#count
-   * @since 3.0.0
    * @param {Object} [query={}] Selection query.
    * @param {Object} [query.where] Filtering criteria.
    * @param {number} [query.skip] Number to skip.
@@ -693,12 +719,10 @@ export default Component.extend({
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
-   * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
-   * lifecycle events.
-   * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
-   * resulting data. If `true` return a response object that includes the
-   * resulting data and metadata about the operation.
-   * @return {Promise}
+   * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
+   * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
+   * @returns {Promise} Resolves with the count of the selected records.
+   * @since 3.0.0
    */
   count (query, opts) {
     return this.crud('count', query, opts)
@@ -711,23 +735,20 @@ export default Component.extend({
    * {@link Mapper#afterCreate} will be called after calling the adapter.
    *
    * @method Mapper#create
-   * @since 3.0.0
    * @param {Object} props The properties for the new record.
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
-   * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
-   * lifecycle events.
-   * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
-   * created data. If `true` return a response object that includes the created
-   * data and metadata about the operation.
+   * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
+   * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
    * @param {string[]} [opts.with=[]] Relations to create in a cascading
    * create if `props` contains nested relations. NOT performed in a
    * transaction. Each nested create will result in another {@link Mapper#create}
    * or {@link Mapper#createMany} call.
    * @param {string[]} [opts.pass=[]] Relations to send to the adapter as part
    * of the payload. Normally relations are not sent.
-   * @return {Promise}
+   * @returns {Promise} Resolves with the created record.
+   * @since 3.0.0
    */
   create (props, opts) {
     let op, adapter
@@ -828,6 +849,16 @@ export default Component.extend({
     })
   },
 
+  /**
+   * Use {@link Mapper#createRecord} instead.
+   * @deprecated
+   * @method Mapper#createInstance
+   * @param {Object|Array} props See {@link Mapper#createRecord}.
+   * @param {Object} [opts] See {@link Mapper#createRecord}.
+   * @returns {Object|Array} See {@link Mapper#createRecord}.
+   * @see Mapper#createRecord
+   * @since 3.0.0
+   */
   createInstance (props, opts) {
     return this.createRecord(props, opts)
   },
@@ -839,23 +870,20 @@ export default Component.extend({
    * {@link Mapper#afterCreateMany} will be called after calling the adapter.
    *
    * @method Mapper#createMany
-   * @since 3.0.0
    * @param {Array} records Array of records to be created in one batch.
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
-   * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
-   * lifecycle events.
-   * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
-   * updated data. If `true` return a response object that includes the updated
-   * data and metadata about the operation.
+   * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
+   * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
    * @param {string[]} [opts.with=[]] Relations to create in a cascading
    * create if `records` contains nested relations. NOT performed in a
    * transaction. Each nested create will result in another {@link Mapper#createMany}
    * call.
    * @param {string[]} [opts.pass=[]] Relations to send to the adapter as part
    * of the payload. Normally relations are not sent.
-   * @return {Promise}
+   * @returns {Promise} Resolves with the created records.
+   * @since 3.0.0
    */
   createMany (records, opts) {
     let op, adapter
@@ -968,13 +996,13 @@ export default Component.extend({
    * {@link Mapper#recordClass}.
    *
    * @method Mapper#createRecord
-   * @since 3.0.0
    * @param {Object|Array} props The properties for the Record instance or an
    * array of property objects for the Record instances.
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.noValidate=false] Whether to skip validation when
    * the Record instances are created.
-   * @return {Object|Array} The Record instance or Record instances.
+   * @returns {Object|Array} The Record instance or Record instances.
+   * @since 3.0.0
    */
   createRecord (props, opts) {
     props || (props = {})
@@ -1007,10 +1035,10 @@ export default Component.extend({
    * Lifecycle invocation method.
    *
    * @method Mapper#crud
-   * @since 3.0.0
    * @param {string} method Name of the lifecycle method to invoke.
    * @param {...*} args Arguments to pass to the lifecycle method.
-   * @return {Promise}
+   * @returns {Promise}
+   * @since 3.0.0
    */
   crud (method, ...args) {
     const self = this
@@ -1070,19 +1098,17 @@ export default Component.extend({
    * {@link Mapper#afterDestroy} will be called after destroying the record.
    *
    * @method Mapper#destroy
-   * @since 3.0.0
    * @param {(string|number)} id The primary key of the record to destroy.
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
-   * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
-   * lifecycle events.
-   * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
-   * ejected data (if any). If `true` return a response object that includes the
-   * ejected data (if any) and metadata about the operation.
+   * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
+   * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
    * @param {string[]} [opts.with=[]] Relations to destroy in a cascading
    * delete. NOT performed in a transaction.
-   * @return {Promise}
+   * @returns {Promise} Resolves when the record has been destroyed. Resolves
+   * even if no record was found to be destroyed.
+   * @since 3.0.0
    */
   destroy (id, opts) {
     return this.crud('destroy', id, opts)
@@ -1096,7 +1122,6 @@ export default Component.extend({
    * {@link Mapper#afterDestroyAll} will be called after destroying the records.
    *
    * @method Mapper#destroyAll
-   * @since 3.0.0
    * @param {Object} [query={}] Selection query.
    * @param {Object} [query.where] Filtering criteria.
    * @param {number} [query.skip] Number to skip.
@@ -1105,14 +1130,13 @@ export default Component.extend({
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
-   * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
-   * lifecycle events.
-   * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
-   * ejected data (if any). If `true` return a response object that includes the
-   * ejected data (if any) and metadata about the operation.
+   * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
+   * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
    * @param {string[]} [opts.with=[]] Relations to destroy in a cascading
    * delete. NOT performed in a transaction.
-   * @return {Promise}
+   * @returns {Promise} Resolves when the records have been destroyed. Resolves
+   * even if no records were found to be destroyed.
+   * @since 3.0.0
    */
   destroyAll (query, opts) {
     return this.crud('destroyAll', query, opts)
@@ -1125,18 +1149,16 @@ export default Component.extend({
    * {@link Mapper#afterFind} will be called after calling the adapter.
    *
    * @method Mapper#find
-   * @since 3.0.0
    * @param {(string|number)} id The primary key of the record to retrieve.
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
-   * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
-   * lifecycle events.
-   * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
-   * updated data. If `true` return a response object that includes the updated
-   * data and metadata about the operation.
+   * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
+   * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
    * @param {string[]} [opts.with=[]] Relations to eager load in the request.
-   * @return {Promise}
+   * @returns {Promise} Resolves with the found record. Resolves with `undefined`
+   * if no record was found.
+   * @since 3.0.0
    */
   find (id, opts) {
     return this.crud('find', id, opts)
@@ -1150,7 +1172,6 @@ export default Component.extend({
    * {@link Mapper#afterFindAll} will be called after calling the adapter.
    *
    * @method Mapper#findAll
-   * @since 3.0.0
    * @param {Object} [query={}] Selection query.
    * @param {Object} [query.where] Filtering criteria.
    * @param {number} [query.skip] Number to skip.
@@ -1159,13 +1180,11 @@ export default Component.extend({
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
-   * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
-   * lifecycle events.
-   * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
-   * resulting data. If `true` return a response object that includes the
-   * resulting data and metadata about the operation.
+   * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
+   * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
    * @param {string[]} [opts.with=[]] Relations to eager load in the request.
-   * @return {Promise}
+   * @returns {Promise} Resolves with the found records.
+   * @since 3.0.0
    */
   findAll (query, opts) {
     return this.crud('findAll', query, opts)
@@ -1176,9 +1195,10 @@ export default Component.extend({
    * no name is provided.
    *
    * @method Mapper#getAdapter
-   * @since 3.0.0
    * @param {string} [name] The name of the adapter to retrieve.
-   * @return {Adapter} The adapter.
+   * @returns {Adapter} The adapter.
+   * @see http://www.js-data.io/v3.0/docs/connecting-to-a-data-source
+   * @since 3.0.0
    */
   getAdapter (name) {
     const self = this
@@ -1195,9 +1215,10 @@ export default Component.extend({
    * or the name of the default adapter if no name provided.
    *
    * @method Mapper#getAdapterName
-   * @since 3.0.0
    * @param {(Object|string)} [opts] The name of an adapter or options, if any.
-   * @return {string} The name of the adapter.
+   * @returns {string} The name of the adapter.
+   * @see http://www.js-data.io/v3.0/docs/connecting-to-a-data-source
+   * @since 3.0.0
    */
   getAdapterName (opts) {
     opts || (opts = {})
@@ -1209,19 +1230,21 @@ export default Component.extend({
 
   /**
    * @method Mapper#getAdapters
+   * @returns {Object} {@link Mapper#_adapters}
+   * @see http://www.js-data.io/v3.0/docs/connecting-to-a-data-source
    * @since 3.0.0
-   * @return {Object} This Mapper's adapters
    */
   getAdapters () {
     return this._adapters
   },
 
   /**
-   * Returns this Mapper's schema.
+   * Returns this Mapper's {@link Schema}.
    *
    * @method Mapper#getAdapters
+   * @see Mapper#schema
    * @since 3.0.0
-   * @return {Schema} This Mapper's schema.
+   * @returns {Schema} This Mapper's {@link Schema}.
    */
   getSchema () {
     return this.schema
@@ -1231,11 +1254,10 @@ export default Component.extend({
    * Defines a hasMany relationship. Only useful if you're managing your
    * Mappers manually and not using a Container or DataStore component.
    *
-   * ```
+   * @example
    * User.hasMany(Post, {
    *   localField: 'my_posts'
    * })
-   * ```
    *
    * @method Mapper#hasMany
    * @since 3.0.0
@@ -1248,11 +1270,10 @@ export default Component.extend({
    * Defines a hasOne relationship. Only useful if you're managing your
    * Mappers manually and not using a Container or DataStore component.
    *
-   * ```
+   * @example
    * User.hasOne(Profile, {
    *   localField: '_profile'
    * })
-   * ```
    *
    * @method Mapper#hasOne
    * @since 3.0.0
@@ -1264,11 +1285,20 @@ export default Component.extend({
   /**
    * Return whether `record` is an instance of this Mapper's recordClass.
    *
+   * @example
+   * import {Container} from 'js-data'
+   * const store = new Container()
+   * store.defineMapper('post')
+   * const post = store.createRecord()
+   *
+   * console.log(store.is('post', post)) // true
+   * console.log(post instanceof store.getMapper('post').recordClass) // true
+   *
    * @method Mapper#is
-   * @since 3.0.0
    * @param {Object} record The record to check.
-   * @return {boolean} Whether `record` is an instance of this Mapper's
+   * @returns {boolean} Whether `record` is an instance of this Mapper's
    * {@link Mapper#recordClass}.
+   * @since 3.0.0
    */
   is (record) {
     const recordClass = this.recordClass
@@ -1279,12 +1309,13 @@ export default Component.extend({
    * Register an adapter on this mapper under the given name.
    *
    * @method Mapper#registerAdapter
-   * @since 3.0.0
    * @param {string} name The name of the adapter to register.
    * @param {Adapter} adapter The adapter to register.
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.default=false] Whether to make the adapter the
    * default adapter for this Mapper.
+   * @see http://www.js-data.io/v3.0/docs/connecting-to-a-data-source
+   * @since 3.0.0
    */
   registerAdapter (name, adapter, opts) {
     const self = this
@@ -1297,14 +1328,13 @@ export default Component.extend({
   },
 
   /**
-   * Using the `query` argument, select records to pull from an adapter.
-   * Expects back from the adapter the array of selected records.
+   * Select records according to the `query` argument, and aggregate the sum
+   * value of the property specified by `field`.
    *
    * {@link Mapper#beforeSum} will be called before calling the adapter.
    * {@link Mapper#afterSum} will be called after calling the adapter.
    *
    * @method Mapper#sum
-   * @since 3.0.0
    * @param {string} field The field to sum.
    * @param {Object} [query={}] Selection query.
    * @param {Object} [query.where] Filtering criteria.
@@ -1314,12 +1344,10 @@ export default Component.extend({
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
-   * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
-   * lifecycle events.
-   * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
-   * resulting data. If `true` return a response object that includes the
-   * resulting data and metadata about the operation.
-   * @return {Promise}
+   * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
+   * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
+   * @returns {Promise} Resolves with the aggregated sum.
+   * @since 3.0.0
    */
   sum (field, query, opts) {
     return this.crud('sum', field, query, opts)
@@ -1335,7 +1363,7 @@ export default Component.extend({
    * @param {Object} [opts] Configuration options.
    * @param {string[]} [opts.with] Array of relation names or relation fields
    * to include in the representation.
-   * @return {Object} Plain object representation of the record.
+   * @returns {Object} Plain object representation of the record.
    */
   toJSON (record, opts) {
     const self = this
@@ -1398,15 +1426,12 @@ export default Component.extend({
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
-   * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
-   * lifecycle events.
-   * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
-   * updated data. If `true` return a response object that includes the updated
-   * data and metadata about the operation.
+   * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
+   * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
    * @param {string[]} [opts.with=[]] Relations to update in a cascading
    * update if `props` contains nested updates to relations. NOT performed in a
    * transaction.
-   * @return {Promise}
+   * @returns {Promise}
    */
   update (id, props, opts) {
     return this.crud('update', id, props, opts)
@@ -1430,15 +1455,12 @@ export default Component.extend({
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
-   * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
-   * lifecycle events.
-   * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
-   * updated data. If `true` return a response object that includes the updated
-   * data and metadata about the operation.
+   * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
+   * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
    * @param {string[]} [opts.with=[]] Relations to update in a cascading
    * update if `props` contains nested updates to relations. NOT performed in a
    * transaction.
-   * @return {Promise}
+   * @returns {Promise}
    */
   updateAll (props, query, opts) {
     return this.crud('updateAll', props, query, opts)
@@ -1458,15 +1480,12 @@ export default Component.extend({
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
-   * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
-   * lifecycle events.
-   * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
-   * updated data. If `true` return a response object that includes the updated
-   * data and metadata about the operation.
+   * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
+   * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
    * @param {string[]} [opts.with=[]] Relations to update in a cascading
    * update if each record update contains nested updates for relations. NOT
    * performed in a transaction.
-   * @return {Promise}
+   * @returns {Promise}
    */
   updateMany (records, opts) {
     return this.crud('updateMany', records, opts)
@@ -1481,7 +1500,7 @@ export default Component.extend({
    * @param {Object|Array} record The record or records to validate.
    * @param {Object} [opts] Configuration options. Passed to
    * {@link Schema#validate}.
-   * @return {Array} Array of errors or undefined if no errors.
+   * @returns {Array} Array of errors or undefined if no errors.
    */
   validate (record, opts) {
     const self = this
@@ -1512,20 +1531,35 @@ export default Component.extend({
    * @since 3.0.0
    * @param {Object|Array} data The data to be wrapped.
    * @param {Object} [opts] Configuration options. Passed to {@link Mapper#createRecord}.
-   * @return {Object|Array}
+   * @returns {Object|Array}
    */
   wrap (data, opts) {
     return this.createRecord(data, opts)
   }
 })
 
- /**
+/**
  * Create a subclass of this Mapper.
  *
+ * @example <caption>Extend the class in a cross-browser manner.</caption>
+ * import {Mapper} from 'js-data'
+ * const CustomMapperClass = Mapper.extend({
+ *   foo () { return 'bar' }
+ * })
+ * const customMapper = new CustomMapperClass({ name: 'test' })
+ * console.log(customMapper.foo()) // "bar"
+ *
+ * @example <caption>Extend the class using ES2015 class syntax.</caption>
+ * class CustomMapperClass extends Mapper {
+ *   foo () { return 'bar' }
+ * }
+ * const customMapper = new CustomMapperClass({ name: 'test' })
+ * console.log(customMapper.foo()) // "bar"
+ *
  * @method Mapper.extend
- * @since 3.0.0
  * @param {Object} [props={}] Properties to add to the prototype of the
  * subclass.
  * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @return {Function} Subclass of this Mapper.
+ * @returns {Constructor} Subclass of this Mapper.
+ * @since 3.0.0
  */

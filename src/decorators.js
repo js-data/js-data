@@ -125,7 +125,7 @@ const relatedTo = function (mapper, related, opts) {
  * related record.
  * @param {string} opts.localField The field that holds a reference to the
  * related record object.
- * @return {Function} Invocation function, which accepts the target as the only
+ * @returns {Function} Invocation function, which accepts the target as the only
  * parameter.
  */
 export const belongsTo = function (related, opts) {
@@ -147,7 +147,7 @@ export const belongsTo = function (related, opts) {
  * related record.
  * @param {string} opts.localField The field that holds a reference to the
  * related record object.
- * @return {Function} Invocation function, which accepts the target as the only
+ * @returns {Function} Invocation function, which accepts the target as the only
  * parameter.
  */
 export const hasMany = function (related, opts) {
@@ -169,7 +169,7 @@ export const hasMany = function (related, opts) {
  * related record.
  * @param {string} opts.localField The field that holds a reference to the
  * related record object.
- * @return {Function} Invocation function, which accepts the target as the only
+ * @returns {Function} Invocation function, which accepts the target as the only
  * parameter.
  */
 export const hasOne = function (related, opts) {

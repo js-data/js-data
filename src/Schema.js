@@ -916,7 +916,7 @@ export default Component.extend({
    * @method
    * @param {*} value Value to validate.
    * @param {Object} [opts] Configuration options.
-   * @return {(array|undefined)} Array of errors or `undefined` if valid.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   validate (value, opts) {
     return validate(value, this, opts)

@@ -71,6 +71,7 @@ import utils from './utils'
  *
  * @name module:js-data.Collection
  * @see Collection
+ * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#collection
  * @since 3.0.0
  * @type {Constructor}
  */
@@ -105,6 +106,7 @@ import Component from './Component'
  *
  * @name module:js-data.Container
  * @see Container
+ * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#container
  * @since 3.0.0
  * @type {Constructor}
  */
@@ -120,6 +122,7 @@ import Container from './Container'
  *
  * @name module:js-data.DataStore
  * @see DataStore
+ * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#datastire
  * @since 3.0.0
  * @type {Constructor}
  */
@@ -163,6 +166,8 @@ import LinkedCollection from './LinkedCollection'
  * @name module:js-data.Mapper
  * @see Container
  * @see Mapper
+ * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#mapper
+ * @see http://www.js-data.io/v3.0/docs/modeling-your-data
  * @since 3.0.0
  * @type {Constructor}
  */
@@ -189,6 +194,7 @@ import Query from './Query'
  *
  * @name module:js-data.Record
  * @see Record
+ * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#record
  * @since 3.0.0
  * @type {Constructor}
  */
@@ -213,6 +219,7 @@ import Record from './Record'
  * @name module:js-data.Schema
  * @see Schema
  * @see http://json-schema.org/
+ * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#schema
  * @since 3.0.0
  * @type {Constructor}
  */

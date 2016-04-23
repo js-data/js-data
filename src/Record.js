@@ -123,7 +123,7 @@ const Record = Component.extend({
    * @name Record#destroy
    * @method
    * @param {Object} [opts] Configuration options passed to {@link Mapper#destroy}.
-   * @return {Promise} The result of calling {@link Mapper#destroy}.
+   * @returns {Promise} The result of calling {@link Mapper#destroy}.
    */
   destroy (opts) {
     const self = this
@@ -138,7 +138,7 @@ const Record = Component.extend({
    * @name Record#get
    * @method
    * @param {string} key - Path of value to retrieve.
-   * @return {*} Value at path.
+   * @returns {*} Value at path.
    */
   'get' (key) {
     return utils.get(this, key)
@@ -317,7 +317,7 @@ const Record = Component.extend({
    * `changesOnly` is `true`.
    * @param {Array} [opts.ignore] Passed to {@link Record#changes} when
    * `changesOnly` is `true`.
-   * @return {Promise} The result of calling {@link Mapper#create} or
+   * @returns {Promise} The result of calling {@link Mapper#create} or
    * {@link Mapper#update}.
    */
   save (opts) {
@@ -377,7 +377,7 @@ const Record = Component.extend({
    * @param {string[]} [opts.with] Array of relation names or relation fields
    * to include in the representation. Only available as an option if the class
    * from which this record was created has a mapper.
-   * @return {Object} Plain object representation of this record.
+   * @returns {Object} Plain object representation of this record.
    */
   toJSON (opts) {
     const mapper = this.constructor.mapper

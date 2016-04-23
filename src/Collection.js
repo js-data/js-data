@@ -169,7 +169,7 @@ export default Component.extend({
    * @param {Object} [opts] Configuration options.
    * @param {string} [opts.onConflict] What to do when a record is already in
    * the collection. Possible values are `merge` or `replace`.
-   * @return {(Object|Object[]|Record|Record[])} The added record or records.
+   * @returns {(Object|Object[]|Record|Record[])} The added record or records.
    */
   add (records, opts) {
     const self = this
@@ -344,7 +344,7 @@ export default Component.extend({
    * on the left boundary.
    * @param {boolean} [opts.limit] Limit the result to a certain number.
    * @param {boolean} [opts.offset] The number of resulting records to skip.
-   * @return {Array} The result.
+   * @returns {Array} The result.
    */
   between (leftKeys, rightKeys, opts) {
     return this.query().between(leftKeys, rightKeys, opts).run()
@@ -365,7 +365,7 @@ export default Component.extend({
    * @param {string[]} [fieldList] - Array of field names to use as the key or
    * compound key of the new secondary index. If no fieldList is provided, then
    * the name will also be the field that is used to index the collection.
-   * @return {Collection} A reference to itself for chaining.
+   * @returns {Collection} A reference to itself for chaining.
    */
   createIndex (name, fieldList, opts) {
     const self = this
@@ -410,7 +410,7 @@ export default Component.extend({
    * function.
    * @param {Object} [thisArg] - Context to which to bind `queryOrFn` if
    * `queryOrFn` is a function.
-   * @return {Array} The result.
+   * @returns {Array} The result.
    */
   filter (query, thisArg) {
     return this.query().filter(query, thisArg).run()
@@ -428,7 +428,7 @@ export default Component.extend({
    * @since 3.0.0
    * @param {Function} forEachFn - Iteration function.
    * @param {*} [thisArg] - Context to which to bind `forEachFn`.
-   * @return {Array} The result.
+   * @returns {Array} The result.
    */
   forEach (cb, thisArg) {
     this.index.visitAll(cb, thisArg)
@@ -440,7 +440,7 @@ export default Component.extend({
    * @method Collection#get
    * @since 3.0.0
    * @param {(string|number)} id - The primary key of the record to get.
-   * @return {(Object|Record)} The record with the given id.
+   * @returns {(Object|Record)} The record with the given id.
    */
   get (id) {
     const instances = this.query().get(id).run()
@@ -466,7 +466,7 @@ export default Component.extend({
    * @param {Object} [opts] - Configuration options.
    * @param {string} [opts.index] - Name of the secondary index to use in the
    * query. If no index is specified, the main index is used.
-   * @return {Array} The result.
+   * @returns {Array} The result.
    */
   getAll (...args) {
     return this.query().getAll(...args).run()
@@ -499,7 +499,7 @@ export default Component.extend({
    * @method Collection#limit
    * @since 3.0.0
    * @param {number} num - The maximum number of records to keep in the result.
-   * @return {Array} The result.
+   * @returns {Array} The result.
    */
   limit (num) {
     return this.query().limit(num).run()
@@ -517,7 +517,7 @@ export default Component.extend({
    * @since 3.0.0
    * @param {Function} mapFn - Mapping function.
    * @param {*} [thisArg] - Context to which to bind `mapFn`.
-   * @return {Array} The result of the mapping.
+   * @returns {Array} The result of the mapping.
    */
   map (cb, thisArg) {
     const data = []
@@ -535,7 +535,7 @@ export default Component.extend({
    * @since 3.0.0
    * @param {string} funcName - Name of function to call
    * @parama {...*} [args] - Remaining arguments to be passed to the function.
-   * @return {Array} The result.
+   * @returns {Array} The result.
    */
   mapCall (funcName, ...args) {
     const data = []
@@ -553,7 +553,7 @@ export default Component.extend({
    * @since 3.0.0
    * @param {(Object|Record)} [record] The record whose primary key is to be
    * returned.
-   * @return {(string|number)} Primary key or name of field that holds primary
+   * @returns {(string|number)} Primary key or name of field that holds primary
    * key.
    */
   recordId (record) {
@@ -577,7 +577,7 @@ export default Component.extend({
    *
    * @method Collection#query
    * @since 3.0.0
-   * @return {Query} New query object.
+   * @returns {Query} New query object.
    */
   query () {
     return new Query(this)
@@ -595,7 +595,7 @@ export default Component.extend({
    * @since 3.0.0
    * @param {Function} cb - Reduction callback.
    * @param {*} initialValue - Initial value of the reduction.
-   * @return {*} The result.
+   * @returns {*} The result.
    */
   reduce (cb, initialValue) {
     const data = this.getAll()
@@ -609,7 +609,7 @@ export default Component.extend({
    * @since 3.0.0
    * @param {(string|number)} id - The primary key of the record to be removed.
    * @param {Object} [opts] - Configuration options.
-   * @return {Object|Record} The removed record, if any.
+   * @returns {Object|Record} The removed record, if any.
    */
   remove (id, opts) {
     const self = this
@@ -644,7 +644,7 @@ export default Component.extend({
    * @param {number} [query.limit] - Number to limit to.
    * @param {Array} [query.orderBy] - Sorting criteria.
    * @param {Object} [opts] - Configuration options.
-   * @return {(Object[]|Record[])} The removed records, if any.
+   * @returns {(Object[]|Record[])} The removed records, if any.
    */
   removeAll (query, opts) {
     const self = this
@@ -671,7 +671,7 @@ export default Component.extend({
    * @method Collection#skip
    * @since 3.0.0
    * @param {number} num - The number of records to skip.
-   * @return {Array} The result.
+   * @returns {Array} The result.
    */
   skip (num) {
     return this.query().skip(num).run()
@@ -686,7 +686,7 @@ export default Component.extend({
    * @param {Object} [opts] - Configuration options.
    * @param {string[]} [opts.with] - Array of relation names or relation fields
    * to include in the representation.
-   * @return {Array} The records.
+   * @returns {Array} The records.
    */
   toJSON (opts) {
     return this.mapCall('toJSON', opts)
