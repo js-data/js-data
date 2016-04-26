@@ -4,7 +4,7 @@
   },
   "plugins": ["plugins/markdown"],
   "opts": {
-    "template": "../docstrap/template",
+    "template": "./node_modules/ink-docstrap/template",
     "destination": "./doc/",
     "recurse": true,
     "verbose": true,

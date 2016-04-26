@@ -96,8 +96,8 @@ const MAPPER_DEFAULTS = {
    *
    * @default {}
    * @name Mapper#_adapters
-   * @see http://www.js-data.io/v3.0/docs/connecting-to-a-data-source
    * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/connecting-to-a-data-source","Connecting to a data source"]
    */
   _adapters: {},
 
@@ -130,8 +130,8 @@ const MAPPER_DEFAULTS = {
    *
    * @default "http"
    * @name Mapper#defaultAdapter
-   * @see http://www.js-data.io/v3.0/docs/connecting-to-a-data-source
    * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/connecting-to-a-data-source","Connecting to a data source"]
    * @type {string}
    */
   defaultAdapter: 'http',
@@ -221,8 +221,8 @@ const MAPPER_DEFAULTS = {
  * @param {Function|boolean} [opts.recordClass] See {@link Mapper#recordClass}.
  * @returns {Mapper} A new {@link Mapper} instance.
  * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#mapper
- * @see http://www.js-data.io/v3.0/docs/modeling-your-data
  * @since 3.0.0
+ * @tutorial ["http://www.js-data.io/v3.0/docs/modeling-your-data","Modeling you data"]
  */
 export default Component.extend({
   constructor: function Mapper (opts) {
@@ -291,6 +291,15 @@ export default Component.extend({
         writable: true
       },
 
+      /**
+       * The meta information describing this Mapper's available lifecycle
+       * methods. Do not modify.
+       *
+       * TODO: Improve documentation.
+       *
+       * @since 3.0.0
+       * @type {Object}
+       */
       lifecycleMethods: {
         value: LIFECYCLE_METHODS
       },
@@ -674,18 +683,29 @@ export default Component.extend({
    * Define a belongsTo relationship. Only useful if you're managing your
    * Mappers manually and not using a Container or DataStore component.
    *
-   * ```
-   * Post.belongsTo(User, {
-   *   localKey: 'myUserId'
+   * @example
+   * PostService.belongsTo(UserService, {
+   *   // post.user_id points to user.id
+   *   foreignKey: 'user_id'
+   *   // user records will be attached to post records at "post.user"
+   *   localField: 'user'
    * })
    *
-   * Comment.belongsTo(User)
-   * Comment.belongsTo(Post, {
-   *   localField: '_post'
+   * CommentService.belongsTo(UserService, {
+   *   // comment.user_id points to user.id
+   *   foreignKey: 'user_id'
+   *   // user records will be attached to comment records at "comment.user"
+   *   localField: 'user'
    * })
-   * ```
+   * CommentService.belongsTo(PostService, {
+   *   // comment.post_id points to post.id
+   *   foreignKey: 'post_id'
+   *   // post records will be attached to comment records at "comment.post"
+   *   localField: 'post'
+   * })
    *
    * @method Mapper#belongsTo
+   * @see http://www.js-data.io/v3.0/docs/relations
    * @since 3.0.0
    */
   belongsTo (relatedMapper, opts) {
@@ -698,25 +718,19 @@ export default Component.extend({
    * {@link Mapper#beforeCount} will be called before calling the adapter.
    * {@link Mapper#afterCount} will be called after calling the adapter.
    *
-   * @example
-   * import {Container} from 'js-data'
-   * import RethinkDBAdapter from 'js-data-rethinkdb'
-   * const store = new Container()
-   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true })
-   * store.defineMapper('post')
-   *
-   * // Get the number of published blog posts
-   * store.count('post', { status: 'published' }).then((numPublished) => {
+   * @example <caption>Get the number of published blog posts</caption>
+   * PostService.count({ status: 'published' }).then((numPublished) => {
    *   console.log(numPublished) // e.g. 45
    * })
    *
    * @method Mapper#count
-   * @param {Object} [query={}] Selection query.
-   * @param {Object} [query.where] Filtering criteria.
-   * @param {number} [query.skip] Number to skip.
-   * @param {number} [query.limit] Number to limit to.
-   * @param {Array} [query.orderBy] Sorting criteria.
-   * @param {Object} [opts] Configuration options.
+   * @param {Object} [query={}] Selection query. See {@link query}.
+   * @param {Object} [query.where] See {@link query.where}.
+   * @param {number} [query.offset] See {@link query.offset}.
+   * @param {number} [query.limit] See {@link query.limit}.
+   * @param {string|Array[]} [query.orderBy] See {@link query.orderBy}.
+   * @param {Object} [opts] Configuration options. Refer to the `count` method
+   * of whatever adapter you're using for more configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
    * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
@@ -734,9 +748,18 @@ export default Component.extend({
    * {@link Mapper#beforeCreate} will be called before calling the adapter.
    * {@link Mapper#afterCreate} will be called after calling the adapter.
    *
+   * @example <caption>Create and save a new blog post</caption>
+   * PostService.create({
+   *   title: 'Modeling your data',
+   *   status: 'draft'
+   * }).then((post) => {
+   *   console.log(post) // { id: 1234, status: 'draft', ... }
+   * })
+   *
    * @method Mapper#create
    * @param {Object} props The properties for the new record.
-   * @param {Object} [opts] Configuration options.
+   * @param {Object} [opts] Configuration options. Refer to the `create` method
+   * of whatever adapter you're using for more configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
    * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
@@ -869,9 +892,22 @@ export default Component.extend({
    * {@link Mapper#beforeCreateMany} will be called before calling the adapter.
    * {@link Mapper#afterCreateMany} will be called after calling the adapter.
    *
+   * @example <caption>Create and save several new blog posts</caption>
+   * PostService.createMany([{
+   *   title: 'Modeling your data',
+   *   status: 'draft'
+   * }, {
+   *   title: 'Reading data',
+   *   status: 'draft'
+   * }]).then((posts) => {
+   *   console.log(posts[0]) // { id: 1234, status: 'draft', ... }
+   *   console.log(posts[1]) // { id: 1235, status: 'draft', ... }
+   * })
+   *
    * @method Mapper#createMany
-   * @param {Array} records Array of records to be created in one batch.
-   * @param {Object} [opts] Configuration options.
+   * @param {Record[]} records Array of records to be created in one batch.
+   * @param {Object} [opts] Configuration options. Refer to the `createMany`
+   * method of whatever adapter you're using for more configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
    * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
@@ -884,6 +920,7 @@ export default Component.extend({
    * of the payload. Normally relations are not sent.
    * @returns {Promise} Resolves with the created records.
    * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/saving-data","Saving data"]
    */
   createMany (records, opts) {
     let op, adapter
@@ -995,13 +1032,67 @@ export default Component.extend({
    * Returns `props` if `props` is already an instance of
    * {@link Mapper#recordClass}.
    *
+   * __Note:__ This method does __not__ interact with any adapter, and does
+   * __not__ save any data. It only creates new objects in memory.
+   *
+   * @example <caption>Create empty unsaved record instance</caption>
+   * const post = PostService.createRecord()
+   *
+   * @example <caption>Create an unsaved record instance with inital properties</caption>
+   * const post = PostService.createRecord({
+   *   title: 'Modeling your data',
+   *   status: 'draft'
+   * })
+   *
+   * @example <caption>Create a record instance that corresponds to a saved record</caption>
+   * const post = PostService.createRecord({
+   *   // JSData thinks this record has been saved if it has a primary key
+   *   id: 1234,
+   *   title: 'Modeling your data',
+   *   status: 'draft'
+   * })
+   *
+   * @example <caption>Create record instances from an array</caption>
+   * const posts = PostService.createRecord([{
+   *   title: 'Modeling your data',
+   *   status: 'draft'
+   * }, {
+   *   title: 'Reading data',
+   *   status: 'draft'
+   * }])
+   *
+   * @example <caption>Records are validated by default</caption>
+   * import {Mapper} from 'js-data'
+   * const PostService = new Mapper({
+   *   name: 'post',
+   *   schema: { properties: { title: { type: 'string' } } }
+   * })
+   * try {
+   *   const post = PostService.createRecord({
+   *     title: 1234,
+   *   })
+   * } catch (err) {
+   *   console.log(err.errors) // [{ expected: 'one of (string)', actual: 'number', path: 'title' }]
+   * }
+   *
+   * @example <caption>Skip validation</caption>
+   * import {Mapper} from 'js-data'
+   * const PostService = new Mapper({
+   *   name: 'post',
+   *   schema: { properties: { title: { type: 'string' } } }
+   * })
+   * const post = PostService.createRecord({
+   *   title: 1234,
+   * }, { noValidate: true })
+   * console.log(post.isValid()) // false
+   *
    * @method Mapper#createRecord
-   * @param {Object|Array} props The properties for the Record instance or an
+   * @param {Object|Object[]} props The properties for the Record instance or an
    * array of property objects for the Record instances.
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.noValidate=false] Whether to skip validation when
    * the Record instances are created.
-   * @returns {Object|Array} The Record instance or Record instances.
+   * @returns {Record|Record[]} The Record instance or Record instances.
    * @since 3.0.0
    */
   createRecord (props, opts) {
@@ -1033,6 +1124,8 @@ export default Component.extend({
 
   /**
    * Lifecycle invocation method.
+   *
+   * TODO: Improve documentation for this method.
    *
    * @method Mapper#crud
    * @param {string} method Name of the lifecycle method to invoke.
@@ -1091,52 +1184,81 @@ export default Component.extend({
   },
 
   /**
-   * Using an adapter, destroy the record with the primary key specified by the
-   * `id` argument.
+   * Using an adapter, destroy the record with the given primary key.
    *
    * {@link Mapper#beforeDestroy} will be called before destroying the record.
    * {@link Mapper#afterDestroy} will be called after destroying the record.
    *
+   * @example <caption>Destroy a specific blog post</caption>
+   * PostService.destroy(1234).then(() => {
+   *   // Blog post #1234 has been destroyed
+   * })
+   *
+   * @example <caption>Get full response</caption>
+   * PostService.destroy(1234, { raw: true }).then((result) => {
+   *   console.log(result.deleted) e.g. 1
+   *   console.log(...) // etc., more metadata can be found on the result
+   * })
+   *
    * @method Mapper#destroy
    * @param {(string|number)} id The primary key of the record to destroy.
-   * @param {Object} [opts] Configuration options.
+   * @param {Object} [opts] Configuration options. Refer to the `destroy` method
+   * of whatever adapter you're using for more configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
    * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
    * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
-   * @param {string[]} [opts.with=[]] Relations to destroy in a cascading
-   * delete. NOT performed in a transaction.
    * @returns {Promise} Resolves when the record has been destroyed. Resolves
    * even if no record was found to be destroyed.
    * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/saving-data","Saving data"]
    */
   destroy (id, opts) {
     return this.crud('destroy', id, opts)
   },
 
   /**
-   * Using the `query` argument, destroy the selected records via an adapter.
-   * If no `query` is provided then all records will be destroyed.
+   * Destroy the records selected by `query` via an adapter. If no `query` is
+   * provided then all records will be destroyed.
    *
    * {@link Mapper#beforeDestroyAll} will be called before destroying the records.
    * {@link Mapper#afterDestroyAll} will be called after destroying the records.
    *
+   * @example <caption>Destroy all blog posts</caption>
+   * PostService.destroyAll().then(() => {
+   *   // All blog posts have been destroyed
+   * })
+   *
+   * @example <caption>Destroy all "draft" blog posts</caption>
+   * PostService.destroyAll({ status: 'draft' }).then(() => {
+   *   // All "draft" blog posts have been destroyed
+   * })
+   *
+   * @example <caption>Get full response</caption>
+   * const query = null
+   * const options = { raw: true }
+   * PostService.destroyAll(query, options).then((result) => {
+   *   console.log(result.deleted) e.g. 14
+   *   console.log(...) // etc., more metadata can be found on the result
+   * })
+   *
    * @method Mapper#destroyAll
-   * @param {Object} [query={}] Selection query.
-   * @param {Object} [query.where] Filtering criteria.
-   * @param {number} [query.skip] Number to skip.
-   * @param {number} [query.limit] Number to limit to.
-   * @param {Array} [query.orderBy] Sorting criteria.
-   * @param {Object} [opts] Configuration options.
+   * @param {Object} [query={}] Selection query. See {@link query}.
+   * @param {Object} [query.where] See {@link query.where}.
+   * @param {number} [query.offset] See {@link query.offset}.
+   * @param {number} [query.limit] See {@link query.limit}.
+   * @param {string|Array[]} [query.orderBy] See {@link query.orderBy}.
+   * @param {Object} [opts] Configuration options. Refer to the `destroyAll`
+   * method of whatever adapter you're using for more configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
    * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
    * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
-   * @param {string[]} [opts.with=[]] Relations to destroy in a cascading
-   * delete. NOT performed in a transaction.
    * @returns {Promise} Resolves when the records have been destroyed. Resolves
    * even if no records were found to be destroyed.
+   * @see query
    * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/saving-data","Saving data"]
    */
   destroyAll (query, opts) {
     return this.crud('destroyAll', query, opts)
@@ -1148,43 +1270,72 @@ export default Component.extend({
    * {@link Mapper#beforeFind} will be called before calling the adapter.
    * {@link Mapper#afterFind} will be called after calling the adapter.
    *
+   * @example
+   * PostService.find(1).then((post) => {
+   *   console.log(post) // { id: 1, ...}
+   * })
+   *
+   * @example <caption>Get full response</caption>
+   * PostService.find(1, { raw: true }).then((result) => {
+   *   console.log(result.data) // { id: 1, ...}
+   *   console.log(result.found) // 1
+   *   console.log(...) // etc., more metadata can be found on the result
+   * })
+   *
    * @method Mapper#find
    * @param {(string|number)} id The primary key of the record to retrieve.
-   * @param {Object} [opts] Configuration options.
+   * @param {Object} [opts] Configuration options. Refer to the `find` method
+   * of whatever adapter you're using for more configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
    * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
    * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
    * @param {string[]} [opts.with=[]] Relations to eager load in the request.
-   * @returns {Promise} Resolves with the found record. Resolves with `undefined`
-   * if no record was found.
+   * @returns {Promise} Resolves with the found record. Resolves with
+   * `undefined` if no record was found.
+   * @see http://www.js-data.io/v3.0/docs/reading-data
    * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/reading-data","Reading data"]
    */
   find (id, opts) {
     return this.crud('find', id, opts)
   },
 
   /**
-   * Using the `query` argument, select records to pull from an adapter.
-   * Expects back from the adapter the array of selected records.
+   * Using the `query` argument, select records to retrieve via an adapter.
    *
    * {@link Mapper#beforeFindAll} will be called before calling the adapter.
    * {@link Mapper#afterFindAll} will be called after calling the adapter.
    *
+   * @example <caption>Find all "published" blog posts</caption>
+   * PostService.findAll({ status: 'published' }).then((posts) => {
+   *   console.log(posts) // [{ id: 1, status: 'published', ...}, ...]
+   * })
+   *
+   * @example <caption>Get full response</caption>
+   * PostService.findAll({ status: 'published' }, { raw: true }).then((result) => {
+   *   console.log(result.data) // [{ id: 1, status: 'published', ...}, ...]
+   *   console.log(result.found) // e.g. 13
+   *   console.log(...) // etc., more metadata can be found on the result
+   * })
+   *
    * @method Mapper#findAll
-   * @param {Object} [query={}] Selection query.
-   * @param {Object} [query.where] Filtering criteria.
-   * @param {number} [query.skip] Number to skip.
-   * @param {number} [query.limit] Number to limit to.
-   * @param {Array} [query.orderBy] Sorting criteria.
-   * @param {Object} [opts] Configuration options.
+   * @param {Object} [query={}] Selection query. See {@link query}.
+   * @param {Object} [query.where] See {@link query.where}.
+   * @param {number} [query.offset] See {@link query.offset}.
+   * @param {number} [query.limit] See {@link query.limit}.
+   * @param {string|Array[]} [query.orderBy] See {@link query.orderBy}.
+   * @param {Object} [opts] Configuration options. Refer to the `findAll` method
+   * of whatever adapter you're using for more configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
    * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
    * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
    * @param {string[]} [opts.with=[]] Relations to eager load in the request.
-   * @returns {Promise} Resolves with the found records.
+   * @returns {Promise} Resolves with the found records, if any.
+   * @see query
    * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/reading-data","Reading data"]
    */
   findAll (query, opts) {
     return this.crud('findAll', query, opts)
@@ -1197,8 +1348,8 @@ export default Component.extend({
    * @method Mapper#getAdapter
    * @param {string} [name] The name of the adapter to retrieve.
    * @returns {Adapter} The adapter.
-   * @see http://www.js-data.io/v3.0/docs/connecting-to-a-data-source
    * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/connecting-to-a-data-source","Connecting to a data source"]
    */
   getAdapter (name) {
     const self = this
@@ -1217,8 +1368,8 @@ export default Component.extend({
    * @method Mapper#getAdapterName
    * @param {(Object|string)} [opts] The name of an adapter or options, if any.
    * @returns {string} The name of the adapter.
-   * @see http://www.js-data.io/v3.0/docs/connecting-to-a-data-source
    * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/connecting-to-a-data-source","Connecting to a data source"]
    */
   getAdapterName (opts) {
     opts || (opts = {})
@@ -1229,10 +1380,12 @@ export default Component.extend({
   },
 
   /**
+   * Get the object of registered adapters for this Mapper.
+   *
    * @method Mapper#getAdapters
    * @returns {Object} {@link Mapper#_adapters}
-   * @see http://www.js-data.io/v3.0/docs/connecting-to-a-data-source
    * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/connecting-to-a-data-source","Connecting to a data source"]
    */
   getAdapters () {
     return this._adapters
@@ -1241,10 +1394,10 @@ export default Component.extend({
   /**
    * Returns this Mapper's {@link Schema}.
    *
-   * @method Mapper#getAdapters
+   * @method Mapper#getSchema
+   * @returns {Schema} This Mapper's {@link Schema}.
    * @see Mapper#schema
    * @since 3.0.0
-   * @returns {Schema} This Mapper's {@link Schema}.
    */
   getSchema () {
     return this.schema
@@ -1255,11 +1408,15 @@ export default Component.extend({
    * Mappers manually and not using a Container or DataStore component.
    *
    * @example
-   * User.hasMany(Post, {
-   *   localField: 'my_posts'
+   * UserService.hasMany(PostService, {
+   *   // post.user_id points to user.id
+   *   foreignKey: 'user_id'
+   *   // post records will be attached to user records at "user.posts"
+   *   localField: 'posts'
    * })
    *
    * @method Mapper#hasMany
+   * @see http://www.js-data.io/v3.0/docs/relations
    * @since 3.0.0
    */
   hasMany (relatedMapper, opts) {
@@ -1267,15 +1424,19 @@ export default Component.extend({
   },
 
   /**
-   * Defines a hasOne relationship. Only useful if you're managing your
-   * Mappers manually and not using a Container or DataStore component.
+   * Defines a hasOne relationship. Only useful if you're managing your Mappers
+   * manually and not using a {@link Container} or {@link DataStore} component.
    *
    * @example
-   * User.hasOne(Profile, {
-   *   localField: '_profile'
+   * UserService.hasOne(ProfileService, {
+   *   // profile.user_id points to user.id
+   *   foreignKey: 'user_id'
+   *   // profile records will be attached to user records at "user.profile"
+   *   localField: 'profile'
    * })
    *
    * @method Mapper#hasOne
+   * @see http://www.js-data.io/v3.0/docs/relations
    * @since 3.0.0
    */
   hasOne (relatedMapper, opts) {
@@ -1286,16 +1447,14 @@ export default Component.extend({
    * Return whether `record` is an instance of this Mapper's recordClass.
    *
    * @example
-   * import {Container} from 'js-data'
-   * const store = new Container()
-   * store.defineMapper('post')
-   * const post = store.createRecord()
+   * const post = PostService.createRecord()
    *
-   * console.log(store.is('post', post)) // true
-   * console.log(post instanceof store.getMapper('post').recordClass) // true
+   * console.log(PostService.is(post)) // true
+   * // Equivalent to what's above
+   * console.log(post instanceof PostService.recordClass) // true
    *
    * @method Mapper#is
-   * @param {Object} record The record to check.
+   * @param {Object|Record} record The record to check.
    * @returns {boolean} Whether `record` is an instance of this Mapper's
    * {@link Mapper#recordClass}.
    * @since 3.0.0
@@ -1306,7 +1465,7 @@ export default Component.extend({
   },
 
   /**
-   * Register an adapter on this mapper under the given name.
+   * Register an adapter on this Mapper under the given name.
    *
    * @method Mapper#registerAdapter
    * @param {string} name The name of the adapter to register.
@@ -1314,8 +1473,8 @@ export default Component.extend({
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.default=false] Whether to make the adapter the
    * default adapter for this Mapper.
-   * @see http://www.js-data.io/v3.0/docs/connecting-to-a-data-source
    * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/connecting-to-a-data-source","Connecting to a data source"]
    */
   registerAdapter (name, adapter, opts) {
     const self = this
@@ -1334,14 +1493,20 @@ export default Component.extend({
    * {@link Mapper#beforeSum} will be called before calling the adapter.
    * {@link Mapper#afterSum} will be called after calling the adapter.
    *
+   * @example
+   * PurchaseOrderService.sum('amount', { status: 'paid' }).then((amountPaid) => {
+   *   console.log(amountPaid) // e.g. 451125.34
+   * })
+   *
    * @method Mapper#sum
    * @param {string} field The field to sum.
-   * @param {Object} [query={}] Selection query.
-   * @param {Object} [query.where] Filtering criteria.
-   * @param {number} [query.skip] Number to skip.
-   * @param {number} [query.limit] Number to limit to.
-   * @param {Array} [query.orderBy] Sorting criteria.
-   * @param {Object} [opts] Configuration options.
+   * @param {Object} [query={}] Selection query. See {@link query}.
+   * @param {Object} [query.where] See {@link query.where}.
+   * @param {number} [query.offset] See {@link query.offset}.
+   * @param {number} [query.limit] See {@link query.limit}.
+   * @param {string|Array[]} [query.orderBy] See {@link query.orderBy}.
+   * @param {Object} [opts] Configuration options. Refer to the `sum` method
+   * of whatever adapter you're using for more configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
    * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
@@ -1354,20 +1519,48 @@ export default Component.extend({
   },
 
   /**
-   * Return a plain object representation of the given record.
+   * Return a plain object representation of the given record. Relations can
+   * be optionally be included. Non-schema properties can be excluded.
+   *
+   * @example
+   * import {Mapper, Schema} from 'js-data'
+   * const PersonService = new Mapper({
+   *   name: 'person',
+   *   schema: {
+   *     properties: {
+   *       name: { type: 'string' },
+   *       id: { type: 'string' }
+   *     }
+   *   }
+   * })
+   * const person = PersonService.createRecord({ id: 1, name: 'John', foo: 'bar' })
+   * console.log(PersonService.toJSON(person)) // {"id":1,"name":"John","foo":"bar"}
+   * console.log(PersonService.toJSON(person), { strict: true }) // {"id":1,"name":"John"}
    *
    * @method Mapper#toJSON
-   * @since 3.0.0
-   * @param {Object} record Record from which to create a plain object
-   * representation.
+   * @param {Record|Record[]} records Record or records from which to create a
+   * POJO representation.
    * @param {Object} [opts] Configuration options.
+   * @param {boolean} [opts.strict] Whether to include properties that are not
+   * defined in {@link Mapper#schema}.
    * @param {string[]} [opts.with] Array of relation names or relation fields
-   * to include in the representation.
-   * @returns {Object} Plain object representation of the record.
+   * to include in the POJO representation.
+   * @param {boolean} [opts.withAll] Whether to simply include all relations in
+   * the representation. Overrides `opts.with`.
+   * @returns {Object|Object[]} POJO representation of the record or records.
+   * @since 3.0.0
    */
-  toJSON (record, opts) {
+  toJSON (records, opts) {
     const self = this
+    let record
     opts || (opts = {})
+    if (utils.isArray(records)) {
+      return records.map(function (record) {
+        return self.toJSON(record, opts)
+      })
+    } else {
+      record = records
+    }
     const relationFields = (self ? self.relationFields : []) || []
     let json = {}
     let properties
@@ -1419,19 +1612,28 @@ export default Component.extend({
    * {@link Mapper#beforeUpdate} will be called before updating the record.
    * {@link Mapper#afterUpdate} will be called after updating the record.
    *
+   * @example <caption>Update a specific post</caption>
+   * PostService.update(1234, {
+   *   status: 'published',
+   *   published_at: new Date()
+   * }).then((post) => {
+   *   console.log(post) // { id: 1234, status: 'published', ... }
+   * })
+   *
    * @method Mapper#update
-   * @since 3.0.0
    * @param {(string|number)} id The primary key of the record to update.
    * @param {Object} props The update to apply to the record.
-   * @param {Object} [opts] Configuration options.
+   * @param {Object} [opts] Configuration options. Refer to the `update` method
+   * of whatever adapter you're using for more configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
    * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
    * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
-   * @param {string[]} [opts.with=[]] Relations to update in a cascading
-   * update if `props` contains nested updates to relations. NOT performed in a
    * transaction.
-   * @returns {Promise}
+   * @returns {Promise} Resolves with the updated record. Rejects if the record
+   * could not be found.
+   * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/saving-data","Saving data"]
    */
   update (id, props, opts) {
     return this.crud('update', id, props, opts)
@@ -1439,28 +1641,35 @@ export default Component.extend({
 
   /**
    * Using the `query` argument, perform the a single updated to the selected
-   * records. Expects back from the adapter an array of the updated records.
+   * records.
    *
    * {@link Mapper#beforeUpdateAll} will be called before making the update.
    * {@link Mapper#afterUpdateAll} will be called after making the update.
    *
+   * @example <caption>Turn all of John's blog posts into drafts.</caption>
+   * const update = { status: draft: published_at: null }
+   * const query = { userId: 1234 }
+   * PostService.updateAll(update, query).then((posts) => {
+   *   console.log(posts) // [...]
+   * })
+   *
    * @method Mapper#updateAll
-   * @since 3.0.0
    * @param {Object} props Update to apply to selected records.
-   * @param {Object} [query={}] Selection query.
-   * @param {Object} [query.where] Filtering criteria.
-   * @param {number} [query.skip] Number to skip.
-   * @param {number} [query.limit] Number to limit to.
-   * @param {Array} [query.orderBy] Sorting criteria.
-   * @param {Object} [opts] Configuration options.
+   * @param {Object} [query={}] Selection query. See {@link query}.
+   * @param {Object} [query.where] See {@link query.where}.
+   * @param {number} [query.offset] See {@link query.offset}.
+   * @param {number} [query.limit] See {@link query.limit}.
+   * @param {string|Array[]} [query.orderBy] See {@link query.orderBy}.
+   * @param {Object} [opts] Configuration options. Refer to the `updateAll`
+   * method of whatever adapter you're using for more configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
    * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
    * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
-   * @param {string[]} [opts.with=[]] Relations to update in a cascading
-   * update if `props` contains nested updates to relations. NOT performed in a
-   * transaction.
-   * @returns {Promise}
+   * @returns {Promise} Resolves with the update records, if any.
+   * @see query
+   * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/saving-data","Saving data"]
    */
   updateAll (props, query, opts) {
     return this.crud('updateAll', props, query, opts)
@@ -1469,23 +1678,31 @@ export default Component.extend({
   /**
    * Given an array of updates, perform each of the updates via an adapter. Each
    * "update" is a hash of properties with which to update an record. Each
-   * update must contain the primary key to be updated.
+   * update must contain the primary key of the record to be updated.
    *
    * {@link Mapper#beforeUpdateMany} will be called before making the update.
    * {@link Mapper#afterUpdateMany} will be called after making the update.
    *
+   * @example
+   * PostService.updateMany([
+   *   { id: 1234, status: 'draft' },
+   *   { id: 2468, status: 'published', published_at: new Date() }
+   * ]).then((posts) => {
+   *   console.log(posts) // [...]
+   * })
+   *
    * @method Mapper#updateMany
-   * @since 3.0.0
-   * @param {Array} records Array up record updates.
-   * @param {Object} [opts] Configuration options.
+   * @param {Record[]} records Array up record updates.
+   * @param {Object} [opts] Configuration options. Refer to the `updateMany`
+   * method of whatever adapter you're using for more configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
    * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
    * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
-   * @param {string[]} [opts.with=[]] Relations to update in a cascading
-   * update if each record update contains nested updates for relations. NOT
-   * performed in a transaction.
-   * @returns {Promise}
+   * @returns {Promise} Resolves with the updated records. Rejects if any of the
+   * records could be found.
+   * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/saving-data","Saving data"]
    */
   updateMany (records, opts) {
     return this.crud('updateMany', records, opts)
@@ -1493,14 +1710,32 @@ export default Component.extend({
 
   /**
    * Validate the given record or records according to this Mapper's
-   * {@link Schema}. No return value means no errors.
+   * {@link Schema}. If there are no validation errors then the return value
+   * will be `undefined`.
+   *
+   * @example
+   * import {Mapper, Schema} from 'js-data'
+   * const PersonSchema = new Schema({
+   *   properties: {
+   *     name: { type: 'string' },
+   *     id: { type: 'string' }
+   *   }
+   * })
+   * const PersonService = new Mapper({
+   *   name: 'person',
+   *   schema: PersonSchema
+   * })
+   * let errors = PersonService.validate({ name: 'John' })
+   * console.log(errors) // undefined
+   * errors = PersonService.validate({ name: 123 })
+   * console.log(errors) // [{ expected: 'one of (string)', actual: 'number', path: 'name' }]
    *
    * @method Mapper#validate
-   * @since 3.0.0
-   * @param {Object|Array} record The record or records to validate.
+   * @param {Object|Object[]} record The record or records to validate.
    * @param {Object} [opts] Configuration options. Passed to
    * {@link Schema#validate}.
-   * @returns {Array} Array of errors or undefined if no errors.
+   * @returns {Object[]} Array of errors or `undefined` if no errors.
+   * @since 3.0.0
    */
   validate (record, opts) {
     const self = this
@@ -1524,14 +1759,41 @@ export default Component.extend({
   },
 
   /**
-   * Method used to wrap data returned by an adapter with this Mapper's Record
-   * class.
+   * Method used to wrap data returned by an adapter with this Mapper's
+   * {@link Mapper#recordClass}. This method is used by all of a Mapper's CRUD
+   * methods. The provided implementation of this method assumes that the `data`
+   * passed to it is a record or records that need to be wrapped with
+   * {@link Mapper#createRecord}. Override with care.
+   *
+   * Provided implementation of {@link Mapper#wrap}:
+   *
+   * ```
+   * function (data, opts) {
+   *   return this.createRecord(data, opts)
+   * }
+   * ```
+   *
+   * @example <caption>Override to customize behavior</caption>
+   * const PostMapper = new Mapper({
+   *   name: 'post',
+   *   wrap (data, opts) {
+   *     const originalWrap = this.constructor.prototype.wrap
+   *     // Let's say "GET /post" doesn't return JSON quite like JSData expects,
+   *     // but the actual post records are nested under a "posts" field. So,
+   *     // we override Mapper#wrap to handle this special case.
+   *     if (opts.op === 'findAll') {
+   *       return originalWrap.call(this, data.posts, opts)
+   *     }
+   *     // Otherwise perform original behavior
+   *     return originalWrap.call(this, data, opts)
+   *   }
+   * })
    *
    * @method Mapper#wrap
-   * @since 3.0.0
-   * @param {Object|Array} data The data to be wrapped.
+   * @param {Object|Object[]} data The record or records to be wrapped.
    * @param {Object} [opts] Configuration options. Passed to {@link Mapper#createRecord}.
-   * @returns {Object|Array}
+   * @returns {Record|Record[]} The wrapped record or records.
+   * @since 3.0.0
    */
   wrap (data, opts) {
     return this.createRecord(data, opts)

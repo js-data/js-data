@@ -883,14 +883,14 @@ export default Container.extend(props)
  * const CustomDataStoreClass = DataStore.extend({
  *   foo () { return 'bar' }
  * })
- * const customDataStore = new CustomDataStoreClass({ name: 'test' })
+ * const customDataStore = new CustomDataStoreClass()
  * console.log(customDataStore.foo()) // "bar"
  *
  * @example <caption>Extend the class using ES2015 class syntax.</caption>
  * class CustomDataStoreClass extends DataStore {
  *   foo () { return 'bar' }
  * }
- * const customDataStore = new CustomDataStoreClass({ name: 'test' })
+ * const customDataStore = new CustomDataStoreClass()
  * console.log(customDataStore.foo()) // "bar"
  *
  * @method DataStore.extend

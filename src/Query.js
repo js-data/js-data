@@ -163,13 +163,10 @@ export default Component.extend({
   },
 
   /**
-   * Find the entity or entities that match the provided query or pass the
-   * provided filter function.
+   * Find the record or records that match the provided query or are accepted by
+   * the provided filter function.
    *
-   * #### Example
-   *
-   * Get the draft posts created less than three months
-   * ```js
+   * @example <caption>Get the draft posts created less than three months</caption>
    * const posts = query.filter({
    *   where: {
    *     status: {
@@ -180,13 +177,11 @@ export default Component.extend({
    *     }
    *   }
    * }).run()
-   * ```
-   * Use a custom filter function
-   * ```js
+   *
+   * @example <caption>Use a custom filter function</caption>
    * const posts = query.filter(function (post) {
    *   return post.isReady()
    * }).run()
-   * ```
    *
    * @name Query#filter
    * @method
@@ -198,11 +193,80 @@ export default Component.extend({
    */
   filter (query, thisArg) {
     const self = this
+
+    /**
+     * Selection query as defined by JSData's [Query Syntax][querysyntax].
+     *
+     * [querysyntax]: http://www.js-data.io/v3.0/docs/query-syntax
+     *
+     * @example <caption>Empty "findAll" query</caption>
+     * store.findAll('post').then((posts) => {
+     *   console.log(posts) // [...]
+     * })
+     *
+     * @example <caption>Empty "filter" query</caption>
+     * const posts = store.filter('post')
+     * console.log(posts) // [...]
+     *
+     * @example <caption>Complex "findAll" query</caption>
+     * const PAGE_SIZE = 10
+     * let currentPage = 3
+     *
+     * // Retrieve a filtered page of blog posts
+     * store.findAll('post', {
+     *   where: {
+     *     status: {
+     *       // WHERE status = 'published'
+     *       '==': 'published'
+     *     },
+     *     author: {
+     *       // AND author IN ('bob', 'alice')
+     *       'in': ['bob', 'alice'],
+     *       // OR author IN ('karen')
+     *       '|in': ['karen']
+     *     }
+     *   },
+     *   orderBy: [
+     *     // ORDER BY date_published DESC,
+     *     ['date_published', 'DESC'],
+     *     // ORDER BY title ASC
+     *     ['title', 'ASC']
+     *   ],
+     *   // LIMIT 10
+     *   limit: PAGE_SIZE,
+     *   // SKIP 20
+     *   offset: PAGE_SIZE * (currentPage - 1)
+     * }).then((posts) => {
+     *   console.log(posts) // [...]
+     * })
+     *
+     * @namespace query
+     * @property {number} [limit] See {@link query.limit}.
+     * @property {number} [offset] See {@link query.offset}.
+     * @property {string|Array[]} [orderBy] See {@link query.orderBy}.
+     * @property {number} [skip] Alias for {@link query.offset}.
+     * @property {string|Array[]} [sort] Alias for {@link query.orderBy}.
+     * @property {Object} [where] See {@link query.where}.
+     * @see http://www.js-data.io/v3.0/docs/query-syntax
+     * @since 3.0.0
+     */
     query || (query = {})
     self.getData()
     if (utils.isObject(query)) {
       let where = {}
-      // Filter
+
+      /**
+       * Filtering criteria. Records that do not meet this criteria will be exluded
+       * from the result.
+       *
+       * @example
+       * TODO
+       *
+       * @name query.where
+       * @type {Object}
+       * @see http://www.js-data.io/v3.0/docs/query-syntax
+       * @since 3.0.0
+       */
       if (utils.isObject(query.where)) {
         where = query.where
       }
@@ -262,7 +326,17 @@ export default Component.extend({
         orderBy = null
       }
 
-      // Apply 'orderBy'
+      /**
+       * Determines how records should be ordered in the result.
+       *
+       * @example
+       * TODO
+       *
+       * @name query.orderBy
+       * @type {string|Array[]}
+       * @see http://www.js-data.io/v3.0/docs/query-syntax
+       * @since 3.0.0
+       */
       if (orderBy) {
         let index = 0
         orderBy.forEach(function (def, i) {
@@ -275,13 +349,44 @@ export default Component.extend({
         })
       }
 
-      // Skip
+      /**
+       * Number of records to skip.
+       *
+       * @example <caption>Retrieve the first "page" of blog posts</caption>
+       * const PAGE_SIZE = 10
+       * let currentPage = 1
+       * PostService.findAll({
+       *   offset: PAGE_SIZE * (currentPage - 1)
+       *   limit: PAGE_SIZE
+       * })
+       *
+       * @name query.offset
+       * @type {number}
+       * @see http://www.js-data.io/v3.0/docs/query-syntax
+       * @since 3.0.0
+       */
       if (utils.isNumber(query.skip)) {
         self.skip(query.skip)
       } else if (utils.isNumber(query.offset)) {
         self.skip(query.offset)
       }
-      // Limit
+
+      /**
+       * Maximum number of records to retrieve.
+       *
+       * @example <caption>Retrieve the first "page" of blog posts</caption>
+       * const PAGE_SIZE = 10
+       * let currentPage = 1
+       * PostService.findAll({
+       *   offset: PAGE_SIZE * (currentPage - 1)
+       *   limit: PAGE_SIZE
+       * })
+       *
+       * @name query.limit
+       * @type {number}
+       * @see http://www.js-data.io/v3.0/docs/query-syntax
+       * @since 3.0.0
+       */
       if (utils.isNumber(query.limit)) {
         self.limit(query.limit)
       }

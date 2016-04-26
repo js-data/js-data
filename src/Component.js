@@ -28,16 +28,17 @@ export default function Component () {
 Component.extend = utils.extend
 
 /**
- * TODO
+ * Log the provided values at the "debug" level.
  *
- * @name Component#dbg
- * @method
+ * @method Component#dbg
+ * @param {...*} [args] Values to log.
  */
 /**
- * TODO
+ * Log the provided values. By default sends values to `console[level]`.
  *
- * @name Component#log
- * @method
+ * @method Component#log
+ * @param {string} level Log level
+ * @param {...*} [args] Values to log.
  */
 utils.logify(Component.prototype)
 
@@ -65,8 +66,7 @@ utils.logify(Component.prototype)
  *   console.log(post.id) // 1234
  * })
  *
- * @name Component#on
- * @method
+ * @method Component#on
  * @param {string} event Name of event to subsribe to.
  * @param {Function} listener Listener function to handle the event.
  * @param {*} [ctx] Optional content in which to invoke the listener.
@@ -85,8 +85,7 @@ utils.logify(Component.prototype)
  * @example <caption>Remove all listeners to all events</caption>
  * store.off()
  *
- * @name Component#off
- * @method
+ * @method Component#off
  * @param {string} [event] Name of event to unsubsribe to.
  * @param {Function} [listener] Listener to remove.
  */
@@ -99,8 +98,7 @@ utils.logify(Component.prototype)
  * })
  * collection.emit('foo', 'bar')
  *
- * @name Component#emit
- * @method
+ * @method Component#emit
  * @param {string} event Name of event to emit.
  * @param {...*} [args] Arguments to pass to any listeners.
  */

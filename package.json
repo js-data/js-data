@@ -70,7 +70,7 @@
     "babel-preset-es2015-rollup": "1.1.1",
     "chai": "3.5.0",
     "codecov": "1.0.1",
-    "ink-docstrap": "git+https://github.com/js-data/docstrap.git#499051b58301933c10afe8ae7343b1c5fb255817",
+    "ink-docstrap": "git+https://github.com/js-data/docstrap.git#745436722e27f4fd7f3ab97c2726a19482a38e5f",
     "js-data-repo-tools": "0.3.0",
     "jsdoc": "3.4.0",
     "karma": "0.13.22",

@@ -167,8 +167,8 @@ import LinkedCollection from './LinkedCollection'
  * @see Container
  * @see Mapper
  * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#mapper
- * @see http://www.js-data.io/v3.0/docs/modeling-your-data
  * @since 3.0.0
+ * @tutorial ["http://www.js-data.io/v3.0/docs/modeling-your-data","Modeling you data"]
  * @type {Constructor}
  */
 import Mapper from './Mapper'
