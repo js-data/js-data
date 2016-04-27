@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="96" height="96" />
 
-# [js-data](http://www.js-data.io/) [![Slack Status][b1]][b2] [![npm version][b3]][b4] [![npm downloads][b5]][b6]
+# [js-data v3 beta](http://www.js-data.io/) [![Slack Status][b1]][b2] [![npm version][b3]][b4] [![npm downloads][b5]][b6]
 
 | __Browser tests__ | __Node.js tests__ |
 | ---------------------------------|----|
@@ -20,6 +20,10 @@
 [b12]: https://img.shields.io/badge/Node.js-v4.x-brightgreen.svg
 [b13]: https://img.shields.io/badge/Node.js-v0.12.x-brightgreen.svg
 [b14]: https://img.shields.io/badge/Node.js-v0.10.x-brightgreen.svg
+
+__JSData v3 is stable. More features may be added before 3.0.0. Some adapters
+still need to be updated to work with v3. Message @jmdobry on the JSData Slack
+channel if you want to help with tests, documentation, tutorials, adapters, etc.__
 
 JSData is a framework-agnostic, datastore-agnostic ORM/ODM for Node.js and the
 Browser.

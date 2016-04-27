@@ -592,7 +592,8 @@ export default Component.extend({
    * @returns {Query} New query object.
    */
   query () {
-    return new self.queryClass(this)
+    const Ctor = this.queryClass
+    return new Ctor(this)
   },
 
   /**
