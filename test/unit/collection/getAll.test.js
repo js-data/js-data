@@ -12,7 +12,7 @@ describe('Collection#getAll', function () {
     ]
     const collection = new JSData.Collection(data)
     collection.createIndex('ageRole', ['age', 'role'])
-    assert.deepEqual(
+    assert.objectsEqual(
       collection.getAll(19, { index: 'ageRole' }),
       [
         { id: 3, age: 19, role: 'admin' },
@@ -21,7 +21,7 @@ describe('Collection#getAll', function () {
       ],
       'should have found all of age:19 using 1 keyList'
     )
-    assert.deepEqual(
+    assert.objectsEqual(
       collection.getAll([19, 'admin'], { index: 'ageRole' }),
       [
         { id: 3, age: 19, role: 'admin' },
@@ -29,7 +29,7 @@ describe('Collection#getAll', function () {
       ],
       'should have found age:19, role:admin'
     )
-    assert.deepEqual(
+    assert.objectsEqual(
       collection.getAll([19, 'admin'], [19, 'owner'], { index: 'ageRole' }),
       [
         { id: 3, age: 19, role: 'admin' },
@@ -38,7 +38,7 @@ describe('Collection#getAll', function () {
       ],
       'should have found all of age:19 using 2 keyLists'
     )
-    assert.deepEqual(
+    assert.objectsEqual(
       collection.getAll([19, 'admin'], 23, { index: 'ageRole' }),
       [
         { id: 3, age: 19, role: 'admin' },

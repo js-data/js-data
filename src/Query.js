@@ -136,7 +136,7 @@ export default Component.extend({
     } else if (cA > cB) {
       return 1
     } else {
-      if (index < orderBy.length) {
+      if (index < orderBy.length - 1) {
         return this.compare(orderBy, index + 1, a, b)
       } else {
         return 0
@@ -489,8 +489,8 @@ export default Component.extend({
     if (!args.length || args.length === 1 && utils.isObject(args[0])) {
       self.getData()
       return self
-    } else if (args.length && utils.isObject(args[args.length])) {
-      opts = args[args.length]
+    } else if (args.length && utils.isObject(args[args.length - 1])) {
+      opts = args[args.length - 1]
       args.pop()
     }
     const collection = self.collection
