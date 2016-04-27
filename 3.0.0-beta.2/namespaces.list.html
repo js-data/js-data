@@ -4,14 +4,61 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>js-data Global</title>
+	<title>js-data Namespaces</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
 	<![endif]-->
-	<link type="text/css" rel="stylesheet" href="styles/sunlight.dark.css">
-
-	<link type="text/css" rel="stylesheet" href="styles/site.lumen.css">
+	<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/styles/googlecode.min.css">
+	<link type="text/css" rel="stylesheet" href="styles/site.jsdata.css">
+  <style>
+    a {
+      text-decoration: none !important;
+    }
+    .hljs {
+      padding: 0;
+      background: none;
+    }
+    #toc {
+      position: fixed;
+      margin-top: 62px;
+      max-height: 82%;
+      max-height: calc(100% - 72px);
+      overflow: auto;
+      padding: 5px;
+    }
+    #toc .list-group-item {
+      padding: 5px 15px;
+    }
+    #toc .list-group-item span.toc-h3 {
+      font-weight: bold;
+    }
+    #toc .list-group-item span.toc-h4 {
+      font-family: monospace;
+      letter-spacing: -1px;
+    }
+    article h4.name, article dt.name {
+      font-family: monospace;
+      font-weight: bold;
+    }
+    .code-panel.panel pre {
+      background-color: #FBFBFB;
+      border-color: #E6E5E5;
+    }
+    span.param-type a {
+      padding: 3px 5px;
+    }
+    span.param-type a:hover {
+      background-color: #158CBA;
+      color: #fff;
+    }
+    .panel ul {
+      padding-left: 0;
+    }
+    .panel ul li {
+      list-style-type: none;
+    }
+  </style>
 
 </head>
 
@@ -20,7 +67,8 @@
 <div class="navbar navbar-default navbar-fixed-top ">
 <div class="container">
 	<div class="navbar-header">
-		<a class="navbar-brand" href="index.html">js-data</a>
+		<a class="navbar-brand" href="index.html"><img class="branding-logo" src="https://raw.githubusercontent.com/js-data/js-data/master/js-data-64.png"
+		alt="logo"/>js-data</a>
 		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
 			<span class="icon-bar"></span>
 			<span class="icon-bar"></span>
@@ -29,6 +77,13 @@
 	</div>
 	<div class="navbar-collapse collapse" id="topNavigation">
 		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="query.html">query</a></li><li><a href="utils.html">utils</a></li>
+				</ul>
+			</li>
 			
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
@@ -40,14 +95,7 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Collection.html">Collection</a></li><li><a href="Container.html">Container</a></li><li><a href="DataStore.html">DataStore</a></li><li><a href="LinkedCollection.html">LinkedCollection</a></li><li><a href="Mapper.html">Mapper</a></li><li><a href="Query.html">Query</a></li><li><a href="Record.html">Record</a></li><li><a href="Schema.html">Schema</a></li>
-				</ul>
-			</li>
-			
-			<li class="dropdown">
-				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
-				<ul class="dropdown-menu ">
-					<li><a href="global.html#getSchema">getSchema</a></li>
+					<li><a href="Collection.html">Collection</a></li><li><a href="Component.html">Component</a></li><li><a href="Container.html">Container</a></li><li><a href="DataStore.html">DataStore</a></li><li><a href="LinkedCollection.html">LinkedCollection</a></li><li><a href="Mapper.html">Mapper</a></li><li><a href="Query_.html">Query</a></li><li><a href="Record.html">Record</a></li><li><a href="Schema.html">Schema</a></li>
 				</ul>
 			</li>
 			
@@ -72,12 +120,20 @@
 <div class="row">
 
 	
-	<div class="col-md-8">
+		<div class="col-md-3 hidden-xs hidden-sm hidden-md">
+			<div id="toc"></div>
+		</div>
+	
+
+	<!-- <div class="clearfix"></div> -->
+
+	
+	<div class="col-md-8 col-md-offset-4">
 	
 		<div id="main">
 			
 
-	<h1 class="page-title">Global</h1>
+	<h1 class="page-title">Namespaces</h1>
 <section>
 
 <header>
@@ -96,14 +152,41 @@
         
 
         
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
 <dl class="details">
     
 
-	
-
-	
-
-	
+  
 
     
 
@@ -111,27 +194,13 @@
 
     
 
-    
+  
 
-	
+  
 
-	
+  
 
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
+  
 </dl>
 
 
@@ -144,129 +213,54 @@
     
 
     
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
+        <h3 class="subsection-title">Classes</h3>
 
         <dl>
-            
-<hr>
-<dt>
-    <h4 class="name" id="getSchema"><span class="type-signature"></span>getSchema()</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        <p>Returns this Mapper's schema.</p>
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="Mapper.js.html">Mapper.js</a>,
-				 <a href="Mapper.js.html#sunlight-1-line-1223">line 1223</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>This Mapper's schema.</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
+            <dt><a href="Collection.html">Collection</a></dt>
+            <dd></dd>
         
-<span class="param-type"><a href="Schema.html">Schema</a></span>
-
-
-
-    </dd>
-</dl>
-
-
+            <dt><a href="Component.html">Component</a></dt>
+            <dd></dd>
         
-
-    
-</dd>
-
+            <dt><a href="Container.html">Container</a></dt>
+            <dd></dd>
+        
+            <dt><a href="DataStore.html">DataStore</a></dt>
+            <dd></dd>
+        
+            <dt><a href="LinkedCollection.html">LinkedCollection</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Mapper.html">Mapper</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Query_.html">Query</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Record.html">Record</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Schema.html">Schema</a></dt>
+            <dd></dd>
         </dl>
+    
+
+    
+
+    
+        <h3 class="subsection-title">Namespaces</h3>
+
+        <dl>
+            <dt><a href="namespaces.html#query"><a href="query.html">query</a></a></dt>
+            <dd></dd>
+        
+            <dt><a href="namespaces.html#utils"><a href="utils.html">utils</a></a></dt>
+            <dd></dd>
+        </dl>
+    
+
+    
+
     
 
     
@@ -281,14 +275,6 @@
 
 		</div>
 	</div>
-
-	<div class="clearfix"></div>
-
-	
-		<div class="col-md-3">
-			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
-		</div>
-	
 
 </div>
 </div>
@@ -310,7 +296,7 @@
 
 <footer>
 
-	<div style="text-align:center">Back to <a href="http://js-data.io">js-data.io</a></div>
+	<div style="text-align:center"><a href="/">api.js-data.io</a>&nbsp;&#8226;&nbsp;<a href="http://js-data.io">js-data.io</a></div>
 
 
 	<span class="copyright">
@@ -320,7 +306,7 @@
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
 	
-		on 2016-04-17T19:32:50-07:00
+		on 2016-04-27T09:29:19-07:00
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>
@@ -329,6 +315,8 @@
 <script src="scripts/docstrap.lib.js"></script>
 <script src="scripts/toc.js"></script>
 <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/highlight.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/languages/javascript.min.js"></script>
 
 <script>
 $( function () {
@@ -356,18 +344,14 @@ $( function () {
 		if ( lang ) {
 
 			$this
-			.addClass( "sunlight-highlight-" + lang )
+			.addClass( lang )
 			.addClass( "linenums" )
 			.html( example.html() );
 
 		}
 	} );
 
-	Sunlight.highlightAll( {
-		lineNumbers : true,
-		showMenu : true,
-		enableDoclinks : true
-	} );
+	hljs.initHighlightingOnLoad();
 
 	$.catchAnchorLinks( {
         navbarOffset: 10

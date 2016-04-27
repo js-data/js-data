@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>js-data Namespace: query</title>
+	<title>js-data Namespace: utils</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -133,13 +133,13 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Namespace: query</h1>
+	<h1 class="page-title">Namespace: utils</h1>
 <section>
 
 <header>
     
         <h2>
-        query
+        utils
         </h2>
         
     
@@ -150,7 +150,7 @@
     <div class="container-overview">
     
         
-            <div class="description"><p>Selection query as defined by JSData's <a href="http://www.js-data.io/v3.0/docs/query-syntax">Query Syntax</a>.</p></div>
+            <div class="description"><p>Utility methods used by JSData.</p></div>
         
 
         
@@ -160,17 +160,15 @@
     <thead>
       <tr>
         
+          <th>Type</th>
         
         
-          <th>Since</th>
         
         
         
           <th>Source</th>
         
         
-        
-          <th>Tutorials</th>
         
         
         
@@ -179,24 +177,24 @@
     <tbody>
       <tr>
         
-        
-        
-          <td>3.0.0</td>
-        
-        
-        
           <td>
-            <a href="Query.js.html">Query.js</a>,
-             <a href="Query.js.html#sunlight-1-line-201">line 201</a>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
           </td>
         
         
         
+        
+        
           <td>
-            <ul>
-              <li><a href="http://www.js-data.io/v3.0/docs/query-syntax">JSData's Query Syntax</a></li>
-              </ul>
+            <a href="utils.js.html">utils.js</a>,
+             <a href="utils.js.html#sunlight-1-line-1">line 1</a>
           </td>
+        
+        
         
         
         
@@ -207,235 +205,6 @@
 <dl class="details">
     
 
-    <h5 class="subsection-title">Properties:</h5>
-
-    <dl>
-
-<table class="props table table-striped table-bordered">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Argument</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>limit</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" target="_blank">Number</a></span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>See <a href="query.html#.limit">query.limit</a>.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>offset</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" target="_blank">Number</a></span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>See <a href="query.html#.offset">query.offset</a>.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>orderBy</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
-|
-
-<span class="param-type">Array.&lt;Array></span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>See <a href="query.html#.orderBy">query.orderBy</a>.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>skip</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" target="_blank">Number</a></span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>Alias for <a href="query.html#.offset">query.offset</a>.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>sort</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
-|
-
-<span class="param-type">Array.&lt;Array></span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>Alias for <a href="query.html#.orderBy">query.orderBy</a>.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>where</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>See <a href="query.html#.where">query.where</a>.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-</dl>
-
-    
-
   
 
     
@@ -455,51 +224,10 @@
 
 
         
-            <h3>Examples</h3>
+            <h3>Example</h3>
             
-        <p class="code-caption">Empty "findAll" query</p>
-    
-    <pre><code class="javascript">store.findAll(&#x27;post&#x27;).then((posts) =&gt; {
-  console.log(posts) // [...]
-})</code></pre>
-
-        <p class="code-caption">Empty "filter" query</p>
-    
-    <pre><code class="javascript">const posts = store.filter(&#x27;post&#x27;)
-console.log(posts) // [...]</code></pre>
-
-        <p class="code-caption">Complex "findAll" query</p>
-    
-    <pre><code class="javascript">const PAGE_SIZE = 10
-let currentPage = 3
-
-// Retrieve a filtered page of blog posts
-store.findAll(&#x27;post&#x27;, {
-  where: {
-    status: {
-      // WHERE status = &#x27;published&#x27;
-      &#x27;==&#x27;: &#x27;published&#x27;
-    },
-    author: {
-      // AND author IN (&#x27;bob&#x27;, &#x27;alice&#x27;)
-      &#x27;in&#x27;: [&#x27;bob&#x27;, &#x27;alice&#x27;],
-      // OR author IN (&#x27;karen&#x27;)
-      &#x27;|in&#x27;: [&#x27;karen&#x27;]
-    }
-  },
-  orderBy: [
-    // ORDER BY date_published DESC,
-    [&#x27;date_published&#x27;, &#x27;DESC&#x27;],
-    // ORDER BY title ASC
-    [&#x27;title&#x27;, &#x27;ASC&#x27;]
-  ],
-  // LIMIT 10
-  limit: PAGE_SIZE,
-  // SKIP 20
-  offset: PAGE_SIZE * (currentPage 1)
-}).then((posts) =&gt; {
-  console.log(posts) // [...]
-})</code></pre>
+    <pre><code class="javascript">import {utils} from &#x27;js-data&#x27;
+console.log(utils.isString(&#x27;foo&#x27;)) // true</code></pre>
 
 
         
@@ -522,15 +250,16 @@ store.findAll(&#x27;post&#x27;, {
         <dl>
             
 <hr>
-<dt class="name" id=".limit">
-    <h4><strong><span class="type-signature">&lt;static> </span>limit</strong></h4>
+<dt class="name" id=".addHiddenPropsToTarget">
+    <h4><strong><span class="type-signature">&lt;static> </span>addHiddenPropsToTarget</strong></h4>
 
     
 </dt>
 <dd>
     
     <div class="description">
-        <p>Maximum number of records to retrieve.</p>
+        <p>Define hidden (non-enumerable), writable properties on <code>target</code> from the
+provided <code>props</code>.</p>
     </div>
     
 
@@ -541,11 +270,7 @@ store.findAll(&#x27;post&#x27;, {
     <thead>
       <tr>
         
-          <th>Type</th>
         
-        
-        
-          <th>Since</th>
         
         
         
@@ -554,41 +279,23 @@ store.findAll(&#x27;post&#x27;, {
         
         
         
-          <th>See</th>
-        
         
       </tr>
     </thead>
     <tbody>
       <tr>
         
-          <td>
-            
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" target="_blank">Number</a></span>
-
-
-
-          </td>
-        
-        
-        
-          <td>3.0.0</td>
-        
-        
-        
-          <td>
-            <a href="Query.js.html">Query.js</a>,
-             <a href="Query.js.html#sunlight-1-line-378">line 378</a>
-          </td>
         
         
         
         
           <td>
-            <ul>
-              <li><a href="http://www.js-data.io/v3.0/docs/query-syntax">http://www.js-data.io/v3.0/docs/query-syntax</a></li>
-              </ul>
+            <a href="utils.js.html">utils.js</a>,
+             <a href="utils.js.html#sunlight-1-line-167">line 167</a>
           </td>
+        
+        
+        
         
         
       </tr>
@@ -616,40 +323,22 @@ store.findAll(&#x27;post&#x27;, {
 </dl>
 
 
-    
-        <div class="code-panel panel panel-warning">
-          <div class="panel-heading">
-            <strong>Example</strong>
-          </div>
-          <div class="panel-body">
-            
-        <p class="code-caption">Retrieve the first "page" of blog posts</p>
-    
-    <pre><code class="javascript">const PAGE_SIZE = 10
-let currentPage = 1
-PostService.findAll({
-  offset: PAGE_SIZE * (currentPage 1)
-  limit: PAGE_SIZE
-})</code></pre>
-
-
-          </div>
-        </div>
     
 </dd>
 
         
             
 <hr>
-<dt class="name" id=".offset">
-    <h4><strong><span class="type-signature">&lt;static> </span>offset</strong></h4>
+<dt class="name" id=".Promise">
+    <h4><strong><span class="type-signature">&lt;static> </span>Promise</strong></h4>
 
     
 </dt>
 <dd>
     
     <div class="description">
-        <p>Number of records to skip.</p>
+        <p>Reference to the Promise constructor used by JSData. Defaults to
+<code>window.Promise</code> or <code>global.Promise</code>.</p>
     </div>
     
 
@@ -673,8 +362,6 @@ PostService.findAll({
         
         
         
-          <th>See</th>
-        
         
       </tr>
     </thead>
@@ -683,7 +370,7 @@ PostService.findAll({
         
           <td>
             
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" target="_blank">Number</a></span>
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
 
 
 
@@ -696,18 +383,12 @@ PostService.findAll({
         
         
           <td>
-            <a href="Query.js.html">Query.js</a>,
-             <a href="Query.js.html#sunlight-1-line-356">line 356</a>
+            <a href="utils.js.html">utils.js</a>,
+             <a href="utils.js.html#sunlight-1-line-68">line 68</a>
           </td>
         
         
         
-        
-          <td>
-            <ul>
-              <li><a href="http://www.js-data.io/v3.0/docs/query-syntax">http://www.js-data.io/v3.0/docs/query-syntax</a></li>
-              </ul>
-          </td>
         
         
       </tr>
@@ -742,242 +423,11 @@ PostService.findAll({
           </div>
           <div class="panel-body">
             
-        <p class="code-caption">Retrieve the first "page" of blog posts</p>
+        <p class="code-caption">Make JSData use a different `Promise` constructor</p>
     
-    <pre><code class="javascript">const PAGE_SIZE = 10
-let currentPage = 1
-PostService.findAll({
-  offset: PAGE_SIZE * (currentPage 1)
-  limit: PAGE_SIZE
-})</code></pre>
-
-
-          </div>
-        </div>
-    
-</dd>
-
-        
-            
-<hr>
-<dt class="name" id=".orderBy">
-    <h4><strong><span class="type-signature">&lt;static> </span>orderBy</strong></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>Determines how records should be ordered in the result.</p>
-    </div>
-    
-
-    
-<div class="panel panel-default">
-  <div class="panel-heading"><strong>Details</strong></div>
-  <table class="table table-striped table-bordered">
-    <thead>
-      <tr>
-        
-          <th>Type</th>
-        
-        
-        
-          <th>Since</th>
-        
-        
-        
-          <th>Source</th>
-        
-        
-        
-        
-          <th>See</th>
-        
-        
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        
-          <td>
-            
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
-|
-
-<span class="param-type">Array.&lt;Array></span>
-
-
-
-          </td>
-        
-        
-        
-          <td>3.0.0</td>
-        
-        
-        
-          <td>
-            <a href="Query.js.html">Query.js</a>,
-             <a href="Query.js.html#sunlight-1-line-333">line 333</a>
-          </td>
-        
-        
-        
-        
-          <td>
-            <ul>
-              <li><a href="http://www.js-data.io/v3.0/docs/query-syntax">http://www.js-data.io/v3.0/docs/query-syntax</a></li>
-              </ul>
-          </td>
-        
-        
-      </tr>
-    </tbody>
-  </table>
-</div>
-<dl class="details">
-    
-
-  
-
-    
-
-    
-
-    
-
-  
-
-  
-
-  
-
-  
-</dl>
-
-
-    
-        <div class="code-panel panel panel-warning">
-          <div class="panel-heading">
-            <strong>Example</strong>
-          </div>
-          <div class="panel-body">
-            
-    <pre><code class="javascript">TODO</code></pre>
-
-
-          </div>
-        </div>
-    
-</dd>
-
-        
-            
-<hr>
-<dt class="name" id=".where">
-    <h4><strong><span class="type-signature">&lt;static> </span>where</strong></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>Filtering criteria. Records that do not meet this criteria will be exluded
-from the result.</p>
-    </div>
-    
-
-    
-<div class="panel panel-default">
-  <div class="panel-heading"><strong>Details</strong></div>
-  <table class="table table-striped table-bordered">
-    <thead>
-      <tr>
-        
-          <th>Type</th>
-        
-        
-        
-          <th>Since</th>
-        
-        
-        
-          <th>Source</th>
-        
-        
-        
-        
-          <th>See</th>
-        
-        
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        
-          <td>
-            
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
-
-
-
-          </td>
-        
-        
-        
-          <td>3.0.0</td>
-        
-        
-        
-          <td>
-            <a href="Query.js.html">Query.js</a>,
-             <a href="Query.js.html#sunlight-1-line-262">line 262</a>
-          </td>
-        
-        
-        
-        
-          <td>
-            <ul>
-              <li><a href="http://www.js-data.io/v3.0/docs/query-syntax">http://www.js-data.io/v3.0/docs/query-syntax</a></li>
-              </ul>
-          </td>
-        
-        
-      </tr>
-    </tbody>
-  </table>
-</div>
-<dl class="details">
-    
-
-  
-
-    
-
-    
-
-    
-
-  
-
-  
-
-  
-
-  
-</dl>
-
-
-    
-        <div class="code-panel panel panel-warning">
-          <div class="panel-heading">
-            <strong>Example</strong>
-          </div>
-          <div class="panel-body">
-            
-    <pre><code class="javascript">TODO</code></pre>
+    <pre><code class="javascript">import Promise from &#x27;bluebird&#x27;
+import {utils} from &#x27;js-data&#x27;
+utils.Promise = Promise</code></pre>
 
 
           </div>
@@ -988,6 +438,406 @@ from the result.</p>
         </dl>
     
 
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
+<hr>
+<dt>
+  <h4 class="name" id=".diffObjects"><span class="type-signature">&lt;static> </span>diffObjects(a, b)</h4>
+
+  
+</dt>
+<dd>
+
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>a</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Base object.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>b</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Comparison object.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Return value:</strong></div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            
+              <td>
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+</td>
+            
+            
+              <td><p>Diff.</p></td>
+            
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+        
+        
+          <td>
+            <a href="utils.js.html">utils.js</a>,
+             <a href="utils.js.html#sunlight-1-line-340">line 340</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id=".equal"><span class="type-signature">&lt;static> </span>equal()</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>TODO</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+        
+        
+          <td>
+            <a href="utils.js.html">utils.js</a>,
+             <a href="utils.js.html#sunlight-1-line-380">line 380</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id=".err"><span class="type-signature">&lt;static> </span>err()</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>TODO</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+        
+        
+          <td>
+            <a href="utils.js.html">utils.js</a>,
+             <a href="utils.js.html#sunlight-1-line-387">line 387</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+</dd>
+
+        </dl>
     
 
     
