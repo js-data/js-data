@@ -28,5 +28,3 @@ jsconfig.json
 coverage/
 doc/
 node_modules/
-dist/*.js
-dist/*.map
