@@ -763,6 +763,10 @@ toProxy.forEach(function (method) {
  * @param {Object} [opts.mapperDefaults] Defaults options to pass to
  * {@link Container#mapperClass} when creating a new mapper.
  * @returns {Container}
+ * @since 3.0.0
+ * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#container","Components of JSData: Container"]
+ * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
+ * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-nodejs","Notes on using JSData in Node.js"]
  */
 export default Component.extend(props)
 

@@ -25,15 +25,20 @@ const escape = function (pattern) {
 /**
  * A class used by the {@link Collection} class to build queries to be executed
  * against the collection's data. An instance of `Query` is returned by
- * {@link Collection#query}. Query instances are typically short-lived.
+ * {@link Collection#query}. Query instances are typically short-lived, and you
+ * shouldn't have to create them yourself. Just use {@link Collection#query}.
  *
  * ```javascript
  * import {Query} from 'js-data'
  * ```
  *
+ * @example
+ * const posts = store.query('post').filter({ status: 'draft' }).limit(2).run()
+ *
  * @class Query
  * @extends Component
  * @param {Collection} collection The collection on which this query operates.
+ * @since 3.0.0
  */
 export default Component.extend({
   constructor: function Query (collection) {
@@ -44,6 +49,7 @@ export default Component.extend({
      * The {@link Collection} on which this query operates.
      *
      * @name Query#collection
+     * @since 3.0.0
      * @type {Collection}
      */
     self.collection = collection
@@ -52,6 +58,7 @@ export default Component.extend({
      * The current data result of this query.
      *
      * @name Query#data
+     * @since 3.0.0
      * @type {Array}
      */
     self.data = null
@@ -60,29 +67,26 @@ export default Component.extend({
   /**
    * Find all entities between two boundaries.
    *
-   * Get the users ages 18 to 30
-   * ```js
+   * @example <caption>Get the users ages 18 to 30.</caption>
    * const users = query.between(18, 30, { index: 'age' }).run()
-   * ```
-   * Same as above
-   * ```js
-   * const users = query.between([18], [30], { index: 'age' }).run()
-   * ```
    *
-   * @name Query#between
-   * @method
-   * @param {Array} leftKeys - Keys defining the left boundary.
-   * @param {Array} rightKeys - Keys defining the right boundary.
-   * @param {Object} [opts] - Configuration options.
-   * @param {string} [opts.index] - Name of the secondary index to use in the
+   * @example <caption>Same as above.</caption>
+   * const users = query.between([18], [30], { index: 'age' }).run()
+   *
+   * @method Query#between
+   * @param {Array} leftKeys Keys defining the left boundary.
+   * @param {Array} rightKeys Keys defining the right boundary.
+   * @param {Object} [opts] Configuration options.
+   * @param {string} [opts.index] Name of the secondary index to use in the
    * query. If no index is specified, the main index is used.
-   * @param {boolean} [opts.leftInclusive=true] - Whether to include entities
+   * @param {boolean} [opts.leftInclusive=true] Whether to include entities
    * on the left boundary.
-   * @param {boolean} [opts.rightInclusive=false] - Whether to include entities
+   * @param {boolean} [opts.rightInclusive=false] Whether to include entities
    * on the left boundary.
-   * @param {boolean} [opts.limit] - Limit the result to a certain number.
-   * @param {boolean} [opts.offset] - The number of resulting entities to skip.
+   * @param {boolean} [opts.limit] Limit the result to a certain number.
+   * @param {boolean} [opts.offset] The number of resulting entities to skip.
    * @returns {Query} A reference to itself for chaining.
+   * @since 3.0.0
    */
   between (leftKeys, rightKeys, opts) {
     const self = this
@@ -95,16 +99,16 @@ export default Component.extend({
   },
 
   /**
-   * The comparison function used by the Query class.
+   * The comparison function used by the {@link Query} class.
    *
-   * @name Query#compare
-   * @method
+   * @method Query#compare
    * @param {Array} orderBy An orderBy clause used for sorting and sub-sorting.
    * @param {number} index The index of the current orderBy clause being used.
    * @param {*} a The first item in the comparison.
    * @param {*} b The second item in the comparison.
    * @returns {number} -1 if `b` should preceed `a`. 0 if `a` and `b` are equal.
    * 1 if `a` should preceed `b`.
+   * @since 3.0.0
    */
   compare (orderBy, index, a, b) {
     const def = orderBy[index]
@@ -132,7 +136,7 @@ export default Component.extend({
     } else if (cA > cB) {
       return 1
     } else {
-      if (index < orderBy.length - 1) {
+      if (index < orderBy.length) {
         return this.compare(orderBy, index + 1, a, b)
       } else {
         return 0
@@ -141,14 +145,14 @@ export default Component.extend({
   },
 
   /**
-   * Predicate evaluation function used by the Query class.
+   * Predicate evaluation function used by the {@link Query} class.
    *
-   * @name Query#evaluate
-   * @method
+   * @method Query#evaluate
    * @param {*} value The value to evaluate.
    * @param {string} op The operator to use in this evaluation.
    * @param {*} predicate The predicate to use in this evaluation.
    * @returns {boolean} Whether the value passed the evaluation or not.
+   * @since 3.0.0
    */
   evaluate (value, op, predicate) {
     const ops = this.constructor.ops
@@ -173,7 +177,7 @@ export default Component.extend({
    *       '==': 'draft'
    *     },
    *     created_at_timestamp: {
-   *       '>=': (new Date().getTime() - (1000 * 60 * 60 * 24 * 30 * 3)) // 3 months ago
+   *       '>=': (new Date().getTime() (1000 * 60 * 60 * 24 * 30 * 3)) // 3 months ago
    *     }
    *   }
    * }).run()
@@ -183,13 +187,13 @@ export default Component.extend({
    *   return post.isReady()
    * }).run()
    *
-   * @name Query#filter
-   * @method
-   * @param {(Object|Function)} [queryOrFn={}] - Selection query or filter
+   * @method Query#filter
+   * @param {(Object|Function)} [queryOrFn={}] Selection query or filter
    * function.
-   * @param {Function} [thisArg] - Context to which to bind `queryOrFn` if
+   * @param {Function} [thisArg] Context to which to bind `queryOrFn` if
    * `queryOrFn` is a function.
    * @returns {Query} A reference to itself for chaining.
+   * @since 3.0.0
    */
   filter (query, thisArg) {
     const self = this
@@ -235,7 +239,7 @@ export default Component.extend({
      *   // LIMIT 10
      *   limit: PAGE_SIZE,
      *   // SKIP 20
-     *   offset: PAGE_SIZE * (currentPage - 1)
+     *   offset: PAGE_SIZE * (currentPage 1)
      * }).then((posts) => {
      *   console.log(posts) // [...]
      * })
@@ -247,8 +251,8 @@ export default Component.extend({
      * @property {number} [skip] Alias for {@link query.offset}.
      * @property {string|Array[]} [sort] Alias for {@link query.orderBy}.
      * @property {Object} [where] See {@link query.where}.
-     * @see http://www.js-data.io/v3.0/docs/query-syntax
      * @since 3.0.0
+     * @tutorial ["http://www.js-data.io/v3.0/docs/query-syntax","JSData's Query Syntax"]
      */
     query || (query = {})
     self.getData()
@@ -356,7 +360,7 @@ export default Component.extend({
        * const PAGE_SIZE = 10
        * let currentPage = 1
        * PostService.findAll({
-       *   offset: PAGE_SIZE * (currentPage - 1)
+       *   offset: PAGE_SIZE * (currentPage 1)
        *   limit: PAGE_SIZE
        * })
        *
@@ -378,7 +382,7 @@ export default Component.extend({
        * const PAGE_SIZE = 10
        * let currentPage = 1
        * PostService.findAll({
-       *   offset: PAGE_SIZE * (currentPage - 1)
+       *   offset: PAGE_SIZE * (currentPage 1)
        *   limit: PAGE_SIZE
        * })
        *
@@ -399,11 +403,11 @@ export default Component.extend({
   /**
    * Iterate over all entities.
    *
-   * @name Query#forEach
-   * @method
-   * @param {Function} forEachFn - Iteration function.
-   * @param {*} [thisArg] - Context to which to bind `forEachFn`.
+   * @method Query#forEach
+   * @param {Function} forEachFn Iteration function.
+   * @param {*} [thisArg] Context to which to bind `forEachFn`.
    * @returns {Query} A reference to itself for chaining.
+   * @since 3.0.0
    */
   forEach (forEachFn, thisArg) {
     this.getData().forEach(forEachFn, thisArg)
@@ -413,38 +417,31 @@ export default Component.extend({
   /**
    * Find the entity or entities that match the provided key.
    *
-   * #### Example
-   *
-   * Get the entity whose primary key is 25
-   * ```js
+   * @example <caption>Get the entity whose primary key is 25.</caption>
    * const entities = query.get(25).run()
-   * ```
-   * Same as above
-   * ```js
+   *
+   * @example <caption>Same as above.</caption>
    * const entities = query.get([25]).run()
-   * ```
-   * Get all users who are active and have the "admin" role
-   * ```js
+   *
+   * @example <caption>Get all users who are active and have the "admin" role.</caption>
    * const activeAdmins = query.get(['active', 'admin'], {
    *   index: 'activityAndRoles'
    * }).run()
-   * ```
-   * Get all entities that match a certain weather condition
-   * ```js
+   *
+   * @example <caption>Get all entities that match a certain weather condition.</caption>
    * const niceDays = query.get(['sunny', 'humid', 'calm'], {
    *   index: 'weatherConditions'
    * }).run()
-   * ```
    *
-   * @name Query#get
-   * @method
-   * @param {Array} keyList - Key(s) defining the entity to retrieve. If
+   * @method Query#get
+   * @param {Array} keyList Key(s) defining the entity to retrieve. If
    * `keyList` is not an array (i.e. for a single-value key), it will be
    * wrapped in an array.
-   * @param {Object} [opts] - Configuration options.
-   * @param {string} [opts.string] - Name of the secondary index to use in the
+   * @param {Object} [opts] Configuration options.
+   * @param {string} [opts.string] Name of the secondary index to use in the
    * query. If no index is specified, the main index is used.
    * @returns {Query} A reference to itself for chaining.
+   * @since 3.0.0
    */
   get (keyList, opts) {
     const self = this
@@ -467,26 +464,21 @@ export default Component.extend({
   /**
    * Find the entity or entities that match the provided keyLists.
    *
-   * #### Example
-   *
-   * Get the posts where "status" is "draft" or "inReview"
-   * ```js
+   * @example <caption>Get the posts where "status" is "draft" or "inReview".</caption>
    * const posts = query.getAll('draft', 'inReview', { index: 'status' }).run()
-   * ```
-   * Same as above
-   * ```js
-   * const posts = query.getAll(['draft'], ['inReview'], { index: 'status' }).run()
-   * ```
    *
-   * @name Query#getAll
-   * @method
-   * @param {...Array} [keyList] - Provide one or more keyLists, and all
+   * @example <caption>Same as above.</caption>
+   * const posts = query.getAll(['draft'], ['inReview'], { index: 'status' }).run()
+   *
+   * @method Query#getAll
+   * @param {...Array} [keyList] Provide one or more keyLists, and all
    * entities matching each keyList will be retrieved. If no keyLists are
    * provided, all entities will be returned.
-   * @param {Object} [opts] - Configuration options.
-   * @param {string} [opts.index] - Name of the secondary index to use in the
+   * @param {Object} [opts] Configuration options.
+   * @param {string} [opts.index] Name of the secondary index to use in the
    * query. If no index is specified, the main index is used.
    * @returns {Query} A reference to itself for chaining.
+   * @since 3.0.0
    */
   getAll (...args) {
     const self = this
@@ -497,8 +489,8 @@ export default Component.extend({
     if (!args.length || args.length === 1 && utils.isObject(args[0])) {
       self.getData()
       return self
-    } else if (args.length && utils.isObject(args[args.length - 1])) {
-      opts = args[args.length - 1]
+    } else if (args.length && utils.isObject(args[args.length])) {
+      opts = args[args.length]
       args.pop()
     }
     const collection = self.collection
@@ -512,9 +504,10 @@ export default Component.extend({
 
   /**
    * Return the current data result of this query.
-   * @name Query#getData
-   * @method
+   *
+   * @method Query#getData
    * @returns {Array} The data in this query.
+   * @since 3.0.0
    */
   getData () {
     const self = this
@@ -524,6 +517,16 @@ export default Component.extend({
     return self.data
   },
 
+  /**
+   * Implementation used by the `like` operator. Takes a pattern and flags and
+   * returns a `RegExp` instance that can test strings.
+   *
+   * @method Query#like
+   * @param {string} pattern Testing pattern.
+   * @param {string} flags Flags for the regular expression.
+   * @returns {RegExp} Regular expression for testing strings.
+   * @since 3.0.0
+   */
   like (pattern, flags) {
     return new RegExp(`^${(escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.'))}$`, flags)
   },
@@ -531,17 +534,13 @@ export default Component.extend({
   /**
    * Limit the result.
    *
-   * #### Example
-   *
-   * Get only the first 10 draft posts
-   * ```js
+   * @example <caption>Get only the first 10 draft posts.</caption>
    * const posts = query.get('draft', { index: 'status' }).limit(10).run()
-   * ```
    *
-   * @name Query#limit
-   * @method
-   * @param {number} num - The maximum number of entities to keep in the result.
+   * @method Query#limit
+   * @param {number} num The maximum number of entities to keep in the result.
    * @returns {Query} A reference to itself for chaining.
+   * @since 3.0.0
    */
   limit (num) {
     if (!utils.isNumber(num)) {
@@ -555,11 +554,16 @@ export default Component.extend({
   /**
    * Apply a mapping function to the result data.
    *
-   * @name Query#map
-   * @method
-   * @param {Function} mapFn - Mapping function.
-   * @param {*} [thisArg] - Context to which to bind `mapFn`.
+   * @example
+   * const ages = UserCollection.query().map((user) => {
+   *   return user.age
+   * }).run()
+   *
+   * @method Query#map
+   * @param {Function} mapFn Mapping function.
+   * @param {*} [thisArg] Context to which to bind `mapFn`.
    * @returns {Query} A reference to itself for chaining.
+   * @since 3.0.0
    */
   map (mapFn, thisArg) {
     this.data = this.getData().map(mapFn, thisArg)
@@ -569,11 +573,15 @@ export default Component.extend({
   /**
    * Return the result of calling the specified function on each item in this
    * collection's main index.
-   * @name Query#mapCall
-   * @method
-   * @param {string} funcName - Name of function to call
-   * @parama {...*} [args] - Remaining arguments to be passed to the function.
+   *
+   * @example
+   * const stringAges = UserCollection.query().mapCall('toString').run()
+   *
+   * @method Query#mapCall
+   * @param {string} funcName Name of function to call
+   * @parama {...*} [args] Remaining arguments to be passed to the function.
    * @returns {Query} A reference to itself for chaining.
+   * @since 3.0.0
    */
   mapCall (funcName, ...args) {
     this.data = this.getData().map(function (item) {
@@ -585,9 +593,9 @@ export default Component.extend({
   /**
    * Complete the execution of the query and return the resulting data.
    *
-   * @name Query#run
-   * @method
+   * @method Query#run
    * @returns {Array} The result of executing this query.
+   * @since 3.0.0
    */
   run () {
     const data = this.data
@@ -598,17 +606,13 @@ export default Component.extend({
   /**
    * Skip a number of results.
    *
-   * #### Example
-   *
-   * Get all but the first 10 draft posts
-   * ```js
+   * @example <caption>Get all but the first 10 draft posts.</caption>
    * const posts = query.get('draft', { index: 'status' }).skip(10).run()
-   * ```
    *
-   * @name Query#skip
-   * @method
-   * @param {number} num - The number of entities to skip.
+   * @method Query#skip
+   * @param {number} num The number of entities to skip.
    * @returns {Query} A reference to itself for chaining.
+   * @since 3.0.0
    */
   skip (num) {
     if (!utils.isNumber(num)) {
@@ -624,9 +628,71 @@ export default Component.extend({
   }
 }, {
   /**
-   * TODO
+   * The filtering operators supported by {@link Query#filter}, and which are
+   * implemented by adapters (for the most part).
+   *
+   * @example <caption>Variant 1</caption>
+   * const publishedPosts = store.filter('post', {
+   *   status: 'published',
+   *   limit: 2
+   * })
+   *
+   * @example <caption>Variant 2</caption>
+   * const publishedPosts = store.filter('post', {
+   *   where: {
+   *     status: {
+   *       '==': 'published'
+   *     }
+   *   },
+   *   limit: 2
+   * })
+   *
+   * @example <caption>Variant 3</caption>
+   * const publishedPosts = store.query('post').filter({
+   *   status: 'published'
+   * }).limit(2).run()
+   *
+   * @example <caption>Variant 4</caption>
+   * const publishedPosts = store.query('post').filter({
+   *   where: {
+   *     status: {
+   *       '==': 'published'
+   *     }
+   *   }
+   * }).limit(2).run()
+   *
+   * @example <caption>Multiple operators</caption>
+   * const myPublishedPosts = store.filter('post', {
+   *   where: {
+   *     status: {
+   *       '==': 'published'
+   *     },
+   *     user_id: {
+   *       '==': currentUser.id
+   *     }
+   *   }
+   * })
    *
    * @name Query.ops
+   * @property {Function} == Equality operator.
+   * @property {Function} != Inequality operator.
+   * @property {Function} > Greater than operator.
+   * @property {Function} >= Greater than (inclusive) operator.
+   * @property {Function} < Less than operator.
+   * @property {Function} <= Less than (inclusive) operator.
+   * @property {Function} isectEmpty Operator that asserts that the intersection
+   * between two arrays is empty.
+   * @property {Function} isectNotEmpty Operator that asserts that the
+   * intersection between two arrays is __not__ empty.
+   * @property {Function} in Operator that asserts whether a value is in an
+   * array.
+   * @property {Function} notIn Operator that asserts whether a value is __not__
+   * in an array.
+   * @property {Function} contains Operator that asserts whether an array
+   * contains a value.
+   * @property {Function} notContains Operator that asserts whether an array
+   * does __not__ contain a value.
+   * @since 3.0.0
    * @type {Object}
    */
   ops: {
@@ -674,3 +740,29 @@ export default Component.extend({
     }
   }
 })
+
+/**
+ * Create a subclass of this Query.
+ *
+ * @example <caption>Extend the class in a cross-browser manner.</caption>
+ * import {Query} from 'js-data'
+ * const CustomQueryClass = Query.extend({
+ *   foo () { return 'bar' }
+ * })
+ * const customQuery = new CustomQueryClass({ name: 'test' })
+ * console.log(customQuery.foo()) // "bar"
+ *
+ * @example <caption>Extend the class using ES2015 class syntax.</caption>
+ * class CustomQueryClass extends Query {
+ *   foo () { return 'bar' }
+ * }
+ * const customQuery = new CustomQueryClass({ name: 'test' })
+ * console.log(customQuery.foo()) // "bar"
+ *
+ * @method Query.extend
+ * @param {Object} [props={}] Properties to add to the prototype of the
+ * subclass.
+ * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @returns {Constructor} Subclass of this Query.
+ * @since 3.0.0
+ */

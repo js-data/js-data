@@ -1,43 +1,25 @@
 <img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="96" height="96" />
 
-# [js-data](http://www.js-data.io/)
+# [js-data](http://www.js-data.io/) [![Slack Status][b1]][b2] [![npm version][b3]][b4] [![npm downloads][b5]][b6]
 
-[![Slack Status][b1]][b2]
-[![npm version][b3]][b4]
-[![npm downloads][b7]][b8]
-[![Coverage Status][b9]][b10]
-[![Codacy][b11]][b12]
-
-__Browser tests__
-
-[![Sauce Test Status][b13]][b14]
-
-__Node.js tests__
-
-[![Circle CI][b5]][b6]
-[![Circle CI][b15]][b6]
-[![Circle CI][b16]][b6]
-[![Circle CI][b17]][b6]
-[![Circle CI][b18]][b6]
+| __Browser tests__ | __Node.js tests__ |
+| ---------------------------------|----|
+| [![Sauce Test Status][b7]][b8] | [![Circle CI][b9]][b10] [![Circle CI][b11]][b10] [![Circle CI][b12]][b10] [![Circle CI][b13]][b10] [![Circle CI][b14]][b10] |
 
 [b1]: http://slack.js-data.io/badge.svg
 [b2]: http://slack.js-data.io
 [b3]: https://img.shields.io/npm/v/js-data.svg?style=flat
 [b4]: https://www.npmjs.org/package/js-data
-[b5]: https://img.shields.io/travis/js-data/js-data/v3.svg?style=flat
-[b6]: https://travis-ci.org/js-data/js-data
-[b7]: https://img.shields.io/npm/dm/js-data.svg?style=flat
-[b8]: https://www.npmjs.org/package/js-data
-[b9]: https://img.shields.io/codecov/c/github/js-data/js-data/v3.svg?style=flat
-[b10]: https://codecov.io/github/js-data/js-data
-[b11]: https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg
-[b12]: https://www.codacy.com/app/jasondobry/js-data/dashboard
-[b13]: https://saucelabs.com/browser-matrix/jsdata.svg
-[b14]: https://saucelabs.com/u/jsdata
-[b15]: https://img.shields.io/badge/Node.js-v5.x-brightgreen.svg
-[b16]: https://img.shields.io/badge/Node.js-v4.x-brightgreen.svg
-[b17]: https://img.shields.io/badge/Node.js-v0.12.x-brightgreen.svg
-[b18]: https://img.shields.io/badge/Node.js-v0.10.x-brightgreen.svg
+[b5]: https://img.shields.io/npm/dm/js-data.svg?style=flat
+[b6]: https://www.npmjs.org/package/js-data
+[b7]: https://saucelabs.com/browser-matrix/jsdata.svg
+[b8]: https://saucelabs.com/u/jsdata
+[b9]: https://img.shields.io/circleci/project/js-data/js-data.svg
+[b10]: https://circleci.com/gh/js-data/js-data
+[b11]: https://img.shields.io/badge/Node.js-v5.x-brightgreen.svg
+[b12]: https://img.shields.io/badge/Node.js-v4.x-brightgreen.svg
+[b13]: https://img.shields.io/badge/Node.js-v0.12.x-brightgreen.svg
+[b14]: https://img.shields.io/badge/Node.js-v0.10.x-brightgreen.svg
 
 JSData is a framework-agnostic, datastore-agnostic ORM/ODM for Node.js and the
 Browser.
@@ -54,14 +36,12 @@ To get started, visit the main website at __[http://js-data.io](http://www.js-da
 
 ## Links
 
-* [Quick start](http://www.js-data.io/v3.0/docs/home#quick-start)
-* [Background](http://www.js-data.io/v3.0/docs/home#background)
-* [Dependencies](http://www.js-data.io/v3.0/docs/home#dependencies)
-* [Guides and Tutorials](http://www.js-data.io/v3.0/docs/home)
-* [API Reference Docs](http://api.js-data.io)
-* [Community](http://js-data.io/docs/community)
-* [Support](http://js-data.io/docs/support)
-* [Contributing](http://js-data.io/docs/contributing)
+* [Quick start](http://www.js-data.io/v3.0/docs/home#quick-start) - Get started in 5 minutes
+* [Guides and Tutorials](http://www.js-data.io/v3.0/docs/home) - Learn how to use JSData
+* [API Reference Docs](http://api.js-data.io) - Explore components, methods, options, etc.
+* [Community & Support](http://js-data.io/docs/community) - Find solutions and chat with the community
+* [General Contributing Guide](http://js-data.io/docs/contributing) - Give back and move the project forward
+  * [Contributing to js-data core](https://github.com/js-data/js-data/blob/master/.github/CONTRIBUTING.md)
 
 ## License
 

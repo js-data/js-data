@@ -99,13 +99,25 @@ export default Component.extend({
      * @type {Mapper}
      * @default null
      */
-    Object.defineProperty(self, 'mapper', {
-      value: undefined,
-      writable: true
+    Object.defineProperties(self, {
+      mapper: {
+        value: undefined,
+        writable: true
+      },
+      queryClass: {
+        value: undefined,
+        writable: true
+      }
     })
 
+    // Apply user-provided configuration
     utils.fillIn(self, opts)
+    // Fill in any missing options with the defaults
     utils.fillIn(self, utils.copy(COLLECTION_DEFAULTS))
+
+    if (!self.queryClass) {
+      self.queryClass = Query
+    }
 
     const idAttribute = self.recordId()
 
@@ -580,7 +592,7 @@ export default Component.extend({
    * @returns {Query} New query object.
    */
   query () {
-    return new Query(this)
+    return new self.queryClass(this)
   },
 
   /**

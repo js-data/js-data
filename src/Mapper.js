@@ -149,13 +149,12 @@ const MAPPER_DEFAULTS = {
   /**
    * Whether this Mapper should emit operational events.
    *
-   * Defaults to `true` in the browser and `false` in Node.js
-   *
+   * @default true
    * @name Mapper#notify
    * @since 3.0.0
    * @type {boolean}
    */
-  notify: utils.isBrowser,
+  notify: true,
 
   /**
    * Whether {@link Mapper#create}, {@link Mapper#createMany},
@@ -222,7 +221,8 @@ const MAPPER_DEFAULTS = {
  * @returns {Mapper} A new {@link Mapper} instance.
  * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#mapper
  * @since 3.0.0
- * @tutorial ["http://www.js-data.io/v3.0/docs/modeling-your-data","Modeling you data"]
+ * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#mapper","Components of JSData: Mapper"]
+ * @tutorial ["http://www.js-data.io/v3.0/docs/modeling-your-data","Modeling your data"]
  */
 export default Component.extend({
   constructor: function Mapper (opts) {
@@ -293,10 +293,11 @@ export default Component.extend({
 
       /**
        * The meta information describing this Mapper's available lifecycle
-       * methods. Do not modify.
+       * methods. __Do not modify.__
        *
        * TODO: Improve documentation.
        *
+       * @name Mapper#lifecycleMethods
        * @since 3.0.0
        * @type {Object}
        */
@@ -329,6 +330,7 @@ export default Component.extend({
      * Resource.
      *
      * @name Mapper#name
+     * @since 3.0.0
      * @type {string}
      */
     if (!self.name) {

@@ -71,8 +71,8 @@ import utils from './utils'
  *
  * @name module:js-data.Collection
  * @see Collection
- * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#collection
  * @since 3.0.0
+ * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#collection","Components of JSData: Collection"]
  * @type {Constructor}
  */
 import Collection from './Collection'
@@ -106,8 +106,8 @@ import Component from './Component'
  *
  * @name module:js-data.Container
  * @see Container
- * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#container
  * @since 3.0.0
+ * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#container","Components of JSData: Container"]
  * @type {Constructor}
  */
 import Container from './Container'
@@ -122,8 +122,8 @@ import Container from './Container'
  *
  * @name module:js-data.DataStore
  * @see DataStore
- * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#datastire
  * @since 3.0.0
+ * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#datastore","Components of JSData: DataStore"]
  * @type {Constructor}
  */
 import DataStore from './DataStore'
@@ -166,9 +166,9 @@ import LinkedCollection from './LinkedCollection'
  * @name module:js-data.Mapper
  * @see Container
  * @see Mapper
- * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#mapper
  * @since 3.0.0
- * @tutorial ["http://www.js-data.io/v3.0/docs/modeling-your-data","Modeling you data"]
+ * @tutorial ["http://www.js-data.io/v3.0/docs/modeling-your-data","Modeling your data"]
+ * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#mapper","Components of JSData: Mapper"]
  * @type {Constructor}
  */
 import Mapper from './Mapper'
@@ -194,8 +194,8 @@ import Query from './Query'
  *
  * @name module:js-data.Record
  * @see Record
- * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#record
  * @since 3.0.0
+ * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#record","Components of JSData: Record"]
  * @type {Constructor}
  */
 import Record from './Record'
@@ -219,8 +219,9 @@ import Record from './Record'
  * @name module:js-data.Schema
  * @see Schema
  * @see http://json-schema.org/
- * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#schema
  * @since 3.0.0
+ * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#schema","Components of JSData: schema"]
+ * @tutorial ["http://www.js-data.io/v3.0/docs/schemas","JSData's Schema Syntax"]
  * @type {Constructor}
  */
 import Schema from './Schema'

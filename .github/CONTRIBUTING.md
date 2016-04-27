@@ -1,18 +1,25 @@
-# Contributing
+# Contributing to js-data core
 
-[Read the Contributing Guide](http://js-data.io/docs/contributing).
+[Read the general Contributing Guide](http://js-data.io/docs/contributing).
 
-## Support
+## Project structure
 
-[Find out how to Get Support](http://js-data.io/docs/support).
+* `dist/` - Contains final build files for distribution
+* `doc/` - Output folder for JSDocs
+* `lib/` - Holds vendored `mindex` library
+* `scripts/ - Various build scripts
+* `src/` - Project source code
+* `test/` - Project tests
 
-## Community
+## Clone, build & test
 
-[Explore the Community](http://js-data.io/docs/community).
+1. `clone git@github.com:js-data/js-data.git`
+1. `cd js-data`
+1. `npm install`
+1. `npm run mocha` - Run tests
+1. `npm run build` - Lint and build distribution files
 
-### Have write access?
-
-To cut a release:
+## To cut a release
 
 1. Checkout master
 1. Bump version in `package.json` appropriately
@@ -25,3 +32,5 @@ To cut a release:
   - set release body to changelog entry for the version
   - attach the files in the `dist/` folder
 1. `npm publish .`
+
+See also [Community & Support](http://js-data.io/docs/community).

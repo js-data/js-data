@@ -8,7 +8,6 @@ import Container from './Container'
 import LinkedCollection from './LinkedCollection'
 
 const DOMAIN = 'DataStore'
-const DATASTORE_DEFAULTS = {}
 
 const safeSet = function (record, field, value) {
   if (record && record._set) {
@@ -35,7 +34,6 @@ const props = {
 
     self.collectionClass = self.collectionClass || LinkedCollection
     self._collections = {}
-    utils.fillIn(self, DATASTORE_DEFAULTS)
     self._pendingQueries = {}
     self._completedQueries = {}
     return self
@@ -856,22 +854,27 @@ toProxy.forEach(function (method) {
  * const UserMapper = store.defineMapper('user')
  *
  * // Call "find" on "UserMapper" (Stateless ORM)
- * UserMapper.find(1).then(function (user) {
+ * UserMapper.find(1).then((user) => {
  *   // retrieved a "user" record via the http adapter, but that's it
  *
- *   // Call "find" on "store" for the "user" mapper (Stateful DataStore)
+ *   // Call "find" on "store" targeting "user" (Stateful DataStore)
  *   return store.find('user', 1)
- * }).then(function (user) {
+ * }).then((user) => {
  *   // not only was a "user" record retrieved, but it was added to the
  *   // store's "user" collection
  *   const cachedUser = store.getCollection('user').get(1)
- *   user === cachedUser // true
+ *   console.log(user === cachedUser) // true
  * })
  *
  * @class DataStore
  * @extends Container
  * @param {Object} [opts] Configuration options. See {@link Container}.
  * @returns {DataStore}
+ * @see Container
+ * @since 3.0.0
+ * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#datastore","Components of JSData: DataStore"]
+ * @tutorial ["http://www.js-data.io/v3.0/docs/working-with-the-datastore","Working with the DataStore"]
+ * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
  */
 export default Container.extend(props)
 
