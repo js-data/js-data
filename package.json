@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "3.0.0-beta.1",
+  "version": "3.0.0-beta.2",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -11,6 +11,13 @@
   "license": "MIT",
   "main": "./dist/js-data.js",
   "jsnext:main": "dist/js-data.es2015.js",
+  "files": [
+    "dist/",
+    "lib/",
+    "src/",
+    "AUTHORS",
+    "CONTRIBUTORS"
+  ],
   "keywords": [
     "orm",
     "odm",
@@ -84,7 +91,7 @@
     "mocha": "2.4.5",
     "nyc": "6.4.0",
     "phantomjs-prebuilt": "2.1.7",
-    "rollup": "0.26.0",
+    "rollup": "0.26.1",
     "rollup-plugin-babel": "2.4.0",
     "sinon": "1.17.3",
     "uglify-js": "2.6.2"

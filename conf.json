@@ -17,8 +17,8 @@
     "copyright": "js-data Copyright © 2014-2016 js-data project authors",
     "outputSourceFiles": true,
     "linenums": true,
-    "logoFile": "https://raw.githubusercontent.com/js-data/js-data/v2/js-data-64.png",
-    "footer": "<div style=\"text-align:center\">Back to <a href=\"http://js-data.io\">js-data.io</a></div>",
+    "logoFile": "https://raw.githubusercontent.com/js-data/js-data/master/js-data-64.png",
+    "footer": "<div style=\"text-align:center\"><a href=\"/\">api.js-data.io</a>&nbsp;&#8226;&nbsp;<a href=\"http://js-data.io\">js-data.io</a></div>",
     "analytics": {
       "ua": "UA-55528236-2",
       "domain": "api.js-data.io"

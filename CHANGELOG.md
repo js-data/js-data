@@ -1,3 +1,9 @@
+##### 3.0.0-beta.2 - 27 April 2016
+
+###### Backwards compatible changes
+- `Collection` now has a configurable `queryClass` property, which defaults to `Query`
+- Lots of JSDoc improvements
+
 ##### 3.0.0-beta.1 - 17 April 2016
 
 Official beta release.
