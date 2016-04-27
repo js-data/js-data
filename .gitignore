@@ -21,3 +21,10 @@ junit/
 
 *.iml
 .idea/
+.vscode/
+jsconfig.json
+
+.nyc_output
+coverage/
+doc/
+node_modules/

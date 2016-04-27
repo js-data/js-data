@@ -1,5408 +1,7727 @@
 /*!
- * js-data
- * @version 2.8.2 - Homepage <http://www.js-data.io/>
- * @author Jason Dobry <jason.dobry@gmail.com>
- * @copyright (c) 2014-2015 Jason Dobry 
- * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
- * 
- * @overview Robust framework-agnostic data store.
- */
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
-		define([], factory);
-	else if(typeof exports === 'object')
-		exports["JSData"] = factory();
-	else
-		root["JSData"] = factory();
-})(this, function() {
-return /******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId])
-/******/ 			return installedModules[moduleId].exports;
-
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			exports: {},
-/******/ 			id: moduleId,
-/******/ 			loaded: false
-/******/ 		};
-
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-
-/******/ 		// Flag the module as loaded
-/******/ 		module.loaded = true;
-
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-
-
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
-
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(0);
-/******/ })
-/************************************************************************/
-/******/ ([
-/* 0 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _datastoreIndex = __webpack_require__(1);
-
-	var _utils = __webpack_require__(2);
-
-	var _errors = __webpack_require__(3);
-
-	/**
-	 * The library export.
-	 *   - window.JSData
-	 *   - require('js-data')
-	 *   - define(['js-data', function (JSData) { ... }]);
-	 *   - import JSData from 'js-data'
-	 */
-	module.exports = {
-	  DS: _datastoreIndex['default'],
-	  DSUtils: _utils['default'],
-	  DSErrors: _errors['default'],
-	  createStore: function createStore(options) {
-	    return new _datastoreIndex['default'](options);
-	  },
-	  version: {
-	    full: '2.8.2',
-	    major: parseInt('2', 10),
-	    minor: parseInt('8', 10),
-	    patch: parseInt('2', 10),
-	    alpha:  true ? 'false' : false,
-	    beta:  true ? 'false' : false
-	  }
-	};
-
-/***/ },
-/* 1 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-	/* jshint eqeqeq:false */
-
-	var _utils = __webpack_require__(2);
-
-	var _errors = __webpack_require__(3);
-
-	var _sync_methodsIndex = __webpack_require__(30);
-
-	var _async_methodsIndex = __webpack_require__(36);
-
-	function lifecycleNoopCb(resource, attrs, cb) {
-	  cb(null, attrs);
-	}
-
-	function lifecycleNoop(resource, attrs) {
-	  return attrs;
-	}
-
-	function compare(_x, _x2, _x3, _x4) {
-	  var _again = true;
-
-	  _function: while (_again) {
-	    var orderBy = _x,
-	        index = _x2,
-	        a = _x3,
-	        b = _x4;
-	    def = cA = cB = undefined;
-	    _again = false;
-
-	    var def = orderBy[index];
-	    var cA = _utils['default'].get(a, def[0]);
-	    var cB = _utils['default'].get(b, def[0]);
-	    if (_utils['default']._s(cA)) {
-	      cA = _utils['default'].upperCase(cA);
-	    }
-	    if (_utils['default']._s(cB)) {
-	      cB = _utils['default'].upperCase(cB);
-	    }
-	    if (def[1] === 'DESC') {
-	      if (cB < cA) {
-	        return -1;
-	      } else if (cB > cA) {
-	        return 1;
-	      } else {
-	        if (index < orderBy.length - 1) {
-	          _x = orderBy;
-	          _x2 = index + 1;
-	          _x3 = a;
-	          _x4 = b;
-	          _again = true;
-	          continue _function;
-	        } else {
-	          return 0;
-	        }
-	      }
-	    } else {
-	      if (cA < cB) {
-	        return -1;
-	      } else if (cA > cB) {
-	        return 1;
-	      } else {
-	        if (index < orderBy.length - 1) {
-	          _x = orderBy;
-	          _x2 = index + 1;
-	          _x3 = a;
-	          _x4 = b;
-	          _again = true;
-	          continue _function;
-	        } else {
-	          return 0;
-	        }
-	      }
-	    }
-	  }
-	}
-
-	var Defaults = (function () {
-	  function Defaults() {
-	    _classCallCheck(this, Defaults);
-	  }
-
-	  _createClass(Defaults, [{
-	    key: 'errorFn',
-	    value: function errorFn(a, b) {
-	      if (this.error && typeof this.error === 'function') {
-	        try {
-	          if (typeof a === 'string') {
-	            throw new Error(a);
-	          } else {
-	            throw a;
-	          }
-	        } catch (err) {
-	          a = err;
-	        }
-	        this.error(this.name || null, a || null, b || null);
-	      }
-	    }
-	  }]);
-
-	  return Defaults;
-	})();
-
-	var defaultsPrototype = Defaults.prototype;
-
-	defaultsPrototype.actions = {};
-	defaultsPrototype.afterCreate = lifecycleNoopCb;
-	defaultsPrototype.afterCreateCollection = lifecycleNoop;
-	defaultsPrototype.afterCreateInstance = lifecycleNoop;
-	defaultsPrototype.afterDestroy = lifecycleNoopCb;
-	defaultsPrototype.afterEject = lifecycleNoop;
-	defaultsPrototype.afterFind = lifecycleNoopCb;
-	defaultsPrototype.afterFindAll = lifecycleNoopCb;
-	defaultsPrototype.afterInject = lifecycleNoop;
-	defaultsPrototype.afterLoadRelations = lifecycleNoopCb;
-	defaultsPrototype.afterReap = lifecycleNoop;
-	defaultsPrototype.afterUpdate = lifecycleNoopCb;
-	defaultsPrototype.afterValidate = lifecycleNoopCb;
-	defaultsPrototype.allowSimpleWhere = true;
-	defaultsPrototype.basePath = '';
-	defaultsPrototype.beforeCreate = lifecycleNoopCb;
-	defaultsPrototype.beforeCreateCollection = lifecycleNoop;
-	defaultsPrototype.beforeCreateInstance = lifecycleNoop;
-	defaultsPrototype.beforeDestroy = lifecycleNoopCb;
-	defaultsPrototype.beforeEject = lifecycleNoop;
-	defaultsPrototype.beforeInject = lifecycleNoop;
-	defaultsPrototype.beforeReap = lifecycleNoop;
-	defaultsPrototype.beforeUpdate = lifecycleNoopCb;
-	defaultsPrototype.beforeValidate = lifecycleNoopCb;
-	defaultsPrototype.bypassCache = false;
-	defaultsPrototype.cacheResponse = !!_utils['default'].w;
-	defaultsPrototype.csp = false;
-	defaultsPrototype.clearEmptyQueries = true;
-	defaultsPrototype.computed = {};
-	defaultsPrototype.defaultAdapter = 'http';
-	defaultsPrototype.debug = false;
-	defaultsPrototype.defaultValues = {};
-	defaultsPrototype.eagerEject = false;
-	// TODO: Implement eagerInject in DS#create
-	defaultsPrototype.eagerInject = false;
-	defaultsPrototype.endpoint = '';
-	defaultsPrototype.error = console ? function (a, b, c) {
-	  return console[typeof console.error === 'function' ? 'error' : 'log'](a, b, c);
-	} : false;
-	defaultsPrototype.errorHandler = function () {
-	  return _utils['default'].Promise.reject(arguments[0]);
-	};
-	defaultsPrototype.fallbackAdapters = ['http'];
-	defaultsPrototype.findStrictCache = false;
-	defaultsPrototype.idAttribute = 'id';
-	defaultsPrototype.ignoredChanges = [/\$/];
-	defaultsPrototype.instanceEvents = !!_utils['default'].w;
-	defaultsPrototype.keepChangeHistory = false;
-	defaultsPrototype.linkRelations = !!_utils['default'].w;
-	defaultsPrototype.log = console ? function (a, b, c, d, e) {
-	  return console[typeof console.info === 'function' ? 'info' : 'log'](a, b, c, d, e);
-	} : false;
-
-	defaultsPrototype.logFn = function (a, b, c, d) {
-	  var _this = this;
-	  if (_this.debug && _this.log && typeof _this.log === 'function') {
-	    _this.log(_this.name || null, a || null, b || null, c || null, d || null);
-	  }
-	};
-
-	defaultsPrototype.maxAge = false;
-	defaultsPrototype.methods = {};
-	defaultsPrototype.notify = !!_utils['default'].w;
-	defaultsPrototype.omit = [];
-	defaultsPrototype.onConflict = 'merge';
-	defaultsPrototype.reapAction = _utils['default'].w ? 'inject' : 'none';
-	defaultsPrototype.reapInterval = _utils['default'].w ? 30000 : false;
-	defaultsPrototype.relationsEnumerable = false;
-	defaultsPrototype.resetHistoryOnInject = true;
-	defaultsPrototype.returnMeta = false;
-	defaultsPrototype.scopes = {};
-	defaultsPrototype.strategy = 'single';
-	defaultsPrototype.upsert = !!_utils['default'].w;
-	defaultsPrototype.useClass = true;
-	defaultsPrototype.useFilter = false;
-	defaultsPrototype.validate = lifecycleNoopCb;
-	defaultsPrototype.watchChanges = !!_utils['default'].w;
-
-	var escapeRegExp = /([.*+?^=!:${}()|[\]\/\\])/g;
-	var percentRegExp = /%/g;
-	var underscoreRegExp = /_/g;
-
-	function escape(pattern) {
-	  return pattern.replace(escapeRegExp, '\\$1');
-	}
-
-	function like(pattern, flags) {
-	  return new RegExp('^' + escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.') + '$', flags);
-	}
-
-	defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
-	  var filtered = collection;
-	  var where = null;
-	  var reserved = {
-	    skip: '',
-	    offset: '',
-	    where: '',
-	    limit: '',
-	    orderBy: '',
-	    sort: ''
-	  };
-
-	  params = params || {};
-	  options = options || {};
-
-	  if (_utils['default']._o(params.where)) {
-	    where = params.where;
-	  } else {
-	    where = {};
-	  }
-
-	  if (options.allowSimpleWhere) {
-	    _utils['default'].forOwn(params, function (value, key) {
-	      if (!(key in reserved) && !(key in where)) {
-	        where[key] = {
-	          '==': value
-	        };
-	      }
-	    });
-	  }
-
-	  if (_utils['default'].isEmpty(where)) {
-	    where = null;
-	  }
-
-	  if (where) {
-	    filtered = _utils['default'].filter(filtered, function (attrs) {
-	      var first = true;
-	      var keep = true;
-	      _utils['default'].forOwn(where, function (clause, field) {
-	        if (!_utils['default']._o(clause)) {
-	          clause = {
-	            '==': clause
-	          };
-	        }
-	        _utils['default'].forOwn(clause, function (term, op) {
-	          var expr = undefined;
-	          var isOr = op[0] === '|';
-	          var val = _utils['default'].get(attrs, field);
-	          op = isOr ? op.substr(1) : op;
-	          if (op === '==') {
-	            expr = val == term; // eslint-disable-line
-	          } else if (op === '===') {
-	              expr = val === term;
-	            } else if (op === '!=') {
-	              expr = val != term; // eslint-disable-line
-	            } else if (op === '!==') {
-	                expr = val !== term;
-	              } else if (op === '>') {
-	                expr = val > term;
-	              } else if (op === '>=') {
-	                expr = val >= term;
-	              } else if (op === '<') {
-	                expr = val < term;
-	              } else if (op === '<=') {
-	                expr = val <= term;
-	              } else if (op === 'isectEmpty') {
-	                expr = !_utils['default'].intersection(val || [], term || []).length;
-	              } else if (op === 'isectNotEmpty') {
-	                expr = _utils['default'].intersection(val || [], term || []).length;
-	              } else if (op === 'in') {
-	                if (_utils['default']._s(term)) {
-	                  expr = term.indexOf(val) !== -1;
-	                } else {
-	                  expr = _utils['default'].contains(term, val);
-	                }
-	              } else if (op === 'notIn') {
-	                if (_utils['default']._s(term)) {
-	                  expr = term.indexOf(val) === -1;
-	                } else {
-	                  expr = !_utils['default'].contains(term, val);
-	                }
-	              } else if (op.indexOf('like') === 0) {
-	                expr = like(term, op.substr(4)).exec(val) !== null;
-	              } else if (op.indexOf('notLike') === 0) {
-	                expr = like(term, op.substr(7)).exec(val) === null;
-	              } else if (op === 'contains') {
-	                if (_utils['default']._s(val)) {
-	                  expr = val.indexOf(term) !== -1;
-	                } else {
-	                  expr = _utils['default'].contains(val, term);
-	                }
-	              } else if (op === 'notContains') {
-	                if (_utils['default']._s(val)) {
-	                  expr = val.indexOf(term) === -1;
-	                } else {
-	                  expr = !_utils['default'].contains(val, term);
-	                }
-	              }
-	          if (expr !== undefined) {
-	            keep = first ? expr : isOr ? keep || expr : keep && expr;
-	          }
-	          first = false;
-	        });
-	      });
-	      return keep;
-	    });
-	  }
-
-	  var orderBy = null;
-
-	  if (_utils['default']._s(params.orderBy)) {
-	    orderBy = [[params.orderBy, 'ASC']];
-	  } else if (_utils['default']._a(params.orderBy)) {
-	    orderBy = params.orderBy;
-	  }
-
-	  if (!orderBy && _utils['default']._s(params.sort)) {
-	    orderBy = [[params.sort, 'ASC']];
-	  } else if (!orderBy && _utils['default']._a(params.sort)) {
-	    orderBy = params.sort;
-	  }
-
-	  // Apply 'orderBy'
-	  if (orderBy) {
-	    (function () {
-	      var index = 0;
-	      _utils['default'].forEach(orderBy, function (def, i) {
-	        if (_utils['default']._s(def)) {
-	          orderBy[i] = [def, 'ASC'];
-	        } else if (!_utils['default']._a(def)) {
-	          throw new _errors['default'].IA('DS.filter("' + resourceName + '"[, params][, options]): ' + _utils['default'].toJson(def) + ': Must be a string or an array!', {
-	            params: {
-	              'orderBy[i]': {
-	                actual: typeof def,
-	                expected: 'string|array'
-	              }
-	            }
-	          });
-	        }
-	      });
-	      filtered = _utils['default'].sort(filtered, function (a, b) {
-	        return compare(orderBy, index, a, b);
-	      });
-	    })();
-	  }
-
-	  var limit = _utils['default']._n(params.limit) ? params.limit : null;
-	  var skip = null;
-
-	  if (_utils['default']._n(params.skip)) {
-	    skip = params.skip;
-	  } else if (_utils['default']._n(params.offset)) {
-	    skip = params.offset;
-	  }
-
-	  // Apply 'limit' and 'skip'
-	  if (limit && skip) {
-	    filtered = _utils['default'].slice(filtered, skip, Math.min(filtered.length, skip + limit));
-	  } else if (_utils['default']._n(limit)) {
-	    filtered = _utils['default'].slice(filtered, 0, Math.min(filtered.length, limit));
-	  } else if (_utils['default']._n(skip)) {
-	    if (skip < filtered.length) {
-	      filtered = _utils['default'].slice(filtered, skip);
-	    } else {
-	      filtered = [];
-	    }
-	  }
-
-	  return filtered === collection ? filtered.slice() : filtered;
-	};
-
-	var DS = (function () {
-	  function DS(options) {
-	    _classCallCheck(this, DS);
-
-	    var _this = this;
-	    options = options || {};
-
-	    _this.store = {};
-	    _this.definitions = {};
-	    _this.adapters = {};
-	    _this.defaults = new Defaults();
-	    _this.observe = _utils['default'].observe;
-	    _utils['default'].forOwn(options, function (v, k) {
-	      if (k === 'omit') {
-	        _this.defaults.omit = v.concat(Defaults.prototype.omit);
-	      } else {
-	        _this.defaults[k] = v;
-	      }
-	    });
-
-	    var P = _utils['default'].Promise;
-
-	    if (P && !P.prototype.spread) {
-	      P.prototype.spread = function (cb) {
-	        return this.then(function (arr) {
-	          return cb.apply(this, arr);
-	        });
-	      };
-	    }
-
-	    _utils['default'].Events(_this);
-	  }
-
-	  _createClass(DS, [{
-	    key: 'getAdapterName',
-	    value: function getAdapterName(options) {
-	      var errorIfNotExist = false;
-	      options = options || {};
-	      if (_utils['default']._s(options)) {
-	        errorIfNotExist = true;
-	        options = {
-	          adapter: options
-	        };
-	      }
-	      if (this.adapters[options.adapter]) {
-	        return options.adapter;
-	      } else if (errorIfNotExist) {
-	        throw new Error(options.adapter + ' is not a registered adapter!');
-	      } else {
-	        return options.defaultAdapter;
-	      }
-	    }
-	  }, {
-	    key: 'getAdapter',
-	    value: function getAdapter(options) {
-	      options = options || {};
-	      return this.adapters[this.getAdapterName(options)];
-	    }
-	  }, {
-	    key: 'registerAdapter',
-	    value: function registerAdapter(name, Adapter, options) {
-	      var _this = this;
-	      options = options || {};
-	      if (_utils['default'].isFunction(Adapter)) {
-	        _this.adapters[name] = new Adapter(options);
-	      } else {
-	        _this.adapters[name] = Adapter;
-	      }
-	      if (options['default']) {
-	        _this.defaults.defaultAdapter = name;
-	      }
-	    }
-	  }, {
-	    key: 'is',
-	    value: function is(resourceName, instance) {
-	      var definition = this.definitions[resourceName];
-	      if (!definition) {
-	        throw new _errors['default'].NER(resourceName);
-	      }
-	      return instance instanceof definition[definition['class']];
-	    }
-	  }, {
-	    key: 'clear',
-	    value: function clear() {
-	      var _this2 = this;
-
-	      var ejected = {};
-	      _utils['default'].forOwn(this.definitions, function (definition) {
-	        var name = definition.name;
-	        ejected[name] = definition.ejectAll();
-	        _this2.store[name].completedQueries = {};
-	        _this2.store[name].queryData = {};
-	      });
-	      return ejected;
-	    }
-	  }, {
-	    key: 'errorFn',
-	    value: function errorFn() {
-	      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	        args[_key] = arguments[_key];
-	      }
-
-	      var options = args[args.length - 1];
-	      var defaultHandler = this.defaults.errorHandler;
-	      var errorHandler = options ? options.errorHandler : defaultHandler;
-	      errorHandler = errorHandler || defaultHandler;
-	      return function (err) {
-	        return errorHandler.apply(undefined, [err].concat(args));
-	      };
-	    }
-	  }]);
-
-	  return DS;
-	})();
-
-	var dsPrototype = DS.prototype;
-
-	dsPrototype.getAdapterName.shorthand = false;
-	dsPrototype.getAdapter.shorthand = false;
-	dsPrototype.registerAdapter.shorthand = false;
-	dsPrototype.errors = _errors['default'];
-	dsPrototype.utils = _utils['default'];
-
-	function addMethods(target, obj) {
-	  _utils['default'].forOwn(obj, function (v, k) {
-	    target[k] = v;
-	    target[k].before = function (fn) {
-	      var orig = target[k];
-	      target[k] = function () {
-	        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-	          args[_key2] = arguments[_key2];
-	        }
-
-	        return orig.apply(this, fn.apply(this, args) || args);
-	      };
-	    };
-	  });
-	}
-
-	addMethods(dsPrototype, _sync_methodsIndex['default']);
-	addMethods(dsPrototype, _async_methodsIndex['default']);
-
-	exports['default'] = DS;
-
-/***/ },
-/* 2 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* jshint eqeqeq:false */
-
-	/**
-	 * Mix of ES6 and CommonJS module imports because the interop of Babel + Webpack + ES6 modules + CommonJS isn't very good.
-	 */
-
-	var _errors = __webpack_require__(3);
-
-	var BinaryHeap = __webpack_require__(4);
-	var forEach = __webpack_require__(5);
-	var slice = __webpack_require__(6);
-	var forOwn = __webpack_require__(7);
-	var contains = __webpack_require__(10);
-	var deepMixIn = __webpack_require__(12);
-	var pascalCase = __webpack_require__(14);
-	var remove = __webpack_require__(21);
-	var pick = __webpack_require__(22);
-	var _keys = __webpack_require__(23);
-	var sort = __webpack_require__(24);
-	var upperCase = __webpack_require__(19);
-	var get = __webpack_require__(25);
-	var set = __webpack_require__(27);
-	var observe = __webpack_require__(29);
-	var w = undefined,
-	    P = undefined,
-	    File = undefined;
-	var objectProto = Object.prototype;
-	var toString = objectProto.toString;
-
-	/**
-	 * Attempt to detect the global Promise constructor.
-	 * JSData will still work without one, as long you do something like this:
-	 *
-	 * var JSData = require('js-data');
-	 * JSData.DSUtils.Promise = MyPromiseLib;
-	 */
-	try {
-	  P = Promise;
-	} catch (e) {
-	  console.error('js-data requires a global Promise constructor!');
-	}
-
-	try {
-	  File = window.File;
-	} catch (e) {
-	  File = function () {};
-	}
-
-	function _isArray(value) {
-	  return toString.call(value) === '[object Array]' || false;
-	}
-
-	var isArray = Array.isArray || _isArray;
-
-	function isRegExp(value) {
-	  return toString.call(value) === '[object RegExp]' || false;
-	}
-
-	// adapted from lodash.isString
-	function isString(value) {
-	  return typeof value === 'string' || value && typeof value === 'object' && toString.call(value) === '[object String]' || false;
-	}
-
-	function isObject(value) {
-	  return toString.call(value) === '[object Object]' || false;
-	}
-
-	// adapted from lodash.isDate
-	function isDate(value) {
-	  return value && typeof value === 'object' && toString.call(value) === '[object Date]' || false;
-	}
-
-	// adapted from lodash.isNumber
-	function isNumber(value) {
-	  var type = typeof value;
-	  return type === 'number' || value && type === 'object' && toString.call(value) === '[object Number]' || false;
-	}
-
-	// adapted from lodash.isFunction
-	function isFunction(value) {
-	  return typeof value === 'function' || value && toString.call(value) === '[object Function]' || false;
-	}
-
-	// shorthand argument checking functions, using these shaves 1.18 kb off of the minified build
-	function isStringOrNumber(value) {
-	  return isString(value) || isNumber(value);
-	}
-
-	function isStringOrNumberErr(field) {
-	  return new _errors['default'].IA('"' + field + '" must be a string or a number!');
-	}
-
-	function isObjectErr(field) {
-	  return new _errors['default'].IA('"' + field + '" must be an object!');
-	}
-
-	function isArrayErr(field) {
-	  return new _errors['default'].IA('"' + field + '" must be an array!');
-	}
-
-	// adapted from mout.isEmpty
-	function isEmpty(val) {
-	  if (val == null) {
-	    // jshint ignore:line
-	    // typeof null == 'object' so we check it first
-	    return true;
-	  } else if (typeof val === 'string' || isArray(val)) {
-	    return !val.length;
-	  } else if (typeof val === 'object') {
-	    var result = true;
-	    forOwn(val, function () {
-	      result = false;
-	      return false; // break loop
-	    });
-	    return result;
-	  } else {
-	    return true;
-	  }
-	}
-
-	// Find the intersection between two arrays
-	function intersection(array1, array2) {
-	  if (!array1 || !array2) {
-	    return [];
-	  }
-	  var result = [];
-	  var item = undefined;
-	  for (var i = 0, _length = array1.length; i < _length; i++) {
-	    item = array1[i];
-	    if (contains(result, item)) {
-	      continue;
-	    }
-	    if (contains(array2, item)) {
-	      result.push(item);
-	    }
-	  }
-	  return result;
-	}
-
-	function filter(array, cb, thisObj) {
-	  var results = [];
-	  forEach(array, function (value, key, arr) {
-	    if (cb(value, key, arr)) {
-	      results.push(value);
-	    }
-	  }, thisObj);
-	  return results;
-	}
-
-	/**
-	 * Attempt to detect whether we are in the browser.
-	 */
-	try {
-	  w = window;
-	  w = {};
-	} catch (e) {
-	  w = null;
-	}
-
-	/**
-	 * Event mixin. Usage:
-	 *
-	 * function handler() { ... }
-	 * Events(myObject);
-	 * myObject.on('foo', handler);
-	 * myObject.emit('foo', 'some', 'data');
-	 * myObject.off('foo', handler);
-	 */
-	function Events(target) {
-	  var events = {};
-	  target = target || this;
-	  Object.defineProperties(target, {
-	    on: {
-	      value: function value(type, func, ctx) {
-	        events[type] = events[type] || [];
-	        events[type].push({
-	          f: func,
-	          c: ctx
-	        });
-	      }
-	    },
-	    off: {
-	      value: function value(type, func) {
-	        var listeners = events[type];
-	        if (!listeners) {
-	          events = {};
-	        } else if (func) {
-	          for (var i = 0; i < listeners.length; i++) {
-	            if (listeners[i].f === func) {
-	              listeners.splice(i, 1);
-	              break;
-	            }
-	          }
-	        } else {
-	          listeners.splice(0, listeners.length);
-	        }
-	      }
-	    },
-	    emit: {
-	      value: function value() {
-	        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	          args[_key] = arguments[_key];
-	        }
-
-	        var listeners = events[args.shift()] || [];
-	        if (listeners) {
-	          for (var i = 0; i < listeners.length; i++) {
-	            listeners[i].f.apply(listeners[i].c, args);
-	          }
-	        }
-	      }
-	    }
-	  });
-	}
-
-	/**
-	 * Lifecycle hooks that should support promises.
-	 */
-	var toPromisify = ['beforeValidate', 'validate', 'afterValidate', 'beforeCreate', 'afterCreate', 'beforeUpdate', 'afterUpdate', 'beforeDestroy', 'afterDestroy'];
-
-	/**
-	 * Return whether "prop" is in the blacklist.
-	 */
-	var isBlacklisted = observe.isBlacklisted;
-
-	// adapted from angular.copy
-	function copy(source, destination, stackSource, stackDest, blacklist) {
-	  if (!destination) {
-	    destination = source;
-	    if (source) {
-	      if (isArray(source)) {
-	        destination = copy(source, [], stackSource, stackDest, blacklist);
-	      } else if (isDate(source)) {
-	        destination = new Date(source.getTime());
-	      } else if (isRegExp(source)) {
-	        destination = new RegExp(source.source, source.toString().match(/[^\/]*$/)[0]);
-	        destination.lastIndex = source.lastIndex;
-	      } else if (isObject(source)) {
-	        destination = copy(source, Object.create(Object.getPrototypeOf(source)), stackSource, stackDest, blacklist);
-	      }
-	    }
-	  } else {
-	    if (source === destination) {
-	      throw new Error('Cannot copy! Source and destination are identical.');
-	    }
-
-	    stackSource = stackSource || [];
-	    stackDest = stackDest || [];
-
-	    if (isObject(source)) {
-	      var index = stackSource.indexOf(source);
-	      if (index !== -1) {
-	        return stackDest[index];
-	      }
-
-	      stackSource.push(source);
-	      stackDest.push(destination);
-	    }
-
-	    var result = undefined;
-	    if (isArray(source)) {
-	      var i = undefined;
-	      destination.length = 0;
-	      for (i = 0; i < source.length; i++) {
-	        result = copy(source[i], null, stackSource, stackDest, blacklist);
-	        if (isObject(source[i])) {
-	          stackSource.push(source[i]);
-	          stackDest.push(result);
-	        }
-	        destination.push(result);
-	      }
-	    } else {
-	      if (isArray(destination)) {
-	        destination.length = 0;
-	      } else {
-	        forEach(destination, function (value, key) {
-	          delete destination[key];
-	        });
-	      }
-	      for (var key in source) {
-	        if (source.hasOwnProperty(key)) {
-	          if (isBlacklisted(key, blacklist)) {
-	            continue;
-	          }
-	          result = copy(source[key], null, stackSource, stackDest, blacklist);
-	          if (isObject(source[key])) {
-	            stackSource.push(source[key]);
-	            stackDest.push(result);
-	          }
-	          destination[key] = result;
-	        }
-	      }
-	    }
-	  }
-	  return destination;
-	}
-
-	// adapted from angular.equals
-	function equals(_x, _x2) {
-	  var _again = true;
-
-	  _function: while (_again) {
-	    var o1 = _x,
-	        o2 = _x2;
-	    t1 = t2 = length = key = keySet = undefined;
-	    _again = false;
-
-	    if (o1 === o2) {
-	      return true;
-	    }
-	    if (o1 === null || o2 === null) {
-	      return false;
-	    }
-	    if (o1 !== o1 && o2 !== o2) {
-	      // eslint-disable-line
-	      return true;
-	    } // NaN === NaN
-	    var t1 = typeof o1;
-	    var t2 = typeof o2;
-	    var length, key, keySet;
-	    if (t1 == t2) {
-	      // eslint-disable-line
-	      if (t1 == 'object') {
-	        // eslint-disable-line
-	        if (isArray(o1)) {
-	          if (!isArray(o2)) {
-	            return false;
-	          }
-	          if ((length = o1.length) === o2.length) {
-	            // jshint ignore:line
-	            for (key = 0; key < length; key++) {
-	              if (!equals(o1[key], o2[key])) {
-	                return false;
-	              }
-	            }
-	            return true;
-	          }
-	        } else if (isDate(o1)) {
-	          if (!isDate(o2)) {
-	            return false;
-	          }
-	          _x = o1.getTime();
-	          _x2 = o2.getTime();
-	          _again = true;
-	          continue _function;
-	        } else if (isRegExp(o1) && isRegExp(o2)) {
-	          return o1.toString() == o2.toString(); // eslint-disable-line
-	        } else {
-	            if (isArray(o2)) {
-	              return false;
-	            }
-	            keySet = {};
-	            for (key in o1) {
-	              if (key.charAt(0) === '$' || isFunction(o1[key])) {
-	                continue;
-	              }
-	              if (!equals(o1[key], o2[key])) {
-	                return false;
-	              }
-	              keySet[key] = true;
-	            }
-	            for (key in o2) {
-	              if (!keySet.hasOwnProperty(key) && key.charAt(0) !== '$' && o2[key] !== undefined && !isFunction(o2[key])) {
-	                return false;
-	              }
-	            }
-	            return true;
-	          }
-	      }
-	    }
-	    return false;
-	  }
-	}
-
-	/**
-	 * Given either an instance or the primary key of an instance, return the primary key.
-	 */
-	function resolveId(definition, idOrInstance) {
-	  if (isString(idOrInstance) || isNumber(idOrInstance)) {
-	    return idOrInstance;
-	  } else if (idOrInstance && definition) {
-	    return idOrInstance[definition.idAttribute] || idOrInstance;
-	  } else {
-	    return idOrInstance;
-	  }
-	}
-
-	/**
-	 * Given either an instance or the primary key of an instance, return the instance.
-	 */
-	function resolveItem(resource, idOrInstance) {
-	  if (resource && (isString(idOrInstance) || isNumber(idOrInstance))) {
-	    return resource.index[idOrInstance] || idOrInstance;
-	  } else {
-	    return idOrInstance;
-	  }
-	}
-
-	function isValidString(val) {
-	  return val != null && val !== ''; // jshint ignore:line
-	}
-
-	function join(items, separator) {
-	  separator = separator || '';
-	  return filter(items, isValidString).join(separator);
-	}
-
-	function makePath() {
-	  for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-	    args[_key2] = arguments[_key2];
-	  }
-
-	  var result = join(args, '/');
-	  return result.replace(/([^:\/]|^)\/{2,}/g, '$1/');
-	}
-
-	exports['default'] = {
-	  Promise: P,
-	  /**
-	   * Method to wrap an "options" object so that it will inherit from
-	   * some parent object, such as a resource definition.
-	   */
-	  _: function _(parent, options) {
-	    var _this = this;
-	    parent = parent || {};
-	    options = options || {};
-	    if (options && options.constructor === parent.constructor) {
-	      return options;
-	    } else if (!isObject(options)) {
-	      throw new _errors['default'].IA('"options" must be an object!');
-	    }
-	    forEach(toPromisify, function (name) {
-	      if (typeof options[name] === 'function' && options[name].toString().indexOf('for (var _len = arg') === -1) {
-	        options[name] = _this.promisify(options[name]);
-	      }
-	    });
-	    // Dynamic constructor function
-	    var O = function Options(attrs) {
-	      var self = this;
-	      forOwn(attrs, function (value, key) {
-	        self[key] = value;
-	      });
-	    };
-	    // Inherit from some parent object
-	    O.prototype = parent;
-	    // Give us a way to get the original options back.
-	    O.prototype.orig = function () {
-	      var orig = {};
-	      forOwn(this, function (value, key) {
-	        orig[key] = value;
-	      });
-	      return orig;
-	    };
-	    return new O(options);
-	  },
-	  _n: isNumber,
-	  _s: isString,
-	  _sn: isStringOrNumber,
-	  _snErr: isStringOrNumberErr,
-	  _o: isObject,
-	  _oErr: isObjectErr,
-	  _a: isArray,
-	  _aErr: isArrayErr,
-	  applyScope: function applyScope(definition, params, options) {
-	    var scope = options.scope;
-	    var _params = copy(params);
-	    if (scope) {
-	      if (isString(scope)) {
-	        scope = [scope];
-	      }
-	    } else {
-	      scope = [];
-	    }
-	    scope.unshift('defaultScope');
-	    forEach(scope, function (_scope) {
-	      var scopeDef = options.scopes[_scope];
-	      if (typeof scopeDef === 'function') {
-	        deepMixIn(params, scopeDef(definition));
-	      } else if (scopeDef) {
-	        deepMixIn(params, scopeDef);
-	      }
-	    });
-	    deepMixIn(params, _params);
-	  },
-	  compute: function compute(fn, field) {
-	    var _this = this;
-	    var args = [];
-	    if (!isObject(fn)) {
-	      forEach(fn.deps, function (dep) {
-	        args.push(get(_this, dep));
-	      });
-	      // compute property
-	      set(_this, field, fn[fn.length - 1].apply(_this, args));
-	    }
-	  },
-	  contains: contains,
-	  copy: copy,
-	  deepMixIn: deepMixIn,
-	  diffObjectFromOldObject: observe.diffObjectFromOldObject,
-	  BinaryHeap: BinaryHeap,
-	  equals: equals,
-	  Events: Events,
-	  filter: filter,
-	  fillIn: function fillIn(target, obj) {
-	    forOwn(obj, function (v, k) {
-	      if (!(k in target)) {
-	        target[k] = v;
-	      }
-	    });
-	    return target;
-	  },
-	  forEach: forEach,
-	  forOwn: forOwn,
-	  fromJson: function fromJson(json) {
-	    return isString(json) ? JSON.parse(json) : json;
-	  },
-	  get: get,
-	  intersection: intersection,
-	  isArray: isArray,
-	  isBlacklisted: isBlacklisted,
-	  isEmpty: isEmpty,
-	  isFunction: isFunction,
-	  isObject: isObject,
-	  isNumber: isNumber,
-	  isString: isString,
-	  keys: _keys,
-	  makePath: makePath,
-	  observe: observe,
-	  omit: function omit(obj, bl) {
-	    var toRemove = [];
-	    forOwn(obj, function (v, k) {
-	      if (isBlacklisted(k, bl)) {
-	        toRemove.push(k);
-	      }
-	    });
-	    forEach(toRemove, function (k) {
-	      delete obj[k];
-	    });
-	    return obj;
-	  },
-	  pascalCase: pascalCase,
-	  pick: pick,
-	  // Turn the given node-style callback function into one that can return a promise.
-	  promisify: function promisify(fn, target) {
-	    var _this = this;
-	    if (!fn) {
-	      return;
-	    } else if (typeof fn !== 'function') {
-	      throw new Error('Can only promisify functions!');
-	    }
-	    return function () {
-	      for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-	        args[_key3] = arguments[_key3];
-	      }
-
-	      return new _this.Promise(function (resolve, reject) {
-	        args.push(function (err, result) {
-	          if (err) {
-	            reject(err);
-	          } else {
-	            resolve(result);
-	          }
-	        });
-
-	        try {
-	          var promise = fn.apply(target || this, args);
-	          if (promise && promise.then) {
-	            promise.then(resolve, reject);
-	          }
-	        } catch (err) {
-	          reject(err);
-	        }
-	      });
-	    };
-	  },
-	  remove: remove,
-	  set: set,
-	  slice: slice,
-	  sort: sort,
-	  toJson: JSON.stringify,
-	  updateTimestamp: function updateTimestamp(timestamp) {
-	    var newTimestamp = typeof Date.now === 'function' ? Date.now() : new Date().getTime();
-	    if (timestamp && newTimestamp <= timestamp) {
-	      return timestamp + 1;
-	    } else {
-	      return newTimestamp;
-	    }
-	  },
-	  upperCase: upperCase,
-	  // Return a copy of "object" with cycles removed.
-	  removeCircular: function removeCircular(object) {
-	    return (function rmCirc(value, ctx) {
-	      var i = undefined;
-	      var nu = undefined;
-
-	      if (typeof value === 'object' && value !== null && !(value instanceof Boolean) && !(value instanceof Date) && !(value instanceof Number) && !(value instanceof RegExp) && !(value instanceof String) && (!File || !(value instanceof File))) {
-	        // check if current object points back to itself
-	        var cur = ctx.cur;
-	        var parent = ctx.ctx;
-	        while (parent) {
-	          if (parent.cur === cur) {
-	            return undefined;
-	          }
-	          parent = parent.ctx;
-	        }
-
-	        if (isArray(value)) {
-	          nu = [];
-	          for (i = 0; i < value.length; i += 1) {
-	            nu[i] = rmCirc(value[i], { ctx: ctx, cur: value[i] });
-	          }
-	        } else {
-	          nu = {};
-	          forOwn(value, function (v, k) {
-	            nu[k] = rmCirc(value[k], { ctx: ctx, cur: value[k] });
-	          });
-	        }
-	        return nu;
-	      }
-	      return value;
-	    })(object, { ctx: null, cur: object });
-	  },
-	  resolveItem: resolveItem,
-	  resolveId: resolveId,
-	  respond: function respond(response, meta, options) {
-	    if (options.returnMeta === 'array') {
-	      return [response, meta];
-	    } else if (options.returnMeta === 'object') {
-	      return { response: response, meta: meta };
-	    } else {
-	      return response;
-	    }
-	  },
-	  w: w,
-	  // This is where the magic of relations happens.
-	  applyRelationGettersToTarget: function applyRelationGettersToTarget(store, definition, target) {
-	    this.forEach(definition.relationList, function (def) {
-	      var relationName = def.relation;
-	      var localField = def.localField;
-	      var localKey = def.localKey;
-	      var foreignKey = def.foreignKey;
-	      var localKeys = def.localKeys;
-	      var foreignKeys = def.foreignKeys;
-	      var enumerable = typeof def.enumerable === 'boolean' ? def.enumerable : !!definition.relationsEnumerable;
-	      if (typeof def.link === 'boolean' ? def.link : !!definition.linkRelations) {
-	        delete target[localField];
-	        var prop = {
-	          enumerable: enumerable
-	        };
-	        if (def.type === 'belongsTo') {
-	          prop.get = function () {
-	            var key = get(this, localKey);
-	            var hasKey = !!(key || key === 0);
-	            return hasKey ? definition.getResource(relationName).get(key) : undefined;
-	          };
-	          prop.set = function (parent) {
-	            if (parent) {
-	              set(this, localKey, get(parent, definition.getResource(relationName).idAttribute));
-	            }
-	            return get(this, localField);
-	          };
-	        } else if (def.type === 'hasMany') {
-	          prop.get = function () {
-	            var params = {};
-	            if (foreignKey) {
-	              params[foreignKey] = this[definition.idAttribute];
-	              return definition.getResource(relationName).defaultFilter.call(store, store.store[relationName].collection, relationName, params, { allowSimpleWhere: true });
-	            } else if (localKeys) {
-	              var keys = get(this, localKeys) || [];
-	              return definition.getResource(relationName).getAll(isArray(keys) ? keys : _keys(keys));
-	            } else if (foreignKeys) {
-	              set(params, 'where.' + foreignKeys + '.contains', this[definition.idAttribute]);
-	              return definition.getResource(relationName).defaultFilter.call(store, store.store[relationName].collection, relationName, params);
-	            }
-	            return undefined;
-	          };
-	          prop.set = function (children) {
-	            var _this2 = this;
-
-	            if (children && children.length) {
-	              (function () {
-	                var id = get(_this2, definition.idAttribute);
-	                if (foreignKey) {
-	                  forEach(children, function (child) {
-	                    set(child, foreignKey, id);
-	                  });
-	                } else if (localKeys) {
-	                  (function () {
-	                    var keys = [];
-	                    forEach(children, function (child) {
-	                      keys.push(get(child, definition.getResource(relationName).idAttribute));
-	                    });
-	                    set(_this2, localKeys, keys);
-	                  })();
-	                } else if (foreignKeys) {
-	                  forEach(children, function (child) {
-	                    var keys = get(child, foreignKeys);
-	                    if (keys) {
-	                      if (!contains(keys, id)) {
-	                        keys.push(id);
-	                      }
-	                    } else {
-	                      set(child, foreignKeys, [id]);
-	                    }
-	                  });
-	                }
-	              })();
-	            }
-	            return get(this, localField);
-	          };
-	        } else if (def.type === 'hasOne') {
-	          if (localKey) {
-	            prop.get = function () {
-	              var key = get(this, localKey);
-	              var hasKey = !!(key || key === 0);
-	              return hasKey ? definition.getResource(relationName).get(key) : undefined;
-	            };
-	            prop.set = function (sibling) {
-	              if (sibling) {
-	                set(this, localKey, get(sibling, definition.getResource(relationName).idAttribute));
-	              }
-	              return get(this, localField);
-	            };
-	          } else {
-	            prop.get = function () {
-	              var params = {};
-	              params[foreignKey] = this[definition.idAttribute];
-	              var items = params[foreignKey] ? definition.getResource(relationName).defaultFilter.call(store, store.store[relationName].collection, relationName, params, { allowSimpleWhere: true }) : [];
-	              if (items.length) {
-	                return items[0];
-	              }
-	              return undefined;
-	            };
-	            prop.set = function (sibling) {
-	              if (sibling) {
-	                set(sibling, foreignKey, get(this, definition.idAttribute));
-	              }
-	              return get(this, localField);
-	            };
-	          }
-	        }
-	        if (def.get) {
-	          (function () {
-	            var orig = prop.get;
-	            prop.get = function () {
-	              var _this3 = this;
-
-	              return def.get(definition, def, this, function () {
-	                for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-	                  args[_key4] = arguments[_key4];
-	                }
-
-	                return orig.apply(_this3, args);
-	              });
-	            };
-	          })();
-	        }
-	        Object.defineProperty(target, localField, prop);
-	      }
-	    });
-	  }
-	};
-
-/***/ },
-/* 3 */
-/***/ function(module, exports) {
-
-	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	/**
-	 * Thrown during a method call when an argument passed into the method is invalid.
-	 */
-
-	var IllegalArgumentError = (function (_Error) {
-	  _inherits(IllegalArgumentError, _Error);
-
-	  function IllegalArgumentError(message) {
-	    _classCallCheck(this, IllegalArgumentError);
-
-	    _get(Object.getPrototypeOf(IllegalArgumentError.prototype), 'constructor', this).call(this);
-	    if (typeof Error.captureStackTrace === 'function') {
-	      Error.captureStackTrace(this, this.constructor);
-	    }
-	    this.type = this.constructor.name;
-	    this.message = message;
-	  }
-
-	  /**
-	   * Thrown when an invariant is violated or unrecoverable error is encountered during execution.
-	   */
-	  return IllegalArgumentError;
-	})(Error);
-
-	var RuntimeError = (function (_Error2) {
-	  _inherits(RuntimeError, _Error2);
-
-	  function RuntimeError(message) {
-	    _classCallCheck(this, RuntimeError);
-
-	    _get(Object.getPrototypeOf(RuntimeError.prototype), 'constructor', this).call(this);
-	    if (typeof Error.captureStackTrace === 'function') {
-	      Error.captureStackTrace(this, this.constructor);
-	    }
-	    this.type = this.constructor.name;
-	    this.message = message;
-	  }
-
-	  /**
-	   * Thrown when attempting to access or work with a non-existent resource.
-	   */
-	  return RuntimeError;
-	})(Error);
-
-	var NonexistentResourceError = (function (_Error3) {
-	  _inherits(NonexistentResourceError, _Error3);
-
-	  function NonexistentResourceError(resourceName) {
-	    _classCallCheck(this, NonexistentResourceError);
-
-	    _get(Object.getPrototypeOf(NonexistentResourceError.prototype), 'constructor', this).call(this);
-	    if (typeof Error.captureStackTrace === 'function') {
-	      Error.captureStackTrace(this, this.constructor);
-	    }
-	    this.type = this.constructor.name;
-	    this.message = resourceName + ' is not a registered resource!';
-	  }
-
-	  return NonexistentResourceError;
-	})(Error);
-
-	exports['default'] = {
-	  IllegalArgumentError: IllegalArgumentError,
-	  IA: IllegalArgumentError,
-	  RuntimeError: RuntimeError,
-	  R: RuntimeError,
-	  NonexistentResourceError: NonexistentResourceError,
-	  NER: NonexistentResourceError
-	};
-
-/***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/*!
-	 * yabh
-	 * @version 1.1.0 - Homepage <http://jmdobry.github.io/yabh/>
-	 * @author Jason Dobry <jason.dobry@gmail.com>
-	 * @copyright (c) 2015 Jason Dobry 
-	 * @license MIT <https://github.com/jmdobry/yabh/blob/master/LICENSE>
-	 * 
-	 * @overview Yet another Binary Heap.
-	 */
-	(function webpackUniversalModuleDefinition(root, factory) {
-		if(true)
-			module.exports = factory();
-		else if(typeof define === 'function' && define.amd)
-			define("yabh", factory);
-		else if(typeof exports === 'object')
-			exports["BinaryHeap"] = factory();
-		else
-			root["BinaryHeap"] = factory();
-	})(this, function() {
-	return /******/ (function(modules) { // webpackBootstrap
-	/******/ 	// The module cache
-	/******/ 	var installedModules = {};
-
-	/******/ 	// The require function
-	/******/ 	function __webpack_require__(moduleId) {
-
-	/******/ 		// Check if module is in cache
-	/******/ 		if(installedModules[moduleId])
-	/******/ 			return installedModules[moduleId].exports;
-
-	/******/ 		// Create a new module (and put it into the cache)
-	/******/ 		var module = installedModules[moduleId] = {
-	/******/ 			exports: {},
-	/******/ 			id: moduleId,
-	/******/ 			loaded: false
-	/******/ 		};
-
-	/******/ 		// Execute the module function
-	/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-
-	/******/ 		// Flag the module as loaded
-	/******/ 		module.loaded = true;
-
-	/******/ 		// Return the exports of the module
-	/******/ 		return module.exports;
-	/******/ 	}
-
-
-	/******/ 	// expose the modules object (__webpack_modules__)
-	/******/ 	__webpack_require__.m = modules;
-
-	/******/ 	// expose the module cache
-	/******/ 	__webpack_require__.c = installedModules;
-
-	/******/ 	// __webpack_public_path__
-	/******/ 	__webpack_require__.p = "";
-
-	/******/ 	// Load entry module and return exports
-	/******/ 	return __webpack_require__(0);
-	/******/ })
-	/************************************************************************/
-	/******/ ([
-	/* 0 */
-	/***/ function(module, exports, __webpack_require__) {
-
-		/**
-		 * @method bubbleUp
-		 * @param {array} heap The heap.
-		 * @param {function} weightFunc The weight function.
-		 * @param {number} n The index of the element to bubble up.
-		 */
-		function bubbleUp(heap, weightFunc, n) {
-		  var element = heap[n];
-		  var weight = weightFunc(element);
-		  // When at 0, an element can not go up any further.
-		  while (n > 0) {
-		    // Compute the parent element's index, and fetch it.
-		    var parentN = Math.floor((n + 1) / 2) - 1;
-		    var _parent = heap[parentN];
-		    // If the parent has a lesser weight, things are in order and we
-		    // are done.
-		    if (weight >= weightFunc(_parent)) {
-		      break;
-		    } else {
-		      heap[parentN] = element;
-		      heap[n] = _parent;
-		      n = parentN;
-		    }
-		  }
-		}
-
-		/**
-		 * @method bubbleDown
-		 * @param {array} heap The heap.
-		 * @param {function} weightFunc The weight function.
-		 * @param {number} n The index of the element to sink down.
-		 */
-		var bubbleDown = function bubbleDown(heap, weightFunc, n) {
-		  var length = heap.length;
-		  var node = heap[n];
-		  var nodeWeight = weightFunc(node);
-
-		  while (true) {
-		    var child2N = (n + 1) * 2,
-		        child1N = child2N - 1;
-		    var swap = null;
-		    if (child1N < length) {
-		      var child1 = heap[child1N],
-		          child1Weight = weightFunc(child1);
-		      // If the score is less than our node's, we need to swap.
-		      if (child1Weight < nodeWeight) {
-		        swap = child1N;
-		      }
-		    }
-		    // Do the same checks for the other child.
-		    if (child2N < length) {
-		      var child2 = heap[child2N],
-		          child2Weight = weightFunc(child2);
-		      if (child2Weight < (swap === null ? nodeWeight : weightFunc(heap[child1N]))) {
-		        swap = child2N;
-		      }
-		    }
-
-		    if (swap === null) {
-		      break;
-		    } else {
-		      heap[n] = heap[swap];
-		      heap[swap] = node;
-		      n = swap;
-		    }
-		  }
-		};
-
-		function BinaryHeap(weightFunc, compareFunc) {
-		  if (!weightFunc) {
-		    weightFunc = function (x) {
-		      return x;
-		    };
-		  }
-		  if (!compareFunc) {
-		    compareFunc = function (x, y) {
-		      return x === y;
-		    };
-		  }
-		  if (typeof weightFunc !== 'function') {
-		    throw new Error('BinaryHeap([weightFunc][, compareFunc]): "weightFunc" must be a function!');
-		  }
-		  if (typeof compareFunc !== 'function') {
-		    throw new Error('BinaryHeap([weightFunc][, compareFunc]): "compareFunc" must be a function!');
-		  }
-		  this.weightFunc = weightFunc;
-		  this.compareFunc = compareFunc;
-		  this.heap = [];
-		}
-
-		var BHProto = BinaryHeap.prototype;
-
-		BHProto.push = function (node) {
-		  this.heap.push(node);
-		  bubbleUp(this.heap, this.weightFunc, this.heap.length - 1);
-		};
-
-		BHProto.peek = function () {
-		  return this.heap[0];
-		};
-
-		BHProto.pop = function () {
-		  var front = this.heap[0];
-		  var end = this.heap.pop();
-		  if (this.heap.length > 0) {
-		    this.heap[0] = end;
-		    bubbleDown(this.heap, this.weightFunc, 0);
-		  }
-		  return front;
-		};
-
-		BHProto.remove = function (node) {
-		  var length = this.heap.length;
-		  for (var i = 0; i < length; i++) {
-		    if (this.compareFunc(this.heap[i], node)) {
-		      var removed = this.heap[i];
-		      var end = this.heap.pop();
-		      if (i !== length - 1) {
-		        this.heap[i] = end;
-		        bubbleUp(this.heap, this.weightFunc, i);
-		        bubbleDown(this.heap, this.weightFunc, i);
-		      }
-		      return removed;
-		    }
-		  }
-		  return null;
-		};
-
-		BHProto.removeAll = function () {
-		  this.heap = [];
-		};
-
-		BHProto.size = function () {
-		  return this.heap.length;
-		};
-
-		module.exports = BinaryHeap;
-
-	/***/ }
-	/******/ ])
-	});
-	;
-
-/***/ },
-/* 5 */
-/***/ function(module, exports) {
-
-	
-
-	    /**
-	     * Array forEach
-	     */
-	    function forEach(arr, callback, thisObj) {
-	        if (arr == null) {
-	            return;
-	        }
-	        var i = -1,
-	            len = arr.length;
-	        while (++i < len) {
-	            // we iterate over sparse items since there is no way to make it
-	            // work properly on IE 7-8. see #64
-	            if ( callback.call(thisObj, arr[i], i, arr) === false ) {
-	                break;
-	            }
-	        }
-	    }
-
-	    module.exports = forEach;
-
-
-
-
-/***/ },
-/* 6 */
-/***/ function(module, exports) {
-
-	
-
-	    /**
-	     * Create slice of source array or array-like object
-	     */
-	    function slice(arr, start, end){
-	        var len = arr.length;
-
-	        if (start == null) {
-	            start = 0;
-	        } else if (start < 0) {
-	            start = Math.max(len + start, 0);
-	        } else {
-	            start = Math.min(start, len);
-	        }
-
-	        if (end == null) {
-	            end = len;
-	        } else if (end < 0) {
-	            end = Math.max(len + end, 0);
-	        } else {
-	            end = Math.min(end, len);
-	        }
-
-	        var result = [];
-	        while (start < end) {
-	            result.push(arr[start++]);
-	        }
-
-	        return result;
-	    }
-
-	    module.exports = slice;
-
-
-
-
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var hasOwn = __webpack_require__(8);
-	var forIn = __webpack_require__(9);
-
-	    /**
-	     * Similar to Array/forEach but works over object properties and fixes Don't
-	     * Enum bug on IE.
-	     * based on: http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
-	     */
-	    function forOwn(obj, fn, thisObj){
-	        forIn(obj, function(val, key){
-	            if (hasOwn(obj, key)) {
-	                return fn.call(thisObj, obj[key], key, obj);
-	            }
-	        });
-	    }
-
-	    module.exports = forOwn;
-
-
-
-
-/***/ },
-/* 8 */
-/***/ function(module, exports) {
-
-	
-
-	    /**
-	     * Safer Object.hasOwnProperty
-	     */
-	     function hasOwn(obj, prop){
-	         return Object.prototype.hasOwnProperty.call(obj, prop);
-	     }
-
-	     module.exports = hasOwn;
-
-
-
-
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var hasOwn = __webpack_require__(8);
-
-	    var _hasDontEnumBug,
-	        _dontEnums;
-
-	    function checkDontEnum(){
-	        _dontEnums = [
-	                'toString',
-	                'toLocaleString',
-	                'valueOf',
-	                'hasOwnProperty',
-	                'isPrototypeOf',
-	                'propertyIsEnumerable',
-	                'constructor'
-	            ];
-
-	        _hasDontEnumBug = true;
-
-	        for (var key in {'toString': null}) {
-	            _hasDontEnumBug = false;
-	        }
-	    }
-
-	    /**
-	     * Similar to Array/forEach but works over object properties and fixes Don't
-	     * Enum bug on IE.
-	     * based on: http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
-	     */
-	    function forIn(obj, fn, thisObj){
-	        var key, i = 0;
-	        // no need to check if argument is a real object that way we can use
-	        // it for arrays, functions, date, etc.
-
-	        //post-pone check till needed
-	        if (_hasDontEnumBug == null) checkDontEnum();
-
-	        for (key in obj) {
-	            if (exec(fn, obj, key, thisObj) === false) {
-	                break;
-	            }
-	        }
-
-
-	        if (_hasDontEnumBug) {
-	            var ctor = obj.constructor,
-	                isProto = !!ctor && obj === ctor.prototype;
-
-	            while (key = _dontEnums[i++]) {
-	                // For constructor, if it is a prototype object the constructor
-	                // is always non-enumerable unless defined otherwise (and
-	                // enumerated above).  For non-prototype objects, it will have
-	                // to be defined on this object, since it cannot be defined on
-	                // any prototype objects.
-	                //
-	                // For other [[DontEnum]] properties, check if the value is
-	                // different than Object prototype value.
-	                if (
-	                    (key !== 'constructor' ||
-	                        (!isProto && hasOwn(obj, key))) &&
-	                    obj[key] !== Object.prototype[key]
-	                ) {
-	                    if (exec(fn, obj, key, thisObj) === false) {
-	                        break;
-	                    }
-	                }
-	            }
-	        }
-	    }
-
-	    function exec(fn, obj, key, thisObj){
-	        return fn.call(thisObj, obj[key], key, obj);
-	    }
-
-	    module.exports = forIn;
-
-
-
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var indexOf = __webpack_require__(11);
-
-	    /**
-	     * If array contains values.
-	     */
-	    function contains(arr, val) {
-	        return indexOf(arr, val) !== -1;
-	    }
-	    module.exports = contains;
-
-
-
-/***/ },
-/* 11 */
-/***/ function(module, exports) {
-
-	
-
-	    /**
-	     * Array.indexOf
-	     */
-	    function indexOf(arr, item, fromIndex) {
-	        fromIndex = fromIndex || 0;
-	        if (arr == null) {
-	            return -1;
-	        }
-
-	        var len = arr.length,
-	            i = fromIndex < 0 ? len + fromIndex : fromIndex;
-	        while (i < len) {
-	            // we iterate over sparse items since there is no way to make it
-	            // work properly on IE 7-8. see #64
-	            if (arr[i] === item) {
-	                return i;
-	            }
-
-	            i++;
-	        }
-
-	        return -1;
-	    }
-
-	    module.exports = indexOf;
-
-
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var forOwn = __webpack_require__(7);
-	var isPlainObject = __webpack_require__(13);
-
-	    /**
-	     * Mixes objects into the target object, recursively mixing existing child
-	     * objects.
-	     */
-	    function deepMixIn(target, objects) {
-	        var i = 0,
-	            n = arguments.length,
-	            obj;
-
-	        while(++i < n){
-	            obj = arguments[i];
-	            if (obj) {
-	                forOwn(obj, copyProp, target);
-	            }
-	        }
-
-	        return target;
-	    }
-
-	    function copyProp(val, key) {
-	        var existing = this[key];
-	        if (isPlainObject(val) && isPlainObject(existing)) {
-	            deepMixIn(existing, val);
-	        } else {
-	            this[key] = val;
-	        }
-	    }
-
-	    module.exports = deepMixIn;
-
-
-
-
-/***/ },
-/* 13 */
-/***/ function(module, exports) {
-
-	
-
-	    /**
-	     * Checks if the value is created by the `Object` constructor.
-	     */
-	    function isPlainObject(value) {
-	        return (!!value && typeof value === 'object' &&
-	            value.constructor === Object);
-	    }
-
-	    module.exports = isPlainObject;
-
-
-
-
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(15);
-	var camelCase = __webpack_require__(16);
-	var upperCase = __webpack_require__(19);
-	    /**
-	     * camelCase + UPPERCASE first char
-	     */
-	    function pascalCase(str){
-	        str = toString(str);
-	        return camelCase(str).replace(/^[a-z]/, upperCase);
-	    }
-
-	    module.exports = pascalCase;
-
-
-
-/***/ },
-/* 15 */
-/***/ function(module, exports) {
-
-	
-
-	    /**
-	     * Typecast a value to a String, using an empty string value for null or
-	     * undefined.
-	     */
-	    function toString(val){
-	        return val == null ? '' : val.toString();
-	    }
-
-	    module.exports = toString;
-
-
-
-
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(15);
-	var replaceAccents = __webpack_require__(17);
-	var removeNonWord = __webpack_require__(18);
-	var upperCase = __webpack_require__(19);
-	var lowerCase = __webpack_require__(20);
-	    /**
-	    * Convert string to camelCase text.
-	    */
-	    function camelCase(str){
-	        str = toString(str);
-	        str = replaceAccents(str);
-	        str = removeNonWord(str)
-	            .replace(/[\-_]/g, ' ') //convert all hyphens and underscores to spaces
-	            .replace(/\s[a-z]/g, upperCase) //convert first char of each word to UPPERCASE
-	            .replace(/\s+/g, '') //remove spaces
-	            .replace(/^[A-Z]/g, lowerCase); //convert first char to lowercase
-	        return str;
-	    }
-	    module.exports = camelCase;
-
-
-
-/***/ },
-/* 17 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(15);
-	    /**
-	    * Replaces all accented chars with regular ones
-	    */
-	    function replaceAccents(str){
-	        str = toString(str);
-
-	        // verifies if the String has accents and replace them
-	        if (str.search(/[\xC0-\xFF]/g) > -1) {
-	            str = str
-	                    .replace(/[\xC0-\xC5]/g, "A")
-	                    .replace(/[\xC6]/g, "AE")
-	                    .replace(/[\xC7]/g, "C")
-	                    .replace(/[\xC8-\xCB]/g, "E")
-	                    .replace(/[\xCC-\xCF]/g, "I")
-	                    .replace(/[\xD0]/g, "D")
-	                    .replace(/[\xD1]/g, "N")
-	                    .replace(/[\xD2-\xD6\xD8]/g, "O")
-	                    .replace(/[\xD9-\xDC]/g, "U")
-	                    .replace(/[\xDD]/g, "Y")
-	                    .replace(/[\xDE]/g, "P")
-	                    .replace(/[\xE0-\xE5]/g, "a")
-	                    .replace(/[\xE6]/g, "ae")
-	                    .replace(/[\xE7]/g, "c")
-	                    .replace(/[\xE8-\xEB]/g, "e")
-	                    .replace(/[\xEC-\xEF]/g, "i")
-	                    .replace(/[\xF1]/g, "n")
-	                    .replace(/[\xF2-\xF6\xF8]/g, "o")
-	                    .replace(/[\xF9-\xFC]/g, "u")
-	                    .replace(/[\xFE]/g, "p")
-	                    .replace(/[\xFD\xFF]/g, "y");
-	        }
-	        return str;
-	    }
-	    module.exports = replaceAccents;
-
-
-
-/***/ },
-/* 18 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(15);
-	    // This pattern is generated by the _build/pattern-removeNonWord.js script
-	    var PATTERN = /[^\x20\x2D0-9A-Z\x5Fa-z\xC0-\xD6\xD8-\xF6\xF8-\xFF]/g;
-
-	    /**
-	     * Remove non-word chars.
-	     */
-	    function removeNonWord(str){
-	        str = toString(str);
-	        return str.replace(PATTERN, '');
-	    }
-
-	    module.exports = removeNonWord;
-
-
-
-/***/ },
-/* 19 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(15);
-	    /**
-	     * "Safer" String.toUpperCase()
-	     */
-	    function upperCase(str){
-	        str = toString(str);
-	        return str.toUpperCase();
-	    }
-	    module.exports = upperCase;
-
-
-
-/***/ },
-/* 20 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toString = __webpack_require__(15);
-	    /**
-	     * "Safer" String.toLowerCase()
-	     */
-	    function lowerCase(str){
-	        str = toString(str);
-	        return str.toLowerCase();
-	    }
-
-	    module.exports = lowerCase;
-
-
-
-/***/ },
-/* 21 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var indexOf = __webpack_require__(11);
-
-	    /**
-	     * Remove a single item from the array.
-	     * (it won't remove duplicates, just a single item)
-	     */
-	    function remove(arr, item){
-	        var idx = indexOf(arr, item);
-	        if (idx !== -1) arr.splice(idx, 1);
-	    }
-
-	    module.exports = remove;
-
-
-
-/***/ },
-/* 22 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var slice = __webpack_require__(6);
-
-	    /**
-	     * Return a copy of the object, filtered to only have values for the whitelisted keys.
-	     */
-	    function pick(obj, var_keys){
-	        var keys = typeof arguments[1] !== 'string'? arguments[1] : slice(arguments, 1),
-	            out = {},
-	            i = 0, key;
-	        while (key = keys[i++]) {
-	            out[key] = obj[key];
-	        }
-	        return out;
-	    }
-
-	    module.exports = pick;
-
-
-
-
-/***/ },
-/* 23 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var forOwn = __webpack_require__(7);
-
-	    /**
-	     * Get object keys
-	     */
-	     var keys = Object.keys || function (obj) {
-	            var keys = [];
-	            forOwn(obj, function(val, key){
-	                keys.push(key);
-	            });
-	            return keys;
-	        };
-
-	    module.exports = keys;
-
-
-
-
-/***/ },
-/* 24 */
-/***/ function(module, exports) {
-
-	
-
-	    /**
-	     * Merge sort (http://en.wikipedia.org/wiki/Merge_sort)
-	     */
-	    function mergeSort(arr, compareFn) {
-	        if (arr == null) {
-	            return [];
-	        } else if (arr.length < 2) {
-	            return arr;
-	        }
-
-	        if (compareFn == null) {
-	            compareFn = defaultCompare;
-	        }
-
-	        var mid, left, right;
-
-	        mid   = ~~(arr.length / 2);
-	        left  = mergeSort( arr.slice(0, mid), compareFn );
-	        right = mergeSort( arr.slice(mid, arr.length), compareFn );
-
-	        return merge(left, right, compareFn);
-	    }
-
-	    function defaultCompare(a, b) {
-	        return a < b ? -1 : (a > b? 1 : 0);
-	    }
-
-	    function merge(left, right, compareFn) {
-	        var result = [];
-
-	        while (left.length && right.length) {
-	            if (compareFn(left[0], right[0]) <= 0) {
-	                // if 0 it should preserve same order (stable)
-	                result.push(left.shift());
-	            } else {
-	                result.push(right.shift());
-	            }
-	        }
-
-	        if (left.length) {
-	            result.push.apply(result, left);
-	        }
-
-	        if (right.length) {
-	            result.push.apply(result, right);
-	        }
-
-	        return result;
-	    }
-
-	    module.exports = mergeSort;
-
-
-
-
-/***/ },
-/* 25 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var isPrimitive = __webpack_require__(26);
-
-	    /**
-	     * get "nested" object property
-	     */
-	    function get(obj, prop){
-	        var parts = prop.split('.'),
-	            last = parts.pop();
-
-	        while (prop = parts.shift()) {
-	            obj = obj[prop];
-	            if (obj == null) return;
-	        }
-
-	        return obj[last];
-	    }
-
-	    module.exports = get;
-
-
-
-
-/***/ },
-/* 26 */
-/***/ function(module, exports) {
-
-	
-
-	    /**
-	     * Checks if the object is a primitive
-	     */
-	    function isPrimitive(value) {
-	        // Using switch fallthrough because it's simple to read and is
-	        // generally fast: http://jsperf.com/testing-value-is-primitive/5
-	        switch (typeof value) {
-	            case "string":
-	            case "number":
-	            case "boolean":
-	                return true;
-	        }
-
-	        return value == null;
-	    }
-
-	    module.exports = isPrimitive;
-
-
-
-
-/***/ },
-/* 27 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var namespace = __webpack_require__(28);
-
-	    /**
-	     * set "nested" object property
-	     */
-	    function set(obj, prop, val){
-	        var parts = (/^(.+)\.(.+)$/).exec(prop);
-	        if (parts){
-	            namespace(obj, parts[1])[parts[2]] = val;
-	        } else {
-	            obj[prop] = val;
-	        }
-	    }
-
-	    module.exports = set;
-
-
-
-
-/***/ },
-/* 28 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var forEach = __webpack_require__(5);
-
-	    /**
-	     * Create nested object if non-existent
-	     */
-	    function namespace(obj, path){
-	        if (!path) return obj;
-	        forEach(path.split('.'), function(key){
-	            if (!obj[key]) {
-	                obj[key] = {};
-	            }
-	            obj = obj[key];
-	        });
-	        return obj;
-	    }
-
-	    module.exports = namespace;
-
-
-
-
-/***/ },
-/* 29 */
-/***/ function(module, exports) {
-
-	/*
-	 * Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
-	 * This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-	 * The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-	 * The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-	 * Code distributed by Google as part of the polymer project is also
-	 * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
-	 */
-
-	// Modifications
-	// Copyright 2014-2015 Jason Dobry
-	//
-	// Summary of modifications:
-	// Fixed use of "delete" keyword for IE8 compatibility
-	// Exposed diffObjectFromOldObject on the exported object
-	// Added the "equals" argument to diffObjectFromOldObject to be used to check equality
-	// Added a way in diffObjectFromOldObject to ignore changes to certain properties
-	// Removed all code related to:
-	// - ArrayObserver
-	// - ArraySplice
-	// - PathObserver
-	// - CompoundObserver
-	// - Path
-	// - ObserverTransform
-
-	(function(global) {
-	  var testingExposeCycleCount = global.testingExposeCycleCount;
-
-	  // Detect and do basic sanity checking on Object/Array.observe.
-	  function detectObjectObserve() {
-	    if (typeof Object.observe !== 'function' ||
-	        typeof Array.observe !== 'function') {
-	      return false;
-	    }
-
-	    var records = [];
-
-	    function callback(recs) {
-	      records = recs;
-	    }
-
-	    var test = {};
-	    var arr = [];
-	    Object.observe(test, callback);
-	    Array.observe(arr, callback);
-	    test.id = 1;
-	    test.id = 2;
-	    delete test.id;
-	    arr.push(1, 2);
-	    arr.length = 0;
-
-	    Object.deliverChangeRecords(callback);
-	    if (records.length !== 5)
-	      return false;
-
-	    if (records[0].type != 'add' ||
-	        records[1].type != 'update' ||
-	        records[2].type != 'delete' ||
-	        records[3].type != 'splice' ||
-	        records[4].type != 'splice') {
-	      return false;
-	    }
-
-	    Object.unobserve(test, callback);
-	    Array.unobserve(arr, callback);
-
-	    return true;
-	  }
-
-	  var hasObserve = detectObjectObserve();
-
-	  var createObject = ('__proto__' in {}) ?
-	    function(obj) { return obj; } :
-	    function(obj) {
-	      var proto = obj.__proto__;
-	      if (!proto)
-	        return obj;
-	      var newObject = Object.create(proto);
-	      Object.getOwnPropertyNames(obj).forEach(function(name) {
-	        Object.defineProperty(newObject, name,
-	                             Object.getOwnPropertyDescriptor(obj, name));
-	      });
-	      return newObject;
-	    };
-
-	  var MAX_DIRTY_CHECK_CYCLES = 1000;
-
-	  function dirtyCheck(observer) {
-	    var cycles = 0;
-	    while (cycles < MAX_DIRTY_CHECK_CYCLES && observer.check_()) {
-	      cycles++;
-	    }
-	    if (testingExposeCycleCount)
-	      global.dirtyCheckCycleCount = cycles;
-
-	    return cycles > 0;
-	  }
-
-	  function objectIsEmpty(object) {
-	    for (var prop in object)
-	      return false;
-	    return true;
-	  }
-
-	  function diffIsEmpty(diff) {
-	    return objectIsEmpty(diff.added) &&
-	           objectIsEmpty(diff.removed) &&
-	           objectIsEmpty(diff.changed);
-	  }
-
-	  function isBlacklisted(prop, bl) {
-	    if (!bl || !bl.length) {
-	      return false;
-	    }
-	    var matches;
-	    for (var i = 0; i < bl.length; i++) {
-	      if ((Object.prototype.toString.call(bl[i]) === '[object RegExp]' && bl[i].test(prop)) || bl[i] === prop) {
-	        return matches = prop;
-	      }
-	    }
-	    return !!matches;
-	  }
-
-	  function diffObjectFromOldObject(object, oldObject, equals, bl) {
-	    var added = {};
-	    var removed = {};
-	    var changed = {};
-
-	    for (var prop in oldObject) {
-	      var newValue = object[prop];
-
-	      if (isBlacklisted(prop, bl))
-	        continue;
-
-	      if (newValue !== undefined && (equals ? equals(newValue, oldObject[prop]) : newValue === oldObject[prop]))
-	        continue;
-
-	      if (!(prop in object)) {
-	        removed[prop] = undefined;
-	        continue;
-	      }
-
-	      if (equals ? !equals(newValue, oldObject[prop]) : newValue !== oldObject[prop])
-	        changed[prop] = newValue;
-	    }
-
-	    for (var prop in object) {
-	      if (prop in oldObject)
-	        continue;
-
-	      if (isBlacklisted(prop, bl))
-	        continue;
-
-	      added[prop] = object[prop];
-	    }
-
-	    if (Array.isArray(object) && object.length !== oldObject.length)
-	      changed.length = object.length;
-
-	    return {
-	      added: added,
-	      removed: removed,
-	      changed: changed
-	    };
-	  }
-
-	  var eomTasks = [];
-	  function runEOMTasks() {
-	    if (!eomTasks.length)
-	      return false;
-
-	    for (var i = 0; i < eomTasks.length; i++) {
-	      eomTasks[i]();
-	    }
-	    eomTasks.length = 0;
-	    return true;
-	  }
-
-	  var runEOM = hasObserve ? (function(){
-	    return function(fn) {
-	      return Promise.resolve().then(fn);
-	    }
-	  })() :
-	  (function() {
-	    return function(fn) {
-	      eomTasks.push(fn);
-	    };
-	  })();
-
-	  var observedObjectCache = [];
-
-	  function newObservedObject() {
-	    var observer;
-	    var object;
-	    var discardRecords = false;
-	    var first = true;
-
-	    function callback(records) {
-	      if (observer && observer.state_ === OPENED && !discardRecords)
-	        observer.check_(records);
-	    }
-
-	    return {
-	      open: function(obs) {
-	        if (observer)
-	          throw Error('ObservedObject in use');
-
-	        if (!first)
-	          Object.deliverChangeRecords(callback);
-
-	        observer = obs;
-	        first = false;
-	      },
-	      observe: function(obj, arrayObserve) {
-	        object = obj;
-	        if (arrayObserve)
-	          Array.observe(object, callback);
-	        else
-	          Object.observe(object, callback);
-	      },
-	      deliver: function(discard) {
-	        discardRecords = discard;
-	        Object.deliverChangeRecords(callback);
-	        discardRecords = false;
-	      },
-	      close: function() {
-	        observer = undefined;
-	        Object.unobserve(object, callback);
-	        observedObjectCache.push(this);
-	      }
-	    };
-	  }
-
-	  function getObservedObject(observer, object, arrayObserve) {
-	    var dir = observedObjectCache.pop() || newObservedObject();
-	    dir.open(observer);
-	    dir.observe(object, arrayObserve);
-	    return dir;
-	  }
-
-	  var UNOPENED = 0;
-	  var OPENED = 1;
-	  var CLOSED = 2;
-
-	  var nextObserverId = 1;
-
-	  function Observer() {
-	    this.state_ = UNOPENED;
-	    this.callback_ = undefined;
-	    this.target_ = undefined; // TODO(rafaelw): Should be WeakRef
-	    this.directObserver_ = undefined;
-	    this.value_ = undefined;
-	    this.id_ = nextObserverId++;
-	  }
-
-	  Observer.prototype = {
-	    open: function(callback, target) {
-	      if (this.state_ != UNOPENED)
-	        throw Error('Observer has already been opened.');
-
-	      addToAll(this);
-	      this.callback_ = callback;
-	      this.target_ = target;
-	      this.connect_();
-	      this.state_ = OPENED;
-	      return this.value_;
-	    },
-
-	    close: function() {
-	      if (this.state_ != OPENED)
-	        return;
-
-	      removeFromAll(this);
-	      this.disconnect_();
-	      this.value_ = undefined;
-	      this.callback_ = undefined;
-	      this.target_ = undefined;
-	      this.state_ = CLOSED;
-	    },
-
-	    deliver: function() {
-	      if (this.state_ != OPENED)
-	        return;
-
-	      dirtyCheck(this);
-	    },
-
-	    report_: function(changes) {
-	      try {
-	        this.callback_.apply(this.target_, changes);
-	      } catch (ex) {
-	        Observer._errorThrownDuringCallback = true;
-	        console.error('Exception caught during observer callback: ' +
-	                       (ex.stack || ex));
-	      }
-	    },
-
-	    discardChanges: function() {
-	      this.check_(undefined, true);
-	      return this.value_;
-	    }
-	  }
-
-	  var collectObservers = !hasObserve;
-	  var allObservers;
-	  Observer._allObserversCount = 0;
-
-	  if (collectObservers) {
-	    allObservers = [];
-	  }
-
-	  function addToAll(observer) {
-	    Observer._allObserversCount++;
-	    if (!collectObservers)
-	      return;
-
-	    allObservers.push(observer);
-	  }
-
-	  function removeFromAll(observer) {
-	    Observer._allObserversCount--;
-	  }
-
-	  var runningMicrotaskCheckpoint = false;
-
-	  global.Platform = global.Platform || {};
-
-	  global.Platform.performMicrotaskCheckpoint = function() {
-	    if (runningMicrotaskCheckpoint)
-	      return;
-
-	    if (!collectObservers)
-	      return;
-
-	    runningMicrotaskCheckpoint = true;
-
-	    var cycles = 0;
-	    var anyChanged, toCheck;
-
-	    do {
-	      cycles++;
-	      toCheck = allObservers;
-	      allObservers = [];
-	      anyChanged = false;
-
-	      for (var i = 0; i < toCheck.length; i++) {
-	        var observer = toCheck[i];
-	        if (observer.state_ != OPENED)
-	          continue;
-
-	        if (observer.check_())
-	          anyChanged = true;
-
-	        allObservers.push(observer);
-	      }
-	      if (runEOMTasks())
-	        anyChanged = true;
-	    } while (cycles < MAX_DIRTY_CHECK_CYCLES && anyChanged);
-
-	    if (testingExposeCycleCount)
-	      global.dirtyCheckCycleCount = cycles;
-
-	    runningMicrotaskCheckpoint = false;
-	  };
-
-	  if (collectObservers) {
-	    global.Platform.clearObservers = function() {
-	      allObservers = [];
-	    };
-	  }
-
-	  function ObjectObserver(object) {
-	    Observer.call(this);
-	    this.value_ = object;
-	    this.oldObject_ = undefined;
-	  }
-
-	  ObjectObserver.prototype = createObject({
-	    __proto__: Observer.prototype,
-
-	    arrayObserve: false,
-
-	    connect_: function(callback, target) {
-	      if (hasObserve) {
-	        this.directObserver_ = getObservedObject(this, this.value_,
-	                                                 this.arrayObserve);
-	      } else {
-	        this.oldObject_ = this.copyObject(this.value_);
-	      }
-
-	    },
-
-	    copyObject: function(object) {
-	      var copy = Array.isArray(object) ? [] : {};
-	      for (var prop in object) {
-	        copy[prop] = object[prop];
-	      };
-	      if (Array.isArray(object))
-	        copy.length = object.length;
-	      return copy;
-	    },
-
-	    check_: function(changeRecords, skipChanges) {
-	      var diff;
-	      var oldValues;
-	      if (hasObserve) {
-	        if (!changeRecords)
-	          return false;
-
-	        oldValues = {};
-	        diff = diffObjectFromChangeRecords(this.value_, changeRecords,
-	                                           oldValues);
-	      } else {
-	        oldValues = this.oldObject_;
-	        diff = diffObjectFromOldObject(this.value_, this.oldObject_);
-	      }
-
-	      if (diffIsEmpty(diff))
-	        return false;
-
-	      if (!hasObserve)
-	        this.oldObject_ = this.copyObject(this.value_);
-
-	      this.report_([
-	        diff.added || {},
-	        diff.removed || {},
-	        diff.changed || {},
-	        function(property) {
-	          return oldValues[property];
-	        }
-	      ]);
-
-	      return true;
-	    },
-
-	    disconnect_: function() {
-	      if (hasObserve) {
-	        this.directObserver_.close();
-	        this.directObserver_ = undefined;
-	      } else {
-	        this.oldObject_ = undefined;
-	      }
-	    },
-
-	    deliver: function() {
-	      if (this.state_ != OPENED)
-	        return;
-
-	      if (hasObserve)
-	        this.directObserver_.deliver(false);
-	      else
-	        dirtyCheck(this);
-	    },
-
-	    discardChanges: function() {
-	      if (this.directObserver_)
-	        this.directObserver_.deliver(true);
-	      else
-	        this.oldObject_ = this.copyObject(this.value_);
-
-	      return this.value_;
-	    }
-	  });
-
-	  var observerSentinel = {};
-
-	  var expectedRecordTypes = {
-	    add: true,
-	    update: true,
-	    'delete': true
-	  };
-
-	  function diffObjectFromChangeRecords(object, changeRecords, oldValues) {
-	    var added = {};
-	    var removed = {};
-
-	    for (var i = 0; i < changeRecords.length; i++) {
-	      var record = changeRecords[i];
-	      if (!expectedRecordTypes[record.type]) {
-	        console.error('Unknown changeRecord type: ' + record.type);
-	        console.error(record);
-	        continue;
-	      }
-
-	      if (!(record.name in oldValues))
-	        oldValues[record.name] = record.oldValue;
-
-	      if (record.type == 'update')
-	        continue;
-
-	      if (record.type == 'add') {
-	        if (record.name in removed)
-	          delete removed[record.name];
-	        else
-	          added[record.name] = true;
-
-	        continue;
-	      }
-
-	      // type = 'delete'
-	      if (record.name in added) {
-	        delete added[record.name];
-	        delete oldValues[record.name];
-	      } else {
-	        removed[record.name] = true;
-	      }
-	    }
-
-	    for (var prop in added)
-	      added[prop] = object[prop];
-
-	    for (var prop in removed)
-	      removed[prop] = undefined;
-
-	    var changed = {};
-	    for (var prop in oldValues) {
-	      if (prop in added || prop in removed)
-	        continue;
-
-	      var newValue = object[prop];
-	      if (oldValues[prop] !== newValue)
-	        changed[prop] = newValue;
-	    }
-
-	    return {
-	      added: added,
-	      removed: removed,
-	      changed: changed
-	    };
-	  }
-
-	  // Export the observe-js object for **Node.js**, with backwards-compatibility
-	  // for the old `require()` API. Also ensure `exports` is not a DOM Element.
-	  // If we're in the browser, export as a global object.
-
-	  global.Observer = Observer;
-	  global.isBlacklisted = isBlacklisted;
-	  global.Observer.runEOM_ = runEOM;
-	  global.Observer.observerSentinel_ = observerSentinel; // for testing.
-	  global.Observer.hasObjectObserve = hasObserve;
-	  global.diffObjectFromOldObject = diffObjectFromOldObject;
-	  global.ObjectObserver = ObjectObserver;
-
-	})(exports);
-
-
-/***/ },
-/* 30 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _utils = __webpack_require__(2);
-
-	var _errors = __webpack_require__(3);
-
-	var NER = _errors['default'].NER;
-	var IA = _errors['default'].IA;
-	var R = _errors['default'].R;
-
-	var fakeId = 'DS_' + new Date().getTime();
-
-	function diffIsEmpty(diff) {
-	  return !(_utils['default'].isEmpty(diff.added) && _utils['default'].isEmpty(diff.removed) && _utils['default'].isEmpty(diff.changed));
-	}
-
-	function check(fnName, resourceName, id, options) {
-	  var _this = this;
-	  var definition = _this.definitions[resourceName];
-	  options = options || {};
-
-	  id = _utils['default'].resolveId(definition, id);
-	  if (!definition) {
-	    throw new NER(resourceName);
-	  } else if (!_utils['default']._sn(id)) {
-	    throw _utils['default']._snErr('id');
-	  }
-	  id = id === fakeId ? undefined : id;
-
-	  options = _utils['default']._(definition, options);
-
-
-	  return { _this: _this, definition: definition, _resourceName: resourceName, _id: id, _options: options };
-	}
-
-	exports['default'] = {
-	  // Return the changes for the given item, if any.
-	  //
-	  // @param resourceName The name of the type of resource of the item whose changes are to be returned.
-	  // @param id The primary key of the item whose changes are to be returned.
-	  // @param options Optional configuration.
-	  // @param options.ignoredChanges Array of strings or regular expressions of fields, the changes of which are to be ignored.
-	  // @returns The changes of the given item, if any.
-	  changes: function changes(resourceName, id, options) {
-	    var _check$call = check.call(this, 'changes', resourceName, id, options);
-
-	    var _this = _check$call._this;
-	    var definition = _check$call.definition;
-	    var _resourceName = _check$call._resourceName;
-	    var _id = _check$call._id;
-	    var _options = _check$call._options;
-
-	    var item = definition.get(_id);
-	    if (item) {
-	      var _ret = (function () {
-	        var observer = _this.store[_resourceName].observers[_id];
-	        if (observer && typeof observer === 'function') {
-	          // force observation handler to be fired for item if there are changes and `Object.observe` is not available
-	          observer.deliver();
-	        }
-
-	        var ignoredChanges = _options.ignoredChanges || [];
-	        // add linked relations to list of ignored changes
-	        _utils['default'].forEach(definition.relationFields, function (field) {
-	          if (!_utils['default'].contains(ignoredChanges, field)) {
-	            ignoredChanges.push(field);
-	          }
-	        });
-	        // calculate changes
-	        var diff = _utils['default'].diffObjectFromOldObject(item, _this.store[_resourceName].previousAttributes[_id], _utils['default'].equals, ignoredChanges);
-	        // remove functions from diff
-	        _utils['default'].forOwn(diff, function (changeset, name) {
-	          var toKeep = [];
-	          _utils['default'].forOwn(changeset, function (value, field) {
-	            if (!_utils['default'].isFunction(value)) {
-	              toKeep.push(field);
-	            }
-	          });
-	          diff[name] = _utils['default'].pick(diff[name], toKeep);
-	        });
-	        // definitely ignore changes to linked relations
-	        _utils['default'].forEach(definition.relationFields, function (field) {
-	          delete diff.added[field];
-	          delete diff.removed[field];
-	          delete diff.changed[field];
-	        });
-	        return {
-	          v: diff
-	        };
-	      })();
-
-	      if (typeof _ret === 'object') return _ret.v;
-	    }
-	  },
-
-	  // Return the change history of the given item, if any.
-	  //
-	  // @param resourceName The name of the type of resource of the item whose change history is to be returned.
-	  // @param id The primary key of the item whose change history is to be returned.
-	  // @returns The change history of the given item, if any.
-	  changeHistory: function changeHistory(resourceName, id) {
-	    var _check$call2 = check.call(this, 'changeHistory', resourceName, id || fakeId);
-
-	    var _this = _check$call2._this;
-	    var definition = _check$call2.definition;
-	    var _resourceName = _check$call2._resourceName;
-	    var _id = _check$call2._id;
-
-	    var resource = _this.store[_resourceName];
-
-	    if (!definition.keepChangeHistory) {
-	      definition.errorFn('changeHistory is disabled for this resource!');
-	    } else {
-	      if (_resourceName) {
-	        var item = definition.get(_id);
-	        if (item) {
-	          return resource.changeHistories[_id];
-	        }
-	      } else {
-	        return resource.changeHistory;
-	      }
-	    }
-	  },
-
-	  commit: function commit(resourceName, id) {
-	    var _check$call3 = check.call(this, 'commit', resourceName, id);
-
-	    var _this = _check$call3._this;
-	    var definition = _check$call3.definition;
-	    var _resourceName = _check$call3._resourceName;
-	    var _id = _check$call3._id;
-
-	    var resource = _this.store[_resourceName];
-	    var item = _this.store[_resourceName].index[_id];
-	    if (item) {
-	      resource.previousAttributes[_id] = _utils['default'].copy(item, null, null, null, definition.relationFields);
-	    }
-
-	    if (resource.changeHistories[_id].length) {
-	      _utils['default'].forEach(resource.changeHistories[_id], function (changeRecord) {
-	        _utils['default'].remove(resource.changeHistory, changeRecord);
-	      });
-	      resource.changeHistories[_id].splice(0, resource.changeHistories[_id].length);
-	    }
-	    return item;
-	  },
-
-	  // Re-compute the computed properties of the given item.
-	  //
-	  // @param resourceName The name of the type of resource of the item whose computed properties are to be re-computed.
-	  // @param instance The instance whose computed properties are to be re-computed.
-	  // @returns The item whose computed properties were re-computed.
-	  compute: function compute(resourceName, instance) {
-	    var _this = this;
-	    var definition = _this.definitions[resourceName];
-
-	    instance = _utils['default'].resolveItem(_this.store[resourceName], instance);
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (!instance) {
-	      throw new R('Item not in the store!');
-	    } else if (!_utils['default']._o(instance) && !_utils['default']._sn(instance)) {
-	      throw new IA('"instance" must be an object, string or number!');
-	    }
-
-
-	    // re-compute all computed properties
-	    _utils['default'].forOwn(definition.computed, function (fn, field) {
-	      _utils['default'].compute.call(instance, fn, field);
-	    });
-	    return instance;
-	  },
-
-	  // Factory function to create an instance of the specified Resource.
-	  //
-	  // @param resourceName The name of the type of resource of which to create an instance.
-	  // @param attrs Hash of properties with which to initialize the instance.
-	  // @param options Optional configuration.
-	  // @param options.defaults Default values with which to initialize the instance.
-	  // @returns The new instance.
-	  createInstance: function createInstance(resourceName, attrs, options) {
-	    var definition = this.definitions[resourceName];
-	    var item = undefined;
-
-	    attrs = attrs || {};
-
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (attrs && !_utils['default'].isObject(attrs)) {
-	      throw new IA('"attrs" must be an object!');
-	    }
-
-	    options = _utils['default']._(definition, options);
-
-	    // lifecycle
-	    options.beforeCreateInstance(options, attrs);
-
-	    // grab instance constructor function from Resource definition
-	    var Constructor = definition[definition['class']];
-
-	    // create instance
-	    item = new Constructor();
-
-	    if (definition.instanceEvents) {
-	      _utils['default'].Events(item);
-	    }
-
-	    // add default values
-	    if (options.defaultValues) {
-	      _utils['default'].deepMixIn(item, options.defaultValues);
-	    }
-	    _utils['default'].deepMixIn(item, attrs);
-
-	    // compute computed properties
-	    if (definition.computed) {
-	      definition.compute(item);
-	    }
-	    // lifecycle
-	    options.afterCreateInstance(options, item);
-	    return item;
-	  },
-
-	  // Create a new collection of the specified Resource.
-	  //
-	  // @param resourceName The name of the type of resource of which to create a collection
-	  // @param arr Possibly empty array of data from which to create the collection.
-	  // @param params The criteria by which to filter items. Will be passed to `DS#findAll` if `fetch` is called. See http://www.js-data.io/docs/query-syntax
-	  // @param options Optional configuration.
-	  // @param options.notify Whether to call the beforeCreateCollection and afterCreateCollection lifecycle hooks..
-	  // @returns The new collection.
-	  createCollection: function createCollection(resourceName, arr, params, options) {
-	    var _this = this;
-	    var definition = _this.definitions[resourceName];
-
-	    arr = arr || [];
-	    params = params || {};
-
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (arr && !_utils['default'].isArray(arr)) {
-	      throw new IA('"arr" must be an array!');
-	    }
-
-	    options = _utils['default']._(definition, options);
-
-
-	    // lifecycle
-	    options.beforeCreateCollection(options, arr);
-
-	    // define the API for this collection
-	    Object.defineProperties(arr, {
-	      //  Call DS#findAll with the params of this collection, filling the collection with the results.
-	      fetch: {
-	        value: function value(params, options) {
-	          var __this = this;
-	          __this.params = params || __this.params;
-	          return definition.findAll(__this.params, options).then(function (data) {
-	            if (data === __this) {
-	              return __this;
-	            }
-	            data.unshift(__this.length);
-	            data.unshift(0);
-	            __this.splice.apply(__this, data);
-	            data.shift();
-	            data.shift();
-	            if (data.$$injected) {
-	              _this.store[resourceName].queryData[_utils['default'].toJson(__this.params)] = __this;
-	              __this.$$injected = true;
-	            }
-	            return __this;
-	          });
-	        }
-	      },
-	      // params for this collection. See http://www.js-data.io/docs/query-syntax
-	      params: {
-	        value: params,
-	        writable: true
-	      },
-	      // name of the resource type of this collection
-	      resourceName: {
-	        value: resourceName
-	      }
-	    });
-
-	    // lifecycle
-	    options.afterCreateCollection(options, arr);
-	    return arr;
-	  },
-	  defineResource: __webpack_require__(31),
-	  digest: function digest() {
-	    this.observe.Platform.performMicrotaskCheckpoint();
-	  },
-	  eject: __webpack_require__(32),
-	  ejectAll: __webpack_require__(33),
-	  filter: __webpack_require__(34),
-
-	  // Return the item with the given primary key if its in the store.
-	  //
-	  // @param resourceName The name of the type of resource of the item to retrieve.
-	  // @param id The primary key of the item to retrieve.
-	  // @returns The item with the given primary key if it's in the store.
-	  // /
-	  get: function get(resourceName, id) {
-	    var _check$call4 = check.call(this, 'get', resourceName, id);
-
-	    var _this = _check$call4._this;
-	    var _resourceName = _check$call4._resourceName;
-	    var _id = _check$call4._id;
-
-	    // return the item if it exists
-	    return _this.store[_resourceName].index[_id];
-	  },
-
-	  // Return the items in the store that have the given primary keys.
-	  //
-	  // @param resourceName The name of the type of resource of the items to retrieve.
-	  // @param ids The primary keys of the items to retrieve.
-	  // @returns The items with the given primary keys if they're in the store.
-	  getAll: function getAll(resourceName, ids) {
-	    var _this = this;
-	    var definition = _this.definitions[resourceName];
-	    var resource = _this.store[resourceName];
-	    var collection = [];
-
-	    if (!definition) {
-	      throw new NER(resourceName);
-	    } else if (ids && !_utils['default']._a(ids)) {
-	      throw _utils['default']._aErr('ids');
-	    }
-
-
-	    if (_utils['default']._a(ids)) {
-	      // return just the items with the given primary keys
-	      var _length = ids.length;
-	      for (var i = 0; i < _length; i++) {
-	        if (resource.index[ids[i]]) {
-	          collection.push(resource.index[ids[i]]);
-	        }
-	      }
-	    } else {
-	      // most efficient of retrieving ALL items from the store
-	      collection = resource.collection.slice();
-	    }
-
-	    return collection;
-	  },
-
-	  // Return the whether the item with the given primary key has any changes.
-	  //
-	  // @param resourceName The name of the type of resource of the item.
-	  // @param id The primary key of the item.
-	  // @returns Whether the item with the given primary key has any changes.
-	  hasChanges: function hasChanges(resourceName, id) {
-	    var _check$call5 = check.call(this, 'hasChanges', resourceName, id);
-
-	    var definition = _check$call5.definition;
-	    var _id = _check$call5._id;
-
-	    return definition.get(_id) ? diffIsEmpty(definition.changes(_id)) : false;
-	  },
-	  inject: __webpack_require__(35),
-
-	  // Return the timestamp from the last time the item with the given primary key was changed.
-	  //
-	  // @param resourceName The name of the type of resource of the item.
-	  // @param id The primary key of the item.
-	  // @returns Timestamp from the last time the item was changed.
-	  lastModified: function lastModified(resourceName, id) {
-	    var _check$call6 = check.call(this, 'lastModified', resourceName, id || fakeId);
-
-	    var _this = _check$call6._this;
-	    var _resourceName = _check$call6._resourceName;
-	    var _id = _check$call6._id;
-
-	    var resource = _this.store[_resourceName];
-
-	    if (_id) {
-	      if (!(_id in resource.modified)) {
-	        resource.modified[_id] = 0;
-	      }
-	      return resource.modified[_id];
-	    }
-	    return resource.collectionModified;
-	  },
-
-	  // Return the timestamp from the last time the item with the given primary key was saved via an adapter.
-	  //
-	  // @param resourceName The name of the type of resource of the item.
-	  // @param id The primary key of the item.
-	  // @returns Timestamp from the last time the item was saved.
-	  lastSaved: function lastSaved(resourceName, id) {
-	    var _check$call7 = check.call(this, 'lastSaved', resourceName, id || fakeId);
-
-	    var _this = _check$call7._this;
-	    var _resourceName = _check$call7._resourceName;
-	    var _id = _check$call7._id;
-
-	    var resource = _this.store[_resourceName];
-
-	    if (!(_id in resource.saved)) {
-	      resource.saved[_id] = 0;
-	    }
-	    return resource.saved[_id];
-	  },
-
-	  // Return the previous attributes of the item with the given primary key before it was changed.
-	  //
-	  // @param resourceName The name of the type of resource of the item.
-	  // @param id The primary key of the item.
-	  // @returns The previous attributes of the item
-	  previous: function previous(resourceName, id) {
-	    var _check$call8 = check.call(this, 'previous', resourceName, id);
-
-	    var _this = _check$call8._this;
-	    var _resourceName = _check$call8._resourceName;
-	    var _id = _check$call8._id;
-
-	    var resource = _this.store[_resourceName];
-
-	    // return resource from cache
-	    return resource.previousAttributes[_id] ? _utils['default'].copy(resource.previousAttributes[_id]) : undefined;
-	  },
-
-	  // Revert all attributes of the item with the given primary key to their previous values.
-	  //
-	  // @param resourceName The name of the type of resource of the item.
-	  // @param id The primary key of the item.
-	  // @param options Optional configuration.
-	  // @returns The reverted item
-	  revert: function revert(resourceName, id, options) {
-	    var _check$call9 = check.call(this, 'revert', resourceName, id, options);
-
-	    var _this = _check$call9._this;
-	    var definition = _check$call9.definition;
-	    var _resourceName = _check$call9._resourceName;
-	    var _id = _check$call9._id;
-	    var _options = _check$call9._options;
-
-	    var preserve = _options.preserve || [];
-	    var injectObj = {};
-
-	    if (preserve.length === 0) {
-	      injectObj = _this.previous(_resourceName, _id);
-	    } else {
-	      var _ret2 = (function () {
-	        var instance = definition.get(id);
-	        var previousInstance = _this.previous(_resourceName, _id);
-
-	        if (!instance) {
-	          return {
-	            v: undefined
-	          };
-	        }
-
-	        _utils['default'].forOwn(instance, function (value, key) {
-	          if (_utils['default'].contains(preserve, key)) {
-	            injectObj[key] = instance[key];
-	          } else {
-	            injectObj[key] = previousInstance[key];
-	          }
-	        });
-	      })();
-
-	      if (typeof _ret2 === 'object') return _ret2.v;
-	    }
-
-	    return definition.inject(injectObj, {
-	      onConflict: 'replace'
-	    });
-	  }
-	};
-
-/***/ },
-/* 31 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* jshint evil:true, loopfunc:true */
-
-	var _utils = __webpack_require__(2);
-
-	var _errors = __webpack_require__(3);
-
-	/**
-	 * These are DS methods that will be proxied by instances. e.g.
-	 *
-	 * var store = new JSData.DS()
-	 * var User = store.defineResource('user')
-	 * var user = User.createInstance({ id: 1 })
-	 *
-	 * store.update(resourceName, id, attrs[, options]) // DS method
-	 * User.update(id, attrs[, options]) // DS method proxied on a Resource
-	 * user.DSUpdate(attrs[, options]) // DS method proxied on an Instance
-	 */
-	var instanceMethods = ['compute', 'eject', 'refresh', 'save', 'update', 'destroy', 'loadRelations', 'changeHistory', 'changes', 'commit', 'hasChanges', 'lastModified', 'lastSaved', 'previous', 'revert'];
-
-	module.exports = function defineResource(definition) {
-	  var _this = this;
-	  var definitions = _this.definitions;
-
-	  /**
-	   * This allows the name-only definition shorthand.
-	   * store.defineResource('user') is the same as store.defineResource({ name: 'user'})
-	   */
-	  if (_utils['default']._s(definition)) {
-	    definition = {
-	      name: definition.replace(/\s/gi, '')
-	    };
-	  }
-	  if (!_utils['default']._o(definition)) {
-	    throw _utils['default']._oErr('definition');
-	  } else if (!_utils['default']._s(definition.name)) {
-	    throw new _errors['default'].IA('"name" must be a string!');
-	  } else if (definitions[definition.name]) {
-	    throw new _errors['default'].R(definition.name + ' is already registered!');
-	  }
-
-	  /**
-	   * Dynamic Resource constructor function.
-	   *
-	   * A Resource inherits from the defaults of the data store that created it.
-	   */
-	  function Resource(options) {
-	    this.defaultValues = {};
-	    this.methods = {};
-	    this.computed = {};
-	    this.scopes = {};
-	    this.actions = {};
-	    _utils['default'].deepMixIn(this, options);
-	    var parent = _this.defaults;
-	    if (definition['extends'] && definitions[definition['extends']]) {
-	      parent = definitions[definition['extends']];
-	    }
-	    _utils['default'].fillIn(this.defaultValues, parent.defaultValues);
-	    _utils['default'].fillIn(this.methods, parent.methods);
-	    _utils['default'].fillIn(this.computed, parent.computed);
-	    _utils['default'].fillIn(this.scopes, parent.scopes);
-	    _utils['default'].fillIn(this.actions, parent.actions);
-	    this.endpoint = 'endpoint' in options ? options.endpoint : this.name;
-	  }
-
-	  try {
-	    var def;
-
-	    var _class;
-
-	    var _ret = (function () {
-	      // Resources can inherit from another resource instead of inheriting directly from the data store defaults.
-	      if (definition['extends'] && definitions[definition['extends']]) {
-	        // Inherit from another resource
-	        Resource.prototype = definitions[definition['extends']];
-	      } else {
-	        // Inherit from global defaults
-	        Resource.prototype = _this.defaults;
-	      }
-	      definitions[definition.name] = new Resource(definition);
-
-	      def = definitions[definition.name];
-
-	      def.getResource = function (resourceName) {
-	        return _this.definitions[resourceName];
-	      };
-
-
-	      if (!_utils['default']._s(def.idAttribute)) {
-	        throw new _errors['default'].IA('"idAttribute" must be a string!');
-	      }
-
-	      // Setup nested parent configuration
-	      if (def.relations) {
-	        def.relationList = [];
-	        def.relationFields = [];
-	        _utils['default'].forOwn(def.relations, function (relatedModels, type) {
-	          _utils['default'].forOwn(relatedModels, function (defs, relationName) {
-	            if (!_utils['default']._a(defs)) {
-	              relatedModels[relationName] = [defs];
-	            }
-	            _utils['default'].forEach(relatedModels[relationName], function (d) {
-	              d.type = type;
-	              d.relation = relationName;
-	              d.name = def.name;
-	              def.relationList.push(d);
-	              if (d.localField) {
-	                def.relationFields.push(d.localField);
-	              }
-	            });
-	          });
-	        });
-	        if (def.relations.belongsTo) {
-	          _utils['default'].forOwn(def.relations.belongsTo, function (relatedModel, modelName) {
-	            _utils['default'].forEach(relatedModel, function (relation) {
-	              if (relation.parent) {
-	                def.parent = modelName;
-	                def.parentKey = relation.localKey;
-	                def.parentField = relation.localField;
-	              }
-	            });
-	          });
-	        }
-	        if (typeof Object.freeze === 'function') {
-	          Object.freeze(def.relations);
-	          Object.freeze(def.relationList);
-	        }
-	      }
-
-	      // Create the wrapper class for the new resource
-	      _class = def['class'] = _utils['default'].pascalCase(def.name);
-
-	      try {
-	        if (typeof def.useClass === 'function') {
-	          if (def.csp) {
-	            def[_class] = function () {
-	              def.useClass.call(this);
-	            };
-	          } else {
-	            def[_class] = new Function('def', 'return function ' + _class + '() { def.useClass.call(this); }')(def); // eslint-disable-line
-	          }
-	          def[_class].prototype = (function (proto) {
-	            function Ctor() {}
-
-	            Ctor.prototype = proto;
-	            return new Ctor();
-	          })(def.useClass.prototype);
-	        } else if (def.csp) {
-	          def[_class] = function () {};
-	        } else {
-	          def[_class] = new Function('return function ' + _class + '() {}')(); // eslint-disable-line
-	        }
-	      } catch (e) {
-	        def[_class] = function () {};
-	      }
-
-	      // Apply developer-defined instance methods
-	      _utils['default'].forOwn(def.methods, function (fn, m) {
-	        def[_class].prototype[m] = fn;
-	      });
-
-	      /**
-	       * var user = User.createInstance({ id: 1 })
-	       * user.set('foo', 'bar')
-	       */
-	      def[_class].prototype.set = function (key, value) {
-	        var _this2 = this;
-
-	        _utils['default'].set(this, key, value);
-	        def.compute(this);
-	        if (def.instanceEvents) {
-	          setTimeout(function () {
-	            _this2.emit('DS.change', def, _this2);
-	          }, 0);
-	        }
-	        def.handleChange(this);
-	        return this;
-	      };
-
-	      /**
-	       * var user = User.createInstance({ id: 1 })
-	       * user.get('id') // 1
-	       */
-	      def[_class].prototype.get = function (key) {
-	        return _utils['default'].get(this, key);
-	      };
-
-	      // Setup the relation links
-	      _utils['default'].applyRelationGettersToTarget(_this, def, def[_class].prototype);
-
-	      var parentOmit = null;
-	      if (!def.hasOwnProperty('omit')) {
-	        parentOmit = def.omit;
-	        def.omit = [];
-	      } else {
-	        parentOmit = _this.defaults.omit;
-	      }
-	      def.omit = def.omit.concat(parentOmit || []);
-
-	      // Prepare for computed properties
-	      _utils['default'].forOwn(def.computed, function (fn, field) {
-	        if (_utils['default'].isFunction(fn)) {
-	          def.computed[field] = [fn];
-	          fn = def.computed[field];
-	        }
-	        if (def.methods && field in def.methods) {
-	          def.errorFn('Computed property "' + field + '" conflicts with previously defined prototype method!');
-	        }
-	        def.omit.push(field);
-	        if (_utils['default'].isArray(fn)) {
-	          var deps;
-	          if (fn.length === 1) {
-	            var match = fn[0].toString().match(/function.*?\(([\s\S]*?)\)/);
-	            deps = match[1].split(',');
-	            deps = _utils['default'].filter(deps, function (x) {
-	              return x;
-	            });
-	            def.computed[field] = deps.concat(fn);
-	            fn = def.computed[field];
-	            if (deps.length) {
-	              def.errorFn('Use the computed property array syntax for compatibility with minified code!');
-	            }
-	          }
-	          deps = fn.slice(0, fn.length - 1);
-	          _utils['default'].forEach(deps, function (val, index) {
-	            deps[index] = val.trim();
-	          });
-	          fn.deps = _utils['default'].filter(deps, function (dep) {
-	            return !!dep;
-	          });
-	        } else if (_utils['default'].isObject(fn)) {
-	          Object.defineProperty(def[_class].prototype, field, fn);
-	        }
-	      });
-
-	      // add instance proxies of DS methods
-	      _utils['default'].forEach(instanceMethods, function (name) {
-	        def[_class].prototype['DS' + _utils['default'].pascalCase(name)] = function () {
-	          for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	            args[_key] = arguments[_key];
-	          }
-
-	          args.unshift(this[def.idAttribute] || this);
-	          args.unshift(def.name);
-	          return _this[name].apply(_this, args);
-	        };
-	      });
-
-	      // manually add instance proxy for DS#create
-	      def[_class].prototype.DSCreate = function () {
-	        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-	          args[_key2] = arguments[_key2];
-	        }
-
-	        args.unshift(this);
-	        args.unshift(def.name);
-	        return _this.create.apply(_this, args);
-	      };
-
-	      // Initialize store data for the new resource
-	      _this.store[def.name] = {
-	        collection: [],
-	        expiresHeap: new _utils['default'].BinaryHeap(function (x) {
-	          return x.expires;
-	        }, function (x, y) {
-	          return x.item === y;
-	        }),
-	        completedQueries: {},
-	        queryData: {},
-	        pendingQueries: {},
-	        index: {},
-	        modified: {},
-	        saved: {},
-	        previousAttributes: {},
-	        observers: {},
-	        changeHistories: {},
-	        changeHistory: [],
-	        collectionModified: 0
-	      };
-
-	      var resource = _this.store[def.name];
-
-	      // start the reaping
-	      if (def.reapInterval) {
-	        setInterval(function () {
-	          return def.reap();
-	        }, def.reapInterval);
-	      }
-
-	      // proxy DS methods with shorthand ones
-	      var fns = ['registerAdapter', 'getAdapterName', 'getAdapter', 'is', '!clear'];
-	      for (var key in _this) {
-	        if (typeof _this[key] === 'function') {
-	          fns.push(key);
-	        }
-	      }
-
-	      /**
-	       * Create the Resource shorthands that proxy DS methods. e.g.
-	       *
-	       * var store = new JSData.DS()
-	       * var User = store.defineResource('user')
-	       *
-	       * store.update(resourceName, id, attrs[, options]) // DS method
-	       * User.update(id, attrs[, options]) // DS method proxied on a Resource
-	       */
-	      _utils['default'].forEach(fns, function (key) {
-	        var k = key;
-	        if (k[0] === '!') {
-	          return;
-	        }
-	        if (_this[k].shorthand !== false) {
-	          def[k] = function () {
-	            for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-	              args[_key3] = arguments[_key3];
-	            }
-
-	            args.unshift(def.name);
-	            return _this[k].apply(_this, args);
-	          };
-	          def[k].before = function (fn) {
-	            var orig = def[k];
-	            def[k] = function () {
-	              for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-	                args[_key4] = arguments[_key4];
-	              }
-
-	              return orig.apply(def, fn.apply(def, args) || args);
-	            };
-	          };
-	        } else {
-	          def[k] = function () {
-	            for (var _len5 = arguments.length, args = Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
-	              args[_key5] = arguments[_key5];
-	            }
-
-	            return _this[k].apply(_this, args);
-	          };
-	        }
-	      });
-
-	      def.beforeValidate = _utils['default'].promisify(def.beforeValidate);
-	      def.validate = _utils['default'].promisify(def.validate);
-	      def.afterValidate = _utils['default'].promisify(def.afterValidate);
-	      def.beforeCreate = _utils['default'].promisify(def.beforeCreate);
-	      def.afterCreate = _utils['default'].promisify(def.afterCreate);
-	      def.afterFind = _utils['default'].promisify(def.afterFind);
-	      def.afterFindAll = _utils['default'].promisify(def.afterFindAll);
-	      def.afterLoadRelations = _utils['default'].promisify(def.afterLoadRelations);
-	      def.beforeUpdate = _utils['default'].promisify(def.beforeUpdate);
-	      def.afterUpdate = _utils['default'].promisify(def.afterUpdate);
-	      def.beforeDestroy = _utils['default'].promisify(def.beforeDestroy);
-	      def.afterDestroy = _utils['default'].promisify(def.afterDestroy);
-
-	      var defaultAdapter = undefined;
-	      if (def.hasOwnProperty('defaultAdapter')) {
-	        defaultAdapter = def.defaultAdapter;
-	      }
-
-	      // setup "actions"
-	      _utils['default'].forOwn(def.actions, function (action, name) {
-	        if (def[name] && !def.actions[name]) {
-	          throw new Error('Cannot override existing method "' + name + '"!');
-	        }
-	        action.request = action.request || function (config) {
-	          return config;
-	        };
-	        action.response = action.response || function (response) {
-	          return response;
-	        };
-	        action.responseError = action.responseError || function (err) {
-	          return _utils['default'].Promise.reject(err);
-	        };
-	        def[name] = function (id, options) {
-	          if (_utils['default']._o(id)) {
-	            options = id;
-	          }
-	          options = options || {};
-	          var adapter = def.getAdapter(action.adapter || defaultAdapter || 'http');
-	          var config = _utils['default'].deepMixIn({}, action);
-	          if (!options.hasOwnProperty('endpoint') && config.endpoint) {
-	            options.endpoint = config.endpoint;
-	          }
-	          if (typeof options.getEndpoint === 'function') {
-	            config.url = options.getEndpoint(def, options);
-	          } else {
-	            var args = [options.basePath || def.basePath || adapter.defaults.basePath, adapter.getEndpoint(def, _utils['default']._sn(id) ? id : null, options)];
-	            if (_utils['default']._sn(id)) {
-	              args.push(id);
-	            }
-	            args.push(action.pathname || name);
-	            config.url = _utils['default'].makePath.apply(null, args);
-	          }
-	          config.method = config.method || 'GET';
-	          config.resourceName = def.name;
-	          _utils['default'].deepMixIn(config, options);
-	          return new _utils['default'].Promise(function (resolve) {
-	            return resolve(config);
-	          }).then(options.request || action.request).then(function (config) {
-	            return adapter.HTTP(config);
-	          }).then(function (data) {
-	            if (data && data.config) {
-	              data.config.resourceName = def.name;
-	            }
-	            return data;
-	          }).then(options.response || action.response, options.responseError || action.responseError);
-	        };
-	      });
-
-	      // mix in events
-	      _utils['default'].Events(def);
-
-	      def.handleChange = function (data) {
-	        resource.collectionModified = _utils['default'].updateTimestamp(resource.collectionModified);
-	        if (def.notify) {
-	          setTimeout(function () {
-	            def.emit('DS.change', def, data);
-	          }, 0);
-	        }
-	      };
-
-
-	      return {
-	        v: def
-	      };
-	    })();
-
-	    if (typeof _ret === 'object') return _ret.v;
-	  } catch (err) {
-	    _this.defaults.errorFn(err);
-	    delete definitions[definition.name];
-	    delete _this.store[definition.name];
-	    throw err;
-	  }
-	};
-
-/***/ },
-/* 32 */
-/***/ function(module, exports) {
-
-	/* jshint eqeqeq:false */
-	/**
-	 * Eject an item from the store, if it is currently in the store.
-	 *
-	 * @param resourceName The name of the resource type of the item eject.
-	 * @param id The primary key of the item to eject.
-	 * @param options Optional configuration.
-	 * @param options.notify Whether to emit the "DS.beforeEject" and "DS.afterEject" events
-	 * @param options.clearEmptyQueries Whether to remove cached findAll queries that become empty as a result of this method call.
-	 * @returns The ejected item if one was ejected.
-	 */
-	module.exports = function eject(resourceName, id, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var definition = _this.definitions[resourceName];
-	  var resource = _this.store[resourceName];
-	  var item = undefined;
-	  var found = false;
-
-	  id = DSUtils.resolveId(definition, id);
-
-	  if (!definition) {
-	    throw new _this.errors.NER(resourceName);
-	  } else if (!DSUtils._sn(id)) {
-	    throw DSUtils._snErr('id');
-	  }
-
-	  options = DSUtils._(definition, options);
-
-
-	  // find the item to eject
-	  for (var i = 0; i < resource.collection.length; i++) {
-	    if (resource.collection[i][definition.idAttribute] == id) {
-	      // eslint-disable-line
-	      item = resource.collection[i];
-	      // remove its expiration timestamp
-	      resource.expiresHeap.remove(item);
-	      found = true;
-	      break;
-	    }
-	  }
-	  if (found) {
-	    var _ret = (function () {
-	      // lifecycle
-	      definition.beforeEject(options, item);
-	      if (options.notify) {
-	        definition.emit('DS.beforeEject', definition, item);
-	      }
-
-	      // find the item in any ($$injected) cached queries
-	      var toRemove = [];
-	      DSUtils.forOwn(resource.queryData, function (items, queryHash) {
-	        if (items.$$injected) {
-	          DSUtils.remove(items, item);
-	        }
-	        // optionally remove any empty queries
-	        if (!items.length && options.clearEmptyQueries) {
-	          toRemove.push(queryHash);
-	        }
-	      });
-
-	      // clean up
-	      DSUtils.forEach(resource.changeHistories[id], function (changeRecord) {
-	        DSUtils.remove(resource.changeHistory, changeRecord);
-	      });
-	      DSUtils.forEach(toRemove, function (queryHash) {
-	        delete resource.completedQueries[queryHash];
-	        delete resource.queryData[queryHash];
-	      });
-	      if (resource.observers[id] && typeof resource.observers[id].close === 'function') {
-	        // stop observation
-	        resource.observers[id].close();
-	      }
-	      delete resource.observers[id];
-	      delete resource.index[id];
-	      delete resource.previousAttributes[id];
-	      delete resource.completedQueries[id];
-	      delete resource.pendingQueries[id];
-	      delete resource.changeHistories[id];
-	      delete resource.modified[id];
-	      delete resource.saved[id];
-	      if (definition.instanceEvents && item.off) {
-	        item.off();
-	      }
-
-	      // remove it from the store
-	      resource.collection.splice(i, 1);
-	      // collection has been modified
-	      definition.handleChange(item);
-
-	      // lifecycle
-	      definition.afterEject(options, item);
-	      if (options.notify) {
-	        definition.emit('DS.afterEject', definition, item);
-	      }
-
-	      return {
-	        v: item
-	      };
-	    })();
-
-	    if (typeof _ret === 'object') return _ret.v;
-	  }
-	};
-
-/***/ },
-/* 33 */
-/***/ function(module, exports) {
-
-	/**
-	 * Eject a collection of items from the store, if any items currently in the store match the given criteria.
-	 *
-	 * @param resourceName The name of the resource type of the items eject.
-	 * @param params The criteria by which to match items to eject. See http://www.js-data.io/docs/query-syntax
-	 * @param options Optional configuration.
-	 * @returns The collection of items that were ejected, if any.
-	 */
-	module.exports = function ejectAll(resourceName, params, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var definition = _this.definitions[resourceName];
-	  params = params || {};
-
-	  if (!definition) {
-	    throw new _this.errors.NER(resourceName);
-	  } else if (!DSUtils._o(params)) {
-	    throw DSUtils._oErr('params');
-	  }
-
-	  options = DSUtils._(definition, options);
-
-	  DSUtils.applyScope(definition, params, options);
-
-	  var resource = _this.store[resourceName];
-	  var queryHash = DSUtils.toJson(params);
-
-	  // get items that match the criteria
-	  var items = definition.filter(params);
-
-	  if (DSUtils.isEmpty(params)) {
-	    // remove all completed queries if ejecting all items
-	    resource.completedQueries = {};
-	  } else {
-	    // remove matching completed query, if any
-	    delete resource.completedQueries[queryHash];
-	  }
-	  // prepare to remove matching items
-	  DSUtils.forEach(items, function (item) {
-	    if (item && item[definition.idAttribute]) {
-	      definition.eject(item[definition.idAttribute], options);
-	    }
-	  });
-	  // collection has been modified
-	  definition.handleChange(items);
-	  return items;
-	};
-
-/***/ },
-/* 34 */
-/***/ function(module, exports) {
-
-	/**
-	 * Return the subset of items currently in the store that match the given criteria.
-	 *
-	 * The actual filtering is delegated to DS#defaults.defaultFilter, which can be overridden by developers.
-	 *
-	 * @param resourceName The name of the resource type of the items to filter.
-	 * @param params The criteria by which to filter items. See http://www.js-data.io/docs/query-syntax
-	 * @param options Optional configuration.
-	 * @returns Matching items.
-	 */
-	module.exports = function filter(resourceName, params, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var definition = _this.definitions[resourceName];
-
-	  if (!definition) {
-	    throw new _this.errors.NER(resourceName);
-	  } else if (params && !DSUtils._o(params)) {
-	    throw DSUtils._oErr('params');
-	  }
-
-	  // Protect against null
-	  params = params || {};
-	  options = DSUtils._(definition, options);
-
-	  DSUtils.applyScope(definition, params, options);
-
-	  // delegate filtering to DS#defaults.defaultFilter, which can be overridden by developers.
-	  return definition.defaultFilter.call(_this, _this.store[resourceName].collection, resourceName, params, options);
-	};
-
-/***/ },
-/* 35 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _utils = __webpack_require__(2);
-
-	var _errors = __webpack_require__(3);
-
-	/**
-	 * This is a beast of a file, but it's where a significant portion of the magic happens.
-	 *
-	 * DS#inject makes up the core of how data gets into the store.
-	 */
-
-	/**
-	 * This factory function produces an observer handler function tailor-made for the current item being injected.
-	 *
-	 * The observer handler is what allows computed properties and change tracking to function.
-	 *
-	 * @param definition Resource definition produced by DS#defineResource
-	 * @param resource Resource data as internally stored by the data store
-	 * @returns {Function} Observer handler function
-	 * @private
-	 */
-	function makeObserverHandler(definition, resource) {
-	  var DS = this;
-
-	  // using "var" avoids a JSHint error
-	  var name = definition.name;
-
-	  /**
-	   * This will be called by observe-js when a new change record is available for the observed object
-	   *
-	   * @param added Change record for added properties
-	   * @param removed Change record for removed properties
-	   * @param changed Change record for changed properties
-	   * @param oldValueFn Function that can be used to get the previous value of a changed property
-	   * @param firstTime Whether this is the first time this function is being called for the given item. Will only be true once.
-	   */
-	  return function _react(added, removed, changed, oldValueFn, firstTime) {
-	    var target = this;
-	    var item = undefined;
-
-	    // Get the previous primary key of the observed item, in-case some knucklehead changed it
-	    var innerId = oldValueFn && oldValueFn(definition.idAttribute) ? oldValueFn(definition.idAttribute) : target[definition.idAttribute];
-
-	    // Ignore changes to relation links
-	    _utils['default'].forEach(definition.relationFields, function (field) {
-	      delete added[field];
-	      delete removed[field];
-	      delete changed[field];
-	    });
-
-	    // Detect whether there are actually any changes
-	    if (!_utils['default'].isEmpty(added) || !_utils['default'].isEmpty(removed) || !_utils['default'].isEmpty(changed) || firstTime) {
-	      item = DS.get(name, innerId);
-
-	      // update item and collection "modified" timestamps
-	      resource.modified[innerId] = _utils['default'].updateTimestamp(resource.modified[innerId]);
-
-	      if (item && definition.instanceEvents) {
-	        setTimeout(function () {
-	          item.emit('DS.change', definition, item);
-	        }, 0);
-	      }
-
-	      definition.handleChange(item);
-
-	      // Save a change record for the item
-	      if (definition.keepChangeHistory) {
-	        var changeRecord = {
-	          resourceName: name,
-	          target: item,
-	          added: added,
-	          removed: removed,
-	          changed: changed,
-	          timestamp: resource.modified[innerId]
-	        };
-	        resource.changeHistories[innerId].push(changeRecord);
-	        resource.changeHistory.push(changeRecord);
-	      }
-	    }
-
-	    // Recompute computed properties if any computed properties depend on changed properties
-	    if (definition.computed) {
-	      item = item || DS.get(name, innerId);
-	      _utils['default'].forOwn(definition.computed, function (fn, field) {
-	        if (_utils['default']._o(fn)) {
-	          return;
-	        }
-	        var compute = false;
-	        // check if required fields changed
-	        _utils['default'].forEach(fn.deps, function (dep) {
-	          if (dep in added || dep in removed || dep in changed || !(field in item)) {
-	            compute = true;
-	          }
-	        });
-	        compute = compute || !fn.deps.length;
-	        if (compute) {
-	          _utils['default'].compute.call(item, fn, field);
-	        }
-	      });
-	    }
-
-	    if (definition.idAttribute in changed) {
-	      definition.errorFn('Doh! You just changed the primary key of an object! Your data for the "' + name + '" resource is now in an undefined (probably broken) state.');
-	    }
-	  };
-	}
-
-	/**
-	 * A recursive function for injecting data into the store.
-	 *
-	 * @param definition Resource definition produced by DS#defineResource
-	 * @param resource Resource data as internally stored by the data store
-	 * @param attrs The data to be injected. Will be an object or an array of objects.
-	 * @param options Optional configuration.
-	 * @returns The injected data
-	 * @private
-	 */
-	function _inject(definition, resource, attrs, options) {
-	  var _this = this;
-	  var injected = undefined;
-
-	  if (_utils['default']._a(attrs)) {
-	    // have an array of objects, go ahead and inject each one individually and return the resulting array
-	    injected = [];
-	    for (var i = 0; i < attrs.length; i++) {
-	      injected.push(_inject.call(_this, definition, resource, attrs[i], options));
-	    }
-	  } else {
-	    // check if "idAttribute" is a computed property
-	    var c = definition.computed;
-	    var idA = definition.idAttribute;
-	    // compute the primary key if necessary
-	    if (c && c[idA]) {
-	      (function () {
-	        var args = [];
-	        _utils['default'].forEach(c[idA].deps, function (dep) {
-	          args.push(attrs[dep]);
-	        });
-	        attrs[idA] = c[idA][c[idA].length - 1].apply(attrs, args);
-	      })();
-	    }
-
-	    if (!(idA in attrs)) {
-	      var error = new _errors['default'].R(definition.name + '.inject: "attrs" must contain the property specified by "idAttribute"!');
-	      options.errorFn(error);
-	      throw error;
-	    } else {
-	      try {
-	        (function () {
-	          // when injecting object that contain their nested relations, this code
-	          // will recursively inject them into their proper places in the data store.
-	          // Magic!
-	          _utils['default'].forEach(definition.relationList, function (def) {
-	            var relationName = def.relation;
-	            var relationDef = _this.definitions[relationName];
-	            var toInject = attrs[def.localField];
-	            if (typeof def.inject === 'function') {
-	              def.inject(definition, def, attrs);
-	            } else if (toInject && def.inject !== false) {
-	              if (!relationDef) {
-	                throw new _errors['default'].R(definition.name + ' relation is defined but the resource is not!');
-	              }
-	              // handle injecting hasMany relations
-	              if (_utils['default']._a(toInject)) {
-	                (function () {
-	                  var items = [];
-	                  _utils['default'].forEach(toInject, function (toInjectItem) {
-	                    if (toInjectItem !== _this.store[relationName].index[toInjectItem[relationDef.idAttribute]]) {
-	                      try {
-	                        var injectedItem = relationDef.inject(toInjectItem, options.orig());
-	                        if (def.foreignKey) {
-	                          _utils['default'].set(injectedItem, def.foreignKey, attrs[definition.idAttribute]);
-	                        }
-	                        items.push(injectedItem);
-	                      } catch (err) {
-	                        options.errorFn(err, 'Failed to inject ' + def.type + ' relation: "' + relationName + '"!');
-	                      }
-	                    }
-	                  });
-	                })();
-	              } else {
-	                // handle injecting belongsTo and hasOne relations
-	                if (toInject !== _this.store[relationName].index[toInject[relationDef.idAttribute]]) {
-	                  try {
-	                    var _injected = relationDef.inject(attrs[def.localField], options.orig());
-	                    if (def.foreignKey) {
-	                      _utils['default'].set(_injected, def.foreignKey, attrs[definition.idAttribute]);
-	                    }
-	                  } catch (err) {
-	                    options.errorFn(err, 'Failed to inject ' + def.type + ' relation: "' + relationName + '"!');
-	                  }
-	                }
-	              }
-	            }
-	          });
-
-	          // primary key of item being injected
-	          var id = attrs[idA];
-	          // item being injected
-	          var item = definition.get(id);
-	          // 0 if the item is new, otherwise the previous last modified timestamp of the item
-	          var initialLastModified = item ? resource.modified[id] : 0;
-
-	          // item is new
-	          if (!item) {
-	            if (attrs instanceof definition[definition['class']]) {
-	              item = attrs;
-	            } else {
-	              item = new definition[definition['class']]();
-	            }
-
-	            if (definition.instanceEvents && typeof item.emit !== 'function') {
-	              _utils['default'].Events(item);
-	            }
-	            // remove relation properties from the item, since those relations have been injected by now
-	            _utils['default'].forEach(definition.relationList, function (def) {
-	              if (typeof def.link === 'boolean' ? def.link : !!definition.linkRelations) {
-	                delete attrs[def.localField];
-	              }
-	            });
-
-	            // copy remaining properties to the injected item
-	            _utils['default'].deepMixIn(item, attrs);
-
-	            // add item to collection
-	            resource.collection.push(item);
-	            resource.changeHistories[id] = [];
-
-	            // create the observer handler for the data to be injected
-	            var _react = makeObserverHandler.call(_this, definition, resource);
-
-	            // If we're in the browser, start observation
-	            if (definition.watchChanges) {
-	              resource.observers[id] = new _this.observe.ObjectObserver(item);
-	              resource.observers[id].open(_react, item);
-	            }
-
-	            // index item
-	            resource.index[id] = item;
-	            // fire observation handler for the first time
-	            _react.call(item, {}, {}, {}, null, true);
-	            // save "previous" attributes of the injected item, for change diffs later
-	            resource.previousAttributes[id] = _utils['default'].copy(item, null, null, null, definition.relationFields);
-	          } else {
-	            // item is being re-injected
-	            // new properties take precedence
-	            if (options.onConflict === 'merge') {
-	              _utils['default'].deepMixIn(item, attrs);
-	            } else if (options.onConflict === 'replace') {
-	              _utils['default'].forOwn(item, function (v, k) {
-	                if (k !== definition.idAttribute) {
-	                  if (!attrs.hasOwnProperty(k)) {
-	                    delete item[k];
-	                  }
-	                }
-	              });
-	              _utils['default'].forOwn(attrs, function (v, k) {
-	                if (k !== definition.idAttribute) {
-	                  item[k] = v;
-	                }
-	              });
-	            }
-
-	            if (definition.resetHistoryOnInject) {
-	              // clear change history for item
-	              _this.commit(definition.name, id);
-	            }
-	            if (resource.observers[id] && typeof resource.observers[id] === 'function') {
-	              // force observation callback to be fired if there are any changes to the item and `Object.observe` is not available
-	              resource.observers[id].deliver();
-	            }
-	          }
-	          // update modified timestamp of item
-	          resource.modified[id] = initialLastModified && resource.modified[id] === initialLastModified ? _utils['default'].updateTimestamp(resource.modified[id]) : resource.modified[id];
-
-	          // reset expiry tracking for item
-	          resource.expiresHeap.remove(item);
-	          var timestamp = new Date().getTime();
-	          resource.expiresHeap.push({
-	            item: item,
-	            timestamp: timestamp,
-	            expires: definition.maxAge ? timestamp + definition.maxAge : Number.MAX_VALUE
-	          });
-
-	          // final injected item
-	          injected = item;
-	        })();
-	      } catch (err) {
-	        options.errorFn(err, attrs);
-	      }
-	    }
-	  }
-	  return injected;
-	}
-
-	/**
-	 * Inject the given object or array of objects into the data store.
-	 *
-	 * @param resourceName The name of the type of resource of the data to be injected.
-	 * @param attrs Object or array of objects. Objects must contain a primary key.
-	 * @param options Optional configuration.
-	 * @param options.notify Whether to emit the "DS.beforeInject" and "DS.afterInject" events.
-	 * @returns The injected data.
-	 */
-	module.exports = function inject(resourceName, attrs, options) {
-	  var _this = this;
-	  var definition = _this.definitions[resourceName];
-	  var resource = _this.store[resourceName];
-	  var injected = undefined;
-
-	  if (!definition) {
-	    throw new _errors['default'].NER(resourceName);
-	  } else if (!_utils['default']._o(attrs) && !_utils['default']._a(attrs)) {
-	    throw new _errors['default'].IA(resourceName + '.inject: "attrs" must be an object or an array!');
-	  }
-
-	  options = _utils['default']._(definition, options);
-
-	  // lifecycle
-	  options.beforeInject(options, attrs);
-	  if (options.notify) {
-	    definition.emit('DS.beforeInject', definition, attrs);
-	  }
-
-	  // start the recursive injection of data
-	  injected = _inject.call(_this, definition, resource, attrs, options);
-
-	  // collection was modified
-	  definition.handleChange(injected);
-
-	  // lifecycle
-	  options.afterInject(options, injected);
-	  if (options.notify) {
-	    definition.emit('DS.afterInject', definition, injected);
-	  }
-
-	  return injected;
-	};
-
-/***/ },
-/* 36 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports['default'] = {
-	  create: __webpack_require__(37),
-	  destroy: __webpack_require__(38),
-	  destroyAll: __webpack_require__(39),
-	  find: __webpack_require__(40),
-	  findAll: __webpack_require__(41),
-	  loadRelations: __webpack_require__(42),
-	  reap: __webpack_require__(43),
-	  refresh: function refresh(resourceName, id, options) {
-	    var _this = this;
-	    var DSUtils = _this.utils;
-
-	    return new DSUtils.Promise(function (resolve, reject) {
-	      var definition = _this.definitions[resourceName];
-	      id = DSUtils.resolveId(_this.definitions[resourceName], id);
-	      if (!definition) {
-	        reject(new _this.errors.NER(resourceName));
-	      } else if (!DSUtils._sn(id)) {
-	        reject(DSUtils._snErr('id'));
-	      } else {
-	        options = DSUtils._(definition, options);
-	        options.bypassCache = true;
-	        resolve(_this.get(resourceName, id));
-	      }
-	    }).then(function (item) {
-	      return item ? _this.find(resourceName, id, options) : item;
-	    })['catch'](_this.errorFn('refresh', resourceName, id, options));
-	  },
-	  refreshAll: function refreshAll(resourceName, params, options) {
-	    var _this = this;
-	    var DSUtils = _this.utils;
-	    var definition = _this.definitions[resourceName];
-	    params = params || {};
-
-	    return new DSUtils.Promise(function (resolve, reject) {
-	      if (!definition) {
-	        reject(new _this.errors.NER(resourceName));
-	      } else if (!DSUtils._o(params)) {
-	        reject(DSUtils._oErr('params'));
-	      } else {
-	        options = DSUtils._(definition, options);
-	        options.bypassCache = true;
-	        resolve(_this.filter(resourceName, params, options));
-	      }
-	    }).then(function (existing) {
-	      options.bypassCache = true;
-	      return _this.findAll(resourceName, params, options).then(function (found) {
-	        DSUtils.forEach(existing, function (item) {
-	          if (found.indexOf(item) === -1) {
-	            definition.eject(item);
-	          }
-	        });
-	        return found;
-	      });
-	    })['catch'](_this.errorFn('refreshAll', resourceName, params, options));
-	  },
-	  save: __webpack_require__(44),
-	  update: __webpack_require__(45),
-	  updateAll: __webpack_require__(46)
-	};
-
-/***/ },
-/* 37 */
-/***/ function(module, exports) {
-
-	/**
-	 * Using an adapter, create a new item.
-	 *
-	 * Generally a primary key will NOT be provided in the properties hash,
-	 * because the adapter's persistence layer should be generating one.
-	 *
-	 * @param resourceName The name of the type of resource of the new item.
-	 * @param attrs Hash of properties with which to create the new item.
-	 * @param options Optional configuration.
-	 * @param options.cacheResponse Whether the newly created item as returned by the adapter should be injected into the data store.
-	 * @param options.upsert If the properties hash contains a primary key, attempt to call DS#update instead.
-	 * @param options.notify Whether to emit the "DS.beforeCreate" and "DS.afterCreate" events.
-	 * @param options.beforeValidate Lifecycle hook.
-	 * @param options.validate Lifecycle hook.
-	 * @param options.afterValidate Lifecycle hook.
-	 * @param options.beforeCreate Lifecycle hook.
-	 * @param options.afterCreate Lifecycle hook.
-	 */
-	module.exports = function create(resourceName, attrs, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var definition = _this.definitions[resourceName];
-	  var adapter = undefined;
-
-	  options = options || {};
-	  attrs = attrs || {};
-
-	  var rejectionError = undefined;
-	  if (!definition) {
-	    rejectionError = new _this.errors.NER(resourceName);
-	  } else if (!DSUtils._o(attrs)) {
-	    rejectionError = DSUtils._oErr('attrs');
-	  } else {
-	    options = DSUtils._(definition, options);
-	    if (options.upsert && DSUtils._sn(attrs[definition.idAttribute])) {
-	      return _this.update(resourceName, attrs[definition.idAttribute], attrs, options);
-	    }
-	  }
-
-	  return new DSUtils.Promise(function (resolve, reject) {
-	    if (rejectionError) {
-	      reject(rejectionError);
-	    } else {
-	      resolve(attrs);
-	    }
-	  })
-	  // start lifecycle
-	  .then(function (attrs) {
-	    return options.beforeValidate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.validate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.afterValidate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.beforeCreate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    if (options.notify) {
-	      definition.emit('DS.beforeCreate', definition, attrs);
-	    }
-	    adapter = _this.getAdapterName(options);
-	    return _this.adapters[adapter].create(definition, DSUtils.omit(attrs, options.omit), options);
-	  }).then(function (attrs) {
-	    return options.afterCreate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    if (options.notify) {
-	      definition.emit('DS.afterCreate', definition, attrs);
-	    }
-	    if (options.cacheResponse) {
-	      // injected created intem into the store
-	      var created = _this.inject(definition.name, attrs, options.orig());
-	      var id = created[definition.idAttribute];
-	      // mark item's `find` query as completed, so a subsequent `find` call for this item will resolve immediately
-	      var resource = _this.store[resourceName];
-	      resource.completedQueries[id] = new Date().getTime();
-	      resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
-	      return created;
-	    } else {
-	      // just return an un-injected instance
-	      return _this.createInstance(resourceName, attrs, options);
-	    }
-	  }).then(function (item) {
-	    return DSUtils.respond(item, { adapter: adapter }, options);
-	  })['catch'](_this.errorFn('create', resourceName, attrs, options));
-	};
-
-/***/ },
-/* 38 */
-/***/ function(module, exports) {
-
-	/**
-	 * Using an adapter, destroy an item.
-	 *
-	 * @param resourceName The name of the type of resource of the item to destroy.
-	 * @param id The primary key of the item to destroy.
-	 * @param options Optional configuration.
-	 * @param options.eagerEject Whether to eject the item from the store before the adapter operation completes, re-injecting if the adapter operation fails.
-	 * @param options.notify Whether to emit the "DS.beforeDestroy" and "DS.afterDestroy" events.
-	 * @param options.beforeDestroy Lifecycle hook.
-	 * @param options.afterDestroy Lifecycle hook.
-	 * @returns The primary key of the destroyed item.
-	 */
-	module.exports = function destroy(resourceName, id, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var definition = _this.definitions[resourceName];
-	  var item = undefined,
-	      adapter = undefined;
-
-	  return new DSUtils.Promise(function (resolve, reject) {
-	    id = DSUtils.resolveId(definition, id);
-	    if (!definition) {
-	      reject(new _this.errors.NER(resourceName));
-	    } else if (!DSUtils._sn(id)) {
-	      reject(DSUtils._snErr('id'));
-	    } else {
-	      // check if the item is in the store
-	      item = definition.get(id) || { id: id };
-	      options = DSUtils._(definition, options);
-	      resolve(item);
-	    }
-	  })
-	  // start lifecycle
-	  .then(function (attrs) {
-	    return options.beforeDestroy.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    if (options.notify) {
-	      definition.emit('DS.beforeDestroy', definition, attrs);
-	    }
-	    // don't wait for the adapter, remove the item from the store
-	    if (options.eagerEject) {
-	      definition.eject(id);
-	    }
-	    adapter = definition.getAdapter(options);
-	    return adapter.destroy(definition, id, options);
-	  }).then(function () {
-	    return options.afterDestroy.call(item, options, item);
-	  }).then(function (item) {
-	    if (options.notify) {
-	      definition.emit('DS.afterDestroy', definition, item);
-	    }
-	    // make sure the item is removed from the store
-	    definition.eject(id);
-	    return DSUtils.respond(id, { adapter: adapter }, options);
-	  })['catch'](function (err) {
-	    // rollback by re-injecting the item into the store
-	    if (options && options.eagerEject && item) {
-	      definition.inject(item, { notify: false });
-	    }
-	    return _this.errorFn('destroy', resourceName, id, options)(err);
-	  });
-	};
-
-/***/ },
-/* 39 */
-/***/ function(module, exports) {
-
-	/**
-	 * Using an adapter, destroy an item.
-	 *
-	 * @param resourceName The name of the type of resource of the item to destroy.
-	 * @param params The criteria by which to filter items to destroy. See http://www.js-data.io/docs/query-syntax
-	 * @param options Optional configuration.
-	 * @param options.eagerEject Whether to eject the items from the store before the adapter operation completes, re-injecting if the adapter operation fails.
-	 * @param options.notify Whether to emit the "DS.beforeDestroy" and "DS.afterDestroy" events.
-	 * @param options.beforeDestroy Lifecycle hook.
-	 * @param options.afterDestroy Lifecycle hook.
-	 * @returns The ejected items, if any.
-	 */
-	module.exports = function destroyAll(resourceName, params, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var definition = _this.definitions[resourceName];
-	  var ejected = undefined,
-	      toEject = undefined,
-	      adapter = undefined;
-
-	  params = params || {};
-
-	  return new DSUtils.Promise(function (resolve, reject) {
-	    if (!definition) {
-	      reject(new _this.errors.NER(resourceName));
-	    } else if (!DSUtils._o(params)) {
-	      reject(DSUtils._oErr('attrs'));
-	    } else {
-	      options = DSUtils._(definition, options);
-	      DSUtils.applyScope(definition, params, options);
-	      resolve();
-	    }
-	  }).then(function () {
-	    // find items that are to be ejected from the store
-	    toEject = definition.defaultFilter.call(_this, resourceName, params);
-	    return options.beforeDestroy(options, toEject);
-	  }).then(function () {
-	    if (options.notify) {
-	      definition.emit('DS.beforeDestroy', definition, toEject);
-	    }
-	    // don't wait for the adapter, remove the items from the store
-	    if (options.eagerEject) {
-	      ejected = definition.ejectAll(params);
-	    }
-	    adapter = definition.getAdapterName(options);
-	    return _this.adapters[adapter].destroyAll(definition, params, options);
-	  }).then(function () {
-	    return options.afterDestroy(options, toEject);
-	  }).then(function () {
-	    if (options.notify) {
-	      definition.emit('DS.afterDestroy', definition, toEject);
-	    }
-	    // make sure items are removed from the store
-	    return ejected || definition.ejectAll(params);
-	  }).then(function (items) {
-	    return DSUtils.respond(items, { adapter: adapter }, options);
-	  })['catch'](function (err) {
-	    // rollback by re-injecting the items into the store
-	    if (options && options.eagerEject && ejected) {
-	      definition.inject(ejected, { notify: false });
-	    }
-	    return _this.errorFn('destroyAll', resourceName, params, options)(err);
-	  });
-	};
-
-/***/ },
-/* 40 */
-/***/ function(module, exports) {
-
-	/* jshint -W082 */
-
-	/**
-	 * Using an adapter, retrieve a single item.
-	 *
-	 * @param resourceName The of the type of resource of the item to retrieve.
-	 * @param id The primary key of the item to retrieve.
-	 * @param options Optional configuration.
-	 * @param options.bypassCache Whether to ignore any cached item and force the retrieval through the adapter.
-	 * @param options.cacheResponse Whether to inject the found item into the data store.
-	 * @param options.strictCache Whether to only consider items to be "cached" if they were injected into the store as the result of `find` or `findAll`.
-	 * @param options.strategy The retrieval strategy to use.
-	 * @param options.findStrategy The retrieval strategy to use. Overrides "strategy".
-	 * @param options.fallbackAdapters Array of names of adapters to use if using "fallback" strategy.
-	 * @param options.findFallbackAdapters Array of names of adapters to use if using "fallback" strategy. Overrides "fallbackAdapters".
-	 * @returns The item.
-	 */
-	module.exports = function find(resourceName, id, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var definition = _this.definitions[resourceName];
-	  var resource = _this.store[resourceName];
-	  var adapter = undefined;
-
-	  return new DSUtils.Promise(function (resolve, reject) {
-	    if (!definition) {
-	      reject(new _this.errors.NER(resourceName));
-	    } else if (!DSUtils._sn(id)) {
-	      reject(DSUtils._snErr('id'));
-	    } else {
-	      options = DSUtils._(definition, options);
-
-	      if (options.params) {
-	        options.params = DSUtils.copy(options.params);
-	      }
-
-	      if (options.bypassCache || !options.cacheResponse) {
-	        delete resource.completedQueries[id];
-	      }
-
-	      var expired = options.maxAge && id in resource.completedQueries && resource.completedQueries[id] + options.maxAge < new Date().getTime();
-
-	      if ((!options.findStrictCache || id in resource.completedQueries) && definition.get(id) && !options.bypassCache && !expired) {
-	        // resolve immediately with the cached item
-	        resolve(definition.get(id));
-	      } else {
-	        // we're going to delegate to the adapter next
-	        delete resource.completedQueries[id];
-	        resolve();
-	      }
-	    }
-	  }).then(function (item) {
-	    if (!item) {
-	      if (!(id in resource.pendingQueries)) {
-	        var promise = undefined;
-	        var strategy = options.findStrategy || options.strategy;
-
-	        // try subsequent adapters if the preceeding one fails
-	        if (strategy === 'fallback') {
-	          var makeFallbackCall = function makeFallbackCall(index) {
-	            adapter = definition.getAdapterName((options.findFallbackAdapters || options.fallbackAdapters)[index]);
-	            return _this.adapters[adapter].find(definition, id, options)['catch'](function (err) {
-	              index++;
-	              if (index < options.fallbackAdapters.length) {
-	                return makeFallbackCall(index);
-	              } else {
-	                return DSUtils.Promise.reject(err);
-	              }
-	            });
-	          };
-
-	          promise = makeFallbackCall(0);
-	        } else {
-	          adapter = definition.getAdapterName(options);
-	          // just make a single attempt
-	          promise = _this.adapters[adapter].find(definition, id, options);
-	        }
-
-	        resource.pendingQueries[id] = promise.then(function (data) {
-	          return options.afterFind.call(data, options, data);
-	        }).then(function (data) {
-	          // Query is no longer pending
-	          delete resource.pendingQueries[id];
-	          if (options.cacheResponse) {
-	            // inject the item into the data store
-	            var injected = definition.inject(data, options.orig());
-	            // mark the item as "cached"
-	            resource.completedQueries[id] = new Date().getTime();
-	            resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
-	            return injected;
-	          } else {
-	            // just return an un-injected instance
-	            return definition.createInstance(data, options.orig());
-	          }
-	        });
-	      }
-	      return resource.pendingQueries[id];
-	    } else {
-	      // resolve immediately with the item
-	      return item;
-	    }
-	  }).then(function (item) {
-	    return DSUtils.respond(item, { adapter: adapter }, options);
-	  })['catch'](function (err) {
-	    if (resource) {
-	      delete resource.pendingQueries[id];
-	    }
-	    return _this.errorFn('find', resourceName, id, options)(err);
-	  });
-	};
-
-/***/ },
-/* 41 */
-/***/ function(module, exports) {
-
-	/* jshint -W082 */
-	function processResults(data, resourceName, queryHash, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var definition = _this.definitions[resourceName];
-	  var resource = _this.store[resourceName];
-	  var idAttribute = _this.definitions[resourceName].idAttribute;
-	  var date = new Date().getTime();
-
-	  data = data || [];
-
-	  // Query is no longer pending
-	  delete resource.pendingQueries[queryHash];
-	  resource.completedQueries[queryHash] = date;
-
-	  // Merge the new values into the cache
-	  var injected = definition.inject(data, options.orig());
-
-	  // Make sure each object is added to completedQueries
-	  if (DSUtils._a(injected)) {
-	    DSUtils.forEach(injected, function (item) {
-	      if (item) {
-	        var id = item[idAttribute];
-	        if (id) {
-	          resource.completedQueries[id] = date;
-	          resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
-	        }
-	      }
-	    });
-	  } else {
-	    options.errorFn('response is expected to be an array!');
-	    resource.completedQueries[injected[idAttribute]] = date;
-	  }
-
-	  return injected;
-	}
-
-	/**
-	 * Using an adapter, retrieve a collection of items.
-	 *
-	 * @param resourceName The name of the type of resource of the items to retrieve.
-	 * @param params The criteria by which to filter items to retrieve. See http://www.js-data.io/docs/query-syntax
-	 * @param options Optional configuration.
-	 * @param options.bypassCache Whether to ignore any cached query for these items and force the retrieval through the adapter.
-	 * @param options.cacheResponse Whether to inject the found items into the data store.
-	 * @returns The items.
-	 */
-	module.exports = function findAll(resourceName, params, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var definition = _this.definitions[resourceName];
-	  var resource = _this.store[resourceName];
-	  var queryHash = undefined,
-	      adapter = undefined;
-
-	  return new DSUtils.Promise(function (resolve, reject) {
-	    params = params || {};
-
-	    if (!_this.definitions[resourceName]) {
-	      reject(new _this.errors.NER(resourceName));
-	    } else if (!DSUtils._o(params)) {
-	      reject(DSUtils._oErr('params'));
-	    } else {
-	      options = DSUtils._(definition, options);
-	      queryHash = DSUtils.toJson(params);
-
-	      if (options.params) {
-	        options.params = DSUtils.copy(options.params);
-	      }
-
-	      DSUtils.applyScope(definition, params, options);
-
-	      // force a new request
-	      if (options.bypassCache || !options.cacheResponse) {
-	        delete resource.completedQueries[queryHash];
-	        delete resource.queryData[queryHash];
-	      }
-
-	      var expired = options.maxAge && queryHash in resource.completedQueries && resource.completedQueries[queryHash] + options.maxAge < new Date().getTime();
-
-	      if (queryHash in resource.completedQueries && !expired) {
-	        if (options.useFilter) {
-	          if (options.localKeys) {
-	            resolve(definition.getAll(options.localKeys, options.orig()));
-	          } else {
-	            // resolve immediately by filtering data from the data store
-	            resolve(definition.filter(params, options.orig()));
-	          }
-	        } else {
-	          // resolve immediately by returning the cached array from the previously made query
-	          resolve(resource.queryData[queryHash]);
-	        }
-	      } else {
-	        resolve();
-	      }
-	    }
-	  }).then(function (items) {
-	    if (!items) {
-	      if (!(queryHash in resource.pendingQueries)) {
-	        var promise = undefined;
-	        var strategy = options.findAllStrategy || options.strategy;
-
-	        // try subsequent adapters if the preceeding one fails
-	        if (strategy === 'fallback') {
-	          var makeFallbackCall = function makeFallbackCall(index) {
-	            adapter = definition.getAdapterName((options.findAllFallbackAdapters || options.fallbackAdapters)[index]);
-	            return _this.adapters[adapter].findAll(definition, params, options)['catch'](function (err) {
-	              index++;
-	              if (index < options.fallbackAdapters.length) {
-	                return makeFallbackCall(index);
-	              } else {
-	                return DSUtils.Promise.reject(err);
-	              }
-	            });
-	          };
-
-	          promise = makeFallbackCall(0);
-	        } else {
-	          adapter = definition.getAdapterName(options);
-	          // just make a single attempt
-	          promise = _this.adapters[adapter].findAll(definition, params, options);
-	        }
-
-	        resource.pendingQueries[queryHash] = promise.then(function (data) {
-	          return options.afterFindAll.call(data, options, data);
-	        }).then(function (data) {
-	          // Query is no longer pending
-	          delete resource.pendingQueries[queryHash];
-	          if (options.cacheResponse) {
-	            // inject the items into the data store
-	            resource.queryData[queryHash] = processResults.call(_this, data, resourceName, queryHash, options);
-	            resource.queryData[queryHash].$$injected = true;
-	            return resource.queryData[queryHash];
-	          } else {
-	            DSUtils.forEach(data, function (item, i) {
-	              data[i] = definition.createInstance(item, options.orig());
-	            });
-	            return data;
-	          }
-	        });
-	      }
-
-	      return resource.pendingQueries[queryHash];
-	    } else {
-	      // resolve immediately with the items
-	      return items;
-	    }
-	  }).then(function (items) {
-	    return DSUtils.respond(items, { adapter: adapter }, options);
-	  })['catch'](function (err) {
-	    if (resource) {
-	      delete resource.pendingQueries[queryHash];
-	    }
-	    return _this.errorFn('findAll', resourceName, params, options)(err);
-	  });
-	};
-
-/***/ },
-/* 42 */
-/***/ function(module, exports) {
-
-	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-	/**
-	 * Load the specified relations for the given instance.
-	 *
-	 * @param resourceName The name of the type of resource of the instance for which to load relations.
-	 * @param instance The instance or the primary key of the instance.
-	 * @param relations An array of the relations to load.
-	 * @param options Optional configuration.
-	 * @returns The instance, now with its relations loaded.
-	 */
-	module.exports = function loadRelations(resourceName, instance, relations, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var DSErrors = _this.errors;
-
-	  var definition = _this.definitions[resourceName];
-	  var _options = undefined;
-
-	  return new DSUtils.Promise(function (resolve, reject) {
-	    if (DSUtils._sn(instance)) {
-	      instance = definition.get(instance);
-	    }
-
-	    if (DSUtils._s(relations)) {
-	      relations = [relations];
-	    }
-
-	    relations = relations || [];
-
-	    if (!definition) {
-	      reject(new DSErrors.NER(resourceName));
-	    } else if (!DSUtils._o(instance)) {
-	      reject(new DSErrors.IA('"instance(id)" must be a string, number or object!'));
-	    } else if (!DSUtils._a(relations)) {
-	      reject(new DSErrors.IA('"relations" must be a string or an array!'));
-	    } else {
-	      (function () {
-	        _options = DSUtils._(definition, options);
-
-	        var tasks = [];
-
-	        DSUtils.forEach(definition.relationList, function (def) {
-	          var relationName = def.relation;
-	          var relationDef = definition.getResource(relationName);
-	          var __options = DSUtils._(relationDef, options);
-
-	          // relations can be loaded based on resource name or field name
-	          if (!relations.length || DSUtils.contains(relations, relationName) || DSUtils.contains(relations, def.localField)) {
-	            var task = undefined;
-	            var params = {};
-	            if (__options.allowSimpleWhere) {
-	              params[def.foreignKey] = instance[definition.idAttribute];
-	            } else {
-	              params.where = {};
-	              params.where[def.foreignKey] = {
-	                '==': instance[definition.idAttribute]
-	              };
-	            }
-
-	            var orig = __options.orig();
-	            var defKey = def.localKey ? DSUtils.get(instance, def.localKey) : null;
-	            var hasDefKey = !!(defKey || defKey === 0);
-
-	            if (typeof def.load === 'function') {
-	              task = def.load(definition, def, instance, orig);
-	            } else {
-	              if (def.type === 'hasMany') {
-	                if (def.localKeys) {
-	                  delete params[def.foreignKey];
-	                  var keys = DSUtils.get(instance, def.localKeys) || [];
-	                  keys = DSUtils._a(keys) ? keys : DSUtils.keys(keys);
-	                  params.where = _defineProperty({}, relationDef.idAttribute, {
-	                    'in': keys
-	                  });
-	                  orig.localKeys = keys;
-	                } else if (def.foreignKeys) {
-	                  delete params[def.foreignKey];
-	                  params.where = _defineProperty({}, def.foreignKeys, {
-	                    contains: instance[definition.idAttribute]
-	                  });
-	                }
-	                task = relationDef.findAll(params, orig);
-	              } else if (def.type === 'hasOne') {
-	                if (def.localKey && hasDefKey) {
-	                  task = relationDef.find(defKey, orig);
-	                } else if (def.foreignKey) {
-	                  task = relationDef.findAll(params, orig).then(function (hasOnes) {
-	                    return hasOnes.length ? hasOnes[0] : null;
-	                  });
-	                }
-	              } else if (hasDefKey) {
-	                task = relationDef.find(defKey, orig);
-	              }
-	            }
-
-	            if (task) {
-	              if (!_options.linkRelations) {
-	                task = task.then(function (data) {
-	                  instance[def.localField] = data;
-	                });
-	              }
-	              tasks.push(task);
-	            }
-	          }
-	        });
-
-	        resolve(tasks);
-	      })();
-	    }
-	  }).then(function (tasks) {
-	    return DSUtils.Promise.all(tasks);
-	  }).then(function () {
-	    return _options.afterLoadRelations.call(instance, _options, instance);
-	  })['catch'](_this.errorFn('loadRelations', resourceName, instance, relations, options));
-	};
-
-/***/ },
-/* 43 */
-/***/ function(module, exports) {
-
-	/**
-	 * Find expired items of the specified resource type and perform the configured action.
-	 *
-	 * @param resourceName The name of the type of resource of the items to reap.
-	 * @param options Optional configuration.
-	 * @returns The reaped items.
-	 */
-	module.exports = function reap(resourceName, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var definition = _this.definitions[resourceName];
-	  var resource = _this.store[resourceName];
-
-	  return new DSUtils.Promise(function (resolve, reject) {
-	    if (!definition) {
-	      reject(new _this.errors.NER(resourceName));
-	    } else {
-	      options = DSUtils._(definition, options);
-	      if (!options.hasOwnProperty('notify')) {
-	        options.notify = false;
-	      }
-	      var items = [];
-	      var now = new Date().getTime();
-	      var expiredItem = undefined;
-
-	      // find the expired items
-	      while ((expiredItem = resource.expiresHeap.peek()) && expiredItem.expires < now) {
-	        items.push(expiredItem.item);
-	        delete expiredItem.item;
-	        resource.expiresHeap.pop();
-	      }
-	      resolve(items);
-	    }
-	  }).then(function (items) {
-	    // only hit lifecycle if there are items
-	    if (items.length) {
-	      definition.beforeReap(options, items);
-	      if (options.notify) {
-	        definition.emit('DS.beforeReap', definition, items);
-	      }
-	    }
-
-	    if (options.reapAction === 'inject') {
-	      (function () {
-	        var timestamp = new Date().getTime();
-	        DSUtils.forEach(items, function (item) {
-	          resource.expiresHeap.push({
-	            item: item,
-	            timestamp: timestamp,
-	            expires: definition.maxAge ? timestamp + definition.maxAge : Number.MAX_VALUE
-	          });
-	        });
-	      })();
-	    } else if (options.reapAction === 'eject') {
-	      DSUtils.forEach(items, function (item) {
-	        definition.eject(item[definition.idAttribute]);
-	      });
-	    } else if (options.reapAction === 'refresh') {
-	      var _ret2 = (function () {
-	        var tasks = [];
-	        DSUtils.forEach(items, function (item) {
-	          tasks.push(definition.refresh(item[definition.idAttribute]));
-	        });
-	        return {
-	          v: DSUtils.Promise.all(tasks)
-	        };
-	      })();
-
-	      if (typeof _ret2 === 'object') return _ret2.v;
-	    }
-	    return items;
-	  }).then(function (items) {
-	    // only hit lifecycle if there are items
-	    if (items.length) {
-	      definition.afterReap(options, items);
-	      if (options.notify) {
-	        definition.emit('DS.afterReap', definition, items);
-	      }
-	    }
-	    return items;
-	  })['catch'](_this.errorFn('reap', resourceName, options));
-	};
-
-/***/ },
-/* 44 */
-/***/ function(module, exports) {
-
-	/**
-	 * Save a single item in its present state.
-	 *
-	 * @param resourceName The name of the type of resource of the item.
-	 * @param id The primary key of the item.
-	 * @param options Optional congifuration.
-	 * @returns The item, now saved.
-	 */
-	module.exports = function save(resourceName, id, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var DSErrors = _this.errors;
-
-	  var definition = _this.definitions[resourceName];
-	  var resource = _this.store[resourceName];
-	  var item = undefined,
-	      noChanges = undefined,
-	      adapter = undefined;
-
-	  return new DSUtils.Promise(function (resolve, reject) {
-	    id = DSUtils.resolveId(definition, id);
-	    if (!definition) {
-	      reject(new DSErrors.NER(resourceName));
-	    } else if (!DSUtils._sn(id)) {
-	      reject(DSUtils._snErr('id'));
-	    } else if (!definition.get(id)) {
-	      reject(new DSErrors.R('id "' + id + '" not found in cache!'));
-	    } else {
-	      item = definition.get(id);
-	      options = DSUtils._(definition, options);
-	      resolve(item);
-	    }
-	  })
-	  // start lifecycle
-	  .then(function (attrs) {
-	    return options.beforeValidate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.validate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.afterValidate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.beforeUpdate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    if (options.notify) {
-	      definition.emit('DS.beforeUpdate', definition, attrs);
-	    }
-	    // only send changed properties to the adapter
-	    if (options.changesOnly) {
-	      if (resource.observers[id] && typeof resource.observers[id] === 'function') {
-	        resource.observers[id].deliver();
-	      }
-	      var toKeep = [];
-	      var changes = definition.changes(id);
-
-	      for (var key in changes.added) {
-	        toKeep.push(key);
-	      }
-	      for (key in changes.changed) {
-	        toKeep.push(key);
-	      }
-	      changes = DSUtils.pick(attrs, toKeep);
-	      // no changes? no save
-	      if (DSUtils.isEmpty(changes)) {
-	        // no changes, return
-	        noChanges = true;
-	        return attrs;
-	      } else {
-	        attrs = changes;
-	      }
-	    }
-	    adapter = definition.getAdapterName(options);
-	    return _this.adapters[adapter].update(definition, id, DSUtils.omit(attrs, options.omit), options);
-	  }).then(function (data) {
-	    return options.afterUpdate.call(data, options, data);
-	  }).then(function (attrs) {
-	    if (options.notify) {
-	      definition.emit('DS.afterUpdate', definition, attrs);
-	    }
-	    if (noChanges) {
-	      // no changes, just return
-	      return attrs;
-	    } else if (options.cacheResponse) {
-	      // inject the reponse into the store, updating the item
-	      var injected = definition.inject(attrs, options.orig());
-	      var _id = injected[definition.idAttribute];
-	      // mark the item as "saved"
-	      resource.saved[_id] = DSUtils.updateTimestamp(resource.saved[_id]);
-	      if (!definition.resetHistoryOnInject) {
-	        resource.previousAttributes[_id] = DSUtils.copy(injected, null, null, null, definition.relationFields);
-	      }
-	      return injected;
-	    } else {
-	      // just return an instance
-	      return definition.createInstance(attrs, options.orig());
-	    }
-	  }).then(function (item) {
-	    return DSUtils.respond(item, { adapter: adapter }, options);
-	  })['catch'](_this.errorFn('save', resourceName, id, options));
-	};
-
-/***/ },
-/* 45 */
-/***/ function(module, exports) {
-
-	/**
-	 * Update a single item using the supplied properties hash.
-	 *
-	 * @param resourceName The name of the type of resource of the item to update.
-	 * @param id The primary key of the item to update.
-	 * @param attrs The attributes with which to update the item.
-	 * @param options Optional configuration.
-	 * @returns The item, now updated.
-	 */
-	module.exports = function update(resourceName, id, attrs, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var DSErrors = _this.errors;
-
-	  var definition = _this.definitions[resourceName];
-	  var adapter = undefined;
-
-	  return new DSUtils.Promise(function (resolve, reject) {
-	    id = DSUtils.resolveId(definition, id);
-	    if (!definition) {
-	      reject(new DSErrors.NER(resourceName));
-	    } else if (!DSUtils._sn(id)) {
-	      reject(DSUtils._snErr('id'));
-	    } else {
-	      options = DSUtils._(definition, options);
-	      resolve(attrs);
-	    }
-	  })
-	  // start lifecycle
-	  .then(function (attrs) {
-	    return options.beforeValidate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.validate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.afterValidate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.beforeUpdate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    if (options.notify) {
-	      definition.emit('DS.beforeUpdate', definition, attrs);
-	    }
-	    adapter = definition.getAdapterName(options);
-	    return _this.adapters[adapter].update(definition, id, DSUtils.omit(attrs, options.omit), options);
-	  }).then(function (data) {
-	    return options.afterUpdate.call(data, options, data);
-	  }).then(function (attrs) {
-	    if (options.notify) {
-	      definition.emit('DS.afterUpdate', definition, attrs);
-	    }
-	    if (options.cacheResponse) {
-	      // inject the updated item into the store
-	      var injected = definition.inject(attrs, options.orig());
-	      var resource = _this.store[resourceName];
-	      var _id = injected[definition.idAttribute];
-	      // mark the item as "saved"
-	      resource.saved[_id] = DSUtils.updateTimestamp(resource.saved[_id]);
-	      if (!definition.resetHistoryOnInject) {
-	        resource.previousAttributes[_id] = DSUtils.copy(injected, null, null, null, definition.relationFields);
-	      }
-	      return injected;
-	    } else {
-	      // just return an instance
-	      return definition.createInstance(attrs, options.orig());
-	    }
-	  }).then(function (item) {
-	    return DSUtils.respond(item, { adapter: adapter }, options);
-	  })['catch'](_this.errorFn('update', resourceName, id, attrs, options));
-	};
-
-/***/ },
-/* 46 */
-/***/ function(module, exports) {
-
-	/**
-	 * Update a collection of items using the supplied properties hash.
-	 *
-	 * @param resourceName The name of the type of resource of the items to update.
-	 * @param attrs  The attributes with which to update the item.
-	 * @param params The criteria by which to select items to update. See http://www.js-data.io/docs/query-syntax
-	 * @param options Optional configuration.
-	 * @returns The updated items.
-	 */
-	module.exports = function updateAll(resourceName, attrs, params, options) {
-	  var _this = this;
-	  var DSUtils = _this.utils;
-	  var DSErrors = _this.errors;
-
-	  var definition = _this.definitions[resourceName];
-	  var adapter = undefined;
-
-	  return new DSUtils.Promise(function (resolve, reject) {
-	    if (!definition) {
-	      reject(new DSErrors.NER(resourceName));
-	    } else {
-	      options = DSUtils._(definition, options);
-	      DSUtils.applyScope(definition, params, options);
-	      resolve(attrs);
-	    }
-	  })
-	  // start lifecycle
-	  .then(function (attrs) {
-	    return options.beforeValidate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.validate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.afterValidate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    return options.beforeUpdate.call(attrs, options, attrs);
-	  }).then(function (attrs) {
-	    if (options.notify) {
-	      definition.emit('DS.beforeUpdate', definition, attrs);
-	    }
-	    adapter = definition.getAdapterName(options);
-	    return _this.adapters[adapter].updateAll(definition, DSUtils.omit(attrs, options.omit), params, options);
-	  }).then(function (data) {
-	    return options.afterUpdate.call(data, options, data);
-	  }).then(function (data) {
-	    if (options.notify) {
-	      definition.emit('DS.afterUpdate', definition, attrs);
-	    }
-	    var origOptions = options.orig();
-	    if (options.cacheResponse) {
-	      var _ret = (function () {
-	        // inject the updated items into the store
-	        var injected = definition.inject(data, origOptions);
-	        var resource = _this.store[resourceName];
-	        // mark the items as "saved"
-	        DSUtils.forEach(injected, function (i) {
-	          var id = i[definition.idAttribute];
-	          resource.saved[id] = DSUtils.updateTimestamp(resource.saved[id]);
-	          if (!definition.resetHistoryOnInject) {
-	            resource.previousAttributes[id] = DSUtils.copy(i, null, null, null, definition.relationFields);
-	          }
-	        });
-	        return {
-	          v: injected
-	        };
-	      })();
-
-	      if (typeof _ret === 'object') return _ret.v;
-	    } else {
-	      var _ret2 = (function () {
-	        // just return instances
-	        var instances = [];
-	        DSUtils.forEach(data, function (item) {
-	          instances.push(definition.createInstance(item, origOptions));
-	        });
-	        return {
-	          v: instances
-	        };
-	      })();
-
-	      if (typeof _ret2 === 'object') return _ret2.v;
-	    }
-	  }).then(function (items) {
-	    return DSUtils.respond(items, { adapter: adapter }, options);
-	  })['catch'](_this.errorFn('updateAll', resourceName, attrs, params, options));
-	};
-
-/***/ }
-/******/ ])
-});
-;
+* js-data
+* @version 3.0.0-beta.1 - Homepage <http://www.js-data.io/>
+* @author js-data project authors
+* @copyright (c) 2014-2016 js-data project authors
+* @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
+*
+* @overview js-data is a framework-agnostic, datastore-agnostic ORM/ODM for Node.js and the Browser.
+*/
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+  typeof define === 'function' && define.amd ? define('js-data', ['exports'], factory) :
+  (factory((global.JSData = global.JSData || {})));
+}(this, function (exports) { 'use strict';
+
+  var babelHelpers = {};
+  babelHelpers.typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+    return typeof obj;
+  } : function (obj) {
+    return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+  };
+
+  babelHelpers.defineProperty = function (obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {
+        value: value,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      });
+    } else {
+      obj[key] = value;
+    }
+
+    return obj;
+  };
+
+  babelHelpers.toConsumableArray = function (arr) {
+    if (Array.isArray(arr)) {
+      for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
+
+      return arr2;
+    } else {
+      return Array.from(arr);
+    }
+  };
+
+  babelHelpers;
+
+  /**
+   * @name utils
+   * @memberof module:js-data
+   * @type {Object}
+   * @property {Function} addHiddenPropsToTarget TODO
+   * @property {Function} classCallCheck TODO
+   * @property {Function} copy TODO
+   * @property {Function} deepMixIn TODO
+   * @property {Function} eventify TODO
+   * @property {Function} extend TODO
+   * @property {Function} fillIn TODO
+   * @property {Function} fromJson TODO
+   * @property {Function} get TODO
+   * @property {Function} getSuper TODO
+   * @property {Function} intersection TODO
+   * @property {Function} isArray TODO
+   * @property {Function} isBlacklisted TODO
+   * @property {boolean} isBrowser TODO
+   * @property {Function} isBoolean TODO
+   * @property {Function} isFunction TODO
+   * @property {Function} isInteger TODO
+   * @property {Function} isNull TODO
+   * @property {Function} isNumber TODO
+   * @property {Function} isObject TODO
+   * @property {Function} isRegExp TODO
+   * @property {Function} isSorN TODO
+   * @property {Function} isString TODO
+   * @property {Function} isUndefined TODO
+   * @property {Function} reject TODO
+   * @property {Function} resolve TODO
+   * @property {Function} set TODO
+   * @property {Function} toJson TODO
+   */
+
+  var DOMAIN = 'utils';
+
+  var INFINITY = 1 / 0;
+  var MAX_INTEGER = 1.7976931348623157e+308;
+  var BOOL_TAG = '[object Boolean]';
+  var DATE_TAG = '[object Date]';
+  var FUNC_TAG = '[object Function]';
+  var NUMBER_TAG = '[object Number]';
+  var OBJECT_TAG = '[object Object]';
+  var REGEXP_TAG = '[object RegExp]';
+  var STRING_TAG = '[object String]';
+  var objToString = Object.prototype.toString;
+  var PATH = /^(.+)\.(.+)$/;
+
+  var ERRORS = {
+    '400': function _() {
+      return 'expected: ' + arguments[0] + ', found: ' + (arguments[2] ? arguments[1] : babelHelpers.typeof(arguments[1]));
+    },
+    '404': function _() {
+      return arguments[0] + ' not found';
+    }
+  };
+
+  var toInteger = function toInteger(value) {
+    if (!value) {
+      return 0;
+    }
+    // Coerce to number
+    value = +value;
+    if (value === INFINITY || value === -INFINITY) {
+      var sign = value < 0 ? -1 : 1;
+      return sign * MAX_INTEGER;
+    }
+    var remainder = value % 1;
+    return value === value ? remainder ? value - remainder : value : 0; // eslint-disable-line
+  };
+
+  var toStr = function toStr(value) {
+    return objToString.call(value);
+  };
+
+  var isPlainObject = function isPlainObject(value) {
+    return !!value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && value.constructor === Object;
+  };
+
+  var mkdirP = function mkdirP(object, path) {
+    if (!path) {
+      return object;
+    }
+    var parts = path.split('.');
+    parts.forEach(function (key) {
+      if (!object[key]) {
+        object[key] = {};
+      }
+      object = object[key];
+    });
+    return object;
+  };
+
+  var utils = {
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    Promise: Promise,
+
+    /**
+     * Shallow copy properties from src to dest that meet the following criteria:
+     * - own enumerable
+     * - not a function
+     * - does not start with "_"
+     *
+     * @ignore
+     * @param {Object} dest Destination object.
+     * @param {Object} src Source object.
+     */
+    _: function _(dest, src) {
+      utils.forOwn(src, function (value, key) {
+        if (key && utils.isUndefined(dest[key]) && !utils.isFunction(value) && key.indexOf('_') !== 0) {
+          dest[key] = value;
+        }
+      });
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    _forRelation: function _forRelation(opts, def, fn, ctx) {
+      var relationName = def.relation;
+      var containedName = null;
+      var index = void 0;
+      opts || (opts = {});
+      opts.with || (opts.with = []);
+
+      if ((index = utils._getIndex(opts.with, relationName)) >= 0) {
+        containedName = relationName;
+      } else if ((index = utils._getIndex(opts.with, def.localField)) >= 0) {
+        containedName = def.localField;
+      }
+
+      if (opts.withAll) {
+        fn.call(ctx, def, {});
+        return;
+      } else if (!containedName) {
+        return;
+      }
+      var optsCopy = {};
+      utils.fillIn(optsCopy, def.getRelation());
+      utils.fillIn(optsCopy, opts);
+      optsCopy.with = opts.with.slice();
+      optsCopy._activeWith = optsCopy.with.splice(index, 1)[0];
+      optsCopy.with.forEach(function (relation, i) {
+        if (relation && relation.indexOf(containedName) === 0 && relation.length >= containedName.length && relation[containedName.length] === '.') {
+          optsCopy.with[i] = relation.substr(containedName.length + 1);
+        } else {
+          optsCopy.with[i] = '';
+        }
+      });
+      fn.call(ctx, def, optsCopy);
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    _getIndex: function _getIndex(list, relation) {
+      var index = -1;
+      list.forEach(function (_relation, i) {
+        if (_relation === relation) {
+          index = i;
+          return false;
+        } else if (utils.isObject(_relation)) {
+          if (_relation.relation === relation) {
+            index = i;
+            return false;
+          }
+        }
+      });
+      return index;
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    addHiddenPropsToTarget: function addHiddenPropsToTarget(target, props) {
+      var map = {};
+      utils.forOwn(props, function (value, key) {
+        map[key] = {
+          writable: true,
+          value: value
+        };
+      });
+      Object.defineProperties(target, map);
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    areDifferent: function areDifferent(a, b, opts) {
+      opts || (opts = {});
+      var diff = utils.diffObjects(a, b, opts);
+      var diffCount = Object.keys(diff.added).length + Object.keys(diff.removed).length + Object.keys(diff.changed).length;
+      return diffCount > 0;
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    classCallCheck: function classCallCheck(instance, ctor) {
+      if (!(instance instanceof ctor)) {
+        throw utils.err('' + ctor.name)(500, 'Cannot call a class as a function');
+      }
+    },
+
+
+    /**
+     * Deep copy a value.
+     *
+     * @ignore
+     * @param {*} from Value to deep copy.
+     * @return {*} Deep copy of `from`.
+     */
+    copy: function copy(from, to, stackFrom, stackTo, blacklist, plain) {
+      if (!to) {
+        to = from;
+        if (from) {
+          if (utils.isArray(from)) {
+            to = utils.copy(from, [], stackFrom, stackTo, blacklist, plain);
+          } else if (utils.isDate(from)) {
+            to = new Date(from.getTime());
+          } else if (utils.isRegExp(from)) {
+            to = new RegExp(from.source, from.toString().match(/[^\/]*$/)[0]);
+            to.lastIndex = from.lastIndex;
+          } else if (utils.isObject(from)) {
+            if (plain) {
+              to = utils.copy(from, {}, stackFrom, stackTo, blacklist, plain);
+            } else {
+              to = utils.copy(from, Object.create(Object.getPrototypeOf(from)), stackFrom, stackTo, blacklist, plain);
+            }
+          }
+        }
+      } else {
+        if (from === to) {
+          throw utils.err(DOMAIN + '.copy')(500, 'Cannot copy! Source and destination are identical.');
+        }
+
+        stackFrom = stackFrom || [];
+        stackTo = stackTo || [];
+
+        if (utils.isObject(from)) {
+          var index = stackFrom.indexOf(from);
+          if (index !== -1) {
+            return stackTo[index];
+          }
+
+          stackFrom.push(from);
+          stackTo.push(to);
+        }
+
+        var result = void 0;
+        if (utils.isArray(from)) {
+          var i = void 0;
+          to.length = 0;
+          for (i = 0; i < from.length; i++) {
+            result = utils.copy(from[i], null, stackFrom, stackTo, blacklist, plain);
+            if (utils.isObject(from[i])) {
+              stackFrom.push(from[i]);
+              stackTo.push(result);
+            }
+            to.push(result);
+          }
+        } else {
+          if (utils.isArray(to)) {
+            to.length = 0;
+          } else {
+            utils.forOwn(to, function (value, key) {
+              delete to[key];
+            });
+          }
+          for (var key in from) {
+            if (from.hasOwnProperty(key)) {
+              if (utils.isBlacklisted(key, blacklist)) {
+                continue;
+              }
+              result = utils.copy(from[key], null, stackFrom, stackTo, blacklist, plain);
+              if (utils.isObject(from[key])) {
+                stackFrom.push(from[key]);
+                stackTo.push(result);
+              }
+              to[key] = result;
+            }
+          }
+        }
+      }
+      return to;
+    },
+
+
+    /**
+     * Recursively shallow fill in own enumberable properties from `source` to `dest`.
+     *
+     * @ignore
+     * @param {Object} dest The destination object.
+     * @param {Object} source The source object.
+     */
+    deepFillIn: function deepFillIn(dest, source) {
+      if (source) {
+        utils.forOwn(source, function (value, key) {
+          var existing = dest[key];
+          if (isPlainObject(value) && isPlainObject(existing)) {
+            utils.deepFillIn(existing, value);
+          } else if (!dest.hasOwnProperty(key) || dest[key] === undefined) {
+            dest[key] = value;
+          }
+        });
+      }
+      return dest;
+    },
+
+
+    /**
+     * Recursively shallow copy own enumberable properties from `source` to `dest`.
+     *
+     * @ignore
+     * @param {Object} dest The destination object.
+     * @param {Object} source The source object.
+     */
+    deepMixIn: function deepMixIn(dest, source) {
+      if (source) {
+        utils.forOwn(source, function (value, key) {
+          var existing = dest[key];
+          if (isPlainObject(value) && isPlainObject(existing)) {
+            utils.deepMixIn(existing, value);
+          } else {
+            dest[key] = value;
+          }
+        });
+      }
+      return dest;
+    },
+
+
+    /**
+     * @param {Object} a Base object.
+     * @param {Object} b Comparison object.
+     * @return {Object} Diff.
+     */
+    diffObjects: function diffObjects(a, b, opts) {
+      opts || (opts = {});
+      var equalsFn = opts.equalsFn;
+      var bl = opts.ignore;
+      var diff = {
+        added: {},
+        changed: {},
+        removed: {}
+      };
+      if (!utils.isFunction(equalsFn)) {
+        equalsFn = utils.strictEqual;
+      }
+
+      utils.forOwn(b, function (oldValue, key) {
+        var newValue = a[key];
+
+        if (utils.isBlacklisted(key, bl) || equalsFn(newValue, oldValue)) {
+          return;
+        }
+
+        if (utils.isUndefined(newValue)) {
+          diff.removed[key] = undefined;
+        } else if (!equalsFn(newValue, oldValue)) {
+          diff.changed[key] = newValue;
+        }
+      });
+
+      utils.forOwn(a, function (newValue, key) {
+        if (!utils.isUndefined(b[key]) || utils.isBlacklisted(key, bl)) {
+          return;
+        }
+        diff.added[key] = newValue;
+      });
+
+      return diff;
+    },
+
+
+    /**
+     * TODO
+     */
+    equal: function equal(a, b) {
+      return a == b; // eslint-disable-line
+    },
+
+
+    /**
+     * TODO
+     */
+    err: function err(domain, target) {
+      return function (code) {
+        var prefix = '[' + domain + ':' + target + '] ';
+        var message = ERRORS[code].apply(null, Array.prototype.slice.call(arguments, 1));
+        message = '' + prefix + message + '\nhttp://www.js-data.io/v3.0/docs/errors#' + code;
+        return new Error(message);
+      };
+    },
+
+
+    /**
+     * Add eventing capabilities into the target object.
+     *
+     * @ignore
+     * @param {Object} target Target object.
+     * @param {Function} [getter] Custom getter for retrieving the object's event
+     * listeners.
+     * @param {Function} [setter] Custom setter for setting the object's event
+     * listeners.
+     */
+    eventify: function eventify(target, getter, setter) {
+      target = target || this;
+      var _events = {};
+      if (!getter && !setter) {
+        getter = function getter() {
+          return _events;
+        };
+        setter = function setter(value) {
+          _events = value;
+        };
+      }
+      Object.defineProperties(target, {
+        emit: {
+          value: function value() {
+            var events = getter.call(this) || {};
+
+            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+              args[_key] = arguments[_key];
+            }
+
+            var type = args.shift();
+            var listeners = events[type] || [];
+            var i = void 0;
+            for (i = 0; i < listeners.length; i++) {
+              listeners[i].f.apply(listeners[i].c, args);
+            }
+            listeners = events.all || [];
+            args.unshift(type);
+            for (i = 0; i < listeners.length; i++) {
+              listeners[i].f.apply(listeners[i].c, args);
+            }
+          }
+        },
+        off: {
+          value: function value(type, func) {
+            var events = getter.call(this);
+            var listeners = events[type];
+            if (!listeners) {
+              setter.call(this, {});
+            } else if (func) {
+              for (var i = 0; i < listeners.length; i++) {
+                if (listeners[i].f === func) {
+                  listeners.splice(i, 1);
+                  break;
+                }
+              }
+            } else {
+              listeners.splice(0, listeners.length);
+            }
+          }
+        },
+        on: {
+          value: function value(type, func, ctx) {
+            if (!getter.call(this)) {
+              setter.call(this, {});
+            }
+            var events = getter.call(this);
+            events[type] = events[type] || [];
+            events[type].push({
+              c: ctx,
+              f: func
+            });
+          }
+        }
+      });
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    extend: function extend(props, classProps) {
+      var superClass = this;
+      var _subClass = void 0;
+
+      props || (props = {});
+      classProps || (classProps = {});
+
+      if (props.hasOwnProperty('constructor')) {
+        _subClass = props.constructor;
+        delete props.constructor;
+      } else {
+        _subClass = function subClass() {
+          utils.classCallCheck(this, _subClass);
+
+          for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+            args[_key2] = arguments[_key2];
+          }
+
+          superClass.apply(this, args);
+        };
+      }
+
+      // Setup inheritance of instance members
+      _subClass.prototype = Object.create(superClass && superClass.prototype, {
+        constructor: {
+          configurable: true,
+          enumerable: false,
+          value: _subClass,
+          writable: true
+        }
+      });
+
+      var obj = Object;
+      // Setup inheritance of static members
+      if (obj.setPrototypeOf) {
+        obj.setPrototypeOf(_subClass, superClass);
+      } else if (classProps.strictEs6Class) {
+        _subClass.__proto__ = superClass; // eslint-disable-line
+      } else {
+          utils.forOwn(superClass, function (value, key) {
+            _subClass[key] = value;
+          });
+        }
+      Object.defineProperty(_subClass, '__super__', {
+        configurable: true,
+        value: superClass
+      });
+
+      utils.addHiddenPropsToTarget(_subClass.prototype, props);
+      utils.fillIn(_subClass, classProps);
+
+      return _subClass;
+    },
+
+
+    /**
+     * Shallow copy own enumerable properties from `src` to `dest` that are on `src`
+     * but are missing from `dest.
+     *
+     * @ignore
+     * @param {Object} dest The destination object.
+     * @param {Object} source The source object.
+     */
+    fillIn: function fillIn(dest, src) {
+      utils.forOwn(src, function (value, key) {
+        if (!dest.hasOwnProperty(key) || dest[key] === undefined) {
+          dest[key] = value;
+        }
+      });
+      return dest;
+    },
+
+
+    /**
+     * Find the index of something according to the given checker function.
+     *
+     * @ignore
+     * @param {Array} array The array to search.
+     * @param {Function} fn Checker function.
+     * @param {number} Index if found or -1 if not found.
+     */
+    findIndex: function findIndex(array, fn) {
+      var index = -1;
+      if (!array) {
+        return index;
+      }
+      array.forEach(function (record, i) {
+        if (fn(record)) {
+          index = i;
+          return false;
+        }
+      });
+      return index;
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    forEachRelation: function forEachRelation(mapper, opts, fn, ctx) {
+      var relationList = mapper.relationList || [];
+      if (!relationList.length) {
+        return;
+      }
+      relationList.forEach(function (def) {
+        utils._forRelation(opts, def, fn, ctx);
+      });
+    },
+
+
+    /**
+     * Iterate over an object's own enumerable properties.
+     *
+     * @ignore
+     * @param {Object} object The object whose properties are to be enumerated.
+     * @param {Function} fn Iteration function.
+     * @param {Object} [thisArg] Content to which to bind `fn`.
+     */
+    forOwn: function forOwn(obj, fn, thisArg) {
+      var keys = Object.keys(obj);
+      var len = keys.length;
+      var i = void 0;
+      for (i = 0; i < len; i++) {
+        fn.call(thisArg, obj[keys[i]], keys[i], obj);
+      }
+    },
+
+
+    /**
+     * Proxy for `JSON.parse`.
+     *
+     * @ignore
+     * @param {string} json JSON to parse.
+     * @return {Object} Parsed object.
+     */
+    fromJson: function fromJson(json) {
+      return utils.isString(json) ? JSON.parse(json) : json;
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    'get': function get(object, prop) {
+      if (!prop) {
+        return;
+      }
+      var parts = prop.split('.');
+      var last = parts.pop();
+
+      while (prop = parts.shift()) {
+        // eslint-disable-line
+        object = object[prop];
+        if (object == null) {
+          // eslint-disable-line
+          return;
+        }
+      }
+
+      return object[last];
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    getSuper: function getSuper(instance, isCtor) {
+      var ctor = isCtor ? instance : instance.constructor;
+      return ctor.__super__ || Object.getPrototypeOf(ctor) || ctor.__proto__; // eslint-disable-line
+    },
+
+
+    /**
+     * Return the intersection of two arrays.
+     *
+     * @ignore
+     * @param {Array} array1 First array.
+     * @param {Array} array2 Second array.
+     * @return {Array} Array of elements common to both arrays.
+     */
+    intersection: function intersection(array1, array2) {
+      if (!array1 || !array2) {
+        return [];
+      }
+      var result = [];
+      var item = void 0;
+      var i = void 0;
+      var len = array1.length;
+      for (i = 0; i < len; i++) {
+        item = array1[i];
+        if (result.indexOf(item) !== -1) {
+          continue;
+        }
+        if (array2.indexOf(item) !== -1) {
+          result.push(item);
+        }
+      }
+      return result;
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isArray: Array.isArray,
+
+    /**
+     * Return whether `prop` is matched by any string or regular expression in `bl`.
+     *
+     * @ignore
+     * @param {string} prop The name of a property.
+     * @param {Array} bl Array of strings and regular expressions.
+     * @return {boolean} Whether `prop` was matched.
+     */
+    isBlacklisted: function isBlacklisted(prop, bl) {
+      if (!bl || !bl.length) {
+        return false;
+      }
+      var matches = void 0;
+      for (var i = 0; i < bl.length; i++) {
+        if (toStr(bl[i]) === REGEXP_TAG && bl[i].test(prop) || bl[i] === prop) {
+          matches = prop;
+          return matches;
+        }
+      }
+      return !!matches;
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isBoolean: function isBoolean(value) {
+      return toStr(value) === BOOL_TAG;
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isBrowser: false,
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isDate: function isDate(value) {
+      return value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toStr(value) === DATE_TAG;
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isFunction: function isFunction(value) {
+      return typeof value === 'function' || value && toStr(value) === FUNC_TAG;
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isInteger: function isInteger(value) {
+      return toStr(value) === NUMBER_TAG && value == toInteger(value); // eslint-disable-line
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isNull: function isNull(value) {
+      return value === null;
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isNumber: function isNumber(value) {
+      var type = typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value);
+      return type === 'number' || value && type === 'object' && toStr(value) === NUMBER_TAG;
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isObject: function isObject(value) {
+      return toStr(value) === OBJECT_TAG;
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isRegExp: function isRegExp(value) {
+      return toStr(value) === REGEXP_TAG;
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isSorN: function isSorN(value) {
+      return utils.isString(value) || utils.isNumber(value);
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isString: function isString(value) {
+      return typeof value === 'string' || value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toStr(value) === STRING_TAG;
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    isUndefined: function isUndefined(value) {
+      return value === undefined;
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    logify: function logify(target) {
+      utils.addHiddenPropsToTarget(target, {
+        dbg: function dbg() {
+          for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+            args[_key3] = arguments[_key3];
+          }
+
+          this.log.apply(this, ['debug'].concat(args));
+        },
+        log: function log(level) {
+          for (var _len4 = arguments.length, args = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
+            args[_key4 - 1] = arguments[_key4];
+          }
+
+          if (level && !args.length) {
+            args.push(level);
+            level = 'debug';
+          }
+          if (level === 'debug' && !this.debug) {
+            return;
+          }
+          var prefix = level.toUpperCase() + ': (' + (this.name || this.constructor.name) + ')';
+          if (console[level]) {
+            var _console;
+
+            (_console = console)[level].apply(_console, [prefix].concat(args));
+          } else {
+            var _console2;
+
+            (_console2 = console).log.apply(_console2, [prefix].concat(args));
+          }
+        }
+      });
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    noDupeAdd: function noDupeAdd(array, record, fn) {
+      if (!array) {
+        return;
+      }
+      var index = this.findIndex(array, fn);
+      if (index < 0) {
+        array.push(record);
+      }
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    omit: function omit(props, keys) {
+      // Remove relations
+      var _props = {};
+      utils.forOwn(props, function (value, key) {
+        if (keys.indexOf(key) === -1) {
+          _props[key] = value;
+        }
+      });
+      return _props;
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    plainCopy: function plainCopy(from) {
+      return utils.copy(from, undefined, undefined, undefined, undefined, true);
+    },
+
+
+    /**
+     * Proxy for `Promise.reject`.
+     *
+     * @ignore
+     * @param {*} [value] Value with which to reject the Promise.
+     * @return {Promise} Promise reject with `value`.
+     */
+    reject: function reject(value) {
+      return utils.Promise.reject(value);
+    },
+
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    remove: function remove(array, fn) {
+      if (!array || !array.length) {
+        return;
+      }
+      var index = this.findIndex(array, fn);
+      if (index >= 0) {
+        array.splice(index, 1);
+      }
+    },
+
+
+    /**
+     * Proxy for `Promise.resolve`.
+     *
+     * @ignore
+     * @param {*} [value] Value with which to resolve the Promise.
+     * @return {Promise} Promise resolved with `value`.
+     */
+    resolve: function resolve(value) {
+      return utils.Promise.resolve(value);
+    },
+
+
+    /**
+     * Set the value at the provided key or path.
+     *
+     * @ignore
+     * @param {Object} object The object on which to set a property.
+     * @param {(string|Object)} path The key or path to the property. Can also
+     * pass in an object of path/value pairs, which will all be set on the target
+     * object.
+     * @param {*} [value] The value to set.
+     */
+    set: function set(object, path, value) {
+      if (utils.isObject(path)) {
+        utils.forOwn(path, function (value, _path) {
+          utils.set(object, _path, value);
+        });
+      } else {
+        var parts = PATH.exec(path);
+        if (parts) {
+          mkdirP(object, parts[1])[parts[2]] = value;
+        } else {
+          object[path] = value;
+        }
+      }
+    },
+
+    /**
+     * TODO
+     *
+     * @ignore
+     */
+    strictEqual: function strictEqual(a, b) {
+      var _equal = a === b;
+      if (!_equal) {
+        if (utils.isObject(a) && utils.isObject(b)) {
+          utils.forOwn(a, function (value, key) {
+            _equal = _equal && utils.strictEqual(value, b[key]);
+          });
+          utils.forOwn(b, function (value, key) {
+            _equal = _equal && utils.strictEqual(value, a[key]);
+          });
+        } else if (utils.isArray(a) && utils.isArray(b)) {
+          a.forEach(function (value, i) {
+            _equal = _equal && utils.strictEqual(value, b[i]);
+          });
+        }
+      }
+      return _equal;
+    },
+
+
+    /**
+     * Proxy for `JSON.stringify`.
+     *
+     * @ignore
+     * @param {*} value Value to serialize to JSON.
+     * @return {string} JSON string.
+     */
+    toJson: JSON.stringify,
+
+    /**
+     * Unset the value at the provided key or path.
+     *
+     * @ignore
+     * @param {Object} object The object from which to delete the property.
+     * @param {string} path The key or path to the property.
+     */
+    unset: function unset(object, path) {
+      var parts = path.split('.');
+      var last = parts.pop();
+
+      while (path = parts.shift()) {
+        // eslint-disable-line
+        object = object[path];
+        if (object == null) {
+          // eslint-disable-line
+          return;
+        }
+      }
+
+      object[last] = undefined;
+    }
+  };
+
+  // Attempt to detect whether we are in the browser.
+  try {
+    utils.isBrowser = !!window;
+  } catch (e) {
+    utils.isBrowser = false;
+  }
+
+  var utils$1 = utils;
+
+  function Component() {
+    /**
+     * Event listeners attached to this Component. Do not modify. Use
+     * {@link Component#on} and {@link Component#off} instead.
+     *
+     * @name Component#_listeners
+     * @instance
+     * @type {Object}
+     */
+    Object.defineProperty(this, '_listeners', { value: {} });
+  }
+
+  /**
+   * Create a subclass of this component.
+   *
+   * @name Component.extend
+   * @method
+   * @param {Object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {Object} [classProps={}] Static properties to add to the subclass.
+   * @return {Function} Subclass of this component.
+   */
+  Component.extend = utils$1.extend;
+
+  /**
+   * TODO
+   *
+   * @name Component#dbg
+   * @method
+   */
+  /**
+   * TODO
+   *
+   * @name Component#log
+   * @method
+   */
+  utils$1.logify(Component.prototype);
+
+  /**
+   * Register a new event listener on this Component.
+   *
+   * @name Component#on
+   * @method
+   * @param {string} event Name of event to subsribe to.
+   * @param {Function} listener Listener function to handle the event.
+   * @param {*} [ctx] Optional content in which to invoke the listener.
+   */
+  /**
+   * Remove an event listener from this Component. If no listener is provided,
+   * then all listeners for the specified event will be removed. If no event is
+   * specified then all listeners for all events will be removed.
+   *
+   * @name Component#off
+   * @method
+   * @param {string} [event] Name of event to unsubsribe to.
+   * @param {Function} [listener] Listener to remove.
+   */
+  /**
+   * Trigger an event on this Component.
+   *
+   * @name Component#emit
+   * @method
+   * @param {string} event Name of event to emit.
+   * @param {...*} [args] Arguments to pass to any listeners.
+   */
+  utils$1.eventify(Component.prototype, function () {
+    return this._listeners;
+  }, function (value) {
+    this._listeners = value;
+  });
+
+  var DOMAIN$2 = 'Query';
+  var INDEX_ERR = 'Index inaccessible after first operation';
+
+  // Reserved words used by JSData's Query Syntax
+  var reserved = {
+    limit: '',
+    offset: '',
+    orderBy: '',
+    skip: '',
+    sort: '',
+    where: ''
+  };
+
+  // Used by our JavaScript implementation of the LIKE operator
+  var escapeRegExp = /([.*+?^=!:${}()|[\]\/\\])/g;
+  var percentRegExp = /%/g;
+  var underscoreRegExp = /_/g;
+  var escape = function escape(pattern) {
+    return pattern.replace(escapeRegExp, '\\$1');
+  };
+
+  /**
+   * A class used by the {@link Collection} class to build queries to be executed
+   * against the collection's data. An instance of `Query` is returned by
+   * {@link Collection#query}. Query instances are typically short-lived.
+   *
+   * ```javascript
+   * import {Query} from 'js-data'
+   * ```
+   *
+   * @class Query
+   * @extends Component
+   * @param {Collection} collection The collection on which this query operates.
+   */
+  var Query = Component.extend({
+    constructor: function Query(collection) {
+      var self = this;
+      utils$1.classCallCheck(self, Query);
+
+      /**
+       * The {@link Collection} on which this query operates.
+       *
+       * @name Query#collection
+       * @type {Collection}
+       */
+      self.collection = collection;
+
+      /**
+       * The current data result of this query.
+       *
+       * @name Query#data
+       * @type {Array}
+       */
+      self.data = null;
+    },
+
+    /**
+     * Find all entities between two boundaries.
+     *
+     * Get the users ages 18 to 30
+     * ```js
+     * const users = query.between(18, 30, { index: 'age' }).run()
+     * ```
+     * Same as above
+     * ```js
+     * const users = query.between([18], [30], { index: 'age' }).run()
+     * ```
+     *
+     * @name Query#between
+     * @method
+     * @param {Array} leftKeys - Keys defining the left boundary.
+     * @param {Array} rightKeys - Keys defining the right boundary.
+     * @param {Object} [opts] - Configuration options.
+     * @param {string} [opts.index] - Name of the secondary index to use in the
+     * query. If no index is specified, the main index is used.
+     * @param {boolean} [opts.leftInclusive=true] - Whether to include entities
+     * on the left boundary.
+     * @param {boolean} [opts.rightInclusive=false] - Whether to include entities
+     * on the left boundary.
+     * @param {boolean} [opts.limit] - Limit the result to a certain number.
+     * @param {boolean} [opts.offset] - The number of resulting entities to skip.
+     * @return {Query} A reference to itself for chaining.
+     */
+    between: function between(leftKeys, rightKeys, opts) {
+      var self = this;
+      opts || (opts = {});
+      if (self.data) {
+        throw utils$1.err(DOMAIN$2 + '#between')(500, 'Cannot access index');
+      }
+      self.data = self.collection.getIndex(opts.index).between(leftKeys, rightKeys, opts);
+      return self;
+    },
+
+
+    /**
+     * The comparison function used by the Query class.
+     *
+     * @name Query#compare
+     * @method
+     * @param {Array} orderBy An orderBy clause used for sorting and sub-sorting.
+     * @param {number} index The index of the current orderBy clause being used.
+     * @param {*} a The first item in the comparison.
+     * @param {*} b The second item in the comparison.
+     * @return {number} -1 if `b` should preceed `a`. 0 if `a` and `b` are equal.
+     * 1 if `a` should preceed `b`.
+     */
+    compare: function compare(orderBy, index, a, b) {
+      var def = orderBy[index];
+      var cA = utils$1.get(a, def[0]);
+      var cB = utils$1.get(b, def[0]);
+      if (cA && utils$1.isString(cA)) {
+        cA = cA.toUpperCase();
+      }
+      if (cB && utils$1.isString(cB)) {
+        cB = cB.toUpperCase();
+      }
+      if (a === undefined) {
+        a = null;
+      }
+      if (b === undefined) {
+        b = null;
+      }
+      if (def[1].toUpperCase() === 'DESC') {
+        var temp = cB;
+        cB = cA;
+        cA = temp;
+      }
+      if (cA < cB) {
+        return -1;
+      } else if (cA > cB) {
+        return 1;
+      } else {
+        if (index < orderBy.length - 1) {
+          return this.compare(orderBy, index + 1, a, b);
+        } else {
+          return 0;
+        }
+      }
+    },
+
+
+    /**
+     * Predicate evaluation function used by the Query class.
+     *
+     * @name Query#evaluate
+     * @method
+     * @param {*} value The value to evaluate.
+     * @param {string} op The operator to use in this evaluation.
+     * @param {*} predicate The predicate to use in this evaluation.
+     * @return {boolean} Whether the value passed the evaluation or not.
+     */
+    evaluate: function evaluate(value, op, predicate) {
+      var ops = this.constructor.ops;
+      if (ops[op]) {
+        return ops[op](value, predicate);
+      }
+      if (op.indexOf('like') === 0) {
+        return !utils$1.isNull(this.like(predicate, op.substr(4)).exec(value));
+      } else if (op.indexOf('notLike') === 0) {
+        return utils$1.isNull(this.like(predicate, op.substr(7)).exec(value));
+      }
+    },
+
+
+    /**
+     * Find the entity or entities that match the provided query or pass the
+     * provided filter function.
+     *
+     * #### Example
+     *
+     * Get the draft posts created less than three months
+     * ```js
+     * const posts = query.filter({
+     *   where: {
+     *     status: {
+     *       '==': 'draft'
+     *     },
+     *     created_at_timestamp: {
+     *       '>=': (new Date().getTime() - (1000 * 60 * 60 * 24 * 30 * 3)) // 3 months ago
+     *     }
+     *   }
+     * }).run()
+     * ```
+     * Use a custom filter function
+     * ```js
+     * const posts = query.filter(function (post) {
+     *   return post.isReady()
+     * }).run()
+     * ```
+     *
+     * @name Query#filter
+     * @method
+     * @param {(Object|Function)} [queryOrFn={}] - Selection query or filter
+     * function.
+     * @param {Function} [thisArg] - Context to which to bind `queryOrFn` if
+     * `queryOrFn` is a function.
+     * @return {Query} A reference to itself for chaining.
+     */
+    filter: function filter(query, thisArg) {
+      var self = this;
+      query || (query = {});
+      self.getData();
+      if (utils$1.isObject(query)) {
+        (function () {
+          var where = {};
+          // Filter
+          if (utils$1.isObject(query.where)) {
+            where = query.where;
+          }
+          utils$1.forOwn(query, function (value, key) {
+            if (!(key in reserved) && !(key in where)) {
+              where[key] = {
+                '==': value
+              };
+            }
+          });
+
+          var fields = [];
+          var ops = [];
+          var predicates = [];
+          utils$1.forOwn(where, function (clause, field) {
+            if (!utils$1.isObject(clause)) {
+              clause = {
+                '==': clause
+              };
+            }
+            utils$1.forOwn(clause, function (expr, op) {
+              fields.push(field);
+              ops.push(op);
+              predicates.push(expr);
+            });
+          });
+          if (fields.length) {
+            (function () {
+              var i = void 0;
+              var len = fields.length;
+              self.data = self.data.filter(function (item) {
+                var first = true;
+                var keep = true;
+
+                for (i = 0; i < len; i++) {
+                  var op = ops[i];
+                  var isOr = op.charAt(0) === '|';
+                  op = isOr ? op.substr(1) : op;
+                  var expr = self.evaluate(utils$1.get(item, fields[i]), op, predicates[i]);
+                  if (expr !== undefined) {
+                    keep = first ? expr : isOr ? keep || expr : keep && expr;
+                  }
+                  first = false;
+                }
+                return keep;
+              });
+            })();
+          }
+
+          // Sort
+          var orderBy = query.orderBy || query.sort;
+
+          if (utils$1.isString(orderBy)) {
+            orderBy = [[orderBy, 'ASC']];
+          }
+          if (!utils$1.isArray(orderBy)) {
+            orderBy = null;
+          }
+
+          // Apply 'orderBy'
+          if (orderBy) {
+            (function () {
+              var index = 0;
+              orderBy.forEach(function (def, i) {
+                if (utils$1.isString(def)) {
+                  orderBy[i] = [def, 'ASC'];
+                }
+              });
+              self.data.sort(function (a, b) {
+                return self.compare(orderBy, index, a, b);
+              });
+            })();
+          }
+
+          // Skip
+          if (utils$1.isNumber(query.skip)) {
+            self.skip(query.skip);
+          } else if (utils$1.isNumber(query.offset)) {
+            self.skip(query.offset);
+          }
+          // Limit
+          if (utils$1.isNumber(query.limit)) {
+            self.limit(query.limit);
+          }
+        })();
+      } else if (utils$1.isFunction(query)) {
+        self.data = self.data.filter(query, thisArg);
+      }
+      return self;
+    },
+
+
+    /**
+     * Iterate over all entities.
+     *
+     * @name Query#forEach
+     * @method
+     * @param {Function} forEachFn - Iteration function.
+     * @param {*} [thisArg] - Context to which to bind `forEachFn`.
+     * @return {Query} A reference to itself for chaining.
+     */
+    forEach: function forEach(forEachFn, thisArg) {
+      this.getData().forEach(forEachFn, thisArg);
+      return this;
+    },
+
+
+    /**
+     * Find the entity or entities that match the provided key.
+     *
+     * #### Example
+     *
+     * Get the entity whose primary key is 25
+     * ```js
+     * const entities = query.get(25).run()
+     * ```
+     * Same as above
+     * ```js
+     * const entities = query.get([25]).run()
+     * ```
+     * Get all users who are active and have the "admin" role
+     * ```js
+     * const activeAdmins = query.get(['active', 'admin'], {
+     *   index: 'activityAndRoles'
+     * }).run()
+     * ```
+     * Get all entities that match a certain weather condition
+     * ```js
+     * const niceDays = query.get(['sunny', 'humid', 'calm'], {
+     *   index: 'weatherConditions'
+     * }).run()
+     * ```
+     *
+     * @name Query#get
+     * @method
+     * @param {Array} keyList - Key(s) defining the entity to retrieve. If
+     * `keyList` is not an array (i.e. for a single-value key), it will be
+     * wrapped in an array.
+     * @param {Object} [opts] - Configuration options.
+     * @param {string} [opts.string] - Name of the secondary index to use in the
+     * query. If no index is specified, the main index is used.
+     * @return {Query} A reference to itself for chaining.
+     */
+    get: function get(keyList, opts) {
+      var self = this;
+      keyList || (keyList = []);
+      opts || (opts = {});
+      if (self.data) {
+        throw utils$1.err(DOMAIN$2 + '#get')(500, INDEX_ERR);
+      }
+      if (keyList && !utils$1.isArray(keyList)) {
+        keyList = [keyList];
+      }
+      if (!keyList.length) {
+        self.getData();
+        return self;
+      }
+      self.data = self.collection.getIndex(opts.index).get(keyList);
+      return self;
+    },
+
+
+    /**
+     * Find the entity or entities that match the provided keyLists.
+     *
+     * #### Example
+     *
+     * Get the posts where "status" is "draft" or "inReview"
+     * ```js
+     * const posts = query.getAll('draft', 'inReview', { index: 'status' }).run()
+     * ```
+     * Same as above
+     * ```js
+     * const posts = query.getAll(['draft'], ['inReview'], { index: 'status' }).run()
+     * ```
+     *
+     * @name Query#getAll
+     * @method
+     * @param {...Array} [keyList] - Provide one or more keyLists, and all
+     * entities matching each keyList will be retrieved. If no keyLists are
+     * provided, all entities will be returned.
+     * @param {Object} [opts] - Configuration options.
+     * @param {string} [opts.index] - Name of the secondary index to use in the
+     * query. If no index is specified, the main index is used.
+     * @return {Query} A reference to itself for chaining.
+     */
+    getAll: function getAll() {
+      var self = this;
+      var opts = {};
+      if (self.data) {
+        throw utils$1.err(DOMAIN$2 + '#getAll')(500, INDEX_ERR);
+      }
+
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      if (!args.length || args.length === 1 && utils$1.isObject(args[0])) {
+        self.getData();
+        return self;
+      } else if (args.length && utils$1.isObject(args[args.length - 1])) {
+        opts = args[args.length - 1];
+        args.pop();
+      }
+      var collection = self.collection;
+      var index = collection.getIndex(opts.index);
+      self.data = [];
+      args.forEach(function (keyList) {
+        self.data = self.data.concat(index.get(keyList));
+      });
+      return self;
+    },
+
+
+    /**
+     * Return the current data result of this query.
+     * @name Query#getData
+     * @method
+     * @return {Array} The data in this query.
+     */
+    getData: function getData() {
+      var self = this;
+      if (!self.data) {
+        self.data = self.collection.index.getAll();
+      }
+      return self.data;
+    },
+    like: function like(pattern, flags) {
+      return new RegExp('^' + escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.') + '$', flags);
+    },
+
+
+    /**
+     * Limit the result.
+     *
+     * #### Example
+     *
+     * Get only the first 10 draft posts
+     * ```js
+     * const posts = query.get('draft', { index: 'status' }).limit(10).run()
+     * ```
+     *
+     * @name Query#limit
+     * @method
+     * @param {number} num - The maximum number of entities to keep in the result.
+     * @return {Query} A reference to itself for chaining.
+     */
+    limit: function limit(num) {
+      if (!utils$1.isNumber(num)) {
+        throw utils$1.err(DOMAIN$2 + '#limit', 'num')(400, 'number', num);
+      }
+      var data = this.getData();
+      this.data = data.slice(0, Math.min(data.length, num));
+      return this;
+    },
+
+
+    /**
+     * Apply a mapping function to the result data.
+     *
+     * @name Query#map
+     * @method
+     * @param {Function} mapFn - Mapping function.
+     * @param {*} [thisArg] - Context to which to bind `mapFn`.
+     * @return {Query} A reference to itself for chaining.
+     */
+    map: function map(mapFn, thisArg) {
+      this.data = this.getData().map(mapFn, thisArg);
+      return this;
+    },
+
+
+    /**
+     * Return the result of calling the specified function on each item in this
+     * collection's main index.
+     * @name Query#mapCall
+     * @method
+     * @param {string} funcName - Name of function to call
+     * @parama {...*} [args] - Remaining arguments to be passed to the function.
+     * @return {Query} A reference to itself for chaining.
+     */
+    mapCall: function mapCall(funcName) {
+      for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+        args[_key2 - 1] = arguments[_key2];
+      }
+
+      this.data = this.getData().map(function (item) {
+        return item[funcName].apply(item, args);
+      });
+      return this;
+    },
+
+
+    /**
+     * Complete the execution of the query and return the resulting data.
+     *
+     * @name Query#run
+     * @method
+     * @return {Array} The result of executing this query.
+     */
+    run: function run() {
+      var data = this.data;
+      this.data = null;
+      return data;
+    },
+
+
+    /**
+     * Skip a number of results.
+     *
+     * #### Example
+     *
+     * Get all but the first 10 draft posts
+     * ```js
+     * const posts = query.get('draft', { index: 'status' }).skip(10).run()
+     * ```
+     *
+     * @name Query#skip
+     * @method
+     * @param {number} num - The number of entities to skip.
+     * @return {Query} A reference to itself for chaining.
+     */
+    skip: function skip(num) {
+      if (!utils$1.isNumber(num)) {
+        throw utils$1.err(DOMAIN$2 + '#skip', 'num')(400, 'number', num);
+      }
+      var data = this.getData();
+      if (num < data.length) {
+        this.data = data.slice(num);
+      } else {
+        this.data = [];
+      }
+      return this;
+    }
+  }, {
+    /**
+     * TODO
+     *
+     * @name Query.ops
+     * @type {Object}
+     */
+    ops: {
+      '==': function _(value, predicate) {
+        return value == predicate; // eslint-disable-line
+      },
+      '===': function _(value, predicate) {
+        return value === predicate;
+      },
+      '!=': function _(value, predicate) {
+        return value != predicate; // eslint-disable-line
+      },
+      '!==': function _(value, predicate) {
+        return value !== predicate;
+      },
+      '>': function _(value, predicate) {
+        return value > predicate;
+      },
+      '>=': function _(value, predicate) {
+        return value >= predicate;
+      },
+      '<': function _(value, predicate) {
+        return value < predicate;
+      },
+      '<=': function _(value, predicate) {
+        return value <= predicate;
+      },
+      'isectEmpty': function isectEmpty(value, predicate) {
+        return !utils$1.intersection(value || [], predicate || []).length;
+      },
+      'isectNotEmpty': function isectNotEmpty(value, predicate) {
+        return utils$1.intersection(value || [], predicate || []).length;
+      },
+      'in': function _in(value, predicate) {
+        return predicate.indexOf(value) !== -1;
+      },
+      'notIn': function notIn(value, predicate) {
+        return predicate.indexOf(value) === -1;
+      },
+      'contains': function contains(value, predicate) {
+        return (value || []).indexOf(predicate) !== -1;
+      },
+      'notContains': function notContains(value, predicate) {
+        return (value || []).indexOf(predicate) === -1;
+      }
+    }
+  });
+
+  function sort(a, b, hashCode) {
+    // Short-curcuit comparison if a and b are strictly equal
+    // This is absolutely necessary for indexed objects that
+    // don't have the idAttribute field
+    if (a === b) {
+      return 0;
+    }
+    if (hashCode) {
+      a = hashCode(a);
+      b = hashCode(b);
+    }
+    if (a === null && b === null) {
+      return 0;
+    }
+
+    if (a === null) {
+      return -1;
+    }
+
+    if (b === null) {
+      return 1;
+    }
+
+    if (a < b) {
+      return -1;
+    }
+
+    if (a > b) {
+      return 1;
+    }
+
+    return 0;
+  }
+
+  function insertAt(array, index, value) {
+    array.splice(index, 0, value);
+    return array;
+  }
+
+  function removeAt(array, index) {
+    array.splice(index, 1);
+    return array;
+  }
+
+  function binarySearch(array, value, field) {
+    var lo = 0;
+    var hi = array.length;
+    var compared = void 0;
+    var mid = void 0;
+
+    while (lo < hi) {
+      mid = (lo + hi) / 2 | 0;
+      compared = sort(value, array[mid], field);
+      if (compared === 0) {
+        return {
+          found: true,
+          index: mid
+        };
+      } else if (compared < 0) {
+        hi = mid;
+      } else {
+        lo = mid + 1;
+      }
+    }
+
+    return {
+      found: false,
+      index: hi
+    };
+  }
+
+  function Index(fieldList, opts) {
+    utils$1.classCallCheck(this, Index);
+    fieldList || (fieldList = []);
+
+    if (!utils$1.isArray(fieldList)) {
+      throw new Error('fieldList must be an array.');
+    }
+
+    opts || (opts = {});
+    this.fieldList = fieldList;
+    this.fieldGetter = opts.fieldGetter;
+    this.hashCode = opts.hashCode;
+    this.isIndex = true;
+    this.keys = [];
+    this.values = [];
+  }
+
+  utils$1.addHiddenPropsToTarget(Index.prototype, {
+    'set': function set(keyList, value) {
+      if (!utils$1.isArray(keyList)) {
+        keyList = [keyList];
+      }
+
+      var key = keyList.shift() || null;
+      var pos = binarySearch(this.keys, key);
+
+      if (keyList.length === 0) {
+        if (pos.found) {
+          var dataLocation = binarySearch(this.values[pos.index], value, this.hashCode);
+          if (!dataLocation.found) {
+            insertAt(this.values[pos.index], dataLocation.index, value);
+          }
+        } else {
+          insertAt(this.keys, pos.index, key);
+          insertAt(this.values, pos.index, [value]);
+        }
+      } else {
+        if (pos.found) {
+          this.values[pos.index].set(keyList, value);
+        } else {
+          insertAt(this.keys, pos.index, key);
+          var newIndex = new Index([], { hashCode: this.hashCode });
+          newIndex.set(keyList, value);
+          insertAt(this.values, pos.index, newIndex);
+        }
+      }
+    },
+    'get': function get(keyList) {
+      if (!utils$1.isArray(keyList)) {
+        keyList = [keyList];
+      }
+
+      var key = keyList.shift() || null;
+      var pos = binarySearch(this.keys, key);
+
+      if (keyList.length === 0) {
+        if (pos.found) {
+          if (this.values[pos.index].isIndex) {
+            return this.values[pos.index].getAll();
+          } else {
+            return this.values[pos.index];
+          }
+        } else {
+          return [];
+        }
+      } else {
+        if (pos.found) {
+          return this.values[pos.index].get(keyList);
+        } else {
+          return [];
+        }
+      }
+    },
+    getAll: function getAll() {
+      var results = [];
+      this.values.forEach(function (value) {
+        if (value.isIndex) {
+          results = results.concat(value.getAll());
+        } else {
+          results = results.concat(value);
+        }
+      });
+      return results;
+    },
+    visitAll: function visitAll(cb, thisArg) {
+      this.values.forEach(function (value) {
+        if (value.isIndex) {
+          value.visitAll(cb, thisArg);
+        } else {
+          value.forEach(cb, thisArg);
+        }
+      });
+    },
+    between: function between(leftKeys, rightKeys, opts) {
+      opts || (opts = {});
+      if (!utils$1.isArray(leftKeys)) {
+        leftKeys = [leftKeys];
+      }
+      if (!utils$1.isArray(rightKeys)) {
+        rightKeys = [rightKeys];
+      }
+      utils$1.fillIn(opts, {
+        leftInclusive: true,
+        rightInclusive: false,
+        limit: undefined,
+        offset: 0
+      });
+
+      var results = this._between(leftKeys, rightKeys, opts);
+
+      if (opts.limit) {
+        return results.slice(opts.offset, opts.limit + opts.offset);
+      } else {
+        return results.slice(opts.offset);
+      }
+    },
+    _between: function _between(leftKeys, rightKeys, opts) {
+      var results = [];
+
+      var leftKey = leftKeys.shift();
+      var rightKey = rightKeys.shift();
+
+      var pos = void 0;
+
+      if (leftKey !== undefined) {
+        pos = binarySearch(this.keys, leftKey);
+      } else {
+        pos = {
+          found: false,
+          index: 0
+        };
+      }
+
+      if (leftKeys.length === 0) {
+        if (pos.found && opts.leftInclusive === false) {
+          pos.index += 1;
+        }
+
+        for (var i = pos.index; i < this.keys.length; i += 1) {
+          if (rightKey !== undefined) {
+            if (opts.rightInclusive) {
+              if (this.keys[i] > rightKey) {
+                break;
+              }
+            } else {
+              if (this.keys[i] >= rightKey) {
+                break;
+              }
+            }
+          }
+
+          if (this.values[i].isIndex) {
+            results = results.concat(this.values[i].getAll());
+          } else {
+            results = results.concat(this.values[i]);
+          }
+
+          if (opts.limit) {
+            if (results.length >= opts.limit + opts.offset) {
+              break;
+            }
+          }
+        }
+      } else {
+        for (var _i = pos.index; _i < this.keys.length; _i += 1) {
+          var currKey = this.keys[_i];
+          if (currKey > rightKey) {
+            break;
+          }
+
+          if (this.values[_i].isIndex) {
+            if (currKey === leftKey) {
+              results = results.concat(this.values[_i]._between(utils$1.copy(leftKeys), rightKeys.map(function () {
+                return undefined;
+              }), opts));
+            } else if (currKey === rightKey) {
+              results = results.concat(this.values[_i]._between(leftKeys.map(function () {
+                return undefined;
+              }), utils$1.copy(rightKeys), opts));
+            } else {
+              results = results.concat(this.values[_i].getAll());
+            }
+          } else {
+            results = results.concat(this.values[_i]);
+          }
+
+          if (opts.limit) {
+            if (results.length >= opts.limit + opts.offset) {
+              break;
+            }
+          }
+        }
+      }
+
+      if (opts.limit) {
+        return results.slice(0, opts.limit + opts.offset);
+      } else {
+        return results;
+      }
+    },
+    peek: function peek() {
+      if (this.values.length) {
+        if (this.values[0].isIndex) {
+          return this.values[0].peek();
+        } else {
+          return this.values[0];
+        }
+      }
+      return [];
+    },
+    clear: function clear() {
+      this.keys = [];
+      this.values = [];
+    },
+    insertRecord: function insertRecord(data) {
+      var keyList = this.fieldList.map(function (field) {
+        if (utils$1.isFunction(field)) {
+          return field(data) || null;
+        } else {
+          return data[field] || null;
+        }
+      });
+      this.set(keyList, data);
+    },
+    removeRecord: function removeRecord(data) {
+      var _this = this;
+
+      var removed = void 0;
+      this.values.forEach(function (value, i) {
+        if (value.isIndex) {
+          if (value.removeRecord(data)) {
+            if (value.keys.length === 0) {
+              removeAt(_this.keys, i);
+              removeAt(_this.values, i);
+            }
+            removed = true;
+            return false;
+          }
+        } else {
+          var dataLocation = binarySearch(value, data, _this.hashCode);
+          if (dataLocation.found) {
+            removeAt(value, dataLocation.index);
+            if (value.length === 0) {
+              removeAt(_this.keys, i);
+              removeAt(_this.values, i);
+            }
+            removed = true;
+            return false;
+          }
+        }
+      });
+      return removed ? data : undefined;
+    },
+    updateRecord: function updateRecord(data) {
+      this.removeRecord(data);
+      this.insertRecord(data);
+    }
+  });
+
+  var DOMAIN$1 = 'Collection';
+
+  var COLLECTION_DEFAULTS = {
+    /**
+     * Field to be used as the unique identifier for records in this collection.
+     * Defaults to `"id"` unless {@link Collection#mapper} is set, in which case
+     * this will default to {@link Mapper#idAttribute}.
+     *
+     * @name Collection#idAttribute
+     * @type {string}
+     * @default "id"
+     */
+    idAttribute: 'id',
+
+    /**
+     * What to do when inserting a record into this Collection that shares a
+     * primary key with a record already in this Collection.
+     *
+     * Possible values:
+     * - merge
+     * - replace
+     *
+     * Merge:
+     *
+     * Recursively shallow copy properties from the new record onto the existing
+     * record.
+     *
+     * Replace:
+     *
+     * Shallow copy top-level properties from the new record onto the existing
+     * record. Any top-level own properties of the existing record that are _not_
+     * on the new record will be removed.
+     *
+     * @name Collection#onConflict
+     * @type {string}
+     * @default "merge"
+     */
+    onConflict: 'merge'
+  };
+
+  /**
+   * ```javascript
+   * import {Collection} from 'js-data'
+   * ```
+   *
+   * An ordered set of {@link Record} instances.
+   *
+   * @example
+   * import {Collection, Record} from 'js-data'
+   * const user1 = new Record({ id: 1 })
+   * const user2 = new Record({ id: 2 })
+   * const UserCollection = new Collection([user1, user2])
+   * UserCollection.get(1) === user1 // true
+   *
+   * @class Collection
+   * @extends Component
+   * @param {Array} [records] Initial set of records to insert into the
+   * collection.
+   * @param {Object} [opts] Configuration options.
+   * @param {string} [opts.idAttribute] See {@link Collection#idAttribute}.
+   * @param {string} [opts.onConflict="merge"] See {@link Collection#onConflict}.
+   * @param {string} [opts.mapper] See {@link Collection#mapper}.
+   */
+  var Collection = Component.extend({
+    constructor: function Collection(records, opts) {
+      var self = this;
+      utils$1.classCallCheck(self, Collection);
+      Collection.__super__.call(self);
+
+      if (records && !utils$1.isArray(records)) {
+        opts = records;
+        records = [];
+      }
+      if (utils$1.isString(opts)) {
+        opts = { idAttribute: opts };
+      }
+
+      // Default values for arguments
+      records || (records = []);
+      opts || (opts = {});
+
+      /**
+       * Default Mapper for this collection. Optional. If a Mapper is provided, then
+       * the collection will use the {@link Mapper#idAttribute} setting, and will
+       * wrap records in {@link Mapper#recordClass}.
+       *
+       * @example
+       * import {Collection, Mapper} from 'js-data'
+       *
+       * class MyMapperClass extends Mapper {
+       *   foo () { return 'bar' }
+       * }
+       * const myMapper = new MyMapperClass()
+       * const collection = new Collection(null, { mapper: myMapper })
+       *
+       * @name Collection#mapper
+       * @type {Mapper}
+       * @default null
+       */
+      Object.defineProperty(self, 'mapper', {
+        value: undefined,
+        writable: true
+      });
+
+      utils$1.fillIn(self, opts);
+      utils$1.fillIn(self, utils$1.copy(COLLECTION_DEFAULTS));
+
+      var idAttribute = self.recordId();
+
+      Object.defineProperties(self, {
+        /**
+         * The main index, which uses @{link Collection#recordId} as the key.
+         *
+         * @name Collection#index
+         * @type {Index}
+         */
+        index: {
+          value: new Index([idAttribute], {
+            hashCode: function hashCode(obj) {
+              return utils$1.get(obj, idAttribute);
+            }
+          })
+        },
+
+        /**
+         * Object that holds the secondary indexes of this collection.
+         *
+         * @name Collection#indexes
+         * @type {Object.<string, Index>}
+         */
+        indexes: {
+          value: {}
+        }
+      });
+
+      // Insert initial data into the collection
+      if (records) {
+        self.add(records);
+      }
+    },
+
+    /**
+     * Used to bind to events emitted by records in this Collection.
+     *
+     * @name Collection#_onRecordEvent
+     * @method
+     * @private
+     * @param {...*} [arg] Args passed to {@link Collection#emit}.
+     */
+    _onRecordEvent: function _onRecordEvent() {
+      this.emit.apply(this, arguments);
+    },
+
+
+    /**
+     * Insert the provided record or records.
+     *
+     * If a record is already in the collection then the provided record will
+     * either merge with or replace the existing record based on the value of the
+     * `onConflict` option.
+     *
+     * The collection's secondary indexes will be updated as each record is
+     * visited.
+     *
+     * @name Collection#add
+     * @method
+     * @param {(Object|Object[]|Record|Record[])} data The record or records to insert.
+     * @param {Object} [opts] Configuration options.
+     * @param {string} [opts.onConflict] What to do when a record is already in
+     * the collection. Possible values are `merge` or `replace`.
+     * @return {(Object|Object[]|Record|Record[])} The added record or records.
+     */
+    add: function add(records, opts) {
+      var self = this;
+
+      // Default values for arguments
+      opts || (opts = {});
+
+      // Fill in "opts" with the Collection's configuration
+      utils$1._(opts, self);
+      records = self.beforeAdd(records, opts) || records;
+
+      // Track whether just one record or an array of records is being inserted
+      var singular = false;
+      var idAttribute = self.recordId();
+      if (!utils$1.isArray(records)) {
+        if (utils$1.isObject(records)) {
+          records = [records];
+          singular = true;
+        } else {
+          throw utils$1.err(DOMAIN$1 + '#add', 'records')(400, 'object or array', records);
+        }
+      }
+
+      // Map the provided records to existing records.
+      // New records will be inserted. If any records map to existing records,
+      // they will be merged into the existing records according to the onConflict
+      // option.
+      records = records.map(function (record) {
+        var id = self.recordId(record);
+        if (!utils$1.isSorN(id)) {
+          throw utils$1.err(DOMAIN$1 + '#add', 'record.' + idAttribute)(400, 'string or number', id);
+        }
+        // Grab existing record if there is one
+        var existing = self.get(id);
+        // If the currently visited record is just a reference to an existing
+        // record, then there is nothing to be done. Exit early.
+        if (record === existing) {
+          return existing;
+        }
+
+        if (existing) {
+          // Here, the currently visited record corresponds to a record already
+          // in the collection, so we need to merge them
+          var onConflict = opts.onConflict || self.onConflict;
+          if (onConflict === 'merge') {
+            utils$1.deepMixIn(existing, record);
+          } else if (onConflict === 'replace') {
+            utils$1.forOwn(existing, function (value, key) {
+              if (key !== idAttribute && !record.hasOwnProperty(key)) {
+                delete existing[key];
+              }
+            });
+            existing.set(record);
+          } else {
+            throw utils$1.err(DOMAIN$1 + '#add', 'opts.onConflict')(400, 'one of (merge, replace)', onConflict, true);
+          }
+          record = existing;
+          // Update all indexes in the collection
+          self.updateIndexes(record);
+        } else {
+          // Here, the currently visted record does not correspond to any record
+          // in the collection, so (optionally) instantiate this record and insert
+          // it into the collection
+          record = self.mapper ? self.mapper.createRecord(record, opts) : record;
+          self.index.insertRecord(record);
+          utils$1.forOwn(self.indexes, function (index, name) {
+            index.insertRecord(record);
+          });
+          if (record && utils$1.isFunction(record.on)) {
+            record.on('all', self._onRecordEvent, self);
+          }
+        }
+        return record;
+      });
+      // Finally, return the inserted data
+      var result = singular ? records[0] : records;
+      // TODO: Make this more performant (batch events?)
+      self.emit('add', result);
+      return self.afterAdd(records, opts, result) || result;
+    },
+
+
+    /**
+     * Lifecycle hook called by {@link Collection#add}. If this method returns a
+     * value then {@link Collection#add} will return that same value.
+     *
+     * @name Collection#method
+     * @method
+     * @param {(Object|Object[]|Record|Record[])} result The record or records
+     * that were added to this Collection by {@link Collection#add}.
+     * @param {Object} opts The `opts` argument passed to {@link Collection#add}.
+     */
+    afterAdd: function afterAdd() {},
+
+
+    /**
+     * Lifecycle hook called by {@link Collection#remove}. If this method returns
+     * a value then {@link Collection#remove} will return that same value.
+     *
+     * @name Collection#afterRemove
+     * @method
+     * @param {(string|number)} id The `id` argument passed to {@link Collection#remove}.
+     * @param {Object} opts The `opts` argument passed to {@link Collection#remove}.
+     * @param {Object} record The result that will be returned by {@link Collection#remove}.
+     */
+    afterRemove: function afterRemove() {},
+
+
+    /**
+     * Lifecycle hook called by {@link Collection#removeAll}. If this method
+     * returns a value then {@link Collection#removeAll} will return that same
+     * value.
+     *
+     * @name Collection#afterRemoveAll
+     * @method
+     * @param {Object} query The `query` argument passed to {@link Collection#removeAll}.
+     * @param {Object} opts The `opts` argument passed to {@link Collection#removeAll}.
+     * @param {Object} records The result that will be returned by {@link Collection#removeAll}.
+     */
+    afterRemoveAll: function afterRemoveAll() {},
+
+
+    /**
+     * Lifecycle hook called by {@link Collection#add}. If this method returns a
+     * value then the `records` argument in {@link Collection#add} will be
+     * re-assigned to the returned value.
+     *
+     * @name Collection#beforeAdd
+     * @method
+     * @param {(Object|Object[]|Record|Record[])} records The `records` argument passed to {@link Collection#add}.
+     * @param {Object} opts The `opts` argument passed to {@link Collection#add}.
+     */
+    beforeAdd: function beforeAdd() {},
+
+
+    /**
+     * Lifecycle hook called by {@link Collection#remove}.
+     *
+     * @name Collection#beforeRemove
+     * @method
+     * @param {(string|number)} id The `id` argument passed to {@link Collection#remove}.
+     * @param {Object} opts The `opts` argument passed to {@link Collection#remove}.
+     */
+    beforeRemove: function beforeRemove() {},
+
+
+    /**
+     * Lifecycle hook called by {@link Collection#removeAll}.
+     *
+     * @name Collection#beforeRemoveAll
+     * @method
+     * @param {Object} query The `query` argument passed to {@link Collection#removeAll}.
+     * @param {Object} opts The `opts` argument passed to {@link Collection#removeAll}.
+     */
+    beforeRemoveAll: function beforeRemoveAll() {},
+
+
+    /**
+     * Find all records between two boundaries.
+     *
+     * Shortcut for `collection.query().between(18, 30, { index: 'age' }).run()`
+     *
+     * @example <caption>Get all users ages 18 to 30</caption>
+     * const users = collection.between(18, 30, { index: 'age' })
+     *
+     * @example <caption>Same as above</caption>
+     * const users = collection.between([18], [30], { index: 'age' })
+     *
+     * @name Collection#between
+     * @method
+     * @param {Array} leftKeys Keys defining the left boundary.
+     * @param {Array} rightKeys Keys defining the right boundary.
+     * @param {Object} [opts] Configuration options.
+     * @param {string} [opts.index] Name of the secondary index to use in the
+     * query. If no index is specified, the main index is used.
+     * @param {boolean} [opts.leftInclusive=true] Whether to include records
+     * on the left boundary.
+     * @param {boolean} [opts.rightInclusive=false] Whether to include records
+     * on the left boundary.
+     * @param {boolean} [opts.limit] Limit the result to a certain number.
+     * @param {boolean} [opts.offset] The number of resulting records to skip.
+     * @return {Array} The result.
+     */
+    between: function between(leftKeys, rightKeys, opts) {
+      return this.query().between(leftKeys, rightKeys, opts).run();
+    },
+
+
+    /**
+     * Create a new secondary index on the contents of the collection.
+     *
+     * @example <caption>Index users by age</caption>
+     * collection.createIndex('age')
+     *
+     * @example <caption>Index users by status and role</caption>
+     * collection.createIndex('statusAndRole', ['status', 'role'])
+     *
+     * @name Collection#createIndex
+     * @method
+     * @param {string} name - The name of the new secondary index.
+     * @param {string[]} [fieldList] - Array of field names to use as the key or
+     * compound key of the new secondary index. If no fieldList is provided, then
+     * the name will also be the field that is used to index the collection.
+     * @return {Collection} A reference to itself for chaining.
+     */
+    createIndex: function createIndex(name, fieldList, opts) {
+      var self = this;
+      if (utils$1.isString(name) && fieldList === undefined) {
+        fieldList = [name];
+      }
+      opts || (opts = {});
+      opts.hashCode = opts.hashCode || function (obj) {
+        return self.recordId(obj);
+      };
+      var index = self.indexes[name] = new Index(fieldList, opts);
+      self.index.visitAll(index.insertRecord, index);
+      return self;
+    },
+
+
+    /**
+     * Find the record or records that match the provided query or pass the
+     * provided filter function.
+     *
+     * Shortcut for `collection.query().filter(queryOrFn[, thisArg]).run()`
+     *
+     * @example <caption>Get the draft posts created less than three months</caption>
+     * const posts = collection.filter({
+     *   where: {
+     *     status: {
+     *       '==': 'draft'
+     *     },
+     *     created_at_timestamp: {
+     *       '>=': (new Date().getTime() - (1000 * 60 * 60 * 24 * 30 * 3)) // 3 months ago
+     *     }
+     *   }
+     * })
+     *
+     * @example <caption>Use a custom filter function</caption>
+     * const posts = collection.filter(function (post) {
+     *   return post.isReady()
+     * })
+     *
+     * @name Collection#filter
+     * @method
+     * @param {(Object|Function)} [queryOrFn={}] - Selection query or filter
+     * function.
+     * @param {Object} [thisArg] - Context to which to bind `queryOrFn` if
+     * `queryOrFn` is a function.
+     * @return {Array} The result.
+     */
+    filter: function filter(query, thisArg) {
+      return this.query().filter(query, thisArg).run();
+    },
+
+
+    /**
+     * Iterate over all records.
+     *
+     * @example
+     * collection.forEach(function (record) {
+     *   // do something
+     * })
+     *
+     * @name Collection#forEach
+     * @method
+     * @param {Function} forEachFn - Iteration function.
+     * @param {*} [thisArg] - Context to which to bind `forEachFn`.
+     * @return {Array} The result.
+     */
+    forEach: function forEach(cb, thisArg) {
+      this.index.visitAll(cb, thisArg);
+    },
+
+
+    /**
+     * Get the record with the given id.
+     *
+     * @name Collection#get
+     * @method
+     * @param {(string|number)} id - The primary key of the record to get.
+     * @return {(Object|Record)} The record with the given id.
+     */
+    get: function get(id) {
+      var instances = this.query().get(id).run();
+      return instances.length ? instances[0] : undefined;
+    },
+
+
+    /**
+     * Find the record or records that match the provided keyLists.
+     *
+     * Shortcut for `collection.query().getAll(keyList1, keyList2, ...).run()`
+     *
+     * @example <caption>Get the posts where "status" is "draft" or "inReview"</caption>
+     * const posts = collection.getAll('draft', 'inReview', { index: 'status' })
+     *
+     * @example <caption>Same as above</caption>
+     * const posts = collection.getAll(['draft'], ['inReview'], { index: 'status' })
+     *
+     * @name Collection#getAll
+     * @method
+     * @param {...Array} [keyList] - Provide one or more keyLists, and all
+     * records matching each keyList will be retrieved. If no keyLists are
+     * provided, all records will be returned.
+     * @param {Object} [opts] - Configuration options.
+     * @param {string} [opts.index] - Name of the secondary index to use in the
+     * query. If no index is specified, the main index is used.
+     * @return {Array} The result.
+     */
+    getAll: function getAll() {
+      var _query;
+
+      return (_query = this.query()).getAll.apply(_query, arguments).run();
+    },
+
+
+    /**
+     * Return the index with the given name. If no name is provided, return the
+     * main index. Throws an error if the specified index does not exist.
+     *
+     * @name Collection#getIndex
+     * @method
+     * @param {string} [name] The name of the index to retrieve.
+     */
+    getIndex: function getIndex(name) {
+      var index = name ? this.indexes[name] : this.index;
+      if (!index) {
+        throw utils$1.err(DOMAIN$1 + '#getIndex', name)(404, 'index');
+      }
+      return index;
+    },
+
+
+    /**
+     * Limit the result.
+     *
+     * Shortcut for `collection.query().limit(maximumNumber).run()`
+     *
+     * @example
+     * const posts = collection.limit(10)
+     *
+     * @name Collection#limit
+     * @method
+     * @param {number} num - The maximum number of records to keep in the result.
+     * @return {Array} The result.
+     */
+    limit: function limit(num) {
+      return this.query().limit(num).run();
+    },
+
+
+    /**
+     * Apply a mapping function to all records.
+     *
+     * @example
+     * const names = collection.map(function (user) {
+     *   return user.name
+     * })
+     *
+     * @name Collection#map
+     * @method
+     * @param {Function} mapFn - Mapping function.
+     * @param {*} [thisArg] - Context to which to bind `mapFn`.
+     * @return {Array} The result of the mapping.
+     */
+    map: function map(cb, thisArg) {
+      var data = [];
+      this.index.visitAll(function (value) {
+        data.push(cb.call(thisArg, value));
+      });
+      return data;
+    },
+
+
+    /**
+     * Return the result of calling the specified function on each record in this
+     * collection's main index.
+     *
+     * @name Collection#mapCall
+     * @method
+     * @param {string} funcName - Name of function to call
+     * @parama {...*} [args] - Remaining arguments to be passed to the function.
+     * @return {Array} The result.
+     */
+    mapCall: function mapCall(funcName) {
+      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+      }
+
+      var data = [];
+      this.index.visitAll(function (record) {
+        data.push(record[funcName].apply(record, args));
+      });
+      return data;
+    },
+
+
+    /**
+     * Return the primary key of the given, or if no record is provided, return the
+     * name of the field that holds the primary key of records in this Collection.
+     *
+     * @name Collection#recordId
+     * @method
+     * @param {(Object|Record)} [record] The record whose primary key is to be
+     * returned.
+     * @return {(string|number)} Primary key or name of field that holds primary
+     * key.
+     */
+    recordId: function recordId(record) {
+      var self = this;
+      if (record) {
+        return utils$1.get(record, self.recordId());
+      }
+      return self.mapper ? self.mapper.idAttribute : self.idAttribute;
+    },
+
+
+    /**
+     * Create a new query to be executed against the contents of the collection.
+     * The result will be all or a subset of the contents of the collection.
+     *
+     * @example <caption>Grab page 2 of users between ages 18 and 30</caption>
+     * collection.query()
+     *   .between(18, 30, { index: 'age' }) // between ages 18 and 30
+     *   .skip(10) // second page
+     *   .limit(10) // page size
+     *   .run()
+     *
+     * @name Collection#query
+     * @method
+     * @return {Query} New query object.
+     */
+    query: function query() {
+      return new Query(this);
+    },
+
+
+    /**
+     * Reduce the data in the collection to a single value and return the result.
+     *
+     * @example
+     * const totalVotes = collection.reduce(function (prev, record) {
+     *   return prev + record.upVotes + record.downVotes
+     * }, 0)
+     *
+     * @name Collection#reduce
+     * @method
+     * @param {Function} cb - Reduction callback.
+     * @param {*} initialValue - Initial value of the reduction.
+     * @return {*} The result.
+     */
+    reduce: function reduce(cb, initialValue) {
+      var data = this.getAll();
+      return data.reduce(cb, initialValue);
+    },
+
+
+    /**
+     * Remove the record with the given id from this Collection.
+     *
+     * @name Collection#remove
+     * @method
+     * @param {(string|number)} id - The primary key of the record to be removed.
+     * @param {Object} [opts] - Configuration options.
+     * @return {Object|Record} The removed record, if any.
+     */
+    remove: function remove(id, opts) {
+      var self = this;
+
+      // Default values for arguments
+      opts || (opts = {});
+      self.beforeRemove(id, opts);
+      var record = self.get(id);
+
+      // The record is in the collection, remove it
+      if (record) {
+        self.index.removeRecord(record);
+        utils$1.forOwn(self.indexes, function (index, name) {
+          index.removeRecord(record);
+        });
+        if (record && utils$1.isFunction(record.off)) {
+          record.off('all', self._onRecordEvent, self);
+          self.emit('remove', record);
+        }
+      }
+      return self.afterRemove(id, opts, record) || record;
+    },
+
+
+    /**
+     * Remove the record selected by "query" from this collection.
+     *
+     * @name Collection#removeAll
+     * @method
+     * @param {Object} [query={}] - Selection query.
+     * @param {Object} [query.where] - Filtering criteria.
+     * @param {number} [query.skip] - Number to skip.
+     * @param {number} [query.limit] - Number to limit to.
+     * @param {Array} [query.orderBy] - Sorting criteria.
+     * @param {Object} [opts] - Configuration options.
+     * @return {(Object[]|Record[])} The removed records, if any.
+     */
+    removeAll: function removeAll(query, opts) {
+      var self = this;
+      // Default values for arguments
+      opts || (opts = {});
+      self.beforeRemoveAll(query, opts);
+      var records = self.filter(query);
+
+      // Remove each selected record from the collection
+      records.forEach(function (item) {
+        self.remove(self.recordId(item), opts);
+      });
+      return self.afterRemoveAll(query, opts, records) || records;
+    },
+
+
+    /**
+     * Skip a number of results.
+     *
+     * Shortcut for `collection.query().skip(numberToSkip).run()`
+     *
+     * @example
+     * const posts = collection.skip(10)
+     *
+     * @name Collection#skip
+     * @method
+     * @param {number} num - The number of records to skip.
+     * @return {Array} The result.
+     */
+    skip: function skip(num) {
+      return this.query().skip(num).run();
+    },
+
+
+    /**
+     * Return the plain JSON representation of all items in this collection.
+     * Assumes records in this collection have a toJSON method.
+     *
+     * @name Collection#toJSON
+     * @method
+     * @param {Object} [opts] - Configuration options.
+     * @param {string[]} [opts.with] - Array of relation names or relation fields
+     * to include in the representation.
+     * @return {Array} The records.
+     */
+    toJSON: function toJSON(opts) {
+      return this.mapCall('toJSON', opts);
+    },
+
+
+    /**
+     * Update a record's position in a single index of this collection. See
+     * {@link Collection#updateIndexes} to update a record's position in all
+     * indexes at once.
+     *
+     * @name Collection#updateIndex
+     * @method
+     * @param {Object} record - The record to update.
+     * @param {Object} [opts] - Configuration options.
+     * @param {string} [opts.index] The index in which to update the record's
+     * position. If you don't specify an index then the record will be updated
+     * in the main index.
+     */
+    updateIndex: function updateIndex(record, opts) {
+      opts || (opts = {});
+      this.getIndex(opts.index).updateRecord(record);
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name Collection#updateIndexes
+     * @method
+     * @param {Object} record - TODO
+     * @param {Object} [opts] - Configuration options.
+     */
+    updateIndexes: function updateIndexes(record) {
+      var self = this;
+      self.index.updateRecord(record);
+      utils$1.forOwn(self.indexes, function (index, name) {
+        index.updateRecord(record);
+      });
+    }
+  });
+
+  var belongsToType = 'belongsTo';
+  var hasManyType = 'hasMany';
+  var hasOneType = 'hasOne';
+
+  var DOMAIN$4 = 'Relation';
+
+  function Relation(related, opts) {
+    var self = this;
+    var DOMAIN_ERR = 'new ' + DOMAIN$4;
+
+    opts || (opts = {});
+
+    var localField = opts.localField;
+    if (!localField) {
+      throw utils$1.err(DOMAIN_ERR, 'opts.localField')(400, 'string', localField);
+    }
+
+    var foreignKey = opts.foreignKey = opts.foreignKey || opts.localKey;
+    if (!foreignKey && (opts.type === belongsToType || opts.type === hasOneType)) {
+      throw utils$1.err(DOMAIN_ERR, 'opts.foreignKey')(400, 'string', foreignKey);
+    }
+    var localKeys = opts.localKeys;
+    var foreignKeys = opts.foreignKeys;
+    if (!foreignKey && !localKeys && !foreignKeys && opts.type === hasManyType) {
+      throw utils$1.err(DOMAIN_ERR, 'opts.<foreignKey|localKeys|foreignKeys>')(400, 'string', foreignKey);
+    }
+
+    if (utils$1.isString(related)) {
+      opts.relation = related;
+      if (!utils$1.isFunction(opts.getRelation)) {
+        throw utils$1.err(DOMAIN_ERR, 'opts.getRelation')(400, 'function', opts.getRelation);
+      }
+    } else if (related) {
+      opts.relation = related.name;
+      Object.defineProperty(self, 'relatedMapper', {
+        value: related
+      });
+    } else {
+      throw utils$1.err(DOMAIN_ERR, 'related')(400, 'Mapper or string', related);
+    }
+
+    Object.defineProperty(self, 'inverse', {
+      value: undefined,
+      writable: true
+    });
+
+    utils$1.fillIn(self, opts);
+  }
+
+  utils$1.addHiddenPropsToTarget(Relation.prototype, {
+    getRelation: function getRelation() {
+      return this.relatedMapper;
+    },
+    getForeignKey: function getForeignKey(record) {
+      if (this.type === belongsToType) {
+        return utils$1.get(record, this.foreignKey);
+      }
+      return utils$1.get(record, this.mapper.idAttribute);
+    },
+    setForeignKey: function setForeignKey(record, relatedRecord) {
+      var self = this;
+      if (!record || !relatedRecord) {
+        return;
+      }
+      if (self.type === belongsToType) {
+        utils$1.set(record, self.foreignKey, utils$1.get(relatedRecord, self.getRelation().idAttribute));
+      } else {
+        (function () {
+          var idAttribute = self.mapper.idAttribute;
+          if (utils$1.isArray(relatedRecord)) {
+            relatedRecord.forEach(function (relatedRecordItem) {
+              utils$1.set(relatedRecordItem, self.foreignKey, utils$1.get(record, idAttribute));
+            });
+          } else {
+            utils$1.set(relatedRecord, self.foreignKey, utils$1.get(record, idAttribute));
+          }
+        })();
+      }
+    },
+    getLocalField: function getLocalField(record) {
+      return utils$1.get(record, this.localField);
+    },
+    setLocalField: function setLocalField(record, data) {
+      return utils$1.set(record, this.localField, data);
+    },
+    getInverse: function getInverse(mapper) {
+      var self = this;
+      if (self.inverse) {
+        return self.inverse;
+      }
+      self.getRelation().relationList.forEach(function (def) {
+        if (def.getRelation() === mapper) {
+          if (def.foreignKey && def.foreignKey !== self.foreignKey) {
+            return;
+          }
+          self.inverse = def;
+          return false;
+        }
+      });
+      return self.inverse;
+    }
+  });
+
+  var relatedTo = function relatedTo(mapper, related, opts) {
+    opts.name = mapper.name;
+    var relation = new Relation(related, opts);
+    Object.defineProperty(relation, 'mapper', {
+      value: mapper
+    });
+
+    mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] });
+    mapper.relationFields || Object.defineProperty(mapper, 'relationFields', { value: [] });
+    mapper.relationList.push(relation);
+    mapper.relationFields.push(relation.localField);
+  };
+
+  /**
+   * TODO
+   *
+   * @name module:js-data.belongsTo
+   * @method
+   * @param {Mapper} related The relation the target belongs to.
+   * @param {Object} opts Configuration options.
+   * @param {string} opts.foreignKey The field that holds the primary key of the
+   * related record.
+   * @param {string} opts.localField The field that holds a reference to the
+   * related record object.
+   * @return {Function} Invocation function, which accepts the target as the only
+   * parameter.
+   */
+  var _belongsTo = function belongsTo(related, opts) {
+    opts || (opts = {});
+    opts.type = belongsToType;
+    return function (target) {
+      relatedTo(target, related, opts);
+    };
+  };
+
+  /**
+   * TODO
+   *
+   * @name module:js-data.hasMany
+   * @method
+   * @param {Mapper} related The relation of which the target has many.
+   * @param {Object} opts Configuration options.
+   * @param {string} [opts.foreignKey] The field that holds the primary key of the
+   * related record.
+   * @param {string} opts.localField The field that holds a reference to the
+   * related record object.
+   * @return {Function} Invocation function, which accepts the target as the only
+   * parameter.
+   */
+  var _hasMany = function hasMany(related, opts) {
+    opts || (opts = {});
+    opts.type = hasManyType;
+    return function (target) {
+      relatedTo(target, related, opts);
+    };
+  };
+
+  /**
+   * TODO
+   *
+   * @name module:js-data.hasOne
+   * @method
+   * @param {Mapper} related The relation of which the target has one.
+   * @param {Object} opts Configuration options.
+   * @param {string} [opts.foreignKey] The field that holds the primary key of the
+   * related record.
+   * @param {string} opts.localField The field that holds a reference to the
+   * related record object.
+   * @return {Function} Invocation function, which accepts the target as the only
+   * parameter.
+   */
+  var _hasOne = function hasOne(related, opts) {
+    opts || (opts = {});
+    opts.type = hasOneType;
+    return function (target) {
+      relatedTo(target, related, opts);
+    };
+  };
+
+  var DOMAIN$6 = 'Record';
+
+  var superMethod = function superMethod(mapper, name) {
+    var store = mapper.datastore;
+    if (store && store[name]) {
+      return function () {
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+
+        return store[name].apply(store, [mapper.name].concat(args));
+      };
+    }
+    return mapper[name].bind(mapper);
+  };
+
+  /**
+   * js-data's Record class.
+   *
+   * ```javascript
+   * import {Record} from 'js-data'
+   * ```
+   *
+   * @class Record
+   * @extends Component
+   * @param {Object} [props] The initial properties of the new Record instance.
+   * @param {Object} [opts] Configuration options.
+   * @param {boolean} [opts.noValidate=false] Whether to skip validation on the
+   * initial properties.
+   */
+  var Record = Component.extend({
+    constructor: function Record(props, opts) {
+      var self = this;
+      utils$1.classCallCheck(self, Record);
+
+      props || (props = {});
+      opts || (opts = {});
+      var _props = {};
+      Object.defineProperties(self, {
+        _get: {
+          value: function value(key) {
+            return utils$1.get(_props, key);
+          }
+        },
+        _set: {
+          value: function value(key, _value) {
+            return utils$1.set(_props, key, _value);
+          }
+        },
+        _unset: {
+          value: function value(key) {
+            return utils$1.unset(_props, key);
+          }
+        }
+      });
+      var _set = self._set;
+      // TODO: Optimize these strings
+      _set('creating', true);
+      if (opts.noValidate) {
+        _set('noValidate', true);
+      }
+      utils$1.fillIn(self, props);
+      _set('creating', false);
+      _set('noValidate', false);
+      _set('previous', utils$1.copy(props));
+    },
+
+    /**
+     * TODO
+     *
+     * @name Record#_mapper
+     * @method
+     * @ignore
+     */
+    _mapper: function _mapper() {
+      var self = this;
+      var mapper = self.constructor.mapper;
+      if (!mapper) {
+        throw utils$1.err(DOMAIN$6 + '#_mapper', '')(404, 'mapper');
+      }
+      return mapper;
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name Record#afterLoadRelations
+     * @method
+     * @param {string[]} relations TODO
+     * @param {Object} opts TODO
+     */
+    afterLoadRelations: function afterLoadRelations() {},
+
+
+    /**
+     * TODO
+     *
+     * @name Record#beforeLoadRelations
+     * @method
+     * @param {string[]} relations TODO
+     * @param {Object} opts TODO
+     */
+    beforeLoadRelations: function beforeLoadRelations() {},
+
+
+    /**
+     * Return changes to this record since it was instantiated or
+     * {@link Record#commit} was called.
+     *
+     * @name Record#changes
+     * @method
+     * @param [opts] Configuration options.
+     * @param {Function} [opts.equalsFn] Equality function. Default uses `===`.
+     * @param {Array} [opts.ignore] Array of strings or RegExp of fields to ignore.
+     */
+    changes: function changes(opts) {
+      var self = this;
+      opts || (opts = {});
+      return utils$1.diffObjects(self, self._get('previous'), opts);
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name Record#commit
+     * @method
+     */
+    commit: function commit() {
+      var self = this;
+      self._set('changed'); // unset
+      self._set('previous', utils$1.copy(self));
+      return self;
+    },
+
+
+    /**
+     * Call {@link Mapper#destroy} using this record's primary key.
+     *
+     * @name Record#destroy
+     * @method
+     * @param {Object} [opts] Configuration options passed to {@link Mapper#destroy}.
+     * @return {Promise} The result of calling {@link Mapper#destroy}.
+     */
+    destroy: function destroy(opts) {
+      var self = this;
+      opts || (opts = {});
+      var mapper = self._mapper();
+      return superMethod(mapper, 'destroy')(utils$1.get(self, mapper.idAttribute), opts);
+    },
+
+
+    /**
+     * Return the value at the given path for this instance.
+     *
+     * @name Record#get
+     * @method
+     * @param {string} key - Path of value to retrieve.
+     * @return {*} Value at path.
+     */
+    'get': function get(key) {
+      return utils$1.get(this, key);
+    },
+
+
+    /**
+     * Return whether this record has changed since it was instantiated or
+     * {@link Record#commit} was called.
+     *
+     * @name Record#hasChanges
+     * @method
+     * @param [opts] Configuration options.
+     * @param {Function} [opts.equalsFn] Equality function. Default uses `===`.
+     * @param {Array} [opts.ignore] Array of strings or RegExp of fields to ignore.
+     */
+    hasChanges: function hasChanges(opts) {
+      var self = this;
+      var quickHasChanges = !!(self._get('changed') || []).length;
+      return quickHasChanges || utils$1.areDifferent(self, self._get('previous'), opts);
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name Record#hashCode
+     * @method
+     */
+    hashCode: function hashCode() {
+      var self = this;
+      return utils$1.get(self, self._mapper().idAttribute);
+    },
+    isValid: function isValid(opts) {
+      var self = this;
+      return !self._mapper().validate(self, opts);
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name Record#loadRelations
+     * @method
+     * @param {string[]} [relations] TODO
+     * @param {Object} [opts] TODO
+     */
+    loadRelations: function loadRelations(relations, opts) {
+      var op = void 0;
+      var self = this;
+      var mapper = self._mapper();
+
+      // Default values for arguments
+      relations || (relations = []);
+      if (utils$1.isString(relations)) {
+        relations = [relations];
+      }
+      opts || (opts = {});
+      opts.with = relations;
+
+      // Fill in "opts" with the Model's configuration
+      utils$1._(opts, mapper);
+      opts.adapter = mapper.getAdapterName(opts);
+
+      // beforeLoadRelations lifecycle hook
+      op = opts.op = 'beforeLoadRelations';
+      return utils$1.resolve(self[op](relations, opts)).then(function () {
+        // Now delegate to the adapter
+        op = opts.op = 'loadRelations';
+        mapper.dbg(op, self, relations, opts);
+        var tasks = [];
+        var task = void 0;
+        utils$1.forEachRelation(mapper, opts, function (def, optsCopy) {
+          var relatedMapper = def.getRelation();
+          optsCopy.raw = false;
+          if (utils$1.isFunction(def.load)) {
+            task = def.load(mapper, def, self, opts);
+          } else if (def.type === 'hasMany' || def.type === 'hasOne') {
+            if (def.foreignKey) {
+              task = superMethod(relatedMapper, 'findAll')(babelHelpers.defineProperty({}, def.foreignKey, utils$1.get(self, mapper.idAttribute)), optsCopy).then(function (relatedData) {
+                if (def.type === 'hasOne') {
+                  return relatedData.length ? relatedData[0] : undefined;
+                }
+                return relatedData;
+              });
+            } else if (def.localKeys) {
+              task = superMethod(relatedMapper, 'findAll')({
+                where: babelHelpers.defineProperty({}, relatedMapper.idAttribute, {
+                  'in': utils$1.get(self, def.localKeys)
+                })
+              });
+            } else if (def.foreignKeys) {
+              task = superMethod(relatedMapper, 'findAll')({
+                where: babelHelpers.defineProperty({}, def.foreignKeys, {
+                  'contains': utils$1.get(self, mapper.idAttribute)
+                })
+              }, opts);
+            }
+          } else if (def.type === 'belongsTo') {
+            var key = utils$1.get(self, def.foreignKey);
+            if (utils$1.isSorN(key)) {
+              task = superMethod(relatedMapper, 'find')(key, optsCopy);
+            }
+          }
+          if (task) {
+            task = task.then(function (relatedData) {
+              def.setLocalField(self, relatedData);
+            });
+            tasks.push(task);
+          }
+        });
+        return Promise.all(tasks);
+      }).then(function () {
+        // afterLoadRelations lifecycle hook
+        op = opts.op = 'afterLoadRelations';
+        return utils$1.resolve(self[op](relations, opts)).then(function () {
+          return self;
+        });
+      });
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name Record#previous
+     * @method
+     * @param {string} [key] TODO
+     */
+    previous: function previous(key) {
+      var self = this;
+      if (key) {
+        return self._get('previous.' + key);
+      }
+      return self._get('previous');
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name Record#revert
+     * @method
+     * @param {Object} [opts] Configuration options.
+     */
+    revert: function revert(opts) {
+      var self = this;
+      var previous = self._get('previous');
+      opts || (opts = {});
+      opts.preserve || (opts.preserve = []);
+      utils$1.forOwn(self, function (value, key) {
+        if (key !== self._mapper().idAttribute && !previous.hasOwnProperty(key) && self.hasOwnProperty(key) && opts.preserve.indexOf(key) === -1) {
+          delete self[key];
+        }
+      });
+      utils$1.forOwn(previous, function (value, key) {
+        if (opts.preserve.indexOf(key) === -1) {
+          self[key] = value;
+        }
+      });
+      self.commit();
+      return self;
+    },
+
+
+    /**
+     * Delegates to {@link Mapper#create} or {@link Mapper#update}.
+     *
+     * @name Record#save
+     * @method
+     * @param {Object} [opts] Configuration options. See {@link Mapper#create}.
+     * @param [opts] Configuration options.
+     * @param {boolean} [opts.changesOnly] Equality function. Default uses `===`.
+     * @param {Function} [opts.equalsFn] Passed to {@link Record#changes} when
+     * `changesOnly` is `true`.
+     * @param {Array} [opts.ignore] Passed to {@link Record#changes} when
+     * `changesOnly` is `true`.
+     * @return {Promise} The result of calling {@link Mapper#create} or
+     * {@link Mapper#update}.
+     */
+    save: function save(opts) {
+      var self = this;
+      opts || (opts = {});
+      var mapper = self._mapper();
+      var id = utils$1.get(self, mapper.idAttribute);
+      var props = self;
+      if (utils$1.isUndefined(id)) {
+        return superMethod(mapper, 'create')(props, opts);
+      }
+      if (opts.changesOnly) {
+        var changes = self.changes(opts);
+        props = {};
+        utils$1.fillIn(props, changes.added);
+        utils$1.fillIn(props, changes.changed);
+      }
+      return superMethod(mapper, 'update')(id, props, opts);
+    },
+
+
+    /**
+     * Set the value for a given key, or the values for the given keys if "key" is
+     * an object.
+     *
+     * @name Record#set
+     * @method
+     * @param {(string|Object)} key - Key to set or hash of key-value pairs to set.
+     * @param {*} [value] - Value to set for the given key.
+     * @param {Object} [opts] - Optional configuration.
+     * @param {boolean} [opts.silent=false] - Whether to trigger change events.
+     */
+    'set': function set(key, value, opts) {
+      var self = this;
+      if (utils$1.isObject(key)) {
+        opts = value;
+      }
+      opts || (opts = {});
+      if (opts.silent) {
+        self._set('silent', true);
+      }
+      utils$1.set(self, key, value);
+      if (!self._get('eventId')) {
+        self._set('silent'); // unset
+      }
+    },
+
+
+    // TODO: move logic for single-item async operations onto the instance.
+
+    /**
+     * Return a plain object representation of this record. If the class from
+     * which this record was created has a mapper, then {@link Mapper#toJSON} will
+     * be called instead.
+     *
+     * @name Record#toJSON
+     * @method
+     * @param {Object} [opts] Configuration options.
+     * @param {string[]} [opts.with] Array of relation names or relation fields
+     * to include in the representation. Only available as an option if the class
+     * from which this record was created has a mapper.
+     * @return {Object} Plain object representation of this record.
+     */
+    toJSON: function toJSON(opts) {
+      var _this = this;
+
+      var mapper = this.constructor.mapper;
+      if (mapper) {
+        return mapper.toJSON(this, opts);
+      } else {
+        var _ret = function () {
+          var json = {};
+          utils$1.forOwn(_this, function (prop, key) {
+            json[key] = utils$1.copy(prop);
+          });
+          return {
+            v: json
+          };
+        }();
+
+        if ((typeof _ret === 'undefined' ? 'undefined' : babelHelpers.typeof(_ret)) === "object") return _ret.v;
+      }
+    },
+
+
+    /**
+     * Unset the value for a given key.
+     *
+     * @name Record#unset
+     * @method
+     * @param {string} key - Key to unset.
+     * @param {Object} [opts] - Optional configuration.
+     * @param {boolean} [opts.silent=false] - Whether to trigger change events.
+     */
+    unset: function unset(key, opts) {
+      this.set(key, undefined, opts);
+    },
+    validate: function validate(opts) {
+      return this._mapper().validate(this, opts);
+    }
+  });
+
+  /**
+   * Allow records to emit events.
+   *
+   * An record's registered listeners are stored in the record's private data.
+   */
+  utils$1.eventify(Record.prototype, function () {
+    return this._get('events');
+  }, function (value) {
+    this._set('events', value);
+  });
+
+  var DOMAIN$7 = 'Schema';
+
+  /**
+   * TODO
+   *
+   * @name Schema.types
+   * @type {Object}
+   */
+  var types = {
+    array: utils$1.isArray,
+    boolean: utils$1.isBoolean,
+    integer: utils$1.isInteger,
+    'null': utils$1.isNull,
+    number: utils$1.isNumber,
+    object: utils$1.isObject,
+    string: utils$1.isString
+  };
+
+  /**
+   * @ignore
+   */
+  var segmentToString = function segmentToString(segment, prev) {
+    var str = '';
+    if (segment) {
+      if (utils$1.isNumber(segment)) {
+        str += '[' + segment + ']';
+      } else if (prev) {
+        str += '.' + segment;
+      } else {
+        str += '' + segment;
+      }
+    }
+    return str;
+  };
+
+  /**
+   * @ignore
+   */
+  var makePath = function makePath(opts) {
+    opts || (opts = {});
+    var path = '';
+    var segments = opts.path || [];
+    segments.forEach(function (segment) {
+      path += segmentToString(segment, path);
+    });
+    path += segmentToString(opts.prop, path);
+    return path;
+  };
+
+  /**
+   * @ignore
+   */
+  var makeError = function makeError(actual, expected, opts) {
+    return {
+      expected: expected,
+      actual: '' + actual,
+      path: makePath(opts)
+    };
+  };
+
+  /**
+   * @ignore
+   */
+  var addError = function addError(actual, expected, opts, errors) {
+    errors.push(makeError(actual, expected, opts));
+  };
+
+  /**
+   * @ignore
+   */
+  var maxLengthCommon = function maxLengthCommon(keyword, value, schema, opts) {
+    var max = schema[keyword];
+    if (value.length > max) {
+      return makeError(value.length, 'length no more than ' + max, opts);
+    }
+  };
+
+  /**
+   * @ignore
+   */
+  var minLengthCommon = function minLengthCommon(keyword, value, schema, opts) {
+    var min = schema[keyword];
+    if (value.length < min) {
+      return makeError(value.length, 'length no less than ' + min, opts);
+    }
+  };
+
+  /**
+   * TODO
+   *
+   * @name Schema.validationKeywords
+   * @type {Object}
+   */
+  var validationKeywords = {
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor82
+     *
+     * @name Schema.validationKeywords.allOf
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+
+    allOf: function allOf(value, schema, opts) {
+      var allErrors = [];
+      schema.allOf.forEach(function (_schema) {
+        allErrors = allErrors.concat(_validate(value, _schema, opts) || []);
+      });
+      return allErrors.length ? undefined : allErrors;
+    },
+
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor85
+     *
+     * @name Schema.validationKeywords.anyOf
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    anyOf: function anyOf(value, schema, opts) {
+      var validated = false;
+      var allErrors = [];
+      schema.anyOf.forEach(function (_schema) {
+        var errors = _validate(value, _schema, opts);
+        if (errors) {
+          allErrors = allErrors.concat(errors);
+        } else {
+          validated = true;
+        }
+      });
+      return validated ? undefined : allErrors;
+    },
+
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor70
+     *
+     * @name Schema.validationKeywords.dependencies
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    dependencies: function dependencies(value, schema, opts) {
+      // TODO
+    },
+
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor76
+     *
+     * @name Schema.validationKeywords.enum
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    enum: function _enum(value, schema, opts) {
+      var possibleValues = schema['enum'];
+      if (possibleValues.indexOf(value) === -1) {
+        return makeError(value, 'one of (' + possibleValues.join(', ') + ')', opts);
+      }
+    },
+
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor37
+     *
+     * @name Schema.validationKeywords.items
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    items: function items(value, schema, opts) {
+      opts || (opts = {});
+      // TODO: additionalItems
+      var items = schema.items;
+      var errors = [];
+      var checkingTuple = utils$1.isArray(items);
+      var length = value.length;
+      for (var prop = 0; prop < length; prop++) {
+        if (checkingTuple) {
+          // Validating a tuple, instead of just checking each item against the
+          // same schema
+          items = schema.items[prop];
+        }
+        opts.prop = prop;
+        errors = errors.concat(_validate(value[prop], items, opts) || []);
+      }
+      return errors.length ? errors : undefined;
+    },
+
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor17
+     *
+     * @name Schema.validationKeywords.maximum
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    maximum: function maximum(value, schema, opts) {
+      // Must be a number
+      var maximum = schema.maximum;
+      // Must be a boolean
+      // Depends on maximum
+      // default: false
+      var exclusiveMaximum = schema.exclusiveMaximum;
+      if ((typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === (typeof maximum === 'undefined' ? 'undefined' : babelHelpers.typeof(maximum)) && (exclusiveMaximum ? maximum < value : maximum <= value)) {
+        // TODO: Account for value of exclusiveMaximum in messaging
+        return makeError(value, 'no more than ' + maximum, opts);
+      }
+    },
+
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor42
+     *
+     * @name Schema.validationKeywords.maxItems
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    maxItems: function maxItems(value, schema, opts) {
+      return maxLengthCommon('maxItems', value, schema, opts);
+    },
+
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor26
+     *
+     * @name Schema.validationKeywords.maxLength
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    maxLength: function maxLength(value, schema, opts) {
+      return maxLengthCommon('maxLength', value, schema, opts);
+    },
+
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor54
+     *
+     * @name Schema.validationKeywords.maxProperties
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    maxProperties: function maxProperties(value, schema, opts) {
+      var maxProperties = schema.maxProperties;
+      var length = Object.keys(value).length;
+      if (length > maxProperties) {
+        return makeError(length, 'no more than ' + maxProperties + ' properties', opts);
+      }
+    },
+
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor21
+     *
+     * @name Schema.validationKeywords.minimum
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    minimum: function minimum(value, schema, opts) {
+      // Must be a number
+      var minimum = schema.minimum;
+      // Must be a boolean
+      // Depends on minimum
+      // default: false
+      var exclusiveMinimum = schema.exclusiveMinimum;
+      if ((typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === (typeof minimum === 'undefined' ? 'undefined' : babelHelpers.typeof(minimum)) && (exclusiveMinimum ? minimum > value : minimum >= value)) {
+        // TODO: Account for value of exclusiveMinimum in messaging
+        return makeError(value, 'no less than ' + minimum, opts);
+      }
+    },
+
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor42
+     *
+     * @name Schema.validationKeywords.minItems
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    minItems: function minItems(value, schema, opts) {
+      return minLengthCommon('minItems', value, schema, opts);
+    },
+
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor29
+     *
+     * @name Schema.validationKeywords.minLength
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    minLength: function minLength(value, schema, opts) {
+      return minLengthCommon('minLength', value, schema, opts);
+    },
+
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor57
+     *
+     * @name Schema.validationKeywords.minProperties
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    minProperties: function minProperties(value, schema, opts) {
+      var minProperties = schema.minProperties;
+      var length = Object.keys(value).length;
+      if (length < minProperties) {
+        return makeError(length, 'no more than ' + minProperties + ' properties', opts);
+      }
+    },
+
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor14
+     *
+     * @name Schema.validationKeywords.multipleOf
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    multipleOf: function multipleOf(value, schema, opts) {
+      // TODO
+    },
+
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor91
+     *
+     * @name Schema.validationKeywords.not
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    not: function not(value, schema, opts) {
+      if (!_validate(value, schema.not, opts)) {
+        // TODO: better messaging
+        return makeError('succeeded', 'should have failed', opts);
+      }
+    },
+
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor88
+     *
+     * @name Schema.validationKeywords.oneOf
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    oneOf: function oneOf(value, schema, opts) {
+      var validated = false;
+      var allErrors = [];
+      schema.oneOf.forEach(function (_schema) {
+        var errors = _validate(value, _schema, opts);
+        if (errors) {
+          allErrors = allErrors.concat(errors);
+        } else if (validated) {
+          allErrors = [makeError('valid against more than one', 'valid against only one', opts)];
+          validated = false;
+          return false;
+        } else {
+          validated = true;
+        }
+      });
+      return validated ? undefined : allErrors;
+    },
+
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor33
+     *
+     * @name Schema.validationKeywords.pattern
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    pattern: function pattern(value, schema, opts) {
+      var pattern = schema.pattern;
+      if (utils$1.isString(value) && !value.match(pattern)) {
+        return makeError(value, pattern, opts);
+      }
+    },
+
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor64
+     *
+     * @name Schema.validationKeywords.properties
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    properties: function properties(value, schema, opts) {
+      opts || (opts = {});
+      // Can be a boolean or an object
+      // Technically the default is an "empty schema", but here "true" is
+      // functionally the same
+      var additionalProperties = utils$1.isUndefined(schema.additionalProperties) ? true : schema.additionalProperties;
+      // "s": The property set of the instance to validate.
+      var toValidate = {};
+      // "p": The property set from "properties".
+      // Default is an object
+      var properties = schema.properties || {};
+      // "pp": The property set from "patternProperties".
+      // Default is an object
+      var patternProperties = schema.patternProperties || {};
+      var errors = [];
+
+      // Collect set "s"
+      utils$1.forOwn(value, function (_value, prop) {
+        toValidate[prop] = undefined;
+      });
+      // Remove from "s" all elements of "p", if any.
+      utils$1.forOwn(properties || {}, function (_schema, prop) {
+        if (utils$1.isUndefined(value[prop]) && !utils$1.isUndefined(_schema['default'])) {
+          value[prop] = utils$1.copy(_schema['default']);
+        }
+        opts.prop = prop;
+        errors = errors.concat(_validate(value[prop], _schema, opts) || []);
+        delete toValidate[prop];
+      });
+      // For each regex in "pp", remove all elements of "s" which this regex
+      // matches.
+      utils$1.forOwn(patternProperties, function (_schema, pattern) {
+        utils$1.forOwn(toValidate, function (undef, prop) {
+          if (prop.match(pattern)) {
+            opts.prop = prop;
+            errors = errors.concat(_validate(value[prop], _schema, opts) || []);
+            delete toValidate[prop];
+          }
+        });
+      });
+      var keys = Object.keys(toValidate);
+      // If "s" is not empty, validation fails
+      if (additionalProperties === false) {
+        if (keys.length) {
+          addError('extra fields: ' + keys.join(', '), 'no extra fields', opts, errors);
+        }
+      } else if (utils$1.isObject(additionalProperties)) {
+        // Otherwise, validate according to provided schema
+        keys.forEach(function (prop) {
+          opts.prop = prop;
+          errors = errors.concat(_validate(value[prop], additionalProperties, opts) || []);
+        });
+      }
+      return errors.length ? errors : undefined;
+    },
+
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor61
+     *
+     * @name Schema.validationKeywords.required
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    required: function required(value, schema, opts) {
+      var required = schema.required;
+      var errors = [];
+      if (!opts.existingOnly) {
+        required.forEach(function (prop) {
+          if (utils$1.isUndefined(utils$1.get(value, prop))) {
+            var prevProp = opts.prop;
+            opts.prop = prop;
+            addError(undefined, 'a value', opts, errors);
+            opts.prop = prevProp;
+          }
+        });
+      }
+      return errors.length ? errors : undefined;
+    },
+
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor79
+     *
+     * @name Schema.validationKeywords.type
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    type: function type(value, schema, opts) {
+      var type = schema.type;
+      var validType = void 0;
+      // Can be one of several types
+      if (utils$1.isString(type)) {
+        type = [type];
+      }
+      // Try to match the value against an expected type
+      type.forEach(function (_type) {
+        // TODO: throw an error if type is not defined
+        if (types[_type](value, schema, opts)) {
+          // Matched a type
+          validType = _type;
+          return false;
+        }
+      });
+      // Value did not match any expected type
+      if (!validType) {
+        return makeError(value ? typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value) : '' + value, 'one of (' + type.join(', ') + ')', opts);
+      }
+      // Run keyword validators for matched type
+      // http://json-schema.org/latest/json-schema-validation.html#anchor12
+      var validator = typeGroupValidators[validType];
+      if (validator) {
+        return validator(value, schema, opts);
+      }
+    },
+
+
+    /**
+     * http://json-schema.org/latest/json-schema-validation.html#anchor49
+     *
+     * @name Schema.validationKeywords.uniqueItems
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    uniqueItems: function uniqueItems(value, schema, opts) {
+      if (value && value.length && schema.uniqueItems) {
+        var length = value.length;
+        var item = void 0,
+            i = void 0,
+            j = void 0;
+        // Check n - 1 items
+        for (i = length - 1; i > 0; i--) {
+          item = value[i];
+          // Only compare against unchecked items
+          for (j = i - 1; j >= 0; j--) {
+            // Found a duplicate
+            if (item === value[j]) {
+              return makeError(item, 'no duplicates', opts);
+            }
+          }
+        }
+      }
+    }
+  };
+
+  /**
+   * @ignore
+   */
+  var validateKeyword = function validateKeyword(op, value, schema, opts) {
+    return !utils$1.isUndefined(schema[op]) && validationKeywords[op](value, schema, opts);
+  };
+
+  /**
+   * @ignore
+   */
+  var runOps = function runOps(ops, value, schema, opts) {
+    var errors = [];
+    ops.forEach(function (op) {
+      errors = errors.concat(validateKeyword(op, value, schema, opts) || []);
+    });
+    return errors.length ? errors : undefined;
+  };
+
+  var ANY_OPS = ['enum', 'type', 'allOf', 'anyOf', 'oneOf', 'not'];
+  var ARRAY_OPS = ['items', 'maxItems', 'minItems', 'uniqueItems'];
+  var NUMERIC_OPS = ['multipleOf', 'maximum', 'minimum'];
+  var OBJECT_OPS = ['maxProperties', 'minProperties', 'required', 'properties', 'dependencies'];
+  var STRING_OPS = ['maxLength', 'minLength', 'pattern'];
+
+  /**
+   * http://json-schema.org/latest/json-schema-validation.html#anchor75
+   * @ignore
+   */
+  var validateAny = function validateAny(value, schema, opts) {
+    return runOps(ANY_OPS, value, schema, opts);
+  };
+
+  /**
+   * TODO
+   *
+   * @name Schema.validate
+   * @method
+   * @param {*} value TODO
+   * @param {Object} [schema] TODO
+   * @param {Object} [opts] Configuration options.
+   */
+  var _validate = function _validate(value, schema, opts) {
+    var errors = [];
+    opts || (opts = {});
+    var shouldPop = void 0;
+    var prevProp = opts.prop;
+    if (utils$1.isUndefined(schema)) {
+      return;
+    }
+    if (!utils$1.isObject(schema)) {
+      throw utils$1.err(DOMAIN$7 + '#validate')(500, 'Invalid schema at path: "' + opts.path + '"');
+    }
+    if (utils$1.isUndefined(opts.path)) {
+      opts.path = [];
+    }
+    // Track our location as we recurse
+    if (!utils$1.isUndefined(opts.prop)) {
+      shouldPop = true;
+      opts.path.push(opts.prop);
+      opts.prop = undefined;
+    }
+    // Validate against parent schema
+    if (schema['extends']) {
+      // opts.path = path
+      // opts.prop = prop
+      if (utils$1.isFunction(schema['extends'].validate)) {
+        errors = errors.concat(schema['extends'].validate(value, opts) || []);
+      } else {
+        errors = errors.concat(_validate(value, schema['extends'], opts) || []);
+      }
+    }
+    if (utils$1.isUndefined(value)) {
+      // Check if property is required
+      if (schema.required === true) {
+        addError(value, 'a value', opts, errors);
+      }
+      if (shouldPop) {
+        opts.path.pop();
+        opts.prop = prevProp;
+      }
+      return errors.length ? errors : undefined;
+    }
+    errors = errors.concat(validateAny(value, schema, opts) || []);
+    if (shouldPop) {
+      opts.path.pop();
+      opts.prop = prevProp;
+    }
+    return errors.length ? errors : undefined;
+  };
+
+  // These strings are cached for optimal performance of the change detection
+  // boolean - Whether a Record is changing in the current execution frame
+  var changingPath = 'changing';
+  // string[] - Properties that have changed in the current execution frame
+  var changedPath = 'changed';
+  // boolean - Whether a Record is currently being instantiated
+  var creatingPath = 'creating';
+  // number - The setTimeout change event id of a Record, if any
+  var eventIdPath = 'eventId';
+  // boolean - Whether to skip validation for a Record's currently changing property
+  var noValidatePath = 'noValidate';
+  // boolean - Whether to skip change notification for a Record's currently
+  // changing property
+  var silentPath = 'silent';
+  var validationFailureMsg = 'validation failed';
+
+  /**
+   * Assemble a property descriptor which will be added to the prototype of
+   * {@link Mapper#recordClass}. This method is called when
+   * {@link Mapper#applySchema} is set to `true`.
+   *
+   * TODO: Make this more configurable, i.e. not so tied to the Record class.
+   *
+   * @ignore
+   */
+  var makeDescriptor = function makeDescriptor(prop, schema, opts) {
+    var descriptor = {
+      // These properties are enumerable by default, but regardless of their
+      // enumerability, they won't be "own" properties of individual records
+      enumerable: utils$1.isUndefined(schema.enumerable) ? true : !!schema.enumerable
+    };
+    // Cache a few strings for optimal performance
+    var keyPath = 'props.' + prop;
+    var previousPath = 'previous.' + prop;
+    var getter = opts.getter;
+    var setter = opts.setter;
+    var unsetter = opts.unsetter;
+
+    descriptor.get = function () {
+      return this._get(keyPath);
+    };
+    descriptor.set = function (value) {
+      var self = this;
+      // These are accessed a lot
+      var _get = self[getter];
+      var _set = self[setter];
+      var _unset = self[unsetter];
+
+      // Optionally check that the new value passes validation
+      if (!_get(noValidatePath)) {
+        var errors = schema.validate(value);
+        if (errors) {
+          // Immediately throw an error, preventing the record from getting into
+          // an invalid state
+          var error = new Error(validationFailureMsg);
+          error.errors = errors;
+          throw error;
+        }
+      }
+      // TODO: Make it so tracking can be turned on for all properties instead of
+      // only per-property
+      if (schema.track && !_get(creatingPath)) {
+        (function () {
+          var previous = _get(previousPath);
+          var current = _get(keyPath);
+          var changing = _get(changingPath);
+          var changed = _get(changedPath);
+
+          if (!changing) {
+            // Track properties that are changing in the current event loop
+            changed = [];
+          }
+
+          // Add changing properties to this array once at most
+          var index = changed.indexOf(prop);
+          if (current !== value && index === -1) {
+            changed.push(prop);
+          }
+          if (previous === value) {
+            if (index >= 0) {
+              changed.splice(index, 1);
+            }
+          }
+          // No changes in current event loop
+          if (!changed.length) {
+            changing = false;
+            _unset(changingPath);
+            _unset(changedPath);
+            // Cancel pending change event
+            if (_get(eventIdPath)) {
+              clearTimeout(_get(eventIdPath));
+              _unset(eventIdPath);
+            }
+          }
+          // Changes detected in current event loop
+          if (!changing && changed.length) {
+            _set(changedPath, changed);
+            _set(changingPath, true);
+            // Saving the timeout id allows us to batch all changes in the same
+            // event loop into a single "change"
+            // TODO: Optimize
+            _set(eventIdPath, setTimeout(function () {
+              // Previous event loop where changes were gathered has ended, so
+              // notify any listeners of those changes and prepare for any new
+              // changes
+              _unset(changedPath);
+              _unset(eventIdPath);
+              _unset(changingPath);
+              // TODO: Optimize
+              if (!_get(silentPath)) {
+                var i = void 0;
+                for (i = 0; i < changed.length; i++) {
+                  self.emit('change:' + changed[i], self, utils$1.get(self, changed[i]));
+                }
+                self.emit('change', self, self.changes());
+              }
+              _unset(silentPath);
+            }, 0));
+          }
+        })();
+      }
+      _set(keyPath, value);
+      return value;
+    };
+
+    return descriptor;
+  };
+
+  /**
+   * TODO
+   *
+   * @name Schema.typeGroupValidators
+   * @type {Object}
+   */
+  var typeGroupValidators = {
+    /**
+     * TODO
+     *
+     * @name Schema.typeGroupValidators.array
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    array: function array(value, schema, opts) {
+      return runOps(ARRAY_OPS, value, schema, opts);
+    },
+
+    /**
+     * TODO
+     *
+     * @name Schema.typeGroupValidators.integer
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    integer: function integer(value, schema, opts) {
+      // Additional validations for numerics are the same
+      return typeGroupValidators.numeric(value, schema, opts);
+    },
+
+    /**
+     * TODO
+     *
+     * @name Schema.typeGroupValidators.number
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    number: function number(value, schema, opts) {
+      // Additional validations for numerics are the same
+      return typeGroupValidators.numeric(value, schema, opts);
+    },
+
+    /**
+     * TODO
+     *
+     * See http://json-schema.org/latest/json-schema-validation.html#anchor13.
+     *
+     * @name Schema.typeGroupValidators.numeric
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    numeric: function numeric(value, schema, opts) {
+      return runOps(NUMERIC_OPS, value, schema, opts);
+    },
+
+    /**
+     * TODO
+     *
+     * See http://json-schema.org/latest/json-schema-validation.html#anchor53.
+     *
+     * @name Schema.typeGroupValidators.object
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    object: function object(value, schema, opts) {
+      return runOps(OBJECT_OPS, value, schema, opts);
+    },
+
+    /**
+     * TODO
+     *
+     * See http://json-schema.org/latest/json-schema-validation.html#anchor25.
+     *
+     * @name Schema.typeGroupValidators.string
+     * @method
+     * @param {*} value TODO
+     * @param {Object} schema TODO
+     * @param {Object} opts TODO
+     */
+    string: function string(value, schema, opts) {
+      return runOps(STRING_OPS, value, schema, opts);
+    }
+  };
+
+  /**
+   * js-data's Schema class.
+   *
+   * ```javascript
+   * import {Schema} from 'js-data'
+   * ```
+   *
+   * @class Schema
+   * @extends Component
+   * @param {Object} definition Schema definition according to json-schema.org
+   */
+  var Schema = Component.extend({
+    constructor: function Schema(definition) {
+      // const self = this
+      definition || (definition = {});
+      // TODO: schema validation
+      utils$1.fillIn(this, definition);
+
+      // TODO: rework this to make sure all possible keywords are converted
+      if (definition.properties) {
+        utils$1.forOwn(definition.properties, function (_definition, prop) {
+          if (!(_definition instanceof Schema)) {
+            definition.properties[prop] = new Schema(_definition);
+          }
+        });
+      }
+    },
+
+    /**
+     * This adds ES5 getters/setters to the target based on the "properties" in
+     * this Schema, which makes possible change tracking and validation on
+     * property assignment.
+     *
+     * @name Schema#validate
+     * @method
+     * @param {Object} target The prototype to which to apply this schema.
+     */
+    apply: function apply(target, opts) {
+      opts || (opts = {});
+      opts.getter = opts.getter || '_get';
+      opts.setter = opts.setter || '_set';
+      opts.unsetter = opts.unsetter || '_unset';
+      var properties = this.properties || {};
+      utils$1.forOwn(properties, function (schema, prop) {
+        Object.defineProperty(target, prop, makeDescriptor(prop, schema, opts));
+      });
+    },
+
+
+    /**
+     * Validate the provided value against this schema.
+     *
+     * @name Schema#validate
+     * @method
+     * @param {*} value Value to validate.
+     * @param {Object} [opts] Configuration options.
+     * @return {(array|undefined)} Array of errors or `undefined` if valid.
+     */
+    validate: function validate(value, opts) {
+      return _validate(value, this, opts);
+    }
+  }, {
+    typeGroupValidators: typeGroupValidators,
+    types: types,
+    validate: _validate,
+    validationKeywords: validationKeywords
+  });
+
+  var DOMAIN$5 = 'Mapper';
+
+  var makeNotify = function makeNotify(num) {
+    return function () {
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      var self = this;
+      var opts = args[args.length - num];
+      self.dbg.apply(self, [opts.op].concat(args));
+      if (opts.notify || opts.notify === undefined && self.notify) {
+        setTimeout(function () {
+          self.emit.apply(self, [opts.op].concat(args));
+        });
+      }
+    };
+  };
+
+  // These are the default implementations of all of the lifecycle hooks
+  var notify = makeNotify(1);
+  var notify2 = makeNotify(2);
+
+  // This object provides meta information used by Mapper#crud to actually
+  // execute each lifecycle method
+  var LIFECYCLE_METHODS = {
+    count: {
+      defaults: [{}, {}],
+      skip: true,
+      types: []
+    },
+    destroy: {
+      defaults: [{}, {}],
+      skip: true,
+      types: []
+    },
+    destroyAll: {
+      defaults: [{}, {}],
+      skip: true,
+      types: []
+    },
+    find: {
+      defaults: [undefined, {}],
+      types: []
+    },
+    findAll: {
+      defaults: [{}, {}],
+      types: []
+    },
+    sum: {
+      defaults: [undefined, {}, {}],
+      skip: true,
+      types: []
+    },
+    update: {
+      adapterArgs: function adapterArgs(mapper, id, props, opts) {
+        return [id, mapper.toJSON(props, opts), opts];
+      },
+
+      beforeAssign: 1,
+      defaults: [undefined, {}, {}],
+      types: []
+    },
+    updateAll: {
+      adapterArgs: function adapterArgs(mapper, props, query, opts) {
+        return [mapper.toJSON(props, opts), query, opts];
+      },
+
+      beforeAssign: 0,
+      defaults: [{}, {}, {}],
+      types: []
+    },
+    updateMany: {
+      adapterArgs: function adapterArgs(mapper, records, opts) {
+        return [records.map(function (record) {
+          return mapper.toJSON(record, opts);
+        }), opts];
+      },
+
+      beforeAssign: 0,
+      defaults: [[], {}],
+      types: []
+    }
+  };
+
+  var MAPPER_DEFAULTS = {
+    /**
+     * Hash of registered adapters. Don't modify directly. Use {@link Mapper#registerAdapter}.
+     *
+     * @name Mapper#_adapters
+     */
+    _adapters: {},
+
+    /**
+     * Whether to augment {@link Mapper#recordClass} with getter/setter property
+     * accessors according to the properties defined in {@link Mapper#schema}.
+     * This makes possible validation and change tracking on individual properties
+     * when using the dot (e.g. `user.name = "Bob"`) operator to modify a
+     * property.
+     *
+     * @name Mapper#applySchema
+     * @type {boolean}
+     * @default true
+     */
+    applySchema: true,
+
+    /**
+     * Whether to enable debug-level logs.
+     *
+     * @name Mapper#debug
+     * @type {boolean}
+     * @default false
+     */
+    debug: false,
+
+    /**
+     * The name of the registered adapter that this Mapper should used by default.
+     *
+     * @name Mapper#defaultAdapter
+     * @type {string}
+     * @default "http"
+     */
+    defaultAdapter: 'http',
+
+    /**
+     * The field used as the unique identifier on records handled by this Mapper.
+     *
+     * @name Mapper#idAttribute
+     * @type {string}
+     * @default id
+     */
+    idAttribute: 'id',
+
+    /**
+     * Whether this Mapper should emit operational events.
+     *
+     * Defaults to `true` in the browser and `false` in Node.js
+     *
+     * @name Mapper#notify
+     * @type {boolean}
+     */
+    notify: utils$1.isBrowser,
+
+    /**
+     * Whether {@link Mapper#create}, {@link Mapper#createMany}, {@link Mapper#save},
+     * {@link Mapper#update}, {@link Mapper#updateAll}, {@link Mapper#updateMany},
+     * {@link Mapper#find}, {@link Mapper#findAll}, {@link Mapper#destroy}, and
+     * {@link Mapper#destroyAll} should return a raw result object that contains
+     * both the instance data returned by the adapter _and_ metadata about the
+     * operation.
+     *
+     * The default is to NOT return the result object, and instead return just the
+     * instance data.
+     *
+     * @name Mapper#raw
+     * @type {boolean}
+     * @default false
+     */
+    raw: false
+  };
+
+  /**
+   * ```javascript
+   * import {Mapper} from 'js-data'
+   * ```
+   *
+   * The core of JSData's [ORM/ODM][orm] implementation. Given a minimum amout of
+   * meta information about a resource, a Mapper can perform generic CRUD
+   * operations against that resource. Apart from its configuration, a Mapper is
+   * stateless. The particulars of various persistence layers has been abstracted
+   * into adapters, which a Mapper uses to perform its operations.
+   *
+   * The term "Mapper" comes from the [Data Mapper Pattern][pattern] described in
+   * Martin Fowler's [Patterns of Enterprise Application Architecture][book]. A
+   * Data Mapper moves data between [in-memory object instances][record] and a
+   * relational or document-based database. JSData's Mapper can work with any
+   * persistence layer you can write an adapter for.
+   *
+   * _("Model" is a heavily overloaded term and is avoided in this documentation
+   * to prevent confusion.)_
+   *
+   * [orm]: https://en.wikipedia.org/wiki/Object-relational_mapping
+   * [pattern]: https://en.wikipedia.org/wiki/Data_mapper_pattern
+   * [book]: http://martinfowler.com/books/eaa.html
+   * [record]: Record.html
+   *
+   * @class Mapper
+   * @extends Component
+   * @param {Object} opts Configuration options.
+   * @param {boolean} [opts.applySchema=true] Whether to apply this Mapper's
+   * {@link Schema} to the prototype of this Mapper's Record class. The enables
+   * features like active change detection, validation during use of the
+   * assignment operator, etc.
+   * @param {boolean} [opts.debug=false] Wether to log debugging information
+   * during operation.
+   * @param {string} [opts.defaultAdapter=http] The name of the adapter to use by
+   * default.
+   * @param {string} [opts.idAttribute=id] The field that uniquely identifies
+   * Records that this Mapper will be dealing with. Typically called a primary
+   * key.
+   * @param {string} opts.name The name for this Mapper. This is the minimum
+   * amount of meta information required for a Mapper to be able to execute CRUD
+   * operations for a "Resource".
+   * @param {boolean} [opts.notify] Whether to emit lifecycle events.
+   * @param {boolean} [opts.raw=false] Whether lifecycle methods should return a
+   * more detailed reponse object instead of just a Record instance or Record
+   * instances.
+   */
+  var Mapper = Component.extend({
+    constructor: function Mapper(opts) {
+      var self = this;
+      utils$1.classCallCheck(self, Mapper);
+      Mapper.__super__.call(self);
+      opts || (opts = {});
+
+      // Prepare certain properties to be non-enumerable
+      Object.defineProperties(self, {
+        _adapters: {
+          value: undefined,
+          writable: true
+        },
+
+        /**
+         * Set the `false` to force the Mapper to work with POJO objects only.
+         *
+         * ```javascript
+         * import {Mapper, Record} from 'js-data'
+         * const UserMapper = new Mapper({ recordClass: false })
+         * UserMapper.recordClass // false
+         * const user = UserMapper#createRecord()
+         * user instanceof Record // false
+         * ```
+         *
+         * Set to a custom class to have records wrapped in your custom class.
+         *
+         * ```javascript
+         * import {Mapper, Record} from 'js-data'
+         *  // Custom class
+         * class User {
+         *   constructor (props = {}) {
+         *     for (var key in props) {
+         *       if (props.hasOwnProperty(key)) {
+         *         this[key] = props[key]
+         *       }
+         *     }
+         *   }
+         * }
+         * const UserMapper = new Mapper({ recordClass: User })
+         * UserMapper.recordClass // function User() {}
+         * const user = UserMapper#createRecord()
+         * user instanceof Record // false
+         * user instanceof User // true
+         * ```
+         *
+         * Extend the {@link Record} class.
+         *
+         * ```javascript
+         * import {Mapper, Record} from 'js-data'
+         *  // Custom class
+         * class User extends Record {
+         *   constructor () {
+         *     super(props)
+         *   }
+         * }
+         * const UserMapper = new Mapper({ recordClass: User })
+         * UserMapper.recordClass // function User() {}
+         * const user = UserMapper#createRecord()
+         * user instanceof Record // true
+         * user instanceof User // true
+         * ```
+         *
+         * @name Mapper#recordClass
+         * @default {@link Record}
+         */
+        recordClass: {
+          value: undefined,
+          writable: true
+        },
+
+        lifecycleMethods: {
+          value: LIFECYCLE_METHODS
+        },
+
+        schema: {
+          value: undefined,
+          writable: true
+        }
+      });
+
+      // Apply user-provided configuration
+      utils$1.fillIn(self, opts);
+      // Fill in any missing options with the defaults
+      utils$1.fillIn(self, utils$1.copy(MAPPER_DEFAULTS));
+
+      /**
+       * Minimum amount of meta information required for a Mapper to be able to
+       * execute CRUD operations for a "Resource".
+       *
+       * @name Mapper#name
+       * @type {string}
+       */
+      if (!self.name) {
+        throw utils$1.err('new ' + DOMAIN$5, 'opts.name')(400, 'string', self.name);
+      }
+
+      // Setup schema, with an empty default schema if necessary
+      if (!(self.schema instanceof Schema)) {
+        self.schema = new Schema(self.schema || {});
+      }
+
+      // Create a subclass of Record that's tied to this Mapper
+      if (utils$1.isUndefined(self.recordClass)) {
+        (function () {
+          var superClass = Record;
+          self.recordClass = superClass.extend({
+            constructor: function () {
+              var subClass = function Record(props, opts) {
+                utils$1.classCallCheck(this, subClass);
+                superClass.call(this, props, opts);
+              };
+              return subClass;
+            }()
+          });
+        })();
+      }
+
+      if (self.recordClass) {
+        self.recordClass.mapper = self;
+
+        // We can only apply the schema to the prototype of self.recordClass if the
+        // class extends Record
+        if (utils$1.getSuper(self.recordClass, true) === Record && self.schema && self.schema.apply && self.applySchema) {
+          self.schema.apply(self.recordClass.prototype);
+        }
+      }
+    },
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#count}. If this method
+     * returns a promise then {@link Mapper#count} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterCount
+     * @method
+     * @param {Object} query The `query` argument passed to {@link Mapper#count}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#count}.
+     * @param {*} result The result, if any.
+     */
+    afterCount: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#create}. If this method
+     * returns a promise then {@link Mapper#create} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterCreate
+     * @method
+     * @param {Object} props The `props` argument passed to {@link Mapper#create}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#create}.
+     * @param {*} result The result, if any.
+     */
+    afterCreate: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#createMany}. If this method
+     * returns a promise then {@link Mapper#createMany} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterCreateMany
+     * @method
+     * @param {Array} records The `records` argument passed to {@link Mapper#createMany}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#createMany}.
+     * @param {*} result The result, if any.
+     */
+    afterCreateMany: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#destroy}. If this method
+     * returns a promise then {@link Mapper#destroy} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterDestroy
+     * @method
+     * @param {(string|number)} id The `id` argument passed to {@link Mapper#destroy}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#destroy}.
+     * @param {*} result The result, if any.
+     */
+    afterDestroy: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#destroyAll}. If this method
+     * returns a promise then {@link Mapper#destroyAll} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterDestroyAll
+     * @method
+     * @param {*} data The `data` returned by the adapter.
+     * @param {query} query The `query` argument passed to {@link Mapper#destroyAll}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#destroyAll}.
+     * @param {*} result The result, if any.
+     */
+    afterDestroyAll: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#find}. If this method
+     * returns a promise then {@link Mapper#find} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterFind
+     * @method
+     * @param {(string|number)} id The `id` argument passed to {@link Mapper#find}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#find}.
+     * @param {*} result The result, if any.
+     */
+    afterFind: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#findAll}. If this method
+     * returns a promise then {@link Mapper#findAll} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterFindAll
+     * @method
+     * @param {Object} query The `query` argument passed to {@link Mapper#findAll}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#findAll}.
+     * @param {*} result The result, if any.
+     */
+    afterFindAll: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#sum}. If this method
+     * returns a promise then {@link Mapper#sum} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterSum
+     * @method
+     * @param {Object} query The `query` argument passed to {@link Mapper#sum}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#sum}.
+     * @param {*} result The result, if any.
+     */
+    afterSum: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#update}. If this method
+     * returns a promise then {@link Mapper#update} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterUpdate
+     * @method
+     * @param {(string|number)} id The `id` argument passed to {@link Mapper#update}.
+     * @param {props} props The `props` argument passed to {@link Mapper#update}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#update}.
+     * @param {*} result The result, if any.
+     */
+    afterUpdate: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#updateAll}. If this method
+     * returns a promise then {@link Mapper#updateAll} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterUpdateAll
+     * @method
+     * @param {Object} props The `props` argument passed to {@link Mapper#updateAll}.
+     * @param {Object} query The `query` argument passed to {@link Mapper#updateAll}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#updateAll}.
+     * @param {*} result The result, if any.
+     */
+    afterUpdateAll: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#updateMany}. If this method
+     * returns a promise then {@link Mapper#updateMany} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#afterUpdateMany
+     * @method
+     * @param {Array} records The `records` argument passed to {@link Mapper#updateMany}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#updateMany}.
+     * @param {*} result The result, if any.
+     */
+    afterUpdateMany: notify2,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#create}. If this method
+     * returns a promise then {@link Mapper#create} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeCreate
+     * @method
+     * @param {Object} props The `props` argument passed to {@link Mapper#create}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#create}.
+     */
+    beforeCreate: notify,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#createMany}. If this method
+     * returns a promise then {@link Mapper#createMany} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeCreateMany
+     * @method
+     * @param {Array} records The `records` argument passed to {@link Mapper#createMany}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#createMany}.
+     */
+    beforeCreateMany: notify,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#count}. If this method
+     * returns a promise then {@link Mapper#count} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeCount
+     * @method
+     * @param {Object} query The `query` argument passed to {@link Mapper#count}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#count}.
+     */
+    beforeCount: notify,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#destroy}. If this method
+     * returns a promise then {@link Mapper#destroy} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeDestroy
+     * @method
+     * @param {(string|number)} id The `id` argument passed to {@link Mapper#destroy}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#destroy}.
+     */
+    beforeDestroy: notify,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#destroyAll}. If this method
+     * returns a promise then {@link Mapper#destroyAll} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeDestroyAll
+     * @method
+     * @param {query} query The `query` argument passed to {@link Mapper#destroyAll}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#destroyAll}.
+     */
+    beforeDestroyAll: notify,
+
+    /**
+     * Mappers lifecycle hook called by {@link Mapper#find}. If this method
+     * returns a promise then {@link Mapper#find} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeFind
+     * @method
+     * @param {(string|number)} id The `id` argument passed to {@link Mapper#find}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#find}.
+     */
+    beforeFind: notify,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#findAll}. If this method
+     * returns a promise then {@link Mapper#findAll} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeFindAll
+     * @method
+     * @param {Object} query The `query` argument passed to {@link Mapper#findAll}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#findAll}.
+     */
+    beforeFindAll: notify,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#sum}. If this method
+     * returns a promise then {@link Mapper#sum} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeSum
+     * @method
+     * @param {string} field The `field` argument passed to {@link Mapper#sum}.
+     * @param {Object} query The `query` argument passed to {@link Mapper#sum}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#sum}.
+     */
+    beforeSum: notify,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#update}. If this method
+     * returns a promise then {@link Mapper#update} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeUpdate
+     * @method
+     * @param {(string|number)} id The `id` argument passed to {@link Mapper#update}.
+     * @param {props} props The `props` argument passed to {@link Mapper#update}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#update}.
+     */
+    beforeUpdate: notify,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#updateAll}. If this method
+     * returns a promise then {@link Mapper#updateAll} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeUpdateAll
+     * @method
+     * @param {Object} props The `props` argument passed to {@link Mapper#updateAll}.
+     * @param {Object} query The `query` argument passed to {@link Mapper#updateAll}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#updateAll}.
+     */
+    beforeUpdateAll: notify,
+
+    /**
+     * Mapper lifecycle hook called by {@link Mapper#updateMany}. If this method
+     * returns a promise then {@link Mapper#updateMany} will wait for the promise
+     * to resolve before continuing.
+     *
+     * @name Mapper#beforeUpdateMany
+     * @method
+     * @param {Array} records The `records` argument passed to {@link Mapper#updateMany}.
+     * @param {Object} opts The `opts` argument passed to {@link Mapper#updateMany}.
+     */
+    beforeUpdateMany: notify,
+
+    /**
+     * This method is called at the end of most lifecycle methods. It does the
+     * following:
+     *
+     * 1. If `opts.raw` is `true`, add this Mapper's configuration to the `opts`
+     * argument as metadata for the operation.
+     * 2. Wrap the result data appropriately using {@link Mapper#wrap}, which
+     * calls {@link Mapper#createRecord}.
+     *
+     * @name Mapper#_end
+     * @method
+     * @private
+     */
+    _end: function _end(result, opts, skip) {
+      var self = this;
+      if (opts.raw) {
+        utils$1._(result, opts);
+      }
+      if (skip) {
+        return result;
+      }
+      var _data = opts.raw ? result.data : result;
+      if (_data && utils$1.isFunction(self.wrap)) {
+        _data = self.wrap(_data, opts);
+        if (opts.raw) {
+          result.data = _data;
+        } else {
+          result = _data;
+        }
+      }
+      return result;
+    },
+
+
+    /**
+     * Define a belongsTo relationship. Only useful if you're managing your
+     * Mappers manually and not using a Container or DataStore component.
+     *
+     * ```
+     * Post.belongsTo(User, {
+     *   localKey: 'myUserId'
+     * })
+     *
+     * Comment.belongsTo(User)
+     * Comment.belongsTo(Post, {
+     *   localField: '_post'
+     * })
+     * ```
+     *
+     * @name Mapper#belongsTo
+     * @method
+     */
+    belongsTo: function belongsTo(relatedMapper, opts) {
+      return _belongsTo(relatedMapper, opts)(this);
+    },
+
+
+    /**
+     * Using the `query` argument, select records to pull from an adapter.
+     * Expects back from the adapter the array of selected records.
+     *
+     * {@link Mapper#beforeCount} will be called before calling the adapter.
+     * {@link Mapper#afterCount} will be called after calling the adapter.
+     *
+     * @name Mapper#count
+     * @method
+     * @param {Object} [query={}] Selection query.
+     * @param {Object} [query.where] Filtering criteria.
+     * @param {number} [query.skip] Number to skip.
+     * @param {number} [query.limit] Number to limit to.
+     * @param {Array} [query.orderBy] Sorting criteria.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * resulting data. If `true` return a response object that includes the
+     * resulting data and metadata about the operation.
+     * @return {Promise}
+     */
+    count: function count(query, opts) {
+      return this.crud('count', query, opts);
+    },
+
+
+    /**
+     * Create and save a new the record using the provided `props`.
+     *
+     * {@link Mapper#beforeCreate} will be called before calling the adapter.
+     * {@link Mapper#afterCreate} will be called after calling the adapter.
+     *
+     * @name Mapper#create
+     * @method
+     * @param {Object} props The properties for the new record.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * created data. If `true` return a response object that includes the created
+     * data and metadata about the operation.
+     * @param {string[]} [opts.with=[]] Relations to create in a cascading
+     * create if `props` contains nested relations. NOT performed in a
+     * transaction. Each nested create will result in another {@link Mapper#create}
+     * or {@link Mapper#createMany} call.
+     * @param {string[]} [opts.pass=[]] Relations to send to the adapter as part
+     * of the payload. Normally relations are not sent.
+     * @return {Promise}
+     */
+    create: function create(props, opts) {
+      var op = void 0,
+          adapter = void 0;
+      var self = this;
+
+      // Default values for arguments
+      props || (props = {});
+      opts || (opts = {});
+
+      // Fill in "opts" with the Mapper's configuration
+      utils$1._(opts, self);
+      adapter = opts.adapter = self.getAdapterName(opts);
+
+      // beforeCreate lifecycle hook
+      op = opts.op = 'beforeCreate';
+      return utils$1.resolve(self[op](props, opts)).then(function (_props) {
+        // Allow for re-assignment from lifecycle hook
+        props = utils$1.isUndefined(_props) ? props : _props;
+
+        // Deep pre-create belongsTo relations
+        var belongsToRelationData = {};
+        opts.with || (opts.with = []);
+        var tasks = [];
+        utils$1.forEachRelation(self, opts, function (def, optsCopy) {
+          var relationData = def.getLocalField(props);
+          var relatedMapper = def.getRelation();
+          var relatedIdAttribute = relatedMapper.idAttribute;
+          optsCopy.raw = false;
+          if (!relationData) {
+            return;
+          }
+          if (def.type === belongsToType) {
+            // Create belongsTo relation first because we need a generated id to
+            // attach to the child
+            tasks.push(relatedMapper.create(relationData, optsCopy).then(function (data) {
+              def.setLocalField(belongsToRelationData, data);
+              def.setForeignKey(props, data);
+            }));
+          } else if (def.type === hasManyType && def.localKeys) {
+            // Create his hasMany relation first because it uses localKeys
+            tasks.push(relatedMapper.createMany(relationData, optsCopy).then(function (data) {
+              def.setLocalField(belongsToRelationData, data);
+              utils$1.set(props, def.localKeys, data.map(function (record) {
+                return utils$1.get(record, relatedIdAttribute);
+              }));
+            }));
+          }
+        });
+        return utils$1.Promise.all(tasks).then(function () {
+          // Now delegate to the adapter for the main create
+          op = opts.op = 'create';
+          self.dbg(op, props, opts);
+          return utils$1.resolve(self.getAdapter(adapter)[op](self, self.toJSON(props, { with: opts.pass || [] }), opts));
+        }).then(function (data) {
+          var createdRecord = opts.raw ? data.data : data;
+          // Deep post-create hasMany and hasOne relations
+          tasks = [];
+          utils$1.forEachRelation(self, opts, function (def, optsCopy) {
+            var relationData = def.getLocalField(props);
+            if (!relationData) {
+              return;
+            }
+            optsCopy.raw = false;
+            var task = void 0;
+            // Create hasMany and hasOne after the main create because we needed
+            // a generated id to attach to these items
+            if (def.type === hasManyType && def.foreignKey) {
+              def.setForeignKey(createdRecord, relationData);
+              task = def.getRelation().createMany(relationData, optsCopy).then(function (data) {
+                def.setLocalField(createdRecord, data);
+              });
+            } else if (def.type === hasOneType) {
+              def.setForeignKey(createdRecord, relationData);
+              task = def.getRelation().create(relationData, optsCopy).then(function (data) {
+                def.setLocalField(createdRecord, data);
+              });
+            } else if (def.type === belongsToType && def.getLocalField(belongsToRelationData)) {
+              def.setLocalField(createdRecord, def.getLocalField(belongsToRelationData));
+            } else if (def.type === hasManyType && def.localKeys && def.getLocalField(belongsToRelationData)) {
+              def.setLocalField(createdRecord, def.getLocalField(belongsToRelationData));
+            }
+            if (task) {
+              tasks.push(task);
+            }
+          });
+          return utils$1.Promise.all(tasks).then(function () {
+            return data;
+          });
+        });
+      }).then(function (result) {
+        result = self._end(result, opts);
+        // afterCreate lifecycle hook
+        op = opts.op = 'afterCreate';
+        return utils$1.resolve(self[op](props, opts, result)).then(function (_result) {
+          // Allow for re-assignment from lifecycle hook
+          return utils$1.isUndefined(_result) ? result : _result;
+        });
+      });
+    },
+    createInstance: function createInstance(props, opts) {
+      return this.createRecord(props, opts);
+    },
+
+
+    /**
+     * Given an array of records, batch create them via an adapter.
+     *
+     * {@link Mapper#beforeCreateMany} will be called before calling the adapter.
+     * {@link Mapper#afterCreateMany} will be called after calling the adapter.
+     *
+     * @name Mapper#createMany
+     * @method
+     * @param {Array} records Array of records to be created in one batch.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * updated data. If `true` return a response object that includes the updated
+     * data and metadata about the operation.
+     * @param {string[]} [opts.with=[]] Relations to create in a cascading
+     * create if `records` contains nested relations. NOT performed in a
+     * transaction. Each nested create will result in another {@link Mapper#createMany}
+     * call.
+     * @param {string[]} [opts.pass=[]] Relations to send to the adapter as part
+     * of the payload. Normally relations are not sent.
+     * @return {Promise}
+     */
+    createMany: function createMany(records, opts) {
+      var op = void 0,
+          adapter = void 0;
+      var self = this;
+
+      // Default values for arguments
+      records || (records = []);
+      opts || (opts = {});
+
+      // Fill in "opts" with the Mapper's configuration
+      utils$1._(opts, self);
+      adapter = opts.adapter = self.getAdapterName(opts);
+
+      // beforeCreateMany lifecycle hook
+      op = opts.op = 'beforeCreateMany';
+      return utils$1.resolve(self[op](records, opts)).then(function (_records) {
+        // Allow for re-assignment from lifecycle hook
+        records = utils$1.isUndefined(_records) ? records : _records;
+
+        // Deep pre-create belongsTo relations
+        var belongsToRelationData = {};
+        opts.with || (opts.with = []);
+        var tasks = [];
+        utils$1.forEachRelation(self, opts, function (def, optsCopy) {
+          var relationData = records.map(function (record) {
+            return def.getLocalField(record);
+          }).filter(function (relatedRecord) {
+            return relatedRecord;
+          });
+          if (def.type === belongsToType && relationData.length === records.length) {
+            // Create belongsTo relation first because we need a generated id to
+            // attach to the child
+            tasks.push(def.getRelation().createMany(relationData, optsCopy).then(function (data) {
+              var relatedRecords = optsCopy.raw ? data.data : data;
+              def.setLocalField(belongsToRelationData, relatedRecords);
+              records.forEach(function (record, i) {
+                def.setForeignKey(record, relatedRecords[i]);
+              });
+            }));
+          }
+        });
+        return utils$1.Promise.all(tasks).then(function () {
+          // Now delegate to the adapter
+          op = opts.op = 'createMany';
+          var json = records.map(function (record) {
+            return self.toJSON(record, { with: opts.pass || [] });
+          });
+          self.dbg(op, records, opts);
+          return utils$1.resolve(self.getAdapter(adapter)[op](self, json, opts));
+        }).then(function (data) {
+          var createdRecords = opts.raw ? data.data : data;
+
+          // Deep post-create hasOne relations
+          tasks = [];
+          utils$1.forEachRelation(self, opts, function (def, optsCopy) {
+            var relationData = records.map(function (record) {
+              return def.getLocalField(record);
+            }).filter(function (relatedRecord) {
+              return relatedRecord;
+            });
+            if (relationData.length !== records.length) {
+              return;
+            }
+            var belongsToData = def.getLocalField(belongsToRelationData);
+            var task = void 0;
+            // Create hasMany and hasOne after the main create because we needed
+            // a generated id to attach to these items
+            if (def.type === hasManyType) {
+              // Not supported
+              self.log('warn', 'deep createMany of hasMany type not supported!');
+            } else if (def.type === hasOneType) {
+              createdRecords.forEach(function (createdRecord, i) {
+                def.setForeignKey(createdRecord, relationData[i]);
+              });
+              task = def.getRelation().createMany(relationData, optsCopy).then(function (data) {
+                var relatedData = opts.raw ? data.data : data;
+                createdRecords.forEach(function (createdRecord, i) {
+                  def.setLocalField(createdRecord, relatedData[i]);
+                });
+              });
+            } else if (def.type === belongsToType && belongsToData && belongsToData.length === createdRecords.length) {
+              createdRecords.forEach(function (createdRecord, i) {
+                def.setLocalField(createdRecord, belongsToData[i]);
+              });
+            }
+            if (task) {
+              tasks.push(task);
+            }
+          });
+          return utils$1.Promise.all(tasks).then(function () {
+            return data;
+          });
+        });
+      }).then(function (result) {
+        result = self._end(result, opts);
+        // afterCreateMany lifecycle hook
+        op = opts.op = 'afterCreateMany';
+        return utils$1.resolve(self[op](records, opts, result)).then(function (_result) {
+          // Allow for re-assignment from lifecycle hook
+          return utils$1.isUndefined(_result) ? result : _result;
+        });
+      });
+    },
+
+
+    /**
+     * Create an unsaved, uncached instance of this Mapper's
+     * {@link Mapper#recordClass}.
+     *
+     * Returns `props` if `props` is already an instance of
+     * {@link Mapper#recordClass}.
+     *
+     * @name Mapper#createRecord
+     * @method
+     * @param {Object|Array} props The properties for the Record instance or an
+     * array of property objects for the Record instances.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.noValidate=false] Whether to skip validation when
+     * the Record instances are created.
+     * @return {Object|Array} The Record instance or Record instances.
+     */
+    createRecord: function createRecord(props, opts) {
+      props || (props = {});
+      var self = this;
+      if (utils$1.isArray(props)) {
+        return props.map(function (_props) {
+          return self.createRecord(_props, opts);
+        });
+      }
+      if (!utils$1.isObject(props)) {
+        throw utils$1.err(DOMAIN$5 + '#createRecord', 'props')(400, 'array or object', props);
+      }
+      var recordClass = self.recordClass;
+      var relationList = self.relationList || [];
+      relationList.forEach(function (def) {
+        var relatedMapper = def.getRelation();
+        var relationData = def.getLocalField(props);
+        if (relationData && !relatedMapper.is(relationData)) {
+          if (utils$1.isArray(relationData) && (!relationData.length || relatedMapper.is(relationData[0]))) {
+            return;
+          }
+          utils$1.set(props, def.localField, relatedMapper.createRecord(relationData, opts));
+        }
+      });
+      // Check to make sure "props" is not already an instance of this Mapper.
+      return recordClass ? props instanceof recordClass ? props : new recordClass(props, opts) : props; // eslint-disable-line
+    },
+
+
+    /**
+     * Lifecycle invocation method.
+     *
+     * @name Mapper#crud
+     * @method
+     * @param {string} method Name of the lifecycle method to invoke.
+     * @param {...*} args Arguments to pass to the lifecycle method.
+     * @return {Promise}
+     */
+    crud: function crud(method) {
+      for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+        args[_key2 - 1] = arguments[_key2];
+      }
+
+      var self = this;
+      var config = self.lifecycleMethods[method];
+      if (!config) {
+        throw utils$1.err(DOMAIN$5 + '#crud', method)(404, 'method');
+      }
+
+      var upper = '' + method.charAt(0).toUpperCase() + method.substr(1);
+      var before = 'before' + upper;
+      var after = 'after' + upper;
+
+      var op = void 0,
+          adapter = void 0;
+
+      // Default values for arguments
+      config.defaults.forEach(function (value, i) {
+        if (utils$1.isUndefined(args[i])) {
+          args[i] = utils$1.copy(value);
+        }
+      });
+
+      var opts = args[args.length - 1];
+
+      // Fill in "opts" with the Mapper's configuration
+      utils$1._(opts, self);
+      adapter = opts.adapter = self.getAdapterName(opts);
+
+      // before lifecycle hook
+      op = opts.op = before;
+      return utils$1.resolve(self[op].apply(self, babelHelpers.toConsumableArray(args))).then(function (_value) {
+        var _self$getAdapter;
+
+        if (!utils$1.isUndefined(config.beforeAssign)) {
+          // Allow for re-assignment from lifecycle hook
+          args[config.beforeAssign] = utils$1.isUndefined(_value) ? args[config.beforeAssign] : _value;
+        }
+        // Now delegate to the adapter
+        op = opts.op = method;
+        args = config.adapterArgs ? config.adapterArgs.apply(config, [self].concat(babelHelpers.toConsumableArray(args))) : args;
+        self.dbg.apply(self, [op].concat(babelHelpers.toConsumableArray(args)));
+        return utils$1.resolve((_self$getAdapter = self.getAdapter(adapter))[op].apply(_self$getAdapter, [self].concat(babelHelpers.toConsumableArray(args))));
+      }).then(function (result) {
+        result = self._end(result, opts, !!config.skip);
+        args.push(result);
+        // after lifecycle hook
+        op = opts.op = after;
+        return utils$1.resolve(self[op].apply(self, babelHelpers.toConsumableArray(args))).then(function (_result) {
+          // Allow for re-assignment from lifecycle hook
+          return utils$1.isUndefined(_result) ? result : _result;
+        });
+      });
+    },
+
+
+    /**
+     * Using an adapter, destroy the record with the primary key specified by the
+     * `id` argument.
+     *
+     * {@link Mapper#beforeDestroy} will be called before destroying the record.
+     * {@link Mapper#afterDestroy} will be called after destroying the record.
+     *
+     * @name Mapper#destroy
+     * @method
+     * @param {(string|number)} id The primary key of the record to destroy.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * ejected data (if any). If `true` return a response object that includes the
+     * ejected data (if any) and metadata about the operation.
+     * @param {string[]} [opts.with=[]] Relations to destroy in a cascading
+     * delete. NOT performed in a transaction.
+     * @return {Promise}
+     */
+    destroy: function destroy(id, opts) {
+      return this.crud('destroy', id, opts);
+    },
+
+
+    /**
+     * Using the `query` argument, destroy the selected records via an adapter.
+     * If no `query` is provided then all records will be destroyed.
+     *
+     * {@link Mapper#beforeDestroyAll} will be called before destroying the records.
+     * {@link Mapper#afterDestroyAll} will be called after destroying the records.
+     *
+     * @name Mapper#destroyAll
+     * @method
+     * @param {Object} [query={}] Selection query.
+     * @param {Object} [query.where] Filtering criteria.
+     * @param {number} [query.skip] Number to skip.
+     * @param {number} [query.limit] Number to limit to.
+     * @param {Array} [query.orderBy] Sorting criteria.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * ejected data (if any). If `true` return a response object that includes the
+     * ejected data (if any) and metadata about the operation.
+     * @param {string[]} [opts.with=[]] Relations to destroy in a cascading
+     * delete. NOT performed in a transaction.
+     * @return {Promise}
+     */
+    destroyAll: function destroyAll(query, opts) {
+      return this.crud('destroyAll', query, opts);
+    },
+
+
+    /**
+     * Retrieve via an adapter the record with the given primary key.
+     *
+     * {@link Mapper#beforeFind} will be called before calling the adapter.
+     * {@link Mapper#afterFind} will be called after calling the adapter.
+     *
+     * @name Mapper#find
+     * @method
+     * @param {(string|number)} id The primary key of the record to retrieve.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * updated data. If `true` return a response object that includes the updated
+     * data and metadata about the operation.
+     * @param {string[]} [opts.with=[]] Relations to eager load in the request.
+     * @return {Promise}
+     */
+    find: function find(id, opts) {
+      return this.crud('find', id, opts);
+    },
+
+
+    /**
+     * Using the `query` argument, select records to pull from an adapter.
+     * Expects back from the adapter the array of selected records.
+     *
+     * {@link Mapper#beforeFindAll} will be called before calling the adapter.
+     * {@link Mapper#afterFindAll} will be called after calling the adapter.
+     *
+     * @name Mapper#findAll
+     * @method
+     * @param {Object} [query={}] Selection query.
+     * @param {Object} [query.where] Filtering criteria.
+     * @param {number} [query.skip] Number to skip.
+     * @param {number} [query.limit] Number to limit to.
+     * @param {Array} [query.orderBy] Sorting criteria.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * resulting data. If `true` return a response object that includes the
+     * resulting data and metadata about the operation.
+     * @param {string[]} [opts.with=[]] Relations to eager load in the request.
+     * @return {Promise}
+     */
+    findAll: function findAll(query, opts) {
+      return this.crud('findAll', query, opts);
+    },
+
+
+    /**
+     * Return the registered adapter with the given name or the default adapter if
+     * no name is provided.
+     *
+     * @name Mapper#getAdapter
+     * @method
+     * @param {string} [name] The name of the adapter to retrieve.
+     * @return {Adapter} The adapter.
+     */
+    getAdapter: function getAdapter(name) {
+      var self = this;
+      self.dbg('getAdapter', 'name:', name);
+      var adapter = self.getAdapterName(name);
+      if (!adapter) {
+        throw utils$1.err(DOMAIN$5 + '#getAdapter', 'name')(400, 'string', name);
+      }
+      return self.getAdapters()[adapter];
+    },
+
+
+    /**
+     * Return the name of a registered adapter based on the given name or options,
+     * or the name of the default adapter if no name provided.
+     *
+     * @name Mapper#getAdapterName
+     * @method
+     * @param {(Object|string)} [opts] The name of an adapter or options, if any.
+     * @return {string} The name of the adapter.
+     */
+    getAdapterName: function getAdapterName(opts) {
+      opts || (opts = {});
+      if (utils$1.isString(opts)) {
+        opts = { adapter: opts };
+      }
+      return opts.adapter || opts.defaultAdapter;
+    },
+
+
+    /**
+     * @name Mapper#getAdapters
+     * @method
+     * @return {Object} This Mapper's adapters
+     */
+    getAdapters: function getAdapters() {
+      return this._adapters;
+    },
+
+
+    /**
+     * Returns this Mapper's schema.
+     *
+     * @return {Schema} This Mapper's schema.
+     */
+    getSchema: function getSchema() {
+      return this.schema;
+    },
+
+
+    /**
+     * Defines a hasMany relationship. Only useful if you're managing your
+     * Mappers manually and not using a Container or DataStore component.
+     *
+     * ```
+     * User.hasMany(Post, {
+     *   localField: 'my_posts'
+     * })
+     * ```
+     *
+     * @name Mapper#hasMany
+     * @method
+     */
+    hasMany: function hasMany(relatedMapper, opts) {
+      return _hasMany(relatedMapper, opts)(this);
+    },
+
+
+    /**
+     * Defines a hasOne relationship. Only useful if you're managing your
+     * Mappers manually and not using a Container or DataStore component.
+     *
+     * ```
+     * User.hasOne(Profile, {
+     *   localField: '_profile'
+     * })
+     * ```
+     *
+     * @name Mapper#hasOne
+     * @method
+     */
+    hasOne: function hasOne(relatedMapper, opts) {
+      return _hasOne(relatedMapper, opts)(this);
+    },
+
+
+    /**
+     * Return whether `record` is an instance of this Mapper's recordClass.
+     *
+     * @name Mapper#is
+     * @method
+     * @param {Object} record The record to check.
+     * @return {boolean} Whether `record` is an instance of this Mapper's
+     * {@link Mapper#recordClass}.
+     */
+    is: function is(record) {
+      var recordClass = this.recordClass;
+      return recordClass ? record instanceof recordClass : false;
+    },
+
+
+    /**
+     * Register an adapter on this mapper under the given name.
+     *
+     * @name Mapper#registerAdapter
+     * @method
+     * @param {string} name The name of the adapter to register.
+     * @param {Adapter} adapter The adapter to register.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.default=false] Whether to make the adapter the
+     * default adapter for this Mapper.
+     */
+    registerAdapter: function registerAdapter(name, adapter, opts) {
+      var self = this;
+      opts || (opts = {});
+      self.getAdapters()[name] = adapter;
+      // Optionally make it the default adapter for the target.
+      if (opts === true || opts.default) {
+        self.defaultAdapter = name;
+      }
+    },
+
+
+    /**
+     * Using the `query` argument, select records to pull from an adapter.
+     * Expects back from the adapter the array of selected records.
+     *
+     * {@link Mapper#beforeSum} will be called before calling the adapter.
+     * {@link Mapper#afterSum} will be called after calling the adapter.
+     *
+     * @name Mapper#sum
+     * @method
+     * @param {string} field The field to sum.
+     * @param {Object} [query={}] Selection query.
+     * @param {Object} [query.where] Filtering criteria.
+     * @param {number} [query.skip] Number to skip.
+     * @param {number} [query.limit] Number to limit to.
+     * @param {Array} [query.orderBy] Sorting criteria.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * resulting data. If `true` return a response object that includes the
+     * resulting data and metadata about the operation.
+     * @return {Promise}
+     */
+    sum: function sum(field, query, opts) {
+      return this.crud('sum', field, query, opts);
+    },
+
+
+    /**
+     * Return a plain object representation of the given record.
+     *
+     * @name Mapper#toJSON
+     * @method
+     * @param {Object} record Record from which to create a plain object
+     * representation.
+     * @param {Object} [opts] Configuration options.
+     * @param {string[]} [opts.with] Array of relation names or relation fields
+     * to include in the representation.
+     * @return {Object} Plain object representation of the record.
+     */
+    toJSON: function toJSON(record, opts) {
+      var self = this;
+      opts || (opts = {});
+      var relationFields = (self ? self.relationFields : []) || [];
+      var json = {};
+      var properties = void 0;
+      if (self && self.schema) {
+        properties = self.schema.properties || {};
+        // TODO: Make this work recursively
+        utils$1.forOwn(properties, function (opts, prop) {
+          json[prop] = utils$1.plainCopy(record[prop]);
+        });
+      }
+      properties || (properties = {});
+      if (!opts.strict) {
+        for (var key in record) {
+          if (!properties[key] && relationFields.indexOf(key) === -1) {
+            json[key] = utils$1.plainCopy(record[key]);
+          }
+        }
+      }
+      // The user wants to include relations in the resulting plain object
+      // representation
+      if (self && opts.withAll) {
+        opts.with = relationFields.slice();
+      }
+      if (self && opts.with) {
+        if (utils$1.isString(opts.with)) {
+          opts.with = [opts.with];
+        }
+        utils$1.forEachRelation(self, opts, function (def, optsCopy) {
+          var relationData = def.getLocalField(record);
+          if (relationData) {
+            // The actual recursion
+            if (utils$1.isArray(relationData)) {
+              def.setLocalField(json, relationData.map(function (item) {
+                return def.getRelation().toJSON(item, optsCopy);
+              }));
+            } else {
+              def.setLocalField(json, def.getRelation().toJSON(relationData, optsCopy));
+            }
+          }
+        });
+      }
+      return json;
+    },
+
+
+    /**
+     * Using an adapter, update the record with the primary key specified by the
+     * `id` argument.
+     *
+     * {@link Mapper#beforeUpdate} will be called before updating the record.
+     * {@link Mapper#afterUpdate} will be called after updating the record.
+     *
+     * @name Mapper#update
+     * @method
+     * @param {(string|number)} id The primary key of the record to update.
+     * @param {Object} props The update to apply to the record.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * updated data. If `true` return a response object that includes the updated
+     * data and metadata about the operation.
+     * @param {string[]} [opts.with=[]] Relations to update in a cascading
+     * update if `props` contains nested updates to relations. NOT performed in a
+     * transaction.
+     * @return {Promise}
+     */
+    update: function update(id, props, opts) {
+      return this.crud('update', id, props, opts);
+    },
+
+
+    /**
+     * Using the `query` argument, perform the a single updated to the selected
+     * records. Expects back from the adapter an array of the updated records.
+     *
+     * {@link Mapper#beforeUpdateAll} will be called before making the update.
+     * {@link Mapper#afterUpdateAll} will be called after making the update.
+     *
+     * @name Mapper#updateAll
+     * @method
+     * @param {Object} props Update to apply to selected records.
+     * @param {Object} [query={}] Selection query.
+     * @param {Object} [query.where] Filtering criteria.
+     * @param {number} [query.skip] Number to skip.
+     * @param {number} [query.limit] Number to limit to.
+     * @param {Array} [query.orderBy] Sorting criteria.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * updated data. If `true` return a response object that includes the updated
+     * data and metadata about the operation.
+     * @param {string[]} [opts.with=[]] Relations to update in a cascading
+     * update if `props` contains nested updates to relations. NOT performed in a
+     * transaction.
+     * @return {Promise}
+     */
+    updateAll: function updateAll(props, query, opts) {
+      return this.crud('updateAll', props, query, opts);
+    },
+
+
+    /**
+     * Given an array of updates, perform each of the updates via an adapter. Each
+     * "update" is a hash of properties with which to update an record. Each
+     * update must contain the primary key to be updated.
+     *
+     * {@link Mapper#beforeUpdateMany} will be called before making the update.
+     * {@link Mapper#afterUpdateMany} will be called after making the update.
+     *
+     * @name Mapper#updateMany
+     * @method
+     * @param {Array} records Array up record updates.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
+     * adapter to use.
+     * @param {boolean} [opts.notify={@link Mapper#notify}] Whether to emit
+     * lifecycle events.
+     * @param {boolean} [opts.raw={@link Mapper#raw}] If `false`, return the
+     * updated data. If `true` return a response object that includes the updated
+     * data and metadata about the operation.
+     * @param {string[]} [opts.with=[]] Relations to update in a cascading
+     * update if each record update contains nested updates for relations. NOT
+     * performed in a transaction.
+     * @return {Promise}
+     */
+    updateMany: function updateMany(records, opts) {
+      return this.crud('updateMany', records, opts);
+    },
+
+
+    /**
+     * Validate the given record or records according to this Mapper's
+     * {@link Schema}. No return value means no errors.
+     *
+     * @name Mapper#validate
+     * @method
+     * @param {Object|Array} record The record or records to validate.
+     * @param {Object} [opts] Configuration options. Passed to
+     * {@link Schema#validate}.
+     * @return {Array} Array of errors or undefined if no errors.
+     */
+    validate: function validate(record, opts) {
+      var self = this;
+      var schema = self.getSchema();
+      if (utils$1.isArray(record)) {
+        var errors = record.map(function (_record) {
+          return schema.validate(_record, opts);
+        });
+        var hasErrors = false;
+        errors.forEach(function (err) {
+          if (err) {
+            hasErrors = true;
+          }
+        });
+        if (hasErrors) {
+          return errors;
+        }
+        return undefined;
+      }
+      return schema.validate(record, opts);
+    },
+
+
+    /**
+     * Method used to wrap data returned by an adapter with this Mapper's Record
+     * class.
+     *
+     * @name Mapper#wrap
+     * @method
+     * @param {Object|Array} data The data to be wrapped.
+     * @param {Object} [opts] Configuration options. Passed to {@link Mapper#createRecord}.
+     * @return {Object|Array}
+     */
+    wrap: function wrap(data, opts) {
+      return this.createRecord(data, opts);
+    }
+  });
+
+  var DOMAIN$3 = 'Container';
+
+  var toProxy = [
+  /**
+   * Proxy for {@link Mapper#count}.
+   *
+   * @name Container#count
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {Object} [query] - Passed to {@link Model.count}.
+   * @param {Object} [opts] - Passed to {@link Model.count}.
+   * @return {Promise}
+   */
+  'count',
+
+  /**
+   * Proxy for {@link Mapper#create}.
+   *
+   * @name Container#create
+   * @method
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {Object} record Passed to {@link Mapper#create}.
+   * @param {Object} [opts] Passed to {@link Mapper#create}. See
+   * {@link Mapper#create} for more configuration options.
+   * @return {Promise}
+   */
+  'create',
+
+  /**
+   * Proxy for {@link Mapper#createMany}.
+   *
+   * @name Container#createMany
+   * @method
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {Array} records Passed to {@link Mapper#createMany}.
+   * @param {Object} [opts] Passed to {@link Mapper#createMany}. See
+   * {@link Mapper#createMany} for more configuration options.
+   * @return {Promise}
+   */
+  'createMany',
+
+  /**
+   * Proxy for {@link Mapper#createRecord}.
+   *
+   * @name Container#createRecord
+   * @method
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {Object} props Passed to {@link Mapper#createRecord}.
+   * @param {Object} [opts] Passed to {@link Mapper#createRecord}. See
+   * {@link Mapper#createRecord} for configuration options.
+   * @return {Promise}
+   */
+  'createRecord',
+
+  /**
+   * Proxy for {@link Mapper#dbg}.
+   *
+   * @name Container#dbg
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {...*} args - Passed to {@link Mapper#dbg}.
+   */
+  'dbg',
+
+  /**
+   * Proxy for {@link Mapper#destroy}.
+   *
+   * @name Container#destroy
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {(string|number)} id - Passed to {@link Mapper#destroy}.
+   * @param {Object} [opts] - Passed to {@link Mapper#destroy}. See
+   * {@link Mapper#destroy} for more configuration options.
+   * @return {Promise}
+   */
+  'destroy',
+
+  /**
+   * Proxy for {@link Mapper#destroyAll}.
+   *
+   * @name Container#destroyAll
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {Object} [query] - Passed to {@link Mapper#destroyAll}.
+   * @param {Object} [opts] - Passed to {@link Mapper#destroyAll}. See
+   * {@link Mapper#destroyAll} for more configuration options.
+   * @return {Promise}
+   */
+  'destroyAll',
+
+  /**
+   * Proxy for {@link Mapper#find}.
+   *
+   * @name Container#find
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {(string|number)} id - Passed to {@link Mapper#find}.
+   * @param {Object} [opts] - Passed to {@link Mapper#find}.
+   * @return {Promise}
+   */
+  'find',
+
+  /**
+   * Proxy for {@link Mapper#createRecord}.
+   *
+   * @name Container#findAll
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {Object} [query] - Passed to {@link Model.findAll}.
+   * @param {Object} [opts] - Passed to {@link Model.findAll}.
+   * @return {Promise}
+   */
+  'findAll',
+
+  /**
+   * Proxy for {@link Mapper#is}.
+   *
+   * @name Container#getSchema
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   */
+  'getSchema',
+
+  /**
+   * Proxy for {@link Mapper#is}.
+   *
+   * @name Container#is
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {...*} args - Passed to {@link Mapper#is}.
+   */
+  'is',
+
+  /**
+   * Proxy for {@link Mapper#log}.
+   *
+   * @name Container#log
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {...*} args - Passed to {@link Mapper#log}.
+   */
+  'log',
+
+  /**
+   * Proxy for {@link Mapper#sum}.
+   *
+   * @name Container#sum
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {string} field - Passed to {@link Model.sum}.
+   * @param {Object} [query] - Passed to {@link Model.sum}.
+   * @param {Object} [opts] - Passed to {@link Model.sum}.
+   * @return {Promise}
+   */
+  'sum',
+
+  /**
+   * Proxy for {@link Mapper#toJSON}.
+   *
+   * @name Container#toJSON
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {...*} args - Passed to {@link Mapper#toJSON}.
+   */
+  'toJSON',
+
+  /**
+   * Proxy for {@link Mapper#update}.
+   *
+   * @name Container#update
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {(string|number)} id - Passed to {@link Mapper#update}.
+   * @param {Object} record - Passed to {@link Mapper#update}.
+   * @param {Object} [opts] - Passed to {@link Mapper#update}. See
+   * {@link Mapper#update} for more configuration options.
+   * @return {Promise}
+   */
+  'update',
+
+  /**
+   * Proxy for {@link Mapper#updateAll}.
+   *
+   * @name Container#updateAll
+   * @method
+   * @param {string} name - Name of the {@link Mapper} to target.
+   * @param {Object?} query - Passed to {@link Model.updateAll}.
+   * @param {Object} props - Passed to {@link Model.updateAll}.
+   * @param {Object} [opts] - Passed to {@link Model.updateAll}. See
+   * {@link Model.updateAll} for more configuration options.
+   * @return {Promise}
+   */
+  'updateAll',
+
+  /**
+   * Proxy for {@link Mapper#updateMany}.
+   *
+   * @name Container#updateMany
+   * @method
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {(Object[]|Record[])} records Passed to {@link Mapper#updateMany}.
+   * @param {Object} [opts] Passed to {@link Mapper#updateMany}. See
+   * {@link Mapper#updateMany} for more configuration options.
+   * @return {Promise}
+   */
+  'updateMany'];
+
+  var props = {
+    constructor: function Container(opts) {
+      var self = this;
+      utils$1.classCallCheck(self, Container);
+      Container.__super__.call(self);
+      opts || (opts = {});
+
+      // Apply options provided by the user
+      utils$1.fillIn(self, opts);
+      /**
+       * Defaults options to pass to {@link Container#mapperClass} when creating a
+       * new mapper.
+       *
+       * @name Container#mapperDefaults
+       * @type {Object}
+       */
+      self.mapperDefaults = self.mapperDefaults || {};
+      /**
+       * Constructor function to use in {@link Container#defineMapper} to create a
+       * new mapper.
+       *
+       * @name Container#mapperClass
+       * @type {Function}
+       */
+      self.mapperClass = self.mapperClass || Mapper;
+
+      // Initilize private data
+
+      // Holds the adapters, shared by all mappers in this container
+      self._adapters = {};
+      // The the mappers in this container
+      self._mappers = {};
+    },
+
+    /**
+     * Register a new event listener on this Container.
+     *
+     * Proxy for {@link Component#on}. If an event was emitted by a Mapper in the
+     * Container, then the name of the Mapper will be prepended to the arugments
+     * passed to the listener.
+     *
+     * @name Container#on
+     * @method
+     * @param {string} event Name of event to subsribe to.
+     * @param {Function} listener Listener function to handle the event.
+     * @param {*} [ctx] Optional content in which to invoke the listener.
+     */
+
+    /**
+     * Used to bind to events emitted by mappers in this container.
+     *
+     * @name Container#_onMapperEvent
+     * @method
+     * @private
+     * @param {string} name Name of the mapper that emitted the event.
+     * @param {...*} [args] Args passed to {@link Mapper#emit}.
+     */
+    _onMapperEvent: function _onMapperEvent(name) {
+      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+      }
+
+      var type = args.shift();
+      this.emit.apply(this, [type, name].concat(args));
+    },
+
+
+    /**
+     * Create a new mapper and register it in this container.
+     *
+     * @example
+     * import {Container} from 'js-data'
+     * const container = new Container({
+     *   mapperDefaults: { foo: 'bar' }
+     * })
+     * const userMapper = container.defineMapper('user')
+     * userMapper.foo // "bar"
+     *
+     * @name Container#defineMapper
+     * @method
+     * @param {string} name Name under which to register the new {@link Mapper}.
+     * {@link Mapper#name} will be set to this value.
+     * @param {Object} [opts] Configuration options. Passed to
+     * {@link Container#mapperClass} when creating the new {@link Mapper}.
+     * @return {Mapper}
+     */
+    defineMapper: function defineMapper(name, opts) {
+      var self = this;
+
+      // For backwards compatibility with defineResource
+      if (utils$1.isObject(name)) {
+        opts = name;
+        name = opts.name;
+      }
+      if (!utils$1.isString(name)) {
+        throw utils$1.err(DOMAIN$3 + '#defineMapper', 'name')(400, 'string', name);
+      }
+
+      // Default values for arguments
+      opts || (opts = {});
+      // Set Mapper#name
+      opts.name = name;
+      opts.relations || (opts.relations = {});
+
+      // Check if the user is overriding the datastore's default mapperClass
+      var mapperClass = opts.mapperClass || self.mapperClass;
+      delete opts.mapperClass;
+
+      // Apply the datastore's defaults to the options going into the mapper
+      utils$1.fillIn(opts, self.mapperDefaults);
+
+      // Instantiate a mapper
+      var mapper = self._mappers[name] = new mapperClass(opts); // eslint-disable-line
+      mapper.relations || (mapper.relations = {});
+      // Make sure the mapper's name is set
+      mapper.name = name;
+      // All mappers in this datastore will share adapters
+      mapper._adapters = self.getAdapters();
+
+      mapper.datastore = self;
+
+      mapper.on('all', function () {
+        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+          args[_key2] = arguments[_key2];
+        }
+
+        self._onMapperEvent.apply(self, [name].concat(args));
+      });
+
+      // Setup the mapper's relations, including generating Mapper#relationList
+      // and Mapper#relationFields
+      utils$1.forOwn(mapper.relations, function (group, type) {
+        utils$1.forOwn(group, function (relations, _name) {
+          if (utils$1.isObject(relations)) {
+            relations = [relations];
+          }
+          relations.forEach(function (def) {
+            def.getRelation = function () {
+              return self.getMapper(_name);
+            };
+            var relatedMapper = self._mappers[_name] || _name;
+            if (type === belongsToType) {
+              mapper.belongsTo(relatedMapper, def);
+            } else if (type === hasOneType) {
+              mapper.hasOne(relatedMapper, def);
+            } else if (type === hasManyType) {
+              mapper.hasMany(relatedMapper, def);
+            }
+          });
+        });
+      });
+
+      return mapper;
+    },
+    defineResource: function defineResource(name, opts) {
+      return this.defineMapper(name, opts);
+    },
+
+
+    /**
+     * Return the registered adapter with the given name or the default adapter if
+     * no name is provided.
+     *
+     * @name Container#getAdapter
+     * @method
+     * @param {string} [name] The name of the adapter to retrieve.
+     * @return {Adapter} The adapter.
+     */
+    getAdapter: function getAdapter(name) {
+      var self = this;
+      var adapter = self.getAdapterName(name);
+      if (!adapter) {
+        throw utils$1.err(DOMAIN$3 + '#getAdapter', 'name')(400, 'string', name);
+      }
+      return self.getAdapters()[adapter];
+    },
+
+
+    /**
+     * Return the name of a registered adapter based on the given name or options,
+     * or the name of the default adapter if no name provided.
+     *
+     * @name Container#getAdapterName
+     * @method
+     * @param {(Object|string)} [opts] The name of an adapter or options, if any.
+     * @return {string} The name of the adapter.
+     */
+    getAdapterName: function getAdapterName(opts) {
+      opts || (opts = {});
+      if (utils$1.isString(opts)) {
+        opts = { adapter: opts };
+      }
+      return opts.adapter || this.mapperDefaults.defaultAdapter;
+    },
+
+
+    /**
+     * Return the registered adapters of this container.
+     *
+     * @name Container#getAdapters
+     * @method
+     * @return {Adapter}
+     */
+    getAdapters: function getAdapters() {
+      return this._adapters;
+    },
+
+
+    /**
+     * Return the mapper registered under the specified name.
+     *
+     * @example
+     * import {Container} from 'js-data'
+     * const container = new Container()
+     * const userMapper = container.defineMapper('user')
+     * userMapper === container.getMapper('user') // true
+     *
+     * @name Container#getMapper
+     * @method
+     * @param {string} name {@link Mapper#name}.
+     * @return {Mapper}
+     */
+    getMapper: function getMapper(name) {
+      var mapper = this._mappers[name];
+      if (!mapper) {
+        throw utils$1.err(DOMAIN$3 + '#getMapper', name)(404, 'mapper');
+      }
+      return mapper;
+    },
+
+
+    /**
+     * Register an adapter on this container under the given name. Adapters
+     * registered on a container are shared by all mappers in the container.
+     *
+     * @example
+     * import {Container} from 'js-data'
+     * import HttpAdapter from 'js-data-http'
+     * const container = new Container()
+     * container.registerAdapter('http', new HttpAdapter, { default: true })
+     *
+     * @name Container#registerAdapter
+     * @method
+     * @param {string} name The name of the adapter to register.
+     * @param {Adapter} adapter The adapter to register.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.default=false] Whether to make the adapter the
+     * default adapter for all Mappers in this container.
+     */
+    registerAdapter: function registerAdapter(name, adapter, opts) {
+      var self = this;
+      opts || (opts = {});
+      self.getAdapters()[name] = adapter;
+      // Optionally make it the default adapter for the target.
+      if (opts === true || opts.default) {
+        self.mapperDefaults.defaultAdapter = name;
+        utils$1.forOwn(self._mappers, function (mapper) {
+          mapper.defaultAdapter = name;
+        });
+      }
+    }
+  };
+
+  toProxy.forEach(function (method) {
+    props[method] = function (name) {
+      var _getMapper;
+
+      for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+        args[_key3 - 1] = arguments[_key3];
+      }
+
+      return (_getMapper = this.getMapper(name))[method].apply(_getMapper, args);
+    };
+  });
+
+  /**
+   * ```javascript
+   * import {Container} from 'js-data'
+   * ```
+   *
+   * The `Container` class is a place to store {@link Mapper} instances.
+   *
+   * Without a container, you need to manage mappers yourself, including resolving
+   * circular dependencies among relations. All mappers in a container share the
+   * same adapters, so you don't have to add each adapter to all of your mappers.
+   *
+   * @example <caption>Without Container</caption>
+   * import {Mapper} from 'js-data'
+   * import HttpAdapter from 'js-data-http'
+   * const adapter = new HttpAdapter()
+   * const userMapper = new Mapper({ name: 'user' })
+   * userMapper.registerAdapter('http', adapter, { default: true })
+   * const commentMapper = new Mapper({ name: 'comment' })
+   * commentMapper.registerAdapter('http', adapter, { default: true })
+   *
+   * // This might be more difficult if the mappers were defined in different
+   * // modules.
+   * userMapper.hasMany(commentMapper, {
+   *   localField: 'comments',
+   *   foreignKey: 'userId'
+   * })
+   * commentMapper.belongsTo(userMapper, {
+   *   localField: 'user',
+   *   foreignKey: 'userId'
+   * })
+   *
+   * @example <caption>With Container</caption>
+   * import {Container} from 'js-data'
+   * import HttpAdapter from 'js-data-http'
+   * const container = new Container()
+   * // All mappers in container share adapters
+   * container.registerAdapter('http', new HttpAdapter(), { default: true })
+   *
+   * // These could be defined in separate modules without a problem.
+   * container.defineMapper('user', {
+   *   relations: {
+   *     hasMany: {
+   *       comment: {
+   *         localField: 'comments',
+   *         foreignKey: 'userId'
+   *       }
+   *     }
+   *   }
+   * })
+   * container.defineMapper('comment', {
+   *   relations: {
+   *     belongsTo: {
+   *       user: {
+   *         localField: 'user',
+   *         foreignKey: 'userId'
+   *       }
+   *     }
+   *   }
+   * })
+   *
+   * @class Container
+   * @extends Component
+   * @param {Object} [opts] Configuration options.
+   * @param {Function} [opts.mapperClass] Constructor function to use in
+   * {@link Container#defineMapper} to create a new mapper.
+   * @param {Object} [opts.mapperDefaults] Defaults options to pass to
+   * {@link Container#mapperClass} when creating a new mapper.
+   * @return {Container}
+   */
+  var Container = Component.extend(props);
+
+  var DOMAIN$9 = 'LinkedCollection';
+
+  /**
+   * TODO
+   *
+   * ```javascript
+   * import {LinkedCollection} from 'js-data'
+   * ```
+   *
+   * @class LinkedCollection
+   * @extends Collection
+   * @param {Array} [records] Initial set of records to insert into the
+   * collection. See {@link Collection}.
+   * @param {Object} [opts] Configuration options. See {@link Collection}.
+   * @return {Mapper}
+   */
+  var LinkedCollection = Collection.extend({
+    constructor: function LinkedCollection(records, opts) {
+      var self = this;
+      utils$1.classCallCheck(self, LinkedCollection);
+      LinkedCollection.__super__.call(self, records, opts);
+
+      // Make sure this collection has somewhere to store "added" timestamps
+      Object.defineProperty(self, '_added', {
+        value: {}
+      });
+
+      // Make sure this collection has a reference to a datastore
+      if (!self.datastore) {
+        throw utils$1.err('new ' + DOMAIN$9, 'opts.datastore')(400, 'DataStore', self.datastore);
+      }
+      return self;
+    },
+
+    _onRecordEvent: function _onRecordEvent() {
+      var self = this;
+
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      utils$1.getSuper(self).prototype._onRecordEvent.apply(self, args);
+      var event = args[0];
+      // This is a very brute force method
+      // Lots of room for optimization
+      if (utils$1.isString(event) && event.indexOf('change') === 0) {
+        self.updateIndexes(args[1]);
+      }
+    },
+    add: function add(records, opts) {
+      var self = this;
+      var datastore = self.datastore;
+      var mapper = self.mapper;
+      var relationList = mapper.relationList;
+      var timestamp = new Date().getTime();
+      var usesRecordClass = !!mapper.recordClass;
+      var idAttribute = mapper.idAttribute;
+      var singular = void 0;
+
+      if (utils$1.isObject(records) && !utils$1.isArray(records)) {
+        singular = true;
+        records = [records];
+      }
+
+      records = utils$1.getSuper(self).prototype.add.call(self, records, opts);
+
+      if (relationList.length && records.length) {
+        // Check the currently visited record for relations that need to be
+        // inserted into their respective collections.
+        mapper.relationList.forEach(function (def) {
+          var relationName = def.relation;
+          // A reference to the Mapper that this Mapper is related to
+          var relatedMapper = datastore.getMapper(relationName);
+          // The field used by the related Mapper as the primary key
+          var relationIdAttribute = relatedMapper.idAttribute;
+          // Grab the foreign key in this relationship, if there is one
+          var foreignKey = def.foreignKey;
+          // A lot of this is an optimization for being able to insert a lot of
+          // data as quickly as possible
+          var relatedCollection = datastore.getCollection(relationName);
+          var type = def.type;
+          var isHasMany = type === hasManyType;
+          var shouldAdd = utils$1.isUndefined(def.add) ? true : !!def.add;
+          var relatedData = void 0;
+
+          records.forEach(function (record) {
+            // Grab a reference to the related data attached or linked to the
+            // currently visited record
+            relatedData = def.getLocalField(record);
+            var id = utils$1.get(record, idAttribute);
+
+            if (utils$1.isFunction(def.add)) {
+              relatedData = def.add(datastore, def, record);
+            } else if (relatedData) {
+              // Otherwise, if there is something to be added, add it
+              if (isHasMany) {
+                // Handle inserting hasMany relations
+                relatedData = relatedData.map(function (toInsertItem) {
+                  // Check that this item isn't the same item that is already in the
+                  // store
+                  if (toInsertItem !== relatedCollection.get(relatedCollection.recordId(toInsertItem))) {
+                    // Make sure this item has its foreignKey
+                    if (foreignKey) {
+                      // TODO: slow, could be optimized? But user loses hook
+                      def.setForeignKey(record, toInsertItem);
+                    }
+                    // Finally add this related item
+                    if (shouldAdd) {
+                      toInsertItem = relatedCollection.add(toInsertItem);
+                    }
+                  }
+                  return toInsertItem;
+                });
+              } else {
+                var relatedDataId = utils$1.get(relatedData, relationIdAttribute);
+                // Handle inserting belongsTo and hasOne relations
+                if (relatedData !== relatedCollection.get(relatedDataId)) {
+                  // Make sure foreignKey field is set
+                  def.setForeignKey(record, relatedData);
+                  // Finally insert this related item
+                  if (shouldAdd) {
+                    relatedData = relatedCollection.add(relatedData);
+                  }
+                }
+              }
+            }
+
+            if (!relatedData || utils$1.isArray(relatedData) && !relatedData.length) {
+              if (type === belongsToType) {
+                var relatedId = utils$1.get(record, foreignKey);
+                if (!utils$1.isUndefined(relatedId)) {
+                  relatedData = relatedCollection.get(relatedId);
+                }
+              } else if (type === hasOneType) {
+                var _records = relatedCollection.filter(babelHelpers.defineProperty({}, foreignKey, id));
+                relatedData = _records.length ? _records[0] : undefined;
+              } else if (type === hasManyType) {
+                if (foreignKey) {
+                  var _records2 = relatedCollection.filter(babelHelpers.defineProperty({}, foreignKey, id));
+                  relatedData = _records2.length ? _records2 : undefined;
+                } else if (def.localKeys && utils$1.get(record, def.localKeys)) {
+                  var _records3 = relatedCollection.filter({
+                    where: babelHelpers.defineProperty({}, relationIdAttribute, {
+                      'in': utils$1.get(record, def.localKeys)
+                    })
+                  });
+                  relatedData = _records3.length ? _records3 : undefined;
+                } else if (def.foreignKeys) {
+                  var _records4 = relatedCollection.filter({
+                    where: babelHelpers.defineProperty({}, def.foreignKeys, {
+                      'contains': id
+                    })
+                  });
+                  relatedData = _records4.length ? _records4 : undefined;
+                }
+              }
+            }
+            if (relatedData) {
+              def.setLocalField(record, relatedData);
+            } else {}
+          });
+        });
+      }
+
+      records.forEach(function (record) {
+        // Track when this record was added
+        self._added[self.recordId(record)] = timestamp;
+
+        if (usesRecordClass) {
+          record._set('$', timestamp);
+        }
+      });
+
+      return singular ? records[0] : records;
+    },
+    remove: function remove(id, opts) {
+      var self = this;
+      var mapper = self.mapper;
+      var record = utils$1.getSuper(self).prototype.remove.call(self, id, opts);
+      if (record) {
+        delete self._added[id];
+        if (mapper.recordClass) {
+          record._set('$'); // unset
+        }
+      }
+      return record;
+    },
+    removeAll: function removeAll(query, opts) {
+      var self = this;
+      var mapper = self.mapper;
+      var records = utils$1.getSuper(self).prototype.removeAll.call(self, query, opts);
+      records.forEach(function (record) {
+        delete self._added[self.recordId(record)];
+        if (mapper.recordClass) {
+          record._set('$'); // unset
+        }
+      });
+      return records;
+    }
+  });
+
+  var DOMAIN$8 = 'DataStore';
+  var DATASTORE_DEFAULTS = {};
+
+  var safeSet = function safeSet(record, field, value) {
+    if (record && record._set) {
+      record._set(field, value);
+    } else {
+      utils$1.set(record, field, value);
+    }
+  };
+
+  var cachedFn = function cachedFn(name, hashOrId, opts) {
+    var self = this;
+    var cached = self._completedQueries[name][hashOrId];
+    if (utils$1.isFunction(cached)) {
+      return cached(name, hashOrId, opts);
+    }
+    return cached;
+  };
+
+  var props$1 = {
+    constructor: function DataStore(opts) {
+      var self = this;
+      utils$1.classCallCheck(self, DataStore);
+      DataStore.__super__.call(self, opts);
+
+      self.collectionClass = self.collectionClass || LinkedCollection;
+      self._collections = {};
+      utils$1.fillIn(self, DATASTORE_DEFAULTS);
+      self._pendingQueries = {};
+      self._completedQueries = {};
+      return self;
+    },
+
+    _callSuper: function _callSuper(method) {
+      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key2 = 1; _key2 < _len; _key2++) {
+        args[_key2 - 1] = arguments[_key2];
+      }
+
+      return this.constructor.__super__.prototype[method].apply(this, args);
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name DataStore#_end
+     * @method
+     * @private
+     * @param {string} name Name of the {@link LinkedCollection} to which to
+     * add the data.
+     * @param {Object} data TODO.
+     * @param {Object} [opts] Configuration options.
+     * @return {(Object|Array)} Result.
+     */
+    _end: function _end(name, result, opts) {
+      var _data = opts.raw ? result.data : result;
+      if (_data && utils$1.isFunction(this.addToCache)) {
+        _data = this.addToCache(name, _data, opts);
+        if (opts.raw) {
+          result.data = _data;
+        } else {
+          result = _data;
+        }
+      }
+      return result;
+    },
+
+
+    /**
+     * Register a new event listener on this DataStore.
+     *
+     * Proxy for {@link Container#on}. If an event was emitted by a Mapper or
+     * Collection in the DataStore, then the name of the Mapper or Collection will
+     * be prepended to the arugments passed to the provided event handler.
+     *
+     * @name DataStore#on
+     * @method
+     * @param {string} event Name of event to subsribe to.
+     * @param {Function} listener Listener function to handle the event.
+     * @param {*} [ctx] Optional content in which to invoke the listener.
+     */
+
+    /**
+     * Used to bind to events emitted by collections in this store.
+     *
+     * @name DataStore#_onCollectionEvent
+     * @method
+     * @private
+     * @param {string} name Name of the collection that emitted the event.
+     * @param {...*} [args] Args passed to {@link Collection#emit}.
+     */
+    _onCollectionEvent: function _onCollectionEvent(name) {
+      for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key3 = 1; _key3 < _len2; _key3++) {
+        args[_key3 - 1] = arguments[_key3];
+      }
+
+      var type = args.shift();
+      this.emit.apply(this, [type, name].concat(args));
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name DataStore#addToCache
+     * @method
+     * @param {string} name - Name of the {@link Mapper} to target.
+     * @param {*} data - Data from which data should be selected for add.
+     * @param {Object} [opts] - Configuration options.
+     */
+    addToCache: function addToCache(name, data, opts) {
+      return this.getCollection(name).add(data, opts);
+    },
+
+
+    /**
+     * Retrieve a cached `find` result, if any.
+     *
+     * @name DataStore#cachedFind
+     * @method
+     * @param {string} name The `name` argument passed to {@link DataStore#find}.
+     * @param {(string|number)} id The `id` argument passed to {@link DataStore#find}.
+     * @param {Object} opts The `opts` argument passed to {@link DataStore#find}.
+     */
+    cachedFind: cachedFn,
+
+    /**
+     * Retrieve a cached `findAll` result, if any.
+     *
+     * @name DataStore#cachedFindAll
+     * @method
+     * @param {string} name The `name` argument passed to {@link DataStore#findAll}.
+     * @param {string} hash The result of calling {@link DataStore#hashQuery} on
+     * the `query` argument passed to {@link DataStore#findAll}.
+     * @param {Object} opts The `opts` argument passed to {@link DataStore#findAll}.
+     */
+    cachedFindAll: cachedFn,
+
+    /**
+     * Cache a `find` result. The default implementation does the following:
+     *
+     * ```
+     * // Find and return the record from the data store
+     * return this.get(name, id)
+     * ```
+     *
+     * Override this method to customize.
+     *
+     * @name DataStore#cacheFind
+     * @method
+     * @param {string} name The `name` argument passed to {@link DataStore#find}.
+     * @param {*} data The result to cache.
+     * @param {(string|number)} id The `id` argument passed to {@link DataStore#find}.
+     * @param {Object} opts The `opts` argument passed to {@link DataStore#find}.
+     */
+    cacheFind: function cacheFind(name, data, id, opts) {
+      var self = this;
+      self._completedQueries[name][id] = function (name, id, opts) {
+        return self.get(name, id);
+      };
+    },
+
+
+    /**
+     * Cache a `findAll` result. The default implementation does the following:
+     *
+     * ```
+     * // Find and return the records from the data store
+     * return this.filter(name, utils.fromJson(hash))
+     * ```
+     *
+     * Override this method to customize.
+     *
+     * @name DataStore#cacheFindAll
+     * @method
+     * @param {string} name The `name` argument passed to {@link DataStore#findAll}.
+     * @param {*} data The result to cache.
+     * @param {string} hash The result of calling {@link DataStore#hashQuery} on
+     * the `query` argument passed to {@link DataStore#findAll}.
+     * @param {Object} opts The `opts` argument passed to {@link DataStore#findAll}.
+     */
+    cacheFindAll: function cacheFindAll(name, data, hash, opts) {
+      var self = this;
+      self._completedQueries[name][hash] = function (name, hash, opts) {
+        return self.filter(name, utils$1.fromJson(hash));
+      };
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name DataStore#create
+     * @method
+     * @param {string} name Name of the {@link Mapper} to target.
+     * @param {Object} record Passed to {@link Mapper#create}.
+     * @param {Object} [opts] Passed to {@link Mapper#create}. See
+     * {@link Mapper#create} for more configuration options.
+     * @return {Promise}
+     */
+    create: function create(name, record, opts) {
+      var self = this;
+      opts || (opts = {});
+      return self._callSuper('create', name, record, opts).then(function (data) {
+        return self._end(name, data, opts);
+      });
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name DataStore#createMany
+     * @method
+     * @param {string} name Name of the {@link Mapper} to target.
+     * @param {Array} records Passed to {@link Mapper#createMany}.
+     * @param {Object} [opts] Passed to {@link Mapper#createMany}. See
+     * {@link Mapper#createMany} for more configuration options.
+     * @return {Promise}
+     */
+    createMany: function createMany(name, records, opts) {
+      var self = this;
+      opts || (opts = {});
+      return self._callSuper('createMany', name, records, opts).then(function (data) {
+        return self._end(name, data, opts);
+      });
+    },
+    defineMapper: function defineMapper(name, opts) {
+      var self = this;
+      var mapper = utils$1.getSuper(self).prototype.defineMapper.call(self, name, opts);
+      self._pendingQueries[name] = {};
+      self._completedQueries[name] = {};
+      mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] });
+
+      // The datastore uses a subclass of Collection that is "datastore-aware"
+      var collection = self._collections[name] = new self.collectionClass(null, { // eslint-disable-line
+        // Make sure the collection has somewhere to store "added" timestamps
+        _added: {},
+        // Give the collection a reference to this datastore
+        datastore: self,
+        // The mapper tied to the collection
+        mapper: mapper
+      });
+
+      var schema = mapper.schema || {};
+      var properties = schema.properties || {};
+      // TODO: Make it possible index nested properties?
+      utils$1.forOwn(properties, function (opts, prop) {
+        if (opts.indexed) {
+          collection.createIndex(prop);
+        }
+      });
+
+      // Create a secondary index on the "added" timestamps of records in the
+      // collection
+      collection.createIndex('addedTimestamps', ['$'], {
+        fieldGetter: function fieldGetter(obj) {
+          return collection._added[collection.recordId(obj)];
+        }
+      });
+
+      collection.on('all', function () {
+        for (var _len3 = arguments.length, args = Array(_len3), _key4 = 0; _key4 < _len3; _key4++) {
+          args[_key4] = arguments[_key4];
+        }
+
+        self._onCollectionEvent.apply(self, [name].concat(args));
+      });
+
+      var idAttribute = mapper.idAttribute;
+
+      mapper.relationList.forEach(function (def) {
+        var relation = def.relation;
+        var localField = def.localField;
+        var path = 'links.' + localField;
+        var foreignKey = def.foreignKey;
+        var type = def.type;
+        var updateOpts = { index: foreignKey };
+        var descriptor = void 0;
+
+        var getter = function getter() {
+          return this._get(path);
+        };
+
+        if (type === belongsToType) {
+          if (!collection.indexes[foreignKey]) {
+            collection.createIndex(foreignKey);
+          }
+
+          descriptor = {
+            get: getter,
+            set: function set(record) {
+              var _self = this;
+              var current = this._get(path);
+              if (record === current) {
+                return current;
+              }
+              var id = utils$1.get(_self, idAttribute);
+              var inverseDef = def.getInverse(mapper);
+
+              if (record) {
+                var relatedIdAttribute = def.getRelation().idAttribute;
+                var relatedId = utils$1.get(record, relatedIdAttribute);
+
+                // Prefer store record
+                if (!utils$1.isUndefined(relatedId)) {
+                  record = self.get(relation, relatedId) || record;
+                }
+
+                // Set locals
+                _self._set(path, record);
+                safeSet(_self, foreignKey, relatedId);
+                collection.updateIndex(_self, updateOpts);
+
+                // Update (set) inverse relation
+                if (inverseDef.type === hasOneType) {
+                  utils$1.set(record, inverseDef.localField, _self);
+                } else if (inverseDef.type === hasManyType) {
+                  var children = utils$1.get(record, inverseDef.localField);
+                  utils$1.noDupeAdd(children, _self, function (_record) {
+                    return id === utils$1.get(_record, idAttribute);
+                  });
+                }
+              } else {
+                // Unset locals
+                _self._set(path, undefined);
+                safeSet(_self, foreignKey, undefined);
+                collection.updateIndex(_self, updateOpts);
+              }
+              if (current) {
+                if (inverseDef.type === hasOneType) {
+                  utils$1.set(current, inverseDef.localField, undefined);
+                } else if (inverseDef.type === hasManyType) {
+                  var _children = utils$1.get(current, inverseDef.localField);
+                  utils$1.remove(_children, function (_record) {
+                    return id === utils$1.get(_record, idAttribute);
+                  });
+                }
+              }
+              return record;
+            }
+          };
+
+          if (mapper.recordClass.prototype.hasOwnProperty(foreignKey)) {
+            (function () {
+              var superClass = mapper.recordClass;
+              mapper.recordClass = superClass.extend({
+                constructor: function () {
+                  var subClass = function Record(props, opts) {
+                    utils$1.classCallCheck(this, subClass);
+                    superClass.call(this, props, opts);
+                  };
+                  return subClass;
+                }()
+              });
+            })();
+          }
+          Object.defineProperty(mapper.recordClass.prototype, foreignKey, {
+            enumerable: true,
+            get: function get() {
+              return this._get(foreignKey);
+            },
+            set: function set(value) {
+              var _self = this;
+              if (utils$1.isUndefined(value)) {
+                // Unset locals
+                utils$1.set(_self, localField, undefined);
+              } else {
+                safeSet(_self, foreignKey, value);
+                var storeRecord = self.get(relation, value);
+                if (storeRecord) {
+                  utils$1.set(_self, localField, storeRecord);
+                }
+              }
+            }
+          });
+        } else if (type === hasManyType) {
+          (function () {
+            var localKeys = def.localKeys;
+            var foreignKeys = def.foreignKeys;
+
+            // TODO: Handle case when belongsTo relation isn't ever defined
+            if (self._collections[relation] && foreignKey && !self.getCollection(relation).indexes[foreignKey]) {
+              self.getCollection(relation).createIndex(foreignKey);
+            }
+
+            descriptor = {
+              get: function get() {
+                var _self = this;
+                var current = getter.call(_self);
+                if (!current) {
+                  _self._set(path, []);
+                }
+                return getter.call(_self);
+              },
+              set: function set(records) {
+                var _self = this;
+                records || (records = []);
+                if (records && !utils$1.isArray(records)) {
+                  records = [records];
+                }
+                var id = utils$1.get(_self, idAttribute);
+                var relatedIdAttribute = def.getRelation().idAttribute;
+                var inverseDef = def.getInverse(mapper);
+                var inverseLocalField = inverseDef.localField;
+                var linked = _self._get(path);
+                if (!linked) {
+                  linked = [];
+                }
+
+                var current = linked;
+                linked = [];
+                var toLink = {};
+                records.forEach(function (record) {
+                  var relatedId = utils$1.get(record, relatedIdAttribute);
+                  if (!utils$1.isUndefined(relatedId)) {
+                    // Prefer store record
+                    record = self.get(relation, relatedId) || record;
+                    toLink[relatedId] = record;
+                  }
+                  linked.push(record);
+                });
+                if (foreignKey) {
+                  records.forEach(function (record) {
+                    // Update (set) inverse relation
+                    safeSet(record, foreignKey, id);
+                    self.getCollection(relation).updateIndex(record, updateOpts);
+                    utils$1.set(record, inverseLocalField, _self);
+                  });
+                  current.forEach(function (record) {
+                    var relatedId = utils$1.get(record, relatedIdAttribute);
+                    if (!utils$1.isUndefined(relatedId) && !toLink.hasOwnProperty(relatedId)) {
+                      // Update (unset) inverse relation
+                      safeSet(record, foreignKey, undefined);
+                      self.getCollection(relation).updateIndex(record, updateOpts);
+                      utils$1.set(record, inverseLocalField, undefined);
+                    }
+                  });
+                } else if (localKeys) {
+                  (function () {
+                    var _localKeys = [];
+                    records.forEach(function (record) {
+                      // Update (set) inverse relation
+                      utils$1.set(record, inverseLocalField, _self);
+                      _localKeys.push(utils$1.get(record, relatedIdAttribute));
+                    });
+                    // Update locals
+                    utils$1.set(_self, localKeys, _localKeys);
+                    // Update (unset) inverse relation
+                    current.forEach(function (record) {
+                      var relatedId = utils$1.get(record, relatedIdAttribute);
+                      if (!utils$1.isUndefined(relatedId) && !toLink.hasOwnProperty(relatedId)) {
+                        // Update inverse relation
+                        utils$1.set(record, inverseLocalField, undefined);
+                      }
+                    });
+                  })();
+                } else if (foreignKeys) {
+                  // Update (unset) inverse relation
+                  current.forEach(function (record) {
+                    var _localKeys = utils$1.get(record, foreignKeys) || [];
+                    utils$1.remove(_localKeys, function (_key) {
+                      return id === _key;
+                    });
+                    var _localField = utils$1.get(record, inverseLocalField) || [];
+                    utils$1.remove(_localField, function (_record) {
+                      return id === utils$1.get(_record, idAttribute);
+                    });
+                  });
+                  // Update (set) inverse relation
+                  records.forEach(function (record) {
+                    var _localKeys = utils$1.get(record, foreignKeys) || [];
+                    utils$1.noDupeAdd(_localKeys, id, function (_key) {
+                      return id === _key;
+                    });
+                    var _localField = utils$1.get(record, inverseLocalField) || [];
+                    utils$1.noDupeAdd(_localField, _self, function (_record) {
+                      return id === utils$1.get(_record, idAttribute);
+                    });
+                  });
+                }
+
+                _self._set(path, linked);
+                return linked;
+              }
+            };
+          })();
+        } else if (type === hasOneType) {
+          // TODO: Handle case when belongsTo relation isn't ever defined
+          if (self._collections[relation] && foreignKey && !self.getCollection(relation).indexes[foreignKey]) {
+            self.getCollection(relation).createIndex(foreignKey);
+          }
+          descriptor = {
+            get: getter,
+            set: function set(record) {
+              var _self = this;
+              var current = this._get(path);
+              if (record === current) {
+                return current;
+              }
+              var relatedId = utils$1.get(record, def.getRelation().idAttribute);
+              var inverseLocalField = def.getInverse(mapper).localField;
+              // Update (unset) inverse relation
+              if (current) {
+                safeSet(current, foreignKey, undefined);
+                self.getCollection(relation).updateIndex(current, updateOpts);
+                utils$1.set(current, inverseLocalField, undefined);
+              }
+              if (record) {
+                // Prefer store record
+                if (!utils$1.isUndefined(relatedId)) {
+                  record = self.get(relation, relatedId) || record;
+                }
+
+                // Set locals
+                _self._set(path, record);
+
+                // Update (set) inverse relation
+                safeSet(record, foreignKey, utils$1.get(_self, idAttribute));
+                self.getCollection(relation).updateIndex(record, updateOpts);
+                utils$1.set(record, inverseLocalField, _self);
+              } else {
+                // Set locals
+                _self._set(path, undefined);
+              }
+              return record;
+            }
+          };
+        }
+
+        if (descriptor) {
+          descriptor.enumerable = utils$1.isUndefined(def.enumerable) ? true : def.enumerable;
+          if (def.get) {
+            (function () {
+              var origGet = descriptor.get;
+              descriptor.get = function () {
+                var _this = this;
+
+                return def.get(def, this, function () {
+                  for (var _len4 = arguments.length, args = Array(_len4), _key5 = 0; _key5 < _len4; _key5++) {
+                    args[_key5] = arguments[_key5];
+                  }
+
+                  return origGet.apply(_this, args);
+                });
+              };
+            })();
+          }
+          if (def.set) {
+            (function () {
+              var origSet = descriptor.set;
+              descriptor.set = function (related) {
+                var _this2 = this;
+
+                return def.set(def, this, related, function (value) {
+                  return origSet.call(_this2, value === undefined ? related : value);
+                });
+              };
+            })();
+          }
+          Object.defineProperty(mapper.recordClass.prototype, localField, descriptor);
+        }
+      });
+
+      return mapper;
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name DataStore#destroy
+     * @method
+     * @param {string} name - Name of the {@link Mapper} to target.
+     * @param {(string|number)} id - Passed to {@link Mapper#destroy}.
+     * @param {Object} [opts] - Passed to {@link Mapper#destroy}. See
+     * {@link Mapper#destroy} for more configuration options.
+     * @return {Promise}
+     */
+    destroy: function destroy(name, id, opts) {
+      var self = this;
+      opts || (opts = {});
+      return self._callSuper('destroy', name, id, opts).then(function (data) {
+        if (opts.raw) {
+          data.data = self.getCollection(name).remove(id, opts);
+        } else {
+          data = self.getCollection(name).remove(id, opts);
+        }
+        delete self._pendingQueries[name][id];
+        delete self._completedQueries[name][id];
+        return data;
+      });
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name DataStore#destroyAll
+     * @method
+     * @param {string} name - Name of the {@link Mapper} to target.
+     * @param {Object} [query] - Passed to {@link Mapper#destroyAll}.
+     * @param {Object} [opts] - Passed to {@link Mapper#destroyAll}. See
+     * {@link Mapper#destroyAll} for more configuration options.
+     * @return {Promise}
+     */
+    destroyAll: function destroyAll(name, query, opts) {
+      var self = this;
+      opts || (opts = {});
+      return self._callSuper('destroyAll', name, query, opts).then(function (data) {
+        if (opts.raw) {
+          data.data = self.getCollection(name).removeAll(query, opts);
+        } else {
+          data = self.getCollection(name).removeAll(query, opts);
+        }
+        var hash = self.hashQuery(name, query, opts);
+        delete self._pendingQueries[name][hash];
+        delete self._completedQueries[name][hash];
+        return data;
+      });
+    },
+    eject: function eject(id, opts) {
+      return this.remove(id, opts);
+    },
+    ejectAll: function ejectAll(query, opts) {
+      return this.removeAll(query, opts);
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name DataStore#find
+     * @method
+     * @param {string} name - Name of the {@link Mapper} to target.
+     * @param {(string|number)} id - Passed to {@link Mapper#find}.
+     * @param {Object} [opts] - Passed to {@link Mapper#find}.
+     * @return {Promise}
+     */
+    find: function find(name, id, opts) {
+      var self = this;
+      opts || (opts = {});
+      var pendingQuery = self._pendingQueries[name][id];
+
+      utils$1.fillIn(opts, self.getMapper(name));
+
+      if (pendingQuery) {
+        return pendingQuery;
+      }
+      var item = self.cachedFind(name, id, opts);
+      var promise = void 0;
+
+      if (opts.force || !item) {
+        promise = self._pendingQueries[name][id] = self._callSuper('find', name, id, opts).then(function (data) {
+          delete self._pendingQueries[name][id];
+          var result = self._end(name, data, opts);
+          self.cacheFind(name, result, id, opts);
+          return result;
+        }, function (err) {
+          delete self._pendingQueries[name][id];
+          return utils$1.reject(err);
+        });
+      } else {
+        promise = utils$1.resolve(item);
+      }
+      return promise;
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name DataStore#findAll
+     * @method
+     * @param {string} name - Name of the {@link Mapper} to target.
+     * @param {Object} [query] - Passed to {@link Model.findAll}.
+     * @param {Object} [opts] - Passed to {@link Model.findAll}.
+     * @return {Promise}
+     */
+    findAll: function findAll(name, query, opts) {
+      var self = this;
+      opts || (opts = {});
+      var hash = self.hashQuery(name, query, opts);
+      var pendingQuery = self._pendingQueries[name][hash];
+
+      utils$1.fillIn(opts, self.getMapper(name));
+
+      if (pendingQuery) {
+        return pendingQuery;
+      }
+
+      var items = self.cachedFindAll(name, hash, opts);
+      var promise = void 0;
+
+      if (opts.force || !items) {
+        promise = self._pendingQueries[name][hash] = self._callSuper('findAll', name, query, opts).then(function (data) {
+          delete self._pendingQueries[name][hash];
+          var result = self._end(name, data, opts);
+          self.cacheFindAll(name, result, hash, opts);
+          return result;
+        }, function (err) {
+          delete self._pendingQueries[name][hash];
+          return utils$1.reject(err);
+        });
+      } else {
+        promise = utils$1.resolve(items);
+      }
+      return promise;
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name DataStore#getCollection
+     * @method
+     * @param {string} name Name of the {@link LinkedCollection} to retrieve.
+     * @return {LinkedCollection}
+     */
+    getCollection: function getCollection(name) {
+      var collection = this._collections[name];
+      if (!collection) {
+        throw utils$1.err(DOMAIN$8 + '#getCollection', name)(404, 'collection');
+      }
+      return collection;
+    },
+    hashQuery: function hashQuery(name, query, opts) {
+      return utils$1.toJson(query);
+    },
+    inject: function inject(records, opts) {
+      return this.add(records, opts);
+    },
+    remove: function remove(name, id, opts) {
+      var self = this;
+      var record = self.getCollection(name).remove(id, opts);
+      if (record) {
+        self.removeRelated(name, [record], opts);
+      }
+      return record;
+    },
+    removeAll: function removeAll(name, query, opts) {
+      var self = this;
+      var records = self.getCollection(name).removeAll(query, opts);
+      if (records.length) {
+        self.removeRelated(name, records, opts);
+      }
+      return records;
+    },
+    removeRelated: function removeRelated(name, records, opts) {
+      var self = this;
+      utils$1.forEachRelation(self.getMapper(name), opts, function (def, optsCopy) {
+        records.forEach(function (record) {
+          var relatedData = void 0;
+          var query = void 0;
+          if (def.foreignKey && (def.type === hasOneType || def.type === hasManyType)) {
+            query = babelHelpers.defineProperty({}, def.foreignKey, def.getForeignKey(record));
+          } else if (def.type === hasManyType && def.localKeys) {
+            query = {
+              where: babelHelpers.defineProperty({}, def.getRelation().idAttribute, {
+                'in': utils$1.get(record, def.localKeys)
+              })
+            };
+          } else if (def.type === hasManyType && def.foreignKeys) {
+            query = {
+              where: babelHelpers.defineProperty({}, def.foreignKeys, {
+                'contains': def.getForeignKey(record)
+              })
+            };
+          } else if (def.type === belongsToType) {
+            relatedData = self.remove(def.relation, def.getForeignKey(record), optsCopy);
+          }
+          if (query) {
+            relatedData = self.removeAll(def.relation, query, optsCopy);
+          }
+          if (relatedData) {
+            if (utils$1.isArray(relatedData) && !relatedData.length) {
+              return;
+            }
+            if (def.type === hasOneType) {
+              relatedData = relatedData[0];
+            }
+            def.setLocalField(record, relatedData);
+          }
+        });
+      });
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name DataStore#update
+     * @method
+     * @param {string} name - Name of the {@link Mapper} to target.
+     * @param {(string|number)} id - Passed to {@link Mapper#update}.
+     * @param {Object} record - Passed to {@link Mapper#update}.
+     * @param {Object} [opts] - Passed to {@link Mapper#update}. See
+     * {@link Mapper#update} for more configuration options.
+     * @return {Promise}
+     */
+    update: function update(name, id, record, opts) {
+      var self = this;
+      opts || (opts = {});
+      return self._callSuper('update', name, id, record, opts).then(function (data) {
+        return self._end(name, data, opts);
+      });
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name DataStore#updateAll
+     * @method
+     * @param {string} name - Name of the {@link Mapper} to target.
+     * @param {Object} props - Passed to {@link Mapper#updateAll}.
+     * @param {Object} [query] - Passed to {@link Mapper#updateAll}.
+     * @param {Object} [opts] - Passed to {@link Mapper#updateAll}. See
+     * {@link Mapper#updateAll} for more configuration options.
+     * @return {Promise}
+     */
+    updateAll: function updateAll(name, props, query, opts) {
+      var self = this;
+      opts || (opts = {});
+      return self._callSuper('updateAll', name, query, props, opts).then(function (data) {
+        return self._end(name, data, opts);
+      });
+    },
+
+
+    /**
+     * TODO
+     *
+     * @name DataStore#updateMany
+     * @method
+     * @param {string} name Name of the {@link Mapper} to target.
+     * @param {(Object[]|Record[])} records Passed to {@link Mapper#updateMany}.
+     * @param {Object} [opts] Passed to {@link Mapper#updateMany}. See
+     * {@link Mapper#updateMany} for more configuration options.
+     * @return {Promise}
+     */
+    updateMany: function updateMany(name, records, opts) {
+      var self = this;
+      opts || (opts = {});
+      return self._callSuper('updateMany', name, records, opts).then(function (data) {
+        return self._end(name, data, opts);
+      });
+    }
+  };
+
+  var toProxy$1 = ['add', 'between', 'createIndex', 'filter', 'get', 'getAll', 'query', 'toJson'];
+
+  toProxy$1.forEach(function (method) {
+    props$1[method] = function (name) {
+      var _getCollection;
+
+      for (var _len5 = arguments.length, args = Array(_len5 > 1 ? _len5 - 1 : 0), _key6 = 1; _key6 < _len5; _key6++) {
+        args[_key6 - 1] = arguments[_key6];
+      }
+
+      return (_getCollection = this.getCollection(name))[method].apply(_getCollection, args);
+    };
+  });
+
+  /**
+   * The `DataStore` class is an extension of {@link Container}. Not only does
+   * `DataStore` manage mappers, but also collections. `DataStore` implements the
+   * asynchronous {@link Mapper} methods, such as {@link Mapper#find} and
+   * {@link Mapper#create}. If you use the asynchronous `DataStore` methods
+   * instead of calling them directly on the mappers, then the results of the
+   * method calls will be inserted into the store's collections. You can think of
+   * a `DataStore` as an [Identity Map](https://en.wikipedia.org/wiki/Identity_map_pattern)
+   * for the [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping)
+   * (the Mappers).
+   *
+   * ```javascript
+   * import {DataStore} from 'js-data'
+   * ```
+   *
+   * @example
+   * import {DataStore} from 'js-data'
+   * import HttpAdapter from 'js-data-http'
+   * const store = new DataStore()
+   * const UserMapper = store.defineMapper('user')
+   *
+   * // Call "find" on "UserMapper" (Stateless ORM)
+   * UserMapper.find(1).then(function (user) {
+   *   // retrieved a "user" record via the http adapter, but that's it
+   *
+   *   // Call "find" on "store" for the "user" mapper (Stateful DataStore)
+   *   return store.find('user', 1)
+   * }).then(function (user) {
+   *   // not only was a "user" record retrieved, but it was added to the
+   *   // store's "user" collection
+   *   const cachedUser = store.getCollection('user').get(1)
+   *   user === cachedUser // true
+   * })
+   *
+   * @class DataStore
+   * @extends Container
+   * @param {Object} [opts] Configuration options. See {@link Container}.
+   * @return {DataStore}
+   */
+  var DataStore = Container.extend(props$1);
+
+  /**
+   * Registered as `js-data` in NPM and Bower.
+   * #### Script tag
+   * ```js
+   * window.JSData
+   * ```
+   * #### CommonJS
+   * ```js
+   * var JSData = require('js-data')
+   * ```
+   * #### ES6 Modules
+   * ```js
+   * import JSData from 'js-data'
+   * ```
+   * #### AMD
+   * ```js
+   * define('myApp', ['js-data'], function (JSData) { ... })
+   * ```
+   *
+   * @module js-data
+   */
+
+  /**
+   * Details of the current version of the `js-data` module.
+   *
+   * @name version
+   * @memberof module:js-data
+   * @type {Object}
+   * @property {string} full The full semver value.
+   * @property {number} major The major version number.
+   * @property {number} minor The minor version number.
+   * @property {number} patch The patch version number.
+   * @property {(string|boolean)} alpha The alpha version value, otherwise `false`
+   * if the current version is not alpha.
+   * @property {(string|boolean)} beta The beta version value, otherwise `false`
+   * if the current version is not beta.
+   */
+  var version = {
+  beta: 1,
+  full: '3.0.0-beta.1',
+  major: 3,
+  minor: 0,
+  patch: 0
+};
+
+  exports.version = version;
+  exports.Collection = Collection;
+  exports.Component = Component;
+  exports.Container = Container;
+  exports.DataStore = DataStore;
+  exports.Index = Index;
+  exports.LinkedCollection = LinkedCollection;
+  exports.Mapper = Mapper;
+  exports.Query = Query;
+  exports.Record = Record;
+  exports.Schema = Schema;
+  exports.utils = utils$1;
+  exports.belongsToType = belongsToType;
+  exports.hasManyType = hasManyType;
+  exports.hasOneType = hasOneType;
+  exports.belongsTo = _belongsTo;
+  exports.hasMany = _hasMany;
+  exports.hasOne = _hasOne;
+
+}));
+//# sourceMappingURL=js-data.js.map

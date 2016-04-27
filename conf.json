@@ -1,0 +1,27 @@
+  {
+  "source": {
+    "includePattern": ".*js$"
+  },
+  "plugins": ["plugins/markdown"],
+  "opts": {
+    "template": "./node_modules/ink-docstrap/template",
+    "destination": "./doc/",
+    "recurse": true,
+    "verbose": true,
+    "readme": "./README.md",
+    "package": "./package.json"
+  },
+  "templates": {
+    "theme": "jsdata",
+    "systemName": "js-data",
+    "copyright": "js-data Copyright © 2014-2016 js-data project authors",
+    "outputSourceFiles": true,
+    "linenums": true,
+    "logoFile": "https://raw.githubusercontent.com/js-data/js-data/v2/js-data-64.png",
+    "footer": "<div style=\"text-align:center\">Back to <a href=\"http://js-data.io\">js-data.io</a></div>",
+    "analytics": {
+      "ua": "UA-55528236-2",
+      "domain": "api.js-data.io"
+    }
+  }
+}

@@ -1,3 +1,215 @@
+##### 3.0.0-beta.1 - 17 April 2016
+
+Official beta release.
+
+###### Other
+- Switched back to Mocha from Ava
+- Added Karma tests with Sauce Labs browser testing
+- Improved test coverage
+
+##### 3.0.0-alpha.29 - 05 April 2016
+
+###### Breaking changes
+- Reworked DataStore relation linking to no longer uses dynamic getters.
+Instead, links are updated as records are added to the store or when the
+assignment operators are used to re-assign relaitons.
+- DataStore now upgrades the Record classes that it touches so that things like
+Record#save and Record#destroy will use the DataStore's methods instead of the
+Mapper's methods.
+
+###### Backwards compatible changes
+- Other tweaks
+
+##### 3.0.0-alpha.28 - 02 April 2016
+
+###### Backwards compatible changes
+- Added selectForAdd to DataStore
+
+##### 3.0.0-alpha.27 - 02 April 2016
+
+###### Backwards compatible bug fixes
+- Quick fix for wrap functionality
+
+##### 3.0.0-alpha.26 - 02 April 2016
+
+###### Backwards compatible changes
+- Improved Mapper#createRecord, and made it easier to work with non-standard responses
+
+##### 3.0.0-alpha.25 - 01 April 2016
+
+###### Backwards compatible bug fixes
+- Removed accidental rx-lite optional dependency
+
+##### 3.0.0-alpha.24 - 01 April 2016
+
+###### Backwards compatible bug fixes
+- Some fixes for js-data.d.ts
+- Added argument check to Mapper#createRecord
+- Made Record instances print nicer
+
+##### 3.0.0-alpha.23 - 01 April 2016
+
+###### Breaking changes
+- Moved `js-data.d.ts` to `dist/js-data.d.ts`
+
+###### Other
+- Fixed some JSDoc comments
+
+##### 3.0.0-alpha.22 - 31 March 2016
+
+###### Backwards compatible API changes
+- Containers and DataStores now bubble up Mapper events
+- DataStores now bubble up Collection events
+
+###### Other
+- Switched from mocha/istanbul to ava/nyc for parallel tests
+
+##### 3.0.0-alpha.21 - 22 March 2016
+
+###### Backwards compatible API changes
+- #195 - Add "with" to remove/removeAll (eject/ejectAll) to also remove relations
+- Added `Mapper#validate(record[, opts])`, `Record#validate([opts])` and `Record#isValid()`
+
+###### Backwards compatible bug fixes
+- #263 - orderBy with undefined values doesn't order (though null works)
+
+###### Other
+- Updated js-data.d.ts
+
+##### 3.0.0-alpha.20 - 18 March 2016
+
+###### Breaking API changes
+- Switched Record#changes and Record#hasChanges to using an options argument
+
+###### Backwards compatible API changes
+- Passive change detection now possible with changes to Record#changes() and Record#hasChanges(), see #313
+- #283 - Added sum and count methods
+
+###### Backwards compatible big fixes
+- Container and DataStore now proxy all Mapper methods
+
+##### 3.0.0-alpha.19 - 14 March 2016
+
+###### Breaking API changes
+- Passive change detection now possible with changes to Record#changes() and Record#hasChanges(), see #313
+
+###### Other
+- Now easier to customize utility functions (when necessary, should be rare)
+
+##### 3.0.0-alpha.18 - 12 March 2016
+
+###### Backwards compatible API changes
+- Improved forEachRelation utility function to support filtering on "with" sub queries
+- Added deepFillIn utility function
+- Made some Mapper instance properties non-enumerable
+
+##### 3.0.0-alpha.17 - 10 March 2016
+
+###### Breaking API changes
+- Removed `upsert` option from js-data core. `upsert` is now handled at the adapter level.
+- Fixed order of arguments to updateAll
+- Fixed how arguments are passed to the various lifecycle methods
+
+###### 3.0.0-alpha.16 - 21 February 2016
+
+- Added "omit" utility method
+
+##### 3.0.0-alpha.15 - 21 February 2016
+
+- Couple of fixes
+
+##### 3.0.0-alpha.14 - 13 February 2016
+
+- Added utility for recursively visiting relations based on `opts.with`
+
+##### 3.0.0-alpha.13 - 05 February 2016
+
+- Added back change detection
+
+##### 3.0.0-alpha.12 - 04 February 2016
+
+- Added back relation linking to DataStore and LinkedCollection
+- Container and DataStore now proxy a number of Collection methods
+- Container and DataStore now proxy Mapper#createRecord
+- Container now proxies async Mapper methods, not just DataStore
+
+##### 3.0.0-alpha.11 - 25 January 2016
+
+- Refactored architecture into Record, Collection (and LinkedCollection), Mapper, Container, DataStore, and Schema
+
+##### 3.0.0-alpha.10 - 09 January 2016
+
+- (temporarily?) removed relation links
+- Added `Collection#modelOpts` option
+- Relations can be defined via `DS#defineModel`
+
+##### 3.0.0-alpha.9 - 09 January 2016
+
+###### Backwards compatible bug fixes
+- Fixed a bug in IE where Object.prototype.toString !== window.toString
+
+##### 3.0.0-alpha.8 - 09 January 2016
+
+###### Breaking API changes
+- The Model class is now stateless
+- All stateful functionality has been moved to the Collection class
+- The DS class no longer proxies Model methods.
+
+##### 3.0.0-alpha.6 - 05 January 2016
+
+- More fixes
+- Inheritance should work better in TypeScript
+- Better operational eventing
+
+##### 3.0.0-alpha.4 - 04 January 2016
+
+- Collections now fire "add" and "remove" events
+- Added before/after(Inject/Eject/EjectAll) lifecycle hooks
+
+##### 3.0.0-alpha.3 - 29 December 2015
+
+- Implemented more methods from 2.x.
+- Better compatibility for the classes exposed by js-data.
+- Switched from Webpack to Rollup for a 7% smaller build
+(automatic tree-shaking) and built code that's simpler and easier to read.
+
+##### 3.0.0-alpha.2 - 22 December 2015
+
+##### 3.0.0-alpha.1 - 12 December 2015
+
+###### Breaking API changes
+- js-data now requires full ES5 support from the runtime. The developer
+can add es5-shim for older browsers.
+- `DS` is now just a container for `Model` classes. It no longer stores data or
+metadata.
+- Settings are no longer inherited via the prototype. A base Model can be
+created which the remaining Models can extend.
+- A `Model` is essentially a constructor function, which can be used to create
+instance of the Model. A Model has static methods like `find` and `create`. The
+prototype of a Model defines behavior for instances of the Model. Models can be
+defined using ES6 class syntax. A Model must be "initialized" in order to be
+able to store data. A Model is automatically initialized if a schema is defined
+for the Model, or if the Model is created using the `.extend` method, or the
+legacy `DS#defineResource` or `DS#defineModel` methods.
+- Use of `Object.observe` and the observe-js polyfill have been dropped in
+`3.0.0-alpha.1` (see https://esdiscuss.org/topic/an-update-on-object-observe),
+replaced with Backbone-style change detection (but unlike with Backbone, you can
+still treat instances like POJOs!) Change detection is now more “opt in”, so you
+can use it more wisely when you actually need, improving performance overall.
+- In  `3.0.0-alpha.1` Models (Resources) can now be defined with plain ES6
+classes
+
+###### Other
+- As this is an alpha build of a complete rewrite from scratch, there is still a
+lot of work to be done. Some features from 2.x may not have been implemented yet
+and there are probably bugs. If you're willing to experiment with 3.x, your
+feedback is appreciated.
+- 3.0.0-alpha.1 gzipped is approximately 40% smaller than 2.8.2 gzipped.
+- In `3.0.0-alpha.1`, the internal store (cache) of each Model (Resource)
+supports secondary indexes for blazing fast lookups on indexed keys. Where in
+2.x a `hasMany` property accessor performs a O(n) lookup, in `3.0.0-alpha.1` the
+lookup is performed in O(log n) time.
+
 ##### 2.8.2 - 04 November 2015
 
 ###### Backwards compatible bug fixes

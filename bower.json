@@ -15,20 +15,20 @@
     ".*",
     "*.iml",
     "src/",
+    "dist/js-data-tests.js",
+    "dist/js-data-tests.js.map",
     "lib/",
     "doc/",
     "guide/",
     "coverage/",
     "Gruntfile.js",
+    "scripts/",
     "node_modules/",
     "test/",
     "package.json",
     "karma.conf.js",
-    "karma.start.js"
-  ],
-  "devDependencies": {
-    "observe-js": "0.5.5",
-    "js-data-http": ">=2.0.0",
-    "js-data-localstorage": ">=2.0.0"
-  }
+    "karma.start.js",
+    "rollup.config.js",
+    "rollup-tests.config.js"
+  ]
 }
