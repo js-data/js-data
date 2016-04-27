@@ -21,7 +21,7 @@
 [b13]: https://img.shields.io/badge/Node.js-v0.12.x-brightgreen.svg
 [b14]: https://img.shields.io/badge/Node.js-v0.10.x-brightgreen.svg
 
-__JSData v3 is stable. More features may be added before 3.0.0. Some adapters
+__JSData v3 beta is stable. More features may be added before 3.0.0. Some adapters
 still need to be updated to work with v3. Message @jmdobry on the JSData Slack
 channel if you want to help with tests, documentation, tutorials, adapters, etc.__
 
