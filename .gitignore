@@ -28,3 +28,4 @@ jsconfig.json
 coverage/
 doc/
 node_modules/
+typings
