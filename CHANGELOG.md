@@ -1,3 +1,12 @@
+##### 3.0.0-beta.3 - 27 April 2016
+
+###### Breaking changes
+- `dist/js-data.d.ts` is now in ES6 module format
+
+###### Backwards compatible changes
+- Added `typings` field to `package.json`
+- Added `typings.json`
+
 ##### 3.0.0-beta.2 - 27 April 2016
 
 ###### Backwards compatible changes
