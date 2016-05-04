@@ -134,7 +134,7 @@ describe('DataStore integration tests', function () {
       relations: {
         belongsTo: {
           parent: {
-            enumerable: false,
+            enumerable: true,
             localField: 'parent',
             foreignKey: 'parentId'
           }
@@ -172,14 +172,14 @@ describe('DataStore integration tests', function () {
         foundParent = true
       }
     }
-    assert(foundParent, 'parent is enumerable')
+    assert(!foundParent, 'parent is NOT enumerable')
     foundParent = false
     for (k in otherChild) {
       if (k === 'parent' && otherChild[k] === otherChild.parent && otherChild[k] === store.get('parent', otherChild.parentId)) {
         foundParent = true
       }
     }
-    assert(!foundParent, 'parent is NOT enumerable')
+    assert(foundParent, 'parent is enumerable')
   })
   it.skip('should unlink upon ejection', function () {
     this.UserCollection.add(this.data.user10)
