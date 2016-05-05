@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-beta.3 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-beta.4 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -3416,7 +3416,7 @@ var Record = Component.extend({
   changes: function changes(opts) {
     var self = this;
     opts || (opts = {});
-    return utils$1.diffObjects(self, self._get('previous'), opts);
+    return utils$1.diffObjects(typeof self.toJSON === 'function' ? self.toJSON(opts) : self, self._get('previous'), opts);
   },
 
 
@@ -3476,7 +3476,7 @@ var Record = Component.extend({
   hasChanges: function hasChanges(opts) {
     var self = this;
     var quickHasChanges = !!(self._get('changed') || []).length;
-    return quickHasChanges || utils$1.areDifferent(self, self._get('previous'), opts);
+    return quickHasChanges || utils$1.areDifferent(typeof self.toJSON === 'function' ? self.toJSON(opts) : self, self._get('previous'), opts);
   },
 
 
@@ -5042,7 +5042,7 @@ var Mapper = Component.extend({
       (function () {
         var superClass = Record;
         self.recordClass = superClass.extend({
-          constructor: function () {
+          constructor: function Record() {
             var subClass = function Record(props, opts) {
               utils$1.classCallCheck(this, subClass);
               superClass.call(this, props, opts);
@@ -8098,7 +8098,7 @@ var props$1 = {
       }
 
       if (descriptor) {
-        descriptor.enumerable = utils$1.isUndefined(def.enumerable) ? true : def.enumerable;
+        descriptor.enumerable = utils$1.isUndefined(def.enumerable) ? false : def.enumerable;
         if (def.get) {
           (function () {
             var origGet = descriptor.get;
@@ -8551,8 +8551,8 @@ var DataStore = Container.extend(props$1);
  * @type {Object}
  */
 var version = {
-  beta: 3,
-  full: '3.0.0-beta.3',
+  beta: 4,
+  full: '3.0.0-beta.4',
   major: 3,
   minor: 0,
   patch: 0
