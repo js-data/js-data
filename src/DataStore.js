@@ -509,7 +509,7 @@ const props = {
       }
 
       if (descriptor) {
-        descriptor.enumerable = utils.isUndefined(def.enumerable) ? true : def.enumerable
+        descriptor.enumerable = utils.isUndefined(def.enumerable) ? false : def.enumerable
         if (def.get) {
           let origGet = descriptor.get
           descriptor.get = function () {

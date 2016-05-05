@@ -1,3 +1,9 @@
+##### 3.0.0-beta.4 - 06 May 2016
+
+###### Breaking changes
+- Relation links managed by `DataStore` are now non-enumerable by default
+- Before calculating `Record#changes`, `toJSON` is called on if available.
+
 ##### 3.0.0-beta.3 - 27 April 2016
 
 ###### Breaking changes

@@ -346,7 +346,7 @@ export default Component.extend({
     if (utils.isUndefined(self.recordClass)) {
       const superClass = Record
       self.recordClass = superClass.extend({
-        constructor: (function () {
+        constructor: (function Record () {
           var subClass = function Record (props, opts) {
             utils.classCallCheck(this, subClass)
             superClass.call(this, props, opts)
