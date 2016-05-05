@@ -227,4 +227,66 @@ describe('DataStore integration tests', function () {
     this.UserCollection.remove(22)
     assert(!this.ProfileCollection.get(21).user)
   })
+  it('should emit change events', function (done) {
+    const store = new JSData.DataStore()
+    let handlersCalled = 0
+    store.defineMapper('foo', {
+      type: 'object',
+      schema: {
+        properties: {
+          bar: { type: 'string', track: true }
+        }
+      }
+    })
+    const foo = store.add('foo', { id: 1 })
+    assert.equal(foo.bar, undefined)
+
+    setTimeout(() => {
+      if (handlersCalled !== 6) {
+        done('not all handlers were called')
+      } else {
+        done()
+      }
+    }, 1000)
+
+    store.on('change', function (mapperName, record, changes) {
+      assert.equal(mapperName, 'foo')
+      assert.strictEqual(record, foo)
+      assert.deepEqual(changes, { added: { bar: 'baz' }, changed: {}, removed: {} })
+      handlersCalled++
+    })
+
+    store.getCollection('foo').on('change', function (record, changes) {
+      assert.strictEqual(record, foo)
+      assert.deepEqual(changes, { added: { bar: 'baz' }, changed: {}, removed: {} })
+      handlersCalled++
+    })
+
+    foo.on('change', (record, changes) => {
+      assert.strictEqual(record, foo)
+      assert.deepEqual(changes, { added: { bar: 'baz' }, changed: {}, removed: {} })
+      handlersCalled++
+    })
+
+    store.on('change:bar', function (mapperName, record, value) {
+      assert.equal(mapperName, 'foo')
+      assert.strictEqual(record, foo)
+      assert.equal(value, 'baz')
+      handlersCalled++
+    })
+
+    store.getCollection('foo').on('change:bar', function (record, value) {
+      assert.strictEqual(record, foo)
+      assert.equal(value, 'baz')
+      handlersCalled++
+    })
+
+    foo.on('change:bar', (record, value) => {
+      assert.strictEqual(record, foo)
+      assert.equal(value, 'baz')
+      handlersCalled++
+    })
+
+    foo.bar = 'baz'
+  })
 })

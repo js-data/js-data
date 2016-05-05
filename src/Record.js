@@ -101,7 +101,7 @@ const Record = Component.extend({
   changes (opts) {
     const self = this
     opts || (opts = {})
-    return utils.diffObjects(self, self._get('previous'), opts)
+    return utils.diffObjects(typeof self.toJSON === 'function' ? self.toJSON(opts) : self, self._get('previous'), opts)
   },
 
   /**
@@ -157,7 +157,7 @@ const Record = Component.extend({
   hasChanges (opts) {
     const self = this
     const quickHasChanges = !!(self._get('changed') || []).length
-    return quickHasChanges || utils.areDifferent(self, self._get('previous'), opts)
+    return quickHasChanges || utils.areDifferent(typeof self.toJSON === 'function' ? self.toJSON(opts) : self, self._get('previous'), opts)
   },
 
   /**
