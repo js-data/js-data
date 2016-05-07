@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-beta.4 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-beta.5 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -712,7 +712,10 @@
      */
     getSuper: function getSuper(instance, isCtor) {
       var ctor = isCtor ? instance : instance.constructor;
-      return ctor.__super__ || Object.getPrototypeOf(ctor) || ctor.__proto__; // eslint-disable-line
+      if (ctor.hasOwnProperty('__super__')) {
+        return ctor.__super__;
+      }
+      return Object.getPrototypeOf(ctor) || ctor.__proto__; // eslint-disable-line
     },
 
 
@@ -2166,15 +2169,29 @@
         }
       }
     },
-    getAll: function getAll() {
+    getAll: function getAll(opts) {
+      opts || (opts = {});
       var results = [];
-      this.values.forEach(function (value) {
-        if (value.isIndex) {
-          results = results.concat(value.getAll());
-        } else {
-          results = results.concat(value);
+      var values = this.values;
+      if (opts.order === 'desc') {
+        for (var i = values.length - 1; i >= 0; i--) {
+          var value = values[i];
+          if (value.isIndex) {
+            results = results.concat(value.getAll(opts));
+          } else {
+            results = results.concat(value);
+          }
         }
-      });
+      } else {
+        for (var _i = 0; _i < values.length; _i++) {
+          var _value = values[_i];
+          if (_value.isIndex) {
+            results = results.concat(_value.getAll(opts));
+          } else {
+            results = results.concat(_value);
+          }
+        }
+      }
       return results;
     },
     visitAll: function visitAll(cb, thisArg) {
@@ -2257,26 +2274,26 @@
           }
         }
       } else {
-        for (var _i = pos.index; _i < this.keys.length; _i += 1) {
-          var currKey = this.keys[_i];
+        for (var _i2 = pos.index; _i2 < this.keys.length; _i2 += 1) {
+          var currKey = this.keys[_i2];
           if (currKey > rightKey) {
             break;
           }
 
-          if (this.values[_i].isIndex) {
+          if (this.values[_i2].isIndex) {
             if (currKey === leftKey) {
-              results = results.concat(this.values[_i]._between(utils$1.copy(leftKeys), rightKeys.map(function () {
+              results = results.concat(this.values[_i2]._between(utils$1.copy(leftKeys), rightKeys.map(function () {
                 return undefined;
               }), opts));
             } else if (currKey === rightKey) {
-              results = results.concat(this.values[_i]._between(leftKeys.map(function () {
+              results = results.concat(this.values[_i2]._between(leftKeys.map(function () {
                 return undefined;
               }), utils$1.copy(rightKeys), opts));
             } else {
-              results = results.concat(this.values[_i].getAll());
+              results = results.concat(this.values[_i2].getAll());
             }
           } else {
-            results = results.concat(this.values[_i]);
+            results = results.concat(this.values[_i2]);
           }
 
           if (opts.limit) {
@@ -8557,8 +8574,8 @@
    * @type {Object}
    */
   var version = {
-  beta: 4,
-  full: '3.0.0-beta.4',
+  beta: 5,
+  full: '3.0.0-beta.5',
   major: 3,
   minor: 0,
   patch: 0
