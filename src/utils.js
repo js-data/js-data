@@ -626,7 +626,10 @@ const utils = {
    */
   getSuper (instance, isCtor) {
     const ctor = isCtor ? instance : instance.constructor
-    return (ctor.__super__ || Object.getPrototypeOf(ctor) || ctor.__proto__) // eslint-disable-line
+    if (ctor.hasOwnProperty('__super__')) {
+      return ctor.__super__
+    }
+    return Object.getPrototypeOf(ctor) || ctor.__proto__ // eslint-disable-line
   },
 
   /**

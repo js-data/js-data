@@ -1,3 +1,11 @@
+##### 3.0.0-beta.5 - 07 May 2016
+
+###### Backwards compatible changes
+- Pulled in mindex updates
+
+###### Bug fixes
+- #327 - Issues with inheritance using babel and ES6 classes
+
 ##### 3.0.0-beta.4 - 06 May 2016
 
 ###### Breaking changes
