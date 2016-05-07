@@ -52,4 +52,19 @@ describe('Collection', function () {
     assert.deepEqual(stub.secondCall.args, [2, 3])
     assert.deepEqual(stub2.secondCall.args, ['foo', 2, 3])
   })
+
+  it('can make a subclass', function () {
+    const FooCollection = JSData.Collection.extend({
+      foo () { return 'foo' }
+    })
+    class BarCollection extends JSData.Collection {
+      bar () { return 'bar' }
+    }
+    const fooC = new FooCollection({ test: 'test' })
+    const barC = new BarCollection({ test: 'test' })
+    assert.equal(fooC.foo(), 'foo')
+    assert.equal(fooC.test, 'test')
+    assert.equal(barC.bar(), 'bar')
+    assert.equal(barC.test, 'test')
+  })
 })

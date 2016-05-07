@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "3.0.0-beta.4",
+  "version": "3.0.0-beta.5",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -82,7 +82,7 @@
     "karma-phantomjs-launcher": "1.0.0",
     "karma-sauce-launcher": "1.0.0",
     "karma-sinon": "1.0.5",
-    "nyc": "6.4.2",
+    "nyc": "6.4.3",
     "phantomjs-prebuilt": "2.1.7",
     "rollup": "0.26.2",
     "rollup-plugin-babel": "2.4.0",

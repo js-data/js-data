@@ -6,5 +6,19 @@ describe('Query', function () {
     let query = new JSData.Query()
     assert(query instanceof JSData.Query, 'query should be an instance')
   })
-  it('should be tested')
+
+  it('can make a subclass', function () {
+    const FooQuery = JSData.Query.extend({
+      foo () { return 'foo' }
+    })
+    class BarQuery extends JSData.Query {
+      bar () { return 'bar' }
+    }
+    const fooQ = new FooQuery('test')
+    const barQ = new BarQuery('test')
+    assert.equal(fooQ.foo(), 'foo')
+    assert.equal(fooQ.collection, 'test')
+    assert.equal(barQ.bar(), 'bar')
+    assert.equal(barQ.collection, 'test')
+  })
 })
