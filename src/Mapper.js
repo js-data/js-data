@@ -342,6 +342,10 @@ export default Component.extend({
       self.schema = new Schema(self.schema || {})
     }
 
+    if (self.schema instanceof Schema) {
+      self.schema.type || (self.schema.type = 'object')
+    }
+
     // Create a subclass of Record that's tied to this Mapper
     if (utils.isUndefined(self.recordClass)) {
       const superClass = Record
