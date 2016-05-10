@@ -53,7 +53,7 @@
   },
   "scripts": {
     "doc": "jsdoc -c conf.json src && node scripts/cleanup.js",
-    "lint": "repo-tools lint src/**/*.js test/**/*.js scripts/*.js lib/**/*.js *.config.js",
+    "lint": "repo-tools lint src/**/*.js scripts/*.js lib/**/*.js *.config.js",
     "bundle:es5": "rollup src/index.js -c -o dist/js-data.js -m dist/js-data.js.map -f umd",
     "bundle:next": "rollup src/index.js -c -o dist/js-data.es2015.js -m dist/js-data.es2015.js.map -f es6",
     "bundle": "npm run bundle:es5 && npm run bundle:next && repo-tools write-version dist/js-data.js dist/js-data.es2015.js",
@@ -63,7 +63,7 @@
     "build": "npm run lint && npm run bundle && npm run min && npm run banner",
     "karma": "karma start",
     "mocha": "mocha --recursive -t 20000 -R dot -r babel-core/register -r babel-polyfill",
-    "cover": "nyc --require babel-core/register --require babel-polyfill --cache mocha --recursive -t 20000 -R dot && nyc report --reporter=html",
+    "cover": "nyc --require babel-core/register --require babel-polyfill --cache mocha --grep \"utils\" --recursive -t 20000 -R dot && nyc report --reporter=html",
     "test": "npm run build && npm run cover && npm run karma",
     "release": "npm test && npm run doc && repo-tools updates && repo-tools changelog && repo-tools authors"
   },
