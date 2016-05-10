@@ -932,20 +932,29 @@ const utils = {
    * @ignore
    */
   strictEqual (a, b) {
-    let _equal = a === b
-    if (!_equal) {
-      if (utils.isObject(a) && utils.isObject(b)) {
-        utils.forOwn(a, function (value, key) {
-          _equal = _equal && utils.strictEqual(value, b[key])
-        })
-        utils.forOwn(b, function (value, key) {
-          _equal = _equal && utils.strictEqual(value, a[key])
-        })
-      } else if (utils.isArray(a) && utils.isArray(b)) {
-        a.forEach(function (value, i) {
-          _equal = _equal && utils.strictEqual(value, b[i])
-        })
+    if (a === b) {
+      return true
+    }
+    let _equal = true
+    if (utils.isObject(a) && utils.isObject(b)) {
+      utils.forOwn(a, function (value, key) {
+        _equal = _equal && utils.strictEqual(value, b[key])
+      })
+      if (!_equal) {
+        return _equal
       }
+      utils.forOwn(b, function (value, key) {
+        _equal = _equal && utils.strictEqual(value, a[key])
+      })
+    } else if (utils.isArray(a) && utils.isArray(b)) {
+      a.forEach(function (value, i) {
+        _equal = _equal && utils.strictEqual(value, b[i])
+        if (!_equal) {
+          return false
+        }
+      })
+    } else {
+      return false
     }
     return _equal
   },
