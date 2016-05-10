@@ -205,6 +205,10 @@ describe('utils.isSorN', function () {
   })
 })
 
+<<<<<<< ef19cc54552baf120c455e52b1354f7ad5cf56bd
+=======
+
+>>>>>>> add utils tests
 describe('utils.isString', function () {
   it('should be a static method', function () {
     assert.equal(typeof utils.isObject, 'function', 'has the isString method')
