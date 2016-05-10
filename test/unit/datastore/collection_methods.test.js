@@ -1,4 +1,4 @@
-import { assert, JSData } from '../../_setup'
+import { assert } from '../../_setup'
 
 describe('DataStore collection methods', function () {
   it('add should work', function () {
@@ -7,7 +7,7 @@ describe('DataStore collection methods', function () {
   })
   it('remove should remove relations', function () {
     let user = this.store.add('user', this.data.user10)
-    let comments = this.store.add('organization', this.data.organization15)
+    this.store.add('organization', this.data.organization15)
     this.store.add('comment', this.data.comment19)
     this.store.add('profile', this.data.profile21)
 
@@ -25,7 +25,7 @@ describe('DataStore collection methods', function () {
   })
   it('remove should remove multiple relations', function () {
     let user = this.store.add('user', this.data.user10)
-    let comments = this.store.add('organization', this.data.organization15)
+    this.store.add('organization', this.data.organization15)
     this.store.add('comment', this.data.comment19)
     this.store.add('profile', this.data.profile21)
 
@@ -45,7 +45,7 @@ describe('DataStore collection methods', function () {
   })
   it('removeAll should remove relations', function () {
     let user = this.store.add('user', this.data.user10)
-    let comments = this.store.add('organization', this.data.organization15)
+    this.store.add('organization', this.data.organization15)
     this.store.add('comment', this.data.comment19)
     this.store.add('profile', this.data.profile21)
 
@@ -63,7 +63,7 @@ describe('DataStore collection methods', function () {
   })
   it('removeAll should remove multiple relations', function () {
     let user = this.store.add('user', this.data.user10)
-    let comments = this.store.add('organization', this.data.organization15)
+    this.store.add('organization', this.data.organization15)
     this.store.add('comment', this.data.comment19)
     this.store.add('profile', this.data.profile21)
 
