@@ -4,21 +4,18 @@ const utils = JSData.utils
 describe('utils', function () {
   it('has the right exports', function () {
     assert(utils)
-    assert.equal(typeof utils.addHiddenPropsToTarget, 'function', 'has the addHiddenPropsToTarget method')
-    assert.equal(typeof utils.classCallCheck, 'function', 'has the classCallCheck method')
-
-    assert.equal(typeof utils.deepFillIn, 'function', 'has the deepFillIn method')
-    assert.equal(typeof utils.deepMixIn, 'function', 'has the deepMixIn decorator')
-    assert.equal(typeof utils.fillIn, 'function', 'has the fillIn method')
-
-    assert.equal(typeof utils.eventify, 'function', 'has the eventify method')
-    assert.equal(typeof utils.extend, 'function', 'has the extend method')
-    assert.equal(typeof utils.findIndex, 'function', 'has the findIndex method')
-    assert.equal(typeof utils.forEachRelation, 'function', 'has the forEachRelation method')
-    assert.equal(typeof utils.forOwn, 'function', 'has the forOwn method')
-    assert.equal(typeof utils.fromJson, 'function', 'has the fromJson method')
+  })
+})
+describe('utils.get', function () {
+  it('should be a static method', function () {
     assert.equal(typeof utils['get'], 'function', 'has the [\get\'] method')
-    assert.equal(typeof utils.logify, 'function', 'has the logify method')
+  })
+
+  it('returns a given property by name or path', function () {
+    const john = { name: 'John', age: 20, friend: { name: 'Sara' } }
+    assert.equal(john.name, utils.get(john, 'name'))
+    assert.equal(john.friend.name, utils.get(john, 'friend.name'))
+    assert.equal(undefined, utils.get(john, ''), 'null prop name returns undefined')
   })
 })
 
