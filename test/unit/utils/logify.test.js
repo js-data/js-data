@@ -34,6 +34,7 @@ describe('utils.logify', function () {
     console.debug = sinon.stub()
     utils.logify(user)
     user.dbg('test dbg')
+    user.log('debug')
     user.log('debug', 'test log debug')
     assert(console.debug.notCalled, 'debug was not called')
     user.debug = true
