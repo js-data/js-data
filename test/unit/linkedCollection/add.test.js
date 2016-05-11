@@ -3,7 +3,7 @@ import { assert, JSData } from '../../_setup'
 describe('LinkedCollection#add', function () {
   it('should add', function () {
     const store = new JSData.DataStore()
-    const mapper = store.defineMapper('user')
+    const mapper = store.defineMapper('user') // eslint-disable-line
     let collection = store.getCollection('user')
     const user = collection.add({ id: 1 })
     assert.equal(user.id, 1)

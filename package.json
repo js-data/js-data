@@ -37,6 +37,7 @@
     "parser": "babel-eslint",
     "globals": [
       "beforeEach",
+      "after",
       "describe",
       "it"
     ]
@@ -52,7 +53,7 @@
   },
   "scripts": {
     "doc": "jsdoc -c conf.json src && node scripts/cleanup.js",
-    "lint": "repo-tools lint src/**/*.js scripts/*.js lib/**/*.js *.config.js",
+    "lint": "repo-tools lint src/**/*.js test/**/*.js scripts/*.js lib/**/*.js *.config.js",
     "bundle:es5": "rollup src/index.js -c -o dist/js-data.js -m dist/js-data.js.map -f umd",
     "bundle:next": "rollup src/index.js -c -o dist/js-data.es2015.js -m dist/js-data.es2015.js.map -f es6",
     "bundle": "npm run bundle:es5 && npm run bundle:next && repo-tools write-version dist/js-data.js dist/js-data.es2015.js",

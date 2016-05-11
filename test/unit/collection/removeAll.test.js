@@ -1,4 +1,4 @@
-import { assert, JSData } from '../../_setup'
+import { assert } from '../../_setup'
 
 describe('Collection#removeAll', function () {
   it('should eject items that meet the criteria from the store', function () {

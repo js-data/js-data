@@ -17,7 +17,7 @@ describe('Record#destroy', function () {
       }
     }
     store.registerAdapter('mock', mockAdapter, { default: true })
-    const FooMapper = store.defineMapper('foo')
+    const FooMapper = store.defineMapper('foo') // eslint-disable-line
     let foo = store.add('foo', { id: 1 })
     let result = await foo.destroy()
     assert(!store.get('foo', 1))

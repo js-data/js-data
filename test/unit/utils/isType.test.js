@@ -139,7 +139,6 @@ describe('utils.isNumber', function () {
   })
 })
 
-
 describe('utils.isObject', function () {
   it('should be a static method', function () {
     assert.equal(typeof utils.isObject, 'function', 'has the isObject method')
@@ -205,7 +204,6 @@ describe('utils.isSorN', function () {
     })
   })
 })
-
 
 describe('utils.isString', function () {
   it('should be a static method', function () {

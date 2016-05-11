@@ -9,8 +9,6 @@ describe('Mapper#count', function () {
   })
   it('should count', async function () {
     const query = { id: 1 }
-    const id = 1
-    const props = [{ id, name: 'John' }]
     let countCalled = false
     const User = new JSData.Mapper({
       name: 'user',
@@ -33,8 +31,6 @@ describe('Mapper#count', function () {
   })
   it('should return raw', async function () {
     const query = { id: 1 }
-    const id = 1
-    const props = [{ id, name: 'John' }]
     let countCalled = false
     const User = new JSData.Mapper({
       name: 'user',
