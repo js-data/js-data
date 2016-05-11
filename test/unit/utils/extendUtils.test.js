@@ -63,7 +63,7 @@ describe('utils.extend', function () {
   })
 
   it('extend can be used to make a subclass', function () {
-    function Foo(name) {
+    function Foo (name) {
       this.name = name
       this.whatsMyName = () => {
         return this.name

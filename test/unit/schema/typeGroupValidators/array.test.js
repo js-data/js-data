@@ -2,7 +2,6 @@ import { assert, JSData, sinon } from '../../../_setup'
 
 describe('Schema.typeGroupValidators.array', function () {
   it('executes correct validation keywords', function () {
-
     const forOwn = JSData.utils.forOwn
     const validationKeywords = JSData.Schema.validationKeywords
     const TARGET_KEYWORDS = ['items', 'maxItems', 'minItems', 'uniqueItems']

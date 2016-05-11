@@ -10,7 +10,7 @@ describe('Collection', function () {
 
   it('should accept just opts', function () {
     assert.doesNotThrow(() => {
-      new JSData.Collection({ idAttribute: 'id' })
+      new JSData.Collection({ idAttribute: 'id' }) // eslint-disable-line
     })
   })
 
