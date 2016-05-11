@@ -4,7 +4,7 @@
 
 | __Browser tests__ | __Node.js tests__ |
 | ---------------------------------|----|
-| [![Sauce Test Status][b7]][b8] | [![Circle CI][b9]][b10] [![Circle CI][b11]][b10] [![Circle CI][b12]][b10] [![Circle CI][b13]][b10] [![Circle CI][b14]][b10] |
+| [![Sauce Test Status][b7]][b8] | [![Circle CI][b9]][b10] [![Circle CI][b11]][b10] [![Circle CI][b12]][b10] [![Circle CI][b13]][b10] [![Circle CI][b14]][b10] [![Circle CI][b15]][b10] |
 
 [b1]: http://slack.js-data.io/badge.svg
 [b2]: http://slack.js-data.io
@@ -16,10 +16,11 @@
 [b8]: https://saucelabs.com/u/jsdata
 [b9]: https://img.shields.io/circleci/project/js-data/js-data.svg
 [b10]: https://circleci.com/gh/js-data/js-data
-[b11]: https://img.shields.io/badge/Node.js-v5.x-brightgreen.svg
-[b12]: https://img.shields.io/badge/Node.js-v4.x-brightgreen.svg
-[b13]: https://img.shields.io/badge/Node.js-v0.12.x-brightgreen.svg
-[b14]: https://img.shields.io/badge/Node.js-v0.10.x-brightgreen.svg
+[b11]: https://img.shields.io/badge/Node.js-v6.x-brightgreen.svg
+[b12]: https://img.shields.io/badge/Node.js-v5.x-brightgreen.svg
+[b13]: https://img.shields.io/badge/Node.js-v4.x-brightgreen.svg
+[b14]: https://img.shields.io/badge/Node.js-v0.12.x-brightgreen.svg
+[b15]: https://img.shields.io/badge/Node.js-v0.10.x-brightgreen.svg
 
 __JSData v3 beta is stable. More features may be added before 3.0.0. Some adapters
 still need to be updated to work with v3. Message @jmdobry on the JSData Slack

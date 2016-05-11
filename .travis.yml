@@ -1,14 +1,16 @@
 sudo: false
 language: node_js
 node_js:
+- "6"
 - "5"
 - "4"
 - "0.12"
 - "0.10"
-
 cache:
   directories:
   - node_modules/
-
-script:
-  - npm run ci
+before_install:
+  - npm i -g npm
+  - npm i -g codecov nyc
+after_success:
+  - nyc report --reporter=lcov | codecov
