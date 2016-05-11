@@ -135,8 +135,8 @@ module.exports = function (config) {
     captureTimeout: 120000,
     colors: true,
     logLevel: config.LOG_INFO,
-    autoWatch: true,
-    singleRun: false,
+    autoWatch: false,
+    singleRun: true,
     concurrency: Infinity
   })
 }
