@@ -347,7 +347,7 @@ const utils = {
       removed: {}
     }
     if (!utils.isFunction(equalsFn)) {
-      equalsFn = utils.strictEqual
+      equalsFn = utils.deepEqual
     }
 
     utils.forOwn(b, function (oldValue, key) {
@@ -933,24 +933,24 @@ const utils = {
    *
    * @ignore
    */
-  strictEqual (a, b) {
+  deepEqual (a, b) {
     if (a === b) {
       return true
     }
     let _equal = true
     if (utils.isObject(a) && utils.isObject(b)) {
       utils.forOwn(a, function (value, key) {
-        _equal = _equal && utils.strictEqual(value, b[key])
+        _equal = _equal && utils.deepEqual(value, b[key])
       })
       if (!_equal) {
         return _equal
       }
       utils.forOwn(b, function (value, key) {
-        _equal = _equal && utils.strictEqual(value, a[key])
+        _equal = _equal && utils.deepEqual(value, a[key])
       })
     } else if (utils.isArray(a) && utils.isArray(b)) {
       a.forEach(function (value, i) {
-        _equal = _equal && utils.strictEqual(value, b[i])
+        _equal = _equal && utils.deepEqual(value, b[i])
         if (!_equal) {
           return false
         }

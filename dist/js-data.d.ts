@@ -57,7 +57,7 @@ export const utils: {
   remove(array: any[], fn: Function): void
   resolve(value: any): Promise<any>
   set(object: Object, path: string, value?: any): void
-  strictEqual(a: any, b: any): boolean
+  deepEqual(a: any, b: any): boolean
   toJson(value: any, replacer?: Function, space?: number): string
   unset(object: Object, path: string): void
 }
