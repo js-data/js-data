@@ -23,10 +23,5 @@ describe('utils.forEachRelation', function () {
     assert.equal(typeof utils.forEachRelation, 'function', 'has the forEachRelation method')
   })
 
-  // it('executes a fn for each relationship defined in a mapper', function () {
-  //   const userMapper = this.User
-  //   utils.forEachRelation(userMapper, { with: ['profile'] }, (a) => {
-
-  //   })
-  // })
+  it('should be tested')
 })
