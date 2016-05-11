@@ -35,7 +35,6 @@ describe('utils.diffObjects', function () {
       removed: { id: undefined }
     }
     const result = utils.diffObjects(objA, objB)
-    console.log(result)
     assert.deepEqual(result, expected)
   })
 
@@ -52,6 +51,7 @@ describe('utils.diffObjects', function () {
   })
 })
 
+
 describe('utils.equal', function () {
   it('should be a static method', function () {
     assert.equal(typeof utils.equal, 'function', 'has the equal method')
@@ -59,16 +59,15 @@ describe('utils.equal', function () {
 
   it('returns true for equal values', function () {
     const objA = { name: 'John', age: 90 }
-    assert.isTrue(utils.equal(1, '1'), 'the two values are equal')
-    assert.isTrue(utils.equal(2, 2), 'the two values are equal')
-    assert.isTrue(utils.equal('test', 'test'), 'the two values are equal')
-    assert.isTrue(utils.equal(objA, objA), 'the two values are equal')
+    assert.isTrue(utils.equal(1, '1'), '1 equals "1"')
+    assert.isTrue(utils.equal(2, 2), '2 equals 2')
+    assert.isTrue(utils.equal('test', 'test'), '"test" equals "test"')
+    assert.isTrue(utils.equal(objA, objA), objA + ' equals ' + objA)
   })
 
   it('returns false for two different values', function () {
-    assert.isFalse(utils.equal(1, 2), 'the two values are not equal')
-    assert.isFalse(utils.equal({}, {}), 'the two values are not equal')
-    assert.isFalse(utils.equal('test', 'test2'), 'the two values are not equal')
+    assert.isFalse(utils.equal(1, 2), '1 does not equal 2')
+    assert.isFalse(utils.equal({}, {}), '{} does not equal {}')
   })
 })
 
@@ -77,41 +76,38 @@ describe('utils.strictEqual', function () {
     assert.equal(typeof utils.strictEqual, 'function', 'has the strictEqual method')
   })
 
-  it('returns true for only strict equal values', function () {
+  it('does deep equal comparison', function () {
     const objA = { name: 'John', age: 90 }
-    assert.isTrue(utils.strictEqual(2, 2), '2 strict equals 2')
-    assert.isTrue(utils.strictEqual('test', 'test'), '"test" strict equals "test"')
-    assert.isTrue(utils.strictEqual(objA, objA), 'objA strict equals objA')
-  })
-
-  it('returns false for two different values', function () {
+    assert.isTrue(utils.strictEqual(2, 2), '2 deep equals 2')
+    assert.isTrue(utils.strictEqual('test', 'test'), '"test" deep equals "test"')
+    assert.isTrue(utils.strictEqual({}, {}), '{} deep equals {}')
+    assert.isTrue(utils.strictEqual(objA, objA), objA + ' deep equals ' + objA)
     assert.isFalse(utils.strictEqual(1, 2), '1 does not strict equal 2')
-    assert.isFalse(utils.strictEqual({}, {}), '{} does not strict equal {}')
     assert.isFalse(utils.strictEqual(1, '1'), '1 does not strict equal "1"')
     assert.isFalse(utils.strictEqual('foo', 'bar'), '"foo" does not equal "bar')
   })
 
   it('compares identical objects', function () {
-    var objA = {
+    const objA = {
       name: 'John',
-      id: 27
+      id: 27,
+      nested: {
+        item: 'item 1',
+        colors: ['red', 'green', 'blue']
+      }
     }
-    var objB = {
+    const objB = {
       name: 'John',
-      id: 27
+      id: 27,
+      nested: {
+        item: 'item 1',
+        colors: ['red', 'green', 'blue']
+      }
     }
-    assert.isFalse(utils.strictEqual(objA, objB))
-  })
+    assert.isTrue(utils.strictEqual(objA, objB))
+    assert.isTrue(utils.strictEqual([objA, objB], [objA, objB]))
 
-  it('compares arrays', function () {
-    var objA = {
-      name: 'John',
-      id: 27
-    }
-    var objB = {
-      name: 'John',
-      id: 27
-    }
+    objA.nested.colors[0] = 'yellow'
     assert.isFalse(utils.strictEqual(objA, objB))
   })
 })
