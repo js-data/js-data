@@ -30,15 +30,16 @@ describe('utils.logify', function () {
 
   it('logs debug messages only when `this.debug` is true', function () {
     const user = { name: 'John' }
-    let debugStub = sinon.stub(console, 'debug')
+    const prev = console.debug
+    console.debug = sinon.stub()
     utils.logify(user)
     user.dbg('test dbg')
     user.log('debug', 'test log debug')
-    assert(debugStub.notCalled, 'debug was not called')
+    assert(console.debug.notCalled, 'debug was not called')
     user.debug = true
     user.dbg('test dbg')
     user.log('debug', 'test log debug')
-    assert(debugStub.calledTwice, 'expected one call to console.debug')
-    debugStub.restore()
+    assert(console.debug.calledTwice, 'expected one call to console.debug')
+    console.debug = prev
   })
 })
