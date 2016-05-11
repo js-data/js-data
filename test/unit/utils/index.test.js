@@ -4,8 +4,18 @@ const utils = JSData.utils
 describe('utils', function () {
   it('has the right exports', function () {
     assert(utils)
+  })
+})
+describe('utils.get', function () {
+  it('should be a static method', function () {
     assert.equal(typeof utils['get'], 'function', 'has the [\get\'] method')
-    assert.equal(typeof utils.logify, 'function', 'has the logify method')
+  })
+
+  it('returns a given property by name or path', function () {
+    const john = { name: 'John', age: 20, friend: { name: 'Sara' } }
+    assert.equal(john.name, utils.get(john, 'name'))
+    assert.equal(john.friend.name, utils.get(john, 'friend.name'))
+    assert.equal(undefined, utils.get(john, ''), 'null prop name returns undefined')
   })
 })
 
