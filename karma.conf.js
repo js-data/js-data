@@ -116,7 +116,7 @@ module.exports = function (config) {
     },
     client: {
       mocha: {
-        grep: 'utils.'
+        // grep: 'utils.'
       }
     },
     browsers: browsers,

@@ -533,7 +533,7 @@ const utils = {
   },
 
   /**
-   * Find the index of something according to the given checker function.
+   * Find the last index of something according to the given checker function.
    *
    * @ignore
    * @param {Array} array The array to search.
@@ -876,9 +876,11 @@ const utils = {
   },
 
   /**
-   * TODO
+   * Remove the last item found in array according to the given checker function.
    *
    * @ignore
+   * @param {Array} array The array to search.
+   * @param {Function} fn Checker function.
    */
   remove (array, fn) {
     if (!array || !array.length) {
