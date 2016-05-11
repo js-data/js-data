@@ -435,13 +435,23 @@ const toProxy = [
 
 const props = {
   constructor: function Container (opts) {
-    const self = this
-    utils.classCallCheck(self, Container)
-    Container.__super__.call(self)
+    utils.classCallCheck(this, Container)
+    Container.__super__.call(this)
     opts || (opts = {})
 
+    Object.defineProperties(this, {
+      // Holds the adapters, shared by all mappers in this container
+      _adapters: {
+        value: {}
+      },
+      // The the mappers in this container
+      _mappers: {
+        value: {}
+      }
+    })
+
     // Apply options provided by the user
-    utils.fillIn(self, opts)
+    utils.fillIn(this, opts)
 
     /**
      * Defaults options to pass to {@link Container#mapperClass} when creating a
@@ -452,7 +462,7 @@ const props = {
      * @since 3.0.0
      * @type {Object}
      */
-    self.mapperDefaults = self.mapperDefaults || {}
+    this.mapperDefaults = this.mapperDefaults || {}
 
     /**
      * Constructor function to use in {@link Container#defineMapper} to create a
@@ -463,13 +473,7 @@ const props = {
      * @since 3.0.0
      * @type {Constructor}
      */
-    self.mapperClass = self.mapperClass || Mapper
-
-    // Holds the adapters, shared by all mappers in this container
-    self._adapters = {}
-
-    // The the mappers in this container
-    self._mappers = {}
+    this.mapperClass = this.mapperClass || Mapper
   },
 
   /**
@@ -520,8 +524,6 @@ const props = {
    * @since 3.0.0
    */
   defineMapper (name, opts) {
-    const self = this
-
     // For backwards compatibility with defineResource
     if (utils.isObject(name)) {
       opts = name
@@ -538,38 +540,34 @@ const props = {
     opts.relations || (opts.relations = {})
 
     // Check if the user is overriding the datastore's default mapperClass
-    const mapperClass = opts.mapperClass || self.mapperClass
+    const mapperClass = opts.mapperClass || this.mapperClass
     delete opts.mapperClass
 
     // Apply the datastore's defaults to the options going into the mapper
-    utils.fillIn(opts, self.mapperDefaults)
+    utils.fillIn(opts, this.mapperDefaults)
 
     // Instantiate a mapper
-    const mapper = self._mappers[name] = new mapperClass(opts) // eslint-disable-line
+    const mapper = this._mappers[name] = new mapperClass(opts) // eslint-disable-line
     mapper.relations || (mapper.relations = {})
     // Make sure the mapper's name is set
     mapper.name = name
     // All mappers in this datastore will share adapters
-    mapper._adapters = self.getAdapters()
+    mapper._adapters = this.getAdapters()
 
-    mapper.datastore = self
+    mapper.datastore = this
 
-    mapper.on('all', function (...args) {
-      self._onMapperEvent(name, ...args)
-    })
+    mapper.on('all', (...args) => this._onMapperEvent(name, ...args))
 
     // Setup the mapper's relations, including generating Mapper#relationList
     // and Mapper#relationFields
-    utils.forOwn(mapper.relations, function (group, type) {
-      utils.forOwn(group, function (relations, _name) {
+    utils.forOwn(mapper.relations, (group, type) => {
+      utils.forOwn(group, (relations, _name) => {
         if (utils.isObject(relations)) {
           relations = [relations]
         }
-        relations.forEach(function (def) {
-          def.getRelation = function () {
-            return self.getMapper(_name)
-          }
-          const relatedMapper = self._mappers[_name] || _name
+        relations.forEach((def) => {
+          def.getRelation = () => this.getMapper(_name)
+          const relatedMapper = this._mappers[_name] || _name
           if (type === belongsToType) {
             mapper.belongsTo(relatedMapper, def)
           } else if (type === hasOneType) {
@@ -598,12 +596,11 @@ const props = {
    * @since 3.0.0
    */
   getAdapter (name) {
-    const self = this
-    const adapter = self.getAdapterName(name)
+    const adapter = this.getAdapterName(name)
     if (!adapter) {
       throw utils.err(`${DOMAIN}#getAdapter`, 'name')(400, 'string', name)
     }
-    return self.getAdapters()[adapter]
+    return this.getAdapters()[adapter]
   },
 
   /**
@@ -676,13 +673,12 @@ const props = {
    * @tutorial ["http://www.js-data.io/v3.0/docs/connecting-to-a-data-source","Connecting to a data source"]
    */
   registerAdapter (name, adapter, opts) {
-    const self = this
     opts || (opts = {})
-    self.getAdapters()[name] = adapter
+    this.getAdapters()[name] = adapter
     // Optionally make it the default adapter for the target.
     if (opts === true || opts.default) {
-      self.mapperDefaults.defaultAdapter = name
-      utils.forOwn(self._mappers, function (mapper) {
+      this.mapperDefaults.defaultAdapter = name
+      utils.forOwn(this._mappers, function (mapper) {
         mapper.defaultAdapter = name
       })
     }

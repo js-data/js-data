@@ -24,37 +24,34 @@ const DOMAIN = 'LinkedCollection'
  */
 export default Collection.extend({
   constructor: function LinkedCollection (records, opts) {
-    const self = this
-    utils.classCallCheck(self, LinkedCollection)
-    LinkedCollection.__super__.call(self, records, opts)
+    utils.classCallCheck(this, LinkedCollection)
+    LinkedCollection.__super__.call(this, records, opts)
 
     // Make sure this collection has somewhere to store "added" timestamps
-    Object.defineProperty(self, '_added', {
+    Object.defineProperty(this, '_added', {
       value: {}
     })
 
     // Make sure this collection has a reference to a datastore
-    if (!self.datastore) {
-      throw utils.err(`new ${DOMAIN}`, 'opts.datastore')(400, 'DataStore', self.datastore)
+    if (!this.datastore) {
+      throw utils.err(`new ${DOMAIN}`, 'opts.datastore')(400, 'DataStore', this.datastore)
     }
-    return self
+    return this
   },
 
   _onRecordEvent (...args) {
-    const self = this
-    utils.getSuper(self).prototype._onRecordEvent.apply(self, args)
+    utils.getSuper(this).prototype._onRecordEvent.apply(this, args)
     const event = args[0]
     // This is a very brute force method
     // Lots of room for optimization
     if (utils.isString(event) && event.indexOf('change') === 0) {
-      self.updateIndexes(args[1])
+      this.updateIndexes(args[1])
     }
   },
 
   add (records, opts) {
-    const self = this
-    const datastore = self.datastore
-    const mapper = self.mapper
+    const datastore = this.datastore
+    const mapper = this.mapper
     const relationList = mapper.relationList
     const timestamp = new Date().getTime()
     const usesRecordClass = !!mapper.recordClass
@@ -66,7 +63,7 @@ export default Collection.extend({
       records = [records]
     }
 
-    records = utils.getSuper(self).prototype.add.call(self, records, opts)
+    records = utils.getSuper(this).prototype.add.call(this, records, opts)
 
     if (relationList.length && records.length) {
       // Check the currently visited record for relations that need to be
@@ -175,9 +172,9 @@ export default Collection.extend({
       })
     }
 
-    records.forEach(function (record) {
+    records.forEach((record) => {
       // Track when this record was added
-      self._added[self.recordId(record)] = timestamp
+      this._added[this.recordId(record)] = timestamp
 
       if (usesRecordClass) {
         record._set('$', timestamp)
@@ -188,11 +185,10 @@ export default Collection.extend({
   },
 
   remove (id, opts) {
-    const self = this
-    const mapper = self.mapper
-    const record = utils.getSuper(self).prototype.remove.call(self, id, opts)
+    const mapper = this.mapper
+    const record = utils.getSuper(this).prototype.remove.call(this, id, opts)
     if (record) {
-      delete self._added[id]
+      delete this._added[id]
       if (mapper.recordClass) {
         record._set('$') // unset
       }
@@ -201,11 +197,10 @@ export default Collection.extend({
   },
 
   removeAll (query, opts) {
-    const self = this
-    const mapper = self.mapper
-    const records = utils.getSuper(self).prototype.removeAll.call(self, query, opts)
-    records.forEach(function (record) {
-      delete self._added[self.recordId(record)]
+    const mapper = this.mapper
+    const records = utils.getSuper(this).prototype.removeAll.call(this, query, opts)
+    records.forEach((record) => {
+      delete this._added[this.recordId(record)]
       if (mapper.recordClass) {
         record._set('$') // unset
       }

@@ -42,8 +42,7 @@ const escape = function (pattern) {
  */
 export default Component.extend({
   constructor: function Query (collection) {
-    const self = this
-    utils.classCallCheck(self, Query)
+    utils.classCallCheck(this, Query)
 
     /**
      * The {@link Collection} on which this query operates.
@@ -52,7 +51,7 @@ export default Component.extend({
      * @since 3.0.0
      * @type {Collection}
      */
-    self.collection = collection
+    this.collection = collection
 
     /**
      * The current data result of this query.
@@ -61,7 +60,7 @@ export default Component.extend({
      * @since 3.0.0
      * @type {Array}
      */
-    self.data = null
+    this.data = null
   },
 
   /**
@@ -89,13 +88,12 @@ export default Component.extend({
    * @since 3.0.0
    */
   between (leftKeys, rightKeys, opts) {
-    const self = this
     opts || (opts = {})
-    if (self.data) {
+    if (this.data) {
       throw utils.err(`${DOMAIN}#between`)(500, 'Cannot access index')
     }
-    self.data = self.collection.getIndex(opts.index).between(leftKeys, rightKeys, opts)
-    return self
+    this.data = this.collection.getIndex(opts.index).between(leftKeys, rightKeys, opts)
+    return this
   },
 
   /**
@@ -196,8 +194,6 @@ export default Component.extend({
    * @since 3.0.0
    */
   filter (query, thisArg) {
-    const self = this
-
     /**
      * Selection query as defined by JSData's [Query Syntax][querysyntax].
      *
@@ -255,7 +251,7 @@ export default Component.extend({
      * @tutorial ["http://www.js-data.io/v3.0/docs/query-syntax","JSData's Query Syntax"]
      */
     query || (query = {})
-    self.getData()
+    this.getData()
     if (utils.isObject(query)) {
       let where = {}
 
@@ -300,7 +296,7 @@ export default Component.extend({
       if (fields.length) {
         let i
         let len = fields.length
-        self.data = self.data.filter(function (item) {
+        this.data = this.data.filter((item) => {
           let first = true
           let keep = true
 
@@ -308,7 +304,7 @@ export default Component.extend({
             let op = ops[i]
             const isOr = op.charAt(0) === '|'
             op = isOr ? op.substr(1) : op
-            const expr = self.evaluate(utils.get(item, fields[i]), op, predicates[i])
+            const expr = this.evaluate(utils.get(item, fields[i]), op, predicates[i])
             if (expr !== undefined) {
               keep = first ? expr : (isOr ? keep || expr : keep && expr)
             }
@@ -348,9 +344,7 @@ export default Component.extend({
             orderBy[i] = [def, 'ASC']
           }
         })
-        self.data.sort(function (a, b) {
-          return self.compare(orderBy, index, a, b)
-        })
+        this.data.sort((a, b) => this.compare(orderBy, index, a, b))
       }
 
       /**
@@ -370,9 +364,9 @@ export default Component.extend({
        * @since 3.0.0
        */
       if (utils.isNumber(query.skip)) {
-        self.skip(query.skip)
+        this.skip(query.skip)
       } else if (utils.isNumber(query.offset)) {
-        self.skip(query.offset)
+        this.skip(query.offset)
       }
 
       /**
@@ -392,12 +386,12 @@ export default Component.extend({
        * @since 3.0.0
        */
       if (utils.isNumber(query.limit)) {
-        self.limit(query.limit)
+        this.limit(query.limit)
       }
     } else if (utils.isFunction(query)) {
-      self.data = self.data.filter(query, thisArg)
+      this.data = this.data.filter(query, thisArg)
     }
-    return self
+    return this
   },
 
   /**
@@ -444,21 +438,20 @@ export default Component.extend({
    * @since 3.0.0
    */
   get (keyList, opts) {
-    const self = this
     keyList || (keyList = [])
     opts || (opts = {})
-    if (self.data) {
+    if (this.data) {
       throw utils.err(`${DOMAIN}#get`)(500, INDEX_ERR)
     }
     if (keyList && !utils.isArray(keyList)) {
       keyList = [keyList]
     }
     if (!keyList.length) {
-      self.getData()
-      return self
+      this.getData()
+      return this
     }
-    self.data = self.collection.getIndex(opts.index).get(keyList)
-    return self
+    this.data = this.collection.getIndex(opts.index).get(keyList)
+    return this
   },
 
   /**
@@ -481,25 +474,24 @@ export default Component.extend({
    * @since 3.0.0
    */
   getAll (...args) {
-    const self = this
     let opts = {}
-    if (self.data) {
+    if (this.data) {
       throw utils.err(`${DOMAIN}#getAll`)(500, INDEX_ERR)
     }
     if (!args.length || args.length === 1 && utils.isObject(args[0])) {
-      self.getData()
-      return self
+      this.getData()
+      return this
     } else if (args.length && utils.isObject(args[args.length - 1])) {
       opts = args[args.length - 1]
       args.pop()
     }
-    const collection = self.collection
+    const collection = this.collection
     const index = collection.getIndex(opts.index)
-    self.data = []
-    args.forEach(function (keyList) {
-      self.data = self.data.concat(index.get(keyList))
+    this.data = []
+    args.forEach((keyList) => {
+      this.data = this.data.concat(index.get(keyList))
     })
-    return self
+    return this
   },
 
   /**
@@ -510,11 +502,10 @@ export default Component.extend({
    * @since 3.0.0
    */
   getData () {
-    const self = this
-    if (!self.data) {
-      self.data = self.collection.index.getAll()
+    if (!this.data) {
+      this.data = this.collection.index.getAll()
     }
-    return self.data
+    return this.data
   },
 
   /**

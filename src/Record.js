@@ -29,24 +29,23 @@ const superMethod = function (mapper, name) {
  */
 const Record = Component.extend({
   constructor: function Record (props, opts) {
-    const self = this
-    utils.classCallCheck(self, Record)
+    utils.classCallCheck(this, Record)
 
     props || (props = {})
     opts || (opts = {})
     const _props = {}
-    Object.defineProperties(self, {
+    Object.defineProperties(this, {
       _get: { value (key) { return utils.get(_props, key) } },
       _set: { value (key, value) { return utils.set(_props, key, value) } },
       _unset: { value (key) { return utils.unset(_props, key) } }
     })
-    const _set = self._set
+    const _set = this._set
     // TODO: Optimize these strings
     _set('creating', true)
     if (opts.noValidate) {
       _set('noValidate', true)
     }
-    utils.fillIn(self, props)
+    utils.fillIn(this, props)
     _set('creating', false)
     _set('noValidate', false)
     _set('previous', utils.copy(props))
@@ -60,8 +59,7 @@ const Record = Component.extend({
    * @ignore
    */
   _mapper () {
-    const self = this
-    const mapper = self.constructor.mapper
+    const mapper = this.constructor.mapper
     if (!mapper) {
       throw utils.err(`${DOMAIN}#_mapper`, '')(404, 'mapper')
     }
@@ -99,9 +97,8 @@ const Record = Component.extend({
    * @param {Array} [opts.ignore] Array of strings or RegExp of fields to ignore.
    */
   changes (opts) {
-    const self = this
     opts || (opts = {})
-    return utils.diffObjects(typeof self.toJSON === 'function' ? self.toJSON(opts) : self, self._get('previous'), opts)
+    return utils.diffObjects(typeof this.toJSON === 'function' ? this.toJSON(opts) : this, this._get('previous'), opts)
   },
 
   /**
@@ -111,10 +108,9 @@ const Record = Component.extend({
    * @method
    */
   commit () {
-    const self = this
-    self._set('changed') // unset
-    self._set('previous', utils.copy(self))
-    return self
+    this._set('changed') // unset
+    this._set('previous', utils.copy(this))
+    return this
   },
 
   /**
@@ -126,10 +122,9 @@ const Record = Component.extend({
    * @returns {Promise} The result of calling {@link Mapper#destroy}.
    */
   destroy (opts) {
-    const self = this
     opts || (opts = {})
-    const mapper = self._mapper()
-    return superMethod(mapper, 'destroy')(utils.get(self, mapper.idAttribute), opts)
+    const mapper = this._mapper()
+    return superMethod(mapper, 'destroy')(utils.get(this, mapper.idAttribute), opts)
   },
 
   /**
@@ -155,9 +150,8 @@ const Record = Component.extend({
    * @param {Array} [opts.ignore] Array of strings or RegExp of fields to ignore.
    */
   hasChanges (opts) {
-    const self = this
-    const quickHasChanges = !!(self._get('changed') || []).length
-    return quickHasChanges || utils.areDifferent(typeof self.toJSON === 'function' ? self.toJSON(opts) : self, self._get('previous'), opts)
+    const quickHasChanges = !!(this._get('changed') || []).length
+    return quickHasChanges || utils.areDifferent(typeof this.toJSON === 'function' ? this.toJSON(opts) : this, this._get('previous'), opts)
   },
 
   /**
@@ -167,13 +161,11 @@ const Record = Component.extend({
    * @method
    */
   hashCode () {
-    const self = this
-    return utils.get(self, self._mapper().idAttribute)
+    return utils.get(this, this._mapper().idAttribute)
   },
 
   isValid (opts) {
-    const self = this
-    return !self._mapper().validate(self, opts)
+    return !this._mapper().validate(this, opts)
   },
 
   /**
@@ -186,8 +178,7 @@ const Record = Component.extend({
    */
   loadRelations (relations, opts) {
     let op
-    const self = this
-    const mapper = self._mapper()
+    const mapper = this._mapper()
 
     // Default values for arguments
     relations || (relations = [])
@@ -203,21 +194,21 @@ const Record = Component.extend({
 
     // beforeLoadRelations lifecycle hook
     op = opts.op = 'beforeLoadRelations'
-    return utils.resolve(self[op](relations, opts)).then(function () {
+    return utils.resolve(this[op](relations, opts)).then(() => {
       // Now delegate to the adapter
       op = opts.op = 'loadRelations'
-      mapper.dbg(op, self, relations, opts)
+      mapper.dbg(op, this, relations, opts)
       let tasks = []
       let task
-      utils.forEachRelation(mapper, opts, function (def, optsCopy) {
+      utils.forEachRelation(mapper, opts, (def, optsCopy) => {
         const relatedMapper = def.getRelation()
         optsCopy.raw = false
         if (utils.isFunction(def.load)) {
-          task = def.load(mapper, def, self, opts)
+          task = def.load(mapper, def, this, opts)
         } else if (def.type === 'hasMany' || def.type === 'hasOne') {
           if (def.foreignKey) {
             task = superMethod(relatedMapper, 'findAll')({
-              [def.foreignKey]: utils.get(self, mapper.idAttribute)
+              [def.foreignKey]: utils.get(this, mapper.idAttribute)
             }, optsCopy).then(function (relatedData) {
               if (def.type === 'hasOne') {
                 return relatedData.length ? relatedData[0] : undefined
@@ -228,7 +219,7 @@ const Record = Component.extend({
             task = superMethod(relatedMapper, 'findAll')({
               where: {
                 [relatedMapper.idAttribute]: {
-                  'in': utils.get(self, def.localKeys)
+                  'in': utils.get(this, def.localKeys)
                 }
               }
             })
@@ -236,31 +227,29 @@ const Record = Component.extend({
             task = superMethod(relatedMapper, 'findAll')({
               where: {
                 [def.foreignKeys]: {
-                  'contains': utils.get(self, mapper.idAttribute)
+                  'contains': utils.get(this, mapper.idAttribute)
                 }
               }
             }, opts)
           }
         } else if (def.type === 'belongsTo') {
-          const key = utils.get(self, def.foreignKey)
+          const key = utils.get(this, def.foreignKey)
           if (utils.isSorN(key)) {
             task = superMethod(relatedMapper, 'find')(key, optsCopy)
           }
         }
         if (task) {
-          task = task.then(function (relatedData) {
-            def.setLocalField(self, relatedData)
+          task = task.then((relatedData) => {
+            def.setLocalField(this, relatedData)
           })
           tasks.push(task)
         }
       })
       return Promise.all(tasks)
-    }).then(function () {
+    }).then(() => {
       // afterLoadRelations lifecycle hook
       op = opts.op = 'afterLoadRelations'
-      return utils.resolve(self[op](relations, opts)).then(function () {
-        return self
-      })
+      return utils.resolve(this[op](relations, opts)).then(() => this)
     })
   },
 
@@ -272,11 +261,10 @@ const Record = Component.extend({
    * @param {string} [key] TODO
    */
   previous (key) {
-    const self = this
     if (key) {
-      return self._get(`previous.${key}`)
+      return this._get(`previous.${key}`)
     }
-    return self._get('previous')
+    return this._get('previous')
   },
 
   /**
@@ -287,22 +275,21 @@ const Record = Component.extend({
    * @param {Object} [opts] Configuration options.
    */
   revert (opts) {
-    const self = this
-    const previous = self._get('previous')
+    const previous = this._get('previous')
     opts || (opts = {})
     opts.preserve || (opts.preserve = [])
-    utils.forOwn(self, (value, key) => {
-      if (key !== self._mapper().idAttribute && !previous.hasOwnProperty(key) && self.hasOwnProperty(key) && opts.preserve.indexOf(key) === -1) {
-        delete self[key]
+    utils.forOwn(this, (value, key) => {
+      if (key !== this._mapper().idAttribute && !previous.hasOwnProperty(key) && this.hasOwnProperty(key) && opts.preserve.indexOf(key) === -1) {
+        delete this[key]
       }
     })
     utils.forOwn(previous, (value, key) => {
       if (opts.preserve.indexOf(key) === -1) {
-        self[key] = value
+        this[key] = value
       }
     })
-    self.commit()
-    return self
+    this.commit()
+    return this
   },
 
   /**
@@ -321,16 +308,15 @@ const Record = Component.extend({
    * {@link Mapper#update}.
    */
   save (opts) {
-    const self = this
     opts || (opts = {})
-    const mapper = self._mapper()
-    const id = utils.get(self, mapper.idAttribute)
-    let props = self
+    const mapper = this._mapper()
+    const id = utils.get(this, mapper.idAttribute)
+    let props = this
     if (utils.isUndefined(id)) {
       return superMethod(mapper, 'create')(props, opts)
     }
     if (opts.changesOnly) {
-      const changes = self.changes(opts)
+      const changes = this.changes(opts)
       props = {}
       utils.fillIn(props, changes.added)
       utils.fillIn(props, changes.changed)
@@ -350,17 +336,16 @@ const Record = Component.extend({
    * @param {boolean} [opts.silent=false] - Whether to trigger change events.
    */
   'set' (key, value, opts) {
-    const self = this
     if (utils.isObject(key)) {
       opts = value
     }
     opts || (opts = {})
     if (opts.silent) {
-      self._set('silent', true)
+      this._set('silent', true)
     }
-    utils.set(self, key, value)
-    if (!self._get('eventId')) {
-      self._set('silent') // unset
+    utils.set(this, key, value)
+    if (!this._get('eventId')) {
+      this._set('silent') // unset
     }
   },
 

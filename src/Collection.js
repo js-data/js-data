@@ -65,9 +65,8 @@ const COLLECTION_DEFAULTS = {
  */
 export default Component.extend({
   constructor: function Collection (records, opts) {
-    const self = this
-    utils.classCallCheck(self, Collection)
-    Collection.__super__.call(self)
+    utils.classCallCheck(this, Collection)
+    Collection.__super__.call(this)
 
     if (records && !utils.isArray(records)) {
       opts = records
@@ -99,11 +98,12 @@ export default Component.extend({
      * @type {Mapper}
      * @default null
      */
-    Object.defineProperties(self, {
+    Object.defineProperties(this, {
       mapper: {
         value: undefined,
         writable: true
       },
+      // Query class used by this collection
       queryClass: {
         value: undefined,
         writable: true
@@ -111,17 +111,17 @@ export default Component.extend({
     })
 
     // Apply user-provided configuration
-    utils.fillIn(self, opts)
+    utils.fillIn(this, opts)
     // Fill in any missing options with the defaults
-    utils.fillIn(self, utils.copy(COLLECTION_DEFAULTS))
+    utils.fillIn(this, utils.copy(COLLECTION_DEFAULTS))
 
-    if (!self.queryClass) {
-      self.queryClass = Query
+    if (!this.queryClass) {
+      this.queryClass = Query
     }
 
-    const idAttribute = self.recordId()
+    const idAttribute = this.recordId()
 
-    Object.defineProperties(self, {
+    Object.defineProperties(this, {
       /**
        * The main index, which uses @{link Collection#recordId} as the key.
        *
@@ -149,7 +149,7 @@ export default Component.extend({
 
     // Insert initial data into the collection
     if (records) {
-      self.add(records)
+      this.add(records)
     }
   },
 
@@ -184,18 +184,16 @@ export default Component.extend({
    * @returns {(Object|Object[]|Record|Record[])} The added record or records.
    */
   add (records, opts) {
-    const self = this
-
     // Default values for arguments
     opts || (opts = {})
 
     // Fill in "opts" with the Collection's configuration
-    utils._(opts, self)
-    records = self.beforeAdd(records, opts) || records
+    utils._(opts, this)
+    records = this.beforeAdd(records, opts) || records
 
     // Track whether just one record or an array of records is being inserted
     let singular = false
-    const idAttribute = self.recordId()
+    const idAttribute = this.recordId()
     if (!utils.isArray(records)) {
       if (utils.isObject(records)) {
         records = [records]
@@ -209,13 +207,13 @@ export default Component.extend({
     // New records will be inserted. If any records map to existing records,
     // they will be merged into the existing records according to the onConflict
     // option.
-    records = records.map(function (record) {
-      let id = self.recordId(record)
+    records = records.map((record) => {
+      let id = this.recordId(record)
       if (!utils.isSorN(id)) {
         throw utils.err(`${DOMAIN}#add`, `record.${idAttribute}`)(400, 'string or number', id)
       }
       // Grab existing record if there is one
-      const existing = self.get(id)
+      const existing = this.get(id)
       // If the currently visited record is just a reference to an existing
       // record, then there is nothing to be done. Exit early.
       if (record === existing) {
@@ -225,7 +223,7 @@ export default Component.extend({
       if (existing) {
         // Here, the currently visited record corresponds to a record already
         // in the collection, so we need to merge them
-        const onConflict = opts.onConflict || self.onConflict
+        const onConflict = opts.onConflict || this.onConflict
         if (onConflict === 'merge') {
           utils.deepMixIn(existing, record)
         } else if (onConflict === 'replace') {
@@ -240,18 +238,18 @@ export default Component.extend({
         }
         record = existing
         // Update all indexes in the collection
-        self.updateIndexes(record)
+        this.updateIndexes(record)
       } else {
         // Here, the currently visted record does not correspond to any record
         // in the collection, so (optionally) instantiate this record and insert
         // it into the collection
-        record = self.mapper ? self.mapper.createRecord(record, opts) : record
-        self.index.insertRecord(record)
-        utils.forOwn(self.indexes, function (index, name) {
+        record = this.mapper ? this.mapper.createRecord(record, opts) : record
+        this.index.insertRecord(record)
+        utils.forOwn(this.indexes, function (index, name) {
           index.insertRecord(record)
         })
         if (record && utils.isFunction(record.on)) {
-          record.on('all', self._onRecordEvent, self)
+          record.on('all', this._onRecordEvent, this)
         }
       }
       return record
@@ -259,8 +257,8 @@ export default Component.extend({
     // Finally, return the inserted data
     const result = singular ? records[0] : records
     // TODO: Make this more performant (batch events?)
-    self.emit('add', result)
-    return self.afterAdd(records, opts, result) || result
+    this.emit('add', result)
+    return this.afterAdd(records, opts, result) || result
   },
 
   /**
@@ -380,17 +378,14 @@ export default Component.extend({
    * @returns {Collection} A reference to itself for chaining.
    */
   createIndex (name, fieldList, opts) {
-    const self = this
     if (utils.isString(name) && fieldList === undefined) {
       fieldList = [name]
     }
     opts || (opts = {})
-    opts.hashCode = opts.hashCode || function (obj) {
-      return self.recordId(obj)
-    }
-    const index = self.indexes[name] = new Index(fieldList, opts)
-    self.index.visitAll(index.insertRecord, index)
-    return self
+    opts.hashCode || (opts.hashCode = (obj) => this.recordId(obj))
+    const index = this.indexes[name] = new Index(fieldList, opts)
+    this.index.visitAll(index.insertRecord, index)
+    return this
   },
 
   /**
@@ -569,11 +564,10 @@ export default Component.extend({
    * key.
    */
   recordId (record) {
-    const self = this
     if (record) {
-      return utils.get(record, self.recordId())
+      return utils.get(record, this.recordId())
     }
-    return self.mapper ? self.mapper.idAttribute : self.idAttribute
+    return this.mapper ? this.mapper.idAttribute : this.idAttribute
   },
 
   /**
@@ -625,25 +619,23 @@ export default Component.extend({
    * @returns {Object|Record} The removed record, if any.
    */
   remove (id, opts) {
-    const self = this
-
     // Default values for arguments
     opts || (opts = {})
-    self.beforeRemove(id, opts)
-    const record = self.get(id)
+    this.beforeRemove(id, opts)
+    const record = this.get(id)
 
     // The record is in the collection, remove it
     if (record) {
-      self.index.removeRecord(record)
-      utils.forOwn(self.indexes, function (index, name) {
+      this.index.removeRecord(record)
+      utils.forOwn(this.indexes, function (index, name) {
         index.removeRecord(record)
       })
       if (record && utils.isFunction(record.off)) {
-        record.off('all', self._onRecordEvent, self)
-        self.emit('remove', record)
+        record.off('all', this._onRecordEvent, this)
+        this.emit('remove', record)
       }
     }
-    return self.afterRemove(id, opts, record) || record
+    return this.afterRemove(id, opts, record) || record
   },
 
   /**
@@ -660,17 +652,16 @@ export default Component.extend({
    * @returns {(Object[]|Record[])} The removed records, if any.
    */
   removeAll (query, opts) {
-    const self = this
     // Default values for arguments
     opts || (opts = {})
-    self.beforeRemoveAll(query, opts)
-    const records = self.filter(query)
+    this.beforeRemoveAll(query, opts)
+    const records = this.filter(query)
 
     // Remove each selected record from the collection
-    records.forEach(function (item) {
-      self.remove(self.recordId(item), opts)
+    records.forEach((item) => {
+      this.remove(this.recordId(item), opts)
     })
-    return self.afterRemoveAll(query, opts, records) || records
+    return this.afterRemoveAll(query, opts, records) || records
   },
 
   /**
@@ -732,9 +723,8 @@ export default Component.extend({
    * @param {Object} [opts] - Configuration options.
    */
   updateIndexes (record) {
-    const self = this
-    self.index.updateRecord(record)
-    utils.forOwn(self.indexes, function (index, name) {
+    this.index.updateRecord(record)
+    utils.forOwn(this.indexes, function (index, name) {
       index.updateRecord(record)
     })
   }
