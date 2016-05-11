@@ -12,7 +12,7 @@ describe('Record#changes', function () {
         }
       },
       findAll (mapper, query, opts) {
-        if (mapper.name === 'profile' ) {
+        if (mapper.name === 'profile') {
           return Promise.resolve([self.data.profile4])
         } else if (mapper.name === 'group') {
           return Promise.resolve([self.data.group3])

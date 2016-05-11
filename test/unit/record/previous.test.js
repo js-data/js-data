@@ -8,7 +8,7 @@ describe('Record#previous', function () {
     assert.strictEqual(record.previous, Record.prototype.previous)
   })
   it('should hold previous data', function () {
-    const post = new this.Post.recordClass(this.data.p1)
+    const post = new this.Post.recordClass(this.data.p1) // eslint-disable-line
     assert.objectsEqual(post, post.previous())
     post.foo = 'bar'
     assert.objectsNotEqual(post, post.previous())
@@ -16,7 +16,7 @@ describe('Record#previous', function () {
     assert.objectsEqual(post, post.previous())
   })
   it('should hold previous data for a specified key', function () {
-    const post = new this.Post.recordClass(this.data.p1)
+    const post = new this.Post.recordClass(this.data.p1) // eslint-disable-line
     assert.equal('John', post.previous('author'))
     post.author = 'Arnold'
     assert.equal('John', post.previous('author'))

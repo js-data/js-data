@@ -262,7 +262,7 @@ beforeEach(function () {
   }
 })
 
-after(function () {
+after(function () { // eslint-disable-line
   var tests = []
   var duration = 0
   var passed = 0

@@ -10,7 +10,7 @@ describe('Mapper', function () {
   it('should require a name', function () {
     assert.throws(
       () => {
-        new JSData.Mapper()
+        new JSData.Mapper() // eslint-disable-line
       },
       Error,
       '[new Mapper:opts.name] expected: string, found: undefined\nhttp://www.js-data.io/v3.0/docs/errors#400'
