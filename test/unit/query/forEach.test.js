@@ -1,4 +1,4 @@
-import { assert, JSData } from '../../_setup'
+import { assert } from '../../_setup'
 
 describe('Query#forEach', function () {
   it('should work', function () {

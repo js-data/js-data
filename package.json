@@ -37,6 +37,7 @@
     "parser": "babel-eslint",
     "globals": [
       "beforeEach",
+      "after",
       "describe",
       "it"
     ]

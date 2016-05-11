@@ -347,7 +347,7 @@ const utils = {
       removed: {}
     }
     if (!utils.isFunction(equalsFn)) {
-      equalsFn = utils.strictEqual
+      equalsFn = utils.deepEqual
     }
 
     utils.forOwn(b, function (oldValue, key) {
@@ -533,7 +533,7 @@ const utils = {
   },
 
   /**
-   * Find the index of something according to the given checker function.
+   * Find the last index of something according to the given checker function.
    *
    * @ignore
    * @param {Array} array The array to search.
@@ -876,9 +876,11 @@ const utils = {
   },
 
   /**
-   * TODO
+   * Remove the last item found in array according to the given checker function.
    *
    * @ignore
+   * @param {Array} array The array to search.
+   * @param {Function} fn Checker function.
    */
   remove (array, fn) {
     if (!array || !array.length) {
@@ -931,21 +933,30 @@ const utils = {
    *
    * @ignore
    */
-  strictEqual (a, b) {
-    let _equal = a === b
-    if (!_equal) {
-      if (utils.isObject(a) && utils.isObject(b)) {
-        utils.forOwn(a, function (value, key) {
-          _equal = _equal && utils.strictEqual(value, b[key])
-        })
-        utils.forOwn(b, function (value, key) {
-          _equal = _equal && utils.strictEqual(value, a[key])
-        })
-      } else if (utils.isArray(a) && utils.isArray(b)) {
-        a.forEach(function (value, i) {
-          _equal = _equal && utils.strictEqual(value, b[i])
-        })
+  deepEqual (a, b) {
+    if (a === b) {
+      return true
+    }
+    let _equal = true
+    if (utils.isObject(a) && utils.isObject(b)) {
+      utils.forOwn(a, function (value, key) {
+        _equal = _equal && utils.deepEqual(value, b[key])
+      })
+      if (!_equal) {
+        return _equal
       }
+      utils.forOwn(b, function (value, key) {
+        _equal = _equal && utils.deepEqual(value, a[key])
+      })
+    } else if (utils.isArray(a) && utils.isArray(b)) {
+      a.forEach(function (value, i) {
+        _equal = _equal && utils.deepEqual(value, b[i])
+        if (!_equal) {
+          return false
+        }
+      })
+    } else {
+      return false
     }
     return _equal
   },

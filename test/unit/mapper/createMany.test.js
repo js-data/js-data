@@ -14,7 +14,6 @@ describe('Mapper#createMany', function () {
       name: 'user',
       defaultAdapter: 'mock'
     })
-    const user = new UserMapper.recordClass({ foo: 'bar' })
     UserMapper.registerAdapter('mock', {
       createMany (mapper, _props, Opts) {
         createCalled = true

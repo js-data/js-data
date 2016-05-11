@@ -8,7 +8,7 @@ describe('Record#hasChanges', function () {
     assert.strictEqual(record.hasChanges, Record.prototype.hasChanges)
   })
   it('should detect when untracked fields are changed', function () {
-    const post = new this.Post.recordClass(this.data.p1)
+    const post = new this.Post.recordClass(this.data.p1) // eslint-disable-line
     assert(!post.hasChanges())
     post.author = 'Jake'
     assert(post.hasChanges())

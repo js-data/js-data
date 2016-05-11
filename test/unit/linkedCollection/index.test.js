@@ -24,7 +24,7 @@ describe('LinkedCollection', function () {
     assert.objectsEqual(collection.getAll(), [data[2], data[0], data[1]], 'data should be in order')
 
     assert.throws(() => {
-      new JSData.LinkedCollection(null, {
+      new JSData.LinkedCollection(null, { // eslint-disable-line
         mapper: mapper
       })
     }, Error, `[new LinkedCollection:opts.datastore] expected: DataStore, found: undefined\nhttp://www.js-data.io/v3.0/docs/errors#400`)

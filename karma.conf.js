@@ -114,6 +114,11 @@ module.exports = function (config) {
         sourceMap: 'inline'
       }
     },
+    client: {
+      mocha: {
+        // grep: 'utils.'
+      }
+    },
     browsers: browsers,
     reporters: ['progress', 'saucelabs'],
     sauceLabs: {

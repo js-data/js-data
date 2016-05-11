@@ -9,8 +9,6 @@ describe('Mapper#sum', function () {
   })
   it('should sum', async function () {
     const query = { id: 1 }
-    const id = 1
-    const props = [{ id, name: 'John', age: 30 }]
     let sumCalled = false
     const User = new JSData.Mapper({
       name: 'user',
@@ -34,8 +32,6 @@ describe('Mapper#sum', function () {
   })
   it('should return raw', async function () {
     const query = { id: 1 }
-    const id = 1
-    const props = [{ id, name: 'John', age: 30 }]
     let sumCalled = false
     const User = new JSData.Mapper({
       name: 'user',
