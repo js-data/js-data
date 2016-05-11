@@ -20,8 +20,8 @@ describe('utils.reject', function () {
   })
 
   it('returns a rejected promise with the specified err', function () {
-    let spy = sinon.spy(utils.Promise, 'reject')
-    utils.reject('rejecting for test').catch()
+    let spy = sinon.stub(utils.Promise, 'reject')
+    utils.reject('rejecting for test')
     assert(spy.withArgs('rejecting for test').calledOnce)
     utils.Promise.reject.restore()
   })
