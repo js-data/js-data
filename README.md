@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="96" height="96" />
 
-# [js-data v3 beta](http://www.js-data.io/) [![Slack Status][b1]][b2] [![npm version][b3]][b4] [![npm downloads][b5]][b6] [![coverage][b15]][b16]
+# [js-data v3 beta](http://www.js-data.io/) [![Slack Status][b1]][b2] [![npm version][b3]][b4] [![npm downloads][b5]][b6] [![coverage][bcov]][lcov]
 
 | __Browser tests__ | __Node.js tests__ |
 | ---------------------------------|----|
@@ -21,6 +21,8 @@
 [b13]: https://img.shields.io/badge/Node.js-v4.x-brightgreen.svg
 [b14]: https://img.shields.io/badge/Node.js-v0.12.x-brightgreen.svg
 [b15]: https://img.shields.io/badge/Node.js-v0.10.x-brightgreen.svg
+[bcov]: https://img.shields.io/codecov/c/github/js-data/js-data/master.svg
+[lcov]: https://codecov.io/github/js-data/js-data
 
 __JSData v3 beta is stable. More features may be added before 3.0.0. Some adapters
 still need to be updated to work with v3. Message @jmdobry on the JSData Slack
