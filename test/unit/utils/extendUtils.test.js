@@ -94,14 +94,27 @@ describe('utils.getSuper', function () {
     assert.equal(typeof utils.getSuper, 'function', 'has the getSuper method')
   })
 
-  it('getSuper returns base class', function () {
-    class Foo { }
+  it('getSuper returns base class with ES2015 classes', function () {
+    class Foo {}
 
-    class Bar extends Foo { }
+    class Bar extends Foo {}
 
     const barInstance = new Bar()
 
-    assert.equal(Foo, utils.getSuper(barInstance, false), 'barInstance inherited from Foo')
+    if (Object.getPrototypeOf(Bar) === Foo) {
+      assert.strictEqual(Foo, utils.getSuper(barInstance, false), 'barInstance inherited from Foo')
+    } else {
+      // Assert nothing in IE9, because this doesn't work in IE9.
+      // You have to use utils.extend if you want it to work in IE9.
+    }
+  })
+
+  it('getSuper returns base class with utils.extend', function () {
+    function Foo () {}
+    Foo.extend = utils.extend
+    const Bar = Foo.extend()
+    const barInstance = new Bar()
+    assert.strictEqual(Foo, utils.getSuper(barInstance, false), 'barInstance inherited from Foo')
   })
 })
 
