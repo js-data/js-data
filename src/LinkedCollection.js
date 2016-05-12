@@ -25,12 +25,18 @@ const DOMAIN = 'LinkedCollection'
 export default Collection.extend({
   constructor: function LinkedCollection (records, opts) {
     utils.classCallCheck(this, LinkedCollection)
-    LinkedCollection.__super__.call(this, records, opts)
-
     // Make sure this collection has somewhere to store "added" timestamps
-    Object.defineProperty(this, '_added', {
-      value: {}
+    Object.defineProperties(this, {
+      _added: {
+        value: {}
+      },
+      datastore: {
+        writable: true,
+        value: undefined
+      }
     })
+
+    LinkedCollection.__super__.call(this, records, opts)
 
     // Make sure this collection has a reference to a datastore
     if (!this.datastore) {

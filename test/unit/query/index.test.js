@@ -12,6 +12,13 @@ describe('Query', function () {
       foo () { return 'foo' }
     })
     class BarQuery extends JSData.Query {
+      // This constructor is here so that the test will work in IE9
+      constructor (collection) {
+        super(collection)
+        if (!BarQuery.__super__) {
+          JSData.Query.call(this, collection)
+        }
+      }
       bar () { return 'bar' }
     }
     const fooQ = new FooQuery('test')

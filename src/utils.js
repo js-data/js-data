@@ -504,10 +504,12 @@ const utils = {
         subClass[key] = value
       })
     }
-    Object.defineProperty(subClass, '__super__', {
-      configurable: true,
-      value: superClass
-    })
+    if (!subClass.hasOwnProperty('__super__')) {
+      Object.defineProperty(subClass, '__super__', {
+        configurable: true,
+        value: superClass
+      })
+    }
 
     utils.addHiddenPropsToTarget(subClass.prototype, props)
     utils.fillIn(subClass, classProps)

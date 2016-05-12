@@ -58,10 +58,17 @@ describe('Collection', function () {
       foo () { return 'foo' }
     })
     class BarCollection extends JSData.Collection {
+      // This constructor is here so that the test will work in IE9
+      constructor (records, opts) {
+        super(records, opts)
+        if (!BarCollection.__super__) {
+          JSData.Collection.call(this, records, opts)
+        }
+      }
       bar () { return 'bar' }
     }
-    const fooC = new FooCollection({ test: 'test' })
-    const barC = new BarCollection({ test: 'test' })
+    const fooC = new FooCollection(null, { test: 'test' })
+    const barC = new BarCollection(null, { test: 'test' })
     assert.equal(fooC.foo(), 'foo')
     assert.equal(fooC.test, 'test')
     assert.equal(barC.bar(), 'bar')
