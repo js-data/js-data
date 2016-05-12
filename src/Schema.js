@@ -622,7 +622,7 @@ const validate = function (value, schema, opts) {
   }
   if (utils.isUndefined(value)) {
     // Check if property is required
-    if (schema.required === true) {
+    if (schema.required === true && !opts.existingOnly) {
       addError(value, 'a value', opts, errors)
     }
     if (shouldPop) {
