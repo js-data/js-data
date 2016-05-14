@@ -590,7 +590,7 @@ describe('Mapper#create', function () {
           path: 'name'
         },
         {
-          actual: 'false',
+          actual: 'boolean',
           expected: 'one of (number)',
           path: 'age'
         }

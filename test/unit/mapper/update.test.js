@@ -100,6 +100,5 @@ describe('Mapper#update', function () {
     }
     assert.equal(updateCalled, false, 'Adapter#update should NOT have been called')
     assert.equal(user, undefined, 'user was not updated')
-    assert.equal(props[User.idAttribute], undefined, 'props does NOT have an id')
   })
 })

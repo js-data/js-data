@@ -34,7 +34,7 @@ const makeNotify = function (num) {
       if (op.indexOf('beforeUpdate') === 0 && utils.isUndefined(opts.existingOnly)) {
         opts.existingOnly = true
       }
-      const errors = this.validate(args[op === 'beforeUpdate' ? 1 : 0], opts)
+      const errors = this.validate(args[op === 'beforeUpdate' ? 1 : 0], utils.pick(opts, ['existingOnly']))
 
       // Restore option
       opts.existingOnly = originalExistingOnly
@@ -1747,9 +1747,11 @@ export default Component.extend({
    * @since 3.0.0
    */
   validate (record, opts) {
+    opts || (opts = {})
     const schema = this.getSchema()
+    const _opts = utils.pick(opts, ['existingOnly'])
     if (utils.isArray(record)) {
-      const errors = record.map((_record) => schema.validate(_record, opts))
+      const errors = record.map((_record) => schema.validate(_record, utils.pick(_opts, ['existingOnly'])))
       let hasErrors = false
       errors.forEach(function (err) {
         if (err) {
@@ -1761,7 +1763,7 @@ export default Component.extend({
       }
       return undefined
     }
-    return schema.validate(record, opts)
+    return schema.validate(record, _opts)
   },
 
   /**

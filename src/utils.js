@@ -857,6 +857,16 @@ const utils = {
     return _props
   },
 
+  pick (props, keys) {
+    const _props = {}
+    utils.forOwn(props, function (value, key) {
+      if (keys.indexOf(key) !== -1) {
+        _props[key] = value
+      }
+    })
+    return _props
+  },
+
   /**
    * TODO
    *
