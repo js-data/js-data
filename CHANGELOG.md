@@ -1,3 +1,13 @@
+##### 3.0.0-beta.6 - 16 May 2016
+
+###### Breaking changes
+- beforeCreate, beforeCreateMany, beforeUpdate, beforeUpdateAll, and beforeUpdateMany
+now run `Mapper#validate` for you by default.
+
+###### Backwards compatible changes
+- Added `Container#as` and `DataStore#as`
+- Added some deprecation warnings
+
 ##### 3.0.0-beta.5 - 07 May 2016
 
 ###### Backwards compatible changes

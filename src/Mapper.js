@@ -14,7 +14,7 @@ import {
 const DOMAIN = 'Mapper'
 const validatingHooks = [
   'beforeCreate',
-  'beforeCreateAll',
+  'beforeCreateMany',
   'beforeUpdate',
   'beforeUpdateAll',
   'beforeUpdateMany'
