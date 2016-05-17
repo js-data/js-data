@@ -10,7 +10,7 @@ describe('Mapper#sum', function () {
   it('should sum', async function () {
     const query = { id: 1 }
     let sumCalled = false
-    const User = new JSData.Mapper({
+    const User = new JSData.Mapper({ // eslint-disable-line
       name: 'user',
       defaultAdapter: 'mock'
     })
