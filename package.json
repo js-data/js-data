@@ -63,7 +63,7 @@
     "build": "npm run lint && npm run bundle && npm run min && npm run banner",
     "karma": "karma start",
     "mocha": "mocha --recursive -t 20000 -R dot -r babel-core/register -r babel-polyfill",
-    "cover": "nyc --require babel-core/register --require babel-polyfill --cache mocha --recursive -t 20000 -R dot && nyc report --reporter=html",
+    "cover": "nyc --require babel-core/register --require babel-polyfill --cache mocha --grep \"utils.\" --recursive -t 20000 -R dot && nyc report --reporter=html",
     "test": "npm run build && npm run cover && npm run karma",
     "release": "npm test && npm run doc && repo-tools updates && repo-tools changelog && repo-tools authors"
   },
