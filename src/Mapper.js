@@ -12,14 +12,43 @@ import {
 } from './decorators'
 
 const DOMAIN = 'Mapper'
-
+const validatingHooks = [
+  'beforeCreate',
+  'beforeCreateMany',
+  'beforeUpdate',
+  'beforeUpdateAll',
+  'beforeUpdateMany'
+]
 const makeNotify = function (num) {
   return function (...args) {
     const opts = args[args.length - num]
-    this.dbg(opts.op, ...args)
+    const op = opts.op
+    this.dbg(op, ...args)
+
+    // Automatic validation
+    if (validatingHooks.indexOf(op) !== -1 && opts.validate !== false) {
+      // Save current value of option
+      const originalExistingOnly = opts.existingOnly
+
+      // For updates, ignore required fields if they aren't present
+      if (op.indexOf('beforeUpdate') === 0 && utils.isUndefined(opts.existingOnly)) {
+        opts.existingOnly = true
+      }
+      const errors = this.validate(args[op === 'beforeUpdate' ? 1 : 0], utils.pick(opts, ['existingOnly']))
+
+      // Restore option
+      opts.existingOnly = originalExistingOnly
+
+      // Abort lifecycle due to validation errors
+      if (errors) {
+        return utils.reject(errors)
+      }
+    }
+
+    // Emit lifecycle event
     if (opts.notify || (opts.notify === undefined && this.notify)) {
       setTimeout(() => {
-        this.emit(opts.op, ...args)
+        this.emit(op, ...args)
       })
     }
   }
@@ -1147,7 +1176,7 @@ export default Component.extend({
     // before lifecycle hook
     op = opts.op = before
     return utils.resolve(this[op](...args)).then((_value) => {
-      if (!utils.isUndefined(config.beforeAssign)) {
+      if (!utils.isUndefined(args[config.beforeAssign])) {
         // Allow for re-assignment from lifecycle hook
         args[config.beforeAssign] = utils.isUndefined(_value) ? args[config.beforeAssign] : _value
       }
@@ -1718,9 +1747,11 @@ export default Component.extend({
    * @since 3.0.0
    */
   validate (record, opts) {
+    opts || (opts = {})
     const schema = this.getSchema()
+    const _opts = utils.pick(opts, ['existingOnly'])
     if (utils.isArray(record)) {
-      const errors = record.map((_record) => schema.validate(_record, opts))
+      const errors = record.map((_record) => schema.validate(_record, utils.pick(_opts, ['existingOnly'])))
       let hasErrors = false
       errors.forEach(function (err) {
         if (err) {
@@ -1732,7 +1763,7 @@ export default Component.extend({
       }
       return undefined
     }
-    return schema.validate(record, opts)
+    return schema.validate(record, _opts)
   },
 
   /**

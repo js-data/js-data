@@ -6,35 +6,6 @@ describe('Container#defineMapper', function () {
     const store = new Container()
     assert.equal(typeof store.defineMapper, 'function')
     assert.strictEqual(store.defineMapper, Container.prototype.defineMapper)
-
-    // Should support legacy method
-    const mapper = store.defineResource('foo')
-    assert(mapper instanceof JSData.Mapper)
-
-    const PostMapper = store.defineResource('post', {
-      relations: {
-        hasMany: {
-          comment: {
-            localField: 'comments',
-            foreignKey: 'post_id'
-          }
-        }
-      }
-    })
-
-    const CommentMapper = store.defineResource('comment', {
-      relations: {
-        belongsTo: {
-          post: {
-            localField: 'posts',
-            foreignKey: 'post_id'
-          }
-        }
-      }
-    })
-
-    assert.equal(PostMapper.relationList[0].getRelation() === CommentMapper, true)
-    assert.equal(CommentMapper.relationList[0].getRelation() === PostMapper, true)
   })
   it('should create a new mapper', function () {
     const Container = JSData.Container
@@ -99,5 +70,18 @@ describe('Container#defineMapper', function () {
       name: 'foo'
     })
     assert.equal(mapper.name, 'foo')
+  })
+  it('can get a scoped reference', function () {
+    const Container = JSData.Container
+    let container = new Container()
+    const fooMapper = container.defineMapper('foo')
+    const fooStore = container.as('foo')
+
+    assert.strictEqual(fooStore._adapters, container._adapters)
+    assert.strictEqual(fooStore._listeners, container._listeners)
+    assert.strictEqual(fooStore.getMapper(), container.getMapper('foo'))
+    assert.deepEqual(fooStore.createRecord({ foo: 'bar' }), container.createRecord('foo', { foo: 'bar' }))
+    assert.strictEqual(fooMapper, container.getMapper('foo'))
+    assert.strictEqual(fooStore.getMapper(), container.getMapper('foo'))
   })
 })

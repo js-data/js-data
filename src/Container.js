@@ -9,7 +9,7 @@ import Mapper from './Mapper'
 
 const DOMAIN = 'Container'
 
-const toProxy = [
+export const proxiedMapperMethods = [
   /**
    * Wrapper for {@link Mapper#count}.
    *
@@ -505,6 +505,44 @@ const props = {
   },
 
   /**
+   * Return a container scoped to a particular mapper.
+   *
+   * @example
+   * import {Container} from 'js-data'
+   * const store = new Container()
+   * const UserMapper = store.defineMapper('user')
+   * const UserStore = store.as('user')
+   *
+   * const user1 = store.createRecord('user', { name: 'John' })
+   * const user2 = UserStore.createRecord({ name: 'John' })
+   * const user3 = UserMapper.createRecord({ name: 'John' })
+   * assert.deepEqual(user1, user2)
+   * assert.deepEqual(user2, user3)
+   * assert.deepEqual(user1, user3)
+   *
+   * @method Container#as
+   * @param {string} name Name of the {@link Mapper}.
+   * @returns {Object} A container scoped to a particular mapper.
+   * @since 3.0.0
+   */
+  as (name) {
+    const props = {}
+    proxiedMapperMethods.forEach(function (method) {
+      props[method] = {
+        writable: true,
+        value: function (...args) {
+          return this.getMapper(name)[method](...args)
+        }
+      }
+    })
+    props.getMapper = {
+      writable: true,
+      value: () => this.getMapper(name)
+    }
+    return Object.create(this, props)
+  },
+
+  /**
    * Create a new mapper and register it in this container.
    *
    * @example
@@ -512,15 +550,20 @@ const props = {
    * const store = new Container({
    *   mapperDefaults: { foo: 'bar' }
    * })
-   * const userMapper = store.defineMapper('user')
-   * userMapper.foo // "bar"
+   * // Container#defineMapper returns a direct reference to the newly created
+   * // Mapper.
+   * const UserMapper = store.defineMapper('user')
+   * UserMapper === store.getMapper('user') // true
+   * UserMapper === store.as('user').getMapper() // true
+   * UserMapper.foo // "bar"
    *
    * @method Container#defineMapper
    * @param {string} name Name under which to register the new {@link Mapper}.
    * {@link Mapper#name} will be set to this value.
    * @param {Object} [opts] Configuration options. Passed to
    * {@link Container#mapperClass} when creating the new {@link Mapper}.
-   * @returns {Mapper}
+   * @returns {Mapper} The newly created instance of {@link Mapper}.
+   * @see Container#as
    * @since 3.0.0
    */
   defineMapper (name, opts) {
@@ -583,6 +626,7 @@ const props = {
   },
 
   defineResource (name, opts) {
+    console.warn('DEPRECATED: defineResource is deprecated, use defineMapper instead')
     return this.defineMapper(name, opts)
   },
 
@@ -637,8 +681,11 @@ const props = {
    * @example
    * import {Container} from 'js-data'
    * const container = new Container()
-   * const userMapper = container.defineMapper('user')
-   * userMapper === container.getMapper('user') // true
+   * // Container#defineMapper returns a direct reference to the newly created
+   * // Mapper.
+   * const UserMapper = container.defineMapper('user')
+   * UserMapper === container.getMapper('user') // true
+   * UserMapper === container.as('user').getMapper() // true
    *
    * @method Container#getMapper
    * @param {string} name {@link Mapper#name}.
@@ -685,7 +732,7 @@ const props = {
   }
 }
 
-toProxy.forEach(function (method) {
+proxiedMapperMethods.forEach(function (method) {
   props[method] = function (name, ...args) {
     return this.getMapper(name)[method](...args)
   }
@@ -764,7 +811,7 @@ toProxy.forEach(function (method) {
  * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
  * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-nodejs","Notes on using JSData in Node.js"]
  */
-export default Component.extend(props)
+export const Container = Component.extend(props)
 
 /**
  * Create a subclass of this Container.

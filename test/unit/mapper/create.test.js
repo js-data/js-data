@@ -560,4 +560,84 @@ describe('Mapper#create', function () {
     assert.equal(createCalledCount.profile, 2)
     assert(!createCalledCount.organization)
   })
+  it('should validate', async function () {
+    const props = { name: 1234, age: false }
+    let createCalled = false
+    let user
+    const User = new JSData.Mapper({
+      name: 'user',
+      defaultAdapter: 'mock',
+      schema: {
+        properties: {
+          name: { type: 'string' },
+          age: { type: 'number' }
+        }
+      }
+    })
+    User.registerAdapter('mock', {
+      create () {
+        createCalled = true
+      }
+    })
+    try {
+      user = await User.create(props)
+      throw new Error('validation error should have been thrown!')
+    } catch (err) {
+      assert.deepEqual(err, [
+        {
+          actual: 'number',
+          expected: 'one of (string)',
+          path: 'name'
+        },
+        {
+          actual: 'boolean',
+          expected: 'one of (number)',
+          path: 'age'
+        }
+      ])
+    }
+    assert.equal(createCalled, false, 'Adapter#create should NOT have been called')
+    assert.equal(user, undefined, 'user was not created')
+    assert.equal(props[User.idAttribute], undefined, 'props does NOT have an id')
+  })
+  it('should validate required', async function () {
+    const props = {}
+    let createCalled = false
+    let user
+    const User = new JSData.Mapper({
+      name: 'user',
+      defaultAdapter: 'mock',
+      schema: {
+        properties: {
+          name: { type: 'string', required: true },
+          age: { type: 'number', required: true }
+        }
+      }
+    })
+    User.registerAdapter('mock', {
+      create () {
+        createCalled = true
+      }
+    })
+    try {
+      user = await User.create(props)
+      throw new Error('validation error should have been thrown!')
+    } catch (err) {
+      assert.deepEqual(err, [
+        {
+          actual: 'undefined',
+          expected: 'a value',
+          path: 'name'
+        },
+        {
+          actual: 'undefined',
+          expected: 'a value',
+          path: 'age'
+        }
+      ])
+    }
+    assert.equal(createCalled, false, 'Adapter#create should NOT have been called')
+    assert.equal(user, undefined, 'user was not created')
+    assert.equal(props[User.idAttribute], undefined, 'props does NOT have an id')
+  })
 })

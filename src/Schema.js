@@ -511,7 +511,7 @@ const validationKeywords = {
     })
     // Value did not match any expected type
     if (!validType) {
-      return makeError(value ? typeof value : '' + value, `one of (${type.join(', ')})`, opts)
+      return makeError(!utils.isUndefined(value) && value !== null ? typeof value : '' + value, `one of (${type.join(', ')})`, opts)
     }
     // Run keyword validators for matched type
     // http://json-schema.org/latest/json-schema-validation.html#anchor12
@@ -622,7 +622,7 @@ const validate = function (value, schema, opts) {
   }
   if (utils.isUndefined(value)) {
     // Check if property is required
-    if (schema.required === true) {
+    if (schema.required === true && !opts.existingOnly) {
       addError(value, 'a value', opts, errors)
     }
     if (shouldPop) {

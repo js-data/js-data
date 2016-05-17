@@ -202,6 +202,74 @@ describe('Query#filter', function () {
     params = { offset: 4 }
 
     assert.objectsEqual(collection.query().filter(params).run(), [p5], 'should support offset')
+
+    params = {
+      where: [
+        {
+          roles: {
+            'contains': 'admin'
+          }
+        },
+        'or',
+        {
+          age: {
+            '=': 30
+          }
+        }
+      ]
+    }
+    assert.objectsEqual(collection.query().filter(params).run(), [p1, p2, p3, p5])
+
+    params = {
+      where: [
+        {
+          roles: {
+            'contains': 'admin'
+          },
+          age: {
+            '=': 30
+          }
+        },
+        'or',
+        {
+          roles: {
+            'contains': 'owner'
+          }
+        }
+      ]
+    }
+    assert.objectsEqual(collection.query().filter(params).run(), [p1, p5])
+
+    params = {
+      where: [
+        [
+          {
+            roles: {
+              'contains': 'admin'
+            },
+            age: {
+              '=': 30
+            }
+          },
+          'or',
+          {
+            author: {
+              '=': 'Mike'
+            }
+          }
+        ],
+        'or',
+        {
+          roles: {
+            'contains': 'owner'
+          },
+          age: {
+            '=': 33
+          }
+        }
+      ]
+    }
+    assert.objectsEqual(collection.query().filter(params).run(), [p1, p3, p5])
   })
   it('should allow custom filter function', function () {
     const p1 = this.data.p1

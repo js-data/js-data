@@ -69,4 +69,38 @@ describe('Mapper#updateAll', function () {
     assert.equal(data.adapter, 'mock', 'should have adapter name in response')
     assert.equal(data.updated, 1, 'should have other metadata in response')
   })
+  it('should validate', async function () {
+    const props = { name: 1234 }
+    let updateCalled = false
+    let users
+    const User = new JSData.Mapper({
+      name: 'user',
+      defaultAdapter: 'mock',
+      schema: {
+        properties: {
+          name: { type: 'string', required: true },
+          age: { type: 'number', required: true }
+        }
+      }
+    })
+    User.registerAdapter('mock', {
+      updateAll () {
+        updateCalled = true
+      }
+    })
+    try {
+      users = await User.updateAll(props)
+      throw new Error('validation error should have been thrown!')
+    } catch (err) {
+      assert.deepEqual(err, [
+        {
+          actual: 'number',
+          expected: 'one of (string)',
+          path: 'name'
+        }
+      ])
+    }
+    assert.equal(updateCalled, false, 'Adapter#updateAll should NOT have been called')
+    assert.equal(users, undefined, 'no users were updated')
+  })
 })

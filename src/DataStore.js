@@ -4,10 +4,28 @@ import {
   hasManyType,
   hasOneType
 } from './decorators'
-import Container from './Container'
+import {proxiedMapperMethods, Container} from './Container'
 import LinkedCollection from './LinkedCollection'
 
 const DOMAIN = 'DataStore'
+const proxiedCollectionMethods = [
+  'add',
+  'between',
+  'createIndex',
+  'filter',
+  'get',
+  'getAll',
+  'query',
+  'toJson'
+]
+const ownMethodsForScoping = [
+  'addToCache',
+  'cachedFind',
+  'cachedFindAll',
+  'cacheFind',
+  'cacheFindAll',
+  'hashQuery'
+]
 
 const safeSet = function (record, field, value) {
   if (record && record._set) {
@@ -105,6 +123,64 @@ const props = {
    */
   addToCache (name, data, opts) {
     return this.getCollection(name).add(data, opts)
+  },
+
+  /**
+   * Return a store scoped to a particular mapper/collection pair.
+   *
+   * @example
+   * import {DataStore} from 'js-data'
+   * const store = new DataStore()
+   * const UserMapper = store.defineMapper('user')
+   * const UserStore = store.as('user')
+   *
+   * const user1 = store.createRecord('user', { name: 'John' })
+   * const user2 = UserStore.createRecord({ name: 'John' })
+   * const user3 = UserMapper.createRecord({ name: 'John' })
+   * assert.deepEqual(user1, user2)
+   * assert.deepEqual(user2, user3)
+   * assert.deepEqual(user1, user3)
+   *
+   * @method DataStore#as
+   * @param {string} name Name of the {@link Mapper}.
+   * @returns {Object} A store scoped to a particular mapper/collection pair.
+   * @since 3.0.0
+   */
+  as (name) {
+    const props = {}
+    ownMethodsForScoping.forEach(function (method) {
+      props[method] = {
+        writable: true,
+        value: function (...args) {
+          return this[method](name, ...args)
+        }
+      }
+    })
+    proxiedMapperMethods.forEach(function (method) {
+      props[method] = {
+        writable: true,
+        value: function (...args) {
+          return this.getMapper(name)[method](...args)
+        }
+      }
+    })
+    props.getMapper = {
+      writable: true,
+      value: () => this.getMapper(name)
+    }
+    proxiedCollectionMethods.forEach(function (method) {
+      props[method] = {
+        writable: true,
+        value: function (...args) {
+          return this.getCollection(name)[method](...args)
+        }
+      }
+    })
+    props.getCollection = {
+      writable: true,
+      value: () => this.getCollection(name)
+    }
+    return Object.create(this, props)
   },
 
   /**
@@ -577,12 +653,14 @@ const props = {
     })
   },
 
-  eject (id, opts) {
-    return this.remove(id, opts)
+  eject (name, id, opts) {
+    console.warn('DEPRECATED: "eject" is deprecated, use "remove" instead')
+    return this.remove(name, id, opts)
   },
 
-  ejectAll (query, opts) {
-    return this.removeAll(query, opts)
+  ejectAll (name, query, opts) {
+    console.warn('DEPRECATED: "ejectAll" is deprecated, use "removeAll" instead')
+    return this.removeAll(name, query, opts)
   },
 
   /**
@@ -683,8 +761,9 @@ const props = {
     return utils.toJson(query)
   },
 
-  inject (records, opts) {
-    return this.add(records, opts)
+  inject (name, records, opts) {
+    console.warn('DEPRECATED: "inject" is deprecated, use "add" instead')
+    return this.add(name, records, opts)
   },
 
   remove (name, id, opts) {
@@ -799,18 +878,7 @@ const props = {
   }
 }
 
-const toProxy = [
-  'add',
-  'between',
-  'createIndex',
-  'filter',
-  'get',
-  'getAll',
-  'query',
-  'toJson'
-]
-
-toProxy.forEach(function (method) {
+proxiedCollectionMethods.forEach(function (method) {
   props[method] = function (name, ...args) {
     return this.getCollection(name)[method](...args)
   }
@@ -835,14 +903,20 @@ toProxy.forEach(function (method) {
  * import {DataStore} from 'js-data'
  * import HttpAdapter from 'js-data-http'
  * const store = new DataStore()
+ *
+ * // DataStore#defineMapper returns a direct reference to the newly created
+ * // Mapper.
  * const UserMapper = store.defineMapper('user')
+ *
+ * // DataStore#as returns the store scoped to a particular Mapper.
+ * const UserStore = store.as('user')
  *
  * // Call "find" on "UserMapper" (Stateless ORM)
  * UserMapper.find(1).then((user) => {
  *   // retrieved a "user" record via the http adapter, but that's it
  *
  *   // Call "find" on "store" targeting "user" (Stateful DataStore)
- *   return store.find('user', 1)
+ *   return store.find('user', 1) // same as "UserStore.find(1)"
  * }).then((user) => {
  *   // not only was a "user" record retrieved, but it was added to the
  *   // store's "user" collection
