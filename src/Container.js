@@ -9,7 +9,7 @@ import Mapper from './Mapper'
 
 const DOMAIN = 'Container'
 
-const toProxy = [
+export const proxiedMapperMethods = [
   /**
    * Wrapper for {@link Mapper#count}.
    *
@@ -435,13 +435,23 @@ const toProxy = [
 
 const props = {
   constructor: function Container (opts) {
-    const self = this
-    utils.classCallCheck(self, Container)
-    Container.__super__.call(self)
+    utils.classCallCheck(this, Container)
+    Container.__super__.call(this)
     opts || (opts = {})
 
+    Object.defineProperties(this, {
+      // Holds the adapters, shared by all mappers in this container
+      _adapters: {
+        value: {}
+      },
+      // The the mappers in this container
+      _mappers: {
+        value: {}
+      }
+    })
+
     // Apply options provided by the user
-    utils.fillIn(self, opts)
+    utils.fillIn(this, opts)
 
     /**
      * Defaults options to pass to {@link Container#mapperClass} when creating a
@@ -452,7 +462,7 @@ const props = {
      * @since 3.0.0
      * @type {Object}
      */
-    self.mapperDefaults = self.mapperDefaults || {}
+    this.mapperDefaults = this.mapperDefaults || {}
 
     /**
      * Constructor function to use in {@link Container#defineMapper} to create a
@@ -463,13 +473,7 @@ const props = {
      * @since 3.0.0
      * @type {Constructor}
      */
-    self.mapperClass = self.mapperClass || Mapper
-
-    // Holds the adapters, shared by all mappers in this container
-    self._adapters = {}
-
-    // The the mappers in this container
-    self._mappers = {}
+    this.mapperClass = this.mapperClass || Mapper
   },
 
   /**
@@ -501,6 +505,44 @@ const props = {
   },
 
   /**
+   * Return a container scoped to a particular mapper.
+   *
+   * @example
+   * import {Container} from 'js-data'
+   * const store = new Container()
+   * const UserMapper = store.defineMapper('user')
+   * const UserStore = store.as('user')
+   *
+   * const user1 = store.createRecord('user', { name: 'John' })
+   * const user2 = UserStore.createRecord({ name: 'John' })
+   * const user3 = UserMapper.createRecord({ name: 'John' })
+   * assert.deepEqual(user1, user2)
+   * assert.deepEqual(user2, user3)
+   * assert.deepEqual(user1, user3)
+   *
+   * @method Container#as
+   * @param {string} name Name of the {@link Mapper}.
+   * @returns {Object} A container scoped to a particular mapper.
+   * @since 3.0.0
+   */
+  as (name) {
+    const props = {}
+    proxiedMapperMethods.forEach(function (method) {
+      props[method] = {
+        writable: true,
+        value: function (...args) {
+          return this.getMapper(name)[method](...args)
+        }
+      }
+    })
+    props.getMapper = {
+      writable: true,
+      value: () => this.getMapper(name)
+    }
+    return Object.create(this, props)
+  },
+
+  /**
    * Create a new mapper and register it in this container.
    *
    * @example
@@ -508,20 +550,23 @@ const props = {
    * const store = new Container({
    *   mapperDefaults: { foo: 'bar' }
    * })
-   * const userMapper = store.defineMapper('user')
-   * userMapper.foo // "bar"
+   * // Container#defineMapper returns a direct reference to the newly created
+   * // Mapper.
+   * const UserMapper = store.defineMapper('user')
+   * UserMapper === store.getMapper('user') // true
+   * UserMapper === store.as('user').getMapper() // true
+   * UserMapper.foo // "bar"
    *
    * @method Container#defineMapper
    * @param {string} name Name under which to register the new {@link Mapper}.
    * {@link Mapper#name} will be set to this value.
    * @param {Object} [opts] Configuration options. Passed to
    * {@link Container#mapperClass} when creating the new {@link Mapper}.
-   * @returns {Mapper}
+   * @returns {Mapper} The newly created instance of {@link Mapper}.
+   * @see Container#as
    * @since 3.0.0
    */
   defineMapper (name, opts) {
-    const self = this
-
     // For backwards compatibility with defineResource
     if (utils.isObject(name)) {
       opts = name
@@ -538,38 +583,34 @@ const props = {
     opts.relations || (opts.relations = {})
 
     // Check if the user is overriding the datastore's default mapperClass
-    const mapperClass = opts.mapperClass || self.mapperClass
+    const mapperClass = opts.mapperClass || this.mapperClass
     delete opts.mapperClass
 
     // Apply the datastore's defaults to the options going into the mapper
-    utils.fillIn(opts, self.mapperDefaults)
+    utils.fillIn(opts, this.mapperDefaults)
 
     // Instantiate a mapper
-    const mapper = self._mappers[name] = new mapperClass(opts) // eslint-disable-line
+    const mapper = this._mappers[name] = new mapperClass(opts) // eslint-disable-line
     mapper.relations || (mapper.relations = {})
     // Make sure the mapper's name is set
     mapper.name = name
     // All mappers in this datastore will share adapters
-    mapper._adapters = self.getAdapters()
+    mapper._adapters = this.getAdapters()
 
-    mapper.datastore = self
+    mapper.datastore = this
 
-    mapper.on('all', function (...args) {
-      self._onMapperEvent(name, ...args)
-    })
+    mapper.on('all', (...args) => this._onMapperEvent(name, ...args))
 
     // Setup the mapper's relations, including generating Mapper#relationList
     // and Mapper#relationFields
-    utils.forOwn(mapper.relations, function (group, type) {
-      utils.forOwn(group, function (relations, _name) {
+    utils.forOwn(mapper.relations, (group, type) => {
+      utils.forOwn(group, (relations, _name) => {
         if (utils.isObject(relations)) {
           relations = [relations]
         }
-        relations.forEach(function (def) {
-          def.getRelation = function () {
-            return self.getMapper(_name)
-          }
-          const relatedMapper = self._mappers[_name] || _name
+        relations.forEach((def) => {
+          def.getRelation = () => this.getMapper(_name)
+          const relatedMapper = this._mappers[_name] || _name
           if (type === belongsToType) {
             mapper.belongsTo(relatedMapper, def)
           } else if (type === hasOneType) {
@@ -585,6 +626,7 @@ const props = {
   },
 
   defineResource (name, opts) {
+    console.warn('DEPRECATED: defineResource is deprecated, use defineMapper instead')
     return this.defineMapper(name, opts)
   },
 
@@ -598,12 +640,11 @@ const props = {
    * @since 3.0.0
    */
   getAdapter (name) {
-    const self = this
-    const adapter = self.getAdapterName(name)
+    const adapter = this.getAdapterName(name)
     if (!adapter) {
       throw utils.err(`${DOMAIN}#getAdapter`, 'name')(400, 'string', name)
     }
-    return self.getAdapters()[adapter]
+    return this.getAdapters()[adapter]
   },
 
   /**
@@ -640,8 +681,11 @@ const props = {
    * @example
    * import {Container} from 'js-data'
    * const container = new Container()
-   * const userMapper = container.defineMapper('user')
-   * userMapper === container.getMapper('user') // true
+   * // Container#defineMapper returns a direct reference to the newly created
+   * // Mapper.
+   * const UserMapper = container.defineMapper('user')
+   * UserMapper === container.getMapper('user') // true
+   * UserMapper === container.as('user').getMapper() // true
    *
    * @method Container#getMapper
    * @param {string} name {@link Mapper#name}.
@@ -676,20 +720,19 @@ const props = {
    * @tutorial ["http://www.js-data.io/v3.0/docs/connecting-to-a-data-source","Connecting to a data source"]
    */
   registerAdapter (name, adapter, opts) {
-    const self = this
     opts || (opts = {})
-    self.getAdapters()[name] = adapter
+    this.getAdapters()[name] = adapter
     // Optionally make it the default adapter for the target.
     if (opts === true || opts.default) {
-      self.mapperDefaults.defaultAdapter = name
-      utils.forOwn(self._mappers, function (mapper) {
+      this.mapperDefaults.defaultAdapter = name
+      utils.forOwn(this._mappers, function (mapper) {
         mapper.defaultAdapter = name
       })
     }
   }
 }
 
-toProxy.forEach(function (method) {
+proxiedMapperMethods.forEach(function (method) {
   props[method] = function (name, ...args) {
     return this.getMapper(name)[method](...args)
   }
@@ -768,7 +811,7 @@ toProxy.forEach(function (method) {
  * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
  * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-nodejs","Notes on using JSData in Node.js"]
  */
-export default Component.extend(props)
+export const Container = Component.extend(props)
 
 /**
  * Create a subclass of this Container.

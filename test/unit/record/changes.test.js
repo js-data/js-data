@@ -8,7 +8,7 @@ describe('Record#changes', function () {
     assert.strictEqual(record.changes, Record.prototype.changes)
   })
   it('should be empty right after an instance is created', function () {
-    const post = new this.Post.recordClass(this.data.p1)
+    const post = new this.Post.recordClass(this.data.p1) // eslint-disable-line
     assert.objectsEqual(post.changes(), {
       added: {},
       removed: {},
@@ -16,7 +16,7 @@ describe('Record#changes', function () {
     })
   })
   it('should detect tracked field changes', function () {
-    const post = new this.Post.recordClass(this.data.p1)
+    const post = new this.Post.recordClass(this.data.p1) // eslint-disable-line
     assert.objectsEqual(post.changes(), {
       added: {},
       removed: {},
@@ -32,7 +32,7 @@ describe('Record#changes', function () {
     })
   })
   it('should detect untracked field changes', function () {
-    const post = new this.Post.recordClass(this.data.p1)
+    const post = new this.Post.recordClass(this.data.p1) // eslint-disable-line
     assert.objectsEqual(post.changes(), {
       added: {},
       removed: {},

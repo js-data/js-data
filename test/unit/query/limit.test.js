@@ -1,4 +1,4 @@
-import { assert, JSData } from '../../_setup'
+import { assert } from '../../_setup'
 
 describe('Query#limit', function () {
   it('should correctly apply "limit" predicates', function () {

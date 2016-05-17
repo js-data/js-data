@@ -14,7 +14,6 @@ describe('Mapper#createMany', function () {
       name: 'user',
       defaultAdapter: 'mock'
     })
-    const user = new UserMapper.recordClass({ foo: 'bar' })
     UserMapper.registerAdapter('mock', {
       createMany (mapper, _props, Opts) {
         createCalled = true
@@ -515,5 +514,100 @@ describe('Mapper#createMany', function () {
     assert(!createCalledCount.comment)
     assert.equal(createCalledCount.profile, 2)
     assert(!createCalledCount.organization)
+  })
+  it('should validate', async function () {
+    const props = [{ name: true }, {}, { name: 1234, age: 25 }]
+    let createCalled = false
+    let users
+    const User = new JSData.Mapper({
+      name: 'user',
+      defaultAdapter: 'mock',
+      schema: {
+        properties: {
+          name: { type: 'string' },
+          age: { type: 'number' }
+        }
+      }
+    })
+    User.registerAdapter('mock', {
+      createMany () {
+        createCalled = true
+      }
+    })
+    try {
+      users = await User.createMany(props)
+      throw new Error('validation error should have been thrown!')
+    } catch (err) {
+      assert.deepEqual(err, [
+        [
+          {
+            actual: 'boolean',
+            expected: 'one of (string)',
+            path: 'name'
+          }
+        ],
+        undefined,
+        [
+          {
+            actual: 'number',
+            expected: 'one of (string)',
+            path: 'name'
+          }
+        ]
+      ])
+    }
+    assert.equal(createCalled, false, 'Adapter#create should NOT have been called')
+    assert.equal(users, undefined, 'users were not created')
+    assert.equal(props[0][User.idAttribute], undefined, 'props[0] does NOT have an id')
+  })
+  it('should validate required', async function () {
+    const props = [{ name: 'John' }, {}, { name: 'Sally', age: 25 }]
+    let createCalled = false
+    let users
+    const User = new JSData.Mapper({
+      name: 'user',
+      defaultAdapter: 'mock',
+      schema: {
+        properties: {
+          name: { type: 'string', required: true },
+          age: { type: 'number', required: true }
+        }
+      }
+    })
+    User.registerAdapter('mock', {
+      createMany () {
+        createCalled = true
+      }
+    })
+    try {
+      users = await User.createMany(props)
+      throw new Error('validation error should have been thrown!')
+    } catch (err) {
+      assert.deepEqual(err, [
+        [
+          {
+            actual: 'undefined',
+            expected: 'a value',
+            path: 'age'
+          }
+        ],
+        [
+          {
+            actual: 'undefined',
+            expected: 'a value',
+            path: 'name'
+          },
+          {
+            actual: 'undefined',
+            expected: 'a value',
+            path: 'age'
+          }
+        ],
+        undefined
+      ])
+    }
+    assert.equal(createCalled, false, 'Adapter#create should NOT have been called')
+    assert.equal(users, undefined, 'users were not created')
+    assert.equal(props[0][User.idAttribute], undefined, 'props[0] does NOT have an id')
   })
 })

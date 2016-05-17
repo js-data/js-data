@@ -52,12 +52,12 @@ export const utils: {
   noDupeAdd(array: any[], record: any, fn: Function): void
   omit(props: Object, keys: string[]): Object
   plainCopy(from: any): any
-  possibleConstructorReturn(self: Object, call: Object | Function): Object
+  possibleConstructorReturn(self: Object, call: Object|Function): Object
   reject(value: any): Promise<any>
   remove(array: any[], fn: Function): void
   resolve(value: any): Promise<any>
   set(object: Object, path: string, value?: any): void
-  strictEqual(a: any, b: any): boolean
+  deepEqual(a: any, b: any): boolean
   toJson(value: any, replacer?: Function, space?: number): string
   unset(object: Object, path: string): void
 }
@@ -118,7 +118,7 @@ export class Mapper extends Component {
   afterDestroyAll(query: any, opts: any, result: any): any
   afterFind(id: string|number, opts: any, result: any): any
   afterFindAll(query: any, opts: any, result: any): any
-  afterSum(field: string, query:any, opts: any, result: any): any
+  afterSum(field: string, query: any, opts: any, result: any): any
   afterUpdate(id: string|number, opts: any, result: any): any
   afterUpdateAll(props: any, query: any, opts: any, result: any): any
   afterUpdateMany(records: any[], opts: any, result: any): any
@@ -158,6 +158,7 @@ export class Mapper extends Component {
   update(id: string|number, props: any, opts?: any): Promise<any>
   updateAll(props: any, query: any, opts?: any): Promise<any>
   updateMany(records: any[], opts?: any): Promise<any>
+  validate(records: any|any[], opts?: any): any
 }
 export class Collection extends Component {
   idAttribute: string
@@ -189,7 +190,7 @@ export class Collection extends Component {
   query(): Query
   reduce(cb: Function, initialValue: any): any
   remove(id: string|number, opts?: any): any
-  removeAll(query: any, opts?: any): void | any[]
+  removeAll(query: any, opts?: any): void|any[]
   skip(num: number): any[]
   toJSON(opts?: any): any[]
   updateIndex(record: any, opts?: any): void
@@ -204,6 +205,7 @@ export class Container extends Component {
   mapperClass: typeof Mapper
   _adapters: Object
   _mappers: Object
+  as(name: string): Mapper
   constructor(opts?: any)
   createRecord(name: string, props?: any, opts?: any): Record
   defineMapper(name: string, opts?: any): Mapper
@@ -220,6 +222,7 @@ export class DataStore extends Container {
   _pendingQueries: Object
   _completedQueries: Object
   linkRelations: boolean
+  as(name: string): Mapper|LinkedCollection
   constructor(opts?: any)
   add(mapperName: string, records: any[]|any, opts?: any): any[]|any
   addToCache(mapperName: string, data: any, opts: any): any
@@ -234,7 +237,7 @@ export class DataStore extends Container {
   getAll(mapperName: string, ...args: any[]): any[]
   query(mapperName: string): Query
   remove(mapperName: string, id: string|number, opts?: any): any
-  removeAll(mapperName: string, query?: any, opts?: any): void | any[]
+  removeAll(mapperName: string, query?: any, opts?: any): void|any[]
   toJson(mapperName: string, opts?: any): any[]
   _callSuper(method: string, ...args: any[]): any
   _end(mapperName: string, data: any, opts?: any): any

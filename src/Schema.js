@@ -511,7 +511,7 @@ const validationKeywords = {
     })
     // Value did not match any expected type
     if (!validType) {
-      return makeError(value ? typeof value : '' + value, `one of (${type.join(', ')})`, opts)
+      return makeError(!utils.isUndefined(value) && value !== null ? typeof value : '' + value, `one of (${type.join(', ')})`, opts)
     }
     // Run keyword validators for matched type
     // http://json-schema.org/latest/json-schema-validation.html#anchor12
@@ -622,7 +622,7 @@ const validate = function (value, schema, opts) {
   }
   if (utils.isUndefined(value)) {
     // Check if property is required
-    if (schema.required === true) {
+    if (schema.required === true && !opts.existingOnly) {
       addError(value, 'a value', opts, errors)
     }
     if (shouldPop) {
@@ -679,11 +679,10 @@ const makeDescriptor = function (prop, schema, opts) {
 
   descriptor.get = function () { return this._get(keyPath) }
   descriptor.set = function (value) {
-    const self = this
     // These are accessed a lot
-    const _get = self[getter]
-    const _set = self[setter]
-    const _unset = self[unsetter]
+    const _get = this[getter]
+    const _set = this[setter]
+    const _unset = this[unsetter]
 
     // Optionally check that the new value passes validation
     if (!_get(noValidatePath)) {
@@ -748,9 +747,9 @@ const makeDescriptor = function (prop, schema, opts) {
           if (!_get(silentPath)) {
             let i
             for (i = 0; i < changed.length; i++) {
-              self.emit('change:' + changed[i], self, utils.get(self, changed[i]))
+              this.emit('change:' + changed[i], this, utils.get(this, changed[i]))
             }
-            self.emit('change', self, self.changes())
+            this.emit('change', this, this.changes())
           }
           _unset(silentPath)
         }, 0))
@@ -870,7 +869,6 @@ const typeGroupValidators = {
  */
 export default Component.extend({
   constructor: function Schema (definition) {
-    // const self = this
     definition || (definition = {})
     // TODO: schema validation
     utils.fillIn(this, definition)

@@ -38,4 +38,20 @@ describe('DataStore#defineMapper', function () {
       'should have found all of age:19 using 1 keyList'
     )
   })
+  it('can get a scoped reference', function () {
+    const DataStore = JSData.DataStore
+    let store = new DataStore()
+    const fooMapper = store.defineMapper('foo')
+    const fooStore = store.as('foo')
+
+    assert.strictEqual(fooStore._adapters, store._adapters)
+    assert.strictEqual(fooStore._mappers, store._mappers)
+    assert.strictEqual(fooStore._collections, store._collections)
+    assert.strictEqual(fooStore._listeners, store._listeners)
+    assert.strictEqual(fooStore.getMapper(), store.getMapper('foo'))
+    assert.strictEqual(fooStore.getCollection(), store.getCollection('foo'))
+    assert.deepEqual(fooStore.createRecord({ foo: 'bar' }), store.createRecord('foo', { foo: 'bar' }))
+    assert.strictEqual(fooMapper, store.getMapper('foo'))
+    assert.strictEqual(fooStore.getMapper(), store.getMapper('foo'))
+  })
 })

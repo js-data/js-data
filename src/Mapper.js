@@ -12,15 +12,43 @@ import {
 } from './decorators'
 
 const DOMAIN = 'Mapper'
-
+const validatingHooks = [
+  'beforeCreate',
+  'beforeCreateMany',
+  'beforeUpdate',
+  'beforeUpdateAll',
+  'beforeUpdateMany'
+]
 const makeNotify = function (num) {
   return function (...args) {
-    const self = this
     const opts = args[args.length - num]
-    self.dbg(opts.op, ...args)
-    if (opts.notify || (opts.notify === undefined && self.notify)) {
+    const op = opts.op
+    this.dbg(op, ...args)
+
+    // Automatic validation
+    if (validatingHooks.indexOf(op) !== -1 && opts.validate !== false) {
+      // Save current value of option
+      const originalExistingOnly = opts.existingOnly
+
+      // For updates, ignore required fields if they aren't present
+      if (op.indexOf('beforeUpdate') === 0 && utils.isUndefined(opts.existingOnly)) {
+        opts.existingOnly = true
+      }
+      const errors = this.validate(args[op === 'beforeUpdate' ? 1 : 0], utils.pick(opts, ['existingOnly']))
+
+      // Restore option
+      opts.existingOnly = originalExistingOnly
+
+      // Abort lifecycle due to validation errors
+      if (errors) {
+        return utils.reject(errors)
+      }
+    }
+
+    // Emit lifecycle event
+    if (opts.notify || (opts.notify === undefined && this.notify)) {
       setTimeout(() => {
-        self.emit(opts.op, ...args)
+        this.emit(op, ...args)
       })
     }
   }
@@ -226,13 +254,12 @@ const MAPPER_DEFAULTS = {
  */
 export default Component.extend({
   constructor: function Mapper (opts) {
-    const self = this
-    utils.classCallCheck(self, Mapper)
-    Mapper.__super__.call(self)
+    utils.classCallCheck(this, Mapper)
+    Mapper.__super__.call(this)
     opts || (opts = {})
 
     // Prepare certain properties to be non-enumerable
-    Object.defineProperties(self, {
+    Object.defineProperties(this, {
       _adapters: {
         value: undefined,
         writable: true
@@ -320,9 +347,9 @@ export default Component.extend({
     })
 
     // Apply user-provided configuration
-    utils.fillIn(self, opts)
+    utils.fillIn(this, opts)
     // Fill in any missing options with the defaults
-    utils.fillIn(self, utils.copy(MAPPER_DEFAULTS))
+    utils.fillIn(this, utils.copy(MAPPER_DEFAULTS))
 
     /**
      * The name for this Mapper. This is the minimum amount of meta information
@@ -333,19 +360,23 @@ export default Component.extend({
      * @since 3.0.0
      * @type {string}
      */
-    if (!self.name) {
-      throw utils.err(`new ${DOMAIN}`, 'opts.name')(400, 'string', self.name)
+    if (!this.name) {
+      throw utils.err(`new ${DOMAIN}`, 'opts.name')(400, 'string', this.name)
     }
 
     // Setup schema, with an empty default schema if necessary
-    if (!(self.schema instanceof Schema)) {
-      self.schema = new Schema(self.schema || {})
+    if (!(this.schema instanceof Schema)) {
+      this.schema = new Schema(this.schema || {})
+    }
+
+    if (this.schema instanceof Schema) {
+      this.schema.type || (this.schema.type = 'object')
     }
 
     // Create a subclass of Record that's tied to this Mapper
-    if (utils.isUndefined(self.recordClass)) {
+    if (utils.isUndefined(this.recordClass)) {
       const superClass = Record
-      self.recordClass = superClass.extend({
+      this.recordClass = superClass.extend({
         constructor: (function Record () {
           var subClass = function Record (props, opts) {
             utils.classCallCheck(this, subClass)
@@ -356,13 +387,13 @@ export default Component.extend({
       })
     }
 
-    if (self.recordClass) {
-      self.recordClass.mapper = self
+    if (this.recordClass) {
+      this.recordClass.mapper = this
 
-      // We can only apply the schema to the prototype of self.recordClass if the
+      // We can only apply the schema to the prototype of this.recordClass if the
       // class extends Record
-      if (utils.getSuper(self.recordClass, true) === Record && self.schema && self.schema.apply && self.applySchema) {
-        self.schema.apply(self.recordClass.prototype)
+      if (utils.getSuper(this.recordClass, true) === Record && this.schema && this.schema.apply && this.applySchema) {
+        this.schema.apply(this.recordClass.prototype)
       }
     }
   },
@@ -662,7 +693,6 @@ export default Component.extend({
    * @since 3.0.0
    */
   _end (result, opts, skip) {
-    const self = this
     if (opts.raw) {
       utils._(result, opts)
     }
@@ -670,8 +700,8 @@ export default Component.extend({
       return result
     }
     let _data = opts.raw ? result.data : result
-    if (_data && utils.isFunction(self.wrap)) {
-      _data = self.wrap(_data, opts)
+    if (_data && utils.isFunction(this.wrap)) {
+      _data = this.wrap(_data, opts)
       if (opts.raw) {
         result.data = _data
       } else {
@@ -777,19 +807,17 @@ export default Component.extend({
    */
   create (props, opts) {
     let op, adapter
-    const self = this
-
     // Default values for arguments
     props || (props = {})
     opts || (opts = {})
 
     // Fill in "opts" with the Mapper's configuration
-    utils._(opts, self)
-    adapter = opts.adapter = self.getAdapterName(opts)
+    utils._(opts, this)
+    adapter = opts.adapter = this.getAdapterName(opts)
 
     // beforeCreate lifecycle hook
     op = opts.op = 'beforeCreate'
-    return utils.resolve(self[op](props, opts)).then(function (_props) {
+    return utils.resolve(this[op](props, opts)).then((_props) => {
       // Allow for re-assignment from lifecycle hook
       props = utils.isUndefined(_props) ? props : _props
 
@@ -797,7 +825,7 @@ export default Component.extend({
       const belongsToRelationData = {}
       opts.with || (opts.with = [])
       let tasks = []
-      utils.forEachRelation(self, opts, function (def, optsCopy) {
+      utils.forEachRelation(this, opts, (def, optsCopy) => {
         const relationData = def.getLocalField(props)
         const relatedMapper = def.getRelation()
         const relatedIdAttribute = relatedMapper.idAttribute
@@ -808,30 +836,28 @@ export default Component.extend({
         if (def.type === belongsToType) {
           // Create belongsTo relation first because we need a generated id to
           // attach to the child
-          tasks.push(relatedMapper.create(relationData, optsCopy).then(function (data) {
+          tasks.push(relatedMapper.create(relationData, optsCopy).then((data) => {
             def.setLocalField(belongsToRelationData, data)
             def.setForeignKey(props, data)
           }))
         } else if (def.type === hasManyType && def.localKeys) {
           // Create his hasMany relation first because it uses localKeys
-          tasks.push(relatedMapper.createMany(relationData, optsCopy).then(function (data) {
+          tasks.push(relatedMapper.createMany(relationData, optsCopy).then((data) => {
             def.setLocalField(belongsToRelationData, data)
-            utils.set(props, def.localKeys, data.map(function (record) {
-              return utils.get(record, relatedIdAttribute)
-            }))
+            utils.set(props, def.localKeys, data.map((record) => utils.get(record, relatedIdAttribute)))
           }))
         }
       })
-      return utils.Promise.all(tasks).then(function () {
+      return utils.Promise.all(tasks).then(() => {
         // Now delegate to the adapter for the main create
         op = opts.op = 'create'
-        self.dbg(op, props, opts)
-        return utils.resolve(self.getAdapter(adapter)[op](self, self.toJSON(props, { with: opts.pass || [] }), opts))
-      }).then(function (data) {
+        this.dbg(op, props, opts)
+        return utils.resolve(this.getAdapter(adapter)[op](this, this.toJSON(props, { with: opts.pass || [] }), opts))
+      }).then((data) => {
         const createdRecord = opts.raw ? data.data : data
         // Deep post-create hasMany and hasOne relations
         tasks = []
-        utils.forEachRelation(self, opts, function (def, optsCopy) {
+        utils.forEachRelation(this, opts, (def, optsCopy) => {
           const relationData = def.getLocalField(props)
           if (!relationData) {
             return
@@ -842,12 +868,12 @@ export default Component.extend({
           // a generated id to attach to these items
           if (def.type === hasManyType && def.foreignKey) {
             def.setForeignKey(createdRecord, relationData)
-            task = def.getRelation().createMany(relationData, optsCopy).then(function (data) {
+            task = def.getRelation().createMany(relationData, optsCopy).then((data) => {
               def.setLocalField(createdRecord, data)
             })
           } else if (def.type === hasOneType) {
             def.setForeignKey(createdRecord, relationData)
-            task = def.getRelation().create(relationData, optsCopy).then(function (data) {
+            task = def.getRelation().create(relationData, optsCopy).then((data) => {
               def.setLocalField(createdRecord, data)
             })
           } else if (def.type === belongsToType && def.getLocalField(belongsToRelationData)) {
@@ -859,15 +885,15 @@ export default Component.extend({
             tasks.push(task)
           }
         })
-        return utils.Promise.all(tasks).then(function () {
+        return utils.Promise.all(tasks).then(() => {
           return data
         })
       })
-    }).then(function (result) {
-      result = self._end(result, opts)
+    }).then((result) => {
+      result = this._end(result, opts)
       // afterCreate lifecycle hook
       op = opts.op = 'afterCreate'
-      return utils.resolve(self[op](props, opts, result)).then(function (_result) {
+      return utils.resolve(this[op](props, opts, result)).then((_result) => {
         // Allow for re-assignment from lifecycle hook
         return utils.isUndefined(_result) ? result : _result
       })
@@ -926,19 +952,17 @@ export default Component.extend({
    */
   createMany (records, opts) {
     let op, adapter
-    const self = this
-
     // Default values for arguments
     records || (records = [])
     opts || (opts = {})
 
     // Fill in "opts" with the Mapper's configuration
-    utils._(opts, self)
-    adapter = opts.adapter = self.getAdapterName(opts)
+    utils._(opts, this)
+    adapter = opts.adapter = this.getAdapterName(opts)
 
     // beforeCreateMany lifecycle hook
     op = opts.op = 'beforeCreateMany'
-    return utils.resolve(self[op](records, opts)).then(function (_records) {
+    return utils.resolve(this[op](records, opts)).then((_records) => {
       // Allow for re-assignment from lifecycle hook
       records = utils.isUndefined(_records) ? records : _records
 
@@ -946,43 +970,37 @@ export default Component.extend({
       const belongsToRelationData = {}
       opts.with || (opts.with = [])
       let tasks = []
-      utils.forEachRelation(self, opts, function (def, optsCopy) {
-        const relationData = records.map(function (record) {
-          return def.getLocalField(record)
-        }).filter(function (relatedRecord) {
-          return relatedRecord
-        })
+      utils.forEachRelation(this, opts, (def, optsCopy) => {
+        const relationData = records
+          .map((record) => def.getLocalField(record))
+          .filter((relatedRecord) => relatedRecord)
         if (def.type === belongsToType && relationData.length === records.length) {
           // Create belongsTo relation first because we need a generated id to
           // attach to the child
-          tasks.push(def.getRelation().createMany(relationData, optsCopy).then(function (data) {
+          tasks.push(def.getRelation().createMany(relationData, optsCopy).then((data) => {
             const relatedRecords = optsCopy.raw ? data.data : data
             def.setLocalField(belongsToRelationData, relatedRecords)
-            records.forEach(function (record, i) {
+            records.forEach((record, i) => {
               def.setForeignKey(record, relatedRecords[i])
             })
           }))
         }
       })
-      return utils.Promise.all(tasks).then(function () {
+      return utils.Promise.all(tasks).then(() => {
         // Now delegate to the adapter
         op = opts.op = 'createMany'
-        const json = records.map(function (record) {
-          return self.toJSON(record, { with: opts.pass || [] })
-        })
-        self.dbg(op, records, opts)
-        return utils.resolve(self.getAdapter(adapter)[op](self, json, opts))
-      }).then(function (data) {
+        const json = records.map((record) => this.toJSON(record, { with: opts.pass || [] }))
+        this.dbg(op, records, opts)
+        return utils.resolve(this.getAdapter(adapter)[op](this, json, opts))
+      }).then((data) => {
         const createdRecords = opts.raw ? data.data : data
 
         // Deep post-create hasOne relations
         tasks = []
-        utils.forEachRelation(self, opts, function (def, optsCopy) {
-          const relationData = records.map(function (record) {
-            return def.getLocalField(record)
-          }).filter(function (relatedRecord) {
-            return relatedRecord
-          })
+        utils.forEachRelation(this, opts, (def, optsCopy) => {
+          const relationData = records
+            .map((record) => def.getLocalField(record))
+            .filter((relatedRecord) => relatedRecord)
           if (relationData.length !== records.length) {
             return
           }
@@ -992,19 +1010,19 @@ export default Component.extend({
           // a generated id to attach to these items
           if (def.type === hasManyType) {
             // Not supported
-            self.log('warn', 'deep createMany of hasMany type not supported!')
+            this.log('warn', 'deep createMany of hasMany type not supported!')
           } else if (def.type === hasOneType) {
-            createdRecords.forEach(function (createdRecord, i) {
+            createdRecords.forEach((createdRecord, i) => {
               def.setForeignKey(createdRecord, relationData[i])
             })
-            task = def.getRelation().createMany(relationData, optsCopy).then(function (data) {
+            task = def.getRelation().createMany(relationData, optsCopy).then((data) => {
               const relatedData = opts.raw ? data.data : data
-              createdRecords.forEach(function (createdRecord, i) {
+              createdRecords.forEach((createdRecord, i) => {
                 def.setLocalField(createdRecord, relatedData[i])
               })
             })
           } else if (def.type === belongsToType && belongsToData && belongsToData.length === createdRecords.length) {
-            createdRecords.forEach(function (createdRecord, i) {
+            createdRecords.forEach((createdRecord, i) => {
               def.setLocalField(createdRecord, belongsToData[i])
             })
           }
@@ -1012,15 +1030,13 @@ export default Component.extend({
             tasks.push(task)
           }
         })
-        return utils.Promise.all(tasks).then(function () {
-          return data
-        })
+        return utils.Promise.all(tasks).then(() => data)
       })
-    }).then(function (result) {
-      result = self._end(result, opts)
+    }).then((result) => {
+      result = this._end(result, opts)
       // afterCreateMany lifecycle hook
       op = opts.op = 'afterCreateMany'
-      return utils.resolve(self[op](records, opts, result)).then(function (_result) {
+      return utils.resolve(this[op](records, opts, result)).then((_result) => {
         // Allow for re-assignment from lifecycle hook
         return utils.isUndefined(_result) ? result : _result
       })
@@ -1099,17 +1115,14 @@ export default Component.extend({
    */
   createRecord (props, opts) {
     props || (props = {})
-    const self = this
     if (utils.isArray(props)) {
-      return props.map(function (_props) {
-        return self.createRecord(_props, opts)
-      })
+      return props.map((_props) => this.createRecord(_props, opts))
     }
     if (!utils.isObject(props)) {
       throw utils.err(`${DOMAIN}#createRecord`, 'props')(400, 'array or object', props)
     }
-    const recordClass = self.recordClass
-    const relationList = self.relationList || []
+    const recordClass = this.recordClass
+    const relationList = this.relationList || []
     relationList.forEach(function (def) {
       const relatedMapper = def.getRelation()
       const relationData = def.getLocalField(props)
@@ -1136,8 +1149,7 @@ export default Component.extend({
    * @since 3.0.0
    */
   crud (method, ...args) {
-    const self = this
-    const config = self.lifecycleMethods[method]
+    const config = this.lifecycleMethods[method]
     if (!config) {
       throw utils.err(`${DOMAIN}#crud`, method)(404, 'method')
     }
@@ -1149,7 +1161,7 @@ export default Component.extend({
     let op, adapter
 
     // Default values for arguments
-    config.defaults.forEach(function (value, i) {
+    config.defaults.forEach((value, i) => {
       if (utils.isUndefined(args[i])) {
         args[i] = utils.copy(value)
       }
@@ -1158,27 +1170,27 @@ export default Component.extend({
     const opts = args[args.length - 1]
 
     // Fill in "opts" with the Mapper's configuration
-    utils._(opts, self)
-    adapter = opts.adapter = self.getAdapterName(opts)
+    utils._(opts, this)
+    adapter = opts.adapter = this.getAdapterName(opts)
 
     // before lifecycle hook
     op = opts.op = before
-    return utils.resolve(self[op](...args)).then(function (_value) {
-      if (!utils.isUndefined(config.beforeAssign)) {
+    return utils.resolve(this[op](...args)).then((_value) => {
+      if (!utils.isUndefined(args[config.beforeAssign])) {
         // Allow for re-assignment from lifecycle hook
         args[config.beforeAssign] = utils.isUndefined(_value) ? args[config.beforeAssign] : _value
       }
       // Now delegate to the adapter
       op = opts.op = method
-      args = config.adapterArgs ? config.adapterArgs(self, ...args) : args
-      self.dbg(op, ...args)
-      return utils.resolve(self.getAdapter(adapter)[op](self, ...args))
-    }).then(function (result) {
-      result = self._end(result, opts, !!config.skip)
+      args = config.adapterArgs ? config.adapterArgs(this, ...args) : args
+      this.dbg(op, ...args)
+      return utils.resolve(this.getAdapter(adapter)[op](this, ...args))
+    }).then((result) => {
+      result = this._end(result, opts, !!config.skip)
       args.push(result)
       // after lifecycle hook
       op = opts.op = after
-      return utils.resolve(self[op](...args)).then(function (_result) {
+      return utils.resolve(this[op](...args)).then((_result) => {
         // Allow for re-assignment from lifecycle hook
         return utils.isUndefined(_result) ? result : _result
       })
@@ -1354,13 +1366,12 @@ export default Component.extend({
    * @tutorial ["http://www.js-data.io/v3.0/docs/connecting-to-a-data-source","Connecting to a data source"]
    */
   getAdapter (name) {
-    const self = this
-    self.dbg('getAdapter', 'name:', name)
-    const adapter = self.getAdapterName(name)
+    this.dbg('getAdapter', 'name:', name)
+    const adapter = this.getAdapterName(name)
     if (!adapter) {
       throw utils.err(`${DOMAIN}#getAdapter`, 'name')(400, 'string', name)
     }
-    return self.getAdapters()[adapter]
+    return this.getAdapters()[adapter]
   },
 
   /**
@@ -1479,12 +1490,11 @@ export default Component.extend({
    * @tutorial ["http://www.js-data.io/v3.0/docs/connecting-to-a-data-source","Connecting to a data source"]
    */
   registerAdapter (name, adapter, opts) {
-    const self = this
     opts || (opts = {})
-    self.getAdapters()[name] = adapter
+    this.getAdapters()[name] = adapter
     // Optionally make it the default adapter for the target.
     if (opts === true || opts.default) {
-      self.defaultAdapter = name
+      this.defaultAdapter = name
     }
   },
 
@@ -1553,23 +1563,20 @@ export default Component.extend({
    * @since 3.0.0
    */
   toJSON (records, opts) {
-    const self = this
     let record
     opts || (opts = {})
     if (utils.isArray(records)) {
-      return records.map(function (record) {
-        return self.toJSON(record, opts)
-      })
+      return records.map((record) => this.toJSON(record, opts))
     } else {
       record = records
     }
-    const relationFields = (self ? self.relationFields : []) || []
+    const relationFields = (this ? this.relationFields : []) || []
     let json = {}
     let properties
-    if (self && self.schema) {
-      properties = self.schema.properties || {}
+    if (this && this.schema) {
+      properties = this.schema.properties || {}
       // TODO: Make this work recursively
-      utils.forOwn(properties, function (opts, prop) {
+      utils.forOwn(properties, (opts, prop) => {
         json[prop] = utils.plainCopy(record[prop])
       })
     }
@@ -1583,19 +1590,19 @@ export default Component.extend({
     }
     // The user wants to include relations in the resulting plain object
     // representation
-    if (self && opts.withAll) {
+    if (this && opts.withAll) {
       opts.with = relationFields.slice()
     }
-    if (self && opts.with) {
+    if (this && opts.with) {
       if (utils.isString(opts.with)) {
         opts.with = [opts.with]
       }
-      utils.forEachRelation(self, opts, function (def, optsCopy) {
+      utils.forEachRelation(this, opts, (def, optsCopy) => {
         const relationData = def.getLocalField(record)
         if (relationData) {
           // The actual recursion
           if (utils.isArray(relationData)) {
-            def.setLocalField(json, relationData.map(function (item) {
+            def.setLocalField(json, relationData.map((item) => {
               return def.getRelation().toJSON(item, optsCopy)
             }))
           } else {
@@ -1740,12 +1747,11 @@ export default Component.extend({
    * @since 3.0.0
    */
   validate (record, opts) {
-    const self = this
-    const schema = self.getSchema()
+    opts || (opts = {})
+    const schema = this.getSchema()
+    const _opts = utils.pick(opts, ['existingOnly'])
     if (utils.isArray(record)) {
-      const errors = record.map(function (_record) {
-        return schema.validate(_record, opts)
-      })
+      const errors = record.map((_record) => schema.validate(_record, utils.pick(_opts, ['existingOnly'])))
       let hasErrors = false
       errors.forEach(function (err) {
         if (err) {
@@ -1757,7 +1763,7 @@ export default Component.extend({
       }
       return undefined
     }
-    return schema.validate(record, opts)
+    return schema.validate(record, _opts)
   },
 
   /**

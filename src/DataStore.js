@@ -4,10 +4,28 @@ import {
   hasManyType,
   hasOneType
 } from './decorators'
-import Container from './Container'
+import {proxiedMapperMethods, Container} from './Container'
 import LinkedCollection from './LinkedCollection'
 
 const DOMAIN = 'DataStore'
+const proxiedCollectionMethods = [
+  'add',
+  'between',
+  'createIndex',
+  'filter',
+  'get',
+  'getAll',
+  'query',
+  'toJson'
+]
+const ownMethodsForScoping = [
+  'addToCache',
+  'cachedFind',
+  'cachedFindAll',
+  'cacheFind',
+  'cacheFindAll',
+  'hashQuery'
+]
 
 const safeSet = function (record, field, value) {
   if (record && record._set) {
@@ -18,8 +36,7 @@ const safeSet = function (record, field, value) {
 }
 
 const cachedFn = function (name, hashOrId, opts) {
-  const self = this
-  const cached = self._completedQueries[name][hashOrId]
+  const cached = this._completedQueries[name][hashOrId]
   if (utils.isFunction(cached)) {
     return cached(name, hashOrId, opts)
   }
@@ -28,15 +45,14 @@ const cachedFn = function (name, hashOrId, opts) {
 
 const props = {
   constructor: function DataStore (opts) {
-    const self = this
-    utils.classCallCheck(self, DataStore)
-    DataStore.__super__.call(self, opts)
+    utils.classCallCheck(this, DataStore)
+    DataStore.__super__.call(this, opts)
 
-    self.collectionClass = self.collectionClass || LinkedCollection
-    self._collections = {}
-    self._pendingQueries = {}
-    self._completedQueries = {}
-    return self
+    this.collectionClass = this.collectionClass || LinkedCollection
+    this._collections = {}
+    this._pendingQueries = {}
+    this._completedQueries = {}
+    return this
   },
 
   _callSuper (method, ...args) {
@@ -110,6 +126,64 @@ const props = {
   },
 
   /**
+   * Return a store scoped to a particular mapper/collection pair.
+   *
+   * @example
+   * import {DataStore} from 'js-data'
+   * const store = new DataStore()
+   * const UserMapper = store.defineMapper('user')
+   * const UserStore = store.as('user')
+   *
+   * const user1 = store.createRecord('user', { name: 'John' })
+   * const user2 = UserStore.createRecord({ name: 'John' })
+   * const user3 = UserMapper.createRecord({ name: 'John' })
+   * assert.deepEqual(user1, user2)
+   * assert.deepEqual(user2, user3)
+   * assert.deepEqual(user1, user3)
+   *
+   * @method DataStore#as
+   * @param {string} name Name of the {@link Mapper}.
+   * @returns {Object} A store scoped to a particular mapper/collection pair.
+   * @since 3.0.0
+   */
+  as (name) {
+    const props = {}
+    ownMethodsForScoping.forEach(function (method) {
+      props[method] = {
+        writable: true,
+        value: function (...args) {
+          return this[method](name, ...args)
+        }
+      }
+    })
+    proxiedMapperMethods.forEach(function (method) {
+      props[method] = {
+        writable: true,
+        value: function (...args) {
+          return this.getMapper(name)[method](...args)
+        }
+      }
+    })
+    props.getMapper = {
+      writable: true,
+      value: () => this.getMapper(name)
+    }
+    proxiedCollectionMethods.forEach(function (method) {
+      props[method] = {
+        writable: true,
+        value: function (...args) {
+          return this.getCollection(name)[method](...args)
+        }
+      }
+    })
+    props.getCollection = {
+      writable: true,
+      value: () => this.getCollection(name)
+    }
+    return Object.create(this, props)
+  },
+
+  /**
    * Retrieve a cached `find` result, if any.
    *
    * @name DataStore#cachedFind
@@ -150,10 +224,7 @@ const props = {
    * @param {Object} opts The `opts` argument passed to {@link DataStore#find}.
    */
   cacheFind (name, data, id, opts) {
-    const self = this
-    self._completedQueries[name][id] = function (name, id, opts) {
-      return self.get(name, id)
-    }
+    this._completedQueries[name][id] = (name, id, opts) => this.get(name, id)
   },
 
   /**
@@ -175,10 +246,15 @@ const props = {
    * @param {Object} opts The `opts` argument passed to {@link DataStore#findAll}.
    */
   cacheFindAll (name, data, hash, opts) {
-    const self = this
-    self._completedQueries[name][hash] = function (name, hash, opts) {
-      return self.filter(name, utils.fromJson(hash))
-    }
+    this._completedQueries[name][hash] = (name, hash, opts) => this.filter(name, utils.fromJson(hash))
+  },
+
+  clear () {
+    const removed = {}
+    utils.forOwn(this._collections, (collection, name) => {
+      removed[name] = collection.removeAll()
+    })
+    return removed
   },
 
   /**
@@ -193,11 +269,9 @@ const props = {
    * @returns {Promise}
    */
   create (name, record, opts) {
-    const self = this
     opts || (opts = {})
-    return self._callSuper('create', name, record, opts).then(function (data) {
-      return self._end(name, data, opts)
-    })
+    return this._callSuper('create', name, record, opts)
+      .then((result) => this._end(name, result, opts))
   },
 
   /**
@@ -212,14 +286,13 @@ const props = {
    * @returns {Promise}
    */
   createMany (name, records, opts) {
-    const self = this
     opts || (opts = {})
-    return self._callSuper('createMany', name, records, opts).then(function (data) {
-      return self._end(name, data, opts)
-    })
+    return this._callSuper('createMany', name, records, opts)
+      .then((result) => this._end(name, result, opts))
   },
 
   defineMapper (name, opts) {
+    // Complexity of this method is beyond simply using => functions to bind context
     const self = this
     const mapper = utils.getSuper(self).prototype.defineMapper.call(self, name, opts)
     self._pendingQueries[name] = {}
@@ -541,17 +614,16 @@ const props = {
    * @returns {Promise}
    */
   destroy (name, id, opts) {
-    const self = this
     opts || (opts = {})
-    return self._callSuper('destroy', name, id, opts).then(function (data) {
+    return this._callSuper('destroy', name, id, opts).then((result) => {
       if (opts.raw) {
-        data.data = self.getCollection(name).remove(id, opts)
+        result.data = this.getCollection(name).remove(id, opts)
       } else {
-        data = self.getCollection(name).remove(id, opts)
+        result = this.getCollection(name).remove(id, opts)
       }
-      delete self._pendingQueries[name][id]
-      delete self._completedQueries[name][id]
-      return data
+      delete this._pendingQueries[name][id]
+      delete this._completedQueries[name][id]
+      return result
     })
   },
 
@@ -567,27 +639,28 @@ const props = {
    * @returns {Promise}
    */
   destroyAll (name, query, opts) {
-    const self = this
     opts || (opts = {})
-    return self._callSuper('destroyAll', name, query, opts).then(function (data) {
+    return this._callSuper('destroyAll', name, query, opts).then((result) => {
       if (opts.raw) {
-        data.data = self.getCollection(name).removeAll(query, opts)
+        result.data = this.getCollection(name).removeAll(query, opts)
       } else {
-        data = self.getCollection(name).removeAll(query, opts)
+        result = this.getCollection(name).removeAll(query, opts)
       }
-      const hash = self.hashQuery(name, query, opts)
-      delete self._pendingQueries[name][hash]
-      delete self._completedQueries[name][hash]
-      return data
+      const hash = this.hashQuery(name, query, opts)
+      delete this._pendingQueries[name][hash]
+      delete this._completedQueries[name][hash]
+      return result
     })
   },
 
-  eject (id, opts) {
-    return this.remove(id, opts)
+  eject (name, id, opts) {
+    console.warn('DEPRECATED: "eject" is deprecated, use "remove" instead')
+    return this.remove(name, id, opts)
   },
 
-  ejectAll (query, opts) {
-    return this.removeAll(query, opts)
+  ejectAll (name, query, opts) {
+    console.warn('DEPRECATED: "ejectAll" is deprecated, use "removeAll" instead')
+    return this.removeAll(name, query, opts)
   },
 
   /**
@@ -601,26 +674,25 @@ const props = {
    * @returns {Promise}
    */
   find (name, id, opts) {
-    const self = this
     opts || (opts = {})
-    const pendingQuery = self._pendingQueries[name][id]
+    const pendingQuery = this._pendingQueries[name][id]
 
-    utils.fillIn(opts, self.getMapper(name))
+    utils.fillIn(opts, this.getMapper(name))
 
     if (pendingQuery) {
       return pendingQuery
     }
-    const item = self.cachedFind(name, id, opts)
+    const item = this.cachedFind(name, id, opts)
     let promise
 
     if (opts.force || !item) {
-      promise = self._pendingQueries[name][id] = self._callSuper('find', name, id, opts).then(function (data) {
-        delete self._pendingQueries[name][id]
-        const result = self._end(name, data, opts)
-        self.cacheFind(name, result, id, opts)
+      promise = this._pendingQueries[name][id] = this._callSuper('find', name, id, opts).then((result) => {
+        delete this._pendingQueries[name][id]
+        result = this._end(name, result, opts)
+        this.cacheFind(name, result, id, opts)
         return result
-      }, function (err) {
-        delete self._pendingQueries[name][id]
+      }, (err) => {
+        delete this._pendingQueries[name][id]
         return utils.reject(err)
       })
     } else {
@@ -640,28 +712,27 @@ const props = {
    * @returns {Promise}
    */
   findAll (name, query, opts) {
-    const self = this
     opts || (opts = {})
-    const hash = self.hashQuery(name, query, opts)
-    const pendingQuery = self._pendingQueries[name][hash]
+    const hash = this.hashQuery(name, query, opts)
+    const pendingQuery = this._pendingQueries[name][hash]
 
-    utils.fillIn(opts, self.getMapper(name))
+    utils.fillIn(opts, this.getMapper(name))
 
     if (pendingQuery) {
       return pendingQuery
     }
 
-    const items = self.cachedFindAll(name, hash, opts)
+    const items = this.cachedFindAll(name, hash, opts)
     let promise
 
     if (opts.force || !items) {
-      promise = self._pendingQueries[name][hash] = self._callSuper('findAll', name, query, opts).then(function (data) {
-        delete self._pendingQueries[name][hash]
-        const result = self._end(name, data, opts)
-        self.cacheFindAll(name, result, hash, opts)
+      promise = this._pendingQueries[name][hash] = this._callSuper('findAll', name, query, opts).then((result) => {
+        delete this._pendingQueries[name][hash]
+        result = this._end(name, result, opts)
+        this.cacheFindAll(name, result, hash, opts)
         return result
-      }, function (err) {
-        delete self._pendingQueries[name][hash]
+      }, (err) => {
+        delete this._pendingQueries[name][hash]
         return utils.reject(err)
       })
     } else {
@@ -690,32 +761,30 @@ const props = {
     return utils.toJson(query)
   },
 
-  inject (records, opts) {
-    return this.add(records, opts)
+  inject (name, records, opts) {
+    console.warn('DEPRECATED: "inject" is deprecated, use "add" instead')
+    return this.add(name, records, opts)
   },
 
   remove (name, id, opts) {
-    const self = this
-    const record = self.getCollection(name).remove(id, opts)
+    const record = this.getCollection(name).remove(id, opts)
     if (record) {
-      self.removeRelated(name, [record], opts)
+      this.removeRelated(name, [record], opts)
     }
     return record
   },
 
   removeAll (name, query, opts) {
-    const self = this
-    const records = self.getCollection(name).removeAll(query, opts)
+    const records = this.getCollection(name).removeAll(query, opts)
     if (records.length) {
-      self.removeRelated(name, records, opts)
+      this.removeRelated(name, records, opts)
     }
     return records
   },
 
   removeRelated (name, records, opts) {
-    const self = this
-    utils.forEachRelation(self.getMapper(name), opts, function (def, optsCopy) {
-      records.forEach(function (record) {
+    utils.forEachRelation(this.getMapper(name), opts, (def, optsCopy) => {
+      records.forEach((record) => {
         let relatedData
         let query
         if (def.foreignKey && (def.type === hasOneType || def.type === hasManyType)) {
@@ -737,10 +806,10 @@ const props = {
             }
           }
         } else if (def.type === belongsToType) {
-          relatedData = self.remove(def.relation, def.getForeignKey(record), optsCopy)
+          relatedData = this.remove(def.relation, def.getForeignKey(record), optsCopy)
         }
         if (query) {
-          relatedData = self.removeAll(def.relation, query, optsCopy)
+          relatedData = this.removeAll(def.relation, query, optsCopy)
         }
         if (relatedData) {
           if (utils.isArray(relatedData) && !relatedData.length) {
@@ -768,11 +837,9 @@ const props = {
    * @returns {Promise}
    */
   update (name, id, record, opts) {
-    const self = this
     opts || (opts = {})
-    return self._callSuper('update', name, id, record, opts).then(function (data) {
-      return self._end(name, data, opts)
-    })
+    return this._callSuper('update', name, id, record, opts)
+      .then((result) => this._end(name, result, opts))
   },
 
   /**
@@ -788,11 +855,9 @@ const props = {
    * @returns {Promise}
    */
   updateAll (name, props, query, opts) {
-    const self = this
     opts || (opts = {})
-    return self._callSuper('updateAll', name, query, props, opts).then(function (data) {
-      return self._end(name, data, opts)
-    })
+    return this._callSuper('updateAll', name, query, props, opts)
+      .then((result) => this._end(name, result, opts))
   },
 
   /**
@@ -807,26 +872,13 @@ const props = {
    * @returns {Promise}
    */
   updateMany (name, records, opts) {
-    const self = this
     opts || (opts = {})
-    return self._callSuper('updateMany', name, records, opts).then(function (data) {
-      return self._end(name, data, opts)
-    })
+    return this._callSuper('updateMany', name, records, opts)
+      .then((result) => this._end(name, result, opts))
   }
 }
 
-const toProxy = [
-  'add',
-  'between',
-  'createIndex',
-  'filter',
-  'get',
-  'getAll',
-  'query',
-  'toJson'
-]
-
-toProxy.forEach(function (method) {
+proxiedCollectionMethods.forEach(function (method) {
   props[method] = function (name, ...args) {
     return this.getCollection(name)[method](...args)
   }
@@ -851,14 +903,20 @@ toProxy.forEach(function (method) {
  * import {DataStore} from 'js-data'
  * import HttpAdapter from 'js-data-http'
  * const store = new DataStore()
+ *
+ * // DataStore#defineMapper returns a direct reference to the newly created
+ * // Mapper.
  * const UserMapper = store.defineMapper('user')
+ *
+ * // DataStore#as returns the store scoped to a particular Mapper.
+ * const UserStore = store.as('user')
  *
  * // Call "find" on "UserMapper" (Stateless ORM)
  * UserMapper.find(1).then((user) => {
  *   // retrieved a "user" record via the http adapter, but that's it
  *
  *   // Call "find" on "store" targeting "user" (Stateful DataStore)
- *   return store.find('user', 1)
+ *   return store.find('user', 1) // same as "UserStore.find(1)"
  * }).then((user) => {
  *   // not only was a "user" record retrieved, but it was added to the
  *   // store's "user" collection

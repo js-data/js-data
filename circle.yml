@@ -4,11 +4,14 @@ general:
       - gh-pages
 machine:
   node:
-    version: 4.1.0
+    version: 5.7.0
+dependencies:
+  pre:
+    - npm i -g npm
+    - npm i -g codecov nyc
 test:
-  override:
-    - npm run ci
+  post:
+    - nyc report --reporter=lcov | codecov
 general:
   artifacts:
-    - "coverage"
     - "dist"

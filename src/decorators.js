@@ -7,7 +7,6 @@ export const hasOneType = 'hasOne'
 const DOMAIN = 'Relation'
 
 function Relation (related, opts) {
-  const self = this
   const DOMAIN_ERR = `new ${DOMAIN}`
 
   opts || (opts = {})
@@ -34,19 +33,19 @@ function Relation (related, opts) {
     }
   } else if (related) {
     opts.relation = related.name
-    Object.defineProperty(self, 'relatedMapper', {
+    Object.defineProperty(this, 'relatedMapper', {
       value: related
     })
   } else {
     throw utils.err(DOMAIN_ERR, 'related')(400, 'Mapper or string', related)
   }
 
-  Object.defineProperty(self, 'inverse', {
+  Object.defineProperty(this, 'inverse', {
     value: undefined,
     writable: true
   })
 
-  utils.fillIn(self, opts)
+  utils.fillIn(this, opts)
 }
 
 utils.addHiddenPropsToTarget(Relation.prototype, {
@@ -60,20 +59,19 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
     return utils.get(record, this.mapper.idAttribute)
   },
   setForeignKey (record, relatedRecord) {
-    const self = this
     if (!record || !relatedRecord) {
       return
     }
-    if (self.type === belongsToType) {
-      utils.set(record, self.foreignKey, utils.get(relatedRecord, self.getRelation().idAttribute))
+    if (this.type === belongsToType) {
+      utils.set(record, this.foreignKey, utils.get(relatedRecord, this.getRelation().idAttribute))
     } else {
-      const idAttribute = self.mapper.idAttribute
+      const idAttribute = this.mapper.idAttribute
       if (utils.isArray(relatedRecord)) {
-        relatedRecord.forEach(function (relatedRecordItem) {
-          utils.set(relatedRecordItem, self.foreignKey, utils.get(record, idAttribute))
+        relatedRecord.forEach((relatedRecordItem) => {
+          utils.set(relatedRecordItem, this.foreignKey, utils.get(record, idAttribute))
         })
       } else {
-        utils.set(relatedRecord, self.foreignKey, utils.get(record, idAttribute))
+        utils.set(relatedRecord, this.foreignKey, utils.get(record, idAttribute))
       }
     }
   },
@@ -84,20 +82,19 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
     return utils.set(record, this.localField, data)
   },
   getInverse (mapper) {
-    const self = this
-    if (self.inverse) {
-      return self.inverse
+    if (this.inverse) {
+      return this.inverse
     }
-    self.getRelation().relationList.forEach(function (def) {
+    this.getRelation().relationList.forEach((def) => {
       if (def.getRelation() === mapper) {
-        if (def.foreignKey && def.foreignKey !== self.foreignKey) {
+        if (def.foreignKey && def.foreignKey !== this.foreignKey) {
           return
         }
-        self.inverse = def
+        this.inverse = def
         return false
       }
     })
-    return self.inverse
+    return this.inverse
   }
 })
 

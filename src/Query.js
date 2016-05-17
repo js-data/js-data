@@ -42,8 +42,7 @@ const escape = function (pattern) {
  */
 export default Component.extend({
   constructor: function Query (collection) {
-    const self = this
-    utils.classCallCheck(self, Query)
+    utils.classCallCheck(this, Query)
 
     /**
      * The {@link Collection} on which this query operates.
@@ -52,7 +51,7 @@ export default Component.extend({
      * @since 3.0.0
      * @type {Collection}
      */
-    self.collection = collection
+    this.collection = collection
 
     /**
      * The current data result of this query.
@@ -61,7 +60,88 @@ export default Component.extend({
      * @since 3.0.0
      * @type {Array}
      */
-    self.data = null
+    this.data = null
+  },
+
+  _applyWhereFromObject (where) {
+    const fields = []
+    const ops = []
+    const predicates = []
+    utils.forOwn(where, (clause, field) => {
+      if (!utils.isObject(clause)) {
+        clause = {
+          '==': clause
+        }
+      }
+      utils.forOwn(clause, (expr, op) => {
+        fields.push(field)
+        ops.push(op)
+        predicates.push(expr)
+      })
+    })
+    return {
+      fields,
+      ops,
+      predicates
+    }
+  },
+
+  _applyWhereFromArray (where) {
+    const groups = []
+    where.forEach((_where, i) => {
+      if (utils.isString(_where)) {
+        return
+      }
+      const prev = where[i - 1]
+      const parser = utils.isArray(_where) ? this._applyWhereFromArray : this._applyWhereFromObject
+      const group = parser.call(this, _where)
+      if (prev === 'or') {
+        group.isOr = true
+      }
+      groups.push(group)
+    })
+    groups.isArray = true
+    return groups
+  },
+
+  _testObjectGroup (keep, first, group, item) {
+    let i
+    const fields = group.fields
+    const ops = group.ops
+    const predicates = group.predicates
+    const len = ops.length
+    for (i = 0; i < len; i++) {
+      let op = ops[i]
+      const isOr = op.charAt(0) === '|'
+      op = isOr ? op.substr(1) : op
+      const expr = this.evaluate(utils.get(item, fields[i]), op, predicates[i])
+      if (expr !== undefined) {
+        keep = first ? expr : (isOr ? keep || expr : keep && expr)
+      }
+      first = false
+    }
+    return { keep, first }
+  },
+
+  _testArrayGroup (keep, first, groups, item) {
+    let i
+    const len = groups.length
+    for (i = 0; i < len; i++) {
+      const group = groups[i]
+      const parser = group.isArray ? this._testArrayGroup : this._testObjectGroup
+      const result = parser.call(this, true, true, group, item)
+      if (groups[i - 1]) {
+        if (group.isOr) {
+          keep = keep || result.keep
+        } else {
+          keep = keep && result.keep
+        }
+      } else {
+        keep = result.keep
+      }
+      first = result.first
+    }
+    return { keep, first }
   },
 
   /**
@@ -89,13 +169,12 @@ export default Component.extend({
    * @since 3.0.0
    */
   between (leftKeys, rightKeys, opts) {
-    const self = this
     opts || (opts = {})
-    if (self.data) {
+    if (this.data) {
       throw utils.err(`${DOMAIN}#between`)(500, 'Cannot access index')
     }
-    self.data = self.collection.getIndex(opts.index).between(leftKeys, rightKeys, opts)
-    return self
+    this.data = this.collection.getIndex(opts.index).between(leftKeys, rightKeys, opts)
+    return this
   },
 
   /**
@@ -196,8 +275,6 @@ export default Component.extend({
    * @since 3.0.0
    */
   filter (query, thisArg) {
-    const self = this
-
     /**
      * Selection query as defined by JSData's [Query Syntax][querysyntax].
      *
@@ -255,7 +332,7 @@ export default Component.extend({
      * @tutorial ["http://www.js-data.io/v3.0/docs/query-syntax","JSData's Query Syntax"]
      */
     query || (query = {})
-    self.getData()
+    this.getData()
     if (utils.isObject(query)) {
       let where = {}
 
@@ -271,7 +348,7 @@ export default Component.extend({
        * @see http://www.js-data.io/v3.0/docs/query-syntax
        * @since 3.0.0
        */
-      if (utils.isObject(query.where)) {
+      if (utils.isObject(query.where) || utils.isArray(query.where)) {
         where = query.where
       }
       utils.forOwn(query, function (value, key) {
@@ -281,41 +358,17 @@ export default Component.extend({
           }
         }
       })
+      let groups
 
-      const fields = []
-      const ops = []
-      const predicates = []
-      utils.forOwn(where, function (clause, field) {
-        if (!utils.isObject(clause)) {
-          clause = {
-            '==': clause
-          }
-        }
-        utils.forOwn(clause, function (expr, op) {
-          fields.push(field)
-          ops.push(op)
-          predicates.push(expr)
-        })
-      })
-      if (fields.length) {
-        let i
-        let len = fields.length
-        self.data = self.data.filter(function (item) {
-          let first = true
-          let keep = true
+      // Apply filter for each field
+      if (utils.isObject(where) && Object.keys(where).length !== 0) {
+        groups = this._applyWhereFromArray([where])
+      } else if (utils.isArray(where)) {
+        groups = this._applyWhereFromArray(where)
+      }
 
-          for (i = 0; i < len; i++) {
-            let op = ops[i]
-            const isOr = op.charAt(0) === '|'
-            op = isOr ? op.substr(1) : op
-            const expr = self.evaluate(utils.get(item, fields[i]), op, predicates[i])
-            if (expr !== undefined) {
-              keep = first ? expr : (isOr ? keep || expr : keep && expr)
-            }
-            first = false
-          }
-          return keep
-        })
+      if (groups) {
+        this.data = this.data.filter((item, i) => this._testArrayGroup(true, true, groups, item).keep)
       }
 
       // Sort
@@ -348,9 +401,7 @@ export default Component.extend({
             orderBy[i] = [def, 'ASC']
           }
         })
-        self.data.sort(function (a, b) {
-          return self.compare(orderBy, index, a, b)
-        })
+        this.data.sort((a, b) => this.compare(orderBy, index, a, b))
       }
 
       /**
@@ -370,9 +421,9 @@ export default Component.extend({
        * @since 3.0.0
        */
       if (utils.isNumber(query.skip)) {
-        self.skip(query.skip)
+        this.skip(query.skip)
       } else if (utils.isNumber(query.offset)) {
-        self.skip(query.offset)
+        this.skip(query.offset)
       }
 
       /**
@@ -392,12 +443,12 @@ export default Component.extend({
        * @since 3.0.0
        */
       if (utils.isNumber(query.limit)) {
-        self.limit(query.limit)
+        this.limit(query.limit)
       }
     } else if (utils.isFunction(query)) {
-      self.data = self.data.filter(query, thisArg)
+      this.data = this.data.filter(query, thisArg)
     }
-    return self
+    return this
   },
 
   /**
@@ -444,21 +495,20 @@ export default Component.extend({
    * @since 3.0.0
    */
   get (keyList, opts) {
-    const self = this
     keyList || (keyList = [])
     opts || (opts = {})
-    if (self.data) {
+    if (this.data) {
       throw utils.err(`${DOMAIN}#get`)(500, INDEX_ERR)
     }
     if (keyList && !utils.isArray(keyList)) {
       keyList = [keyList]
     }
     if (!keyList.length) {
-      self.getData()
-      return self
+      this.getData()
+      return this
     }
-    self.data = self.collection.getIndex(opts.index).get(keyList)
-    return self
+    this.data = this.collection.getIndex(opts.index).get(keyList)
+    return this
   },
 
   /**
@@ -481,25 +531,24 @@ export default Component.extend({
    * @since 3.0.0
    */
   getAll (...args) {
-    const self = this
     let opts = {}
-    if (self.data) {
+    if (this.data) {
       throw utils.err(`${DOMAIN}#getAll`)(500, INDEX_ERR)
     }
     if (!args.length || args.length === 1 && utils.isObject(args[0])) {
-      self.getData()
-      return self
+      this.getData()
+      return this
     } else if (args.length && utils.isObject(args[args.length - 1])) {
       opts = args[args.length - 1]
       args.pop()
     }
-    const collection = self.collection
+    const collection = this.collection
     const index = collection.getIndex(opts.index)
-    self.data = []
-    args.forEach(function (keyList) {
-      self.data = self.data.concat(index.get(keyList))
+    this.data = []
+    args.forEach((keyList) => {
+      this.data = this.data.concat(index.get(keyList))
     })
-    return self
+    return this
   },
 
   /**
@@ -510,11 +559,10 @@ export default Component.extend({
    * @since 3.0.0
    */
   getData () {
-    const self = this
-    if (!self.data) {
-      self.data = self.collection.index.getAll()
+    if (!this.data) {
+      this.data = this.collection.index.getAll()
     }
-    return self.data
+    return this.data
   },
 
   /**
@@ -696,6 +744,9 @@ export default Component.extend({
    * @type {Object}
    */
   ops: {
+    '=': function (value, predicate) {
+      return value == predicate // eslint-disable-line
+    },
     '==': function (value, predicate) {
       return value == predicate // eslint-disable-line
     },

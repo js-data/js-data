@@ -1,4 +1,4 @@
-import { assert, JSData } from '../../_setup'
+import { assert } from '../../_setup'
 
 describe('Collection#get', function () {
   it('should get an item from the collection', function () {
