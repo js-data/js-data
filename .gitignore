@@ -4,3 +4,4 @@ doc/
 coverage/
 junit/
 .nyc_output
+typings/
