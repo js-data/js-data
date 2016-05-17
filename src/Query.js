@@ -63,6 +63,87 @@ export default Component.extend({
     this.data = null
   },
 
+  _applyWhereFromObject (where) {
+    const fields = []
+    const ops = []
+    const predicates = []
+    utils.forOwn(where, (clause, field) => {
+      if (!utils.isObject(clause)) {
+        clause = {
+          '==': clause
+        }
+      }
+      utils.forOwn(clause, (expr, op) => {
+        fields.push(field)
+        ops.push(op)
+        predicates.push(expr)
+      })
+    })
+    return {
+      fields,
+      ops,
+      predicates
+    }
+  },
+
+  _applyWhereFromArray (where) {
+    const groups = []
+    where.forEach((_where, i) => {
+      if (utils.isString(_where)) {
+        return
+      }
+      const prev = where[i - 1]
+      const parser = utils.isArray(_where) ? this._applyWhereFromArray : this._applyWhereFromObject
+      const group = parser.call(this, _where)
+      if (prev === 'or') {
+        group.isOr = true
+      }
+      groups.push(group)
+    })
+    groups.isArray = true
+    return groups
+  },
+
+  _testObjectGroup (keep, first, group, item) {
+    let i
+    const fields = group.fields
+    const ops = group.ops
+    const predicates = group.predicates
+    const len = ops.length
+    for (i = 0; i < len; i++) {
+      let op = ops[i]
+      const isOr = op.charAt(0) === '|'
+      op = isOr ? op.substr(1) : op
+      const expr = this.evaluate(utils.get(item, fields[i]), op, predicates[i])
+      if (expr !== undefined) {
+        keep = first ? expr : (isOr ? keep || expr : keep && expr)
+      }
+      first = false
+    }
+    return { keep, first }
+  },
+
+  _testArrayGroup (keep, first, groups, item) {
+    let i
+    const len = groups.length
+    for (i = 0; i < len; i++) {
+      const group = groups[i]
+      const parser = group.isArray ? this._testArrayGroup : this._testObjectGroup
+      const result = parser.call(this, true, true, group, item)
+      if (groups[i - 1]) {
+        if (group.isOr) {
+          keep = keep || result.keep
+        } else {
+          keep = keep && result.keep
+        }
+      } else {
+        keep = result.keep
+      }
+      first = result.first
+    }
+    return { keep, first }
+  },
+
   /**
    * Find all entities between two boundaries.
    *
@@ -267,7 +348,7 @@ export default Component.extend({
        * @see http://www.js-data.io/v3.0/docs/query-syntax
        * @since 3.0.0
        */
-      if (utils.isObject(query.where)) {
+      if (utils.isObject(query.where) || utils.isArray(query.where)) {
         where = query.where
       }
       utils.forOwn(query, function (value, key) {
@@ -277,41 +358,17 @@ export default Component.extend({
           }
         }
       })
+      let groups
 
-      const fields = []
-      const ops = []
-      const predicates = []
-      utils.forOwn(where, function (clause, field) {
-        if (!utils.isObject(clause)) {
-          clause = {
-            '==': clause
-          }
-        }
-        utils.forOwn(clause, function (expr, op) {
-          fields.push(field)
-          ops.push(op)
-          predicates.push(expr)
-        })
-      })
-      if (fields.length) {
-        let i
-        let len = fields.length
-        this.data = this.data.filter((item) => {
-          let first = true
-          let keep = true
+      // Apply filter for each field
+      if (utils.isObject(where) && Object.keys(where).length !== 0) {
+        groups = this._applyWhereFromArray([where])
+      } else if (utils.isArray(where)) {
+        groups = this._applyWhereFromArray(where)
+      }
 
-          for (i = 0; i < len; i++) {
-            let op = ops[i]
-            const isOr = op.charAt(0) === '|'
-            op = isOr ? op.substr(1) : op
-            const expr = this.evaluate(utils.get(item, fields[i]), op, predicates[i])
-            if (expr !== undefined) {
-              keep = first ? expr : (isOr ? keep || expr : keep && expr)
-            }
-            first = false
-          }
-          return keep
-        })
+      if (groups) {
+        this.data = this.data.filter((item, i) => this._testArrayGroup(true, true, groups, item).keep)
       }
 
       // Sort
@@ -687,6 +744,9 @@ export default Component.extend({
    * @type {Object}
    */
   ops: {
+    '=': function (value, predicate) {
+      return value == predicate // eslint-disable-line
+    },
     '==': function (value, predicate) {
       return value == predicate // eslint-disable-line
     },
