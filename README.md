@@ -39,7 +39,7 @@ Support is handled via the [Slack channel][slack] or the [Mailing List][ml].
 ##### Looking for contributors!
 
 JSData is getting popular and becoming a lot of work for me. I could use help
-with tests, documentation, demos/examples, and adapters. Contact me if you wan
+with tests, documentation, demos/examples, and adapters. Contact me if you want
 to help! jason dot dobry at gmail dot com
 
 [![MtnWestJS Conf 2015 Presentation][mtn_b]][mtn_l]
