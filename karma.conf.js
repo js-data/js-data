@@ -81,6 +81,7 @@ module.exports = function (config) {
     files: [
       'node_modules/babel-polyfill/dist/polyfill.js',
       'src/utils.js',
+      'src/Relation.js',
       'src/decorators.js',
       'src/Component.js',
       'src/Schema.js',
