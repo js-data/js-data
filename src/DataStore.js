@@ -29,7 +29,7 @@ const ownMethodsForScoping = [
 
 const safeSet = function (record, field, value) {
   if (record && record._set) {
-    record._set(field, value)
+    record._set(`props.${field}`, value)
   } else {
     utils.set(record, field, value)
   }
@@ -402,35 +402,36 @@ const props = {
           }
         }
 
-        if (mapper.recordClass.prototype.hasOwnProperty(foreignKey)) {
-          const superClass = mapper.recordClass
-          mapper.recordClass = superClass.extend({
-            constructor: (function () {
-              var subClass = function Record (props, opts) {
-                utils.classCallCheck(this, subClass)
-                superClass.call(this, props, opts)
-              }
-              return subClass
-            })()
-          })
+        let foreignKeyDescriptor = Object.getOwnPropertyDescriptor(mapper.recordClass.prototype, foreignKey)
+        if (!foreignKeyDescriptor) {
+          foreignKeyDescriptor = {
+            enumerable: true
+          }
         }
-        Object.defineProperty(mapper.recordClass.prototype, foreignKey, {
-          enumerable: true,
-          get () { return this._get(foreignKey) },
-          set (value) {
-            const _self = this
-            if (utils.isUndefined(value)) {
-              // Unset locals
-              utils.set(_self, localField, undefined)
-            } else {
-              safeSet(_self, foreignKey, value)
-              let storeRecord = self.get(relation, value)
-              if (storeRecord) {
-                utils.set(_self, localField, storeRecord)
-              }
+        const originalGet = foreignKeyDescriptor.get
+        foreignKeyDescriptor.get = function () {
+          if (originalGet) {
+            return originalGet.call(this)
+          }
+          return this._get(`props.${foreignKey}`)
+        }
+        const originalSet = foreignKeyDescriptor.set
+        foreignKeyDescriptor.set = function (value) {
+          if (originalSet) {
+            originalSet.call(this, value)
+          }
+          if (utils.isUndefined(value)) {
+            // Unset locals
+            utils.set(this, localField, undefined)
+          } else {
+            safeSet(this, foreignKey, value)
+            let storeRecord = self.get(relation, value)
+            if (storeRecord) {
+              utils.set(this, localField, storeRecord)
             }
           }
-        })
+        }
+        Object.defineProperty(mapper.recordClass.prototype, foreignKey, foreignKeyDescriptor)
       } else if (type === hasManyType) {
         const localKeys = def.localKeys
         const foreignKeys = def.foreignKeys

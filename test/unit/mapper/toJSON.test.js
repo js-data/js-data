@@ -44,6 +44,54 @@ describe('Mapper#toJSON', function () {
       }
     )
   })
+  it('should strictly keep schema props', function () {
+    const UserMapper = new JSData.Mapper({
+      name: 'user',
+      schema: {
+        properties: {
+          name: { type: 'string' },
+          age: { type: 'number' }
+        }
+      }
+    })
+    const json = UserMapper.toJSON({
+      name: 'John',
+      age: 30,
+      foo: 'bar'
+    }, { strict: true })
+    assert.objectsEqual(json, {
+      name: 'John',
+      age: 30
+    })
+  })
+  it('should allow custom getters/setters', function () {
+    const UserMapper = new JSData.Mapper({
+      name: 'user',
+      schema: {
+        properties: {
+          first: { type: 'string' },
+          last: { type: 'string' },
+          name: {
+            type: 'string',
+            get: function () {
+              return `${this.first} ${this.last}`
+            },
+            set: function (value) {
+              const parts = value.split(' ')
+              this.first = parts[0] || this.first
+              this.last = parts[1] || this.last
+            }
+          },
+          age: { type: 'number' }
+        }
+      }
+    })
+    const user = UserMapper.createRecord({
+      first: 'John',
+      last: 'Anderson'
+    })
+    assert.equal(user.name, 'John Anderson')
+  })
   it('should make json when the record class does not have a mapper', function () {
     const props = { name: 'John' }
     const record = new JSData.Record(props)

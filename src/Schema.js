@@ -666,6 +666,8 @@ const validationFailureMsg = 'validation failed'
  */
 const makeDescriptor = function (prop, schema, opts) {
   const descriptor = {
+    // Better to allow configurability, but at the user's own risk
+    configurable: true,
     // These properties are enumerable by default, but regardless of their
     // enumerability, they won't be "own" properties of individual records
     enumerable: utils.isUndefined(schema.enumerable) ? true : !!schema.enumerable
@@ -677,7 +679,17 @@ const makeDescriptor = function (prop, schema, opts) {
   const setter = opts.setter
   const unsetter = opts.unsetter
 
-  descriptor.get = function () { return this._get(keyPath) }
+  descriptor.get = function () {
+    return this._get(keyPath)
+  }
+
+  if (utils.isFunction(schema.get)) {
+    const originalGet = descriptor.get
+    descriptor.get = function () {
+      return schema.get.call(this, originalGet)
+    }
+  }
+
   descriptor.set = function (value) {
     // These are accessed a lot
     const _get = this[getter]
@@ -757,6 +769,13 @@ const makeDescriptor = function (prop, schema, opts) {
     }
     _set(keyPath, value)
     return value
+  }
+
+  if (utils.isFunction(schema.set)) {
+    const originalSet = descriptor.set
+    descriptor.set = function (value) {
+      return schema.set.call(this, value, originalSet)
+    }
   }
 
   return descriptor
