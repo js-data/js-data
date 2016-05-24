@@ -47,13 +47,13 @@ describe('DataStore integration tests', function () {
       foo_id: 66
     })
     assert(bar88.foo === foo66)
-    assert.equal(66, bar88.foo_id)
+    assert.equal(bar88.foo_id, 66)
     bar88.foo_id = 77
     assert(bar88.foo === foo77)
-    assert.equal(77, bar88.foo_id)
+    assert.equal(bar88.foo_id, 77)
     bar88.foo = foo66
     assert(bar88.foo === foo66)
-    assert.equal(66, bar88.foo_id)
+    assert.equal(bar88.foo_id, 66)
     assert.objectsEqual(foo77.bars, [])
     foo77.bars = [bar88]
     assert(foo77.bars[0] === store.getAll('bar')[0])
