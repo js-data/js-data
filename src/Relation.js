@@ -1,30 +1,64 @@
 import utils from './utils'
 
-const DOMAIN = 'Relation'
-
 // TODO: remove this when the rest of the project is cleaned
 export const belongsToType = 'belongsTo'
 export const hasManyType = 'hasMany'
 export const hasOneType = 'hasOne'
 
-export class Relation {
+const DOMAIN = 'Relation'
 
-  static create (type, relatedMapper, options = {}) {
-    options.type = type
+export function Relation (relatedMapper, options = {}) {
+  utils.classCallCheck(this, Relation)
 
-    return new Relation(relatedMapper, options)
+  options.type = this.constructor.TYPE_NAME
+  this.validateOptions(relatedMapper, options)
+
+  if (typeof relatedMapper === 'object') {
+    Object.defineProperty(this, 'relatedMapper', { value: relatedMapper })
   }
 
-  constructor (relatedMapper, options) {
-    validateOptions(relatedMapper, options)
+  Object.defineProperty(this, 'inverse', { writable: true })
+  utils.fillIn(this, options)
+}
 
-    if (typeof relatedMapper === 'object') {
-      Object.defineProperty(this, 'relatedMapper', { value: relatedMapper })
+Relation.extend = utils.extend
+Relation.create = function createRelation (RelationType, relatedMapper, options = {}) {
+  return new RelationType(relatedMapper, options)
+}
+
+utils.addHiddenPropsToTarget(Relation.prototype, {
+  get canAutoAddLinks() {
+    return utils.isUndefined(this.add) || !!this.add
+  },
+
+  get relatedCollection() {
+    return this.mapper.datastore.getCollection(this.relation)
+  },
+
+  validateOptions (related, opts) {
+    const DOMAIN_ERR = `new ${DOMAIN}`
+
+    const localField = opts.localField
+    if (!localField) {
+      throw utils.err(DOMAIN_ERR, 'opts.localField')(400, 'string', localField)
     }
 
-    Object.defineProperty(this, 'inverse', { writable: true })
-    utils.fillIn(this, options)
-  }
+    const foreignKey = opts.foreignKey = opts.foreignKey || opts.localKey
+    if (!foreignKey && (opts.type === belongsToType || opts.type === hasOneType)) {
+      throw utils.err(DOMAIN_ERR, 'opts.foreignKey')(400, 'string', foreignKey)
+    }
+
+    if (utils.isString(related)) {
+      opts.relation = related
+      if (!utils.isFunction(opts.getRelation)) {
+        throw utils.err(DOMAIN_ERR, 'opts.getRelation')(400, 'function', opts.getRelation)
+      }
+    } else if (related) {
+      opts.relation = related.name
+    } else {
+      throw utils.err(DOMAIN_ERR, 'related')(400, 'Mapper or string', related)
+    }
+  },
 
   assignTo (mapper) {
     this.name = mapper.name
@@ -34,47 +68,47 @@ export class Relation {
     mapper.relationFields || Object.defineProperty(mapper, 'relationFields', { value: [] })
     mapper.relationList.push(this)
     mapper.relationFields.push(this.localField)
-  }
+  },
+
+  canFindLinkFor() {
+    return Boolean(this.foreignKey || this.localKey)
+  },
 
   getRelation () {
     return this.relatedMapper
-  }
+  },
 
   getForeignKey (record) {
-    if (this.type === belongsToType) {
-      return utils.get(record, this.foreignKey)
-    }
-
     return utils.get(record, this.mapper.idAttribute)
-  }
+  },
 
   setForeignKey (record, relatedRecord) {
     if (!record || !relatedRecord) {
       return
     }
 
-    if (this.type === belongsToType) {
-      utils.set(record, this.foreignKey, utils.get(relatedRecord, this.getRelation().idAttribute))
-    } else {
-      const idAttribute = this.mapper.idAttribute
+    this._setForeignKey(record, relatedRecord)
+  },
 
-      if (!utils.isArray(relatedRecord)) {
-        relatedRecord = [relatedRecord]
-      }
+  _setForeignKey (record, relatedRecord) {
+    const idAttribute = this.mapper.idAttribute
 
-      relatedRecord.forEach((relatedRecordItem) => {
-        utils.set(relatedRecordItem, this.foreignKey, utils.get(record, idAttribute))
-      })
+    if (!utils.isArray(relatedRecord)) {
+      relatedRecord = [relatedRecord]
     }
-  }
+
+    relatedRecord.forEach((relatedRecordItem) => {
+      utils.set(relatedRecordItem, this.foreignKey, utils.get(record, idAttribute))
+    })
+  },
 
   getLocalField (record) {
     return utils.get(record, this.localField)
-  }
+  },
 
   setLocalField (record, data) {
     return utils.set(record, this.localField, data)
-  }
+  },
 
   getInverse (mapper) {
     if (!this.inverse) {
@@ -82,52 +116,62 @@ export class Relation {
     }
 
     return this.inverse
-  }
+  },
 
   findInverseRelation (mapper) {
     this.getRelation().relationList.forEach((def) => {
-      if (def.getRelation() === mapper && this.isAssociatedWith(def)) {
+      if (def.getRelation() === mapper && this.isInversedTo(def)) {
         this.inverse = def
         return true
       }
     })
-  }
+  },
 
-  isAssociatedWith (def) {
+  isInversedTo (def) {
     return !def.foreignKey || def.foreignKey === this.foreignKey
-  }
-}
+  },
 
-Relation.HAS_MANY = hasManyType
-Relation.HAS_ONE = hasOneType
-Relation.BELONGS_TO = belongsToType
+  linkRecords (relatedMapper, records) {
+    const datastore = this.mapper.datastore
 
-function validateOptions (related, opts) {
-  const DOMAIN_ERR = `new ${DOMAIN}`
+    records.forEach((record) => {
+      let relatedData = this.getLocalField(record)
 
-  const localField = opts.localField
-  if (!localField) {
-    throw utils.err(DOMAIN_ERR, 'opts.localField')(400, 'string', localField)
-  }
+      if (utils.isFunction(this.add)) {
+        relatedData = this.add(datastore, this, record)
+      } else if (relatedData) {
+        relatedData = this.linkRecord(record, relatedData)
+      }
 
-  const foreignKey = opts.foreignKey = opts.foreignKey || opts.localKey
-  if (!foreignKey && (opts.type === belongsToType || opts.type === hasOneType)) {
-    throw utils.err(DOMAIN_ERR, 'opts.foreignKey')(400, 'string', foreignKey)
-  }
+      const isEmptyLinks = !relatedData || utils.isArray(relatedData) && !relatedData.length
 
-  const { localKeys, foreignKeys } = opts
-  if (!foreignKey && !localKeys && !foreignKeys && opts.type === hasManyType) {
-    throw utils.err(DOMAIN_ERR, 'opts.<foreignKey|localKeys|foreignKeys>')(400, 'string', foreignKey)
-  }
+      if (isEmptyLinks && this.canFindLinkFor(record)) {
+        relatedData = this.findExistingLinksFor(relatedMapper, record)
+      }
 
-  if (utils.isString(related)) {
-    opts.relation = related
-    if (!utils.isFunction(opts.getRelation)) {
-      throw utils.err(DOMAIN_ERR, 'opts.getRelation')(400, 'function', opts.getRelation)
+      if (relatedData) {
+        this.setLocalField(record, relatedData)
+      }
+    })
+  },
+
+  linkRecord (record, relatedRecord) {
+    const relatedId = utils.get(relatedRecord, this.mapper.idAttribute)
+
+    if (relatedRecord !== this.relatedCollection.get(relatedId)) {
+      this.setForeignKey(record, relatedRecord)
+
+      if (this.canAutoAddLinks) {
+        relatedRecord = this.relatedCollection.add(relatedRecord)
+      }
     }
-  } else if (related) {
-    opts.relation = related.name
-  } else {
-    throw utils.err(DOMAIN_ERR, 'related')(400, 'Mapper or string', related)
+
+    return relatedRecord
+  },
+
+  findExistingLinksByForeignKey (foreignId) {
+    return this.relatedCollection.filter({
+      [this.foreignKey]: foreignId
+    })
   }
-}
+})

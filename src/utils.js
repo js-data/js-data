@@ -174,11 +174,11 @@ const utils = {
    */
   addHiddenPropsToTarget (target, props) {
     const map = {}
-    utils.forOwn(props, function (value, key) {
-      map[key] = {
-        writable: true,
-        value
-      }
+    Object.keys(props).forEach(function (propName) {
+      const descriptor = Object.getOwnPropertyDescriptor(props, propName)
+
+      descriptor.enumerable = false
+      map[propName] = descriptor
     })
     Object.defineProperties(target, map)
   },
