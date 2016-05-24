@@ -22,28 +22,30 @@ const DOMAIN = 'LinkedCollection'
  * @param {Object} [opts] Configuration options. See {@link Collection}.
  * @returns {Mapper}
  */
-export default Collection.extend({
-  constructor: function LinkedCollection (records, opts) {
-    utils.classCallCheck(this, LinkedCollection)
-    // Make sure this collection has somewhere to store "added" timestamps
-    Object.defineProperties(this, {
-      _added: {
-        value: {}
-      },
-      datastore: {
-        writable: true,
-        value: undefined
-      }
-    })
-
-    LinkedCollection.__super__.call(this, records, opts)
-
-    // Make sure this collection has a reference to a datastore
-    if (!this.datastore) {
-      throw utils.err(`new ${DOMAIN}`, 'opts.datastore')(400, 'DataStore', this.datastore)
+function LinkedCollection (records, opts) {
+  utils.classCallCheck(this, LinkedCollection)
+  // Make sure this collection has somewhere to store "added" timestamps
+  Object.defineProperties(this, {
+    _added: {
+      value: {}
+    },
+    datastore: {
+      writable: true,
+      value: undefined
     }
-    return this
-  },
+  })
+
+  LinkedCollection.__super__.call(this, records, opts)
+
+  // Make sure this collection has a reference to a datastore
+  if (!this.datastore) {
+    throw utils.err(`new ${DOMAIN}`, 'opts.datastore')(400, 'DataStore', this.datastore)
+  }
+  return this
+}
+
+export default Collection.extend({
+  constructor: LinkedCollection,
 
   _onRecordEvent (...args) {
     utils.getSuper(this).prototype._onRecordEvent.apply(this, args)
@@ -214,3 +216,29 @@ export default Collection.extend({
     return records
   }
 })
+
+/**
+ * Create a subclass of this LinkedCollection.
+ *
+ * @example <caption>Extend the class in a cross-browser manner.</caption>
+ * import {LinkedCollection} from 'js-data'
+ * const CustomLinkedCollectionClass = LinkedCollection.extend({
+ *   foo () { return 'bar' }
+ * })
+ * const customLinkedCollection = new CustomLinkedCollectionClass()
+ * console.log(customLinkedCollection.foo()) // "bar"
+ *
+ * @example <caption>Extend the class using ES2015 class syntax.</caption>
+ * class CustomLinkedCollectionClass extends LinkedCollection {
+ *   foo () { return 'bar' }
+ * }
+ * const customLinkedCollection = new CustomLinkedCollectionClass()
+ * console.log(customLinkedCollection.foo()) // "bar"
+ *
+ * @method LinkedCollection.extend
+ * @param {Object} [props={}] Properties to add to the prototype of the
+ * subclass.
+ * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @returns {Constructor} Subclass of this LinkedCollection class.
+ * @since 3.0.0
+ */

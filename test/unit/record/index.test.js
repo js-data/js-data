@@ -67,10 +67,4 @@ describe('Record', function () {
       record._mapper()
     }, Error, '[Record#_mapper:] mapper not found\nhttp://www.js-data.io/v3.0/docs/errors#404')
   })
-
-  it('hashCode should work', function () {
-    const BarMapper = new JSData.Mapper({ name: 'bar', idAttribute: '_id' })
-    let bar = BarMapper.createRecord({ _id: 1 })
-    assert.equal(bar.hashCode(), 1)
-  })
 })

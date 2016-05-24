@@ -62,96 +62,100 @@ const COLLECTION_DEFAULTS = {
  * @param {string} [opts.idAttribute] See {@link Collection#idAttribute}.
  * @param {string} [opts.onConflict="merge"] See {@link Collection#onConflict}.
  * @param {string} [opts.mapper] See {@link Collection#mapper}.
+ * @since 3.0.0
  */
-export default Component.extend({
-  constructor: function Collection (records, opts) {
-    utils.classCallCheck(this, Collection)
-    Collection.__super__.call(this)
+function Collection (records, opts) {
+  utils.classCallCheck(this, Collection)
+  Collection.__super__.call(this)
 
-    if (records && !utils.isArray(records)) {
-      opts = records
-      records = []
-    }
-    if (utils.isString(opts)) {
-      opts = { idAttribute: opts }
-    }
+  if (records && !utils.isArray(records)) {
+    opts = records
+    records = []
+  }
+  if (utils.isString(opts)) {
+    opts = { idAttribute: opts }
+  }
 
-    // Default values for arguments
-    records || (records = [])
-    opts || (opts = {})
+  // Default values for arguments
+  records || (records = [])
+  opts || (opts = {})
+
+  /**
+   * Default Mapper for this collection. Optional. If a Mapper is provided, then
+   * the collection will use the {@link Mapper#idAttribute} setting, and will
+   * wrap records in {@link Mapper#recordClass}.
+   *
+   * @example
+   * import {Collection, Mapper} from 'js-data'
+   *
+   * class MyMapperClass extends Mapper {
+   *   foo () { return 'bar' }
+   * }
+   * const myMapper = new MyMapperClass()
+   * const collection = new Collection(null, { mapper: myMapper })
+   *
+   * @name Collection#mapper
+   * @type {Mapper}
+   * @default null
+   * @since 3.0.0
+   */
+  Object.defineProperties(this, {
+    mapper: {
+      value: undefined,
+      writable: true
+    },
+    // Query class used by this collection
+    queryClass: {
+      value: undefined,
+      writable: true
+    }
+  })
+
+  // Apply user-provided configuration
+  utils.fillIn(this, opts)
+  // Fill in any missing options with the defaults
+  utils.fillIn(this, utils.copy(COLLECTION_DEFAULTS))
+
+  if (!this.queryClass) {
+    this.queryClass = Query
+  }
+
+  const idAttribute = this.recordId()
+
+  Object.defineProperties(this, {
+    /**
+     * The main index, which uses @{link Collection#recordId} as the key.
+     *
+     * @name Collection#index
+     * @type {Index}
+     */
+    index: {
+      value: new Index([idAttribute], {
+        hashCode (obj) {
+          return utils.get(obj, idAttribute)
+        }
+      })
+    },
 
     /**
-     * Default Mapper for this collection. Optional. If a Mapper is provided, then
-     * the collection will use the {@link Mapper#idAttribute} setting, and will
-     * wrap records in {@link Mapper#recordClass}.
+     * Object that holds the secondary indexes of this collection.
      *
-     * @example
-     * import {Collection, Mapper} from 'js-data'
-     *
-     * class MyMapperClass extends Mapper {
-     *   foo () { return 'bar' }
-     * }
-     * const myMapper = new MyMapperClass()
-     * const collection = new Collection(null, { mapper: myMapper })
-     *
-     * @name Collection#mapper
-     * @type {Mapper}
-     * @default null
+     * @name Collection#indexes
+     * @type {Object.<string, Index>}
      */
-    Object.defineProperties(this, {
-      mapper: {
-        value: undefined,
-        writable: true
-      },
-      // Query class used by this collection
-      queryClass: {
-        value: undefined,
-        writable: true
-      }
-    })
-
-    // Apply user-provided configuration
-    utils.fillIn(this, opts)
-    // Fill in any missing options with the defaults
-    utils.fillIn(this, utils.copy(COLLECTION_DEFAULTS))
-
-    if (!this.queryClass) {
-      this.queryClass = Query
+    indexes: {
+      value: {}
     }
+  })
 
-    const idAttribute = this.recordId()
+  // Insert initial data into the collection
+  if (records) {
+    this.add(records)
+  }
+}
 
-    Object.defineProperties(this, {
-      /**
-       * The main index, which uses @{link Collection#recordId} as the key.
-       *
-       * @name Collection#index
-       * @type {Index}
-       */
-      index: {
-        value: new Index([idAttribute], {
-          hashCode (obj) {
-            return utils.get(obj, idAttribute)
-          }
-        })
-      },
-
-      /**
-       * Object that holds the secondary indexes of this collection.
-       *
-       * @name Collection#indexes
-       * @type {Object.<string, Index>}
-       */
-      indexes: {
-        value: {}
-      }
-    })
-
-    // Insert initial data into the collection
-    if (records) {
-      this.add(records)
-    }
-  },
+export default Component.extend({
+  constructor: Collection,
 
   /**
    * Used to bind to events emitted by records in this Collection.
@@ -729,3 +733,29 @@ export default Component.extend({
     })
   }
 })
+
+/**
+ * Create a subclass of this Collection.
+ *
+ * @example <caption>Extend the class in a cross-browser manner.</caption>
+ * import {Collection} from 'js-data'
+ * const CustomCollectionClass = Collection.extend({
+ *   foo () { return 'bar' }
+ * })
+ * const customCollection = new CustomCollectionClass()
+ * console.log(customCollection.foo()) // "bar"
+ *
+ * @example <caption>Extend the class using ES2015 class syntax.</caption>
+ * class CustomCollectionClass extends Collection {
+ *   foo () { return 'bar' }
+ * }
+ * const customCollection = new CustomCollectionClass()
+ * console.log(customCollection.foo()) // "bar"
+ *
+ * @method Collection.extend
+ * @param {Object} [props={}] Properties to add to the prototype of the
+ * subclass.
+ * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @returns {Constructor} Subclass of this Collection class.
+ * @since 3.0.0
+ */

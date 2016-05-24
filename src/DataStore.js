@@ -43,17 +43,69 @@ const cachedFn = function (name, hashOrId, opts) {
   return cached
 }
 
-const props = {
-  constructor: function DataStore (opts) {
-    utils.classCallCheck(this, DataStore)
-    DataStore.__super__.call(this, opts)
+function DataStore (opts) {
+  utils.classCallCheck(this, DataStore)
+  DataStore.__super__.call(this, opts)
 
-    this.collectionClass = this.collectionClass || LinkedCollection
-    this._collections = {}
-    this._pendingQueries = {}
-    this._completedQueries = {}
-    return this
-  },
+  this.collectionClass = this.collectionClass || LinkedCollection
+  this._collections = {}
+  this._pendingQueries = {}
+  this._completedQueries = {}
+  return this
+}
+
+/**
+ * The `DataStore` class is an extension of {@link Container}. Not only does
+ * `DataStore` manage mappers, but also collections. `DataStore` implements the
+ * asynchronous {@link Mapper} methods, such as {@link Mapper#find} and
+ * {@link Mapper#create}. If you use the asynchronous `DataStore` methods
+ * instead of calling them directly on the mappers, then the results of the
+ * method calls will be inserted into the store's collections. You can think of
+ * a `DataStore` as an [Identity Map](https://en.wikipedia.org/wiki/Identity_map_pattern)
+ * for the [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping)
+ * (the Mappers).
+ *
+ * ```javascript
+ * import {DataStore} from 'js-data'
+ * ```
+ *
+ * @example
+ * import {DataStore} from 'js-data'
+ * import HttpAdapter from 'js-data-http'
+ * const store = new DataStore()
+ *
+ * // DataStore#defineMapper returns a direct reference to the newly created
+ * // Mapper.
+ * const UserMapper = store.defineMapper('user')
+ *
+ * // DataStore#as returns the store scoped to a particular Mapper.
+ * const UserStore = store.as('user')
+ *
+ * // Call "find" on "UserMapper" (Stateless ORM)
+ * UserMapper.find(1).then((user) => {
+ *   // retrieved a "user" record via the http adapter, but that's it
+ *
+ *   // Call "find" on "store" targeting "user" (Stateful DataStore)
+ *   return store.find('user', 1) // same as "UserStore.find(1)"
+ * }).then((user) => {
+ *   // not only was a "user" record retrieved, but it was added to the
+ *   // store's "user" collection
+ *   const cachedUser = store.getCollection('user').get(1)
+ *   console.log(user === cachedUser) // true
+ * })
+ *
+ * @class DataStore
+ * @extends Container
+ * @param {Object} [opts] Configuration options. See {@link Container}.
+ * @returns {DataStore}
+ * @see Container
+ * @since 3.0.0
+ * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#datastore","Components of JSData: DataStore"]
+ * @tutorial ["http://www.js-data.io/v3.0/docs/working-with-the-datastore","Working with the DataStore"]
+ * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
+ */
+const props = {
+  constructor: DataStore,
 
   _callSuper (method, ...args) {
     return this.constructor.__super__.prototype[method].apply(this, args)
@@ -885,56 +937,6 @@ proxiedCollectionMethods.forEach(function (method) {
   }
 })
 
-/**
- * The `DataStore` class is an extension of {@link Container}. Not only does
- * `DataStore` manage mappers, but also collections. `DataStore` implements the
- * asynchronous {@link Mapper} methods, such as {@link Mapper#find} and
- * {@link Mapper#create}. If you use the asynchronous `DataStore` methods
- * instead of calling them directly on the mappers, then the results of the
- * method calls will be inserted into the store's collections. You can think of
- * a `DataStore` as an [Identity Map](https://en.wikipedia.org/wiki/Identity_map_pattern)
- * for the [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping)
- * (the Mappers).
- *
- * ```javascript
- * import {DataStore} from 'js-data'
- * ```
- *
- * @example
- * import {DataStore} from 'js-data'
- * import HttpAdapter from 'js-data-http'
- * const store = new DataStore()
- *
- * // DataStore#defineMapper returns a direct reference to the newly created
- * // Mapper.
- * const UserMapper = store.defineMapper('user')
- *
- * // DataStore#as returns the store scoped to a particular Mapper.
- * const UserStore = store.as('user')
- *
- * // Call "find" on "UserMapper" (Stateless ORM)
- * UserMapper.find(1).then((user) => {
- *   // retrieved a "user" record via the http adapter, but that's it
- *
- *   // Call "find" on "store" targeting "user" (Stateful DataStore)
- *   return store.find('user', 1) // same as "UserStore.find(1)"
- * }).then((user) => {
- *   // not only was a "user" record retrieved, but it was added to the
- *   // store's "user" collection
- *   const cachedUser = store.getCollection('user').get(1)
- *   console.log(user === cachedUser) // true
- * })
- *
- * @class DataStore
- * @extends Container
- * @param {Object} [opts] Configuration options. See {@link Container}.
- * @returns {DataStore}
- * @see Container
- * @since 3.0.0
- * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#datastore","Components of JSData: DataStore"]
- * @tutorial ["http://www.js-data.io/v3.0/docs/working-with-the-datastore","Working with the DataStore"]
- * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
- */
 export default Container.extend(props)
 
 /**

@@ -886,21 +886,23 @@ const typeGroupValidators = {
  * @extends Component
  * @param {Object} definition Schema definition according to json-schema.org
  */
-export default Component.extend({
-  constructor: function Schema (definition) {
-    definition || (definition = {})
-    // TODO: schema validation
-    utils.fillIn(this, definition)
+function Schema (definition) {
+  definition || (definition = {})
+  // TODO: schema validation
+  utils.fillIn(this, definition)
 
-    // TODO: rework this to make sure all possible keywords are converted
-    if (definition.properties) {
-      utils.forOwn(definition.properties, function (_definition, prop) {
-        if (!(_definition instanceof Schema)) {
-          definition.properties[prop] = new Schema(_definition)
-        }
-      })
-    }
-  },
+  // TODO: rework this to make sure all possible keywords are converted
+  if (definition.properties) {
+    utils.forOwn(definition.properties, function (_definition, prop) {
+      if (!(_definition instanceof Schema)) {
+        definition.properties[prop] = new Schema(_definition)
+      }
+    })
+  }
+}
+
+export default Component.extend({
+  constructor: Schema,
 
   /**
    * This adds ES5 getters/setters to the target based on the "properties" in
