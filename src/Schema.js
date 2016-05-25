@@ -4,8 +4,13 @@ import Component from './Component'
 const DOMAIN = 'Schema'
 
 /**
- * TODO
- *
+ * A function map for each of the seven primitive JSON types defined by the core specification.
+ * Each function will check a given value and return true or false if the value matches the type.
+ * ```
+ *   types.integer(1) // returns true
+ *   types.string({}) // returns false
+ * ```
+ * http://json-schema.org/latest/json-schema-core.html#anchor8
  * @name Schema.types
  * @type {Object}
  */
@@ -89,15 +94,17 @@ const minLengthCommon = function (keyword, value, schema, opts) {
 }
 
 /**
- * TODO
- *
+ * A map of all object member functions for each keyword defined in the JSON Schema
  * @name Schema.validationKeywords
  * @type {Object}
  */
 const validationKeywords = {
   /**
-   * http://json-schema.org/latest/json-schema-validation.html#anchor82
+   * An instance is valid against this keyword if and only if it is valid against all the schemas in this keyword's value.
    *
+   * The value of this keyword MUST be an array. This array MUST have at least one element.
+   * Each element of this array MUST be an object, and each object MUST be a valid JSON Schema.
+   * see http://json-schema.org/latest/json-schema-validation.html#anchor82
    * @name Schema.validationKeywords.allOf
    * @method
    * @param {*} value TODO
@@ -159,18 +166,19 @@ const validationKeywords = {
    */
   enum (value, schema, opts) {
     const possibleValues = schema['enum']
-    if (possibleValues.indexOf(value) === -1) {
+    if (utils.findIndex(possibleValues, (item) => utils.deepEqual(item, value)) === -1) {
       return makeError(value, `one of (${possibleValues.join(', ')})`, opts)
     }
   },
 
   /**
+   * Validates items in an array against the specified schema.
    * http://json-schema.org/latest/json-schema-validation.html#anchor37
    *
    * @name Schema.validationKeywords.items
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
+   * @param {Array} value Array to be validated
+   * @param {Object} schema A schema that
    * @param {Object} opts TODO
    */
   items (value, schema, opts) {
@@ -208,7 +216,7 @@ const validationKeywords = {
     // Depends on maximum
     // default: false
     const exclusiveMaximum = schema.exclusiveMaximum
-    if (typeof value === typeof maximum && (exclusiveMaximum ? maximum < value : maximum <= value)) {
+    if (typeof value === typeof maximum && !(exclusiveMaximum ? maximum > value : maximum >= value)) {
       // TODO: Account for value of exclusiveMaximum in messaging
       return makeError(value, `no more than ${maximum}`, opts)
     }
@@ -224,7 +232,9 @@ const validationKeywords = {
    * @param {Object} opts TODO
    */
   maxItems (value, schema, opts) {
-    return maxLengthCommon('maxItems', value, schema, opts)
+    if (utils.isArray(value)) {
+      return maxLengthCommon('maxItems', value, schema, opts)
+    }
   },
 
   /**
@@ -250,6 +260,8 @@ const validationKeywords = {
    * @param {Object} opts TODO
    */
   maxProperties (value, schema, opts) {
+    // validate only objects
+    if (!utils.isObject(value)) return
     const maxProperties = schema.maxProperties
     const length = Object.keys(value).length
     if (length > maxProperties) {
@@ -273,9 +285,10 @@ const validationKeywords = {
     // Depends on minimum
     // default: false
     const exclusiveMinimum = schema.exclusiveMinimum
-    if (typeof value === typeof minimum && (exclusiveMinimum ? minimum > value : minimum >= value)) {
-      // TODO: Account for value of exclusiveMinimum in messaging
-      return makeError(value, `no less than ${minimum}`, opts)
+    if (typeof value === typeof minimum && !(exclusiveMinimum ? value > minimum : value >= minimum)) {
+      return exclusiveMinimum
+        ? makeError(value, `no less than nor equal to ${minimum}`, opts)
+        : makeError(value, `no less than ${minimum}`, opts)
     }
   },
 
@@ -289,7 +302,9 @@ const validationKeywords = {
    * @param {Object} opts TODO
    */
   minItems (value, schema, opts) {
-    return minLengthCommon('minItems', value, schema, opts)
+    if (utils.isArray(value)) {
+      return minLengthCommon('minItems', value, schema, opts)
+    }
   },
 
   /**
@@ -315,6 +330,8 @@ const validationKeywords = {
    * @param {Object} opts TODO
    */
   minProperties (value, schema, opts) {
+    // validate only objects
+    if (!utils.isObject(value)) return
     const minProperties = schema.minProperties
     const length = Object.keys(value).length
     if (length < minProperties) {
@@ -332,7 +349,12 @@ const validationKeywords = {
    * @param {Object} opts TODO
    */
   multipleOf (value, schema, opts) {
-    // TODO
+    const multipleOf = schema.multipleOf
+    if (utils.isNumber(value)) {
+      if ((value / multipleOf) % 1 !== 0) {
+        return makeError(value, `multipleOf ${multipleOf}`, opts)
+      }
+    }
   },
 
   /**
@@ -469,6 +491,7 @@ const validationKeywords = {
    * @param {Object} opts TODO
    */
   required (value, schema, opts) {
+    opts || (opts = {})
     const required = schema.required
     let errors = []
     if (!opts.existingOnly) {
@@ -540,7 +563,7 @@ const validationKeywords = {
         // Only compare against unchecked items
         for (j = i - 1; j >= 0; j--) {
           // Found a duplicate
-          if (item === value[j]) {
+          if (utils.deepEqual(item, value[j])) {
             return makeError(item, 'no duplicates', opts)
           }
         }
@@ -631,6 +654,7 @@ const validate = function (value, schema, opts) {
     }
     return errors.length ? errors : undefined
   }
+
   errors = errors.concat(validateAny(value, schema, opts) || [])
   if (shouldPop) {
     opts.path.pop()
