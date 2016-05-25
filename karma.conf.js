@@ -136,7 +136,7 @@ module.exports = function (config) {
     singleRun: false,
     client: {
       mocha: {
-        grep: 'utils.'
+        grep: 'Schema'
       }
     },
     concurrency: Infinity
