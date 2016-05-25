@@ -157,20 +157,20 @@ describe('Schema.validationKeywords.type', function () {
 //   validationTestRunner(allOfTests)
 // })
 
-describe('Schema.validationKeywords.anyOf', function () {
-  anyOfTests.forEach((suite) => {
-    let Schema = new JSData.Schema(suite.schema)
-    describe(suite.description, function () {
-      suite.tests.forEach((test) => {
-        it(test.description, function () {
-          // let errors = JSData.Schema.validationKeywords.anyOf(test.data, Schema, {})
-          let errors = Schema.validate(test.data)
-          assert.equal(test.valid, !errors, errors)
-        })
-      })
-    })
-  })
-})
+// describe('Schema.validationKeywords.anyOf', function () {
+//   anyOfTests.forEach((suite) => {
+//     let Schema = new JSData.Schema(suite.schema)
+//     describe(suite.description, function () {
+//       suite.tests.forEach((test) => {
+//         it(test.description, function () {
+//           // let errors = JSData.Schema.validationKeywords.anyOf(test.data, Schema, {})
+//           let errors = Schema.validate(test.data)
+//           assert.equal(test.valid, !errors, errors)
+//         })
+//       })
+//     })
+//   })
+// })
 
 // describe('Schema.validationKeywords.oneOf', function () {
 //   validationTestRunner(oneOfTests)
