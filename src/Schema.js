@@ -5,7 +5,7 @@ const DOMAIN = 'Schema'
 
 /**
  * A function map for each of the seven primitive JSON types defined by the core specification.
- * Each function will check a given value and return true or false if the value matches the type.
+ * Each function will check a given value and return true or false if the value is an instance of that type.
  * ```
  *   types.integer(1) // returns true
  *   types.string({}) // returns false
@@ -94,22 +94,26 @@ const minLengthCommon = function (keyword, value, schema, opts) {
 }
 
 /**
- * A map of all object member functions for each keyword defined in the JSON Schema
+ * A map of all object member validation functions for each keyword defined in the JSON Schema.
  * @name Schema.validationKeywords
  * @type {Object}
  */
 const validationKeywords = {
   /**
-   * An instance is valid against this keyword if and only if it is valid against all the schemas in this keyword's value.
+   * Validates the provided value against all schemas defined in the Schemas `allOf` keyword.
+   * The instance is valid against if and only if it is valid against all the schemas declared in the Schema's value.
    *
    * The value of this keyword MUST be an array. This array MUST have at least one element.
-   * Each element of this array MUST be an object, and each object MUST be a valid JSON Schema.
+   * Each element of this array MUST be a valid JSON Schema.
+   *
    * see http://json-schema.org/latest/json-schema-validation.html#anchor82
+   *
    * @name Schema.validationKeywords.allOf
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value Value to be validated.
+   * @param {Object} [schema] Schema containing the `allOf` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   allOf (value, schema, opts) {
     let allErrors = []
@@ -120,13 +124,20 @@ const validationKeywords = {
   },
 
   /**
-   * http://json-schema.org/latest/json-schema-validation.html#anchor85
+   * Validates the provided value against all schemas defined in the Schemas `anyOf` keyword.
+   * The instance is valid against this keyword if and only if it is valid against
+   * at least one of the schemas in this keyword's value.
+   *
+   * The value of this keyword MUST be an array. This array MUST have at least one element.
+   * Each element of this array MUST be an object, and each object MUST be a valid JSON Schema.
+   * see http://json-schema.org/latest/json-schema-validation.html#anchor85
    *
    * @name Schema.validationKeywords.anyOf
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value Value to be validated.
+   * @param {Object} [schema] Schema containing the `anyOf` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   anyOf (value, schema, opts) {
     let validated = false
@@ -156,13 +167,16 @@ const validationKeywords = {
   },
 
   /**
-   * http://json-schema.org/latest/json-schema-validation.html#anchor76
+   * Validates the provided value against an array of possible values defined by the Schema's `enum` keyword
+   * Validation succeeds if the value is deeply equal to one of the values in the array.
+   * see http://json-schema.org/latest/json-schema-validation.html#anchor76
    *
    * @name Schema.validationKeywords.enum
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value Value to validate
+   * @param {Object} [schema] Schema containing the `enum` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   enum (value, schema, opts) {
     const possibleValues = schema['enum']
@@ -172,14 +186,15 @@ const validationKeywords = {
   },
 
   /**
-   * Validates items in an array against the specified schema.
-   * http://json-schema.org/latest/json-schema-validation.html#anchor37
+   * Validates each of the provided array values against a schema or an array of schemas defined by the Schema's `items` keyword
+   * see http://json-schema.org/latest/json-schema-validation.html#anchor37 for validation rules.
    *
    * @name Schema.validationKeywords.items
    * @method
-   * @param {Array} value Array to be validated
-   * @param {Object} schema A schema that
-   * @param {Object} opts TODO
+   * @param {*} value [Array] Array to be validated.
+   * @param {Object} [schema] Schema containing the items keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   items (value, schema, opts) {
     opts || (opts = {})
@@ -201,13 +216,16 @@ const validationKeywords = {
   },
 
   /**
+   * Validates the provided number against a maximum value defined by the Schema's `maximum` keyword
+   * Validation succeeds if the value is a number, and is less than, or equal to, the value of this keyword.
    * http://json-schema.org/latest/json-schema-validation.html#anchor17
    *
    * @name Schema.validationKeywords.maximum
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value [Number] number to validate against the keyword.
+   * @param {Object} schema [schema] Schema containing the `maximum` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   maximum (value, schema, opts) {
     // Must be a number
@@ -217,19 +235,23 @@ const validationKeywords = {
     // default: false
     const exclusiveMaximum = schema.exclusiveMaximum
     if (typeof value === typeof maximum && !(exclusiveMaximum ? maximum > value : maximum >= value)) {
-      // TODO: Account for value of exclusiveMaximum in messaging
-      return makeError(value, `no more than ${maximum}`, opts)
+      return exclusiveMaximum
+        ? makeError(value, `no more than nor equal to ${maximum}`, opts)
+        : makeError(value, `no more than ${maximum}`, opts)
     }
   },
 
   /**
-   * http://json-schema.org/latest/json-schema-validation.html#anchor42
+   * Validates the length of the provided array against a maximum value defined by the Schema's `maxItems` keyword.
+   * Validation succeeds if the length of the array is less than, or equal to the value of this keyword.
+   * see http://json-schema.org/latest/json-schema-validation.html#anchor42
    *
    * @name Schema.validationKeywords.maxItems
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value [array] Array to be validated.
+   * @param {Object} [schema] Schema containing the `maxItems` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   maxItems (value, schema, opts) {
     if (utils.isArray(value)) {
@@ -238,26 +260,32 @@ const validationKeywords = {
   },
 
   /**
-   * http://json-schema.org/latest/json-schema-validation.html#anchor26
+   * Validates the length of the provided string against a maximum value defined in the Schema's `maxLength` keyword.
+   * Validation succeeds if the length of the string is less than, or equal to the value of this keyword.
+   * see http://json-schema.org/latest/json-schema-validation.html#anchor26
    *
    * @name Schema.validationKeywords.maxLength
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value [string] String to be validated.
+   * @param {Object} [schema] Schema containing the `maxLength` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   maxLength (value, schema, opts) {
     return maxLengthCommon('maxLength', value, schema, opts)
   },
 
   /**
-   * http://json-schema.org/latest/json-schema-validation.html#anchor54
+   * Validates the count of the provided object's properties against a maximum value defined in the Schema's `maxProperties` keyword.
+   * Validation succeeds if the object's property count is less than, or equal to the value of this keyword.
+   * see http://json-schema.org/latest/json-schema-validation.html#anchor54
    *
    * @name Schema.validationKeywords.maxProperties
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value [Object] Object to be validated.
+   * @param {Object} [schema] Schema containing the `maxProperties` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   maxProperties (value, schema, opts) {
     // validate only objects
@@ -270,13 +298,16 @@ const validationKeywords = {
   },
 
   /**
+   * Validates the provided value against a minimum value defined by the Schema's `minimum` keyword
+   * Validation succeeds if the value is a number and is greater than, or equal to, the value of this keyword.
    * http://json-schema.org/latest/json-schema-validation.html#anchor21
    *
    * @name Schema.validationKeywords.minimum
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value [number] number to validate against the keyword.
+   * @param {Object} [schema] Schema containing the `minimum` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   minimum (value, schema, opts) {
     // Must be a number
@@ -293,13 +324,16 @@ const validationKeywords = {
   },
 
   /**
-   * http://json-schema.org/latest/json-schema-validation.html#anchor42
+   * Validates the length of the provided array against a minimum value defined by the Schema's `minItems` keyword.
+   * Validation succeeds if the length of the array is greater than, or equal to the value of this keyword.
+   * see http://json-schema.org/latest/json-schema-validation.html#anchor45
    *
    * @name Schema.validationKeywords.minItems
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value [array] Array to be validated.
+   * @param {Object} [schema] Schema containing the `minItems` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   minItems (value, schema, opts) {
     if (utils.isArray(value)) {
@@ -308,26 +342,32 @@ const validationKeywords = {
   },
 
   /**
-   * http://json-schema.org/latest/json-schema-validation.html#anchor29
+   * Validates the length of the provided string against a minimum value defined in the Schema's `minLength` keyword.
+   * Validation succeeds if the length of the string is greater than, or equal to the value of this keyword.
+   * see http://json-schema.org/latest/json-schema-validation.html#anchor29
    *
    * @name Schema.validationKeywords.minLength
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value [string] String to be validated.
+   * @param {Object} [schema] Schema containing the `minLength` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   minLength (value, schema, opts) {
     return minLengthCommon('minLength', value, schema, opts)
   },
 
   /**
-   * http://json-schema.org/latest/json-schema-validation.html#anchor57
+   * Validates the count of the provided object's properties against a minimum value defined in the Schema's `minProperties` keyword.
+   * Validation succeeds if the object's property count is greater than, or equal to the value of this keyword.
+   * see http://json-schema.org/latest/json-schema-validation.html#anchor57
    *
    * @name Schema.validationKeywords.minProperties
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value [Object] Object to be validated.
+   * @param {Object} [schema] Schema containing the `minProperties` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   minProperties (value, schema, opts) {
     // validate only objects
@@ -340,13 +380,16 @@ const validationKeywords = {
   },
 
   /**
-   * http://json-schema.org/latest/json-schema-validation.html#anchor14
+   * Validates the provided number is a multiple of the number defined in the Schema's `multipleOf` keyword.
+   * Validation succeeds if the number can be divided equally into the value of this keyword.
+   * see http://json-schema.org/latest/json-schema-validation.html#anchor14
    *
    * @name Schema.validationKeywords.multipleOf
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value [number] Number to be validated.
+   * @param {Object} [schema] Schema containing the `multipleOf` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   multipleOf (value, schema, opts) {
     const multipleOf = schema.multipleOf
@@ -358,13 +401,16 @@ const validationKeywords = {
   },
 
   /**
-   * http://json-schema.org/latest/json-schema-validation.html#anchor91
+   * Validates the provided value is not valid with any of the schemas defined in the Schema's `not` keyword.
+   * An instance is valid against this keyword if and only if it is NOT valid against the schemas in this keyword's value.
    *
+   * see http://json-schema.org/latest/json-schema-validation.html#anchor91
    * @name Schema.validationKeywords.not
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value to be checked.
+   * @param {Object} [schema] Schema containing the not keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   not (value, schema, opts) {
     if (!validate(value, schema.not, opts)) {
@@ -374,13 +420,16 @@ const validationKeywords = {
   },
 
   /**
-   * http://json-schema.org/latest/json-schema-validation.html#anchor88
+   * Validates the provided value is valid with one and only one of the schemas defined in the Schema's `oneOf` keyword.
+   * An instance is valid against this keyword if and only if it is valid against a single schemas in this keyword's value.
    *
+   * see http://json-schema.org/latest/json-schema-validation.html#anchor88
    * @name Schema.validationKeywords.oneOf
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value to be checked.
+   * @param {Object} [schema] Schema containing the `oneOf` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   oneOf (value, schema, opts) {
     let validated = false
@@ -401,13 +450,16 @@ const validationKeywords = {
   },
 
   /**
-   * http://json-schema.org/latest/json-schema-validation.html#anchor33
+   * Validates the provided string matches a pattern defined in the Schema's `pattern` keyword.
+   * Validation succeeds if the string is a match of the regex value of this keyword.
    *
+   * see http://json-schema.org/latest/json-schema-validation.html#anchor33
    * @name Schema.validationKeywords.pattern
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value [string] String to be validated.
+   * @param {Object} [schema] Schema containing the `pattern` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   pattern (value, schema, opts) {
     const pattern = schema.pattern
@@ -417,13 +469,18 @@ const validationKeywords = {
   },
 
   /**
-   * http://json-schema.org/latest/json-schema-validation.html#anchor64
+   * Validates the provided object's properties against a map of values defined in the Schema's `properties` keyword.
+   * Validation succeeds if the object's property are valid with each of the schema's in the provided map.
+   * Validation also depends on the additionalProperties and or patternProperties.
+   *
+   * see http://json-schema.org/latest/json-schema-validation.html#anchor64 for more info.
    *
    * @name Schema.validationKeywords.properties
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value [Object] Object to be validated.
+   * @param {Object} [schema] Schema containing the `properties` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   properties (value, schema, opts) {
     opts || (opts = {})
@@ -482,13 +539,16 @@ const validationKeywords = {
   },
 
   /**
-   * http://json-schema.org/latest/json-schema-validation.html#anchor61
+   * Validates the provided object's has all properties listed in the Schema's `properties` keyword array.
+   * Validation succeeds if the object contains all properties provided in the array value of this keyword.
+   * see http://json-schema.org/latest/json-schema-validation.html#anchor61
    *
    * @name Schema.validationKeywords.required
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value [Object] Object to be validated.
+   * @param {Object} [schema] Schema containing the `required` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   required (value, schema, opts) {
     opts || (opts = {})
@@ -508,13 +568,15 @@ const validationKeywords = {
   },
 
   /**
-   * http://json-schema.org/latest/json-schema-validation.html#anchor79
+   * Validates the provided value's type is equal to the type, or array of types, defined in the Schema's `type` keyword.
+   * see http://json-schema.org/latest/json-schema-validation.html#anchor79
    *
    * @name Schema.validationKeywords.type
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value Value to be validated.
+   * @param {Object} [schema] Schema containing the `type` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   type (value, schema, opts) {
     let type = schema.type
@@ -545,13 +607,16 @@ const validationKeywords = {
   },
 
   /**
-   * http://json-schema.org/latest/json-schema-validation.html#anchor49
+   * Validates the provided array values are unique.
+   * Validation succeeds if the items in the array are unique, but only if the value of this keyword is true
+   * see http://json-schema.org/latest/json-schema-validation.html#anchor49
    *
    * @name Schema.validationKeywords.uniqueItems
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value [array] Array to be validated.
+   * @param {Object} [schema] Schema containing the `uniqueItems` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   uniqueItems (value, schema, opts) {
     if (value && value.length && schema.uniqueItems) {
@@ -605,13 +670,14 @@ const validateAny = function (value, schema, opts) {
 }
 
 /**
- * TODO
+ * Validates the provided value against a given Schema according to the http://json-schema.org/ v4 specification.
  *
  * @name Schema.validate
  * @method
- * @param {*} value TODO
- * @param {Object} [schema] TODO
+ * @param {*} value Value to be validated.
+ * @param {Object} [schema] Valid Schema according to the http://json-schema.org/ v4 specification.
  * @param {Object} [opts] Configuration options.
+ * @returns {(array|undefined)} Array of errors or `undefined` if valid.
  */
 const validate = function (value, schema, opts) {
   let errors = []
@@ -806,33 +872,43 @@ const makeDescriptor = function (prop, schema, opts) {
 }
 
 /**
- * TODO
+ * A map of validation functions grouped by type.
  *
  * @name Schema.typeGroupValidators
  * @type {Object}
  */
 const typeGroupValidators = {
   /**
-   * TODO
+   * Validates the provided value against the schema using all of the validation keywords specific to instances of an array.
+   * The validation keywords for the type `array` are:
+   *```
+   * ['items', 'maxItems', 'minItems', 'uniqueItems']
+   *```
+   * see http://json-schema.org/latest/json-schema-validation.html#anchor25
    *
    * @name Schema.typeGroupValidators.array
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value [array] Array to be validated.
+   * @param {Object} [schema] Schema containing at least one array keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   array: function (value, schema, opts) {
     return runOps(ARRAY_OPS, value, schema, opts)
   },
 
   /**
-   * TODO
-   *
+   * Validates the provided value against the schema using all of the validation keywords specific to instances of an integer.
+   * The validation keywords for the type `integer` are:
+   *```
+   * ['multipleOf', 'maximum', 'minimum']
+   *```
    * @name Schema.typeGroupValidators.integer
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value [number] Number to be validated.
+   * @param {Object} [schema] Schema containing at least one `integer` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   integer: function (value, schema, opts) {
     // Additional validations for numerics are the same
@@ -840,13 +916,17 @@ const typeGroupValidators = {
   },
 
   /**
-   * TODO
-   *
+   * Validates the provided value against the schema using all of the validation keywords specific to instances of an number.
+   * The validation keywords for the type `number` are:
+   *```
+   * ['multipleOf', 'maximum', 'minimum']
+   *```
    * @name Schema.typeGroupValidators.number
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value [number] Number to be validated.
+   * @param {Object} [schema] Schema containing at least one `number` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   number: function (value, schema, opts) {
     // Additional validations for numerics are the same
@@ -854,45 +934,57 @@ const typeGroupValidators = {
   },
 
   /**
-   * TODO
-   *
+   * Validates the provided value against the schema using all of the validation keywords specific to instances of a number or integer.
+   * The validation keywords for the type `numeric` are:
+   *```
+   * ['multipleOf', 'maximum', 'minimum']
+   *```
    * See http://json-schema.org/latest/json-schema-validation.html#anchor13.
    *
    * @name Schema.typeGroupValidators.numeric
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value [number] Number to be validated.
+   * @param {Object} [schema] Schema containing at least one `numeric` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   numeric: function (value, schema, opts) {
     return runOps(NUMERIC_OPS, value, schema, opts)
   },
 
   /**
-   * TODO
-   *
+   * Validates the provided value against the schema using all of the validation keywords specific to instances of an object.
+   * The validation keywords for the type `object` are:
+   *```
+   * ['maxProperties', 'minProperties', 'required', 'properties', 'dependencies']
+   *```
    * See http://json-schema.org/latest/json-schema-validation.html#anchor53.
    *
    * @name Schema.typeGroupValidators.object
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value [number] Object to be validated.
+   * @param {Object} [schema] Schema containing at least one `object` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   object: function (value, schema, opts) {
     return runOps(OBJECT_OPS, value, schema, opts)
   },
 
   /**
-   * TODO
-   *
+   * Validates the provided value against the schema using all of the validation keywords specific to instances of an string.
+   * The validation keywords for the type `string` are:
+   *```
+   * ['maxLength', 'minLength', 'pattern']
+   *```
    * See http://json-schema.org/latest/json-schema-validation.html#anchor25.
    *
    * @name Schema.typeGroupValidators.string
    * @method
-   * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {*} value [number] String to be validated.
+   * @param {Object} [schema] Schema containing at least one `string` keyword.
+   * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   string: function (value, schema, opts) {
     return runOps(STRING_OPS, value, schema, opts)
