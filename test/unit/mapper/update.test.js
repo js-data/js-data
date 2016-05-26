@@ -101,4 +101,54 @@ describe('Mapper#update', function () {
     assert.equal(updateCalled, false, 'Adapter#update should NOT have been called')
     assert.equal(user, undefined, 'user was not updated')
   })
+  it('should update nested', async function () {
+    const props = {
+      id: 1,
+      addresses: [
+        {
+          id: 45,
+          customer_id: 1
+        }
+      ]
+    }
+    let updateCalled = false
+    let customer
+    const store = new JSData.Container({
+      mapperDefaults: {
+        defaultAdapter: 'mock'
+      }
+    })
+    store.registerAdapter('mock', {
+      update (mapper, id, props) {
+        assert.equal(props.id, 1)
+        assert.equal(props.addresses.length, 1)
+        assert.equal(props.addresses[0].id, 45)
+        assert.equal(props.addresses[0].customer_id, 1)
+        updateCalled = true
+        return props
+      }
+    })
+    store.defineMapper('customer', {
+      relations: {
+        hasMany: {
+          address: {
+            localField: 'addresses',
+            foreignKey: 'customer_id'
+          }
+        }
+      }
+    })
+    store.defineMapper('address', {
+      relations: {
+        belongsTo: {
+          customer: {
+            localField: 'customer',
+            foreignKey: 'customer_id'
+          }
+        }
+      }
+    })
+    await store.update('customer', 1, props, { with: ['address']})
+    assert.equal(updateCalled, true)
+  })
 })
