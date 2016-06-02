@@ -22,9 +22,6 @@ export function Relation (relatedMapper, options = {}) {
 }
 
 Relation.extend = utils.extend
-Relation.create = function createRelation (RelationType, relatedMapper, options = {}) {
-  return new RelationType(relatedMapper, options)
-}
 
 utils.addHiddenPropsToTarget(Relation.prototype, {
   get canAutoAddLinks() {

@@ -2,6 +2,7 @@ import utils from './utils'
 import Component from './Component'
 import Record from './Record'
 import Schema from './Schema'
+import { Relation } from './relations'
 import {
   belongsTo,
   belongsToType,
@@ -1807,6 +1808,31 @@ export default Component.extend({
    */
   wrap (data, opts) {
     return this.createRecord(data, opts)
+  },
+
+  /**
+   * @ignore
+   */
+  defineRelations() {
+    // Setup the mapper's relations, including generating Mapper#relationList
+    // and Mapper#relationFields
+    utils.forOwn(this.relations, (group, type) => {
+      utils.forOwn(group, (relations, _name) => {
+        if (utils.isObject(relations)) {
+          relations = [relations]
+        }
+        relations.forEach((def) => {
+          const relatedMapper = this.datastore.getMapperByName(_name) || _name
+          def.getRelation = () => this.datastore.getMapper(_name)
+
+          if (typeof Relation[type] !== 'function') {
+            throw utils.err(DOMAIN, 'defineRelations')(400, 'relation type (hasOne, hasMany, etc)', type, true)
+          }
+
+          this[type](relatedMapper, def)
+        })
+      })
+    })
   }
 })
 
