@@ -83,6 +83,7 @@ module.exports = function (config) {
       'src/utils.js',
       'src/Relation.js',
       'src/Relation/*.js',
+      'src/relations.js',
       'src/decorators.js',
       'src/Component.js',
       'src/Schema.js',

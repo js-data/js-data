@@ -1,10 +1,5 @@
 import utils from './utils'
 import Component from './Component'
-import {
-  belongsToType,
-  hasManyType,
-  hasOneType
-} from './decorators'
 import Mapper from './Mapper'
 
 const DOMAIN = 'Container'
@@ -602,27 +597,7 @@ const props = {
     mapper.datastore = this
 
     mapper.on('all', (...args) => this._onMapperEvent(name, ...args))
-
-    // Setup the mapper's relations, including generating Mapper#relationList
-    // and Mapper#relationFields
-    utils.forOwn(mapper.relations, (group, type) => {
-      utils.forOwn(group, (relations, _name) => {
-        if (utils.isObject(relations)) {
-          relations = [relations]
-        }
-        relations.forEach((def) => {
-          def.getRelation = () => this.getMapper(_name)
-          const relatedMapper = this._mappers[_name] || _name
-          if (type === belongsToType) {
-            mapper.belongsTo(relatedMapper, def)
-          } else if (type === hasOneType) {
-            mapper.hasOne(relatedMapper, def)
-          } else if (type === hasManyType) {
-            mapper.hasMany(relatedMapper, def)
-          }
-        })
-      })
-    })
+    mapper.defineRelations()
 
     return mapper
   },
@@ -688,6 +663,7 @@ const props = {
    * const UserMapper = container.defineMapper('user')
    * UserMapper === container.getMapper('user') // true
    * UserMapper === container.as('user').getMapper() // true
+   * container.getMapper('profile') // throws Error, there is no mapper with name "profile"
    *
    * @method Container#getMapper
    * @param {string} name {@link Mapper#name}.
@@ -695,11 +671,33 @@ const props = {
    * @since 3.0.0
    */
   getMapper (name) {
-    const mapper = this._mappers[name]
+    const mapper = this.getMapperByName(name)
     if (!mapper) {
       throw utils.err(`${DOMAIN}#getMapper`, name)(404, 'mapper')
     }
     return mapper
+  },
+
+  /**
+   * Return the mapper registered under the specified name.
+   * Doesn't throw error if mapper doesn't exist.
+   *
+   * @example
+   * import {Container} from 'js-data'
+   * const container = new Container()
+   * // Container#defineMapper returns a direct reference to the newly created
+   * // Mapper.
+   * const UserMapper = container.defineMapper('user')
+   * UserMapper === container.getMapperByName('user') // true
+   * container.getMapperByName('profile') // undefined
+   *
+   * @method Container#getMapperByName
+   * @param {string} name {@link Mapper#name}.
+   * @returns {Mapper}
+   * @since 3.0.0
+   */
+  getMapperByName (name) {
+    return this._mappers[name]
   },
 
   /**
