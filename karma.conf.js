@@ -117,11 +117,6 @@ module.exports = function (config) {
         sourceMap: 'inline'
       }
     },
-    client: {
-      mocha: {
-        // grep: 'utils.'
-      }
-    },
     browsers: browsers,
     reporters: ['progress', 'saucelabs'],
     sauceLabs: {
@@ -140,6 +135,11 @@ module.exports = function (config) {
     logLevel: config.LOG_INFO,
     autoWatch: false,
     singleRun: true,
+    // client: {
+    //   mocha: {
+    //     grep: 'Schema'
+    //   }
+    // },
     concurrency: Infinity
   })
 }
