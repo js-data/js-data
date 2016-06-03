@@ -114,8 +114,7 @@ const props = {
   /**
    * TODO
    *
-   * @name DataStore#_end
-   * @method
+   * @method DataStore#_end
    * @private
    * @param {string} name Name of the {@link LinkedCollection} to which to
    * add the data.
@@ -143,8 +142,7 @@ const props = {
    * Collection in the DataStore, then the name of the Mapper or Collection will
    * be prepended to the arugments passed to the provided event handler.
    *
-   * @name DataStore#on
-   * @method
+   * @method DataStore#on
    * @param {string} event Name of event to subsribe to.
    * @param {Function} listener Listener function to handle the event.
    * @param {*} [ctx] Optional content in which to invoke the listener.
@@ -153,8 +151,7 @@ const props = {
   /**
    * Used to bind to events emitted by collections in this store.
    *
-   * @name DataStore#_onCollectionEvent
-   * @method
+   * @method DataStore#_onCollectionEvent
    * @private
    * @param {string} name Name of the collection that emitted the event.
    * @param {...*} [args] Args passed to {@link Collection#emit}.
@@ -167,11 +164,10 @@ const props = {
   /**
    * TODO
    *
-   * @name DataStore#addToCache
-   * @method
-   * @param {string} name - Name of the {@link Mapper} to target.
-   * @param {*} data - Data from which data should be selected for add.
-   * @param {Object} [opts] - Configuration options.
+   * @method DataStore#addToCache
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {*} data Data from which data should be selected for add.
+   * @param {Object} [opts] Configuration options.
    */
   addToCache (name, data, opts) {
     return this.getCollection(name).add(data, opts)
@@ -238,23 +234,23 @@ const props = {
   /**
    * Retrieve a cached `find` result, if any.
    *
-   * @name DataStore#cachedFind
-   * @method
+   * @method DataStore#cachedFind
    * @param {string} name The `name` argument passed to {@link DataStore#find}.
    * @param {(string|number)} id The `id` argument passed to {@link DataStore#find}.
    * @param {Object} opts The `opts` argument passed to {@link DataStore#find}.
+   * @since 3.0.0
    */
   cachedFind: cachedFn,
 
   /**
    * Retrieve a cached `findAll` result, if any.
    *
-   * @name DataStore#cachedFindAll
-   * @method
+   * @method DataStore#cachedFindAll
    * @param {string} name The `name` argument passed to {@link DataStore#findAll}.
    * @param {string} hash The result of calling {@link DataStore#hashQuery} on
    * the `query` argument passed to {@link DataStore#findAll}.
    * @param {Object} opts The `opts` argument passed to {@link DataStore#findAll}.
+   * @since 3.0.0
    */
   cachedFindAll: cachedFn,
 
@@ -268,12 +264,12 @@ const props = {
    *
    * Override this method to customize.
    *
-   * @name DataStore#cacheFind
-   * @method
+   * @method DataStore#cacheFind
    * @param {string} name The `name` argument passed to {@link DataStore#find}.
    * @param {*} data The result to cache.
    * @param {(string|number)} id The `id` argument passed to {@link DataStore#find}.
    * @param {Object} opts The `opts` argument passed to {@link DataStore#find}.
+   * @since 3.0.0
    */
   cacheFind (name, data, id, opts) {
     this._completedQueries[name][id] = (name, id, opts) => this.get(name, id)
@@ -289,13 +285,13 @@ const props = {
    *
    * Override this method to customize.
    *
-   * @name DataStore#cacheFindAll
-   * @method
+   * @method DataStore#cacheFindAll
    * @param {string} name The `name` argument passed to {@link DataStore#findAll}.
    * @param {*} data The result to cache.
    * @param {string} hash The result of calling {@link DataStore#hashQuery} on
    * the `query` argument passed to {@link DataStore#findAll}.
    * @param {Object} opts The `opts` argument passed to {@link DataStore#findAll}.
+   * @since 3.0.0
    */
   cacheFindAll (name, data, hash, opts) {
     this._completedQueries[name][hash] = (name, hash, opts) => this.filter(name, utils.fromJson(hash))
@@ -310,15 +306,15 @@ const props = {
   },
 
   /**
-   * TODO
+   * Wrapper for {@link Mapper#create}. Adds the created to the store.
    *
-   * @name DataStore#create
-   * @method
+   * @method DataStore#create
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Object} record Passed to {@link Mapper#create}.
    * @param {Object} [opts] Passed to {@link Mapper#create}. See
    * {@link Mapper#create} for more configuration options.
-   * @returns {Promise}
+   * @returns {Promise} Resolves with the result of the create.
+   * @since 3.0.0
    */
   create (name, record, opts) {
     opts || (opts = {})
@@ -327,15 +323,16 @@ const props = {
   },
 
   /**
-   * TODO
+   * Wrapper for {@link Mapper#createMany}. Adds the created records to the
+   * store.
    *
-   * @name DataStore#createMany
-   * @method
+   * @method DataStore#createMany
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Array} records Passed to {@link Mapper#createMany}.
    * @param {Object} [opts] Passed to {@link Mapper#createMany}. See
    * {@link Mapper#createMany} for more configuration options.
-   * @returns {Promise}
+   * @returns {Promise} Resolves with the result of the create.
+   * @since 3.0.0
    */
   createMany (name, records, opts) {
     opts || (opts = {})
@@ -656,15 +653,16 @@ const props = {
   },
 
   /**
-   * TODO
+   * Wrapper for {@link Mapper#destroy}. Removes any destroyed record from the
+   * store.
    *
-   * @name DataStore#destroy
-   * @method
-   * @param {string} name - Name of the {@link Mapper} to target.
-   * @param {(string|number)} id - Passed to {@link Mapper#destroy}.
-   * @param {Object} [opts] - Passed to {@link Mapper#destroy}. See
+   * @method DataStore#destroy
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {(string|number)} id Passed to {@link Mapper#destroy}.
+   * @param {Object} [opts] Passed to {@link Mapper#destroy}. See
    * {@link Mapper#destroy} for more configuration options.
-   * @returns {Promise}
+   * @returns {Promise} Resolves when the delete completes.
+   * @since 3.0.0
    */
   destroy (name, id, opts) {
     opts || (opts = {})
@@ -681,15 +679,16 @@ const props = {
   },
 
   /**
-   * TODO
+   * Wrapper for {@link Mapper#destroyAll}. Removes any destroyed records from
+   * the store.
    *
-   * @name DataStore#destroyAll
-   * @method
-   * @param {string} name - Name of the {@link Mapper} to target.
-   * @param {Object} [query] - Passed to {@link Mapper#destroyAll}.
-   * @param {Object} [opts] - Passed to {@link Mapper#destroyAll}. See
+   * @method DataStore#destroyAll
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {Object} [query] Passed to {@link Mapper#destroyAll}.
+   * @param {Object} [opts] Passed to {@link Mapper#destroyAll}. See
    * {@link Mapper#destroyAll} for more configuration options.
-   * @returns {Promise}
+   * @returns {Promise} Resolves when the delete completes.
+   * @since 3.0.0
    */
   destroyAll (name, query, opts) {
     opts || (opts = {})
@@ -717,14 +716,14 @@ const props = {
   },
 
   /**
-   * TODO
+   * Wrapper for {@link Mapper#find}. Adds any found record to the store.
    *
-   * @name DataStore#find
-   * @method
-   * @param {string} name - Name of the {@link Mapper} to target.
-   * @param {(string|number)} id - Passed to {@link Mapper#find}.
-   * @param {Object} [opts] - Passed to {@link Mapper#find}.
-   * @returns {Promise}
+   * @method DataStore#find
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {(string|number)} id Passed to {@link Mapper#find}.
+   * @param {Object} [opts] Passed to {@link Mapper#find}.
+   * @returns {Promise} Resolves with the result, if any.
+   * @since 3.0.0
    */
   find (name, id, opts) {
     opts || (opts = {})
@@ -755,14 +754,14 @@ const props = {
   },
 
   /**
-   * TODO
+   * Wrapper for {@link Mapper#findAll}. Adds any found records to the store.
    *
-   * @name DataStore#findAll
-   * @method
-   * @param {string} name - Name of the {@link Mapper} to target.
-   * @param {Object} [query] - Passed to {@link Model.findAll}.
-   * @param {Object} [opts] - Passed to {@link Model.findAll}.
-   * @returns {Promise}
+   * @method DataStore#findAll
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {Object} [query] Passed to {@link Model.findAll}.
+   * @param {Object} [opts] Passed to {@link Model.findAll}.
+   * @returns {Promise} Resolves with the result, if any.
+   * @since 3.0.0
    */
   findAll (name, query, opts) {
     opts || (opts = {})
@@ -795,12 +794,14 @@ const props = {
   },
 
   /**
-   * TODO
+   * Return the {@link LinkedCollection} with the given name.
    *
-   * @name DataStore#getCollection
-   * @method
+   * @method DataStore#getCollection
    * @param {string} name Name of the {@link LinkedCollection} to retrieve.
    * @returns {LinkedCollection}
+   * @since 3.0.0
+   * @throws {Error} Thrown if the specified {@link LinkedCollection} does not
+   * exist.
    */
   getCollection (name) {
     const collection = this._collections[name]
@@ -810,6 +811,21 @@ const props = {
     return collection
   },
 
+  /**
+   * Hashing function used to cache {@link DataStore#find} and
+   * {@link DataStore#findAll} requests. This method simply JSONifies the
+   * `query` argument passed to {@link DataStore#find} or
+   * {@link DataStore#findAll}.
+   *
+   * Override this method for custom hashing behavior.
+   * @method DataStore#hashQuery
+   * @param {string} name The `name` argument passed to {@link DataStore#find}
+   * or {@link DataStore#findAll}.
+   * @param {Object} query The `query` argument passed to {@link DataStore#find}
+   * or {@link DataStore#findAll}.
+   * @returns {string} The JSONified `query`.
+   * @since 3.0.0
+   */
   hashQuery (name, query, opts) {
     return utils.toJson(query)
   },
@@ -819,6 +835,19 @@ const props = {
     return this.add(name, records, opts)
   },
 
+  /**
+   * Wrapper for {@link LinkedCollection#remove}. Removes the specified
+   * {@link Record} from the store.
+   *
+   * @method DataStore#remove
+   * @param {string} name The name of the {@link LinkedCollection} to target.
+   * @param {string|number} id The primary key of the {@link Record} to remove.
+   * @param {Object} [opts] Configuration options.
+   * @param {string[]} [opts.with] Relations of the {@link Record} to also
+   * remove from the store.
+   * @returns {Record} The removed {@link Record}, if any.
+   * @since 3.0.0
+   */
   remove (name, id, opts) {
     const record = this.getCollection(name).remove(id, opts)
     if (record) {
@@ -827,6 +856,23 @@ const props = {
     return record
   },
 
+  /**
+   * Wrapper for {@link LinkedCollection#removeAll}. Removes the selected
+   * {@link Record}s from the store.
+   *
+   * @method DataStore#removeAll
+   * @param {string} name The name of the {@link LinkedCollection} to target.
+   * @param {Object} [query={}] Selection query. See {@link query}.
+   * @param {Object} [query.where] See {@link query.where}.
+   * @param {number} [query.offset] See {@link query.offset}.
+   * @param {number} [query.limit] See {@link query.limit}.
+   * @param {string|Array[]} [query.orderBy] See {@link query.orderBy}.
+   * @param {Object} [opts] Configuration options.
+   * @param {string[]} [opts.with] Relations of the {@link Record} to also
+   * remove from the store.
+   * @returns {Record} The removed {@link Record}s, if any.
+   * @since 3.0.0
+   */
   removeAll (name, query, opts) {
     const records = this.getCollection(name).removeAll(query, opts)
     if (records.length) {
@@ -835,7 +881,23 @@ const props = {
     return records
   },
 
+  /**
+   * Remove from the store {@link Record}s that are related to the provided
+   * {@link Record}(s).
+   *
+   * @method DataStore#removeRelated
+   * @param {string} name The name of the {@link LinkedCollection} to target.
+   * @param {Record|Record[]} records {@link Record}s whose relations are to be
+   * removed.
+   * @param {Object} [opts] Configuration options.
+   * @param {string[]} [opts.with] Relations of the {@link Record}(s) to remove
+   * from the store.
+   * @since 3.0.0
+   */
   removeRelated (name, records, opts) {
+    if (!utils.isArray(records)) {
+      records = [records]
+    }
     utils.forEachRelation(this.getMapper(name), opts, (def, optsCopy) => {
       records.forEach((record) => {
         let relatedData
@@ -878,16 +940,17 @@ const props = {
   },
 
   /**
-   * TODO
+   * Wrapper for {@link Mapper#update}. Adds the updated {@link Record} to the
+   * store.
    *
-   * @name DataStore#update
-   * @method
-   * @param {string} name - Name of the {@link Mapper} to target.
-   * @param {(string|number)} id - Passed to {@link Mapper#update}.
-   * @param {Object} record - Passed to {@link Mapper#update}.
-   * @param {Object} [opts] - Passed to {@link Mapper#update}. See
+   * @method DataStore#update
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {(string|number)} id Passed to {@link Mapper#update}.
+   * @param {Object} record Passed to {@link Mapper#update}.
+   * @param {Object} [opts] Passed to {@link Mapper#update}. See
    * {@link Mapper#update} for more configuration options.
-   * @returns {Promise}
+   * @returns {Promise} Resolves with the result of the update.
+   * @since 3.0.0
    */
   update (name, id, record, opts) {
     opts || (opts = {})
@@ -896,16 +959,17 @@ const props = {
   },
 
   /**
-   * TODO
+   * Wrapper for {@link Mapper#updateAll}. Adds the updated {@link Record}s to
+   * the store.
    *
-   * @name DataStore#updateAll
-   * @method
-   * @param {string} name - Name of the {@link Mapper} to target.
-   * @param {Object} props - Passed to {@link Mapper#updateAll}.
-   * @param {Object} [query] - Passed to {@link Mapper#updateAll}.
-   * @param {Object} [opts] - Passed to {@link Mapper#updateAll}. See
+   * @method DataStore#updateAll
+   * @param {string} name Name of the {@link Mapper} to target.
+   * @param {Object} props Passed to {@link Mapper#updateAll}.
+   * @param {Object} [query] Passed to {@link Mapper#updateAll}.
+   * @param {Object} [opts] Passed to {@link Mapper#updateAll}. See
    * {@link Mapper#updateAll} for more configuration options.
-   * @returns {Promise}
+   * @returns {Promise} Resolves with the result of the update.
+   * @since 3.0.0
    */
   updateAll (name, props, query, opts) {
     opts || (opts = {})
@@ -914,15 +978,16 @@ const props = {
   },
 
   /**
-   * TODO
+   * Wrapper for {@link Mapper#updateMany}. Adds the updated {@link Record}s to
+   * the store.
    *
-   * @name DataStore#updateMany
-   * @method
+   * @method DataStore#updateMany
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(Object[]|Record[])} records Passed to {@link Mapper#updateMany}.
    * @param {Object} [opts] Passed to {@link Mapper#updateMany}. See
    * {@link Mapper#updateMany} for more configuration options.
-   * @returns {Promise}
+   * @returns {Promise} Resolves with the result of the update.
+   * @since 3.0.0
    */
   updateMany (name, records, opts) {
     opts || (opts = {})

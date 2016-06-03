@@ -22,8 +22,8 @@ const COLLECTION_DEFAULTS = {
    * primary key with a record already in this Collection.
    *
    * Possible values:
-   * - merge
-   * - replace
+   * merge
+   * replace
    *
    * Merge:
    *
@@ -375,8 +375,8 @@ export default Component.extend({
    *
    * @method Collection#createIndex
    * @since 3.0.0
-   * @param {string} name - The name of the new secondary index.
-   * @param {string[]} [fieldList] - Array of field names to use as the key or
+   * @param {string} name The name of the new secondary index.
+   * @param {string[]} [fieldList] Array of field names to use as the key or
    * compound key of the new secondary index. If no fieldList is provided, then
    * the name will also be the field that is used to index the collection.
    * @returns {Collection} A reference to itself for chaining.
@@ -417,9 +417,9 @@ export default Component.extend({
    *
    * @method Collection#filter
    * @since 3.0.0
-   * @param {(Object|Function)} [queryOrFn={}] - Selection query or filter
+   * @param {(Object|Function)} [queryOrFn={}] Selection query or filter
    * function.
-   * @param {Object} [thisArg] - Context to which to bind `queryOrFn` if
+   * @param {Object} [thisArg] Context to which to bind `queryOrFn` if
    * `queryOrFn` is a function.
    * @returns {Array} The result.
    */
@@ -437,8 +437,8 @@ export default Component.extend({
    *
    * @method Collection#forEach
    * @since 3.0.0
-   * @param {Function} forEachFn - Iteration function.
-   * @param {*} [thisArg] - Context to which to bind `forEachFn`.
+   * @param {Function} forEachFn Iteration function.
+   * @param {*} [thisArg] Context to which to bind `forEachFn`.
    * @returns {Array} The result.
    */
   forEach (cb, thisArg) {
@@ -450,7 +450,7 @@ export default Component.extend({
    *
    * @method Collection#get
    * @since 3.0.0
-   * @param {(string|number)} id - The primary key of the record to get.
+   * @param {(string|number)} id The primary key of the record to get.
    * @returns {(Object|Record)} The record with the given id.
    */
   get (id) {
@@ -471,11 +471,11 @@ export default Component.extend({
    *
    * @method Collection#getAll
    * @since 3.0.0
-   * @param {...Array} [keyList] - Provide one or more keyLists, and all
+   * @param {...Array} [keyList] Provide one or more keyLists, and all
    * records matching each keyList will be retrieved. If no keyLists are
    * provided, all records will be returned.
-   * @param {Object} [opts] - Configuration options.
-   * @param {string} [opts.index] - Name of the secondary index to use in the
+   * @param {Object} [opts] Configuration options.
+   * @param {string} [opts.index] Name of the secondary index to use in the
    * query. If no index is specified, the main index is used.
    * @returns {Array} The result.
    */
@@ -509,7 +509,7 @@ export default Component.extend({
    *
    * @method Collection#limit
    * @since 3.0.0
-   * @param {number} num - The maximum number of records to keep in the result.
+   * @param {number} num The maximum number of records to keep in the result.
    * @returns {Array} The result.
    */
   limit (num) {
@@ -526,8 +526,8 @@ export default Component.extend({
    *
    * @method Collection#map
    * @since 3.0.0
-   * @param {Function} mapFn - Mapping function.
-   * @param {*} [thisArg] - Context to which to bind `mapFn`.
+   * @param {Function} mapFn Mapping function.
+   * @param {*} [thisArg] Context to which to bind `mapFn`.
    * @returns {Array} The result of the mapping.
    */
   map (cb, thisArg) {
@@ -544,8 +544,8 @@ export default Component.extend({
    *
    * @method Collection#mapCall
    * @since 3.0.0
-   * @param {string} funcName - Name of function to call
-   * @parama {...*} [args] - Remaining arguments to be passed to the function.
+   * @param {string} funcName Name of function to call
+   * @parama {...*} [args] Remaining arguments to be passed to the function.
    * @returns {Array} The result.
    */
   mapCall (funcName, ...args) {
@@ -604,8 +604,8 @@ export default Component.extend({
    *
    * @method Collection#reduce
    * @since 3.0.0
-   * @param {Function} cb - Reduction callback.
-   * @param {*} initialValue - Initial value of the reduction.
+   * @param {Function} cb Reduction callback.
+   * @param {*} initialValue Initial value of the reduction.
    * @returns {*} The result.
    */
   reduce (cb, initialValue) {
@@ -618,8 +618,8 @@ export default Component.extend({
    *
    * @method Collection#remove
    * @since 3.0.0
-   * @param {(string|number)} id - The primary key of the record to be removed.
-   * @param {Object} [opts] - Configuration options.
+   * @param {(string|number)} id The primary key of the record to be removed.
+   * @param {Object} [opts] Configuration options.
    * @returns {Object|Record} The removed record, if any.
    */
   remove (id, opts) {
@@ -647,12 +647,12 @@ export default Component.extend({
    *
    * @method Collection#removeAll
    * @since 3.0.0
-   * @param {Object} [query={}] - Selection query.
-   * @param {Object} [query.where] - Filtering criteria.
-   * @param {number} [query.skip] - Number to skip.
-   * @param {number} [query.limit] - Number to limit to.
-   * @param {Array} [query.orderBy] - Sorting criteria.
-   * @param {Object} [opts] - Configuration options.
+   * @param {Object} [query={}] Selection query. See {@link query}.
+   * @param {Object} [query.where] See {@link query.where}.
+   * @param {number} [query.offset] See {@link query.offset}.
+   * @param {number} [query.limit] See {@link query.limit}.
+   * @param {string|Array[]} [query.orderBy] See {@link query.orderBy}.
+   * @param {Object} [opts] Configuration options.
    * @returns {(Object[]|Record[])} The removed records, if any.
    */
   removeAll (query, opts) {
@@ -678,7 +678,7 @@ export default Component.extend({
    *
    * @method Collection#skip
    * @since 3.0.0
-   * @param {number} num - The number of records to skip.
+   * @param {number} num The number of records to skip.
    * @returns {Array} The result.
    */
   skip (num) {
@@ -691,8 +691,8 @@ export default Component.extend({
    *
    * @method Collection#toJSON
    * @since 3.0.0
-   * @param {Object} [opts] - Configuration options.
-   * @param {string[]} [opts.with] - Array of relation names or relation fields
+   * @param {Object} [opts] Configuration options.
+   * @param {string[]} [opts.with] Array of relation names or relation fields
    * to include in the representation.
    * @returns {Array} The records.
    */
@@ -707,8 +707,8 @@ export default Component.extend({
    *
    * @method Collection#updateIndex
    * @since 3.0.0
-   * @param {Object} record - The record to update.
-   * @param {Object} [opts] - Configuration options.
+   * @param {Object} record The record to update.
+   * @param {Object} [opts] Configuration options.
    * @param {string} [opts.index] The index in which to update the record's
    * position. If you don't specify an index then the record will be updated
    * in the main index.
@@ -723,8 +723,8 @@ export default Component.extend({
    *
    * @method Collection#updateIndexes
    * @since 3.0.0
-   * @param {Object} record - TODO
-   * @param {Object} [opts] - Configuration options.
+   * @param {Object} record TODO
+   * @param {Object} [opts] Configuration options.
    */
   updateIndexes (record) {
     this.index.updateRecord(record)
