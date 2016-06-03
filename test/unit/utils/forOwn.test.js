@@ -17,11 +17,3 @@ describe('utils.forOwn', function () {
     assert.deepEqual(expectedProps, actualProps)
   })
 })
-
-describe('utils.forEachRelation', function () {
-  it('should be a static method', function () {
-    assert.equal(typeof utils.forEachRelation, 'function', 'has the forEachRelation method')
-  })
-
-  it('should be tested')
-})
