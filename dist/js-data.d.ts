@@ -88,13 +88,13 @@ export class Record extends Component {
   loadRelations(relations: any, opts?: any): Promise<this>
   'get'(key: string): any
   hasChanges(opts?: any): boolean
-  hashCode(): string|number
   previous(key: any): any
   revert(opts?: any): this
   save(opts?: any): Promise<this>
   'set'(key: string, value?: any, opts?: any): void
   toJSON(opts?: any): any
   unset(key: string, opts?: any): void
+  validate(opts?: any): any
 }
 export class Mapper extends Component {
   _adapters: Object
@@ -222,7 +222,7 @@ export class DataStore extends Container {
   _pendingQueries: Object
   _completedQueries: Object
   linkRelations: boolean
-  as(name: string): Mapper|LinkedCollection
+  as(name: string): Mapper|LinkedCollection|any
   constructor(opts?: any)
   add(mapperName: string, records: any[]|any, opts?: any): any[]|any
   addToCache(mapperName: string, data: any, opts: any): any

@@ -1,10 +1,5 @@
 import utils from './utils'
 import Component from './Component'
-import {
-  belongsToType,
-  hasManyType,
-  hasOneType
-} from './decorators'
 import Mapper from './Mapper'
 
 const DOMAIN = 'Container'
@@ -433,48 +428,50 @@ export const proxiedMapperMethods = [
   'validate'
 ]
 
+export function Container (opts) {
+  utils.classCallCheck(this, Container)
+  Container.__super__.call(this)
+  opts || (opts = {})
+
+  Object.defineProperties(this, {
+    // Holds the adapters, shared by all mappers in this container
+    _adapters: {
+      value: {}
+    },
+    // The the mappers in this container
+    _mappers: {
+      value: {}
+    }
+  })
+
+  // Apply options provided by the user
+  utils.fillIn(this, opts)
+
+  /**
+   * Defaults options to pass to {@link Container#mapperClass} when creating a
+   * new {@link Mapper}.
+   *
+   * @default {}
+   * @name Container#mapperDefaults
+   * @since 3.0.0
+   * @type {Object}
+   */
+  this.mapperDefaults = this.mapperDefaults || {}
+
+  /**
+   * Constructor function to use in {@link Container#defineMapper} to create a
+   * new mapper.
+   *
+   * {@link Mapper}
+   * @name Container#mapperClass
+   * @since 3.0.0
+   * @type {Constructor}
+   */
+  this.mapperClass = this.mapperClass || Mapper
+}
+
 const props = {
-  constructor: function Container (opts) {
-    utils.classCallCheck(this, Container)
-    Container.__super__.call(this)
-    opts || (opts = {})
-
-    Object.defineProperties(this, {
-      // Holds the adapters, shared by all mappers in this container
-      _adapters: {
-        value: {}
-      },
-      // The the mappers in this container
-      _mappers: {
-        value: {}
-      }
-    })
-
-    // Apply options provided by the user
-    utils.fillIn(this, opts)
-
-    /**
-     * Defaults options to pass to {@link Container#mapperClass} when creating a
-     * new {@link Mapper}.
-     *
-     * @default {}
-     * @name Container#mapperDefaults
-     * @since 3.0.0
-     * @type {Object}
-     */
-    this.mapperDefaults = this.mapperDefaults || {}
-
-    /**
-     * Constructor function to use in {@link Container#defineMapper} to create a
-     * new mapper.
-     *
-     * {@link Mapper}
-     * @name Container#mapperClass
-     * @since 3.0.0
-     * @type {Constructor}
-     */
-    this.mapperClass = this.mapperClass || Mapper
-  },
+  constructor: Container,
 
   /**
    * Register a new event listener on this Container.
@@ -600,27 +597,7 @@ const props = {
     mapper.datastore = this
 
     mapper.on('all', (...args) => this._onMapperEvent(name, ...args))
-
-    // Setup the mapper's relations, including generating Mapper#relationList
-    // and Mapper#relationFields
-    utils.forOwn(mapper.relations, (group, type) => {
-      utils.forOwn(group, (relations, _name) => {
-        if (utils.isObject(relations)) {
-          relations = [relations]
-        }
-        relations.forEach((def) => {
-          def.getRelation = () => this.getMapper(_name)
-          const relatedMapper = this._mappers[_name] || _name
-          if (type === belongsToType) {
-            mapper.belongsTo(relatedMapper, def)
-          } else if (type === hasOneType) {
-            mapper.hasOne(relatedMapper, def)
-          } else if (type === hasManyType) {
-            mapper.hasMany(relatedMapper, def)
-          }
-        })
-      })
-    })
+    mapper.defineRelations()
 
     return mapper
   },
@@ -686,6 +663,7 @@ const props = {
    * const UserMapper = container.defineMapper('user')
    * UserMapper === container.getMapper('user') // true
    * UserMapper === container.as('user').getMapper() // true
+   * container.getMapper('profile') // throws Error, there is no mapper with name "profile"
    *
    * @method Container#getMapper
    * @param {string} name {@link Mapper#name}.
@@ -693,11 +671,33 @@ const props = {
    * @since 3.0.0
    */
   getMapper (name) {
-    const mapper = this._mappers[name]
+    const mapper = this.getMapperByName(name)
     if (!mapper) {
       throw utils.err(`${DOMAIN}#getMapper`, name)(404, 'mapper')
     }
     return mapper
+  },
+
+  /**
+   * Return the mapper registered under the specified name.
+   * Doesn't throw error if mapper doesn't exist.
+   *
+   * @example
+   * import {Container} from 'js-data'
+   * const container = new Container()
+   * // Container#defineMapper returns a direct reference to the newly created
+   * // Mapper.
+   * const UserMapper = container.defineMapper('user')
+   * UserMapper === container.getMapperByName('user') // true
+   * container.getMapperByName('profile') // undefined
+   *
+   * @method Container#getMapperByName
+   * @param {string} name {@link Mapper#name}.
+   * @returns {Mapper}
+   * @since 3.0.0
+   */
+  getMapperByName (name) {
+    return this._mappers[name]
   },
 
   /**
@@ -738,80 +738,7 @@ proxiedMapperMethods.forEach(function (method) {
   }
 })
 
-/**
- * ```javascript
- * import {Container} from 'js-data'
- * ```
- *
- * The `Container` class is a place to store {@link Mapper} instances.
- *
- * Without a container, you need to manage mappers yourself, including resolving
- * circular dependencies among relations. All mappers in a container share the
- * same adapters, so you don't have to add each adapter to all of your mappers.
- *
- * @example <caption>Without Container</caption>
- * import {Mapper} from 'js-data'
- * import HttpAdapter from 'js-data-http'
- * const adapter = new HttpAdapter()
- * const userMapper = new Mapper({ name: 'user' })
- * userMapper.registerAdapter('http', adapter, { default: true })
- * const commentMapper = new Mapper({ name: 'comment' })
- * commentMapper.registerAdapter('http', adapter, { default: true })
- *
- * // This might be more difficult if the mappers were defined in different
- * // modules.
- * userMapper.hasMany(commentMapper, {
- *   localField: 'comments',
- *   foreignKey: 'userId'
- * })
- * commentMapper.belongsTo(userMapper, {
- *   localField: 'user',
- *   foreignKey: 'userId'
- * })
- *
- * @example <caption>With Container</caption>
- * import {Container} from 'js-data'
- * import HttpAdapter from 'js-data-http'
- * const container = new Container()
- * // All mappers in container share adapters
- * container.registerAdapter('http', new HttpAdapter(), { default: true })
- *
- * // These could be defined in separate modules without a problem.
- * container.defineMapper('user', {
- *   relations: {
- *     hasMany: {
- *       comment: {
- *         localField: 'comments',
- *         foreignKey: 'userId'
- *       }
- *     }
- *   }
- * })
- * container.defineMapper('comment', {
- *   relations: {
- *     belongsTo: {
- *       user: {
- *         localField: 'user',
- *         foreignKey: 'userId'
- *       }
- *     }
- *   }
- * })
- *
- * @class Container
- * @extends Component
- * @param {Object} [opts] Configuration options.
- * @param {Function} [opts.mapperClass] Constructor function to use in
- * {@link Container#defineMapper} to create a new mapper.
- * @param {Object} [opts.mapperDefaults] Defaults options to pass to
- * {@link Container#mapperClass} when creating a new mapper.
- * @returns {Container}
- * @since 3.0.0
- * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#container","Components of JSData: Container"]
- * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
- * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-nodejs","Notes on using JSData in Node.js"]
- */
-export const Container = Component.extend(props)
+Component.extend(props)
 
 /**
  * Create a subclass of this Container.

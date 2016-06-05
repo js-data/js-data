@@ -1,3 +1,19 @@
+##### 3.0.0-beta.7 - 05 June 2016
+
+###### Backwards compatible changes
+- #336 - refactor(Relation): move Relation class into separate file by @stalniy
+- #337 - refactor(LinkedCollection) by @stalniy
+- #342 - Allow definition of custom getter/setter for schema properties by @jmdobry
+- #344 - Schema and utils tests by @MatthewOverall
+- #345 - refactor(Container): move defineRelations method to Mapper by @stalniy
+- Turned off minification of function names in js-data.min.js
+
+###### Bug fixes
+- #332 - records should "commit" when they are saved fixed by @jmdobry
+
+###### Other
+- Upgraded dependencies
+
 ##### 3.0.0-beta.6 - 16 May 2016
 
 ###### Breaking changes

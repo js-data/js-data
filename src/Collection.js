@@ -7,6 +7,16 @@ const DOMAIN = 'Collection'
 
 const COLLECTION_DEFAULTS = {
   /**
+   * Whether to call {@link Record#commit} on records that are added to the
+   * collection and already exist in the collection.
+   *
+   * @name Collection#commitOnMerge
+   * @type {boolean}
+   * @default true
+   */
+  commitOnMerge: true,
+
+  /**
    * Field to be used as the unique identifier for records in this collection.
    * Defaults to `"id"` unless {@link Collection#mapper} is set, in which case
    * this will default to {@link Mapper#idAttribute}.
@@ -22,8 +32,8 @@ const COLLECTION_DEFAULTS = {
    * primary key with a record already in this Collection.
    *
    * Possible values:
-   * - merge
-   * - replace
+   * merge
+   * replace
    *
    * Merge:
    *
@@ -59,99 +69,104 @@ const COLLECTION_DEFAULTS = {
  * @param {Array} [records] Initial set of records to insert into the
  * collection.
  * @param {Object} [opts] Configuration options.
+ * @param {string} [opts.commitOnMerge] See {@link Collection#commitOnMerge}.
  * @param {string} [opts.idAttribute] See {@link Collection#idAttribute}.
  * @param {string} [opts.onConflict="merge"] See {@link Collection#onConflict}.
  * @param {string} [opts.mapper] See {@link Collection#mapper}.
+ * @since 3.0.0
  */
-export default Component.extend({
-  constructor: function Collection (records, opts) {
-    utils.classCallCheck(this, Collection)
-    Collection.__super__.call(this)
+function Collection (records, opts) {
+  utils.classCallCheck(this, Collection)
+  Collection.__super__.call(this)
 
-    if (records && !utils.isArray(records)) {
-      opts = records
-      records = []
-    }
-    if (utils.isString(opts)) {
-      opts = { idAttribute: opts }
-    }
+  if (records && !utils.isArray(records)) {
+    opts = records
+    records = []
+  }
+  if (utils.isString(opts)) {
+    opts = { idAttribute: opts }
+  }
 
-    // Default values for arguments
-    records || (records = [])
-    opts || (opts = {})
+  // Default values for arguments
+  records || (records = [])
+  opts || (opts = {})
+
+  /**
+   * Default Mapper for this collection. Optional. If a Mapper is provided, then
+   * the collection will use the {@link Mapper#idAttribute} setting, and will
+   * wrap records in {@link Mapper#recordClass}.
+   *
+   * @example
+   * import {Collection, Mapper} from 'js-data'
+   *
+   * class MyMapperClass extends Mapper {
+   *   foo () { return 'bar' }
+   * }
+   * const myMapper = new MyMapperClass()
+   * const collection = new Collection(null, { mapper: myMapper })
+   *
+   * @name Collection#mapper
+   * @type {Mapper}
+   * @default null
+   * @since 3.0.0
+   */
+  Object.defineProperties(this, {
+    mapper: {
+      value: undefined,
+      writable: true
+    },
+    // Query class used by this collection
+    queryClass: {
+      value: undefined,
+      writable: true
+    }
+  })
+
+  // Apply user-provided configuration
+  utils.fillIn(this, opts)
+  // Fill in any missing options with the defaults
+  utils.fillIn(this, utils.copy(COLLECTION_DEFAULTS))
+
+  if (!this.queryClass) {
+    this.queryClass = Query
+  }
+
+  const idAttribute = this.recordId()
+
+  Object.defineProperties(this, {
+    /**
+     * The main index, which uses @{link Collection#recordId} as the key.
+     *
+     * @name Collection#index
+     * @type {Index}
+     */
+    index: {
+      value: new Index([idAttribute], {
+        hashCode (obj) {
+          return utils.get(obj, idAttribute)
+        }
+      })
+    },
 
     /**
-     * Default Mapper for this collection. Optional. If a Mapper is provided, then
-     * the collection will use the {@link Mapper#idAttribute} setting, and will
-     * wrap records in {@link Mapper#recordClass}.
+     * Object that holds the secondary indexes of this collection.
      *
-     * @example
-     * import {Collection, Mapper} from 'js-data'
-     *
-     * class MyMapperClass extends Mapper {
-     *   foo () { return 'bar' }
-     * }
-     * const myMapper = new MyMapperClass()
-     * const collection = new Collection(null, { mapper: myMapper })
-     *
-     * @name Collection#mapper
-     * @type {Mapper}
-     * @default null
+     * @name Collection#indexes
+     * @type {Object.<string, Index>}
      */
-    Object.defineProperties(this, {
-      mapper: {
-        value: undefined,
-        writable: true
-      },
-      // Query class used by this collection
-      queryClass: {
-        value: undefined,
-        writable: true
-      }
-    })
-
-    // Apply user-provided configuration
-    utils.fillIn(this, opts)
-    // Fill in any missing options with the defaults
-    utils.fillIn(this, utils.copy(COLLECTION_DEFAULTS))
-
-    if (!this.queryClass) {
-      this.queryClass = Query
+    indexes: {
+      value: {}
     }
+  })
 
-    const idAttribute = this.recordId()
+  // Insert initial data into the collection
+  if (records) {
+    this.add(records)
+  }
+}
 
-    Object.defineProperties(this, {
-      /**
-       * The main index, which uses @{link Collection#recordId} as the key.
-       *
-       * @name Collection#index
-       * @type {Index}
-       */
-      index: {
-        value: new Index([idAttribute], {
-          hashCode (obj) {
-            return utils.get(obj, idAttribute)
-          }
-        })
-      },
-
-      /**
-       * Object that holds the secondary indexes of this collection.
-       *
-       * @name Collection#indexes
-       * @type {Object.<string, Index>}
-       */
-      indexes: {
-        value: {}
-      }
-    })
-
-    // Insert initial data into the collection
-    if (records) {
-      this.add(records)
-    }
-  },
+export default Component.extend({
+  constructor: Collection,
 
   /**
    * Used to bind to events emitted by records in this Collection.
@@ -179,8 +194,8 @@ export default Component.extend({
    * @since 3.0.0
    * @param {(Object|Object[]|Record|Record[])} data The record or records to insert.
    * @param {Object} [opts] Configuration options.
-   * @param {string} [opts.onConflict] What to do when a record is already in
-   * the collection. Possible values are `merge` or `replace`.
+   * @param {boolean} [opts.commitOnMerge=true] See {@link Collection#commitOnMerge}.
+   * @param {string} [opts.onConflict] See {@link Collection#onConflict}.
    * @returns {(Object|Object[]|Record|Record[])} The added record or records.
    */
   add (records, opts) {
@@ -237,6 +252,9 @@ export default Component.extend({
           throw utils.err(`${DOMAIN}#add`, 'opts.onConflict')(400, 'one of (merge, replace)', onConflict, true)
         }
         record = existing
+        if (opts.commitOnMerge && utils.isFunction(record.commit)) {
+          record.commit()
+        }
         // Update all indexes in the collection
         this.updateIndexes(record)
       } else {
@@ -371,8 +389,8 @@ export default Component.extend({
    *
    * @method Collection#createIndex
    * @since 3.0.0
-   * @param {string} name - The name of the new secondary index.
-   * @param {string[]} [fieldList] - Array of field names to use as the key or
+   * @param {string} name The name of the new secondary index.
+   * @param {string[]} [fieldList] Array of field names to use as the key or
    * compound key of the new secondary index. If no fieldList is provided, then
    * the name will also be the field that is used to index the collection.
    * @returns {Collection} A reference to itself for chaining.
@@ -413,9 +431,9 @@ export default Component.extend({
    *
    * @method Collection#filter
    * @since 3.0.0
-   * @param {(Object|Function)} [queryOrFn={}] - Selection query or filter
+   * @param {(Object|Function)} [queryOrFn={}] Selection query or filter
    * function.
-   * @param {Object} [thisArg] - Context to which to bind `queryOrFn` if
+   * @param {Object} [thisArg] Context to which to bind `queryOrFn` if
    * `queryOrFn` is a function.
    * @returns {Array} The result.
    */
@@ -433,8 +451,8 @@ export default Component.extend({
    *
    * @method Collection#forEach
    * @since 3.0.0
-   * @param {Function} forEachFn - Iteration function.
-   * @param {*} [thisArg] - Context to which to bind `forEachFn`.
+   * @param {Function} forEachFn Iteration function.
+   * @param {*} [thisArg] Context to which to bind `forEachFn`.
    * @returns {Array} The result.
    */
   forEach (cb, thisArg) {
@@ -446,7 +464,7 @@ export default Component.extend({
    *
    * @method Collection#get
    * @since 3.0.0
-   * @param {(string|number)} id - The primary key of the record to get.
+   * @param {(string|number)} id The primary key of the record to get.
    * @returns {(Object|Record)} The record with the given id.
    */
   get (id) {
@@ -467,11 +485,11 @@ export default Component.extend({
    *
    * @method Collection#getAll
    * @since 3.0.0
-   * @param {...Array} [keyList] - Provide one or more keyLists, and all
+   * @param {...Array} [keyList] Provide one or more keyLists, and all
    * records matching each keyList will be retrieved. If no keyLists are
    * provided, all records will be returned.
-   * @param {Object} [opts] - Configuration options.
-   * @param {string} [opts.index] - Name of the secondary index to use in the
+   * @param {Object} [opts] Configuration options.
+   * @param {string} [opts.index] Name of the secondary index to use in the
    * query. If no index is specified, the main index is used.
    * @returns {Array} The result.
    */
@@ -505,7 +523,7 @@ export default Component.extend({
    *
    * @method Collection#limit
    * @since 3.0.0
-   * @param {number} num - The maximum number of records to keep in the result.
+   * @param {number} num The maximum number of records to keep in the result.
    * @returns {Array} The result.
    */
   limit (num) {
@@ -522,8 +540,8 @@ export default Component.extend({
    *
    * @method Collection#map
    * @since 3.0.0
-   * @param {Function} mapFn - Mapping function.
-   * @param {*} [thisArg] - Context to which to bind `mapFn`.
+   * @param {Function} mapFn Mapping function.
+   * @param {*} [thisArg] Context to which to bind `mapFn`.
    * @returns {Array} The result of the mapping.
    */
   map (cb, thisArg) {
@@ -540,8 +558,8 @@ export default Component.extend({
    *
    * @method Collection#mapCall
    * @since 3.0.0
-   * @param {string} funcName - Name of function to call
-   * @parama {...*} [args] - Remaining arguments to be passed to the function.
+   * @param {string} funcName Name of function to call
+   * @parama {...*} [args] Remaining arguments to be passed to the function.
    * @returns {Array} The result.
    */
   mapCall (funcName, ...args) {
@@ -600,8 +618,8 @@ export default Component.extend({
    *
    * @method Collection#reduce
    * @since 3.0.0
-   * @param {Function} cb - Reduction callback.
-   * @param {*} initialValue - Initial value of the reduction.
+   * @param {Function} cb Reduction callback.
+   * @param {*} initialValue Initial value of the reduction.
    * @returns {*} The result.
    */
   reduce (cb, initialValue) {
@@ -614,8 +632,8 @@ export default Component.extend({
    *
    * @method Collection#remove
    * @since 3.0.0
-   * @param {(string|number)} id - The primary key of the record to be removed.
-   * @param {Object} [opts] - Configuration options.
+   * @param {(string|number)} id The primary key of the record to be removed.
+   * @param {Object} [opts] Configuration options.
    * @returns {Object|Record} The removed record, if any.
    */
   remove (id, opts) {
@@ -643,12 +661,12 @@ export default Component.extend({
    *
    * @method Collection#removeAll
    * @since 3.0.0
-   * @param {Object} [query={}] - Selection query.
-   * @param {Object} [query.where] - Filtering criteria.
-   * @param {number} [query.skip] - Number to skip.
-   * @param {number} [query.limit] - Number to limit to.
-   * @param {Array} [query.orderBy] - Sorting criteria.
-   * @param {Object} [opts] - Configuration options.
+   * @param {Object} [query={}] Selection query. See {@link query}.
+   * @param {Object} [query.where] See {@link query.where}.
+   * @param {number} [query.offset] See {@link query.offset}.
+   * @param {number} [query.limit] See {@link query.limit}.
+   * @param {string|Array[]} [query.orderBy] See {@link query.orderBy}.
+   * @param {Object} [opts] Configuration options.
    * @returns {(Object[]|Record[])} The removed records, if any.
    */
   removeAll (query, opts) {
@@ -674,7 +692,7 @@ export default Component.extend({
    *
    * @method Collection#skip
    * @since 3.0.0
-   * @param {number} num - The number of records to skip.
+   * @param {number} num The number of records to skip.
    * @returns {Array} The result.
    */
   skip (num) {
@@ -687,8 +705,8 @@ export default Component.extend({
    *
    * @method Collection#toJSON
    * @since 3.0.0
-   * @param {Object} [opts] - Configuration options.
-   * @param {string[]} [opts.with] - Array of relation names or relation fields
+   * @param {Object} [opts] Configuration options.
+   * @param {string[]} [opts.with] Array of relation names or relation fields
    * to include in the representation.
    * @returns {Array} The records.
    */
@@ -703,8 +721,8 @@ export default Component.extend({
    *
    * @method Collection#updateIndex
    * @since 3.0.0
-   * @param {Object} record - The record to update.
-   * @param {Object} [opts] - Configuration options.
+   * @param {Object} record The record to update.
+   * @param {Object} [opts] Configuration options.
    * @param {string} [opts.index] The index in which to update the record's
    * position. If you don't specify an index then the record will be updated
    * in the main index.
@@ -719,8 +737,8 @@ export default Component.extend({
    *
    * @method Collection#updateIndexes
    * @since 3.0.0
-   * @param {Object} record - TODO
-   * @param {Object} [opts] - Configuration options.
+   * @param {Object} record TODO
+   * @param {Object} [opts] Configuration options.
    */
   updateIndexes (record) {
     this.index.updateRecord(record)
@@ -729,3 +747,29 @@ export default Component.extend({
     })
   }
 })
+
+/**
+ * Create a subclass of this Collection.
+ *
+ * @example <caption>Extend the class in a cross-browser manner.</caption>
+ * import {Collection} from 'js-data'
+ * const CustomCollectionClass = Collection.extend({
+ *   foo () { return 'bar' }
+ * })
+ * const customCollection = new CustomCollectionClass()
+ * console.log(customCollection.foo()) // "bar"
+ *
+ * @example <caption>Extend the class using ES2015 class syntax.</caption>
+ * class CustomCollectionClass extends Collection {
+ *   foo () { return 'bar' }
+ * }
+ * const customCollection = new CustomCollectionClass()
+ * console.log(customCollection.foo()) // "bar"
+ *
+ * @method Collection.extend
+ * @param {Object} [props={}] Properties to add to the prototype of the
+ * subclass.
+ * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @returns {Constructor} Subclass of this Collection class.
+ * @since 3.0.0
+ */

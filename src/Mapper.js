@@ -2,6 +2,7 @@ import utils from './utils'
 import Component from './Component'
 import Record from './Record'
 import Schema from './Schema'
+import { Relation } from './relations'
 import {
   belongsTo,
   belongsToType,
@@ -252,151 +253,153 @@ const MAPPER_DEFAULTS = {
  * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#mapper","Components of JSData: Mapper"]
  * @tutorial ["http://www.js-data.io/v3.0/docs/modeling-your-data","Modeling your data"]
  */
-export default Component.extend({
-  constructor: function Mapper (opts) {
-    utils.classCallCheck(this, Mapper)
-    Mapper.__super__.call(this)
-    opts || (opts = {})
+function Mapper (opts) {
+  utils.classCallCheck(this, Mapper)
+  Mapper.__super__.call(this)
+  opts || (opts = {})
 
-    // Prepare certain properties to be non-enumerable
-    Object.defineProperties(this, {
-      _adapters: {
-        value: undefined,
-        writable: true
-      },
-
-      /**
-       * Set to `false` to force the Mapper to work with POJO objects only.
-       *
-       * @example <caption>Use POJOs only.</caption>
-       * import {Mapper, Record} from 'js-data'
-       * const UserMapper = new Mapper({ recordClass: false })
-       * UserMapper.recordClass // false
-       * const user = UserMapper#createRecord()
-       * user instanceof Record // false
-       *
-       * @example <caption>Set to a custom class to have records wrapped in your custom class.</caption>
-       * import {Mapper, Record} from 'js-data'
-       *  // Custom class
-       * class User {
-       *   constructor (props = {}) {
-       *     for (var key in props) {
-       *       if (props.hasOwnProperty(key)) {
-       *         this[key] = props[key]
-       *       }
-       *     }
-       *   }
-       * }
-       * const UserMapper = new Mapper({ recordClass: User })
-       * UserMapper.recordClass // function User() {}
-       * const user = UserMapper#createRecord()
-       * user instanceof Record // false
-       * user instanceof User // true
-       *
-       *
-       * @example <caption>Extend the {@link Record} class.</caption>
-       * import {Mapper, Record} from 'js-data'
-       *  // Custom class
-       * class User extends Record {
-       *   constructor () {
-       *     super(props)
-       *   }
-       * }
-       * const UserMapper = new Mapper({ recordClass: User })
-       * UserMapper.recordClass // function User() {}
-       * const user = UserMapper#createRecord()
-       * user instanceof Record // true
-       * user instanceof User // true
-       *
-       * @name Mapper#recordClass
-       * @default {@link Record}
-       * @see Record
-       * @since 3.0.0
-       */
-      recordClass: {
-        value: undefined,
-        writable: true
-      },
-
-      /**
-       * The meta information describing this Mapper's available lifecycle
-       * methods. __Do not modify.__
-       *
-       * TODO: Improve documentation.
-       *
-       * @name Mapper#lifecycleMethods
-       * @since 3.0.0
-       * @type {Object}
-       */
-      lifecycleMethods: {
-        value: LIFECYCLE_METHODS
-      },
-
-      /**
-       * This Mapper's {@link Schema}.
-       *
-       * @name Mapper#schema
-       * @see Schema
-       * @since 3.0.0
-       * @type {Schema}
-       */
-      schema: {
-        value: undefined,
-        writable: true
-      }
-    })
-
-    // Apply user-provided configuration
-    utils.fillIn(this, opts)
-    // Fill in any missing options with the defaults
-    utils.fillIn(this, utils.copy(MAPPER_DEFAULTS))
+  // Prepare certain properties to be non-enumerable
+  Object.defineProperties(this, {
+    _adapters: {
+      value: undefined,
+      writable: true
+    },
 
     /**
-     * The name for this Mapper. This is the minimum amount of meta information
-     * required for a Mapper to be able to execute CRUD operations for a
-     * Resource.
+     * Set to `false` to force the Mapper to work with POJO objects only.
      *
-     * @name Mapper#name
+     * @example <caption>Use POJOs only.</caption>
+     * import {Mapper, Record} from 'js-data'
+     * const UserMapper = new Mapper({ recordClass: false })
+     * UserMapper.recordClass // false
+     * const user = UserMapper#createRecord()
+     * user instanceof Record // false
+     *
+     * @example <caption>Set to a custom class to have records wrapped in your custom class.</caption>
+     * import {Mapper, Record} from 'js-data'
+     *  // Custom class
+     * class User {
+     *   constructor (props = {}) {
+     *     for (var key in props) {
+     *       if (props.hasOwnProperty(key)) {
+     *         this[key] = props[key]
+     *       }
+     *     }
+     *   }
+     * }
+     * const UserMapper = new Mapper({ recordClass: User })
+     * UserMapper.recordClass // function User() {}
+     * const user = UserMapper#createRecord()
+     * user instanceof Record // false
+     * user instanceof User // true
+     *
+     *
+     * @example <caption>Extend the {@link Record} class.</caption>
+     * import {Mapper, Record} from 'js-data'
+     *  // Custom class
+     * class User extends Record {
+     *   constructor () {
+     *     super(props)
+     *   }
+     * }
+     * const UserMapper = new Mapper({ recordClass: User })
+     * UserMapper.recordClass // function User() {}
+     * const user = UserMapper#createRecord()
+     * user instanceof Record // true
+     * user instanceof User // true
+     *
+     * @name Mapper#recordClass
+     * @default {@link Record}
+     * @see Record
      * @since 3.0.0
-     * @type {string}
      */
-    if (!this.name) {
-      throw utils.err(`new ${DOMAIN}`, 'opts.name')(400, 'string', this.name)
-    }
+    recordClass: {
+      value: undefined,
+      writable: true
+    },
 
-    // Setup schema, with an empty default schema if necessary
-    if (!(this.schema instanceof Schema)) {
-      this.schema = new Schema(this.schema || {})
-    }
+    /**
+     * The meta information describing this Mapper's available lifecycle
+     * methods. __Do not modify.__
+     *
+     * TODO: Improve documentation.
+     *
+     * @name Mapper#lifecycleMethods
+     * @since 3.0.0
+     * @type {Object}
+     */
+    lifecycleMethods: {
+      value: LIFECYCLE_METHODS
+    },
 
-    if (this.schema instanceof Schema) {
-      this.schema.type || (this.schema.type = 'object')
+    /**
+     * This Mapper's {@link Schema}.
+     *
+     * @name Mapper#schema
+     * @see Schema
+     * @since 3.0.0
+     * @type {Schema}
+     */
+    schema: {
+      value: undefined,
+      writable: true
     }
+  })
 
-    // Create a subclass of Record that's tied to this Mapper
-    if (utils.isUndefined(this.recordClass)) {
-      const superClass = Record
-      this.recordClass = superClass.extend({
-        constructor: (function Record () {
-          var subClass = function Record (props, opts) {
-            utils.classCallCheck(this, subClass)
-            superClass.call(this, props, opts)
-          }
-          return subClass
-        })()
-      })
+  // Apply user-provided configuration
+  utils.fillIn(this, opts)
+  // Fill in any missing options with the defaults
+  utils.fillIn(this, utils.copy(MAPPER_DEFAULTS))
+
+  /**
+   * The name for this Mapper. This is the minimum amount of meta information
+   * required for a Mapper to be able to execute CRUD operations for a
+   * Resource.
+   *
+   * @name Mapper#name
+   * @since 3.0.0
+   * @type {string}
+   */
+  if (!this.name) {
+    throw utils.err(`new ${DOMAIN}`, 'opts.name')(400, 'string', this.name)
+  }
+
+  // Setup schema, with an empty default schema if necessary
+  if (!(this.schema instanceof Schema)) {
+    this.schema = new Schema(this.schema || {})
+  }
+
+  if (this.schema instanceof Schema) {
+    this.schema.type || (this.schema.type = 'object')
+  }
+
+  // Create a subclass of Record that's tied to this Mapper
+  if (utils.isUndefined(this.recordClass)) {
+    const superClass = Record
+    this.recordClass = superClass.extend({
+      constructor: (function Record () {
+        var subClass = function Record (props, opts) {
+          utils.classCallCheck(this, subClass)
+          superClass.call(this, props, opts)
+        }
+        return subClass
+      })()
+    })
+  }
+
+  if (this.recordClass) {
+    this.recordClass.mapper = this
+
+    // We can only apply the schema to the prototype of this.recordClass if the
+    // class extends Record
+    if (utils.getSuper(this.recordClass, true) === Record && this.schema && this.schema.apply && this.applySchema) {
+      this.schema.apply(this.recordClass.prototype)
     }
+  }
+}
 
-    if (this.recordClass) {
-      this.recordClass.mapper = this
-
-      // We can only apply the schema to the prototype of this.recordClass if the
-      // class extends Record
-      if (utils.getSuper(this.recordClass, true) === Record && this.schema && this.schema.apply && this.applySchema) {
-        this.schema.apply(this.recordClass.prototype)
-      }
-    }
-  },
+export default Component.extend({
+  constructor: Mapper,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#count}. If this method
@@ -1805,6 +1808,31 @@ export default Component.extend({
    */
   wrap (data, opts) {
     return this.createRecord(data, opts)
+  },
+
+  /**
+   * @ignore
+   */
+  defineRelations() {
+    // Setup the mapper's relations, including generating Mapper#relationList
+    // and Mapper#relationFields
+    utils.forOwn(this.relations, (group, type) => {
+      utils.forOwn(group, (relations, _name) => {
+        if (utils.isObject(relations)) {
+          relations = [relations]
+        }
+        relations.forEach((def) => {
+          const relatedMapper = this.datastore.getMapperByName(_name) || _name
+          def.getRelation = () => this.datastore.getMapper(_name)
+
+          if (typeof Relation[type] !== 'function') {
+            throw utils.err(DOMAIN, 'defineRelations')(400, 'relation type (hasOne, hasMany, etc)', type, true)
+          }
+
+          this[type](relatedMapper, def)
+        })
+      })
+    })
   }
 })
 
@@ -1830,6 +1858,6 @@ export default Component.extend({
  * @param {Object} [props={}] Properties to add to the prototype of the
  * subclass.
  * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @returns {Constructor} Subclass of this Mapper.
+ * @returns {Constructor} Subclass of this Mapper class.
  * @since 3.0.0
  */

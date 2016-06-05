@@ -40,28 +40,30 @@ const escape = function (pattern) {
  * @param {Collection} collection The collection on which this query operates.
  * @since 3.0.0
  */
+function Query (collection) {
+  utils.classCallCheck(this, Query)
+
+  /**
+   * The {@link Collection} on which this query operates.
+   *
+   * @name Query#collection
+   * @since 3.0.0
+   * @type {Collection}
+   */
+  this.collection = collection
+
+  /**
+   * The current data result of this query.
+   *
+   * @name Query#data
+   * @since 3.0.0
+   * @type {Array}
+   */
+  this.data = null
+}
+
 export default Component.extend({
-  constructor: function Query (collection) {
-    utils.classCallCheck(this, Query)
-
-    /**
-     * The {@link Collection} on which this query operates.
-     *
-     * @name Query#collection
-     * @since 3.0.0
-     * @type {Collection}
-     */
-    this.collection = collection
-
-    /**
-     * The current data result of this query.
-     *
-     * @name Query#data
-     * @since 3.0.0
-     * @type {Array}
-     */
-    this.data = null
-  },
+  constructor: Query,
 
   _applyWhereFromObject (where) {
     const fields = []
@@ -814,6 +816,6 @@ export default Component.extend({
  * @param {Object} [props={}] Properties to add to the prototype of the
  * subclass.
  * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @returns {Constructor} Subclass of this Query.
+ * @returns {Constructor} Subclass of this Query class.
  * @since 3.0.0
  */

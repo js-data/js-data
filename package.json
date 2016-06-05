@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "3.0.0-beta.6",
+  "version": "3.0.0-beta.7",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -57,23 +57,21 @@
     "bundle:es5": "rollup src/index.js -c -o dist/js-data.js -m dist/js-data.js.map -f umd",
     "bundle:next": "rollup src/index.js -c -o dist/js-data.es2015.js -m dist/js-data.es2015.js.map -f es6",
     "bundle": "npm run bundle:es5 && npm run bundle:next && repo-tools write-version dist/js-data.js dist/js-data.es2015.js",
-    "min": "uglifyjs dist/js-data.js -o dist/js-data.min.js --source-map dist/js-data.min.map --source-map-url js-data.min.map -v -m -c --screw-ie8",
+    "min": "uglifyjs dist/js-data.js -o dist/js-data.min.js --source-map dist/js-data.min.map --source-map-url js-data.min.map -v -m -c --keep-fnames --screw-ie8",
     "banner": "node scripts/banner.js",
     "gzip": "echo gzipped size: $(cat dist/js-data.min.js | gzip -f9 | wc -c)kb",
     "build": "npm run lint && npm run bundle && npm run min && npm run banner",
     "karma": "karma start",
     "mocha": "mocha --recursive -t 20000 -R dot -r babel-core/register -r babel-polyfill",
-    "cover": "nyc --require babel-core/register --require babel-polyfill --cache mocha --recursive -t 20000 -R dot && nyc report --reporter=html",
+    "cover": "nyc --require babel-core/register --require babel-polyfill --cache mocha  --recursive -t 20000 -R dot && nyc report --reporter=html",
     "test": "npm run build && npm run cover && npm run karma",
     "release": "npm test && npm run doc && repo-tools updates && repo-tools changelog && repo-tools authors"
   },
   "devDependencies": {
     "babel-plugin-syntax-async-functions": "6.8.0",
     "babel-plugin-transform-es2015-modules-umd": "6.8.0",
-    "babel-plugin-transform-regenerator": "6.8.0",
-    "babel-polyfill": "6.8.0",
-    "babel-preset-es2015-rollup": "1.1.1",
-    "js-data-repo-tools": "0.5.1",
+    "babel-plugin-transform-regenerator": "6.9.0",
+    "js-data-repo-tools": "0.5.2",
     "karma": "0.13.22",
     "karma-babel-preprocessor": "6.0.1",
     "karma-chai": "0.1.0",
@@ -82,10 +80,7 @@
     "karma-phantomjs-launcher": "1.0.0",
     "karma-sauce-launcher": "1.0.0",
     "karma-sinon": "1.0.5",
-    "nyc": "6.4.4",
     "phantomjs-prebuilt": "2.1.7",
-    "rollup": "0.26.3",
-    "rollup-plugin-babel": "2.4.0",
     "uglify-js": "2.6.2"
   }
 }

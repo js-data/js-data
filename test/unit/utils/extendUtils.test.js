@@ -10,12 +10,11 @@ describe('utils.fillIn', function () {
     const dest = { name: 'John', age: 90, friend: { name: 'Sara' } }
     const src = { name: 'John', age: 0, spy: true, friend: { name: 'Sara', age: 20 } }
     const expected = { name: 'John', age: 90, spy: true, friend: { name: 'Sara' } }
-    const actual = utils.fillIn(dest, src)
+    utils.fillIn(dest, src)
 
-    assert.equal(dest, actual, 'dest and return value are equal')
-    assert.equal(expected.age, actual.age, 'age already set on dest is not overriden')
+    assert.equal(expected.age, dest.age, 'age already set on dest is not overriden')
     assert.isUndefined(expected.friend.age, 'missing nested property is not filled in')
-    assert.deepEqual(expected, actual, 'sorce own properties shallow copied into dest only if missing')
+    assert.deepEqual(expected, dest, 'sorce own properties shallow copied into dest only if missing')
   })
 })
 

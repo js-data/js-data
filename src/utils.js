@@ -88,7 +88,7 @@ const utils = {
    * - not a function
    * - does not start with "_"
    *
-   * @name utils._
+   * @method utils._
    * @param {Object} dest Destination object.
    * @param {Object} src Source object.
    * @private
@@ -103,12 +103,17 @@ const utils = {
   },
 
   /**
-   * TODO
+   * Recursively iterates over relations found in `opts.with`.
    *
-   * @name utils._forRelation
+   * @method utils._forRelation
+   * @param {Object} opts Configuration options.
+   * @param {Relation} def Relation definition.
+   * @param {Function} fn Callback function.
+   * @param {*} [thisArg] Execution context for the callback function.
    * @private
+   * @since 3.0.0
    */
-  _forRelation (opts, def, fn, ctx) {
+  _forRelation (opts, def, fn, thisArg) {
     const relationName = def.relation
     let containedName = null
     let index
@@ -122,7 +127,7 @@ const utils = {
     }
 
     if (opts.withAll) {
-      fn.call(ctx, def, {})
+      fn.call(thisArg, def, {})
       return
     } else if (!containedName) {
       return
@@ -139,14 +144,17 @@ const utils = {
         optsCopy.with[i] = ''
       }
     })
-    fn.call(ctx, def, optsCopy)
+    fn.call(thisArg, def, optsCopy)
   },
 
   /**
-   * TODO
+   * Find the index of a relation in the given list
    *
-   * @name utils._getIndex
+   * @method utils._getIndex
+   * @param {string[]} list List to search.
+   * @param {string} relation Relation to find.
    * @private
+   * @returns {number}
    */
   _getIndex (list, relation) {
     let index = -1
@@ -168,29 +176,55 @@ const utils = {
    * Define hidden (non-enumerable), writable properties on `target` from the
    * provided `props`.
    *
-   * @name utils.addHiddenPropsToTarget
+   * @example
+   * import {utils} from 'js-data'
+   * function Cat () {}
+   * utils.addHiddenPropsToTarget(Cat.prototype, {
+   *   say () {
+   *     console.log('meow')
+   *   }
+   * })
+   * const cat = new Cat()
+   * cat.say() // "meow"
+   *
+   * @method utils.addHiddenPropsToTarget
    * @param {Object} target That to which `props` should be added.
    * @param {Object} props Properties to be added to `target`.
+   * @since 3.0.0
    */
   addHiddenPropsToTarget (target, props) {
     const map = {}
-    utils.forOwn(props, function (value, key) {
-      map[key] = {
-        writable: true,
-        value
-      }
+    Object.keys(props).forEach(function (propName) {
+      const descriptor = Object.getOwnPropertyDescriptor(props, propName)
+
+      descriptor.enumerable = false
+      map[propName] = descriptor
     })
     Object.defineProperties(target, map)
   },
 
   /**
-   * TODO
+   * Return whether the two objects are deeply different.
    *
-   * @ignore
+   * @example
+   * import {utils} from 'js-data'
+   * utils.areDifferent({}, {}) // false
+   * utils.areDifferent({ a: 1 }, { a: 1 }) // false
+   * utils.areDifferent({ foo: 'bar' }, {}) // true
+   *
+   * @method utils.areDifferent
+   * @param {Object} a Base object.
+   * @param {Object} b Comparison object.
+   * @param {Object} [opts] Configuration options.
+   * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
+   * @param {Array} [opts.ignore=[]] Array of strings or RegExp of fields to ignore.
+   * @returns {boolean} Whether the two objects are deeply different.
+   * @see utils.diffObjects
+   * @since 3.0.0
    */
-  areDifferent (a, b, opts) {
+  areDifferent (newObject, oldObject, opts) {
     opts || (opts = {})
-    const diff = utils.diffObjects(a, b, opts)
+    const diff = utils.diffObjects(newObject, oldObject, opts)
     const diffCount = Object.keys(diff.added).length +
       Object.keys(diff.removed).length +
       Object.keys(diff.changed).length
@@ -198,9 +232,24 @@ const utils = {
   },
 
   /**
-   * TODO
+   * Verified that the given constructor is being invoked via `new`, as opposed
+   * to just being called like a normal function.
    *
-   * @ignore
+   * @example
+   * import {utils} from 'js-data'
+   * function Cat () {
+   *   utils.classCallCheck(this, Cat)
+   * }
+   * const cat = new Cat() // this is ok
+   * Cat() // this throws an error
+   *
+   * @method utils.classCallCheck
+   * @param {*} instance Instance that is being constructed.
+   * @param {Constructor} ctor Constructor function used to construct the
+   * instance.
+   * @since 3.0.0
+   * @throws {Error} Throws an error if the constructor is being improperly
+   * invoked.
    */
   classCallCheck (instance, ctor) {
     if (!(instance instanceof ctor)) {
@@ -211,9 +260,23 @@ const utils = {
   /**
    * Deep copy a value.
    *
-   * @ignore
+   * @example
+   * import {utils} from 'js-data'
+   * const a = { foo: { bar: 'baz' } }
+   * const b = utils.copy(a)
+   * a === b // false
+   * utils.areDifferent(a, b) // false
+   *
    * @param {*} from Value to deep copy.
+   * @param {*} [to] Destination object for the copy operation.
+   * @param {*} [stackFrom] For internal use.
+   * @param {*} [stackTo] For internal use.
+   * @param {string[]|RegExp[]} [blacklist] List of strings or RegExp of
+   * properties to skip.
+   * @param {boolean} [plain] Whether to make a plain copy (don't try to use
+   * original prototype).
    * @returns {*} Deep copy of `from`.
+   * @since 3.0.0
    */
   copy (from, to, stackFrom, stackTo, blacklist, plain) {
     if (!to) {
@@ -291,11 +354,22 @@ const utils = {
   },
 
   /**
-   * Recursively shallow fill in own enumberable properties from `source` to `dest`.
+   * Recursively shallow fill in own enumerable properties from `source` to
+   * `dest`.
    *
-   * @ignore
+   * @example
+   * import {utils} from 'js-data'
+   * const a = { foo: { bar: 'baz' }, beep: 'boop' }
+   * const b = { beep: 'bip' }
+   * utils.deepFillIn(b, a)
+   * console.log(b) // {"foo":{"bar":"baz"},"beep":"bip"}
+   *
+   * @method utils.deepFillIn
    * @param {Object} dest The destination object.
    * @param {Object} source The source object.
+   * @see utils.fillIn
+   * @see utils.deepMixIn
+   * @since 3.0.0
    */
   deepFillIn (dest, source) {
     if (source) {
@@ -312,11 +386,21 @@ const utils = {
   },
 
   /**
-   * Recursively shallow copy own enumberable properties from `source` to `dest`.
+   * Recursively shallow copy own enumerable properties from `source` to `dest`.
    *
-   * @ignore
+   * @example
+   * import {utils} from 'js-data'
+   * const a = { foo: { bar: 'baz' }, beep: 'boop' }
+   * const b = { beep: 'bip' }
+   * utils.deepFillIn(b, a)
+   * console.log(b) // {"foo":{"bar":"baz"},"beep":"boop"}
+   *
+   * @method utils.deepMixIn
    * @param {Object} dest The destination object.
    * @param {Object} source The source object.
+   * @see utils.fillIn
+   * @see utils.deepFillIn
+   * @since 3.0.0
    */
   deepMixIn (dest, source) {
     if (source) {
@@ -333,14 +417,31 @@ const utils = {
   },
 
   /**
-   * @param {Object} a Base object.
-   * @param {Object} b Comparison object.
-   * @returns {Object} Diff.
+   * Return a diff of the base object to the comparison object.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * const oldObject = { foo: 'bar', a: 1234 }
+   * const newObject = { beep: 'boop', a: 5678 }
+   * const diff = utils.diffObjects(oldObject, newObject)
+   * console.log(diff.added) // {"beep":"boop"}
+   * console.log(diff.changed) // {"a":5678}
+   * console.log(diff.removed) // {"foo":undefined}
+   *
+   * @method utils.diffObjects
+   * @param {Object} newObject Comparison object.
+   * @param {Object} oldObject Base object.
+   * @param {Object} [opts] Configuration options.
+   * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
+   * @param {Array} [opts.ignore=[]] Array of strings or RegExp of fields to ignore.
+   * @returns {Object} The diff from the base object to the comparison object.
+   * @see utils.areDifferent
+   * @since 3.0.0
    */
-  diffObjects (a, b, opts) {
+  diffObjects (newObject, oldObject, opts) {
     opts || (opts = {})
     let equalsFn = opts.equalsFn
-    let bl = opts.ignore
+    let blacklist = opts.ignore
     const diff = {
       added: {},
       changed: {},
@@ -350,39 +451,61 @@ const utils = {
       equalsFn = utils.deepEqual
     }
 
-    utils.forOwn(b, function (oldValue, key) {
-      const newValue = a[key]
+    const newKeys = Object.keys(newObject).filter(function (key) {
+      return !utils.isBlacklisted(key, blacklist)
+    })
+    const oldKeys = Object.keys(oldObject).filter(function (key) {
+      return !utils.isBlacklisted(key, blacklist)
+    })
 
-      if (utils.isBlacklisted(key, bl) || equalsFn(newValue, oldValue)) {
+    // Check for properties that were added or changed
+    newKeys.forEach(function (key) {
+      const oldValue = oldObject[key]
+      const newValue = newObject[key]
+      if (equalsFn(oldValue, newValue)) {
         return
       }
-
-      if (utils.isUndefined(newValue)) {
-        diff.removed[key] = undefined
-      } else if (!equalsFn(newValue, oldValue)) {
+      if (utils.isUndefined(oldValue)) {
+        diff.added[key] = newValue
+      } else {
         diff.changed[key] = newValue
       }
     })
 
-    utils.forOwn(a, function (newValue, key) {
-      if (!utils.isUndefined(b[key]) || utils.isBlacklisted(key, bl)) {
-        return
+    // Check for properties that were removed
+    oldKeys.forEach(function (key) {
+      const oldValue = oldObject[key]
+      const newValue = newObject[key]
+      if (utils.isUndefined(newValue) && !utils.isUndefined(oldValue)) {
+        diff.removed[key] = undefined
       }
-      diff.added[key] = newValue
     })
 
     return diff
   },
 
   /**
-   * TODO
+   * Return whether the two values are equal according to the `==` operator.
+   *
+   * @method utils.equal
+   * @param {*} a First value in the comparison.
+   * @param {*} b Second value in the comparison.
+   * @returns {boolean} Whether the two values are equal according to `==`.
+   * @since 3.0.0
    */
   equal (a, b) {
     return a == b // eslint-disable-line
   },
 
   /**
-   * TODO
+   * Produce a factory function for making Error objects with the provided
+   * metadata. Used throughout the various js-data components.
+   *
+   * @method utils.err
+   * @param {string} domain Namespace.
+   * @param {string} target Target.
+   * @returns {Function} Factory function.
+   * @since 3.0.0
    */
   err (domain, target) {
     return function (code) {
@@ -396,12 +519,13 @@ const utils = {
   /**
    * Add eventing capabilities into the target object.
    *
-   * @ignore
+   * @method utils.eventify
    * @param {Object} target Target object.
    * @param {Function} [getter] Custom getter for retrieving the object's event
    * listeners.
    * @param {Function} [setter] Custom setter for setting the object's event
    * listeners.
+   * @since 3.0.0
    */
   eventify (target, getter, setter) {
     target = target || this
@@ -446,14 +570,14 @@ const utils = {
         }
       },
       on: {
-        value (type, func, ctx) {
+        value (type, func, thisArg) {
           if (!getter.call(this)) {
             setter.call(this, {})
           }
           const events = getter.call(this)
           events[type] = events[type] || []
           events[type].push({
-            c: ctx,
+            c: thisArg,
             f: func
           })
         }
@@ -462,9 +586,30 @@ const utils = {
   },
 
   /**
-   * TODO
+   * Used for sublcassing. Invoke this method in the context of a superclass to
+   * to produce a subclass based on `props` and `classProps`.
    *
-   * @ignore
+   * @example
+   * import {utils} from 'js-data'
+   * function Animal () {}
+   * Animal.extend = utils.extend
+   * const Cat = Animal.extend({
+   *   say () {
+   *     console.log('meow')
+   *   }
+   * })
+   * const cat = new Cat()
+   * cat instanceof Animal // true
+   * cat instanceof Cat // true
+   * cat.say() // "meow"
+   *
+   * @method utils.extend
+   * @param {Object} props Instance properties for the subclass.
+   * @param {Object} [props.constructor] Provide a custom constructor function
+   * to use as the subclass.
+   * @param {Object} props Static properties for the subclass.
+   * @returns {Constructor} A new subclass.
+   * @since 3.0.0
    */
   extend (props, classProps) {
     const superClass = this
@@ -518,12 +663,22 @@ const utils = {
   },
 
   /**
-   * Shallow copy own enumerable properties from `src` to `dest` that are on `src`
-   * but are missing from `dest.
+   * Shallow copy own enumerable properties from `src` to `dest` that are on
+   * `src` but are missing from `dest.
    *
-   * @ignore
+   * @example
+   * import {utils} from 'js-data'
+   * const a = { foo: 'bar', beep: 'boop' }
+   * const b = { beep: 'bip' }
+   * utils.fillIn(b, a)
+   * console.log(b) // {"foo":"bar","beep":"bip"}
+   *
+   * @method utils.fillIn
    * @param {Object} dest The destination object.
    * @param {Object} source The source object.
+   * @see utils.deepFillIn
+   * @see utils.deepMixIn
+   * @since 3.0.0
    */
   fillIn (dest, src) {
     utils.forOwn(src, function (value, key) {
@@ -531,16 +686,16 @@ const utils = {
         dest[key] = value
       }
     })
-    return dest
   },
 
   /**
    * Find the last index of something according to the given checker function.
    *
-   * @ignore
+   * @method utils.findIndex
    * @param {Array} array The array to search.
    * @param {Function} fn Checker function.
-   * @param {number} Index if found or -1 if not found.
+   * @returns {number} Index if found or -1 if not found.
+   * @since 3.0.0
    */
   findIndex (array, fn) {
     let index = -1
@@ -557,27 +712,43 @@ const utils = {
   },
 
   /**
-   * TODO
+   * Recursively iterate over a {@link Mapper}'s relations according to
+   * `opts.with`.
    *
-   * @ignore
+   * @method utils.forEachRelation
+   * @param {Mapper} mapper Mapper.
+   * @param {Object} opts Configuration options.
+   * @param {Function} fn Callback function.
+   * @param {*} thisArg Execution context for the callback function.
+   * @since 3.0.0
    */
-  forEachRelation (mapper, opts, fn, ctx) {
+  forEachRelation (mapper, opts, fn, thisArg) {
     const relationList = mapper.relationList || []
     if (!relationList.length) {
       return
     }
     relationList.forEach(function (def) {
-      utils._forRelation(opts, def, fn, ctx)
+      utils._forRelation(opts, def, fn, thisArg)
     })
   },
 
   /**
    * Iterate over an object's own enumerable properties.
    *
-   * @ignore
+   * @example
+   * import {utils} from 'js-data'
+   * const a = { b: 1, c: 4 }
+   * let sum = 0
+   * utils.forOwn(a, function (value, key) {
+   *   sum += value
+   * })
+   * console.log(sum) // 5
+   *
+   * @method utils.forOwn
    * @param {Object} object The object whose properties are to be enumerated.
    * @param {Function} fn Iteration function.
    * @param {Object} [thisArg] Content to which to bind `fn`.
+   * @since 3.0.0
    */
   forOwn (obj, fn, thisArg) {
     const keys = Object.keys(obj)
@@ -591,18 +762,32 @@ const utils = {
   /**
    * Proxy for `JSON.parse`.
    *
-   * @ignore
+   * @method utils.fromJson
    * @param {string} json JSON to parse.
    * @returns {Object} Parsed object.
+   * @see utils.toJson
+   * @since 3.0.0
    */
   fromJson (json) {
     return utils.isString(json) ? JSON.parse(json) : json
   },
 
   /**
-   * TODO
+   * Retrieve the specified property from the given object. Supports retrieving
+   * nested properties.
    *
-   * @ignore
+   * @example
+   * import {utils} from 'js-data'
+   * const a = { foo: { bar: 'baz' }, beep: 'boop' }
+   * console.log(utils.get(a, 'beep')) // "boop"
+   * console.log(utils.get(a, 'foo.bar')) // "bar"
+   *
+   * @method utils.get
+   * @param {Object} object Object from which to retrieve a property's value.
+   * @param {string} prop Property to retrieve.
+   * @returns {*} Value of the specified property.
+   * @see utils.set
+   * @since 3.0.0
    */
   'get': function (object, prop) {
     if (!prop) {
@@ -622,9 +807,14 @@ const utils = {
   },
 
   /**
-   * TODO
+   * Return the superclass for the given instance or subclass. If an instance is
+   * provided, then finds the parent class of the instance's constructor.
    *
-   * @ignore
+   * @method utils.getSuper
+   * @param {Object|Function} instance Instance or constructor.
+   * @param {boolean} [isCtor=false] Whether `instance` is a constructor.
+   * @returns {Constructor} The superclass (grandparent constructor).
+   * @since 3.0.0
    */
   getSuper (instance, isCtor) {
     const ctor = isCtor ? instance : instance.constructor
@@ -637,10 +827,11 @@ const utils = {
   /**
    * Return the intersection of two arrays.
    *
-   * @ignore
+   * @method utils.intersection
    * @param {Array} array1 First array.
    * @param {Array} array2 Second array.
    * @returns {Array} Array of elements common to both arrays.
+   * @since 3.0.0
    */
   intersection (array1, array2) {
     if (!array1 || !array2) {
@@ -663,27 +854,32 @@ const utils = {
   },
 
   /**
-   * TODO
+   * Proxy for `Array.isArray`.
    *
-   * @ignore
+   * @method utils.isArray
+   * @param {*} value The value to test.
+   * @returns {boolean} Whether the provided value is an array.
+   * @since 3.0.0
    */
   isArray: Array.isArray,
 
   /**
-   * Return whether `prop` is matched by any string or regular expression in `bl`.
+   * Return whether `prop` is matched by any string or regular expression in
+   * `blacklist`.
    *
-   * @ignore
-   * @param {string} prop The name of a property.
-   * @param {Array} bl Array of strings and regular expressions.
+   * @method utils.isBlacklisted
+   * @param {string} prop The name of a property to check.
+   * @param {Array} blacklist Array of strings and regular expressions.
    * @returns {boolean} Whether `prop` was matched.
+   * @since 3.0.0
    */
-  isBlacklisted (prop, bl) {
-    if (!bl || !bl.length) {
+  isBlacklisted (prop, blacklist) {
+    if (!blacklist || !blacklist.length) {
       return false
     }
     let matches
-    for (var i = 0; i < bl.length; i++) {
-      if ((toStr(bl[i]) === REGEXP_TAG && bl[i].test(prop)) || bl[i] === prop) {
+    for (var i = 0; i < blacklist.length; i++) {
+      if ((toStr(blacklist[i]) === REGEXP_TAG && blacklist[i].test(prop)) || blacklist[i] === prop) {
         matches = prop
         return matches
       }
@@ -692,61 +888,72 @@ const utils = {
   },
 
   /**
-   * TODO
+   * Return whether the provided value is a boolean.
    *
-   * @ignore
+   * @method utils.isBoolean
+   * @param {*} value The value to test.
+   * @returns {boolean} Whether the provided value is a boolean.
+   * @since 3.0.0
    */
   isBoolean (value) {
     return toStr(value) === BOOL_TAG
   },
 
   /**
-   * TODO
+   * Return whether the provided value is a date.
    *
-   * @ignore
-   */
-  isBrowser: false,
-
-  /**
-   * TODO
-   *
-   * @ignore
+   * @method utils.isDate
+   * @param {*} value The value to test.
+   * @returns {Date} Whether the provided value is a date.
+   * @since 3.0.0
    */
   isDate (value) {
     return (value && typeof value === 'object' && toStr(value) === DATE_TAG)
   },
 
   /**
-   * TODO
+   * Return whether the provided value is a function.
    *
-   * @ignore
+   * @method utils.isFunction
+   * @param {*} value The value to test.
+   * @returns {boolean} Whether the provided value is a function.
+   * @since 3.0.0
    */
   isFunction (value) {
     return typeof value === 'function' || (value && toStr(value) === FUNC_TAG)
   },
 
   /**
-   * TODO
+   * Return whether the provided value is an integer.
    *
-   * @ignore
+   * @method utils.isInteger
+   * @param {*} value The value to test.
+   * @returns {boolean} Whether the provided value is an integer.
+   * @since 3.0.0
    */
   isInteger (value) {
     return toStr(value) === NUMBER_TAG && value == toInteger(value) // eslint-disable-line
   },
 
   /**
-   * TODO
+   * Return whether the provided value is `null`.
    *
-   * @ignore
+   * @method utils.isNull
+   * @param {*} value The value to test.
+   * @returns {boolean} Whether the provided value is `null`.
+   * @since 3.0.0
    */
   isNull (value) {
     return value === null
   },
 
   /**
-   * TODO
+   * Return whether the provided value is a number.
    *
-   * @ignore
+   * @method utils.isNumber
+   * @param {*} value The value to test.
+   * @returns {boolean} Whether the provided value is a number.
+   * @since 3.0.0
    */
   isNumber (value) {
     const type = typeof value
@@ -754,54 +961,71 @@ const utils = {
   },
 
   /**
-   * TODO
+   * Return whether the provided value is an object.
    *
-   * @ignore
+   * @method utils.isObject
+   * @param {*} value The value to test.
+   * @returns {boolean} Whether the provided value is an object.
+   * @since 3.0.0
    */
   isObject (value) {
     return toStr(value) === OBJECT_TAG
   },
 
   /**
-   * TODO
+   * Return whether the provided value is a regular expression.
    *
-   * @ignore
+   * @method utils.isRegExp
+   * @param {*} value The value to test.
+   * @returns {boolean} Whether the provided value is a regular expression.
+   * @since 3.0.0
    */
   isRegExp (value) {
     return toStr(value) === REGEXP_TAG
   },
 
   /**
-   * TODO
+   * Return whether the provided value is a string or a number.
    *
-   * @ignore
+   * @method utils.isSorN
+   * @param {*} value The value to test.
+   * @returns {boolean} Whether the provided value is a string or a number.
+   * @since 3.0.0
    */
   isSorN (value) {
     return utils.isString(value) || utils.isNumber(value)
   },
 
   /**
-   * TODO
+   * Return whether the provided value is a string.
    *
-   * @ignore
+   * @method utils.isString
+   * @param {*} value The value to test.
+   * @returns {boolean} Whether the provided value is a string.
+   * @since 3.0.0
    */
   isString (value) {
     return typeof value === 'string' || (value && typeof value === 'object' && toStr(value) === STRING_TAG)
   },
 
   /**
-   * TODO
+   * Return whether the provided value is a `undefined`.
    *
-   * @ignore
+   * @method utils.isUndefined
+   * @param {*} value The value to test.
+   * @returns {boolean} Whether the provided value is a `undefined`.
+   * @since 3.0.0
    */
   isUndefined (value) {
     return value === undefined
   },
 
   /**
-   * TODO
+   * Mix in logging capabilities to the target.
    *
-   * @ignore
+   * @method utils.logify
+   * @param {*} target The target.
+   * @since 3.0.0
    */
   logify (target) {
     utils.addHiddenPropsToTarget(target, {
@@ -827,9 +1051,14 @@ const utils = {
   },
 
   /**
-   * TODO
+   * Adds the given record to the provided array only if it's not already in the
+   * array.
    *
-   * @ignore
+   * @method utils.noDupeAdd
+   * @param {Array} array The array.
+   * @param {*} record The value to add.
+   * @param {Function} fn Callback function passed to {@link utils.findIndex}.
+   * @since 3.0.0
    */
   noDupeAdd (array, record, fn) {
     if (!array) {
@@ -842,12 +1071,16 @@ const utils = {
   },
 
   /**
-   * TODO
+   * Return a shallow copy of the provided object, minus the properties
+   * specified in `keys`.
    *
-   * @ignore
+   * @method utils.omit
+   * @param {Object} props The object to copy.
+   * @param {string[]} keys Array of strings, representing properties to skip.
+   * @returns {Object} Shallow copy of `props`, minus `keys`.
+   * @since 3.0.0
    */
   omit (props, keys) {
-    // Remove relations
     const _props = {}
     utils.forOwn(props, function (value, key) {
       if (keys.indexOf(key) === -1) {
@@ -857,6 +1090,16 @@ const utils = {
     return _props
   },
 
+  /**
+   * Return a shallow copy of the provided object, but only include the
+   * properties specified in `keys`.
+   *
+   * @method utils.pick
+   * @param {Object} props The object to copy.
+   * @param {string[]} keys Array of strings, representing properties to keep.
+   * @returns {Object} Shallow copy of `props`, but only including `keys`.
+   * @since 3.0.0
+   */
   pick (props, keys) {
     const _props = {}
     utils.forOwn(props, function (value, key) {
@@ -868,20 +1111,26 @@ const utils = {
   },
 
   /**
-   * TODO
+   * Return a plain copy of the given value.
    *
-   * @ignore
+   * @method utils.plainCopy
+   * @param {*} value The value to copy.
+   * @returns {*} Plain copy of `value`.
+   * @see utils.copy
+   * @since 3.0.0
    */
-  plainCopy (from) {
-    return utils.copy(from, undefined, undefined, undefined, undefined, true)
+  plainCopy (value) {
+    return utils.copy(value, undefined, undefined, undefined, undefined, true)
   },
 
   /**
-   * Proxy for `Promise.reject`.
+   * Shortcut for `utils.Promise.reject(value)`.
    *
-   * @ignore
+   * @method utils.reject
    * @param {*} [value] Value with which to reject the Promise.
    * @returns {Promise} Promise reject with `value`.
+   * @see utils.Promise
+   * @since 3.0.0
    */
   reject (value) {
     return utils.Promise.reject(value)
@@ -890,7 +1139,7 @@ const utils = {
   /**
    * Remove the last item found in array according to the given checker function.
    *
-   * @ignore
+   * @method utils.remove
    * @param {Array} array The array to search.
    * @param {Function} fn Checker function.
    */
@@ -905,11 +1154,13 @@ const utils = {
   },
 
   /**
-   * Proxy for `Promise.resolve`.
+   * Shortcut for `utils.Promise.resolve(value)`.
    *
    * @ignore
    * @param {*} [value] Value with which to resolve the Promise.
    * @returns {Promise} Promise resolved with `value`.
+   * @see utils.Promise
+   * @since 3.0.0
    */
   resolve (value) {
     return utils.Promise.resolve(value)
@@ -918,7 +1169,7 @@ const utils = {
   /**
    * Set the value at the provided key or path.
    *
-   * @ignore
+   * @method utils.set
    * @param {Object} object The object on which to set a property.
    * @param {(string|Object)} path The key or path to the property. Can also
    * pass in an object of path/value pairs, which will all be set on the target
@@ -941,9 +1192,14 @@ const utils = {
   },
 
   /**
-   * TODO
+   * Check whether the two provided objects are deeply equal.
    *
-   * @ignore
+   * @method utils.deepEqual
+   * @param {Object} a First object in the comparison.
+   * @param {Object} b Second object in the comparison.
+   * @returns {boolean} Whether the two provided objects are deeply equal.
+   * @see utils.equal
+   * @since 3.0.0
    */
   deepEqual (a, b) {
     if (a === b) {
@@ -976,18 +1232,22 @@ const utils = {
   /**
    * Proxy for `JSON.stringify`.
    *
-   * @ignore
+   * @method utils.toJson
    * @param {*} value Value to serialize to JSON.
    * @returns {string} JSON string.
+   * @see utils.fromJson
+   * @since 3.0.0
    */
   toJson: JSON.stringify,
 
   /**
    * Unset the value at the provided key or path.
    *
-   * @ignore
+   * @method utils.unset
    * @param {Object} object The object from which to delete the property.
    * @param {string} path The key or path to the property.
+   * @see utils.set
+   * @since 3.0.0
    */
   unset (object, path) {
     const parts = path.split('.')
@@ -1002,13 +1262,6 @@ const utils = {
 
     object[last] = undefined
   }
-}
-
-// Attempt to detect whether we are in the browser.
-try {
-  utils.isBrowser = !!window
-} catch (e) {
-  utils.isBrowser = false
 }
 
 export default utils

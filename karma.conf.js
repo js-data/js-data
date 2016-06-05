@@ -81,6 +81,9 @@ module.exports = function (config) {
     files: [
       'node_modules/babel-polyfill/dist/polyfill.js',
       'src/utils.js',
+      'src/Relation.js',
+      'src/Relation/*.js',
+      'src/relations.js',
       'src/decorators.js',
       'src/Component.js',
       'src/Schema.js',
@@ -114,11 +117,6 @@ module.exports = function (config) {
         sourceMap: 'inline'
       }
     },
-    client: {
-      mocha: {
-        // grep: 'utils.'
-      }
-    },
     browsers: browsers,
     reporters: ['progress', 'saucelabs'],
     sauceLabs: {
@@ -137,6 +135,11 @@ module.exports = function (config) {
     logLevel: config.LOG_INFO,
     autoWatch: false,
     singleRun: true,
+    // client: {
+    //   mocha: {
+    //     grep: 'Schema'
+    //   }
+    // },
     concurrency: Infinity
   })
 }

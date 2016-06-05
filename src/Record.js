@@ -26,37 +26,40 @@ const superMethod = function (mapper, name) {
  * @param {Object} [opts] Configuration options.
  * @param {boolean} [opts.noValidate=false] Whether to skip validation on the
  * initial properties.
+ * @since 3.0.0
  */
-const Record = Component.extend({
-  constructor: function Record (props, opts) {
-    utils.classCallCheck(this, Record)
+function Record (props, opts) {
+  utils.classCallCheck(this, Record)
+  props || (props = {})
+  opts || (opts = {})
+  const _props = {}
+  Object.defineProperties(this, {
+    _get: { value (key) { return utils.get(_props, key) } },
+    _set: { value (key, value) { return utils.set(_props, key, value) } },
+    _unset: { value (key) { return utils.unset(_props, key) } }
+  })
+  const _set = this._set
+  // TODO: Optimize these strings
+  _set('creating', true)
+  if (opts.noValidate) {
+    _set('noValidate', true)
+  }
+  utils.fillIn(this, props)
+  _set('creating', false)
+  _set('noValidate', false)
+  _set('previous', utils.plainCopy(props))
+}
 
-    props || (props = {})
-    opts || (opts = {})
-    const _props = {}
-    Object.defineProperties(this, {
-      _get: { value (key) { return utils.get(_props, key) } },
-      _set: { value (key, value) { return utils.set(_props, key, value) } },
-      _unset: { value (key) { return utils.unset(_props, key) } }
-    })
-    const _set = this._set
-    // TODO: Optimize these strings
-    _set('creating', true)
-    if (opts.noValidate) {
-      _set('noValidate', true)
-    }
-    utils.fillIn(this, props)
-    _set('creating', false)
-    _set('noValidate', false)
-    _set('previous', utils.copy(props))
-  },
+export default Component.extend({
+  constructor: Record,
 
   /**
-   * TODO
+   * Returns the {@link Mapper} paired with this record's class, if any.
    *
-   * @name Record#_mapper
-   * @method
-   * @ignore
+   * @private
+   * @method Record#_mapper
+   * @returns {Mapper} The {@link Mapper} paired with this record's class, if any.
+   * @since 3.0.0
    */
   _mapper () {
     const mapper = this.constructor.mapper
@@ -67,22 +70,22 @@ const Record = Component.extend({
   },
 
   /**
-   * TODO
+   * Lifecycle hook.
    *
-   * @name Record#afterLoadRelations
-   * @method
-   * @param {string[]} relations TODO
-   * @param {Object} opts TODO
+   * @method Record#afterLoadRelations
+   * @param {string[]} relations The `relations` argument passed to {@link Record#loadRelations}.
+   * @param {Object} opts The `opts` argument passed to {@link Record#loadRelations}.
+   * @since 3.0.0
    */
   afterLoadRelations () {},
 
   /**
-   * TODO
+   * Lifecycle hook.
    *
-   * @name Record#beforeLoadRelations
-   * @method
-   * @param {string[]} relations TODO
-   * @param {Object} opts TODO
+   * @method Record#beforeLoadRelations
+   * @param {string[]} relations The `relations` argument passed to {@link Record#loadRelations}.
+   * @param {Object} opts The `opts` argument passed to {@link Record#loadRelations}.
+   * @since 3.0.0
    */
   beforeLoadRelations () {},
 
@@ -90,11 +93,13 @@ const Record = Component.extend({
    * Return changes to this record since it was instantiated or
    * {@link Record#commit} was called.
    *
-   * @name Record#changes
-   * @method
+   * @method Record#changes
    * @param [opts] Configuration options.
-   * @param {Function} [opts.equalsFn] Equality function. Default uses `===`.
-   * @param {Array} [opts.ignore] Array of strings or RegExp of fields to ignore.
+   * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
+   * @param {Array} [opts.ignore=[]] Array of strings or RegExp of fields to ignore.
+   * @returns {Object} Object describing the changes to this record since it was
+   * instantiated or its {@link Record#commit} method was last called.
+   * @since 3.0.0
    */
   changes (opts) {
     opts || (opts = {})
@@ -102,24 +107,25 @@ const Record = Component.extend({
   },
 
   /**
-   * TODO
+   * Make the record's current in-memory state it's only state, with any
+   * previous property values being set to current values.
    *
-   * @name Record#commit
-   * @method
+   * @method Record#commit
+   * @since 3.0.0
    */
   commit () {
     this._set('changed') // unset
-    this._set('previous', utils.copy(this))
-    return this
+    this._set('previous', utils.plainCopy(this))
   },
 
   /**
    * Call {@link Mapper#destroy} using this record's primary key.
    *
-   * @name Record#destroy
-   * @method
+   * @method Record#destroy
    * @param {Object} [opts] Configuration options passed to {@link Mapper#destroy}.
-   * @returns {Promise} The result of calling {@link Mapper#destroy}.
+   * @returns {Promise} The result of calling {@link Mapper#destroy} with the
+   * primary key of this record.
+   * @since 3.0.0
    */
   destroy (opts) {
     opts || (opts = {})
@@ -130,10 +136,10 @@ const Record = Component.extend({
   /**
    * Return the value at the given path for this instance.
    *
-   * @name Record#get
-   * @method
-   * @param {string} key - Path of value to retrieve.
+   * @method Record#get
+   * @param {string} key Path of value to retrieve.
    * @returns {*} Value at path.
+   * @since 3.0.0
    */
   'get' (key) {
     return utils.get(this, key)
@@ -143,11 +149,13 @@ const Record = Component.extend({
    * Return whether this record has changed since it was instantiated or
    * {@link Record#commit} was called.
    *
-   * @name Record#hasChanges
-   * @method
+   * @method Record#hasChanges
    * @param [opts] Configuration options.
-   * @param {Function} [opts.equalsFn] Equality function. Default uses `===`.
-   * @param {Array} [opts.ignore] Array of strings or RegExp of fields to ignore.
+   * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
+   * @param {Array} [opts.ignore=[]] Array of strings or RegExp of fields to ignore.
+   * @returns {boolean} Return whether the record has changed since it was
+   * instantiated or since its {@link Record#commit} method was called.
+   * @since 3.0.0
    */
   hasChanges (opts) {
     const quickHasChanges = !!(this._get('changed') || []).length
@@ -155,26 +163,28 @@ const Record = Component.extend({
   },
 
   /**
-   * TODO
+   * Return whether the record in its current state passes validation.
    *
-   * @name Record#hashCode
-   * @method
+   * @method Record#isValid
+   * @param {Object} [opts] Configuration options. Passed to {@link Mapper#validate}.
+   * @returns {boolean} Whether the record in its current state passes
+   * validation.
+   * @since 3.0.0
    */
-  hashCode () {
-    return utils.get(this, this._mapper().idAttribute)
-  },
-
   isValid (opts) {
     return !this._mapper().validate(this, opts)
   },
 
   /**
-   * TODO
+   * Lazy load relations of this record, to be attached to the record once their
+   * loaded.
    *
-   * @name Record#loadRelations
-   * @method
-   * @param {string[]} [relations] TODO
-   * @param {Object} [opts] TODO
+   * @method Record#loadRelations
+   * @param {string[]} [relations] List of relations to load.
+   * @param {Object} [opts] Configuration options.
+   * @returns {Promise} Resolves with the record, with the loaded relations now
+   * attached.
+   * @since 3.0.0
    */
   loadRelations (relations, opts) {
     let op
@@ -254,11 +264,13 @@ const Record = Component.extend({
   },
 
   /**
-   * TODO
+   * Return the properties with which this record was instantiated.
    *
-   * @name Record#previous
-   * @method
-   * @param {string} [key] TODO
+   * @method Record#previous
+   * @param {string} [key] If specified, return just the initial value of the
+   * given key.
+   * @returns {Object} The initial properties of this record.
+   * @since 3.0.0
    */
   previous (key) {
     if (key) {
@@ -268,11 +280,14 @@ const Record = Component.extend({
   },
 
   /**
-   * TODO
+   * Revert changes to this record back to the properties it had when it was
+   * instantiated.
    *
-   * @name Record#revert
-   * @method
+   * @method Record#revert
    * @param {Object} [opts] Configuration options.
+   * @param {string[]} [opts.preserve] Array of strings or Regular Expressions
+   * denoting properties that should not be reverted.
+   * @since 3.0.0
    */
   revert (opts) {
     const previous = this._get('previous')
@@ -289,23 +304,22 @@ const Record = Component.extend({
       }
     })
     this.commit()
-    return this
   },
 
   /**
    * Delegates to {@link Mapper#create} or {@link Mapper#update}.
    *
-   * @name Record#save
-   * @method
-   * @param {Object} [opts] Configuration options. See {@link Mapper#create}.
-   * @param [opts] Configuration options.
+   * @method Record#save
+   * @param {Object} [opts] Configuration options. See {@link Mapper#create} and
+   * {@link Mapper#update}.
    * @param {boolean} [opts.changesOnly] Equality function. Default uses `===`.
    * @param {Function} [opts.equalsFn] Passed to {@link Record#changes} when
-   * `changesOnly` is `true`.
+   * `opts.changesOnly` is `true`.
    * @param {Array} [opts.ignore] Passed to {@link Record#changes} when
-   * `changesOnly` is `true`.
+   * `opts.changesOnly` is `true`.
    * @returns {Promise} The result of calling {@link Mapper#create} or
    * {@link Mapper#update}.
+   * @since 3.0.0
    */
   save (opts) {
     opts || (opts = {})
@@ -321,19 +335,26 @@ const Record = Component.extend({
       utils.fillIn(props, changes.added)
       utils.fillIn(props, changes.changed)
     }
-    return superMethod(mapper, 'update')(id, props, opts)
+    return superMethod(mapper, 'update')(id, props, opts).then((result) => {
+      const record = opts.raw ? result.data : result
+      if (record) {
+        utils.deepMixIn(this, record)
+        this.commit()
+      }
+      return result
+    })
   },
 
   /**
    * Set the value for a given key, or the values for the given keys if "key" is
    * an object.
    *
-   * @name Record#set
-   * @method
-   * @param {(string|Object)} key - Key to set or hash of key-value pairs to set.
-   * @param {*} [value] - Value to set for the given key.
-   * @param {Object} [opts] - Optional configuration.
-   * @param {boolean} [opts.silent=false] - Whether to trigger change events.
+   * @method Record#set
+   * @param {(string|Object)} key Key to set or hash of key-value pairs to set.
+   * @param {*} [value] Value to set for the given key.
+   * @param {Object} [opts] Configuration options.
+   * @param {boolean} [opts.silent=false] Whether to trigger change events.
+   * @since 3.0.0
    */
   'set' (key, value, opts) {
     if (utils.isObject(key)) {
@@ -349,20 +370,19 @@ const Record = Component.extend({
     }
   },
 
-  // TODO: move logic for single-item async operations onto the instance.
-
   /**
    * Return a plain object representation of this record. If the class from
-   * which this record was created has a mapper, then {@link Mapper#toJSON} will
-   * be called instead.
+   * which this record was created has a Mapper, then {@link Mapper#toJSON} will
+   * be called with this record instead.
    *
-   * @name Record#toJSON
-   * @method
+   * @method Record#toJSON
    * @param {Object} [opts] Configuration options.
    * @param {string[]} [opts.with] Array of relation names or relation fields
    * to include in the representation. Only available as an option if the class
-   * from which this record was created has a mapper.
+   * from which this record was created has a Mapper and this record resides in
+   * an instance of {@link DataStore}.
    * @returns {Object} Plain object representation of this record.
+   * @since 3.0.0
    */
   toJSON (opts) {
     const mapper = this.constructor.mapper
@@ -371,7 +391,7 @@ const Record = Component.extend({
     } else {
       const json = {}
       utils.forOwn(this, function (prop, key) {
-        json[key] = utils.copy(prop)
+        json[key] = utils.plainCopy(prop)
       })
       return json
     }
@@ -380,16 +400,24 @@ const Record = Component.extend({
   /**
    * Unset the value for a given key.
    *
-   * @name Record#unset
-   * @method
-   * @param {string} key - Key to unset.
-   * @param {Object} [opts] - Optional configuration.
-   * @param {boolean} [opts.silent=false] - Whether to trigger change events.
+   * @method Record#unset
+   * @param {string} key Key to unset.
+   * @param {Object} [opts] Configuration options.
+   * @param {boolean} [opts.silent=false] Whether to trigger change events.
+   * @since 3.0.0
    */
   unset (key, opts) {
     this.set(key, undefined, opts)
   },
 
+  /**
+   * Validate this record based on its current properties.
+   *
+   * @method Record#validate
+   * @param {Object} [opts] Configuration options. Passed to {@link Mapper#validate}.
+   * @returns {*} Array of errors or `undefined` if no errors.
+   * @since 3.0.0
+   */
   validate (opts) {
     return this._mapper().validate(this, opts)
   }
@@ -410,4 +438,28 @@ utils.eventify(
   }
 )
 
-export default Record
+/**
+ * Create a subclass of this Record.
+ *
+ * @example <caption>Extend the class in a cross-browser manner.</caption>
+ * import {Record} from 'js-data'
+ * const CustomRecordClass = Record.extend({
+ *   foo () { return 'bar' }
+ * })
+ * const customRecord = new CustomRecordClass()
+ * console.log(customRecord.foo()) // "bar"
+ *
+ * @example <caption>Extend the class using ES2015 class syntax.</caption>
+ * class CustomRecordClass extends Record {
+ *   foo () { return 'bar' }
+ * }
+ * const customRecord = new CustomRecordClass()
+ * console.log(customRecord.foo()) // "bar"
+ *
+ * @method Record.extend
+ * @param {Object} [props={}] Properties to add to the prototype of the
+ * subclass.
+ * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @returns {Constructor} Subclass of this Record class.
+ * @since 3.0.0
+ */
