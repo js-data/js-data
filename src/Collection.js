@@ -7,6 +7,16 @@ const DOMAIN = 'Collection'
 
 const COLLECTION_DEFAULTS = {
   /**
+   * Whether to call {@link Record#commit} on records that are added to the
+   * collection and already exist in the collection.
+   *
+   * @name Collection#commitOnMerge
+   * @type {boolean}
+   * @default true
+   */
+  commitOnMerge: true,
+
+  /**
    * Field to be used as the unique identifier for records in this collection.
    * Defaults to `"id"` unless {@link Collection#mapper} is set, in which case
    * this will default to {@link Mapper#idAttribute}.
@@ -59,6 +69,7 @@ const COLLECTION_DEFAULTS = {
  * @param {Array} [records] Initial set of records to insert into the
  * collection.
  * @param {Object} [opts] Configuration options.
+ * @param {string} [opts.commitOnMerge] See {@link Collection#commitOnMerge}.
  * @param {string} [opts.idAttribute] See {@link Collection#idAttribute}.
  * @param {string} [opts.onConflict="merge"] See {@link Collection#onConflict}.
  * @param {string} [opts.mapper] See {@link Collection#mapper}.
@@ -183,8 +194,8 @@ export default Component.extend({
    * @since 3.0.0
    * @param {(Object|Object[]|Record|Record[])} data The record or records to insert.
    * @param {Object} [opts] Configuration options.
-   * @param {string} [opts.onConflict] What to do when a record is already in
-   * the collection. Possible values are `merge` or `replace`.
+   * @param {boolean} [opts.commitOnMerge=true] See {@link Collection#commitOnMerge}.
+   * @param {string} [opts.onConflict] See {@link Collection#onConflict}.
    * @returns {(Object|Object[]|Record|Record[])} The added record or records.
    */
   add (records, opts) {
@@ -241,6 +252,9 @@ export default Component.extend({
           throw utils.err(`${DOMAIN}#add`, 'opts.onConflict')(400, 'one of (merge, replace)', onConflict, true)
         }
         record = existing
+        if (opts.commitOnMerge && utils.isFunction(record.commit)) {
+          record.commit()
+        }
         // Update all indexes in the collection
         this.updateIndexes(record)
       } else {

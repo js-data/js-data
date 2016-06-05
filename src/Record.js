@@ -95,8 +95,8 @@ export default Component.extend({
    *
    * @method Record#changes
    * @param [opts] Configuration options.
-   * @param {Function} [opts.equalsFn] Equality function. Default uses `===`.
-   * @param {Array} [opts.ignore] Array of strings or RegExp of fields to ignore.
+   * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
+   * @param {Array} [opts.ignore=[]] Array of strings or RegExp of fields to ignore.
    * @returns {Object} Object describing the changes to this record since it was
    * instantiated or its {@link Record#commit} method was last called.
    * @since 3.0.0
@@ -151,8 +151,8 @@ export default Component.extend({
    *
    * @method Record#hasChanges
    * @param [opts] Configuration options.
-   * @param {Function} [opts.equalsFn] Equality function. Default uses `===`.
-   * @param {Array} [opts.ignore] Array of strings or RegExp of fields to ignore.
+   * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
+   * @param {Array} [opts.ignore=[]] Array of strings or RegExp of fields to ignore.
    * @returns {boolean} Return whether the record has changed since it was
    * instantiated or since its {@link Record#commit} method was called.
    * @since 3.0.0
@@ -335,7 +335,14 @@ export default Component.extend({
       utils.fillIn(props, changes.added)
       utils.fillIn(props, changes.changed)
     }
-    return superMethod(mapper, 'update')(id, props, opts)
+    return superMethod(mapper, 'update')(id, props, opts).then((result) => {
+      const record = opts.raw ? result.data : result
+      if (record) {
+        utils.deepMixIn(this, record)
+        this.commit()
+      }
+      return result
+    })
   },
 
   /**

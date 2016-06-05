@@ -123,13 +123,13 @@ const props = {
    * @returns {(Object|Array)} Result.
    */
   _end (name, result, opts) {
-    let _data = opts.raw ? result.data : result
-    if (_data && utils.isFunction(this.addToCache)) {
-      _data = this.addToCache(name, _data, opts)
+    let data = opts.raw ? result.data : result
+    if (data && utils.isFunction(this.addToCache)) {
+      data = this.addToCache(name, data, opts)
       if (opts.raw) {
-        result.data = _data
+        result.data = data
       } else {
-        result = _data
+        result = data
       }
     }
     return result

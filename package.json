@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "3.0.0-beta.6",
+  "version": "3.0.0-beta.7",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -57,7 +57,7 @@
     "bundle:es5": "rollup src/index.js -c -o dist/js-data.js -m dist/js-data.js.map -f umd",
     "bundle:next": "rollup src/index.js -c -o dist/js-data.es2015.js -m dist/js-data.es2015.js.map -f es6",
     "bundle": "npm run bundle:es5 && npm run bundle:next && repo-tools write-version dist/js-data.js dist/js-data.es2015.js",
-    "min": "uglifyjs dist/js-data.js -o dist/js-data.min.js --source-map dist/js-data.min.map --source-map-url js-data.min.map -v -m -c --screw-ie8",
+    "min": "uglifyjs dist/js-data.js -o dist/js-data.min.js --source-map dist/js-data.min.map --source-map-url js-data.min.map -v -m -c --keep-fnames --screw-ie8",
     "banner": "node scripts/banner.js",
     "gzip": "echo gzipped size: $(cat dist/js-data.min.js | gzip -f9 | wc -c)kb",
     "build": "npm run lint && npm run bundle && npm run min && npm run banner",

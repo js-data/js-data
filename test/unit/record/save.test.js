@@ -46,6 +46,7 @@ describe('Record#save', function () {
     const FooMapper = store.defineMapper('foo')
     let foo = store.add('foo', { id: 1, foo: 'bar' })
     let updateFoo = await foo.save()
+    assert.objectsEqual(foo, { id: 1, foo: 'bar', beep: 'boop' })
     assert.objectsEqual(updateFoo, { id: 1, foo: 'bar', beep: 'boop' })
     assert(updateFoo instanceof FooMapper.recordClass)
     assert.strictEqual(store.get('foo', 1), updateFoo)

@@ -23,12 +23,16 @@ describe('Collection#add', function () {
     assert.objectsEqual(this.PostCollection.get(7), this.data.p3)
     assert.objectsEqual(this.PostCollection.get(8), this.data.p4)
   })
-  it('should inject existing items into the collection', function () {
+  it('should inject existing items into the collection and call Record#commit', function () {
     const collection = new JSData.Collection({ mapper: new JSData.Mapper({ name: 'user' }) })
 
     const user = collection.add({ id: 1 })
+    assert.equal(user.hasChanges(), false, 'user does not have changes yet')
+    user.foo = 'bar'
+    assert.equal(user.hasChanges(), true, 'user has changes now')
     const users = collection.add([{ id: 2 }, { id: 3 }])
     const userAgain = collection.add({ id: 1 })
+    assert.equal(user.hasChanges(), false, 'user no longer has changes')
     const usersAgain = collection.add([{ id: 2 }, { id: 3 }])
     assert(collection.get(1) === user, 'original reference should still be valid')
     assert(collection.get(1) === userAgain, 'new reference should be valid')
