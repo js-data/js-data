@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-beta.6 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-beta.7 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -141,7 +141,7 @@
      * - not a function
      * - does not start with "_"
      *
-     * @name utils._
+     * @method utils._
      * @param {Object} dest Destination object.
      * @param {Object} src Source object.
      * @private
@@ -157,12 +157,17 @@
 
 
     /**
-     * TODO
+     * Recursively iterates over relations found in `opts.with`.
      *
-     * @name utils._forRelation
+     * @method utils._forRelation
+     * @param {Object} opts Configuration options.
+     * @param {Relation} def Relation definition.
+     * @param {Function} fn Callback function.
+     * @param {*} [thisArg] Execution context for the callback function.
      * @private
+     * @since 3.0.0
      */
-    _forRelation: function _forRelation(opts, def, fn, ctx) {
+    _forRelation: function _forRelation(opts, def, fn, thisArg) {
       var relationName = def.relation;
       var containedName = null;
       var index = void 0;
@@ -176,7 +181,7 @@
       }
 
       if (opts.withAll) {
-        fn.call(ctx, def, {});
+        fn.call(thisArg, def, {});
         return;
       } else if (!containedName) {
         return;
@@ -193,15 +198,18 @@
           optsCopy.with[i] = '';
         }
       });
-      fn.call(ctx, def, optsCopy);
+      fn.call(thisArg, def, optsCopy);
     },
 
 
     /**
-     * TODO
+     * Find the index of a relation in the given list
      *
-     * @name utils._getIndex
+     * @method utils._getIndex
+     * @param {string[]} list List to search.
+     * @param {string} relation Relation to find.
      * @private
+     * @returns {number}
      */
     _getIndex: function _getIndex(list, relation) {
       var index = -1;
@@ -224,39 +232,80 @@
      * Define hidden (non-enumerable), writable properties on `target` from the
      * provided `props`.
      *
-     * @name utils.addHiddenPropsToTarget
+     * @example
+     * import {utils} from 'js-data'
+     * function Cat () {}
+     * utils.addHiddenPropsToTarget(Cat.prototype, {
+     *   say () {
+     *     console.log('meow')
+     *   }
+     * })
+     * const cat = new Cat()
+     * cat.say() // "meow"
+     *
+     * @method utils.addHiddenPropsToTarget
      * @param {Object} target That to which `props` should be added.
      * @param {Object} props Properties to be added to `target`.
+     * @since 3.0.0
      */
     addHiddenPropsToTarget: function addHiddenPropsToTarget(target, props) {
       var map = {};
-      utils.forOwn(props, function (value, key) {
-        map[key] = {
-          writable: true,
-          value: value
-        };
+      Object.keys(props).forEach(function (propName) {
+        var descriptor = Object.getOwnPropertyDescriptor(props, propName);
+
+        descriptor.enumerable = false;
+        map[propName] = descriptor;
       });
       Object.defineProperties(target, map);
     },
 
 
     /**
-     * TODO
+     * Return whether the two objects are deeply different.
      *
-     * @ignore
+     * @example
+     * import {utils} from 'js-data'
+     * utils.areDifferent({}, {}) // false
+     * utils.areDifferent({ a: 1 }, { a: 1 }) // false
+     * utils.areDifferent({ foo: 'bar' }, {}) // true
+     *
+     * @method utils.areDifferent
+     * @param {Object} a Base object.
+     * @param {Object} b Comparison object.
+     * @param {Object} [opts] Configuration options.
+     * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
+     * @param {Array} [opts.ignore=[]] Array of strings or RegExp of fields to ignore.
+     * @returns {boolean} Whether the two objects are deeply different.
+     * @see utils.diffObjects
+     * @since 3.0.0
      */
-    areDifferent: function areDifferent(a, b, opts) {
+    areDifferent: function areDifferent(newObject, oldObject, opts) {
       opts || (opts = {});
-      var diff = utils.diffObjects(a, b, opts);
+      var diff = utils.diffObjects(newObject, oldObject, opts);
       var diffCount = Object.keys(diff.added).length + Object.keys(diff.removed).length + Object.keys(diff.changed).length;
       return diffCount > 0;
     },
 
 
     /**
-     * TODO
+     * Verified that the given constructor is being invoked via `new`, as opposed
+     * to just being called like a normal function.
      *
-     * @ignore
+     * @example
+     * import {utils} from 'js-data'
+     * function Cat () {
+     *   utils.classCallCheck(this, Cat)
+     * }
+     * const cat = new Cat() // this is ok
+     * Cat() // this throws an error
+     *
+     * @method utils.classCallCheck
+     * @param {*} instance Instance that is being constructed.
+     * @param {Constructor} ctor Constructor function used to construct the
+     * instance.
+     * @since 3.0.0
+     * @throws {Error} Throws an error if the constructor is being improperly
+     * invoked.
      */
     classCallCheck: function classCallCheck(instance, ctor) {
       if (!(instance instanceof ctor)) {
@@ -268,9 +317,23 @@
     /**
      * Deep copy a value.
      *
-     * @ignore
+     * @example
+     * import {utils} from 'js-data'
+     * const a = { foo: { bar: 'baz' } }
+     * const b = utils.copy(a)
+     * a === b // false
+     * utils.areDifferent(a, b) // false
+     *
      * @param {*} from Value to deep copy.
+     * @param {*} [to] Destination object for the copy operation.
+     * @param {*} [stackFrom] For internal use.
+     * @param {*} [stackTo] For internal use.
+     * @param {string[]|RegExp[]} [blacklist] List of strings or RegExp of
+     * properties to skip.
+     * @param {boolean} [plain] Whether to make a plain copy (don't try to use
+     * original prototype).
      * @returns {*} Deep copy of `from`.
+     * @since 3.0.0
      */
     copy: function copy(from, to, stackFrom, stackTo, blacklist, plain) {
       if (!to) {
@@ -349,11 +412,22 @@
 
 
     /**
-     * Recursively shallow fill in own enumberable properties from `source` to `dest`.
+     * Recursively shallow fill in own enumerable properties from `source` to
+     * `dest`.
      *
-     * @ignore
+     * @example
+     * import {utils} from 'js-data'
+     * const a = { foo: { bar: 'baz' }, beep: 'boop' }
+     * const b = { beep: 'bip' }
+     * utils.deepFillIn(b, a)
+     * console.log(b) // {"foo":{"bar":"baz"},"beep":"bip"}
+     *
+     * @method utils.deepFillIn
      * @param {Object} dest The destination object.
      * @param {Object} source The source object.
+     * @see utils.fillIn
+     * @see utils.deepMixIn
+     * @since 3.0.0
      */
     deepFillIn: function deepFillIn(dest, source) {
       if (source) {
@@ -371,11 +445,21 @@
 
 
     /**
-     * Recursively shallow copy own enumberable properties from `source` to `dest`.
+     * Recursively shallow copy own enumerable properties from `source` to `dest`.
      *
-     * @ignore
+     * @example
+     * import {utils} from 'js-data'
+     * const a = { foo: { bar: 'baz' }, beep: 'boop' }
+     * const b = { beep: 'bip' }
+     * utils.deepFillIn(b, a)
+     * console.log(b) // {"foo":{"bar":"baz"},"beep":"boop"}
+     *
+     * @method utils.deepMixIn
      * @param {Object} dest The destination object.
      * @param {Object} source The source object.
+     * @see utils.fillIn
+     * @see utils.deepFillIn
+     * @since 3.0.0
      */
     deepMixIn: function deepMixIn(dest, source) {
       if (source) {
@@ -393,14 +477,31 @@
 
 
     /**
-     * @param {Object} a Base object.
-     * @param {Object} b Comparison object.
-     * @returns {Object} Diff.
+     * Return a diff of the base object to the comparison object.
+     *
+     * @example
+     * import {utils} from 'js-data'
+     * const oldObject = { foo: 'bar', a: 1234 }
+     * const newObject = { beep: 'boop', a: 5678 }
+     * const diff = utils.diffObjects(oldObject, newObject)
+     * console.log(diff.added) // {"beep":"boop"}
+     * console.log(diff.changed) // {"a":5678}
+     * console.log(diff.removed) // {"foo":undefined}
+     *
+     * @method utils.diffObjects
+     * @param {Object} newObject Comparison object.
+     * @param {Object} oldObject Base object.
+     * @param {Object} [opts] Configuration options.
+     * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
+     * @param {Array} [opts.ignore=[]] Array of strings or RegExp of fields to ignore.
+     * @returns {Object} The diff from the base object to the comparison object.
+     * @see utils.areDifferent
+     * @since 3.0.0
      */
-    diffObjects: function diffObjects(a, b, opts) {
+    diffObjects: function diffObjects(newObject, oldObject, opts) {
       opts || (opts = {});
       var equalsFn = opts.equalsFn;
-      var bl = opts.ignore;
+      var blacklist = opts.ignore;
       var diff = {
         added: {},
         changed: {},
@@ -410,25 +511,34 @@
         equalsFn = utils.deepEqual;
       }
 
-      utils.forOwn(b, function (oldValue, key) {
-        var newValue = a[key];
+      var newKeys = Object.keys(newObject).filter(function (key) {
+        return !utils.isBlacklisted(key, blacklist);
+      });
+      var oldKeys = Object.keys(oldObject).filter(function (key) {
+        return !utils.isBlacklisted(key, blacklist);
+      });
 
-        if (utils.isBlacklisted(key, bl) || equalsFn(newValue, oldValue)) {
+      // Check for properties that were added or changed
+      newKeys.forEach(function (key) {
+        var oldValue = oldObject[key];
+        var newValue = newObject[key];
+        if (equalsFn(oldValue, newValue)) {
           return;
         }
-
-        if (utils.isUndefined(newValue)) {
-          diff.removed[key] = undefined;
-        } else if (!equalsFn(newValue, oldValue)) {
+        if (utils.isUndefined(oldValue)) {
+          diff.added[key] = newValue;
+        } else {
           diff.changed[key] = newValue;
         }
       });
 
-      utils.forOwn(a, function (newValue, key) {
-        if (!utils.isUndefined(b[key]) || utils.isBlacklisted(key, bl)) {
-          return;
+      // Check for properties that were removed
+      oldKeys.forEach(function (key) {
+        var oldValue = oldObject[key];
+        var newValue = newObject[key];
+        if (utils.isUndefined(newValue) && !utils.isUndefined(oldValue)) {
+          diff.removed[key] = undefined;
         }
-        diff.added[key] = newValue;
       });
 
       return diff;
@@ -436,7 +546,13 @@
 
 
     /**
-     * TODO
+     * Return whether the two values are equal according to the `==` operator.
+     *
+     * @method utils.equal
+     * @param {*} a First value in the comparison.
+     * @param {*} b Second value in the comparison.
+     * @returns {boolean} Whether the two values are equal according to `==`.
+     * @since 3.0.0
      */
     equal: function equal(a, b) {
       return a == b; // eslint-disable-line
@@ -444,7 +560,14 @@
 
 
     /**
-     * TODO
+     * Produce a factory function for making Error objects with the provided
+     * metadata. Used throughout the various js-data components.
+     *
+     * @method utils.err
+     * @param {string} domain Namespace.
+     * @param {string} target Target.
+     * @returns {Function} Factory function.
+     * @since 3.0.0
      */
     err: function err(domain, target) {
       return function (code) {
@@ -459,12 +582,13 @@
     /**
      * Add eventing capabilities into the target object.
      *
-     * @ignore
+     * @method utils.eventify
      * @param {Object} target Target object.
      * @param {Function} [getter] Custom getter for retrieving the object's event
      * listeners.
      * @param {Function} [setter] Custom setter for setting the object's event
      * listeners.
+     * @since 3.0.0
      */
     eventify: function eventify(target, getter, setter) {
       target = target || this;
@@ -518,14 +642,14 @@
           }
         },
         on: {
-          value: function value(type, func, ctx) {
+          value: function value(type, func, thisArg) {
             if (!getter.call(this)) {
               setter.call(this, {});
             }
             var events = getter.call(this);
             events[type] = events[type] || [];
             events[type].push({
-              c: ctx,
+              c: thisArg,
               f: func
             });
           }
@@ -535,9 +659,30 @@
 
 
     /**
-     * TODO
+     * Used for sublcassing. Invoke this method in the context of a superclass to
+     * to produce a subclass based on `props` and `classProps`.
      *
-     * @ignore
+     * @example
+     * import {utils} from 'js-data'
+     * function Animal () {}
+     * Animal.extend = utils.extend
+     * const Cat = Animal.extend({
+     *   say () {
+     *     console.log('meow')
+     *   }
+     * })
+     * const cat = new Cat()
+     * cat instanceof Animal // true
+     * cat instanceof Cat // true
+     * cat.say() // "meow"
+     *
+     * @method utils.extend
+     * @param {Object} props Instance properties for the subclass.
+     * @param {Object} [props.constructor] Provide a custom constructor function
+     * to use as the subclass.
+     * @param {Object} props Static properties for the subclass.
+     * @returns {Constructor} A new subclass.
+     * @since 3.0.0
      */
     extend: function extend(props, classProps) {
       var superClass = this;
@@ -597,12 +742,22 @@
 
 
     /**
-     * Shallow copy own enumerable properties from `src` to `dest` that are on `src`
-     * but are missing from `dest.
+     * Shallow copy own enumerable properties from `src` to `dest` that are on
+     * `src` but are missing from `dest.
      *
-     * @ignore
+     * @example
+     * import {utils} from 'js-data'
+     * const a = { foo: 'bar', beep: 'boop' }
+     * const b = { beep: 'bip' }
+     * utils.fillIn(b, a)
+     * console.log(b) // {"foo":"bar","beep":"bip"}
+     *
+     * @method utils.fillIn
      * @param {Object} dest The destination object.
      * @param {Object} source The source object.
+     * @see utils.deepFillIn
+     * @see utils.deepMixIn
+     * @since 3.0.0
      */
     fillIn: function fillIn(dest, src) {
       utils.forOwn(src, function (value, key) {
@@ -610,17 +765,17 @@
           dest[key] = value;
         }
       });
-      return dest;
     },
 
 
     /**
      * Find the last index of something according to the given checker function.
      *
-     * @ignore
+     * @method utils.findIndex
      * @param {Array} array The array to search.
      * @param {Function} fn Checker function.
-     * @param {number} Index if found or -1 if not found.
+     * @returns {number} Index if found or -1 if not found.
+     * @since 3.0.0
      */
     findIndex: function findIndex(array, fn) {
       var index = -1;
@@ -638,17 +793,23 @@
 
 
     /**
-     * TODO
+     * Recursively iterate over a {@link Mapper}'s relations according to
+     * `opts.with`.
      *
-     * @ignore
+     * @method utils.forEachRelation
+     * @param {Mapper} mapper Mapper.
+     * @param {Object} opts Configuration options.
+     * @param {Function} fn Callback function.
+     * @param {*} thisArg Execution context for the callback function.
+     * @since 3.0.0
      */
-    forEachRelation: function forEachRelation(mapper, opts, fn, ctx) {
+    forEachRelation: function forEachRelation(mapper, opts, fn, thisArg) {
       var relationList = mapper.relationList || [];
       if (!relationList.length) {
         return;
       }
       relationList.forEach(function (def) {
-        utils._forRelation(opts, def, fn, ctx);
+        utils._forRelation(opts, def, fn, thisArg);
       });
     },
 
@@ -656,10 +817,20 @@
     /**
      * Iterate over an object's own enumerable properties.
      *
-     * @ignore
+     * @example
+     * import {utils} from 'js-data'
+     * const a = { b: 1, c: 4 }
+     * let sum = 0
+     * utils.forOwn(a, function (value, key) {
+     *   sum += value
+     * })
+     * console.log(sum) // 5
+     *
+     * @method utils.forOwn
      * @param {Object} object The object whose properties are to be enumerated.
      * @param {Function} fn Iteration function.
      * @param {Object} [thisArg] Content to which to bind `fn`.
+     * @since 3.0.0
      */
     forOwn: function forOwn(obj, fn, thisArg) {
       var keys = Object.keys(obj);
@@ -674,9 +845,11 @@
     /**
      * Proxy for `JSON.parse`.
      *
-     * @ignore
+     * @method utils.fromJson
      * @param {string} json JSON to parse.
      * @returns {Object} Parsed object.
+     * @see utils.toJson
+     * @since 3.0.0
      */
     fromJson: function fromJson(json) {
       return utils.isString(json) ? JSON.parse(json) : json;
@@ -684,9 +857,21 @@
 
 
     /**
-     * TODO
+     * Retrieve the specified property from the given object. Supports retrieving
+     * nested properties.
      *
-     * @ignore
+     * @example
+     * import {utils} from 'js-data'
+     * const a = { foo: { bar: 'baz' }, beep: 'boop' }
+     * console.log(utils.get(a, 'beep')) // "boop"
+     * console.log(utils.get(a, 'foo.bar')) // "bar"
+     *
+     * @method utils.get
+     * @param {Object} object Object from which to retrieve a property's value.
+     * @param {string} prop Property to retrieve.
+     * @returns {*} Value of the specified property.
+     * @see utils.set
+     * @since 3.0.0
      */
     'get': function get(object, prop) {
       if (!prop) {
@@ -708,9 +893,14 @@
     },
 
     /**
-     * TODO
+     * Return the superclass for the given instance or subclass. If an instance is
+     * provided, then finds the parent class of the instance's constructor.
      *
-     * @ignore
+     * @method utils.getSuper
+     * @param {Object|Function} instance Instance or constructor.
+     * @param {boolean} [isCtor=false] Whether `instance` is a constructor.
+     * @returns {Constructor} The superclass (grandparent constructor).
+     * @since 3.0.0
      */
     getSuper: function getSuper(instance, isCtor) {
       var ctor = isCtor ? instance : instance.constructor;
@@ -724,10 +914,11 @@
     /**
      * Return the intersection of two arrays.
      *
-     * @ignore
+     * @method utils.intersection
      * @param {Array} array1 First array.
      * @param {Array} array2 Second array.
      * @returns {Array} Array of elements common to both arrays.
+     * @since 3.0.0
      */
     intersection: function intersection(array1, array2) {
       if (!array1 || !array2) {
@@ -751,27 +942,32 @@
 
 
     /**
-     * TODO
+     * Proxy for `Array.isArray`.
      *
-     * @ignore
+     * @method utils.isArray
+     * @param {*} value The value to test.
+     * @returns {boolean} Whether the provided value is an array.
+     * @since 3.0.0
      */
     isArray: Array.isArray,
 
     /**
-     * Return whether `prop` is matched by any string or regular expression in `bl`.
+     * Return whether `prop` is matched by any string or regular expression in
+     * `blacklist`.
      *
-     * @ignore
-     * @param {string} prop The name of a property.
-     * @param {Array} bl Array of strings and regular expressions.
+     * @method utils.isBlacklisted
+     * @param {string} prop The name of a property to check.
+     * @param {Array} blacklist Array of strings and regular expressions.
      * @returns {boolean} Whether `prop` was matched.
+     * @since 3.0.0
      */
-    isBlacklisted: function isBlacklisted(prop, bl) {
-      if (!bl || !bl.length) {
+    isBlacklisted: function isBlacklisted(prop, blacklist) {
+      if (!blacklist || !blacklist.length) {
         return false;
       }
       var matches = void 0;
-      for (var i = 0; i < bl.length; i++) {
-        if (toStr(bl[i]) === REGEXP_TAG && bl[i].test(prop) || bl[i] === prop) {
+      for (var i = 0; i < blacklist.length; i++) {
+        if (toStr(blacklist[i]) === REGEXP_TAG && blacklist[i].test(prop) || blacklist[i] === prop) {
           matches = prop;
           return matches;
         }
@@ -781,9 +977,12 @@
 
 
     /**
-     * TODO
+     * Return whether the provided value is a boolean.
      *
-     * @ignore
+     * @method utils.isBoolean
+     * @param {*} value The value to test.
+     * @returns {boolean} Whether the provided value is a boolean.
+     * @since 3.0.0
      */
     isBoolean: function isBoolean(value) {
       return toStr(value) === BOOL_TAG;
@@ -791,16 +990,12 @@
 
 
     /**
-     * TODO
+     * Return whether the provided value is a date.
      *
-     * @ignore
-     */
-    isBrowser: false,
-
-    /**
-     * TODO
-     *
-     * @ignore
+     * @method utils.isDate
+     * @param {*} value The value to test.
+     * @returns {Date} Whether the provided value is a date.
+     * @since 3.0.0
      */
     isDate: function isDate(value) {
       return value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toStr(value) === DATE_TAG;
@@ -808,9 +1003,12 @@
 
 
     /**
-     * TODO
+     * Return whether the provided value is a function.
      *
-     * @ignore
+     * @method utils.isFunction
+     * @param {*} value The value to test.
+     * @returns {boolean} Whether the provided value is a function.
+     * @since 3.0.0
      */
     isFunction: function isFunction(value) {
       return typeof value === 'function' || value && toStr(value) === FUNC_TAG;
@@ -818,9 +1016,12 @@
 
 
     /**
-     * TODO
+     * Return whether the provided value is an integer.
      *
-     * @ignore
+     * @method utils.isInteger
+     * @param {*} value The value to test.
+     * @returns {boolean} Whether the provided value is an integer.
+     * @since 3.0.0
      */
     isInteger: function isInteger(value) {
       return toStr(value) === NUMBER_TAG && value == toInteger(value); // eslint-disable-line
@@ -828,9 +1029,12 @@
 
 
     /**
-     * TODO
+     * Return whether the provided value is `null`.
      *
-     * @ignore
+     * @method utils.isNull
+     * @param {*} value The value to test.
+     * @returns {boolean} Whether the provided value is `null`.
+     * @since 3.0.0
      */
     isNull: function isNull(value) {
       return value === null;
@@ -838,9 +1042,12 @@
 
 
     /**
-     * TODO
+     * Return whether the provided value is a number.
      *
-     * @ignore
+     * @method utils.isNumber
+     * @param {*} value The value to test.
+     * @returns {boolean} Whether the provided value is a number.
+     * @since 3.0.0
      */
     isNumber: function isNumber(value) {
       var type = typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value);
@@ -849,9 +1056,12 @@
 
 
     /**
-     * TODO
+     * Return whether the provided value is an object.
      *
-     * @ignore
+     * @method utils.isObject
+     * @param {*} value The value to test.
+     * @returns {boolean} Whether the provided value is an object.
+     * @since 3.0.0
      */
     isObject: function isObject(value) {
       return toStr(value) === OBJECT_TAG;
@@ -859,9 +1069,12 @@
 
 
     /**
-     * TODO
+     * Return whether the provided value is a regular expression.
      *
-     * @ignore
+     * @method utils.isRegExp
+     * @param {*} value The value to test.
+     * @returns {boolean} Whether the provided value is a regular expression.
+     * @since 3.0.0
      */
     isRegExp: function isRegExp(value) {
       return toStr(value) === REGEXP_TAG;
@@ -869,9 +1082,12 @@
 
 
     /**
-     * TODO
+     * Return whether the provided value is a string or a number.
      *
-     * @ignore
+     * @method utils.isSorN
+     * @param {*} value The value to test.
+     * @returns {boolean} Whether the provided value is a string or a number.
+     * @since 3.0.0
      */
     isSorN: function isSorN(value) {
       return utils.isString(value) || utils.isNumber(value);
@@ -879,9 +1095,12 @@
 
 
     /**
-     * TODO
+     * Return whether the provided value is a string.
      *
-     * @ignore
+     * @method utils.isString
+     * @param {*} value The value to test.
+     * @returns {boolean} Whether the provided value is a string.
+     * @since 3.0.0
      */
     isString: function isString(value) {
       return typeof value === 'string' || value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toStr(value) === STRING_TAG;
@@ -889,9 +1108,12 @@
 
 
     /**
-     * TODO
+     * Return whether the provided value is a `undefined`.
      *
-     * @ignore
+     * @method utils.isUndefined
+     * @param {*} value The value to test.
+     * @returns {boolean} Whether the provided value is a `undefined`.
+     * @since 3.0.0
      */
     isUndefined: function isUndefined(value) {
       return value === undefined;
@@ -899,9 +1121,11 @@
 
 
     /**
-     * TODO
+     * Mix in logging capabilities to the target.
      *
-     * @ignore
+     * @method utils.logify
+     * @param {*} target The target.
+     * @since 3.0.0
      */
     logify: function logify(target) {
       utils.addHiddenPropsToTarget(target, {
@@ -940,9 +1164,14 @@
 
 
     /**
-     * TODO
+     * Adds the given record to the provided array only if it's not already in the
+     * array.
      *
-     * @ignore
+     * @method utils.noDupeAdd
+     * @param {Array} array The array.
+     * @param {*} record The value to add.
+     * @param {Function} fn Callback function passed to {@link utils.findIndex}.
+     * @since 3.0.0
      */
     noDupeAdd: function noDupeAdd(array, record, fn) {
       if (!array) {
@@ -956,12 +1185,16 @@
 
 
     /**
-     * TODO
+     * Return a shallow copy of the provided object, minus the properties
+     * specified in `keys`.
      *
-     * @ignore
+     * @method utils.omit
+     * @param {Object} props The object to copy.
+     * @param {string[]} keys Array of strings, representing properties to skip.
+     * @returns {Object} Shallow copy of `props`, minus `keys`.
+     * @since 3.0.0
      */
     omit: function omit(props, keys) {
-      // Remove relations
       var _props = {};
       utils.forOwn(props, function (value, key) {
         if (keys.indexOf(key) === -1) {
@@ -970,6 +1203,18 @@
       });
       return _props;
     },
+
+
+    /**
+     * Return a shallow copy of the provided object, but only include the
+     * properties specified in `keys`.
+     *
+     * @method utils.pick
+     * @param {Object} props The object to copy.
+     * @param {string[]} keys Array of strings, representing properties to keep.
+     * @returns {Object} Shallow copy of `props`, but only including `keys`.
+     * @since 3.0.0
+     */
     pick: function pick(props, keys) {
       var _props = {};
       utils.forOwn(props, function (value, key) {
@@ -982,21 +1227,27 @@
 
 
     /**
-     * TODO
+     * Return a plain copy of the given value.
      *
-     * @ignore
+     * @method utils.plainCopy
+     * @param {*} value The value to copy.
+     * @returns {*} Plain copy of `value`.
+     * @see utils.copy
+     * @since 3.0.0
      */
-    plainCopy: function plainCopy(from) {
-      return utils.copy(from, undefined, undefined, undefined, undefined, true);
+    plainCopy: function plainCopy(value) {
+      return utils.copy(value, undefined, undefined, undefined, undefined, true);
     },
 
 
     /**
-     * Proxy for `Promise.reject`.
+     * Shortcut for `utils.Promise.reject(value)`.
      *
-     * @ignore
+     * @method utils.reject
      * @param {*} [value] Value with which to reject the Promise.
      * @returns {Promise} Promise reject with `value`.
+     * @see utils.Promise
+     * @since 3.0.0
      */
     reject: function reject(value) {
       return utils.Promise.reject(value);
@@ -1006,7 +1257,7 @@
     /**
      * Remove the last item found in array according to the given checker function.
      *
-     * @ignore
+     * @method utils.remove
      * @param {Array} array The array to search.
      * @param {Function} fn Checker function.
      */
@@ -1022,11 +1273,13 @@
 
 
     /**
-     * Proxy for `Promise.resolve`.
+     * Shortcut for `utils.Promise.resolve(value)`.
      *
      * @ignore
      * @param {*} [value] Value with which to resolve the Promise.
      * @returns {Promise} Promise resolved with `value`.
+     * @see utils.Promise
+     * @since 3.0.0
      */
     resolve: function resolve(value) {
       return utils.Promise.resolve(value);
@@ -1036,7 +1289,7 @@
     /**
      * Set the value at the provided key or path.
      *
-     * @ignore
+     * @method utils.set
      * @param {Object} object The object on which to set a property.
      * @param {(string|Object)} path The key or path to the property. Can also
      * pass in an object of path/value pairs, which will all be set on the target
@@ -1059,9 +1312,14 @@
     },
 
     /**
-     * TODO
+     * Check whether the two provided objects are deeply equal.
      *
-     * @ignore
+     * @method utils.deepEqual
+     * @param {Object} a First object in the comparison.
+     * @param {Object} b Second object in the comparison.
+     * @returns {boolean} Whether the two provided objects are deeply equal.
+     * @see utils.equal
+     * @since 3.0.0
      */
     deepEqual: function deepEqual(a, b) {
       if (a === b) {
@@ -1095,18 +1353,22 @@
     /**
      * Proxy for `JSON.stringify`.
      *
-     * @ignore
+     * @method utils.toJson
      * @param {*} value Value to serialize to JSON.
      * @returns {string} JSON string.
+     * @see utils.fromJson
+     * @since 3.0.0
      */
     toJson: JSON.stringify,
 
     /**
      * Unset the value at the provided key or path.
      *
-     * @ignore
+     * @method utils.unset
      * @param {Object} object The object from which to delete the property.
      * @param {string} path The key or path to the property.
+     * @see utils.set
+     * @since 3.0.0
      */
     unset: function unset(object, path) {
       var parts = path.split('.');
@@ -1124,13 +1386,6 @@
       object[last] = undefined;
     }
   };
-
-  // Attempt to detect whether we are in the browser.
-  try {
-    utils.isBrowser = !!window;
-  } catch (e) {
-    utils.isBrowser = false;
-  }
 
   /**
    * @class Component
@@ -1292,28 +1547,30 @@
    * @param {Collection} collection The collection on which this query operates.
    * @since 3.0.0
    */
-  var Query = Component.extend({
-    constructor: function Query(collection) {
-      utils.classCallCheck(this, Query);
+  function Query(collection) {
+    utils.classCallCheck(this, Query);
 
-      /**
-       * The {@link Collection} on which this query operates.
-       *
-       * @name Query#collection
-       * @since 3.0.0
-       * @type {Collection}
-       */
-      this.collection = collection;
+    /**
+     * The {@link Collection} on which this query operates.
+     *
+     * @name Query#collection
+     * @since 3.0.0
+     * @type {Collection}
+     */
+    this.collection = collection;
 
-      /**
-       * The current data result of this query.
-       *
-       * @name Query#data
-       * @since 3.0.0
-       * @type {Array}
-       */
-      this.data = null;
-    },
+    /**
+     * The current data result of this query.
+     *
+     * @name Query#data
+     * @since 3.0.0
+     * @type {Array}
+     */
+    this.data = null;
+  }
+
+  var Query$1 = Component.extend({
+    constructor: Query,
 
     _applyWhereFromObject: function _applyWhereFromObject(where) {
       var fields = [];
@@ -2098,7 +2355,7 @@
    * @param {Object} [props={}] Properties to add to the prototype of the
    * subclass.
    * @param {Object} [classProps={}] Static properties to add to the subclass.
-   * @returns {Constructor} Subclass of this Query.
+   * @returns {Constructor} Subclass of this Query class.
    * @since 3.0.0
    */
 
@@ -2450,6 +2707,16 @@
 
   var COLLECTION_DEFAULTS = {
     /**
+     * Whether to call {@link Record#commit} on records that are added to the
+     * collection and already exist in the collection.
+     *
+     * @name Collection#commitOnMerge
+     * @type {boolean}
+     * @default true
+     */
+    commitOnMerge: true,
+
+    /**
      * Field to be used as the unique identifier for records in this collection.
      * Defaults to `"id"` unless {@link Collection#mapper} is set, in which case
      * this will default to {@link Mapper#idAttribute}.
@@ -2465,8 +2732,8 @@
      * primary key with a record already in this Collection.
      *
      * Possible values:
-     * - merge
-     * - replace
+     * merge
+     * replace
      *
      * Merge:
      *
@@ -2502,99 +2769,104 @@
    * @param {Array} [records] Initial set of records to insert into the
    * collection.
    * @param {Object} [opts] Configuration options.
+   * @param {string} [opts.commitOnMerge] See {@link Collection#commitOnMerge}.
    * @param {string} [opts.idAttribute] See {@link Collection#idAttribute}.
    * @param {string} [opts.onConflict="merge"] See {@link Collection#onConflict}.
    * @param {string} [opts.mapper] See {@link Collection#mapper}.
+   * @since 3.0.0
    */
-  var Collection = Component.extend({
-    constructor: function Collection(records, opts) {
-      utils.classCallCheck(this, Collection);
-      Collection.__super__.call(this);
+  function Collection(records, opts) {
+    utils.classCallCheck(this, Collection);
+    Collection.__super__.call(this);
 
-      if (records && !utils.isArray(records)) {
-        opts = records;
-        records = [];
-      }
-      if (utils.isString(opts)) {
-        opts = { idAttribute: opts };
-      }
+    if (records && !utils.isArray(records)) {
+      opts = records;
+      records = [];
+    }
+    if (utils.isString(opts)) {
+      opts = { idAttribute: opts };
+    }
 
-      // Default values for arguments
-      records || (records = []);
-      opts || (opts = {});
+    // Default values for arguments
+    records || (records = []);
+    opts || (opts = {});
+
+    /**
+     * Default Mapper for this collection. Optional. If a Mapper is provided, then
+     * the collection will use the {@link Mapper#idAttribute} setting, and will
+     * wrap records in {@link Mapper#recordClass}.
+     *
+     * @example
+     * import {Collection, Mapper} from 'js-data'
+     *
+     * class MyMapperClass extends Mapper {
+     *   foo () { return 'bar' }
+     * }
+     * const myMapper = new MyMapperClass()
+     * const collection = new Collection(null, { mapper: myMapper })
+     *
+     * @name Collection#mapper
+     * @type {Mapper}
+     * @default null
+     * @since 3.0.0
+     */
+    Object.defineProperties(this, {
+      mapper: {
+        value: undefined,
+        writable: true
+      },
+      // Query class used by this collection
+      queryClass: {
+        value: undefined,
+        writable: true
+      }
+    });
+
+    // Apply user-provided configuration
+    utils.fillIn(this, opts);
+    // Fill in any missing options with the defaults
+    utils.fillIn(this, utils.copy(COLLECTION_DEFAULTS));
+
+    if (!this.queryClass) {
+      this.queryClass = Query$1;
+    }
+
+    var idAttribute = this.recordId();
+
+    Object.defineProperties(this, {
+      /**
+       * The main index, which uses @{link Collection#recordId} as the key.
+       *
+       * @name Collection#index
+       * @type {Index}
+       */
+      index: {
+        value: new Index([idAttribute], {
+          hashCode: function hashCode(obj) {
+            return utils.get(obj, idAttribute);
+          }
+        })
+      },
 
       /**
-       * Default Mapper for this collection. Optional. If a Mapper is provided, then
-       * the collection will use the {@link Mapper#idAttribute} setting, and will
-       * wrap records in {@link Mapper#recordClass}.
+       * Object that holds the secondary indexes of this collection.
        *
-       * @example
-       * import {Collection, Mapper} from 'js-data'
-       *
-       * class MyMapperClass extends Mapper {
-       *   foo () { return 'bar' }
-       * }
-       * const myMapper = new MyMapperClass()
-       * const collection = new Collection(null, { mapper: myMapper })
-       *
-       * @name Collection#mapper
-       * @type {Mapper}
-       * @default null
+       * @name Collection#indexes
+       * @type {Object.<string, Index>}
        */
-      Object.defineProperties(this, {
-        mapper: {
-          value: undefined,
-          writable: true
-        },
-        // Query class used by this collection
-        queryClass: {
-          value: undefined,
-          writable: true
-        }
-      });
-
-      // Apply user-provided configuration
-      utils.fillIn(this, opts);
-      // Fill in any missing options with the defaults
-      utils.fillIn(this, utils.copy(COLLECTION_DEFAULTS));
-
-      if (!this.queryClass) {
-        this.queryClass = Query;
+      indexes: {
+        value: {}
       }
+    });
 
-      var idAttribute = this.recordId();
+    // Insert initial data into the collection
+    if (records) {
+      this.add(records);
+    }
+  }
 
-      Object.defineProperties(this, {
-        /**
-         * The main index, which uses @{link Collection#recordId} as the key.
-         *
-         * @name Collection#index
-         * @type {Index}
-         */
-        index: {
-          value: new Index([idAttribute], {
-            hashCode: function hashCode(obj) {
-              return utils.get(obj, idAttribute);
-            }
-          })
-        },
-
-        /**
-         * Object that holds the secondary indexes of this collection.
-         *
-         * @name Collection#indexes
-         * @type {Object.<string, Index>}
-         */
-        indexes: {
-          value: {}
-        }
-      });
-
-      // Insert initial data into the collection
-      if (records) {
-        this.add(records);
-      }
-    },
+  var Collection$1 = Component.extend({
+    constructor: Collection,
 
     /**
      * Used to bind to events emitted by records in this Collection.
@@ -2623,8 +2895,8 @@
      * @since 3.0.0
      * @param {(Object|Object[]|Record|Record[])} data The record or records to insert.
      * @param {Object} [opts] Configuration options.
-     * @param {string} [opts.onConflict] What to do when a record is already in
-     * the collection. Possible values are `merge` or `replace`.
+     * @param {boolean} [opts.commitOnMerge=true] See {@link Collection#commitOnMerge}.
+     * @param {string} [opts.onConflict] See {@link Collection#onConflict}.
      * @returns {(Object|Object[]|Record|Record[])} The added record or records.
      */
     add: function add(records, opts) {
@@ -2683,6 +2955,9 @@
             throw utils.err(DOMAIN$1 + '#add', 'opts.onConflict')(400, 'one of (merge, replace)', onConflict, true);
           }
           record = existing;
+          if (opts.commitOnMerge && utils.isFunction(record.commit)) {
+            record.commit();
+          }
           // Update all indexes in the collection
           _this.updateIndexes(record);
         } else {
@@ -2825,8 +3100,8 @@
      *
      * @method Collection#createIndex
      * @since 3.0.0
-     * @param {string} name - The name of the new secondary index.
-     * @param {string[]} [fieldList] - Array of field names to use as the key or
+     * @param {string} name The name of the new secondary index.
+     * @param {string[]} [fieldList] Array of field names to use as the key or
      * compound key of the new secondary index. If no fieldList is provided, then
      * the name will also be the field that is used to index the collection.
      * @returns {Collection} A reference to itself for chaining.
@@ -2872,9 +3147,9 @@
      *
      * @method Collection#filter
      * @since 3.0.0
-     * @param {(Object|Function)} [queryOrFn={}] - Selection query or filter
+     * @param {(Object|Function)} [queryOrFn={}] Selection query or filter
      * function.
-     * @param {Object} [thisArg] - Context to which to bind `queryOrFn` if
+     * @param {Object} [thisArg] Context to which to bind `queryOrFn` if
      * `queryOrFn` is a function.
      * @returns {Array} The result.
      */
@@ -2893,8 +3168,8 @@
      *
      * @method Collection#forEach
      * @since 3.0.0
-     * @param {Function} forEachFn - Iteration function.
-     * @param {*} [thisArg] - Context to which to bind `forEachFn`.
+     * @param {Function} forEachFn Iteration function.
+     * @param {*} [thisArg] Context to which to bind `forEachFn`.
      * @returns {Array} The result.
      */
     forEach: function forEach(cb, thisArg) {
@@ -2907,7 +3182,7 @@
      *
      * @method Collection#get
      * @since 3.0.0
-     * @param {(string|number)} id - The primary key of the record to get.
+     * @param {(string|number)} id The primary key of the record to get.
      * @returns {(Object|Record)} The record with the given id.
      */
     get: function get(id) {
@@ -2929,11 +3204,11 @@
      *
      * @method Collection#getAll
      * @since 3.0.0
-     * @param {...Array} [keyList] - Provide one or more keyLists, and all
+     * @param {...Array} [keyList] Provide one or more keyLists, and all
      * records matching each keyList will be retrieved. If no keyLists are
      * provided, all records will be returned.
-     * @param {Object} [opts] - Configuration options.
-     * @param {string} [opts.index] - Name of the secondary index to use in the
+     * @param {Object} [opts] Configuration options.
+     * @param {string} [opts.index] Name of the secondary index to use in the
      * query. If no index is specified, the main index is used.
      * @returns {Array} The result.
      */
@@ -2971,7 +3246,7 @@
      *
      * @method Collection#limit
      * @since 3.0.0
-     * @param {number} num - The maximum number of records to keep in the result.
+     * @param {number} num The maximum number of records to keep in the result.
      * @returns {Array} The result.
      */
     limit: function limit(num) {
@@ -2989,8 +3264,8 @@
      *
      * @method Collection#map
      * @since 3.0.0
-     * @param {Function} mapFn - Mapping function.
-     * @param {*} [thisArg] - Context to which to bind `mapFn`.
+     * @param {Function} mapFn Mapping function.
+     * @param {*} [thisArg] Context to which to bind `mapFn`.
      * @returns {Array} The result of the mapping.
      */
     map: function map(cb, thisArg) {
@@ -3008,8 +3283,8 @@
      *
      * @method Collection#mapCall
      * @since 3.0.0
-     * @param {string} funcName - Name of function to call
-     * @parama {...*} [args] - Remaining arguments to be passed to the function.
+     * @param {string} funcName Name of function to call
+     * @parama {...*} [args] Remaining arguments to be passed to the function.
      * @returns {Array} The result.
      */
     mapCall: function mapCall(funcName) {
@@ -3075,8 +3350,8 @@
      *
      * @method Collection#reduce
      * @since 3.0.0
-     * @param {Function} cb - Reduction callback.
-     * @param {*} initialValue - Initial value of the reduction.
+     * @param {Function} cb Reduction callback.
+     * @param {*} initialValue Initial value of the reduction.
      * @returns {*} The result.
      */
     reduce: function reduce(cb, initialValue) {
@@ -3090,8 +3365,8 @@
      *
      * @method Collection#remove
      * @since 3.0.0
-     * @param {(string|number)} id - The primary key of the record to be removed.
-     * @param {Object} [opts] - Configuration options.
+     * @param {(string|number)} id The primary key of the record to be removed.
+     * @param {Object} [opts] Configuration options.
      * @returns {Object|Record} The removed record, if any.
      */
     remove: function remove(id, opts) {
@@ -3120,12 +3395,12 @@
      *
      * @method Collection#removeAll
      * @since 3.0.0
-     * @param {Object} [query={}] - Selection query.
-     * @param {Object} [query.where] - Filtering criteria.
-     * @param {number} [query.skip] - Number to skip.
-     * @param {number} [query.limit] - Number to limit to.
-     * @param {Array} [query.orderBy] - Sorting criteria.
-     * @param {Object} [opts] - Configuration options.
+     * @param {Object} [query={}] Selection query. See {@link query}.
+     * @param {Object} [query.where] See {@link query.where}.
+     * @param {number} [query.offset] See {@link query.offset}.
+     * @param {number} [query.limit] See {@link query.limit}.
+     * @param {string|Array[]} [query.orderBy] See {@link query.orderBy}.
+     * @param {Object} [opts] Configuration options.
      * @returns {(Object[]|Record[])} The removed records, if any.
      */
     removeAll: function removeAll(query, opts) {
@@ -3154,7 +3429,7 @@
      *
      * @method Collection#skip
      * @since 3.0.0
-     * @param {number} num - The number of records to skip.
+     * @param {number} num The number of records to skip.
      * @returns {Array} The result.
      */
     skip: function skip(num) {
@@ -3168,8 +3443,8 @@
      *
      * @method Collection#toJSON
      * @since 3.0.0
-     * @param {Object} [opts] - Configuration options.
-     * @param {string[]} [opts.with] - Array of relation names or relation fields
+     * @param {Object} [opts] Configuration options.
+     * @param {string[]} [opts.with] Array of relation names or relation fields
      * to include in the representation.
      * @returns {Array} The records.
      */
@@ -3185,8 +3460,8 @@
      *
      * @method Collection#updateIndex
      * @since 3.0.0
-     * @param {Object} record - The record to update.
-     * @param {Object} [opts] - Configuration options.
+     * @param {Object} record The record to update.
+     * @param {Object} [opts] Configuration options.
      * @param {string} [opts.index] The index in which to update the record's
      * position. If you don't specify an index then the record will be updated
      * in the main index.
@@ -3202,8 +3477,8 @@
      *
      * @method Collection#updateIndexes
      * @since 3.0.0
-     * @param {Object} record - TODO
-     * @param {Object} [opts] - Configuration options.
+     * @param {Object} record TODO
+     * @param {Object} [opts] Configuration options.
      */
     updateIndexes: function updateIndexes(record) {
       this.index.updateRecord(record);
@@ -3213,190 +3488,33 @@
     }
   });
 
-  var belongsToType = 'belongsTo';
-  var hasManyType = 'hasMany';
-  var hasOneType = 'hasOne';
-
-  var DOMAIN$4 = 'Relation';
-
-  function Relation(related, opts) {
-    var DOMAIN_ERR = 'new ' + DOMAIN$4;
-
-    opts || (opts = {});
-
-    var localField = opts.localField;
-    if (!localField) {
-      throw utils.err(DOMAIN_ERR, 'opts.localField')(400, 'string', localField);
-    }
-
-    var foreignKey = opts.foreignKey = opts.foreignKey || opts.localKey;
-    if (!foreignKey && (opts.type === belongsToType || opts.type === hasOneType)) {
-      throw utils.err(DOMAIN_ERR, 'opts.foreignKey')(400, 'string', foreignKey);
-    }
-    var localKeys = opts.localKeys;
-    var foreignKeys = opts.foreignKeys;
-    if (!foreignKey && !localKeys && !foreignKeys && opts.type === hasManyType) {
-      throw utils.err(DOMAIN_ERR, 'opts.<foreignKey|localKeys|foreignKeys>')(400, 'string', foreignKey);
-    }
-
-    if (utils.isString(related)) {
-      opts.relation = related;
-      if (!utils.isFunction(opts.getRelation)) {
-        throw utils.err(DOMAIN_ERR, 'opts.getRelation')(400, 'function', opts.getRelation);
-      }
-    } else if (related) {
-      opts.relation = related.name;
-      Object.defineProperty(this, 'relatedMapper', {
-        value: related
-      });
-    } else {
-      throw utils.err(DOMAIN_ERR, 'related')(400, 'Mapper or string', related);
-    }
-
-    Object.defineProperty(this, 'inverse', {
-      value: undefined,
-      writable: true
-    });
-
-    utils.fillIn(this, opts);
-  }
-
-  utils.addHiddenPropsToTarget(Relation.prototype, {
-    getRelation: function getRelation() {
-      return this.relatedMapper;
-    },
-    getForeignKey: function getForeignKey(record) {
-      if (this.type === belongsToType) {
-        return utils.get(record, this.foreignKey);
-      }
-      return utils.get(record, this.mapper.idAttribute);
-    },
-    setForeignKey: function setForeignKey(record, relatedRecord) {
-      var _this = this;
-
-      if (!record || !relatedRecord) {
-        return;
-      }
-      if (this.type === belongsToType) {
-        utils.set(record, this.foreignKey, utils.get(relatedRecord, this.getRelation().idAttribute));
-      } else {
-        (function () {
-          var idAttribute = _this.mapper.idAttribute;
-          if (utils.isArray(relatedRecord)) {
-            relatedRecord.forEach(function (relatedRecordItem) {
-              utils.set(relatedRecordItem, _this.foreignKey, utils.get(record, idAttribute));
-            });
-          } else {
-            utils.set(relatedRecord, _this.foreignKey, utils.get(record, idAttribute));
-          }
-        })();
-      }
-    },
-    getLocalField: function getLocalField(record) {
-      return utils.get(record, this.localField);
-    },
-    setLocalField: function setLocalField(record, data) {
-      return utils.set(record, this.localField, data);
-    },
-    getInverse: function getInverse(mapper) {
-      var _this2 = this;
-
-      if (this.inverse) {
-        return this.inverse;
-      }
-      this.getRelation().relationList.forEach(function (def) {
-        if (def.getRelation() === mapper) {
-          if (def.foreignKey && def.foreignKey !== _this2.foreignKey) {
-            return;
-          }
-          _this2.inverse = def;
-          return false;
-        }
-      });
-      return this.inverse;
-    }
-  });
-
-  var relatedTo = function relatedTo(mapper, related, opts) {
-    opts.name = mapper.name;
-    var relation = new Relation(related, opts);
-    Object.defineProperty(relation, 'mapper', {
-      value: mapper
-    });
-
-    mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] });
-    mapper.relationFields || Object.defineProperty(mapper, 'relationFields', { value: [] });
-    mapper.relationList.push(relation);
-    mapper.relationFields.push(relation.localField);
-  };
-
   /**
-   * TODO
+   * Create a subclass of this Collection.
    *
-   * @name module:js-data.belongsTo
-   * @method
-   * @param {Mapper} related The relation the target belongs to.
-   * @param {Object} opts Configuration options.
-   * @param {string} opts.foreignKey The field that holds the primary key of the
-   * related record.
-   * @param {string} opts.localField The field that holds a reference to the
-   * related record object.
-   * @returns {Function} Invocation function, which accepts the target as the only
-   * parameter.
-   */
-  var _belongsTo = function belongsTo(related, opts) {
-    opts || (opts = {});
-    opts.type = belongsToType;
-    return function (target) {
-      relatedTo(target, related, opts);
-    };
-  };
-
-  /**
-   * TODO
+   * @example <caption>Extend the class in a cross-browser manner.</caption>
+   * import {Collection} from 'js-data'
+   * const CustomCollectionClass = Collection.extend({
+   *   foo () { return 'bar' }
+   * })
+   * const customCollection = new CustomCollectionClass()
+   * console.log(customCollection.foo()) // "bar"
    *
-   * @name module:js-data.hasMany
-   * @method
-   * @param {Mapper} related The relation of which the target has many.
-   * @param {Object} opts Configuration options.
-   * @param {string} [opts.foreignKey] The field that holds the primary key of the
-   * related record.
-   * @param {string} opts.localField The field that holds a reference to the
-   * related record object.
-   * @returns {Function} Invocation function, which accepts the target as the only
-   * parameter.
-   */
-  var _hasMany = function hasMany(related, opts) {
-    opts || (opts = {});
-    opts.type = hasManyType;
-    return function (target) {
-      relatedTo(target, related, opts);
-    };
-  };
-
-  /**
-   * TODO
+   * @example <caption>Extend the class using ES2015 class syntax.</caption>
+   * class CustomCollectionClass extends Collection {
+   *   foo () { return 'bar' }
+   * }
+   * const customCollection = new CustomCollectionClass()
+   * console.log(customCollection.foo()) // "bar"
    *
-   * @name module:js-data.hasOne
-   * @method
-   * @param {Mapper} related The relation of which the target has one.
-   * @param {Object} opts Configuration options.
-   * @param {string} [opts.foreignKey] The field that holds the primary key of the
-   * related record.
-   * @param {string} opts.localField The field that holds a reference to the
-   * related record object.
-   * @returns {Function} Invocation function, which accepts the target as the only
-   * parameter.
+   * @method Collection.extend
+   * @param {Object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {Object} [classProps={}] Static properties to add to the subclass.
+   * @returns {Constructor} Subclass of this Collection class.
+   * @since 3.0.0
    */
-  var _hasOne = function hasOne(related, opts) {
-    opts || (opts = {});
-    opts.type = hasOneType;
-    return function (target) {
-      relatedTo(target, related, opts);
-    };
-  };
 
-  var DOMAIN$6 = 'Record';
+  var DOMAIN$5 = 'Record';
 
   var superMethod = function superMethod(mapper, name) {
     var store = mapper.datastore;
@@ -3425,77 +3543,80 @@
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.noValidate=false] Whether to skip validation on the
    * initial properties.
+   * @since 3.0.0
    */
-  var Record = Component.extend({
-    constructor: function Record(props, opts) {
-      utils.classCallCheck(this, Record);
-
-      props || (props = {});
-      opts || (opts = {});
-      var _props = {};
-      Object.defineProperties(this, {
-        _get: {
-          value: function value(key) {
-            return utils.get(_props, key);
-          }
-        },
-        _set: {
-          value: function value(key, _value) {
-            return utils.set(_props, key, _value);
-          }
-        },
-        _unset: {
-          value: function value(key) {
-            return utils.unset(_props, key);
-          }
+  function Record(props, opts) {
+    utils.classCallCheck(this, Record);
+    props || (props = {});
+    opts || (opts = {});
+    var _props = {};
+    Object.defineProperties(this, {
+      _get: {
+        value: function value(key) {
+          return utils.get(_props, key);
         }
-      });
-      var _set = this._set;
-      // TODO: Optimize these strings
-      _set('creating', true);
-      if (opts.noValidate) {
-        _set('noValidate', true);
+      },
+      _set: {
+        value: function value(key, _value) {
+          return utils.set(_props, key, _value);
+        }
+      },
+      _unset: {
+        value: function value(key) {
+          return utils.unset(_props, key);
+        }
       }
-      utils.fillIn(this, props);
-      _set('creating', false);
-      _set('noValidate', false);
-      _set('previous', utils.copy(props));
-    },
+    });
+    var _set = this._set;
+    // TODO: Optimize these strings
+    _set('creating', true);
+    if (opts.noValidate) {
+      _set('noValidate', true);
+    }
+    utils.fillIn(this, props);
+    _set('creating', false);
+    _set('noValidate', false);
+    _set('previous', utils.plainCopy(props));
+  }
+
+  var Record$1 = Component.extend({
+    constructor: Record,
 
     /**
-     * TODO
+     * Returns the {@link Mapper} paired with this record's class, if any.
      *
-     * @name Record#_mapper
-     * @method
-     * @ignore
+     * @private
+     * @method Record#_mapper
+     * @returns {Mapper} The {@link Mapper} paired with this record's class, if any.
+     * @since 3.0.0
      */
     _mapper: function _mapper() {
       var mapper = this.constructor.mapper;
       if (!mapper) {
-        throw utils.err(DOMAIN$6 + '#_mapper', '')(404, 'mapper');
+        throw utils.err(DOMAIN$5 + '#_mapper', '')(404, 'mapper');
       }
       return mapper;
     },
 
 
     /**
-     * TODO
+     * Lifecycle hook.
      *
-     * @name Record#afterLoadRelations
-     * @method
-     * @param {string[]} relations TODO
-     * @param {Object} opts TODO
+     * @method Record#afterLoadRelations
+     * @param {string[]} relations The `relations` argument passed to {@link Record#loadRelations}.
+     * @param {Object} opts The `opts` argument passed to {@link Record#loadRelations}.
+     * @since 3.0.0
      */
     afterLoadRelations: function afterLoadRelations() {},
 
 
     /**
-     * TODO
+     * Lifecycle hook.
      *
-     * @name Record#beforeLoadRelations
-     * @method
-     * @param {string[]} relations TODO
-     * @param {Object} opts TODO
+     * @method Record#beforeLoadRelations
+     * @param {string[]} relations The `relations` argument passed to {@link Record#loadRelations}.
+     * @param {Object} opts The `opts` argument passed to {@link Record#loadRelations}.
+     * @since 3.0.0
      */
     beforeLoadRelations: function beforeLoadRelations() {},
 
@@ -3504,11 +3625,13 @@
      * Return changes to this record since it was instantiated or
      * {@link Record#commit} was called.
      *
-     * @name Record#changes
-     * @method
+     * @method Record#changes
      * @param [opts] Configuration options.
-     * @param {Function} [opts.equalsFn] Equality function. Default uses `===`.
-     * @param {Array} [opts.ignore] Array of strings or RegExp of fields to ignore.
+     * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
+     * @param {Array} [opts.ignore=[]] Array of strings or RegExp of fields to ignore.
+     * @returns {Object} Object describing the changes to this record since it was
+     * instantiated or its {@link Record#commit} method was last called.
+     * @since 3.0.0
      */
     changes: function changes(opts) {
       opts || (opts = {});
@@ -3517,25 +3640,26 @@
 
 
     /**
-     * TODO
+     * Make the record's current in-memory state it's only state, with any
+     * previous property values being set to current values.
      *
-     * @name Record#commit
-     * @method
+     * @method Record#commit
+     * @since 3.0.0
      */
     commit: function commit() {
       this._set('changed'); // unset
-      this._set('previous', utils.copy(this));
-      return this;
+      this._set('previous', utils.plainCopy(this));
     },
 
 
     /**
      * Call {@link Mapper#destroy} using this record's primary key.
      *
-     * @name Record#destroy
-     * @method
+     * @method Record#destroy
      * @param {Object} [opts] Configuration options passed to {@link Mapper#destroy}.
-     * @returns {Promise} The result of calling {@link Mapper#destroy}.
+     * @returns {Promise} The result of calling {@link Mapper#destroy} with the
+     * primary key of this record.
+     * @since 3.0.0
      */
     destroy: function destroy(opts) {
       opts || (opts = {});
@@ -3547,10 +3671,10 @@
     /**
      * Return the value at the given path for this instance.
      *
-     * @name Record#get
-     * @method
-     * @param {string} key - Path of value to retrieve.
+     * @method Record#get
+     * @param {string} key Path of value to retrieve.
      * @returns {*} Value at path.
+     * @since 3.0.0
      */
     'get': function get(key) {
       return utils.get(this, key);
@@ -3561,11 +3685,13 @@
      * Return whether this record has changed since it was instantiated or
      * {@link Record#commit} was called.
      *
-     * @name Record#hasChanges
-     * @method
+     * @method Record#hasChanges
      * @param [opts] Configuration options.
-     * @param {Function} [opts.equalsFn] Equality function. Default uses `===`.
-     * @param {Array} [opts.ignore] Array of strings or RegExp of fields to ignore.
+     * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
+     * @param {Array} [opts.ignore=[]] Array of strings or RegExp of fields to ignore.
+     * @returns {boolean} Return whether the record has changed since it was
+     * instantiated or since its {@link Record#commit} method was called.
+     * @since 3.0.0
      */
     hasChanges: function hasChanges(opts) {
       var quickHasChanges = !!(this._get('changed') || []).length;
@@ -3574,26 +3700,29 @@
 
 
     /**
-     * TODO
+     * Return whether the record in its current state passes validation.
      *
-     * @name Record#hashCode
-     * @method
+     * @method Record#isValid
+     * @param {Object} [opts] Configuration options. Passed to {@link Mapper#validate}.
+     * @returns {boolean} Whether the record in its current state passes
+     * validation.
+     * @since 3.0.0
      */
-    hashCode: function hashCode() {
-      return utils.get(this, this._mapper().idAttribute);
-    },
     isValid: function isValid(opts) {
       return !this._mapper().validate(this, opts);
     },
 
 
     /**
-     * TODO
+     * Lazy load relations of this record, to be attached to the record once their
+     * loaded.
      *
-     * @name Record#loadRelations
-     * @method
-     * @param {string[]} [relations] TODO
-     * @param {Object} [opts] TODO
+     * @method Record#loadRelations
+     * @param {string[]} [relations] List of relations to load.
+     * @param {Object} [opts] Configuration options.
+     * @returns {Promise} Resolves with the record, with the loaded relations now
+     * attached.
+     * @since 3.0.0
      */
     loadRelations: function loadRelations(relations, opts) {
       var _this = this;
@@ -3672,11 +3801,13 @@
 
 
     /**
-     * TODO
+     * Return the properties with which this record was instantiated.
      *
-     * @name Record#previous
-     * @method
-     * @param {string} [key] TODO
+     * @method Record#previous
+     * @param {string} [key] If specified, return just the initial value of the
+     * given key.
+     * @returns {Object} The initial properties of this record.
+     * @since 3.0.0
      */
     previous: function previous(key) {
       if (key) {
@@ -3687,11 +3818,14 @@
 
 
     /**
-     * TODO
+     * Revert changes to this record back to the properties it had when it was
+     * instantiated.
      *
-     * @name Record#revert
-     * @method
+     * @method Record#revert
      * @param {Object} [opts] Configuration options.
+     * @param {string[]} [opts.preserve] Array of strings or Regular Expressions
+     * denoting properties that should not be reverted.
+     * @since 3.0.0
      */
     revert: function revert(opts) {
       var _this2 = this;
@@ -3710,26 +3844,27 @@
         }
       });
       this.commit();
-      return this;
     },
 
 
     /**
      * Delegates to {@link Mapper#create} or {@link Mapper#update}.
      *
-     * @name Record#save
-     * @method
-     * @param {Object} [opts] Configuration options. See {@link Mapper#create}.
-     * @param [opts] Configuration options.
+     * @method Record#save
+     * @param {Object} [opts] Configuration options. See {@link Mapper#create} and
+     * {@link Mapper#update}.
      * @param {boolean} [opts.changesOnly] Equality function. Default uses `===`.
      * @param {Function} [opts.equalsFn] Passed to {@link Record#changes} when
-     * `changesOnly` is `true`.
+     * `opts.changesOnly` is `true`.
      * @param {Array} [opts.ignore] Passed to {@link Record#changes} when
-     * `changesOnly` is `true`.
+     * `opts.changesOnly` is `true`.
      * @returns {Promise} The result of calling {@link Mapper#create} or
      * {@link Mapper#update}.
+     * @since 3.0.0
      */
     save: function save(opts) {
+      var _this3 = this;
+
       opts || (opts = {});
       var mapper = this._mapper();
       var id = utils.get(this, mapper.idAttribute);
@@ -3743,7 +3878,14 @@
         utils.fillIn(props, changes.added);
         utils.fillIn(props, changes.changed);
       }
-      return superMethod(mapper, 'update')(id, props, opts);
+      return superMethod(mapper, 'update')(id, props, opts).then(function (result) {
+        var record = opts.raw ? result.data : result;
+        if (record) {
+          utils.deepMixIn(_this3, record);
+          _this3.commit();
+        }
+        return result;
+      });
     },
 
 
@@ -3751,12 +3893,12 @@
      * Set the value for a given key, or the values for the given keys if "key" is
      * an object.
      *
-     * @name Record#set
-     * @method
-     * @param {(string|Object)} key - Key to set or hash of key-value pairs to set.
-     * @param {*} [value] - Value to set for the given key.
-     * @param {Object} [opts] - Optional configuration.
-     * @param {boolean} [opts.silent=false] - Whether to trigger change events.
+     * @method Record#set
+     * @param {(string|Object)} key Key to set or hash of key-value pairs to set.
+     * @param {*} [value] Value to set for the given key.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.silent=false] Whether to trigger change events.
+     * @since 3.0.0
      */
     'set': function set(key, value, opts) {
       if (utils.isObject(key)) {
@@ -3773,23 +3915,22 @@
     },
 
 
-    // TODO: move logic for single-item async operations onto the instance.
-
     /**
      * Return a plain object representation of this record. If the class from
-     * which this record was created has a mapper, then {@link Mapper#toJSON} will
-     * be called instead.
+     * which this record was created has a Mapper, then {@link Mapper#toJSON} will
+     * be called with this record instead.
      *
-     * @name Record#toJSON
-     * @method
+     * @method Record#toJSON
      * @param {Object} [opts] Configuration options.
      * @param {string[]} [opts.with] Array of relation names or relation fields
      * to include in the representation. Only available as an option if the class
-     * from which this record was created has a mapper.
+     * from which this record was created has a Mapper and this record resides in
+     * an instance of {@link DataStore}.
      * @returns {Object} Plain object representation of this record.
+     * @since 3.0.0
      */
     toJSON: function toJSON(opts) {
-      var _this3 = this;
+      var _this4 = this;
 
       var mapper = this.constructor.mapper;
       if (mapper) {
@@ -3797,8 +3938,8 @@
       } else {
         var _ret = function () {
           var json = {};
-          utils.forOwn(_this3, function (prop, key) {
-            json[key] = utils.copy(prop);
+          utils.forOwn(_this4, function (prop, key) {
+            json[key] = utils.plainCopy(prop);
           });
           return {
             v: json
@@ -3813,15 +3954,25 @@
     /**
      * Unset the value for a given key.
      *
-     * @name Record#unset
-     * @method
-     * @param {string} key - Key to unset.
-     * @param {Object} [opts] - Optional configuration.
-     * @param {boolean} [opts.silent=false] - Whether to trigger change events.
+     * @method Record#unset
+     * @param {string} key Key to unset.
+     * @param {Object} [opts] Configuration options.
+     * @param {boolean} [opts.silent=false] Whether to trigger change events.
+     * @since 3.0.0
      */
     unset: function unset(key, opts) {
       this.set(key, undefined, opts);
     },
+
+
+    /**
+     * Validate this record based on its current properties.
+     *
+     * @method Record#validate
+     * @param {Object} [opts] Configuration options. Passed to {@link Mapper#validate}.
+     * @returns {*} Array of errors or `undefined` if no errors.
+     * @since 3.0.0
+     */
     validate: function validate(opts) {
       return this._mapper().validate(this, opts);
     }
@@ -3838,11 +3989,42 @@
     this._set('events', value);
   });
 
-  var DOMAIN$7 = 'Schema';
+  /**
+   * Create a subclass of this Record.
+   *
+   * @example <caption>Extend the class in a cross-browser manner.</caption>
+   * import {Record} from 'js-data'
+   * const CustomRecordClass = Record.extend({
+   *   foo () { return 'bar' }
+   * })
+   * const customRecord = new CustomRecordClass()
+   * console.log(customRecord.foo()) // "bar"
+   *
+   * @example <caption>Extend the class using ES2015 class syntax.</caption>
+   * class CustomRecordClass extends Record {
+   *   foo () { return 'bar' }
+   * }
+   * const customRecord = new CustomRecordClass()
+   * console.log(customRecord.foo()) // "bar"
+   *
+   * @method Record.extend
+   * @param {Object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {Object} [classProps={}] Static properties to add to the subclass.
+   * @returns {Constructor} Subclass of this Record class.
+   * @since 3.0.0
+   */
+
+  var DOMAIN$6 = 'Schema';
 
   /**
-   * TODO
-   *
+   * A function map for each of the seven primitive JSON types defined by the core specification.
+   * Each function will check a given value and return true or false if the value is an instance of that type.
+   * ```
+   *   types.integer(1) // returns true
+   *   types.string({}) // returns false
+   * ```
+   * http://json-schema.org/latest/json-schema-core.html#anchor8
    * @name Schema.types
    * @type {Object}
    */
@@ -3926,20 +4108,26 @@
   };
 
   /**
-   * TODO
-   *
+   * A map of all object member validation functions for each keyword defined in the JSON Schema.
    * @name Schema.validationKeywords
    * @type {Object}
    */
   var validationKeywords = {
     /**
-     * http://json-schema.org/latest/json-schema-validation.html#anchor82
+     * Validates the provided value against all schemas defined in the Schemas `allOf` keyword.
+     * The instance is valid against if and only if it is valid against all the schemas declared in the Schema's value.
+     *
+     * The value of this keyword MUST be an array. This array MUST have at least one element.
+     * Each element of this array MUST be a valid JSON Schema.
+     *
+     * see http://json-schema.org/latest/json-schema-validation.html#anchor82
      *
      * @name Schema.validationKeywords.allOf
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value Value to be validated.
+     * @param {Object} [schema] Schema containing the `allOf` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
 
     allOf: function allOf(value, schema, opts) {
@@ -3952,13 +4140,20 @@
 
 
     /**
-     * http://json-schema.org/latest/json-schema-validation.html#anchor85
+     * Validates the provided value against all schemas defined in the Schemas `anyOf` keyword.
+     * The instance is valid against this keyword if and only if it is valid against
+     * at least one of the schemas in this keyword's value.
+     *
+     * The value of this keyword MUST be an array. This array MUST have at least one element.
+     * Each element of this array MUST be an object, and each object MUST be a valid JSON Schema.
+     * see http://json-schema.org/latest/json-schema-validation.html#anchor85
      *
      * @name Schema.validationKeywords.anyOf
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value Value to be validated.
+     * @param {Object} [schema] Schema containing the `anyOf` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     anyOf: function anyOf(value, schema, opts) {
       var validated = false;
@@ -3990,30 +4185,37 @@
 
 
     /**
-     * http://json-schema.org/latest/json-schema-validation.html#anchor76
+     * Validates the provided value against an array of possible values defined by the Schema's `enum` keyword
+     * Validation succeeds if the value is deeply equal to one of the values in the array.
+     * see http://json-schema.org/latest/json-schema-validation.html#anchor76
      *
      * @name Schema.validationKeywords.enum
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value Value to validate
+     * @param {Object} [schema] Schema containing the `enum` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     enum: function _enum(value, schema, opts) {
       var possibleValues = schema['enum'];
-      if (possibleValues.indexOf(value) === -1) {
+      if (utils.findIndex(possibleValues, function (item) {
+        return utils.deepEqual(item, value);
+      }) === -1) {
         return makeError(value, 'one of (' + possibleValues.join(', ') + ')', opts);
       }
     },
 
 
     /**
-     * http://json-schema.org/latest/json-schema-validation.html#anchor37
+     * Validates each of the provided array values against a schema or an array of schemas defined by the Schema's `items` keyword
+     * see http://json-schema.org/latest/json-schema-validation.html#anchor37 for validation rules.
      *
      * @name Schema.validationKeywords.items
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value [Array] Array to be validated.
+     * @param {Object} [schema] Schema containing the items keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     items: function items(value, schema, opts) {
       opts || (opts = {});
@@ -4036,13 +4238,16 @@
 
 
     /**
+     * Validates the provided number against a maximum value defined by the Schema's `maximum` keyword
+     * Validation succeeds if the value is a number, and is less than, or equal to, the value of this keyword.
      * http://json-schema.org/latest/json-schema-validation.html#anchor17
      *
      * @name Schema.validationKeywords.maximum
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value [Number] number to validate against the keyword.
+     * @param {Object} schema [schema] Schema containing the `maximum` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     maximum: function maximum(value, schema, opts) {
       // Must be a number
@@ -4051,35 +4256,42 @@
       // Depends on maximum
       // default: false
       var exclusiveMaximum = schema.exclusiveMaximum;
-      if ((typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === (typeof maximum === 'undefined' ? 'undefined' : babelHelpers.typeof(maximum)) && (exclusiveMaximum ? maximum < value : maximum <= value)) {
-        // TODO: Account for value of exclusiveMaximum in messaging
-        return makeError(value, 'no more than ' + maximum, opts);
+      if ((typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === (typeof maximum === 'undefined' ? 'undefined' : babelHelpers.typeof(maximum)) && !(exclusiveMaximum ? maximum > value : maximum >= value)) {
+        return exclusiveMaximum ? makeError(value, 'no more than nor equal to ' + maximum, opts) : makeError(value, 'no more than ' + maximum, opts);
       }
     },
 
 
     /**
-     * http://json-schema.org/latest/json-schema-validation.html#anchor42
+     * Validates the length of the provided array against a maximum value defined by the Schema's `maxItems` keyword.
+     * Validation succeeds if the length of the array is less than, or equal to the value of this keyword.
+     * see http://json-schema.org/latest/json-schema-validation.html#anchor42
      *
      * @name Schema.validationKeywords.maxItems
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value [array] Array to be validated.
+     * @param {Object} [schema] Schema containing the `maxItems` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     maxItems: function maxItems(value, schema, opts) {
-      return maxLengthCommon('maxItems', value, schema, opts);
+      if (utils.isArray(value)) {
+        return maxLengthCommon('maxItems', value, schema, opts);
+      }
     },
 
 
     /**
-     * http://json-schema.org/latest/json-schema-validation.html#anchor26
+     * Validates the length of the provided string against a maximum value defined in the Schema's `maxLength` keyword.
+     * Validation succeeds if the length of the string is less than, or equal to the value of this keyword.
+     * see http://json-schema.org/latest/json-schema-validation.html#anchor26
      *
      * @name Schema.validationKeywords.maxLength
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value [string] String to be validated.
+     * @param {Object} [schema] Schema containing the `maxLength` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     maxLength: function maxLength(value, schema, opts) {
       return maxLengthCommon('maxLength', value, schema, opts);
@@ -4087,15 +4299,20 @@
 
 
     /**
-     * http://json-schema.org/latest/json-schema-validation.html#anchor54
+     * Validates the count of the provided object's properties against a maximum value defined in the Schema's `maxProperties` keyword.
+     * Validation succeeds if the object's property count is less than, or equal to the value of this keyword.
+     * see http://json-schema.org/latest/json-schema-validation.html#anchor54
      *
      * @name Schema.validationKeywords.maxProperties
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value [Object] Object to be validated.
+     * @param {Object} [schema] Schema containing the `maxProperties` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     maxProperties: function maxProperties(value, schema, opts) {
+      // validate only objects
+      if (!utils.isObject(value)) return;
       var maxProperties = schema.maxProperties;
       var length = Object.keys(value).length;
       if (length > maxProperties) {
@@ -4105,13 +4322,16 @@
 
 
     /**
+     * Validates the provided value against a minimum value defined by the Schema's `minimum` keyword
+     * Validation succeeds if the value is a number and is greater than, or equal to, the value of this keyword.
      * http://json-schema.org/latest/json-schema-validation.html#anchor21
      *
      * @name Schema.validationKeywords.minimum
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value [number] number to validate against the keyword.
+     * @param {Object} [schema] Schema containing the `minimum` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     minimum: function minimum(value, schema, opts) {
       // Must be a number
@@ -4120,35 +4340,42 @@
       // Depends on minimum
       // default: false
       var exclusiveMinimum = schema.exclusiveMinimum;
-      if ((typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === (typeof minimum === 'undefined' ? 'undefined' : babelHelpers.typeof(minimum)) && (exclusiveMinimum ? minimum > value : minimum >= value)) {
-        // TODO: Account for value of exclusiveMinimum in messaging
-        return makeError(value, 'no less than ' + minimum, opts);
+      if ((typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === (typeof minimum === 'undefined' ? 'undefined' : babelHelpers.typeof(minimum)) && !(exclusiveMinimum ? value > minimum : value >= minimum)) {
+        return exclusiveMinimum ? makeError(value, 'no less than nor equal to ' + minimum, opts) : makeError(value, 'no less than ' + minimum, opts);
       }
     },
 
 
     /**
-     * http://json-schema.org/latest/json-schema-validation.html#anchor42
+     * Validates the length of the provided array against a minimum value defined by the Schema's `minItems` keyword.
+     * Validation succeeds if the length of the array is greater than, or equal to the value of this keyword.
+     * see http://json-schema.org/latest/json-schema-validation.html#anchor45
      *
      * @name Schema.validationKeywords.minItems
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value [array] Array to be validated.
+     * @param {Object} [schema] Schema containing the `minItems` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     minItems: function minItems(value, schema, opts) {
-      return minLengthCommon('minItems', value, schema, opts);
+      if (utils.isArray(value)) {
+        return minLengthCommon('minItems', value, schema, opts);
+      }
     },
 
 
     /**
-     * http://json-schema.org/latest/json-schema-validation.html#anchor29
+     * Validates the length of the provided string against a minimum value defined in the Schema's `minLength` keyword.
+     * Validation succeeds if the length of the string is greater than, or equal to the value of this keyword.
+     * see http://json-schema.org/latest/json-schema-validation.html#anchor29
      *
      * @name Schema.validationKeywords.minLength
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value [string] String to be validated.
+     * @param {Object} [schema] Schema containing the `minLength` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     minLength: function minLength(value, schema, opts) {
       return minLengthCommon('minLength', value, schema, opts);
@@ -4156,15 +4383,20 @@
 
 
     /**
-     * http://json-schema.org/latest/json-schema-validation.html#anchor57
+     * Validates the count of the provided object's properties against a minimum value defined in the Schema's `minProperties` keyword.
+     * Validation succeeds if the object's property count is greater than, or equal to the value of this keyword.
+     * see http://json-schema.org/latest/json-schema-validation.html#anchor57
      *
      * @name Schema.validationKeywords.minProperties
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value [Object] Object to be validated.
+     * @param {Object} [schema] Schema containing the `minProperties` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     minProperties: function minProperties(value, schema, opts) {
+      // validate only objects
+      if (!utils.isObject(value)) return;
       var minProperties = schema.minProperties;
       var length = Object.keys(value).length;
       if (length < minProperties) {
@@ -4174,27 +4406,38 @@
 
 
     /**
-     * http://json-schema.org/latest/json-schema-validation.html#anchor14
+     * Validates the provided number is a multiple of the number defined in the Schema's `multipleOf` keyword.
+     * Validation succeeds if the number can be divided equally into the value of this keyword.
+     * see http://json-schema.org/latest/json-schema-validation.html#anchor14
      *
      * @name Schema.validationKeywords.multipleOf
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value [number] Number to be validated.
+     * @param {Object} [schema] Schema containing the `multipleOf` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     multipleOf: function multipleOf(value, schema, opts) {
-      // TODO
+      var multipleOf = schema.multipleOf;
+      if (utils.isNumber(value)) {
+        if (value / multipleOf % 1 !== 0) {
+          return makeError(value, 'multipleOf ' + multipleOf, opts);
+        }
+      }
     },
 
 
     /**
-     * http://json-schema.org/latest/json-schema-validation.html#anchor91
+     * Validates the provided value is not valid with any of the schemas defined in the Schema's `not` keyword.
+     * An instance is valid against this keyword if and only if it is NOT valid against the schemas in this keyword's value.
      *
+     * see http://json-schema.org/latest/json-schema-validation.html#anchor91
      * @name Schema.validationKeywords.not
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value to be checked.
+     * @param {Object} [schema] Schema containing the not keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     not: function not(value, schema, opts) {
       if (!_validate(value, schema.not, opts)) {
@@ -4205,13 +4448,16 @@
 
 
     /**
-     * http://json-schema.org/latest/json-schema-validation.html#anchor88
+     * Validates the provided value is valid with one and only one of the schemas defined in the Schema's `oneOf` keyword.
+     * An instance is valid against this keyword if and only if it is valid against a single schemas in this keyword's value.
      *
+     * see http://json-schema.org/latest/json-schema-validation.html#anchor88
      * @name Schema.validationKeywords.oneOf
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value to be checked.
+     * @param {Object} [schema] Schema containing the `oneOf` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     oneOf: function oneOf(value, schema, opts) {
       var validated = false;
@@ -4233,13 +4479,16 @@
 
 
     /**
-     * http://json-schema.org/latest/json-schema-validation.html#anchor33
+     * Validates the provided string matches a pattern defined in the Schema's `pattern` keyword.
+     * Validation succeeds if the string is a match of the regex value of this keyword.
      *
+     * see http://json-schema.org/latest/json-schema-validation.html#anchor33
      * @name Schema.validationKeywords.pattern
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value [string] String to be validated.
+     * @param {Object} [schema] Schema containing the `pattern` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     pattern: function pattern(value, schema, opts) {
       var pattern = schema.pattern;
@@ -4250,13 +4499,18 @@
 
 
     /**
-     * http://json-schema.org/latest/json-schema-validation.html#anchor64
+     * Validates the provided object's properties against a map of values defined in the Schema's `properties` keyword.
+     * Validation succeeds if the object's property are valid with each of the schema's in the provided map.
+     * Validation also depends on the additionalProperties and or patternProperties.
+     *
+     * see http://json-schema.org/latest/json-schema-validation.html#anchor64 for more info.
      *
      * @name Schema.validationKeywords.properties
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value [Object] Object to be validated.
+     * @param {Object} [schema] Schema containing the `properties` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     properties: function properties(value, schema, opts) {
       opts || (opts = {});
@@ -4316,15 +4570,19 @@
 
 
     /**
-     * http://json-schema.org/latest/json-schema-validation.html#anchor61
+     * Validates the provided object's has all properties listed in the Schema's `properties` keyword array.
+     * Validation succeeds if the object contains all properties provided in the array value of this keyword.
+     * see http://json-schema.org/latest/json-schema-validation.html#anchor61
      *
      * @name Schema.validationKeywords.required
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value [Object] Object to be validated.
+     * @param {Object} [schema] Schema containing the `required` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     required: function required(value, schema, opts) {
+      opts || (opts = {});
       var required = schema.required;
       var errors = [];
       if (!opts.existingOnly) {
@@ -4342,13 +4600,15 @@
 
 
     /**
-     * http://json-schema.org/latest/json-schema-validation.html#anchor79
+     * Validates the provided value's type is equal to the type, or array of types, defined in the Schema's `type` keyword.
+     * see http://json-schema.org/latest/json-schema-validation.html#anchor79
      *
      * @name Schema.validationKeywords.type
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value Value to be validated.
+     * @param {Object} [schema] Schema containing the `type` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     type: function type(value, schema, opts) {
       var type = schema.type;
@@ -4380,13 +4640,16 @@
 
 
     /**
-     * http://json-schema.org/latest/json-schema-validation.html#anchor49
+     * Validates the provided array values are unique.
+     * Validation succeeds if the items in the array are unique, but only if the value of this keyword is true
+     * see http://json-schema.org/latest/json-schema-validation.html#anchor49
      *
      * @name Schema.validationKeywords.uniqueItems
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value [array] Array to be validated.
+     * @param {Object} [schema] Schema containing the `uniqueItems` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     uniqueItems: function uniqueItems(value, schema, opts) {
       if (value && value.length && schema.uniqueItems) {
@@ -4400,7 +4663,7 @@
           // Only compare against unchecked items
           for (j = i - 1; j >= 0; j--) {
             // Found a duplicate
-            if (item === value[j]) {
+            if (utils.deepEqual(item, value[j])) {
               return makeError(item, 'no duplicates', opts);
             }
           }
@@ -4442,13 +4705,14 @@
   };
 
   /**
-   * TODO
+   * Validates the provided value against a given Schema according to the http://json-schema.org/ v4 specification.
    *
    * @name Schema.validate
    * @method
-   * @param {*} value TODO
-   * @param {Object} [schema] TODO
+   * @param {*} value Value to be validated.
+   * @param {Object} [schema] Valid Schema according to the http://json-schema.org/ v4 specification.
    * @param {Object} [opts] Configuration options.
+   * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   var _validate = function _validate(value, schema, opts) {
     var errors = [];
@@ -4459,7 +4723,7 @@
       return;
     }
     if (!utils.isObject(schema)) {
-      throw utils.err(DOMAIN$7 + '#validate')(500, 'Invalid schema at path: "' + opts.path + '"');
+      throw utils.err(DOMAIN$6 + '#validate')(500, 'Invalid schema at path: "' + opts.path + '"');
     }
     if (utils.isUndefined(opts.path)) {
       opts.path = [];
@@ -4491,6 +4755,7 @@
       }
       return errors.length ? errors : undefined;
     }
+
     errors = errors.concat(validateAny(value, schema, opts) || []);
     if (shouldPop) {
       opts.path.pop();
@@ -4526,6 +4791,8 @@
    */
   var makeDescriptor = function makeDescriptor(prop, schema, opts) {
     var descriptor = {
+      // Better to allow configurability, but at the user's own risk
+      configurable: true,
       // These properties are enumerable by default, but regardless of their
       // enumerability, they won't be "own" properties of individual records
       enumerable: utils.isUndefined(schema.enumerable) ? true : !!schema.enumerable
@@ -4540,6 +4807,16 @@
     descriptor.get = function () {
       return this._get(keyPath);
     };
+
+    if (utils.isFunction(schema.get)) {
+      (function () {
+        var originalGet = descriptor.get;
+        descriptor.get = function () {
+          return schema.get.call(this, originalGet);
+        };
+      })();
+    }
+
     descriptor.set = function (value) {
       var _this = this;
 
@@ -4625,37 +4902,56 @@
       return value;
     };
 
+    if (utils.isFunction(schema.set)) {
+      (function () {
+        var originalSet = descriptor.set;
+        descriptor.set = function (value) {
+          return schema.set.call(this, value, originalSet);
+        };
+      })();
+    }
+
     return descriptor;
   };
 
   /**
-   * TODO
+   * A map of validation functions grouped by type.
    *
    * @name Schema.typeGroupValidators
    * @type {Object}
    */
   var typeGroupValidators = {
     /**
-     * TODO
+     * Validates the provided value against the schema using all of the validation keywords specific to instances of an array.
+     * The validation keywords for the type `array` are:
+     *```
+     * ['items', 'maxItems', 'minItems', 'uniqueItems']
+     *```
+     * see http://json-schema.org/latest/json-schema-validation.html#anchor25
      *
      * @name Schema.typeGroupValidators.array
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value [array] Array to be validated.
+     * @param {Object} [schema] Schema containing at least one array keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     array: function array(value, schema, opts) {
       return runOps(ARRAY_OPS, value, schema, opts);
     },
 
     /**
-     * TODO
-     *
+     * Validates the provided value against the schema using all of the validation keywords specific to instances of an integer.
+     * The validation keywords for the type `integer` are:
+     *```
+     * ['multipleOf', 'maximum', 'minimum']
+     *```
      * @name Schema.typeGroupValidators.integer
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value [number] Number to be validated.
+     * @param {Object} [schema] Schema containing at least one `integer` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     integer: function integer(value, schema, opts) {
       // Additional validations for numerics are the same
@@ -4663,13 +4959,17 @@
     },
 
     /**
-     * TODO
-     *
+     * Validates the provided value against the schema using all of the validation keywords specific to instances of an number.
+     * The validation keywords for the type `number` are:
+     *```
+     * ['multipleOf', 'maximum', 'minimum']
+     *```
      * @name Schema.typeGroupValidators.number
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value [number] Number to be validated.
+     * @param {Object} [schema] Schema containing at least one `number` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     number: function number(value, schema, opts) {
       // Additional validations for numerics are the same
@@ -4677,45 +4977,57 @@
     },
 
     /**
-     * TODO
-     *
+     * Validates the provided value against the schema using all of the validation keywords specific to instances of a number or integer.
+     * The validation keywords for the type `numeric` are:
+     *```
+     * ['multipleOf', 'maximum', 'minimum']
+     *```
      * See http://json-schema.org/latest/json-schema-validation.html#anchor13.
      *
      * @name Schema.typeGroupValidators.numeric
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value [number] Number to be validated.
+     * @param {Object} [schema] Schema containing at least one `numeric` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     numeric: function numeric(value, schema, opts) {
       return runOps(NUMERIC_OPS, value, schema, opts);
     },
 
     /**
-     * TODO
-     *
+     * Validates the provided value against the schema using all of the validation keywords specific to instances of an object.
+     * The validation keywords for the type `object` are:
+     *```
+     * ['maxProperties', 'minProperties', 'required', 'properties', 'dependencies']
+     *```
      * See http://json-schema.org/latest/json-schema-validation.html#anchor53.
      *
      * @name Schema.typeGroupValidators.object
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value [number] Object to be validated.
+     * @param {Object} [schema] Schema containing at least one `object` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     object: function object(value, schema, opts) {
       return runOps(OBJECT_OPS, value, schema, opts);
     },
 
     /**
-     * TODO
-     *
+     * Validates the provided value against the schema using all of the validation keywords specific to instances of an string.
+     * The validation keywords for the type `string` are:
+     *```
+     * ['maxLength', 'minLength', 'pattern']
+     *```
      * See http://json-schema.org/latest/json-schema-validation.html#anchor25.
      *
      * @name Schema.typeGroupValidators.string
      * @method
-     * @param {*} value TODO
-     * @param {Object} schema TODO
-     * @param {Object} opts TODO
+     * @param {*} value [number] String to be validated.
+     * @param {Object} [schema] Schema containing at least one `string` keyword.
+     * @param {Object} [opts] Configuration options.
+     * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     string: function string(value, schema, opts) {
       return runOps(STRING_OPS, value, schema, opts);
@@ -4733,21 +5045,23 @@
    * @extends Component
    * @param {Object} definition Schema definition according to json-schema.org
    */
-  var Schema = Component.extend({
-    constructor: function Schema(definition) {
-      definition || (definition = {});
-      // TODO: schema validation
-      utils.fillIn(this, definition);
+  function Schema(definition) {
+    definition || (definition = {});
+    // TODO: schema validation
+    utils.fillIn(this, definition);
 
-      // TODO: rework this to make sure all possible keywords are converted
-      if (definition.properties) {
-        utils.forOwn(definition.properties, function (_definition, prop) {
-          if (!(_definition instanceof Schema)) {
-            definition.properties[prop] = new Schema(_definition);
-          }
-        });
-      }
-    },
+    // TODO: rework this to make sure all possible keywords are converted
+    if (definition.properties) {
+      utils.forOwn(definition.properties, function (_definition, prop) {
+        if (!(_definition instanceof Schema)) {
+          definition.properties[prop] = new Schema(_definition);
+        }
+      });
+    }
+  }
+
+  var Schema$1 = Component.extend({
+    constructor: Schema,
 
     /**
      * This adds ES5 getters/setters to the target based on the "properties" in
@@ -4789,7 +5103,344 @@
     validationKeywords: validationKeywords
   });
 
-  var DOMAIN$5 = 'Mapper';
+  // TODO: remove this when the rest of the project is cleaned
+  var belongsToType = 'belongsTo';
+  var hasManyType = 'hasMany';
+  var hasOneType = 'hasOne';
+
+  var DOMAIN$7 = 'Relation';
+
+  function Relation(relatedMapper) {
+    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    utils.classCallCheck(this, Relation);
+
+    options.type = this.constructor.TYPE_NAME;
+    this.validateOptions(relatedMapper, options);
+
+    if ((typeof relatedMapper === 'undefined' ? 'undefined' : babelHelpers.typeof(relatedMapper)) === 'object') {
+      Object.defineProperty(this, 'relatedMapper', { value: relatedMapper });
+    }
+
+    Object.defineProperty(this, 'inverse', { writable: true });
+    utils.fillIn(this, options);
+  }
+
+  Relation.extend = utils.extend;
+
+  utils.addHiddenPropsToTarget(Relation.prototype, {
+    get canAutoAddLinks() {
+      return utils.isUndefined(this.add) || !!this.add;
+    },
+
+    get relatedCollection() {
+      return this.mapper.datastore.getCollection(this.relation);
+    },
+
+    validateOptions: function validateOptions(related, opts) {
+      var DOMAIN_ERR = 'new ' + DOMAIN$7;
+
+      var localField = opts.localField;
+      if (!localField) {
+        throw utils.err(DOMAIN_ERR, 'opts.localField')(400, 'string', localField);
+      }
+
+      var foreignKey = opts.foreignKey = opts.foreignKey || opts.localKey;
+      if (!foreignKey && (opts.type === belongsToType || opts.type === hasOneType)) {
+        throw utils.err(DOMAIN_ERR, 'opts.foreignKey')(400, 'string', foreignKey);
+      }
+
+      if (utils.isString(related)) {
+        opts.relation = related;
+        if (!utils.isFunction(opts.getRelation)) {
+          throw utils.err(DOMAIN_ERR, 'opts.getRelation')(400, 'function', opts.getRelation);
+        }
+      } else if (related) {
+        opts.relation = related.name;
+      } else {
+        throw utils.err(DOMAIN_ERR, 'related')(400, 'Mapper or string', related);
+      }
+    },
+    assignTo: function assignTo(mapper) {
+      this.name = mapper.name;
+      Object.defineProperty(this, 'mapper', { value: mapper });
+
+      mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] });
+      mapper.relationFields || Object.defineProperty(mapper, 'relationFields', { value: [] });
+      mapper.relationList.push(this);
+      mapper.relationFields.push(this.localField);
+    },
+    canFindLinkFor: function canFindLinkFor() {
+      return Boolean(this.foreignKey || this.localKey);
+    },
+    getRelation: function getRelation() {
+      return this.relatedMapper;
+    },
+    getForeignKey: function getForeignKey(record) {
+      return utils.get(record, this.mapper.idAttribute);
+    },
+    setForeignKey: function setForeignKey(record, relatedRecord) {
+      if (!record || !relatedRecord) {
+        return;
+      }
+
+      this._setForeignKey(record, relatedRecord);
+    },
+    _setForeignKey: function _setForeignKey(record, relatedRecord) {
+      var _this = this;
+
+      var idAttribute = this.mapper.idAttribute;
+
+      if (!utils.isArray(relatedRecord)) {
+        relatedRecord = [relatedRecord];
+      }
+
+      relatedRecord.forEach(function (relatedRecordItem) {
+        utils.set(relatedRecordItem, _this.foreignKey, utils.get(record, idAttribute));
+      });
+    },
+    getLocalField: function getLocalField(record) {
+      return utils.get(record, this.localField);
+    },
+    setLocalField: function setLocalField(record, data) {
+      return utils.set(record, this.localField, data);
+    },
+    getInverse: function getInverse(mapper) {
+      if (!this.inverse) {
+        this.findInverseRelation(mapper);
+      }
+
+      return this.inverse;
+    },
+    findInverseRelation: function findInverseRelation(mapper) {
+      var _this2 = this;
+
+      this.getRelation().relationList.forEach(function (def) {
+        if (def.getRelation() === mapper && _this2.isInversedTo(def)) {
+          _this2.inverse = def;
+          return true;
+        }
+      });
+    },
+    isInversedTo: function isInversedTo(def) {
+      return !def.foreignKey || def.foreignKey === this.foreignKey;
+    },
+    linkRecords: function linkRecords(relatedMapper, records) {
+      var _this3 = this;
+
+      var datastore = this.mapper.datastore;
+
+      records.forEach(function (record) {
+        var relatedData = _this3.getLocalField(record);
+
+        if (utils.isFunction(_this3.add)) {
+          relatedData = _this3.add(datastore, _this3, record);
+        } else if (relatedData) {
+          relatedData = _this3.linkRecord(record, relatedData);
+        }
+
+        var isEmptyLinks = !relatedData || utils.isArray(relatedData) && !relatedData.length;
+
+        if (isEmptyLinks && _this3.canFindLinkFor(record)) {
+          relatedData = _this3.findExistingLinksFor(relatedMapper, record);
+        }
+
+        if (relatedData) {
+          _this3.setLocalField(record, relatedData);
+        }
+      });
+    },
+    linkRecord: function linkRecord(record, relatedRecord) {
+      var relatedId = utils.get(relatedRecord, this.mapper.idAttribute);
+
+      if (relatedRecord !== this.relatedCollection.get(relatedId)) {
+        this.setForeignKey(record, relatedRecord);
+
+        if (this.canAutoAddLinks) {
+          relatedRecord = this.relatedCollection.add(relatedRecord);
+        }
+      }
+
+      return relatedRecord;
+    },
+    findExistingLinksByForeignKey: function findExistingLinksByForeignKey(foreignId) {
+      return this.relatedCollection.filter(babelHelpers.defineProperty({}, this.foreignKey, foreignId));
+    }
+  });
+
+  var BelongsToRelation = Relation.extend({
+    getForeignKey: function getForeignKey(record) {
+      return utils.get(record, this.foreignKey);
+    },
+    _setForeignKey: function _setForeignKey(record, relatedRecord) {
+      utils.set(record, this.foreignKey, utils.get(relatedRecord, this.getRelation().idAttribute));
+    },
+    findExistingLinksFor: function findExistingLinksFor(relatedMapper, record) {
+      var relatedId = utils.get(record, this.foreignKey);
+
+      if (!utils.isUndefined(relatedId)) {
+        return this.relatedCollection.get(relatedId);
+      }
+    }
+  }, {
+    TYPE_NAME: 'belongsTo'
+  });
+
+  var HasManyRelation = Relation.extend({
+    validateOptions: function validateOptions(related, opts) {
+      Relation.prototype.validateOptions.call(this, related, opts);
+
+      var localKeys = opts.localKeys;
+      var foreignKeys = opts.foreignKeys;
+      var foreignKey = opts.foreignKey;
+
+
+      if (!foreignKey && !localKeys && !foreignKeys) {
+        throw utils.err('new Relation', 'opts.<foreignKey|localKeys|foreignKeys>')(400, 'string', foreignKey);
+      }
+    },
+    canFindLinkFor: function canFindLinkFor(record) {
+      var hasForeignKeys = this.foreignKey || this.foreignKeys;
+
+      return Boolean(hasForeignKeys || this.localKeys && utils.get(record, this.localKeys));
+    },
+    linkRecord: function linkRecord(record, relatedRecords) {
+      var _this = this;
+
+      var relatedCollection = this.relatedCollection;
+
+      return relatedRecords.map(function (toInsertItem) {
+        var relatedId = relatedCollection.recordId(toInsertItem);
+
+        if (toInsertItem !== relatedCollection.get(relatedId)) {
+          if (_this.foreignKey) {
+            // TODO: slow, could be optimized? But user loses hook
+            _this.setForeignKey(record, toInsertItem);
+          }
+
+          if (_this.canAutoAddLinks) {
+            toInsertItem = relatedCollection.add(toInsertItem);
+          }
+        }
+
+        return toInsertItem;
+      });
+    },
+    findExistingLinksFor: function findExistingLinksFor(relatedMapper, record) {
+      var recordId = utils.get(record, relatedMapper.idAttribute);
+      var localKeysValue = this.localKeys ? utils.get(record, this.localKeys) : null;
+      var records = void 0;
+
+      if (this.foreignKey) {
+        records = this.findExistingLinksByForeignKey(recordId);
+      } else if (this.localKeys && localKeysValue) {
+        records = this.findExistingLinksByLocalKeys(localKeysValue);
+      } else if (this.foreignKeys) {
+        records = this.findExistingLinksByForeignKeys(recordId);
+      }
+
+      if (records && records.length) {
+        return records;
+      }
+    },
+    findExistingLinksByLocalKeys: function findExistingLinksByLocalKeys(localKeysValue) {
+      return this.relatedCollection.filter({
+        where: babelHelpers.defineProperty({}, this.mapper.idAttribute, {
+          'in': localKeysValue
+        })
+      });
+    },
+    findExistingLinksByForeignKeys: function findExistingLinksByForeignKeys(foreignId) {
+      return this.relatedCollection.filter({
+        where: babelHelpers.defineProperty({}, this.foreignKeys, {
+          'contains': foreignId
+        })
+      });
+    }
+  }, {
+    TYPE_NAME: 'hasMany'
+  });
+
+  var HasOneRelation = Relation.extend({
+    findExistingLinksFor: function findExistingLinksFor(relatedMapper, record) {
+      var recordId = utils.get(record, relatedMapper.idAttribute);
+      var records = this.findExistingLinksByForeignKey(recordId);
+
+      if (records.length) {
+        return records[0];
+      }
+    }
+  }, {
+    TYPE_NAME: 'hasOne'
+  });
+
+  [BelongsToRelation, HasManyRelation, HasOneRelation].forEach(function (RelationType) {
+    Relation[RelationType.TYPE_NAME] = function (related, options) {
+      return new RelationType(related, options);
+    };
+  });
+
+  /**
+   * TODO
+   *
+   * @name module:js-data.belongsTo
+   * @method
+   * @param {Mapper} related The relation the target belongs to.
+   * @param {Object} opts Configuration options.
+   * @param {string} opts.foreignKey The field that holds the primary key of the
+   * related record.
+   * @param {string} opts.localField The field that holds a reference to the
+   * related record object.
+   * @returns {Function} Invocation function, which accepts the target as the only
+   * parameter.
+   */
+  var belongsTo = function belongsTo(related, opts) {
+    return function (mapper) {
+      Relation.belongsTo(related, opts).assignTo(mapper);
+    };
+  };
+
+  /**
+   * TODO
+   *
+   * @name module:js-data.hasMany
+   * @method
+   * @param {Mapper} related The relation of which the target has many.
+   * @param {Object} opts Configuration options.
+   * @param {string} [opts.foreignKey] The field that holds the primary key of the
+   * related record.
+   * @param {string} opts.localField The field that holds a reference to the
+   * related record object.
+   * @returns {Function} Invocation function, which accepts the target as the only
+   * parameter.
+   */
+  var hasMany = function hasMany(related, opts) {
+    return function (mapper) {
+      Relation.hasMany(related, opts).assignTo(mapper);
+    };
+  };
+
+  /**
+   * TODO
+   *
+   * @name module:js-data.hasOne
+   * @method
+   * @param {Mapper} related The relation of which the target has one.
+   * @param {Object} opts Configuration options.
+   * @param {string} [opts.foreignKey] The field that holds the primary key of the
+   * related record.
+   * @param {string} opts.localField The field that holds a reference to the
+   * related record object.
+   * @returns {Function} Invocation function, which accepts the target as the only
+   * parameter.
+   */
+  var hasOne = function hasOne(related, opts) {
+    return function (mapper) {
+      Relation.hasOne(related, opts).assignTo(mapper);
+    };
+  };
+
+  var DOMAIN$4 = 'Mapper';
   var validatingHooks = ['beforeCreate', 'beforeCreateMany', 'beforeUpdate', 'beforeUpdateAll', 'beforeUpdateMany'];
   var makeNotify = function makeNotify(num) {
     return function () {
@@ -5033,155 +5684,157 @@
    * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#mapper","Components of JSData: Mapper"]
    * @tutorial ["http://www.js-data.io/v3.0/docs/modeling-your-data","Modeling your data"]
    */
-  var Mapper = Component.extend({
-    constructor: function Mapper(opts) {
-      var _this2 = this;
+  function Mapper(opts) {
+    var _this2 = this;
 
-      utils.classCallCheck(this, Mapper);
-      Mapper.__super__.call(this);
-      opts || (opts = {});
+    utils.classCallCheck(this, Mapper);
+    Mapper.__super__.call(this);
+    opts || (opts = {});
 
-      // Prepare certain properties to be non-enumerable
-      Object.defineProperties(this, {
-        _adapters: {
-          value: undefined,
-          writable: true
-        },
-
-        /**
-         * Set to `false` to force the Mapper to work with POJO objects only.
-         *
-         * @example <caption>Use POJOs only.</caption>
-         * import {Mapper, Record} from 'js-data'
-         * const UserMapper = new Mapper({ recordClass: false })
-         * UserMapper.recordClass // false
-         * const user = UserMapper#createRecord()
-         * user instanceof Record // false
-         *
-         * @example <caption>Set to a custom class to have records wrapped in your custom class.</caption>
-         * import {Mapper, Record} from 'js-data'
-         *  // Custom class
-         * class User {
-         *   constructor (props = {}) {
-         *     for (var key in props) {
-         *       if (props.hasOwnProperty(key)) {
-         *         this[key] = props[key]
-         *       }
-         *     }
-         *   }
-         * }
-         * const UserMapper = new Mapper({ recordClass: User })
-         * UserMapper.recordClass // function User() {}
-         * const user = UserMapper#createRecord()
-         * user instanceof Record // false
-         * user instanceof User // true
-         *
-         *
-         * @example <caption>Extend the {@link Record} class.</caption>
-         * import {Mapper, Record} from 'js-data'
-         *  // Custom class
-         * class User extends Record {
-         *   constructor () {
-         *     super(props)
-         *   }
-         * }
-         * const UserMapper = new Mapper({ recordClass: User })
-         * UserMapper.recordClass // function User() {}
-         * const user = UserMapper#createRecord()
-         * user instanceof Record // true
-         * user instanceof User // true
-         *
-         * @name Mapper#recordClass
-         * @default {@link Record}
-         * @see Record
-         * @since 3.0.0
-         */
-        recordClass: {
-          value: undefined,
-          writable: true
-        },
-
-        /**
-         * The meta information describing this Mapper's available lifecycle
-         * methods. __Do not modify.__
-         *
-         * TODO: Improve documentation.
-         *
-         * @name Mapper#lifecycleMethods
-         * @since 3.0.0
-         * @type {Object}
-         */
-        lifecycleMethods: {
-          value: LIFECYCLE_METHODS
-        },
-
-        /**
-         * This Mapper's {@link Schema}.
-         *
-         * @name Mapper#schema
-         * @see Schema
-         * @since 3.0.0
-         * @type {Schema}
-         */
-        schema: {
-          value: undefined,
-          writable: true
-        }
-      });
-
-      // Apply user-provided configuration
-      utils.fillIn(this, opts);
-      // Fill in any missing options with the defaults
-      utils.fillIn(this, utils.copy(MAPPER_DEFAULTS));
+    // Prepare certain properties to be non-enumerable
+    Object.defineProperties(this, {
+      _adapters: {
+        value: undefined,
+        writable: true
+      },
 
       /**
-       * The name for this Mapper. This is the minimum amount of meta information
-       * required for a Mapper to be able to execute CRUD operations for a
-       * Resource.
+       * Set to `false` to force the Mapper to work with POJO objects only.
        *
-       * @name Mapper#name
+       * @example <caption>Use POJOs only.</caption>
+       * import {Mapper, Record} from 'js-data'
+       * const UserMapper = new Mapper({ recordClass: false })
+       * UserMapper.recordClass // false
+       * const user = UserMapper#createRecord()
+       * user instanceof Record // false
+       *
+       * @example <caption>Set to a custom class to have records wrapped in your custom class.</caption>
+       * import {Mapper, Record} from 'js-data'
+       *  // Custom class
+       * class User {
+       *   constructor (props = {}) {
+       *     for (var key in props) {
+       *       if (props.hasOwnProperty(key)) {
+       *         this[key] = props[key]
+       *       }
+       *     }
+       *   }
+       * }
+       * const UserMapper = new Mapper({ recordClass: User })
+       * UserMapper.recordClass // function User() {}
+       * const user = UserMapper#createRecord()
+       * user instanceof Record // false
+       * user instanceof User // true
+       *
+       *
+       * @example <caption>Extend the {@link Record} class.</caption>
+       * import {Mapper, Record} from 'js-data'
+       *  // Custom class
+       * class User extends Record {
+       *   constructor () {
+       *     super(props)
+       *   }
+       * }
+       * const UserMapper = new Mapper({ recordClass: User })
+       * UserMapper.recordClass // function User() {}
+       * const user = UserMapper#createRecord()
+       * user instanceof Record // true
+       * user instanceof User // true
+       *
+       * @name Mapper#recordClass
+       * @default {@link Record}
+       * @see Record
        * @since 3.0.0
-       * @type {string}
        */
-      if (!this.name) {
-        throw utils.err('new ' + DOMAIN$5, 'opts.name')(400, 'string', this.name);
-      }
+      recordClass: {
+        value: undefined,
+        writable: true
+      },
 
-      // Setup schema, with an empty default schema if necessary
-      if (!(this.schema instanceof Schema)) {
-        this.schema = new Schema(this.schema || {});
-      }
+      /**
+       * The meta information describing this Mapper's available lifecycle
+       * methods. __Do not modify.__
+       *
+       * TODO: Improve documentation.
+       *
+       * @name Mapper#lifecycleMethods
+       * @since 3.0.0
+       * @type {Object}
+       */
+      lifecycleMethods: {
+        value: LIFECYCLE_METHODS
+      },
 
-      if (this.schema instanceof Schema) {
-        this.schema.type || (this.schema.type = 'object');
+      /**
+       * This Mapper's {@link Schema}.
+       *
+       * @name Mapper#schema
+       * @see Schema
+       * @since 3.0.0
+       * @type {Schema}
+       */
+      schema: {
+        value: undefined,
+        writable: true
       }
+    });
 
-      // Create a subclass of Record that's tied to this Mapper
-      if (utils.isUndefined(this.recordClass)) {
-        (function () {
-          var superClass = Record;
-          _this2.recordClass = superClass.extend({
-            constructor: function Record() {
-              var subClass = function Record(props, opts) {
-                utils.classCallCheck(this, subClass);
-                superClass.call(this, props, opts);
-              };
-              return subClass;
-            }()
-          });
-        })();
+    // Apply user-provided configuration
+    utils.fillIn(this, opts);
+    // Fill in any missing options with the defaults
+    utils.fillIn(this, utils.copy(MAPPER_DEFAULTS));
+
+    /**
+     * The name for this Mapper. This is the minimum amount of meta information
+     * required for a Mapper to be able to execute CRUD operations for a
+     * Resource.
+     *
+     * @name Mapper#name
+     * @since 3.0.0
+     * @type {string}
+     */
+    if (!this.name) {
+      throw utils.err('new ' + DOMAIN$4, 'opts.name')(400, 'string', this.name);
+    }
+
+    // Setup schema, with an empty default schema if necessary
+    if (!(this.schema instanceof Schema$1)) {
+      this.schema = new Schema$1(this.schema || {});
+    }
+
+    if (this.schema instanceof Schema$1) {
+      this.schema.type || (this.schema.type = 'object');
+    }
+
+    // Create a subclass of Record that's tied to this Mapper
+    if (utils.isUndefined(this.recordClass)) {
+      (function () {
+        var superClass = Record$1;
+        _this2.recordClass = superClass.extend({
+          constructor: function Record() {
+            var subClass = function Record(props, opts) {
+              utils.classCallCheck(this, subClass);
+              superClass.call(this, props, opts);
+            };
+            return subClass;
+          }()
+        });
+      })();
+    }
+
+    if (this.recordClass) {
+      this.recordClass.mapper = this;
+
+      // We can only apply the schema to the prototype of this.recordClass if the
+      // class extends Record
+      if (utils.getSuper(this.recordClass, true) === Record$1 && this.schema && this.schema.apply && this.applySchema) {
+        this.schema.apply(this.recordClass.prototype);
       }
+    }
+  }
 
-      if (this.recordClass) {
-        this.recordClass.mapper = this;
-
-        // We can only apply the schema to the prototype of this.recordClass if the
-        // class extends Record
-        if (utils.getSuper(this.recordClass, true) === Record && this.schema && this.schema.apply && this.applySchema) {
-          this.schema.apply(this.recordClass.prototype);
-        }
-      }
-    },
+  var Mapper$1 = Component.extend({
+    constructor: Mapper,
 
     /**
      * Mapper lifecycle hook called by {@link Mapper#count}. If this method
@@ -5526,8 +6179,8 @@
      * @see http://www.js-data.io/v3.0/docs/relations
      * @since 3.0.0
      */
-    belongsTo: function belongsTo(relatedMapper, opts) {
-      return _belongsTo(relatedMapper, opts)(this);
+    belongsTo: function belongsTo$$(relatedMapper, opts) {
+      return belongsTo(relatedMapper, opts)(this);
     },
 
 
@@ -5930,7 +6583,7 @@
         });
       }
       if (!utils.isObject(props)) {
-        throw utils.err(DOMAIN$5 + '#createRecord', 'props')(400, 'array or object', props);
+        throw utils.err(DOMAIN$4 + '#createRecord', 'props')(400, 'array or object', props);
       }
       var recordClass = this.recordClass;
       var relationList = this.relationList || [];
@@ -5969,7 +6622,7 @@
 
       var config = this.lifecycleMethods[method];
       if (!config) {
-        throw utils.err(DOMAIN$5 + '#crud', method)(404, 'method');
+        throw utils.err(DOMAIN$4 + '#crud', method)(404, 'method');
       }
 
       var upper = '' + method.charAt(0).toUpperCase() + method.substr(1);
@@ -6195,7 +6848,7 @@
       this.dbg('getAdapter', 'name:', name);
       var adapter = this.getAdapterName(name);
       if (!adapter) {
-        throw utils.err(DOMAIN$5 + '#getAdapter', 'name')(400, 'string', name);
+        throw utils.err(DOMAIN$4 + '#getAdapter', 'name')(400, 'string', name);
       }
       return this.getAdapters()[adapter];
     },
@@ -6262,8 +6915,8 @@
      * @see http://www.js-data.io/v3.0/docs/relations
      * @since 3.0.0
      */
-    hasMany: function hasMany(relatedMapper, opts) {
-      return _hasMany(relatedMapper, opts)(this);
+    hasMany: function hasMany$$(relatedMapper, opts) {
+      return hasMany(relatedMapper, opts)(this);
     },
 
 
@@ -6283,8 +6936,8 @@
      * @see http://www.js-data.io/v3.0/docs/relations
      * @since 3.0.0
      */
-    hasOne: function hasOne(relatedMapper, opts) {
-      return _hasOne(relatedMapper, opts)(this);
+    hasOne: function hasOne$$(relatedMapper, opts) {
+      return hasOne(relatedMapper, opts)(this);
     },
 
 
@@ -6651,6 +7304,36 @@
      */
     wrap: function wrap(data, opts) {
       return this.createRecord(data, opts);
+    },
+
+
+    /**
+     * @ignore
+     */
+    defineRelations: function defineRelations() {
+      var _this8 = this;
+
+      // Setup the mapper's relations, including generating Mapper#relationList
+      // and Mapper#relationFields
+      utils.forOwn(this.relations, function (group, type) {
+        utils.forOwn(group, function (relations, _name) {
+          if (utils.isObject(relations)) {
+            relations = [relations];
+          }
+          relations.forEach(function (def) {
+            var relatedMapper = _this8.datastore.getMapperByName(_name) || _name;
+            def.getRelation = function () {
+              return _this8.datastore.getMapper(_name);
+            };
+
+            if (typeof Relation[type] !== 'function') {
+              throw utils.err(DOMAIN$4, 'defineRelations')(400, 'relation type (hasOne, hasMany, etc)', type, true);
+            }
+
+            _this8[type](relatedMapper, def);
+          });
+        });
+      });
     }
   });
 
@@ -6676,7 +7359,7 @@
    * @param {Object} [props={}] Properties to add to the prototype of the
    * subclass.
    * @param {Object} [classProps={}] Static properties to add to the subclass.
-   * @returns {Constructor} Subclass of this Mapper.
+   * @returns {Constructor} Subclass of this Mapper class.
    * @since 3.0.0
    */
 
@@ -7105,48 +7788,50 @@
    */
   'validate'];
 
+  function Container(opts) {
+    utils.classCallCheck(this, Container);
+    Container.__super__.call(this);
+    opts || (opts = {});
+
+    Object.defineProperties(this, {
+      // Holds the adapters, shared by all mappers in this container
+      _adapters: {
+        value: {}
+      },
+      // The the mappers in this container
+      _mappers: {
+        value: {}
+      }
+    });
+
+    // Apply options provided by the user
+    utils.fillIn(this, opts);
+
+    /**
+     * Defaults options to pass to {@link Container#mapperClass} when creating a
+     * new {@link Mapper}.
+     *
+     * @default {}
+     * @name Container#mapperDefaults
+     * @since 3.0.0
+     * @type {Object}
+     */
+    this.mapperDefaults = this.mapperDefaults || {};
+
+    /**
+     * Constructor function to use in {@link Container#defineMapper} to create a
+     * new mapper.
+     *
+     * {@link Mapper}
+     * @name Container#mapperClass
+     * @since 3.0.0
+     * @type {Constructor}
+     */
+    this.mapperClass = this.mapperClass || Mapper$1;
+  }
+
   var props = {
-    constructor: function Container(opts) {
-      utils.classCallCheck(this, Container);
-      Container.__super__.call(this);
-      opts || (opts = {});
-
-      Object.defineProperties(this, {
-        // Holds the adapters, shared by all mappers in this container
-        _adapters: {
-          value: {}
-        },
-        // The the mappers in this container
-        _mappers: {
-          value: {}
-        }
-      });
-
-      // Apply options provided by the user
-      utils.fillIn(this, opts);
-
-      /**
-       * Defaults options to pass to {@link Container#mapperClass} when creating a
-       * new {@link Mapper}.
-       *
-       * @default {}
-       * @name Container#mapperDefaults
-       * @since 3.0.0
-       * @type {Object}
-       */
-      this.mapperDefaults = this.mapperDefaults || {};
-
-      /**
-       * Constructor function to use in {@link Container#defineMapper} to create a
-       * new mapper.
-       *
-       * {@link Mapper}
-       * @name Container#mapperClass
-       * @since 3.0.0
-       * @type {Constructor}
-       */
-      this.mapperClass = this.mapperClass || Mapper;
-    },
+    constructor: Container,
 
     /**
      * Register a new event listener on this Container.
@@ -7292,29 +7977,7 @@
 
         return _this2._onMapperEvent.apply(_this2, [name].concat(args));
       });
-
-      // Setup the mapper's relations, including generating Mapper#relationList
-      // and Mapper#relationFields
-      utils.forOwn(mapper.relations, function (group, type) {
-        utils.forOwn(group, function (relations, _name) {
-          if (utils.isObject(relations)) {
-            relations = [relations];
-          }
-          relations.forEach(function (def) {
-            def.getRelation = function () {
-              return _this2.getMapper(_name);
-            };
-            var relatedMapper = _this2._mappers[_name] || _name;
-            if (type === belongsToType) {
-              mapper.belongsTo(relatedMapper, def);
-            } else if (type === hasOneType) {
-              mapper.hasOne(relatedMapper, def);
-            } else if (type === hasManyType) {
-              mapper.hasMany(relatedMapper, def);
-            }
-          });
-        });
-      });
+      mapper.defineRelations();
 
       return mapper;
     },
@@ -7383,6 +8046,7 @@
      * const UserMapper = container.defineMapper('user')
      * UserMapper === container.getMapper('user') // true
      * UserMapper === container.as('user').getMapper() // true
+     * container.getMapper('profile') // throws Error, there is no mapper with name "profile"
      *
      * @method Container#getMapper
      * @param {string} name {@link Mapper#name}.
@@ -7390,11 +8054,34 @@
      * @since 3.0.0
      */
     getMapper: function getMapper(name) {
-      var mapper = this._mappers[name];
+      var mapper = this.getMapperByName(name);
       if (!mapper) {
         throw utils.err(DOMAIN$3 + '#getMapper', name)(404, 'mapper');
       }
       return mapper;
+    },
+
+
+    /**
+     * Return the mapper registered under the specified name.
+     * Doesn't throw error if mapper doesn't exist.
+     *
+     * @example
+     * import {Container} from 'js-data'
+     * const container = new Container()
+     * // Container#defineMapper returns a direct reference to the newly created
+     * // Mapper.
+     * const UserMapper = container.defineMapper('user')
+     * UserMapper === container.getMapperByName('user') // true
+     * container.getMapperByName('profile') // undefined
+     *
+     * @method Container#getMapperByName
+     * @param {string} name {@link Mapper#name}.
+     * @returns {Mapper}
+     * @since 3.0.0
+     */
+    getMapperByName: function getMapperByName(name) {
+      return this._mappers[name];
     },
 
 
@@ -7442,80 +8129,7 @@
     };
   });
 
-  /**
-   * ```javascript
-   * import {Container} from 'js-data'
-   * ```
-   *
-   * The `Container` class is a place to store {@link Mapper} instances.
-   *
-   * Without a container, you need to manage mappers yourself, including resolving
-   * circular dependencies among relations. All mappers in a container share the
-   * same adapters, so you don't have to add each adapter to all of your mappers.
-   *
-   * @example <caption>Without Container</caption>
-   * import {Mapper} from 'js-data'
-   * import HttpAdapter from 'js-data-http'
-   * const adapter = new HttpAdapter()
-   * const userMapper = new Mapper({ name: 'user' })
-   * userMapper.registerAdapter('http', adapter, { default: true })
-   * const commentMapper = new Mapper({ name: 'comment' })
-   * commentMapper.registerAdapter('http', adapter, { default: true })
-   *
-   * // This might be more difficult if the mappers were defined in different
-   * // modules.
-   * userMapper.hasMany(commentMapper, {
-   *   localField: 'comments',
-   *   foreignKey: 'userId'
-   * })
-   * commentMapper.belongsTo(userMapper, {
-   *   localField: 'user',
-   *   foreignKey: 'userId'
-   * })
-   *
-   * @example <caption>With Container</caption>
-   * import {Container} from 'js-data'
-   * import HttpAdapter from 'js-data-http'
-   * const container = new Container()
-   * // All mappers in container share adapters
-   * container.registerAdapter('http', new HttpAdapter(), { default: true })
-   *
-   * // These could be defined in separate modules without a problem.
-   * container.defineMapper('user', {
-   *   relations: {
-   *     hasMany: {
-   *       comment: {
-   *         localField: 'comments',
-   *         foreignKey: 'userId'
-   *       }
-   *     }
-   *   }
-   * })
-   * container.defineMapper('comment', {
-   *   relations: {
-   *     belongsTo: {
-   *       user: {
-   *         localField: 'user',
-   *         foreignKey: 'userId'
-   *       }
-   *     }
-   *   }
-   * })
-   *
-   * @class Container
-   * @extends Component
-   * @param {Object} [opts] Configuration options.
-   * @param {Function} [opts.mapperClass] Constructor function to use in
-   * {@link Container#defineMapper} to create a new mapper.
-   * @param {Object} [opts.mapperDefaults] Defaults options to pass to
-   * {@link Container#mapperClass} when creating a new mapper.
-   * @returns {Container}
-   * @since 3.0.0
-   * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#container","Components of JSData: Container"]
-   * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
-   * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-nodejs","Notes on using JSData in Node.js"]
-   */
-  var Container = Component.extend(props);
+  Component.extend(props);
 
   /**
    * Create a subclass of this Container.
@@ -7559,28 +8173,30 @@
    * @param {Object} [opts] Configuration options. See {@link Collection}.
    * @returns {Mapper}
    */
-  var LinkedCollection = Collection.extend({
-    constructor: function LinkedCollection(records, opts) {
-      utils.classCallCheck(this, LinkedCollection);
-      // Make sure this collection has somewhere to store "added" timestamps
-      Object.defineProperties(this, {
-        _added: {
-          value: {}
-        },
-        datastore: {
-          writable: true,
-          value: undefined
-        }
-      });
-
-      LinkedCollection.__super__.call(this, records, opts);
-
-      // Make sure this collection has a reference to a datastore
-      if (!this.datastore) {
-        throw utils.err('new ' + DOMAIN$9, 'opts.datastore')(400, 'DataStore', this.datastore);
+  function LinkedCollection(records, opts) {
+    utils.classCallCheck(this, LinkedCollection);
+    // Make sure this collection has somewhere to store "added" timestamps
+    Object.defineProperties(this, {
+      _added: {
+        value: {}
+      },
+      datastore: {
+        writable: true,
+        value: undefined
       }
-      return this;
-    },
+    });
+
+    LinkedCollection.__super__.call(this, records, opts);
+
+    // Make sure this collection has a reference to a datastore
+    if (!this.datastore) {
+      throw utils.err('new ' + DOMAIN$9, 'opts.datastore')(400, 'DataStore', this.datastore);
+    }
+    return this;
+  }
+
+  var LinkedCollection$1 = Collection$1.extend({
+    constructor: LinkedCollection,
 
     _onRecordEvent: function _onRecordEvent() {
       for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
@@ -7598,126 +8214,26 @@
     add: function add(records, opts) {
       var _this = this;
 
-      var datastore = this.datastore;
       var mapper = this.mapper;
-      var relationList = mapper.relationList;
       var timestamp = new Date().getTime();
-      var usesRecordClass = !!mapper.recordClass;
-      var idAttribute = mapper.idAttribute;
-      var singular = void 0;
+      var singular = utils.isObject(records) && !utils.isArray(records);
 
-      if (utils.isObject(records) && !utils.isArray(records)) {
-        singular = true;
+      if (singular) {
         records = [records];
       }
 
       records = utils.getSuper(this).prototype.add.call(this, records, opts);
 
-      if (relationList.length && records.length) {
+      if (mapper.relationList.length && records.length) {
         // Check the currently visited record for relations that need to be
         // inserted into their respective collections.
         mapper.relationList.forEach(function (def) {
-          var relationName = def.relation;
-          // A reference to the Mapper that this Mapper is related to
-          var relatedMapper = datastore.getMapper(relationName);
-          // The field used by the related Mapper as the primary key
-          var relationIdAttribute = relatedMapper.idAttribute;
-          // Grab the foreign key in this relationship, if there is one
-          var foreignKey = def.foreignKey;
-          // A lot of this is an optimization for being able to insert a lot of
-          // data as quickly as possible
-          var relatedCollection = datastore.getCollection(relationName);
-          var type = def.type;
-          var isHasMany = type === hasManyType;
-          var shouldAdd = utils.isUndefined(def.add) ? true : !!def.add;
-          var relatedData = void 0;
-
-          records.forEach(function (record) {
-            // Grab a reference to the related data attached or linked to the
-            // currently visited record
-            relatedData = def.getLocalField(record);
-            var id = utils.get(record, idAttribute);
-
-            if (utils.isFunction(def.add)) {
-              relatedData = def.add(datastore, def, record);
-            } else if (relatedData) {
-              // Otherwise, if there is something to be added, add it
-              if (isHasMany) {
-                // Handle inserting hasMany relations
-                relatedData = relatedData.map(function (toInsertItem) {
-                  // Check that this item isn't the same item that is already in the
-                  // store
-                  if (toInsertItem !== relatedCollection.get(relatedCollection.recordId(toInsertItem))) {
-                    // Make sure this item has its foreignKey
-                    if (foreignKey) {
-                      // TODO: slow, could be optimized? But user loses hook
-                      def.setForeignKey(record, toInsertItem);
-                    }
-                    // Finally add this related item
-                    if (shouldAdd) {
-                      toInsertItem = relatedCollection.add(toInsertItem);
-                    }
-                  }
-                  return toInsertItem;
-                });
-              } else {
-                var relatedDataId = utils.get(relatedData, relationIdAttribute);
-                // Handle inserting belongsTo and hasOne relations
-                if (relatedData !== relatedCollection.get(relatedDataId)) {
-                  // Make sure foreignKey field is set
-                  def.setForeignKey(record, relatedData);
-                  // Finally insert this related item
-                  if (shouldAdd) {
-                    relatedData = relatedCollection.add(relatedData);
-                  }
-                }
-              }
-            }
-
-            if (!relatedData || utils.isArray(relatedData) && !relatedData.length) {
-              if (type === belongsToType) {
-                var relatedId = utils.get(record, foreignKey);
-                if (!utils.isUndefined(relatedId)) {
-                  relatedData = relatedCollection.get(relatedId);
-                }
-              } else if (type === hasOneType) {
-                var _records = relatedCollection.filter(babelHelpers.defineProperty({}, foreignKey, id));
-                relatedData = _records.length ? _records[0] : undefined;
-              } else if (type === hasManyType) {
-                if (foreignKey) {
-                  var _records2 = relatedCollection.filter(babelHelpers.defineProperty({}, foreignKey, id));
-                  relatedData = _records2.length ? _records2 : undefined;
-                } else if (def.localKeys && utils.get(record, def.localKeys)) {
-                  var _records3 = relatedCollection.filter({
-                    where: babelHelpers.defineProperty({}, relationIdAttribute, {
-                      'in': utils.get(record, def.localKeys)
-                    })
-                  });
-                  relatedData = _records3.length ? _records3 : undefined;
-                } else if (def.foreignKeys) {
-                  var _records4 = relatedCollection.filter({
-                    where: babelHelpers.defineProperty({}, def.foreignKeys, {
-                      'contains': id
-                    })
-                  });
-                  relatedData = _records4.length ? _records4 : undefined;
-                }
-              }
-            }
-            if (relatedData) {
-              def.setLocalField(record, relatedData);
-            } else {}
-          });
+          def.linkRecords(mapper, records);
         });
       }
 
       records.forEach(function (record) {
-        // Track when this record was added
-        _this._added[_this.recordId(record)] = timestamp;
-
-        if (usesRecordClass) {
-          record._set('$', timestamp);
-        }
+        return _this._addMeta(record, timestamp);
       });
 
       return singular ? records[0] : records;
@@ -7726,27 +8242,57 @@
       var mapper = this.mapper;
       var record = utils.getSuper(this).prototype.remove.call(this, id, opts);
       if (record) {
-        delete this._added[id];
-        if (mapper.recordClass) {
-          record._set('$'); // unset
-        }
+        this._clearMeta(record);
       }
       return record;
     },
     removeAll: function removeAll(query, opts) {
-      var _this2 = this;
-
       var mapper = this.mapper;
       var records = utils.getSuper(this).prototype.removeAll.call(this, query, opts);
-      records.forEach(function (record) {
-        delete _this2._added[_this2.recordId(record)];
-        if (mapper.recordClass) {
-          record._set('$'); // unset
-        }
-      });
+      records.forEach(this._clearMeta, this);
       return records;
+    },
+    _clearMeta: function _clearMeta(record) {
+      delete this._added[this.recordId(record)];
+      if (this.mapper.recordClass) {
+        record._set('$'); // unset
+      }
+    },
+    _addMeta: function _addMeta(record, timestamp) {
+      // Track when this record was added
+      this._added[this.recordId(record)] = timestamp;
+
+      if (this.mapper.recordClass) {
+        record._set('$', timestamp);
+      }
     }
   });
+
+  /**
+   * Create a subclass of this LinkedCollection.
+   *
+   * @example <caption>Extend the class in a cross-browser manner.</caption>
+   * import {LinkedCollection} from 'js-data'
+   * const CustomLinkedCollectionClass = LinkedCollection.extend({
+   *   foo () { return 'bar' }
+   * })
+   * const customLinkedCollection = new CustomLinkedCollectionClass()
+   * console.log(customLinkedCollection.foo()) // "bar"
+   *
+   * @example <caption>Extend the class using ES2015 class syntax.</caption>
+   * class CustomLinkedCollectionClass extends LinkedCollection {
+   *   foo () { return 'bar' }
+   * }
+   * const customLinkedCollection = new CustomLinkedCollectionClass()
+   * console.log(customLinkedCollection.foo()) // "bar"
+   *
+   * @method LinkedCollection.extend
+   * @param {Object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {Object} [classProps={}] Static properties to add to the subclass.
+   * @returns {Constructor} Subclass of this LinkedCollection class.
+   * @since 3.0.0
+   */
 
   var DOMAIN$8 = 'DataStore';
   var proxiedCollectionMethods = ['add', 'between', 'createIndex', 'filter', 'get', 'getAll', 'query', 'toJson'];
@@ -7754,7 +8300,7 @@
 
   var safeSet = function safeSet(record, field, value) {
     if (record && record._set) {
-      record._set(field, value);
+      record._set('props.' + field, value);
     } else {
       utils.set(record, field, value);
     }
@@ -7768,17 +8314,69 @@
     return cached;
   };
 
-  var props$1 = {
-    constructor: function DataStore(opts) {
-      utils.classCallCheck(this, DataStore);
-      DataStore.__super__.call(this, opts);
+  function DataStore(opts) {
+    utils.classCallCheck(this, DataStore);
+    DataStore.__super__.call(this, opts);
 
-      this.collectionClass = this.collectionClass || LinkedCollection;
-      this._collections = {};
-      this._pendingQueries = {};
-      this._completedQueries = {};
-      return this;
-    },
+    this.collectionClass = this.collectionClass || LinkedCollection$1;
+    this._collections = {};
+    this._pendingQueries = {};
+    this._completedQueries = {};
+    return this;
+  }
+
+  /**
+   * The `DataStore` class is an extension of {@link Container}. Not only does
+   * `DataStore` manage mappers, but also collections. `DataStore` implements the
+   * asynchronous {@link Mapper} methods, such as {@link Mapper#find} and
+   * {@link Mapper#create}. If you use the asynchronous `DataStore` methods
+   * instead of calling them directly on the mappers, then the results of the
+   * method calls will be inserted into the store's collections. You can think of
+   * a `DataStore` as an [Identity Map](https://en.wikipedia.org/wiki/Identity_map_pattern)
+   * for the [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping)
+   * (the Mappers).
+   *
+   * ```javascript
+   * import {DataStore} from 'js-data'
+   * ```
+   *
+   * @example
+   * import {DataStore} from 'js-data'
+   * import HttpAdapter from 'js-data-http'
+   * const store = new DataStore()
+   *
+   * // DataStore#defineMapper returns a direct reference to the newly created
+   * // Mapper.
+   * const UserMapper = store.defineMapper('user')
+   *
+   * // DataStore#as returns the store scoped to a particular Mapper.
+   * const UserStore = store.as('user')
+   *
+   * // Call "find" on "UserMapper" (Stateless ORM)
+   * UserMapper.find(1).then((user) => {
+   *   // retrieved a "user" record via the http adapter, but that's it
+   *
+   *   // Call "find" on "store" targeting "user" (Stateful DataStore)
+   *   return store.find('user', 1) // same as "UserStore.find(1)"
+   * }).then((user) => {
+   *   // not only was a "user" record retrieved, but it was added to the
+   *   // store's "user" collection
+   *   const cachedUser = store.getCollection('user').get(1)
+   *   console.log(user === cachedUser) // true
+   * })
+   *
+   * @class DataStore
+   * @extends Container
+   * @param {Object} [opts] Configuration options. See {@link Container}.
+   * @returns {DataStore}
+   * @see Container
+   * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#datastore","Components of JSData: DataStore"]
+   * @tutorial ["http://www.js-data.io/v3.0/docs/working-with-the-datastore","Working with the DataStore"]
+   * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
+   */
+  var props$1 = {
+    constructor: DataStore,
 
     _callSuper: function _callSuper(method) {
       for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key2 = 1; _key2 < _len; _key2++) {
@@ -7792,8 +8390,7 @@
     /**
      * TODO
      *
-     * @name DataStore#_end
-     * @method
+     * @method DataStore#_end
      * @private
      * @param {string} name Name of the {@link LinkedCollection} to which to
      * add the data.
@@ -7802,13 +8399,13 @@
      * @returns {(Object|Array)} Result.
      */
     _end: function _end(name, result, opts) {
-      var _data = opts.raw ? result.data : result;
-      if (_data && utils.isFunction(this.addToCache)) {
-        _data = this.addToCache(name, _data, opts);
+      var data = opts.raw ? result.data : result;
+      if (data && utils.isFunction(this.addToCache)) {
+        data = this.addToCache(name, data, opts);
         if (opts.raw) {
-          result.data = _data;
+          result.data = data;
         } else {
-          result = _data;
+          result = data;
         }
       }
       return result;
@@ -7822,8 +8419,7 @@
      * Collection in the DataStore, then the name of the Mapper or Collection will
      * be prepended to the arugments passed to the provided event handler.
      *
-     * @name DataStore#on
-     * @method
+     * @method DataStore#on
      * @param {string} event Name of event to subsribe to.
      * @param {Function} listener Listener function to handle the event.
      * @param {*} [ctx] Optional content in which to invoke the listener.
@@ -7832,8 +8428,7 @@
     /**
      * Used to bind to events emitted by collections in this store.
      *
-     * @name DataStore#_onCollectionEvent
-     * @method
+     * @method DataStore#_onCollectionEvent
      * @private
      * @param {string} name Name of the collection that emitted the event.
      * @param {...*} [args] Args passed to {@link Collection#emit}.
@@ -7851,11 +8446,10 @@
     /**
      * TODO
      *
-     * @name DataStore#addToCache
-     * @method
-     * @param {string} name - Name of the {@link Mapper} to target.
-     * @param {*} data - Data from which data should be selected for add.
-     * @param {Object} [opts] - Configuration options.
+     * @method DataStore#addToCache
+     * @param {string} name Name of the {@link Mapper} to target.
+     * @param {*} data Data from which data should be selected for add.
+     * @param {Object} [opts] Configuration options.
      */
     addToCache: function addToCache(name, data, opts) {
       return this.getCollection(name).add(data, opts);
@@ -7938,23 +8532,23 @@
     /**
      * Retrieve a cached `find` result, if any.
      *
-     * @name DataStore#cachedFind
-     * @method
+     * @method DataStore#cachedFind
      * @param {string} name The `name` argument passed to {@link DataStore#find}.
      * @param {(string|number)} id The `id` argument passed to {@link DataStore#find}.
      * @param {Object} opts The `opts` argument passed to {@link DataStore#find}.
+     * @since 3.0.0
      */
     cachedFind: cachedFn,
 
     /**
      * Retrieve a cached `findAll` result, if any.
      *
-     * @name DataStore#cachedFindAll
-     * @method
+     * @method DataStore#cachedFindAll
      * @param {string} name The `name` argument passed to {@link DataStore#findAll}.
      * @param {string} hash The result of calling {@link DataStore#hashQuery} on
      * the `query` argument passed to {@link DataStore#findAll}.
      * @param {Object} opts The `opts` argument passed to {@link DataStore#findAll}.
+     * @since 3.0.0
      */
     cachedFindAll: cachedFn,
 
@@ -7968,12 +8562,12 @@
      *
      * Override this method to customize.
      *
-     * @name DataStore#cacheFind
-     * @method
+     * @method DataStore#cacheFind
      * @param {string} name The `name` argument passed to {@link DataStore#find}.
      * @param {*} data The result to cache.
      * @param {(string|number)} id The `id` argument passed to {@link DataStore#find}.
      * @param {Object} opts The `opts` argument passed to {@link DataStore#find}.
+     * @since 3.0.0
      */
     cacheFind: function cacheFind(name, data, id, opts) {
       var _this2 = this;
@@ -7994,13 +8588,13 @@
      *
      * Override this method to customize.
      *
-     * @name DataStore#cacheFindAll
-     * @method
+     * @method DataStore#cacheFindAll
      * @param {string} name The `name` argument passed to {@link DataStore#findAll}.
      * @param {*} data The result to cache.
      * @param {string} hash The result of calling {@link DataStore#hashQuery} on
      * the `query` argument passed to {@link DataStore#findAll}.
      * @param {Object} opts The `opts` argument passed to {@link DataStore#findAll}.
+     * @since 3.0.0
      */
     cacheFindAll: function cacheFindAll(name, data, hash, opts) {
       var _this3 = this;
@@ -8019,15 +8613,15 @@
 
 
     /**
-     * TODO
+     * Wrapper for {@link Mapper#create}. Adds the created to the store.
      *
-     * @name DataStore#create
-     * @method
+     * @method DataStore#create
      * @param {string} name Name of the {@link Mapper} to target.
      * @param {Object} record Passed to {@link Mapper#create}.
      * @param {Object} [opts] Passed to {@link Mapper#create}. See
      * {@link Mapper#create} for more configuration options.
-     * @returns {Promise}
+     * @returns {Promise} Resolves with the result of the create.
+     * @since 3.0.0
      */
     create: function create(name, record, opts) {
       var _this4 = this;
@@ -8040,15 +8634,16 @@
 
 
     /**
-     * TODO
+     * Wrapper for {@link Mapper#createMany}. Adds the created records to the
+     * store.
      *
-     * @name DataStore#createMany
-     * @method
+     * @method DataStore#createMany
      * @param {string} name Name of the {@link Mapper} to target.
      * @param {Array} records Passed to {@link Mapper#createMany}.
      * @param {Object} [opts] Passed to {@link Mapper#createMany}. See
      * {@link Mapper#createMany} for more configuration options.
-     * @returns {Promise}
+     * @returns {Promise} Resolves with the result of the create.
+     * @since 3.0.0
      */
     createMany: function createMany(name, records, opts) {
       var _this5 = this;
@@ -8117,97 +8712,96 @@
         };
 
         if (type === belongsToType) {
-          if (!collection.indexes[foreignKey]) {
-            collection.createIndex(foreignKey);
-          }
-
-          descriptor = {
-            get: getter,
-            set: function set(record) {
-              var _self = this;
-              var current = this._get(path);
-              if (record === current) {
-                return current;
-              }
-              var id = utils.get(_self, idAttribute);
-              var inverseDef = def.getInverse(mapper);
-
-              if (record) {
-                var relatedIdAttribute = def.getRelation().idAttribute;
-                var relatedId = utils.get(record, relatedIdAttribute);
-
-                // Prefer store record
-                if (!utils.isUndefined(relatedId)) {
-                  record = self.get(relation, relatedId) || record;
-                }
-
-                // Set locals
-                _self._set(path, record);
-                safeSet(_self, foreignKey, relatedId);
-                collection.updateIndex(_self, updateOpts);
-
-                // Update (set) inverse relation
-                if (inverseDef.type === hasOneType) {
-                  utils.set(record, inverseDef.localField, _self);
-                } else if (inverseDef.type === hasManyType) {
-                  var children = utils.get(record, inverseDef.localField);
-                  utils.noDupeAdd(children, _self, function (_record) {
-                    return id === utils.get(_record, idAttribute);
-                  });
-                }
-              } else {
-                // Unset locals
-                _self._set(path, undefined);
-                safeSet(_self, foreignKey, undefined);
-                collection.updateIndex(_self, updateOpts);
-              }
-              if (current) {
-                if (inverseDef.type === hasOneType) {
-                  utils.set(current, inverseDef.localField, undefined);
-                } else if (inverseDef.type === hasManyType) {
-                  var _children = utils.get(current, inverseDef.localField);
-                  utils.remove(_children, function (_record) {
-                    return id === utils.get(_record, idAttribute);
-                  });
-                }
-              }
-              return record;
+          (function () {
+            if (!collection.indexes[foreignKey]) {
+              collection.createIndex(foreignKey);
             }
-          };
 
-          if (mapper.recordClass.prototype.hasOwnProperty(foreignKey)) {
-            (function () {
-              var superClass = mapper.recordClass;
-              mapper.recordClass = superClass.extend({
-                constructor: function () {
-                  var subClass = function Record(props, opts) {
-                    utils.classCallCheck(this, subClass);
-                    superClass.call(this, props, opts);
-                  };
-                  return subClass;
-                }()
-              });
-            })();
-          }
-          Object.defineProperty(mapper.recordClass.prototype, foreignKey, {
-            enumerable: true,
-            get: function get() {
-              return this._get(foreignKey);
-            },
-            set: function set(value) {
-              var _self = this;
+            descriptor = {
+              get: getter,
+              set: function set(record) {
+                var _self = this;
+                var current = this._get(path);
+                if (record === current) {
+                  return current;
+                }
+                var id = utils.get(_self, idAttribute);
+                var inverseDef = def.getInverse(mapper);
+
+                if (record) {
+                  var relatedIdAttribute = def.getRelation().idAttribute;
+                  var relatedId = utils.get(record, relatedIdAttribute);
+
+                  // Prefer store record
+                  if (!utils.isUndefined(relatedId)) {
+                    record = self.get(relation, relatedId) || record;
+                  }
+
+                  // Set locals
+                  _self._set(path, record);
+                  safeSet(_self, foreignKey, relatedId);
+                  collection.updateIndex(_self, updateOpts);
+
+                  // Update (set) inverse relation
+                  if (inverseDef.type === hasOneType) {
+                    utils.set(record, inverseDef.localField, _self);
+                  } else if (inverseDef.type === hasManyType) {
+                    var children = utils.get(record, inverseDef.localField);
+                    utils.noDupeAdd(children, _self, function (_record) {
+                      return id === utils.get(_record, idAttribute);
+                    });
+                  }
+                } else {
+                  // Unset locals
+                  _self._set(path, undefined);
+                  safeSet(_self, foreignKey, undefined);
+                  collection.updateIndex(_self, updateOpts);
+                }
+                if (current) {
+                  if (inverseDef.type === hasOneType) {
+                    utils.set(current, inverseDef.localField, undefined);
+                  } else if (inverseDef.type === hasManyType) {
+                    var _children = utils.get(current, inverseDef.localField);
+                    utils.remove(_children, function (_record) {
+                      return id === utils.get(_record, idAttribute);
+                    });
+                  }
+                }
+                return record;
+              }
+            };
+
+            var foreignKeyDescriptor = Object.getOwnPropertyDescriptor(mapper.recordClass.prototype, foreignKey);
+            if (!foreignKeyDescriptor) {
+              foreignKeyDescriptor = {
+                enumerable: true
+              };
+            }
+            var originalGet = foreignKeyDescriptor.get;
+            foreignKeyDescriptor.get = function () {
+              if (originalGet) {
+                return originalGet.call(this);
+              }
+              return this._get('props.' + foreignKey);
+            };
+            var originalSet = foreignKeyDescriptor.set;
+            foreignKeyDescriptor.set = function (value) {
+              if (originalSet) {
+                originalSet.call(this, value);
+              }
               if (utils.isUndefined(value)) {
                 // Unset locals
-                utils.set(_self, localField, undefined);
+                utils.set(this, localField, undefined);
               } else {
-                safeSet(_self, foreignKey, value);
+                safeSet(this, foreignKey, value);
                 var storeRecord = self.get(relation, value);
                 if (storeRecord) {
-                  utils.set(_self, localField, storeRecord);
+                  utils.set(this, localField, storeRecord);
                 }
               }
-            }
-          });
+            };
+            Object.defineProperty(mapper.recordClass.prototype, foreignKey, foreignKeyDescriptor);
+          })();
         } else if (type === hasManyType) {
           (function () {
             var localKeys = def.localKeys;
@@ -8401,15 +8995,16 @@
 
 
     /**
-     * TODO
+     * Wrapper for {@link Mapper#destroy}. Removes any destroyed record from the
+     * store.
      *
-     * @name DataStore#destroy
-     * @method
-     * @param {string} name - Name of the {@link Mapper} to target.
-     * @param {(string|number)} id - Passed to {@link Mapper#destroy}.
-     * @param {Object} [opts] - Passed to {@link Mapper#destroy}. See
+     * @method DataStore#destroy
+     * @param {string} name Name of the {@link Mapper} to target.
+     * @param {(string|number)} id Passed to {@link Mapper#destroy}.
+     * @param {Object} [opts] Passed to {@link Mapper#destroy}. See
      * {@link Mapper#destroy} for more configuration options.
-     * @returns {Promise}
+     * @returns {Promise} Resolves when the delete completes.
+     * @since 3.0.0
      */
     destroy: function destroy(name, id, opts) {
       var _this8 = this;
@@ -8429,15 +9024,16 @@
 
 
     /**
-     * TODO
+     * Wrapper for {@link Mapper#destroyAll}. Removes any destroyed records from
+     * the store.
      *
-     * @name DataStore#destroyAll
-     * @method
-     * @param {string} name - Name of the {@link Mapper} to target.
-     * @param {Object} [query] - Passed to {@link Mapper#destroyAll}.
-     * @param {Object} [opts] - Passed to {@link Mapper#destroyAll}. See
+     * @method DataStore#destroyAll
+     * @param {string} name Name of the {@link Mapper} to target.
+     * @param {Object} [query] Passed to {@link Mapper#destroyAll}.
+     * @param {Object} [opts] Passed to {@link Mapper#destroyAll}. See
      * {@link Mapper#destroyAll} for more configuration options.
-     * @returns {Promise}
+     * @returns {Promise} Resolves when the delete completes.
+     * @since 3.0.0
      */
     destroyAll: function destroyAll(name, query, opts) {
       var _this9 = this;
@@ -8466,14 +9062,14 @@
 
 
     /**
-     * TODO
+     * Wrapper for {@link Mapper#find}. Adds any found record to the store.
      *
-     * @name DataStore#find
-     * @method
-     * @param {string} name - Name of the {@link Mapper} to target.
-     * @param {(string|number)} id - Passed to {@link Mapper#find}.
-     * @param {Object} [opts] - Passed to {@link Mapper#find}.
-     * @returns {Promise}
+     * @method DataStore#find
+     * @param {string} name Name of the {@link Mapper} to target.
+     * @param {(string|number)} id Passed to {@link Mapper#find}.
+     * @param {Object} [opts] Passed to {@link Mapper#find}.
+     * @returns {Promise} Resolves with the result, if any.
+     * @since 3.0.0
      */
     find: function find(name, id, opts) {
       var _this10 = this;
@@ -8507,14 +9103,14 @@
 
 
     /**
-     * TODO
+     * Wrapper for {@link Mapper#findAll}. Adds any found records to the store.
      *
-     * @name DataStore#findAll
-     * @method
-     * @param {string} name - Name of the {@link Mapper} to target.
-     * @param {Object} [query] - Passed to {@link Model.findAll}.
-     * @param {Object} [opts] - Passed to {@link Model.findAll}.
-     * @returns {Promise}
+     * @method DataStore#findAll
+     * @param {string} name Name of the {@link Mapper} to target.
+     * @param {Object} [query] Passed to {@link Model.findAll}.
+     * @param {Object} [opts] Passed to {@link Model.findAll}.
+     * @returns {Promise} Resolves with the result, if any.
+     * @since 3.0.0
      */
     findAll: function findAll(name, query, opts) {
       var _this11 = this;
@@ -8550,12 +9146,14 @@
 
 
     /**
-     * TODO
+     * Return the {@link LinkedCollection} with the given name.
      *
-     * @name DataStore#getCollection
-     * @method
+     * @method DataStore#getCollection
      * @param {string} name Name of the {@link LinkedCollection} to retrieve.
      * @returns {LinkedCollection}
+     * @since 3.0.0
+     * @throws {Error} Thrown if the specified {@link LinkedCollection} does not
+     * exist.
      */
     getCollection: function getCollection(name) {
       var collection = this._collections[name];
@@ -8564,6 +9162,23 @@
       }
       return collection;
     },
+
+
+    /**
+     * Hashing function used to cache {@link DataStore#find} and
+     * {@link DataStore#findAll} requests. This method simply JSONifies the
+     * `query` argument passed to {@link DataStore#find} or
+     * {@link DataStore#findAll}.
+     *
+     * Override this method for custom hashing behavior.
+     * @method DataStore#hashQuery
+     * @param {string} name The `name` argument passed to {@link DataStore#find}
+     * or {@link DataStore#findAll}.
+     * @param {Object} query The `query` argument passed to {@link DataStore#find}
+     * or {@link DataStore#findAll}.
+     * @returns {string} The JSONified `query`.
+     * @since 3.0.0
+     */
     hashQuery: function hashQuery(name, query, opts) {
       return utils.toJson(query);
     },
@@ -8571,6 +9186,21 @@
       console.warn('DEPRECATED: "inject" is deprecated, use "add" instead');
       return this.add(name, records, opts);
     },
+
+
+    /**
+     * Wrapper for {@link LinkedCollection#remove}. Removes the specified
+     * {@link Record} from the store.
+     *
+     * @method DataStore#remove
+     * @param {string} name The name of the {@link LinkedCollection} to target.
+     * @param {string|number} id The primary key of the {@link Record} to remove.
+     * @param {Object} [opts] Configuration options.
+     * @param {string[]} [opts.with] Relations of the {@link Record} to also
+     * remove from the store.
+     * @returns {Record} The removed {@link Record}, if any.
+     * @since 3.0.0
+     */
     remove: function remove(name, id, opts) {
       var record = this.getCollection(name).remove(id, opts);
       if (record) {
@@ -8578,6 +9208,25 @@
       }
       return record;
     },
+
+
+    /**
+     * Wrapper for {@link LinkedCollection#removeAll}. Removes the selected
+     * {@link Record}s from the store.
+     *
+     * @method DataStore#removeAll
+     * @param {string} name The name of the {@link LinkedCollection} to target.
+     * @param {Object} [query={}] Selection query. See {@link query}.
+     * @param {Object} [query.where] See {@link query.where}.
+     * @param {number} [query.offset] See {@link query.offset}.
+     * @param {number} [query.limit] See {@link query.limit}.
+     * @param {string|Array[]} [query.orderBy] See {@link query.orderBy}.
+     * @param {Object} [opts] Configuration options.
+     * @param {string[]} [opts.with] Relations of the {@link Record} to also
+     * remove from the store.
+     * @returns {Record} The removed {@link Record}s, if any.
+     * @since 3.0.0
+     */
     removeAll: function removeAll(name, query, opts) {
       var records = this.getCollection(name).removeAll(query, opts);
       if (records.length) {
@@ -8585,9 +9234,27 @@
       }
       return records;
     },
+
+
+    /**
+     * Remove from the store {@link Record}s that are related to the provided
+     * {@link Record}(s).
+     *
+     * @method DataStore#removeRelated
+     * @param {string} name The name of the {@link LinkedCollection} to target.
+     * @param {Record|Record[]} records {@link Record}s whose relations are to be
+     * removed.
+     * @param {Object} [opts] Configuration options.
+     * @param {string[]} [opts.with] Relations of the {@link Record}(s) to remove
+     * from the store.
+     * @since 3.0.0
+     */
     removeRelated: function removeRelated(name, records, opts) {
       var _this12 = this;
 
+      if (!utils.isArray(records)) {
+        records = [records];
+      }
       utils.forEachRelation(this.getMapper(name), opts, function (def, optsCopy) {
         records.forEach(function (record) {
           var relatedData = void 0;
@@ -8627,16 +9294,17 @@
 
 
     /**
-     * TODO
+     * Wrapper for {@link Mapper#update}. Adds the updated {@link Record} to the
+     * store.
      *
-     * @name DataStore#update
-     * @method
-     * @param {string} name - Name of the {@link Mapper} to target.
-     * @param {(string|number)} id - Passed to {@link Mapper#update}.
-     * @param {Object} record - Passed to {@link Mapper#update}.
-     * @param {Object} [opts] - Passed to {@link Mapper#update}. See
+     * @method DataStore#update
+     * @param {string} name Name of the {@link Mapper} to target.
+     * @param {(string|number)} id Passed to {@link Mapper#update}.
+     * @param {Object} record Passed to {@link Mapper#update}.
+     * @param {Object} [opts] Passed to {@link Mapper#update}. See
      * {@link Mapper#update} for more configuration options.
-     * @returns {Promise}
+     * @returns {Promise} Resolves with the result of the update.
+     * @since 3.0.0
      */
     update: function update(name, id, record, opts) {
       var _this13 = this;
@@ -8649,16 +9317,17 @@
 
 
     /**
-     * TODO
+     * Wrapper for {@link Mapper#updateAll}. Adds the updated {@link Record}s to
+     * the store.
      *
-     * @name DataStore#updateAll
-     * @method
-     * @param {string} name - Name of the {@link Mapper} to target.
-     * @param {Object} props - Passed to {@link Mapper#updateAll}.
-     * @param {Object} [query] - Passed to {@link Mapper#updateAll}.
-     * @param {Object} [opts] - Passed to {@link Mapper#updateAll}. See
+     * @method DataStore#updateAll
+     * @param {string} name Name of the {@link Mapper} to target.
+     * @param {Object} props Passed to {@link Mapper#updateAll}.
+     * @param {Object} [query] Passed to {@link Mapper#updateAll}.
+     * @param {Object} [opts] Passed to {@link Mapper#updateAll}. See
      * {@link Mapper#updateAll} for more configuration options.
-     * @returns {Promise}
+     * @returns {Promise} Resolves with the result of the update.
+     * @since 3.0.0
      */
     updateAll: function updateAll(name, props, query, opts) {
       var _this14 = this;
@@ -8671,15 +9340,16 @@
 
 
     /**
-     * TODO
+     * Wrapper for {@link Mapper#updateMany}. Adds the updated {@link Record}s to
+     * the store.
      *
-     * @name DataStore#updateMany
-     * @method
+     * @method DataStore#updateMany
      * @param {string} name Name of the {@link Mapper} to target.
      * @param {(Object[]|Record[])} records Passed to {@link Mapper#updateMany}.
      * @param {Object} [opts] Passed to {@link Mapper#updateMany}. See
      * {@link Mapper#updateMany} for more configuration options.
-     * @returns {Promise}
+     * @returns {Promise} Resolves with the result of the update.
+     * @since 3.0.0
      */
     updateMany: function updateMany(name, records, opts) {
       var _this15 = this;
@@ -8703,57 +9373,7 @@
     };
   });
 
-  /**
-   * The `DataStore` class is an extension of {@link Container}. Not only does
-   * `DataStore` manage mappers, but also collections. `DataStore` implements the
-   * asynchronous {@link Mapper} methods, such as {@link Mapper#find} and
-   * {@link Mapper#create}. If you use the asynchronous `DataStore` methods
-   * instead of calling them directly on the mappers, then the results of the
-   * method calls will be inserted into the store's collections. You can think of
-   * a `DataStore` as an [Identity Map](https://en.wikipedia.org/wiki/Identity_map_pattern)
-   * for the [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping)
-   * (the Mappers).
-   *
-   * ```javascript
-   * import {DataStore} from 'js-data'
-   * ```
-   *
-   * @example
-   * import {DataStore} from 'js-data'
-   * import HttpAdapter from 'js-data-http'
-   * const store = new DataStore()
-   *
-   * // DataStore#defineMapper returns a direct reference to the newly created
-   * // Mapper.
-   * const UserMapper = store.defineMapper('user')
-   *
-   * // DataStore#as returns the store scoped to a particular Mapper.
-   * const UserStore = store.as('user')
-   *
-   * // Call "find" on "UserMapper" (Stateless ORM)
-   * UserMapper.find(1).then((user) => {
-   *   // retrieved a "user" record via the http adapter, but that's it
-   *
-   *   // Call "find" on "store" targeting "user" (Stateful DataStore)
-   *   return store.find('user', 1) // same as "UserStore.find(1)"
-   * }).then((user) => {
-   *   // not only was a "user" record retrieved, but it was added to the
-   *   // store's "user" collection
-   *   const cachedUser = store.getCollection('user').get(1)
-   *   console.log(user === cachedUser) // true
-   * })
-   *
-   * @class DataStore
-   * @extends Container
-   * @param {Object} [opts] Configuration options. See {@link Container}.
-   * @returns {DataStore}
-   * @see Container
-   * @since 3.0.0
-   * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#datastore","Components of JSData: DataStore"]
-   * @tutorial ["http://www.js-data.io/v3.0/docs/working-with-the-datastore","Working with the DataStore"]
-   * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
-   */
-  var DataStore = Container.extend(props$1);
+  var DataStore$1 = Container.extend(props$1);
 
   /**
    * Create a subclass of this DataStore.
@@ -8829,31 +9449,31 @@
    * @type {Object}
    */
   var version = {
-  beta: 6,
-  full: '3.0.0-beta.6',
+  beta: 7,
+  full: '3.0.0-beta.7',
   major: 3,
   minor: 0,
   patch: 0
 };
 
   exports.version = version;
-  exports.Collection = Collection;
+  exports.Collection = Collection$1;
   exports.Component = Component;
   exports.Container = Container;
-  exports.DataStore = DataStore;
+  exports.DataStore = DataStore$1;
   exports.Index = Index;
-  exports.LinkedCollection = LinkedCollection;
-  exports.Mapper = Mapper;
-  exports.Query = Query;
-  exports.Record = Record;
-  exports.Schema = Schema;
+  exports.LinkedCollection = LinkedCollection$1;
+  exports.Mapper = Mapper$1;
+  exports.Query = Query$1;
+  exports.Record = Record$1;
+  exports.Schema = Schema$1;
   exports.utils = utils;
+  exports.belongsTo = belongsTo;
+  exports.hasMany = hasMany;
+  exports.hasOne = hasOne;
   exports.belongsToType = belongsToType;
   exports.hasManyType = hasManyType;
   exports.hasOneType = hasOneType;
-  exports.belongsTo = _belongsTo;
-  exports.hasMany = _hasMany;
-  exports.hasOne = _hasOne;
 
 }));
 //# sourceMappingURL=js-data.js.map
