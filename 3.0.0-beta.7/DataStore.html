@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>js-data Class: Container</title>
+	<title>js-data Class: DataStore</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -94,7 +94,7 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Collection.html">Collection</a></li><li><a href="Component.html">Component</a></li><li><a href="Container.html">Container</a></li><li><a href="DataStore.html">DataStore</a></li><li><a href="LinkedCollection.html">LinkedCollection</a></li><li><a href="Mapper.html">Mapper</a></li><li><a href="Query.html">Query</a></li><li><a href="Record.html">Record</a></li><li><a href="Schema.html">Schema</a></li>
+					<li><a href="Collection.html">Collection</a></li><li><a href="Component.html">Component</a></li><li><a href="DataStore.html">DataStore</a></li><li><a href="LinkedCollection.html">LinkedCollection</a></li><li><a href="Mapper.html">Mapper</a></li><li><a href="Query.html">Query</a></li><li><a href="Record.html">Record</a></li><li><a href="Schema.html">Schema</a></li>
 				</ul>
 			</li>
 			
@@ -132,13 +132,13 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: Container</h1>
+	<h1 class="page-title">Class: DataStore</h1>
 <section>
 
 <header>
     
         <h2>
-        Container
+        DataStore
         </h2>
         
     
@@ -151,7 +151,7 @@
         
 <hr>
 <dt>
-  <h4 class="name" id="Container"><span class="type-signature"></span>new Container(<span class="optional">opts</span>)</h4>
+  <h4 class="name" id="DataStore"><span class="type-signature"></span>new DataStore(<span class="optional">opts</span>)</h4>
 
   
 </dt>
@@ -159,10 +159,16 @@
 
   
   <div class="description">
-    <pre class="prettyprint source lang-javascript"><code>import {Container} from 'js-data'</code></pre><p>The <code>Container</code> class is a place to store <a href="Mapper.html">Mapper</a> instances.</p>
-<p>Without a container, you need to manage mappers yourself, including resolving
-circular dependencies among relations. All mappers in a container share the
-same adapters, so you don't have to add each adapter to all of your mappers.</p>
+    <p>The <code>DataStore</code> class is an extension of <a href="Container.html">Container</a>. Not only does
+<code>DataStore</code> manage mappers, but also collections. <code>DataStore</code> implements the
+asynchronous <a href="Mapper.html">Mapper</a> methods, such as <a href="Mapper.html#find">Mapper#find</a> and
+<a href="Mapper.html#create">Mapper#create</a>. If you use the asynchronous <code>DataStore</code> methods
+instead of calling them directly on the mappers, then the results of the
+method calls will be inserted into the store's collections. You can think of
+a <code>DataStore</code> as an <a href="https://en.wikipedia.org/wiki/Identity_map_pattern">Identity Map</a>
+for the <a href="https://en.wikipedia.org/wiki/Object-relational_mapping">ORM</a>
+(the Mappers).</p>
+<pre class="prettyprint source lang-javascript"><code>import {DataStore} from 'js-data'</code></pre>
   </div>
   
 
@@ -228,105 +234,7 @@ same adapters, so you don't have to add each adapter to all of your mappers.</p>
 
             
 
-            <td class="description last"><p>Configuration options.</p>
-                <h6 class="method-params-label method-subparams-label">Properties</h6>
-                
-
-<table class="params table table-striped table-bordered">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Argument</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>mapperClass</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>Constructor function to use in
-<a href="Container.html#defineMapper">Container#defineMapper</a> to create a new mapper.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>mapperDefaults</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>Defaults options to pass to
-<a href="Container.html#mapperClass">Container#mapperClass</a> when creating a new mapper.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
+            <td class="description last"><p>Configuration options. See <a href="Container.html">Container</a>.</p></td>
         </tr>
 
     
@@ -362,7 +270,7 @@ same adapters, so you don't have to add each adapter to all of your mappers.</p>
           <tr>
             
               <td>
-<span class="param-type"><a href="Container.html">Container</a></span>
+<span class="param-type"><a href="DataStore.html">DataStore</a></span>
 
 
 </td>
@@ -397,6 +305,8 @@ same adapters, so you don't have to add each adapter to all of your mappers.</p>
           <th>Tutorials</th>
         
         
+          <th>See</th>
+        
         
       </tr>
     </thead>
@@ -410,22 +320,28 @@ same adapters, so you don't have to add each adapter to all of your mappers.</p>
         
         
           <td>
-            <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-741">line 741</a>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-57">line 57</a>
           </td>
         
         
         
           <td>
             <ul>
-              <li><a href="http://www.js-data.io/v3.0/docs/components-of-jsdata#container">Components of JSData: Container</a></li>
+              <li><a href="http://www.js-data.io/v3.0/docs/components-of-jsdata#datastore">Components of JSData: DataStore</a></li>
+              
+              <li><a href="http://www.js-data.io/v3.0/docs/working-with-the-datastore">Working with the DataStore</a></li>
               
               <li><a href="http://www.js-data.io/v3.0/docs/jsdata-and-the-browser">Notes on using JSData in the Browser</a></li>
-              
-              <li><a href="http://www.js-data.io/v3.0/docs/jsdata-and-nodejs">Notes on using JSData in Node.js</a></li>
               </ul>
           </td>
         
+        
+          <td>
+            <ul>
+              <li><a href="Container.html">Container</a></li>
+              </ul>
+          </td>
         
         
       </tr>
@@ -456,59 +372,32 @@ same adapters, so you don't have to add each adapter to all of your mappers.</p>
   
     <div class="code-panel panel panel-warning">
       <div class="panel-heading">
-        <strong>Examples</strong>
+        <strong>Example</strong>
       </div>
       <div class="panel-body">
         
-        <p class="code-caption">Without Container</p>
-    
-    <pre><code class="javascript">import {Mapper} from &#x27;js-data&#x27;
+    <pre><code class="javascript">import {DataStore} from &#x27;js-data&#x27;
 import HttpAdapter from &#x27;js-data-http&#x27;
-const adapter = new HttpAdapter()
-const userMapper = new Mapper({ name: &#x27;user&#x27; })
-userMapper.registerAdapter(&#x27;http&#x27;, adapter, { default: true })
-const commentMapper = new Mapper({ name: &#x27;comment&#x27; })
-commentMapper.registerAdapter(&#x27;http&#x27;, adapter, { default: true })
+const store = new DataStore()
 
-// This might be more difficult if the mappers were defined in different
-// modules.
-userMapper.hasMany(commentMapper, {
-  localField: &#x27;comments&#x27;,
-  foreignKey: &#x27;userId&#x27;
-})
-commentMapper.belongsTo(userMapper, {
-  localField: &#x27;user&#x27;,
-  foreignKey: &#x27;userId&#x27;
-})</code></pre>
+// DataStore#defineMapper returns a direct reference to the newly created
+// Mapper.
+const UserMapper = store.defineMapper(&#x27;user&#x27;)
 
-        <p class="code-caption">With Container</p>
-    
-    <pre><code class="javascript">import {Container} from &#x27;js-data&#x27;
-import HttpAdapter from &#x27;js-data-http&#x27;
-const container = new Container()
-// All mappers in container share adapters
-container.registerAdapter(&#x27;http&#x27;, new HttpAdapter(), { default: true })
+// DataStore#as returns the store scoped to a particular Mapper.
+const UserStore = store.as(&#x27;user&#x27;)
 
-// These could be defined in separate modules without a problem.
-container.defineMapper(&#x27;user&#x27;, {
-  relations: {
-    hasMany: {
-      comment: {
-        localField: &#x27;comments&#x27;,
-        foreignKey: &#x27;userId&#x27;
-      }
-    }
-  }
-})
-container.defineMapper(&#x27;comment&#x27;, {
-  relations: {
-    belongsTo: {
-      user: {
-        localField: &#x27;user&#x27;,
-        foreignKey: &#x27;userId&#x27;
-      }
-    }
-  }
+// Call &quot;find&quot; on &quot;UserMapper&quot; (Stateless ORM)
+UserMapper.find(1).then((user) =&gt; {
+  // retrieved a &quot;user&quot; record via the http adapter, but that&#x27;s it
+
+  // Call &quot;find&quot; on &quot;store&quot; targeting &quot;user&quot; (Stateful DataStore)
+  return store.find(&#x27;user&#x27;, 1) // same as &quot;UserStore.find(1)&quot;
+}).then((user) =&gt; {
+  // not only was a &quot;user&quot; record retrieved, but it was added to the
+  // store&#x27;s &quot;user&quot; collection
+  const cachedUser = store.getCollection(&#x27;user&#x27;).get(1)
+  console.log(user === cachedUser) // true
 })</code></pre>
 
 
@@ -526,7 +415,7 @@ container.defineMapper(&#x27;comment&#x27;, {
         
 
 
-    This class extends the <a href="Component.html">Component</a> class.
+    This class extends the <a href="Container.html">Container</a> class.
 
 
     
@@ -543,108 +432,6 @@ container.defineMapper(&#x27;comment&#x27;, {
         <h3 class="subsection-title">Members</h3>
 
         <dl>
-            
-<hr>
-<dt class="name" id="_listeners">
-    <h4><strong><span class="type-signature"></span>_listeners</strong></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>Event listeners attached to this Component. <strong>Do not modify.</strong> Use
-<a href="Component.html#on">Component#on</a> and <a href="Component.html#off">Component#off</a> instead.</p>
-    </div>
-    
-
-    
-<div class="panel panel-default">
-  <div class="panel-heading"><strong>Details</strong></div>
-  <table class="table table-striped table-bordered">
-    <thead>
-      <tr>
-        
-          <th>Type</th>
-        
-        
-        
-          <th>Since</th>
-        
-        
-        
-          <th>Source</th>
-        
-        
-        
-        
-        
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        
-          <td>
-            
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
-
-
-
-          </td>
-        
-        
-        
-          <td>3.0.0</td>
-        
-        
-        
-          <td>
-            <a href="Component.js.html">Component.js</a>,
-             <a href="Component.js.html#sunlight-1-line-7">line 7</a>
-          </td>
-        
-        
-        
-        
-        
-      </tr>
-    </tbody>
-  </table>
-</div>
-<dl class="details">
-    
-
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="Component.html#_listeners">Component#_listeners</a>
-      </li>
-    </ul>
-  </dd>
-  
-
-    
-
-    
-
-    
-
-  
-
-  
-
-  
-
-  
-</dl>
-
-
-    
-</dd>
-
-        
             
 <hr>
 <dt class="name" id="mapperClass">
@@ -703,7 +490,7 @@ new mapper.</p>
         
           <td>
             <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-467">line 467</a>
+             <a href="Container.js.html#sunlight-1-line-461">line 461</a>
           </td>
         
         
@@ -717,6 +504,15 @@ new mapper.</p>
 <dl class="details">
     
 
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Container.html#mapperClass">Container#mapperClass</a>
+      </li>
+    </ul>
+  </dd>
   
 
     
@@ -800,7 +596,7 @@ new <a href="Mapper.html">Mapper</a>.</p>
         
           <td>
             <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-456">line 456</a>
+             <a href="Container.js.html#sunlight-1-line-450">line 450</a>
           </td>
         
         
@@ -814,6 +610,15 @@ new <a href="Mapper.html">Mapper</a>.</p>
 <dl class="details">
     
 
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Container.html#mapperDefaults">Container#mapperDefaults</a>
+      </li>
+    </ul>
+  </dd>
   
 
     
@@ -853,7 +658,7 @@ new <a href="Mapper.html">Mapper</a>.</p>
 
   
   <div class="description">
-    <p>Create a subclass of this Container.</p>
+    <p>Create a subclass of this DataStore.</p>
   </div>
   
 
@@ -1010,7 +815,7 @@ subclass.</p></td>
 </td>
             
             
-              <td><p>Subclass of this Container.</p></td>
+              <td><p>Subclass of this DataStore.</p></td>
             
           </tr>
         
@@ -1050,8 +855,8 @@ subclass.</p></td>
         
         
           <td>
-            <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-816">line 816</a>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-1007">line 1007</a>
           </td>
         
         
@@ -1092,24 +897,251 @@ subclass.</p></td>
         
         <p class="code-caption">Extend the class in a cross-browser manner.</p>
     
-    <pre><code class="javascript">import {Container} from &#x27;js-data&#x27;
-const CustomContainerClass = Container.extend({
+    <pre><code class="javascript">import {DataStore} from &#x27;js-data&#x27;
+const CustomDataStoreClass = DataStore.extend({
   foo () { return &#x27;bar&#x27; }
 })
-const customContainer = new CustomContainerClass()
-console.log(customContainer.foo()) // &quot;bar&quot;</code></pre>
+const customDataStore = new CustomDataStoreClass()
+console.log(customDataStore.foo()) // &quot;bar&quot;</code></pre>
 
         <p class="code-caption">Extend the class using ES2015 class syntax.</p>
     
-    <pre><code class="javascript">class CustomContainerClass extends Container {
+    <pre><code class="javascript">class CustomDataStoreClass extends DataStore {
   foo () { return &#x27;bar&#x27; }
 }
-const customContainer = new CustomContainerClass()
-console.log(customContainer.foo()) // &quot;bar&quot;</code></pre>
+const customDataStore = new CustomDataStoreClass()
+console.log(customDataStore.foo()) // &quot;bar&quot;</code></pre>
 
 
       </div>
     </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="addToCache"><span class="type-signature"></span>addToCache(name, data, <span class="optional">opts</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>TODO</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Name of the <a href="Mapper.html">Mapper</a> to target.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Data from which data should be selected for add.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+        
+        
+          <td>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-164">line 164</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
   
 </dd>
 
@@ -1125,7 +1157,7 @@ console.log(customContainer.foo()) // &quot;bar&quot;</code></pre>
 
   
   <div class="description">
-    <p>Return a container scoped to a particular mapper.</p>
+    <p>Return a store scoped to a particular mapper/collection pair.</p>
   </div>
   
 
@@ -1221,7 +1253,7 @@ console.log(customContainer.foo()) // &quot;bar&quot;</code></pre>
 </td>
             
             
-              <td><p>A container scoped to a particular mapper.</p></td>
+              <td><p>A store scoped to a particular mapper/collection pair.</p></td>
             
           </tr>
         
@@ -1246,6 +1278,8 @@ console.log(customContainer.foo()) // &quot;bar&quot;</code></pre>
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
         
@@ -1261,10 +1295,14 @@ console.log(customContainer.foo()) // &quot;bar&quot;</code></pre>
         
         
           <td>
-            <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-507">line 507</a>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-176">line 176</a>
           </td>
         
+        
+          <td>
+            <a href="Container.html#as">Container#as</a>
+          </td>
         
         
         
@@ -1301,8 +1339,8 @@ console.log(customContainer.foo()) // &quot;bar&quot;</code></pre>
       </div>
       <div class="panel-body">
         
-    <pre><code class="javascript">import {Container} from &#x27;js-data&#x27;
-const store = new Container()
+    <pre><code class="javascript">import {DataStore} from &#x27;js-data&#x27;
+const store = new DataStore()
 const UserMapper = store.defineMapper(&#x27;user&#x27;)
 const UserStore = store.as(&#x27;user&#x27;)
 
@@ -1316,6 +1354,878 @@ assert.deepEqual(user1, user3)</code></pre>
 
       </div>
     </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="cachedFind"><span class="type-signature"></span>cachedFind(name, id, opts)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Retrieve a cached <code>find</code> result, if any.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument passed to <a href="DataStore.html#find">DataStore#find</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+|
+
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" target="_blank">Number</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>id</code> argument passed to <a href="DataStore.html#find">DataStore#find</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument passed to <a href="DataStore.html#find">DataStore#find</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-234">line 234</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="cachedFindAll"><span class="type-signature"></span>cachedFindAll(name, hash, opts)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Retrieve a cached <code>findAll</code> result, if any.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument passed to <a href="DataStore.html#findAll">DataStore#findAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>hash</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The result of calling <a href="DataStore.html#hashQuery">DataStore#hashQuery</a> on
+the <code>query</code> argument passed to <a href="DataStore.html#findAll">DataStore#findAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument passed to <a href="DataStore.html#findAll">DataStore#findAll</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-245">line 245</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="cacheFind"><span class="type-signature"></span>cacheFind(name, data, id, opts)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Cache a <code>find</code> result. The default implementation does the following:</p>
+<pre class="prettyprint source"><code>// Find and return the record from the data store
+return this.get(name, id)</code></pre><p>Override this method to customize.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument passed to <a href="DataStore.html#find">DataStore#find</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The result to cache.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+|
+
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" target="_blank">Number</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>id</code> argument passed to <a href="DataStore.html#find">DataStore#find</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument passed to <a href="DataStore.html#find">DataStore#find</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-257">line 257</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="cacheFindAll"><span class="type-signature"></span>cacheFindAll(name, data, hash, opts)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Cache a <code>findAll</code> result. The default implementation does the following:</p>
+<pre class="prettyprint source"><code>// Find and return the records from the data store
+return this.filter(name, utils.fromJson(hash))</code></pre><p>Override this method to customize.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument passed to <a href="DataStore.html#findAll">DataStore#findAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The result to cache.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>hash</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The result of calling <a href="DataStore.html#hashQuery">DataStore#hashQuery</a> on
+the <code>query</code> argument passed to <a href="DataStore.html#findAll">DataStore#findAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument passed to <a href="DataStore.html#findAll">DataStore#findAll</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-278">line 278</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
   
 </dd>
 
@@ -1548,7 +2458,7 @@ assert.deepEqual(user1, user3)</code></pre>
         
           <td>
             <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-13">line 13</a>
+             <a href="Container.js.html#sunlight-1-line-8">line 8</a>
           </td>
         
         
@@ -1568,6 +2478,15 @@ assert.deepEqual(user1, user3)</code></pre>
 <dl class="details">
     
 
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Container.html#count">Container#count</a>
+      </li>
+    </ul>
+  </dd>
   
 
     
@@ -1615,7 +2534,7 @@ store.count(&#x27;post&#x27;, { status: &#x27;published&#x27; }).then((numPublis
             
 <hr>
 <dt>
-  <h4 class="name" id="create"><span class="type-signature"></span>create(name, props, <span class="optional">opts</span>)</h4>
+  <h4 class="name" id="create"><span class="type-signature"></span>create(name, record, <span class="optional">opts</span>)</h4>
 
   
 </dt>
@@ -1623,7 +2542,7 @@ store.count(&#x27;post&#x27;, { status: &#x27;published&#x27; }).then((numPublis
 
   
   <div class="description">
-    <p>Wrapper for <a href="Mapper.html#create">Mapper#create</a>.</p>
+    <p>Wrapper for <a href="Mapper.html#create">Mapper#create</a>. Adds the created to the store.</p>
   </div>
   
 
@@ -1694,7 +2613,7 @@ store.count(&#x27;post&#x27;, { status: &#x27;published&#x27; }).then((numPublis
 
         <tr>
             
-                <td class="name"><code>props</code></td>
+                <td class="name"><code>record</code></td>
             
 
             <td class="type">
@@ -1719,7 +2638,7 @@ store.count(&#x27;post&#x27;, { status: &#x27;published&#x27; }).then((numPublis
 
             
 
-            <td class="description last"><p>See <a href="Mapper.html#create">Mapper#create</a>.</p></td>
+            <td class="description last"><p>Passed to <a href="Mapper.html#create">Mapper#create</a>.</p></td>
         </tr>
 
     
@@ -1753,7 +2672,8 @@ store.count(&#x27;post&#x27;, { status: &#x27;published&#x27; }).then((numPublis
 
             
 
-            <td class="description last"><p>See <a href="Mapper.html#create">Mapper#create</a>.</p></td>
+            <td class="description last"><p>Passed to <a href="Mapper.html#create">Mapper#create</a>. See
+<a href="Mapper.html#create">Mapper#create</a> for more configuration options.</p></td>
         </tr>
 
     
@@ -1795,7 +2715,7 @@ store.count(&#x27;post&#x27;, { status: &#x27;published&#x27; }).then((numPublis
 </td>
             
             
-              <td><p>See <a href="Mapper.html#create">Mapper#create</a>.</p></td>
+              <td><p>Resolves with the result of the create.</p></td>
             
           </tr>
         
@@ -1820,9 +2740,9 @@ store.count(&#x27;post&#x27;, { status: &#x27;published&#x27; }).then((numPublis
           <th>Source</th>
         
         
+          <th>Overrides</th>
         
         
-          <th>See</th>
         
         
       </tr>
@@ -1837,18 +2757,16 @@ store.count(&#x27;post&#x27;, { status: &#x27;published&#x27; }).then((numPublis
         
         
           <td>
-            <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-37">line 37</a>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-308">line 308</a>
           </td>
-        
-        
         
         
           <td>
-            <ul>
-              <li><a href="Mapper.html#create">Mapper#create</a></li>
-              </ul>
+            <a href="Container.html#create">Container#create</a>
           </td>
+        
+        
         
         
       </tr>
@@ -1877,31 +2795,6 @@ store.count(&#x27;post&#x27;, { status: &#x27;published&#x27; }).then((numPublis
 
 
   
-    <div class="code-panel panel panel-warning">
-      <div class="panel-heading">
-        <strong>Example</strong>
-      </div>
-      <div class="panel-body">
-        
-        <p class="code-caption">Create and save a new blog post</p>
-    
-    <pre><code class="javascript">import {Container} from &#x27;js-data&#x27;
-import RethinkDBAdapter from &#x27;js-data-rethinkdb&#x27;
-const store = new Container()
-store.registerAdapter(&#x27;rethinkdb&#x27;, new RethinkDBAdapter(), { default: true })
-store.defineMapper(&#x27;post&#x27;)
-
-store.create(&#x27;post&#x27;, {
-  title: &#x27;Modeling your data&#x27;,
-  status: &#x27;draft&#x27;
-}).then((post) =&gt; {
-  console.log(post) // { id: 1234, status: &#x27;draft&#x27;, ... }
-})</code></pre>
-
-
-      </div>
-    </div>
-  
 </dd>
 
         
@@ -1916,7 +2809,8 @@ store.create(&#x27;post&#x27;, {
 
   
   <div class="description">
-    <p>Wrapper for <a href="Mapper.html#createMany">Mapper#createMany</a>.</p>
+    <p>Wrapper for <a href="Mapper.html#createMany">Mapper#createMany</a>. Adds the created records to the
+store.</p>
   </div>
   
 
@@ -1993,7 +2887,7 @@ store.create(&#x27;post&#x27;, {
             <td class="type">
             
                 
-<span class="param-type">Array.&lt;<a href="Record.html">Record</a>></span>
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" target="_blank">Array</a></span>
 
 
 
@@ -2012,7 +2906,7 @@ store.create(&#x27;post&#x27;, {
 
             
 
-            <td class="description last"><p>See <a href="Mapper.html#createMany">Mapper#createMany</a>.</p></td>
+            <td class="description last"><p>Passed to <a href="Mapper.html#createMany">Mapper#createMany</a>.</p></td>
         </tr>
 
     
@@ -2046,7 +2940,8 @@ store.create(&#x27;post&#x27;, {
 
             
 
-            <td class="description last"><p>See <a href="Mapper.html#createMany">Mapper#createMany</a>.</p></td>
+            <td class="description last"><p>Passed to <a href="Mapper.html#createMany">Mapper#createMany</a>. See
+<a href="Mapper.html#createMany">Mapper#createMany</a> for more configuration options.</p></td>
         </tr>
 
     
@@ -2088,7 +2983,7 @@ store.create(&#x27;post&#x27;, {
 </td>
             
             
-              <td><p>See <a href="Mapper.html#createMany">Mapper#createMany</a>.</p></td>
+              <td><p>Resolves with the result of the create.</p></td>
             
           </tr>
         
@@ -2113,9 +3008,9 @@ store.create(&#x27;post&#x27;, {
           <th>Source</th>
         
         
+          <th>Overrides</th>
         
         
-          <th>See</th>
         
         
       </tr>
@@ -2130,18 +3025,16 @@ store.create(&#x27;post&#x27;, {
         
         
           <td>
-            <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-64">line 64</a>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-325">line 325</a>
           </td>
-        
-        
         
         
           <td>
-            <ul>
-              <li><a href="Mapper.html#createMany">Mapper#createMany</a></li>
-              </ul>
+            <a href="Container.html#createMany">Container#createMany</a>
           </td>
+        
+        
         
         
       </tr>
@@ -2169,35 +3062,6 @@ store.create(&#x27;post&#x27;, {
 </dl>
 
 
-  
-    <div class="code-panel panel panel-warning">
-      <div class="panel-heading">
-        <strong>Example</strong>
-      </div>
-      <div class="panel-body">
-        
-        <p class="code-caption">Create and save several new blog posts</p>
-    
-    <pre><code class="javascript">import {Container} from &#x27;js-data&#x27;
-import RethinkDBAdapter from &#x27;js-data-rethinkdb&#x27;
-const store = new Container()
-store.registerAdapter(&#x27;rethinkdb&#x27;, new RethinkDBAdapter(), { default: true })
-store.defineMapper(&#x27;post&#x27;)
-
-store.createMany(&#x27;post&#x27;, [{
-  title: &#x27;Modeling your data&#x27;,
-  status: &#x27;draft&#x27;
-}, {
-  title: &#x27;Reading data&#x27;,
-  status: &#x27;draft&#x27;
-}]).then((posts) =&gt; {
-  console.log(posts[0]) // { id: 1234, status: &#x27;draft&#x27;, ... }
-  console.log(posts[1]) // { id: 1235, status: &#x27;draft&#x27;, ... }
-})</code></pre>
-
-
-      </div>
-    </div>
   
 </dd>
 
@@ -2433,7 +3297,7 @@ store.createMany(&#x27;post&#x27;, [{
         
           <td>
             <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-95">line 95</a>
+             <a href="Container.js.html#sunlight-1-line-90">line 90</a>
           </td>
         
         
@@ -2453,6 +3317,15 @@ store.createMany(&#x27;post&#x27;, [{
 <dl class="details">
     
 
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Container.html#createRecord">Container#createRecord</a>
+      </li>
+    </ul>
+  </dd>
   
 
     
@@ -2639,8 +3512,6 @@ const post = PostService.createRecord()</code></pre>
           <th>Source</th>
         
         
-          <th>Overrides</th>
-        
         
         
           <th>See</th>
@@ -2659,13 +3530,9 @@ const post = PostService.createRecord()</code></pre>
         
           <td>
             <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-117">line 117</a>
+             <a href="Container.js.html#sunlight-1-line-112">line 112</a>
           </td>
         
-        
-          <td>
-            <a href="Component.html#dbg">Component#dbg</a>
-          </td>
         
         
         
@@ -2683,6 +3550,15 @@ const post = PostService.createRecord()</code></pre>
 <dl class="details">
     
 
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Container.html#dbg">Container#dbg</a>
+      </li>
+    </ul>
+  </dd>
   
 
     
@@ -2901,7 +3777,7 @@ const post = PostService.createRecord()</code></pre>
         
           <td>
             <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-545">line 545</a>
+             <a href="Container.js.html#sunlight-1-line-542">line 542</a>
           </td>
         
         
@@ -2921,6 +3797,15 @@ const post = PostService.createRecord()</code></pre>
 <dl class="details">
     
 
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Container.html#defineMapper">Container#defineMapper</a>
+      </li>
+    </ul>
+  </dd>
   
 
     
@@ -2975,7 +3860,8 @@ UserMapper.foo // &quot;bar&quot;</code></pre>
 
   
   <div class="description">
-    <p>Wrapper for <a href="Mapper.html#destroy">Mapper#destroy</a>.</p>
+    <p>Wrapper for <a href="Mapper.html#destroy">Mapper#destroy</a>. Removes any destroyed record from the
+store.</p>
   </div>
   
 
@@ -3074,7 +3960,7 @@ UserMapper.foo // &quot;bar&quot;</code></pre>
 
             
 
-            <td class="description last"><p>See <a href="Mapper.html#destroy">Mapper#destroy</a>.</p></td>
+            <td class="description last"><p>Passed to <a href="Mapper.html#destroy">Mapper#destroy</a>.</p></td>
         </tr>
 
     
@@ -3108,7 +3994,8 @@ UserMapper.foo // &quot;bar&quot;</code></pre>
 
             
 
-            <td class="description last"><p>See <a href="Mapper.html#destroy">Mapper#destroy</a>.</p></td>
+            <td class="description last"><p>Passed to <a href="Mapper.html#destroy">Mapper#destroy</a>. See
+<a href="Mapper.html#destroy">Mapper#destroy</a> for more configuration options.</p></td>
         </tr>
 
     
@@ -3150,7 +4037,7 @@ UserMapper.foo // &quot;bar&quot;</code></pre>
 </td>
             
             
-              <td><p>See <a href="Mapper.html#destroy">Mapper#destroy</a>.</p></td>
+              <td><p>Resolves when the delete completes.</p></td>
             
           </tr>
         
@@ -3175,9 +4062,9 @@ UserMapper.foo // &quot;bar&quot;</code></pre>
           <th>Source</th>
         
         
+          <th>Overrides</th>
         
         
-          <th>See</th>
         
         
       </tr>
@@ -3192,18 +4079,16 @@ UserMapper.foo // &quot;bar&quot;</code></pre>
         
         
           <td>
-            <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-128">line 128</a>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-655">line 655</a>
           </td>
-        
-        
         
         
           <td>
-            <ul>
-              <li><a href="Mapper.html#destroy">Mapper#destroy</a></li>
-              </ul>
+            <a href="Container.html#destroy">Container#destroy</a>
           </td>
+        
+        
         
         
       </tr>
@@ -3231,28 +4116,6 @@ UserMapper.foo // &quot;bar&quot;</code></pre>
 </dl>
 
 
-  
-    <div class="code-panel panel panel-warning">
-      <div class="panel-heading">
-        <strong>Example</strong>
-      </div>
-      <div class="panel-body">
-        
-        <p class="code-caption">Destroy a specific blog post</p>
-    
-    <pre><code class="javascript">import {Container} from &#x27;js-data&#x27;
-import RethinkDBAdapter from &#x27;js-data-rethinkdb&#x27;
-const store = new Container()
-store.registerAdapter(&#x27;rethinkdb&#x27;, new RethinkDBAdapter(), { default: true })
-store.defineMapper(&#x27;post&#x27;)
-
-store.destroy(&#x27;post&#x27;, 1234).then(() =&gt; {
-  // Blog post #1234 has been destroyed
-})</code></pre>
-
-
-      </div>
-    </div>
   
 </dd>
 
@@ -3268,7 +4131,8 @@ store.destroy(&#x27;post&#x27;, 1234).then(() =&gt; {
 
   
   <div class="description">
-    <p>Wrapper for <a href="Mapper.html#destroyAll">Mapper#destroyAll</a>.</p>
+    <p>Wrapper for <a href="Mapper.html#destroyAll">Mapper#destroyAll</a>. Removes any destroyed records from
+the store.</p>
   </div>
   
 
@@ -3366,7 +4230,7 @@ store.destroy(&#x27;post&#x27;, 1234).then(() =&gt; {
 
             
 
-            <td class="description last"><p>See <a href="Mapper.html#destroyAll">Mapper#destroyAll</a>.</p></td>
+            <td class="description last"><p>Passed to <a href="Mapper.html#destroyAll">Mapper#destroyAll</a>.</p></td>
         </tr>
 
     
@@ -3400,7 +4264,8 @@ store.destroy(&#x27;post&#x27;, 1234).then(() =&gt; {
 
             
 
-            <td class="description last"><p>See <a href="Mapper.html#destroyAll">Mapper#destroyAll</a>.</p></td>
+            <td class="description last"><p>Passed to <a href="Mapper.html#destroyAll">Mapper#destroyAll</a>. See
+<a href="Mapper.html#destroyAll">Mapper#destroyAll</a> for more configuration options.</p></td>
         </tr>
 
     
@@ -3442,7 +4307,7 @@ store.destroy(&#x27;post&#x27;, 1234).then(() =&gt; {
 </td>
             
             
-              <td><p>See <a href="Mapper.html#destroyAll">Mapper#destroyAll</a>.</p></td>
+              <td><p>Resolves when the delete completes.</p></td>
             
           </tr>
         
@@ -3467,9 +4332,9 @@ store.destroy(&#x27;post&#x27;, 1234).then(() =&gt; {
           <th>Source</th>
         
         
+          <th>Overrides</th>
         
         
-          <th>See</th>
         
         
       </tr>
@@ -3484,18 +4349,16 @@ store.destroy(&#x27;post&#x27;, 1234).then(() =&gt; {
         
         
           <td>
-            <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-152">line 152</a>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-681">line 681</a>
           </td>
-        
-        
         
         
           <td>
-            <ul>
-              <li><a href="Mapper.html#destroyAll">Mapper#destroyAll</a></li>
-              </ul>
+            <a href="Container.html#destroyAll">Container#destroyAll</a>
           </td>
+        
+        
         
         
       </tr>
@@ -3523,258 +4386,6 @@ store.destroy(&#x27;post&#x27;, 1234).then(() =&gt; {
 </dl>
 
 
-  
-    <div class="code-panel panel panel-warning">
-      <div class="panel-heading">
-        <strong>Example</strong>
-      </div>
-      <div class="panel-body">
-        
-        <p class="code-caption">Destroy all "draft" blog posts</p>
-    
-    <pre><code class="javascript">import {Container} from &#x27;js-data&#x27;
-import RethinkDBAdapter from &#x27;js-data-rethinkdb&#x27;
-const store = new Container()
-store.registerAdapter(&#x27;rethinkdb&#x27;, new RethinkDBAdapter(), { default: true })
-store.defineMapper(&#x27;post&#x27;)
-
-store.destroyAll(&#x27;post&#x27;, { status: &#x27;draft&#x27; }).then(() =&gt; {
-  // All &quot;draft&quot; blog posts have been destroyed
-})</code></pre>
-
-
-      </div>
-    </div>
-  
-</dd>
-
-        
-            
-<hr>
-<dt>
-  <h4 class="name" id="emit"><span class="type-signature"></span>emit(event, <span class="optional">args</span>)</h4>
-
-  
-</dt>
-<dd>
-
-  
-  <div class="description">
-    <p>Trigger an event on this Component.</p>
-  </div>
-  
-
-  
-
-  
-
-  
-  
-    <div class="panel panel-success">
-      <!-- Default panel contents -->
-      <div class="panel-heading"><strong>Method parameters:</strong></div>
-      
-
-<table class="params table table-striped table-bordered">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Argument</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>event</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>Name of event to emit.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>args</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">*</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                    &lt;repeatable><br>
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>Arguments to pass to any listeners.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    </div>
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-<div class="panel panel-default">
-  <div class="panel-heading"><strong>Details</strong></div>
-  <table class="table table-striped table-bordered">
-    <thead>
-      <tr>
-        
-        
-        
-          <th>Since</th>
-        
-        
-        
-          <th>Source</th>
-        
-        
-        
-        
-        
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        
-        
-        
-          <td>3.0.0</td>
-        
-        
-        
-          <td>
-            <a href="Component.js.html">Component.js</a>,
-             <a href="Component.js.html#sunlight-1-line-98">line 98</a>
-          </td>
-        
-        
-        
-        
-        
-      </tr>
-    </tbody>
-  </table>
-</div>
-<dl class="details">
-    
-
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="Component.html#emit">Component#emit</a>
-      </li>
-    </ul>
-  </dd>
-  
-
-    
-
-    
-
-    
-
-  
-
-  
-
-  
-
-  
-</dl>
-
-
-  
-    <div class="code-panel panel panel-warning">
-      <div class="panel-heading">
-        <strong>Examples</strong>
-      </div>
-      <div class="panel-body">
-        
-    <pre><code class="javascript">collection.on(&#x27;foo&#x27;, (msg) =&gt; {
-  console.log(msg) // &quot;bar&quot;
-})
-collection.emit(&#x27;foo&#x27;, &#x27;bar&#x27;)</code></pre>
-
-    <pre><code class="javascript">store.on(&#x27;foo&#x27;, (msg, val1, val2) =&gt; {
-  console.log(msg, val1, val2) // &quot;bar&quot; &quot;beep&quot; &quot;boop&quot;
-})
-store.emit(&#x27;foo&#x27;, &#x27;bar&#x27;, &#x27;beep&#x27;, &#x27;boop&#x27;)</code></pre>
-
-
-      </div>
-    </div>
   
 </dd>
 
@@ -3790,7 +4401,7 @@ store.emit(&#x27;foo&#x27;, &#x27;bar&#x27;, &#x27;beep&#x27;, &#x27;boop&#x27;)
 
   
   <div class="description">
-    <p>Wrapper for <a href="Mapper.html#find">Mapper#find</a>.</p>
+    <p>Wrapper for <a href="Mapper.html#find">Mapper#find</a>. Adds any found record to the store.</p>
   </div>
   
 
@@ -3889,7 +4500,7 @@ store.emit(&#x27;foo&#x27;, &#x27;bar&#x27;, &#x27;beep&#x27;, &#x27;boop&#x27;)
 
             
 
-            <td class="description last"><p>See <a href="Mapper.html#find">Mapper#find</a>.</p></td>
+            <td class="description last"><p>Passed to <a href="Mapper.html#find">Mapper#find</a>.</p></td>
         </tr>
 
     
@@ -3923,7 +4534,7 @@ store.emit(&#x27;foo&#x27;, &#x27;bar&#x27;, &#x27;beep&#x27;, &#x27;boop&#x27;)
 
             
 
-            <td class="description last"><p>See <a href="Mapper.html#find">Mapper#find</a>.</p></td>
+            <td class="description last"><p>Passed to <a href="Mapper.html#find">Mapper#find</a>.</p></td>
         </tr>
 
     
@@ -3965,7 +4576,7 @@ store.emit(&#x27;foo&#x27;, &#x27;bar&#x27;, &#x27;beep&#x27;, &#x27;boop&#x27;)
 </td>
             
             
-              <td><p>See <a href="Mapper.html#find">Mapper#find</a>.</p></td>
+              <td><p>Resolves with the result, if any.</p></td>
             
           </tr>
         
@@ -3990,9 +4601,9 @@ store.emit(&#x27;foo&#x27;, &#x27;bar&#x27;, &#x27;beep&#x27;, &#x27;boop&#x27;)
           <th>Source</th>
         
         
+          <th>Overrides</th>
         
         
-          <th>See</th>
         
         
       </tr>
@@ -4007,18 +4618,16 @@ store.emit(&#x27;foo&#x27;, &#x27;bar&#x27;, &#x27;beep&#x27;, &#x27;boop&#x27;)
         
         
           <td>
-            <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-176">line 176</a>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-718">line 718</a>
           </td>
-        
-        
         
         
           <td>
-            <ul>
-              <li><a href="Mapper.html#find">Mapper#find</a></li>
-              </ul>
+            <a href="Container.html#find">Container#find</a>
           </td>
+        
+        
         
         
       </tr>
@@ -4047,26 +4656,6 @@ store.emit(&#x27;foo&#x27;, &#x27;bar&#x27;, &#x27;beep&#x27;, &#x27;boop&#x27;)
 
 
   
-    <div class="code-panel panel panel-warning">
-      <div class="panel-heading">
-        <strong>Example</strong>
-      </div>
-      <div class="panel-body">
-        
-    <pre><code class="javascript">import {Container} from &#x27;js-data&#x27;
-import RethinkDBAdapter from &#x27;js-data-rethinkdb&#x27;
-const store = new Container()
-store.registerAdapter(&#x27;rethinkdb&#x27;, new RethinkDBAdapter(), { default: true })
-store.defineMapper(&#x27;post&#x27;)
-
-store.find(&#x27;post&#x27;, 1).then((post) =&gt; {
-  console.log(post) // { id: 1, ...}
-})</code></pre>
-
-
-      </div>
-    </div>
-  
 </dd>
 
         
@@ -4081,7 +4670,7 @@ store.find(&#x27;post&#x27;, 1).then((post) =&gt; {
 
   
   <div class="description">
-    <p>Wrapper for <a href="Mapper.html#createRecord">Mapper#createRecord</a>.</p>
+    <p>Wrapper for <a href="Mapper.html#findAll">Mapper#findAll</a>. Adds any found records to the store.</p>
   </div>
   
 
@@ -4179,7 +4768,7 @@ store.find(&#x27;post&#x27;, 1).then((post) =&gt; {
 
             
 
-            <td class="description last"><p>See <a href="Mapper.html#findAll">Mapper#findAll</a>.</p></td>
+            <td class="description last"><p>Passed to Model.findAll.</p></td>
         </tr>
 
     
@@ -4213,7 +4802,7 @@ store.find(&#x27;post&#x27;, 1).then((post) =&gt; {
 
             
 
-            <td class="description last"><p>See <a href="Mapper.html#findAll">Mapper#findAll</a>.</p></td>
+            <td class="description last"><p>Passed to Model.findAll.</p></td>
         </tr>
 
     
@@ -4255,7 +4844,7 @@ store.find(&#x27;post&#x27;, 1).then((post) =&gt; {
 </td>
             
             
-              <td><p>See <a href="Mapper.html#findAll">Mapper#findAll</a>.</p></td>
+              <td><p>Resolves with the result, if any.</p></td>
             
           </tr>
         
@@ -4280,9 +4869,9 @@ store.find(&#x27;post&#x27;, 1).then((post) =&gt; {
           <th>Source</th>
         
         
+          <th>Overrides</th>
         
         
-          <th>See</th>
         
         
       </tr>
@@ -4297,18 +4886,16 @@ store.find(&#x27;post&#x27;, 1).then((post) =&gt; {
         
         
           <td>
-            <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-200">line 200</a>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-756">line 756</a>
           </td>
-        
-        
         
         
           <td>
-            <ul>
-              <li><a href="Mapper.html#findAll">Mapper#findAll</a></li>
-              </ul>
+            <a href="Container.html#findAll">Container#findAll</a>
           </td>
+        
+        
         
         
       </tr>
@@ -4336,28 +4923,6 @@ store.find(&#x27;post&#x27;, 1).then((post) =&gt; {
 </dl>
 
 
-  
-    <div class="code-panel panel panel-warning">
-      <div class="panel-heading">
-        <strong>Example</strong>
-      </div>
-      <div class="panel-body">
-        
-        <p class="code-caption">Find all "published" blog posts</p>
-    
-    <pre><code class="javascript">import {Container} from &#x27;js-data&#x27;
-import RethinkDBAdapter from &#x27;js-data-rethinkdb&#x27;
-const store = new Container()
-store.registerAdapter(&#x27;rethinkdb&#x27;, new RethinkDBAdapter(), { default: true })
-store.defineMapper(&#x27;post&#x27;)
-
-store.findAll(&#x27;post&#x27;, { status: &#x27;published&#x27; }).then((posts) =&gt; {
-  console.log(posts) // [{ id: 1, ...}, ...]
-})</code></pre>
-
-
-      </div>
-    </div>
   
 </dd>
 
@@ -4523,7 +5088,7 @@ no name is provided.</p>
         
           <td>
             <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-633">line 633</a>
+             <a href="Container.js.html#sunlight-1-line-610">line 610</a>
           </td>
         
         
@@ -4537,6 +5102,15 @@ no name is provided.</p>
 <dl class="details">
     
 
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Container.html#getAdapter">Container#getAdapter</a>
+      </li>
+    </ul>
+  </dd>
   
 
     
@@ -4723,7 +5297,7 @@ or the name of the default adapter if no name provided.</p>
         
           <td>
             <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-650">line 650</a>
+             <a href="Container.js.html#sunlight-1-line-627">line 627</a>
           </td>
         
         
@@ -4737,6 +5311,15 @@ or the name of the default adapter if no name provided.</p>
 <dl class="details">
     
 
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Container.html#getAdapterName">Container#getAdapterName</a>
+      </li>
+    </ul>
+  </dd>
   
 
     
@@ -4854,7 +5437,229 @@ or the name of the default adapter if no name provided.</p>
         
           <td>
             <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-667">line 667</a>
+             <a href="Container.js.html#sunlight-1-line-644">line 644</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Container.html#getAdapters">Container#getAdapters</a>
+      </li>
+    </ul>
+  </dd>
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="getCollection"><span class="type-signature"></span>getCollection(name)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Return the <a href="LinkedCollection.html">LinkedCollection</a> with the given name.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Name of the <a href="LinkedCollection.html">LinkedCollection</a> to retrieve.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <h5><strong>Throws:</strong></h5>
+  
+      
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        <p>Thrown if the specified <a href="LinkedCollection.html">LinkedCollection</a> does not
+exist.</p>
+        </div>
+    </dt>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+
+            </dd>
+        </dl>
+    </dt>
+</dl>
+
+
+    
+
+  
+  <div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Return value:</strong></div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            
+              <td>
+<span class="param-type"><a href="LinkedCollection.html">LinkedCollection</a></span>
+
+
+</td>
+            
+            
+              <td>Unspecified</td>
+            
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-796">line 796</a>
           </td>
         
         
@@ -5038,7 +5843,7 @@ or the name of the default adapter if no name provided.</p>
         
           <td>
             <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-678">line 678</a>
+             <a href="Container.js.html#sunlight-1-line-655">line 655</a>
           </td>
         
         
@@ -5052,6 +5857,15 @@ or the name of the default adapter if no name provided.</p>
 <dl class="details">
     
 
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Container.html#getMapper">Container#getMapper</a>
+      </li>
+    </ul>
+  </dd>
   
 
     
@@ -5083,7 +5897,220 @@ const container = new Container()
 // Mapper.
 const UserMapper = container.defineMapper(&#x27;user&#x27;)
 UserMapper === container.getMapper(&#x27;user&#x27;) // true
-UserMapper === container.as(&#x27;user&#x27;).getMapper() // true</code></pre>
+UserMapper === container.as(&#x27;user&#x27;).getMapper() // true
+container.getMapper(&#x27;profile&#x27;) // throws Error, there is no mapper with name &quot;profile&quot;</code></pre>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="getMapperByName"><span class="type-signature"></span>getMapperByName(name)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Return the mapper registered under the specified name.
+Doesn't throw error if mapper doesn't exist.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p><a href="Mapper.html#name">Mapper#name</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Return value:</strong></div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            
+              <td>
+<span class="param-type"><a href="Mapper.html">Mapper</a></span>
+
+
+</td>
+            
+            
+              <td>Unspecified</td>
+            
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Container.js.html">Container.js</a>,
+             <a href="Container.js.html#sunlight-1-line-681">line 681</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Container.html#getMapperByName">Container#getMapperByName</a>
+      </li>
+    </ul>
+  </dd>
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre><code class="javascript">import {Container} from &#x27;js-data&#x27;
+const container = new Container()
+// Container#defineMapper returns a direct reference to the newly created
+// Mapper.
+const UserMapper = container.defineMapper(&#x27;user&#x27;)
+UserMapper === container.getMapperByName(&#x27;user&#x27;) // true
+container.getMapperByName(&#x27;profile&#x27;) // undefined</code></pre>
 
 
       </div>
@@ -5242,7 +6269,7 @@ UserMapper === container.as(&#x27;user&#x27;).getMapper() // true</code></pre>
         
           <td>
             <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-224">line 224</a>
+             <a href="Container.js.html#sunlight-1-line-219">line 219</a>
           </td>
         
         
@@ -5253,6 +6280,229 @@ UserMapper === container.as(&#x27;user&#x27;).getMapper() // true</code></pre>
               <li><a href="Mapper.html#getSchema">Mapper#getSchema</a></li>
               </ul>
           </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Container.html#getSchema">Container#getSchema</a>
+      </li>
+    </ul>
+  </dd>
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="hashQuery"><span class="type-signature"></span>hashQuery(name, query)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Hashing function used to cache <a href="DataStore.html#find">DataStore#find</a> and
+<a href="DataStore.html#findAll">DataStore#findAll</a> requests. This method simply JSONifies the
+<code>query</code> argument passed to <a href="DataStore.html#find">DataStore#find</a> or
+<a href="DataStore.html#findAll">DataStore#findAll</a>.</p>
+<p>Override this method for custom hashing behavior.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument passed to <a href="DataStore.html#find">DataStore#find</a>
+or <a href="DataStore.html#findAll">DataStore#findAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>query</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>query</code> argument passed to <a href="DataStore.html#find">DataStore#find</a>
+or <a href="DataStore.html#findAll">DataStore#findAll</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Return value:</strong></div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            
+              <td>
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+</td>
+            
+            
+              <td><p>The JSONified <code>query</code>.</p></td>
+            
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-814">line 814</a>
+          </td>
+        
+        
+        
         
         
       </tr>
@@ -5461,7 +6711,7 @@ UserMapper === container.as(&#x27;user&#x27;).getMapper() // true</code></pre>
         
           <td>
             <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-235">line 235</a>
+             <a href="Container.js.html#sunlight-1-line-230">line 230</a>
           </td>
         
         
@@ -5481,6 +6731,15 @@ UserMapper === container.as(&#x27;user&#x27;).getMapper() // true</code></pre>
 <dl class="details">
     
 
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Container.html#is">Container#is</a>
+      </li>
+    </ul>
+  </dd>
   
 
     
@@ -5669,8 +6928,6 @@ console.log(post instanceof store.getMapper(&#x27;post&#x27;).recordClass) // tr
           <th>Source</th>
         
         
-          <th>Overrides</th>
-        
         
         
           <th>See</th>
@@ -5689,13 +6946,9 @@ console.log(post instanceof store.getMapper(&#x27;post&#x27;).recordClass) // tr
         
           <td>
             <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-257">line 257</a>
+             <a href="Container.js.html#sunlight-1-line-252">line 252</a>
           </td>
         
-        
-          <td>
-            <a href="Component.html#log">Component#log</a>
-          </td>
         
         
         
@@ -5714,214 +6967,11 @@ console.log(post instanceof store.getMapper(&#x27;post&#x27;).recordClass) // tr
     
 
   
-
-    
-
-    
-
-    
-
-  
-
-  
-
-  
-
-  
-</dl>
-
-
-  
-</dd>
-
-        
-            
-<hr>
-<dt>
-  <h4 class="name" id="off"><span class="type-signature"></span>off(<span class="optional">event</span>, <span class="optional">listener</span>)</h4>
-
-  
-</dt>
-<dd>
-
-  
-  <div class="description">
-    <p>Remove an event listener from this Component. If no listener is provided,
-then all listeners for the specified event will be removed. If no event is
-specified then all listeners for all events will be removed.</p>
-  </div>
-  
-
-  
-
-  
-
-  
-  
-    <div class="panel panel-success">
-      <!-- Default panel contents -->
-      <div class="panel-heading"><strong>Method parameters:</strong></div>
-      
-
-<table class="params table table-striped table-bordered">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Argument</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>event</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>Name of event to unsubsribe to.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>listener</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>Listener to remove.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    </div>
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-<div class="panel panel-default">
-  <div class="panel-heading"><strong>Details</strong></div>
-  <table class="table table-striped table-bordered">
-    <thead>
-      <tr>
-        
-        
-        
-          <th>Since</th>
-        
-        
-        
-          <th>Source</th>
-        
-        
-        
-        
-        
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        
-        
-        
-          <td>3.0.0</td>
-        
-        
-        
-          <td>
-            <a href="Component.js.html">Component.js</a>,
-             <a href="Component.js.html#sunlight-1-line-79">line 79</a>
-          </td>
-        
-        
-        
-        
-        
-      </tr>
-    </tbody>
-  </table>
-</div>
-<dl class="details">
-    
-
-  
   <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
   <dd class="inherited-from">
     <ul class="dummy">
       <li>
-        <a href="Component.html#off">Component#off</a>
+        <a href="Container.html#log">Container#log</a>
       </li>
     </ul>
   </dd>
@@ -5944,28 +6994,6 @@ specified then all listeners for all events will be removed.</p>
 
 
   
-    <div class="code-panel panel panel-warning">
-      <div class="panel-heading">
-        <strong>Examples</strong>
-      </div>
-      <div class="panel-body">
-        
-        <p class="code-caption">Remove a listener to a single event</p>
-    
-    <pre><code class="javascript">collection.off(&#x27;add&#x27;, handler)</code></pre>
-
-        <p class="code-caption">Remove all listeners to a single event</p>
-    
-    <pre><code class="javascript">record.off(&#x27;change&#x27;)</code></pre>
-
-        <p class="code-caption">Remove all listeners to all events</p>
-    
-    <pre><code class="javascript">store.off()</code></pre>
-
-
-      </div>
-    </div>
-  
 </dd>
 
         
@@ -5980,10 +7008,10 @@ specified then all listeners for all events will be removed.</p>
 
   
   <div class="description">
-    <p>Register a new event listener on this Container.</p>
-<p>Proxy for <a href="Component.html#on">Component#on</a>. If an event was emitted by a Mapper in the
-Container, then the name of the Mapper will be prepended to the arugments
-passed to the listener.</p>
+    <p>Register a new event listener on this DataStore.</p>
+<p>Proxy for <a href="Container.html#on">Container#on</a>. If an event was emitted by a Mapper or
+Collection in the DataStore, then the name of the Mapper or Collection will
+be prepended to the arugments passed to the provided event handler.</p>
   </div>
   
 
@@ -6144,8 +7172,6 @@ passed to the listener.</p>
         
         
         
-          <th>Since</th>
-        
         
         
           <th>Source</th>
@@ -6163,18 +7189,16 @@ passed to the listener.</p>
         
         
         
-          <td>3.0.0</td>
-        
         
         
           <td>
-            <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-479">line 479</a>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-138">line 138</a>
           </td>
         
         
           <td>
-            <a href="Component.html#on">Component#on</a>
+            <a href="Container.html#on">Container#on</a>
           </td>
         
         
@@ -6499,6 +7523,15 @@ default adapter for all Mappers in this container.</p></td>
     
 
   
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Container.html#registerAdapter">Container#registerAdapter</a>
+      </li>
+    </ul>
+  </dd>
+  
 
     
 
@@ -6531,6 +7564,1141 @@ container.registerAdapter(&#x27;http&#x27;, new HttpAdapter, { default: true })<
 
       </div>
     </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="remove"><span class="type-signature"></span>remove(name, id, <span class="optional">opts</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Wrapper for <a href="LinkedCollection.html#remove">LinkedCollection#remove</a>. Removes the specified
+<a href="Record.html">Record</a> from the store.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The name of the <a href="LinkedCollection.html">LinkedCollection</a> to target.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+|
+
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" target="_blank">Number</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The primary key of the <a href="Record.html">Record</a> to remove.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options.</p>
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>with</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" target="_blank">Array</a>.&lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a>&gt;</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Relations of the <a href="Record.html">Record</a> to also
+remove from the store.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Return value:</strong></div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            
+              <td>
+<span class="param-type"><a href="Record.html">Record</a></span>
+
+
+</td>
+            
+            
+              <td><p>The removed <a href="Record.html">Record</a>, if any.</p></td>
+            
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-838">line 838</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="removeAll"><span class="type-signature"></span>removeAll(name, <span class="optional">query</span>, <span class="optional">opts</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Wrapper for <a href="LinkedCollection.html#removeAll">LinkedCollection#removeAll</a>. Removes the selected
+<a href="Record.html">Record</a>s from the store.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>The name of the <a href="LinkedCollection.html">LinkedCollection</a> to target.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>query</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p>Selection query. See <a href="query_.html">query</a>.</p>
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>where</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>See <a href="query_.html#.where">query.where</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>offset</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" target="_blank">Number</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>See <a href="query_.html#.offset">query.offset</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>limit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" target="_blank">Number</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>See <a href="query_.html#.limit">query.limit</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>orderBy</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+|
+
+<span class="param-type">Array.&lt;Array></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>See <a href="query_.html#.orderBy">query.orderBy</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Configuration options.</p>
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>with</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" target="_blank">Array</a>.&lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a>&gt;</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Relations of the <a href="Record.html">Record</a> to also
+remove from the store.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Return value:</strong></div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            
+              <td>
+<span class="param-type"><a href="Record.html">Record</a></span>
+
+
+</td>
+            
+            
+              <td><p>The removed <a href="Record.html">Record</a>s, if any.</p></td>
+            
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-859">line 859</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="removeRelated"><span class="type-signature"></span>removeRelated(name, records, <span class="optional">opts</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Remove from the store <a href="Record.html">Record</a>s that are related to the provided
+<a href="Record.html">Record</a>(s).</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The name of the <a href="LinkedCollection.html">LinkedCollection</a> to target.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>records</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Record.html">Record</a></span>
+|
+
+<span class="param-type">Array.&lt;<a href="Record.html">Record</a>></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p><a href="Record.html">Record</a>s whose relations are to be
+removed.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options.</p>
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>with</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" target="_blank">Array</a>.&lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a>&gt;</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Relations of the <a href="Record.html">Record</a>(s) to remove
+from the store.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-884">line 884</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
   
 </dd>
 
@@ -6795,7 +8963,7 @@ container.registerAdapter(&#x27;http&#x27;, new HttpAdapter, { default: true })<
         
           <td>
             <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-268">line 268</a>
+             <a href="Container.js.html#sunlight-1-line-263">line 263</a>
           </td>
         
         
@@ -6815,6 +8983,15 @@ container.registerAdapter(&#x27;http&#x27;, new HttpAdapter, { default: true })<
 <dl class="details">
     
 
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Container.html#sum">Container#sum</a>
+      </li>
+    </ul>
+  </dd>
   
 
     
@@ -7089,7 +9266,7 @@ store.sum(&#x27;purchase_order&#x27;, &#x27;amount&#x27;, { status: &#x27;paid&#
         
           <td>
             <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-293">line 293</a>
+             <a href="Container.js.html#sunlight-1-line-288">line 288</a>
           </td>
         
         
@@ -7109,6 +9286,15 @@ store.sum(&#x27;purchase_order&#x27;, &#x27;amount&#x27;, { status: &#x27;paid&#
 <dl class="details">
     
 
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Container.html#toJSON">Container#toJSON</a>
+      </li>
+    </ul>
+  </dd>
   
 
     
@@ -7168,7 +9354,8 @@ console.log(store.toJSON(&#x27;person&#x27;, person), { strict: true }) // {&quo
 
   
   <div class="description">
-    <p>Wrapper for <a href="Mapper.html#update">Mapper#update</a>.</p>
+    <p>Wrapper for <a href="Mapper.html#update">Mapper#update</a>. Adds the updated <a href="Record.html">Record</a> to the
+store.</p>
   </div>
   
 
@@ -7267,7 +9454,7 @@ console.log(store.toJSON(&#x27;person&#x27;, person), { strict: true }) // {&quo
 
             
 
-            <td class="description last"><p>See <a href="Mapper.html#update">Mapper#update</a>.</p></td>
+            <td class="description last"><p>Passed to <a href="Mapper.html#update">Mapper#update</a>.</p></td>
         </tr>
 
     
@@ -7299,7 +9486,7 @@ console.log(store.toJSON(&#x27;person&#x27;, person), { strict: true }) // {&quo
 
             
 
-            <td class="description last"><p>See <a href="Mapper.html#update">Mapper#update</a>.</p></td>
+            <td class="description last"><p>Passed to <a href="Mapper.html#update">Mapper#update</a>.</p></td>
         </tr>
 
     
@@ -7333,7 +9520,8 @@ console.log(store.toJSON(&#x27;person&#x27;, person), { strict: true }) // {&quo
 
             
 
-            <td class="description last"><p>See <a href="Mapper.html#update">Mapper#update</a>.</p></td>
+            <td class="description last"><p>Passed to <a href="Mapper.html#update">Mapper#update</a>. See
+<a href="Mapper.html#update">Mapper#update</a> for more configuration options.</p></td>
         </tr>
 
     
@@ -7375,7 +9563,7 @@ console.log(store.toJSON(&#x27;person&#x27;, person), { strict: true }) // {&quo
 </td>
             
             
-              <td><p>See <a href="Mapper.html#update">Mapper#update</a>.</p></td>
+              <td><p>Resolves with the result of the update.</p></td>
             
           </tr>
         
@@ -7400,11 +9588,9 @@ console.log(store.toJSON(&#x27;person&#x27;, person), { strict: true }) // {&quo
           <th>Source</th>
         
         
+          <th>Overrides</th>
         
-          <th>Tutorials</th>
         
-        
-          <th>See</th>
         
         
       </tr>
@@ -7419,24 +9605,16 @@ console.log(store.toJSON(&#x27;person&#x27;, person), { strict: true }) // {&quo
         
         
           <td>
-            <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-323">line 323</a>
-          </td>
-        
-        
-        
-          <td>
-            <ul>
-              <li><a href="http://www.js-data.io/v3.0/docs/saving-data">Saving data</a></li>
-              </ul>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-942">line 942</a>
           </td>
         
         
           <td>
-            <ul>
-              <li><a href="Mapper.html#update">Mapper#update</a></li>
-              </ul>
+            <a href="Container.html#update">Container#update</a>
           </td>
+        
+        
         
         
       </tr>
@@ -7465,36 +9643,13 @@ console.log(store.toJSON(&#x27;person&#x27;, person), { strict: true }) // {&quo
 
 
   
-    <div class="code-panel panel panel-warning">
-      <div class="panel-heading">
-        <strong>Example</strong>
-      </div>
-      <div class="panel-body">
-        
-    <pre><code class="javascript">import {Container} from &#x27;js-data&#x27;
-import RethinkDBAdapter from &#x27;js-data-rethinkdb&#x27;
-const store = new Container()
-store.registerAdapter(&#x27;rethinkdb&#x27;, new RethinkDBAdapter(), { default: true })
-store.defineMapper(&#x27;post&#x27;)
-
-store.update(&#x27;post&#x27;, 1234, {
-  status: &#x27;published&#x27;,
-  published_at: new Date()
-}).then((post) =&gt; {
-  console.log(post) // { id: 1234, status: &#x27;published&#x27;, ... }
-})</code></pre>
-
-
-      </div>
-    </div>
-  
 </dd>
 
         
             
 <hr>
 <dt>
-  <h4 class="name" id="updateAll"><span class="type-signature"></span>updateAll(name, update, <span class="optional">query</span>, <span class="optional">opts</span>)</h4>
+  <h4 class="name" id="updateAll"><span class="type-signature"></span>updateAll(name, props, <span class="optional">query</span>, <span class="optional">opts</span>)</h4>
 
   
 </dt>
@@ -7502,7 +9657,8 @@ store.update(&#x27;post&#x27;, 1234, {
 
   
   <div class="description">
-    <p>Wrapper for <a href="Mapper.html#updateAll">Mapper#updateAll</a>.</p>
+    <p>Wrapper for <a href="Mapper.html#updateAll">Mapper#updateAll</a>. Adds the updated <a href="Record.html">Record</a>s to
+the store.</p>
   </div>
   
 
@@ -7573,7 +9729,7 @@ store.update(&#x27;post&#x27;, 1234, {
 
         <tr>
             
-                <td class="name"><code>update</code></td>
+                <td class="name"><code>props</code></td>
             
 
             <td class="type">
@@ -7598,7 +9754,7 @@ store.update(&#x27;post&#x27;, 1234, {
 
             
 
-            <td class="description last"><p>See <a href="Mapper.html#updateAll">Mapper#updateAll</a>.</p></td>
+            <td class="description last"><p>Passed to <a href="Mapper.html#updateAll">Mapper#updateAll</a>.</p></td>
         </tr>
 
     
@@ -7632,7 +9788,7 @@ store.update(&#x27;post&#x27;, 1234, {
 
             
 
-            <td class="description last"><p>See <a href="Mapper.html#updateAll">Mapper#updateAll</a>.</p></td>
+            <td class="description last"><p>Passed to <a href="Mapper.html#updateAll">Mapper#updateAll</a>.</p></td>
         </tr>
 
     
@@ -7666,7 +9822,8 @@ store.update(&#x27;post&#x27;, 1234, {
 
             
 
-            <td class="description last"><p>See <a href="Mapper.html#updateAll">Mapper#updateAll</a>.</p></td>
+            <td class="description last"><p>Passed to <a href="Mapper.html#updateAll">Mapper#updateAll</a>. See
+<a href="Mapper.html#updateAll">Mapper#updateAll</a> for more configuration options.</p></td>
         </tr>
 
     
@@ -7708,7 +9865,7 @@ store.update(&#x27;post&#x27;, 1234, {
 </td>
             
             
-              <td><p>See <a href="Mapper.html#updateAll">Mapper#updateAll</a>.</p></td>
+              <td><p>Resolves with the result of the update.</p></td>
             
           </tr>
         
@@ -7733,9 +9890,9 @@ store.update(&#x27;post&#x27;, 1234, {
           <th>Source</th>
         
         
+          <th>Overrides</th>
         
         
-          <th>See</th>
         
         
       </tr>
@@ -7750,18 +9907,16 @@ store.update(&#x27;post&#x27;, 1234, {
         
         
           <td>
-            <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-352">line 352</a>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-961">line 961</a>
           </td>
-        
-        
         
         
           <td>
-            <ul>
-              <li><a href="Mapper.html#updateAll">Mapper#updateAll</a></li>
-              </ul>
+            <a href="Container.html#updateAll">Container#updateAll</a>
           </td>
+        
+        
         
         
       </tr>
@@ -7790,30 +9945,6 @@ store.update(&#x27;post&#x27;, 1234, {
 
 
   
-    <div class="code-panel panel panel-warning">
-      <div class="panel-heading">
-        <strong>Example</strong>
-      </div>
-      <div class="panel-body">
-        
-        <p class="code-caption">Turn all of John's blog posts into drafts.</p>
-    
-    <pre><code class="javascript">import {Container} from &#x27;js-data&#x27;
-import RethinkDBAdapter from &#x27;js-data-rethinkdb&#x27;
-const store = new Container()
-store.registerAdapter(&#x27;rethinkdb&#x27;, new RethinkDBAdapter(), { default: true })
-store.defineMapper(&#x27;post&#x27;)
-
-const update = { status: draft: published_at: null }
-const query = { userId: 1234 }
-store.updateAll(&#x27;post&#x27;, update, query).then((posts) =&gt; {
-  console.log(posts) // [...]
-})</code></pre>
-
-
-      </div>
-    </div>
-  
 </dd>
 
         
@@ -7828,7 +9959,8 @@ store.updateAll(&#x27;post&#x27;, update, query).then((posts) =&gt; {
 
   
   <div class="description">
-    <p>Wrapper for <a href="Mapper.html#updateMany">Mapper#updateMany</a>.</p>
+    <p>Wrapper for <a href="Mapper.html#updateMany">Mapper#updateMany</a>. Adds the updated <a href="Record.html">Record</a>s to
+the store.</p>
   </div>
   
 
@@ -7927,7 +10059,7 @@ store.updateAll(&#x27;post&#x27;, update, query).then((posts) =&gt; {
 
             
 
-            <td class="description last"><p>See <a href="Mapper.html#updateMany">Mapper#updateMany</a>.</p></td>
+            <td class="description last"><p>Passed to <a href="Mapper.html#updateMany">Mapper#updateMany</a>.</p></td>
         </tr>
 
     
@@ -7961,7 +10093,8 @@ store.updateAll(&#x27;post&#x27;, update, query).then((posts) =&gt; {
 
             
 
-            <td class="description last"><p>See <a href="Mapper.html#updateMany">Mapper#updateMany</a>.</p></td>
+            <td class="description last"><p>Passed to <a href="Mapper.html#updateMany">Mapper#updateMany</a>. See
+<a href="Mapper.html#updateMany">Mapper#updateMany</a> for more configuration options.</p></td>
         </tr>
 
     
@@ -8003,7 +10136,7 @@ store.updateAll(&#x27;post&#x27;, update, query).then((posts) =&gt; {
 </td>
             
             
-              <td><p>See <a href="Mapper.html#updateMany">Mapper#updateMany</a>.</p></td>
+              <td><p>Resolves with the result of the update.</p></td>
             
           </tr>
         
@@ -8028,9 +10161,9 @@ store.updateAll(&#x27;post&#x27;, update, query).then((posts) =&gt; {
           <th>Source</th>
         
         
+          <th>Overrides</th>
         
         
-          <th>See</th>
         
         
       </tr>
@@ -8045,18 +10178,16 @@ store.updateAll(&#x27;post&#x27;, update, query).then((posts) =&gt; {
         
         
           <td>
-            <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-379">line 379</a>
+            <a href="DataStore.js.html">DataStore.js</a>,
+             <a href="DataStore.js.html#sunlight-1-line-980">line 980</a>
           </td>
-        
-        
         
         
           <td>
-            <ul>
-              <li><a href="Mapper.html#updateMany">Mapper#updateMany</a></li>
-              </ul>
+            <a href="Container.html#updateMany">Container#updateMany</a>
           </td>
+        
+        
         
         
       </tr>
@@ -8084,29 +10215,6 @@ store.updateAll(&#x27;post&#x27;, update, query).then((posts) =&gt; {
 </dl>
 
 
-  
-    <div class="code-panel panel panel-warning">
-      <div class="panel-heading">
-        <strong>Example</strong>
-      </div>
-      <div class="panel-body">
-        
-    <pre><code class="javascript">import {Container} from &#x27;js-data&#x27;
-import RethinkDBAdapter from &#x27;js-data-rethinkdb&#x27;
-const store = new Container()
-store.registerAdapter(&#x27;rethinkdb&#x27;, new RethinkDBAdapter(), { default: true })
-store.defineMapper(&#x27;post&#x27;)
-
-store.updateMany(&#x27;post&#x27;, [
-  { id: 1234, status: &#x27;draft&#x27; },
-  { id: 2468, status: &#x27;published&#x27;, published_at: new Date() }
-]).then((posts) =&gt; {
-  console.log(posts) // [...]
-})</code></pre>
-
-
-      </div>
-    </div>
   
 </dd>
 
@@ -8340,7 +10448,7 @@ store.updateMany(&#x27;post&#x27;, [
         
           <td>
             <a href="Container.js.html">Container.js</a>,
-             <a href="Container.js.html#sunlight-1-line-406">line 406</a>
+             <a href="Container.js.html#sunlight-1-line-401">line 401</a>
           </td>
         
         
@@ -8360,6 +10468,15 @@ store.updateMany(&#x27;post&#x27;, [
 <dl class="details">
     
 
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Container.html#validate">Container#validate</a>
+      </li>
+    </ul>
+  </dd>
   
 
     
@@ -8452,7 +10569,7 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
 	
-		on 2016-05-16T21:31:37-07:00
+		on 2016-06-05T10:13:55-07:00
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>
