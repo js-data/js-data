@@ -205,7 +205,7 @@ export class Container extends Component {
   mapperClass: typeof Mapper
   _adapters: Object
   _mappers: Object
-  as(name: string): Mapper
+  as(name: string): any
   constructor(opts?: any)
   createRecord(name: string, props?: any, opts?: any): Record
   defineMapper(name: string, opts?: any): Mapper
@@ -222,7 +222,7 @@ export class DataStore extends Container {
   _pendingQueries: Object
   _completedQueries: Object
   linkRelations: boolean
-  as(name: string): Mapper|LinkedCollection|any
+  as(name: string): Mapper|LinkedCollection
   constructor(opts?: any)
   add(mapperName: string, records: any[]|any, opts?: any): any[]|any
   addToCache(mapperName: string, data: any, opts: any): any
