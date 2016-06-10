@@ -14,7 +14,10 @@ const superMethod = function (mapper, name) {
 }
 
 /**
- * js-data's Record class.
+ * js-data's Record class. An instance of `Record` corresponds to an in-memory
+ * representation of a single row or document in a database, Firebase,
+ * localstorage, etc. Basically, a `Record` instance represents whatever kind of
+ * entity in your persistence layer that has a primary key.
  *
  * ```javascript
  * import {Record} from 'js-data'
@@ -22,20 +25,25 @@ const superMethod = function (mapper, name) {
  *
  * Instantiate a plain record:
  * <div id="Record#constructor" class="tonic">
- * // import {Record} from 'js-data'
+ * // Normally you would do: import {Record} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
- * const {Record, version} = JSData
- * console.log(\`Using JSData v${version.full}\`)
- * const record = new Record({ name: 'John' })
+ * const {Record} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
+ *
+ * let record = new Record()
  * console.log('record: ' + JSON.stringify(record))
+ *
+ * // You can supply properties on instantiation:
+ * record = new Record({ name: 'John' })
+ * console.log('record: ' + JSON.stringify(record2))
  * </div>
  *
  * Instantiate a record that's associated with a Mapper:
  * <div id="Record#constructor2" class="tonic">
- * // import {Mapper} from 'js-data'
+ * // Normally you would do: import {Mapper} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
- * const {Mapper, version} = JSData
- * console.log(\`Using JSData v${version.full}\`)
+ * const {Mapper} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
  *
  * const UserMapper = new Mapper({ name: 'user' })
  * const User = UserMapper.recordClass
@@ -47,10 +55,10 @@ const superMethod = function (mapper, name) {
  *
  * Instantiate a record that's associated with a store's Mapper:
  * <div id="Record#constructor3" class="tonic">
- * // import {Container} from 'js-data'
+ * // Normally you would do: import {Container} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
- * const {Container, version} = JSData
- * console.log(\`Using JSData v${version.full}\`)
+ * const {Container} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
  *
  * const store = new Container()
  * store.defineMapper('user')
@@ -58,12 +66,12 @@ const superMethod = function (mapper, name) {
  * console.log('user: ' + JSON.stringify(user))
  * </div>
  *
- * Validation on instantiation:
+ * Validate on instantiation:
  * <div id="Record#constructor4" class="tonic">
- * // import {Container} from 'js-data'
+ * // Normally you would do: import {Container} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
- * const {Container, version} = JSData
- * console.log(\`Using JSData v${version.full}\`)
+ * const {Container} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
  *
  * const store = new Container()
  * store.defineMapper('user', {
@@ -79,10 +87,10 @@ const superMethod = function (mapper, name) {
  *
  * Skip validation on instantiation:
  * <div id="Record#constructor5" class="tonic">
- * // import {Container} from 'js-data'
+ * // Normally you would do: import {Container} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
- * const {Container, version} = JSData
- * console.log(\`Using JSData v${version.full}\`)
+ * const {Container} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
  *
  * const store = new Container()
  * store.defineMapper('user', {
@@ -111,8 +119,52 @@ function Record (props, opts) {
   opts || (opts = {})
   const _props = {}
   Object.defineProperties(this, {
+    /**
+     * Get a private property of this Record. Properties defined in
+     * {@link Mapper#schema} become private properties for
+     * {@link Mapper#recordClass}, though you can still access and set them
+     * using the provided ES5 getters and setters.
+     *
+     * __You shouldn't need to use this method unless you have a special need or
+     * unless you're extending the Record class.__
+     *
+     * @method Record#_get
+     * @param {string} key The property to retrieve.
+     * @returns {*} The value of the property.
+     * @since 3.0.0
+     */
     _get: { value (key) { return utils.get(_props, key) } },
+
+    /**
+     * Set a private property of this Record. Properties defined in
+     * {@link Mapper#schema} become private properties for
+     * {@link Mapper#recordClass}, though you can still access and set them
+     * using the provided ES5 getters and setters.
+     *
+     * __You shouldn't need to use this method unless you have a special need or
+     * unless you're extending the Record class.__
+     *
+     * @method Record#_set
+     * @param {(string|Object)} key The key or path to the property. Can also
+     * pass in an object of key/value pairs, which will all be set on the Record.
+     * @param {*} [value] The value to set.
+     * @since 3.0.0
+     */
     _set: { value (key, value) { return utils.set(_props, key, value) } },
+
+    /**
+     * Unset a private property of this Record. Properties defined in
+     * {@link Mapper#schema} become private properties for
+     * {@link Mapper#recordClass}, though you can still access and set them
+     * using the provided ES5 getters and setters.
+     *
+     * __You shouldn't need to use this method unless you have a special need or
+     * unless you're extending the Record class.__
+     *
+     * @method Record#_unset
+     * @param {string} key The property to unset.
+     * @since 3.0.0
+     */
     _unset: { value (key) { return utils.unset(_props, key) } }
   })
   const _set = this._set
@@ -133,7 +185,6 @@ export default Component.extend({
   /**
    * Returns the {@link Mapper} paired with this record's class, if any.
    *
-   * @private
    * @method Record#_mapper
    * @returns {Mapper} The {@link Mapper} paired with this record's class, if any.
    * @since 3.0.0
@@ -171,10 +222,11 @@ export default Component.extend({
    * {@link Record#commit} was called.
    *
    * <div id="Record#changes" class="tonic">
-   * // import {Container} from 'js-data'
+   * // Normally you would do: import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
-   * const {Container, version} = JSData
-   * console.log(\`Using JSData v${version.full}\`)
+   * const {Container} = JSData
+   * console.log(\`Using JSData v${JSData.version.full}\`)
+   *
    * const store = new Container()
    * store.defineMapper('user')
    * const user = store.createRecord('user')
@@ -201,10 +253,11 @@ export default Component.extend({
    * previous property values being set to current values.
    *
    * <div id="Record#commit" class="tonic">
-   * // import {Container} from 'js-data'
+   * // Normally you would do: import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
-   * const {Container, version} = JSData
-   * console.log(\`Using JSData v${version.full}\`)
+   * const {Container} = JSData
+   * console.log(\`Using JSData v${JSData.version.full}\`)
+   *
    * const store = new Container()
    * store.defineMapper('user')
    * const user = store.createRecord('user')
@@ -226,6 +279,20 @@ export default Component.extend({
   /**
    * Call {@link Mapper#destroy} using this record's primary key.
    *
+   * @example
+   * import {Container} from 'js-data'
+   * import {RethinkDBAdapter} from 'js-data-rethinkdb'
+   *
+   * const store = new Container()
+   * store.registerAdapter('rethink', new RethinkDBAdapter(), { default: true })
+   * store.defineMapper('user')
+   * store.find('user', 1234).then((user) => {
+   *   console.log(user.id) // 1234
+   *
+   *   // Destroy this user from the database
+   *   return user.destroy()
+   * })
+   *
    * @method Record#destroy
    * @param {Object} [opts] Configuration options passed to {@link Mapper#destroy}.
    * @returns {Promise} The result of calling {@link Mapper#destroy} with the
@@ -241,6 +308,18 @@ export default Component.extend({
   /**
    * Return the value at the given path for this instance.
    *
+   * <div id="Record#get" class="tonic">
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log(\`Using JSData v${JSData.version.full}\`)
+   * const store = new Container()
+   * store.defineMapper('user')
+   *
+   * const user = store.createRecord('user', { name: 'Bob' })
+   * console.log('user.get("name"): ' + user.get('name'))
+   * </div>
+   *
    * @method Record#get
    * @param {string} key Path of value to retrieve.
    * @returns {*} Value at path.
@@ -255,10 +334,10 @@ export default Component.extend({
    * {@link Record#commit} was called.
    *
    * <div id="Record#hasChanges" class="tonic">
-   * // import {Container} from 'js-data'
+   * // Normally you would do: import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
-   * const {Container, version} = JSData
-   * console.log(\`Using JSData v${version.full}\`)
+   * const {Container} = JSData
+   * console.log(\`Using JSData v${JSData.version.full}\`)
    * const store = new Container()
    * store.defineMapper('user')
    * const user = store.createRecord('user')
@@ -286,10 +365,10 @@ export default Component.extend({
    * Return whether the record in its current state passes validation.
    *
    * <div id="Record#isValid" class="tonic">
-   * // import {Container} from 'js-data'
+   * // Normally you would do: import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
-   * const {Container, version} = JSData
-   * console.log(\`Using JSData v${version.full}\`)
+   * const {Container} = JSData
+   * console.log(\`Using JSData v${JSData.version.full}\`)
    * const store = new Container()
    * store.defineMapper('user', {
    *   schema: {
@@ -322,8 +401,44 @@ export default Component.extend({
    * Lazy load relations of this record, to be attached to the record once their
    * loaded.
    *
+   * @example
+   * import {Container} from 'js-data'
+   * import {RethinkDBAdapter} from 'js-data-rethinkdb'
+   *
+   * const store = new Container()
+   * store.registerAdapter('rethink', new RethinkDBAdapter(), { default: true })
+   * store.defineMapper('user', {
+   *   relations: {
+   *     hasMany: {
+   *       post: {
+   *         localField: 'posts',
+   *         foreignKey: 'user_id'
+   *       }
+   *     }
+   *   }
+   * })
+   * store.defineMapper('post', {
+   *   relations: {
+   *     belongsTo: {
+   *       user: {
+   *         localField: 'user',
+   *         foreignKey: 'user_id'
+   *       }
+   *     }
+   *   }
+   * })
+   * store.find('user', 1234).then((user) => {
+   *   console.log(user.id) // 1234
+   *
+   *   // Destroy this user from the database
+   *   return user.loadRelations(['post'])
+   * }).then((user) => {
+   *   console.log(user.posts) // [{...}, {...}, ...]
+   * })
+   *
    * @method Record#loadRelations
-   * @param {string[]} [relations] List of relations to load.
+   * @param {string[]} [relations] List of relations to load. Can use localField
+   * names or Mapper names to pick relations.
    * @param {Object} [opts] Configuration options.
    * @returns {Promise} Resolves with the record, with the loaded relations now
    * attached.
@@ -412,8 +527,8 @@ export default Component.extend({
    * <div id="Record#previous" class="tonic">
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
-   * const {Container, version} = JSData
-   * console.log(\`Using JSData v${version.full}\`)
+   * const {Container} = JSData
+   * console.log(\`Using JSData v${JSData.version.full}\`)
    * const store = new Container()
    * store.defineMapper('user')
    * const user = store.createRecord('user', {
@@ -446,8 +561,8 @@ export default Component.extend({
    * <div id="Record#revert" class="tonic">
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
-   * const {Container, version} = JSData
-   * console.log(\`Using JSData v${version.full}\`)
+   * const {Container} = JSData
+   * console.log(\`Using JSData v${JSData.version.full}\`)
    * const store = new Container()
    * store.defineMapper('user')
    * const user = store.createRecord('user', {
@@ -485,6 +600,25 @@ export default Component.extend({
 
   /**
    * Delegates to {@link Mapper#create} or {@link Mapper#update}.
+   *
+   * @example
+   * import {Container} from 'js-data'
+   * import {RethinkDBAdapter} from 'js-data-rethinkdb'
+   *
+   * const store = new Container()
+   * store.registerAdapter('rethink', new RethinkDBAdapter(), { default: true })
+   * store.defineMapper('session')
+   * const session = store.createRecord('session', { topic: 'Node.js' })
+   *
+   * // Create a new record in the database
+   * session.save().then(() => {
+   *   console.log(session.id) // 1234
+   *
+   *   session.skill_level = 'beginner'
+   *
+   *   // Update the record in the database
+   *   return user.save()
+   * })
    *
    * @method Record#save
    * @param {Object} [opts] Configuration options. See {@link Mapper#create} and
@@ -524,13 +658,14 @@ export default Component.extend({
 
   /**
    * Set the value for a given key, or the values for the given keys if "key" is
-   * an object.
+   * an object. Triggers change events on those properties that have `track: true`
+   * in {@link Mapper#schema}.
    *
    * <div id="Record#set" class="tonic">
-   * // import {Container} from 'js-data'
+   * // Normally you would do: import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
-   * const {Container, version} = JSData
-   * console.log(\`Using JSData v${version.full}\`)
+   * const {Container} = JSData
+   * console.log(\`Using JSData v${JSData.version.full}\`)
    * const store = new Container()
    * store.defineMapper('user')
    *
@@ -571,10 +706,10 @@ export default Component.extend({
    * be called with this record instead.
    *
    * <div id="Record#toJSON" class="tonic">
-   * // import {Container} from 'js-data'
+   * // Normally you would do: import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
-   * const {Container, version} = JSData
-   * console.log(\`Using JSData v${version.full}\`)
+   * const {Container} = JSData
+   * console.log(\`Using JSData v${JSData.version.full}\`)
    * const store = new Container()
    * store.defineMapper('user', {
    *   schema: {
@@ -594,6 +729,8 @@ export default Component.extend({
    *
    * @method Record#toJSON
    * @param {Object} [opts] Configuration options.
+   * @param {boolean} [opts.strict] Whether to exclude properties that are not
+   * defined in {@link Mapper#schema}.
    * @param {string[]} [opts.with] Array of relation names or relation fields
    * to include in the representation. Only available as an option if the class
    * from which this record was created has a Mapper and this record resides in
@@ -615,13 +752,14 @@ export default Component.extend({
   },
 
   /**
-   * Unset the value for a given key.
+   * Unset the value for a given key. Triggers change events on those properties
+   * that have `track: true` in {@link Mapper#schema}.
    *
    * <div id="Record#set" class="tonic">
-   * // import {Container} from 'js-data'
+   * // Normally you would do: import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
-   * const {Container, version} = JSData
-   * console.log(\`Using JSData v${version.full}\`)
+   * const {Container} = JSData
+   * console.log(\`Using JSData v${JSData.version.full}\`)
    * const store = new Container()
    * store.defineMapper('user')
    *
@@ -648,10 +786,10 @@ export default Component.extend({
    * Validate this record based on its current properties.
    *
    * <div id="Record#validate" class="tonic">
-   * // import {Container} from 'js-data'
+   * // Normally you would do: import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
-   * const {Container, version} = JSData
-   * console.log(\`Using JSData v${version.full}\`)
+   * const {Container} = JSData
+   * console.log(\`Using JSData v${JSData.version.full}\`)
    * const store = new Container()
    * store.defineMapper('user', {
    *   schema: {
@@ -696,32 +834,62 @@ utils.eventify(
 )
 
 /**
- * Create a subclass of this Record.
- *
+ * Create a subclass of this Record:
  * <div id="Record.extend" class="tonic">
- * // import {Record} from 'js-data'
+ * // Normally you would do: import {Record} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
- * const {Record, version} = JSData
- * console.log(\`Using JSData v${version.full}\`)
- * <br>
+ * const {Record} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
+ *
  * // Extend the class using ES2015 class syntax.
  * class CustomRecordClass extends Record {
  *   foo () { return 'bar' }
+ *   static beep () { return 'boop' }
  * }
  * const customRecord = new CustomRecordClass()
  * console.log(customRecord.foo())
- * <br>
+ * console.log(CustomRecordClass.beep())
+ *
  * // Extend the class using alternate method.
  * const OtherRecordClass = Record.extend({
- *   foo () { return 'beep' }
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
  * })
  * const otherRecord = new OtherRecordClass()
  * console.log(otherRecord.foo())
+ * console.log(OtherRecordClass.beep())
+ * </div>
+ *
+ * Provide a custom constructor function:
+ * <div id="Record.extend" class="tonic">
+ * // Normally you would do: import {Record} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Record} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
+ *
+ * // Extend the class, providing a custom constructor.
+ * function OtherRecordClass (props, opts) {
+ *   Record.call(this, props, opts)
+ *   this.created_at = new Date().getTime()
+ * }
+ * Record.extend({
+ *   constructor: OtherRecordClass,
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherRecord = new OtherRecordClass()
+ * console.log(otherRecord.created_at)
+ * console.log(otherRecord.foo())
+ * console.log(OtherRecordClass.beep())
  * </div>
  *
  * @method Record.extend
  * @param {Object} [props={}] Properties to add to the prototype of the
  * subclass.
+ * @param {Object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
  * @param {Object} [classProps={}] Static properties to add to the subclass.
  * @returns {Constructor} Subclass of this Record class.
  * @since 3.0.0

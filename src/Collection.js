@@ -769,26 +769,62 @@ export default Component.extend({
 })
 
 /**
- * Create a subclass of this Collection.
+ * Create a subclass of this Collection:
+ * <div id="Collection.extend" class="tonic">
+ * // Normally you would do: import {Collection} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Collection} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
  *
- * @example <caption>Extend the class in a cross-browser manner.</caption>
- * import {Collection} from 'js-data'
- * const CustomCollectionClass = Collection.extend({
- *   foo () { return 'bar' }
- * })
- * const customCollection = new CustomCollectionClass()
- * console.log(customCollection.foo()) // "bar"
- *
- * @example <caption>Extend the class using ES2015 class syntax.</caption>
+ * // Extend the class using ES2015 class syntax.
  * class CustomCollectionClass extends Collection {
  *   foo () { return 'bar' }
+ *   static beep () { return 'boop' }
  * }
  * const customCollection = new CustomCollectionClass()
- * console.log(customCollection.foo()) // "bar"
+ * console.log(customCollection.foo())
+ * console.log(CustomCollectionClass.beep())
+ *
+ * // Extend the class using alternate method.
+ * const OtherCollectionClass = Collection.extend({
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherCollection = new OtherCollectionClass()
+ * console.log(otherCollection.foo())
+ * console.log(OtherCollectionClass.beep())
+ * </div>
+ *
+ * Provide a custom constructor function:
+ * <div id="Collection.extend" class="tonic">
+ * // Normally you would do: import {Collection} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Collection} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
+ *
+ * // Extend the class, providing a custom constructor.
+ * function OtherCollectionClass (records, opts) {
+ *   Collection.call(this, records, opts)
+ *   this.created_at = new Date().getTime()
+ * }
+ * Collection.extend({
+ *   constructor: OtherCollectionClass,
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherCollection = new OtherCollectionClass()
+ * console.log(otherCollection.created_at)
+ * console.log(otherCollection.foo())
+ * console.log(OtherCollectionClass.beep())
+ * </div>
  *
  * @method Collection.extend
  * @param {Object} [props={}] Properties to add to the prototype of the
  * subclass.
+ * @param {Object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
  * @param {Object} [classProps={}] Static properties to add to the subclass.
  * @returns {Constructor} Subclass of this Collection class.
  * @since 3.0.0

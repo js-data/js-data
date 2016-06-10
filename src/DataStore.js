@@ -1005,27 +1005,63 @@ proxiedCollectionMethods.forEach(function (method) {
 export default Container.extend(props)
 
 /**
- * Create a subclass of this DataStore.
+ * Create a subclass of this DataStore:
+ * <div id="DataStore.extend" class="tonic">
+ * // Normally you would do: import {DataStore} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {DataStore} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
  *
- * @example <caption>Extend the class in a cross-browser manner.</caption>
- * import {DataStore} from 'js-data'
- * const CustomDataStoreClass = DataStore.extend({
- *   foo () { return 'bar' }
- * })
- * const customDataStore = new CustomDataStoreClass()
- * console.log(customDataStore.foo()) // "bar"
- *
- * @example <caption>Extend the class using ES2015 class syntax.</caption>
+ * // Extend the class using ES2015 class syntax.
  * class CustomDataStoreClass extends DataStore {
  *   foo () { return 'bar' }
+ *   static beep () { return 'boop' }
  * }
  * const customDataStore = new CustomDataStoreClass()
- * console.log(customDataStore.foo()) // "bar"
+ * console.log(customDataStore.foo())
+ * console.log(CustomDataStoreClass.beep())
+ *
+ * // Extend the class using alternate method.
+ * const OtherDataStoreClass = DataStore.extend({
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherDataStore = new OtherDataStoreClass()
+ * console.log(otherDataStore.foo())
+ * console.log(OtherDataStoreClass.beep())
+ * </div>
+ *
+ * Provide a custom constructor function:
+ * <div id="DataStore.extend" class="tonic">
+ * // Normally you would do: import {DataStore} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {DataStore} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
+ *
+ * // Extend the class, providing a custom constructor.
+ * function OtherDataStoreClass (opts) {
+ *   DataStore.call(this, opts)
+ *   this.created_at = new Date().getTime()
+ * }
+ * DataStore.extend({
+ *   constructor: OtherDataStoreClass,
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherDataStore = new OtherDataStoreClass()
+ * console.log(otherDataStore.created_at)
+ * console.log(otherDataStore.foo())
+ * console.log(OtherDataStoreClass.beep())
+ * </div>
  *
  * @method DataStore.extend
  * @param {Object} [props={}] Properties to add to the prototype of the
  * subclass.
+ * @param {Object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
  * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @returns {Constructor} Subclass of this DataStore.
+ * @returns {Constructor} Subclass of this DataStore class.
  * @since 3.0.0
  */

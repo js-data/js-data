@@ -17,14 +17,64 @@ export default function Component () {
 }
 
 /**
- * Create a subclass of this component.
+ * Create a subclass of this Component:
+ * <div id="Component.extend" class="tonic">
+ * // Normally you would do: import {Component} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Component} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
+ *
+ * // Extend the class using ES2015 class syntax.
+ * class CustomComponentClass extends Component {
+ *   foo () { return 'bar' }
+ *   static beep () { return 'boop' }
+ * }
+ * const customComponent = new CustomComponentClass()
+ * console.log(customComponent.foo())
+ * console.log(CustomComponentClass.beep())
+ *
+ * // Extend the class using alternate method.
+ * const OtherComponentClass = Component.extend({
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherComponent = new OtherComponentClass()
+ * console.log(otherComponent.foo())
+ * console.log(OtherComponentClass.beep())
+ * </div>
+ *
+ * Provide a custom constructor function:
+ * <div id="Component.extend" class="tonic">
+ * // Normally you would do: import {Component} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Component} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
+ *
+ * // Extend the class, providing a custom constructor.
+ * function OtherComponentClass () {
+ *   Component.call(this)
+ *   this.created_at = new Date().getTime()
+ * }
+ * Component.extend({
+ *   constructor: OtherComponentClass,
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherComponent = new OtherComponentClass()
+ * console.log(otherComponent.created_at)
+ * console.log(otherComponent.foo())
+ * console.log(OtherComponentClass.beep())
+ * </div>
  *
  * @method Component.extend
- * @static
  * @param {Object} [props={}] Properties to add to the prototype of the
  * subclass.
+ * @param {Object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
  * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @returns {Constructor} Subclass of this component.
+ * @returns {Constructor} Subclass of this Component class.
  * @since 3.0.0
  */
 Component.extend = utils.extend

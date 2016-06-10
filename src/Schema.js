@@ -1073,3 +1073,65 @@ export default Component.extend({
   validate,
   validationKeywords
 })
+
+/**
+ * Create a subclass of this Schema:
+ * <div id="Schema.extend" class="tonic">
+ * // Normally you would do: import {Schema} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Schema} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
+ *
+ * // Extend the class using ES2015 class syntax.
+ * class CustomSchemaClass extends Schema {
+ *   foo () { return 'bar' }
+ *   static beep () { return 'boop' }
+ * }
+ * const customSchema = new CustomSchemaClass()
+ * console.log(customSchema.foo())
+ * console.log(CustomSchemaClass.beep())
+ *
+ * // Extend the class using alternate method.
+ * const OtherSchemaClass = Schema.extend({
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherSchema = new OtherSchemaClass()
+ * console.log(otherSchema.foo())
+ * console.log(OtherSchemaClass.beep())
+ * </div>
+ *
+ * Provide a custom constructor function:
+ * <div id="Schema.extend" class="tonic">
+ * // Normally you would do: import {Schema} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Schema} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
+ *
+ * // Extend the class, providing a custom constructor.
+ * function OtherSchemaClass (definition) {
+ *   Schema.call(this, definition)
+ *   this.created_at = new Date().getTime()
+ * }
+ * Schema.extend({
+ *   constructor: OtherSchemaClass,
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherSchema = new OtherSchemaClass()
+ * console.log(otherSchema.created_at)
+ * console.log(otherSchema.foo())
+ * console.log(OtherSchemaClass.beep())
+ * </div>
+ *
+ * @method Schema.extend
+ * @param {Object} [props={}] Properties to add to the prototype of the
+ * subclass.
+ * @param {Object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
+ * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @returns {Constructor} Subclass of this Schema class.
+ * @since 3.0.0
+ */

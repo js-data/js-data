@@ -795,26 +795,62 @@ export default Component.extend({
 })
 
 /**
- * Create a subclass of this Query.
+ * Create a subclass of this Query:
+ * <div id="Query.extend" class="tonic">
+ * // Normally you would do: import {Query} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Query} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
  *
- * @example <caption>Extend the class in a cross-browser manner.</caption>
- * import {Query} from 'js-data'
- * const CustomQueryClass = Query.extend({
- *   foo () { return 'bar' }
- * })
- * const customQuery = new CustomQueryClass({ name: 'test' })
- * console.log(customQuery.foo()) // "bar"
- *
- * @example <caption>Extend the class using ES2015 class syntax.</caption>
+ * // Extend the class using ES2015 class syntax.
  * class CustomQueryClass extends Query {
  *   foo () { return 'bar' }
+ *   static beep () { return 'boop' }
  * }
- * const customQuery = new CustomQueryClass({ name: 'test' })
- * console.log(customQuery.foo()) // "bar"
+ * const customQuery = new CustomQueryClass()
+ * console.log(customQuery.foo())
+ * console.log(CustomQueryClass.beep())
+ *
+ * // Extend the class using alternate method.
+ * const OtherQueryClass = Query.extend({
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherQuery = new OtherQueryClass()
+ * console.log(otherQuery.foo())
+ * console.log(OtherQueryClass.beep())
+ * </div>
+ *
+ * Provide a custom constructor function:
+ * <div id="Query.extend" class="tonic">
+ * // Normally you would do: import {Query} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Query} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
+ *
+ * // Extend the class, providing a custom constructor.
+ * function OtherQueryClass (collection) {
+ *   Query.call(this, collection)
+ *   this.created_at = new Date().getTime()
+ * }
+ * Query.extend({
+ *   constructor: OtherQueryClass,
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherQuery = new OtherQueryClass()
+ * console.log(otherQuery.created_at)
+ * console.log(otherQuery.foo())
+ * console.log(OtherQueryClass.beep())
+ * </div>
  *
  * @method Query.extend
  * @param {Object} [props={}] Properties to add to the prototype of the
  * subclass.
+ * @param {Object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
  * @param {Object} [classProps={}] Static properties to add to the subclass.
  * @returns {Constructor} Subclass of this Query class.
  * @since 3.0.0

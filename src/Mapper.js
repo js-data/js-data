@@ -1556,7 +1556,7 @@ export default Component.extend({
    * @param {Record|Record[]} records Record or records from which to create a
    * POJO representation.
    * @param {Object} [opts] Configuration options.
-   * @param {boolean} [opts.strict] Whether to include properties that are not
+   * @param {boolean} [opts.strict] Whether to exclude properties that are not
    * defined in {@link Mapper#schema}.
    * @param {string[]} [opts.with] Array of relation names or relation fields
    * to include in the POJO representation.
@@ -1837,26 +1837,62 @@ export default Component.extend({
 })
 
 /**
- * Create a subclass of this Mapper.
+ * Create a subclass of this Mapper:
+ * <div id="Mapper.extend" class="tonic">
+ * // Normally you would do: import {Mapper} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Mapper} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
  *
- * @example <caption>Extend the class in a cross-browser manner.</caption>
- * import {Mapper} from 'js-data'
- * const CustomMapperClass = Mapper.extend({
- *   foo () { return 'bar' }
- * })
- * const customMapper = new CustomMapperClass({ name: 'test' })
- * console.log(customMapper.foo()) // "bar"
- *
- * @example <caption>Extend the class using ES2015 class syntax.</caption>
+ * // Extend the class using ES2015 class syntax.
  * class CustomMapperClass extends Mapper {
  *   foo () { return 'bar' }
+ *   static beep () { return 'boop' }
  * }
- * const customMapper = new CustomMapperClass({ name: 'test' })
- * console.log(customMapper.foo()) // "bar"
+ * const customMapper = new CustomMapperClass()
+ * console.log(customMapper.foo())
+ * console.log(CustomMapperClass.beep())
+ *
+ * // Extend the class using alternate method.
+ * const OtherMapperClass = Mapper.extend({
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherMapper = new OtherMapperClass()
+ * console.log(otherMapper.foo())
+ * console.log(OtherMapperClass.beep())
+ * </div>
+ *
+ * Provide a custom constructor function:
+ * <div id="Mapper.extend" class="tonic">
+ * // Normally you would do: import {Mapper} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Mapper} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
+ *
+ * // Extend the class, providing a custom constructor.
+ * function OtherMapperClass (opts) {
+ *   Mapper.call(this, opts)
+ *   this.created_at = new Date().getTime()
+ * }
+ * Mapper.extend({
+ *   constructor: OtherMapperClass,
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherMapper = new OtherMapperClass()
+ * console.log(otherMapper.created_at)
+ * console.log(otherMapper.foo())
+ * console.log(OtherMapperClass.beep())
+ * </div>
  *
  * @method Mapper.extend
  * @param {Object} [props={}] Properties to add to the prototype of the
  * subclass.
+ * @param {Object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
  * @param {Object} [classProps={}] Static properties to add to the subclass.
  * @returns {Constructor} Subclass of this Mapper class.
  * @since 3.0.0

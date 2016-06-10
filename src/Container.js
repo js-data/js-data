@@ -781,34 +781,63 @@ proxiedMapperMethods.forEach(function (method) {
 Component.extend(props)
 
 /**
- * Create a subclass of this Container.
- *
- * <div id="Container.extend">
- * // import {Container} from 'js-data'
+ * Create a subclass of this Container:
+ * <div id="Container.extend" class="tonic">
+ * // Normally you would do: import {Container} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
- * const {Container, version} = JSData
- * console.log(\`Using JSData v${version.full}\`)
- * <br>
+ * const {Container} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
+ *
  * // Extend the class using ES2015 class syntax.
  * class CustomContainerClass extends Container {
  *   foo () { return 'bar' }
+ *   static beep () { return 'boop' }
  * }
  * const customContainer = new CustomContainerClass()
  * console.log(customContainer.foo())
- * <br>
+ * console.log(CustomContainerClass.beep())
+ *
  * // Extend the class using alternate method.
  * const OtherContainerClass = Container.extend({
- *   foo () { return 'beep' }
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
  * })
  * const otherContainer = new OtherContainerClass()
  * console.log(otherContainer.foo())
+ * console.log(OtherContainerClass.beep())
  * </div>
- * <script src="https://embed.tonicdev.com" data-element-id="Container.extend"></script>
+ *
+ * Provide a custom constructor function:
+ * <div id="Container.extend" class="tonic">
+ * // Normally you would do: import {Container} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Container} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
+ *
+ * // Extend the class, providing a custom constructor.
+ * function OtherContainerClass (opts) {
+ *   Container.call(this, opts)
+ *   this.created_at = new Date().getTime()
+ * }
+ * Container.extend({
+ *   constructor: OtherContainerClass,
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherContainer = new OtherContainerClass()
+ * console.log(otherContainer.created_at)
+ * console.log(otherContainer.foo())
+ * console.log(OtherContainerClass.beep())
+ * </div>
  *
  * @method Container.extend
  * @param {Object} [props={}] Properties to add to the prototype of the
  * subclass.
+ * @param {Object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
  * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @returns {Constructor} Subclass of this Container.
+ * @returns {Constructor} Subclass of this Container class.
  * @since 3.0.0
  */
