@@ -788,7 +788,7 @@ const makeDescriptor = function (prop, schema, opts) {
 
     // Optionally check that the new value passes validation
     if (!_get(noValidatePath)) {
-      const errors = schema.validate(value)
+      const errors = schema.validate(value, { path: [prop] })
       if (errors) {
         // Immediately throw an error, preventing the record from getting into
         // an invalid state
@@ -994,9 +994,20 @@ const typeGroupValidators = {
 /**
  * js-data's Schema class.
  *
- * ```javascript
- * import {Schema} from 'js-data'
- * ```
+ * <div id="Schema#constructor">
+ * // import {Schema} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Schema, version} = JSData
+ *
+ * const PostSchema = new Schema({
+ *   type: 'object',
+ *   properties: {
+ *     title: { type: 'string' }
+ *   }
+ * })
+ * PostSchema.validate({ title: 1234 })
+ * </div>
+ * <script src="https://embed.tonicdev.com" data-element-id="Schema#constructor"></script>
  *
  * @class Schema
  * @extends Component

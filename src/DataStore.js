@@ -43,17 +43,6 @@ const cachedFn = function (name, hashOrId, opts) {
   return cached
 }
 
-function DataStore (opts) {
-  utils.classCallCheck(this, DataStore)
-  DataStore.__super__.call(this, opts)
-
-  this.collectionClass = this.collectionClass || LinkedCollection
-  this._collections = {}
-  this._pendingQueries = {}
-  this._completedQueries = {}
-  return this
-}
-
 /**
  * The `DataStore` class is an extension of {@link Container}. Not only does
  * `DataStore` manage mappers, but also collections. `DataStore` implements the
@@ -104,6 +93,17 @@ function DataStore (opts) {
  * @tutorial ["http://www.js-data.io/v3.0/docs/working-with-the-datastore","Working with the DataStore"]
  * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
  */
+function DataStore (opts) {
+  utils.classCallCheck(this, DataStore)
+  DataStore.__super__.call(this, opts)
+
+  this.collectionClass = this.collectionClass || LinkedCollection
+  this._collections = {}
+  this._pendingQueries = {}
+  this._completedQueries = {}
+  return this
+}
+
 const props = {
   constructor: DataStore,
 

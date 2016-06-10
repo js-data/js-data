@@ -98,17 +98,24 @@ utils.logify(Component.prototype)
 /**
  * Trigger an event on this Component.
  *
- * @example
+ * <div id="Component#emit">
+ * // import {Collection, DataStore} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Collection, DataStore, version} = JSData
+ *
+ * const collection = new Collection()
  * collection.on('foo', (msg) => {
- *   console.log(msg) // "bar"
+ *   console.log(msg)
  * })
  * collection.emit('foo', 'bar')
  *
- * @example
- * store.on('foo', (msg, val1, val2) => {
- *   console.log(msg, val1, val2) // "bar" "beep" "boop"
+ * const store = new DataStore()
+ * store.on('beep', (msg) => {
+ *   console.log(msg)
  * })
- * store.emit('foo', 'bar', 'beep', 'boop')
+ * store.emit('beep', 'boop')
+ * </div>
+ * <script src="https://embed.tonicdev.com" data-element-id="Component#emit"></script>
  *
  * @method Component#emit
  * @param {string} event Name of event to emit.

@@ -56,16 +56,20 @@ const COLLECTION_DEFAULTS = {
 /**
  * An ordered set of {@link Record} instances.
  *
- * @example
- * import {Collection, Record} from 'js-data'
+ * <div id="Collection#constructor">
+ * // import {Collection, Record} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Collection, Record, version} = JSData
+ * console.log(\`Using JSData v${version.full}\`)
  * const user1 = new Record({ id: 1 })
  * const user2 = new Record({ id: 2 })
  * const UserCollection = new Collection([user1, user2])
- * UserCollection.get(1) === user1 // true
+ * console.log(UserCollection.get(1) === user1)
+ * </div>
+ * <script src="https://embed.tonicdev.com" data-element-id="Collection#constructor"></script>
  *
  * @class Collection
  * @extends Component
- * @type {Function}
  * @param {Array} [records] Initial set of records to insert into the
  * collection.
  * @param {Object} [opts] Configuration options.
@@ -91,26 +95,30 @@ function Collection (records, opts) {
   records || (records = [])
   opts || (opts = {})
 
-  /**
-   * Default Mapper for this collection. Optional. If a Mapper is provided, then
-   * the collection will use the {@link Mapper#idAttribute} setting, and will
-   * wrap records in {@link Mapper#recordClass}.
-   *
-   * @example
-   * import {Collection, Mapper} from 'js-data'
-   *
-   * class MyMapperClass extends Mapper {
-   *   foo () { return 'bar' }
-   * }
-   * const myMapper = new MyMapperClass()
-   * const collection = new Collection(null, { mapper: myMapper })
-   *
-   * @name Collection#mapper
-   * @type {Mapper}
-   * @default null
-   * @since 3.0.0
-   */
   Object.defineProperties(this, {
+    /**
+     * Default Mapper for this collection. Optional. If a Mapper is provided, then
+     * the collection will use the {@link Mapper#idAttribute} setting, and will
+     * wrap records in {@link Mapper#recordClass}.
+     *
+     * <div id="Collection#mapper">
+     * // import {Collection, Mapper} from 'js-data'
+     * const JSData = require('js-data@3.0.0-beta.7')
+     * const {Collection, Mapper, version} = JSData
+     * console.log(\`Using JSData v${version.full}\`)
+     * class MyMapperClass extends Mapper {
+     *   foo () { return 'bar' }
+     * }
+     * const myMapper = new MyMapperClass({ name: 'myMapper' })
+     * const collection = new Collection(null, { mapper: myMapper })
+     * </div>
+     * <script src="https://embed.tonicdev.com" data-element-id="Collection#mapper"></script>
+     *
+     * @name Collection#mapper
+     * @type {Mapper}
+     * @default null
+     * @since 3.0.0
+     */
     mapper: {
       value: undefined,
       writable: true
@@ -412,22 +420,34 @@ export default Component.extend({
    *
    * Shortcut for `collection.query().filter(queryOrFn[, thisArg]).run()`
    *
-   * @example <caption>Get the draft posts created less than three months</caption>
-   * const posts = collection.filter({
+   * <div id="Collection#filter">
+   * // import {Collection} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Collection, version} = JSData
+   * console.log(\`Using JSData v${version.full}\`)
+   * const collection = new Collection([
+   *   { id: 1, status: 'draft', created_at_timestamp: new Date().getTime() }
+   * ])
+   *
+   * // Get the draft posts created less than three months ago
+   * let posts = collection.filter({
    *   where: {
    *     status: {
    *       '==': 'draft'
    *     },
    *     created_at_timestamp: {
-   *       '>=': (new Date().getTime() - (1000 * 60 * 60 * 24 * 30 * 3)) // 3 months ago
+   *       '>=': (new Date().getTime() - (1000 \* 60 \* 60 \* 24 \* 30 \* 3)) // 3 months ago
    *     }
    *   }
    * })
+   * console.log(posts)
    *
-   * @example <caption>Use a custom filter function</caption>
-   * const posts = collection.filter(function (post) {
-   *   return post.isReady()
+   * // Use a custom filter function
+   * posts = collection.filter(function (post) {
+   *   return post.id % 2 === 0
    * })
+   * </div>
+   * <script src="https://embed.tonicdev.com" data-element-id="Collection#filter"></script>
    *
    * @method Collection#filter
    * @since 3.0.0

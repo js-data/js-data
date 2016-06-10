@@ -93,6 +93,20 @@ export default Component.extend({
    * Return changes to this record since it was instantiated or
    * {@link Record#commit} was called.
    *
+   * <div id="Record#changes">
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container, version} = JSData
+   * console.log(\`Using JSData v${version.full}\`)
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user')
+   * console.log('user changes: ' + JSON.stringify(user.changes()))
+   * user.name = 'John'
+   * console.log('user changes: ' + JSON.stringify(user.changes()))
+   * </div>
+   * <script src="https://embed.tonicdev.com" data-element-id="Record#changes"></script>
+   *
    * @method Record#changes
    * @param [opts] Configuration options.
    * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
@@ -109,6 +123,22 @@ export default Component.extend({
   /**
    * Make the record's current in-memory state it's only state, with any
    * previous property values being set to current values.
+   *
+   * <div id="Record#commit">
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container, version} = JSData
+   * console.log(\`Using JSData v${version.full}\`)
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user')
+   * console.log('user hasChanges: ' + user.hasChanges())
+   * user.name = 'John'
+   * console.log('user hasChanges: ' + user.hasChanges())
+   * user.commit()
+   * console.log('user hasChanges: ' + user.hasChanges())
+   * </div>
+   * <script src="https://embed.tonicdev.com" data-element-id="Record#commit"></script>
    *
    * @method Record#commit
    * @since 3.0.0
@@ -149,6 +179,22 @@ export default Component.extend({
    * Return whether this record has changed since it was instantiated or
    * {@link Record#commit} was called.
    *
+   * <div id="Record#hasChanges">
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container, version} = JSData
+   * console.log(\`Using JSData v${version.full}\`)
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user')
+   * console.log('user hasChanges: ' + user.hasChanges())
+   * user.name = 'John'
+   * console.log('user hasChanges: ' + user.hasChanges())
+   * user.commit()
+   * console.log('user hasChanges: ' + user.hasChanges())
+   * </div>
+   * <script src="https://embed.tonicdev.com" data-element-id="Record#hasChanges"></script>
+   *
    * @method Record#hasChanges
    * @param [opts] Configuration options.
    * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
@@ -164,6 +210,30 @@ export default Component.extend({
 
   /**
    * Return whether the record in its current state passes validation.
+   *
+   * <div id="Record#isValid">
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container, version} = JSData
+   * console.log(\`Using JSData v${version.full}\`)
+   * const store = new Container()
+   * store.defineMapper('user', {
+   *   schema: {
+   *     properties: {
+   *       name: { type: 'string' }
+   *     }
+   *   }
+   * })
+   * const user = store.createRecord('user', {
+   *   name: 1234
+   * }, {
+   *   noValidate: true // this allows us to put the record into an invalid state
+   * })
+   * console.log('user isValid: ' + user.isValid())
+   * user.name = 'John'
+   * console.log('user isValid: ' + user.isValid())
+   * </div>
+   * <script src="https://embed.tonicdev.com" data-element-id="Record#isValid"></script>
    *
    * @method Record#isValid
    * @param {Object} [opts] Configuration options. Passed to {@link Mapper#validate}.
@@ -266,6 +336,24 @@ export default Component.extend({
   /**
    * Return the properties with which this record was instantiated.
    *
+   * <div id="Record#previous">
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container, version} = JSData
+   * console.log(\`Using JSData v${version.full}\`)
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user', {
+   *   name: 'William'
+   * })
+   * console.log('user previous: ' + JSON.stringify(user.previous()))
+   * user.name = 'Bob'
+   * console.log('user previous: ' + JSON.stringify(user.previous()))
+   * user.commit()
+   * console.log('user previous: ' + JSON.stringify(user.previous()))
+   * </div>
+   * <script src="https://embed.tonicdev.com" data-element-id="Record#previous"></script>
+   *
    * @method Record#previous
    * @param {string} [key] If specified, return just the initial value of the
    * given key.
@@ -282,6 +370,24 @@ export default Component.extend({
   /**
    * Revert changes to this record back to the properties it had when it was
    * instantiated.
+   *
+   * <div id="Record#revert">
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container, version} = JSData
+   * console.log(\`Using JSData v${version.full}\`)
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user', {
+   *   name: 'William'
+   * })
+   * console.log('user: ' + JSON.stringify(user))
+   * user.name = 'Bob'
+   * console.log('user: ' + JSON.stringify(user))
+   * user.revert()
+   * console.log('user: ' + JSON.stringify(user))
+   * </div>
+   * <script src="https://embed.tonicdev.com" data-element-id="Record#revert"></script>
    *
    * @method Record#revert
    * @param {Object} [opts] Configuration options.
@@ -349,6 +455,25 @@ export default Component.extend({
    * Set the value for a given key, or the values for the given keys if "key" is
    * an object.
    *
+   * <div id="Record#set">
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container, version} = JSData
+   * console.log(\`Using JSData v${version.full}\`)
+   * const store = new Container()
+   * store.defineMapper('user')
+   *
+   * const user = store.createRecord('user')
+   * console.log('user: ' + JSON.stringify(user))
+   *
+   * user.set('name', 'Bob')
+   * console.log('user: ' + JSON.stringify(user))
+   *
+   * user.set({ age: 30, role: 'admin' })
+   * console.log('user: ' + JSON.stringify(user))
+   * </div>
+   * <script src="https://embed.tonicdev.com" data-element-id="Record#set"></script>
+   *
    * @method Record#set
    * @param {(string|Object)} key Key to set or hash of key-value pairs to set.
    * @param {*} [value] Value to set for the given key.
@@ -375,6 +500,29 @@ export default Component.extend({
    * which this record was created has a Mapper, then {@link Mapper#toJSON} will
    * be called with this record instead.
    *
+   * <div id="Record#toJSON">
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container, version} = JSData
+   * console.log(\`Using JSData v${version.full}\`)
+   * const store = new Container()
+   * store.defineMapper('user', {
+   *   schema: {
+   *     properties: {
+   *       name: { type: 'string' }
+   *     }
+   *   }
+   * })
+   *
+   * const user = store.createRecord('user', {
+   *   name: 'John',
+   *   $$hashKey: '1234'
+   * })
+   * console.log('user: ' + JSON.stringify(user.toJSON()))
+   * console.log('user: ' + JSON.stringify(user.toJSON({ strict: true })))
+   * </div>
+   * <script src="https://embed.tonicdev.com" data-element-id="Record#toJSON"></script>
+   *
    * @method Record#toJSON
    * @param {Object} [opts] Configuration options.
    * @param {string[]} [opts.with] Array of relation names or relation fields
@@ -400,6 +548,24 @@ export default Component.extend({
   /**
    * Unset the value for a given key.
    *
+   * <div id="Record#set">
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container, version} = JSData
+   * console.log(\`Using JSData v${version.full}\`)
+   * const store = new Container()
+   * store.defineMapper('user')
+   *
+   * const user = store.createRecord('user', {
+   *   name: 'John'
+   * })
+   * console.log('user: ' + JSON.stringify(user))
+   *
+   * user.unset('name')
+   * console.log('user: ' + JSON.stringify(user))
+   * </div>
+   * <script src="https://embed.tonicdev.com" data-element-id="Record#set"></script>
+   *
    * @method Record#unset
    * @param {string} key Key to unset.
    * @param {Object} [opts] Configuration options.
@@ -412,6 +578,30 @@ export default Component.extend({
 
   /**
    * Validate this record based on its current properties.
+   *
+   * <div id="Record#validate">
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container, version} = JSData
+   * console.log(\`Using JSData v${version.full}\`)
+   * const store = new Container()
+   * store.defineMapper('user', {
+   *   schema: {
+   *     properties: {
+   *       name: { type: 'string' }
+   *     }
+   *   }
+   * })
+   * const user = store.createRecord('user', {
+   *   name: 1234
+   * }, {
+   *   noValidate: true // this allows us to put the record into an invalid state
+   * })
+   * console.log('user validation: ' + JSON.stringify(user.validate()))
+   * user.name = 'John'
+   * console.log('user validation: ' + user.validate())
+   * </div>
+   * <script src="https://embed.tonicdev.com" data-element-id="Record#validate"></script>
    *
    * @method Record#validate
    * @param {Object} [opts] Configuration options. Passed to {@link Mapper#validate}.
@@ -441,20 +631,27 @@ utils.eventify(
 /**
  * Create a subclass of this Record.
  *
- * @example <caption>Extend the class in a cross-browser manner.</caption>
- * import {Record} from 'js-data'
- * const CustomRecordClass = Record.extend({
- *   foo () { return 'bar' }
- * })
- * const customRecord = new CustomRecordClass()
- * console.log(customRecord.foo()) // "bar"
- *
- * @example <caption>Extend the class using ES2015 class syntax.</caption>
+ * <div id="Record.extend">
+ * // import {Record} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Record, version} = JSData
+ * console.log(\`Using JSData v${version.full}\`)
+ * <br>
+ * // Extend the class using ES2015 class syntax.
  * class CustomRecordClass extends Record {
  *   foo () { return 'bar' }
  * }
  * const customRecord = new CustomRecordClass()
- * console.log(customRecord.foo()) // "bar"
+ * console.log(customRecord.foo())
+ * <br>
+ * // Extend the class using alternate method.
+ * const OtherRecordClass = Record.extend({
+ *   foo () { return 'beep' }
+ * })
+ * const otherRecord = new OtherRecordClass()
+ * console.log(otherRecord.foo())
+ * </div>
+ * <script src="https://embed.tonicdev.com" data-element-id="Record.extend"></script>
  *
  * @method Record.extend
  * @param {Object} [props={}] Properties to add to the prototype of the
