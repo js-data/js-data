@@ -507,6 +507,12 @@ const utils = {
    * Produce a factory function for making Error objects with the provided
    * metadata. Used throughout the various js-data components.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * const errorFactory = utils.err('domain', 'target')
+   * const error400 = errorFactory(400, 'expected type', 'actual type')
+   * console.log(error400) // [Error: [domain:target] expected: expected type, found: string
+http://www.js-data.io/v3.0/docs/errors#400]
    * @method utils.err
    * @param {string} domain Namespace.
    * @param {string} target Target.
@@ -962,6 +968,13 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
 
   /**
    * Return whether the provided value is a boolean.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = true
+   * const b = { foo: "bar" }
+   * console.log(utils.isBoolean(a)) // true
+   * console.log(utils.isBoolean(b)) // false
    *
    * @method utils.isBoolean
    * @param {*} value The value to test.
