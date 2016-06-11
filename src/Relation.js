@@ -24,11 +24,11 @@ export function Relation (relatedMapper, options = {}) {
 Relation.extend = utils.extend
 
 utils.addHiddenPropsToTarget(Relation.prototype, {
-  get canAutoAddLinks() {
+  get canAutoAddLinks () {
     return utils.isUndefined(this.add) || !!this.add
   },
 
-  get relatedCollection() {
+  get relatedCollection () {
     return this.mapper.datastore.getCollection(this.relation)
   },
 
@@ -67,7 +67,7 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
     mapper.relationFields.push(this.localField)
   },
 
-  canFindLinkFor() {
+  canFindLinkFor () {
     return Boolean(this.foreignKey || this.localKey)
   },
 

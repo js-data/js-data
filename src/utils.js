@@ -226,8 +226,8 @@ const utils = {
     opts || (opts = {})
     const diff = utils.diffObjects(newObject, oldObject, opts)
     const diffCount = Object.keys(diff.added).length +
-      Object.keys(diff.removed).length +
-      Object.keys(diff.changed).length
+    Object.keys(diff.removed).length +
+    Object.keys(diff.changed).length
     return diffCount > 0
   },
 
@@ -487,6 +487,12 @@ const utils = {
   /**
    * Return whether the two values are equal according to the `==` operator.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * console.log(utils.equal(1,1)) // true
+   * console.log(utils.equal(1,'1')) // true
+   * console.log(utils.equal(93, 66)) // false
+   *
    * @method utils.equal
    * @param {*} a First value in the comparison.
    * @param {*} b Second value in the comparison.
@@ -511,13 +517,21 @@ const utils = {
     return function (code) {
       const prefix = `[${domain}:${target}] `
       let message = ERRORS[code].apply(null, Array.prototype.slice.call(arguments, 1))
-      message = `${prefix}${message}\nhttp://www.js-data.io/v3.0/docs/errors#${code}`
+      message = `${prefix}${message}
+http://www.js-data.io/v3.0/docs/errors#${code}`
       return new Error(message)
     }
   },
 
   /**
    * Add eventing capabilities into the target object.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * const user = { name: 'John' }
+   * utils.eventify(user)
+   * user.on('foo', () => console.log(arguments))
+   * user.emit('foo', 1, 'bar') // should log to console values (1, "bar")
    *
    * @method utils.eventify
    * @param {Object} target Target object.
@@ -689,7 +703,20 @@ const utils = {
   },
 
   /**
-   * Find the last index of something according to the given checker function.
+   * Find the last index of an item in an array according to the given checker function.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   *
+   * const john = { name: 'John', age: 20 }
+   * const sara = { name: 'Sara', age: 25 }
+   * const dan = { name: 'Dan', age: 20 }
+   * const users = [john, sara, dan]
+   *
+   * console.log(utils.findIndex(users, (user) => user.age === 25)) // 1
+   * console.log(utils.findIndex(users, (user) => user.age > 19)) // 2
+   * console.log(utils.findIndex(users, (user) => user.name === 'John')) // 0
+   * console.log(utils.findIndex(users, (user) => user.name === 'Jimmy')) // -1
    *
    * @method utils.findIndex
    * @param {Array} array The array to search.
@@ -762,6 +789,12 @@ const utils = {
   /**
    * Proxy for `JSON.parse`.
    *
+   * @example
+   * import {utils} from 'js-data'
+   *
+   * const a = utils.fromJson('{"name" : "John"}')
+   * console.log(a) // { name: 'John' }
+   *
    * @method utils.fromJson
    * @param {string} json JSON to parse.
    * @returns {Object} Parsed object.
@@ -810,6 +843,23 @@ const utils = {
    * Return the superclass for the given instance or subclass. If an instance is
    * provided, then finds the parent class of the instance's constructor.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * // using ES2015 classes
+   * class Foo {}
+   * class Bar extends Foo {}
+   * const barInstance = new Bar()
+   * let baseType = utils.getSuper(barInstance)
+   * console.log(Foo === baseType) // true
+   *
+   * // using Function constructor with utils.extend
+   * function Foo () {}
+   * Foo.extend = utils.extend
+   * const Bar = Foo.extend()
+   * const barInstance = new Bar()
+   * let baseType = utils.getSuper(barInstance)
+   * console.log(Foo === baseType) // true
+   *
    * @method utils.getSuper
    * @param {Object|Function} instance Instance or constructor.
    * @param {boolean} [isCtor=false] Whether `instance` is a constructor.
@@ -826,6 +876,14 @@ const utils = {
 
   /**
    * Return the intersection of two arrays.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * const arrA = ['green', 'red', 'blue', 'red']
+   * const arrB = ['green', 'yellow', 'red']
+   * const intersected = utils.intersection(arrA, arrB)
+   *
+   * console.log(intersected) // ['green', 'red'])
    *
    * @method utils.intersection
    * @param {Array} array1 First array.
@@ -856,6 +914,13 @@ const utils = {
   /**
    * Proxy for `Array.isArray`.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = [1,2,3,4,5]
+   * const b = { foo: "bar" }
+   * console.log(utils.isArray(a)) // true
+   * console.log(utils.isArray(b)) // false
+   *
    * @method utils.isArray
    * @param {*} value The value to test.
    * @returns {boolean} Whether the provided value is an array.
@@ -866,6 +931,14 @@ const utils = {
   /**
    * Return whether `prop` is matched by any string or regular expression in
    * `blacklist`.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * const blackList = [/^\$hashKey/g, /^_/g, 'id']
+   * console.log(utils.isBlacklisted("$hashKey")) // true
+   * console.log(utils.isBlacklisted("id")) // true
+   * console.log(utils.isBlacklisted("_myProp")) // true
+   * console.log(utils.isBlacklisted("my_id")) // false
    *
    * @method utils.isBlacklisted
    * @param {string} prop The name of a property to check.
@@ -902,6 +975,13 @@ const utils = {
   /**
    * Return whether the provided value is a date.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = new Date()
+   * const b = { foo: "bar" }
+   * console.log(utils.isDate(a)) // true
+   * console.log(utils.isDate(b)) // false
+   *
    * @method utils.isDate
    * @param {*} value The value to test.
    * @returns {Date} Whether the provided value is a date.
@@ -913,6 +993,13 @@ const utils = {
 
   /**
    * Return whether the provided value is a function.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = function (){ console.log('foo bar')}
+   * const b = { foo: "bar" }
+   * console.log(utils.isFunction(a)) // true
+   * console.log(utils.isFunction(b)) // false
    *
    * @method utils.isFunction
    * @param {*} value The value to test.
@@ -926,6 +1013,15 @@ const utils = {
   /**
    * Return whether the provided value is an integer.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = 1
+   * const b = 1.25
+   * const c = '1'
+   * console.log(utils.isInteger(a)) // true
+   * console.log(utils.isInteger(b)) // false
+   * console.log(utils.isInteger(c)) // false
+   *
    * @method utils.isInteger
    * @param {*} value The value to test.
    * @returns {boolean} Whether the provided value is an integer.
@@ -938,6 +1034,13 @@ const utils = {
   /**
    * Return whether the provided value is `null`.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = null
+   * const b = { foo: "bar" }
+   * console.log(utils.isNull(a)) // true
+   * console.log(utils.isNull(b)) // false
+   *
    * @method utils.isNull
    * @param {*} value The value to test.
    * @returns {boolean} Whether the provided value is `null`.
@@ -949,6 +1052,15 @@ const utils = {
 
   /**
    * Return whether the provided value is a number.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = 1
+   * const b = -1.25
+   * const c = '1'
+   * console.log(utils.isNumber(a)) // true
+   * console.log(utils.isNumber(b)) // true
+   * console.log(utils.isNumber(c)) // false
    *
    * @method utils.isNumber
    * @param {*} value The value to test.
@@ -963,6 +1075,13 @@ const utils = {
   /**
    * Return whether the provided value is an object.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = { foo: "bar" }
+   * const b = 'foo bar'
+   * console.log(utils.isObject(a)) // true
+   * console.log(utils.isObject(b)) // false
+   *
    * @method utils.isObject
    * @param {*} value The value to test.
    * @returns {boolean} Whether the provided value is an object.
@@ -974,6 +1093,15 @@ const utils = {
 
   /**
    * Return whether the provided value is a regular expression.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = /^\$.+$/ig
+   * const b = new RegExp('^\$.+$', 'ig')
+   * const c = { foo: "bar" }
+   * console.log(utils.isRegExp(a)) // true
+   * console.log(utils.isRegExp(b)) // true
+   * console.log(utils.isRegExp(b)) // false
    *
    * @method utils.isRegExp
    * @param {*} value The value to test.
@@ -987,6 +1115,14 @@ const utils = {
   /**
    * Return whether the provided value is a string or a number.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * console.log(utils.isSorN('')) // true
+   * console.log(utils.isSorN(-1.65)) // true
+   * console.log(utils.isSorN('my string')) // true
+   * console.log(utils.isSorN({})) // false
+   * console.log(utils.isSorN([1,2,4])) // false
+   *
    * @method utils.isSorN
    * @param {*} value The value to test.
    * @returns {boolean} Whether the provided value is a string or a number.
@@ -998,6 +1134,13 @@ const utils = {
 
   /**
    * Return whether the provided value is a string.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * console.log(utils.isSorN('')) // true
+   * console.log(utils.isSorN('my string')) // true
+   * console.log(utils.isSorN(100)) // false
+   * console.log(utils.isSorN([1,2,4])) // false
    *
    * @method utils.isString
    * @param {*} value The value to test.
@@ -1011,6 +1154,15 @@ const utils = {
   /**
    * Return whether the provided value is a `undefined`.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = undefined
+   * const b = { foo: "bar"}
+   * console.log(utils.isDate(a)) // true
+   * console.log(utils.isDate(b.baz)) // true
+   * console.log(utils.isDate(b)) // false
+   * console.log(utils.isDate(b.foo)) // false
+   *
    * @method utils.isUndefined
    * @param {*} value The value to test.
    * @returns {boolean} Whether the provided value is a `undefined`.
@@ -1022,6 +1174,19 @@ const utils = {
 
   /**
    * Mix in logging capabilities to the target.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = { foo: "bar"}
+   *
+   * // Add standard logging to an object
+   * utils.logify(a)
+   * a.log('info', 'test log info') // output 'test log info' to console.
+   *
+   * // Toggle debug output of an object
+   * a.dbg('test debug output') // does not output because debug is off.
+   * a.debug = true
+   * a.dbg('test debug output') // output 'test debug output' to console.
    *
    * @method utils.logify
    * @param {*} target The target.
@@ -1054,6 +1219,17 @@ const utils = {
    * Adds the given record to the provided array only if it's not already in the
    * array.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * const colors = ['red', 'green', 'yellow']
+   *
+   * console.log(colors.length) // 3
+   * utils.noDupeAdd(colors, 'red')
+   * console.log(colors.length) // 3, red already exists
+   *
+   * utils.noDupeAdd(colors, 'blue')
+   * console.log(colors.length) // 4, blue was added
+   *
    * @method utils.noDupeAdd
    * @param {Array} array The array.
    * @param {*} record The value to add.
@@ -1073,6 +1249,13 @@ const utils = {
   /**
    * Return a shallow copy of the provided object, minus the properties
    * specified in `keys`.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = { name: 'John', $hashKey: 1214910 }
+   *
+   * let b = utils.omit(a, ['$hashKey'])
+   * console.log(b) // { name: 'John' }
    *
    * @method utils.omit
    * @param {Object} props The object to copy.
@@ -1094,6 +1277,13 @@ const utils = {
    * Return a shallow copy of the provided object, but only include the
    * properties specified in `keys`.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = { name: 'John', $hashKey: 1214910 }
+   *
+   * let b = utils.pick(a, ['$hashKey'])
+   * console.log(b) // { $hashKey: 1214910 }
+   *
    * @method utils.pick
    * @param {Object} props The object to copy.
    * @param {string[]} keys Array of strings, representing properties to keep.
@@ -1113,6 +1303,12 @@ const utils = {
   /**
    * Return a plain copy of the given value.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = { name: 'John' }
+   * let b = utils.plainCopy(a)
+   * console.log(a === b) // false
+   *
    * @method utils.plainCopy
    * @param {*} value The value to copy.
    * @returns {*} Plain copy of `value`.
@@ -1125,6 +1321,15 @@ const utils = {
 
   /**
    * Shortcut for `utils.Promise.reject(value)`.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   *
+   * utils.reject("Testing static reject").then(function(data) {
+   *   // not called
+   * }).catch(function(reason) {
+   *   console.log(reason); // "Testing static reject"
+   * })
    *
    * @method utils.reject
    * @param {*} [value] Value with which to reject the Promise.
@@ -1139,6 +1344,13 @@ const utils = {
   /**
    * Remove the last item found in array according to the given checker function.
    *
+   * @example
+   * import {utils} from 'js-data'
+   *
+   * const colors = ['red', 'green', 'yellow', 'red']
+   * utils.remove(colors, (color) => color === 'red')
+   * console.log(colors) // ['red', 'green', 'yellow']
+   *
    * @method utils.remove
    * @param {Array} array The array to search.
    * @param {Function} fn Checker function.
@@ -1149,14 +1361,22 @@ const utils = {
     }
     const index = this.findIndex(array, fn)
     if (index >= 0) {
-      array.splice(index, 1)
+      array.splice(index, 1) // todo should this be recursive?
     }
   },
 
   /**
    * Shortcut for `utils.Promise.resolve(value)`.
    *
-   * @ignore
+   * @example
+   * import {utils} from 'js-data'
+   *
+   * utils.resolve("Testing static resolve").then(function(data) {
+   *   console.log(data); // "Testing static resolve"
+   * }).catch(function(reason) {
+   *   // not called
+   * })
+   *
    * @param {*} [value] Value with which to resolve the Promise.
    * @returns {Promise} Promise resolved with `value`.
    * @see utils.Promise
@@ -1168,6 +1388,35 @@ const utils = {
 
   /**
    * Set the value at the provided key or path.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   *
+   * const john = {
+   *   name: 'John',
+   *   age: 25,
+   *   parent: {
+   *     name: 'John's Mom',
+   *     age: 50
+   *   }
+   * }
+   * // set value by key
+   * utils.set(john, 'id', 98)
+   * console.log(john.id) // 98
+   *
+   * // set value by path
+   * utils.set(john, 'parent.id', 20)
+   * console.log(john.parent.id) // 20
+   *
+   * // set value by path/value map
+   * utils.set(john, {
+   *   'id': 1098,
+   *   'parent': { id: 1020 },
+   *   'parent.age': '55'
+   * })
+   * console.log(john.id) // 1098
+   * console.log(john.parent.id) // 1020
+   * console.log(john.parent.age) // 55
    *
    * @method utils.set
    * @param {Object} object The object on which to set a property.
@@ -1193,6 +1442,31 @@ const utils = {
 
   /**
    * Check whether the two provided objects are deeply equal.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   *
+   * const objA = {
+   *   name: 'John',
+   *   id: 27,
+   *   nested: {
+   *     item: 'item 1',
+   *     colors: ['red', 'green', 'blue']
+   *   }
+   * }
+   *
+   * const objB = {
+   *   name: 'John',
+   *   id: 27,
+   *   nested: {
+   *     item: 'item 1',
+   *     colors: ['red', 'green', 'blue']
+   *   }
+   * }
+   *
+   * console.log(utils.deepEqual(a,b)) // true
+   * objB.nested.colors.add('yellow') // make a change to a nested object's array
+   * console.log(utils.deepEqual(a,b)) // false
    *
    * @method utils.deepEqual
    * @param {Object} a First object in the comparison.
@@ -1232,6 +1506,13 @@ const utils = {
   /**
    * Proxy for `JSON.stringify`.
    *
+   * @example
+   * import {utils} from 'js-data'
+   *
+   * const a = { name: 'John' }
+   * let jsonVal = utils.toJson(a)
+   * console.log(jsonVal) // '{"name" : "John"}'
+   *
    * @method utils.toJson
    * @param {*} value Value to serialize to JSON.
    * @returns {string} JSON string.
@@ -1242,6 +1523,24 @@ const utils = {
 
   /**
    * Unset the value at the provided key or path.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   *
+   * const john = {
+   *   name: 'John',
+   *   age: 25,
+   *   parent: {
+   *     name: 'John's Mom',
+   *     age: 50
+   *   }
+   * }
+   *
+   * utils.unset(john, age)
+   * utils.unset(john, parent.age)
+   *
+   * console.log(john.age) // null
+   * console.log(john.parent.age) // null
    *
    * @method utils.unset
    * @param {Object} object The object from which to delete the property.
