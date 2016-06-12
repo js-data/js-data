@@ -819,7 +819,7 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * import {utils} from 'js-data'
    * const a = { foo: { bar: 'baz' }, beep: 'boop' }
    * console.log(utils.get(a, 'beep')) // "boop"
-   * console.log(utils.get(a, 'foo.bar')) // "bar"
+   * console.log(utils.get(a, 'foo.bar')) // "baz"
    *
    * @method utils.get
    * @param {Object} object Object from which to retrieve a property's value.
@@ -940,11 +940,11 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    *
    * @example
    * import {utils} from 'js-data'
-   * const blackList = [/^\$hashKey/g, /^_/g, 'id']
-   * console.log(utils.isBlacklisted("$hashKey")) // true
-   * console.log(utils.isBlacklisted("id")) // true
-   * console.log(utils.isBlacklisted("_myProp")) // true
-   * console.log(utils.isBlacklisted("my_id")) // false
+   * const blacklist = [/^\$hashKey/g, /^_/g, 'id']
+   * console.log(utils.isBlacklisted("$hashKey", blacklist)) // true
+   * console.log(utils.isBlacklisted("id", blacklist)) // true
+   * console.log(utils.isBlacklisted("_myProp", blacklist)) // true
+   * console.log(utils.isBlacklisted("my_id", blacklist)) // false
    *
    * @method utils.isBlacklisted
    * @param {string} prop The name of a property to check.
@@ -960,7 +960,7 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
     for (var i = 0; i < blacklist.length; i++) {
       if ((toStr(blacklist[i]) === REGEXP_TAG && blacklist[i].test(prop)) || blacklist[i] === prop) {
         matches = prop
-        return matches
+        return !!matches
       }
     }
     return !!matches
@@ -1114,7 +1114,7 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * const c = { foo: "bar" }
    * console.log(utils.isRegExp(a)) // true
    * console.log(utils.isRegExp(b)) // true
-   * console.log(utils.isRegExp(b)) // false
+   * console.log(utils.isRegExp(c)) // false
    *
    * @method utils.isRegExp
    * @param {*} value The value to test.
@@ -1150,10 +1150,10 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    *
    * @example
    * import {utils} from 'js-data'
-   * console.log(utils.isSorN('')) // true
-   * console.log(utils.isSorN('my string')) // true
-   * console.log(utils.isSorN(100)) // false
-   * console.log(utils.isSorN([1,2,4])) // false
+   * console.log(utils.isString('')) // true
+   * console.log(utils.isString('my string')) // true
+   * console.log(utils.isString(100)) // false
+   * console.log(utils.isString([1,2,4])) // false
    *
    * @method utils.isString
    * @param {*} value The value to test.
@@ -1171,10 +1171,10 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * import {utils} from 'js-data'
    * const a = undefined
    * const b = { foo: "bar"}
-   * console.log(utils.isDate(a)) // true
-   * console.log(utils.isDate(b.baz)) // true
-   * console.log(utils.isDate(b)) // false
-   * console.log(utils.isDate(b.foo)) // false
+   * console.log(utils.isUndefined(a)) // true
+   * console.log(utils.isUndefined(b.baz)) // true
+   * console.log(utils.isUndefined(b)) // false
+   * console.log(utils.isUndefined(b.foo)) // false
    *
    * @method utils.isUndefined
    * @param {*} value The value to test.
