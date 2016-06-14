@@ -167,7 +167,7 @@ describe('utils.isRegExp', function () {
   })
 
   it('isRegExp returns true for regex values', function () {
-    const trueVals = [/^\$.+$/ig, new RegExp('^\$.+$', 'ig')]
+    const trueVals = [/^\$.+$/ig, new RegExp('^\\$.+$', 'ig')]
     trueVals.forEach((val) => {
       assert.typeOf(val, 'regexp', val + ' is a regular expression')
       assert.isTrue(utils.isRegExp(val))

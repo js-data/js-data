@@ -1803,7 +1803,7 @@ export default Component.extend({
   /**
    * @ignore
    */
-  defineRelations() {
+  defineRelations () {
     // Setup the mapper's relations, including generating Mapper#relationList
     // and Mapper#relationFields
     utils.forOwn(this.relations, (group, type) => {

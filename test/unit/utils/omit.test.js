@@ -31,3 +31,16 @@ describe('utils.isBlacklisted', function () {
     })
   })
 })
+
+describe('utils.pick', function () {
+  it('should be a static method', function () {
+    assert.equal(typeof utils.pick, 'function', 'has the pick method')
+  })
+
+  it('Shallow copies an object, but only include the properties specified', function () {
+    const src = { name: 'John', $hashKey: 1214910 }
+    const actual = utils.pick(src, ['$hashKey'])
+    const expected = { $hashKey: 1214910 }
+    assert.deepEqual(expected, actual)
+  })
+})

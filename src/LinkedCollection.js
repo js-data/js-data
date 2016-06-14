@@ -78,7 +78,6 @@ export default Collection.extend({
   },
 
   remove (id, opts) {
-    const mapper = this.mapper
     const record = utils.getSuper(this).prototype.remove.call(this, id, opts)
     if (record) {
       this._clearMeta(record)
@@ -87,7 +86,6 @@ export default Collection.extend({
   },
 
   removeAll (query, opts) {
-    const mapper = this.mapper
     const records = utils.getSuper(this).prototype.removeAll.call(this, query, opts)
     records.forEach(this._clearMeta, this)
     return records

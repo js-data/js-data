@@ -388,8 +388,24 @@ export default Component.extend({
       /**
        * Determines how records should be ordered in the result.
        *
-       * @example
-       * TODO
+       * @example <caption>Order posts by `author` then by `id` descending </caption>
+       *
+       * const store = new JSData.DataStore()
+       * store.defineMapper('post')
+       * const posts = [
+       *   { author: 'John', age: 30, id: 5 },
+       *   { author: 'Sally', age: 31, id: 6 },
+       *   { author: 'Mike', age: 32, id: 7 },
+       *   { author: 'Adam', age: 33, id: 8 },
+       *   { author: 'Adam', age: 33, id: 9 }
+       * ]
+       * store.add('post', posts)
+       * let collection = store.getCollection('post')
+       * let results = collection.query().filter({
+       *     orderBy:[['author','ASC'],['id','DESC']]
+       * }).run()
+       *
+       * console.log(results)
        *
        * @name query.orderBy
        * @type {string|Array[]}
