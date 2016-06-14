@@ -23,19 +23,19 @@ const superMethod = function (mapper, name) {
  * import {Record} from 'js-data'
  * ```
  *
- * Instantiate a plain record:
  * <div id="Record#constructor" class="tonic">
  * // Normally you would do: import {Record} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Record} = JSData
  * console.log(\`Using JSData v${JSData.version.full}\`)
  *
+ * // Instantiate a plain record
  * let record = new Record()
  * console.log('record: ' + JSON.stringify(record))
  *
- * // You can supply properties on instantiation:
+ * // You can supply properties on instantiation
  * record = new Record({ name: 'John' })
- * console.log('record: ' + JSON.stringify(record2))
+ * console.log('record: ' + JSON.stringify(record))
  * </div>
  *
  * Instantiate a record that's associated with a Mapper:
@@ -53,7 +53,7 @@ const superMethod = function (mapper, name) {
  * console.log('user2: ' + JSON.stringify(user2))
  * </div>
  *
- * Instantiate a record that's associated with a store's Mapper:
+ *
  * <div id="Record#constructor3" class="tonic">
  * // Normally you would do: import {Container} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
@@ -62,11 +62,13 @@ const superMethod = function (mapper, name) {
  *
  * const store = new Container()
  * store.defineMapper('user')
+ *
+ * // Instantiate a record that's associated with a store's Mapper
  * const user = store.createRecord('user', { name: 'John' })
  * console.log('user: ' + JSON.stringify(user))
  * </div>
  *
- * Validate on instantiation:
+ *
  * <div id="Record#constructor4" class="tonic">
  * // Normally you would do: import {Container} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
@@ -81,11 +83,12 @@ const superMethod = function (mapper, name) {
  *     }
  *   }
  * })
+ *
+ * // Validate on instantiation
  * const user = store.createRecord('user', { name: 1234 })
  * console.log('user: ' + JSON.stringify(user))
  * </div>
  *
- * Skip validation on instantiation:
  * <div id="Record#constructor5" class="tonic">
  * // Normally you would do: import {Container} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
@@ -100,6 +103,8 @@ const superMethod = function (mapper, name) {
  *     }
  *   }
  * })
+ *
+ * // Skip validation on instantiation
  * const user = store.createRecord('user', { name: 1234 }, { noValidate: true })
  * console.log('user: ' + JSON.stringify(user))
  * console.log('user.isValid(): ' + user.isValid())
@@ -430,7 +435,7 @@ export default Component.extend({
    * store.find('user', 1234).then((user) => {
    *   console.log(user.id) // 1234
    *
-   *   // Destroy this user from the database
+   *   // Load the user's post relations
    *   return user.loadRelations(['post'])
    * }).then((user) => {
    *   console.log(user.posts) // [{...}, {...}, ...]

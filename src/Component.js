@@ -1,9 +1,53 @@
 import utils from './utils'
 
 /**
+ * The base class from which all JSData components inherit some basic
+ * functionality.
+ *
+ * Typically you won't instantiate this class directly, but you may find it
+ * useful as an abstract class for your own components.
+ *
+ * See {@link Component.extend} for an example of using {@link Component} as a
+ * base class.
+ *
+ *```javascript
+ * import {Component} from 'js-data'
+ * ```
+ *
  * @class Component
+ * @param {Object} [opts] Configuration options.
+ * @param {boolean} [opts.debug=false] See {@link Component#debug}.
+ * @returns {Component} A new {@link Component} instance.
+ * @since 3.0.0
  */
-export default function Component () {
+export default function Component (opts) {
+  opts || (opts = {})
+
+  /**
+   * Whether to enable debug-level logs for this component. Anything that
+   * extends `Component` inherits this option and the corresponding logging
+   * functionality.
+   *
+   * Display debug logs:
+   * <div id="Component#debug" class="tonic">
+   * // Normally you would do: import {Component} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Component} = JSData
+   * console.log(\`Using JSData v${JSData.version.full}\`)
+   *
+   * const component = new Component()
+   * component.log('debug', 'some message') // nothing gets logged
+   * component.debug = true
+   * component.log('debug', 'other message') // this DOES get logged
+   * </div>
+   *
+   * @default false
+   * @name Component#debug
+   * @since 3.0.0
+   * @type {boolean}
+   */
+  this.debug = opts.hasOwnProperty('debug') ? !!opts.debug : false
+
   /**
    * Event listeners attached to this Component. __Do not modify.__ Use
    * {@link Component#on} and {@link Component#off} instead.
@@ -42,30 +86,22 @@ export default function Component () {
  * const otherComponent = new OtherComponentClass()
  * console.log(otherComponent.foo())
  * console.log(OtherComponentClass.beep())
- * </div>
- *
- * Provide a custom constructor function:
- * <div id="Component.extend" class="tonic">
- * // Normally you would do: import {Component} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
- * const {Component} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
  *
  * // Extend the class, providing a custom constructor.
- * function OtherComponentClass () {
+ * function AnotherComponentClass () {
  *   Component.call(this)
  *   this.created_at = new Date().getTime()
  * }
  * Component.extend({
- *   constructor: OtherComponentClass,
+ *   constructor: AnotherComponentClass,
  *   foo () { return 'bar' }
  * }, {
  *   beep () { return 'boop' }
  * })
- * const otherComponent = new OtherComponentClass()
- * console.log(otherComponent.created_at)
- * console.log(otherComponent.foo())
- * console.log(OtherComponentClass.beep())
+ * const anotherComponent = new AnotherComponentClass()
+ * console.log(anotherComponent.created_at)
+ * console.log(anotherComponent.foo())
+ * console.log(AnotherComponentClass.beep())
  * </div>
  *
  * @method Component.extend
@@ -80,7 +116,10 @@ export default function Component () {
 Component.extend = utils.extend
 
 /**
- * Log the provided values at the "debug" level.
+ * Log the provided values at the "debug" level. Debug-level logs are only
+ * logged if {@link Component#debug} is `true`.
+ *
+ * `.dbg(...)` is shorthand for `.log('debug', ...)`.
  *
  * @method Component#dbg
  * @param {...*} [args] Values to log.
@@ -88,9 +127,12 @@ Component.extend = utils.extend
  */
 /**
  * Log the provided values. By default sends values to `console[level]`.
+ * Debug-level logs are only logged if {@link Component#debug} is `true`.
+ *
+ * Will attempt to use appropriate `console` methods if they are available.
  *
  * @method Component#log
- * @param {string} level Log level
+ * @param {string} level Log level.
  * @param {...*} [args] Values to log.
  * @since 3.0.0
  */
@@ -131,10 +173,10 @@ utils.logify(Component.prototype)
  * then all listeners for the specified event will be removed. If no event is
  * specified then all listeners for all events will be removed.
  *
- * @example <caption>Remove a listener to a single event</caption>
+ * @example <caption>Remove a particular listener for a particular event</caption>
  * collection.off('add', handler)
  *
- * @example <caption>Remove all listeners to a single event</caption>
+ * @example <caption>Remove all listeners for a particular event</caption>
  * record.off('change')
  *
  * @example <caption>Remove all listeners to all events</caption>

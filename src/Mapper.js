@@ -131,11 +131,11 @@ const MAPPER_DEFAULTS = {
   _adapters: {},
 
   /**
-   * Whether to augment {@link Mapper#recordClass} with getter/setter property
-   * accessors according to the properties defined in {@link Mapper#schema}.
-   * This makes possible validation and change tracking on individual properties
+   * Whether to augment {@link Mapper#recordClass} with ES5 getters and setters
+   * according to the properties defined in {@link Mapper#schema}. This makes
+   * possible validation and change tracking on individual properties
    * when using the dot (e.g. `user.name = "Bob"`) operator to modify a
-   * property.
+   * property, and is `true` by default.
    *
    * @default true
    * @name Mapper#applySchema
@@ -143,16 +143,6 @@ const MAPPER_DEFAULTS = {
    * @type {boolean}
    */
   applySchema: true,
-
-  /**
-   * Whether to enable debug-level logs.
-   *
-   * @default false
-   * @name Mapper#debug
-   * @since 3.0.0
-   * @type {boolean}
-   */
-  debug: false,
 
   /**
    * The name of the registered adapter that this Mapper should used by default.
@@ -240,7 +230,7 @@ const MAPPER_DEFAULTS = {
  * @extends Component
  * @param {Object} opts Configuration options.
  * @param {boolean} [opts.applySchema=true] See {@link Mapper#applySchema}.
- * @param {boolean} [opts.debug=false] See {@link Mapper#debug}.
+ * @param {boolean} [opts.debug=false] See {@link Component#debug}.
  * @param {string} [opts.defaultAdapter=http] See {@link Mapper#defaultAdapter}.
  * @param {string} [opts.idAttribute=id] See {@link Mapper#idAttribute}.
  * @param {string} opts.name See {@link Mapper#name}.
@@ -255,7 +245,7 @@ const MAPPER_DEFAULTS = {
  */
 function Mapper (opts) {
   utils.classCallCheck(this, Mapper)
-  Mapper.__super__.call(this)
+  Component.call(this)
   opts || (opts = {})
 
   // Prepare certain properties to be non-enumerable

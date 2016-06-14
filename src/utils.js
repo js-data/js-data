@@ -1041,7 +1041,7 @@ const utils = {
           return
         }
         const prefix = `${level.toUpperCase()}: (${this.name || this.constructor.name})`
-        if (console[level]) {
+        if (utils.isFunction(console[level])) {
           console[level](prefix, ...args)
         } else {
           console.log(prefix, ...args)

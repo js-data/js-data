@@ -110,17 +110,6 @@ export const proxiedMapperMethods = [
   'createRecord',
 
   /**
-   * Wrapper for {@link Mapper#dbg}.
-   *
-   * @method Container#dbg
-   * @param {string} name Name of the {@link Mapper} to target.
-   * @param {...*} args See {@link Mapper#dbg}.
-   * @see Mapper#dbg
-   * @since 3.0.0
-   */
-  'dbg',
-
-  /**
    * Wrapper for {@link Mapper#destroy}.
    *
    * @example <caption>Destroy a specific blog post</caption>
@@ -248,17 +237,6 @@ export const proxiedMapperMethods = [
    * @since 3.0.0
    */
   'is',
-
-  /**
-   * Wrapper for {@link Mapper#log}.
-   *
-   * @method Container#log
-   * @param {string} name Name of the {@link Mapper} to target.
-   * @param {...*} args See {@link Mapper#log}.
-   * @see Mapper#log
-   * @since 3.0.0
-   */
-  'log',
 
   /**
    * Wrapper for {@link Mapper#sum}.
@@ -431,35 +409,85 @@ export const proxiedMapperMethods = [
 /**
  * The `Container` class is a place to define and store {@link Mapper} instances.
  *
- * <div id="Container#constructor">
+ * A `Container` makes it easy to manage your Mappers.
+ *
+ * <div id="Container#constructor" class="tonic">
  * // import {Container} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
- * const {Container, version} = JSData
- * console.log(\`Using JSData v${version.full}\`)
+ * const {Container} = JSData
+ * console.log(\`Using JSData v${JSData.version.full}\`)
+ *
  * const store = new Container()
  * </div>
- * <script src="https://embed.tonicdev.com" data-element-id="Container#constructor"></script>
  *
  * @class Container
  * @extends Component
  * @param {Object} [opts] Configuration options.
+ * @param {boolean} [opts.debug=false] See {@link Component#debug}.
  * @param {Constructor} [opts.mapperClass] See {@link Container#mapperClass}.
  * @param {Object} [opts.mapperDefaults] See {@link Container#mapperDefaults}.
  * @since 3.0.0
  */
 export function Container (opts) {
   utils.classCallCheck(this, Container)
-  Container.__super__.call(this)
+  Component.call(this)
   opts || (opts = {})
 
   Object.defineProperties(this, {
-    // Holds the adapters, shared by all mappers in this container
+    /**
+     * The adapters registered with this Container, which are also shared by all
+     * Mappers in this Container.
+     *
+     * @name Container#_adapters
+     * @see Container#registerAdapter
+     * @since 3.0.0
+     * @type {Object}
+     */
     _adapters: {
       value: {}
     },
-    // The the mappers in this container
+
+    /**
+     * The the mappers in this container
+     *
+     * @name Container#_mappers
+     * @see Mapper
+     * @since 3.0.0
+     * @type {Object}
+     */
     _mappers: {
       value: {}
+    },
+
+    /**
+     * Constructor function to use in {@link Container#defineMapper} to create new
+     * {@link Mapper} instances. {@link Container#mapperClass} should extend
+     * {@link Mapper}. By default {@link Mapper} is used to instantiate Mappers.
+     *
+     * <div id="Container#mapperClass" class="tonic">
+     * // import {Container, Mapper} from 'js-data'
+     * const JSData = require('js-data@3.0.0-beta.7')
+     * const {Container} = JSData
+     * console.log(\`Using JSData v${JSData.version.full}\`)
+     *
+     * class MyMapperClass extends Mapper {
+     *   foo () { return 'bar' }
+     * }
+     * const store = new Container({
+     *   mapperClass: MyMapperClass
+     * })
+     * store.defineMapper('user')
+     * console.log(store.getMapper('user').foo())
+     * </div>
+     *
+     * @name Container#mapperClass
+     * @see Mapper
+     * @since 3.0.0
+     * @type {Constructor}
+     */
+    mapperClass: {
+      value: undefined,
+      writable: true
     }
   })
 
@@ -470,6 +498,21 @@ export function Container (opts) {
    * Defaults options to pass to {@link Container#mapperClass} when creating a
    * new {@link Mapper}.
    *
+   * <div id="Container#mapperDefaults" class="tonic">
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log(\`Using JSData v${JSData.version.full}\`)
+   *
+   * const store = new Container({
+   *   mapperDefaults: {
+   *     idAttribute: '_id'
+   *   }
+   * })
+   * store.defineMapper('user')
+   * console.log(store.getMapper('user').idAttribute)
+   * </div>
+   *
    * @default {}
    * @name Container#mapperDefaults
    * @since 3.0.0
@@ -477,16 +520,8 @@ export function Container (opts) {
    */
   this.mapperDefaults = this.mapperDefaults || {}
 
-  /**
-   * Constructor function to use in {@link Container#defineMapper} to create new
-   * {@link Mapper} instances.
-   *
-   * {@link Mapper}
-   * @name Container#mapperClass
-   * @since 3.0.0
-   * @type {Constructor}
-   */
-  this.mapperClass = this.mapperClass || Mapper
+  // Use the Mapper class if the user didn't provide a mapperClass
+  this.mapperClass || (this.mapperClass = Mapper)
 }
 
 const props = {
@@ -495,9 +530,22 @@ const props = {
   /**
    * Register a new event listener on this Container.
    *
-   * Proxy for {@link Component#on}. If an event was emitted by a Mapper in the
-   * Container, then the name of the Mapper will be prepended to the arugments
-   * passed to the listener.
+   * Proxy for {@link Component#on}. If an event was emitted by a {@link Mapper}
+   * in the Container, then the name of the {@link Mapper} will be prepended to
+   * the arugments passed to the listener.
+   *
+   * <div id="Container#on" class="tonic">
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log(\`Using JSData v${JSData.version.full}\`)
+   *
+   * const store = new Container()
+   * store.on('foo', function (...args) { console.log(args.join(':')) })
+   * store.defineMapper('user')
+   * store.emit('foo', 'arg1', 'arg2')
+   * store.getMapper('user').emit('foo', 'arg1', 'arg2')
+   * </div>
    *
    * @method Container#on
    * @param {string} event Name of event to subsribe to.
@@ -523,7 +571,7 @@ const props = {
   /**
    * Return a container scoped to a particular mapper.
    *
-   * <div id="Container#as">
+   * <div id="Container#as" class="tonic">
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container, version} = JSData
@@ -539,7 +587,6 @@ const props = {
    * console.log(user2 === user3)
    * console.log(user1 === user3)
    * </div>
-   * <script src="https://embed.tonicdev.com" data-element-id="Container#as"></script>
    *
    * @method Container#as
    * @param {string} name Name of the {@link Mapper}.
@@ -566,7 +613,7 @@ const props = {
   /**
    * Create a new mapper and register it in this container.
    *
-   * <div id="Container#defineMapper">
+   * <div id="Container#defineMapper" class="tonic">
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container, version} = JSData
@@ -581,7 +628,6 @@ const props = {
    * console.log(UserMapper === store.as('user').getMapper())
    * console.log(UserMapper.foo)
    * </div>
-   * <script src="https://embed.tonicdev.com" data-element-id="Container#defineMapper"></script>
    *
    * @method Container#defineMapper
    * @param {string} name Name under which to register the new {@link Mapper}.
@@ -684,7 +730,7 @@ const props = {
   /**
    * Return the mapper registered under the specified name.
    *
-   * <div id="Container#getMapper">
+   * <div id="Container#getMapper" class="tonic">
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container, version} = JSData
@@ -697,7 +743,6 @@ const props = {
    * console.log(UserMapper === store.as('user').getMapper())
    * store.getMapper('profile') // throws Error, there is no mapper with name "profile"
    * </div>
-   * <script src="https://embed.tonicdev.com" data-element-id="Container#getMapper"></script>
    *
    * @method Container#getMapper
    * @param {string} name {@link Mapper#name}.
@@ -716,7 +761,7 @@ const props = {
    * Return the mapper registered under the specified name.
    * Doesn't throw error if mapper doesn't exist.
    *
-   * <div id="Container#getMapperByName">
+   * <div id="Container#getMapperByName" class="tonic">
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container, version} = JSData
@@ -729,7 +774,6 @@ const props = {
    * console.log(UserMapper === store.as('user').getMapper())
    * console.log(store.getMapper('profile')) // Does NOT throw an error
    * </div>
-   * <script src="https://embed.tonicdev.com" data-element-id="Container#getMapperByName"></script>
    *
    * @method Container#getMapperByName
    * @param {string} name {@link Mapper#name}.
@@ -816,8 +860,8 @@ Component.extend(props)
  * console.log(\`Using JSData v${JSData.version.full}\`)
  *
  * // Extend the class, providing a custom constructor.
- * function OtherContainerClass (opts) {
- *   Container.call(this, opts)
+ * function OtherContainerClass (props, opts) {
+ *   Container.call(this, props, opts)
  *   this.created_at = new Date().getTime()
  * }
  * Container.extend({

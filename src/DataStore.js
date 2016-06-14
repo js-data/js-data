@@ -86,6 +86,8 @@ const cachedFn = function (name, hashOrId, opts) {
  * @class DataStore
  * @extends Container
  * @param {Object} [opts] Configuration options. See {@link Container}.
+ * @param {boolean} [opts.collectionClass={@link LinkedCollection}] See {@link DataStore#collectionClass}.
+ * @param {boolean} [opts.debug=false] See {@link Component#debug}.
  * @returns {DataStore}
  * @see Container
  * @since 3.0.0
@@ -95,7 +97,7 @@ const cachedFn = function (name, hashOrId, opts) {
  */
 function DataStore (opts) {
   utils.classCallCheck(this, DataStore)
-  DataStore.__super__.call(this, opts)
+  Container.call(this, opts)
 
   this.collectionClass = this.collectionClass || LinkedCollection
   this._collections = {}
