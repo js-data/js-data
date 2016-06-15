@@ -850,30 +850,22 @@ Component.extend(props)
  * const otherContainer = new OtherContainerClass()
  * console.log(otherContainer.foo())
  * console.log(OtherContainerClass.beep())
- * </div>
- *
- * Provide a custom constructor function:
- * <div id="Container.extend" class="tonic">
- * // Normally you would do: import {Container} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
- * const {Container} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
  *
  * // Extend the class, providing a custom constructor.
- * function OtherContainerClass (props, opts) {
- *   Container.call(this, props, opts)
+ * function AnotherContainerClass () {
+ *   Container.call(this)
  *   this.created_at = new Date().getTime()
  * }
  * Container.extend({
- *   constructor: OtherContainerClass,
+ *   constructor: AnotherContainerClass,
  *   foo () { return 'bar' }
  * }, {
  *   beep () { return 'boop' }
  * })
- * const otherContainer = new OtherContainerClass()
- * console.log(otherContainer.created_at)
- * console.log(otherContainer.foo())
- * console.log(OtherContainerClass.beep())
+ * const anotherContainer = new AnotherContainerClass()
+ * console.log(anotherContainer.created_at)
+ * console.log(anotherContainer.foo())
+ * console.log(AnotherContainerClass.beep())
  * </div>
  *
  * @method Container.extend

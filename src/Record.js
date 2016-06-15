@@ -864,30 +864,22 @@ utils.eventify(
  * const otherRecord = new OtherRecordClass()
  * console.log(otherRecord.foo())
  * console.log(OtherRecordClass.beep())
- * </div>
- *
- * Provide a custom constructor function:
- * <div id="Record.extend" class="tonic">
- * // Normally you would do: import {Record} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
- * const {Record} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
  *
  * // Extend the class, providing a custom constructor.
- * function OtherRecordClass (props, opts) {
- *   Record.call(this, props, opts)
+ * function AnotherRecordClass () {
+ *   Record.call(this)
  *   this.created_at = new Date().getTime()
  * }
  * Record.extend({
- *   constructor: OtherRecordClass,
+ *   constructor: AnotherRecordClass,
  *   foo () { return 'bar' }
  * }, {
  *   beep () { return 'boop' }
  * })
- * const otherRecord = new OtherRecordClass()
- * console.log(otherRecord.created_at)
- * console.log(otherRecord.foo())
- * console.log(OtherRecordClass.beep())
+ * const anotherRecord = new AnotherRecordClass()
+ * console.log(anotherRecord.created_at)
+ * console.log(anotherRecord.foo())
+ * console.log(AnotherRecordClass.beep())
  * </div>
  *
  * @method Record.extend

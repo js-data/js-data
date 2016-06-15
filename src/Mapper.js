@@ -1852,30 +1852,22 @@ export default Component.extend({
  * const otherMapper = new OtherMapperClass()
  * console.log(otherMapper.foo())
  * console.log(OtherMapperClass.beep())
- * </div>
- *
- * Provide a custom constructor function:
- * <div id="Mapper.extend" class="tonic">
- * // Normally you would do: import {Mapper} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
- * const {Mapper} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
  *
  * // Extend the class, providing a custom constructor.
- * function OtherMapperClass (opts) {
- *   Mapper.call(this, opts)
+ * function AnotherMapperClass () {
+ *   Mapper.call(this)
  *   this.created_at = new Date().getTime()
  * }
  * Mapper.extend({
- *   constructor: OtherMapperClass,
+ *   constructor: AnotherMapperClass,
  *   foo () { return 'bar' }
  * }, {
  *   beep () { return 'boop' }
  * })
- * const otherMapper = new OtherMapperClass()
- * console.log(otherMapper.created_at)
- * console.log(otherMapper.foo())
- * console.log(OtherMapperClass.beep())
+ * const anotherMapper = new AnotherMapperClass()
+ * console.log(anotherMapper.created_at)
+ * console.log(anotherMapper.foo())
+ * console.log(AnotherMapperClass.beep())
  * </div>
  *
  * @method Mapper.extend

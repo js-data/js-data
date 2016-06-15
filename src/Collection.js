@@ -670,7 +670,9 @@ export default Component.extend({
       })
       if (record && utils.isFunction(record.off)) {
         record.off('all', this._onRecordEvent, this)
-        this.emit('remove', record)
+        if (!opts.silent) {
+          this.emit('remove', record)
+        }
       }
     }
     return this.afterRemove(id, opts, record) || record
@@ -696,9 +698,14 @@ export default Component.extend({
     const records = this.filter(query)
 
     // Remove each selected record from the collection
+    const optsCopy = utils.plainCopy(opts)
+    optsCopy.silent = true
     records.forEach((item) => {
-      this.remove(this.recordId(item), opts)
+      this.remove(this.recordId(item), optsCopy)
     })
+    if (!opts.silent) {
+      this.emit('remove', records)
+    }
     return this.afterRemoveAll(query, opts, records) || records
   },
 
