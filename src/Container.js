@@ -47,9 +47,9 @@ export const proxiedMapperMethods = [
    * store.on('beforeCreate', onBeforeCreate)
    *
    * @callback Container~beforeCreateListener
-   * @param {string} name The `name` argument passed to {@link Container#beforeCreate}.
-   * @param {Object} props The `props` argument passed to {@link Container#beforeCreate}.
-   * @param {Object} opts The `opts` argument passed to {@link Container#beforeCreate}.
+   * @param {string} name The `name` argument received by {@link Mapper#beforeCreate}.
+   * @param {Object} props The `props` argument received by {@link Mapper#beforeCreate}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeCreate}.
    * @see Container#event:beforeCreate
    * @see Container#create
    * @since 3.0.0
@@ -72,10 +72,10 @@ export const proxiedMapperMethods = [
    * store.on('afterCreate', onAfterCreate)
    *
    * @callback Container~afterCreateListener
-   * @param {string} name The `name` argument passed to {@link Container#afterCreate}.
-   * @param {Object} props The `props` argument passed to {@link Container#afterCreate}.
-   * @param {Object} opts The `opts` argument passed to {@link Container#afterCreate}.
-   * @param {Object} result The `result` argument passed to {@link Container#afterCreate}.
+   * @param {string} name The `name` argument received by {@link Mapper#afterCreate}.
+   * @param {Object} props The `props` argument received by {@link Mapper#afterCreate}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterCreate}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterCreate}.
    * @see Container#event:afterCreate
    * @see Container#create
    * @since 3.0.0
@@ -127,9 +127,9 @@ export const proxiedMapperMethods = [
    * store.on('beforeCreateMany', onBeforeCreateMany)
    *
    * @callback Container~beforeCreateManyListener
-   * @param {string} name The `name` argument passed to {@link Container#beforeCreateMany}.
-   * @param {Object} records The `records` argument passed to {@link Container#beforeCreateMany}.
-   * @param {Object} opts The `opts` argument passed to {@link Container#beforeCreateMany}.
+   * @param {string} name The `name` argument received by {@link Mapper#beforeCreateMany}.
+   * @param {Object} records The `records` argument received by {@link Mapper#beforeCreateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeCreateMany}.
    * @see Container#event:beforeCreateMany
    * @see Container#createMany
    * @since 3.0.0
@@ -152,10 +152,10 @@ export const proxiedMapperMethods = [
    * store.on('afterCreateMany', onAfterCreateMany)
    *
    * @callback Container~afterCreateManyListener
-   * @param {string} name The `name` argument passed to {@link Container#afterCreateMany}.
-   * @param {Object} records The `records` argument passed to {@link Container#afterCreateMany}.
-   * @param {Object} opts The `opts` argument passed to {@link Container#afterCreateMany}.
-   * @param {Object} result The `result` argument passed to {@link Container#afterCreateMany}.
+   * @param {string} name The `name` argument received by {@link Mapper#afterCreateMany}.
+   * @param {Object} records The `records` argument received by {@link Mapper#afterCreateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterCreateMany}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterCreateMany}.
    * @see Container#event:afterCreateMany
    * @see Container#createMany
    * @since 3.0.0
@@ -233,9 +233,9 @@ export const proxiedMapperMethods = [
    * store.on('beforeDestroy', onBeforeDestroy)
    *
    * @callback Container~beforeDestroyListener
-   * @param {string} name The `name` argument passed to {@link Container#beforeDestroy}.
-   * @param {string|number} id The `id` argument passed to {@link Container#beforeDestroy}.
-   * @param {Object} opts The `opts` argument passed to {@link Container#beforeDestroy}.
+   * @param {string} name The `name` argument received by {@link Mapper#beforeDestroy}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#beforeDestroy}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeDestroy}.
    * @see Container#event:beforeDestroy
    * @see Container#destroy
    * @since 3.0.0
@@ -258,10 +258,10 @@ export const proxiedMapperMethods = [
    * store.on('afterDestroy', onAfterDestroy)
    *
    * @callback Container~afterDestroyListener
-   * @param {string} name The `name` argument passed to {@link Container#afterDestroy}.
-   * @param {string|number} id The `id` argument passed to {@link Container#afterDestroy}.
-   * @param {Object} opts The `opts` argument passed to {@link Container#afterDestroy}.
-   * @param {Object} result The `result` argument passed to {@link Container#afterDestroy}.
+   * @param {string} name The `name` argument received by {@link Mapper#afterDestroy}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#afterDestroy}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterDestroy}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterDestroy}.
    * @see Container#event:afterDestroy
    * @see Container#destroy
    * @since 3.0.0
@@ -310,9 +310,9 @@ export const proxiedMapperMethods = [
    * store.on('beforeDestroyAll', onBeforeDestroyAll)
    *
    * @callback Container~beforeDestroyAllListener
-   * @param {string} name The `name` argument passed to {@link Container#beforeDestroyAll}.
-   * @param {Object} query The `query` argument passed to {@link Container#beforeDestroyAll}.
-   * @param {Object} opts The `opts` argument passed to {@link Container#beforeDestroyAll}.
+   * @param {string} name The `name` argument received by {@link Mapper#beforeDestroyAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#beforeDestroyAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeDestroyAll}.
    * @see Container#event:beforeDestroyAll
    * @see Container#destroyAll
    * @since 3.0.0
@@ -335,10 +335,10 @@ export const proxiedMapperMethods = [
    * store.on('afterDestroyAll', onAfterDestroyAll)
    *
    * @callback Container~afterDestroyAllListener
-   * @param {string} name The `name` argument passed to {@link Container#afterDestroyAll}.
-   * @param {Object} query The `query` argument passed to {@link Container#afterDestroyAll}.
-   * @param {Object} opts The `opts` argument passed to {@link Container#afterDestroyAll}.
-   * @param {Object} result The `result` argument passed to {@link Container#afterDestroyAll}.
+   * @param {string} name The `name` argument received by {@link Mapper#afterDestroyAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#afterDestroyAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterDestroyAll}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterDestroyAll}.
    * @see Container#event:afterDestroyAll
    * @see Container#destroyAll
    * @since 3.0.0
@@ -387,9 +387,9 @@ export const proxiedMapperMethods = [
    * store.on('beforeFind', onBeforeFind)
    *
    * @callback Container~beforeFindListener
-   * @param {string} name The `name` argument passed to {@link Container#beforeFind}.
-   * @param {string|number} id The `id` argument passed to {@link Container#beforeFind}.
-   * @param {Object} opts The `opts` argument passed to {@link Container#beforeFind}.
+   * @param {string} name The `name` argument received by {@link Mapper#beforeFind}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#beforeFind}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeFind}.
    * @see Container#event:beforeFind
    * @see Container#find
    * @since 3.0.0
@@ -412,10 +412,10 @@ export const proxiedMapperMethods = [
    * store.on('afterFind', onAfterFind)
    *
    * @callback Container~afterFindListener
-   * @param {string} name The `name` argument passed to {@link Container#afterFind}.
-   * @param {string|number} id The `id` argument passed to {@link Container#afterFind}.
-   * @param {Object} opts The `opts` argument passed to {@link Container#afterFind}.
-   * @param {Object} result The `result` argument passed to {@link Container#afterFind}.
+   * @param {string} name The `name` argument received by {@link Mapper#afterFind}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#afterFind}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterFind}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterFind}.
    * @see Container#event:afterFind
    * @see Container#find
    * @since 3.0.0
@@ -464,9 +464,9 @@ export const proxiedMapperMethods = [
    * store.on('beforeFindAll', onBeforeFindAll)
    *
    * @callback Container~beforeFindAllListener
-   * @param {string} name The `name` argument passed to {@link Container#beforeFindAll}.
-   * @param {Object} query The `query` argument passed to {@link Container#beforeFindAll}.
-   * @param {Object} opts The `opts` argument passed to {@link Container#beforeFindAll}.
+   * @param {string} name The `name` argument received by {@link Mapper#beforeFindAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#beforeFindAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeFindAll}.
    * @see Container#event:beforeFindAll
    * @see Container#findAll
    * @since 3.0.0
@@ -489,10 +489,10 @@ export const proxiedMapperMethods = [
    * store.on('afterFindAll', onAfterFindAll)
    *
    * @callback Container~afterFindAllListener
-   * @param {string} name The `name` argument passed to {@link Container#afterFindAll}.
-   * @param {Object} query The `query` argument passed to {@link Container#afterFindAll}.
-   * @param {Object} opts The `opts` argument passed to {@link Container#afterFindAll}.
-   * @param {Object} result The `result` argument passed to {@link Container#afterFindAll}.
+   * @param {string} name The `name` argument received by {@link Mapper#afterFindAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#afterFindAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterFindAll}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterFindAll}.
    * @see Container#event:afterFindAll
    * @see Container#findAll
    * @since 3.0.0
@@ -629,10 +629,10 @@ export const proxiedMapperMethods = [
    * store.on('beforeUpdate', onBeforeUpdate)
    *
    * @callback Container~beforeUpdateListener
-   * @param {string} name The `name` argument passed to {@link Container#beforeUpdate}.
-   * @param {string|number} id The `id` argument passed to {@link Container#beforeUpdate}.
-   * @param {Object} props The `props` argument passed to {@link Container#beforeUpdate}.
-   * @param {Object} opts The `opts` argument passed to {@link Container#beforeUpdate}.
+   * @param {string} name The `name` argument received by {@link Mapper#beforeUpdate}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#beforeUpdate}.
+   * @param {Object} props The `props` argument received by {@link Mapper#beforeUpdate}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdate}.
    * @see Container#event:beforeUpdate
    * @see Container#update
    * @since 3.0.0
@@ -655,11 +655,11 @@ export const proxiedMapperMethods = [
    * store.on('afterUpdate', onAfterUpdate)
    *
    * @callback Container~afterUpdateListener
-   * @param {string} name The `name` argument passed to {@link Container#afterUpdate}.
-   * @param {string|number} id The `id` argument passed to {@link Container#afterUpdate}.
-   * @param {Object} props The `props` argument passed to {@link Container#afterUpdate}.
-   * @param {Object} opts The `opts` argument passed to {@link Container#afterUpdate}.
-   * @param {Object} result The `result` argument passed to {@link Container#afterUpdate}.
+   * @param {string} name The `name` argument received by {@link Mapper#afterUpdate}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#afterUpdate}.
+   * @param {Object} props The `props` argument received by {@link Mapper#afterUpdate}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdate}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterUpdate}.
    * @see Container#event:afterUpdate
    * @see Container#update
    * @since 3.0.0
@@ -713,10 +713,10 @@ export const proxiedMapperMethods = [
    * store.on('beforeUpdateAll', onBeforeUpdateAll)
    *
    * @callback Container~beforeUpdateAllListener
-   * @param {string} name The `name` argument passed to {@link Container#beforeUpdateAll}.
-   * @param {Object} props The `props` argument passed to {@link Container#beforeUpdateAll}.
-   * @param {Object} query The `query` argument passed to {@link Container#beforeUpdateAll}.
-   * @param {Object} opts The `opts` argument passed to {@link Container#beforeUpdateAll}.
+   * @param {string} name The `name` argument received by {@link Mapper#beforeUpdateAll}.
+   * @param {Object} props The `props` argument received by {@link Mapper#beforeUpdateAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#beforeUpdateAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdateAll}.
    * @see Container#event:beforeUpdateAll
    * @see Container#updateAll
    * @since 3.0.0
@@ -739,11 +739,11 @@ export const proxiedMapperMethods = [
    * store.on('afterUpdateAll', onAfterUpdateAll)
    *
    * @callback Container~afterUpdateAllListener
-   * @param {string} name The `name` argument passed to {@link Container#afterUpdateAll}.
-   * @param {Object} props The `props` argument passed to {@link Container#afterUpdateAll}.
-   * @param {Object} query The `query` argument passed to {@link Container#afterUpdateAll}.
-   * @param {Object} opts The `opts` argument passed to {@link Container#afterUpdateAll}.
-   * @param {Object} result The `result` argument passed to {@link Container#afterUpdateAll}.
+   * @param {string} name The `name` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} props The `props` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterUpdateAll}.
    * @see Container#event:afterUpdateAll
    * @see Container#updateAll
    * @since 3.0.0
@@ -795,9 +795,9 @@ export const proxiedMapperMethods = [
    * store.on('beforeUpdateMany', onBeforeUpdateMany)
    *
    * @callback Container~beforeUpdateManyListener
-   * @param {string} name The `name` argument passed to {@link Container#beforeUpdateMany}.
-   * @param {Object} records The `records` argument passed to {@link Container#beforeUpdateMany}.
-   * @param {Object} opts The `opts` argument passed to {@link Container#beforeUpdateMany}.
+   * @param {string} name The `name` argument received by {@link Mapper#beforeUpdateMany}.
+   * @param {Object} records The `records` argument received by {@link Mapper#beforeUpdateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdateMany}.
    * @see Container#event:beforeUpdateMany
    * @see Container#updateMany
    * @since 3.0.0
@@ -820,10 +820,10 @@ export const proxiedMapperMethods = [
    * store.on('afterUpdateMany', onAfterUpdateMany)
    *
    * @callback Container~afterUpdateManyListener
-   * @param {string} name The `name` argument passed to {@link Container#afterUpdateMany}.
-   * @param {Object} records The `records` argument passed to {@link Container#afterUpdateMany}.
-   * @param {Object} opts The `opts` argument passed to {@link Container#afterUpdateMany}.
-   * @param {Object} result The `result` argument passed to {@link Container#afterUpdateMany}.
+   * @param {string} name The `name` argument received by {@link Mapper#afterUpdateMany}.
+   * @param {Object} records The `records` argument received by {@link Mapper#afterUpdateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdateMany}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterUpdateMany}.
    * @see Container#event:afterUpdateMany
    * @see Container#updateMany
    * @since 3.0.0

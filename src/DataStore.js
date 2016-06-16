@@ -723,9 +723,9 @@ const props = {
    * store.on('beforeCreate', onBeforeCreate)
    *
    * @callback DataStore~beforeCreateListener
-   * @param {string} name The `name` argument passed to {@link DataStore#beforeCreate}.
-   * @param {Object} props The `props` argument passed to {@link DataStore#beforeCreate}.
-   * @param {Object} opts The `opts` argument passed to {@link DataStore#beforeCreate}.
+   * @param {string} name The `name` argument received by {@link Mapper#beforeCreate}.
+   * @param {Object} props The `props` argument received by {@link Mapper#beforeCreate}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeCreate}.
    * @see DataStore#event:beforeCreate
    * @see DataStore#create
    * @since 3.0.0
@@ -748,10 +748,10 @@ const props = {
    * store.on('afterCreate', onAfterCreate)
    *
    * @callback DataStore~afterCreateListener
-   * @param {string} name The `name` argument passed to {@link DataStore#afterCreate}.
-   * @param {Object} props The `props` argument passed to {@link DataStore#afterCreate}.
-   * @param {Object} opts The `opts` argument passed to {@link DataStore#afterCreate}.
-   * @param {Object} result The `result` argument passed to {@link DataStore#afterCreate}.
+   * @param {string} name The `name` argument received by {@link Mapper#afterCreate}.
+   * @param {Object} props The `props` argument received by {@link Mapper#afterCreate}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterCreate}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterCreate}.
    * @see DataStore#event:afterCreate
    * @see DataStore#create
    * @since 3.0.0
@@ -815,9 +815,9 @@ const props = {
    * store.on('beforeCreateMany', onBeforeCreateMany)
    *
    * @callback DataStore~beforeCreateManyListener
-   * @param {string} name The `name` argument passed to {@link DataStore#beforeCreateMany}.
-   * @param {Object} records The `records` argument passed to {@link DataStore#beforeCreateMany}.
-   * @param {Object} opts The `opts` argument passed to {@link DataStore#beforeCreateMany}.
+   * @param {string} name The `name` argument received by {@link Mapper#beforeCreateMany}.
+   * @param {Object} records The `records` argument received by {@link Mapper#beforeCreateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeCreateMany}.
    * @see DataStore#event:beforeCreateMany
    * @see DataStore#createMany
    * @since 3.0.0
@@ -840,10 +840,10 @@ const props = {
    * store.on('afterCreateMany', onAfterCreateMany)
    *
    * @callback DataStore~afterCreateManyListener
-   * @param {string} name The `name` argument passed to {@link DataStore#afterCreateMany}.
-   * @param {Object} records The `records` argument passed to {@link DataStore#afterCreateMany}.
-   * @param {Object} opts The `opts` argument passed to {@link DataStore#afterCreateMany}.
-   * @param {Object} result The `result` argument passed to {@link DataStore#afterCreateMany}.
+   * @param {string} name The `name` argument received by {@link Mapper#afterCreateMany}.
+   * @param {Object} records The `records` argument received by {@link Mapper#afterCreateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterCreateMany}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterCreateMany}.
    * @see DataStore#event:afterCreateMany
    * @see DataStore#createMany
    * @since 3.0.0
@@ -1224,9 +1224,9 @@ const props = {
    * store.on('beforeDestroy', onBeforeDestroy)
    *
    * @callback DataStore~beforeDestroyListener
-   * @param {string} name The `name` argument passed to {@link DataStore#beforeDestroy}.
-   * @param {string|number} id The `id` argument passed to {@link DataStore#beforeDestroy}.
-   * @param {Object} opts The `opts` argument passed to {@link DataStore#beforeDestroy}.
+   * @param {string} name The `name` argument received by {@link Mapper#beforeDestroy}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#beforeDestroy}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeDestroy}.
    * @see DataStore#event:beforeDestroy
    * @see DataStore#destroy
    * @since 3.0.0
@@ -1249,10 +1249,10 @@ const props = {
    * store.on('afterDestroy', onAfterDestroy)
    *
    * @callback DataStore~afterDestroyListener
-   * @param {string} name The `name` argument passed to {@link DataStore#afterDestroy}.
-   * @param {string|number} id The `id` argument passed to {@link DataStore#afterDestroy}.
-   * @param {Object} opts The `opts` argument passed to {@link DataStore#afterDestroy}.
-   * @param {Object} result The `result` argument passed to {@link DataStore#afterDestroy}.
+   * @param {string} name The `name` argument received by {@link Mapper#afterDestroy}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#afterDestroy}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterDestroy}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterDestroy}.
    * @see DataStore#event:afterDestroy
    * @see DataStore#destroy
    * @since 3.0.0
@@ -1329,9 +1329,9 @@ const props = {
    * store.on('beforeDestroyAll', onBeforeDestroyAll)
    *
    * @callback DataStore~beforeDestroyAllListener
-   * @param {string} name The `name` argument passed to {@link DataStore#beforeDestroyAll}.
-   * @param {Object} query The `query` argument passed to {@link DataStore#beforeDestroyAll}.
-   * @param {Object} opts The `opts` argument passed to {@link DataStore#beforeDestroyAll}.
+   * @param {string} name The `name` argument received by {@link Mapper#beforeDestroyAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#beforeDestroyAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeDestroyAll}.
    * @see DataStore#event:beforeDestroyAll
    * @see DataStore#destroyAll
    * @since 3.0.0
@@ -1354,10 +1354,10 @@ const props = {
    * store.on('afterDestroyAll', onAfterDestroyAll)
    *
    * @callback DataStore~afterDestroyAllListener
-   * @param {string} name The `name` argument passed to {@link DataStore#afterDestroyAll}.
-   * @param {Object} query The `query` argument passed to {@link DataStore#afterDestroyAll}.
-   * @param {Object} opts The `opts` argument passed to {@link DataStore#afterDestroyAll}.
-   * @param {Object} result The `result` argument passed to {@link DataStore#afterDestroyAll}.
+   * @param {string} name The `name` argument received by {@link Mapper#afterDestroyAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#afterDestroyAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterDestroyAll}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterDestroyAll}.
    * @see DataStore#event:afterDestroyAll
    * @see DataStore#destroyAll
    * @since 3.0.0
@@ -1443,9 +1443,9 @@ const props = {
    * store.on('beforeFind', onBeforeFind)
    *
    * @callback DataStore~beforeFindListener
-   * @param {string} name The `name` argument passed to {@link DataStore#beforeFind}.
-   * @param {string|number} id The `id` argument passed to {@link DataStore#beforeFind}.
-   * @param {Object} opts The `opts` argument passed to {@link DataStore#beforeFind}.
+   * @param {string} name The `name` argument received by {@link Mapper#beforeFind}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#beforeFind}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeFind}.
    * @see DataStore#event:beforeFind
    * @see DataStore#find
    * @since 3.0.0
@@ -1468,10 +1468,10 @@ const props = {
    * store.on('afterFind', onAfterFind)
    *
    * @callback DataStore~afterFindListener
-   * @param {string} name The `name` argument passed to {@link DataStore#afterFind}.
-   * @param {string|number} id The `id` argument passed to {@link DataStore#afterFind}.
-   * @param {Object} opts The `opts` argument passed to {@link DataStore#afterFind}.
-   * @param {Object} result The `result` argument passed to {@link DataStore#afterFind}.
+   * @param {string} name The `name` argument received by {@link Mapper#afterFind}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#afterFind}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterFind}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterFind}.
    * @see DataStore#event:afterFind
    * @see DataStore#find
    * @since 3.0.0
@@ -1552,9 +1552,9 @@ const props = {
    * store.on('beforeFindAll', onBeforeFindAll)
    *
    * @callback DataStore~beforeFindAllListener
-   * @param {string} name The `name` argument passed to {@link DataStore#beforeFindAll}.
-   * @param {Object} query The `query` argument passed to {@link DataStore#beforeFindAll}.
-   * @param {Object} opts The `opts` argument passed to {@link DataStore#beforeFindAll}.
+   * @param {string} name The `name` argument received by {@link Mapper#beforeFindAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#beforeFindAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeFindAll}.
    * @see DataStore#event:beforeFindAll
    * @see DataStore#findAll
    * @since 3.0.0
@@ -1577,10 +1577,10 @@ const props = {
    * store.on('afterFindAll', onAfterFindAll)
    *
    * @callback DataStore~afterFindAllListener
-   * @param {string} name The `name` argument passed to {@link DataStore#afterFindAll}.
-   * @param {Object} query The `query` argument passed to {@link DataStore#afterFindAll}.
-   * @param {Object} opts The `opts` argument passed to {@link DataStore#afterFindAll}.
-   * @param {Object} result The `result` argument passed to {@link DataStore#afterFindAll}.
+   * @param {string} name The `name` argument received by {@link Mapper#afterFindAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#afterFindAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterFindAll}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterFindAll}.
    * @see DataStore#event:afterFindAll
    * @see DataStore#findAll
    * @since 3.0.0
@@ -1847,10 +1847,10 @@ const props = {
    * store.on('beforeUpdate', onBeforeUpdate)
    *
    * @callback DataStore~beforeUpdateListener
-   * @param {string} name The `name` argument passed to {@link DataStore#beforeUpdate}.
-   * @param {string|number} id The `id` argument passed to {@link DataStore#beforeUpdate}.
-   * @param {Object} props The `props` argument passed to {@link DataStore#beforeUpdate}.
-   * @param {Object} opts The `opts` argument passed to {@link DataStore#beforeUpdate}.
+   * @param {string} name The `name` argument received by {@link Mapper#beforeUpdate}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#beforeUpdate}.
+   * @param {Object} props The `props` argument received by {@link Mapper#beforeUpdate}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdate}.
    * @see DataStore#event:beforeUpdate
    * @see DataStore#update
    * @since 3.0.0
@@ -1873,11 +1873,11 @@ const props = {
    * store.on('afterUpdate', onAfterUpdate)
    *
    * @callback DataStore~afterUpdateListener
-   * @param {string} name The `name` argument passed to {@link DataStore#afterUpdate}.
-   * @param {string|number} id The `id` argument passed to {@link DataStore#afterUpdate}.
-   * @param {Object} props The `props` argument passed to {@link DataStore#afterUpdate}.
-   * @param {Object} opts The `opts` argument passed to {@link DataStore#afterUpdate}.
-   * @param {Object} result The `result` argument passed to {@link DataStore#afterUpdate}.
+   * @param {string} name The `name` argument received by {@link Mapper#afterUpdate}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#afterUpdate}.
+   * @param {Object} props The `props` argument received by {@link Mapper#afterUpdate}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdate}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterUpdate}.
    * @see DataStore#event:afterUpdate
    * @see DataStore#update
    * @since 3.0.0
@@ -1939,10 +1939,10 @@ const props = {
    * store.on('beforeUpdateAll', onBeforeUpdateAll)
    *
    * @callback DataStore~beforeUpdateAllListener
-   * @param {string} name The `name` argument passed to {@link DataStore#beforeUpdateAll}.
-   * @param {Object} props The `props` argument passed to {@link DataStore#beforeUpdateAll}.
-   * @param {Object} query The `query` argument passed to {@link DataStore#beforeUpdateAll}.
-   * @param {Object} opts The `opts` argument passed to {@link DataStore#beforeUpdateAll}.
+   * @param {string} name The `name` argument received by {@link Mapper#beforeUpdateAll}.
+   * @param {Object} props The `props` argument received by {@link Mapper#beforeUpdateAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#beforeUpdateAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdateAll}.
    * @see DataStore#event:beforeUpdateAll
    * @see DataStore#updateAll
    * @since 3.0.0
@@ -1965,11 +1965,11 @@ const props = {
    * store.on('afterUpdateAll', onAfterUpdateAll)
    *
    * @callback DataStore~afterUpdateAllListener
-   * @param {string} name The `name` argument passed to {@link DataStore#afterUpdateAll}.
-   * @param {Object} props The `props` argument passed to {@link DataStore#afterUpdateAll}.
-   * @param {Object} query The `query` argument passed to {@link DataStore#afterUpdateAll}.
-   * @param {Object} opts The `opts` argument passed to {@link DataStore#afterUpdateAll}.
-   * @param {Object} result The `result` argument passed to {@link DataStore#afterUpdateAll}.
+   * @param {string} name The `name` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} props The `props` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterUpdateAll}.
    * @see DataStore#event:afterUpdateAll
    * @see DataStore#updateAll
    * @since 3.0.0
@@ -2031,9 +2031,9 @@ const props = {
    * store.on('beforeUpdateMany', onBeforeUpdateMany)
    *
    * @callback DataStore~beforeUpdateManyListener
-   * @param {string} name The `name` argument passed to {@link DataStore#beforeUpdateMany}.
-   * @param {Object} records The `records` argument passed to {@link DataStore#beforeUpdateMany}.
-   * @param {Object} opts The `opts` argument passed to {@link DataStore#beforeUpdateMany}.
+   * @param {string} name The `name` argument received by {@link Mapper#beforeUpdateMany}.
+   * @param {Object} records The `records` argument received by {@link Mapper#beforeUpdateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdateMany}.
    * @see DataStore#event:beforeUpdateMany
    * @see DataStore#updateMany
    * @since 3.0.0
@@ -2056,10 +2056,10 @@ const props = {
    * store.on('afterUpdateMany', onAfterUpdateMany)
    *
    * @callback DataStore~afterUpdateManyListener
-   * @param {string} name The `name` argument passed to {@link DataStore#afterUpdateMany}.
-   * @param {Object} records The `records` argument passed to {@link DataStore#afterUpdateMany}.
-   * @param {Object} opts The `opts` argument passed to {@link DataStore#afterUpdateMany}.
-   * @param {Object} result The `result` argument passed to {@link DataStore#afterUpdateMany}.
+   * @param {string} name The `name` argument received by {@link Mapper#afterUpdateMany}.
+   * @param {Object} records The `records` argument received by {@link Mapper#afterUpdateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdateMany}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterUpdateMany}.
    * @see DataStore#event:afterUpdateMany
    * @see DataStore#updateMany
    * @since 3.0.0
