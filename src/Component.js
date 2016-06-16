@@ -28,18 +28,17 @@ export default function Component (opts) {
    * extends `Component` inherits this option and the corresponding logging
    * functionality.
    *
-   * Display debug logs:
-   * <div id="Component#debug" class="tonic">
+   * @example <caption>Component#debug</caption>
    * // Normally you would do: import {Component} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Component} = JSData
-   * console.log(\`Using JSData v${JSData.version.full}\`)
+   * console.log('Using JSData v' + JSData.version.full)
    *
    * const component = new Component()
    * component.log('debug', 'some message') // nothing gets logged
+   * // Display debug logs:
    * component.debug = true
    * component.log('debug', 'other message') // this DOES get logged
-   * </div>
    *
    * @default false
    * @name Component#debug
@@ -62,11 +61,12 @@ export default function Component (opts) {
 
 /**
  * Create a subclass of this Component:
- * <div id="Component.extend" class="tonic">
+ *
+ * @example <caption>Component.extend</caption>
  * // Normally you would do: import {Component} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Component} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
+ * console.log('Using JSData v' + JSData.version.full)
  *
  * // Extend the class using ES2015 class syntax.
  * class CustomComponentClass extends Component {
@@ -102,7 +102,6 @@ export default function Component (opts) {
  * console.log(anotherComponent.created_at)
  * console.log(anotherComponent.foo())
  * console.log(AnotherComponentClass.beep())
- * </div>
  *
  * @method Component.extend
  * @param {Object} [props={}] Properties to add to the prototype of the
@@ -141,7 +140,8 @@ utils.logify(Component.prototype)
 /**
  * Register a new event listener on this Component.
  *
- * @example <caption>Listen for all "afterCreate" events in a DataStore</caption>
+ * @example
+ * // Listen for all "afterCreate" events in a DataStore
  * store.on('afterCreate', (mapperName, props, opts, result) => {
  *   console.log(mapperName) // "post"
  *   console.log(props.id) // undefined
@@ -151,12 +151,14 @@ utils.logify(Component.prototype)
  *   console.log(post.id) // 1234
  * })
  *
- * @example <caption>Listen for the "add" event on a collection</caption>
+ * @example
+ * // Listen for the "add" event on a collection
  * collection.on('add', (records) => {
  *   console.log(records) // [...]
  * })
  *
- * @example <caption>Listen for "change" events on a record</caption>
+ * @example
+ * // Listen for "change" events on a record
  * post.on('change', (record, changes) => {
  *   console.log(changes) // { changed: { title: 'Modeling your data' } }
  * })
@@ -173,13 +175,16 @@ utils.logify(Component.prototype)
  * then all listeners for the specified event will be removed. If no event is
  * specified then all listeners for all events will be removed.
  *
- * @example <caption>Remove a particular listener for a particular event</caption>
+ * @example
+ * // Remove a particular listener for a particular event
  * collection.off('add', handler)
  *
- * @example <caption>Remove all listeners for a particular event</caption>
+ * @example
+ * // Remove all listeners for a particular event
  * record.off('change')
  *
- * @example <caption>Remove all listeners to all events</caption>
+ * @example
+ * // Remove all listeners to all events
  * store.off()
  *
  * @method Component#off
@@ -190,7 +195,7 @@ utils.logify(Component.prototype)
 /**
  * Trigger an event on this Component.
  *
- * <div id="Component#emit">
+ * @example <caption>Component#emit</caption>
  * // import {Collection, DataStore} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Collection, DataStore, version} = JSData
@@ -206,8 +211,6 @@ utils.logify(Component.prototype)
  *   console.log(msg)
  * })
  * store.emit('beep', 'boop')
- * </div>
- * <script src="https://embed.tonicdev.com" data-element-id="Component#emit"></script>
  *
  * @method Component#emit
  * @param {string} event Name of event to emit.

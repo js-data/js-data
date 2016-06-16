@@ -8,7 +8,8 @@ export const proxiedMapperMethods = [
   /**
    * Wrapper for {@link Mapper#count}.
    *
-   * @example <caption>Get the number of published blog posts</caption>
+   * @example
+   * // Get the number of published blog posts
    * import {Container} from 'js-data'
    * import RethinkDBAdapter from 'js-data-rethinkdb'
    * const store = new Container()
@@ -83,7 +84,8 @@ export const proxiedMapperMethods = [
   /**
    * Wrapper for {@link Mapper#create}.
    *
-   * @example <caption>Create and save a new blog post</caption>
+   * @example
+   * // Create and save a new blog post
    * import {Container} from 'js-data'
    * import RethinkDBAdapter from 'js-data-rethinkdb'
    * const store = new Container()
@@ -163,7 +165,8 @@ export const proxiedMapperMethods = [
   /**
    * Wrapper for {@link Mapper#createMany}.
    *
-   * @example <caption>Create and save several new blog posts</caption>
+   * @example
+   * // Create and save several new blog posts
    * import {Container} from 'js-data'
    * import RethinkDBAdapter from 'js-data-rethinkdb'
    * const store = new Container()
@@ -181,8 +184,8 @@ export const proxiedMapperMethods = [
    *   console.log(posts[1]) // { id: 1235, status: 'draft', ... }
    * })
    *
-   * @fires Container#beforeCreate
-   * @fires Container#afterCreate
+   * @fires Container#beforeCreateMany
+   * @fires Container#afterCreateMany
    * @method Container#createMany
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Record[]} records See {@link Mapper#createMany}.
@@ -199,7 +202,8 @@ export const proxiedMapperMethods = [
    * __Note:__ This method does __not__ interact with any adapter, and does
    * __not__ save any data. It only creates new objects in memory.
    *
-   * @example <caption>Create empty unsaved record instance</caption>
+   * @example
+   * // Create empty unsaved record instance
    * import {Container} from 'js-data'
    * const store = new Container()
    * store.defineMapper('post')
@@ -269,7 +273,8 @@ export const proxiedMapperMethods = [
   /**
    * Wrapper for {@link Mapper#destroy}.
    *
-   * @example <caption>Destroy a specific blog post</caption>
+   * @example
+   * // Destroy a specific blog post
    * import {Container} from 'js-data'
    * import RethinkDBAdapter from 'js-data-rethinkdb'
    * const store = new Container()
@@ -346,7 +351,8 @@ export const proxiedMapperMethods = [
   /**
    * Wrapper for {@link Mapper#destroyAll}.
    *
-   * @example <caption>Destroy all "draft" blog posts</caption>
+   * @example
+   * // Destroy all "draft" blog posts
    * import {Container} from 'js-data'
    * import RethinkDBAdapter from 'js-data-rethinkdb'
    * const store = new Container()
@@ -357,8 +363,8 @@ export const proxiedMapperMethods = [
    *   // All "draft" blog posts have been destroyed
    * })
    *
-   * @fires Container#beforeDestroy
-   * @fires Container#afterDestroy
+   * @fires Container#beforeDestroyAll
+   * @fires Container#afterDestroyAll
    * @method Container#destroyAll
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Object} [query] See {@link Mapper#destroyAll}.
@@ -500,7 +506,8 @@ export const proxiedMapperMethods = [
   /**
    * Wrapper for {@link Mapper#createRecord}.
    *
-   * @example <caption>Find all "published" blog posts</caption>
+   * @example
+   * // Find all "published" blog posts
    * import {Container} from 'js-data'
    * import RethinkDBAdapter from 'js-data-rethinkdb'
    * const store = new Container()
@@ -751,7 +758,8 @@ export const proxiedMapperMethods = [
   /**
    * Wrapper for {@link Mapper#updateAll}.
    *
-   * @example <caption>Turn all of John's blog posts into drafts.</caption>
+   * @example
+   * // Turn all of John's blog posts into drafts.
    * import {Container} from 'js-data'
    * import RethinkDBAdapter from 'js-data-rethinkdb'
    * const store = new Container()
@@ -892,14 +900,13 @@ export const proxiedMapperMethods = [
  *
  * A `Container` makes it easy to manage your Mappers.
  *
- * <div id="Container#constructor" class="tonic">
+ * @example <caption>Container#constructor</caption>
  * // import {Container} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Container} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
+ * console.log('Using JSData v' + JSData.version.full)
  *
  * const store = new Container()
- * </div>
  *
  * @class Container
  * @extends Component
@@ -945,11 +952,11 @@ export function Container (opts) {
      * {@link Mapper} instances. {@link Container#mapperClass} should extend
      * {@link Mapper}. By default {@link Mapper} is used to instantiate Mappers.
      *
-     * <div id="Container#mapperClass" class="tonic">
+     * @example <caption>Container#mapperClass</caption>
      * // import {Container, Mapper} from 'js-data'
      * const JSData = require('js-data@3.0.0-beta.7')
      * const {Container} = JSData
-     * console.log(\`Using JSData v${JSData.version.full}\`)
+     * console.log('Using JSData v' + JSData.version.full)
      *
      * class MyMapperClass extends Mapper {
      *   foo () { return 'bar' }
@@ -959,7 +966,6 @@ export function Container (opts) {
      * })
      * store.defineMapper('user')
      * console.log(store.getMapper('user').foo())
-     * </div>
      *
      * @name Container#mapperClass
      * @see Mapper
@@ -979,11 +985,11 @@ export function Container (opts) {
    * Defaults options to pass to {@link Container#mapperClass} when creating a
    * new {@link Mapper}.
    *
-   * <div id="Container#mapperDefaults" class="tonic">
+   * @example <caption>Container#mapperDefaults</caption>
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container} = JSData
-   * console.log(\`Using JSData v${JSData.version.full}\`)
+   * console.log('Using JSData v' + JSData.version.full)
    *
    * const store = new Container({
    *   mapperDefaults: {
@@ -992,7 +998,6 @@ export function Container (opts) {
    * })
    * store.defineMapper('user')
    * console.log(store.getMapper('user').idAttribute)
-   * </div>
    *
    * @default {}
    * @name Container#mapperDefaults
@@ -1015,18 +1020,17 @@ const props = {
    * in the Container, then the name of the {@link Mapper} will be prepended to
    * the arugments passed to the listener.
    *
-   * <div id="Container#on" class="tonic">
+   * @example <caption>Container#on</caption>
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container} = JSData
-   * console.log(\`Using JSData v${JSData.version.full}\`)
+   * console.log('Using JSData v' + JSData.version.full)
    *
    * const store = new Container()
    * store.on('foo', function (...args) { console.log(args.join(':')) })
    * store.defineMapper('user')
    * store.emit('foo', 'arg1', 'arg2')
    * store.getMapper('user').emit('foo', 'arg1', 'arg2')
-   * </div>
    *
    * @method Container#on
    * @param {string} event Name of event to subsribe to.
@@ -1052,7 +1056,7 @@ const props = {
   /**
    * Return a container scoped to a particular mapper.
    *
-   * <div id="Container#as" class="tonic">
+   * @example <caption>Container#as</caption>
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container, version} = JSData
@@ -1067,7 +1071,6 @@ const props = {
    * console.log(user1 === user2)
    * console.log(user2 === user3)
    * console.log(user1 === user3)
-   * </div>
    *
    * @method Container#as
    * @param {string} name Name of the {@link Mapper}.
@@ -1094,7 +1097,7 @@ const props = {
   /**
    * Create a new mapper and register it in this container.
    *
-   * <div id="Container#defineMapper" class="tonic">
+   * @example <caption>Container#defineMapper</caption>
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container, version} = JSData
@@ -1108,7 +1111,6 @@ const props = {
    * console.log(UserMapper === store.getMapper('user'))
    * console.log(UserMapper === store.as('user').getMapper())
    * console.log(UserMapper.foo)
-   * </div>
    *
    * @method Container#defineMapper
    * @param {string} name Name under which to register the new {@link Mapper}.
@@ -1211,7 +1213,7 @@ const props = {
   /**
    * Return the mapper registered under the specified name.
    *
-   * <div id="Container#getMapper" class="tonic">
+   * @example <caption>Container#getMapper</caption>
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container, version} = JSData
@@ -1223,7 +1225,6 @@ const props = {
    * console.log(UserMapper === store.getMapper('user'))
    * console.log(UserMapper === store.as('user').getMapper())
    * store.getMapper('profile') // throws Error, there is no mapper with name "profile"
-   * </div>
    *
    * @method Container#getMapper
    * @param {string} name {@link Mapper#name}.
@@ -1242,7 +1243,7 @@ const props = {
    * Return the mapper registered under the specified name.
    * Doesn't throw error if mapper doesn't exist.
    *
-   * <div id="Container#getMapperByName" class="tonic">
+   * @example <caption>Container#getMapperByName</caption>
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container, version} = JSData
@@ -1254,7 +1255,6 @@ const props = {
    * console.log(UserMapper === store.getMapper('user'))
    * console.log(UserMapper === store.as('user').getMapper())
    * console.log(store.getMapper('profile')) // Does NOT throw an error
-   * </div>
    *
    * @method Container#getMapperByName
    * @param {string} name {@link Mapper#name}.
@@ -1307,11 +1307,11 @@ Component.extend(props)
 
 /**
  * Create a subclass of this Container:
- * <div id="Container.extend" class="tonic">
+ * @example <caption>Container.extend</caption>
  * // Normally you would do: import {Container} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Container} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
+ * console.log('Using JSData v' + JSData.version.full)
  *
  * // Extend the class using ES2015 class syntax.
  * class CustomContainerClass extends Container {
@@ -1347,7 +1347,6 @@ Component.extend(props)
  * console.log(anotherContainer.created_at)
  * console.log(anotherContainer.foo())
  * console.log(AnotherContainerClass.beep())
- * </div>
  *
  * @method Container.extend
  * @param {Object} [props={}] Properties to add to the prototype of the

@@ -855,7 +855,7 @@ export default Component.extend({
  * // Normally you would do: import {Collection} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Collection} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
+ * console.log('Using JSData v' + JSData.version.full)
  *
  * // Extend the class using ES2015 class syntax.
  * class CustomCollectionClass extends Collection {

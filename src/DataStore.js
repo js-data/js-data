@@ -12,11 +12,11 @@ const proxiedCollectionMethods = [
   /**
    * Wrapper for {@link LinkedCollection#add}.
    *
-   * <div id="DataStore#add" class="tonic">
+   * @example <caption>DataStore#add</caption>
    * // Normally you would do: import {DataStore} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {DataStore} = JSData
-   * console.log(\`Using JSData v${JSData.version.full}\`)
+   * console.log('Using JSData v' + JSData.version.full)
    *
    * const store = new DataStore()
    * store.defineMapper('book')
@@ -28,7 +28,6 @@ const proxiedCollectionMethods = [
    *   { id: 2, title: 'Easy data recipes' },
    *   { id: 3, title: 'Active Record 101' }
    * ])
-   * </div>
    *
    * @fires DataStore#add
    * @method DataStore#add
@@ -45,10 +44,12 @@ const proxiedCollectionMethods = [
   /**
    * Wrapper for {@link LinkedCollection#between}.
    *
-   * @example <caption>Get all users ages 18 to 30</caption>
+   * @example
+   * // Get all users ages 18 to 30
    * const users = store.between('user', 18, 30, { index: 'age' })
    *
-   * @example <caption>Same as above</caption>
+   * @example
+   * // Same as above
    * const users = store.between('user', [18], [30], { index: 'age' })
    *
    * @method DataStore#between
@@ -66,10 +67,12 @@ const proxiedCollectionMethods = [
   /**
    * Wrapper for {@link LinkedCollection#createIndex}.
    *
-   * @example <caption>Index users by age</caption>
+   * @example
+   * // Index users by age
    * store.createIndex('user', 'age')
    *
-   * @example <caption>Index users by status and role</caption>
+   * @example
+   * // Index users by status and role
    * store.createIndex('user', 'statusAndRole', ['status', 'role'])
    *
    * @method DataStore#createIndex
@@ -85,7 +88,7 @@ const proxiedCollectionMethods = [
   /**
    * Wrapper for {@link LinkedCollection#filter}.
    *
-   * <div id="DataStore#filter" class="tonic">
+   * @example <caption>DataStore#filter</caption>
    * // import {DataStore} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {DataStore, version} = JSData
@@ -112,7 +115,6 @@ const proxiedCollectionMethods = [
    *
    * // Use a custom filter function
    * posts = store.filter('post', (post) => post.id % 2 === 0)
-   * </div>
    *
    * @method DataStore#filter
    * @param {(string|number)} name Name of the {@link Mapper} to target.
@@ -128,7 +130,7 @@ const proxiedCollectionMethods = [
   /**
    * Wrapper for {@link LinkedCollection#get}.
    *
-   * <div id="DataStore#get" class="tonic">
+   * @example <caption>DataStore#get</caption>
    * // import {DataStore} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {DataStore, version} = JSData
@@ -142,7 +144,6 @@ const proxiedCollectionMethods = [
    *
    * console.log(store.get('post', 1)) // {...}
    * console.log(store.get('post', 2)) // undefined
-   * </div>
    *
    * @method DataStore#get
    * @param {(string|number)} name Name of the {@link Mapper} to target.
@@ -157,10 +158,12 @@ const proxiedCollectionMethods = [
   /**
    * Wrapper for {@link LinkedCollection#getAll}.
    *
-   * @example <caption>Get the posts where "status" is "draft" or "inReview"</caption>
+   * @example
+   * // Get the posts where "status" is "draft" or "inReview"
    * const posts = store.getAll('post', 'draft', 'inReview', { index: 'status' })
    *
-   * @example <caption>Same as above</caption>
+   * @example
+   * // Same as above
    * const posts = store.getAll('post', ['draft'], ['inReview'], { index: 'status' })
    *
    * @method DataStore#getAll
@@ -177,7 +180,8 @@ const proxiedCollectionMethods = [
   /**
    * Wrapper for {@link LinkedCollection#query}.
    *
-   * @example <caption>Grab page 2 of users between ages 18 and 30</caption>
+   * @example
+   * // Grab page 2 of users between ages 18 and 30
    * store.query('user')
    *   .between(18, 30, { index: 'age' }) // between ages 18 and 30
    *   .skip(10) // second page
@@ -350,7 +354,8 @@ const props = {
    * Collection in the DataStore, then the name of the Mapper or Collection will
    * be prepended to the arugments passed to the provided event handler.
    *
-   * @example <caption>Listen for all "afterCreate" events in a DataStore</caption>
+   * @example
+   * // Listen for all "afterCreate" events in a DataStore
    * store.on('afterCreate', (mapperName, props, opts, result) => {
    *   console.log(mapperName) // "post"
    *   console.log(props.id) // undefined
@@ -360,12 +365,14 @@ const props = {
    *   console.log(post.id) // 1234
    * })
    *
-   * @example <caption>Listen for the "add" event on a collection</caption>
+   * @example
+   * // Listen for the "add" event on a collection
    * store.on('add', (mapperName, records) => {
    *   console.log(records) // [...]
    * })
    *
-   * @example <caption>Listen for "change" events on a record</caption>
+   * @example
+   * // Listen for "change" events on a record
    * store.on('change', (mapperName, record, changes) => {
    *   console.log(changes) // { changed: { title: 'Modeling your data' } }
    * })
@@ -412,7 +419,8 @@ const props = {
    *   }
    * })
    *
-   * @example <caption>Extend using ES2015 class syntax.</caption>
+   * @example
+   * // Extend using ES2015 class syntax.
    * class MyStore extends DataStore {
    *   addToCache (mapperName, data, opts) {
    *     // Let's say for a particular Resource, response data is in a weird format
@@ -438,11 +446,11 @@ const props = {
   /**
    * Return the store scoped to a particular mapper/collection pair.
    *
-   * <div id="DataStore.as" class="tonic">
+   * @example <caption>DataStore.as</caption>
    * // Normally you would do: import {DataStore} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {DataStore} = JSData
-   * console.log(\`Using JSData v${JSData.version.full}\`)
+   * console.log('Using JSData v' + JSData.version.full)
    *
    * const store = new DataStore()
    * const UserMapper = store.defineMapper('user')
@@ -454,7 +462,6 @@ const props = {
    * console.log(user1 === user2)
    * console.log(user2 === user3)
    * console.log(user1 === user3)
-   * </div>
    *
    * @method DataStore#as
    * @param {string} name Name of the {@link Mapper}.
@@ -521,7 +528,8 @@ const props = {
    *   }
    * })
    *
-   * @example <caption>Extend using ES2015 class syntax.</caption>
+   * @example
+   * // Extend using ES2015 class syntax.
    * class MyStore extends DataStore {
    *   cachedFind (mapperName, id, opts) {
    *     // Let's say for a particular Resource, we always want to pull fresh from the server
@@ -566,7 +574,8 @@ const props = {
    *   }
    * })
    *
-   * @example <caption>Extend using ES2015 class syntax.</caption>
+   * @example
+   * // Extend using ES2015 class syntax.
    * class MyStore extends DataStore {
    *   cachedFindAll (mapperName, hash, opts) {
    *     // Let's say for a particular Resource, we always want to pull fresh from the server
@@ -612,7 +621,8 @@ const props = {
    *   }
    * })
    *
-   * @example <caption>Extend using ES2015 class syntax.</caption>
+   * @example
+   * // Extend using ES2015 class syntax.
    * class MyStore extends DataStore {
    *   cacheFind (mapperName, data, id, opts) {
    *     // Let's say for a particular Resource, we always want to pull fresh from the server
@@ -660,7 +670,8 @@ const props = {
    *   }
    * })
    *
-   * @example <caption>Extend using ES2015 class syntax.</caption>
+   * @example
+   * // Extend using ES2015 class syntax.
    * class MyStore extends DataStore {
    *   cachedFindAll (mapperName, data, hash, opts) {
    *     // Let's say for a particular Resource, we always want to pull fresh from the server
@@ -877,8 +888,8 @@ const props = {
    *   console.log(books[0].title) // "Respect your Data"
    * })
    *
-   * @fires DataStore#beforeCreate
-   * @fires DataStore#afterCreate
+   * @fires DataStore#beforeCreateMany
+   * @fires DataStore#afterCreateMany
    * @fires DataStore#add
    * @method DataStore#createMany
    * @param {string} name Name of the {@link Mapper} to target.
@@ -1389,8 +1400,8 @@ const props = {
    *   console.log(book) // undefined
    * })
    *
-   * @fires DataStore#beforeDestroy
-   * @fires DataStore#afterDestroy
+   * @fires DataStore#beforeDestroyAll
+   * @fires DataStore#afterDestroyAll
    * @fires DataStore#remove
    * @method DataStore#destroyAll
    * @param {string} name Name of the {@link Mapper} to target.
@@ -1692,11 +1703,11 @@ const props = {
    * Wrapper for {@link LinkedCollection#remove}. Removes the specified
    * {@link Record} from the store.
    *
-   * <div id="DataStore#remove" class="tonic">
+   * @example <caption>DataStore#remove</caption>
    * // Normally you would do: import {DataStore} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {DataStore} = JSData
-   * console.log(\`Using JSData v${JSData.version.full}\`)
+   * console.log('Using JSData v' + JSData.version.full)
    *
    * const store = new DataStore()
    * store.defineMapper('book')
@@ -1705,7 +1716,6 @@ const props = {
    * console.log(store.getAll('book').length)
    * store.remove('book', 1234)
    * console.log(store.getAll('book').length)
-   * </div>
    *
    * @fires DataStore#remove
    * @method DataStore#remove
@@ -1731,11 +1741,11 @@ const props = {
    * Wrapper for {@link LinkedCollection#removeAll}. Removes the selected
    * {@link Record}s from the store.
    *
-   * <div id="DataStore#remove" class="tonic">
+   * @example <caption>DataStore#removeAll</caption>
    * // Normally you would do: import {DataStore} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {DataStore} = JSData
-   * console.log(\`Using JSData v${JSData.version.full}\`)
+   * console.log('Using JSData v' + JSData.version.full)
    *
    * const store = new DataStore()
    * store.defineMapper('movie')
@@ -1744,7 +1754,6 @@ const props = {
    * console.log(store.getAll('movie').length)
    * store.removeAll('movie', { rating: 'R' })
    * console.log(store.getAll('movie').length)
-   * </div>
    *
    * @fires DataStore#remove
    * @method DataStore#removeAll
@@ -2115,7 +2124,7 @@ proxiedCollectionMethods.forEach(function (method) {
 export default Container.extend(props)
 
 /**
- * Fired when a record changes. Only works for records that have tracked changes.
+ * Fired when a record changes. Only works for records that have tracked fields.
  * See {@link DataStore~changeListener} on how to listen for this event.
  *
  * @event DataStore#change
@@ -2217,11 +2226,11 @@ export default Container.extend(props)
 
 /**
  * Create a subclass of this DataStore:
- * <div id="DataStore.extend" class="tonic">
+ * @example <caption>DataStore.extend</caption>
  * // Normally you would do: import {DataStore} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {DataStore} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
+ * console.log('Using JSData v' + JSData.version.full)
  *
  * // Extend the class using ES2015 class syntax.
  * class CustomDataStoreClass extends DataStore {
@@ -2257,7 +2266,6 @@ export default Container.extend(props)
  * console.log(anotherDataStore.created_at)
  * console.log(anotherDataStore.foo())
  * console.log(AnotherDataStoreClass.beep())
- * </div>
  *
  * @method DataStore.extend
  * @param {Object} [props={}] Properties to add to the prototype of the
