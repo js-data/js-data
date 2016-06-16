@@ -30,6 +30,57 @@ export const proxiedMapperMethods = [
   'count',
 
   /**
+   * Fired during {@link Container#create}. See
+   * {@link Container~beforeCreateListener} for how to listen for this event.
+   *
+   * @event Container#beforeCreate
+   * @see Container~beforeCreateListener
+   * @see Container#create
+   */
+  /**
+   * Callback signature for the {@link Container#event:beforeCreate} event.
+   *
+   * @example
+   * function onBeforeCreate (mapperName, props, opts) {
+   *   // do something
+   * }
+   * store.on('beforeCreate', onBeforeCreate)
+   *
+   * @callback Container~beforeCreateListener
+   * @param {string} name The `name` argument passed to {@link Container#beforeCreate}.
+   * @param {Object} props The `props` argument passed to {@link Container#beforeCreate}.
+   * @param {Object} opts The `opts` argument passed to {@link Container#beforeCreate}.
+   * @see Container#event:beforeCreate
+   * @see Container#create
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Container#create}. See
+   * {@link Container~afterCreateListener} for how to listen for this event.
+   *
+   * @event Container#afterCreate
+   * @see Container~afterCreateListener
+   * @see Container#create
+   */
+  /**
+   * Callback signature for the {@link Container#event:afterCreate} event.
+   *
+   * @example
+   * function onAfterCreate (mapperName, props, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterCreate', onAfterCreate)
+   *
+   * @callback Container~afterCreateListener
+   * @param {string} name The `name` argument passed to {@link Container#afterCreate}.
+   * @param {Object} props The `props` argument passed to {@link Container#afterCreate}.
+   * @param {Object} opts The `opts` argument passed to {@link Container#afterCreate}.
+   * @param {Object} result The `result` argument passed to {@link Container#afterCreate}.
+   * @see Container#event:afterCreate
+   * @see Container#create
+   * @since 3.0.0
+   */
+  /**
    * Wrapper for {@link Mapper#create}.
    *
    * @example <caption>Create and save a new blog post</caption>
@@ -46,6 +97,8 @@ export const proxiedMapperMethods = [
    *   console.log(post) // { id: 1234, status: 'draft', ... }
    * })
    *
+   * @fires Container#beforeCreate
+   * @fires Container#afterCreate
    * @method Container#create
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Object} props See {@link Mapper#create}.
@@ -56,6 +109,57 @@ export const proxiedMapperMethods = [
    */
   'create',
 
+  /**
+   * Fired during {@link Container#createMany}. See
+   * {@link Container~beforeCreateManyListener} for how to listen for this event.
+   *
+   * @event Container#beforeCreateMany
+   * @see Container~beforeCreateManyListener
+   * @see Container#createMany
+   */
+  /**
+   * Callback signature for the {@link Container#event:beforeCreateMany} event.
+   *
+   * @example
+   * function onBeforeCreateMany (mapperName, records, opts) {
+   *   // do something
+   * }
+   * store.on('beforeCreateMany', onBeforeCreateMany)
+   *
+   * @callback Container~beforeCreateManyListener
+   * @param {string} name The `name` argument passed to {@link Container#beforeCreateMany}.
+   * @param {Object} records The `records` argument passed to {@link Container#beforeCreateMany}.
+   * @param {Object} opts The `opts` argument passed to {@link Container#beforeCreateMany}.
+   * @see Container#event:beforeCreateMany
+   * @see Container#createMany
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Container#createMany}. See
+   * {@link Container~afterCreateManyListener} for how to listen for this event.
+   *
+   * @event Container#afterCreateMany
+   * @see Container~afterCreateManyListener
+   * @see Container#createMany
+   */
+  /**
+   * Callback signature for the {@link Container#event:afterCreateMany} event.
+   *
+   * @example
+   * function onAfterCreateMany (mapperName, records, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterCreateMany', onAfterCreateMany)
+   *
+   * @callback Container~afterCreateManyListener
+   * @param {string} name The `name` argument passed to {@link Container#afterCreateMany}.
+   * @param {Object} records The `records` argument passed to {@link Container#afterCreateMany}.
+   * @param {Object} opts The `opts` argument passed to {@link Container#afterCreateMany}.
+   * @param {Object} result The `result` argument passed to {@link Container#afterCreateMany}.
+   * @see Container#event:afterCreateMany
+   * @see Container#createMany
+   * @since 3.0.0
+   */
   /**
    * Wrapper for {@link Mapper#createMany}.
    *
@@ -77,6 +181,8 @@ export const proxiedMapperMethods = [
    *   console.log(posts[1]) // { id: 1235, status: 'draft', ... }
    * })
    *
+   * @fires Container#beforeCreate
+   * @fires Container#afterCreate
    * @method Container#createMany
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Record[]} records See {@link Mapper#createMany}.
@@ -110,6 +216,57 @@ export const proxiedMapperMethods = [
   'createRecord',
 
   /**
+   * Fired during {@link Container#destroy}. See
+   * {@link Container~beforeDestroyListener} for how to listen for this event.
+   *
+   * @event Container#beforeDestroy
+   * @see Container~beforeDestroyListener
+   * @see Container#destroy
+   */
+  /**
+   * Callback signature for the {@link Container#event:beforeDestroy} event.
+   *
+   * @example
+   * function onBeforeDestroy (mapperName, id, opts) {
+   *   // do something
+   * }
+   * store.on('beforeDestroy', onBeforeDestroy)
+   *
+   * @callback Container~beforeDestroyListener
+   * @param {string} name The `name` argument passed to {@link Container#beforeDestroy}.
+   * @param {string|number} id The `id` argument passed to {@link Container#beforeDestroy}.
+   * @param {Object} opts The `opts` argument passed to {@link Container#beforeDestroy}.
+   * @see Container#event:beforeDestroy
+   * @see Container#destroy
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Container#destroy}. See
+   * {@link Container~afterDestroyListener} for how to listen for this event.
+   *
+   * @event Container#afterDestroy
+   * @see Container~afterDestroyListener
+   * @see Container#destroy
+   */
+  /**
+   * Callback signature for the {@link Container#event:afterDestroy} event.
+   *
+   * @example
+   * function onAfterDestroy (mapperName, id, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterDestroy', onAfterDestroy)
+   *
+   * @callback Container~afterDestroyListener
+   * @param {string} name The `name` argument passed to {@link Container#afterDestroy}.
+   * @param {string|number} id The `id` argument passed to {@link Container#afterDestroy}.
+   * @param {Object} opts The `opts` argument passed to {@link Container#afterDestroy}.
+   * @param {Object} result The `result` argument passed to {@link Container#afterDestroy}.
+   * @see Container#event:afterDestroy
+   * @see Container#destroy
+   * @since 3.0.0
+   */
+  /**
    * Wrapper for {@link Mapper#destroy}.
    *
    * @example <caption>Destroy a specific blog post</caption>
@@ -123,6 +280,8 @@ export const proxiedMapperMethods = [
    *   // Blog post #1234 has been destroyed
    * })
    *
+   * @fires Container#beforeDestroy
+   * @fires Container#afterDestroy
    * @method Container#destroy
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(string|number)} id See {@link Mapper#destroy}.
@@ -133,6 +292,57 @@ export const proxiedMapperMethods = [
    */
   'destroy',
 
+  /**
+   * Fired during {@link Container#destroyAll}. See
+   * {@link Container~beforeDestroyAllListener} for how to listen for this event.
+   *
+   * @event Container#beforeDestroyAll
+   * @see Container~beforeDestroyAllListener
+   * @see Container#destroyAll
+   */
+  /**
+   * Callback signature for the {@link Container#event:beforeDestroyAll} event.
+   *
+   * @example
+   * function onBeforeDestroyAll (mapperName, query, opts) {
+   *   // do something
+   * }
+   * store.on('beforeDestroyAll', onBeforeDestroyAll)
+   *
+   * @callback Container~beforeDestroyAllListener
+   * @param {string} name The `name` argument passed to {@link Container#beforeDestroyAll}.
+   * @param {Object} query The `query` argument passed to {@link Container#beforeDestroyAll}.
+   * @param {Object} opts The `opts` argument passed to {@link Container#beforeDestroyAll}.
+   * @see Container#event:beforeDestroyAll
+   * @see Container#destroyAll
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Container#destroyAll}. See
+   * {@link Container~afterDestroyAllListener} for how to listen for this event.
+   *
+   * @event Container#afterDestroyAll
+   * @see Container~afterDestroyAllListener
+   * @see Container#destroyAll
+   */
+  /**
+   * Callback signature for the {@link Container#event:afterDestroyAll} event.
+   *
+   * @example
+   * function onAfterDestroyAll (mapperName, query, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterDestroyAll', onAfterDestroyAll)
+   *
+   * @callback Container~afterDestroyAllListener
+   * @param {string} name The `name` argument passed to {@link Container#afterDestroyAll}.
+   * @param {Object} query The `query` argument passed to {@link Container#afterDestroyAll}.
+   * @param {Object} opts The `opts` argument passed to {@link Container#afterDestroyAll}.
+   * @param {Object} result The `result` argument passed to {@link Container#afterDestroyAll}.
+   * @see Container#event:afterDestroyAll
+   * @see Container#destroyAll
+   * @since 3.0.0
+   */
   /**
    * Wrapper for {@link Mapper#destroyAll}.
    *
@@ -147,6 +357,8 @@ export const proxiedMapperMethods = [
    *   // All "draft" blog posts have been destroyed
    * })
    *
+   * @fires Container#beforeDestroy
+   * @fires Container#afterDestroy
    * @method Container#destroyAll
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Object} [query] See {@link Mapper#destroyAll}.
@@ -157,6 +369,57 @@ export const proxiedMapperMethods = [
    */
   'destroyAll',
 
+  /**
+   * Fired during {@link Container#find}. See
+   * {@link Container~beforeFindListener} for how to listen for this event.
+   *
+   * @event Container#beforeFind
+   * @see Container~beforeFindListener
+   * @see Container#find
+   */
+  /**
+   * Callback signature for the {@link Container#event:beforeFind} event.
+   *
+   * @example
+   * function onBeforeFind (mapperName, id, opts) {
+   *   // do something
+   * }
+   * store.on('beforeFind', onBeforeFind)
+   *
+   * @callback Container~beforeFindListener
+   * @param {string} name The `name` argument passed to {@link Container#beforeFind}.
+   * @param {string|number} id The `id` argument passed to {@link Container#beforeFind}.
+   * @param {Object} opts The `opts` argument passed to {@link Container#beforeFind}.
+   * @see Container#event:beforeFind
+   * @see Container#find
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Container#find}. See
+   * {@link Container~afterFindListener} for how to listen for this event.
+   *
+   * @event Container#afterFind
+   * @see Container~afterFindListener
+   * @see Container#find
+   */
+  /**
+   * Callback signature for the {@link Container#event:afterFind} event.
+   *
+   * @example
+   * function onAfterFind (mapperName, id, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterFind', onAfterFind)
+   *
+   * @callback Container~afterFindListener
+   * @param {string} name The `name` argument passed to {@link Container#afterFind}.
+   * @param {string|number} id The `id` argument passed to {@link Container#afterFind}.
+   * @param {Object} opts The `opts` argument passed to {@link Container#afterFind}.
+   * @param {Object} result The `result` argument passed to {@link Container#afterFind}.
+   * @see Container#event:afterFind
+   * @see Container#find
+   * @since 3.0.0
+   */
   /**
    * Wrapper for {@link Mapper#find}.
    *
@@ -171,6 +434,8 @@ export const proxiedMapperMethods = [
    *   console.log(post) // { id: 1, ...}
    * })
    *
+   * @fires Container#beforeFind
+   * @fires Container#afterFind
    * @method Container#find
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(string|number)} id See {@link Mapper#find}.
@@ -181,6 +446,57 @@ export const proxiedMapperMethods = [
    */
   'find',
 
+  /**
+   * Fired during {@link Container#findAll}. See
+   * {@link Container~beforeFindAllListener} for how to listen for this event.
+   *
+   * @event Container#beforeFindAll
+   * @see Container~beforeFindAllListener
+   * @see Container#findAll
+   */
+  /**
+   * Callback signature for the {@link Container#event:beforeFindAll} event.
+   *
+   * @example
+   * function onBeforeFindAll (mapperName, query, opts) {
+   *   // do something
+   * }
+   * store.on('beforeFindAll', onBeforeFindAll)
+   *
+   * @callback Container~beforeFindAllListener
+   * @param {string} name The `name` argument passed to {@link Container#beforeFindAll}.
+   * @param {Object} query The `query` argument passed to {@link Container#beforeFindAll}.
+   * @param {Object} opts The `opts` argument passed to {@link Container#beforeFindAll}.
+   * @see Container#event:beforeFindAll
+   * @see Container#findAll
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Container#findAll}. See
+   * {@link Container~afterFindAllListener} for how to listen for this event.
+   *
+   * @event Container#afterFindAll
+   * @see Container~afterFindAllListener
+   * @see Container#findAll
+   */
+  /**
+   * Callback signature for the {@link Container#event:afterFindAll} event.
+   *
+   * @example
+   * function onAfterFindAll (mapperName, query, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterFindAll', onAfterFindAll)
+   *
+   * @callback Container~afterFindAllListener
+   * @param {string} name The `name` argument passed to {@link Container#afterFindAll}.
+   * @param {Object} query The `query` argument passed to {@link Container#afterFindAll}.
+   * @param {Object} opts The `opts` argument passed to {@link Container#afterFindAll}.
+   * @param {Object} result The `result` argument passed to {@link Container#afterFindAll}.
+   * @see Container#event:afterFindAll
+   * @see Container#findAll
+   * @since 3.0.0
+   */
   /**
    * Wrapper for {@link Mapper#createRecord}.
    *
@@ -195,6 +511,8 @@ export const proxiedMapperMethods = [
    *   console.log(posts) // [{ id: 1, ...}, ...]
    * })
    *
+   * @fires Container#beforeFindAll
+   * @fires Container#afterFindAll
    * @method Container#findAll
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Object} [query] See {@link Mapper#findAll}.
@@ -294,6 +612,59 @@ export const proxiedMapperMethods = [
   'toJSON',
 
   /**
+   * Fired during {@link Container#update}. See
+   * {@link Container~beforeUpdateListener} for how to listen for this event.
+   *
+   * @event Container#beforeUpdate
+   * @see Container~beforeUpdateListener
+   * @see Container#update
+   */
+  /**
+   * Callback signature for the {@link Container#event:beforeUpdate} event.
+   *
+   * @example
+   * function onBeforeUpdate (mapperName, id, props, opts) {
+   *   // do something
+   * }
+   * store.on('beforeUpdate', onBeforeUpdate)
+   *
+   * @callback Container~beforeUpdateListener
+   * @param {string} name The `name` argument passed to {@link Container#beforeUpdate}.
+   * @param {string|number} id The `id` argument passed to {@link Container#beforeUpdate}.
+   * @param {Object} props The `props` argument passed to {@link Container#beforeUpdate}.
+   * @param {Object} opts The `opts` argument passed to {@link Container#beforeUpdate}.
+   * @see Container#event:beforeUpdate
+   * @see Container#update
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Container#update}. See
+   * {@link Container~afterUpdateListener} for how to listen for this event.
+   *
+   * @event Container#afterUpdate
+   * @see Container~afterUpdateListener
+   * @see Container#update
+   */
+  /**
+   * Callback signature for the {@link Container#event:afterUpdate} event.
+   *
+   * @example
+   * function onAfterUpdate (mapperName, id, props, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterUpdate', onAfterUpdate)
+   *
+   * @callback Container~afterUpdateListener
+   * @param {string} name The `name` argument passed to {@link Container#afterUpdate}.
+   * @param {string|number} id The `id` argument passed to {@link Container#afterUpdate}.
+   * @param {Object} props The `props` argument passed to {@link Container#afterUpdate}.
+   * @param {Object} opts The `opts` argument passed to {@link Container#afterUpdate}.
+   * @param {Object} result The `result` argument passed to {@link Container#afterUpdate}.
+   * @see Container#event:afterUpdate
+   * @see Container#update
+   * @since 3.0.0
+   */
+  /**
    * Wrapper for {@link Mapper#update}.
    *
    * @example
@@ -310,6 +681,8 @@ export const proxiedMapperMethods = [
    *   console.log(post) // { id: 1234, status: 'published', ... }
    * })
    *
+   * @fires Container#beforeUpdate
+   * @fires Container#afterUpdate
    * @method Container#update
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(string|number)} id See {@link Mapper#update}.
@@ -322,6 +695,59 @@ export const proxiedMapperMethods = [
    */
   'update',
 
+  /**
+   * Fired during {@link Container#updateAll}. See
+   * {@link Container~beforeUpdateAllListener} for how to listen for this event.
+   *
+   * @event Container#beforeUpdateAll
+   * @see Container~beforeUpdateAllListener
+   * @see Container#updateAll
+   */
+  /**
+   * Callback signature for the {@link Container#event:beforeUpdateAll} event.
+   *
+   * @example
+   * function onBeforeUpdateAll (mapperName, props, query, opts) {
+   *   // do something
+   * }
+   * store.on('beforeUpdateAll', onBeforeUpdateAll)
+   *
+   * @callback Container~beforeUpdateAllListener
+   * @param {string} name The `name` argument passed to {@link Container#beforeUpdateAll}.
+   * @param {Object} props The `props` argument passed to {@link Container#beforeUpdateAll}.
+   * @param {Object} query The `query` argument passed to {@link Container#beforeUpdateAll}.
+   * @param {Object} opts The `opts` argument passed to {@link Container#beforeUpdateAll}.
+   * @see Container#event:beforeUpdateAll
+   * @see Container#updateAll
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Container#updateAll}. See
+   * {@link Container~afterUpdateAllListener} for how to listen for this event.
+   *
+   * @event Container#afterUpdateAll
+   * @see Container~afterUpdateAllListener
+   * @see Container#updateAll
+   */
+  /**
+   * Callback signature for the {@link Container#event:afterUpdateAll} event.
+   *
+   * @example
+   * function onAfterUpdateAll (mapperName, props, query, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterUpdateAll', onAfterUpdateAll)
+   *
+   * @callback Container~afterUpdateAllListener
+   * @param {string} name The `name` argument passed to {@link Container#afterUpdateAll}.
+   * @param {Object} props The `props` argument passed to {@link Container#afterUpdateAll}.
+   * @param {Object} query The `query` argument passed to {@link Container#afterUpdateAll}.
+   * @param {Object} opts The `opts` argument passed to {@link Container#afterUpdateAll}.
+   * @param {Object} result The `result` argument passed to {@link Container#afterUpdateAll}.
+   * @see Container#event:afterUpdateAll
+   * @see Container#updateAll
+   * @since 3.0.0
+   */
   /**
    * Wrapper for {@link Mapper#updateAll}.
    *
@@ -338,6 +764,8 @@ export const proxiedMapperMethods = [
    *   console.log(posts) // [...]
    * })
    *
+   * @fires Container#beforeUpdateAll
+   * @fires Container#afterUpdateAll
    * @method Container#updateAll
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Object} update See {@link Mapper#updateAll}.
@@ -349,6 +777,57 @@ export const proxiedMapperMethods = [
    */
   'updateAll',
 
+  /**
+   * Fired during {@link Container#updateMany}. See
+   * {@link Container~beforeUpdateManyListener} for how to listen for this event.
+   *
+   * @event Container#beforeUpdateMany
+   * @see Container~beforeUpdateManyListener
+   * @see Container#updateMany
+   */
+  /**
+   * Callback signature for the {@link Container#event:beforeUpdateMany} event.
+   *
+   * @example
+   * function onBeforeUpdateMany (mapperName, records, opts) {
+   *   // do something
+   * }
+   * store.on('beforeUpdateMany', onBeforeUpdateMany)
+   *
+   * @callback Container~beforeUpdateManyListener
+   * @param {string} name The `name` argument passed to {@link Container#beforeUpdateMany}.
+   * @param {Object} records The `records` argument passed to {@link Container#beforeUpdateMany}.
+   * @param {Object} opts The `opts` argument passed to {@link Container#beforeUpdateMany}.
+   * @see Container#event:beforeUpdateMany
+   * @see Container#updateMany
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Container#updateMany}. See
+   * {@link Container~afterUpdateManyListener} for how to listen for this event.
+   *
+   * @event Container#afterUpdateMany
+   * @see Container~afterUpdateManyListener
+   * @see Container#updateMany
+   */
+  /**
+   * Callback signature for the {@link Container#event:afterUpdateMany} event.
+   *
+   * @example
+   * function onAfterUpdateMany (mapperName, records, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterUpdateMany', onAfterUpdateMany)
+   *
+   * @callback Container~afterUpdateManyListener
+   * @param {string} name The `name` argument passed to {@link Container#afterUpdateMany}.
+   * @param {Object} records The `records` argument passed to {@link Container#afterUpdateMany}.
+   * @param {Object} opts The `opts` argument passed to {@link Container#afterUpdateMany}.
+   * @param {Object} result The `result` argument passed to {@link Container#afterUpdateMany}.
+   * @see Container#event:afterUpdateMany
+   * @see Container#updateMany
+   * @since 3.0.0
+   */
   /**
    * Wrapper for {@link Mapper#updateMany}.
    *
@@ -366,6 +845,8 @@ export const proxiedMapperMethods = [
    *   console.log(posts) // [...]
    * })
    *
+   * @fires Container#beforeUpdateMany
+   * @fires Container#afterUpdateMany
    * @method Container#updateMany
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(Object[]|Record[])} records See {@link Mapper#updateMany}.

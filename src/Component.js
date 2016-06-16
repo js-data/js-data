@@ -57,7 +57,7 @@ export default function Component (opts) {
    * @since 3.0.0
    * @type {Object}
    */
-  Object.defineProperty(this, '_listeners', { value: {} })
+  Object.defineProperty(this, '_listeners', { value: {}, writable: true })
 }
 
 /**

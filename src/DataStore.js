@@ -9,14 +9,221 @@ import LinkedCollection from './LinkedCollection'
 
 const DOMAIN = 'DataStore'
 const proxiedCollectionMethods = [
+  /**
+   * Wrapper for {@link LinkedCollection#add}.
+   *
+   * <div id="DataStore#add" class="tonic">
+   * // Normally you would do: import {DataStore} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {DataStore} = JSData
+   * console.log(\`Using JSData v${JSData.version.full}\`)
+   *
+   * const store = new DataStore()
+   * store.defineMapper('book')
+   *
+   * // Add one book to the in-memory store:
+   * store.add('book', { id: 1, title: 'Respect your Data' })
+   * // Add multiple books to the in-memory store:
+   * store.add('book', [
+   *   { id: 2, title: 'Easy data recipes' },
+   *   { id: 3, title: 'Active Record 101' }
+   * ])
+   * </div>
+   *
+   * @fires DataStore#add
+   * @method DataStore#add
+   * @param {(string|number)} name Name of the {@link Mapper} to target.
+   * @param {(Object|Object[]|Record|Record[])} data See {@link LinkedCollection#add}.
+   * @param {Object} [opts] Configuration options. See {@link LinkedCollection#add}.
+   * @returns {(Object|Object[]|Record|Record[])} See {@link LinkedCollection#add}.
+   * @see LinkedCollection#add
+   * @see Collection#add
+   * @since 3.0.0
+   */
   'add',
+
+  /**
+   * Wrapper for {@link LinkedCollection#between}.
+   *
+   * @example <caption>Get all users ages 18 to 30</caption>
+   * const users = store.between('user', 18, 30, { index: 'age' })
+   *
+   * @example <caption>Same as above</caption>
+   * const users = store.between('user', [18], [30], { index: 'age' })
+   *
+   * @method DataStore#between
+   * @param {(string|number)} name Name of the {@link Mapper} to target.
+   * @param {Array} leftKeys See {@link LinkedCollection#between}.
+   * @param {Array} rightKeys See {@link LinkedCollection#between}.
+   * @param {Object} [opts] Configuration options. See {@link LinkedCollection#between}.
+   * @returns {Object[]|Record[]} See {@link LinkedCollection#between}.
+   * @see LinkedCollection#between
+   * @see Collection#between
+   * @since 3.0.0
+   */
   'between',
+
+  /**
+   * Wrapper for {@link LinkedCollection#createIndex}.
+   *
+   * @example <caption>Index users by age</caption>
+   * store.createIndex('user', 'age')
+   *
+   * @example <caption>Index users by status and role</caption>
+   * store.createIndex('user', 'statusAndRole', ['status', 'role'])
+   *
+   * @method DataStore#createIndex
+   * @param {(string|number)} name Name of the {@link Mapper} to target.
+   * @param {string} name See {@link LinkedCollection#createIndex}.
+   * @param {string[]} [fieldList] See {@link LinkedCollection#createIndex}.
+   * @see LinkedCollection#createIndex
+   * @see Collection#createIndex
+   * @since 3.0.0
+   */
   'createIndex',
+
+  /**
+   * Wrapper for {@link LinkedCollection#filter}.
+   *
+   * <div id="DataStore#filter" class="tonic">
+   * // import {DataStore} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {DataStore, version} = JSData
+   * console.log(\`Using JSData v${version.full}\`)
+   *
+   * const store = new DataStore()
+   * store.defineMapper('post')
+   * store.add('post', [
+   *   { id: 1, status: 'draft', created_at_timestamp: new Date().getTime() }
+   * ])
+   *
+   * // Get the draft posts created less than three months ago
+   * let posts = store.filter('post', {
+   *   where: {
+   *     status: {
+   *       '==': 'draft'
+   *     },
+   *     created_at_timestamp: {
+   *       '>=': (new Date().getTime() - (1000 \* 60 \* 60 \* 24 \* 30 \* 3)) // 3 months ago
+   *     }
+   *   }
+   * })
+   * console.log(posts)
+   *
+   * // Use a custom filter function
+   * posts = store.filter('post', (post) => post.id % 2 === 0)
+   * </div>
+   *
+   * @method DataStore#filter
+   * @param {(string|number)} name Name of the {@link Mapper} to target.
+   * @param {(Object|Function)} [queryOrFn={}] See {@link LinkedCollection#filter}.
+   * @param {Object} [thisArg] See {@link LinkedCollection#filter}.
+   * @returns {Array} See {@link LinkedCollection#filter}.
+   * @see LinkedCollection#filter
+   * @see Collection#filter
+   * @since 3.0.0
+   */
   'filter',
+
+  /**
+   * Wrapper for {@link LinkedCollection#get}.
+   *
+   * <div id="DataStore#get" class="tonic">
+   * // import {DataStore} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {DataStore, version} = JSData
+   * console.log(\`Using JSData v${version.full}\`)
+   *
+   * const store = new DataStore()
+   * store.defineMapper('post')
+   * store.add('post', [
+   *   { id: 1, status: 'draft', created_at_timestamp: new Date().getTime() }
+   * ])
+   *
+   * console.log(store.get('post', 1)) // {...}
+   * console.log(store.get('post', 2)) // undefined
+   * </div>
+   *
+   * @method DataStore#get
+   * @param {(string|number)} name Name of the {@link Mapper} to target.
+   * @param {(string|number)} id See {@link LinkedCollection#get}.
+   * @returns {(Object|Record)} See {@link LinkedCollection#get}.
+   * @see LinkedCollection#get
+   * @see Collection#get
+   * @since 3.0.0
+   */
   'get',
+
+  /**
+   * Wrapper for {@link LinkedCollection#getAll}.
+   *
+   * @example <caption>Get the posts where "status" is "draft" or "inReview"</caption>
+   * const posts = store.getAll('post', 'draft', 'inReview', { index: 'status' })
+   *
+   * @example <caption>Same as above</caption>
+   * const posts = store.getAll('post', ['draft'], ['inReview'], { index: 'status' })
+   *
+   * @method DataStore#getAll
+   * @param {(string|number)} name Name of the {@link Mapper} to target.
+   * @param {...Array} [keyList] See {@link LinkedCollection#getAll}.
+   * @param {Object} [opts] See {@link LinkedCollection#getAll}.
+   * @returns {Array} See {@link LinkedCollection#getAll}.
+   * @see LinkedCollection#getAll
+   * @see Collection#getAll
+   * @since 3.0.0
+   */
   'getAll',
+
+  /**
+   * Wrapper for {@link LinkedCollection#query}.
+   *
+   * @example <caption>Grab page 2 of users between ages 18 and 30</caption>
+   * store.query('user')
+   *   .between(18, 30, { index: 'age' }) // between ages 18 and 30
+   *   .skip(10) // second page
+   *   .limit(10) // page size
+   *   .run()
+   *
+   * @method DataStore#query
+   * @param {(string|number)} name Name of the {@link Mapper} to target.
+   * @returns {Query} See {@link LinkedCollection#query}.
+   * @see LinkedCollection#query
+   * @see Collection#query
+   * @since 3.0.0
+   */
   'query',
-  'toJson'
+
+  /**
+   * Wrapper for {@link LinkedCollection#toJSON}.
+   *
+   * @example
+   * store.defineMapper('post', {
+   *   schema: {
+   *     properties: {
+   *       id: { type: 'number' },
+   *       title: { type: 'string' }
+   *     }
+   *   }
+   * })
+   * store.add('post', [
+   *   { id: 1, status: 'published', title: 'Respect your Data' },
+   *   { id: 2, status: 'draft', title: 'Connecting to a data source' }
+   * ])
+   * console.log(store.toJSON('post'))
+   * const draftsJSON = store.query('post')
+   *   .filter({ status: 'draft' })
+   *   .mapCall('toJSON')
+   *   .run()
+   *
+   * @method DataStore#toJSON
+   * @param {(string|number)} name Name of the {@link Mapper} to target.
+   * @param {Object} [opts] See {@link LinkedCollection#toJSON}.
+   * @returns {Array} See {@link LinkedCollection#toJSON}.
+   * @see LinkedCollection#toJSON
+   * @see Collection#toJSON
+   * @since 3.0.0
+   */
+  'toJSON'
 ]
 const ownMethodsForScoping = [
   'addToCache',
@@ -1328,6 +1535,57 @@ const props = {
   },
 
   /**
+   * Fired during {@link DataStore#findAll}. See
+   * {@link DataStore~beforeFindAllListener} for how to listen for this event.
+   *
+   * @event DataStore#beforeFindAll
+   * @see DataStore~beforeFindAllListener
+   * @see DataStore#findAll
+   */
+  /**
+   * Callback signature for the {@link DataStore#event:beforeFindAll} event.
+   *
+   * @example
+   * function onBeforeFindAll (mapperName, query, opts) {
+   *   // do something
+   * }
+   * store.on('beforeFindAll', onBeforeFindAll)
+   *
+   * @callback DataStore~beforeFindAllListener
+   * @param {string} name The `name` argument passed to {@link DataStore#beforeFindAll}.
+   * @param {Object} query The `query` argument passed to {@link DataStore#beforeFindAll}.
+   * @param {Object} opts The `opts` argument passed to {@link DataStore#beforeFindAll}.
+   * @see DataStore#event:beforeFindAll
+   * @see DataStore#findAll
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link DataStore#findAll}. See
+   * {@link DataStore~afterFindAllListener} for how to listen for this event.
+   *
+   * @event DataStore#afterFindAll
+   * @see DataStore~afterFindAllListener
+   * @see DataStore#findAll
+   */
+  /**
+   * Callback signature for the {@link DataStore#event:afterFindAll} event.
+   *
+   * @example
+   * function onAfterFindAll (mapperName, query, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterFindAll', onAfterFindAll)
+   *
+   * @callback DataStore~afterFindAllListener
+   * @param {string} name The `name` argument passed to {@link DataStore#afterFindAll}.
+   * @param {Object} query The `query` argument passed to {@link DataStore#afterFindAll}.
+   * @param {Object} opts The `opts` argument passed to {@link DataStore#afterFindAll}.
+   * @param {Object} result The `result` argument passed to {@link DataStore#afterFindAll}.
+   * @see DataStore#event:afterFindAll
+   * @see DataStore#findAll
+   * @since 3.0.0
+   */
+  /**
    * Wrapper for {@link Mapper#findAll}. Adds any found records to the store.
    *
    * @example
@@ -1352,8 +1610,8 @@ const props = {
    * @fires DataStore#add
    * @method DataStore#findAll
    * @param {string} name Name of the {@link Mapper} to target.
-   * @param {Object} [query] Passed to {@link Model.findAll}.
-   * @param {Object} [opts] Passed to {@link Model.findAll}.
+   * @param {Object} [query] Passed to {@link Mapper.findAll}.
+   * @param {Object} [opts] Passed to {@link Mapper.findAll}.
    * @returns {Promise} Resolves with the result, if any.
    * @since 3.0.0
    */
@@ -1457,6 +1715,8 @@ const props = {
    * @param {string[]} [opts.with] Relations of the {@link Record} to also
    * remove from the store.
    * @returns {Record} The removed {@link Record}, if any.
+   * @see LinkedCollection#add
+   * @see Collection#add
    * @since 3.0.0
    */
   remove (name, id, opts) {
@@ -1498,6 +1758,8 @@ const props = {
    * @param {string[]} [opts.with] Relations of the {@link Record} to also
    * remove from the store.
    * @returns {Record} The removed {@link Record}s, if any.
+   * @see LinkedCollection#add
+   * @see Collection#add
    * @since 3.0.0
    */
   removeAll (name, query, opts) {
@@ -1872,6 +2134,7 @@ export default Container.extend(props)
  * @callback DataStore~changeListener
  * @param {string} name The name of the associated {@link Mapper}.
  * @param {Record} The Record that changed.
+ * @param {Object} The changes.
  * @see DataStore#event:change
  * @since 3.0.0
  */
@@ -1882,6 +2145,7 @@ export default Container.extend(props)
  *
  * @event DataStore#add
  * @see DataStore~addListener
+ * @see DataStore#event:add
  * @see DataStore#add
  * @see DataStore#create
  * @see DataStore#createMany
@@ -1890,7 +2154,6 @@ export default Container.extend(props)
  * @see DataStore#update
  * @see DataStore#updateAll
  * @see DataStore#updateMany
- * @see DataStore#event:add
  */
 
 /**
@@ -1923,12 +2186,12 @@ export default Container.extend(props)
  *
  * @event DataStore#remove
  * @see DataStore~removeListener
+ * @see DataStore#event:remove
  * @see DataStore#clear
  * @see DataStore#destroy
  * @see DataStore#destroyAll
  * @see DataStore#remove
  * @see DataStore#removeAll
- * @see DataStore#event:remove
  */
 
 /**
