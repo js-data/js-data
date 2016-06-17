@@ -8,7 +8,8 @@ export const proxiedMapperMethods = [
   /**
    * Wrapper for {@link Mapper#count}.
    *
-   * @example <caption>Get the number of published blog posts</caption>
+   * @example
+   * // Get the number of published blog posts
    * import {Container} from 'js-data'
    * import RethinkDBAdapter from 'js-data-rethinkdb'
    * const store = new Container()
@@ -30,9 +31,61 @@ export const proxiedMapperMethods = [
   'count',
 
   /**
+   * Fired during {@link Container#create}. See
+   * {@link Container~beforeCreateListener} for how to listen for this event.
+   *
+   * @event Container#beforeCreate
+   * @see Container~beforeCreateListener
+   * @see Container#create
+   */
+  /**
+   * Callback signature for the {@link Container#event:beforeCreate} event.
+   *
+   * @example
+   * function onBeforeCreate (mapperName, props, opts) {
+   *   // do something
+   * }
+   * store.on('beforeCreate', onBeforeCreate)
+   *
+   * @callback Container~beforeCreateListener
+   * @param {string} name The `name` argument received by {@link Mapper#beforeCreate}.
+   * @param {Object} props The `props` argument received by {@link Mapper#beforeCreate}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeCreate}.
+   * @see Container#event:beforeCreate
+   * @see Container#create
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Container#create}. See
+   * {@link Container~afterCreateListener} for how to listen for this event.
+   *
+   * @event Container#afterCreate
+   * @see Container~afterCreateListener
+   * @see Container#create
+   */
+  /**
+   * Callback signature for the {@link Container#event:afterCreate} event.
+   *
+   * @example
+   * function onAfterCreate (mapperName, props, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterCreate', onAfterCreate)
+   *
+   * @callback Container~afterCreateListener
+   * @param {string} name The `name` argument received by {@link Mapper#afterCreate}.
+   * @param {Object} props The `props` argument received by {@link Mapper#afterCreate}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterCreate}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterCreate}.
+   * @see Container#event:afterCreate
+   * @see Container#create
+   * @since 3.0.0
+   */
+  /**
    * Wrapper for {@link Mapper#create}.
    *
-   * @example <caption>Create and save a new blog post</caption>
+   * @example
+   * // Create and save a new blog post
    * import {Container} from 'js-data'
    * import RethinkDBAdapter from 'js-data-rethinkdb'
    * const store = new Container()
@@ -46,6 +99,8 @@ export const proxiedMapperMethods = [
    *   console.log(post) // { id: 1234, status: 'draft', ... }
    * })
    *
+   * @fires Container#beforeCreate
+   * @fires Container#afterCreate
    * @method Container#create
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Object} props See {@link Mapper#create}.
@@ -57,9 +112,61 @@ export const proxiedMapperMethods = [
   'create',
 
   /**
+   * Fired during {@link Container#createMany}. See
+   * {@link Container~beforeCreateManyListener} for how to listen for this event.
+   *
+   * @event Container#beforeCreateMany
+   * @see Container~beforeCreateManyListener
+   * @see Container#createMany
+   */
+  /**
+   * Callback signature for the {@link Container#event:beforeCreateMany} event.
+   *
+   * @example
+   * function onBeforeCreateMany (mapperName, records, opts) {
+   *   // do something
+   * }
+   * store.on('beforeCreateMany', onBeforeCreateMany)
+   *
+   * @callback Container~beforeCreateManyListener
+   * @param {string} name The `name` argument received by {@link Mapper#beforeCreateMany}.
+   * @param {Object} records The `records` argument received by {@link Mapper#beforeCreateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeCreateMany}.
+   * @see Container#event:beforeCreateMany
+   * @see Container#createMany
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Container#createMany}. See
+   * {@link Container~afterCreateManyListener} for how to listen for this event.
+   *
+   * @event Container#afterCreateMany
+   * @see Container~afterCreateManyListener
+   * @see Container#createMany
+   */
+  /**
+   * Callback signature for the {@link Container#event:afterCreateMany} event.
+   *
+   * @example
+   * function onAfterCreateMany (mapperName, records, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterCreateMany', onAfterCreateMany)
+   *
+   * @callback Container~afterCreateManyListener
+   * @param {string} name The `name` argument received by {@link Mapper#afterCreateMany}.
+   * @param {Object} records The `records` argument received by {@link Mapper#afterCreateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterCreateMany}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterCreateMany}.
+   * @see Container#event:afterCreateMany
+   * @see Container#createMany
+   * @since 3.0.0
+   */
+  /**
    * Wrapper for {@link Mapper#createMany}.
    *
-   * @example <caption>Create and save several new blog posts</caption>
+   * @example
+   * // Create and save several new blog posts
    * import {Container} from 'js-data'
    * import RethinkDBAdapter from 'js-data-rethinkdb'
    * const store = new Container()
@@ -77,6 +184,8 @@ export const proxiedMapperMethods = [
    *   console.log(posts[1]) // { id: 1235, status: 'draft', ... }
    * })
    *
+   * @fires Container#beforeCreateMany
+   * @fires Container#afterCreateMany
    * @method Container#createMany
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Record[]} records See {@link Mapper#createMany}.
@@ -93,7 +202,8 @@ export const proxiedMapperMethods = [
    * __Note:__ This method does __not__ interact with any adapter, and does
    * __not__ save any data. It only creates new objects in memory.
    *
-   * @example <caption>Create empty unsaved record instance</caption>
+   * @example
+   * // Create empty unsaved record instance
    * import {Container} from 'js-data'
    * const store = new Container()
    * store.defineMapper('post')
@@ -110,20 +220,61 @@ export const proxiedMapperMethods = [
   'createRecord',
 
   /**
-   * Wrapper for {@link Mapper#dbg}.
+   * Fired during {@link Container#destroy}. See
+   * {@link Container~beforeDestroyListener} for how to listen for this event.
    *
-   * @method Container#dbg
-   * @param {string} name Name of the {@link Mapper} to target.
-   * @param {...*} args See {@link Mapper#dbg}.
-   * @see Mapper#dbg
+   * @event Container#beforeDestroy
+   * @see Container~beforeDestroyListener
+   * @see Container#destroy
+   */
+  /**
+   * Callback signature for the {@link Container#event:beforeDestroy} event.
+   *
+   * @example
+   * function onBeforeDestroy (mapperName, id, opts) {
+   *   // do something
+   * }
+   * store.on('beforeDestroy', onBeforeDestroy)
+   *
+   * @callback Container~beforeDestroyListener
+   * @param {string} name The `name` argument received by {@link Mapper#beforeDestroy}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#beforeDestroy}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeDestroy}.
+   * @see Container#event:beforeDestroy
+   * @see Container#destroy
    * @since 3.0.0
    */
-  'dbg',
-
+  /**
+   * Fired during {@link Container#destroy}. See
+   * {@link Container~afterDestroyListener} for how to listen for this event.
+   *
+   * @event Container#afterDestroy
+   * @see Container~afterDestroyListener
+   * @see Container#destroy
+   */
+  /**
+   * Callback signature for the {@link Container#event:afterDestroy} event.
+   *
+   * @example
+   * function onAfterDestroy (mapperName, id, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterDestroy', onAfterDestroy)
+   *
+   * @callback Container~afterDestroyListener
+   * @param {string} name The `name` argument received by {@link Mapper#afterDestroy}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#afterDestroy}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterDestroy}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterDestroy}.
+   * @see Container#event:afterDestroy
+   * @see Container#destroy
+   * @since 3.0.0
+   */
   /**
    * Wrapper for {@link Mapper#destroy}.
    *
-   * @example <caption>Destroy a specific blog post</caption>
+   * @example
+   * // Destroy a specific blog post
    * import {Container} from 'js-data'
    * import RethinkDBAdapter from 'js-data-rethinkdb'
    * const store = new Container()
@@ -134,6 +285,8 @@ export const proxiedMapperMethods = [
    *   // Blog post #1234 has been destroyed
    * })
    *
+   * @fires Container#beforeDestroy
+   * @fires Container#afterDestroy
    * @method Container#destroy
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(string|number)} id See {@link Mapper#destroy}.
@@ -145,9 +298,61 @@ export const proxiedMapperMethods = [
   'destroy',
 
   /**
+   * Fired during {@link Container#destroyAll}. See
+   * {@link Container~beforeDestroyAllListener} for how to listen for this event.
+   *
+   * @event Container#beforeDestroyAll
+   * @see Container~beforeDestroyAllListener
+   * @see Container#destroyAll
+   */
+  /**
+   * Callback signature for the {@link Container#event:beforeDestroyAll} event.
+   *
+   * @example
+   * function onBeforeDestroyAll (mapperName, query, opts) {
+   *   // do something
+   * }
+   * store.on('beforeDestroyAll', onBeforeDestroyAll)
+   *
+   * @callback Container~beforeDestroyAllListener
+   * @param {string} name The `name` argument received by {@link Mapper#beforeDestroyAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#beforeDestroyAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeDestroyAll}.
+   * @see Container#event:beforeDestroyAll
+   * @see Container#destroyAll
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Container#destroyAll}. See
+   * {@link Container~afterDestroyAllListener} for how to listen for this event.
+   *
+   * @event Container#afterDestroyAll
+   * @see Container~afterDestroyAllListener
+   * @see Container#destroyAll
+   */
+  /**
+   * Callback signature for the {@link Container#event:afterDestroyAll} event.
+   *
+   * @example
+   * function onAfterDestroyAll (mapperName, query, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterDestroyAll', onAfterDestroyAll)
+   *
+   * @callback Container~afterDestroyAllListener
+   * @param {string} name The `name` argument received by {@link Mapper#afterDestroyAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#afterDestroyAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterDestroyAll}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterDestroyAll}.
+   * @see Container#event:afterDestroyAll
+   * @see Container#destroyAll
+   * @since 3.0.0
+   */
+  /**
    * Wrapper for {@link Mapper#destroyAll}.
    *
-   * @example <caption>Destroy all "draft" blog posts</caption>
+   * @example
+   * // Destroy all "draft" blog posts
    * import {Container} from 'js-data'
    * import RethinkDBAdapter from 'js-data-rethinkdb'
    * const store = new Container()
@@ -158,6 +363,8 @@ export const proxiedMapperMethods = [
    *   // All "draft" blog posts have been destroyed
    * })
    *
+   * @fires Container#beforeDestroyAll
+   * @fires Container#afterDestroyAll
    * @method Container#destroyAll
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Object} [query] See {@link Mapper#destroyAll}.
@@ -168,6 +375,57 @@ export const proxiedMapperMethods = [
    */
   'destroyAll',
 
+  /**
+   * Fired during {@link Container#find}. See
+   * {@link Container~beforeFindListener} for how to listen for this event.
+   *
+   * @event Container#beforeFind
+   * @see Container~beforeFindListener
+   * @see Container#find
+   */
+  /**
+   * Callback signature for the {@link Container#event:beforeFind} event.
+   *
+   * @example
+   * function onBeforeFind (mapperName, id, opts) {
+   *   // do something
+   * }
+   * store.on('beforeFind', onBeforeFind)
+   *
+   * @callback Container~beforeFindListener
+   * @param {string} name The `name` argument received by {@link Mapper#beforeFind}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#beforeFind}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeFind}.
+   * @see Container#event:beforeFind
+   * @see Container#find
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Container#find}. See
+   * {@link Container~afterFindListener} for how to listen for this event.
+   *
+   * @event Container#afterFind
+   * @see Container~afterFindListener
+   * @see Container#find
+   */
+  /**
+   * Callback signature for the {@link Container#event:afterFind} event.
+   *
+   * @example
+   * function onAfterFind (mapperName, id, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterFind', onAfterFind)
+   *
+   * @callback Container~afterFindListener
+   * @param {string} name The `name` argument received by {@link Mapper#afterFind}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#afterFind}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterFind}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterFind}.
+   * @see Container#event:afterFind
+   * @see Container#find
+   * @since 3.0.0
+   */
   /**
    * Wrapper for {@link Mapper#find}.
    *
@@ -182,6 +440,8 @@ export const proxiedMapperMethods = [
    *   console.log(post) // { id: 1, ...}
    * })
    *
+   * @fires Container#beforeFind
+   * @fires Container#afterFind
    * @method Container#find
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(string|number)} id See {@link Mapper#find}.
@@ -193,9 +453,61 @@ export const proxiedMapperMethods = [
   'find',
 
   /**
+   * Fired during {@link Container#findAll}. See
+   * {@link Container~beforeFindAllListener} for how to listen for this event.
+   *
+   * @event Container#beforeFindAll
+   * @see Container~beforeFindAllListener
+   * @see Container#findAll
+   */
+  /**
+   * Callback signature for the {@link Container#event:beforeFindAll} event.
+   *
+   * @example
+   * function onBeforeFindAll (mapperName, query, opts) {
+   *   // do something
+   * }
+   * store.on('beforeFindAll', onBeforeFindAll)
+   *
+   * @callback Container~beforeFindAllListener
+   * @param {string} name The `name` argument received by {@link Mapper#beforeFindAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#beforeFindAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeFindAll}.
+   * @see Container#event:beforeFindAll
+   * @see Container#findAll
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Container#findAll}. See
+   * {@link Container~afterFindAllListener} for how to listen for this event.
+   *
+   * @event Container#afterFindAll
+   * @see Container~afterFindAllListener
+   * @see Container#findAll
+   */
+  /**
+   * Callback signature for the {@link Container#event:afterFindAll} event.
+   *
+   * @example
+   * function onAfterFindAll (mapperName, query, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterFindAll', onAfterFindAll)
+   *
+   * @callback Container~afterFindAllListener
+   * @param {string} name The `name` argument received by {@link Mapper#afterFindAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#afterFindAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterFindAll}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterFindAll}.
+   * @see Container#event:afterFindAll
+   * @see Container#findAll
+   * @since 3.0.0
+   */
+  /**
    * Wrapper for {@link Mapper#createRecord}.
    *
-   * @example <caption>Find all "published" blog posts</caption>
+   * @example
+   * // Find all "published" blog posts
    * import {Container} from 'js-data'
    * import RethinkDBAdapter from 'js-data-rethinkdb'
    * const store = new Container()
@@ -206,6 +518,8 @@ export const proxiedMapperMethods = [
    *   console.log(posts) // [{ id: 1, ...}, ...]
    * })
    *
+   * @fires Container#beforeFindAll
+   * @fires Container#afterFindAll
    * @method Container#findAll
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Object} [query] See {@link Mapper#findAll}.
@@ -248,17 +562,6 @@ export const proxiedMapperMethods = [
    * @since 3.0.0
    */
   'is',
-
-  /**
-   * Wrapper for {@link Mapper#log}.
-   *
-   * @method Container#log
-   * @param {string} name Name of the {@link Mapper} to target.
-   * @param {...*} args See {@link Mapper#log}.
-   * @see Mapper#log
-   * @since 3.0.0
-   */
-  'log',
 
   /**
    * Wrapper for {@link Mapper#sum}.
@@ -316,6 +619,59 @@ export const proxiedMapperMethods = [
   'toJSON',
 
   /**
+   * Fired during {@link Container#update}. See
+   * {@link Container~beforeUpdateListener} for how to listen for this event.
+   *
+   * @event Container#beforeUpdate
+   * @see Container~beforeUpdateListener
+   * @see Container#update
+   */
+  /**
+   * Callback signature for the {@link Container#event:beforeUpdate} event.
+   *
+   * @example
+   * function onBeforeUpdate (mapperName, id, props, opts) {
+   *   // do something
+   * }
+   * store.on('beforeUpdate', onBeforeUpdate)
+   *
+   * @callback Container~beforeUpdateListener
+   * @param {string} name The `name` argument received by {@link Mapper#beforeUpdate}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#beforeUpdate}.
+   * @param {Object} props The `props` argument received by {@link Mapper#beforeUpdate}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdate}.
+   * @see Container#event:beforeUpdate
+   * @see Container#update
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Container#update}. See
+   * {@link Container~afterUpdateListener} for how to listen for this event.
+   *
+   * @event Container#afterUpdate
+   * @see Container~afterUpdateListener
+   * @see Container#update
+   */
+  /**
+   * Callback signature for the {@link Container#event:afterUpdate} event.
+   *
+   * @example
+   * function onAfterUpdate (mapperName, id, props, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterUpdate', onAfterUpdate)
+   *
+   * @callback Container~afterUpdateListener
+   * @param {string} name The `name` argument received by {@link Mapper#afterUpdate}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#afterUpdate}.
+   * @param {Object} props The `props` argument received by {@link Mapper#afterUpdate}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdate}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterUpdate}.
+   * @see Container#event:afterUpdate
+   * @see Container#update
+   * @since 3.0.0
+   */
+  /**
    * Wrapper for {@link Mapper#update}.
    *
    * @example
@@ -332,6 +688,8 @@ export const proxiedMapperMethods = [
    *   console.log(post) // { id: 1234, status: 'published', ... }
    * })
    *
+   * @fires Container#beforeUpdate
+   * @fires Container#afterUpdate
    * @method Container#update
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(string|number)} id See {@link Mapper#update}.
@@ -345,9 +703,63 @@ export const proxiedMapperMethods = [
   'update',
 
   /**
+   * Fired during {@link Container#updateAll}. See
+   * {@link Container~beforeUpdateAllListener} for how to listen for this event.
+   *
+   * @event Container#beforeUpdateAll
+   * @see Container~beforeUpdateAllListener
+   * @see Container#updateAll
+   */
+  /**
+   * Callback signature for the {@link Container#event:beforeUpdateAll} event.
+   *
+   * @example
+   * function onBeforeUpdateAll (mapperName, props, query, opts) {
+   *   // do something
+   * }
+   * store.on('beforeUpdateAll', onBeforeUpdateAll)
+   *
+   * @callback Container~beforeUpdateAllListener
+   * @param {string} name The `name` argument received by {@link Mapper#beforeUpdateAll}.
+   * @param {Object} props The `props` argument received by {@link Mapper#beforeUpdateAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#beforeUpdateAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdateAll}.
+   * @see Container#event:beforeUpdateAll
+   * @see Container#updateAll
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Container#updateAll}. See
+   * {@link Container~afterUpdateAllListener} for how to listen for this event.
+   *
+   * @event Container#afterUpdateAll
+   * @see Container~afterUpdateAllListener
+   * @see Container#updateAll
+   */
+  /**
+   * Callback signature for the {@link Container#event:afterUpdateAll} event.
+   *
+   * @example
+   * function onAfterUpdateAll (mapperName, props, query, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterUpdateAll', onAfterUpdateAll)
+   *
+   * @callback Container~afterUpdateAllListener
+   * @param {string} name The `name` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} props The `props` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterUpdateAll}.
+   * @see Container#event:afterUpdateAll
+   * @see Container#updateAll
+   * @since 3.0.0
+   */
+  /**
    * Wrapper for {@link Mapper#updateAll}.
    *
-   * @example <caption>Turn all of John's blog posts into drafts.</caption>
+   * @example
+   * // Turn all of John's blog posts into drafts.
    * import {Container} from 'js-data'
    * import RethinkDBAdapter from 'js-data-rethinkdb'
    * const store = new Container()
@@ -360,6 +772,8 @@ export const proxiedMapperMethods = [
    *   console.log(posts) // [...]
    * })
    *
+   * @fires Container#beforeUpdateAll
+   * @fires Container#afterUpdateAll
    * @method Container#updateAll
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Object} update See {@link Mapper#updateAll}.
@@ -371,6 +785,57 @@ export const proxiedMapperMethods = [
    */
   'updateAll',
 
+  /**
+   * Fired during {@link Container#updateMany}. See
+   * {@link Container~beforeUpdateManyListener} for how to listen for this event.
+   *
+   * @event Container#beforeUpdateMany
+   * @see Container~beforeUpdateManyListener
+   * @see Container#updateMany
+   */
+  /**
+   * Callback signature for the {@link Container#event:beforeUpdateMany} event.
+   *
+   * @example
+   * function onBeforeUpdateMany (mapperName, records, opts) {
+   *   // do something
+   * }
+   * store.on('beforeUpdateMany', onBeforeUpdateMany)
+   *
+   * @callback Container~beforeUpdateManyListener
+   * @param {string} name The `name` argument received by {@link Mapper#beforeUpdateMany}.
+   * @param {Object} records The `records` argument received by {@link Mapper#beforeUpdateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdateMany}.
+   * @see Container#event:beforeUpdateMany
+   * @see Container#updateMany
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Container#updateMany}. See
+   * {@link Container~afterUpdateManyListener} for how to listen for this event.
+   *
+   * @event Container#afterUpdateMany
+   * @see Container~afterUpdateManyListener
+   * @see Container#updateMany
+   */
+  /**
+   * Callback signature for the {@link Container#event:afterUpdateMany} event.
+   *
+   * @example
+   * function onAfterUpdateMany (mapperName, records, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterUpdateMany', onAfterUpdateMany)
+   *
+   * @callback Container~afterUpdateManyListener
+   * @param {string} name The `name` argument received by {@link Mapper#afterUpdateMany}.
+   * @param {Object} records The `records` argument received by {@link Mapper#afterUpdateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdateMany}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterUpdateMany}.
+   * @see Container#event:afterUpdateMany
+   * @see Container#updateMany
+   * @since 3.0.0
+   */
   /**
    * Wrapper for {@link Mapper#updateMany}.
    *
@@ -388,6 +853,8 @@ export const proxiedMapperMethods = [
    *   console.log(posts) // [...]
    * })
    *
+   * @fires Container#beforeUpdateMany
+   * @fires Container#afterUpdateMany
    * @method Container#updateMany
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(Object[]|Record[])} records See {@link Mapper#updateMany}.
@@ -431,35 +898,83 @@ export const proxiedMapperMethods = [
 /**
  * The `Container` class is a place to define and store {@link Mapper} instances.
  *
- * <div id="Container#constructor">
+ * A `Container` makes it easy to manage your Mappers.
+ *
+ * @example <caption>Container#constructor</caption>
  * // import {Container} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
- * const {Container, version} = JSData
- * console.log(\`Using JSData v${version.full}\`)
+ * const {Container} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
  * const store = new Container()
- * </div>
- * <script src="https://embed.tonicdev.com" data-element-id="Container#constructor"></script>
  *
  * @class Container
  * @extends Component
  * @param {Object} [opts] Configuration options.
+ * @param {boolean} [opts.debug=false] See {@link Component#debug}.
  * @param {Constructor} [opts.mapperClass] See {@link Container#mapperClass}.
  * @param {Object} [opts.mapperDefaults] See {@link Container#mapperDefaults}.
  * @since 3.0.0
  */
 export function Container (opts) {
   utils.classCallCheck(this, Container)
-  Container.__super__.call(this)
+  Component.call(this)
   opts || (opts = {})
 
   Object.defineProperties(this, {
-    // Holds the adapters, shared by all mappers in this container
+    /**
+     * The adapters registered with this Container, which are also shared by all
+     * Mappers in this Container.
+     *
+     * @name Container#_adapters
+     * @see Container#registerAdapter
+     * @since 3.0.0
+     * @type {Object}
+     */
     _adapters: {
       value: {}
     },
-    // The the mappers in this container
+
+    /**
+     * The the mappers in this container
+     *
+     * @name Container#_mappers
+     * @see Mapper
+     * @since 3.0.0
+     * @type {Object}
+     */
     _mappers: {
       value: {}
+    },
+
+    /**
+     * Constructor function to use in {@link Container#defineMapper} to create new
+     * {@link Mapper} instances. {@link Container#mapperClass} should extend
+     * {@link Mapper}. By default {@link Mapper} is used to instantiate Mappers.
+     *
+     * @example <caption>Container#mapperClass</caption>
+     * // import {Container, Mapper} from 'js-data'
+     * const JSData = require('js-data@3.0.0-beta.7')
+     * const {Container} = JSData
+     * console.log('Using JSData v' + JSData.version.full)
+     *
+     * class MyMapperClass extends Mapper {
+     *   foo () { return 'bar' }
+     * }
+     * const store = new Container({
+     *   mapperClass: MyMapperClass
+     * })
+     * store.defineMapper('user')
+     * console.log(store.getMapper('user').foo())
+     *
+     * @name Container#mapperClass
+     * @see Mapper
+     * @since 3.0.0
+     * @type {Constructor}
+     */
+    mapperClass: {
+      value: undefined,
+      writable: true
     }
   })
 
@@ -470,6 +985,20 @@ export function Container (opts) {
    * Defaults options to pass to {@link Container#mapperClass} when creating a
    * new {@link Mapper}.
    *
+   * @example <caption>Container#mapperDefaults</caption>
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
+   * const store = new Container({
+   *   mapperDefaults: {
+   *     idAttribute: '_id'
+   *   }
+   * })
+   * store.defineMapper('user')
+   * console.log(store.getMapper('user').idAttribute)
+   *
    * @default {}
    * @name Container#mapperDefaults
    * @since 3.0.0
@@ -477,16 +1006,8 @@ export function Container (opts) {
    */
   this.mapperDefaults = this.mapperDefaults || {}
 
-  /**
-   * Constructor function to use in {@link Container#defineMapper} to create new
-   * {@link Mapper} instances.
-   *
-   * {@link Mapper}
-   * @name Container#mapperClass
-   * @since 3.0.0
-   * @type {Constructor}
-   */
-  this.mapperClass = this.mapperClass || Mapper
+  // Use the Mapper class if the user didn't provide a mapperClass
+  this.mapperClass || (this.mapperClass = Mapper)
 }
 
 const props = {
@@ -495,9 +1016,21 @@ const props = {
   /**
    * Register a new event listener on this Container.
    *
-   * Proxy for {@link Component#on}. If an event was emitted by a Mapper in the
-   * Container, then the name of the Mapper will be prepended to the arugments
-   * passed to the listener.
+   * Proxy for {@link Component#on}. If an event was emitted by a {@link Mapper}
+   * in the Container, then the name of the {@link Mapper} will be prepended to
+   * the arugments passed to the listener.
+   *
+   * @example <caption>Container#on</caption>
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
+   * const store = new Container()
+   * store.on('foo', function (...args) { console.log(args.join(':')) })
+   * store.defineMapper('user')
+   * store.emit('foo', 'arg1', 'arg2')
+   * store.getMapper('user').emit('foo', 'arg1', 'arg2')
    *
    * @method Container#on
    * @param {string} event Name of event to subsribe to.
@@ -523,7 +1056,7 @@ const props = {
   /**
    * Return a container scoped to a particular mapper.
    *
-   * <div id="Container#as">
+   * @example <caption>Container#as</caption>
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container, version} = JSData
@@ -538,8 +1071,6 @@ const props = {
    * console.log(user1 === user2)
    * console.log(user2 === user3)
    * console.log(user1 === user3)
-   * </div>
-   * <script src="https://embed.tonicdev.com" data-element-id="Container#as"></script>
    *
    * @method Container#as
    * @param {string} name Name of the {@link Mapper}.
@@ -566,7 +1097,7 @@ const props = {
   /**
    * Create a new mapper and register it in this container.
    *
-   * <div id="Container#defineMapper">
+   * @example <caption>Container#defineMapper</caption>
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container, version} = JSData
@@ -580,8 +1111,6 @@ const props = {
    * console.log(UserMapper === store.getMapper('user'))
    * console.log(UserMapper === store.as('user').getMapper())
    * console.log(UserMapper.foo)
-   * </div>
-   * <script src="https://embed.tonicdev.com" data-element-id="Container#defineMapper"></script>
    *
    * @method Container#defineMapper
    * @param {string} name Name under which to register the new {@link Mapper}.
@@ -684,7 +1213,7 @@ const props = {
   /**
    * Return the mapper registered under the specified name.
    *
-   * <div id="Container#getMapper">
+   * @example <caption>Container#getMapper</caption>
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container, version} = JSData
@@ -696,8 +1225,6 @@ const props = {
    * console.log(UserMapper === store.getMapper('user'))
    * console.log(UserMapper === store.as('user').getMapper())
    * store.getMapper('profile') // throws Error, there is no mapper with name "profile"
-   * </div>
-   * <script src="https://embed.tonicdev.com" data-element-id="Container#getMapper"></script>
    *
    * @method Container#getMapper
    * @param {string} name {@link Mapper#name}.
@@ -716,7 +1243,7 @@ const props = {
    * Return the mapper registered under the specified name.
    * Doesn't throw error if mapper doesn't exist.
    *
-   * <div id="Container#getMapperByName">
+   * @example <caption>Container#getMapperByName</caption>
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container, version} = JSData
@@ -728,8 +1255,6 @@ const props = {
    * console.log(UserMapper === store.getMapper('user'))
    * console.log(UserMapper === store.as('user').getMapper())
    * console.log(store.getMapper('profile')) // Does NOT throw an error
-   * </div>
-   * <script src="https://embed.tonicdev.com" data-element-id="Container#getMapperByName"></script>
    *
    * @method Container#getMapperByName
    * @param {string} name {@link Mapper#name}.
@@ -782,11 +1307,11 @@ Component.extend(props)
 
 /**
  * Create a subclass of this Container:
- * <div id="Container.extend" class="tonic">
+ * @example <caption>Container.extend</caption>
  * // Normally you would do: import {Container} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Container} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
+ * console.log('Using JSData v' + JSData.version.full)
  *
  * // Extend the class using ES2015 class syntax.
  * class CustomContainerClass extends Container {
@@ -806,31 +1331,22 @@ Component.extend(props)
  * const otherContainer = new OtherContainerClass()
  * console.log(otherContainer.foo())
  * console.log(OtherContainerClass.beep())
- * </div>
- *
- * Provide a custom constructor function:
- * <div id="Container.extend" class="tonic">
- * // Normally you would do: import {Container} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
- * const {Container} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
  *
  * // Extend the class, providing a custom constructor.
- * function OtherContainerClass (opts) {
- *   Container.call(this, opts)
+ * function AnotherContainerClass () {
+ *   Container.call(this)
  *   this.created_at = new Date().getTime()
  * }
  * Container.extend({
- *   constructor: OtherContainerClass,
+ *   constructor: AnotherContainerClass,
  *   foo () { return 'bar' }
  * }, {
  *   beep () { return 'boop' }
  * })
- * const otherContainer = new OtherContainerClass()
- * console.log(otherContainer.created_at)
- * console.log(otherContainer.foo())
- * console.log(OtherContainerClass.beep())
- * </div>
+ * const anotherContainer = new AnotherContainerClass()
+ * console.log(anotherContainer.created_at)
+ * console.log(anotherContainer.foo())
+ * console.log(AnotherContainerClass.beep())
  *
  * @method Container.extend
  * @param {Object} [props={}] Properties to add to the prototype of the

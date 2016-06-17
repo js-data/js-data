@@ -23,55 +23,52 @@ const superMethod = function (mapper, name) {
  * import {Record} from 'js-data'
  * ```
  *
- * Instantiate a plain record:
- * <div id="Record#constructor" class="tonic">
+ * @example <caption>Record#constructor</caption>
  * // Normally you would do: import {Record} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Record} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
+ * console.log('Using JSData v' + JSData.version.full)
  *
+ * // Instantiate a plain record
  * let record = new Record()
  * console.log('record: ' + JSON.stringify(record))
  *
- * // You can supply properties on instantiation:
+ * // You can supply properties on instantiation
  * record = new Record({ name: 'John' })
- * console.log('record: ' + JSON.stringify(record2))
- * </div>
+ * console.log('record: ' + JSON.stringify(record))
  *
- * Instantiate a record that's associated with a Mapper:
- * <div id="Record#constructor2" class="tonic">
+ * @example <caption>Record#constructor2</caption>
  * // Normally you would do: import {Mapper} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Mapper} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
+ * console.log('Using JSData v' + JSData.version.full)
  *
+ * // Instantiate a record that's associated with a Mapper:
  * const UserMapper = new Mapper({ name: 'user' })
  * const User = UserMapper.recordClass
  * const user = UserMapper.createRecord({ name: 'John' })
  * const user2 = new User({ name: 'Sally' })
  * console.log('user: ' + JSON.stringify(user))
  * console.log('user2: ' + JSON.stringify(user2))
- * </div>
  *
- * Instantiate a record that's associated with a store's Mapper:
- * <div id="Record#constructor3" class="tonic">
+ * @example <caption>Record#constructor3</caption>
  * // Normally you would do: import {Container} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Container} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
+ * console.log('Using JSData v' + JSData.version.full)
  *
  * const store = new Container()
  * store.defineMapper('user')
+ *
+ * // Instantiate a record that's associated with a store's Mapper
  * const user = store.createRecord('user', { name: 'John' })
  * console.log('user: ' + JSON.stringify(user))
- * </div>
  *
- * Validate on instantiation:
- * <div id="Record#constructor4" class="tonic">
+ * @example <caption>Record#constructor4</caption>
  * // Normally you would do: import {Container} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Container} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
+ * console.log('Using JSData v' + JSData.version.full)
  *
  * const store = new Container()
  * store.defineMapper('user', {
@@ -81,16 +78,16 @@ const superMethod = function (mapper, name) {
  *     }
  *   }
  * })
+ *
+ * // Validate on instantiation
  * const user = store.createRecord('user', { name: 1234 })
  * console.log('user: ' + JSON.stringify(user))
- * </div>
  *
- * Skip validation on instantiation:
- * <div id="Record#constructor5" class="tonic">
+ * @example <caption>Record#constructor5</caption>
  * // Normally you would do: import {Container} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Container} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
+ * console.log('Using JSData v' + JSData.version.full)
  *
  * const store = new Container()
  * store.defineMapper('user', {
@@ -100,10 +97,11 @@ const superMethod = function (mapper, name) {
  *     }
  *   }
  * })
+ *
+ * // Skip validation on instantiation
  * const user = store.createRecord('user', { name: 1234 }, { noValidate: true })
  * console.log('user: ' + JSON.stringify(user))
  * console.log('user.isValid(): ' + user.isValid())
- * </div>
  *
  * @class Record
  * @extends Component
@@ -221,11 +219,11 @@ export default Component.extend({
    * Return changes to this record since it was instantiated or
    * {@link Record#commit} was called.
    *
-   * <div id="Record#changes" class="tonic">
+   * @example <caption>Record#changes</caption>
    * // Normally you would do: import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container} = JSData
-   * console.log(\`Using JSData v${JSData.version.full}\`)
+   * console.log('Using JSData v' + JSData.version.full)
    *
    * const store = new Container()
    * store.defineMapper('user')
@@ -233,7 +231,6 @@ export default Component.extend({
    * console.log('user changes: ' + JSON.stringify(user.changes()))
    * user.name = 'John'
    * console.log('user changes: ' + JSON.stringify(user.changes()))
-   * </div>
    *
    * @method Record#changes
    * @param [opts] Configuration options.
@@ -252,11 +249,11 @@ export default Component.extend({
    * Make the record's current in-memory state it's only state, with any
    * previous property values being set to current values.
    *
-   * <div id="Record#commit" class="tonic">
+   * @example <caption>Record#commit</caption>
    * // Normally you would do: import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container} = JSData
-   * console.log(\`Using JSData v${JSData.version.full}\`)
+   * console.log('Using JSData v' + JSData.version.full)
    *
    * const store = new Container()
    * store.defineMapper('user')
@@ -266,7 +263,6 @@ export default Component.extend({
    * console.log('user hasChanges: ' + user.hasChanges())
    * user.commit()
    * console.log('user hasChanges: ' + user.hasChanges())
-   * </div>
    *
    * @method Record#commit
    * @since 3.0.0
@@ -308,17 +304,16 @@ export default Component.extend({
   /**
    * Return the value at the given path for this instance.
    *
-   * <div id="Record#get" class="tonic">
+   * @example <caption>Record#get</caption>
    * // Normally you would do: import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container} = JSData
-   * console.log(\`Using JSData v${JSData.version.full}\`)
+   * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
    * store.defineMapper('user')
    *
    * const user = store.createRecord('user', { name: 'Bob' })
    * console.log('user.get("name"): ' + user.get('name'))
-   * </div>
    *
    * @method Record#get
    * @param {string} key Path of value to retrieve.
@@ -333,11 +328,11 @@ export default Component.extend({
    * Return whether this record has changed since it was instantiated or
    * {@link Record#commit} was called.
    *
-   * <div id="Record#hasChanges" class="tonic">
+   * @example <caption>Record#hasChanges</caption>
    * // Normally you would do: import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container} = JSData
-   * console.log(\`Using JSData v${JSData.version.full}\`)
+   * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
    * store.defineMapper('user')
    * const user = store.createRecord('user')
@@ -346,7 +341,6 @@ export default Component.extend({
    * console.log('user hasChanges: ' + user.hasChanges())
    * user.commit()
    * console.log('user hasChanges: ' + user.hasChanges())
-   * </div>
    *
    * @method Record#hasChanges
    * @param [opts] Configuration options.
@@ -364,11 +358,11 @@ export default Component.extend({
   /**
    * Return whether the record in its current state passes validation.
    *
-   * <div id="Record#isValid" class="tonic">
+   * @example <caption>Record#isValid</caption>
    * // Normally you would do: import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container} = JSData
-   * console.log(\`Using JSData v${JSData.version.full}\`)
+   * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
    * store.defineMapper('user', {
    *   schema: {
@@ -385,7 +379,6 @@ export default Component.extend({
    * console.log('user isValid: ' + user.isValid())
    * user.name = 'John'
    * console.log('user isValid: ' + user.isValid())
-   * </div>
    *
    * @method Record#isValid
    * @param {Object} [opts] Configuration options. Passed to {@link Mapper#validate}.
@@ -430,7 +423,7 @@ export default Component.extend({
    * store.find('user', 1234).then((user) => {
    *   console.log(user.id) // 1234
    *
-   *   // Destroy this user from the database
+   *   // Load the user's post relations
    *   return user.loadRelations(['post'])
    * }).then((user) => {
    *   console.log(user.posts) // [{...}, {...}, ...]
@@ -524,11 +517,11 @@ export default Component.extend({
   /**
    * Return the properties with which this record was instantiated.
    *
-   * <div id="Record#previous" class="tonic">
+   * @example <caption>Record#previous</caption>
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container} = JSData
-   * console.log(\`Using JSData v${JSData.version.full}\`)
+   * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
    * store.defineMapper('user')
    * const user = store.createRecord('user', {
@@ -539,7 +532,6 @@ export default Component.extend({
    * console.log('user previous: ' + JSON.stringify(user.previous()))
    * user.commit()
    * console.log('user previous: ' + JSON.stringify(user.previous()))
-   * </div>
    *
    * @method Record#previous
    * @param {string} [key] If specified, return just the initial value of the
@@ -558,11 +550,11 @@ export default Component.extend({
    * Revert changes to this record back to the properties it had when it was
    * instantiated.
    *
-   * <div id="Record#revert" class="tonic">
+   * @example <caption>Record#revert</caption>
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container} = JSData
-   * console.log(\`Using JSData v${JSData.version.full}\`)
+   * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
    * store.defineMapper('user')
    * const user = store.createRecord('user', {
@@ -573,7 +565,6 @@ export default Component.extend({
    * console.log('user: ' + JSON.stringify(user))
    * user.revert()
    * console.log('user: ' + JSON.stringify(user))
-   * </div>
    *
    * @method Record#revert
    * @param {Object} [opts] Configuration options.
@@ -661,11 +652,11 @@ export default Component.extend({
    * an object. Triggers change events on those properties that have `track: true`
    * in {@link Mapper#schema}.
    *
-   * <div id="Record#set" class="tonic">
+   * @example <caption>Record#set</caption>
    * // Normally you would do: import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container} = JSData
-   * console.log(\`Using JSData v${JSData.version.full}\`)
+   * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
    * store.defineMapper('user')
    *
@@ -677,8 +668,8 @@ export default Component.extend({
    *
    * user.set({ age: 30, role: 'admin' })
    * console.log('user: ' + JSON.stringify(user))
-   * </div>
    *
+   * @fires Record#change
    * @method Record#set
    * @param {(string|Object)} key Key to set or hash of key-value pairs to set.
    * @param {*} [value] Value to set for the given key.
@@ -705,11 +696,11 @@ export default Component.extend({
    * which this record was created has a Mapper, then {@link Mapper#toJSON} will
    * be called with this record instead.
    *
-   * <div id="Record#toJSON" class="tonic">
+   * @example <caption>Record#toJSON</caption>
    * // Normally you would do: import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container} = JSData
-   * console.log(\`Using JSData v${JSData.version.full}\`)
+   * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
    * store.defineMapper('user', {
    *   schema: {
@@ -725,7 +716,6 @@ export default Component.extend({
    * })
    * console.log('user: ' + JSON.stringify(user.toJSON()))
    * console.log('user: ' + JSON.stringify(user.toJSON({ strict: true })))
-   * </div>
    *
    * @method Record#toJSON
    * @param {Object} [opts] Configuration options.
@@ -755,11 +745,11 @@ export default Component.extend({
    * Unset the value for a given key. Triggers change events on those properties
    * that have `track: true` in {@link Mapper#schema}.
    *
-   * <div id="Record#set" class="tonic">
+   * @example <caption>Record#unset</caption>
    * // Normally you would do: import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container} = JSData
-   * console.log(\`Using JSData v${JSData.version.full}\`)
+   * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
    * store.defineMapper('user')
    *
@@ -770,7 +760,6 @@ export default Component.extend({
    *
    * user.unset('name')
    * console.log('user: ' + JSON.stringify(user))
-   * </div>
    *
    * @method Record#unset
    * @param {string} key Key to unset.
@@ -785,11 +774,11 @@ export default Component.extend({
   /**
    * Validate this record based on its current properties.
    *
-   * <div id="Record#validate" class="tonic">
+   * @example <caption>Record#validate</caption>
    * // Normally you would do: import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Container} = JSData
-   * console.log(\`Using JSData v${JSData.version.full}\`)
+   * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
    * store.defineMapper('user', {
    *   schema: {
@@ -806,7 +795,6 @@ export default Component.extend({
    * console.log('user validation: ' + JSON.stringify(user.validate()))
    * user.name = 'John'
    * console.log('user validation: ' + user.validate())
-   * </div>
    *
    * @method Record#validate
    * @param {Object} [opts] Configuration options. Passed to {@link Mapper#validate}.
@@ -834,12 +822,36 @@ utils.eventify(
 )
 
 /**
+ * Fired when a record changes. Only works for records that have tracked fields.
+ * See {@link Record~changeListener} on how to listen for this event.
+ *
+ * @event Record#change
+ * @see Record~changeListener
+ */
+
+/**
+ * Callback signature for the {@link Record#event:change} event.
+ *
+ * @example
+ * function onChange (mapperName, record, changes) {
+ *   // do something
+ * }
+ * store.on('change', onChange)
+ *
+ * @callback Record~changeListener
+ * @param {Record} The Record that changed.
+ * @param {Object} The changes.
+ * @see Record#event:change
+ * @since 3.0.0
+ */
+
+/**
  * Create a subclass of this Record:
- * <div id="Record.extend" class="tonic">
+ * @example <caption>Record.extend</caption>
  * // Normally you would do: import {Record} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Record} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
+ * console.log('Using JSData v' + JSData.version.full)
  *
  * // Extend the class using ES2015 class syntax.
  * class CustomRecordClass extends Record {
@@ -859,31 +871,22 @@ utils.eventify(
  * const otherRecord = new OtherRecordClass()
  * console.log(otherRecord.foo())
  * console.log(OtherRecordClass.beep())
- * </div>
- *
- * Provide a custom constructor function:
- * <div id="Record.extend" class="tonic">
- * // Normally you would do: import {Record} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
- * const {Record} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
  *
  * // Extend the class, providing a custom constructor.
- * function OtherRecordClass (props, opts) {
- *   Record.call(this, props, opts)
+ * function AnotherRecordClass () {
+ *   Record.call(this)
  *   this.created_at = new Date().getTime()
  * }
  * Record.extend({
- *   constructor: OtherRecordClass,
+ *   constructor: AnotherRecordClass,
  *   foo () { return 'bar' }
  * }, {
  *   beep () { return 'boop' }
  * })
- * const otherRecord = new OtherRecordClass()
- * console.log(otherRecord.created_at)
- * console.log(otherRecord.foo())
- * console.log(OtherRecordClass.beep())
- * </div>
+ * const anotherRecord = new AnotherRecordClass()
+ * console.log(anotherRecord.created_at)
+ * console.log(anotherRecord.foo())
+ * console.log(AnotherRecordClass.beep())
  *
  * @method Record.extend
  * @param {Object} [props={}] Properties to add to the prototype of the

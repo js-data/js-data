@@ -56,7 +56,7 @@ const COLLECTION_DEFAULTS = {
 /**
  * An ordered set of {@link Record} instances.
  *
- * <div id="Collection#constructor">
+ * <div id="Collection#constructor" class="tonic">
  * // import {Collection, Record} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Collection, Record, version} = JSData
@@ -66,7 +66,6 @@ const COLLECTION_DEFAULTS = {
  * const UserCollection = new Collection([user1, user2])
  * console.log(UserCollection.get(1) === user1)
  * </div>
- * <script src="https://embed.tonicdev.com" data-element-id="Collection#constructor"></script>
  *
  * @class Collection
  * @extends Component
@@ -101,7 +100,7 @@ function Collection (records, opts) {
      * the collection will use the {@link Mapper#idAttribute} setting, and will
      * wrap records in {@link Mapper#recordClass}.
      *
-     * <div id="Collection#mapper">
+     * <div id="Collection#mapper" class="tonic">
      * // import {Collection, Mapper} from 'js-data'
      * const JSData = require('js-data@3.0.0-beta.7')
      * const {Collection, Mapper, version} = JSData
@@ -112,7 +111,6 @@ function Collection (records, opts) {
      * const myMapper = new MyMapperClass({ name: 'myMapper' })
      * const collection = new Collection(null, { mapper: myMapper })
      * </div>
-     * <script src="https://embed.tonicdev.com" data-element-id="Collection#mapper"></script>
      *
      * @name Collection#mapper
      * @type {Mapper}
@@ -380,7 +378,7 @@ export default Component.extend({
    * on the left boundary.
    * @param {boolean} [opts.limit] Limit the result to a certain number.
    * @param {boolean} [opts.offset] The number of resulting records to skip.
-   * @returns {Array} The result.
+   * @returns {Object[]|Record[]} The result.
    */
   between (leftKeys, rightKeys, opts) {
     return this.query().between(leftKeys, rightKeys, opts).run()
@@ -401,7 +399,6 @@ export default Component.extend({
    * @param {string[]} [fieldList] Array of field names to use as the key or
    * compound key of the new secondary index. If no fieldList is provided, then
    * the name will also be the field that is used to index the collection.
-   * @returns {Collection} A reference to itself for chaining.
    */
   createIndex (name, fieldList, opts) {
     if (utils.isString(name) && fieldList === undefined) {
@@ -411,7 +408,6 @@ export default Component.extend({
     opts.hashCode || (opts.hashCode = (obj) => this.recordId(obj))
     const index = this.indexes[name] = new Index(fieldList, opts)
     this.index.visitAll(index.insertRecord, index)
-    return this
   },
 
   /**
@@ -420,7 +416,7 @@ export default Component.extend({
    *
    * Shortcut for `collection.query().filter(queryOrFn[, thisArg]).run()`
    *
-   * <div id="Collection#filter">
+   * <div id="Collection#filter" class="tonic">
    * // import {Collection} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Collection, version} = JSData
@@ -447,15 +443,15 @@ export default Component.extend({
    *   return post.id % 2 === 0
    * })
    * </div>
-   * <script src="https://embed.tonicdev.com" data-element-id="Collection#filter"></script>
    *
    * @method Collection#filter
-   * @since 3.0.0
    * @param {(Object|Function)} [queryOrFn={}] Selection query or filter
    * function.
    * @param {Object} [thisArg] Context to which to bind `queryOrFn` if
    * `queryOrFn` is a function.
    * @returns {Array} The result.
+   * @see query
+   * @since 3.0.0
    */
   filter (query, thisArg) {
     return this.query().filter(query, thisArg).run()
@@ -670,7 +666,9 @@ export default Component.extend({
       })
       if (record && utils.isFunction(record.off)) {
         record.off('all', this._onRecordEvent, this)
-        this.emit('remove', record)
+        if (!opts.silent) {
+          this.emit('remove', record)
+        }
       }
     }
     return this.afterRemove(id, opts, record) || record
@@ -696,9 +694,14 @@ export default Component.extend({
     const records = this.filter(query)
 
     // Remove each selected record from the collection
+    const optsCopy = utils.plainCopy(opts)
+    optsCopy.silent = true
     records.forEach((item) => {
-      this.remove(this.recordId(item), opts)
+      this.remove(this.recordId(item), optsCopy)
     })
+    if (!opts.silent) {
+      this.emit('remove', records)
+    }
     return this.afterRemoveAll(query, opts, records) || records
   },
 
@@ -769,12 +772,90 @@ export default Component.extend({
 })
 
 /**
+ * Fired when a record changes. Only works for records that have tracked changes.
+ * See {@link Collection~changeListener} on how to listen for this event.
+ *
+ * @event Collection#change
+ * @see Collection~changeListener
+ */
+
+/**
+ * Callback signature for the {@link Collection#event:change} event.
+ *
+ * @example
+ * function onChange (record, changes) {
+ *   // do something
+ * }
+ * collection.on('change', onChange)
+ *
+ * @callback Collection~changeListener
+ * @param {Record} The Record that changed.
+ * @param {Object} The changes.
+ * @see Collection#event:change
+ * @since 3.0.0
+ */
+
+/**
+ * Fired when one or more records are added to the Collection. See
+ * {@link Collection~addListener} on how to listen for this event.
+ *
+ * @event Collection#add
+ * @see Collection~addListener
+ * @see Collection#event:add
+ * @see Collection#add
+ */
+
+/**
+ * Callback signature for the {@link Collection#event:add} event.
+ *
+ * @example
+ * function onAdd (recordOrRecords) {
+ *   // do something
+ * }
+ * collection.on('add', onAdd)
+ *
+ * @callback Collection~addListener
+ * @param {Record|Record[]} The Record or Records that were added.
+ * @see Collection#event:add
+ * @see Collection#add
+ * @since 3.0.0
+ */
+
+/**
+ * Fired when one or more records are removed from the Collection. See
+ * {@link Collection~removeListener} for how to listen for this event.
+ *
+ * @event Collection#remove
+ * @see Collection~removeListener
+ * @see Collection#event:remove
+ * @see Collection#remove
+ * @see Collection#removeAll
+ */
+
+/**
+ * Callback signature for the {@link Collection#event:remove} event.
+ *
+ * @example
+ * function onRemove (recordsOrRecords) {
+ *   // do something
+ * }
+ * collection.on('remove', onRemove)
+ *
+ * @callback Collection~removeListener
+ * @param {Record|Record[]} Record or Records that were removed.
+ * @see Collection#event:remove
+ * @see Collection#remove
+ * @see Collection#removeAll
+ * @since 3.0.0
+ */
+
+/**
  * Create a subclass of this Collection:
  * <div id="Collection.extend" class="tonic">
  * // Normally you would do: import {Collection} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Collection} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
+ * console.log('Using JSData v' + JSData.version.full)
  *
  * // Extend the class using ES2015 class syntax.
  * class CustomCollectionClass extends Collection {
@@ -794,30 +875,22 @@ export default Component.extend({
  * const otherCollection = new OtherCollectionClass()
  * console.log(otherCollection.foo())
  * console.log(OtherCollectionClass.beep())
- * </div>
- *
- * Provide a custom constructor function:
- * <div id="Collection.extend" class="tonic">
- * // Normally you would do: import {Collection} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
- * const {Collection} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
  *
  * // Extend the class, providing a custom constructor.
- * function OtherCollectionClass (records, opts) {
- *   Collection.call(this, records, opts)
+ * function AnotherCollectionClass () {
+ *   Collection.call(this)
  *   this.created_at = new Date().getTime()
  * }
  * Collection.extend({
- *   constructor: OtherCollectionClass,
+ *   constructor: AnotherCollectionClass,
  *   foo () { return 'bar' }
  * }, {
  *   beep () { return 'boop' }
  * })
- * const otherCollection = new OtherCollectionClass()
- * console.log(otherCollection.created_at)
- * console.log(otherCollection.foo())
- * console.log(OtherCollectionClass.beep())
+ * const anotherCollection = new AnotherCollectionClass()
+ * console.log(anotherCollection.created_at)
+ * console.log(anotherCollection.foo())
+ * console.log(AnotherCollectionClass.beep())
  * </div>
  *
  * @method Collection.extend

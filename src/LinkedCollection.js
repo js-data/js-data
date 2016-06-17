@@ -110,11 +110,12 @@ export default Collection.extend({
 
 /**
  * Create a subclass of this LinkedCollection:
- * <div id="LinkedCollection.extend" class="tonic">
+ *
+ * @example <caption>LinkedCollection.extend</caption>
  * // Normally you would do: import {LinkedCollection} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {LinkedCollection} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
+ * console.log('Using JSData v' + JSData.version.full)
  *
  * // Extend the class using ES2015 class syntax.
  * class CustomLinkedCollectionClass extends LinkedCollection {
@@ -134,31 +135,22 @@ export default Collection.extend({
  * const otherLinkedCollection = new OtherLinkedCollectionClass()
  * console.log(otherLinkedCollection.foo())
  * console.log(OtherLinkedCollectionClass.beep())
- * </div>
- *
- * Provide a custom constructor function:
- * <div id="LinkedCollection.extend" class="tonic">
- * // Normally you would do: import {LinkedCollection} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
- * const {LinkedCollection} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
  *
  * // Extend the class, providing a custom constructor.
- * function OtherLinkedCollectionClass (records, opts) {
- *   LinkedCollection.call(this, records, opts)
+ * function AnotherLinkedCollectionClass () {
+ *   LinkedCollection.call(this)
  *   this.created_at = new Date().getTime()
  * }
  * LinkedCollection.extend({
- *   constructor: OtherLinkedCollectionClass,
+ *   constructor: AnotherLinkedCollectionClass,
  *   foo () { return 'bar' }
  * }, {
  *   beep () { return 'boop' }
  * })
- * const otherLinkedCollection = new OtherLinkedCollectionClass()
- * console.log(otherLinkedCollection.created_at)
- * console.log(otherLinkedCollection.foo())
- * console.log(OtherLinkedCollectionClass.beep())
- * </div>
+ * const anotherLinkedCollection = new AnotherLinkedCollectionClass()
+ * console.log(anotherLinkedCollection.created_at)
+ * console.log(anotherLinkedCollection.foo())
+ * console.log(AnotherLinkedCollectionClass.beep())
  *
  * @method LinkedCollection.extend
  * @param {Object} [props={}] Properties to add to the prototype of the

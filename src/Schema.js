@@ -994,7 +994,7 @@ const typeGroupValidators = {
 /**
  * js-data's Schema class.
  *
- * <div id="Schema#constructor">
+ * <div id="Schema#constructor" class="tonic">
  * // import {Schema} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Schema, version} = JSData
@@ -1007,7 +1007,6 @@ const typeGroupValidators = {
  * })
  * PostSchema.validate({ title: 1234 })
  * </div>
- * <script src="https://embed.tonicdev.com" data-element-id="Schema#constructor"></script>
  *
  * @class Schema
  * @extends Component
@@ -1080,7 +1079,7 @@ export default Component.extend({
  * // Normally you would do: import {Schema} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Schema} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
+ * console.log('Using JSData v' + JSData.version.full)
  *
  * // Extend the class using ES2015 class syntax.
  * class CustomSchemaClass extends Schema {
@@ -1107,7 +1106,7 @@ export default Component.extend({
  * // Normally you would do: import {Schema} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Schema} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
+ * console.log('Using JSData v' + JSData.version.full)
  *
  * // Extend the class, providing a custom constructor.
  * function OtherSchemaClass (definition) {

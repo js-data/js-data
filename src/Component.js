@@ -1,9 +1,52 @@
 import utils from './utils'
 
 /**
+ * The base class from which all JSData components inherit some basic
+ * functionality.
+ *
+ * Typically you won't instantiate this class directly, but you may find it
+ * useful as an abstract class for your own components.
+ *
+ * See {@link Component.extend} for an example of using {@link Component} as a
+ * base class.
+ *
+ *```javascript
+ * import {Component} from 'js-data'
+ * ```
+ *
  * @class Component
+ * @param {Object} [opts] Configuration options.
+ * @param {boolean} [opts.debug=false] See {@link Component#debug}.
+ * @returns {Component} A new {@link Component} instance.
+ * @since 3.0.0
  */
-export default function Component () {
+export default function Component (opts) {
+  opts || (opts = {})
+
+  /**
+   * Whether to enable debug-level logs for this component. Anything that
+   * extends `Component` inherits this option and the corresponding logging
+   * functionality.
+   *
+   * @example <caption>Component#debug</caption>
+   * // Normally you would do: import {Component} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Component} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
+   * const component = new Component()
+   * component.log('debug', 'some message') // nothing gets logged
+   * // Display debug logs:
+   * component.debug = true
+   * component.log('debug', 'other message') // this DOES get logged
+   *
+   * @default false
+   * @name Component#debug
+   * @since 3.0.0
+   * @type {boolean}
+   */
+  this.debug = opts.hasOwnProperty('debug') ? !!opts.debug : false
+
   /**
    * Event listeners attached to this Component. __Do not modify.__ Use
    * {@link Component#on} and {@link Component#off} instead.
@@ -13,16 +56,17 @@ export default function Component () {
    * @since 3.0.0
    * @type {Object}
    */
-  Object.defineProperty(this, '_listeners', { value: {} })
+  Object.defineProperty(this, '_listeners', { value: {}, writable: true })
 }
 
 /**
  * Create a subclass of this Component:
- * <div id="Component.extend" class="tonic">
+ *
+ * @example <caption>Component.extend</caption>
  * // Normally you would do: import {Component} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Component} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
+ * console.log('Using JSData v' + JSData.version.full)
  *
  * // Extend the class using ES2015 class syntax.
  * class CustomComponentClass extends Component {
@@ -42,31 +86,22 @@ export default function Component () {
  * const otherComponent = new OtherComponentClass()
  * console.log(otherComponent.foo())
  * console.log(OtherComponentClass.beep())
- * </div>
- *
- * Provide a custom constructor function:
- * <div id="Component.extend" class="tonic">
- * // Normally you would do: import {Component} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
- * const {Component} = JSData
- * console.log(\`Using JSData v${JSData.version.full}\`)
  *
  * // Extend the class, providing a custom constructor.
- * function OtherComponentClass () {
+ * function AnotherComponentClass () {
  *   Component.call(this)
  *   this.created_at = new Date().getTime()
  * }
  * Component.extend({
- *   constructor: OtherComponentClass,
+ *   constructor: AnotherComponentClass,
  *   foo () { return 'bar' }
  * }, {
  *   beep () { return 'boop' }
  * })
- * const otherComponent = new OtherComponentClass()
- * console.log(otherComponent.created_at)
- * console.log(otherComponent.foo())
- * console.log(OtherComponentClass.beep())
- * </div>
+ * const anotherComponent = new AnotherComponentClass()
+ * console.log(anotherComponent.created_at)
+ * console.log(anotherComponent.foo())
+ * console.log(AnotherComponentClass.beep())
  *
  * @method Component.extend
  * @param {Object} [props={}] Properties to add to the prototype of the
@@ -80,7 +115,10 @@ export default function Component () {
 Component.extend = utils.extend
 
 /**
- * Log the provided values at the "debug" level.
+ * Log the provided values at the "debug" level. Debug-level logs are only
+ * logged if {@link Component#debug} is `true`.
+ *
+ * `.dbg(...)` is shorthand for `.log('debug', ...)`.
  *
  * @method Component#dbg
  * @param {...*} [args] Values to log.
@@ -88,9 +126,12 @@ Component.extend = utils.extend
  */
 /**
  * Log the provided values. By default sends values to `console[level]`.
+ * Debug-level logs are only logged if {@link Component#debug} is `true`.
+ *
+ * Will attempt to use appropriate `console` methods if they are available.
  *
  * @method Component#log
- * @param {string} level Log level
+ * @param {string} level Log level.
  * @param {...*} [args] Values to log.
  * @since 3.0.0
  */
@@ -99,7 +140,8 @@ utils.logify(Component.prototype)
 /**
  * Register a new event listener on this Component.
  *
- * @example <caption>Listen for all "afterCreate" events in a DataStore</caption>
+ * @example
+ * // Listen for all "afterCreate" events in a DataStore
  * store.on('afterCreate', (mapperName, props, opts, result) => {
  *   console.log(mapperName) // "post"
  *   console.log(props.id) // undefined
@@ -109,12 +151,14 @@ utils.logify(Component.prototype)
  *   console.log(post.id) // 1234
  * })
  *
- * @example <caption>Listen for the "add" event on a collection</caption>
+ * @example
+ * // Listen for the "add" event on a collection
  * collection.on('add', (records) => {
  *   console.log(records) // [...]
  * })
  *
- * @example <caption>Listen for "change" events on a record</caption>
+ * @example
+ * // Listen for "change" events on a record
  * post.on('change', (record, changes) => {
  *   console.log(changes) // { changed: { title: 'Modeling your data' } }
  * })
@@ -131,13 +175,16 @@ utils.logify(Component.prototype)
  * then all listeners for the specified event will be removed. If no event is
  * specified then all listeners for all events will be removed.
  *
- * @example <caption>Remove a listener to a single event</caption>
+ * @example
+ * // Remove a particular listener for a particular event
  * collection.off('add', handler)
  *
- * @example <caption>Remove all listeners to a single event</caption>
+ * @example
+ * // Remove all listeners for a particular event
  * record.off('change')
  *
- * @example <caption>Remove all listeners to all events</caption>
+ * @example
+ * // Remove all listeners to all events
  * store.off()
  *
  * @method Component#off
@@ -148,7 +195,7 @@ utils.logify(Component.prototype)
 /**
  * Trigger an event on this Component.
  *
- * <div id="Component#emit">
+ * @example <caption>Component#emit</caption>
  * // import {Collection, DataStore} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Collection, DataStore, version} = JSData
@@ -164,8 +211,6 @@ utils.logify(Component.prototype)
  *   console.log(msg)
  * })
  * store.emit('beep', 'boop')
- * </div>
- * <script src="https://embed.tonicdev.com" data-element-id="Component#emit"></script>
  *
  * @method Component#emit
  * @param {string} event Name of event to emit.
