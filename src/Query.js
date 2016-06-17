@@ -33,7 +33,18 @@ const escape = function (pattern) {
  * ```
  *
  * @example
- * const posts = store.query('post').filter({ status: 'draft' }).limit(2).run()
+ * const store = new JSData.DataStore()
+ * store.defineMapper('post')
+ * const posts = [
+ *   { author: 'John', age: 30, status: 'published', id: 1 },
+ *   { author: 'Sally', age: 31, status: 'draft', id: 2 },
+ *   { author: 'Mike', age: 32, status: 'draft', id: 3 },
+ *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
+ *   { author: 'Adam', age: 33, status: 'draft', id: 5 }
+ * ]
+ * store.add('post', posts)
+ * const drafts = store.query('post').filter({ status: 'draft' }).limit(2).run()
+ * console.log(drafts)
  *
  * @class Query
  * @extends Component
@@ -150,10 +161,32 @@ export default Component.extend({
    * Find all entities between two boundaries.
    *
    * @example <caption>Get the users ages 18 to 30.</caption>
-   * const users = query.between(18, 30, { index: 'age' }).run()
+   * const store = new JSData.DataStore()
+   * store.defineMapper('user')
+   * const users = [
+   *   { name: 'Peter', age: 25, id: 1 },
+   *   { name: 'Jim', age: 19, id: 2 },
+   *   { name: 'Mike', age: 17, id: 3 },
+   *   { name: 'Alan', age: 29, id: 4 },
+   *   { name: 'Katie', age: 33, id: 5 }
+   * ]
+   * store.add('post', posts)
+   * const filteredUsers = store.query('user').between(18, 30, { index: 'age' }).run()
+   * console.log(filteredUsers)
    *
    * @example <caption>Same as above.</caption>
-   * const users = query.between([18], [30], { index: 'age' }).run()
+   * const store = new JSData.DataStore()
+   * store.defineMapper('user')
+   * const users = [
+   *   { name: 'Peter', age: 25, id: 1 },
+   *   { name: 'Jim', age: 19, id: 2 },
+   *   { name: 'Mike', age: 17, id: 3 },
+   *   { name: 'Alan', age: 29, id: 4 },
+   *   { name: 'Katie', age: 33, id: 5 }
+   * ]
+   * store.add('post', posts)
+   * const filteredUsers = store.query('user').between([18], [30], { index: 'age' }).run()
+   * console.log(filteredUsers)
    *
    * @method Query#between
    * @param {Array} leftKeys Keys defining the left boundary.
@@ -251,17 +284,33 @@ export default Component.extend({
    * Find the record or records that match the provided query or are accepted by
    * the provided filter function.
    *
-   * @example <caption>Get the draft posts created less than three months</caption>
-   * const posts = query.filter({
+   * @example <caption>Get the draft posts by authors younger than 30</caption>
+   * const store = new JSData.DataStore()
+   * store.defineMapper('post')
+   * const posts = [
+   *   { author: 'John', age: 30, status: 'published', id: 1 },
+   *   { author: 'Sally', age: 31, status: 'published', id: 2 },
+   *   { author: 'Mike', age: 32, status: 'draft', id: 3 },
+   *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
+   *   { author: 'Adam', age: 33, status: 'published', id: 5 }
+   *   { author: 'Peter', age: 25, status: 'deleted', id: 6 },
+   *   { author: 'Sally', age: 21, status: 'draft', id: 7 },
+   *   { author: 'Jim', age: 27, status: 'draft', id: 8 },
+   *   { author: 'Jim', age: 27, status: 'published', id: 9 },
+   *   { author: 'Jason', age: 55, status: 'published', id: 10 }
+   * ]
+   * store.add('post', posts)
+   * let results = store.query('post').filter({
    *   where: {
    *     status: {
    *       '==': 'draft'
    *     },
-   *     created_at_timestamp: {
-   *       '>=': (new Date().getTime() (1000 * 60 * 60 * 24 * 30 * 3)) // 3 months ago
+   *     age: {
+   *       '<': 30
    *     }
    *   }
    * }).run()
+   * console.log(results)
    *
    * @example <caption>Use a custom filter function</caption>
    * const posts = query.filter(function (post) {
@@ -283,20 +332,40 @@ export default Component.extend({
      * [querysyntax]: http://www.js-data.io/v3.0/docs/query-syntax
      *
      * @example <caption>Empty "findAll" query</caption>
+     * const store = new JSData.DataStore()
+     * store.defineMapper('post')
      * store.findAll('post').then((posts) => {
      *   console.log(posts) // [...]
      * })
      *
      * @example <caption>Empty "filter" query</caption>
+     * const store = new JSData.DataStore()
+     * store.defineMapper('post')
      * const posts = store.filter('post')
      * console.log(posts) // [...]
      *
-     * @example <caption>Complex "findAll" query</caption>
-     * const PAGE_SIZE = 10
+     * @example <caption>Complex "filter" query</caption>
+     * const PAGE_SIZE = 2
      * let currentPage = 3
      *
+     * const store = new JSData.DataStore()
+     * store.defineMapper('post')
+     * const posts = [
+     *   { author: 'John', age: 30, status: 'published', id: 1 },
+     *   { author: 'Sally', age: 31, status: 'published', id: 2 },
+     *   { author: 'Mike', age: 32, status: 'draft', id: 3 },
+     *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
+     *   { author: 'Adam', age: 33, status: 'published', id: 5 }
+     *   { author: 'Peter', age: 25, status: 'deleted', id: 6 },
+     *   { author: 'Sally', age: 21, status: 'draft', id: 7 },
+     *   { author: 'Jim', age: 27, status: 'draft', id: 8 },
+     *   { author: 'Jim', age: 27, status: 'published', id: 9 },
+     *   { author: 'Jason', age: 55, status: 'published', id: 10 }
+     * ]
+     * store.add('post', posts)
      * // Retrieve a filtered page of blog posts
-     * store.findAll('post', {
+     * // Would typically replace filter with findAll
+     * store.filter('post', {
      *   where: {
      *     status: {
      *       // WHERE status = 'published'
@@ -315,12 +384,10 @@ export default Component.extend({
      *     // ORDER BY title ASC
      *     ['title', 'ASC']
      *   ],
-     *   // LIMIT 10
+     *   // LIMIT 2
      *   limit: PAGE_SIZE,
-     *   // SKIP 20
-     *   offset: PAGE_SIZE * (currentPage 1)
-     * }).then((posts) => {
-     *   console.log(posts) // [...]
+     *   // SKIP 4
+     *   offset: PAGE_SIZE * (currentPage - 1)
      * })
      *
      * @namespace query
@@ -342,8 +409,25 @@ export default Component.extend({
        * Filtering criteria. Records that do not meet this criteria will be exluded
        * from the result.
        *
-       * @example
-       * TODO
+       * @example <caption>Return posts where author is at least 32 years old</caption>
+       * const store = new JSData.DataStore()
+       * store.defineMapper('post')
+       * const posts = [
+       *   { author: 'John', age: 30, id: 5 },
+       *   { author: 'Sally', age: 31, id: 6 },
+       *   { author: 'Mike', age: 32, id: 7 },
+       *   { author: 'Adam', age: 33, id: 8 },
+       *   { author: 'Adam', age: 33, id: 9 }
+       * ]
+       * store.add('post', posts)
+       * store.filter('post', {
+       *   where: {
+       *     age: {
+       *       '>=': 30
+       *     }
+       *   }
+       * })
+       * console.log(results)
        *
        * @name query.where
        * @type {Object}
@@ -389,7 +473,6 @@ export default Component.extend({
        * Determines how records should be ordered in the result.
        *
        * @example <caption>Order posts by `author` then by `id` descending </caption>
-       *
        * const store = new JSData.DataStore()
        * store.defineMapper('post')
        * const posts = [
@@ -400,11 +483,9 @@ export default Component.extend({
        *   { author: 'Adam', age: 33, id: 9 }
        * ]
        * store.add('post', posts)
-       * let collection = store.getCollection('post')
-       * let results = collection.query().filter({
+       * store.filter('post', {
        *     orderBy:[['author','ASC'],['id','DESC']]
-       * }).run()
-       *
+       * })
        * console.log(results)
        *
        * @name query.orderBy
@@ -425,13 +506,38 @@ export default Component.extend({
       /**
        * Number of records to skip.
        *
-       * @example <caption>Retrieve the first "page" of blog posts</caption>
+       * @example <caption>Retrieve the first "page" of blog posts using findAll</caption>
        * const PAGE_SIZE = 10
        * let currentPage = 1
        * PostService.findAll({
        *   offset: PAGE_SIZE * (currentPage 1)
        *   limit: PAGE_SIZE
        * })
+       *
+       * @example <caption>Retrieve the last "page" of blog posts using filter</caption>
+       * const PAGE_SIZE = 5
+       * let currentPage = 2
+       * const store = new JSData.DataStore()
+       * store.defineMapper('post')
+       * const posts = [
+       *   { author: 'John', age: 30, id: 1 },
+       *   { author: 'Sally', age: 31, id: 2 },
+       *   { author: 'Mike', age: 32, id: 3 },
+       *   { author: 'Adam', age: 33, id: 4 },
+       *   { author: 'Adam', age: 33, id: 5 },
+       *   { author: 'Peter', age: 25, id: 6 },
+       *   { author: 'Sally', age: 21, id: 7 },
+       *   { author: 'Jim', age: 27, id: 8 },
+       *   { author: 'Jim', age: 27, id: 9 },
+       *   { author: 'Jason', age: 55, id: 10 }
+       * ]
+       * store.add('post', posts)
+       * store.filter('post', {
+       *   offset: PAGE_SIZE * (currentPage 1)
+       *   limit: PAGE_SIZE
+       * })
+       *
+       * console.log(results)
        *
        * @name query.offset
        * @type {number}
@@ -447,7 +553,7 @@ export default Component.extend({
       /**
        * Maximum number of records to retrieve.
        *
-       * @example <caption>Retrieve the first "page" of blog posts</caption>
+       * @example <caption>Retrieve the first "page" of blog posts using findAll</caption>
        * const PAGE_SIZE = 10
        * let currentPage = 1
        * PostService.findAll({
@@ -455,6 +561,30 @@ export default Component.extend({
        *   limit: PAGE_SIZE
        * })
        *
+       * @example <caption>Retrieve the last "page" of blog posts using filter</caption>
+       * const PAGE_SIZE = 5
+       * let currentPage = 2
+       * const store = new JSData.DataStore()
+       * store.defineMapper('post')
+       * const posts = [
+       *   { author: 'John', age: 30, id: 1 },
+       *   { author: 'Sally', age: 31, id: 2 },
+       *   { author: 'Mike', age: 32, id: 3 },
+       *   { author: 'Adam', age: 33, id: 4 },
+       *   { author: 'Adam', age: 33, id: 5 },
+       *   { author: 'Peter', age: 25, id: 6 },
+       *   { author: 'Sally', age: 21, id: 7 },
+       *   { author: 'Jim', age: 27, id: 8 },
+       *   { author: 'Jim', age: 27, id: 9 },
+       *   { author: 'Jason', age: 55, id: 10 }
+       * ]
+       * store.add('post', posts)
+       * store.filter('post', {
+       *   offset: PAGE_SIZE * (currentPage 1)
+       *   limit: PAGE_SIZE
+       * })
+       *
+       * console.log(results)
        * @name query.limit
        * @type {number}
        * @see http://www.js-data.io/v3.0/docs/query-syntax
@@ -600,8 +730,19 @@ export default Component.extend({
   /**
    * Limit the result.
    *
-   * @example <caption>Get only the first 10 draft posts.</caption>
-   * const posts = query.get('draft', { index: 'status' }).limit(10).run()
+   * @example <caption>Get only the first 2 posts.</caption>
+   * const store = new JSData.DataStore()
+   * store.defineMapper('post')
+   * const posts = [
+   *   { author: 'John', age: 30, status: 'published', id: 1 },
+   *   { author: 'Sally', age: 31, status: 'draft', id: 2 },
+   *   { author: 'Mike', age: 32, status: 'draft', id: 3 },
+   *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
+   *   { author: 'Adam', age: 33, status: 'draft', id: 5 }
+   * ]
+   * store.add('post', posts)
+   * const results = store.query('post').limit(2).run()
+   * console.log(results)
    *
    * @method Query#limit
    * @param {number} num The maximum number of entities to keep in the result.
@@ -620,10 +761,21 @@ export default Component.extend({
   /**
    * Apply a mapping function to the result data.
    *
-   * @example
-   * const ages = UserCollection.query().map((user) => {
+   * @example Return the age of all users
+   * const store = new JSData.DataStore()
+   * store.defineMapper('user')
+   * const users = [
+   *   { name: 'Peter', age: 25, id: 1 },
+   *   { name: 'Jim', age: 19, id: 2 },
+   *   { name: 'Mike', age: 17, id: 3 },
+   *   { name: 'Alan', age: 29, id: 4 },
+   *   { name: 'Katie', age: 33, id: 5 }
+   * ]
+   * store.add('post', posts)
+   * const ages = store.query('user').map((user) => {
    *   return user.age
    * }).run()
+   * console.log(ages)
    *
    * @method Query#map
    * @param {Function} mapFn Mapping function.
@@ -672,8 +824,19 @@ export default Component.extend({
   /**
    * Skip a number of results.
    *
-   * @example <caption>Get all but the first 10 draft posts.</caption>
-   * const posts = query.get('draft', { index: 'status' }).skip(10).run()
+   * @example <caption>Get all but the first 2 posts.</caption>
+   * const store = new JSData.DataStore()
+   * store.defineMapper('post')
+   * const posts = [
+   *   { author: 'John', age: 30, status: 'published', id: 1 },
+   *   { author: 'Sally', age: 31, status: 'draft', id: 2 },
+   *   { author: 'Mike', age: 32, status: 'draft', id: 3 },
+   *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
+   *   { author: 'Adam', age: 33, status: 'draft', id: 5 }
+   * ]
+   * store.add('post', posts)
+   * const results = store.query('post').skip(2).run()
+   * console.log(results)
    *
    * @method Query#skip
    * @param {number} num The number of entities to skip.
@@ -698,12 +861,39 @@ export default Component.extend({
    * implemented by adapters (for the most part).
    *
    * @example <caption>Variant 1</caption>
+   *
+   * const store = new JSData.DataStore()
+   * store.defineMapper('post')
+   * const posts = [
+   *   { author: 'John', age: 30, status: 'published', id: 1 },
+   *   { author: 'Sally', age: 31, status: 'published', id: 2 },
+   *   { author: 'Mike', age: 32, status: 'published', id: 3 },
+   *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
+   *   { author: 'Adam', age: 33, status: 'published', id: 5 }
+   * ]
+   * store.add('post', posts)
+   *
    * const publishedPosts = store.filter('post', {
    *   status: 'published',
    *   limit: 2
    * })
    *
+   * console.log(publishedPosts)
+   *
+   *
    * @example <caption>Variant 2</caption>
+   *
+   * const store = new JSData.DataStore()
+   * store.defineMapper('post')
+   * const posts = [
+   *   { author: 'John', age: 30, status: 'published', id: 1 },
+   *   { author: 'Sally', age: 31, status: 'published', id: 2 },
+   *   { author: 'Mike', age: 32, status: 'published', id: 3 },
+   *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
+   *   { author: 'Adam', age: 33, status: 'published', id: 5 }
+   * ]
+   * store.add('post', posts)
+   *
    * const publishedPosts = store.filter('post', {
    *   where: {
    *     status: {
@@ -713,12 +903,40 @@ export default Component.extend({
    *   limit: 2
    * })
    *
+   * console.log(publishedPosts)
+   *
    * @example <caption>Variant 3</caption>
+   *
+   * const store = new JSData.DataStore()
+   * store.defineMapper('post')
+   * const posts = [
+   *   { author: 'John', age: 30, status: 'published', id: 1 },
+   *   { author: 'Sally', age: 31, status: 'published', id: 2 },
+   *   { author: 'Mike', age: 32, status: 'published', id: 3 },
+   *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
+   *   { author: 'Adam', age: 33, status: 'published', id: 5 }
+   * ]
+   * store.add('post', posts)
+   *
    * const publishedPosts = store.query('post').filter({
    *   status: 'published'
    * }).limit(2).run()
    *
+   * console.log(publishedPosts)
+   *
    * @example <caption>Variant 4</caption>
+   *
+   * const store = new JSData.DataStore()
+   * store.defineMapper('post')
+   * const posts = [
+   *   { author: 'John', age: 30, status: 'published', id: 1 },
+   *   { author: 'Sally', age: 31, status: 'published', id: 2 },
+   *   { author: 'Mike', age: 32, status: 'published', id: 3 },
+   *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
+   *   { author: 'Adam', age: 33, status: 'published', id: 5 }
+   * ]
+   * store.add('post', posts)
+   *
    * const publishedPosts = store.query('post').filter({
    *   where: {
    *     status: {
@@ -727,7 +945,21 @@ export default Component.extend({
    *   }
    * }).limit(2).run()
    *
+   * console.log(publishedPosts)
+   *
    * @example <caption>Multiple operators</caption>
+   *
+   * const store = new JSData.DataStore()
+   * store.defineMapper('post')
+   * const posts = [
+   *   { author: 'John', age: 30, status: 'published', id: 1 },
+   *   { author: 'Sally', age: 31, status: 'published', id: 2 },
+   *   { author: 'Mike', age: 32, status: 'published', id: 3 },
+   *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
+   *   { author: 'Adam', age: 33, status: 'published', id: 5 }
+   * ]
+   * store.add('post', posts)
+   *
    * const myPublishedPosts = store.filter('post', {
    *   where: {
    *     status: {
@@ -738,6 +970,8 @@ export default Component.extend({
    *     }
    *   }
    * })
+   *
+   * console.log(myPublishedPosts)
    *
    * @name Query.ops
    * @property {Function} == Equality operator.
