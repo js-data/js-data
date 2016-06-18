@@ -226,6 +226,22 @@ import Record from './Record'
  */
 import Schema from './Schema'
 
+/**
+ * JSData's {@link Settable} class.
+ *
+ * @example
+ * import {Settable} from 'js-data'
+ * const obj = new Settable()
+ * obj.set('secret', 'value')
+ * console.log(JSON.stringify(obj)) // {}
+ *
+ * @name module:js-data.Settable
+ * @see Settable
+ * @since 3.0.0
+ * @type {Constructor}
+ */
+import Settable from './Settable'
+
 export * from './decorators'
 
 export {
@@ -239,5 +255,6 @@ export {
   Query,
   Record,
   Schema,
+  Settable,
   utils
 }

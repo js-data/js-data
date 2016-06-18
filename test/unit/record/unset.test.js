@@ -52,6 +52,7 @@ describe('Record#unset', function () {
     }, 10)
   })
   it('should support "silent" option', function (done) {
+    console.log('TEST\n\n')
     const UserMapper = new JSData.Mapper({
       name: 'user',
       schema: {

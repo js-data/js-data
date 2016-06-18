@@ -1017,14 +1017,25 @@ function Schema (definition) {
   // TODO: schema validation
   utils.fillIn(this, definition)
 
-  // TODO: rework this to make sure all possible keywords are converted
-  if (definition.properties) {
-    utils.forOwn(definition.properties, function (_definition, prop) {
+  if (this.type === 'object' && this.properties) {
+    utils.forOwn(this.properties, (_definition, prop) => {
       if (!(_definition instanceof Schema)) {
-        definition.properties[prop] = new Schema(_definition)
+        this.properties[prop] = new Schema(_definition)
       }
     })
   }
+  if (this.type === 'array' && this.items && !(this.items instanceof Schema)) {
+    this.items = new Schema(this.items)
+  }
+  ['allOf', 'anyOf', 'oneOf'].forEach((validationKeyword) => {
+    if (this[validationKeyword]) {
+      this[validationKeyword].forEach((_definition, i) => {
+        if (!(_definition instanceof Schema)) {
+          this[validationKeyword][i] = new Schema(_definition)
+        }
+      })
+    }
+  })
 }
 
 export default Component.extend({
