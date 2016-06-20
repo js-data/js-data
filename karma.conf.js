@@ -85,6 +85,7 @@ module.exports = function (config) {
       'src/Relation/*.js',
       'src/relations.js',
       'src/decorators.js',
+      'src/Settable.js',
       'src/Component.js',
       'src/Schema.js',
       'src/Query.js',

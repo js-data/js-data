@@ -115,14 +115,14 @@ describe('Mapper#validate', function () {
       assert.fail()
     } catch (err) {
       assert(err instanceof Error)
-      assert.deepEqual(err.errors, [{ actual: 'string', expected: 'one of (number)', path: '' }], 'should require a number')
+      assert.deepEqual(err.errors, [{ actual: 'string', expected: 'one of (number)', path: 'age' }], 'should require a number')
       assert.equal(err.message, 'validation failed')
     }
     try {
       user.age = {}
     } catch (err) {
       assert(err instanceof Error)
-      assert.deepEqual(err.errors, [{ actual: 'object', expected: 'one of (number)', path: '' }], 'should require a number')
+      assert.deepEqual(err.errors, [{ actual: 'object', expected: 'one of (number)', path: 'age' }], 'should require a number')
       assert.equal(err.message, 'validation failed')
     }
     assert.doesNotThrow(function () {
@@ -132,7 +132,7 @@ describe('Mapper#validate', function () {
       user.title = 1234
     } catch (err) {
       assert(err instanceof Error)
-      assert.deepEqual(err.errors, [{ actual: 'number', expected: 'one of (string, null)', path: '' }], 'should require a string or null')
+      assert.deepEqual(err.errors, [{ actual: 'number', expected: 'one of (string, null)', path: 'title' }], 'should require a string or null')
       assert.equal(err.message, 'validation failed')
     }
     assert.doesNotThrow(function () {
@@ -150,7 +150,7 @@ describe('Mapper#validate', function () {
       user.set('foo', 'bar')
     } catch (err) {
       assert(err instanceof Error)
-      assert.deepEqual(err.errors, [{ actual: 'string', expected: 'one of (number)', path: '' }], 'should validate on create')
+      assert.deepEqual(err.errors, [{ actual: 'string', expected: 'one of (number)', path: 'age' }], 'should validate on create')
       assert.equal(err.message, 'validation failed')
     }
 

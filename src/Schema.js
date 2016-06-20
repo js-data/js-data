@@ -111,7 +111,7 @@ const validationKeywords = {
    * @name Schema.validationKeywords.allOf
    * @method
    * @param {*} value Value to be validated.
-   * @param {Object} [schema] Schema containing the `allOf` keyword.
+   * @param {Object} schema Schema containing the `allOf` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -135,7 +135,7 @@ const validationKeywords = {
    * @name Schema.validationKeywords.anyOf
    * @method
    * @param {*} value Value to be validated.
-   * @param {Object} [schema] Schema containing the `anyOf` keyword.
+   * @param {Object} schema Schema containing the `anyOf` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -174,7 +174,7 @@ const validationKeywords = {
    * @name Schema.validationKeywords.enum
    * @method
    * @param {*} value Value to validate
-   * @param {Object} [schema] Schema containing the `enum` keyword.
+   * @param {Object} schema Schema containing the `enum` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -191,8 +191,8 @@ const validationKeywords = {
    *
    * @name Schema.validationKeywords.items
    * @method
-   * @param {*} value [Array] Array to be validated.
-   * @param {Object} [schema] Schema containing the items keyword.
+   * @param {*} value Array to be validated.
+   * @param {Object} schema Schema containing the items keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -222,8 +222,8 @@ const validationKeywords = {
    *
    * @name Schema.validationKeywords.maximum
    * @method
-   * @param {*} value [Number] number to validate against the keyword.
-   * @param {Object} schema [schema] Schema containing the `maximum` keyword.
+   * @param {*} value Number to validate against the keyword.
+   * @param {Object} schema Schema containing the `maximum` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -248,8 +248,8 @@ const validationKeywords = {
    *
    * @name Schema.validationKeywords.maxItems
    * @method
-   * @param {*} value [array] Array to be validated.
-   * @param {Object} [schema] Schema containing the `maxItems` keyword.
+   * @param {*} value Array to be validated.
+   * @param {Object} schema Schema containing the `maxItems` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -266,8 +266,8 @@ const validationKeywords = {
    *
    * @name Schema.validationKeywords.maxLength
    * @method
-   * @param {*} value [string] String to be validated.
-   * @param {Object} [schema] Schema containing the `maxLength` keyword.
+   * @param {*} value String to be validated.
+   * @param {Object} schema Schema containing the `maxLength` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -282,8 +282,8 @@ const validationKeywords = {
    *
    * @name Schema.validationKeywords.maxProperties
    * @method
-   * @param {*} value [Object] Object to be validated.
-   * @param {Object} [schema] Schema containing the `maxProperties` keyword.
+   * @param {*} value Object to be validated.
+   * @param {Object} schema Schema containing the `maxProperties` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -304,8 +304,8 @@ const validationKeywords = {
    *
    * @name Schema.validationKeywords.minimum
    * @method
-   * @param {*} value [number] number to validate against the keyword.
-   * @param {Object} [schema] Schema containing the `minimum` keyword.
+   * @param {*} value Number to validate against the keyword.
+   * @param {Object} schema Schema containing the `minimum` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -330,8 +330,8 @@ const validationKeywords = {
    *
    * @name Schema.validationKeywords.minItems
    * @method
-   * @param {*} value [array] Array to be validated.
-   * @param {Object} [schema] Schema containing the `minItems` keyword.
+   * @param {*} value Array to be validated.
+   * @param {Object} schema Schema containing the `minItems` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -348,8 +348,8 @@ const validationKeywords = {
    *
    * @name Schema.validationKeywords.minLength
    * @method
-   * @param {*} value [string] String to be validated.
-   * @param {Object} [schema] Schema containing the `minLength` keyword.
+   * @param {*} value String to be validated.
+   * @param {Object} schema Schema containing the `minLength` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -364,8 +364,8 @@ const validationKeywords = {
    *
    * @name Schema.validationKeywords.minProperties
    * @method
-   * @param {*} value [Object] Object to be validated.
-   * @param {Object} [schema] Schema containing the `minProperties` keyword.
+   * @param {*} value Object to be validated.
+   * @param {Object} schema Schema containing the `minProperties` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -386,8 +386,8 @@ const validationKeywords = {
    *
    * @name Schema.validationKeywords.multipleOf
    * @method
-   * @param {*} value [number] Number to be validated.
-   * @param {Object} [schema] Schema containing the `multipleOf` keyword.
+   * @param {*} value Number to be validated.
+   * @param {Object} schema Schema containing the `multipleOf` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -408,7 +408,7 @@ const validationKeywords = {
    * @name Schema.validationKeywords.not
    * @method
    * @param {*} value to be checked.
-   * @param {Object} [schema] Schema containing the not keyword.
+   * @param {Object} schema Schema containing the not keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -427,7 +427,7 @@ const validationKeywords = {
    * @name Schema.validationKeywords.oneOf
    * @method
    * @param {*} value to be checked.
-   * @param {Object} [schema] Schema containing the `oneOf` keyword.
+   * @param {Object} schema Schema containing the `oneOf` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -456,8 +456,8 @@ const validationKeywords = {
    * see http://json-schema.org/latest/json-schema-validation.html#anchor33
    * @name Schema.validationKeywords.pattern
    * @method
-   * @param {*} value [string] String to be validated.
-   * @param {Object} [schema] Schema containing the `pattern` keyword.
+   * @param {*} value String to be validated.
+   * @param {Object} schema Schema containing the `pattern` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -477,8 +477,8 @@ const validationKeywords = {
    *
    * @name Schema.validationKeywords.properties
    * @method
-   * @param {*} value [Object] Object to be validated.
-   * @param {Object} [schema] Schema containing the `properties` keyword.
+   * @param {*} value Object to be validated.
+   * @param {Object} schema Schema containing the `properties` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -545,8 +545,8 @@ const validationKeywords = {
    *
    * @name Schema.validationKeywords.required
    * @method
-   * @param {*} value [Object] Object to be validated.
-   * @param {Object} [schema] Schema containing the `required` keyword.
+   * @param {*} value Object to be validated.
+   * @param {Object} schema Schema containing the `required` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -574,7 +574,7 @@ const validationKeywords = {
    * @name Schema.validationKeywords.type
    * @method
    * @param {*} value Value to be validated.
-   * @param {Object} [schema] Schema containing the `type` keyword.
+   * @param {Object} schema Schema containing the `type` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -613,8 +613,8 @@ const validationKeywords = {
    *
    * @name Schema.validationKeywords.uniqueItems
    * @method
-   * @param {*} value [array] Array to be validated.
-   * @param {Object} [schema] Schema containing the `uniqueItems` keyword.
+   * @param {*} value Array to be validated.
+   * @param {Object} schema Schema containing the `uniqueItems` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -675,7 +675,7 @@ const validateAny = function (value, schema, opts) {
  * @name Schema.validate
  * @method
  * @param {*} value Value to be validated.
- * @param {Object} [schema] Valid Schema according to the http://json-schema.org/ v4 specification.
+ * @param {Object} schema Valid Schema according to the http://json-schema.org/ v4 specification.
  * @param {Object} [opts] Configuration options.
  * @returns {(array|undefined)} Array of errors or `undefined` if valid.
  */
@@ -750,8 +750,6 @@ const validationFailureMsg = 'validation failed'
  * {@link Mapper#recordClass}. This method is called when
  * {@link Mapper#applySchema} is set to `true`.
  *
- * TODO: Make this more configurable, i.e. not so tied to the Record class.
- *
  * @ignore
  */
 const makeDescriptor = function (prop, schema, opts) {
@@ -788,7 +786,7 @@ const makeDescriptor = function (prop, schema, opts) {
 
     // Optionally check that the new value passes validation
     if (!_get(noValidatePath)) {
-      const errors = schema.validate(value)
+      const errors = schema.validate(value, { path: [prop] })
       if (errors) {
         // Immediately throw an error, preventing the record from getting into
         // an invalid state
@@ -888,8 +886,8 @@ const typeGroupValidators = {
    *
    * @name Schema.typeGroupValidators.array
    * @method
-   * @param {*} value [array] Array to be validated.
-   * @param {Object} [schema] Schema containing at least one array keyword.
+   * @param {*} value Array to be validated.
+   * @param {Object} schema Schema containing at least one array keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -905,8 +903,8 @@ const typeGroupValidators = {
    *```
    * @name Schema.typeGroupValidators.integer
    * @method
-   * @param {*} value [number] Number to be validated.
-   * @param {Object} [schema] Schema containing at least one `integer` keyword.
+   * @param {*} value Number to be validated.
+   * @param {Object} schema Schema containing at least one `integer` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -923,8 +921,8 @@ const typeGroupValidators = {
    *```
    * @name Schema.typeGroupValidators.number
    * @method
-   * @param {*} value [number] Number to be validated.
-   * @param {Object} [schema] Schema containing at least one `number` keyword.
+   * @param {*} value Number to be validated.
+   * @param {Object} schema Schema containing at least one `number` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -943,8 +941,8 @@ const typeGroupValidators = {
    *
    * @name Schema.typeGroupValidators.numeric
    * @method
-   * @param {*} value [number] Number to be validated.
-   * @param {Object} [schema] Schema containing at least one `numeric` keyword.
+   * @param {*} value Number to be validated.
+   * @param {Object} schema Schema containing at least one `numeric` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -962,8 +960,8 @@ const typeGroupValidators = {
    *
    * @name Schema.typeGroupValidators.object
    * @method
-   * @param {*} value [number] Object to be validated.
-   * @param {Object} [schema] Schema containing at least one `object` keyword.
+   * @param {*} value Object to be validated.
+   * @param {Object} schema Schema containing at least one `object` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -981,8 +979,8 @@ const typeGroupValidators = {
    *
    * @name Schema.typeGroupValidators.string
    * @method
-   * @param {*} value [number] String to be validated.
-   * @param {Object} [schema] Schema containing at least one `string` keyword.
+   * @param {*} value String to be validated.
+   * @param {Object} schema Schema containing at least one `string` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -994,9 +992,19 @@ const typeGroupValidators = {
 /**
  * js-data's Schema class.
  *
- * ```javascript
- * import {Schema} from 'js-data'
- * ```
+ * @example Schema#constructor</caption>
+ * // Normally you would do:  import {Schema} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Schema} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * const PostSchema = new Schema({
+ *   type: 'object',
+ *   properties: {
+ *     title: { type: 'string' }
+ *   }
+ * })
+ * PostSchema.validate({ title: 1234 })
  *
  * @class Schema
  * @extends Component
@@ -1007,14 +1015,25 @@ function Schema (definition) {
   // TODO: schema validation
   utils.fillIn(this, definition)
 
-  // TODO: rework this to make sure all possible keywords are converted
-  if (definition.properties) {
-    utils.forOwn(definition.properties, function (_definition, prop) {
+  if (this.type === 'object' && this.properties) {
+    utils.forOwn(this.properties, (_definition, prop) => {
       if (!(_definition instanceof Schema)) {
-        definition.properties[prop] = new Schema(_definition)
+        this.properties[prop] = new Schema(_definition)
       }
     })
   }
+  if (this.type === 'array' && this.items && !(this.items instanceof Schema)) {
+    this.items = new Schema(this.items)
+  }
+  ['allOf', 'anyOf', 'oneOf'].forEach((validationKeyword) => {
+    if (this[validationKeyword]) {
+      this[validationKeyword].forEach((_definition, i) => {
+        if (!(_definition instanceof Schema)) {
+          this[validationKeyword][i] = new Schema(_definition)
+        }
+      })
+    }
+  })
 }
 
 export default Component.extend({
@@ -1062,3 +1081,57 @@ export default Component.extend({
   validate,
   validationKeywords
 })
+
+/**
+ * Create a subclass of this Schema:
+ * @example <caption>Schema.extend</caption>
+ * // Normally you would do: import {Schema} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Schema} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * // Extend the class using ES2015 class syntax.
+ * class CustomSchemaClass extends Schema {
+ *   foo () { return 'bar' }
+ *   static beep () { return 'boop' }
+ * }
+ * const customSchema = new CustomSchemaClass()
+ * console.log(customSchema.foo())
+ * console.log(CustomSchemaClass.beep())
+ *
+ * // Extend the class using alternate method.
+ * const OtherSchemaClass = Schema.extend({
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherSchema = new OtherSchemaClass()
+ * console.log(otherSchema.foo())
+ * console.log(OtherSchemaClass.beep())
+ *
+ * // Extend the class, providing a custom constructor.
+ * function AnotherSchemaClass () {
+ *   Schema.call(this)
+ *   this.created_at = new Date().getTime()
+ * }
+ * Schema.extend({
+ *   constructor: AnotherSchemaClass,
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const anotherSchema = new AnotherSchemaClass()
+ * console.log(anotherSchema.created_at)
+ * console.log(anotherSchema.foo())
+ * console.log(AnotherSchemaClass.beep())
+ *
+ * @method Schema.extend
+ * @param {Object} [props={}] Properties to add to the prototype of the
+ * subclass.
+ * @param {Object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
+ * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @returns {Constructor} Subclass of this Schema class.
+ * @since 3.0.0
+ */
+

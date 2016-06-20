@@ -1,5 +1,6 @@
 import utils from './utils'
 import Component from './Component'
+import Settable from './Settable'
 
 const DOMAIN = 'Record'
 
@@ -14,11 +15,94 @@ const superMethod = function (mapper, name) {
 }
 
 /**
- * js-data's Record class.
+ * js-data's Record class. An instance of `Record` corresponds to an in-memory
+ * representation of a single row or document in a database, Firebase,
+ * localstorage, etc. Basically, a `Record` instance represents whatever kind of
+ * entity in your persistence layer that has a primary key.
  *
  * ```javascript
  * import {Record} from 'js-data'
  * ```
+ *
+ * @example <caption>Record#constructor</caption>
+ * // Normally you would do: import {Record} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Record} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * // Instantiate a plain record
+ * let record = new Record()
+ * console.log('record: ' + JSON.stringify(record))
+ *
+ * // You can supply properties on instantiation
+ * record = new Record({ name: 'John' })
+ * console.log('record: ' + JSON.stringify(record))
+ *
+ * @example <caption>Record#constructor2</caption>
+ * // Normally you would do: import {Mapper} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Mapper} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * // Instantiate a record that's associated with a Mapper:
+ * const UserMapper = new Mapper({ name: 'user' })
+ * const User = UserMapper.recordClass
+ * const user = UserMapper.createRecord({ name: 'John' })
+ * const user2 = new User({ name: 'Sally' })
+ * console.log('user: ' + JSON.stringify(user))
+ * console.log('user2: ' + JSON.stringify(user2))
+ *
+ * @example <caption>Record#constructor3</caption>
+ * // Normally you would do: import {Container} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Container} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * const store = new Container()
+ * store.defineMapper('user')
+ *
+ * // Instantiate a record that's associated with a store's Mapper
+ * const user = store.createRecord('user', { name: 'John' })
+ * console.log('user: ' + JSON.stringify(user))
+ *
+ * @example <caption>Record#constructor4</caption>
+ * // Normally you would do: import {Container} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Container} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * const store = new Container()
+ * store.defineMapper('user', {
+ *   schema: {
+ *     properties: {
+ *       name: { type: 'string' }
+ *     }
+ *   }
+ * })
+ *
+ * // Validate on instantiation
+ * const user = store.createRecord('user', { name: 1234 })
+ * console.log('user: ' + JSON.stringify(user))
+ *
+ * @example <caption>Record#constructor5</caption>
+ * // Normally you would do: import {Container} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Container} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * const store = new Container()
+ * store.defineMapper('user', {
+ *   schema: {
+ *     properties: {
+ *       name: { type: 'string' }
+ *     }
+ *   }
+ * })
+ *
+ * // Skip validation on instantiation
+ * const user = store.createRecord('user', { name: 1234 }, { noValidate: true })
+ * console.log('user: ' + JSON.stringify(user))
+ * console.log('user.isValid(): ' + user.isValid())
  *
  * @class Record
  * @extends Component
@@ -30,14 +114,9 @@ const superMethod = function (mapper, name) {
  */
 function Record (props, opts) {
   utils.classCallCheck(this, Record)
+  Settable.call(this)
   props || (props = {})
   opts || (opts = {})
-  const _props = {}
-  Object.defineProperties(this, {
-    _get: { value (key) { return utils.get(_props, key) } },
-    _set: { value (key, value) { return utils.set(_props, key, value) } },
-    _unset: { value (key) { return utils.unset(_props, key) } }
-  })
   const _set = this._set
   // TODO: Optimize these strings
   _set('creating', true)
@@ -56,7 +135,6 @@ export default Component.extend({
   /**
    * Returns the {@link Mapper} paired with this record's class, if any.
    *
-   * @private
    * @method Record#_mapper
    * @returns {Mapper} The {@link Mapper} paired with this record's class, if any.
    * @since 3.0.0
@@ -93,6 +171,19 @@ export default Component.extend({
    * Return changes to this record since it was instantiated or
    * {@link Record#commit} was called.
    *
+   * @example <caption>Record#changes</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user')
+   * console.log('user changes: ' + JSON.stringify(user.changes()))
+   * user.name = 'John'
+   * console.log('user changes: ' + JSON.stringify(user.changes()))
+   *
    * @method Record#changes
    * @param [opts] Configuration options.
    * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
@@ -110,6 +201,21 @@ export default Component.extend({
    * Make the record's current in-memory state it's only state, with any
    * previous property values being set to current values.
    *
+   * @example <caption>Record#commit</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user')
+   * console.log('user hasChanges: ' + user.hasChanges())
+   * user.name = 'John'
+   * console.log('user hasChanges: ' + user.hasChanges())
+   * user.commit()
+   * console.log('user hasChanges: ' + user.hasChanges())
+   *
    * @method Record#commit
    * @since 3.0.0
    */
@@ -120,6 +226,20 @@ export default Component.extend({
 
   /**
    * Call {@link Mapper#destroy} using this record's primary key.
+   *
+   * @example
+   * import {Container} from 'js-data'
+   * import {RethinkDBAdapter} from 'js-data-rethinkdb'
+   *
+   * const store = new Container()
+   * store.registerAdapter('rethink', new RethinkDBAdapter(), { default: true })
+   * store.defineMapper('user')
+   * store.find('user', 1234).then((user) => {
+   *   console.log(user.id) // 1234
+   *
+   *   // Destroy this user from the database
+   *   return user.destroy()
+   * })
    *
    * @method Record#destroy
    * @param {Object} [opts] Configuration options passed to {@link Mapper#destroy}.
@@ -136,6 +256,17 @@ export default Component.extend({
   /**
    * Return the value at the given path for this instance.
    *
+   * @example <caption>Record#get</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user')
+   *
+   * const user = store.createRecord('user', { name: 'Bob' })
+   * console.log('user.get("name"): ' + user.get('name'))
+   *
    * @method Record#get
    * @param {string} key Path of value to retrieve.
    * @returns {*} Value at path.
@@ -148,6 +279,20 @@ export default Component.extend({
   /**
    * Return whether this record has changed since it was instantiated or
    * {@link Record#commit} was called.
+   *
+   * @example <caption>Record#hasChanges</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user')
+   * console.log('user hasChanges: ' + user.hasChanges())
+   * user.name = 'John'
+   * console.log('user hasChanges: ' + user.hasChanges())
+   * user.commit()
+   * console.log('user hasChanges: ' + user.hasChanges())
    *
    * @method Record#hasChanges
    * @param [opts] Configuration options.
@@ -165,6 +310,28 @@ export default Component.extend({
   /**
    * Return whether the record in its current state passes validation.
    *
+   * @example <caption>Record#isValid</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user', {
+   *   schema: {
+   *     properties: {
+   *       name: { type: 'string' }
+   *     }
+   *   }
+   * })
+   * const user = store.createRecord('user', {
+   *   name: 1234
+   * }, {
+   *   noValidate: true // this allows us to put the record into an invalid state
+   * })
+   * console.log('user isValid: ' + user.isValid())
+   * user.name = 'John'
+   * console.log('user isValid: ' + user.isValid())
+   *
    * @method Record#isValid
    * @param {Object} [opts] Configuration options. Passed to {@link Mapper#validate}.
    * @returns {boolean} Whether the record in its current state passes
@@ -179,8 +346,44 @@ export default Component.extend({
    * Lazy load relations of this record, to be attached to the record once their
    * loaded.
    *
+   * @example
+   * import {Container} from 'js-data'
+   * import {RethinkDBAdapter} from 'js-data-rethinkdb'
+   *
+   * const store = new Container()
+   * store.registerAdapter('rethink', new RethinkDBAdapter(), { default: true })
+   * store.defineMapper('user', {
+   *   relations: {
+   *     hasMany: {
+   *       post: {
+   *         localField: 'posts',
+   *         foreignKey: 'user_id'
+   *       }
+   *     }
+   *   }
+   * })
+   * store.defineMapper('post', {
+   *   relations: {
+   *     belongsTo: {
+   *       user: {
+   *         localField: 'user',
+   *         foreignKey: 'user_id'
+   *       }
+   *     }
+   *   }
+   * })
+   * store.find('user', 1234).then((user) => {
+   *   console.log(user.id) // 1234
+   *
+   *   // Load the user's post relations
+   *   return user.loadRelations(['post'])
+   * }).then((user) => {
+   *   console.log(user.posts) // [{...}, {...}, ...]
+   * })
+   *
    * @method Record#loadRelations
-   * @param {string[]} [relations] List of relations to load.
+   * @param {string[]} [relations] List of relations to load. Can use localField
+   * names or Mapper names to pick relations.
    * @param {Object} [opts] Configuration options.
    * @returns {Promise} Resolves with the record, with the loaded relations now
    * attached.
@@ -266,6 +469,22 @@ export default Component.extend({
   /**
    * Return the properties with which this record was instantiated.
    *
+   * @example <caption>Record#previous</caption>
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user', {
+   *   name: 'William'
+   * })
+   * console.log('user previous: ' + JSON.stringify(user.previous()))
+   * user.name = 'Bob'
+   * console.log('user previous: ' + JSON.stringify(user.previous()))
+   * user.commit()
+   * console.log('user previous: ' + JSON.stringify(user.previous()))
+   *
    * @method Record#previous
    * @param {string} [key] If specified, return just the initial value of the
    * given key.
@@ -282,6 +501,22 @@ export default Component.extend({
   /**
    * Revert changes to this record back to the properties it had when it was
    * instantiated.
+   *
+   * @example <caption>Record#revert</caption>
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user', {
+   *   name: 'William'
+   * })
+   * console.log('user: ' + JSON.stringify(user))
+   * user.name = 'Bob'
+   * console.log('user: ' + JSON.stringify(user))
+   * user.revert()
+   * console.log('user: ' + JSON.stringify(user))
    *
    * @method Record#revert
    * @param {Object} [opts] Configuration options.
@@ -308,6 +543,25 @@ export default Component.extend({
 
   /**
    * Delegates to {@link Mapper#create} or {@link Mapper#update}.
+   *
+   * @example
+   * import {Container} from 'js-data'
+   * import {RethinkDBAdapter} from 'js-data-rethinkdb'
+   *
+   * const store = new Container()
+   * store.registerAdapter('rethink', new RethinkDBAdapter(), { default: true })
+   * store.defineMapper('session')
+   * const session = store.createRecord('session', { topic: 'Node.js' })
+   *
+   * // Create a new record in the database
+   * session.save().then(() => {
+   *   console.log(session.id) // 1234
+   *
+   *   session.skill_level = 'beginner'
+   *
+   *   // Update the record in the database
+   *   return user.save()
+   * })
    *
    * @method Record#save
    * @param {Object} [opts] Configuration options. See {@link Mapper#create} and
@@ -347,8 +601,27 @@ export default Component.extend({
 
   /**
    * Set the value for a given key, or the values for the given keys if "key" is
-   * an object.
+   * an object. Triggers change events on those properties that have `track: true`
+   * in {@link Mapper#schema}.
    *
+   * @example <caption>Record#set</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user')
+   *
+   * const user = store.createRecord('user')
+   * console.log('user: ' + JSON.stringify(user))
+   *
+   * user.set('name', 'Bob')
+   * console.log('user: ' + JSON.stringify(user))
+   *
+   * user.set({ age: 30, role: 'admin' })
+   * console.log('user: ' + JSON.stringify(user))
+   *
+   * @fires Record#change
    * @method Record#set
    * @param {(string|Object)} key Key to set or hash of key-value pairs to set.
    * @param {*} [value] Value to set for the given key.
@@ -375,8 +648,31 @@ export default Component.extend({
    * which this record was created has a Mapper, then {@link Mapper#toJSON} will
    * be called with this record instead.
    *
+   * @example <caption>Record#toJSON</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user', {
+   *   schema: {
+   *     properties: {
+   *       name: { type: 'string' }
+   *     }
+   *   }
+   * })
+   *
+   * const user = store.createRecord('user', {
+   *   name: 'John',
+   *   $$hashKey: '1234'
+   * })
+   * console.log('user: ' + JSON.stringify(user.toJSON()))
+   * console.log('user: ' + JSON.stringify(user.toJSON({ strict: true })))
+   *
    * @method Record#toJSON
    * @param {Object} [opts] Configuration options.
+   * @param {boolean} [opts.strict] Whether to exclude properties that are not
+   * defined in {@link Mapper#schema}.
    * @param {string[]} [opts.with] Array of relation names or relation fields
    * to include in the representation. Only available as an option if the class
    * from which this record was created has a Mapper and this record resides in
@@ -398,7 +694,24 @@ export default Component.extend({
   },
 
   /**
-   * Unset the value for a given key.
+   * Unset the value for a given key. Triggers change events on those properties
+   * that have `track: true` in {@link Mapper#schema}.
+   *
+   * @example <caption>Record#unset</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user')
+   *
+   * const user = store.createRecord('user', {
+   *   name: 'John'
+   * })
+   * console.log('user: ' + JSON.stringify(user))
+   *
+   * user.unset('name')
+   * console.log('user: ' + JSON.stringify(user))
    *
    * @method Record#unset
    * @param {string} key Key to unset.
@@ -412,6 +725,28 @@ export default Component.extend({
 
   /**
    * Validate this record based on its current properties.
+   *
+   * @example <caption>Record#validate</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user', {
+   *   schema: {
+   *     properties: {
+   *       name: { type: 'string' }
+   *     }
+   *   }
+   * })
+   * const user = store.createRecord('user', {
+   *   name: 1234
+   * }, {
+   *   noValidate: true // this allows us to put the record into an invalid state
+   * })
+   * console.log('user validation: ' + JSON.stringify(user.validate()))
+   * user.name = 'John'
+   * console.log('user validation: ' + user.validate())
    *
    * @method Record#validate
    * @param {Object} [opts] Configuration options. Passed to {@link Mapper#validate}.
@@ -439,26 +774,77 @@ utils.eventify(
 )
 
 /**
- * Create a subclass of this Record.
+ * Fired when a record changes. Only works for records that have tracked fields.
+ * See {@link Record~changeListener} on how to listen for this event.
  *
- * @example <caption>Extend the class in a cross-browser manner.</caption>
- * import {Record} from 'js-data'
- * const CustomRecordClass = Record.extend({
- *   foo () { return 'bar' }
- * })
- * const customRecord = new CustomRecordClass()
- * console.log(customRecord.foo()) // "bar"
+ * @event Record#change
+ * @see Record~changeListener
+ */
+
+/**
+ * Callback signature for the {@link Record#event:change} event.
  *
- * @example <caption>Extend the class using ES2015 class syntax.</caption>
+ * @example
+ * function onChange (mapperName, record, changes) {
+ *   // do something
+ * }
+ * store.on('change', onChange)
+ *
+ * @callback Record~changeListener
+ * @param {Record} The Record that changed.
+ * @param {Object} The changes.
+ * @see Record#event:change
+ * @since 3.0.0
+ */
+
+/**
+ * Create a subclass of this Record:
+ * @example <caption>Record.extend</caption>
+ * // Normally you would do: import {Record} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Record} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * // Extend the class using ES2015 class syntax.
  * class CustomRecordClass extends Record {
  *   foo () { return 'bar' }
+ *   static beep () { return 'boop' }
  * }
  * const customRecord = new CustomRecordClass()
- * console.log(customRecord.foo()) // "bar"
+ * console.log(customRecord.foo())
+ * console.log(CustomRecordClass.beep())
+ *
+ * // Extend the class using alternate method.
+ * const OtherRecordClass = Record.extend({
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherRecord = new OtherRecordClass()
+ * console.log(otherRecord.foo())
+ * console.log(OtherRecordClass.beep())
+ *
+ * // Extend the class, providing a custom constructor.
+ * function AnotherRecordClass () {
+ *   Record.call(this)
+ *   this.created_at = new Date().getTime()
+ * }
+ * Record.extend({
+ *   constructor: AnotherRecordClass,
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const anotherRecord = new AnotherRecordClass()
+ * console.log(anotherRecord.created_at)
+ * console.log(anotherRecord.foo())
+ * console.log(AnotherRecordClass.beep())
  *
  * @method Record.extend
  * @param {Object} [props={}] Properties to add to the prototype of the
  * subclass.
+ * @param {Object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
  * @param {Object} [classProps={}] Static properties to add to the subclass.
  * @returns {Constructor} Subclass of this Record class.
  * @since 3.0.0

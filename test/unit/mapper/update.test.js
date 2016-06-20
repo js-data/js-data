@@ -112,7 +112,6 @@ describe('Mapper#update', function () {
       ]
     }
     let updateCalled = false
-    let customer
     const store = new JSData.Container({
       mapperDefaults: {
         defaultAdapter: 'mock'
@@ -148,7 +147,7 @@ describe('Mapper#update', function () {
         }
       }
     })
-    await store.update('customer', 1, props, { with: ['address']})
+    await store.update('customer', 1, props, { with: ['address'] })
     assert.equal(updateCalled, true)
   })
 })

@@ -56,16 +56,19 @@ const COLLECTION_DEFAULTS = {
 /**
  * An ordered set of {@link Record} instances.
  *
- * @example
- * import {Collection, Record} from 'js-data'
+ * @example <caption>Collection#constructor</caption>
+ * // import {Collection, Record} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Collection, Record} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
  * const user1 = new Record({ id: 1 })
  * const user2 = new Record({ id: 2 })
  * const UserCollection = new Collection([user1, user2])
- * UserCollection.get(1) === user1 // true
+ * console.log(UserCollection.get(1) === user1)
  *
  * @class Collection
  * @extends Component
- * @type {Function}
  * @param {Array} [records] Initial set of records to insert into the
  * collection.
  * @param {Object} [opts] Configuration options.
@@ -91,26 +94,29 @@ function Collection (records, opts) {
   records || (records = [])
   opts || (opts = {})
 
-  /**
-   * Default Mapper for this collection. Optional. If a Mapper is provided, then
-   * the collection will use the {@link Mapper#idAttribute} setting, and will
-   * wrap records in {@link Mapper#recordClass}.
-   *
-   * @example
-   * import {Collection, Mapper} from 'js-data'
-   *
-   * class MyMapperClass extends Mapper {
-   *   foo () { return 'bar' }
-   * }
-   * const myMapper = new MyMapperClass()
-   * const collection = new Collection(null, { mapper: myMapper })
-   *
-   * @name Collection#mapper
-   * @type {Mapper}
-   * @default null
-   * @since 3.0.0
-   */
   Object.defineProperties(this, {
+    /**
+     * Default Mapper for this collection. Optional. If a Mapper is provided, then
+     * the collection will use the {@link Mapper#idAttribute} setting, and will
+     * wrap records in {@link Mapper#recordClass}.
+     *
+     * @example <caption>Collection#mapper</caption>
+     * // Normally you would do: import {Collection, Mapper} from 'js-data'
+     * const JSData = require('js-data@3.0.0-beta.7')
+     * const {Collection, Mapper} = JSData
+     * console.log('Using JSData v' + JSData.version.full)
+     *
+     * class MyMapperClass extends Mapper {
+     *   foo () { return 'bar' }
+     * }
+     * const myMapper = new MyMapperClass({ name: 'myMapper' })
+     * const collection = new Collection(null, { mapper: myMapper })
+     *
+     * @name Collection#mapper
+     * @type {Mapper}
+     * @default null
+     * @since 3.0.0
+     */
     mapper: {
       value: undefined,
       writable: true
@@ -274,7 +280,6 @@ export default Component.extend({
     })
     // Finally, return the inserted data
     const result = singular ? records[0] : records
-    // TODO: Make this more performant (batch events?)
     this.emit('add', result)
     return this.afterAdd(records, opts, result) || result
   },
@@ -353,10 +358,12 @@ export default Component.extend({
    *
    * Shortcut for `collection.query().between(18, 30, { index: 'age' }).run()`
    *
-   * @example <caption>Get all users ages 18 to 30</caption>
+   * @example
+   * // Get all users ages 18 to 30
    * const users = collection.between(18, 30, { index: 'age' })
    *
-   * @example <caption>Same as above</caption>
+   * @example
+   * // Same as above
    * const users = collection.between([18], [30], { index: 'age' })
    *
    * @method Collection#between
@@ -372,7 +379,7 @@ export default Component.extend({
    * on the left boundary.
    * @param {boolean} [opts.limit] Limit the result to a certain number.
    * @param {boolean} [opts.offset] The number of resulting records to skip.
-   * @returns {Array} The result.
+   * @returns {Object[]|Record[]} The result.
    */
   between (leftKeys, rightKeys, opts) {
     return this.query().between(leftKeys, rightKeys, opts).run()
@@ -381,10 +388,12 @@ export default Component.extend({
   /**
    * Create a new secondary index on the contents of the collection.
    *
-   * @example <caption>Index users by age</caption>
+   * @example
+   * // Index users by age
    * collection.createIndex('age')
    *
-   * @example <caption>Index users by status and role</caption>
+   * @example
+   * // Index users by status and role
    * collection.createIndex('statusAndRole', ['status', 'role'])
    *
    * @method Collection#createIndex
@@ -393,7 +402,6 @@ export default Component.extend({
    * @param {string[]} [fieldList] Array of field names to use as the key or
    * compound key of the new secondary index. If no fieldList is provided, then
    * the name will also be the field that is used to index the collection.
-   * @returns {Collection} A reference to itself for chaining.
    */
   createIndex (name, fieldList, opts) {
     if (utils.isString(name) && fieldList === undefined) {
@@ -403,7 +411,6 @@ export default Component.extend({
     opts.hashCode || (opts.hashCode = (obj) => this.recordId(obj))
     const index = this.indexes[name] = new Index(fieldList, opts)
     this.index.visitAll(index.insertRecord, index)
-    return this
   },
 
   /**
@@ -412,30 +419,42 @@ export default Component.extend({
    *
    * Shortcut for `collection.query().filter(queryOrFn[, thisArg]).run()`
    *
-   * @example <caption>Get the draft posts created less than three months</caption>
-   * const posts = collection.filter({
+   * @example <caption>Collection#filter</caption>
+   * // Normally you would do: import {Collection} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Collection} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
+   * const collection = new Collection([
+   *   { id: 1, status: 'draft', created_at_timestamp: new Date().getTime() }
+   * ])
+   *
+   * // Get the draft posts created less than three months ago
+   * let posts = collection.filter({
    *   where: {
    *     status: {
    *       '==': 'draft'
    *     },
    *     created_at_timestamp: {
-   *       '>=': (new Date().getTime() - (1000 * 60 * 60 * 24 * 30 * 3)) // 3 months ago
+   *       '>=': (new Date().getTime() - (1000 \* 60 \* 60 \* 24 \* 30 \* 3)) // 3 months ago
    *     }
    *   }
    * })
+   * console.log(posts)
    *
-   * @example <caption>Use a custom filter function</caption>
-   * const posts = collection.filter(function (post) {
-   *   return post.isReady()
+   * // Use a custom filter function
+   * posts = collection.filter(function (post) {
+   *   return post.id % 2 === 0
    * })
    *
    * @method Collection#filter
-   * @since 3.0.0
    * @param {(Object|Function)} [queryOrFn={}] Selection query or filter
    * function.
    * @param {Object} [thisArg] Context to which to bind `queryOrFn` if
    * `queryOrFn` is a function.
    * @returns {Array} The result.
+   * @see query
+   * @since 3.0.0
    */
   filter (query, thisArg) {
     return this.query().filter(query, thisArg).run()
@@ -477,10 +496,12 @@ export default Component.extend({
    *
    * Shortcut for `collection.query().getAll(keyList1, keyList2, ...).run()`
    *
-   * @example <caption>Get the posts where "status" is "draft" or "inReview"</caption>
+   * @example
+   * // Get the posts where "status" is "draft" or "inReview"
    * const posts = collection.getAll('draft', 'inReview', { index: 'status' })
    *
-   * @example <caption>Same as above</caption>
+   * @example
+   * // Same as above
    * const posts = collection.getAll(['draft'], ['inReview'], { index: 'status' })
    *
    * @method Collection#getAll
@@ -592,7 +613,8 @@ export default Component.extend({
    * Create a new query to be executed against the contents of the collection.
    * The result will be all or a subset of the contents of the collection.
    *
-   * @example <caption>Grab page 2 of users between ages 18 and 30</caption>
+   * @example
+   * // Grab page 2 of users between ages 18 and 30
    * collection.query()
    *   .between(18, 30, { index: 'age' }) // between ages 18 and 30
    *   .skip(10) // second page
@@ -650,7 +672,9 @@ export default Component.extend({
       })
       if (record && utils.isFunction(record.off)) {
         record.off('all', this._onRecordEvent, this)
-        this.emit('remove', record)
+        if (!opts.silent) {
+          this.emit('remove', record)
+        }
       }
     }
     return this.afterRemove(id, opts, record) || record
@@ -676,9 +700,14 @@ export default Component.extend({
     const records = this.filter(query)
 
     // Remove each selected record from the collection
+    const optsCopy = utils.plainCopy(opts)
+    optsCopy.silent = true
     records.forEach((item) => {
-      this.remove(this.recordId(item), opts)
+      this.remove(this.recordId(item), optsCopy)
     })
+    if (!opts.silent) {
+      this.emit('remove', records)
+    }
     return this.afterRemoveAll(query, opts, records) || records
   },
 
@@ -733,12 +762,12 @@ export default Component.extend({
   },
 
   /**
-   * TODO
+   * Updates all indexes in this collection for the provided record. Has no
+   * effect if the record is not in the collection.
    *
    * @method Collection#updateIndexes
    * @since 3.0.0
    * @param {Object} record TODO
-   * @param {Object} [opts] Configuration options.
    */
   updateIndexes (record) {
     this.index.updateRecord(record)
@@ -749,26 +778,131 @@ export default Component.extend({
 })
 
 /**
- * Create a subclass of this Collection.
+ * Fired when a record changes. Only works for records that have tracked changes.
+ * See {@link Collection~changeListener} on how to listen for this event.
  *
- * @example <caption>Extend the class in a cross-browser manner.</caption>
- * import {Collection} from 'js-data'
- * const CustomCollectionClass = Collection.extend({
- *   foo () { return 'bar' }
- * })
- * const customCollection = new CustomCollectionClass()
- * console.log(customCollection.foo()) // "bar"
+ * @event Collection#change
+ * @see Collection~changeListener
+ */
+
+/**
+ * Callback signature for the {@link Collection#event:change} event.
  *
- * @example <caption>Extend the class using ES2015 class syntax.</caption>
+ * @example
+ * function onChange (record, changes) {
+ *   // do something
+ * }
+ * collection.on('change', onChange)
+ *
+ * @callback Collection~changeListener
+ * @param {Record} The Record that changed.
+ * @param {Object} The changes.
+ * @see Collection#event:change
+ * @since 3.0.0
+ */
+
+/**
+ * Fired when one or more records are added to the Collection. See
+ * {@link Collection~addListener} on how to listen for this event.
+ *
+ * @event Collection#add
+ * @see Collection~addListener
+ * @see Collection#event:add
+ * @see Collection#add
+ */
+
+/**
+ * Callback signature for the {@link Collection#event:add} event.
+ *
+ * @example
+ * function onAdd (recordOrRecords) {
+ *   // do something
+ * }
+ * collection.on('add', onAdd)
+ *
+ * @callback Collection~addListener
+ * @param {Record|Record[]} The Record or Records that were added.
+ * @see Collection#event:add
+ * @see Collection#add
+ * @since 3.0.0
+ */
+
+/**
+ * Fired when one or more records are removed from the Collection. See
+ * {@link Collection~removeListener} for how to listen for this event.
+ *
+ * @event Collection#remove
+ * @see Collection~removeListener
+ * @see Collection#event:remove
+ * @see Collection#remove
+ * @see Collection#removeAll
+ */
+
+/**
+ * Callback signature for the {@link Collection#event:remove} event.
+ *
+ * @example
+ * function onRemove (recordsOrRecords) {
+ *   // do something
+ * }
+ * collection.on('remove', onRemove)
+ *
+ * @callback Collection~removeListener
+ * @param {Record|Record[]} Record or Records that were removed.
+ * @see Collection#event:remove
+ * @see Collection#remove
+ * @see Collection#removeAll
+ * @since 3.0.0
+ */
+
+/**
+ * Create a subclass of this Collection:
+ * @example <caption>Collection.extend</caption>
+ * // Normally you would do: import {Collection} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Collection} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * // Extend the class using ES2015 class syntax.
  * class CustomCollectionClass extends Collection {
  *   foo () { return 'bar' }
+ *   static beep () { return 'boop' }
  * }
  * const customCollection = new CustomCollectionClass()
- * console.log(customCollection.foo()) // "bar"
+ * console.log(customCollection.foo())
+ * console.log(CustomCollectionClass.beep())
+ *
+ * // Extend the class using alternate method.
+ * const OtherCollectionClass = Collection.extend({
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherCollection = new OtherCollectionClass()
+ * console.log(otherCollection.foo())
+ * console.log(OtherCollectionClass.beep())
+ *
+ * // Extend the class, providing a custom constructor.
+ * function AnotherCollectionClass () {
+ *   Collection.call(this)
+ *   this.created_at = new Date().getTime()
+ * }
+ * Collection.extend({
+ *   constructor: AnotherCollectionClass,
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const anotherCollection = new AnotherCollectionClass()
+ * console.log(anotherCollection.created_at)
+ * console.log(anotherCollection.foo())
+ * console.log(AnotherCollectionClass.beep())
  *
  * @method Collection.extend
  * @param {Object} [props={}] Properties to add to the prototype of the
  * subclass.
+ * @param {Object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
  * @param {Object} [classProps={}] Static properties to add to the subclass.
  * @returns {Constructor} Subclass of this Collection class.
  * @since 3.0.0
