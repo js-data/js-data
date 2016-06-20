@@ -391,12 +391,11 @@ function Mapper (opts) {
   }
 
   // Setup schema, with an empty default schema if necessary
-  if (!(this.schema instanceof Schema)) {
-    this.schema = new Schema(this.schema || {})
-  }
-
-  if (this.schema instanceof Schema) {
+  if (this.schema) {
     this.schema.type || (this.schema.type = 'object')
+  }
+  if (!(this.schema instanceof Schema)) {
+    this.schema = new Schema(this.schema || { type: 'object' })
   }
 
   // Create a subclass of Record that's tied to this Mapper

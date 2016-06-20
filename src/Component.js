@@ -1,4 +1,5 @@
 import utils from './utils'
+import Settable from './Settable'
 
 /**
  * The base class from which all JSData components inherit some basic
@@ -20,7 +21,8 @@ import utils from './utils'
  * @returns {Component} A new {@link Component} instance.
  * @since 3.0.0
  */
-export default function Component (opts) {
+function Component (opts) {
+  Settable.call(this)
   opts || (opts = {})
 
   /**
@@ -58,6 +60,10 @@ export default function Component (opts) {
    */
   Object.defineProperty(this, '_listeners', { value: {}, writable: true })
 }
+
+export default Settable.extend({
+  constructor: Component
+})
 
 /**
  * Create a subclass of this Component:

@@ -1,5 +1,6 @@
 import utils from './utils'
 import Component from './Component'
+import Settable from './Settable'
 
 const DOMAIN = 'Record'
 
@@ -113,58 +114,9 @@ const superMethod = function (mapper, name) {
  */
 function Record (props, opts) {
   utils.classCallCheck(this, Record)
+  Settable.call(this)
   props || (props = {})
   opts || (opts = {})
-  const _props = {}
-  Object.defineProperties(this, {
-    /**
-     * Get a private property of this Record. Properties defined in
-     * {@link Mapper#schema} become private properties for
-     * {@link Mapper#recordClass}, though you can still access and set them
-     * using the provided ES5 getters and setters.
-     *
-     * __You shouldn't need to use this method unless you have a special need or
-     * unless you're extending the Record class.__
-     *
-     * @method Record#_get
-     * @param {string} key The property to retrieve.
-     * @returns {*} The value of the property.
-     * @since 3.0.0
-     */
-    _get: { value (key) { return utils.get(_props, key) } },
-
-    /**
-     * Set a private property of this Record. Properties defined in
-     * {@link Mapper#schema} become private properties for
-     * {@link Mapper#recordClass}, though you can still access and set them
-     * using the provided ES5 getters and setters.
-     *
-     * __You shouldn't need to use this method unless you have a special need or
-     * unless you're extending the Record class.__
-     *
-     * @method Record#_set
-     * @param {(string|Object)} key The key or path to the property. Can also
-     * pass in an object of key/value pairs, which will all be set on the Record.
-     * @param {*} [value] The value to set.
-     * @since 3.0.0
-     */
-    _set: { value (key, value) { return utils.set(_props, key, value) } },
-
-    /**
-     * Unset a private property of this Record. Properties defined in
-     * {@link Mapper#schema} become private properties for
-     * {@link Mapper#recordClass}, though you can still access and set them
-     * using the provided ES5 getters and setters.
-     *
-     * __You shouldn't need to use this method unless you have a special need or
-     * unless you're extending the Record class.__
-     *
-     * @method Record#_unset
-     * @param {string} key The property to unset.
-     * @since 3.0.0
-     */
-    _unset: { value (key) { return utils.unset(_props, key) } }
-  })
   const _set = this._set
   // TODO: Optimize these strings
   _set('creating', true)
