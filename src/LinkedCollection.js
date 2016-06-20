@@ -5,7 +5,8 @@ import Collection from './Collection'
 const DOMAIN = 'LinkedCollection'
 
 /**
- * TODO
+ * Extends {@link Collection}. Used by a {@link DataStore} to implement an
+ * Identity Map.
  *
  * ```javascript
  * import {LinkedCollection} from 'js-data'

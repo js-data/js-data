@@ -91,8 +91,8 @@ const proxiedCollectionMethods = [
    * @example <caption>DataStore#filter</caption>
    * // import {DataStore} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
-   * const {DataStore, version} = JSData
-   * console.log(\`Using JSData v${version.full}\`)
+   * const {DataStore} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
    *
    * const store = new DataStore()
    * store.defineMapper('post')
@@ -133,8 +133,8 @@ const proxiedCollectionMethods = [
    * @example <caption>DataStore#get</caption>
    * // import {DataStore} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
-   * const {DataStore, version} = JSData
-   * console.log(\`Using JSData v${version.full}\`)
+   * const {DataStore} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
    *
    * const store = new DataStore()
    * store.defineMapper('post')
@@ -324,13 +324,13 @@ const props = {
   },
 
   /**
-   * TODO
+   * Internal method used to handle Mapper responses.
    *
    * @method DataStore#_end
    * @private
    * @param {string} name Name of the {@link LinkedCollection} to which to
    * add the data.
-   * @param {Object} data TODO.
+   * @param {Object} result The result from a Mapper.
    * @param {Object} [opts] Configuration options.
    * @returns {(Object|Array)} Result.
    */

@@ -204,7 +204,7 @@ utils.logify(Component.prototype)
  * @example <caption>Component#emit</caption>
  * // import {Collection, DataStore} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
- * const {Collection, DataStore, version} = JSData
+ * const {Collection, DataStore} = JSData
  *
  * const collection = new Collection()
  * collection.on('foo', (msg) => {

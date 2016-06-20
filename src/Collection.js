@@ -56,16 +56,16 @@ const COLLECTION_DEFAULTS = {
 /**
  * An ordered set of {@link Record} instances.
  *
- * <div id="Collection#constructor" class="tonic">
+ * @example <caption>Collection#constructor</caption>
  * // import {Collection, Record} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
- * const {Collection, Record, version} = JSData
- * console.log(\`Using JSData v${version.full}\`)
+ * const {Collection, Record} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
  * const user1 = new Record({ id: 1 })
  * const user2 = new Record({ id: 2 })
  * const UserCollection = new Collection([user1, user2])
  * console.log(UserCollection.get(1) === user1)
- * </div>
  *
  * @class Collection
  * @extends Component
@@ -100,17 +100,17 @@ function Collection (records, opts) {
      * the collection will use the {@link Mapper#idAttribute} setting, and will
      * wrap records in {@link Mapper#recordClass}.
      *
-     * <div id="Collection#mapper" class="tonic">
-     * // import {Collection, Mapper} from 'js-data'
+     * @example <caption>Collection#mapper</caption>
+     * // Normally you would do: import {Collection, Mapper} from 'js-data'
      * const JSData = require('js-data@3.0.0-beta.7')
-     * const {Collection, Mapper, version} = JSData
-     * console.log(\`Using JSData v${version.full}\`)
+     * const {Collection, Mapper} = JSData
+     * console.log('Using JSData v' + JSData.version.full)
+     *
      * class MyMapperClass extends Mapper {
      *   foo () { return 'bar' }
      * }
      * const myMapper = new MyMapperClass({ name: 'myMapper' })
      * const collection = new Collection(null, { mapper: myMapper })
-     * </div>
      *
      * @name Collection#mapper
      * @type {Mapper}
@@ -280,7 +280,6 @@ export default Component.extend({
     })
     // Finally, return the inserted data
     const result = singular ? records[0] : records
-    // TODO: Make this more performant (batch events?)
     this.emit('add', result)
     return this.afterAdd(records, opts, result) || result
   },
@@ -359,10 +358,12 @@ export default Component.extend({
    *
    * Shortcut for `collection.query().between(18, 30, { index: 'age' }).run()`
    *
-   * @example <caption>Get all users ages 18 to 30</caption>
+   * @example
+   * // Get all users ages 18 to 30
    * const users = collection.between(18, 30, { index: 'age' })
    *
-   * @example <caption>Same as above</caption>
+   * @example
+   * // Same as above
    * const users = collection.between([18], [30], { index: 'age' })
    *
    * @method Collection#between
@@ -387,10 +388,12 @@ export default Component.extend({
   /**
    * Create a new secondary index on the contents of the collection.
    *
-   * @example <caption>Index users by age</caption>
+   * @example
+   * // Index users by age
    * collection.createIndex('age')
    *
-   * @example <caption>Index users by status and role</caption>
+   * @example
+   * // Index users by status and role
    * collection.createIndex('statusAndRole', ['status', 'role'])
    *
    * @method Collection#createIndex
@@ -416,11 +419,12 @@ export default Component.extend({
    *
    * Shortcut for `collection.query().filter(queryOrFn[, thisArg]).run()`
    *
-   * <div id="Collection#filter" class="tonic">
-   * // import {Collection} from 'js-data'
+   * @example <caption>Collection#filter</caption>
+   * // Normally you would do: import {Collection} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
-   * const {Collection, version} = JSData
-   * console.log(\`Using JSData v${version.full}\`)
+   * const {Collection} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
    * const collection = new Collection([
    *   { id: 1, status: 'draft', created_at_timestamp: new Date().getTime() }
    * ])
@@ -442,7 +446,6 @@ export default Component.extend({
    * posts = collection.filter(function (post) {
    *   return post.id % 2 === 0
    * })
-   * </div>
    *
    * @method Collection#filter
    * @param {(Object|Function)} [queryOrFn={}] Selection query or filter
@@ -493,10 +496,12 @@ export default Component.extend({
    *
    * Shortcut for `collection.query().getAll(keyList1, keyList2, ...).run()`
    *
-   * @example <caption>Get the posts where "status" is "draft" or "inReview"</caption>
+   * @example
+   * // Get the posts where "status" is "draft" or "inReview"
    * const posts = collection.getAll('draft', 'inReview', { index: 'status' })
    *
-   * @example <caption>Same as above</caption>
+   * @example
+   * // Same as above
    * const posts = collection.getAll(['draft'], ['inReview'], { index: 'status' })
    *
    * @method Collection#getAll
@@ -608,7 +613,8 @@ export default Component.extend({
    * Create a new query to be executed against the contents of the collection.
    * The result will be all or a subset of the contents of the collection.
    *
-   * @example <caption>Grab page 2 of users between ages 18 and 30</caption>
+   * @example
+   * // Grab page 2 of users between ages 18 and 30
    * collection.query()
    *   .between(18, 30, { index: 'age' }) // between ages 18 and 30
    *   .skip(10) // second page
@@ -756,12 +762,12 @@ export default Component.extend({
   },
 
   /**
-   * TODO
+   * Updates all indexes in this collection for the provided record. Has no
+   * effect if the record is not in the collection.
    *
    * @method Collection#updateIndexes
    * @since 3.0.0
    * @param {Object} record TODO
-   * @param {Object} [opts] Configuration options.
    */
   updateIndexes (record) {
     this.index.updateRecord(record)
@@ -851,7 +857,7 @@ export default Component.extend({
 
 /**
  * Create a subclass of this Collection:
- * <div id="Collection.extend" class="tonic">
+ * @example <caption>Collection.extend</caption>
  * // Normally you would do: import {Collection} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Collection} = JSData
@@ -891,7 +897,6 @@ export default Component.extend({
  * console.log(anotherCollection.created_at)
  * console.log(anotherCollection.foo())
  * console.log(AnotherCollectionClass.beep())
- * </div>
  *
  * @method Collection.extend
  * @param {Object} [props={}] Properties to add to the prototype of the

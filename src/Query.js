@@ -509,7 +509,7 @@ export default Component.extend({
        * @example <caption>Retrieve the first "page" of blog posts using findAll</caption>
        * const PAGE_SIZE = 10
        * let currentPage = 1
-       * PostService.findAll({
+       * PostMapper.findAll({
        *   offset: PAGE_SIZE * (currentPage 1)
        *   limit: PAGE_SIZE
        * })
@@ -556,7 +556,7 @@ export default Component.extend({
        * @example <caption>Retrieve the first "page" of blog posts using findAll</caption>
        * const PAGE_SIZE = 10
        * let currentPage = 1
-       * PostService.findAll({
+       * PostMapper.findAll({
        *   offset: PAGE_SIZE * (currentPage 1)
        *   limit: PAGE_SIZE
        * })
@@ -1046,7 +1046,7 @@ export default Component.extend({
 
 /**
  * Create a subclass of this Query:
- * <div id="Query.extend" class="tonic">
+ * @example <caption>Query.extend</caption>
  * // Normally you would do: import {Query} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Query} = JSData
@@ -1070,31 +1070,22 @@ export default Component.extend({
  * const otherQuery = new OtherQueryClass()
  * console.log(otherQuery.foo())
  * console.log(OtherQueryClass.beep())
- * </div>
- *
- * Provide a custom constructor function:
- * <div id="Query.extend" class="tonic">
- * // Normally you would do: import {Query} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
- * const {Query} = JSData
- * console.log('Using JSData v' + JSData.version.full)
  *
  * // Extend the class, providing a custom constructor.
- * function OtherQueryClass (collection) {
+ * function AnotherQueryClass (collection) {
  *   Query.call(this, collection)
  *   this.created_at = new Date().getTime()
  * }
  * Query.extend({
- *   constructor: OtherQueryClass,
+ *   constructor: AnotherQueryClass,
  *   foo () { return 'bar' }
  * }, {
  *   beep () { return 'boop' }
  * })
- * const otherQuery = new OtherQueryClass()
- * console.log(otherQuery.created_at)
- * console.log(otherQuery.foo())
- * console.log(OtherQueryClass.beep())
- * </div>
+ * const anotherQuery = new AnotherQueryClass()
+ * console.log(anotherQuery.created_at)
+ * console.log(anotherQuery.foo())
+ * console.log(AnotherQueryClass.beep())
  *
  * @method Query.extend
  * @param {Object} [props={}] Properties to add to the prototype of the

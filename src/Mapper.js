@@ -218,7 +218,7 @@ const MAPPER_DEFAULTS = {
  * @example
  * // Import and instantiate
  * import {Mapper} from 'js-data'
- * const UserService = new Mapper({ name: 'user' })
+ * const UserMapper = new Mapper({ name: 'user' })
  *
  * @example
  * // Define a Mapper using the Container component
@@ -316,8 +316,6 @@ function Mapper (opts) {
      * The meta information describing this Mapper's available lifecycle
      * methods. __Do not modify.__
      *
-     * TODO: Improve documentation.
-     *
      * @name Mapper#lifecycleMethods
      * @since 3.0.0
      * @type {Object}
@@ -335,7 +333,7 @@ function Mapper (opts) {
      * const {Mapper} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      *
-     * const UserService = new Mapper({
+     * const UserMapper = new Mapper({
      *   name: 'user',
      *   schema: {
      *     properties: {
@@ -348,7 +346,7 @@ function Mapper (opts) {
      *     }
      *   }
      * })
-     * const user = UserService.createRecord({
+     * const user = UserMapper.createRecord({
      *   id: 1,
      *   name: 'John',
      *   role: 'admin'
@@ -744,20 +742,20 @@ export default Component.extend({
    * Mappers manually and not using a Container or DataStore component.
    *
    * @example
-   * PostService.belongsTo(UserService, {
+   * PostMapper.belongsTo(UserMapper, {
    *   // post.user_id points to user.id
    *   foreignKey: 'user_id'
    *   // user records will be attached to post records at "post.user"
    *   localField: 'user'
    * })
    *
-   * CommentService.belongsTo(UserService, {
+   * CommentMapper.belongsTo(UserMapper, {
    *   // comment.user_id points to user.id
    *   foreignKey: 'user_id'
    *   // user records will be attached to comment records at "comment.user"
    *   localField: 'user'
    * })
-   * CommentService.belongsTo(PostService, {
+   * CommentMapper.belongsTo(PostMapper, {
    *   // comment.post_id points to post.id
    *   foreignKey: 'post_id'
    *   // post records will be attached to comment records at "comment.post"
@@ -780,7 +778,7 @@ export default Component.extend({
    *
    * @example
    * // Get the number of published blog posts
-   * PostService.count({ status: 'published' }).then((numPublished) => {
+   * PostMapper.count({ status: 'published' }).then((numPublished) => {
    *   console.log(numPublished) // e.g. 45
    * })
    *
@@ -860,7 +858,7 @@ export default Component.extend({
    *
    * @example
    * // Create and save a new blog post
-   * PostService.create({
+   * PostMapper.create({
    *   title: 'Modeling your data',
    *   status: 'draft'
    * }).then((post) => {
@@ -1052,7 +1050,7 @@ export default Component.extend({
    *
    * @example
    * // Create and save several new blog posts
-   * PostService.createMany([{
+   * PostMapper.createMany([{
    *   title: 'Modeling your data',
    *   status: 'draft'
    * }, {
@@ -1188,18 +1186,18 @@ export default Component.extend({
    *
    * @example
    * // Create empty unsaved record instance
-   * const post = PostService.createRecord()
+   * const post = PostMapper.createRecord()
    *
    * @example
    * // Create an unsaved record instance with inital properties
-   * const post = PostService.createRecord({
+   * const post = PostMapper.createRecord({
    *   title: 'Modeling your data',
    *   status: 'draft'
    * })
    *
    * @example
    * // Create a record instance that corresponds to a saved record
-   * const post = PostService.createRecord({
+   * const post = PostMapper.createRecord({
    *   // JSData thinks this record has been saved if it has a primary key
    *   id: 1234,
    *   title: 'Modeling your data',
@@ -1208,7 +1206,7 @@ export default Component.extend({
    *
    * @example
    * // Create record instances from an array
-   * const posts = PostService.createRecord([{
+   * const posts = PostMapper.createRecord([{
    *   title: 'Modeling your data',
    *   status: 'draft'
    * }, {
@@ -1219,12 +1217,12 @@ export default Component.extend({
    * @example
    * // Records are validated by default
    * import {Mapper} from 'js-data'
-   * const PostService = new Mapper({
+   * const PostMapper = new Mapper({
    *   name: 'post',
    *   schema: { properties: { title: { type: 'string' } } }
    * })
    * try {
-   *   const post = PostService.createRecord({
+   *   const post = PostMapper.createRecord({
    *     title: 1234,
    *   })
    * } catch (err) {
@@ -1234,11 +1232,11 @@ export default Component.extend({
    * @example
    * // Skip validation
    * import {Mapper} from 'js-data'
-   * const PostService = new Mapper({
+   * const PostMapper = new Mapper({
    *   name: 'post',
    *   schema: { properties: { title: { type: 'string' } } }
    * })
-   * const post = PostService.createRecord({
+   * const post = PostMapper.createRecord({
    *   title: 1234,
    * }, { noValidate: true })
    * console.log(post.isValid()) // false
@@ -1277,9 +1275,7 @@ export default Component.extend({
   },
 
   /**
-   * Lifecycle invocation method.
-   *
-   * TODO: Improve documentation for this method.
+   * Lifecycle invocation method. You probably won't call this method directly.
    *
    * @method Mapper#crud
    * @param {string} method Name of the lifecycle method to invoke.
@@ -1393,13 +1389,13 @@ export default Component.extend({
    *
    * @example
    * // Destroy a specific blog post
-   * PostService.destroy(1234).then(() => {
+   * PostMapper.destroy(1234).then(() => {
    *   // Blog post #1234 has been destroyed
    * })
    *
    * @example
    * // Get full response
-   * PostService.destroy(1234, { raw: true }).then((result) => {
+   * PostMapper.destroy(1234, { raw: true }).then((result) => {
    *   console.log(result.deleted) e.g. 1
    *   console.log(...) // etc., more metadata can be found on the result
    * })
@@ -1481,13 +1477,13 @@ export default Component.extend({
    *
    * @example
    * // Destroy all blog posts
-   * PostService.destroyAll().then(() => {
+   * PostMapper.destroyAll().then(() => {
    *   // All blog posts have been destroyed
    * })
    *
    * @example
    * // Destroy all "draft" blog posts
-   * PostService.destroyAll({ status: 'draft' }).then(() => {
+   * PostMapper.destroyAll({ status: 'draft' }).then(() => {
    *   // All "draft" blog posts have been destroyed
    * })
    *
@@ -1495,7 +1491,7 @@ export default Component.extend({
    * // Get full response
    * const query = null
    * const options = { raw: true }
-   * PostService.destroyAll(query, options).then((result) => {
+   * PostMapper.destroyAll(query, options).then((result) => {
    *   console.log(result.deleted) e.g. 14
    *   console.log(...) // etc., more metadata can be found on the result
    * })
@@ -1580,13 +1576,13 @@ export default Component.extend({
    * {@link Mapper#afterFind} will be called after calling the adapter.
    *
    * @example
-   * PostService.find(1).then((post) => {
+   * PostMapper.find(1).then((post) => {
    *   console.log(post) // { id: 1, ...}
    * })
    *
    * @example
    * // Get full response
-   * PostService.find(1, { raw: true }).then((result) => {
+   * PostMapper.find(1, { raw: true }).then((result) => {
    *   console.log(result.data) // { id: 1, ...}
    *   console.log(result.found) // 1
    *   console.log(...) // etc., more metadata can be found on the result
@@ -1670,13 +1666,13 @@ export default Component.extend({
    *
    * @example
    * // Find all "published" blog posts
-   * PostService.findAll({ status: 'published' }).then((posts) => {
+   * PostMapper.findAll({ status: 'published' }).then((posts) => {
    *   console.log(posts) // [{ id: 1, status: 'published', ...}, ...]
    * })
    *
    * @example
    * // Get full response
-   * PostService.findAll({ status: 'published' }, { raw: true }).then((result) => {
+   * PostMapper.findAll({ status: 'published' }, { raw: true }).then((result) => {
    *   console.log(result.data) // [{ id: 1, status: 'published', ...}, ...]
    *   console.log(result.found) // e.g. 13
    *   console.log(...) // etc., more metadata can be found on the result
@@ -1772,7 +1768,7 @@ export default Component.extend({
    * Mappers manually and not using a Container or DataStore component.
    *
    * @example
-   * UserService.hasMany(PostService, {
+   * UserMapper.hasMany(PostMapper, {
    *   // post.user_id points to user.id
    *   foreignKey: 'user_id'
    *   // post records will be attached to user records at "user.posts"
@@ -1792,7 +1788,7 @@ export default Component.extend({
    * manually and not using a {@link Container} or {@link DataStore} component.
    *
    * @example
-   * UserService.hasOne(ProfileService, {
+   * UserMapper.hasOne(ProfileMapper, {
    *   // profile.user_id points to user.id
    *   foreignKey: 'user_id'
    *   // profile records will be attached to user records at "user.profile"
@@ -1811,11 +1807,11 @@ export default Component.extend({
    * Return whether `record` is an instance of this Mapper's recordClass.
    *
    * @example
-   * const post = PostService.createRecord()
+   * const post = PostMapper.createRecord()
    *
-   * console.log(PostService.is(post)) // true
+   * console.log(PostMapper.is(post)) // true
    * // Equivalent to what's above
-   * console.log(post instanceof PostService.recordClass) // true
+   * console.log(post instanceof PostMapper.recordClass) // true
    *
    * @method Mapper#is
    * @param {Object|Record} record The record to check.
@@ -1857,7 +1853,7 @@ export default Component.extend({
    * {@link Mapper#afterSum} will be called after calling the adapter.
    *
    * @example
-   * PurchaseOrderService.sum('amount', { status: 'paid' }).then((amountPaid) => {
+   * PurchaseOrderMapper.sum('amount', { status: 'paid' }).then((amountPaid) => {
    *   console.log(amountPaid) // e.g. 451125.34
    * })
    *
@@ -1887,7 +1883,7 @@ export default Component.extend({
    *
    * @example
    * import {Mapper, Schema} from 'js-data'
-   * const PersonService = new Mapper({
+   * const PersonMapper = new Mapper({
    *   name: 'person',
    *   schema: {
    *     properties: {
@@ -1896,9 +1892,9 @@ export default Component.extend({
    *     }
    *   }
    * })
-   * const person = PersonService.createRecord({ id: 1, name: 'John', foo: 'bar' })
-   * console.log(PersonService.toJSON(person)) // {"id":1,"name":"John","foo":"bar"}
-   * console.log(PersonService.toJSON(person), { strict: true }) // {"id":1,"name":"John"}
+   * const person = PersonMapper.createRecord({ id: 1, name: 'John', foo: 'bar' })
+   * console.log(PersonMapper.toJSON(person)) // {"id":1,"name":"John","foo":"bar"}
+   * console.log(PersonMapper.toJSON(person), { strict: true }) // {"id":1,"name":"John"}
    *
    * @method Mapper#toJSON
    * @param {Record|Record[]} records Record or records from which to create a
@@ -2025,7 +2021,7 @@ export default Component.extend({
    *
    * @example
    * // Update a specific post
-   * PostService.update(1234, {
+   * PostMapper.update(1234, {
    *   status: 'published',
    *   published_at: new Date()
    * }).then((post) => {
@@ -2115,7 +2111,7 @@ export default Component.extend({
    * // Turn all of John's blog posts into drafts.
    * const update = { status: draft: published_at: null }
    * const query = { userId: 1234 }
-   * PostService.updateAll(update, query).then((posts) => {
+   * PostMapper.updateAll(update, query).then((posts) => {
    *   console.log(posts) // [...]
    * })
    *
@@ -2201,7 +2197,7 @@ export default Component.extend({
    * {@link Mapper#afterUpdateMany} will be called after making the update.
    *
    * @example
-   * PostService.updateMany([
+   * PostMapper.updateMany([
    *   { id: 1234, status: 'draft' },
    *   { id: 2468, status: 'published', published_at: new Date() }
    * ]).then((posts) => {
@@ -2240,13 +2236,13 @@ export default Component.extend({
    *     id: { type: 'string' }
    *   }
    * })
-   * const PersonService = new Mapper({
+   * const PersonMapper = new Mapper({
    *   name: 'person',
    *   schema: PersonSchema
    * })
-   * let errors = PersonService.validate({ name: 'John' })
+   * let errors = PersonMapper.validate({ name: 'John' })
    * console.log(errors) // undefined
-   * errors = PersonService.validate({ name: 123 })
+   * errors = PersonMapper.validate({ name: 123 })
    * console.log(errors) // [{ expected: 'one of (string)', actual: 'number', path: 'name' }]
    *
    * @method Mapper#validate

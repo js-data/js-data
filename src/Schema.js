@@ -750,8 +750,6 @@ const validationFailureMsg = 'validation failed'
  * {@link Mapper#recordClass}. This method is called when
  * {@link Mapper#applySchema} is set to `true`.
  *
- * TODO: Make this more configurable, i.e. not so tied to the Record class.
- *
  * @ignore
  */
 const makeDescriptor = function (prop, schema, opts) {
@@ -994,10 +992,11 @@ const typeGroupValidators = {
 /**
  * js-data's Schema class.
  *
- * <div id="Schema#constructor" class="tonic">
- * // import {Schema} from 'js-data'
+ * @example Schema#constructor</caption>
+ * // Normally you would do:  import {Schema} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
- * const {Schema, version} = JSData
+ * const {Schema} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
  *
  * const PostSchema = new Schema({
  *   type: 'object',
@@ -1006,7 +1005,6 @@ const typeGroupValidators = {
  *   }
  * })
  * PostSchema.validate({ title: 1234 })
- * </div>
  *
  * @class Schema
  * @extends Component
@@ -1086,7 +1084,7 @@ export default Component.extend({
 
 /**
  * Create a subclass of this Schema:
- * <div id="Schema.extend" class="tonic">
+ * @example <caption>Schema.extend</caption>
  * // Normally you would do: import {Schema} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Schema} = JSData
@@ -1110,31 +1108,22 @@ export default Component.extend({
  * const otherSchema = new OtherSchemaClass()
  * console.log(otherSchema.foo())
  * console.log(OtherSchemaClass.beep())
- * </div>
- *
- * Provide a custom constructor function:
- * <div id="Schema.extend" class="tonic">
- * // Normally you would do: import {Schema} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
- * const {Schema} = JSData
- * console.log('Using JSData v' + JSData.version.full)
  *
  * // Extend the class, providing a custom constructor.
- * function OtherSchemaClass (definition) {
- *   Schema.call(this, definition)
+ * function AnotherSchemaClass () {
+ *   Schema.call(this)
  *   this.created_at = new Date().getTime()
  * }
  * Schema.extend({
- *   constructor: OtherSchemaClass,
+ *   constructor: AnotherSchemaClass,
  *   foo () { return 'bar' }
  * }, {
  *   beep () { return 'boop' }
  * })
- * const otherSchema = new OtherSchemaClass()
- * console.log(otherSchema.created_at)
- * console.log(otherSchema.foo())
- * console.log(OtherSchemaClass.beep())
- * </div>
+ * const anotherSchema = new AnotherSchemaClass()
+ * console.log(anotherSchema.created_at)
+ * console.log(anotherSchema.foo())
+ * console.log(AnotherSchemaClass.beep())
  *
  * @method Schema.extend
  * @param {Object} [props={}] Properties to add to the prototype of the
@@ -1145,3 +1134,4 @@ export default Component.extend({
  * @returns {Constructor} Subclass of this Schema class.
  * @since 3.0.0
  */
+

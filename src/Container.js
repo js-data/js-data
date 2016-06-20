@@ -207,7 +207,7 @@ export const proxiedMapperMethods = [
    * import {Container} from 'js-data'
    * const store = new Container()
    * store.defineMapper('post')
-   * const post = PostService.createRecord()
+   * const post = PostMapper.createRecord()
    *
    * @method Container#createRecord
    * @param {string} name Name of the {@link Mapper} to target.
@@ -1059,8 +1059,9 @@ const props = {
    * @example <caption>Container#as</caption>
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
-   * const {Container, version} = JSData
-   * console.log(\`Using JSData v${version.full}\`)
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
    * const store = new Container()
    * const UserMapper = store.defineMapper('user')
    * const UserStore = store.as('user')
@@ -1100,8 +1101,9 @@ const props = {
    * @example <caption>Container#defineMapper</caption>
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
-   * const {Container, version} = JSData
-   * console.log(\`Using JSData v${version.full}\`)
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
    * const store = new Container({
    *   mapperDefaults: { foo: 'bar' }
    * })
@@ -1216,8 +1218,9 @@ const props = {
    * @example <caption>Container#getMapper</caption>
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
-   * const {Container, version} = JSData
-   * console.log(\`Using JSData v${version.full}\`)
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
    * const store = new Container()
    * // Container#defineMapper returns a direct reference to the newly created
    * // Mapper.
@@ -1246,8 +1249,9 @@ const props = {
    * @example <caption>Container#getMapperByName</caption>
    * // import {Container} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
-   * const {Container, version} = JSData
-   * console.log(\`Using JSData v${version.full}\`)
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
    * const store = new Container()
    * // Container#defineMapper returns a direct reference to the newly created
    * // Mapper.
