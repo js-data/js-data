@@ -2,9 +2,7 @@ import { assert, JSData } from '../_setup'
 
 describe('DataStore integration tests', function () {
   it('relation links should stay up-to-date', function () {
-    const store = new JSData.DataStore({
-      linkRelations: true
-    })
+    const store = new JSData.DataStore()
     store.defineMapper('foo', {
       schema: {
         properties: {
@@ -46,23 +44,28 @@ describe('DataStore integration tests', function () {
       id: 88,
       foo_id: 66
     })
-    assert(bar88.foo === foo66)
+    assert.strictEqual(bar88.foo, foo66)
+    assert.strictEqual(foo66.bars[0], bar88)
+    assert.deepEqual(foo77.bars, [])
     assert.equal(bar88.foo_id, 66)
     bar88.foo_id = 77
-    assert(bar88.foo === foo77)
+    assert.strictEqual(bar88.foo, foo77)
     assert.equal(bar88.foo_id, 77)
+    assert.strictEqual(foo77.bars[0], bar88)
+    assert.deepEqual(foo66.bars, [])
     bar88.foo = foo66
-    assert(bar88.foo === foo66)
+    assert.strictEqual(bar88.foo, foo66)
     assert.equal(bar88.foo_id, 66)
-    assert.objectsEqual(foo77.bars, [])
+    assert.strictEqual(foo66.bars[0], bar88)
+    assert.deepEqual(foo77.bars, [])
     foo77.bars = [bar88]
-    assert(foo77.bars[0] === store.getAll('bar')[0])
+    assert.strictEqual(foo77.bars[0], bar88)
     assert.equal(bar88.foo_id, 77)
-    assert.objectsEqual(foo66.bars, [])
+    assert.deepEqual(foo66.bars, [])
     foo66.bars = [bar88]
-    assert(foo66.bars[0] === store.getAll('bar')[0])
+    assert.strictEqual(foo66.bars[0], bar88)
     assert.equal(bar88.foo_id, 66)
-    assert.objectsEqual(foo77.bars, [])
+    assert.deepEqual(foo77.bars, [])
   })
   it('should allow enhanced relation getters', function () {
     let wasItActivated = false

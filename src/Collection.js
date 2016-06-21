@@ -80,7 +80,7 @@ const COLLECTION_DEFAULTS = {
  */
 function Collection (records, opts) {
   utils.classCallCheck(this, Collection)
-  Collection.__super__.call(this)
+  Component.call(this, opts)
 
   if (records && !utils.isArray(records)) {
     opts = records
@@ -166,7 +166,7 @@ function Collection (records, opts) {
   })
 
   // Insert initial data into the collection
-  if (records) {
+  if (utils.isObject(records) || (utils.isArray(records) && records.length)) {
     this.add(records)
   }
 }

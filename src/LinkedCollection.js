@@ -32,13 +32,12 @@ function LinkedCollection (records, opts) {
     }
   })
 
-  LinkedCollection.__super__.call(this, records, opts)
+  Collection.call(this, records, opts)
 
   // Make sure this collection has a reference to a datastore
   if (!this.datastore) {
     throw utils.err(`new ${DOMAIN}`, 'opts.datastore')(400, 'DataStore', this.datastore)
   }
-  return this
 }
 
 export default Collection.extend({
@@ -62,7 +61,6 @@ export default Collection.extend({
     if (singular) {
       records = [records]
     }
-
     records = utils.getSuper(this).prototype.add.call(this, records, opts)
 
     if (mapper.relationList.length && records.length) {

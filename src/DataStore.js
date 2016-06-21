@@ -238,9 +238,17 @@ const ownMethodsForScoping = [
   'hashQuery'
 ]
 
-const safeSet = function (record, field, value) {
+const safeSetProp = function (record, field, value) {
   if (record && record._set) {
     record._set(`props.${field}`, value)
+  } else {
+    utils.set(record, field, value)
+  }
+}
+
+const safeSetLink = function (record, field, value) {
+  if (record && record._set) {
+    record._set(`links.${field}`, value)
   } else {
     utils.set(record, field, value)
   }
@@ -964,16 +972,35 @@ const props = {
 
         descriptor = {
           get: getter,
+          // e.g. profile.user = someUser
+          // or comment.post = somePost
           set (record) {
             const _self = this
+            // e.g. const otherUser = profile.user
             const current = this._get(path)
+            // e.g. profile.user === someUser
             if (record === current) {
               return current
             }
             const id = utils.get(_self, idAttribute)
             const inverseDef = def.getInverse(mapper)
 
+            // e.g. profile.user !== someUser
+            // or comment.post !== somePost
+            if (current) {
+              // e.g. otherUser.profile = undefined
+              if (inverseDef.type === hasOneType) {
+                safeSetLink(current, inverseDef.localField, undefined)
+              } else if (inverseDef.type === hasManyType) {
+                // e.g. remove comment from otherPost.comments
+                const children = utils.get(current, inverseDef.localField)
+                utils.remove(children, function (_record) {
+                  return id === utils.get(_record, idAttribute)
+                })
+              }
+            }
             if (record) {
+              // e.g. profile.user = someUser
               const relatedIdAttribute = def.getRelation().idAttribute
               const relatedId = utils.get(record, relatedIdAttribute)
 
@@ -983,14 +1010,18 @@ const props = {
               }
 
               // Set locals
+              // e.g. profile.user = someUser
+              // or comment.post = somePost
               _self._set(path, record)
-              safeSet(_self, foreignKey, relatedId)
+              safeSetProp(_self, foreignKey, relatedId)
               collection.updateIndex(_self, updateOpts)
 
               // Update (set) inverse relation
               if (inverseDef.type === hasOneType) {
-                utils.set(record, inverseDef.localField, _self)
+                // e.g. someUser.profile = profile
+                safeSetLink(record, inverseDef.localField, _self)
               } else if (inverseDef.type === hasManyType) {
+                // e.g. add comment to somePost.comments
                 const children = utils.get(record, inverseDef.localField)
                 utils.noDupeAdd(children, _self, function (_record) {
                   return id === utils.get(_record, idAttribute)
@@ -998,19 +1029,11 @@ const props = {
               }
             } else {
               // Unset locals
+              // e.g. profile.user = undefined
+              // or comment.post = undefined
               _self._set(path, undefined)
-              safeSet(_self, foreignKey, undefined)
+              safeSetProp(_self, foreignKey, undefined)
               collection.updateIndex(_self, updateOpts)
-            }
-            if (current) {
-              if (inverseDef.type === hasOneType) {
-                utils.set(current, inverseDef.localField, undefined)
-              } else if (inverseDef.type === hasManyType) {
-                const children = utils.get(current, inverseDef.localField)
-                utils.remove(children, function (_record) {
-                  return id === utils.get(_record, idAttribute)
-                })
-              }
             }
             return record
           }
@@ -1038,7 +1061,7 @@ const props = {
             // Unset locals
             utils.set(this, localField, undefined)
           } else {
-            safeSet(this, foreignKey, value)
+            safeSetProp(this, foreignKey, value)
             let storeRecord = self.get(relation, value)
             if (storeRecord) {
               utils.set(this, localField, storeRecord)
@@ -1064,6 +1087,9 @@ const props = {
             }
             return getter.call(_self)
           },
+          // e.g. post.comments = someComments
+          // or user.groups = someGroups
+          // or group.users = someUsers
           set (records) {
             const _self = this
             records || (records = [])
@@ -1074,70 +1100,104 @@ const props = {
             const relatedIdAttribute = def.getRelation().idAttribute
             const inverseDef = def.getInverse(mapper)
             const inverseLocalField = inverseDef.localField
-            let linked = _self._get(path)
-            if (!linked) {
-              linked = []
-            }
-
-            const current = linked
-            linked = []
+            const current = _self._get(path) || []
+            const linked = []
             const toLink = {}
+
             records.forEach(function (record) {
+              // e.g. comment.id
               const relatedId = utils.get(record, relatedIdAttribute)
               if (!utils.isUndefined(relatedId)) {
                 // Prefer store record
                 record = self.get(relation, relatedId) || record
+                // e.g. toLink[comment.id] = comment
                 toLink[relatedId] = record
+                const _localField = utils.get(record, inverseLocalField)
+                if (_localField) {
+                  const __localField = utils.get(_localField, localField)
+                  // e.g. somePost.comments.remove(comment)
+                  utils.remove(__localField, function (_record) {
+                    return relatedId === utils.get(_record, relatedIdAttribute)
+                  })
+                }
               }
               linked.push(record)
             })
+
+            // e.g. post.comments = someComments
             if (foreignKey) {
-              records.forEach(function (record) {
-                // Update (set) inverse relation
-                safeSet(record, foreignKey, id)
-                self.getCollection(relation).updateIndex(record, updateOpts)
-                utils.set(record, inverseLocalField, _self)
-              })
               current.forEach(function (record) {
+                // e.g. comment.id
                 const relatedId = utils.get(record, relatedIdAttribute)
-                if (!utils.isUndefined(relatedId) && !toLink.hasOwnProperty(relatedId)) {
+                if (!utils.isUndefined(relatedId) && !(relatedId in toLink)) {
                   // Update (unset) inverse relation
-                  safeSet(record, foreignKey, undefined)
+                  // e.g. comment.post_id = undefined
+                  safeSetProp(record, foreignKey, undefined)
+                  // e.g. CommentCollection.updateIndex(comment, { index: 'post_id' })
                   self.getCollection(relation).updateIndex(record, updateOpts)
-                  utils.set(record, inverseLocalField, undefined)
+                  // e.g. comment.post = undefined
+                  safeSetLink(record, inverseLocalField, undefined)
                 }
+              })
+              linked.forEach(function (record) {
+                // Update (set) inverse relation
+                // e.g. comment.post_id = post.id
+                safeSetProp(record, foreignKey, id)
+                // e.g. CommentCollection.updateIndex(comment, { index: 'post_id' })
+                self.getCollection(relation).updateIndex(record, updateOpts)
+                // e.g. comment.post = post
+                safeSetLink(record, inverseLocalField, _self)
               })
             } else if (localKeys) {
-              const _localKeys = []
-              records.forEach(function (record) {
-                // Update (set) inverse relation
-                utils.set(record, inverseLocalField, _self)
-                _localKeys.push(utils.get(record, relatedIdAttribute))
-              })
               // Update locals
+              // e.g. group.users = someUsers
+              const _localKeys = linked.map(function (record) {
+                // Update (set) inverse relation
+                // safeSetLink(record, inverseLocalField, _self)
+                return utils.get(record, relatedIdAttribute)
+              })
+              // e.g. group.user_ids = [1,2,3,...]
               utils.set(_self, localKeys, _localKeys)
               // Update (unset) inverse relation
-              current.forEach(function (record) {
-                const relatedId = utils.get(record, relatedIdAttribute)
-                if (!utils.isUndefined(relatedId) && !toLink.hasOwnProperty(relatedId)) {
-                  // Update inverse relation
-                  utils.set(record, inverseLocalField, undefined)
-                }
-              })
+              if (inverseDef.foreignKeys) {
+                current.forEach(function (record) {
+                  const relatedId = utils.get(record, relatedIdAttribute)
+                  if (!utils.isUndefined(relatedId) && !(relatedId in toLink)) {
+                    // Update inverse relation
+                    // safeSetLink(record, inverseLocalField, undefined)
+                    const _localField = utils.get(record, inverseLocalField) || []
+                    // e.g. someUser.groups.remove(group)
+                    utils.remove(_localField, function (_record) {
+                      return id === utils.get(_record, idAttribute)
+                    })
+                  }
+                })
+                linked.forEach(function (record) {
+                  // Update (set) inverse relation
+                  const _localField = utils.get(record, inverseLocalField) || []
+                  // e.g. someUser.groups.push(group)
+                  utils.noDupeAdd(_localField, _self, function (_record) {
+                    return id === utils.get(_record, idAttribute)
+                  })
+                })
+              }
             } else if (foreignKeys) {
+              // e.g. user.groups = someGroups
               // Update (unset) inverse relation
               current.forEach(function (record) {
                 const _localKeys = utils.get(record, foreignKeys) || []
+                // e.g. someGroup.user_ids.remove(user.id)
                 utils.remove(_localKeys, function (_key) {
                   return id === _key
                 })
                 const _localField = utils.get(record, inverseLocalField) || []
+                // e.g. someGroup.users.remove(user)
                 utils.remove(_localField, function (_record) {
                   return id === utils.get(_record, idAttribute)
                 })
               })
               // Update (set) inverse relation
-              records.forEach(function (record) {
+              linked.forEach(function (record) {
                 const _localKeys = utils.get(record, foreignKeys) || []
                 utils.noDupeAdd(_localKeys, id, function (_key) {
                   return id === _key
@@ -1160,6 +1220,7 @@ const props = {
         }
         descriptor = {
           get: getter,
+          // e.g. user.profile = someProfile
           set (record) {
             const _self = this
             const current = this._get(path)
@@ -1170,9 +1231,9 @@ const props = {
             const inverseLocalField = def.getInverse(mapper).localField
             // Update (unset) inverse relation
             if (current) {
-              safeSet(current, foreignKey, undefined)
+              safeSetProp(current, foreignKey, undefined)
               self.getCollection(relation).updateIndex(current, updateOpts)
-              utils.set(current, inverseLocalField, undefined)
+              safeSetLink(current, inverseLocalField, undefined)
             }
             if (record) {
               // Prefer store record
@@ -1184,9 +1245,9 @@ const props = {
               _self._set(path, record)
 
               // Update (set) inverse relation
-              safeSet(record, foreignKey, utils.get(_self, idAttribute))
+              safeSetProp(record, foreignKey, utils.get(_self, idAttribute))
               self.getCollection(relation).updateIndex(record, updateOpts)
-              utils.set(record, inverseLocalField, _self)
+              safeSetLink(record, inverseLocalField, _self)
             } else {
               // Set locals
               _self._set(path, undefined)
