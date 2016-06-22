@@ -413,6 +413,10 @@ function Mapper (opts) {
   if (this.recordClass) {
     this.recordClass.mapper = this
 
+    if (utils.isObject(this.methods)) {
+      utils.addHiddenPropsToTarget(this.recordClass.prototype, this.methods)
+    }
+
     // We can only apply the schema to the prototype of this.recordClass if the
     // class extends Record
     if (utils.getSuper(this.recordClass, true) === Record && this.schema && this.schema.apply && this.applySchema) {
