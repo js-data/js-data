@@ -478,37 +478,30 @@ const props = {
    */
   as (name) {
     const props = {}
-    ownMethodsForScoping.forEach(function (method) {
+    const original = this
+    const methods = ownMethodsForScoping
+      .concat(proxiedMapperMethods)
+      .concat(proxiedCollectionMethods)
+
+    methods.forEach(function (method) {
       props[method] = {
         writable: true,
-        value: function (...args) {
-          return this[method](name, ...args)
-        }
-      }
-    })
-    proxiedMapperMethods.forEach(function (method) {
-      props[method] = {
-        writable: true,
-        value: function (...args) {
-          return this.getMapper(name)[method](...args)
+        value (...args) {
+          return original[method](name, ...args)
         }
       }
     })
     props.getMapper = {
       writable: true,
-      value: () => this.getMapper(name)
-    }
-    proxiedCollectionMethods.forEach(function (method) {
-      props[method] = {
-        writable: true,
-        value: function (...args) {
-          return this.getCollection(name)[method](...args)
-        }
+      value () {
+        return original.getMapper(name)
       }
-    })
+    }
     props.getCollection = {
       writable: true,
-      value: () => this.getCollection(name)
+      value () {
+        return original.getCollection(name)
+      }
     }
     return Object.create(this, props)
   },

@@ -1080,17 +1080,20 @@ const props = {
    */
   as (name) {
     const props = {}
+    const original = this
     proxiedMapperMethods.forEach(function (method) {
       props[method] = {
         writable: true,
-        value: function (...args) {
-          return this.getMapper(name)[method](...args)
+        value (...args) {
+          return original[method](name, ...args)
         }
       }
     })
     props.getMapper = {
       writable: true,
-      value: () => this.getMapper(name)
+      value () {
+        return original.getMapper(name)
+      }
     }
     return Object.create(this, props)
   },
