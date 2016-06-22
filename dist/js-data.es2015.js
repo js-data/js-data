@@ -7,14 +7,13 @@
 *
 * @overview js-data is a framework-agnostic, datastore-agnostic ORM/ODM for Node.js and the Browser.
 */
-var babelHelpers = {};
-babelHelpers.typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
 } : function (obj) {
   return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
 };
 
-babelHelpers.defineProperty = function (obj, key, value) {
+var defineProperty = function (obj, key, value) {
   if (key in obj) {
     Object.defineProperty(obj, key, {
       value: value,
@@ -29,7 +28,7 @@ babelHelpers.defineProperty = function (obj, key, value) {
   return obj;
 };
 
-babelHelpers.toConsumableArray = function (arr) {
+var toConsumableArray = function (arr) {
   if (Array.isArray(arr)) {
     for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
 
@@ -38,8 +37,6 @@ babelHelpers.toConsumableArray = function (arr) {
     return Array.from(arr);
   }
 };
-
-babelHelpers;
 
 /**
  * Utility methods used by JSData.
@@ -68,7 +65,7 @@ var PATH = /^(.+)\.(.+)$/;
 
 var ERRORS = {
   '400': function _() {
-    return 'expected: ' + arguments[0] + ', found: ' + (arguments[2] ? arguments[1] : babelHelpers.typeof(arguments[1]));
+    return 'expected: ' + arguments[0] + ', found: ' + (arguments[2] ? arguments[1] : _typeof(arguments[1]));
   },
   '404': function _() {
     return arguments[0] + ' not found';
@@ -94,7 +91,7 @@ var toStr = function toStr(value) {
 };
 
 var isPlainObject = function isPlainObject(value) {
-  return !!value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && value.constructor === Object;
+  return !!value && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && value.constructor === Object;
 };
 
 var mkdirP = function mkdirP(object, path) {
@@ -542,6 +539,12 @@ var utils = {
   /**
    * Return whether the two values are equal according to the `==` operator.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * console.log(utils.equal(1,1)) // true
+   * console.log(utils.equal(1,'1')) // true
+   * console.log(utils.equal(93, 66)) // false
+   *
    * @method utils.equal
    * @param {*} a First value in the comparison.
    * @param {*} b Second value in the comparison.
@@ -557,6 +560,12 @@ var utils = {
    * Produce a factory function for making Error objects with the provided
    * metadata. Used throughout the various js-data components.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * const errorFactory = utils.err('domain', 'target')
+   * const error400 = errorFactory(400, 'expected type', 'actual type')
+   * console.log(error400) // [Error: [domain:target] expected: expected type, found: string
+  http://www.js-data.io/v3.0/docs/errors#400]
    * @method utils.err
    * @param {string} domain Namespace.
    * @param {string} target Target.
@@ -575,6 +584,13 @@ var utils = {
 
   /**
    * Add eventing capabilities into the target object.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * const user = { name: 'John' }
+   * utils.eventify(user)
+   * user.on('foo', () => console.log(arguments))
+   * user.emit('foo', 1, 'bar') // should log to console values (1, "bar")
    *
    * @method utils.eventify
    * @param {Object} target Target object.
@@ -763,7 +779,20 @@ var utils = {
 
 
   /**
-   * Find the last index of something according to the given checker function.
+   * Find the last index of an item in an array according to the given checker function.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   *
+   * const john = { name: 'John', age: 20 }
+   * const sara = { name: 'Sara', age: 25 }
+   * const dan = { name: 'Dan', age: 20 }
+   * const users = [john, sara, dan]
+   *
+   * console.log(utils.findIndex(users, (user) => user.age === 25)) // 1
+   * console.log(utils.findIndex(users, (user) => user.age > 19)) // 2
+   * console.log(utils.findIndex(users, (user) => user.name === 'John')) // 0
+   * console.log(utils.findIndex(users, (user) => user.name === 'Jimmy')) // -1
    *
    * @method utils.findIndex
    * @param {Array} array The array to search.
@@ -839,6 +868,12 @@ var utils = {
   /**
    * Proxy for `JSON.parse`.
    *
+   * @example
+   * import {utils} from 'js-data'
+   *
+   * const a = utils.fromJson('{"name" : "John"}')
+   * console.log(a) // { name: 'John' }
+   *
    * @method utils.fromJson
    * @param {string} json JSON to parse.
    * @returns {Object} Parsed object.
@@ -858,7 +893,7 @@ var utils = {
    * import {utils} from 'js-data'
    * const a = { foo: { bar: 'baz' }, beep: 'boop' }
    * console.log(utils.get(a, 'beep')) // "boop"
-   * console.log(utils.get(a, 'foo.bar')) // "bar"
+   * console.log(utils.get(a, 'foo.bar')) // "baz"
    *
    * @method utils.get
    * @param {Object} object Object from which to retrieve a property's value.
@@ -890,6 +925,23 @@ var utils = {
    * Return the superclass for the given instance or subclass. If an instance is
    * provided, then finds the parent class of the instance's constructor.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * // using ES2015 classes
+   * class Foo {}
+   * class Bar extends Foo {}
+   * const barInstance = new Bar()
+   * let baseType = utils.getSuper(barInstance)
+   * console.log(Foo === baseType) // true
+   *
+   * // using Function constructor with utils.extend
+   * function Foo () {}
+   * Foo.extend = utils.extend
+   * const Bar = Foo.extend()
+   * const barInstance = new Bar()
+   * let baseType = utils.getSuper(barInstance)
+   * console.log(Foo === baseType) // true
+   *
    * @method utils.getSuper
    * @param {Object|Function} instance Instance or constructor.
    * @param {boolean} [isCtor=false] Whether `instance` is a constructor.
@@ -907,6 +959,14 @@ var utils = {
 
   /**
    * Return the intersection of two arrays.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * const arrA = ['green', 'red', 'blue', 'red']
+   * const arrB = ['green', 'yellow', 'red']
+   * const intersected = utils.intersection(arrA, arrB)
+   *
+   * console.log(intersected) // ['green', 'red'])
    *
    * @method utils.intersection
    * @param {Array} array1 First array.
@@ -938,6 +998,13 @@ var utils = {
   /**
    * Proxy for `Array.isArray`.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = [1,2,3,4,5]
+   * const b = { foo: "bar" }
+   * console.log(utils.isArray(a)) // true
+   * console.log(utils.isArray(b)) // false
+   *
    * @method utils.isArray
    * @param {*} value The value to test.
    * @returns {boolean} Whether the provided value is an array.
@@ -948,6 +1015,14 @@ var utils = {
   /**
    * Return whether `prop` is matched by any string or regular expression in
    * `blacklist`.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * const blacklist = [/^\$hashKey/g, /^_/g, 'id']
+   * console.log(utils.isBlacklisted("$hashKey", blacklist)) // true
+   * console.log(utils.isBlacklisted("id", blacklist)) // true
+   * console.log(utils.isBlacklisted("_myProp", blacklist)) // true
+   * console.log(utils.isBlacklisted("my_id", blacklist)) // false
    *
    * @method utils.isBlacklisted
    * @param {string} prop The name of a property to check.
@@ -963,7 +1038,7 @@ var utils = {
     for (var i = 0; i < blacklist.length; i++) {
       if (toStr(blacklist[i]) === REGEXP_TAG && blacklist[i].test(prop) || blacklist[i] === prop) {
         matches = prop;
-        return matches;
+        return !!matches;
       }
     }
     return !!matches;
@@ -972,6 +1047,13 @@ var utils = {
 
   /**
    * Return whether the provided value is a boolean.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = true
+   * const b = { foo: "bar" }
+   * console.log(utils.isBoolean(a)) // true
+   * console.log(utils.isBoolean(b)) // false
    *
    * @method utils.isBoolean
    * @param {*} value The value to test.
@@ -986,18 +1068,32 @@ var utils = {
   /**
    * Return whether the provided value is a date.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = new Date()
+   * const b = { foo: "bar" }
+   * console.log(utils.isDate(a)) // true
+   * console.log(utils.isDate(b)) // false
+   *
    * @method utils.isDate
    * @param {*} value The value to test.
    * @returns {Date} Whether the provided value is a date.
    * @since 3.0.0
    */
   isDate: function isDate(value) {
-    return value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toStr(value) === DATE_TAG;
+    return value && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && toStr(value) === DATE_TAG;
   },
 
 
   /**
    * Return whether the provided value is a function.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = function (){ console.log('foo bar')}
+   * const b = { foo: "bar" }
+   * console.log(utils.isFunction(a)) // true
+   * console.log(utils.isFunction(b)) // false
    *
    * @method utils.isFunction
    * @param {*} value The value to test.
@@ -1012,6 +1108,15 @@ var utils = {
   /**
    * Return whether the provided value is an integer.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = 1
+   * const b = 1.25
+   * const c = '1'
+   * console.log(utils.isInteger(a)) // true
+   * console.log(utils.isInteger(b)) // false
+   * console.log(utils.isInteger(c)) // false
+   *
    * @method utils.isInteger
    * @param {*} value The value to test.
    * @returns {boolean} Whether the provided value is an integer.
@@ -1024,6 +1129,13 @@ var utils = {
 
   /**
    * Return whether the provided value is `null`.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = null
+   * const b = { foo: "bar" }
+   * console.log(utils.isNull(a)) // true
+   * console.log(utils.isNull(b)) // false
    *
    * @method utils.isNull
    * @param {*} value The value to test.
@@ -1038,19 +1150,35 @@ var utils = {
   /**
    * Return whether the provided value is a number.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = 1
+   * const b = -1.25
+   * const c = '1'
+   * console.log(utils.isNumber(a)) // true
+   * console.log(utils.isNumber(b)) // true
+   * console.log(utils.isNumber(c)) // false
+   *
    * @method utils.isNumber
    * @param {*} value The value to test.
    * @returns {boolean} Whether the provided value is a number.
    * @since 3.0.0
    */
   isNumber: function isNumber(value) {
-    var type = typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value);
+    var type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
     return type === 'number' || value && type === 'object' && toStr(value) === NUMBER_TAG;
   },
 
 
   /**
    * Return whether the provided value is an object.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = { foo: "bar" }
+   * const b = 'foo bar'
+   * console.log(utils.isObject(a)) // true
+   * console.log(utils.isObject(b)) // false
    *
    * @method utils.isObject
    * @param {*} value The value to test.
@@ -1065,6 +1193,15 @@ var utils = {
   /**
    * Return whether the provided value is a regular expression.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = /^\$.+$/ig
+   * const b = new RegExp('^\$.+$', 'ig')
+   * const c = { foo: "bar" }
+   * console.log(utils.isRegExp(a)) // true
+   * console.log(utils.isRegExp(b)) // true
+   * console.log(utils.isRegExp(c)) // false
+   *
    * @method utils.isRegExp
    * @param {*} value The value to test.
    * @returns {boolean} Whether the provided value is a regular expression.
@@ -1077,6 +1214,14 @@ var utils = {
 
   /**
    * Return whether the provided value is a string or a number.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * console.log(utils.isSorN('')) // true
+   * console.log(utils.isSorN(-1.65)) // true
+   * console.log(utils.isSorN('my string')) // true
+   * console.log(utils.isSorN({})) // false
+   * console.log(utils.isSorN([1,2,4])) // false
    *
    * @method utils.isSorN
    * @param {*} value The value to test.
@@ -1091,18 +1236,34 @@ var utils = {
   /**
    * Return whether the provided value is a string.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * console.log(utils.isString('')) // true
+   * console.log(utils.isString('my string')) // true
+   * console.log(utils.isString(100)) // false
+   * console.log(utils.isString([1,2,4])) // false
+   *
    * @method utils.isString
    * @param {*} value The value to test.
    * @returns {boolean} Whether the provided value is a string.
    * @since 3.0.0
    */
   isString: function isString(value) {
-    return typeof value === 'string' || value && (typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === 'object' && toStr(value) === STRING_TAG;
+    return typeof value === 'string' || value && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && toStr(value) === STRING_TAG;
   },
 
 
   /**
    * Return whether the provided value is a `undefined`.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = undefined
+   * const b = { foo: "bar"}
+   * console.log(utils.isUndefined(a)) // true
+   * console.log(utils.isUndefined(b.baz)) // true
+   * console.log(utils.isUndefined(b)) // false
+   * console.log(utils.isUndefined(b.foo)) // false
    *
    * @method utils.isUndefined
    * @param {*} value The value to test.
@@ -1116,6 +1277,19 @@ var utils = {
 
   /**
    * Mix in logging capabilities to the target.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = { foo: "bar"}
+   *
+   * // Add standard logging to an object
+   * utils.logify(a)
+   * a.log('info', 'test log info') // output 'test log info' to console.
+   *
+   * // Toggle debug output of an object
+   * a.dbg('test debug output') // does not output because debug is off.
+   * a.debug = true
+   * a.dbg('test debug output') // output 'test debug output' to console.
    *
    * @method utils.logify
    * @param {*} target The target.
@@ -1143,7 +1317,7 @@ var utils = {
           return;
         }
         var prefix = level.toUpperCase() + ': (' + (this.name || this.constructor.name) + ')';
-        if (console[level]) {
+        if (utils.isFunction(console[level])) {
           var _console;
 
           (_console = console)[level].apply(_console, [prefix].concat(args));
@@ -1160,6 +1334,17 @@ var utils = {
   /**
    * Adds the given record to the provided array only if it's not already in the
    * array.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   * const colors = ['red', 'green', 'yellow']
+   *
+   * console.log(colors.length) // 3
+   * utils.noDupeAdd(colors, 'red')
+   * console.log(colors.length) // 3, red already exists
+   *
+   * utils.noDupeAdd(colors, 'blue')
+   * console.log(colors.length) // 4, blue was added
    *
    * @method utils.noDupeAdd
    * @param {Array} array The array.
@@ -1182,6 +1367,13 @@ var utils = {
    * Return a shallow copy of the provided object, minus the properties
    * specified in `keys`.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = { name: 'John', $hashKey: 1214910 }
+   *
+   * let b = utils.omit(a, ['$hashKey'])
+   * console.log(b) // { name: 'John' }
+   *
    * @method utils.omit
    * @param {Object} props The object to copy.
    * @param {string[]} keys Array of strings, representing properties to skip.
@@ -1203,6 +1395,13 @@ var utils = {
    * Return a shallow copy of the provided object, but only include the
    * properties specified in `keys`.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = { name: 'John', $hashKey: 1214910 }
+   *
+   * let b = utils.pick(a, ['$hashKey'])
+   * console.log(b) // { $hashKey: 1214910 }
+   *
    * @method utils.pick
    * @param {Object} props The object to copy.
    * @param {string[]} keys Array of strings, representing properties to keep.
@@ -1223,6 +1422,12 @@ var utils = {
   /**
    * Return a plain copy of the given value.
    *
+   * @example
+   * import {utils} from 'js-data'
+   * const a = { name: 'John' }
+   * let b = utils.plainCopy(a)
+   * console.log(a === b) // false
+   *
    * @method utils.plainCopy
    * @param {*} value The value to copy.
    * @returns {*} Plain copy of `value`.
@@ -1236,6 +1441,15 @@ var utils = {
 
   /**
    * Shortcut for `utils.Promise.reject(value)`.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   *
+   * utils.reject("Testing static reject").then(function(data) {
+   *   // not called
+   * }).catch(function(reason) {
+   *   console.log(reason); // "Testing static reject"
+   * })
    *
    * @method utils.reject
    * @param {*} [value] Value with which to reject the Promise.
@@ -1251,6 +1465,13 @@ var utils = {
   /**
    * Remove the last item found in array according to the given checker function.
    *
+   * @example
+   * import {utils} from 'js-data'
+   *
+   * const colors = ['red', 'green', 'yellow', 'red']
+   * utils.remove(colors, (color) => color === 'red')
+   * console.log(colors) // ['red', 'green', 'yellow']
+   *
    * @method utils.remove
    * @param {Array} array The array to search.
    * @param {Function} fn Checker function.
@@ -1261,7 +1482,7 @@ var utils = {
     }
     var index = this.findIndex(array, fn);
     if (index >= 0) {
-      array.splice(index, 1);
+      array.splice(index, 1); // todo should this be recursive?
     }
   },
 
@@ -1269,7 +1490,15 @@ var utils = {
   /**
    * Shortcut for `utils.Promise.resolve(value)`.
    *
-   * @ignore
+   * @example
+   * import {utils} from 'js-data'
+   *
+   * utils.resolve("Testing static resolve").then(function(data) {
+   *   console.log(data); // "Testing static resolve"
+   * }).catch(function(reason) {
+   *   // not called
+   * })
+   *
    * @param {*} [value] Value with which to resolve the Promise.
    * @returns {Promise} Promise resolved with `value`.
    * @see utils.Promise
@@ -1282,6 +1511,35 @@ var utils = {
 
   /**
    * Set the value at the provided key or path.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   *
+   * const john = {
+   *   name: 'John',
+   *   age: 25,
+   *   parent: {
+   *     name: 'John's Mom',
+   *     age: 50
+   *   }
+   * }
+   * // set value by key
+   * utils.set(john, 'id', 98)
+   * console.log(john.id) // 98
+   *
+   * // set value by path
+   * utils.set(john, 'parent.id', 20)
+   * console.log(john.parent.id) // 20
+   *
+   * // set value by path/value map
+   * utils.set(john, {
+   *   'id': 1098,
+   *   'parent': { id: 1020 },
+   *   'parent.age': '55'
+   * })
+   * console.log(john.id) // 1098
+   * console.log(john.parent.id) // 1020
+   * console.log(john.parent.age) // 55
    *
    * @method utils.set
    * @param {Object} object The object on which to set a property.
@@ -1307,6 +1565,31 @@ var utils = {
 
   /**
    * Check whether the two provided objects are deeply equal.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   *
+   * const objA = {
+   *   name: 'John',
+   *   id: 27,
+   *   nested: {
+   *     item: 'item 1',
+   *     colors: ['red', 'green', 'blue']
+   *   }
+   * }
+   *
+   * const objB = {
+   *   name: 'John',
+   *   id: 27,
+   *   nested: {
+   *     item: 'item 1',
+   *     colors: ['red', 'green', 'blue']
+   *   }
+   * }
+   *
+   * console.log(utils.deepEqual(a,b)) // true
+   * objB.nested.colors.add('yellow') // make a change to a nested object's array
+   * console.log(utils.deepEqual(a,b)) // false
    *
    * @method utils.deepEqual
    * @param {Object} a First object in the comparison.
@@ -1347,6 +1630,13 @@ var utils = {
   /**
    * Proxy for `JSON.stringify`.
    *
+   * @example
+   * import {utils} from 'js-data'
+   *
+   * const a = { name: 'John' }
+   * let jsonVal = utils.toJson(a)
+   * console.log(jsonVal) // '{"name" : "John"}'
+   *
    * @method utils.toJson
    * @param {*} value Value to serialize to JSON.
    * @returns {string} JSON string.
@@ -1357,6 +1647,24 @@ var utils = {
 
   /**
    * Unset the value at the provided key or path.
+   *
+   * @example
+   * import {utils} from 'js-data'
+   *
+   * const john = {
+   *   name: 'John',
+   *   age: 25,
+   *   parent: {
+   *     name: 'John's Mom',
+   *     age: 50
+   *   }
+   * }
+   *
+   * utils.unset(john, age)
+   * utils.unset(john, parent.age)
+   *
+   * console.log(john.age) // null
+   * console.log(john.parent.age) // null
    *
    * @method utils.unset
    * @param {Object} object The object from which to delete the property.
@@ -1382,9 +1690,178 @@ var utils = {
 };
 
 /**
- * @class Component
+ * A base class which gives instances private properties.
+ *
+ * Typically you won't instantiate this class directly, but you may find it
+ * useful as an abstract class for your own components.
+ *
+ * See {@link Settable.extend} for an example of using {@link Settable} as a
+ * base class.
+ *
+ *```javascript
+ * import {Settable} from 'js-data'
+ * ```
+ *
+ * @class Settable
+ * @returns {Settable} A new {@link Settable} instance.
+ * @since 3.0.0
  */
-function Component() {
+function Settable() {
+  var _props = {};
+  Object.defineProperties(this, {
+    /**
+     * Get a private property of this instance.
+     *
+     * __Don't use the method unless you know what you're doing.__
+     *
+     * @method Settable#_get
+     * @param {string} key The property to retrieve.
+     * @returns {*} The value of the property.
+     * @since 3.0.0
+     */
+    _get: {
+      value: function value(key) {
+        return utils.get(_props, key);
+      }
+    },
+
+    /**
+     * Set a private property of this instance.
+     *
+     * __Don't use the method unless you know what you're doing.__
+     *
+     * @method __Don't use the method unless you know what you're doing.__#_set
+     * @param {(string|Object)} key The key or path to the property. Can also
+     * pass in an object of key/value pairs, which will all be set on the instance.
+     * @param {*} [value] The value to set.
+     * @since 3.0.0
+     */
+    _set: {
+      value: function value(key, _value) {
+        return utils.set(_props, key, _value);
+      }
+    },
+
+    /**
+     * Unset a private property of this instance.
+     *
+     * __Don't use the method unless you know what you're doing.__
+     *
+     * @method __Don't use the method unless you know what you're doing.__#_unset
+     * @param {string} key The property to unset.
+     * @since 3.0.0
+     */
+    _unset: {
+      value: function value(key) {
+        return utils.unset(_props, key);
+      }
+    }
+  });
+}
+
+/**
+ * Create a subclass of this Settable:
+ *
+ * @example <caption>Settable.extend</caption>
+ * // Normally you would do: import {Settable} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Settable} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * // Extend the class using ES2015 class syntax.
+ * class CustomSettableClass extends Settable {
+ *   foo () { return 'bar' }
+ *   static beep () { return 'boop' }
+ * }
+ * const customSettable = new CustomSettableClass()
+ * console.log(customSettable.foo())
+ * console.log(CustomSettableClass.beep())
+ *
+ * // Extend the class using alternate method.
+ * const OtherSettableClass = Settable.extend({
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherSettable = new OtherSettableClass()
+ * console.log(otherSettable.foo())
+ * console.log(OtherSettableClass.beep())
+ *
+ * // Extend the class, providing a custom constructor.
+ * function AnotherSettableClass () {
+ *   Settable.call(this)
+ *   this.created_at = new Date().getTime()
+ * }
+ * Settable.extend({
+ *   constructor: AnotherSettableClass,
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const anotherSettable = new AnotherSettableClass()
+ * console.log(anotherSettable.created_at)
+ * console.log(anotherSettable.foo())
+ * console.log(AnotherSettableClass.beep())
+ *
+ * @method Settable.extend
+ * @param {Object} [props={}] Properties to add to the prototype of the
+ * subclass.
+ * @param {Object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
+ * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @returns {Constructor} Subclass of this Settable class.
+ * @since 3.0.0
+ */
+Settable.extend = utils.extend;
+
+/**
+ * The base class from which all JSData components inherit some basic
+ * functionality.
+ *
+ * Typically you won't instantiate this class directly, but you may find it
+ * useful as an abstract class for your own components.
+ *
+ * See {@link Component.extend} for an example of using {@link Component} as a
+ * base class.
+ *
+ *```javascript
+ * import {Component} from 'js-data'
+ * ```
+ *
+ * @class Component
+ * @param {Object} [opts] Configuration options.
+ * @param {boolean} [opts.debug=false] See {@link Component#debug}.
+ * @returns {Component} A new {@link Component} instance.
+ * @since 3.0.0
+ */
+function Component(opts) {
+  Settable.call(this);
+  opts || (opts = {});
+
+  /**
+   * Whether to enable debug-level logs for this component. Anything that
+   * extends `Component` inherits this option and the corresponding logging
+   * functionality.
+   *
+   * @example <caption>Component#debug</caption>
+   * // Normally you would do: import {Component} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Component} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
+   * const component = new Component()
+   * component.log('debug', 'some message') // nothing gets logged
+   * // Display debug logs:
+   * component.debug = true
+   * component.log('debug', 'other message') // this DOES get logged
+   *
+   * @default false
+   * @name Component#debug
+   * @since 3.0.0
+   * @type {boolean}
+   */
+  this.debug = opts.hasOwnProperty('debug') ? !!opts.debug : false;
+
   /**
    * Event listeners attached to this Component. __Do not modify.__ Use
    * {@link Component#on} and {@link Component#off} instead.
@@ -1394,24 +1871,73 @@ function Component() {
    * @since 3.0.0
    * @type {Object}
    */
-  Object.defineProperty(this, '_listeners', { value: {} });
+  Object.defineProperty(this, '_listeners', { value: {}, writable: true });
 }
 
+var Component$1 = Settable.extend({
+  constructor: Component
+});
+
 /**
- * Create a subclass of this component.
+ * Create a subclass of this Component:
+ *
+ * @example <caption>Component.extend</caption>
+ * // Normally you would do: import {Component} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Component} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * // Extend the class using ES2015 class syntax.
+ * class CustomComponentClass extends Component {
+ *   foo () { return 'bar' }
+ *   static beep () { return 'boop' }
+ * }
+ * const customComponent = new CustomComponentClass()
+ * console.log(customComponent.foo())
+ * console.log(CustomComponentClass.beep())
+ *
+ * // Extend the class using alternate method.
+ * const OtherComponentClass = Component.extend({
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherComponent = new OtherComponentClass()
+ * console.log(otherComponent.foo())
+ * console.log(OtherComponentClass.beep())
+ *
+ * // Extend the class, providing a custom constructor.
+ * function AnotherComponentClass () {
+ *   Component.call(this)
+ *   this.created_at = new Date().getTime()
+ * }
+ * Component.extend({
+ *   constructor: AnotherComponentClass,
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const anotherComponent = new AnotherComponentClass()
+ * console.log(anotherComponent.created_at)
+ * console.log(anotherComponent.foo())
+ * console.log(AnotherComponentClass.beep())
  *
  * @method Component.extend
- * @static
  * @param {Object} [props={}] Properties to add to the prototype of the
  * subclass.
+ * @param {Object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
  * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @returns {Constructor} Subclass of this component.
+ * @returns {Constructor} Subclass of this Component class.
  * @since 3.0.0
  */
 Component.extend = utils.extend;
 
 /**
- * Log the provided values at the "debug" level.
+ * Log the provided values at the "debug" level. Debug-level logs are only
+ * logged if {@link Component#debug} is `true`.
+ *
+ * `.dbg(...)` is shorthand for `.log('debug', ...)`.
  *
  * @method Component#dbg
  * @param {...*} [args] Values to log.
@@ -1419,9 +1945,12 @@ Component.extend = utils.extend;
  */
 /**
  * Log the provided values. By default sends values to `console[level]`.
+ * Debug-level logs are only logged if {@link Component#debug} is `true`.
+ *
+ * Will attempt to use appropriate `console` methods if they are available.
  *
  * @method Component#log
- * @param {string} level Log level
+ * @param {string} level Log level.
  * @param {...*} [args] Values to log.
  * @since 3.0.0
  */
@@ -1430,7 +1959,8 @@ utils.logify(Component.prototype);
 /**
  * Register a new event listener on this Component.
  *
- * @example <caption>Listen for all "afterCreate" events in a DataStore</caption>
+ * @example
+ * // Listen for all "afterCreate" events in a DataStore
  * store.on('afterCreate', (mapperName, props, opts, result) => {
  *   console.log(mapperName) // "post"
  *   console.log(props.id) // undefined
@@ -1440,12 +1970,14 @@ utils.logify(Component.prototype);
  *   console.log(post.id) // 1234
  * })
  *
- * @example <caption>Listen for the "add" event on a collection</caption>
+ * @example
+ * // Listen for the "add" event on a collection
  * collection.on('add', (records) => {
  *   console.log(records) // [...]
  * })
  *
- * @example <caption>Listen for "change" events on a record</caption>
+ * @example
+ * // Listen for "change" events on a record
  * post.on('change', (record, changes) => {
  *   console.log(changes) // { changed: { title: 'Modeling your data' } }
  * })
@@ -1462,13 +1994,16 @@ utils.logify(Component.prototype);
  * then all listeners for the specified event will be removed. If no event is
  * specified then all listeners for all events will be removed.
  *
- * @example <caption>Remove a listener to a single event</caption>
+ * @example
+ * // Remove a particular listener for a particular event
  * collection.off('add', handler)
  *
- * @example <caption>Remove all listeners to a single event</caption>
+ * @example
+ * // Remove all listeners for a particular event
  * record.off('change')
  *
- * @example <caption>Remove all listeners to all events</caption>
+ * @example
+ * // Remove all listeners to all events
  * store.off()
  *
  * @method Component#off
@@ -1479,17 +2014,22 @@ utils.logify(Component.prototype);
 /**
  * Trigger an event on this Component.
  *
- * @example
+ * @example <caption>Component#emit</caption>
+ * // import {Collection, DataStore} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Collection, DataStore} = JSData
+ *
+ * const collection = new Collection()
  * collection.on('foo', (msg) => {
- *   console.log(msg) // "bar"
+ *   console.log(msg)
  * })
  * collection.emit('foo', 'bar')
  *
- * @example
- * store.on('foo', (msg, val1, val2) => {
- *   console.log(msg, val1, val2) // "bar" "beep" "boop"
+ * const store = new DataStore()
+ * store.on('beep', (msg) => {
+ *   console.log(msg)
  * })
- * store.emit('foo', 'bar', 'beep', 'boop')
+ * store.emit('beep', 'boop')
  *
  * @method Component#emit
  * @param {string} event Name of event to emit.
@@ -1534,7 +2074,18 @@ var escape = function escape(pattern) {
  * ```
  *
  * @example
- * const posts = store.query('post').filter({ status: 'draft' }).limit(2).run()
+ * const store = new JSData.DataStore()
+ * store.defineMapper('post')
+ * const posts = [
+ *   { author: 'John', age: 30, status: 'published', id: 1 },
+ *   { author: 'Sally', age: 31, status: 'draft', id: 2 },
+ *   { author: 'Mike', age: 32, status: 'draft', id: 3 },
+ *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
+ *   { author: 'Adam', age: 33, status: 'draft', id: 5 }
+ * ]
+ * store.add('post', posts)
+ * const drafts = store.query('post').filter({ status: 'draft' }).limit(2).run()
+ * console.log(drafts)
  *
  * @class Query
  * @extends Component
@@ -1563,7 +2114,7 @@ function Query(collection) {
   this.data = null;
 }
 
-var Query$1 = Component.extend({
+var Query$1 = Component$1.extend({
   constructor: Query,
 
   _applyWhereFromObject: function _applyWhereFromObject(where) {
@@ -1651,10 +2202,32 @@ var Query$1 = Component.extend({
    * Find all entities between two boundaries.
    *
    * @example <caption>Get the users ages 18 to 30.</caption>
-   * const users = query.between(18, 30, { index: 'age' }).run()
+   * const store = new JSData.DataStore()
+   * store.defineMapper('user')
+   * const users = [
+   *   { name: 'Peter', age: 25, id: 1 },
+   *   { name: 'Jim', age: 19, id: 2 },
+   *   { name: 'Mike', age: 17, id: 3 },
+   *   { name: 'Alan', age: 29, id: 4 },
+   *   { name: 'Katie', age: 33, id: 5 }
+   * ]
+   * store.add('post', posts)
+   * const filteredUsers = store.query('user').between(18, 30, { index: 'age' }).run()
+   * console.log(filteredUsers)
    *
    * @example <caption>Same as above.</caption>
-   * const users = query.between([18], [30], { index: 'age' }).run()
+   * const store = new JSData.DataStore()
+   * store.defineMapper('user')
+   * const users = [
+   *   { name: 'Peter', age: 25, id: 1 },
+   *   { name: 'Jim', age: 19, id: 2 },
+   *   { name: 'Mike', age: 17, id: 3 },
+   *   { name: 'Alan', age: 29, id: 4 },
+   *   { name: 'Katie', age: 33, id: 5 }
+   * ]
+   * store.add('post', posts)
+   * const filteredUsers = store.query('user').between([18], [30], { index: 'age' }).run()
+   * console.log(filteredUsers)
    *
    * @method Query#between
    * @param {Array} leftKeys Keys defining the left boundary.
@@ -1755,17 +2328,33 @@ var Query$1 = Component.extend({
    * Find the record or records that match the provided query or are accepted by
    * the provided filter function.
    *
-   * @example <caption>Get the draft posts created less than three months</caption>
-   * const posts = query.filter({
+   * @example <caption>Get the draft posts by authors younger than 30</caption>
+   * const store = new JSData.DataStore()
+   * store.defineMapper('post')
+   * const posts = [
+   *   { author: 'John', age: 30, status: 'published', id: 1 },
+   *   { author: 'Sally', age: 31, status: 'published', id: 2 },
+   *   { author: 'Mike', age: 32, status: 'draft', id: 3 },
+   *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
+   *   { author: 'Adam', age: 33, status: 'published', id: 5 }
+   *   { author: 'Peter', age: 25, status: 'deleted', id: 6 },
+   *   { author: 'Sally', age: 21, status: 'draft', id: 7 },
+   *   { author: 'Jim', age: 27, status: 'draft', id: 8 },
+   *   { author: 'Jim', age: 27, status: 'published', id: 9 },
+   *   { author: 'Jason', age: 55, status: 'published', id: 10 }
+   * ]
+   * store.add('post', posts)
+   * let results = store.query('post').filter({
    *   where: {
    *     status: {
    *       '==': 'draft'
    *     },
-   *     created_at_timestamp: {
-   *       '>=': (new Date().getTime() (1000 * 60 * 60 * 24 * 30 * 3)) // 3 months ago
+   *     age: {
+   *       '<': 30
    *     }
    *   }
    * }).run()
+   * console.log(results)
    *
    * @example <caption>Use a custom filter function</caption>
    * const posts = query.filter(function (post) {
@@ -1789,20 +2378,40 @@ var Query$1 = Component.extend({
      * [querysyntax]: http://www.js-data.io/v3.0/docs/query-syntax
      *
      * @example <caption>Empty "findAll" query</caption>
+     * const store = new JSData.DataStore()
+     * store.defineMapper('post')
      * store.findAll('post').then((posts) => {
      *   console.log(posts) // [...]
      * })
      *
      * @example <caption>Empty "filter" query</caption>
+     * const store = new JSData.DataStore()
+     * store.defineMapper('post')
      * const posts = store.filter('post')
      * console.log(posts) // [...]
      *
-     * @example <caption>Complex "findAll" query</caption>
-     * const PAGE_SIZE = 10
+     * @example <caption>Complex "filter" query</caption>
+     * const PAGE_SIZE = 2
      * let currentPage = 3
      *
+     * const store = new JSData.DataStore()
+     * store.defineMapper('post')
+     * const posts = [
+     *   { author: 'John', age: 30, status: 'published', id: 1 },
+     *   { author: 'Sally', age: 31, status: 'published', id: 2 },
+     *   { author: 'Mike', age: 32, status: 'draft', id: 3 },
+     *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
+     *   { author: 'Adam', age: 33, status: 'published', id: 5 }
+     *   { author: 'Peter', age: 25, status: 'deleted', id: 6 },
+     *   { author: 'Sally', age: 21, status: 'draft', id: 7 },
+     *   { author: 'Jim', age: 27, status: 'draft', id: 8 },
+     *   { author: 'Jim', age: 27, status: 'published', id: 9 },
+     *   { author: 'Jason', age: 55, status: 'published', id: 10 }
+     * ]
+     * store.add('post', posts)
      * // Retrieve a filtered page of blog posts
-     * store.findAll('post', {
+     * // Would typically replace filter with findAll
+     * store.filter('post', {
      *   where: {
      *     status: {
      *       // WHERE status = 'published'
@@ -1821,12 +2430,10 @@ var Query$1 = Component.extend({
      *     // ORDER BY title ASC
      *     ['title', 'ASC']
      *   ],
-     *   // LIMIT 10
+     *   // LIMIT 2
      *   limit: PAGE_SIZE,
-     *   // SKIP 20
-     *   offset: PAGE_SIZE * (currentPage 1)
-     * }).then((posts) => {
-     *   console.log(posts) // [...]
+     *   // SKIP 4
+     *   offset: PAGE_SIZE * (currentPage - 1)
      * })
      *
      * @namespace query
@@ -1849,8 +2456,25 @@ var Query$1 = Component.extend({
          * Filtering criteria. Records that do not meet this criteria will be exluded
          * from the result.
          *
-         * @example
-         * TODO
+         * @example <caption>Return posts where author is at least 32 years old</caption>
+         * const store = new JSData.DataStore()
+         * store.defineMapper('post')
+         * const posts = [
+         *   { author: 'John', age: 30, id: 5 },
+         *   { author: 'Sally', age: 31, id: 6 },
+         *   { author: 'Mike', age: 32, id: 7 },
+         *   { author: 'Adam', age: 33, id: 8 },
+         *   { author: 'Adam', age: 33, id: 9 }
+         * ]
+         * store.add('post', posts)
+         * store.filter('post', {
+         *   where: {
+         *     age: {
+         *       '>=': 30
+         *     }
+         *   }
+         * })
+         * console.log(results)
          *
          * @name query.where
          * @type {Object}
@@ -1895,8 +2519,21 @@ var Query$1 = Component.extend({
         /**
          * Determines how records should be ordered in the result.
          *
-         * @example
-         * TODO
+         * @example <caption>Order posts by `author` then by `id` descending </caption>
+         * const store = new JSData.DataStore()
+         * store.defineMapper('post')
+         * const posts = [
+         *   { author: 'John', age: 30, id: 5 },
+         *   { author: 'Sally', age: 31, id: 6 },
+         *   { author: 'Mike', age: 32, id: 7 },
+         *   { author: 'Adam', age: 33, id: 8 },
+         *   { author: 'Adam', age: 33, id: 9 }
+         * ]
+         * store.add('post', posts)
+         * store.filter('post', {
+         *     orderBy:[['author','ASC'],['id','DESC']]
+         * })
+         * console.log(results)
          *
          * @name query.orderBy
          * @type {string|Array[]}
@@ -1920,13 +2557,38 @@ var Query$1 = Component.extend({
         /**
          * Number of records to skip.
          *
-         * @example <caption>Retrieve the first "page" of blog posts</caption>
+         * @example <caption>Retrieve the first "page" of blog posts using findAll</caption>
          * const PAGE_SIZE = 10
          * let currentPage = 1
-         * PostService.findAll({
+         * PostMapper.findAll({
          *   offset: PAGE_SIZE * (currentPage 1)
          *   limit: PAGE_SIZE
          * })
+         *
+         * @example <caption>Retrieve the last "page" of blog posts using filter</caption>
+         * const PAGE_SIZE = 5
+         * let currentPage = 2
+         * const store = new JSData.DataStore()
+         * store.defineMapper('post')
+         * const posts = [
+         *   { author: 'John', age: 30, id: 1 },
+         *   { author: 'Sally', age: 31, id: 2 },
+         *   { author: 'Mike', age: 32, id: 3 },
+         *   { author: 'Adam', age: 33, id: 4 },
+         *   { author: 'Adam', age: 33, id: 5 },
+         *   { author: 'Peter', age: 25, id: 6 },
+         *   { author: 'Sally', age: 21, id: 7 },
+         *   { author: 'Jim', age: 27, id: 8 },
+         *   { author: 'Jim', age: 27, id: 9 },
+         *   { author: 'Jason', age: 55, id: 10 }
+         * ]
+         * store.add('post', posts)
+         * store.filter('post', {
+         *   offset: PAGE_SIZE * (currentPage 1)
+         *   limit: PAGE_SIZE
+         * })
+         *
+         * console.log(results)
          *
          * @name query.offset
          * @type {number}
@@ -1942,14 +2604,38 @@ var Query$1 = Component.extend({
         /**
          * Maximum number of records to retrieve.
          *
-         * @example <caption>Retrieve the first "page" of blog posts</caption>
+         * @example <caption>Retrieve the first "page" of blog posts using findAll</caption>
          * const PAGE_SIZE = 10
          * let currentPage = 1
-         * PostService.findAll({
+         * PostMapper.findAll({
          *   offset: PAGE_SIZE * (currentPage 1)
          *   limit: PAGE_SIZE
          * })
          *
+         * @example <caption>Retrieve the last "page" of blog posts using filter</caption>
+         * const PAGE_SIZE = 5
+         * let currentPage = 2
+         * const store = new JSData.DataStore()
+         * store.defineMapper('post')
+         * const posts = [
+         *   { author: 'John', age: 30, id: 1 },
+         *   { author: 'Sally', age: 31, id: 2 },
+         *   { author: 'Mike', age: 32, id: 3 },
+         *   { author: 'Adam', age: 33, id: 4 },
+         *   { author: 'Adam', age: 33, id: 5 },
+         *   { author: 'Peter', age: 25, id: 6 },
+         *   { author: 'Sally', age: 21, id: 7 },
+         *   { author: 'Jim', age: 27, id: 8 },
+         *   { author: 'Jim', age: 27, id: 9 },
+         *   { author: 'Jason', age: 55, id: 10 }
+         * ]
+         * store.add('post', posts)
+         * store.filter('post', {
+         *   offset: PAGE_SIZE * (currentPage 1)
+         *   limit: PAGE_SIZE
+         * })
+         *
+         * console.log(results)
          * @name query.limit
          * @type {number}
          * @see http://www.js-data.io/v3.0/docs/query-syntax
@@ -2109,8 +2795,19 @@ var Query$1 = Component.extend({
   /**
    * Limit the result.
    *
-   * @example <caption>Get only the first 10 draft posts.</caption>
-   * const posts = query.get('draft', { index: 'status' }).limit(10).run()
+   * @example <caption>Get only the first 2 posts.</caption>
+   * const store = new JSData.DataStore()
+   * store.defineMapper('post')
+   * const posts = [
+   *   { author: 'John', age: 30, status: 'published', id: 1 },
+   *   { author: 'Sally', age: 31, status: 'draft', id: 2 },
+   *   { author: 'Mike', age: 32, status: 'draft', id: 3 },
+   *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
+   *   { author: 'Adam', age: 33, status: 'draft', id: 5 }
+   * ]
+   * store.add('post', posts)
+   * const results = store.query('post').limit(2).run()
+   * console.log(results)
    *
    * @method Query#limit
    * @param {number} num The maximum number of entities to keep in the result.
@@ -2130,10 +2827,21 @@ var Query$1 = Component.extend({
   /**
    * Apply a mapping function to the result data.
    *
-   * @example
-   * const ages = UserCollection.query().map((user) => {
+   * @example Return the age of all users
+   * const store = new JSData.DataStore()
+   * store.defineMapper('user')
+   * const users = [
+   *   { name: 'Peter', age: 25, id: 1 },
+   *   { name: 'Jim', age: 19, id: 2 },
+   *   { name: 'Mike', age: 17, id: 3 },
+   *   { name: 'Alan', age: 29, id: 4 },
+   *   { name: 'Katie', age: 33, id: 5 }
+   * ]
+   * store.add('post', posts)
+   * const ages = store.query('user').map((user) => {
    *   return user.age
    * }).run()
+   * console.log(ages)
    *
    * @method Query#map
    * @param {Function} mapFn Mapping function.
@@ -2189,8 +2897,19 @@ var Query$1 = Component.extend({
   /**
    * Skip a number of results.
    *
-   * @example <caption>Get all but the first 10 draft posts.</caption>
-   * const posts = query.get('draft', { index: 'status' }).skip(10).run()
+   * @example <caption>Get all but the first 2 posts.</caption>
+   * const store = new JSData.DataStore()
+   * store.defineMapper('post')
+   * const posts = [
+   *   { author: 'John', age: 30, status: 'published', id: 1 },
+   *   { author: 'Sally', age: 31, status: 'draft', id: 2 },
+   *   { author: 'Mike', age: 32, status: 'draft', id: 3 },
+   *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
+   *   { author: 'Adam', age: 33, status: 'draft', id: 5 }
+   * ]
+   * store.add('post', posts)
+   * const results = store.query('post').skip(2).run()
+   * console.log(results)
    *
    * @method Query#skip
    * @param {number} num The number of entities to skip.
@@ -2215,12 +2934,39 @@ var Query$1 = Component.extend({
    * implemented by adapters (for the most part).
    *
    * @example <caption>Variant 1</caption>
+   *
+   * const store = new JSData.DataStore()
+   * store.defineMapper('post')
+   * const posts = [
+   *   { author: 'John', age: 30, status: 'published', id: 1 },
+   *   { author: 'Sally', age: 31, status: 'published', id: 2 },
+   *   { author: 'Mike', age: 32, status: 'published', id: 3 },
+   *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
+   *   { author: 'Adam', age: 33, status: 'published', id: 5 }
+   * ]
+   * store.add('post', posts)
+   *
    * const publishedPosts = store.filter('post', {
    *   status: 'published',
    *   limit: 2
    * })
    *
+   * console.log(publishedPosts)
+   *
+   *
    * @example <caption>Variant 2</caption>
+   *
+   * const store = new JSData.DataStore()
+   * store.defineMapper('post')
+   * const posts = [
+   *   { author: 'John', age: 30, status: 'published', id: 1 },
+   *   { author: 'Sally', age: 31, status: 'published', id: 2 },
+   *   { author: 'Mike', age: 32, status: 'published', id: 3 },
+   *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
+   *   { author: 'Adam', age: 33, status: 'published', id: 5 }
+   * ]
+   * store.add('post', posts)
+   *
    * const publishedPosts = store.filter('post', {
    *   where: {
    *     status: {
@@ -2230,12 +2976,40 @@ var Query$1 = Component.extend({
    *   limit: 2
    * })
    *
+   * console.log(publishedPosts)
+   *
    * @example <caption>Variant 3</caption>
+   *
+   * const store = new JSData.DataStore()
+   * store.defineMapper('post')
+   * const posts = [
+   *   { author: 'John', age: 30, status: 'published', id: 1 },
+   *   { author: 'Sally', age: 31, status: 'published', id: 2 },
+   *   { author: 'Mike', age: 32, status: 'published', id: 3 },
+   *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
+   *   { author: 'Adam', age: 33, status: 'published', id: 5 }
+   * ]
+   * store.add('post', posts)
+   *
    * const publishedPosts = store.query('post').filter({
    *   status: 'published'
    * }).limit(2).run()
    *
+   * console.log(publishedPosts)
+   *
    * @example <caption>Variant 4</caption>
+   *
+   * const store = new JSData.DataStore()
+   * store.defineMapper('post')
+   * const posts = [
+   *   { author: 'John', age: 30, status: 'published', id: 1 },
+   *   { author: 'Sally', age: 31, status: 'published', id: 2 },
+   *   { author: 'Mike', age: 32, status: 'published', id: 3 },
+   *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
+   *   { author: 'Adam', age: 33, status: 'published', id: 5 }
+   * ]
+   * store.add('post', posts)
+   *
    * const publishedPosts = store.query('post').filter({
    *   where: {
    *     status: {
@@ -2244,7 +3018,21 @@ var Query$1 = Component.extend({
    *   }
    * }).limit(2).run()
    *
+   * console.log(publishedPosts)
+   *
    * @example <caption>Multiple operators</caption>
+   *
+   * const store = new JSData.DataStore()
+   * store.defineMapper('post')
+   * const posts = [
+   *   { author: 'John', age: 30, status: 'published', id: 1 },
+   *   { author: 'Sally', age: 31, status: 'published', id: 2 },
+   *   { author: 'Mike', age: 32, status: 'published', id: 3 },
+   *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
+   *   { author: 'Adam', age: 33, status: 'published', id: 5 }
+   * ]
+   * store.add('post', posts)
+   *
    * const myPublishedPosts = store.filter('post', {
    *   where: {
    *     status: {
@@ -2255,6 +3043,8 @@ var Query$1 = Component.extend({
    *     }
    *   }
    * })
+   *
+   * console.log(myPublishedPosts)
    *
    * @name Query.ops
    * @property {Function} == Equality operator.
@@ -2328,26 +3118,53 @@ var Query$1 = Component.extend({
 });
 
 /**
- * Create a subclass of this Query.
+ * Create a subclass of this Query:
+ * @example <caption>Query.extend</caption>
+ * // Normally you would do: import {Query} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Query} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
  *
- * @example <caption>Extend the class in a cross-browser manner.</caption>
- * import {Query} from 'js-data'
- * const CustomQueryClass = Query.extend({
- *   foo () { return 'bar' }
- * })
- * const customQuery = new CustomQueryClass({ name: 'test' })
- * console.log(customQuery.foo()) // "bar"
- *
- * @example <caption>Extend the class using ES2015 class syntax.</caption>
+ * // Extend the class using ES2015 class syntax.
  * class CustomQueryClass extends Query {
  *   foo () { return 'bar' }
+ *   static beep () { return 'boop' }
  * }
- * const customQuery = new CustomQueryClass({ name: 'test' })
- * console.log(customQuery.foo()) // "bar"
+ * const customQuery = new CustomQueryClass()
+ * console.log(customQuery.foo())
+ * console.log(CustomQueryClass.beep())
+ *
+ * // Extend the class using alternate method.
+ * const OtherQueryClass = Query.extend({
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherQuery = new OtherQueryClass()
+ * console.log(otherQuery.foo())
+ * console.log(OtherQueryClass.beep())
+ *
+ * // Extend the class, providing a custom constructor.
+ * function AnotherQueryClass (collection) {
+ *   Query.call(this, collection)
+ *   this.created_at = new Date().getTime()
+ * }
+ * Query.extend({
+ *   constructor: AnotherQueryClass,
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const anotherQuery = new AnotherQueryClass()
+ * console.log(anotherQuery.created_at)
+ * console.log(anotherQuery.foo())
+ * console.log(AnotherQueryClass.beep())
  *
  * @method Query.extend
  * @param {Object} [props={}] Properties to add to the prototype of the
  * subclass.
+ * @param {Object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
  * @param {Object} [classProps={}] Static properties to add to the subclass.
  * @returns {Constructor} Subclass of this Query class.
  * @since 3.0.0
@@ -2750,16 +3567,19 @@ var COLLECTION_DEFAULTS = {
 /**
  * An ordered set of {@link Record} instances.
  *
- * @example
- * import {Collection, Record} from 'js-data'
+ * @example <caption>Collection#constructor</caption>
+ * // import {Collection, Record} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Collection, Record} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
  * const user1 = new Record({ id: 1 })
  * const user2 = new Record({ id: 2 })
  * const UserCollection = new Collection([user1, user2])
- * UserCollection.get(1) === user1 // true
+ * console.log(UserCollection.get(1) === user1)
  *
  * @class Collection
  * @extends Component
- * @type {Function}
  * @param {Array} [records] Initial set of records to insert into the
  * collection.
  * @param {Object} [opts] Configuration options.
@@ -2771,7 +3591,7 @@ var COLLECTION_DEFAULTS = {
  */
 function Collection(records, opts) {
   utils.classCallCheck(this, Collection);
-  Collection.__super__.call(this);
+  Component$1.call(this, opts);
 
   if (records && !utils.isArray(records)) {
     opts = records;
@@ -2785,26 +3605,29 @@ function Collection(records, opts) {
   records || (records = []);
   opts || (opts = {});
 
-  /**
-   * Default Mapper for this collection. Optional. If a Mapper is provided, then
-   * the collection will use the {@link Mapper#idAttribute} setting, and will
-   * wrap records in {@link Mapper#recordClass}.
-   *
-   * @example
-   * import {Collection, Mapper} from 'js-data'
-   *
-   * class MyMapperClass extends Mapper {
-   *   foo () { return 'bar' }
-   * }
-   * const myMapper = new MyMapperClass()
-   * const collection = new Collection(null, { mapper: myMapper })
-   *
-   * @name Collection#mapper
-   * @type {Mapper}
-   * @default null
-   * @since 3.0.0
-   */
   Object.defineProperties(this, {
+    /**
+     * Default Mapper for this collection. Optional. If a Mapper is provided, then
+     * the collection will use the {@link Mapper#idAttribute} setting, and will
+     * wrap records in {@link Mapper#recordClass}.
+     *
+     * @example <caption>Collection#mapper</caption>
+     * // Normally you would do: import {Collection, Mapper} from 'js-data'
+     * const JSData = require('js-data@3.0.0-beta.7')
+     * const {Collection, Mapper} = JSData
+     * console.log('Using JSData v' + JSData.version.full)
+     *
+     * class MyMapperClass extends Mapper {
+     *   foo () { return 'bar' }
+     * }
+     * const myMapper = new MyMapperClass({ name: 'myMapper' })
+     * const collection = new Collection(null, { mapper: myMapper })
+     *
+     * @name Collection#mapper
+     * @type {Mapper}
+     * @default null
+     * @since 3.0.0
+     */
     mapper: {
       value: undefined,
       writable: true
@@ -2854,12 +3677,12 @@ function Collection(records, opts) {
   });
 
   // Insert initial data into the collection
-  if (records) {
+  if (utils.isObject(records) || utils.isArray(records) && records.length) {
     this.add(records);
   }
 }
 
-var Collection$1 = Component.extend({
+var Collection$1 = Component$1.extend({
   constructor: Collection,
 
   /**
@@ -2971,7 +3794,6 @@ var Collection$1 = Component.extend({
     });
     // Finally, return the inserted data
     var result = singular ? records[0] : records;
-    // TODO: Make this more performant (batch events?)
     this.emit('add', result);
     return this.afterAdd(records, opts, result) || result;
   },
@@ -3057,10 +3879,12 @@ var Collection$1 = Component.extend({
    *
    * Shortcut for `collection.query().between(18, 30, { index: 'age' }).run()`
    *
-   * @example <caption>Get all users ages 18 to 30</caption>
+   * @example
+   * // Get all users ages 18 to 30
    * const users = collection.between(18, 30, { index: 'age' })
    *
-   * @example <caption>Same as above</caption>
+   * @example
+   * // Same as above
    * const users = collection.between([18], [30], { index: 'age' })
    *
    * @method Collection#between
@@ -3076,7 +3900,7 @@ var Collection$1 = Component.extend({
    * on the left boundary.
    * @param {boolean} [opts.limit] Limit the result to a certain number.
    * @param {boolean} [opts.offset] The number of resulting records to skip.
-   * @returns {Array} The result.
+   * @returns {Object[]|Record[]} The result.
    */
   between: function between(leftKeys, rightKeys, opts) {
     return this.query().between(leftKeys, rightKeys, opts).run();
@@ -3086,10 +3910,12 @@ var Collection$1 = Component.extend({
   /**
    * Create a new secondary index on the contents of the collection.
    *
-   * @example <caption>Index users by age</caption>
+   * @example
+   * // Index users by age
    * collection.createIndex('age')
    *
-   * @example <caption>Index users by status and role</caption>
+   * @example
+   * // Index users by status and role
    * collection.createIndex('statusAndRole', ['status', 'role'])
    *
    * @method Collection#createIndex
@@ -3098,7 +3924,6 @@ var Collection$1 = Component.extend({
    * @param {string[]} [fieldList] Array of field names to use as the key or
    * compound key of the new secondary index. If no fieldList is provided, then
    * the name will also be the field that is used to index the collection.
-   * @returns {Collection} A reference to itself for chaining.
    */
   createIndex: function createIndex(name, fieldList, opts) {
     var _this2 = this;
@@ -3112,7 +3937,6 @@ var Collection$1 = Component.extend({
     });
     var index = this.indexes[name] = new Index(fieldList, opts);
     this.index.visitAll(index.insertRecord, index);
-    return this;
   },
 
 
@@ -3122,30 +3946,42 @@ var Collection$1 = Component.extend({
    *
    * Shortcut for `collection.query().filter(queryOrFn[, thisArg]).run()`
    *
-   * @example <caption>Get the draft posts created less than three months</caption>
-   * const posts = collection.filter({
+   * @example <caption>Collection#filter</caption>
+   * // Normally you would do: import {Collection} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Collection} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
+   * const collection = new Collection([
+   *   { id: 1, status: 'draft', created_at_timestamp: new Date().getTime() }
+   * ])
+   *
+   * // Get the draft posts created less than three months ago
+   * let posts = collection.filter({
    *   where: {
    *     status: {
    *       '==': 'draft'
    *     },
    *     created_at_timestamp: {
-   *       '>=': (new Date().getTime() - (1000 * 60 * 60 * 24 * 30 * 3)) // 3 months ago
+   *       '>=': (new Date().getTime() - (1000 \* 60 \* 60 \* 24 \* 30 \* 3)) // 3 months ago
    *     }
    *   }
    * })
+   * console.log(posts)
    *
-   * @example <caption>Use a custom filter function</caption>
-   * const posts = collection.filter(function (post) {
-   *   return post.isReady()
+   * // Use a custom filter function
+   * posts = collection.filter(function (post) {
+   *   return post.id % 2 === 0
    * })
    *
    * @method Collection#filter
-   * @since 3.0.0
    * @param {(Object|Function)} [queryOrFn={}] Selection query or filter
    * function.
    * @param {Object} [thisArg] Context to which to bind `queryOrFn` if
    * `queryOrFn` is a function.
    * @returns {Array} The result.
+   * @see query
+   * @since 3.0.0
    */
   filter: function filter(query, thisArg) {
     return this.query().filter(query, thisArg).run();
@@ -3190,10 +4026,12 @@ var Collection$1 = Component.extend({
    *
    * Shortcut for `collection.query().getAll(keyList1, keyList2, ...).run()`
    *
-   * @example <caption>Get the posts where "status" is "draft" or "inReview"</caption>
+   * @example
+   * // Get the posts where "status" is "draft" or "inReview"
    * const posts = collection.getAll('draft', 'inReview', { index: 'status' })
    *
-   * @example <caption>Same as above</caption>
+   * @example
+   * // Same as above
    * const posts = collection.getAll(['draft'], ['inReview'], { index: 'status' })
    *
    * @method Collection#getAll
@@ -3317,7 +4155,8 @@ var Collection$1 = Component.extend({
    * Create a new query to be executed against the contents of the collection.
    * The result will be all or a subset of the contents of the collection.
    *
-   * @example <caption>Grab page 2 of users between ages 18 and 30</caption>
+   * @example
+   * // Grab page 2 of users between ages 18 and 30
    * collection.query()
    *   .between(18, 30, { index: 'age' }) // between ages 18 and 30
    *   .skip(10) // second page
@@ -3377,7 +4216,9 @@ var Collection$1 = Component.extend({
       });
       if (record && utils.isFunction(record.off)) {
         record.off('all', this._onRecordEvent, this);
-        this.emit('remove', record);
+        if (!opts.silent) {
+          this.emit('remove', record);
+        }
       }
     }
     return this.afterRemove(id, opts, record) || record;
@@ -3406,9 +4247,14 @@ var Collection$1 = Component.extend({
     var records = this.filter(query);
 
     // Remove each selected record from the collection
+    var optsCopy = utils.plainCopy(opts);
+    optsCopy.silent = true;
     records.forEach(function (item) {
-      _this3.remove(_this3.recordId(item), opts);
+      _this3.remove(_this3.recordId(item), optsCopy);
     });
+    if (!opts.silent) {
+      this.emit('remove', records);
+    }
     return this.afterRemoveAll(query, opts, records) || records;
   },
 
@@ -3467,12 +4313,12 @@ var Collection$1 = Component.extend({
 
 
   /**
-   * TODO
+   * Updates all indexes in this collection for the provided record. Has no
+   * effect if the record is not in the collection.
    *
    * @method Collection#updateIndexes
    * @since 3.0.0
    * @param {Object} record TODO
-   * @param {Object} [opts] Configuration options.
    */
   updateIndexes: function updateIndexes(record) {
     this.index.updateRecord(record);
@@ -3483,26 +4329,131 @@ var Collection$1 = Component.extend({
 });
 
 /**
- * Create a subclass of this Collection.
+ * Fired when a record changes. Only works for records that have tracked changes.
+ * See {@link Collection~changeListener} on how to listen for this event.
  *
- * @example <caption>Extend the class in a cross-browser manner.</caption>
- * import {Collection} from 'js-data'
- * const CustomCollectionClass = Collection.extend({
- *   foo () { return 'bar' }
- * })
- * const customCollection = new CustomCollectionClass()
- * console.log(customCollection.foo()) // "bar"
+ * @event Collection#change
+ * @see Collection~changeListener
+ */
+
+/**
+ * Callback signature for the {@link Collection#event:change} event.
  *
- * @example <caption>Extend the class using ES2015 class syntax.</caption>
+ * @example
+ * function onChange (record, changes) {
+ *   // do something
+ * }
+ * collection.on('change', onChange)
+ *
+ * @callback Collection~changeListener
+ * @param {Record} The Record that changed.
+ * @param {Object} The changes.
+ * @see Collection#event:change
+ * @since 3.0.0
+ */
+
+/**
+ * Fired when one or more records are added to the Collection. See
+ * {@link Collection~addListener} on how to listen for this event.
+ *
+ * @event Collection#add
+ * @see Collection~addListener
+ * @see Collection#event:add
+ * @see Collection#add
+ */
+
+/**
+ * Callback signature for the {@link Collection#event:add} event.
+ *
+ * @example
+ * function onAdd (recordOrRecords) {
+ *   // do something
+ * }
+ * collection.on('add', onAdd)
+ *
+ * @callback Collection~addListener
+ * @param {Record|Record[]} The Record or Records that were added.
+ * @see Collection#event:add
+ * @see Collection#add
+ * @since 3.0.0
+ */
+
+/**
+ * Fired when one or more records are removed from the Collection. See
+ * {@link Collection~removeListener} for how to listen for this event.
+ *
+ * @event Collection#remove
+ * @see Collection~removeListener
+ * @see Collection#event:remove
+ * @see Collection#remove
+ * @see Collection#removeAll
+ */
+
+/**
+ * Callback signature for the {@link Collection#event:remove} event.
+ *
+ * @example
+ * function onRemove (recordsOrRecords) {
+ *   // do something
+ * }
+ * collection.on('remove', onRemove)
+ *
+ * @callback Collection~removeListener
+ * @param {Record|Record[]} Record or Records that were removed.
+ * @see Collection#event:remove
+ * @see Collection#remove
+ * @see Collection#removeAll
+ * @since 3.0.0
+ */
+
+/**
+ * Create a subclass of this Collection:
+ * @example <caption>Collection.extend</caption>
+ * // Normally you would do: import {Collection} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Collection} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * // Extend the class using ES2015 class syntax.
  * class CustomCollectionClass extends Collection {
  *   foo () { return 'bar' }
+ *   static beep () { return 'boop' }
  * }
  * const customCollection = new CustomCollectionClass()
- * console.log(customCollection.foo()) // "bar"
+ * console.log(customCollection.foo())
+ * console.log(CustomCollectionClass.beep())
+ *
+ * // Extend the class using alternate method.
+ * const OtherCollectionClass = Collection.extend({
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherCollection = new OtherCollectionClass()
+ * console.log(otherCollection.foo())
+ * console.log(OtherCollectionClass.beep())
+ *
+ * // Extend the class, providing a custom constructor.
+ * function AnotherCollectionClass () {
+ *   Collection.call(this)
+ *   this.created_at = new Date().getTime()
+ * }
+ * Collection.extend({
+ *   constructor: AnotherCollectionClass,
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const anotherCollection = new AnotherCollectionClass()
+ * console.log(anotherCollection.created_at)
+ * console.log(anotherCollection.foo())
+ * console.log(AnotherCollectionClass.beep())
  *
  * @method Collection.extend
  * @param {Object} [props={}] Properties to add to the prototype of the
  * subclass.
+ * @param {Object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
  * @param {Object} [classProps={}] Static properties to add to the subclass.
  * @returns {Constructor} Subclass of this Collection class.
  * @since 3.0.0
@@ -3525,11 +4476,94 @@ var superMethod = function superMethod(mapper, name) {
 };
 
 /**
- * js-data's Record class.
+ * js-data's Record class. An instance of `Record` corresponds to an in-memory
+ * representation of a single row or document in a database, Firebase,
+ * localstorage, etc. Basically, a `Record` instance represents whatever kind of
+ * entity in your persistence layer that has a primary key.
  *
  * ```javascript
  * import {Record} from 'js-data'
  * ```
+ *
+ * @example <caption>Record#constructor</caption>
+ * // Normally you would do: import {Record} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Record} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * // Instantiate a plain record
+ * let record = new Record()
+ * console.log('record: ' + JSON.stringify(record))
+ *
+ * // You can supply properties on instantiation
+ * record = new Record({ name: 'John' })
+ * console.log('record: ' + JSON.stringify(record))
+ *
+ * @example <caption>Record#constructor2</caption>
+ * // Normally you would do: import {Mapper} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Mapper} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * // Instantiate a record that's associated with a Mapper:
+ * const UserMapper = new Mapper({ name: 'user' })
+ * const User = UserMapper.recordClass
+ * const user = UserMapper.createRecord({ name: 'John' })
+ * const user2 = new User({ name: 'Sally' })
+ * console.log('user: ' + JSON.stringify(user))
+ * console.log('user2: ' + JSON.stringify(user2))
+ *
+ * @example <caption>Record#constructor3</caption>
+ * // Normally you would do: import {Container} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Container} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * const store = new Container()
+ * store.defineMapper('user')
+ *
+ * // Instantiate a record that's associated with a store's Mapper
+ * const user = store.createRecord('user', { name: 'John' })
+ * console.log('user: ' + JSON.stringify(user))
+ *
+ * @example <caption>Record#constructor4</caption>
+ * // Normally you would do: import {Container} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Container} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * const store = new Container()
+ * store.defineMapper('user', {
+ *   schema: {
+ *     properties: {
+ *       name: { type: 'string' }
+ *     }
+ *   }
+ * })
+ *
+ * // Validate on instantiation
+ * const user = store.createRecord('user', { name: 1234 })
+ * console.log('user: ' + JSON.stringify(user))
+ *
+ * @example <caption>Record#constructor5</caption>
+ * // Normally you would do: import {Container} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Container} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * const store = new Container()
+ * store.defineMapper('user', {
+ *   schema: {
+ *     properties: {
+ *       name: { type: 'string' }
+ *     }
+ *   }
+ * })
+ *
+ * // Skip validation on instantiation
+ * const user = store.createRecord('user', { name: 1234 }, { noValidate: true })
+ * console.log('user: ' + JSON.stringify(user))
+ * console.log('user.isValid(): ' + user.isValid())
  *
  * @class Record
  * @extends Component
@@ -3541,26 +4575,9 @@ var superMethod = function superMethod(mapper, name) {
  */
 function Record(props, opts) {
   utils.classCallCheck(this, Record);
+  Settable.call(this);
   props || (props = {});
   opts || (opts = {});
-  var _props = {};
-  Object.defineProperties(this, {
-    _get: {
-      value: function value(key) {
-        return utils.get(_props, key);
-      }
-    },
-    _set: {
-      value: function value(key, _value) {
-        return utils.set(_props, key, _value);
-      }
-    },
-    _unset: {
-      value: function value(key) {
-        return utils.unset(_props, key);
-      }
-    }
-  });
   var _set = this._set;
   // TODO: Optimize these strings
   _set('creating', true);
@@ -3573,13 +4590,12 @@ function Record(props, opts) {
   _set('previous', utils.plainCopy(props));
 }
 
-var Record$1 = Component.extend({
+var Record$1 = Component$1.extend({
   constructor: Record,
 
   /**
    * Returns the {@link Mapper} paired with this record's class, if any.
    *
-   * @private
    * @method Record#_mapper
    * @returns {Mapper} The {@link Mapper} paired with this record's class, if any.
    * @since 3.0.0
@@ -3619,6 +4635,19 @@ var Record$1 = Component.extend({
    * Return changes to this record since it was instantiated or
    * {@link Record#commit} was called.
    *
+   * @example <caption>Record#changes</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user')
+   * console.log('user changes: ' + JSON.stringify(user.changes()))
+   * user.name = 'John'
+   * console.log('user changes: ' + JSON.stringify(user.changes()))
+   *
    * @method Record#changes
    * @param [opts] Configuration options.
    * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
@@ -3637,6 +4666,21 @@ var Record$1 = Component.extend({
    * Make the record's current in-memory state it's only state, with any
    * previous property values being set to current values.
    *
+   * @example <caption>Record#commit</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user')
+   * console.log('user hasChanges: ' + user.hasChanges())
+   * user.name = 'John'
+   * console.log('user hasChanges: ' + user.hasChanges())
+   * user.commit()
+   * console.log('user hasChanges: ' + user.hasChanges())
+   *
    * @method Record#commit
    * @since 3.0.0
    */
@@ -3648,6 +4692,20 @@ var Record$1 = Component.extend({
 
   /**
    * Call {@link Mapper#destroy} using this record's primary key.
+   *
+   * @example
+   * import {Container} from 'js-data'
+   * import {RethinkDBAdapter} from 'js-data-rethinkdb'
+   *
+   * const store = new Container()
+   * store.registerAdapter('rethink', new RethinkDBAdapter(), { default: true })
+   * store.defineMapper('user')
+   * store.find('user', 1234).then((user) => {
+   *   console.log(user.id) // 1234
+   *
+   *   // Destroy this user from the database
+   *   return user.destroy()
+   * })
    *
    * @method Record#destroy
    * @param {Object} [opts] Configuration options passed to {@link Mapper#destroy}.
@@ -3665,6 +4723,17 @@ var Record$1 = Component.extend({
   /**
    * Return the value at the given path for this instance.
    *
+   * @example <caption>Record#get</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user')
+   *
+   * const user = store.createRecord('user', { name: 'Bob' })
+   * console.log('user.get("name"): ' + user.get('name'))
+   *
    * @method Record#get
    * @param {string} key Path of value to retrieve.
    * @returns {*} Value at path.
@@ -3678,6 +4747,20 @@ var Record$1 = Component.extend({
   /**
    * Return whether this record has changed since it was instantiated or
    * {@link Record#commit} was called.
+   *
+   * @example <caption>Record#hasChanges</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user')
+   * console.log('user hasChanges: ' + user.hasChanges())
+   * user.name = 'John'
+   * console.log('user hasChanges: ' + user.hasChanges())
+   * user.commit()
+   * console.log('user hasChanges: ' + user.hasChanges())
    *
    * @method Record#hasChanges
    * @param [opts] Configuration options.
@@ -3696,6 +4779,28 @@ var Record$1 = Component.extend({
   /**
    * Return whether the record in its current state passes validation.
    *
+   * @example <caption>Record#isValid</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user', {
+   *   schema: {
+   *     properties: {
+   *       name: { type: 'string' }
+   *     }
+   *   }
+   * })
+   * const user = store.createRecord('user', {
+   *   name: 1234
+   * }, {
+   *   noValidate: true // this allows us to put the record into an invalid state
+   * })
+   * console.log('user isValid: ' + user.isValid())
+   * user.name = 'John'
+   * console.log('user isValid: ' + user.isValid())
+   *
    * @method Record#isValid
    * @param {Object} [opts] Configuration options. Passed to {@link Mapper#validate}.
    * @returns {boolean} Whether the record in its current state passes
@@ -3711,8 +4816,44 @@ var Record$1 = Component.extend({
    * Lazy load relations of this record, to be attached to the record once their
    * loaded.
    *
+   * @example
+   * import {Container} from 'js-data'
+   * import {RethinkDBAdapter} from 'js-data-rethinkdb'
+   *
+   * const store = new Container()
+   * store.registerAdapter('rethink', new RethinkDBAdapter(), { default: true })
+   * store.defineMapper('user', {
+   *   relations: {
+   *     hasMany: {
+   *       post: {
+   *         localField: 'posts',
+   *         foreignKey: 'user_id'
+   *       }
+   *     }
+   *   }
+   * })
+   * store.defineMapper('post', {
+   *   relations: {
+   *     belongsTo: {
+   *       user: {
+   *         localField: 'user',
+   *         foreignKey: 'user_id'
+   *       }
+   *     }
+   *   }
+   * })
+   * store.find('user', 1234).then((user) => {
+   *   console.log(user.id) // 1234
+   *
+   *   // Load the user's post relations
+   *   return user.loadRelations(['post'])
+   * }).then((user) => {
+   *   console.log(user.posts) // [{...}, {...}, ...]
+   * })
+   *
    * @method Record#loadRelations
-   * @param {string[]} [relations] List of relations to load.
+   * @param {string[]} [relations] List of relations to load. Can use localField
+   * names or Mapper names to pick relations.
    * @param {Object} [opts] Configuration options.
    * @returns {Promise} Resolves with the record, with the loaded relations now
    * attached.
@@ -3751,7 +4892,7 @@ var Record$1 = Component.extend({
           task = def.load(mapper, def, _this, opts);
         } else if (def.type === 'hasMany' || def.type === 'hasOne') {
           if (def.foreignKey) {
-            task = superMethod(relatedMapper, 'findAll')(babelHelpers.defineProperty({}, def.foreignKey, utils.get(_this, mapper.idAttribute)), optsCopy).then(function (relatedData) {
+            task = superMethod(relatedMapper, 'findAll')(defineProperty({}, def.foreignKey, utils.get(_this, mapper.idAttribute)), optsCopy).then(function (relatedData) {
               if (def.type === 'hasOne') {
                 return relatedData.length ? relatedData[0] : undefined;
               }
@@ -3759,13 +4900,13 @@ var Record$1 = Component.extend({
             });
           } else if (def.localKeys) {
             task = superMethod(relatedMapper, 'findAll')({
-              where: babelHelpers.defineProperty({}, relatedMapper.idAttribute, {
+              where: defineProperty({}, relatedMapper.idAttribute, {
                 'in': utils.get(_this, def.localKeys)
               })
             });
           } else if (def.foreignKeys) {
             task = superMethod(relatedMapper, 'findAll')({
-              where: babelHelpers.defineProperty({}, def.foreignKeys, {
+              where: defineProperty({}, def.foreignKeys, {
                 'contains': utils.get(_this, mapper.idAttribute)
               })
             }, opts);
@@ -3797,6 +4938,22 @@ var Record$1 = Component.extend({
   /**
    * Return the properties with which this record was instantiated.
    *
+   * @example <caption>Record#previous</caption>
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user', {
+   *   name: 'William'
+   * })
+   * console.log('user previous: ' + JSON.stringify(user.previous()))
+   * user.name = 'Bob'
+   * console.log('user previous: ' + JSON.stringify(user.previous()))
+   * user.commit()
+   * console.log('user previous: ' + JSON.stringify(user.previous()))
+   *
    * @method Record#previous
    * @param {string} [key] If specified, return just the initial value of the
    * given key.
@@ -3814,6 +4971,22 @@ var Record$1 = Component.extend({
   /**
    * Revert changes to this record back to the properties it had when it was
    * instantiated.
+   *
+   * @example <caption>Record#revert</caption>
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user', {
+   *   name: 'William'
+   * })
+   * console.log('user: ' + JSON.stringify(user))
+   * user.name = 'Bob'
+   * console.log('user: ' + JSON.stringify(user))
+   * user.revert()
+   * console.log('user: ' + JSON.stringify(user))
    *
    * @method Record#revert
    * @param {Object} [opts] Configuration options.
@@ -3843,6 +5016,25 @@ var Record$1 = Component.extend({
 
   /**
    * Delegates to {@link Mapper#create} or {@link Mapper#update}.
+   *
+   * @example
+   * import {Container} from 'js-data'
+   * import {RethinkDBAdapter} from 'js-data-rethinkdb'
+   *
+   * const store = new Container()
+   * store.registerAdapter('rethink', new RethinkDBAdapter(), { default: true })
+   * store.defineMapper('session')
+   * const session = store.createRecord('session', { topic: 'Node.js' })
+   *
+   * // Create a new record in the database
+   * session.save().then(() => {
+   *   console.log(session.id) // 1234
+   *
+   *   session.skill_level = 'beginner'
+   *
+   *   // Update the record in the database
+   *   return user.save()
+   * })
    *
    * @method Record#save
    * @param {Object} [opts] Configuration options. See {@link Mapper#create} and
@@ -3885,8 +5077,27 @@ var Record$1 = Component.extend({
 
   /**
    * Set the value for a given key, or the values for the given keys if "key" is
-   * an object.
+   * an object. Triggers change events on those properties that have `track: true`
+   * in {@link Mapper#schema}.
    *
+   * @example <caption>Record#set</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user')
+   *
+   * const user = store.createRecord('user')
+   * console.log('user: ' + JSON.stringify(user))
+   *
+   * user.set('name', 'Bob')
+   * console.log('user: ' + JSON.stringify(user))
+   *
+   * user.set({ age: 30, role: 'admin' })
+   * console.log('user: ' + JSON.stringify(user))
+   *
+   * @fires Record#change
    * @method Record#set
    * @param {(string|Object)} key Key to set or hash of key-value pairs to set.
    * @param {*} [value] Value to set for the given key.
@@ -3914,8 +5125,31 @@ var Record$1 = Component.extend({
    * which this record was created has a Mapper, then {@link Mapper#toJSON} will
    * be called with this record instead.
    *
+   * @example <caption>Record#toJSON</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user', {
+   *   schema: {
+   *     properties: {
+   *       name: { type: 'string' }
+   *     }
+   *   }
+   * })
+   *
+   * const user = store.createRecord('user', {
+   *   name: 'John',
+   *   $$hashKey: '1234'
+   * })
+   * console.log('user: ' + JSON.stringify(user.toJSON()))
+   * console.log('user: ' + JSON.stringify(user.toJSON({ strict: true })))
+   *
    * @method Record#toJSON
    * @param {Object} [opts] Configuration options.
+   * @param {boolean} [opts.strict] Whether to exclude properties that are not
+   * defined in {@link Mapper#schema}.
    * @param {string[]} [opts.with] Array of relation names or relation fields
    * to include in the representation. Only available as an option if the class
    * from which this record was created has a Mapper and this record resides in
@@ -3940,13 +5174,30 @@ var Record$1 = Component.extend({
         };
       }();
 
-      if ((typeof _ret === 'undefined' ? 'undefined' : babelHelpers.typeof(_ret)) === "object") return _ret.v;
+      if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
     }
   },
 
 
   /**
-   * Unset the value for a given key.
+   * Unset the value for a given key. Triggers change events on those properties
+   * that have `track: true` in {@link Mapper#schema}.
+   *
+   * @example <caption>Record#unset</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user')
+   *
+   * const user = store.createRecord('user', {
+   *   name: 'John'
+   * })
+   * console.log('user: ' + JSON.stringify(user))
+   *
+   * user.unset('name')
+   * console.log('user: ' + JSON.stringify(user))
    *
    * @method Record#unset
    * @param {string} key Key to unset.
@@ -3961,6 +5212,28 @@ var Record$1 = Component.extend({
 
   /**
    * Validate this record based on its current properties.
+   *
+   * @example <caption>Record#validate</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user', {
+   *   schema: {
+   *     properties: {
+   *       name: { type: 'string' }
+   *     }
+   *   }
+   * })
+   * const user = store.createRecord('user', {
+   *   name: 1234
+   * }, {
+   *   noValidate: true // this allows us to put the record into an invalid state
+   * })
+   * console.log('user validation: ' + JSON.stringify(user.validate()))
+   * user.name = 'John'
+   * console.log('user validation: ' + user.validate())
    *
    * @method Record#validate
    * @param {Object} [opts] Configuration options. Passed to {@link Mapper#validate}.
@@ -3982,32 +5255,6 @@ utils.eventify(Record.prototype, function () {
 }, function (value) {
   this._set('events', value);
 });
-
-/**
- * Create a subclass of this Record.
- *
- * @example <caption>Extend the class in a cross-browser manner.</caption>
- * import {Record} from 'js-data'
- * const CustomRecordClass = Record.extend({
- *   foo () { return 'bar' }
- * })
- * const customRecord = new CustomRecordClass()
- * console.log(customRecord.foo()) // "bar"
- *
- * @example <caption>Extend the class using ES2015 class syntax.</caption>
- * class CustomRecordClass extends Record {
- *   foo () { return 'bar' }
- * }
- * const customRecord = new CustomRecordClass()
- * console.log(customRecord.foo()) // "bar"
- *
- * @method Record.extend
- * @param {Object} [props={}] Properties to add to the prototype of the
- * subclass.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @returns {Constructor} Subclass of this Record class.
- * @since 3.0.0
- */
 
 var DOMAIN$6 = 'Schema';
 
@@ -4119,7 +5366,7 @@ var validationKeywords = {
    * @name Schema.validationKeywords.allOf
    * @method
    * @param {*} value Value to be validated.
-   * @param {Object} [schema] Schema containing the `allOf` keyword.
+   * @param {Object} schema Schema containing the `allOf` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4145,7 +5392,7 @@ var validationKeywords = {
    * @name Schema.validationKeywords.anyOf
    * @method
    * @param {*} value Value to be validated.
-   * @param {Object} [schema] Schema containing the `anyOf` keyword.
+   * @param {Object} schema Schema containing the `anyOf` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4186,7 +5433,7 @@ var validationKeywords = {
    * @name Schema.validationKeywords.enum
    * @method
    * @param {*} value Value to validate
-   * @param {Object} [schema] Schema containing the `enum` keyword.
+   * @param {Object} schema Schema containing the `enum` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4206,8 +5453,8 @@ var validationKeywords = {
    *
    * @name Schema.validationKeywords.items
    * @method
-   * @param {*} value [Array] Array to be validated.
-   * @param {Object} [schema] Schema containing the items keyword.
+   * @param {*} value Array to be validated.
+   * @param {Object} schema Schema containing the items keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4238,8 +5485,8 @@ var validationKeywords = {
    *
    * @name Schema.validationKeywords.maximum
    * @method
-   * @param {*} value [Number] number to validate against the keyword.
-   * @param {Object} schema [schema] Schema containing the `maximum` keyword.
+   * @param {*} value Number to validate against the keyword.
+   * @param {Object} schema Schema containing the `maximum` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4250,7 +5497,7 @@ var validationKeywords = {
     // Depends on maximum
     // default: false
     var exclusiveMaximum = schema.exclusiveMaximum;
-    if ((typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === (typeof maximum === 'undefined' ? 'undefined' : babelHelpers.typeof(maximum)) && !(exclusiveMaximum ? maximum > value : maximum >= value)) {
+    if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === (typeof maximum === 'undefined' ? 'undefined' : _typeof(maximum)) && !(exclusiveMaximum ? maximum > value : maximum >= value)) {
       return exclusiveMaximum ? makeError(value, 'no more than nor equal to ' + maximum, opts) : makeError(value, 'no more than ' + maximum, opts);
     }
   },
@@ -4263,8 +5510,8 @@ var validationKeywords = {
    *
    * @name Schema.validationKeywords.maxItems
    * @method
-   * @param {*} value [array] Array to be validated.
-   * @param {Object} [schema] Schema containing the `maxItems` keyword.
+   * @param {*} value Array to be validated.
+   * @param {Object} schema Schema containing the `maxItems` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4282,8 +5529,8 @@ var validationKeywords = {
    *
    * @name Schema.validationKeywords.maxLength
    * @method
-   * @param {*} value [string] String to be validated.
-   * @param {Object} [schema] Schema containing the `maxLength` keyword.
+   * @param {*} value String to be validated.
+   * @param {Object} schema Schema containing the `maxLength` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4299,8 +5546,8 @@ var validationKeywords = {
    *
    * @name Schema.validationKeywords.maxProperties
    * @method
-   * @param {*} value [Object] Object to be validated.
-   * @param {Object} [schema] Schema containing the `maxProperties` keyword.
+   * @param {*} value Object to be validated.
+   * @param {Object} schema Schema containing the `maxProperties` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4322,8 +5569,8 @@ var validationKeywords = {
    *
    * @name Schema.validationKeywords.minimum
    * @method
-   * @param {*} value [number] number to validate against the keyword.
-   * @param {Object} [schema] Schema containing the `minimum` keyword.
+   * @param {*} value Number to validate against the keyword.
+   * @param {Object} schema Schema containing the `minimum` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4334,7 +5581,7 @@ var validationKeywords = {
     // Depends on minimum
     // default: false
     var exclusiveMinimum = schema.exclusiveMinimum;
-    if ((typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value)) === (typeof minimum === 'undefined' ? 'undefined' : babelHelpers.typeof(minimum)) && !(exclusiveMinimum ? value > minimum : value >= minimum)) {
+    if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === (typeof minimum === 'undefined' ? 'undefined' : _typeof(minimum)) && !(exclusiveMinimum ? value > minimum : value >= minimum)) {
       return exclusiveMinimum ? makeError(value, 'no less than nor equal to ' + minimum, opts) : makeError(value, 'no less than ' + minimum, opts);
     }
   },
@@ -4347,8 +5594,8 @@ var validationKeywords = {
    *
    * @name Schema.validationKeywords.minItems
    * @method
-   * @param {*} value [array] Array to be validated.
-   * @param {Object} [schema] Schema containing the `minItems` keyword.
+   * @param {*} value Array to be validated.
+   * @param {Object} schema Schema containing the `minItems` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4366,8 +5613,8 @@ var validationKeywords = {
    *
    * @name Schema.validationKeywords.minLength
    * @method
-   * @param {*} value [string] String to be validated.
-   * @param {Object} [schema] Schema containing the `minLength` keyword.
+   * @param {*} value String to be validated.
+   * @param {Object} schema Schema containing the `minLength` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4383,8 +5630,8 @@ var validationKeywords = {
    *
    * @name Schema.validationKeywords.minProperties
    * @method
-   * @param {*} value [Object] Object to be validated.
-   * @param {Object} [schema] Schema containing the `minProperties` keyword.
+   * @param {*} value Object to be validated.
+   * @param {Object} schema Schema containing the `minProperties` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4406,8 +5653,8 @@ var validationKeywords = {
    *
    * @name Schema.validationKeywords.multipleOf
    * @method
-   * @param {*} value [number] Number to be validated.
-   * @param {Object} [schema] Schema containing the `multipleOf` keyword.
+   * @param {*} value Number to be validated.
+   * @param {Object} schema Schema containing the `multipleOf` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4429,7 +5676,7 @@ var validationKeywords = {
    * @name Schema.validationKeywords.not
    * @method
    * @param {*} value to be checked.
-   * @param {Object} [schema] Schema containing the not keyword.
+   * @param {Object} schema Schema containing the not keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4449,7 +5696,7 @@ var validationKeywords = {
    * @name Schema.validationKeywords.oneOf
    * @method
    * @param {*} value to be checked.
-   * @param {Object} [schema] Schema containing the `oneOf` keyword.
+   * @param {Object} schema Schema containing the `oneOf` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4479,8 +5726,8 @@ var validationKeywords = {
    * see http://json-schema.org/latest/json-schema-validation.html#anchor33
    * @name Schema.validationKeywords.pattern
    * @method
-   * @param {*} value [string] String to be validated.
-   * @param {Object} [schema] Schema containing the `pattern` keyword.
+   * @param {*} value String to be validated.
+   * @param {Object} schema Schema containing the `pattern` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4501,8 +5748,8 @@ var validationKeywords = {
    *
    * @name Schema.validationKeywords.properties
    * @method
-   * @param {*} value [Object] Object to be validated.
-   * @param {Object} [schema] Schema containing the `properties` keyword.
+   * @param {*} value Object to be validated.
+   * @param {Object} schema Schema containing the `properties` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4570,8 +5817,8 @@ var validationKeywords = {
    *
    * @name Schema.validationKeywords.required
    * @method
-   * @param {*} value [Object] Object to be validated.
-   * @param {Object} [schema] Schema containing the `required` keyword.
+   * @param {*} value Object to be validated.
+   * @param {Object} schema Schema containing the `required` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4600,7 +5847,7 @@ var validationKeywords = {
    * @name Schema.validationKeywords.type
    * @method
    * @param {*} value Value to be validated.
-   * @param {Object} [schema] Schema containing the `type` keyword.
+   * @param {Object} schema Schema containing the `type` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4622,7 +5869,7 @@ var validationKeywords = {
     });
     // Value did not match any expected type
     if (!validType) {
-      return makeError(!utils.isUndefined(value) && value !== null ? typeof value === 'undefined' ? 'undefined' : babelHelpers.typeof(value) : '' + value, 'one of (' + type.join(', ') + ')', opts);
+      return makeError(!utils.isUndefined(value) && value !== null ? typeof value === 'undefined' ? 'undefined' : _typeof(value) : '' + value, 'one of (' + type.join(', ') + ')', opts);
     }
     // Run keyword validators for matched type
     // http://json-schema.org/latest/json-schema-validation.html#anchor12
@@ -4640,8 +5887,8 @@ var validationKeywords = {
    *
    * @name Schema.validationKeywords.uniqueItems
    * @method
-   * @param {*} value [array] Array to be validated.
-   * @param {Object} [schema] Schema containing the `uniqueItems` keyword.
+   * @param {*} value Array to be validated.
+   * @param {Object} schema Schema containing the `uniqueItems` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4704,7 +5951,7 @@ var validateAny = function validateAny(value, schema, opts) {
  * @name Schema.validate
  * @method
  * @param {*} value Value to be validated.
- * @param {Object} [schema] Valid Schema according to the http://json-schema.org/ v4 specification.
+ * @param {Object} schema Valid Schema according to the http://json-schema.org/ v4 specification.
  * @param {Object} [opts] Configuration options.
  * @returns {(array|undefined)} Array of errors or `undefined` if valid.
  */
@@ -4779,8 +6026,6 @@ var validationFailureMsg = 'validation failed';
  * {@link Mapper#recordClass}. This method is called when
  * {@link Mapper#applySchema} is set to `true`.
  *
- * TODO: Make this more configurable, i.e. not so tied to the Record class.
- *
  * @ignore
  */
 var makeDescriptor = function makeDescriptor(prop, schema, opts) {
@@ -4797,6 +6042,7 @@ var makeDescriptor = function makeDescriptor(prop, schema, opts) {
   var getter = opts.getter;
   var setter = opts.setter;
   var unsetter = opts.unsetter;
+  var track = utils.isBoolean(opts.track) ? opts.track : schema.track;
 
   descriptor.get = function () {
     return this._get(keyPath);
@@ -4821,7 +6067,7 @@ var makeDescriptor = function makeDescriptor(prop, schema, opts) {
 
     // Optionally check that the new value passes validation
     if (!_get(noValidatePath)) {
-      var errors = schema.validate(value);
+      var errors = schema.validate(value, { path: [prop] });
       if (errors) {
         // Immediately throw an error, preventing the record from getting into
         // an invalid state
@@ -4832,7 +6078,7 @@ var makeDescriptor = function makeDescriptor(prop, schema, opts) {
     }
     // TODO: Make it so tracking can be turned on for all properties instead of
     // only per-property
-    if (schema.track && !_get(creatingPath)) {
+    if (track && !_get(creatingPath)) {
       (function () {
         var previous = _get(previousPath);
         var current = _get(keyPath);
@@ -4925,8 +6171,8 @@ var typeGroupValidators = {
    *
    * @name Schema.typeGroupValidators.array
    * @method
-   * @param {*} value [array] Array to be validated.
-   * @param {Object} [schema] Schema containing at least one array keyword.
+   * @param {*} value Array to be validated.
+   * @param {Object} schema Schema containing at least one array keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4942,8 +6188,8 @@ var typeGroupValidators = {
    *```
    * @name Schema.typeGroupValidators.integer
    * @method
-   * @param {*} value [number] Number to be validated.
-   * @param {Object} [schema] Schema containing at least one `integer` keyword.
+   * @param {*} value Number to be validated.
+   * @param {Object} schema Schema containing at least one `integer` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4960,8 +6206,8 @@ var typeGroupValidators = {
    *```
    * @name Schema.typeGroupValidators.number
    * @method
-   * @param {*} value [number] Number to be validated.
-   * @param {Object} [schema] Schema containing at least one `number` keyword.
+   * @param {*} value Number to be validated.
+   * @param {Object} schema Schema containing at least one `number` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4980,8 +6226,8 @@ var typeGroupValidators = {
    *
    * @name Schema.typeGroupValidators.numeric
    * @method
-   * @param {*} value [number] Number to be validated.
-   * @param {Object} [schema] Schema containing at least one `numeric` keyword.
+   * @param {*} value Number to be validated.
+   * @param {Object} schema Schema containing at least one `numeric` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -4999,8 +6245,8 @@ var typeGroupValidators = {
    *
    * @name Schema.typeGroupValidators.object
    * @method
-   * @param {*} value [number] Object to be validated.
-   * @param {Object} [schema] Schema containing at least one `object` keyword.
+   * @param {*} value Object to be validated.
+   * @param {Object} schema Schema containing at least one `object` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -5018,8 +6264,8 @@ var typeGroupValidators = {
    *
    * @name Schema.typeGroupValidators.string
    * @method
-   * @param {*} value [number] String to be validated.
-   * @param {Object} [schema] Schema containing at least one `string` keyword.
+   * @param {*} value String to be validated.
+   * @param {Object} schema Schema containing at least one `string` keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -5031,30 +6277,53 @@ var typeGroupValidators = {
 /**
  * js-data's Schema class.
  *
- * ```javascript
- * import {Schema} from 'js-data'
- * ```
+ * @example Schema#constructor</caption>
+ * // Normally you would do:  import {Schema} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Schema} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * const PostSchema = new Schema({
+ *   type: 'object',
+ *   properties: {
+ *     title: { type: 'string' }
+ *   }
+ * })
+ * PostSchema.validate({ title: 1234 })
  *
  * @class Schema
  * @extends Component
  * @param {Object} definition Schema definition according to json-schema.org
  */
 function Schema(definition) {
+  var _this2 = this;
+
   definition || (definition = {});
   // TODO: schema validation
   utils.fillIn(this, definition);
 
-  // TODO: rework this to make sure all possible keywords are converted
-  if (definition.properties) {
-    utils.forOwn(definition.properties, function (_definition, prop) {
+  if (this.type === 'object' && this.properties) {
+    utils.forOwn(this.properties, function (_definition, prop) {
       if (!(_definition instanceof Schema)) {
-        definition.properties[prop] = new Schema(_definition);
+        _this2.properties[prop] = new Schema(_definition);
       }
     });
   }
+  if (this.type === 'array' && this.items && !(this.items instanceof Schema)) {
+    this.items = new Schema(this.items);
+  }
+  ['allOf', 'anyOf', 'oneOf'].forEach(function (validationKeyword) {
+    if (_this2[validationKeyword]) {
+      _this2[validationKeyword].forEach(function (_definition, i) {
+        if (!(_definition instanceof Schema)) {
+          _this2[validationKeyword][i] = new Schema(_definition);
+        }
+      });
+    }
+  });
 }
 
-var Schema$1 = Component.extend({
+var Schema$1 = Component$1.extend({
   constructor: Schema,
 
   /**
@@ -5068,9 +6337,10 @@ var Schema$1 = Component.extend({
    */
   apply: function apply(target, opts) {
     opts || (opts = {});
-    opts.getter = opts.getter || '_get';
-    opts.setter = opts.setter || '_set';
-    opts.unsetter = opts.unsetter || '_unset';
+    opts.getter || (opts.getter = '_get');
+    opts.setter || (opts.setter = '_set');
+    opts.unsetter || (opts.unsetter = '_unset');
+    opts.track || (opts.track = this.track);
     var properties = this.properties || {};
     utils.forOwn(properties, function (schema, prop) {
       Object.defineProperty(target, prop, makeDescriptor(prop, schema, opts));
@@ -5112,7 +6382,7 @@ function Relation(relatedMapper) {
   options.type = this.constructor.TYPE_NAME;
   this.validateOptions(relatedMapper, options);
 
-  if ((typeof relatedMapper === 'undefined' ? 'undefined' : babelHelpers.typeof(relatedMapper)) === 'object') {
+  if ((typeof relatedMapper === 'undefined' ? 'undefined' : _typeof(relatedMapper)) === 'object') {
     Object.defineProperty(this, 'relatedMapper', { value: relatedMapper });
   }
 
@@ -5258,7 +6528,7 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
     return relatedRecord;
   },
   findExistingLinksByForeignKey: function findExistingLinksByForeignKey(foreignId) {
-    return this.relatedCollection.filter(babelHelpers.defineProperty({}, this.foreignKey, foreignId));
+    return this.relatedCollection.filter(defineProperty({}, this.foreignKey, foreignId));
   }
 });
 
@@ -5339,14 +6609,14 @@ var HasManyRelation = Relation.extend({
   },
   findExistingLinksByLocalKeys: function findExistingLinksByLocalKeys(localKeysValue) {
     return this.relatedCollection.filter({
-      where: babelHelpers.defineProperty({}, this.mapper.idAttribute, {
+      where: defineProperty({}, this.mapper.idAttribute, {
         'in': localKeysValue
       })
     });
   },
   findExistingLinksByForeignKeys: function findExistingLinksByForeignKeys(foreignId) {
     return this.relatedCollection.filter({
-      where: babelHelpers.defineProperty({}, this.foreignKeys, {
+      where: defineProperty({}, this.foreignKeys, {
         'contains': foreignId
       })
     });
@@ -5375,7 +6645,7 @@ var HasOneRelation = Relation.extend({
 });
 
 /**
- * TODO
+ * BelongsTo relation decorator. You probably won't use this directly.
  *
  * @name module:js-data.belongsTo
  * @method
@@ -5395,7 +6665,7 @@ var belongsTo = function belongsTo(related, opts) {
 };
 
 /**
- * TODO
+ * HasMany relation decorator. You probably won't use this directly.
  *
  * @name module:js-data.hasMany
  * @method
@@ -5415,7 +6685,7 @@ var hasMany = function hasMany(related, opts) {
 };
 
 /**
- * TODO
+ * HasOne relation decorator. You probably won't use this directly.
  *
  * @name module:js-data.hasOne
  * @method
@@ -5556,11 +6826,11 @@ var MAPPER_DEFAULTS = {
   _adapters: {},
 
   /**
-   * Whether to augment {@link Mapper#recordClass} with getter/setter property
-   * accessors according to the properties defined in {@link Mapper#schema}.
-   * This makes possible validation and change tracking on individual properties
+   * Whether to augment {@link Mapper#recordClass} with ES5 getters and setters
+   * according to the properties defined in {@link Mapper#schema}. This makes
+   * possible validation and change tracking on individual properties
    * when using the dot (e.g. `user.name = "Bob"`) operator to modify a
-   * property.
+   * property, and is `true` by default.
    *
    * @default true
    * @name Mapper#applySchema
@@ -5568,16 +6838,6 @@ var MAPPER_DEFAULTS = {
    * @type {boolean}
    */
   applySchema: true,
-
-  /**
-   * Whether to enable debug-level logs.
-   *
-   * @default false
-   * @name Mapper#debug
-   * @since 3.0.0
-   * @type {boolean}
-   */
-  debug: false,
 
   /**
    * The name of the registered adapter that this Mapper should used by default.
@@ -5650,14 +6910,14 @@ var MAPPER_DEFAULTS = {
  * [book]: http://martinfowler.com/books/eaa.html
  * [record]: Record.html
  *
- * @example <caption>Import and instantiate</caption>
+ * @example
+ * // Import and instantiate
  * import {Mapper} from 'js-data'
+ * const UserMapper = new Mapper({ name: 'user' })
  *
- * const UserService = new Mapper({ name: 'user' })
- *
- * @example <caption>Define a Mapper using the Container component</caption>
+ * @example
+ * // Define a Mapper using the Container component
  * import {Container} from 'js-data'
- *
  * const store = new Container()
  * store.defineMapper('user')
  *
@@ -5665,13 +6925,14 @@ var MAPPER_DEFAULTS = {
  * @extends Component
  * @param {Object} opts Configuration options.
  * @param {boolean} [opts.applySchema=true] See {@link Mapper#applySchema}.
- * @param {boolean} [opts.debug=false] See {@link Mapper#debug}.
+ * @param {boolean} [opts.debug=false] See {@link Component#debug}.
  * @param {string} [opts.defaultAdapter=http] See {@link Mapper#defaultAdapter}.
  * @param {string} [opts.idAttribute=id] See {@link Mapper#idAttribute}.
  * @param {string} opts.name See {@link Mapper#name}.
  * @param {boolean} [opts.notify] See {@link Mapper#notify}.
  * @param {boolean} [opts.raw=false] See {@link Mapper#raw}.
  * @param {Function|boolean} [opts.recordClass] See {@link Mapper#recordClass}.
+ * @param {Object|Schema} [opts.schema] See {@link Mapper#schema}.
  * @returns {Mapper} A new {@link Mapper} instance.
  * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#mapper
  * @since 3.0.0
@@ -5682,7 +6943,7 @@ function Mapper(opts) {
   var _this2 = this;
 
   utils.classCallCheck(this, Mapper);
-  Mapper.__super__.call(this);
+  Component$1.call(this);
   opts || (opts = {});
 
   // Prepare certain properties to be non-enumerable
@@ -5695,14 +6956,16 @@ function Mapper(opts) {
     /**
      * Set to `false` to force the Mapper to work with POJO objects only.
      *
-     * @example <caption>Use POJOs only.</caption>
+     * @example
+     * // Use POJOs only.
      * import {Mapper, Record} from 'js-data'
      * const UserMapper = new Mapper({ recordClass: false })
      * UserMapper.recordClass // false
      * const user = UserMapper#createRecord()
      * user instanceof Record // false
      *
-     * @example <caption>Set to a custom class to have records wrapped in your custom class.</caption>
+     * @example
+     * // Set to a custom class to have records wrapped in your custom class.
      * import {Mapper, Record} from 'js-data'
      *  // Custom class
      * class User {
@@ -5721,7 +6984,8 @@ function Mapper(opts) {
      * user instanceof User // true
      *
      *
-     * @example <caption>Extend the {@link Record} class.</caption>
+     * @example
+     * // Extend the {@link Record} class.
      * import {Mapper, Record} from 'js-data'
      *  // Custom class
      * class User extends Record {
@@ -5749,8 +7013,6 @@ function Mapper(opts) {
      * The meta information describing this Mapper's available lifecycle
      * methods. __Do not modify.__
      *
-     * TODO: Improve documentation.
-     *
      * @name Mapper#lifecycleMethods
      * @since 3.0.0
      * @type {Object}
@@ -5761,6 +7023,38 @@ function Mapper(opts) {
 
     /**
      * This Mapper's {@link Schema}.
+     *
+     * @example <caption>Mapper#schema</caption>
+     * // Normally you would do: import {Mapper} from 'js-data'
+     * const JSData = require('js-data@3.0.0-beta.7')
+     * const {Mapper} = JSData
+     * console.log('Using JSData v' + JSData.version.full)
+     *
+     * const UserMapper = new Mapper({
+     *   name: 'user',
+     *   schema: {
+     *     properties: {
+     *       id: { type: 'number' },
+     *       first: { type: 'string', track: true },
+     *       last: { type: 'string', track: true },
+     *       role: { type: 'string', track: true, required: true },
+     *       age: { type: 'integer', track: true },
+     *       is_active: { type: 'number' }
+     *     }
+     *   }
+     * })
+     * const user = UserMapper.createRecord({
+     *   id: 1,
+     *   name: 'John',
+     *   role: 'admin'
+     * })
+     * user.on('change', function (user, changes) {
+     *   console.log(changes)
+     * })
+     * user.on('change:role', function (user, value) {
+     *   console.log('change:role - ' + value)
+     * })
+     * user.role = 'owner'
      *
      * @name Mapper#schema
      * @see Schema
@@ -5792,12 +7086,11 @@ function Mapper(opts) {
   }
 
   // Setup schema, with an empty default schema if necessary
-  if (!(this.schema instanceof Schema$1)) {
-    this.schema = new Schema$1(this.schema || {});
-  }
-
-  if (this.schema instanceof Schema$1) {
+  if (this.schema) {
     this.schema.type || (this.schema.type = 'object');
+  }
+  if (!(this.schema instanceof Schema$1)) {
+    this.schema = new Schema$1(this.schema || { type: 'object' });
   }
 
   // Create a subclass of Record that's tied to this Mapper
@@ -5819,6 +7112,10 @@ function Mapper(opts) {
   if (this.recordClass) {
     this.recordClass.mapper = this;
 
+    if (utils.isObject(this.methods)) {
+      utils.addHiddenPropsToTarget(this.recordClass.prototype, this.methods);
+    }
+
     // We can only apply the schema to the prototype of this.recordClass if the
     // class extends Record
     if (utils.getSuper(this.recordClass, true) === Record$1 && this.schema && this.schema.apply && this.applySchema) {
@@ -5827,7 +7124,7 @@ function Mapper(opts) {
   }
 }
 
-var Mapper$1 = Component.extend({
+var Mapper$1 = Component$1.extend({
   constructor: Mapper,
 
   /**
@@ -6149,20 +7446,20 @@ var Mapper$1 = Component.extend({
    * Mappers manually and not using a Container or DataStore component.
    *
    * @example
-   * PostService.belongsTo(UserService, {
+   * PostMapper.belongsTo(UserMapper, {
    *   // post.user_id points to user.id
    *   foreignKey: 'user_id'
    *   // user records will be attached to post records at "post.user"
    *   localField: 'user'
    * })
    *
-   * CommentService.belongsTo(UserService, {
+   * CommentMapper.belongsTo(UserMapper, {
    *   // comment.user_id points to user.id
    *   foreignKey: 'user_id'
    *   // user records will be attached to comment records at "comment.user"
    *   localField: 'user'
    * })
-   * CommentService.belongsTo(PostService, {
+   * CommentMapper.belongsTo(PostMapper, {
    *   // comment.post_id points to post.id
    *   foreignKey: 'post_id'
    *   // post records will be attached to comment records at "comment.post"
@@ -6184,8 +7481,9 @@ var Mapper$1 = Component.extend({
    * {@link Mapper#beforeCount} will be called before calling the adapter.
    * {@link Mapper#afterCount} will be called after calling the adapter.
    *
-   * @example <caption>Get the number of published blog posts</caption>
-   * PostService.count({ status: 'published' }).then((numPublished) => {
+   * @example
+   * // Get the number of published blog posts
+   * PostMapper.count({ status: 'published' }).then((numPublished) => {
    *   console.log(numPublished) // e.g. 45
    * })
    *
@@ -6210,19 +7508,71 @@ var Mapper$1 = Component.extend({
 
 
   /**
+   * Fired during {@link Mapper#create}. See
+   * {@link Mapper~beforeCreateListener} for how to listen for this event.
+   *
+   * @event Mapper#beforeCreate
+   * @see Mapper~beforeCreateListener
+   * @see Mapper#create
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:beforeCreate} event.
+   *
+   * @example
+   * function onBeforeCreate (props, opts) {
+   *   // do something
+   * }
+   * store.on('beforeCreate', onBeforeCreate)
+   *
+   * @callback Mapper~beforeCreateListener
+   * @param {Object} props The `props` argument passed to {@link Mapper#beforeCreate}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#beforeCreate}.
+   * @see Mapper#event:beforeCreate
+   * @see Mapper#create
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Mapper#create}. See
+   * {@link Mapper~afterCreateListener} for how to listen for this event.
+   *
+   * @event Mapper#afterCreate
+   * @see Mapper~afterCreateListener
+   * @see Mapper#create
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:afterCreate} event.
+   *
+   * @example
+   * function onAfterCreate (props, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterCreate', onAfterCreate)
+   *
+   * @callback Mapper~afterCreateListener
+   * @param {Object} props The `props` argument passed to {@link Mapper#afterCreate}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#afterCreate}.
+   * @param {Object} result The `result` argument passed to {@link Mapper#afterCreate}.
+   * @see Mapper#event:afterCreate
+   * @see Mapper#create
+   * @since 3.0.0
+   */
+  /**
    * Create and save a new the record using the provided `props`.
    *
    * {@link Mapper#beforeCreate} will be called before calling the adapter.
    * {@link Mapper#afterCreate} will be called after calling the adapter.
    *
-   * @example <caption>Create and save a new blog post</caption>
-   * PostService.create({
+   * @example
+   * // Create and save a new blog post
+   * PostMapper.create({
    *   title: 'Modeling your data',
    *   status: 'draft'
    * }).then((post) => {
    *   console.log(post) // { id: 1234, status: 'draft', ... }
    * })
    *
+   * @fires Mapper#beforeCreate
+   * @fires Mapper#afterCreate
    * @method Mapper#create
    * @param {Object} props The properties for the new record.
    * @param {Object} [opts] Configuration options. Refer to the `create` method
@@ -6357,13 +7707,63 @@ var Mapper$1 = Component.extend({
 
 
   /**
+   * Fired during {@link Mapper#createMany}. See
+   * {@link Mapper~beforeCreateManyListener} for how to listen for this event.
+   *
+   * @event Mapper#beforeCreateMany
+   * @see Mapper~beforeCreateManyListener
+   * @see Mapper#createMany
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:beforeCreateMany} event.
+   *
+   * @example
+   * function onBeforeCreateMany (records, opts) {
+   *   // do something
+   * }
+   * store.on('beforeCreateMany', onBeforeCreateMany)
+   *
+   * @callback Mapper~beforeCreateManyListener
+   * @param {Object} records The `records` argument received by {@link Mapper#beforeCreateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeCreateMany}.
+   * @see Mapper#event:beforeCreateMany
+   * @see Mapper#createMany
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Mapper#createMany}. See
+   * {@link Mapper~afterCreateManyListener} for how to listen for this event.
+   *
+   * @event Mapper#afterCreateMany
+   * @see Mapper~afterCreateManyListener
+   * @see Mapper#createMany
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:afterCreateMany} event.
+   *
+   * @example
+   * function onAfterCreateMany (records, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterCreateMany', onAfterCreateMany)
+   *
+   * @callback Mapper~afterCreateManyListener
+   * @param {Object} records The `records` argument received by {@link Mapper#afterCreateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterCreateMany}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterCreateMany}.
+   * @see Mapper#event:afterCreateMany
+   * @see Mapper#createMany
+   * @since 3.0.0
+   */
+  /**
    * Given an array of records, batch create them via an adapter.
    *
    * {@link Mapper#beforeCreateMany} will be called before calling the adapter.
    * {@link Mapper#afterCreateMany} will be called after calling the adapter.
    *
-   * @example <caption>Create and save several new blog posts</caption>
-   * PostService.createMany([{
+   * @example
+   * // Create and save several new blog posts
+   * PostMapper.createMany([{
    *   title: 'Modeling your data',
    *   status: 'draft'
    * }, {
@@ -6374,6 +7774,8 @@ var Mapper$1 = Component.extend({
    *   console.log(posts[1]) // { id: 1235, status: 'draft', ... }
    * })
    *
+   * @fires Mapper#beforeCreate
+   * @fires Mapper#afterCreate
    * @method Mapper#createMany
    * @param {Record[]} records Array of records to be created in one batch.
    * @param {Object} [opts] Configuration options. Refer to the `createMany`
@@ -6507,25 +7909,29 @@ var Mapper$1 = Component.extend({
    * __Note:__ This method does __not__ interact with any adapter, and does
    * __not__ save any data. It only creates new objects in memory.
    *
-   * @example <caption>Create empty unsaved record instance</caption>
-   * const post = PostService.createRecord()
+   * @example
+   * // Create empty unsaved record instance
+   * const post = PostMapper.createRecord()
    *
-   * @example <caption>Create an unsaved record instance with inital properties</caption>
-   * const post = PostService.createRecord({
+   * @example
+   * // Create an unsaved record instance with inital properties
+   * const post = PostMapper.createRecord({
    *   title: 'Modeling your data',
    *   status: 'draft'
    * })
    *
-   * @example <caption>Create a record instance that corresponds to a saved record</caption>
-   * const post = PostService.createRecord({
+   * @example
+   * // Create a record instance that corresponds to a saved record
+   * const post = PostMapper.createRecord({
    *   // JSData thinks this record has been saved if it has a primary key
    *   id: 1234,
    *   title: 'Modeling your data',
    *   status: 'draft'
    * })
    *
-   * @example <caption>Create record instances from an array</caption>
-   * const posts = PostService.createRecord([{
+   * @example
+   * // Create record instances from an array
+   * const posts = PostMapper.createRecord([{
    *   title: 'Modeling your data',
    *   status: 'draft'
    * }, {
@@ -6533,27 +7939,29 @@ var Mapper$1 = Component.extend({
    *   status: 'draft'
    * }])
    *
-   * @example <caption>Records are validated by default</caption>
+   * @example
+   * // Records are validated by default
    * import {Mapper} from 'js-data'
-   * const PostService = new Mapper({
+   * const PostMapper = new Mapper({
    *   name: 'post',
    *   schema: { properties: { title: { type: 'string' } } }
    * })
    * try {
-   *   const post = PostService.createRecord({
+   *   const post = PostMapper.createRecord({
    *     title: 1234,
    *   })
    * } catch (err) {
    *   console.log(err.errors) // [{ expected: 'one of (string)', actual: 'number', path: 'title' }]
    * }
    *
-   * @example <caption>Skip validation</caption>
+   * @example
+   * // Skip validation
    * import {Mapper} from 'js-data'
-   * const PostService = new Mapper({
+   * const PostMapper = new Mapper({
    *   name: 'post',
    *   schema: { properties: { title: { type: 'string' } } }
    * })
-   * const post = PostService.createRecord({
+   * const post = PostMapper.createRecord({
    *   title: 1234,
    * }, { noValidate: true })
    * console.log(post.isValid()) // false
@@ -6597,9 +8005,7 @@ var Mapper$1 = Component.extend({
 
 
   /**
-   * Lifecycle invocation method.
-   *
-   * TODO: Improve documentation for this method.
+   * Lifecycle invocation method. You probably won't call this method directly.
    *
    * @method Mapper#crud
    * @param {string} method Name of the lifecycle method to invoke.
@@ -6641,7 +8047,7 @@ var Mapper$1 = Component.extend({
 
     // before lifecycle hook
     op = opts.op = before;
-    return utils.resolve(this[op].apply(this, babelHelpers.toConsumableArray(args))).then(function (_value) {
+    return utils.resolve(this[op].apply(this, toConsumableArray(args))).then(function (_value) {
       var _getAdapter;
 
       if (!utils.isUndefined(args[config.beforeAssign])) {
@@ -6650,15 +8056,15 @@ var Mapper$1 = Component.extend({
       }
       // Now delegate to the adapter
       op = opts.op = method;
-      args = config.adapterArgs ? config.adapterArgs.apply(config, [_this6].concat(babelHelpers.toConsumableArray(args))) : args;
-      _this6.dbg.apply(_this6, [op].concat(babelHelpers.toConsumableArray(args)));
-      return utils.resolve((_getAdapter = _this6.getAdapter(adapter))[op].apply(_getAdapter, [_this6].concat(babelHelpers.toConsumableArray(args))));
+      args = config.adapterArgs ? config.adapterArgs.apply(config, [_this6].concat(toConsumableArray(args))) : args;
+      _this6.dbg.apply(_this6, [op].concat(toConsumableArray(args)));
+      return utils.resolve((_getAdapter = _this6.getAdapter(adapter))[op].apply(_getAdapter, [_this6].concat(toConsumableArray(args))));
     }).then(function (result) {
       result = _this6._end(result, opts, !!config.skip);
       args.push(result);
       // after lifecycle hook
       op = opts.op = after;
-      return utils.resolve(_this6[op].apply(_this6, babelHelpers.toConsumableArray(args))).then(function (_result) {
+      return utils.resolve(_this6[op].apply(_this6, toConsumableArray(args))).then(function (_result) {
         // Allow for re-assignment from lifecycle hook
         return utils.isUndefined(_result) ? result : _result;
       });
@@ -6667,22 +8073,75 @@ var Mapper$1 = Component.extend({
 
 
   /**
+   * Fired during {@link Mapper#destroy}. See
+   * {@link Mapper~beforeDestroyListener} for how to listen for this event.
+   *
+   * @event Mapper#beforeDestroy
+   * @see Mapper~beforeDestroyListener
+   * @see Mapper#destroy
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:beforeDestroy} event.
+   *
+   * @example
+   * function onBeforeDestroy (id, opts) {
+   *   // do something
+   * }
+   * store.on('beforeDestroy', onBeforeDestroy)
+   *
+   * @callback Mapper~beforeDestroyListener
+   * @param {string|number} id The `id` argument passed to {@link Mapper#beforeDestroy}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#beforeDestroy}.
+   * @see Mapper#event:beforeDestroy
+   * @see Mapper#destroy
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Mapper#destroy}. See
+   * {@link Mapper~afterDestroyListener} for how to listen for this event.
+   *
+   * @event Mapper#afterDestroy
+   * @see Mapper~afterDestroyListener
+   * @see Mapper#destroy
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:afterDestroy} event.
+   *
+   * @example
+   * function onAfterDestroy (id, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterDestroy', onAfterDestroy)
+   *
+   * @callback Mapper~afterDestroyListener
+   * @param {string|number} id The `id` argument passed to {@link Mapper#afterDestroy}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#afterDestroy}.
+   * @param {Object} result The `result` argument passed to {@link Mapper#afterDestroy}.
+   * @see Mapper#event:afterDestroy
+   * @see Mapper#destroy
+   * @since 3.0.0
+   */
+  /**
    * Using an adapter, destroy the record with the given primary key.
    *
    * {@link Mapper#beforeDestroy} will be called before destroying the record.
    * {@link Mapper#afterDestroy} will be called after destroying the record.
    *
-   * @example <caption>Destroy a specific blog post</caption>
-   * PostService.destroy(1234).then(() => {
+   * @example
+   * // Destroy a specific blog post
+   * PostMapper.destroy(1234).then(() => {
    *   // Blog post #1234 has been destroyed
    * })
    *
-   * @example <caption>Get full response</caption>
-   * PostService.destroy(1234, { raw: true }).then((result) => {
+   * @example
+   * // Get full response
+   * PostMapper.destroy(1234, { raw: true }).then((result) => {
    *   console.log(result.deleted) e.g. 1
    *   console.log(...) // etc., more metadata can be found on the result
    * })
    *
+   * @fires Mapper#beforeDestroy
+   * @fires Mapper#afterDestroy
    * @method Mapper#destroy
    * @param {(string|number)} id The primary key of the record to destroy.
    * @param {Object} [opts] Configuration options. Refer to the `destroy` method
@@ -6702,30 +8161,84 @@ var Mapper$1 = Component.extend({
 
 
   /**
+   * Fired during {@link Mapper#destroyAll}. See
+   * {@link Mapper~beforeDestroyAllListener} for how to listen for this event.
+   *
+   * @event Mapper#beforeDestroyAll
+   * @see Mapper~beforeDestroyAllListener
+   * @see Mapper#destroyAll
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:beforeDestroyAll} event.
+   *
+   * @example
+   * function onBeforeDestroyAll (query, opts) {
+   *   // do something
+   * }
+   * store.on('beforeDestroyAll', onBeforeDestroyAll)
+   *
+   * @callback Mapper~beforeDestroyAllListener
+   * @param {Object} query The `query` argument passed to {@link Mapper#beforeDestroyAll}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#beforeDestroyAll}.
+   * @see Mapper#event:beforeDestroyAll
+   * @see Mapper#destroyAll
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Mapper#destroyAll}. See
+   * {@link Mapper~afterDestroyAllListener} for how to listen for this event.
+   *
+   * @event Mapper#afterDestroyAll
+   * @see Mapper~afterDestroyAllListener
+   * @see Mapper#destroyAll
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:afterDestroyAll} event.
+   *
+   * @example
+   * function onAfterDestroyAll (query, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterDestroyAll', onAfterDestroyAll)
+   *
+   * @callback Mapper~afterDestroyAllListener
+   * @param {Object} query The `query` argument passed to {@link Mapper#afterDestroyAll}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#afterDestroyAll}.
+   * @param {Object} result The `result` argument passed to {@link Mapper#afterDestroyAll}.
+   * @see Mapper#event:afterDestroyAll
+   * @see Mapper#destroyAll
+   * @since 3.0.0
+   */
+  /**
    * Destroy the records selected by `query` via an adapter. If no `query` is
    * provided then all records will be destroyed.
    *
    * {@link Mapper#beforeDestroyAll} will be called before destroying the records.
    * {@link Mapper#afterDestroyAll} will be called after destroying the records.
    *
-   * @example <caption>Destroy all blog posts</caption>
-   * PostService.destroyAll().then(() => {
+   * @example
+   * // Destroy all blog posts
+   * PostMapper.destroyAll().then(() => {
    *   // All blog posts have been destroyed
    * })
    *
-   * @example <caption>Destroy all "draft" blog posts</caption>
-   * PostService.destroyAll({ status: 'draft' }).then(() => {
+   * @example
+   * // Destroy all "draft" blog posts
+   * PostMapper.destroyAll({ status: 'draft' }).then(() => {
    *   // All "draft" blog posts have been destroyed
    * })
    *
-   * @example <caption>Get full response</caption>
+   * @example
+   * // Get full response
    * const query = null
    * const options = { raw: true }
-   * PostService.destroyAll(query, options).then((result) => {
+   * PostMapper.destroyAll(query, options).then((result) => {
    *   console.log(result.deleted) e.g. 14
    *   console.log(...) // etc., more metadata can be found on the result
    * })
    *
+   * @fires Mapper#beforeDestroyAll
+   * @fires Mapper#afterDestroyAll
    * @method Mapper#destroyAll
    * @param {Object} [query={}] Selection query. See {@link query}.
    * @param {Object} [query.where] See {@link query.where}.
@@ -6750,23 +8263,75 @@ var Mapper$1 = Component.extend({
 
 
   /**
+   * Fired during {@link Mapper#find}. See
+   * {@link Mapper~beforeFindListener} for how to listen for this event.
+   *
+   * @event Mapper#beforeFind
+   * @see Mapper~beforeFindListener
+   * @see Mapper#find
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:beforeFind} event.
+   *
+   * @example
+   * function onBeforeFind (id, opts) {
+   *   // do something
+   * }
+   * store.on('beforeFind', onBeforeFind)
+   *
+   * @callback Mapper~beforeFindListener
+   * @param {string|number} id The `id` argument passed to {@link Mapper#beforeFind}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#beforeFind}.
+   * @see Mapper#event:beforeFind
+   * @see Mapper#find
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Mapper#find}. See
+   * {@link Mapper~afterFindListener} for how to listen for this event.
+   *
+   * @event Mapper#afterFind
+   * @see Mapper~afterFindListener
+   * @see Mapper#find
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:afterFind} event.
+   *
+   * @example
+   * function onAfterFind (id, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterFind', onAfterFind)
+   *
+   * @callback Mapper~afterFindListener
+   * @param {string|number} id The `id` argument passed to {@link Mapper#afterFind}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#afterFind}.
+   * @param {Object} result The `result` argument passed to {@link Mapper#afterFind}.
+   * @see Mapper#event:afterFind
+   * @see Mapper#find
+   * @since 3.0.0
+   */
+  /**
    * Retrieve via an adapter the record with the given primary key.
    *
    * {@link Mapper#beforeFind} will be called before calling the adapter.
    * {@link Mapper#afterFind} will be called after calling the adapter.
    *
    * @example
-   * PostService.find(1).then((post) => {
+   * PostMapper.find(1).then((post) => {
    *   console.log(post) // { id: 1, ...}
    * })
    *
-   * @example <caption>Get full response</caption>
-   * PostService.find(1, { raw: true }).then((result) => {
+   * @example
+   * // Get full response
+   * PostMapper.find(1, { raw: true }).then((result) => {
    *   console.log(result.data) // { id: 1, ...}
    *   console.log(result.found) // 1
    *   console.log(...) // etc., more metadata can be found on the result
    * })
    *
+   * @fires Mapper#beforeFind
+   * @fires Mapper#afterFind
    * @method Mapper#find
    * @param {(string|number)} id The primary key of the record to retrieve.
    * @param {Object} [opts] Configuration options. Refer to the `find` method
@@ -6788,23 +8353,76 @@ var Mapper$1 = Component.extend({
 
 
   /**
+   * Fired during {@link Mapper#findAll}. See
+   * {@link Mapper~beforeFindAllListener} for how to listen for this event.
+   *
+   * @event Mapper#beforeFindAll
+   * @see Mapper~beforeFindAllListener
+   * @see Mapper#findAll
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:beforeFindAll} event.
+   *
+   * @example
+   * function onBeforeFindAll (query, opts) {
+   *   // do something
+   * }
+   * store.on('beforeFindAll', onBeforeFindAll)
+   *
+   * @callback Mapper~beforeFindAllListener
+   * @param {Object} query The `query` argument passed to {@link Mapper#beforeFindAll}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#beforeFindAll}.
+   * @see Mapper#event:beforeFindAll
+   * @see Mapper#findAll
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Mapper#findAll}. See
+   * {@link Mapper~afterFindAllListener} for how to listen for this event.
+   *
+   * @event Mapper#afterFindAll
+   * @see Mapper~afterFindAllListener
+   * @see Mapper#findAll
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:afterFindAll} event.
+   *
+   * @example
+   * function onAfterFindAll (query, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterFindAll', onAfterFindAll)
+   *
+   * @callback Mapper~afterFindAllListener
+   * @param {Object} query The `query` argument passed to {@link Mapper#afterFindAll}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#afterFindAll}.
+   * @param {Object} result The `result` argument passed to {@link Mapper#afterFindAll}.
+   * @see Mapper#event:afterFindAll
+   * @see Mapper#findAll
+   * @since 3.0.0
+   */
+  /**
    * Using the `query` argument, select records to retrieve via an adapter.
    *
    * {@link Mapper#beforeFindAll} will be called before calling the adapter.
    * {@link Mapper#afterFindAll} will be called after calling the adapter.
    *
-   * @example <caption>Find all "published" blog posts</caption>
-   * PostService.findAll({ status: 'published' }).then((posts) => {
+   * @example
+   * // Find all "published" blog posts
+   * PostMapper.findAll({ status: 'published' }).then((posts) => {
    *   console.log(posts) // [{ id: 1, status: 'published', ...}, ...]
    * })
    *
-   * @example <caption>Get full response</caption>
-   * PostService.findAll({ status: 'published' }, { raw: true }).then((result) => {
+   * @example
+   * // Get full response
+   * PostMapper.findAll({ status: 'published' }, { raw: true }).then((result) => {
    *   console.log(result.data) // [{ id: 1, status: 'published', ...}, ...]
    *   console.log(result.found) // e.g. 13
    *   console.log(...) // etc., more metadata can be found on the result
    * })
    *
+   * @fires Mapper#beforeFindAll
+   * @fires Mapper#afterFindAll
    * @method Mapper#findAll
    * @param {Object} [query={}] Selection query. See {@link query}.
    * @param {Object} [query.where] See {@link query.where}.
@@ -6898,7 +8516,7 @@ var Mapper$1 = Component.extend({
    * Mappers manually and not using a Container or DataStore component.
    *
    * @example
-   * UserService.hasMany(PostService, {
+   * UserMapper.hasMany(PostMapper, {
    *   // post.user_id points to user.id
    *   foreignKey: 'user_id'
    *   // post records will be attached to user records at "user.posts"
@@ -6919,7 +8537,7 @@ var Mapper$1 = Component.extend({
    * manually and not using a {@link Container} or {@link DataStore} component.
    *
    * @example
-   * UserService.hasOne(ProfileService, {
+   * UserMapper.hasOne(ProfileMapper, {
    *   // profile.user_id points to user.id
    *   foreignKey: 'user_id'
    *   // profile records will be attached to user records at "user.profile"
@@ -6939,11 +8557,11 @@ var Mapper$1 = Component.extend({
    * Return whether `record` is an instance of this Mapper's recordClass.
    *
    * @example
-   * const post = PostService.createRecord()
+   * const post = PostMapper.createRecord()
    *
-   * console.log(PostService.is(post)) // true
+   * console.log(PostMapper.is(post)) // true
    * // Equivalent to what's above
-   * console.log(post instanceof PostService.recordClass) // true
+   * console.log(post instanceof PostMapper.recordClass) // true
    *
    * @method Mapper#is
    * @param {Object|Record} record The record to check.
@@ -6987,7 +8605,7 @@ var Mapper$1 = Component.extend({
    * {@link Mapper#afterSum} will be called after calling the adapter.
    *
    * @example
-   * PurchaseOrderService.sum('amount', { status: 'paid' }).then((amountPaid) => {
+   * PurchaseOrderMapper.sum('amount', { status: 'paid' }).then((amountPaid) => {
    *   console.log(amountPaid) // e.g. 451125.34
    * })
    *
@@ -7018,7 +8636,7 @@ var Mapper$1 = Component.extend({
    *
    * @example
    * import {Mapper, Schema} from 'js-data'
-   * const PersonService = new Mapper({
+   * const PersonMapper = new Mapper({
    *   name: 'person',
    *   schema: {
    *     properties: {
@@ -7027,15 +8645,15 @@ var Mapper$1 = Component.extend({
    *     }
    *   }
    * })
-   * const person = PersonService.createRecord({ id: 1, name: 'John', foo: 'bar' })
-   * console.log(PersonService.toJSON(person)) // {"id":1,"name":"John","foo":"bar"}
-   * console.log(PersonService.toJSON(person), { strict: true }) // {"id":1,"name":"John"}
+   * const person = PersonMapper.createRecord({ id: 1, name: 'John', foo: 'bar' })
+   * console.log(PersonMapper.toJSON(person)) // {"id":1,"name":"John","foo":"bar"}
+   * console.log(PersonMapper.toJSON(person), { strict: true }) // {"id":1,"name":"John"}
    *
    * @method Mapper#toJSON
    * @param {Record|Record[]} records Record or records from which to create a
    * POJO representation.
    * @param {Object} [opts] Configuration options.
-   * @param {boolean} [opts.strict] Whether to include properties that are not
+   * @param {boolean} [opts.strict] Whether to exclude properties that are not
    * defined in {@link Mapper#schema}.
    * @param {string[]} [opts.with] Array of relation names or relation fields
    * to include in the POJO representation.
@@ -7102,20 +8720,74 @@ var Mapper$1 = Component.extend({
 
 
   /**
+   * Fired during {@link Mapper#update}. See
+   * {@link Mapper~beforeUpdateListener} for how to listen for this event.
+   *
+   * @event Mapper#beforeUpdate
+   * @see Mapper~beforeUpdateListener
+   * @see Mapper#update
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:beforeUpdate} event.
+   *
+   * @example
+   * function onBeforeUpdate (id, props, opts) {
+   *   // do something
+   * }
+   * store.on('beforeUpdate', onBeforeUpdate)
+   *
+   * @callback Mapper~beforeUpdateListener
+   * @param {string|number} id The `id` argument passed to {@link Mapper#beforeUpdate}.
+   * @param {Object} props The `props` argument passed to {@link Mapper#beforeUpdate}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#beforeUpdate}.
+   * @see Mapper#event:beforeUpdate
+   * @see Mapper#update
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Mapper#update}. See
+   * {@link Mapper~afterUpdateListener} for how to listen for this event.
+   *
+   * @event Mapper#afterUpdate
+   * @see Mapper~afterUpdateListener
+   * @see Mapper#update
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:afterUpdate} event.
+   *
+   * @example
+   * function onAfterUpdate (id, props, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterUpdate', onAfterUpdate)
+   *
+   * @callback Mapper~afterUpdateListener
+   * @param {string|number} id The `id` argument passed to {@link Mapper#afterUpdate}.
+   * @param {Object} props The `props` argument passed to {@link Mapper#afterUpdate}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#afterUpdate}.
+   * @param {Object} result The `result` argument passed to {@link Mapper#afterUpdate}.
+   * @see Mapper#event:afterUpdate
+   * @see Mapper#update
+   * @since 3.0.0
+   */
+  /**
    * Using an adapter, update the record with the primary key specified by the
    * `id` argument.
    *
    * {@link Mapper#beforeUpdate} will be called before updating the record.
    * {@link Mapper#afterUpdate} will be called after updating the record.
    *
-   * @example <caption>Update a specific post</caption>
-   * PostService.update(1234, {
+   * @example
+   * // Update a specific post
+   * PostMapper.update(1234, {
    *   status: 'published',
    *   published_at: new Date()
    * }).then((post) => {
    *   console.log(post) // { id: 1234, status: 'published', ... }
    * })
    *
+   * @fires Mapper#beforeUpdate
+   * @fires Mapper#afterUpdate
    * @method Mapper#update
    * @param {(string|number)} id The primary key of the record to update.
    * @param {Object} props The update to apply to the record.
@@ -7137,19 +8809,73 @@ var Mapper$1 = Component.extend({
 
 
   /**
+   * Fired during {@link Mapper#updateAll}. See
+   * {@link Mapper~beforeUpdateAllListener} for how to listen for this event.
+   *
+   * @event Mapper#beforeUpdateAll
+   * @see Mapper~beforeUpdateAllListener
+   * @see Mapper#updateAll
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:beforeUpdateAll} event.
+   *
+   * @example
+   * function onBeforeUpdateAll (props, query, opts) {
+   *   // do something
+   * }
+   * store.on('beforeUpdateAll', onBeforeUpdateAll)
+   *
+   * @callback Mapper~beforeUpdateAllListener
+   * @param {Object} props The `props` argument received by {@link Mapper#beforeUpdateAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#beforeUpdateAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdateAll}.
+   * @see Mapper#event:beforeUpdateAll
+   * @see Mapper#updateAll
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Mapper#updateAll}. See
+   * {@link Mapper~afterUpdateAllListener} for how to listen for this event.
+   *
+   * @event Mapper#afterUpdateAll
+   * @see Mapper~afterUpdateAllListener
+   * @see Mapper#updateAll
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:afterUpdateAll} event.
+   *
+   * @example
+   * function onAfterUpdateAll (props, query, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterUpdateAll', onAfterUpdateAll)
+   *
+   * @callback Mapper~afterUpdateAllListener
+   * @param {Object} props The `props` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterUpdateAll}.
+   * @see Mapper#event:afterUpdateAll
+   * @see Mapper#updateAll
+   * @since 3.0.0
+   */
+  /**
    * Using the `query` argument, perform the a single updated to the selected
    * records.
    *
    * {@link Mapper#beforeUpdateAll} will be called before making the update.
    * {@link Mapper#afterUpdateAll} will be called after making the update.
    *
-   * @example <caption>Turn all of John's blog posts into drafts.</caption>
+   * @example
+   * // Turn all of John's blog posts into drafts.
    * const update = { status: draft: published_at: null }
    * const query = { userId: 1234 }
-   * PostService.updateAll(update, query).then((posts) => {
+   * PostMapper.updateAll(update, query).then((posts) => {
    *   console.log(posts) // [...]
    * })
    *
+   * @fires Mapper#beforeUpdateAll
+   * @fires Mapper#afterUpdateAll
    * @method Mapper#updateAll
    * @param {Object} props Update to apply to selected records.
    * @param {Object} [query={}] Selection query. See {@link query}.
@@ -7174,6 +8900,55 @@ var Mapper$1 = Component.extend({
 
 
   /**
+   * Fired during {@link Mapper#updateMany}. See
+   * {@link Mapper~beforeUpdateManyListener} for how to listen for this event.
+   *
+   * @event Mapper#beforeUpdateMany
+   * @see Mapper~beforeUpdateManyListener
+   * @see Mapper#updateMany
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:beforeUpdateMany} event.
+   *
+   * @example
+   * function onBeforeUpdateMany (records, opts) {
+   *   // do something
+   * }
+   * store.on('beforeUpdateMany', onBeforeUpdateMany)
+   *
+   * @callback Mapper~beforeUpdateManyListener
+   * @param {Object} records The `records` argument received by {@link Mapper#beforeUpdateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdateMany}.
+   * @see Mapper#event:beforeUpdateMany
+   * @see Mapper#updateMany
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Mapper#updateMany}. See
+   * {@link Mapper~afterUpdateManyListener} for how to listen for this event.
+   *
+   * @event Mapper#afterUpdateMany
+   * @see Mapper~afterUpdateManyListener
+   * @see Mapper#updateMany
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:afterUpdateMany} event.
+   *
+   * @example
+   * function onAfterUpdateMany (records, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterUpdateMany', onAfterUpdateMany)
+   *
+   * @callback Mapper~afterUpdateManyListener
+   * @param {Object} records The `records` argument received by {@link Mapper#afterUpdateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdateMany}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterUpdateMany}.
+   * @see Mapper#event:afterUpdateMany
+   * @see Mapper#updateMany
+   * @since 3.0.0
+   */
+  /**
    * Given an array of updates, perform each of the updates via an adapter. Each
    * "update" is a hash of properties with which to update an record. Each
    * update must contain the primary key of the record to be updated.
@@ -7182,13 +8957,15 @@ var Mapper$1 = Component.extend({
    * {@link Mapper#afterUpdateMany} will be called after making the update.
    *
    * @example
-   * PostService.updateMany([
+   * PostMapper.updateMany([
    *   { id: 1234, status: 'draft' },
    *   { id: 2468, status: 'published', published_at: new Date() }
    * ]).then((posts) => {
    *   console.log(posts) // [...]
    * })
    *
+   * @fires Mapper#beforeUpdateMany
+   * @fires Mapper#afterUpdateMany
    * @method Mapper#updateMany
    * @param {Record[]} records Array up record updates.
    * @param {Object} [opts] Configuration options. Refer to the `updateMany`
@@ -7220,13 +8997,13 @@ var Mapper$1 = Component.extend({
    *     id: { type: 'string' }
    *   }
    * })
-   * const PersonService = new Mapper({
+   * const PersonMapper = new Mapper({
    *   name: 'person',
    *   schema: PersonSchema
    * })
-   * let errors = PersonService.validate({ name: 'John' })
+   * let errors = PersonMapper.validate({ name: 'John' })
    * console.log(errors) // undefined
-   * errors = PersonService.validate({ name: 123 })
+   * errors = PersonMapper.validate({ name: 123 })
    * console.log(errors) // [{ expected: 'one of (string)', actual: 'number', path: 'name' }]
    *
    * @method Mapper#validate
@@ -7274,9 +9051,10 @@ var Mapper$1 = Component.extend({
    * }
    * ```
    *
-   * @example <caption>Override to customize behavior</caption>
+   * @example
    * const PostMapper = new Mapper({
    *   name: 'post',
+   *   // Override to customize behavior
    *   wrap (data, opts) {
    *     const originalWrap = this.constructor.prototype.wrap
    *     // Let's say "GET /post" doesn't return JSON quite like JSData expects,
@@ -7331,39 +9109,14 @@ var Mapper$1 = Component.extend({
   }
 });
 
-/**
- * Create a subclass of this Mapper.
- *
- * @example <caption>Extend the class in a cross-browser manner.</caption>
- * import {Mapper} from 'js-data'
- * const CustomMapperClass = Mapper.extend({
- *   foo () { return 'bar' }
- * })
- * const customMapper = new CustomMapperClass({ name: 'test' })
- * console.log(customMapper.foo()) // "bar"
- *
- * @example <caption>Extend the class using ES2015 class syntax.</caption>
- * class CustomMapperClass extends Mapper {
- *   foo () { return 'bar' }
- * }
- * const customMapper = new CustomMapperClass({ name: 'test' })
- * console.log(customMapper.foo()) // "bar"
- *
- * @method Mapper.extend
- * @param {Object} [props={}] Properties to add to the prototype of the
- * subclass.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @returns {Constructor} Subclass of this Mapper class.
- * @since 3.0.0
- */
-
 var DOMAIN$3 = 'Container';
 
 var proxiedMapperMethods = [
 /**
  * Wrapper for {@link Mapper#count}.
  *
- * @example <caption>Get the number of published blog posts</caption>
+ * @example
+ * // Get the number of published blog posts
  * import {Container} from 'js-data'
  * import RethinkDBAdapter from 'js-data-rethinkdb'
  * const store = new Container()
@@ -7385,9 +9138,61 @@ var proxiedMapperMethods = [
 'count',
 
 /**
+ * Fired during {@link Container#create}. See
+ * {@link Container~beforeCreateListener} for how to listen for this event.
+ *
+ * @event Container#beforeCreate
+ * @see Container~beforeCreateListener
+ * @see Container#create
+ */
+/**
+ * Callback signature for the {@link Container#event:beforeCreate} event.
+ *
+ * @example
+ * function onBeforeCreate (mapperName, props, opts) {
+ *   // do something
+ * }
+ * store.on('beforeCreate', onBeforeCreate)
+ *
+ * @callback Container~beforeCreateListener
+ * @param {string} name The `name` argument received by {@link Mapper#beforeCreate}.
+ * @param {Object} props The `props` argument received by {@link Mapper#beforeCreate}.
+ * @param {Object} opts The `opts` argument received by {@link Mapper#beforeCreate}.
+ * @see Container#event:beforeCreate
+ * @see Container#create
+ * @since 3.0.0
+ */
+/**
+ * Fired during {@link Container#create}. See
+ * {@link Container~afterCreateListener} for how to listen for this event.
+ *
+ * @event Container#afterCreate
+ * @see Container~afterCreateListener
+ * @see Container#create
+ */
+/**
+ * Callback signature for the {@link Container#event:afterCreate} event.
+ *
+ * @example
+ * function onAfterCreate (mapperName, props, opts, result) {
+ *   // do something
+ * }
+ * store.on('afterCreate', onAfterCreate)
+ *
+ * @callback Container~afterCreateListener
+ * @param {string} name The `name` argument received by {@link Mapper#afterCreate}.
+ * @param {Object} props The `props` argument received by {@link Mapper#afterCreate}.
+ * @param {Object} opts The `opts` argument received by {@link Mapper#afterCreate}.
+ * @param {Object} result The `result` argument received by {@link Mapper#afterCreate}.
+ * @see Container#event:afterCreate
+ * @see Container#create
+ * @since 3.0.0
+ */
+/**
  * Wrapper for {@link Mapper#create}.
  *
- * @example <caption>Create and save a new blog post</caption>
+ * @example
+ * // Create and save a new blog post
  * import {Container} from 'js-data'
  * import RethinkDBAdapter from 'js-data-rethinkdb'
  * const store = new Container()
@@ -7401,6 +9206,8 @@ var proxiedMapperMethods = [
  *   console.log(post) // { id: 1234, status: 'draft', ... }
  * })
  *
+ * @fires Container#beforeCreate
+ * @fires Container#afterCreate
  * @method Container#create
  * @param {string} name Name of the {@link Mapper} to target.
  * @param {Object} props See {@link Mapper#create}.
@@ -7412,9 +9219,61 @@ var proxiedMapperMethods = [
 'create',
 
 /**
+ * Fired during {@link Container#createMany}. See
+ * {@link Container~beforeCreateManyListener} for how to listen for this event.
+ *
+ * @event Container#beforeCreateMany
+ * @see Container~beforeCreateManyListener
+ * @see Container#createMany
+ */
+/**
+ * Callback signature for the {@link Container#event:beforeCreateMany} event.
+ *
+ * @example
+ * function onBeforeCreateMany (mapperName, records, opts) {
+ *   // do something
+ * }
+ * store.on('beforeCreateMany', onBeforeCreateMany)
+ *
+ * @callback Container~beforeCreateManyListener
+ * @param {string} name The `name` argument received by {@link Mapper#beforeCreateMany}.
+ * @param {Object} records The `records` argument received by {@link Mapper#beforeCreateMany}.
+ * @param {Object} opts The `opts` argument received by {@link Mapper#beforeCreateMany}.
+ * @see Container#event:beforeCreateMany
+ * @see Container#createMany
+ * @since 3.0.0
+ */
+/**
+ * Fired during {@link Container#createMany}. See
+ * {@link Container~afterCreateManyListener} for how to listen for this event.
+ *
+ * @event Container#afterCreateMany
+ * @see Container~afterCreateManyListener
+ * @see Container#createMany
+ */
+/**
+ * Callback signature for the {@link Container#event:afterCreateMany} event.
+ *
+ * @example
+ * function onAfterCreateMany (mapperName, records, opts, result) {
+ *   // do something
+ * }
+ * store.on('afterCreateMany', onAfterCreateMany)
+ *
+ * @callback Container~afterCreateManyListener
+ * @param {string} name The `name` argument received by {@link Mapper#afterCreateMany}.
+ * @param {Object} records The `records` argument received by {@link Mapper#afterCreateMany}.
+ * @param {Object} opts The `opts` argument received by {@link Mapper#afterCreateMany}.
+ * @param {Object} result The `result` argument received by {@link Mapper#afterCreateMany}.
+ * @see Container#event:afterCreateMany
+ * @see Container#createMany
+ * @since 3.0.0
+ */
+/**
  * Wrapper for {@link Mapper#createMany}.
  *
- * @example <caption>Create and save several new blog posts</caption>
+ * @example
+ * // Create and save several new blog posts
  * import {Container} from 'js-data'
  * import RethinkDBAdapter from 'js-data-rethinkdb'
  * const store = new Container()
@@ -7432,6 +9291,8 @@ var proxiedMapperMethods = [
  *   console.log(posts[1]) // { id: 1235, status: 'draft', ... }
  * })
  *
+ * @fires Container#beforeCreateMany
+ * @fires Container#afterCreateMany
  * @method Container#createMany
  * @param {string} name Name of the {@link Mapper} to target.
  * @param {Record[]} records See {@link Mapper#createMany}.
@@ -7448,11 +9309,12 @@ var proxiedMapperMethods = [
  * __Note:__ This method does __not__ interact with any adapter, and does
  * __not__ save any data. It only creates new objects in memory.
  *
- * @example <caption>Create empty unsaved record instance</caption>
+ * @example
+ * // Create empty unsaved record instance
  * import {Container} from 'js-data'
  * const store = new Container()
  * store.defineMapper('post')
- * const post = PostService.createRecord()
+ * const post = PostMapper.createRecord()
  *
  * @method Container#createRecord
  * @param {string} name Name of the {@link Mapper} to target.
@@ -7465,20 +9327,61 @@ var proxiedMapperMethods = [
 'createRecord',
 
 /**
- * Wrapper for {@link Mapper#dbg}.
+ * Fired during {@link Container#destroy}. See
+ * {@link Container~beforeDestroyListener} for how to listen for this event.
  *
- * @method Container#dbg
- * @param {string} name Name of the {@link Mapper} to target.
- * @param {...*} args See {@link Mapper#dbg}.
- * @see Mapper#dbg
+ * @event Container#beforeDestroy
+ * @see Container~beforeDestroyListener
+ * @see Container#destroy
+ */
+/**
+ * Callback signature for the {@link Container#event:beforeDestroy} event.
+ *
+ * @example
+ * function onBeforeDestroy (mapperName, id, opts) {
+ *   // do something
+ * }
+ * store.on('beforeDestroy', onBeforeDestroy)
+ *
+ * @callback Container~beforeDestroyListener
+ * @param {string} name The `name` argument received by {@link Mapper#beforeDestroy}.
+ * @param {string|number} id The `id` argument received by {@link Mapper#beforeDestroy}.
+ * @param {Object} opts The `opts` argument received by {@link Mapper#beforeDestroy}.
+ * @see Container#event:beforeDestroy
+ * @see Container#destroy
  * @since 3.0.0
  */
-'dbg',
-
+/**
+ * Fired during {@link Container#destroy}. See
+ * {@link Container~afterDestroyListener} for how to listen for this event.
+ *
+ * @event Container#afterDestroy
+ * @see Container~afterDestroyListener
+ * @see Container#destroy
+ */
+/**
+ * Callback signature for the {@link Container#event:afterDestroy} event.
+ *
+ * @example
+ * function onAfterDestroy (mapperName, id, opts, result) {
+ *   // do something
+ * }
+ * store.on('afterDestroy', onAfterDestroy)
+ *
+ * @callback Container~afterDestroyListener
+ * @param {string} name The `name` argument received by {@link Mapper#afterDestroy}.
+ * @param {string|number} id The `id` argument received by {@link Mapper#afterDestroy}.
+ * @param {Object} opts The `opts` argument received by {@link Mapper#afterDestroy}.
+ * @param {Object} result The `result` argument received by {@link Mapper#afterDestroy}.
+ * @see Container#event:afterDestroy
+ * @see Container#destroy
+ * @since 3.0.0
+ */
 /**
  * Wrapper for {@link Mapper#destroy}.
  *
- * @example <caption>Destroy a specific blog post</caption>
+ * @example
+ * // Destroy a specific blog post
  * import {Container} from 'js-data'
  * import RethinkDBAdapter from 'js-data-rethinkdb'
  * const store = new Container()
@@ -7489,6 +9392,8 @@ var proxiedMapperMethods = [
  *   // Blog post #1234 has been destroyed
  * })
  *
+ * @fires Container#beforeDestroy
+ * @fires Container#afterDestroy
  * @method Container#destroy
  * @param {string} name Name of the {@link Mapper} to target.
  * @param {(string|number)} id See {@link Mapper#destroy}.
@@ -7500,9 +9405,61 @@ var proxiedMapperMethods = [
 'destroy',
 
 /**
+ * Fired during {@link Container#destroyAll}. See
+ * {@link Container~beforeDestroyAllListener} for how to listen for this event.
+ *
+ * @event Container#beforeDestroyAll
+ * @see Container~beforeDestroyAllListener
+ * @see Container#destroyAll
+ */
+/**
+ * Callback signature for the {@link Container#event:beforeDestroyAll} event.
+ *
+ * @example
+ * function onBeforeDestroyAll (mapperName, query, opts) {
+ *   // do something
+ * }
+ * store.on('beforeDestroyAll', onBeforeDestroyAll)
+ *
+ * @callback Container~beforeDestroyAllListener
+ * @param {string} name The `name` argument received by {@link Mapper#beforeDestroyAll}.
+ * @param {Object} query The `query` argument received by {@link Mapper#beforeDestroyAll}.
+ * @param {Object} opts The `opts` argument received by {@link Mapper#beforeDestroyAll}.
+ * @see Container#event:beforeDestroyAll
+ * @see Container#destroyAll
+ * @since 3.0.0
+ */
+/**
+ * Fired during {@link Container#destroyAll}. See
+ * {@link Container~afterDestroyAllListener} for how to listen for this event.
+ *
+ * @event Container#afterDestroyAll
+ * @see Container~afterDestroyAllListener
+ * @see Container#destroyAll
+ */
+/**
+ * Callback signature for the {@link Container#event:afterDestroyAll} event.
+ *
+ * @example
+ * function onAfterDestroyAll (mapperName, query, opts, result) {
+ *   // do something
+ * }
+ * store.on('afterDestroyAll', onAfterDestroyAll)
+ *
+ * @callback Container~afterDestroyAllListener
+ * @param {string} name The `name` argument received by {@link Mapper#afterDestroyAll}.
+ * @param {Object} query The `query` argument received by {@link Mapper#afterDestroyAll}.
+ * @param {Object} opts The `opts` argument received by {@link Mapper#afterDestroyAll}.
+ * @param {Object} result The `result` argument received by {@link Mapper#afterDestroyAll}.
+ * @see Container#event:afterDestroyAll
+ * @see Container#destroyAll
+ * @since 3.0.0
+ */
+/**
  * Wrapper for {@link Mapper#destroyAll}.
  *
- * @example <caption>Destroy all "draft" blog posts</caption>
+ * @example
+ * // Destroy all "draft" blog posts
  * import {Container} from 'js-data'
  * import RethinkDBAdapter from 'js-data-rethinkdb'
  * const store = new Container()
@@ -7513,6 +9470,8 @@ var proxiedMapperMethods = [
  *   // All "draft" blog posts have been destroyed
  * })
  *
+ * @fires Container#beforeDestroyAll
+ * @fires Container#afterDestroyAll
  * @method Container#destroyAll
  * @param {string} name Name of the {@link Mapper} to target.
  * @param {Object} [query] See {@link Mapper#destroyAll}.
@@ -7523,6 +9482,57 @@ var proxiedMapperMethods = [
  */
 'destroyAll',
 
+/**
+ * Fired during {@link Container#find}. See
+ * {@link Container~beforeFindListener} for how to listen for this event.
+ *
+ * @event Container#beforeFind
+ * @see Container~beforeFindListener
+ * @see Container#find
+ */
+/**
+ * Callback signature for the {@link Container#event:beforeFind} event.
+ *
+ * @example
+ * function onBeforeFind (mapperName, id, opts) {
+ *   // do something
+ * }
+ * store.on('beforeFind', onBeforeFind)
+ *
+ * @callback Container~beforeFindListener
+ * @param {string} name The `name` argument received by {@link Mapper#beforeFind}.
+ * @param {string|number} id The `id` argument received by {@link Mapper#beforeFind}.
+ * @param {Object} opts The `opts` argument received by {@link Mapper#beforeFind}.
+ * @see Container#event:beforeFind
+ * @see Container#find
+ * @since 3.0.0
+ */
+/**
+ * Fired during {@link Container#find}. See
+ * {@link Container~afterFindListener} for how to listen for this event.
+ *
+ * @event Container#afterFind
+ * @see Container~afterFindListener
+ * @see Container#find
+ */
+/**
+ * Callback signature for the {@link Container#event:afterFind} event.
+ *
+ * @example
+ * function onAfterFind (mapperName, id, opts, result) {
+ *   // do something
+ * }
+ * store.on('afterFind', onAfterFind)
+ *
+ * @callback Container~afterFindListener
+ * @param {string} name The `name` argument received by {@link Mapper#afterFind}.
+ * @param {string|number} id The `id` argument received by {@link Mapper#afterFind}.
+ * @param {Object} opts The `opts` argument received by {@link Mapper#afterFind}.
+ * @param {Object} result The `result` argument received by {@link Mapper#afterFind}.
+ * @see Container#event:afterFind
+ * @see Container#find
+ * @since 3.0.0
+ */
 /**
  * Wrapper for {@link Mapper#find}.
  *
@@ -7537,6 +9547,8 @@ var proxiedMapperMethods = [
  *   console.log(post) // { id: 1, ...}
  * })
  *
+ * @fires Container#beforeFind
+ * @fires Container#afterFind
  * @method Container#find
  * @param {string} name Name of the {@link Mapper} to target.
  * @param {(string|number)} id See {@link Mapper#find}.
@@ -7548,9 +9560,61 @@ var proxiedMapperMethods = [
 'find',
 
 /**
+ * Fired during {@link Container#findAll}. See
+ * {@link Container~beforeFindAllListener} for how to listen for this event.
+ *
+ * @event Container#beforeFindAll
+ * @see Container~beforeFindAllListener
+ * @see Container#findAll
+ */
+/**
+ * Callback signature for the {@link Container#event:beforeFindAll} event.
+ *
+ * @example
+ * function onBeforeFindAll (mapperName, query, opts) {
+ *   // do something
+ * }
+ * store.on('beforeFindAll', onBeforeFindAll)
+ *
+ * @callback Container~beforeFindAllListener
+ * @param {string} name The `name` argument received by {@link Mapper#beforeFindAll}.
+ * @param {Object} query The `query` argument received by {@link Mapper#beforeFindAll}.
+ * @param {Object} opts The `opts` argument received by {@link Mapper#beforeFindAll}.
+ * @see Container#event:beforeFindAll
+ * @see Container#findAll
+ * @since 3.0.0
+ */
+/**
+ * Fired during {@link Container#findAll}. See
+ * {@link Container~afterFindAllListener} for how to listen for this event.
+ *
+ * @event Container#afterFindAll
+ * @see Container~afterFindAllListener
+ * @see Container#findAll
+ */
+/**
+ * Callback signature for the {@link Container#event:afterFindAll} event.
+ *
+ * @example
+ * function onAfterFindAll (mapperName, query, opts, result) {
+ *   // do something
+ * }
+ * store.on('afterFindAll', onAfterFindAll)
+ *
+ * @callback Container~afterFindAllListener
+ * @param {string} name The `name` argument received by {@link Mapper#afterFindAll}.
+ * @param {Object} query The `query` argument received by {@link Mapper#afterFindAll}.
+ * @param {Object} opts The `opts` argument received by {@link Mapper#afterFindAll}.
+ * @param {Object} result The `result` argument received by {@link Mapper#afterFindAll}.
+ * @see Container#event:afterFindAll
+ * @see Container#findAll
+ * @since 3.0.0
+ */
+/**
  * Wrapper for {@link Mapper#createRecord}.
  *
- * @example <caption>Find all "published" blog posts</caption>
+ * @example
+ * // Find all "published" blog posts
  * import {Container} from 'js-data'
  * import RethinkDBAdapter from 'js-data-rethinkdb'
  * const store = new Container()
@@ -7561,6 +9625,8 @@ var proxiedMapperMethods = [
  *   console.log(posts) // [{ id: 1, ...}, ...]
  * })
  *
+ * @fires Container#beforeFindAll
+ * @fires Container#afterFindAll
  * @method Container#findAll
  * @param {string} name Name of the {@link Mapper} to target.
  * @param {Object} [query] See {@link Mapper#findAll}.
@@ -7603,17 +9669,6 @@ var proxiedMapperMethods = [
  * @since 3.0.0
  */
 'is',
-
-/**
- * Wrapper for {@link Mapper#log}.
- *
- * @method Container#log
- * @param {string} name Name of the {@link Mapper} to target.
- * @param {...*} args See {@link Mapper#log}.
- * @see Mapper#log
- * @since 3.0.0
- */
-'log',
 
 /**
  * Wrapper for {@link Mapper#sum}.
@@ -7671,6 +9726,59 @@ var proxiedMapperMethods = [
 'toJSON',
 
 /**
+ * Fired during {@link Container#update}. See
+ * {@link Container~beforeUpdateListener} for how to listen for this event.
+ *
+ * @event Container#beforeUpdate
+ * @see Container~beforeUpdateListener
+ * @see Container#update
+ */
+/**
+ * Callback signature for the {@link Container#event:beforeUpdate} event.
+ *
+ * @example
+ * function onBeforeUpdate (mapperName, id, props, opts) {
+ *   // do something
+ * }
+ * store.on('beforeUpdate', onBeforeUpdate)
+ *
+ * @callback Container~beforeUpdateListener
+ * @param {string} name The `name` argument received by {@link Mapper#beforeUpdate}.
+ * @param {string|number} id The `id` argument received by {@link Mapper#beforeUpdate}.
+ * @param {Object} props The `props` argument received by {@link Mapper#beforeUpdate}.
+ * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdate}.
+ * @see Container#event:beforeUpdate
+ * @see Container#update
+ * @since 3.0.0
+ */
+/**
+ * Fired during {@link Container#update}. See
+ * {@link Container~afterUpdateListener} for how to listen for this event.
+ *
+ * @event Container#afterUpdate
+ * @see Container~afterUpdateListener
+ * @see Container#update
+ */
+/**
+ * Callback signature for the {@link Container#event:afterUpdate} event.
+ *
+ * @example
+ * function onAfterUpdate (mapperName, id, props, opts, result) {
+ *   // do something
+ * }
+ * store.on('afterUpdate', onAfterUpdate)
+ *
+ * @callback Container~afterUpdateListener
+ * @param {string} name The `name` argument received by {@link Mapper#afterUpdate}.
+ * @param {string|number} id The `id` argument received by {@link Mapper#afterUpdate}.
+ * @param {Object} props The `props` argument received by {@link Mapper#afterUpdate}.
+ * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdate}.
+ * @param {Object} result The `result` argument received by {@link Mapper#afterUpdate}.
+ * @see Container#event:afterUpdate
+ * @see Container#update
+ * @since 3.0.0
+ */
+/**
  * Wrapper for {@link Mapper#update}.
  *
  * @example
@@ -7687,6 +9795,8 @@ var proxiedMapperMethods = [
  *   console.log(post) // { id: 1234, status: 'published', ... }
  * })
  *
+ * @fires Container#beforeUpdate
+ * @fires Container#afterUpdate
  * @method Container#update
  * @param {string} name Name of the {@link Mapper} to target.
  * @param {(string|number)} id See {@link Mapper#update}.
@@ -7700,9 +9810,63 @@ var proxiedMapperMethods = [
 'update',
 
 /**
+ * Fired during {@link Container#updateAll}. See
+ * {@link Container~beforeUpdateAllListener} for how to listen for this event.
+ *
+ * @event Container#beforeUpdateAll
+ * @see Container~beforeUpdateAllListener
+ * @see Container#updateAll
+ */
+/**
+ * Callback signature for the {@link Container#event:beforeUpdateAll} event.
+ *
+ * @example
+ * function onBeforeUpdateAll (mapperName, props, query, opts) {
+ *   // do something
+ * }
+ * store.on('beforeUpdateAll', onBeforeUpdateAll)
+ *
+ * @callback Container~beforeUpdateAllListener
+ * @param {string} name The `name` argument received by {@link Mapper#beforeUpdateAll}.
+ * @param {Object} props The `props` argument received by {@link Mapper#beforeUpdateAll}.
+ * @param {Object} query The `query` argument received by {@link Mapper#beforeUpdateAll}.
+ * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdateAll}.
+ * @see Container#event:beforeUpdateAll
+ * @see Container#updateAll
+ * @since 3.0.0
+ */
+/**
+ * Fired during {@link Container#updateAll}. See
+ * {@link Container~afterUpdateAllListener} for how to listen for this event.
+ *
+ * @event Container#afterUpdateAll
+ * @see Container~afterUpdateAllListener
+ * @see Container#updateAll
+ */
+/**
+ * Callback signature for the {@link Container#event:afterUpdateAll} event.
+ *
+ * @example
+ * function onAfterUpdateAll (mapperName, props, query, opts, result) {
+ *   // do something
+ * }
+ * store.on('afterUpdateAll', onAfterUpdateAll)
+ *
+ * @callback Container~afterUpdateAllListener
+ * @param {string} name The `name` argument received by {@link Mapper#afterUpdateAll}.
+ * @param {Object} props The `props` argument received by {@link Mapper#afterUpdateAll}.
+ * @param {Object} query The `query` argument received by {@link Mapper#afterUpdateAll}.
+ * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdateAll}.
+ * @param {Object} result The `result` argument received by {@link Mapper#afterUpdateAll}.
+ * @see Container#event:afterUpdateAll
+ * @see Container#updateAll
+ * @since 3.0.0
+ */
+/**
  * Wrapper for {@link Mapper#updateAll}.
  *
- * @example <caption>Turn all of John's blog posts into drafts.</caption>
+ * @example
+ * // Turn all of John's blog posts into drafts.
  * import {Container} from 'js-data'
  * import RethinkDBAdapter from 'js-data-rethinkdb'
  * const store = new Container()
@@ -7715,6 +9879,8 @@ var proxiedMapperMethods = [
  *   console.log(posts) // [...]
  * })
  *
+ * @fires Container#beforeUpdateAll
+ * @fires Container#afterUpdateAll
  * @method Container#updateAll
  * @param {string} name Name of the {@link Mapper} to target.
  * @param {Object} update See {@link Mapper#updateAll}.
@@ -7726,6 +9892,57 @@ var proxiedMapperMethods = [
  */
 'updateAll',
 
+/**
+ * Fired during {@link Container#updateMany}. See
+ * {@link Container~beforeUpdateManyListener} for how to listen for this event.
+ *
+ * @event Container#beforeUpdateMany
+ * @see Container~beforeUpdateManyListener
+ * @see Container#updateMany
+ */
+/**
+ * Callback signature for the {@link Container#event:beforeUpdateMany} event.
+ *
+ * @example
+ * function onBeforeUpdateMany (mapperName, records, opts) {
+ *   // do something
+ * }
+ * store.on('beforeUpdateMany', onBeforeUpdateMany)
+ *
+ * @callback Container~beforeUpdateManyListener
+ * @param {string} name The `name` argument received by {@link Mapper#beforeUpdateMany}.
+ * @param {Object} records The `records` argument received by {@link Mapper#beforeUpdateMany}.
+ * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdateMany}.
+ * @see Container#event:beforeUpdateMany
+ * @see Container#updateMany
+ * @since 3.0.0
+ */
+/**
+ * Fired during {@link Container#updateMany}. See
+ * {@link Container~afterUpdateManyListener} for how to listen for this event.
+ *
+ * @event Container#afterUpdateMany
+ * @see Container~afterUpdateManyListener
+ * @see Container#updateMany
+ */
+/**
+ * Callback signature for the {@link Container#event:afterUpdateMany} event.
+ *
+ * @example
+ * function onAfterUpdateMany (mapperName, records, opts, result) {
+ *   // do something
+ * }
+ * store.on('afterUpdateMany', onAfterUpdateMany)
+ *
+ * @callback Container~afterUpdateManyListener
+ * @param {string} name The `name` argument received by {@link Mapper#afterUpdateMany}.
+ * @param {Object} records The `records` argument received by {@link Mapper#afterUpdateMany}.
+ * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdateMany}.
+ * @param {Object} result The `result` argument received by {@link Mapper#afterUpdateMany}.
+ * @see Container#event:afterUpdateMany
+ * @see Container#updateMany
+ * @since 3.0.0
+ */
 /**
  * Wrapper for {@link Mapper#updateMany}.
  *
@@ -7743,6 +9960,8 @@ var proxiedMapperMethods = [
  *   console.log(posts) // [...]
  * })
  *
+ * @fires Container#beforeUpdateMany
+ * @fires Container#afterUpdateMany
  * @method Container#updateMany
  * @param {string} name Name of the {@link Mapper} to target.
  * @param {(Object[]|Record[])} records See {@link Mapper#updateMany}.
@@ -7782,19 +10001,86 @@ var proxiedMapperMethods = [
  */
 'validate'];
 
+/**
+ * The `Container` class is a place to define and store {@link Mapper} instances.
+ *
+ * A `Container` makes it easy to manage your Mappers.
+ *
+ * @example <caption>Container#constructor</caption>
+ * // import {Container} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Container} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * const store = new Container()
+ *
+ * @class Container
+ * @extends Component
+ * @param {Object} [opts] Configuration options.
+ * @param {boolean} [opts.debug=false] See {@link Component#debug}.
+ * @param {Constructor} [opts.mapperClass] See {@link Container#mapperClass}.
+ * @param {Object} [opts.mapperDefaults] See {@link Container#mapperDefaults}.
+ * @since 3.0.0
+ */
 function Container(opts) {
   utils.classCallCheck(this, Container);
-  Container.__super__.call(this);
+  Component$1.call(this);
   opts || (opts = {});
 
   Object.defineProperties(this, {
-    // Holds the adapters, shared by all mappers in this container
+    /**
+     * The adapters registered with this Container, which are also shared by all
+     * Mappers in this Container.
+     *
+     * @name Container#_adapters
+     * @see Container#registerAdapter
+     * @since 3.0.0
+     * @type {Object}
+     */
     _adapters: {
       value: {}
     },
-    // The the mappers in this container
+
+    /**
+     * The the mappers in this container
+     *
+     * @name Container#_mappers
+     * @see Mapper
+     * @since 3.0.0
+     * @type {Object}
+     */
     _mappers: {
       value: {}
+    },
+
+    /**
+     * Constructor function to use in {@link Container#defineMapper} to create new
+     * {@link Mapper} instances. {@link Container#mapperClass} should extend
+     * {@link Mapper}. By default {@link Mapper} is used to instantiate Mappers.
+     *
+     * @example <caption>Container#mapperClass</caption>
+     * // import {Container, Mapper} from 'js-data'
+     * const JSData = require('js-data@3.0.0-beta.7')
+     * const {Container} = JSData
+     * console.log('Using JSData v' + JSData.version.full)
+     *
+     * class MyMapperClass extends Mapper {
+     *   foo () { return 'bar' }
+     * }
+     * const store = new Container({
+     *   mapperClass: MyMapperClass
+     * })
+     * store.defineMapper('user')
+     * console.log(store.getMapper('user').foo())
+     *
+     * @name Container#mapperClass
+     * @see Mapper
+     * @since 3.0.0
+     * @type {Constructor}
+     */
+    mapperClass: {
+      value: undefined,
+      writable: true
     }
   });
 
@@ -7805,6 +10091,20 @@ function Container(opts) {
    * Defaults options to pass to {@link Container#mapperClass} when creating a
    * new {@link Mapper}.
    *
+   * @example <caption>Container#mapperDefaults</caption>
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
+   * const store = new Container({
+   *   mapperDefaults: {
+   *     idAttribute: '_id'
+   *   }
+   * })
+   * store.defineMapper('user')
+   * console.log(store.getMapper('user').idAttribute)
+   *
    * @default {}
    * @name Container#mapperDefaults
    * @since 3.0.0
@@ -7812,16 +10112,8 @@ function Container(opts) {
    */
   this.mapperDefaults = this.mapperDefaults || {};
 
-  /**
-   * Constructor function to use in {@link Container#defineMapper} to create a
-   * new mapper.
-   *
-   * {@link Mapper}
-   * @name Container#mapperClass
-   * @since 3.0.0
-   * @type {Constructor}
-   */
-  this.mapperClass = this.mapperClass || Mapper$1;
+  // Use the Mapper class if the user didn't provide a mapperClass
+  this.mapperClass || (this.mapperClass = Mapper$1);
 }
 
 var props = {
@@ -7830,9 +10122,21 @@ var props = {
   /**
    * Register a new event listener on this Container.
    *
-   * Proxy for {@link Component#on}. If an event was emitted by a Mapper in the
-   * Container, then the name of the Mapper will be prepended to the arugments
-   * passed to the listener.
+   * Proxy for {@link Component#on}. If an event was emitted by a {@link Mapper}
+   * in the Container, then the name of the {@link Mapper} will be prepended to
+   * the arugments passed to the listener.
+   *
+   * @example <caption>Container#on</caption>
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
+   * const store = new Container()
+   * store.on('foo', function (...args) { console.log(args.join(':')) })
+   * store.defineMapper('user')
+   * store.emit('foo', 'arg1', 'arg2')
+   * store.getMapper('user').emit('foo', 'arg1', 'arg2')
    *
    * @method Container#on
    * @param {string} event Name of event to subsribe to.
@@ -7863,8 +10167,12 @@ var props = {
   /**
    * Return a container scoped to a particular mapper.
    *
-   * @example
-   * import {Container} from 'js-data'
+   * @example <caption>Container#as</caption>
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
    * const store = new Container()
    * const UserMapper = store.defineMapper('user')
    * const UserStore = store.as('user')
@@ -7872,9 +10180,9 @@ var props = {
    * const user1 = store.createRecord('user', { name: 'John' })
    * const user2 = UserStore.createRecord({ name: 'John' })
    * const user3 = UserMapper.createRecord({ name: 'John' })
-   * assert.deepEqual(user1, user2)
-   * assert.deepEqual(user2, user3)
-   * assert.deepEqual(user1, user3)
+   * console.log(user1 === user2)
+   * console.log(user2 === user3)
+   * console.log(user1 === user3)
    *
    * @method Container#as
    * @param {string} name Name of the {@link Mapper}.
@@ -7882,23 +10190,24 @@ var props = {
    * @since 3.0.0
    */
   as: function as(name) {
-    var _this = this;
-
     var props = {};
+    var original = this;
     proxiedMapperMethods.forEach(function (method) {
       props[method] = {
         writable: true,
         value: function value() {
-          var _getMapper;
+          for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+            args[_key2] = arguments[_key2];
+          }
 
-          return (_getMapper = this.getMapper(name))[method].apply(_getMapper, arguments);
+          return original[method].apply(original, [name].concat(args));
         }
       };
     });
     props.getMapper = {
       writable: true,
       value: function value() {
-        return _this.getMapper(name);
+        return original.getMapper(name);
       }
     };
     return Object.create(this, props);
@@ -7908,17 +10217,21 @@ var props = {
   /**
    * Create a new mapper and register it in this container.
    *
-   * @example
-   * import {Container} from 'js-data'
+   * @example <caption>Container#defineMapper</caption>
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
    * const store = new Container({
    *   mapperDefaults: { foo: 'bar' }
    * })
    * // Container#defineMapper returns a direct reference to the newly created
    * // Mapper.
    * const UserMapper = store.defineMapper('user')
-   * UserMapper === store.getMapper('user') // true
-   * UserMapper === store.as('user').getMapper() // true
-   * UserMapper.foo // "bar"
+   * console.log(UserMapper === store.getMapper('user'))
+   * console.log(UserMapper === store.as('user').getMapper())
+   * console.log(UserMapper.foo)
    *
    * @method Container#defineMapper
    * @param {string} name Name under which to register the new {@link Mapper}.
@@ -7930,7 +10243,7 @@ var props = {
    * @since 3.0.0
    */
   defineMapper: function defineMapper(name, opts) {
-    var _this2 = this;
+    var _this = this;
 
     // For backwards compatibility with defineResource
     if (utils.isObject(name)) {
@@ -7965,11 +10278,11 @@ var props = {
     mapper.datastore = this;
 
     mapper.on('all', function () {
-      for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-        args[_key2] = arguments[_key2];
+      for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+        args[_key3] = arguments[_key3];
       }
 
-      return _this2._onMapperEvent.apply(_this2, [name].concat(args));
+      return _this._onMapperEvent.apply(_this, [name].concat(args));
     });
     mapper.defineRelations();
 
@@ -8032,15 +10345,19 @@ var props = {
   /**
    * Return the mapper registered under the specified name.
    *
-   * @example
-   * import {Container} from 'js-data'
-   * const container = new Container()
+   * @example <caption>Container#getMapper</caption>
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
+   * const store = new Container()
    * // Container#defineMapper returns a direct reference to the newly created
    * // Mapper.
-   * const UserMapper = container.defineMapper('user')
-   * UserMapper === container.getMapper('user') // true
-   * UserMapper === container.as('user').getMapper() // true
-   * container.getMapper('profile') // throws Error, there is no mapper with name "profile"
+   * const UserMapper = store.defineMapper('user')
+   * console.log(UserMapper === store.getMapper('user'))
+   * console.log(UserMapper === store.as('user').getMapper())
+   * store.getMapper('profile') // throws Error, there is no mapper with name "profile"
    *
    * @method Container#getMapper
    * @param {string} name {@link Mapper#name}.
@@ -8060,14 +10377,19 @@ var props = {
    * Return the mapper registered under the specified name.
    * Doesn't throw error if mapper doesn't exist.
    *
-   * @example
-   * import {Container} from 'js-data'
-   * const container = new Container()
+   * @example <caption>Container#getMapperByName</caption>
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
+   * const store = new Container()
    * // Container#defineMapper returns a direct reference to the newly created
    * // Mapper.
-   * const UserMapper = container.defineMapper('user')
-   * UserMapper === container.getMapperByName('user') // true
-   * container.getMapperByName('profile') // undefined
+   * const UserMapper = store.defineMapper('user')
+   * console.log(UserMapper === store.getMapper('user'))
+   * console.log(UserMapper === store.as('user').getMapper())
+   * console.log(store.getMapper('profile')) // Does NOT throw an error
    *
    * @method Container#getMapperByName
    * @param {string} name {@link Mapper#name}.
@@ -8085,9 +10407,9 @@ var props = {
    *
    * @example
    * import {Container} from 'js-data'
-   * import HttpAdapter from 'js-data-http'
-   * const container = new Container()
-   * container.registerAdapter('http', new HttpAdapter, { default: true })
+   * import {RethinkDBAdapter} from 'js-data-rethinkdb'
+   * const store = new Container()
+   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true })
    *
    * @method Container#registerAdapter
    * @param {string} name The name of the adapter to register.
@@ -8113,48 +10435,76 @@ var props = {
 
 proxiedMapperMethods.forEach(function (method) {
   props[method] = function (name) {
-    var _getMapper2;
+    var _getMapper;
 
-    for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-      args[_key3 - 1] = arguments[_key3];
+    for (var _len4 = arguments.length, args = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
+      args[_key4 - 1] = arguments[_key4];
     }
 
-    return (_getMapper2 = this.getMapper(name))[method].apply(_getMapper2, args);
+    return (_getMapper = this.getMapper(name))[method].apply(_getMapper, args);
   };
 });
 
-Component.extend(props);
+Component$1.extend(props);
 
 /**
- * Create a subclass of this Container.
+ * Create a subclass of this Container:
+ * @example <caption>Container.extend</caption>
+ * // Normally you would do: import {Container} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Container} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
  *
- * @example <caption>Extend the class in a cross-browser manner.</caption>
- * import {Container} from 'js-data'
- * const CustomContainerClass = Container.extend({
- *   foo () { return 'bar' }
- * })
- * const customContainer = new CustomContainerClass()
- * console.log(customContainer.foo()) // "bar"
- *
- * @example <caption>Extend the class using ES2015 class syntax.</caption>
+ * // Extend the class using ES2015 class syntax.
  * class CustomContainerClass extends Container {
  *   foo () { return 'bar' }
+ *   static beep () { return 'boop' }
  * }
  * const customContainer = new CustomContainerClass()
- * console.log(customContainer.foo()) // "bar"
+ * console.log(customContainer.foo())
+ * console.log(CustomContainerClass.beep())
+ *
+ * // Extend the class using alternate method.
+ * const OtherContainerClass = Container.extend({
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherContainer = new OtherContainerClass()
+ * console.log(otherContainer.foo())
+ * console.log(OtherContainerClass.beep())
+ *
+ * // Extend the class, providing a custom constructor.
+ * function AnotherContainerClass () {
+ *   Container.call(this)
+ *   this.created_at = new Date().getTime()
+ * }
+ * Container.extend({
+ *   constructor: AnotherContainerClass,
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const anotherContainer = new AnotherContainerClass()
+ * console.log(anotherContainer.created_at)
+ * console.log(anotherContainer.foo())
+ * console.log(AnotherContainerClass.beep())
  *
  * @method Container.extend
  * @param {Object} [props={}] Properties to add to the prototype of the
  * subclass.
+ * @param {Object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
  * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @returns {Constructor} Subclass of this Container.
+ * @returns {Constructor} Subclass of this Container class.
  * @since 3.0.0
  */
 
 var DOMAIN$9 = 'LinkedCollection';
 
 /**
- * TODO
+ * Extends {@link Collection}. Used by a {@link DataStore} to implement an
+ * Identity Map.
  *
  * ```javascript
  * import {LinkedCollection} from 'js-data'
@@ -8180,13 +10530,12 @@ function LinkedCollection(records, opts) {
     }
   });
 
-  LinkedCollection.__super__.call(this, records, opts);
+  Collection$1.call(this, records, opts);
 
   // Make sure this collection has a reference to a datastore
   if (!this.datastore) {
     throw utils.err('new ' + DOMAIN$9, 'opts.datastore')(400, 'DataStore', this.datastore);
   }
-  return this;
 }
 
 var LinkedCollection$1 = Collection$1.extend({
@@ -8215,7 +10564,6 @@ var LinkedCollection$1 = Collection$1.extend({
     if (singular) {
       records = [records];
     }
-
     records = utils.getSuper(this).prototype.add.call(this, records, opts);
 
     if (mapper.relationList.length && records.length) {
@@ -8233,7 +10581,6 @@ var LinkedCollection$1 = Collection$1.extend({
     return singular ? records[0] : records;
   },
   remove: function remove(id, opts) {
-    var mapper = this.mapper;
     var record = utils.getSuper(this).prototype.remove.call(this, id, opts);
     if (record) {
       this._clearMeta(record);
@@ -8241,7 +10588,6 @@ var LinkedCollection$1 = Collection$1.extend({
     return record;
   },
   removeAll: function removeAll(query, opts) {
-    var mapper = this.mapper;
     var records = utils.getSuper(this).prototype.removeAll.call(this, query, opts);
     records.forEach(this._clearMeta, this);
     return records;
@@ -8263,38 +10609,293 @@ var LinkedCollection$1 = Collection$1.extend({
 });
 
 /**
- * Create a subclass of this LinkedCollection.
+ * Create a subclass of this LinkedCollection:
  *
- * @example <caption>Extend the class in a cross-browser manner.</caption>
- * import {LinkedCollection} from 'js-data'
- * const CustomLinkedCollectionClass = LinkedCollection.extend({
- *   foo () { return 'bar' }
- * })
- * const customLinkedCollection = new CustomLinkedCollectionClass()
- * console.log(customLinkedCollection.foo()) // "bar"
+ * @example <caption>LinkedCollection.extend</caption>
+ * // Normally you would do: import {LinkedCollection} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {LinkedCollection} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
  *
- * @example <caption>Extend the class using ES2015 class syntax.</caption>
+ * // Extend the class using ES2015 class syntax.
  * class CustomLinkedCollectionClass extends LinkedCollection {
  *   foo () { return 'bar' }
+ *   static beep () { return 'boop' }
  * }
  * const customLinkedCollection = new CustomLinkedCollectionClass()
- * console.log(customLinkedCollection.foo()) // "bar"
+ * console.log(customLinkedCollection.foo())
+ * console.log(CustomLinkedCollectionClass.beep())
+ *
+ * // Extend the class using alternate method.
+ * const OtherLinkedCollectionClass = LinkedCollection.extend({
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherLinkedCollection = new OtherLinkedCollectionClass()
+ * console.log(otherLinkedCollection.foo())
+ * console.log(OtherLinkedCollectionClass.beep())
+ *
+ * // Extend the class, providing a custom constructor.
+ * function AnotherLinkedCollectionClass () {
+ *   LinkedCollection.call(this)
+ *   this.created_at = new Date().getTime()
+ * }
+ * LinkedCollection.extend({
+ *   constructor: AnotherLinkedCollectionClass,
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const anotherLinkedCollection = new AnotherLinkedCollectionClass()
+ * console.log(anotherLinkedCollection.created_at)
+ * console.log(anotherLinkedCollection.foo())
+ * console.log(AnotherLinkedCollectionClass.beep())
  *
  * @method LinkedCollection.extend
  * @param {Object} [props={}] Properties to add to the prototype of the
  * subclass.
+ * @param {Object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
  * @param {Object} [classProps={}] Static properties to add to the subclass.
  * @returns {Constructor} Subclass of this LinkedCollection class.
  * @since 3.0.0
  */
 
 var DOMAIN$8 = 'DataStore';
-var proxiedCollectionMethods = ['add', 'between', 'createIndex', 'filter', 'get', 'getAll', 'query', 'toJson'];
+var proxiedCollectionMethods = [
+/**
+ * Wrapper for {@link LinkedCollection#add}.
+ *
+ * @example <caption>DataStore#add</caption>
+ * // Normally you would do: import {DataStore} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {DataStore} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * const store = new DataStore()
+ * store.defineMapper('book')
+ *
+ * // Add one book to the in-memory store:
+ * store.add('book', { id: 1, title: 'Respect your Data' })
+ * // Add multiple books to the in-memory store:
+ * store.add('book', [
+ *   { id: 2, title: 'Easy data recipes' },
+ *   { id: 3, title: 'Active Record 101' }
+ * ])
+ *
+ * @fires DataStore#add
+ * @method DataStore#add
+ * @param {(string|number)} name Name of the {@link Mapper} to target.
+ * @param {(Object|Object[]|Record|Record[])} data See {@link LinkedCollection#add}.
+ * @param {Object} [opts] Configuration options. See {@link LinkedCollection#add}.
+ * @returns {(Object|Object[]|Record|Record[])} See {@link LinkedCollection#add}.
+ * @see LinkedCollection#add
+ * @see Collection#add
+ * @since 3.0.0
+ */
+'add',
+
+/**
+ * Wrapper for {@link LinkedCollection#between}.
+ *
+ * @example
+ * // Get all users ages 18 to 30
+ * const users = store.between('user', 18, 30, { index: 'age' })
+ *
+ * @example
+ * // Same as above
+ * const users = store.between('user', [18], [30], { index: 'age' })
+ *
+ * @method DataStore#between
+ * @param {(string|number)} name Name of the {@link Mapper} to target.
+ * @param {Array} leftKeys See {@link LinkedCollection#between}.
+ * @param {Array} rightKeys See {@link LinkedCollection#between}.
+ * @param {Object} [opts] Configuration options. See {@link LinkedCollection#between}.
+ * @returns {Object[]|Record[]} See {@link LinkedCollection#between}.
+ * @see LinkedCollection#between
+ * @see Collection#between
+ * @since 3.0.0
+ */
+'between',
+
+/**
+ * Wrapper for {@link LinkedCollection#createIndex}.
+ *
+ * @example
+ * // Index users by age
+ * store.createIndex('user', 'age')
+ *
+ * @example
+ * // Index users by status and role
+ * store.createIndex('user', 'statusAndRole', ['status', 'role'])
+ *
+ * @method DataStore#createIndex
+ * @param {(string|number)} name Name of the {@link Mapper} to target.
+ * @param {string} name See {@link LinkedCollection#createIndex}.
+ * @param {string[]} [fieldList] See {@link LinkedCollection#createIndex}.
+ * @see LinkedCollection#createIndex
+ * @see Collection#createIndex
+ * @since 3.0.0
+ */
+'createIndex',
+
+/**
+ * Wrapper for {@link LinkedCollection#filter}.
+ *
+ * @example <caption>DataStore#filter</caption>
+ * // import {DataStore} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {DataStore} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * const store = new DataStore()
+ * store.defineMapper('post')
+ * store.add('post', [
+ *   { id: 1, status: 'draft', created_at_timestamp: new Date().getTime() }
+ * ])
+ *
+ * // Get the draft posts created less than three months ago
+ * let posts = store.filter('post', {
+ *   where: {
+ *     status: {
+ *       '==': 'draft'
+ *     },
+ *     created_at_timestamp: {
+ *       '>=': (new Date().getTime() - (1000 \* 60 \* 60 \* 24 \* 30 \* 3)) // 3 months ago
+ *     }
+ *   }
+ * })
+ * console.log(posts)
+ *
+ * // Use a custom filter function
+ * posts = store.filter('post', (post) => post.id % 2 === 0)
+ *
+ * @method DataStore#filter
+ * @param {(string|number)} name Name of the {@link Mapper} to target.
+ * @param {(Object|Function)} [queryOrFn={}] See {@link LinkedCollection#filter}.
+ * @param {Object} [thisArg] See {@link LinkedCollection#filter}.
+ * @returns {Array} See {@link LinkedCollection#filter}.
+ * @see LinkedCollection#filter
+ * @see Collection#filter
+ * @since 3.0.0
+ */
+'filter',
+
+/**
+ * Wrapper for {@link LinkedCollection#get}.
+ *
+ * @example <caption>DataStore#get</caption>
+ * // import {DataStore} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {DataStore} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * const store = new DataStore()
+ * store.defineMapper('post')
+ * store.add('post', [
+ *   { id: 1, status: 'draft', created_at_timestamp: new Date().getTime() }
+ * ])
+ *
+ * console.log(store.get('post', 1)) // {...}
+ * console.log(store.get('post', 2)) // undefined
+ *
+ * @method DataStore#get
+ * @param {(string|number)} name Name of the {@link Mapper} to target.
+ * @param {(string|number)} id See {@link LinkedCollection#get}.
+ * @returns {(Object|Record)} See {@link LinkedCollection#get}.
+ * @see LinkedCollection#get
+ * @see Collection#get
+ * @since 3.0.0
+ */
+'get',
+
+/**
+ * Wrapper for {@link LinkedCollection#getAll}.
+ *
+ * @example
+ * // Get the posts where "status" is "draft" or "inReview"
+ * const posts = store.getAll('post', 'draft', 'inReview', { index: 'status' })
+ *
+ * @example
+ * // Same as above
+ * const posts = store.getAll('post', ['draft'], ['inReview'], { index: 'status' })
+ *
+ * @method DataStore#getAll
+ * @param {(string|number)} name Name of the {@link Mapper} to target.
+ * @param {...Array} [keyList] See {@link LinkedCollection#getAll}.
+ * @param {Object} [opts] See {@link LinkedCollection#getAll}.
+ * @returns {Array} See {@link LinkedCollection#getAll}.
+ * @see LinkedCollection#getAll
+ * @see Collection#getAll
+ * @since 3.0.0
+ */
+'getAll',
+
+/**
+ * Wrapper for {@link LinkedCollection#query}.
+ *
+ * @example
+ * // Grab page 2 of users between ages 18 and 30
+ * store.query('user')
+ *   .between(18, 30, { index: 'age' }) // between ages 18 and 30
+ *   .skip(10) // second page
+ *   .limit(10) // page size
+ *   .run()
+ *
+ * @method DataStore#query
+ * @param {(string|number)} name Name of the {@link Mapper} to target.
+ * @returns {Query} See {@link LinkedCollection#query}.
+ * @see LinkedCollection#query
+ * @see Collection#query
+ * @since 3.0.0
+ */
+'query',
+
+/**
+ * Wrapper for {@link LinkedCollection#toJSON}.
+ *
+ * @example
+ * store.defineMapper('post', {
+ *   schema: {
+ *     properties: {
+ *       id: { type: 'number' },
+ *       title: { type: 'string' }
+ *     }
+ *   }
+ * })
+ * store.add('post', [
+ *   { id: 1, status: 'published', title: 'Respect your Data' },
+ *   { id: 2, status: 'draft', title: 'Connecting to a data source' }
+ * ])
+ * console.log(store.toJSON('post'))
+ * const draftsJSON = store.query('post')
+ *   .filter({ status: 'draft' })
+ *   .mapCall('toJSON')
+ *   .run()
+ *
+ * @method DataStore#toJSON
+ * @param {(string|number)} name Name of the {@link Mapper} to target.
+ * @param {Object} [opts] See {@link LinkedCollection#toJSON}.
+ * @returns {Array} See {@link LinkedCollection#toJSON}.
+ * @see LinkedCollection#toJSON
+ * @see Collection#toJSON
+ * @since 3.0.0
+ */
+'toJSON'];
 var ownMethodsForScoping = ['addToCache', 'cachedFind', 'cachedFindAll', 'cacheFind', 'cacheFindAll', 'hashQuery'];
 
-var safeSet = function safeSet(record, field, value) {
+var safeSetProp = function safeSetProp(record, field, value) {
   if (record && record._set) {
     record._set('props.' + field, value);
+  } else {
+    utils.set(record, field, value);
+  }
+};
+
+var safeSetLink = function safeSetLink(record, field, value) {
+  if (record && record._set) {
+    record._set('links.' + field, value);
   } else {
     utils.set(record, field, value);
   }
@@ -8307,17 +10908,6 @@ var cachedFn = function cachedFn(name, hashOrId, opts) {
   }
   return cached;
 };
-
-function DataStore(opts) {
-  utils.classCallCheck(this, DataStore);
-  DataStore.__super__.call(this, opts);
-
-  this.collectionClass = this.collectionClass || LinkedCollection$1;
-  this._collections = {};
-  this._pendingQueries = {};
-  this._completedQueries = {};
-  return this;
-}
 
 /**
  * The `DataStore` class is an extension of {@link Container}. Not only does
@@ -8362,6 +10952,8 @@ function DataStore(opts) {
  * @class DataStore
  * @extends Container
  * @param {Object} [opts] Configuration options. See {@link Container}.
+ * @param {boolean} [opts.collectionClass={@link LinkedCollection}] See {@link DataStore#collectionClass}.
+ * @param {boolean} [opts.debug=false] See {@link Component#debug}.
  * @returns {DataStore}
  * @see Container
  * @since 3.0.0
@@ -8369,6 +10961,16 @@ function DataStore(opts) {
  * @tutorial ["http://www.js-data.io/v3.0/docs/working-with-the-datastore","Working with the DataStore"]
  * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
  */
+function DataStore(opts) {
+  utils.classCallCheck(this, DataStore);
+  Container.call(this, opts);
+
+  this.collectionClass = this.collectionClass || LinkedCollection$1;
+  this._collections = {};
+  this._pendingQueries = {};
+  this._completedQueries = {};
+}
+
 var props$1 = {
   constructor: DataStore,
 
@@ -8382,13 +10984,13 @@ var props$1 = {
 
 
   /**
-   * TODO
+   * Internal method used to handle Mapper responses.
    *
    * @method DataStore#_end
    * @private
    * @param {string} name Name of the {@link LinkedCollection} to which to
    * add the data.
-   * @param {Object} data TODO.
+   * @param {Object} result The result from a Mapper.
    * @param {Object} [opts] Configuration options.
    * @returns {(Object|Array)} Result.
    */
@@ -8412,6 +11014,30 @@ var props$1 = {
    * Proxy for {@link Container#on}. If an event was emitted by a Mapper or
    * Collection in the DataStore, then the name of the Mapper or Collection will
    * be prepended to the arugments passed to the provided event handler.
+   *
+   * @example
+   * // Listen for all "afterCreate" events in a DataStore
+   * store.on('afterCreate', (mapperName, props, opts, result) => {
+   *   console.log(mapperName) // "post"
+   *   console.log(props.id) // undefined
+   *   console.log(result.id) // 1234
+   * })
+   * store.create('post', { title: 'Modeling your data' }).then((post) => {
+   *   console.log(post.id) // 1234
+   * })
+   *
+   * @example
+   * // Listen for the "add" event on a collection
+   * store.on('add', (mapperName, records) => {
+   *   console.log(records) // [...]
+   * })
+   *
+   * @example
+   * // Listen for "change" events on a record
+   * store.on('change', (mapperName, record, changes) => {
+   *   console.log(changes) // { changed: { title: 'Modeling your data' } }
+   * })
+   * post.title = 'Modeling your data'
    *
    * @method DataStore#on
    * @param {string} event Name of event to subsribe to.
@@ -8438,7 +11064,41 @@ var props$1 = {
 
 
   /**
-   * TODO
+   * This method takes the data received from {@link DataStore#find},
+   * {@link DataStore#findAll}, {@link DataStore#update}, etc., and adds the
+   * data to the store. _You don't need to call this method directly._
+   *
+   * If you're using the http adapter and your response data is in an unexpected
+   * format, you may need to override this method so the right data gets added
+   * to the store.
+   *
+   * @example
+   * const store = new DataStore({
+   *   addToCache (mapperName, data, opts) {
+   *     // Let's say for a particular Resource, response data is in a weird format
+   *     if (name === 'comment') {
+   *       // Re-assign the variable to add the correct records into the stores
+   *       data = data.items
+   *     }
+   *     // Now perform default behavior
+   *     return DataStore.prototype.addToCache.call(this, mapperName, data, opts)
+   *   }
+   * })
+   *
+   * @example
+   * // Extend using ES2015 class syntax.
+   * class MyStore extends DataStore {
+   *   addToCache (mapperName, data, opts) {
+   *     // Let's say for a particular Resource, response data is in a weird format
+   *     if (name === 'comment') {
+   *       // Re-assign the variable to add the correct records into the stores
+   *       data = data.items
+   *     }
+   *     // Now perform default behavior
+   *     return super.addToCache(mapperName, data, opts)
+   *   }
+   * }
+   * const store = new MyStore()
    *
    * @method DataStore#addToCache
    * @param {string} name Name of the {@link Mapper} to target.
@@ -8451,10 +11111,14 @@ var props$1 = {
 
 
   /**
-   * Return a store scoped to a particular mapper/collection pair.
+   * Return the store scoped to a particular mapper/collection pair.
    *
-   * @example
-   * import {DataStore} from 'js-data'
+   * @example <caption>DataStore.as</caption>
+   * // Normally you would do: import {DataStore} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {DataStore} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
    * const store = new DataStore()
    * const UserMapper = store.defineMapper('user')
    * const UserStore = store.as('user')
@@ -8462,20 +11126,21 @@ var props$1 = {
    * const user1 = store.createRecord('user', { name: 'John' })
    * const user2 = UserStore.createRecord({ name: 'John' })
    * const user3 = UserMapper.createRecord({ name: 'John' })
-   * assert.deepEqual(user1, user2)
-   * assert.deepEqual(user2, user3)
-   * assert.deepEqual(user1, user3)
+   * console.log(user1 === user2)
+   * console.log(user2 === user3)
+   * console.log(user1 === user3)
    *
    * @method DataStore#as
    * @param {string} name Name of the {@link Mapper}.
-   * @returns {Object} A store scoped to a particular mapper/collection pair.
+   * @returns {Object} The store, scoped to a particular Mapper/Collection pair.
    * @since 3.0.0
    */
   as: function as(name) {
-    var _this = this;
-
     var props = {};
-    ownMethodsForScoping.forEach(function (method) {
+    var original = this;
+    var methods = ownMethodsForScoping.concat(proxiedMapperMethods).concat(proxiedCollectionMethods);
+
+    methods.forEach(function (method) {
       props[method] = {
         writable: true,
         value: function value() {
@@ -8483,40 +11148,20 @@ var props$1 = {
             args[_key4] = arguments[_key4];
           }
 
-          return this[method].apply(this, [name].concat(args));
-        }
-      };
-    });
-    proxiedMapperMethods.forEach(function (method) {
-      props[method] = {
-        writable: true,
-        value: function value() {
-          var _getMapper;
-
-          return (_getMapper = this.getMapper(name))[method].apply(_getMapper, arguments);
+          return original[method].apply(original, [name].concat(args));
         }
       };
     });
     props.getMapper = {
       writable: true,
       value: function value() {
-        return _this.getMapper(name);
+        return original.getMapper(name);
       }
     };
-    proxiedCollectionMethods.forEach(function (method) {
-      props[method] = {
-        writable: true,
-        value: function value() {
-          var _getCollection;
-
-          return (_getCollection = this.getCollection(name))[method].apply(_getCollection, arguments);
-        }
-      };
-    });
     props.getCollection = {
       writable: true,
       value: function value() {
-        return _this.getCollection(name);
+        return original.getCollection(name);
       }
     };
     return Object.create(this, props);
@@ -8524,7 +11169,42 @@ var props$1 = {
 
 
   /**
-   * Retrieve a cached `find` result, if any.
+   * Retrieve a cached `find` result, if any. This method is called during
+   * {@link DataStore#find} to determine if {@link Mapper#find} needs to be
+   * called. If this method returns `undefined` then {@link Mapper#find} will
+   * be called. Otherwise {@link DataStore#find} will immediately resolve with
+   * the return value of this method.
+   *
+   * When using {@link DataStore} in the browser, you can override this method
+   * to implement your own cache-busting strategy.
+   *
+   * @example
+   * const store = new DataStore({
+   *   cachedFind (mapperName, id, opts) {
+   *     // Let's say for a particular Resource, we always want to pull fresh from the server
+   *     if (mapperName === 'schedule') {
+   *       // Return undefined to trigger a Mapper#find call
+   *       return
+   *     }
+   *     // Otherwise perform default behavior
+   *     return DataStore.prototype.cachedFind.call(this, mapperName, id, opts)
+   *   }
+   * })
+   *
+   * @example
+   * // Extend using ES2015 class syntax.
+   * class MyStore extends DataStore {
+   *   cachedFind (mapperName, id, opts) {
+   *     // Let's say for a particular Resource, we always want to pull fresh from the server
+   *     if (mapperName === 'schedule') {
+   *       // Return undefined to trigger a Mapper#find call
+   *       return
+   *     }
+   *     // Otherwise perform default behavior
+   *     return super.cachedFind(mapperName, id, opts)
+   *   }
+   * }
+   * const store = new MyStore()
    *
    * @method DataStore#cachedFind
    * @param {string} name The `name` argument passed to {@link DataStore#find}.
@@ -8535,7 +11215,42 @@ var props$1 = {
   cachedFind: cachedFn,
 
   /**
-   * Retrieve a cached `findAll` result, if any.
+   * Retrieve a cached `findAll` result, if any. This method is called during
+   * {@link DataStore#findAll} to determine if {@link Mapper#findAll} needs to be
+   * called. If this method returns `undefined` then {@link Mapper#findAll} will
+   * be called. Otherwise {@link DataStore#findAll} will immediately resolve with
+   * the return value of this method.
+   *
+   * When using {@link DataStore} in the browser, you can override this method
+   * to implement your own cache-busting strategy.
+   *
+   * @example
+   * const store = new DataStore({
+   *   cachedFindAll (mapperName, hash, opts) {
+   *     // Let's say for a particular Resource, we always want to pull fresh from the server
+   *     if (mapperName === 'schedule') {
+   *       // Return undefined to trigger a Mapper#findAll call
+   *       return undefined
+   *     }
+   *     // Otherwise perform default behavior
+   *     return DataStore.prototype.cachedFindAll.call(this, mapperName, hash, opts)
+   *   }
+   * })
+   *
+   * @example
+   * // Extend using ES2015 class syntax.
+   * class MyStore extends DataStore {
+   *   cachedFindAll (mapperName, hash, opts) {
+   *     // Let's say for a particular Resource, we always want to pull fresh from the server
+   *     if (mapperName === 'schedule') {
+   *       // Return undefined to trigger a Mapper#findAll call
+   *       return undefined
+   *     }
+   *     // Otherwise perform default behavior
+   *     return super.cachedFindAll(mapperName, hash, opts)
+   *   }
+   * }
+   * const store = new MyStore()
    *
    * @method DataStore#cachedFindAll
    * @param {string} name The `name` argument passed to {@link DataStore#findAll}.
@@ -8547,14 +11262,42 @@ var props$1 = {
   cachedFindAll: cachedFn,
 
   /**
-   * Cache a `find` result. The default implementation does the following:
+   * Mark a {@link Mapper#find} result as cached by adding an entry to
+   * {@link DataStore#_completedQueries}. By default, once a `find` entry is
+   * added it means subsequent calls to the same Resource with the same `id`
+   * argument will immediately resolve with the result of calling
+   * {@link DataStore#get} instead of delegating to {@link Mapper#find}.
    *
-   * ```
-   * // Find and return the record from the data store
-   * return this.get(name, id)
-   * ```
+   * As part of implementing your own caching strategy, you may choose to
+   * override this method.
    *
-   * Override this method to customize.
+   * @example
+   * const store = new DataStore({
+   *   cacheFind (mapperName, data, id, opts) {
+   *     // Let's say for a particular Resource, we always want to pull fresh from the server
+   *     if (mapperName === 'schedule') {
+   *       // Return without saving an entry to DataStore#_completedQueries
+   *       return
+   *     }
+   *     // Otherwise perform default behavior
+   *     return DataStore.prototype.cacheFind.call(this, mapperName, data, id, opts)
+   *   }
+   * })
+   *
+   * @example
+   * // Extend using ES2015 class syntax.
+   * class MyStore extends DataStore {
+   *   cacheFind (mapperName, data, id, opts) {
+   *     // Let's say for a particular Resource, we always want to pull fresh from the server
+   *     if (mapperName === 'schedule') {
+   *       // Return without saving an entry to DataStore#_completedQueries
+   *       return
+   *     }
+   *     // Otherwise perform default behavior
+   *     return super.cacheFind(mapperName, data, id, opts)
+   *   }
+   * }
+   * const store = new MyStore()
    *
    * @method DataStore#cacheFind
    * @param {string} name The `name` argument passed to {@link DataStore#find}.
@@ -8564,23 +11307,51 @@ var props$1 = {
    * @since 3.0.0
    */
   cacheFind: function cacheFind(name, data, id, opts) {
-    var _this2 = this;
+    var _this = this;
 
     this._completedQueries[name][id] = function (name, id, opts) {
-      return _this2.get(name, id);
+      return _this.get(name, id);
     };
   },
 
 
   /**
-   * Cache a `findAll` result. The default implementation does the following:
+   * Mark a {@link Mapper#findAll} result as cached by adding an entry to
+   * {@link DataStore#_completedQueries}. By default, once a `findAll` entry is
+   * added it means subsequent calls to the same Resource with the same `query`
+   * argument will immediately resolve with the result of calling
+   * {@link DataStore#filter} instead of delegating to {@link Mapper#findAll}.
    *
-   * ```
-   * // Find and return the records from the data store
-   * return this.filter(name, utils.fromJson(hash))
-   * ```
+   * As part of implementing your own caching strategy, you may choose to
+   * override this method.
    *
-   * Override this method to customize.
+   * @example
+   * const store = new DataStore({
+   *   cachedFindAll (mapperName, data, hash, opts) {
+   *     // Let's say for a particular Resource, we always want to pull fresh from the server
+   *     if (mapperName === 'schedule') {
+   *       // Return without saving an entry to DataStore#_completedQueries
+   *       return
+   *     }
+   *     // Otherwise perform default behavior.
+   *     return DataStore.prototype.cachedFindAll.call(this, mapperName, data, hash, opts)
+   *   }
+   * })
+   *
+   * @example
+   * // Extend using ES2015 class syntax.
+   * class MyStore extends DataStore {
+   *   cachedFindAll (mapperName, data, hash, opts) {
+   *     // Let's say for a particular Resource, we always want to pull fresh from the server
+   *     if (mapperName === 'schedule') {
+   *       // Return without saving an entry to DataStore#_completedQueries
+   *       return
+   *     }
+   *     // Otherwise perform default behavior.
+   *     return super.cachedFindAll(mapperName, data, hash, opts)
+   *   }
+   * }
+   * const store = new MyStore()
    *
    * @method DataStore#cacheFindAll
    * @param {string} name The `name` argument passed to {@link DataStore#findAll}.
@@ -8591,24 +11362,114 @@ var props$1 = {
    * @since 3.0.0
    */
   cacheFindAll: function cacheFindAll(name, data, hash, opts) {
-    var _this3 = this;
+    var _this2 = this;
 
     this._completedQueries[name][hash] = function (name, hash, opts) {
-      return _this3.filter(name, utils.fromJson(hash));
+      return _this2.filter(name, utils.fromJson(hash));
     };
   },
+
+
+  /**
+   * Remove __all__ records from the in-memory store and reset
+   * {@link DataStore#_completedQueries}.
+   *
+   * @method DataStore#clear
+   * @returns {Object} Object containing all records that were in the store.
+   * @see DataStore#remove
+   * @see DataStore#removeAll
+   * @since 3.0.0
+   */
   clear: function clear() {
+    var _this3 = this;
+
     var removed = {};
     utils.forOwn(this._collections, function (collection, name) {
       removed[name] = collection.removeAll();
+      _this3._completedQueries[name] = {};
     });
     return removed;
   },
 
 
   /**
-   * Wrapper for {@link Mapper#create}. Adds the created to the store.
+   * Fired during {@link DataStore#create}. See
+   * {@link DataStore~beforeCreateListener} for how to listen for this event.
    *
+   * @event DataStore#beforeCreate
+   * @see DataStore~beforeCreateListener
+   * @see DataStore#create
+   */
+  /**
+   * Callback signature for the {@link DataStore#event:beforeCreate} event.
+   *
+   * @example
+   * function onBeforeCreate (mapperName, props, opts) {
+   *   // do something
+   * }
+   * store.on('beforeCreate', onBeforeCreate)
+   *
+   * @callback DataStore~beforeCreateListener
+   * @param {string} name The `name` argument received by {@link Mapper#beforeCreate}.
+   * @param {Object} props The `props` argument received by {@link Mapper#beforeCreate}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeCreate}.
+   * @see DataStore#event:beforeCreate
+   * @see DataStore#create
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link DataStore#create}. See
+   * {@link DataStore~afterCreateListener} for how to listen for this event.
+   *
+   * @event DataStore#afterCreate
+   * @see DataStore~afterCreateListener
+   * @see DataStore#create
+   */
+  /**
+   * Callback signature for the {@link DataStore#event:afterCreate} event.
+   *
+   * @example
+   * function onAfterCreate (mapperName, props, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterCreate', onAfterCreate)
+   *
+   * @callback DataStore~afterCreateListener
+   * @param {string} name The `name` argument received by {@link Mapper#afterCreate}.
+   * @param {Object} props The `props` argument received by {@link Mapper#afterCreate}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterCreate}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterCreate}.
+   * @see DataStore#event:afterCreate
+   * @see DataStore#create
+   * @since 3.0.0
+   */
+  /**
+   * Wrapper for {@link Mapper#create}. Adds the created record to the store.
+   *
+   * @example
+   * import {DataStore} from 'js-data'
+   * import {HttpAdapter} from 'js-data-http'
+   *
+   * const store = new DataStore()
+   * store.registerAdapter('http', new HttpAdapter(), { default: true })
+   *
+   * store.defineMapper('book')
+   *
+   * // Since this example uses the http adapter, we'll get something like:
+   * //
+   * //   POST /book {"author_id":1234,...}
+   * store.create('book', {
+   *   author_id: 1234,
+   *   edition: 'First Edition',
+   *   title: 'Respect your Data'
+   * }).then((book) => {
+   *   console.log(book.id) // 120392
+   *   console.log(book.title) // "Respect your Data"
+   * })
+   *
+   * @fires DataStore#beforeCreate
+   * @fires DataStore#afterCreate
+   * @fires DataStore#add
    * @method DataStore#create
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Object} record Passed to {@link Mapper#create}.
@@ -8628,9 +11489,88 @@ var props$1 = {
 
 
   /**
+   * Fired during {@link DataStore#createMany}. See
+   * {@link DataStore~beforeCreateManyListener} for how to listen for this event.
+   *
+   * @event DataStore#beforeCreateMany
+   * @see DataStore~beforeCreateManyListener
+   * @see DataStore#createMany
+   */
+  /**
+   * Callback signature for the {@link DataStore#event:beforeCreateMany} event.
+   *
+   * @example
+   * function onBeforeCreateMany (mapperName, records, opts) {
+   *   // do something
+   * }
+   * store.on('beforeCreateMany', onBeforeCreateMany)
+   *
+   * @callback DataStore~beforeCreateManyListener
+   * @param {string} name The `name` argument received by {@link Mapper#beforeCreateMany}.
+   * @param {Object} records The `records` argument received by {@link Mapper#beforeCreateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeCreateMany}.
+   * @see DataStore#event:beforeCreateMany
+   * @see DataStore#createMany
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link DataStore#createMany}. See
+   * {@link DataStore~afterCreateManyListener} for how to listen for this event.
+   *
+   * @event DataStore#afterCreateMany
+   * @see DataStore~afterCreateManyListener
+   * @see DataStore#createMany
+   */
+  /**
+   * Callback signature for the {@link DataStore#event:afterCreateMany} event.
+   *
+   * @example
+   * function onAfterCreateMany (mapperName, records, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterCreateMany', onAfterCreateMany)
+   *
+   * @callback DataStore~afterCreateManyListener
+   * @param {string} name The `name` argument received by {@link Mapper#afterCreateMany}.
+   * @param {Object} records The `records` argument received by {@link Mapper#afterCreateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterCreateMany}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterCreateMany}.
+   * @see DataStore#event:afterCreateMany
+   * @see DataStore#createMany
+   * @since 3.0.0
+   */
+  /**
    * Wrapper for {@link Mapper#createMany}. Adds the created records to the
    * store.
    *
+   * @example
+   * import {DataStore} from 'js-data'
+   * import {HttpAdapter} from 'js-data-http'
+   *
+   * const store = new DataStore()
+   * store.registerAdapter('http', new HttpAdapter(), { default: true })
+   *
+   * store.defineMapper('book')
+   *
+   * // Since this example uses the http adapter, we'll get something like:
+   * //
+   * //   POST /book [{"author_id":1234,...},{...}]
+   * store.createMany('book', [{
+   *   author_id: 1234,
+   *   edition: 'First Edition',
+   *   title: 'Respect your Data'
+   * }, {
+   *   author_id: 1234,
+   *   edition: 'Second Edition',
+   *   title: 'Respect your Data'
+   * }]).then((books) => {
+   *   console.log(books[0].id) // 142394
+   *   console.log(books[0].title) // "Respect your Data"
+   * })
+   *
+   * @fires DataStore#beforeCreateMany
+   * @fires DataStore#afterCreateMany
+   * @fires DataStore#add
    * @method DataStore#createMany
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Array} records Passed to {@link Mapper#createMany}.
@@ -8713,16 +11653,35 @@ var props$1 = {
 
           descriptor = {
             get: getter,
+            // e.g. profile.user = someUser
+            // or comment.post = somePost
             set: function set(record) {
               var _self = this;
+              // e.g. const otherUser = profile.user
               var current = this._get(path);
+              // e.g. profile.user === someUser
               if (record === current) {
                 return current;
               }
               var id = utils.get(_self, idAttribute);
               var inverseDef = def.getInverse(mapper);
 
+              // e.g. profile.user !== someUser
+              // or comment.post !== somePost
+              if (current) {
+                // e.g. otherUser.profile = undefined
+                if (inverseDef.type === hasOneType) {
+                  safeSetLink(current, inverseDef.localField, undefined);
+                } else if (inverseDef.type === hasManyType) {
+                  // e.g. remove comment from otherPost.comments
+                  var children = utils.get(current, inverseDef.localField);
+                  utils.remove(children, function (_record) {
+                    return id === utils.get(_record, idAttribute);
+                  });
+                }
+              }
               if (record) {
+                // e.g. profile.user = someUser
                 var relatedIdAttribute = def.getRelation().idAttribute;
                 var relatedId = utils.get(record, relatedIdAttribute);
 
@@ -8732,34 +11691,30 @@ var props$1 = {
                 }
 
                 // Set locals
+                // e.g. profile.user = someUser
+                // or comment.post = somePost
                 _self._set(path, record);
-                safeSet(_self, foreignKey, relatedId);
+                safeSetProp(_self, foreignKey, relatedId);
                 collection.updateIndex(_self, updateOpts);
 
                 // Update (set) inverse relation
                 if (inverseDef.type === hasOneType) {
-                  utils.set(record, inverseDef.localField, _self);
+                  // e.g. someUser.profile = profile
+                  safeSetLink(record, inverseDef.localField, _self);
                 } else if (inverseDef.type === hasManyType) {
-                  var children = utils.get(record, inverseDef.localField);
-                  utils.noDupeAdd(children, _self, function (_record) {
+                  // e.g. add comment to somePost.comments
+                  var _children = utils.get(record, inverseDef.localField);
+                  utils.noDupeAdd(_children, _self, function (_record) {
                     return id === utils.get(_record, idAttribute);
                   });
                 }
               } else {
                 // Unset locals
+                // e.g. profile.user = undefined
+                // or comment.post = undefined
                 _self._set(path, undefined);
-                safeSet(_self, foreignKey, undefined);
+                safeSetProp(_self, foreignKey, undefined);
                 collection.updateIndex(_self, updateOpts);
-              }
-              if (current) {
-                if (inverseDef.type === hasOneType) {
-                  utils.set(current, inverseDef.localField, undefined);
-                } else if (inverseDef.type === hasManyType) {
-                  var _children = utils.get(current, inverseDef.localField);
-                  utils.remove(_children, function (_record) {
-                    return id === utils.get(_record, idAttribute);
-                  });
-                }
               }
               return record;
             }
@@ -8787,7 +11742,7 @@ var props$1 = {
               // Unset locals
               utils.set(this, localField, undefined);
             } else {
-              safeSet(this, foreignKey, value);
+              safeSetProp(this, foreignKey, value);
               var storeRecord = self.get(relation, value);
               if (storeRecord) {
                 utils.set(this, localField, storeRecord);
@@ -8815,6 +11770,10 @@ var props$1 = {
               }
               return getter.call(_self);
             },
+
+            // e.g. post.comments = someComments
+            // or user.groups = someGroups
+            // or group.users = someUsers
             set: function set(records) {
               var _self = this;
               records || (records = []);
@@ -8825,72 +11784,104 @@ var props$1 = {
               var relatedIdAttribute = def.getRelation().idAttribute;
               var inverseDef = def.getInverse(mapper);
               var inverseLocalField = inverseDef.localField;
-              var linked = _self._get(path);
-              if (!linked) {
-                linked = [];
-              }
-
-              var current = linked;
-              linked = [];
+              var current = _self._get(path) || [];
+              var linked = [];
               var toLink = {};
+
               records.forEach(function (record) {
+                // e.g. comment.id
                 var relatedId = utils.get(record, relatedIdAttribute);
                 if (!utils.isUndefined(relatedId)) {
                   // Prefer store record
                   record = self.get(relation, relatedId) || record;
+                  // e.g. toLink[comment.id] = comment
                   toLink[relatedId] = record;
+                  var _localField = utils.get(record, inverseLocalField);
+                  if (_localField) {
+                    var __localField = utils.get(_localField, localField);
+                    // e.g. somePost.comments.remove(comment)
+                    utils.remove(__localField, function (_record) {
+                      return relatedId === utils.get(_record, relatedIdAttribute);
+                    });
+                  }
                 }
                 linked.push(record);
               });
+
+              // e.g. post.comments = someComments
               if (foreignKey) {
-                records.forEach(function (record) {
-                  // Update (set) inverse relation
-                  safeSet(record, foreignKey, id);
-                  self.getCollection(relation).updateIndex(record, updateOpts);
-                  utils.set(record, inverseLocalField, _self);
-                });
                 current.forEach(function (record) {
+                  // e.g. comment.id
                   var relatedId = utils.get(record, relatedIdAttribute);
-                  if (!utils.isUndefined(relatedId) && !toLink.hasOwnProperty(relatedId)) {
+                  if (!utils.isUndefined(relatedId) && !(relatedId in toLink)) {
                     // Update (unset) inverse relation
-                    safeSet(record, foreignKey, undefined);
+                    // e.g. comment.post_id = undefined
+                    safeSetProp(record, foreignKey, undefined);
+                    // e.g. CommentCollection.updateIndex(comment, { index: 'post_id' })
                     self.getCollection(relation).updateIndex(record, updateOpts);
-                    utils.set(record, inverseLocalField, undefined);
+                    // e.g. comment.post = undefined
+                    safeSetLink(record, inverseLocalField, undefined);
                   }
                 });
+                linked.forEach(function (record) {
+                  // Update (set) inverse relation
+                  // e.g. comment.post_id = post.id
+                  safeSetProp(record, foreignKey, id);
+                  // e.g. CommentCollection.updateIndex(comment, { index: 'post_id' })
+                  self.getCollection(relation).updateIndex(record, updateOpts);
+                  // e.g. comment.post = post
+                  safeSetLink(record, inverseLocalField, _self);
+                });
               } else if (localKeys) {
-                (function () {
-                  var _localKeys = [];
-                  records.forEach(function (record) {
-                    // Update (set) inverse relation
-                    utils.set(record, inverseLocalField, _self);
-                    _localKeys.push(utils.get(record, relatedIdAttribute));
-                  });
-                  // Update locals
-                  utils.set(_self, localKeys, _localKeys);
-                  // Update (unset) inverse relation
+                // Update locals
+                // e.g. group.users = someUsers
+                var _localKeys = linked.map(function (record) {
+                  // Update (set) inverse relation
+                  // safeSetLink(record, inverseLocalField, _self)
+                  return utils.get(record, relatedIdAttribute);
+                });
+                // e.g. group.user_ids = [1,2,3,...]
+                utils.set(_self, localKeys, _localKeys);
+                // Update (unset) inverse relation
+                if (inverseDef.foreignKeys) {
                   current.forEach(function (record) {
                     var relatedId = utils.get(record, relatedIdAttribute);
-                    if (!utils.isUndefined(relatedId) && !toLink.hasOwnProperty(relatedId)) {
+                    if (!utils.isUndefined(relatedId) && !(relatedId in toLink)) {
                       // Update inverse relation
-                      utils.set(record, inverseLocalField, undefined);
+                      // safeSetLink(record, inverseLocalField, undefined)
+                      var _localField = utils.get(record, inverseLocalField) || [];
+                      // e.g. someUser.groups.remove(group)
+                      utils.remove(_localField, function (_record) {
+                        return id === utils.get(_record, idAttribute);
+                      });
                     }
                   });
-                })();
+                  linked.forEach(function (record) {
+                    // Update (set) inverse relation
+                    var _localField = utils.get(record, inverseLocalField) || [];
+                    // e.g. someUser.groups.push(group)
+                    utils.noDupeAdd(_localField, _self, function (_record) {
+                      return id === utils.get(_record, idAttribute);
+                    });
+                  });
+                }
               } else if (foreignKeys) {
+                // e.g. user.groups = someGroups
                 // Update (unset) inverse relation
                 current.forEach(function (record) {
                   var _localKeys = utils.get(record, foreignKeys) || [];
+                  // e.g. someGroup.user_ids.remove(user.id)
                   utils.remove(_localKeys, function (_key) {
                     return id === _key;
                   });
                   var _localField = utils.get(record, inverseLocalField) || [];
+                  // e.g. someGroup.users.remove(user)
                   utils.remove(_localField, function (_record) {
                     return id === utils.get(_record, idAttribute);
                   });
                 });
                 // Update (set) inverse relation
-                records.forEach(function (record) {
+                linked.forEach(function (record) {
                   var _localKeys = utils.get(record, foreignKeys) || [];
                   utils.noDupeAdd(_localKeys, id, function (_key) {
                     return id === _key;
@@ -8914,6 +11905,7 @@ var props$1 = {
         }
         descriptor = {
           get: getter,
+          // e.g. user.profile = someProfile
           set: function set(record) {
             var _self = this;
             var current = this._get(path);
@@ -8924,9 +11916,9 @@ var props$1 = {
             var inverseLocalField = def.getInverse(mapper).localField;
             // Update (unset) inverse relation
             if (current) {
-              safeSet(current, foreignKey, undefined);
+              safeSetProp(current, foreignKey, undefined);
               self.getCollection(relation).updateIndex(current, updateOpts);
-              utils.set(current, inverseLocalField, undefined);
+              safeSetLink(current, inverseLocalField, undefined);
             }
             if (record) {
               // Prefer store record
@@ -8938,9 +11930,9 @@ var props$1 = {
               _self._set(path, record);
 
               // Update (set) inverse relation
-              safeSet(record, foreignKey, utils.get(_self, idAttribute));
+              safeSetProp(record, foreignKey, utils.get(_self, idAttribute));
               self.getCollection(relation).updateIndex(record, updateOpts);
-              utils.set(record, inverseLocalField, _self);
+              safeSetLink(record, inverseLocalField, _self);
             } else {
               // Set locals
               _self._set(path, undefined);
@@ -8989,15 +11981,94 @@ var props$1 = {
 
 
   /**
-   * Wrapper for {@link Mapper#destroy}. Removes any destroyed record from the
-   * store.
+   * Fired during {@link DataStore#destroy}. See
+   * {@link DataStore~beforeDestroyListener} for how to listen for this event.
    *
+   * @event DataStore#beforeDestroy
+   * @see DataStore~beforeDestroyListener
+   * @see DataStore#destroy
+   */
+  /**
+   * Callback signature for the {@link DataStore#event:beforeDestroy} event.
+   *
+   * @example
+   * function onBeforeDestroy (mapperName, id, opts) {
+   *   // do something
+   * }
+   * store.on('beforeDestroy', onBeforeDestroy)
+   *
+   * @callback DataStore~beforeDestroyListener
+   * @param {string} name The `name` argument received by {@link Mapper#beforeDestroy}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#beforeDestroy}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeDestroy}.
+   * @see DataStore#event:beforeDestroy
+   * @see DataStore#destroy
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link DataStore#destroy}. See
+   * {@link DataStore~afterDestroyListener} for how to listen for this event.
+   *
+   * @event DataStore#afterDestroy
+   * @see DataStore~afterDestroyListener
+   * @see DataStore#destroy
+   */
+  /**
+   * Callback signature for the {@link DataStore#event:afterDestroy} event.
+   *
+   * @example
+   * function onAfterDestroy (mapperName, id, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterDestroy', onAfterDestroy)
+   *
+   * @callback DataStore~afterDestroyListener
+   * @param {string} name The `name` argument received by {@link Mapper#afterDestroy}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#afterDestroy}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterDestroy}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterDestroy}.
+   * @see DataStore#event:afterDestroy
+   * @see DataStore#destroy
+   * @since 3.0.0
+   */
+  /**
+   * Wrapper for {@link Mapper#destroy}. Removes any destroyed record from the
+   * in-memory store. Clears out any {@link DataStore#_completedQueries} entries
+   * associated with the provided `id`.
+   *
+   * @example
+   * import {DataStore} from 'js-data'
+   * import {HttpAdapter} from 'js-data-http'
+   *
+   * const store = new DataStore()
+   * store.registerAdapter('http', new HttpAdapter(), { default: true })
+   *
+   * store.defineMapper('book')
+   *
+   * store.add('book', { id: 1234, title: 'Data Management is Hard' })
+   *
+   * // Since this example uses the http adapter, we'll get something like:
+   * //
+   * //   DELETE /book/1234
+   * store.destroy('book', 1234).then(() => {
+   *   // The book record is no longer in the in-memory store
+   *   console.log(store.get('book', 1234)) // undefined
+   *
+   *   return store.find('book', 1234)
+   * }).then((book) {
+   *   // The book was deleted from the database too
+   *   console.log(book) // undefined
+   * })
+   *
+   * @fires DataStore#beforeDestroy
+   * @fires DataStore#afterDestroy
+   * @fires DataStore#remove
    * @method DataStore#destroy
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(string|number)} id Passed to {@link Mapper#destroy}.
    * @param {Object} [opts] Passed to {@link Mapper#destroy}. See
    * {@link Mapper#destroy} for more configuration options.
-   * @returns {Promise} Resolves when the delete completes.
+   * @returns {Promise} Resolves when the destroy operation completes.
    * @since 3.0.0
    */
   destroy: function destroy(name, id, opts) {
@@ -9018,9 +12089,86 @@ var props$1 = {
 
 
   /**
-   * Wrapper for {@link Mapper#destroyAll}. Removes any destroyed records from
-   * the store.
+   * Fired during {@link DataStore#destroyAll}. See
+   * {@link DataStore~beforeDestroyAllListener} for how to listen for this event.
    *
+   * @event DataStore#beforeDestroyAll
+   * @see DataStore~beforeDestroyAllListener
+   * @see DataStore#destroyAll
+   */
+  /**
+   * Callback signature for the {@link DataStore#event:beforeDestroyAll} event.
+   *
+   * @example
+   * function onBeforeDestroyAll (mapperName, query, opts) {
+   *   // do something
+   * }
+   * store.on('beforeDestroyAll', onBeforeDestroyAll)
+   *
+   * @callback DataStore~beforeDestroyAllListener
+   * @param {string} name The `name` argument received by {@link Mapper#beforeDestroyAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#beforeDestroyAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeDestroyAll}.
+   * @see DataStore#event:beforeDestroyAll
+   * @see DataStore#destroyAll
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link DataStore#destroyAll}. See
+   * {@link DataStore~afterDestroyAllListener} for how to listen for this event.
+   *
+   * @event DataStore#afterDestroyAll
+   * @see DataStore~afterDestroyAllListener
+   * @see DataStore#destroyAll
+   */
+  /**
+   * Callback signature for the {@link DataStore#event:afterDestroyAll} event.
+   *
+   * @example
+   * function onAfterDestroyAll (mapperName, query, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterDestroyAll', onAfterDestroyAll)
+   *
+   * @callback DataStore~afterDestroyAllListener
+   * @param {string} name The `name` argument received by {@link Mapper#afterDestroyAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#afterDestroyAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterDestroyAll}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterDestroyAll}.
+   * @see DataStore#event:afterDestroyAll
+   * @see DataStore#destroyAll
+   * @since 3.0.0
+   */
+  /**
+   * Wrapper for {@link Mapper#destroyAll}. Removes any destroyed records from
+   * the in-memory store.
+   *
+   * @example
+   * import {DataStore} from 'js-data'
+   * import {HttpAdapter} from 'js-data-http'
+   *
+   * const store = new DataStore()
+   * store.registerAdapter('http', new HttpAdapter(), { default: true })
+   *
+   * store.defineMapper('book')
+   *
+   * store.add('book', { id: 1234, title: 'Data Management is Hard' })
+   *
+   * // Since this example uses the http adapter, we'll get something like:
+   * //
+   * //   DELETE /book/1234
+   * store.destroy('book', 1234).then(() => {
+   *   // The book record is gone from the in-memory store
+   *   console.log(store.get('book', 1234)) // undefined
+   *   return store.find('book', 1234)
+   * }).then((book) {
+   *   // The book was deleted from the database too
+   *   console.log(book) // undefined
+   * })
+   *
+   * @fires DataStore#beforeDestroyAll
+   * @fires DataStore#afterDestroyAll
+   * @fires DataStore#remove
    * @method DataStore#destroyAll
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Object} [query] Passed to {@link Mapper#destroyAll}.
@@ -9056,8 +12204,79 @@ var props$1 = {
 
 
   /**
+   * Fired during {@link DataStore#find}. See
+   * {@link DataStore~beforeFindListener} for how to listen for this event.
+   *
+   * @event DataStore#beforeFind
+   * @see DataStore~beforeFindListener
+   * @see DataStore#find
+   */
+  /**
+   * Callback signature for the {@link DataStore#event:beforeFind} event.
+   *
+   * @example
+   * function onBeforeFind (mapperName, id, opts) {
+   *   // do something
+   * }
+   * store.on('beforeFind', onBeforeFind)
+   *
+   * @callback DataStore~beforeFindListener
+   * @param {string} name The `name` argument received by {@link Mapper#beforeFind}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#beforeFind}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeFind}.
+   * @see DataStore#event:beforeFind
+   * @see DataStore#find
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link DataStore#find}. See
+   * {@link DataStore~afterFindListener} for how to listen for this event.
+   *
+   * @event DataStore#afterFind
+   * @see DataStore~afterFindListener
+   * @see DataStore#find
+   */
+  /**
+   * Callback signature for the {@link DataStore#event:afterFind} event.
+   *
+   * @example
+   * function onAfterFind (mapperName, id, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterFind', onAfterFind)
+   *
+   * @callback DataStore~afterFindListener
+   * @param {string} name The `name` argument received by {@link Mapper#afterFind}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#afterFind}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterFind}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterFind}.
+   * @see DataStore#event:afterFind
+   * @see DataStore#find
+   * @since 3.0.0
+   */
+  /**
    * Wrapper for {@link Mapper#find}. Adds any found record to the store.
    *
+   * @example
+   * import {DataStore} from 'js-data'
+   * import {HttpAdapter} from 'js-data-http'
+   *
+   * const store = new DataStore()
+   * store.registerAdapter('http', new HttpAdapter(), { default: true })
+   *
+   * store.defineMapper('book')
+   *
+   * // Since this example uses the http adapter, we'll get something like:
+   * //
+   * //   GET /book/1234
+   * store.find('book', 1234).then((book) => {
+   *   // The book record is now in the in-memory store
+   *   console.log(store.get('book', 1234) === book) // true
+   * })
+   *
+   * @fires DataStore#beforeFind
+   * @fires DataStore#afterFind
+   * @fires DataStore#add
    * @method DataStore#find
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(string|number)} id Passed to {@link Mapper#find}.
@@ -9097,12 +12316,83 @@ var props$1 = {
 
 
   /**
+   * Fired during {@link DataStore#findAll}. See
+   * {@link DataStore~beforeFindAllListener} for how to listen for this event.
+   *
+   * @event DataStore#beforeFindAll
+   * @see DataStore~beforeFindAllListener
+   * @see DataStore#findAll
+   */
+  /**
+   * Callback signature for the {@link DataStore#event:beforeFindAll} event.
+   *
+   * @example
+   * function onBeforeFindAll (mapperName, query, opts) {
+   *   // do something
+   * }
+   * store.on('beforeFindAll', onBeforeFindAll)
+   *
+   * @callback DataStore~beforeFindAllListener
+   * @param {string} name The `name` argument received by {@link Mapper#beforeFindAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#beforeFindAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeFindAll}.
+   * @see DataStore#event:beforeFindAll
+   * @see DataStore#findAll
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link DataStore#findAll}. See
+   * {@link DataStore~afterFindAllListener} for how to listen for this event.
+   *
+   * @event DataStore#afterFindAll
+   * @see DataStore~afterFindAllListener
+   * @see DataStore#findAll
+   */
+  /**
+   * Callback signature for the {@link DataStore#event:afterFindAll} event.
+   *
+   * @example
+   * function onAfterFindAll (mapperName, query, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterFindAll', onAfterFindAll)
+   *
+   * @callback DataStore~afterFindAllListener
+   * @param {string} name The `name` argument received by {@link Mapper#afterFindAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#afterFindAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterFindAll}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterFindAll}.
+   * @see DataStore#event:afterFindAll
+   * @see DataStore#findAll
+   * @since 3.0.0
+   */
+  /**
    * Wrapper for {@link Mapper#findAll}. Adds any found records to the store.
    *
+   * @example
+   * import {DataStore} from 'js-data'
+   * import {HttpAdapter} from 'js-data-http'
+   *
+   * const store = new DataStore()
+   * store.registerAdapter('http', new HttpAdapter(), { default: true })
+   *
+   * store.defineMapper('movie')
+   *
+   * // Since this example uses the http adapter, we'll get something like:
+   * //
+   * //   GET /movie?rating=PG
+   * store.find('movie', { rating: 'PG' }).then((movies) => {
+   *   // The movie records are now in the in-memory store
+   *   console.log(store.filter('movie'))
+   * })
+   *
+   * @fires DataStore#beforeFindAll
+   * @fires DataStore#afterFindAll
+   * @fires DataStore#add
    * @method DataStore#findAll
    * @param {string} name Name of the {@link Mapper} to target.
-   * @param {Object} [query] Passed to {@link Model.findAll}.
-   * @param {Object} [opts] Passed to {@link Model.findAll}.
+   * @param {Object} [query] Passed to {@link Mapper.findAll}.
+   * @param {Object} [opts] Passed to {@link Mapper.findAll}.
    * @returns {Promise} Resolves with the result, if any.
    * @since 3.0.0
    */
@@ -9140,7 +12430,8 @@ var props$1 = {
 
 
   /**
-   * Return the {@link LinkedCollection} with the given name.
+   * Return the {@link LinkedCollection} with the given name, if for some
+   * reason you need a direct reference to the collection.
    *
    * @method DataStore#getCollection
    * @param {string} name Name of the {@link LinkedCollection} to retrieve.
@@ -9186,6 +12477,21 @@ var props$1 = {
    * Wrapper for {@link LinkedCollection#remove}. Removes the specified
    * {@link Record} from the store.
    *
+   * @example <caption>DataStore#remove</caption>
+   * // Normally you would do: import {DataStore} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {DataStore} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
+   * const store = new DataStore()
+   * store.defineMapper('book')
+   * console.log(store.getAll('book').length)
+   * store.add('book', { id: 1234 })
+   * console.log(store.getAll('book').length)
+   * store.remove('book', 1234)
+   * console.log(store.getAll('book').length)
+   *
+   * @fires DataStore#remove
    * @method DataStore#remove
    * @param {string} name The name of the {@link LinkedCollection} to target.
    * @param {string|number} id The primary key of the {@link Record} to remove.
@@ -9193,6 +12499,8 @@ var props$1 = {
    * @param {string[]} [opts.with] Relations of the {@link Record} to also
    * remove from the store.
    * @returns {Record} The removed {@link Record}, if any.
+   * @see LinkedCollection#add
+   * @see Collection#add
    * @since 3.0.0
    */
   remove: function remove(name, id, opts) {
@@ -9208,6 +12516,21 @@ var props$1 = {
    * Wrapper for {@link LinkedCollection#removeAll}. Removes the selected
    * {@link Record}s from the store.
    *
+   * @example <caption>DataStore#removeAll</caption>
+   * // Normally you would do: import {DataStore} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {DataStore} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
+   * const store = new DataStore()
+   * store.defineMapper('movie')
+   * console.log(store.getAll('movie').length)
+   * store.add('movie', [{ id: 3, rating: 'R' }, { id: 4, rating: 'PG-13' })
+   * console.log(store.getAll('movie').length)
+   * store.removeAll('movie', { rating: 'R' })
+   * console.log(store.getAll('movie').length)
+   *
+   * @fires DataStore#remove
    * @method DataStore#removeAll
    * @param {string} name The name of the {@link LinkedCollection} to target.
    * @param {Object} [query={}] Selection query. See {@link query}.
@@ -9219,6 +12542,8 @@ var props$1 = {
    * @param {string[]} [opts.with] Relations of the {@link Record} to also
    * remove from the store.
    * @returns {Record} The removed {@link Record}s, if any.
+   * @see LinkedCollection#add
+   * @see Collection#add
    * @since 3.0.0
    */
   removeAll: function removeAll(name, query, opts) {
@@ -9234,6 +12559,7 @@ var props$1 = {
    * Remove from the store {@link Record}s that are related to the provided
    * {@link Record}(s).
    *
+   * @fires DataStore#remove
    * @method DataStore#removeRelated
    * @param {string} name The name of the {@link LinkedCollection} to target.
    * @param {Record|Record[]} records {@link Record}s whose relations are to be
@@ -9254,16 +12580,16 @@ var props$1 = {
         var relatedData = void 0;
         var query = void 0;
         if (def.foreignKey && (def.type === hasOneType || def.type === hasManyType)) {
-          query = babelHelpers.defineProperty({}, def.foreignKey, def.getForeignKey(record));
+          query = defineProperty({}, def.foreignKey, def.getForeignKey(record));
         } else if (def.type === hasManyType && def.localKeys) {
           query = {
-            where: babelHelpers.defineProperty({}, def.getRelation().idAttribute, {
+            where: defineProperty({}, def.getRelation().idAttribute, {
               'in': utils.get(record, def.localKeys)
             })
           };
         } else if (def.type === hasManyType && def.foreignKeys) {
           query = {
-            where: babelHelpers.defineProperty({}, def.foreignKeys, {
+            where: defineProperty({}, def.foreignKeys, {
               'contains': def.getForeignKey(record)
             })
           };
@@ -9288,9 +12614,82 @@ var props$1 = {
 
 
   /**
+   * Fired during {@link DataStore#update}. See
+   * {@link DataStore~beforeUpdateListener} for how to listen for this event.
+   *
+   * @event DataStore#beforeUpdate
+   * @see DataStore~beforeUpdateListener
+   * @see DataStore#update
+   */
+  /**
+   * Callback signature for the {@link DataStore#event:beforeUpdate} event.
+   *
+   * @example
+   * function onBeforeUpdate (mapperName, id, props, opts) {
+   *   // do something
+   * }
+   * store.on('beforeUpdate', onBeforeUpdate)
+   *
+   * @callback DataStore~beforeUpdateListener
+   * @param {string} name The `name` argument received by {@link Mapper#beforeUpdate}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#beforeUpdate}.
+   * @param {Object} props The `props` argument received by {@link Mapper#beforeUpdate}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdate}.
+   * @see DataStore#event:beforeUpdate
+   * @see DataStore#update
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link DataStore#update}. See
+   * {@link DataStore~afterUpdateListener} for how to listen for this event.
+   *
+   * @event DataStore#afterUpdate
+   * @see DataStore~afterUpdateListener
+   * @see DataStore#update
+   */
+  /**
+   * Callback signature for the {@link DataStore#event:afterUpdate} event.
+   *
+   * @example
+   * function onAfterUpdate (mapperName, id, props, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterUpdate', onAfterUpdate)
+   *
+   * @callback DataStore~afterUpdateListener
+   * @param {string} name The `name` argument received by {@link Mapper#afterUpdate}.
+   * @param {string|number} id The `id` argument received by {@link Mapper#afterUpdate}.
+   * @param {Object} props The `props` argument received by {@link Mapper#afterUpdate}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdate}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterUpdate}.
+   * @see DataStore#event:afterUpdate
+   * @see DataStore#update
+   * @since 3.0.0
+   */
+  /**
    * Wrapper for {@link Mapper#update}. Adds the updated {@link Record} to the
    * store.
    *
+   * @example
+   * import {DataStore} from 'js-data'
+   * import {HttpAdapter} from 'js-data-http'
+   *
+   * const store = new DataStore()
+   * store.registerAdapter('http', new HttpAdapter(), { default: true })
+   *
+   * store.defineMapper('post')
+   *
+   * // Since this example uses the http adapter, we'll get something like:
+   * //
+   * //   PUT /post/1234 {"status":"published"}
+   * store.update('post', 1, { status: 'published' }).then((post) => {
+   *   // The post record has also been updated in the in-memory store
+   *   console.log(store.get('post', 1234))
+   * })
+   *
+   * @fires DataStore#beforeUpdate
+   * @fires DataStore#afterUpdate
+   * @fires DataStore#add
    * @method DataStore#update
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(string|number)} id Passed to {@link Mapper#update}.
@@ -9311,9 +12710,82 @@ var props$1 = {
 
 
   /**
+   * Fired during {@link DataStore#updateAll}. See
+   * {@link DataStore~beforeUpdateAllListener} for how to listen for this event.
+   *
+   * @event DataStore#beforeUpdateAll
+   * @see DataStore~beforeUpdateAllListener
+   * @see DataStore#updateAll
+   */
+  /**
+   * Callback signature for the {@link DataStore#event:beforeUpdateAll} event.
+   *
+   * @example
+   * function onBeforeUpdateAll (mapperName, props, query, opts) {
+   *   // do something
+   * }
+   * store.on('beforeUpdateAll', onBeforeUpdateAll)
+   *
+   * @callback DataStore~beforeUpdateAllListener
+   * @param {string} name The `name` argument received by {@link Mapper#beforeUpdateAll}.
+   * @param {Object} props The `props` argument received by {@link Mapper#beforeUpdateAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#beforeUpdateAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdateAll}.
+   * @see DataStore#event:beforeUpdateAll
+   * @see DataStore#updateAll
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link DataStore#updateAll}. See
+   * {@link DataStore~afterUpdateAllListener} for how to listen for this event.
+   *
+   * @event DataStore#afterUpdateAll
+   * @see DataStore~afterUpdateAllListener
+   * @see DataStore#updateAll
+   */
+  /**
+   * Callback signature for the {@link DataStore#event:afterUpdateAll} event.
+   *
+   * @example
+   * function onAfterUpdateAll (mapperName, props, query, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterUpdateAll', onAfterUpdateAll)
+   *
+   * @callback DataStore~afterUpdateAllListener
+   * @param {string} name The `name` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} props The `props` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterUpdateAll}.
+   * @see DataStore#event:afterUpdateAll
+   * @see DataStore#updateAll
+   * @since 3.0.0
+   */
+  /**
    * Wrapper for {@link Mapper#updateAll}. Adds the updated {@link Record}s to
    * the store.
    *
+   * @example
+   * import {DataStore} from 'js-data'
+   * import {HttpAdapter} from 'js-data-http'
+   *
+   * const store = new DataStore()
+   * store.registerAdapter('http', new HttpAdapter(), { default: true })
+   *
+   * store.defineMapper('post')
+   *
+   * // Since this example uses the http adapter, we'll get something like:
+   * //
+   * //   PUT /post?author_id=1234 {"status":"published"}
+   * store.updateAll('post', { author_id: 1234 }, { status: 'published' }).then((posts) => {
+   *   // The post records have also been updated in the in-memory store
+   *   console.log(store.filter('posts', { author_id: 1234 }))
+   * })
+   *
+   * @fires DataStore#beforeUpdateAll
+   * @fires DataStore#afterUpdateAll
+   * @fires DataStore#add
    * @method DataStore#updateAll
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Object} props Passed to {@link Mapper#updateAll}.
@@ -9334,9 +12806,83 @@ var props$1 = {
 
 
   /**
+   * Fired during {@link DataStore#updateMany}. See
+   * {@link DataStore~beforeUpdateManyListener} for how to listen for this event.
+   *
+   * @event DataStore#beforeUpdateMany
+   * @see DataStore~beforeUpdateManyListener
+   * @see DataStore#updateMany
+   */
+  /**
+   * Callback signature for the {@link DataStore#event:beforeUpdateMany} event.
+   *
+   * @example
+   * function onBeforeUpdateMany (mapperName, records, opts) {
+   *   // do something
+   * }
+   * store.on('beforeUpdateMany', onBeforeUpdateMany)
+   *
+   * @callback DataStore~beforeUpdateManyListener
+   * @param {string} name The `name` argument received by {@link Mapper#beforeUpdateMany}.
+   * @param {Object} records The `records` argument received by {@link Mapper#beforeUpdateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdateMany}.
+   * @see DataStore#event:beforeUpdateMany
+   * @see DataStore#updateMany
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link DataStore#updateMany}. See
+   * {@link DataStore~afterUpdateManyListener} for how to listen for this event.
+   *
+   * @event DataStore#afterUpdateMany
+   * @see DataStore~afterUpdateManyListener
+   * @see DataStore#updateMany
+   */
+  /**
+   * Callback signature for the {@link DataStore#event:afterUpdateMany} event.
+   *
+   * @example
+   * function onAfterUpdateMany (mapperName, records, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterUpdateMany', onAfterUpdateMany)
+   *
+   * @callback DataStore~afterUpdateManyListener
+   * @param {string} name The `name` argument received by {@link Mapper#afterUpdateMany}.
+   * @param {Object} records The `records` argument received by {@link Mapper#afterUpdateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdateMany}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterUpdateMany}.
+   * @see DataStore#event:afterUpdateMany
+   * @see DataStore#updateMany
+   * @since 3.0.0
+   */
+  /**
    * Wrapper for {@link Mapper#updateMany}. Adds the updated {@link Record}s to
    * the store.
    *
+   * @example
+   * import {DataStore} from 'js-data'
+   * import {HttpAdapter} from 'js-data-http'
+   *
+   * const store = new DataStore()
+   * store.registerAdapter('http', new HttpAdapter(), { default: true })
+   *
+   * store.defineMapper('post')
+   *
+   * // Since this example uses the http adapter, we'll get something like:
+   * //
+   * //   PUT /post [{"id":3,status":"published"},{"id":4,status":"published"}]
+   * store.updateMany('post', [
+   *   { id: 3, status: 'published' },
+   *   { id: 4, status: 'published' }
+   * ]).then((posts) => {
+   *   // The post records have also been updated in the in-memory store
+   *   console.log(store.getAll('post', 3, 4))
+   * })
+   *
+   * @fires DataStore#beforeUpdateMany
+   * @fires DataStore#afterUpdateMany
+   * @fires DataStore#add
    * @method DataStore#updateMany
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(Object[]|Record[])} records Passed to {@link Mapper#updateMany}.
@@ -9357,43 +12903,17 @@ var props$1 = {
 
 proxiedCollectionMethods.forEach(function (method) {
   props$1[method] = function (name) {
-    var _getCollection2;
+    var _getCollection;
 
     for (var _len6 = arguments.length, args = Array(_len6 > 1 ? _len6 - 1 : 0), _key7 = 1; _key7 < _len6; _key7++) {
       args[_key7 - 1] = arguments[_key7];
     }
 
-    return (_getCollection2 = this.getCollection(name))[method].apply(_getCollection2, args);
+    return (_getCollection = this.getCollection(name))[method].apply(_getCollection, args);
   };
 });
 
 var DataStore$1 = Container.extend(props$1);
-
-/**
- * Create a subclass of this DataStore.
- *
- * @example <caption>Extend the class in a cross-browser manner.</caption>
- * import {DataStore} from 'js-data'
- * const CustomDataStoreClass = DataStore.extend({
- *   foo () { return 'bar' }
- * })
- * const customDataStore = new CustomDataStoreClass()
- * console.log(customDataStore.foo()) // "bar"
- *
- * @example <caption>Extend the class using ES2015 class syntax.</caption>
- * class CustomDataStoreClass extends DataStore {
- *   foo () { return 'bar' }
- * }
- * const customDataStore = new CustomDataStoreClass()
- * console.log(customDataStore.foo()) // "bar"
- *
- * @method DataStore.extend
- * @param {Object} [props={}] Properties to add to the prototype of the
- * subclass.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @returns {Constructor} Subclass of this DataStore.
- * @since 3.0.0
- */
 
 /**
  * Registered as `js-data` in NPM and Bower.
@@ -9450,5 +12970,5 @@ var version = {
   patch: 0
 };
 
-export { version, Collection$1 as Collection, Component, Container, DataStore$1 as DataStore, Index, LinkedCollection$1 as LinkedCollection, Mapper$1 as Mapper, Query$1 as Query, Record$1 as Record, Schema$1 as Schema, utils, belongsTo, hasMany, hasOne, belongsToType, hasManyType, hasOneType };
+export { version, Collection$1 as Collection, Component$1 as Component, Container, DataStore$1 as DataStore, Index, LinkedCollection$1 as LinkedCollection, Mapper$1 as Mapper, Query$1 as Query, Record$1 as Record, Schema$1 as Schema, Settable, utils, belongsTo, hasMany, hasOne, belongsToType, hasManyType, hasOneType };
 //# sourceMappingURL=js-data.es2015.js.map
