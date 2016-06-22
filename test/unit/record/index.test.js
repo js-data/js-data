@@ -67,4 +67,68 @@ describe('Record', function () {
       record._mapper()
     }, Error, '[Record#_mapper:] mapper not found\nhttp://www.js-data.io/v3.0/docs/errors#404')
   })
+
+  it('should throw a validation error on instantiation', function () {
+    const store = new JSData.DataStore()
+    store.defineMapper('user', {
+      schema: {
+        properties: {
+          name: { type: 'string' },
+          age: { type: 'number' }
+        }
+      }
+    })
+    try {
+      store.createRecord('user', { name: 1234, age: 30 })
+    } catch (err) {
+      assert.equal(err.message, 'validation failed')
+      assert.deepEqual(err.errors, [
+        {
+          expected: 'one of (string)',
+          actual: 'number',
+          path: 'name'
+        }
+      ])
+    }
+  })
+
+  it('should skip validation on instantiation', function () {
+    const store = new JSData.DataStore()
+    store.defineMapper('user', {
+      schema: {
+        properties: {
+          name: { type: 'string' },
+          age: { type: 'number' }
+        }
+      }
+    })
+    assert.doesNotThrow(function () {
+      store.createRecord('user', { name: 1234, age: 30 }, { noValidate: true })
+    })
+  })
+
+  it('should throw a validation error on property assignment', function () {
+    const store = new JSData.DataStore()
+    store.defineMapper('user', {
+      schema: {
+        properties: {
+          name: { type: 'string' },
+          age: { type: 'number' }
+        }
+      }
+    })
+    const user = store.createRecord('user', { name: 'John', age: 30 })
+    try {
+      user.name = 1234
+    } catch (err) {
+      assert.equal(err.message, 'validation failed')
+      assert.deepEqual(err.errors, [
+        {
+          expected: 'one of (string)',
+          actual: 'number',
+          path: 'name'
+        }
+      ])
+    }
+  })
 })

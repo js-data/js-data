@@ -29,6 +29,30 @@ describe('DataStore#findAll', function () {
     assert.objectsEqual(await this.store.findAll('user', query), props, 'should return the cached users')
     assert.equal(callCount, 2, 'findAll should have been called twice')
   })
+  it('should findAll with scoped store', async function () {
+    const query = { name: 'John' }
+    const props = [{ id: 1, name: 'John' }]
+    let callCount = 0
+    this.store.registerAdapter('mock', {
+      findAll () {
+        callCount++
+        return JSData.utils.resolve(props)
+      }
+    }, { 'default': true })
+    const scopedStore = this.store.as('user')
+    const users = await scopedStore.findAll(query)
+    assert.equal(callCount, 1, 'findAll should have been called once')
+    assert.equal(typeof scopedStore._completedQueries.user[scopedStore.hashQuery(query)], 'function')
+    assert.objectsEqual(users, props, 'users should have been found')
+    assert(users[0] instanceof this.User.recordClass, 'user is a record')
+    assert.objectsEqual(await scopedStore.findAll(query), users, 'should return the cached users')
+    assert.equal(callCount, 1, 'findAll should have been called once')
+    assert.objectsEqual(await scopedStore.findAll(query, { force: true }), props, 'should make a new query')
+    assert.equal(callCount, 2, 'findAll should have been called twice')
+    assert.objectsEqual(await scopedStore.findAll(query), props, 'should return the cached users')
+    assert.equal(callCount, 2, 'findAll should have been called twice')
+    assert.equal(scopedStore.getAll().length, 1, 'user should have been added to the store')
+  })
   it('should return pending query', async function () {
     const query = { name: 'John' }
     const props = [{ id: 1, name: 'John' }]

@@ -47,4 +47,21 @@ describe('Mapper', function () {
     const User = new JSData.Mapper({ name: 'user', recordClass: false })
     assert.equal(User.recordClass, false)
   })
+  it('should add methods to record class', function () {
+    const User = new JSData.Mapper({
+      name: 'user',
+      methods: {
+        foo () {
+          return 'bar'
+        }
+      }
+    })
+    const user = User.createRecord()
+    assert.equal(user.foo(), 'bar')
+    const descriptor = Object.getOwnPropertyDescriptor(User.recordClass.prototype, 'foo')
+    assert(descriptor.writable)
+    assert(descriptor.configurable)
+    assert.equal(descriptor.enumerable, false)
+    assert.equal(typeof descriptor.value, 'function')
+  })
 })

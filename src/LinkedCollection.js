@@ -5,7 +5,8 @@ import Collection from './Collection'
 const DOMAIN = 'LinkedCollection'
 
 /**
- * TODO
+ * Extends {@link Collection}. Used by a {@link DataStore} to implement an
+ * Identity Map.
  *
  * ```javascript
  * import {LinkedCollection} from 'js-data'
@@ -31,13 +32,12 @@ function LinkedCollection (records, opts) {
     }
   })
 
-  LinkedCollection.__super__.call(this, records, opts)
+  Collection.call(this, records, opts)
 
   // Make sure this collection has a reference to a datastore
   if (!this.datastore) {
     throw utils.err(`new ${DOMAIN}`, 'opts.datastore')(400, 'DataStore', this.datastore)
   }
-  return this
 }
 
 export default Collection.extend({
@@ -61,7 +61,6 @@ export default Collection.extend({
     if (singular) {
       records = [records]
     }
-
     records = utils.getSuper(this).prototype.add.call(this, records, opts)
 
     if (mapper.relationList.length && records.length) {
@@ -78,7 +77,6 @@ export default Collection.extend({
   },
 
   remove (id, opts) {
-    const mapper = this.mapper
     const record = utils.getSuper(this).prototype.remove.call(this, id, opts)
     if (record) {
       this._clearMeta(record)
@@ -87,7 +85,6 @@ export default Collection.extend({
   },
 
   removeAll (query, opts) {
-    const mapper = this.mapper
     const records = utils.getSuper(this).prototype.removeAll.call(this, query, opts)
     records.forEach(this._clearMeta, this)
     return records
@@ -111,26 +108,54 @@ export default Collection.extend({
 })
 
 /**
- * Create a subclass of this LinkedCollection.
+ * Create a subclass of this LinkedCollection:
  *
- * @example <caption>Extend the class in a cross-browser manner.</caption>
- * import {LinkedCollection} from 'js-data'
- * const CustomLinkedCollectionClass = LinkedCollection.extend({
- *   foo () { return 'bar' }
- * })
- * const customLinkedCollection = new CustomLinkedCollectionClass()
- * console.log(customLinkedCollection.foo()) // "bar"
+ * @example <caption>LinkedCollection.extend</caption>
+ * // Normally you would do: import {LinkedCollection} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {LinkedCollection} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
  *
- * @example <caption>Extend the class using ES2015 class syntax.</caption>
+ * // Extend the class using ES2015 class syntax.
  * class CustomLinkedCollectionClass extends LinkedCollection {
  *   foo () { return 'bar' }
+ *   static beep () { return 'boop' }
  * }
  * const customLinkedCollection = new CustomLinkedCollectionClass()
- * console.log(customLinkedCollection.foo()) // "bar"
+ * console.log(customLinkedCollection.foo())
+ * console.log(CustomLinkedCollectionClass.beep())
+ *
+ * // Extend the class using alternate method.
+ * const OtherLinkedCollectionClass = LinkedCollection.extend({
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherLinkedCollection = new OtherLinkedCollectionClass()
+ * console.log(otherLinkedCollection.foo())
+ * console.log(OtherLinkedCollectionClass.beep())
+ *
+ * // Extend the class, providing a custom constructor.
+ * function AnotherLinkedCollectionClass () {
+ *   LinkedCollection.call(this)
+ *   this.created_at = new Date().getTime()
+ * }
+ * LinkedCollection.extend({
+ *   constructor: AnotherLinkedCollectionClass,
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const anotherLinkedCollection = new AnotherLinkedCollectionClass()
+ * console.log(anotherLinkedCollection.created_at)
+ * console.log(anotherLinkedCollection.foo())
+ * console.log(AnotherLinkedCollectionClass.beep())
  *
  * @method LinkedCollection.extend
  * @param {Object} [props={}] Properties to add to the prototype of the
  * subclass.
+ * @param {Object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
  * @param {Object} [classProps={}] Static properties to add to the subclass.
  * @returns {Constructor} Subclass of this LinkedCollection class.
  * @since 3.0.0

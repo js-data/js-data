@@ -91,19 +91,21 @@ describe('JSData.hasMany', function () {
         }
       }
     })
-    const foo = store.add('foo', { id: 1, bar_ids: [1] })
+    const foo1 = store.add('foo', { id: 1, bar_ids: [1] })
     const foo2 = store.add('foo', { id: 2, bar_ids: [2] })
-    assert.objectsEqual(foo.bars, [])
-    assert.objectsEqual(foo2.bars, [])
-    const bars = store.add('bar', [{ fooId: 1, id: 1 }])
-    const bars2 = store.add('bar', [{ fooId: 2, id: 2 }])
-    assert.objectsEqual(foo.bars, bars)
-    assert.objectsEqual(foo2.bars, bars2)
-    foo.bars = bars2
-    foo2.bars = bars
-    assert.objectsEqual(foo2.bars, bars)
-    assert.objectsEqual(foo.bars, bars2)
-    assert.objectsEqual(foo.bar_ids, [2])
+    assert.deepEqual(foo1.bars, [])
+    assert.deepEqual(foo2.bars, [])
+    const bar1 = store.add('bar', { id: 1 })
+    const bar2 = store.add('bar', { id: 2 })
+    assert.strictEqual(foo1.bars[0], bar1)
+    assert.strictEqual(foo2.bars[0], bar2)
+    foo1.bars = [bar2]
+    foo2.bars = [bar1]
+    assert.strictEqual(foo2.bars[0], bar1)
+    assert.equal(foo2.bars.length, 1)
+    assert.strictEqual(foo1.bars[0], bar2)
+    assert.equal(foo1.bars.length, 1)
+    assert.objectsEqual(foo1.bar_ids, [2])
     assert.objectsEqual(foo2.bar_ids, [1])
   })
   it('should add property accessors to prototype of target and allow relation re-assignment (foreignKeys)', function () {
@@ -195,7 +197,7 @@ describe('JSData.hasMany', function () {
     assert.equal(bars[0].fooId, foo2.id)
     assert.objectsEqual(foo2._bars, bars)
     assert.objectsEqual(foo._bars, bars2)
-    assert.equal(getCalled, 14)
+    assert.equal(getCalled, 11)
     assert.equal(setCalled, 2)
   })
 })

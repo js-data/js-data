@@ -131,11 +131,11 @@ const MAPPER_DEFAULTS = {
   _adapters: {},
 
   /**
-   * Whether to augment {@link Mapper#recordClass} with getter/setter property
-   * accessors according to the properties defined in {@link Mapper#schema}.
-   * This makes possible validation and change tracking on individual properties
+   * Whether to augment {@link Mapper#recordClass} with ES5 getters and setters
+   * according to the properties defined in {@link Mapper#schema}. This makes
+   * possible validation and change tracking on individual properties
    * when using the dot (e.g. `user.name = "Bob"`) operator to modify a
-   * property.
+   * property, and is `true` by default.
    *
    * @default true
    * @name Mapper#applySchema
@@ -143,16 +143,6 @@ const MAPPER_DEFAULTS = {
    * @type {boolean}
    */
   applySchema: true,
-
-  /**
-   * Whether to enable debug-level logs.
-   *
-   * @default false
-   * @name Mapper#debug
-   * @since 3.0.0
-   * @type {boolean}
-   */
-  debug: false,
 
   /**
    * The name of the registered adapter that this Mapper should used by default.
@@ -225,14 +215,14 @@ const MAPPER_DEFAULTS = {
  * [book]: http://martinfowler.com/books/eaa.html
  * [record]: Record.html
  *
- * @example <caption>Import and instantiate</caption>
+ * @example
+ * // Import and instantiate
  * import {Mapper} from 'js-data'
+ * const UserMapper = new Mapper({ name: 'user' })
  *
- * const UserService = new Mapper({ name: 'user' })
- *
- * @example <caption>Define a Mapper using the Container component</caption>
+ * @example
+ * // Define a Mapper using the Container component
  * import {Container} from 'js-data'
- *
  * const store = new Container()
  * store.defineMapper('user')
  *
@@ -240,13 +230,14 @@ const MAPPER_DEFAULTS = {
  * @extends Component
  * @param {Object} opts Configuration options.
  * @param {boolean} [opts.applySchema=true] See {@link Mapper#applySchema}.
- * @param {boolean} [opts.debug=false] See {@link Mapper#debug}.
+ * @param {boolean} [opts.debug=false] See {@link Component#debug}.
  * @param {string} [opts.defaultAdapter=http] See {@link Mapper#defaultAdapter}.
  * @param {string} [opts.idAttribute=id] See {@link Mapper#idAttribute}.
  * @param {string} opts.name See {@link Mapper#name}.
  * @param {boolean} [opts.notify] See {@link Mapper#notify}.
  * @param {boolean} [opts.raw=false] See {@link Mapper#raw}.
  * @param {Function|boolean} [opts.recordClass] See {@link Mapper#recordClass}.
+ * @param {Object|Schema} [opts.schema] See {@link Mapper#schema}.
  * @returns {Mapper} A new {@link Mapper} instance.
  * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#mapper
  * @since 3.0.0
@@ -255,7 +246,7 @@ const MAPPER_DEFAULTS = {
  */
 function Mapper (opts) {
   utils.classCallCheck(this, Mapper)
-  Mapper.__super__.call(this)
+  Component.call(this)
   opts || (opts = {})
 
   // Prepare certain properties to be non-enumerable
@@ -268,14 +259,16 @@ function Mapper (opts) {
     /**
      * Set to `false` to force the Mapper to work with POJO objects only.
      *
-     * @example <caption>Use POJOs only.</caption>
+     * @example
+     * // Use POJOs only.
      * import {Mapper, Record} from 'js-data'
      * const UserMapper = new Mapper({ recordClass: false })
      * UserMapper.recordClass // false
      * const user = UserMapper#createRecord()
      * user instanceof Record // false
      *
-     * @example <caption>Set to a custom class to have records wrapped in your custom class.</caption>
+     * @example
+     * // Set to a custom class to have records wrapped in your custom class.
      * import {Mapper, Record} from 'js-data'
      *  // Custom class
      * class User {
@@ -294,7 +287,8 @@ function Mapper (opts) {
      * user instanceof User // true
      *
      *
-     * @example <caption>Extend the {@link Record} class.</caption>
+     * @example
+     * // Extend the {@link Record} class.
      * import {Mapper, Record} from 'js-data'
      *  // Custom class
      * class User extends Record {
@@ -322,8 +316,6 @@ function Mapper (opts) {
      * The meta information describing this Mapper's available lifecycle
      * methods. __Do not modify.__
      *
-     * TODO: Improve documentation.
-     *
      * @name Mapper#lifecycleMethods
      * @since 3.0.0
      * @type {Object}
@@ -334,6 +326,38 @@ function Mapper (opts) {
 
     /**
      * This Mapper's {@link Schema}.
+     *
+     * @example <caption>Mapper#schema</caption>
+     * // Normally you would do: import {Mapper} from 'js-data'
+     * const JSData = require('js-data@3.0.0-beta.7')
+     * const {Mapper} = JSData
+     * console.log('Using JSData v' + JSData.version.full)
+     *
+     * const UserMapper = new Mapper({
+     *   name: 'user',
+     *   schema: {
+     *     properties: {
+     *       id: { type: 'number' },
+     *       first: { type: 'string', track: true },
+     *       last: { type: 'string', track: true },
+     *       role: { type: 'string', track: true, required: true },
+     *       age: { type: 'integer', track: true },
+     *       is_active: { type: 'number' }
+     *     }
+     *   }
+     * })
+     * const user = UserMapper.createRecord({
+     *   id: 1,
+     *   name: 'John',
+     *   role: 'admin'
+     * })
+     * user.on('change', function (user, changes) {
+     *   console.log(changes)
+     * })
+     * user.on('change:role', function (user, value) {
+     *   console.log('change:role - ' + value)
+     * })
+     * user.role = 'owner'
      *
      * @name Mapper#schema
      * @see Schema
@@ -365,12 +389,11 @@ function Mapper (opts) {
   }
 
   // Setup schema, with an empty default schema if necessary
-  if (!(this.schema instanceof Schema)) {
-    this.schema = new Schema(this.schema || {})
-  }
-
-  if (this.schema instanceof Schema) {
+  if (this.schema) {
     this.schema.type || (this.schema.type = 'object')
+  }
+  if (!(this.schema instanceof Schema)) {
+    this.schema = new Schema(this.schema || { type: 'object' })
   }
 
   // Create a subclass of Record that's tied to this Mapper
@@ -389,6 +412,10 @@ function Mapper (opts) {
 
   if (this.recordClass) {
     this.recordClass.mapper = this
+
+    if (utils.isObject(this.methods)) {
+      utils.addHiddenPropsToTarget(this.recordClass.prototype, this.methods)
+    }
 
     // We can only apply the schema to the prototype of this.recordClass if the
     // class extends Record
@@ -719,20 +746,20 @@ export default Component.extend({
    * Mappers manually and not using a Container or DataStore component.
    *
    * @example
-   * PostService.belongsTo(UserService, {
+   * PostMapper.belongsTo(UserMapper, {
    *   // post.user_id points to user.id
    *   foreignKey: 'user_id'
    *   // user records will be attached to post records at "post.user"
    *   localField: 'user'
    * })
    *
-   * CommentService.belongsTo(UserService, {
+   * CommentMapper.belongsTo(UserMapper, {
    *   // comment.user_id points to user.id
    *   foreignKey: 'user_id'
    *   // user records will be attached to comment records at "comment.user"
    *   localField: 'user'
    * })
-   * CommentService.belongsTo(PostService, {
+   * CommentMapper.belongsTo(PostMapper, {
    *   // comment.post_id points to post.id
    *   foreignKey: 'post_id'
    *   // post records will be attached to comment records at "comment.post"
@@ -753,8 +780,9 @@ export default Component.extend({
    * {@link Mapper#beforeCount} will be called before calling the adapter.
    * {@link Mapper#afterCount} will be called after calling the adapter.
    *
-   * @example <caption>Get the number of published blog posts</caption>
-   * PostService.count({ status: 'published' }).then((numPublished) => {
+   * @example
+   * // Get the number of published blog posts
+   * PostMapper.count({ status: 'published' }).then((numPublished) => {
    *   console.log(numPublished) // e.g. 45
    * })
    *
@@ -778,19 +806,71 @@ export default Component.extend({
   },
 
   /**
+   * Fired during {@link Mapper#create}. See
+   * {@link Mapper~beforeCreateListener} for how to listen for this event.
+   *
+   * @event Mapper#beforeCreate
+   * @see Mapper~beforeCreateListener
+   * @see Mapper#create
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:beforeCreate} event.
+   *
+   * @example
+   * function onBeforeCreate (props, opts) {
+   *   // do something
+   * }
+   * store.on('beforeCreate', onBeforeCreate)
+   *
+   * @callback Mapper~beforeCreateListener
+   * @param {Object} props The `props` argument passed to {@link Mapper#beforeCreate}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#beforeCreate}.
+   * @see Mapper#event:beforeCreate
+   * @see Mapper#create
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Mapper#create}. See
+   * {@link Mapper~afterCreateListener} for how to listen for this event.
+   *
+   * @event Mapper#afterCreate
+   * @see Mapper~afterCreateListener
+   * @see Mapper#create
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:afterCreate} event.
+   *
+   * @example
+   * function onAfterCreate (props, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterCreate', onAfterCreate)
+   *
+   * @callback Mapper~afterCreateListener
+   * @param {Object} props The `props` argument passed to {@link Mapper#afterCreate}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#afterCreate}.
+   * @param {Object} result The `result` argument passed to {@link Mapper#afterCreate}.
+   * @see Mapper#event:afterCreate
+   * @see Mapper#create
+   * @since 3.0.0
+   */
+  /**
    * Create and save a new the record using the provided `props`.
    *
    * {@link Mapper#beforeCreate} will be called before calling the adapter.
    * {@link Mapper#afterCreate} will be called after calling the adapter.
    *
-   * @example <caption>Create and save a new blog post</caption>
-   * PostService.create({
+   * @example
+   * // Create and save a new blog post
+   * PostMapper.create({
    *   title: 'Modeling your data',
    *   status: 'draft'
    * }).then((post) => {
    *   console.log(post) // { id: 1234, status: 'draft', ... }
    * })
    *
+   * @fires Mapper#beforeCreate
+   * @fires Mapper#afterCreate
    * @method Mapper#create
    * @param {Object} props The properties for the new record.
    * @param {Object} [opts] Configuration options. Refer to the `create` method
@@ -918,13 +998,63 @@ export default Component.extend({
   },
 
   /**
+   * Fired during {@link Mapper#createMany}. See
+   * {@link Mapper~beforeCreateManyListener} for how to listen for this event.
+   *
+   * @event Mapper#beforeCreateMany
+   * @see Mapper~beforeCreateManyListener
+   * @see Mapper#createMany
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:beforeCreateMany} event.
+   *
+   * @example
+   * function onBeforeCreateMany (records, opts) {
+   *   // do something
+   * }
+   * store.on('beforeCreateMany', onBeforeCreateMany)
+   *
+   * @callback Mapper~beforeCreateManyListener
+   * @param {Object} records The `records` argument received by {@link Mapper#beforeCreateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeCreateMany}.
+   * @see Mapper#event:beforeCreateMany
+   * @see Mapper#createMany
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Mapper#createMany}. See
+   * {@link Mapper~afterCreateManyListener} for how to listen for this event.
+   *
+   * @event Mapper#afterCreateMany
+   * @see Mapper~afterCreateManyListener
+   * @see Mapper#createMany
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:afterCreateMany} event.
+   *
+   * @example
+   * function onAfterCreateMany (records, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterCreateMany', onAfterCreateMany)
+   *
+   * @callback Mapper~afterCreateManyListener
+   * @param {Object} records The `records` argument received by {@link Mapper#afterCreateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterCreateMany}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterCreateMany}.
+   * @see Mapper#event:afterCreateMany
+   * @see Mapper#createMany
+   * @since 3.0.0
+   */
+  /**
    * Given an array of records, batch create them via an adapter.
    *
    * {@link Mapper#beforeCreateMany} will be called before calling the adapter.
    * {@link Mapper#afterCreateMany} will be called after calling the adapter.
    *
-   * @example <caption>Create and save several new blog posts</caption>
-   * PostService.createMany([{
+   * @example
+   * // Create and save several new blog posts
+   * PostMapper.createMany([{
    *   title: 'Modeling your data',
    *   status: 'draft'
    * }, {
@@ -935,6 +1065,8 @@ export default Component.extend({
    *   console.log(posts[1]) // { id: 1235, status: 'draft', ... }
    * })
    *
+   * @fires Mapper#beforeCreate
+   * @fires Mapper#afterCreate
    * @method Mapper#createMany
    * @param {Record[]} records Array of records to be created in one batch.
    * @param {Object} [opts] Configuration options. Refer to the `createMany`
@@ -1056,25 +1188,29 @@ export default Component.extend({
    * __Note:__ This method does __not__ interact with any adapter, and does
    * __not__ save any data. It only creates new objects in memory.
    *
-   * @example <caption>Create empty unsaved record instance</caption>
-   * const post = PostService.createRecord()
+   * @example
+   * // Create empty unsaved record instance
+   * const post = PostMapper.createRecord()
    *
-   * @example <caption>Create an unsaved record instance with inital properties</caption>
-   * const post = PostService.createRecord({
+   * @example
+   * // Create an unsaved record instance with inital properties
+   * const post = PostMapper.createRecord({
    *   title: 'Modeling your data',
    *   status: 'draft'
    * })
    *
-   * @example <caption>Create a record instance that corresponds to a saved record</caption>
-   * const post = PostService.createRecord({
+   * @example
+   * // Create a record instance that corresponds to a saved record
+   * const post = PostMapper.createRecord({
    *   // JSData thinks this record has been saved if it has a primary key
    *   id: 1234,
    *   title: 'Modeling your data',
    *   status: 'draft'
    * })
    *
-   * @example <caption>Create record instances from an array</caption>
-   * const posts = PostService.createRecord([{
+   * @example
+   * // Create record instances from an array
+   * const posts = PostMapper.createRecord([{
    *   title: 'Modeling your data',
    *   status: 'draft'
    * }, {
@@ -1082,27 +1218,29 @@ export default Component.extend({
    *   status: 'draft'
    * }])
    *
-   * @example <caption>Records are validated by default</caption>
+   * @example
+   * // Records are validated by default
    * import {Mapper} from 'js-data'
-   * const PostService = new Mapper({
+   * const PostMapper = new Mapper({
    *   name: 'post',
    *   schema: { properties: { title: { type: 'string' } } }
    * })
    * try {
-   *   const post = PostService.createRecord({
+   *   const post = PostMapper.createRecord({
    *     title: 1234,
    *   })
    * } catch (err) {
    *   console.log(err.errors) // [{ expected: 'one of (string)', actual: 'number', path: 'title' }]
    * }
    *
-   * @example <caption>Skip validation</caption>
+   * @example
+   * // Skip validation
    * import {Mapper} from 'js-data'
-   * const PostService = new Mapper({
+   * const PostMapper = new Mapper({
    *   name: 'post',
    *   schema: { properties: { title: { type: 'string' } } }
    * })
-   * const post = PostService.createRecord({
+   * const post = PostMapper.createRecord({
    *   title: 1234,
    * }, { noValidate: true })
    * console.log(post.isValid()) // false
@@ -1141,9 +1279,7 @@ export default Component.extend({
   },
 
   /**
-   * Lifecycle invocation method.
-   *
-   * TODO: Improve documentation for this method.
+   * Lifecycle invocation method. You probably won't call this method directly.
    *
    * @method Mapper#crud
    * @param {string} method Name of the lifecycle method to invoke.
@@ -1201,22 +1337,75 @@ export default Component.extend({
   },
 
   /**
+   * Fired during {@link Mapper#destroy}. See
+   * {@link Mapper~beforeDestroyListener} for how to listen for this event.
+   *
+   * @event Mapper#beforeDestroy
+   * @see Mapper~beforeDestroyListener
+   * @see Mapper#destroy
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:beforeDestroy} event.
+   *
+   * @example
+   * function onBeforeDestroy (id, opts) {
+   *   // do something
+   * }
+   * store.on('beforeDestroy', onBeforeDestroy)
+   *
+   * @callback Mapper~beforeDestroyListener
+   * @param {string|number} id The `id` argument passed to {@link Mapper#beforeDestroy}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#beforeDestroy}.
+   * @see Mapper#event:beforeDestroy
+   * @see Mapper#destroy
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Mapper#destroy}. See
+   * {@link Mapper~afterDestroyListener} for how to listen for this event.
+   *
+   * @event Mapper#afterDestroy
+   * @see Mapper~afterDestroyListener
+   * @see Mapper#destroy
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:afterDestroy} event.
+   *
+   * @example
+   * function onAfterDestroy (id, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterDestroy', onAfterDestroy)
+   *
+   * @callback Mapper~afterDestroyListener
+   * @param {string|number} id The `id` argument passed to {@link Mapper#afterDestroy}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#afterDestroy}.
+   * @param {Object} result The `result` argument passed to {@link Mapper#afterDestroy}.
+   * @see Mapper#event:afterDestroy
+   * @see Mapper#destroy
+   * @since 3.0.0
+   */
+  /**
    * Using an adapter, destroy the record with the given primary key.
    *
    * {@link Mapper#beforeDestroy} will be called before destroying the record.
    * {@link Mapper#afterDestroy} will be called after destroying the record.
    *
-   * @example <caption>Destroy a specific blog post</caption>
-   * PostService.destroy(1234).then(() => {
+   * @example
+   * // Destroy a specific blog post
+   * PostMapper.destroy(1234).then(() => {
    *   // Blog post #1234 has been destroyed
    * })
    *
-   * @example <caption>Get full response</caption>
-   * PostService.destroy(1234, { raw: true }).then((result) => {
+   * @example
+   * // Get full response
+   * PostMapper.destroy(1234, { raw: true }).then((result) => {
    *   console.log(result.deleted) e.g. 1
    *   console.log(...) // etc., more metadata can be found on the result
    * })
    *
+   * @fires Mapper#beforeDestroy
+   * @fires Mapper#afterDestroy
    * @method Mapper#destroy
    * @param {(string|number)} id The primary key of the record to destroy.
    * @param {Object} [opts] Configuration options. Refer to the `destroy` method
@@ -1235,30 +1424,84 @@ export default Component.extend({
   },
 
   /**
+   * Fired during {@link Mapper#destroyAll}. See
+   * {@link Mapper~beforeDestroyAllListener} for how to listen for this event.
+   *
+   * @event Mapper#beforeDestroyAll
+   * @see Mapper~beforeDestroyAllListener
+   * @see Mapper#destroyAll
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:beforeDestroyAll} event.
+   *
+   * @example
+   * function onBeforeDestroyAll (query, opts) {
+   *   // do something
+   * }
+   * store.on('beforeDestroyAll', onBeforeDestroyAll)
+   *
+   * @callback Mapper~beforeDestroyAllListener
+   * @param {Object} query The `query` argument passed to {@link Mapper#beforeDestroyAll}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#beforeDestroyAll}.
+   * @see Mapper#event:beforeDestroyAll
+   * @see Mapper#destroyAll
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Mapper#destroyAll}. See
+   * {@link Mapper~afterDestroyAllListener} for how to listen for this event.
+   *
+   * @event Mapper#afterDestroyAll
+   * @see Mapper~afterDestroyAllListener
+   * @see Mapper#destroyAll
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:afterDestroyAll} event.
+   *
+   * @example
+   * function onAfterDestroyAll (query, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterDestroyAll', onAfterDestroyAll)
+   *
+   * @callback Mapper~afterDestroyAllListener
+   * @param {Object} query The `query` argument passed to {@link Mapper#afterDestroyAll}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#afterDestroyAll}.
+   * @param {Object} result The `result` argument passed to {@link Mapper#afterDestroyAll}.
+   * @see Mapper#event:afterDestroyAll
+   * @see Mapper#destroyAll
+   * @since 3.0.0
+   */
+  /**
    * Destroy the records selected by `query` via an adapter. If no `query` is
    * provided then all records will be destroyed.
    *
    * {@link Mapper#beforeDestroyAll} will be called before destroying the records.
    * {@link Mapper#afterDestroyAll} will be called after destroying the records.
    *
-   * @example <caption>Destroy all blog posts</caption>
-   * PostService.destroyAll().then(() => {
+   * @example
+   * // Destroy all blog posts
+   * PostMapper.destroyAll().then(() => {
    *   // All blog posts have been destroyed
    * })
    *
-   * @example <caption>Destroy all "draft" blog posts</caption>
-   * PostService.destroyAll({ status: 'draft' }).then(() => {
+   * @example
+   * // Destroy all "draft" blog posts
+   * PostMapper.destroyAll({ status: 'draft' }).then(() => {
    *   // All "draft" blog posts have been destroyed
    * })
    *
-   * @example <caption>Get full response</caption>
+   * @example
+   * // Get full response
    * const query = null
    * const options = { raw: true }
-   * PostService.destroyAll(query, options).then((result) => {
+   * PostMapper.destroyAll(query, options).then((result) => {
    *   console.log(result.deleted) e.g. 14
    *   console.log(...) // etc., more metadata can be found on the result
    * })
    *
+   * @fires Mapper#beforeDestroyAll
+   * @fires Mapper#afterDestroyAll
    * @method Mapper#destroyAll
    * @param {Object} [query={}] Selection query. See {@link query}.
    * @param {Object} [query.where] See {@link query.where}.
@@ -1282,23 +1525,75 @@ export default Component.extend({
   },
 
   /**
+   * Fired during {@link Mapper#find}. See
+   * {@link Mapper~beforeFindListener} for how to listen for this event.
+   *
+   * @event Mapper#beforeFind
+   * @see Mapper~beforeFindListener
+   * @see Mapper#find
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:beforeFind} event.
+   *
+   * @example
+   * function onBeforeFind (id, opts) {
+   *   // do something
+   * }
+   * store.on('beforeFind', onBeforeFind)
+   *
+   * @callback Mapper~beforeFindListener
+   * @param {string|number} id The `id` argument passed to {@link Mapper#beforeFind}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#beforeFind}.
+   * @see Mapper#event:beforeFind
+   * @see Mapper#find
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Mapper#find}. See
+   * {@link Mapper~afterFindListener} for how to listen for this event.
+   *
+   * @event Mapper#afterFind
+   * @see Mapper~afterFindListener
+   * @see Mapper#find
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:afterFind} event.
+   *
+   * @example
+   * function onAfterFind (id, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterFind', onAfterFind)
+   *
+   * @callback Mapper~afterFindListener
+   * @param {string|number} id The `id` argument passed to {@link Mapper#afterFind}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#afterFind}.
+   * @param {Object} result The `result` argument passed to {@link Mapper#afterFind}.
+   * @see Mapper#event:afterFind
+   * @see Mapper#find
+   * @since 3.0.0
+   */
+  /**
    * Retrieve via an adapter the record with the given primary key.
    *
    * {@link Mapper#beforeFind} will be called before calling the adapter.
    * {@link Mapper#afterFind} will be called after calling the adapter.
    *
    * @example
-   * PostService.find(1).then((post) => {
+   * PostMapper.find(1).then((post) => {
    *   console.log(post) // { id: 1, ...}
    * })
    *
-   * @example <caption>Get full response</caption>
-   * PostService.find(1, { raw: true }).then((result) => {
+   * @example
+   * // Get full response
+   * PostMapper.find(1, { raw: true }).then((result) => {
    *   console.log(result.data) // { id: 1, ...}
    *   console.log(result.found) // 1
    *   console.log(...) // etc., more metadata can be found on the result
    * })
    *
+   * @fires Mapper#beforeFind
+   * @fires Mapper#afterFind
    * @method Mapper#find
    * @param {(string|number)} id The primary key of the record to retrieve.
    * @param {Object} [opts] Configuration options. Refer to the `find` method
@@ -1319,23 +1614,76 @@ export default Component.extend({
   },
 
   /**
+   * Fired during {@link Mapper#findAll}. See
+   * {@link Mapper~beforeFindAllListener} for how to listen for this event.
+   *
+   * @event Mapper#beforeFindAll
+   * @see Mapper~beforeFindAllListener
+   * @see Mapper#findAll
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:beforeFindAll} event.
+   *
+   * @example
+   * function onBeforeFindAll (query, opts) {
+   *   // do something
+   * }
+   * store.on('beforeFindAll', onBeforeFindAll)
+   *
+   * @callback Mapper~beforeFindAllListener
+   * @param {Object} query The `query` argument passed to {@link Mapper#beforeFindAll}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#beforeFindAll}.
+   * @see Mapper#event:beforeFindAll
+   * @see Mapper#findAll
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Mapper#findAll}. See
+   * {@link Mapper~afterFindAllListener} for how to listen for this event.
+   *
+   * @event Mapper#afterFindAll
+   * @see Mapper~afterFindAllListener
+   * @see Mapper#findAll
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:afterFindAll} event.
+   *
+   * @example
+   * function onAfterFindAll (query, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterFindAll', onAfterFindAll)
+   *
+   * @callback Mapper~afterFindAllListener
+   * @param {Object} query The `query` argument passed to {@link Mapper#afterFindAll}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#afterFindAll}.
+   * @param {Object} result The `result` argument passed to {@link Mapper#afterFindAll}.
+   * @see Mapper#event:afterFindAll
+   * @see Mapper#findAll
+   * @since 3.0.0
+   */
+  /**
    * Using the `query` argument, select records to retrieve via an adapter.
    *
    * {@link Mapper#beforeFindAll} will be called before calling the adapter.
    * {@link Mapper#afterFindAll} will be called after calling the adapter.
    *
-   * @example <caption>Find all "published" blog posts</caption>
-   * PostService.findAll({ status: 'published' }).then((posts) => {
+   * @example
+   * // Find all "published" blog posts
+   * PostMapper.findAll({ status: 'published' }).then((posts) => {
    *   console.log(posts) // [{ id: 1, status: 'published', ...}, ...]
    * })
    *
-   * @example <caption>Get full response</caption>
-   * PostService.findAll({ status: 'published' }, { raw: true }).then((result) => {
+   * @example
+   * // Get full response
+   * PostMapper.findAll({ status: 'published' }, { raw: true }).then((result) => {
    *   console.log(result.data) // [{ id: 1, status: 'published', ...}, ...]
    *   console.log(result.found) // e.g. 13
    *   console.log(...) // etc., more metadata can be found on the result
    * })
    *
+   * @fires Mapper#beforeFindAll
+   * @fires Mapper#afterFindAll
    * @method Mapper#findAll
    * @param {Object} [query={}] Selection query. See {@link query}.
    * @param {Object} [query.where] See {@link query.where}.
@@ -1424,7 +1772,7 @@ export default Component.extend({
    * Mappers manually and not using a Container or DataStore component.
    *
    * @example
-   * UserService.hasMany(PostService, {
+   * UserMapper.hasMany(PostMapper, {
    *   // post.user_id points to user.id
    *   foreignKey: 'user_id'
    *   // post records will be attached to user records at "user.posts"
@@ -1444,7 +1792,7 @@ export default Component.extend({
    * manually and not using a {@link Container} or {@link DataStore} component.
    *
    * @example
-   * UserService.hasOne(ProfileService, {
+   * UserMapper.hasOne(ProfileMapper, {
    *   // profile.user_id points to user.id
    *   foreignKey: 'user_id'
    *   // profile records will be attached to user records at "user.profile"
@@ -1463,11 +1811,11 @@ export default Component.extend({
    * Return whether `record` is an instance of this Mapper's recordClass.
    *
    * @example
-   * const post = PostService.createRecord()
+   * const post = PostMapper.createRecord()
    *
-   * console.log(PostService.is(post)) // true
+   * console.log(PostMapper.is(post)) // true
    * // Equivalent to what's above
-   * console.log(post instanceof PostService.recordClass) // true
+   * console.log(post instanceof PostMapper.recordClass) // true
    *
    * @method Mapper#is
    * @param {Object|Record} record The record to check.
@@ -1509,7 +1857,7 @@ export default Component.extend({
    * {@link Mapper#afterSum} will be called after calling the adapter.
    *
    * @example
-   * PurchaseOrderService.sum('amount', { status: 'paid' }).then((amountPaid) => {
+   * PurchaseOrderMapper.sum('amount', { status: 'paid' }).then((amountPaid) => {
    *   console.log(amountPaid) // e.g. 451125.34
    * })
    *
@@ -1539,7 +1887,7 @@ export default Component.extend({
    *
    * @example
    * import {Mapper, Schema} from 'js-data'
-   * const PersonService = new Mapper({
+   * const PersonMapper = new Mapper({
    *   name: 'person',
    *   schema: {
    *     properties: {
@@ -1548,15 +1896,15 @@ export default Component.extend({
    *     }
    *   }
    * })
-   * const person = PersonService.createRecord({ id: 1, name: 'John', foo: 'bar' })
-   * console.log(PersonService.toJSON(person)) // {"id":1,"name":"John","foo":"bar"}
-   * console.log(PersonService.toJSON(person), { strict: true }) // {"id":1,"name":"John"}
+   * const person = PersonMapper.createRecord({ id: 1, name: 'John', foo: 'bar' })
+   * console.log(PersonMapper.toJSON(person)) // {"id":1,"name":"John","foo":"bar"}
+   * console.log(PersonMapper.toJSON(person), { strict: true }) // {"id":1,"name":"John"}
    *
    * @method Mapper#toJSON
    * @param {Record|Record[]} records Record or records from which to create a
    * POJO representation.
    * @param {Object} [opts] Configuration options.
-   * @param {boolean} [opts.strict] Whether to include properties that are not
+   * @param {boolean} [opts.strict] Whether to exclude properties that are not
    * defined in {@link Mapper#schema}.
    * @param {string[]} [opts.with] Array of relation names or relation fields
    * to include in the POJO representation.
@@ -1618,20 +1966,74 @@ export default Component.extend({
   },
 
   /**
+   * Fired during {@link Mapper#update}. See
+   * {@link Mapper~beforeUpdateListener} for how to listen for this event.
+   *
+   * @event Mapper#beforeUpdate
+   * @see Mapper~beforeUpdateListener
+   * @see Mapper#update
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:beforeUpdate} event.
+   *
+   * @example
+   * function onBeforeUpdate (id, props, opts) {
+   *   // do something
+   * }
+   * store.on('beforeUpdate', onBeforeUpdate)
+   *
+   * @callback Mapper~beforeUpdateListener
+   * @param {string|number} id The `id` argument passed to {@link Mapper#beforeUpdate}.
+   * @param {Object} props The `props` argument passed to {@link Mapper#beforeUpdate}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#beforeUpdate}.
+   * @see Mapper#event:beforeUpdate
+   * @see Mapper#update
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Mapper#update}. See
+   * {@link Mapper~afterUpdateListener} for how to listen for this event.
+   *
+   * @event Mapper#afterUpdate
+   * @see Mapper~afterUpdateListener
+   * @see Mapper#update
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:afterUpdate} event.
+   *
+   * @example
+   * function onAfterUpdate (id, props, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterUpdate', onAfterUpdate)
+   *
+   * @callback Mapper~afterUpdateListener
+   * @param {string|number} id The `id` argument passed to {@link Mapper#afterUpdate}.
+   * @param {Object} props The `props` argument passed to {@link Mapper#afterUpdate}.
+   * @param {Object} opts The `opts` argument passed to {@link Mapper#afterUpdate}.
+   * @param {Object} result The `result` argument passed to {@link Mapper#afterUpdate}.
+   * @see Mapper#event:afterUpdate
+   * @see Mapper#update
+   * @since 3.0.0
+   */
+  /**
    * Using an adapter, update the record with the primary key specified by the
    * `id` argument.
    *
    * {@link Mapper#beforeUpdate} will be called before updating the record.
    * {@link Mapper#afterUpdate} will be called after updating the record.
    *
-   * @example <caption>Update a specific post</caption>
-   * PostService.update(1234, {
+   * @example
+   * // Update a specific post
+   * PostMapper.update(1234, {
    *   status: 'published',
    *   published_at: new Date()
    * }).then((post) => {
    *   console.log(post) // { id: 1234, status: 'published', ... }
    * })
    *
+   * @fires Mapper#beforeUpdate
+   * @fires Mapper#afterUpdate
    * @method Mapper#update
    * @param {(string|number)} id The primary key of the record to update.
    * @param {Object} props The update to apply to the record.
@@ -1652,19 +2054,73 @@ export default Component.extend({
   },
 
   /**
+   * Fired during {@link Mapper#updateAll}. See
+   * {@link Mapper~beforeUpdateAllListener} for how to listen for this event.
+   *
+   * @event Mapper#beforeUpdateAll
+   * @see Mapper~beforeUpdateAllListener
+   * @see Mapper#updateAll
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:beforeUpdateAll} event.
+   *
+   * @example
+   * function onBeforeUpdateAll (props, query, opts) {
+   *   // do something
+   * }
+   * store.on('beforeUpdateAll', onBeforeUpdateAll)
+   *
+   * @callback Mapper~beforeUpdateAllListener
+   * @param {Object} props The `props` argument received by {@link Mapper#beforeUpdateAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#beforeUpdateAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdateAll}.
+   * @see Mapper#event:beforeUpdateAll
+   * @see Mapper#updateAll
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Mapper#updateAll}. See
+   * {@link Mapper~afterUpdateAllListener} for how to listen for this event.
+   *
+   * @event Mapper#afterUpdateAll
+   * @see Mapper~afterUpdateAllListener
+   * @see Mapper#updateAll
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:afterUpdateAll} event.
+   *
+   * @example
+   * function onAfterUpdateAll (props, query, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterUpdateAll', onAfterUpdateAll)
+   *
+   * @callback Mapper~afterUpdateAllListener
+   * @param {Object} props The `props` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} query The `query` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterUpdateAll}.
+   * @see Mapper#event:afterUpdateAll
+   * @see Mapper#updateAll
+   * @since 3.0.0
+   */
+  /**
    * Using the `query` argument, perform the a single updated to the selected
    * records.
    *
    * {@link Mapper#beforeUpdateAll} will be called before making the update.
    * {@link Mapper#afterUpdateAll} will be called after making the update.
    *
-   * @example <caption>Turn all of John's blog posts into drafts.</caption>
+   * @example
+   * // Turn all of John's blog posts into drafts.
    * const update = { status: draft: published_at: null }
    * const query = { userId: 1234 }
-   * PostService.updateAll(update, query).then((posts) => {
+   * PostMapper.updateAll(update, query).then((posts) => {
    *   console.log(posts) // [...]
    * })
    *
+   * @fires Mapper#beforeUpdateAll
+   * @fires Mapper#afterUpdateAll
    * @method Mapper#updateAll
    * @param {Object} props Update to apply to selected records.
    * @param {Object} [query={}] Selection query. See {@link query}.
@@ -1688,6 +2144,55 @@ export default Component.extend({
   },
 
   /**
+   * Fired during {@link Mapper#updateMany}. See
+   * {@link Mapper~beforeUpdateManyListener} for how to listen for this event.
+   *
+   * @event Mapper#beforeUpdateMany
+   * @see Mapper~beforeUpdateManyListener
+   * @see Mapper#updateMany
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:beforeUpdateMany} event.
+   *
+   * @example
+   * function onBeforeUpdateMany (records, opts) {
+   *   // do something
+   * }
+   * store.on('beforeUpdateMany', onBeforeUpdateMany)
+   *
+   * @callback Mapper~beforeUpdateManyListener
+   * @param {Object} records The `records` argument received by {@link Mapper#beforeUpdateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdateMany}.
+   * @see Mapper#event:beforeUpdateMany
+   * @see Mapper#updateMany
+   * @since 3.0.0
+   */
+  /**
+   * Fired during {@link Mapper#updateMany}. See
+   * {@link Mapper~afterUpdateManyListener} for how to listen for this event.
+   *
+   * @event Mapper#afterUpdateMany
+   * @see Mapper~afterUpdateManyListener
+   * @see Mapper#updateMany
+   */
+  /**
+   * Callback signature for the {@link Mapper#event:afterUpdateMany} event.
+   *
+   * @example
+   * function onAfterUpdateMany (records, opts, result) {
+   *   // do something
+   * }
+   * store.on('afterUpdateMany', onAfterUpdateMany)
+   *
+   * @callback Mapper~afterUpdateManyListener
+   * @param {Object} records The `records` argument received by {@link Mapper#afterUpdateMany}.
+   * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdateMany}.
+   * @param {Object} result The `result` argument received by {@link Mapper#afterUpdateMany}.
+   * @see Mapper#event:afterUpdateMany
+   * @see Mapper#updateMany
+   * @since 3.0.0
+   */
+  /**
    * Given an array of updates, perform each of the updates via an adapter. Each
    * "update" is a hash of properties with which to update an record. Each
    * update must contain the primary key of the record to be updated.
@@ -1696,13 +2201,15 @@ export default Component.extend({
    * {@link Mapper#afterUpdateMany} will be called after making the update.
    *
    * @example
-   * PostService.updateMany([
+   * PostMapper.updateMany([
    *   { id: 1234, status: 'draft' },
    *   { id: 2468, status: 'published', published_at: new Date() }
    * ]).then((posts) => {
    *   console.log(posts) // [...]
    * })
    *
+   * @fires Mapper#beforeUpdateMany
+   * @fires Mapper#afterUpdateMany
    * @method Mapper#updateMany
    * @param {Record[]} records Array up record updates.
    * @param {Object} [opts] Configuration options. Refer to the `updateMany`
@@ -1733,13 +2240,13 @@ export default Component.extend({
    *     id: { type: 'string' }
    *   }
    * })
-   * const PersonService = new Mapper({
+   * const PersonMapper = new Mapper({
    *   name: 'person',
    *   schema: PersonSchema
    * })
-   * let errors = PersonService.validate({ name: 'John' })
+   * let errors = PersonMapper.validate({ name: 'John' })
    * console.log(errors) // undefined
-   * errors = PersonService.validate({ name: 123 })
+   * errors = PersonMapper.validate({ name: 123 })
    * console.log(errors) // [{ expected: 'one of (string)', actual: 'number', path: 'name' }]
    *
    * @method Mapper#validate
@@ -1784,9 +2291,10 @@ export default Component.extend({
    * }
    * ```
    *
-   * @example <caption>Override to customize behavior</caption>
+   * @example
    * const PostMapper = new Mapper({
    *   name: 'post',
+   *   // Override to customize behavior
    *   wrap (data, opts) {
    *     const originalWrap = this.constructor.prototype.wrap
    *     // Let's say "GET /post" doesn't return JSON quite like JSData expects,
@@ -1813,7 +2321,7 @@ export default Component.extend({
   /**
    * @ignore
    */
-  defineRelations() {
+  defineRelations () {
     // Setup the mapper's relations, including generating Mapper#relationList
     // and Mapper#relationFields
     utils.forOwn(this.relations, (group, type) => {
@@ -1837,26 +2345,54 @@ export default Component.extend({
 })
 
 /**
- * Create a subclass of this Mapper.
+ * Create a subclass of this Mapper:
  *
- * @example <caption>Extend the class in a cross-browser manner.</caption>
- * import {Mapper} from 'js-data'
- * const CustomMapperClass = Mapper.extend({
- *   foo () { return 'bar' }
- * })
- * const customMapper = new CustomMapperClass({ name: 'test' })
- * console.log(customMapper.foo()) // "bar"
+ * @example <caption>Mapper.extend</caption>
+ * // Normally you would do: import {Mapper} from 'js-data'
+ * const JSData = require('js-data@3.0.0-beta.7')
+ * const {Mapper} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
  *
- * @example <caption>Extend the class using ES2015 class syntax.</caption>
+ * // Extend the class using ES2015 class syntax.
  * class CustomMapperClass extends Mapper {
  *   foo () { return 'bar' }
+ *   static beep () { return 'boop' }
  * }
- * const customMapper = new CustomMapperClass({ name: 'test' })
- * console.log(customMapper.foo()) // "bar"
+ * const customMapper = new CustomMapperClass()
+ * console.log(customMapper.foo())
+ * console.log(CustomMapperClass.beep())
+ *
+ * // Extend the class using alternate method.
+ * const OtherMapperClass = Mapper.extend({
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherMapper = new OtherMapperClass()
+ * console.log(otherMapper.foo())
+ * console.log(OtherMapperClass.beep())
+ *
+ * // Extend the class, providing a custom constructor.
+ * function AnotherMapperClass () {
+ *   Mapper.call(this)
+ *   this.created_at = new Date().getTime()
+ * }
+ * Mapper.extend({
+ *   constructor: AnotherMapperClass,
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const anotherMapper = new AnotherMapperClass()
+ * console.log(anotherMapper.created_at)
+ * console.log(anotherMapper.foo())
+ * console.log(AnotherMapperClass.beep())
  *
  * @method Mapper.extend
  * @param {Object} [props={}] Properties to add to the prototype of the
  * subclass.
+ * @param {Object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
  * @param {Object} [classProps={}] Static properties to add to the subclass.
  * @returns {Constructor} Subclass of this Mapper class.
  * @since 3.0.0

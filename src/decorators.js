@@ -2,7 +2,7 @@ import { Relation } from './relations'
 
 export { belongsToType, hasManyType, hasOneType } from './relations'
 /**
- * TODO
+ * BelongsTo relation decorator. You probably won't use this directly.
  *
  * @name module:js-data.belongsTo
  * @method
@@ -22,7 +22,7 @@ export const belongsTo = function (related, opts) {
 }
 
 /**
- * TODO
+ * HasMany relation decorator. You probably won't use this directly.
  *
  * @name module:js-data.hasMany
  * @method
@@ -42,7 +42,7 @@ export const hasMany = function (related, opts) {
 }
 
 /**
- * TODO
+ * HasOne relation decorator. You probably won't use this directly.
  *
  * @name module:js-data.hasOne
  * @method

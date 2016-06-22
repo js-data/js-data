@@ -10,6 +10,50 @@ describe('Schema', function () {
     assert(JSData.Schema.typeGroupValidators)
   })
 
+  it('should recursively instantiate schemas', function () {
+    const schemaDef = JSData.utils.plainCopy(productSchema)
+    schemaDef.properties.things = {
+      type: 'array',
+      items: {
+        type: 'number'
+      }
+    }
+    schemaDef.properties.anyFoo = {
+      anyOf: [
+        { type: 'number' },
+        { type: 'string' }
+      ]
+    }
+    schemaDef.properties.allFoo = {
+      allOf: [
+        { type: 'number' },
+        { enum: [1, 2, 3] }
+      ]
+    }
+    schemaDef.properties.oneFoo = {
+      oneOf: [
+        { type: 'string' },
+        { enum: [1, 2, 3] }
+      ]
+    }
+    const ProductSchema = new JSData.Schema(schemaDef)
+    assert(ProductSchema instanceof JSData.Schema)
+    assert(ProductSchema.properties.id instanceof JSData.Schema)
+    assert(ProductSchema.properties.name instanceof JSData.Schema)
+    assert(ProductSchema.properties.price instanceof JSData.Schema)
+    assert(ProductSchema.properties.tags instanceof JSData.Schema)
+    assert(ProductSchema.properties.dimensions instanceof JSData.Schema)
+    assert(ProductSchema.properties.warehouseLocation instanceof JSData.Schema)
+    assert(ProductSchema.properties.things instanceof JSData.Schema)
+    assert(ProductSchema.properties.things.items instanceof JSData.Schema)
+    assert(ProductSchema.properties.anyFoo.anyOf[0] instanceof JSData.Schema)
+    assert(ProductSchema.properties.anyFoo.anyOf[1] instanceof JSData.Schema)
+    assert(ProductSchema.properties.allFoo.allOf[0] instanceof JSData.Schema)
+    assert(ProductSchema.properties.allFoo.allOf[1] instanceof JSData.Schema)
+    assert(ProductSchema.properties.oneFoo.oneOf[0] instanceof JSData.Schema)
+    assert(ProductSchema.properties.oneFoo.oneOf[1] instanceof JSData.Schema)
+  })
+
   it('should validate', function () {
     const ProductSchema = new JSData.Schema(productSchema)
 
