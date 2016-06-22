@@ -80,4 +80,37 @@ describe('Record#changes', function () {
       changed: {}
     })
   })
+  it('should show changed tracked fields (tracking all fields)', function () {
+    const PostMapper = new JSData.Mapper({
+      name: 'post',
+      schema: {
+        track: true,
+        properties: {
+          author: {
+            type: 'string'
+          }
+        }
+      }
+    })
+    const post = PostMapper.createRecord(this.data.p1)
+    assert.objectsEqual(post.changes(), {
+      added: {},
+      removed: {},
+      changed: {}
+    })
+    post.author = 'Jake'
+    assert.objectsEqual(post.changes(), {
+      added: {},
+      removed: {},
+      changed: {
+        author: 'Jake'
+      }
+    })
+    post.author = 'John'
+    assert.objectsEqual(post.changes(), {
+      added: {},
+      removed: {},
+      changed: {}
+    })
+  })
 })

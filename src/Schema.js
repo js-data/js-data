@@ -766,6 +766,7 @@ const makeDescriptor = function (prop, schema, opts) {
   const getter = opts.getter
   const setter = opts.setter
   const unsetter = opts.unsetter
+  const track = utils.isBoolean(opts.track) ? opts.track : schema.track
 
   descriptor.get = function () {
     return this._get(keyPath)
@@ -797,7 +798,7 @@ const makeDescriptor = function (prop, schema, opts) {
     }
     // TODO: Make it so tracking can be turned on for all properties instead of
     // only per-property
-    if (schema.track && !_get(creatingPath)) {
+    if (track && !_get(creatingPath)) {
       const previous = _get(previousPath)
       const current = _get(keyPath)
       let changing = _get(changingPath)
@@ -1050,9 +1051,10 @@ export default Component.extend({
    */
   apply (target, opts) {
     opts || (opts = {})
-    opts.getter = opts.getter || '_get'
-    opts.setter = opts.setter || '_set'
-    opts.unsetter = opts.unsetter || '_unset'
+    opts.getter || (opts.getter = '_get')
+    opts.setter || (opts.setter = '_set')
+    opts.unsetter || (opts.unsetter = '_unset')
+    opts.track || (opts.track = this.track)
     const properties = this.properties || {}
     utils.forOwn(properties, function (schema, prop) {
       Object.defineProperty(
