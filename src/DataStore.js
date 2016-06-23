@@ -262,6 +262,17 @@ const cachedFn = function (name, hashOrId, opts) {
   return cached
 }
 
+const DATASTORE_DEFAULTS = {
+  /**
+   * Whether records should be unlinked from relations after they are destroyed.
+   *
+   * @default true
+   * @name DataStore#unlinkOnDestroy
+   * @since 3.0.0
+   */
+  unlinkOnDestroy: true
+}
+
 /**
  * The `DataStore` class is an extension of {@link Container}. Not only does
  * `DataStore` manage mappers, but also collections. `DataStore` implements the
@@ -316,6 +327,10 @@ const cachedFn = function (name, hashOrId, opts) {
  */
 function DataStore (opts) {
   utils.classCallCheck(this, DataStore)
+
+  opts || (opts = {})
+  // Fill in any missing options with the defaults
+  utils.fillIn(opts, utils.plainCopy(DATASTORE_DEFAULTS))
   Container.call(this, opts)
 
   this.collectionClass = this.collectionClass || LinkedCollection
@@ -1220,7 +1235,6 @@ const props = {
             if (record === current) {
               return current
             }
-            const relatedId = utils.get(record, def.getRelation().idAttribute)
             const inverseLocalField = def.getInverse(mapper).localField
             // Update (unset) inverse relation
             if (current) {
@@ -1229,6 +1243,7 @@ const props = {
               safeSetLink(current, inverseLocalField, undefined)
             }
             if (record) {
+              const relatedId = utils.get(record, def.getRelation().idAttribute)
               // Prefer store record
               if (!utils.isUndefined(relatedId)) {
                 record = self.get(relation, relatedId) || record
@@ -1365,10 +1380,20 @@ const props = {
   destroy (name, id, opts) {
     opts || (opts = {})
     return this._callSuper('destroy', name, id, opts).then((result) => {
+      const record = this.getCollection(name).remove(id, opts)
+
+      if (record && this.unlinkOnDestroy) {
+        const _opts = utils.plainCopy(opts)
+        _opts.withAll = true
+        utils.forEachRelation(this.getMapper(name), _opts, (def) => {
+          utils.set(record, def.localField, undefined)
+        })
+      }
+
       if (opts.raw) {
-        result.data = this.getCollection(name).remove(id, opts)
+        result.data = record
       } else {
-        result = this.getCollection(name).remove(id, opts)
+        result = record
       }
       delete this._pendingQueries[name][id]
       delete this._completedQueries[name][id]
@@ -1468,10 +1493,22 @@ const props = {
   destroyAll (name, query, opts) {
     opts || (opts = {})
     return this._callSuper('destroyAll', name, query, opts).then((result) => {
+      const records = this.getCollection(name).removeAll(query, opts)
+
+      if (records && records.length && this.unlinkOnDestroy) {
+        const _opts = utils.plainCopy(opts)
+        _opts.withAll = true
+        utils.forEachRelation(this.getMapper(name), _opts, (def) => {
+          records.forEach((record) => {
+            utils.set(record, def.localField, undefined)
+          })
+        })
+      }
+
       if (opts.raw) {
-        result.data = this.getCollection(name).removeAll(query, opts)
+        result.data = records
       } else {
-        result = this.getCollection(name).removeAll(query, opts)
+        result = records
       }
       const hash = this.hashQuery(name, query, opts)
       delete this._pendingQueries[name][hash]
