@@ -264,7 +264,8 @@ const cachedFn = function (name, hashOrId, opts) {
 
 const DATASTORE_DEFAULTS = {
   /**
-   * Whether records should be unlinked from relations after they are destroyed.
+   * Whether in-memory relations should be unlinked from records after they are
+   * destroyed.
    *
    * @default true
    * @name DataStore#unlinkOnDestroy
@@ -318,6 +319,7 @@ const DATASTORE_DEFAULTS = {
  * @param {Object} [opts] Configuration options. See {@link Container}.
  * @param {boolean} [opts.collectionClass={@link LinkedCollection}] See {@link DataStore#collectionClass}.
  * @param {boolean} [opts.debug=false] See {@link Component#debug}.
+ * @param {boolean} [opts.unlinkOnDestroy=true] See {@link DataStore#unlinkOnDestroy}.
  * @returns {DataStore}
  * @see Container
  * @since 3.0.0
