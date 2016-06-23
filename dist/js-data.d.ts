@@ -61,8 +61,12 @@ export const utils: {
   toJson(value: any, replacer?: Function, space?: number): string
   unset(object: Object, path: string): void
 }
+export class Settable {
+  static extend(instanceProps?: any, classProps?: any): any
+}
 export class Component {
   static extend(instanceProps?: any, classProps?: any): any
+  constructor(opts?: any)
   _listeners: Object
   dbg(...args: any[]): void
   emit(key: string, ...args: any[]): void

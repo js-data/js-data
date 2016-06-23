@@ -233,6 +233,7 @@ const MAPPER_DEFAULTS = {
  * @param {boolean} [opts.debug=false] See {@link Component#debug}.
  * @param {string} [opts.defaultAdapter=http] See {@link Mapper#defaultAdapter}.
  * @param {string} [opts.idAttribute=id] See {@link Mapper#idAttribute}.
+ * @param {Object} [opts.methods] See {@link Mapper#methods}.
  * @param {string} opts.name See {@link Mapper#name}.
  * @param {boolean} [opts.notify] See {@link Mapper#notify}.
  * @param {boolean} [opts.raw=false] See {@link Mapper#raw}.
@@ -413,6 +414,13 @@ function Mapper (opts) {
   if (this.recordClass) {
     this.recordClass.mapper = this
 
+    /**
+     * Functions that should be added to the prototype of {@link Mapper#recordClass}.
+     *
+     * @name Mapper#methods
+     * @since 3.0.0
+     * @type {Object}
+     */
     if (utils.isObject(this.methods)) {
       utils.addHiddenPropsToTarget(this.recordClass.prototype, this.methods)
     }

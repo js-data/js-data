@@ -1,3 +1,21 @@
+##### 3.0.0-beta.8 - 22 June 2016
+
+###### Breaking changes
+- #359 - In-memory relations are now unlinked by default when a record is destroyed
+
+###### Backwards compatible changes
+- #353 - Schema: Add shorthand option to track all properties
+- #356 - Add back "methods" shortcut for adding instance methods to Mapper#recordClass
+
+###### Bug fixes
+- #349 - Individual Record property validation errors don't report correct path
+- #354 - Unsubscribing from an event listener in the case of no event listeners, shouldn't raise an error
+- #355 - Resetting locals to undefined triggers a setter with an (undefined)record argument
+- #358 - findAll() on scoped store (store.as()) does not add the result to the store collection
+
+###### Other
+- TONS of additional JSDoc comments in the source code. Thanks @MatthewOverall!
+
 ##### 3.0.0-beta.7 - 05 June 2016
 
 ###### Backwards compatible changes
