@@ -993,7 +993,7 @@ const typeGroupValidators = {
 /**
  * js-data's Schema class.
  *
- * @example Schema#constructor</caption>
+ * @example <caption>Schema#constructor</caption>
  * // Normally you would do:  import {Schema} from 'js-data'
  * const JSData = require('js-data@3.0.0-beta.7')
  * const {Schema} = JSData

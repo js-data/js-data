@@ -761,7 +761,8 @@ export default Component.extend({
   /**
    * Apply a mapping function to the result data.
    *
-   * @example Return the age of all users
+   * @example
+   * // Return the age of all users
    * const store = new JSData.DataStore()
    * store.defineMapper('user')
    * const users = [

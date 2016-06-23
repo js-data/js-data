@@ -114,7 +114,7 @@ const proxiedCollectionMethods = [
    * console.log(posts)
    *
    * // Use a custom filter function
-   * posts = store.filter('post', (post) => post.id % 2 === 0)
+   * posts = store.filter('post', function (post) { return post.id % 2 === 0 })
    *
    * @method DataStore#filter
    * @param {(string|number)} name Name of the {@link Mapper} to target.
