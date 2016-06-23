@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-beta.7 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-beta.8 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -6928,6 +6928,7 @@ var MAPPER_DEFAULTS = {
  * @param {boolean} [opts.debug=false] See {@link Component#debug}.
  * @param {string} [opts.defaultAdapter=http] See {@link Mapper#defaultAdapter}.
  * @param {string} [opts.idAttribute=id] See {@link Mapper#idAttribute}.
+ * @param {Object} [opts.methods] See {@link Mapper#methods}.
  * @param {string} opts.name See {@link Mapper#name}.
  * @param {boolean} [opts.notify] See {@link Mapper#notify}.
  * @param {boolean} [opts.raw=false] See {@link Mapper#raw}.
@@ -7112,6 +7113,13 @@ function Mapper(opts) {
   if (this.recordClass) {
     this.recordClass.mapper = this;
 
+    /**
+     * Functions that should be added to the prototype of {@link Mapper#recordClass}.
+     *
+     * @name Mapper#methods
+     * @since 3.0.0
+     * @type {Object}
+     */
     if (utils.isObject(this.methods)) {
       utils.addHiddenPropsToTarget(this.recordClass.prototype, this.methods);
     }
@@ -10909,6 +10917,18 @@ var cachedFn = function cachedFn(name, hashOrId, opts) {
   return cached;
 };
 
+var DATASTORE_DEFAULTS = {
+  /**
+   * Whether in-memory relations should be unlinked from records after they are
+   * destroyed.
+   *
+   * @default true
+   * @name DataStore#unlinkOnDestroy
+   * @since 3.0.0
+   */
+  unlinkOnDestroy: true
+};
+
 /**
  * The `DataStore` class is an extension of {@link Container}. Not only does
  * `DataStore` manage mappers, but also collections. `DataStore` implements the
@@ -10954,6 +10974,7 @@ var cachedFn = function cachedFn(name, hashOrId, opts) {
  * @param {Object} [opts] Configuration options. See {@link Container}.
  * @param {boolean} [opts.collectionClass={@link LinkedCollection}] See {@link DataStore#collectionClass}.
  * @param {boolean} [opts.debug=false] See {@link Component#debug}.
+ * @param {boolean} [opts.unlinkOnDestroy=true] See {@link DataStore#unlinkOnDestroy}.
  * @returns {DataStore}
  * @see Container
  * @since 3.0.0
@@ -10963,6 +10984,10 @@ var cachedFn = function cachedFn(name, hashOrId, opts) {
  */
 function DataStore(opts) {
   utils.classCallCheck(this, DataStore);
+
+  opts || (opts = {});
+  // Fill in any missing options with the defaults
+  utils.fillIn(opts, utils.plainCopy(DATASTORE_DEFAULTS));
   Container.call(this, opts);
 
   this.collectionClass = this.collectionClass || LinkedCollection$1;
@@ -11912,7 +11937,6 @@ var props$1 = {
             if (record === current) {
               return current;
             }
-            var relatedId = utils.get(record, def.getRelation().idAttribute);
             var inverseLocalField = def.getInverse(mapper).localField;
             // Update (unset) inverse relation
             if (current) {
@@ -11921,6 +11945,7 @@ var props$1 = {
               safeSetLink(current, inverseLocalField, undefined);
             }
             if (record) {
+              var relatedId = utils.get(record, def.getRelation().idAttribute);
               // Prefer store record
               if (!utils.isUndefined(relatedId)) {
                 record = self.get(relation, relatedId) || record;
@@ -12076,10 +12101,20 @@ var props$1 = {
 
     opts || (opts = {});
     return this._callSuper('destroy', name, id, opts).then(function (result) {
+      var record = _this8.getCollection(name).remove(id, opts);
+
+      if (record && _this8.unlinkOnDestroy) {
+        var _opts = utils.plainCopy(opts);
+        _opts.withAll = true;
+        utils.forEachRelation(_this8.getMapper(name), _opts, function (def) {
+          utils.set(record, def.localField, undefined);
+        });
+      }
+
       if (opts.raw) {
-        result.data = _this8.getCollection(name).remove(id, opts);
+        result.data = record;
       } else {
-        result = _this8.getCollection(name).remove(id, opts);
+        result = record;
       }
       delete _this8._pendingQueries[name][id];
       delete _this8._completedQueries[name][id];
@@ -12182,10 +12217,22 @@ var props$1 = {
 
     opts || (opts = {});
     return this._callSuper('destroyAll', name, query, opts).then(function (result) {
+      var records = _this9.getCollection(name).removeAll(query, opts);
+
+      if (records && records.length && _this9.unlinkOnDestroy) {
+        var _opts = utils.plainCopy(opts);
+        _opts.withAll = true;
+        utils.forEachRelation(_this9.getMapper(name), _opts, function (def) {
+          records.forEach(function (record) {
+            utils.set(record, def.localField, undefined);
+          });
+        });
+      }
+
       if (opts.raw) {
-        result.data = _this9.getCollection(name).removeAll(query, opts);
+        result.data = records;
       } else {
-        result = _this9.getCollection(name).removeAll(query, opts);
+        result = records;
       }
       var hash = _this9.hashQuery(name, query, opts);
       delete _this9._pendingQueries[name][hash];
@@ -12963,8 +13010,8 @@ var DataStore$1 = Container.extend(props$1);
  * @type {Object}
  */
 var version = {
-  beta: 7,
-  full: '3.0.0-beta.7',
+  beta: 8,
+  full: '3.0.0-beta.8',
   major: 3,
   minor: 0,
   patch: 0
