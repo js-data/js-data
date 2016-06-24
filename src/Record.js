@@ -123,6 +123,10 @@ function Record (props, opts) {
   if (opts.noValidate) {
     _set('noValidate', true)
   }
+  // Set the idAttribute value first, if it exists.
+  if (props[opts.idAttribute] !== undefined) {
+    this[opts.idAttribute] = props[opts.idAttribute];
+  }
   utils.fillIn(this, props)
   _set('creating', false)
   _set('noValidate', false)
