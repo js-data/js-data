@@ -15,7 +15,7 @@ export const HasManyRelation = Relation.extend({
   canFindLinkFor (record) {
     const hasForeignKeys = this.foreignKey || this.foreignKeys
 
-    return Boolean(hasForeignKeys || this.localKeys && utils.get(record, this.localKeys))
+    return !!(hasForeignKeys || this.localKeys && utils.get(record, this.localKeys))
   },
 
   linkRecord (record, relatedRecords) {
@@ -24,7 +24,7 @@ export const HasManyRelation = Relation.extend({
     return relatedRecords.map((toInsertItem) => {
       const relatedId = relatedCollection.recordId(toInsertItem)
 
-      if (toInsertItem !== relatedCollection.get(relatedId)) {
+      if (!utils.isUndefined(relatedId) && toInsertItem !== relatedCollection.get(relatedId)) {
         if (this.foreignKey) {
           // TODO: slow, could be optimized? But user loses hook
           this.setForeignKey(record, toInsertItem)

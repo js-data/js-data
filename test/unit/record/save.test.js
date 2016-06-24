@@ -24,6 +24,7 @@ describe('Record#save', function () {
     let createdFoo = await foo.save()
     assert.objectsEqual(createdFoo, { id: 1, foo: 'bar' })
     assert(createdFoo instanceof FooMapper.recordClass)
+    assert.strictEqual(foo, createdFoo)
     assert.strictEqual(store.get('foo', 1), createdFoo)
 
     const BarMapper = new JSData.Mapper({ name: 'bar' })

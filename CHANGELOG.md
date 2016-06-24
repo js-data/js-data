@@ -1,3 +1,9 @@
+##### 3.0.0-beta.x - xx June 2016
+
+###### Breaking changes
+- Usaved records can now be added to a Collection (added to the store)
+- Record#save now always updates the original record
+
 ##### 3.0.0-beta.8 - 22 June 2016
 
 ###### Breaking changes

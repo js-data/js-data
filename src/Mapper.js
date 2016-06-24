@@ -901,6 +901,7 @@ export default Component.extend({
     // Default values for arguments
     props || (props = {})
     opts || (opts = {})
+    const originalRecord = props
 
     // Fill in "opts" with the Mapper's configuration
     utils._(opts, this)
@@ -944,8 +945,9 @@ export default Component.extend({
         op = opts.op = 'create'
         this.dbg(op, props, opts)
         return utils.resolve(this.getAdapter(adapter)[op](this, this.toJSON(props, { with: opts.pass || [] }), opts))
-      }).then((data) => {
-        const createdRecord = opts.raw ? data.data : data
+      }).then((result) => {
+        const createdRecordData = opts.raw ? result.data : result
+
         // Deep post-create hasMany and hasOne relations
         tasks = []
         utils.forEachRelation(this, opts, (def, optsCopy) => {
@@ -958,26 +960,35 @@ export default Component.extend({
           // Create hasMany and hasOne after the main create because we needed
           // a generated id to attach to these items
           if (def.type === hasManyType && def.foreignKey) {
-            def.setForeignKey(createdRecord, relationData)
-            task = def.getRelation().createMany(relationData, optsCopy).then((data) => {
-              def.setLocalField(createdRecord, data)
+            def.setForeignKey(createdRecordData, relationData)
+            task = def.getRelation().createMany(relationData, optsCopy).then((result) => {
+              def.setLocalField(createdRecordData, result)
             })
           } else if (def.type === hasOneType) {
-            def.setForeignKey(createdRecord, relationData)
-            task = def.getRelation().create(relationData, optsCopy).then((data) => {
-              def.setLocalField(createdRecord, data)
+            def.setForeignKey(createdRecordData, relationData)
+            task = def.getRelation().create(relationData, optsCopy).then((result) => {
+              def.setLocalField(createdRecordData, result)
             })
           } else if (def.type === belongsToType && def.getLocalField(belongsToRelationData)) {
-            def.setLocalField(createdRecord, def.getLocalField(belongsToRelationData))
+            def.setLocalField(createdRecordData, def.getLocalField(belongsToRelationData))
           } else if (def.type === hasManyType && def.localKeys && def.getLocalField(belongsToRelationData)) {
-            def.setLocalField(createdRecord, def.getLocalField(belongsToRelationData))
+            def.setLocalField(createdRecordData, def.getLocalField(belongsToRelationData))
           }
           if (task) {
             tasks.push(task)
           }
         })
         return utils.Promise.all(tasks).then(() => {
-          return data
+          utils.set(originalRecord, createdRecordData, { silent: true })
+          if (originalRecord.commit) {
+            originalRecord.commit()
+          }
+          if (opts.raw) {
+            result.data = originalRecord
+          } else {
+            result = originalRecord
+          }
+          return result
         })
       })
     }).then((result) => {
@@ -1135,8 +1146,8 @@ export default Component.extend({
         const json = records.map((record) => this.toJSON(record, { with: opts.pass || [] }))
         this.dbg(op, records, opts)
         return utils.resolve(this.getAdapter(adapter)[op](this, json, opts))
-      }).then((data) => {
-        const createdRecords = opts.raw ? data.data : data
+      }).then((result) => {
+        const createdRecordDatas = opts.raw ? result.data : result
 
         // Deep post-create hasOne relations
         tasks = []
@@ -1155,25 +1166,25 @@ export default Component.extend({
             // Not supported
             this.log('warn', 'deep createMany of hasMany type not supported!')
           } else if (def.type === hasOneType) {
-            createdRecords.forEach((createdRecord, i) => {
-              def.setForeignKey(createdRecord, relationData[i])
+            createdRecordDatas.forEach((createdRecordData, i) => {
+              def.setForeignKey(createdRecordData, relationData[i])
             })
-            task = def.getRelation().createMany(relationData, optsCopy).then((data) => {
-              const relatedData = opts.raw ? data.data : data
-              createdRecords.forEach((createdRecord, i) => {
-                def.setLocalField(createdRecord, relatedData[i])
+            task = def.getRelation().createMany(relationData, optsCopy).then((result) => {
+              const relatedData = opts.raw ? result.data : result
+              createdRecordDatas.forEach((createdRecordData, i) => {
+                def.setLocalField(createdRecordData, relatedData[i])
               })
             })
-          } else if (def.type === belongsToType && belongsToData && belongsToData.length === createdRecords.length) {
-            createdRecords.forEach((createdRecord, i) => {
-              def.setLocalField(createdRecord, belongsToData[i])
+          } else if (def.type === belongsToType && belongsToData && belongsToData.length === createdRecordDatas.length) {
+            createdRecordDatas.forEach((createdRecordData, i) => {
+              def.setLocalField(createdRecordData, belongsToData[i])
             })
           }
           if (task) {
             tasks.push(task)
           }
         })
-        return utils.Promise.all(tasks).then(() => data)
+        return utils.Promise.all(tasks).then(() => result)
       })
     }).then((result) => {
       result = this._end(result, opts)

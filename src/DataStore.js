@@ -1612,9 +1612,9 @@ const props = {
    */
   find (name, id, opts) {
     opts || (opts = {})
+    const mapper = this.getMapper(name)
     const pendingQuery = this._pendingQueries[name][id]
-
-    utils.fillIn(opts, this.getMapper(name))
+    utils._(opts, mapper)
 
     if (pendingQuery) {
       return pendingQuery

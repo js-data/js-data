@@ -1208,7 +1208,9 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
   logify (target) {
     utils.addHiddenPropsToTarget(target, {
       dbg (...args) {
-        this.log('debug', ...args)
+        if (utils.isFunction(this.log)) {
+          this.log('debug', ...args)
+        }
       },
       log (level, ...args) {
         if (level && !args.length) {

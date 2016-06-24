@@ -56,11 +56,11 @@ describe('Collection#add', function () {
     assert(collection.get(1) === data[1])
     assert.equal(collection.getAll(20, { index: 'age' }).length, 1)
   })
-  it('should require an id', function () {
+  it('should not require an id', function () {
     const collection = new JSData.Collection()
-    assert.throws(() => {
+    assert.doesNotThrow(() => {
       collection.add({})
-    }, Error, `[Collection#add:record.id] expected: string or number, found: undefined\nhttp://www.js-data.io/v3.0/docs/errors#400`)
+    })
   })
   it('should test opts.onConflict', function () {
     const collection = new JSData.Collection()

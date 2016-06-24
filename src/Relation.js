@@ -155,7 +155,7 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
   linkRecord (record, relatedRecord) {
     const relatedId = utils.get(relatedRecord, this.mapper.idAttribute)
 
-    if (relatedRecord !== this.relatedCollection.get(relatedId)) {
+    if (!utils.isUndefined(relatedId) && relatedRecord !== this.relatedCollection.get(relatedId)) {
       this.setForeignKey(record, relatedRecord)
 
       if (this.canAutoAddLinks) {

@@ -230,11 +230,11 @@ export default Component.extend({
     // option.
     records = records.map((record) => {
       let id = this.recordId(record)
-      if (!utils.isSorN(id)) {
-        throw utils.err(`${DOMAIN}#add`, `record.${idAttribute}`)(400, 'string or number', id)
-      }
+      // if (!utils.isSorN(id)) {
+      //   throw utils.err(`${DOMAIN}#add`, `record.${idAttribute}`)(400, 'string or number', id)
+      // }
       // Grab existing record if there is one
-      const existing = this.get(id)
+      const existing = utils.isUndefined(id) ? undefined : this.get(id)
       // If the currently visited record is just a reference to an existing
       // record, then there is nothing to be done. Exit early.
       if (record === existing) {
