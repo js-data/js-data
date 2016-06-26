@@ -980,7 +980,7 @@ export default Component.extend({
         })
         return utils.Promise.all(tasks).then(() => {
           utils.set(originalRecord, createdRecordData, { silent: true })
-          if (originalRecord.commit) {
+          if (utils.isFunction(originalRecord.commit)) {
             originalRecord.commit()
           }
           if (opts.raw) {
@@ -1109,6 +1109,7 @@ export default Component.extend({
     // Default values for arguments
     records || (records = [])
     opts || (opts = {})
+    const originalRecords = records
 
     // Fill in "opts" with the Mapper's configuration
     utils._(opts, this)
@@ -1147,7 +1148,7 @@ export default Component.extend({
         this.dbg(op, records, opts)
         return utils.resolve(this.getAdapter(adapter)[op](this, json, opts))
       }).then((result) => {
-        const createdRecordDatas = opts.raw ? result.data : result
+        const createdRecordsData = opts.raw ? result.data : result
 
         // Deep post-create hasOne relations
         tasks = []
@@ -1166,17 +1167,17 @@ export default Component.extend({
             // Not supported
             this.log('warn', 'deep createMany of hasMany type not supported!')
           } else if (def.type === hasOneType) {
-            createdRecordDatas.forEach((createdRecordData, i) => {
+            createdRecordsData.forEach((createdRecordData, i) => {
               def.setForeignKey(createdRecordData, relationData[i])
             })
             task = def.getRelation().createMany(relationData, optsCopy).then((result) => {
               const relatedData = opts.raw ? result.data : result
-              createdRecordDatas.forEach((createdRecordData, i) => {
+              createdRecordsData.forEach((createdRecordData, i) => {
                 def.setLocalField(createdRecordData, relatedData[i])
               })
             })
-          } else if (def.type === belongsToType && belongsToData && belongsToData.length === createdRecordDatas.length) {
-            createdRecordDatas.forEach((createdRecordData, i) => {
+          } else if (def.type === belongsToType && belongsToData && belongsToData.length === createdRecordsData.length) {
+            createdRecordsData.forEach((createdRecordData, i) => {
               def.setLocalField(createdRecordData, belongsToData[i])
             })
           }
@@ -1184,7 +1185,21 @@ export default Component.extend({
             tasks.push(task)
           }
         })
-        return utils.Promise.all(tasks).then(() => result)
+        return utils.Promise.all(tasks).then(() => {
+          createdRecordsData.forEach((createdRecordData, i) => {
+            const originalRecord = originalRecords[i]
+            utils.set(originalRecord, createdRecordData, { silent: true })
+            if (utils.isFunction(originalRecord.commit)) {
+              originalRecord.commit()
+            }
+          })
+          if (opts.raw) {
+            result.data = originalRecords
+          } else {
+            result = originalRecords
+          }
+          return result
+        })
       })
     }).then((result) => {
       result = this._end(result, opts)

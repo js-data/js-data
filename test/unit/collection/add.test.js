@@ -23,6 +23,34 @@ describe('Collection#add', function () {
     assert.objectsEqual(this.PostCollection.get(7), this.data.p3)
     assert.objectsEqual(this.PostCollection.get(8), this.data.p4)
   })
+  it('should allow unsaved records into the collection', function () {
+    assert.objectsEqual(this.PostCollection.add([
+      this.data.p1,
+      this.data.p2,
+      { author: 'Alice' },
+      this.data.p3,
+      { author: 'Bob' },
+      this.data.p4
+    ]), [this.data.p1, this.data.p2, { author: 'Alice' }, this.data.p3, { author: 'Bob' }, this.data.p4])
+
+    assert.objectsEqual(this.PostCollection.get(5), this.data.p1)
+    assert.objectsEqual(this.PostCollection.get(6), this.data.p2)
+    assert.objectsEqual(this.PostCollection.get(7), this.data.p3)
+    assert.objectsEqual(this.PostCollection.get(8), this.data.p4)
+    assert.objectsEqual(this.PostCollection.filter({
+      id: undefined
+    }).length, 2)
+    assert.objectsEqual(this.PostCollection.filter({
+      id: undefined
+    })[0], { author: 'Bob' })
+    assert.objectsEqual(this.PostCollection.filter({
+      id: undefined
+    })[1], { author: 'Alice' })
+    assert.objectsEqual(this.PostCollection.filter({
+      id: undefined
+    })[0], { author: 'Bob' })
+    assert.objectsEqual(this.PostCollection.filter().length, 6)
+  })
   it('should inject existing items into the collection and call Record#commit', function () {
     const collection = new JSData.Collection({ mapper: new JSData.Mapper({ name: 'user' }) })
 

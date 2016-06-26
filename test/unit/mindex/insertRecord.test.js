@@ -27,7 +27,19 @@ describe('Index#insertRecord', function () {
     index.insertRecord(record8)
     index.insertRecord(record9)
     index.insertRecord(record10)
-    // console.log(index.keys, index.values)
+
+    assert.deepEqual(index.keys, [undefined, 1, 2, 3, 5, 6, 7, 8, 10])
+    assert.deepEqual(index.values, [
+      [record5, record3],
+      [record1],
+      [record6],
+      [record4],
+      [record2],
+      [record7],
+      [record9],
+      [record8],
+      [record10]
+    ])
 
     const index2 = new JSData.Index(['age'], {
       hashCode (obj) {
@@ -44,7 +56,26 @@ describe('Index#insertRecord', function () {
     index2.insertRecord(record8)
     index2.insertRecord(record9)
     index2.insertRecord(record10)
-    // console.log(index2.keys, index2.values)
-    // console.log(index2.between([44], [98]))
+
+    assert.deepEqual(index2.keys, [undefined, 18, 27, 30, 45, 55, 97])
+    assert.deepEqual(index2.values, [
+      [record10],
+      [record3],
+      [record2],
+      [record1],
+      [record4],
+      [record6],
+      [record5, record7, record9, record8]
+    ])
+    let records = index2.between([44], [98])
+
+    assert.deepEqual(records, [
+      record4,
+      record6,
+      record5,
+      record7,
+      record9,
+      record8
+    ])
   })
 })
