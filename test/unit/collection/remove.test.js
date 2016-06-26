@@ -33,4 +33,77 @@ describe('Collection#remove', function () {
     const removed = collection.remove(1)
     assert.equal(item === removed, true)
   })
+
+  it('should remove unsaved records', function () {
+    let alice = { author: 'Alice' }
+    let bob = this.store.createRecord('post', { author: 'Bob' })
+    assert.objectsEqual(this.PostCollection.add([
+      this.data.p1,
+      this.data.p2,
+      alice,
+      this.data.p3,
+      bob,
+      this.data.p4
+    ]), [this.data.p1, this.data.p2, alice, this.data.p3, bob, this.data.p4])
+
+    assert.strictEqual(bob, this.PostCollection.filter({
+      author: 'Bob'
+    })[0])
+    assert.notStrictEqual(alice, this.PostCollection.filter({
+      author: 'Alice'
+    })[0])
+
+    assert.objectsEqual(this.PostCollection.get(5), this.data.p1)
+    assert.objectsEqual(this.PostCollection.get(6), this.data.p2)
+    assert.objectsEqual(this.PostCollection.get(7), this.data.p3)
+    assert.objectsEqual(this.PostCollection.get(8), this.data.p4)
+    assert.objectsEqual(this.PostCollection.filter({
+      id: undefined
+    }).length, 2)
+    assert.objectsEqual(this.PostCollection.filter({
+      author: 'Bob'
+    }).length, 1)
+    assert.objectsEqual(this.PostCollection.filter().length, 6)
+
+    let removedAlice = this.PostCollection.remove(alice)
+    assert.equal(removedAlice, undefined)
+    assert.objectsEqual(this.PostCollection.filter({
+      author: 'Alice'
+    }).length, 1)
+    assert.objectsEqual(this.PostCollection.filter().length, 6)
+    removedAlice = this.PostCollection.remove(this.PostCollection.filter({
+      author: 'Alice'
+    })[0])
+    assert.objectsEqual(removedAlice, { author: 'Alice' })
+    assert.objectsEqual(this.PostCollection.filter({
+      author: 'Alice'
+    }).length, 0)
+    assert.objectsEqual(this.PostCollection.filter().length, 5)
+    assert.objectsEqual(this.PostCollection.filter({
+      id: undefined
+    }).length, 1)
+    assert.objectsEqual(this.PostCollection.filter({
+      author: 'Bob'
+    }).length, 1)
+
+    const bob2 = this.PostCollection.add({ author: 'Bob' })
+    assert.objectsEqual(this.PostCollection.filter({
+      id: undefined
+    }).length, 2)
+    assert.objectsEqual(this.PostCollection.filter({
+      author: 'Bob'
+    }).length, 2)
+    assert.objectsEqual(this.PostCollection.filter().length, 6)
+
+    let removedBob = this.PostCollection.remove(bob)
+    assert.strictEqual(removedBob, bob)
+
+    assert.objectsEqual(this.PostCollection.filter({
+      id: undefined
+    }).length, 1)
+    assert.objectsEqual(this.PostCollection.filter({
+      author: 'Bob'
+    }).length, 1)
+    assert.objectsEqual(this.PostCollection.filter().length, 5)
+  })
 })

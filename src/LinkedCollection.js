@@ -76,8 +76,8 @@ export default Collection.extend({
     return singular ? records[0] : records
   },
 
-  remove (id, opts) {
-    const record = utils.getSuper(this).prototype.remove.call(this, id, opts)
+  remove (idOrRecord, opts) {
+    const record = utils.getSuper(this).prototype.remove.call(this, idOrRecord, opts)
     if (record) {
       this._clearMeta(record)
     }
@@ -92,7 +92,7 @@ export default Collection.extend({
 
   _clearMeta (record) {
     delete this._added[this.recordId(record)]
-    if (this.mapper.recordClass) {
+    if (utils.isFunction(record._set)) {
       record._set('$') // unset
     }
   },

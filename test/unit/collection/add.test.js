@@ -50,6 +50,24 @@ describe('Collection#add', function () {
       id: undefined
     })[0], { author: 'Bob' })
     assert.objectsEqual(this.PostCollection.filter().length, 6)
+
+    this.PostCollection.add({ author: 'Bob' })
+    assert.objectsEqual(this.PostCollection.filter({
+      id: undefined
+    }).length, 3)
+    assert.objectsEqual(this.PostCollection.filter({
+      author: 'Bob'
+    }).length, 2)
+    assert.objectsEqual(this.PostCollection.filter().length, 7)
+
+    this.PostCollection.add({ author: 'Bob' })
+    assert.objectsEqual(this.PostCollection.filter({
+      id: undefined
+    }).length, 4)
+    assert.objectsEqual(this.PostCollection.filter({
+      author: 'Bob'
+    }).length, 3)
+    assert.objectsEqual(this.PostCollection.filter().length, 8)
   })
   it('should inject existing items into the collection and call Record#commit', function () {
     const collection = new JSData.Collection({ mapper: new JSData.Mapper({ name: 'user' }) })

@@ -654,61 +654,65 @@ export default Component.extend({
    *
    * @method Collection#remove
    * @since 3.0.0
-   * @param {(string|number)} id The primary key of the record to be removed.
+   * @param {(string|number|object|Record)} idOrRecord The primary key of the
+   * record to be removed, or a reference to the record that is to be removed.
    * @param {Object} [opts] Configuration options.
    * @returns {Object|Record} The removed record, if any.
    */
-  remove (id, opts) {
+  remove (idOrRecord, opts) {
     // Default values for arguments
     opts || (opts = {})
-    this.beforeRemove(id, opts)
-    const record = this.get(id)
+    this.beforeRemove(idOrRecord, opts)
+    let record = utils.isSorN(idOrRecord) ? this.get(idOrRecord) : idOrRecord
 
     // The record is in the collection, remove it
-    if (record) {
-      this.index.removeRecord(record)
-      utils.forOwn(this.indexes, function (index, name) {
-        index.removeRecord(record)
-      })
-      if (record && utils.isFunction(record.off)) {
-        record.off('all', this._onRecordEvent, this)
-        if (!opts.silent) {
-          this.emit('remove', record)
+    if (utils.isObject(record)) {
+      record = this.index.removeRecord(record)
+      if (record) {
+        utils.forOwn(this.indexes, function (index, name) {
+          index.removeRecord(record)
+        })
+        if (utils.isFunction(record.off)) {
+          record.off('all', this._onRecordEvent, this)
+          if (!opts.silent) {
+            this.emit('remove', record)
+          }
         }
       }
     }
-    return this.afterRemove(id, opts, record) || record
+    return this.afterRemove(idOrRecord, opts, record) || record
   },
 
   /**
-   * Remove the record selected by "query" from this collection.
+   * Remove from this collection the given records or the records selected by
+   * the given "query".
    *
    * @method Collection#removeAll
    * @since 3.0.0
-   * @param {Object} [query={}] Selection query. See {@link query}.
-   * @param {Object} [query.where] See {@link query.where}.
-   * @param {number} [query.offset] See {@link query.offset}.
-   * @param {number} [query.limit] See {@link query.limit}.
-   * @param {string|Array[]} [query.orderBy] See {@link query.orderBy}.
+   * @param {Object|Object[]|Record[]} [queryOrRecords={}] Records to be removed or selection query. See {@link query}.
+   * @param {Object} [queryOrRecords.where] See {@link query.where}.
+   * @param {number} [queryOrRecords.offset] See {@link query.offset}.
+   * @param {number} [queryOrRecords.limit] See {@link query.limit}.
+   * @param {string|Array[]} [queryOrRecords.orderBy] See {@link query.orderBy}.
    * @param {Object} [opts] Configuration options.
    * @returns {(Object[]|Record[])} The removed records, if any.
    */
-  removeAll (query, opts) {
+  removeAll (queryOrRecords, opts) {
     // Default values for arguments
     opts || (opts = {})
-    this.beforeRemoveAll(query, opts)
-    const records = this.filter(query)
+    this.beforeRemoveAll(queryOrRecords, opts)
+    let records = utils.isArray(queryOrRecords) ? queryOrRecords : this.filter(queryOrRecords)
 
     // Remove each selected record from the collection
     const optsCopy = utils.plainCopy(opts)
     optsCopy.silent = true
-    records.forEach((item) => {
-      this.remove(this.recordId(item), optsCopy)
-    })
+    records = records
+      .map((record) => this.remove(record, optsCopy))
+      .filter((record) => record)
     if (!opts.silent) {
       this.emit('remove', records)
     }
-    return this.afterRemoveAll(query, opts, records) || records
+    return this.afterRemoveAll(queryOrRecords, opts, records) || records
   },
 
   /**
