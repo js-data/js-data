@@ -109,4 +109,38 @@ describe('Collection#removeAll', function () {
     }).length, 0)
     assert.objectsEqual(this.PostCollection.filter().length, 4)
   })
+
+  it('should remove unsaved records with convenience method', function () {
+    let alice = { author: 'Alice' }
+    let bob = this.store.createRecord('post', { author: 'Bob' })
+    assert.objectsEqual(this.PostCollection.add([
+      this.data.p1,
+      this.data.p2,
+      alice,
+      this.data.p3,
+      bob,
+      this.data.p4
+    ]), [this.data.p1, this.data.p2, alice, this.data.p3, bob, this.data.p4])
+    const storeAlice = this.PostCollection.filter({
+      author: 'Alice'
+    })[0]
+
+    const bob2 = this.PostCollection.add({ author: 'Bob', num: 2 })
+
+    assert.equal(this.PostCollection.getAll().length, 7)
+
+    const records = this.PostCollection.unsaved()
+
+    assert.objectsEqual(records, [
+      bob2,
+      bob,
+      storeAlice
+    ])
+
+    const removedRecords = this.PostCollection.prune()
+
+    assert.equal(removedRecords.length, 3)
+    assert.equal(this.PostCollection.getAll().length, 4)
+    assert.objectsEqual(removedRecords, [bob2, bob, alice])
+  })
 })

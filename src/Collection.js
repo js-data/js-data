@@ -592,21 +592,15 @@ export default Component.extend({
   },
 
   /**
-   * Return the primary key of the given, or if no record is provided, return the
-   * name of the field that holds the primary key of records in this Collection.
+   * Return all "unsaved" (not uniquely identifiable) records in this colleciton.
    *
-   * @method Collection#recordId
+   * @method Collection#prune
+   * @param {Object} [opts] Configuration options, passed to {@link Collection#removeAll}.
    * @since 3.0.0
-   * @param {(Object|Record)} [record] The record whose primary key is to be
-   * returned.
-   * @returns {(string|number)} Primary key or name of field that holds primary
-   * key.
+   * @returns {Array} The removed records, if any.
    */
-  recordId (record) {
-    if (record) {
-      return utils.get(record, this.recordId())
-    }
-    return this.mapper ? this.mapper.idAttribute : this.idAttribute
+  prune (opts) {
+    return this.removeAll(this.unsaved(), opts)
   },
 
   /**
@@ -628,6 +622,24 @@ export default Component.extend({
   query () {
     const Ctor = this.queryClass
     return new Ctor(this)
+  },
+
+  /**
+   * Return the primary key of the given, or if no record is provided, return the
+   * name of the field that holds the primary key of records in this Collection.
+   *
+   * @method Collection#recordId
+   * @since 3.0.0
+   * @param {(Object|Record)} [record] The record whose primary key is to be
+   * returned.
+   * @returns {(string|number)} Primary key or name of field that holds primary
+   * key.
+   */
+  recordId (record) {
+    if (record) {
+      return utils.get(record, this.recordId())
+    }
+    return this.mapper ? this.mapper.idAttribute : this.idAttribute
   },
 
   /**
@@ -701,7 +713,7 @@ export default Component.extend({
     // Default values for arguments
     opts || (opts = {})
     this.beforeRemoveAll(queryOrRecords, opts)
-    let records = utils.isArray(queryOrRecords) ? queryOrRecords : this.filter(queryOrRecords)
+    let records = utils.isArray(queryOrRecords) ? queryOrRecords.slice() : this.filter(queryOrRecords)
 
     // Remove each selected record from the collection
     const optsCopy = utils.plainCopy(opts)
@@ -745,6 +757,17 @@ export default Component.extend({
    */
   toJSON (opts) {
     return this.mapCall('toJSON', opts)
+  },
+
+  /**
+   * Return all "unsaved" (not uniquely identifiable) records in this colleciton.
+   *
+   * @method Collection#unsaved
+   * @since 3.0.0
+   * @returns {Array} The unsaved records, if any.
+   */
+  unsaved (opts) {
+    return this.index.get()
   },
 
   /**

@@ -28,6 +28,7 @@ describe('Index#insertRecord', function () {
     index.insertRecord(record9)
     index.insertRecord(record10)
 
+    assert.objectsEqual(index.get(), [record5, record3])
     assert.deepEqual(index.keys, [undefined, 1, 2, 3, 5, 6, 7, 8, 10])
     assert.deepEqual(index.values, [
       [record5, record3],

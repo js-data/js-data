@@ -178,6 +178,18 @@ const proxiedCollectionMethods = [
   'getAll',
 
   /**
+   * Wrapper for {@link LinkedCollection#prune}.
+   *
+   * @method DataStore#prune
+   * @param {Object} [opts] See {@link LinkedCollection#prune}.
+   * @returns {Array} See {@link LinkedCollection#prune}.
+   * @see LinkedCollection#prune
+   * @see Collection#prune
+   * @since 3.0.0
+   */
+  'prune',
+
+  /**
    * Wrapper for {@link LinkedCollection#query}.
    *
    * @example
@@ -227,7 +239,18 @@ const proxiedCollectionMethods = [
    * @see Collection#toJSON
    * @since 3.0.0
    */
-  'toJSON'
+  'toJSON',
+
+  /**
+   * Wrapper for {@link LinkedCollection#unsaved}.
+   *
+   * @method DataStore#unsaved
+   * @returns {Array} See {@link LinkedCollection#unsaved}.
+   * @see LinkedCollection#unsaved
+   * @see Collection#unsaved
+   * @since 3.0.0
+   */
+  'unsaved'
 ]
 const ownMethodsForScoping = [
   'addToCache',
