@@ -293,8 +293,33 @@ const DATASTORE_DEFAULTS = {
    * @default true
    * @name DataStore#unlinkOnDestroy
    * @since 3.0.0
+   * @type {boolean}
    */
-  unlinkOnDestroy: true
+  unlinkOnDestroy: true,
+
+  /**
+   * Whether to use the pending query if a `find` request for the specified
+   * record is currently underway. Can be set to `true`, `false`, or to a
+   * function that returns `true` or `false`.
+   *
+   * @default true
+   * @name DataStore#usePendingFind
+   * @since 3.0.0
+   * @type {boolean|Function}
+   */
+  usePendingFind: true,
+
+  /**
+   * Whether to use the pending query if a `findAll` request for the given query
+   * is currently underway. Can be set to `true`, `false`, or to a function that
+   * returns `true` or `false`.
+   *
+   * @default true
+   * @name DataStore#usePendingFindAll
+   * @since 3.0.0
+   * @type {boolean|Function}
+   */
+  usePendingFindAll: true
 }
 
 /**
@@ -343,6 +368,8 @@ const DATASTORE_DEFAULTS = {
  * @param {boolean} [opts.collectionClass={@link LinkedCollection}] See {@link DataStore#collectionClass}.
  * @param {boolean} [opts.debug=false] See {@link Component#debug}.
  * @param {boolean} [opts.unlinkOnDestroy=true] See {@link DataStore#unlinkOnDestroy}.
+ * @param {boolean|Function} [opts.usePendingFind=true] See {@link DataStore#usePendingFind}.
+ * @param {boolean|Function} [opts.usePendingFindAll=true] See {@link DataStore#usePendingFindAll}.
  * @returns {DataStore}
  * @see Container
  * @since 3.0.0
@@ -355,7 +382,7 @@ function DataStore (opts) {
 
   opts || (opts = {})
   // Fill in any missing options with the defaults
-  utils.fillIn(opts, utils.plainCopy(DATASTORE_DEFAULTS))
+  utils.fillIn(opts, DATASTORE_DEFAULTS)
   Container.call(this, opts)
 
   this.collectionClass = this.collectionClass || LinkedCollection
@@ -1630,6 +1657,7 @@ const props = {
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(string|number)} id Passed to {@link Mapper#find}.
    * @param {Object} [opts] Passed to {@link Mapper#find}.
+   * @param {boolean|Function} [opts.usePendingFind] See {@link DataStore#usePendingFind}
    * @returns {Promise} Resolves with the result, if any.
    * @since 3.0.0
    */
@@ -1637,9 +1665,10 @@ const props = {
     opts || (opts = {})
     const mapper = this.getMapper(name)
     const pendingQuery = this._pendingQueries[name][id]
+    const usePendingFind = utils.isUndefined(opts.usePendingFind) ? this.usePendingFind : opts.usePendingFind
     utils._(opts, mapper)
 
-    if (pendingQuery) {
+    if (pendingQuery && (utils.isFunction(usePendingFind) ? usePendingFind.call(this, name, id, opts) : usePendingFind)) {
       return pendingQuery
     }
     const item = this.cachedFind(name, id, opts)
@@ -1739,17 +1768,19 @@ const props = {
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Object} [query] Passed to {@link Mapper.findAll}.
    * @param {Object} [opts] Passed to {@link Mapper.findAll}.
+   * @param {boolean|Function} [opts.usePendingFindAll] See {@link DataStore#usePendingFindAll}
    * @returns {Promise} Resolves with the result, if any.
    * @since 3.0.0
    */
   findAll (name, query, opts) {
     opts || (opts = {})
+    const mapper = this.getMapper(name)
     const hash = this.hashQuery(name, query, opts)
     const pendingQuery = this._pendingQueries[name][hash]
+    const usePendingFindAll = utils.isUndefined(opts.usePendingFindAll) ? this.usePendingFindAll : opts.usePendingFindAll
+    utils._(opts, mapper)
 
-    utils.fillIn(opts, this.getMapper(name))
-
-    if (pendingQuery) {
+    if (pendingQuery && (utils.isFunction(usePendingFindAll) ? usePendingFindAll.call(this, name, query, opts) : usePendingFindAll)) {
       return pendingQuery
     }
 

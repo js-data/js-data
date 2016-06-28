@@ -258,6 +258,30 @@ function Mapper (opts) {
     },
 
     /**
+     * The {@link Container} that holds this Mapper. __Do not modify.__
+     *
+     * @name Mapper#lifecycleMethods
+     * @since 3.0.0
+     * @type {Object}
+     */
+    datastore: {
+      value: undefined,
+      writable: true
+    },
+
+    /**
+     * The meta information describing this Mapper's available lifecycle
+     * methods. __Do not modify.__
+     *
+     * @name Mapper#lifecycleMethods
+     * @since 3.0.0
+     * @type {Object}
+     */
+    lifecycleMethods: {
+      value: LIFECYCLE_METHODS
+    },
+
+    /**
      * Set to `false` to force the Mapper to work with POJO objects only.
      *
      * @example
@@ -311,18 +335,6 @@ function Mapper (opts) {
     recordClass: {
       value: undefined,
       writable: true
-    },
-
-    /**
-     * The meta information describing this Mapper's available lifecycle
-     * methods. __Do not modify.__
-     *
-     * @name Mapper#lifecycleMethods
-     * @since 3.0.0
-     * @type {Object}
-     */
-    lifecycleMethods: {
-      value: LIFECYCLE_METHODS
     },
 
     /**

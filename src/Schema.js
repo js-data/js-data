@@ -734,6 +734,8 @@ const validate = function (value, schema, opts) {
 const changingPath = 'changing'
 // string[] - Properties that have changed in the current execution frame
 const changedPath = 'changed'
+// Object[] - History of change records
+const changeHistoryPath = 'history'
 // boolean - Whether a Record is currently being instantiated
 const creatingPath = 'creating'
 // number - The setTimeout change event id of a Record, if any
@@ -850,7 +852,13 @@ const makeDescriptor = function (prop, schema, opts) {
             for (i = 0; i < changed.length; i++) {
               this.emit('change:' + changed[i], this, utils.get(this, changed[i]))
             }
-            this.emit('change', this, this.changes())
+            const changes = this.changes()
+            const changeRecord = utils.plainCopy(changes)
+            changeRecord.timestamp = new Date().getTime()
+            const changeHistory = _get(changeHistoryPath) || []
+            _set(changeHistoryPath, changeHistory)
+            changeHistory.push(changeRecord)
+            this.emit('change', this, changes)
           }
           _unset(silentPath)
         }, 0))

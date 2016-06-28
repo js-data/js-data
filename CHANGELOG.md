@@ -4,6 +4,13 @@
 - Usaved records can now be added to a Collection (added to the store)
 - Record#save now always updates the original record
 
+###### Backwards compatible changes
+- Added `Collection#unsaved`, `LinkedCollection#unsaved`, `DataStore#unsaved`
+- Added `Collection#prune`, `LinkedCollection#prune`, `DataStore#prune`
+- Added `Record#isNew`
+- Added option `DataStore#usePendingFind`, which defaults to `true`
+- Added option `DataStore#usePendingFindAll`, which defaults to `true`
+
 ##### 3.0.0-beta.8 - 22 June 2016
 
 ###### Breaking changes

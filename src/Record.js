@@ -221,6 +221,7 @@ export default Component.extend({
    */
   commit () {
     this._set('changed') // unset
+    this._set('history', []) // clear history
     this._set('previous', utils.plainCopy(this))
   },
 
