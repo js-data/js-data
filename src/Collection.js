@@ -234,7 +234,7 @@ export default Component.extend({
       //   throw utils.err(`${DOMAIN}#add`, `record.${idAttribute}`)(400, 'string or number', id)
       // }
       // Grab existing record if there is one
-      const existing = utils.isUndefined(id) ? undefined : this.get(id)
+      const existing = id === undefined ? id : this.get(id)
       // If the currently visited record is just a reference to an existing
       // record, then there is nothing to be done. Exit early.
       if (record === existing) {

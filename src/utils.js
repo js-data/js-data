@@ -96,7 +96,7 @@ const utils = {
    */
   _ (dest, src) {
     utils.forOwn(src, function (value, key) {
-      if (key && utils.isUndefined(dest[key]) && !utils.isFunction(value) && key.indexOf('_') !== 0) {
+      if (key && dest[key] === undefined && !utils.isFunction(value) && key.indexOf('_') !== 0) {
         dest[key] = value
       }
     })
@@ -465,7 +465,7 @@ const utils = {
       if (equalsFn(oldValue, newValue)) {
         return
       }
-      if (utils.isUndefined(oldValue)) {
+      if (oldValue === undefined) {
         diff.added[key] = newValue
       } else {
         diff.changed[key] = newValue
@@ -476,7 +476,7 @@ const utils = {
     oldKeys.forEach(function (key) {
       const oldValue = oldObject[key]
       const newValue = newObject[key]
-      if (utils.isUndefined(newValue) && !utils.isUndefined(oldValue)) {
+      if (newValue === undefined && oldValue !== undefined) {
         diff.removed[key] = undefined
       }
     })

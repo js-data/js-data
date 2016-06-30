@@ -10,10 +10,13 @@ export const BelongsToRelation = Relation.extend({
     utils.set(record, this.foreignKey, utils.get(relatedRecord, this.getRelation().idAttribute))
   },
 
-  findExistingLinksFor (relatedMapper, record) {
+  findExistingLinksFor (record) {
+    // console.log('\tBelongsTo#findExistingLinksFor', record)
+    if (!record) {
+      return
+    }
     const relatedId = utils.get(record, this.foreignKey)
-
-    if (!utils.isUndefined(relatedId)) {
+    if (relatedId !== undefined) {
       return this.relatedCollection.get(relatedId)
     }
   }

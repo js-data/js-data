@@ -331,7 +331,7 @@ export default Component.extend({
    * @since 3.0.0
    */
   isNew (opts) {
-    return utils.isUndefined(utils.get(this, this._mapper().idAttribute))
+    return utils.get(this, this._mapper().idAttribute) === undefined
   },
 
   /**
@@ -617,7 +617,7 @@ export default Component.extend({
       return result
     }
 
-    if (utils.isUndefined(id)) {
+    if (id === undefined) {
       return superMethod(mapper, 'create')(props, opts).then(postProcess)
     }
     if (opts.changesOnly) {

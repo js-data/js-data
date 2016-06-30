@@ -487,7 +487,7 @@ const validationKeywords = {
     // Can be a boolean or an object
     // Technically the default is an "empty schema", but here "true" is
     // functionally the same
-    const additionalProperties = utils.isUndefined(schema.additionalProperties) ? true : schema.additionalProperties
+    const additionalProperties = schema.additionalProperties === undefined ? true : schema.additionalProperties
     // "s": The property set of the instance to validate.
     const toValidate = {}
     // "p": The property set from "properties".
@@ -504,7 +504,7 @@ const validationKeywords = {
     })
     // Remove from "s" all elements of "p", if any.
     utils.forOwn(properties || {}, function (_schema, prop) {
-      if (utils.isUndefined(value[prop]) && !utils.isUndefined(_schema['default'])) {
+      if (value[prop] === undefined && _schema['default'] !== undefined) {
         value[prop] = utils.copy(_schema['default'])
       }
       opts.prop = prop
@@ -556,7 +556,7 @@ const validationKeywords = {
     let errors = []
     if (!opts.existingOnly) {
       required.forEach(function (prop) {
-        if (utils.isUndefined(utils.get(value, prop))) {
+        if (utils.get(value, prop) === undefined) {
           const prevProp = opts.prop
           opts.prop = prop
           addError(undefined, 'a value', opts, errors)
@@ -596,7 +596,7 @@ const validationKeywords = {
     })
     // Value did not match any expected type
     if (!validType) {
-      return makeError(!utils.isUndefined(value) && value !== null ? typeof value : '' + value, `one of (${type.join(', ')})`, opts)
+      return makeError(value !== undefined && value !== null ? typeof value : '' + value, `one of (${type.join(', ')})`, opts)
     }
     // Run keyword validators for matched type
     // http://json-schema.org/latest/json-schema-validation.html#anchor12
@@ -641,7 +641,7 @@ const validationKeywords = {
  * @ignore
  */
 const validateKeyword = function (op, value, schema, opts) {
-  return !utils.isUndefined(schema[op]) && validationKeywords[op](value, schema, opts)
+  return schema[op] !== undefined && validationKeywords[op](value, schema, opts)
 }
 
 /**
@@ -684,17 +684,17 @@ const validate = function (value, schema, opts) {
   opts || (opts = {})
   let shouldPop
   let prevProp = opts.prop
-  if (utils.isUndefined(schema)) {
+  if (schema === undefined) {
     return
   }
   if (!utils.isObject(schema)) {
     throw utils.err(`${DOMAIN}#validate`)(500, `Invalid schema at path: "${opts.path}"`)
   }
-  if (utils.isUndefined(opts.path)) {
+  if (opts.path === undefined) {
     opts.path = []
   }
   // Track our location as we recurse
-  if (!utils.isUndefined(opts.prop)) {
+  if (opts.prop !== undefined) {
     shouldPop = true
     opts.path.push(opts.prop)
     opts.prop = undefined
@@ -709,7 +709,7 @@ const validate = function (value, schema, opts) {
       errors = errors.concat(validate(value, schema['extends'], opts) || [])
     }
   }
-  if (utils.isUndefined(value)) {
+  if (value === undefined) {
     // Check if property is required
     if (schema.required === true && !opts.existingOnly) {
       addError(value, 'a value', opts, errors)
@@ -760,7 +760,7 @@ const makeDescriptor = function (prop, schema, opts) {
     configurable: true,
     // These properties are enumerable by default, but regardless of their
     // enumerability, they won't be "own" properties of individual records
-    enumerable: utils.isUndefined(schema.enumerable) ? true : !!schema.enumerable
+    enumerable: schema.enumerable === undefined ? true : !!schema.enumerable
   }
   // Cache a few strings for optimal performance
   const keyPath = `props.${prop}`

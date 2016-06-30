@@ -32,7 +32,7 @@ const makeNotify = function (num) {
       const originalExistingOnly = opts.existingOnly
 
       // For updates, ignore required fields if they aren't present
-      if (op.indexOf('beforeUpdate') === 0 && utils.isUndefined(opts.existingOnly)) {
+      if (op.indexOf('beforeUpdate') === 0 && opts.existingOnly === undefined) {
         opts.existingOnly = true
       }
       const errors = this.validate(args[op === 'beforeUpdate' ? 1 : 0], utils.pick(opts, ['existingOnly']))
@@ -410,7 +410,7 @@ function Mapper (opts) {
   }
 
   // Create a subclass of Record that's tied to this Mapper
-  if (utils.isUndefined(this.recordClass)) {
+  if (this.recordClass === undefined) {
     const superClass = Record
     this.recordClass = superClass.extend({
       constructor: (function Record () {
@@ -923,7 +923,7 @@ export default Component.extend({
     op = opts.op = 'beforeCreate'
     return utils.resolve(this[op](props, opts)).then((_props) => {
       // Allow for re-assignment from lifecycle hook
-      props = utils.isUndefined(_props) ? props : _props
+      props = _props === undefined ? props : _props
 
       // Deep pre-create belongsTo relations
       const belongsToRelationData = {}
@@ -1009,7 +1009,7 @@ export default Component.extend({
       op = opts.op = 'afterCreate'
       return utils.resolve(this[op](props, opts, result)).then((_result) => {
         // Allow for re-assignment from lifecycle hook
-        return utils.isUndefined(_result) ? result : _result
+        return _result === undefined ? result : _result
       })
     })
   },
@@ -1131,7 +1131,7 @@ export default Component.extend({
     op = opts.op = 'beforeCreateMany'
     return utils.resolve(this[op](records, opts)).then((_records) => {
       // Allow for re-assignment from lifecycle hook
-      records = utils.isUndefined(_records) ? records : _records
+      records = _records === undefined ? records : _records
 
       // Deep pre-create belongsTo relations
       const belongsToRelationData = {}
@@ -1219,7 +1219,7 @@ export default Component.extend({
       op = opts.op = 'afterCreateMany'
       return utils.resolve(this[op](records, opts, result)).then((_result) => {
         // Allow for re-assignment from lifecycle hook
-        return utils.isUndefined(_result) ? result : _result
+        return _result === undefined ? result : _result
       })
     })
   },
@@ -1347,7 +1347,7 @@ export default Component.extend({
 
     // Default values for arguments
     config.defaults.forEach((value, i) => {
-      if (utils.isUndefined(args[i])) {
+      if (args[i] === undefined) {
         args[i] = utils.copy(value)
       }
     })
@@ -1361,9 +1361,9 @@ export default Component.extend({
     // before lifecycle hook
     op = opts.op = before
     return utils.resolve(this[op](...args)).then((_value) => {
-      if (!utils.isUndefined(args[config.beforeAssign])) {
+      if (args[config.beforeAssign] !== undefined) {
         // Allow for re-assignment from lifecycle hook
-        args[config.beforeAssign] = utils.isUndefined(_value) ? args[config.beforeAssign] : _value
+        args[config.beforeAssign] = _value === undefined ? args[config.beforeAssign] : _value
       }
       // Now delegate to the adapter
       op = opts.op = method
@@ -1377,7 +1377,7 @@ export default Component.extend({
       op = opts.op = after
       return utils.resolve(this[op](...args)).then((_result) => {
         // Allow for re-assignment from lifecycle hook
-        return utils.isUndefined(_result) ? result : _result
+        return _result === undefined ? result : _result
       })
     })
   },

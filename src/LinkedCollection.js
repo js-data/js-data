@@ -43,6 +43,22 @@ function LinkedCollection (records, opts) {
 export default Collection.extend({
   constructor: LinkedCollection,
 
+  _addMeta (record, timestamp) {
+    // Track when this record was added
+    this._added[this.recordId(record)] = timestamp
+
+    if (utils.isFunction(record._set)) {
+      record._set('$', timestamp)
+    }
+  },
+
+  _clearMeta (record) {
+    delete this._added[this.recordId(record)]
+    if (utils.isFunction(record._set)) {
+      record._set('$') // unset
+    }
+  },
+
   _onRecordEvent (...args) {
     utils.getSuper(this).prototype._onRecordEvent.apply(this, args)
     const event = args[0]
@@ -67,7 +83,7 @@ export default Collection.extend({
       // Check the currently visited record for relations that need to be
       // inserted into their respective collections.
       mapper.relationList.forEach(function (def) {
-        def.linkRecords(mapper, records)
+        def.addLinkedRecords(records)
       })
     }
 
@@ -77,33 +93,37 @@ export default Collection.extend({
   },
 
   remove (idOrRecord, opts) {
+    const mapper = this.mapper
     const record = utils.getSuper(this).prototype.remove.call(this, idOrRecord, opts)
     if (record) {
       this._clearMeta(record)
     }
+
+    if (mapper.relationList.length && record) {
+      // Check the currently visited record for relations that need to be
+      // inserted into their respective collections.
+      mapper.relationList.forEach(function (def) {
+        def.removeLinkedRecords(mapper, [record])
+      })
+    }
+
     return record
   },
 
   removeAll (query, opts) {
+    const mapper = this.mapper
     const records = utils.getSuper(this).prototype.removeAll.call(this, query, opts)
     records.forEach(this._clearMeta, this)
+
+    if (mapper.relationList.length && records.length) {
+      // Check the currently visited record for relations that need to be
+      // inserted into their respective collections.
+      mapper.relationList.forEach(function (def) {
+        def.removeLinkedRecords(mapper, records)
+      })
+    }
+
     return records
-  },
-
-  _clearMeta (record) {
-    delete this._added[this.recordId(record)]
-    if (utils.isFunction(record._set)) {
-      record._set('$') // unset
-    }
-  },
-
-  _addMeta (record, timestamp) {
-    // Track when this record was added
-    this._added[this.recordId(record)] = timestamp
-
-    if (this.mapper.recordClass) {
-      record._set('$', timestamp)
-    }
   }
 })
 
