@@ -386,7 +386,7 @@ const utils = {
   },
 
   /**
-   * Recursively shallow copy own enumerable properties from `source` to `dest`.
+   * Recursively shallow copy enumerable properties from `source` to `dest`.
    *
    * @example
    * import {utils} from 'js-data'
@@ -404,14 +404,15 @@ const utils = {
    */
   deepMixIn (dest, source) {
     if (source) {
-      utils.forOwn(source, function (value, key) {
+      for (var key in source) {
+        const value = source[key]
         const existing = dest[key]
         if (isPlainObject(value) && isPlainObject(existing)) {
           utils.deepMixIn(existing, value)
         } else {
           dest[key] = value
         }
-      })
+      }
     }
     return dest
   },

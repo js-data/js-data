@@ -230,9 +230,6 @@ export default Component.extend({
     // option.
     records = records.map((record) => {
       let id = this.recordId(record)
-      // if (!utils.isSorN(id)) {
-      //   throw utils.err(`${DOMAIN}#add`, `record.${idAttribute}`)(400, 'string or number', id)
-      // }
       // Grab existing record if there is one
       const existing = id === undefined ? id : this.get(id)
       // If the currently visited record is just a reference to an existing
@@ -249,8 +246,8 @@ export default Component.extend({
           utils.deepMixIn(existing, record)
         } else if (onConflict === 'replace') {
           utils.forOwn(existing, (value, key) => {
-            if (key !== idAttribute && !record.hasOwnProperty(key)) {
-              delete existing[key]
+            if (key !== idAttribute && record[key] === undefined) {
+              existing[key] = undefined
             }
           })
           existing.set(record)
