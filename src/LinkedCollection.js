@@ -60,7 +60,7 @@ export default Collection.extend({
   },
 
   _onRecordEvent (...args) {
-    utils.getSuper(this).prototype._onRecordEvent.apply(this, args)
+    Collection.prototype._onRecordEvent.apply(this, args)
     const event = args[0]
     // This is a very brute force method
     // Lots of room for optimization
@@ -77,7 +77,7 @@ export default Collection.extend({
     if (singular) {
       records = [records]
     }
-    records = utils.getSuper(this).prototype.add.call(this, records, opts)
+    records = Collection.prototype.add.call(this, records, opts)
 
     if (mapper.relationList.length && records.length) {
       // Check the currently visited record for relations that need to be
@@ -94,7 +94,7 @@ export default Collection.extend({
 
   remove (idOrRecord, opts) {
     const mapper = this.mapper
-    const record = utils.getSuper(this).prototype.remove.call(this, idOrRecord, opts)
+    const record = Collection.prototype.remove.call(this, idOrRecord, opts)
     if (record) {
       this._clearMeta(record)
     }
@@ -112,7 +112,7 @@ export default Collection.extend({
 
   removeAll (query, opts) {
     const mapper = this.mapper
-    const records = utils.getSuper(this).prototype.removeAll.call(this, query, opts)
+    const records = Collection.prototype.removeAll.call(this, query, opts)
     records.forEach(this._clearMeta, this)
 
     if (mapper.relationList.length && records.length) {

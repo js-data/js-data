@@ -976,7 +976,7 @@ const props = {
   defineMapper (name, opts) {
     // Complexity of this method is beyond simply using => functions to bind context
     const self = this
-    const mapper = utils.getSuper(self).prototype.defineMapper.call(self, name, opts)
+    const mapper = Container.prototype.defineMapper.call(self, name, opts)
     self._pendingQueries[name] = {}
     self._completedQueries[name] = {}
     mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] })
