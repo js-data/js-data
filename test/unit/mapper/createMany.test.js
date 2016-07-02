@@ -19,7 +19,7 @@ describe('Mapper#createMany', function () {
         createCalled = true
         return new Promise(function (resolve, reject) {
           assert.strictEqual(mapper, UserMapper, 'should pass in the Model')
-          assert.deepEqual(_props, props, 'should pass in the props')
+          assert.objectsEqual(_props, props, 'should pass in the props')
           _props[0][mapper.idAttribute] = new Date().getTime()
           resolve(_props)
         })
@@ -43,7 +43,7 @@ describe('Mapper#createMany', function () {
         createCalled = true
         return new Promise(function (resolve, reject) {
           assert.strictEqual(mapper, User, 'should pass in the Model')
-          assert.deepEqual(_props, props, 'should pass in the props')
+          assert.objectsEqual(_props, props, 'should pass in the props')
           assert.equal(Opts.raw, true, 'Opts are provided')
           _props[0][mapper.idAttribute] = new Date().getTime()
           resolve({
@@ -120,18 +120,14 @@ describe('Mapper#createMany', function () {
     assert(store.is('user', users[1]), 'user 2 should be a user record')
     assert(store.get('user', users[0].id) === users[0], 'user 1 should be in the store')
     assert(store.get('user', users[1].id) === users[1], 'user 2 should be in the store')
-    assert.objectsEqual(users[0].profile, {
-      email: 'john@email.com'
-    }, 'users[0].profile should be a profile')
-    assert.objectsEqual(users[1].profile, {
-      email: 'sally@email.com'
-    }, 'users[1].profile should be a profile')
-    assert.deepEqual(store.getAll('profile'), [], 'profiles should not be in the store')
-    assert(!users[0].organization, 'users[0].organization should be undefined')
-    assert(!users[1].organization, 'users[1].organization should be undefined')
+    assert.objectsEqual(users[0].profile, userProps[0].profile, 'users[0].profile should be a profile')
+    assert.objectsEqual(users[1].profile, userProps[1].profile, 'users[1].profile should be a profile')
+    assert.objectsEqual(store.getAll('profile'), [userProps[1].profile, userProps[0].profile], 'profiles should not be in the store')
+    assert.objectsEqual(users[0].organization, userProps[0].organization, 'users[0].organization should exist')
+    assert.objectsEqual(users[1].organization, userProps[1].organization, 'users[1].organization should exist')
     assert(!users[0].organizationId, 'users[0].organizationId should be undefined')
     assert(!users[1].organizationId, 'users[1].organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organization should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps[1].organization, userProps[0].organization], 'organization should not be in the store')
     clear()
 
     users = await store.createMany('user', getProps(), { with: ['profile'] })
@@ -142,11 +138,11 @@ describe('Mapper#createMany', function () {
     assert(store.is('profile', users[0].profile), 'users[0].profile should be a profile record')
     assert(store.is('profile', users[1].profile), 'users[1].profile should be a profile record')
     assert.objectsEqual(store.getAll('profile'), [users[0].profile, users[1].profile], 'profiles should be in the store')
-    assert(!users[0].organization, 'users[0].organization should be undefined')
-    assert(!users[1].organization, 'users[1].organization should be undefined')
+    assert.objectsEqual(users[0].organization, userProps[0].organization, 'users[0].organization should exist')
+    assert.objectsEqual(users[1].organization, userProps[1].organization, 'users[1].organization should exist')
     assert(!users[0].organizationId, 'users[0].organizationId should be undefined')
     assert(!users[1].organizationId, 'users[1].organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organizations should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps[1].organization, userProps[0].organization], 'organizations should be in the store')
     clear()
 
     users = await store.createMany('user', getProps(), { with: ['profile', 'organization'] })
@@ -161,7 +157,7 @@ describe('Mapper#createMany', function () {
     assert(store.is('organization', users[1].organization), 'users[1].organization should be a organization record')
     assert.equal(store.getAll('organization')[0].id, users[0].organizationId, 'users[0].organizationId should be correct')
     assert.equal(store.getAll('organization')[1].id, users[1].organizationId, 'users[1].organizationId should be correct')
-    assert.deepEqual(store.getAll('organization'), [users[0].organization, users[1].organization], 'organizations should be in the store')
+    assert.objectsEqual(store.getAll('organization'), [users[0].organization, users[1].organization], 'organizations should be in the store')
     clear()
 
     // when props are NOT a record
@@ -170,13 +166,9 @@ describe('Mapper#createMany', function () {
     assert(store.is('user', users[1]), 'users[1] should be a user record')
     assert(store.get('user', users[0].id) === users[0], 'users[0] should be in the store')
     assert(store.get('user', users[1].id) === users[1], 'users[1] should be in the store')
-    assert.objectsEqual(users[0].profile, {
-      email: 'john@email.com'
-    }, 'users[0].profile should be a profile')
-    assert.objectsEqual(users[1].profile, {
-      email: 'sally@email.com'
-    }, 'users[1].profile should be a profile')
-    assert.deepEqual(store.getAll('profile'), [], 'profiles should not be in the store')
+    assert.objectsEqual(users[0].profile, userProps[0].profile, 'users[0].profile should be a profile')
+    assert.objectsEqual(users[1].profile, userProps[1].profile, 'users[1].profile should be a profile')
+    assert.objectsEqual(store.getAll('profile'), [userProps[1].profile, userProps[0].profile], 'profiles should not be in the store')
     assert.objectsEqual(users[0].organization, {
       name: 'Company Inc'
     }, 'users[0].organization should an organization')
@@ -185,7 +177,7 @@ describe('Mapper#createMany', function () {
     }, 'users[1].organization should an organization')
     assert(!users[0].organizationId, 'users[0].organizationId should be undefined')
     assert(!users[1].organizationId, 'users[1].organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organizations should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps[1].organization, userProps[0].organization], 'organizations should be in the store')
     clear()
 
     users = await store.createMany('user', JSData.utils.copy(userProps), { with: ['profile'] })
@@ -204,7 +196,7 @@ describe('Mapper#createMany', function () {
     }, 'users[1].organization should an organization')
     assert(!users[0].organizationId, 'users[0].organizationId should be undefined')
     assert(!users[1].organizationId, 'users[1].organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organizations should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps[1].organization, userProps[0].organization], 'organizations should be in the store')
     clear()
 
     users = await store.createMany('user', JSData.utils.copy(userProps), { with: ['profile', 'organization'] })
@@ -219,7 +211,7 @@ describe('Mapper#createMany', function () {
     assert(store.is('organization', users[1].organization), 'users[1].organization should be a organization record')
     assert.equal(store.getAll('organization')[0].id, users[0].organizationId, 'users[0].organizationId should be correct')
     assert.equal(store.getAll('organization')[1].id, users[1].organizationId, 'users[1].organizationId should be correct')
-    assert.deepEqual(store.getAll('organization'), [users[0].organization, users[1].organization], 'organizations should be in the store')
+    assert.objectsEqual(store.getAll('organization'), [users[0].organization, users[1].organization], 'organizations should be in the store')
     clear()
 
     assert.equal(createCalledCount.user, 6)
@@ -303,18 +295,14 @@ describe('Mapper#createMany', function () {
     assert(store.is('user', users[1]), 'user 2 should be a user record')
     assert(store.get('user', users[0].id) === users[0], 'user 1 should be in the store')
     assert(store.get('user', users[1].id) === users[1], 'user 2 should be in the store')
-    assert.objectsEqual(users[0].profile, {
-      email: 'john@email.com'
-    }, 'users[0].profile should be a profile')
-    assert.objectsEqual(users[1].profile, {
-      email: 'sally@email.com'
-    }, 'users[1].profile should be a profile')
-    assert.deepEqual(store.getAll('profile'), [], 'profiles should not be in the store')
-    assert(!users[0].organization, 'users[0].organization should be undefined')
-    assert(!users[1].organization, 'users[1].organization should be undefined')
+    assert.objectsEqual(users[0].profile, userProps[0].profile, 'users[0].profile should be a profile')
+    assert.objectsEqual(users[1].profile, userProps[1].profile, 'users[1].profile should be a profile')
+    assert.objectsEqual(store.getAll('profile'), [userProps[1].profile, userProps[0].profile], 'profiles should not be in the store')
+    assert.objectsEqual(users[0].organization, userProps[0].organization, 'users[0].organization should exist')
+    assert.objectsEqual(users[1].organization, userProps[1].organization, 'users[1].organization should exist')
     assert(!users[0].organizationId, 'users[0].organizationId should be undefined')
     assert(!users[1].organizationId, 'users[1].organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organization should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps[1].organization, userProps[0].organization], 'organization should not be in the store')
     clear()
 
     users = await store.createMany('user', getProps(), { pass: ['profile'] })
@@ -325,11 +313,11 @@ describe('Mapper#createMany', function () {
     assert(store.is('profile', users[0].profile), 'users[0].profile should be a profile record')
     assert(store.is('profile', users[1].profile), 'users[1].profile should be a profile record')
     assert.objectsEqual(store.getAll('profile'), [users[0].profile, users[1].profile], 'profiles should be in the store')
-    assert(!users[0].organization, 'users[0].organization should be undefined')
-    assert(!users[1].organization, 'users[1].organization should be undefined')
+    assert.objectsEqual(users[0].organization, userProps[0].organization, 'users[0].organization should exist')
+    assert.objectsEqual(users[1].organization, userProps[1].organization, 'users[1].organization should exist')
     assert(!users[0].organizationId, 'users[0].organizationId should be undefined')
     assert(!users[1].organizationId, 'users[1].organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organizations should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps[1].organization, userProps[0].organization], 'organizations should be in the store')
     clear()
 
     users = await store.createMany('user', getProps(), { pass: ['profile', 'organization'] })
@@ -344,7 +332,7 @@ describe('Mapper#createMany', function () {
     assert(store.is('organization', users[1].organization), 'users[1].organization should be a organization record')
     assert.equal(store.getAll('organization')[0].id, users[0].organizationId, 'users[0].organizationId should be correct')
     assert.equal(store.getAll('organization')[1].id, users[1].organizationId, 'users[1].organizationId should be correct')
-    assert.deepEqual(store.getAll('organization'), [users[0].organization, users[1].organization], 'organizations should be in the store')
+    assert.objectsEqual(store.getAll('organization'), [users[0].organization, users[1].organization], 'organizations should be in the store')
     clear()
 
     // when props are NOT a record
@@ -353,13 +341,9 @@ describe('Mapper#createMany', function () {
     assert(store.is('user', users[1]), 'users[1] should be a user record')
     assert(store.get('user', users[0].id) === users[0], 'users[0] should be in the store')
     assert(store.get('user', users[1].id) === users[1], 'users[1] should be in the store')
-    assert.objectsEqual(users[0].profile, {
-      email: 'john@email.com'
-    }, 'users[0].profile should be a profile')
-    assert.objectsEqual(users[1].profile, {
-      email: 'sally@email.com'
-    }, 'users[1].profile should be a profile')
-    assert.deepEqual(store.getAll('profile'), [], 'profiles should not be in the store')
+    assert.objectsEqual(users[0].profile, userProps[0].profile, 'users[0].profile should be a profile')
+    assert.objectsEqual(users[1].profile, userProps[1].profile, 'users[1].profile should be a profile')
+    assert.objectsEqual(store.getAll('profile'), [userProps[1].profile, userProps[0].profile], 'profiles should not be in the store')
     assert.objectsEqual(users[0].organization, {
       name: 'Company Inc'
     }, 'users[0].organization should an organization')
@@ -368,7 +352,7 @@ describe('Mapper#createMany', function () {
     }, 'users[1].organization should an organization')
     assert(!users[0].organizationId, 'users[0].organizationId should be undefined')
     assert(!users[1].organizationId, 'users[1].organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organizations should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps[1].organization, userProps[0].organization], 'organizations should be in the store')
     clear()
 
     users = await store.createMany('user', JSData.utils.copy(userProps), { pass: ['profile'] })
@@ -387,7 +371,7 @@ describe('Mapper#createMany', function () {
     }, 'users[1].organization should an organization')
     assert(!users[0].organizationId, 'users[0].organizationId should be undefined')
     assert(!users[1].organizationId, 'users[1].organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organizations should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps[1].organization, userProps[0].organization], 'organizations should be in the store')
     clear()
 
     users = await store.createMany('user', JSData.utils.copy(userProps), { pass: ['profile', 'organization'] })
@@ -402,7 +386,7 @@ describe('Mapper#createMany', function () {
     assert(store.is('organization', users[1].organization), 'users[1].organization should be a organization record')
     assert.equal(store.getAll('organization')[0].id, users[0].organizationId, 'users[0].organizationId should be correct')
     assert.equal(store.getAll('organization')[1].id, users[1].organizationId, 'users[1].organizationId should be correct')
-    assert.deepEqual(store.getAll('organization'), [users[0].organization, users[1].organization], 'organizations should be in the store')
+    assert.objectsEqual(store.getAll('organization'), [users[0].organization, users[1].organization], 'organizations should be in the store')
     clear()
 
     assert.equal(createCalledCount.user, 6)
@@ -486,18 +470,14 @@ describe('Mapper#createMany', function () {
     assert(store.is('user', users[1]), 'user 2 should be a user record')
     assert(store.get('user', users[0].id) === users[0], 'user 1 should be in the store')
     assert(store.get('user', users[1].id) === users[1], 'user 2 should be in the store')
-    assert.objectsEqual(users[0].profile, {
-      email: 'john@email.com'
-    }, 'users[0].profile should be a profile')
-    assert.objectsEqual(users[1].profile, {
-      email: 'sally@email.com'
-    }, 'users[1].profile should be a profile')
-    assert.deepEqual(store.getAll('profile'), [], 'profiles should not be in the store')
-    assert(!users[0].organization, 'users[0].organization should be undefined')
-    assert(!users[1].organization, 'users[1].organization should be undefined')
+    assert.objectsEqual(users[0].profile, userProps[0].profile, 'users[0].profile should be a profile')
+    assert.objectsEqual(users[1].profile, userProps[1].profile, 'users[1].profile should be a profile')
+    assert.objectsEqual(store.getAll('profile'), [userProps[1].profile, userProps[0].profile], 'profiles should not be in the store')
+    assert.objectsEqual(users[0].organization, userProps[0].organization, 'users[0].organization should exist')
+    assert.objectsEqual(users[1].organization, userProps[1].organization, 'users[1].organization should exist')
     assert(!users[0].organizationId, 'users[0].organizationId should be undefined')
     assert(!users[1].organizationId, 'users[1].organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organization should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps[1].organization, userProps[0].organization], 'organization should not be in the store')
     clear()
 
     users = await store.createMany('user', getProps(), { with: ['profile'], pass: ['organization'] })
@@ -512,7 +492,7 @@ describe('Mapper#createMany', function () {
     assert(store.is('organization', users[1].organization), 'users[1].organization should be a organization record')
     assert.equal(store.getAll('organization')[0].id, users[0].organizationId, 'users[0].organizationId should be correct')
     assert.equal(store.getAll('organization')[1].id, users[1].organizationId, 'users[1].organizationId should be correct')
-    assert.deepEqual(store.getAll('organization'), [users[0].organization, users[1].organization], 'organizations should be in the store')
+    assert.objectsEqual(store.getAll('organization'), [users[0].organization, users[1].organization], 'organizations should be in the store')
     clear()
 
     // when props are NOT a record
@@ -521,13 +501,9 @@ describe('Mapper#createMany', function () {
     assert(store.is('user', users[1]), 'users[1] should be a user record')
     assert(store.get('user', users[0].id) === users[0], 'users[0] should be in the store')
     assert(store.get('user', users[1].id) === users[1], 'users[1] should be in the store')
-    assert.objectsEqual(users[0].profile, {
-      email: 'john@email.com'
-    }, 'users[0].profile should be a profile')
-    assert.objectsEqual(users[1].profile, {
-      email: 'sally@email.com'
-    }, 'users[1].profile should be a profile')
-    assert.deepEqual(store.getAll('profile'), [], 'profiles should not be in the store')
+    assert.objectsEqual(users[0].profile, userProps[0].profile, 'users[0].profile should be a profile')
+    assert.objectsEqual(users[1].profile, userProps[1].profile, 'users[1].profile should be a profile')
+    assert.objectsEqual(store.getAll('profile'), [userProps[1].profile, userProps[0].profile], 'profiles should not be in the store')
     assert.objectsEqual(users[0].organization, {
       name: 'Company Inc'
     }, 'users[0].organization should an organization')
@@ -536,7 +512,7 @@ describe('Mapper#createMany', function () {
     }, 'users[1].organization should an organization')
     assert(!users[0].organizationId, 'users[0].organizationId should be undefined')
     assert(!users[1].organizationId, 'users[1].organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organizations should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps[1].organization, userProps[0].organization], 'organizations should be in the store')
     clear()
 
     users = await store.createMany('user', JSData.utils.copy(userProps), { with: ['profile'], pass: ['organization'] })
@@ -551,7 +527,7 @@ describe('Mapper#createMany', function () {
     assert(store.is('organization', users[1].organization), 'users[1].organization should be a organization record')
     assert.equal(store.getAll('organization')[0].id, users[0].organizationId, 'users[0].organizationId should be correct')
     assert.equal(store.getAll('organization')[1].id, users[1].organizationId, 'users[1].organizationId should be correct')
-    assert.deepEqual(store.getAll('organization'), [users[0].organization, users[1].organization], 'organizations should be in the store')
+    assert.objectsEqual(store.getAll('organization'), [users[0].organization, users[1].organization], 'organizations should be in the store')
     clear()
 
     assert.equal(createCalledCount.user, 4)
@@ -582,7 +558,7 @@ describe('Mapper#createMany', function () {
       users = await User.createMany(props)
       throw new Error('validation error should have been thrown!')
     } catch (err) {
-      assert.deepEqual(err, [
+      assert.objectsEqual(err, [
         [
           {
             actual: 'boolean',
@@ -627,7 +603,7 @@ describe('Mapper#createMany', function () {
       users = await User.createMany(props)
       throw new Error('validation error should have been thrown!')
     } catch (err) {
-      assert.deepEqual(err, [
+      assert.objectsEqual(err, [
         [
           {
             actual: 'undefined',
