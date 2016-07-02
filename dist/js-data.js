@@ -146,7 +146,7 @@
      */
     _: function _(dest, src) {
       utils.forOwn(src, function (value, key) {
-        if (key && utils.isUndefined(dest[key]) && !utils.isFunction(value) && key.indexOf('_') !== 0) {
+        if (key && dest[key] === undefined && !utils.isFunction(value) && key.indexOf('_') !== 0) {
           dest[key] = value;
         }
       });
@@ -442,7 +442,7 @@
 
 
     /**
-     * Recursively shallow copy own enumerable properties from `source` to `dest`.
+     * Recursively shallow copy enumerable properties from `source` to `dest`.
      *
      * @example
      * import {utils} from 'js-data'
@@ -460,14 +460,15 @@
      */
     deepMixIn: function deepMixIn(dest, source) {
       if (source) {
-        utils.forOwn(source, function (value, key) {
+        for (var key in source) {
+          var value = source[key];
           var existing = dest[key];
           if (isPlainObject(value) && isPlainObject(existing)) {
             utils.deepMixIn(existing, value);
           } else {
             dest[key] = value;
           }
-        });
+        }
       }
       return dest;
     },
@@ -522,7 +523,7 @@
         if (equalsFn(oldValue, newValue)) {
           return;
         }
-        if (utils.isUndefined(oldValue)) {
+        if (oldValue === undefined) {
           diff.added[key] = newValue;
         } else {
           diff.changed[key] = newValue;
@@ -533,7 +534,7 @@
       oldKeys.forEach(function (key) {
         var oldValue = oldObject[key];
         var newValue = newObject[key];
-        if (utils.isUndefined(newValue) && !utils.isUndefined(oldValue)) {
+        if (newValue === undefined && oldValue !== undefined) {
           diff.removed[key] = undefined;
         }
       });
@@ -1304,11 +1305,13 @@
     logify: function logify(target) {
       utils.addHiddenPropsToTarget(target, {
         dbg: function dbg() {
-          for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-            args[_key3] = arguments[_key3];
-          }
+          if (utils.isFunction(this.log)) {
+            for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+              args[_key3] = arguments[_key3];
+            }
 
-          this.log.apply(this, ['debug'].concat(args));
+            this.log.apply(this, ['debug'].concat(args));
+          }
         },
         log: function log(level) {
           for (var _len4 = arguments.length, args = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
@@ -2026,13 +2029,13 @@
    * const {Collection, DataStore} = JSData
    *
    * const collection = new Collection()
-   * collection.on('foo', (msg) => {
+   * collection.on('foo', function (msg) {
    *   console.log(msg)
    * })
    * collection.emit('foo', 'bar')
    *
    * const store = new DataStore()
-   * store.on('beep', (msg) => {
+   * store.on('beep', function (msg) {
    *   console.log(msg)
    * })
    * store.emit('beep', 'boop')
@@ -2833,7 +2836,8 @@
     /**
      * Apply a mapping function to the result data.
      *
-     * @example Return the age of all users
+     * @example
+     * // Return the age of all users
      * const store = new JSData.DataStore()
      * store.defineMapper('user')
      * const users = [
@@ -3177,7 +3181,7 @@
    */
 
   function sort(a, b, hashCode) {
-    // Short-curcuit comparison if a and b are strictly equal
+    // Short-circuit comparison if a and b are strictly equal
     // This is absolutely necessary for indexed objects that
     // don't have the idAttribute field
     if (a === b) {
@@ -3187,15 +3191,15 @@
       a = hashCode(a);
       b = hashCode(b);
     }
-    if (a === null && b === null) {
-      return 0;
-    }
-
-    if (a === null) {
+    if (a === null && b === null || a === undefined && b === undefined) {
       return -1;
     }
 
-    if (b === null) {
+    if (a === null || a === undefined) {
+      return -1;
+    }
+
+    if (b === null || b === undefined) {
       return 1;
     }
 
@@ -3270,7 +3274,7 @@
         keyList = [keyList];
       }
 
-      var key = keyList.shift() || null;
+      var key = keyList.shift() || undefined;
       var pos = binarySearch(this.keys, key);
 
       if (keyList.length === 0) {
@@ -3299,7 +3303,7 @@
         keyList = [keyList];
       }
 
-      var key = keyList.shift() || null;
+      var key = keyList.shift() || undefined;
       var pos = binarySearch(this.keys, key);
 
       if (keyList.length === 0) {
@@ -3307,7 +3311,7 @@
           if (this.values[pos.index].isIndex) {
             return this.values[pos.index].getAll();
           } else {
-            return this.values[pos.index];
+            return this.values[pos.index].slice();
           }
         } else {
           return [];
@@ -3478,9 +3482,9 @@
     insertRecord: function insertRecord(data) {
       var keyList = this.fieldList.map(function (field) {
         if (utils.isFunction(field)) {
-          return field(data) || null;
+          return field(data) || undefined;
         } else {
-          return data[field] || null;
+          return data[field] || undefined;
         }
       });
       this.set(keyList, data);
@@ -3489,6 +3493,7 @@
       var _this = this;
 
       var removed = void 0;
+      var isUnique = this.hashCode(data) !== undefined;
       this.values.forEach(function (value, i) {
         if (value.isIndex) {
           if (value.removeRecord(data)) {
@@ -3500,7 +3505,20 @@
             return false;
           }
         } else {
-          var dataLocation = binarySearch(value, data, _this.hashCode);
+          var dataLocation = {};
+          if (_this.keys[i] === undefined || !isUnique) {
+            for (var j = value.length - 1; j >= 0; j--) {
+              if (value[j] === data) {
+                dataLocation = {
+                  found: true,
+                  index: j
+                };
+                break;
+              }
+            }
+          } else if (isUnique) {
+            dataLocation = binarySearch(value, data, _this.hashCode);
+          }
           if (dataLocation.found) {
             removeAt(value, dataLocation.index);
             if (value.length === 0) {
@@ -3515,8 +3533,10 @@
       return removed ? data : undefined;
     },
     updateRecord: function updateRecord(data) {
-      this.removeRecord(data);
-      this.insertRecord(data);
+      var removed = this.removeRecord(data);
+      if (removed !== undefined) {
+        this.insertRecord(data);
+      }
     }
   });
 
@@ -3750,11 +3770,8 @@
       // option.
       records = records.map(function (record) {
         var id = _this.recordId(record);
-        if (!utils.isSorN(id)) {
-          throw utils.err(DOMAIN$1 + '#add', 'record.' + idAttribute)(400, 'string or number', id);
-        }
         // Grab existing record if there is one
-        var existing = _this.get(id);
+        var existing = id === undefined ? id : _this.get(id);
         // If the currently visited record is just a reference to an existing
         // record, then there is nothing to be done. Exit early.
         if (record === existing) {
@@ -3769,8 +3786,8 @@
             utils.deepMixIn(existing, record);
           } else if (onConflict === 'replace') {
             utils.forOwn(existing, function (value, key) {
-              if (key !== idAttribute && !record.hasOwnProperty(key)) {
-                delete existing[key];
+              if (key !== idAttribute && record[key] === undefined) {
+                existing[key] = undefined;
               }
             });
             existing.set(record);
@@ -4139,21 +4156,15 @@
 
 
     /**
-     * Return the primary key of the given, or if no record is provided, return the
-     * name of the field that holds the primary key of records in this Collection.
+     * Return all "unsaved" (not uniquely identifiable) records in this colleciton.
      *
-     * @method Collection#recordId
+     * @method Collection#prune
+     * @param {Object} [opts] Configuration options, passed to {@link Collection#removeAll}.
      * @since 3.0.0
-     * @param {(Object|Record)} [record] The record whose primary key is to be
-     * returned.
-     * @returns {(string|number)} Primary key or name of field that holds primary
-     * key.
+     * @returns {Array} The removed records, if any.
      */
-    recordId: function recordId(record) {
-      if (record) {
-        return utils.get(record, this.recordId());
-      }
-      return this.mapper ? this.mapper.idAttribute : this.idAttribute;
+    prune: function prune(opts) {
+      return this.removeAll(this.unsaved(), opts);
     },
 
 
@@ -4176,6 +4187,25 @@
     query: function query() {
       var Ctor = this.queryClass;
       return new Ctor(this);
+    },
+
+
+    /**
+     * Return the primary key of the given, or if no record is provided, return the
+     * name of the field that holds the primary key of records in this Collection.
+     *
+     * @method Collection#recordId
+     * @since 3.0.0
+     * @param {(Object|Record)} [record] The record whose primary key is to be
+     * returned.
+     * @returns {(string|number)} Primary key or name of field that holds primary
+     * key.
+     */
+    recordId: function recordId(record) {
+      if (record) {
+        return utils.get(record, this.recordId());
+      }
+      return this.mapper ? this.mapper.idAttribute : this.idAttribute;
     },
 
 
@@ -4204,64 +4234,70 @@
      *
      * @method Collection#remove
      * @since 3.0.0
-     * @param {(string|number)} id The primary key of the record to be removed.
+     * @param {(string|number|object|Record)} idOrRecord The primary key of the
+     * record to be removed, or a reference to the record that is to be removed.
      * @param {Object} [opts] Configuration options.
      * @returns {Object|Record} The removed record, if any.
      */
-    remove: function remove(id, opts) {
+    remove: function remove(idOrRecord, opts) {
       // Default values for arguments
       opts || (opts = {});
-      this.beforeRemove(id, opts);
-      var record = this.get(id);
+      this.beforeRemove(idOrRecord, opts);
+      var record = utils.isSorN(idOrRecord) ? this.get(idOrRecord) : idOrRecord;
 
       // The record is in the collection, remove it
-      if (record) {
-        this.index.removeRecord(record);
-        utils.forOwn(this.indexes, function (index, name) {
-          index.removeRecord(record);
-        });
-        if (record && utils.isFunction(record.off)) {
-          record.off('all', this._onRecordEvent, this);
-          if (!opts.silent) {
-            this.emit('remove', record);
+      if (utils.isObject(record)) {
+        record = this.index.removeRecord(record);
+        if (record) {
+          utils.forOwn(this.indexes, function (index, name) {
+            index.removeRecord(record);
+          });
+          if (utils.isFunction(record.off)) {
+            record.off('all', this._onRecordEvent, this);
+            if (!opts.silent) {
+              this.emit('remove', record);
+            }
           }
         }
       }
-      return this.afterRemove(id, opts, record) || record;
+      return this.afterRemove(idOrRecord, opts, record) || record;
     },
 
 
     /**
-     * Remove the record selected by "query" from this collection.
+     * Remove from this collection the given records or the records selected by
+     * the given "query".
      *
      * @method Collection#removeAll
      * @since 3.0.0
-     * @param {Object} [query={}] Selection query. See {@link query}.
-     * @param {Object} [query.where] See {@link query.where}.
-     * @param {number} [query.offset] See {@link query.offset}.
-     * @param {number} [query.limit] See {@link query.limit}.
-     * @param {string|Array[]} [query.orderBy] See {@link query.orderBy}.
+     * @param {Object|Object[]|Record[]} [queryOrRecords={}] Records to be removed or selection query. See {@link query}.
+     * @param {Object} [queryOrRecords.where] See {@link query.where}.
+     * @param {number} [queryOrRecords.offset] See {@link query.offset}.
+     * @param {number} [queryOrRecords.limit] See {@link query.limit}.
+     * @param {string|Array[]} [queryOrRecords.orderBy] See {@link query.orderBy}.
      * @param {Object} [opts] Configuration options.
      * @returns {(Object[]|Record[])} The removed records, if any.
      */
-    removeAll: function removeAll(query, opts) {
+    removeAll: function removeAll(queryOrRecords, opts) {
       var _this3 = this;
 
       // Default values for arguments
       opts || (opts = {});
-      this.beforeRemoveAll(query, opts);
-      var records = this.filter(query);
+      this.beforeRemoveAll(queryOrRecords, opts);
+      var records = utils.isArray(queryOrRecords) ? queryOrRecords.slice() : this.filter(queryOrRecords);
 
       // Remove each selected record from the collection
       var optsCopy = utils.plainCopy(opts);
       optsCopy.silent = true;
-      records.forEach(function (item) {
-        _this3.remove(_this3.recordId(item), optsCopy);
+      records = records.map(function (record) {
+        return _this3.remove(record, optsCopy);
+      }).filter(function (record) {
+        return record;
       });
       if (!opts.silent) {
         this.emit('remove', records);
       }
-      return this.afterRemoveAll(query, opts, records) || records;
+      return this.afterRemoveAll(queryOrRecords, opts, records) || records;
     },
 
 
@@ -4296,6 +4332,18 @@
      */
     toJSON: function toJSON(opts) {
       return this.mapCall('toJSON', opts);
+    },
+
+
+    /**
+     * Return all "unsaved" (not uniquely identifiable) records in this colleciton.
+     *
+     * @method Collection#unsaved
+     * @since 3.0.0
+     * @returns {Array} The unsaved records, if any.
+     */
+    unsaved: function unsaved(opts) {
+      return this.index.get();
     },
 
 
@@ -4590,6 +4638,12 @@
     if (opts.noValidate) {
       _set('noValidate', true);
     }
+    // Set the idAttribute value first, if it exists.
+    var mapper = this.constructor.mapper;
+    var id = mapper ? utils.get(props, mapper.idAttribute) : undefined;
+    if (id !== undefined) {
+      utils.set(this, mapper.idAttribute, id);
+    }
     utils.fillIn(this, props);
     _set('creating', false);
     _set('noValidate', false);
@@ -4635,6 +4689,18 @@
      * @since 3.0.0
      */
     beforeLoadRelations: function beforeLoadRelations() {},
+
+
+    /**
+     * Return the change history of this record since it was instantiated or
+     * {@link Record#commit} was called.
+     *
+     * @method Record#changeHistory
+     * @since 3.0.0
+     */
+    changeHistory: function changeHistory() {
+      return (this._get('history') || []).slice();
+    },
 
 
     /**
@@ -4692,6 +4758,7 @@
      */
     commit: function commit() {
       this._set('changed'); // unset
+      this._set('history', []); // clear history
       this._set('previous', utils.plainCopy(this));
     },
 
@@ -4779,6 +4846,33 @@
     hasChanges: function hasChanges(opts) {
       var quickHasChanges = !!(this._get('changed') || []).length;
       return quickHasChanges || utils.areDifferent(typeof this.toJSON === 'function' ? this.toJSON(opts) : this, this._get('previous'), opts);
+    },
+
+
+    /**
+     * Return whether the record is unsaved. Records that have primary keys are
+     * considered "saved". Records without primary keys are considered "unsaved".
+     *
+     * @example <caption>Record#isNew</caption>
+     * // Normally you would do: import {Container} from 'js-data'
+     * const JSData = require('js-data@3.0.0-beta.7')
+     * const {Container} = JSData
+     * console.log('Using JSData v' + JSData.version.full)
+     * const store = new Container()
+     * store.defineMapper('user')
+     * const user = store.createRecord('user', {
+     *   id: 1234
+     * })
+     * const user2 = store.createRecord('user')
+     * console.log('user isNew: ' + user.isNew()) // false
+     * console.log('user2 isNew: ' + user2.isNew()) // true
+     *
+     * @method Record#isNew
+     * @returns {boolean} Whether the record is unsaved.
+     * @since 3.0.0
+     */
+    isNew: function isNew(opts) {
+      return utils.get(this, this._mapper().idAttribute) === undefined;
     },
 
 
@@ -5061,8 +5155,18 @@
       var mapper = this._mapper();
       var id = utils.get(this, mapper.idAttribute);
       var props = this;
-      if (utils.isUndefined(id)) {
-        return superMethod(mapper, 'create')(props, opts);
+
+      var postProcess = function postProcess(result) {
+        var record = opts.raw ? result.data : result;
+        if (record) {
+          utils.deepMixIn(_this3, record);
+          _this3.commit();
+        }
+        return result;
+      };
+
+      if (id === undefined) {
+        return superMethod(mapper, 'create')(props, opts).then(postProcess);
       }
       if (opts.changesOnly) {
         var changes = this.changes(opts);
@@ -5070,14 +5174,7 @@
         utils.fillIn(props, changes.added);
         utils.fillIn(props, changes.changed);
       }
-      return superMethod(mapper, 'update')(id, props, opts).then(function (result) {
-        var record = opts.raw ? result.data : result;
-        if (record) {
-          utils.deepMixIn(_this3, record);
-          _this3.commit();
-        }
-        return result;
-      });
+      return superMethod(mapper, 'update')(id, props, opts).then(postProcess);
     },
 
 
@@ -5764,7 +5861,7 @@
       // Can be a boolean or an object
       // Technically the default is an "empty schema", but here "true" is
       // functionally the same
-      var additionalProperties = utils.isUndefined(schema.additionalProperties) ? true : schema.additionalProperties;
+      var additionalProperties = schema.additionalProperties === undefined ? true : schema.additionalProperties;
       // "s": The property set of the instance to validate.
       var toValidate = {};
       // "p": The property set from "properties".
@@ -5781,7 +5878,7 @@
       });
       // Remove from "s" all elements of "p", if any.
       utils.forOwn(properties || {}, function (_schema, prop) {
-        if (utils.isUndefined(value[prop]) && !utils.isUndefined(_schema['default'])) {
+        if (value[prop] === undefined && _schema['default'] !== undefined) {
           value[prop] = utils.copy(_schema['default']);
         }
         opts.prop = prop;
@@ -5834,7 +5931,7 @@
       var errors = [];
       if (!opts.existingOnly) {
         required.forEach(function (prop) {
-          if (utils.isUndefined(utils.get(value, prop))) {
+          if (utils.get(value, prop) === undefined) {
             var prevProp = opts.prop;
             opts.prop = prop;
             addError(undefined, 'a value', opts, errors);
@@ -5875,7 +5972,7 @@
       });
       // Value did not match any expected type
       if (!validType) {
-        return makeError(!utils.isUndefined(value) && value !== null ? typeof value === 'undefined' ? 'undefined' : _typeof(value) : '' + value, 'one of (' + type.join(', ') + ')', opts);
+        return makeError(value !== undefined && value !== null ? typeof value === 'undefined' ? 'undefined' : _typeof(value) : '' + value, 'one of (' + type.join(', ') + ')', opts);
       }
       // Run keyword validators for matched type
       // http://json-schema.org/latest/json-schema-validation.html#anchor12
@@ -5923,7 +6020,7 @@
    * @ignore
    */
   var validateKeyword = function validateKeyword(op, value, schema, opts) {
-    return !utils.isUndefined(schema[op]) && validationKeywords[op](value, schema, opts);
+    return schema[op] !== undefined && validationKeywords[op](value, schema, opts);
   };
 
   /**
@@ -5966,17 +6063,17 @@
     opts || (opts = {});
     var shouldPop = void 0;
     var prevProp = opts.prop;
-    if (utils.isUndefined(schema)) {
+    if (schema === undefined) {
       return;
     }
     if (!utils.isObject(schema)) {
       throw utils.err(DOMAIN$6 + '#validate')(500, 'Invalid schema at path: "' + opts.path + '"');
     }
-    if (utils.isUndefined(opts.path)) {
+    if (opts.path === undefined) {
       opts.path = [];
     }
     // Track our location as we recurse
-    if (!utils.isUndefined(opts.prop)) {
+    if (opts.prop !== undefined) {
       shouldPop = true;
       opts.path.push(opts.prop);
       opts.prop = undefined;
@@ -5991,7 +6088,7 @@
         errors = errors.concat(_validate(value, schema['extends'], opts) || []);
       }
     }
-    if (utils.isUndefined(value)) {
+    if (value === undefined) {
       // Check if property is required
       if (schema.required === true && !opts.existingOnly) {
         addError(value, 'a value', opts, errors);
@@ -6016,6 +6113,8 @@
   var changingPath = 'changing';
   // string[] - Properties that have changed in the current execution frame
   var changedPath = 'changed';
+  // Object[] - History of change records
+  var changeHistoryPath = 'history';
   // boolean - Whether a Record is currently being instantiated
   var creatingPath = 'creating';
   // number - The setTimeout change event id of a Record, if any
@@ -6040,7 +6139,7 @@
       configurable: true,
       // These properties are enumerable by default, but regardless of their
       // enumerability, they won't be "own" properties of individual records
-      enumerable: utils.isUndefined(schema.enumerable) ? true : !!schema.enumerable
+      enumerable: schema.enumerable === undefined ? true : !!schema.enumerable
     };
     // Cache a few strings for optimal performance
     var keyPath = 'props.' + prop;
@@ -6137,7 +6236,13 @@
                 for (i = 0; i < changed.length; i++) {
                   _this.emit('change:' + changed[i], _this, utils.get(_this, changed[i]));
                 }
-                _this.emit('change', _this, _this.changes());
+                var changes = _this.changes();
+                var changeRecord = utils.plainCopy(changes);
+                changeRecord.timestamp = new Date().getTime();
+                var changeHistory = _get(changeHistoryPath) || [];
+                _set(changeHistoryPath, changeHistory);
+                changeHistory.push(changeRecord);
+                _this.emit('change', _this, changes);
               }
               _unset(silentPath);
             }, 0));
@@ -6283,7 +6388,7 @@
   /**
    * js-data's Schema class.
    *
-   * @example Schema#constructor</caption>
+   * @example <caption>Schema#constructor</caption>
    * // Normally you would do:  import {Schema} from 'js-data'
    * const JSData = require('js-data@3.0.0-beta.7')
    * const {Schema} = JSData
@@ -6400,7 +6505,7 @@
 
   utils.addHiddenPropsToTarget(Relation.prototype, {
     get canAutoAddLinks() {
-      return utils.isUndefined(this.add) || !!this.add;
+      return this.add === undefined || !!this.add;
     },
 
     get relatedCollection() {
@@ -6441,7 +6546,7 @@
       mapper.relationFields.push(this.localField);
     },
     canFindLinkFor: function canFindLinkFor() {
-      return Boolean(this.foreignKey || this.localKey);
+      return !!(this.foreignKey || this.localKey);
     },
     getRelation: function getRelation() {
       return this.relatedMapper;
@@ -6456,24 +6561,24 @@
 
       this._setForeignKey(record, relatedRecord);
     },
-    _setForeignKey: function _setForeignKey(record, relatedRecord) {
+    _setForeignKey: function _setForeignKey(record, relatedRecords) {
       var _this = this;
 
       var idAttribute = this.mapper.idAttribute;
 
-      if (!utils.isArray(relatedRecord)) {
-        relatedRecord = [relatedRecord];
+      if (!utils.isArray(relatedRecords)) {
+        relatedRecords = [relatedRecords];
       }
 
-      relatedRecord.forEach(function (relatedRecordItem) {
-        utils.set(relatedRecordItem, _this.foreignKey, utils.get(record, idAttribute));
+      relatedRecords.forEach(function (relatedRecord) {
+        utils.set(relatedRecord, _this.foreignKey, utils.get(record, idAttribute));
       });
     },
     getLocalField: function getLocalField(record) {
       return utils.get(record, this.localField);
     },
-    setLocalField: function setLocalField(record, data) {
-      return utils.set(record, this.localField, data);
+    setLocalField: function setLocalField(record, relatedData) {
+      return utils.set(record, this.localField, relatedData);
     },
     getInverse: function getInverse(mapper) {
       if (!this.inverse) {
@@ -6495,7 +6600,7 @@
     isInversedTo: function isInversedTo(def) {
       return !def.foreignKey || def.foreignKey === this.foreignKey;
     },
-    linkRecords: function linkRecords(relatedMapper, records) {
+    addLinkedRecords: function addLinkedRecords(records) {
       var _this3 = this;
 
       var datastore = this.mapper.datastore;
@@ -6512,7 +6617,7 @@
         var isEmptyLinks = !relatedData || utils.isArray(relatedData) && !relatedData.length;
 
         if (isEmptyLinks && _this3.canFindLinkFor(record)) {
-          relatedData = _this3.findExistingLinksFor(relatedMapper, record);
+          relatedData = _this3.findExistingLinksFor(record);
         }
 
         if (relatedData) {
@@ -6520,21 +6625,49 @@
         }
       });
     },
+    removeLinkedRecords: function removeLinkedRecords(relatedMapper, records) {
+      var _this4 = this;
+
+      var localField = this.localField;
+      records.forEach(function (record) {
+        var relatedData = utils.get(record, localField);
+        _this4.unlinkInverseRecords(relatedData);
+        utils.set(record, localField, undefined);
+      });
+    },
+    unlinkInverseRecords: function unlinkInverseRecords(record) {
+      if (!record) {
+        return;
+      }
+      utils.set(record, this.getInverse(this.mapper).localField, undefined);
+    },
     linkRecord: function linkRecord(record, relatedRecord) {
       var relatedId = utils.get(relatedRecord, this.mapper.idAttribute);
 
-      if (relatedRecord !== this.relatedCollection.get(relatedId)) {
-        this.setForeignKey(record, relatedRecord);
+      if (relatedId === undefined) {
+        var unsaved = this.relatedCollection.unsaved();
+        if (unsaved.indexOf(relatedRecord) === -1) {
+          if (this.canAutoAddLinks) {
+            relatedRecord = this.relatedCollection.add(relatedRecord);
+          }
+        }
+      } else {
+        if (relatedRecord !== this.relatedCollection.get(relatedId)) {
+          this.setForeignKey(record, relatedRecord);
 
-        if (this.canAutoAddLinks) {
-          relatedRecord = this.relatedCollection.add(relatedRecord);
+          if (this.canAutoAddLinks) {
+            relatedRecord = this.relatedCollection.add(relatedRecord);
+          }
         }
       }
 
       return relatedRecord;
     },
-    findExistingLinksByForeignKey: function findExistingLinksByForeignKey(foreignId) {
-      return this.relatedCollection.filter(defineProperty({}, this.foreignKey, foreignId));
+
+
+    // e.g. user hasMany post via "foreignKey", so find all posts of user
+    findExistingLinksByForeignKey: function findExistingLinksByForeignKey(id) {
+      return this.relatedCollection.filter(defineProperty({}, this.foreignKey, id));
     }
   });
 
@@ -6545,10 +6678,13 @@
     _setForeignKey: function _setForeignKey(record, relatedRecord) {
       utils.set(record, this.foreignKey, utils.get(relatedRecord, this.getRelation().idAttribute));
     },
-    findExistingLinksFor: function findExistingLinksFor(relatedMapper, record) {
+    findExistingLinksFor: function findExistingLinksFor(record) {
+      // console.log('\tBelongsTo#findExistingLinksFor', record)
+      if (!record) {
+        return;
+      }
       var relatedId = utils.get(record, this.foreignKey);
-
-      if (!utils.isUndefined(relatedId)) {
+      if (relatedId !== undefined) {
         return this.relatedCollection.get(relatedId);
       }
     }
@@ -6571,59 +6707,75 @@
     },
     canFindLinkFor: function canFindLinkFor(record) {
       var hasForeignKeys = this.foreignKey || this.foreignKeys;
-
-      return Boolean(hasForeignKeys || this.localKeys && utils.get(record, this.localKeys));
+      return !!(hasForeignKeys || this.localKeys && utils.get(record, this.localKeys));
+    },
+    unlinkInverseRecords: function unlinkInverseRecords(records) {
+      if (!records) {
+        return;
+      }
+      var localField = this.getInverse(this.mapper).localField;
+      records.forEach(function (record) {
+        utils.set(record, localField, undefined);
+      });
     },
     linkRecord: function linkRecord(record, relatedRecords) {
       var _this = this;
 
       var relatedCollection = this.relatedCollection;
+      var canAutoAddLinks = this.canAutoAddLinks;
+      var foreignKey = this.foreignKey;
+      var unsaved = this.relatedCollection.unsaved();
 
-      return relatedRecords.map(function (toInsertItem) {
-        var relatedId = relatedCollection.recordId(toInsertItem);
+      return relatedRecords.map(function (relatedRecord) {
+        var relatedId = relatedCollection.recordId(relatedRecord);
 
-        if (toInsertItem !== relatedCollection.get(relatedId)) {
-          if (_this.foreignKey) {
+        if (relatedId === undefined && unsaved.indexOf(relatedRecord) === -1 || relatedRecord !== relatedCollection.get(relatedId)) {
+          if (foreignKey) {
             // TODO: slow, could be optimized? But user loses hook
-            _this.setForeignKey(record, toInsertItem);
+            _this.setForeignKey(record, relatedRecord);
           }
-
-          if (_this.canAutoAddLinks) {
-            toInsertItem = relatedCollection.add(toInsertItem);
+          if (canAutoAddLinks) {
+            relatedRecord = relatedCollection.add(relatedRecord);
           }
         }
 
-        return toInsertItem;
+        return relatedRecord;
       });
     },
-    findExistingLinksFor: function findExistingLinksFor(relatedMapper, record) {
-      var recordId = utils.get(record, relatedMapper.idAttribute);
-      var localKeysValue = this.localKeys ? utils.get(record, this.localKeys) : null;
+    findExistingLinksFor: function findExistingLinksFor(record) {
+      var id = utils.get(record, this.mapper.idAttribute);
+      var ids = this.localKeys ? utils.get(record, this.localKeys) : null;
       var records = void 0;
 
-      if (this.foreignKey) {
-        records = this.findExistingLinksByForeignKey(recordId);
-      } else if (this.localKeys && localKeysValue) {
-        records = this.findExistingLinksByLocalKeys(localKeysValue);
-      } else if (this.foreignKeys) {
-        records = this.findExistingLinksByForeignKeys(recordId);
+      if (id !== undefined && this.foreignKey) {
+        records = this.findExistingLinksByForeignKey(id);
+      } else if (this.localKeys && ids) {
+        records = this.findExistingLinksByLocalKeys(ids);
+      } else if (id !== undefined && this.foreignKeys) {
+        records = this.findExistingLinksByForeignKeys(id);
       }
 
       if (records && records.length) {
         return records;
       }
     },
-    findExistingLinksByLocalKeys: function findExistingLinksByLocalKeys(localKeysValue) {
+
+
+    // e.g. user hasMany group via "foreignKeys", so find all users of a group
+    findExistingLinksByLocalKeys: function findExistingLinksByLocalKeys(ids) {
       return this.relatedCollection.filter({
         where: defineProperty({}, this.mapper.idAttribute, {
-          'in': localKeysValue
+          'in': ids
         })
       });
     },
-    findExistingLinksByForeignKeys: function findExistingLinksByForeignKeys(foreignId) {
+
+
+    // e.g. group hasMany user via "localKeys", so find all groups that own a user
+    findExistingLinksByForeignKeys: function findExistingLinksByForeignKeys(id) {
       return this.relatedCollection.filter({
         where: defineProperty({}, this.foreignKeys, {
-          'contains': foreignId
+          'contains': id
         })
       });
     }
@@ -6730,7 +6882,7 @@
         var originalExistingOnly = opts.existingOnly;
 
         // For updates, ignore required fields if they aren't present
-        if (op.indexOf('beforeUpdate') === 0 && utils.isUndefined(opts.existingOnly)) {
+        if (op.indexOf('beforeUpdate') === 0 && opts.existingOnly === undefined) {
           opts.existingOnly = true;
         }
         var errors = this.validate(args[op === 'beforeUpdate' ? 1 : 0], utils.pick(opts, ['existingOnly']));
@@ -6961,6 +7113,30 @@
       },
 
       /**
+       * The {@link Container} that holds this Mapper. __Do not modify.__
+       *
+       * @name Mapper#lifecycleMethods
+       * @since 3.0.0
+       * @type {Object}
+       */
+      datastore: {
+        value: undefined,
+        writable: true
+      },
+
+      /**
+       * The meta information describing this Mapper's available lifecycle
+       * methods. __Do not modify.__
+       *
+       * @name Mapper#lifecycleMethods
+       * @since 3.0.0
+       * @type {Object}
+       */
+      lifecycleMethods: {
+        value: LIFECYCLE_METHODS
+      },
+
+      /**
        * Set to `false` to force the Mapper to work with POJO objects only.
        *
        * @example
@@ -7014,18 +7190,6 @@
       recordClass: {
         value: undefined,
         writable: true
-      },
-
-      /**
-       * The meta information describing this Mapper's available lifecycle
-       * methods. __Do not modify.__
-       *
-       * @name Mapper#lifecycleMethods
-       * @since 3.0.0
-       * @type {Object}
-       */
-      lifecycleMethods: {
-        value: LIFECYCLE_METHODS
       },
 
       /**
@@ -7101,7 +7265,7 @@
     }
 
     // Create a subclass of Record that's tied to this Mapper
-    if (utils.isUndefined(this.recordClass)) {
+    if (this.recordClass === undefined) {
       (function () {
         var superClass = Record$1;
         _this2.recordClass = superClass.extend({
@@ -7612,6 +7776,7 @@
       // Default values for arguments
       props || (props = {});
       opts || (opts = {});
+      var originalRecord = props;
 
       // Fill in "opts" with the Mapper's configuration
       utils._(opts, this);
@@ -7621,7 +7786,7 @@
       op = opts.op = 'beforeCreate';
       return utils.resolve(this[op](props, opts)).then(function (_props) {
         // Allow for re-assignment from lifecycle hook
-        props = utils.isUndefined(_props) ? props : _props;
+        props = _props === undefined ? props : _props;
 
         // Deep pre-create belongsTo relations
         var belongsToRelationData = {};
@@ -7657,8 +7822,9 @@
           op = opts.op = 'create';
           _this3.dbg(op, props, opts);
           return utils.resolve(_this3.getAdapter(adapter)[op](_this3, _this3.toJSON(props, { with: opts.pass || [] }), opts));
-        }).then(function (data) {
-          var createdRecord = opts.raw ? data.data : data;
+        }).then(function (result) {
+          var createdRecordData = opts.raw ? result.data : result;
+
           // Deep post-create hasMany and hasOne relations
           tasks = [];
           utils.forEachRelation(_this3, opts, function (def, optsCopy) {
@@ -7671,26 +7837,35 @@
             // Create hasMany and hasOne after the main create because we needed
             // a generated id to attach to these items
             if (def.type === hasManyType && def.foreignKey) {
-              def.setForeignKey(createdRecord, relationData);
-              task = def.getRelation().createMany(relationData, optsCopy).then(function (data) {
-                def.setLocalField(createdRecord, data);
+              def.setForeignKey(createdRecordData, relationData);
+              task = def.getRelation().createMany(relationData, optsCopy).then(function (result) {
+                def.setLocalField(createdRecordData, result);
               });
             } else if (def.type === hasOneType) {
-              def.setForeignKey(createdRecord, relationData);
-              task = def.getRelation().create(relationData, optsCopy).then(function (data) {
-                def.setLocalField(createdRecord, data);
+              def.setForeignKey(createdRecordData, relationData);
+              task = def.getRelation().create(relationData, optsCopy).then(function (result) {
+                def.setLocalField(createdRecordData, result);
               });
             } else if (def.type === belongsToType && def.getLocalField(belongsToRelationData)) {
-              def.setLocalField(createdRecord, def.getLocalField(belongsToRelationData));
+              def.setLocalField(createdRecordData, def.getLocalField(belongsToRelationData));
             } else if (def.type === hasManyType && def.localKeys && def.getLocalField(belongsToRelationData)) {
-              def.setLocalField(createdRecord, def.getLocalField(belongsToRelationData));
+              def.setLocalField(createdRecordData, def.getLocalField(belongsToRelationData));
             }
             if (task) {
               tasks.push(task);
             }
           });
           return utils.Promise.all(tasks).then(function () {
-            return data;
+            utils.set(originalRecord, createdRecordData, { silent: true });
+            if (utils.isFunction(originalRecord.commit)) {
+              originalRecord.commit();
+            }
+            if (opts.raw) {
+              result.data = originalRecord;
+            } else {
+              result = originalRecord;
+            }
+            return result;
           });
         });
       }).then(function (result) {
@@ -7699,7 +7874,7 @@
         op = opts.op = 'afterCreate';
         return utils.resolve(_this3[op](props, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          return utils.isUndefined(_result) ? result : _result;
+          return _result === undefined ? result : _result;
         });
       });
     },
@@ -7816,6 +7991,7 @@
       // Default values for arguments
       records || (records = []);
       opts || (opts = {});
+      var originalRecords = records;
 
       // Fill in "opts" with the Mapper's configuration
       utils._(opts, this);
@@ -7825,7 +8001,7 @@
       op = opts.op = 'beforeCreateMany';
       return utils.resolve(this[op](records, opts)).then(function (_records) {
         // Allow for re-assignment from lifecycle hook
-        records = utils.isUndefined(_records) ? records : _records;
+        records = _records === undefined ? records : _records;
 
         // Deep pre-create belongsTo relations
         var belongsToRelationData = {};
@@ -7857,8 +8033,8 @@
           });
           _this4.dbg(op, records, opts);
           return utils.resolve(_this4.getAdapter(adapter)[op](_this4, json, opts));
-        }).then(function (data) {
-          var createdRecords = opts.raw ? data.data : data;
+        }).then(function (result) {
+          var createdRecordsData = opts.raw ? result.data : result;
 
           // Deep post-create hasOne relations
           tasks = [];
@@ -7879,18 +8055,18 @@
               // Not supported
               _this4.log('warn', 'deep createMany of hasMany type not supported!');
             } else if (def.type === hasOneType) {
-              createdRecords.forEach(function (createdRecord, i) {
-                def.setForeignKey(createdRecord, relationData[i]);
+              createdRecordsData.forEach(function (createdRecordData, i) {
+                def.setForeignKey(createdRecordData, relationData[i]);
               });
-              task = def.getRelation().createMany(relationData, optsCopy).then(function (data) {
-                var relatedData = opts.raw ? data.data : data;
-                createdRecords.forEach(function (createdRecord, i) {
-                  def.setLocalField(createdRecord, relatedData[i]);
+              task = def.getRelation().createMany(relationData, optsCopy).then(function (result) {
+                var relatedData = opts.raw ? result.data : result;
+                createdRecordsData.forEach(function (createdRecordData, i) {
+                  def.setLocalField(createdRecordData, relatedData[i]);
                 });
               });
-            } else if (def.type === belongsToType && belongsToData && belongsToData.length === createdRecords.length) {
-              createdRecords.forEach(function (createdRecord, i) {
-                def.setLocalField(createdRecord, belongsToData[i]);
+            } else if (def.type === belongsToType && belongsToData && belongsToData.length === createdRecordsData.length) {
+              createdRecordsData.forEach(function (createdRecordData, i) {
+                def.setLocalField(createdRecordData, belongsToData[i]);
               });
             }
             if (task) {
@@ -7898,7 +8074,19 @@
             }
           });
           return utils.Promise.all(tasks).then(function () {
-            return data;
+            createdRecordsData.forEach(function (createdRecordData, i) {
+              var originalRecord = originalRecords[i];
+              utils.set(originalRecord, createdRecordData, { silent: true });
+              if (utils.isFunction(originalRecord.commit)) {
+                originalRecord.commit();
+              }
+            });
+            if (opts.raw) {
+              result.data = originalRecords;
+            } else {
+              result = originalRecords;
+            }
+            return result;
           });
         });
       }).then(function (result) {
@@ -7907,7 +8095,7 @@
         op = opts.op = 'afterCreateMany';
         return utils.resolve(_this4[op](records, opts, result)).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          return utils.isUndefined(_result) ? result : _result;
+          return _result === undefined ? result : _result;
         });
       });
     },
@@ -8048,7 +8236,7 @@
 
       // Default values for arguments
       config.defaults.forEach(function (value, i) {
-        if (utils.isUndefined(args[i])) {
+        if (args[i] === undefined) {
           args[i] = utils.copy(value);
         }
       });
@@ -8064,9 +8252,9 @@
       return utils.resolve(this[op].apply(this, toConsumableArray(args))).then(function (_value) {
         var _getAdapter;
 
-        if (!utils.isUndefined(args[config.beforeAssign])) {
+        if (args[config.beforeAssign] !== undefined) {
           // Allow for re-assignment from lifecycle hook
-          args[config.beforeAssign] = utils.isUndefined(_value) ? args[config.beforeAssign] : _value;
+          args[config.beforeAssign] = _value === undefined ? args[config.beforeAssign] : _value;
         }
         // Now delegate to the adapter
         op = opts.op = method;
@@ -8080,7 +8268,7 @@
         op = opts.op = after;
         return utils.resolve(_this6[op].apply(_this6, toConsumableArray(args))).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
-          return utils.isUndefined(_result) ? result : _result;
+          return _result === undefined ? result : _result;
         });
       });
     },
@@ -10555,12 +10743,26 @@
   var LinkedCollection$1 = Collection$1.extend({
     constructor: LinkedCollection,
 
+    _addMeta: function _addMeta(record, timestamp) {
+      // Track when this record was added
+      this._added[this.recordId(record)] = timestamp;
+
+      if (utils.isFunction(record._set)) {
+        record._set('$', timestamp);
+      }
+    },
+    _clearMeta: function _clearMeta(record) {
+      delete this._added[this.recordId(record)];
+      if (utils.isFunction(record._set)) {
+        record._set('$'); // unset
+      }
+    },
     _onRecordEvent: function _onRecordEvent() {
       for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
         args[_key] = arguments[_key];
       }
 
-      utils.getSuper(this).prototype._onRecordEvent.apply(this, args);
+      Collection$1.prototype._onRecordEvent.apply(this, args);
       var event = args[0];
       // This is a very brute force method
       // Lots of room for optimization
@@ -10578,13 +10780,13 @@
       if (singular) {
         records = [records];
       }
-      records = utils.getSuper(this).prototype.add.call(this, records, opts);
+      records = Collection$1.prototype.add.call(this, records, opts);
 
       if (mapper.relationList.length && records.length) {
         // Check the currently visited record for relations that need to be
         // inserted into their respective collections.
         mapper.relationList.forEach(function (def) {
-          def.linkRecords(mapper, records);
+          def.addLinkedRecords(records);
         });
       }
 
@@ -10594,31 +10796,37 @@
 
       return singular ? records[0] : records;
     },
-    remove: function remove(id, opts) {
-      var record = utils.getSuper(this).prototype.remove.call(this, id, opts);
+    remove: function remove(idOrRecord, opts) {
+      var mapper = this.mapper;
+      var record = Collection$1.prototype.remove.call(this, idOrRecord, opts);
       if (record) {
         this._clearMeta(record);
       }
+
+      if (mapper.relationList.length && record) {
+        // Check the currently visited record for relations that need to be
+        // inserted into their respective collections.
+        mapper.relationList.forEach(function (def) {
+          def.removeLinkedRecords(mapper, [record]);
+        });
+      }
+
       return record;
     },
     removeAll: function removeAll(query, opts) {
-      var records = utils.getSuper(this).prototype.removeAll.call(this, query, opts);
+      var mapper = this.mapper;
+      var records = Collection$1.prototype.removeAll.call(this, query, opts);
       records.forEach(this._clearMeta, this);
-      return records;
-    },
-    _clearMeta: function _clearMeta(record) {
-      delete this._added[this.recordId(record)];
-      if (this.mapper.recordClass) {
-        record._set('$'); // unset
-      }
-    },
-    _addMeta: function _addMeta(record, timestamp) {
-      // Track when this record was added
-      this._added[this.recordId(record)] = timestamp;
 
-      if (this.mapper.recordClass) {
-        record._set('$', timestamp);
+      if (mapper.relationList.length && records.length) {
+        // Check the currently visited record for relations that need to be
+        // inserted into their respective collections.
+        mapper.relationList.forEach(function (def) {
+          def.removeLinkedRecords(mapper, records);
+        });
       }
+
+      return records;
     }
   });
 
@@ -10783,7 +10991,7 @@
    * console.log(posts)
    *
    * // Use a custom filter function
-   * posts = store.filter('post', (post) => post.id % 2 === 0)
+   * posts = store.filter('post', function (post) { return post.id % 2 === 0 })
    *
    * @method DataStore#filter
    * @param {(string|number)} name Name of the {@link Mapper} to target.
@@ -10847,6 +11055,18 @@
   'getAll',
 
   /**
+   * Wrapper for {@link LinkedCollection#prune}.
+   *
+   * @method DataStore#prune
+   * @param {Object} [opts] See {@link LinkedCollection#prune}.
+   * @returns {Array} See {@link LinkedCollection#prune}.
+   * @see LinkedCollection#prune
+   * @see Collection#prune
+   * @since 3.0.0
+   */
+  'prune',
+
+  /**
    * Wrapper for {@link LinkedCollection#query}.
    *
    * @example
@@ -10896,7 +11116,18 @@
    * @see Collection#toJSON
    * @since 3.0.0
    */
-  'toJSON'];
+  'toJSON',
+
+  /**
+   * Wrapper for {@link LinkedCollection#unsaved}.
+   *
+   * @method DataStore#unsaved
+   * @returns {Array} See {@link LinkedCollection#unsaved}.
+   * @see LinkedCollection#unsaved
+   * @see Collection#unsaved
+   * @since 3.0.0
+   */
+  'unsaved'];
   var ownMethodsForScoping = ['addToCache', 'cachedFind', 'cachedFindAll', 'cacheFind', 'cacheFindAll', 'hashQuery'];
 
   var safeSetProp = function safeSetProp(record, field, value) {
@@ -10931,8 +11162,33 @@
      * @default true
      * @name DataStore#unlinkOnDestroy
      * @since 3.0.0
+     * @type {boolean}
      */
-    unlinkOnDestroy: true
+    unlinkOnDestroy: true,
+
+    /**
+     * Whether to use the pending query if a `find` request for the specified
+     * record is currently underway. Can be set to `true`, `false`, or to a
+     * function that returns `true` or `false`.
+     *
+     * @default true
+     * @name DataStore#usePendingFind
+     * @since 3.0.0
+     * @type {boolean|Function}
+     */
+    usePendingFind: true,
+
+    /**
+     * Whether to use the pending query if a `findAll` request for the given query
+     * is currently underway. Can be set to `true`, `false`, or to a function that
+     * returns `true` or `false`.
+     *
+     * @default true
+     * @name DataStore#usePendingFindAll
+     * @since 3.0.0
+     * @type {boolean|Function}
+     */
+    usePendingFindAll: true
   };
 
   /**
@@ -10981,6 +11237,8 @@
    * @param {boolean} [opts.collectionClass={@link LinkedCollection}] See {@link DataStore#collectionClass}.
    * @param {boolean} [opts.debug=false] See {@link Component#debug}.
    * @param {boolean} [opts.unlinkOnDestroy=true] See {@link DataStore#unlinkOnDestroy}.
+   * @param {boolean|Function} [opts.usePendingFind=true] See {@link DataStore#usePendingFind}.
+   * @param {boolean|Function} [opts.usePendingFindAll=true] See {@link DataStore#usePendingFindAll}.
    * @returns {DataStore}
    * @see Container
    * @since 3.0.0
@@ -10993,7 +11251,7 @@
 
     opts || (opts = {});
     // Fill in any missing options with the defaults
-    utils.fillIn(opts, utils.plainCopy(DATASTORE_DEFAULTS));
+    utils.fillIn(opts, DATASTORE_DEFAULTS);
     Container.call(this, opts);
 
     this.collectionClass = this.collectionClass || LinkedCollection$1;
@@ -11621,7 +11879,7 @@
     defineMapper: function defineMapper(name, opts) {
       // Complexity of this method is beyond simply using => functions to bind context
       var self = this;
-      var mapper = utils.getSuper(self).prototype.defineMapper.call(self, name, opts);
+      var mapper = Container.prototype.defineMapper.call(self, name, opts);
       self._pendingQueries[name] = {};
       self._completedQueries[name] = {};
       mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] });
@@ -11687,28 +11945,35 @@
               // e.g. profile.user = someUser
               // or comment.post = somePost
               set: function set(record) {
-                var _self = this;
+                var _this6 = this;
+
                 // e.g. const otherUser = profile.user
-                var current = this._get(path);
+                var currentParent = this._get(path);
                 // e.g. profile.user === someUser
-                if (record === current) {
-                  return current;
+                if (record === currentParent) {
+                  return currentParent;
                 }
-                var id = utils.get(_self, idAttribute);
+                var id = utils.get(this, idAttribute);
                 var inverseDef = def.getInverse(mapper);
 
                 // e.g. profile.user !== someUser
                 // or comment.post !== somePost
-                if (current) {
+                if (currentParent) {
                   // e.g. otherUser.profile = undefined
                   if (inverseDef.type === hasOneType) {
-                    safeSetLink(current, inverseDef.localField, undefined);
+                    safeSetLink(currentParent, inverseDef.localField, undefined);
                   } else if (inverseDef.type === hasManyType) {
                     // e.g. remove comment from otherPost.comments
-                    var children = utils.get(current, inverseDef.localField);
-                    utils.remove(children, function (_record) {
-                      return id === utils.get(_record, idAttribute);
-                    });
+                    var children = utils.get(currentParent, inverseDef.localField);
+                    if (id === undefined) {
+                      utils.remove(children, function (child) {
+                        return child === _this6;
+                      });
+                    } else {
+                      utils.remove(children, function (child) {
+                        return child === _this6 || id === utils.get(child, idAttribute);
+                      });
+                    }
                   }
                 }
                 if (record) {
@@ -11717,35 +11982,39 @@
                   var relatedId = utils.get(record, relatedIdAttribute);
 
                   // Prefer store record
-                  if (!utils.isUndefined(relatedId)) {
+                  if (relatedId !== undefined && this._get('$')) {
                     record = self.get(relation, relatedId) || record;
                   }
 
                   // Set locals
                   // e.g. profile.user = someUser
                   // or comment.post = somePost
-                  _self._set(path, record);
-                  safeSetProp(_self, foreignKey, relatedId);
-                  collection.updateIndex(_self, updateOpts);
+                  safeSetLink(this, localField, record);
+                  safeSetProp(this, foreignKey, relatedId);
+                  collection.updateIndex(this, updateOpts);
 
                   // Update (set) inverse relation
                   if (inverseDef.type === hasOneType) {
                     // e.g. someUser.profile = profile
-                    safeSetLink(record, inverseDef.localField, _self);
+                    safeSetLink(record, inverseDef.localField, this);
                   } else if (inverseDef.type === hasManyType) {
                     // e.g. add comment to somePost.comments
                     var _children = utils.get(record, inverseDef.localField);
-                    utils.noDupeAdd(_children, _self, function (_record) {
-                      return id === utils.get(_record, idAttribute);
-                    });
+                    if (id === undefined) {
+                      utils.noDupeAdd(_children, this, function (child) {
+                        return child === _this6;
+                      });
+                    } else {
+                      utils.noDupeAdd(_children, this, function (child) {
+                        return child === _this6 || id === utils.get(child, idAttribute);
+                      });
+                    }
                   }
                 } else {
-                  // Unset locals
+                  // Unset in-memory link only
                   // e.g. profile.user = undefined
                   // or comment.post = undefined
-                  _self._set(path, undefined);
-                  safeSetProp(_self, foreignKey, undefined);
-                  collection.updateIndex(_self, updateOpts);
+                  safeSetLink(this, localField, undefined);
                 }
                 return record;
               }
@@ -11766,14 +12035,42 @@
             };
             var originalSet = foreignKeyDescriptor.set;
             foreignKeyDescriptor.set = function (value) {
+              var _this7 = this;
+
               if (originalSet) {
                 originalSet.call(this, value);
               }
-              if (utils.isUndefined(value)) {
-                // Unset locals
-                utils.set(this, localField, undefined);
-              } else {
-                safeSetProp(this, foreignKey, value);
+              var currentParent = utils.get(this, localField);
+              var id = utils.get(this, idAttribute);
+              var inverseDef = def.getInverse(mapper);
+              var currentParentId = currentParent ? utils.get(currentParent, def.getRelation().idAttribute) : undefined;
+
+              if (currentParent && currentParentId !== undefined && currentParentId !== value) {
+                if (inverseDef.type === hasOneType) {
+                  safeSetLink(currentParent, inverseDef.localField, undefined);
+                } else if (inverseDef.type === hasManyType) {
+                  var children = utils.get(currentParent, inverseDef.localField);
+                  if (id === undefined) {
+                    utils.remove(children, function (child) {
+                      return child === _this7;
+                    });
+                  } else {
+                    utils.remove(children, function (child) {
+                      return child === _this7 || id === utils.get(child, idAttribute);
+                    });
+                  }
+                }
+              }
+
+              safeSetProp(this, foreignKey, value);
+              collection.updateIndex(this, updateOpts);
+
+              if (value === undefined || value === null) {
+                if (currentParentId !== undefined) {
+                  // Unset locals
+                  utils.set(this, localField, undefined);
+                }
+              } else if (this._get('$')) {
                 var storeRecord = self.get(relation, value);
                 if (storeRecord) {
                   utils.set(this, localField, storeRecord);
@@ -11794,138 +12091,174 @@
 
             descriptor = {
               get: function get() {
-                var _self = this;
-                var current = getter.call(_self);
+                var current = getter.call(this);
                 if (!current) {
-                  _self._set(path, []);
+                  this._set(path, []);
                 }
-                return getter.call(_self);
+                return getter.call(this);
               },
 
               // e.g. post.comments = someComments
               // or user.groups = someGroups
               // or group.users = someUsers
               set: function set(records) {
-                var _self = this;
-                records || (records = []);
+                var _this8 = this;
+
                 if (records && !utils.isArray(records)) {
                   records = [records];
                 }
-                var id = utils.get(_self, idAttribute);
+                var id = utils.get(this, idAttribute);
                 var relatedIdAttribute = def.getRelation().idAttribute;
                 var inverseDef = def.getInverse(mapper);
                 var inverseLocalField = inverseDef.localField;
-                var current = _self._get(path) || [];
-                var linked = [];
-                var toLink = {};
+                var current = this._get(path) || [];
+                var toLink = [];
+                var toLinkIds = {};
 
-                records.forEach(function (record) {
-                  // e.g. comment.id
-                  var relatedId = utils.get(record, relatedIdAttribute);
-                  if (!utils.isUndefined(relatedId)) {
-                    // Prefer store record
-                    record = self.get(relation, relatedId) || record;
-                    // e.g. toLink[comment.id] = comment
-                    toLink[relatedId] = record;
-                    var _localField = utils.get(record, inverseLocalField);
-                    if (_localField) {
-                      var __localField = utils.get(_localField, localField);
+                if (records) {
+                  records.forEach(function (record) {
+                    // e.g. comment.id
+                    var relatedId = utils.get(record, relatedIdAttribute);
+                    var currentParent = utils.get(record, inverseLocalField);
+                    if (currentParent && currentParent !== _this8) {
+                      var currentChildrenOfParent = utils.get(currentParent, localField);
                       // e.g. somePost.comments.remove(comment)
-                      utils.remove(__localField, function (_record) {
-                        return relatedId === utils.get(_record, relatedIdAttribute);
-                      });
+                      if (relatedId === undefined) {
+                        utils.remove(currentChildrenOfParent, function (child) {
+                          return child === record;
+                        });
+                      } else {
+                        utils.remove(currentChildrenOfParent, function (child) {
+                          return child === record || relatedId === utils.get(child, relatedIdAttribute);
+                        });
+                      }
                     }
-                  }
-                  linked.push(record);
-                });
+                    if (relatedId !== undefined) {
+                      if (_this8._get('$')) {
+                        // Prefer store record
+                        record = self.get(relation, relatedId) || record;
+                      }
+                      // e.g. toLinkIds[comment.id] = comment
+                      toLinkIds[relatedId] = record;
+                    }
+                    toLink.push(record);
+                  });
+                }
 
                 // e.g. post.comments = someComments
                 if (foreignKey) {
                   current.forEach(function (record) {
                     // e.g. comment.id
                     var relatedId = utils.get(record, relatedIdAttribute);
-                    if (!utils.isUndefined(relatedId) && !(relatedId in toLink)) {
+                    if (relatedId === undefined && toLink.indexOf(record) === -1 || relatedId !== undefined && !(relatedId in toLinkIds)) {
                       // Update (unset) inverse relation
-                      // e.g. comment.post_id = undefined
-                      safeSetProp(record, foreignKey, undefined);
-                      // e.g. CommentCollection.updateIndex(comment, { index: 'post_id' })
-                      self.getCollection(relation).updateIndex(record, updateOpts);
+                      if (records) {
+                        // e.g. comment.post_id = undefined
+                        safeSetProp(record, foreignKey, undefined);
+                        // e.g. CommentCollection.updateIndex(comment, { index: 'post_id' })
+                        self.getCollection(relation).updateIndex(record, updateOpts);
+                      }
                       // e.g. comment.post = undefined
                       safeSetLink(record, inverseLocalField, undefined);
                     }
                   });
-                  linked.forEach(function (record) {
+                  toLink.forEach(function (record) {
                     // Update (set) inverse relation
                     // e.g. comment.post_id = post.id
                     safeSetProp(record, foreignKey, id);
                     // e.g. CommentCollection.updateIndex(comment, { index: 'post_id' })
                     self.getCollection(relation).updateIndex(record, updateOpts);
                     // e.g. comment.post = post
-                    safeSetLink(record, inverseLocalField, _self);
+                    safeSetLink(record, inverseLocalField, _this8);
                   });
                 } else if (localKeys) {
                   // Update locals
                   // e.g. group.users = someUsers
-                  var _localKeys = linked.map(function (record) {
-                    // Update (set) inverse relation
-                    // safeSetLink(record, inverseLocalField, _self)
-                    return utils.get(record, relatedIdAttribute);
+                  // Update (set) inverse relation
+                  var ids = toLink.map(function (child) {
+                    return utils.get(child, relatedIdAttribute);
+                  }).filter(function (id) {
+                    return id !== undefined;
                   });
                   // e.g. group.user_ids = [1,2,3,...]
-                  utils.set(_self, localKeys, _localKeys);
+                  utils.set(this, localKeys, ids);
                   // Update (unset) inverse relation
                   if (inverseDef.foreignKeys) {
-                    current.forEach(function (record) {
-                      var relatedId = utils.get(record, relatedIdAttribute);
-                      if (!utils.isUndefined(relatedId) && !(relatedId in toLink)) {
+                    current.forEach(function (child) {
+                      var relatedId = utils.get(child, relatedIdAttribute);
+                      if (relatedId === undefined && toLink.indexOf(child) === -1 || relatedId !== undefined && !(relatedId in toLinkIds)) {
                         // Update inverse relation
-                        // safeSetLink(record, inverseLocalField, undefined)
-                        var _localField = utils.get(record, inverseLocalField) || [];
+                        // safeSetLink(child, inverseLocalField, undefined)
+                        var parents = utils.get(child, inverseLocalField) || [];
                         // e.g. someUser.groups.remove(group)
-                        utils.remove(_localField, function (_record) {
-                          return id === utils.get(_record, idAttribute);
-                        });
+                        if (id === undefined) {
+                          utils.remove(parents, function (parent) {
+                            return parent === _this8;
+                          });
+                        } else {
+                          utils.remove(parents, function (parent) {
+                            return parent === _this8 || id === utils.get(parent, idAttribute);
+                          });
+                        }
                       }
                     });
-                    linked.forEach(function (record) {
+                    toLink.forEach(function (child) {
                       // Update (set) inverse relation
-                      var _localField = utils.get(record, inverseLocalField) || [];
+                      var parents = utils.get(child, inverseLocalField);
                       // e.g. someUser.groups.push(group)
-                      utils.noDupeAdd(_localField, _self, function (_record) {
-                        return id === utils.get(_record, idAttribute);
-                      });
+                      if (id === undefined) {
+                        utils.noDupeAdd(parents, _this8, function (parent) {
+                          return parent === _this8;
+                        });
+                      } else {
+                        utils.noDupeAdd(parents, _this8, function (parent) {
+                          return parent === _this8 || id === utils.get(parent, idAttribute);
+                        });
+                      }
                     });
                   }
                 } else if (foreignKeys) {
                   // e.g. user.groups = someGroups
                   // Update (unset) inverse relation
-                  current.forEach(function (record) {
-                    var _localKeys = utils.get(record, foreignKeys) || [];
+                  current.forEach(function (parent) {
+                    var ids = utils.get(parent, foreignKeys) || [];
                     // e.g. someGroup.user_ids.remove(user.id)
-                    utils.remove(_localKeys, function (_key) {
+                    utils.remove(ids, function (_key) {
                       return id === _key;
                     });
-                    var _localField = utils.get(record, inverseLocalField) || [];
+                    var children = utils.get(parent, inverseLocalField);
                     // e.g. someGroup.users.remove(user)
-                    utils.remove(_localField, function (_record) {
-                      return id === utils.get(_record, idAttribute);
-                    });
+                    if (id === undefined) {
+                      utils.remove(children, function (child) {
+                        return child === _this8;
+                      });
+                    } else {
+                      utils.remove(children, function (child) {
+                        return child === _this8 || id === utils.get(child, idAttribute);
+                      });
+                    }
                   });
                   // Update (set) inverse relation
-                  linked.forEach(function (record) {
-                    var _localKeys = utils.get(record, foreignKeys) || [];
-                    utils.noDupeAdd(_localKeys, id, function (_key) {
+                  toLink.forEach(function (parent) {
+                    var ids = utils.get(parent, foreignKeys) || [];
+                    utils.noDupeAdd(ids, id, function (_key) {
                       return id === _key;
                     });
-                    var _localField = utils.get(record, inverseLocalField) || [];
-                    utils.noDupeAdd(_localField, _self, function (_record) {
-                      return id === utils.get(_record, idAttribute);
-                    });
+                    var children = utils.get(parent, inverseLocalField);
+                    if (id === undefined) {
+                      utils.noDupeAdd(children, _this8, function (child) {
+                        return child === _this8;
+                      });
+                    } else {
+                      utils.noDupeAdd(children, _this8, function (child) {
+                        return child === _this8 || id === utils.get(child, idAttribute);
+                      });
+                    }
                   });
                 }
 
-                _self._set(path, linked);
-                return linked;
+                this._set(path, toLink);
+                return toLink;
               }
             };
           })();
@@ -11938,35 +12271,34 @@
             get: getter,
             // e.g. user.profile = someProfile
             set: function set(record) {
-              var _self = this;
               var current = this._get(path);
               if (record === current) {
                 return current;
               }
               var inverseLocalField = def.getInverse(mapper).localField;
-              // Update (unset) inverse relation
-              if (current) {
-                safeSetProp(current, foreignKey, undefined);
-                self.getCollection(relation).updateIndex(current, updateOpts);
-                safeSetLink(current, inverseLocalField, undefined);
-              }
               if (record) {
+                // Update (unset) inverse relation
+                if (current) {
+                  safeSetProp(current, foreignKey, undefined);
+                  self.getCollection(relation).updateIndex(current, updateOpts);
+                  safeSetLink(current, inverseLocalField, undefined);
+                }
                 var relatedId = utils.get(record, def.getRelation().idAttribute);
                 // Prefer store record
-                if (!utils.isUndefined(relatedId)) {
+                if (relatedId !== undefined) {
                   record = self.get(relation, relatedId) || record;
                 }
 
                 // Set locals
-                _self._set(path, record);
+                safeSetLink(this, localField, record);
 
                 // Update (set) inverse relation
-                safeSetProp(record, foreignKey, utils.get(_self, idAttribute));
+                safeSetProp(record, foreignKey, utils.get(this, idAttribute));
                 self.getCollection(relation).updateIndex(record, updateOpts);
-                safeSetLink(record, inverseLocalField, _self);
+                safeSetLink(record, inverseLocalField, this);
               } else {
-                // Set locals
-                _self._set(path, undefined);
+                // Unset locals
+                safeSetLink(this, localField, undefined);
               }
               return record;
             }
@@ -11974,19 +12306,19 @@
         }
 
         if (descriptor) {
-          descriptor.enumerable = utils.isUndefined(def.enumerable) ? false : def.enumerable;
+          descriptor.enumerable = def.enumerable === undefined ? false : def.enumerable;
           if (def.get) {
             (function () {
               var origGet = descriptor.get;
               descriptor.get = function () {
-                var _this6 = this;
+                var _this9 = this;
 
                 return def.get(def, this, function () {
                   for (var _len5 = arguments.length, args = Array(_len5), _key6 = 0; _key6 < _len5; _key6++) {
                     args[_key6] = arguments[_key6];
                   }
 
-                  return origGet.apply(_this6, args);
+                  return origGet.apply(_this9, args);
                 });
               };
             })();
@@ -11995,10 +12327,10 @@
             (function () {
               var origSet = descriptor.set;
               descriptor.set = function (related) {
-                var _this7 = this;
+                var _this10 = this;
 
                 return def.set(def, this, related, function (value) {
-                  return origSet.call(_this7, value === undefined ? related : value);
+                  return origSet.call(_this10, value === undefined ? related : value);
                 });
               };
             })();
@@ -12103,16 +12435,16 @@
      * @since 3.0.0
      */
     destroy: function destroy(name, id, opts) {
-      var _this8 = this;
+      var _this11 = this;
 
       opts || (opts = {});
       return this._callSuper('destroy', name, id, opts).then(function (result) {
-        var record = _this8.getCollection(name).remove(id, opts);
+        var record = _this11.getCollection(name).remove(id, opts);
 
-        if (record && _this8.unlinkOnDestroy) {
+        if (record && _this11.unlinkOnDestroy) {
           var _opts = utils.plainCopy(opts);
           _opts.withAll = true;
-          utils.forEachRelation(_this8.getMapper(name), _opts, function (def) {
+          utils.forEachRelation(_this11.getMapper(name), _opts, function (def) {
             utils.set(record, def.localField, undefined);
           });
         }
@@ -12122,8 +12454,8 @@
         } else {
           result = record;
         }
-        delete _this8._pendingQueries[name][id];
-        delete _this8._completedQueries[name][id];
+        delete _this11._pendingQueries[name][id];
+        delete _this11._completedQueries[name][id];
         return result;
       });
     },
@@ -12219,16 +12551,16 @@
      * @since 3.0.0
      */
     destroyAll: function destroyAll(name, query, opts) {
-      var _this9 = this;
+      var _this12 = this;
 
       opts || (opts = {});
       return this._callSuper('destroyAll', name, query, opts).then(function (result) {
-        var records = _this9.getCollection(name).removeAll(query, opts);
+        var records = _this12.getCollection(name).removeAll(query, opts);
 
-        if (records && records.length && _this9.unlinkOnDestroy) {
+        if (records && records.length && _this12.unlinkOnDestroy) {
           var _opts = utils.plainCopy(opts);
           _opts.withAll = true;
-          utils.forEachRelation(_this9.getMapper(name), _opts, function (def) {
+          utils.forEachRelation(_this12.getMapper(name), _opts, function (def) {
             records.forEach(function (record) {
               utils.set(record, def.localField, undefined);
             });
@@ -12240,9 +12572,9 @@
         } else {
           result = records;
         }
-        var hash = _this9.hashQuery(name, query, opts);
-        delete _this9._pendingQueries[name][hash];
-        delete _this9._completedQueries[name][hash];
+        var hash = _this12.hashQuery(name, query, opts);
+        delete _this12._pendingQueries[name][hash];
+        delete _this12._completedQueries[name][hash];
         return result;
       });
     },
@@ -12334,18 +12666,20 @@
      * @param {string} name Name of the {@link Mapper} to target.
      * @param {(string|number)} id Passed to {@link Mapper#find}.
      * @param {Object} [opts] Passed to {@link Mapper#find}.
+     * @param {boolean|Function} [opts.usePendingFind] See {@link DataStore#usePendingFind}
      * @returns {Promise} Resolves with the result, if any.
      * @since 3.0.0
      */
     find: function find(name, id, opts) {
-      var _this10 = this;
+      var _this13 = this;
 
       opts || (opts = {});
+      var mapper = this.getMapper(name);
       var pendingQuery = this._pendingQueries[name][id];
+      var usePendingFind = opts.usePendingFind === undefined ? this.usePendingFind : opts.usePendingFind;
+      utils._(opts, mapper);
 
-      utils.fillIn(opts, this.getMapper(name));
-
-      if (pendingQuery) {
+      if (pendingQuery && (utils.isFunction(usePendingFind) ? usePendingFind.call(this, name, id, opts) : usePendingFind)) {
         return pendingQuery;
       }
       var item = this.cachedFind(name, id, opts);
@@ -12353,12 +12687,12 @@
 
       if (opts.force || !item) {
         promise = this._pendingQueries[name][id] = this._callSuper('find', name, id, opts).then(function (result) {
-          delete _this10._pendingQueries[name][id];
-          result = _this10._end(name, result, opts);
-          _this10.cacheFind(name, result, id, opts);
+          delete _this13._pendingQueries[name][id];
+          result = _this13._end(name, result, opts);
+          _this13.cacheFind(name, result, id, opts);
           return result;
         }, function (err) {
-          delete _this10._pendingQueries[name][id];
+          delete _this13._pendingQueries[name][id];
           return utils.reject(err);
         });
       } else {
@@ -12446,19 +12780,21 @@
      * @param {string} name Name of the {@link Mapper} to target.
      * @param {Object} [query] Passed to {@link Mapper.findAll}.
      * @param {Object} [opts] Passed to {@link Mapper.findAll}.
+     * @param {boolean|Function} [opts.usePendingFindAll] See {@link DataStore#usePendingFindAll}
      * @returns {Promise} Resolves with the result, if any.
      * @since 3.0.0
      */
     findAll: function findAll(name, query, opts) {
-      var _this11 = this;
+      var _this14 = this;
 
       opts || (opts = {});
+      var mapper = this.getMapper(name);
       var hash = this.hashQuery(name, query, opts);
       var pendingQuery = this._pendingQueries[name][hash];
+      var usePendingFindAll = opts.usePendingFindAll === undefined ? this.usePendingFindAll : opts.usePendingFindAll;
+      utils._(opts, mapper);
 
-      utils.fillIn(opts, this.getMapper(name));
-
-      if (pendingQuery) {
+      if (pendingQuery && (utils.isFunction(usePendingFindAll) ? usePendingFindAll.call(this, name, query, opts) : usePendingFindAll)) {
         return pendingQuery;
       }
 
@@ -12467,12 +12803,12 @@
 
       if (opts.force || !items) {
         promise = this._pendingQueries[name][hash] = this._callSuper('findAll', name, query, opts).then(function (result) {
-          delete _this11._pendingQueries[name][hash];
-          result = _this11._end(name, result, opts);
-          _this11.cacheFindAll(name, result, hash, opts);
+          delete _this14._pendingQueries[name][hash];
+          result = _this14._end(name, result, opts);
+          _this14.cacheFindAll(name, result, hash, opts);
           return result;
         }, function (err) {
-          delete _this11._pendingQueries[name][hash];
+          delete _this14._pendingQueries[name][hash];
           return utils.reject(err);
         });
       } else {
@@ -12623,7 +12959,7 @@
      * @since 3.0.0
      */
     removeRelated: function removeRelated(name, records, opts) {
-      var _this12 = this;
+      var _this15 = this;
 
       if (!utils.isArray(records)) {
         records = [records];
@@ -12647,10 +12983,10 @@
               })
             };
           } else if (def.type === belongsToType) {
-            relatedData = _this12.remove(def.relation, def.getForeignKey(record), optsCopy);
+            relatedData = _this15.remove(def.relation, def.getForeignKey(record), optsCopy);
           }
           if (query) {
-            relatedData = _this12.removeAll(def.relation, query, optsCopy);
+            relatedData = _this15.removeAll(def.relation, query, optsCopy);
           }
           if (relatedData) {
             if (utils.isArray(relatedData) && !relatedData.length) {
@@ -12753,11 +13089,11 @@
      * @since 3.0.0
      */
     update: function update(name, id, record, opts) {
-      var _this13 = this;
+      var _this16 = this;
 
       opts || (opts = {});
       return this._callSuper('update', name, id, record, opts).then(function (result) {
-        return _this13._end(name, result, opts);
+        return _this16._end(name, result, opts);
       });
     },
 
@@ -12849,11 +13185,11 @@
      * @since 3.0.0
      */
     updateAll: function updateAll(name, props, query, opts) {
-      var _this14 = this;
+      var _this17 = this;
 
       opts || (opts = {});
       return this._callSuper('updateAll', name, query, props, opts).then(function (result) {
-        return _this14._end(name, result, opts);
+        return _this17._end(name, result, opts);
       });
     },
 
@@ -12945,11 +13281,11 @@
      * @since 3.0.0
      */
     updateMany: function updateMany(name, records, opts) {
-      var _this15 = this;
+      var _this18 = this;
 
       opts || (opts = {});
       return this._callSuper('updateMany', name, records, opts).then(function (result) {
-        return _this15._end(name, result, opts);
+        return _this18._end(name, result, opts);
       });
     }
   };
