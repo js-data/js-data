@@ -32,7 +32,7 @@ const makeNotify = function (num) {
       const originalExistingOnly = opts.existingOnly
 
       // For updates, ignore required fields if they aren't present
-      if (op.indexOf('beforeUpdate') === 0 && utils.isUndefined(opts.existingOnly)) {
+      if (op.indexOf('beforeUpdate') === 0 && opts.existingOnly === undefined) {
         opts.existingOnly = true
       }
       const errors = this.validate(args[op === 'beforeUpdate' ? 1 : 0], utils.pick(opts, ['existingOnly']))
@@ -258,6 +258,30 @@ function Mapper (opts) {
     },
 
     /**
+     * The {@link Container} that holds this Mapper. __Do not modify.__
+     *
+     * @name Mapper#lifecycleMethods
+     * @since 3.0.0
+     * @type {Object}
+     */
+    datastore: {
+      value: undefined,
+      writable: true
+    },
+
+    /**
+     * The meta information describing this Mapper's available lifecycle
+     * methods. __Do not modify.__
+     *
+     * @name Mapper#lifecycleMethods
+     * @since 3.0.0
+     * @type {Object}
+     */
+    lifecycleMethods: {
+      value: LIFECYCLE_METHODS
+    },
+
+    /**
      * Set to `false` to force the Mapper to work with POJO objects only.
      *
      * @example
@@ -311,18 +335,6 @@ function Mapper (opts) {
     recordClass: {
       value: undefined,
       writable: true
-    },
-
-    /**
-     * The meta information describing this Mapper's available lifecycle
-     * methods. __Do not modify.__
-     *
-     * @name Mapper#lifecycleMethods
-     * @since 3.0.0
-     * @type {Object}
-     */
-    lifecycleMethods: {
-      value: LIFECYCLE_METHODS
     },
 
     /**
@@ -398,7 +410,7 @@ function Mapper (opts) {
   }
 
   // Create a subclass of Record that's tied to this Mapper
-  if (utils.isUndefined(this.recordClass)) {
+  if (this.recordClass === undefined) {
     const superClass = Record
     this.recordClass = superClass.extend({
       constructor: (function Record () {
@@ -901,6 +913,7 @@ export default Component.extend({
     // Default values for arguments
     props || (props = {})
     opts || (opts = {})
+    const originalRecord = props
 
     // Fill in "opts" with the Mapper's configuration
     utils._(opts, this)
@@ -910,7 +923,7 @@ export default Component.extend({
     op = opts.op = 'beforeCreate'
     return utils.resolve(this[op](props, opts)).then((_props) => {
       // Allow for re-assignment from lifecycle hook
-      props = utils.isUndefined(_props) ? props : _props
+      props = _props === undefined ? props : _props
 
       // Deep pre-create belongsTo relations
       const belongsToRelationData = {}
@@ -944,8 +957,9 @@ export default Component.extend({
         op = opts.op = 'create'
         this.dbg(op, props, opts)
         return utils.resolve(this.getAdapter(adapter)[op](this, this.toJSON(props, { with: opts.pass || [] }), opts))
-      }).then((data) => {
-        const createdRecord = opts.raw ? data.data : data
+      }).then((result) => {
+        const createdRecordData = opts.raw ? result.data : result
+
         // Deep post-create hasMany and hasOne relations
         tasks = []
         utils.forEachRelation(this, opts, (def, optsCopy) => {
@@ -958,26 +972,35 @@ export default Component.extend({
           // Create hasMany and hasOne after the main create because we needed
           // a generated id to attach to these items
           if (def.type === hasManyType && def.foreignKey) {
-            def.setForeignKey(createdRecord, relationData)
-            task = def.getRelation().createMany(relationData, optsCopy).then((data) => {
-              def.setLocalField(createdRecord, data)
+            def.setForeignKey(createdRecordData, relationData)
+            task = def.getRelation().createMany(relationData, optsCopy).then((result) => {
+              def.setLocalField(createdRecordData, result)
             })
           } else if (def.type === hasOneType) {
-            def.setForeignKey(createdRecord, relationData)
-            task = def.getRelation().create(relationData, optsCopy).then((data) => {
-              def.setLocalField(createdRecord, data)
+            def.setForeignKey(createdRecordData, relationData)
+            task = def.getRelation().create(relationData, optsCopy).then((result) => {
+              def.setLocalField(createdRecordData, result)
             })
           } else if (def.type === belongsToType && def.getLocalField(belongsToRelationData)) {
-            def.setLocalField(createdRecord, def.getLocalField(belongsToRelationData))
+            def.setLocalField(createdRecordData, def.getLocalField(belongsToRelationData))
           } else if (def.type === hasManyType && def.localKeys && def.getLocalField(belongsToRelationData)) {
-            def.setLocalField(createdRecord, def.getLocalField(belongsToRelationData))
+            def.setLocalField(createdRecordData, def.getLocalField(belongsToRelationData))
           }
           if (task) {
             tasks.push(task)
           }
         })
         return utils.Promise.all(tasks).then(() => {
-          return data
+          utils.set(originalRecord, createdRecordData, { silent: true })
+          if (utils.isFunction(originalRecord.commit)) {
+            originalRecord.commit()
+          }
+          if (opts.raw) {
+            result.data = originalRecord
+          } else {
+            result = originalRecord
+          }
+          return result
         })
       })
     }).then((result) => {
@@ -986,7 +1009,7 @@ export default Component.extend({
       op = opts.op = 'afterCreate'
       return utils.resolve(this[op](props, opts, result)).then((_result) => {
         // Allow for re-assignment from lifecycle hook
-        return utils.isUndefined(_result) ? result : _result
+        return _result === undefined ? result : _result
       })
     })
   },
@@ -1098,6 +1121,7 @@ export default Component.extend({
     // Default values for arguments
     records || (records = [])
     opts || (opts = {})
+    const originalRecords = records
 
     // Fill in "opts" with the Mapper's configuration
     utils._(opts, this)
@@ -1107,7 +1131,7 @@ export default Component.extend({
     op = opts.op = 'beforeCreateMany'
     return utils.resolve(this[op](records, opts)).then((_records) => {
       // Allow for re-assignment from lifecycle hook
-      records = utils.isUndefined(_records) ? records : _records
+      records = _records === undefined ? records : _records
 
       // Deep pre-create belongsTo relations
       const belongsToRelationData = {}
@@ -1135,8 +1159,8 @@ export default Component.extend({
         const json = records.map((record) => this.toJSON(record, { with: opts.pass || [] }))
         this.dbg(op, records, opts)
         return utils.resolve(this.getAdapter(adapter)[op](this, json, opts))
-      }).then((data) => {
-        const createdRecords = opts.raw ? data.data : data
+      }).then((result) => {
+        const createdRecordsData = opts.raw ? result.data : result
 
         // Deep post-create hasOne relations
         tasks = []
@@ -1155,25 +1179,39 @@ export default Component.extend({
             // Not supported
             this.log('warn', 'deep createMany of hasMany type not supported!')
           } else if (def.type === hasOneType) {
-            createdRecords.forEach((createdRecord, i) => {
-              def.setForeignKey(createdRecord, relationData[i])
+            createdRecordsData.forEach((createdRecordData, i) => {
+              def.setForeignKey(createdRecordData, relationData[i])
             })
-            task = def.getRelation().createMany(relationData, optsCopy).then((data) => {
-              const relatedData = opts.raw ? data.data : data
-              createdRecords.forEach((createdRecord, i) => {
-                def.setLocalField(createdRecord, relatedData[i])
+            task = def.getRelation().createMany(relationData, optsCopy).then((result) => {
+              const relatedData = opts.raw ? result.data : result
+              createdRecordsData.forEach((createdRecordData, i) => {
+                def.setLocalField(createdRecordData, relatedData[i])
               })
             })
-          } else if (def.type === belongsToType && belongsToData && belongsToData.length === createdRecords.length) {
-            createdRecords.forEach((createdRecord, i) => {
-              def.setLocalField(createdRecord, belongsToData[i])
+          } else if (def.type === belongsToType && belongsToData && belongsToData.length === createdRecordsData.length) {
+            createdRecordsData.forEach((createdRecordData, i) => {
+              def.setLocalField(createdRecordData, belongsToData[i])
             })
           }
           if (task) {
             tasks.push(task)
           }
         })
-        return utils.Promise.all(tasks).then(() => data)
+        return utils.Promise.all(tasks).then(() => {
+          createdRecordsData.forEach((createdRecordData, i) => {
+            const originalRecord = originalRecords[i]
+            utils.set(originalRecord, createdRecordData, { silent: true })
+            if (utils.isFunction(originalRecord.commit)) {
+              originalRecord.commit()
+            }
+          })
+          if (opts.raw) {
+            result.data = originalRecords
+          } else {
+            result = originalRecords
+          }
+          return result
+        })
       })
     }).then((result) => {
       result = this._end(result, opts)
@@ -1181,7 +1219,7 @@ export default Component.extend({
       op = opts.op = 'afterCreateMany'
       return utils.resolve(this[op](records, opts, result)).then((_result) => {
         // Allow for re-assignment from lifecycle hook
-        return utils.isUndefined(_result) ? result : _result
+        return _result === undefined ? result : _result
       })
     })
   },
@@ -1309,7 +1347,7 @@ export default Component.extend({
 
     // Default values for arguments
     config.defaults.forEach((value, i) => {
-      if (utils.isUndefined(args[i])) {
+      if (args[i] === undefined) {
         args[i] = utils.copy(value)
       }
     })
@@ -1323,9 +1361,9 @@ export default Component.extend({
     // before lifecycle hook
     op = opts.op = before
     return utils.resolve(this[op](...args)).then((_value) => {
-      if (!utils.isUndefined(args[config.beforeAssign])) {
+      if (args[config.beforeAssign] !== undefined) {
         // Allow for re-assignment from lifecycle hook
-        args[config.beforeAssign] = utils.isUndefined(_value) ? args[config.beforeAssign] : _value
+        args[config.beforeAssign] = _value === undefined ? args[config.beforeAssign] : _value
       }
       // Now delegate to the adapter
       op = opts.op = method
@@ -1339,7 +1377,7 @@ export default Component.extend({
       op = opts.op = after
       return utils.resolve(this[op](...args)).then((_result) => {
         // Allow for re-assignment from lifecycle hook
-        return utils.isUndefined(_result) ? result : _result
+        return _result === undefined ? result : _result
       })
     })
   },

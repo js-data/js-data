@@ -19,7 +19,7 @@ describe('Mapper#create', function () {
         createCalled = true
         return new Promise(function (resolve, reject) {
           assert.strictEqual(mapper, User, 'should pass in the JSData.Mapper')
-          assert.deepEqual(_props, props, 'should pass in the props')
+          assert.objectsEqual(_props, props, 'should pass in the props')
           assert(!Opts.raw, 'Opts are provided')
           _props[mapper.idAttribute] = new Date().getTime()
           resolve(_props)
@@ -44,7 +44,7 @@ describe('Mapper#create', function () {
         createCalled = true
         return new Promise(function (resolve, reject) {
           assert.strictEqual(mapper, User, 'should pass in the JSData.Mapper')
-          assert.deepEqual(_props, props, 'should pass in the props')
+          assert.objectsEqual(_props, props, 'should pass in the props')
           assert(!Opts.raw, 'Opts are provided')
           _props[mapper.idAttribute] = new Date().getTime()
           resolve(_props)
@@ -69,7 +69,7 @@ describe('Mapper#create', function () {
         createCalled = true
         return new Promise(function (resolve, reject) {
           assert.strictEqual(mapper, User, 'should pass in the JSData.Mapper')
-          assert.deepEqual(_props, props, 'should pass in the props')
+          assert.objectsEqual(_props, props, 'should pass in the props')
           assert(Opts.raw, 'Opts are provided')
           _props[mapper.idAttribute] = new Date().getTime()
           resolve({
@@ -131,50 +131,66 @@ describe('Mapper#create', function () {
       }
     }
 
-    let group = await store.create('group', store.createRecord('group', {
+    let group
+    group = await store.create('group', store.createRecord('group', {
       users: [{ name: 'John' }]
     }), { with: ['users'] })
     assert(group.users[0].id)
     assert.equal(group.users[0].name, 'John')
 
+    let user
     // when props are a Record
-    let user = await store.create('user', store.createRecord('user', JSData.utils.copy(userProps)), { with: [] })
+    user = await store.createRecord('user', JSData.utils.plainCopy(userProps)).save({ with: [] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
-    assert.deepEqual(user.comments, [], 'user.comments should be an empty array')
-    assert.deepEqual(store.getAll('comment'), [], 'comments should not be in the store')
-    assert(!user.profile, 'user.profile should be undefined')
-    assert.deepEqual(store.getAll('profile'), [], 'profile should not be in the store')
-    assert(!user.organization, 'user.organization should be undefined')
+    assert.objectsEqual(user.comments, [
+      {
+        content: 'foo',
+        userId: user.id
+      }
+    ], 'user.comments should be an array with a comment')
+    assert.objectsEqual(store.getAll('comment'), [
+      {
+        content: 'foo',
+        userId: user.id
+      }
+    ], 'comments should not be in the store')
+    assert.objectsEqual(user.profile, userProps.profile, 'user.profile should be undefined')
+    assert.objectsEqual(store.getAll('profile'), [
+      userProps.profile
+    ], 'profile should not be in the store')
+    assert.objectsEqual(user.organization, userProps.organization)
     assert(!user.organizationId, 'user.organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organization should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps.organization], 'organization should be in the store')
     clear()
 
-    user = await store.create('user', store.createRecord('user', JSData.utils.copy(userProps)), { with: ['comment'] })
+    user = await store.createRecord('user', JSData.utils.plainCopy(userProps)).save({ with: ['comments'] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
     assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
     assert.objectsEqual(store.getAll('comment'), user.comments, 'comments should be in the store')
-    assert(!user.profile, 'user.profile should be undefined')
-    assert.deepEqual(store.getAll('profile'), [], 'profile should not be in the store')
-    assert(!user.organization, 'user.organization should be undefined')
+    assert.objectsEqual(user.profile, {
+      email: 'john@email.com'
+    }, 'user.profile should be undefined')
+    assert.objectsEqual(store.getAll('profile'), [userProps.profile], 'profile should not be in the store')
+    assert.objectsEqual(user.organization, userProps.organization)
     assert(!user.organizationId, 'user.organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organization should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps.organization], 'organization should be in the store')
     clear()
 
-    user = await store.create('user', store.createRecord('user', JSData.utils.copy(userProps)), { with: ['comment', 'profile'] })
+    user = await store.create('user', store.createRecord('user', JSData.utils.plainCopy(userProps)), { with: ['comments', 'profile'] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
     assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
     assert.objectsEqual(store.getAll('comment'), user.comments, 'comments should be in the store')
     assert(store.is('profile', user.profile), 'user.profile should be a profile record')
     assert.objectsEqual(store.getAll('profile'), [user.profile], 'profile should be in the store')
-    assert(!user.organization, 'user.organization should be undefined')
+    assert.objectsEqual(user.organization, userProps.organization)
     assert(!user.organizationId, 'user.organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organization should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps.organization], 'organization should be in the store')
     clear()
 
-    user = await store.create('user', store.createRecord('user', JSData.utils.copy(userProps)), { with: ['comment', 'profile', 'organization'] })
+    user = await store.create('user', store.createRecord('user', JSData.utils.plainCopy(userProps)), { with: ['comments', 'profile', 'organization'] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
     assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
@@ -183,47 +199,45 @@ describe('Mapper#create', function () {
     assert.objectsEqual(store.getAll('profile'), [user.profile], 'profile should be in the store')
     assert(store.is('organization', user.organization), 'user.organization should be a organization record')
     assert.equal(store.getAll('organization')[0].id, user.organizationId, 'user.organizationId should be correct')
-    assert.deepEqual(store.getAll('organization'), [user.organization], 'organization should be in the store')
+    assert.objectsEqual(store.getAll('organization'), [user.organization], 'organization should be in the store')
     clear()
 
     // when props are NOT a record
-    user = await store.create('user', JSData.utils.copy(userProps), { with: [] })
+    user = await store.create('user', JSData.utils.plainCopy(userProps), { with: [] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
-    assert.deepEqual(user.comments, [], 'user.comments should be an empty array')
-    assert.deepEqual(store.getAll('comment'), [], 'comments should not be in the store')
-    assert(!user.profile, 'user.profile should be undefined')
-    assert.deepEqual(store.getAll('profile'), [], 'profile should not be in the store')
-    assert(!user.organization, 'user.organization should be undefined')
-    assert(!user.organizationId, 'user.organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organization should not be in the store')
+    assert.objectsEqual(user.comments, [
+      {
+        content: 'foo',
+        userId: user.id
+      }
+    ], 'user.comments should be an array with a comment')
+    assert.objectsEqual(store.getAll('comment'), [
+      {
+        content: 'foo',
+        userId: user.id
+      }
+    ], 'comments should not be in the store')
+    assert.objectsEqual(user.profile, userProps.profile, 'user.profile should not be undefined')
+    assert.objectsEqual(store.getAll('profile'), [userProps.profile], 'profile should be in the store')
+    assert(store.is('organization', user.organization), 'user.organization should be a organization record')
+    assert.equal(store.getAll('organization')[0].id, user.organizationId, 'user.organizationId should be correct')
+    assert.objectsEqual(store.getAll('organization'), [user.organization], 'organization should be in the store')
     clear()
 
-    user = await store.create('user', JSData.utils.copy(userProps), { with: ['comment'] })
+    user = await store.create('user', JSData.utils.plainCopy(userProps), { with: ['comments'] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
     assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
     assert.objectsEqual(store.getAll('comment'), user.comments, 'comments should be in the store')
-    assert(!user.profile, 'user.profile should be undefined')
-    assert.deepEqual(store.getAll('profile'), [], 'profile should not be in the store')
-    assert(!user.organization, 'user.organization should be undefined')
-    assert(!user.organizationId, 'user.organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organization should not be in the store')
+    assert.objectsEqual(user.profile, userProps.profile, 'user.profile should not be undefined')
+    assert.objectsEqual(store.getAll('profile'), [userProps.profile], 'profile should be in the store')
+    assert(store.is('organization', user.organization), 'user.organization should be a organization record')
+    assert.equal(store.getAll('organization')[0].id, user.organizationId, 'user.organizationId should be correct')
+    assert.objectsEqual(store.getAll('organization'), [user.organization], 'organization should be in the store')
     clear()
 
-    user = await store.create('user', JSData.utils.copy(userProps), { with: ['comment', 'profile'] })
-    assert(store.is('user', user), 'user should be a user record')
-    assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
-    assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
-    assert.objectsEqual(store.getAll('comment'), user.comments, 'comments should be in the store')
-    assert(store.is('profile', user.profile), 'user.profile should be a profile record')
-    assert.objectsEqual(store.getAll('profile'), [user.profile], 'profile should be in the store')
-    assert(!user.organization, 'user.organization should be undefined')
-    assert(!user.organizationId, 'user.organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organization should not be in the store')
-    clear()
-
-    user = await store.create('user', JSData.utils.copy(userProps), { with: ['comment', 'profile', 'organization'] })
+    user = await store.create('user', JSData.utils.plainCopy(userProps), { with: ['comments', 'profile'] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
     assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
@@ -232,11 +246,23 @@ describe('Mapper#create', function () {
     assert.objectsEqual(store.getAll('profile'), [user.profile], 'profile should be in the store')
     assert(store.is('organization', user.organization), 'user.organization should be a organization record')
     assert.equal(store.getAll('organization')[0].id, user.organizationId, 'user.organizationId should be correct')
-    assert.deepEqual(store.getAll('organization'), [user.organization], 'organization should be in the store')
+    assert.objectsEqual(store.getAll('organization'), [user.organization], 'organization should be in the store')
+    clear()
+
+    user = await store.create('user', JSData.utils.plainCopy(userProps), { with: ['comments', 'profile', 'organization'] })
+    assert(store.is('user', user), 'user should be a user record')
+    assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
+    assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
+    assert.objectsEqual(store.getAll('comment'), user.comments, 'comments should be in the store')
+    assert(store.is('profile', user.profile), 'user.profile should be a profile record')
+    assert.objectsEqual(store.getAll('profile'), [user.profile], 'profile should be in the store')
+    assert(store.is('organization', user.organization), 'user.organization should be a organization record')
+    assert.equal(store.getAll('organization')[0].id, user.organizationId, 'user.organizationId should be correct')
+    assert.objectsEqual(store.getAll('organization'), [user.organization], 'organization should be in the store')
     clear()
 
     assert.equal(createCalledCount.user, 9)
-    assert.equal(createCalledCount.comment, 9)
+    assert.equal(createCalledCount.comment, 6)
     assert.equal(createCalledCount.profile, 4)
     assert.equal(createCalledCount.organization, 2)
   })
@@ -298,43 +324,53 @@ describe('Mapper#create', function () {
     }
 
     // when props are a Record
-    let user = await store.create('user', store.createRecord('user', JSData.utils.copy(userProps)), { pass: [] })
+    let user = await store.create('user', store.createRecord('user', JSData.utils.plainCopy(userProps)), { pass: [] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
-    assert.deepEqual(user.comments, [], 'user.comments should be an empty array')
-    assert.deepEqual(store.getAll('comment'), [], 'comments should not be in the store')
-    assert(!user.profile, 'user.profile should be undefined')
-    assert.deepEqual(store.getAll('profile'), [], 'profile should not be in the store')
-    assert(!user.organization, 'user.organization should be undefined')
+    assert.objectsEqual(user.comments, [
+      {
+        content: 'foo',
+        userId: user.id
+      }
+    ], 'user.comments should be an array')
+    assert.objectsEqual(store.getAll('comment'), [
+      {
+        content: 'foo',
+        userId: user.id
+      }
+    ], 'comments should not be in the store')
+    assert.objectsEqual(user.profile, userProps.profile, 'user.profile should be a profile')
+    assert.objectsEqual(store.getAll('profile'), [userProps.profile], 'profile should be in the store')
+    assert.objectsEqual(user.organization, userProps.organization)
     assert(!user.organizationId, 'user.organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organization should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps.organization], 'organization should be in the store')
     clear()
 
-    user = await store.create('user', store.createRecord('user', JSData.utils.copy(userProps)), { pass: ['comment'] })
+    user = await store.create('user', store.createRecord('user', JSData.utils.plainCopy(userProps)), { pass: ['comments'] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
     assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
     assert.objectsEqual(store.getAll('comment'), user.comments, 'comments should be in the store')
-    assert(!user.profile, 'user.profile should be undefined')
-    assert.deepEqual(store.getAll('profile'), [], 'profile should not be in the store')
-    assert(!user.organization, 'user.organization should be undefined')
+    assert.objectsEqual(user.profile, userProps.profile, 'user.profile should be a profile')
+    assert.objectsEqual(store.getAll('profile'), [userProps.profile], 'profile should be in the store')
+    assert.objectsEqual(user.organization, userProps.organization)
     assert(!user.organizationId, 'user.organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organization should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps.organization], 'organization should be in the store')
     clear()
 
-    user = await store.create('user', store.createRecord('user', JSData.utils.copy(userProps)), { pass: ['comment', 'profile'] })
+    user = await store.create('user', store.createRecord('user', JSData.utils.plainCopy(userProps)), { pass: ['comments', 'profile'] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
     assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
     assert.objectsEqual(store.getAll('comment'), user.comments, 'comments should be in the store')
     assert(store.is('profile', user.profile), 'user.profile should be a profile record')
     assert.objectsEqual(store.getAll('profile'), [user.profile], 'profile should be in the store')
-    assert(!user.organization, 'user.organization should be undefined')
+    assert.objectsEqual(user.organization, userProps.organization)
     assert(!user.organizationId, 'user.organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organization should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps.organization], 'organization should be in the store')
     clear()
 
-    user = await store.create('user', store.createRecord('user', JSData.utils.copy(userProps)), { pass: ['comment', 'profile', 'organization'] })
+    user = await store.create('user', store.createRecord('user', JSData.utils.plainCopy(userProps)), { pass: ['comments', 'profile', 'organization'] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
     assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
@@ -343,47 +379,57 @@ describe('Mapper#create', function () {
     assert.objectsEqual(store.getAll('profile'), [user.profile], 'profile should be in the store')
     assert(store.is('organization', user.organization), 'user.organization should be a organization record')
     assert.equal(store.getAll('organization')[0].id, user.organizationId, 'user.organizationId should be correct')
-    assert.deepEqual(store.getAll('organization'), [user.organization], 'organization should be in the store')
+    assert.objectsEqual(store.getAll('organization'), [user.organization], 'organization should be in the store')
     clear()
 
     // when props are NOT a record
-    user = await store.create('user', JSData.utils.copy(userProps), { pass: [] })
+    user = await store.create('user', JSData.utils.plainCopy(userProps), { pass: [] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
-    assert.deepEqual(user.comments, [], 'user.comments should be an empty array')
-    assert.deepEqual(store.getAll('comment'), [], 'comments should not be in the store')
-    assert(!user.profile, 'user.profile should be undefined')
-    assert.deepEqual(store.getAll('profile'), [], 'profile should not be in the store')
-    assert(!user.organization, 'user.organization should be undefined')
+    assert.objectsEqual(user.comments, [
+      {
+        content: 'foo',
+        userId: user.id
+      }
+    ], 'user.comments should be an empty array')
+    assert.objectsEqual(store.getAll('comment'), [
+      {
+        content: 'foo',
+        userId: user.id
+      }
+    ], 'comments should not be in the store')
+    assert.objectsEqual(user.profile, userProps.profile, 'user.profile should be a profile')
+    assert.objectsEqual(store.getAll('profile'), [userProps.profile], 'profile should be in the store')
+    assert.objectsEqual(user.organization, userProps.organization)
     assert(!user.organizationId, 'user.organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organization should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps.organization], 'organization should be in the store')
     clear()
 
-    user = await store.create('user', JSData.utils.copy(userProps), { pass: ['comment'] })
+    user = await store.create('user', JSData.utils.plainCopy(userProps), { pass: ['comments'] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
     assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
     assert.objectsEqual(store.getAll('comment'), user.comments, 'comments should be in the store')
-    assert(!user.profile, 'user.profile should be undefined')
-    assert.deepEqual(store.getAll('profile'), [], 'profile should not be in the store')
-    assert(!user.organization, 'user.organization should be undefined')
+    assert.objectsEqual(user.profile, userProps.profile, 'user.profile should be a profile')
+    assert.objectsEqual(store.getAll('profile'), [userProps.profile], 'profile should be in the store')
+    assert.objectsEqual(user.organization, userProps.organization)
     assert(!user.organizationId, 'user.organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organization should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps.organization], 'organization should be in the store')
     clear()
 
-    user = await store.create('user', JSData.utils.copy(userProps), { pass: ['comment', 'profile'] })
+    user = await store.create('user', JSData.utils.plainCopy(userProps), { pass: ['comments', 'profile'] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
     assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
     assert.objectsEqual(store.getAll('comment'), user.comments, 'comments should be in the store')
     assert(store.is('profile', user.profile), 'user.profile should be a profile record')
     assert.objectsEqual(store.getAll('profile'), [user.profile], 'profile should be in the store')
-    assert(!user.organization, 'user.organization should be undefined')
+    assert.objectsEqual(user.organization, userProps.organization)
     assert(!user.organizationId, 'user.organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organization should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps.organization], 'organization should be in the store')
     clear()
 
-    user = await store.create('user', JSData.utils.copy(userProps), { pass: ['comment', 'profile', 'organization'] })
+    user = await store.create('user', JSData.utils.plainCopy(userProps), { pass: ['comments', 'profile', 'organization'] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
     assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
@@ -392,7 +438,7 @@ describe('Mapper#create', function () {
     assert.objectsEqual(store.getAll('profile'), [user.profile], 'profile should be in the store')
     assert(store.is('organization', user.organization), 'user.organization should be a organization record')
     assert.equal(store.getAll('organization')[0].id, user.organizationId, 'user.organizationId should be correct')
-    assert.deepEqual(store.getAll('organization'), [user.organization], 'organization should be in the store')
+    assert.objectsEqual(store.getAll('organization'), [user.organization], 'organization should be in the store')
     clear()
 
     assert.equal(createCalledCount.user, 8)
@@ -458,43 +504,53 @@ describe('Mapper#create', function () {
     }
 
     // when props are a Record
-    let user = await store.create('user', store.createRecord('user', JSData.utils.copy(userProps)), { pass: [] })
+    let user = await store.create('user', store.createRecord('user', JSData.utils.plainCopy(userProps)), { pass: [] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
-    assert.deepEqual(user.comments, [], 'user.comments should be an empty array')
-    assert.deepEqual(store.getAll('comment'), [], 'comments should not be in the store')
-    assert(!user.profile, 'user.profile should be undefined')
-    assert.deepEqual(store.getAll('profile'), [], 'profile should not be in the store')
-    assert(!user.organization, 'user.organization should be undefined')
+    assert.objectsEqual(user.comments, [
+      {
+        content: 'foo',
+        userId: user.id
+      }
+    ], 'user.comments should be an array')
+    assert.objectsEqual(store.getAll('comment'), [
+      {
+        content: 'foo',
+        userId: user.id
+      }
+    ], 'comments should not be in the store')
+    assert.objectsEqual(user.profile, userProps.profile, 'user.profile should be a profile')
+    assert.objectsEqual(store.getAll('profile'), [userProps.profile], 'profile should be in the store')
+    assert.objectsEqual(user.organization, userProps.organization)
     assert(!user.organizationId, 'user.organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organization should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps.organization], 'organization should be in the store')
     clear()
 
-    user = await store.create('user', store.createRecord('user', JSData.utils.copy(userProps)), { pass: ['comment'] })
+    user = await store.create('user', store.createRecord('user', JSData.utils.plainCopy(userProps)), { pass: ['comments'] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
     assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
     assert.objectsEqual(store.getAll('comment'), user.comments, 'comments should be in the store')
-    assert(!user.profile, 'user.profile should be undefined')
-    assert.deepEqual(store.getAll('profile'), [], 'profile should not be in the store')
-    assert(!user.organization, 'user.organization should be undefined')
+    assert.objectsEqual(user.profile, userProps.profile, 'user.profile should be a profile')
+    assert.objectsEqual(store.getAll('profile'), [userProps.profile], 'profile should be in the store')
+    assert.objectsEqual(user.organization, userProps.organization)
     assert(!user.organizationId, 'user.organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organization should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps.organization], 'organization should be in the store')
     clear()
 
-    user = await store.create('user', store.createRecord('user', JSData.utils.copy(userProps)), { with: ['comment'], pass: ['profile'] })
+    user = await store.create('user', store.createRecord('user', JSData.utils.plainCopy(userProps)), { with: ['comments'], pass: ['profile'] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
     assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
     assert.objectsEqual(store.getAll('comment'), user.comments, 'comments should be in the store')
     assert(store.is('profile', user.profile), 'user.profile should be a profile record')
     assert.objectsEqual(store.getAll('profile'), [user.profile], 'profile should be in the store')
-    assert(!user.organization, 'user.organization should be undefined')
+    assert.objectsEqual(user.organization, userProps.organization)
     assert(!user.organizationId, 'user.organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organization should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps.organization], 'organization should be in the store')
     clear()
 
-    user = await store.create('user', store.createRecord('user', JSData.utils.copy(userProps)), { with: ['comment', 'profile'], pass: ['organization'] })
+    user = await store.create('user', store.createRecord('user', JSData.utils.plainCopy(userProps)), { with: ['comments', 'profile'], pass: ['organization'] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
     assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
@@ -503,47 +559,57 @@ describe('Mapper#create', function () {
     assert.objectsEqual(store.getAll('profile'), [user.profile], 'profile should be in the store')
     assert(store.is('organization', user.organization), 'user.organization should be a organization record')
     assert.equal(store.getAll('organization')[0].id, user.organizationId, 'user.organizationId should be correct')
-    assert.deepEqual(store.getAll('organization'), [user.organization], 'organization should be in the store')
+    assert.objectsEqual(store.getAll('organization'), [user.organization], 'organization should be in the store')
     clear()
 
     // when props are NOT a record
-    user = await store.create('user', JSData.utils.copy(userProps), { pass: [] })
+    user = await store.create('user', JSData.utils.plainCopy(userProps), { pass: [] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
-    assert.deepEqual(user.comments, [], 'user.comments should be an empty array')
-    assert.deepEqual(store.getAll('comment'), [], 'comments should not be in the store')
-    assert(!user.profile, 'user.profile should be undefined')
-    assert.deepEqual(store.getAll('profile'), [], 'profile should not be in the store')
-    assert(!user.organization, 'user.organization should be undefined')
+    assert.objectsEqual(user.comments, [
+      {
+        content: 'foo',
+        userId: user.id
+      }
+    ], 'user.comments should be an array')
+    assert.objectsEqual(store.getAll('comment'), [
+      {
+        content: 'foo',
+        userId: user.id
+      }
+    ], 'comments should not be in the store')
+    assert.objectsEqual(user.profile, userProps.profile, 'user.profile should be a profile')
+    assert.objectsEqual(store.getAll('profile'), [userProps.profile], 'profile should be in the store')
+    assert.objectsEqual(user.organization, userProps.organization)
     assert(!user.organizationId, 'user.organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organization should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps.organization], 'organization should be in the store')
     clear()
 
-    user = await store.create('user', JSData.utils.copy(userProps), { pass: ['comment'] })
+    user = await store.create('user', JSData.utils.plainCopy(userProps), { pass: ['comments'] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
     assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
     assert.objectsEqual(store.getAll('comment'), user.comments, 'comments should be in the store')
-    assert(!user.profile, 'user.profile should be undefined')
-    assert.deepEqual(store.getAll('profile'), [], 'profile should not be in the store')
-    assert(!user.organization, 'user.organization should be undefined')
+    assert.objectsEqual(user.profile, userProps.profile, 'user.profile should be a profile')
+    assert.objectsEqual(store.getAll('profile'), [userProps.profile], 'profile should be in the store')
+    assert.objectsEqual(user.organization, userProps.organization)
     assert(!user.organizationId, 'user.organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organization should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps.organization], 'organization should be in the store')
     clear()
 
-    user = await store.create('user', JSData.utils.copy(userProps), { with: ['comment'], pass: ['profile'] })
+    user = await store.create('user', JSData.utils.plainCopy(userProps), { with: ['comments'], pass: ['profile'] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
     assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
     assert.objectsEqual(store.getAll('comment'), user.comments, 'comments should be in the store')
     assert(store.is('profile', user.profile), 'user.profile should be a profile record')
     assert.objectsEqual(store.getAll('profile'), [user.profile], 'profile should be in the store')
-    assert(!user.organization, 'user.organization should be undefined')
+    assert.objectsEqual(user.organization, userProps.organization)
     assert(!user.organizationId, 'user.organizationId should be undefined')
-    assert.deepEqual(store.getAll('organization'), [], 'organization should not be in the store')
+    assert.objectsEqual(store.getAll('organization'), [userProps.organization], 'organization should be in the store')
     clear()
 
-    user = await store.create('user', JSData.utils.copy(userProps), { with: ['comment', 'profile'], pass: ['organization'] })
+    user = await store.create('user', JSData.utils.plainCopy(userProps), { with: ['comments', 'profile'], pass: ['organization'] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
     assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
@@ -552,11 +618,11 @@ describe('Mapper#create', function () {
     assert.objectsEqual(store.getAll('profile'), [user.profile], 'profile should be in the store')
     assert(store.is('organization', user.organization), 'user.organization should be a organization record')
     assert.equal(store.getAll('organization')[0].id, user.organizationId, 'user.organizationId should be correct')
-    assert.deepEqual(store.getAll('organization'), [user.organization], 'organization should be in the store')
+    assert.objectsEqual(store.getAll('organization'), [user.organization], 'organization should be in the store')
     clear()
 
     assert.equal(createCalledCount.user, 8)
-    assert.equal(createCalledCount.comment, 6)
+    assert.equal(createCalledCount.comment, 4)
     assert.equal(createCalledCount.profile, 2)
     assert(!createCalledCount.organization)
   })
@@ -583,7 +649,7 @@ describe('Mapper#create', function () {
       user = await User.create(props)
       throw new Error('validation error should have been thrown!')
     } catch (err) {
-      assert.deepEqual(err, [
+      assert.objectsEqual(err, [
         {
           actual: 'number',
           expected: 'one of (string)',
@@ -623,7 +689,7 @@ describe('Mapper#create', function () {
       user = await User.create(props)
       throw new Error('validation error should have been thrown!')
     } catch (err) {
-      assert.deepEqual(err, [
+      assert.objectsEqual(err, [
         {
           actual: 'undefined',
           expected: 'a value',

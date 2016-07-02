@@ -292,4 +292,84 @@ describe('DataStore integration tests', function () {
 
     foo.bar = 'baz'
   })
+  it('should add relations', function () {
+    const store = new JSData.DataStore()
+    store.defineMapper('foo', {
+      schema: {
+        properties: {
+          id: { type: 'number' }
+        }
+      },
+      relations: {
+        hasMany: {
+          bar: {
+            localField: 'bars',
+            foreignKey: 'foo_id'
+          }
+        }
+      }
+    })
+    store.defineMapper('bar', {
+      schema: {
+        properties: {
+          id: { type: 'number' },
+          foo_id: { type: 'number' }
+        }
+      },
+      relations: {
+        belongsTo: {
+          foo: {
+            localField: 'foo',
+            foreignKey: 'foo_id'
+          }
+        }
+      }
+    })
+    const foo66 = store.add('foo', {
+      id: 66,
+      bars: [{ id: 88 }]
+    })
+    assert.strictEqual(foo66, store.get('foo', 66))
+    assert.strictEqual(foo66.bars[0], store.get('bar', 88))
+    assert.strictEqual(foo66.bars[0].foo_id, 66)
+
+    const bar99 = store.add('bar', {
+      id: 99,
+      foo: { id: 101 }
+    })
+    assert.strictEqual(bar99, store.get('bar', 99))
+    assert.strictEqual(bar99.foo, store.get('foo', 101))
+    assert.strictEqual(bar99.foo_id, 101)
+
+    const bar = store.add('bar', {
+      foo: {}
+    })
+    assert.strictEqual(bar, store.unsaved('bar')[0])
+    assert.strictEqual(bar.foo, store.unsaved('foo')[0])
+    assert.strictEqual(bar.foo_id, undefined)
+
+    let bar2 = store.add('bar', bar)
+    assert.strictEqual(bar2, bar)
+    let foo2 = store.add('foo', bar.foo)
+    assert.strictEqual(foo2, bar.foo)
+    assert.equal(store.unsaved('bar').length, 1)
+    assert.equal(store.unsaved('foo').length, 1)
+
+    store.prune('bar')
+    store.prune('foo')
+
+    const foo = store.add('foo', {
+      bars: [{}]
+    })
+    assert.strictEqual(foo, store.unsaved('foo')[0])
+    assert.strictEqual(foo.bars[0], store.unsaved('bar')[0])
+    assert.strictEqual(foo.bars[0].foo_id, undefined)
+
+    foo2 = store.add('foo', foo)
+    assert.strictEqual(foo2, foo)
+    bar2 = store.add('bar', foo.bars[0])
+    assert.strictEqual(bar2, foo.bars[0])
+    assert.equal(store.unsaved('bar').length, 1)
+    assert.equal(store.unsaved('foo').length, 1)
+  })
 })

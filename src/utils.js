@@ -96,7 +96,7 @@ const utils = {
    */
   _ (dest, src) {
     utils.forOwn(src, function (value, key) {
-      if (key && utils.isUndefined(dest[key]) && !utils.isFunction(value) && key.indexOf('_') !== 0) {
+      if (key && dest[key] === undefined && !utils.isFunction(value) && key.indexOf('_') !== 0) {
         dest[key] = value
       }
     })
@@ -386,7 +386,7 @@ const utils = {
   },
 
   /**
-   * Recursively shallow copy own enumerable properties from `source` to `dest`.
+   * Recursively shallow copy enumerable properties from `source` to `dest`.
    *
    * @example
    * import {utils} from 'js-data'
@@ -404,14 +404,15 @@ const utils = {
    */
   deepMixIn (dest, source) {
     if (source) {
-      utils.forOwn(source, function (value, key) {
+      for (var key in source) {
+        const value = source[key]
         const existing = dest[key]
         if (isPlainObject(value) && isPlainObject(existing)) {
           utils.deepMixIn(existing, value)
         } else {
           dest[key] = value
         }
-      })
+      }
     }
     return dest
   },
@@ -465,7 +466,7 @@ const utils = {
       if (equalsFn(oldValue, newValue)) {
         return
       }
-      if (utils.isUndefined(oldValue)) {
+      if (oldValue === undefined) {
         diff.added[key] = newValue
       } else {
         diff.changed[key] = newValue
@@ -476,7 +477,7 @@ const utils = {
     oldKeys.forEach(function (key) {
       const oldValue = oldObject[key]
       const newValue = newObject[key]
-      if (utils.isUndefined(newValue) && !utils.isUndefined(oldValue)) {
+      if (newValue === undefined && oldValue !== undefined) {
         diff.removed[key] = undefined
       }
     })
@@ -1208,7 +1209,9 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
   logify (target) {
     utils.addHiddenPropsToTarget(target, {
       dbg (...args) {
-        this.log('debug', ...args)
+        if (utils.isFunction(this.log)) {
+          this.log('debug', ...args)
+        }
       },
       log (level, ...args) {
         if (level && !args.length) {

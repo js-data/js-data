@@ -225,6 +225,7 @@ export default Component.extend({
    */
   commit () {
     this._set('changed') // unset
+    this._set('history', []) // clear history
     this._set('previous', utils.plainCopy(this))
   },
 
@@ -309,6 +310,32 @@ export default Component.extend({
   hasChanges (opts) {
     const quickHasChanges = !!(this._get('changed') || []).length
     return quickHasChanges || utils.areDifferent(typeof this.toJSON === 'function' ? this.toJSON(opts) : this, this._get('previous'), opts)
+  },
+
+  /**
+   * Return whether the record is unsaved. Records that have primary keys are
+   * considered "saved". Records without primary keys are considered "unsaved".
+   *
+   * @example <caption>Record#isNew</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-beta.7')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user', {
+   *   id: 1234
+   * })
+   * const user2 = store.createRecord('user')
+   * console.log('user isNew: ' + user.isNew()) // false
+   * console.log('user2 isNew: ' + user2.isNew()) // true
+   *
+   * @method Record#isNew
+   * @returns {boolean} Whether the record is unsaved.
+   * @since 3.0.0
+   */
+  isNew (opts) {
+    return utils.get(this, this._mapper().idAttribute) === undefined
   },
 
   /**
@@ -584,8 +611,18 @@ export default Component.extend({
     const mapper = this._mapper()
     const id = utils.get(this, mapper.idAttribute)
     let props = this
-    if (utils.isUndefined(id)) {
-      return superMethod(mapper, 'create')(props, opts)
+
+    const postProcess = (result) => {
+      const record = opts.raw ? result.data : result
+      if (record) {
+        utils.deepMixIn(this, record)
+        this.commit()
+      }
+      return result
+    }
+
+    if (id === undefined) {
+      return superMethod(mapper, 'create')(props, opts).then(postProcess)
     }
     if (opts.changesOnly) {
       const changes = this.changes(opts)
@@ -593,14 +630,7 @@ export default Component.extend({
       utils.fillIn(props, changes.added)
       utils.fillIn(props, changes.changed)
     }
-    return superMethod(mapper, 'update')(id, props, opts).then((result) => {
-      const record = opts.raw ? result.data : result
-      if (record) {
-        utils.deepMixIn(this, record)
-        this.commit()
-      }
-      return result
-    })
+    return superMethod(mapper, 'update')(id, props, opts).then(postProcess)
   },
 
   /**
