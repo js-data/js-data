@@ -218,8 +218,14 @@ describe('Mapper#create', function () {
         userId: user.id
       }
     ], 'comments should not be in the store')
-    assert.objectsEqual(user.profile, userProps.profile, 'user.profile should not be undefined')
-    assert.objectsEqual(store.getAll('profile'), [userProps.profile], 'profile should be in the store')
+    assert.objectsEqual(user.profile, {
+      email: userProps.profile.email,
+      userId: user.id
+    }, 'user.profile should not be undefined')
+    assert.objectsEqual(store.getAll('profile'), [{
+      email: userProps.profile.email,
+      userId: user.id
+    }], 'profile should be in the store')
     assert(store.is('organization', user.organization), 'user.organization should be a organization record')
     assert.equal(store.getAll('organization')[0].id, user.organizationId, 'user.organizationId should be correct')
     assert.objectsEqual(store.getAll('organization'), [user.organization], 'organization should be in the store')
@@ -230,8 +236,14 @@ describe('Mapper#create', function () {
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
     assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
     assert.objectsEqual(store.getAll('comment'), user.comments, 'comments should be in the store')
-    assert.objectsEqual(user.profile, userProps.profile, 'user.profile should not be undefined')
-    assert.objectsEqual(store.getAll('profile'), [userProps.profile], 'profile should be in the store')
+    assert.objectsEqual(user.profile, {
+      email: userProps.profile.email,
+      userId: user.id
+    }, 'user.profile should not be undefined')
+    assert.objectsEqual(store.getAll('profile'), [{
+      email: userProps.profile.email,
+      userId: user.id
+    }], 'profile should be in the store')
     assert(store.is('organization', user.organization), 'user.organization should be a organization record')
     assert.equal(store.getAll('organization')[0].id, user.organizationId, 'user.organizationId should be correct')
     assert.objectsEqual(store.getAll('organization'), [user.organization], 'organization should be in the store')
@@ -398,8 +410,14 @@ describe('Mapper#create', function () {
         userId: user.id
       }
     ], 'comments should not be in the store')
-    assert.objectsEqual(user.profile, userProps.profile, 'user.profile should be a profile')
-    assert.objectsEqual(store.getAll('profile'), [userProps.profile], 'profile should be in the store')
+    assert.objectsEqual(user.profile, {
+      email: userProps.profile.email,
+      userId: user.id
+    }, 'user.profile should be a profile')
+    assert.objectsEqual(store.getAll('profile'), [{
+      email: userProps.profile.email,
+      userId: user.id
+    }], 'profile should be in the store')
     assert.objectsEqual(user.organization, userProps.organization)
     assert(!user.organizationId, 'user.organizationId should be undefined')
     assert.objectsEqual(store.getAll('organization'), [userProps.organization], 'organization should be in the store')
@@ -410,8 +428,14 @@ describe('Mapper#create', function () {
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
     assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
     assert.objectsEqual(store.getAll('comment'), user.comments, 'comments should be in the store')
-    assert.objectsEqual(user.profile, userProps.profile, 'user.profile should be a profile')
-    assert.objectsEqual(store.getAll('profile'), [userProps.profile], 'profile should be in the store')
+    assert.objectsEqual(user.profile, {
+      email: userProps.profile.email,
+      userId: user.id
+    }, 'user.profile should be a profile')
+    assert.objectsEqual(store.getAll('profile'), [{
+      email: userProps.profile.email,
+      userId: user.id
+    }], 'profile should be in the store')
     assert.objectsEqual(user.organization, userProps.organization)
     assert(!user.organizationId, 'user.organizationId should be undefined')
     assert.objectsEqual(store.getAll('organization'), [userProps.organization], 'organization should be in the store')
@@ -578,8 +602,14 @@ describe('Mapper#create', function () {
         userId: user.id
       }
     ], 'comments should not be in the store')
-    assert.objectsEqual(user.profile, userProps.profile, 'user.profile should be a profile')
-    assert.objectsEqual(store.getAll('profile'), [userProps.profile], 'profile should be in the store')
+    assert.objectsEqual(user.profile, {
+      email: userProps.profile.email,
+      userId: user.id
+    }, 'user.profile should be a profile')
+    assert.objectsEqual(store.getAll('profile'), [{
+      email: userProps.profile.email,
+      userId: user.id
+    }], 'profile should be in the store')
     assert.objectsEqual(user.organization, userProps.organization)
     assert(!user.organizationId, 'user.organizationId should be undefined')
     assert.objectsEqual(store.getAll('organization'), [userProps.organization], 'organization should be in the store')
@@ -590,8 +620,14 @@ describe('Mapper#create', function () {
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
     assert(store.is('comment', user.comments[0]), 'user.comments[0] should be a comment record')
     assert.objectsEqual(store.getAll('comment'), user.comments, 'comments should be in the store')
-    assert.objectsEqual(user.profile, userProps.profile, 'user.profile should be a profile')
-    assert.objectsEqual(store.getAll('profile'), [userProps.profile], 'profile should be in the store')
+    assert.objectsEqual(user.profile, {
+      email: userProps.profile.email,
+      userId: user.id
+    }, 'user.profile should be a profile')
+    assert.objectsEqual(store.getAll('profile'), [{
+      email: userProps.profile.email,
+      userId: user.id
+    }], 'profile should be in the store')
     assert.objectsEqual(user.organization, userProps.organization)
     assert(!user.organizationId, 'user.organizationId should be undefined')
     assert.objectsEqual(store.getAll('organization'), [userProps.organization], 'organization should be in the store')

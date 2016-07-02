@@ -166,9 +166,21 @@ describe('Mapper#createMany', function () {
     assert(store.is('user', users[1]), 'users[1] should be a user record')
     assert(store.get('user', users[0].id) === users[0], 'users[0] should be in the store')
     assert(store.get('user', users[1].id) === users[1], 'users[1] should be in the store')
-    assert.objectsEqual(users[0].profile, userProps[0].profile, 'users[0].profile should be a profile')
-    assert.objectsEqual(users[1].profile, userProps[1].profile, 'users[1].profile should be a profile')
-    assert.objectsEqual(store.getAll('profile'), [userProps[1].profile, userProps[0].profile], 'profiles should not be in the store')
+    assert.objectsEqual(users[0].profile, {
+      email: userProps[0].profile.email,
+      userId: users[0].id
+    }, 'users[0].profile should be a profile')
+    assert.objectsEqual(users[1].profile, {
+      email: userProps[1].profile.email,
+      userId: users[1].id
+    }, 'users[1].profile should be a profile')
+    assert.objectsEqual(store.getAll('profile'), [{
+      email: userProps[1].profile.email,
+      userId: users[1].id
+    }, {
+      email: userProps[0].profile.email,
+      userId: users[0].id
+    }], 'profiles should be in the store')
     assert.objectsEqual(users[0].organization, {
       name: 'Company Inc'
     }, 'users[0].organization should an organization')
@@ -341,9 +353,21 @@ describe('Mapper#createMany', function () {
     assert(store.is('user', users[1]), 'users[1] should be a user record')
     assert(store.get('user', users[0].id) === users[0], 'users[0] should be in the store')
     assert(store.get('user', users[1].id) === users[1], 'users[1] should be in the store')
-    assert.objectsEqual(users[0].profile, userProps[0].profile, 'users[0].profile should be a profile')
-    assert.objectsEqual(users[1].profile, userProps[1].profile, 'users[1].profile should be a profile')
-    assert.objectsEqual(store.getAll('profile'), [userProps[1].profile, userProps[0].profile], 'profiles should not be in the store')
+    assert.objectsEqual(users[0].profile, {
+      email: userProps[0].profile.email,
+      userId: users[0].id
+    }, 'users[0].profile should be a profile')
+    assert.objectsEqual(users[1].profile, {
+      email: userProps[1].profile.email,
+      userId: users[1].id
+    }, 'users[1].profile should be a profile')
+    assert.objectsEqual(store.getAll('profile'), [{
+      email: userProps[1].profile.email,
+      userId: users[1].id
+    }, {
+      email: userProps[0].profile.email,
+      userId: users[0].id
+    }], 'profiles should be in the store')
     assert.objectsEqual(users[0].organization, {
       name: 'Company Inc'
     }, 'users[0].organization should an organization')
@@ -501,9 +525,21 @@ describe('Mapper#createMany', function () {
     assert(store.is('user', users[1]), 'users[1] should be a user record')
     assert(store.get('user', users[0].id) === users[0], 'users[0] should be in the store')
     assert(store.get('user', users[1].id) === users[1], 'users[1] should be in the store')
-    assert.objectsEqual(users[0].profile, userProps[0].profile, 'users[0].profile should be a profile')
-    assert.objectsEqual(users[1].profile, userProps[1].profile, 'users[1].profile should be a profile')
-    assert.objectsEqual(store.getAll('profile'), [userProps[1].profile, userProps[0].profile], 'profiles should not be in the store')
+    assert.objectsEqual(users[0].profile, {
+      email: userProps[0].profile.email,
+      userId: users[0].id
+    }, 'users[0].profile should be a profile')
+    assert.objectsEqual(users[1].profile, {
+      email: userProps[1].profile.email,
+      userId: users[1].id
+    }, 'users[1].profile should be a profile')
+    assert.objectsEqual(store.getAll('profile'), [{
+      email: userProps[1].profile.email,
+      userId: users[1].id
+    }, {
+      email: userProps[0].profile.email,
+      userId: users[0].id
+    }], 'profiles should be in the store')
     assert.objectsEqual(users[0].organization, {
       name: 'Company Inc'
     }, 'users[0].organization should an organization')

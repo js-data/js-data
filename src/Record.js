@@ -124,8 +124,10 @@ function Record (props, opts) {
     _set('noValidate', true)
   }
   // Set the idAttribute value first, if it exists.
-  if (props[opts.idAttribute] !== undefined) {
-    this[opts.idAttribute] = props[opts.idAttribute];
+  const mapper = this.constructor.mapper
+  const id = mapper ? utils.get(props, mapper.idAttribute) : undefined
+  if (id !== undefined) {
+    utils.set(this, mapper.idAttribute, id)
   }
   utils.fillIn(this, props)
   _set('creating', false)
@@ -170,6 +172,17 @@ export default Component.extend({
    * @since 3.0.0
    */
   beforeLoadRelations () {},
+
+  /**
+   * Return the change history of this record since it was instantiated or
+   * {@link Record#commit} was called.
+   *
+   * @method Record#changeHistory
+   * @since 3.0.0
+   */
+  changeHistory () {
+    return (this._get('history') || []).slice()
+  },
 
   /**
    * Return changes to this record since it was instantiated or
