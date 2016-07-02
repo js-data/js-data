@@ -23,6 +23,52 @@ describe('Collection#add', function () {
     assert.objectsEqual(this.PostCollection.get(7), this.data.p3)
     assert.objectsEqual(this.PostCollection.get(8), this.data.p4)
   })
+  it('should allow unsaved records into the collection', function () {
+    assert.objectsEqual(this.PostCollection.add([
+      this.data.p1,
+      this.data.p2,
+      { author: 'Alice' },
+      this.data.p3,
+      { author: 'Bob' },
+      this.data.p4
+    ]), [this.data.p1, this.data.p2, { author: 'Alice' }, this.data.p3, { author: 'Bob' }, this.data.p4])
+
+    assert.objectsEqual(this.PostCollection.get(5), this.data.p1)
+    assert.objectsEqual(this.PostCollection.get(6), this.data.p2)
+    assert.objectsEqual(this.PostCollection.get(7), this.data.p3)
+    assert.objectsEqual(this.PostCollection.get(8), this.data.p4)
+    assert.objectsEqual(this.PostCollection.filter({
+      id: undefined
+    }).length, 2)
+    assert.objectsEqual(this.PostCollection.filter({
+      id: undefined
+    })[0], { author: 'Bob' })
+    assert.objectsEqual(this.PostCollection.filter({
+      id: undefined
+    })[1], { author: 'Alice' })
+    assert.objectsEqual(this.PostCollection.filter({
+      id: undefined
+    })[0], { author: 'Bob' })
+    assert.objectsEqual(this.PostCollection.filter().length, 6)
+
+    this.PostCollection.add({ author: 'Bob' })
+    assert.objectsEqual(this.PostCollection.filter({
+      id: undefined
+    }).length, 3)
+    assert.objectsEqual(this.PostCollection.filter({
+      author: 'Bob'
+    }).length, 2)
+    assert.objectsEqual(this.PostCollection.filter().length, 7)
+
+    this.PostCollection.add({ author: 'Bob' })
+    assert.objectsEqual(this.PostCollection.filter({
+      id: undefined
+    }).length, 4)
+    assert.objectsEqual(this.PostCollection.filter({
+      author: 'Bob'
+    }).length, 3)
+    assert.objectsEqual(this.PostCollection.filter().length, 8)
+  })
   it('should inject existing items into the collection and call Record#commit', function () {
     const collection = new JSData.Collection({ mapper: new JSData.Mapper({ name: 'user' }) })
 
@@ -56,11 +102,11 @@ describe('Collection#add', function () {
     assert(collection.get(1) === data[1])
     assert.equal(collection.getAll(20, { index: 'age' }).length, 1)
   })
-  it('should require an id', function () {
+  it('should not require an id', function () {
     const collection = new JSData.Collection()
-    assert.throws(() => {
+    assert.doesNotThrow(() => {
       collection.add({})
-    }, Error, `[Collection#add:record.id] expected: string or number, found: undefined\nhttp://www.js-data.io/v3.0/docs/errors#400`)
+    })
   })
   it('should test opts.onConflict', function () {
     const collection = new JSData.Collection()
@@ -96,6 +142,22 @@ describe('Collection#add', function () {
     assert.equal(existing.biz, 'baz')
     assert.equal(existing.foo, 'BAR')
     assert(!existing.beep)
+
+    const store = new JSData.DataStore()
+    store.defineMapper('test', {
+      schema: {
+        properties: {
+          id: { type: 'string' },
+          count: { type: 'number' }
+        }
+      }
+    });
+
+    const test = store.createRecord('test', { id: 'abcd', count: 1 })
+    store.add('test', test)
+    const test2 = store.createRecord('test', { id: 'abcd', count: 2 })
+    store.add('test', test2)
+    assert.equal(store.get('test', 'abcd').count, 2)
   })
   it('should replace existing items (2)', function () {
     let post = this.PostCollection.add(this.data.p1)

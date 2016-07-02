@@ -131,4 +131,13 @@ describe('Record', function () {
       ])
     }
   })
+
+  it('should be saved or unsaved', function () {
+    const store = new JSData.DataStore()
+    store.defineMapper('user')
+    const user = store.createRecord('user', { id: 1 })
+    const user2 = store.createRecord('user')
+    assert.equal(user.isNew(), false)
+    assert.equal(user2.isNew(), true)
+  })
 })

@@ -97,6 +97,8 @@ describe('JSData.hasMany', function () {
     assert.deepEqual(foo2.bars, [])
     const bar1 = store.add('bar', { id: 1 })
     const bar2 = store.add('bar', { id: 2 })
+    assert.objectsEqual(foo1.bars, [bar1])
+    assert.objectsEqual(foo2.bars, [bar2])
     assert.strictEqual(foo1.bars[0], bar1)
     assert.strictEqual(foo2.bars[0], bar2)
     foo1.bars = [bar2]

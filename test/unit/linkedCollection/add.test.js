@@ -321,9 +321,7 @@ describe('LinkedCollection#add', function () {
     ], 'bars should have been added')
   })
   it('should update links', function () {
-    const store = new JSData.DataStore({
-      linkRelations: true
-    })
+    const store = new JSData.DataStore()
     store.defineMapper('foo', {
       relations: {
         hasMany: {
@@ -361,8 +359,8 @@ describe('LinkedCollection#add', function () {
       id: 3,
       fooId: 1
     })
-    assert.equal(foo.bars.length, 3, 'bars should have been added, but not linked')
-    assert.equal(store.getAll('bar').length, 3, '3 bars should be in the store')
+    assert.equal(foo.bars.length, 3)
+    assert.equal(store.getAll('bar').length, 3)
   })
   it('should inject 1,000 items', function () {
     let users = []

@@ -25,7 +25,7 @@ Relation.extend = utils.extend
 
 utils.addHiddenPropsToTarget(Relation.prototype, {
   get canAutoAddLinks () {
-    return utils.isUndefined(this.add) || !!this.add
+    return this.add === undefined || !!this.add
   },
 
   get relatedCollection () {
@@ -68,7 +68,7 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
   },
 
   canFindLinkFor () {
-    return Boolean(this.foreignKey || this.localKey)
+    return !!(this.foreignKey || this.localKey)
   },
 
   getRelation () {
@@ -87,15 +87,15 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
     this._setForeignKey(record, relatedRecord)
   },
 
-  _setForeignKey (record, relatedRecord) {
+  _setForeignKey (record, relatedRecords) {
     const idAttribute = this.mapper.idAttribute
 
-    if (!utils.isArray(relatedRecord)) {
-      relatedRecord = [relatedRecord]
+    if (!utils.isArray(relatedRecords)) {
+      relatedRecords = [relatedRecords]
     }
 
-    relatedRecord.forEach((relatedRecordItem) => {
-      utils.set(relatedRecordItem, this.foreignKey, utils.get(record, idAttribute))
+    relatedRecords.forEach((relatedRecord) => {
+      utils.set(relatedRecord, this.foreignKey, utils.get(record, idAttribute))
     })
   },
 
@@ -103,8 +103,8 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
     return utils.get(record, this.localField)
   },
 
-  setLocalField (record, data) {
-    return utils.set(record, this.localField, data)
+  setLocalField (record, relatedData) {
+    return utils.set(record, this.localField, relatedData)
   },
 
   getInverse (mapper) {
@@ -128,7 +128,7 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
     return !def.foreignKey || def.foreignKey === this.foreignKey
   },
 
-  linkRecords (relatedMapper, records) {
+  addLinkedRecords (records) {
     const datastore = this.mapper.datastore
 
     records.forEach((record) => {
@@ -143,7 +143,7 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
       const isEmptyLinks = !relatedData || utils.isArray(relatedData) && !relatedData.length
 
       if (isEmptyLinks && this.canFindLinkFor(record)) {
-        relatedData = this.findExistingLinksFor(relatedMapper, record)
+        relatedData = this.findExistingLinksFor(record)
       }
 
       if (relatedData) {
@@ -152,23 +152,49 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
     })
   },
 
+  removeLinkedRecords (relatedMapper, records) {
+    const localField = this.localField
+    records.forEach((record) => {
+      const relatedData = utils.get(record, localField)
+      this.unlinkInverseRecords(relatedData)
+      utils.set(record, localField, undefined)
+    })
+  },
+
+  unlinkInverseRecords (record) {
+    if (!record) {
+      return
+    }
+    utils.set(record, this.getInverse(this.mapper).localField, undefined)
+  },
+
   linkRecord (record, relatedRecord) {
     const relatedId = utils.get(relatedRecord, this.mapper.idAttribute)
 
-    if (relatedRecord !== this.relatedCollection.get(relatedId)) {
-      this.setForeignKey(record, relatedRecord)
+    if (relatedId === undefined) {
+      const unsaved = this.relatedCollection.unsaved()
+      if (unsaved.indexOf(relatedRecord) === -1) {
+        if (this.canAutoAddLinks) {
+          relatedRecord = this.relatedCollection.add(relatedRecord)
+        }
+      }
+    } else {
+      if (relatedRecord !== this.relatedCollection.get(relatedId)) {
+        this.setForeignKey(record, relatedRecord)
 
-      if (this.canAutoAddLinks) {
-        relatedRecord = this.relatedCollection.add(relatedRecord)
+        if (this.canAutoAddLinks) {
+          relatedRecord = this.relatedCollection.add(relatedRecord)
+        }
       }
     }
 
     return relatedRecord
   },
 
-  findExistingLinksByForeignKey (foreignId) {
+  // e.g. user hasMany post via "foreignKey", so find all posts of user
+  findExistingLinksByForeignKey (id) {
     return this.relatedCollection.filter({
-      [this.foreignKey]: foreignId
+      [this.foreignKey]: id
     })
   }
 })

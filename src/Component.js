@@ -207,13 +207,13 @@ utils.logify(Component.prototype)
  * const {Collection, DataStore} = JSData
  *
  * const collection = new Collection()
- * collection.on('foo', (msg) => {
+ * collection.on('foo', function (msg) {
  *   console.log(msg)
  * })
  * collection.emit('foo', 'bar')
  *
  * const store = new DataStore()
- * store.on('beep', (msg) => {
+ * store.on('beep', function (msg) {
  *   console.log(msg)
  * })
  * store.emit('beep', 'boop')

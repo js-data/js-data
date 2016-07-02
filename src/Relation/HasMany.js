@@ -14,42 +14,53 @@ export const HasManyRelation = Relation.extend({
 
   canFindLinkFor (record) {
     const hasForeignKeys = this.foreignKey || this.foreignKeys
+    return !!(hasForeignKeys || (this.localKeys && utils.get(record, this.localKeys)))
+  },
 
-    return Boolean(hasForeignKeys || this.localKeys && utils.get(record, this.localKeys))
+  unlinkInverseRecords (records) {
+    if (!records) {
+      return
+    }
+    const localField = this.getInverse(this.mapper).localField
+    records.forEach(function (record) {
+      utils.set(record, localField, undefined)
+    })
   },
 
   linkRecord (record, relatedRecords) {
     const relatedCollection = this.relatedCollection
+    const canAutoAddLinks = this.canAutoAddLinks
+    const foreignKey = this.foreignKey
+    const unsaved = this.relatedCollection.unsaved()
 
-    return relatedRecords.map((toInsertItem) => {
-      const relatedId = relatedCollection.recordId(toInsertItem)
+    return relatedRecords.map((relatedRecord) => {
+      const relatedId = relatedCollection.recordId(relatedRecord)
 
-      if (toInsertItem !== relatedCollection.get(relatedId)) {
-        if (this.foreignKey) {
+      if ((relatedId === undefined && unsaved.indexOf(relatedRecord) === -1) || relatedRecord !== relatedCollection.get(relatedId)) {
+        if (foreignKey) {
           // TODO: slow, could be optimized? But user loses hook
-          this.setForeignKey(record, toInsertItem)
+          this.setForeignKey(record, relatedRecord)
         }
-
-        if (this.canAutoAddLinks) {
-          toInsertItem = relatedCollection.add(toInsertItem)
+        if (canAutoAddLinks) {
+          relatedRecord = relatedCollection.add(relatedRecord)
         }
       }
 
-      return toInsertItem
+      return relatedRecord
     })
   },
 
-  findExistingLinksFor (relatedMapper, record) {
-    const recordId = utils.get(record, relatedMapper.idAttribute)
-    const localKeysValue = this.localKeys ? utils.get(record, this.localKeys) : null
+  findExistingLinksFor (record) {
+    const id = utils.get(record, this.mapper.idAttribute)
+    const ids = this.localKeys ? utils.get(record, this.localKeys) : null
     let records
 
-    if (this.foreignKey) {
-      records = this.findExistingLinksByForeignKey(recordId)
-    } else if (this.localKeys && localKeysValue) {
-      records = this.findExistingLinksByLocalKeys(localKeysValue)
-    } else if (this.foreignKeys) {
-      records = this.findExistingLinksByForeignKeys(recordId)
+    if (id !== undefined && this.foreignKey) {
+      records = this.findExistingLinksByForeignKey(id)
+    } else if (this.localKeys && ids) {
+      records = this.findExistingLinksByLocalKeys(ids)
+    } else if (id !== undefined && this.foreignKeys) {
+      records = this.findExistingLinksByForeignKeys(id)
     }
 
     if (records && records.length) {
@@ -57,21 +68,23 @@ export const HasManyRelation = Relation.extend({
     }
   },
 
-  findExistingLinksByLocalKeys (localKeysValue) {
+  // e.g. user hasMany group via "foreignKeys", so find all users of a group
+  findExistingLinksByLocalKeys (ids) {
     return this.relatedCollection.filter({
       where: {
         [this.mapper.idAttribute]: {
-          'in': localKeysValue
+          'in': ids
         }
       }
     })
   },
 
-  findExistingLinksByForeignKeys (foreignId) {
+  // e.g. group hasMany user via "localKeys", so find all groups that own a user
+  findExistingLinksByForeignKeys (id) {
     return this.relatedCollection.filter({
       where: {
         [this.foreignKeys]: {
-          'contains': foreignId
+          'contains': id
         }
       }
     })

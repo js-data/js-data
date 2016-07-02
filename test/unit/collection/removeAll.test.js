@@ -35,4 +35,112 @@ describe('Collection#removeAll', function () {
     assert(!this.PostCollection.get(7))
     assert(!this.PostCollection.get(8))
   })
+
+  it('should remove unsaved records', function () {
+    let alice = { author: 'Alice' }
+    let bob = this.store.createRecord('post', { author: 'Bob' })
+    assert.objectsEqual(this.PostCollection.add([
+      this.data.p1,
+      this.data.p2,
+      alice,
+      this.data.p3,
+      bob,
+      this.data.p4
+    ]), [this.data.p1, this.data.p2, alice, this.data.p3, bob, this.data.p4])
+
+    assert.strictEqual(bob, this.PostCollection.filter({
+      author: 'Bob'
+    })[0])
+    assert.notStrictEqual(alice, this.PostCollection.filter({
+      author: 'Alice'
+    })[0])
+
+    assert.objectsEqual(this.PostCollection.get(5), this.data.p1)
+    assert.objectsEqual(this.PostCollection.get(6), this.data.p2)
+    assert.objectsEqual(this.PostCollection.get(7), this.data.p3)
+    assert.objectsEqual(this.PostCollection.get(8), this.data.p4)
+    assert.objectsEqual(this.PostCollection.filter({
+      id: undefined
+    }).length, 2)
+    assert.objectsEqual(this.PostCollection.filter({
+      author: 'Bob'
+    }).length, 1)
+    assert.objectsEqual(this.PostCollection.filter().length, 6)
+
+    let removedAlices = this.PostCollection.removeAll([alice])
+    assert.equal(removedAlices.length, 0)
+    assert.objectsEqual(this.PostCollection.filter({
+      author: 'Alice'
+    }).length, 1)
+    assert.objectsEqual(this.PostCollection.filter().length, 6)
+    removedAlices = this.PostCollection.removeAll(this.PostCollection.filter({
+      author: 'Alice'
+    }))
+    assert.objectsEqual(removedAlices, [{ author: 'Alice' }])
+    assert.objectsEqual(this.PostCollection.filter({
+      author: 'Alice'
+    }).length, 0)
+    assert.objectsEqual(this.PostCollection.filter().length, 5)
+    assert.objectsEqual(this.PostCollection.filter({
+      id: undefined
+    }).length, 1)
+    assert.objectsEqual(this.PostCollection.filter({
+      author: 'Bob'
+    }).length, 1)
+
+    const bob2 = this.PostCollection.add({ author: 'Bob' })
+    assert.objectsEqual(this.PostCollection.filter({
+      id: undefined
+    }).length, 2)
+    assert.objectsEqual(this.PostCollection.filter({
+      author: 'Bob'
+    }).length, 2)
+    assert.objectsEqual(this.PostCollection.filter().length, 6)
+
+    let removedBobs = this.PostCollection.removeAll([bob2, bob])
+    assert.strictEqual(removedBobs[0], bob2)
+    assert.strictEqual(removedBobs[1], bob)
+
+    assert.equal(this.PostCollection.filter({
+      id: undefined
+    }).length, 0)
+    assert.equal(this.PostCollection.filter({
+      author: 'Bob'
+    }).length, 0)
+    assert.objectsEqual(this.PostCollection.filter().length, 4)
+  })
+
+  it('should remove unsaved records with convenience method', function () {
+    let alice = { author: 'Alice' }
+    let bob = this.store.createRecord('post', { author: 'Bob' })
+    assert.objectsEqual(this.PostCollection.add([
+      this.data.p1,
+      this.data.p2,
+      alice,
+      this.data.p3,
+      bob,
+      this.data.p4
+    ]), [this.data.p1, this.data.p2, alice, this.data.p3, bob, this.data.p4])
+    const storeAlice = this.PostCollection.filter({
+      author: 'Alice'
+    })[0]
+
+    const bob2 = this.PostCollection.add({ author: 'Bob', num: 2 })
+
+    assert.equal(this.PostCollection.getAll().length, 7)
+
+    const records = this.PostCollection.unsaved()
+
+    assert.objectsEqual(records, [
+      bob2,
+      bob,
+      storeAlice
+    ])
+
+    const removedRecords = this.PostCollection.prune()
+
+    assert.equal(removedRecords.length, 3)
+    assert.equal(this.PostCollection.getAll().length, 4)
+    assert.objectsEqual(removedRecords, [bob2, bob, alice])
+  })
 })

@@ -85,10 +85,12 @@ export class Record extends Component {
   afterSave(): void
   beforeSave(): void
   beforeLoadRelations(): void
+  changeHistory(): any[]
   changes(opts?: any): Diff
   commit(): this
   create(opts?: any): Promise<Record>
   destroy(opts?: any): Promise<any>
+  isNew(): boolean
   loadRelations(relations: any, opts?: any): Promise<this>
   'get'(key: string): any
   hasChanges(opts?: any): boolean
@@ -190,13 +192,15 @@ export class Collection extends Component {
   limit(num: number): any[]
   map(cb: any, thisArg: any): any[]
   mapCall(funcName: string, ...args: any[]): any[]
-  recordId(record?: any): any
+  prune(): any[]
   query(): Query
+  recordId(record?: any): any
   reduce(cb: Function, initialValue: any): any
   remove(id: string|number, opts?: any): any
-  removeAll(query: any, opts?: any): void|any[]
+  removeAll(query: any, opts?: any): any[]
   skip(num: number): any[]
   toJSON(opts?: any): any[]
+  unsaved(): any[]
   updateIndex(record: any, opts?: any): void
   updateIndexes(record: any): void
 }
@@ -225,7 +229,8 @@ export class DataStore extends Container {
   _collections: Object
   _pendingQueries: Object
   _completedQueries: Object
-  linkRelations: boolean
+  usePendingFind: boolean
+  usePendingFindAll: boolean
   as(name: string): Mapper|LinkedCollection
   constructor(opts?: any)
   add(mapperName: string, records: any[]|any, opts?: any): any[]|any

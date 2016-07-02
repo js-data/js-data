@@ -114,7 +114,7 @@ const proxiedCollectionMethods = [
    * console.log(posts)
    *
    * // Use a custom filter function
-   * posts = store.filter('post', (post) => post.id % 2 === 0)
+   * posts = store.filter('post', function (post) { return post.id % 2 === 0 })
    *
    * @method DataStore#filter
    * @param {(string|number)} name Name of the {@link Mapper} to target.
@@ -178,6 +178,18 @@ const proxiedCollectionMethods = [
   'getAll',
 
   /**
+   * Wrapper for {@link LinkedCollection#prune}.
+   *
+   * @method DataStore#prune
+   * @param {Object} [opts] See {@link LinkedCollection#prune}.
+   * @returns {Array} See {@link LinkedCollection#prune}.
+   * @see LinkedCollection#prune
+   * @see Collection#prune
+   * @since 3.0.0
+   */
+  'prune',
+
+  /**
    * Wrapper for {@link LinkedCollection#query}.
    *
    * @example
@@ -227,7 +239,18 @@ const proxiedCollectionMethods = [
    * @see Collection#toJSON
    * @since 3.0.0
    */
-  'toJSON'
+  'toJSON',
+
+  /**
+   * Wrapper for {@link LinkedCollection#unsaved}.
+   *
+   * @method DataStore#unsaved
+   * @returns {Array} See {@link LinkedCollection#unsaved}.
+   * @see LinkedCollection#unsaved
+   * @see Collection#unsaved
+   * @since 3.0.0
+   */
+  'unsaved'
 ]
 const ownMethodsForScoping = [
   'addToCache',
@@ -270,8 +293,33 @@ const DATASTORE_DEFAULTS = {
    * @default true
    * @name DataStore#unlinkOnDestroy
    * @since 3.0.0
+   * @type {boolean}
    */
-  unlinkOnDestroy: true
+  unlinkOnDestroy: true,
+
+  /**
+   * Whether to use the pending query if a `find` request for the specified
+   * record is currently underway. Can be set to `true`, `false`, or to a
+   * function that returns `true` or `false`.
+   *
+   * @default true
+   * @name DataStore#usePendingFind
+   * @since 3.0.0
+   * @type {boolean|Function}
+   */
+  usePendingFind: true,
+
+  /**
+   * Whether to use the pending query if a `findAll` request for the given query
+   * is currently underway. Can be set to `true`, `false`, or to a function that
+   * returns `true` or `false`.
+   *
+   * @default true
+   * @name DataStore#usePendingFindAll
+   * @since 3.0.0
+   * @type {boolean|Function}
+   */
+  usePendingFindAll: true
 }
 
 /**
@@ -320,6 +368,8 @@ const DATASTORE_DEFAULTS = {
  * @param {boolean} [opts.collectionClass={@link LinkedCollection}] See {@link DataStore#collectionClass}.
  * @param {boolean} [opts.debug=false] See {@link Component#debug}.
  * @param {boolean} [opts.unlinkOnDestroy=true] See {@link DataStore#unlinkOnDestroy}.
+ * @param {boolean|Function} [opts.usePendingFind=true] See {@link DataStore#usePendingFind}.
+ * @param {boolean|Function} [opts.usePendingFindAll=true] See {@link DataStore#usePendingFindAll}.
  * @returns {DataStore}
  * @see Container
  * @since 3.0.0
@@ -332,7 +382,7 @@ function DataStore (opts) {
 
   opts || (opts = {})
   // Fill in any missing options with the defaults
-  utils.fillIn(opts, utils.plainCopy(DATASTORE_DEFAULTS))
+  utils.fillIn(opts, DATASTORE_DEFAULTS)
   Container.call(this, opts)
 
   this.collectionClass = this.collectionClass || LinkedCollection
@@ -926,7 +976,7 @@ const props = {
   defineMapper (name, opts) {
     // Complexity of this method is beyond simply using => functions to bind context
     const self = this
-    const mapper = utils.getSuper(self).prototype.defineMapper.call(self, name, opts)
+    const mapper = Container.prototype.defineMapper.call(self, name, opts)
     self._pendingQueries[name] = {}
     self._completedQueries[name] = {}
     mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] })
@@ -985,28 +1035,29 @@ const props = {
           // e.g. profile.user = someUser
           // or comment.post = somePost
           set (record) {
-            const _self = this
             // e.g. const otherUser = profile.user
-            const current = this._get(path)
+            const currentParent = this._get(path)
             // e.g. profile.user === someUser
-            if (record === current) {
-              return current
+            if (record === currentParent) {
+              return currentParent
             }
-            const id = utils.get(_self, idAttribute)
+            const id = utils.get(this, idAttribute)
             const inverseDef = def.getInverse(mapper)
 
             // e.g. profile.user !== someUser
             // or comment.post !== somePost
-            if (current) {
+            if (currentParent) {
               // e.g. otherUser.profile = undefined
               if (inverseDef.type === hasOneType) {
-                safeSetLink(current, inverseDef.localField, undefined)
+                safeSetLink(currentParent, inverseDef.localField, undefined)
               } else if (inverseDef.type === hasManyType) {
                 // e.g. remove comment from otherPost.comments
-                const children = utils.get(current, inverseDef.localField)
-                utils.remove(children, function (_record) {
-                  return id === utils.get(_record, idAttribute)
-                })
+                const children = utils.get(currentParent, inverseDef.localField)
+                if (id === undefined) {
+                  utils.remove(children, (child) => child === this)
+                } else {
+                  utils.remove(children, (child) => child === this || id === utils.get(child, idAttribute))
+                }
               }
             }
             if (record) {
@@ -1015,35 +1066,35 @@ const props = {
               const relatedId = utils.get(record, relatedIdAttribute)
 
               // Prefer store record
-              if (!utils.isUndefined(relatedId)) {
+              if (relatedId !== undefined && this._get('$')) {
                 record = self.get(relation, relatedId) || record
               }
 
               // Set locals
               // e.g. profile.user = someUser
               // or comment.post = somePost
-              _self._set(path, record)
-              safeSetProp(_self, foreignKey, relatedId)
-              collection.updateIndex(_self, updateOpts)
+              safeSetLink(this, localField, record)
+              safeSetProp(this, foreignKey, relatedId)
+              collection.updateIndex(this, updateOpts)
 
               // Update (set) inverse relation
               if (inverseDef.type === hasOneType) {
                 // e.g. someUser.profile = profile
-                safeSetLink(record, inverseDef.localField, _self)
+                safeSetLink(record, inverseDef.localField, this)
               } else if (inverseDef.type === hasManyType) {
                 // e.g. add comment to somePost.comments
                 const children = utils.get(record, inverseDef.localField)
-                utils.noDupeAdd(children, _self, function (_record) {
-                  return id === utils.get(_record, idAttribute)
-                })
+                if (id === undefined) {
+                  utils.noDupeAdd(children, this, (child) => child === this)
+                } else {
+                  utils.noDupeAdd(children, this, (child) => child === this || id === utils.get(child, idAttribute))
+                }
               }
             } else {
-              // Unset locals
+              // Unset in-memory link only
               // e.g. profile.user = undefined
               // or comment.post = undefined
-              _self._set(path, undefined)
-              safeSetProp(_self, foreignKey, undefined)
-              collection.updateIndex(_self, updateOpts)
+              safeSetLink(this, localField, undefined)
             }
             return record
           }
@@ -1067,12 +1118,34 @@ const props = {
           if (originalSet) {
             originalSet.call(this, value)
           }
-          if (utils.isUndefined(value)) {
-            // Unset locals
-            utils.set(this, localField, undefined)
-          } else {
-            safeSetProp(this, foreignKey, value)
-            let storeRecord = self.get(relation, value)
+          const currentParent = utils.get(this, localField)
+          const id = utils.get(this, idAttribute)
+          const inverseDef = def.getInverse(mapper)
+          const currentParentId = currentParent ? utils.get(currentParent, def.getRelation().idAttribute) : undefined
+
+          if (currentParent && currentParentId !== undefined && currentParentId !== value) {
+            if (inverseDef.type === hasOneType) {
+              safeSetLink(currentParent, inverseDef.localField, undefined)
+            } else if (inverseDef.type === hasManyType) {
+              const children = utils.get(currentParent, inverseDef.localField)
+              if (id === undefined) {
+                utils.remove(children, (child) => child === this)
+              } else {
+                utils.remove(children, (child) => child === this || id === utils.get(child, idAttribute))
+              }
+            }
+          }
+
+          safeSetProp(this, foreignKey, value)
+          collection.updateIndex(this, updateOpts)
+
+          if ((value === undefined || value === null)) {
+            if (currentParentId !== undefined) {
+              // Unset locals
+              utils.set(this, localField, undefined)
+            }
+          } else if (this._get('$')) {
+            const storeRecord = self.get(relation, value)
             if (storeRecord) {
               utils.set(this, localField, storeRecord)
             }
@@ -1090,137 +1163,143 @@ const props = {
 
         descriptor = {
           get () {
-            const _self = this
-            let current = getter.call(_self)
+            let current = getter.call(this)
             if (!current) {
-              _self._set(path, [])
+              this._set(path, [])
             }
-            return getter.call(_self)
+            return getter.call(this)
           },
           // e.g. post.comments = someComments
           // or user.groups = someGroups
           // or group.users = someUsers
           set (records) {
-            const _self = this
-            records || (records = [])
             if (records && !utils.isArray(records)) {
               records = [records]
             }
-            const id = utils.get(_self, idAttribute)
+            const id = utils.get(this, idAttribute)
             const relatedIdAttribute = def.getRelation().idAttribute
             const inverseDef = def.getInverse(mapper)
             const inverseLocalField = inverseDef.localField
-            const current = _self._get(path) || []
-            const linked = []
-            const toLink = {}
+            const current = this._get(path) || []
+            const toLink = []
+            const toLinkIds = {}
 
-            records.forEach(function (record) {
-              // e.g. comment.id
-              const relatedId = utils.get(record, relatedIdAttribute)
-              if (!utils.isUndefined(relatedId)) {
-                // Prefer store record
-                record = self.get(relation, relatedId) || record
-                // e.g. toLink[comment.id] = comment
-                toLink[relatedId] = record
-                const _localField = utils.get(record, inverseLocalField)
-                if (_localField) {
-                  const __localField = utils.get(_localField, localField)
+            if (records) {
+              records.forEach((record) => {
+                // e.g. comment.id
+                const relatedId = utils.get(record, relatedIdAttribute)
+                const currentParent = utils.get(record, inverseLocalField)
+                if (currentParent && currentParent !== this) {
+                  const currentChildrenOfParent = utils.get(currentParent, localField)
                   // e.g. somePost.comments.remove(comment)
-                  utils.remove(__localField, function (_record) {
-                    return relatedId === utils.get(_record, relatedIdAttribute)
-                  })
+                  if (relatedId === undefined) {
+                    utils.remove(currentChildrenOfParent, (child) => child === record)
+                  } else {
+                    utils.remove(currentChildrenOfParent, (child) => child === record || relatedId === utils.get(child, relatedIdAttribute))
+                  }
                 }
-              }
-              linked.push(record)
-            })
+                if (relatedId !== undefined) {
+                  if (this._get('$')) {
+                    // Prefer store record
+                    record = self.get(relation, relatedId) || record
+                  }
+                  // e.g. toLinkIds[comment.id] = comment
+                  toLinkIds[relatedId] = record
+                }
+                toLink.push(record)
+              })
+            }
 
             // e.g. post.comments = someComments
             if (foreignKey) {
-              current.forEach(function (record) {
+              current.forEach((record) => {
                 // e.g. comment.id
                 const relatedId = utils.get(record, relatedIdAttribute)
-                if (!utils.isUndefined(relatedId) && !(relatedId in toLink)) {
+                if ((relatedId === undefined && toLink.indexOf(record) === -1) || (relatedId !== undefined && !(relatedId in toLinkIds))) {
                   // Update (unset) inverse relation
-                  // e.g. comment.post_id = undefined
-                  safeSetProp(record, foreignKey, undefined)
-                  // e.g. CommentCollection.updateIndex(comment, { index: 'post_id' })
-                  self.getCollection(relation).updateIndex(record, updateOpts)
+                  if (records) {
+                    // e.g. comment.post_id = undefined
+                    safeSetProp(record, foreignKey, undefined)
+                    // e.g. CommentCollection.updateIndex(comment, { index: 'post_id' })
+                    self.getCollection(relation).updateIndex(record, updateOpts)
+                  }
                   // e.g. comment.post = undefined
                   safeSetLink(record, inverseLocalField, undefined)
                 }
               })
-              linked.forEach(function (record) {
+              toLink.forEach((record) => {
                 // Update (set) inverse relation
                 // e.g. comment.post_id = post.id
                 safeSetProp(record, foreignKey, id)
                 // e.g. CommentCollection.updateIndex(comment, { index: 'post_id' })
                 self.getCollection(relation).updateIndex(record, updateOpts)
                 // e.g. comment.post = post
-                safeSetLink(record, inverseLocalField, _self)
+                safeSetLink(record, inverseLocalField, this)
               })
             } else if (localKeys) {
               // Update locals
               // e.g. group.users = someUsers
-              const _localKeys = linked.map(function (record) {
-                // Update (set) inverse relation
-                // safeSetLink(record, inverseLocalField, _self)
-                return utils.get(record, relatedIdAttribute)
-              })
+              // Update (set) inverse relation
+              const ids = toLink.map((child) => utils.get(child, relatedIdAttribute)).filter((id) => id !== undefined)
               // e.g. group.user_ids = [1,2,3,...]
-              utils.set(_self, localKeys, _localKeys)
+              utils.set(this, localKeys, ids)
               // Update (unset) inverse relation
               if (inverseDef.foreignKeys) {
-                current.forEach(function (record) {
-                  const relatedId = utils.get(record, relatedIdAttribute)
-                  if (!utils.isUndefined(relatedId) && !(relatedId in toLink)) {
+                current.forEach((child) => {
+                  const relatedId = utils.get(child, relatedIdAttribute)
+                  if ((relatedId === undefined && toLink.indexOf(child) === -1) || (relatedId !== undefined && !(relatedId in toLinkIds))) {
                     // Update inverse relation
-                    // safeSetLink(record, inverseLocalField, undefined)
-                    const _localField = utils.get(record, inverseLocalField) || []
+                    // safeSetLink(child, inverseLocalField, undefined)
+                    const parents = utils.get(child, inverseLocalField) || []
                     // e.g. someUser.groups.remove(group)
-                    utils.remove(_localField, function (_record) {
-                      return id === utils.get(_record, idAttribute)
-                    })
+                    if (id === undefined) {
+                      utils.remove(parents, (parent) => parent === this)
+                    } else {
+                      utils.remove(parents, (parent) => parent === this || id === utils.get(parent, idAttribute))
+                    }
                   }
                 })
-                linked.forEach(function (record) {
+                toLink.forEach((child) => {
                   // Update (set) inverse relation
-                  const _localField = utils.get(record, inverseLocalField) || []
+                  const parents = utils.get(child, inverseLocalField)
                   // e.g. someUser.groups.push(group)
-                  utils.noDupeAdd(_localField, _self, function (_record) {
-                    return id === utils.get(_record, idAttribute)
-                  })
+                  if (id === undefined) {
+                    utils.noDupeAdd(parents, this, (parent) => parent === this)
+                  } else {
+                    utils.noDupeAdd(parents, this, (parent) => parent === this || id === utils.get(parent, idAttribute))
+                  }
                 })
               }
             } else if (foreignKeys) {
               // e.g. user.groups = someGroups
               // Update (unset) inverse relation
-              current.forEach(function (record) {
-                const _localKeys = utils.get(record, foreignKeys) || []
+              current.forEach((parent) => {
+                const ids = utils.get(parent, foreignKeys) || []
                 // e.g. someGroup.user_ids.remove(user.id)
-                utils.remove(_localKeys, function (_key) {
-                  return id === _key
-                })
-                const _localField = utils.get(record, inverseLocalField) || []
+                utils.remove(ids, (_key) => id === _key)
+                const children = utils.get(parent, inverseLocalField)
                 // e.g. someGroup.users.remove(user)
-                utils.remove(_localField, function (_record) {
-                  return id === utils.get(_record, idAttribute)
-                })
+                if (id === undefined) {
+                  utils.remove(children, (child) => child === this)
+                } else {
+                  utils.remove(children, (child) => child === this || id === utils.get(child, idAttribute))
+                }
               })
               // Update (set) inverse relation
-              linked.forEach(function (record) {
-                const _localKeys = utils.get(record, foreignKeys) || []
-                utils.noDupeAdd(_localKeys, id, function (_key) {
-                  return id === _key
-                })
-                const _localField = utils.get(record, inverseLocalField) || []
-                utils.noDupeAdd(_localField, _self, function (_record) {
-                  return id === utils.get(_record, idAttribute)
-                })
+              toLink.forEach((parent) => {
+                const ids = utils.get(parent, foreignKeys) || []
+                utils.noDupeAdd(ids, id, (_key) => id === _key)
+                const children = utils.get(parent, inverseLocalField)
+                if (id === undefined) {
+                  utils.noDupeAdd(children, this, (child) => child === this)
+                } else {
+                  utils.noDupeAdd(children, this, (child) => child === this || id === utils.get(child, idAttribute))
+                }
               })
             }
 
-            _self._set(path, linked)
-            return linked
+            this._set(path, toLink)
+            return toLink
           }
         }
       } else if (type === hasOneType) {
@@ -1232,35 +1311,34 @@ const props = {
           get: getter,
           // e.g. user.profile = someProfile
           set (record) {
-            const _self = this
             const current = this._get(path)
             if (record === current) {
               return current
             }
             const inverseLocalField = def.getInverse(mapper).localField
-            // Update (unset) inverse relation
-            if (current) {
-              safeSetProp(current, foreignKey, undefined)
-              self.getCollection(relation).updateIndex(current, updateOpts)
-              safeSetLink(current, inverseLocalField, undefined)
-            }
             if (record) {
+              // Update (unset) inverse relation
+              if (current) {
+                safeSetProp(current, foreignKey, undefined)
+                self.getCollection(relation).updateIndex(current, updateOpts)
+                safeSetLink(current, inverseLocalField, undefined)
+              }
               const relatedId = utils.get(record, def.getRelation().idAttribute)
               // Prefer store record
-              if (!utils.isUndefined(relatedId)) {
+              if (relatedId !== undefined) {
                 record = self.get(relation, relatedId) || record
               }
 
               // Set locals
-              _self._set(path, record)
+              safeSetLink(this, localField, record)
 
               // Update (set) inverse relation
-              safeSetProp(record, foreignKey, utils.get(_self, idAttribute))
+              safeSetProp(record, foreignKey, utils.get(this, idAttribute))
               self.getCollection(relation).updateIndex(record, updateOpts)
-              safeSetLink(record, inverseLocalField, _self)
+              safeSetLink(record, inverseLocalField, this)
             } else {
-              // Set locals
-              _self._set(path, undefined)
+              // Unset locals
+              safeSetLink(this, localField, undefined)
             }
             return record
           }
@@ -1268,7 +1346,7 @@ const props = {
       }
 
       if (descriptor) {
-        descriptor.enumerable = utils.isUndefined(def.enumerable) ? false : def.enumerable
+        descriptor.enumerable = def.enumerable === undefined ? false : def.enumerable
         if (def.get) {
           let origGet = descriptor.get
           descriptor.get = function () {
@@ -1607,16 +1685,18 @@ const props = {
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(string|number)} id Passed to {@link Mapper#find}.
    * @param {Object} [opts] Passed to {@link Mapper#find}.
+   * @param {boolean|Function} [opts.usePendingFind] See {@link DataStore#usePendingFind}
    * @returns {Promise} Resolves with the result, if any.
    * @since 3.0.0
    */
   find (name, id, opts) {
     opts || (opts = {})
+    const mapper = this.getMapper(name)
     const pendingQuery = this._pendingQueries[name][id]
+    const usePendingFind = opts.usePendingFind === undefined ? this.usePendingFind : opts.usePendingFind
+    utils._(opts, mapper)
 
-    utils.fillIn(opts, this.getMapper(name))
-
-    if (pendingQuery) {
+    if (pendingQuery && (utils.isFunction(usePendingFind) ? usePendingFind.call(this, name, id, opts) : usePendingFind)) {
       return pendingQuery
     }
     const item = this.cachedFind(name, id, opts)
@@ -1716,17 +1796,19 @@ const props = {
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Object} [query] Passed to {@link Mapper.findAll}.
    * @param {Object} [opts] Passed to {@link Mapper.findAll}.
+   * @param {boolean|Function} [opts.usePendingFindAll] See {@link DataStore#usePendingFindAll}
    * @returns {Promise} Resolves with the result, if any.
    * @since 3.0.0
    */
   findAll (name, query, opts) {
     opts || (opts = {})
+    const mapper = this.getMapper(name)
     const hash = this.hashQuery(name, query, opts)
     const pendingQuery = this._pendingQueries[name][hash]
+    const usePendingFindAll = opts.usePendingFindAll === undefined ? this.usePendingFindAll : opts.usePendingFindAll
+    utils._(opts, mapper)
 
-    utils.fillIn(opts, this.getMapper(name))
-
-    if (pendingQuery) {
+    if (pendingQuery && (utils.isFunction(usePendingFindAll) ? usePendingFindAll.call(this, name, query, opts) : usePendingFindAll)) {
       return pendingQuery
     }
 
