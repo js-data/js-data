@@ -1,3 +1,7 @@
+##### 3.0.0-beta.10 - 02 July 2016
+
+Forgot to bump version in package.json for previous release
+
 ##### 3.0.0-beta.9 - 02 July 2016
 
 ###### Breaking changes
