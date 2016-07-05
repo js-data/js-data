@@ -1,3 +1,13 @@
+##### 3.0.0-rc.1 - xx July 2016
+
+###### Breaking changes
+- Added `Mapper#applyDefaults` option which defaults to `true`
+- #352 - `Mapper#beforeCreate` and `Mapper#beforeCreateMany` now apply default values
+to records for missing values according to the Mapper's schema and the `applyDefaults` option.
+
+###### Backwards compatible changes
+- Added `Schema#applyDefaults(target)` method
+
 ##### 3.0.0-beta.10 - 02 July 2016
 
 Forgot to bump version in package.json for previous release

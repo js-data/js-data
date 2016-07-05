@@ -832,10 +832,10 @@ utils.eventify(
  * Callback signature for the {@link Record#event:change} event.
  *
  * @example
- * function onChange (mapperName, record, changes) {
+ * function onChange (record, changes) {
  *   // do something
  * }
- * store.on('change', onChange)
+ * record.on('change', onChange)
  *
  * @callback Record~changeListener
  * @param {Record} The Record that changed.

@@ -504,9 +504,9 @@ const validationKeywords = {
     })
     // Remove from "s" all elements of "p", if any.
     utils.forOwn(properties || {}, function (_schema, prop) {
-      if (value[prop] === undefined && _schema['default'] !== undefined) {
-        value[prop] = utils.copy(_schema['default'])
-      }
+      // if (value[prop] === undefined && _schema['default'] !== undefined) {
+      //   value[prop] = utils.copy(_schema['default'])
+      // }
       opts.prop = prop
       errors = errors.concat(validate(value[prop], _schema, opts) || [])
       delete toValidate[prop]
@@ -1070,6 +1070,41 @@ export default Component.extend({
         prop,
         makeDescriptor(prop, schema, opts)
       )
+    })
+  },
+
+  /**
+   * Apply default values to the target object for missing values.
+   *
+   * @name Schema#applyDefaults
+   * @method
+   * @param {Object} target The target to which to apply values for missing values.
+   */
+  applyDefaults (target) {
+    if (!target) {
+      return
+    }
+    const properties = this.properties || {}
+    const hasSet = utils.isFunction(target.set) || utils.isFunction(target._set)
+    utils.forOwn(properties, function (schema, prop) {
+      if (schema.hasOwnProperty('default') && utils.get(target, prop) === undefined) {
+        if (hasSet) {
+          target.set(target, prop, utils.plainCopy(schema['default']), { silent: true })
+        } else {
+          utils.set(target, prop, utils.plainCopy(schema['default']))
+        }
+      }
+      if (schema.type === 'object' && schema.properties) {
+        if (hasSet) {
+          const orig = target._get('noValidate')
+          target._set('noValidate', true)
+          utils.set(target, prop, utils.get(target, prop) || {}, { silent: true })
+          target._set('noValidate', orig)
+        } else {
+          utils.set(target, prop, utils.get(target, prop) || {})
+        }
+        schema.applyDefaults(utils.get(target, prop))
+      }
     })
   },
 

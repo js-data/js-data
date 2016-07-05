@@ -13,6 +13,10 @@ import {
 } from './decorators'
 
 const DOMAIN = 'Mapper'
+const applyDefaultsHooks = [
+  'beforeCreate',
+  'beforeCreateMany'
+]
 const validatingHooks = [
   'beforeCreate',
   'beforeCreateMany',
@@ -25,6 +29,19 @@ const makeNotify = function (num) {
     const opts = args[args.length - num]
     const op = opts.op
     this.dbg(op, ...args)
+
+    if (applyDefaultsHooks.indexOf(op) !== -1 && opts.applyDefaults !== false) {
+      const schema = this.getSchema()
+      if (schema && schema.applyDefaults) {
+        let toProcess = args[0]
+        if (!utils.isArray(toProcess)) {
+          toProcess = [toProcess]
+        }
+        toProcess.forEach((record) => {
+          schema.applyDefaults(record)
+        })
+      }
+    }
 
     // Automatic validation
     if (validatingHooks.indexOf(op) !== -1 && opts.validate !== false) {
@@ -129,6 +146,17 @@ const MAPPER_DEFAULTS = {
    * @tutorial ["http://www.js-data.io/v3.0/docs/connecting-to-a-data-source","Connecting to a data source"]
    */
   _adapters: {},
+
+  /**
+   * Whether {@link Mapper#beforeCreate} and {@link Mapper#beforeCreateMany}
+   * should automatically receive default values according to the Mapper's schema.
+   *
+   * @default true
+   * @name Mapper#applyDefaults
+   * @since 3.0.0
+   * @type {boolean}
+   */
+  applyDefaults: true,
 
   /**
    * Whether to augment {@link Mapper#recordClass} with ES5 getters and setters
@@ -1308,7 +1336,7 @@ export default Component.extend({
     if (!utils.isObject(props)) {
       throw utils.err(`${DOMAIN}#createRecord`, 'props')(400, 'array or object', props)
     }
-    const recordClass = this.recordClass
+    const RecordCtor = this.recordClass
     const relationList = this.relationList || []
     relationList.forEach(function (def) {
       const relatedMapper = def.getRelation()
@@ -1321,7 +1349,10 @@ export default Component.extend({
       }
     })
     // Check to make sure "props" is not already an instance of this Mapper.
-    return recordClass ? (props instanceof recordClass ? props : new recordClass(props, opts)) : props // eslint-disable-line
+    if (RecordCtor && (!(props instanceof RecordCtor))) {
+      return new RecordCtor(props, opts)
+    }
+    return props
   },
 
   /**

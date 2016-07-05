@@ -2317,8 +2317,8 @@ export default Container.extend(props)
  *
  * @callback DataStore~changeListener
  * @param {string} name The name of the associated {@link Mapper}.
- * @param {Record} The Record that changed.
- * @param {Object} The changes.
+ * @param {Record} record The Record that changed.
+ * @param {Object} changes The changes.
  * @see DataStore#event:change
  * @since 3.0.0
  */
