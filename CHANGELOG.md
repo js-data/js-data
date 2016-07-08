@@ -1,3 +1,17 @@
+##### 3.0.0-rc.1 - 08 July 2016
+
+###### Breaking changes
+- Added `Mapper#applyDefaults` option which defaults to `true`
+- #352 - `Mapper#beforeCreate` and `Mapper#beforeCreateMany` now apply default values
+to records for missing values according to the Mapper's schema and the `applyDefaults` option.
+
+###### Backwards compatible changes
+- Added the `ctx` property to the `opts` argument passed to validation keywords
+- Added `Schema#applyDefaults(target)` method
+
+###### Bug fixes
+- #365 - "noValidate" should be used instead of "validate"
+
 ##### 3.0.0-beta.10 - 02 July 2016
 
 Forgot to bump version in package.json for previous release

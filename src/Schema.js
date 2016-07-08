@@ -504,9 +504,9 @@ const validationKeywords = {
     })
     // Remove from "s" all elements of "p", if any.
     utils.forOwn(properties || {}, function (_schema, prop) {
-      if (value[prop] === undefined && _schema['default'] !== undefined) {
-        value[prop] = utils.copy(_schema['default'])
-      }
+      // if (value[prop] === undefined && _schema['default'] !== undefined) {
+      //   value[prop] = utils.copy(_schema['default'])
+      // }
       opts.prop = prop
       errors = errors.concat(validate(value[prop], _schema, opts) || [])
       delete toValidate[prop]
@@ -682,6 +682,7 @@ const validateAny = function (value, schema, opts) {
 const validate = function (value, schema, opts) {
   let errors = []
   opts || (opts = {})
+  opts.ctx || (opts.ctx = { value, schema })
   let shouldPop
   let prevProp = opts.prop
   if (schema === undefined) {
@@ -1003,7 +1004,7 @@ const typeGroupValidators = {
  *
  * @example <caption>Schema#constructor</caption>
  * // Normally you would do:  import {Schema} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
+ * const JSData = require('js-data@3.0.0-beta.10')
  * const {Schema} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *
@@ -1074,6 +1075,41 @@ export default Component.extend({
   },
 
   /**
+   * Apply default values to the target object for missing values.
+   *
+   * @name Schema#applyDefaults
+   * @method
+   * @param {Object} target The target to which to apply values for missing values.
+   */
+  applyDefaults (target) {
+    if (!target) {
+      return
+    }
+    const properties = this.properties || {}
+    const hasSet = utils.isFunction(target.set) || utils.isFunction(target._set)
+    utils.forOwn(properties, function (schema, prop) {
+      if (schema.hasOwnProperty('default') && utils.get(target, prop) === undefined) {
+        if (hasSet) {
+          target.set(target, prop, utils.plainCopy(schema['default']), { silent: true })
+        } else {
+          utils.set(target, prop, utils.plainCopy(schema['default']))
+        }
+      }
+      if (schema.type === 'object' && schema.properties) {
+        if (hasSet) {
+          const orig = target._get('noValidate')
+          target._set('noValidate', true)
+          utils.set(target, prop, utils.get(target, prop) || {}, { silent: true })
+          target._set('noValidate', orig)
+        } else {
+          utils.set(target, prop, utils.get(target, prop) || {})
+        }
+        schema.applyDefaults(utils.get(target, prop))
+      }
+    })
+  },
+
+  /**
    * Validate the provided value against this schema.
    *
    * @name Schema#validate
@@ -1086,6 +1122,11 @@ export default Component.extend({
     return validate(value, this, opts)
   }
 }, {
+  ANY_OPS,
+  ARRAY_OPS,
+  NUMERIC_OPS,
+  OBJECT_OPS,
+  STRING_OPS,
   typeGroupValidators,
   types,
   validate,
@@ -1096,7 +1137,7 @@ export default Component.extend({
  * Create a subclass of this Schema:
  * @example <caption>Schema.extend</caption>
  * // Normally you would do: import {Schema} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
+ * const JSData = require('js-data@3.0.0-beta.10')
  * const {Schema} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *

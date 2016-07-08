@@ -31,6 +31,37 @@ describe('Mapper#create', function () {
     assert(user[User.idAttribute], 'new user has an id')
     assert(user instanceof User.recordClass, 'user is a record')
   })
+  it('should create with defaults', async function () {
+    const props = { name: 'John' }
+    let createCalled = false
+    const User = new JSData.Mapper({
+      name: 'user',
+      defaultAdapter: 'mock',
+      schema: {
+        properties: {
+          name: { type: 'string' },
+          role: { type: 'string', default: 'viewer' }
+        }
+      }
+    })
+    User.registerAdapter('mock', {
+      create (mapper, _props, Opts) {
+        createCalled = true
+        return new Promise(function (resolve, reject) {
+          assert.strictEqual(mapper, User, 'should pass in the JSData.Mapper')
+          assert.objectsEqual(_props, props, 'should pass in the props')
+          assert(!Opts.raw, 'Opts are provided')
+          _props[mapper.idAttribute] = new Date().getTime()
+          resolve(_props)
+        })
+      }
+    })
+    const user = await User.create(props)
+    assert(createCalled, 'Adapter#create should have been called')
+    assert(user[User.idAttribute], 'new user has an id')
+    assert(user instanceof User.recordClass, 'user is a record')
+    assert.equal(user.role, 'viewer', 'user should have default value')
+  })
   it('should create without wrapping', async function () {
     const props = { name: 'John' }
     let createCalled = false

@@ -63,7 +63,7 @@ export default function Settable () {
  *
  * @example <caption>Settable.extend</caption>
  * // Normally you would do: import {Settable} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
+ * const JSData = require('js-data@3.0.0-beta.10')
  * const {Settable} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *

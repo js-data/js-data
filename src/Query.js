@@ -274,9 +274,9 @@ export default Component.extend({
       return ops[op](value, predicate)
     }
     if (op.indexOf('like') === 0) {
-      return !utils.isNull(this.like(predicate, op.substr(4)).exec(value))
+      return this.like(predicate, op.substr(4)).exec(value) !== null
     } else if (op.indexOf('notLike') === 0) {
-      return utils.isNull(this.like(predicate, op.substr(7)).exec(value))
+      return this.like(predicate, op.substr(7)).exec(value) === null
     }
   },
 
@@ -1049,7 +1049,7 @@ export default Component.extend({
  * Create a subclass of this Query:
  * @example <caption>Query.extend</caption>
  * // Normally you would do: import {Query} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
+ * const JSData = require('js-data@3.0.0-beta.10')
  * const {Query} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *

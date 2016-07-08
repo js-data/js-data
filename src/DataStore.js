@@ -14,7 +14,7 @@ const proxiedCollectionMethods = [
    *
    * @example <caption>DataStore#add</caption>
    * // Normally you would do: import {DataStore} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {DataStore} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -90,7 +90,7 @@ const proxiedCollectionMethods = [
    *
    * @example <caption>DataStore#filter</caption>
    * // import {DataStore} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {DataStore} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -132,7 +132,7 @@ const proxiedCollectionMethods = [
    *
    * @example <caption>DataStore#get</caption>
    * // import {DataStore} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {DataStore} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -523,7 +523,7 @@ const props = {
    *
    * @example <caption>DataStore.as</caption>
    * // Normally you would do: import {DataStore} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {DataStore} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -1880,7 +1880,7 @@ const props = {
    *
    * @example <caption>DataStore#remove</caption>
    * // Normally you would do: import {DataStore} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {DataStore} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -1918,7 +1918,7 @@ const props = {
    *
    * @example <caption>DataStore#removeAll</caption>
    * // Normally you would do: import {DataStore} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {DataStore} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -2317,8 +2317,8 @@ export default Container.extend(props)
  *
  * @callback DataStore~changeListener
  * @param {string} name The name of the associated {@link Mapper}.
- * @param {Record} The Record that changed.
- * @param {Object} The changes.
+ * @param {Record} record The Record that changed.
+ * @param {Object} changes The changes.
  * @see DataStore#event:change
  * @since 3.0.0
  */
@@ -2403,7 +2403,7 @@ export default Container.extend(props)
  * Create a subclass of this DataStore:
  * @example <caption>DataStore.extend</caption>
  * // Normally you would do: import {DataStore} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
+ * const JSData = require('js-data@3.0.0-beta.10')
  * const {DataStore} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *
