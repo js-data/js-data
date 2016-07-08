@@ -1,4 +1,4 @@
-##### 3.0.0-rc.1 - xx July 2016
+##### 3.0.0-rc.1 - 08 July 2016
 
 ###### Breaking changes
 - Added `Mapper#applyDefaults` option which defaults to `true`
