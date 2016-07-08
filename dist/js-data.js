@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-beta.10 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-rc.1 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -1773,7 +1773,7 @@
    *
    * @example <caption>Settable.extend</caption>
    * // Normally you would do: import {Settable} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Settable} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -1854,7 +1854,7 @@
      *
      * @example <caption>Component#debug</caption>
      * // Normally you would do: import {Component} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Component} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      *
@@ -1892,7 +1892,7 @@
    *
    * @example <caption>Component.extend</caption>
    * // Normally you would do: import {Component} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Component} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -2025,7 +2025,7 @@
    *
    * @example <caption>Component#emit</caption>
    * // import {Collection, DataStore} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Collection, DataStore} = JSData
    *
    * const collection = new Collection()
@@ -2326,9 +2326,9 @@
         return ops[op](value, predicate);
       }
       if (op.indexOf('like') === 0) {
-        return !utils.isNull(this.like(predicate, op.substr(4)).exec(value));
+        return this.like(predicate, op.substr(4)).exec(value) !== null;
       } else if (op.indexOf('notLike') === 0) {
-        return utils.isNull(this.like(predicate, op.substr(7)).exec(value));
+        return this.like(predicate, op.substr(7)).exec(value) === null;
       }
     },
 
@@ -3131,7 +3131,7 @@
    * Create a subclass of this Query:
    * @example <caption>Query.extend</caption>
    * // Normally you would do: import {Query} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Query} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -3595,7 +3595,7 @@
    *
    * @example <caption>Collection#constructor</caption>
    * // import {Collection, Record} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Collection, Record} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -3639,7 +3639,7 @@
        *
        * @example <caption>Collection#mapper</caption>
        * // Normally you would do: import {Collection, Mapper} from 'js-data'
-       * const JSData = require('js-data@3.0.0-beta.7')
+       * const JSData = require('js-data@3.0.0-beta.10')
        * const {Collection, Mapper} = JSData
        * console.log('Using JSData v' + JSData.version.full)
        *
@@ -3971,7 +3971,7 @@
      *
      * @example <caption>Collection#filter</caption>
      * // Normally you would do: import {Collection} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Collection} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      *
@@ -4464,7 +4464,7 @@
    * Create a subclass of this Collection:
    * @example <caption>Collection.extend</caption>
    * // Normally you would do: import {Collection} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Collection} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -4541,7 +4541,7 @@
    *
    * @example <caption>Record#constructor</caption>
    * // Normally you would do: import {Record} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Record} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -4555,7 +4555,7 @@
    *
    * @example <caption>Record#constructor2</caption>
    * // Normally you would do: import {Mapper} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Mapper} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -4569,7 +4569,7 @@
    *
    * @example <caption>Record#constructor3</caption>
    * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -4582,7 +4582,7 @@
    *
    * @example <caption>Record#constructor4</caption>
    * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -4601,7 +4601,7 @@
    *
    * @example <caption>Record#constructor5</caption>
    * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -4709,7 +4709,7 @@
      *
      * @example <caption>Record#changes</caption>
      * // Normally you would do: import {Container} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Container} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      *
@@ -4740,7 +4740,7 @@
      *
      * @example <caption>Record#commit</caption>
      * // Normally you would do: import {Container} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Container} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      *
@@ -4798,7 +4798,7 @@
      *
      * @example <caption>Record#get</caption>
      * // Normally you would do: import {Container} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Container} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      * const store = new Container()
@@ -4823,7 +4823,7 @@
      *
      * @example <caption>Record#hasChanges</caption>
      * // Normally you would do: import {Container} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Container} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      * const store = new Container()
@@ -4855,7 +4855,7 @@
      *
      * @example <caption>Record#isNew</caption>
      * // Normally you would do: import {Container} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Container} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      * const store = new Container()
@@ -4881,7 +4881,7 @@
      *
      * @example <caption>Record#isValid</caption>
      * // Normally you would do: import {Container} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Container} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      * const store = new Container()
@@ -5040,7 +5040,7 @@
      *
      * @example <caption>Record#previous</caption>
      * // import {Container} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Container} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      * const store = new Container()
@@ -5074,7 +5074,7 @@
      *
      * @example <caption>Record#revert</caption>
      * // import {Container} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Container} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      * const store = new Container()
@@ -5185,7 +5185,7 @@
      *
      * @example <caption>Record#set</caption>
      * // Normally you would do: import {Container} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Container} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      * const store = new Container()
@@ -5230,7 +5230,7 @@
      *
      * @example <caption>Record#toJSON</caption>
      * // Normally you would do: import {Container} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Container} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      * const store = new Container()
@@ -5288,7 +5288,7 @@
      *
      * @example <caption>Record#unset</caption>
      * // Normally you would do: import {Container} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Container} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      * const store = new Container()
@@ -5318,7 +5318,7 @@
      *
      * @example <caption>Record#validate</caption>
      * // Normally you would do: import {Container} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Container} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      * const store = new Container()
@@ -5878,9 +5878,9 @@
       });
       // Remove from "s" all elements of "p", if any.
       utils.forOwn(properties || {}, function (_schema, prop) {
-        if (value[prop] === undefined && _schema['default'] !== undefined) {
-          value[prop] = utils.copy(_schema['default']);
-        }
+        // if (value[prop] === undefined && _schema['default'] !== undefined) {
+        //   value[prop] = utils.copy(_schema['default'])
+        // }
         opts.prop = prop;
         errors = errors.concat(_validate(value[prop], _schema, opts) || []);
         delete toValidate[prop];
@@ -6061,6 +6061,7 @@
   var _validate = function _validate(value, schema, opts) {
     var errors = [];
     opts || (opts = {});
+    opts.ctx || (opts.ctx = { value: value, schema: schema });
     var shouldPop = void 0;
     var prevProp = opts.prop;
     if (schema === undefined) {
@@ -6390,7 +6391,7 @@
    *
    * @example <caption>Schema#constructor</caption>
    * // Normally you would do:  import {Schema} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Schema} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -6460,6 +6461,42 @@
 
 
     /**
+     * Apply default values to the target object for missing values.
+     *
+     * @name Schema#applyDefaults
+     * @method
+     * @param {Object} target The target to which to apply values for missing values.
+     */
+    applyDefaults: function applyDefaults(target) {
+      if (!target) {
+        return;
+      }
+      var properties = this.properties || {};
+      var hasSet = utils.isFunction(target.set) || utils.isFunction(target._set);
+      utils.forOwn(properties, function (schema, prop) {
+        if (schema.hasOwnProperty('default') && utils.get(target, prop) === undefined) {
+          if (hasSet) {
+            target.set(target, prop, utils.plainCopy(schema['default']), { silent: true });
+          } else {
+            utils.set(target, prop, utils.plainCopy(schema['default']));
+          }
+        }
+        if (schema.type === 'object' && schema.properties) {
+          if (hasSet) {
+            var orig = target._get('noValidate');
+            target._set('noValidate', true);
+            utils.set(target, prop, utils.get(target, prop) || {}, { silent: true });
+            target._set('noValidate', orig);
+          } else {
+            utils.set(target, prop, utils.get(target, prop) || {});
+          }
+          schema.applyDefaults(utils.get(target, prop));
+        }
+      });
+    },
+
+
+    /**
      * Validate the provided value against this schema.
      *
      * @name Schema#validate
@@ -6472,6 +6509,11 @@
       return _validate(value, this, opts);
     }
   }, {
+    ANY_OPS: ANY_OPS,
+    ARRAY_OPS: ARRAY_OPS,
+    NUMERIC_OPS: NUMERIC_OPS,
+    OBJECT_OPS: OBJECT_OPS,
+    STRING_OPS: STRING_OPS,
     typeGroupValidators: typeGroupValidators,
     types: types,
     validate: _validate,
@@ -6863,6 +6905,7 @@
   };
 
   var DOMAIN$4 = 'Mapper';
+  var applyDefaultsHooks = ['beforeCreate', 'beforeCreateMany'];
   var validatingHooks = ['beforeCreate', 'beforeCreateMany', 'beforeUpdate', 'beforeUpdateAll', 'beforeUpdateMany'];
   var makeNotify = function makeNotify(num) {
     return function () {
@@ -6876,8 +6919,23 @@
       var op = opts.op;
       this.dbg.apply(this, [op].concat(args));
 
+      if (applyDefaultsHooks.indexOf(op) !== -1 && opts.applyDefaults !== false) {
+        (function () {
+          var schema = _this.getSchema();
+          if (schema && schema.applyDefaults) {
+            var toProcess = args[0];
+            if (!utils.isArray(toProcess)) {
+              toProcess = [toProcess];
+            }
+            toProcess.forEach(function (record) {
+              schema.applyDefaults(record);
+            });
+          }
+        })();
+      }
+
       // Automatic validation
-      if (validatingHooks.indexOf(op) !== -1 && opts.validate !== false) {
+      if (validatingHooks.indexOf(op) !== -1 && !opts.noValidate) {
         // Save current value of option
         var originalExistingOnly = opts.existingOnly;
 
@@ -6984,6 +7042,17 @@
     _adapters: {},
 
     /**
+     * Whether {@link Mapper#beforeCreate} and {@link Mapper#beforeCreateMany}
+     * should automatically receive default values according to the Mapper's schema.
+     *
+     * @default true
+     * @name Mapper#applyDefaults
+     * @since 3.0.0
+     * @type {boolean}
+     */
+    applyDefaults: true,
+
+    /**
      * Whether to augment {@link Mapper#recordClass} with ES5 getters and setters
      * according to the properties defined in {@link Mapper#schema}. This makes
      * possible validation and change tracking on individual properties
@@ -7027,6 +7096,16 @@
      * @type {boolean}
      */
     notify: true,
+
+    /**
+     * Whether to skip validation when the Record instances are created.
+     *
+     * @default false
+     * @name Mapper#noValidate
+     * @since 3.0.0
+     * @type {boolean}
+     */
+    noValidate: false,
 
     /**
      * Whether {@link Mapper#create}, {@link Mapper#createMany},
@@ -7197,7 +7276,7 @@
        *
        * @example <caption>Mapper#schema</caption>
        * // Normally you would do: import {Mapper} from 'js-data'
-       * const JSData = require('js-data@3.0.0-beta.7')
+       * const JSData = require('js-data@3.0.0-beta.10')
        * const {Mapper} = JSData
        * console.log('Using JSData v' + JSData.version.full)
        *
@@ -7757,6 +7836,7 @@
      * of whatever adapter you're using for more configuration options.
      * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
      * adapter to use.
+     * @param {boolean} [opts.noValidate={@link Mapper#noValidate}] See {@link Mapper#noValidate}.
      * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
      * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
      * @param {string[]} [opts.with=[]] Relations to create in a cascading
@@ -7971,6 +8051,7 @@
      * method of whatever adapter you're using for more configuration options.
      * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
      * adapter to use.
+     * @param {boolean} [opts.noValidate={@link Mapper#noValidate}] See {@link Mapper#noValidate}.
      * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
      * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
      * @param {string[]} [opts.with=[]] Relations to create in a cascading
@@ -8172,8 +8253,7 @@
      * @param {Object|Object[]} props The properties for the Record instance or an
      * array of property objects for the Record instances.
      * @param {Object} [opts] Configuration options.
-     * @param {boolean} [opts.noValidate=false] Whether to skip validation when
-     * the Record instances are created.
+     * @param {boolean} [opts.noValidate={@link Mapper#noValidate}] See {@link Mapper#noValidate}.
      * @returns {Record|Record[]} The Record instance or Record instances.
      * @since 3.0.0
      */
@@ -8189,7 +8269,7 @@
       if (!utils.isObject(props)) {
         throw utils.err(DOMAIN$4 + '#createRecord', 'props')(400, 'array or object', props);
       }
-      var recordClass = this.recordClass;
+      var RecordCtor = this.recordClass;
       var relationList = this.relationList || [];
       relationList.forEach(function (def) {
         var relatedMapper = def.getRelation();
@@ -8202,7 +8282,10 @@
         }
       });
       // Check to make sure "props" is not already an instance of this Mapper.
-      return recordClass ? props instanceof recordClass ? props : new recordClass(props, opts) : props; // eslint-disable-line
+      if (RecordCtor && !(props instanceof RecordCtor)) {
+        return new RecordCtor(props, opts);
+      }
+      return props;
     },
 
 
@@ -8998,6 +9081,7 @@
      * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
      * adapter to use.
      * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
+     * @param {boolean} [opts.noValidate={@link Mapper#noValidate}] See {@link Mapper#noValidate}.
      * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
      * transaction.
      * @returns {Promise} Resolves with the updated record. Rejects if the record
@@ -9090,6 +9174,7 @@
      * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
      * adapter to use.
      * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
+     * @param {boolean} [opts.noValidate={@link Mapper#noValidate}] See {@link Mapper#noValidate}.
      * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
      * @returns {Promise} Resolves with the update records, if any.
      * @see query
@@ -9175,6 +9260,7 @@
      * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
      * adapter to use.
      * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
+     * @param {boolean} [opts.noValidate={@link Mapper#noValidate}] See {@link Mapper#noValidate}.
      * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
      * @returns {Promise} Resolves with the updated records. Rejects if any of the
      * records could be found.
@@ -10206,11 +10292,14 @@
   /**
    * The `Container` class is a place to define and store {@link Mapper} instances.
    *
-   * A `Container` makes it easy to manage your Mappers.
+   * `Container` makes it easy to manage your Mappers. Without a container, you
+   * need to manage Mappers yourself, including resolving circular dependencies
+   * among relations. All Mappers in a container share the same adapters, so you
+   * don't have to register adapters for every single Mapper.
    *
    * @example <caption>Container#constructor</caption>
    * // import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -10262,7 +10351,7 @@
        *
        * @example <caption>Container#mapperClass</caption>
        * // import {Container, Mapper} from 'js-data'
-       * const JSData = require('js-data@3.0.0-beta.7')
+       * const JSData = require('js-data@3.0.0-beta.10')
        * const {Container} = JSData
        * console.log('Using JSData v' + JSData.version.full)
        *
@@ -10295,7 +10384,7 @@
      *
      * @example <caption>Container#mapperDefaults</caption>
      * // import {Container} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Container} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      *
@@ -10330,7 +10419,7 @@
      *
      * @example <caption>Container#on</caption>
      * // import {Container} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Container} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      *
@@ -10371,7 +10460,7 @@
      *
      * @example <caption>Container#as</caption>
      * // import {Container} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Container} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      *
@@ -10421,7 +10510,7 @@
      *
      * @example <caption>Container#defineMapper</caption>
      * // import {Container} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Container} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      *
@@ -10549,7 +10638,7 @@
      *
      * @example <caption>Container#getMapper</caption>
      * // import {Container} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Container} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      *
@@ -10581,7 +10670,7 @@
      *
      * @example <caption>Container#getMapperByName</caption>
      * // import {Container} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Container} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      *
@@ -10653,7 +10742,7 @@
    * Create a subclass of this Container:
    * @example <caption>Container.extend</caption>
    * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -10835,7 +10924,7 @@
    *
    * @example <caption>LinkedCollection.extend</caption>
    * // Normally you would do: import {LinkedCollection} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {LinkedCollection} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -10891,7 +10980,7 @@
    *
    * @example <caption>DataStore#add</caption>
    * // Normally you would do: import {DataStore} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {DataStore} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -10967,7 +11056,7 @@
    *
    * @example <caption>DataStore#filter</caption>
    * // import {DataStore} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {DataStore} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -11009,7 +11098,7 @@
    *
    * @example <caption>DataStore#get</caption>
    * // import {DataStore} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {DataStore} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -11404,7 +11493,7 @@
      *
      * @example <caption>DataStore.as</caption>
      * // Normally you would do: import {DataStore} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {DataStore} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      *
@@ -12868,7 +12957,7 @@
      *
      * @example <caption>DataStore#remove</caption>
      * // Normally you would do: import {DataStore} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {DataStore} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      *
@@ -12907,7 +12996,7 @@
      *
      * @example <caption>DataStore#removeAll</caption>
      * // Normally you would do: import {DataStore} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {DataStore} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      *
@@ -13352,8 +13441,7 @@
    * @type {Object}
    */
   var version = {
-  beta: 10,
-  full: '3.0.0-beta.10',
+  full: '3.0.0-rc.1',
   major: 3,
   minor: 0,
   patch: 0
