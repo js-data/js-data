@@ -44,7 +44,7 @@ const makeNotify = function (num) {
     }
 
     // Automatic validation
-    if (validatingHooks.indexOf(op) !== -1 && opts.validate !== false) {
+    if (validatingHooks.indexOf(op) !== -1 && !opts.noValidate) {
       // Save current value of option
       const originalExistingOnly = opts.existingOnly
 
@@ -202,6 +202,16 @@ const MAPPER_DEFAULTS = {
    * @type {boolean}
    */
   notify: true,
+
+  /**
+   * Whether to skip validation when the Record instances are created.
+   *
+   * @default false
+   * @name Mapper#noValidate
+   * @since 3.0.0
+   * @type {boolean}
+   */
+  noValidate: false,
 
   /**
    * Whether {@link Mapper#create}, {@link Mapper#createMany},
@@ -370,7 +380,7 @@ function Mapper (opts) {
      *
      * @example <caption>Mapper#schema</caption>
      * // Normally you would do: import {Mapper} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Mapper} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      *
@@ -925,6 +935,7 @@ export default Component.extend({
    * of whatever adapter you're using for more configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
+   * @param {boolean} [opts.noValidate={@link Mapper#noValidate}] See {@link Mapper#noValidate}.
    * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
    * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
    * @param {string[]} [opts.with=[]] Relations to create in a cascading
@@ -1132,6 +1143,7 @@ export default Component.extend({
    * method of whatever adapter you're using for more configuration options.
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
+   * @param {boolean} [opts.noValidate={@link Mapper#noValidate}] See {@link Mapper#noValidate}.
    * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
    * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
    * @param {string[]} [opts.with=[]] Relations to create in a cascading
@@ -1323,8 +1335,7 @@ export default Component.extend({
    * @param {Object|Object[]} props The properties for the Record instance or an
    * array of property objects for the Record instances.
    * @param {Object} [opts] Configuration options.
-   * @param {boolean} [opts.noValidate=false] Whether to skip validation when
-   * the Record instances are created.
+   * @param {boolean} [opts.noValidate={@link Mapper#noValidate}] See {@link Mapper#noValidate}.
    * @returns {Record|Record[]} The Record instance or Record instances.
    * @since 3.0.0
    */
@@ -2119,6 +2130,7 @@ export default Component.extend({
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
    * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
+   * @param {boolean} [opts.noValidate={@link Mapper#noValidate}] See {@link Mapper#noValidate}.
    * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
    * transaction.
    * @returns {Promise} Resolves with the updated record. Rejects if the record
@@ -2210,6 +2222,7 @@ export default Component.extend({
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
    * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
+   * @param {boolean} [opts.noValidate={@link Mapper#noValidate}] See {@link Mapper#noValidate}.
    * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
    * @returns {Promise} Resolves with the update records, if any.
    * @see query
@@ -2294,6 +2307,7 @@ export default Component.extend({
    * @param {boolean} [opts.adapter={@link Mapper#defaultAdapter}] Name of the
    * adapter to use.
    * @param {boolean} [opts.notify={@link Mapper#notify}] See {@link Mapper#notify}.
+   * @param {boolean} [opts.noValidate={@link Mapper#noValidate}] See {@link Mapper#noValidate}.
    * @param {boolean} [opts.raw={@link Mapper#raw}] See {@link Mapper#raw}.
    * @returns {Promise} Resolves with the updated records. Rejects if any of the
    * records could be found.
@@ -2426,7 +2440,7 @@ export default Component.extend({
  *
  * @example <caption>Mapper.extend</caption>
  * // Normally you would do: import {Mapper} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
+ * const JSData = require('js-data@3.0.0-beta.10')
  * const {Mapper} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *

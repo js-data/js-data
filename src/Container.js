@@ -898,11 +898,14 @@ export const proxiedMapperMethods = [
 /**
  * The `Container` class is a place to define and store {@link Mapper} instances.
  *
- * A `Container` makes it easy to manage your Mappers.
+ * `Container` makes it easy to manage your Mappers. Without a container, you
+ * need to manage Mappers yourself, including resolving circular dependencies
+ * among relations. All Mappers in a container share the same adapters, so you
+ * don't have to register adapters for every single Mapper.
  *
  * @example <caption>Container#constructor</caption>
  * // import {Container} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
+ * const JSData = require('js-data@3.0.0-beta.10')
  * const {Container} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *
@@ -954,7 +957,7 @@ export function Container (opts) {
      *
      * @example <caption>Container#mapperClass</caption>
      * // import {Container, Mapper} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Container} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      *
@@ -987,7 +990,7 @@ export function Container (opts) {
    *
    * @example <caption>Container#mapperDefaults</caption>
    * // import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -1022,7 +1025,7 @@ const props = {
    *
    * @example <caption>Container#on</caption>
    * // import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -1058,7 +1061,7 @@ const props = {
    *
    * @example <caption>Container#as</caption>
    * // import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -1103,7 +1106,7 @@ const props = {
    *
    * @example <caption>Container#defineMapper</caption>
    * // import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -1220,7 +1223,7 @@ const props = {
    *
    * @example <caption>Container#getMapper</caption>
    * // import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -1251,7 +1254,7 @@ const props = {
    *
    * @example <caption>Container#getMapperByName</caption>
    * // import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -1316,7 +1319,7 @@ Component.extend(props)
  * Create a subclass of this Container:
  * @example <caption>Container.extend</caption>
  * // Normally you would do: import {Container} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
+ * const JSData = require('js-data@3.0.0-beta.10')
  * const {Container} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *

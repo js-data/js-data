@@ -682,6 +682,7 @@ const validateAny = function (value, schema, opts) {
 const validate = function (value, schema, opts) {
   let errors = []
   opts || (opts = {})
+  opts.ctx || (opts.ctx = { value, schema })
   let shouldPop
   let prevProp = opts.prop
   if (schema === undefined) {
@@ -1003,7 +1004,7 @@ const typeGroupValidators = {
  *
  * @example <caption>Schema#constructor</caption>
  * // Normally you would do:  import {Schema} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
+ * const JSData = require('js-data@3.0.0-beta.10')
  * const {Schema} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *
@@ -1121,6 +1122,11 @@ export default Component.extend({
     return validate(value, this, opts)
   }
 }, {
+  ANY_OPS,
+  ARRAY_OPS,
+  NUMERIC_OPS,
+  OBJECT_OPS,
+  STRING_OPS,
   typeGroupValidators,
   types,
   validate,
@@ -1131,7 +1137,7 @@ export default Component.extend({
  * Create a subclass of this Schema:
  * @example <caption>Schema.extend</caption>
  * // Normally you would do: import {Schema} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
+ * const JSData = require('js-data@3.0.0-beta.10')
  * const {Schema} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *

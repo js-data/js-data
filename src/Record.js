@@ -26,7 +26,7 @@ const superMethod = function (mapper, name) {
  *
  * @example <caption>Record#constructor</caption>
  * // Normally you would do: import {Record} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
+ * const JSData = require('js-data@3.0.0-beta.10')
  * const {Record} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *
@@ -40,7 +40,7 @@ const superMethod = function (mapper, name) {
  *
  * @example <caption>Record#constructor2</caption>
  * // Normally you would do: import {Mapper} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
+ * const JSData = require('js-data@3.0.0-beta.10')
  * const {Mapper} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *
@@ -54,7 +54,7 @@ const superMethod = function (mapper, name) {
  *
  * @example <caption>Record#constructor3</caption>
  * // Normally you would do: import {Container} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
+ * const JSData = require('js-data@3.0.0-beta.10')
  * const {Container} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *
@@ -67,7 +67,7 @@ const superMethod = function (mapper, name) {
  *
  * @example <caption>Record#constructor4</caption>
  * // Normally you would do: import {Container} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
+ * const JSData = require('js-data@3.0.0-beta.10')
  * const {Container} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *
@@ -86,7 +86,7 @@ const superMethod = function (mapper, name) {
  *
  * @example <caption>Record#constructor5</caption>
  * // Normally you would do: import {Container} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
+ * const JSData = require('js-data@3.0.0-beta.10')
  * const {Container} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *
@@ -190,7 +190,7 @@ export default Component.extend({
    *
    * @example <caption>Record#changes</caption>
    * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -220,7 +220,7 @@ export default Component.extend({
    *
    * @example <caption>Record#commit</caption>
    * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -276,7 +276,7 @@ export default Component.extend({
    *
    * @example <caption>Record#get</caption>
    * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
@@ -300,7 +300,7 @@ export default Component.extend({
    *
    * @example <caption>Record#hasChanges</caption>
    * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
@@ -331,7 +331,7 @@ export default Component.extend({
    *
    * @example <caption>Record#isNew</caption>
    * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
@@ -356,7 +356,7 @@ export default Component.extend({
    *
    * @example <caption>Record#isValid</caption>
    * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
@@ -515,7 +515,7 @@ export default Component.extend({
    *
    * @example <caption>Record#previous</caption>
    * // import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
@@ -548,7 +548,7 @@ export default Component.extend({
    *
    * @example <caption>Record#revert</caption>
    * // import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
@@ -653,7 +653,7 @@ export default Component.extend({
    *
    * @example <caption>Record#set</caption>
    * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
@@ -697,7 +697,7 @@ export default Component.extend({
    *
    * @example <caption>Record#toJSON</caption>
    * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
@@ -746,7 +746,7 @@ export default Component.extend({
    *
    * @example <caption>Record#unset</caption>
    * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
@@ -775,7 +775,7 @@ export default Component.extend({
    *
    * @example <caption>Record#validate</caption>
    * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Container} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
@@ -848,7 +848,7 @@ utils.eventify(
  * Create a subclass of this Record:
  * @example <caption>Record.extend</caption>
  * // Normally you would do: import {Record} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
+ * const JSData = require('js-data@3.0.0-beta.10')
  * const {Record} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *

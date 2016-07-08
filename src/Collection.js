@@ -58,7 +58,7 @@ const COLLECTION_DEFAULTS = {
  *
  * @example <caption>Collection#constructor</caption>
  * // import {Collection, Record} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
+ * const JSData = require('js-data@3.0.0-beta.10')
  * const {Collection, Record} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *
@@ -102,7 +102,7 @@ function Collection (records, opts) {
      *
      * @example <caption>Collection#mapper</caption>
      * // Normally you would do: import {Collection, Mapper} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.7')
+     * const JSData = require('js-data@3.0.0-beta.10')
      * const {Collection, Mapper} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      *
@@ -418,7 +418,7 @@ export default Component.extend({
    *
    * @example <caption>Collection#filter</caption>
    * // Normally you would do: import {Collection} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.7')
+   * const JSData = require('js-data@3.0.0-beta.10')
    * const {Collection} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -883,7 +883,7 @@ export default Component.extend({
  * Create a subclass of this Collection:
  * @example <caption>Collection.extend</caption>
  * // Normally you would do: import {Collection} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.7')
+ * const JSData = require('js-data@3.0.0-beta.10')
  * const {Collection} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *

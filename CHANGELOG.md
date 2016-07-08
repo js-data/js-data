@@ -6,7 +6,11 @@
 to records for missing values according to the Mapper's schema and the `applyDefaults` option.
 
 ###### Backwards compatible changes
+- Added the `ctx` property to the `opts` argument passed to validation keywords
 - Added `Schema#applyDefaults(target)` method
+
+###### Bug fixes
+- #365 - "noValidate" should be used instead of "validate"
 
 ##### 3.0.0-beta.10 - 02 July 2016
 
