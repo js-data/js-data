@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-rc.1 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-rc.2 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -7369,7 +7369,7 @@ function Mapper(opts) {
 
     // We can only apply the schema to the prototype of this.recordClass if the
     // class extends Record
-    if (utils.getSuper(this.recordClass, true) === Record$1 && this.schema && this.schema.apply && this.applySchema) {
+    if (Record$1.prototype.isPrototypeOf(Object.create(this.recordClass.prototype)) && this.schema && this.schema.apply && this.applySchema) {
       this.schema.apply(this.recordClass.prototype);
     }
   }
@@ -13435,7 +13435,7 @@ var DataStore$1 = Container.extend(props$1);
  * @type {Object}
  */
 var version = {
-  full: '3.0.0-rc.1',
+  full: '3.0.0-rc.2',
   major: 3,
   minor: 0,
   patch: 0
