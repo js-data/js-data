@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="96" height="96" />
 
-# [js-data v3 beta](http://www.js-data.io/) [![Slack Status][b1]][b2] [![npm version][b3]][b4] [![npm downloads][b5]][b6] [![coverage][bcov]][lcov]
+# [js-data v3](http://www.js-data.io/) [![Slack Status][b1]][b2] [![npm version][b3]][b4] [![npm downloads][b5]][b6] [![coverage][bcov]][lcov]
 
 | __Browser tests__ | __Node.js tests__ |
 | ---------------------------------|----|

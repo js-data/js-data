@@ -1,3 +1,8 @@
+##### 3.0.0-rc.2 - 08 July 2016
+
+###### Bug fixes
+- #366 - Mapper doesn't always call Schema#apply when it should
+
 ##### 3.0.0-rc.1 - 08 July 2016
 
 ###### Breaking changes
