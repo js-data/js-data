@@ -477,7 +477,7 @@ function Mapper (opts) {
 
     // We can only apply the schema to the prototype of this.recordClass if the
     // class extends Record
-    if (utils.getSuper(this.recordClass, true) === Record && this.schema && this.schema.apply && this.applySchema) {
+    if (Record.prototype.isPrototypeOf(Object.create(this.recordClass.prototype)) && this.schema && this.schema.apply && this.applySchema) {
       this.schema.apply(this.recordClass.prototype)
     }
   }
