@@ -24,11 +24,12 @@
 [bcov]: https://img.shields.io/codecov/c/github/js-data/js-data/master.svg
 [lcov]: https://codecov.io/github/js-data/js-data
 
-__JSData v3 beta is stable. More features may be added before 3.0.0. Some adapters
-still need to be updated to work with v3. Message @jmdobry on the JSData Slack
-channel if you want to help with tests, documentation, tutorials, adapters, etc.__
+__JSData v3 release candidate is stable. More features may be added before 3.0.0,
+and there might be some bugs. Some adapters still need to be updated to work
+with v3. Message @jmdobry on the JSData Slack channel if you want to help with
+tests, documentation, tutorials, adapters, etc.__
 
-JSData is a framework-agnostic, datastore-agnostic ORM/ODM for Node.js and the
+JSData is a framework-agnostic, datastore-agnostic ORM for Node.js and the
 Browser.
 
 Adapters allow JSData to connect to various data sources such as Firebase,
@@ -44,7 +45,7 @@ To get started, visit the main website at __[http://js-data.io](http://www.js-da
 ## Links
 
 * [Quick start](http://www.js-data.io/v3.0/docs/home#quick-start) - Get started in 5 minutes
-* [Guides and Tutorials](http://www.js-data.io/v3.0/docs/home) - Learn how to use JSData
+* [Guides and Tutorials](http://www.js-data.io/v3.0/docs/installation) - Learn how to use JSData
 * [API Reference Docs](http://api.js-data.io) - Explore components, methods, options, etc.
 * [Community & Support](http://js-data.io/docs/community) - Find solutions and chat with the community
 * [General Contributing Guide](http://js-data.io/docs/contributing) - Give back and move the project forward
