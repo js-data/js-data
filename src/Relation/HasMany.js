@@ -78,6 +78,27 @@ export const HasManyRelation = Relation.extend({
         }
       }
     })
+  },
+
+  isRequiresParentId () {
+    return !!this.localKeys && this.localKeys.length > 0
+  },
+
+  isRequiresChildId () {
+    return !!this.foreignKey
+  },
+
+  createParentRecord (props, opts) {
+    const relationData = this.getLocalField(props)
+    const foreignIdField = this.getRelation().idAttribute
+
+    return this.createLinkedRecord(relationData, opts).then((records) => {
+      utils.set(props, this.localKeys, records.map((record) => utils.get(record, foreignIdField)))
+    })
+  },
+
+  createLinkedRecord (props, opts) {
+    return this.getRelation().createMany(props, opts)
   }
 }, {
   TYPE_NAME: 'hasMany'

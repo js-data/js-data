@@ -9,6 +9,10 @@ export const HasOneRelation = Relation.extend({
     if (records && records.length) {
       return records[0]
     }
+  },
+
+  isRequiresChildId () {
+    return true
   }
 }, {
   TYPE_NAME: 'hasOne'

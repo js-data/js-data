@@ -19,6 +19,22 @@ export const BelongsToRelation = Relation.extend({
     if (relatedId !== undefined && relatedId !== null) {
       return this.relatedCollection.get(relatedId)
     }
+  },
+
+  isRequiresParentId () {
+    return true
+  },
+
+  createParentRecord (props, opts) {
+    const relationData = this.getLocalField(props)
+
+    return this.createLinkedRecord(relationData, opts).then((record) => {
+      this.setForeignKey(props, record)
+    })
+  },
+
+  createChildRecord () {
+    throw new Error('"BelongsTo" relation does not support child creation as it cannot have children.')
   }
 }, {
   TYPE_NAME: 'belongsTo'
