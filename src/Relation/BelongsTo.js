@@ -16,7 +16,7 @@ export const BelongsToRelation = Relation.extend({
       return
     }
     const relatedId = utils.get(record, this.foreignKey)
-    if (relatedId !== undefined) {
+    if (relatedId !== undefined && relatedId !== null) {
       return this.relatedCollection.get(relatedId)
     }
   }
