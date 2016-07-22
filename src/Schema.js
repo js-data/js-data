@@ -1090,7 +1090,7 @@ export default Component.extend({
     utils.forOwn(properties, function (schema, prop) {
       if (schema.hasOwnProperty('default') && utils.get(target, prop) === undefined) {
         if (hasSet) {
-          target.set(target, prop, utils.plainCopy(schema['default']), { silent: true })
+          target.set(prop, utils.plainCopy(schema['default']), { silent: true })
         } else {
           utils.set(target, prop, utils.plainCopy(schema['default']))
         }
