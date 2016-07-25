@@ -1,3 +1,9 @@
+##### 3.0.0-rc.3 - 25 July 2016
+
+###### Bug fixes
+- #370 - fix(belongsTo): do not try to link when foreign key is null by @nickescallon
+- #371 - Remove target param when calling target.set() by @nickescallon
+
 ##### 3.0.0-rc.2 - 08 July 2016
 
 ###### Bug fixes

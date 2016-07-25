@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "3.0.0-rc.2",
+  "version": "3.0.0-rc.3",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -70,7 +70,7 @@
   "devDependencies": {
     "babel-plugin-syntax-async-functions": "6.8.0",
     "babel-plugin-transform-es2015-modules-umd": "6.8.0",
-    "babel-plugin-transform-regenerator": "6.9.0",
+    "babel-plugin-transform-regenerator": "6.11.4",
     "js-data-repo-tools": "0.5.5",
     "karma": "1.1.1",
     "karma-babel-preprocessor": "6.0.1",
