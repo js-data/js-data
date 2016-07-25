@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-rc.2 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-rc.3 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -6470,7 +6470,7 @@ var Schema$1 = Component$1.extend({
     utils.forOwn(properties, function (schema, prop) {
       if (schema.hasOwnProperty('default') && utils.get(target, prop) === undefined) {
         if (hasSet) {
-          target.set(target, prop, utils.plainCopy(schema['default']), { silent: true });
+          target.set(prop, utils.plainCopy(schema['default']), { silent: true });
         } else {
           utils.set(target, prop, utils.plainCopy(schema['default']));
         }
@@ -6720,7 +6720,7 @@ var BelongsToRelation = Relation.extend({
       return;
     }
     var relatedId = utils.get(record, this.foreignKey);
-    if (relatedId !== undefined) {
+    if (relatedId !== undefined && relatedId !== null) {
       return this.relatedCollection.get(relatedId);
     }
   }
@@ -13435,7 +13435,7 @@ var DataStore$1 = Container.extend(props$1);
  * @type {Object}
  */
 var version = {
-  full: '3.0.0-rc.2',
+  full: '3.0.0-rc.3',
   major: 3,
   minor: 0,
   patch: 0
