@@ -71,6 +71,7 @@
     "babel-plugin-syntax-async-functions": "6.8.0",
     "babel-plugin-transform-es2015-modules-umd": "6.8.0",
     "babel-plugin-transform-regenerator": "6.11.4",
+    "babel-preset-es2015-rollup": "^1.1.1",
     "js-data-repo-tools": "0.5.5",
     "karma": "1.1.1",
     "karma-babel-preprocessor": "6.0.1",
@@ -81,6 +82,8 @@
     "karma-sauce-launcher": "1.0.0",
     "karma-sinon": "1.0.5",
     "phantomjs-prebuilt": "2.1.7",
+    "rollup": "^0.34.1",
+    "rollup-plugin-babel": "^2.6.1",
     "uglify-js": "2.7.0"
-  }
+  },
 }
