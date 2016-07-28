@@ -42,6 +42,10 @@ particular needs.
 
 To get started, visit the main website at __[http://js-data.io](http://www.js-data.io/v3.0/docs/home)__.
 
+## Building
+
+To build everything, run `npm build`.
+
 ## Links
 
 * [Quick start](http://www.js-data.io/v3.0/docs/home#quick-start) - Get started in 5 minutes
