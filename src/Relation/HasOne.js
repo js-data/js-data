@@ -6,7 +6,7 @@ export const HasOneRelation = Relation.extend({
     const recordId = utils.get(record, relatedMapper.idAttribute)
     const records = this.findExistingLinksByForeignKey(recordId)
 
-    if (records.length) {
+    if (records && records.length) {
       return records[0]
     }
   }

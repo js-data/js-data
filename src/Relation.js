@@ -193,6 +193,9 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
 
   // e.g. user hasMany post via "foreignKey", so find all posts of user
   findExistingLinksByForeignKey (id) {
+    if (id === undefined || id === null) {
+      return
+    }
     return this.relatedCollection.filter({
       [this.foreignKey]: id
     })
