@@ -63,12 +63,14 @@ describe('DataStore#destroy', function () {
 
     const user = this.store.add('user', this.data.user10)
     assert.strictEqual(this.store.get('profile', this.data.profile15.id).user, user)
+    // console.log("TEST USER", user, "\n")
     assert.strictEqual(this.store.get('organization', this.data.organization14.id).users[0], user)
     assert.strictEqual(this.store.get('comment', this.data.comment11.id).user, user)
     assert.strictEqual(this.store.get('comment', this.data.comment12.id).user, user)
     assert.strictEqual(this.store.get('comment', this.data.comment13.id).user, user)
 
     const result = await this.store.destroy('user', user.id)
+    // assert.isTrue(this.store.get('profile', this.data.profile15.id).user == user)
     assert(destroyCalled, 'Adapter#destroy should have been called')
     assert.equal(this.store.get('profile', this.data.profile15.id).user, undefined)
     assert.equal(this.store.get('organization', this.data.organization14.id).users[0], undefined)

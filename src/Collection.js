@@ -689,6 +689,7 @@ export default Component.extend({
         }
       }
     }
+    console.log(this.afterRemove)
     return this.afterRemove(idOrRecord, opts, record) || record
   },
 

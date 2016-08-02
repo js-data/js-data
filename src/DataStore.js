@@ -998,7 +998,6 @@ const props = {
     })
 
     const idAttribute = mapper.idAttribute
-
     mapper.relationList.forEach(function (def) {
       const relation = def.relation
       const localField = def.localField
@@ -1275,11 +1274,13 @@ const props = {
           get: getter,
           // e.g. user.profile = someProfile
           set (record) {
+            console.log("IN SET HAS ONE\n", this, path, this._get('links'), localField, "\n")
             const current = this._get(path)
             if (record === current) {
               return current
             }
             const inverseLocalField = def.getInverse(mapper).localField
+            console.log("SAFE SET LINK\n", current, inverseLocalField, record, "\n")
             if (record) {
               // Update (unset) inverse relation
               if (current) {
@@ -1302,6 +1303,15 @@ const props = {
               safeSetLink(record, inverseLocalField, this)
             } else {
               // Unset locals
+              if (current) {
+                console.log("SAFE SET FOREIGN KEY\n", current, foreignKey, "\n")
+                // Update (unset) inverse relation
+                /* Note that setting foreignKey to null / undefined breaks other specs
+                * Seems like there are other errors
+                */
+                // safeSetProp(current, foreignKey, undefined)
+                safeSetLink(current, inverseLocalField, undefined)
+              }
               safeSetLink(this, localField, undefined)
             }
             return record
