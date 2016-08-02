@@ -94,6 +94,7 @@ describe('JSData.belongsTo', function () {
     })
     const foo = store.add('foo', { id: 1 })
     const bar = store.add('bar', { id: 1, foo_id: 1 })
+    assert.strictEqual(bar._foo, foo)
   })
 
   it('should add property accessors to prototype of target and allow relation re-assignment using customizations', function () {

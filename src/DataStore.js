@@ -1046,19 +1046,8 @@ const props = {
 
             // e.g. profile.user !== someUser
             // or comment.post !== somePost
-            if (currentParent) {
-              // e.g. otherUser.profile = undefined
-              if (inverseDef.type === hasOneType) {
-                safeSetLink(currentParent, inverseDef.localField, undefined)
-              } else if (inverseDef.type === hasManyType) {
-                // e.g. remove comment from otherPost.comments
-                const children = utils.get(currentParent, inverseDef.localField)
-                if (id === undefined) {
-                  utils.remove(children, (child) => child === this)
-                } else {
-                  utils.remove(children, (child) => child === this || id === utils.get(child, idAttribute))
-                }
-              }
+            if (currentParent && inverseDef) {
+              this.removeInverseRelation(currentParent, id, inverseDef, idAttribute)
             }
             if (record) {
               // e.g. profile.user = someUser
@@ -1077,18 +1066,8 @@ const props = {
               safeSetProp(this, foreignKey, relatedId)
               collection.updateIndex(this, updateOpts)
 
-              // Update (set) inverse relation
-              if (inverseDef.type === hasOneType) {
-                // e.g. someUser.profile = profile
-                safeSetLink(record, inverseDef.localField, this)
-              } else if (inverseDef.type === hasManyType) {
-                // e.g. add comment to somePost.comments
-                const children = utils.get(record, inverseDef.localField)
-                if (id === undefined) {
-                  utils.noDupeAdd(children, this, (child) => child === this)
-                } else {
-                  utils.noDupeAdd(children, this, (child) => child === this || id === utils.get(child, idAttribute))
-                }
+              if (inverseDef) {
+                this.setupInverseRelation(record, id, inverseDef, idAttribute)
               }
             } else {
               // Unset in-memory link only
