@@ -1,4 +1,4 @@
-import utils from './utils'
+import utils, { safeSetLink } from './utils'
 import Component from './Component'
 import Settable from './Settable'
 import {

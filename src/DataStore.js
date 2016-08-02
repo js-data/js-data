@@ -1,4 +1,5 @@
-import utils from './utils'
+import utils, { safeSetLink, safeSetProp } from './utils'
+
 import {
   belongsToType,
   hasManyType,
@@ -260,22 +261,6 @@ const ownMethodsForScoping = [
   'cacheFindAll',
   'hashQuery'
 ]
-
-const safeSetProp = function (record, field, value) {
-  if (record && record._set) {
-    record._set(`props.${field}`, value)
-  } else {
-    utils.set(record, field, value)
-  }
-}
-
-const safeSetLink = function (record, field, value) {
-  if (record && record._set) {
-    record._set(`links.${field}`, value)
-  } else {
-    utils.set(record, field, value)
-  }
-}
 
 const cachedFn = function (name, hashOrId, opts) {
   const cached = this._completedQueries[name][hashOrId]
