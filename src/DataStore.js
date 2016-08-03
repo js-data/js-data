@@ -1,4 +1,5 @@
-import utils from './utils'
+import utils, { safeSetLink, safeSetProp } from './utils'
+
 import {
   belongsToType,
   hasManyType,
@@ -260,22 +261,6 @@ const ownMethodsForScoping = [
   'cacheFindAll',
   'hashQuery'
 ]
-
-const safeSetProp = function (record, field, value) {
-  if (record && record._set) {
-    record._set(`props.${field}`, value)
-  } else {
-    utils.set(record, field, value)
-  }
-}
-
-const safeSetLink = function (record, field, value) {
-  if (record && record._set) {
-    record._set(`links.${field}`, value)
-  } else {
-    utils.set(record, field, value)
-  }
-}
 
 const cachedFn = function (name, hashOrId, opts) {
   const cached = this._completedQueries[name][hashOrId]
@@ -1013,7 +998,6 @@ const props = {
     })
 
     const idAttribute = mapper.idAttribute
-
     mapper.relationList.forEach(function (def) {
       const relation = def.relation
       const localField = def.localField
@@ -1046,19 +1030,8 @@ const props = {
 
             // e.g. profile.user !== someUser
             // or comment.post !== somePost
-            if (currentParent) {
-              // e.g. otherUser.profile = undefined
-              if (inverseDef.type === hasOneType) {
-                safeSetLink(currentParent, inverseDef.localField, undefined)
-              } else if (inverseDef.type === hasManyType) {
-                // e.g. remove comment from otherPost.comments
-                const children = utils.get(currentParent, inverseDef.localField)
-                if (id === undefined) {
-                  utils.remove(children, (child) => child === this)
-                } else {
-                  utils.remove(children, (child) => child === this || id === utils.get(child, idAttribute))
-                }
-              }
+            if (currentParent && inverseDef) {
+              this.removeInverseRelation(currentParent, id, inverseDef, idAttribute)
             }
             if (record) {
               // e.g. profile.user = someUser
@@ -1077,18 +1050,8 @@ const props = {
               safeSetProp(this, foreignKey, relatedId)
               collection.updateIndex(this, updateOpts)
 
-              // Update (set) inverse relation
-              if (inverseDef.type === hasOneType) {
-                // e.g. someUser.profile = profile
-                safeSetLink(record, inverseDef.localField, this)
-              } else if (inverseDef.type === hasManyType) {
-                // e.g. add comment to somePost.comments
-                const children = utils.get(record, inverseDef.localField)
-                if (id === undefined) {
-                  utils.noDupeAdd(children, this, (child) => child === this)
-                } else {
-                  utils.noDupeAdd(children, this, (child) => child === this || id === utils.get(child, idAttribute))
-                }
+              if (inverseDef) {
+                this.setupInverseRelation(record, id, inverseDef, idAttribute)
               }
             } else {
               // Unset in-memory link only
@@ -1338,6 +1301,14 @@ const props = {
               safeSetLink(record, inverseLocalField, this)
             } else {
               // Unset locals
+              if (current) {
+                // Update (unset) inverse relation
+                /* Note that setting foreignKey to null / undefined breaks other specs
+                * Seems like there are other errors
+                */
+                // safeSetProp(current, foreignKey, undefined)
+                safeSetLink(current, inverseLocalField, undefined)
+              }
               safeSetLink(this, localField, undefined)
             }
             return record

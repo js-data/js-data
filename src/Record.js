@@ -1,6 +1,11 @@
-import utils from './utils'
+import utils, { safeSetLink } from './utils'
 import Component from './Component'
 import Settable from './Settable'
+import {
+  belongsToType,
+  hasManyType,
+  hasOneType
+} from './decorators'
 
 const DOMAIN = 'Record'
 
@@ -384,6 +389,36 @@ export default Component.extend({
    */
   isValid (opts) {
     return !this._mapper().validate(this, opts)
+  },
+
+  removeInverseRelation(currentParent, id, inverseDef, idAttribute) {
+    if (inverseDef.type === hasOneType) {
+      safeSetLink(currentParent, inverseDef.localField, undefined)
+    } else if (inverseDef.type === hasManyType) {
+      // e.g. remove comment from otherPost.comments
+      const children = utils.get(currentParent, inverseDef.localField)
+      if (id === undefined) {
+        utils.remove(children, (child) => child === this)
+      } else {
+        utils.remove(children, (child) => child === this || id === utils.get(child, idAttribute))
+      }
+    }
+  },
+
+  setupInverseRelation(record, id, inverseDef, idAttribute) {
+    // Update (set) inverse relation
+    if (inverseDef.type === hasOneType) {
+      // e.g. someUser.profile = profile
+      safeSetLink(record, inverseDef.localField, this)
+    } else if (inverseDef.type === hasManyType) {
+      // e.g. add comment to somePost.comments
+      const children = utils.get(record, inverseDef.localField)
+      if (id === undefined) {
+        utils.noDupeAdd(children, this, (child) => child === this)
+      } else {
+        utils.noDupeAdd(children, this, (child) => child === this || id === utils.get(child, idAttribute))
+      }
+    }
   },
 
   /**

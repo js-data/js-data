@@ -202,4 +202,38 @@ describe('JSData.hasMany', function () {
     assert.equal(getCalled, 11)
     assert.equal(setCalled, 2)
   })
+  it('unlinks correctly in related structures when a record is removed', function() {
+    const store = new JSData.DataStore();
+    const mapperA = store.defineMapper('A', {
+      properties: {
+        parent: { type: 'boolean' }
+      },
+      relations:  {
+        hasMany: {
+          B: {
+            localField: 'b',
+            foreignKey: 'a_id'
+          }
+        }
+      }
+    });
+    const mapperB = store.defineMapper('B', {
+      relations:  {
+        belongsTo: {
+          A: {
+            localField: 'a',
+            foreignKey: 'a_id'
+          }
+        }
+      }
+    });
+
+    // We add two records, which are not linked
+    const aRecord = store.add('A', {id: 1, parent: true});
+
+    store.add('B', [{id: 1, a_id: 1}, {id: 2, a_id: 1}]);
+    assert.equal(aRecord.b.length, 2, '2 items linked as expected');
+    store.remove('B', 2);
+    assert.equal(aRecord.b.length, 1, 'expected 1 item to still be linked but got empty array');
+  })
 })

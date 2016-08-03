@@ -156,16 +156,12 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
     const localField = this.localField
     records.forEach((record) => {
       const relatedData = utils.get(record, localField)
-      this.unlinkInverseRecords(relatedData)
+      /* CAN DEPRECATE? */
+      // this.unlinkInverseRecords(relatedData, record)
+
+      // descriptor.set will trigger removeInverseRelations
       utils.set(record, localField, undefined)
     })
-  },
-
-  unlinkInverseRecords (record) {
-    if (!record) {
-      return
-    }
-    utils.set(record, this.getInverse(this.mapper).localField, undefined)
   },
 
   linkRecord (record, relatedRecord) {
