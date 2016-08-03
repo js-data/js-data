@@ -372,4 +372,60 @@ describe('DataStore integration tests', function () {
     assert.equal(store.unsaved('bar').length, 1)
     assert.equal(store.unsaved('foo').length, 1)
   })
+  it('should correctly unlink inverse records', function () {
+    const store = new JSData.DataStore()
+
+    store.defineMapper('A', {
+      idAttribute: 'uid',
+      properties: {
+        uid: { type: 'string' }
+      },
+      relations: {
+        hasMany: {
+          B: {
+            localField: 'b',
+            foreignKey: 'a_uid'
+          }
+        }
+      }
+    })
+
+    store.defineMapper('B', {
+      idAttribute: 'uid',
+      properties: {
+        uid: { type: 'string' },
+        a_uid: { type: ['string', 'null'] }
+      },
+      relations: {
+        belongsTo: {
+          A: {
+            localField: 'a',
+            foreignKey: 'a_uid'
+          }
+        }
+      }
+    })
+
+    const aRecord = store.add('A', { uid: 'a1' })
+    const bRecords = store.add('B', [{ uid: 'b1', a_uid: 'a1' }, { uid: 'b2', a_uid: 'a1' }])
+    assert.objectsEqual(aRecord.b, bRecords)
+    assert.strictEqual(bRecords[0].a, aRecord)
+    assert.strictEqual(bRecords[1].a, aRecord)
+
+    const aRecord2 = store.add('A', { uid: 'a2' })
+    const bRecords2 = store.add('B', [{ uid: 'b3', a_uid: 'a2' }, { uid: 'b4', a_uid: 'a2' }])
+    assert.objectsEqual(aRecord2.b, bRecords2)
+    assert.strictEqual(bRecords2[0].a, aRecord2)
+    assert.strictEqual(bRecords2[1].a, aRecord2)
+
+    store.remove('B', 'b2')
+    assert.objectsEqual(aRecord.b, [bRecords[0]])
+    assert.strictEqual(bRecords[0].a, aRecord)
+    assert.strictEqual(bRecords[1].a, undefined)
+
+    store.remove('A', 'a2')
+    assert.objectsEqual(aRecord2.b, [])
+    assert.equal(bRecords2[0].a, undefined)
+    assert.equal(bRecords2[1].a, undefined)
+  })
 })

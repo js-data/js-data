@@ -100,8 +100,6 @@ export default Collection.extend({
     }
 
     if (mapper.relationList.length && record) {
-      // Check the currently visited record for relations that need to be
-      // inserted into their respective collections.
       mapper.relationList.forEach(function (def) {
         def.removeLinkedRecords(mapper, [record])
       })
@@ -116,8 +114,6 @@ export default Collection.extend({
     records.forEach(this._clearMeta, this)
 
     if (mapper.relationList.length && records.length) {
-      // Check the currently visited record for relations that need to be
-      // inserted into their respective collections.
       mapper.relationList.forEach(function (def) {
         def.removeLinkedRecords(mapper, records)
       })

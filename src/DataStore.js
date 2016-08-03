@@ -1316,13 +1316,13 @@ const props = {
               return current
             }
             const inverseLocalField = def.getInverse(mapper).localField
+            // Update (unset) inverse relation
+            if (current) {
+              safeSetProp(current, foreignKey, undefined)
+              self.getCollection(relation).updateIndex(current, updateOpts)
+              safeSetLink(current, inverseLocalField, undefined)
+            }
             if (record) {
-              // Update (unset) inverse relation
-              if (current) {
-                safeSetProp(current, foreignKey, undefined)
-                self.getCollection(relation).updateIndex(current, updateOpts)
-                safeSetLink(current, inverseLocalField, undefined)
-              }
               const relatedId = utils.get(record, def.getRelation().idAttribute)
               // Prefer store record
               if (relatedId !== undefined) {
