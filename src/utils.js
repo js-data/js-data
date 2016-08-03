@@ -1576,6 +1576,23 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
     }
 
     object[last] = undefined
+  },
+
+}
+
+export const safeSetProp = function (record, field, value) {
+  if (record && record._set) {
+    record._set(`props.${field}`, value)
+  } else {
+    utils.set(record, field, value)
+  }
+}
+
+export const safeSetLink = function (record, field, value) {
+  if (record && record._set) {
+    record._set(`links.${field}`, value)
+  } else {
+    utils.set(record, field, value)
   }
 }
 
