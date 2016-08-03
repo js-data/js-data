@@ -233,9 +233,7 @@ describe('JSData.hasMany', function () {
 
     store.add('B', [{id: 1, a_id: 1}, {id: 2, a_id: 1}]);
     assert.equal(aRecord.b.length, 2, '2 items linked as expected');
-    console.log(aRecord.b)
     store.remove('B', 2);
-    console.log(aRecord.b)
     assert.equal(aRecord.b.length, 1, 'expected 1 item to still be linked but got empty array');
   })
 })

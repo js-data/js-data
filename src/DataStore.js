@@ -1274,13 +1274,11 @@ const props = {
           get: getter,
           // e.g. user.profile = someProfile
           set (record) {
-            console.log("IN SET HAS ONE\n", this, path, this._get('links'), localField, "\n")
             const current = this._get(path)
             if (record === current) {
               return current
             }
             const inverseLocalField = def.getInverse(mapper).localField
-            console.log("SAFE SET LINK\n", current, inverseLocalField, record, "\n")
             if (record) {
               // Update (unset) inverse relation
               if (current) {
@@ -1304,7 +1302,6 @@ const props = {
             } else {
               // Unset locals
               if (current) {
-                console.log("SAFE SET FOREIGN KEY\n", current, foreignKey, "\n")
                 // Update (unset) inverse relation
                 /* Note that setting foreignKey to null / undefined breaks other specs
                 * Seems like there are other errors

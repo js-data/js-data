@@ -160,7 +160,6 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
       // this.unlinkInverseRecords(relatedData, record)
 
       // descriptor.set will trigger removeInverseRelations
-      console.log("\nremoveLinkedRecords: RECORD - LOCALFIELD", record, localField, "\n")
       utils.set(record, localField, undefined)
     })
   },

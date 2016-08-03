@@ -392,7 +392,6 @@ export default Component.extend({
   },
 
   removeInverseRelation(currentParent, id, inverseDef, idAttribute) {
-    console.log('REMOVEINVERSERELATION')
     if (inverseDef.type === hasOneType) {
       safeSetLink(currentParent, inverseDef.localField, undefined)
     } else if (inverseDef.type === hasManyType) {
