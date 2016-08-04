@@ -1,4 +1,5 @@
-import utils from './utils'
+import utils, { safeSetLink, safeSetProp } from './utils'
+
 import {
   belongsToType,
   hasManyType,
@@ -261,22 +262,6 @@ const ownMethodsForScoping = [
   'hashQuery'
 ]
 
-const safeSetProp = function (record, field, value) {
-  if (record && record._set) {
-    record._set(`props.${field}`, value)
-  } else {
-    utils.set(record, field, value)
-  }
-}
-
-const safeSetLink = function (record, field, value) {
-  if (record && record._set) {
-    record._set(`links.${field}`, value)
-  } else {
-    utils.set(record, field, value)
-  }
-}
-
 const cachedFn = function (name, hashOrId, opts) {
   const cached = this._completedQueries[name][hashOrId]
   if (utils.isFunction(cached)) {
@@ -393,10 +378,6 @@ function DataStore (opts) {
 
 const props = {
   constructor: DataStore,
-
-  _callSuper (method, ...args) {
-    return this.constructor.__super__.prototype[method].apply(this, args)
-  },
 
   /**
    * Internal method used to handle Mapper responses.
@@ -872,7 +853,7 @@ const props = {
    */
   create (name, record, opts) {
     opts || (opts = {})
-    return this._callSuper('create', name, record, opts)
+    return Container.prototype.create.call(this, name, record, opts)
       .then((result) => this._end(name, result, opts))
   },
 
@@ -969,7 +950,7 @@ const props = {
    */
   createMany (name, records, opts) {
     opts || (opts = {})
-    return this._callSuper('createMany', name, records, opts)
+    return Container.prototype.createMany.call(this, name, records, opts)
       .then((result) => this._end(name, result, opts))
   },
 
@@ -1046,19 +1027,8 @@ const props = {
 
             // e.g. profile.user !== someUser
             // or comment.post !== somePost
-            if (currentParent) {
-              // e.g. otherUser.profile = undefined
-              if (inverseDef.type === hasOneType) {
-                safeSetLink(currentParent, inverseDef.localField, undefined)
-              } else if (inverseDef.type === hasManyType) {
-                // e.g. remove comment from otherPost.comments
-                const children = utils.get(currentParent, inverseDef.localField)
-                if (id === undefined) {
-                  utils.remove(children, (child) => child === this)
-                } else {
-                  utils.remove(children, (child) => child === this || id === utils.get(child, idAttribute))
-                }
-              }
+            if (currentParent && inverseDef) {
+              this.removeInverseRelation(currentParent, id, inverseDef, idAttribute)
             }
             if (record) {
               // e.g. profile.user = someUser
@@ -1077,18 +1047,8 @@ const props = {
               safeSetProp(this, foreignKey, relatedId)
               collection.updateIndex(this, updateOpts)
 
-              // Update (set) inverse relation
-              if (inverseDef.type === hasOneType) {
-                // e.g. someUser.profile = profile
-                safeSetLink(record, inverseDef.localField, this)
-              } else if (inverseDef.type === hasManyType) {
-                // e.g. add comment to somePost.comments
-                const children = utils.get(record, inverseDef.localField)
-                if (id === undefined) {
-                  utils.noDupeAdd(children, this, (child) => child === this)
-                } else {
-                  utils.noDupeAdd(children, this, (child) => child === this || id === utils.get(child, idAttribute))
-                }
+              if (inverseDef) {
+                this.setupInverseRelation(record, id, inverseDef, idAttribute)
               }
             } else {
               // Unset in-memory link only
@@ -1316,13 +1276,13 @@ const props = {
               return current
             }
             const inverseLocalField = def.getInverse(mapper).localField
+            // Update (unset) inverse relation
+            if (current) {
+              safeSetProp(current, foreignKey, undefined)
+              self.getCollection(relation).updateIndex(current, updateOpts)
+              safeSetLink(current, inverseLocalField, undefined)
+            }
             if (record) {
-              // Update (unset) inverse relation
-              if (current) {
-                safeSetProp(current, foreignKey, undefined)
-                self.getCollection(relation).updateIndex(current, updateOpts)
-                safeSetLink(current, inverseLocalField, undefined)
-              }
               const relatedId = utils.get(record, def.getRelation().idAttribute)
               // Prefer store record
               if (relatedId !== undefined) {
@@ -1459,7 +1419,7 @@ const props = {
    */
   destroy (name, id, opts) {
     opts || (opts = {})
-    return this._callSuper('destroy', name, id, opts).then((result) => {
+    return Container.prototype.destroy.call(this, name, id, opts).then((result) => {
       const record = this.getCollection(name).remove(id, opts)
 
       if (record && this.unlinkOnDestroy) {
@@ -1572,7 +1532,7 @@ const props = {
    */
   destroyAll (name, query, opts) {
     opts || (opts = {})
-    return this._callSuper('destroyAll', name, query, opts).then((result) => {
+    return Container.prototype.destroyAll.call(this, name, query, opts).then((result) => {
       const records = this.getCollection(name).removeAll(query, opts)
 
       if (records && records.length && this.unlinkOnDestroy) {
@@ -1703,7 +1663,7 @@ const props = {
     let promise
 
     if (opts.force || !item) {
-      promise = this._pendingQueries[name][id] = this._callSuper('find', name, id, opts).then((result) => {
+      promise = this._pendingQueries[name][id] = Container.prototype.find.call(this, name, id, opts).then((result) => {
         delete this._pendingQueries[name][id]
         result = this._end(name, result, opts)
         this.cacheFind(name, result, id, opts)
@@ -1816,7 +1776,7 @@ const props = {
     let promise
 
     if (opts.force || !items) {
-      promise = this._pendingQueries[name][hash] = this._callSuper('findAll', name, query, opts).then((result) => {
+      promise = this._pendingQueries[name][hash] = Container.prototype.findAll.call(this, name, query, opts).then((result) => {
         delete this._pendingQueries[name][hash]
         result = this._end(name, result, opts)
         this.cacheFindAll(name, result, hash, opts)
@@ -2101,7 +2061,7 @@ const props = {
    */
   update (name, id, record, opts) {
     opts || (opts = {})
-    return this._callSuper('update', name, id, record, opts)
+    return Container.prototype.update.call(this, name, id, record, opts)
       .then((result) => this._end(name, result, opts))
   },
 
@@ -2193,7 +2153,7 @@ const props = {
    */
   updateAll (name, props, query, opts) {
     opts || (opts = {})
-    return this._callSuper('updateAll', name, query, props, opts)
+    return Container.prototype.updateAll.call(this, name, query, props, opts)
       .then((result) => this._end(name, result, opts))
   },
 
@@ -2285,7 +2245,7 @@ const props = {
    */
   updateMany (name, records, opts) {
     opts || (opts = {})
-    return this._callSuper('updateMany', name, records, opts)
+    return Container.prototype.updateMany.call(this, name, records, opts)
       .then((result) => this._end(name, result, opts))
   }
 }

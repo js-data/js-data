@@ -17,16 +17,6 @@ export const HasManyRelation = Relation.extend({
     return !!(hasForeignKeys || (this.localKeys && utils.get(record, this.localKeys)))
   },
 
-  unlinkInverseRecords (records) {
-    if (!records) {
-      return
-    }
-    const localField = this.getInverse(this.mapper).localField
-    records.forEach(function (record) {
-      utils.set(record, localField, undefined)
-    })
-  },
-
   linkRecord (record, relatedRecords) {
     const relatedCollection = this.relatedCollection
     const canAutoAddLinks = this.canAutoAddLinks

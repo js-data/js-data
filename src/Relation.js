@@ -155,17 +155,8 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
   removeLinkedRecords (relatedMapper, records) {
     const localField = this.localField
     records.forEach((record) => {
-      const relatedData = utils.get(record, localField)
-      this.unlinkInverseRecords(relatedData)
       utils.set(record, localField, undefined)
     })
-  },
-
-  unlinkInverseRecords (record) {
-    if (!record) {
-      return
-    }
-    utils.set(record, this.getInverse(this.mapper).localField, undefined)
   },
 
   linkRecord (record, relatedRecord) {
@@ -193,6 +184,9 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
 
   // e.g. user hasMany post via "foreignKey", so find all posts of user
   findExistingLinksByForeignKey (id) {
+    if (id === undefined || id === null) {
+      return
+    }
     return this.relatedCollection.filter({
       [this.foreignKey]: id
     })

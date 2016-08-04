@@ -77,6 +77,26 @@ describe('JSData.belongsTo', function () {
     assert.strictEqual(bar2.foo, foo)
     assert.strictEqual(bar3.foo, foo)
   })
+
+  it ('should not create an inverseLink if no inverseRelationship is defined', function() {
+    const store = new JSData.DataStore()
+    store.defineMapper('foo', {
+    })
+    store.defineMapper('bar', {
+      relations: {
+        belongsTo: {
+          foo: {
+            localField: '_foo',
+            foreignKey: 'foo_id'
+          }
+        }
+      }
+    })
+    const foo = store.add('foo', { id: 1 })
+    const bar = store.add('bar', { id: 1, foo_id: 1 })
+    assert.strictEqual(bar._foo, foo)
+  })
+
   it('should add property accessors to prototype of target and allow relation re-assignment using customizations', function () {
     const store = new JSData.DataStore()
     store.defineMapper('foo', {
