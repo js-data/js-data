@@ -4,6 +4,7 @@
 - #376 - Fix unlinking of records
 - #379 fixes #380 - fix(hasOne): do not create links for undefined or null keys by @nickescallon
 - #382 fixes #381 - check that inverseDef exists before attempting to setup Inverse for belongsTo by @pik
+- #384 - DataStore does not correctly call super
 
 ##### 3.0.0-rc.3 - 25 July 2016
 
