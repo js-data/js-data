@@ -68,11 +68,11 @@
     "release": "npm test && npm run doc && repo-tools updates && repo-tools changelog && repo-tools authors"
   },
   "devDependencies": {
-    "babel-plugin-syntax-async-functions": "6.8.0",
+    "babel-plugin-syntax-async-functions": "6.13.0",
     "babel-plugin-transform-es2015-modules-umd": "6.12.0",
     "babel-plugin-transform-regenerator": "6.11.4",
-    "js-data-repo-tools": "0.5.5",
-    "karma": "1.1.2",
+    "js-data-repo-tools": "0.5.6",
+    "karma": "1.2.0",
     "karma-babel-preprocessor": "6.0.1",
     "karma-chai": "0.1.0",
     "karma-chrome-launcher": "1.0.1",
@@ -80,7 +80,7 @@
     "karma-phantomjs-launcher": "1.0.1",
     "karma-sauce-launcher": "1.0.0",
     "karma-sinon": "1.0.5",
-    "phantomjs-prebuilt": "2.1.10",
+    "phantomjs-prebuilt": "2.1.11",
     "uglify-js": "2.7.0"
   }
 }

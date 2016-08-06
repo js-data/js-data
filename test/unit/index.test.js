@@ -14,6 +14,8 @@ describe('JSData', function () {
     assert.equal(typeof JSData.Query, 'function', 'has the Query class')
     assert.equal(typeof JSData.Record, 'function', 'has the Record class')
     assert.equal(typeof JSData.Schema, 'function', 'has the Schema class')
+    assert.equal(typeof JSData.Settable, 'function', 'has the Settable class')
+    assert.equal(typeof JSData.SimpleStore, 'function', 'has the SimpleStore class')
     assert(JSData.version, 'has a version')
   })
 })
