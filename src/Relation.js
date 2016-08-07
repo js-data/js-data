@@ -1,4 +1,4 @@
-import utils from './utils'
+import utils, { safeSetLink, safeSetProp } from './utils'
 
 // TODO: remove this when the rest of the project is cleaned
 export const belongsToType = 'belongsTo'
@@ -24,6 +24,29 @@ export function Relation (relatedMapper, options = {}) {
 Relation.extend = utils.extend
 
 utils.addHiddenPropsToTarget(Relation.prototype, {
+  setupDescriptor(descriptor, store, mapper, collection) {
+    const def = this
+    const localField = def.localField
+    const path = `links.${localField}`
+    if (descriptor) {
+      descriptor.enumerable = def.enumerable === undefined ? false : def.enumerable
+      if (def.get) {
+        let origGet = descriptor.get
+        descriptor.get = function () {
+          return def.get(def, this, (...args) => origGet.apply(this, args))
+        }
+      }
+      if (def.set) {
+        let origSet = descriptor.set
+        descriptor.set = function (related) {
+          return def.set(def, this, related, (value) => origSet.call(this, value === undefined ? related : value))
+        }
+      }
+      Object.defineProperty(mapper.recordClass.prototype, localField, descriptor)
+    }
+    return descriptor
+  },
+
   get canAutoAddLinks () {
     return this.add === undefined || !!this.add
   },
