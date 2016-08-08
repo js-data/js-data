@@ -95,6 +95,23 @@ describe('utils.copy', function () {
     })
   })
 
+  it('should copy Records including defined properties', function() {
+    const Store = new JSData.DataStore()
+    const Foo = Store.defineMapper('foo', {
+      schema: {
+        properties: {
+          id: { type: 'number' },
+          name: { type: 'string', track: true }
+        }
+      },
+    })
+    const foo = Foo.createRecord({name: 'a foo record'})
+    foo.arbitraryString = "I wasn't declared in properties"
+    const newFoo = utils.plainCopy(foo)
+    assert.equal(foo.name, newFoo.name)
+    assert.equal(foo.arbitraryString, newFoo.arbitraryString)
+  })
+
   it('copies arrays recursively', function () {
     assert.deepEqual(objCopy.structs.arrayOfPrimitives, srcObj.structs.arrayOfPrimitives)
     assert.notStrictEqual(objCopy.structs.arrayOfPrimitives, srcObj.structs.arrayOfPrimitives)

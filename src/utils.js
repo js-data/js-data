@@ -331,12 +331,14 @@ const utils = {
         if (utils.isArray(to)) {
           to.length = 0
         } else {
-          utils.forOwn(to, function (value, key) {
+          utils.forOwnWithPrototype(from, function (value, key) {
             delete to[key]
           })
         }
-        for (var key in from) {
-          if (from.hasOwnProperty(key)) {
+
+        const proto = Object.getPrototypeOf(from)
+        for (var key of utils.keysWithPrototype(from)) {
+          if (from.hasOwnProperty(key) || proto.hasOwnProperty(key)) {
             if (utils.isBlacklisted(key, blacklist)) {
               continue
             }
@@ -764,6 +766,36 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
     relationList.forEach(function (def) {
       utils._forRelation(opts, def, fn, thisArg)
     })
+  },
+
+  /**
+   * Returns the enumrable keys of an object and its prototype.
+   *
+   * @method utils.forOwnProperties
+   * @param {Object} object The object on which to lookup keys
+   * @returns {Object} Array of keys.
+   * @since 3.0.0
+   */
+  keysWithPrototype(obj) {
+    return Object.keys(Object.getPrototypeOf(obj)).concat(Object.keys(obj))
+  },
+
+  /**
+   * Iterate over an object's enumerable and prototype enumerable properties.
+   *
+   * @method utils.forOwnWithPrototype
+   * @param {Object} object The object whose properties are to be enumerated.
+   * @param {Function} fn Iteration function.
+   * @param {Object} [thisArg] Content to which to bind `fn`.
+   * @since 3.0.0
+   */
+  forOwnWithPrototype(obj, fn, thisArg) {
+    const keys = utils.keysWithPrototype(obj)
+    const len = keys.length
+    let i
+    for (i = 0; i < len; i++) {
+      fn.call(thisArg, obj[keys[i]], keys[i], obj)
+    }
   },
 
   /**
