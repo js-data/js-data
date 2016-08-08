@@ -92,12 +92,12 @@ export const HasManyRelation = Relation.extend({
     const relationData = this.getLocalField(props)
     const foreignIdField = this.getRelation().idAttribute
 
-    return this.createLinkedRecord(relationData, opts).then((records) => {
+    return this.createLinked(relationData, opts).then((records) => {
       utils.set(props, this.localKeys, records.map((record) => utils.get(record, foreignIdField)))
     })
   },
 
-  createLinkedRecord (props, opts) {
+  createLinked (props, opts) {
     return this.getRelation().createMany(props, opts)
   }
 }, {

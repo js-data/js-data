@@ -216,12 +216,14 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
   createChildRecord (props, relationData, opts) {
     this.setForeignKey(props, relationData)
 
-    return this.createLinkedRecord(relationData, opts).then((result) => {
+    return this.createLinked(relationData, opts).then((result) => {
       this.setLocalField(props, result)
     })
   },
 
-  createLinkedRecord (props, opts) {
-    return this.getRelation().create(props, opts)
+  createLinked (props, opts) {
+    const create = utils.isArray(props) ? 'createMany' : 'create'
+
+    return this.getRelation()[create](props, opts)
   }
 })

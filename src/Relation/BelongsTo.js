@@ -28,7 +28,7 @@ export const BelongsToRelation = Relation.extend({
   createParentRecord (props, opts) {
     const relationData = this.getLocalField(props)
 
-    return this.createLinkedRecord(relationData, opts).then((record) => {
+    return this.createLinked(relationData, opts).then((record) => {
       this.setForeignKey(props, record)
     })
   },
