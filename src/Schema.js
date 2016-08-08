@@ -743,6 +743,8 @@ const creatingPath = 'creating'
 const eventIdPath = 'eventId'
 // boolean - Whether to skip validation for a Record's currently changing property
 const noValidatePath = 'noValidate'
+// boolean - Whether to preserve Change History for a Record
+const keepChangeHistoryPath = 'keepChangeHistory'
 // boolean - Whether to skip change notification for a Record's currently
 // changing property
 const silentPath = 'silent'
@@ -787,7 +789,6 @@ const makeDescriptor = function (prop, schema, opts) {
     const _get = this[getter]
     const _set = this[setter]
     const _unset = this[unsetter]
-
     // Optionally check that the new value passes validation
     if (!_get(noValidatePath)) {
       const errors = schema.validate(value, { path: [prop] })
@@ -802,23 +803,19 @@ const makeDescriptor = function (prop, schema, opts) {
     // TODO: Make it so tracking can be turned on for all properties instead of
     // only per-property
     if (track && !_get(creatingPath)) {
-      /* previous is versioned on database commit
-       * props are versioned on set()
-       * TODO? Option to disable props versioning (commit only versioning)
-       */
+      // previous is versioned on database commit
+      // props are versioned on set()
       const previous = _get(previousPath)
       const current = _get(keyPath)
       let changing = _get(changingPath)
       let changed = _get(changedPath)
 
-      // IS it possible for changing to be defined but changed undefined?
       if (!changing) {
         // Track properties that are changing in the current event loop
         changed = []
       }
 
       // Add changing properties to this array once at most
-      // Consider making changed into a Set ?
       const index = changed.indexOf(prop)
       if (current !== value && index === -1) {
         changed.push(prop)
@@ -861,11 +858,14 @@ const makeDescriptor = function (prop, schema, opts) {
             }
 
             const changes = utils.diffObjects({ [prop] : value }, { [prop] : current })
-            const changeRecord = utils.plainCopy(changes)
-            changeRecord.timestamp = new Date().getTime()
-            const changeHistory = _get(changeHistoryPath) || []
-            _set(changeHistoryPath, changeHistory)
-            changeHistory.push(changeRecord)
+
+            if (_get(keepChangeHistoryPath)) {
+              const changeRecord = utils.plainCopy(changes)
+              changeRecord.timestamp = new Date().getTime()
+              let changeHistory = _get(changeHistoryPath)
+              !changeHistory && _set(changeHistoryPath, (changeHistory = []))
+              changeHistory.push(changeRecord)
+            }
             this.emit('change', this, changes)
           }
           _unset(silentPath)
