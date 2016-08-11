@@ -134,6 +134,8 @@ function Record (props, opts) {
   if (id !== undefined) {
     utils.set(this, mapper.idAttribute, id)
   }
+  const keepChangeHistory = opts.keepChangeHistory !== undefined ? opts.keepChangeHistory : (mapper ? mapper.keepChangeHistory : true)
+  _set('keepChangeHistory', keepChangeHistory)
   utils.fillIn(this, props)
   _set('creating', false)
   _set('noValidate', false)

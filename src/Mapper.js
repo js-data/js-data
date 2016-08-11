@@ -194,6 +194,16 @@ const MAPPER_DEFAULTS = {
   idAttribute: 'id',
 
   /**
+   * Whether records created from this mapper keep changeHistory on property changes.
+   *
+   * @default true
+   * @name Mapper#keepChangeHistory
+   * @since 3.0.0
+   * @type {boolean}
+   */
+  keepChangeHistory: true,
+
+  /**
    * Whether this Mapper should emit operational events.
    *
    * @default true
