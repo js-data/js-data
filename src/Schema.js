@@ -1038,9 +1038,11 @@ function Schema (definition) {
         this.properties[prop] = new Schema(_definition)
       }
     })
-  }
-  if (this.type === 'array' && this.items && !(this.items instanceof Schema)) {
+  } else if (this.type === 'array' && this.items && !(this.items instanceof Schema)) {
     this.items = new Schema(this.items)
+  }
+  if (this.extends && !(this.extends instanceof Schema)) {
+    this.extends = new Schema(this.extends)
   }
   ['allOf', 'anyOf', 'oneOf'].forEach((validationKeyword) => {
     if (this[validationKeyword]) {
@@ -1114,6 +1116,41 @@ export default Component.extend({
         schema.applyDefaults(utils.get(target, prop))
       }
     })
+  },
+
+  /**
+   * Create a copy of the given value that contains only the properties defined
+   * in this schema.
+   *
+   * @name Schema#pick
+   * @method
+   * @param {*} value The value to copy.
+   * @returns {*} The copy.
+   */
+  pick (value) {
+    if (this.type === 'object') {
+      value || (value = {})
+      let copy = {}
+      if (this.properties) {
+        utils.forOwn(this.properties, (_definition, prop) => {
+          copy[prop] = _definition.pick(value[prop])
+        })
+      }
+      if (this.extends) {
+        utils.fillIn(copy, this.extends.pick(value))
+      }
+      return copy
+    } else if (this.type === 'array') {
+      value || (value = [])
+      return value.map((item) => {
+        const _copy = this.items ? this.items.pick(item) : {}
+        if (this.extends) {
+          utils.fillIn(_copy, this.extends.pick(item))
+        }
+        return _copy
+      })
+    }
+    return utils.plainCopy(value)
   },
 
   /**
