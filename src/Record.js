@@ -248,12 +248,13 @@ export default Component.extend({
    * console.log('user hasChanges: ' + user.hasChanges())
    *
    * @method Record#commit
+   * @param {Object} [opts] Configuration options. Passed to {@link Record#toJSON}.
    * @since 3.0.0
    */
-  commit () {
+  commit (opts) {
     this._set('changed') // unset
     this._set('history', []) // clear history
-    this._set('previous', utils.plainCopy(this))
+    this._set('previous', this.toJSON(opts))
   },
 
   /**

@@ -2033,14 +2033,15 @@ export default Component.extend({
     const relationFields = (this ? this.relationFields : []) || []
     let json = {}
     let properties
+
+    // Copy properties defined in the schema
     if (this && this.schema) {
-      properties = this.schema.properties || {}
-      // TODO: Make this work recursively
-      utils.forOwn(properties, (opts, prop) => {
-        json[prop] = utils.plainCopy(record[prop])
-      })
+      json = this.schema.pick(record)
+      properties = this.schema.properties
     }
     properties || (properties = {})
+
+    // Optionally copy properties not defined in the schema
     if (!opts.strict) {
       for (var key in record) {
         if (!properties[key] && relationFields.indexOf(key) === -1) {
@@ -2048,8 +2049,8 @@ export default Component.extend({
         }
       }
     }
-    // The user wants to include relations in the resulting plain object
-    // representation
+
+    // The user wants to include relations in the resulting plain object representation
     if (this && opts.withAll) {
       opts.with = relationFields.slice()
     }
