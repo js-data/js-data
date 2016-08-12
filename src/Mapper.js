@@ -239,7 +239,18 @@ const MAPPER_DEFAULTS = {
    * @since 3.0.0
    * @type {boolean}
    */
-  raw: false
+  raw: false,
+
+  /**
+   * Whether records created from this mapper automatically validate their properties
+   * when their properties are modified.
+   *
+   * @default true
+   * @name Mapper#validateOnSet
+   * @since 3.0.0
+   * @type {boolean}
+   */
+  validateOnSet: true
 }
 
 /**
@@ -390,7 +401,7 @@ function Mapper (opts) {
      *
      * @example <caption>Mapper#schema</caption>
      * // Normally you would do: import {Mapper} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.10')
+     * const JSData = require('js-data@3.0.0-rc.4')
      * const {Mapper} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      *
@@ -2450,7 +2461,7 @@ export default Component.extend({
  *
  * @example <caption>Mapper.extend</caption>
  * // Normally you would do: import {Mapper} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.10')
+ * const JSData = require('js-data@3.0.0-rc.4')
  * const {Mapper} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *

@@ -1011,7 +1011,7 @@ const typeGroupValidators = {
  *
  * @example <caption>Schema#constructor</caption>
  * // Normally you would do:  import {Schema} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.10')
+ * const JSData = require('js-data@3.0.0-rc.4')
  * const {Schema} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *
@@ -1144,7 +1144,7 @@ export default Component.extend({
  * Create a subclass of this Schema:
  * @example <caption>Schema.extend</caption>
  * // Normally you would do: import {Schema} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.10')
+ * const JSData = require('js-data@3.0.0-rc.4')
  * const {Schema} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *

@@ -32,7 +32,7 @@ function Component (opts) {
    *
    * @example <caption>Component#debug</caption>
    * // Normally you would do: import {Component} from 'js-data'
-   * const JSData = require('js-data@3.0.0-beta.10')
+   * const JSData = require('js-data@3.0.0-rc.4')
    * const {Component} = JSData
    * console.log('Using JSData v' + JSData.version.full)
    *
@@ -70,7 +70,7 @@ export default Settable.extend({
  *
  * @example <caption>Component.extend</caption>
  * // Normally you would do: import {Component} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.10')
+ * const JSData = require('js-data@3.0.0-rc.4')
  * const {Component} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *
@@ -203,7 +203,7 @@ utils.logify(Component.prototype)
  *
  * @example <caption>Component#emit</caption>
  * // import {Collection, DataStore} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.10')
+ * const JSData = require('js-data@3.0.0-rc.4')
  * const {Collection, DataStore} = JSData
  *
  * const collection = new Collection()

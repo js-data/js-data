@@ -12,6 +12,6 @@ describe('DataStore#getCollection', function () {
 
     assert.throws(function () {
       store.getCollection('foo')
-    }, Error, '[DataStore#getCollection:foo] collection not found\nhttp://www.js-data.io/v3.0/docs/errors#404')
+    }, Error, '[SimpleStore#getCollection:foo] collection not found\nhttp://www.js-data.io/v3.0/docs/errors#404')
   })
 })

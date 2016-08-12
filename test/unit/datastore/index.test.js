@@ -6,7 +6,7 @@ describe('DataStore', function () {
     assert.equal(typeof DataStore, 'function')
     const store = new DataStore()
     assert(store instanceof DataStore)
-    assert.strictEqual(JSData.utils.getSuper(store), JSData.Container)
+    assert.strictEqual(JSData.utils.getSuper(store), JSData.SimpleStore)
   })
   it('should initialize with defaults', function () {
     const DataStore = JSData.DataStore

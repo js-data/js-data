@@ -242,6 +242,22 @@ import Schema from './Schema'
  */
 import Settable from './Settable'
 
+/**
+ * JSData's {@link SimpleStore} class. Primarily for use in the browser. In
+ * Node.js you probably want to use {@link Container} instead.
+ *
+ * @example
+ * import {SimpleStore} from 'js-data'
+ * const store = new SimpleStore()
+ *
+ * @name module:js-data.SimpleStore
+ * @see SimpleStore
+ * @since 3.0.0
+ * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#SimpleStore","Components of JSData: SimpleStore"]
+ * @type {Constructor}
+ */
+import SimpleStore from './SimpleStore'
+
 export * from './decorators'
 
 export {
@@ -256,5 +272,6 @@ export {
   Record,
   Schema,
   Settable,
+  SimpleStore,
   utils
 }

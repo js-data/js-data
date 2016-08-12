@@ -128,7 +128,7 @@ export default Collection.extend({
  *
  * @example <caption>LinkedCollection.extend</caption>
  * // Normally you would do: import {LinkedCollection} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.10')
+ * const JSData = require('js-data@3.0.0-rc.4')
  * const {LinkedCollection} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *
