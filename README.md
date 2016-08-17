@@ -282,7 +282,7 @@ SOFTWARE.
 [mtn_b]: http://img.youtube.com/vi/8wxnnJA9FKw/0.jpg
 [mtn_l]: https://www.youtube.com/watch?v=8wxnnJA9FKw
 
-[inst]: http://www.js-data.io/docs#use-with-webpack
+[inst]: http://www.js-data.io/docs/installation#section-webpack
 
 [slack]: http://slack.js-data.io
 [ml]: https://groups.io/org/groupsio/jsdata
