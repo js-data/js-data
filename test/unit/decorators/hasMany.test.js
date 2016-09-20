@@ -1,205 +1,236 @@
 import { assert, JSData } from '../../_setup'
 
+const { Mapper, hasMany, DataStore } = JSData
+
 describe('JSData.hasMany', function () {
-  it('should check relation configuration', function () {
-    let mapper = new JSData.Mapper({ name: 'foo' })
-    let mapper2 = new JSData.Mapper({ name: 'bar' })
+  describe('configuration', function () {
+    let mapper, anotherMapper
 
-    assert.throws(() => {
-      JSData.hasMany(mapper2, {
-        foreignKey: 'm_id'
-      })(mapper)
-    }, Error, '[new Relation:opts.localField] expected: string, found: undefined\nhttp://www.js-data.io/v3.0/docs/errors#400')
+    beforeEach(function () {
+      mapper = new Mapper({ name: 'foo' })
+      anotherMapper = new Mapper({ name: 'bar' })
+    })
 
-    assert.throws(() => {
-      JSData.hasMany(mapper2, {
-        localField: 'm'
-      })(mapper)
-    }, Error, '[new Relation:opts.<foreignKey|localKeys|foreignKeys>] expected: string, found: undefined\nhttp://www.js-data.io/v3.0/docs/errors#400')
+    it('should throw error if passed "foreignKey" and "localField" is omitted', function () {
+      assert.throws(() => {
+        hasMany(anotherMapper, { foreignKey: 'foo_id' })(mapper)
+      }, Error, '[new Relation:opts.localField] expected: string, found: undefined\nhttp://www.js-data.io/v3.0/docs/errors#400')
+    })
 
-    assert.throws(() => {
-      JSData.hasMany('mapper2', {
-        localField: 'm',
-        foreignKey: 'm_id'
-      })(mapper)
-    }, Error, '[new Relation:opts.getRelation] expected: function, found: undefined\nhttp://www.js-data.io/v3.0/docs/errors#400')
+    it('should throw error if passed "localField" and "foreignKey" is omitted', function () {
+      assert.throws(() => {
+        hasMany(anotherMapper, { localField: 'foo' })(mapper)
+      }, Error, '[new Relation:opts.<foreignKey|localKeys|foreignKeys>] expected: string, found: undefined\nhttp://www.js-data.io/v3.0/docs/errors#400')
+    })
 
-    assert.doesNotThrow(() => {
-      JSData.hasMany('mapper2', {
-        localField: 'm',
-        foreignKey: 'm_id',
-        getRelation () {
-          return mapper2
-        }
-      })(mapper)
+    it('should throw error if passed relation name and "getRelation" is omitted', function () {
+      assert.throws(() => {
+        hasMany('anotherMapper', { localField: 'foo', foreignKey: 'foo_id' })(mapper)
+      }, Error, '[new Relation:opts.getRelation] expected: function, found: undefined\nhttp://www.js-data.io/v3.0/docs/errors#400')
+    })
+
+    it('should not throw error if passed relation together with "getRelation" option', function () {
+      assert.doesNotThrow(() => {
+        hasMany('anotherMapper', { localField: 'foo', foreignKey: 'foo_id', getRelation: () => anotherMapper })(mapper)
+      })
     })
   })
-  it('should add property accessors to prototype of target and allow relation re-assignment (foreignKeys)', function () {
-    const store = new JSData.DataStore()
-    store.defineMapper('foo', {
-      relations: {
-        hasMany: {
-          bar: {
+
+  describe('when relation is set up using "foreignKey"', function () {
+    let store
+
+    beforeEach(function () {
+      store = new DataStore()
+      store.defineMapper('foo', {
+        relations: {
+          hasMany: relation('bar', { localField: 'bars', foreignKey: 'fooId' })
+        }
+      })
+      store.defineMapper('bar', {
+        relations: {
+          belongsTo: relation('foo', { localField: 'foo', foreignKey: 'fooId' })
+        }
+      })
+    })
+
+    it('should add property accessors to prototype of target', function () {
+      const Foo = store.getMapper('foo').recordClass
+      const Bar = store.getMapper('bar').recordClass
+
+      assert.isTrue(Foo.prototype.hasOwnProperty('bars'))
+      assert.isTrue(Bar.prototype.hasOwnProperty('foo'))
+    })
+
+    it('should return empty array for association if there is no linked records', function () {
+      const foo = store.add('foo', {})
+
+      assert.objectsEqual(foo.bars, [])
+    })
+
+    it('should create association when related record is added to the store', function () {
+      const foo = store.add('foo', { id: 1 })
+      const bars = store.add('bar', [{ fooId: 1, id: 1 }, { fooId: 1, id: 2 }])
+
+      assert.objectsEqual(foo.bars, bars)
+    })
+
+    it('should allow relation re-assignment', function () {
+      const foo = store.add('foo', { id: 1 })
+      const bars = store.add('bar', [{ fooId: 1, id: 1 }, { fooId: 1, id: 2 }])
+      const otherBars = store.add('bar', [{ id: 10 }])
+
+      foo.bars = otherBars
+
+      assert.objectsEqual(foo.bars, otherBars)
+      assert.objectsEqual(otherBars.map(bar => bar.fooId), [foo.id])
+    })
+  })
+
+  describe('when relation is set up using "localKeys"', function () {
+    let store
+
+    beforeEach(function () {
+      store = new DataStore()
+      store.defineMapper('foo', {
+        relations: {
+          hasMany: relation('bar', { localField: 'bars', localKeys: 'barIds' })
+        }
+      })
+      store.defineMapper('bar', {
+        relations: {
+          hasMany: relation('foo', { localField: 'foos', foreignKeys: 'barIds' })
+        }
+      })
+    })
+
+    it('should add property accessors to prototype of target', function () {
+      const Foo = store.getMapper('foo').recordClass
+      const Bar = store.getMapper('bar').recordClass
+
+      assert.isTrue(Foo.prototype.hasOwnProperty('bars'))
+      assert.isTrue(Bar.prototype.hasOwnProperty('foos'))
+    })
+
+    it('should return empty array for association if there is no linked records', function () {
+      const foo = store.add('foo', {})
+
+      assert.objectsEqual(foo.bars, [])
+    })
+
+    it('should create association when related record is added to the store', function () {
+      const foo = store.add('foo', { id: 1, barIds: [1] })
+      const bars = store.add('bar', [{ id: 1 }, { id: 2 }])
+
+      assert.objectsEqual(foo.bars, bars.slice(0, 1))
+    })
+
+    it('should allow relation re-assignment', function () {
+      const foo = store.add('foo', { id: 1, barIds: [1] })
+      const anotherFoo = store.add('foo', { id: 2, barIds: [2, 3] })
+      const bars = store.add('bar', [{ id: 1 }, { id: 2 }, { id: 3 }])
+      const otherBars = bars.slice(1)
+
+      foo.bars = otherBars
+
+      assert.objectsEqual(foo.bars, otherBars)
+      assert.objectsEqual(otherBars[0].foos, otherBars[1].foos)
+      assert.objectsEqual(otherBars[0].foos, [anotherFoo, foo])
+    })
+  })
+
+  describe('when relation is set up using "foreignKeys" (reverse "localKeys")', function () {
+    let store
+
+    beforeEach(function () {
+      store = new DataStore()
+      store.defineMapper('foo', {
+        relations: {
+          hasMany: relation('bar', { localField: 'bars', foreignKeys: 'fooIds' })
+        }
+      })
+      store.defineMapper('bar', {
+        relations: {
+          hasMany: relation('foo', { localField: 'foos', localKeys: 'fooIds' })
+        }
+      })
+    })
+
+    it('should add property accessors to prototype of target', function () {
+      const Foo = store.getMapper('foo').recordClass
+      const Bar = store.getMapper('bar').recordClass
+
+      assert.isTrue(Foo.prototype.hasOwnProperty('bars'))
+      assert.isTrue(Bar.prototype.hasOwnProperty('foos'))
+    })
+
+    it('should return empty array for association if there is no linked records', function () {
+      const foo = store.add('foo', {})
+
+      assert.objectsEqual(foo.bars, [])
+    })
+
+    it('should create association when related record is added to the store', function () {
+      const foo = store.add('foo', { id: 1 })
+      const bars = store.add('bar', [{ id: 1, fooIds: [1] }, { id: 2 }])
+
+      assert.objectsEqual(foo.bars, bars.slice(0, 1))
+    })
+
+    it('should allow relation re-assignment', function () {
+      const foo = store.add('foo', { id: 1 })
+      const anotherFoo = store.add('foo', { id: 2 })
+      const bars = store.add('bar', [{ id: 1, fooIds: [1] }, { id: 2, fooIds: [2] }, { id: 3, fooIds: [2] }])
+      const otherBars = bars.slice(1)
+
+      foo.bars = otherBars
+
+      assert.objectsEqual(foo.bars, otherBars)
+      assert.objectsEqual(otherBars[0].foos, otherBars[1].foos)
+      assert.objectsEqual(otherBars[0].foos, [anotherFoo, foo])
+    })
+  })
+
+  describe('when getter/setter is specified for association', function () {
+    let store, foo
+
+    beforeEach(function () {
+      store = new DataStore()
+      store.defineMapper('foo', {
+        relations: {
+          hasMany: relation('bar', {
             localField: 'bars',
-            foreignKey: 'fooId'
-          }
-        }
-      }
-    })
-    store.defineMapper('bar', {
-      relations: {
-        belongsTo: {
-          foo: {
-            localField: 'foo',
-            foreignKey: 'fooId'
-          }
-        }
-      }
-    })
-    const foo = store.add('foo', { id: 1 })
-    const foo2 = store.add('foo', { id: 2 })
-    assert.objectsEqual(foo.bars, [])
-    assert.objectsEqual(foo2.bars, [])
-    const bars = store.add('bar', [{ fooId: 1, id: 1 }])
-    const bars2 = store.add('bar', [{ fooId: 2, id: 2 }])
-    assert.objectsEqual(foo.bars, bars)
-    assert.objectsEqual(foo2.bars, bars2)
-    foo.bars = bars2
-    foo2.bars = bars
-    assert.objectsEqual(foo2.bars, bars)
-    assert.objectsEqual(foo.bars, bars2)
-  })
-  it('should add property accessors to prototype of target and allow relation re-assignment (localKeys)', function () {
-    const store = new JSData.DataStore()
-    store.defineMapper('foo', {
-      relations: {
-        hasMany: {
-          bar: {
-            localField: 'bars',
-            localKeys: 'bar_ids'
-          }
-        }
-      }
-    })
-    store.defineMapper('bar', {
-      relations: {
-        hasMany: {
-          foo: {
-            localField: 'foos',
-            foreignKeys: 'bar_ids'
-          }
-        }
-      }
-    })
-    const foo1 = store.add('foo', { id: 1, bar_ids: [1] })
-    const foo2 = store.add('foo', { id: 2, bar_ids: [2] })
-    assert.deepEqual(foo1.bars, [])
-    assert.deepEqual(foo2.bars, [])
-    const bar1 = store.add('bar', { id: 1 })
-    const bar2 = store.add('bar', { id: 2 })
-    assert.objectsEqual(foo1.bars, [bar1])
-    assert.objectsEqual(foo2.bars, [bar2])
-    assert.strictEqual(foo1.bars[0], bar1)
-    assert.strictEqual(foo2.bars[0], bar2)
-    foo1.bars = [bar2]
-    foo2.bars = [bar1]
-    assert.strictEqual(foo2.bars[0], bar1)
-    assert.equal(foo2.bars.length, 1)
-    assert.strictEqual(foo1.bars[0], bar2)
-    assert.equal(foo1.bars.length, 1)
-    assert.objectsEqual(foo1.bar_ids, [2])
-    assert.objectsEqual(foo2.bar_ids, [1])
-  })
-  it('should add property accessors to prototype of target and allow relation re-assignment (foreignKeys)', function () {
-    const store = new JSData.DataStore()
-    store.defineMapper('bar', {
-      relations: {
-        hasMany: {
-          foo: {
-            localField: 'foos',
-            localKeys: 'foo_ids'
-          }
-        }
-      }
-    })
-    store.defineMapper('foo', {
-      relations: {
-        hasMany: {
-          bar: {
-            localField: 'bars',
-            foreignKeys: 'foo_ids'
-          }
-        }
-      }
-    })
-    const foo = store.add('foo', { id: 1 })
-    const foo2 = store.add('foo', { id: 2 })
-    const foo3 = store.add('foo', { id: 3 })
-    assert.objectsEqual(foo.bars, [])
-    assert.objectsEqual(foo2.bars, [])
-    const bars = store.add('bar', [{ foo_ids: [1], id: 1 }])
-    const bars2 = store.add('bar', [{ foo_ids: [2], id: 2 }])
-    const bars3 = store.add('bar', [{ id: 3 }])
-    assert.objectsEqual(foo.bars, bars)
-    assert.objectsEqual(foo2.bars, bars2)
-    assert.objectsEqual(foo3.bars, [])
-    foo.bars = bars2
-    foo2.bars = bars.concat(bars2)
-    foo3.bars = bars3
-    assert.objectsEqual(foo2.bars, bars.concat(bars2))
-    assert.objectsEqual(foo.bars, bars2)
-    assert.objectsEqual(foo3.bars, bars3)
-    assert.objectsEqual(bars[0].foo_ids, [2])
-    assert.objectsEqual(bars2[0].foo_ids, [1, 2])
-    assert.objectsEqual(bars3[0].foo_ids, [3])
-  })
-  it('should allow custom getter and setter', function () {
-    const store = new JSData.DataStore()
-    store.defineMapper('foo', {
-      relations: {
-        hasMany: {
-          bar: {
-            localField: '_bars',
             foreignKey: 'fooId',
-            get (Relation, foo, originalGet) {
-              getCalled++
-              return originalGet()
+            get (Relation, foo) {
+              foo._bars = foo._bars || []
+              return foo._bars
             },
-            set (Relation, foo, bars, originalSet) {
-              setCalled++
-              originalSet()
+            set (Relation, foo, bars) {
+              foo._bars = bars
             }
-          }
+          })
         }
-      }
-    })
-    store.defineMapper('bar', {
-      relations: {
-        belongsTo: {
-          foo: {
-            localField: 'foo',
-            foreignKey: 'fooId'
-          }
+      })
+      store.defineMapper('bar', {
+        relations: {
+          belongsTo: relation('foo', { localField: 'foo', foreignKey: 'fooId' })
         }
-      }
+      })
+      foo = store.add('foo', { id: 1 })
+      store.add('bar', [{ id: 1, fooId: 1 }])
     })
-    let getCalled = 0
-    let setCalled = 0
-    const foo = store.add('foo', { id: 1 })
-    const foo2 = store.add('foo', { id: 2 })
-    assert.objectsEqual(foo._bars, [])
-    assert.objectsEqual(foo2._bars, [])
-    const bars = store.add('bar', [{ fooId: 1, id: 1 }])
-    const bars2 = store.add('bar', [{ fooId: 2, id: 2 }])
-    assert.objectsEqual(foo._bars, bars)
-    assert.objectsEqual(foo2._bars, bars2)
-    foo._bars = bars2
-    foo2._bars = bars
-    assert.equal(bars2[0].fooId, foo.id)
-    assert.equal(bars[0].fooId, foo2.id)
-    assert.objectsEqual(foo2._bars, bars)
-    assert.objectsEqual(foo._bars, bars2)
-    assert.equal(getCalled, 11)
-    assert.equal(setCalled, 2)
+
+    it('sets related records according to implemented setter', function () {
+      foo.bars = store.add('bar', [{ id: 2 }, { id: 3 }])
+
+      assert.equal(foo.bars, foo._bars)
+    })
+
+    it('gets related records according to implemented getter', function () {
+      assert.equal(foo.bars, foo._bars)
+    })
   })
+
+  function relation(name, definition) {
+    return { [name]: definition }
+  }
 })
