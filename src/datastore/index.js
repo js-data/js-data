@@ -82,6 +82,7 @@ defaultsPrototype.afterReap = lifecycleNoop
 defaultsPrototype.afterUpdate = lifecycleNoopCb
 defaultsPrototype.afterValidate = lifecycleNoopCb
 defaultsPrototype.allowSimpleWhere = true
+defaultsPrototype.applyDefaultsOnInject = false
 defaultsPrototype.basePath = ''
 defaultsPrototype.beforeCreate = lifecycleNoopCb
 defaultsPrototype.beforeCreateCollection = lifecycleNoop

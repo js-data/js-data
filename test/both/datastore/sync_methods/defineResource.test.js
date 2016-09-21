@@ -208,6 +208,24 @@ describe('DS#defineResource', function () {
       type: 'foo',
       bazId: 10
     }));
+
+    var foo2 = Foo.inject({ id: 2, type: 'foo', bazId: 10 });
+
+    assert.equal(DSUtils.toJson(foo2), DSUtils.toJson({
+      id: 2,
+      type: 'foo',
+      bazId: 10
+    }));
+
+    var foo3 = Foo.inject({ id: 3, type: 'foo', bazId: 10 }, { applyDefaultsOnInject: true });
+
+    assert.equal(DSUtils.toJson(foo3), DSUtils.toJson({
+      beep: 'boop',
+      foo: true,
+      id: 3,
+      type: 'foo',
+      bazId: 10
+    }));
   });
   it('should allow a bit of aspect oriented programming', function () {
     var Foo = store.defineResource('foo');

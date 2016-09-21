@@ -205,6 +205,9 @@ function _inject (definition, resource, attrs, options) {
             item = attrs
           } else {
             item = new definition[definition['class']]()
+            if (options.applyDefaultsOnInject && options.defaultValues) {
+              DSUtils.deepMixIn(item, DSUtils.copy(options.defaultValues))
+            }
           }
 
           if (definition.instanceEvents && typeof item.emit !== 'function') {

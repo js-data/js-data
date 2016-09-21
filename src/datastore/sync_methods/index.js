@@ -150,7 +150,7 @@ export default {
   // @param resourceName The name of the type of resource of which to create an instance.
   // @param attrs Hash of properties with which to initialize the instance.
   // @param options Optional configuration.
-  // @param options.defaults Default values with which to initialize the instance.
+  // @param options.defaultValues Default values with which to initialize the instance.
   // @returns The new instance.
   createInstance (resourceName, attrs, options) {
     let definition = this.definitions[resourceName]
