@@ -327,7 +327,7 @@ describe('DS#loadRelations', function () {
     ];
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
-      assert.equal(_this.requests[0].url, 'http://test.js-data.io/bar?where=%7B%22id%22:%7B%22in%22:%5B4,7,9%5D%7D%7D');
+      assert.equal(_this.requests[0].url, 'http://test.js-data.io/bar?where=%7B%22id%22:%7B%22in%22:[4,7,9]%7D%7D');
       assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(barsData));
     }, 60);
@@ -384,7 +384,7 @@ describe('DS#loadRelations', function () {
     ];
     setTimeout(function () {
       assert.equal(1, _this.requests.length);
-      assert.isTrue(_this.requests[0].url === 'http://test.js-data.io/bar?where=%7B%22id%22:%7B%22in%22:%5B%224%22,%227%22,%229%22%5D%7D%7D' || _this.requests[0].url === 'http://test.js-data.io/bar?where=%7B%22id%22:%7B%22in%22:%5B4,7,9%5D%7D%7D');
+      assert.isTrue(_this.requests[0].url === 'http://test.js-data.io/bar?where=%7B%22id%22:%7B%22in%22:[%224%22,%227%22,%229%22]%7D%7D' || _this.requests[0].url === 'http://test.js-data.io/bar?where=%7B%22id%22:%7B%22in%22:[4,7,9]%7D%7D');
       assert.equal(_this.requests[0].method, 'GET');
       _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(barsData));
     }, 60);
@@ -498,7 +498,7 @@ describe('DS#loadRelations', function () {
         assert.equal(_this.requests[0].method, 'GET');
         _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(item5));
       }, 60);
-      return Item.find(item5.id)
+      Item.find(item5.id)
         .then(function(item) {
           setTimeout(function () {
             assert.equal(2, _this.requests.length);
@@ -507,7 +507,7 @@ describe('DS#loadRelations', function () {
             _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(clientZero));
             done();
           }, 60);
-          return Item.loadRelations(item, ['client']);
+          Item.loadRelations(item, ['client']);
         });
     });
     it('should return hasOne relation data from "localField"', function() {
@@ -538,7 +538,7 @@ describe('DS#loadRelations', function () {
         assert.equal(_this.requests[0].method, 'GET');
         _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(item5));
       }, 60);
-      return Item.find(item5.id)
+      Item.find(item5.id)
           .then(function(item) {
             setTimeout(function () {
               assert.equal(2, _this.requests.length);
@@ -547,7 +547,7 @@ describe('DS#loadRelations', function () {
               _this.requests[1].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson(partZero));
               done();
             }, 60);
-            return Item.loadRelations(item, ['part']);
+            Item.loadRelations(item, ['part']);
           });
     });
     it('should return belongsTo relation data from "localField"', function() {
