@@ -27,12 +27,14 @@ module.exports = function ejectAll (resourceName, params, options) {
   let queryHash = DSUtils.toJson(params)
 
   // get items that match the criteria
-  let items = definition.filter(params)
+  let items
 
   if (DSUtils.isEmpty(params)) {
+    items = definition.getAll()
     // remove all completed queries if ejecting all items
     resource.completedQueries = {}
   } else {
+    items = definition.filter(params)
     // remove matching completed query, if any
     delete resource.completedQueries[queryHash]
   }
