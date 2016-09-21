@@ -106,7 +106,14 @@ export default {
     let resource = _this.store[_resourceName]
     let item = _this.store[_resourceName].index[_id]
     if (item) {
-      resource.previousAttributes[_id] = DSUtils.copy(item, null, null, null, definition.relationFields)
+      const relationFields = definition.relationFields || []
+      const previousAttributes = {}
+      for (let key in item) {
+        if (relationFields.indexOf(key) === -1) {
+          previousAttributes[key] = DSUtils.copy(item[key], null, null, null, [])
+        }
+      }
+      resource.previousAttributes[_id] = previousAttributes
     }
 
     if (resource.changeHistories[_id].length) {
