@@ -139,6 +139,8 @@ defaultsPrototype.strategy = 'single'
 defaultsPrototype.upsert = !!DSUtils.w
 defaultsPrototype.useClass = true
 defaultsPrototype.useFilter = false
+defaultsPrototype.usePendingFind = true
+defaultsPrototype.usePendingFindAll = true
 defaultsPrototype.validate = lifecycleNoopCb
 defaultsPrototype.watchChanges = !!DSUtils.w
 

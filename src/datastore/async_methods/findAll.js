@@ -97,7 +97,8 @@ module.exports = function findAll (resourceName, params, options) {
     }
   }).then(function (items) {
     if (!items) {
-      if (!(queryHash in resource.pendingQueries)) {
+      const usePendingFindAll = DSUtils.isFunction(options.usePendingFindAll) ? options.usePendingFindAll.call(this, resourceName, params, options) : options.usePendingFindAll
+      if (!(queryHash in resource.pendingQueries) && usePendingFindAll) {
         let promise
         let strategy = options.findAllStrategy || options.strategy
 

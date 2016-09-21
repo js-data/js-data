@@ -54,7 +54,8 @@ module.exports = function find (resourceName, id, options) {
     }
   }).then(function (item) {
     if (!item) {
-      if (!(id in resource.pendingQueries)) {
+      const usePendingFind = DSUtils.isFunction(options.usePendingFind) ? options.usePendingFind.call(this, resourceName, id, options) : options.usePendingFind
+      if (!(id in resource.pendingQueries) && usePendingFind) {
         let promise
         let strategy = options.findStrategy || options.strategy
 
