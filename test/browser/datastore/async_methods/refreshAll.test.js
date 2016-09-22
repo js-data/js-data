@@ -14,7 +14,6 @@ describe('DS#refreshAll', function () {
     return Post.refreshAll({
       age: 33
     }).then(function (posts) {
-      console.log(posts);
       assert.equal(posts.length, 2);
       assert.equal(Post.getAll().length, 2);
       assert.isDefined(Post.get(8));

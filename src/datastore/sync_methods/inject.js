@@ -251,7 +251,13 @@ function _inject (definition, resource, attrs, options) {
           // new properties take precedence
           if (options.onConflict === 'merge') {
             DSUtils.deepMixIn(item, attrs)
+            DSUtils.forOwn(definition.computed, function (fn, field) {
+              DSUtils.compute.call(item, fn, field)
+            })
           } else if (options.onConflict === 'replace') {
+            DSUtils.forOwn(definition.computed, function (fn, field) {
+              DSUtils.compute.call(attrs, fn, field)
+            })
             DSUtils.forOwn(item, function (v, k) {
               if (k !== definition.idAttribute) {
                 if (!attrs.hasOwnProperty(k)) {

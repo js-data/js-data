@@ -55,7 +55,7 @@ describe('DS#defineResource', function () {
       computed: {
         fullName: function (first, last) {
           callCount++;
-          return first + ' ' + last;
+          return (first || '') + (last ? ' ' + last : '');
         }
       }
     });
@@ -134,6 +134,24 @@ describe('DS#defineResource', function () {
         store.digest();
 
         assert.equal(callCount, 5, 'fullName() should have been called 3 times');
+
+        person = store.inject('person', { id: 1, first: 'Bill', email: 'bill.anderson@test.com' });
+
+        assert.objectsEqual(person, {
+          first: 'Bill',
+          last: 'Anderson',
+          email: 'bill.anderson@test.com',
+          id: 1,
+          fullName: 'Bill Anderson'
+        });
+
+        person = store.inject('person', { id: 1, first: 'William' }, { onConflict: 'replace' });
+
+        assert.objectsEqual(person, {
+          first: 'William',
+          id: 1,
+          fullName: 'William'
+        });
 
         done();
       }, 50);
@@ -408,7 +426,6 @@ describe('DS#defineResource', function () {
 
           setTimeout(function () {
             assert.equal(4, _this.requests.length);
-            console.log(_this.requests[3]);
             assert.equal(_this.requests[3].url, 'blah/1/test2');
             assert.equal(_this.requests[3].method, 'GET');
             _this.requests[3].respond(200, {'Content-Type': 'text/plain'}, 'bleh');
