@@ -9,6 +9,10 @@
 [![Coverage Status][cov_b]][cov_l]
 [![Codacy][cod_b]][cod_l]
 
+*JSData 3.x is code complete (waiting on documentation updates to release 3.0.0 stable). Read more in the [3.x docs](http://www.js-data.io/v3.0/docs).*
+
+-----
+
 Inspired by [Ember Data][ember], __JSData__ is the model layer you've been
 craving. It consists of a convenient __framework-agnostic__, __in-memory store__
 for managing your data, which uses __adapters__ to communicate with various

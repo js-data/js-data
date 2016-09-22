@@ -1,3 +1,16 @@
+##### 2.10.0 - 22 September 2016
+
+###### Backwards compatible changes
+- #324 - Added `applyDefaultsOnInject` option, which defaults to `false`
+- #364 - Added `usePendingFind` and `usePendingFindAll` options, which both default to `true`
+
+###### Bug fixes
+- #316 - Merge/Replace inject does not reevaluate computed properties
+- #324 - Inconsistent defaultValues behavior.
+- #364 - Resource.pendingQueries on server causes unexpected behaviour
+- #373 - DS.clear() extremely slow
+- #407 - DSUtils.copy blacklist applies to nested fields
+
 ##### 2.9.0 - 17 February 2016
 
 ###### Backwards compatible bug API changes

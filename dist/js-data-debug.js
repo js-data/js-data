@@ -1,6 +1,6 @@
 /*!
  * js-data
- * @version 2.9.0 - Homepage <http://www.js-data.io/>
+ * @version 2.10.0 - Homepage <http://www.js-data.io/>
  * @author Jason Dobry <jason.dobry@gmail.com>
  * @copyright (c) 2014-2016 Jason Dobry 
  * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -95,9 +95,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	
 	  version: {
-	    full: '2.9.0',
+	    full: '2.10.0',
 	    major: parseInt('2', 10),
-	    minor: parseInt('9', 10),
+	    minor: parseInt('10', 10),
 	    patch: parseInt('0', 10),
 	    alpha:  true ? 'false' : false,
 	    beta:  true ? 'false' : false
@@ -226,6 +226,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	defaultsPrototype.afterUpdate = lifecycleNoopCb;
 	defaultsPrototype.afterValidate = lifecycleNoopCb;
 	defaultsPrototype.allowSimpleWhere = true;
+	defaultsPrototype.applyDefaultsOnInject = false;
 	defaultsPrototype.basePath = '';
 	defaultsPrototype.beforeCreate = lifecycleNoopCb;
 	defaultsPrototype.beforeCreateCollection = lifecycleNoop;
@@ -287,6 +288,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	defaultsPrototype.upsert = !!_utils2.default.w;
 	defaultsPrototype.useClass = true;
 	defaultsPrototype.useFilter = false;
+	defaultsPrototype.usePendingFind = true;
+	defaultsPrototype.usePendingFindAll = true;
 	defaultsPrototype.validate = lifecycleNoopCb;
 	defaultsPrototype.watchChanges = !!_utils2.default.w;
 	
@@ -305,7 +308,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	defaultsPrototype.defaultFilter = function (collection, resourceName, params, options) {
 	  var definition = this.definitions[resourceName];
 	  var idA = 'id';
-	  var resource = undefined;
+	  var resource = void 0;
 	  if (definition) {
 	    idA = definition.idAttribute;
 	    resource = this.store[resourceName];
@@ -360,59 +363,59 @@ return /******/ (function(modules) { // webpackBootstrap
 	          };
 	        }
 	        _utils2.default.forOwn(clause, function (term, op) {
-	          var expr = undefined;
+	          var expr = void 0;
 	          var isOr = op[0] === '|';
 	          var val = _utils2.default.get(attrs, field);
 	          op = isOr ? op.substr(1) : op;
 	          if (op === '==') {
 	            expr = val == term; // eslint-disable-line
 	          } else if (op === '===') {
-	              expr = val === term;
-	            } else if (op === '!=') {
-	              expr = val != term; // eslint-disable-line
-	            } else if (op === '!==') {
-	                expr = val !== term;
-	              } else if (op === '>') {
-	                expr = val > term;
-	              } else if (op === '>=') {
-	                expr = val >= term;
-	              } else if (op === '<') {
-	                expr = val < term;
-	              } else if (op === '<=') {
-	                expr = val <= term;
-	              } else if (op === 'isectEmpty') {
-	                expr = !_utils2.default.intersection(val || [], term || []).length;
-	              } else if (op === 'isectNotEmpty') {
-	                expr = _utils2.default.intersection(val || [], term || []).length;
-	              } else if (op === 'in') {
-	                if (_utils2.default._s(term)) {
-	                  expr = term.indexOf(val) !== -1;
-	                } else {
-	                  expr = _utils2.default.contains(term, val);
-	                }
-	              } else if (op === 'notIn') {
-	                if (_utils2.default._s(term)) {
-	                  expr = term.indexOf(val) === -1;
-	                } else {
-	                  expr = !_utils2.default.contains(term, val);
-	                }
-	              } else if (op.indexOf('like') === 0) {
-	                expr = like(term, op.substr(4)).exec(val) !== null;
-	              } else if (op.indexOf('notLike') === 0) {
-	                expr = like(term, op.substr(7)).exec(val) === null;
-	              } else if (op === 'contains') {
-	                if (_utils2.default._s(val)) {
-	                  expr = val.indexOf(term) !== -1;
-	                } else {
-	                  expr = _utils2.default.contains(val, term);
-	                }
-	              } else if (op === 'notContains') {
-	                if (_utils2.default._s(val)) {
-	                  expr = val.indexOf(term) === -1;
-	                } else {
-	                  expr = !_utils2.default.contains(val, term);
-	                }
-	              }
+	            expr = val === term;
+	          } else if (op === '!=') {
+	            expr = val != term; // eslint-disable-line
+	          } else if (op === '!==') {
+	            expr = val !== term;
+	          } else if (op === '>') {
+	            expr = val > term;
+	          } else if (op === '>=') {
+	            expr = val >= term;
+	          } else if (op === '<') {
+	            expr = val < term;
+	          } else if (op === '<=') {
+	            expr = val <= term;
+	          } else if (op === 'isectEmpty') {
+	            expr = !_utils2.default.intersection(val || [], term || []).length;
+	          } else if (op === 'isectNotEmpty') {
+	            expr = _utils2.default.intersection(val || [], term || []).length;
+	          } else if (op === 'in') {
+	            if (_utils2.default._s(term)) {
+	              expr = term.indexOf(val) !== -1;
+	            } else {
+	              expr = _utils2.default.contains(term, val);
+	            }
+	          } else if (op === 'notIn') {
+	            if (_utils2.default._s(term)) {
+	              expr = term.indexOf(val) === -1;
+	            } else {
+	              expr = !_utils2.default.contains(term, val);
+	            }
+	          } else if (op.indexOf('like') === 0) {
+	            expr = like(term, op.substr(4)).exec(val) !== null;
+	          } else if (op.indexOf('notLike') === 0) {
+	            expr = like(term, op.substr(7)).exec(val) === null;
+	          } else if (op === 'contains') {
+	            if (_utils2.default._s(val)) {
+	              expr = val.indexOf(term) !== -1;
+	            } else {
+	              expr = _utils2.default.contains(val, term);
+	            }
+	          } else if (op === 'notContains') {
+	            if (_utils2.default._s(val)) {
+	              expr = val.indexOf(term) === -1;
+	            } else {
+	              expr = !_utils2.default.contains(val, term);
+	            }
+	          }
 	          if (expr !== undefined) {
 	            keep = first ? expr : isOr ? keep || expr : keep && expr;
 	          }
@@ -679,9 +682,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var set = __webpack_require__(27);
 	var observe = __webpack_require__(29);
 	var guid = __webpack_require__(30);
-	var w = undefined,
-	    P = undefined,
-	    File = undefined;
+	var w = void 0,
+	    P = void 0,
+	    File = void 0;
 	var objectProto = Object.prototype;
 	var toString = objectProto.toString;
 	
@@ -782,7 +785,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return [];
 	  }
 	  var result = [];
-	  var item = undefined;
+	  var item = void 0;
 	  for (var i = 0, length = array1.length; i < length; i++) {
 	    item = array1[i];
 	    if (contains(result, item)) {
@@ -915,9 +918,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      stackDest.push(destination);
 	    }
 	
-	    var result = undefined;
+	    var result = void 0;
 	    if (isArray(source)) {
-	      var i = undefined;
+	      var i = void 0;
 	      destination.length = 0;
 	      for (i = 0; i < source.length; i++) {
 	        result = copy(source[i], null, stackSource, stackDest, blacklist);
@@ -993,26 +996,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	      } else if (isRegExp(o1) && isRegExp(o2)) {
 	        return o1.toString() == o2.toString(); // eslint-disable-line
 	      } else {
-	          if (isArray(o2)) {
+	        if (isArray(o2)) {
+	          return false;
+	        }
+	        keySet = {};
+	        for (key in o1) {
+	          if (key.charAt(0) === '$' || isFunction(o1[key])) {
+	            continue;
+	          }
+	          if (!equals(o1[key], o2[key])) {
 	            return false;
 	          }
-	          keySet = {};
-	          for (key in o1) {
-	            if (key.charAt(0) === '$' || isFunction(o1[key])) {
-	              continue;
-	            }
-	            if (!equals(o1[key], o2[key])) {
-	              return false;
-	            }
-	            keySet[key] = true;
-	          }
-	          for (key in o2) {
-	            if (!keySet.hasOwnProperty(key) && key.charAt(0) !== '$' && o2[key] !== undefined && !isFunction(o2[key])) {
-	              return false;
-	            }
-	          }
-	          return true;
+	          keySet[key] = true;
 	        }
+	        for (key in o2) {
+	          if (!keySet.hasOwnProperty(key) && key.charAt(0) !== '$' && o2[key] !== undefined && !isFunction(o2[key])) {
+	            return false;
+	          }
+	        }
+	        return true;
+	      }
 	    }
 	  }
 	  return false;
@@ -1244,8 +1247,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Return a copy of "object" with cycles removed.
 	  removeCircular: function removeCircular(object) {
 	    return function rmCirc(value, ctx) {
-	      var i = undefined;
-	      var nu = undefined;
+	      var i = void 0;
+	      var nu = void 0;
 	
 	      if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && value !== null && !(value instanceof Boolean) && !(value instanceof Date) && !(value instanceof Number) && !(value instanceof RegExp) && !(value instanceof String) && (!File || !(value instanceof File))) {
 	        // check if current object points back to itself
@@ -1436,14 +1439,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Thrown during a method call when an argument passed into the method is invalid.
 	 */
-	
 	var IllegalArgumentError = function (_Error) {
 	  _inherits(IllegalArgumentError, _Error);
 	
 	  function IllegalArgumentError(message) {
 	    _classCallCheck(this, IllegalArgumentError);
 	
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(IllegalArgumentError).call(this));
+	    var _this = _possibleConstructorReturn(this, (IllegalArgumentError.__proto__ || Object.getPrototypeOf(IllegalArgumentError)).call(this));
 	
 	    if (typeof Error.captureStackTrace === 'function') {
 	      Error.captureStackTrace(_this, _this.constructor);
@@ -1467,7 +1469,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  function RuntimeError(message) {
 	    _classCallCheck(this, RuntimeError);
 	
-	    var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(RuntimeError).call(this));
+	    var _this2 = _possibleConstructorReturn(this, (RuntimeError.__proto__ || Object.getPrototypeOf(RuntimeError)).call(this));
 	
 	    if (typeof Error.captureStackTrace === 'function') {
 	      Error.captureStackTrace(_this2, _this2.constructor);
@@ -1491,7 +1493,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  function NonexistentResourceError(resourceName) {
 	    _classCallCheck(this, NonexistentResourceError);
 	
-	    var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(NonexistentResourceError).call(this));
+	    var _this3 = _possibleConstructorReturn(this, (NonexistentResourceError.__proto__ || Object.getPrototypeOf(NonexistentResourceError)).call(this));
 	
 	    if (typeof Error.captureStackTrace === 'function') {
 	      Error.captureStackTrace(_this3, _this3.constructor);
@@ -1517,213 +1519,152 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/*!
-	 * yabh
-	 * @version 1.1.0 - Homepage <http://jmdobry.github.io/yabh/>
-	 * @author Jason Dobry <jason.dobry@gmail.com>
-	 * @copyright (c) 2015 Jason Dobry 
-	 * @license MIT <https://github.com/jmdobry/yabh/blob/master/LICENSE>
-	 * 
-	 * @overview Yet another Binary Heap.
-	 */
-	(function webpackUniversalModuleDefinition(root, factory) {
-		if(true)
-			module.exports = factory();
-		else if(typeof define === 'function' && define.amd)
-			define("yabh", factory);
-		else if(typeof exports === 'object')
-			exports["BinaryHeap"] = factory();
-		else
-			root["BinaryHeap"] = factory();
-	})(this, function() {
-	return /******/ (function(modules) { // webpackBootstrap
-	/******/ 	// The module cache
-	/******/ 	var installedModules = {};
+	(function (global, factory) {
+	   true ? module.exports = factory() :
+	  typeof define === 'function' && define.amd ? define('yabh', factory) :
+	  (global.BinaryHeap = factory());
+	}(this, function () { 'use strict';
 	
-	/******/ 	// The require function
-	/******/ 	function __webpack_require__(moduleId) {
+	  /**
+	   * @method bubbleUp
+	   * @param {array} heap The heap.
+	   * @param {function} weightFunc The weight function.
+	   * @param {number} n The index of the element to bubble up.
+	   */
+	  var bubbleUp = function bubbleUp(heap, weightFunc, n) {
+	    var element = heap[n];
+	    var weight = weightFunc(element);
+	    // When at 0, an element can not go up any further.
+	    while (n > 0) {
+	      // Compute the parent element's index, and fetch it.
+	      var parentN = Math.floor((n + 1) / 2) - 1;
+	      var parent = heap[parentN];
+	      // If the parent has a lesser weight, things are in order and we
+	      // are done.
+	      if (weight >= weightFunc(parent)) {
+	        break;
+	      } else {
+	        heap[parentN] = element;
+	        heap[n] = parent;
+	        n = parentN;
+	      }
+	    }
+	  };
 	
-	/******/ 		// Check if module is in cache
-	/******/ 		if(installedModules[moduleId])
-	/******/ 			return installedModules[moduleId].exports;
+	  /**
+	   * @method bubbleDown
+	   * @param {array} heap The heap.
+	   * @param {function} weightFunc The weight function.
+	   * @param {number} n The index of the element to sink down.
+	   */
+	  var bubbleDown = function bubbleDown(heap, weightFunc, n) {
+	    var length = heap.length;
+	    var node = heap[n];
+	    var nodeWeight = weightFunc(node);
 	
-	/******/ 		// Create a new module (and put it into the cache)
-	/******/ 		var module = installedModules[moduleId] = {
-	/******/ 			exports: {},
-	/******/ 			id: moduleId,
-	/******/ 			loaded: false
-	/******/ 		};
+	    while (true) {
+	      var child2N = (n + 1) * 2;
+	      var child1N = child2N - 1;
+	      var swap = null;
+	      if (child1N < length) {
+	        var child1 = heap[child1N];
+	        var child1Weight = weightFunc(child1);
+	        // If the score is less than our node's, we need to swap.
+	        if (child1Weight < nodeWeight) {
+	          swap = child1N;
+	        }
+	      }
+	      // Do the same checks for the other child.
+	      if (child2N < length) {
+	        var child2 = heap[child2N];
+	        var child2Weight = weightFunc(child2);
+	        if (child2Weight < (swap === null ? nodeWeight : weightFunc(heap[child1N]))) {
+	          swap = child2N;
+	        }
+	      }
 	
-	/******/ 		// Execute the module function
-	/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+	      if (swap === null) {
+	        break;
+	      } else {
+	        heap[n] = heap[swap];
+	        heap[swap] = node;
+	        n = swap;
+	      }
+	    }
+	  };
 	
-	/******/ 		// Flag the module as loaded
-	/******/ 		module.loaded = true;
+	  function BinaryHeap(weightFunc, compareFunc) {
+	    if (!weightFunc) {
+	      weightFunc = function weightFunc(x) {
+	        return x;
+	      };
+	    }
+	    if (!compareFunc) {
+	      compareFunc = function compareFunc(x, y) {
+	        return x === y;
+	      };
+	    }
+	    if (typeof weightFunc !== 'function') {
+	      throw new Error('BinaryHeap([weightFunc][, compareFunc]): "weightFunc" must be a function!');
+	    }
+	    if (typeof compareFunc !== 'function') {
+	      throw new Error('BinaryHeap([weightFunc][, compareFunc]): "compareFunc" must be a function!');
+	    }
+	    this.weightFunc = weightFunc;
+	    this.compareFunc = compareFunc;
+	    this.heap = [];
+	  }
 	
-	/******/ 		// Return the exports of the module
-	/******/ 		return module.exports;
-	/******/ 	}
+	  var BHProto = BinaryHeap.prototype;
 	
+	  BHProto.push = function (node) {
+	    this.heap.push(node);
+	    bubbleUp(this.heap, this.weightFunc, this.heap.length - 1);
+	  };
 	
-	/******/ 	// expose the modules object (__webpack_modules__)
-	/******/ 	__webpack_require__.m = modules;
+	  BHProto.peek = function () {
+	    return this.heap[0];
+	  };
 	
-	/******/ 	// expose the module cache
-	/******/ 	__webpack_require__.c = installedModules;
+	  BHProto.pop = function () {
+	    var front = this.heap[0];
+	    var end = this.heap.pop();
+	    if (this.heap.length > 0) {
+	      this.heap[0] = end;
+	      bubbleDown(this.heap, this.weightFunc, 0);
+	    }
+	    return front;
+	  };
 	
-	/******/ 	// __webpack_public_path__
-	/******/ 	__webpack_require__.p = "";
+	  BHProto.remove = function (node) {
+	    var length = this.heap.length;
+	    for (var i = 0; i < length; i++) {
+	      if (this.compareFunc(this.heap[i], node)) {
+	        var removed = this.heap[i];
+	        var end = this.heap.pop();
+	        if (i !== length - 1) {
+	          this.heap[i] = end;
+	          bubbleUp(this.heap, this.weightFunc, i);
+	          bubbleDown(this.heap, this.weightFunc, i);
+	        }
+	        return removed;
+	      }
+	    }
+	    return null;
+	  };
 	
-	/******/ 	// Load entry module and return exports
-	/******/ 	return __webpack_require__(0);
-	/******/ })
-	/************************************************************************/
-	/******/ ([
-	/* 0 */
-	/***/ function(module, exports, __webpack_require__) {
+	  BHProto.removeAll = function () {
+	    this.heap = [];
+	  };
 	
-		/**
-		 * @method bubbleUp
-		 * @param {array} heap The heap.
-		 * @param {function} weightFunc The weight function.
-		 * @param {number} n The index of the element to bubble up.
-		 */
-		function bubbleUp(heap, weightFunc, n) {
-		  var element = heap[n];
-		  var weight = weightFunc(element);
-		  // When at 0, an element can not go up any further.
-		  while (n > 0) {
-		    // Compute the parent element's index, and fetch it.
-		    var parentN = Math.floor((n + 1) / 2) - 1;
-		    var _parent = heap[parentN];
-		    // If the parent has a lesser weight, things are in order and we
-		    // are done.
-		    if (weight >= weightFunc(_parent)) {
-		      break;
-		    } else {
-		      heap[parentN] = element;
-		      heap[n] = _parent;
-		      n = parentN;
-		    }
-		  }
-		}
+	  BHProto.size = function () {
+	    return this.heap.length;
+	  };
 	
-		/**
-		 * @method bubbleDown
-		 * @param {array} heap The heap.
-		 * @param {function} weightFunc The weight function.
-		 * @param {number} n The index of the element to sink down.
-		 */
-		var bubbleDown = function bubbleDown(heap, weightFunc, n) {
-		  var length = heap.length;
-		  var node = heap[n];
-		  var nodeWeight = weightFunc(node);
+	  return BinaryHeap;
 	
-		  while (true) {
-		    var child2N = (n + 1) * 2,
-		        child1N = child2N - 1;
-		    var swap = null;
-		    if (child1N < length) {
-		      var child1 = heap[child1N],
-		          child1Weight = weightFunc(child1);
-		      // If the score is less than our node's, we need to swap.
-		      if (child1Weight < nodeWeight) {
-		        swap = child1N;
-		      }
-		    }
-		    // Do the same checks for the other child.
-		    if (child2N < length) {
-		      var child2 = heap[child2N],
-		          child2Weight = weightFunc(child2);
-		      if (child2Weight < (swap === null ? nodeWeight : weightFunc(heap[child1N]))) {
-		        swap = child2N;
-		      }
-		    }
-	
-		    if (swap === null) {
-		      break;
-		    } else {
-		      heap[n] = heap[swap];
-		      heap[swap] = node;
-		      n = swap;
-		    }
-		  }
-		};
-	
-		function BinaryHeap(weightFunc, compareFunc) {
-		  if (!weightFunc) {
-		    weightFunc = function (x) {
-		      return x;
-		    };
-		  }
-		  if (!compareFunc) {
-		    compareFunc = function (x, y) {
-		      return x === y;
-		    };
-		  }
-		  if (typeof weightFunc !== 'function') {
-		    throw new Error('BinaryHeap([weightFunc][, compareFunc]): "weightFunc" must be a function!');
-		  }
-		  if (typeof compareFunc !== 'function') {
-		    throw new Error('BinaryHeap([weightFunc][, compareFunc]): "compareFunc" must be a function!');
-		  }
-		  this.weightFunc = weightFunc;
-		  this.compareFunc = compareFunc;
-		  this.heap = [];
-		}
-	
-		var BHProto = BinaryHeap.prototype;
-	
-		BHProto.push = function (node) {
-		  this.heap.push(node);
-		  bubbleUp(this.heap, this.weightFunc, this.heap.length - 1);
-		};
-	
-		BHProto.peek = function () {
-		  return this.heap[0];
-		};
-	
-		BHProto.pop = function () {
-		  var front = this.heap[0];
-		  var end = this.heap.pop();
-		  if (this.heap.length > 0) {
-		    this.heap[0] = end;
-		    bubbleDown(this.heap, this.weightFunc, 0);
-		  }
-		  return front;
-		};
-	
-		BHProto.remove = function (node) {
-		  var length = this.heap.length;
-		  for (var i = 0; i < length; i++) {
-		    if (this.compareFunc(this.heap[i], node)) {
-		      var removed = this.heap[i];
-		      var end = this.heap.pop();
-		      if (i !== length - 1) {
-		        this.heap[i] = end;
-		        bubbleUp(this.heap, this.weightFunc, i);
-		        bubbleDown(this.heap, this.weightFunc, i);
-		      }
-		      return removed;
-		    }
-		  }
-		  return null;
-		};
-	
-		BHProto.removeAll = function () {
-		  this.heap = [];
-		};
-	
-		BHProto.size = function () {
-		  return this.heap.length;
-		};
-	
-		module.exports = BinaryHeap;
-	
-	/***/ }
-	/******/ ])
-	});
-	;
+	}));
+	//# sourceMappingURL=yabh.js.map
 
 /***/ },
 /* 5 */
@@ -3249,7 +3190,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // @param options Optional configuration.
 	  // @param options.ignoredChanges Array of strings or regular expressions of fields, the changes of which are to be ignored.
 	  // @returns The changes of the given item, if any.
-	
 	  changes: function changes(resourceName, id, options) {
 	    var _check$call = check.call(this, 'changes', resourceName, id, options);
 	
@@ -3343,7 +3283,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var resource = _this.store[_resourceName];
 	    var item = _this.store[_resourceName].index[_id];
 	    if (item) {
-	      resource.previousAttributes[_id] = _utils2.default.copy(item, null, null, null, definition.relationFields);
+	      var relationFields = definition.relationFields || [];
+	      var previousAttributes = {};
+	      for (var key in item) {
+	        if (relationFields.indexOf(key) === -1) {
+	          previousAttributes[key] = _utils2.default.copy(item[key], null, null, null, []);
+	        }
+	      }
+	      resource.previousAttributes[_id] = previousAttributes;
 	    }
 	
 	    if (resource.changeHistories[_id].length) {
@@ -3389,11 +3336,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // @param resourceName The name of the type of resource of which to create an instance.
 	  // @param attrs Hash of properties with which to initialize the instance.
 	  // @param options Optional configuration.
-	  // @param options.defaults Default values with which to initialize the instance.
+	  // @param options.defaultValues Default values with which to initialize the instance.
 	  // @returns The new instance.
 	  createInstance: function createInstance(resourceName, attrs, options) {
 	    var definition = this.definitions[resourceName];
-	    var item = undefined;
+	    var item = void 0;
 	
 	    attrs = attrs || {};
 	
@@ -3717,7 +3664,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	        if (!instance) {
 	          return {
-	            v: undefined
+	            v: void 0
 	          };
 	        }
 	
@@ -4113,7 +4060,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      def.beforeDestroy = _utils2.default.promisify(def.beforeDestroy);
 	      def.afterDestroy = _utils2.default.promisify(def.afterDestroy);
 	
-	      var defaultAdapter = undefined;
+	      var defaultAdapter = void 0;
 	      if (def.hasOwnProperty('defaultAdapter')) {
 	        defaultAdapter = def.defaultAdapter;
 	      }
@@ -4220,7 +4167,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSUtils = _this.utils;
 	  var definition = _this.definitions[resourceName];
 	  var resource = _this.store[resourceName];
-	  var item = undefined;
+	  var item = void 0;
 	  var found = false;
 	
 	  id = DSUtils.resolveId(definition, id);
@@ -4345,12 +4292,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var queryHash = DSUtils.toJson(params);
 	
 	  // get items that match the criteria
-	  var items = definition.filter(params);
+	  var items = void 0;
 	
 	  if (DSUtils.isEmpty(params)) {
+	    items = definition.getAll();
 	    // remove all completed queries if ejecting all items
 	    resource.completedQueries = {};
 	  } else {
+	    items = definition.filter(params);
 	    // remove matching completed query, if any
 	    delete resource.completedQueries[queryHash];
 	  }
@@ -4452,7 +4401,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  return function _react(added, removed, changed, oldValueFn, firstTime) {
 	    var target = this;
-	    var item = undefined;
+	    var item = void 0;
 	
 	    // Get the previous primary key of the observed item, in-case some knucklehead changed it
 	    var innerId = oldValueFn && oldValueFn(definition.idAttribute) ? oldValueFn(definition.idAttribute) : target[definition.idAttribute];
@@ -4533,7 +4482,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	function _inject(definition, resource, attrs, options) {
 	  var _this = this;
-	  var injected = undefined;
+	  var injected = void 0;
 	
 	  if (_utils2.default._a(attrs)) {
 	    // have an array of objects, go ahead and inject each one individually and return the resulting array
@@ -4628,6 +4577,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	              item = attrs;
 	            } else {
 	              item = new definition[definition['class']]();
+	              if (options.applyDefaultsOnInject && options.defaultValues) {
+	                _utils2.default.deepMixIn(item, _utils2.default.copy(options.defaultValues));
+	              }
 	            }
 	
 	            if (definition.instanceEvents && typeof item.emit !== 'function') {
@@ -4671,7 +4623,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // new properties take precedence
 	            if (options.onConflict === 'merge') {
 	              _utils2.default.deepMixIn(item, attrs);
+	              _utils2.default.forOwn(definition.computed, function (fn, field) {
+	                _utils2.default.compute.call(item, fn, field);
+	              });
 	            } else if (options.onConflict === 'replace') {
+	              _utils2.default.forOwn(definition.computed, function (fn, field) {
+	                _utils2.default.compute.call(attrs, fn, field);
+	              });
 	              _utils2.default.forOwn(item, function (v, k) {
 	                if (k !== definition.idAttribute) {
 	                  if (!attrs.hasOwnProperty(k)) {
@@ -4731,7 +4689,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var _this = this;
 	  var definition = _this.definitions[resourceName];
 	  var resource = _this.store[resourceName];
-	  var injected = undefined;
+	  var injected = void 0;
 	
 	  if (!definition) {
 	    throw new _errors2.default.NER(resourceName);
@@ -4865,12 +4823,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSUtils = _this.utils;
 	  var definition = _this.definitions[resourceName];
 	  var resource = _this.store[resourceName];
-	  var adapter = undefined;
+	  var adapter = void 0;
 	
 	  options = options || {};
 	  attrs = attrs || {};
 	
-	  var rejectionError = undefined;
+	  var rejectionError = void 0;
 	  if (!definition) {
 	    rejectionError = new _this.errors.NER(resourceName);
 	  } else if (!DSUtils._o(attrs)) {
@@ -4951,8 +4909,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var _this = this;
 	  var DSUtils = _this.utils;
 	  var definition = _this.definitions[resourceName];
-	  var item = undefined,
-	      adapter = undefined;
+	  var item = void 0,
+	      adapter = void 0;
 	
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    id = DSUtils.resolveId(definition, id);
@@ -5021,9 +4979,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var _this = this;
 	  var DSUtils = _this.utils;
 	  var definition = _this.definitions[resourceName];
-	  var ejected = undefined,
-	      toEject = undefined,
-	      adapter = undefined;
+	  var ejected = void 0,
+	      toEject = void 0,
+	      adapter = void 0;
 	
 	  params = params || {};
 	
@@ -5099,7 +5057,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSUtils = _this.utils;
 	  var definition = _this.definitions[resourceName];
 	  var resource = _this.store[resourceName];
-	  var adapter = undefined;
+	  var adapter = void 0;
 	
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    if (!definition) {
@@ -5131,8 +5089,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }).then(function (item) {
 	    if (!item) {
-	      if (!(id in resource.pendingQueries)) {
-	        var promise = undefined;
+	      var usePendingFind = DSUtils.isFunction(options.usePendingFind) ? options.usePendingFind.call(this, resourceName, id, options) : options.usePendingFind;
+	      if (!(id in resource.pendingQueries) && usePendingFind) {
+	        var promise = void 0;
 	        var strategy = options.findStrategy || options.strategy;
 	
 	        // try subsequent adapters if the preceeding one fails
@@ -5247,8 +5206,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSUtils = _this.utils;
 	  var definition = _this.definitions[resourceName];
 	  var resource = _this.store[resourceName];
-	  var queryHash = undefined,
-	      adapter = undefined;
+	  var queryHash = void 0,
+	      adapter = void 0;
 	
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    params = params || {};
@@ -5294,8 +5253,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }).then(function (items) {
 	    if (!items) {
-	      if (!(queryHash in resource.pendingQueries)) {
-	        var promise = undefined;
+	      var usePendingFindAll = DSUtils.isFunction(options.usePendingFindAll) ? options.usePendingFindAll.call(this, resourceName, params, options) : options.usePendingFindAll;
+	      if (!(queryHash in resource.pendingQueries) && usePendingFindAll) {
+	        var promise = void 0;
 	        var strategy = options.findAllStrategy || options.strategy;
 	
 	        // try subsequent adapters if the preceeding one fails
@@ -5376,7 +5336,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSErrors = _this.errors;
 	
 	  var definition = _this.definitions[resourceName];
-	  var _options = undefined;
+	  var _options = void 0;
 	
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    if (DSUtils._sn(instance)) {
@@ -5409,7 +5369,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	          // relations can be loaded based on resource name or field name
 	          if (!relations.length || DSUtils.contains(relations, relationName) || DSUtils.contains(relations, def.localField)) {
-	            var task = undefined;
+	            var task = void 0;
 	            var params = {};
 	            if (__options.allowSimpleWhere) {
 	              params[def.foreignKey] = instance[definition.idAttribute];
@@ -5509,7 +5469,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      options.logFn('reap', options);
 	      var items = [];
 	      var now = new Date().getTime();
-	      var expiredItem = undefined;
+	      var expiredItem = void 0;
 	
 	      // find the expired items
 	      while ((expiredItem = resource.expiresHeap.peek()) && expiredItem.expires < now) {
@@ -5592,9 +5552,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  var definition = _this.definitions[resourceName];
 	  var resource = _this.store[resourceName];
-	  var item = undefined,
-	      noChanges = undefined,
-	      adapter = undefined;
+	  var item = void 0,
+	      noChanges = void 0,
+	      adapter = void 0;
 	
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    id = DSUtils.resolveId(definition, id);
@@ -5710,7 +5670,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSErrors = _this.errors;
 	
 	  var definition = _this.definitions[resourceName];
-	  var adapter = undefined;
+	  var adapter = void 0;
 	
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    id = DSUtils.resolveId(definition, id);
@@ -5788,7 +5748,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var DSErrors = _this.errors;
 	
 	  var definition = _this.definitions[resourceName];
-	  var adapter = undefined;
+	  var adapter = void 0;
 	
 	  return new DSUtils.Promise(function (resolve, reject) {
 	    if (!definition) {

@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "2.9.0",
+  "version": "2.10.0",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -49,7 +49,7 @@
     "karma-firefox-launcher": "1.0.0",
     "karma-junit-reporter": "1.1.0",
     "karma-mocha": "1.1.1",
-    "karma-phantomjs-launcher": "1.0.1",
+    "karma-phantomjs-launcher": "1.0.2",
     "karma-sinon": "1.0.5",
     "mocha": "3.0.2",
     "mout": "1.0.0",
