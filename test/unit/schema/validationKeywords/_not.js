@@ -73,6 +73,7 @@ export const notTests = [
   {
     'description': 'forbidden property',
     'schema': {
+      'type': 'object',
       'properties': {
         'foo': {
           'not': {}

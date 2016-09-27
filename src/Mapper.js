@@ -194,6 +194,16 @@ const MAPPER_DEFAULTS = {
   idAttribute: 'id',
 
   /**
+   * Whether records created from this mapper keep changeHistory on property changes.
+   *
+   * @default true
+   * @name Mapper#keepChangeHistory
+   * @since 3.0.0
+   * @type {boolean}
+   */
+  keepChangeHistory: true,
+
+  /**
    * Whether this Mapper should emit operational events.
    *
    * @default true
@@ -229,7 +239,18 @@ const MAPPER_DEFAULTS = {
    * @since 3.0.0
    * @type {boolean}
    */
-  raw: false
+  raw: false,
+
+  /**
+   * Whether records created from this mapper automatically validate their properties
+   * when their properties are modified.
+   *
+   * @default true
+   * @name Mapper#validateOnSet
+   * @since 3.0.0
+   * @type {boolean}
+   */
+  validateOnSet: true
 }
 
 /**
@@ -380,7 +401,7 @@ function Mapper (opts) {
      *
      * @example <caption>Mapper#schema</caption>
      * // Normally you would do: import {Mapper} from 'js-data'
-     * const JSData = require('js-data@3.0.0-beta.10')
+     * const JSData = require('js-data@3.0.0-rc.4')
      * const {Mapper} = JSData
      * console.log('Using JSData v' + JSData.version.full)
      *
@@ -2012,14 +2033,15 @@ export default Component.extend({
     const relationFields = (this ? this.relationFields : []) || []
     let json = {}
     let properties
+
+    // Copy properties defined in the schema
     if (this && this.schema) {
-      properties = this.schema.properties || {}
-      // TODO: Make this work recursively
-      utils.forOwn(properties, (opts, prop) => {
-        json[prop] = utils.plainCopy(record[prop])
-      })
+      json = this.schema.pick(record)
+      properties = this.schema.properties
     }
     properties || (properties = {})
+
+    // Optionally copy properties not defined in the schema
     if (!opts.strict) {
       for (var key in record) {
         if (!properties[key] && relationFields.indexOf(key) === -1) {
@@ -2027,8 +2049,8 @@ export default Component.extend({
         }
       }
     }
-    // The user wants to include relations in the resulting plain object
-    // representation
+
+    // The user wants to include relations in the resulting plain object representation
     if (this && opts.withAll) {
       opts.with = relationFields.slice()
     }
@@ -2440,7 +2462,7 @@ export default Component.extend({
  *
  * @example <caption>Mapper.extend</caption>
  * // Normally you would do: import {Mapper} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.10')
+ * const JSData = require('js-data@3.0.0-rc.4')
  * const {Mapper} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *

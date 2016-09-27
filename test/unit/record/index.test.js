@@ -132,6 +132,23 @@ describe('Record', function () {
     }
   })
 
+  it('should allow validtion on set to be disabled', function () {
+    const store = new JSData.DataStore()
+    store.defineMapper('user', {
+      schema: {
+        properties: {
+          name: { type: 'string' },
+          age: { type: 'number' }
+        }
+      },
+      validateOnSet: false
+    })
+    const user = store.createRecord('user', { name: 'John', age: 30 })
+    assert.doesNotThrow(function () {
+      user.name = 1234
+    })
+  })
+
   it('should be saved or unsaved', function () {
     const store = new JSData.DataStore()
     store.defineMapper('user')

@@ -7,6 +7,7 @@ export const anyOfTests = [
           'type': 'integer'
         },
         {
+          'type': 'number',
           'minimum': 2
         }
       ]
@@ -40,9 +41,11 @@ export const anyOfTests = [
       'type': 'string',
       'anyOf': [
         {
+          'type': 'string',
           'maxLength': 2
         },
         {
+          'type': 'string',
           'minLength': 4
         }
       ]

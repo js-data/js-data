@@ -95,6 +95,7 @@ module.exports = function (config) {
       'lib/mindex/index.js',
       'src/Collection.js',
       'src/Container.js',
+      'src/SimpleStore.js',
       'src/LinkedCollection.js',
       'src/DataStore.js',
       'src/index.js',

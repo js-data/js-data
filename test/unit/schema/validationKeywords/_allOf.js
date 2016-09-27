@@ -4,12 +4,14 @@ export const allOfTests = [
     'schema': {
       'allOf': [
         {
+          'type': 'object',
           'properties': {
             'bar': { 'type': 'integer' }
           },
           'required': ['bar']
         },
         {
+          'type': 'object',
           'properties': {
             'foo': { 'type': 'string' }
           },
@@ -43,16 +45,19 @@ export const allOfTests = [
   {
     'description': 'allOf with base schema',
     'schema': {
+      'type': 'object',
       'properties': { 'bar': { 'type': 'integer' } },
       'required': ['bar'],
       'allOf': [
         {
+          'type': 'object',
           'properties': {
             'foo': { 'type': 'string' }
           },
           'required': ['foo']
         },
         {
+          'type': 'object',
           'properties': {
             'baz': { 'type': 'null' }
           },
@@ -92,8 +97,8 @@ export const allOfTests = [
     'description': 'allOf simple types',
     'schema': {
       'allOf': [
-        { 'maximum': 30 },
-        { 'minimum': 20 }
+        { 'type': 'integer', 'maximum': 30 },
+        { 'type': 'integer', 'minimum': 20 }
       ]
     },
     'tests': [

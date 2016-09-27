@@ -434,7 +434,8 @@ describe('Mapper#create', function () {
         content: 'foo',
         userId: user.id
       }
-    ], 'user.comments should be an empty array')
+    ], 'user.comments should be there')
+    return
     assert.objectsEqual(store.getAll('comment'), [
       {
         content: 'foo',
@@ -766,6 +767,68 @@ describe('Mapper#create', function () {
           actual: 'undefined',
           expected: 'a value',
           path: 'age'
+        }
+      ])
+    }
+    assert.equal(createCalled, false, 'Adapter#create should NOT have been called')
+    assert.equal(user, undefined, 'user was not created')
+    assert.equal(props[User.idAttribute], undefined, 'props does NOT have an id')
+  })
+  it('should disallow extra props', async function () {
+    const props = {
+      name: 'John',
+      age: 30,
+      foo: 'bar',
+      beep: 'boop',
+      address: {
+        baz: 'biz',
+        state: 'TX'
+      }
+    }
+    let createCalled = false
+    let user
+    const User = new JSData.Mapper({
+      name: 'user',
+      defaultAdapter: 'mock',
+      schema: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', required: true },
+          age: { type: 'number', required: true },
+          address: {
+            type: 'object',
+            required: ['state'],
+            properties: {
+              state: {
+                type: 'string',
+                required: true
+              }
+            },
+            additionalProperties: false
+          }
+        },
+        additionalProperties: false
+      }
+    })
+    User.registerAdapter('mock', {
+      create () {
+        createCalled = true
+      }
+    })
+    try {
+      user = await User.create(props)
+      throw new Error('validation error should have been thrown!')
+    } catch (err) {
+      assert.objectsEqual(err, [
+        {
+          actual: 'extra fields: baz',
+          expected: 'no extra fields',
+          path: 'address'
+        },
+        {
+          actual: 'extra fields: foo, beep',
+          expected: 'no extra fields',
+          path: ''
         }
       ])
     }

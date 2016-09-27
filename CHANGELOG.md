@@ -1,3 +1,17 @@
+##### 3.0.0-rc.5 - 26 September 2016
+
+###### Backwards compatible changes
+- Fixed some edge cases with Schemas related to anyOf, oneOf, allOf, and additionalProperties
+- #386 - Added intermediate `SimpleStore` class between `Container` and `DataStore`.
+- #393 - Added `Schema#pick` method
+
+###### Bug fixes
+- #374 - revert() after a save() does not work with Schema defined properties
+- #387 - Switch to passing only the current-change in 'changes' emit by @pik
+
+###### Other
+- #406 - refactor(test): splits tests into smaller ones by @stalniy
+
 ##### 3.0.0-rc.4 - 03 August 2016
 
 ###### Bug fixes

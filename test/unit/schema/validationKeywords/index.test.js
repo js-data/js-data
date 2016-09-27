@@ -17,16 +17,16 @@ import { maxPropertiesTests } from './_maxProperties'
 import { minPropertiesTests } from './_minProperties'
 import { requiredTests } from './_required'
 import { propertiesTests } from './_properties'
-// import { patternPropertiesTests } from './_patternProperties'
+import { patternPropertiesTests } from './_patternProperties'
 // import { dependenciesTests } from './_dependencies'
 
 import { enumTests } from './_enum'
 import { typeTests } from './_type'
-// import { allOfTests } from './_allOf'
-// import { anyOfTests } from './_anyOf'
-// import { oneOfTests } from './_oneOf'
-// import { notTests } from './_not'
-// import { definitionsTests } from './_definitions'
+import { allOfTests } from './_allOf'
+import { anyOfTests } from './_anyOf'
+import { oneOfTests } from './_oneOf'
+import { notTests } from './_not'
+import { definitionsTests } from './_definitions'
 
 describe('Schema.validationKeywords', function () {
   it('has the right default keywords', function () {
@@ -153,32 +153,32 @@ describe('Schema.validationKeywords.type', function () {
   validationTestRunner(typeTests)
 })
 
-// describe('Schema.validationKeywords.allOf', function () {
-//   validationTestRunner(allOfTests)
-// })
+describe('Schema.validationKeywords.allOf', function () {
+  validationTestRunner(allOfTests)
+})
 
-// describe('Schema.validationKeywords.anyOf', function () {
-//   anyOfTests.forEach((suite) => {
-//     let Schema = new JSData.Schema(suite.schema)
-//     describe(suite.description, function () {
-//       suite.tests.forEach((test) => {
-//         it(test.description, function () {
-//           // let errors = JSData.Schema.validationKeywords.anyOf(test.data, Schema, {})
-//           let errors = Schema.validate(test.data)
-//           assert.equal(test.valid, !errors, errors)
-//         })
-//       })
-//     })
-//   })
-// })
+describe('Schema.validationKeywords.anyOf', function () {
+  anyOfTests.forEach((suite) => {
+    let Schema = new JSData.Schema(suite.schema)
+    describe(suite.description, function () {
+      suite.tests.forEach((test) => {
+        it(test.description, function () {
+          // let errors = JSData.Schema.validationKeywords.anyOf(test.data, Schema, {})
+          let errors = Schema.validate(test.data)
+          assert.equal(test.valid, !errors, errors)
+        })
+      })
+    })
+  })
+})
 
-// describe('Schema.validationKeywords.oneOf', function () {
-//   validationTestRunner(oneOfTests)
-// })
+describe('Schema.validationKeywords.oneOf', function () {
+  validationTestRunner(oneOfTests)
+})
 
-// describe('Schema.validationKeywords.not', function () {
-//   validationTestRunner(notTests)
-// })
+describe('Schema.validationKeywords.not', function () {
+  validationTestRunner(notTests)
+})
 
 // describe('Schema.validationKeywords.definitions', function () {
 //   validationTestRunner(definitionsTests)

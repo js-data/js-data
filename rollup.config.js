@@ -7,8 +7,11 @@ export default {
     babel({
       babelrc: false,
       presets: [
-        'es2015-rollup'
+        [
+          'es2015', { 'modules': false }
+        ]
       ],
+      plugins: ['external-helpers'],
       exclude: 'node_modules/**'
     })
   ]

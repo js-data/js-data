@@ -1,28 +1,28 @@
 <img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="96" height="96" />
 
-# [js-data v3](http://www.js-data.io/) [![Slack Status][b1]][b2] [![npm version][b3]][b4] [![npm downloads][b5]][b6] [![coverage][bcov]][lcov]
+# [js-data v3](http://www.js-data.io/) [![Slack][1]][2] [![NPM][3]][4] [![Downloads][5]][6] [![Coverage][7]][8]
 
 | __Browser tests__ | __Node.js tests__ |
 | ---------------------------------|----|
-| [![Sauce Test Status][b7]][b8] | [![Circle CI][b9]][b10] [![Circle CI][b11]][b10] [![Circle CI][b12]][b10] [![Circle CI][b13]][b10] [![Circle CI][b14]][b10] [![Circle CI][b15]][b10] |
+| [![Tests][9]][10] | [![Tests][11]][12] [![Tests][13]][12] [![Tests][14]][12] [![Tests][15]][12] [![Tests][16]][12] [![Tests][17]][12] |
 
-[b1]: http://slack.js-data.io/badge.svg
-[b2]: http://slack.js-data.io
-[b3]: https://img.shields.io/npm/v/js-data.svg?style=flat
-[b4]: https://www.npmjs.org/package/js-data
-[b5]: https://img.shields.io/npm/dm/js-data.svg?style=flat
-[b6]: https://www.npmjs.org/package/js-data
-[b7]: https://saucelabs.com/browser-matrix/jsdata.svg
-[b8]: https://saucelabs.com/u/jsdata
-[b9]: https://img.shields.io/circleci/project/js-data/js-data.svg
-[b10]: https://circleci.com/gh/js-data/js-data
-[b11]: https://img.shields.io/badge/Node.js-v6.x-brightgreen.svg
-[b12]: https://img.shields.io/badge/Node.js-v5.x-brightgreen.svg
-[b13]: https://img.shields.io/badge/Node.js-v4.x-brightgreen.svg
-[b14]: https://img.shields.io/badge/Node.js-v0.12.x-brightgreen.svg
-[b15]: https://img.shields.io/badge/Node.js-v0.10.x-brightgreen.svg
-[bcov]: https://img.shields.io/codecov/c/github/js-data/js-data/master.svg
-[lcov]: https://codecov.io/github/js-data/js-data
+[1]: http://slack.js-data.io/badge.svg
+[2]: http://slack.js-data.io
+[3]: https://img.shields.io/npm/v/js-data.svg?style=flat
+[4]: https://www.npmjs.org/package/js-data
+[5]: https://img.shields.io/npm/dm/js-data.svg?style=flat
+[6]: https://www.npmjs.org/package/js-data
+[7]: https://img.shields.io/codecov/c/github/js-data/js-data/master.svg
+[8]: https://codecov.io/github/js-data/js-data
+[9]: https://saucelabs.com/browser-matrix/jsdata.svg
+[10]: https://saucelabs.com/u/jsdata
+[11]: https://img.shields.io/circleci/project/js-data/js-data.svg
+[12]: https://circleci.com/gh/js-data/js-data
+[13]: https://img.shields.io/badge/Node.js-v6.x-brightgreen.svg
+[14]: https://img.shields.io/badge/Node.js-v5.x-brightgreen.svg
+[15]: https://img.shields.io/badge/Node.js-v4.x-brightgreen.svg
+[16]: https://img.shields.io/badge/Node.js-v0.12.x-brightgreen.svg
+[17]: https://img.shields.io/badge/Node.js-v0.10.x-brightgreen.svg
 
 __JSData v3 release candidate is stable. More features may be added before 3.0.0,
 and there might be some bugs. Some adapters still need to be updated to work
@@ -40,23 +40,34 @@ data API on the server and the client. JSData employs conventions for rapid
 development, but allows for endless customization in order to meet your
 particular needs.
 
-To get started, visit the main website at __[http://js-data.io](http://www.js-data.io/v3.0/docs/home)__.
+### Just getting started?
 
-## Links
+Start with the [JSData Getting Started Tutorial][18] or checkout the [API Reference Documentation][19].
 
-* [Quick start](http://www.js-data.io/v3.0/docs/home#quick-start) - Get started in 5 minutes
-* [Guides and Tutorials](http://www.js-data.io/v3.0/docs/installation) - Learn how to use JSData
-* [API Reference Docs](http://api.js-data.io) - Explore components, methods, options, etc.
-* [Community & Support](http://js-data.io/docs/community) - Find solutions and chat with the community
-* [General Contributing Guide](http://js-data.io/docs/contributing) - Give back and move the project forward
-  * [Contributing to js-data core](https://github.com/js-data/js-data/blob/master/.github/CONTRIBUTING.md)
+### Need help?
 
-## License
+Please [post a question][20] on Stack Overflow. **This is the preferred method.**
 
-The MIT License (MIT)
+You can also chat with folks on the [Slack Channel][21]. If you end up getting
+your question answered, please still consider consider posting your question to
+Stack Overflow (then possibly answering it yourself). Thanks!
 
-Copyright (c) 2014-2016 js-data project authors
+### Want to contribute?
 
-* [LICENSE](https://github.com/js-data/js-data/blob/master/LICENSE)
-* [AUTHORS](https://github.com/js-data/js-data/blob/master/AUTHORS)
-* [CONTRIBUTORS](https://github.com/js-data/js-data/blob/master/CONTRIBUTORS)
+Awesome! You can get started over at the [Contributing guide][22].
+
+And thank you!
+
+### License
+
+[The MIT License (MIT)][23]
+
+Copyright (c) 2014-2016 [js-data project authors][24]
+
+[18]: http://www.js-data.io/v3.0/docs/home
+[19]: http://api.js-data.io/
+[20]: http://stackoverflow.com/questions/tagged/jsdata
+[21]: http://slack.js-data.io/
+[22]: https://github.com/js-data/js-data/blob/master/.github/CONTRIBUTING.md
+[23]: https://github.com/js-data/js-data/blob/master/LICENSE
+[24]: https://github.com/js-data/js-data/blob/master/AUTHORS

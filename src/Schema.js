@@ -120,7 +120,7 @@ const validationKeywords = {
     schema.allOf.forEach(function (_schema) {
       allErrors = allErrors.concat(validate(value, _schema, opts) || [])
     })
-    return allErrors.length ? undefined : allErrors
+    return allErrors.length ? allErrors : undefined
   },
 
   /**
@@ -504,9 +504,6 @@ const validationKeywords = {
     })
     // Remove from "s" all elements of "p", if any.
     utils.forOwn(properties || {}, function (_schema, prop) {
-      // if (value[prop] === undefined && _schema['default'] !== undefined) {
-      //   value[prop] = utils.copy(_schema['default'])
-      // }
       opts.prop = prop
       errors = errors.concat(validate(value[prop], _schema, opts) || [])
       delete toValidate[prop]
@@ -526,7 +523,10 @@ const validationKeywords = {
     // If "s" is not empty, validation fails
     if (additionalProperties === false) {
       if (keys.length) {
+        const origProp = opts.prop
+        opts.prop = ''
         addError(`extra fields: ${keys.join(', ')}`, 'no extra fields', opts, errors)
+        opts.prop = origProp
       }
     } else if (utils.isObject(additionalProperties)) {
       // Otherwise, validate according to provided schema
@@ -640,17 +640,12 @@ const validationKeywords = {
 /**
  * @ignore
  */
-const validateKeyword = function (op, value, schema, opts) {
-  return schema[op] !== undefined && validationKeywords[op](value, schema, opts)
-}
-
-/**
- * @ignore
- */
 const runOps = function (ops, value, schema, opts) {
   let errors = []
   ops.forEach(function (op) {
-    errors = errors.concat(validateKeyword(op, value, schema, opts) || [])
+    if (schema[op] !== undefined) {
+      errors = errors.concat(validationKeywords[op](value, schema, opts) || [])
+    }
   })
   return errors.length ? errors : undefined
 }
@@ -743,6 +738,8 @@ const creatingPath = 'creating'
 const eventIdPath = 'eventId'
 // boolean - Whether to skip validation for a Record's currently changing property
 const noValidatePath = 'noValidate'
+// boolean - Whether to preserve Change History for a Record
+const keepChangeHistoryPath = 'keepChangeHistory'
 // boolean - Whether to skip change notification for a Record's currently
 // changing property
 const silentPath = 'silent'
@@ -787,7 +784,6 @@ const makeDescriptor = function (prop, schema, opts) {
     const _get = this[getter]
     const _set = this[setter]
     const _unset = this[unsetter]
-
     // Optionally check that the new value passes validation
     if (!_get(noValidatePath)) {
       const errors = schema.validate(value, { path: [prop] })
@@ -802,6 +798,8 @@ const makeDescriptor = function (prop, schema, opts) {
     // TODO: Make it so tracking can be turned on for all properties instead of
     // only per-property
     if (track && !_get(creatingPath)) {
+      // previous is versioned on database commit
+      // props are versioned on set()
       const previous = _get(previousPath)
       const current = _get(keyPath)
       let changing = _get(changingPath)
@@ -853,12 +851,16 @@ const makeDescriptor = function (prop, schema, opts) {
             for (i = 0; i < changed.length; i++) {
               this.emit('change:' + changed[i], this, utils.get(this, changed[i]))
             }
-            const changes = this.changes()
-            const changeRecord = utils.plainCopy(changes)
-            changeRecord.timestamp = new Date().getTime()
-            const changeHistory = _get(changeHistoryPath) || []
-            _set(changeHistoryPath, changeHistory)
-            changeHistory.push(changeRecord)
+
+            const changes = utils.diffObjects({ [prop] : value }, { [prop] : current })
+
+            if (_get(keepChangeHistoryPath)) {
+              const changeRecord = utils.plainCopy(changes)
+              changeRecord.timestamp = new Date().getTime()
+              let changeHistory = _get(changeHistoryPath)
+              !changeHistory && _set(changeHistoryPath, (changeHistory = []))
+              changeHistory.push(changeRecord)
+            }
             this.emit('change', this, changes)
           }
           _unset(silentPath)
@@ -1004,7 +1006,7 @@ const typeGroupValidators = {
  *
  * @example <caption>Schema#constructor</caption>
  * // Normally you would do:  import {Schema} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.10')
+ * const JSData = require('js-data@3.0.0-rc.4')
  * const {Schema} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *
@@ -1031,9 +1033,11 @@ function Schema (definition) {
         this.properties[prop] = new Schema(_definition)
       }
     })
-  }
-  if (this.type === 'array' && this.items && !(this.items instanceof Schema)) {
+  } else if (this.type === 'array' && this.items && !(this.items instanceof Schema)) {
     this.items = new Schema(this.items)
+  }
+  if (this.extends && !(this.extends instanceof Schema)) {
+    this.extends = new Schema(this.extends)
   }
   ['allOf', 'anyOf', 'oneOf'].forEach((validationKeyword) => {
     if (this[validationKeyword]) {
@@ -1110,6 +1114,41 @@ export default Component.extend({
   },
 
   /**
+   * Create a copy of the given value that contains only the properties defined
+   * in this schema.
+   *
+   * @name Schema#pick
+   * @method
+   * @param {*} value The value to copy.
+   * @returns {*} The copy.
+   */
+  pick (value) {
+    if (this.type === 'object') {
+      value || (value = {})
+      let copy = {}
+      if (this.properties) {
+        utils.forOwn(this.properties, (_definition, prop) => {
+          copy[prop] = _definition.pick(value[prop])
+        })
+      }
+      if (this.extends) {
+        utils.fillIn(copy, this.extends.pick(value))
+      }
+      return copy
+    } else if (this.type === 'array') {
+      value || (value = [])
+      return value.map((item) => {
+        const _copy = this.items ? this.items.pick(item) : {}
+        if (this.extends) {
+          utils.fillIn(_copy, this.extends.pick(item))
+        }
+        return _copy
+      })
+    }
+    return utils.plainCopy(value)
+  },
+
+  /**
    * Validate the provided value against this schema.
    *
    * @name Schema#validate
@@ -1137,7 +1176,7 @@ export default Component.extend({
  * Create a subclass of this Schema:
  * @example <caption>Schema.extend</caption>
  * // Normally you would do: import {Schema} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.10')
+ * const JSData = require('js-data@3.0.0-rc.4')
  * const {Schema} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *

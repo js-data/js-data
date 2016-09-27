@@ -1049,7 +1049,7 @@ export default Component.extend({
  * Create a subclass of this Query:
  * @example <caption>Query.extend</caption>
  * // Normally you would do: import {Query} from 'js-data'
- * const JSData = require('js-data@3.0.0-beta.10')
+ * const JSData = require('js-data@3.0.0-rc.4')
  * const {Query} = JSData
  * console.log('Using JSData v' + JSData.version.full)
  *
