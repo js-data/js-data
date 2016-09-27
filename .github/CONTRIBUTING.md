@@ -50,17 +50,10 @@ Dear contributor,
 
 * `dist/` - Contains final build files for distribution
 * `doc/` - Output folder for JSDocs
-* `lib/` - Holds vendored `mindex` library
+* `lib/` - Holds the vendored `mindex` library
 * `scripts/ - Various build scripts
 * `src/` - Project source code
 * `test/` - Project tests
-
-## Clone, build & test
-
-1. `clone git@github.com:js-data/js-data.git`
-1. `cd js-data`
-1. `npm install`
-1. `npm test` - Build and run the tests
 
 ## To cut a release
 
