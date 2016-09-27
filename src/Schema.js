@@ -120,7 +120,7 @@ const validationKeywords = {
     schema.allOf.forEach(function (_schema) {
       allErrors = allErrors.concat(validate(value, _schema, opts) || [])
     })
-    return allErrors.length ? undefined : allErrors
+    return allErrors.length ? allErrors : undefined
   },
 
   /**
@@ -504,9 +504,6 @@ const validationKeywords = {
     })
     // Remove from "s" all elements of "p", if any.
     utils.forOwn(properties || {}, function (_schema, prop) {
-      // if (value[prop] === undefined && _schema['default'] !== undefined) {
-      //   value[prop] = utils.copy(_schema['default'])
-      // }
       opts.prop = prop
       errors = errors.concat(validate(value[prop], _schema, opts) || [])
       delete toValidate[prop]
@@ -526,7 +523,10 @@ const validationKeywords = {
     // If "s" is not empty, validation fails
     if (additionalProperties === false) {
       if (keys.length) {
+        const origProp = opts.prop
+        opts.prop = ''
         addError(`extra fields: ${keys.join(', ')}`, 'no extra fields', opts, errors)
+        opts.prop = origProp
       }
     } else if (utils.isObject(additionalProperties)) {
       // Otherwise, validate according to provided schema
@@ -640,17 +640,12 @@ const validationKeywords = {
 /**
  * @ignore
  */
-const validateKeyword = function (op, value, schema, opts) {
-  return schema[op] !== undefined && validationKeywords[op](value, schema, opts)
-}
-
-/**
- * @ignore
- */
 const runOps = function (ops, value, schema, opts) {
   let errors = []
   ops.forEach(function (op) {
-    errors = errors.concat(validateKeyword(op, value, schema, opts) || [])
+    if (schema[op] !== undefined) {
+      errors = errors.concat(validationKeywords[op](value, schema, opts) || [])
+    }
   })
   return errors.length ? errors : undefined
 }

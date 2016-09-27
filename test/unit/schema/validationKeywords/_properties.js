@@ -2,6 +2,7 @@ export const propertiesTests = [
   {
     'description': 'object properties validation',
     'schema': {
+      'type': 'object',
       'properties': {
         'foo': { 'type': 'integer' },
         'bar': { 'type': 'string' }
@@ -38,6 +39,7 @@ export const propertiesTests = [
   {
     'description': 'properties, patternProperties, additionalProperties interaction',
     'schema': {
+      'type': 'object',
       'properties': {
         'foo': { 'type': 'array', 'maxItems': 3 },
         'bar': { 'type': 'array' }
@@ -97,6 +99,7 @@ export const additionalProperties = [
     'description':
     'additionalProperties being false does not allow other properties',
     'schema': {
+      'type': 'object',
       'properties': { 'foo': {}, 'bar': {} },
       'patternProperties': { '^v': {} },
       'additionalProperties': false
@@ -128,6 +131,7 @@ export const additionalProperties = [
     'description':
     'additionalProperties allows a schema which should validate',
     'schema': {
+      'type': 'object',
       'properties': { 'foo': {}, 'bar': {} },
       'additionalProperties': { 'type': 'boolean' }
     },
@@ -153,6 +157,7 @@ export const additionalProperties = [
     'description':
     'additionalProperties can exist by itself',
     'schema': {
+      'type': 'object',
       'additionalProperties': { 'type': 'boolean' }
     },
     'tests': [
@@ -170,7 +175,10 @@ export const additionalProperties = [
   },
   {
     'description': 'additionalProperties are allowed by default',
-    'schema': { 'properties': { 'foo': {}, 'bar': {} } },
+    'schema': {
+      'type': 'object',
+      'properties': { 'foo': {}, 'bar': {} }
+    },
     'tests': [
       {
         'description': 'additional properties are allowed',
