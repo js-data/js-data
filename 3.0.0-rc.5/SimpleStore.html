@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>js-data Class: DataStore</title>
+	<title>js-data Class: SimpleStore</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -136,13 +136,13 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: DataStore</h1>
+	<h1 class="page-title">Class: SimpleStore</h1>
 <section>
 
 <header>
     
         <h2>
-        DataStore
+        SimpleStore
         </h2>
         
     
@@ -155,7 +155,7 @@
         
 <hr>
 <dt>
-  <h4 class="name" id="DataStore"><span class="type-signature"></span>new DataStore(<span class="optional">opts</span>)</h4>
+  <h4 class="name" id="SimpleStore"><span class="type-signature"></span>new SimpleStore(<span class="optional">opts</span>)</h4>
 
   
 </dt>
@@ -163,10 +163,16 @@
 
   
   <div class="description">
-    <p>The <code>DataStore</code> class is an extension of <a href="SimpleStore.html">SimpleStore</a>. Not only does
-<code>DataStore</code> manage mappers and store data in collections, it uses the
-<a href="LinkedCollection.html">LinkedCollection</a> class to link related records together in memory.</p>
-<pre class="prettyprint source lang-javascript"><code>import {DataStore} from 'js-data'</code></pre>
+    <p>The <code>SimpleStore</code> class is an extension of <a href="Container.html">Container</a>. Not only does
+<code>SimpleStore</code> manage mappers, but also collections. <code>SimpleStore</code> implements the
+asynchronous <a href="Mapper.html">Mapper</a> methods, such as <a href="Mapper.html#find">Mapper#find</a> and
+<a href="Mapper.html#create">Mapper#create</a>. If you use the asynchronous <code>SimpleStore</code> methods
+instead of calling them directly on the mappers, then the results of the
+method calls will be inserted into the store's collections. You can think of
+a <code>SimpleStore</code> as an <a href="https://en.wikipedia.org/wiki/Identity_map_pattern">Identity Map</a>
+for the <a href="https://en.wikipedia.org/wiki/Object-relational_mapping">ORM</a>
+(the Mappers).</p>
+<pre class="prettyprint source lang-javascript"><code>import {SimpleStore} from 'js-data'</code></pre>
   </div>
   
 
@@ -232,7 +238,7 @@
 
             
 
-            <td class="description last"><p>Configuration options. See <a href="SimpleStore.html">SimpleStore</a>.</p>
+            <td class="description last"><p>Configuration options. See <a href="Container.html">Container</a>.</p>
                 <h6 class="method-params-label method-subparams-label">Properties</h6>
                 
 
@@ -290,12 +296,12 @@
             
                 <td class="default">
                 
-                    <a href="LinkedCollection.html">LinkedCollection</a>
+                    <a href="Collection.html">Collection</a>
                 
                 </td>
             
 
-            <td class="description last"><p>See DataStore#collectionClass.</p></td>
+            <td class="description last"><p>See SimpleStore#collectionClass.</p></td>
         </tr>
 
     
@@ -342,46 +348,6 @@
 
         <tr>
             
-                <td class="name"><code>unlinkOnDestroy</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" target="_blank">Boolean</a></span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    true
-                
-                </td>
-            
-
-            <td class="description last"><p>See <a href="DataStore.html#unlinkOnDestroy">DataStore#unlinkOnDestroy</a>.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>usePendingFind</code></td>
             
 
@@ -418,7 +384,7 @@
                 </td>
             
 
-            <td class="description last"><p>See <a href="DataStore.html#usePendingFind">DataStore#usePendingFind</a>.</p></td>
+            <td class="description last"><p>See <a href="SimpleStore.html#usePendingFind">SimpleStore#usePendingFind</a>.</p></td>
         </tr>
 
     
@@ -461,7 +427,7 @@
                 </td>
             
 
-            <td class="description last"><p>See <a href="DataStore.html#usePendingFindAll">DataStore#usePendingFindAll</a>.</p></td>
+            <td class="description last"><p>See <a href="SimpleStore.html#usePendingFindAll">SimpleStore#usePendingFindAll</a>.</p></td>
         </tr>
 
     
@@ -504,7 +470,7 @@
           <tr>
             
               <td>
-<span class="param-type"><a href="DataStore.html">DataStore</a></span>
+<span class="param-type"><a href="SimpleStore.html">SimpleStore</a></span>
 
 
 </td>
@@ -554,17 +520,17 @@
         
         
           <td>
-            <a href="DataStore.js.html">DataStore.js</a>,
-             <a href="DataStore.js.html#sunlight-1-line-26">line 26</a>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-299">line 299</a>
           </td>
         
         
         
           <td>
             <ul>
-              <li><a href="http://www.js-data.io/v3.0/docs/components-of-jsdata#datastore">Components of JSData: DataStore</a></li>
+              <li><a href="http://www.js-data.io/v3.0/docs/components-of-jsdata#SimpleStore">Components of JSData: SimpleStore</a></li>
               
-              <li><a href="http://www.js-data.io/v3.0/docs/working-with-the-datastore">Working with the DataStore</a></li>
+              <li><a href="http://www.js-data.io/v3.0/docs/working-with-the-SimpleStore">Working with the SimpleStore</a></li>
               
               <li><a href="http://www.js-data.io/v3.0/docs/jsdata-and-the-browser">Notes on using JSData in the Browser</a></li>
               </ul>
@@ -573,7 +539,7 @@
         
           <td>
             <ul>
-              <li><a href="SimpleStore.html">SimpleStore</a></li>
+              <li><a href="Container.html">Container</a></li>
               </ul>
           </td>
         
@@ -610,22 +576,22 @@
       </div>
       <div class="panel-body">
         
-    <pre id="pre-"><code class="javascript">import {DataStore} from &#x27;js-data&#x27;
+    <pre id="pre-"><code class="javascript">import {SimpleStore} from &#x27;js-data&#x27;
 import HttpAdapter from &#x27;js-data-http&#x27;
-const store = new DataStore()
+const store = new SimpleStore()
 
-// DataStore#defineMapper returns a direct reference to the newly created
+// SimpleStore#defineMapper returns a direct reference to the newly created
 // Mapper.
 const UserMapper = store.defineMapper(&#x27;user&#x27;)
 
-// DataStore#as returns the store scoped to a particular Mapper.
+// SimpleStore#as returns the store scoped to a particular Mapper.
 const UserStore = store.as(&#x27;user&#x27;)
 
 // Call &quot;find&quot; on &quot;UserMapper&quot; (Stateless ORM)
 UserMapper.find(1).then((user) =&gt; {
   // retrieved a &quot;user&quot; record via the http adapter, but that&#x27;s it
 
-  // Call &quot;find&quot; on &quot;store&quot; targeting &quot;user&quot; (Stateful DataStore)
+  // Call &quot;find&quot; on &quot;store&quot; targeting &quot;user&quot; (Stateful SimpleStore)
   return store.find(&#x27;user&#x27;, 1) // same as &quot;UserStore.find(1)&quot;
 }).then((user) =&gt; {
   // not only was a &quot;user&quot; record retrieved, but it was added to the
@@ -634,22 +600,22 @@ UserMapper.find(1).then((user) =&gt; {
   console.log(user === cachedUser) // true
 })</code></pre>
     <div class="tonic" id="tonic-" style="display: none;">
-      import {DataStore} from &#x27;js-data&#x27;
+      import {SimpleStore} from &#x27;js-data&#x27;
 import HttpAdapter from &#x27;js-data-http&#x27;
-const store = new DataStore()
+const store = new SimpleStore()
 
-// DataStore#defineMapper returns a direct reference to the newly created
+// SimpleStore#defineMapper returns a direct reference to the newly created
 // Mapper.
 const UserMapper = store.defineMapper(&#x27;user&#x27;)
 
-// DataStore#as returns the store scoped to a particular Mapper.
+// SimpleStore#as returns the store scoped to a particular Mapper.
 const UserStore = store.as(&#x27;user&#x27;)
 
 // Call &quot;find&quot; on &quot;UserMapper&quot; (Stateless ORM)
 UserMapper.find(1).then((user) =&gt; {
   // retrieved a &quot;user&quot; record via the http adapter, but that&#x27;s it
 
-  // Call &quot;find&quot; on &quot;store&quot; targeting &quot;user&quot; (Stateful DataStore)
+  // Call &quot;find&quot; on &quot;store&quot; targeting &quot;user&quot; (Stateful SimpleStore)
   return store.find(&#x27;user&#x27;, 1) // same as &quot;UserStore.find(1)&quot;
 }).then((user) =&gt; {
   // not only was a &quot;user&quot; record retrieved, but it was added to the
@@ -674,7 +640,7 @@ UserMapper.find(1).then((user) =&gt; {
         
 
 
-    This class extends the <a href="SimpleStore.html">SimpleStore</a> class.
+    This class extends the <a href="Container.html">Container</a> class.
 
 
     
@@ -1459,103 +1425,6 @@ console.log(store.getMapper(&#x27;user&#x27;).idAttribute)
         
             
 <hr>
-<dt class="name" id="unlinkOnDestroy">
-    <h4><strong><span class="type-signature"></span>unlinkOnDestroy</strong></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>Whether in-memory relations should be unlinked from records after they are
-destroyed.</p>
-    </div>
-    
-
-    
-<div class="panel panel-default">
-  <div class="panel-heading"><strong>Details</strong></div>
-  <table class="table table-striped table-bordered">
-    <thead>
-      <tr>
-        
-          <th>Type</th>
-        
-        
-        
-          <th>Since</th>
-        
-        
-          <th>Default value</th>
-        
-        
-          <th>Source</th>
-        
-        
-        
-        
-        
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        
-          <td>
-            
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" target="_blank">Boolean</a></span>
-
-
-
-          </td>
-        
-        
-        
-          <td>3.0.0</td>
-        
-        
-          <td><pre><code>true</code></pre></td>
-        
-        
-          <td>
-            <a href="DataStore.js.html">DataStore.js</a>,
-             <a href="DataStore.js.html#sunlight-1-line-14">line 14</a>
-          </td>
-        
-        
-        
-        
-        
-      </tr>
-    </tbody>
-  </table>
-</div>
-<dl class="details">
-    
-
-  
-
-    
-
-    
-
-    
-
-  
-
-  
-
-  
-
-  
-</dl>
-
-
-    
-</dd>
-
-        
-            
-<hr>
 <dt class="name" id="usePendingFind">
     <h4><strong><span class="type-signature"></span>usePendingFind</strong></h4>
 
@@ -1633,15 +1502,6 @@ function that returns <code>true</code> or <code>false</code>.</p>
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#usePendingFind">SimpleStore#usePendingFind</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -1744,15 +1604,6 @@ returns <code>true</code> or <code>false</code>.</p>
     
 
   
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#usePendingFindAll">SimpleStore#usePendingFindAll</a>
-      </li>
-    </ul>
-  </dd>
-  
 
     
 
@@ -1791,7 +1642,7 @@ returns <code>true</code> or <code>false</code>.</p>
 
   
   <div class="description">
-    <p>Create a subclass of this DataStore:</p>
+    <p>Create a subclass of this SimpleStore:</p>
   </div>
   
 
@@ -2011,7 +1862,7 @@ to be used as the subclass itself.</p></td>
 </td>
             
             
-              <td><p>Subclass of this DataStore class.</p></td>
+              <td><p>Subclass of this SimpleStore class.</p></td>
             
           </tr>
         
@@ -2051,8 +1902,8 @@ to be used as the subclass itself.</p></td>
         
         
           <td>
-            <a href="DataStore.js.html">DataStore.js</a>,
-             <a href="DataStore.js.html#sunlight-1-line-473">line 473</a>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-2001">line 2001</a>
           </td>
         
         
@@ -2091,89 +1942,89 @@ to be used as the subclass itself.</p></td>
       </div>
       <div class="panel-body">
         
-        <p class="code-caption" id="btn-DataStore.extend">
-          <button class="btn btn-primary" onclick="loadTonic('DataStore.extend')">Try it out</button>
+        <p class="code-caption" id="btn-SimpleStore.extend">
+          <button class="btn btn-primary" onclick="loadTonic('SimpleStore.extend')">Try it out</button>
         </p>
     
-    <pre id="pre-DataStore.extend"><code class="javascript">// Normally you would do: import {DataStore} from &#x27;js-data&#x27;
+    <pre id="pre-SimpleStore.extend"><code class="javascript">// Normally you would do: import {SimpleStore} from &#x27;js-data&#x27;
 const JSData = require(&#x27;js-data@3.0.0-rc.4&#x27;)
-const {DataStore} = JSData
+const {SimpleStore} = JSData
 console.log(&#x27;Using JSData v&#x27; + JSData.version.full)
 
 // Extend the class using ES2015 class syntax.
-class CustomDataStoreClass extends DataStore {
+class CustomSimpleStoreClass extends SimpleStore {
   foo () { return &#x27;bar&#x27; }
   static beep () { return &#x27;boop&#x27; }
 }
-const customDataStore = new CustomDataStoreClass()
-console.log(customDataStore.foo())
-console.log(CustomDataStoreClass.beep())
+const customSimpleStore = new CustomSimpleStoreClass()
+console.log(customSimpleStore.foo())
+console.log(CustomSimpleStoreClass.beep())
 
 // Extend the class using alternate method.
-const OtherDataStoreClass = DataStore.extend({
+const OtherSimpleStoreClass = SimpleStore.extend({
   foo () { return &#x27;bar&#x27; }
 }, {
   beep () { return &#x27;boop&#x27; }
 })
-const otherDataStore = new OtherDataStoreClass()
-console.log(otherDataStore.foo())
-console.log(OtherDataStoreClass.beep())
+const otherSimpleStore = new OtherSimpleStoreClass()
+console.log(otherSimpleStore.foo())
+console.log(OtherSimpleStoreClass.beep())
 
 // Extend the class, providing a custom constructor.
-function AnotherDataStoreClass () {
-  DataStore.call(this)
+function AnotherSimpleStoreClass () {
+  SimpleStore.call(this)
   this.created_at = new Date().getTime()
 }
-DataStore.extend({
-  constructor: AnotherDataStoreClass,
+SimpleStore.extend({
+  constructor: AnotherSimpleStoreClass,
   foo () { return &#x27;bar&#x27; }
 }, {
   beep () { return &#x27;boop&#x27; }
 })
-const anotherDataStore = new AnotherDataStoreClass()
-console.log(anotherDataStore.created_at)
-console.log(anotherDataStore.foo())
-console.log(AnotherDataStoreClass.beep())</code></pre>
-    <div class="tonic" id="tonic-DataStore.extend" style="display: none;">
-      // Normally you would do: import {DataStore} from &#x27;js-data&#x27;
+const anotherSimpleStore = new AnotherSimpleStoreClass()
+console.log(anotherSimpleStore.created_at)
+console.log(anotherSimpleStore.foo())
+console.log(AnotherSimpleStoreClass.beep())</code></pre>
+    <div class="tonic" id="tonic-SimpleStore.extend" style="display: none;">
+      // Normally you would do: import {SimpleStore} from &#x27;js-data&#x27;
 const JSData = require(&#x27;js-data@3.0.0-rc.4&#x27;)
-const {DataStore} = JSData
+const {SimpleStore} = JSData
 console.log(&#x27;Using JSData v&#x27; + JSData.version.full)
 
 // Extend the class using ES2015 class syntax.
-class CustomDataStoreClass extends DataStore {
+class CustomSimpleStoreClass extends SimpleStore {
   foo () { return &#x27;bar&#x27; }
   static beep () { return &#x27;boop&#x27; }
 }
-const customDataStore = new CustomDataStoreClass()
-console.log(customDataStore.foo())
-console.log(CustomDataStoreClass.beep())
+const customSimpleStore = new CustomSimpleStoreClass()
+console.log(customSimpleStore.foo())
+console.log(CustomSimpleStoreClass.beep())
 
 // Extend the class using alternate method.
-const OtherDataStoreClass = DataStore.extend({
+const OtherSimpleStoreClass = SimpleStore.extend({
   foo () { return &#x27;bar&#x27; }
 }, {
   beep () { return &#x27;boop&#x27; }
 })
-const otherDataStore = new OtherDataStoreClass()
-console.log(otherDataStore.foo())
-console.log(OtherDataStoreClass.beep())
+const otherSimpleStore = new OtherSimpleStoreClass()
+console.log(otherSimpleStore.foo())
+console.log(OtherSimpleStoreClass.beep())
 
 // Extend the class, providing a custom constructor.
-function AnotherDataStoreClass () {
-  DataStore.call(this)
+function AnotherSimpleStoreClass () {
+  SimpleStore.call(this)
   this.created_at = new Date().getTime()
 }
-DataStore.extend({
-  constructor: AnotherDataStoreClass,
+SimpleStore.extend({
+  constructor: AnotherSimpleStoreClass,
   foo () { return &#x27;bar&#x27; }
 }, {
   beep () { return &#x27;boop&#x27; }
 })
-const anotherDataStore = new AnotherDataStoreClass()
-console.log(anotherDataStore.created_at)
-console.log(anotherDataStore.foo())
-console.log(AnotherDataStoreClass.beep())
+const anotherSimpleStore = new AnotherSimpleStoreClass()
+console.log(anotherSimpleStore.created_at)
+console.log(anotherSimpleStore.foo())
+console.log(AnotherSimpleStoreClass.beep())
     </div>
 
 
@@ -2458,15 +2309,6 @@ console.log(AnotherDataStoreClass.beep())
     
 
   
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#add">SimpleStore#add</a>
-      </li>
-    </ul>
-  </dd>
-  
 
     
 
@@ -2746,15 +2588,6 @@ to the store.</p>
     
 
   
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#addToCache">SimpleStore#addToCache</a>
-      </li>
-    </ul>
-  </dd>
-  
 
     
 
@@ -2972,6 +2805,8 @@ const store = new MyStore()
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
         
@@ -2992,6 +2827,10 @@ const store = new MyStore()
           </td>
         
         
+          <td>
+            <a href="Container.html#as">Container#as</a>
+          </td>
+        
         
         
         
@@ -3002,15 +2841,6 @@ const store = new MyStore()
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#as">SimpleStore#as</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -3367,15 +3197,6 @@ console.log(user1 === user3)
     
 
   
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#between">SimpleStore#between</a>
-      </li>
-    </ul>
-  </dd>
-  
 
     
 
@@ -3611,15 +3432,6 @@ to implement your own cache-busting strategy.</p>
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#cachedFind">SimpleStore#cachedFind</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -3894,15 +3706,6 @@ the <code>query</code> argument passed to <a href="SimpleStore.html#findAll">Sim
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#cachedFindAll">SimpleStore#cachedFindAll</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -4204,15 +4007,6 @@ override this method.</p>
     
 
   
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#cacheFind">SimpleStore#cacheFind</a>
-      </li>
-    </ul>
-  </dd>
-  
 
     
 
@@ -4511,15 +4305,6 @@ the <code>query</code> argument passed to <a href="SimpleStore.html#findAll">Sim
     
 
   
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#cacheFindAll">SimpleStore#cacheFindAll</a>
-      </li>
-    </ul>
-  </dd>
-  
 
     
 
@@ -4725,15 +4510,6 @@ SimpleStore#_completedQueries.</p>
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#clear">SimpleStore#clear</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -5286,6 +5062,8 @@ store.count(&#x27;post&#x27;, { status: &#x27;published&#x27; }).then((numPublis
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
         
@@ -5306,6 +5084,10 @@ store.count(&#x27;post&#x27;, { status: &#x27;published&#x27; }).then((numPublis
           </td>
         
         
+          <td>
+            <a href="Container.html#create">Container#create</a>
+          </td>
+        
         
         
         
@@ -5316,15 +5098,6 @@ store.count(&#x27;post&#x27;, { status: &#x27;published&#x27; }).then((numPublis
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#create">SimpleStore#create</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -5621,15 +5394,6 @@ store.create(&#x27;book&#x27;, {
     
 
   
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#createIndex">SimpleStore#createIndex</a>
-      </li>
-    </ul>
-  </dd>
-  
 
     
 
@@ -5894,6 +5658,8 @@ store.</p>
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
         
@@ -5914,6 +5680,10 @@ store.</p>
           </td>
         
         
+          <td>
+            <a href="Container.html#createMany">Container#createMany</a>
+          </td>
+        
         
         
         
@@ -5924,15 +5694,6 @@ store.</p>
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#createMany">SimpleStore#createMany</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -7014,6 +6775,8 @@ associated with the provided <code>id</code>.</p>
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
         
@@ -7034,6 +6797,10 @@ associated with the provided <code>id</code>.</p>
           </td>
         
         
+          <td>
+            <a href="Container.html#destroy">Container#destroy</a>
+          </td>
+        
         
         
         
@@ -7044,15 +6811,6 @@ associated with the provided <code>id</code>.</p>
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#destroy">SimpleStore#destroy</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -7353,6 +7111,8 @@ the in-memory store.</p>
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
         
@@ -7373,6 +7133,10 @@ the in-memory store.</p>
           </td>
         
         
+          <td>
+            <a href="Container.html#destroyAll">Container#destroyAll</a>
+          </td>
+        
         
         
         
@@ -7383,15 +7147,6 @@ the in-memory store.</p>
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#destroyAll">SimpleStore#destroyAll</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -7999,15 +7754,6 @@ store.emit(&#x27;beep&#x27;, &#x27;boop&#x27;)
     
 
   
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#filter">SimpleStore#filter</a>
-      </li>
-    </ul>
-  </dd>
-  
 
     
 
@@ -8383,6 +8129,8 @@ posts = store.filter(&#x27;post&#x27;, function (post) { return post.id % 2 === 
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
         
@@ -8403,6 +8151,10 @@ posts = store.filter(&#x27;post&#x27;, function (post) { return post.id % 2 === 
           </td>
         
         
+          <td>
+            <a href="Container.html#find">Container#find</a>
+          </td>
+        
         
         
         
@@ -8413,15 +8165,6 @@ posts = store.filter(&#x27;post&#x27;, function (post) { return post.id % 2 === 
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#find">SimpleStore#find</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -8771,6 +8514,8 @@ store.find(&#x27;book&#x27;, 1234).then((book) =&gt; {
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
         
@@ -8791,6 +8536,10 @@ store.find(&#x27;book&#x27;, 1234).then((book) =&gt; {
           </td>
         
         
+          <td>
+            <a href="Container.html#findAll">Container#findAll</a>
+          </td>
+        
         
         
         
@@ -8801,15 +8550,6 @@ store.find(&#x27;book&#x27;, 1234).then((book) =&gt; {
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#findAll">SimpleStore#findAll</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -9080,15 +8820,6 @@ store.find(&#x27;movie&#x27;, { rating: &#x27;PG&#x27; }).then((movies) =&gt; {
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#get">SimpleStore#get</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -9965,15 +9696,6 @@ or the name of the default adapter if no name provided.</p>
     
 
   
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#getAll">SimpleStore#getAll</a>
-      </li>
-    </ul>
-  </dd>
-  
 
     
 
@@ -10211,15 +9933,6 @@ exist.</p>
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#getCollection">SimpleStore#getCollection</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -11104,15 +10817,6 @@ or <a href="SimpleStore.html#findAll">SimpleStore#findAll</a>.</p></td>
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#hashQuery">SimpleStore#hashQuery</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -12027,6 +11731,8 @@ be prepended to the arugments passed to the provided event handler.</p>
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
         
@@ -12045,6 +11751,10 @@ be prepended to the arugments passed to the provided event handler.</p>
           </td>
         
         
+          <td>
+            <a href="Container.html#on">Container#on</a>
+          </td>
+        
         
         
         
@@ -12055,15 +11765,6 @@ be prepended to the arugments passed to the provided event handler.</p>
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#on">SimpleStore#on</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -12326,15 +12027,6 @@ post.title = &#x27;Modeling your data&#x27;
     
 
   
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#prune">SimpleStore#prune</a>
-      </li>
-    </ul>
-  </dd>
-  
 
     
 
@@ -12531,15 +12223,6 @@ post.title = &#x27;Modeling your data&#x27;
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#query">SimpleStore#query</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -13249,15 +12932,6 @@ remove from the store.</p></td>
     
 
   
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#remove">SimpleStore#remove</a>
-      </li>
-    </ul>
-  </dd>
-  
 
     
 
@@ -13823,15 +13497,6 @@ remove from the store.</p></td>
     
 
   
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#removeAll">SimpleStore#removeAll</a>
-      </li>
-    </ul>
-  </dd>
-  
 
     
 
@@ -14176,15 +13841,6 @@ from the store.</p></td>
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#removeRelated">SimpleStore#removeRelated</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -14728,6 +14384,8 @@ store.sum(&#x27;purchase_order&#x27;, &#x27;amount&#x27;, { status: &#x27;paid&#
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
           <th>See</th>
@@ -14750,6 +14408,10 @@ store.sum(&#x27;purchase_order&#x27;, &#x27;amount&#x27;, { status: &#x27;paid&#
           </td>
         
         
+          <td>
+            <a href="Container.html#toJSON">Container#toJSON</a>
+          </td>
+        
         
         
           <td>
@@ -14768,15 +14430,6 @@ store.sum(&#x27;purchase_order&#x27;, &#x27;amount&#x27;, { status: &#x27;paid&#
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#toJSON">SimpleStore#toJSON</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -14965,15 +14618,6 @@ const draftsJSON = store.query(&#x27;post&#x27;)
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#unsaved">SimpleStore#unsaved</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -15250,6 +14894,8 @@ store.</p>
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
         
@@ -15270,6 +14916,10 @@ store.</p>
           </td>
         
         
+          <td>
+            <a href="Container.html#update">Container#update</a>
+          </td>
+        
         
         
         
@@ -15280,15 +14930,6 @@ store.</p>
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#update">SimpleStore#update</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -15607,6 +15248,8 @@ the store.</p>
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
         
@@ -15627,6 +15270,10 @@ the store.</p>
           </td>
         
         
+          <td>
+            <a href="Container.html#updateAll">Container#updateAll</a>
+          </td>
+        
         
         
         
@@ -15637,15 +15284,6 @@ the store.</p>
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#updateAll">SimpleStore#updateAll</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -15933,6 +15571,8 @@ the store.</p>
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
         
@@ -15953,6 +15593,10 @@ the store.</p>
           </td>
         
         
+          <td>
+            <a href="Container.html#updateMany">Container#updateMany</a>
+          </td>
+        
         
         
         
@@ -15963,15 +15607,6 @@ the store.</p>
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#updateMany">SimpleStore#updateMany</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -16367,6 +16002,5442 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
     
 
     
+        <h3 class="subsection-title">Type Definitions</h3>
+
+        <dl>
+                
+<hr>
+<dt>
+  <h4 class="name" id="~addListener"><span class="type-signature"></span>addListener(name, The)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="SimpleStore.html#event:add">SimpleStore#event:add</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The name of the associated <a href="Mapper.html">Mapper</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>The</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Record.html">Record</a></span>
+|
+
+<span class="param-type">Array.&lt;<a href="Record.html">Record</a>></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Record or Records that were added.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-1942">line 1942</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="SimpleStore.html#event:add">SimpleStore#event:add</a></li>
+              
+              <li><a href="SimpleStore.html#add">SimpleStore#add</a></li>
+              
+              <li><a href="SimpleStore.html#create">SimpleStore#create</a></li>
+              
+              <li><a href="SimpleStore.html#createMany">SimpleStore#createMany</a></li>
+              
+              <li><a href="SimpleStore.html#find">SimpleStore#find</a></li>
+              
+              <li><a href="SimpleStore.html#findAll">SimpleStore#findAll</a></li>
+              
+              <li><a href="SimpleStore.html#update">SimpleStore#update</a></li>
+              
+              <li><a href="SimpleStore.html#updateAll">SimpleStore#updateAll</a></li>
+              
+              <li><a href="SimpleStore.html#updateMany">SimpleStore#updateMany</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onAdd (mapperName, recordOrRecords) {
+  // do something
+}
+store.on(&#x27;add&#x27;, onAdd)</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onAdd (mapperName, recordOrRecords) {
+  // do something
+}
+store.on(&#x27;add&#x27;, onAdd)
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            
+                
+<hr>
+<dt>
+  <h4 class="name" id="~afterCreateListener"><span class="type-signature"></span>afterCreateListener(name, props, opts, result)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="SimpleStore.html#event:afterCreate">SimpleStore#event:afterCreate</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument received by <a href="Mapper.html#afterCreate">Mapper#afterCreate</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>props</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>props</code> argument received by <a href="Mapper.html#afterCreate">Mapper#afterCreate</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument received by <a href="Mapper.html#afterCreate">Mapper#afterCreate</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>result</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>result</code> argument received by <a href="Mapper.html#afterCreate">Mapper#afterCreate</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-789">line 789</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="SimpleStore.html#event:afterCreate">SimpleStore#event:afterCreate</a></li>
+              
+              <li><a href="SimpleStore.html#create">SimpleStore#create</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onAfterCreate (mapperName, props, opts, result) {
+  // do something
+}
+store.on(&#x27;afterCreate&#x27;, onAfterCreate)</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onAfterCreate (mapperName, props, opts, result) {
+  // do something
+}
+store.on(&#x27;afterCreate&#x27;, onAfterCreate)
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            
+                
+<hr>
+<dt>
+  <h4 class="name" id="~afterCreateManyListener"><span class="type-signature"></span>afterCreateManyListener(name, records, opts, result)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="SimpleStore.html#event:afterCreateMany">SimpleStore#event:afterCreateMany</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument received by <a href="Mapper.html#afterCreateMany">Mapper#afterCreateMany</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>records</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>records</code> argument received by <a href="Mapper.html#afterCreateMany">Mapper#afterCreateMany</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument received by <a href="Mapper.html#afterCreateMany">Mapper#afterCreateMany</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>result</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>result</code> argument received by <a href="Mapper.html#afterCreateMany">Mapper#afterCreateMany</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-881">line 881</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="SimpleStore.html#event:afterCreateMany">SimpleStore#event:afterCreateMany</a></li>
+              
+              <li><a href="SimpleStore.html#createMany">SimpleStore#createMany</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onAfterCreateMany (mapperName, records, opts, result) {
+  // do something
+}
+store.on(&#x27;afterCreateMany&#x27;, onAfterCreateMany)</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onAfterCreateMany (mapperName, records, opts, result) {
+  // do something
+}
+store.on(&#x27;afterCreateMany&#x27;, onAfterCreateMany)
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            
+                
+<hr>
+<dt>
+  <h4 class="name" id="~afterDestroyAllListener"><span class="type-signature"></span>afterDestroyAllListener(name, query, opts, result)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="SimpleStore.html#event:afterDestroyAll">SimpleStore#event:afterDestroyAll</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument received by <a href="Mapper.html#afterDestroyAll">Mapper#afterDestroyAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>query</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>query</code> argument received by <a href="Mapper.html#afterDestroyAll">Mapper#afterDestroyAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument received by <a href="Mapper.html#afterDestroyAll">Mapper#afterDestroyAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>result</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>result</code> argument received by <a href="Mapper.html#afterDestroyAll">Mapper#afterDestroyAll</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-1126">line 1126</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="SimpleStore.html#event:afterDestroyAll">SimpleStore#event:afterDestroyAll</a></li>
+              
+              <li><a href="SimpleStore.html#destroyAll">SimpleStore#destroyAll</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onAfterDestroyAll (mapperName, query, opts, result) {
+  // do something
+}
+store.on(&#x27;afterDestroyAll&#x27;, onAfterDestroyAll)</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onAfterDestroyAll (mapperName, query, opts, result) {
+  // do something
+}
+store.on(&#x27;afterDestroyAll&#x27;, onAfterDestroyAll)
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            
+                
+<hr>
+<dt>
+  <h4 class="name" id="~afterDestroyListener"><span class="type-signature"></span>afterDestroyListener(name, id, opts, result)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="SimpleStore.html#event:afterDestroy">SimpleStore#event:afterDestroy</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument received by <a href="Mapper.html#afterDestroy">Mapper#afterDestroy</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+|
+
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" target="_blank">Number</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>id</code> argument received by <a href="Mapper.html#afterDestroy">Mapper#afterDestroy</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument received by <a href="Mapper.html#afterDestroy">Mapper#afterDestroy</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>result</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>result</code> argument received by <a href="Mapper.html#afterDestroy">Mapper#afterDestroy</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-1019">line 1019</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="SimpleStore.html#event:afterDestroy">SimpleStore#event:afterDestroy</a></li>
+              
+              <li><a href="SimpleStore.html#destroy">SimpleStore#destroy</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onAfterDestroy (mapperName, id, opts, result) {
+  // do something
+}
+store.on(&#x27;afterDestroy&#x27;, onAfterDestroy)</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onAfterDestroy (mapperName, id, opts, result) {
+  // do something
+}
+store.on(&#x27;afterDestroy&#x27;, onAfterDestroy)
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            
+                
+<hr>
+<dt>
+  <h4 class="name" id="~afterFindAllListener"><span class="type-signature"></span>afterFindAllListener(name, query, opts, result)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="SimpleStore.html#event:afterFindAll">SimpleStore#event:afterFindAll</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument received by <a href="Mapper.html#afterFindAll">Mapper#afterFindAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>query</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>query</code> argument received by <a href="Mapper.html#afterFindAll">Mapper#afterFindAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument received by <a href="Mapper.html#afterFindAll">Mapper#afterFindAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>result</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>result</code> argument received by <a href="Mapper.html#afterFindAll">Mapper#afterFindAll</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-1353">line 1353</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="SimpleStore.html#event:afterFindAll">SimpleStore#event:afterFindAll</a></li>
+              
+              <li><a href="SimpleStore.html#findAll">SimpleStore#findAll</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onAfterFindAll (mapperName, query, opts, result) {
+  // do something
+}
+store.on(&#x27;afterFindAll&#x27;, onAfterFindAll)</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onAfterFindAll (mapperName, query, opts, result) {
+  // do something
+}
+store.on(&#x27;afterFindAll&#x27;, onAfterFindAll)
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            
+                
+<hr>
+<dt>
+  <h4 class="name" id="~afterFindListener"><span class="type-signature"></span>afterFindListener(name, id, opts, result)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="SimpleStore.html#event:afterFind">SimpleStore#event:afterFind</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument received by <a href="Mapper.html#afterFind">Mapper#afterFind</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+|
+
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" target="_blank">Number</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>id</code> argument received by <a href="Mapper.html#afterFind">Mapper#afterFind</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument received by <a href="Mapper.html#afterFind">Mapper#afterFind</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>result</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>result</code> argument received by <a href="Mapper.html#afterFind">Mapper#afterFind</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-1242">line 1242</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="SimpleStore.html#event:afterFind">SimpleStore#event:afterFind</a></li>
+              
+              <li><a href="SimpleStore.html#find">SimpleStore#find</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onAfterFind (mapperName, id, opts, result) {
+  // do something
+}
+store.on(&#x27;afterFind&#x27;, onAfterFind)</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onAfterFind (mapperName, id, opts, result) {
+  // do something
+}
+store.on(&#x27;afterFind&#x27;, onAfterFind)
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            
+                
+<hr>
+<dt>
+  <h4 class="name" id="~afterUpdateAllListener"><span class="type-signature"></span>afterUpdateAllListener(name, props, query, opts, result)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="SimpleStore.html#event:afterUpdateAll">SimpleStore#event:afterUpdateAll</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument received by <a href="Mapper.html#afterUpdateAll">Mapper#afterUpdateAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>props</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>props</code> argument received by <a href="Mapper.html#afterUpdateAll">Mapper#afterUpdateAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>query</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>query</code> argument received by <a href="Mapper.html#afterUpdateAll">Mapper#afterUpdateAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument received by <a href="Mapper.html#afterUpdateAll">Mapper#afterUpdateAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>result</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>result</code> argument received by <a href="Mapper.html#afterUpdateAll">Mapper#afterUpdateAll</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-1741">line 1741</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="SimpleStore.html#event:afterUpdateAll">SimpleStore#event:afterUpdateAll</a></li>
+              
+              <li><a href="SimpleStore.html#updateAll">SimpleStore#updateAll</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onAfterUpdateAll (mapperName, props, query, opts, result) {
+  // do something
+}
+store.on(&#x27;afterUpdateAll&#x27;, onAfterUpdateAll)</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onAfterUpdateAll (mapperName, props, query, opts, result) {
+  // do something
+}
+store.on(&#x27;afterUpdateAll&#x27;, onAfterUpdateAll)
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            
+                
+<hr>
+<dt>
+  <h4 class="name" id="~afterUpdateListener"><span class="type-signature"></span>afterUpdateListener(name, id, props, opts, result)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="SimpleStore.html#event:afterUpdate">SimpleStore#event:afterUpdate</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument received by <a href="Mapper.html#afterUpdate">Mapper#afterUpdate</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+|
+
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" target="_blank">Number</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>id</code> argument received by <a href="Mapper.html#afterUpdate">Mapper#afterUpdate</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>props</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>props</code> argument received by <a href="Mapper.html#afterUpdate">Mapper#afterUpdate</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument received by <a href="Mapper.html#afterUpdate">Mapper#afterUpdate</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>result</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>result</code> argument received by <a href="Mapper.html#afterUpdate">Mapper#afterUpdate</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-1649">line 1649</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="SimpleStore.html#event:afterUpdate">SimpleStore#event:afterUpdate</a></li>
+              
+              <li><a href="SimpleStore.html#update">SimpleStore#update</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onAfterUpdate (mapperName, id, props, opts, result) {
+  // do something
+}
+store.on(&#x27;afterUpdate&#x27;, onAfterUpdate)</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onAfterUpdate (mapperName, id, props, opts, result) {
+  // do something
+}
+store.on(&#x27;afterUpdate&#x27;, onAfterUpdate)
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            
+                
+<hr>
+<dt>
+  <h4 class="name" id="~afterUpdateManyListener"><span class="type-signature"></span>afterUpdateManyListener(name, records, opts, result)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="SimpleStore.html#event:afterUpdateMany">SimpleStore#event:afterUpdateMany</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument received by <a href="Mapper.html#afterUpdateMany">Mapper#afterUpdateMany</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>records</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>records</code> argument received by <a href="Mapper.html#afterUpdateMany">Mapper#afterUpdateMany</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument received by <a href="Mapper.html#afterUpdateMany">Mapper#afterUpdateMany</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>result</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>result</code> argument received by <a href="Mapper.html#afterUpdateMany">Mapper#afterUpdateMany</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-1832">line 1832</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="SimpleStore.html#event:afterUpdateMany">SimpleStore#event:afterUpdateMany</a></li>
+              
+              <li><a href="SimpleStore.html#updateMany">SimpleStore#updateMany</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onAfterUpdateMany (mapperName, records, opts, result) {
+  // do something
+}
+store.on(&#x27;afterUpdateMany&#x27;, onAfterUpdateMany)</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onAfterUpdateMany (mapperName, records, opts, result) {
+  // do something
+}
+store.on(&#x27;afterUpdateMany&#x27;, onAfterUpdateMany)
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            
+                
+<hr>
+<dt>
+  <h4 class="name" id="~beforeCreateListener"><span class="type-signature"></span>beforeCreateListener(name, props, opts)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="SimpleStore.html#event:beforeCreate">SimpleStore#event:beforeCreate</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument received by <a href="Mapper.html#beforeCreate">Mapper#beforeCreate</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>props</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>props</code> argument received by <a href="Mapper.html#beforeCreate">Mapper#beforeCreate</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument received by <a href="Mapper.html#beforeCreate">Mapper#beforeCreate</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-764">line 764</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="SimpleStore.html#event:beforeCreate">SimpleStore#event:beforeCreate</a></li>
+              
+              <li><a href="SimpleStore.html#create">SimpleStore#create</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onBeforeCreate (mapperName, props, opts) {
+  // do something
+}
+store.on(&#x27;beforeCreate&#x27;, onBeforeCreate)</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onBeforeCreate (mapperName, props, opts) {
+  // do something
+}
+store.on(&#x27;beforeCreate&#x27;, onBeforeCreate)
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            
+                
+<hr>
+<dt>
+  <h4 class="name" id="~beforeCreateManyListener"><span class="type-signature"></span>beforeCreateManyListener(name, records, opts)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="SimpleStore.html#event:beforeCreateMany">SimpleStore#event:beforeCreateMany</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument received by <a href="Mapper.html#beforeCreateMany">Mapper#beforeCreateMany</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>records</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>records</code> argument received by <a href="Mapper.html#beforeCreateMany">Mapper#beforeCreateMany</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument received by <a href="Mapper.html#beforeCreateMany">Mapper#beforeCreateMany</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-856">line 856</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="SimpleStore.html#event:beforeCreateMany">SimpleStore#event:beforeCreateMany</a></li>
+              
+              <li><a href="SimpleStore.html#createMany">SimpleStore#createMany</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onBeforeCreateMany (mapperName, records, opts) {
+  // do something
+}
+store.on(&#x27;beforeCreateMany&#x27;, onBeforeCreateMany)</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onBeforeCreateMany (mapperName, records, opts) {
+  // do something
+}
+store.on(&#x27;beforeCreateMany&#x27;, onBeforeCreateMany)
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            
+                
+<hr>
+<dt>
+  <h4 class="name" id="~beforeDestroyAllListener"><span class="type-signature"></span>beforeDestroyAllListener(name, query, opts)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="SimpleStore.html#event:beforeDestroyAll">SimpleStore#event:beforeDestroyAll</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument received by <a href="Mapper.html#beforeDestroyAll">Mapper#beforeDestroyAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>query</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>query</code> argument received by <a href="Mapper.html#beforeDestroyAll">Mapper#beforeDestroyAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument received by <a href="Mapper.html#beforeDestroyAll">Mapper#beforeDestroyAll</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-1101">line 1101</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="SimpleStore.html#event:beforeDestroyAll">SimpleStore#event:beforeDestroyAll</a></li>
+              
+              <li><a href="SimpleStore.html#destroyAll">SimpleStore#destroyAll</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onBeforeDestroyAll (mapperName, query, opts) {
+  // do something
+}
+store.on(&#x27;beforeDestroyAll&#x27;, onBeforeDestroyAll)</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onBeforeDestroyAll (mapperName, query, opts) {
+  // do something
+}
+store.on(&#x27;beforeDestroyAll&#x27;, onBeforeDestroyAll)
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            
+                
+<hr>
+<dt>
+  <h4 class="name" id="~beforeDestroyListener"><span class="type-signature"></span>beforeDestroyListener(name, id, opts)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="SimpleStore.html#event:beforeDestroy">SimpleStore#event:beforeDestroy</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument received by <a href="Mapper.html#beforeDestroy">Mapper#beforeDestroy</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+|
+
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" target="_blank">Number</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>id</code> argument received by <a href="Mapper.html#beforeDestroy">Mapper#beforeDestroy</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument received by <a href="Mapper.html#beforeDestroy">Mapper#beforeDestroy</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-994">line 994</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="SimpleStore.html#event:beforeDestroy">SimpleStore#event:beforeDestroy</a></li>
+              
+              <li><a href="SimpleStore.html#destroy">SimpleStore#destroy</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onBeforeDestroy (mapperName, id, opts) {
+  // do something
+}
+store.on(&#x27;beforeDestroy&#x27;, onBeforeDestroy)</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onBeforeDestroy (mapperName, id, opts) {
+  // do something
+}
+store.on(&#x27;beforeDestroy&#x27;, onBeforeDestroy)
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            
+                
+<hr>
+<dt>
+  <h4 class="name" id="~beforeFindAllListener"><span class="type-signature"></span>beforeFindAllListener(name, query, opts)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="SimpleStore.html#event:beforeFindAll">SimpleStore#event:beforeFindAll</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument received by <a href="Mapper.html#beforeFindAll">Mapper#beforeFindAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>query</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>query</code> argument received by <a href="Mapper.html#beforeFindAll">Mapper#beforeFindAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument received by <a href="Mapper.html#beforeFindAll">Mapper#beforeFindAll</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-1328">line 1328</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="SimpleStore.html#event:beforeFindAll">SimpleStore#event:beforeFindAll</a></li>
+              
+              <li><a href="SimpleStore.html#findAll">SimpleStore#findAll</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onBeforeFindAll (mapperName, query, opts) {
+  // do something
+}
+store.on(&#x27;beforeFindAll&#x27;, onBeforeFindAll)</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onBeforeFindAll (mapperName, query, opts) {
+  // do something
+}
+store.on(&#x27;beforeFindAll&#x27;, onBeforeFindAll)
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            
+                
+<hr>
+<dt>
+  <h4 class="name" id="~beforeFindListener"><span class="type-signature"></span>beforeFindListener(name, id, opts)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="SimpleStore.html#event:beforeFind">SimpleStore#event:beforeFind</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument received by <a href="Mapper.html#beforeFind">Mapper#beforeFind</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+|
+
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" target="_blank">Number</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>id</code> argument received by <a href="Mapper.html#beforeFind">Mapper#beforeFind</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument received by <a href="Mapper.html#beforeFind">Mapper#beforeFind</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-1217">line 1217</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="SimpleStore.html#event:beforeFind">SimpleStore#event:beforeFind</a></li>
+              
+              <li><a href="SimpleStore.html#find">SimpleStore#find</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onBeforeFind (mapperName, id, opts) {
+  // do something
+}
+store.on(&#x27;beforeFind&#x27;, onBeforeFind)</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onBeforeFind (mapperName, id, opts) {
+  // do something
+}
+store.on(&#x27;beforeFind&#x27;, onBeforeFind)
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            
+                
+<hr>
+<dt>
+  <h4 class="name" id="~beforeUpdateAllListener"><span class="type-signature"></span>beforeUpdateAllListener(name, props, query, opts)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="SimpleStore.html#event:beforeUpdateAll">SimpleStore#event:beforeUpdateAll</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument received by <a href="Mapper.html#beforeUpdateAll">Mapper#beforeUpdateAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>props</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>props</code> argument received by <a href="Mapper.html#beforeUpdateAll">Mapper#beforeUpdateAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>query</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>query</code> argument received by <a href="Mapper.html#beforeUpdateAll">Mapper#beforeUpdateAll</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument received by <a href="Mapper.html#beforeUpdateAll">Mapper#beforeUpdateAll</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-1715">line 1715</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="SimpleStore.html#event:beforeUpdateAll">SimpleStore#event:beforeUpdateAll</a></li>
+              
+              <li><a href="SimpleStore.html#updateAll">SimpleStore#updateAll</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onBeforeUpdateAll (mapperName, props, query, opts) {
+  // do something
+}
+store.on(&#x27;beforeUpdateAll&#x27;, onBeforeUpdateAll)</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onBeforeUpdateAll (mapperName, props, query, opts) {
+  // do something
+}
+store.on(&#x27;beforeUpdateAll&#x27;, onBeforeUpdateAll)
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            
+                
+<hr>
+<dt>
+  <h4 class="name" id="~beforeUpdateListener"><span class="type-signature"></span>beforeUpdateListener(name, id, props, opts)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="SimpleStore.html#event:beforeUpdate">SimpleStore#event:beforeUpdate</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument received by <a href="Mapper.html#beforeUpdate">Mapper#beforeUpdate</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+|
+
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" target="_blank">Number</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>id</code> argument received by <a href="Mapper.html#beforeUpdate">Mapper#beforeUpdate</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>props</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>props</code> argument received by <a href="Mapper.html#beforeUpdate">Mapper#beforeUpdate</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument received by <a href="Mapper.html#beforeUpdate">Mapper#beforeUpdate</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-1623">line 1623</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="SimpleStore.html#event:beforeUpdate">SimpleStore#event:beforeUpdate</a></li>
+              
+              <li><a href="SimpleStore.html#update">SimpleStore#update</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onBeforeUpdate (mapperName, id, props, opts) {
+  // do something
+}
+store.on(&#x27;beforeUpdate&#x27;, onBeforeUpdate)</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onBeforeUpdate (mapperName, id, props, opts) {
+  // do something
+}
+store.on(&#x27;beforeUpdate&#x27;, onBeforeUpdate)
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            
+                
+<hr>
+<dt>
+  <h4 class="name" id="~beforeUpdateManyListener"><span class="type-signature"></span>beforeUpdateManyListener(name, records, opts)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="SimpleStore.html#event:beforeUpdateMany">SimpleStore#event:beforeUpdateMany</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>name</code> argument received by <a href="Mapper.html#beforeUpdateMany">Mapper#beforeUpdateMany</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>records</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>records</code> argument received by <a href="Mapper.html#beforeUpdateMany">Mapper#beforeUpdateMany</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument received by <a href="Mapper.html#beforeUpdateMany">Mapper#beforeUpdateMany</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-1807">line 1807</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="SimpleStore.html#event:beforeUpdateMany">SimpleStore#event:beforeUpdateMany</a></li>
+              
+              <li><a href="SimpleStore.html#updateMany">SimpleStore#updateMany</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onBeforeUpdateMany (mapperName, records, opts) {
+  // do something
+}
+store.on(&#x27;beforeUpdateMany&#x27;, onBeforeUpdateMany)</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onBeforeUpdateMany (mapperName, records, opts) {
+  // do something
+}
+store.on(&#x27;beforeUpdateMany&#x27;, onBeforeUpdateMany)
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            
+                
+<hr>
+<dt>
+  <h4 class="name" id="~changeListener"><span class="type-signature"></span>changeListener(name, record, changes)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="SimpleStore.html#event:change">SimpleStore#event:change</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The name of the associated <a href="Mapper.html">Mapper</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>record</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Record.html">Record</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The Record that changed.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>changes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The changes.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-1908">line 1908</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="SimpleStore.html#event:change">SimpleStore#event:change</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onChange (mapperName, record, changes) {
+  // do something
+}
+store.on(&#x27;change&#x27;, onChange)</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onChange (mapperName, record, changes) {
+  // do something
+}
+store.on(&#x27;change&#x27;, onChange)
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            
+                
+<hr>
+<dt>
+  <h4 class="name" id="~removeListener"><span class="type-signature"></span>removeListener(name, Record)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="SimpleStore.html#event:remove">SimpleStore#event:remove</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The name of the associated <a href="Mapper.html">Mapper</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>Record</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Record.html">Record</a></span>
+|
+
+<span class="param-type">Array.&lt;<a href="Record.html">Record</a>></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>or Records that were removed.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="SimpleStore.js.html">SimpleStore.js</a>,
+             <a href="SimpleStore.js.html#sunlight-1-line-1980">line 1980</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="SimpleStore.html#event:remove">SimpleStore#event:remove</a></li>
+              
+              <li><a href="SimpleStore.html#clear">SimpleStore#clear</a></li>
+              
+              <li><a href="SimpleStore.html#destroy">SimpleStore#destroy</a></li>
+              
+              <li><a href="SimpleStore.html#destroyAll">SimpleStore#destroyAll</a></li>
+              
+              <li><a href="SimpleStore.html#remove">SimpleStore#remove</a></li>
+              
+              <li><a href="SimpleStore.html#removeAll">SimpleStore#removeAll</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onRemove (mapperName, recordsOrRecords) {
+  // do something
+}
+store.on(&#x27;remove&#x27;, onRemove)</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onRemove (mapperName, recordsOrRecords) {
+  // do something
+}
+store.on(&#x27;remove&#x27;, onRemove)
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            </dl>
+    
 
     
         <h3 class="subsection-title">Events</h3>
@@ -16476,15 +21547,6 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
     
 
   
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#event:add">SimpleStore#event:add</a>
-      </li>
-    </ul>
-  </dd>
-  
 
     
 
@@ -16555,6 +21617,8 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
           <th>See</th>
@@ -16575,6 +21639,10 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           </td>
         
         
+          <td>
+            <a href="Container.html#event:afterCreate">Container#event:afterCreate</a>
+          </td>
+        
         
         
           <td>
@@ -16593,15 +21661,6 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#event:afterCreate">SimpleStore#event:afterCreate</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -16673,6 +21732,8 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
           <th>See</th>
@@ -16693,6 +21754,10 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           </td>
         
         
+          <td>
+            <a href="Container.html#event:afterCreateMany">Container#event:afterCreateMany</a>
+          </td>
+        
         
         
           <td>
@@ -16711,15 +21776,6 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#event:afterCreateMany">SimpleStore#event:afterCreateMany</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -16791,6 +21847,8 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
           <th>See</th>
@@ -16811,6 +21869,10 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           </td>
         
         
+          <td>
+            <a href="Container.html#event:afterDestroy">Container#event:afterDestroy</a>
+          </td>
+        
         
         
           <td>
@@ -16829,15 +21891,6 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#event:afterDestroy">SimpleStore#event:afterDestroy</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -16909,6 +21962,8 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
           <th>See</th>
@@ -16929,6 +21984,10 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           </td>
         
         
+          <td>
+            <a href="Container.html#event:afterDestroyAll">Container#event:afterDestroyAll</a>
+          </td>
+        
         
         
           <td>
@@ -16947,15 +22006,6 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#event:afterDestroyAll">SimpleStore#event:afterDestroyAll</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -17027,6 +22077,8 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
           <th>See</th>
@@ -17047,6 +22099,10 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           </td>
         
         
+          <td>
+            <a href="Container.html#event:afterFind">Container#event:afterFind</a>
+          </td>
+        
         
         
           <td>
@@ -17065,15 +22121,6 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#event:afterFind">SimpleStore#event:afterFind</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -17145,6 +22192,8 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
           <th>See</th>
@@ -17165,6 +22214,10 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           </td>
         
         
+          <td>
+            <a href="Container.html#event:afterFindAll">Container#event:afterFindAll</a>
+          </td>
+        
         
         
           <td>
@@ -17183,15 +22236,6 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#event:afterFindAll">SimpleStore#event:afterFindAll</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -17263,6 +22307,8 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
           <th>See</th>
@@ -17283,6 +22329,10 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           </td>
         
         
+          <td>
+            <a href="Container.html#event:afterUpdate">Container#event:afterUpdate</a>
+          </td>
+        
         
         
           <td>
@@ -17301,15 +22351,6 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#event:afterUpdate">SimpleStore#event:afterUpdate</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -17381,6 +22422,8 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
           <th>See</th>
@@ -17401,6 +22444,10 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           </td>
         
         
+          <td>
+            <a href="Container.html#event:afterUpdateAll">Container#event:afterUpdateAll</a>
+          </td>
+        
         
         
           <td>
@@ -17419,15 +22466,6 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#event:afterUpdateAll">SimpleStore#event:afterUpdateAll</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -17499,6 +22537,8 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
           <th>See</th>
@@ -17519,6 +22559,10 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           </td>
         
         
+          <td>
+            <a href="Container.html#event:afterUpdateMany">Container#event:afterUpdateMany</a>
+          </td>
+        
         
         
           <td>
@@ -17537,15 +22581,6 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#event:afterUpdateMany">SimpleStore#event:afterUpdateMany</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -17617,6 +22652,8 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
           <th>See</th>
@@ -17637,6 +22674,10 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           </td>
         
         
+          <td>
+            <a href="Container.html#event:beforeCreate">Container#event:beforeCreate</a>
+          </td>
+        
         
         
           <td>
@@ -17655,15 +22696,6 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#event:beforeCreate">SimpleStore#event:beforeCreate</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -17735,6 +22767,8 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
           <th>See</th>
@@ -17755,6 +22789,10 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           </td>
         
         
+          <td>
+            <a href="Container.html#event:beforeCreateMany">Container#event:beforeCreateMany</a>
+          </td>
+        
         
         
           <td>
@@ -17773,15 +22811,6 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#event:beforeCreateMany">SimpleStore#event:beforeCreateMany</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -17853,6 +22882,8 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
           <th>See</th>
@@ -17873,6 +22904,10 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           </td>
         
         
+          <td>
+            <a href="Container.html#event:beforeDestroy">Container#event:beforeDestroy</a>
+          </td>
+        
         
         
           <td>
@@ -17891,15 +22926,6 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#event:beforeDestroy">SimpleStore#event:beforeDestroy</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -17971,6 +22997,8 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
           <th>See</th>
@@ -17991,6 +23019,10 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           </td>
         
         
+          <td>
+            <a href="Container.html#event:beforeDestroyAll">Container#event:beforeDestroyAll</a>
+          </td>
+        
         
         
           <td>
@@ -18009,15 +23041,6 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#event:beforeDestroyAll">SimpleStore#event:beforeDestroyAll</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -18089,6 +23112,8 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
           <th>See</th>
@@ -18109,6 +23134,10 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           </td>
         
         
+          <td>
+            <a href="Container.html#event:beforeFind">Container#event:beforeFind</a>
+          </td>
+        
         
         
           <td>
@@ -18127,15 +23156,6 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#event:beforeFind">SimpleStore#event:beforeFind</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -18207,6 +23227,8 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
           <th>See</th>
@@ -18227,6 +23249,10 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           </td>
         
         
+          <td>
+            <a href="Container.html#event:beforeFindAll">Container#event:beforeFindAll</a>
+          </td>
+        
         
         
           <td>
@@ -18245,15 +23271,6 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#event:beforeFindAll">SimpleStore#event:beforeFindAll</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -18325,6 +23342,8 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
           <th>See</th>
@@ -18345,6 +23364,10 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           </td>
         
         
+          <td>
+            <a href="Container.html#event:beforeUpdate">Container#event:beforeUpdate</a>
+          </td>
+        
         
         
           <td>
@@ -18363,15 +23386,6 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#event:beforeUpdate">SimpleStore#event:beforeUpdate</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -18443,6 +23457,8 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
           <th>See</th>
@@ -18463,6 +23479,10 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           </td>
         
         
+          <td>
+            <a href="Container.html#event:beforeUpdateAll">Container#event:beforeUpdateAll</a>
+          </td>
+        
         
         
           <td>
@@ -18481,15 +23501,6 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#event:beforeUpdateAll">SimpleStore#event:beforeUpdateAll</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -18561,6 +23572,8 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           <th>Source</th>
         
         
+          <th>Overrides</th>
+        
         
         
           <th>See</th>
@@ -18581,6 +23594,10 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
           </td>
         
         
+          <td>
+            <a href="Container.html#event:beforeUpdateMany">Container#event:beforeUpdateMany</a>
+          </td>
+        
         
         
           <td>
@@ -18599,15 +23616,6 @@ console.log(errors) // [{ expected: &#x27;one of (string)&#x27;, actual: &#x27;n
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#event:beforeUpdateMany">SimpleStore#event:beforeUpdateMany</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -18715,15 +23723,6 @@ See <a href="SimpleStore.html#~changeListener">SimpleStore~changeListener</a> on
 <dl class="details">
     
 
-  
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#event:change">SimpleStore#event:change</a>
-      </li>
-    </ul>
-  </dd>
   
 
     
@@ -18844,15 +23843,6 @@ See <a href="SimpleStore.html#~changeListener">SimpleStore~changeListener</a> on
     
 
   
-  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-  <dd class="inherited-from">
-    <ul class="dummy">
-      <li>
-        <a href="SimpleStore.html#event:remove">SimpleStore#event:remove</a>
-      </li>
-    </ul>
-  </dd>
-  
 
     
 
@@ -18915,7 +23905,7 @@ See <a href="SimpleStore.html#~changeListener">SimpleStore~changeListener</a> on
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.1</a>
 	
-		on 2016-09-26T20:55:30-07:00
+		on 2016-09-26T20:55:31-07:00
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>
