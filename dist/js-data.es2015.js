@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-rc.5 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-rc.6 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -7279,7 +7279,9 @@ var makeNotify = function makeNotify(num) {
 
       // Abort lifecycle due to validation errors
       if (errors) {
-        return utils.reject(errors);
+        var err = new Error('validation failed');
+        err.errors = errors;
+        return utils.reject(err);
       }
     }
 
@@ -9660,13 +9662,10 @@ var Mapper$1 = Component$1.extend({
       var errors = record.map(function (_record) {
         return schema.validate(_record, utils.pick(_opts, ['existingOnly']));
       });
-      var hasErrors = false;
-      errors.forEach(function (err) {
-        if (err) {
-          hasErrors = true;
-        }
+      var foundErrors = errors.filter(function (err) {
+        return err;
       });
-      if (hasErrors) {
+      if (foundErrors.length) {
         return errors;
       }
       return undefined;
@@ -14094,7 +14093,7 @@ var DataStore$1 = SimpleStore$1.extend(props$1);
  * @type {Object}
  */
 var version = {
-  full: '3.0.0-rc.5',
+  full: '3.0.0-rc.6',
   major: 3,
   minor: 0,
   patch: 0
