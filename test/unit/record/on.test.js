@@ -45,9 +45,6 @@ describe("Record#on('change')", function() {
     class FooRecord extends Record {
       constructor(props, opts) {
         super(props, opts)
-        if (!FooRecord.__super__) {
-          JSData.Record.call(this, props, opts)
-        }
         this._set('keepChangeHistory', false)
         this._set('noValidate', true)
       }

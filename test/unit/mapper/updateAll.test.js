@@ -92,7 +92,8 @@ describe('Mapper#updateAll', function () {
       users = await User.updateAll(props)
       throw new Error('validation error should have been thrown!')
     } catch (err) {
-      assert.deepEqual(err, [
+      assert.equal(err.message, 'validation failed')
+      assert.deepEqual(err.errors, [
         {
           actual: 'number',
           expected: 'one of (string)',

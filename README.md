@@ -42,7 +42,7 @@ particular needs.
 
 ### Just getting started?
 
-Start with the [JSData Getting Started Tutorial][18] or checkout the [API Reference Documentation][19].
+Start with the [JSData Getting Started Tutorial][18] or explore the [API Reference Documentation][19].
 
 ### Need help?
 

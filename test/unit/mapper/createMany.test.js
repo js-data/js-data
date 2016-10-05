@@ -594,7 +594,8 @@ describe('Mapper#createMany', function () {
       users = await User.createMany(props)
       throw new Error('validation error should have been thrown!')
     } catch (err) {
-      assert.objectsEqual(err, [
+      assert.equal(err.message, 'validation failed')
+      assert.objectsEqual(err.errors, [
         [
           {
             actual: 'boolean',
@@ -639,7 +640,8 @@ describe('Mapper#createMany', function () {
       users = await User.createMany(props)
       throw new Error('validation error should have been thrown!')
     } catch (err) {
-      assert.objectsEqual(err, [
+      assert.equal(err.message, 'validation failed')
+      assert.objectsEqual(err.errors, [
         [
           {
             actual: 'undefined',

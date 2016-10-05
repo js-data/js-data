@@ -1,5 +1,9 @@
-(delete this line) Find out how to get help here: http://js-data.io/docs/community.
+## Description
 
-<your detailed, actionable, and helpful text goes here>
+<description>
+
+## Steps to reproduce
+
+<steps_to_reproduce>
 
 Thanks!
