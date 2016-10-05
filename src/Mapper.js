@@ -59,7 +59,9 @@ const makeNotify = function (num) {
 
       // Abort lifecycle due to validation errors
       if (errors) {
-        return utils.reject(errors)
+        const err = new Error('validation failed')
+        err.errors = errors
+        return utils.reject(err)
       }
     }
 
@@ -125,9 +127,7 @@ const LIFECYCLE_METHODS = {
   },
   updateMany: {
     adapterArgs (mapper, records, opts) {
-      return [records.map(function (record) {
-        return mapper.toJSON(record, opts)
-      }), opts]
+      return [records.map((record) => mapper.toJSON(record, opts)), opts]
     },
     beforeAssign: 0,
     defaults: [[], {}],
@@ -1370,7 +1370,7 @@ export default Component.extend({
     }
     const RecordCtor = this.recordClass
     const relationList = this.relationList || []
-    relationList.forEach(function (def) {
+    relationList.forEach((def) => {
       const relatedMapper = def.getRelation()
       const relationData = def.getLocalField(props)
       if (relationData && !relatedMapper.is(relationData)) {
@@ -2375,13 +2375,8 @@ export default Component.extend({
     const _opts = utils.pick(opts, ['existingOnly'])
     if (utils.isArray(record)) {
       const errors = record.map((_record) => schema.validate(_record, utils.pick(_opts, ['existingOnly'])))
-      let hasErrors = false
-      errors.forEach(function (err) {
-        if (err) {
-          hasErrors = true
-        }
-      })
-      if (hasErrors) {
+      const foundErrors = errors.filter((err) => err)
+      if (foundErrors.length) {
         return errors
       }
       return undefined

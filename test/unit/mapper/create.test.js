@@ -717,7 +717,8 @@ describe('Mapper#create', function () {
       user = await User.create(props)
       throw new Error('validation error should have been thrown!')
     } catch (err) {
-      assert.objectsEqual(err, [
+      assert.equal(err.message, 'validation failed')
+      assert.objectsEqual(err.errors, [
         {
           actual: 'number',
           expected: 'one of (string)',
@@ -757,7 +758,8 @@ describe('Mapper#create', function () {
       user = await User.create(props)
       throw new Error('validation error should have been thrown!')
     } catch (err) {
-      assert.objectsEqual(err, [
+      assert.equal(err.message, 'validation failed')
+      assert.objectsEqual(err.errors, [
         {
           actual: 'undefined',
           expected: 'a value',
@@ -819,7 +821,8 @@ describe('Mapper#create', function () {
       user = await User.create(props)
       throw new Error('validation error should have been thrown!')
     } catch (err) {
-      assert.objectsEqual(err, [
+      assert.equal(err.message, 'validation failed')
+      assert.objectsEqual(err.errors, [
         {
           actual: 'extra fields: baz',
           expected: 'no extra fields',

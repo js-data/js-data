@@ -1,3 +1,8 @@
+##### 3.0.0-rc.6 - 05 October 2016
+
+###### Bug fixes
+- Wrapped lifecycle hook validation error in an instance of Error
+
 ##### 3.0.0-rc.5 - 26 September 2016
 
 ###### Backwards compatible changes
