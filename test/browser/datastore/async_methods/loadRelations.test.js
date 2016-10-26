@@ -619,4 +619,73 @@ describe('DS#loadRelations', function () {
       assert.isTrue(foo.beep === foo.beep);
     });
   });
+
+  it('http://www.js-data.io/v2.9/docs/dsloadrelations example should work', function () {
+    var _this = this;
+    var store = new JSData.DS();
+    store.registerAdapter('http', dsHttpAdapter, { default: true });
+
+    var User = store.defineResource({
+      name: 'user',
+      relations: {
+        hasOne: {
+          profile: {
+            localField: 'profile',
+            foreignKey: 'userId'
+          }
+        }
+      }
+    });
+
+    var Profile = store.defineResource({
+      name: 'profile',
+      relations: {
+        belongsTo: {
+          user: {
+            localField: 'user',
+            localKey: 'userId'
+          }
+        }
+      }
+    });
+
+    var user = User.inject({
+      id: 135,
+      profile: {
+        id: 246,
+        userId: 135
+      }
+    });
+
+    assert.objectsEqual(user, store.get('user', 135));
+    assert.objectsEqual(user.profile, store.get('profile', 246));
+    assert.objectsEqual(user.profile.user, store.get('user', 135));
+
+    var profile = Profile.inject({
+      id: 680,
+      userId: 579,
+      user: {
+        id: 579
+      }
+    });
+
+    assert.objectsEqual(profile, store.get('profile', 680));
+    assert.objectsEqual(profile.user, store.get('user', 579));
+    assert.objectsEqual(profile.user.profile, store.get('profile', 680));
+
+    var user = User.inject({
+      id: 10
+    });
+
+    setTimeout(function () {
+      assert.equal(1, _this.requests.length);
+      assert.equal(_this.requests[0].url, 'profile?userId=10');
+      assert.equal(_this.requests[0].method, 'GET');
+      _this.requests[0].respond(200, { 'Content-Type': 'application/json' }, DSUtils.toJson([{ id: 2, userId: 10 }]));
+    }, 60);
+
+    return User.loadRelations(10, ['profile']).then(function (user) {
+      assert.objectsEqual(user.profile, Profile.get(2));
+    });
+  });
 });
