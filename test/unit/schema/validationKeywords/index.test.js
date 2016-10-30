@@ -16,7 +16,7 @@ import { uniqueItemsTests } from './_uniqueItems'
 import { maxPropertiesTests } from './_maxProperties'
 import { minPropertiesTests } from './_minProperties'
 import { requiredTests } from './_required'
-import { propertiesTests } from './_properties'
+import { propertiesTests, additionalProperties } from './_properties'
 import { patternPropertiesTests } from './_patternProperties'
 // import { dependenciesTests } from './_dependencies'
 
@@ -64,13 +64,14 @@ describe('Schema.validationKeywords', function () {
 
 const validationTestRunner = function (suites, group) {
   suites.forEach((suite) => {
-    let Schema = new JSData.Schema(suite.schema)
+    let schema = new JSData.Schema(suite.schema)
     describe(suite.description, function () {
       suite.tests.forEach((test) => {
         it(test.description, function () {
           let errors = group
-            ? JSData.Schema.typeGroupValidators[group](test.data, Schema)
-            : JSData.Schema.validate(test.data, Schema)
+            ? JSData.Schema.typeGroupValidators[group](test.data, schema)
+            : JSData.Schema.validate(test.data, schema)
+
           assert.equal(test.valid, !errors, errors)
         })
       })
@@ -136,8 +137,8 @@ describe('Schema.validationKeywords.required', function () {
 
 describe('Schema.validationKeywords.properties', function () {
   validationTestRunner(propertiesTests, 'object')
-  // TODO make work
-  // validationTestRunner(patternPropertiesTests, 'object')
+  validationTestRunner(patternPropertiesTests, 'object')
+  validationTestRunner(additionalProperties, 'object')
 })
 
 describe('Schema.validationKeywords.dependencies', function () {

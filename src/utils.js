@@ -1307,13 +1307,10 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * @since 3.0.0
    */
   pick (props, keys) {
-    const _props = {}
-    utils.forOwn(props, function (value, key) {
-      if (keys.indexOf(key) !== -1) {
-        _props[key] = value
-      }
-    })
-    return _props
+    return keys.reduce((map, key) => {
+      map[key] = props[key]
+      return map
+    }, {})
   },
 
   /**

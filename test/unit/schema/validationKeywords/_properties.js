@@ -97,7 +97,7 @@ export const propertiesTests = [
 export const additionalProperties = [
   {
     'description':
-    'additionalProperties being false does not allow other properties',
+    'when "additionalProperties" option is false',
     'schema': {
       'type': 'object',
       'properties': { 'foo': {}, 'bar': {} },
@@ -106,22 +106,22 @@ export const additionalProperties = [
     },
     'tests': [
       {
-        'description': 'no additional properties is valid',
+        'description': 'should pass validation if record has only specified fields',
         'data': { 'foo': 1 },
         'valid': true
       },
       {
-        'description': 'an additional property is invalid',
+        'description': 'should not pass validation if record has non-specified fields in schema',
         'data': { 'foo': 1, 'bar': 2, 'quux': 'boom' },
         'valid': false
       },
       {
-        'description': 'ignores non-objects',
+        'description': 'should ignore validation if record is not an object',
         'data': [1, 2, 3],
         'valid': true
       },
       {
-        'description': 'patternProperties are not additional properties',
+        'description': 'should pass validation if record contains fields which are matched by "patternProperties"',
         'data': { 'foo': 1, 'vroom': 2 },
         'valid': true
       }
@@ -129,7 +129,7 @@ export const additionalProperties = [
   },
   {
     'description':
-    'additionalProperties allows a schema which should validate',
+    'when "additionalProperties" allows to pass "boolean" types',
     'schema': {
       'type': 'object',
       'properties': { 'foo': {}, 'bar': {} },
@@ -137,17 +137,17 @@ export const additionalProperties = [
     },
     'tests': [
       {
-        'description': 'no additional properties is valid',
+        'description': 'should pass validation if record does not contain additional fields',
         'data': { 'foo': 1 },
         'valid': true
       },
       {
-        'description': 'an additional valid property is valid',
+        'description': 'should pass validation if record contains boolean additional fields',
         'data': { 'foo': 1, 'bar': 2, 'quux': true },
         'valid': true
       },
       {
-        'description': 'an additional invalid property is invalid',
+        'description': 'should not pass validation if record contains non-bookean additional fields',
         'data': { 'foo': 1, 'bar': 2, 'quux': 12 },
         'valid': false
       }
@@ -155,33 +155,33 @@ export const additionalProperties = [
   },
   {
     'description':
-    'additionalProperties can exist by itself',
+    'when schema does not have "properties" option but has "additionalProperties" which allows to pass boolean',
     'schema': {
       'type': 'object',
       'additionalProperties': { 'type': 'boolean' }
     },
     'tests': [
       {
-        'description': 'an additional valid property is valid',
+        'description': 'should pass validation if record contains boolean fields',
         'data': { 'foo': true },
         'valid': true
       },
       {
-        'description': 'an additional invalid property is invalid',
+        'description': 'should not pass validation if record contains non-boolean fields',
         'data': { 'foo': 1 },
         'valid': false
       }
     ]
   },
   {
-    'description': 'additionalProperties are allowed by default',
+    'description': 'by default',
     'schema': {
       'type': 'object',
       'properties': { 'foo': {}, 'bar': {} }
     },
     'tests': [
       {
-        'description': 'additional properties are allowed',
+        'description': 'should pass validation if records contains additional fields',
         'data': { 'foo': 1, 'bar': 2, 'quux': true },
         'valid': true
       }
