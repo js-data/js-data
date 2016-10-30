@@ -1,4 +1,4 @@
-import { assert, JSData } from '../../_setup'
+import { assert, JSData, createRelation as relation } from '../../_setup'
 
 const { Mapper, hasMany, DataStore } = JSData
 
@@ -229,8 +229,4 @@ describe('JSData.hasMany', function () {
       assert.equal(foo.bars, foo._bars)
     })
   })
-
-  function relation(name, definition) {
-    return { [name]: definition }
-  }
 })
