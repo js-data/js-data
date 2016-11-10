@@ -484,12 +484,16 @@ const validationKeywords = {
    */
   properties (value, schema, opts) {
     opts || (opts = {})
+
+    if (utils.isArray(value)) {
+      return
+    }
+
     // Can be a boolean or an object
     // Technically the default is an "empty schema", but here "true" is
     // functionally the same
     const additionalProperties = schema.additionalProperties === undefined ? true : schema.additionalProperties
-    // "s": The property set of the instance to validate.
-    const toValidate = {}
+    const validated = []
     // "p": The property set from "properties".
     // Default is an object
     const properties = schema.properties || {}
@@ -498,28 +502,24 @@ const validationKeywords = {
     const patternProperties = schema.patternProperties || {}
     let errors = []
 
-    // Collect set "s"
-    utils.forOwn(value, function (_value, prop) {
-      toValidate[prop] = undefined
-    })
-    // Remove from "s" all elements of "p", if any.
-    utils.forOwn(properties || {}, function (_schema, prop) {
+    utils.forOwn(properties, function (_schema, prop) {
       opts.prop = prop
       errors = errors.concat(validate(value[prop], _schema, opts) || [])
-      delete toValidate[prop]
+      validated.push(prop)
     })
-    // For each regex in "pp", remove all elements of "s" which this regex
-    // matches.
+
+    const toValidate = utils.omit(value, validated)
     utils.forOwn(patternProperties, function (_schema, pattern) {
       utils.forOwn(toValidate, function (undef, prop) {
         if (prop.match(pattern)) {
           opts.prop = prop
+          // console.log(_schema)
           errors = errors.concat(validate(value[prop], _schema, opts) || [])
-          delete toValidate[prop]
+          validated.push(prop)
         }
       })
     })
-    const keys = Object.keys(toValidate)
+    const keys = Object.keys(utils.omit(value, validated))
     // If "s" is not empty, validation fails
     if (additionalProperties === false) {
       if (keys.length) {
@@ -1027,7 +1027,8 @@ function Schema (definition) {
   // TODO: schema validation
   utils.fillIn(this, definition)
 
-  if (this.type === 'object' && this.properties) {
+  if (this.type === 'object') {
+    this.properties = this.properties || {}
     utils.forOwn(this.properties, (_definition, prop) => {
       if (!(_definition instanceof Schema)) {
         this.properties[prop] = new Schema(_definition)
@@ -1224,4 +1225,3 @@ export default Component.extend({
  * @returns {Constructor} Subclass of this Schema class.
  * @since 3.0.0
  */
-
