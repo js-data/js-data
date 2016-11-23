@@ -1792,7 +1792,7 @@ const props = {
    */
   updateAll (name, props, query, opts) {
     opts || (opts = {})
-    return Container.prototype.updateAll.call(this, name, query, props, opts)
+    return Container.prototype.updateAll.call(this, name, props, query, opts)
       .then((result) => this._end(name, result, opts))
   },
 
