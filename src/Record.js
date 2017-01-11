@@ -649,7 +649,7 @@ export default Component.extend({
    *   session.skill_level = 'beginner'
    *
    *   // Update the record in the database
-   *   return user.save()
+   *   return session.save()
    * })
    *
    * @method Record#save
