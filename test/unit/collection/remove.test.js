@@ -86,7 +86,7 @@ describe('Collection#remove', function () {
       author: 'Bob'
     }).length, 1)
 
-    const bob2 = this.PostCollection.add({ author: 'Bob' })
+    this.PostCollection.add({ author: 'Bob' })
     assert.objectsEqual(this.PostCollection.filter({
       id: undefined
     }).length, 2)

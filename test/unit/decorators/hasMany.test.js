@@ -76,7 +76,7 @@ describe('JSData.hasMany', function () {
 
     it('should allow relation re-assignment', function () {
       const foo = store.add('foo', { id: 1 })
-      const bars = store.add('bar', [{ fooId: 1, id: 1 }, { fooId: 1, id: 2 }])
+      store.add('bar', [{ fooId: 1, id: 1 }, { fooId: 1, id: 2 }])
       const otherBars = store.add('bar', [{ id: 10 }])
 
       foo.bars = otherBars

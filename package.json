@@ -53,7 +53,7 @@
   },
   "scripts": {
     "doc": "jsdoc -c conf.json src && node scripts/cleanup.js",
-    "lint": "repo-tools lint src/**/*.js test/**/*.js scripts/*.js lib/**/*.js *.config.js",
+    "lint": "standard 'src/**/*.js' 'test/**/*.js' 'scripts/*.js' 'lib/**/*.js' '*.config.js'",
     "bundle:es5": "rollup src/index.js -c -o dist/js-data.js -m dist/js-data.js.map -f umd",
     "bundle:next": "rollup src/index.js -c -o dist/js-data.es2015.js -m dist/js-data.es2015.js.map -f es",
     "bundle": "npm run bundle:es5 && npm run bundle:next && repo-tools write-version dist/js-data.js dist/js-data.es2015.js",
@@ -68,11 +68,18 @@
     "release": "npm test && npm run doc && repo-tools updates && repo-tools changelog && repo-tools authors"
   },
   "devDependencies": {
+    "babel-core": "6.21.0",
+    "babel-eslint": "7.1.1",
     "babel-plugin-external-helpers": "6.18.0",
     "babel-plugin-syntax-async-functions": "6.13.0",
     "babel-plugin-transform-es2015-modules-umd": "6.18.0",
     "babel-plugin-transform-regenerator": "6.21.0",
+    "babel-polyfill": "6.20.0",
+    "babel-preset-es2015": "6.18.0",
+    "chai": "3.5.0",
+    "ink-docstrap": "git+https://github.com/js-data/docstrap.git#cfbe45fa313e1628c493076d5e15d2b855dfbf2c",
     "js-data-repo-tools": "0.5.9",
+    "jsdoc": "3.4.3",
     "karma": "1.4.0",
     "karma-babel-preprocessor": "6.0.1",
     "karma-chai": "0.1.0",
@@ -81,7 +88,13 @@
     "karma-phantomjs-launcher": "1.0.2",
     "karma-sauce-launcher": "1.1.0",
     "karma-sinon": "1.0.5",
+    "mocha": "3.2.0",
+    "nyc": "10.1.2",
     "phantomjs-prebuilt": "2.1.14",
+    "rollup": "0.41.4",
+    "rollup-plugin-babel": "2.7.1",
+    "sinon": "1.17.7",
+    "standard": "8.6.0",
     "uglify-js": "2.7.5"
   }
 }

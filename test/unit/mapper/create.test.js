@@ -435,7 +435,7 @@ describe('Mapper#create', function () {
         userId: user.id
       }
     ], 'user.comments should be there')
-    return
+    // return
     assert.objectsEqual(store.getAll('comment'), [
       {
         content: 'foo',

@@ -287,7 +287,7 @@ const utils = {
         } else if (utils.isDate(from)) {
           to = new Date(from.getTime())
         } else if (utils.isRegExp(from)) {
-          to = new RegExp(from.source, from.toString().match(/[^\/]*$/)[0])
+          to = new RegExp(from.source, from.toString().match(/[^/]*$/)[0])
           to.lastIndex = from.lastIndex
         } else if (utils.isObject(from)) {
           if (plain) {
@@ -1573,8 +1573,7 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
     }
 
     object[last] = undefined
-  },
-
+  }
 }
 
 export const safeSetProp = function (record, field, value) {

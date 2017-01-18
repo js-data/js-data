@@ -60,11 +60,11 @@ export function createMapper (options) {
 }
 
 let idCounter = 1
-function generateId() {
+function generateId () {
   return Date.now() + (idCounter++)
 }
 
-function createInMemoryAdapter() {
+function createInMemoryAdapter () {
   const adapter = {
     create (mapper, props, options) {
       props[mapper.idAttribute] = generateId()
@@ -72,7 +72,9 @@ function createInMemoryAdapter() {
     },
 
     createMany (mapper, records, options) {
-      records.forEach(props => props[mapper.idAttribute] = generateId())
+      records.forEach(props => {
+        props[mapper.idAttribute] = generateId()
+      })
 
       return adapter.resolve(records, options)
     },
@@ -92,7 +94,7 @@ function createInMemoryAdapter() {
   return adapter
 }
 
-function registerInMemoryAdapterFor(storeOrMapper, options = { default: true }) {
+function registerInMemoryAdapterFor (storeOrMapper, options = { default: true }) {
   storeOrMapper.registerAdapter('inMemory', createInMemoryAdapter(), options)
 
   const adapter = storeOrMapper.getAdapter('inMemory')

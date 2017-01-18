@@ -1,4 +1,4 @@
-import utils, { safeSetLink, safeSetProp } from './utils'
+import utils from './utils'
 
 import {
   belongsToType,

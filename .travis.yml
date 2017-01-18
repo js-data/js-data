@@ -9,7 +9,7 @@ cache:
   directories:
   - node_modules/
 before_install:
-  - yarn global add nyc codecov rollup
+  - yarn global add nyc codecov
 script:
   - yarn test
 after_success:

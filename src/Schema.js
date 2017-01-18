@@ -852,7 +852,7 @@ const makeDescriptor = function (prop, schema, opts) {
               this.emit('change:' + changed[i], this, utils.get(this, changed[i]))
             }
 
-            const changes = utils.diffObjects({ [prop] : value }, { [prop] : current })
+            const changes = utils.diffObjects({ [prop]: value }, { [prop]: current })
 
             if (_get(keepChangeHistoryPath)) {
               const changeRecord = utils.plainCopy(changes)

@@ -26,7 +26,7 @@ import { allOfTests } from './_allOf'
 import { anyOfTests } from './_anyOf'
 import { oneOfTests } from './_oneOf'
 import { notTests } from './_not'
-import { definitionsTests } from './_definitions'
+// import { definitionsTests } from './_definitions'
 
 describe('Schema.validationKeywords', function () {
   it('has the right default keywords', function () {

@@ -1,6 +1,6 @@
 import { assert, JSData, createStore, createRelation, sinon } from '../../_setup'
 
-const { Mapper, belongsTo, utils } = JSData
+const { Mapper, belongsTo } = JSData
 
 describe('JSData.belongsTo', function () {
   let store
@@ -63,7 +63,7 @@ describe('JSData.belongsTo', function () {
       bars = store.add('bar', [{ id: 1, fooId: 1 }, { id: 2, fooId: 1 }])
     })
 
-    it('should add property accessors to prototype of target' , function () {
+    it('should add property accessors to prototype of target', function () {
       const Foo = store.getMapper('foo').recordClass
       const Bar = store.getMapper('bar').recordClass
 
@@ -102,7 +102,7 @@ describe('JSData.belongsTo', function () {
       })
     })
 
-    it('should not create an inverse link', function() {
+    it('should not create an inverse link', function () {
       const foo = store.add('foo', { id: 1 })
       const bar = store.add('bar', { id: 1, fooId: 1 })
 
@@ -147,7 +147,7 @@ describe('JSData.belongsTo', function () {
     })
 
     it('should call custom setter each time relation is changed', function () {
-      const foo = store.add('foo', { id: 1, name: 'test' })
+      store.add('foo', { id: 1, name: 'test' })
       const bar = store.add('bar', { id: 1, fooId: 1 })
 
       bar.foo = null

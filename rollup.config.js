@@ -6,12 +6,17 @@ export default {
   plugins: [
     babel({
       babelrc: false,
+      plugins: [
+        'external-helpers'
+      ],
       presets: [
         [
-          'es2015', { 'modules': false }
+          'es2015',
+          {
+            modules: false
+          }
         ]
       ],
-      plugins: ['external-helpers'],
       exclude: 'node_modules/**'
     })
   ]
