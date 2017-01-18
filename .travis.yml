@@ -5,10 +5,12 @@ node_js:
 - "5"
 - "4"
 cache:
+  yarn: true
   directories:
   - node_modules/
 before_install:
-  - npm i -g npm
-  - npm i -g codecov nyc
+  - yarn add -g nyc codecov
+script:
+  - yarn test
 after_success:
-  - nyc report --reporter=lcov | codecov
+  - nyc report --reporter=lcov > coverage.lcov && codecov
