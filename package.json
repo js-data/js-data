@@ -43,15 +43,6 @@
       "it"
     ]
   },
-  "babel": {
-    "presets": [
-      "es2015"
-    ],
-    "plugins": [
-      "syntax-async-functions",
-      "transform-regenerator"
-    ]
-  },
   "scripts": {
     "doc": "jsdoc -c conf.json src && node scripts/cleanup.js",
     "lint": "standard 'src/**/*.js' 'test/**/*.js' 'scripts/*.js' 'lib/**/*.js' '*.config.js'",
