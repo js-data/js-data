@@ -13,6 +13,5 @@ describe('utils.err', function () {
 
     const error404 = utils.err(JSData)(404, 'not found')
     assert(error404 instanceof Error)
-    console.log(error400)
   })
 })

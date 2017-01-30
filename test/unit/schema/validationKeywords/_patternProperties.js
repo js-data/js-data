@@ -1,8 +1,9 @@
 export const patternPropertiesTests = [
   {
     'description':
-    'patternProperties validates properties matching a regex',
+    '"patternProperties" validates properties matching a regexp',
     'schema': {
+      'type': 'object',
       'patternProperties': {
         'f.*o': { 'type': 'integer' }
       }
@@ -36,11 +37,12 @@ export const patternPropertiesTests = [
     ]
   },
   {
-    'description': 'multiple simultaneous patternProperties are validated',
+    'description': 'multiple simultaneous "patternProperties" are validated',
     'schema': {
+      'type': 'object',
       'patternProperties': {
         'a*': { 'type': 'integer' },
-        'aaa*': { 'maximum': 20 }
+        'aaa*': { 'type': 'integer', 'maximum': 20 }
       }
     },
     'tests': [
@@ -79,6 +81,7 @@ export const patternPropertiesTests = [
   {
     'description': 'regexes are not anchored by default and are case sensitive',
     'schema': {
+      'type': 'object',
       'patternProperties': {
         '[0-9]{2,}': { 'type': 'boolean' },
         'X_': { 'type': 'string' }

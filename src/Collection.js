@@ -17,6 +17,15 @@ const COLLECTION_DEFAULTS = {
   commitOnMerge: true,
 
   /**
+   * Whether record events should bubble up and be emitted by the collection.
+   *
+   * @name Collection#emitRecordEvents
+   * @type {boolean}
+   * @default true
+   */
+  emitRecordEvents: true,
+
+  /**
    * Field to be used as the unique identifier for records in this collection.
    * Defaults to `"id"` unless {@link Collection#mapper} is set, in which case
    * this will default to {@link Mapper#idAttribute}.
@@ -183,7 +192,9 @@ export default Component.extend({
    * @param {...*} [arg] Args passed to {@link Collection#emit}.
    */
   _onRecordEvent (...args) {
-    this.emit(...args)
+    if (this.emitRecordEvents) {
+      this.emit(...args)
+    }
   },
 
   /**
@@ -277,7 +288,9 @@ export default Component.extend({
     })
     // Finally, return the inserted data
     const result = singular ? records[0] : records
-    this.emit('add', result)
+    if (!opts.silent) {
+      this.emit('add', result)
+    }
     return this.afterAdd(records, opts, result) || result
   },
 

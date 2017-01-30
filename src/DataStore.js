@@ -8,8 +8,6 @@ import {
 import SimpleStore from './SimpleStore'
 import LinkedCollection from './LinkedCollection'
 
-const DOMAIN = 'DataStore'
-
 const DATASTORE_DEFAULTS = {
   /**
    * Whether in-memory relations should be unlinked from records after they are

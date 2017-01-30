@@ -33,11 +33,11 @@ describe('Record#hasChanges', function () {
     assert(post.hasChanges())
     post.author = 'John'
     assert(!post.hasChanges())
-    setTimeout(function() {
+    setTimeout(function () {
       assert.equal(listener.callCount, 0)
       done()
     }, 5)
-  }),
+  })
 
   /* The previous test has a property set and changed back within a single event loop
   * So no listener is ever called.
@@ -45,7 +45,7 @@ describe('Record#hasChanges', function () {
   * even if both changes were registered and a listener was called on each change (twice in total).
   */
 
-  it('is not affected by timing', function(done) {
+  it('is not affected by timing', function (done) {
     const PostMapper = new JSData.Mapper({
       name: 'post',
       schema: {
@@ -62,7 +62,7 @@ describe('Record#hasChanges', function () {
     post.on('change', listener)
     post.author = 'Jake'
     assert(post.hasChanges())
-    const secondSpec = function() {
+    const secondSpec = function () {
       assert.equal(listener.callCount, 2)
       assert(!post.hasChanges())
       done()

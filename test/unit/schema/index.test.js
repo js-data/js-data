@@ -75,7 +75,7 @@ describe('Schema', function () {
     assert(!errors)
 
     errors = ProductSchema.validate('foo')
-    return
+    // return
     assert.deepEqual(
       errors,
       [{ expected: 'one of (object)', actual: 'string', path: '' }]

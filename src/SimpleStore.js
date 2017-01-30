@@ -1,4 +1,4 @@
-import utils, { safeSetLink, safeSetProp } from './utils'
+import utils from './utils'
 
 import {
   belongsToType,
@@ -1284,6 +1284,7 @@ const props = {
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(string|number)} id Passed to {@link Mapper#find}.
    * @param {Object} [opts] Passed to {@link Mapper#find}.
+   * @param {boolean} [opts.force] Bypass cacheFind
    * @param {boolean|Function} [opts.usePendingFind] See {@link SimpleStore#usePendingFind}
    * @returns {Promise} Resolves with the result, if any.
    * @since 3.0.0
@@ -1395,6 +1396,7 @@ const props = {
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Object} [query] Passed to {@link Mapper.findAll}.
    * @param {Object} [opts] Passed to {@link Mapper.findAll}.
+   * @param {boolean} [opts.force] Bypass cacheFindAll
    * @param {boolean|Function} [opts.usePendingFindAll] See {@link SimpleStore#usePendingFindAll}
    * @returns {Promise} Resolves with the result, if any.
    * @since 3.0.0
@@ -1792,7 +1794,7 @@ const props = {
    */
   updateAll (name, props, query, opts) {
     opts || (opts = {})
-    return Container.prototype.updateAll.call(this, name, query, props, opts)
+    return Container.prototype.updateAll.call(this, name, props, query, opts)
       .then((result) => this._end(name, result, opts))
   },
 

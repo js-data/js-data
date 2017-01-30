@@ -41,6 +41,68 @@ export const TYPES_EXCEPT_OBJECT_OR_ARRAY = ['string', 123, 123.123, null, undef
 export const TYPES_EXCEPT_BOOLEAN = ['string', 123, 123.123, null, undefined, {}, [], function () {}]
 export const TYPES_EXCEPT_FUNCTION = ['string', 123, 123.123, null, undefined, {}, [], true, false]
 
+export function createRelation (name, defs) {
+  return { [name]: defs }
+}
+
+export function createStore (options) {
+  const store = new JSData.DataStore(options)
+  registerInMemoryAdapterFor(store)
+
+  return store
+}
+
+export function createMapper (options) {
+  const mapper = new JSData.Mapper(options)
+  registerInMemoryAdapterFor(mapper)
+
+  return mapper
+}
+
+let idCounter = 1
+function generateId () {
+  return Date.now() + (idCounter++)
+}
+
+function createInMemoryAdapter () {
+  const adapter = {
+    create (mapper, props, options) {
+      props[mapper.idAttribute] = generateId()
+      return adapter.resolve(props, options)
+    },
+
+    createMany (mapper, records, options) {
+      records.forEach(props => {
+        props[mapper.idAttribute] = generateId()
+      })
+
+      return adapter.resolve(records, options)
+    },
+
+    resolve (data, options) {
+      if (options.raw) {
+        return JSData.utils.resolve({
+          data,
+          processedAt: new Date()
+        })
+      }
+
+      return JSData.utils.resolve(data)
+    }
+  }
+
+  return adapter
+}
+
+function registerInMemoryAdapterFor (storeOrMapper, options = { default: true }) {
+  storeOrMapper.registerAdapter('inMemory', createInMemoryAdapter(), options)
+
+  const adapter = storeOrMapper.getAdapter('inMemory')
+  Object.keys(adapter).forEach(name => sinon.spy(adapter, name))
+
+  return adapter
+}
+
 // Clean setup for each test
 beforeEach(function () {
   this.data = {}

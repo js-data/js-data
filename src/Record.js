@@ -2,7 +2,6 @@ import utils, { safeSetLink } from './utils'
 import Component from './Component'
 import Settable from './Settable'
 import {
-  belongsToType,
   hasManyType,
   hasOneType
 } from './decorators'
@@ -401,7 +400,7 @@ export default Component.extend({
     return !this._mapper().validate(this, opts)
   },
 
-  removeInverseRelation(currentParent, id, inverseDef, idAttribute) {
+  removeInverseRelation (currentParent, id, inverseDef, idAttribute) {
     if (inverseDef.type === hasOneType) {
       safeSetLink(currentParent, inverseDef.localField, undefined)
     } else if (inverseDef.type === hasManyType) {
@@ -415,7 +414,7 @@ export default Component.extend({
     }
   },
 
-  setupInverseRelation(record, id, inverseDef, idAttribute) {
+  setupInverseRelation (record, id, inverseDef, idAttribute) {
       // Update (set) inverse relation
     if (inverseDef.type === hasOneType) {
       // e.g. someUser.profile = profile
@@ -649,7 +648,7 @@ export default Component.extend({
    *   session.skill_level = 'beginner'
    *
    *   // Update the record in the database
-   *   return user.save()
+   *   return session.save()
    * })
    *
    * @method Record#save

@@ -1,17 +1,30 @@
+machine:
+  node:
+    version: 6.9.1
+  environment:
+    YARN_VERSION: 0.18.1
+    PATH: "${PATH}:${HOME}/.yarn/bin:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin"
+
 general:
   branches:
     ignore:
       - gh-pages
-machine:
-  node:
-    version: 5.7.0
+
 dependencies:
   pre:
-    - npm i -g npm
-    - npm i -g codecov nyc
+    - |
+      if [[ ! -e ~/.yarn/bin/yarn || $(yarn --version) != "${YARN_VERSION}" ]]; then
+        curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version $YARN_VERSION
+      fi
+    - yarn global add nyc codecov
+  override:
+    - yarn install
+  cache_directories:
+    - ~/.yarn
+    - ~/.cache/yarn
+
 test:
+  override:
+    - yarn test
   post:
-    - nyc report --reporter=lcov | codecov
-general:
-  artifacts:
-    - "dist"
+    - nyc report --reporter=lcov > coverage.lcov && codecov

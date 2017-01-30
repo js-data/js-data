@@ -15,7 +15,7 @@ const reserved = {
 }
 
 // Used by our JavaScript implementation of the LIKE operator
-const escapeRegExp = /([.*+?^=!:${}()|[\]\/\\])/g
+const escapeRegExp = /([.*+?^=!:${}()|[\]/\\])/g
 const percentRegExp = /%/g
 const underscoreRegExp = /_/g
 const escape = function (pattern) {

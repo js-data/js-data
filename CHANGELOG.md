@@ -1,3 +1,16 @@
+##### 3.0.0-rc.7 - 29 January 2017
+
+###### Bug fixes
+- #433 - `Collection#add` is missing a "silent" option
+
+###### Backwards compatible changes
+- Added a `emitRecordEvents` option to `Collection` which defaults to `true`
+
+###### Other
+- Moved Babel config from `package.json` to `.babelrc`
+- Upgraded devDependencies
+- Added a `yarn.lock` file
+
 ##### 3.0.0-rc.6 - 05 October 2016
 
 ###### Bug fixes

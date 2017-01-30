@@ -151,7 +151,7 @@ describe('Collection#add', function () {
           count: { type: 'number' }
         }
       }
-    });
+    })
 
     const test = store.createRecord('test', { id: 'abcd', count: 1 })
     store.add('test', test)
