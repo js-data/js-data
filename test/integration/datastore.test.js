@@ -244,53 +244,75 @@ describe('DataStore integration tests', function () {
     const foo = store.add('foo', { id: 1 })
     assert.equal(foo.bar, undefined)
 
-    setTimeout(() => {
-      if (handlersCalled !== 6) {
-        done('not all handlers were called')
-      } else {
-        done()
-      }
-    }, 1000)
-
     store.on('change', function (mapperName, record, changes) {
       assert.equal(mapperName, 'foo')
       assert.strictEqual(record, foo)
-      assert.deepEqual(changes, { added: { bar: 'baz' }, changed: {}, removed: {} })
+      try {
+        assert.deepEqual(changes, { added: { bar: 'baz' }, changed: {}, removed: {} })
+      } catch (err) {
+        assert.deepEqual(changes, { added: {}, changed: { bar: 'beep' }, removed: {} })
+      }
       handlersCalled++
     })
 
     store.getCollection('foo').on('change', function (record, changes) {
       assert.strictEqual(record, foo)
-      assert.deepEqual(changes, { added: { bar: 'baz' }, changed: {}, removed: {} })
+      try {
+        assert.deepEqual(changes, { added: { bar: 'baz' }, changed: {}, removed: {} })
+      } catch (err) {
+        assert.deepEqual(changes, { added: {}, changed: { bar: 'beep' }, removed: {} })
+      }
       handlersCalled++
     })
 
     foo.on('change', (record, changes) => {
       assert.strictEqual(record, foo)
-      assert.deepEqual(changes, { added: { bar: 'baz' }, changed: {}, removed: {} })
+      try {
+        assert.deepEqual(changes, { added: { bar: 'baz' }, changed: {}, removed: {} })
+      } catch (err) {
+        assert.deepEqual(changes, { added: {}, changed: { bar: 'beep' }, removed: {} })
+      }
       handlersCalled++
     })
 
     store.on('change:bar', function (mapperName, record, value) {
       assert.equal(mapperName, 'foo')
       assert.strictEqual(record, foo)
-      assert.equal(value, 'baz')
+      assert(value === 'baz' || value === 'beep')
       handlersCalled++
     })
 
     store.getCollection('foo').on('change:bar', function (record, value) {
       assert.strictEqual(record, foo)
-      assert.equal(value, 'baz')
+      assert(value === 'baz' || value === 'beep')
       handlersCalled++
     })
 
     foo.on('change:bar', (record, value) => {
       assert.strictEqual(record, foo)
-      assert.equal(value, 'baz')
+      assert(value === 'baz' || value === 'beep')
       handlersCalled++
     })
 
+    // Modify the record directly
     foo.bar = 'baz'
+
+    setTimeout(() => {
+      if (handlersCalled !== 6) {
+        done('not all handlers were called')
+      } else {
+        // Modify the record indirectly
+        store.add('foo', { id: 1, bar: 'beep' })
+
+        setTimeout(() => {
+          if (handlersCalled !== 12) {
+            done('not all handlers were called')
+          } else {
+            done()
+          }
+        }, 500)
+      }
+    }, 500)
   })
   it('should add relations', function () {
     const store = new JSData.DataStore()

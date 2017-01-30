@@ -1,4 +1,4 @@
-##### 3.0.0-rc.7 - 18 February 2017
+##### 3.0.0-rc.7 - 29 January 2017
 
 ###### Bug fixes
 - #433 - `Collection#add` is missing a "silent" option

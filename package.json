@@ -1,7 +1,7 @@
 {
   "name": "js-data",
   "description": "Robust, framework-agnostic in-memory data store.",
-  "version": "3.0.0-rc.6",
+  "version": "3.0.0-rc.7",
   "homepage": "http://www.js-data.io",
   "repository": {
     "type": "git",
@@ -72,7 +72,7 @@
     "ink-docstrap": "git+https://github.com/js-data/docstrap.git#cfbe45fa313e1628c493076d5e15d2b855dfbf2c",
     "js-data-repo-tools": "1.0.0",
     "jsdoc": "3.4.3",
-    "karma": "1.4.0",
+    "karma": "1.4.1",
     "karma-babel-preprocessor": "6.0.1",
     "karma-chai": "0.1.0",
     "karma-chrome-launcher": "2.0.0",
