@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-rc.6 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-rc.7 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -10,8 +10,14 @@
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
 } : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 };
+
+
+
+
+
+
 
 
 
@@ -40,30 +46,6 @@ var defineProperty = function (obj, key, value) {
   return obj;
 };
 
-var get$1 = function get$1(object, property, receiver) {
-  if (object === null) object = Function.prototype;
-  var desc = Object.getOwnPropertyDescriptor(object, property);
-
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
-
-    if (parent === null) {
-      return undefined;
-    } else {
-      return get$1(parent, property, receiver);
-    }
-  } else if ("value" in desc) {
-    return desc.value;
-  } else {
-    var getter = desc.get;
-
-    if (getter === undefined) {
-      return undefined;
-    }
-
-    return getter.call(receiver);
-  }
-};
 
 
 
@@ -81,27 +63,8 @@ var get$1 = function get$1(object, property, receiver) {
 
 
 
-var set$1 = function set$1(object, property, value, receiver) {
-  var desc = Object.getOwnPropertyDescriptor(object, property);
 
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
 
-    if (parent !== null) {
-      set$1(parent, property, value, receiver);
-    }
-  } else if ("value" in desc && desc.writable) {
-    desc.value = value;
-  } else {
-    var setter = desc.set;
-
-    if (setter !== undefined) {
-      setter.call(receiver, value);
-    }
-  }
-
-  return value;
-};
 
 
 
@@ -387,7 +350,7 @@ var utils = {
    * @throws {Error} Throws an error if the constructor is being improperly
    * invoked.
    */
-  classCallCheck: function classCallCheck(instance, ctor) {
+  classCallCheck: function classCallCheck$$1(instance, ctor) {
     if (!(instance instanceof ctor)) {
       throw utils.err('' + ctor.name)(500, 'Cannot call a class as a function');
     }
@@ -424,7 +387,7 @@ var utils = {
         } else if (utils.isDate(from)) {
           to = new Date(from.getTime());
         } else if (utils.isRegExp(from)) {
-          to = new RegExp(from.source, from.toString().match(/[^\/]*$/)[0]);
+          to = new RegExp(from.source, from.toString().match(/[^/]*$/)[0]);
           to.lastIndex = from.lastIndex;
         } else if (utils.isObject(from)) {
           if (plain) {
@@ -992,7 +955,7 @@ var utils = {
    * @see utils.set
    * @since 3.0.0
    */
-  'get': function get(object, prop) {
+  'get': function get$$1(object, prop) {
     if (!prop) {
       return;
     }
@@ -1501,13 +1464,10 @@ var utils = {
    * @since 3.0.0
    */
   pick: function pick(props, keys) {
-    var _props = {};
-    utils.forOwn(props, function (value, key) {
-      if (keys.indexOf(key) !== -1) {
-        _props[key] = value;
-      }
-    });
-    return _props;
+    return keys.reduce(function (map, key) {
+      map[key] = props[key];
+      return map;
+    }, {});
   },
 
 
@@ -1640,7 +1600,7 @@ var utils = {
    * object.
    * @param {*} [value] The value to set.
    */
-  set: function set(object, path, value) {
+  set: function set$$1(object, path, value) {
     if (utils.isObject(path)) {
       utils.forOwn(path, function (value, _path) {
         utils.set(object, _path, value);
@@ -2164,7 +2124,7 @@ var reserved = {
 };
 
 // Used by our JavaScript implementation of the LIKE operator
-var escapeRegExp = /([.*+?^=!:${}()|[\]\/\\])/g;
+var escapeRegExp = /([.*+?^=!:${}()|[\]/\\])/g;
 var percentRegExp = /%/g;
 var underscoreRegExp = /_/g;
 var escape = function escape(pattern) {
@@ -3672,6 +3632,15 @@ var COLLECTION_DEFAULTS = {
   commitOnMerge: true,
 
   /**
+   * Whether record events should bubble up and be emitted by the collection.
+   *
+   * @name Collection#emitRecordEvents
+   * @type {boolean}
+   * @default true
+   */
+  emitRecordEvents: true,
+
+  /**
    * Field to be used as the unique identifier for records in this collection.
    * Defaults to `"id"` unless {@link Collection#mapper} is set, in which case
    * this will default to {@link Mapper#idAttribute}.
@@ -3838,7 +3807,9 @@ var Collection$1 = Component$1.extend({
    * @param {...*} [arg] Args passed to {@link Collection#emit}.
    */
   _onRecordEvent: function _onRecordEvent() {
-    this.emit.apply(this, arguments);
+    if (this.emitRecordEvents) {
+      this.emit.apply(this, arguments);
+    }
   },
 
 
@@ -3935,7 +3906,9 @@ var Collection$1 = Component$1.extend({
     });
     // Finally, return the inserted data
     var result = singular ? records[0] : records;
-    this.emit('add', result);
+    if (!opts.silent) {
+      this.emit('add', result);
+    }
     return this.afterAdd(records, opts, result) || result;
   },
 
@@ -4639,7 +4612,7 @@ var hasOneType = 'hasOne';
 var DOMAIN$6 = 'Relation';
 
 function Relation(relatedMapper) {
-  var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
   utils.classCallCheck(this, Relation);
 
@@ -4842,9 +4815,9 @@ var HasManyRelation = Relation.extend({
   validateOptions: function validateOptions(related, opts) {
     Relation.prototype.validateOptions.call(this, related, opts);
 
-    var localKeys = opts.localKeys;
-    var foreignKeys = opts.foreignKeys;
-    var foreignKey = opts.foreignKey;
+    var localKeys = opts.localKeys,
+        foreignKeys = opts.foreignKeys,
+        foreignKey = opts.foreignKey;
 
 
     if (!foreignKey && !localKeys && !foreignKeys) {
@@ -4953,7 +4926,7 @@ var HasOneRelation = Relation.extend({
  * @returns {Function} Invocation function, which accepts the target as the only
  * parameter.
  */
-var belongsTo$1 = function belongsTo$1(related, opts) {
+var belongsTo = function belongsTo(related, opts) {
   return function (mapper) {
     Relation.belongsTo(related, opts).assignTo(mapper);
   };
@@ -4973,7 +4946,7 @@ var belongsTo$1 = function belongsTo$1(related, opts) {
  * @returns {Function} Invocation function, which accepts the target as the only
  * parameter.
  */
-var hasMany$1 = function hasMany$1(related, opts) {
+var hasMany = function hasMany(related, opts) {
   return function (mapper) {
     Relation.hasMany(related, opts).assignTo(mapper);
   };
@@ -4993,7 +4966,7 @@ var hasMany$1 = function hasMany$1(related, opts) {
  * @returns {Function} Invocation function, which accepts the target as the only
  * parameter.
  */
-var hasOne$1 = function hasOne$1(related, opts) {
+var hasOne = function hasOne(related, opts) {
   return function (mapper) {
     Relation.hasOne(related, opts).assignTo(mapper);
   };
@@ -5308,7 +5281,7 @@ var Record$1 = Component$1.extend({
    * @returns {*} Value at path.
    * @since 3.0.0
    */
-  'get': function get(key) {
+  'get': function get$$1(key) {
     return utils.get(this, key);
   },
 
@@ -5669,7 +5642,7 @@ var Record$1 = Component$1.extend({
    *   session.skill_level = 'beginner'
    *
    *   // Update the record in the database
-   *   return user.save()
+   *   return session.save()
    * })
    *
    * @method Record#save
@@ -5744,7 +5717,7 @@ var Record$1 = Component$1.extend({
    * @param {boolean} [opts.silent=false] Whether to trigger change events.
    * @since 3.0.0
    */
-  'set': function set(key, value, opts) {
+  'set': function set$$1(key, value, opts) {
     if (utils.isObject(key)) {
       opts = value;
     }
@@ -6470,12 +6443,16 @@ var validationKeywords = {
    */
   properties: function properties(value, schema, opts) {
     opts || (opts = {});
+
+    if (utils.isArray(value)) {
+      return;
+    }
+
     // Can be a boolean or an object
     // Technically the default is an "empty schema", but here "true" is
     // functionally the same
     var additionalProperties = schema.additionalProperties === undefined ? true : schema.additionalProperties;
-    // "s": The property set of the instance to validate.
-    var toValidate = {};
+    var validated = [];
     // "p": The property set from "properties".
     // Default is an object
     var properties = schema.properties || {};
@@ -6484,28 +6461,24 @@ var validationKeywords = {
     var patternProperties = schema.patternProperties || {};
     var errors = [];
 
-    // Collect set "s"
-    utils.forOwn(value, function (_value, prop) {
-      toValidate[prop] = undefined;
-    });
-    // Remove from "s" all elements of "p", if any.
-    utils.forOwn(properties || {}, function (_schema, prop) {
+    utils.forOwn(properties, function (_schema, prop) {
       opts.prop = prop;
       errors = errors.concat(_validate(value[prop], _schema, opts) || []);
-      delete toValidate[prop];
+      validated.push(prop);
     });
-    // For each regex in "pp", remove all elements of "s" which this regex
-    // matches.
+
+    var toValidate = utils.omit(value, validated);
     utils.forOwn(patternProperties, function (_schema, pattern) {
       utils.forOwn(toValidate, function (undef, prop) {
         if (prop.match(pattern)) {
           opts.prop = prop;
+          // console.log(_schema)
           errors = errors.concat(_validate(value[prop], _schema, opts) || []);
-          delete toValidate[prop];
+          validated.push(prop);
         }
       });
     });
-    var keys = Object.keys(toValidate);
+    var keys = Object.keys(utils.omit(value, validated));
     // If "s" is not empty, validation fails
     if (additionalProperties === false) {
       if (keys.length) {
@@ -7028,7 +7001,8 @@ function Schema(definition) {
   // TODO: schema validation
   utils.fillIn(this, definition);
 
-  if (this.type === 'object' && this.properties) {
+  if (this.type === 'object') {
+    this.properties = this.properties || {};
     utils.forOwn(this.properties, function (_definition, prop) {
       if (!(_definition instanceof Schema)) {
         _this2.properties[prop] = new Schema(_definition);
@@ -7700,8 +7674,8 @@ function Mapper(opts) {
     (function () {
       var superClass = Record$1;
       _this2.recordClass = superClass.extend({
-        constructor: function Record$1() {
-          var subClass = function Record$1(props, opts) {
+        constructor: function Record() {
+          var subClass = function Record(props, opts) {
             utils.classCallCheck(this, subClass);
             superClass.call(this, props, opts);
           };
@@ -8079,8 +8053,8 @@ var Mapper$1 = Component$1.extend({
    * @see http://www.js-data.io/v3.0/docs/relations
    * @since 3.0.0
    */
-  belongsTo: function belongsTo(relatedMapper, opts) {
-    return belongsTo$1(relatedMapper, opts)(this);
+  belongsTo: function belongsTo$$1(relatedMapper, opts) {
+    return belongsTo(relatedMapper, opts)(this);
   },
 
 
@@ -9164,8 +9138,8 @@ var Mapper$1 = Component$1.extend({
    * @see http://www.js-data.io/v3.0/docs/relations
    * @since 3.0.0
    */
-  hasMany: function hasMany(relatedMapper, opts) {
-    return hasMany$1(relatedMapper, opts)(this);
+  hasMany: function hasMany$$1(relatedMapper, opts) {
+    return hasMany(relatedMapper, opts)(this);
   },
 
 
@@ -9185,8 +9159,8 @@ var Mapper$1 = Component$1.extend({
    * @see http://www.js-data.io/v3.0/docs/relations
    * @since 3.0.0
    */
-  hasOne: function hasOne(relatedMapper, opts) {
-    return hasOne$1(relatedMapper, opts)(this);
+  hasOne: function hasOne$$1(relatedMapper, opts) {
+    return hasOne(relatedMapper, opts)(this);
   },
 
 
@@ -11195,7 +11169,7 @@ Component$1.extend(props);
  * @since 3.0.0
  */
 
-var DOMAIN$9 = 'SimpleStore';
+var DOMAIN$8 = 'SimpleStore';
 var proxiedCollectionMethods = [
 /**
  * Wrapper for {@link Collection#add}.
@@ -12501,6 +12475,7 @@ var props$2 = {
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(string|number)} id Passed to {@link Mapper#find}.
    * @param {Object} [opts] Passed to {@link Mapper#find}.
+   * @param {boolean} [opts.force] Bypass cacheFind
    * @param {boolean|Function} [opts.usePendingFind] See {@link SimpleStore#usePendingFind}
    * @returns {Promise} Resolves with the result, if any.
    * @since 3.0.0
@@ -12615,6 +12590,7 @@ var props$2 = {
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Object} [query] Passed to {@link Mapper.findAll}.
    * @param {Object} [opts] Passed to {@link Mapper.findAll}.
+   * @param {boolean} [opts.force] Bypass cacheFindAll
    * @param {boolean|Function} [opts.usePendingFindAll] See {@link SimpleStore#usePendingFindAll}
    * @returns {Promise} Resolves with the result, if any.
    * @since 3.0.0
@@ -12667,7 +12643,7 @@ var props$2 = {
   getCollection: function getCollection(name) {
     var collection = this._collections[name];
     if (!collection) {
-      throw utils.err(DOMAIN$9 + '#getCollection', name)(404, 'collection');
+      throw utils.err(DOMAIN$8 + '#getCollection', name)(404, 'collection');
     }
     return collection;
   },
@@ -13023,7 +12999,7 @@ var props$2 = {
     var _this12 = this;
 
     opts || (opts = {});
-    return Container.prototype.updateAll.call(this, name, query, props, opts).then(function (result) {
+    return Container.prototype.updateAll.call(this, name, props, query, opts).then(function (result) {
       return _this12._end(name, result, opts);
     });
   },
@@ -13293,7 +13269,7 @@ var SimpleStore$1 = Container.extend(props$2);
  * @since 3.0.0
  */
 
-var DOMAIN$10 = 'LinkedCollection';
+var DOMAIN$9 = 'LinkedCollection';
 
 /**
  * Extends {@link Collection}. Used by a {@link DataStore} to implement an
@@ -13327,7 +13303,7 @@ function LinkedCollection(records, opts) {
 
   // Make sure this collection has a reference to a datastore
   if (!this.datastore) {
-    throw utils.err('new ' + DOMAIN$10, 'opts.datastore')(400, 'DataStore', this.datastore);
+    throw utils.err('new ' + DOMAIN$9, 'opts.datastore')(400, 'DataStore', this.datastore);
   }
 }
 
@@ -14093,7 +14069,7 @@ var DataStore$1 = SimpleStore$1.extend(props$1);
  * @type {Object}
  */
 var version = {
-  full: '3.0.0-rc.6',
+  full: '3.0.0-rc.7',
   major: 3,
   minor: 0,
   patch: 0
@@ -14285,5 +14261,5 @@ var version = {
  * @type {Constructor}
  */
 
-export { version, Collection$1 as Collection, Component$1 as Component, Container, DataStore$1 as DataStore, Index, LinkedCollection$1 as LinkedCollection, Mapper$1 as Mapper, Query$1 as Query, Record$1 as Record, Schema$1 as Schema, Settable, SimpleStore$1 as SimpleStore, utils, belongsTo$1 as belongsTo, hasMany$1 as hasMany, hasOne$1 as hasOne, belongsToType, hasManyType, hasOneType };
+export { version, Collection$1 as Collection, Component$1 as Component, Container, DataStore$1 as DataStore, Index, LinkedCollection$1 as LinkedCollection, Mapper$1 as Mapper, Query$1 as Query, Record$1 as Record, Schema$1 as Schema, Settable, SimpleStore$1 as SimpleStore, utils, belongsTo, hasMany, hasOne, belongsToType, hasManyType, hasOneType };
 //# sourceMappingURL=js-data.es2015.js.map
