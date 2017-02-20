@@ -4,10 +4,10 @@
 
 [![Slack Status][sl_b]][slack]
 [![npm version][npm_b]][npm_l]
+[![npm version](https://img.shields.io/badge/npm-v3.0.0--rc.7-yellow.svg?style=flat)](https://www.npmjs.org/package/js-data)
 [![Circle CI][circle_b]][circle_l]
 [![npm downloads][dn_b]][dn_l]
 [![Coverage Status][cov_b]][cov_l]
-[![Codacy][cod_b]][cod_l]
 
 *JSData 3.x is code complete (waiting on documentation updates to release 3.0.0 stable). Read more in the [3.x docs](http://www.js-data.io/v3.0/docs).*
 
@@ -268,8 +268,6 @@ SOFTWARE.
 [dn_l]: https://www.npmjs.org/package/js-data
 [cov_b]: https://img.shields.io/coveralls/js-data/js-data/master.svg?style=flat
 [cov_l]: https://coveralls.io/github/js-data/js-data?branch=master
-[cod_b]: https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg
-[cod_l]: https://www.codacy.com/app/jasondobry/js-data/dashboard
 
 [ember]: https://github.com/emberjs/data
 [http]: http://www.js-data.io/docs/dshttpadapter
