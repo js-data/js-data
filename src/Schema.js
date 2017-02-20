@@ -650,10 +650,70 @@ const runOps = function (ops, value, schema, opts) {
   return errors.length ? errors : undefined
 }
 
+/**
+ * Validation keywords validated for any type:
+ *
+ * - `enum`
+ * - `type`
+ * - `allOf`
+ * - `anyOf`
+ * - `oneOf`
+ * - `not`
+ *
+ * @name Schema.ANY_OPS
+ * @type {string[]}
+ */
 const ANY_OPS = ['enum', 'type', 'allOf', 'anyOf', 'oneOf', 'not']
+
+/**
+ * Validation keywords validated for array types:
+ *
+ * - `items`
+ * - `maxItems`
+ * - `minItems`
+ * - `uniqueItems`
+ *
+ * @name Schema.ARRAY_OPS
+ * @type {string[]}
+ */
 const ARRAY_OPS = ['items', 'maxItems', 'minItems', 'uniqueItems']
+
+/**
+ * Validation keywords validated for numeric (number and integer) types:
+ *
+ * - `multipleOf`
+ * - `maximum`
+ * - `minimum`
+ *
+ * @name Schema.NUMERIC_OPS
+ * @type {string[]}
+ */
 const NUMERIC_OPS = ['multipleOf', 'maximum', 'minimum']
+
+/**
+ * Validation keywords validated for object types:
+ *
+ * - `maxProperties`
+ * - `minProperties`
+ * - `required`
+ * - `properties`
+ * - `dependencies`
+ *
+ * @name Schema.OBJECT_OPS
+ * @type {string[]}
+ */
 const OBJECT_OPS = ['maxProperties', 'minProperties', 'required', 'properties', 'dependencies']
+
+/**
+ * Validation keywords validated for string types:
+ *
+ * - `maxLength`
+ * - `minLength`
+ * - `pattern`
+ *
+ * @name Schema.STRING_OPS
+ * @type {string[]}
+ */
 const STRING_OPS = ['maxLength', 'minLength', 'pattern']
 
 /**
@@ -1059,7 +1119,7 @@ export default Component.extend({
    * this Schema, which makes possible change tracking and validation on
    * property assignment.
    *
-   * @name Schema#validate
+   * @name Schema#apply
    * @method
    * @param {Object} target The prototype to which to apply this schema.
    */

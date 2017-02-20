@@ -54,6 +54,7 @@ function Component (opts) {
    * {@link Component#on} and {@link Component#off} instead.
    *
    * @name Component#_listeners
+   * @private
    * @instance
    * @since 3.0.0
    * @type {Object}
