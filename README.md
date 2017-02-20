@@ -9,7 +9,7 @@
 [![npm downloads][dn_b]][dn_l]
 [![Coverage Status][cov_b]][cov_l]
 
-*JSData 3.x is code complete (waiting on documentation updates to release 3.0.0 stable). Read more in the [3.x docs](http://www.js-data.io/v3.0/docs).*
+**ATTENTION: JSData 3.x is code complete (waiting on documentation updates to release 3.0.0 stable). If you're just getting started with JSData, I recommended going straight for v3. Read more in the [3.x docs](http://www.js-data.io/v3.0/docs).**
 
 -----
 
