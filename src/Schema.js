@@ -513,7 +513,6 @@ const validationKeywords = {
       utils.forOwn(toValidate, function (undef, prop) {
         if (prop.match(pattern)) {
           opts.prop = prop
-          // console.log(_schema)
           errors = errors.concat(validate(value[prop], _schema, opts) || [])
           validated.push(prop)
         }
@@ -1187,13 +1186,22 @@ export default Component.extend({
     if (this.type === 'object') {
       value || (value = {})
       let copy = {}
-      if (this.properties) {
-        utils.forOwn(this.properties, (_definition, prop) => {
+      const properties = this.properties
+      if (properties) {
+        utils.forOwn(properties, (_definition, prop) => {
           copy[prop] = _definition.pick(value[prop])
         })
       }
       if (this.extends) {
         utils.fillIn(copy, this.extends.pick(value))
+      }
+      // Conditionally copy properties not defined in "properties"
+      if (this.additionalProperties) {
+        for (var key in value) {
+          if (!properties[key]) {
+            copy[key] = utils.plainCopy(value[key])
+          }
+        }
       }
       return copy
     } else if (this.type === 'array') {

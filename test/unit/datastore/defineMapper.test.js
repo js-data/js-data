@@ -12,6 +12,7 @@ describe('DataStore#defineMapper', function () {
     store.defineMapper('user', {
       schema: {
         properties: {
+          id: { type: 'number' },
           age: { indexed: true },
           role: { indexed: true }
         }

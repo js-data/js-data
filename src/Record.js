@@ -740,9 +740,9 @@ export default Component.extend({
    * be called with this record instead.
    *
    * @example <caption>Record#toJSON</caption>
-   * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Container} = JSData
+   * // Normally you would do: import { Container } from 'js-data'
+   * const JSData = require('js-data@3.0.0-rc.7')
+   * const { Container } = JSData
    * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
    * store.defineMapper('user', {
@@ -758,12 +758,9 @@ export default Component.extend({
    *   $$hashKey: '1234'
    * })
    * console.log('user: ' + JSON.stringify(user.toJSON()))
-   * console.log('user: ' + JSON.stringify(user.toJSON({ strict: true })))
    *
    * @method Record#toJSON
    * @param {Object} [opts] Configuration options.
-   * @param {boolean} [opts.strict] Whether to exclude properties that are not
-   * defined in {@link Mapper#schema}.
    * @param {string[]} [opts.with] Array of relation names or relation fields
    * to include in the representation. Only available as an option if the class
    * from which this record was created has a Mapper and this record resides in
@@ -777,7 +774,7 @@ export default Component.extend({
       return mapper.toJSON(this, opts)
     } else {
       const json = {}
-      utils.forOwn(this, function (prop, key) {
+      utils.forOwn(this, (prop, key) => {
         json[key] = utils.plainCopy(prop)
       })
       return json

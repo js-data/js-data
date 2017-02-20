@@ -592,7 +592,7 @@ export const proxiedMapperMethods = [
    * Wrapper for {@link Mapper#toJSON}.
    *
    * @example
-   * import {Container} from 'js-data'
+   * import { Container } from 'js-data'
    * import RethinkDBAdapter from 'js-data-rethinkdb'
    * const store = new Container()
    * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true })
@@ -605,8 +605,21 @@ export const proxiedMapperMethods = [
    *   }
    * })
    * const person = store.createRecord('person', { id: 1, name: 'John', foo: 'bar' })
-   * console.log(store.toJSON('person', person)) // {"id":1,"name":"John","foo":"bar"}
-   * console.log(store.toJSON('person', person), { strict: true }) // {"id":1,"name":"John"}
+   * // "foo" is stripped by toJSON()
+   * console.log(store.toJSON('person', person)) // {"id":1,"name":"John"}
+   *
+   * store.defineMapper('personRelaxed', {
+   *   schema: {
+   *     properties: {
+   *       name: { type: 'string' },
+   *       id: { type: 'string' }
+   *     },
+   *     additionalProperties: true
+   *   }
+   * })
+   * const person2 = store.createRecord('personRelaxed', { id: 1, name: 'John', foo: 'bar' })
+   * // "foo" is not stripped by toJSON
+   * console.log(store.toJSON('personRelaxed', person2)) // {"id":1,"name":"John","foo":"bar"}
    *
    * @method Container#toJSON
    * @param {string} name Name of the {@link Mapper} to target.

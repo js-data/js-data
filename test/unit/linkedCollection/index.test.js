@@ -7,6 +7,7 @@ describe('LinkedCollection', function () {
     const mapper = store.defineMapper('user', {
       schema: {
         properties: {
+          id: { type: 'number' },
           name: { type: 'string', track: true }
         }
       }

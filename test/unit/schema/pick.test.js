@@ -37,7 +37,59 @@ describe('Schema.pick', function () {
     })
   })
 
-  it('Copies a value based on the items defined in the schema', function () {
+  it('Copies a value based on the items defined in the schema allowing extra properties', function () {
+    const schema = new JSData.Schema({
+      type: 'object',
+      properties: {
+        id: {
+          type: 'number'
+        },
+        tags: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              name: {
+                type: 'string'
+              },
+              id: {
+                type: 'number'
+              }
+            },
+            additionalProperties: true
+          }
+        }
+      },
+      additionalProperties: true
+    })
+
+    const data = {
+      id: 1,
+      foo: 'bar',
+      tags: [
+        {
+          name: 'foo',
+          beep: 'boop'
+        }
+      ]
+    }
+
+    const copy = schema.pick(data)
+
+    assert.deepEqual(copy, {
+      id: 1,
+      foo: 'bar',
+      tags: [
+        {
+          name: 'foo',
+          id: undefined,
+          beep: 'boop'
+        }
+      ]
+    })
+  })
+
+  it('Copies a value based on the items defined in the schema disallowing extra properties', function () {
     const schema = new JSData.Schema({
       type: 'object',
       properties: {
@@ -72,14 +124,16 @@ describe('Schema.pick', function () {
       ]
     }
 
-    const copy = schema.pick(data)
+    const copy = schema.pick(data, { strict: true })
 
     assert.deepEqual(copy, {
       id: 1,
+      // foo was stripped
       tags: [
         {
           name: 'foo',
           id: undefined
+          // beep was stripped
         }
       ]
     })
