@@ -1,7 +1,10 @@
 import utils from './utils'
 import Component from './Component'
 import Query from './Query'
+import Record from './Record'
 import Index from '../lib/mindex/index'
+
+const { noValidatePath } = Record
 
 const DOMAIN = 'Collection'
 
@@ -212,7 +215,7 @@ export default Component.extend({
    * @param {(Object|Object[]|Record|Record[])} data The record or records to insert.
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.commitOnMerge=true] See {@link Collection#commitOnMerge}.
-   * @param {boolean} [opts.noValidate] See {@link Mapper#noValidate}.
+   * @param {boolean} [opts.noValidate] See {@link Record#noValidate}.
    * @param {string} [opts.onConflict] See {@link Collection#onConflict}.
    * @returns {(Object|Object[]|Record|Record[])} The added record or records.
    */
@@ -254,11 +257,13 @@ export default Component.extend({
         // Here, the currently visited record corresponds to a record already
         // in the collection, so we need to merge them
         const onConflict = opts.onConflict || this.onConflict
-        let restoreNoValidate
-        // `noValidate` might have been overriden in find/findAll. respect that
-        if (opts.noValidate !== undefined) {
-          restoreNoValidate = existing._set.bind(existing, 'noValidate', existing._get('noValidate'))
-          existing._set('noValidate', opts.noValidate)
+        if (onConflict !== 'merge' && onConflict !== 'replace') {
+          throw utils.err(`${DOMAIN}#add`, 'opts.onConflict')(400, 'one of (merge, replace)', onConflict, true)
+        }
+        const existingNoValidate = existing._get(noValidatePath)
+        if (opts.noValidate) {
+          // Disable validation
+          existing._set(noValidatePath, true)
         }
         if (onConflict === 'merge') {
           utils.deepMixIn(existing, record)
@@ -269,13 +274,11 @@ export default Component.extend({
             }
           })
           existing.set(record)
-        } else {
-          // restore prev `noValidate` before throwing if it was overriden for the record
-          utils.isFunction(restoreNoValidate) && restoreNoValidate()
-          throw utils.err(`${DOMAIN}#add`, 'opts.onConflict')(400, 'one of (merge, replace)', onConflict, true)
         }
-        // restore prev `noValidate` value if it was overriden for the record
-        utils.isFunction(restoreNoValidate) && restoreNoValidate()
+        if (opts.noValidate) {
+          // Restore previous `noValidate` value
+          existing._set(noValidatePath, existingNoValidate)
+        }
         record = existing
         if (opts.commitOnMerge && utils.isFunction(record.commit)) {
           record.commit()

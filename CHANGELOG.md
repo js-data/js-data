@@ -6,6 +6,9 @@
   - `Schema#pick` now copies properties not defined in the "properties" keyword if the "additionalProperties" keyword is present and truthy.
   - Mappers are no longer given an empty schema if no schema is provided
 
+###### Bug fixes
+- #446 - fix(Collection): Add noValidate option to Collection#add, by @ivanvoznyakovsky
+
 ##### 3.0.0-rc.7 - 29 January 2017
 
 ###### Bug fixes
