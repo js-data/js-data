@@ -115,6 +115,27 @@ describe('Collection#add', function () {
       collection.add({ id: 1 }, { onConflict: 'invalid_choice' })
     }, Error, `[Collection#add:opts.onConflict] expected: one of (merge, replace), found: invalid_choice\nhttp://www.js-data.io/v3.0/docs/errors#400`)
   })
+  it('should respect opts.noValidate', function () {
+    const mapper = new JSData.Mapper({
+      name: 'user',
+      noValidate: false,
+      schema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          name: { type: 'string' }
+        }
+      }
+    })
+    const collection = new JSData.Collection({ mapper })
+    const userData = { id: Math.random().toString(), name: Math.random().toString() }
+    const user = collection.add(userData)
+    assert.doesNotThrow(() => {
+      collection.add(Object.assign({}, userData, { name: null }), { noValidate: true })
+    })
+    // original noValidate prop value should be restored
+    assert.equal(user._get('noValidate'), false)
+  })
   it('should required an argument', function () {
     const collection = new JSData.Collection()
     TYPES_EXCEPT_OBJECT_OR_ARRAY.forEach((value) => {
